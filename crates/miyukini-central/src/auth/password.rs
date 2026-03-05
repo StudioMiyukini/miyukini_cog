@@ -82,7 +82,7 @@ impl std::fmt::Display for PasswordError {
 impl std::error::Error for PasswordError {}
 
 /// Message d'aide pour l'utilisateur (règles affichées dans la fenêtre).
-#[must_use] 
+#[must_use]
 pub fn password_rules_hint() -> &'static str {
     "8 caractères min., 1 lettre, 1 chiffre, 1 caractère spécial, 1 majuscule, 1 minuscule."
 }
@@ -93,27 +93,42 @@ mod tests {
 
     #[test]
     fn too_short() {
-        assert!(matches!(validate_password("Ab1!xyz"), Err(PasswordError::TooShort)));
+        assert!(matches!(
+            validate_password("Ab1!xyz"),
+            Err(PasswordError::TooShort)
+        ));
     }
 
     #[test]
     fn no_digit() {
-        assert!(matches!(validate_password("Abcdefg!"), Err(PasswordError::NoDigit)));
+        assert!(matches!(
+            validate_password("Abcdefg!"),
+            Err(PasswordError::NoDigit)
+        ));
     }
 
     #[test]
     fn no_special() {
-        assert!(matches!(validate_password("Abcdefg1"), Err(PasswordError::NoSpecial)));
+        assert!(matches!(
+            validate_password("Abcdefg1"),
+            Err(PasswordError::NoSpecial)
+        ));
     }
 
     #[test]
     fn no_upper() {
-        assert!(matches!(validate_password("abcdefg1!"), Err(PasswordError::NoUppercase)));
+        assert!(matches!(
+            validate_password("abcdefg1!"),
+            Err(PasswordError::NoUppercase)
+        ));
     }
 
     #[test]
     fn no_lower() {
-        assert!(matches!(validate_password("ABCDEFG1!"), Err(PasswordError::NoLowercase)));
+        assert!(matches!(
+            validate_password("ABCDEFG1!"),
+            Err(PasswordError::NoLowercase)
+        ));
     }
 
     #[test]

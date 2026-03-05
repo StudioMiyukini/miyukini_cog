@@ -1,7 +1,7 @@
 // @id: MUIT-PaletteD2 @do: d2-palette @role: token @layer: 5 @human: miyuk
 
-use crate::color::Rgba;
 use super::Palette;
+use crate::color::Rgba;
 
 /// D2 "Sodomight Medieval" palette -- dark, warm, gold accents.
 ///
@@ -10,45 +10,45 @@ use super::Palette;
 /// - `BRIEF-miyuki-ui-lib-art-direction.md` section 3.2 (Lise)
 pub const D2_PALETTE: Palette = Palette {
     // Backgrounds (medieval surfaces)
-    bg_base:      Rgba::new(5, 4, 2),        // #050402 -- void black
-    bg_primary:   Rgba::new(10, 8, 5),       // #0a0805 -- deep dark
-    bg_secondary: Rgba::new(28, 22, 14),     // #1c160e -- panel / wood
-    bg_surface:   Rgba::with_alpha(40, 32, 16, 144), // slot empty
-    bg_elevated:  Rgba::with_alpha(60, 50, 25, 220), // slot hover
-    bg_overlay:   Rgba::new(15, 13, 8),      // #0f0d08 -- input bg
+    bg_base: Rgba::new(5, 4, 2),         // #050402 -- void black
+    bg_primary: Rgba::new(10, 8, 5),     // #0a0805 -- deep dark
+    bg_secondary: Rgba::new(28, 22, 14), // #1c160e -- panel / wood
+    bg_surface: Rgba::with_alpha(40, 32, 16, 144), // slot empty
+    bg_elevated: Rgba::with_alpha(60, 50, 25, 220), // slot hover
+    bg_overlay: Rgba::new(15, 13, 8),    // #0f0d08 -- input bg
 
     // Text
-    text_high:      Rgba::new(255, 215, 0),   // #ffd700 -- gold bright
-    text_primary:   Rgba::new(200, 190, 160), // #c8bea0 -- parchment
-    text_secondary: Rgba::new(200, 165, 70),  // #c8a546 -- gold standard
-    text_muted:     Rgba::new(96, 90, 70),    // #605a46 -- disabled
+    text_high: Rgba::new(255, 215, 0), // #ffd700 -- gold bright
+    text_primary: Rgba::new(200, 190, 160), // #c8bea0 -- parchment
+    text_secondary: Rgba::new(200, 165, 70), // #c8a546 -- gold standard
+    text_muted: Rgba::new(96, 90, 70), // #605a46 -- disabled
 
     // Accent primary (gold)
-    accent_primary:        Rgba::new(200, 165, 70),  // #c8a546 -- gold
-    accent_primary_hover:  Rgba::new(255, 215, 0),   // #ffd700 -- bright gold
-    accent_primary_active: Rgba::new(132, 100, 48),  // #846430 -- dark gold
+    accent_primary: Rgba::new(200, 165, 70), // #c8a546 -- gold
+    accent_primary_hover: Rgba::new(255, 215, 0), // #ffd700 -- bright gold
+    accent_primary_active: Rgba::new(132, 100, 48), // #846430 -- dark gold
     accent_primary_subtle: Rgba::with_alpha(200, 165, 70, 40),
 
     // Accent secondary (life red)
-    accent_secondary:        Rgba::new(180, 20, 20),  // #b41414
-    accent_secondary_hover:  Rgba::new(220, 40, 40),  // brighter red
+    accent_secondary: Rgba::new(180, 20, 20), // #b41414
+    accent_secondary_hover: Rgba::new(220, 40, 40), // brighter red
     accent_secondary_subtle: Rgba::with_alpha(180, 20, 20, 40),
 
     // Semantic (D2 uses elements as semantic colors)
-    success:        Rgba::new(0, 180, 0),     // #00b400 -- set green
+    success: Rgba::new(0, 180, 0), // #00b400 -- set green
     success_subtle: Rgba::with_alpha(0, 180, 0, 40),
-    warning:        Rgba::new(255, 165, 0),   // #ffa500 -- crafted orange
+    warning: Rgba::new(255, 165, 0), // #ffa500 -- crafted orange
     warning_subtle: Rgba::with_alpha(255, 165, 0, 40),
-    error:          Rgba::new(255, 64, 64),   // #ff4040 -- requirement red
-    error_subtle:   Rgba::with_alpha(255, 64, 64, 40),
-    info:           Rgba::new(105, 105, 255), // #6969ff -- magic blue
-    info_subtle:    Rgba::with_alpha(105, 105, 255, 40),
+    error: Rgba::new(255, 64, 64), // #ff4040 -- requirement red
+    error_subtle: Rgba::with_alpha(255, 64, 64, 40),
+    info: Rgba::new(105, 105, 255), // #6969ff -- magic blue
+    info_subtle: Rgba::with_alpha(105, 105, 255, 40),
 
     // Borders
-    border_subtle:  Rgba::new(26, 20, 16),   // #1a1410 -- stone dark
-    border_default: Rgba::new(80, 60, 20),   // #503c14 -- panel border
-    border_strong:  Rgba::new(132, 100, 48), // #846430 -- gold dark
-    border_accent:  Rgba::new(200, 165, 70), // #c8a546 -- gold
+    border_subtle: Rgba::new(26, 20, 16), // #1a1410 -- stone dark
+    border_default: Rgba::new(80, 60, 20), // #503c14 -- panel border
+    border_strong: Rgba::new(132, 100, 48), // #846430 -- gold dark
+    border_accent: Rgba::new(200, 165, 70), // #c8a546 -- gold
 };
 
 // -- D2-specific extended colors (not in the unified Palette) --

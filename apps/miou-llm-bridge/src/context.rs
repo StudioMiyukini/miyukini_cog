@@ -286,7 +286,10 @@ impl ContextRegistry {
                 continue;
             }
             remaining -= doc.estimated_tokens;
-            result.push_str(&format!("## [{base_name}] {}\n{}\n\n", doc.title, doc.content));
+            result.push_str(&format!(
+                "## [{base_name}] {}\n{}\n\n",
+                doc.title, doc.content
+            ));
         }
 
         result

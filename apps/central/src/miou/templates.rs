@@ -1,9 +1,9 @@
 //! Banque de templates Miou et injection de variables.
 
-use std::collections::HashMap;
+use super::bubble::{ActionType, BulleAction, BulleOutput};
 use super::context::BotContext;
-use super::bubble::{BulleOutput, BulleAction, ActionType};
 use super::engine::*;
+use std::collections::HashMap;
 
 /// Template de bulle.
 #[derive(Debug, Clone)]
@@ -19,193 +19,230 @@ pub fn get_templates() -> HashMap<&'static str, Vec<Template>> {
     let mut bank: HashMap<&'static str, Vec<Template>> = HashMap::new();
 
     // Accueil Matin
-    bank.insert(CAT_ACCUEIL_MATIN, vec![
-        Template {
-            id: "matin_1",
-            categorie: CAT_ACCUEIL_MATIN,
-            texte: "Bonjour {pseudo} ! 🌅 Prêt·e pour une nouvelle journée ?",
-            actions: vec![("Merci Miou", ActionType::Dismiss, None)],
-        },
-        Template {
-            id: "matin_2",
-            categorie: CAT_ACCUEIL_MATIN,
-            texte: "Salut {pseudo}, une nouvelle journée commence. Je suis là si tu as besoin.",
-            actions: vec![("OK", ActionType::Dismiss, None)],
-        },
-        Template {
-            id: "matin_3",
-            categorie: CAT_ACCUEIL_MATIN,
-            texte: "Hey {pseudo} ! Le soleil se lève, ton COG aussi. Bonne journée !",
-            actions: vec![("Merci", ActionType::Dismiss, None)],
-        },
-    ]);
+    bank.insert(
+        CAT_ACCUEIL_MATIN,
+        vec![
+            Template {
+                id: "matin_1",
+                categorie: CAT_ACCUEIL_MATIN,
+                texte: "Bonjour {pseudo} ! 🌅 Prêt·e pour une nouvelle journée ?",
+                actions: vec![("Merci Miou", ActionType::Dismiss, None)],
+            },
+            Template {
+                id: "matin_2",
+                categorie: CAT_ACCUEIL_MATIN,
+                texte: "Salut {pseudo}, une nouvelle journée commence. Je suis là si tu as besoin.",
+                actions: vec![("OK", ActionType::Dismiss, None)],
+            },
+            Template {
+                id: "matin_3",
+                categorie: CAT_ACCUEIL_MATIN,
+                texte: "Hey {pseudo} ! Le soleil se lève, ton COG aussi. Bonne journée !",
+                actions: vec![("Merci", ActionType::Dismiss, None)],
+            },
+        ],
+    );
 
     // Accueil Après-midi
-    bank.insert(CAT_ACCUEIL_APRES_MIDI, vec![
-        Template {
-            id: "aprem_1",
-            categorie: CAT_ACCUEIL_APRES_MIDI,
-            texte: "Hey {pseudo}, contente de te voir cet après-midi.",
-            actions: vec![("OK", ActionType::Dismiss, None)],
-        },
-        Template {
-            id: "aprem_2",
-            categorie: CAT_ACCUEIL_APRES_MIDI,
-            texte: "Bonne après-midi {pseudo} ! Qu'est-ce qu'on fait de beau ?",
-            actions: vec![("Merci Miou", ActionType::Dismiss, None)],
-        },
-    ]);
+    bank.insert(
+        CAT_ACCUEIL_APRES_MIDI,
+        vec![
+            Template {
+                id: "aprem_1",
+                categorie: CAT_ACCUEIL_APRES_MIDI,
+                texte: "Hey {pseudo}, contente de te voir cet après-midi.",
+                actions: vec![("OK", ActionType::Dismiss, None)],
+            },
+            Template {
+                id: "aprem_2",
+                categorie: CAT_ACCUEIL_APRES_MIDI,
+                texte: "Bonne après-midi {pseudo} ! Qu'est-ce qu'on fait de beau ?",
+                actions: vec![("Merci Miou", ActionType::Dismiss, None)],
+            },
+        ],
+    );
 
     // Accueil Soir
-    bank.insert(CAT_ACCUEIL_SOIR, vec![
-        Template {
-            id: "soir_1",
-            categorie: CAT_ACCUEIL_SOIR,
-            texte: "Bonsoir {pseudo}. 🌙 Une soirée tranquille en perspective ?",
-            actions: vec![("Oui !", ActionType::Dismiss, None)],
-        },
-        Template {
-            id: "soir_2",
-            categorie: CAT_ACCUEIL_SOIR,
-            texte: "Hey {pseudo}, bonne soirée sur ton COG. N'oublie pas de te reposer.",
-            actions: vec![("Merci", ActionType::Dismiss, None)],
-        },
-    ]);
+    bank.insert(
+        CAT_ACCUEIL_SOIR,
+        vec![
+            Template {
+                id: "soir_1",
+                categorie: CAT_ACCUEIL_SOIR,
+                texte: "Bonsoir {pseudo}. 🌙 Une soirée tranquille en perspective ?",
+                actions: vec![("Oui !", ActionType::Dismiss, None)],
+            },
+            Template {
+                id: "soir_2",
+                categorie: CAT_ACCUEIL_SOIR,
+                texte: "Hey {pseudo}, bonne soirée sur ton COG. N'oublie pas de te reposer.",
+                actions: vec![("Merci", ActionType::Dismiss, None)],
+            },
+        ],
+    );
 
     // Accueil Nuit
-    bank.insert(CAT_ACCUEIL_NUIT, vec![
-        Template {
+    bank.insert(
+        CAT_ACCUEIL_NUIT,
+        vec![Template {
             id: "nuit_1",
             categorie: CAT_ACCUEIL_NUIT,
             texte: "Encore debout, {pseudo} ? 🦉 Je veille avec toi.",
             actions: vec![("Merci", ActionType::Dismiss, None)],
-        },
-    ]);
+        }],
+    );
 
     // Pause Santé
-    bank.insert(CAT_PAUSE_SANTE, vec![
-        Template {
-            id: "pause_1",
-            categorie: CAT_PAUSE_SANTE,
-            texte: "Ça fait {duree} que tu es là — accorde-toi une petite pause ! 🍵",
-            actions: vec![
-                ("Je prends une pause", ActionType::Pause, None),
-                ("Plus tard", ActionType::Dismiss, None),
-            ],
-        },
-        Template {
-            id: "pause_2",
-            categorie: CAT_PAUSE_SANTE,
-            texte: "{pseudo}, {duree} déjà ! Tes yeux méritent un peu de repos.",
-            actions: vec![
-                ("OK, je fais une pause", ActionType::Pause, None),
-                ("Pas maintenant", ActionType::Dismiss, None),
-            ],
-        },
-        Template {
-            id: "pause_3",
-            categorie: CAT_PAUSE_SANTE,
-            texte: "Une pause ? Tu en as bien besoin après {duree}. 🧘",
-            actions: vec![
-                ("Je fais une pause", ActionType::Pause, None),
-                ("Je continue", ActionType::Dismiss, None),
-            ],
-        },
-    ]);
+    bank.insert(
+        CAT_PAUSE_SANTE,
+        vec![
+            Template {
+                id: "pause_1",
+                categorie: CAT_PAUSE_SANTE,
+                texte: "Ça fait {duree} que tu es là — accorde-toi une petite pause ! 🍵",
+                actions: vec![
+                    ("Je prends une pause", ActionType::Pause, None),
+                    ("Plus tard", ActionType::Dismiss, None),
+                ],
+            },
+            Template {
+                id: "pause_2",
+                categorie: CAT_PAUSE_SANTE,
+                texte: "{pseudo}, {duree} déjà ! Tes yeux méritent un peu de repos.",
+                actions: vec![
+                    ("OK, je fais une pause", ActionType::Pause, None),
+                    ("Pas maintenant", ActionType::Dismiss, None),
+                ],
+            },
+            Template {
+                id: "pause_3",
+                categorie: CAT_PAUSE_SANTE,
+                texte: "Une pause ? Tu en as bien besoin après {duree}. 🧘",
+                actions: vec![
+                    ("Je fais une pause", ActionType::Pause, None),
+                    ("Je continue", ActionType::Dismiss, None),
+                ],
+            },
+        ],
+    );
 
     // Rappel Événement
-    bank.insert(CAT_RAPPEL_EVENEMENT, vec![
-        Template {
-            id: "event_1",
-            categorie: CAT_RAPPEL_EVENEMENT,
-            texte: "📅 Rappel : « {evenement} » dans moins d'une heure !",
-            actions: vec![
-                ("Voir dans JayKoa", ActionType::OuvrirService, Some("jaykoa")),
-                ("OK", ActionType::Dismiss, None),
-            ],
-        },
-        Template {
-            id: "event_2",
-            categorie: CAT_RAPPEL_EVENEMENT,
-            texte: "{pseudo}, n'oublie pas : {evenement} approche !",
-            actions: vec![
-                ("Ouvrir JayKoa", ActionType::OuvrirService, Some("jaykoa")),
-                ("Merci", ActionType::Dismiss, None),
-            ],
-        },
-    ]);
+    bank.insert(
+        CAT_RAPPEL_EVENEMENT,
+        vec![
+            Template {
+                id: "event_1",
+                categorie: CAT_RAPPEL_EVENEMENT,
+                texte: "📅 Rappel : « {evenement} » dans moins d'une heure !",
+                actions: vec![
+                    (
+                        "Voir dans JayKoa",
+                        ActionType::OuvrirService,
+                        Some("jaykoa"),
+                    ),
+                    ("OK", ActionType::Dismiss, None),
+                ],
+            },
+            Template {
+                id: "event_2",
+                categorie: CAT_RAPPEL_EVENEMENT,
+                texte: "{pseudo}, n'oublie pas : {evenement} approche !",
+                actions: vec![
+                    ("Ouvrir JayKoa", ActionType::OuvrirService, Some("jaykoa")),
+                    ("Merci", ActionType::Dismiss, None),
+                ],
+            },
+        ],
+    );
 
     // Retour Absence
-    bank.insert(CAT_RETOUR_ABSENCE, vec![
-        Template {
-            id: "retour_1",
-            categorie: CAT_RETOUR_ABSENCE,
-            texte: "Te revoilà {pseudo} ! Ça fait {jours} jours. Tu m'as manqué. 💕",
-            actions: vec![("Merci Miou", ActionType::Dismiss, None)],
-        },
-        Template {
-            id: "retour_2",
-            categorie: CAT_RETOUR_ABSENCE,
-            texte: "Contente de te revoir après {jours} jours, {pseudo}. Tout va bien ?",
-            actions: vec![("Oui, merci !", ActionType::Dismiss, None)],
-        },
-    ]);
+    bank.insert(
+        CAT_RETOUR_ABSENCE,
+        vec![
+            Template {
+                id: "retour_1",
+                categorie: CAT_RETOUR_ABSENCE,
+                texte: "Te revoilà {pseudo} ! Ça fait {jours} jours. Tu m'as manqué. 💕",
+                actions: vec![("Merci Miou", ActionType::Dismiss, None)],
+            },
+            Template {
+                id: "retour_2",
+                categorie: CAT_RETOUR_ABSENCE,
+                texte: "Contente de te revoir après {jours} jours, {pseudo}. Tout va bien ?",
+                actions: vec![("Oui, merci !", ActionType::Dismiss, None)],
+            },
+        ],
+    );
 
     // Rappel Ami
-    bank.insert(CAT_RAPPEL_AMI, vec![
-        Template {
+    bank.insert(
+        CAT_RAPPEL_AMI,
+        vec![Template {
             id: "ami_1",
             categorie: CAT_RAPPEL_AMI,
-            texte: "Tu n'as pas donné de nouvelles à {ami} depuis {jours} jours. Un petit message ?",
+            texte:
+                "Tu n'as pas donné de nouvelles à {ami} depuis {jours} jours. Un petit message ?",
             actions: vec![
-                ("Voir Jay1Tribu", ActionType::OuvrirService, Some("jay1tribu")),
+                (
+                    "Voir Jay1Tribu",
+                    ActionType::OuvrirService,
+                    Some("jay1tribu"),
+                ),
                 ("Plus tard", ActionType::Dismiss, None),
             ],
-        },
-    ]);
+        }],
+    );
 
     // Suggestion Service
-    bank.insert(CAT_SUGGESTION_SERVICE, vec![
-        Template {
+    bank.insert(
+        CAT_SUGGESTION_SERVICE,
+        vec![Template {
             id: "service_1",
             categorie: CAT_SUGGESTION_SERVICE,
             texte: "Tu n'as pas ouvert {service} depuis un moment. Envie d'y faire un tour ?",
             actions: vec![
-                ("Ouvrir {service}", ActionType::OuvrirService, Some("{service_id}")),
+                (
+                    "Ouvrir {service}",
+                    ActionType::OuvrirService,
+                    Some("{service_id}"),
+                ),
                 ("Pas maintenant", ActionType::Dismiss, None),
             ],
-        },
-    ]);
+        }],
+    );
 
     // Specs RAM
-    bank.insert(CAT_SPECS_RAM, vec![
-        Template {
+    bank.insert(
+        CAT_SPECS_RAM,
+        vec![Template {
             id: "ram_1",
             categorie: CAT_SPECS_RAM,
             texte: "J'aimerais un peu plus de RAM pour mieux te servir. 🧠",
             actions: vec![("Compris", ActionType::Dismiss, None)],
-        },
-    ]);
+        }],
+    );
 
     // Specs Stockage
-    bank.insert(CAT_SPECS_STOCKAGE, vec![
-        Template {
+    bank.insert(
+        CAT_SPECS_STOCKAGE,
+        vec![Template {
             id: "disk_1",
             categorie: CAT_SPECS_STOCKAGE,
             texte: "Mon disque s'essouffle — un peu de ménage ? 🧹",
             actions: vec![("Je vais voir", ActionType::Dismiss, None)],
-        },
-    ]);
+        }],
+    );
 
     // Specs Upgrade
-    bank.insert(CAT_SPECS_UPGRADE, vec![
-        Template {
+    bank.insert(
+        CAT_SPECS_UPGRADE,
+        vec![Template {
             id: "upgrade_1",
             categorie: CAT_SPECS_UPGRADE,
             texte: "Tu as amélioré la machine — merci {pseudo} ! ⚡",
             actions: vec![("De rien", ActionType::Dismiss, None)],
-        },
-    ]);
+        }],
+    );
 
     bank
 }

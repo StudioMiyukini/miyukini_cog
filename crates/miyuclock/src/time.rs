@@ -28,7 +28,10 @@ pub fn now(ctx: &GovernedContext) -> Result<SystemTime, MiyuclockError> {
 /// @layer: tool
 /// @human: Retourne l'instant présent avec horloge injectée (tests).
 /// @do: time_now_with_clock
-pub fn now_with_clock<C: Clock>(ctx: &GovernedContext, clock: &C) -> Result<SystemTime, MiyuclockError> {
+pub fn now_with_clock<C: Clock>(
+    ctx: &GovernedContext,
+    clock: &C,
+) -> Result<SystemTime, MiyuclockError> {
     if !ctx.has_mandate() {
         return Err(MiyuclockError::NoMandate);
     }
@@ -49,5 +52,7 @@ pub fn delta(
     if !ctx.has_mandate() {
         return Err(MiyuclockError::NoMandate);
     }
-    t_now.duration_since(t_prev).map_err(|_| MiyuclockError::InvalidDelta)
+    t_now
+        .duration_since(t_prev)
+        .map_err(|_| MiyuclockError::InvalidDelta)
 }

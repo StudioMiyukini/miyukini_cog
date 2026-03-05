@@ -1,11 +1,13 @@
 //! Gestion des series JayManga — regroupement d'oeuvres en series.
 
+use super::components::{
+    ActionButton, Badge, EmptyState, FormField, FormSection, FormTextarea, PageHeader,
+};
+use super::JayMangaState;
+use crate::use_db;
 use dioxus::prelude::*;
 use jaymanga::data::Series;
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, EmptyState, ActionButton, FormField, FormTextarea, FormSection, Badge};
-use super::JayMangaState;
 
 #[component]
 pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
@@ -13,7 +15,9 @@ pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
     let db = use_db();
 
     let series_list = db.series_list().unwrap_or_default();
-    let works = db.work_list(&jaymanga::data::WorkFilters::default()).unwrap_or_default();
+    let works = db
+        .work_list(&jaymanga::data::WorkFilters::default())
+        .unwrap_or_default();
 
     let mut show_form = use_signal(|| false);
     let mut editing_series_id = use_signal(|| Option::<String>::None);

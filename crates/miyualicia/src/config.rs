@@ -106,6 +106,18 @@ pub struct AliciaConfig {
     #[serde(default = "AliciaConfig::default_llm_bridge_url")]
     pub llm_bridge_url: String,
 
+    /// URL du service STT (MiyuSTT). Par defaut : "http://127.0.0.1:3003".
+    #[serde(default = "AliciaConfig::default_stt_service_url")]
+    pub stt_service_url: String,
+
+    /// URL du service TTS (MiyuTTS). Par defaut : "http://127.0.0.1:3004".
+    #[serde(default = "AliciaConfig::default_tts_service_url")]
+    pub tts_service_url: String,
+
+    /// Active le client TTS Alicia (feature flag). Par defaut : false.
+    #[serde(default)]
+    pub tts_feature_enabled: bool,
+
     /// Configuration du wake word.
     #[serde(default)]
     pub wake_word: WakeWordConfig,
@@ -122,6 +134,14 @@ pub struct AliciaConfig {
 impl AliciaConfig {
     fn default_llm_bridge_url() -> String {
         "http://127.0.0.1:3003".to_string()
+    }
+
+    fn default_stt_service_url() -> String {
+        "http://127.0.0.1:3003".to_string()
+    }
+
+    fn default_tts_service_url() -> String {
+        "http://127.0.0.1:3004".to_string()
     }
 
     fn default_rooms() -> Vec<RoomConfig> {
@@ -171,6 +191,9 @@ impl Default for AliciaConfig {
             mqtt: Some(MqttConfig::default()),
             api: ApiPortConfig::default(),
             llm_bridge_url: Self::default_llm_bridge_url(),
+            stt_service_url: Self::default_stt_service_url(),
+            tts_service_url: Self::default_tts_service_url(),
+            tts_feature_enabled: false,
             wake_word: WakeWordConfig::default(),
             rooms: Self::default_rooms(),
             db_path: Self::default_db_path(),
@@ -188,6 +211,9 @@ mod tests {
         assert!(config.mqtt.is_some());
         assert_eq!(config.api.port, 7890);
         assert_eq!(config.llm_bridge_url, "http://127.0.0.1:3003");
+        assert_eq!(config.stt_service_url, "http://127.0.0.1:3003");
+        assert_eq!(config.tts_service_url, "http://127.0.0.1:3004");
+        assert!(!config.tts_feature_enabled);
         assert_eq!(config.wake_word.keyword, "hey alicia");
         assert_eq!(config.rooms.len(), 4);
         assert_eq!(config.db_path, "alicia.db");
@@ -201,6 +227,9 @@ mod tests {
         "#;
         let config = AliciaConfig::from_toml(toml_str).expect("parse minimal TOML");
         assert_eq!(config.db_path, "test.db");
+        assert_eq!(config.stt_service_url, "http://127.0.0.1:3003");
+        assert_eq!(config.tts_service_url, "http://127.0.0.1:3004");
+        assert!(!config.tts_feature_enabled);
         // mqtt est None car non specifie et Option
         assert!(config.mqtt.is_none());
         // api prend les defauts
@@ -211,6 +240,9 @@ mod tests {
     fn test_config_from_toml_with_mqtt() {
         let toml_str = r#"
             llm_bridge_url = "http://127.0.0.1:3003"
+            stt_service_url = "http://127.0.0.1:3003"
+            tts_service_url = "http://127.0.0.1:3004"
+            tts_feature_enabled = true
 
             [mqtt]
             broker_host = "192.168.1.50"
@@ -235,6 +267,7 @@ mod tests {
         let mqtt = config.mqtt.expect("mqtt present");
         assert_eq!(mqtt.broker_host, "192.168.1.50");
         assert_eq!(mqtt.broker_port, 1884);
+        assert!(config.tts_feature_enabled);
         assert_eq!(config.api.port, 9999);
         assert_eq!(config.wake_word.keyword, "hey miyuki");
         assert_eq!(config.rooms.len(), 2);

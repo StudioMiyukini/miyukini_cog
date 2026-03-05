@@ -30,7 +30,9 @@ pub struct MiyucmsTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyucmsIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyucmsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.cms";
 
-#[must_use] 
+#[must_use]
 pub fn miyucms_admin_cell(version: &str, fingerprint: &str) -> MiyucmsAdminCell {
     MiyucmsAdminCell {
         identification: MiyucmsIdentification {
@@ -63,7 +65,9 @@ pub fn miyucms_admin_cell(version: &str, fingerprint: &str) -> MiyucmsAdminCell 
                 id: "Miyucms".to_string(),
                 name: "Test chemin complet Miyucms".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

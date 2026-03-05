@@ -1,8 +1,8 @@
 //! EXP-E04 — Dashboard exposant (candidatures, participations, alertes).
 
+use super::components::{EmptyState, StatCard};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{EmptyState, StatCard};
 
 #[component]
 pub fn ExpDashboard() -> Element {
@@ -10,7 +10,10 @@ pub fn ExpDashboard() -> Element {
     // Charger les données exposant (premier exposant de la DB pour la démo)
     let exposant = {
         let db = crate::use_db();
-        db.exposants_list(false).unwrap_or_default().into_iter().next()
+        db.exposants_list(false)
+            .unwrap_or_default()
+            .into_iter()
+            .next()
     };
 
     if exposant.is_none() {

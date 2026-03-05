@@ -1,8 +1,8 @@
 //! VIS-E06 — Billets visiteur.
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton};
 
 /// Gestion des billets du visiteur.
 #[component]
@@ -11,10 +11,26 @@ pub fn VisBillets() -> Element {
     let mut active_tab = use_signal(|| "actifs".to_string());
 
     let tab = active_tab.read().clone();
-    let tab_actifs_bg = if tab == "actifs" { c.accent_blue } else { c.bg_secondary };
-    let tab_actifs_color = if tab == "actifs" { "white" } else { c.text_primary };
-    let tab_passes_bg = if tab == "passes" { c.accent_blue } else { c.bg_secondary };
-    let tab_passes_color = if tab == "passes" { "white" } else { c.text_primary };
+    let tab_actifs_bg = if tab == "actifs" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_actifs_color = if tab == "actifs" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_passes_bg = if tab == "passes" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_passes_color = if tab == "passes" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {

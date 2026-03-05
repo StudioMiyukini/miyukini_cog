@@ -11,8 +11,8 @@
 use miyukini_kernel::{
     config::{Config, EnvConfig},
     id::{IdGenerator, UuidIdGenerator},
-    lifecycle::{Lifecycle, DefaultLifecycle},
-    log::{Level, Logger, DefaultLogger},
+    lifecycle::{DefaultLifecycle, Lifecycle},
+    log::{DefaultLogger, Level, Logger},
     time::{Clock, DefaultClock},
 };
 use std::time::UNIX_EPOCH;
@@ -83,10 +83,7 @@ fn test_integration_time_log_integration() {
     let timestamp = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
 
     // Logger avec timestamp (le produit formate)
-    logger.log(
-        Level::Info,
-        &format!("Event at timestamp: {}", timestamp),
-    );
+    logger.log(Level::Info, &format!("Event at timestamp: {}", timestamp));
 
     // Pas de panic
     assert!(timestamp > 0);

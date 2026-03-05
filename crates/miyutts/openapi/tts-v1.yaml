@@ -1,0 +1,67 @@
+openapi: 3.1.0
+info:
+  title: MiyuTTS API
+  version: 0.1.0
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service status
+  /api/tts/voices:
+    get:
+      summary: List available voices
+      responses:
+        "200":
+          description: Voices payload
+  /api/tts:
+    post:
+      summary: Text-to-speech synthesis
+      parameters:
+        - in: header
+          name: X-Request-ID
+          required: false
+          schema:
+            type: string
+          description: Correlation ID inter-services.
+        - in: header
+          name: X-Source
+          required: false
+          schema:
+            type: string
+          description: Source appelante (ex: alicia-home).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Audio payload (JSON base64)
+  /api/tts/wav:
+    post:
+      summary: Text-to-speech synthesis (binary WAV)
+      parameters:
+        - in: header
+          name: X-Request-ID
+          required: false
+          schema:
+            type: string
+          description: Correlation ID inter-services.
+        - in: header
+          name: X-Source
+          required: false
+          schema:
+            type: string
+          description: Source appelante (ex: alicia-home).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Binary WAV payload

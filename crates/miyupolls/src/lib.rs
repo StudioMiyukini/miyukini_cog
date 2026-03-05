@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPolls ; expose les modules tools.
 /// @do: expose_miyupolls_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod errors;
@@ -21,4 +20,7 @@ pub use admin_cell::{
 };
 pub use context::GovernedContext;
 pub use errors::MiyupollsError;
-pub use poll::{create as poll_create, list as poll_list, result as poll_result, vote as poll_vote, PollItem, PollResult};
+pub use poll::{
+    create as poll_create, list as poll_list, result as poll_result, vote as poll_vote, PollItem,
+    PollResult,
+};

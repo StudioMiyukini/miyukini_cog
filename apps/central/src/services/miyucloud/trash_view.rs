@@ -13,10 +13,10 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::client::MiyuCloudClient;
-use super::components::{ActionButton, FileIcon, format_size};
+use super::components::{format_size, ActionButton, FileIcon};
 use super::state::MiyuCloudState;
+use crate::state::use_app_state;
 
 /// Vue corbeille complete avec liste et actions.
 #[component]
@@ -271,7 +271,8 @@ fn PurgeConfirmDialog(
     let message = if is_all {
         "Voulez-vous vider la corbeille ? Tous les elements seront supprimes definitivement. Cette action est irreversible.".to_string()
     } else {
-        "Voulez-vous supprimer definitivement cet element ? Cette action est irreversible.".to_string()
+        "Voulez-vous supprimer definitivement cet element ? Cette action est irreversible."
+            .to_string()
     };
     let title = if is_all {
         "Vider la corbeille"
@@ -396,10 +397,7 @@ fn trigger_purge(
 }
 
 /// Vide la corbeille entierement.
-fn trigger_empty_trash(
-    client: Signal<Option<MiyuCloudClient>>,
-    mut state: Signal<MiyuCloudState>,
-) {
+fn trigger_empty_trash(client: Signal<Option<MiyuCloudClient>>, mut state: Signal<MiyuCloudState>) {
     spawn(async move {
         let http = {
             let c = client.read();

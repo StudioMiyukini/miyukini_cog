@@ -3,13 +3,13 @@
 //! 6 etapes : Fichiers, Metadonnees, Format/Structure, Prix/Demo, Optimisation, Publication.
 //! Navigation libre entre etapes. Indicateur de completion par etape.
 
-use dioxus::prelude::*;
-use dioxus::html::HasFileData;
-use jaymanga::data::{Work, Chapter, Page};
-use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{FormField, FormTextarea, FormSection, ActionButton, Badge};
+use super::components::{ActionButton, Badge, FormField, FormSection, FormTextarea};
 use super::{JayMangaSection, JayMangaState};
+use crate::use_db;
+use dioxus::html::HasFileData;
+use dioxus::prelude::*;
+use jaymanga::data::{Chapter, Page, Work};
+use miyukini_service_ui::use_palette;
 use std::sync::Arc;
 
 // ── Etapes de l'editeur ──────────────────────────────────────────────────
@@ -88,30 +88,119 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
     };
 
     // Etape active
-    let mut current_step = use_signal(|| if is_edit { EditorStep::Metadata } else { EditorStep::Files });
+    let mut current_step = use_signal(|| {
+        if is_edit {
+            EditorStep::Metadata
+        } else {
+            EditorStep::Files
+        }
+    });
 
     // Champs du formulaire
-    let mut title = use_signal(|| existing.as_ref().and_then(|w| w.title.clone()).unwrap_or_default());
-    let mut synopsis = use_signal(|| existing.as_ref().and_then(|w| w.synopsis.clone()).unwrap_or_default());
-    let mut authors = use_signal(|| existing.as_ref().and_then(|w| w.authors.clone()).unwrap_or_default());
-    let mut genres = use_signal(|| existing.as_ref().and_then(|w| w.genres.clone()).unwrap_or_default());
-    let mut language = use_signal(|| existing.as_ref().and_then(|w| w.language.clone()).unwrap_or_else(|| "fr".to_string()));
-    let mut pricing_model = use_signal(|| existing.as_ref().and_then(|w| w.pricing_model.clone()).unwrap_or_else(|| "free".to_string()));
-    let mut price = use_signal(|| existing.as_ref().and_then(|w| w.price).unwrap_or(0).to_string());
-    let mut reading_format = use_signal(|| existing.as_ref().and_then(|w| w.reading_format.clone()).unwrap_or_else(|| "manga".to_string()));
-    let mut demo_pages = use_signal(|| existing.as_ref().and_then(|w| w.demo_pages_count).unwrap_or(5).to_string());
-    let mut tags = use_signal(|| existing.as_ref().and_then(|w| w.tags.clone()).unwrap_or_default());
-    let mut allow_download = use_signal(|| existing.as_ref().and_then(|w| w.allow_download).unwrap_or(true));
-    let mut cover_path = use_signal(|| existing.as_ref().and_then(|w| w.cover_image_path.clone()).unwrap_or_default());
-    let mut volume_number = use_signal(|| existing.as_ref().and_then(|w| w.volume_number).unwrap_or(1).to_string());
-    let mut series_id = use_signal(|| existing.as_ref().and_then(|w| w.series_id.clone()).unwrap_or_default());
+    let mut title = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.title.clone())
+            .unwrap_or_default()
+    });
+    let mut synopsis = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.synopsis.clone())
+            .unwrap_or_default()
+    });
+    let mut authors = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.authors.clone())
+            .unwrap_or_default()
+    });
+    let mut genres = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.genres.clone())
+            .unwrap_or_default()
+    });
+    let mut language = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.language.clone())
+            .unwrap_or_else(|| "fr".to_string())
+    });
+    let mut pricing_model = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.pricing_model.clone())
+            .unwrap_or_else(|| "free".to_string())
+    });
+    let mut price = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.price)
+            .unwrap_or(0)
+            .to_string()
+    });
+    let mut reading_format = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.reading_format.clone())
+            .unwrap_or_else(|| "manga".to_string())
+    });
+    let mut demo_pages = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.demo_pages_count)
+            .unwrap_or(5)
+            .to_string()
+    });
+    let mut tags = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.tags.clone())
+            .unwrap_or_default()
+    });
+    let mut allow_download = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.allow_download)
+            .unwrap_or(true)
+    });
+    let mut cover_path = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.cover_image_path.clone())
+            .unwrap_or_default()
+    });
+    let mut volume_number = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.volume_number)
+            .unwrap_or(1)
+            .to_string()
+    });
+    let mut series_id = use_signal(|| {
+        existing
+            .as_ref()
+            .and_then(|w| w.series_id.clone())
+            .unwrap_or_default()
+    });
 
-    let work_status = existing.as_ref().and_then(|w| w.status.clone()).unwrap_or_else(|| "draft".to_string());
+    let work_status = existing
+        .as_ref()
+        .and_then(|w| w.status.clone())
+        .unwrap_or_else(|| "draft".to_string());
 
     // Chapitres/pages existants
     let work_id_ref = editing_id.clone().unwrap_or_default();
-    let chapters = if is_edit { db.chapter_list_by_work(&work_id_ref).unwrap_or_default() } else { Vec::new() };
-    let total_pages: usize = chapters.iter().map(|ch| ch.page_count.unwrap_or(0) as usize).sum();
+    let chapters = if is_edit {
+        db.chapter_list_by_work(&work_id_ref).unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    let total_pages: usize = chapters
+        .iter()
+        .map(|ch| ch.page_count.unwrap_or(0) as usize)
+        .sum();
 
     // Indicateurs de completion par etape
     let step_complete = |step: EditorStep| -> bool {
@@ -121,11 +210,17 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
             EditorStep::FormatStructure => !reading_format.read().is_empty(),
             EditorStep::PricingDemo => !pricing_model.read().is_empty(),
             EditorStep::Optimization => true,
-            EditorStep::Publication => !title.read().is_empty() && !reading_format.read().is_empty(),
+            EditorStep::Publication => {
+                !title.read().is_empty() && !reading_format.read().is_empty()
+            }
         }
     };
 
-    let page_title = if is_edit { "\u{270F}\u{FE0F} Modifier l'oeuvre" } else { "\u{2795} Nouvelle oeuvre" };
+    let page_title = if is_edit {
+        "\u{270F}\u{FE0F} Modifier l'oeuvre"
+    } else {
+        "\u{2795} Nouvelle oeuvre"
+    };
     let step = *current_step.read();
 
     let db_draft = db.clone();
@@ -529,21 +624,49 @@ fn save_work(
     let now = chrono::Utc::now().to_rfc3339();
     let is_edit = editing_id.is_some();
     let work = Work {
-        id: Some(editing_id.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string())),
+        id: Some(
+            editing_id
+                .clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string()),
+        ),
         title: Some(title.read().clone()),
-        synopsis: if synopsis.read().is_empty() { None } else { Some(synopsis.read().clone()) },
-        authors: if authors.read().is_empty() { None } else { Some(authors.read().clone()) },
-        genres: if genres.read().is_empty() { None } else { Some(genres.read().clone()) },
+        synopsis: if synopsis.read().is_empty() {
+            None
+        } else {
+            Some(synopsis.read().clone())
+        },
+        authors: if authors.read().is_empty() {
+            None
+        } else {
+            Some(authors.read().clone())
+        },
+        genres: if genres.read().is_empty() {
+            None
+        } else {
+            Some(genres.read().clone())
+        },
         language: Some(language.read().clone()),
         pricing_model: Some(pricing_model.read().clone()),
         price: price.read().parse::<i64>().ok(),
         reading_format: Some(reading_format.read().clone()),
         demo_pages_count: demo_pages.read().parse::<i32>().ok(),
-        tags: if tags.read().is_empty() { None } else { Some(tags.read().clone()) },
+        tags: if tags.read().is_empty() {
+            None
+        } else {
+            Some(tags.read().clone())
+        },
         allow_download: Some(*allow_download.read()),
-        cover_image_path: if cover_path.read().is_empty() { None } else { Some(cover_path.read().clone()) },
+        cover_image_path: if cover_path.read().is_empty() {
+            None
+        } else {
+            Some(cover_path.read().clone())
+        },
         volume_number: volume_number.read().parse::<i32>().ok(),
-        series_id: if series_id.read().is_empty() { None } else { Some(series_id.read().clone()) },
+        series_id: if series_id.read().is_empty() {
+            None
+        } else {
+            Some(series_id.read().clone())
+        },
         status: Some(status.to_string()),
         created_at: if is_edit { None } else { Some(now.clone()) },
         updated_at: Some(now),
@@ -576,8 +699,16 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
     let mut imported_count: Signal<usize> = use_signal(|| 0);
     let mut is_drag_over: Signal<bool> = use_signal(|| false);
 
-    let border_color = if *is_drag_over.read() { c.accent_blue } else { c.border };
-    let drop_bg = if *is_drag_over.read() { format!("{}15", c.accent_blue) } else { c.bg_main.to_string() };
+    let border_color = if *is_drag_over.read() {
+        c.accent_blue
+    } else {
+        c.border
+    };
+    let drop_bg = if *is_drag_over.read() {
+        format!("{}15", c.accent_blue)
+    } else {
+        c.bg_main.to_string()
+    };
 
     let file_count = selected_files.read().len();
     let db_import = db.clone();
@@ -813,12 +944,17 @@ fn StepOptimization(work_id: String, is_edit: bool) -> Element {
     let c = use_palette();
     let db = use_db();
 
-    let opt_config = db.optimization_config_get().unwrap_or_else(|_| jaymanga::data::OptimizationConfig::defaults());
+    let opt_config = db
+        .optimization_config_get()
+        .unwrap_or_else(|_| jaymanga::data::OptimizationConfig::defaults());
 
     let quality_hd = opt_config.quality_hd.unwrap_or(85);
     let quality_sd = opt_config.quality_sd.unwrap_or(80);
     let quality_mobile = opt_config.quality_mobile.unwrap_or(75);
-    let format = opt_config.output_format.clone().unwrap_or_else(|| "webp".to_string());
+    let format = opt_config
+        .output_format
+        .clone()
+        .unwrap_or_else(|| "webp".to_string());
 
     let mut optimized = 0usize;
     let mut pending = 0usize;
@@ -914,7 +1050,11 @@ fn StepPublication(
     let price_display = if pricing_model == "free" {
         "Gratuit".to_string()
     } else if price_cents > 0 {
-        format!("{},{:02} \u{20AC}", price_cents / 100, (price_cents % 100).abs())
+        format!(
+            "{},{:02} \u{20AC}",
+            price_cents / 100,
+            (price_cents % 100).abs()
+        )
     } else {
         "0,00 \u{20AC}".to_string()
     };

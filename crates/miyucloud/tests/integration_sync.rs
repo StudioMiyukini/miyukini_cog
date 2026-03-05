@@ -345,11 +345,7 @@ mod integration_sync {
     fn test_sync_engine_no_trusted_peers_returns_empty_result() {
         let (db, storage, km, _tmp) = setup_instance([1u8; 32]);
 
-        let config = SyncEngineConfig::new(
-            "local-cog".into(),
-            "owner".into(),
-            "pubkey".into(),
-        );
+        let config = SyncEngineConfig::new("local-cog".into(), "owner".into(), "pubkey".into());
         let engine = SyncEngine::new(config);
 
         let result = engine.sync_once(&db, &storage, &km).unwrap();
@@ -361,11 +357,7 @@ mod integration_sync {
 
     #[test]
     fn test_sync_engine_stop_flag_prevents_sync() {
-        let config = SyncEngineConfig::new(
-            "local-cog".into(),
-            "owner".into(),
-            "pubkey".into(),
-        );
+        let config = SyncEngineConfig::new("local-cog".into(), "owner".into(), "pubkey".into());
         let engine = SyncEngine::new(config);
 
         assert!(!engine.is_syncing());
@@ -419,15 +411,9 @@ mod integration_sync {
         assert!(zip_path.metadata().unwrap().len() > 0);
 
         // Import into B (different key!)
-        let imported = miyucloud::export::import_archive(
-            &db_b,
-            &storage_b,
-            &km_b,
-            &zip_path,
-            None,
-            "owner-b",
-        )
-        .unwrap();
+        let imported =
+            miyucloud::export::import_archive(&db_b, &storage_b, &km_b, &zip_path, None, "owner-b")
+                .unwrap();
 
         assert_eq!(imported.len(), 2);
 
@@ -452,8 +438,7 @@ mod integration_sync {
         let (db, storage, km, tmp) = setup_instance([1u8; 32]);
         let zip_path = tmp.path().join("empty.zip");
 
-        let result =
-            miyucloud::export::export_folder(&db, &storage, &km, None, "owner", &zip_path);
+        let result = miyucloud::export::export_folder(&db, &storage, &km, None, "owner", &zip_path);
         assert!(result.is_err());
 
         let err = result.unwrap_err().to_string();
@@ -475,12 +460,16 @@ mod integration_sync {
         let kp_a = e2e::generate_ephemeral_keypair();
         let kp_b = e2e::generate_ephemeral_keypair();
 
-        let session_key_a =
-            e2e::derive_session_key(&kp_a, &x25519_dalek::PublicKey::from(kp_b.public_key_bytes()))
-                .unwrap();
-        let session_key_b =
-            e2e::derive_session_key(&kp_b, &x25519_dalek::PublicKey::from(kp_a.public_key_bytes()))
-                .unwrap();
+        let session_key_a = e2e::derive_session_key(
+            &kp_a,
+            &x25519_dalek::PublicKey::from(kp_b.public_key_bytes()),
+        )
+        .unwrap();
+        let session_key_b = e2e::derive_session_key(
+            &kp_b,
+            &x25519_dalek::PublicKey::from(kp_a.public_key_bytes()),
+        )
+        .unwrap();
 
         // Both should derive the same session key
         assert_eq!(session_key_a, session_key_b);

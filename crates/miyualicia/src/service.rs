@@ -49,12 +49,18 @@ impl AliciaService {
     /// Initialise le registre de dispositifs vide, les clients de transport,
     /// et le bridge NLU. Ne lance pas la connexion MQTT (appeler `connect_mqtt()` apres).
     pub fn new(config: AliciaConfig) -> Self {
-        let mqtt_client = config.mqtt.as_ref().map(|mqtt_cfg| MqttClient::new(mqtt_cfg.clone()));
+        let mqtt_client = config
+            .mqtt
+            .as_ref()
+            .map(|mqtt_cfg| MqttClient::new(mqtt_cfg.clone()));
 
         let http_client = HttpDeviceClient::default();
 
         let nlu_config = NluBridgeConfig {
-            base_url: config.llm_bridge_url.clone(),
+            stt_base_url: config.stt_service_url.clone(),
+            nlu_base_url: config.llm_bridge_url.clone(),
+            tts_base_url: config.tts_service_url.clone(),
+            tts_enabled: config.tts_feature_enabled,
             known_rooms: config.rooms.iter().map(|r| r.id.clone()).collect(),
             ..Default::default()
         };
@@ -116,11 +122,12 @@ impl AliciaService {
         let start = Instant::now();
         let registry = self.registry.read().await;
 
-        let device = registry
-            .get_device(cmd.device_id)
-            .map_err(|_| AliciaError::DeviceNotFound {
-                device_id: cmd.device_id.to_string(),
-            })?;
+        let device =
+            registry
+                .get_device(cmd.device_id)
+                .map_err(|_| AliciaError::DeviceNotFound {
+                    device_id: cmd.device_id.to_string(),
+                })?;
 
         let device_name = device.name.clone();
         let protocol = device.protocol;
@@ -131,9 +138,7 @@ impl AliciaService {
             DeviceProtocol::Mqtt | DeviceProtocol::Zigbee2Mqtt => {
                 self.execute_mqtt_command(&cmd, &address).await
             }
-            DeviceProtocol::HttpLocal => {
-                self.execute_http_command(&cmd, &address).await
-            }
+            DeviceProtocol::HttpLocal => self.execute_http_command(&cmd, &address).await,
         };
 
         let latency = start.elapsed().as_millis() as u64;
@@ -181,11 +186,11 @@ impl AliciaService {
                 action,
                 value,
             } => {
-                let device_id = self
-                    .resolve_device(device_type, room_id.as_deref())
-                    .await?;
+                let device_id = self.resolve_device(device_type, room_id.as_deref()).await?;
                 let cmd = match value {
-                    Some(v) => DeviceCommand::with_value(device_id, action.clone(), v.clone(), source),
+                    Some(v) => {
+                        DeviceCommand::with_value(device_id, action.clone(), v.clone(), source)
+                    }
                     None => DeviceCommand::simple(device_id, action.clone(), source),
                 };
                 let latency = self.execute_command(cmd).await?;
@@ -211,6 +216,22 @@ impl AliciaService {
     /// Retourne une reference au bridge NLU.
     pub fn nlu_bridge(&self) -> &NluBridge {
         &self.nlu_bridge
+    }
+
+    /// Synthetise une reponse vocale via MiyuTTS (si feature flag active).
+    pub async fn synthesize_voice_reply(
+        &self,
+        text: &str,
+        language: &str,
+    ) -> Result<Option<Vec<u8>>, AliciaError> {
+        if !self.config.tts_feature_enabled {
+            return Ok(None);
+        }
+        self.nlu_bridge
+            .synthesize_tts(text, language)
+            .await
+            .map(Some)
+            .map_err(|e| AliciaError::NluError(e.to_string()))
     }
 
     /// Retourne la configuration Alicia.
@@ -376,9 +397,7 @@ impl AliciaService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use miyualicia_devices::{
-        DeviceCapabilities, DeviceConfig, DeviceProtocol, DeviceType,
-    };
+    use miyualicia_devices::{DeviceCapabilities, DeviceConfig, DeviceProtocol, DeviceType};
 
     fn test_config() -> AliciaConfig {
         AliciaConfig {
@@ -447,9 +466,7 @@ mod tests {
             action: "on".to_string(),
             value: None,
         };
-        let result = service
-            .dispatch_intent(&intent, CommandSource::Voice)
-            .await;
+        let result = service.dispatch_intent(&intent, CommandSource::Voice).await;
         assert!(result.is_err());
     }
 
@@ -486,5 +503,15 @@ mod tests {
         }
         let log = service.activity_log.read().await;
         assert!(log.len() <= MAX_ACTIVITY_LOG);
+    }
+
+    #[tokio::test]
+    async fn test_synthesize_voice_reply_returns_none_when_tts_disabled() {
+        let service = AliciaService::new(test_config());
+        let audio = service
+            .synthesize_voice_reply("bonjour", "fr")
+            .await
+            .expect("tts disabled should not fail");
+        assert!(audio.is_none());
     }
 }

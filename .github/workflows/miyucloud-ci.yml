@@ -1,0 +1,68 @@
+name: miyucloud-ci
+
+on:
+  push:
+    branches:
+      - main
+      - feat/**
+    paths:
+      - "apps/miyucloud/**"
+      - "crates/miyucloud/**"
+      - ".github/workflows/miyucloud-ci.yml"
+  pull_request:
+    paths:
+      - "apps/miyucloud/**"
+      - "crates/miyucloud/**"
+      - ".github/workflows/miyucloud-ci.yml"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: fmt
+        run: cargo fmt --manifest-path apps/miyucloud/Cargo.toml --all -- --check
+      - name: clippy
+        run: cargo clippy -p miyucloud -p miyucloud-server --all-targets -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: test miyucloud core
+        run: cargo test -p miyucloud
+      - name: test miyucloud server
+        run: cargo test -p miyucloud-server
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: install cargo-audit
+        run: cargo install cargo-audit --locked
+      - name: cargo audit
+        run: cargo audit
+
+  build-release:
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - test
+      - security
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: build release
+        run: cargo build -p miyucloud-server --release
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: miyucloud-server-linux-x86_64
+          path: target/release/miyucloud-server

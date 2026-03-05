@@ -21,7 +21,9 @@ pub use admin_cell::{
     MiyuinvoiceTestManifest, TOOLKIT_ID,
 };
 pub use context::GovernedContext;
-pub use customer::{list as customer_list, register as customer_register, resolve as customer_resolve};
+pub use customer::{
+    list as customer_list, register as customer_register, resolve as customer_resolve,
+};
 pub use electronic::submit as electronic_submit;
 pub use errors::MiyuinvoiceError;
 pub use invoice::{create as invoice_create, send as invoice_send};
@@ -45,7 +47,10 @@ mod tests {
         let list = customer_list(&c, None).unwrap();
         assert!(list.contains(&"cust-1".to_string()));
         assert!(list.contains(&"cust-2".to_string()));
-        assert_eq!(customer_resolve(&c, "cust-1").unwrap(), "{\"name\":\"Acme\"}");
+        assert_eq!(
+            customer_resolve(&c, "cust-1").unwrap(),
+            "{\"name\":\"Acme\"}"
+        );
     }
 
     #[test]
@@ -82,8 +87,12 @@ mod tests {
     fn electronic_submit_payment_link_reminder() {
         let c = ctx();
         let id = invoice_create(&c, "{}").unwrap();
-        assert!(electronic_submit(&c, &id, None).unwrap().starts_with("submitted:"));
-        assert!(payment_link_generate(&c, &id).unwrap().contains("pay.example"));
+        assert!(electronic_submit(&c, &id, None)
+            .unwrap()
+            .starts_with("submitted:"));
+        assert!(payment_link_generate(&c, &id)
+            .unwrap()
+            .contains("pay.example"));
         reminder_send(&c, &id, None).unwrap();
     }
 

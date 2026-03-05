@@ -3,10 +3,10 @@
 //! Initialise la DB KindMother, les providers de contexte (theme + DB),
 //! puis lance l'UI Dioxus Desktop.
 
-use std::sync::Arc;
 use dioxus::prelude::*;
+use jaykoa_app::{views::JayKoaView, DbContext};
 use miyukini_service_ui::{Theme, ThemeContext};
-use jaykoa_app::{DbContext, views::JayKoaView};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -34,12 +34,10 @@ fn main() {
 #[component]
 fn App() -> Element {
     // Repertoire de donnees (injecte par Central ou fallback local)
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| {
-            let base = std::env::var("LOCALAPPDATA")
-                .unwrap_or_else(|_| ".".to_string());
-            format!("{base}/Miyukini-COG/services/jaykoa/data")
-        });
+    let data_dir = std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| {
+        let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+        format!("{base}/Miyukini-COG/services/jaykoa/data")
+    });
 
     // Creer le repertoire de donnees si necessaire
     let _ = std::fs::create_dir_all(&data_dir);
@@ -62,7 +60,11 @@ fn App() -> Element {
     };
 
     // Provider : theme
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::Gaming }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::Gaming,
+        })
+    });
 
     // Provider : DB
     use_context_provider(|| Signal::new(DbContext { db }));

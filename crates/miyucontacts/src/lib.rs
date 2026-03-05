@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuContacts ; expose les modules tools.
 /// @do: expose_miyucontacts_toolkit
-
 pub mod admin_cell;
 pub mod contacts;
 pub mod context;
@@ -19,8 +18,8 @@ pub mod friend;
 pub mod store;
 
 pub use admin_cell::{
-    miyucontacts_admin_cell, MiyucontactsAdminCell, MiyucontactsIdentification, MiyucontactsIntegrity,
-    MiyucontactsTestManifest, TOOLKIT_ID,
+    miyucontacts_admin_cell, MiyucontactsAdminCell, MiyucontactsIdentification,
+    MiyucontactsIntegrity, MiyucontactsTestManifest, TOOLKIT_ID,
 };
 pub use contacts::list as contacts_list;
 pub use context::GovernedContext;

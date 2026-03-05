@@ -14,7 +14,9 @@ pub fn receive(ctx: &GovernedContext) -> Result<Vec<u8>, MiyuwebwayTrackerError>
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::TrackerUnavailable("transport_receive: network delegation not implemented".into()))
+    Err(MiyuwebwayTrackerError::TrackerUnavailable(
+        "transport_receive: network delegation not implemented".into(),
+    ))
 }
 
 /// @id: miyuwebway_tracker_mws_transport_send
@@ -23,9 +25,15 @@ pub fn receive(ctx: &GovernedContext) -> Result<Vec<u8>, MiyuwebwayTrackerError>
 /// @human: Envoie un message (réponse, liste statuts) ; adresse fournie.
 /// @do: mws_transport_send_under_governance
 /// Stub : délégation réseau non implémentée.
-pub fn send(ctx: &GovernedContext, _address: &str, _payload: &[u8]) -> Result<(), MiyuwebwayTrackerError> {
+pub fn send(
+    ctx: &GovernedContext,
+    _address: &str,
+    _payload: &[u8],
+) -> Result<(), MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
-    Err(MiyuwebwayTrackerError::TrackerUnavailable("transport_send: network delegation not implemented".into()))
+    Err(MiyuwebwayTrackerError::TrackerUnavailable(
+        "transport_send: network delegation not implemented".into(),
+    ))
 }

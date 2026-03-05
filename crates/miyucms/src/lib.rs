@@ -19,11 +19,17 @@ pub use admin_cell::{
     MiyucmsTestManifest, TOOLKIT_ID,
 };
 pub use comment::{create as comment_create, list as comment_list, moderate as comment_moderate};
-pub use content::{create as content_create, publish as content_publish, schedule as content_schedule, update as content_update};
+pub use content::{
+    create as content_create, publish as content_publish, schedule as content_schedule,
+    update as content_update,
+};
 pub use context::GovernedContext;
 pub use errors::MiyucmsError;
 pub use media::{serve as media_serve, transform as media_transform, upload as media_upload};
-pub use revision::{compare as revision_compare, create as revision_create, list as revision_list, restore as revision_restore};
+pub use revision::{
+    compare as revision_compare, create as revision_create, list as revision_list,
+    restore as revision_restore,
+};
 
 #[cfg(test)]
 mod tests {

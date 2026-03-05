@@ -60,8 +60,8 @@ impl SyncConnection {
     /// puis encadre avec un header de 4 bytes (longueur big-endian).
     pub fn send_message(&mut self, msg: &SyncMessage) -> Result<(), MiyucloudError> {
         // Serialize message to JSON
-        let json = serde_json::to_vec(msg)
-            .map_err(|e| MiyucloudError::Serialization(e.to_string()))?;
+        let json =
+            serde_json::to_vec(msg).map_err(|e| MiyucloudError::Serialization(e.to_string()))?;
 
         // Encrypt with session key
         let encrypted = e2e::encrypt_message(&self.session_key, &json)?;
@@ -149,8 +149,8 @@ impl SyncTransport {
     /// 2. Le serveur repond avec sa cle publique.
     /// 3. Les deux derivent la cle de session partagee.
     pub fn connect(peer_addr: SocketAddr) -> Result<SyncConnection, MiyucloudError> {
-        let stream = TcpStream::connect_timeout(&peer_addr, DEFAULT_TIMEOUT)
-            .map_err(MiyucloudError::Io)?;
+        let stream =
+            TcpStream::connect_timeout(&peer_addr, DEFAULT_TIMEOUT).map_err(MiyucloudError::Io)?;
 
         // Generate ephemeral keypair
         let local_kp = e2e::generate_ephemeral_keypair();
@@ -184,9 +184,7 @@ impl SyncTransport {
     }
 
     /// Accepte une connexion entrante et effectue l'echange de cles.
-    pub fn accept_connection(
-        stream: TcpStream,
-    ) -> Result<SyncConnection, MiyucloudError> {
+    pub fn accept_connection(stream: TcpStream) -> Result<SyncConnection, MiyucloudError> {
         stream
             .set_read_timeout(Some(DEFAULT_TIMEOUT))
             .map_err(MiyucloudError::Io)?;
@@ -248,8 +246,7 @@ mod tests {
     #[test]
     fn test_send_and_receive_message_roundtrip() {
         // Create a pair of connected TCP streams via listener
-        let listener =
-            TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
         let addr = listener.local_addr().unwrap();
 
         let session_key = [42u8; 32]; // Shared key for testing
@@ -280,8 +277,7 @@ mod tests {
 
     #[test]
     fn test_send_chunk_data_roundtrip() {
-        let listener =
-            TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
         let addr = listener.local_addr().unwrap();
 
         let session_key = [99u8; 32];
@@ -324,8 +320,7 @@ mod tests {
 
     #[test]
     fn test_connection_with_key_exchange() {
-        let listener =
-            TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
         let addr = listener.local_addr().unwrap();
 
         let handle = thread::spawn(move || {
@@ -369,8 +364,7 @@ mod tests {
     #[test]
     fn test_connection_timeout() {
         // Bind but never accept
-        let listener =
-            TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0".parse::<SocketAddr>().unwrap()).unwrap();
         let _addr = listener.local_addr().unwrap();
 
         // Try to connect to a port that nobody listens on (high port)

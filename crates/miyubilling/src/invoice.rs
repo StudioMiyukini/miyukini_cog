@@ -25,7 +25,10 @@ pub fn generate(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyubil
 /// @layer: tool
 /// @human: Liste les factures ; filtres fournis ; lecture gouvernée.
 /// @do: billing_invoice_list_under_governance
-pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>, MiyubillingError> {
+pub fn list(
+    ctx: &GovernedContext,
+    _filters: Option<&str>,
+) -> Result<Vec<String>, MiyubillingError> {
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }

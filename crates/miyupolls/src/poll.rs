@@ -60,7 +60,9 @@ pub fn create(
         item: item.clone(),
         votes: HashMap::new(),
     };
-    let mut guard = polls().lock().map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
+    let mut guard = polls()
+        .lock()
+        .map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), record);
     Ok(id)
 }
@@ -71,16 +73,16 @@ pub fn create(
 /// @human: Enregistre un vote ; WriteIntent KindMother.
 /// @do: poll_vote_under_governance
 /// tool.poll.vote
-pub fn vote(
-    ctx: &GovernedContext,
-    poll_id: &str,
-    option_id: &str,
-) -> Result<(), MiyupollsError> {
+pub fn vote(ctx: &GovernedContext, poll_id: &str, option_id: &str) -> Result<(), MiyupollsError> {
     if !ctx.has_mandate() {
         return Err(MiyupollsError::NoMandate);
     }
-    let mut guard = polls().lock().map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
-    let rec = guard.get_mut(poll_id).ok_or_else(|| MiyupollsError::InvalidInput("poll not found".into()))?;
+    let mut guard = polls()
+        .lock()
+        .map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
+    let rec = guard
+        .get_mut(poll_id)
+        .ok_or_else(|| MiyupollsError::InvalidInput("poll not found".into()))?;
     if !rec.item.options.iter().any(|o| o == option_id) {
         return Err(MiyupollsError::InvalidInput("option not found".into()));
     }
@@ -98,7 +100,9 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<PollItem>, MiyupollsError> {
     if !ctx.has_mandate() {
         return Err(MiyupollsError::NoMandate);
     }
-    let guard = polls().lock().map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
+    let guard = polls()
+        .lock()
+        .map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
     Ok(guard.values().map(|r| r.item.clone()).collect())
 }
 
@@ -112,8 +116,12 @@ pub fn result(ctx: &GovernedContext, poll_id: &str) -> Result<PollResult, Miyupo
     if !ctx.has_mandate() {
         return Err(MiyupollsError::NoMandate);
     }
-    let guard = polls().lock().map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
-    let rec = guard.get(poll_id).ok_or_else(|| MiyupollsError::InvalidInput("poll not found".into()))?;
+    let guard = polls()
+        .lock()
+        .map_err(|_| MiyupollsError::InvalidInput("lock".into()))?;
+    let rec = guard
+        .get(poll_id)
+        .ok_or_else(|| MiyupollsError::InvalidInput("poll not found".into()))?;
     let option_counts: Vec<(String, u64)> = rec
         .item
         .options

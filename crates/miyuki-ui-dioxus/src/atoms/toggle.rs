@@ -63,11 +63,7 @@ pub fn Toggle(
     let knob_color = p.text_high.to_css();
     let text_color = p.text_primary.to_css();
     let opacity = if disabled { "0.5" } else { "1" };
-    let cursor = if disabled {
-        "not-allowed"
-    } else {
-        "pointer"
-    };
+    let cursor = if disabled { "not-allowed" } else { "pointer" };
 
     let knob_x = if checked {
         track_w - knob_size - knob_offset

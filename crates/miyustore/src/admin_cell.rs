@@ -30,7 +30,9 @@ pub struct MiyustoreTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyustoreIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyustoreAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.commerce.store";
 
-#[must_use] 
+#[must_use]
 pub fn miyustore_admin_cell(version: &str, fingerprint: &str) -> MiyustoreAdminCell {
     MiyustoreAdminCell {
         identification: MiyustoreIdentification {
@@ -63,7 +65,9 @@ pub fn miyustore_admin_cell(version: &str, fingerprint: &str) -> MiyustoreAdminC
                 id: "Miyustore".to_string(),
                 name: "Test chemin complet Miyustore".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

@@ -1,8 +1,8 @@
 //! VIS-E12 — Compte visiteur.
 
+use super::components::ActionButton;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::ActionButton;
 
 /// Mon compte visiteur.
 #[component]

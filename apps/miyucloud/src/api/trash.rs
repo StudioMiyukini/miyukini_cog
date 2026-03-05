@@ -17,6 +17,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use miyucloud::domain::TrashOps;
+use miyucloud::utils::sanitize::validate_uuid;
 use std::sync::Arc;
 
 /// Liste le contenu de la corbeille.
@@ -46,15 +47,19 @@ pub async fn restore_from_trash(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            "INVALID_ID",
+            "Invalid trash element id",
+        );
+    }
     let db = &state.db;
     // Try file first
     if db.file_by_id(&id).ok().flatten().is_some() {
         match TrashOps::restore_file(db, &id) {
             Ok(()) => {
-                return (
-                    StatusCode::OK,
-                    Json(serde_json::json!({"restored": true})),
-                )
+                return (StatusCode::OK, Json(serde_json::json!({"restored": true})))
                     .into_response()
             }
             Err(e) => {
@@ -70,10 +75,7 @@ pub async fn restore_from_trash(
     if db.folder_by_id(&id).ok().flatten().is_some() {
         match TrashOps::restore_folder(db, &id) {
             Ok(()) => {
-                return (
-                    StatusCode::OK,
-                    Json(serde_json::json!({"restored": true})),
-                )
+                return (StatusCode::OK, Json(serde_json::json!({"restored": true})))
                     .into_response()
             }
             Err(e) => {
@@ -97,17 +99,20 @@ pub async fn purge_from_trash(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            "INVALID_ID",
+            "Invalid trash element id",
+        );
+    }
     let db = &state.db;
     let storage = &state.storage;
     // Try file first
     if db.file_by_id(&id).ok().flatten().is_some() {
         match TrashOps::purge_file(db, storage, &id) {
             Ok(()) => {
-                return (
-                    StatusCode::OK,
-                    Json(serde_json::json!({"purged": true})),
-                )
-                    .into_response()
+                return (StatusCode::OK, Json(serde_json::json!({"purged": true}))).into_response()
             }
             Err(e) => {
                 return error_response(
@@ -122,11 +127,7 @@ pub async fn purge_from_trash(
     if db.folder_by_id(&id).ok().flatten().is_some() {
         match TrashOps::purge_folder(db, storage, &id) {
             Ok(()) => {
-                return (
-                    StatusCode::OK,
-                    Json(serde_json::json!({"purged": true})),
-                )
-                    .into_response()
+                return (StatusCode::OK, Json(serde_json::json!({"purged": true}))).into_response()
             }
             Err(e) => {
                 return error_response(
@@ -150,11 +151,7 @@ pub async fn empty_trash(State(state): State<Arc<AppState>>) -> Response {
     let storage = &state.storage;
     let owner_id = &state.config.owner_id;
     match TrashOps::empty_trash(db, storage, owner_id) {
-        Ok(()) => (
-            StatusCode::OK,
-            Json(serde_json::json!({"emptied": true})),
-        )
-            .into_response(),
+        Ok(()) => (StatusCode::OK, Json(serde_json::json!({"emptied": true}))).into_response(),
         Err(e) => error_response(
             StatusCode::INTERNAL_SERVER_ERROR,
             "EMPTY_TRASH_ERROR",

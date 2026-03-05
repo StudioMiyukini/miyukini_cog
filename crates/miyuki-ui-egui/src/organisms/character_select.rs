@@ -2,10 +2,10 @@
 
 //! Character selection screen organism.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::d2_button::{D2Button, D2ButtonVariant};
 use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Character slot data for the selection screen.
 #[derive(Debug, Clone)]
@@ -27,13 +27,21 @@ impl CharacterSelect {
     /// Draw the character selection screen.
     ///
     /// Returns the index of the selected character, or `None`.
-    pub fn show(ctx: &Context, characters: &[CharSlotData], selected: Option<usize>) -> CharSelectAction {
+    pub fn show(
+        ctx: &Context,
+        characters: &[CharSlotData],
+        selected: Option<usize>,
+    ) -> CharSelectAction {
         let mut action = CharSelectAction::None;
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical_centered(|ui| {
                 let gold = rgba_to_color32(&D2_PALETTE.text_high);
-                ui.label(egui::RichText::new("Selection du personnage").color(gold).size(18.0));
+                ui.label(
+                    egui::RichText::new("Selection du personnage")
+                        .color(gold)
+                        .size(18.0),
+                );
                 ui.separator();
 
                 for (i, character) in characters.iter().enumerate() {
@@ -50,10 +58,8 @@ impl CharacterSelect {
                     );
 
                     let resp = ui.add(
-                        egui::Label::new(
-                            egui::RichText::new(&label).color(text_color).size(13.0),
-                        )
-                        .sense(egui::Sense::click()),
+                        egui::Label::new(egui::RichText::new(&label).color(text_color).size(13.0))
+                            .sense(egui::Sense::click()),
                     );
 
                     if resp.clicked() {

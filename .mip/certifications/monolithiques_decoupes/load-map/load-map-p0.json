@@ -1,0 +1,21 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+
+                 },
+    "fallback_par_phase":  {
+                               "p0.maria":  [
+                                                "cert.maria.psm"
+                                            ],
+                               "p0.fabrice":  [
+                                                  "cert.fabrice.pspo"
+                                              ],
+                               "p0.denis":  [
+                                                "cert.denis.togaf"
+                                            ],
+                               "p0.victor":  [
+                                                 "cert.victor.iso_27001"
+                                             ]
+                           }
+}

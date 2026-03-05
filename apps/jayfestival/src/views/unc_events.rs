@@ -2,11 +2,11 @@
 //!
 //! Catalogue des evenements publies, filtres, et detail d'un evenement.
 
+use super::components::{format_date_range, ActionButton, Badge};
+use super::{JayFestivalState, UncSection};
 use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use super::{UncSection, JayFestivalState};
-use super::components::{Badge, ActionButton, format_date_range};
 use jayfestival::data::Edition;
+use miyukini_service_ui::use_palette;
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()
@@ -400,10 +400,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
 /// Item de liste d'evenement.
 #[component]
-fn EventListItem(
-    edition: Edition,
-    onclick: EventHandler<MouseEvent>,
-) -> Element {
+fn EventListItem(edition: Edition, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
     let status_str = opt_str(&edition.status);
     let status_color = match status_str.as_str() {

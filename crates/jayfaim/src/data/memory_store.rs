@@ -39,7 +39,10 @@ impl JayFaimStore {
     // --- Tables
     pub fn table_insert(&self, table: Table) -> Result<(), DbError> {
         let id = table.id.clone();
-        self.tables.write().map_err(|e| DbError(e.to_string()))?.insert(id, table);
+        self.tables
+            .write()
+            .map_err(|e| DbError(e.to_string()))?
+            .insert(id, table);
         Ok(())
     }
 
@@ -48,7 +51,11 @@ impl JayFaimStore {
         Ok(guard.get(id).cloned())
     }
 
-    pub fn table_list(&self, venue_id: Option<&str>, active_only: bool) -> Result<Vec<Table>, DbError> {
+    pub fn table_list(
+        &self,
+        venue_id: Option<&str>,
+        active_only: bool,
+    ) -> Result<Vec<Table>, DbError> {
         let guard = self.tables.read().map_err(|e| DbError(e.to_string()))?;
         let out: Vec<Table> = guard
             .values()
@@ -64,7 +71,10 @@ impl JayFaimStore {
     // --- Slots
     pub fn slot_insert(&self, slot: ReservationSlot) -> Result<(), DbError> {
         let id = slot.id.clone();
-        self.slots.write().map_err(|e| DbError(e.to_string()))?.insert(id, slot);
+        self.slots
+            .write()
+            .map_err(|e| DbError(e.to_string()))?
+            .insert(id, slot);
         Ok(())
     }
 
@@ -95,12 +105,18 @@ impl JayFaimStore {
     // --- Reservations
     pub fn reservation_insert(&self, r: Reservation) -> Result<(), DbError> {
         let id = r.id.clone();
-        self.reservations.write().map_err(|e| DbError(e.to_string()))?.insert(id, r);
+        self.reservations
+            .write()
+            .map_err(|e| DbError(e.to_string()))?
+            .insert(id, r);
         Ok(())
     }
 
     pub fn reservation_by_id(&self, id: &str) -> Result<Option<Reservation>, DbError> {
-        let guard = self.reservations.read().map_err(|e| DbError(e.to_string()))?;
+        let guard = self
+            .reservations
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         Ok(guard.get(id).cloned())
     }
 
@@ -111,7 +127,10 @@ impl JayFaimStore {
         date: Option<&str>,
         status_filter: Option<ReservationStatus>,
     ) -> Result<Vec<Reservation>, DbError> {
-        let guard = self.reservations.read().map_err(|e| DbError(e.to_string()))?;
+        let guard = self
+            .reservations
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         let out: Vec<Reservation> = guard
             .values()
             .filter(|r| {
@@ -125,9 +144,18 @@ impl JayFaimStore {
         Ok(out)
     }
 
-    pub fn reservation_set_status(&self, id: &str, status: ReservationStatus) -> Result<(), DbError> {
-        let mut guard = self.reservations.write().map_err(|e| DbError(e.to_string()))?;
-        let r = guard.get_mut(id).ok_or_else(|| DbError(format!("reservation not found: {id}")))?;
+    pub fn reservation_set_status(
+        &self,
+        id: &str,
+        status: ReservationStatus,
+    ) -> Result<(), DbError> {
+        let mut guard = self
+            .reservations
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
+        let r = guard
+            .get_mut(id)
+            .ok_or_else(|| DbError(format!("reservation not found: {id}")))?;
         r.status = status;
         r.updated_at = chrono::Utc::now().to_rfc3339();
         Ok(())
@@ -136,7 +164,10 @@ impl JayFaimStore {
     // --- Guests
     pub fn guest_insert(&self, guest: Guest) -> Result<(), DbError> {
         let id = guest.id.clone();
-        self.guests.write().map_err(|e| DbError(e.to_string()))?.insert(id, guest);
+        self.guests
+            .write()
+            .map_err(|e| DbError(e.to_string()))?
+            .insert(id, guest);
         Ok(())
     }
 

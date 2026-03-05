@@ -316,8 +316,16 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
     let cb_bg_color = if accepted { "#FF6B35" } else { "transparent" };
     let btn_bg = if can_proceed { "#FF6B35" } else { c.bg_hover };
     let btn_color = if can_proceed { "white" } else { c.text_muted };
-    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", c.border) };
-    let btn_cursor = if can_proceed { "pointer" } else { "not-allowed" };
+    let btn_border = if can_proceed {
+        "none".to_string()
+    } else {
+        format!("1px solid {}", c.border)
+    };
+    let btn_cursor = if can_proceed {
+        "pointer"
+    } else {
+        "not-allowed"
+    };
 
     rsx! {
         div {
@@ -470,8 +478,16 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
     let cb_bg_color = if accepted { "#FF6B35" } else { "transparent" };
     let btn_bg = if can_proceed { "#FF6B35" } else { c.bg_hover };
     let btn_color = if can_proceed { "white" } else { c.text_muted };
-    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", c.border) };
-    let btn_cursor = if can_proceed { "pointer" } else { "not-allowed" };
+    let btn_border = if can_proceed {
+        "none".to_string()
+    } else {
+        format!("1px solid {}", c.border)
+    };
+    let btn_cursor = if can_proceed {
+        "pointer"
+    } else {
+        "not-allowed"
+    };
 
     rsx! {
         div {
@@ -605,11 +621,7 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 // -- Composant reutilisable : section de contrat --
 
 #[component]
-fn ContractSection(
-    number: &'static str,
-    title: &'static str,
-    text: &'static str,
-) -> Element {
+fn ContractSection(number: &'static str, title: &'static str, text: &'static str) -> Element {
     let c = use_palette();
 
     rsx! {

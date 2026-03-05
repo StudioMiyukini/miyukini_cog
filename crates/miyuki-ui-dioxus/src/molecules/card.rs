@@ -78,13 +78,9 @@ pub fn Card(
          padding: {pad}px; border-bottom: 1px solid {border_color};"
     );
 
-    let body_style = format!(
-        "padding: {pad}px; color: {text_color}; flex: 1;"
-    );
+    let body_style = format!("padding: {pad}px; color: {text_color}; flex: 1;");
 
-    let footer_style = format!(
-        "padding: {pad}px; border-top: 1px solid {border_color};"
-    );
+    let footer_style = format!("padding: {pad}px; border-top: 1px solid {border_color};");
 
     rsx! {
         div {

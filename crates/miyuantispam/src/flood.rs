@@ -10,7 +10,10 @@ use crate::errors::MiyuantispamError;
 /// @human: Vérifie le flood (scope fourni) ; seuils = flux ou KindMother.
 /// @do: flood_check_under_governance
 /// tool.antispam.flood.check
-pub fn check(ctx: &GovernedContext, _scope_id: &str) -> Result<FloodCheckResult, MiyuantispamError> {
+pub fn check(
+    ctx: &GovernedContext,
+    _scope_id: &str,
+) -> Result<FloodCheckResult, MiyuantispamError> {
     if !ctx.has_mandate() {
         return Err(MiyuantispamError::NoMandate);
     }

@@ -66,10 +66,7 @@ pub fn download_compute_sha256(path: &Path) -> Result<String, DownloadError> {
 }
 
 /// Vérifie l'intégrité d'un fichier téléchargé.
-pub fn download_verify_integrity(
-    path: &Path,
-    expected_hash: &str,
-) -> Result<(), DownloadError> {
+pub fn download_verify_integrity(path: &Path, expected_hash: &str) -> Result<(), DownloadError> {
     let actual = download_compute_sha256(path)?;
     if actual != expected_hash {
         return Err(DownloadError::IntegrityFailed {
@@ -87,15 +84,8 @@ pub fn download_verify_integrity(
 
 /// Construit le chemin de stockage local pour une oeuvre téléchargée.
 #[must_use]
-pub fn download_local_path(
-    base_dir: &Path,
-    seller_cog_id: &str,
-    work_id: &str,
-) -> PathBuf {
-    base_dir
-        .join("downloads")
-        .join(seller_cog_id)
-        .join(work_id)
+pub fn download_local_path(base_dir: &Path, seller_cog_id: &str, work_id: &str) -> PathBuf {
+    base_dir.join("downloads").join(seller_cog_id).join(work_id)
 }
 
 /// Construit le chemin vers un chapitre dans le stockage local.
@@ -113,11 +103,7 @@ pub fn download_chapter_path(
 
 /// Vérifie si une oeuvre est disponible localement.
 #[must_use]
-pub fn download_is_available_locally(
-    base_dir: &Path,
-    seller_cog_id: &str,
-    work_id: &str,
-) -> bool {
+pub fn download_is_available_locally(base_dir: &Path, seller_cog_id: &str, work_id: &str) -> bool {
     let path = download_local_path(base_dir, seller_cog_id, work_id);
     path.join("metadata.json").exists()
 }
@@ -157,10 +143,7 @@ mod tests {
     fn test_local_path() {
         let base = Path::new("/jaymanga");
         let path = download_local_path(base, "cog-abc", "work-123");
-        assert_eq!(
-            path,
-            PathBuf::from("/jaymanga/downloads/cog-abc/work-123")
-        );
+        assert_eq!(path, PathBuf::from("/jaymanga/downloads/cog-abc/work-123"));
     }
 
     #[test]

@@ -58,7 +58,7 @@ pub struct ModuleLifecycleService {
 
 impl ModuleLifecycleService {
     /// Crée un nouveau service de cycle de vie (stub : registre en mémoire).
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             modules: RwLock::new(HashMap::new()),
@@ -67,7 +67,10 @@ impl ModuleLifecycleService {
 
     /// Ajoute un module (validation StrongFather, enregistrement Master Butler, traçabilité).
     /// Stub : enregistre en mémoire ; en production, passe par BondingBrother.
-    pub fn add_module(&self, params: AddModuleParams) -> Result<LifecycleActionResult, ModuleLifecycleError> {
+    pub fn add_module(
+        &self,
+        params: AddModuleParams,
+    ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
         let module_id = params.id.clone();
         let info = ModuleInfo {
             id: params.id.clone(),
@@ -88,12 +91,17 @@ impl ModuleLifecycleService {
             action: ModuleLifecycleAction::Add,
             module_id: module_id.clone(),
             success: true,
-            message: Some("Module enregistré (stub ; StrongFather/Master Butler en production).".to_string()),
+            message: Some(
+                "Module enregistré (stub ; StrongFather/Master Butler en production).".to_string(),
+            ),
         })
     }
 
     /// Verrouille un module (blocage d'usage sans suppression ; validation StrongFather).
-    pub fn lock_module(&self, module_id: &str) -> Result<LifecycleActionResult, ModuleLifecycleError> {
+    pub fn lock_module(
+        &self,
+        module_id: &str,
+    ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
         let mut modules = self.modules.write().expect("RwLock poisoned");
         let info = modules
             .get_mut(module_id)
@@ -108,12 +116,17 @@ impl ModuleLifecycleService {
             action: ModuleLifecycleAction::Lock,
             module_id: module_id.to_string(),
             success: true,
-            message: Some("Module verrouillé (stub ; StrongFather/CaringNanny en production).".to_string()),
+            message: Some(
+                "Module verrouillé (stub ; StrongFather/CaringNanny en production).".to_string(),
+            ),
         })
     }
 
     /// Déverrouille un module.
-    pub fn unlock_module(&self, module_id: &str) -> Result<LifecycleActionResult, ModuleLifecycleError> {
+    pub fn unlock_module(
+        &self,
+        module_id: &str,
+    ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
         let mut modules = self.modules.write().expect("RwLock poisoned");
         let info = modules
             .get_mut(module_id)
@@ -133,7 +146,10 @@ impl ModuleLifecycleService {
     }
 
     /// Supprime un module (validation StrongFather, retrait du registre Master Butler, nettoyage contrôlé).
-    pub fn delete_module(&self, module_id: &str) -> Result<LifecycleActionResult, ModuleLifecycleError> {
+    pub fn delete_module(
+        &self,
+        module_id: &str,
+    ) -> Result<LifecycleActionResult, ModuleLifecycleError> {
         let mut modules = self.modules.write().expect("RwLock poisoned");
         if modules.remove(module_id).is_none() {
             return Err(ModuleLifecycleError::ModuleNotFound(module_id.to_string()));
@@ -142,18 +158,30 @@ impl ModuleLifecycleService {
             action: ModuleLifecycleAction::Delete,
             module_id: module_id.to_string(),
             success: true,
-            message: Some("Module supprimé du registre (stub ; StrongFather/Master Butler en production).".to_string()),
+            message: Some(
+                "Module supprimé du registre (stub ; StrongFather/Master Butler en production)."
+                    .to_string(),
+            ),
         })
     }
 
     /// Retourne la liste des modules (pour synchronisation avec le stub de découverte).
     pub fn list_modules(&self) -> Vec<ModuleInfo> {
-        self.modules.read().expect("RwLock poisoned").values().cloned().collect()
+        self.modules
+            .read()
+            .expect("RwLock poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 
     /// Retourne les infos d'un module (pour enregistrement dans la découverte après add).
     pub fn get_module(&self, module_id: &str) -> Option<ModuleInfo> {
-        self.modules.read().expect("RwLock poisoned").get(module_id).cloned()
+        self.modules
+            .read()
+            .expect("RwLock poisoned")
+            .get(module_id)
+            .cloned()
     }
 }
 

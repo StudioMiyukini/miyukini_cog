@@ -4,11 +4,11 @@
 //! - EventBlock : bloc d'evenement dans la grille
 //! - ConflictBadge : indicateur de conflit
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
 use super::CalendarViewMode;
-use jaykoa::data::{TemporalEntry, TemporalConflict, EventSource, EntryType};
 use chrono::{Datelike, NaiveDate};
+use dioxus::prelude::*;
+use jaykoa::data::{EntryType, EventSource, TemporalConflict, TemporalEntry};
+use miyukini_service_ui::use_palette;
 
 /// Props pour le header du calendrier.
 #[derive(Props, Clone, PartialEq)]
@@ -39,14 +39,28 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
                 chrono::Weekday::Sat => "Samedi",
                 chrono::Weekday::Sun => "Dimanche",
             };
-            format!("{} {} {}", weekday, props.current_date.day(), month_name(props.current_date.month()))
+            format!(
+                "{} {} {}",
+                weekday,
+                props.current_date.day(),
+                month_name(props.current_date.month())
+            )
         }
         CalendarViewMode::Week => {
             let week_num = props.current_date.iso_week().week();
-            format!("{} {} — Semaine {}", month_name(props.current_date.month()), props.current_date.year(), week_num)
+            format!(
+                "{} {} — Semaine {}",
+                month_name(props.current_date.month()),
+                props.current_date.year(),
+                week_num
+            )
         }
         CalendarViewMode::Month | CalendarViewMode::Schedule => {
-            format!("{} {}", month_name(props.current_date.month()), props.current_date.year())
+            format!(
+                "{} {}",
+                month_name(props.current_date.month()),
+                props.current_date.year()
+            )
         }
         CalendarViewMode::Year => {
             format!("{}", props.current_date.year())
@@ -169,11 +183,17 @@ pub fn EventBlock(props: EventBlockProps) -> Element {
 
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
-    let entry_type = props.entry.entry_type.as_deref().map_or(EntryType::Internal, EntryType::from_str);
+    let entry_type = props
+        .entry
+        .entry_type
+        .as_deref()
+        .map_or(EntryType::Internal, EntryType::from_str);
     let is_readonly = entry_type.is_readonly();
 
     // Formater l'heure
-    let time_label = if let (Some(start), Some(end)) = (&props.entry.start_datetime, &props.entry.end_datetime) {
+    let time_label = if let (Some(start), Some(end)) =
+        (&props.entry.start_datetime, &props.entry.end_datetime)
+    {
         let start_time = &start[11..16];
         let end_time = &end[11..16];
         format!("{start_time} — {end_time}")
@@ -182,7 +202,12 @@ pub fn EventBlock(props: EventBlockProps) -> Element {
     };
 
     // Icone de source
-    let source_icon = match props.entry.source_service.as_deref().map(EventSource::from_str) {
+    let source_icon = match props
+        .entry
+        .source_service
+        .as_deref()
+        .map(EventSource::from_str)
+    {
         Some(EventSource::JayFestival) => Some("F"),
         Some(EventSource::JayRDV) => Some("R"),
         _ => None,
@@ -263,7 +288,11 @@ pub struct ConflictBadgeProps {
 pub fn ConflictBadge(props: ConflictBadgeProps) -> Element {
     let c = use_palette();
 
-    let desc = props.conflict.description.as_deref().unwrap_or("Conflit detecte");
+    let desc = props
+        .conflict
+        .description
+        .as_deref()
+        .unwrap_or("Conflit detecte");
     let badge_bg = format!("{}15", c.accent_orange);
     let badge_border = format!("{}40", c.accent_orange);
 
@@ -303,9 +332,18 @@ pub fn CalendarMainView(props: CalendarMainViewProps) -> Element {
 // Helper : nom du mois en francais
 fn month_name(month: u32) -> &'static str {
     match month {
-        1 => "Janvier", 2 => "Fevrier", 3 => "Mars", 4 => "Avril",
-        5 => "Mai", 6 => "Juin", 7 => "Juillet", 8 => "Aout",
-        9 => "Septembre", 10 => "Octobre", 11 => "Novembre", 12 => "Decembre",
+        1 => "Janvier",
+        2 => "Fevrier",
+        3 => "Mars",
+        4 => "Avril",
+        5 => "Mai",
+        6 => "Juin",
+        7 => "Juillet",
+        8 => "Aout",
+        9 => "Septembre",
+        10 => "Octobre",
+        11 => "Novembre",
+        12 => "Decembre",
         _ => "?",
     }
 }

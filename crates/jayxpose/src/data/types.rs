@@ -875,7 +875,12 @@ impl ArticleStatus {
 
     /// Liste des statuts disponibles.
     pub fn all() -> &'static [Self] {
-        &[Self::Brouillon, Self::Relecture, Self::Publie, Self::Archive]
+        &[
+            Self::Brouillon,
+            Self::Relecture,
+            Self::Publie,
+            Self::Archive,
+        ]
     }
 
     /// Libellé français pour l'UI.

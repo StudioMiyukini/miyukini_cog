@@ -30,7 +30,9 @@ pub struct MiyuprofileTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuprofileIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuprofileAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.identity.profile";
 
-#[must_use] 
+#[must_use]
 pub fn miyuprofile_admin_cell(version: &str, fingerprint: &str) -> MiyuprofileAdminCell {
     MiyuprofileAdminCell {
         identification: MiyuprofileIdentification {
@@ -63,7 +65,9 @@ pub fn miyuprofile_admin_cell(version: &str, fingerprint: &str) -> MiyuprofileAd
                 id: "Miyuprofile".to_string(),
                 name: "Test chemin complet Miyuprofile".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

@@ -25,6 +25,7 @@ pub mod sandbox;
 pub mod share_page;
 pub mod tls;
 
+use crate::security_headers::SecurityHeadersLayer;
 use crate::AppState;
 use axum::routing::{get, post};
 use axum::Router;
@@ -41,12 +42,14 @@ pub fn web_surface_router(state: Arc<AppState>) -> Router {
     let share_rate_limiter = RateLimiterLayer::new(RateLimiterConfig {
         max_requests: 10,
         window: Duration::from_secs(60),
+        trust_proxy: state.config.trust_proxy,
     });
 
     // Rate limiter plus strict pour l'authentification : 3 tentatives/minute par IP
     let auth_rate_limiter = RateLimiterLayer::new(RateLimiterConfig {
         max_requests: 3,
         window: Duration::from_secs(60),
+        trust_proxy: state.config.trust_proxy,
     });
 
     // Routes d'authentification avec rate limiter strict
@@ -64,6 +67,7 @@ pub fn web_surface_router(state: Arc<AppState>) -> Router {
         .merge(auth_routes)
         .merge(share_routes)
         .route("/health", get(web_health))
+        .layer(SecurityHeadersLayer::for_web())
         .with_state(state)
 }
 
@@ -94,6 +98,7 @@ mod tests {
             owner_id: "test-owner".to_string(),
             web_port: 11442,
             web_enabled: true,
+            trust_proxy: false,
             tls_cert_path: None,
             tls_key_path: None,
         };

@@ -100,9 +100,7 @@ pub fn Modal(
          padding: 16px 20px; border-bottom: 1px solid {border_color}; flex-shrink: 0;"
     );
 
-    let body_style = format!(
-        "flex: 1; padding: 20px; overflow-y: auto; color: {text_color};"
-    );
+    let body_style = format!("flex: 1; padding: 20px; overflow-y: auto; color: {text_color};");
 
     let has_actions = actions.is_some();
     let footer_style = format!(

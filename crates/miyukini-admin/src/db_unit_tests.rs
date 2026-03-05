@@ -154,13 +154,15 @@ pub struct Recommendation {
 }
 
 /// Définitions des tests COH (cohérence).
-#[must_use] 
+#[must_use]
 pub fn coh_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
             id: "COH-001".to_string(),
             name: "Intégrité Référentielle".to_string(),
-            description: "Vérifie que toutes les clés étrangères pointent vers des enregistrements existants".to_string(),
+            description:
+                "Vérifie que toutes les clés étrangères pointent vers des enregistrements existants"
+                    .to_string(),
             category: "coherence".to_string(),
             query_type: "foreign_key_check".to_string(),
             criteria: [("violations_count".to_string(), 0)].into_iter().collect(),
@@ -224,7 +226,7 @@ pub fn coh_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Définitions des tests CONF (conformité).
-#[must_use] 
+#[must_use]
 pub fn conf_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
@@ -282,7 +284,7 @@ pub fn conf_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Définitions des tests STRUCT (structure).
-#[must_use] 
+#[must_use]
 pub fn struct_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
@@ -334,16 +336,19 @@ pub fn struct_test_definitions() -> Vec<DbUnitTestDefinition> {
 }
 
 /// Définitions des tests SEC (sécurité).
-#[must_use] 
+#[must_use]
 pub fn sec_test_definitions() -> Vec<DbUnitTestDefinition> {
     vec![
         DbUnitTestDefinition {
             id: "SEC-001".to_string(),
             name: "Permissions non escaladées".to_string(),
-            description: "Vérifie qu'aucun utilisateur n'a des permissions supérieures à son rôle".to_string(),
+            description: "Vérifie qu'aucun utilisateur n'a des permissions supérieures à son rôle"
+                .to_string(),
             category: "security".to_string(),
             query_type: "permission_check".to_string(),
-            criteria: [("escalated_permissions_count".to_string(), 0)].into_iter().collect(),
+            criteria: [("escalated_permissions_count".to_string(), 0)]
+                .into_iter()
+                .collect(),
             severity: TestSeverity::Critical,
         },
         DbUnitTestDefinition {
@@ -394,14 +399,16 @@ pub fn sec_test_definitions() -> Vec<DbUnitTestDefinition> {
             description: "Détecte les permissions orphelines".to_string(),
             category: "security".to_string(),
             query_type: "orphan_permissions_check".to_string(),
-            criteria: [("orphan_permissions_count".to_string(), 0)].into_iter().collect(),
+            criteria: [("orphan_permissions_count".to_string(), 0)]
+                .into_iter()
+                .collect(),
             severity: TestSeverity::Medium,
         },
     ]
 }
 
 /// Toutes les définitions de tests unitaires DB (COH, CONF, STRUCT, SEC).
-#[must_use] 
+#[must_use]
 pub fn all_db_unit_test_definitions() -> Vec<DbUnitTestDefinition> {
     let mut all = coh_test_definitions();
     all.extend(conf_test_definitions());
@@ -414,14 +421,18 @@ pub fn all_db_unit_test_definitions() -> Vec<DbUnitTestDefinition> {
 /// Si absent, les tests retournent SKIP.
 pub trait DbUnitTestBackend: Send + Sync {
     /// Exécute une requête de vérification en lecture seule et retourne les métriques (violations_count, etc.).
-    fn run_verification(&self, test_id: &str, _query_type: &str) -> Result<HashMap<String, u64>, String>;
+    fn run_verification(
+        &self,
+        test_id: &str,
+        _query_type: &str,
+    ) -> Result<HashMap<String, u64>, String>;
 }
 
 /// @id: miyukiniadmin_db_unit_tests_run_single
 /// @role: mutator
 /// @layer: operator
 /// Exécute un seul test unitaire DB et retourne le résultat.
-#[must_use] 
+#[must_use]
 pub fn run_single_test(
     def: &DbUnitTestDefinition,
     backend: Option<&dyn DbUnitTestBackend>,
@@ -432,37 +443,38 @@ pub fn run_single_test(
 
     let verdict = match backend {
         None => {
-            details.insert("reason".to_string(), serde_json::json!("no backend configured"));
+            details.insert(
+                "reason".to_string(),
+                serde_json::json!("no backend configured"),
+            );
             UnitTestVerdict::Skip
         }
-        Some(b) => {
-            match b.run_verification(&def.id, &def.query_type) {
-                Ok(metrics) => {
-                    for (k, v) in &metrics {
-                        details.insert(k.clone(), serde_json::json!(v));
-                    }
-                    let mut failed = false;
-                    for (criterion, expected) in &def.criteria {
-                        let actual = metrics.get(criterion).copied().unwrap_or(0);
-                        if actual > *expected {
-                            failed = true;
-                            break;
-                        }
-                    }
-                    if failed {
-                        UnitTestVerdict::Fail
-                    } else if details.values().any(|v| v.as_u64().unwrap_or(0) > 0) {
-                        UnitTestVerdict::Warn
-                    } else {
-                        UnitTestVerdict::Pass
+        Some(b) => match b.run_verification(&def.id, &def.query_type) {
+            Ok(metrics) => {
+                for (k, v) in &metrics {
+                    details.insert(k.clone(), serde_json::json!(v));
+                }
+                let mut failed = false;
+                for (criterion, expected) in &def.criteria {
+                    let actual = metrics.get(criterion).copied().unwrap_or(0);
+                    if actual > *expected {
+                        failed = true;
+                        break;
                     }
                 }
-                Err(e) => {
-                    details.insert("error".to_string(), serde_json::json!(e));
-                    UnitTestVerdict::Error
+                if failed {
+                    UnitTestVerdict::Fail
+                } else if details.values().any(|v| v.as_u64().unwrap_or(0) > 0) {
+                    UnitTestVerdict::Warn
+                } else {
+                    UnitTestVerdict::Pass
                 }
             }
-        }
+            Err(e) => {
+                details.insert("error".to_string(), serde_json::json!(e));
+                UnitTestVerdict::Error
+            }
+        },
     };
 
     let duration_ms = start.elapsed().min(timeout).as_millis() as u64;
@@ -481,7 +493,7 @@ pub fn run_single_test(
 /// @role: mutator
 /// @layer: operator
 /// Exécute une suite de tests (Quick, Standard, Full) et produit un rapport.
-#[must_use] 
+#[must_use]
 pub fn run_suite(
     suite_name: &str,
     definitions: &[DbUnitTestDefinition],
@@ -524,11 +536,13 @@ pub fn run_suite(
     let recommendations: Vec<Recommendation> = results
         .iter()
         .filter(|r| r.verdict == UnitTestVerdict::Fail || r.verdict == UnitTestVerdict::Warn)
-        .filter_map(|r| r.recommendation.as_ref().map(|rec| Recommendation {
-            severity: r.severity,
-            issue: format!("{}: {}", r.id, r.name),
-            action: rec.clone(),
-        }))
+        .filter_map(|r| {
+            r.recommendation.as_ref().map(|rec| Recommendation {
+                severity: r.severity,
+                issue: format!("{}: {}", r.id, r.name),
+                action: rec.clone(),
+            })
+        })
         .collect();
 
     DbUnitTestReport {

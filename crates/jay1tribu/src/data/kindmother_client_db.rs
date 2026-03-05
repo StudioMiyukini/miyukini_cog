@@ -97,7 +97,10 @@ impl Jay1TribuDb {
 
     /// Crée une instance utilisant le client global.
     pub fn new() -> Result<Self, DbError> {
-        let client = CLIENT.get().ok_or(DbError("Client KindMother non initialisé".to_string()))?.clone();
+        let client = CLIENT
+            .get()
+            .ok_or(DbError("Client KindMother non initialisé".to_string()))?
+            .clone();
         Ok(Self {
             client,
             instance: InstanceIdentity::new(InstanceType::Daughter),
@@ -158,7 +161,12 @@ impl Jay1TribuDb {
         Ok(out)
     }
 
-    pub fn friend_create(&self, profile_id: &str, friend_cog_id: &str, friend_pseudo: Option<&str>) -> Result<Friend, DbError> {
+    pub fn friend_create(
+        &self,
+        profile_id: &str,
+        friend_cog_id: &str,
+        friend_pseudo: Option<&str>,
+    ) -> Result<Friend, DbError> {
         let existing = run_blocking(self.client.query(
             "SELECT 1 FROM friends WHERE profile_id = ?1 AND friend_cog_id = ?2 LIMIT 1",
             vec![profile_id.to_string(), friend_cog_id.to_string()],
@@ -178,7 +186,11 @@ impl Jay1TribuDb {
             id,
             profile_id: profile_id.to_string(),
             friend_cog_id: friend_cog_id.to_string(),
-            friend_pseudo: if pseudo.is_empty() { None } else { Some(pseudo) },
+            friend_pseudo: if pseudo.is_empty() {
+                None
+            } else {
+                Some(pseudo)
+            },
             created_at,
         })
     }
@@ -238,7 +250,12 @@ impl Jay1TribuDb {
         }))
     }
 
-    pub fn tribe_create(&self, name: &str, description: Option<&str>, creator_cog_id: &str) -> Result<Tribe, DbError> {
+    pub fn tribe_create(
+        &self,
+        name: &str,
+        description: Option<&str>,
+        creator_cog_id: &str,
+    ) -> Result<Tribe, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let now = now_rfc3339();
         let desc = description.map(String::from).unwrap_or_default();
@@ -275,7 +292,12 @@ impl Jay1TribuDb {
         })
     }
 
-    pub fn tribe_update(&self, id: &str, name: &str, description: Option<&str>) -> Result<(), DbError> {
+    pub fn tribe_update(
+        &self,
+        id: &str,
+        name: &str,
+        description: Option<&str>,
+    ) -> Result<(), DbError> {
         let now = now_rfc3339();
         let desc = description.map(String::from).unwrap_or_default();
         run_blocking(self.client.execute(
@@ -287,16 +309,43 @@ impl Jay1TribuDb {
     }
 
     pub fn tribe_delete(&self, id: &str) -> Result<(), DbError> {
-        run_blocking(self.client.execute("DELETE FROM tribe_members WHERE tribe_id = ?1", vec![id.to_string()], "tribe_delete_members"))?;
-        run_blocking(self.client.execute("DELETE FROM tribe_roles WHERE tribe_id = ?1", vec![id.to_string()], "tribe_delete_roles"))?;
-        let salons: Vec<HashMap<String, serde_json::Value>> = run_blocking(self.client.query("SELECT id FROM salons WHERE tribe_id = ?1", vec![id.to_string()]))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM tribe_members WHERE tribe_id = ?1",
+            vec![id.to_string()],
+            "tribe_delete_members",
+        ))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM tribe_roles WHERE tribe_id = ?1",
+            vec![id.to_string()],
+            "tribe_delete_roles",
+        ))?;
+        let salons: Vec<HashMap<String, serde_json::Value>> = run_blocking(self.client.query(
+            "SELECT id FROM salons WHERE tribe_id = ?1",
+            vec![id.to_string()],
+        ))?;
         for row in &salons {
             let sid = row_str(row, "id");
-            let _ = run_blocking(self.client.execute("DELETE FROM messages WHERE salon_id = ?1", vec![sid.clone()], "tribe_delete_msgs"));
-            let _ = run_blocking(self.client.execute("DELETE FROM salon_members WHERE salon_id = ?1", vec![sid], "tribe_delete_sm"));
+            let _ = run_blocking(self.client.execute(
+                "DELETE FROM messages WHERE salon_id = ?1",
+                vec![sid.clone()],
+                "tribe_delete_msgs",
+            ));
+            let _ = run_blocking(self.client.execute(
+                "DELETE FROM salon_members WHERE salon_id = ?1",
+                vec![sid],
+                "tribe_delete_sm",
+            ));
         }
-        run_blocking(self.client.execute("DELETE FROM salons WHERE tribe_id = ?1", vec![id.to_string()], "tribe_delete_salons"))?;
-        run_blocking(self.client.execute("DELETE FROM tribes WHERE id = ?1", vec![id.to_string()], "tribe_delete"))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM salons WHERE tribe_id = ?1",
+            vec![id.to_string()],
+            "tribe_delete_salons",
+        ))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM tribes WHERE id = ?1",
+            vec![id.to_string()],
+            "tribe_delete",
+        ))?;
         Ok(())
     }
 
@@ -343,7 +392,12 @@ impl Jay1TribuDb {
         }))
     }
 
-    pub fn salon_create(&self, tribe_id: Option<&str>, name: &str, salon_type: SalonType) -> Result<Salon, DbError> {
+    pub fn salon_create(
+        &self,
+        tribe_id: Option<&str>,
+        name: &str,
+        salon_type: SalonType,
+    ) -> Result<Salon, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
         let tid = tribe_id.map(String::from).unwrap_or_default();
@@ -380,9 +434,21 @@ impl Jay1TribuDb {
     }
 
     pub fn salon_delete(&self, id: &str) -> Result<(), DbError> {
-        run_blocking(self.client.execute("DELETE FROM messages WHERE salon_id = ?1", vec![id.to_string()], "salon_delete_msgs"))?;
-        run_blocking(self.client.execute("DELETE FROM salon_members WHERE salon_id = ?1", vec![id.to_string()], "salon_delete_sm"))?;
-        run_blocking(self.client.execute("DELETE FROM salons WHERE id = ?1", vec![id.to_string()], "salon_delete"))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM messages WHERE salon_id = ?1",
+            vec![id.to_string()],
+            "salon_delete_msgs",
+        ))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM salon_members WHERE salon_id = ?1",
+            vec![id.to_string()],
+            "salon_delete_sm",
+        ))?;
+        run_blocking(self.client.execute(
+            "DELETE FROM salons WHERE id = ?1",
+            vec![id.to_string()],
+            "salon_delete",
+        ))?;
         Ok(())
     }
 
@@ -404,7 +470,11 @@ impl Jay1TribuDb {
         Ok(out)
     }
 
-    pub fn salon_find_direct_between(&self, cog_id_1: &str, cog_id_2: &str) -> Result<Option<Salon>, DbError> {
+    pub fn salon_find_direct_between(
+        &self,
+        cog_id_1: &str,
+        cog_id_2: &str,
+    ) -> Result<Option<Salon>, DbError> {
         let rows = run_blocking(self.client.query(
             "SELECT s.id, s.tribe_id, s.name, s.salon_type, s.created_at FROM salons s
              INNER JOIN salon_members m1 ON s.id = m1.salon_id AND m1.cog_id = ?1
@@ -444,13 +514,20 @@ impl Jay1TribuDb {
         Ok(msgs)
     }
 
-    pub fn message_create(&self, salon_id: &str, sender_cog_id: &str, content: &str) -> Result<Message, DbError> {
+    pub fn message_create(
+        &self,
+        salon_id: &str,
+        sender_cog_id: &str,
+        content: &str,
+    ) -> Result<Message, DbError> {
         let check = run_blocking(self.client.query(
             "SELECT 1 FROM salon_members WHERE salon_id = ?1 AND cog_id = ?2 LIMIT 1",
             vec![salon_id.to_string(), sender_cog_id.to_string()],
         ))?;
         if check.is_empty() {
-            return Err(DbError("L'expéditeur n'est pas membre du salon.".to_string()));
+            return Err(DbError(
+                "L'expéditeur n'est pas membre du salon.".to_string(),
+            ));
         }
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
@@ -486,7 +563,11 @@ impl Jay1TribuDb {
         }))
     }
 
-    pub fn pending_delivery_enqueue(&self, message_id: &str, recipient_cog_id: &str) -> Result<(), DbError> {
+    pub fn pending_delivery_enqueue(
+        &self,
+        message_id: &str,
+        recipient_cog_id: &str,
+    ) -> Result<(), DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
         run_blocking(self.client.execute(
@@ -497,7 +578,10 @@ impl Jay1TribuDb {
         Ok(())
     }
 
-    pub fn pending_delivery_message_ids_for(&self, recipient_cog_id: &str) -> Result<Vec<(String, String)>, DbError> {
+    pub fn pending_delivery_message_ids_for(
+        &self,
+        recipient_cog_id: &str,
+    ) -> Result<Vec<(String, String)>, DbError> {
         let rows = run_blocking(self.client.query(
             "SELECT id, message_id FROM pending_deliveries WHERE recipient_cog_id = ?1 ORDER BY created_at",
             vec![recipient_cog_id.to_string()],
@@ -517,24 +601,40 @@ impl Jay1TribuDb {
         Ok(())
     }
 
-    pub fn pending_deliveries_for_sender(&self, sender_cog_id: &str) -> Result<Vec<(String, String, String)>, DbError> {
+    pub fn pending_deliveries_for_sender(
+        &self,
+        sender_cog_id: &str,
+    ) -> Result<Vec<(String, String, String)>, DbError> {
         let rows = run_blocking(self.client.query(
             "SELECT pd.id, pd.message_id, pd.recipient_cog_id FROM pending_deliveries pd INNER JOIN messages m ON m.id = pd.message_id WHERE m.sender_cog_id = ?1 ORDER BY pd.created_at",
             vec![sender_cog_id.to_string()],
         ))?;
         Ok(rows
             .iter()
-            .map(|r| (row_str(r, "id"), row_str(r, "message_id"), row_str(r, "recipient_cog_id")))
+            .map(|r| {
+                (
+                    row_str(r, "id"),
+                    row_str(r, "message_id"),
+                    row_str(r, "recipient_cog_id"),
+                )
+            })
             .collect())
     }
 
-    pub fn tribe_invitation_create(&self, tribe_id: &str, inviter_cog_id: &str, invitee_cog_id: &str) -> Result<String, DbError> {
+    pub fn tribe_invitation_create(
+        &self,
+        tribe_id: &str,
+        inviter_cog_id: &str,
+        invitee_cog_id: &str,
+    ) -> Result<String, DbError> {
         let existing = run_blocking(self.client.query(
             "SELECT 1 FROM tribe_invitations WHERE tribe_id = ?1 AND invitee_cog_id = ?2 AND status = 'pending' LIMIT 1",
             vec![tribe_id.to_string(), invitee_cog_id.to_string()],
         ))?;
         if !existing.is_empty() {
-            return Err(DbError("Invitation déjà en attente pour ce COG.".to_string()));
+            return Err(DbError(
+                "Invitation déjà en attente pour ce COG.".to_string(),
+            ));
         }
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
@@ -551,7 +651,9 @@ impl Jay1TribuDb {
             "SELECT tribe_id, invitee_cog_id FROM tribe_invitations WHERE id = ?1 AND status = 'pending'",
             vec![invitation_id.to_string()],
         ))?;
-        let row = rows.into_iter().next().ok_or(DbError("Invitation introuvable ou déjà traitée.".to_string()))?;
+        let row = rows.into_iter().next().ok_or(DbError(
+            "Invitation introuvable ou déjà traitée.".to_string(),
+        ))?;
         let tribe_id = row_str(&row, "tribe_id");
         let invitee_cog_id = row_str(&row, "invitee_cog_id");
         let role_rows = run_blocking(self.client.query(
@@ -562,10 +664,13 @@ impl Jay1TribuDb {
             .first()
             .map(|r| row_str(r, "id"))
             .or_else(|| {
-                run_blocking(self.client.query("SELECT id FROM tribe_roles WHERE tribe_id = ?1 LIMIT 1", vec![tribe_id.clone()]))
-                    .ok()
-                    .and_then(|v| v.into_iter().next())
-                    .map(|r| row_str(&r, "id"))
+                run_blocking(self.client.query(
+                    "SELECT id FROM tribe_roles WHERE tribe_id = ?1 LIMIT 1",
+                    vec![tribe_id.clone()],
+                ))
+                .ok()
+                .and_then(|v| v.into_iter().next())
+                .map(|r| row_str(&r, "id"))
             })
             .ok_or(DbError("Aucun rôle pour cette tribu.".to_string()))?;
         run_blocking(self.client.execute(
@@ -592,14 +697,23 @@ impl Jay1TribuDb {
         Ok(())
     }
 
-    pub fn tribe_invitations_pending_for(&self, invitee_cog_id: &str) -> Result<Vec<(String, String, String)>, DbError> {
+    pub fn tribe_invitations_pending_for(
+        &self,
+        invitee_cog_id: &str,
+    ) -> Result<Vec<(String, String, String)>, DbError> {
         let rows = run_blocking(self.client.query(
             "SELECT id, tribe_id, inviter_cog_id FROM tribe_invitations WHERE invitee_cog_id = ?1 AND status = 'pending' ORDER BY created_at",
             vec![invitee_cog_id.to_string()],
         ))?;
         Ok(rows
             .iter()
-            .map(|r| (row_str(r, "id"), row_str(r, "tribe_id"), row_str(r, "inviter_cog_id")))
+            .map(|r| {
+                (
+                    row_str(r, "id"),
+                    row_str(r, "tribe_id"),
+                    row_str(r, "inviter_cog_id"),
+                )
+            })
             .collect())
     }
 
@@ -618,7 +732,12 @@ impl Jay1TribuDb {
         Ok(rows2.into_iter().next().map(|r| row_str(&r, "id")))
     }
 
-    pub fn message_attachment_create(&self, message_id: &str, kind: &str, local_path: &str) -> Result<(), DbError> {
+    pub fn message_attachment_create(
+        &self,
+        message_id: &str,
+        kind: &str,
+        local_path: &str,
+    ) -> Result<(), DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
         run_blocking(self.client.execute(

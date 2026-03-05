@@ -16,11 +16,23 @@ const MAX_READ_SIZE: u64 = 1_048_576;
 /// Métadonnées du skill.
 pub fn info() -> SkillInfo {
     let mut params = HashMap::new();
-    params.insert("action".into(), "read | write | list | search | exists | mkdir | delete".into());
-    params.insert("path".into(), "Chemin relatif au sandbox (obligatoire)".into());
+    params.insert(
+        "action".into(),
+        "read | write | list | search | exists | mkdir | delete".into(),
+    );
+    params.insert(
+        "path".into(),
+        "Chemin relatif au sandbox (obligatoire)".into(),
+    );
     params.insert("content".into(), "Contenu à écrire (pour write)".into());
-    params.insert("pattern".into(), "Pattern de recherche (pour search)".into());
-    params.insert("recursive".into(), "Recherche récursive (pour list/search, défaut: false)".into());
+    params.insert(
+        "pattern".into(),
+        "Pattern de recherche (pour search)".into(),
+    );
+    params.insert(
+        "recursive".into(),
+        "Recherche récursive (pour list/search, défaut: false)".into(),
+    );
 
     SkillInfo {
         id: "file_ops".into(),
@@ -38,10 +50,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         .and_then(|v| v.as_str())
         .unwrap_or("read");
 
-    let path_str = params
-        .get("path")
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
+    let path_str = params.get("path").and_then(|v| v.as_str()).unwrap_or("");
 
     if path_str.is_empty() && action != "list" {
         return SkillResult {
@@ -72,14 +81,15 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
     match action {
         "read" => read_file(&full_path).await,
         "write" => {
-            let content = params
-                .get("content")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let content = params.get("content").and_then(|v| v.as_str()).unwrap_or("");
             write_file(&full_path, content).await
         }
         "list" => {
-            let target = if path_str.is_empty() { &sandbox } else { &full_path };
+            let target = if path_str.is_empty() {
+                &sandbox
+            } else {
+                &full_path
+            };
             let recursive = params
                 .get("recursive")
                 .and_then(|v| v.as_bool())
@@ -87,10 +97,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             list_dir(target, recursive).await
         }
         "search" => {
-            let pattern = params
-                .get("pattern")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let pattern = params.get("pattern").and_then(|v| v.as_str()).unwrap_or("");
             search_files(&full_path, pattern).await
         }
         "exists" => {

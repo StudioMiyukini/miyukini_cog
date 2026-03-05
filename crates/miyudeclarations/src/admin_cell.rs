@@ -30,7 +30,9 @@ pub struct MiyudeclarationsTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyudeclarationsIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyudeclarationsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.compta.declarations";
 
-#[must_use] 
+#[must_use]
 pub fn miyudeclarations_admin_cell(version: &str, fingerprint: &str) -> MiyudeclarationsAdminCell {
     MiyudeclarationsAdminCell {
         identification: MiyudeclarationsIdentification {
@@ -63,7 +65,9 @@ pub fn miyudeclarations_admin_cell(version: &str, fingerprint: &str) -> Miyudecl
                 id: "Miyudeclarations".to_string(),
                 name: "Test chemin complet Miyudeclarations".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

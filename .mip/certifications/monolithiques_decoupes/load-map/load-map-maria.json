@@ -1,0 +1,20 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "maria.brainstorm":  [
+                                              "cert.maria.psm"
+                                          ],
+                     "maria.planning":  [
+                                            "cert.maria.pmp",
+                                            "cert.maria.prince2"
+                                        ],
+                     "maria.scrum":  [
+                                         "cert.maria.psm",
+                                         "cert.maria.itil4"
+                                     ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

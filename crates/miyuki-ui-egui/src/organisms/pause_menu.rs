@@ -2,10 +2,10 @@
 
 //! Pause menu organism -- overlay with resume/options/save/quit.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::d2_button::{D2Button, D2ButtonVariant};
 use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Action from the pause menu.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

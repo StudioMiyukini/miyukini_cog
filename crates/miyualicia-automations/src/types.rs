@@ -249,9 +249,9 @@ impl Automation {
             return false;
         }
         match &self.trigger {
-            TriggerType::VoiceCommand {
-                routine_name: name,
-            } => name.eq_ignore_ascii_case(routine_name),
+            TriggerType::VoiceCommand { routine_name: name } => {
+                name.eq_ignore_ascii_case(routine_name)
+            }
             _ => false,
         }
     }
@@ -263,9 +263,7 @@ impl Automation {
             return false;
         }
         match &self.trigger {
-            TriggerType::SensorChange {
-                device_id: did, ..
-            } => *did == device_id,
+            TriggerType::SensorChange { device_id: did, .. } => *did == device_id,
             _ => false,
         }
     }

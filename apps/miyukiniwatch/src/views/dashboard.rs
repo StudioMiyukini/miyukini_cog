@@ -1,15 +1,12 @@
 //! Ecran Tableau de bord MiyukiniWatch.
 
+use crate::{use_db, use_profile_id};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
 use miyukiniwatch::MiyukiniWatchPresenter;
-use crate::{use_db, use_profile_id};
 
 #[component]
-pub fn DashboardScreen(
-    has_data: bool,
-    is_collecting: bool,
-) -> Element {
+pub fn DashboardScreen(has_data: bool, is_collecting: bool) -> Element {
     let c = use_palette();
     let db = use_db();
     let profile_id = use_profile_id();

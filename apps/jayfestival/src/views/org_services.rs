@@ -91,10 +91,22 @@ fn ServiceToggle(
 ) -> Element {
     let c = use_palette();
     let is_enabled = *enabled.read();
-    let bg = if is_enabled { c.bg_secondary } else { c.bg_main };
+    let bg = if is_enabled {
+        c.bg_secondary
+    } else {
+        c.bg_main
+    };
     let border = if is_enabled { c.accent_blue } else { c.border };
-    let toggle_bg = if is_enabled { c.accent_blue } else { c.bg_hover };
-    let toggle_pos = if is_enabled { "right: 2px" } else { "left: 2px" };
+    let toggle_bg = if is_enabled {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let toggle_pos = if is_enabled {
+        "right: 2px"
+    } else {
+        "left: 2px"
+    };
 
     rsx! {
         div {

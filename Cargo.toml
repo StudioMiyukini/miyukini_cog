@@ -25,6 +25,8 @@ members = [
     "crates/miyusql",
     "crates/miyucalc",
     "crates/miyutext",
+    "crates/miyustt",
+    "crates/miyutts",
     "crates/miyuvalidate",
     "crates/miyulocale",
     "crates/miyuexport",
@@ -116,6 +118,7 @@ members = [
     "apps/jaymanga",
     "apps/miyuclicker",
     "apps/miou-llm-bridge",
+    "apps/miyukini-whisper",
     "apps/miyucloud",
 
     # === MWS Origin ===

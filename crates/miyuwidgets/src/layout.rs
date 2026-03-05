@@ -16,7 +16,9 @@ pub fn apply(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuwidgets
         return Err(MiyuwidgetsError::NoMandate);
     }
     let id = format!("layout:{}", UuidIdGenerator.generate());
-    let mut guard = store::layouts().lock().map_err(|_| MiyuwidgetsError::InvalidInput("lock".into()))?;
+    let mut guard = store::layouts()
+        .lock()
+        .map_err(|_| MiyuwidgetsError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }

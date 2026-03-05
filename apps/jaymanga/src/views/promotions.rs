@@ -1,11 +1,13 @@
 //! Gestion des promotions JayManga — reductions, campagnes promotionnelles.
 
+use super::components::{
+    ActionButton, Badge, EmptyState, FormField, FormSection, PageHeader, StatCard,
+};
+use super::JayMangaState;
+use crate::use_db;
 use dioxus::prelude::*;
 use jaymanga::data::Promotion;
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, EmptyState, ActionButton, Badge, StatCard, FormField, FormSection};
-use super::JayMangaState;
 
 #[component]
 pub fn Promotions(state: Signal<JayMangaState>) -> Element {
@@ -25,7 +27,8 @@ pub fn Promotions(state: Signal<JayMangaState>) -> Element {
     let mut end_date = use_signal(String::new);
 
     // Stats
-    let active_count = promotions.iter()
+    let active_count = promotions
+        .iter()
         .filter(|p| p.active.unwrap_or(false))
         .count();
 

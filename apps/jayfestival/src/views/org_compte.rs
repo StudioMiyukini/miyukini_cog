@@ -1,8 +1,8 @@
 //! ORG-E20 — Mon compte organisateur.
 
+use super::components::ActionButton;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::ActionButton;
 
 /// Page compte organisateur.
 #[component]

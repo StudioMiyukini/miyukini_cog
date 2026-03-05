@@ -10,8 +10,8 @@
 //! pas encore consommés mais font partie du contrat du composant.
 #![allow(dead_code)]
 
-use dioxus::prelude::*;
 use crate::state::use_app_state;
+use dioxus::prelude::*;
 
 /// Definition d'une section dans la sidebar.
 #[derive(Clone, PartialEq)]
@@ -345,7 +345,11 @@ fn SidebarItem(
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {

@@ -30,7 +30,9 @@ pub struct MiyuposinventoryTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuposinventoryIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuposinventoryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.pos.miyuposinventory";
 
-#[must_use] 
+#[must_use]
 pub fn miyuposinventory_admin_cell(version: &str, fingerprint: &str) -> MiyuposinventoryAdminCell {
     MiyuposinventoryAdminCell {
         identification: MiyuposinventoryIdentification {
@@ -63,7 +65,9 @@ pub fn miyuposinventory_admin_cell(version: &str, fingerprint: &str) -> Miyuposi
                 id: "Miyuposinventory".to_string(),
                 name: "Test chemin complet Miyuposinventory".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

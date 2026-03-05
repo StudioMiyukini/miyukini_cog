@@ -12,19 +12,19 @@ use miyualicia_wakeword::WakeWordConfig;
 
 use crate::state::use_app_state;
 
-pub mod state;
 mod automations;
 mod dashboard;
 mod devices;
 mod rooms;
 mod settings;
+pub mod state;
 
 use automations::AutomationsScreen;
 use dashboard::DashboardScreen;
 use devices::DevicesScreen;
 use rooms::RoomsScreen;
 use settings::SettingsScreen;
-use state::{SharedAliciaService, AliciaService, AliciaSnapshot};
+use state::{AliciaService, AliciaSnapshot, SharedAliciaService};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 enum AliciaTab {
@@ -176,18 +176,23 @@ fn StatusBadge() -> Element {
     let c = app_state.read().current_theme.palette();
     let snapshot = use_context::<Signal<Option<AliciaSnapshot>>>();
 
-    let is_listening = snapshot
-        .read()
-        .as_ref()
-        .is_some_and(|s| s.any_listening);
+    let is_listening = snapshot.read().as_ref().is_some_and(|s| s.any_listening);
 
-    let badge_bg = if is_listening { c.accent_green } else { c.bg_hover };
+    let badge_bg = if is_listening {
+        c.accent_green
+    } else {
+        c.bg_hover
+    };
     let badge_label = if is_listening {
         "Alicia ecoute"
     } else {
         "En veille"
     };
-    let dot_color = if is_listening { "#4ade80" } else { c.text_muted };
+    let dot_color = if is_listening {
+        "#4ade80"
+    } else {
+        c.text_muted
+    };
 
     rsx! {
         div {
@@ -205,16 +210,24 @@ fn StatusBadge() -> Element {
 
 /// Bouton d'onglet local (meme pattern que MiyukiniWatch).
 #[component]
-fn TabButton(
-    label: &'static str,
-    is_active: bool,
-    onclick: EventHandler<MouseEvent>,
-) -> Element {
+fn TabButton(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     let app_state = use_app_state();
     let c = app_state.read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
-    let border_color = if is_active { c.accent_blue } else { "transparent" };
+    let bg = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
+    let border_color = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
 
     rsx! {
         button {

@@ -27,7 +27,7 @@ impl EnvironmentStateService {
     /// @layer: operator
     /// @human: Construit le service avec le répertoire de données.
     /// @do: create_environment_state_service
-    #[must_use] 
+    #[must_use]
     pub fn new(data_dir: PathBuf) -> Self {
         Self { data_dir }
     }
@@ -49,7 +49,10 @@ impl EnvironmentStateService {
 
     /// Vérifie la présence d'un fichier (artefact).
     async fn has_artifact(path: &PathBuf) -> bool {
-        fs::metadata(path).await.map(|m| m.is_file()).unwrap_or(false)
+        fs::metadata(path)
+            .await
+            .map(|m| m.is_file())
+            .unwrap_or(false)
     }
 
     /// Vérifie l'intégrité EIP (stub : présence = valide pour implémentation minimale).
@@ -90,7 +93,8 @@ impl EnvironmentStateService {
             return Ok(true);
         }
         let content = fs::read_to_string(&path).await?;
-        let schema: serde_json::Value = serde_json::from_str(&content).unwrap_or(serde_json::Value::Null);
+        let schema: serde_json::Value =
+            serde_json::from_str(&content).unwrap_or(serde_json::Value::Null);
         Ok(!schema.is_null() && schema.get("version").is_some())
     }
 
@@ -141,7 +145,7 @@ impl EnvironmentStateService {
     }
 
     /// Retourne le répertoire de données (pour autres services).
-    #[must_use] 
+    #[must_use]
     pub fn data_dir(&self) -> &PathBuf {
         &self.data_dir
     }

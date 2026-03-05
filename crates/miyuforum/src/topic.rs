@@ -9,7 +9,11 @@ use crate::errors::MiyuforumError;
 /// @layer: tool
 /// @human: Crée un topic ; WriteIntent KindMother.
 /// @do: forum_topic_create_under_governance
-pub fn create(ctx: &GovernedContext, _board_id: &str, _payload: &str) -> Result<String, MiyuforumError> {
+pub fn create(
+    ctx: &GovernedContext,
+    _board_id: &str,
+    _payload: &str,
+) -> Result<String, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
@@ -21,7 +25,11 @@ pub fn create(ctx: &GovernedContext, _board_id: &str, _payload: &str) -> Result<
 /// @layer: tool
 /// @human: Liste les topics (filtres fournis).
 /// @do: forum_topic_list_under_governance
-pub fn list(ctx: &GovernedContext, _board_id: &str, _filters: Option<&str>) -> Result<Vec<String>, MiyuforumError> {
+pub fn list(
+    ctx: &GovernedContext,
+    _board_id: &str,
+    _filters: Option<&str>,
+) -> Result<Vec<String>, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
@@ -45,7 +53,11 @@ pub fn get(ctx: &GovernedContext, _topic_id: &str) -> Result<String, MiyuforumEr
 /// @layer: tool
 /// @human: Met à jour un topic ; WriteIntent KindMother.
 /// @do: forum_topic_update_under_governance
-pub fn update(ctx: &GovernedContext, _topic_id: &str, _payload: &str) -> Result<(), MiyuforumError> {
+pub fn update(
+    ctx: &GovernedContext,
+    _topic_id: &str,
+    _payload: &str,
+) -> Result<(), MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
@@ -69,7 +81,11 @@ pub fn sticky(ctx: &GovernedContext, _topic_id: &str, _sticky: bool) -> Result<(
 /// @layer: tool
 /// @human: Marque ou démarque annonce ; décision StrongFather.
 /// @do: forum_topic_announce_under_governance
-pub fn announce(ctx: &GovernedContext, _topic_id: &str, _announce: bool) -> Result<(), MiyuforumError> {
+pub fn announce(
+    ctx: &GovernedContext,
+    _topic_id: &str,
+    _announce: bool,
+) -> Result<(), MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }

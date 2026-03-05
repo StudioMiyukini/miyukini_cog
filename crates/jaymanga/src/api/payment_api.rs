@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 /// Requête d'ajout au panier.
 #[derive(Debug, Clone, Deserialize)]
 pub struct AddToCartRequest {
-    pub item_type: String,  // "work", "chapter", "series"
+    pub item_type: String, // "work", "chapter", "series"
     pub item_id: String,
     pub quantity: Option<i32>,
 }
@@ -70,10 +70,7 @@ pub struct LicenseVerifyResponse {
 #[must_use]
 pub fn cart_compute_total(items: &[CartItem]) -> (i64, i64, i64) {
     let subtotal: i64 = items.iter().map(|i| i.price).sum();
-    let discount: i64 = items
-        .iter()
-        .filter_map(|i| i.promotion_discount)
-        .sum();
+    let discount: i64 = items.iter().filter_map(|i| i.promotion_discount).sum();
     let total = (subtotal - discount).max(0);
     (subtotal, discount, total)
 }

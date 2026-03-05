@@ -13,8 +13,7 @@
 
 use miyumarket::manifest::ServiceManifest;
 use miyumarket::protocol::{
-    MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult,
-    PublishRequest, PublishResponse,
+    MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult, PublishRequest, PublishResponse,
 };
 
 /// Client HTTP pour le Service Market d'Origin.
@@ -48,7 +47,9 @@ impl std::fmt::Display for MarketError {
 impl MarketClient {
     /// Crée un nouveau client Market.
     pub fn new(origin_url: impl Into<String>) -> Self {
-        Self { origin_url: origin_url.into() }
+        Self {
+            origin_url: origin_url.into(),
+        }
     }
 
     /// URL de base de l'Origin connecté.
@@ -64,7 +65,8 @@ impl MarketClient {
             serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
 
         if resp.success {
-            resp.data.ok_or_else(|| MarketError::Server("Réponse vide".into()))
+            resp.data
+                .ok_or_else(|| MarketError::Server("Réponse vide".into()))
         } else {
             Err(MarketError::Server(resp.error.unwrap_or_default()))
         }
@@ -78,7 +80,8 @@ impl MarketClient {
             serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
 
         if resp.success {
-            resp.data.ok_or_else(|| MarketError::Server("Service introuvable".into()))
+            resp.data
+                .ok_or_else(|| MarketError::Server("Service introuvable".into()))
         } else {
             Err(MarketError::Server(resp.error.unwrap_or_default()))
         }
@@ -93,34 +96,47 @@ impl MarketClient {
             serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
 
         if resp.success {
-            resp.data.ok_or_else(|| MarketError::Server("Réponse vide".into()))
+            resp.data
+                .ok_or_else(|| MarketError::Server("Réponse vide".into()))
         } else {
             Err(MarketError::Server(resp.error.unwrap_or_default()))
         }
     }
 
     /// Télécharge le package d'un service.
-    pub async fn download_package(&self, service_id: &str, version: &str) -> Result<Vec<u8>, MarketError> {
-        let url = format!("{}/api/market/package/{service_id}/{version}", self.origin_url);
+    pub async fn download_package(
+        &self,
+        service_id: &str,
+        version: &str,
+    ) -> Result<Vec<u8>, MarketError> {
+        let url = format!(
+            "{}/api/market/package/{service_id}/{version}",
+            self.origin_url
+        );
         http_get_bytes(&url).await
     }
 
     /// Publie un service sur le Market (pour les développeurs).
-    pub async fn publish(&self, manifest: ServiceManifest, developer_token: &str) -> Result<PublishResponse, MarketError> {
+    pub async fn publish(
+        &self,
+        manifest: ServiceManifest,
+        developer_token: &str,
+    ) -> Result<PublishResponse, MarketError> {
         let url = format!("{}/api/market/publish", self.origin_url);
         let req = PublishRequest {
             manifest,
             developer_token: developer_token.to_string(),
         };
-        let req_body = serde_json::to_string(&req)
-            .map_err(|e| MarketError::Parse(e.to_string()))?;
+        let req_body =
+            serde_json::to_string(&req).map_err(|e| MarketError::Parse(e.to_string()))?;
 
         let body = http_post(&url, &req_body).await?;
         let resp: MarketResponse<PublishResponse> =
             serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
 
         if resp.success {
-            resp.data.ok_or_else(|| MarketError::Server("Réponse vide".into()))
+            resp.data
+                .ok_or_else(|| MarketError::Server("Réponse vide".into()))
         } else {
             Err(MarketError::Server(resp.error.unwrap_or_default()))
         }
@@ -167,7 +183,8 @@ fn parse_url(url: &str) -> Result<(String, u16, String), MarketError> {
     };
 
     let (host, port) = if let Some(idx) = host_port.rfind(':') {
-        let port: u16 = host_port[idx + 1..].parse()
+        let port: u16 = host_port[idx + 1..]
+            .parse()
             .map_err(|_| MarketError::Network(format!("Port invalide dans URL: {host_port}")))?;
         (&host_port[..idx], port)
     } else {
@@ -178,7 +195,13 @@ fn parse_url(url: &str) -> Result<(String, u16, String), MarketError> {
 }
 
 /// Envoie une requête TCP brute et retourne la réponse complète.
-async fn tcp_request(host: &str, port: u16, method: &str, path: &str, body: Option<&str>) -> Result<Vec<u8>, MarketError> {
+async fn tcp_request(
+    host: &str,
+    port: u16,
+    method: &str,
+    path: &str,
+    body: Option<&str>,
+) -> Result<Vec<u8>, MarketError> {
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
     let addr = format!("{host}:{port}");
@@ -188,19 +211,24 @@ async fn tcp_request(host: &str, port: u16, method: &str, path: &str, body: Opti
 
     let mut request = format!("{method} {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n");
     if let Some(b) = body {
-        request.push_str(&format!("Content-Type: application/json\r\nContent-Length: {}\r\n", b.len()));
+        request.push_str(&format!(
+            "Content-Type: application/json\r\nContent-Length: {}\r\n",
+            b.len()
+        ));
     }
     request.push_str("\r\n");
     if let Some(b) = body {
         request.push_str(b);
     }
 
-    stream.write_all(request.as_bytes())
+    stream
+        .write_all(request.as_bytes())
         .await
         .map_err(|e| MarketError::Network(format!("Envoi requête : {e}")))?;
 
     let mut response = Vec::new();
-    stream.read_to_end(&mut response)
+    stream
+        .read_to_end(&mut response)
         .await
         .map_err(|e| MarketError::Network(format!("Lecture réponse : {e}")))?;
 
@@ -220,6 +248,8 @@ fn extract_body(response: Vec<u8>) -> Result<Vec<u8>, MarketError> {
         }
         Ok(response[pos + 4..].to_vec())
     } else {
-        Err(MarketError::Parse("Réponse HTTP invalide (séparateur header/body manquant)".into()))
+        Err(MarketError::Parse(
+            "Réponse HTTP invalide (séparateur header/body manquant)".into(),
+        ))
     }
 }

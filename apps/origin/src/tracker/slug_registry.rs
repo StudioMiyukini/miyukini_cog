@@ -14,30 +14,9 @@ use tracing::{debug, info};
 
 /// Slugs réservés (sous-domaines système, ne peuvent pas être pris par un COG).
 const RESERVED_SLUGS: &[&str] = &[
-    "www",
-    "api",
-    "admin",
-    "origin",
-    "relay",
-    "tracker",
-    "mail",
-    "smtp",
-    "imap",
-    "ftp",
-    "ssh",
-    "ns1",
-    "ns2",
-    "test",
-    "dev",
-    "staging",
-    "cdn",
-    "static",
-    "docs",
-    "blog",
-    "status",
-    "miyukini",
-    "webway",
-    "mws",
+    "www", "api", "admin", "origin", "relay", "tracker", "mail", "smtp", "imap", "ftp", "ssh",
+    "ns1", "ns2", "test", "dev", "staging", "cdn", "static", "docs", "blog", "status", "miyukini",
+    "webway", "mws",
 ];
 
 /// Erreurs du registre de slugs.
@@ -234,10 +213,7 @@ impl SlugRegistry {
             cogs.insert(cog_id.to_string(), slug.clone());
         }
 
-        info!(
-            "Slug '{}' registered for COG '{}'",
-            slug, cog_id
-        );
+        info!("Slug '{}' registered for COG '{}'", slug, cog_id);
 
         Ok(slug)
     }
@@ -367,10 +343,7 @@ mod tests {
     #[test]
     fn test_sanitize_cog_id() {
         assert_eq!(SlugRegistry::sanitize_cog_id("Mon-PC"), "mon-pc");
-        assert_eq!(
-            SlugRegistry::sanitize_cog_id("Alice's_COG"),
-            "alice-s-cog"
-        );
+        assert_eq!(SlugRegistry::sanitize_cog_id("Alice's_COG"), "alice-s-cog");
         assert_eq!(
             SlugRegistry::sanitize_cog_id("test.machine.local"),
             "test-machine-local"
@@ -394,7 +367,10 @@ mod tests {
         let slug = registry.register("Mon-Super-COG", None).await;
         assert!(slug.is_ok());
         let slug = slug.unwrap();
-        assert_eq!(registry.lookup(&slug).await, Some("Mon-Super-COG".to_string()));
+        assert_eq!(
+            registry.lookup(&slug).await,
+            Some("Mon-Super-COG".to_string())
+        );
     }
 
     #[tokio::test]

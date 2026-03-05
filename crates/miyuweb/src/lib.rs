@@ -56,7 +56,10 @@ mod tests {
     #[test]
     fn layout_render_returns_data() {
         let c = ctx();
-        assert_eq!(layout_render(&c, "{\"title\":\"x\"}").unwrap(), "{\"title\":\"x\"}");
+        assert_eq!(
+            layout_render(&c, "{\"title\":\"x\"}").unwrap(),
+            "{\"title\":\"x\"}"
+        );
     }
 
     #[test]

@@ -59,24 +59,54 @@ pub struct WarriorSkillDef {
 }
 
 impl WarriorSkillId {
-    #[must_use] 
+    #[must_use]
     pub fn all() -> &'static [WarriorSkillId] {
-        use WarriorSkillId::{Baston, Bagarre, Kungfu, PlusFort, Souple, EncorePlusFort, Rapide, Precis, Musculation, Balayage, Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge, DoubleArmes, Assassin, GigaChad, TrombiLol, Tireur, TirRapide, VuPercante, TirARepetition, MunitionsLourdes, RechargementRapide, Sniper, TirDouble};
+        use WarriorSkillId::{
+            Assassin, AttaqueLarge, Bagarre, Balayage, Baston, DetectionFaiblesses, DoubleArmes,
+            EncorePlusFort, Fulgurant, GigaChad, Kungfu, MunitionsLourdes, Musculation, PlusFort,
+            PotDeWey, Precis, Rapide, RechargementRapide, Sniper, Souple, TirARepetition,
+            TirDouble, TirRapide, Tireur, TrombiLol, VuPercante,
+        };
         &[
-            Baston, Bagarre, Kungfu,
-            PlusFort, Souple, EncorePlusFort, Rapide, Precis, Musculation, Balayage,
-            Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge,
-            DoubleArmes, Assassin, GigaChad, TrombiLol,
-            Tireur, TirRapide, VuPercante, TirARepetition,
-            MunitionsLourdes, RechargementRapide, Sniper, TirDouble,
+            Baston,
+            Bagarre,
+            Kungfu,
+            PlusFort,
+            Souple,
+            EncorePlusFort,
+            Rapide,
+            Precis,
+            Musculation,
+            Balayage,
+            Fulgurant,
+            DetectionFaiblesses,
+            PotDeWey,
+            AttaqueLarge,
+            DoubleArmes,
+            Assassin,
+            GigaChad,
+            TrombiLol,
+            Tireur,
+            TirRapide,
+            VuPercante,
+            TirARepetition,
+            MunitionsLourdes,
+            RechargementRapide,
+            Sniper,
+            TirDouble,
         ]
     }
 }
 
 /// Retourne la définition d'une compétence.
-#[must_use] 
+#[must_use]
 pub fn warrior_skill_def(id: WarriorSkillId) -> WarriorSkillDef {
-    use WarriorSkillId::{Baston, Bagarre, Rapide, Kungfu, PlusFort, Souple, EncorePlusFort, Precis, Musculation, Balayage, Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge, DoubleArmes, Assassin, GigaChad, TrombiLol, Tireur, TirRapide, VuPercante, TirARepetition, MunitionsLourdes, RechargementRapide, Sniper, TirDouble};
+    use WarriorSkillId::{
+        Assassin, AttaqueLarge, Bagarre, Balayage, Baston, DetectionFaiblesses, DoubleArmes,
+        EncorePlusFort, Fulgurant, GigaChad, Kungfu, MunitionsLourdes, Musculation, PlusFort,
+        PotDeWey, Precis, Rapide, RechargementRapide, Sniper, Souple, TirARepetition, TirDouble,
+        TirRapide, Tireur, TrombiLol, VuPercante,
+    };
     match id {
         Baston => WarriorSkillDef {
             id: Baston,
@@ -342,9 +372,14 @@ pub fn warrior_skill_def(id: WarriorSkillId) -> WarriorSkillDef {
 }
 
 /// Arêtes de l'arbre (prérequis → compétence) pour tracer les lignes.
-#[must_use] 
+#[must_use]
 pub fn warrior_skill_edges() -> Vec<(WarriorSkillId, WarriorSkillId)> {
-    use WarriorSkillId::{Baston, Bagarre, Rapide, Kungfu, PlusFort, Souple, EncorePlusFort, Precis, Musculation, Balayage, Fulgurant, DetectionFaiblesses, PotDeWey, AttaqueLarge, DoubleArmes, Assassin, GigaChad, TrombiLol, Tireur, TirRapide, VuPercante, TirARepetition, MunitionsLourdes, RechargementRapide, Sniper, TirDouble};
+    use WarriorSkillId::{
+        Assassin, AttaqueLarge, Bagarre, Balayage, Baston, DetectionFaiblesses, DoubleArmes,
+        EncorePlusFort, Fulgurant, GigaChad, Kungfu, MunitionsLourdes, Musculation, PlusFort,
+        PotDeWey, Precis, Rapide, RechargementRapide, Sniper, Souple, TirARepetition, TirDouble,
+        TirRapide, Tireur, TrombiLol, VuPercante,
+    };
     vec![
         (Baston, Bagarre),
         (Rapide, Bagarre),
@@ -374,12 +409,12 @@ pub fn warrior_skill_edges() -> Vec<(WarriorSkillId, WarriorSkillId)> {
 }
 
 /// Vérifie si les prérequis sont satisfaits (chaque prérequis au moins au rang 1).
-#[must_use] 
+#[must_use]
 pub fn prerequisites_met(ranks: &HashMap<WarriorSkillId, u32>, def: &WarriorSkillDef) -> bool {
     if def.prerequisites.is_empty() {
         return true;
     }
-    def.prerequisites.iter().any(|&prereq| {
-        ranks.get(&prereq).copied().unwrap_or(0) >= 1
-    })
+    def.prerequisites
+        .iter()
+        .any(|&prereq| ranks.get(&prereq).copied().unwrap_or(0) >= 1)
 }

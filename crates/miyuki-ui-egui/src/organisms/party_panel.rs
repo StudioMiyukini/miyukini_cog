@@ -2,10 +2,10 @@
 
 //! Party panel organism -- list of party members with actions.
 
+use crate::convert::rgba_to_color32;
+use crate::molecules::party_member::{PartyMember, PartyMemberData};
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::molecules::party_member::{PartyMember, PartyMemberData};
-use crate::convert::rgba_to_color32;
 
 /// The party panel organism.
 pub struct PartyPanel;
@@ -37,7 +37,11 @@ impl PartyPanel {
 
                 if members.is_empty() {
                     let muted = rgba_to_color32(&D2_PALETTE.text_muted);
-                    ui.label(egui::RichText::new("Aucun joueur dans le groupe").color(muted).size(11.0));
+                    ui.label(
+                        egui::RichText::new("Aucun joueur dans le groupe")
+                            .color(muted)
+                            .size(11.0),
+                    );
                 }
             });
     }

@@ -42,8 +42,12 @@ pub trait Classifier {
     /// @human: Classifie une entité selon une taxonomie.
     /// @do: classify_entity
     /// @depends: tamr_classifier_trait
-    fn classify(&mut self, entity_id: &str, taxonomy_id: &str, terms: Vec<String>)
-        -> Classification;
+    fn classify(
+        &mut self,
+        entity_id: &str,
+        taxonomy_id: &str,
+        terms: Vec<String>,
+    ) -> Classification;
 }
 
 #[cfg(test)]

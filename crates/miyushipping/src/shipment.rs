@@ -9,7 +9,11 @@ use crate::errors::MiyushippingError;
 /// @layer: tool
 /// @human: Crée une expédition (colis) ; WriteIntent si état commande géré ; décision StrongFather.
 /// @do: commerce_shipping_shipment_create_under_governance
-pub fn create(ctx: &GovernedContext, order_id: &str, _payload: &str) -> Result<String, MiyushippingError> {
+pub fn create(
+    ctx: &GovernedContext,
+    order_id: &str,
+    _payload: &str,
+) -> Result<String, MiyushippingError> {
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }

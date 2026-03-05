@@ -30,7 +30,9 @@ pub struct MiyuwebTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuwebIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuwebAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.web.miyuweb";
 
-#[must_use] 
+#[must_use]
 pub fn miyuweb_admin_cell(version: &str, fingerprint: &str) -> MiyuwebAdminCell {
     MiyuwebAdminCell {
         identification: MiyuwebIdentification {
@@ -63,7 +65,9 @@ pub fn miyuweb_admin_cell(version: &str, fingerprint: &str) -> MiyuwebAdminCell 
                 id: "Miyuweb".to_string(),
                 name: "Test chemin complet Miyuweb".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

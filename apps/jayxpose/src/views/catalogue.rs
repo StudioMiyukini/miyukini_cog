@@ -1,9 +1,9 @@
 //! Catalogue produits (XP-E03 + XP-E05) — liste des produits + gestion categories.
 
+use super::components::{Badge, EmptyState, PageHeader};
+use super::{JayXposeSection, JayXposeState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{PageHeader, Badge, EmptyState};
-use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
@@ -20,13 +20,18 @@ pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
     let categories = db.categories_by_exposant(&exposant_id).unwrap_or_default();
 
     // Filtrage
-    let filtered: Vec<_> = products.iter().filter(|p| {
-        let q = search_query.read().to_lowercase();
-        let cat_filter = filter_category.read().clone();
-        let name_match = q.is_empty() || p.name.as_deref().unwrap_or("").to_lowercase().contains(&q);
-        let cat_match = cat_filter.is_empty() || p.category_id.as_deref() == Some(cat_filter.as_str());
-        name_match && cat_match
-    }).collect();
+    let filtered: Vec<_> = products
+        .iter()
+        .filter(|p| {
+            let q = search_query.read().to_lowercase();
+            let cat_filter = filter_category.read().clone();
+            let name_match =
+                q.is_empty() || p.name.as_deref().unwrap_or("").to_lowercase().contains(&q);
+            let cat_match =
+                cat_filter.is_empty() || p.category_id.as_deref() == Some(cat_filter.as_str());
+            name_match && cat_match
+        })
+        .collect();
 
     rsx! {
         div {
@@ -143,7 +148,9 @@ fn ProductRow(
 
     let pid = product.id.clone().unwrap_or_default();
     let name = product.name.as_deref().unwrap_or("Sans nom");
-    let price = product.price.map_or_else(|| "Sur demande".to_string(), |p| format!("{p:.2} EUR"));
+    let price = product
+        .price
+        .map_or_else(|| "Sur demande".to_string(), |p| format!("{p:.2} EUR"));
     let availability = product.availability.as_deref().unwrap_or("disponible");
     let is_featured = product.is_featured.unwrap_or(false);
 
@@ -154,8 +161,14 @@ fn ProductRow(
         _ => c.text_muted,
     };
 
-    let cat_name = product.category_id.as_ref()
-        .and_then(|cid| categories.iter().find(|c| c.id.as_deref() == Some(cid.as_str())))
+    let cat_name = product
+        .category_id
+        .as_ref()
+        .and_then(|cid| {
+            categories
+                .iter()
+                .find(|c| c.id.as_deref() == Some(cid.as_str()))
+        })
         .and_then(|c| c.name.clone())
         .unwrap_or_default();
 

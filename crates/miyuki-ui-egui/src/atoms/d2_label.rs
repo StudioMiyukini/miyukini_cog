@@ -5,9 +5,9 @@
 //! Used for section titles, stat category headings, and other text that
 //! needs to stand out with the classic D2 gold-on-dark appearance.
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// A D2-style gold label.
 ///

@@ -2,10 +2,10 @@
 //!
 //! Gestion de l'authentification et modals CTA pour utilisateurs non connectes.
 
+use super::components::ActionButton;
+use super::{JayFestivalRole, JayFestivalState, UncSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{UncSection, JayFestivalRole, JayFestivalState};
-use super::components::ActionButton;
 
 #[allow(dead_code)]
 fn opt_str(s: &Option<String>) -> String {
@@ -267,7 +267,9 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
             evt.prevent_default();
             // Validation
             if password.read().len() < 6 {
-                error.set(Some("Le mot de passe doit contenir au moins 6 caracteres".to_string()));
+                error.set(Some(
+                    "Le mot de passe doit contenir au moins 6 caracteres".to_string(),
+                ));
                 return;
             }
             if *password.read() != *password_confirm.read() {
@@ -552,7 +554,7 @@ pub fn UncMentionsLegales(state: Signal<JayFestivalState>) -> Element {
     let c = use_palette();
 
     let active_tab = use_signal(|| "mentions".to_string());
-    
+
     let tab = active_tab.read().clone();
     let is_mentions = tab == "mentions";
     let is_cgu = tab == "cgu";
@@ -612,11 +614,24 @@ pub fn UncMentionsLegales(state: Signal<JayFestivalState>) -> Element {
 }
 
 #[component]
-fn MentionsTab(label: &'static str, id: &'static str, active_tab: Signal<String>, is_active: bool) -> Element {
+fn MentionsTab(
+    label: &'static str,
+    id: &'static str,
+    active_tab: Signal<String>,
+    is_active: bool,
+) -> Element {
     let c = use_palette();
-    let border = if is_active { c.accent_blue } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_muted };
-    
+    let border = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_muted
+    };
+
     rsx! {
         button {
             style: "padding: 8px 16px; background: transparent; border: none; border-bottom: 2px solid {border}; color: {color}; cursor: pointer; font-size: 13px;",

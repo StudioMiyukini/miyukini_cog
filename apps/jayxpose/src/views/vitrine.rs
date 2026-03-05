@@ -1,9 +1,9 @@
 //! Ma vitrine — Parametres, pages et previsualisation (XP-E06/07/08).
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
 use super::components::{Badge, FormField, FormSection};
 use super::JayXposeState;
+use dioxus::prelude::*;
+use miyukini_service_ui::use_palette;
 
 /// Onglet actif dans la section Vitrine.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -22,12 +22,21 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
     let mut active_tab = use_signal(|| VitrineTab::Parametres);
 
     // Charger donnees
-    let exposant = db.exposant_by_id(&exposant_id).ok().flatten().unwrap_or_default();
+    let exposant = db
+        .exposant_by_id(&exposant_id)
+        .ok()
+        .flatten()
+        .unwrap_or_default();
     let exposant_publish = exposant.clone();
     let exposant_suspend = exposant.clone();
-    let pages = db.vitrine_pages_by_exposant(&exposant_id).unwrap_or_default();
+    let pages = db
+        .vitrine_pages_by_exposant(&exposant_id)
+        .unwrap_or_default();
 
-    let vitrine_status = exposant.vitrine_status.clone().unwrap_or_else(|| "brouillon".to_string());
+    let vitrine_status = exposant
+        .vitrine_status
+        .clone()
+        .unwrap_or_else(|| "brouillon".to_string());
     let status_color = match vitrine_status.as_str() {
         "publiee" => c.accent_green,
         "suspendue" => c.accent_orange,
@@ -118,7 +127,11 @@ fn VitrineParametres(exposant_id: String) -> Element {
     let c = use_palette();
     let db = crate::use_db();
 
-    let exposant = db.exposant_by_id(&exposant_id).ok().flatten().unwrap_or_default();
+    let exposant = db
+        .exposant_by_id(&exposant_id)
+        .ok()
+        .flatten()
+        .unwrap_or_default();
 
     let mut slug = use_signal(|| exposant.vitrine_slug.clone().unwrap_or_default());
     let mut seo_title = use_signal(|| exposant.seo_title.clone().unwrap_or_default());
@@ -276,13 +289,24 @@ fn VitrinePreview(exposant_id: String) -> Element {
     let c = use_palette();
     let db = crate::use_db();
 
-    let exposant = db.exposant_by_id(&exposant_id).ok().flatten().unwrap_or_default();
+    let exposant = db
+        .exposant_by_id(&exposant_id)
+        .ok()
+        .flatten()
+        .unwrap_or_default();
     let products = db.produits_by_exposant(&exposant_id).unwrap_or_default();
-    let featured: Vec<_> = products.iter().filter(|p| p.is_featured.unwrap_or(false)).take(6).collect();
+    let featured: Vec<_> = products
+        .iter()
+        .filter(|p| p.is_featured.unwrap_or(false))
+        .take(6)
+        .collect();
 
     let company = exposant.company_name.as_deref().unwrap_or("Mon entreprise");
     let slogan = exposant.slogan.as_deref().unwrap_or("");
-    let desc = exposant.description_short.as_deref().unwrap_or("Aucune description.");
+    let desc = exposant
+        .description_short
+        .as_deref()
+        .unwrap_or("Aucune description.");
 
     rsx! {
         div {
@@ -362,7 +386,11 @@ fn VitrinePreview(exposant_id: String) -> Element {
 #[component]
 fn TabButton(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
-    let bg = if is_active { c.accent_blue } else { "transparent" };
+    let bg = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
     let color = if is_active { "white" } else { c.text_secondary };
 
     rsx! {

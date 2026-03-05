@@ -2,12 +2,12 @@
 
 //! Inventory panel organism -- equipment slots + 10x4 item grid + gold display.
 
-use egui::{Color32, Context, Pos2, Vec2};
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::quality_text::ItemQuality;
 use crate::atoms::slot_frame::CELL_PX;
 use crate::convert::rgba_to_color32;
 use crate::molecules::equip_slot::{EquipItemData, EquipPosition, EquipSlot};
+use egui::{Color32, Context, Pos2, Vec2};
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Grid dimensions.
 pub const GRID_COLS: usize = 10;
@@ -108,7 +108,11 @@ impl InventoryPanel {
                 // Gold
                 let gold_text = format!("Or : {}", data.gold);
                 let gold_bright = rgba_to_color32(&D2_PALETTE.text_high);
-                ui.label(egui::RichText::new(&gold_text).color(gold_bright).size(11.0));
+                ui.label(
+                    egui::RichText::new(&gold_text)
+                        .color(gold_bright)
+                        .size(11.0),
+                );
             });
     }
 

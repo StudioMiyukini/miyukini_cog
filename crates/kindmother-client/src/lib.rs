@@ -44,9 +44,9 @@
 //! ```
 
 mod client;
-mod protocol;
 mod errors;
+mod protocol;
 
 pub use client::KindMotherClient;
-pub use protocol::{Request, Response, Operation};
 pub use errors::ClientError;
+pub use protocol::{Operation, Request, Response};

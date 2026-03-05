@@ -1,0 +1,19 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "jean.efficience_tokens":  [
+                                                    "cert.jean.prompt_eng",
+                                                    "cert.jean.finops"
+                                                ],
+                     "jean.cout_cloud":  [
+                                             "cert.jean.finops"
+                                         ],
+                     "jean.mlops":  [
+                                        "cert.jean.mlops"
+                                    ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

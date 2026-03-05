@@ -33,9 +33,7 @@ pub fn move_troops(
     }
     let from_troupes = state.cites[from_idx].troupes;
     if from_troupes < count {
-        return Err(format!(
-            "Pas assez de troupes ({from_troupes} disponibles)"
-        ));
+        return Err(format!("Pas assez de troupes ({from_troupes} disponibles)"));
     }
     state.cites[from_idx].troupes -= count;
     let to_cite = state.cites.iter().find(|c| c.id == to_cite_id).unwrap();

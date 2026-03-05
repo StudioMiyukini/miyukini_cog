@@ -53,9 +53,7 @@ pub fn Form(
     let pad = sp.space_4;
     let radius = theme.radius.md;
 
-    let form_style = format!(
-        "display: flex; flex-direction: column; gap: {pad}px;"
-    );
+    let form_style = format!("display: flex; flex-direction: column; gap: {pad}px;");
 
     let has_title = title.is_some();
     let title_text = title.unwrap_or_default();

@@ -22,10 +22,8 @@ pub use errors::MiyuwidgetsError;
 pub use layout::apply as layout_apply;
 pub use template::{register as template_register, resolve as template_resolve};
 pub use widget::{
-    button_render as widget_button_render,
-    container_render as widget_container_render,
-    grid_render as widget_grid_render,
-    image_render as widget_image_render,
+    button_render as widget_button_render, container_render as widget_container_render,
+    grid_render as widget_grid_render, image_render as widget_image_render,
     text_render as widget_text_render,
 };
 
@@ -44,7 +42,9 @@ mod tests {
         assert!(widget_image_render(&c, "url").unwrap().contains("<img"));
         assert!(widget_button_render(&c, "OK").unwrap().contains("<button>"));
         assert!(widget_grid_render(&c, "{}").unwrap().contains("grid"));
-        assert!(widget_container_render(&c, "{}").unwrap().contains("container"));
+        assert!(widget_container_render(&c, "{}")
+            .unwrap()
+            .contains("container"));
     }
 
     #[test]

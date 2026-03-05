@@ -82,9 +82,7 @@ pub fn DataTable(
          border-radius: {radius}px; overflow: hidden;"
     );
 
-    let header_style = format!(
-        "background: {header_bg}; border-bottom: 1px solid {border_color};"
-    );
+    let header_style = format!("background: {header_bg}; border-bottom: 1px solid {border_color};");
 
     rsx! {
         table { style: "{table_style}",

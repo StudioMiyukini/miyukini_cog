@@ -78,7 +78,9 @@ pub fn enqueue(
         status: TaskStatus::Pending,
     };
     let store = default_store();
-    let mut guard = store.lock().map_err(|_| MiyuJobsError::InvalidInput("store lock".into()))?;
+    let mut guard = store
+        .lock()
+        .map_err(|_| MiyuJobsError::InvalidInput("store lock".into()))?;
     guard
         .queues
         .entry(q.to_string())
@@ -115,7 +117,9 @@ pub fn process(
         return Err(MiyuJobsError::InvalidInput("queue_id empty".into()));
     }
     let store = default_store();
-    let mut guard = store.lock().map_err(|_| MiyuJobsError::InvalidInput("store lock".into()))?;
+    let mut guard = store
+        .lock()
+        .map_err(|_| MiyuJobsError::InvalidInput("store lock".into()))?;
     let queue = guard.queues.get_mut(q);
     let (processed, task_ids) = if let Some(queue_ref) = queue {
         let n = (batch_size as usize).min(queue_ref.len());
@@ -141,7 +145,9 @@ pub fn get_task(ctx: &GovernedContext, task_id: &str) -> Result<Option<Task>, Mi
         return Err(MiyuJobsError::NoMandate);
     }
     let store = default_store();
-    let guard = store.lock().map_err(|_| MiyuJobsError::InvalidInput("store lock".into()))?;
+    let guard = store
+        .lock()
+        .map_err(|_| MiyuJobsError::InvalidInput("store lock".into()))?;
     for queue in guard.queues.values() {
         for t in queue {
             if t.id == task_id {

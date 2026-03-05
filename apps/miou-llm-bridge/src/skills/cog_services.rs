@@ -15,7 +15,11 @@ const KNOWN_SERVICES: &[(&str, &str, u16)] = &[
     ("jaykoa", "JayKoa — Calendrier", 11442),
     ("jayxpose", "JayXpose — Vitrine", 11443),
     ("jayfestival", "JayFestival — Événements", 11444),
-    ("miyukiniwatch", "MiyukiniWatch — Habitudes & Mesures", 11445),
+    (
+        "miyukiniwatch",
+        "MiyukiniWatch — Habitudes & Mesures",
+        11445,
+    ),
     ("jay1tribu", "Jay1Tribu — Social & Chat", 11446),
     ("jaymanga", "JayManga — Manga", 11447),
     ("miyuclicker", "Lord of the Click — Jeu", 11448),
@@ -26,7 +30,10 @@ pub fn info() -> SkillInfo {
     let mut params = HashMap::new();
     params.insert("action".into(), "list | call | status".into());
     params.insert("service".into(), "ID du service COG (ex: jaykonta)".into());
-    params.insert("endpoint".into(), "Endpoint API du service (ex: /api/balance)".into());
+    params.insert(
+        "endpoint".into(),
+        "Endpoint API du service (ex: /api/balance)".into(),
+    );
     params.insert("method".into(), "Méthode HTTP (défaut: GET)".into());
     params.insert("body".into(), "Corps de la requête JSON".into());
 
@@ -54,15 +61,23 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         }
         "call" => {
             let service = params.get("service").and_then(|v| v.as_str()).unwrap_or("");
-            let endpoint = params.get("endpoint").and_then(|v| v.as_str()).unwrap_or("/health");
-            let method = params.get("method").and_then(|v| v.as_str()).unwrap_or("GET");
+            let endpoint = params
+                .get("endpoint")
+                .and_then(|v| v.as_str())
+                .unwrap_or("/health");
+            let method = params
+                .get("method")
+                .and_then(|v| v.as_str())
+                .unwrap_or("GET");
             let body = params.get("body");
             call_service(service, endpoint, method, body).await
         }
         _ => SkillResult {
             success: false,
             output: serde_json::Value::Null,
-            error: Some(format!("Action inconnue : {action}. Actions : list, status, call")),
+            error: Some(format!(
+                "Action inconnue : {action}. Actions : list, status, call"
+            )),
             duration_ms: 0,
         },
     }

@@ -1,10 +1,10 @@
 //! Vue Semaine — Grille 7 jours x 24 heures type Google Agenda.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use jaykoa::data::{TemporalEntry, TemporalConflict};
-use chrono::{Datelike, NaiveDate, Timelike};
 use super::components::EventBlock;
+use chrono::{Datelike, NaiveDate, Timelike};
+use dioxus::prelude::*;
+use jaykoa::data::{TemporalConflict, TemporalEntry};
+use miyukini_service_ui::use_palette;
 
 /// Props pour la vue semaine.
 #[derive(Props, Clone, PartialEq)]
@@ -41,26 +41,31 @@ pub fn WeekView(props: WeekViewProps) -> Element {
     let weekday_names = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
     // Grouper les entrees par jour
-    let entries_by_day: Vec<Vec<&TemporalEntry>> = days.iter().map(|day| {
-        let day_str = day.format("%Y-%m-%d").to_string();
-        props.entries.iter()
-            .filter(|e| {
-                if let Some(start) = &e.start_datetime {
-                    start.starts_with(&day_str)
-                } else {
-                    false
-                }
-            })
-            .collect()
-    }).collect();
-
-    // Entrees journee entiere
-    let all_day_entries: Vec<&TemporalEntry> = props.entries.iter()
-        .filter(|e| e.all_day)
+    let entries_by_day: Vec<Vec<&TemporalEntry>> = days
+        .iter()
+        .map(|day| {
+            let day_str = day.format("%Y-%m-%d").to_string();
+            props
+                .entries
+                .iter()
+                .filter(|e| {
+                    if let Some(start) = &e.start_datetime {
+                        start.starts_with(&day_str)
+                    } else {
+                        false
+                    }
+                })
+                .collect()
+        })
         .collect();
 
+    // Entrees journee entiere
+    let all_day_entries: Vec<&TemporalEntry> = props.entries.iter().filter(|e| e.all_day).collect();
+
     // IDs des entrees en conflit
-    let conflict_ids: Vec<String> = props.conflicts.iter()
+    let conflict_ids: Vec<String> = props
+        .conflicts
+        .iter()
         .flat_map(|c| [c.entry_a_id.clone(), c.entry_b_id.clone()])
         .flatten()
         .collect();

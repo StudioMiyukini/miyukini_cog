@@ -30,7 +30,7 @@ const TOTP_SECRET_BYTES: usize = 20;
 const ISSUER: &str = "MiyuCloud";
 
 /// Resultat du setup TOTP : secret + URI + codes de recuperation.
-#[derive(Debug)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct TotpSetupResult {
     /// URI otpauth:// pour les apps TOTP (Google Authenticator, etc.)
     pub otpauth_uri: String,
@@ -71,7 +71,13 @@ pub fn setup_totp(
 
     // 4. Store in DB
     let totp_id = uuid::Uuid::new_v4().to_string();
-    db.totp_insert(&totp_id, owner_id, &encrypted_secret_b64, &nonce_b64, account_name)?;
+    db.totp_insert(
+        &totp_id,
+        owner_id,
+        &encrypted_secret_b64,
+        &nonce_b64,
+        account_name,
+    )?;
 
     // 5. Create the TOTP instance and get the otpauth URI
     let totp = TOTP::new(
@@ -109,9 +115,9 @@ pub fn validate_totp(
     code: &str,
 ) -> Result<bool, MiyucloudError> {
     // 1. Get TOTP row, check active
-    let row = db
-        .totp_get_by_owner(owner_id)?
-        .ok_or_else(|| MiyucloudError::NotFound("TOTP not configured for this owner".to_string()))?;
+    let row = db.totp_get_by_owner(owner_id)?.ok_or_else(|| {
+        MiyucloudError::NotFound("TOTP not configured for this owner".to_string())
+    })?;
 
     if !row.is_active {
         return Err(MiyucloudError::NotFound(
@@ -175,10 +181,7 @@ pub fn validate_recovery_code(
 }
 
 /// Desactive le 2FA pour un proprietaire.
-pub fn disable_totp(
-    db: &crate::data::MiyucloudDb,
-    owner_id: &str,
-) -> Result<(), MiyucloudError> {
+pub fn disable_totp(db: &crate::data::MiyucloudDb, owner_id: &str) -> Result<(), MiyucloudError> {
     // 1. Delete TOTP secret
     db.totp_delete(owner_id)?;
     // 2. Delete all recovery codes
@@ -232,10 +235,7 @@ fn decrypt_totp_secret(
         MiyucloudError::Crypto("Invalid nonce length: expected 12 bytes".to_string())
     })?;
 
-    let encrypted = EncryptedChunk {
-        nonce,
-        ciphertext,
-    };
+    let encrypted = EncryptedChunk { nonce, ciphertext };
 
     decrypt_chunk(key_manager.master_key(), &encrypted)
 }
@@ -313,8 +313,8 @@ mod tests {
         let km = test_key_manager();
         let owner = "owner-001";
 
-        let result = setup_totp(&db, &km, owner, "alice@miyucloud.local")
-            .expect("setup should succeed");
+        let result =
+            setup_totp(&db, &km, owner, "alice@miyucloud.local").expect("setup should succeed");
 
         // URI should start with otpauth://
         assert!(
@@ -353,8 +353,8 @@ mod tests {
 
         setup_totp(&db, &km, owner, "bob@test.com").expect("first setup ok");
 
-        let err = setup_totp(&db, &km, owner, "bob@test.com")
-            .expect_err("second setup should fail");
+        let err =
+            setup_totp(&db, &km, owner, "bob@test.com").expect_err("second setup should fail");
         let msg = err.to_string();
         assert!(
             msg.contains("already enabled"),
@@ -414,8 +414,8 @@ mod tests {
 
         let current_code = totp.generate_current().unwrap();
 
-        let valid = validate_totp(&db, &km, owner, &current_code)
-            .expect("validation should not error");
+        let valid =
+            validate_totp(&db, &km, owner, &current_code).expect("validation should not error");
         assert!(valid, "Current code should be valid");
     }
 
@@ -427,8 +427,7 @@ mod tests {
 
         setup_totp(&db, &km, owner, "eve@test.com").expect("setup ok");
 
-        let valid = validate_totp(&db, &km, owner, "000000")
-            .expect("validation should not error");
+        let valid = validate_totp(&db, &km, owner, "000000").expect("validation should not error");
         // It is statistically possible (but extremely unlikely) that "000000"
         // matches the current window. We accept this minimal flakiness.
         // In practice with a random secret this will be false.
@@ -459,17 +458,13 @@ mod tests {
 
         // Use the first recovery code
         let code = &result.recovery_codes[0];
-        let valid = validate_recovery_code(&db, owner, code)
-            .expect("validation should not error");
+        let valid = validate_recovery_code(&db, owner, code).expect("validation should not error");
         assert!(valid, "Recovery code should be valid");
 
         // Same code should not work twice (single-use)
-        let valid_again = validate_recovery_code(&db, owner, code)
-            .expect("validation should not error");
-        assert!(
-            !valid_again,
-            "Recovery code should be single-use"
-        );
+        let valid_again =
+            validate_recovery_code(&db, owner, code).expect("validation should not error");
+        assert!(!valid_again, "Recovery code should be single-use");
     }
 
     #[test]
@@ -480,8 +475,8 @@ mod tests {
 
         setup_totp(&db, &km, owner, "grace@test.com").expect("setup ok");
 
-        let valid = validate_recovery_code(&db, owner, "ZZZZZZZZ")
-            .expect("validation should not error");
+        let valid =
+            validate_recovery_code(&db, owner, "ZZZZZZZZ").expect("validation should not error");
         assert!(!valid, "Wrong recovery code should be invalid");
     }
 
@@ -514,8 +509,7 @@ mod tests {
         let original = setup_totp(&db, &km, owner, "ivan@test.com").expect("setup ok");
         let original_codes = original.recovery_codes;
 
-        let new_codes = regenerate_recovery_codes(&db, owner)
-            .expect("regenerate should succeed");
+        let new_codes = regenerate_recovery_codes(&db, owner).expect("regenerate should succeed");
 
         assert_eq!(new_codes.len(), RECOVERY_CODE_COUNT);
         // New codes should differ from originals (statistically guaranteed)
@@ -530,8 +524,8 @@ mod tests {
         assert!(!valid, "Old recovery codes should be invalidated");
 
         // New codes should work
-        let valid = validate_recovery_code(&db, owner, &new_codes[0])
-            .expect("validation should not error");
+        let valid =
+            validate_recovery_code(&db, owner, &new_codes[0]).expect("validation should not error");
         assert!(valid, "New recovery codes should work");
     }
 
@@ -540,8 +534,7 @@ mod tests {
         let db = mem_db();
         let owner = "owner-011";
 
-        let err = regenerate_recovery_codes(&db, owner)
-            .expect_err("should fail without TOTP");
+        let err = regenerate_recovery_codes(&db, owner).expect_err("should fail without TOTP");
         assert!(
             err.to_string().contains("not enabled"),
             "Should indicate TOTP not enabled: {}",
@@ -564,7 +557,8 @@ mod tests {
         let code = generate_recovery_code();
         assert_eq!(code.len(), RECOVERY_CODE_LENGTH);
         assert!(
-            code.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()),
+            code.chars()
+                .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()),
             "Code should be uppercase alphanumeric: {code}"
         );
     }
@@ -585,7 +579,10 @@ mod tests {
 
         // setup_totp should clean up and succeed
         let result = setup_totp(&db, &km, owner, "new@test.com");
-        assert!(result.is_ok(), "Should succeed after cleaning inactive entry");
+        assert!(
+            result.is_ok(),
+            "Should succeed after cleaning inactive entry"
+        );
         assert!(is_totp_enabled(&db, owner).unwrap());
     }
 }

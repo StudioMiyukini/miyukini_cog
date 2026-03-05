@@ -30,7 +30,9 @@ pub struct MiyucomptareportsTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyucomptareportsIntegrity {
@@ -49,8 +51,11 @@ pub struct MiyucomptareportsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.compta.reports";
 
-#[must_use] 
-pub fn miyucomptareports_admin_cell(version: &str, fingerprint: &str) -> MiyucomptareportsAdminCell {
+#[must_use]
+pub fn miyucomptareports_admin_cell(
+    version: &str,
+    fingerprint: &str,
+) -> MiyucomptareportsAdminCell {
     MiyucomptareportsAdminCell {
         identification: MiyucomptareportsIdentification {
             id: TOOLKIT_ID.to_string(),
@@ -63,7 +68,9 @@ pub fn miyucomptareports_admin_cell(version: &str, fingerprint: &str) -> Miyucom
                 id: "Miyucomptareports".to_string(),
                 name: "Test chemin complet Miyucomptareports".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

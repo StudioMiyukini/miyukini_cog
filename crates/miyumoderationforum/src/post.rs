@@ -18,8 +18,12 @@ pub fn edit(
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let mut guard = store::posts().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    let (content, _locked) = guard.get_mut(post_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
+    let mut guard = store::posts()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (content, _locked) = guard
+        .get_mut(post_id)
+        .ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
     *content = new_content.to_string();
     Ok(())
 }
@@ -34,8 +38,12 @@ pub fn lock(ctx: &GovernedContext, post_id: &str) -> Result<(), Miyumoderationfo
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let mut guard = store::posts().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    let (_, locked) = guard.get_mut(post_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
+    let mut guard = store::posts()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let (_, locked) = guard
+        .get_mut(post_id)
+        .ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
     *locked = true;
     Ok(())
 }
@@ -50,7 +58,11 @@ pub fn delete(ctx: &GovernedContext, post_id: &str) -> Result<(), Miyumoderation
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let mut guard = store::posts().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    guard.remove(post_id).ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
+    let mut guard = store::posts()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard
+        .remove(post_id)
+        .ok_or_else(|| MiyumoderationforumError::InvalidInput("post not found".into()))?;
     Ok(())
 }

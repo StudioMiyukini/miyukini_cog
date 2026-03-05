@@ -11,9 +11,10 @@
 use std::path::Path;
 
 use super::state::{
-    CreateShareLinkRequest, CreateSharePermissionRequest, FileEntry, FolderContents, FolderEntry,
-    RegisterPeerRequest, ResolveConflictRequest, ShareLink, SharePermission, SharedWithMeEntry,
-    StorageStats, SyncConflict, SyncPeer, SyncStatus, UserQuota,
+    AuthSession, CreateShareLinkRequest, CreateSharePermissionRequest, FileEntry, FolderContents,
+    FolderEntry, HealthStatus, OnboardingStatus, RegisterPeerRequest, ResolveConflictRequest,
+    ShareLink, SharePermission, SharedWithMeEntry, StorageStats, SyncConflict, SyncPeer,
+    SyncStatus, TotpSetupData, UserQuota,
 };
 
 /// Erreur du client MiyuCloud.
@@ -73,10 +74,7 @@ impl MiyuCloudClient {
     }
 
     /// Liste le contenu d'un dossier.
-    pub async fn list_files(
-        &self,
-        parent_id: Option<&str>,
-    ) -> ClientResult<FolderContents> {
+    pub async fn list_files(&self, parent_id: Option<&str>) -> ClientResult<FolderContents> {
         let mut url = format!("{}/api/files", self.base_url);
         if let Some(pid) = parent_id {
             url = format!("{url}?parent_id={pid}");
@@ -221,11 +219,7 @@ impl MiyuCloudClient {
     }
 
     /// Renomme ou deplace un fichier.
-    pub async fn rename_file(
-        &self,
-        id: &str,
-        new_name: &str,
-    ) -> ClientResult<FileEntry> {
+    pub async fn rename_file(&self, id: &str, new_name: &str) -> ClientResult<FileEntry> {
         let url = format!("{}/api/files/{id}", self.base_url);
         let body = serde_json::json!({ "name": new_name });
 
@@ -735,11 +729,7 @@ impl MiyuCloudClient {
     /// # Arguments
     /// * `id` - UUID du conflit.
     /// * `resolution` - Strategie : "keep_local" ou "keep_remote".
-    pub async fn resolve_conflict(
-        &self,
-        id: &str,
-        resolution: &str,
-    ) -> ClientResult<()> {
+    pub async fn resolve_conflict(&self, id: &str, resolution: &str) -> ClientResult<()> {
         let url = format!("{}/api/sync/conflicts/{id}/resolve", self.base_url);
 
         let request = ResolveConflictRequest {
@@ -765,6 +755,393 @@ impl MiyuCloudClient {
         }
 
         Ok(())
+    }
+
+    /// Cree une nouvelle session d'authentification.
+    pub async fn create_auth_session(&self) -> ClientResult<String> {
+        let url = format!("{}/api/auth/session", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 201 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        let body = response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))?;
+        let token = body
+            .get("session_token")
+            .and_then(serde_json::Value::as_str)
+            .ok_or_else(|| MiyuCloudClientError::Parse("missing session_token".to_string()))?;
+        Ok(token.to_string())
+    }
+
+    /// Liste les sessions d'authentification actives.
+    pub async fn list_auth_sessions(&self) -> ClientResult<Vec<AuthSession>> {
+        let url = format!("{}/api/auth/sessions", self.base_url);
+        let response = self
+            .http
+            .get(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        response
+            .json::<Vec<AuthSession>>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
+    }
+
+    /// Revoque une session d'authentification.
+    pub async fn revoke_auth_session(&self, session_id: &str) -> ClientResult<()> {
+        let url = format!("{}/api/auth/sessions/{session_id}", self.base_url);
+        let response = self
+            .http
+            .delete(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        Ok(())
+    }
+
+    /// Revoque toutes les sessions d'authentification.
+    pub async fn revoke_all_auth_sessions(&self) -> ClientResult<()> {
+        let url = format!("{}/api/auth/sessions", self.base_url);
+        let response = self
+            .http
+            .delete(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        Ok(())
+    }
+
+    /// Retourne l'etat d'activation de la 2FA TOTP.
+    pub async fn get_totp_status(&self) -> ClientResult<bool> {
+        let url = format!("{}/api/auth/totp/status", self.base_url);
+        let response = self
+            .http
+            .get(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        let body = response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))?;
+        Ok(body
+            .get("enabled")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false))
+    }
+
+    /// Configure la 2FA TOTP et retourne URI + recovery codes.
+    pub async fn setup_totp(&self, account_name: &str) -> ClientResult<TotpSetupData> {
+        let url = format!("{}/api/auth/totp/setup", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .json(&serde_json::json!({ "account_name": account_name }))
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        response
+            .json::<TotpSetupData>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
+    }
+
+    /// Verifie un code TOTP.
+    pub async fn verify_totp_code(
+        &self,
+        code: &str,
+        session_id: Option<&str>,
+    ) -> ClientResult<bool> {
+        let url = format!("{}/api/auth/totp/verify", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .json(&serde_json::json!({
+                "code": code,
+                "session_id": session_id
+            }))
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 && status != 401 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        let body = response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))?;
+        Ok(body
+            .get("valid")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false))
+    }
+
+    /// Verifie un recovery code.
+    pub async fn verify_recovery_code(
+        &self,
+        code: &str,
+        session_id: Option<&str>,
+    ) -> ClientResult<bool> {
+        let url = format!("{}/api/auth/totp/recovery/verify", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .json(&serde_json::json!({
+                "code": code,
+                "session_id": session_id
+            }))
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 && status != 401 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        let body = response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))?;
+        Ok(body
+            .get("valid")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false))
+    }
+
+    /// Regenere les recovery codes.
+    pub async fn regenerate_recovery_codes(&self) -> ClientResult<Vec<String>> {
+        let url = format!("{}/api/auth/totp/recovery/regenerate", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        let body = response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))?;
+        let values = body
+            .get("recovery_codes")
+            .and_then(serde_json::Value::as_array)
+            .ok_or_else(|| MiyuCloudClientError::Parse("missing recovery_codes".to_string()))?;
+
+        Ok(values
+            .iter()
+            .filter_map(|v| v.as_str().map(ToString::to_string))
+            .collect())
+    }
+
+    /// Desactive la 2FA TOTP.
+    pub async fn disable_totp(&self) -> ClientResult<()> {
+        let url = format!("{}/api/auth/totp", self.base_url);
+        let response = self
+            .http
+            .delete(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        Ok(())
+    }
+
+    /// Retourne le statut onboarding consolide.
+    pub async fn get_onboarding_status(&self) -> ClientResult<OnboardingStatus> {
+        let url = format!("{}/api/onboarding/status", self.base_url);
+        let response = self
+            .http
+            .get(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        response
+            .json::<OnboardingStatus>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
+    }
+
+    /// Marque l'onboarding comme termine.
+    pub async fn complete_onboarding(&self) -> ClientResult<()> {
+        let url = format!("{}/api/onboarding/complete", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+        Ok(())
+    }
+
+    /// Reinitialise l'onboarding.
+    pub async fn reset_onboarding(&self) -> ClientResult<()> {
+        let url = format!("{}/api/onboarding/reset", self.base_url);
+        let response = self
+            .http
+            .post(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+        Ok(())
+    }
+
+    /// Retourne le health check detaille.
+    pub async fn get_health_status(&self) -> ClientResult<HealthStatus> {
+        let url = format!("{}/api/admin/health", self.base_url);
+        let response = self
+            .http
+            .get(&url)
+            .header("X-COG-Token", &self.cog_token)
+            .send()
+            .await
+            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
+        let status = response.status().as_u16();
+        if status != 200 {
+            let body = response.text().await.unwrap_or_default();
+            return Err(MiyuCloudClientError::ServerError {
+                status,
+                message: body,
+            });
+        }
+
+        response
+            .json::<HealthStatus>()
+            .await
+            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
     }
 }
 

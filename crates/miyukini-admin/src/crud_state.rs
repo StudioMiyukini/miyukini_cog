@@ -12,7 +12,7 @@ pub struct CrudState {
 
 impl CrudState {
     /// Crée l'état avec des tables de démo.
-    #[must_use] 
+    #[must_use]
     pub fn with_demo_tables() -> Self {
         let tables = RwLock::new(Self::demo_tables());
         Self { tables }

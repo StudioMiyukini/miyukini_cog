@@ -44,7 +44,7 @@ impl ValidationError {
     /// @human: Crée une nouvelle erreur de validation.
     /// @do: create_validation_error
     /// @depends: strongfather_validator_error
-    #[must_use] 
+    #[must_use]
     pub fn new(
         missing_components: Vec<String>,
         violated_rules: Vec<String>,
@@ -94,7 +94,7 @@ impl IntentValidator {
     /// @human: Crée un nouveau validateur d'intentions.
     /// @do: create_intent_validator
     /// @depends: strongfather_intent_validator
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self
     }

@@ -2,24 +2,24 @@
 //!
 //! Architecture : sidebar + contenu dynamique par espace (Purse/Account).
 
-mod sidebar;
 pub mod components;
 mod entry_point;
 mod purse_dashboard;
+mod purse_forecast;
 mod purse_movement_form;
 mod purse_movements;
 mod purse_recurring;
-mod purse_forecast;
+mod sidebar;
 
 use dioxus::prelude::*;
 
-use sidebar::JayKontaSidebar;
 use entry_point::EntryPointSelector;
 use purse_dashboard::PurseDashboard;
+use purse_forecast::PurseForecast;
 use purse_movement_form::PurseMovementForm;
 use purse_movements::PurseMovements;
 use purse_recurring::PurseRecurring;
-use purse_forecast::PurseForecast;
+use sidebar::JayKontaSidebar;
 
 // ── State ──────────────────────────────────────────────────────────────
 

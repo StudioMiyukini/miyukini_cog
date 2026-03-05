@@ -30,7 +30,9 @@ pub struct MiyuforumTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuforumIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuforumAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.community.forum";
 
-#[must_use] 
+#[must_use]
 pub fn miyuforum_admin_cell(version: &str, fingerprint: &str) -> MiyuforumAdminCell {
     MiyuforumAdminCell {
         identification: MiyuforumIdentification {
@@ -63,7 +65,9 @@ pub fn miyuforum_admin_cell(version: &str, fingerprint: &str) -> MiyuforumAdminC
                 id: "Miyuforum".to_string(),
                 name: "Test chemin complet Miyuforum".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

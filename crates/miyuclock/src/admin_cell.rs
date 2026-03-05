@@ -30,7 +30,9 @@ pub struct MiyuclockTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuclockIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuclockAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.kernel.miyuclock";
 
-#[must_use] 
+#[must_use]
 pub fn miyuclock_admin_cell(version: &str, fingerprint: &str) -> MiyuclockAdminCell {
     MiyuclockAdminCell {
         identification: MiyuclockIdentification {
@@ -63,7 +65,9 @@ pub fn miyuclock_admin_cell(version: &str, fingerprint: &str) -> MiyuclockAdminC
                 id: "Miyuclock".to_string(),
                 name: "Test chemin complet Miyuclock".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

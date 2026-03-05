@@ -2,9 +2,9 @@
 
 //! Minimap marker -- small colored dots/icons on the minimap overlay.
 
-use egui::{Color32, Pos2, Response, Ui, Vec2};
-use miyuki_ui_tokens::palette::d2::{D2OrbColors, D2MiscColors, D2_PALETTE};
 use crate::convert::rgba_to_color32;
+use egui::{Color32, Pos2, Response, Ui, Vec2};
+use miyuki_ui_tokens::palette::d2::{D2MiscColors, D2OrbColors, D2_PALETTE};
 
 /// Type of entity shown on the minimap.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -78,18 +78,26 @@ impl MinimapMarker {
         let (response, painter) = ui.allocate_painter(size, egui::Sense::hover());
         let center = response.rect.center();
 
-        let color = self.color_override.unwrap_or_else(|| self.marker_type.color());
+        let color = self
+            .color_override
+            .unwrap_or_else(|| self.marker_type.color());
 
         match self.marker_type {
             MarkerType::Waypoint => {
                 // Cross shape
                 let half = self.radius;
                 painter.line_segment(
-                    [Pos2::new(center.x - half, center.y), Pos2::new(center.x + half, center.y)],
+                    [
+                        Pos2::new(center.x - half, center.y),
+                        Pos2::new(center.x + half, center.y),
+                    ],
                     egui::Stroke::new(2.0, color),
                 );
                 painter.line_segment(
-                    [Pos2::new(center.x, center.y - half), Pos2::new(center.x, center.y + half)],
+                    [
+                        Pos2::new(center.x, center.y - half),
+                        Pos2::new(center.x, center.y + half),
+                    ],
                     egui::Stroke::new(2.0, color),
                 );
             }

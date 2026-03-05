@@ -36,10 +36,10 @@ pub struct SalesReportData {
 /// Résumé des ventes.
 #[derive(Debug, Clone, Serialize)]
 pub struct SalesReportSummary {
-    pub total_revenue: i64,   // centimes
+    pub total_revenue: i64, // centimes
     pub total_transactions: i32,
     pub total_refunds: i32,
-    pub net_revenue: i64,      // centimes
+    pub net_revenue: i64, // centimes
     pub currency: String,
     pub unique_buyers: i32,
 }
@@ -50,7 +50,7 @@ pub struct TopWorkEntry {
     pub work_id: String,
     pub title: String,
     pub sales_count: i32,
-    pub revenue: i64,         // centimes
+    pub revenue: i64, // centimes
 }
 
 /// Revenu par méthode de paiement.
@@ -58,7 +58,7 @@ pub struct TopWorkEntry {
 pub struct RevenueByMethod {
     pub method: String,
     pub transaction_count: i32,
-    pub revenue: i64,         // centimes
+    pub revenue: i64, // centimes
 }
 
 // ---------------------------------------------------------------------------

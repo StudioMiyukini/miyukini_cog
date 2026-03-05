@@ -45,7 +45,8 @@ impl JayRdvStore {
         from_date: Option<&str>,
         to_date: Option<&str>,
     ) -> Result<Vec<Appointment>, crate::data::DbError> {
-        self.inner.appointment_list(resource_id, status_filter, from_date, to_date)
+        self.inner
+            .appointment_list(resource_id, status_filter, from_date, to_date)
     }
     pub fn appointment_delete(&self, id: &str) -> Result<bool, crate::data::DbError> {
         self.inner.appointment_delete(id)

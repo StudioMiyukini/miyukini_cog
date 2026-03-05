@@ -24,8 +24,8 @@
 //! - **Phase 2** (future) : Les services tiers sont distribués en WASM/dylib.
 //!   Le Market distribue des packages `.msp` que Central charge dynamiquement.
 
+use crate::manifest::{ManifestError, ServiceManifest};
 use sha2::{Digest, Sha256};
-use crate::manifest::{ServiceManifest, ManifestError};
 
 /// Extension des packages Market.
 pub const PACKAGE_EXTENSION: &str = "msp";
@@ -70,9 +70,14 @@ pub fn storage_path(service_id: &str, version: &str) -> String {
 }
 
 /// Valide un package (vérifie le manifeste intégré et le checksum).
-pub fn validate_package(data: &[u8], expected_manifest: &ServiceManifest) -> Result<PackageInfo, PackageError> {
+pub fn validate_package(
+    data: &[u8],
+    expected_manifest: &ServiceManifest,
+) -> Result<PackageInfo, PackageError> {
     // Phase 1 : on vérifie uniquement le manifeste et le checksum
-    expected_manifest.validate().map_err(PackageError::Manifest)?;
+    expected_manifest
+        .validate()
+        .map_err(PackageError::Manifest)?;
 
     let checksum = sha256_hex(data);
     let size = data.len() as u64;
@@ -111,7 +116,10 @@ mod tests {
     #[test]
     fn test_sha256() {
         let hash = sha256_hex(b"hello world");
-        assert_eq!(hash, "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
+        assert_eq!(
+            hash,
+            "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+        );
     }
 
     #[test]

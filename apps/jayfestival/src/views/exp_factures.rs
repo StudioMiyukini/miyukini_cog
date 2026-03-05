@@ -1,8 +1,8 @@
 //! EXP-E11/E12 — Factures et paiements exposant.
 
+use super::components::{ActionButton, Badge, StatCard};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton, StatCard};
 
 /// Vue des factures et paiements.
 #[component]
@@ -283,7 +283,12 @@ fn FactureDetail(facture_id: String, on_back: EventHandler<()>) -> Element {
 }
 
 #[component]
-fn InvoiceLine(description: &'static str, quantity: &'static str, unit_price: &'static str, total: &'static str) -> Element {
+fn InvoiceLine(
+    description: &'static str,
+    quantity: &'static str,
+    unit_price: &'static str,
+    total: &'static str,
+) -> Element {
     let c = use_palette();
 
     rsx! {

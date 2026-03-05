@@ -1,0 +1,207 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "francois.unit_test":  [
+                                                "cert.francois.istqb"
+                                            ],
+                     "francois.integration_test":  [
+                                                       "cert.francois.istqb"
+                                                   ],
+                     "francois.api_design":  [
+                                                 "cert.francois.openapi"
+                                             ],
+                     "francois.api_impl":  [
+                                               "cert.francois.openapi"
+                                           ],
+                     "lise.ui_component":  [
+                                               "cert.lise.wcag",
+                                               "cert.lise.iso_9241"
+                                           ],
+                     "lise.accessibility":  [
+                                                "cert.lise.wcag"
+                                            ],
+                     "lise.ergonomie":  [
+                                            "cert.lise.iso_9241"
+                                        ],
+                     "denis.architecture":  [
+                                                "cert.denis.togaf"
+                                            ],
+                     "denis.qualite_logicielle":  [
+                                                      "cert.denis.iso_25010"
+                                                  ],
+                     "denis.cycle_vie":  [
+                                             "cert.denis.iso_12207"
+                                         ],
+                     "maria.brainstorm":  [
+                                              "cert.maria.psm"
+                                          ],
+                     "maria.planning":  [
+                                            "cert.maria.pmp",
+                                            "cert.maria.prince2"
+                                        ],
+                     "maria.scrum":  [
+                                         "cert.maria.psm",
+                                         "cert.maria.itil4"
+                                     ],
+                     "fabrice.product":  [
+                                             "cert.fabrice.pspo",
+                                             "cert.fabrice.lean_startup"
+                                         ],
+                     "fabrice.mvp":  [
+                                         "cert.fabrice.lean_startup"
+                                     ],
+                     "victor.threat_model":  [
+                                                 "cert.victor.cissp",
+                                                 "cert.victor.iso_27001"
+                                             ],
+                     "victor.audit_securite":  [
+                                                   "cert.victor.iso_27001",
+                                                   "cert.victor.ceh"
+                                               ],
+                     "victor.donnees_sante":  [
+                                                  "cert.victor.hds",
+                                                  "cert.victor.iso_27001"
+                                              ],
+                     "victor.caisse_fiscale":  [
+                                                   "cert.victor.nf525",
+                                                   "cert.victor.nf203"
+                                               ],
+                     "victor.archivage":  [
+                                              "cert.victor.nf461"
+                                          ],
+                     "victor.vie_privee":  [
+                                               "cert.victor.vp2"
+                                           ],
+                     "victor.pentest":  [
+                                            "cert.victor.ceh"
+                                        ],
+                     "george.audit_conformite":  [
+                                                     "cert.george.iso_19011",
+                                                     "cert.george.cisa"
+                                                 ],
+                     "george.rgpd":  [
+                                         "cert.george.rgpd"
+                                     ],
+                     "george.audit_si":  [
+                                             "cert.george.cisa"
+                                         ],
+                     "arianne.qualite_process":  [
+                                                     "cert.arianne.iso_9001"
+                                                 ],
+                     "arianne.amelioration":  [
+                                                  "cert.arianne.six_sigma",
+                                                  "cert.arianne.iso_33001"
+                                              ],
+                     "arianne.evaluation_process":  [
+                                                        "cert.arianne.iso_33001"
+                                                    ],
+                     "hugo.docker":  [
+                                         "cert.hugo.docker"
+                                     ],
+                     "hugo.kubernetes":  [
+                                             "cert.hugo.cka"
+                                         ],
+                     "hugo.aws":  [
+                                      "cert.hugo.aws"
+                                  ],
+                     "hugo.terraform":  [
+                                            "cert.hugo.terraform"
+                                        ],
+                     "hugo.devops":  [
+                                         "cert.hugo.devops"
+                                     ],
+                     "jean.efficience_tokens":  [
+                                                    "cert.jean.prompt_eng",
+                                                    "cert.jean.finops"
+                                                ],
+                     "jean.cout_cloud":  [
+                                             "cert.jean.finops"
+                                         ],
+                     "jean.mlops":  [
+                                        "cert.jean.mlops"
+                                    ],
+                     "george.audit_cisa_control":  [
+                                                       "cert.george.cisa"
+                                                   ],
+                     "victor.audit_nf525_control":  [
+                                                        "cert.victor.nf525"
+                                                    ],
+                     "george.audit_rgpd_control":  [
+                                                       "cert.george.rgpd"
+                                                   ],
+                     "victor.audit_cissp_control":  [
+                                                        "cert.victor.cissp"
+                                                    ],
+                     "victor.audit_hds_control":  [
+                                                      "cert.victor.hds"
+                                                  ],
+                     "victor.audit_critical_cyber":  [
+                                                         "cert.victor.iso_27001",
+                                                         "cert.victor.hds"
+                                                     ],
+                     "george.audit_critical_cyber":  [
+                                                         "cert.george.cisa",
+                                                         "cert.george.rgpd"
+                                                     ],
+                     "victor.audit_ceh_control":  [
+                                                      "cert.victor.ceh"
+                                                  ],
+                     "victor.audit_iso27001_control":  [
+                                                           "cert.victor.iso_27001"
+                                                       ]
+                 },
+    "fallback_par_phase":  {
+                               "p0.maria":  [
+                                                "cert.maria.psm"
+                                            ],
+                               "p0.fabrice":  [
+                                                  "cert.fabrice.pspo"
+                                              ],
+                               "p0.denis":  [
+                                                "cert.denis.togaf"
+                                            ],
+                               "p0.victor":  [
+                                                 "cert.victor.iso_27001"
+                                             ],
+                               "p3.francois":  [
+                                                   "cert.francois.istqb",
+                                                   "cert.francois.openapi"
+                                               ],
+                               "p3.lise":  [
+                                               "cert.lise.wcag",
+                                               "cert.lise.iso_9241"
+                                           ],
+                               "p4.victor":  [
+                                                 "cert.victor.iso_27001",
+                                                 "cert.victor.cissp"
+                                             ],
+                               "p4.george":  [
+                                                 "cert.george.iso_19011",
+                                                 "cert.george.cisa"
+                                             ],
+                               "p4.hugo":  [
+                                               "cert.hugo.docker",
+                                               "cert.hugo.devops"
+                                           ],
+                               "p4.jean":  [
+                                               "cert.jean.prompt_eng"
+                                           ],
+                               "p6.arianne":  [
+                                                  "cert.arianne.iso_9001"
+                                              ],
+                               "p6.jean":  [
+                                               "cert.jean.prompt_eng",
+                                               "cert.jean.finops"
+                                           ],
+                               "p4.victor.critical_cyber":  [
+                                                                "cert.victor.iso_27001",
+                                                                "cert.victor.hds"
+                                                            ],
+                               "p4.george.critical_cyber":  [
+                                                                "cert.george.cisa",
+                                                                "cert.george.rgpd"
+                                                            ]
+                           }
+}
+

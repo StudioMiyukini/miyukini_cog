@@ -9,7 +9,9 @@ mod kindmother_db;
 #[cfg(feature = "kindmother-only")]
 mod kindmother_client_db;
 
-pub use types::{AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord};
+pub use types::{
+    AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,
+};
 
 #[cfg(feature = "legacy-sqlite")]
 pub use kindmother_db::{AccountStats, DbError, JayKontaDb, PurseStats};

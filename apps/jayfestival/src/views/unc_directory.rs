@@ -2,11 +2,11 @@
 //!
 //! Listes et fiches detaillees des organisateurs et exposants visibles au public.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use super::{UncSection, JayFestivalState};
 use super::components::Badge;
-use jayfestival::data::{Organisateur, Exposant};
+use super::{JayFestivalState, UncSection};
+use dioxus::prelude::*;
+use jayfestival::data::{Exposant, Organisateur};
+use miyukini_service_ui::use_palette;
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()
@@ -279,10 +279,8 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
                 || e.secteur
                     .as_ref()
                     .is_some_and(|s| s.to_lowercase().contains(&search_str.to_lowercase()));
-            let cat_match = cat_str.is_empty()
-                || e.category
-                    .as_ref()
-                    .is_some_and(|c| c == &cat_str);
+            let cat_match =
+                cat_str.is_empty() || e.category.as_ref().is_some_and(|c| c == &cat_str);
             search_match && cat_match
         })
         .collect();
@@ -521,10 +519,7 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
 
 /// Carte organisateur.
 #[component]
-fn OrganisateurCard(
-    organisateur: Organisateur,
-    onclick: EventHandler<MouseEvent>,
-) -> Element {
+fn OrganisateurCard(organisateur: Organisateur, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
     let name = opt_str(&organisateur.name);
 
@@ -564,10 +559,7 @@ fn OrganisateurCard(
 
 /// Carte exposant.
 #[component]
-fn ExposantCard(
-    exposant: Exposant,
-    onclick: EventHandler<MouseEvent>,
-) -> Element {
+fn ExposantCard(exposant: Exposant, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
     let company_name = opt_str(&exposant.company_name);
 

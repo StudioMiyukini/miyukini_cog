@@ -11,7 +11,11 @@ use crate::errors::MiyuSQLError;
 /// @human: Récupère une entrée depuis le cache gouverné (clé fournie).
 /// @do: get_cache_entry
 /// tool.cache.get
-pub fn get(ctx: &GovernedContext, key: &str, executor: &dyn CacheExecutor) -> Result<Option<Vec<u8>>, MiyuSQLError> {
+pub fn get(
+    ctx: &GovernedContext,
+    key: &str,
+    executor: &dyn CacheExecutor,
+) -> Result<Option<Vec<u8>>, MiyuSQLError> {
     if !ctx.has_mandate() {
         return Err(MiyuSQLError::NoMandate);
     }
@@ -43,7 +47,11 @@ pub fn set(
 /// @human: Invalide une ou plusieurs entrées du cache (par clé ou motif).
 /// @do: invalidate_cache_entries
 /// tool.cache.invalidate
-pub fn invalidate(ctx: &GovernedContext, key_or_pattern: &str, executor: &dyn CacheExecutor) -> Result<u64, MiyuSQLError> {
+pub fn invalidate(
+    ctx: &GovernedContext,
+    key_or_pattern: &str,
+    executor: &dyn CacheExecutor,
+) -> Result<u64, MiyuSQLError> {
     if !ctx.has_mandate() {
         return Err(MiyuSQLError::NoMandate);
     }

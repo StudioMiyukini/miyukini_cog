@@ -29,7 +29,9 @@ fn events() -> &'static Mutex<Vec<ClockEvent>> {
 
 fn now_utc() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
-    let t = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default();
+    let t = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default();
     format!("{}", t.as_secs())
 }
 
@@ -54,7 +56,9 @@ pub fn clock_in(ctx: &GovernedContext, employee_id: &str) -> Result<String, Miyu
         kind: ClockEventKind::In,
         timestamp_utc: now_utc(),
     };
-    let mut guard = events().lock().map_err(|_| MiyuhrError::InvalidInput("lock".into()))?;
+    let mut guard = events()
+        .lock()
+        .map_err(|_| MiyuhrError::InvalidInput("lock".into()))?;
     guard.push(event);
     Ok(format!("clock:in:{eid}:{id}"))
 }
@@ -80,7 +84,9 @@ pub fn clock_out(ctx: &GovernedContext, employee_id: &str) -> Result<String, Miy
         kind: ClockEventKind::Out,
         timestamp_utc: now_utc(),
     };
-    let mut guard = events().lock().map_err(|_| MiyuhrError::InvalidInput("lock".into()))?;
+    let mut guard = events()
+        .lock()
+        .map_err(|_| MiyuhrError::InvalidInput("lock".into()))?;
     guard.push(event);
     Ok(format!("clock:out:{eid}:{id}"))
 }
@@ -93,7 +99,9 @@ pub fn list_clock_events(
     if !ctx.has_mandate() {
         return Err(MiyuhrError::NoMandate);
     }
-    let guard = events().lock().map_err(|_| MiyuhrError::InvalidInput("lock".into()))?;
+    let guard = events()
+        .lock()
+        .map_err(|_| MiyuhrError::InvalidInput("lock".into()))?;
     Ok(guard
         .iter()
         .filter(|e| e.employee_id == employee_id)

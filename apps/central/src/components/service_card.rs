@@ -1,8 +1,8 @@
 //! Carte d'un service (affichage dans la grille).
 
-use dioxus::prelude::*;
 use crate::state::{use_app_state, ServiceInfo};
 use crate::theme::styles;
+use dioxus::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ServiceCardProps {

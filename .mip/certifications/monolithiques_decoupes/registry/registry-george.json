@@ -1,0 +1,22 @@
+﻿{
+    "certs":  {
+                  "cert.george.cisa":  {
+                                           "folder":  "cisa",
+                                           "agent":  "george",
+                                           "name":  "CISA",
+                                           "tldr":  "Audit SI. 5 domaines, COBIT. ISACA."
+                                       },
+                  "cert.george.iso_19011":  {
+                                                "folder":  "iso_19011",
+                                                "agent":  "george",
+                                                "name":  "ISO 19011",
+                                                "tldr":  "Audit systÃ¨mes management. 7 principes. ISO."
+                                            },
+                  "cert.george.rgpd":  {
+                                           "folder":  "rgpd",
+                                           "agent":  "george",
+                                           "name":  "RGPD",
+                                           "tldr":  "DonnÃ©es personnelles UE. 7 principes, DPO. RÃ¨glement 2016/679."
+                                       }
+              }
+}

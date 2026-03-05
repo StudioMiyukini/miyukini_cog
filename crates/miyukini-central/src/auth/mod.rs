@@ -34,4 +34,4 @@ pub use db_client::{
 };
 
 pub use mother_client::{validate_profiles_with_mother, MotherClientError};
-pub use password::{validate_password, password_rules_hint, PasswordError, PASSWORD_MIN_LEN};
+pub use password::{password_rules_hint, validate_password, PasswordError, PASSWORD_MIN_LEN};

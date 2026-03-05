@@ -6,10 +6,10 @@
 //! - MIYUKINI_DATA_DIR
 //! - MIYUKINI_PROFILE_ID
 
-use std::sync::Arc;
 use dioxus::prelude::*;
+use jayxpose_app::{views::JayXposeView, DbContext};
 use miyukini_service_ui::{Theme, ThemeContext};
-use jayxpose_app::{DbContext, views::JayXposeView};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -36,11 +36,10 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| {
-            let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
-            format!("{base}/Miyukini-COG/services/jayxpose/data")
-        });
+    let data_dir = std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| {
+        let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+        format!("{base}/Miyukini-COG/services/jayxpose/data")
+    });
     let _ = std::fs::create_dir_all(&data_dir);
     let db_path = format!("{data_dir}/jayxpose.db");
 
@@ -58,7 +57,11 @@ fn App() -> Element {
         }
     };
 
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::Gaming }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::Gaming,
+        })
+    });
     use_context_provider(|| Signal::new(DbContext { db }));
 
     rsx! {

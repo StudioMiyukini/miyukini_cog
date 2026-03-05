@@ -4,9 +4,9 @@
 //! execute/prepare/tx/cache/schema). Implémentation minimale (stub ou réelle selon stockage).
 
 use miyusql::{
+    query_execute, query_prepare, schema_read, schema_read_table, tx_begin, tx_commit, tx_rollback,
     GovernedContext, MiyuSQLError, QueryExecutor, QueryResult, SchemaExecutor, TableMeta,
-    TransactionExecutor, query_execute, query_prepare, schema_read, schema_read_table, tx_begin,
-    tx_commit, tx_rollback,
+    TransactionExecutor,
 };
 
 /// @id: kindmother_miyusql_bridge
@@ -40,7 +40,11 @@ pub trait MiyuSQLExecutionBridge: Send + Sync {
     ) -> Result<(), MiyuSQLError>;
 
     /// Démarre une transaction sous mandat.
-    fn begin_transaction(&self, mandate_id: &str, security_level: u8) -> Result<String, MiyuSQLError>;
+    fn begin_transaction(
+        &self,
+        mandate_id: &str,
+        security_level: u8,
+    ) -> Result<String, MiyuSQLError>;
 
     /// Valide la transaction.
     fn commit_transaction(
@@ -127,7 +131,11 @@ where
         query_prepare(&ctx, sql, params, self.executor.as_ref())
     }
 
-    fn begin_transaction(&self, mandate_id: &str, security_level: u8) -> Result<String, MiyuSQLError> {
+    fn begin_transaction(
+        &self,
+        mandate_id: &str,
+        security_level: u8,
+    ) -> Result<String, MiyuSQLError> {
         let ctx = self.ctx(mandate_id, security_level);
         tx_begin(&ctx, self.executor.as_ref())
     }

@@ -18,11 +18,17 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyusocialfeedError::NoMandate);
     }
-    let guard = store::posts().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    let guard = store::posts()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
     let mut items: Vec<PostItem> = guard
         .iter()
         .filter(|(_, (author_id, _))| filters.author_id.as_ref().map_or(true, |a| author_id == a))
-        .map(|(id, (author_id, content))| PostItem { id: id.clone(), author_id: author_id.clone(), content: content.clone() })
+        .map(|(id, (author_id, content))| PostItem {
+            id: id.clone(),
+            author_id: author_id.clone(),
+            content: content.clone(),
+        })
         .collect();
     if let Some(limit) = filters.limit {
         items.truncate(limit as usize);

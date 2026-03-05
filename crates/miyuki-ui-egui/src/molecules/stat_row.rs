@@ -5,9 +5,9 @@
 //! Used in the character sheet for base attributes (Strength, Dexterity, etc.)
 //! and derived stats (Defense, Attack Rating, etc.).
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// Stat row display variant.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -73,9 +73,7 @@ impl<'a> StatRow<'a> {
 
         let label_color = rgba_to_color32(&D2_PALETTE.text_primary);
         let value_color = match self.variant {
-            StatVariant::Base | StatVariant::Derived => {
-                rgba_to_color32(&D2_PALETTE.accent_primary)
-            }
+            StatVariant::Base | StatVariant::Derived => rgba_to_color32(&D2_PALETTE.accent_primary),
             StatVariant::Bonus => Color32::from_rgb(0, 200, 0),
             StatVariant::Penalty => rgba_to_color32(&D2_PALETTE.error),
         };
@@ -90,16 +88,10 @@ impl<'a> StatRow<'a> {
 
             // Value
             let val_text = self.value.to_string();
-            ui.label(
-                egui::RichText::new(&val_text)
-                    .color(value_color)
-                    .size(11.0),
-            );
+            ui.label(egui::RichText::new(&val_text).color(value_color).size(11.0));
 
             // "+" button for base stats
-            if self.variant == StatVariant::Base && self.can_add
-                && ui.small_button("+").clicked()
-            {
+            if self.variant == StatVariant::Base && self.can_add && ui.small_button("+").clicked() {
                 add_clicked = true;
             }
         });

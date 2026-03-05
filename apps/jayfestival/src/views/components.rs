@@ -69,9 +69,21 @@ pub fn ActionButton(
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
     let c = use_palette();
-    let bg = if accent { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let color = if accent { "white".to_string() } else { c.text_primary.to_string() };
-    let border = if accent { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let bg = if accent {
+        c.accent_blue.to_string()
+    } else {
+        c.bg_hover.to_string()
+    };
+    let color = if accent {
+        "white".to_string()
+    } else {
+        c.text_primary.to_string()
+    };
+    let border = if accent {
+        "none".to_string()
+    } else {
+        format!("1px solid {}", c.border)
+    };
 
     rsx! {
         button {

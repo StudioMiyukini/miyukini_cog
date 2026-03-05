@@ -20,20 +20,48 @@ const MAX_OUTPUT_SIZE: usize = 65_536;
 /// Les commandes non listées ici sont refusées.
 const ALLOWED_COMMANDS: &[&str] = &[
     // Build & dev
-    "cargo", "rustc", "rustfmt", "clippy-driver",
-    "npm", "npx", "node", "bun", "deno",
-    "python", "python3", "pip", "pip3",
+    "cargo",
+    "rustc",
+    "rustfmt",
+    "clippy-driver",
+    "npm",
+    "npx",
+    "node",
+    "bun",
+    "deno",
+    "python",
+    "python3",
+    "pip",
+    "pip3",
     "git",
     // Utilitaires
-    "ls", "dir", "cat", "head", "tail", "wc", "sort", "uniq",
-    "find", "grep", "rg", "fd",
-    "echo", "printf",
-    "mkdir", "cp", "mv",
-    "curl", "wget",
+    "ls",
+    "dir",
+    "cat",
+    "head",
+    "tail",
+    "wc",
+    "sort",
+    "uniq",
+    "find",
+    "grep",
+    "rg",
+    "fd",
+    "echo",
+    "printf",
+    "mkdir",
+    "cp",
+    "mv",
+    "curl",
+    "wget",
     // Windows
-    "powershell", "cmd",
+    "powershell",
+    "cmd",
     // Diagnostic
-    "ping", "nslookup", "ipconfig", "ifconfig",
+    "ping",
+    "nslookup",
+    "ipconfig",
+    "ifconfig",
 ];
 
 /// Commandes interdites (blocklist — même si elles passent la whitelist via shell).
@@ -48,7 +76,7 @@ const BLOCKED_PATTERNS: &[&str] = &[
     "mkfs",
     "dd if=",
     "> /dev/sd",
-    ":(){ :|:& };:",  // Fork bomb
+    ":(){ :|:& };:", // Fork bomb
 ];
 
 /// Métadonnées du skill.
@@ -56,14 +84,21 @@ pub fn info() -> SkillInfo {
     let mut params = HashMap::new();
     params.insert("command".into(), "Commande à exécuter (obligatoire)".into());
     params.insert("args".into(), "Arguments (tableau de strings)".into());
-    params.insert("cwd".into(), "Répertoire de travail (relatif au sandbox)".into());
-    params.insert("timeout".into(), format!("Timeout en secondes (défaut {DEFAULT_TIMEOUT_SECS}, max {MAX_TIMEOUT_SECS})"));
+    params.insert(
+        "cwd".into(),
+        "Répertoire de travail (relatif au sandbox)".into(),
+    );
+    params.insert(
+        "timeout".into(),
+        format!("Timeout en secondes (défaut {DEFAULT_TIMEOUT_SECS}, max {MAX_TIMEOUT_SECS})"),
+    );
     params.insert("shell".into(), "Exécuter via shell (défaut: false)".into());
 
     SkillInfo {
         id: "shell_exec".into(),
         name: "Exécution Shell".into(),
-        description: "Exécute des commandes système sandboxées (whitelist, timeout, sortie limitée).".into(),
+        description:
+            "Exécute des commandes système sandboxées (whitelist, timeout, sortie limitée).".into(),
         parameters: params,
         min_security_level: "extended",
     }
@@ -90,7 +125,9 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             return SkillResult {
                 success: false,
                 output: serde_json::Value::Null,
-                error: Some(format!("Commande bloquée par la politique de sécurité : {command}")),
+                error: Some(format!(
+                    "Commande bloquée par la politique de sécurité : {command}"
+                )),
                 duration_ms: 0,
             };
         }
@@ -105,9 +142,11 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
     if !use_shell {
         let base_cmd = command.split_whitespace().next().unwrap_or("");
         let base_cmd_lower = base_cmd.to_lowercase();
-        let allowed = ALLOWED_COMMANDS
-            .iter()
-            .any(|c| base_cmd_lower == c.to_lowercase() || base_cmd_lower.ends_with(&format!("/{c}")) || base_cmd_lower.ends_with(&format!("\\{c}")));
+        let allowed = ALLOWED_COMMANDS.iter().any(|c| {
+            base_cmd_lower == c.to_lowercase()
+                || base_cmd_lower.ends_with(&format!("/{c}"))
+                || base_cmd_lower.ends_with(&format!("\\{c}"))
+        });
 
         if !allowed {
             return SkillResult {
@@ -174,11 +213,8 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
     cmd.stderr(std::process::Stdio::piped());
 
     // Exécuter avec timeout
-    let result = tokio::time::timeout(
-        std::time::Duration::from_secs(timeout_secs),
-        cmd.output(),
-    )
-    .await;
+    let result =
+        tokio::time::timeout(std::time::Duration::from_secs(timeout_secs), cmd.output()).await;
 
     match result {
         Ok(Ok(output)) => {

@@ -13,7 +13,9 @@ impl std::fmt::Display for MiyuTextError {
         match self {
             MiyuTextError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuTextError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuTextError::RegexNotSupportedV01 => write!(f, "Regex replace not supported in v0.1; use Literal mode"),
+            MiyuTextError::RegexNotSupportedV01 => {
+                write!(f, "Regex replace not supported in v0.1; use Literal mode")
+            }
         }
     }
 }

@@ -35,7 +35,10 @@ impl MiyukiniSalesStore {
     /// Insère un devis (écrase si même id).
     pub fn quote_insert(&self, quote: Quote) -> Result<(), DbError> {
         let id = quote.id.clone();
-        self.quotes.write().map_err(|e| DbError(e.to_string()))?.insert(id, quote);
+        self.quotes
+            .write()
+            .map_err(|e| DbError(e.to_string()))?
+            .insert(id, quote);
         Ok(())
     }
 
@@ -66,7 +69,9 @@ impl MiyukiniSalesStore {
     /// Met à jour le statut d'un devis.
     pub fn quote_set_status(&self, id: &str, status: QuoteStatus) -> Result<(), DbError> {
         let mut guard = self.quotes.write().map_err(|e| DbError(e.to_string()))?;
-        let q = guard.get_mut(id).ok_or_else(|| DbError(format!("quote not found: {id}")))?;
+        let q = guard
+            .get_mut(id)
+            .ok_or_else(|| DbError(format!("quote not found: {id}")))?;
         q.status = status;
         Ok(())
     }
@@ -74,7 +79,10 @@ impl MiyukiniSalesStore {
     /// Insère une commande.
     pub fn order_insert(&self, order: Order) -> Result<(), DbError> {
         let id = order.id.clone();
-        self.orders.write().map_err(|e| DbError(e.to_string()))?.insert(id, order);
+        self.orders
+            .write()
+            .map_err(|e| DbError(e.to_string()))?
+            .insert(id, order);
         Ok(())
     }
 
@@ -105,7 +113,9 @@ impl MiyukiniSalesStore {
     /// Met à jour le statut d'une commande.
     pub fn order_set_status(&self, id: &str, status: OrderStatus) -> Result<(), DbError> {
         let mut guard = self.orders.write().map_err(|e| DbError(e.to_string()))?;
-        let o = guard.get_mut(id).ok_or_else(|| DbError(format!("order not found: {id}")))?;
+        let o = guard
+            .get_mut(id)
+            .ok_or_else(|| DbError(format!("order not found: {id}")))?;
         o.status = status;
         o.updated_at = chrono::Utc::now().to_rfc3339();
         Ok(())

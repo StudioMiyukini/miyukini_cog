@@ -9,7 +9,11 @@ use crate::errors::MiyuinvoiceError;
 /// @layer: tool
 /// @human: Envoie une relance ; règles = StrongFather.
 /// @do: invoice_reminder_send_under_governance
-pub fn send(ctx: &GovernedContext, _invoice_id: &str, _payload: Option<&str>) -> Result<(), MiyuinvoiceError> {
+pub fn send(
+    ctx: &GovernedContext,
+    _invoice_id: &str,
+    _payload: Option<&str>,
+) -> Result<(), MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }

@@ -1,8 +1,10 @@
 //! Catalogue Market — grille de services avec filtres et recherche.
 
-use dioxus::prelude::*;
-use crate::state::{use_app_state, use_service_manager, ServiceInfo, ServiceSource, ServiceType, ServiceRegistry};
 use super::{MarketSection, MarketState};
+use crate::state::{
+    use_app_state, use_service_manager, ServiceInfo, ServiceRegistry, ServiceSource, ServiceType,
+};
+use dioxus::prelude::*;
 
 #[component]
 pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
@@ -28,18 +30,18 @@ pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
             MarketSection::Installes => s.is_installed,
         })
         .filter(|s| {
-            if query.is_empty() { return true; }
+            if query.is_empty() {
+                return true;
+            }
             let q = query.to_lowercase();
             s.name.to_lowercase().contains(&q)
                 || s.description.to_lowercase().contains(&q)
                 || s.id.to_lowercase().contains(&q)
                 || s.developer.to_lowercase().contains(&q)
         })
-        .filter(|s| {
-            match type_filter {
-                Some(t) => s.service_type == t,
-                None => true,
-            }
+        .filter(|s| match type_filter {
+            Some(t) => s.service_type == t,
+            None => true,
         })
         .collect();
 
@@ -138,9 +140,17 @@ fn FilterChip(
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { format!("{}20", color) } else { "transparent".to_string() };
+    let bg = if is_active {
+        format!("{}20", color)
+    } else {
+        "transparent".to_string()
+    };
     let border_color = if is_active { color } else { c.border };
-    let text_color = if is_active { c.text_white } else { c.text_secondary };
+    let text_color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     rsx! {
         button {
@@ -172,7 +182,10 @@ fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
     let source_label = service.source.label();
 
     // Vérifier si une mise à jour est disponible
-    let has_update = state.read().available_updates.iter()
+    let has_update = state
+        .read()
+        .available_updates
+        .iter()
         .any(|(id, _, _)| id == &svc_id);
 
     let status_label = if has_update {
@@ -259,12 +272,28 @@ fn EmptyState(section: MarketSection, has_query: bool) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
     let (icon, title, description) = if has_query {
-        ("\u{1F50D}", "Aucun r\u{00e9}sultat", "Essayez avec d'autres mots-cl\u{00e9}s.")
+        (
+            "\u{1F50D}",
+            "Aucun r\u{00e9}sultat",
+            "Essayez avec d'autres mots-cl\u{00e9}s.",
+        )
     } else {
         match section {
-            MarketSection::Communaute => ("\u{1F30D}", "Aucun service communautaire", "Les services tiers seront disponibles prochainement."),
-            MarketSection::Installes => ("\u{1F4E6}", "Aucun service install\u{00e9}", "Parcourez le catalogue pour d\u{00e9}couvrir les services."),
-            _ => ("\u{2728}", "Catalogue vide", "Aucun service disponible pour le moment."),
+            MarketSection::Communaute => (
+                "\u{1F30D}",
+                "Aucun service communautaire",
+                "Les services tiers seront disponibles prochainement.",
+            ),
+            MarketSection::Installes => (
+                "\u{1F4E6}",
+                "Aucun service install\u{00e9}",
+                "Parcourez le catalogue pour d\u{00e9}couvrir les services.",
+            ),
+            _ => (
+                "\u{2728}",
+                "Catalogue vide",
+                "Aucun service disponible pour le moment.",
+            ),
         }
     };
 

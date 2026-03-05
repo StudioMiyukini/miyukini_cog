@@ -51,6 +51,54 @@ pub fn sanitize_filename(name: &str) -> String {
     }
 }
 
+/// Sanitise un type MIME pour utilisation dans les en-tetes HTTP.
+///
+/// Autorise uniquement le format `type/subtype` avec des caracteres ASCII
+/// restreints. Retourne `application/octet-stream` si invalide.
+pub fn sanitize_mime_type(mime: &str) -> String {
+    let trimmed = mime.trim();
+    let mut parts = trimmed.split('/');
+    let Some(kind) = parts.next() else {
+        return "application/octet-stream".to_string();
+    };
+    let Some(subtype) = parts.next() else {
+        return "application/octet-stream".to_string();
+    };
+    if parts.next().is_some() {
+        return "application/octet-stream".to_string();
+    }
+
+    let allowed = |c: char| {
+        c.is_ascii_alphanumeric()
+            || matches!(c, '!' | '#' | '$' | '&' | '^' | '_' | '.' | '+' | '-')
+    };
+    if kind.is_empty()
+        || subtype.is_empty()
+        || !kind.chars().all(allowed)
+        || !subtype.chars().all(allowed)
+    {
+        return "application/octet-stream".to_string();
+    }
+
+    trimmed.to_ascii_lowercase()
+}
+
+/// Sanitise un segment de chemin URL.
+///
+/// Conserve uniquement `[A-Za-z0-9_-]` pour eviter l'injection dans
+/// les URLs et cookies bases sur des segments dynamiques.
+pub fn sanitize_path_segment(segment: &str) -> String {
+    let cleaned: String = segment
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+        .collect();
+    if cleaned.is_empty() {
+        "invalid".to_string()
+    } else {
+        cleaned
+    }
+}
+
 /// Valide qu'un identifiant est un UUID valide (versions 1-5, format 8-4-4-4-12).
 ///
 /// Rejette tout identifiant contenant `/`, `\`, ou `..`.
@@ -148,10 +196,7 @@ mod tests {
 
     #[test]
     fn test_sanitize_filename_quotes() {
-        assert_eq!(
-            sanitize_filename("file\"name\".txt"),
-            "filename.txt"
-        );
+        assert_eq!(sanitize_filename("file\"name\".txt"), "filename.txt");
     }
 
     #[test]
@@ -172,7 +217,43 @@ mod tests {
     #[test]
     fn test_validate_uuid_path_traversal() {
         assert!(!validate_uuid("../../../etc/passwd"));
-        assert!(!validate_uuid("550e8400-e29b-41d4-a716-446655440000/../../etc"));
+        assert!(!validate_uuid(
+            "550e8400-e29b-41d4-a716-446655440000/../../etc"
+        ));
         assert!(!validate_uuid("550e8400-e29b-41d4-a716-44665544\\cmd"));
+    }
+
+    #[test]
+    fn test_sanitize_mime_type_valid() {
+        assert_eq!(sanitize_mime_type("text/plain"), "text/plain");
+        assert_eq!(sanitize_mime_type("IMAGE/JPEG"), "image/jpeg");
+        assert_eq!(
+            sanitize_mime_type("application/vnd.api+json"),
+            "application/vnd.api+json"
+        );
+    }
+
+    #[test]
+    fn test_sanitize_mime_type_invalid() {
+        assert_eq!(sanitize_mime_type(""), "application/octet-stream");
+        assert_eq!(sanitize_mime_type("text"), "application/octet-stream");
+        assert_eq!(
+            sanitize_mime_type("text/plain; charset=utf-8"),
+            "application/octet-stream"
+        );
+        assert_eq!(
+            sanitize_mime_type("text/\nplain"),
+            "application/octet-stream"
+        );
+    }
+
+    #[test]
+    fn test_sanitize_path_segment() {
+        assert_eq!(sanitize_path_segment("abcDEF123_-"), "abcDEF123_-");
+        assert_eq!(
+            sanitize_path_segment("abc/../\"x\";\nSet-Cookie"),
+            "abcxSet-Cookie"
+        );
+        assert_eq!(sanitize_path_segment(""), "invalid");
     }
 }

@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuLocale ; expose les modules tools.
 /// @do: expose_miyulocale_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod date;

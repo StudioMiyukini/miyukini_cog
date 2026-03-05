@@ -9,7 +9,10 @@ use crate::errors::MiyutreasuryError;
 /// @layer: tool
 /// @human: Vérifie les seuils et échéances (exécution ; règles = StrongFather).
 /// @do: treasury_alert_check_under_governance
-pub fn check(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<Vec<String>, MiyutreasuryError> {
+pub fn check(
+    ctx: &GovernedContext,
+    _context_ref: Option<&str>,
+) -> Result<Vec<String>, MiyutreasuryError> {
     if !ctx.has_mandate() {
         return Err(MiyutreasuryError::NoMandate);
     }

@@ -2,8 +2,8 @@
 
 //! Character selection layout template.
 
+use crate::organisms::character_select::{CharSelectAction, CharSlotData, CharacterSelect};
 use egui::Context;
-use crate::organisms::character_select::{CharacterSelect, CharSelectAction, CharSlotData};
 
 /// The character selection layout template.
 pub struct CharSelectLayout;

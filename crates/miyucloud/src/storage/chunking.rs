@@ -43,9 +43,7 @@ impl Chunker {
         if data.is_empty() {
             return vec![vec![]];
         }
-        data.chunks(self.chunk_size)
-            .map(<[u8]>::to_vec)
-            .collect()
+        data.chunks(self.chunk_size).map(<[u8]>::to_vec).collect()
     }
 
     /// Reassemble des chunks en un seul buffer de donnees.

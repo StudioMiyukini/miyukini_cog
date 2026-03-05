@@ -21,7 +21,9 @@ pub fn suggest(
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    let guard = store::index().lock().map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
+    let guard = store::index()
+        .lock()
+        .map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
     let prefix_lower = prefix.to_lowercase();
     let mut suggestions: HashSet<String> = HashSet::new();
     for fields in guard.values() {

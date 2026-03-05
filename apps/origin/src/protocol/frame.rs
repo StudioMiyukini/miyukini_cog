@@ -100,8 +100,8 @@ impl FrameHeader {
         }
 
         let type_byte = buf.get_u8();
-        let message_type = MessageType::from_byte(type_byte)
-            .ok_or(FrameError::UnknownMessageType(type_byte))?;
+        let message_type =
+            MessageType::from_byte(type_byte).ok_or(FrameError::UnknownMessageType(type_byte))?;
 
         let flags = FrameFlags::from_byte(buf.get_u8());
 
@@ -462,7 +462,7 @@ mod tests {
             .token(b"test-token".to_vec())
             .cog_id(b"cog-001".to_vec())
             .cog_type(0x03) // STABLE
-            .os_type(0x01)  // LINUX
+            .os_type(0x01) // LINUX
             .core_version(b"1.0.0".to_vec())
             .nonce([0u8; 16])
             .timestamp(1234567890)

@@ -1,8 +1,8 @@
 //! Services dépendants alpha : JayXpose, JayKoa, JayKonta, Miyunotify, Miyubooking, MiyuClock.
 
-pub mod jayxpose;
 pub mod jaykoa;
 pub mod jaykonta;
-pub mod miyunotify;
+pub mod jayxpose;
 pub mod miyubooking;
 pub mod miyuclock;
+pub mod miyunotify;

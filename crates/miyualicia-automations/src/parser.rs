@@ -253,7 +253,10 @@ delay_ms = 0
 
         let result = parse_automation_toml(toml_content);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), AutomationError::ParseError(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            AutomationError::ParseError(_)
+        ));
     }
 
     #[test]

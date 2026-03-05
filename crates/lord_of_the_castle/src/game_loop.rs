@@ -16,10 +16,10 @@ use crate::constants::{
 use crate::enemies::{Enemy, EnemyKind};
 use crate::game_state::{rand_simple, GamePhase, GameState};
 use crate::player::{Dir8, Player};
-use crate::warrior_skills::WarriorSkillId;
-use crate::towers::{Tower, TowerProjectile};
 use crate::secondary_player::{SecondaryPlayer, SecondaryPlayerKind, SecondaryProjectile};
+use crate::towers::{Tower, TowerProjectile};
 use crate::troops::{Troop, TroopKind, TroopState};
+use crate::warrior_skills::WarriorSkillId;
 use std::collections::HashMap;
 use std::time::Instant;
 
@@ -37,7 +37,7 @@ pub enum EnemyTarget {
 }
 
 /// Calcule la cible d'un ennemi (champ de vision 30 px) : Joueur > Tour > Château.
-#[must_use] 
+#[must_use]
 pub fn enemy_target(
     enemy: &Enemy,
     _castle: &Castle,
@@ -67,7 +67,13 @@ pub fn enemy_target(
 }
 
 /// Déplace un ennemi vers sa cible (dx, dy normalisé × speed × dt).
-pub fn move_enemy_toward(enemy: &mut Enemy, target_x: f32, target_y: f32, dt_s: f32, wave_number: u32) {
+pub fn move_enemy_toward(
+    enemy: &mut Enemy,
+    target_x: f32,
+    target_y: f32,
+    dt_s: f32,
+    wave_number: u32,
+) {
     let dx = target_x - enemy.x;
     let dy = target_y - enemy.y;
     let dist = (dx * dx + dy * dy).sqrt();
@@ -81,7 +87,7 @@ pub fn move_enemy_toward(enemy: &mut Enemy, target_x: f32, target_y: f32, dt_s: 
 }
 
 /// Retourne (x, y) de la cible pour un ennemi.
-#[must_use] 
+#[must_use]
 pub fn target_position(
     target: EnemyTarget,
     castle: &Castle,
@@ -102,13 +108,19 @@ pub fn target_position(
 }
 
 /// Hitbox overlap : distance entre centres <= half_a + half_b.
-#[must_use] 
+#[must_use]
 pub fn overlap(dist: f32, half_a: f32, half_b: f32) -> bool {
     dist <= half_a + half_b
 }
 
 /// Delta (dx, dy) pour pousser une entité en (toward_x, toward_y) depuis (from_x, from_y) de `distance` px.
-fn push_back_delta(from_x: f32, from_y: f32, toward_x: f32, toward_y: f32, distance: f32) -> (f32, f32) {
+fn push_back_delta(
+    from_x: f32,
+    from_y: f32,
+    toward_x: f32,
+    toward_y: f32,
+    distance: f32,
+) -> (f32, f32) {
     let dx = toward_x - from_x;
     let dy = toward_y - from_y;
     let dist_sq = dx * dx + dy * dy;
@@ -350,18 +362,8 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
 
     // ——— Déplacement ennemis ———
     for enemy in &mut state.enemies {
-        let target = enemy_target(
-            enemy,
-            &state.castle,
-            &state.player,
-            &state.towers,
-        );
-        let (tx, ty) = target_position(
-            target,
-            &state.castle,
-            &state.player,
-            &state.towers,
-        );
+        let target = enemy_target(enemy, &state.castle, &state.player, &state.towers);
+        let (tx, ty) = target_position(target, &state.castle, &state.player, &state.towers);
         move_enemy_toward(enemy, tx, ty, delta_s, state.wave_number);
     }
 
@@ -382,7 +384,13 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
             let d_player = enemy.dist_to(state.player.x, state.player.y);
             if overlap(d_player, enemy.half_size(), player_half) {
                 player_contact_damage += enemy.contact_damage();
-                let (dx, dy) = push_back_delta(enemy.x, enemy.y, state.player.x, state.player.y, combat::ENEMY_PUSHBACK_ON_CONTACT_PX);
+                let (dx, dy) = push_back_delta(
+                    enemy.x,
+                    enemy.y,
+                    state.player.x,
+                    state.player.y,
+                    combat::ENEMY_PUSHBACK_ON_CONTACT_PX,
+                );
                 player_push_dx += dx;
                 player_push_dy += dy;
             }
@@ -393,7 +401,13 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
                 let d_sec = enemy.dist_to(sec.x, sec.y);
                 if overlap(d_sec, enemy.half_size(), sec_half) {
                     sec.take_damage(enemy.contact_damage());
-                    let (dx, dy) = push_back_delta(enemy.x, enemy.y, sec.x, sec.y, combat::ENEMY_PUSHBACK_ON_CONTACT_PX);
+                    let (dx, dy) = push_back_delta(
+                        enemy.x,
+                        enemy.y,
+                        sec.x,
+                        sec.y,
+                        combat::ENEMY_PUSHBACK_ON_CONTACT_PX,
+                    );
                     sec.x += dx;
                     sec.y += dy;
                 }
@@ -415,13 +429,21 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
             let d_troop = enemy.dist_to(troop.x, troop.y);
             if overlap(d_troop, enemy.half_size(), troop.half_size()) {
                 let raw_damage = enemy.contact_damage();
-                let damage = if troop.kind.block_chance() > 0.0 && rand_simple() < troop.kind.block_chance() {
+                let damage = if troop.kind.block_chance() > 0.0
+                    && rand_simple() < troop.kind.block_chance()
+                {
                     0
                 } else {
                     raw_damage
                 };
                 troop.take_damage(damage, TROOP_RESPAWN_DELAY_S);
-                let (dx, dy) = push_back_delta(enemy.x, enemy.y, troop.x, troop.y, combat::ENEMY_PUSHBACK_ON_CONTACT_PX);
+                let (dx, dy) = push_back_delta(
+                    enemy.x,
+                    enemy.y,
+                    troop.x,
+                    troop.y,
+                    combat::ENEMY_PUSHBACK_ON_CONTACT_PX,
+                );
                 troop.x += dx;
                 troop.y += dy;
             }
@@ -435,7 +457,12 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
 
     // ——— Régénération GigaChad : 1 PV/s si compétence apprise ———
     if !state.player.dead
-        && state.warrior_skill_ranks.get(&WarriorSkillId::GigaChad).copied().unwrap_or(0) >= 1
+        && state
+            .warrior_skill_ranks
+            .get(&WarriorSkillId::GigaChad)
+            .copied()
+            .unwrap_or(0)
+            >= 1
     {
         state.gigachad_regen_accumulator += delta_s;
         while state.gigachad_regen_accumulator >= 1.0 {
@@ -454,7 +481,10 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
             let range = Player::auto_attack_range();
             let px = state.player.x;
             let py = state.player.y;
-            let aim_angle = cursor_world.map_or_else(|| state.player.dir.to_angle_rad(), |(cx, cy)| (cy - py).atan2(cx - px));
+            let aim_angle = cursor_world.map_or_else(
+                || state.player.dir.to_angle_rad(),
+                |(cx, cy)| (cy - py).atan2(cx - px),
+            );
             let damage = state.player_auto_attack_damage();
             let in_cone: Vec<u64> = state
                 .enemies
@@ -548,9 +578,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
         if tower.hp <= 0 {
             continue;
         }
-        let elapsed = tower
-            .last_attack
-            .map_or(2.0, |t| t.elapsed().as_secs_f32());
+        let elapsed = tower.last_attack.map_or(2.0, |t| t.elapsed().as_secs_f32());
         if elapsed < Tower::attack_interval_s() {
             continue;
         }
@@ -575,11 +603,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
             let enemy = &state.enemies[idx];
             // Tir vers la cible actuelle ; à l'impact on blesse le premier ennemi touché (peut être un autre si la cible a bougé ou est morte).
             state.tower_projectiles.push(TowerProjectile::toward(
-                tower.x,
-                tower.y,
-                enemy.x,
-                enemy.y,
-                damage,
+                tower.x, tower.y, enemy.x, enemy.y, damage,
             ));
         }
     }
@@ -620,11 +644,7 @@ pub fn tick_battle(state: &mut GameState, delta_s: f32, cursor_world: Option<(f3
 
     // ——— Ramassage du loot par le joueur (or, xp, objets) ———
     if !state.player.dead {
-        state.collect_loot_near_player(
-            state.player.x,
-            state.player.y,
-            PICKUP_RADIUS,
-        );
+        state.collect_loot_near_player(state.player.x, state.player.y, PICKUP_RADIUS);
     }
 
     // ——— Supprimer tours détruites ———
@@ -637,17 +657,16 @@ fn tick_secondary_projectiles(
     delta_s: f32,
     to_remove_enemies: &mut Vec<u64>,
 ) {
-    let enemy_pos: Vec<(u64, f32, f32)> = state
-        .enemies
-        .iter()
-        .map(|e| (e.id, e.x, e.y))
-        .collect();
+    let enemy_pos: Vec<(u64, f32, f32)> = state.enemies.iter().map(|e| (e.id, e.x, e.y)).collect();
     let mut hits: Vec<(usize, u64, i32, f32, f32)> = Vec::new();
     let mut to_remove_proj: Vec<usize> = Vec::new();
 
     for (pi, p) in state.secondary_projectiles.iter_mut().enumerate() {
         let target_id = p.target_enemy_id;
-        let (tx, ty) = if let Some((_, x, y)) = enemy_pos.iter().find(|(id, _, _)| *id == target_id) { (*x, *y) } else {
+        let (tx, ty) = if let Some((_, x, y)) = enemy_pos.iter().find(|(id, _, _)| *id == target_id)
+        {
+            (*x, *y)
+        } else {
             to_remove_proj.push(pi);
             continue;
         };
@@ -693,11 +712,7 @@ fn tick_secondary_projectiles(
 /// ou jusqu'à leur portée maximale (flèches : 600 px). Champ de vision des tours : 300 px.
 /// Règle : tout projectile allié blesse le **premier ennemi qu'il touche** puis disparaît (sauf effets ex. transpercer).
 /// L'ennemi blessé peut ne pas être celui visé au départ (cible morte ou bougée).
-fn tick_tower_projectiles(
-    state: &mut GameState,
-    dt_s: f32,
-    to_remove_enemies: &mut Vec<u64>,
-) {
+fn tick_tower_projectiles(state: &mut GameState, dt_s: f32, to_remove_enemies: &mut Vec<u64>) {
     // Déplacer chaque projectile
     for p in &mut state.tower_projectiles {
         p.x += p.vx * dt_s;
@@ -714,10 +729,13 @@ fn tick_tower_projectiles(
         for (ei, enemy) in state.enemies.iter().enumerate() {
             let d_to_center = ((p.x - enemy.x).powi(2) + (p.y - enemy.y).powi(2)).sqrt();
             if d_to_center <= enemy.half_size() {
-                let dist_from_origin = ((enemy.x - p.origin_x).powi(2) + (enemy.y - p.origin_y).powi(2)).sqrt();
+                let dist_from_origin =
+                    ((enemy.x - p.origin_x).powi(2) + (enemy.y - p.origin_y).powi(2)).sqrt();
                 match best {
                     None => best = Some((ei, dist_from_origin)),
-                    Some((_, best_d)) if dist_from_origin < best_d => best = Some((ei, dist_from_origin)),
+                    Some((_, best_d)) if dist_from_origin < best_d => {
+                        best = Some((ei, dist_from_origin))
+                    }
                     _ => {}
                 }
             }
@@ -822,18 +840,18 @@ fn tick_troops(state: &mut GameState, delta_s: f32, to_remove_enemies: &mut Vec<
     let castle_y = state.castle.y;
     let half_castle = crate::castle::Castle::half_size();
     // Snapshot des positions ennemis pour éviter double emprunt state.troops / state.enemies.
-    let enemy_pos: Vec<(u64, f32, f32)> = state
-        .enemies
-        .iter()
-        .map(|e| (e.id, e.x, e.y))
-        .collect();
+    let enemy_pos: Vec<(u64, f32, f32)> = state.enemies.iter().map(|e| (e.id, e.x, e.y)).collect();
     let mut attacks: Vec<(TroopKind, u64, f32, f32)> = Vec::new(); // (kind, enemy_id, troop_x, troop_y)
-    // Comptage des troupes par cible : pas plus de TROOP_MAX_PER_ENEMY par ennemi.
-    let mut enemy_target_counts: HashMap<u64, usize> = state.enemies.iter().map(|e| (e.id, 0)).collect();
+                                                                   // Comptage des troupes par cible : pas plus de TROOP_MAX_PER_ENEMY par ennemi.
+    let mut enemy_target_counts: HashMap<u64, usize> =
+        state.enemies.iter().map(|e| (e.id, 0)).collect();
 
     for troop in &mut state.troops {
         // ——— Dead : timer puis respawn au château ———
-        if let TroopState::Dead { respawn_remaining_s } = &mut troop.state {
+        if let TroopState::Dead {
+            respawn_remaining_s,
+        } = &mut troop.state
+        {
             *respawn_remaining_s -= delta_s;
             if *respawn_remaining_s <= 0.0 {
                 troop.state = TroopState::AtCastle;

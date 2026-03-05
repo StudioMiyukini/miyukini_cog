@@ -19,6 +19,11 @@ use tower::{Layer, Service};
 /// Header contenant le token COG.
 pub const COG_TOKEN_HEADER: &str = "X-COG-Token";
 
+/// Verifie un token en comparaison constant-time.
+fn token_matches(provided: &str, expected: &str) -> bool {
+    miyucloud::utils::constant_time::constant_time_eq(provided.as_bytes(), expected.as_bytes())
+}
+
 /// Layer pour verifier le token COG sur chaque requete.
 #[derive(Clone)]
 pub struct CogTokenLayer {
@@ -77,7 +82,7 @@ where
 
         Box::pin(async move {
             match token_header {
-                Some(token) if token == expected => inner.call(req).await,
+                Some(token) if token_matches(&token, &expected) => inner.call(req).await,
                 _ => {
                     let response = error_response(
                         StatusCode::UNAUTHORIZED,
@@ -101,4 +106,20 @@ pub fn error_response(status: StatusCode, code: &str, message: &str) -> Response
         }
     });
     (status, axum::Json(body)).into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::token_matches;
+
+    #[test]
+    fn test_token_matches_equal() {
+        assert!(token_matches("abc123", "abc123"));
+    }
+
+    #[test]
+    fn test_token_matches_different() {
+        assert!(!token_matches("abc123", "abc124"));
+        assert!(!token_matches("short", "much-longer-token"));
+    }
 }

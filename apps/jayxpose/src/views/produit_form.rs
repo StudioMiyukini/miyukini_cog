@@ -1,9 +1,9 @@
 //! Fiche produit — creation / modification (XP-E04).
 
+use super::components::{FormField, FormSection, FormTextarea};
+use super::{JayXposeSection, JayXposeState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{FormField, FormTextarea, FormSection};
-use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
@@ -29,7 +29,12 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
     let mut description = use_signal(|| existing.description.clone().unwrap_or_default());
     let mut price = use_signal(|| existing.price.map(|p| p.to_string()).unwrap_or_default());
     let mut category_id = use_signal(|| existing.category_id.clone().unwrap_or_default());
-    let mut availability = use_signal(|| existing.availability.clone().unwrap_or_else(|| "disponible".to_string()));
+    let mut availability = use_signal(|| {
+        existing
+            .availability
+            .clone()
+            .unwrap_or_else(|| "disponible".to_string())
+    });
     let mut is_featured = use_signal(|| existing.is_featured.unwrap_or(false));
     let mut save_message = use_signal(String::new);
 
@@ -43,7 +48,9 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
 
         let p_price = price.read().parse::<f64>().ok();
         let product = jayxpose::data::ProduitCatalogue {
-            id: editing_id_for_save.clone().or_else(|| Some(uuid::Uuid::new_v4().to_string())),
+            id: editing_id_for_save
+                .clone()
+                .or_else(|| Some(uuid::Uuid::new_v4().to_string())),
             exposant_id: Some(exposant_id.clone()),
             name: Some(p_name),
             description: Some(description.read().clone()),
@@ -70,7 +77,11 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
         }
     };
 
-    let title = if is_edit { "✏️ Modifier le produit" } else { "➕ Nouveau produit" };
+    let title = if is_edit {
+        "✏️ Modifier le produit"
+    } else {
+        "➕ Nouveau produit"
+    };
 
     rsx! {
         div {

@@ -2,9 +2,9 @@
 
 //! Quest entry molecule -- icon + name + completion state.
 
+use crate::convert::rgba_to_color32;
 use egui::{Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// Quest completion state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -34,31 +34,14 @@ impl<'a> QuestEntry<'a> {
     /// Draw the quest entry and return the egui [`Response`].
     pub fn show(self, ui: &mut Ui) -> Response {
         let (icon, text_color) = match self.state {
-            QuestState::NotStarted => (
-                "[  ]",
-                rgba_to_color32(&D2_PALETTE.text_muted),
-            ),
-            QuestState::InProgress => (
-                "[>>]",
-                rgba_to_color32(&D2_PALETTE.text_primary),
-            ),
-            QuestState::Completed => (
-                "[OK]",
-                rgba_to_color32(&D2_PALETTE.text_high),
-            ),
+            QuestState::NotStarted => ("[  ]", rgba_to_color32(&D2_PALETTE.text_muted)),
+            QuestState::InProgress => ("[>>]", rgba_to_color32(&D2_PALETTE.text_primary)),
+            QuestState::Completed => ("[OK]", rgba_to_color32(&D2_PALETTE.text_high)),
         };
 
         let response = ui.horizontal(|ui| {
-            ui.label(
-                egui::RichText::new(icon)
-                    .color(text_color)
-                    .size(10.0),
-            );
-            ui.label(
-                egui::RichText::new(self.name)
-                    .color(text_color)
-                    .size(11.0),
-            )
+            ui.label(egui::RichText::new(icon).color(text_color).size(10.0));
+            ui.label(egui::RichText::new(self.name).color(text_color).size(11.0))
         });
 
         response.inner

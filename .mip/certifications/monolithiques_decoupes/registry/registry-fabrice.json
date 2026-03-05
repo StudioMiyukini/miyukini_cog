@@ -1,0 +1,16 @@
+﻿{
+    "certs":  {
+                  "cert.fabrice.lean_startup":  {
+                                                    "folder":  "lean_startup",
+                                                    "agent":  "fabrice",
+                                                    "name":  "Lean Startup",
+                                                    "tldr":  "Build-Measure-Learn, MVP. Eric Ries."
+                                                },
+                  "cert.fabrice.pspo":  {
+                                            "folder":  "pspo",
+                                            "agent":  "fabrice",
+                                            "name":  "PSPO",
+                                            "tldr":  "Product Owner. Vision, backlog. Scrum.org."
+                                        }
+              }
+}

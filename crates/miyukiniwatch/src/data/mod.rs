@@ -1,7 +1,7 @@
 //! Données MiyukiniWatch : types et persistance KindMother.
 
-mod types;
 mod db;
+mod types;
 
-pub use types::{MetricRecord, Prefs, TimeSlot, AuditEvent};
 pub use db::MiyukiniWatchDb;
+pub use types::{AuditEvent, MetricRecord, Prefs, TimeSlot};

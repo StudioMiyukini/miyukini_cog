@@ -5,8 +5,8 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::state::AliciaSnapshot;
+use crate::state::use_app_state;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types locaux (placeholders en attendant miyualicia-automations)

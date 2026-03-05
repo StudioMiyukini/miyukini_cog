@@ -1,11 +1,11 @@
 // @id: MUIT-Theme @do: theme-composition @role: token @layer: 5 @human: miyuk
 
+use crate::animation::TransitionScale;
 use crate::palette::Palette;
-use crate::spacing::SpacingScale;
-use crate::typography::TypographyScale;
 use crate::radius::RadiusScale;
 use crate::shadow::ShadowScale;
-use crate::animation::TransitionScale;
+use crate::spacing::SpacingScale;
+use crate::typography::TypographyScale;
 use crate::z_index::ZIndexScale;
 
 /// Complete UI theme composing all design token categories.

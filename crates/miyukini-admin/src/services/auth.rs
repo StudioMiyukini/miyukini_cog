@@ -40,7 +40,7 @@ impl AuthService {
     /// @layer: operator
     /// @human: Construit le service d'authentification.
     /// @do: create_auth_service
-    #[must_use] 
+    #[must_use]
     pub fn new(data_dir: PathBuf) -> Self {
         Self {
             data_dir,
@@ -76,7 +76,11 @@ impl AuthService {
     /// @id: miyukiniadmin_auth_load_registry
     pub async fn load_registry(&self) -> Result<Vec<AdminAccount>, std::io::Error> {
         let path = self.admin_registry_path();
-        if !fs::metadata(&path).await.map(|m| m.is_file()).unwrap_or(false) {
+        if !fs::metadata(&path)
+            .await
+            .map(|m| m.is_file())
+            .unwrap_or(false)
+        {
             return Ok(Vec::new());
         }
         let content = fs::read_to_string(&path).await?;
@@ -109,7 +113,10 @@ impl AuthService {
         ip: Option<&str>,
         user_agent: Option<&str>,
     ) -> Result<AdminSession, LoginError> {
-        let accounts = self.load_registry().await.map_err(|_| LoginError::InvalidCredentials)?;
+        let accounts = self
+            .load_registry()
+            .await
+            .map_err(|_| LoginError::InvalidCredentials)?;
         let account = accounts
             .iter()
             .find(|a| a.username.eq_ignore_ascii_case(username))
@@ -121,7 +128,8 @@ impl AuthService {
             }
         }
 
-        Self::verify_password(password, &account.password_hash).map_err(|_| LoginError::InvalidCredentials)?;
+        Self::verify_password(password, &account.password_hash)
+            .map_err(|_| LoginError::InvalidCredentials)?;
 
         let now = Utc::now();
         let expires_at = now
@@ -183,11 +191,18 @@ impl AuthService {
         if username.is_empty() || password.len() < 12 {
             return Err(CreateAccountError::PolicyViolation);
         }
-        let mut accounts = self.load_registry().await.map_err(|_| CreateAccountError::Io)?;
-        if accounts.iter().any(|a| a.username.eq_ignore_ascii_case(username)) {
+        let mut accounts = self
+            .load_registry()
+            .await
+            .map_err(|_| CreateAccountError::Io)?;
+        if accounts
+            .iter()
+            .any(|a| a.username.eq_ignore_ascii_case(username))
+        {
             return Err(CreateAccountError::UsernameExists);
         }
-        let password_hash = Self::hash_password(password).map_err(|_| CreateAccountError::HashError)?;
+        let password_hash =
+            Self::hash_password(password).map_err(|_| CreateAccountError::HashError)?;
         let now = Utc::now();
         let account = AdminAccount {
             account_id: Uuid::new_v4().to_string(),
@@ -203,7 +218,9 @@ impl AuthService {
             failed_attempts: 0,
         };
         accounts.push(account.clone());
-        self.save_registry(&accounts).await.map_err(|_| CreateAccountError::Io)?;
+        self.save_registry(&accounts)
+            .await
+            .map_err(|_| CreateAccountError::Io)?;
         Ok(account)
     }
 }

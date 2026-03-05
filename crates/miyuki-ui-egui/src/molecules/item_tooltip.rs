@@ -6,10 +6,10 @@
 //! magical properties (blue), requirements (red if unmet), durability, and
 //! sell value. The tooltip has a dark background with a thin border.
 
-use egui::{Color32, Pos2, Ui};
-use miyuki_ui_tokens::palette::d2::{D2_PALETTE, D2QualityColors};
 use crate::atoms::quality_text::ItemQuality;
 use crate::convert::rgba_to_color32;
+use egui::{Color32, Pos2, Ui};
+use miyuki_ui_tokens::palette::d2::{D2QualityColors, D2_PALETTE};
 
 /// Complete data for rendering an item tooltip.
 #[derive(Debug, Clone)]
@@ -69,7 +69,10 @@ impl<'a> ItemTooltip<'a> {
             .show(ctx, |ui| {
                 egui::Frame::popup(ui.style())
                     .fill(Color32::from_rgba_premultiplied(10, 8, 5, 245))
-                    .stroke(egui::Stroke::new(1.0, rgba_to_color32(&D2_PALETTE.border_default)))
+                    .stroke(egui::Stroke::new(
+                        1.0,
+                        rgba_to_color32(&D2_PALETTE.border_default),
+                    ))
                     .show(ui, |ui| {
                         ui.set_max_width(self.max_width);
                         self.draw_contents(ui);
@@ -109,11 +112,7 @@ impl<'a> ItemTooltip<'a> {
         // Magical properties (blue)
         let magic_color = rgba_to_color32(&D2QualityColors::MAGIC);
         for prop in &data.properties {
-            ui.label(
-                egui::RichText::new(prop)
-                    .color(magic_color)
-                    .size(11.0),
-            );
+            ui.label(egui::RichText::new(prop).color(magic_color).size(11.0));
         }
 
         if !data.properties.is_empty() {
@@ -123,33 +122,25 @@ impl<'a> ItemTooltip<'a> {
         // Requirements
         let req_color_met = rgba_to_color32(&D2_PALETTE.text_primary);
         let req_color_unmet = rgba_to_color32(&D2_PALETTE.error);
-        let req_color = if data.requirements_met { req_color_met } else { req_color_unmet };
+        let req_color = if data.requirements_met {
+            req_color_met
+        } else {
+            req_color_unmet
+        };
 
         if data.required_level > 0 {
             let text = format!("Niveau requis : {}", data.required_level);
-            ui.label(
-                egui::RichText::new(&text)
-                    .color(req_color)
-                    .size(10.0),
-            );
+            ui.label(egui::RichText::new(&text).color(req_color).size(10.0));
         }
 
         if let Some(str_req) = data.required_strength {
             let text = format!("Force requise : {str_req}");
-            ui.label(
-                egui::RichText::new(&text)
-                    .color(req_color)
-                    .size(10.0),
-            );
+            ui.label(egui::RichText::new(&text).color(req_color).size(10.0));
         }
 
         if let Some(dex_req) = data.required_dexterity {
             let text = format!("Dexterite requise : {dex_req}");
-            ui.label(
-                egui::RichText::new(&text)
-                    .color(req_color)
-                    .size(10.0),
-            );
+            ui.label(egui::RichText::new(&text).color(req_color).size(10.0));
         }
 
         // Durability

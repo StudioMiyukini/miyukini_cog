@@ -3,10 +3,10 @@
 //! Initialise la DB KindMother, les providers de contexte (thème + DB),
 //! puis lance l'UI Dioxus Desktop.
 
-use std::sync::Arc;
 use dioxus::prelude::*;
+use jaykonta_app::{views::JayKontaView, DbContext};
 use miyukini_service_ui::{Theme, ThemeContext};
-use jaykonta_app::{DbContext, views::JayKontaView};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -34,12 +34,10 @@ fn main() {
 #[component]
 fn App() -> Element {
     // R\u{00e9}pertoire de donn\u{00e9}es (injecté par Central ou fallback local)
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| {
-            let base = std::env::var("LOCALAPPDATA")
-                .unwrap_or_else(|_| ".".to_string());
-            format!("{base}/Miyukini-COG/services/jaykonta/data")
-        });
+    let data_dir = std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| {
+        let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+        format!("{base}/Miyukini-COG/services/jaykonta/data")
+    });
 
     // Cr\u{00e9}er le r\u{00e9}pertoire de donn\u{00e9}es si n\u{00e9}cessaire
     let _ = std::fs::create_dir_all(&data_dir);
@@ -62,7 +60,11 @@ fn App() -> Element {
     };
 
     // Provider : th\u{00e8}me
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::Gaming }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::Gaming,
+        })
+    });
 
     // Provider : DB
     use_context_provider(|| Signal::new(DbContext { db }));

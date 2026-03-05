@@ -1,9 +1,9 @@
 //! Fenêtre (overlay) Profil : infos du compte, thème, option réinitialisation COG (tests).
 
-use dioxus::prelude::*;
-use crate::data::{use_service_connections, profile_display_name};
+use crate::data::{profile_display_name, use_service_connections};
 use crate::state::use_app_state;
-use crate::theme::{Theme, styles};
+use crate::theme::{styles, Theme};
+use dioxus::prelude::*;
 
 #[component]
 pub fn ProfileWindow() -> Element {

@@ -4,9 +4,9 @@
 
 pub mod views;
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use jaymanga::data::JayMangaDb;
+use std::sync::Arc;
 
 /// Contexte DB partagé dans l'arbre de composants.
 #[derive(Clone)]

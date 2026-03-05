@@ -36,11 +36,7 @@ pub fn create(ctx: &GovernedContext, _name: &str) -> Result<String, MiyupmError>
 /// @human: Met à jour un dossier ; WriteIntent KindMother.
 /// @do: pm_folder_update_under_governance
 /// tool.pm.folder.update — ne décide pas ; WriteIntent.
-pub fn update(
-    ctx: &GovernedContext,
-    _folder_id: &str,
-    _payload: &str,
-) -> Result<(), MiyupmError> {
+pub fn update(ctx: &GovernedContext, _folder_id: &str, _payload: &str) -> Result<(), MiyupmError> {
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }

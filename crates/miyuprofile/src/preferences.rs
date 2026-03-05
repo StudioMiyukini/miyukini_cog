@@ -12,7 +12,10 @@ use std::collections::HashMap;
 /// @human: Récupère les préférences.
 /// @do: preferences_get_under_governance
 /// tool.profile.preferences.get
-pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<HashMap<String, String>, MiyuprofileError> {
+pub fn get(
+    ctx: &GovernedContext,
+    user_id: &str,
+) -> Result<HashMap<String, String>, MiyuprofileError> {
     if !ctx.has_mandate() {
         return Err(MiyuprofileError::NoMandate);
     }

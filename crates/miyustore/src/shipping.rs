@@ -9,7 +9,11 @@ use crate::errors::MiyustoreError;
 /// @layer: tool
 /// @human: Calcule le tarif de livraison ; panier/zone fourni.
 /// @do: commerce_shipping_rate_under_governance
-pub fn rate(ctx: &GovernedContext, _cart_ref: &str, _zone_ref: &str) -> Result<String, MiyustoreError> {
+pub fn rate(
+    ctx: &GovernedContext,
+    _cart_ref: &str,
+    _zone_ref: &str,
+) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
@@ -21,7 +25,10 @@ pub fn rate(ctx: &GovernedContext, _cart_ref: &str, _zone_ref: &str) -> Result<S
 /// @layer: tool
 /// @human: Résout les zones de livraison applicables ; lecture gouvernée.
 /// @do: commerce_shipping_zones_resolve_under_governance
-pub fn zones_resolve(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<Vec<String>, MiyustoreError> {
+pub fn zones_resolve(
+    ctx: &GovernedContext,
+    _context_ref: Option<&str>,
+) -> Result<Vec<String>, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }

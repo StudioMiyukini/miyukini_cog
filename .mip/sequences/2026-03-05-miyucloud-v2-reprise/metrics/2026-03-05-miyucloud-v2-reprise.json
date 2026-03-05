@@ -1,0 +1,85 @@
+﻿{
+    "project":  {
+                    "title":  "MiyuCloud v2 Reprise (Securite + Onboarding + Infrastructure)",
+                    "description":  "Reprise de cadrage MIP v2 pour relancer MiyuCloud v2 avec brief refait",
+                    "class":  "T4",
+                    "slug":  "miyucloud-v2-reprise",
+                    "mip_sequence_number":  1,
+                    "autonomy_mode":  "FULL"
+                },
+    "timestamps":  {
+                       "sequence_start":  "2026-03-05T00:38:35Z",
+                       "p0_start":  "2026-03-05T00:38:35Z",
+                       "p0_end":  "2026-03-05T00:38:35Z",
+                       "autopilot_start":  "2026-03-05T08:13:36Z",
+                       "p3_start":  "2026-03-05T08:13:36Z",
+                       "p3_end":  null,
+                       "p4_start":  null,
+                       "p4_end":  null,
+                       "p5_start":  null,
+                       "p5_end":  null,
+                       "p5_test_start":  null,
+                       "p5_test_end":  null,
+                       "p6_start":  null,
+                       "p6_end":  null,
+                       "total_end":  null
+                   },
+    "counters":  {
+                     "lines_written":  2630,
+                     "lines_deleted":  376,
+                     "packages_touched":  [
+                                             "apps/miyucloud",
+                                             "apps/central",
+                                             "crates/miyucloud"
+                                          ],
+                     "packages_created":  [
+
+                                          ],
+                     "files_created":  16,
+                     "files_modified":  30,
+                     "commits":  0,
+                     "agents_engaged":  [
+                                            "maria",
+                                            "lise",
+                                            "fabrice",
+                                            "denis",
+                                            "hugo",
+                                            "jean",
+                                            "victor",
+                                            "francois",
+                                            "arianne"
+                                        ],
+                     "mip_loops":  1,
+                     "unit_tests_total":  0,
+                     "unit_tests_failed":  0,
+                     "integration_tests_total":  0,
+                     "integration_tests_failed":  0,
+                     "global_tests_total":  211,
+                     "global_tests_failed":  0,
+                     "auto_corrections":  0,
+                     "audits":  0,
+                     "audit_defects":  [
+
+                                       ],
+                     "security_score":  null,
+                     "security_defects":  [
+
+                                          ],
+                     "infra_checks_passed":  null,
+                     "emergency_brakes":  0
+                 },
+    "human_interventions":  [
+                                {
+                                    "phase":  "P0",
+                                    "timestamp":  "2026-03-05T07:10:15Z",
+                                    "description":  "Brief approuve et mode autonomie choisi: FULL",
+                                    "type":  "validation",
+                                    "impact":  "none"
+                                }
+                            ],
+    "agent_questions":  [
+
+                        ],
+    "satisfaction":  null,
+    "notes":  "P0 FULL valide. P3 V0-V7 avance localement: V5 hardening securite termine, V6 composants front 2FA/onboarding/health implementes, API onboarding+health ajoutee, V7 infra de base ajoutee (workflow, systemd, Caddy, scripts). Validation serveur OK. Compilation front bloquee par assets manquants dans crates/lord_of_the_castle (hors perimetre MiyuCloud). Verification shell scripts non executable en environnement Windows (bash indisponible). Push distant toujours bloque (auth GitHub)."
+}

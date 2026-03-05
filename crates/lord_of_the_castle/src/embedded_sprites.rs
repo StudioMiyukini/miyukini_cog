@@ -1,7 +1,7 @@
 //! Sprites intégrés directement dans le binaire via include_bytes!
 //! Cela permet d'afficher les sprites sans dépendre du système de fichiers.
 
-use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use std::sync::LazyLock;
 
 /// Macro pour créer une data URL à partir de bytes PNG
@@ -71,12 +71,16 @@ pub static SKELETON_DEATH: LazyLock<String> = LazyLock::new(|| {
 
 /// Orc Idle (6 frames)
 pub static ORC_IDLE: LazyLock<String> = LazyLock::new(|| {
-    png_data_url!(include_bytes!("../../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Orc/Orc/Orc-Idle.png"))
+    png_data_url!(include_bytes!(
+        "../../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Orc/Orc/Orc-Idle.png"
+    ))
 });
 
 /// Orc Walk (6 frames)
 pub static ORC_WALK: LazyLock<String> = LazyLock::new(|| {
-    png_data_url!(include_bytes!("../../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Orc/Orc/Orc-Walk.png"))
+    png_data_url!(include_bytes!(
+        "../../../images/sprites/Tiny RPG Character Asset/Characters(100x100)/Orc/Orc/Orc-Walk.png"
+    ))
 });
 
 /// Orc Attack (4 frames)
@@ -151,7 +155,7 @@ impl EmbeddedSprite {
         let bg_pos = self.background_position_for_frame(frame_index);
         let bg_size = self.background_size();
         let transform = if flip_h { "transform:scaleX(-1);" } else { "" };
-        
+
         format!(
             "background-image:url('{}');background-position:{};background-size:{};background-repeat:no-repeat;{transform}image-rendering:pixelated;",
             self.data_url.as_str(),
@@ -180,28 +184,28 @@ pub fn animation_frame_index(elapsed_s: f32, frame_count: usize, frame_duration_
 /// Sprites du joueur
 pub mod player {
     use super::*;
-    
+
     pub const IDLE: EmbeddedSprite = EmbeddedSprite {
         data_url: &KNIGHT_IDLE,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.15,
     };
-    
+
     pub const WALK: EmbeddedSprite = EmbeddedSprite {
         data_url: &KNIGHT_WALK,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.1,
     };
-    
+
     pub const ATTACK: EmbeddedSprite = EmbeddedSprite {
         data_url: &KNIGHT_ATTACK,
         frame_count: 4,
         frame_size: (100, 100),
         frame_duration_s: 0.1,
     };
-    
+
     pub const DEATH: EmbeddedSprite = EmbeddedSprite {
         data_url: &KNIGHT_DEATH,
         frame_count: 6,
@@ -213,21 +217,21 @@ pub mod player {
 /// Sprites des ennemis normaux (Skeleton)
 pub mod enemy_normal {
     use super::*;
-    
+
     pub const IDLE: EmbeddedSprite = EmbeddedSprite {
         data_url: &SKELETON_IDLE,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.2,
     };
-    
+
     pub const WALK: EmbeddedSprite = EmbeddedSprite {
         data_url: &SKELETON_WALK,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.12,
     };
-    
+
     pub const DEATH: EmbeddedSprite = EmbeddedSprite {
         data_url: &SKELETON_DEATH,
         frame_count: 6,
@@ -239,21 +243,21 @@ pub mod enemy_normal {
 /// Sprites des mini-boss (Orc)
 pub mod enemy_miniboss {
     use super::*;
-    
+
     pub const IDLE: EmbeddedSprite = EmbeddedSprite {
         data_url: &ORC_IDLE,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.2,
     };
-    
+
     pub const WALK: EmbeddedSprite = EmbeddedSprite {
         data_url: &ORC_WALK,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.12,
     };
-    
+
     pub const DEATH: EmbeddedSprite = EmbeddedSprite {
         data_url: &ORC_DEATH,
         frame_count: 6,
@@ -265,21 +269,21 @@ pub mod enemy_miniboss {
 /// Sprites des boss (Werebear)
 pub mod enemy_boss {
     use super::*;
-    
+
     pub const IDLE: EmbeddedSprite = EmbeddedSprite {
         data_url: &WEREBEAR_IDLE,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.2,
     };
-    
+
     pub const WALK: EmbeddedSprite = EmbeddedSprite {
         data_url: &WEREBEAR_WALK,
         frame_count: 6,
         frame_size: (100, 100),
         frame_duration_s: 0.12,
     };
-    
+
     pub const DEATH: EmbeddedSprite = EmbeddedSprite {
         data_url: &WEREBEAR_DEATH,
         frame_count: 6,

@@ -99,10 +99,7 @@ mod tests {
 
     #[test]
     fn test_filter_blocked() {
-        let cogs = vec![
-            make_cog("cog-1", 10, true),
-            make_cog("cog-2", 5, true),
-        ];
+        let cogs = vec![make_cog("cog-1", 10, true), make_cog("cog-2", 5, true)];
         let blocked = vec!["cog-1".to_string()];
         let filtered = discovery_filter_aggregable(&cogs, &blocked);
         assert_eq!(filtered.len(), 1);

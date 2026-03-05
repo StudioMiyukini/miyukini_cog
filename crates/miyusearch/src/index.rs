@@ -20,7 +20,9 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    let mut guard = store::index().lock().map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
+    let mut guard = store::index()
+        .lock()
+        .map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
     guard.insert(document_id.to_string(), fields.to_string());
     Ok(())
 }

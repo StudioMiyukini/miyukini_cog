@@ -16,6 +16,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use miyucloud::data::types::ConflictStatus;
+use miyucloud::utils::sanitize::validate_uuid;
 use serde::Deserialize;
 use std::sync::Arc;
 
@@ -79,10 +80,10 @@ pub async fn register_peer(
 /// Approuve un pair (le rend fiable pour la synchronisation).
 ///
 /// POST /api/sync/peers/{id}/trust
-pub async fn trust_peer(
-    State(state): State<Arc<AppState>>,
-    Path(id): Path<String>,
-) -> Response {
+pub async fn trust_peer(State(state): State<Arc<AppState>>, Path(id): Path<String>) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(StatusCode::BAD_REQUEST, "INVALID_ID", "Invalid peer id");
+    }
     let db = &state.db;
 
     // Find peer by ID first to get its cog_id
@@ -125,10 +126,10 @@ pub async fn trust_peer(
 /// Revoque la confiance d'un pair.
 ///
 /// POST /api/sync/peers/{id}/untrust
-pub async fn untrust_peer(
-    State(state): State<Arc<AppState>>,
-    Path(id): Path<String>,
-) -> Response {
+pub async fn untrust_peer(State(state): State<Arc<AppState>>, Path(id): Path<String>) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(StatusCode::BAD_REQUEST, "INVALID_ID", "Invalid conflict id");
+    }
     let db = &state.db;
 
     let peers = match db.sync_peer_list() {
@@ -261,9 +262,7 @@ pub async fn resolve_conflict(
             return error_response(
                 StatusCode::BAD_REQUEST,
                 "INVALID_RESOLUTION",
-                &format!(
-                    "Resolution invalide: '{other}'. Valeurs acceptees: local, remote, both."
-                ),
+                &format!("Resolution invalide: '{other}'. Valeurs acceptees: local, remote, both."),
             );
         }
     };
@@ -294,10 +293,7 @@ pub async fn trigger_sync(State(state): State<Arc<AppState>>) -> Response {
     let key_manager = &state.key_manager;
 
     // Create a temporary sync engine for one-shot sync
-    let cog_id = state
-        .config
-        .owner_id
-        .clone();
+    let cog_id = state.config.owner_id.clone();
     let engine_config = miyucloud::sync::engine::SyncEngineConfig::new(
         cog_id,
         state.config.owner_id.clone(),

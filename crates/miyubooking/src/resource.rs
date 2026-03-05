@@ -21,7 +21,9 @@ pub fn register_resource(
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let mut guard = resources_store().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let mut guard = resources_store()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     guard.insert(resource_id.to_string(), metadata.to_string());
     Ok(())
 }
@@ -31,11 +33,16 @@ pub fn register_resource(
 /// @layer: tool
 /// @human: Résout une ressource (salle, équipement) ; contraintes fournies par KindMother.
 /// @do: booking_resource_resolve_under_governance
-pub fn resolve(ctx: &GovernedContext, _constraints: Option<&str>) -> Result<String, MiyubookingError> {
+pub fn resolve(
+    ctx: &GovernedContext,
+    _constraints: Option<&str>,
+) -> Result<String, MiyubookingError> {
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let guard = resources_store().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let guard = resources_store()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     if let Some(id) = guard.keys().next() {
         return Ok(id.clone());
     }
@@ -47,7 +54,11 @@ pub fn resolve(ctx: &GovernedContext, _constraints: Option<&str>) -> Result<Stri
 /// @layer: tool
 /// @human: Retourne la disponibilité d'une ressource sur une plage donnée ; lecture gouvernée.
 /// @do: booking_resource_availability_under_governance
-pub fn availability(ctx: &GovernedContext, _resource_id: &str, _range: &str) -> Result<String, MiyubookingError> {
+pub fn availability(
+    ctx: &GovernedContext,
+    _resource_id: &str,
+    _range: &str,
+) -> Result<String, MiyubookingError> {
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }

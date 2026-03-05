@@ -19,9 +19,7 @@ pub fn get(
     if !ctx.has_mandate() {
         return Err(MiyuhrError::NoMandate);
     }
-    Ok(ScheduleResult {
-        shifts: Vec::new(),
-    })
+    Ok(ScheduleResult { shifts: Vec::new() })
 }
 
 /// Résultat planning.

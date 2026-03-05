@@ -74,7 +74,9 @@ pub fn order_create_from_quote(
         .quote_by_id(quote_id)?
         .ok_or_else(|| DbError(format!("quote not found: {quote_id}")))?;
     if quote.status != QuoteStatus::Accepted {
-        return Err(DbError("quote must be accepted to create order".to_string()));
+        return Err(DbError(
+            "quote must be accepted to create order".to_string(),
+        ));
     }
     let total_cents: i64 = lines.iter().map(|l| l.line_total_cents).sum();
     let now = Utc::now().to_rfc3339();

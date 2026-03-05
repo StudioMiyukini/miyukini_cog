@@ -1,7 +1,7 @@
 //! Module de gestion de connexions de BondingBrother
 
-use std::collections::HashSet;
 use miyukini_kernel::{IdGenerator, UuidIdGenerator};
+use std::collections::HashSet;
 
 /// @id: bondingbrother_connection
 /// @role: data

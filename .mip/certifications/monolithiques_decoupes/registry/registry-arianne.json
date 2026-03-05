@@ -1,0 +1,22 @@
+﻿{
+    "certs":  {
+                  "cert.arianne.iso_33001":  {
+                                                 "folder":  "iso_33001",
+                                                 "agent":  "arianne",
+                                                 "name":  "ISO 33001",
+                                                 "tldr":  "Ã‰valuation processus. 6 niveaux. Ex-SPICE."
+                                             },
+                  "cert.arianne.iso_9001":  {
+                                                "folder":  "iso_9001",
+                                                "agent":  "arianne",
+                                                "name":  "ISO 9001",
+                                                "tldr":  "Management qualitÃ©. PDCA, 10 clauses. ISO."
+                                            },
+                  "cert.arianne.six_sigma":  {
+                                                 "folder":  "six_sigma",
+                                                 "agent":  "arianne",
+                                                 "name":  "Six Sigma",
+                                                 "tldr":  "DMAIC, outils statistiques. ISO."
+                                             }
+              }
+}

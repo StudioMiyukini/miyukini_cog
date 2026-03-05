@@ -9,7 +9,11 @@ use crate::errors::MiyuposkitchenError;
 /// @human: Envoie la commande à l'imprimante cuisine (données fournies).
 /// @do: kitchen_print_under_governance
 /// tool.pos.kitchen.print
-pub fn print(ctx: &GovernedContext, _order_id: &str, _payload: &[u8]) -> Result<(), MiyuposkitchenError> {
+pub fn print(
+    ctx: &GovernedContext,
+    _order_id: &str,
+    _payload: &[u8],
+) -> Result<(), MiyuposkitchenError> {
     if !ctx.has_mandate() {
         return Err(MiyuposkitchenError::NoMandate);
     }

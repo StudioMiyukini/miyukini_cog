@@ -378,9 +378,7 @@ mod tests {
             .await;
 
         // Test avec le bon bloc
-        let result = verifier
-            .verify_phase_b("jayfestival", 0, test_block)
-            .await;
+        let result = verifier.verify_phase_b("jayfestival", 0, test_block).await;
         assert_eq!(result, VerifyResult::Ok);
 
         // Test avec un mauvais bloc

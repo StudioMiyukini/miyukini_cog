@@ -36,10 +36,7 @@ pub fn get(
         return Err(MiyuprofileError::NoMandate);
     }
     let p = profile::get(ctx, user_id)?;
-    Ok(p.fields
-        .get(field_name)
-        .cloned()
-        .unwrap_or_default())
+    Ok(p.fields.get(field_name).cloned().unwrap_or_default())
 }
 
 /// @id: miyuprofile_tool_field_set

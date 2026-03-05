@@ -11,7 +11,10 @@ use crate::errors::MiyuSQLError;
 /// @human: Démarre une transaction sur la connexion gouvernée.
 /// @do: begin_transaction_under_governance
 /// tool.transaction.begin
-pub fn begin(ctx: &GovernedContext, executor: &dyn TransactionExecutor) -> Result<String, MiyuSQLError> {
+pub fn begin(
+    ctx: &GovernedContext,
+    executor: &dyn TransactionExecutor,
+) -> Result<String, MiyuSQLError> {
     if !ctx.has_mandate() {
         return Err(MiyuSQLError::NoMandate);
     }
@@ -24,7 +27,11 @@ pub fn begin(ctx: &GovernedContext, executor: &dyn TransactionExecutor) -> Resul
 /// @human: Valide (commit) la transaction en cours.
 /// @do: commit_transaction
 /// tool.transaction.commit
-pub fn commit(ctx: &GovernedContext, tx_id: &str, executor: &dyn TransactionExecutor) -> Result<(), MiyuSQLError> {
+pub fn commit(
+    ctx: &GovernedContext,
+    tx_id: &str,
+    executor: &dyn TransactionExecutor,
+) -> Result<(), MiyuSQLError> {
     if !ctx.has_mandate() {
         return Err(MiyuSQLError::NoMandate);
     }
@@ -37,7 +44,11 @@ pub fn commit(ctx: &GovernedContext, tx_id: &str, executor: &dyn TransactionExec
 /// @human: Annule (rollback) la transaction en cours.
 /// @do: rollback_transaction
 /// tool.transaction.rollback
-pub fn rollback(ctx: &GovernedContext, tx_id: &str, executor: &dyn TransactionExecutor) -> Result<(), MiyuSQLError> {
+pub fn rollback(
+    ctx: &GovernedContext,
+    tx_id: &str,
+    executor: &dyn TransactionExecutor,
+) -> Result<(), MiyuSQLError> {
     if !ctx.has_mandate() {
         return Err(MiyuSQLError::NoMandate);
     }

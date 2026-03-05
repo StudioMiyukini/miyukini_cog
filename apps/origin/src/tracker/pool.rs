@@ -5,10 +5,10 @@
 //! Note : Code préparé pour fonctionnalités futures (pools étendus).
 #![allow(dead_code)]
 
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use chrono::{DateTime, Utc};
 use tracing::{debug, info};
 
 /// Informations sur un COG dans le pool.
@@ -135,9 +135,7 @@ impl Pool {
         let mut cogs = self.cogs.write().await;
         let before = cogs.len();
 
-        cogs.retain(|_, entry| {
-            (now - entry.last_seen).num_seconds() < timeout_seconds
-        });
+        cogs.retain(|_, entry| (now - entry.last_seen).num_seconds() < timeout_seconds);
 
         before - cogs.len()
     }
@@ -344,23 +342,27 @@ mod tests {
         let pool2 = manager.get_or_create_pool("1.1.0").await;
 
         // Ajouter des COGs
-        pool1.add_cog(CogEntry {
-            cog_id: "cog-1".to_string(),
-            core_version: "1.0.0".to_string(),
-            address: "127.0.0.1:12345".to_string(),
-            last_seen: Utc::now(),
-            services: Vec::new(),
-            lobbys: Vec::new(),
-        }).await;
+        pool1
+            .add_cog(CogEntry {
+                cog_id: "cog-1".to_string(),
+                core_version: "1.0.0".to_string(),
+                address: "127.0.0.1:12345".to_string(),
+                last_seen: Utc::now(),
+                services: Vec::new(),
+                lobbys: Vec::new(),
+            })
+            .await;
 
-        pool2.add_cog(CogEntry {
-            cog_id: "cog-2".to_string(),
-            core_version: "1.1.0".to_string(),
-            address: "127.0.0.1:12346".to_string(),
-            last_seen: Utc::now(),
-            services: Vec::new(),
-            lobbys: Vec::new(),
-        }).await;
+        pool2
+            .add_cog(CogEntry {
+                cog_id: "cog-2".to_string(),
+                core_version: "1.1.0".to_string(),
+                address: "127.0.0.1:12346".to_string(),
+                last_seen: Utc::now(),
+                services: Vec::new(),
+                lobbys: Vec::new(),
+            })
+            .await;
 
         // Compter
         assert_eq!(manager.total_cog_count().await, 2);

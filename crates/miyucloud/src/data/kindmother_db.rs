@@ -47,7 +47,9 @@ impl MiyucloudDb {
     }
 
     /// Verrouille et retourne la connexion SQLite.
-    pub fn lock_conn(&self) -> Result<std::sync::MutexGuard<'_, rusqlite::Connection>, MiyucloudError> {
+    pub fn lock_conn(
+        &self,
+    ) -> Result<std::sync::MutexGuard<'_, rusqlite::Connection>, MiyucloudError> {
         self.conn
             .lock()
             .map_err(|e| MiyucloudError::Db(format!("Mutex poisoned: {e}")))
@@ -580,7 +582,11 @@ impl MiyucloudDb {
     // -----------------------------------------------------------------------
 
     /// Cree un lien de partage.
-    pub fn share_link_create(&self, data: &ShareLink, password_hash: Option<&str>) -> Result<ShareLink, MiyucloudError> {
+    pub fn share_link_create(
+        &self,
+        data: &ShareLink,
+        password_hash: Option<&str>,
+    ) -> Result<ShareLink, MiyucloudError> {
         let conn = self.lock_conn()?;
         conn.execute(
             "INSERT INTO cloud_share_links (id, file_id, folder_id, creator_id, token, password_hash,
@@ -657,12 +663,8 @@ impl MiyucloudDb {
         link_id: &str,
     ) -> Result<Option<String>, MiyucloudError> {
         let conn = self.lock_conn()?;
-        let mut stmt = conn.prepare(
-            "SELECT password_hash FROM cloud_share_links WHERE id = ?1",
-        )?;
-        let mut rows = stmt.query_map(params![link_id], |row| {
-            row.get::<_, Option<String>>(0)
-        })?;
+        let mut stmt = conn.prepare("SELECT password_hash FROM cloud_share_links WHERE id = ?1")?;
+        let mut rows = stmt.query_map(params![link_id], |row| row.get::<_, Option<String>>(0))?;
         match rows.next() {
             Some(r) => Ok(r.map_err(|e| MiyucloudError::Db(e.to_string()))?),
             None => Ok(None),
@@ -685,11 +687,7 @@ impl MiyucloudDb {
     }
 
     /// Met a jour le quota maximum pour un proprietaire.
-    pub fn quota_set_max(
-        &self,
-        owner_id: &str,
-        max_bytes: u64,
-    ) -> Result<(), MiyucloudError> {
+    pub fn quota_set_max(&self, owner_id: &str, max_bytes: u64) -> Result<(), MiyucloudError> {
         let now = now_iso();
         let conn = self.lock_conn()?;
         conn.execute(
@@ -746,11 +744,9 @@ impl MiyucloudDb {
             )
             .unwrap_or(0) as u64;
         let sync_peers: u64 = conn
-            .query_row(
-                "SELECT COUNT(*) FROM cloud_sync_peers",
-                [],
-                |row| row.get::<_, i64>(0),
-            )
+            .query_row("SELECT COUNT(*) FROM cloud_sync_peers", [], |row| {
+                row.get::<_, i64>(0)
+            })
             .unwrap_or(0) as u64;
 
         Ok(crate::data::types::StorageStats {
@@ -1102,7 +1098,10 @@ impl MiyucloudDb {
     // -----------------------------------------------------------------------
 
     /// Recupere la configuration cryptographique pour un proprietaire.
-    pub fn crypto_config_get(&self, owner_id: &str) -> Result<Option<CryptoConfig>, MiyucloudError> {
+    pub fn crypto_config_get(
+        &self,
+        owner_id: &str,
+    ) -> Result<Option<CryptoConfig>, MiyucloudError> {
         let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT owner_id, argon2_salt, canary_ciphertext, canary_nonce, key_version, created_at, updated_at
@@ -1267,7 +1266,10 @@ impl MiyucloudDb {
     }
 
     /// Retourne l'ID de la session active la plus ancienne d'un proprietaire.
-    pub fn session_oldest_by_owner(&self, owner_id: &str) -> Result<Option<String>, MiyucloudError> {
+    pub fn session_oldest_by_owner(
+        &self,
+        owner_id: &str,
+    ) -> Result<Option<String>, MiyucloudError> {
         let now = now_iso();
         let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(

@@ -22,6 +22,8 @@ pub struct JayMangaDb;
 impl JayMangaDb {
     /// Ouvre la connexion au client KindMother.
     pub fn open(_path: impl AsRef<std::path::Path>) -> Result<Self, DbError> {
-        Err(DbError("KindMother Client not yet implemented for JayManga. Use legacy-sqlite.".to_string()))
+        Err(DbError(
+            "KindMother Client not yet implemented for JayManga. Use legacy-sqlite.".to_string(),
+        ))
     }
 }

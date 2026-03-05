@@ -3,10 +3,10 @@
 //! Initialise la DB KindMother, les providers de contexte (theme + DB + profil),
 //! puis lance l'UI Dioxus Desktop.
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use miyukini_service_ui::{Theme, ThemeContext};
-use miyukiniwatch_app::{DbContext, ProfileContext, views::MiyukiniWatchView};
+use miyukiniwatch_app::{views::MiyukiniWatchView, DbContext, ProfileContext};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -34,12 +34,10 @@ fn main() {
 #[component]
 fn App() -> Element {
     // Repertoire de donnees (injecte par Central ou fallback local)
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| {
-            let base = std::env::var("LOCALAPPDATA")
-                .unwrap_or_else(|_| ".".to_string());
-            format!("{base}/Miyukini-COG/services/miyukiniwatch/data")
-        });
+    let data_dir = std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| {
+        let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+        format!("{base}/Miyukini-COG/services/miyukiniwatch/data")
+    });
 
     // Creer le repertoire de donnees si necessaire
     let _ = std::fs::create_dir_all(&data_dir);
@@ -62,11 +60,14 @@ fn App() -> Element {
     };
 
     // Profile ID depuis env var ou "default"
-    let profile_id = std::env::var("MIYUKINI_PROFILE_ID")
-        .unwrap_or_else(|_| "default".to_string());
+    let profile_id = std::env::var("MIYUKINI_PROFILE_ID").unwrap_or_else(|_| "default".to_string());
 
     // Provider : theme
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::Gaming }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::Gaming,
+        })
+    });
 
     // Provider : DB
     use_context_provider(|| Signal::new(DbContext { db }));

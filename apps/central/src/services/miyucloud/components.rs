@@ -10,8 +10,8 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::state::BreadcrumbItem;
+use crate::state::use_app_state;
 
 // ════════════════════════════════════════════════════════════════════════════
 // Breadcrumb
@@ -75,12 +75,7 @@ pub fn Breadcrumb(
 
 /// Icone representant un fichier ou dossier en fonction du type MIME.
 #[component]
-pub fn FileIcon(
-    mime_type: String,
-    is_folder: bool,
-    #[props(default = 32)]
-    size: u32,
-) -> Element {
+pub fn FileIcon(mime_type: String, is_folder: bool, #[props(default = 32)] size: u32) -> Element {
     let icon = if is_folder {
         "\u{1F4C1}" // folder
     } else {
@@ -134,11 +129,7 @@ fn mime_to_icon(mime: &str) -> &'static str {
 
 /// Affiche une taille en octets formatee (KB, MB, GB).
 #[component]
-pub fn SizeLabel(
-    bytes: u64,
-    #[props(default = false)]
-    compact: bool,
-) -> Element {
+pub fn SizeLabel(bytes: u64, #[props(default = false)] compact: bool) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let label = format_size(bytes);
     let font_size = if compact { "11px" } else { "13px" };
@@ -227,14 +218,10 @@ pub fn ActionButton(
     label: String,
     icon: String,
     onclick: EventHandler<MouseEvent>,
-    #[props(default = false)]
-    primary: bool,
-    #[props(default = false)]
-    danger: bool,
-    #[props(default = false)]
-    small: bool,
-    #[props(default = false)]
-    disabled: bool,
+    #[props(default = false)] primary: bool,
+    #[props(default = false)] danger: bool,
+    #[props(default = false)] small: bool,
+    #[props(default = false)] disabled: bool,
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let bg = if disabled {

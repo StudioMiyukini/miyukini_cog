@@ -14,9 +14,18 @@ pub struct RankItem {
 
 fn default_ranks() -> Vec<RankItem> {
     vec![
-        RankItem { id: "member".to_string(), name: "Membre".to_string() },
-        RankItem { id: "vip".to_string(), name: "VIP".to_string() },
-        RankItem { id: "mod".to_string(), name: "Modérateur".to_string() },
+        RankItem {
+            id: "member".to_string(),
+            name: "Membre".to_string(),
+        },
+        RankItem {
+            id: "vip".to_string(),
+            name: "VIP".to_string(),
+        },
+        RankItem {
+            id: "mod".to_string(),
+            name: "Modérateur".to_string(),
+        },
     ]
 }
 
@@ -44,5 +53,8 @@ pub fn resolve(ctx: &GovernedContext, user_id: &str) -> Result<String, Miyuprofi
         return Err(MiyuprofileError::NoMandate);
     }
     let p = profile::get(ctx, user_id)?;
-    Ok(p.fields.get("rank").cloned().unwrap_or_else(|| "member".to_string()))
+    Ok(p.fields
+        .get("rank")
+        .cloned()
+        .unwrap_or_else(|| "member".to_string()))
 }

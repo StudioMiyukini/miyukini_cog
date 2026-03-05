@@ -116,7 +116,11 @@ pub fn int_to_bool(val: i32) -> bool {
 /// Convention: false = 0, true = 1.
 #[inline]
 pub fn bool_to_int(val: bool) -> i32 {
-    if val { 1 } else { 0 }
+    if val {
+        1
+    } else {
+        0
+    }
 }
 
 /// Convertit un `Option<bool>` en `Option<i32>`.
@@ -177,10 +181,8 @@ pub fn is_legacy_password_hash(stored: &str) -> bool {
 pub fn hash_password(password: &str) -> String {
     use argon2::{Argon2, Params, Version};
     let mut salt = [0u8; ARGON2_SALT_LEN];
-    getrandom::getrandom(&mut salt)
-        .expect("getrandom failed");
-    let params = Params::new(65536, 3, 4, Some(ARGON2_OUTPUT_LEN))
-        .expect("Argon2 params");
+    getrandom::getrandom(&mut salt).expect("getrandom failed");
+    let params = Params::new(65536, 3, 4, Some(ARGON2_OUTPUT_LEN)).expect("Argon2 params");
     let argon2 = Argon2::new(argon2::Algorithm::Argon2id, Version::V0x13, params);
     let mut out = [0u8; ARGON2_OUTPUT_LEN];
     argon2
@@ -223,8 +225,7 @@ fn verify_password_argon2(encoded: &str, password: &str) -> bool {
         Ok(h) if h.len() == ARGON2_OUTPUT_LEN => h,
         _ => return false,
     };
-    let params = Params::new(65536, 3, 4, Some(ARGON2_OUTPUT_LEN))
-        .expect("Argon2 params");
+    let params = Params::new(65536, 3, 4, Some(ARGON2_OUTPUT_LEN)).expect("Argon2 params");
     let argon2 = Argon2::new(argon2::Algorithm::Argon2id, Version::V0x13, params);
     let mut out = [0u8; ARGON2_OUTPUT_LEN];
     if argon2

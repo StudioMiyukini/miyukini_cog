@@ -80,19 +80,34 @@ fn classify_question(input: &str) -> QuestionCategory {
     let lower = input.to_lowercase();
 
     // Salutations
-    let greetings = ["bonjour", "salut", "hello", "bonsoir", "hey", "coucou", "yo"];
-    if greetings.iter().any(|g| lower.starts_with(g) || lower == *g) {
+    let greetings = [
+        "bonjour", "salut", "hello", "bonsoir", "hey", "coucou", "yo",
+    ];
+    if greetings
+        .iter()
+        .any(|g| lower.starts_with(g) || lower == *g)
+    {
         return QuestionCategory::Greeting;
     }
 
     // Status
-    let status_kw = ["status", "état", "etat", "connecté", "modèle", "llm", "disponible"];
+    let status_kw = [
+        "status",
+        "état",
+        "etat",
+        "connecté",
+        "modèle",
+        "llm",
+        "disponible",
+    ];
     if status_kw.iter().any(|k| lower.contains(k)) {
         return QuestionCategory::StatusQuery;
     }
 
     // Aide / navigation
-    let help_kw = ["aide", "help", "comment", "service", "agent", "équipe", "miou"];
+    let help_kw = [
+        "aide", "help", "comment", "service", "agent", "équipe", "miou",
+    ];
     if help_kw.iter().any(|k| lower.contains(k)) {
         return QuestionCategory::HelpRequest;
     }

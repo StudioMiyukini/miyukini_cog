@@ -1,0 +1,19 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "lise.ui_component":  [
+                                               "cert.lise.wcag",
+                                               "cert.lise.iso_9241"
+                                           ],
+                     "lise.accessibility":  [
+                                                "cert.lise.wcag"
+                                            ],
+                     "lise.ergonomie":  [
+                                            "cert.lise.iso_9241"
+                                        ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

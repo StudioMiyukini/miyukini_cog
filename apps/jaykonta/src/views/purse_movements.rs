@@ -3,10 +3,10 @@
 //! Composants : FilterBar, MouvementsTable (paginee), TotauxSummary, Pagination.
 //! Contrats : CK-TK-11.
 
+use super::components::{ActionButton, MovementRow};
+use super::{JayKontaState, PurseSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{JayKontaState, PurseSection};
-use super::components::{MovementRow, ActionButton};
 
 #[component]
 pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
@@ -25,11 +25,12 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
     let filtered: Vec<_> = all_movements
         .iter()
         .filter(|m| {
-            m.scope == "purse" && match filter_type.read().as_str() {
-                "expense" => m.amount < 0.0,
-                "income" => m.amount > 0.0,
-                _ => true,
-            }
+            m.scope == "purse"
+                && match filter_type.read().as_str() {
+                    "expense" => m.amount < 0.0,
+                    "income" => m.amount > 0.0,
+                    _ => true,
+                }
         })
         .collect();
 
@@ -45,8 +46,16 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
         .collect();
 
     // Totaux
-    let total_income: f64 = filtered.iter().filter(|m| m.amount > 0.0).map(|m| m.amount).sum();
-    let total_expense: f64 = filtered.iter().filter(|m| m.amount < 0.0).map(|m| m.amount.abs()).sum();
+    let total_income: f64 = filtered
+        .iter()
+        .filter(|m| m.amount > 0.0)
+        .map(|m| m.amount)
+        .sum();
+    let total_expense: f64 = filtered
+        .iter()
+        .filter(|m| m.amount < 0.0)
+        .map(|m| m.amount.abs())
+        .sum();
     let net = total_income - total_expense;
 
     rsx! {
@@ -211,9 +220,17 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
 }
 
 #[component]
-fn FilterButton(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
+fn FilterButton(
+    label: &'static str,
+    is_active: bool,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
     let c = use_palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_secondary };
+    let bg = if is_active {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
     let color = if is_active { "white" } else { c.text_secondary };
 
     rsx! {

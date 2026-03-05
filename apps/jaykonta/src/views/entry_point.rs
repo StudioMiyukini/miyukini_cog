@@ -1,8 +1,8 @@
 //! Ecran de selection Purse / Account.
 
+use super::{JayKontaSpace, JayKontaState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{JayKontaSpace, JayKontaState};
 
 #[component]
 pub fn EntryPointSelector(state: Signal<JayKontaState>) -> Element {

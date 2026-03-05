@@ -67,11 +67,8 @@ async fn main() {
         .expect("reqwest client");
 
     let upstream_backend = UpstreamBackend::new(http_client.clone(), cfg.upstream_url.clone());
-    let inference_router = InferenceRouter::new(
-        native_backend,
-        upstream_backend,
-        cfg.native.prefer_native,
-    );
+    let inference_router =
+        InferenceRouter::new(native_backend, upstream_backend, cfg.native.prefer_native);
 
     // Auto-load : charger le meilleur modèle GGUF disponible
     if cfg.native.auto_load {
@@ -99,14 +96,23 @@ async fn main() {
     let native_model = inference_router.native.loaded_model_name();
 
     tracing::info!("╔══════════════════════════════════════════════════╗");
-    tracing::info!("║     Miyukini AI Studio v{}                ║", env!("CARGO_PKG_VERSION"));
+    tracing::info!(
+        "║     Miyukini AI Studio v{}                ║",
+        env!("CARGO_PKG_VERSION")
+    );
     tracing::info!("╠══════════════════════════════════════════════════╣");
     tracing::info!("║  Listen   : {:<37}║", cfg.bind_addr);
-    tracing::info!("║  Upstream : {:<37}║", format!("{} (backup)", cfg.upstream_url));
+    tracing::info!(
+        "║  Upstream : {:<37}║",
+        format!("{} (backup)", cfg.upstream_url)
+    );
     if let Some(ref name) = native_model {
         tracing::info!("║  Natif    : {:<37}║", name);
     } else {
-        tracing::info!("║  Natif    : {:<37}║", format!("{local_model_count} GGUF disponibles (aucun chargé)"));
+        tracing::info!(
+            "║  Natif    : {:<37}║",
+            format!("{local_model_count} GGUF disponibles (aucun chargé)")
+        );
     }
     if cfg.auth_token.is_some() {
         tracing::info!("║  Auth     : {:<37}║", "Bearer token activé");
@@ -135,11 +141,18 @@ async fn main() {
     );
     tracing::info!(
         "║  Skills   : {:<37}║",
-        format!("{} skills disponibles", skills::SkillRegistry::list_skills().len())
+        format!(
+            "{} skills disponibles",
+            skills::SkillRegistry::list_skills().len()
+        )
     );
     tracing::info!(
         "║  Mode     : {:<37}║",
-        if native_model.is_some() { "Natif (GGUF)" } else { "Upstream (backup)" }
+        if native_model.is_some() {
+            "Natif (GGUF)"
+        } else {
+            "Upstream (backup)"
+        }
     );
     tracing::info!("╠══════════════════════════════════════════════════╣");
     let sec = &cfg.security;

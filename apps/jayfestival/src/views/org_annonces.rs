@@ -1,8 +1,8 @@
 //! ORG-E23 — Annonces et notifications aux exposants/visiteurs.
 
+use super::components::{ActionButton, Badge, EmptyState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{ActionButton, Badge, EmptyState};
 
 /// Gestion des annonces d'une edition.
 #[component]
@@ -13,9 +13,24 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
 
     // Données de démonstration (à remplacer par DB)
     let annonces = vec![
-        ("Important : Changement d'horaire", "Exposants", "2026-01-15", "publie"),
-        ("Rappel : Deadline candidatures", "Tous", "2026-01-10", "publie"),
-        ("Preparation evenement", "Exposants", "2025-12-20", "brouillon"),
+        (
+            "Important : Changement d'horaire",
+            "Exposants",
+            "2026-01-15",
+            "publie",
+        ),
+        (
+            "Rappel : Deadline candidatures",
+            "Tous",
+            "2026-01-10",
+            "publie",
+        ),
+        (
+            "Preparation evenement",
+            "Exposants",
+            "2025-12-20",
+            "brouillon",
+        ),
     ];
 
     rsx! {

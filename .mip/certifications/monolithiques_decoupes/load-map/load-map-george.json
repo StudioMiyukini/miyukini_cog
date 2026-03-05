@@ -1,0 +1,29 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "george.audit_conformite":  [
+                                                     "cert.george.iso_19011",
+                                                     "cert.george.cisa"
+                                                 ],
+                     "george.rgpd":  [
+                                         "cert.george.rgpd"
+                                     ],
+                     "george.audit_si":  [
+                                             "cert.george.cisa"
+                                         ],
+                     "george.audit_cisa_control":  [
+                                                       "cert.george.cisa"
+                                                   ],
+                     "george.audit_rgpd_control":  [
+                                                       "cert.george.rgpd"
+                                                   ],
+                     "george.audit_critical_cyber":  [
+                                                         "cert.george.cisa",
+                                                         "cert.george.rgpd"
+                                                     ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

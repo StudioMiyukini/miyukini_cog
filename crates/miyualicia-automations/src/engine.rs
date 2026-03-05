@@ -180,11 +180,7 @@ impl AutomationEngine {
             let automations = self.inner.automations.read().await;
             automations
                 .values()
-                .flat_map(|a| {
-                    a.conditions
-                        .iter()
-                        .filter_map(|c| c.device_id)
-                })
+                .flat_map(|a| a.conditions.iter().filter_map(|c| c.device_id))
                 .collect()
         };
 
@@ -227,10 +223,7 @@ impl AutomationEngine {
     }
 
     /// Evalue et execute toutes les automatisations correspondant a une routine vocale.
-    pub async fn handle_voice_routine(
-        &self,
-        routine_name: &str,
-    ) -> Result<(), AutomationError> {
+    pub async fn handle_voice_routine(&self, routine_name: &str) -> Result<(), AutomationError> {
         let candidates: Vec<Automation> = {
             let automations = self.inner.automations.read().await;
             automations
@@ -334,10 +327,7 @@ mod tests {
     }
 
     impl AliciaCommandDispatcher for MockDispatcher {
-        fn dispatch_command(
-            &self,
-            command: DeviceCommand,
-        ) -> Result<(), AutomationError> {
+        fn dispatch_command(&self, command: DeviceCommand) -> Result<(), AutomationError> {
             self.commands.lock().expect("lock").push(command);
             Ok(())
         }
@@ -372,11 +362,7 @@ mod tests {
         }
     }
 
-    fn make_automation_sensor(
-        name: &str,
-        device_id: Uuid,
-        action_device_id: Uuid,
-    ) -> Automation {
+    fn make_automation_sensor(name: &str, device_id: Uuid, action_device_id: Uuid) -> Automation {
         Automation {
             id: Uuid::new_v4(),
             name: name.to_string(),

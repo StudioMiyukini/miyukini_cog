@@ -9,23 +9,22 @@ use axum::{
     extract::{Path, Query, State},
     http::{header, status::StatusCode, HeaderValue},
     middleware,
-    routing::{delete, get, post, put},
-    Router,
     response::{Html, IntoResponse, Json, Redirect, Response},
-    Json as JsonExtract,
+    routing::{delete, get, post, put},
+    Json as JsonExtract, Router,
 };
 use miyukini_admin::admin_cell::{AdminCell, ModuleInfo, ModuleType};
-use miyukini_admin::backup_service::{BackupServiceImpl, BackupService};
+use miyukini_admin::backup_service::{BackupService, BackupServiceImpl};
 use miyukini_admin::config::BackendConfig;
 use miyukini_admin::crud_state::CrudState;
-use miyukini_admin::migration_service::{MigrationServiceImpl, MigrationService};
+use miyukini_admin::migration_service::{MigrationService, MigrationServiceImpl};
 use miyukini_admin::models::{AdminRole, EnvironmentState};
 use miyukini_admin::module_lifecycle_service::{AddModuleParams, ModuleLifecycleService};
 use miyukini_admin::module_testing_service::{
     ModuleTestingService, StubAdminCellReader, StubIntegrityVerifier, StubModuleDiscovery,
 };
 use miyukini_admin::services::{
-    AutoRecoveryService, AuthService, DestructionAndReinitService, EnvironmentStateService,
+    AuthService, AutoRecoveryService, DestructionAndReinitService, EnvironmentStateService,
     PermissionService, PreDestructionBackupService,
 };
 use miyukini_kernel::EnvConfig;
@@ -65,7 +64,8 @@ struct AppState {
     permission_svc: Arc<PermissionService>,
     /// @id: miyukiniadmin_app_state_module_testing_svc
     /// Service de tests des modules (découverte, cellule Admin, tests embarqués, intégrité TAMR).
-    module_testing_svc: Arc<ModuleTestingService<StubModuleDiscovery, StubAdminCellReader, StubIntegrityVerifier>>,
+    module_testing_svc:
+        Arc<ModuleTestingService<StubModuleDiscovery, StubAdminCellReader, StubIntegrityVerifier>>,
     /// @id: miyukiniadmin_app_state_module_lifecycle_svc
     /// Service de cycle de vie des modules (add, lock, unlock, delete).
     module_lifecycle_svc: Arc<ModuleLifecycleService>,
@@ -88,7 +88,8 @@ fn session_id_from_headers(headers: &axum::http::HeaderMap) -> Option<String> {
         .filter_map(|s| {
             let s = s.trim();
             let prefix = format!("{SESSION_COOKIE_NAME}=");
-            s.starts_with(prefix.as_str()).then(|| s[prefix.len()..].trim().to_string())
+            s.starts_with(prefix.as_str())
+                .then(|| s[prefix.len()..].trim().to_string())
         })
         .next()
 }
@@ -154,10 +155,8 @@ async fn main() {
         PreDestructionBackupService::new(Arc::clone(&backups), backups_dir);
     let destruction_reinit =
         DestructionAndReinitService::new(data_dir.clone(), pre_destruction_backup);
-    let _auto_recovery = AutoRecoveryService::new(
-        Arc::clone(&env_state_svc),
-        destruction_reinit.clone(),
-    );
+    let _auto_recovery =
+        AutoRecoveryService::new(Arc::clone(&env_state_svc), destruction_reinit.clone());
 
     let module_discovery = Arc::new(StubModuleDiscovery::new());
     let admin_cell_reader = Arc::new(StubAdminCellReader::new());
@@ -179,7 +178,8 @@ async fn main() {
                     let count = registry.entries.len();
                     for entry in registry.entries {
                         module_discovery.register_module(entry.module_info.clone());
-                        admin_cell_reader.register_cell(entry.module_info.id.clone(), entry.admin_cell);
+                        admin_cell_reader
+                            .register_cell(entry.module_info.id.clone(), entry.admin_cell);
                     }
                     eprintln!("MiyukiniAdmin: {count} toolkits chargés depuis mscm_index/toolkit_registry.json");
                 }
@@ -220,11 +220,9 @@ async fn main() {
 
     let app = match env_state {
         EnvironmentState::Vierge => router_setup_only(state_for_router, ui_path),
-        EnvironmentState::Initialise => router_full(state_for_router.clone(), ui_path)
-            .layer(middleware::from_fn_with_state(
-                state_for_router,
-                require_session_layer,
-            )),
+        EnvironmentState::Initialise => router_full(state_for_router.clone(), ui_path).layer(
+            middleware::from_fn_with_state(state_for_router, require_session_layer),
+        ),
         EnvironmentState::Compromis => router_compromised_only(state_for_router, ui_path),
     }
     .layer(cors);
@@ -235,7 +233,10 @@ async fn main() {
         "MiyukiniAdmin [état: {}] sur {}://{}:{}",
         env_state, scheme, config.host, config.port
     );
-    println!("Ouvrez {}://localhost:{}/ dans votre navigateur.", scheme, config.port);
+    println!(
+        "Ouvrez {}://localhost:{}/ dans votre navigateur.",
+        scheme, config.port
+    );
     if config.use_https {
         println!("Note: HTTPS configuré — en production, utilisez un reverse proxy (nginx, Caddy) avec TLS devant MiyukiniAdmin.");
     }
@@ -270,12 +271,23 @@ fn router_full(state: Arc<AppState>, ui_path: PathBuf) -> Router {
         .route("/api/auth/login", post(api_auth_login))
         .route("/api/auth/logout", post(api_auth_logout))
         .route("/api/tables", get(api_tables_list))
-        .route("/api/tables/:name/rows", get(api_table_rows).post(api_table_create_row))
-        .route("/api/tables/:name/rows/:id", get(api_table_get_row).put(api_table_update_row).delete(api_table_delete_row))
+        .route(
+            "/api/tables/:name/rows",
+            get(api_table_rows).post(api_table_create_row),
+        )
+        .route(
+            "/api/tables/:name/rows/:id",
+            get(api_table_get_row)
+                .put(api_table_update_row)
+                .delete(api_table_delete_row),
+        )
         .route("/api/migrations", get(api_migrations_list))
         .route("/api/migrations/history", get(api_migrations_history))
         .route("/api/migrations/apply", post(api_migrations_apply))
-        .route("/api/backups", get(api_backups_list).post(api_backups_create))
+        .route(
+            "/api/backups",
+            get(api_backups_list).post(api_backups_create),
+        )
         .route("/api/backups/restore", post(api_backups_restore))
         .route("/api/tests/flow", get(api_tests_flow))
         .route("/api/modules", get(api_modules_list).post(api_modules_add))
@@ -370,7 +382,11 @@ async fn api_setup_create_admin(
             "message": "Le mot de passe doit contenir au moins 12 caractères."
         }));
     }
-    match state.auth_svc.create_account(username, &body.password, AdminRole::Admin).await {
+    match state
+        .auth_svc
+        .create_account(username, &body.password, AdminRole::Admin)
+        .await
+    {
         Ok(_) => {}
         Err(e) => {
             let message = match e {
@@ -396,7 +412,11 @@ async fn api_setup_create_admin(
             "message": "Profil admin créé mais échec de la génération EIP. Consultez les logs."
         }));
     }
-    if let Err(_) = state.environment_state_svc.write_bootstrap_schema_initial().await {
+    if let Err(_) = state
+        .environment_state_svc
+        .write_bootstrap_schema_initial()
+        .await
+    {
         return Json(serde_json::json!({
             "success": false,
             "message": "Profil admin et EIP créés mais échec du schéma bootstrap. Consultez les logs."
@@ -432,8 +452,7 @@ async fn api_auth_login(
             let mut res = json.into_response();
             let cookie_value = format!(
                 "{}={}; HttpOnly; Path=/; SameSite=Lax",
-                SESSION_COOKIE_NAME,
-                session.session_id
+                SESSION_COOKIE_NAME, session.session_id
             );
             if let Ok(hv) = HeaderValue::try_from(cookie_value) {
                 res.headers_mut().append(header::SET_COOKIE, hv);
@@ -444,7 +463,7 @@ async fn api_auth_login(
             "success": false,
             "message": "Identifiants invalides."
         }))
-            .into_response(),
+        .into_response(),
     }
 }
 
@@ -457,7 +476,8 @@ async fn api_auth_logout(
     if let Some(sid) = session_id_from_headers(req.headers()) {
         state.auth_svc.logout(&sid).await;
     }
-    let mut res = Json(serde_json::json!({ "success": true, "message": "Déconnecté." })).into_response();
+    let mut res =
+        Json(serde_json::json!({ "success": true, "message": "Déconnecté." })).into_response();
     let clear_cookie = format!("{SESSION_COOKIE_NAME}=; Max-Age=0; Path=/; SameSite=Lax");
     if let Ok(hv) = HeaderValue::try_from(clear_cookie) {
         res.headers_mut().append(header::SET_COOKIE, hv);
@@ -471,7 +491,9 @@ async fn api_auth_logout(
 /// @human: Sert la page d'accueil MiyukiniAdmin (protégée par session).
 /// @do: serve_dashboard_html
 async fn serve_dashboard() -> impl IntoResponse {
-    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("ui").join("index.html");
+    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("ui")
+        .join("index.html");
     match tokio::fs::read_to_string(path).await {
         Ok(html) => Html(html),
         Err(_) => Html(DASHBOARD_FALLBACK_HTML.to_string()),
@@ -522,7 +544,7 @@ async fn api_status(State(state): State<Arc<AppState>>) -> Json<serde_json::Valu
                 "api_modules_unlock": "/api/modules/:id/unlock",
                 "api_modules_delete": "/api/modules/:id"
             }),
-            ""
+            "",
         )
     };
     let mut payload = serde_json::json!({
@@ -580,7 +602,11 @@ async fn api_table_rows(
     let start = ((page - 1) * per_page) as usize;
     let end = (start + per_page as usize).min(total);
     let slice: Vec<serde_json::Value> = rows[start..end].to_vec();
-    let total_pages = if per_page as usize == 0 { 1 } else { total.div_ceil(per_page as usize) };
+    let total_pages = if per_page as usize == 0 {
+        1
+    } else {
+        total.div_ceil(per_page as usize)
+    };
     Json(serde_json::json!({
         "table": name,
         "rows": slice,
@@ -630,7 +656,10 @@ async fn api_table_get_row(
     if idx == 0 || idx > rows.len() {
         return Json(serde_json::json!({ "error": "row not found", "id": id }));
     }
-    let row = rows.get(idx - 1).cloned().unwrap_or(serde_json::Value::Null);
+    let row = rows
+        .get(idx - 1)
+        .cloned()
+        .unwrap_or(serde_json::Value::Null);
     Json(serde_json::json!({ "table": name, "id": id, "row": row }))
 }
 
@@ -694,9 +723,7 @@ async fn api_table_delete_row(
 /// @human: Liste des migrations (appliquées et en attente).
 /// @do: api_migrations_list
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_migrations_list(
-    State(state): State<Arc<AppState>>,
-) -> Json<serde_json::Value> {
+async fn api_migrations_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let applied = state.migrations.list_applied();
     let pending = state.migrations.list_pending();
     Json(serde_json::json!({
@@ -711,9 +738,7 @@ async fn api_migrations_list(
 /// @human: Historique complet des migrations.
 /// @do: api_migrations_history
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_migrations_history(
-    State(state): State<Arc<AppState>>,
-) -> Json<serde_json::Value> {
+async fn api_migrations_history(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let history = state.migrations.history();
     Json(serde_json::json!({
         "history": serde_json::to_value(&history).unwrap_or(serde_json::Value::Array(vec![]))
@@ -741,9 +766,7 @@ async fn api_migrations_apply(State(state): State<Arc<AppState>>) -> Json<serde_
 /// @human: Liste des sauvegardes.
 /// @do: api_backups_list
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_backups_list(
-    State(state): State<Arc<AppState>>,
-) -> Json<serde_json::Value> {
+async fn api_backups_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let backups = state.backups.list();
     Json(serde_json::json!({
         "backups": serde_json::to_value(&backups).unwrap_or(serde_json::Value::Array(vec![]))
@@ -756,9 +779,7 @@ async fn api_backups_list(
 /// @human: Crée une sauvegarde (stub ; KindMother en production).
 /// @do: api_backups_create
 /// @depends: miyukiniadmin_backend_app_state
-async fn api_backups_create(
-    State(state): State<Arc<AppState>>,
-) -> Json<serde_json::Value> {
+async fn api_backups_create(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let result = state.backups.create();
     Json(serde_json::json!({
         "success": result.success,
@@ -788,10 +809,9 @@ async fn api_backups_restore(
     State(state): State<Arc<AppState>>,
     JsonExtract(body): JsonExtract<RestoreBackupBody>,
 ) -> Json<serde_json::Value> {
-    let result = state.backups.restore(
-        &body.backup_id,
-        body.justification.as_deref(),
-    );
+    let result = state
+        .backups
+        .restore(&body.backup_id, body.justification.as_deref());
     Json(serde_json::json!({
         "success": result.success,
         "message": result.message
@@ -799,9 +819,7 @@ async fn api_backups_restore(
 }
 
 /// GET /api/modules : liste des modules (découverte via Master Butler / BondingBrother).
-async fn api_modules_list(
-    State(state): State<Arc<AppState>>,
-) -> Json<serde_json::Value> {
+async fn api_modules_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let modules = state.module_testing_svc.discover_modules();
     Json(serde_json::json!({
         "modules": serde_json::to_value(&modules).unwrap_or(serde_json::Value::Array(vec![]))
@@ -994,7 +1012,10 @@ async fn api_tests_flow() -> Json<serde_json::Value> {
         "passed": true,
         "detail": "CRUD tables disponible"
     }));
-    let passed = results.iter().filter(|r| r["passed"].as_bool().unwrap_or(false)).count();
+    let passed = results
+        .iter()
+        .filter(|r| r["passed"].as_bool().unwrap_or(false))
+        .count();
     let total = results.len();
     Json(serde_json::json!({
         "status": if passed == total { "ok" } else { "partial" },
@@ -1010,7 +1031,9 @@ async fn api_tests_flow() -> Json<serde_json::Value> {
 /// @human: Sert la page Database (Daynight) depuis ui/database.html.
 /// @do: serve_database_html
 async fn serve_database() -> impl IntoResponse {
-    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("ui").join("database.html");
+    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("ui")
+        .join("database.html");
     match tokio::fs::read_to_string(path).await {
         Ok(html) => Html(html),
         Err(_) => Html(DATABASE_FALLBACK_HTML.to_string()),
@@ -1023,7 +1046,9 @@ async fn serve_database() -> impl IntoResponse {
 /// @human: Sert la page Tests (Daynight) depuis ui/tests.html.
 /// @do: serve_tests_html
 async fn serve_tests() -> impl IntoResponse {
-    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("ui").join("tests.html");
+    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("ui")
+        .join("tests.html");
     match tokio::fs::read_to_string(path).await {
         Ok(html) => Html(html),
         Err(_) => Html(TESTS_FALLBACK_HTML.to_string()),

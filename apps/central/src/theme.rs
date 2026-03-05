@@ -8,7 +8,7 @@
 
 // Types principaux
 #[allow(unused_imports)]
-pub use miyukini_service_ui::theme::{Theme, ThemePalette, spacing};
+pub use miyukini_service_ui::theme::{spacing, Theme, ThemePalette};
 
 // --- Module styles : re-export complet + ajouts Central-specifiques ---
 
@@ -33,8 +33,8 @@ pub mod styles {
 
 /// Retrocompatibilite : acces aux couleurs du theme par defaut.
 pub mod colors {
-    pub use super::ThemePalette;
     use super::Theme;
+    pub use super::ThemePalette;
 
     /// Couleurs du theme Gaming (par defaut).
     /// Pour un theme dynamique, utiliser `state.read().current_theme.palette()`.

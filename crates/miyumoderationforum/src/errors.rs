@@ -8,7 +8,9 @@ pub enum MiyumoderationforumError {
 impl std::fmt::Display for MiyumoderationforumError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MiyumoderationforumError::NoMandate => write!(f, "Execution refused: no governed mandate"),
+            MiyumoderationforumError::NoMandate => {
+                write!(f, "Execution refused: no governed mandate")
+            }
             MiyumoderationforumError::Unimplemented => write!(f, "Tool not yet implemented"),
             MiyumoderationforumError::InvalidInput(ref m) => write!(f, "{m}"),
         }

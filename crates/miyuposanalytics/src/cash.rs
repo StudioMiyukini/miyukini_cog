@@ -9,7 +9,10 @@ use crate::errors::MiyuposanalyticsError;
 /// @human: Retourne l'écart caisse pour un shift.
 /// @do: cash_discrepancy_under_governance
 /// tool.analytics.cash.discrepancy
-pub fn discrepancy(ctx: &GovernedContext, _shift_id: &str) -> Result<CashDiscrepancyResult, MiyuposanalyticsError> {
+pub fn discrepancy(
+    ctx: &GovernedContext,
+    _shift_id: &str,
+) -> Result<CashDiscrepancyResult, MiyuposanalyticsError> {
     if !ctx.has_mandate() {
         return Err(MiyuposanalyticsError::NoMandate);
     }

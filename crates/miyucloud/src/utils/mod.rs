@@ -5,6 +5,6 @@
 //! @role: utility
 //! @layer: infra
 
+pub mod base64;
 pub mod constant_time;
 pub mod sanitize;
-pub mod base64;

@@ -17,10 +17,10 @@
 pub mod aggregation;
 /// Modèle de domaine : types métier JayKoa.
 pub mod data;
-/// Adaptateurs inter-Services (lecture réfléchie JayFestival, JayRDV).
-pub mod services;
 /// Module d'export (iCal, PDF futur).
 pub mod export;
+/// Adaptateurs inter-Services (lecture réfléchie JayFestival, JayRDV).
+pub mod services;
 /// Runner des tests unitaires — exécutable depuis MiyukiniAdmin.
 pub mod test_runner;
 

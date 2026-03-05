@@ -315,40 +315,39 @@ pub fn animation_frame_index(elapsed_s: f32, frame_count: usize, frame_duration_
 // CHARGEMENT DES SPRITES EN BASE64 POUR DIOXUS DESKTOP
 // ═══════════════════════════════════════════════════════════════════════
 
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use std::collections::HashMap;
 use std::sync::{LazyLock, RwLock};
-use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
 /// Cache global des sprites encodés en base64.
-static SPRITE_CACHE: LazyLock<RwLock<HashMap<String, String>>> = LazyLock::new(|| {
-    RwLock::new(HashMap::new())
-});
+static SPRITE_CACHE: LazyLock<RwLock<HashMap<String, String>>> =
+    LazyLock::new(|| RwLock::new(HashMap::new()));
 
 /// Charge un sprite depuis le disque et retourne sa data URL base64.
 /// Le résultat est mis en cache pour éviter de recharger le même fichier.
 pub fn load_sprite_as_data_url(base_path: &Path, sprite_config: &SpriteConfig) -> Option<String> {
     let full_path = base_path.join(sprite_full_path(sprite_config.path));
     let cache_key = full_path.to_string_lossy().to_string();
-    
+
     // Vérifier le cache d'abord
     if let Ok(cache) = SPRITE_CACHE.read() {
         if let Some(data_url) = cache.get(&cache_key) {
             return Some(data_url.clone());
         }
     }
-    
+
     // Charger le fichier
     let data = std::fs::read(&full_path).ok()?;
-    
+
     // Encoder en base64
     let b64 = BASE64.encode(&data);
     let data_url = format!("data:image/png;base64,{}", b64);
-    
+
     // Mettre en cache
     if let Ok(mut cache) = SPRITE_CACHE.write() {
         cache.insert(cache_key, data_url.clone());
     }
-    
+
     Some(data_url)
 }
 
@@ -377,7 +376,7 @@ pub fn preload_all_sprites(base_path: &Path) {
         &enemy_boss_sprites::HURT,
         &enemy_boss_sprites::DEATH,
     ];
-    
+
     for sprite in sprites_to_load {
         if let Some(_) = load_sprite_as_data_url(base_path, sprite) {
             tracing::debug!("Sprite chargé: {}", sprite.path);
@@ -400,7 +399,7 @@ pub fn sprite_css_style(
     let bg_pos = sprite_config.background_position_for_frame(frame_index);
     let bg_size = sprite_config.background_size();
     let transform = if flip_h { "scaleX(-1)" } else { "" };
-    
+
     Some(format!(
         "background-image:url('{data_url}');background-position:{bg_pos};background-size:{bg_size};background-repeat:no-repeat;transform:{transform};image-rendering:pixelated;",
     ))

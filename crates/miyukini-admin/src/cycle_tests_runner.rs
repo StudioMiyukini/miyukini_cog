@@ -70,7 +70,7 @@ pub trait MiyukiniSQLtestBackend: Send + Sync {
 
 /// Exécute le test MiyukiniSQLtest via le backend fourni.
 /// Si aucun backend n'est fourni, retourne un résultat SKIP/Abort avec message.
-#[must_use] 
+#[must_use]
 pub fn run_miyukinisqltest(backend: Option<&dyn MiyukiniSQLtestBackend>) -> MiyukiniSQLtestResult {
     let timestamp = chrono::Utc::now().to_rfc3339();
     match backend {

@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosPayment ; expose les modules tools.
 /// @do: expose_miyupospayment_toolkit
-
 pub mod admin_cell;
 pub mod cash;
 pub mod check;
@@ -27,7 +26,9 @@ pub use check::record as check_record;
 pub use context::GovernedContext;
 pub use errors::MiyupospaymentError;
 pub use split::split as payment_split;
-pub use terminal::{authorize as terminal_authorize, capture as terminal_capture, TerminalAuthResult};
+pub use terminal::{
+    authorize as terminal_authorize, capture as terminal_capture, TerminalAuthResult,
+};
 
 #[cfg(test)]
 mod tests {

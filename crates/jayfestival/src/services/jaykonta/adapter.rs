@@ -14,9 +14,9 @@
 //!
 //! Décision P0 : Miyuinvoice en façade, JayKonta en backend ; alpha = appels Miyuinvoice.
 
-use miyuinvoice::{quote, invoice};
 use miyuinvoice::context::GovernedContext;
 use miyuinvoice::errors::MiyuinvoiceError;
+use miyuinvoice::{invoice, quote};
 use std::fmt;
 
 /// Contexte gouverné alpha pour les appels Miyuinvoice depuis JayFestival.
@@ -52,9 +52,7 @@ impl From<MiyuinvoiceError> for JayKontaError {
 /// @id: jaykonta_create_quote
 /// @do: crée un devis pour un exposant (façade Miyuinvoice → JayKonta)
 /// @layer: domain
-pub fn jaykonta_create_quote(
-    payload: &str,
-) -> Result<String, JayKontaError> {
+pub fn jaykonta_create_quote(payload: &str) -> Result<String, JayKontaError> {
     let ctx = jayfestival_invoice_ctx();
     quote::create(&ctx, payload).map_err(JayKontaError::Invoice)
 }

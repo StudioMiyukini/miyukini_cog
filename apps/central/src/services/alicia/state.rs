@@ -21,7 +21,11 @@ use miyualicia_wakeword::{RustpotterDetector, WakeWordConfig, WakeWordDetector};
 /// Pieces predefinies supportees par Alicia Home Assistante.
 const ROOMS: &[(&str, &str, &str)] = &[
     ("chambre-theresa", "Chambre Theresa", "\u{1F6CF}\u{FE0F}"),
-    ("chambre-parentale", "Chambre parentale", "\u{1F6CF}\u{FE0F}"),
+    (
+        "chambre-parentale",
+        "Chambre parentale",
+        "\u{1F6CF}\u{FE0F}",
+    ),
     ("chambre-eleanore", "Chambre Eleanore", "\u{1F6CF}\u{FE0F}"),
     ("salon", "Salon", "\u{1F6CB}\u{FE0F}"),
 ];
@@ -196,8 +200,8 @@ impl AliciaService {
         }
 
         // Demarrer la capture audio
-        let (capture, handle) = AudioCapture::start(config)
-            .map_err(|e| format!("Erreur capture audio: {e}"))?;
+        let (capture, handle) =
+            AudioCapture::start(config).map_err(|e| format!("Erreur capture audio: {e}"))?;
 
         // Creer le VAD
         let vad = VoiceActivityDetector::new();
@@ -379,9 +383,7 @@ fn processing_loop(
             let rms = vad.last_rms();
 
             // Wake word (sur tous les samples, rustpotter gere son buffering interne)
-            let detection = detector
-                .as_mut()
-                .and_then(|d| d.process_samples(chunk));
+            let detection = detector.as_mut().and_then(|d| d.process_samples(chunk));
 
             // Mettre a jour l'etat partage
             if let Ok(mut snap) = state.write() {
@@ -411,9 +413,7 @@ fn processing_loop(
                     }
 
                     // Transition VAD : log uniquement quand on entre en Speech
-                    if vad_state == VadState::Speech
-                        && !matches!(prev_vad, VadState::Speech)
-                    {
+                    if vad_state == VadState::Speech && !matches!(prev_vad, VadState::Speech) {
                         let now = chrono::Local::now();
                         log_entries.push(ActivityEntry {
                             time: now.format("%H:%M").to_string(),
@@ -434,8 +434,7 @@ fn processing_loop(
                         room.last_rms = rms;
 
                         if let Some(det) = detection {
-                            let detected_at =
-                                chrono::Local::now().format("%H:%M:%S").to_string();
+                            let detected_at = chrono::Local::now().format("%H:%M:%S").to_string();
                             room.last_detection = Some(DetectionSnapshot {
                                 keyword: det.keyword.clone(),
                                 confidence: det.confidence,

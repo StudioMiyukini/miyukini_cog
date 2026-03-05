@@ -12,8 +12,8 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::state::{CloudSection, FolderEntry, MiyuCloudState};
+use crate::state::use_app_state;
 
 /// Sidebar de navigation MiyuCloud.
 #[component]
@@ -37,32 +37,64 @@ pub fn CloudSidebar(state: Signal<MiyuCloudState>) -> Element {
     let trash_active = current_section == CloudSection::Trash;
     let settings_active = current_section == CloudSection::Settings;
 
-    let files_bg = if files_active { c.bg_hover } else { "transparent" };
-    let files_color = if files_active { c.text_white } else { c.text_secondary };
+    let files_bg = if files_active {
+        c.bg_hover
+    } else {
+        "transparent"
+    };
+    let files_color = if files_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let files_border = if files_active {
         format!("2px solid {}", c.accent_blue)
     } else {
         "2px solid transparent".to_string()
     };
 
-    let shares_bg = if shares_active { c.bg_hover } else { "transparent" };
-    let shares_color = if shares_active { c.text_white } else { c.text_secondary };
+    let shares_bg = if shares_active {
+        c.bg_hover
+    } else {
+        "transparent"
+    };
+    let shares_color = if shares_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let shares_border = if shares_active {
         format!("2px solid {}", c.accent_blue)
     } else {
         "2px solid transparent".to_string()
     };
 
-    let trash_bg = if trash_active { c.bg_hover } else { "transparent" };
-    let trash_color = if trash_active { c.text_white } else { c.text_secondary };
+    let trash_bg = if trash_active {
+        c.bg_hover
+    } else {
+        "transparent"
+    };
+    let trash_color = if trash_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let trash_border = if trash_active {
         format!("2px solid {}", c.accent_blue)
     } else {
         "2px solid transparent".to_string()
     };
 
-    let settings_bg = if settings_active { c.bg_hover } else { "transparent" };
-    let settings_color = if settings_active { c.text_white } else { c.text_secondary };
+    let settings_bg = if settings_active {
+        c.bg_hover
+    } else {
+        "transparent"
+    };
+    let settings_color = if settings_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let settings_border = if settings_active {
         format!("2px solid {}", c.accent_blue)
     } else {
@@ -200,11 +232,23 @@ fn FolderTreeItem(
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
-    let bg = if is_selected { c.bg_hover } else { "transparent" };
-    let color = if is_selected { c.text_white } else { c.text_secondary };
+    let bg = if is_selected {
+        c.bg_hover
+    } else {
+        "transparent"
+    };
+    let color = if is_selected {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let indent = depth * 16 + 8;
     let chevron = if has_children {
-        if is_expanded { "\u{25BE}" } else { "\u{25B8}" }
+        if is_expanded {
+            "\u{25BE}"
+        } else {
+            "\u{25B8}"
+        }
     } else {
         " "
     };

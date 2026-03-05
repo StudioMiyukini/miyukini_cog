@@ -22,7 +22,9 @@ pub use admin_cell::{
     AliciaWakewordIntegrity, AliciaWakewordTestManifest, TOOLKIT_ID,
 };
 pub use context::GovernedContext;
-pub use detector::{RustpotterDetector, ScoreMode, WakeWordConfig, WakeWordDetection, WakeWordDetector};
+pub use detector::{
+    RustpotterDetector, ScoreMode, WakeWordConfig, WakeWordDetection, WakeWordDetector,
+};
 pub use errors::WakeWordError;
 pub use models::{ModelInfo, ModelType};
 

@@ -30,7 +30,9 @@ pub struct MiyutreasuryTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyutreasuryIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyutreasuryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.treasury.forecast";
 
-#[must_use] 
+#[must_use]
 pub fn miyutreasury_admin_cell(version: &str, fingerprint: &str) -> MiyutreasuryAdminCell {
     MiyutreasuryAdminCell {
         identification: MiyutreasuryIdentification {
@@ -63,7 +65,9 @@ pub fn miyutreasury_admin_cell(version: &str, fingerprint: &str) -> Miyutreasury
                 id: "Miyutreasury".to_string(),
                 name: "Test chemin complet Miyutreasury".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

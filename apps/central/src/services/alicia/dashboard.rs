@@ -7,8 +7,8 @@
 use dioxus::prelude::*;
 use miyualicia_capture::VadState;
 
+use super::state::{AliciaSnapshot, RoomLiveState};
 use crate::state::use_app_state;
-use super::state::{RoomLiveState, AliciaSnapshot};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Composant principal
@@ -254,12 +254,28 @@ fn AudioRoomCard(props: AudioRoomCardProps) -> Element {
     let c = app_state.read().current_theme.palette();
     let room = &props.room;
 
-    let mic_color = if room.mic_active { c.accent_green } else { c.text_muted };
-    let mic_label = if room.mic_active { "Micro actif" } else { "Micro inactif" };
+    let mic_color = if room.mic_active {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
+    let mic_label = if room.mic_active {
+        "Micro actif"
+    } else {
+        "Micro inactif"
+    };
 
     let vad_active = matches!(room.vad_state, VadState::Speech | VadState::MaybeEnd);
-    let vad_color = if vad_active { c.accent_orange } else { c.text_muted };
-    let vad_label = if vad_active { "Voix detectee" } else { "Silence" };
+    let vad_color = if vad_active {
+        c.accent_orange
+    } else {
+        c.text_muted
+    };
+    let vad_label = if vad_active {
+        "Voix detectee"
+    } else {
+        "Silence"
+    };
 
     let (wake_label, wake_color) = match &room.last_detection {
         Some(det) => {

@@ -11,10 +11,10 @@
 //! P1 : MiyuClock atteste l'horaire et la date IRL ; JayKoa organise les données et l'interface.
 
 use miyuclock::context::GovernedContext;
-use miyuclock::time;
 use miyuclock::errors::MiyuclockError;
-use std::time::SystemTime;
+use miyuclock::time;
 use std::fmt;
+use std::time::SystemTime;
 
 /// Contexte gouverné alpha pour les appels MiyuClock depuis JayFestival.
 fn jayfestival_clock_ctx() -> GovernedContext {

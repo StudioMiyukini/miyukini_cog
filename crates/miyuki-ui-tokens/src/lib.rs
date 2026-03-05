@@ -18,25 +18,25 @@
 //! let array = d2_gold.to_array(); // [200, 165, 70, 255]
 //! ```
 
+pub mod animation;
 pub mod color;
-pub mod spacing;
-pub mod typography;
+pub mod palette;
 pub mod radius;
 pub mod shadow;
-pub mod animation;
-pub mod z_index;
-pub mod palette;
+pub mod spacing;
 pub mod theme;
 pub mod themes;
+pub mod typography;
+pub mod z_index;
 
 // Re-exports principaux
+pub use animation::{Easing, TransitionDuration, TransitionScale};
 pub use color::Rgba;
-pub use spacing::SpacingScale;
-pub use typography::{FontFamily, FontWeight, FontSize, TypographyScale, TextStyle};
+pub use palette::Palette;
 pub use radius::RadiusScale;
 pub use shadow::{Shadow, ShadowScale};
-pub use animation::{TransitionDuration, Easing, TransitionScale};
-pub use z_index::ZIndexScale;
-pub use palette::Palette;
+pub use spacing::SpacingScale;
 pub use theme::UiTheme;
 pub use themes::{COG_THEME, D2_THEME};
+pub use typography::{FontFamily, FontSize, FontWeight, TextStyle, TypographyScale};
+pub use z_index::ZIndexScale;

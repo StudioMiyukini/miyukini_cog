@@ -27,15 +27,15 @@ use tracing::{debug, error, info, warn};
 
 use super::metrics::RelayMetrics;
 use super::permis_registry::PermisRegistry;
-use super::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
+use super::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
 use super::session::{PermisInfo, Session, SessionManager, SessionState};
 use super::tunnel::{TunnelManager, TunnelMessage};
 use super::verification::Verifier;
 use crate::config::OriginConfig;
 use crate::protocol::{
-    CoreKeyPayload, Frame, MessageType, RegisterErrPayload, RegisterErrorCode,
-    RegisterOkPayload, RegisterPayload, ServiceBlockPayload, VerifyPhase, VerifyResult,
-    VerifyResultPayload, ED25519_SIGNATURE_SIZE, SESSION_ID_SIZE,
+    CoreKeyPayload, Frame, MessageType, RegisterErrPayload, RegisterErrorCode, RegisterOkPayload,
+    RegisterPayload, ServiceBlockPayload, VerifyPhase, VerifyResult, VerifyResultPayload,
+    ED25519_SIGNATURE_SIZE, SESSION_ID_SIZE,
 };
 
 /// Pending HTTP injections (Phase 2 : Origin → COG via tunnel).
@@ -111,9 +111,9 @@ impl RelayServer {
         permis_registry: Option<Arc<PermisRegistry>>,
     ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
         // Créer le gestionnaire de sessions
-        let sessions = Arc::new(SessionManager::new(
-            i64::from(config.limits.tunnel_timeout_seconds),
-        ));
+        let sessions = Arc::new(SessionManager::new(i64::from(
+            config.limits.tunnel_timeout_seconds,
+        )));
 
         // Créer le vérificateur
         let verifier = Arc::new(Verifier::new(config.cores.keys_dir.clone()));
@@ -141,9 +141,9 @@ impl RelayServer {
         let rate_limiter = Arc::new(RateLimiter::new(rate_limiter_config));
 
         // Créer le gestionnaire de tunnels
-        let tunnel_manager = Arc::new(TunnelManager::new(
-            i64::from(config.limits.tunnel_timeout_seconds),
-        ));
+        let tunnel_manager = Arc::new(TunnelManager::new(i64::from(
+            config.limits.tunnel_timeout_seconds,
+        )));
 
         // Créer les métriques
         let metrics = Arc::new(RelayMetrics::new());
@@ -216,12 +216,7 @@ impl RelayServer {
             .map_err(|e| format!("Failed to send to session: {}", e))?;
 
         // Attendre la réponse (timeout 30s)
-        match tokio::time::timeout(
-            tokio::time::Duration::from_secs(30),
-            rx,
-        )
-        .await
-        {
+        match tokio::time::timeout(tokio::time::Duration::from_secs(30), rx).await {
             Ok(Ok(response)) => Ok(response),
             Ok(Err(_)) => Err("COG closed connection before response".into()),
             Err(_) => Err("HTTP tunnel response timeout (30s)".into()),
@@ -234,13 +229,11 @@ impl RelayServer {
     ) -> Result<TlsAcceptor, Box<dyn std::error::Error + Send + Sync>> {
         let cert_path = Path::new(&config.tls.cert_path);
         let cert_pem = tokio::fs::read(cert_path).await?;
-        let certs = rustls_pemfile::certs(&mut &*cert_pem)
-            .collect::<Result<Vec<_>, _>>()?;
+        let certs = rustls_pemfile::certs(&mut &*cert_pem).collect::<Result<Vec<_>, _>>()?;
 
         let key_path = Path::new(&config.tls.key_path);
         let key_pem = tokio::fs::read(key_path).await?;
-        let key = rustls_pemfile::private_key(&mut &*key_pem)?
-            .ok_or("No private key found")?;
+        let key = rustls_pemfile::private_key(&mut &*key_pem)?.ok_or("No private key found")?;
 
         let tls_versions: Vec<&'static rustls::SupportedProtocolVersion> =
             match config.tls.min_version.as_str() {
@@ -257,8 +250,8 @@ impl RelayServer {
 
     /// Démarre le serveur.
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let addr: SocketAddr = format!("{}:{}", self.config.relay.host, self.config.relay.port)
-            .parse()?;
+        let addr: SocketAddr =
+            format!("{}:{}", self.config.relay.host, self.config.relay.port).parse()?;
 
         let listener = TcpListener::bind(addr).await?;
         info!("🔐 Relay server listening on {}", addr);
@@ -339,7 +332,10 @@ impl RelayServer {
                 self.metrics.record_rejected_connection();
                 return;
             }
-            RateLimitResult::Blocked { reason, retry_after } => {
+            RateLimitResult::Blocked {
+                reason,
+                retry_after,
+            } => {
                 warn!(
                     "Connection from {} blocked: {} (retry after {}s)",
                     peer_addr, reason, retry_after
@@ -437,7 +433,9 @@ impl RelayServer {
 
         // Créer un channel pour les messages sortants du tunnel
         let (tunnel_tx, mut tunnel_rx) = mpsc::channel::<TunnelMessage>(100);
-        tunnel_manager.register_outbound(session_id, tunnel_tx).await;
+        tunnel_manager
+            .register_outbound(session_id, tunnel_tx)
+            .await;
 
         // Buffer de lecture
         let mut read_buf = BytesMut::with_capacity(8192);
@@ -616,7 +614,14 @@ impl RelayServer {
                 None
             }
             MessageType::Data => {
-                Self::handle_data(&frame.payload, session, tunnel_manager, http_injector, metrics).await
+                Self::handle_data(
+                    &frame.payload,
+                    session,
+                    tunnel_manager,
+                    http_injector,
+                    metrics,
+                )
+                .await
             }
             _ => {
                 warn!("Unhandled message type: {:?}", frame.header.message_type);
@@ -769,9 +774,7 @@ impl RelayServer {
         );
 
         if let Some(registry) = permis_registry {
-            registry
-                .register(permis_id.clone(), permis_expires)
-                .await;
+            registry.register(permis_id.clone(), permis_expires).await;
         }
 
         let response = RegisterOkPayload::build(
@@ -827,10 +830,7 @@ impl RelayServer {
         if passed_a && config.relay.strict_verification {
             let (environment_health, cog_id) = {
                 let s = session.read().await;
-                let health = s
-                    .environment_health
-                    .clone()
-                    .unwrap_or_else(Bytes::new);
+                let health = s.environment_health.clone().unwrap_or_else(Bytes::new);
                 let cog_id = s.cog_id.clone();
                 (health, cog_id)
             };
@@ -887,9 +887,7 @@ impl RelayServer {
             );
 
             if let Some(registry) = permis_registry {
-                registry
-                    .register(permis_id.clone(), permis_expires)
-                    .await;
+                registry.register(permis_id.clone(), permis_expires).await;
             }
 
             let response = RegisterOkPayload::build(
@@ -939,13 +937,9 @@ impl RelayServer {
         let passed = result == VerifyResult::Ok;
         metrics.record_phase_b(passed);
 
-        let response = VerifyResultPayload::new(
-            block.session_id,
-            VerifyPhase::PhaseB,
-            result,
-            Bytes::new(),
-        )
-        .with_service_id(block.service_id);
+        let response =
+            VerifyResultPayload::new(block.session_id, VerifyPhase::PhaseB, result, Bytes::new())
+                .with_service_id(block.service_id);
 
         if passed {
             let mut s = session.write().await;
@@ -956,10 +950,7 @@ impl RelayServer {
     }
 
     /// Traite un message HEARTBEAT.
-    async fn handle_heartbeat(
-        payload: &Bytes,
-        session: &Arc<RwLock<Session>>,
-    ) -> Option<Frame> {
+    async fn handle_heartbeat(payload: &Bytes, session: &Arc<RwLock<Session>>) -> Option<Frame> {
         {
             let mut s = session.write().await;
             s.touch();
@@ -1002,7 +993,10 @@ impl RelayServer {
 
         // Phase 2 : si c'est une réponse à une requête HTTP injectée par Origin, compléter le oneshot
         if http_injector.complete(session_id, payload.clone()).await {
-            debug!("HTTP response received via tunnel for session {}", hex::encode(&session_id[..8]));
+            debug!(
+                "HTTP response received via tunnel for session {}",
+                hex::encode(&session_id[..8])
+            );
             return None;
         }
 
@@ -1032,6 +1026,11 @@ mod tests {
     #[test]
     fn test_relay_metrics_created() {
         let metrics = RelayMetrics::new();
-        assert_eq!(metrics.active_connections.load(std::sync::atomic::Ordering::Relaxed), 0);
+        assert_eq!(
+            metrics
+                .active_connections
+                .load(std::sync::atomic::Ordering::Relaxed),
+            0
+        );
     }
 }

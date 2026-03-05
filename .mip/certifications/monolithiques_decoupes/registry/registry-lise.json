@@ -1,0 +1,16 @@
+﻿{
+    "certs":  {
+                  "cert.lise.iso_9241":  {
+                                             "folder":  "iso_9241",
+                                             "agent":  "lise",
+                                             "name":  "ISO 9241",
+                                             "tldr":  "Ergonomie IHM. 7 principes. ISO."
+                                         },
+                  "cert.lise.wcag":  {
+                                         "folder":  "wcag",
+                                         "agent":  "lise",
+                                         "name":  "WCAG 2.2",
+                                         "tldr":  "AccessibilitÃ©. 4 principes POUR, A/AA/AAA. W3C."
+                                     }
+              }
+}

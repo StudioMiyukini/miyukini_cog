@@ -1,0 +1,115 @@
+﻿{
+    "generated_at":  "2026-03-05",
+    "mode":  "assessment_sync",
+    "agents":  {
+                   "arianne":  {
+                                   "total":  3,
+                                   "ready_interne":  3,
+                                   "ready_externe":  0,
+                                   "formation_imported":  0,
+                                   "not_ready":  0
+                               },
+                   "denis":  {
+                                 "total":  3,
+                                 "ready_interne":  3,
+                                 "ready_externe":  0,
+                                 "formation_imported":  0,
+                                 "not_ready":  0
+                             },
+                   "fabrice":  {
+                                   "total":  2,
+                                   "ready_interne":  2,
+                                   "ready_externe":  0,
+                                   "formation_imported":  0,
+                                   "not_ready":  0
+                               },
+                   "francois":  {
+                                    "total":  2,
+                                    "ready_interne":  2,
+                                    "ready_externe":  0,
+                                    "formation_imported":  0,
+                                    "not_ready":  0
+                                },
+                   "george":  {
+                                  "total":  3,
+                                  "ready_interne":  3,
+                                  "ready_externe":  0,
+                                  "formation_imported":  0,
+                                  "not_ready":  0
+                              },
+                   "hugo":  {
+                                "total":  5,
+                                "ready_interne":  5,
+                                "ready_externe":  0,
+                                "formation_imported":  0,
+                                "not_ready":  0
+                            },
+                   "jean":  {
+                                "total":  3,
+                                "ready_interne":  3,
+                                "ready_externe":  0,
+                                "formation_imported":  0,
+                                "not_ready":  0
+                            },
+                   "lise":  {
+                                "total":  2,
+                                "ready_interne":  2,
+                                "ready_externe":  0,
+                                "formation_imported":  0,
+                                "not_ready":  0
+                            },
+                   "maria":  {
+                                 "total":  4,
+                                 "ready_interne":  4,
+                                 "ready_externe":  0,
+                                 "formation_imported":  0,
+                                 "not_ready":  0
+                             },
+                   "victor":  {
+                                  "total":  10,
+                                  "ready_interne":  10,
+                                  "ready_externe":  0,
+                                  "formation_imported":  0,
+                                  "not_ready":  0
+                              }
+               },
+    "cert_status":  {
+                        "cert.victor.nf525":  "READY_INTERNE",
+                        "cert.jean.finops":  "READY_INTERNE",
+                        "cert.denis.togaf":  "READY_INTERNE",
+                        "cert.lise.wcag":  "READY_INTERNE",
+                        "cert.francois.istqb":  "READY_INTERNE",
+                        "cert.victor.hds":  "READY_INTERNE",
+                        "cert.victor.ceh":  "READY_INTERNE",
+                        "cert.george.iso_19011":  "READY_INTERNE",
+                        "cert.fabrice.pspo":  "READY_INTERNE",
+                        "cert.hugo.cka":  "READY_INTERNE",
+                        "cert.arianne.iso_33001":  "READY_INTERNE",
+                        "cert.lise.iso_9241":  "READY_INTERNE",
+                        "cert.victor.vp2":  "READY_INTERNE",
+                        "cert.maria.prince2":  "READY_INTERNE",
+                        "cert.denis.iso_12207":  "READY_INTERNE",
+                        "cert.hugo.docker":  "READY_INTERNE",
+                        "cert.victor.cmmi":  "READY_INTERNE",
+                        "cert.victor.cissp":  "READY_INTERNE",
+                        "cert.jean.prompt_eng":  "READY_INTERNE",
+                        "cert.george.cisa":  "READY_INTERNE",
+                        "cert.arianne.six_sigma":  "READY_INTERNE",
+                        "cert.hugo.devops":  "READY_INTERNE",
+                        "cert.denis.iso_25010":  "READY_INTERNE",
+                        "cert.maria.pmp":  "READY_INTERNE",
+                        "cert.hugo.aws":  "READY_INTERNE",
+                        "cert.hugo.terraform":  "READY_INTERNE",
+                        "cert.victor.iso_27001":  "READY_INTERNE",
+                        "cert.george.rgpd":  "READY_INTERNE",
+                        "cert.jean.mlops":  "READY_INTERNE",
+                        "cert.victor.nf461":  "READY_INTERNE",
+                        "cert.francois.openapi":  "READY_INTERNE",
+                        "cert.maria.itil4":  "READY_INTERNE",
+                        "cert.fabrice.lean_startup":  "READY_INTERNE",
+                        "cert.arianne.iso_9001":  "READY_INTERNE",
+                        "cert.maria.psm":  "READY_INTERNE",
+                        "cert.victor.nf203":  "READY_INTERNE",
+                        "cert.victor.iso_20000":  "READY_INTERNE"
+                    }
+}

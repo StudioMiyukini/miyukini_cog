@@ -85,7 +85,11 @@ impl DefaultThreatDetector {
     /// Retourne le niveau maximal parmi les signaux, ou `ThreatLevel::None` si aucun.
     #[must_use]
     pub fn max_signal(&self) -> ThreatLevel {
-        self.levels.iter().copied().max().unwrap_or(ThreatLevel::None)
+        self.levels
+            .iter()
+            .copied()
+            .max()
+            .unwrap_or(ThreatLevel::None)
     }
 }
 

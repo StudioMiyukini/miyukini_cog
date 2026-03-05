@@ -5,9 +5,9 @@
 //! The orb is a circle that fills from bottom to top proportionally to
 //! the current/max ratio. Life orbs are red, mana orbs are blue.
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Pos2, Rect, Response, Ui, Vec2};
 use miyuki_ui_tokens::palette::d2::{D2OrbColors, D2_PALETTE};
-use crate::convert::rgba_to_color32;
 
 /// Orb type determines the fill color.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -82,10 +82,8 @@ impl Orb {
         // We draw a filled circle but clip it to only show the bottom portion.
         if pct > 0.0 {
             let fill_height = self.diameter * pct;
-            let clip_rect = Rect::from_min_max(
-                Pos2::new(rect.min.x, rect.max.y - fill_height),
-                rect.max,
-            );
+            let clip_rect =
+                Rect::from_min_max(Pos2::new(rect.min.x, rect.max.y - fill_height), rect.max);
 
             // Use the painter's clip rect to restrict the fill
             let clipped = painter.with_clip_rect(clip_rect);

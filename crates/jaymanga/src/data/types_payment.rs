@@ -15,15 +15,15 @@ use serde::{Deserialize, Serialize};
 pub struct PurchaseLicense {
     pub id: Option<String>,
     pub buyer_cog_id: Option<String>,
-    pub buyer_identity: Option<String>,       // LSI, VID, WID
+    pub buyer_identity: Option<String>, // LSI, VID, WID
     pub work_id: Option<String>,
-    pub purchase_type: Option<String>,        // PurchaseType as_str
+    pub purchase_type: Option<String>, // PurchaseType as_str
     pub target_id: Option<String>,
-    pub amount_paid: Option<i64>,             // centimes
+    pub amount_paid: Option<i64>, // centimes
     pub currency: Option<String>,
     pub payment_method: Option<String>,
     pub download_allowed: Option<bool>,
-    pub status: Option<String>,               // LicenseStatus as_str
+    pub status: Option<String>, // LicenseStatus as_str
     #[serde(default)]
     pub purchased_at: Option<String>,
     pub refunded_at: Option<String>,
@@ -96,10 +96,10 @@ pub struct PaymentTransaction {
     pub id: Option<String>,
     pub license_id: Option<String>,
     pub buyer_cog_id: Option<String>,
-    pub amount: Option<i64>,                  // centimes
+    pub amount: Option<i64>, // centimes
     pub currency: Option<String>,
-    pub method: Option<String>,               // "card", "transfer", "other"
-    pub status: Option<String>,               // TransactionStatus as_str
+    pub method: Option<String>, // "card", "transfer", "other"
+    pub status: Option<String>, // TransactionStatus as_str
     pub external_ref: Option<String>,
     #[serde(default)]
     pub created_at: Option<String>,
@@ -150,10 +150,10 @@ impl TransactionStatus {
 pub struct Promotion {
     pub id: Option<String>,
     pub name: Option<String>,
-    pub discount_type: Option<String>,        // DiscountType as_str
-    pub discount_value: Option<i64>,          // pourcentage ou centimes
-    pub target_scope: Option<String>,         // "work", "chapter", "series", "catalog"
-    pub target_ids: Option<String>,           // JSON Vec<String>
+    pub discount_type: Option<String>, // DiscountType as_str
+    pub discount_value: Option<i64>,   // pourcentage ou centimes
+    pub target_scope: Option<String>,  // "work", "chapter", "series", "catalog"
+    pub target_ids: Option<String>,    // JSON Vec<String>
     pub start_date: Option<String>,
     pub end_date: Option<String>,
     pub active: Option<bool>,
@@ -219,14 +219,22 @@ mod tests {
 
     #[test]
     fn test_purchase_type_roundtrip() {
-        for pt in [PurchaseType::Work, PurchaseType::Chapter, PurchaseType::Series] {
+        for pt in [
+            PurchaseType::Work,
+            PurchaseType::Chapter,
+            PurchaseType::Series,
+        ] {
             assert_eq!(PurchaseType::from_str(pt.as_str()), pt);
         }
     }
 
     #[test]
     fn test_license_status_roundtrip() {
-        for s in [LicenseStatus::Active, LicenseStatus::Refunded, LicenseStatus::Revoked] {
+        for s in [
+            LicenseStatus::Active,
+            LicenseStatus::Refunded,
+            LicenseStatus::Revoked,
+        ] {
             assert_eq!(LicenseStatus::from_str(s.as_str()), s);
         }
     }
@@ -246,7 +254,11 @@ mod tests {
 
     #[test]
     fn test_discount_type_roundtrip() {
-        for dt in [DiscountType::Percent, DiscountType::FixedAmount, DiscountType::Free] {
+        for dt in [
+            DiscountType::Percent,
+            DiscountType::FixedAmount,
+            DiscountType::Free,
+        ] {
             assert_eq!(DiscountType::from_str(dt.as_str()), dt);
         }
     }

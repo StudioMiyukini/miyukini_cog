@@ -9,12 +9,11 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuStory ; expose les modules tools.
 /// @do: expose_miyustory_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod errors;
-pub mod story;
 mod store;
+pub mod story;
 
 pub use admin_cell::{
     miyustory_admin_cell, MiyustoryAdminCell, MiyustoryIdentification, MiyustoryIntegrity,
@@ -23,8 +22,8 @@ pub use admin_cell::{
 pub use context::GovernedContext;
 pub use errors::MiyustoryError;
 pub use story::{
-    create as story_create, get as story_get, list as story_list, reaction_add as story_reaction_add,
-    StoryDetail, StoryFilters, StoryItem,
+    create as story_create, get as story_get, list as story_list,
+    reaction_add as story_reaction_add, StoryDetail, StoryFilters, StoryItem,
 };
 
 #[cfg(test)]

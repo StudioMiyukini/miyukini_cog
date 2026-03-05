@@ -121,9 +121,7 @@ pub fn health_check(
 /// les fichiers, dossiers, liens de partage actifs, sessions actives
 /// et pairs de synchronisation.
 #[cfg(feature = "legacy-sqlite")]
-pub fn collect_metrics(
-    db: &crate::data::MiyucloudDb,
-) -> Result<Metrics, MiyucloudError> {
+pub fn collect_metrics(db: &crate::data::MiyucloudDb) -> Result<Metrics, MiyucloudError> {
     let conn = db.lock_conn()?;
     let now = chrono::Utc::now().to_rfc3339();
 
@@ -170,11 +168,9 @@ pub fn collect_metrics(
         .map_err(|e| MiyucloudError::Db(e.to_string()))?;
 
     let sync_peers: u64 = conn
-        .query_row(
-            "SELECT COUNT(*) FROM cloud_sync_peers",
-            [],
-            |row| row.get(0),
-        )
+        .query_row("SELECT COUNT(*) FROM cloud_sync_peers", [], |row| {
+            row.get(0)
+        })
         .map_err(|e| MiyucloudError::Db(e.to_string()))?;
 
     Ok(Metrics {
@@ -196,15 +192,13 @@ pub fn collect_metrics(
 /// ou des appels plateforme-specifiques (`statvfs` sur Unix, `GetDiskFreeSpaceExW`
 /// sur Windows). Cette fonction compile et fonctionne sur toutes les cibles;
 /// les valeurs seront substituees lorsqu'un backend plateforme sera integre.
-pub fn check_disk_space(
-    path: &str,
-) -> Result<(u64, u64), MiyucloudError> {
+pub fn check_disk_space(path: &str) -> Result<(u64, u64), MiyucloudError> {
     // Verify the path exists so callers get an early error for bad paths.
     let p = std::path::Path::new(path);
     if !p.exists() {
-        return Err(MiyucloudError::NotFound(
-            format!("Storage path does not exist: {path}"),
-        ));
+        return Err(MiyucloudError::NotFound(format!(
+            "Storage path does not exist: {path}"
+        )));
     }
 
     // TODO: Platform-specific disk space retrieval.
@@ -295,10 +289,18 @@ mod tests {
               is_trashed, created_at, updated_at) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             rusqlite::params![
-                "file-1", "owner-1", "photo.jpg", "image/jpeg",
-                2048_i64, "abc123", 0, &now, &now
+                "file-1",
+                "owner-1",
+                "photo.jpg",
+                "image/jpeg",
+                2048_i64,
+                "abc123",
+                0,
+                &now,
+                &now
             ],
-        ).expect("insert file-1");
+        )
+        .expect("insert file-1");
 
         conn.execute(
             "INSERT INTO cloud_files \
@@ -306,10 +308,18 @@ mod tests {
               is_trashed, created_at, updated_at) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             rusqlite::params![
-                "file-2", "owner-1", "trashed.jpg", "image/jpeg",
-                512_i64, "def456", 1, &now, &now
+                "file-2",
+                "owner-1",
+                "trashed.jpg",
+                "image/jpeg",
+                512_i64,
+                "def456",
+                1,
+                &now,
+                &now
             ],
-        ).expect("insert file-2 (trashed)");
+        )
+        .expect("insert file-2 (trashed)");
 
         // Insert 1 folder (active).
         conn.execute(
@@ -317,7 +327,8 @@ mod tests {
              (id, owner_id, name, is_trashed, created_at, updated_at) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             rusqlite::params!["folder-1", "owner-1", "Photos", 0, &now, &now],
-        ).expect("insert folder-1");
+        )
+        .expect("insert folder-1");
 
         // Insert 1 sync peer.
         conn.execute(
@@ -325,7 +336,8 @@ mod tests {
              (id, cog_id, public_key, created_at) \
              VALUES (?1, ?2, ?3, ?4)",
             rusqlite::params!["peer-1", "cog-1", "pubkey-base64", &now],
-        ).expect("insert peer-1");
+        )
+        .expect("insert peer-1");
 
         // Insert 1 active share link (expires in the future).
         let future = "2099-01-01T00:00:00Z";
@@ -333,11 +345,9 @@ mod tests {
             "INSERT INTO cloud_share_links \
              (id, file_id, creator_id, token, expires_at, is_revoked, created_at) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            rusqlite::params![
-                "share-1", "file-1", "owner-1", "token123",
-                future, 0, &now
-            ],
-        ).expect("insert share-1");
+            rusqlite::params!["share-1", "file-1", "owner-1", "token123", future, 0, &now],
+        )
+        .expect("insert share-1");
 
         // Insert 1 active session (expires in the future).
         conn.execute(
@@ -345,10 +355,16 @@ mod tests {
              (id, owner_id, token, created_at, expires_at, last_activity_at, is_revoked) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             rusqlite::params![
-                "session-1", "owner-1", "sess-token-1",
-                &now, future, &now, 0
+                "session-1",
+                "owner-1",
+                "sess-token-1",
+                &now,
+                future,
+                &now,
+                0
             ],
-        ).expect("insert session-1");
+        )
+        .expect("insert session-1");
 
         // Drop conn before calling collect_metrics (which locks again).
         drop(conn);

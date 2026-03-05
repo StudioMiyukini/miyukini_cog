@@ -16,7 +16,12 @@ pub struct BoundaryMetadata {
 impl BoundaryMetadata {
     /// Crée des métadonnées de traçabilité.
     #[must_use]
-    pub fn new(created_at: String, created_by: String, justification: String, version: u32) -> Self {
+    pub fn new(
+        created_at: String,
+        created_by: String,
+        justification: String,
+        version: u32,
+    ) -> Self {
         Self {
             created_at,
             created_by,

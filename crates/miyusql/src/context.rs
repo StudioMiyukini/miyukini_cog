@@ -41,7 +41,7 @@ impl GovernedContext {
     /// @human: Construit un contexte gouverné.
     /// @do: build_governed_context
     /// @depends: miyusql_governed_context_struct
-    #[must_use] 
+    #[must_use]
     pub fn new(mandate_id: String, security_level: u8) -> Self {
         Self {
             mandate_id,
@@ -55,7 +55,7 @@ impl GovernedContext {
     /// @human: Indique si le contexte a un mandat valide.
     /// @do: check_mandate_valid
     /// @depends: miyusql_governed_context_struct
-    #[must_use] 
+    #[must_use]
     pub fn has_mandate(&self) -> bool {
         !self.mandate_id.is_empty()
     }

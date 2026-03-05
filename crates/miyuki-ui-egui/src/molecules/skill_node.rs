@@ -6,8 +6,8 @@
 //! with its current invested level and can be connected to prerequisite nodes
 //! via lines drawn by the parent organism.
 
-use egui::{Pos2, Response, Ui};
 use crate::atoms::skill_icon::{SkillIcon, SkillState};
+use egui::{Pos2, Response, Ui};
 
 /// Data for a skill tree node.
 #[derive(Debug, Clone)]

@@ -1,8 +1,8 @@
 //! ORG-E17 — Programme et animations d'une édition.
 
+use super::components::Badge;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::Badge;
 
 #[component]
 pub fn OrgProgramme(edition_id: String) -> Element {

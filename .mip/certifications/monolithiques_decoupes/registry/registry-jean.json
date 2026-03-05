@@ -1,0 +1,22 @@
+﻿{
+    "certs":  {
+                  "cert.jean.finops":  {
+                                           "folder":  "finops",
+                                           "agent":  "jean",
+                                           "name":  "FinOps",
+                                           "tldr":  "CoÃ»ts cloud/inference. FinOps Foundation."
+                                       },
+                  "cert.jean.mlops":  {
+                                          "folder":  "mlops",
+                                          "agent":  "jean",
+                                          "name":  "MLOps",
+                                          "tldr":  "Cycle vie modÃ¨les. Versioning, drift."
+                                      },
+                  "cert.jean.prompt_eng":  {
+                                               "folder":  "prompt_eng",
+                                               "agent":  "jean",
+                                               "name":  "Prompt Engineering",
+                                               "tldr":  "Compression, few-shot, CoT. LLM."
+                                           }
+              }
+}

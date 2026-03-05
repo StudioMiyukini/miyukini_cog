@@ -2,9 +2,9 @@
 
 //! Chat message molecule -- colored pseudo + text.
 
+use crate::convert::rgba_to_color32;
 use egui::{Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// Chat message type (determines name color).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -56,16 +56,8 @@ impl<'a> ChatMessage<'a> {
                     .color(name_color)
                     .size(11.0),
             );
-            ui.label(
-                egui::RichText::new(": ")
-                    .color(text_color)
-                    .size(11.0),
-            );
-            ui.label(
-                egui::RichText::new(self.text)
-                    .color(text_color)
-                    .size(11.0),
-            );
+            ui.label(egui::RichText::new(": ").color(text_color).size(11.0));
+            ui.label(egui::RichText::new(self.text).color(text_color).size(11.0));
         });
 
         response.response

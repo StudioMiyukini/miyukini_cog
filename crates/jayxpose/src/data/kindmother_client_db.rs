@@ -12,11 +12,11 @@ use crate::data::types::{
     DocumentProfessionnel, DocumentVersion, ExposantProfile, PosStockLink, ProduitCatalogue,
     ProduitVisuel, SyncLog, VitrineBlock, VitrinePage, VitrineTemplate,
 };
-use kindmother_client::{KindMotherClient, ClientError};
+use kindmother_client::{ClientError, KindMotherClient};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::OnceCell;
 use thiserror::Error;
+use tokio::sync::OnceCell;
 
 // Note: Ce fichier n'est compilé que si le feature "kindmother-only" est activé
 
@@ -26,15 +26,15 @@ pub enum DbError {
     /// Erreur du client KindMother.
     #[error("KindMother client error: {0}")]
     Client(#[from] ClientError),
-    
+
     /// Erreur de sérialisation.
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
-    
+
     /// Erreur interne.
     #[error("Internal error: {0}")]
     Internal(String),
-    
+
     /// Client non initialisé.
     #[error("Client not initialized")]
     NotInitialized,
@@ -63,21 +63,18 @@ impl JayXposeDb {
     pub async fn init_global(addr: Option<&str>) -> Result<(), DbError> {
         let addr = addr.unwrap_or(DEFAULT_KINDMOTHER_ADDR);
         let client = KindMotherClient::connect(addr, "jayxpose", "jayxpose").await?;
-        
+
         CLIENT
             .set(Arc::new(client))
             .map_err(|_| DbError::Internal("Client already initialized".to_string()))?;
-        
+
         Ok(())
     }
 
     /// Crée une nouvelle instance utilisant le client global.
     pub fn new() -> Result<Self, DbError> {
-        let client = CLIENT
-            .get()
-            .ok_or(DbError::NotInitialized)?
-            .clone();
-        
+        let client = CLIENT.get().ok_or(DbError::NotInitialized)?.clone();
+
         Ok(Self { client })
     }
 
@@ -96,21 +93,21 @@ impl JayXposeDb {
     pub async fn init_schema(&self) -> Result<(), DbError> {
         // Le schéma est créé via des requêtes DDL envoyées à KindMother
         let schema_sql = include_str!("schema.sql");
-        
+
         // Exécuter le schéma en une transaction
         let statements: Vec<&str> = schema_sql
             .split(';')
             .map(|s| s.trim())
             .filter(|s| !s.is_empty())
             .collect();
-        
+
         for sql in statements {
             self.client
                 .execute(sql, Vec::<String>::new(), "init_schema")
                 .await
                 .map_err(DbError::from)?;
         }
-        
+
         Ok(())
     }
 
@@ -191,7 +188,7 @@ impl JayXposeDb {
                 "exposant_upsert",
             )
             .await?;
-        
+
         Ok(())
     }
 
@@ -212,7 +209,7 @@ impl JayXposeDb {
                 vec![id],
             )
             .await?;
-        
+
         rows.into_iter()
             .next()
             .map(|row| Self::row_to_exposant(&row))
@@ -236,10 +233,8 @@ impl JayXposeDb {
                 Vec::<String>::new(),
             )
             .await?;
-        
-        rows.iter()
-            .map(|row| Self::row_to_exposant(row))
-            .collect()
+
+        rows.iter().map(|row| Self::row_to_exposant(row)).collect()
     }
 
     /// Retourne le premier slug de vitrine publiée (pour la carte Home COG / lien Découvrir).
@@ -257,7 +252,10 @@ impl JayXposeDb {
 
     /// Récupère un exposant par slug vitrine, uniquement si la vitrine est publiée.
     /// Utilisé par le service WEB (Origin) pour servir les pages vitrine publiques.
-    pub async fn exposant_by_vitrine_slug(&self, slug: &str) -> Result<Option<ExposantProfile>, DbError> {
+    pub async fn exposant_by_vitrine_slug(
+        &self,
+        slug: &str,
+    ) -> Result<Option<ExposantProfile>, DbError> {
         let rows = self.client
             .query(
                 "SELECT id, company_name, legal_form, slogan, description_short, description_long,
@@ -300,7 +298,7 @@ impl JayXposeDb {
                 vec![email, password_hash],
             )
             .await?;
-        
+
         rows.into_iter()
             .next()
             .map(|row| Self::row_to_exposant(&row))
@@ -316,7 +314,7 @@ impl JayXposeDb {
     ) -> Result<String, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().to_rfc3339();
-        
+
         self.client
             .execute(
                 "INSERT INTO exposants (id, company_name, contact_email, password_hash, created_at, updated_at)
@@ -325,12 +323,14 @@ impl JayXposeDb {
                 "exposant_create",
             )
             .await?;
-        
+
         Ok(id)
     }
 
     /// Convertit une ligne en ExposantProfile.
-    fn row_to_exposant(row: &HashMap<String, serde_json::Value>) -> Result<ExposantProfile, DbError> {
+    fn row_to_exposant(
+        row: &HashMap<String, serde_json::Value>,
+    ) -> Result<ExposantProfile, DbError> {
         Ok(ExposantProfile {
             id: Self::get_opt_string(row, "id"),
             company_name: Self::get_opt_string(row, "company_name"),
@@ -383,9 +383,11 @@ impl JayXposeDb {
 
     /// Insère un produit catalogue.
     pub async fn produit_insert(&self, p: &ProduitCatalogue) -> Result<(), DbError> {
-        let id = p.id.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            p.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
-        
+
         self.client
             .execute(
                 "INSERT INTO produits_catalogue (id, exposant_id, name, description, price, currency, category_id, availability, is_featured, sort_order, created_at, updated_at)
@@ -407,15 +409,17 @@ impl JayXposeDb {
                 "produit_insert",
             )
             .await?;
-        
+
         Ok(())
     }
 
     /// Met à jour un produit catalogue.
     pub async fn produit_update(&self, p: &ProduitCatalogue) -> Result<(), DbError> {
-        let id = p.id.as_ref().ok_or_else(|| DbError::Internal("produit_update: id requis".to_string()))?;
+        let id =
+            p.id.as_ref()
+                .ok_or_else(|| DbError::Internal("produit_update: id requis".to_string()))?;
         let now = chrono::Utc::now().to_rfc3339();
-        
+
         self.client
             .execute(
                 "UPDATE produits_catalogue SET exposant_id=?1, name=?2, description=?3, price=?4, currency=?5, category_id=?6, availability=?7, is_featured=?8, sort_order=?9, updated_at=?10 WHERE id=?11",
@@ -435,7 +439,7 @@ impl JayXposeDb {
                 "produit_update",
             )
             .await?;
-        
+
         Ok(())
     }
 
@@ -448,12 +452,15 @@ impl JayXposeDb {
                 "produit_delete",
             )
             .await?;
-        
+
         Ok(())
     }
 
     /// Liste les produits d'un exposant.
-    pub async fn produits_by_exposant(&self, exposant_id: &str) -> Result<Vec<ProduitCatalogue>, DbError> {
+    pub async fn produits_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<ProduitCatalogue>, DbError> {
         let rows = self.client
             .query(
                 "SELECT id, exposant_id, name, description, price, currency, category_id, availability, is_featured, sort_order, created_at, updated_at
@@ -461,10 +468,8 @@ impl JayXposeDb {
                 vec![exposant_id],
             )
             .await?;
-        
-        rows.iter()
-            .map(|row| Self::row_to_produit(row))
-            .collect()
+
+        rows.iter().map(|row| Self::row_to_produit(row)).collect()
     }
 
     /// Récupère un produit par identifiant.
@@ -476,14 +481,16 @@ impl JayXposeDb {
                 vec![id],
             )
             .await?;
-        
+
         rows.into_iter()
             .next()
             .map(|row| Self::row_to_produit(&row))
             .transpose()
     }
 
-    fn row_to_produit(row: &HashMap<String, serde_json::Value>) -> Result<ProduitCatalogue, DbError> {
+    fn row_to_produit(
+        row: &HashMap<String, serde_json::Value>,
+    ) -> Result<ProduitCatalogue, DbError> {
         Ok(ProduitCatalogue {
             id: Self::get_opt_string(row, "id"),
             exposant_id: Self::get_opt_string(row, "exposant_id"),
@@ -512,22 +519,19 @@ impl JayXposeDb {
     }
 
     fn get_opt_bool(row: &HashMap<String, serde_json::Value>, key: &str) -> Option<bool> {
-        row.get(key)
-            .and_then(|v| {
-                if let Some(i) = v.as_i64() {
-                    Some(i != 0)
-                } else if let Some(b) = v.as_bool() {
-                    Some(b)
-                } else {
-                    None
-                }
-            })
+        row.get(key).and_then(|v| {
+            if let Some(i) = v.as_i64() {
+                Some(i != 0)
+            } else if let Some(b) = v.as_bool() {
+                Some(b)
+            } else {
+                None
+            }
+        })
     }
 
     fn get_opt_i32(row: &HashMap<String, serde_json::Value>, key: &str) -> Option<i32> {
-        row.get(key)
-            .and_then(|v| v.as_i64())
-            .map(|i| i as i32)
+        row.get(key).and_then(|v| v.as_i64()).map(|i| i as i32)
     }
 
     fn get_opt_i64(row: &HashMap<String, serde_json::Value>, key: &str) -> Option<i64> {

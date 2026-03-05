@@ -1,0 +1,72 @@
+﻿{
+    "certs":  {
+                  "cert.victor.ceh":  {
+                                          "folder":  "ceh",
+                                          "agent":  "victor",
+                                          "name":  "CEH",
+                                          "tldr":  "Ethical hacking. Pentest. EC-Council."
+                                      },
+                  "cert.victor.cissp":  {
+                                            "folder":  "cissp",
+                                            "agent":  "victor",
+                                            "name":  "CISSP",
+                                            "tldr":  "Gouvernance sÃ©curitÃ©. 8 domaines. (ISC)Â²."
+                                        },
+                  "cert.victor.cmmi":  {
+                                           "folder":  "cmmi",
+                                           "agent":  "victor",
+                                           "name":  "CMMI v2.0",
+                                           "tldr":  "MaturitÃ© processus. 6 niveaux. ISACA."
+                                       },
+                  "cert.victor.critical_cyber":  {
+                                                     "folder":  "critical_cyber",
+                                                     "agent":  "victor",
+                                                     "name":  "Critical Cyber KB",
+                                                     "tldr":  "Base atomique de verification de controles cyber critiques."
+                                                 },
+                  "cert.victor.hds":  {
+                                          "folder":  "hds",
+                                          "agent":  "victor",
+                                          "name":  "HDS",
+                                          "tldr":  "Hebergement donnÃ©es santÃ©. 6 activitÃ©s.",
+                                          "mandatory_if":  "sante"
+                                      },
+                  "cert.victor.iso_20000":  {
+                                                "folder":  "iso-iec_20000-1",
+                                                "agent":  "victor",
+                                                "name":  "ISO 20000-1",
+                                                "tldr":  "Services IT. SMS, SLA. ISO."
+                                            },
+                  "cert.victor.iso_27001":  {
+                                                "folder":  "iso-iec_27001",
+                                                "agent":  "victor",
+                                                "name":  "ISO 27001",
+                                                "tldr":  "SMSI. 93 contrÃ´les. ISO."
+                                            },
+                  "cert.victor.nf203":  {
+                                            "folder":  "nf203",
+                                            "agent":  "victor",
+                                            "name":  "NF203",
+                                            "tldr":  "Logiciel comptable. ISO 25051. AFNOR."
+                                        },
+                  "cert.victor.nf461":  {
+                                            "folder":  "nf461",
+                                            "agent":  "victor",
+                                            "name":  "NF461",
+                                            "tldr":  "Archivage Ã©lectronique. AFNOR."
+                                        },
+                  "cert.victor.nf525":  {
+                                            "folder":  "nf525",
+                                            "agent":  "victor",
+                                            "name":  "NF525",
+                                            "tldr":  "ConformitÃ© fiscale caisse.",
+                                            "mandatory_if":  "caisse"
+                                        },
+                  "cert.victor.vp2":  {
+                                          "folder":  "vp2",
+                                          "agent":  "victor",
+                                          "name":  "VP2",
+                                          "tldr":  "Vie privÃ©e. MaturitÃ© RGPD. AFNOR/CNIL."
+                                      }
+              }
+}

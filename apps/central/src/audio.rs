@@ -73,8 +73,8 @@ fn play_mp3_sync(path: &PathBuf) -> Result<(), String> {
 }
 
 fn rodio_play(file: std::fs::File, _path: &Path) -> Result<(), String> {
-    let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-        .map_err(|e| e.to_string())?;
+    let stream_handle =
+        rodio::OutputStreamBuilder::open_default_stream().map_err(|e| e.to_string())?;
     let sink = rodio::Sink::connect_new(stream_handle.mixer());
     let source = rodio::Decoder::try_from(file).map_err(|e| e.to_string())?;
     sink.append(source);
@@ -137,11 +137,16 @@ fn play_tts_sync(text: &str) -> Result<(), String> {
     // Appeler eSpeak-ng pour générer le WAV
     let status = Command::new("espeak-ng")
         .args([
-            "-v", "fr",           // Voix française
-            "-s", "150",          // Vitesse (mots/minute)
-            "-p", "60",           // Pitch (hauteur, plus élevé = plus féminin)
-            "-w", wav_path.to_str().unwrap(),
-            "--", text,
+            "-v",
+            "fr", // Voix française
+            "-s",
+            "150", // Vitesse (mots/minute)
+            "-p",
+            "60", // Pitch (hauteur, plus élevé = plus féminin)
+            "-w",
+            wav_path.to_str().unwrap(),
+            "--",
+            text,
         ])
         .status()
         .map_err(|e| format!("espeak-ng launch: {e}"))?;
@@ -166,8 +171,8 @@ fn play_tts_sync(text: &str) -> Result<(), String> {
 /// Joue un fichier WAV de manière synchrone.
 fn play_wav_sync(path: &PathBuf) -> Result<(), String> {
     let file = std::fs::File::open(path).map_err(|e| e.to_string())?;
-    let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-        .map_err(|e| e.to_string())?;
+    let stream_handle =
+        rodio::OutputStreamBuilder::open_default_stream().map_err(|e| e.to_string())?;
     let sink = rodio::Sink::connect_new(stream_handle.mixer());
     let source = rodio::Decoder::try_from(file).map_err(|e| e.to_string())?;
     sink.append(source);

@@ -18,9 +18,9 @@ pub struct FederationInfo {
     pub shop_description: Option<String>,
     pub work_count: Option<i32>,
     pub free_work_count: Option<i32>,
-    pub formats: Option<String>,              // JSON Vec<String>
-    pub genres: Option<String>,               // JSON Vec<String>
-    pub languages: Option<String>,            // JSON Vec<String>
+    pub formats: Option<String>,   // JSON Vec<String>
+    pub genres: Option<String>,    // JSON Vec<String>
+    pub languages: Option<String>, // JSON Vec<String>
     pub allow_aggregation: Option<bool>,
     pub federation_api_version: Option<String>,
     pub last_catalog_update: Option<String>,
@@ -37,20 +37,20 @@ pub struct FederationInfo {
 pub struct FederationCatalogEntry {
     pub work_id: Option<String>,
     pub title: Option<String>,
-    pub authors: Option<String>,              // JSON
-    pub genres: Option<String>,               // JSON
-    pub synopsis: Option<String>,             // tronqué à federation_synopsis_length
+    pub authors: Option<String>,  // JSON
+    pub genres: Option<String>,   // JSON
+    pub synopsis: Option<String>, // tronqué à federation_synopsis_length
     pub cover_thumb_url: Option<String>,
     pub reading_format: Option<String>,
     pub pricing_model: Option<String>,
-    pub price: Option<i64>,                   // centimes (si federation_include_prices)
+    pub price: Option<i64>, // centimes (si federation_include_prices)
     pub currency: Option<String>,
     pub chapter_count: Option<i32>,
     pub total_pages: Option<i32>,
     pub demo_pages_count: Option<i32>,
     pub series_id: Option<String>,
     pub series_title: Option<String>,
-    pub tags: Option<String>,                 // JSON
+    pub tags: Option<String>, // JSON
     pub language: Option<String>,
     pub portal_url: Option<String>,
     pub published_at: Option<String>,

@@ -51,7 +51,7 @@ pub struct MiyuExportAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.export.miyuexport";
 
-#[must_use] 
+#[must_use]
 pub fn miyuexport_admin_cell(version: &str, fingerprint: &str) -> MiyuExportAdminCell {
     MiyuExportAdminCell {
         identification: MiyuExportIdentification {
@@ -65,7 +65,9 @@ pub fn miyuexport_admin_cell(version: &str, fingerprint: &str) -> MiyuExportAdmi
                 id: "MiyukiniExporttest".to_string(),
                 name: "Test chemin complet MiyuExport".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

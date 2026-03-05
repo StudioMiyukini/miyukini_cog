@@ -45,14 +45,46 @@ fn DocumentCategories(selected: Signal<String>) -> Element {
     let c = use_palette();
     let current = selected.read().clone();
 
-    let cat_tous_bg = if current == "Tous" { c.accent_blue } else { c.bg_secondary };
-    let cat_tous_color = if current == "Tous" { "white" } else { c.text_primary };
-    let cat_reg_bg = if current == "Reglementaire" { c.accent_blue } else { c.bg_secondary };
-    let cat_reg_color = if current == "Reglementaire" { "white" } else { c.text_primary };
-    let cat_con_bg = if current == "Contrats" { c.accent_blue } else { c.bg_secondary };
-    let cat_con_color = if current == "Contrats" { "white" } else { c.text_primary };
-    let cat_com_bg = if current == "Communication" { c.accent_blue } else { c.bg_secondary };
-    let cat_com_color = if current == "Communication" { "white" } else { c.text_primary };
+    let cat_tous_bg = if current == "Tous" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let cat_tous_color = if current == "Tous" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let cat_reg_bg = if current == "Reglementaire" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let cat_reg_color = if current == "Reglementaire" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let cat_con_bg = if current == "Contrats" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let cat_con_color = if current == "Contrats" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let cat_com_bg = if current == "Communication" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let cat_com_color = if current == "Communication" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -111,7 +143,12 @@ fn DocumentsList() -> Element {
 }
 
 #[component]
-fn DocumentRow(name: &'static str, doc_icon: &'static str, filename: &'static str, size: &'static str) -> Element {
+fn DocumentRow(
+    name: &'static str,
+    doc_icon: &'static str,
+    filename: &'static str,
+    size: &'static str,
+) -> Element {
     let c = use_palette();
 
     rsx! {

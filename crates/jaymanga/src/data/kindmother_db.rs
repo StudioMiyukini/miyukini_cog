@@ -11,9 +11,9 @@ use rusqlite::{params, Connection, OptionalExtension};
 use kindmother::{InstanceIdentity, InstanceType};
 
 use super::types::*;
+use super::types_aggregator::*;
 use super::types_payment::*;
 use super::types_reader::*;
-use super::types_aggregator::*;
 
 // ---------------------------------------------------------------------------
 // Erreur
@@ -61,8 +61,7 @@ impl JayMangaDb {
                 .file_stem()
                 .and_then(|s| s.to_str())
                 .unwrap_or("jaymanga");
-            let kd = kindmother_db_key::KeyDerivation::new(data_dir)
-                .map_err(|e| DbError(e.0))?;
+            let kd = kindmother_db_key::KeyDerivation::new(data_dir).map_err(|e| DbError(e.0))?;
             let pragma_key = kd.pragma_key_hex(db_name).map_err(|e| DbError(e.0))?;
             conn.pragma_update(None, "key", &pragma_key)?;
         }
@@ -93,7 +92,8 @@ impl JayMangaDb {
         let mut sql = "SELECT id, series_id, title, authors, genres, synopsis, \
             cover_image_path, language, volume_number, status, pricing_model, price, \
             currency, demo_pages_count, reading_format, allow_download, total_pages, \
-            tags, created_at, updated_at FROM works WHERE 1=1".to_string();
+            tags, created_at, updated_at FROM works WHERE 1=1"
+            .to_string();
         let mut param_values: Vec<Box<dyn rusqlite::types::ToSql>> = Vec::new();
 
         if let Some(ref status) = filters.status {
@@ -211,11 +211,26 @@ impl JayMangaDb {
              tags, created_at, updated_at) \
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)",
             params![
-                work.id, work.series_id, work.title, work.authors, work.genres,
-                work.synopsis, work.cover_image_path, work.language, work.volume_number,
-                work.status, work.pricing_model, work.price, work.currency,
-                work.demo_pages_count, work.reading_format, work.allow_download,
-                work.total_pages, work.tags, work.created_at, work.updated_at,
+                work.id,
+                work.series_id,
+                work.title,
+                work.authors,
+                work.genres,
+                work.synopsis,
+                work.cover_image_path,
+                work.language,
+                work.volume_number,
+                work.status,
+                work.pricing_model,
+                work.price,
+                work.currency,
+                work.demo_pages_count,
+                work.reading_format,
+                work.allow_download,
+                work.total_pages,
+                work.tags,
+                work.created_at,
+                work.updated_at,
             ],
         )?;
         Ok(())
@@ -231,11 +246,25 @@ impl JayMangaDb {
              demo_pages_count=?14, reading_format=?15, allow_download=?16, \
              total_pages=?17, tags=?18, updated_at=?19 WHERE id=?1",
             params![
-                work.id, work.series_id, work.title, work.authors, work.genres,
-                work.synopsis, work.cover_image_path, work.language, work.volume_number,
-                work.status, work.pricing_model, work.price, work.currency,
-                work.demo_pages_count, work.reading_format, work.allow_download,
-                work.total_pages, work.tags, work.updated_at,
+                work.id,
+                work.series_id,
+                work.title,
+                work.authors,
+                work.genres,
+                work.synopsis,
+                work.cover_image_path,
+                work.language,
+                work.volume_number,
+                work.status,
+                work.pricing_model,
+                work.price,
+                work.currency,
+                work.demo_pages_count,
+                work.reading_format,
+                work.allow_download,
+                work.total_pages,
+                work.tags,
+                work.updated_at,
             ],
         )?;
         Ok(())
@@ -309,8 +338,11 @@ impl JayMangaDb {
             "UPDATE chapters SET chapter_number=?2, title=?3, page_count=?4, sort_order=?5 \
              WHERE id=?1",
             params![
-                chapter.id, chapter.chapter_number, chapter.title,
-                chapter.page_count, chapter.sort_order,
+                chapter.id,
+                chapter.chapter_number,
+                chapter.title,
+                chapter.page_count,
+                chapter.sort_order,
             ],
         )?;
         Ok(())
@@ -377,9 +409,16 @@ impl JayMangaDb {
              optimized_variants, width, height, file_size, optimization_status, sort_order) \
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",
             params![
-                page.id, page.chapter_id, page.page_number, page.original_image_path,
-                page.optimized_variants, page.width, page.height, page.file_size,
-                page.optimization_status, page.sort_order,
+                page.id,
+                page.chapter_id,
+                page.page_number,
+                page.original_image_path,
+                page.optimized_variants,
+                page.width,
+                page.height,
+                page.file_size,
+                page.optimization_status,
+                page.sort_order,
             ],
         )?;
         Ok(())
@@ -493,8 +532,12 @@ impl JayMangaDb {
             "UPDATE series SET title=?2, synopsis=?3, cover_image_path=?4, status=?5, \
              updated_at=?6 WHERE id=?1",
             params![
-                series.id, series.title, series.synopsis, series.cover_image_path,
-                series.status, series.updated_at,
+                series.id,
+                series.title,
+                series.synopsis,
+                series.cover_image_path,
+                series.status,
+                series.updated_at,
             ],
         )?;
         Ok(())
@@ -561,13 +604,22 @@ impl JayMangaDb {
              payment_gateway=excluded.payment_gateway, gateway_config=excluded.gateway_config, \
              updated_at=excluded.updated_at",
             params![
-                config.id, config.shop_name, config.shop_description,
-                config.default_demo_pages, config.default_allow_download,
-                config.accepted_payment_methods, config.currency,
-                config.reading_direction, config.theme, config.allow_aggregation,
-                config.federation_synopsis_length, config.federation_include_prices,
-                config.payment_gateway, config.gateway_config,
-                config.created_at, config.updated_at,
+                config.id,
+                config.shop_name,
+                config.shop_description,
+                config.default_demo_pages,
+                config.default_allow_download,
+                config.accepted_payment_methods,
+                config.currency,
+                config.reading_direction,
+                config.theme,
+                config.allow_aggregation,
+                config.federation_synopsis_length,
+                config.federation_include_prices,
+                config.payment_gateway,
+                config.gateway_config,
+                config.created_at,
+                config.updated_at,
             ],
         )?;
         Ok(())
@@ -619,9 +671,15 @@ impl JayMangaDb {
              max_concurrent_jobs=excluded.max_concurrent_jobs, \
              jpeg_fallback=excluded.jpeg_fallback",
             params![
-                config.quality_hd, config.quality_sd, config.quality_mobile,
-                config.quality_thumb, config.output_format, config.generate_avif,
-                config.active_profiles, config.max_concurrent_jobs, config.jpeg_fallback,
+                config.quality_hd,
+                config.quality_sd,
+                config.quality_mobile,
+                config.quality_thumb,
+                config.output_format,
+                config.generate_avif,
+                config.active_profiles,
+                config.max_concurrent_jobs,
+                config.jpeg_fallback,
             ],
         )?;
         Ok(())
@@ -640,11 +698,19 @@ impl JayMangaDb {
              download_allowed, status, purchased_at, refunded_at) \
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)",
             params![
-                license.id, license.buyer_cog_id, license.buyer_identity,
-                license.work_id, license.purchase_type, license.target_id,
-                license.amount_paid, license.currency, license.payment_method,
-                license.download_allowed, license.status,
-                license.purchased_at, license.refunded_at,
+                license.id,
+                license.buyer_cog_id,
+                license.buyer_identity,
+                license.work_id,
+                license.purchase_type,
+                license.target_id,
+                license.amount_paid,
+                license.currency,
+                license.payment_method,
+                license.download_allowed,
+                license.status,
+                license.purchased_at,
+                license.refunded_at,
             ],
         )?;
         Ok(())
@@ -688,7 +754,10 @@ impl JayMangaDb {
     }
 
     /// Liste les licences d'un acheteur.
-    pub fn license_list_by_buyer(&self, buyer_cog_id: &str) -> Result<Vec<PurchaseLicense>, DbError> {
+    pub fn license_list_by_buyer(
+        &self,
+        buyer_cog_id: &str,
+    ) -> Result<Vec<PurchaseLicense>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, buyer_cog_id, buyer_identity, work_id, purchase_type, target_id, \
@@ -775,19 +844,31 @@ impl JayMangaDb {
              currency, method, status, external_ref, created_at, completed_at) \
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",
             params![
-                tx.id, tx.license_id, tx.buyer_cog_id, tx.amount, tx.currency,
-                tx.method, tx.status, tx.external_ref, tx.created_at, tx.completed_at,
+                tx.id,
+                tx.license_id,
+                tx.buyer_cog_id,
+                tx.amount,
+                tx.currency,
+                tx.method,
+                tx.status,
+                tx.external_ref,
+                tx.created_at,
+                tx.completed_at,
             ],
         )?;
         Ok(())
     }
 
     /// Liste les transactions avec filtres optionnels.
-    pub fn transaction_list(&self, filters: &TransactionFilters) -> Result<Vec<PaymentTransaction>, DbError> {
+    pub fn transaction_list(
+        &self,
+        filters: &TransactionFilters,
+    ) -> Result<Vec<PaymentTransaction>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut sql = "SELECT id, license_id, buyer_cog_id, amount, currency, method, \
             status, external_ref, created_at, completed_at \
-            FROM payment_transactions WHERE 1=1".to_string();
+            FROM payment_transactions WHERE 1=1"
+            .to_string();
         let mut param_values: Vec<Box<dyn rusqlite::types::ToSql>> = Vec::new();
 
         if let Some(ref status) = filters.status {
@@ -891,9 +972,15 @@ impl JayMangaDb {
             "INSERT INTO promotions (id, name, discount_type, discount_value, target_scope, \
              target_ids, start_date, end_date, active) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)",
             params![
-                promo.id, promo.name, promo.discount_type, promo.discount_value,
-                promo.target_scope, promo.target_ids, promo.start_date,
-                promo.end_date, promo.active,
+                promo.id,
+                promo.name,
+                promo.discount_type,
+                promo.discount_value,
+                promo.target_scope,
+                promo.target_ids,
+                promo.start_date,
+                promo.end_date,
+                promo.active,
             ],
         )?;
         Ok(())
@@ -945,10 +1032,19 @@ impl JayMangaDb {
              last_read_chapter, last_read_page, reading_progress, added_at, last_synced_at) \
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)",
             params![
-                fav.id, fav.seller_cog_id, fav.work_id, fav.cached_title,
-                fav.cached_cover_url, fav.cached_authors, fav.cached_format,
-                fav.purchase_status, fav.last_read_chapter, fav.last_read_page,
-                fav.reading_progress, fav.added_at, fav.last_synced_at,
+                fav.id,
+                fav.seller_cog_id,
+                fav.work_id,
+                fav.cached_title,
+                fav.cached_cover_url,
+                fav.cached_authors,
+                fav.cached_format,
+                fav.purchase_status,
+                fav.last_read_chapter,
+                fav.last_read_page,
+                fav.reading_progress,
+                fav.added_at,
+                fav.last_synced_at,
             ],
         )?;
         Ok(())
@@ -1038,9 +1134,16 @@ impl JayMangaDb {
              unit_price, currency, promotion_id, discounted_price, added_at) \
              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)",
             params![
-                item.id, item.buyer_cog_id, item.work_id, item.purchase_type,
-                item.target_id, item.unit_price, item.currency, item.promotion_id,
-                item.discounted_price, item.added_at,
+                item.id,
+                item.buyer_cog_id,
+                item.work_id,
+                item.purchase_type,
+                item.target_id,
+                item.unit_price,
+                item.currency,
+                item.promotion_id,
+                item.discounted_price,
+                item.added_at,
             ],
         )?;
         Ok(())
@@ -1125,12 +1228,23 @@ impl JayMangaDb {
              cogs_visited=excluded.cogs_visited, languages_read=excluded.languages_read, \
              onboarding_completed=excluded.onboarding_completed, updated_at=excluded.updated_at",
             params![
-                prog.id, prog.total_xp, prog.current_level, prog.current_streak,
-                prog.longest_streak, prog.streak_shield_available, prog.last_read_date,
-                prog.total_pages_read, prog.total_works_completed,
-                prog.total_chapters_completed, prog.genres_explored,
-                prog.formats_explored, prog.cogs_visited, prog.languages_read,
-                prog.onboarding_completed, prog.created_at, prog.updated_at,
+                prog.id,
+                prog.total_xp,
+                prog.current_level,
+                prog.current_streak,
+                prog.longest_streak,
+                prog.streak_shield_available,
+                prog.last_read_date,
+                prog.total_pages_read,
+                prog.total_works_completed,
+                prog.total_chapters_completed,
+                prog.genres_explored,
+                prog.formats_explored,
+                prog.cogs_visited,
+                prog.languages_read,
+                prog.onboarding_completed,
+                prog.created_at,
+                prog.updated_at,
             ],
         )?;
         Ok(())
@@ -1169,7 +1283,13 @@ impl JayMangaDb {
         conn.execute(
             "INSERT INTO reader_badges (id, badge_id, badge_name, badge_category, earned_at) \
              VALUES (?1,?2,?3,?4,?5)",
-            params![badge.id, badge.badge_id, badge.badge_name, badge.badge_category, badge.earned_at],
+            params![
+                badge.id,
+                badge.badge_id,
+                badge.badge_name,
+                badge.badge_category,
+                badge.earned_at
+            ],
         )?;
         Ok(())
     }
@@ -1222,9 +1342,15 @@ impl JayMangaDb {
              online_status=excluded.online_status, last_synced_at=excluded.last_synced_at, \
              last_seen_online_at=excluded.last_seen_online_at, blocked=excluded.blocked",
             params![
-                seller.cog_id, seller.shop_name, seller.shop_description,
-                seller.avatar_path, seller.work_count, seller.online_status,
-                seller.last_synced_at, seller.last_seen_online_at, seller.blocked,
+                seller.cog_id,
+                seller.shop_name,
+                seller.shop_description,
+                seller.avatar_path,
+                seller.work_count,
+                seller.online_status,
+                seller.last_synced_at,
+                seller.last_seen_online_at,
+                seller.blocked,
             ],
         )?;
         Ok(())
@@ -1295,7 +1421,8 @@ impl JayMangaDb {
             cover_thumb_path, reading_format, pricing_model, price, currency, chapter_count, \
             total_pages, demo_pages_count, series_title, tags, language, portal_url, \
             published_at, updated_at, cached_at \
-            FROM aggregated_catalog_entries WHERE 1=1".to_string();
+            FROM aggregated_catalog_entries WHERE 1=1"
+            .to_string();
         let mut param_values: Vec<Box<dyn rusqlite::types::ToSql>> = Vec::new();
 
         if let Some(ref genre) = filters.genre {
@@ -1443,9 +1570,13 @@ impl JayMangaDb {
              highlight_own_catalog=excluded.highlight_own_catalog, \
              blocked_cogs=excluded.blocked_cogs",
             params![
-                config.enabled, config.name, config.sync_interval_minutes,
-                config.presence_refresh_minutes, config.max_indexed_cogs,
-                config.show_offline_works, config.highlight_own_catalog,
+                config.enabled,
+                config.name,
+                config.sync_interval_minutes,
+                config.presence_refresh_minutes,
+                config.max_indexed_cogs,
+                config.show_offline_works,
+                config.highlight_own_catalog,
                 config.blocked_cogs,
             ],
         )?;

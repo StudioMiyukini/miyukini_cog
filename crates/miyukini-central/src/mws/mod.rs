@@ -23,9 +23,9 @@ use miyuwebway_participant::{
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use tokio::io::AsyncWriteExt;
-use tokio::task::JoinHandle;
 use tokio::net::TcpListener;
 use tokio::sync::{oneshot, RwLock};
+use tokio::task::JoinHandle;
 use tokio::time::{sleep, Duration};
 use tracing::{error, info, warn};
 
@@ -85,7 +85,7 @@ impl Default for CentralMwsConfig {
             auto_heartbeat: true,
             auto_reconnect: true,
             present_without_services: true, // Se présente toujours
-            home_http_bind: None, // Optionnel : "0.0.0.0:8080" pour exposer la Home
+            home_http_bind: None,           // Optionnel : "0.0.0.0:8080" pour exposer la Home
             expose_jayxpose_vitrine: false,
             jayxpose_vitrine_base_url: None,
             subdomain_slug: None,
@@ -270,7 +270,10 @@ impl CentralMwsManager {
         let (state, conformity) = if config.lone_mode {
             (CentralMwsState::Lone, MwsConformityState::LoneMode)
         } else if config.enabled {
-            (CentralMwsState::Disconnected, MwsConformityState::Uninitialized)
+            (
+                CentralMwsState::Disconnected,
+                MwsConformityState::Uninitialized,
+            )
         } else {
             (CentralMwsState::Disabled, MwsConformityState::Uninitialized)
         };
@@ -382,19 +385,28 @@ impl CentralMwsManager {
             return Err("MWS est désactivé".to_string());
         }
 
-        info!("Démarrage du protocole de conformité MWS pour COG {}...", self.cog_id);
+        info!(
+            "Démarrage du protocole de conformité MWS pour COG {}...",
+            self.cog_id
+        );
         self.update_state(CentralMwsState::Connecting).await;
 
         // Étape 1: Résolution Origin
-        self.update_conformity(MwsConformityState::ResolvingOrigin).await;
-        
+        self.update_conformity(MwsConformityState::ResolvingOrigin)
+            .await;
+
         // Vérifier que l'adresse est valide
-        let relay_host = self.config.relay_address.split(':').next()
+        let relay_host = self
+            .config
+            .relay_address
+            .split(':')
+            .next()
             .ok_or("Adresse Relay invalide")?;
         info!("Origin résolu: {}", relay_host);
 
         // Étape 2: Connexion au Relay
-        self.update_conformity(MwsConformityState::ConnectingRelay).await;
+        self.update_conformity(MwsConformityState::ConnectingRelay)
+            .await;
 
         // Créer la configuration MWS
         let mut mws_config = MwsServiceConfig::default();
@@ -408,7 +420,10 @@ impl CentralMwsManager {
         // Phase 2 : adresse pour le forwarding HTTP via tunnel (0.0.0.0 → 127.0.0.1)
         mws_config.home_http_bind = self.config.home_http_bind.as_ref().map(|addr| {
             if addr.starts_with("0.0.0.0:") {
-                format!("127.0.0.1:{}", addr.strip_prefix("0.0.0.0:").unwrap_or("8080"))
+                format!(
+                    "127.0.0.1:{}",
+                    addr.strip_prefix("0.0.0.0:").unwrap_or("8080")
+                )
             } else {
                 addr.clone()
             }
@@ -442,20 +457,27 @@ impl CentralMwsManager {
         }
 
         // Étape 3-6: Enregistrement Relay et obtention Permis
-        self.update_conformity(MwsConformityState::RegisteringRelay).await;
-        self.update_conformity(MwsConformityState::AwaitingRelayAck).await;
+        self.update_conformity(MwsConformityState::RegisteringRelay)
+            .await;
+        self.update_conformity(MwsConformityState::AwaitingRelayAck)
+            .await;
 
         // Démarrer le service (inclut connexion Relay + annonce Tracker)
         match service.start(identity).await {
             Ok(_) => {
-                self.update_conformity(MwsConformityState::RelaySessionEstablished).await;
-                self.update_conformity(MwsConformityState::ObtainingPermis).await;
+                self.update_conformity(MwsConformityState::RelaySessionEstablished)
+                    .await;
+                self.update_conformity(MwsConformityState::ObtainingPermis)
+                    .await;
                 self.update_state(CentralMwsState::RelayConnected).await;
 
                 // Étape 7-9: Annonce au Tracker
-                self.update_conformity(MwsConformityState::ConnectingTracker).await;
-                self.update_conformity(MwsConformityState::AnnouncingTracker).await;
-                self.update_conformity(MwsConformityState::AwaitingTrackerAck).await;
+                self.update_conformity(MwsConformityState::ConnectingTracker)
+                    .await;
+                self.update_conformity(MwsConformityState::AnnouncingTracker)
+                    .await;
+                self.update_conformity(MwsConformityState::AwaitingTrackerAck)
+                    .await;
 
                 // Stocker le service
                 {
@@ -468,7 +490,10 @@ impl CentralMwsManager {
                 let service_ref = Arc::clone(&self.service);
                 let cog_id_log = self.cog_id.clone();
                 const HEARTBEAT_INTERVAL_SECS: u64 = 30;
-                info!("Démarrage heartbeat Central → Tracker (interval={}s, cog={})", HEARTBEAT_INTERVAL_SECS, &cog_id_log);
+                info!(
+                    "Démarrage heartbeat Central → Tracker (interval={}s, cog={})",
+                    HEARTBEAT_INTERVAL_SECS, &cog_id_log
+                );
                 let handle = tokio::spawn(async move {
                     let mut count: u64 = 0;
                     loop {
@@ -476,15 +501,24 @@ impl CentralMwsManager {
                         count += 1;
                         let guard = service_ref.read().await;
                         let Some(ref svc) = *guard else {
-                            warn!("[Heartbeat #{}] Service MWS disparu, arrêt du heartbeat (COG {})", count, cog_id_log);
+                            warn!(
+                                "[Heartbeat #{}] Service MWS disparu, arrêt du heartbeat (COG {})",
+                                count, cog_id_log
+                            );
                             break;
                         };
                         match svc.send_heartbeat().await {
                             Ok(()) => {
-                                info!("[Heartbeat #{} OK] Central → Tracker (COG {})", count, cog_id_log);
+                                info!(
+                                    "[Heartbeat #{} OK] Central → Tracker (COG {})",
+                                    count, cog_id_log
+                                );
                             }
                             Err(e) => {
-                                warn!("[Heartbeat #{} ERREUR] Central → Tracker (COG {}): {}", count, cog_id_log, e);
+                                warn!(
+                                    "[Heartbeat #{} ERREUR] Central → Tracker (COG {}): {}",
+                                    count, cog_id_log, e
+                                );
                             }
                         }
                     }
@@ -494,7 +528,8 @@ impl CentralMwsManager {
                 }
 
                 // Conformité complète
-                self.update_conformity(MwsConformityState::FullyConformant).await;
+                self.update_conformity(MwsConformityState::FullyConformant)
+                    .await;
                 self.update_state(CentralMwsState::Connected).await;
 
                 // Démarrer le mini serveur Home si configuré (exposition automatique)
@@ -505,18 +540,30 @@ impl CentralMwsManager {
                     let home_jayxpose = (self.config.expose_jayxpose_vitrine
                         && self.config.jayxpose_vitrine_base_url.is_some()
                         && self.jayxpose_vitrine_slug.is_some())
-                        .then(|| HomeJayXposeInfo {
-                            base_url: self.config.jayxpose_vitrine_base_url.clone().unwrap(),
-                            slug: self.jayxpose_vitrine_slug.clone().unwrap(),
-                        });
+                    .then(|| HomeJayXposeInfo {
+                        base_url: self.config.jayxpose_vitrine_base_url.clone().unwrap(),
+                        slug: self.jayxpose_vitrine_slug.clone().unwrap(),
+                    });
                     let jayxpose_db = self.jayxpose_db.clone();
                     let (tx, rx) = oneshot::channel();
                     let bind_for_server = bind_addr.clone();
                     let bind_for_log = bind_addr.clone();
                     tokio::spawn(async move {
-                        match run_home_server(bind_for_server.clone(), cog_id, core_version, services, home_jayxpose, jayxpose_db, rx).await {
+                        match run_home_server(
+                            bind_for_server.clone(),
+                            cog_id,
+                            core_version,
+                            services,
+                            home_jayxpose,
+                            jayxpose_db,
+                            rx,
+                        )
+                        .await
+                        {
                             Ok(()) => info!("Serveur Home arrêté proprement"),
-                            Err(e) => error!("❌ Serveur Home ERREUR (bind={}): {}", bind_for_server, e),
+                            Err(e) => {
+                                error!("❌ Serveur Home ERREUR (bind={}): {}", bind_for_server, e)
+                            }
                         }
                     });
                     let mut shutdown_guard = self.home_server_shutdown.write().await;
@@ -535,8 +582,10 @@ impl CentralMwsManager {
                 let error_msg = e.to_string();
                 error!("❌ Échec de la conformité MWS: {}", error_msg);
 
-                self.update_conformity(MwsConformityState::ConformityError(error_msg.clone())).await;
-                self.update_state(CentralMwsState::Error(error_msg.clone())).await;
+                self.update_conformity(MwsConformityState::ConformityError(error_msg.clone()))
+                    .await;
+                self.update_state(CentralMwsState::Error(error_msg.clone()))
+                    .await;
 
                 Err(error_msg)
             }
@@ -582,14 +631,20 @@ impl CentralMwsManager {
         let (new_state, new_conformity) = if self.config.lone_mode {
             (CentralMwsState::Lone, MwsConformityState::LoneMode)
         } else if self.config.enabled {
-            (CentralMwsState::Disconnected, MwsConformityState::Uninitialized)
+            (
+                CentralMwsState::Disconnected,
+                MwsConformityState::Uninitialized,
+            )
         } else {
             (CentralMwsState::Disabled, MwsConformityState::Uninitialized)
         };
 
         self.update_state(new_state.clone()).await;
         self.update_conformity(new_conformity.clone()).await;
-        info!("[CentralMws] État → {:?}, Conformité → {:?}", new_state, new_conformity);
+        info!(
+            "[CentralMws] État → {:?}, Conformité → {:?}",
+            new_state, new_conformity
+        );
 
         // 4. Effacer le service
         {
@@ -669,7 +724,8 @@ impl CentralMwsManager {
             metadata,
         };
 
-        let lobby_id = svc.create_lobby(lobby.clone(), password)
+        let lobby_id = svc
+            .create_lobby(lobby.clone(), password)
             .await
             .map_err(|e| e.to_string())?;
 
@@ -806,7 +862,8 @@ impl CentralMwsManager {
     pub async fn disable_lone_mode(&mut self) {
         self.config.lone_mode = false;
         self.config.enabled = true;
-        self.update_conformity(MwsConformityState::Uninitialized).await;
+        self.update_conformity(MwsConformityState::Uninitialized)
+            .await;
         self.update_state(CentralMwsState::Disconnected).await;
         info!("Mode Lone désactivé — COG prêt à rejoindre le réseau MWS");
     }
@@ -869,8 +926,8 @@ impl MwsNetworkInfo {
             conformity_description: conformity.description().to_string(),
             conformity,
             is_lone: manager.is_lone().await,
-            visible_cogs: 0,    // TODO: mettre à jour via polling
-            visible_lobbys: 0,  // TODO: mettre à jour via polling
+            visible_cogs: 0,   // TODO: mettre à jour via polling
+            visible_lobbys: 0, // TODO: mettre à jour via polling
             relay_address: manager.config.relay_address.clone(),
             tracker_address: manager.config.tracker_address.clone(),
             services,
@@ -1098,7 +1155,10 @@ fn route_request(
                     ("404 Not Found", not_found_html("Aucune vitrine publiée"))
                 }
             } else {
-                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+                (
+                    "503 Service Unavailable",
+                    not_found_html("Service JayXpose non disponible"),
+                )
             }
         }
         "/jayxpose/catalogue" => {
@@ -1109,7 +1169,10 @@ fn route_request(
                     ("404 Not Found", not_found_html("Catalogue non disponible"))
                 }
             } else {
-                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+                (
+                    "503 Service Unavailable",
+                    not_found_html("Service JayXpose non disponible"),
+                )
             }
         }
         "/jayxpose/contact" => {
@@ -1117,10 +1180,16 @@ fn route_request(
                 if let Some(html) = jayxpose_contact_html(db) {
                     ("200 OK", html)
                 } else {
-                    ("404 Not Found", not_found_html("Page contact non disponible"))
+                    (
+                        "404 Not Found",
+                        not_found_html("Page contact non disponible"),
+                    )
                 }
             } else {
-                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+                (
+                    "503 Service Unavailable",
+                    not_found_html("Service JayXpose non disponible"),
+                )
             }
         }
         _ if path.starts_with("/jayxpose/catalogue/") => {
@@ -1132,7 +1201,10 @@ fn route_request(
                     ("404 Not Found", not_found_html("Produit non trouvé"))
                 }
             } else {
-                ("503 Service Unavailable", not_found_html("Service JayXpose non disponible"))
+                (
+                    "503 Service Unavailable",
+                    not_found_html("Service JayXpose non disponible"),
+                )
             }
         }
         _ => ("404 Not Found", not_found_html("Page non trouvée")),
@@ -1151,7 +1223,12 @@ fn not_found_html(message: &str) -> String {
 }
 
 /// Génère la page portail du COG avec liens vers les services locaux.
-fn home_portal_html(cog_id: &str, core_version: &str, services: &[String], _home_jayxpose: Option<&HomeJayXposeInfo>) -> String {
+fn home_portal_html(
+    cog_id: &str,
+    core_version: &str,
+    services: &[String],
+    _home_jayxpose: Option<&HomeJayXposeInfo>,
+) -> String {
     // Génère des cartes pour chaque service exposé avec lien local
     let services_cards: String = if services.is_empty() {
         r#"<p class="text-muted">Aucun service exposé pour le moment.</p>"#.to_string()
@@ -1258,9 +1335,21 @@ fn home_portal_html(cog_id: &str, core_version: &str, services: &[String], _home
 
 /// Layout commun pour les pages JayXpose locales.
 fn jayxpose_layout(title: &str, content: &str, active_page: &str) -> String {
-    let nav_home_class = if active_page == "home" { "nav-link active" } else { "nav-link" };
-    let nav_catalogue_class = if active_page == "catalogue" { "nav-link active" } else { "nav-link" };
-    let nav_contact_class = if active_page == "contact" { "nav-link active" } else { "nav-link" };
+    let nav_home_class = if active_page == "home" {
+        "nav-link active"
+    } else {
+        "nav-link"
+    };
+    let nav_catalogue_class = if active_page == "catalogue" {
+        "nav-link active"
+    } else {
+        "nav-link"
+    };
+    let nav_contact_class = if active_page == "contact" {
+        "nav-link active"
+    } else {
+        "nav-link"
+    };
 
     format!(
         r##"<!DOCTYPE html>
@@ -1404,7 +1493,10 @@ fn jayxpose_catalogue_html(db: &JayXposeDb) -> Option<String> {
 
     let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
     let exposant_id = exposant.id.as_deref().unwrap_or("");
-    let produits = db.produits_by_exposant(exposant_id).ok().unwrap_or_default();
+    let produits = db
+        .produits_by_exposant(exposant_id)
+        .ok()
+        .unwrap_or_default();
 
     let availability_label = |a: Option<&String>| -> (&str, &str) {
         let s: &str = a.map(|x| x.as_str()).unwrap_or("disponible");
@@ -1453,7 +1545,11 @@ fn jayxpose_catalogue_html(db: &JayXposeDb) -> Option<String> {
         cards = cards,
     );
 
-    Some(jayxpose_layout(&format!("Catalogue — {}", company_name), &content, "catalogue"))
+    Some(jayxpose_layout(
+        &format!("Catalogue — {}", company_name),
+        &content,
+        "catalogue",
+    ))
 }
 
 /// Page fiche produit JayXpose.
@@ -1507,16 +1603,28 @@ fn jayxpose_contact_html(db: &JayXposeDb) -> Option<String> {
     // Réseaux sociaux
     let mut socials = Vec::new();
     if let Some(fb) = exposant.social_facebook.as_ref().filter(|s| !s.is_empty()) {
-        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">Facebook</a>"#, html_escape(fb)));
+        socials.push(format!(
+            r#"<a href="{}" target="_blank" rel="noopener">Facebook</a>"#,
+            html_escape(fb)
+        ));
     }
     if let Some(ig) = exposant.social_instagram.as_ref().filter(|s| !s.is_empty()) {
-        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">Instagram</a>"#, html_escape(ig)));
+        socials.push(format!(
+            r#"<a href="{}" target="_blank" rel="noopener">Instagram</a>"#,
+            html_escape(ig)
+        ));
     }
     if let Some(li) = exposant.social_linkedin.as_ref().filter(|s| !s.is_empty()) {
-        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">LinkedIn</a>"#, html_escape(li)));
+        socials.push(format!(
+            r#"<a href="{}" target="_blank" rel="noopener">LinkedIn</a>"#,
+            html_escape(li)
+        ));
     }
     if let Some(x) = exposant.social_x.as_ref().filter(|s| !s.is_empty()) {
-        socials.push(format!(r#"<a href="{}" target="_blank" rel="noopener">X (Twitter)</a>"#, html_escape(x)));
+        socials.push(format!(
+            r#"<a href="{}" target="_blank" rel="noopener">X (Twitter)</a>"#,
+            html_escape(x)
+        ));
     }
 
     let socials_html = if socials.is_empty() {
@@ -1543,22 +1651,37 @@ fn jayxpose_contact_html(db: &JayXposeDb) -> Option<String> {
         email_html = if email.is_empty() {
             String::new()
         } else {
-            format!(r#"<div class="contact-item"><span>📧 Email</span><a href="mailto:{}" style="color: var(--primary);">{}</a></div>"#, html_escape(email), html_escape(email))
+            format!(
+                r#"<div class="contact-item"><span>📧 Email</span><a href="mailto:{}" style="color: var(--primary);">{}</a></div>"#,
+                html_escape(email),
+                html_escape(email)
+            )
         },
         phone_html = if phone.is_empty() {
             String::new()
         } else {
-            format!(r#"<div class="contact-item"><span>📞 Téléphone</span><span>{}</span></div>"#, html_escape(phone))
+            format!(
+                r#"<div class="contact-item"><span>📞 Téléphone</span><span>{}</span></div>"#,
+                html_escape(phone)
+            )
         },
         site_html = if site_web.is_empty() {
             String::new()
         } else {
-            format!(r#"<div class="contact-item"><span>🌐 Site web</span><a href="{}" target="_blank" rel="noopener" style="color: var(--primary);">{}</a></div>"#, html_escape(site_web), html_escape(site_web))
+            format!(
+                r#"<div class="contact-item"><span>🌐 Site web</span><a href="{}" target="_blank" rel="noopener" style="color: var(--primary);">{}</a></div>"#,
+                html_escape(site_web),
+                html_escape(site_web)
+            )
         },
         socials_html = socials_html,
     );
 
-    Some(jayxpose_layout(&format!("Contact — {}", company_name), &content, "contact"))
+    Some(jayxpose_layout(
+        &format!("Contact — {}", company_name),
+        &content,
+        "contact",
+    ))
 }
 
 fn html_escape(s: &str) -> String {
@@ -1620,10 +1743,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_manager_creation() {
-        let manager = CentralMwsManager::with_defaults(
-            "test-cog".to_string(),
-            "1.0.0".to_string(),
-        );
+        let manager = CentralMwsManager::with_defaults("test-cog".to_string(), "1.0.0".to_string());
 
         assert_eq!(manager.get_state().await, CentralMwsState::Disconnected);
         assert!(!manager.is_connected().await);
@@ -1632,10 +1752,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_lone_manager() {
-        let manager = CentralMwsManager::lone(
-            "lone-cog".to_string(),
-            "1.0.0".to_string(),
-        );
+        let manager = CentralMwsManager::lone("lone-cog".to_string(), "1.0.0".to_string());
 
         assert_eq!(manager.get_state().await, CentralMwsState::Lone);
         assert!(manager.is_lone().await);
@@ -1644,10 +1761,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_service_management() {
-        let manager = CentralMwsManager::with_defaults(
-            "test-cog".to_string(),
-            "1.0.0".to_string(),
-        );
+        let manager = CentralMwsManager::with_defaults("test-cog".to_string(), "1.0.0".to_string());
 
         manager.add_service("jayfestival".to_string()).await;
         manager.add_service("jayxpose".to_string()).await;
@@ -1671,10 +1785,8 @@ mod tests {
         assert!(summary.can_disconnect);
         assert!(!summary.can_connect);
 
-        let lone_summary = MwsStatusSummary::from_state(
-            &CentralMwsState::Lone,
-            &MwsConformityState::LoneMode,
-        );
+        let lone_summary =
+            MwsStatusSummary::from_state(&CentralMwsState::Lone, &MwsConformityState::LoneMode);
         assert_eq!(lone_summary.icon, "🏝️");
         assert!(!lone_summary.can_connect);
         assert!(!lone_summary.can_disconnect);

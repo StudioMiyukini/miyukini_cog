@@ -129,10 +129,7 @@ mod tests {
     }
 
     impl AliciaCommandDispatcher for MockDispatcher {
-        fn dispatch_command(
-            &self,
-            command: DeviceCommand,
-        ) -> Result<(), AutomationError> {
+        fn dispatch_command(&self, command: DeviceCommand) -> Result<(), AutomationError> {
             if self.should_fail {
                 return Err(AutomationError::DispatchError(
                     "mock dispatch failure".to_string(),
@@ -197,7 +194,10 @@ mod tests {
 
         let result = execute_actions(&actions, dispatcher.clone(), auto_id).await;
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), AutomationError::DispatchError(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            AutomationError::DispatchError(_)
+        ));
     }
 
     #[tokio::test]
@@ -248,6 +248,10 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(dispatcher.commands_count(), 2);
         // Verifie que le delai a bien ete respecte (au moins 40ms pour tolerance)
-        assert!(elapsed.as_millis() >= 40, "elapsed: {}ms", elapsed.as_millis());
+        assert!(
+            elapsed.as_millis() >= 40,
+            "elapsed: {}ms",
+            elapsed.as_millis()
+        );
     }
 }

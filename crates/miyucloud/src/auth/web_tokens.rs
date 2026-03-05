@@ -47,11 +47,7 @@ pub fn hash_password(password: &str) -> Result<String, MiyucloudError> {
     rand::rngs::OsRng.fill_bytes(&mut salt);
 
     let params = password_argon2_params();
-    let argon2 = argon2::Argon2::new(
-        argon2::Algorithm::Argon2id,
-        argon2::Version::V0x13,
-        params,
-    );
+    let argon2 = argon2::Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
     let mut hash = [0u8; 32];
     argon2
         .hash_password_into(password.as_bytes(), &salt, &mut hash)
@@ -87,11 +83,7 @@ pub fn verify_password(password: &str, stored_hash: &str) -> bool {
     };
 
     let params = password_argon2_params();
-    let argon2 = argon2::Argon2::new(
-        argon2::Algorithm::Argon2id,
-        argon2::Version::V0x13,
-        params,
-    );
+    let argon2 = argon2::Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, params);
     let mut computed = [0u8; 32];
     if argon2
         .hash_password_into(password.as_bytes(), &salt, &mut computed)
@@ -259,7 +251,10 @@ mod tests {
         link.has_password = true;
         let result = validate_share_link(&link, Some("wrong-password"), Some(&hashed));
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Incorrect password"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Incorrect password"));
     }
 
     #[test]
@@ -269,12 +264,10 @@ mod tests {
         link.has_password = true;
         let result = validate_share_link(&link, None, Some(&hashed));
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Password is required")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Password is required"));
     }
 
     #[test]
@@ -284,12 +277,10 @@ mod tests {
         link.download_count = 5;
         let result = validate_share_link(&link, None, None);
         assert!(result.is_err());
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Maximum download count")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Maximum download count"));
     }
 
     #[test]
@@ -307,11 +298,7 @@ mod tests {
         let parts: Vec<&str> = hashed.splitn(2, '$').collect();
         assert_eq!(parts.len(), 2);
         assert_eq!(parts[0].len(), 32, "Salt should be 32 hex chars (16 bytes)");
-        assert_eq!(
-            parts[1].len(),
-            64,
-            "Hash should be 64 hex chars (32 bytes)"
-        );
+        assert_eq!(parts[1].len(), 64, "Hash should be 64 hex chars (32 bytes)");
     }
 
     #[test]

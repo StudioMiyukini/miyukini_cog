@@ -14,7 +14,9 @@ pub mod data;
 pub mod domain;
 pub mod transport;
 
-pub use transport::{DispatchError, MwsTransportSender, set_mws_transport_sender, has_mws_transport_sender};
+pub use transport::{
+    has_mws_transport_sender, set_mws_transport_sender, DispatchError, MwsTransportSender,
+};
 
 pub use data::{
     Friend, FriendWithPresence, Jay1TribuDb, Message, Salon, SalonMember, SalonType, Tribe,
@@ -23,8 +25,8 @@ pub use data::{
 #[allow(deprecated)]
 pub use domain::{
     accept_tribe_invitation, check_can_transfer_file, create_salon, create_tribe,
-    find_direct_salon_between, get_friends_list, get_friends_with_presence,
-    get_or_create_direct_salon, get_online_friends, invite_to_tribe, is_webway_connected,
-    list_pending_invitations, process_pending_deliveries, refuse_tribe_invitation, send_file,
-    send_message, set_webway_connected, Jay1TribuDomainError, Jay1TribuResult, PendingInvitation,
+    find_direct_salon_between, get_friends_list, get_friends_with_presence, get_online_friends,
+    get_or_create_direct_salon, invite_to_tribe, is_webway_connected, list_pending_invitations,
+    process_pending_deliveries, refuse_tribe_invitation, send_file, send_message,
+    set_webway_connected, Jay1TribuDomainError, Jay1TribuResult, PendingInvitation,
 };

@@ -280,9 +280,7 @@ fn extract_room_id(text: &str) -> Option<String> {
         "chambre parentale" | "chambre des parents" | "parents" => {
             Some("chambre-parentale".to_string())
         }
-        "chambre theresa" | "chambre de theresa" | "theresa" => {
-            Some("chambre-theresa".to_string())
-        }
+        "chambre theresa" | "chambre de theresa" | "theresa" => Some("chambre-theresa".to_string()),
         "chambre eleanore" | "chambre d eleanore" | "eleanore" => {
             Some("chambre-eleanore".to_string())
         }

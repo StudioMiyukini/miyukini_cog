@@ -58,11 +58,7 @@ mod tests {
     #[test]
     fn test_registry_register_and_get() {
         let mut reg = BoundaryRegistry::new();
-        let boundary = Boundary::new(
-            "b1".to_string(),
-            BoundaryType::External,
-            "Ext".to_string(),
-        );
+        let boundary = Boundary::new("b1".to_string(), BoundaryType::External, "Ext".to_string());
         let meta = BoundaryMetadata::new(
             "2026-01-01T00:00:00Z".to_string(),
             "system".to_string(),

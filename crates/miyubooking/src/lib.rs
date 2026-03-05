@@ -45,8 +45,13 @@ mod tests {
         assert!(list.contains(&"slot-1".to_string()));
         assert!(list.contains(&"slot-2".to_string()));
         assert_eq!(slots_resolve(&c, "slot-1").unwrap(), "{}");
-        assert_eq!(slots_resolve(&c, "slot-2").unwrap(), "{\"start\":\"10:00\"}");
-        assert!(slots_list(&c, "res-2", "2026-02-17", None).unwrap().is_empty());
+        assert_eq!(
+            slots_resolve(&c, "slot-2").unwrap(),
+            "{\"start\":\"10:00\"}"
+        );
+        assert!(slots_list(&c, "res-2", "2026-02-17", None)
+            .unwrap()
+            .is_empty());
     }
 
     #[test]

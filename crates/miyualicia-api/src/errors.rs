@@ -62,16 +62,12 @@ impl ApiError {
     /// Retourne le code HTTP correspondant a l'erreur.
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::Unauthorized | Self::TokenExpired | Self::JwtError(_) => {
-                StatusCode::UNAUTHORIZED
-            }
+            Self::Unauthorized | Self::TokenExpired | Self::JwtError(_) => StatusCode::UNAUTHORIZED,
             Self::Forbidden { .. } => StatusCode::FORBIDDEN,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Self::TooManyRequests { .. } => StatusCode::TOO_MANY_REQUESTS,
-            Self::InternalError(_) | Self::AliciaError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            Self::InternalError(_) | Self::AliciaError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

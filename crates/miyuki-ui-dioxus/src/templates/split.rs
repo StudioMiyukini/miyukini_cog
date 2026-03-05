@@ -36,17 +36,13 @@ pub fn SplitLayout(
     let border_color = p.border_subtle.to_css();
     let right_pct = 100.0 - ratio;
 
-    let container_style = format!(
-        "display: flex; height: 100vh; background: {bg_color}; overflow: hidden;"
-    );
+    let container_style =
+        format!("display: flex; height: 100vh; background: {bg_color}; overflow: hidden;");
 
-    let left_style = format!(
-        "width: {ratio}%; overflow-y: auto; border-right: 1px solid {border_color};"
-    );
+    let left_style =
+        format!("width: {ratio}%; overflow-y: auto; border-right: 1px solid {border_color};");
 
-    let right_style = format!(
-        "width: {right_pct}%; overflow-y: auto;"
-    );
+    let right_style = format!("width: {right_pct}%; overflow-y: auto;");
 
     rsx! {
         div { style: "{container_style}",

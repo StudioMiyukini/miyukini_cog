@@ -5,8 +5,6 @@
 pub mod adapter;
 
 pub use adapter::{
-    miyunotify_send_announcement,
-    miyunotify_send_targeted,
-    MiyunotifyAdapterError,
+    miyunotify_send_announcement, miyunotify_send_targeted, MiyunotifyAdapterError,
     MiyunotifyTargetChannel,
 };

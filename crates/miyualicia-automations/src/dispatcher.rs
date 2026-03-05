@@ -23,10 +23,7 @@ use crate::errors::AutomationError;
 /// (evite la dependance circulaire). `miyualicia::AliciaService` implemente ce trait.
 pub trait AliciaCommandDispatcher: Send + Sync {
     /// Envoie une commande vers un dispositif.
-    fn dispatch_command(
-        &self,
-        command: DeviceCommand,
-    ) -> Result<(), AutomationError>;
+    fn dispatch_command(&self, command: DeviceCommand) -> Result<(), AutomationError>;
 
     /// Retourne l'etat courant d'un dispositif.
     fn get_device_state(&self, device_id: &Uuid) -> Option<DeviceState>;

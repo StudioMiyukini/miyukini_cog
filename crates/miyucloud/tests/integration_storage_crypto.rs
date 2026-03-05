@@ -107,6 +107,10 @@ mod integration {
 
         // Verify encrypted storage is not plaintext
         let stored = storage.read_chunk(&entry.id, 0).unwrap();
-        assert_ne!(&stored[12..], original, "Stored data should be encrypted, not plaintext");
+        assert_ne!(
+            &stored[12..],
+            original,
+            "Stored data should be encrypted, not plaintext"
+        );
     }
 }

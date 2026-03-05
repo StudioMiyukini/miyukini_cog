@@ -1,9 +1,9 @@
 //! Point d'entree binaire Lord of the Click / MiyuClicker (standalone).
 
-use std::path::PathBuf;
 use dioxus::prelude::*;
+use miyuclicker_app::{views::MiyuClickerView, DataDirContext};
 use miyukini_service_ui::{Theme, ThemeContext};
-use miyuclicker_app::{DataDirContext, views::MiyuClickerView};
+use std::path::PathBuf;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -30,15 +30,22 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| {
-            let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
-            format!("{base}/Miyukini-COG/services/miyuclicker/data")
-        });
+    let data_dir = std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| {
+        let base = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
+        format!("{base}/Miyukini-COG/services/miyuclicker/data")
+    });
     let _ = std::fs::create_dir_all(&data_dir);
 
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::Gaming }));
-    use_context_provider(|| Signal::new(DataDirContext { data_dir: PathBuf::from(&data_dir) }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::Gaming,
+        })
+    });
+    use_context_provider(|| {
+        Signal::new(DataDirContext {
+            data_dir: PathBuf::from(&data_dir),
+        })
+    });
 
     rsx! {
         div {

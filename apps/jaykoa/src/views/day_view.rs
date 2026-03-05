@@ -1,10 +1,10 @@
 //! Vue Jour — Grille horaire sur une journee unique.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use jaykoa::data::{TemporalEntry, TemporalConflict};
-use chrono::{Datelike, NaiveDate, Timelike};
 use super::components::EventBlock;
+use chrono::{Datelike, NaiveDate, Timelike};
+use dioxus::prelude::*;
+use jaykoa::data::{TemporalConflict, TemporalEntry};
+use miyukini_service_ui::use_palette;
 
 /// Props pour la vue jour.
 #[derive(Props, Clone, PartialEq)]
@@ -46,7 +46,9 @@ pub fn DayView(props: DayViewProps) -> Element {
 
     // Filtrer les entrees du jour
     let day_str = props.date.format("%Y-%m-%d").to_string();
-    let day_entries: Vec<&TemporalEntry> = props.entries.iter()
+    let day_entries: Vec<&TemporalEntry> = props
+        .entries
+        .iter()
         .filter(|e| {
             if let Some(start) = &e.start_datetime {
                 start.starts_with(&day_str)
@@ -57,7 +59,9 @@ pub fn DayView(props: DayViewProps) -> Element {
         .filter(|e| !e.all_day)
         .collect();
 
-    let all_day_entries: Vec<&TemporalEntry> = props.entries.iter()
+    let all_day_entries: Vec<&TemporalEntry> = props
+        .entries
+        .iter()
         .filter(|e| e.all_day)
         .filter(|e| {
             if let Some(start) = &e.start_datetime {
@@ -69,7 +73,9 @@ pub fn DayView(props: DayViewProps) -> Element {
         .collect();
 
     // IDs des entrees en conflit
-    let conflict_ids: Vec<String> = props.conflicts.iter()
+    let conflict_ids: Vec<String> = props
+        .conflicts
+        .iter()
         .flat_map(|c| [c.entry_a_id.clone(), c.entry_b_id.clone()])
         .flatten()
         .collect();

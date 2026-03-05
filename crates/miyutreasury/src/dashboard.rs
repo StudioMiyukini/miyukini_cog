@@ -9,7 +9,10 @@ use crate::errors::MiyutreasuryError;
 /// @layer: tool
 /// @human: Agrège les indicateurs pour le tableau de bord trésorerie ; données = KindMother.
 /// @do: treasury_dashboard_aggregate_under_governance
-pub fn aggregate(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<String, MiyutreasuryError> {
+pub fn aggregate(
+    ctx: &GovernedContext,
+    _context_ref: Option<&str>,
+) -> Result<String, MiyutreasuryError> {
     if !ctx.has_mandate() {
         return Err(MiyutreasuryError::NoMandate);
     }

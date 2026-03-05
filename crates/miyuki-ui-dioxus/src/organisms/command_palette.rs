@@ -93,9 +93,7 @@ pub fn CommandPalette(
     let query_lower = query.to_lowercase();
     let filtered: Vec<&CommandAction> = actions
         .iter()
-        .filter(|a| {
-            query_lower.is_empty() || a.label.to_lowercase().contains(&query_lower)
-        })
+        .filter(|a| query_lower.is_empty() || a.label.to_lowercase().contains(&query_lower))
         .collect();
 
     rsx! {

@@ -21,7 +21,9 @@ pub fn create(
     }
     let id = format!("post:{}", UuidIdGenerator.generate());
     let author_id = ctx.mandate_id.clone();
-    let mut guard = store::posts().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    let mut guard = store::posts()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), (author_id, content.to_string()));
     Ok(id)
 }
@@ -40,8 +42,12 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyusocialfeedError::NoMandate);
     }
-    let mut guard = store::posts().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
-    let (_, c) = guard.get_mut(post_id).ok_or_else(|| MiyusocialfeedError::InvalidInput("post not found".into()))?;
+    let mut guard = store::posts()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    let (_, c) = guard
+        .get_mut(post_id)
+        .ok_or_else(|| MiyusocialfeedError::InvalidInput("post not found".into()))?;
     *c = content.to_string();
     Ok(())
 }
@@ -56,8 +62,12 @@ pub fn delete(ctx: &GovernedContext, post_id: &str) -> Result<(), Miyusocialfeed
     if !ctx.has_mandate() {
         return Err(MiyusocialfeedError::NoMandate);
     }
-    let mut guard = store::posts().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
-    guard.remove(post_id).ok_or_else(|| MiyusocialfeedError::InvalidInput("post not found".into()))?;
+    let mut guard = store::posts()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    guard
+        .remove(post_id)
+        .ok_or_else(|| MiyusocialfeedError::InvalidInput("post not found".into()))?;
     Ok(())
 }
 
@@ -71,9 +81,18 @@ pub fn get(ctx: &GovernedContext, post_id: &str) -> Result<PostItem, Miyusocialf
     if !ctx.has_mandate() {
         return Err(MiyusocialfeedError::NoMandate);
     }
-    let guard = store::posts().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
-    let (author_id, content) = guard.get(post_id).ok_or_else(|| MiyusocialfeedError::InvalidInput("post not found".into()))?.clone();
-    Ok(PostItem { id: post_id.to_string(), author_id, content })
+    let guard = store::posts()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    let (author_id, content) = guard
+        .get(post_id)
+        .ok_or_else(|| MiyusocialfeedError::InvalidInput("post not found".into()))?
+        .clone();
+    Ok(PostItem {
+        id: post_id.to_string(),
+        author_id,
+        content,
+    })
 }
 
 /// Élément publication.

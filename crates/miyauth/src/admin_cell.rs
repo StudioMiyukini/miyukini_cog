@@ -30,7 +30,9 @@ pub struct MiyauthTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyauthIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyauthAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.identity.miyauth";
 
-#[must_use] 
+#[must_use]
 pub fn miyauth_admin_cell(version: &str, fingerprint: &str) -> MiyauthAdminCell {
     MiyauthAdminCell {
         identification: MiyauthIdentification {
@@ -63,7 +65,9 @@ pub fn miyauth_admin_cell(version: &str, fingerprint: &str) -> MiyauthAdminCell 
                 id: "Miyauth".to_string(),
                 name: "Test chemin complet Miyauth".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

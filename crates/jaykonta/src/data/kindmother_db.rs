@@ -7,9 +7,9 @@ use crate::data::types::{
     AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,
 };
 use crate::domain::purse::{
-    BudgetRef, BudgetStatus, Category, CategoryBreakdown, CategoryRef, GoalStatus, GoalType,
-    Movement, MovementFilters, MovementType, OccasionalBudget, Goal,
-    RecurringDirection, RecurringFrequency, RecurringTransaction,
+    BudgetRef, BudgetStatus, Category, CategoryBreakdown, CategoryRef, Goal, GoalStatus, GoalType,
+    Movement, MovementFilters, MovementType, OccasionalBudget, RecurringDirection,
+    RecurringFrequency, RecurringTransaction,
 };
 // Types Account importes au besoin pour les methodes futures
 // use crate::domain::account::{Counterparty, InvoiceStatus, PaymentMethod, QuoteStatus};
@@ -160,10 +160,7 @@ impl JayKontaDb {
 
         // Mettre a jour la version
         if current_version < Self::SCHEMA_VERSION {
-            conn.execute_batch(&format!(
-                "PRAGMA user_version = {};",
-                Self::SCHEMA_VERSION
-            ))?;
+            conn.execute_batch(&format!("PRAGMA user_version = {};", Self::SCHEMA_VERSION))?;
         }
 
         Ok(())
@@ -177,22 +174,25 @@ impl JayKontaDb {
     pub fn is_bootstrap_needed(&self) -> Result<bool, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         // Verifie les deux tables d'audit (legacy + nouvelle)
-        let legacy_exists: bool = conn.query_row(
-            "SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='audit_log'",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(false);
+        let legacy_exists: bool = conn
+            .query_row(
+                "SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='audit_log'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(false);
 
         if legacy_exists {
-            let count: i64 = conn.query_row("SELECT COUNT(*) FROM audit_log", [], |row| row.get(0))?;
-            if count > 0 { return Ok(false); }
+            let count: i64 =
+                conn.query_row("SELECT COUNT(*) FROM audit_log", [], |row| row.get(0))?;
+            if count > 0 {
+                return Ok(false);
+            }
         }
 
-        let count: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM audit",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0);
+        let count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM audit", [], |row| row.get(0))
+            .unwrap_or(0);
         Ok(count == 0)
     }
 
@@ -282,11 +282,13 @@ impl JayKontaDb {
     pub fn insert_payment_and_update_invoice(&self, p: &PaymentRecord) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         // Retrouver account_id depuis la facture
-        let account_id: String = conn.query_row(
-            "SELECT account_id FROM invoices WHERE id = ?1",
-            params![p.invoice_id],
-            |row| row.get(0),
-        ).unwrap_or_else(|_| "default-account".to_string());
+        let account_id: String = conn
+            .query_row(
+                "SELECT account_id FROM invoices WHERE id = ?1",
+                params![p.invoice_id],
+                |row| row.get(0),
+            )
+            .unwrap_or_else(|_| "default-account".to_string());
         conn.execute(
             "INSERT OR REPLACE INTO payments
              (id, account_id, invoice_id, amount, currency, method, reference_opaque, paid_at)
@@ -361,36 +363,42 @@ impl JayKontaDb {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let month_key = Local::now().format("%Y-%m").to_string();
 
-        let ca_mensuel: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(total_ttc), 0) FROM invoices
+        let ca_mensuel: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(total_ttc), 0) FROM invoices
              WHERE substr(issued_at, 1, 7)=?1",
-            params![month_key],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+                params![month_key],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
 
-        let impayes: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(total_ttc - paid_amount), 0) FROM invoices
+        let impayes: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(total_ttc - paid_amount), 0) FROM invoices
              WHERE status IN ('issued','sent','partial','overdue')",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
 
-        let invoices_count: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM invoices",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0);
+        let invoices_count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM invoices", [], |row| row.get(0))
+            .unwrap_or(0);
 
-        let paid_sum: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(paid_amount), 0) FROM invoices",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
-        let total_sum: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(total_ttc), 0) FROM invoices",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+        let paid_sum: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(paid_amount), 0) FROM invoices",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
+        let total_sum: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(total_ttc), 0) FROM invoices",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
         let payment_rate_pct = if total_sum > 0.0 {
             (paid_sum / total_sum) * 100.0
         } else {
@@ -410,48 +418,60 @@ impl JayKontaDb {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let month_key = Local::now().format("%Y-%m").to_string();
 
-        let monthly_expenses: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
+        let monthly_expenses: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
              WHERE scope='purse' AND amount < 0 AND substr(movement_date, 1, 7)=?1",
-            params![month_key],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+                params![month_key],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
 
-        let budget_in: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(amount), 0) FROM movements
+        let budget_in: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(amount), 0) FROM movements
              WHERE scope='purse' AND amount > 0",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
-        let budget_out: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
+        let budget_out: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
              WHERE scope='purse' AND amount < 0",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
         let budget_usage_pct = if budget_in > 0.0 {
             (budget_out / budget_in * 100.0).min(999.0)
         } else {
             0.0
         };
 
-        let active_goals: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM goals WHERE status='active'",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0);
+        let active_goals: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM goals WHERE status='active'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0);
 
-        let total_moves: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM movements WHERE scope='purse'",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0);
-        let categorized_moves: i64 = conn.query_row(
-            "SELECT COUNT(*) FROM movements
+        let total_moves: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM movements WHERE scope='purse'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0);
+        let categorized_moves: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM movements
              WHERE scope='purse' AND category_id IS NOT NULL",
-            [],
-            |row| row.get(0),
-        ).unwrap_or(0);
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or(0);
         let categorized_pct = if total_moves > 0 {
             categorized_moves as f64 * 100.0 / total_moves as f64
         } else {
@@ -555,7 +575,15 @@ impl JayKontaDb {
              (id, account_id, scope, category_id, amount, currency, description,
               movement_date, source_service, budget_id)
              VALUES (?1, ?2, 'purse', ?3, ?4, 'EUR', ?5, ?6, 'manual', ?7)",
-            params![id, account_id, category_id, amount, description, movement_date, budget_id],
+            params![
+                id,
+                account_id,
+                category_id,
+                amount,
+                description,
+                movement_date,
+                budget_id
+            ],
         )?;
         Ok(())
     }
@@ -569,7 +597,10 @@ impl JayKontaDb {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
 
         // Construire la clause WHERE
-        let mut where_clauses = vec!["m.scope = 'purse'".to_string(), "m.account_id = ?1".to_string()];
+        let mut where_clauses = vec![
+            "m.scope = 'purse'".to_string(),
+            "m.account_id = ?1".to_string(),
+        ];
         let mut param_idx = 2u32;
 
         if filters.month.is_some() {
@@ -592,7 +623,11 @@ impl JayKontaDb {
         }
 
         let where_sql = where_clauses.join(" AND ");
-        let per_page = if filters.per_page == 0 { 20 } else { filters.per_page };
+        let per_page = if filters.per_page == 0 {
+            20
+        } else {
+            filters.per_page
+        };
         let offset = filters.page * per_page;
 
         // Compter le total
@@ -614,10 +649,19 @@ impl JayKontaDb {
         let total_count: u32 = {
             let mut stmt = conn.prepare(&count_sql)?;
             let mut p_idx = 1;
-            stmt.raw_bind_parameter(p_idx, account_id)?; p_idx += 1;
-            if let Some(m) = &filters.month { stmt.raw_bind_parameter(p_idx, m.as_str())?; p_idx += 1; }
-            if let Some(c) = &filters.category_id { stmt.raw_bind_parameter(p_idx, c.as_str())?; p_idx += 1; }
-            if let Some(b) = &filters.budget_id { stmt.raw_bind_parameter(p_idx, b.as_str())?; }
+            stmt.raw_bind_parameter(p_idx, account_id)?;
+            p_idx += 1;
+            if let Some(m) = &filters.month {
+                stmt.raw_bind_parameter(p_idx, m.as_str())?;
+                p_idx += 1;
+            }
+            if let Some(c) = &filters.category_id {
+                stmt.raw_bind_parameter(p_idx, c.as_str())?;
+                p_idx += 1;
+            }
+            if let Some(b) = &filters.budget_id {
+                stmt.raw_bind_parameter(p_idx, b.as_str())?;
+            }
             let mut rows = stmt.raw_query();
             if let Some(row) = rows.next()? {
                 row.get::<_, i64>(0)? as u32
@@ -629,10 +673,19 @@ impl JayKontaDb {
         let movements = {
             let mut stmt = conn.prepare(&list_sql)?;
             let mut p_idx = 1;
-            stmt.raw_bind_parameter(p_idx, account_id)?; p_idx += 1;
-            if let Some(m) = &filters.month { stmt.raw_bind_parameter(p_idx, m.as_str())?; p_idx += 1; }
-            if let Some(c) = &filters.category_id { stmt.raw_bind_parameter(p_idx, c.as_str())?; p_idx += 1; }
-            if let Some(b) = &filters.budget_id { stmt.raw_bind_parameter(p_idx, b.as_str())?; }
+            stmt.raw_bind_parameter(p_idx, account_id)?;
+            p_idx += 1;
+            if let Some(m) = &filters.month {
+                stmt.raw_bind_parameter(p_idx, m.as_str())?;
+                p_idx += 1;
+            }
+            if let Some(c) = &filters.category_id {
+                stmt.raw_bind_parameter(p_idx, c.as_str())?;
+                p_idx += 1;
+            }
+            if let Some(b) = &filters.budget_id {
+                stmt.raw_bind_parameter(p_idx, b.as_str())?;
+            }
             let mut rows = stmt.raw_query();
             let mut items = Vec::new();
             while let Some(row) = rows.next()? {
@@ -644,10 +697,14 @@ impl JayKontaDb {
                     id: row.get(0)?,
                     amount: row.get(1)?,
                     currency: row.get(2)?,
-                    category: cat_id.zip(cat_name).map(|(id, name)| CategoryRef { id, name }),
+                    category: cat_id
+                        .zip(cat_name)
+                        .map(|(id, name)| CategoryRef { id, name }),
                     description: row.get(5)?,
                     movement_date: row.get(6)?,
-                    budget: budget_id.zip(budget_name).map(|(id, name)| BudgetRef { id, name }),
+                    budget: budget_id
+                        .zip(budget_name)
+                        .map(|(id, name)| BudgetRef { id, name }),
                     source_service: row.get(9)?,
                     context_ref: row.get(10)?,
                     created_at: row.get::<_, String>(11).unwrap_or_default(),
@@ -743,7 +800,11 @@ impl JayKontaDb {
             let target: f64 = row.get(2)?;
             let spent: f64 = row.get(3)?;
             let remaining = (target - spent).max(0.0);
-            let progress_pct = if target > 0.0 { (spent / target * 100.0).min(100.0) } else { 0.0 };
+            let progress_pct = if target > 0.0 {
+                (spent / target * 100.0).min(100.0)
+            } else {
+                0.0
+            };
             Ok(OccasionalBudget {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -804,17 +865,25 @@ impl JayKontaDb {
         let rows = stmt.query_map(params![account_id], |row| {
             let target: f64 = row.get(2)?;
             let current: f64 = row.get(3)?;
-            let progress_pct = if target > 0.0 { (current / target * 100.0).min(100.0) } else { 0.0 };
+            let progress_pct = if target > 0.0 {
+                (current / target * 100.0).min(100.0)
+            } else {
+                0.0
+            };
             let goal_type = GoalType::from_str(&row.get::<_, String>(5)?);
             let deadline: Option<String> = row.get(6)?;
             // Calcul montant mensuel requis si deadline
             let monthly_required = deadline.as_ref().and_then(|d| {
                 let remaining = target - current;
-                if remaining <= 0.0 { return None; }
+                if remaining <= 0.0 {
+                    return None;
+                }
                 // Estimation simplifiee : mois restants
                 let now = Local::now().format("%Y-%m").to_string();
                 let dl_month = &d[..7.min(d.len())];
-                if dl_month <= now.as_str() { return Some(remaining); }
+                if dl_month <= now.as_str() {
+                    return Some(remaining);
+                }
                 // Approximation nombre de mois
                 Some(remaining / 6.0) // placeholder
             });
@@ -882,13 +951,15 @@ impl JayKontaDb {
         month: &str,
     ) -> Result<Vec<CategoryBreakdown>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let total_expenses: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
+        let total_expenses: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
              WHERE scope='purse' AND account_id=?1 AND amount < 0
              AND substr(movement_date, 1, 7)=?2",
-            params![account_id, month],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+                params![account_id, month],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
 
         let mut stmt = conn.prepare(
             "SELECT COALESCE(c.name, 'Sans categorie'), SUM(ABS(m.amount))
@@ -900,7 +971,11 @@ impl JayKontaDb {
         )?;
         let rows = stmt.query_map(params![account_id, month], |row| {
             let amount: f64 = row.get(1)?;
-            let percentage = if total_expenses > 0.0 { amount / total_expenses * 100.0 } else { 0.0 };
+            let percentage = if total_expenses > 0.0 {
+                amount / total_expenses * 100.0
+            } else {
+                0.0
+            };
             Ok(CategoryBreakdown {
                 category_name: row.get(0)?,
                 amount,
@@ -913,20 +988,24 @@ impl JayKontaDb {
     /// Revenus et depenses du mois pour Purse.
     pub fn purse_month_totals(&self, account_id: &str, month: &str) -> Result<(f64, f64), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let income: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(amount), 0) FROM movements
+        let income: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(amount), 0) FROM movements
              WHERE scope='purse' AND account_id=?1 AND amount > 0
              AND substr(movement_date, 1, 7)=?2",
-            params![account_id, month],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
-        let expense: f64 = conn.query_row(
-            "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
+                params![account_id, month],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
+        let expense: f64 = conn
+            .query_row(
+                "SELECT COALESCE(SUM(ABS(amount)), 0) FROM movements
              WHERE scope='purse' AND account_id=?1 AND amount < 0
              AND substr(movement_date, 1, 7)=?2",
-            params![account_id, month],
-            |row| row.get(0),
-        ).unwrap_or(0.0);
+                params![account_id, month],
+                |row| row.get(0),
+            )
+            .unwrap_or(0.0);
         Ok((income, expense))
     }
 
@@ -969,7 +1048,9 @@ impl JayKontaDb {
                 direction: RecurringDirection::from_str(&row.get::<_, String>(1)?),
                 amount: row.get(2)?,
                 currency: row.get(3)?,
-                category: cat_id.zip(cat_name).map(|(id, name)| CategoryRef { id, name }),
+                category: cat_id
+                    .zip(cat_name)
+                    .map(|(id, name)| CategoryRef { id, name }),
                 description: row.get(6)?,
                 frequency: RecurringFrequency::from_str(&row.get::<_, String>(7)?),
                 day_of_month: row.get(8)?,
@@ -1005,11 +1086,13 @@ impl JayKontaDb {
         notes: Option<&str>,
     ) -> Result<(), DbError> {
         if account_id.is_empty() {
-            return Err(DbError("account_id manquant (compte Purse non initialisé)".to_string()));
+            return Err(DbError(
+                "account_id manquant (compte Purse non initialisé)".to_string(),
+            ));
         }
         // Chaîne vide pour category_id viole la FK : on insère NULL si absent ou vide.
-        let category_id_null = category_id
-            .and_then(|s| if s.trim().is_empty() { None } else { Some(s) });
+        let category_id_null =
+            category_id.and_then(|s| if s.trim().is_empty() { None } else { Some(s) });
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         conn.execute(
             "INSERT INTO recurring_transactions
@@ -1084,7 +1167,12 @@ impl JayKontaDb {
     // ═══════════════════════════════════════════════════════════
 
     /// Retourne ou cree un account pour un scope donne.
-    pub fn ensure_account(&self, scope: &str, user_id: &str, label: &str) -> Result<String, DbError> {
+    pub fn ensure_account(
+        &self,
+        scope: &str,
+        user_id: &str,
+        label: &str,
+    ) -> Result<String, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         if let Ok(id) = conn.query_row(
             "SELECT id FROM accounts WHERE scope=?1 AND user_id=?2",
@@ -1102,7 +1190,11 @@ impl JayKontaDb {
     }
 
     /// Retourne l'account_id pour un scope (interne, avec connexion deja lockee).
-    fn ensure_account_exists_inner(&self, conn: &Connection, scope: &str) -> Result<String, DbError> {
+    fn ensure_account_exists_inner(
+        &self,
+        conn: &Connection,
+        scope: &str,
+    ) -> Result<String, DbError> {
         if let Ok(id) = conn.query_row(
             "SELECT id FROM accounts WHERE scope=?1",
             params![scope],
@@ -1120,11 +1212,9 @@ impl JayKontaDb {
 
     /// Retourne le premier account_id existant ou en cree un.
     fn first_account_id_inner(&self, conn: &Connection) -> Result<String, DbError> {
-        if let Ok(id) = conn.query_row(
-            "SELECT id FROM accounts LIMIT 1",
-            [],
-            |row| row.get::<_, String>(0),
-        ) {
+        if let Ok(id) = conn.query_row("SELECT id FROM accounts LIMIT 1", [], |row| {
+            row.get::<_, String>(0)
+        }) {
             return Ok(id);
         }
         let id = uuid::Uuid::new_v4().to_string();
@@ -1136,7 +1226,12 @@ impl JayKontaDb {
     }
 
     /// Assure qu'une contrepartie existe pour une reference (interne, avec connexion deja lockee).
-    fn ensure_counterparty_inner(&self, conn: &Connection, account_id: &str, cp_ref: &str) -> Result<String, DbError> {
+    fn ensure_counterparty_inner(
+        &self,
+        conn: &Connection,
+        account_id: &str,
+        cp_ref: &str,
+    ) -> Result<String, DbError> {
         if let Ok(id) = conn.query_row(
             "SELECT id FROM counterparties WHERE account_id=?1 AND name=?2",
             params![account_id, cp_ref],

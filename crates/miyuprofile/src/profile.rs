@@ -66,6 +66,8 @@ pub fn update(
             user_id: user_id.to_string(),
             fields: HashMap::new(),
         });
-    entry.fields.extend(data.iter().map(|(k, v)| (k.clone(), v.clone())));
+    entry
+        .fields
+        .extend(data.iter().map(|(k, v)| (k.clone(), v.clone())));
     Ok(())
 }

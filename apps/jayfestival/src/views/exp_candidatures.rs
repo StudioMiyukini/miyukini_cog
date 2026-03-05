@@ -1,8 +1,8 @@
 //! EXP-E05/E08/E10 — Candidatures exposant + annuaire événements.
 
+use super::components::{Badge, EmptyState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, EmptyState};
 
 #[component]
 pub fn ExpCandidatures() -> Element {

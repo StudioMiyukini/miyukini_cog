@@ -95,8 +95,8 @@ pub use intent::{ActionType, CallContext, Constraint, Intent, IntentData, Intent
 /// @do: reexport_policy_types
 /// @depends: strongfather_module_policy
 pub use policy::{
-    Policy, PolicyCondition, PolicyEffect, PolicyId, PolicyPriorityLevel, PolicyResult,
-    PolicyRule, PolicySet, PolicyType,
+    Policy, PolicyCondition, PolicyEffect, PolicyId, PolicyPriorityLevel, PolicyResult, PolicyRule,
+    PolicySet, PolicyType,
 };
 
 /// @id: strongfather_reexport_decision
@@ -105,9 +105,7 @@ pub use policy::{
 /// @human: Ré-export des types de décision pour faciliter l'usage.
 /// @do: reexport_decision_types
 /// @depends: strongfather_module_decision
-pub use decision::{
-    Decision, DecisionMetadata, DecisionType, EvaluationContext, Justification,
-};
+pub use decision::{Decision, DecisionMetadata, DecisionType, EvaluationContext, Justification};
 
 /// @id: strongfather_reexport_policy_engine
 /// @role: infrastructure

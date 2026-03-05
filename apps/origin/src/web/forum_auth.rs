@@ -40,7 +40,10 @@ impl ForumAuthStore {
     }
 
     fn init_schema(&self) -> Result<(), String> {
-        let conn = self.conn.lock().map_err(|_| "store lock poisoned".to_string())?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|_| "store lock poisoned".to_string())?;
         conn.execute_batch(
             "CREATE TABLE IF NOT EXISTS forum_profiles (
                 central_id TEXT PRIMARY KEY,
@@ -50,7 +53,8 @@ impl ForumAuthStore {
                 updated_at INTEGER NOT NULL
             );
             CREATE UNIQUE INDEX IF NOT EXISTS idx_forum_profiles_email ON forum_profiles(email);",
-        ).map_err(|e| e.to_string())?;
+        )
+        .map_err(|e| e.to_string())?;
         Ok(())
     }
 
@@ -96,7 +100,10 @@ impl ForumAuthStore {
                 "UPDATE forum_profiles SET password_hash = ?1 WHERE central_id = ?2",
                 rusqlite::params![new_hash, central_id],
             );
-            info!("Upgraded password hash to Argon2id for central_id={}", central_id);
+            info!(
+                "Upgraded password hash to Argon2id for central_id={}",
+                central_id
+            );
         }
     }
 
@@ -107,7 +114,10 @@ impl ForumAuthStore {
         if email.is_empty() || password.is_empty() {
             return Ok(None);
         }
-        let conn = self.conn.lock().map_err(|_| "store lock poisoned".to_string())?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|_| "store lock poisoned".to_string())?;
         let mut stmt = conn.prepare(
             "SELECT central_id, email, pseudonyme, password_hash FROM forum_profiles WHERE email = ?1",
         ).map_err(|e| e.to_string())?;
@@ -151,7 +161,10 @@ impl ForumAuthStore {
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_secs() as i64)
             .unwrap_or(0);
-        let conn = self.conn.lock().map_err(|_| "store lock poisoned".to_string())?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|_| "store lock poisoned".to_string())?;
         conn.execute(
             "INSERT INTO forum_profiles (central_id, email, password_hash, pseudonyme, updated_at)
              VALUES (?1, ?2, ?3, ?4, ?5)
@@ -161,7 +174,8 @@ impl ForumAuthStore {
                pseudonyme = excluded.pseudonyme,
                updated_at = excluded.updated_at",
             rusqlite::params![central_id, email, password_hash, pseudonyme, now],
-        ).map_err(|e| e.to_string())?;
+        )
+        .map_err(|e| e.to_string())?;
         debug!("Forum profile synced: central_id={}", central_id);
         Ok(())
     }
@@ -185,11 +199,7 @@ pub struct SyncRequest {
 }
 
 /// Traite une requête API auth forum (POST body déjà lu).
-pub fn handle_api(
-    path: &str,
-    body: &[u8],
-    store: &ForumAuthStore,
-) -> super::server::RouteResponse {
+pub fn handle_api(path: &str, body: &[u8], store: &ForumAuthStore) -> super::server::RouteResponse {
     let path_clean = path.trim_end_matches('/');
     let body_str = match std::str::from_utf8(body) {
         Ok(s) => s.trim(),

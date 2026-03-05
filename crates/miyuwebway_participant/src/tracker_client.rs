@@ -4,9 +4,9 @@
 
 use crate::errors::MiyuwebwayParticipantError;
 use crate::protocol::{
-    AnnounceAckPayload, AnnouncePayload, CogInfo, LobbyInfo, LobbySearchResult,
-    SearchCogsPayload, SearchCogsResultPayload, SearchLobbysPayload, SearchLobbysResultPayload,
-    TrackerFrame, TrackerHeartbeatPayload, TrackerMessageType,
+    AnnounceAckPayload, AnnouncePayload, CogInfo, LobbyInfo, LobbySearchResult, SearchCogsPayload,
+    SearchCogsResultPayload, SearchLobbysPayload, SearchLobbysResultPayload, TrackerFrame,
+    TrackerHeartbeatPayload, TrackerMessageType,
 };
 use bytes::BytesMut;
 use std::sync::Arc;
@@ -134,9 +134,10 @@ impl TrackerClient {
         // Envoyer l'annonce (format Origin : pas de request_id)
         let frame = TrackerFrame::new(TrackerMessageType::Announce, payload.to_bytes());
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         debug!("ANNOUNCE sent, waiting for response");
 
@@ -150,7 +151,10 @@ impl TrackerClient {
 
                 if ack.success {
                     if let Some(ref subdomain) = ack.assigned_subdomain {
-                        info!("Announce successful: {} (ttl: {}s, subdomain: {})", ack.message, ack.ttl, subdomain);
+                        info!(
+                            "Announce successful: {} (ttl: {}s, subdomain: {})",
+                            ack.message, ack.ttl, subdomain
+                        );
                     } else {
                         info!("Announce successful: {} (ttl: {}s)", ack.message, ack.ttl);
                     }
@@ -190,9 +194,7 @@ impl TrackerClient {
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
-            .map_err(|e| {
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = TrackerHeartbeatPayload {
             cog_id: cog_id.to_string(),
@@ -206,9 +208,10 @@ impl TrackerClient {
 
         let frame = TrackerFrame::new(TrackerMessageType::Heartbeat, payload.to_bytes());
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         // Lire l'accusé
         let response = self.read_frame(&mut stream).await?;
@@ -227,37 +230,47 @@ impl TrackerClient {
 
     /// Retire le COG du réseau.
     pub async fn withdraw(&self, cog_id: &str) -> Result<(), MiyuwebwayParticipantError> {
-        info!("[Withdraw] Envoi WITHDRAW pour COG {} au Tracker ({})", cog_id, &self.config.tracker_address);
+        info!(
+            "[Withdraw] Envoi WITHDRAW pour COG {} au Tracker ({})",
+            cog_id, &self.config.tracker_address
+        );
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
-            .map_err(|e| {
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = serde_json::json!({ "cog_id": cog_id });
         let payload_bytes = bytes::Bytes::from(serde_json::to_vec(&payload).unwrap_or_default());
 
         let frame = TrackerFrame::new(TrackerMessageType::Withdraw, payload_bytes);
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         // Attendre l'accusé de retrait (WithdrawAck) du Tracker
         match tokio::time::timeout(
             std::time::Duration::from_secs(5),
             self.read_frame(&mut stream),
-        ).await {
+        )
+        .await
+        {
             Ok(Ok(response)) => {
                 if response.header.message_type == TrackerMessageType::WithdrawAck {
                     info!("[Withdraw] Accusé de retrait reçu pour COG {}", cog_id);
                 } else {
-                    warn!("[Withdraw] Réponse inattendue du Tracker: {:?}", response.header.message_type);
+                    warn!(
+                        "[Withdraw] Réponse inattendue du Tracker: {:?}",
+                        response.header.message_type
+                    );
                 }
             }
             Ok(Err(e)) => {
-                warn!("[Withdraw] Erreur lecture accusé: {} — le COG a quand même été retiré", e);
+                warn!(
+                    "[Withdraw] Erreur lecture accusé: {} — le COG a quand même été retiré",
+                    e
+                );
             }
             Err(_) => {
                 warn!("[Withdraw] Timeout en attente de l'accusé — le COG a quand même été retiré");
@@ -282,9 +295,7 @@ impl TrackerClient {
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
-            .map_err(|e| {
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = SearchCogsPayload {
             query: None,
@@ -296,9 +307,10 @@ impl TrackerClient {
 
         let frame = TrackerFrame::new(TrackerMessageType::SearchCogs, payload.to_bytes());
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         let response = self.read_frame(&mut stream).await?;
 
@@ -329,9 +341,7 @@ impl TrackerClient {
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
-            .map_err(|e| {
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = SearchLobbysPayload {
             query: name_filter,
@@ -343,9 +353,10 @@ impl TrackerClient {
 
         let frame = TrackerFrame::new(TrackerMessageType::SearchLobbys, payload.to_bytes());
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         let response = self.read_frame(&mut stream).await?;
 
@@ -354,7 +365,11 @@ impl TrackerClient {
                 let result = SearchLobbysResultPayload::from_bytes(&response.payload)
                     .ok_or(MiyuwebwayParticipantError::InvalidPayload)?;
 
-                debug!("Found {} lobbys (total: {})", result.lobbys.len(), result.total);
+                debug!(
+                    "Found {} lobbys (total: {})",
+                    result.lobbys.len(),
+                    result.total
+                );
                 Ok(result.lobbys)
             }
             TrackerMessageType::Error => {
@@ -376,9 +391,7 @@ impl TrackerClient {
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
-            .map_err(|e| {
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = crate::protocol::CreateLobbyPayload {
             cog_id: cog_id.to_string(),
@@ -388,9 +401,10 @@ impl TrackerClient {
 
         let frame = TrackerFrame::new(TrackerMessageType::CreateLobby, payload.to_bytes());
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         let response = self.read_frame(&mut stream).await?;
 
@@ -425,9 +439,7 @@ impl TrackerClient {
 
         let mut stream = TcpStream::connect(&self.config.tracker_address)
             .await
-            .map_err(|e| {
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = serde_json::json!({
             "cog_id": cog_id,
@@ -437,9 +449,10 @@ impl TrackerClient {
 
         let frame = TrackerFrame::new(TrackerMessageType::DeleteLobby, payload_bytes);
 
-        stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         let response = self.read_frame(&mut stream).await?;
 
@@ -466,9 +479,10 @@ impl TrackerClient {
 
         let mut temp = [0u8; 4096];
         loop {
-            let n = stream.read(&mut temp).await.map_err(|e| {
-                MiyuwebwayParticipantError::ReadError(e.to_string())
-            })?;
+            let n = stream
+                .read(&mut temp)
+                .await
+                .map_err(|e| MiyuwebwayParticipantError::ReadError(e.to_string()))?;
 
             if n == 0 {
                 return Err(MiyuwebwayParticipantError::ConnectionClosed);

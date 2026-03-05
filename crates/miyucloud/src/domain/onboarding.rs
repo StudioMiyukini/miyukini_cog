@@ -62,10 +62,7 @@ impl OnboardingStatus {
 /// Si aucun enregistrement n'existe en base, retourne un statut par defaut
 /// (etape 1, tous les booleens a faux).
 #[cfg(feature = "legacy-sqlite")]
-pub fn get_status(
-    db: &MiyucloudDb,
-    owner_id: &str,
-) -> Result<OnboardingStatus, MiyucloudError> {
+pub fn get_status(db: &MiyucloudDb, owner_id: &str) -> Result<OnboardingStatus, MiyucloudError> {
     match db.onboarding_get(owner_id)? {
         Some(row) => Ok(OnboardingStatus::from_row(&row)),
         None => Ok(OnboardingStatus::default_new()),
@@ -77,10 +74,7 @@ pub fn get_status(
 /// Retourne `true` si la configuration crypto existe ET que le canary
 /// chiffre est present (preuve que la passphrase a ete definie et verifiee).
 #[cfg(feature = "legacy-sqlite")]
-pub fn check_passphrase(
-    db: &MiyucloudDb,
-    owner_id: &str,
-) -> Result<bool, MiyucloudError> {
+pub fn check_passphrase(db: &MiyucloudDb, owner_id: &str) -> Result<bool, MiyucloudError> {
     match db.crypto_config_get(owner_id)? {
         Some(cfg) => Ok(cfg.canary_ciphertext.is_some()),
         None => Ok(false),
@@ -92,10 +86,7 @@ pub fn check_passphrase(
 /// Delegue a `crate::auth::totp::is_totp_enabled` qui verifie si un secret
 /// TOTP actif existe pour le proprietaire.
 #[cfg(feature = "legacy-sqlite")]
-pub fn check_2fa(
-    db: &MiyucloudDb,
-    owner_id: &str,
-) -> Result<bool, MiyucloudError> {
+pub fn check_2fa(db: &MiyucloudDb, owner_id: &str) -> Result<bool, MiyucloudError> {
     crate::auth::totp::is_totp_enabled(db, owner_id)
 }
 
@@ -105,9 +96,7 @@ pub fn check_2fa(
 /// 1. Le chemin existe.
 /// 2. Le chemin est un repertoire.
 /// 3. Le repertoire est accessible en ecriture (creation + suppression d'un fichier temporaire).
-pub fn verify_storage(
-    storage_path: &str,
-) -> Result<bool, MiyucloudError> {
+pub fn verify_storage(storage_path: &str) -> Result<bool, MiyucloudError> {
     let path = std::path::Path::new(storage_path);
 
     // Le chemin doit exister
@@ -139,10 +128,7 @@ pub fn verify_storage(
 /// Les champs `passphrase_set`, `totp_set` et `storage_verified` sont
 /// preserves depuis l'etat courant.
 #[cfg(feature = "legacy-sqlite")]
-pub fn complete(
-    db: &MiyucloudDb,
-    owner_id: &str,
-) -> Result<(), MiyucloudError> {
+pub fn complete(db: &MiyucloudDb, owner_id: &str) -> Result<(), MiyucloudError> {
     let status = get_status(db, owner_id)?;
     let now = chrono::Utc::now().to_rfc3339();
     let row = OnboardingRow {
@@ -162,10 +148,7 @@ pub fn complete(
 /// Supprime l'enregistrement d'onboarding en base. Au prochain appel a
 /// `get_status`, un statut par defaut sera retourne.
 #[cfg(feature = "legacy-sqlite")]
-pub fn reset(
-    db: &MiyucloudDb,
-    owner_id: &str,
-) -> Result<(), MiyucloudError> {
+pub fn reset(db: &MiyucloudDb, owner_id: &str) -> Result<(), MiyucloudError> {
     db.onboarding_delete(owner_id)
 }
 
@@ -177,8 +160,8 @@ pub fn reset(
 #[cfg(feature = "legacy-sqlite")]
 mod tests {
     use super::*;
-    use crate::data::MiyucloudDb;
     use crate::data::types::CryptoConfig;
+    use crate::data::MiyucloudDb;
 
     /// Ouvre une base en memoire pour les tests.
     fn mem_db() -> MiyucloudDb {
@@ -272,15 +255,14 @@ mod tests {
     #[test]
     fn test_verify_storage_valid_dir() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let result = verify_storage(dir.path().to_str().expect("utf8 path"))
-            .expect("should not error");
+        let result =
+            verify_storage(dir.path().to_str().expect("utf8 path")).expect("should not error");
         assert!(result);
     }
 
     #[test]
     fn test_verify_storage_nonexistent_path() {
-        let result = verify_storage("/this/path/does/not/exist/at/all")
-            .expect("should not error");
+        let result = verify_storage("/this/path/does/not/exist/at/all").expect("should not error");
         assert!(!result);
     }
 
@@ -290,8 +272,8 @@ mod tests {
         let file_path = dir.path().join("not_a_dir.txt");
         std::fs::write(&file_path, b"hello").expect("write file");
 
-        let result = verify_storage(file_path.to_str().expect("utf8 path"))
-            .expect("should not error");
+        let result =
+            verify_storage(file_path.to_str().expect("utf8 path")).expect("should not error");
         assert!(!result);
     }
 

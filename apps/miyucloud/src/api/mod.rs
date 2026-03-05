@@ -10,13 +10,16 @@
 
 pub mod admin;
 pub mod auth;
+pub mod auth_2fa;
 pub mod files;
 pub mod folders;
+pub mod onboarding;
 pub mod shares;
 pub mod sync_api;
 pub mod trash;
 
 use crate::api::auth::CogTokenLayer;
+use crate::security_headers::SecurityHeadersLayer;
 use axum::routing::{delete, get, post, put};
 use axum::Router;
 use std::sync::Arc;
@@ -73,7 +76,33 @@ pub fn api_router(state: Arc<AppState>) -> Router {
         .route("/admin/quota", get(admin::get_quota))
         .route("/admin/stats", get(admin::get_stats))
         .route("/admin/access-log", get(admin::get_access_log))
+        .route("/admin/health", get(onboarding::admin_health))
+        // Onboarding (V3/V4)
+        .route("/onboarding/status", get(onboarding::onboarding_status))
+        .route(
+            "/onboarding/complete",
+            post(onboarding::onboarding_complete),
+        )
+        .route("/onboarding/reset", post(onboarding::onboarding_reset))
+        // Auth sessions + 2FA (V2/V4)
+        .route("/auth/session", post(auth_2fa::create_session))
+        .route("/auth/sessions", get(auth_2fa::list_sessions))
+        .route("/auth/sessions", delete(auth_2fa::revoke_all_sessions))
+        .route("/auth/sessions/{id}", delete(auth_2fa::revoke_session))
+        .route("/auth/totp/status", get(auth_2fa::totp_status))
+        .route("/auth/totp/setup", post(auth_2fa::setup_totp))
+        .route("/auth/totp/verify", post(auth_2fa::verify_totp))
+        .route(
+            "/auth/totp/recovery/verify",
+            post(auth_2fa::verify_recovery_code),
+        )
+        .route(
+            "/auth/totp/recovery/regenerate",
+            post(auth_2fa::regenerate_recovery_codes),
+        )
+        .route("/auth/totp", delete(auth_2fa::disable_totp))
         .layer(CogTokenLayer::new(state.config.cog_token.clone()))
+        .layer(SecurityHeadersLayer::for_api())
         .with_state(state.clone());
 
     Router::new()

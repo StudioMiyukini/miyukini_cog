@@ -1,0 +1,18 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "denis.architecture":  [
+                                                "cert.denis.togaf"
+                                            ],
+                     "denis.qualite_logicielle":  [
+                                                      "cert.denis.iso_25010"
+                                                  ],
+                     "denis.cycle_vie":  [
+                                             "cert.denis.iso_12207"
+                                         ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

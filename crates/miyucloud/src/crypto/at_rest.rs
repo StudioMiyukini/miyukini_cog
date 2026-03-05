@@ -64,7 +64,11 @@ pub fn decrypt_chunk(
 
     cipher
         .decrypt(nonce, encrypted.ciphertext.as_ref())
-        .map_err(|e| MiyucloudError::Crypto(format!("Decryption failed (corrupted data or wrong key): {e}")))
+        .map_err(|e| {
+            MiyucloudError::Crypto(format!(
+                "Decryption failed (corrupted data or wrong key): {e}"
+            ))
+        })
 }
 
 #[cfg(test)]
@@ -106,7 +110,10 @@ mod tests {
         let wrong_key = [0u8; 32];
         let result = decrypt_chunk(&wrong_key, &encrypted);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Decryption failed"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Decryption failed"));
     }
 
     #[test]

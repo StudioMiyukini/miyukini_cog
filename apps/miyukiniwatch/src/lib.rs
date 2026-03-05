@@ -6,9 +6,9 @@
 
 pub mod views;
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use miyukiniwatch::MiyukiniWatchDb;
+use std::sync::Arc;
 
 /// Contexte DB partage dans l'arbre Dioxus.
 #[derive(Clone)]
@@ -29,5 +29,8 @@ pub struct ProfileContext {
 
 /// Hook pour acceder au profile_id depuis n'importe quel composant.
 pub fn use_profile_id() -> String {
-    use_context::<Signal<ProfileContext>>().read().profile_id.clone()
+    use_context::<Signal<ProfileContext>>()
+        .read()
+        .profile_id
+        .clone()
 }

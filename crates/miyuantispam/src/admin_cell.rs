@@ -30,7 +30,9 @@ pub struct MiyuantispamTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuantispamIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuantispamAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.security.antispam";
 
-#[must_use] 
+#[must_use]
 pub fn miyuantispam_admin_cell(version: &str, fingerprint: &str) -> MiyuantispamAdminCell {
     MiyuantispamAdminCell {
         identification: MiyuantispamIdentification {
@@ -63,7 +65,9 @@ pub fn miyuantispam_admin_cell(version: &str, fingerprint: &str) -> Miyuantispam
                 id: "Miyuantispam".to_string(),
                 name: "Test chemin complet Miyuantispam".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

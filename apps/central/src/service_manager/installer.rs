@@ -7,7 +7,7 @@
 
 use std::io::Read;
 
-use super::registry::{InstalledService, ServiceRegistryData, service_install_dir};
+use super::registry::{service_install_dir, InstalledService, ServiceRegistryData};
 use miyumarket::manifest::ServiceManifest;
 
 /// Installe un service depuis les bytes d'un package .msp (archive ZIP).
@@ -29,16 +29,22 @@ pub fn install_package(
         manifest_file
             .read_to_string(&mut content)
             .map_err(|e| format!("Lecture du manifeste échouée : {e}"))?;
-        serde_json::from_str(&content)
-            .map_err(|e| format!("Manifeste JSON invalide : {e}"))?
+        serde_json::from_str(&content).map_err(|e| format!("Manifeste JSON invalide : {e}"))?
     };
 
-    manifest.validate().map_err(|e| format!("Manifeste invalide : {e}"))?;
+    manifest
+        .validate()
+        .map_err(|e| format!("Manifeste invalide : {e}"))?;
 
     let service_id = manifest.id.clone();
     let install_dir = service_install_dir(&service_id);
 
-    tracing::info!("Installation du service '{}' v{} dans {:?}", service_id, manifest.version, install_dir);
+    tracing::info!(
+        "Installation du service '{}' v{} dans {:?}",
+        service_id,
+        manifest.version,
+        install_dir
+    );
 
     // 2. Créer le répertoire d'installation
     std::fs::create_dir_all(&install_dir)
@@ -50,7 +56,8 @@ pub fn install_package(
 
     // 3. Extraire les fichiers
     for i in 0..archive.len() {
-        let mut file = archive.by_index(i)
+        let mut file = archive
+            .by_index(i)
             .map_err(|e| format!("Erreur lecture archive index {i}: {e}"))?;
 
         let name = file.name().to_string();
@@ -114,7 +121,11 @@ pub fn install_from_binary(
     let service_id = manifest.id.clone();
     let install_dir = service_install_dir(&service_id);
 
-    tracing::info!("Installation directe du service '{}' depuis {:?}", service_id, binary_source);
+    tracing::info!(
+        "Installation directe du service '{}' depuis {:?}",
+        service_id,
+        binary_source
+    );
 
     // Créer les répertoires
     std::fs::create_dir_all(install_dir.join("bin"))
@@ -124,12 +135,15 @@ pub fn install_from_binary(
 
     // Copier le binaire
     let binary_name = manifest.binary_name.clone().unwrap_or_else(|| {
-        binary_source.file_name()
+        binary_source
+            .file_name()
             .map(|n| n.to_string_lossy().to_string())
-            .unwrap_or_else(|| if cfg!(windows) {
-                format!("{}.exe", service_id)
-            } else {
-                service_id.clone()
+            .unwrap_or_else(|| {
+                if cfg!(windows) {
+                    format!("{}.exe", service_id)
+                } else {
+                    service_id.clone()
+                }
             })
     });
     let binary_path = install_dir.join("bin").join(&binary_name);
@@ -152,7 +166,11 @@ pub fn install_from_binary(
     };
     registry.services.insert(service_id.clone(), installed);
 
-    tracing::info!("Service '{}' installé (binaire: {:?})", service_id, binary_path);
+    tracing::info!(
+        "Service '{}' installé (binaire: {:?})",
+        service_id,
+        binary_path
+    );
     Ok(service_id)
 }
 
@@ -161,18 +179,25 @@ pub fn uninstall_service(
     service_id: &str,
     registry: &mut ServiceRegistryData,
 ) -> Result<(), String> {
-    let service = registry.services.remove(service_id)
+    let service = registry
+        .services
+        .remove(service_id)
         .ok_or_else(|| format!("Service '{service_id}' non trouvé dans le registre"))?;
 
-    tracing::info!("Désinstallation du service '{}' depuis {:?}", service_id, service.install_dir);
+    tracing::info!(
+        "Désinstallation du service '{}' depuis {:?}",
+        service_id,
+        service.install_dir
+    );
 
     // Supprimer le répertoire d'installation
     if service.install_dir.exists() {
-        std::fs::remove_dir_all(&service.install_dir)
-            .map_err(|e| format!(
+        std::fs::remove_dir_all(&service.install_dir).map_err(|e| {
+            format!(
                 "Suppression de {} échouée : {e}. Supprimez manuellement.",
                 service.install_dir.display()
-            ))?;
+            )
+        })?;
     }
 
     tracing::info!("Service '{}' désinstallé", service_id);
@@ -187,7 +212,9 @@ pub fn scan_installed_services(registry: &mut ServiceRegistryData) {
         return;
     }
 
-    let Ok(entries) = std::fs::read_dir(&root) else { return };
+    let Ok(entries) = std::fs::read_dir(&root) else {
+        return;
+    };
 
     for entry in entries.flatten() {
         let path = entry.path();
@@ -201,8 +228,12 @@ pub fn scan_installed_services(registry: &mut ServiceRegistryData) {
         }
 
         // Lire le manifeste
-        let Ok(content) = std::fs::read_to_string(&manifest_path) else { continue };
-        let Ok(manifest): Result<ServiceManifest, _> = serde_json::from_str(&content) else { continue };
+        let Ok(content) = std::fs::read_to_string(&manifest_path) else {
+            continue;
+        };
+        let Ok(manifest): Result<ServiceManifest, _> = serde_json::from_str(&content) else {
+            continue;
+        };
 
         let service_id = manifest.id.clone();
 
@@ -222,14 +253,21 @@ pub fn scan_installed_services(registry: &mut ServiceRegistryData) {
         let binary_path = path.join("bin").join(&binary_name);
 
         if binary_path.exists() {
-            tracing::info!("Service détecté par scan : '{}' dans {:?}", service_id, path);
-            registry.services.insert(service_id, InstalledService {
-                manifest,
-                install_dir: path,
-                binary_path,
-                installed_at: String::new(),
-                updated_at: None,
-            });
+            tracing::info!(
+                "Service détecté par scan : '{}' dans {:?}",
+                service_id,
+                path
+            );
+            registry.services.insert(
+                service_id,
+                InstalledService {
+                    manifest,
+                    install_dir: path,
+                    binary_path,
+                    installed_at: String::new(),
+                    updated_at: None,
+                },
+            );
         }
     }
 }

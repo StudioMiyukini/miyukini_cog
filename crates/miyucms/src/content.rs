@@ -12,7 +12,8 @@ struct ContentRecord {
     status: String,
 }
 
-static CONTENTS: std::sync::OnceLock<Mutex<HashMap<String, ContentRecord>>> = std::sync::OnceLock::new();
+static CONTENTS: std::sync::OnceLock<Mutex<HashMap<String, ContentRecord>>> =
+    std::sync::OnceLock::new();
 
 fn contents() -> &'static Mutex<HashMap<String, ContentRecord>> {
     CONTENTS.get_or_init(|| Mutex::new(HashMap::new()))
@@ -28,7 +29,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyucmsErr
         return Err(MiyucmsError::NoMandate);
     }
     let id = format!("cms:{}", UuidIdGenerator.generate());
-    let mut guard = contents().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let mut guard = contents()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
     guard.insert(
         id.clone(),
         ContentRecord {
@@ -48,7 +51,9 @@ pub fn update(ctx: &GovernedContext, content_id: &str, payload: &str) -> Result<
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let mut guard = contents().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let mut guard = contents()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
     if let Some(rec) = guard.get_mut(content_id) {
         rec.payload = payload.to_string();
     }
@@ -64,7 +69,9 @@ pub fn publish(ctx: &GovernedContext, content_id: &str) -> Result<(), MiyucmsErr
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let mut guard = contents().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let mut guard = contents()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
     if let Some(rec) = guard.get_mut(content_id) {
         rec.status = "published".to_string();
     }
@@ -80,7 +87,9 @@ pub fn schedule(ctx: &GovernedContext, content_id: &str, _at: &str) -> Result<()
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let mut guard = contents().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let mut guard = contents()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
     if let Some(rec) = guard.get_mut(content_id) {
         rec.status = "scheduled".to_string();
     }

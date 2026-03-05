@@ -12,9 +12,9 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::client::MiyuCloudClient;
 use super::state::{MiyuCloudState, SyncConflict, SyncPeer};
+use crate::state::use_app_state;
 
 // ════════════════════════════════════════════════════════════════════════════
 // SyncStatusBadge — Atome : badge compact dans le header
@@ -30,9 +30,7 @@ use super::state::{MiyuCloudState, SyncConflict, SyncPeer};
 ///
 /// Un clic ouvre le `SyncPanel`.
 #[component]
-pub fn SyncStatusBadge(
-    mut state: Signal<MiyuCloudState>,
-) -> Element {
+pub fn SyncStatusBadge(mut state: Signal<MiyuCloudState>) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
     let peers_online = state.read().sync_status.peers_online;
@@ -125,10 +123,10 @@ pub fn SyncPanel(
     let conflicts_count = conflicts.len();
     let pending_count = conflicts.iter().filter(|c| c.status == "pending").count();
 
-    let last_sync_label = sync_info.last_sync.as_deref().map_or_else(
-        || "Jamais".to_string(),
-        format_sync_date,
-    );
+    let last_sync_label = sync_info
+        .last_sync
+        .as_deref()
+        .map_or_else(|| "Jamais".to_string(), format_sync_date);
 
     // Charger les donnees au montage
     let mut loaded = use_signal(|| false);
@@ -279,7 +277,11 @@ fn SyncStatsBar(
 
     let peers_label = format!("{online_count}/{peers_count}");
     let conflicts_label = format!("{conflicts_count}");
-    let conflict_color = if conflicts_count > 0 { c.accent_red } else { c.accent_green };
+    let conflict_color = if conflicts_count > 0 {
+        c.accent_red
+    } else {
+        c.accent_green
+    };
 
     rsx! {
         div {
@@ -330,7 +332,11 @@ fn PeerCard(
     let is_trusted = peer.is_trusted;
     let peer_id = peer.id.clone();
 
-    let status_dot_color = if is_online { c.accent_green } else { c.text_muted };
+    let status_dot_color = if is_online {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
     let status_label = if is_online { "En ligne" } else { "Hors ligne" };
 
     let last_sync_text = peer.last_sync.as_deref().map_or_else(
@@ -350,8 +356,16 @@ fn PeerCard(
         peer.public_key.clone()
     };
 
-    let trust_badge_bg = if is_trusted { c.accent_green } else { c.accent_orange };
-    let trust_badge_label = if is_trusted { "Approuve" } else { "Non approuve" };
+    let trust_badge_bg = if is_trusted {
+        c.accent_green
+    } else {
+        c.accent_orange
+    };
+    let trust_badge_label = if is_trusted {
+        "Approuve"
+    } else {
+        "Non approuve"
+    };
 
     rsx! {
         div {
@@ -712,10 +726,9 @@ pub fn SyncSettingsSection(
         "Inactif".to_string()
     };
     let sync_status_color = if syncing { c.accent_blue } else { c.text_muted };
-    let last_sync_label = last_sync.as_deref().map_or_else(
-        || "Jamais".to_string(),
-        format_sync_date,
-    );
+    let last_sync_label = last_sync
+        .as_deref()
+        .map_or_else(|| "Jamais".to_string(), format_sync_date);
 
     // Charger les donnees sync si pas deja fait
     let mut sync_loaded = use_signal(|| false);
@@ -856,7 +869,10 @@ async fn load_sync_data(
         }
         Err(_) => {
             let mock_conflicts = mock_sync_conflicts();
-            let pending = mock_conflicts.iter().filter(|c| c.status == "pending").count() as u32;
+            let pending = mock_conflicts
+                .iter()
+                .filter(|c| c.status == "pending")
+                .count() as u32;
             state.write().sync_conflicts = mock_conflicts;
             state.write().sync_status.pending_conflicts = pending;
         }
@@ -894,11 +910,7 @@ async fn resolve_conflict_action(
 }
 
 /// Met a jour le statut d'un conflit dans l'etat local.
-fn update_conflict_status(
-    state: &mut Signal<MiyuCloudState>,
-    conflict_id: &str,
-    new_status: &str,
-) {
+fn update_conflict_status(state: &mut Signal<MiyuCloudState>, conflict_id: &str, new_status: &str) {
     let mut conflicts = state.read().sync_conflicts.clone();
     if let Some(c) = conflicts.iter_mut().find(|c| c.id == conflict_id) {
         c.status = new_status.to_string();

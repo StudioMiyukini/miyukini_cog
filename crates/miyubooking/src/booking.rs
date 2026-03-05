@@ -23,7 +23,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyubookin
         return Err(MiyubookingError::NoMandate);
     }
     let id = format!("book:{}", UuidIdGenerator.generate());
-    let mut guard = bookings().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let mut guard = bookings()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }
@@ -33,11 +35,17 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyubookin
 /// @layer: tool
 /// @human: Met à jour une réservation (déplacement, prolongation) ; WriteIntent KindMother.
 /// @do: booking_update_under_governance
-pub fn update(ctx: &GovernedContext, booking_id: &str, payload: &str) -> Result<(), MiyubookingError> {
+pub fn update(
+    ctx: &GovernedContext,
+    booking_id: &str,
+    payload: &str,
+) -> Result<(), MiyubookingError> {
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let mut guard = bookings().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let mut guard = bookings()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     guard.insert(booking_id.to_string(), payload.to_string());
     Ok(())
 }
@@ -51,7 +59,9 @@ pub fn cancel(ctx: &GovernedContext, booking_id: &str) -> Result<(), Miyubooking
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let mut guard = bookings().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let mut guard = bookings()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     guard.remove(booking_id);
     Ok(())
 }

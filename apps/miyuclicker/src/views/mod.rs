@@ -4,14 +4,12 @@
 
 use dioxus::prelude::*;
 use miyuclicker::idlesim::{
-    apply_click, apply_allocation, apply_allocation_batisseurs, construction_progress_pct,
+    apply_allocation, apply_allocation_batisseurs, apply_click, construction_progress_pct,
     convert_batisseur_to_ouvrier, convert_ouvrier_to_batisseur, convert_ouvrier_to_soldat,
-    convert_soldat_to_ouvrier, production_rates, start_construction, tick,
-    GAME_SPEED_1, GAME_SPEED_2, GAME_SPEED_3, GAME_SPEED_4, GAME_SPEED_5, GAME_SPEED_PAUSE,
+    convert_soldat_to_ouvrier, production_rates, start_construction, tick, GAME_SPEED_1,
+    GAME_SPEED_2, GAME_SPEED_3, GAME_SPEED_4, GAME_SPEED_5, GAME_SPEED_PAUSE,
 };
-use miyuclicker::state::{
-    AllocationBatisseurs, BuildingType, ClickTarget, GameState,
-};
+use miyuclicker::state::{AllocationBatisseurs, BuildingType, ClickTarget, GameState};
 use miyukini_service_ui::use_palette;
 use std::path::Path;
 
@@ -192,7 +190,10 @@ fn ClickButton(game_state: Signal<GameState>, target: ClickTarget, label: &'stat
 }
 
 #[component]
-fn AllocationProduction(game_state: Signal<GameState>, rates: miyuclicker::state::ProductionRates) -> Element {
+fn AllocationProduction(
+    game_state: Signal<GameState>,
+    rates: miyuclicker::state::ProductionRates,
+) -> Element {
     let c = use_palette();
     let g = game_state.read();
     let alloc = g.allocation.clone();
@@ -262,7 +263,11 @@ fn RowAlloc(
 fn AllocationBuilders(game_state: Signal<GameState>) -> Element {
     let c = use_palette();
     let g = game_state.read();
-    let (m, ca, gu) = (g.allocation_batisseurs.maison, g.allocation_batisseurs.caserne, g.allocation_batisseurs.guilde_des_macons);
+    let (m, ca, gu) = (
+        g.allocation_batisseurs.maison,
+        g.allocation_batisseurs.caserne,
+        g.allocation_batisseurs.guilde_des_macons,
+    );
 
     rsx! {
         div {
@@ -346,17 +351,37 @@ fn ConversionPanel(game_state: Signal<GameState>) -> Element {
     let c = use_palette();
     let g = game_state.read().clone();
 
-    let bg_batisseur = if g.can_convert_to_batisseur() { c.accent_blue } else { c.bg_hover };
-    let bg_soldat = if g.can_convert_to_soldat() { c.accent_blue } else { c.bg_hover };
-    let bg_bat_retour = if g.batisseurs_libres() > 0 { c.bg_hover } else { c.bg_secondary };
-    let bg_sol_retour = if g.soldats > 0 { c.bg_hover } else { c.bg_secondary };
+    let bg_batisseur = if g.can_convert_to_batisseur() {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let bg_soldat = if g.can_convert_to_soldat() {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let bg_bat_retour = if g.batisseurs_libres() > 0 {
+        c.bg_hover
+    } else {
+        c.bg_secondary
+    };
+    let bg_sol_retour = if g.soldats > 0 {
+        c.bg_hover
+    } else {
+        c.bg_secondary
+    };
     let can_bat = g.can_convert_to_batisseur();
     let can_sol = g.can_convert_to_soldat();
     let bat_libres = g.batisseurs_libres();
     let soldats = g.soldats;
     let pop_summary = format!(
         "Ouvriers: {} | Batisseurs: {} / {} | Soldats: {} / {}",
-        g.ouvriers, g.batisseurs, g.cap_batisseurs(), g.soldats, g.cap_soldats()
+        g.ouvriers,
+        g.batisseurs,
+        g.cap_batisseurs(),
+        g.soldats,
+        g.cap_soldats()
     );
 
     rsx! {
@@ -546,7 +571,8 @@ fn SlotRow(
 fn load_or_new(data_dir: &Path) -> GameState {
     let slots = miyuclicker::save::slot_list(data_dir);
     if let Some(slot) = slots.iter().find(|s| s.occupied) {
-        miyuclicker::save::slot_read(data_dir, slot.slot_id).unwrap_or_else(|_| GameState::new_game(1))
+        miyuclicker::save::slot_read(data_dir, slot.slot_id)
+            .unwrap_or_else(|_| GameState::new_game(1))
     } else {
         GameState::new_game(1)
     }

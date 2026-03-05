@@ -5,8 +5,4 @@
 
 pub mod adapter;
 
-pub use adapter::{
-    miyuclock_now,
-    miyuclock_attest_date,
-    MiyuclockAdapterError,
-};
+pub use adapter::{miyuclock_attest_date, miyuclock_now, MiyuclockAdapterError};

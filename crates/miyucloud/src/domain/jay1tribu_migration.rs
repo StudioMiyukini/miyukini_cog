@@ -177,10 +177,9 @@ mod tests {
             data: b"fake jpeg data".to_vec(),
         }];
 
-        let report = migrate_jay1tribu_attachments(
-            &db, &storage, &km, "owner1", None, &attachments,
-        )
-        .unwrap();
+        let report =
+            migrate_jay1tribu_attachments(&db, &storage, &km, "owner1", None, &attachments)
+                .unwrap();
 
         assert_eq!(report.migrated, 1);
         assert_eq!(report.skipped, 0);
@@ -203,17 +202,15 @@ mod tests {
         }];
 
         // First migration
-        let report1 = migrate_jay1tribu_attachments(
-            &db, &storage, &km, "owner1", None, &attachments,
-        )
-        .unwrap();
+        let report1 =
+            migrate_jay1tribu_attachments(&db, &storage, &km, "owner1", None, &attachments)
+                .unwrap();
         assert_eq!(report1.migrated, 1);
 
         // Second migration (same data)
-        let report2 = migrate_jay1tribu_attachments(
-            &db, &storage, &km, "owner1", None, &attachments,
-        )
-        .unwrap();
+        let report2 =
+            migrate_jay1tribu_attachments(&db, &storage, &km, "owner1", None, &attachments)
+                .unwrap();
         assert_eq!(report2.migrated, 0);
         assert_eq!(report2.skipped, 1);
     }
@@ -243,22 +240,15 @@ mod tests {
         ];
 
         // Migrate first two
-        let report1 = migrate_jay1tribu_attachments(
-            &db,
-            &storage,
-            &km,
-            "owner1",
-            None,
-            &attachments[..2],
-        )
-        .unwrap();
+        let report1 =
+            migrate_jay1tribu_attachments(&db, &storage, &km, "owner1", None, &attachments[..2])
+                .unwrap();
         assert_eq!(report1.migrated, 2);
 
         // Migrate all three (first two should be skipped)
-        let report2 = migrate_jay1tribu_attachments(
-            &db, &storage, &km, "owner1", None, &attachments,
-        )
-        .unwrap();
+        let report2 =
+            migrate_jay1tribu_attachments(&db, &storage, &km, "owner1", None, &attachments)
+                .unwrap();
         assert_eq!(report2.migrated, 1);
         assert_eq!(report2.skipped, 2);
         assert!(report2.errors.is_empty());

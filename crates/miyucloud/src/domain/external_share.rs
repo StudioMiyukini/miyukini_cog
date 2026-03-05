@@ -64,17 +64,13 @@ impl ExternalShareOps {
         if let Some(fid) = file_id {
             let file = db.file_by_id(fid)?;
             if file.is_none() {
-                return Err(MiyucloudError::NotFound(format!(
-                    "File {fid} not found"
-                )));
+                return Err(MiyucloudError::NotFound(format!("File {fid} not found")));
             }
         }
         if let Some(foid) = folder_id {
             let folder = db.folder_by_id(foid)?;
             if folder.is_none() {
-                return Err(MiyucloudError::NotFound(format!(
-                    "Folder {foid} not found"
-                )));
+                return Err(MiyucloudError::NotFound(format!("Folder {foid} not found")));
             }
         }
 
@@ -133,14 +129,9 @@ impl ExternalShareOps {
         web_tokens::validate_share_link(&link, password, password_hash.as_deref())?;
 
         // Get the associated file
-        let file_id = link
-            .file_id
-            .as_deref()
-            .ok_or_else(|| {
-                MiyucloudError::InvalidInput(
-                    "Folder share download not yet supported".to_string(),
-                )
-            })?;
+        let file_id = link.file_id.as_deref().ok_or_else(|| {
+            MiyucloudError::InvalidInput("Folder share download not yet supported".to_string())
+        })?;
 
         let file_entry = db
             .file_by_id(file_id)?
@@ -178,11 +169,7 @@ mod tests {
         (db, storage, km)
     }
 
-    fn create_test_file(
-        db: &MiyucloudDb,
-        storage: &LocalFsStorage,
-        km: &KeyManager,
-    ) -> FileEntry {
+    fn create_test_file(db: &MiyucloudDb, storage: &LocalFsStorage, km: &KeyManager) -> FileEntry {
         FileOps::upload_file(
             db,
             storage,
@@ -200,16 +187,9 @@ mod tests {
     fn test_create_share_link_with_expiration() {
         let (db, storage, km) = setup();
         let file = create_test_file(&db, &storage, &km);
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         assert_eq!(link.file_id.as_deref(), Some(file.id.as_str()));
         assert!(!link.has_password);
@@ -240,16 +220,9 @@ mod tests {
     fn test_revoke_share_link() {
         let (db, storage, km) = setup();
         let file = create_test_file(&db, &storage, &km);
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         ExternalShareOps::revoke_link(&db, &link.id).unwrap();
 
@@ -263,16 +236,9 @@ mod tests {
     fn test_access_share_link_increments_counter() {
         let (db, storage, km) = setup();
         let file = create_test_file(&db, &storage, &km);
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         // First access
         let (accessed, _file_entry) =
@@ -290,16 +256,9 @@ mod tests {
     fn test_access_revoked_link_fails() {
         let (db, storage, km) = setup();
         let file = create_test_file(&db, &storage, &km);
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         ExternalShareOps::revoke_link(&db, &link.id).unwrap();
         let result = ExternalShareOps::access_link(&db, &link.token, None);
@@ -338,10 +297,8 @@ mod tests {
         let (db, storage, km) = setup();
         let file = create_test_file(&db, &storage, &km);
 
-        ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
-            .unwrap();
-        ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 48, None)
-            .unwrap();
+        ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None).unwrap();
+        ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 48, None).unwrap();
 
         let links = ExternalShareOps::list_links(&db, "owner1").unwrap();
         assert_eq!(links.len(), 2);
@@ -358,23 +315,15 @@ mod tests {
         assert!(result.is_err());
 
         // Too long (>30 days)
-        let result = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            721,
-            None,
-        );
+        let result =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 721, None);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_create_link_no_target() {
         let (db, _storage, _km) = setup();
-        let result =
-            ExternalShareOps::create_link(&db, None, None, "owner1", None, 24, None);
+        let result = ExternalShareOps::create_link(&db, None, None, "owner1", None, 24, None);
         assert!(result.is_err());
     }
 }

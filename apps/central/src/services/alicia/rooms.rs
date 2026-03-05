@@ -7,8 +7,8 @@
 use dioxus::prelude::*;
 use miyualicia_capture::VadState;
 
+use super::state::{AliciaSnapshot, RoomLiveState, SharedAliciaService};
 use crate::state::use_app_state;
-use super::state::{RoomLiveState, SharedAliciaService, AliciaSnapshot};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Composant principal
@@ -126,11 +126,19 @@ fn RoomConfigCard(props: RoomConfigCardProps) -> Element {
     // Device selectionne (signal local pour le dropdown)
     let mut selected_device = use_signal(|| room.device_name.clone().unwrap_or_default());
 
-    let status_color = if room.mic_active { c.accent_green } else { c.text_muted };
+    let status_color = if room.mic_active {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
     let status_label = if room.mic_active { "Actif" } else { "Inactif" };
 
     let vad_active = matches!(room.vad_state, VadState::Speech | VadState::MaybeEnd);
-    let vad_color = if vad_active { c.accent_orange } else { c.text_muted };
+    let vad_color = if vad_active {
+        c.accent_orange
+    } else {
+        c.text_muted
+    };
     let vad_label = if vad_active { "Voix" } else { "Silence" };
 
     // Seuils pour les barres de progression (en pourcentage 0-100)

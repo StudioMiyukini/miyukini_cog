@@ -12,9 +12,9 @@ use std::path::PathBuf;
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::client::MiyuCloudClient;
 use super::state::{MiyuCloudState, UploadProgress};
+use crate::state::use_app_state;
 
 /// Zone d'upload avec selecteur de fichiers et barre de progression.
 #[component]

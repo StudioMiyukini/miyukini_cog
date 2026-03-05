@@ -5,9 +5,9 @@
 //! Combines [`SlotFrame`] with [`ItemIcon`] and provides hover/click
 //! interaction for drag-and-drop and tooltip display.
 
-use egui::{Response, Ui};
 use crate::atoms::quality_text::ItemQuality;
 use crate::atoms::slot_frame::{SlotFrame, SlotSize};
+use egui::{Response, Ui};
 
 /// Data for an item in an inventory slot.
 #[derive(Debug, Clone)]
@@ -71,11 +71,8 @@ impl<'a> InventorySlot<'a> {
         // is best drawn within the same painter call. For the molecule pattern,
         // we draw the item info as a tooltip.
         if let Some(item_data) = self.item {
-            let tooltip_text = format!(
-                "{}\n({})",
-                item_data.name,
-                quality_label(item_data.quality),
-            );
+            let tooltip_text =
+                format!("{}\n({})", item_data.name, quality_label(item_data.quality),);
             frame_resp.clone().on_hover_text(tooltip_text);
         }
 
@@ -122,9 +119,14 @@ mod tests {
     #[test]
     fn test_quality_labels_all_valid() {
         let qualities = [
-            ItemQuality::Normal, ItemQuality::Socketed, ItemQuality::Magic,
-            ItemQuality::Rare, ItemQuality::Unique, ItemQuality::Set,
-            ItemQuality::Crafted, ItemQuality::RuneWord,
+            ItemQuality::Normal,
+            ItemQuality::Socketed,
+            ItemQuality::Magic,
+            ItemQuality::Rare,
+            ItemQuality::Unique,
+            ItemQuality::Set,
+            ItemQuality::Crafted,
+            ItemQuality::RuneWord,
         ];
         for q in qualities {
             assert!(!quality_label(q).is_empty());

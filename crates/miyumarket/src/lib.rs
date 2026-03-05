@@ -15,5 +15,5 @@
 //! ```
 
 pub mod manifest;
-pub mod protocol;
 pub mod package;
+pub mod protocol;

@@ -170,14 +170,14 @@ mod tests {
     #[test]
     fn test_pre_buffer_samples() {
         let ctx = VoiceCaptureContext::new(); // 16kHz, 500ms pre-buffer
-        // 500ms * 16000 / 1000 = 8000 samples
+                                              // 500ms * 16000 / 1000 = 8000 samples
         assert_eq!(ctx.vad_pre_buffer_samples(), 8_000);
     }
 
     #[test]
     fn test_debounce_samples() {
         let ctx = VoiceCaptureContext::new(); // 16kHz, 300ms debounce
-        // 300ms * 16000 / 1000 = 4800 samples
+                                              // 300ms * 16000 / 1000 = 4800 samples
         assert_eq!(ctx.vad_debounce_samples(), 4_800);
     }
 }

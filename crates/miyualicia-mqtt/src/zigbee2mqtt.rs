@@ -143,9 +143,7 @@ impl Z2mCommand {
                 position: None,
             }),
             "set_brightness" => {
-                let pct = value
-                    .and_then(serde_json::Value::as_u64)
-                    .unwrap_or(0);
+                let pct = value.and_then(serde_json::Value::as_u64).unwrap_or(0);
                 // Alicia 0-100 -> Z2M 0-254
                 let z2m_val = (pct * 254 / 100).min(254);
                 let z2m_byte = u8::try_from(z2m_val).unwrap_or(254);
@@ -180,9 +178,7 @@ impl Z2mCommand {
                 })
             }
             "set_temperature" => {
-                let temp = value
-                    .and_then(serde_json::Value::as_f64)
-                    .unwrap_or(20.0);
+                let temp = value.and_then(serde_json::Value::as_f64).unwrap_or(20.0);
                 #[allow(clippy::cast_possible_truncation)]
                 let temp_f32 = temp as f32;
                 Ok(Self {
@@ -208,9 +204,7 @@ impl Z2mCommand {
                 position: Some(0),
             }),
             "set_position" => {
-                let pos = value
-                    .and_then(serde_json::Value::as_u64)
-                    .unwrap_or(0);
+                let pos = value.and_then(serde_json::Value::as_u64).unwrap_or(0);
                 let pos_byte = u8::try_from(pos.min(100)).unwrap_or(100);
                 Ok(Self {
                     state: None,

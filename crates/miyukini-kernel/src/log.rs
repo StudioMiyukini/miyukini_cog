@@ -174,7 +174,7 @@ mod tests {
         let _ = Level::Info;
         let _ = Level::Debug;
         let _ = Level::Trace;
-        
+
         // Vérifier l'ordre (Error < Warn < Info < Debug < Trace)
         // L'ordre est basé sur la position dans l'enum (Error = 0, Warn = 1, etc.)
         assert!(Level::Error < Level::Warn);
@@ -206,7 +206,8 @@ mod tests {
     fn test_log_no_format_imposed() {
         let logger = DefaultLogger;
         // Le produit peut formater en JSON avant l'appel
-        let json_message = r#"{"level":"info","message":"test","timestamp":"2026-01-28T12:00:00Z"}"#;
+        let json_message =
+            r#"{"level":"info","message":"test","timestamp":"2026-01-28T12:00:00Z"}"#;
         logger.log(Level::Info, json_message);
         // Pas de panic, le format est accepté tel quel
     }
@@ -223,7 +224,7 @@ mod tests {
         // Le kernel ne doit pas avoir de méthodes comme log_order_created(), etc.
         let logger = DefaultLogger;
         logger.log(Level::Info, "order_created"); // Le produit formate, pas le kernel
-        // Si on pouvait faire : logger.log_order_created(), cela violerait INV-K-1
+                                                  // Si on pouvait faire : logger.log_order_created(), cela violerait INV-K-1
     }
 
     /// @id: test_log_no_external_dependency

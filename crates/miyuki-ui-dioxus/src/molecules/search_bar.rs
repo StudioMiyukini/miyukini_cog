@@ -60,9 +60,7 @@ pub fn SearchBar(
          color: {text_color}; font-size: {font_px}px; font-family: inherit;"
     );
 
-    let icon_style = format!(
-        "color: {muted_color}; font-size: 16px; flex-shrink: 0;"
-    );
+    let icon_style = format!("color: {muted_color}; font-size: 16px; flex-shrink: 0;");
 
     let has_value = !value.is_empty();
     let has_clear = on_clear.is_some() && has_value;

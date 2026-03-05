@@ -5,8 +5,4 @@
 
 pub mod adapter;
 
-pub use adapter::{
-    miyubooking_list_slots,
-    miyubooking_create_booking,
-    MiyubookingAdapterError,
-};
+pub use adapter::{miyubooking_create_booking, miyubooking_list_slots, MiyubookingAdapterError};

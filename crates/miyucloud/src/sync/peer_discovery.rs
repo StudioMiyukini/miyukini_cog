@@ -111,11 +111,8 @@ impl PeerDiscovery {
     ///
     /// Le paquet est envoye a l'adresse broadcast `255.255.255.255:{port}`.
     pub fn announce(&self) -> Result<(), MiyucloudError> {
-        let socket = std::net::UdpSocket::bind("0.0.0.0:0")
-            .map_err(MiyucloudError::Io)?;
-        socket
-            .set_broadcast(true)
-            .map_err(MiyucloudError::Io)?;
+        let socket = std::net::UdpSocket::bind("0.0.0.0:0").map_err(MiyucloudError::Io)?;
+        socket.set_broadcast(true).map_err(MiyucloudError::Io)?;
 
         let announce = self.build_announce();
         let data = serde_json::to_vec(&announce)
@@ -123,9 +120,7 @@ impl PeerDiscovery {
 
         let broadcast_addr: SocketAddr = format!("255.255.255.255:{}", self.discovery_port)
             .parse()
-            .map_err(|e: std::net::AddrParseError| {
-                MiyucloudError::InvalidInput(e.to_string())
-            })?;
+            .map_err(|e: std::net::AddrParseError| MiyucloudError::InvalidInput(e.to_string()))?;
 
         socket
             .send_to(&data, broadcast_addr)
@@ -173,8 +168,9 @@ impl PeerDiscovery {
                         });
                     }
                 }
-                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock
-                    || e.kind() == std::io::ErrorKind::TimedOut =>
+                Err(ref e)
+                    if e.kind() == std::io::ErrorKind::WouldBlock
+                        || e.kind() == std::io::ErrorKind::TimedOut =>
                 {
                     break;
                 }
@@ -230,11 +226,9 @@ impl PeerDiscovery {
     /// C'est une action manuelle de l'utilisateur : il doit verifier
     /// le fingerprint du pair avant de l'approuver.
     #[cfg(feature = "legacy-sqlite")]
-    pub fn trust_peer(
-        db: &crate::data::MiyucloudDb,
-        peer_id: &str,
-    ) -> Result<(), MiyucloudError> {
-        let peer = db.sync_peer_by_cog_id(peer_id)?
+    pub fn trust_peer(db: &crate::data::MiyucloudDb, peer_id: &str) -> Result<(), MiyucloudError> {
+        let peer = db
+            .sync_peer_by_cog_id(peer_id)?
             .or_else(|| {
                 // Try by ID
                 let list = db.sync_peer_list().ok()?;

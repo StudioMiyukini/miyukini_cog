@@ -66,7 +66,11 @@ impl MiyukiniWatchPresenter {
     }
 
     /// Liste les événements d'audit.
-    pub fn list_audit(&self, profile_id: &str, limit: i32) -> Result<Vec<AuditEvent>, MiyukiniWatchError> {
+    pub fn list_audit(
+        &self,
+        profile_id: &str,
+        limit: i32,
+    ) -> Result<Vec<AuditEvent>, MiyukiniWatchError> {
         self.db.list_audit_events(profile_id, limit)
     }
 }

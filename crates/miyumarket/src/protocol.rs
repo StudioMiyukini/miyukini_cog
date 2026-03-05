@@ -11,8 +11,8 @@
 //! | POST    | /api/market/publish              | Publie un nouveau service (upload multipart)  |
 //! | DELETE  | /api/market/package/{id}/{ver}   | Retire un package (développeur authentifié)   |
 
-use serde::{Deserialize, Serialize};
 use crate::manifest::ServiceManifest;
+use serde::{Deserialize, Serialize};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Réponses du serveur Market (Origin)
@@ -30,11 +30,19 @@ pub struct MarketResponse<T> {
 
 impl<T> MarketResponse<T> {
     pub fn ok(data: T) -> Self {
-        Self { success: true, data: Some(data), error: None }
+        Self {
+            success: true,
+            data: Some(data),
+            error: None,
+        }
     }
 
     pub fn err(msg: impl Into<String>) -> Self {
-        Self { success: false, data: None, error: Some(msg.into()) }
+        Self {
+            success: false,
+            data: None,
+            error: Some(msg.into()),
+        }
     }
 }
 
@@ -140,7 +148,7 @@ pub fn publish_url(origin_base: &str) -> String {
 /// Encodage URL minimal pour les query strings.
 fn urlencoding(s: &str) -> String {
     s.replace(' ', "%20")
-     .replace('&', "%26")
-     .replace('=', "%3D")
-     .replace('?', "%3F")
+        .replace('&', "%26")
+        .replace('=', "%3D")
+        .replace('?', "%3F")
 }

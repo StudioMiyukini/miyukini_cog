@@ -4,9 +4,9 @@
 //!
 //! TAMR gère les taxonomies, les métadonnées, et la classification des entités.
 
-pub mod taxonomy;
-pub mod metadata;
 pub mod classification;
+pub mod metadata;
+pub mod taxonomy;
 
 pub use classification::{Classification, Classifier};
 pub use metadata::{DefaultMetadataManager, Metadata, MetadataManager};

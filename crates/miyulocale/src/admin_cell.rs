@@ -51,7 +51,7 @@ pub struct MiyuLocaleAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.locale.miyulocale";
 
-#[must_use] 
+#[must_use]
 pub fn miyulocale_admin_cell(version: &str, fingerprint: &str) -> MiyuLocaleAdminCell {
     MiyuLocaleAdminCell {
         identification: MiyuLocaleIdentification {
@@ -65,7 +65,9 @@ pub fn miyulocale_admin_cell(version: &str, fingerprint: &str) -> MiyuLocaleAdmi
                 id: "MiyukiniLocaletest".to_string(),
                 name: "Test chemin complet MiyuLocale".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

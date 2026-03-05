@@ -3,41 +3,41 @@
 //! Architecture : sidebar + contenu dynamique par section.
 //! Donnees reelles via JayMangaDb (crate::use_db()).
 
-mod sidebar;
+mod aggregation;
+mod boutique;
+mod catalogue;
+mod chapters;
 pub mod components;
 mod dashboard;
-mod catalogue;
-mod work_form;
-mod chapters;
-mod sales;
-mod reader_stats;
-mod boutique;
-mod aggregation;
 mod library;
+mod onboarding;
 mod profile;
-mod series;
 mod promotions;
 mod reader;
-mod onboarding;
+mod reader_stats;
+mod sales;
+mod series;
+mod sidebar;
+mod work_form;
 
-use dioxus::prelude::*;
 use crate::use_db;
+use dioxus::prelude::*;
 
-use sidebar::JayMangaSidebar;
-use dashboard::Dashboard;
-use catalogue::Catalogue;
-use work_form::WorkForm;
-use chapters::Chapters;
-use sales::Sales;
-use reader_stats::ReaderStats;
-use boutique::Boutique;
 use aggregation::Aggregation;
+use boutique::Boutique;
+use catalogue::Catalogue;
+use chapters::Chapters;
+use dashboard::Dashboard;
 use library::Library;
+use onboarding::Onboarding;
 use profile::Profile;
-use series::SeriesView;
 use promotions::Promotions;
 use reader::Reader;
-use onboarding::Onboarding;
+use reader_stats::ReaderStats;
+use sales::Sales;
+use series::SeriesView;
+use sidebar::JayMangaSidebar;
+use work_form::WorkForm;
 
 // ── State ──────────────────────────────────────────────────────────────
 
@@ -99,7 +99,8 @@ pub fn JayMangaView() -> Element {
     // Verifier si l'onboarding est termine (ReaderProgression.onboarding_completed)
     let db_onboard = db.clone();
     let mut onboarding_done = use_signal(move || {
-        db_onboard.progression_get()
+        db_onboard
+            .progression_get()
             .ok()
             .flatten()
             .and_then(|p| p.onboarding_completed)
@@ -149,9 +150,7 @@ pub fn JayMangaView() -> Element {
     }
 
     // Verifier si le vendeur a une configuration boutique
-    let has_seller_config = {
-        db.seller_config_get().ok().flatten().is_some()
-    };
+    let has_seller_config = { db.seller_config_get().ok().flatten().is_some() };
 
     let db_setup = db.clone();
 

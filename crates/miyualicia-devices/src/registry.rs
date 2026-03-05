@@ -134,9 +134,7 @@ impl DeviceRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{
-        DeviceCapabilities, DeviceConfig, DeviceProtocol, DeviceState, DeviceType,
-    };
+    use crate::types::{DeviceCapabilities, DeviceConfig, DeviceProtocol, DeviceState, DeviceType};
     use chrono::Utc;
 
     fn make_device(room_id: &str) -> (Device, DeviceState) {

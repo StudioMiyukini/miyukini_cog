@@ -21,7 +21,10 @@ pub fn build(ctx: &GovernedContext, payload: &str) -> Result<Vec<u8>, Miyuwebway
 /// @layer: tool
 /// @human: Signe une déclaration ; exécution seule ; clé gouvernée.
 /// @do: mws_declaration_sign_under_governance
-pub fn sign(ctx: &GovernedContext, declaration: &[u8]) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
+pub fn sign(
+    ctx: &GovernedContext,
+    declaration: &[u8],
+) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
@@ -33,7 +36,10 @@ pub fn sign(ctx: &GovernedContext, declaration: &[u8]) -> Result<Vec<u8>, Miyuwe
 /// @layer: tool
 /// @human: Valide le format d'une déclaration ; exécution seule.
 /// @do: mws_declaration_validate_under_governance
-pub fn validate(ctx: &GovernedContext, declaration: &[u8]) -> Result<bool, MiyuwebwayParticipantError> {
+pub fn validate(
+    ctx: &GovernedContext,
+    declaration: &[u8],
+) -> Result<bool, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
@@ -45,7 +51,10 @@ pub fn validate(ctx: &GovernedContext, declaration: &[u8]) -> Result<bool, Miyuw
 /// @layer: tool
 /// @human: Vérifie la signature d'une déclaration ; exécution seule.
 /// @do: mws_declaration_verify_under_governance
-pub fn verify(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, MiyuwebwayParticipantError> {
+pub fn verify(
+    ctx: &GovernedContext,
+    _declaration: &[u8],
+) -> Result<bool, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }

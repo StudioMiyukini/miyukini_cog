@@ -121,7 +121,7 @@ pub const MIYUKINI_SQLTEST_TABLE: &str = "MiyukiniSQLtest";
 /// @human: Construit la Cellule Admin MiyuSQL (identification, manifeste MiyukiniSQLtest, intégrité).
 /// @do: build_miyusql_admin_cell
 /// @depends: miyusql_admin_cell_struct
-#[must_use] 
+#[must_use]
 pub fn miyusql_admin_cell(version: &str, fingerprint: &str) -> MiyuSQLAdminCell {
     MiyuSQLAdminCell {
         identification: MiyuSQLIdentification {

@@ -736,7 +736,10 @@ mod tests {
 
     #[test]
     fn permission_level_roundtrip() {
-        assert_eq!(PermissionLevel::from_str_value("read"), PermissionLevel::Read);
+        assert_eq!(
+            PermissionLevel::from_str_value("read"),
+            PermissionLevel::Read
+        );
         assert_eq!(
             PermissionLevel::from_str_value("read_write"),
             PermissionLevel::ReadWrite

@@ -53,7 +53,7 @@ pub struct MiyuTextAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.text.miyutext";
 
-#[must_use] 
+#[must_use]
 pub fn miyutext_admin_cell(version: &str, fingerprint: &str) -> MiyuTextAdminCell {
     MiyuTextAdminCell {
         identification: MiyuTextIdentification {
@@ -67,7 +67,9 @@ pub fn miyutext_admin_cell(version: &str, fingerprint: &str) -> MiyuTextAdminCel
                 id: "MiyukiniTexttest".to_string(),
                 name: "Test chemin complet MiyuText".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

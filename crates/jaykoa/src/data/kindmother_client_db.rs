@@ -230,11 +230,18 @@ impl JayKoaDb {
         run_blocking(self.agenda_set_visible_async(agenda_id, visible))
     }
 
-    async fn agenda_set_visible_async(&self, agenda_id: &str, visible: bool) -> Result<(), DbError> {
+    async fn agenda_set_visible_async(
+        &self,
+        agenda_id: &str,
+        visible: bool,
+    ) -> Result<(), DbError> {
         self.client
             .execute(
                 "UPDATE agendas SET visible = ?1 WHERE id = ?2",
-                vec![if visible { "1" } else { "0" }.to_string(), agenda_id.to_string()],
+                vec![
+                    if visible { "1" } else { "0" }.to_string(),
+                    agenda_id.to_string(),
+                ],
                 "agenda_set_visible",
             )
             .await?;
@@ -438,7 +445,10 @@ impl JayKoaDb {
         run_blocking(self.entries_by_agenda_async(agenda_id))
     }
 
-    async fn entries_by_agenda_async(&self, agenda_id: &str) -> Result<Vec<TemporalEntry>, DbError> {
+    async fn entries_by_agenda_async(
+        &self,
+        agenda_id: &str,
+    ) -> Result<Vec<TemporalEntry>, DbError> {
         let rows = self
             .client
             .query(

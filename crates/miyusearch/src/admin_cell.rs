@@ -30,7 +30,9 @@ pub struct MiyusearchTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyusearchIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyusearchAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.search.miyusearch";
 
-#[must_use] 
+#[must_use]
 pub fn miyusearch_admin_cell(version: &str, fingerprint: &str) -> MiyusearchAdminCell {
     MiyusearchAdminCell {
         identification: MiyusearchIdentification {
@@ -63,7 +65,9 @@ pub fn miyusearch_admin_cell(version: &str, fingerprint: &str) -> MiyusearchAdmi
                 id: "Miyusearch".to_string(),
                 name: "Test chemin complet Miyusearch".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

@@ -21,7 +21,11 @@ pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyuexpen
 /// @layer: tool
 /// @human: Met à jour une note de frais ; WriteIntent KindMother.
 /// @do: expense_claim_update_under_governance
-pub fn update(ctx: &GovernedContext, _claim_id: &str, _payload: &str) -> Result<(), MiyuexpenseError> {
+pub fn update(
+    ctx: &GovernedContext,
+    _claim_id: &str,
+    _payload: &str,
+) -> Result<(), MiyuexpenseError> {
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
@@ -33,7 +37,10 @@ pub fn update(ctx: &GovernedContext, _claim_id: &str, _payload: &str) -> Result<
 /// @layer: tool
 /// @human: Liste les notes de frais ; filtres fournis ; lecture.
 /// @do: expense_claim_list_under_governance
-pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>, MiyuexpenseError> {
+pub fn list(
+    ctx: &GovernedContext,
+    _filters: Option<&str>,
+) -> Result<Vec<String>, MiyuexpenseError> {
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
@@ -57,7 +64,11 @@ pub fn validate(ctx: &GovernedContext, _claim_id: &str) -> Result<(), Miyuexpens
 /// @layer: tool
 /// @human: Export des notes de frais vers compta ; autorisation = StrongFather.
 /// @do: expense_claim_export_under_governance
-pub fn export(ctx: &GovernedContext, _claim_ids: &str, _format: Option<&str>) -> Result<Vec<u8>, MiyuexpenseError> {
+pub fn export(
+    ctx: &GovernedContext,
+    _claim_ids: &str,
+    _format: Option<&str>,
+) -> Result<Vec<u8>, MiyuexpenseError> {
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }

@@ -4,9 +4,7 @@ use chrono::Utc;
 use uuid::Uuid;
 
 use crate::data::{DbError, JayFaimStore};
-use crate::{
-    Guest, Reservation, ReservationSlot, ReservationStatus, Table,
-};
+use crate::{Guest, Reservation, ReservationSlot, ReservationStatus, Table};
 
 /// Crée une table.
 pub fn table_create(

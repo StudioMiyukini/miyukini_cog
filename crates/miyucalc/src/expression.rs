@@ -14,21 +14,22 @@ use std::str::Chars;
 /// @human: Évalue une expression mathématique fournie.
 /// @do: evaluate_expression_under_governance
 /// tool.calc.expression.evaluate — ne décide pas du contenu ni de l'autorisation.
-pub fn evaluate(
-    ctx: &GovernedContext,
-    expression: &str,
-) -> Result<f64, MiyuCalcError> {
+pub fn evaluate(ctx: &GovernedContext, expression: &str) -> Result<f64, MiyuCalcError> {
     if !ctx.has_mandate() {
         return Err(MiyuCalcError::NoMandate);
     }
     let expr = expression.trim();
     if expr.is_empty() {
-        return Err(MiyuCalcError::InvalidExpression("empty expression".to_string()));
+        return Err(MiyuCalcError::InvalidExpression(
+            "empty expression".to_string(),
+        ));
     }
     let mut it = expr.chars().peekable();
     let v = parse_expr(&mut it)?;
     if it.next().is_some() {
-        return Err(MiyuCalcError::InvalidExpression("trailing input".to_string()));
+        return Err(MiyuCalcError::InvalidExpression(
+            "trailing input".to_string(),
+        ));
     }
     Ok(v)
 }
@@ -63,7 +64,9 @@ fn parse_term(it: &mut Peekable<Chars>) -> Result<f64, MiyuCalcError> {
                 it.next();
                 let right = parse_factor(it)?;
                 if right == 0.0 {
-                    return Err(MiyuCalcError::InvalidExpression("division by zero".to_string()));
+                    return Err(MiyuCalcError::InvalidExpression(
+                        "division by zero".to_string(),
+                    ));
                 }
                 left /= right;
             }
@@ -94,7 +97,9 @@ fn parse_factor(it: &mut Peekable<Chars>) -> Result<f64, MiyuCalcError> {
             parse_factor(it).map(|x| -x)
         }
         Some(c) if c.is_ascii_digit() || c == '.' => parse_number(it),
-        _ => Err(MiyuCalcError::InvalidExpression("expected number or '('".to_string())),
+        _ => Err(MiyuCalcError::InvalidExpression(
+            "expected number or '('".to_string(),
+        )),
     }
 }
 
@@ -114,5 +119,6 @@ fn parse_number(it: &mut Peekable<Chars>) -> Result<f64, MiyuCalcError> {
             break;
         }
     }
-    s.parse::<f64>().map_err(|_| MiyuCalcError::InvalidExpression(format!("invalid number: {s}")))
+    s.parse::<f64>()
+        .map_err(|_| MiyuCalcError::InvalidExpression(format!("invalid number: {s}")))
 }

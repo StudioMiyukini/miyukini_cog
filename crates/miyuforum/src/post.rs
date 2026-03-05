@@ -9,7 +9,11 @@ use crate::errors::MiyuforumError;
 /// @layer: tool
 /// @human: Crée un post ; WriteIntent KindMother.
 /// @do: forum_post_create_under_governance
-pub fn create(ctx: &GovernedContext, _topic_id: &str, _payload: &str) -> Result<String, MiyuforumError> {
+pub fn create(
+    ctx: &GovernedContext,
+    _topic_id: &str,
+    _payload: &str,
+) -> Result<String, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }
@@ -21,7 +25,11 @@ pub fn create(ctx: &GovernedContext, _topic_id: &str, _payload: &str) -> Result<
 /// @layer: tool
 /// @human: Liste les posts d'un topic.
 /// @do: forum_post_list_under_governance
-pub fn list(ctx: &GovernedContext, _topic_id: &str, _filters: Option<&str>) -> Result<Vec<String>, MiyuforumError> {
+pub fn list(
+    ctx: &GovernedContext,
+    _topic_id: &str,
+    _filters: Option<&str>,
+) -> Result<Vec<String>, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }

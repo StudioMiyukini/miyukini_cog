@@ -29,8 +29,8 @@
 //! Alignement MIP : domaine `webway`, layer tool/toolkit.
 
 // Modules existants
-pub mod admin_cell;
 pub mod address;
+pub mod admin_cell;
 pub mod cog_list;
 pub mod context;
 pub mod declaration;
@@ -41,10 +41,10 @@ mod store;
 pub mod transport;
 
 // Nouveaux modules MWS
+pub mod mws_service;
 pub mod protocol;
 pub mod relay_client;
 pub mod tracker_client;
-pub mod mws_service;
 
 // Ré-exports admin_cell
 pub use admin_cell::{
@@ -61,20 +61,21 @@ pub use declaration::{
     build as declaration_build, sign as declaration_sign, validate as declaration_validate,
     verify as declaration_verify,
 };
-pub use discovery::{request_build as discovery_request_build, request_send as discovery_request_send};
+pub use discovery::{
+    request_build as discovery_request_build, request_send as discovery_request_send,
+};
 pub use errors::MiyuwebwayParticipantError;
 pub use port::check as port_check;
 pub use transport::send as transport_send;
 
 // Ré-exports MWS client
 pub use mws_service::{CogIdentity, MwsService, MwsServiceConfig, MwsServiceState};
+pub use protocol::{
+    CogInfo, LobbyInfo, LobbySearchResult, RelayFrame, RelayMessageType, TrackerFrame,
+    TrackerMessageType,
+};
 pub use relay_client::{RelayClient, RelayClientConfig, RelaySession, RelaySessionState};
 pub use tracker_client::{TrackerAnnouncement, TrackerClient, TrackerClientConfig, TrackerState};
-pub use protocol::{
-    CogInfo, LobbyInfo, LobbySearchResult,
-    RelayFrame, RelayMessageType,
-    TrackerFrame, TrackerMessageType,
-};
 
 #[cfg(test)]
 mod tests {
@@ -87,15 +88,23 @@ mod tests {
     #[test]
     fn test_address_tracker_default() {
         let c = ctx();
-        assert_eq!(address_tracker_default(&c, None).unwrap(), "127.0.0.1:21000");
-        assert_eq!(address_tracker_default(&c, Some("host.example")).unwrap(), "host.example:21000");
+        assert_eq!(
+            address_tracker_default(&c, None).unwrap(),
+            "127.0.0.1:21000"
+        );
+        assert_eq!(
+            address_tracker_default(&c, Some("host.example")).unwrap(),
+            "host.example:21000"
+        );
     }
 
     #[test]
     fn test_transport_send_tracker_indisponible() {
         let c = ctx();
         let e = transport_send(&c, "addr", b"payload").unwrap_err();
-        assert!(matches!(e, MiyuwebwayParticipantError::ConnectionFailed(ref m) if m.contains("Tracker indisponible")));
+        assert!(
+            matches!(e, MiyuwebwayParticipantError::ConnectionFailed(ref m) if m.contains("Tracker indisponible"))
+        );
     }
 
     #[test]

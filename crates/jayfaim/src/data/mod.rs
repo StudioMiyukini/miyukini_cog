@@ -6,6 +6,4 @@ mod memory_store;
 mod types;
 
 pub use memory_store::{DbError, JayFaimStore};
-pub use types::{
-    Guest, Reservation, ReservationSlot, ReservationStatus, Table,
-};
+pub use types::{Guest, Reservation, ReservationSlot, ReservationStatus, Table};

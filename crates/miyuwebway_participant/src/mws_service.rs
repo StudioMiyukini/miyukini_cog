@@ -125,7 +125,11 @@ impl MwsService {
     /// Configure l'adresse Origin personnalisée.
     pub fn with_origin(mut self, relay_address: String, tracker_address: String) -> Self {
         self.config.relay.relay_address = relay_address.clone();
-        self.config.relay.tls_domain = relay_address.split(':').next().unwrap_or("localhost").to_string();
+        self.config.relay.tls_domain = relay_address
+            .split(':')
+            .next()
+            .unwrap_or("localhost")
+            .to_string();
         self.config.tracker.tracker_address = tracker_address;
         self.relay_client = Arc::new(RelayClient::new(self.config.relay.clone()));
         self.tracker_client = Arc::new(TrackerClient::new(self.config.tracker.clone()));
@@ -151,7 +155,11 @@ impl MwsService {
         // 1. Connexion au Relay
         let session = self
             .relay_client
-            .connect_and_register(&identity.cog_id, &identity.core_version, identity.services.clone())
+            .connect_and_register(
+                &identity.cog_id,
+                &identity.core_version,
+                identity.services.clone(),
+            )
             .await?;
 
         info!("Relay session established");
@@ -275,7 +283,10 @@ impl MwsService {
             info!("[MWS Service] Envoi WITHDRAW pour COG {}…", &id.cog_id);
             match self.tracker_client.withdraw(&id.cog_id).await {
                 Ok(()) => info!("[MWS Service] WITHDRAW réussi pour COG {}", &id.cog_id),
-                Err(e) => warn!("[MWS Service] WITHDRAW échoué pour COG {}: {}", &id.cog_id, e),
+                Err(e) => warn!(
+                    "[MWS Service] WITHDRAW échoué pour COG {}: {}",
+                    &id.cog_id, e
+                ),
             }
         } else {
             warn!("[MWS Service] Pas d'identité — WITHDRAW ignoré");

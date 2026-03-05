@@ -29,7 +29,10 @@ pub async fn api_downloads(content_mgr: &ContentManager) -> String {
 }
 
 /// Génère la réponse JSON pour /api/downloads/{category}.
-pub async fn api_downloads_by_category(content_mgr: &ContentManager, category: &str) -> Option<String> {
+pub async fn api_downloads_by_category(
+    content_mgr: &ContentManager,
+    category: &str,
+) -> Option<String> {
     let cat = match category {
         "cog" => DownloadCategory::Cog,
         "cores" => DownloadCategory::Cores,
@@ -55,7 +58,11 @@ pub async fn api_doc_section(content_mgr: &ContentManager, section_id: &str) -> 
 }
 
 /// Génère la réponse JSON pour /api/docs/{section}/{article}.
-pub async fn api_doc_article(content_mgr: &ContentManager, section_id: &str, article_id: &str) -> Option<String> {
+pub async fn api_doc_article(
+    content_mgr: &ContentManager,
+    section_id: &str,
+    article_id: &str,
+) -> Option<String> {
     let article = content_mgr.get_doc_article(section_id, article_id).await?;
     Some(serde_json::to_string_pretty(&article).unwrap_or_else(|_| "{}".to_string()))
 }
@@ -94,5 +101,6 @@ pub fn api_health() -> String {
     json!({
         "status": "healthy",
         "timestamp": chrono::Utc::now().to_rfc3339()
-    }).to_string()
+    })
+    .to_string()
 }

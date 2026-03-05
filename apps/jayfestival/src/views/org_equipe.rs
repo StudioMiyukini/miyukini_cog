@@ -1,8 +1,8 @@
 //! ORG-E21 — Gestion de l'equipe et des invitations.
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{ActionButton, Badge};
 
 /// Page gestion de l'equipe organisateur.
 #[component]
@@ -15,12 +15,15 @@ pub fn OrgEquipe() -> Element {
     let membres = vec![
         ("Alice Martin", "alice@organisation.fr", "Admin", "Actif"),
         ("Bob Dupont", "bob@organisation.fr", "Manager", "Actif"),
-        ("Claire Petit", "claire@organisation.fr", "Contributeur", "Invite"),
+        (
+            "Claire Petit",
+            "claire@organisation.fr",
+            "Contributeur",
+            "Invite",
+        ),
     ];
 
-    let invitations = vec![
-        ("david@example.com", "Manager", "En attente", "01/02/2026"),
-    ];
+    let invitations = vec![("david@example.com", "Manager", "En attente", "01/02/2026")];
 
     rsx! {
         div {

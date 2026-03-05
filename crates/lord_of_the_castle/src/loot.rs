@@ -48,25 +48,25 @@ pub struct MerchantEntry {
 /// Slots d’équipement du joueur (armure + mains + munitions).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ItemSlot {
-    Head,       // Tête
-    Neck,       // Collier
-    Shoulders,  // Épaules
-    Bracer,     // Brassard
-    Gloves,     // Gants
-    Ring1,      // Bague 1
-    Ring2,      // Bague 2
-    Chest,      // Torse
-    Belt,       // Ceinture
-    Legs,       // Jambes
-    Feet,       // Pieds
-    MainHand,   // Main droite (arme 1H, 2H, tir, bouclier)
-    OffHand,    // Main gauche (arme 1H, bouclier)
-    Ammo,       // Munitions
+    Head,      // Tête
+    Neck,      // Collier
+    Shoulders, // Épaules
+    Bracer,    // Brassard
+    Gloves,    // Gants
+    Ring1,     // Bague 1
+    Ring2,     // Bague 2
+    Chest,     // Torse
+    Belt,      // Ceinture
+    Legs,      // Jambes
+    Feet,      // Pieds
+    MainHand,  // Main droite (arme 1H, 2H, tir, bouclier)
+    OffHand,   // Main gauche (arme 1H, bouclier)
+    Ammo,      // Munitions
     Consumable,
 }
 
 impl ItemSlot {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             ItemSlot::Head => "Tête",
@@ -87,23 +87,26 @@ impl ItemSlot {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_weapon_or_shield(&self) -> bool {
         matches!(self, ItemSlot::MainHand | ItemSlot::OffHand)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_ammo(&self) -> bool {
         self == &ItemSlot::Ammo
     }
 
     /// Slots affichés dans la fenêtre Équipement (tous sauf Consumable).
-    #[must_use] 
+    #[must_use]
     pub fn equipment_slots() -> &'static [ItemSlot] {
-        use ItemSlot::{Head, Neck, Shoulders, Bracer, Gloves, Ring1, Ring2, Chest, Belt, Legs, Feet, MainHand, OffHand, Ammo};
+        use ItemSlot::{
+            Ammo, Belt, Bracer, Chest, Feet, Gloves, Head, Legs, MainHand, Neck, OffHand, Ring1,
+            Ring2, Shoulders,
+        };
         const SLOTS: [ItemSlot; 14] = [
-            Head, Neck, Shoulders, Bracer, Gloves, Ring1, Ring2,
-            Chest, Belt, Legs, Feet, MainHand, OffHand, Ammo,
+            Head, Neck, Shoulders, Bracer, Gloves, Ring1, Ring2, Chest, Belt, Legs, Feet, MainHand,
+            OffHand, Ammo,
         ];
         &SLOTS
     }
@@ -121,7 +124,7 @@ pub enum ItemRarity {
 }
 
 impl ItemRarity {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             ItemRarity::Common => "Commun",
@@ -134,7 +137,7 @@ impl ItemRarity {
     }
 
     /// Couleur de carte (affichage) selon la rareté.
-    #[must_use] 
+    #[must_use]
     pub fn color_rgb(&self) -> (u8, u8, u8) {
         match self {
             ItemRarity::Common => (160, 160, 160),
@@ -162,7 +165,7 @@ pub enum WeaponPrefix {
 }
 
 impl WeaponPrefix {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             WeaponPrefix::Mauvais => "Mauvais",
@@ -174,7 +177,7 @@ impl WeaponPrefix {
             WeaponPrefix::Legendaire => "Légendaire",
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn damage_pct(&self) -> i32 {
         match self {
             WeaponPrefix::Mauvais => -20,
@@ -186,7 +189,7 @@ impl WeaponPrefix {
             WeaponPrefix::Legendaire => 25,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn price_pct(&self) -> i32 {
         match self {
             WeaponPrefix::Mauvais => -30,
@@ -199,7 +202,7 @@ impl WeaponPrefix {
         }
     }
     /// Multiplicateur prix achat (marchand). Table : Mauvais 0.7, Banal 0.9, Aucun 1.0, Bon 1.2, Solide 2.0, Héroïque 3.0, Légendaire 5.0.
-    #[must_use] 
+    #[must_use]
     pub fn achat_mult(&self) -> f32 {
         match self {
             WeaponPrefix::Mauvais => 0.7,
@@ -212,7 +215,7 @@ impl WeaponPrefix {
         }
     }
     /// Multiplicateur prix vente. Même valeurs que achat.
-    #[must_use] 
+    #[must_use]
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -221,22 +224,22 @@ impl WeaponPrefix {
 /// Suffixe arme : table d100.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum WeaponSuffix {
-    Casse,      // cassé 0.2 / 0.2
-    Tordu,      // tordu 0.5 / 0.5
-    Emousse,    // émoussé 0.8 / 0.8
-    Aucun,      // 0% / 0%
-    Aiguise,    // aiguisé 1.1 / 1.1
-    Travaille,  // travaillé 1.2 / 1.2
-    Orne,       // orné 1.4 / 1.4
-    Leger,      // léger 1.1 / 1.1
-    Renforce,   // renforcé 1.3 / 1.3
-    Blinde,     // blindé 1.4 / 1.4
-    DeMaitre,   // de maître 1.6 / 1.6
-    Unique,     // unique 1.8 / 1.8
+    Casse,     // cassé 0.2 / 0.2
+    Tordu,     // tordu 0.5 / 0.5
+    Emousse,   // émoussé 0.8 / 0.8
+    Aucun,     // 0% / 0%
+    Aiguise,   // aiguisé 1.1 / 1.1
+    Travaille, // travaillé 1.2 / 1.2
+    Orne,      // orné 1.4 / 1.4
+    Leger,     // léger 1.1 / 1.1
+    Renforce,  // renforcé 1.3 / 1.3
+    Blinde,    // blindé 1.4 / 1.4
+    DeMaitre,  // de maître 1.6 / 1.6
+    Unique,    // unique 1.8 / 1.8
 }
 
 impl WeaponSuffix {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             WeaponSuffix::Casse => "cassé",
@@ -253,7 +256,7 @@ impl WeaponSuffix {
             WeaponSuffix::Unique => "unique",
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn damage_pct(&self) -> i32 {
         match self {
             WeaponSuffix::Casse => -60,
@@ -270,7 +273,7 @@ impl WeaponSuffix {
             WeaponSuffix::Unique => 30,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn price_pct(&self) -> i32 {
         match self {
             WeaponSuffix::Casse => -30,
@@ -288,7 +291,7 @@ impl WeaponSuffix {
         }
     }
     /// Multiplicateur achat/vente (table : cassé 0.2 … de maître 1.6, unique 1.8).
-    #[must_use] 
+    #[must_use]
     pub fn achat_mult(&self) -> f32 {
         match self {
             WeaponSuffix::Casse => 0.2,
@@ -305,7 +308,7 @@ impl WeaponSuffix {
             WeaponSuffix::Unique => 1.8,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -325,7 +328,7 @@ pub enum WeaponMaterial {
 }
 
 impl WeaponMaterial {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             WeaponMaterial::Bois => "bois",
@@ -338,7 +341,7 @@ impl WeaponMaterial {
             WeaponMaterial::Adamante => "adamante",
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn damage_pct(&self) -> i32 {
         match self {
             WeaponMaterial::Bois => -20,
@@ -352,7 +355,7 @@ impl WeaponMaterial {
         }
     }
     /// Multiplicateur achat/vente (table : bois 0.5 … adamante 2.0).
-    #[must_use] 
+    #[must_use]
     pub fn achat_mult(&self) -> f32 {
         match self {
             WeaponMaterial::Bois => 0.5,
@@ -365,7 +368,7 @@ impl WeaponMaterial {
             WeaponMaterial::Adamante => 2.0,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -376,17 +379,17 @@ impl WeaponMaterial {
 /// Préfixe armure : multiplicateur sur la valeur d’armure de base.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ArmorPrefix {
-    Mauvais,   // 0.5
-    Banal,     // 0.9
-    Aucun,     // 1.0
-    Bon,       // 1.1
-    Solide,    // 1.2
-    Heroique,  // 1.3
+    Mauvais,    // 0.5
+    Banal,      // 0.9
+    Aucun,      // 1.0
+    Bon,        // 1.1
+    Solide,     // 1.2
+    Heroique,   // 1.3
     Legendaire, // 1.5
 }
 
 impl ArmorPrefix {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             ArmorPrefix::Mauvais => "Mauvais",
@@ -398,7 +401,7 @@ impl ArmorPrefix {
             ArmorPrefix::Legendaire => "Légendaire",
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn mult(&self) -> f32 {
         match self {
             ArmorPrefix::Mauvais => 0.5,
@@ -411,7 +414,7 @@ impl ArmorPrefix {
         }
     }
     /// Multiplicateur prix achat/vente (tableau-armure.csv).
-    #[must_use] 
+    #[must_use]
     pub fn achat_mult(&self) -> f32 {
         match self {
             ArmorPrefix::Aucun => 1.0,
@@ -423,7 +426,7 @@ impl ArmorPrefix {
             ArmorPrefix::Legendaire => 5.0,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -447,7 +450,7 @@ pub enum ArmorSuffix {
 }
 
 impl ArmorSuffix {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             ArmorSuffix::Casse => "cassé",
@@ -464,7 +467,7 @@ impl ArmorSuffix {
             ArmorSuffix::Unique => "unique",
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn mult(&self) -> f32 {
         match self {
             ArmorSuffix::Casse => 0.5,
@@ -482,7 +485,7 @@ impl ArmorSuffix {
         }
     }
     /// Multiplicateur prix achat/vente (tableau-armure.csv).
-    #[must_use] 
+    #[must_use]
     pub fn achat_mult(&self) -> f32 {
         match self {
             ArmorSuffix::Aucun => 1.0,
@@ -499,7 +502,7 @@ impl ArmorSuffix {
             ArmorSuffix::Unique => 1.8,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -519,7 +522,7 @@ pub enum ArmorMaterial {
 }
 
 impl ArmorMaterial {
-    #[must_use] 
+    #[must_use]
     pub fn label(&self) -> &'static str {
         match self {
             ArmorMaterial::Bois => "bois",
@@ -532,7 +535,7 @@ impl ArmorMaterial {
             ArmorMaterial::Adamante => "adamante",
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn mult(&self) -> f32 {
         match self {
             ArmorMaterial::Bois => 0.4,
@@ -546,7 +549,7 @@ impl ArmorMaterial {
         }
     }
     /// Multiplicateur prix achat/vente (tableau-armure.csv).
-    #[must_use] 
+    #[must_use]
     pub fn achat_mult(&self) -> f32 {
         match self {
             ArmorMaterial::Bois => 0.5,
@@ -559,7 +562,7 @@ impl ArmorMaterial {
             ArmorMaterial::Adamante => 2.0,
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn vente_mult(&self) -> f32 {
         self.achat_mult()
     }
@@ -648,7 +651,7 @@ pub struct ItemInstance {
 
 impl ItemInstance {
     /// Épée courte de départ (équipée par défaut en main droite). Table : 98 achat, 49 vente.
-    #[must_use] 
+    #[must_use]
     pub fn default_short_sword() -> Self {
         Self {
             display_name: "Épée courte".to_string(),
@@ -672,7 +675,7 @@ impl ItemInstance {
     }
 
     /// Potion de vie (marchand / consommable).
-    #[must_use] 
+    #[must_use]
     pub fn potion_vie() -> Self {
         Self {
             display_name: "Potion de vie".to_string(),
@@ -696,7 +699,7 @@ impl ItemInstance {
     }
 
     /// Potion de mana (marchand / consommable).
-    #[must_use] 
+    #[must_use]
     pub fn potion_mana() -> Self {
         Self {
             display_name: "Potion de mana".to_string(),
@@ -720,7 +723,7 @@ impl ItemInstance {
     }
 
     /// Dégâts effectifs de l’arme (base × (100 + bonus %)/100, min 1). None si pas une arme.
-    #[must_use] 
+    #[must_use]
     pub fn effective_weapon_damage(&self) -> Option<i32> {
         let base = self.base_damage?;
         let pct = self.weapon_damage_pct_bonus();
@@ -741,7 +744,7 @@ impl ItemInstance {
     }
 
     /// Bonus dégâts total % (préfixe + suffixe + matériau) pour armes.
-    #[must_use] 
+    #[must_use]
     pub fn weapon_damage_pct_bonus(&self) -> i32 {
         let mut pct = 0i32;
         if let Some(wp) = self.weapon_prefix {
@@ -757,17 +760,23 @@ impl ItemInstance {
     }
 
     /// Prix de vente (or). Si base_sell présent (arme/munition/armure) : base_sell × préfixe × suffixe × matériau ; sinon ancienne formule slot/rareté.
-    #[must_use] 
+    #[must_use]
     pub fn sell_price(&self) -> u32 {
         if let Some(base) = self.base_sell {
-            if self.weapon_prefix.is_some() || self.weapon_suffix.is_some() || self.weapon_material.is_some() {
+            if self.weapon_prefix.is_some()
+                || self.weapon_suffix.is_some()
+                || self.weapon_material.is_some()
+            {
                 let wp = self.weapon_prefix.map_or(1.0, |p| p.vente_mult());
                 let ws = self.weapon_suffix.map_or(1.0, |s| s.vente_mult());
                 let wm = self.weapon_material.map_or(1.0, |m| m.vente_mult());
                 let p = (base as f32 * wp * ws * wm).round().max(0.0) as u32;
                 return p.max(1);
             }
-            if self.armor_prefix.is_some() || self.armor_suffix.is_some() || self.armor_material.is_some() {
+            if self.armor_prefix.is_some()
+                || self.armor_suffix.is_some()
+                || self.armor_material.is_some()
+            {
                 let ap = self.armor_prefix.map_or(1.0, |p| p.vente_mult());
                 let as_ = self.armor_suffix.map_or(1.0, |s| s.vente_mult());
                 let am = self.armor_material.map_or(1.0, |m| m.vente_mult());
@@ -800,17 +809,23 @@ impl ItemInstance {
     }
 
     /// Prix d'achat (marchand). Si base_buy présent : base_buy × préfixe × suffixe × matériau (arme ou armure) ; sinon 2× sell_price (fallback).
-    #[must_use] 
+    #[must_use]
     pub fn buy_price(&self) -> u32 {
         if let Some(base) = self.base_buy {
-            if self.weapon_prefix.is_some() || self.weapon_suffix.is_some() || self.weapon_material.is_some() {
+            if self.weapon_prefix.is_some()
+                || self.weapon_suffix.is_some()
+                || self.weapon_material.is_some()
+            {
                 let wp = self.weapon_prefix.map_or(1.0, |p| p.achat_mult());
                 let ws = self.weapon_suffix.map_or(1.0, |s| s.achat_mult());
                 let wm = self.weapon_material.map_or(1.0, |m| m.achat_mult());
                 let p = (base as f32 * wp * ws * wm).round().max(0.0) as u32;
                 return p.max(1);
             }
-            if self.armor_prefix.is_some() || self.armor_suffix.is_some() || self.armor_material.is_some() {
+            if self.armor_prefix.is_some()
+                || self.armor_suffix.is_some()
+                || self.armor_material.is_some()
+            {
                 let ap = self.armor_prefix.map_or(1.0, |p| p.achat_mult());
                 let as_ = self.armor_suffix.map_or(1.0, |s| s.achat_mult());
                 let am = self.armor_material.map_or(1.0, |m| m.achat_mult());
@@ -823,7 +838,7 @@ impl ItemInstance {
     }
 
     /// Armure effective : base × préfixe × suffixe × matériau (réduction plate ; dégâts min subis = 1).
-    #[must_use] 
+    #[must_use]
     pub fn effective_armor(&self) -> i32 {
         let Some(base) = self.base_armor else {
             return 0;
@@ -835,7 +850,7 @@ impl ItemInstance {
     }
 
     /// Texte des effets (préfixe/suffixe arme ou générique ou armure).
-    #[must_use] 
+    #[must_use]
     pub fn effects_text(&self) -> String {
         if self.slot.is_weapon_or_shield() {
             let mut parts = Vec::new();
@@ -947,7 +962,8 @@ pub fn roll_identification_self(
         let wp = roll_weapon_prefix(roll);
         let ws = roll_weapon_suffix(roll);
         let wm = roll_weapon_material(roll);
-        let (base_name, base_damage, block_chance_base, is_ranged, base_buy, base_sell) = roll_weapon_base(slot, roll);
+        let (base_name, base_damage, block_chance_base, is_ranged, base_buy, base_sell) =
+            roll_weapon_base(slot, roll);
         let display_name = build_weapon_display_name(&wp, &base_name, &ws, &wm);
         ItemInstance {
             display_name,
@@ -991,11 +1007,20 @@ pub fn roll_identification_self(
             armor_suffix: None,
             armor_material: None,
         }
-    } else if matches!(slot, ItemSlot::Chest | ItemSlot::Head | ItemSlot::Gloves | ItemSlot::Shoulders | ItemSlot::Legs | ItemSlot::Feet) {
+    } else if matches!(
+        slot,
+        ItemSlot::Chest
+            | ItemSlot::Head
+            | ItemSlot::Gloves
+            | ItemSlot::Shoulders
+            | ItemSlot::Legs
+            | ItemSlot::Feet
+    ) {
         let ap = roll_armor_prefix(roll);
         let as_ = roll_armor_suffix(roll);
         let am = roll_armor_material(roll);
-        let (base_name, base_armor) = roll_armor_base(slot, roll).unwrap_or_else(|| (String::from("Objet"), 0));
+        let (base_name, base_armor) =
+            roll_armor_base(slot, roll).unwrap_or_else(|| (String::from("Objet"), 0));
         let display_name = build_armor_display_name(&ap, &base_name, &as_, &am);
         ItemInstance {
             display_name,
@@ -1017,7 +1042,8 @@ pub fn roll_identification_self(
             is_ranged: false,
         }
     } else {
-        let (base_name, _) = roll_base_item_identification(slot, rarity, roll, wisdom).unwrap_or_else(|| (String::from("Objet"), slot));
+        let (base_name, _) = roll_base_item_identification(slot, rarity, roll, wisdom)
+            .unwrap_or_else(|| (String::from("Objet"), slot));
         let prefix = if roll() < 0.3 + wisdom * 0.2 {
             Some(roll_prefix(roll))
         } else {
@@ -1249,8 +1275,8 @@ const RANGED_WEAPONS: &[WeaponEntry] = &[
 
 /// Munitions : (nom, achat, vente, dispo%). Source : tableau-armes.csv. Vente 0.01 = 0 or, 0.5 = 1 or arrondi.
 const AMMO_ENTRIES: &[(&str, u32, u32, u8)] = &[
-    ("Flèches", 1, 0, 100),           // vente 0.01 -> 0 or
-    ("Carreaux", 2, 1, 100),           // vente 0.5 -> 1 or
+    ("Flèches", 1, 0, 100),  // vente 0.01 -> 0 or
+    ("Carreaux", 2, 1, 100), // vente 0.5 -> 1 or
     ("9mm", 3, 2, 50),
     ("365 magnum", 5, 3, 40),
     ("Cal12", 6, 4, 30),
@@ -1323,7 +1349,10 @@ fn pick_with_dispo_retry<T: Copy>(roll: &mut impl FnMut() -> f32, list: &[(T, f3
 }
 
 /// Même logique pour une liste d'entrées arme (dispo = .4).
-fn pick_weapon_entry_with_dispo_retry<'a>(roll: &mut impl FnMut() -> f32, entries: &'a [WeaponEntry]) -> &'a WeaponEntry {
+fn pick_weapon_entry_with_dispo_retry<'a>(
+    roll: &mut impl FnMut() -> f32,
+    entries: &'a [WeaponEntry],
+) -> &'a WeaponEntry {
     let mut idx = 0;
     loop {
         let roll_val = roll() * 100.0;
@@ -1335,7 +1364,10 @@ fn pick_weapon_entry_with_dispo_retry<'a>(roll: &mut impl FnMut() -> f32, entrie
 }
 
 /// Même logique pour une liste d'entrées armure (dispo = .4).
-fn pick_armor_entry_with_dispo_retry<'a>(roll: &mut impl FnMut() -> f32, entries: &'a [ArmorEntry]) -> &'a ArmorEntry {
+fn pick_armor_entry_with_dispo_retry<'a>(
+    roll: &mut impl FnMut() -> f32,
+    entries: &'a [ArmorEntry],
+) -> &'a ArmorEntry {
     let mut idx = 0;
     loop {
         let roll_val = roll() * 100.0;
@@ -1360,7 +1392,9 @@ fn pick_ammo_entry_with_dispo_retry(roll: &mut impl FnMut() -> f32) -> (&'static
 }
 
 /// Bouclier avec retry Dispo%. Retourne (nom, block, achat, vente).
-fn pick_shield_entry_with_dispo_retry(roll: &mut impl FnMut() -> f32) -> (&'static str, f32, u32, u32) {
+fn pick_shield_entry_with_dispo_retry(
+    roll: &mut impl FnMut() -> f32,
+) -> (&'static str, f32, u32, u32) {
     let list = SHIELD_ENTRIES;
     let mut idx = 0;
     loop {
@@ -1630,7 +1664,10 @@ fn build_armor_display_name(
 }
 
 /// Tirage pondéré par dispo% dans une slice de WeaponEntry. Retourne l'entrée choisie.
-fn pick_weighted_weapon<'a>(entries: &'a [WeaponEntry], roll: &mut impl FnMut() -> f32) -> &'a WeaponEntry {
+fn pick_weighted_weapon<'a>(
+    entries: &'a [WeaponEntry],
+    roll: &mut impl FnMut() -> f32,
+) -> &'a WeaponEntry {
     let total: u32 = entries.iter().map(|e| u32::from(e.4)).sum();
     let r = (roll() * total as f32).min(total as f32 - 0.01).max(0.0) as u32;
     let mut cum = 0u32;
@@ -1677,7 +1714,14 @@ fn pick_weighted_ammo(roll: &mut impl FnMut() -> f32) -> (&'static str, u32, u32
 fn roll_weapon_base(
     slot: ItemSlot,
     roll: &mut impl FnMut() -> f32,
-) -> (String, Option<i32>, Option<f32>, bool, Option<u32>, Option<u32>) {
+) -> (
+    String,
+    Option<i32>,
+    Option<f32>,
+    bool,
+    Option<u32>,
+    Option<u32>,
+) {
     match slot {
         ItemSlot::MainHand | ItemSlot::OffHand => {
             let total_1h: u32 = ONE_HAND_WEAPONS.iter().map(|e| u32::from(e.4)).sum();
@@ -1687,22 +1731,59 @@ fn roll_weapon_base(
             let total_weapons = total_1h + total_2h + total_hast + total_ranged;
             let total_shields: u32 = SHIELD_ENTRIES.iter().map(|e| u32::from(e.4)).sum();
             let kind_total = total_weapons + total_shields;
-            let kind_r = (roll() * kind_total as f32).min(kind_total as f32 - 0.01).max(0.0) as u32;
+            let kind_r = (roll() * kind_total as f32)
+                .min(kind_total as f32 - 0.01)
+                .max(0.0) as u32;
             if kind_r < total_1h {
                 let e = pick_weighted_weapon(ONE_HAND_WEAPONS, roll);
-                (e.0.to_string(), Some(e.1.max(1)), None, false, Some(e.2), Some(e.3))
+                (
+                    e.0.to_string(),
+                    Some(e.1.max(1)),
+                    None,
+                    false,
+                    Some(e.2),
+                    Some(e.3),
+                )
             } else if kind_r < total_1h + total_2h {
                 let e = pick_weighted_weapon(TWO_HAND_WEAPONS, roll);
-                (e.0.to_string(), Some(e.1.max(1)), None, false, Some(e.2), Some(e.3))
+                (
+                    e.0.to_string(),
+                    Some(e.1.max(1)),
+                    None,
+                    false,
+                    Some(e.2),
+                    Some(e.3),
+                )
             } else if kind_r < total_1h + total_2h + total_hast {
                 let e = pick_weighted_weapon(HAST_WEAPONS, roll);
-                (e.0.to_string(), Some(e.1.max(1)), None, false, Some(e.2), Some(e.3))
+                (
+                    e.0.to_string(),
+                    Some(e.1.max(1)),
+                    None,
+                    false,
+                    Some(e.2),
+                    Some(e.3),
+                )
             } else if kind_r < total_weapons {
                 let e = pick_weighted_weapon(RANGED_WEAPONS, roll);
-                (e.0.to_string(), Some(e.1.max(1)), None, true, Some(e.2), Some(e.3))
+                (
+                    e.0.to_string(),
+                    Some(e.1.max(1)),
+                    None,
+                    true,
+                    Some(e.2),
+                    Some(e.3),
+                )
             } else {
                 let e = pick_weighted_weapon_shield(roll);
-                (e.0.to_string(), None, Some(e.1), false, Some(e.2), Some(e.3))
+                (
+                    e.0.to_string(),
+                    None,
+                    Some(e.1),
+                    false,
+                    Some(e.2),
+                    Some(e.3),
+                )
             }
         }
         ItemSlot::Ammo => {
@@ -1721,37 +1802,78 @@ fn roll_base_item_identification(
     _wisdom_bonus: f32,
 ) -> Option<(String, ItemSlot)> {
     let (names, s) = match (slot, rarity) {
-        (ItemSlot::Head, ItemRarity::Common) => (vec!["Capuche", "Chapeau de cuir", "Bandana"], ItemSlot::Head),
-        (ItemSlot::Head, ItemRarity::Uncommon) => (vec!["Heaume léger", "Coiffe de mage"], ItemSlot::Head),
+        (ItemSlot::Head, ItemRarity::Common) => (
+            vec!["Capuche", "Chapeau de cuir", "Bandana"],
+            ItemSlot::Head,
+        ),
+        (ItemSlot::Head, ItemRarity::Uncommon) => {
+            (vec!["Heaume léger", "Coiffe de mage"], ItemSlot::Head)
+        }
         (ItemSlot::Head, ItemRarity::Rare) => (vec!["Couronne de fer"], ItemSlot::Head),
         (ItemSlot::Head, ItemRarity::Magical) => (vec!["Diadème de clarté"], ItemSlot::Head),
         (ItemSlot::Head, ItemRarity::UltraRare) => (vec!["Couronne du souverain"], ItemSlot::Head),
         (ItemSlot::Head, ItemRarity::Unique) => (vec!["Visage de Nawak"], ItemSlot::Head),
         (ItemSlot::Neck, _) => (vec!["Collier", "Amulette", "Medaillon"], ItemSlot::Neck),
-        (ItemSlot::Shoulders, _) => (vec!["Spalières", "Épaulières", "Mantelet"], ItemSlot::Shoulders),
-        (ItemSlot::Bracer, _) => (vec!["Brassard", "Protège-bras", "Manchette"], ItemSlot::Bracer),
+        (ItemSlot::Shoulders, _) => (
+            vec!["Spalières", "Épaulières", "Mantelet"],
+            ItemSlot::Shoulders,
+        ),
+        (ItemSlot::Bracer, _) => (
+            vec!["Brassard", "Protège-bras", "Manchette"],
+            ItemSlot::Bracer,
+        ),
         (ItemSlot::Gloves, _) => (vec!["Gants", "Gantelets", "Mitaines"], ItemSlot::Gloves),
         (ItemSlot::Ring1 | ItemSlot::Ring2, _) => (vec!["Bague", "Anneau", "Chevalière"], slot),
-        (ItemSlot::Chest, ItemRarity::Common) => (vec!["Tunique", "Veste en cuir", "Haubert usé"], ItemSlot::Chest),
-        (ItemSlot::Chest, ItemRarity::Uncommon) => (vec!["Armure de plaques légère", "Robe de voyage"], ItemSlot::Chest),
+        (ItemSlot::Chest, ItemRarity::Common) => (
+            vec!["Tunique", "Veste en cuir", "Haubert usé"],
+            ItemSlot::Chest,
+        ),
+        (ItemSlot::Chest, ItemRarity::Uncommon) => (
+            vec!["Armure de plaques légère", "Robe de voyage"],
+            ItemSlot::Chest,
+        ),
         (ItemSlot::Chest, ItemRarity::Rare) => (vec!["Cuirasse du château"], ItemSlot::Chest),
         (ItemSlot::Chest, ItemRarity::Magical) => (vec!["Cuirasse runique"], ItemSlot::Chest),
         (ItemSlot::Chest, ItemRarity::UltraRare) => (vec!["Plastron immortel"], ItemSlot::Chest),
         (ItemSlot::Chest, ItemRarity::Unique) => (vec!["Cœur de pierre"], ItemSlot::Chest),
         (ItemSlot::Belt, _) => (vec!["Ceinture", "Baudrier", "Sash"], ItemSlot::Belt),
-        (ItemSlot::Legs, _) => (vec!["Jambières", "Grèves", "Pantalon de cuir"], ItemSlot::Legs),
-        (ItemSlot::Feet, ItemRarity::Common) => (vec!["Bottes en cuir", "Sandales", "Souliers usés"], ItemSlot::Feet),
-        (ItemSlot::Feet, ItemRarity::Uncommon) => (vec!["Bottes de marche", "Grèves légères"], ItemSlot::Feet),
+        (ItemSlot::Legs, _) => (
+            vec!["Jambières", "Grèves", "Pantalon de cuir"],
+            ItemSlot::Legs,
+        ),
+        (ItemSlot::Feet, ItemRarity::Common) => (
+            vec!["Bottes en cuir", "Sandales", "Souliers usés"],
+            ItemSlot::Feet,
+        ),
+        (ItemSlot::Feet, ItemRarity::Uncommon) => {
+            (vec!["Bottes de marche", "Grèves légères"], ItemSlot::Feet)
+        }
         (ItemSlot::Feet, ItemRarity::Rare) => (vec!["Bottes de guerre"], ItemSlot::Feet),
         (ItemSlot::Feet, ItemRarity::Magical) => (vec!["Bottes de vent"], ItemSlot::Feet),
         (ItemSlot::Feet, ItemRarity::UltraRare) => (vec!["Marcheur des ombres"], ItemSlot::Feet),
         (ItemSlot::Feet, ItemRarity::Unique) => (vec!["Pas de géant"], ItemSlot::Feet),
-        (ItemSlot::Consumable, ItemRarity::Common) => (vec!["Potion de vie mineure", "Pain", "Eau"], ItemSlot::Consumable),
-        (ItemSlot::Consumable, ItemRarity::Uncommon) => (vec!["Potion de vie", "Elixir de force"], ItemSlot::Consumable),
-        (ItemSlot::Consumable, ItemRarity::Rare) => (vec!["Potion de vie majeure", "Pierre de rappel"], ItemSlot::Consumable),
-        (ItemSlot::Consumable, ItemRarity::Magical) => (vec!["Elixir de résistance", "Potion de mana"], ItemSlot::Consumable),
-        (ItemSlot::Consumable, ItemRarity::UltraRare) => (vec!["Pierre de renaissance"], ItemSlot::Consumable),
-        (ItemSlot::Consumable, ItemRarity::Unique) => (vec!["Larme de Nawak"], ItemSlot::Consumable),
+        (ItemSlot::Consumable, ItemRarity::Common) => (
+            vec!["Potion de vie mineure", "Pain", "Eau"],
+            ItemSlot::Consumable,
+        ),
+        (ItemSlot::Consumable, ItemRarity::Uncommon) => (
+            vec!["Potion de vie", "Elixir de force"],
+            ItemSlot::Consumable,
+        ),
+        (ItemSlot::Consumable, ItemRarity::Rare) => (
+            vec!["Potion de vie majeure", "Pierre de rappel"],
+            ItemSlot::Consumable,
+        ),
+        (ItemSlot::Consumable, ItemRarity::Magical) => (
+            vec!["Elixir de résistance", "Potion de mana"],
+            ItemSlot::Consumable,
+        ),
+        (ItemSlot::Consumable, ItemRarity::UltraRare) => {
+            (vec!["Pierre de renaissance"], ItemSlot::Consumable)
+        }
+        (ItemSlot::Consumable, ItemRarity::Unique) => {
+            (vec!["Larme de Nawak"], ItemSlot::Consumable)
+        }
         (ItemSlot::MainHand | ItemSlot::OffHand | ItemSlot::Ammo, _) => return None,
     };
     let idx = (roll() * names.len() as f32).min(names.len() as f32 - 1.0) as usize;
@@ -1822,7 +1944,10 @@ fn pick_five_distinct_weapon_types(roll: &mut impl FnMut() -> f32) -> [usize; 5]
 }
 
 /// Génère un objet de la pool « armes » pour un type donné (0=1H, 1=2H, 2=hast, 3=tir, 4=munitions, 5=bouclier).
-fn generate_merchant_weapon_of_type(roll: &mut impl FnMut() -> f32, type_idx: usize) -> ItemInstance {
+fn generate_merchant_weapon_of_type(
+    roll: &mut impl FnMut() -> f32,
+    type_idx: usize,
+) -> ItemInstance {
     match type_idx {
         0 => {
             let e = pick_weapon_entry_with_dispo_retry(roll, ONE_HAND_WEAPONS);
@@ -2008,7 +2133,8 @@ const MERCHANT_ARMOR_TYPES: usize = 7;
 
 /// Génère un objet de la pool « armures » : type choisi équitablement, puis base / préfixe / suffixe / matériau avec retry Dispo%.
 fn generate_merchant_armor_slot(roll: &mut impl FnMut() -> f32) -> ItemInstance {
-    let type_idx = (roll() * MERCHANT_ARMOR_TYPES as f32).min(MERCHANT_ARMOR_TYPES as f32 - 0.01) as usize;
+    let type_idx =
+        (roll() * MERCHANT_ARMOR_TYPES as f32).min(MERCHANT_ARMOR_TYPES as f32 - 0.01) as usize;
     let (slot, entries): (ItemSlot, &[ArmorEntry]) = match type_idx {
         0 => (ItemSlot::Chest, CHEST_ARMOR_ENTRIES),
         1 => (ItemSlot::Head, HEAD_ARMOR_ENTRIES),
@@ -2070,7 +2196,8 @@ const MERCHANT_ACCESSORY_TYPES: usize = 6;
 
 /// Génère un objet de la pool « accessoires & potions » : type choisi équitablement, puis roll identification pour ce slot.
 fn generate_merchant_accessory_slot(roll: &mut impl FnMut() -> f32) -> ItemInstance {
-    let type_idx = (roll() * MERCHANT_ACCESSORY_TYPES as f32).min(MERCHANT_ACCESSORY_TYPES as f32 - 0.01) as usize;
+    let type_idx = (roll() * MERCHANT_ACCESSORY_TYPES as f32)
+        .min(MERCHANT_ACCESSORY_TYPES as f32 - 0.01) as usize;
     let slot = match type_idx {
         0 => ItemSlot::Neck,
         1 => ItemSlot::Shoulders,
@@ -2129,7 +2256,11 @@ pub fn generate_merchant_pools(
         })
         .collect();
 
-    let mut all: Vec<&mut MerchantEntry> = weapons.iter_mut().chain(armor.iter_mut()).chain(accessories.iter_mut()).collect();
+    let mut all: Vec<&mut MerchantEntry> = weapons
+        .iter_mut()
+        .chain(armor.iter_mut())
+        .chain(accessories.iter_mut())
+        .collect();
     let n = all.len();
 
     let idx_unidentified = (roll() * n as f32).min(n as f32 - 1.0) as usize;

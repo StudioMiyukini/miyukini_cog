@@ -118,8 +118,8 @@ impl AdminServer {
 
     /// Démarre le serveur admin.
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let addr: SocketAddr = format!("{}:{}", self.config.admin.host, self.config.admin.port)
-            .parse()?;
+        let addr: SocketAddr =
+            format!("{}:{}", self.config.admin.host, self.config.admin.port).parse()?;
 
         let listener = TcpListener::bind(addr).await?;
         info!("Admin server listening on {}", addr);
@@ -141,8 +141,15 @@ impl AdminServer {
                 match stream.read(&mut buf).await {
                     Ok(n) if n > 0 => {
                         let request = String::from_utf8_lossy(&buf[..n]).to_string();
-                        let response =
-                            Self::handle_request(&request, &config, sessions.as_ref(), pools.as_ref(), &auth_state, peer_addr).await;
+                        let response = Self::handle_request(
+                            &request,
+                            &config,
+                            sessions.as_ref(),
+                            pools.as_ref(),
+                            &auth_state,
+                            peer_addr,
+                        )
+                        .await;
                         let _ = stream.write_all(response.as_bytes()).await;
                     }
                     _ => {}
@@ -213,7 +220,10 @@ impl AdminServer {
         entry.1 = Instant::now();
         if entry.0 >= MAX_LOGIN_ATTEMPTS {
             entry.2 = Some(Instant::now() + Duration::from_secs(LOGIN_BLOCK_DURATION_SECS));
-            warn!("Admin login blocked for IP {} ({} failed attempts)", ip, entry.0);
+            warn!(
+                "Admin login blocked for IP {} ({} failed attempts)",
+                ip, entry.0
+            );
         }
     }
 
@@ -282,7 +292,11 @@ impl AdminServer {
             }
             if method == "POST" {
                 if !Self::check_login_rate_limit(auth_state, peer_addr.ip()).await {
-                    return Self::http_response(429, "Too Many Requests", "Too many login attempts. Try again later.");
+                    return Self::http_response(
+                        429,
+                        "Too Many Requests",
+                        "Too many login attempts. Try again later.",
+                    );
                 }
                 return Self::login_post(config, body, auth_state, peer_addr.ip()).await;
             }
@@ -402,7 +416,11 @@ impl AdminServer {
         let auth_config = match &auth_state.config {
             Some(c) => c,
             None => {
-                return Self::http_response_html(403, "Forbidden", "<p>Admin auth not configured.</p>");
+                return Self::http_response_html(
+                    403,
+                    "Forbidden",
+                    "<p>Admin auth not configured.</p>",
+                );
             }
         };
 
@@ -433,7 +451,10 @@ impl AdminServer {
 
         Self::reset_login_attempts(auth_state, client_ip).await;
 
-        let token: String = (0..32).map(|_| rand::random::<u8>()).map(|b| format!("{:02x}", b)).collect();
+        let token: String = (0..32)
+            .map(|_| rand::random::<u8>())
+            .map(|b| format!("{:02x}", b))
+            .collect();
         let ttl = Duration::from_secs(auth_config.session_ttl_seconds);
         {
             let mut sessions = auth_state.sessions.lock().await;
@@ -449,7 +470,9 @@ impl AdminServer {
             let part = part.trim();
             if part.starts_with(&key_eq) {
                 let value = part[key_eq.len()..].trim();
-                return urlencoding::decode(value).unwrap_or(std::borrow::Cow::Borrowed(value)).into_owned();
+                return urlencoding::decode(value)
+                    .unwrap_or(std::borrow::Cow::Borrowed(value))
+                    .into_owned();
             }
         }
         String::new()

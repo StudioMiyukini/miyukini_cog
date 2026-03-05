@@ -18,12 +18,13 @@ use crate::web_surface::sandbox::SandboxedStore;
 use crate::AppState;
 use axum::body::Body;
 use axum::extract::{Path, State};
-use axum::http::{header, StatusCode};
+use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::Json;
 use miyucloud::auth::web_tokens;
 use miyucloud::crypto::StreamingDecryptor;
 use miyucloud::data::types::AccessAction;
+use miyucloud::utils::sanitize::{sanitize_mime_type, sanitize_path_segment};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::fmt::Write as FmtWrite;
@@ -50,7 +51,11 @@ fn generate_session_hmac(share_token: &str, server_secret: &str) -> String {
 }
 
 /// Verifie que la requete contient un cookie de session valide pour ce token.
-fn verify_session_cookie(headers: &axum::http::HeaderMap, share_token: &str, server_secret: &str) -> bool {
+fn verify_session_cookie(
+    headers: &axum::http::HeaderMap,
+    share_token: &str,
+    server_secret: &str,
+) -> bool {
     let expected = generate_session_hmac(share_token, server_secret);
     let cookie_header = match headers.get(header::COOKIE) {
         Some(v) => match v.to_str() {
@@ -74,10 +79,7 @@ fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
 }
 
 /// Affiche la page de partage (HTML).
-pub async fn share_page(
-    State(state): State<Arc<AppState>>,
-    Path(token): Path<String>,
-) -> Response {
+pub async fn share_page(State(state): State<Arc<AppState>>, Path(token): Path<String>) -> Response {
     let db = &state.db;
     let storage = &state.storage;
     let sandbox = SandboxedStore::new(db, storage);
@@ -88,8 +90,15 @@ pub async fn share_page(
             let file_name = &file_entry.name;
             let file_size = format_file_size(file_entry.size_bytes);
             let expires = &link.expires_at;
+            let safe_token = sanitize_path_segment(&token);
 
-            let html = render_share_page(file_name, &file_size, expires, password_required, &token);
+            let html = render_share_page(
+                file_name,
+                &file_size,
+                expires,
+                password_required,
+                &safe_token,
+            );
             Html(html).into_response()
         }
         Err(e) => {
@@ -115,6 +124,7 @@ pub struct AuthBody {
 pub async fn share_auth(
     State(state): State<Arc<AppState>>,
     Path(token): Path<String>,
+    headers: HeaderMap,
     Json(body): Json<AuthBody>,
 ) -> Response {
     let db = &state.db;
@@ -127,16 +137,16 @@ pub async fn share_auth(
         return (StatusCode::INTERNAL_SERVER_ERROR, "Error").into_response();
     };
 
-    let ip = None::<&str>; // In production, extract from request
-    let ua = None::<&str>;
+    let ip = access_log::extract_client_ip(&headers, state.config.trust_proxy);
+    let ua = access_log::extract_user_agent(&headers);
 
     if let Some(hash) = &password_hash {
         if web_tokens::verify_password(&body.password, hash) {
             let _ = access_log::log_access(
                 db,
                 Some(&link.id),
-                ip,
-                ua,
+                ip.as_deref(),
+                ua.as_deref(),
                 AccessAction::AuthAttempt,
                 link.file_id.as_deref(),
                 true,
@@ -144,15 +154,18 @@ pub async fn share_auth(
             );
             // Generate session cookie HMAC tied to this share token
             let session_hmac = generate_session_hmac(&token, &state.config.cog_token);
+            let safe_token = sanitize_path_segment(&token);
             let cookie_value = format!(
-                "{SESSION_COOKIE_NAME}={session_hmac}; Path=/share/{token}; HttpOnly; Secure; SameSite=Strict; Max-Age=3600"
+                "{SESSION_COOKIE_NAME}={session_hmac}; Path=/share/{safe_token}; HttpOnly; Secure; SameSite=Strict; Max-Age=3600"
             );
             let response_body = serde_json::json!({"authenticated": true});
             return Response::builder()
                 .status(StatusCode::OK)
                 .header(header::SET_COOKIE, cookie_value)
                 .header(header::CONTENT_TYPE, "application/json")
-                .body(Body::from(serde_json::to_string(&response_body).unwrap_or_default()))
+                .body(Body::from(
+                    serde_json::to_string(&response_body).unwrap_or_default(),
+                ))
                 .unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Error").into_response());
         }
     }
@@ -160,8 +173,8 @@ pub async fn share_auth(
     let _ = access_log::log_access(
         db,
         Some(&link.id),
-        ip,
-        ua,
+        ip.as_deref(),
+        ua.as_deref(),
         AccessAction::AuthFail,
         link.file_id.as_deref(),
         false,
@@ -207,9 +220,7 @@ pub async fn share_download(
     }
 
     // F-01 FIX: If link has password, verify session cookie before allowing download
-    if link.has_password
-        && !verify_session_cookie(&headers, &token, &state.config.cog_token)
-    {
+    if link.has_password && !verify_session_cookie(&headers, &token, &state.config.cog_token) {
         return (StatusCode::UNAUTHORIZED, "Authentication required").into_response();
     }
 
@@ -241,8 +252,8 @@ pub async fn share_download(
     let _ = access_log::log_access(
         db,
         Some(&link.id),
-        None,
-        None,
+        access_log::extract_client_ip(&headers, state.config.trust_proxy).as_deref(),
+        access_log::extract_user_agent(&headers).as_deref(),
         AccessAction::Download,
         Some(file_id),
         true,
@@ -254,7 +265,7 @@ pub async fn share_download(
     let content_disposition = format!("attachment; filename=\"{safe_filename}\"");
     Response::builder()
         .status(StatusCode::OK)
-        .header("Content-Type", &file_entry.mime_type)
+        .header("Content-Type", sanitize_mime_type(&file_entry.mime_type))
         .header("Content-Length", data.len().to_string())
         .header("Content-Disposition", content_disposition)
         .body(Body::from(data))
@@ -436,16 +447,9 @@ mod tests {
         )
         .unwrap();
 
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         let sandbox = SandboxedStore::new(&db, &storage);
         let result = sandbox.verify_token(&link.token);
@@ -528,7 +532,10 @@ mod tests {
 
         // Verify password
         let password_hash = db.share_link_password_hash(&link.id).unwrap().unwrap();
-        assert!(miyucloud::auth::verify_password("my-password", &password_hash));
+        assert!(miyucloud::auth::verify_password(
+            "my-password",
+            &password_hash
+        ));
         assert!(!miyucloud::auth::verify_password(
             "wrong-password",
             &password_hash
@@ -550,16 +557,9 @@ mod tests {
         )
         .unwrap();
 
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         // Simulate download counter increment
         db.share_link_increment_downloads(&link.id).unwrap();

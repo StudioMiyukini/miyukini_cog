@@ -1,10 +1,10 @@
 //! Bibliotheque lecteur JayManga — 5 onglets (Favoris, Achats, Telecharges, En cours, Termines).
 
+use super::components::{Badge, EmptyState};
+use super::{JayMangaSection, JayMangaState, LibraryTab};
+use crate::use_db;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{EmptyState, Badge};
-use super::{JayMangaSection, JayMangaState, LibraryTab};
 
 #[component]
 pub fn Library(state: Signal<JayMangaState>) -> Element {
@@ -14,7 +14,10 @@ pub fn Library(state: Signal<JayMangaState>) -> Element {
     // Progression lecteur
     let progression = db.progression_get().ok().flatten();
     let total_xp = progression.as_ref().and_then(|p| p.total_xp).unwrap_or(0);
-    let current_streak = progression.as_ref().and_then(|p| p.current_streak).unwrap_or(0);
+    let current_streak = progression
+        .as_ref()
+        .and_then(|p| p.current_streak)
+        .unwrap_or(0);
 
     // Niveau via domain
     let (level, level_name) = jaymanga::domain::gamification::gamification_level_for_xp(total_xp);
@@ -28,17 +31,23 @@ pub fn Library(state: Signal<JayMangaState>) -> Element {
 
     // Classement par onglet
     let fav_count = favorites.len();
-    let purchases_count = licenses.iter().filter(|l| l.status.as_deref() == Some("active")).count();
-    let in_progress: Vec<_> = favorites.iter()
+    let purchases_count = licenses
+        .iter()
+        .filter(|l| l.status.as_deref() == Some("active"))
+        .count();
+    let in_progress: Vec<_> = favorites
+        .iter()
         .filter(|f| {
             let p = f.reading_progress.unwrap_or(0.0);
             p > 0.0 && p < 1.0
         })
         .collect();
-    let completed: Vec<_> = favorites.iter()
+    let completed: Vec<_> = favorites
+        .iter()
         .filter(|f| f.reading_progress.unwrap_or(0.0) >= 1.0)
         .collect();
-    let downloaded: Vec<_> = favorites.iter()
+    let downloaded: Vec<_> = favorites
+        .iter()
         .filter(|f| f.purchase_status.as_deref() == Some("downloaded"))
         .collect();
 
@@ -146,8 +155,16 @@ fn TabButton(
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
     let c = use_palette();
-    let border_color = if is_active { c.accent_blue } else { "transparent" };
-    let text_color = if is_active { c.text_white } else { c.text_secondary };
+    let border_color = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
+    let text_color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     rsx! {
         button {
@@ -178,7 +195,11 @@ fn WorkCard(
 ) -> Element {
     let c = use_palette();
     let progress_pct = (progress * 100.0) as i32;
-    let progress_color = if progress >= 1.0 { c.accent_green } else { c.accent_blue };
+    let progress_color = if progress >= 1.0 {
+        c.accent_green
+    } else {
+        c.accent_blue
+    };
     let cog_indicator = if cog_online { "\u{1F7E2}" } else { "\u{26AB}" };
 
     let status_info = match status.as_str() {
@@ -266,7 +287,10 @@ fn WorkCard(
 // -- Onglet Favoris --
 
 #[component]
-fn FavoritesTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<JayMangaState>) -> Element {
+fn FavoritesTab(
+    favorites: Vec<jaymanga::data::ReaderFavorite>,
+    state: Signal<JayMangaState>,
+) -> Element {
     if favorites.is_empty() {
         return rsx! {
             EmptyState {
@@ -320,7 +344,8 @@ fn FavoritesTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<Ja
 fn PurchasesTab(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
     let c = use_palette();
 
-    let active_licenses: Vec<_> = licenses.iter()
+    let active_licenses: Vec<_> = licenses
+        .iter()
         .filter(|l| l.status.as_deref() == Some("active"))
         .collect();
 
@@ -387,8 +412,12 @@ fn PurchasesTab(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
 // -- Onglet Telecharges --
 
 #[component]
-fn DownloadsTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<JayMangaState>) -> Element {
-    let downloaded: Vec<_> = favorites.iter()
+fn DownloadsTab(
+    favorites: Vec<jaymanga::data::ReaderFavorite>,
+    state: Signal<JayMangaState>,
+) -> Element {
+    let downloaded: Vec<_> = favorites
+        .iter()
         .filter(|f| f.purchase_status.as_deref() == Some("downloaded"))
         .collect();
 
@@ -437,8 +466,12 @@ fn DownloadsTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<Ja
 // -- Onglet En cours --
 
 #[component]
-fn InProgressTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<JayMangaState>) -> Element {
-    let mut in_progress: Vec<_> = favorites.iter()
+fn InProgressTab(
+    favorites: Vec<jaymanga::data::ReaderFavorite>,
+    state: Signal<JayMangaState>,
+) -> Element {
+    let mut in_progress: Vec<_> = favorites
+        .iter()
         .filter(|f| {
             let p = f.reading_progress.unwrap_or(0.0);
             p > 0.0 && p < 1.0
@@ -502,10 +535,14 @@ fn InProgressTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<J
 // -- Onglet Termines --
 
 #[component]
-fn CompletedTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<JayMangaState>) -> Element {
+fn CompletedTab(
+    favorites: Vec<jaymanga::data::ReaderFavorite>,
+    state: Signal<JayMangaState>,
+) -> Element {
     let c = use_palette();
 
-    let completed: Vec<_> = favorites.iter()
+    let completed: Vec<_> = favorites
+        .iter()
         .filter(|f| f.reading_progress.unwrap_or(0.0) >= 1.0)
         .collect();
 

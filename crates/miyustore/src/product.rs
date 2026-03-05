@@ -22,7 +22,9 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let guard = products()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     Ok(guard.keys().cloned().collect())
 }
 
@@ -35,7 +37,9 @@ pub fn resolve(ctx: &GovernedContext, product_id: &str) -> Result<String, Miyust
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let guard = products()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     Ok(guard.get(product_id).cloned().unwrap_or_default())
 }
 
@@ -61,7 +65,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreE
         return Err(MiyustoreError::NoMandate);
     }
     let id = format!("prod:{}", UuidIdGenerator.generate());
-    let mut guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = products()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }
@@ -71,11 +77,17 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreE
 /// @layer: tool
 /// @human: Met à jour un produit ; WriteIntent KindMother.
 /// @do: commerce_product_update_under_governance
-pub fn update(ctx: &GovernedContext, product_id: &str, payload: &str) -> Result<(), MiyustoreError> {
+pub fn update(
+    ctx: &GovernedContext,
+    product_id: &str,
+    payload: &str,
+) -> Result<(), MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let mut guard = products().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = products()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     guard.insert(product_id.to_string(), payload.to_string());
     Ok(())
 }

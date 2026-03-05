@@ -30,7 +30,9 @@ pub struct MiyuexpenseTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuexpenseIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuexpenseAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.expense.claims";
 
-#[must_use] 
+#[must_use]
 pub fn miyuexpense_admin_cell(version: &str, fingerprint: &str) -> MiyuexpenseAdminCell {
     MiyuexpenseAdminCell {
         identification: MiyuexpenseIdentification {
@@ -63,7 +65,9 @@ pub fn miyuexpense_admin_cell(version: &str, fingerprint: &str) -> MiyuexpenseAd
                 id: "Miyuexpense".to_string(),
                 name: "Test chemin complet Miyuexpense".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

@@ -15,8 +15,8 @@ pub mod folder;
 pub mod message;
 
 pub use admin_cell::{
-    miyupm_admin_cell, MiyupmAdminCell, MiyupmIdentification, MiyupmIntegrity,
-    MiyupmTestManifest, TOOLKIT_ID,
+    miyupm_admin_cell, MiyupmAdminCell, MiyupmIdentification, MiyupmIntegrity, MiyupmTestManifest,
+    TOOLKIT_ID,
 };
 pub use context::GovernedContext;
 pub use conversation::{get as conversation_get, list as conversation_list};

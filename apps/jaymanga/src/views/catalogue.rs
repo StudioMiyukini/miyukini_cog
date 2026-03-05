@@ -1,17 +1,19 @@
 //! Catalogue JayManga — liste des oeuvres avec gestion CRUD.
 
+use super::components::{Badge, EmptyState, PageHeader};
+use super::{JayMangaSection, JayMangaState};
+use crate::use_db;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, Badge, EmptyState};
-use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
     let c = use_palette();
     let db = use_db();
 
-    let works = db.work_list(&jaymanga::data::WorkFilters::default()).unwrap_or_default();
+    let works = db
+        .work_list(&jaymanga::data::WorkFilters::default())
+        .unwrap_or_default();
     let work_count = works.len();
 
     rsx! {

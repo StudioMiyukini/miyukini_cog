@@ -15,8 +15,8 @@ use llama_cpp_2::llama_batch::LlamaBatch;
 use llama_cpp_2::model::params::LlamaModelParams;
 use llama_cpp_2::model::LlamaModel;
 use llama_cpp_2::sampling::LlamaSampler;
-use llama_cpp_2::token::LlamaToken;
 use llama_cpp_2::token::data_array::LlamaTokenDataArray;
+use llama_cpp_2::token::LlamaToken;
 
 use crate::config::NativeInferenceConfig;
 use crate::model_manager::ModelManager;
@@ -225,10 +225,7 @@ impl NativeBackend {
     ) -> Result<(String, u32, u32), InferenceError> {
         let state = self.state.lock().unwrap();
 
-        let loaded = state
-            .loaded
-            .as_ref()
-            .ok_or(InferenceError::NoModelLoaded)?;
+        let loaded = state.loaded.as_ref().ok_or(InferenceError::NoModelLoaded)?;
 
         // Construire le prompt à partir des messages
         let prompt = build_chat_prompt(messages);
@@ -240,8 +237,8 @@ impl NativeBackend {
             4096
         };
 
-        let ctx_params = LlamaContextParams::default()
-            .with_n_ctx(std::num::NonZeroU32::new(ctx_size));
+        let ctx_params =
+            LlamaContextParams::default().with_n_ctx(std::num::NonZeroU32::new(ctx_size));
 
         let mut ctx = loaded
             .model
@@ -300,10 +297,8 @@ impl NativeBackend {
         }
 
         // Configurer le sampler
-        let mut sampler = LlamaSampler::chain_simple([
-            LlamaSampler::temp(temperature),
-            LlamaSampler::dist(42),
-        ]);
+        let mut sampler =
+            LlamaSampler::chain_simple([LlamaSampler::temp(temperature), LlamaSampler::dist(42)]);
 
         // Générer les tokens
         let mut output_tokens: Vec<LlamaToken> = Vec::new();
@@ -314,7 +309,8 @@ impl NativeBackend {
             let mut candidates = ctx.token_data_array();
             sampler.apply(&mut candidates);
 
-            let token = candidates.selected_token()
+            let token = candidates
+                .selected_token()
                 .ok_or_else(|| InferenceError::LlamaError("Aucun token sélectionné".into()))?;
 
             sampler.accept(token);
@@ -507,12 +503,11 @@ impl InferenceRouter {
 
         // Exécuter l'inférence dans un thread bloquant (llama-cpp est sync)
         let native = self.native.clone();
-        let (content, prompt_tokens, completion_tokens) =
-            tokio::task::spawn_blocking(move || {
-                native.chat_completion_blocking(&messages, temperature, max_tokens)
-            })
-            .await
-            .map_err(|e| InferenceError::LlamaError(format!("Task join : {e}")))??;
+        let (content, prompt_tokens, completion_tokens) = tokio::task::spawn_blocking(move || {
+            native.chat_completion_blocking(&messages, temperature, max_tokens)
+        })
+        .await
+        .map_err(|e| InferenceError::LlamaError(format!("Task join : {e}")))??;
 
         Ok(ChatCompletionResponse {
             id: format!("native-{}", uuid_simple()),
@@ -602,14 +597,8 @@ fn build_chat_prompt(messages: &[serde_json::Value]) -> String {
     let mut prompt = String::new();
 
     for msg in messages {
-        let role = msg
-            .get("role")
-            .and_then(|r| r.as_str())
-            .unwrap_or("user");
-        let content = msg
-            .get("content")
-            .and_then(|c| c.as_str())
-            .unwrap_or("");
+        let role = msg.get("role").and_then(|r| r.as_str()).unwrap_or("user");
+        let content = msg.get("content").and_then(|c| c.as_str()).unwrap_or("");
 
         match role {
             "system" => {

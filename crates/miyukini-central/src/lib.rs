@@ -20,6 +20,6 @@ pub mod services;
 
 // Ré-exports MWS pour accès facile
 pub use mws::{
-    CentralMwsConfig, CentralMwsManager, CentralMwsState,
-    MwsConformityState, MwsNetworkInfo, MwsStatusSummary,
+    CentralMwsConfig, CentralMwsManager, CentralMwsState, MwsConformityState, MwsNetworkInfo,
+    MwsStatusSummary,
 };

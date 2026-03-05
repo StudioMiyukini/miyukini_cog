@@ -1,8 +1,8 @@
 //! EXP-E14 — Fiche publique exposant (aperçu et édition).
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton};
 
 /// Gestion de la fiche publique exposant.
 #[component]
@@ -13,15 +13,36 @@ pub fn ExpFichePublique() -> Element {
     // Charger les données exposant
     let exposant = {
         let db = crate::use_db();
-        db.exposants_list(false).unwrap_or_default().into_iter().next()
+        db.exposants_list(false)
+            .unwrap_or_default()
+            .into_iter()
+            .next()
     };
 
-    let company_name = exposant.as_ref().and_then(|e| e.company_name.clone()).unwrap_or_else(|| "Mon entreprise".to_string());
-    let stand_name = exposant.as_ref().and_then(|e| e.stand_name.clone()).unwrap_or_default();
-    let description = exposant.as_ref().and_then(|e| e.description.clone()).unwrap_or_default();
-    let category = exposant.as_ref().and_then(|e| e.category.clone()).unwrap_or_default();
-    let site_web = exposant.as_ref().and_then(|e| e.site_web.clone()).unwrap_or_default();
-    let visible = exposant.as_ref().and_then(|e| e.visible_repertoire).unwrap_or(false);
+    let company_name = exposant
+        .as_ref()
+        .and_then(|e| e.company_name.clone())
+        .unwrap_or_else(|| "Mon entreprise".to_string());
+    let stand_name = exposant
+        .as_ref()
+        .and_then(|e| e.stand_name.clone())
+        .unwrap_or_default();
+    let description = exposant
+        .as_ref()
+        .and_then(|e| e.description.clone())
+        .unwrap_or_default();
+    let category = exposant
+        .as_ref()
+        .and_then(|e| e.category.clone())
+        .unwrap_or_default();
+    let site_web = exposant
+        .as_ref()
+        .and_then(|e| e.site_web.clone())
+        .unwrap_or_default();
+    let visible = exposant
+        .as_ref()
+        .and_then(|e| e.visible_repertoire)
+        .unwrap_or(false);
 
     let is_editing = *edit_mode.read();
 

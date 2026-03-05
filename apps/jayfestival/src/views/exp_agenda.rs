@@ -13,12 +13,36 @@ pub fn ExpAgenda() -> Element {
     // Pour la démo, on utilise des données statiques
 
     let tab = active_tab.read().clone();
-    let tab_jour_bg = if tab == "jour" { c.accent_blue } else { c.bg_secondary };
-    let tab_jour_color = if tab == "jour" { "white" } else { c.text_primary };
-    let tab_semaine_bg = if tab == "semaine" { c.accent_blue } else { c.bg_secondary };
-    let tab_semaine_color = if tab == "semaine" { "white" } else { c.text_primary };
-    let tab_mois_bg = if tab == "mois" { c.accent_blue } else { c.bg_secondary };
-    let tab_mois_color = if tab == "mois" { "white" } else { c.text_primary };
+    let tab_jour_bg = if tab == "jour" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_jour_color = if tab == "jour" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_semaine_bg = if tab == "semaine" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_semaine_color = if tab == "semaine" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_mois_bg = if tab == "mois" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_mois_color = if tab == "mois" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -168,9 +192,17 @@ fn WeekView() -> Element {
 }
 
 #[component]
-fn DayHeader(day: &'static str, date: &'static str, #[props(default = false)] is_today: bool) -> Element {
+fn DayHeader(
+    day: &'static str,
+    date: &'static str,
+    #[props(default = false)] is_today: bool,
+) -> Element {
     let c = use_palette();
-    let bg = if is_today { c.accent_blue } else { "transparent" };
+    let bg = if is_today {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
     let color = if is_today { "white" } else { c.text_primary };
 
     rsx! {

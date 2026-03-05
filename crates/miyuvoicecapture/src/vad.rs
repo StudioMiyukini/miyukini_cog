@@ -90,9 +90,9 @@ impl VadConfig {
         frame_size: usize,
     ) -> Result<Self, VoiceCaptureError> {
         if rms_threshold <= 0.0 || rms_threshold >= 1.0 {
-            return Err(VoiceCaptureError::InvalidVadConfig(
-                format!("RMS threshold must be in (0.0, 1.0), got {rms_threshold}"),
-            ));
+            return Err(VoiceCaptureError::InvalidVadConfig(format!(
+                "RMS threshold must be in (0.0, 1.0), got {rms_threshold}"
+            )));
         }
         if frame_size == 0 {
             return Err(VoiceCaptureError::InvalidVadConfig(
@@ -126,12 +126,10 @@ impl VadConfig {
     /// Valide la configuration.
     pub fn validate(&self) -> Result<(), VoiceCaptureError> {
         if self.rms_threshold <= 0.0 || self.rms_threshold >= 1.0 {
-            return Err(VoiceCaptureError::InvalidVadConfig(
-                format!(
-                    "RMS threshold must be in (0.0, 1.0), got {}",
-                    self.rms_threshold
-                ),
-            ));
+            return Err(VoiceCaptureError::InvalidVadConfig(format!(
+                "RMS threshold must be in (0.0, 1.0), got {}",
+                self.rms_threshold
+            )));
         }
         if self.debounce_frames == 0 {
             return Err(VoiceCaptureError::InvalidVadConfig(
@@ -223,10 +221,7 @@ impl VoiceActivityDetector {
         if samples.is_empty() {
             return 0.0;
         }
-        let sum_sq: f64 = samples
-            .iter()
-            .map(|&s| f64::from(s) * f64::from(s))
-            .sum();
+        let sum_sq: f64 = samples.iter().map(|&s| f64::from(s) * f64::from(s)).sum();
         let mean_sq = sum_sq / samples.len() as f64;
         mean_sq.sqrt() as f32
     }
@@ -400,7 +395,10 @@ mod tests {
         // RMS of constant signal = absolute value of the constant
         let samples = vec![0.5_f32; 100];
         let rms = VoiceActivityDetector::compute_rms(&samples);
-        assert!((rms - 0.5).abs() < 0.001, "RMS of constant 0.5 should be ~0.5, got {rms}");
+        assert!(
+            (rms - 0.5).abs() < 0.001,
+            "RMS of constant 0.5 should be ~0.5, got {rms}"
+        );
     }
 
     #[test]
@@ -593,11 +591,11 @@ mod tests {
     #[test]
     fn test_vad_config_from_context() {
         let config = VadConfig::from_context_params(
-            0.03,    // threshold
-            300,     // debounce ms
-            500,     // pre-buffer ms
-            16_000,  // sample rate
-            480,     // frame size (30ms)
+            0.03,   // threshold
+            300,    // debounce ms
+            500,    // pre-buffer ms
+            16_000, // sample rate
+            480,    // frame size (30ms)
         );
         assert!(config.is_ok());
         let config = config.unwrap();

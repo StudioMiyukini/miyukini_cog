@@ -23,12 +23,12 @@
 //! // theme::apply_theme(&ctx, &D2_THEME);
 //! ```
 
-pub mod convert;
-pub mod theme;
 pub mod atoms;
+pub mod convert;
 pub mod molecules;
 pub mod organisms;
 pub mod templates;
+pub mod theme;
 
 // Re-exports for convenience
 pub use convert::rgba_to_color32;

@@ -2,19 +2,19 @@
 //!
 //! Interface : tableau de bord, detail, parametres, audit.
 
+use crate::{use_db, use_profile_id};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use crate::{use_db, use_profile_id};
 
+mod audit;
 mod dashboard;
 mod detail;
 mod params;
-mod audit;
 
+use audit::AuditScreen;
 use dashboard::DashboardScreen;
 use detail::DetailScreen;
 use params::ParamsScreen;
-use audit::AuditScreen;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 enum MiyukiniWatchTab {
@@ -114,15 +114,23 @@ pub fn MiyukiniWatchView() -> Element {
 }
 
 #[component]
-fn TabButton(
-    label: &'static str,
-    is_active: bool,
-    onclick: EventHandler<MouseEvent>,
-) -> Element {
+fn TabButton(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
-    let bg = if is_active { c.accent_blue } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
-    let border_color = if is_active { c.accent_blue } else { "transparent" };
+    let bg = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
+    let border_color = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
 
     rsx! {
         button {

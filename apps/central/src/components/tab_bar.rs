@@ -1,8 +1,8 @@
 //! Barre d'onglets des services ouverts.
 
-use dioxus::prelude::*;
 use crate::state::use_app_state;
 use crate::theme::styles;
+use dioxus::prelude::*;
 
 #[component]
 pub fn TabBar() -> Element {

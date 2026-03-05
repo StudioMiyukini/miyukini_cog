@@ -144,7 +144,7 @@ impl MemoryStorage {
     /// @do: create_memory_storage
     /// @depends: kindmother_storage_memory
     /// Crée un nouveau stockage mémoire.
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -153,10 +153,7 @@ impl MemoryStorage {
 impl Storage for MemoryStorage {
     fn read(&self, instance: &InstanceIdentity, entity_id: &str) -> Option<Vec<u8>> {
         let instance_key = format!("{}", instance.id);
-        self.data
-            .get(&instance_key)?
-            .get(entity_id)
-            .cloned()
+        self.data.get(&instance_key)?.get(entity_id).cloned()
     }
 
     fn write(
@@ -202,9 +199,7 @@ mod tests {
         let entity_id = "test-entity";
         let data = b"test data";
 
-        storage
-            .write(&instance.identity, entity_id, data)
-            .unwrap();
+        storage.write(&instance.identity, entity_id, data).unwrap();
         let read_data = storage.read(&instance.identity, entity_id).unwrap();
         assert_eq!(read_data, data);
     }
@@ -222,9 +217,7 @@ mod tests {
         let entity_id = "test-entity";
         let data = b"test data";
 
-        storage
-            .write(&instance.identity, entity_id, data)
-            .unwrap();
+        storage.write(&instance.identity, entity_id, data).unwrap();
         storage.delete(&instance.identity, entity_id).unwrap();
         assert!(storage.read(&instance.identity, entity_id).is_none());
     }

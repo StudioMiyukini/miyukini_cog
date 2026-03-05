@@ -1,11 +1,11 @@
 //! Dashboard JayManga — hub principal vendeur + lecteur.
 
+use super::components::{ActionButton, Badge, QuickAccessCard, StatCard};
+use super::{JayMangaSection, JayMangaState};
+use crate::use_db;
 use dioxus::prelude::*;
 use jaymanga::domain::gamification::{gamification_level_for_xp, gamification_level_progress};
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{StatCard, QuickAccessCard, ActionButton, Badge};
-use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
@@ -13,7 +13,9 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
     let db = use_db();
 
     // Charger les donnees reelles
-    let works = db.work_list(&jaymanga::data::WorkFilters::default()).unwrap_or_default();
+    let works = db
+        .work_list(&jaymanga::data::WorkFilters::default())
+        .unwrap_or_default();
     let work_count = works.len();
     let series_count = db.series_list().map(|v| v.len()).unwrap_or(0);
     let licenses = db.license_list_all().unwrap_or_default();
@@ -21,42 +23,62 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
     let favorites = db.favorite_list().unwrap_or_default();
     let progression = db.progression_get().ok().flatten();
 
-    let chapter_count: usize = works.iter()
+    let chapter_count: usize = works
+        .iter()
         .filter_map(|w| w.id.as_ref())
         .map(|wid| db.chapter_list_by_work(wid).map(|v| v.len()).unwrap_or(0))
         .sum();
 
     let seller_config = db.seller_config_get().ok().flatten();
-    let shop_name = seller_config.as_ref()
+    let shop_name = seller_config
+        .as_ref()
         .and_then(|c| c.shop_name.clone())
         .unwrap_or_else(|| "Ma Boutique".to_string());
 
     // Revenus totaux
-    let total_revenue_cents: i64 = licenses.iter()
+    let total_revenue_cents: i64 = licenses
+        .iter()
         .filter(|l| l.status.as_deref() == Some("active"))
         .filter_map(|l| l.amount_paid)
         .sum();
-    let total_revenue = format!("{},{:02} \u{20AC}", total_revenue_cents / 100, total_revenue_cents % 100);
+    let total_revenue = format!(
+        "{},{:02} \u{20AC}",
+        total_revenue_cents / 100,
+        total_revenue_cents % 100
+    );
 
     // Revenus ce mois
     let now_prefix = chrono::Utc::now().format("%Y-%m").to_string();
-    let month_sales = licenses.iter()
-        .filter(|l| l.purchased_at.as_deref().unwrap_or("").starts_with(&now_prefix))
+    let month_sales = licenses
+        .iter()
+        .filter(|l| {
+            l.purchased_at
+                .as_deref()
+                .unwrap_or("")
+                .starts_with(&now_prefix)
+        })
         .count();
 
     // Publiees / brouillons
-    let published_count = works.iter().filter(|w| w.status.as_deref() == Some("published")).count();
+    let published_count = works
+        .iter()
+        .filter(|w| w.status.as_deref() == Some("published"))
+        .count();
     let draft_count = work_count.saturating_sub(published_count);
 
     // Progression lecteur
     let total_xp = progression.as_ref().and_then(|p| p.total_xp).unwrap_or(0);
-    let current_streak = progression.as_ref().and_then(|p| p.current_streak).unwrap_or(0);
+    let current_streak = progression
+        .as_ref()
+        .and_then(|p| p.current_streak)
+        .unwrap_or(0);
     let (level, level_name) = gamification_level_for_xp(total_xp);
     let level_progress = gamification_level_progress(total_xp);
     let progress_pct = (level_progress * 100.0) as i32;
 
     // Ventes recentes (5 dernieres)
-    let mut recent_licenses: Vec<_> = licenses.iter()
+    let mut recent_licenses: Vec<_> = licenses
+        .iter()
         .filter(|l| l.status.as_deref() == Some("active"))
         .collect();
     recent_licenses.sort_by(|a, b| {

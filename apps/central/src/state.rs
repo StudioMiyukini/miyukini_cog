@@ -2,12 +2,12 @@
 
 use std::sync::Arc;
 
-use dioxus::prelude::*;
-use miyukini_central::auth::CentralProfile;
 use crate::data::ServiceConnections;
+use crate::miou::state::{MiouPreferences, MiouState};
 use crate::service_manager::ServiceManager;
 use crate::theme::Theme;
-use crate::miou::state::{MiouState, MiouPreferences};
+use dioxus::prelude::*;
+use miyukini_central::auth::CentralProfile;
 
 /// Contexte partagé (connexions + état + service manager) fourni une seule fois à la racine.
 #[derive(Clone)]
@@ -75,9 +75,9 @@ impl ServiceType {
 
     pub fn color(&self) -> &'static str {
         match self {
-            Self::InterneCog => "#3b82f6",  // Blue
-            Self::SurfaceWeb => "#10b981",  // Emerald
-            Self::InterCog => "#8b5cf6",    // Violet
+            Self::InterneCog => "#3b82f6", // Blue
+            Self::SurfaceWeb => "#10b981", // Emerald
+            Self::InterCog => "#8b5cf6",   // Violet
         }
     }
 }
@@ -99,7 +99,7 @@ impl ServiceSource {
 
     pub fn badge_color(&self) -> &'static str {
         match self {
-            Self::Officiel => "#10b981",  // Emerald
+            Self::Officiel => "#10b981", // Emerald
             Self::Tiers => "#f59e0b",    // Amber
         }
     }
@@ -159,6 +159,7 @@ const OFFICIAL_CATALOG: &[ServiceMeta] = &[
     ServiceMeta { id: "miyuclicker",  name: "Lord of the Click", description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)",      icon: "\u{1F3AE}", service_type: ServiceType::InterCog, is_favorite: true },
     ServiceMeta { id: "lord_of_the_castle", name: "Miyukini Survivor", description: "Jeu Survivor/Tower Defense officiel Miyukini",                    icon: "\u{1F3F0}", service_type: ServiceType::InterCog, is_favorite: false },
     ServiceMeta { id: "miou-llm-bridge", name: "Miyukini AI Studio",   description: "Service IA local — inférence GGUF native, agents spécialisés, skills, tool calling", icon: "\u{1F9E0}", service_type: ServiceType::InterneCog, is_favorite: false },
+    ServiceMeta { id: "miyukini-whisper", name: "Miyukini Whisper", description: "Dictee locale STT/TTS avec presets hardware FR/EN et fallback opt-in", icon: "\u{1F3A4}", service_type: ServiceType::InterneCog, is_favorite: true },
     ServiceMeta { id: "alicia",          name: "Alicia Home Assistante", description: "Assistant vocal local Alicia — capture audio, détection de mot-clé, domotique 100% hors-ligne", icon: "\u{1F399}", service_type: ServiceType::InterneCog, is_favorite: false },
     ServiceMeta { id: "miyucloud",       name: "MiyuCloud",             description: "Cloud priv\u{00e9} \u{2014} fichiers, sync, partage s\u{00e9}curis\u{00e9}",                                      icon: "\u{2601}",  service_type: ServiceType::InterCog,   is_favorite: true },
 ];
@@ -225,7 +226,8 @@ impl ServiceRegistry {
         services.push(ServiceInfo {
             id: "market".into(),
             name: "Services".into(),
-            description: "Catalogue des services \u{2014} chercher, installer, d\u{00e9}sinstaller.".into(),
+            description:
+                "Catalogue des services \u{2014} chercher, installer, d\u{00e9}sinstaller.".into(),
             icon: "\u{1F6D2}".into(),
             service_type: ServiceType::InterneCog,
             source: ServiceSource::Officiel,
@@ -262,10 +264,14 @@ impl ServiceRegistry {
     ) -> (Vec<ServiceInfo>, Vec<ServiceInfo>) {
         match client.fetch_catalog().await {
             Ok(catalog) => {
-                let official = catalog.official.into_iter()
+                let official = catalog
+                    .official
+                    .into_iter()
                     .map(|e| market_entry_to_service_info(e, true, manager))
                     .collect();
-                let community = catalog.community.into_iter()
+                let community = catalog
+                    .community
+                    .into_iter()
                     .map(|e| market_entry_to_service_info(e, false, manager))
                     .collect();
                 (official, community)
@@ -285,7 +291,9 @@ impl ServiceRegistry {
         manager: &ServiceManager,
     ) -> Vec<ServiceInfo> {
         match client.search(query).await {
-            Ok(result) => result.results.into_iter()
+            Ok(result) => result
+                .results
+                .into_iter()
                 .map(|e| market_entry_to_service_info(e, false, manager))
                 .collect(),
             Err(e) => {
@@ -315,7 +323,11 @@ fn market_entry_to_service_info(
             miyumarket::manifest::ServiceType::SurfaceWeb => ServiceType::SurfaceWeb,
             miyumarket::manifest::ServiceType::InterCog => ServiceType::InterCog,
         },
-        source: if is_official { ServiceSource::Officiel } else { ServiceSource::Tiers },
+        source: if is_official {
+            ServiceSource::Officiel
+        } else {
+            ServiceSource::Tiers
+        },
         is_installed,
         is_favorite: false,
         version: m.version,
@@ -407,9 +419,11 @@ impl AppState {
 
     /// Ouvre un service dans un nouvel onglet.
     pub fn open_service(&mut self, service: &ServiceInfo) {
-        if let Some(idx) = self.open_tabs.iter().position(|t| {
-            t.service_id.as_ref() == Some(&service.id)
-        }) {
+        if let Some(idx) = self
+            .open_tabs
+            .iter()
+            .position(|t| t.service_id.as_ref() == Some(&service.id))
+        {
             self.active_tab_index = idx;
             return;
         }

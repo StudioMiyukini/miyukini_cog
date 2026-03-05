@@ -30,7 +30,9 @@ pub fn register_slot(
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let mut guard = slots_store().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let mut guard = slots_store()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     guard.insert(
         slot_id.to_string(),
         SlotRecord {
@@ -56,7 +58,9 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let guard = slots_store().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let guard = slots_store()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     let ids: Vec<String> = guard
         .iter()
         .filter(|(_, r)| r.resource_id == resource_ref && r.date_range == date_range)
@@ -74,7 +78,9 @@ pub fn resolve(ctx: &GovernedContext, slot_id: &str) -> Result<String, Miyubooki
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
     }
-    let guard = slots_store().lock().map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
+    let guard = slots_store()
+        .lock()
+        .map_err(|_| MiyubookingError::InvalidInput("lock".into()))?;
     let payload = guard
         .get(slot_id)
         .map(|r| r.payload.clone())

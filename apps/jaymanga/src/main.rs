@@ -1,10 +1,10 @@
 //! Point d'entree binaire JayManga (standalone).
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use jaymanga::data::JayMangaDb;
-use jaymanga_app::{DbContext, views};
-use miyukini_service_ui::{ThemeContext, Theme};
+use jaymanga_app::{views, DbContext};
+use miyukini_service_ui::{Theme, ThemeContext};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -32,8 +32,8 @@ fn main() {
 #[component]
 fn App() -> Element {
     // Ouvrir la DB JayManga
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| ".miyukini/jaymanga".to_string());
+    let data_dir =
+        std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| ".miyukini/jaymanga".to_string());
 
     let db_path = std::path::Path::new(&data_dir).join("jaymanga.db");
 
@@ -57,7 +57,11 @@ fn App() -> Element {
 
     // Fournir les contextes
     use_context_provider(|| Signal::new(DbContext { db }));
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::default() }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::default(),
+        })
+    });
 
     rsx! {
         views::JayMangaView {}

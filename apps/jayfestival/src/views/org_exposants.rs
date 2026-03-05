@@ -6,9 +6,9 @@
 //! - E13: Vue factures
 //! - E18: Import CSV
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton};
 
 /// Vue principale des exposants avec onglets.
 #[component]
@@ -29,16 +29,56 @@ pub fn OrgExposants(edition_id: String) -> Element {
     }
 
     let tab = active_tab.read().clone();
-    let tab_cand_bg = if tab == "candidatures" { c.accent_blue } else { c.bg_secondary };
-    let tab_cand_color = if tab == "candidatures" { "white" } else { c.text_primary };
-    let tab_conf_bg = if tab == "confirmes" { c.accent_blue } else { c.bg_secondary };
-    let tab_conf_color = if tab == "confirmes" { "white" } else { c.text_primary };
-    let tab_devis_bg = if tab == "devis" { c.accent_blue } else { c.bg_secondary };
-    let tab_devis_color = if tab == "devis" { "white" } else { c.text_primary };
-    let tab_factures_bg = if tab == "factures" { c.accent_blue } else { c.bg_secondary };
-    let tab_factures_color = if tab == "factures" { "white" } else { c.text_primary };
-    let tab_import_bg = if tab == "import" { c.accent_blue } else { c.bg_secondary };
-    let tab_import_color = if tab == "import" { "white" } else { c.text_primary };
+    let tab_cand_bg = if tab == "candidatures" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_cand_color = if tab == "candidatures" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_conf_bg = if tab == "confirmes" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_conf_color = if tab == "confirmes" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_devis_bg = if tab == "devis" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_devis_color = if tab == "devis" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_factures_bg = if tab == "factures" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_factures_color = if tab == "factures" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_import_bg = if tab == "import" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_import_color = if tab == "import" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -108,7 +148,8 @@ fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Eleme
 
     let participations = {
         let db = crate::use_db();
-        db.editions_exposants_by_edition(&edition_id).unwrap_or_default()
+        db.editions_exposants_by_edition(&edition_id)
+            .unwrap_or_default()
     };
 
     let exposants_map: std::collections::HashMap<String, String> = {
@@ -205,7 +246,8 @@ fn ConfirmesTab(edition_id: String, on_select: EventHandler<String>) -> Element 
 
     let participations = {
         let db = crate::use_db();
-        db.editions_exposants_by_edition(&edition_id).unwrap_or_default()
+        db.editions_exposants_by_edition(&edition_id)
+            .unwrap_or_default()
     };
 
     let exposants_map: std::collections::HashMap<String, String> = {
@@ -300,14 +342,35 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
             .find(|p| p.exposant_id.as_deref() == Some(&exposant_id))
     };
 
-    let name = exposant.as_ref().and_then(|e| e.company_name.clone()).unwrap_or_else(|| "Exposant inconnu".to_string());
-    let email = exposant.as_ref().and_then(|e| e.contact_email.clone()).unwrap_or_default();
-    let phone = exposant.as_ref().and_then(|e| e.contact_phone.clone()).unwrap_or_default();
-    let website = exposant.as_ref().and_then(|e| e.site_web.clone()).unwrap_or_default();
-    let description = exposant.as_ref().and_then(|e| e.description.clone()).unwrap_or_default();
+    let name = exposant
+        .as_ref()
+        .and_then(|e| e.company_name.clone())
+        .unwrap_or_else(|| "Exposant inconnu".to_string());
+    let email = exposant
+        .as_ref()
+        .and_then(|e| e.contact_email.clone())
+        .unwrap_or_default();
+    let phone = exposant
+        .as_ref()
+        .and_then(|e| e.contact_phone.clone())
+        .unwrap_or_default();
+    let website = exposant
+        .as_ref()
+        .and_then(|e| e.site_web.clone())
+        .unwrap_or_default();
+    let description = exposant
+        .as_ref()
+        .and_then(|e| e.description.clone())
+        .unwrap_or_default();
 
-    let stand = participation.as_ref().and_then(|p| p.assigned_stand.clone()).unwrap_or_else(|| "Non attribue".to_string());
-    let status = participation.as_ref().and_then(|p| p.status_candidature.clone()).unwrap_or_default();
+    let stand = participation
+        .as_ref()
+        .and_then(|p| p.assigned_stand.clone())
+        .unwrap_or_else(|| "Non attribue".to_string());
+    let status = participation
+        .as_ref()
+        .and_then(|p| p.status_candidature.clone())
+        .unwrap_or_default();
 
     let status_color = match status.as_str() {
         "acceptee" => c.accent_green.to_string(),
@@ -423,7 +486,11 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
 #[component]
 fn ContactField(label: &'static str, value: String) -> Element {
     let c = use_palette();
-    let display_value = if value.is_empty() { "Non renseigne".to_string() } else { value };
+    let display_value = if value.is_empty() {
+        "Non renseigne".to_string()
+    } else {
+        value
+    };
 
     rsx! {
         div {
@@ -514,7 +581,13 @@ fn DevisTab(edition_id: String) -> Element {
 }
 
 #[component]
-fn DevisRow(numero: &'static str, exposant: &'static str, montant: &'static str, status: &'static str, date: &'static str) -> Element {
+fn DevisRow(
+    numero: &'static str,
+    exposant: &'static str,
+    montant: &'static str,
+    status: &'static str,
+    date: &'static str,
+) -> Element {
     let c = use_palette();
 
     let (status_label, status_color) = match status {
@@ -649,7 +722,13 @@ fn StatMini(label: &'static str, value: &'static str) -> Element {
 }
 
 #[component]
-fn FactureRow(numero: &'static str, exposant: &'static str, montant: &'static str, status: &'static str, date: &'static str) -> Element {
+fn FactureRow(
+    numero: &'static str,
+    exposant: &'static str,
+    montant: &'static str,
+    status: &'static str,
+    date: &'static str,
+) -> Element {
     let c = use_palette();
 
     let (status_label, status_color) = match status {

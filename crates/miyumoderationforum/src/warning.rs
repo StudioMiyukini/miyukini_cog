@@ -20,7 +20,9 @@ pub fn create(
         return Err(MiyumoderationforumError::NoMandate);
     }
     let id = format!("warn:{}", UuidIdGenerator.generate());
-    let mut guard = store::warnings().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let mut guard = store::warnings()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), (user_id.to_string(), reason.to_string()));
     Ok(id)
 }
@@ -35,12 +37,17 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<WarningItem>, Miyumoderationfor
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let guard = store::warnings().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    let items = guard.iter().map(|(id, (user_id, reason))| WarningItem {
-        id: id.clone(),
-        user_id: user_id.clone(),
-        reason: reason.clone(),
-    }).collect();
+    let guard = store::warnings()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items = guard
+        .iter()
+        .map(|(id, (user_id, reason))| WarningItem {
+            id: id.clone(),
+            user_id: user_id.clone(),
+            reason: reason.clone(),
+        })
+        .collect();
     Ok(items)
 }
 

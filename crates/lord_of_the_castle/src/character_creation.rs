@@ -11,18 +11,18 @@ use serde::{Deserialize, Serialize};
 /// Les 8 caractéristiques du personnage.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Stat {
-    For,  // Force
-    Con,  // Constitution
-    Agi,  // Agilité
-    Dex,  // Dextérité
-    Int,  // Intelligence
-    Sag,  // Sagesse
-    Cha,  // Charisme
-    Luk,  // Chance
+    For, // Force
+    Con, // Constitution
+    Agi, // Agilité
+    Dex, // Dextérité
+    Int, // Intelligence
+    Sag, // Sagesse
+    Cha, // Charisme
+    Luk, // Chance
 }
 
 impl Stat {
-    #[must_use] 
+    #[must_use]
     pub fn label(self) -> &'static str {
         match self {
             Stat::For => "For",
@@ -51,7 +51,7 @@ pub struct CharacterStats {
 }
 
 impl CharacterStats {
-    #[must_use] 
+    #[must_use]
     pub fn get(&self, s: Stat) -> i32 {
         match s {
             Stat::For => self.for_,
@@ -79,7 +79,7 @@ impl CharacterStats {
     }
 
     /// Affichage : si négatif "1(-x)", sinon la valeur.
-    #[must_use] 
+    #[must_use]
     pub fn display(&self, s: Stat) -> String {
         let v = self.get(s);
         if v < 0 {
@@ -146,7 +146,11 @@ fn roll_in(roll: &mut impl FnMut() -> f32, min: i32, max: i32) -> i32 {
 
 /// Applique les effets d'une phrase aux stats (roll pour les tirages).
 /// Retourne true si la phrase contenait RerollAllEnd (à appliquer en fin de création).
-pub fn apply_phrase_effects(stats: &mut CharacterStats, effects: &[PhraseEffect], roll: &mut impl FnMut() -> f32) -> bool {
+pub fn apply_phrase_effects(
+    stats: &mut CharacterStats,
+    effects: &[PhraseEffect],
+    roll: &mut impl FnMut() -> f32,
+) -> bool {
     let mut reroll_at_end = false;
     for e in effects {
         match e {
@@ -172,23 +176,32 @@ pub fn apply_phrase_effects(stats: &mut CharacterStats, effects: &[PhraseEffect]
 }
 
 /// Pool de toutes les phrases (id = index).
-#[must_use] 
+#[must_use]
 pub fn all_phrases() -> Vec<PhraseDef> {
     vec![
         PhraseDef {
             id: 0,
             text: "Je fais du sport avec mon gros shaker de wey.",
-            effects: vec![PhraseEffect::StatBonus(Stat::For, 1, 3), PhraseEffect::StatBonus(Stat::Con, 1, 3)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::For, 1, 3),
+                PhraseEffect::StatBonus(Stat::Con, 1, 3),
+            ],
         },
         PhraseDef {
             id: 1,
             text: "Je suis un(e) vrai cleptomane.",
-            effects: vec![PhraseEffect::StatBonus(Stat::Agi, 1, 3), PhraseEffect::StatBonus(Stat::Dex, 1, 3)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Agi, 1, 3),
+                PhraseEffect::StatBonus(Stat::Dex, 1, 3),
+            ],
         },
         PhraseDef {
             id: 2,
             text: "Balékouille frère!",
-            effects: vec![PhraseEffect::StatBonus(Stat::Int, -1, -1), PhraseEffect::StatBonus(Stat::Con, 1, 1)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Int, -1, -1),
+                PhraseEffect::StatBonus(Stat::Con, 1, 1),
+            ],
         },
         PhraseDef {
             id: 3,
@@ -198,7 +211,10 @@ pub fn all_phrases() -> Vec<PhraseDef> {
         PhraseDef {
             id: 4,
             text: "Je sais ce qu'est \"Les fleurs du mal\".",
-            effects: vec![PhraseEffect::StatBonus(Stat::Int, 1, 3), PhraseEffect::StatBonus(Stat::Sag, 1, 3)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Int, 1, 3),
+                PhraseEffect::StatBonus(Stat::Sag, 1, 3),
+            ],
         },
         PhraseDef {
             id: 5,
@@ -208,12 +224,18 @@ pub fn all_phrases() -> Vec<PhraseDef> {
         PhraseDef {
             id: 6,
             text: "Je mange mes crottes de nez.",
-            effects: vec![PhraseEffect::StatBonus(Stat::For, 1, 1), PhraseEffect::StatBonus(Stat::Int, -1, -1)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::For, 1, 1),
+                PhraseEffect::StatBonus(Stat::Int, -1, -1),
+            ],
         },
         PhraseDef {
             id: 7,
             text: "The emperor protects!",
-            effects: vec![PhraseEffect::StatBonus(Stat::Cha, 1, 1), PhraseEffect::StatBonus(Stat::Con, 1, 1)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Cha, 1, 1),
+                PhraseEffect::StatBonus(Stat::Con, 1, 1),
+            ],
         },
         PhraseDef {
             id: 8,
@@ -236,7 +258,10 @@ pub fn all_phrases() -> Vec<PhraseDef> {
         PhraseDef {
             id: 10,
             text: "J'aime manger épicé.",
-            effects: vec![PhraseEffect::StatBonus(Stat::Cha, 1, 1), PhraseEffect::StatBonus(Stat::Con, 1, 1)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Cha, 1, 1),
+                PhraseEffect::StatBonus(Stat::Con, 1, 1),
+            ],
         },
         PhraseDef {
             id: 11,
@@ -246,7 +271,10 @@ pub fn all_phrases() -> Vec<PhraseDef> {
         PhraseDef {
             id: 12,
             text: "Ratatatatatatatatata...",
-            effects: vec![PhraseEffect::StatBonus(Stat::Agi, 2, 2), PhraseEffect::StatBonus(Stat::Dex, 2, 2)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Agi, 2, 2),
+                PhraseEffect::StatBonus(Stat::Dex, 2, 2),
+            ],
         },
         PhraseDef {
             id: 13,
@@ -306,7 +334,10 @@ pub fn all_phrases() -> Vec<PhraseDef> {
         PhraseDef {
             id: 19,
             text: "J'ai été délégué de classe.",
-            effects: vec![PhraseEffect::StatBonus(Stat::Int, 2, 2), PhraseEffect::StatBonus(Stat::Cha, 2, 2)],
+            effects: vec![
+                PhraseEffect::StatBonus(Stat::Int, 2, 2),
+                PhraseEffect::StatBonus(Stat::Cha, 2, 2),
+            ],
         },
         PhraseDef {
             id: 20,

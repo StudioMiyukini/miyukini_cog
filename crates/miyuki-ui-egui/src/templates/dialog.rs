@@ -2,10 +2,10 @@
 
 //! Dialog layout template -- NPC interaction with darkened game backdrop.
 
+use crate::convert::rgba_to_color32;
+use crate::organisms::npc_dialog::{NpcDialog, NpcDialogData};
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::organisms::npc_dialog::{NpcDialog, NpcDialogData};
-use crate::convert::rgba_to_color32;
 
 /// The dialog layout template.
 pub struct DialogLayout;

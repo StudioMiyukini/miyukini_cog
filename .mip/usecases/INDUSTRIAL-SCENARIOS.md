@@ -1,0 +1,780 @@
+---
+id: mip.usecases.industrial
+title: MIP Industrial Use Cases — 3 scénarios réalistes
+---
+
+# MIP Industrial Use Cases
+
+> Trois scénarios réalistes montrant comment industrialiser MIP pour des utilisateurs très différents : employé corporate, admin indépendant, startup tech.
+
+---
+
+## Scénario 1: Total Energy (Employé Corporate)
+
+### 🏢 Profil utilisateur
+
+| Aspect | Details |
+|--------|---------|
+| **Poste** | Développeur senior C++/Python, 15 ans XP |
+| **Contexte** | Project IOT pour surveillance pipeline offshore |
+| **Devices disponibles** | Entreprise laptop (Dell, 8GB RAM) |
+| **IA disponible** | GitHub Copilot ONLY (via VS Code entreprise) |
+| **Internet** | Firewall strict, git intranet only |
+| **Besoin** | Coder vite, zéro coûts externes, compliance RGPD strict |
+
+### Challenge
+
+```
+"Je veux implémenter X feature rapidement avec Copilot gratuit.
+Pas moyen d'utiliser Mistral (infra IT approval = 3 mois).
+Comment maximiser Copilot?"
+```
+
+### Solution MIP
+
+#### Étape 1 : SETUP-4 (Profil selection)
+
+```
+Maria : "Quelle IA avez-vous ?
+         > Copilot (VS Code)" 
+
+MIP détecte : Profile github-copilot-free
+Display : Mode 3 (Assisted Development)
+
+Limitations :
+  ❌ Terminal auto
+  ❌ Parallel agents
+  ❌ Web resources
+  
+Adaptations :
+  ✅ Vous = Copilot du Copilot
+  ✅ Max 2 fichiers/iteration
+  ✅ Découpage en T2 max
+```
+
+#### Étape 2 : Task classification
+
+**Scénario réel** : Feature = "Add MQTT payload validation"
+
+```
+Maria : "C'est quoi le scope ?"
+
+Dev   : "Ajouter un validateur MQTT parser dans lib.rs
+         + tests unitaires
+         + intégration dans listener_mqtt.rs"
+
+Maria : "Complexité ? Risques décapage dépendances ?"
+
+Dev   : "Petit scope, validé par tests auto"
+
+Maria : "T2 ? (1-3 fichiers)"
+
+Dev   : "Oui"
+
+→ Classification : T2
+  Mode : 3 (Copilot)
+  Durée estimée : ~45min
+  Phases : P0 → P3 → P4 (manual tests) → P5
+```
+
+#### Étape 3 : Workflow T2 Copilot
+
+**P0 Framing** (5 min)
+
+```
+Dev describes :
+  "Ajouter struct MqttValidator avec méthode validate(&msg) 
+   → Result<(), Error>"
+
+Copilot (Chat) :
+  "Je vais donc :
+   1. Lire lib.rs (contexte structure)
+   2. Définir le validateur (signature + logique)
+   3. Ajouter tests (tests/ folder)
+   
+  Prêt ? Y/N"
+```
+
+**P3 Implementation** (25 min)
+
+*Iteration 1* :
+```
+Copilot : "Lisant lib.rs pour structure..."
+Dev      : [Attend 20 sec]
+
+Copilot : "Voici le validateur :
+           
+           pub struct MqttValidator { ... }
+           impl MqttValidator {
+               pub fn validate(&self, msg: &[u8]) 
+                   -> Result<ValidatedMsg, Error> { ... }
+           }
+           
+           Appliquer ? Y/N"
+
+Dev      : "Y"
+Dev      : [Copy struct to lib.rs manually]
+(Note : Copilot ne peut pas éditer auto)
+```
+
+*Iteration 2* :
+```
+Copilot : "Lisant listener_mqtt.rs pour call site..."
+
+Copilot : "Changement minimal :
+           
+           OLD : let msg = parse_mqtt(data);
+           NEW : let msg = validator.validate(data)?;
+           
+           Appliquer ? Y/N"
+
+Dev      : "Y"
+Dev      : [Patch listener_mqtt.rs]
+```
+
+**P4 Integration** (15 min)
+
+```
+Dev : Exécute en PowerShell
+      > cargo test -p mqtt_validate
+
+Error: duplicate impl
+
+Copilot (chat avec output) :
+      "Aha, il y a une autre impl MqttValidator ailleurs.
+       Où ? Lire listener.rs ligne 42?"
+
+Dev : [Copy-paste listener.rs:42-60]
+
+Copilot : "Oui, conflit. Fusionner avec struct principal ?
+          Y/N"
+
+Dev : "Y"
+
+Dev : [Manual merge, test again]
+
+Output : test result: ok ✅
+```
+
+**P5 Delivery** (5 min)
+
+```
+Dev : "LGTM ? ✅"
+
+Copilot : "Rapport :
+
+Feature MqttValidator
+  3 tests ✅
+  loc added: 45
+  files changed: 2 (lib.rs, listener.rs)
+  
+Tokens: 4500 / 8000 limit (56%).
+Durée: 48 minMaintenance: Low risk (tests covered)."
+```
+
+**P6 Archive** (2 min)
+
+```
+Arianne (QA/Memory) :
+  ✅ Feature merged
+  📝 Memory update:
+     "MQTT validation pattern: 
+      Use dedicated struct validator"
+  ✅ No doc required (code is clear)
+```
+
+#### Résumé Total
+
+| Aspect | Value |
+|--------|-------|
+| **Durée réelle** | 1h (vs 3h solo) |
+| **Coût** | $0 (Copilot gratuit) |
+| **Qualification** | T2 = OK pour Copilot |
+| **Itérations** | 4 (normal pour Mode 3) |
+| **Compliance** | ✅ 0 data left IDE, 0 external API |
+| **Scalability** | 3-4 T2/jour max |
+
+---
+
+## Scénario 2: Freelance Admin (Budget constraints)
+
+### 👤 Profil utilisateur
+
+| Aspect | Details |
+|--------|---------|
+| **Poste** | Full-stack dev freelance, 5 ans |
+| **Clients** | PME, startups (France/Belgium) |
+| **Devices** | MacBook M1, Desktop Linux |
+| **IA disponible** | Mistral (API ou local), Budget < €100/mois |
+| **Internet** | Full access, no compliance burden |
+| **Besoin** | Rapidité, économies, offline autonomy |
+
+### Challenge
+
+```
+"Je dois livrer T3 features vite, à budget zéro/minimal.
+Mistral local me permet de travailler sans quota.
+Comment setup MIP pour multi-project?"
+```
+
+### Solution MIP
+
+#### Étape 1 : SETUP avec Local Mistral
+
+```
+Arianne (onboarding) : "Outils IA ?
+
+Admin : "LM Studio local (Mistral Nemo), 
+         ou Mistral API pay-as-you-go"
+
+MIP détecte : Profile mistral-nemo
+Mode 2 (Guided Autonomy) ✅
+
+Option A (local, gratuit) :
+  - LM Studio + Mistral 7B GGUF (8GB)
+  - Offline-first (Autonomy Law 1 ✅)
+  - CPU-bound (~1 tok/sec M1)
+
+Option B (API, économique) :
+  - Mistral API (€0.3-0.9 / 1M tokens)
+  - Faster (~100 tok/sec)
+  - Hyper-scalable
+
+Admin : "Local + API fallback (plan hybride)"
+
+Maria : "Ok, setup :
+        [Lire guide LOCAL.md]"
+```
+
+#### Étape 2 : Project structure (multi-client)
+
+Admin a 3 projets en parallèle :
+- **P1_Client_A** : Rust µ-service + CLI
+- **P2_Client_B** : Python data pipeline  
+- **P3_Client_C** : JS full-stack (Dioxus/Tauri)
+
+MIP workspace agnostique → Clone `.mip/` dans chaque project
+
+```
+P1_Client_A/
+  .mip/          ← Shared (symlink to ~/.mip_shared/)
+  src/
+  Cargo.toml
+
+P2_Client_B/
+  .mip/          ← Shared
+  scripts/
+  requirements.txt
+
+P3_Client_C/
+  .mip/          ← Shared
+  apps/
+  crates/
+  pnpm-workspace.yaml
+```
+
+#### Étape 3 : Workflow T3 Mistral (parallel agents)
+
+**Task** : "Add payment webhook validation + listener"
+
+Scope :
+- Backend : Payment webhook handler (Axum)
+- Frontend : Payment status component (Dioxus)
+- Tests : E2E webhook sim
+- Docs : API change
+
+→ **T3** (multi-file)  
+→ **Durée Mode 1** : 30 min  
+→ **Durée Mode 2** (Mistral) : 1 heure  
+
+**P0 Framing** (10 min)
+
+```
+Maria : "Webhook validation spec, please.
+
+Admin  : [Paste requirements]
+        POST /webhook/payment
+        Signature HMAC-SHA256 validation
+        Dedupe by idempotence key
+        Fire event to subscribers
+        Return 200 immediately
+
+Maria : "Scope T3, dependencies ? (Axum, serde, ...)"
+
+Admin  : "Standard stack, zero new crates"
+
+Maria : "Estimated 6 P3 sub-steps :
+        1. Add webhook route (backend)
+        2. Signature validation (lib)
+        3. Tests (mocked webhook)
+        4. Dioxus subscriber component
+        5. Integration test (e2e)
+        6. Docs comment
+
+Parallel où possible ?"
+
+Admin  : "Yes"
+```
+
+**P3 Implementation** (35 min, parallel)
+
+*Mistral Agent Lise* (Frontend) :
+```
+Lise : Lisant Dioxus component patterns...
+       (async fetch in use_effect)
+       
+Code gen :
+  pub fn PaymentStatus(id: String) -> Element {
+      rsx! {
+          if let Some(status) = status_signal() {
+              match status {
+                  "pending" => rsx! { "⏳ In progress" },
+                  "completed" => rsx! { "✅ Done" },
+                  "failed" => rsx! { "❌ Failed" },
+                  _ => rsx! { "?" }
+              }
+          }
+      }
+  }
+
+Applied ✅ (multi_replace_string_in_file)
+```
+
+*Mistral Agent François* (Backend) :
+```
+François : Lisant axum/HMAC patterns...
+
+Code gen :
+  async fn webhook_payment(
+      headers: HeaderMap,
+      body: String
+  ) -> Result<StatusCode> {
+      let sig = headers.get("X-Signature")?.to_str()?;
+      let expected = hmac_sha256(&body, &SECRET)?;
+      
+      if !constant_time_eq(sig.as_bytes(), 
+                           expected.as_bytes()) {
+          return Err(Error::InvalidSignature);
+      }
+      
+      // Fire event
+      WEBHOOK_EVENT.notify(&body).await;
+      Ok(StatusCode::OK)
+  }
+
+Applied ✅ (multi_replace_string_in_file)
+```
+
+*Parallel execution* (Agent subagent parallel) :
+```
+Both agents run in parallel :
+  Lise : 8 min (Dioxus)
+  François : 12 min (Backend + HMAC)
+  Overlap : 20 min total (vs 20 sequential)
+```
+
+**P4 Integration** (15 min)
+
+```
+George (Compliance audit) :
+  "Security check :"
+  
+  ✅ HMAC timing-safe (constant_time_eq)
+  ✅ Input validation (trimmed, normalized)
+  ✅ Idempotence key (dedup check)
+  ⚠️  Event ordering (async, could race)
+     → Add sequence number?
+  
+Admin : "Add seq ?"
+
+François : "Yes, 1-line change"
+
+Mistral : [Apply change]
+
+George : "Locking tests (cargo test)"
+
+Mistral : Exécute : cargo test -p payment
+         Output : 27 tests OK ✅
+         
+George : "Ready P5"
+```
+
+**P5 Delivery** (5 min)
+
+```
+Admin review : "Code looks good, timing OK"
+
+Admin : "Ship to staging"
+
+Mistral : [commit + push]
+          "Prêt pour merge."
+```
+
+**P6 Archive** (10 min)
+
+```
+Arianne (Memory) :
+  ✅ Feature live
+  📊 Metrics:
+     Durée : 1h15 (local CPU, 3 agents)
+     Tokens : 105k  (coûts ~$0.09 si API)
+     Tests : 27 ✅
+     Coverage : 94%
+     
+  📝 Lessons learned:
+     "Webhook patterns: HMAC + dedup + event
+      Cost-effective with local Mistral"
+```
+
+#### Multi-project coordination
+
+Travailler sur 3 projets simulatément :
+
+```
+Time |  P1_A (Rust)  |  P2_B (Python) |  P3_C (JS)
+-----|---------------|--------|--------|
+14h  |  P0 framing   |        |        |
+14:20| P3 impl (5min)|        |        |
+14:40|              | P0 framing      |
+15:00|  P4 tests    | P3 impl (15 min) |
+15:15|              | P4 tests       |
+16:00|              |        | P0 framing
+16:30|              |        | P3/P4 (45min)
+17:00| [3h total, 3 features, zéro overhead]
+```
+
+#### Résumé Mistral Freelance
+
+| Aspect | Value |
+|--------|-------|
+| **Durée par T3** | 1h (vs 2h Copilot solo) |
+| **Coût local** | €0 (HW amortized) |
+| **Coûts API** | €0.09/T3 (~€2-3/mois) |
+| **Projects parallèles** | 3-4 avec 0 context switch |
+| **Scalability** | 5-6 T3/semaine solo |
+| **Offline autonomy** | ✅ Full (Autonomy Law 1) |
+
+---
+
+## Scénario 3: Startup Tech (Full mode 1)
+
+### 🚀 Profil utilisateur
+
+| Aspect | Details |
+|--------|---------|
+| **Poste** | Tech lead, 8 engineers |
+| **Produit** | SaaS multi-service (Rust + Dioxus) |
+| **Devices** | M1 MacBook, Desktop GPU |
+| **IA disponible** | Claude Code (Enterprise), budget €2000/mois |
+| **Internet** | Full access, fast infra |
+| **Besoin** | Velocity maximale, parallel development, quality |
+
+### Challenge
+
+```
+"8 engineers, trop peu pour paralleliser humans.
+Claude + MIP + agents = 2-3x velocity sans hiring?"
+```
+
+### Solution MIP
+
+#### Étape 1 : Enterprise SETUP
+
+```
+Maria : "Claude Code Enterprise ?
+
+TP   : "Yes, with Anthropic API"
+
+MIP détecte : Profile anthropic-opus
+Mode 1 (Autonomy Complete) ✅✅✅
+
+Capabilities :
+  ✅ Parallel agents (MASS)
+  ✅ Terminal + Background jobs
+  ✅ TodoWrite orchestration
+  ✅ Multi-file (10+)
+  ✅ MCP + web search
+  ✅ Doc verification
+  
+Setup :
+  Team member 1: Tech lead (Claude orchestration)
+  Team member 2-4: Engineers (observe + review P4)
+  Claude : P0-P3-P4-P5 auto
+  
+Budget tracking : €8/hour Claude = ~€1600/mois
+```
+
+#### Étape 2 : Major refactor (T4)
+
+**Task** : "Multi-tenancy refactoring"
+
+Scope :
+- DB schema (kindmother persistence)
+- API endpoints (40+ changes)
+- Auth boundary system (borderguard)
+- Frontend tenant selector (Dioxus)
+- E2E tests + deployment
+
+→ **T4** (10-30 files)  
+→ **Durée Mode 1** : 1-2h  
+→ **8 engineers solo** : 1 semaine iterative  
+
+**P0 Framing** (30 min, Maria + TP)
+
+```
+TP describes :
+  Scope:
+    - Each user can manage multiple organizations
+    - Org isolation (SQL row-level + app logic)
+    - JWT tenant claim
+    - 20+ API endpoints multi-tenant
+    - UI reflects active org
+
+Architecture review (Maria) :
+  Risk assessment :
+    - High: DB schema evolution
+    - Med: API surface change
+    - Low: UI component isolation
+  
+  Phases :
+    1. Schema migration + KindMother adapter
+    2. API layer multi-tenant routing
+    3. Frontend org selector + context
+    4. Auth boundary enforcement (BorderGuard)
+    5. Integration tests  
+    6. Deployment strategy
+
+Maria : "Parallel ?
+        → Phase 1 (DB) must serial
+        → Phase 2-3 parallel (independent)
+        → Phase 4 depends on 1-3
+        → Phase 5-6 can start early"
+
+TP : "Estimate ?"
+
+Maria : "2h Claude, 2h human review P4"
+```
+
+**P3 Implementation** (1h, 4 agents parallel)
+
+*Agent 1 (SQL/Kindmother)* :
+```
+Reads:
+  - kindmother/src/persistence.rs
+  - Schema migrations
+  
+Generates :
+  - Schema v2 (tenant_id FK)
+  - Adapter code (transparently add tenant filter)
+  - Rollback strategy
+  
+Status : ✅ Applied
+```
+
+*Agent 2 (API routes - independent)* :
+```
+Reads  :
+  - services/payment_api.rs
+  - 15 route handlers
+  
+Generates :
+  - Tenant routing middleware
+  - Multi-route update (parameterized)
+  - Auth check per route
+  
+Status : Applied ✅
+```
+
+*Agent 3 (Frontend)* :
+```
+Reads :
+  - apps/central/src/context
+  - Component tree
+  
+Generates :
+  - OrgContext (AppContext extension)
+  - Org selector dropdown
+  - Re-render on org switch
+  
+Status : ✅ Applied
+```
+
+*Agent 4 (Security/BorderGuard)* :
+```
+Reads :
+  - borderguard/src/access.rs
+  
+Generates :
+  - Tenant boundary enforcement
+  - Claim validation
+  - Cross-tenant request rejection
+  
+Status : ✅ Applied
+```
+
+**Parallel speedup** :
+```
+Serial (4 agents sequential) : 240 min
+Parallel (4 concurrent)       : 60 min ← 4x speedup
+MIP Mode 1 actual            : 50 min (overlaps + subagent overhead)
+```
+
+**P4 Integration** (40 min)
+
+```
+Victor (Security) :
+  "Reviewing changes...
+   
+   ✅ Tenant isolation (row-level security)
+   ✅ JWT validation
+   ⚠️  Foreign key constraints (good!)
+   ⚠️  Cascade deletes (danger? review)
+   
+   Running security tests..."
+   
+Tests : cargo test -- --ignored tenant_*
+        18 tests ✅
+        Coverage : 91%
+
+George (Compliance) :
+  "Schema migration check :
+   - Reversible ? ✅
+   - Data loss risk ? ❌ None
+   - Rollback plan ? ✅
+   
+  Ready for production"
+
+Hugo (DevOps) :
+  "Deployment strategy :
+   - Blue-green with new schema
+   - Backwards-compat adapter (Y+1 quarter)
+   - Monitoring : Tenant isolation breach alerts
+   
+  Staging deploy ready"
+```
+
+**P5 Delivery** (10 min)
+
+```
+TP (Human) reviews :
+  - Code quality : Great
+  - Test coverage : 91% solid
+  - Security : Safe
+  - "Ship to staging →  prod"
+
+Deployment : Auto via CD pipeline (Mistral approval)
+```
+
+**P6 Archive** (10 min)
+
+```
+Arianne (Memory) :
+  ✅ Multi-tenancy live
+  📊 Metrics:
+     Durée Claude : 50 min
+     Durée human review : 30 min
+     Total : 80 min (vs 40h solo)
+     Coûts : €7 (50 min Claude)
+     Token efficienty : 420k tokens, 95% reuse
+     
+  📝 Architecture lesson:
+     "Multi-tenancy pattern:
+      KindMother adapter + BorderGuard claims"
+```
+
+#### Scaling to full team
+
+8 engineers, 1 tech lead (Claude orchestrator) :
+
+```
+Concurrent T3-T4 tasks :
+
+Task 1 (Multi-tenancy)  : 80 min auto
+Task 2 (Payment v2)     : 60 min auto (parallel)
+Task 3 (Monitoring)     : 90 min auto (parallel)
+Task 4 (Docs gen)       : 40 min auto (parallel)
+
+Human time :
+  - TP : 2h review total
+  - Engineers 1-4 : 0.5h feedback each
+  - Engineers 5-8 : Feature review pre-merge
+
+Result : 4 major features in 2h human time
+        (vs 1 week solo serial)
+        
+Cost : ~€30 Claude (4h total)
+     + €1600 human time (8 eng × 2h)
+     
+Velocity : 4x (features/cycle) vs solo team
+```
+
+#### Résumé Startup Mode 1
+
+| Aspect | Value |
+|--------|-------|
+| **Durée par T4** | 1-2h parallelism |
+| **Coûts par T4** | €5-10 Claude + review |
+| **Team scalability** | 8-15 engineers |
+| **Parallelism** | 4-6 T3-T4 simultaneous |
+| **Quality (tests)** | 90%+ coverage auto |
+| **Velocity** | 3-4x vs human-only |
+| **Cost/feature** | €50 (Claude + team review) |
+
+---
+
+## Comparaison : 3 Scenarios
+
+| Aspect | Total Corp | Freelance | Startup |
+|--------|-----------|-----------|---------|
+| **Profil IA** | Copilot gratuit | Mistral local | Claude API |
+| **Mode MIP** | 3 (Assisted) | 2 (Guided) | 1 (Autonomy) |
+| **Task type** | T1-T2 micro | T2-T3 standard | T3-T4 major |
+| **Durée T2/T3** | 1h / 4h | 15min / 1h | 5min / 1h |
+| **Coûts** | €0 | €0-2 | €50-500 |
+| **Team size** | 1 (pair) | 1 (solo) | 8+ engineers |
+| **Parallelism** | ❌ Serial | ⚠️ CPU-bound | ✅ Full |
+| **Compliance** | ✅ Strict | ⚠️ GDPR | ✅ SOC2 |
+| **Offline** | ❌ Firewalled | ✅ Autonomous | ⚠️ API-dependent |
+
+---
+
+## Déploiement MIP dans chaque contexte
+
+### Total : Minimal onboarding
+
+```
+1. GitHub Copilot (already have)
+2. Clone MIP to project
+3. Check github-copilot-free profile
+4. Maria greeting + workflow explain (5 min)
+5. First T2 (pair session)
+```
+
+### Freelance : Hybrid setup
+
+```
+1. Choose local Mistral OR API
+2. Clone MIP + config (30 min)
+3. Setup LM Studio OR Mistral API key
+4. Run SETUP-4 (detect Mistral profile)
+5. First T3 (solo, optimized)
+```
+
+### Startup : Enterprise acceleration
+
+```
+1. Claude Code Enterprise subscription
+2. Clone MIP + multi-project structure
+3. SETUP-4 + team onboarding (1h)
+4. First T4 (4 agents parallel) + review
+5. Measure velocity improvement
+```
+
+---
+
+## Références
+
+- [ADAPTIVE-MODES.md](./ADAPTIVE-MODES.md) — Mode selection detail
+- [Profiles INDEX](./INDEX.md) — All LLM profiles
+- [Capability Negotiation](./CAPABILITY-NEGOTIATION.md) — Transparentcy protocol
+- [MIP Workflow](../protocol/conventions.md) — P0-P6 phases

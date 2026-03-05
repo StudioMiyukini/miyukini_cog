@@ -11,12 +11,12 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
 use super::client::MiyuCloudClient;
 use super::state::{
     CreateShareLinkRequest, CreateSharePermissionRequest, GranteeType, MiyuCloudState,
     PermissionLevel,
 };
+use crate::state::use_app_state;
 
 // ════════════════════════════════════════════════════════════════════════════
 // Types locaux
@@ -39,11 +39,26 @@ struct ExpirationOption {
 }
 
 const EXPIRATION_OPTIONS: &[ExpirationOption] = &[
-    ExpirationOption { label: "1 heure", hours: 1 },
-    ExpirationOption { label: "6 heures", hours: 6 },
-    ExpirationOption { label: "24 heures", hours: 24 },
-    ExpirationOption { label: "7 jours", hours: 168 },
-    ExpirationOption { label: "30 jours", hours: 720 },
+    ExpirationOption {
+        label: "1 heure",
+        hours: 1,
+    },
+    ExpirationOption {
+        label: "6 heures",
+        hours: 6,
+    },
+    ExpirationOption {
+        label: "24 heures",
+        hours: 24,
+    },
+    ExpirationOption {
+        label: "7 jours",
+        hours: 168,
+    },
+    ExpirationOption {
+        label: "30 jours",
+        hours: 720,
+    },
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -87,13 +102,33 @@ pub fn ShareDialog(
     let link_tab_active = tab == ShareTab::ExternalLink;
     let tribe_tab_active = tab == ShareTab::TribeShare;
 
-    let link_tab_bg = if link_tab_active { c.accent_blue } else { c.bg_hover };
-    let link_tab_color = if link_tab_active { c.text_white } else { c.text_secondary };
-    let tribe_tab_bg = if tribe_tab_active { c.accent_blue } else { c.bg_hover };
-    let tribe_tab_color = if tribe_tab_active { c.text_white } else { c.text_secondary };
+    let link_tab_bg = if link_tab_active {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let link_tab_color = if link_tab_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
+    let tribe_tab_bg = if tribe_tab_active {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let tribe_tab_color = if tribe_tab_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     let btn_opacity = if is_creating { "0.6" } else { "1" };
-    let btn_cursor = if is_creating { "not-allowed" } else { "pointer" };
+    let btn_cursor = if is_creating {
+        "not-allowed"
+    } else {
+        "pointer"
+    };
 
     // File info for the dialog title
     let file_name = state

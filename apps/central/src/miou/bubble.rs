@@ -68,7 +68,12 @@ pub struct BulleOutput {
 }
 
 impl BulleOutput {
-    pub fn new(texte: String, categorie: &str, variante_id: &str, actions: Vec<BulleAction>) -> Self {
+    pub fn new(
+        texte: String,
+        categorie: &str,
+        variante_id: &str,
+        actions: Vec<BulleAction>,
+    ) -> Self {
         Self {
             texte,
             categorie: categorie.to_string(),
@@ -86,7 +91,8 @@ fn bubble_overlay_style() -> String {
         right: 16px;
         z-index: 1000;
         animation: miou-slide-up 200ms ease-out;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 /// Style CSS pour la bulle elle-même.
@@ -101,7 +107,8 @@ fn bubble_style() -> String {
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         color: #f7fafc;
         font-family: 'Segoe UI', sans-serif;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 fn bubble_header_style() -> String {
@@ -112,7 +119,8 @@ fn bubble_header_style() -> String {
         margin-bottom: 12px;
         padding-bottom: 8px;
         border-bottom: 1px solid #4a5568;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 fn bubble_title_style() -> String {
@@ -123,7 +131,8 @@ fn bubble_title_style() -> String {
         font-weight: 600;
         font-size: 14px;
         color: #ffd4e5;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 fn bubble_close_style() -> String {
@@ -136,7 +145,8 @@ fn bubble_close_style() -> String {
         border-radius: 4px;
         font-size: 16px;
         transition: all 0.15s ease;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 fn bubble_text_style() -> String {
@@ -145,7 +155,8 @@ fn bubble_text_style() -> String {
         line-height: 1.5;
         color: #e2e8f0;
         margin-bottom: 12px;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 fn bubble_actions_style() -> String {
@@ -154,7 +165,8 @@ fn bubble_actions_style() -> String {
         gap: 8px;
         flex-wrap: wrap;
         justify-content: flex-end;
-    "#.to_string()
+    "#
+    .to_string()
 }
 
 fn action_button_style(is_primary: bool) -> String {
@@ -169,7 +181,8 @@ fn action_button_style(is_primary: bool) -> String {
             background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
             color: white;
             transition: all 0.15s ease;
-        "#.to_string()
+        "#
+        .to_string()
     } else {
         r#"
             padding: 8px 16px;
@@ -181,7 +194,8 @@ fn action_button_style(is_primary: bool) -> String {
             background: transparent;
             color: #a0aec0;
             transition: all 0.15s ease;
-        "#.to_string()
+        "#
+        .to_string()
     }
 }
 
@@ -226,21 +240,21 @@ pub fn MiouBubbleOverlay(
         div {
             style: "{bubble_overlay_style()}",
             class: "miou-bubble-overlay",
-            
+
             div {
                 style: "{bubble_style()}",
                 class: "miou-bubble",
-                
+
                 // En-tête
                 div {
                     style: "{bubble_header_style()}",
-                    
+
                     div {
                         style: "{bubble_title_style()}",
                         span { "🌸" }
                         span { "Miou" }
                     }
-                    
+
                     button {
                         style: "{bubble_close_style()}",
                         class: "miou-close-btn",
@@ -249,18 +263,18 @@ pub fn MiouBubbleOverlay(
                         "✕"
                     }
                 }
-                
+
                 // Texte
                 p {
                     style: "{bubble_text_style()}",
                     "{b.texte}"
                 }
-                
+
                 // Actions
                 if !b.actions.is_empty() {
                     div {
                         style: "{bubble_actions_style()}",
-                        
+
                         for (idx, action) in b.actions.iter().enumerate() {
                             {
                                 let action_clone = action.clone();

@@ -32,10 +32,12 @@ pub fn render(
     doc.set_minimal_conformance();
     doc.set_page_decorator(SimplePageDecorator::new());
     let content = substitute_template(template, data);
-    let paragraph = elements::Paragraph::new(content).styled(style::Style::new().with_font_size(12));
+    let paragraph =
+        elements::Paragraph::new(content).styled(style::Style::new().with_font_size(12));
     doc.push(paragraph);
     let mut buf = Cursor::new(Vec::new());
-    doc.render(&mut buf).map_err(|e| MiyuExportError::Io(e.to_string()))?;
+    doc.render(&mut buf)
+        .map_err(|e| MiyuExportError::Io(e.to_string()))?;
     Ok(buf.into_inner())
 }
 

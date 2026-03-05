@@ -16,7 +16,7 @@ mod kindmother_client_db;
 pub use types::*;
 
 #[cfg(feature = "legacy-sqlite")]
-pub use kindmother_db::{JayXposeDb, DbError};
+pub use kindmother_db::{DbError, JayXposeDb};
 
 #[cfg(feature = "kindmother-only")]
-pub use kindmother_client_db::{JayXposeDb, DbError};
+pub use kindmother_client_db::{DbError, JayXposeDb};

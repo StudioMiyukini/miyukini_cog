@@ -1,9 +1,9 @@
 //! Vue détaillée d'un service dans le Market.
 
-use dioxus::prelude::*;
-use crate::state::{use_app_state, use_service_manager, ServiceRegistry};
+use super::{InstallStatus, MarketState};
 use crate::market_client::MarketClient;
-use super::{MarketState, InstallStatus};
+use crate::state::{use_app_state, use_service_manager, ServiceRegistry};
+use dioxus::prelude::*;
 
 #[component]
 pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
@@ -15,9 +15,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
 
     // Chercher dans la liste complète (installés + catalogue)
     let all_services = ServiceRegistry::installed_services(&manager);
-    let service = all_services.iter()
-        .find(|s| s.id == service_id)
-        .cloned();
+    let service = all_services.iter().find(|s| s.id == service_id).cloned();
 
     if let Some(svc) = service {
         let is_installed = svc.is_installed;
@@ -35,7 +33,8 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
 
         let icon_bg = format!("width: 100px; height: 100px; background: linear-gradient(135deg, {type_color}30, {type_color}10); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;");
         let type_badge_style = format!("display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: {type_color}15; border: 1px solid {type_color}30; border-radius: 6px; font-size: 12px; color: {type_color};");
-        let type_dot_style = format!("width: 6px; height: 6px; border-radius: 50%; background: {type_color};");
+        let type_dot_style =
+            format!("width: 6px; height: 6px; border-radius: 50%; background: {type_color};");
         let source_badge_style = format!("padding: 4px 10px; background: {source_color}15; border: 1px solid {source_color}30; border-radius: 6px; font-size: 12px; color: {source_color};");
         let version_text = format!("v{svc_version}");
 
@@ -57,7 +56,10 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
         let type_label_str = type_label.to_string();
 
         // Vérifier si une mise à jour est disponible
-        let update_info = state.read().available_updates.iter()
+        let update_info = state
+            .read()
+            .available_updates
+            .iter()
             .find(|(id, _, _)| id == &svc_id)
             .cloned();
         let has_update = update_info.is_some();

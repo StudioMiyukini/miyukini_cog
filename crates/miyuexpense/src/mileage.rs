@@ -9,7 +9,11 @@ use crate::errors::MiyuexpenseError;
 /// @layer: tool
 /// @human: Calcule les indemnités kilométriques selon barème fourni ; exécution seule.
 /// @do: expense_mileage_calculate_under_governance
-pub fn calculate(ctx: &GovernedContext, _payload: &str, _scale_ref: Option<&str>) -> Result<String, MiyuexpenseError> {
+pub fn calculate(
+    ctx: &GovernedContext,
+    _payload: &str,
+    _scale_ref: Option<&str>,
+) -> Result<String, MiyuexpenseError> {
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }
@@ -21,7 +25,11 @@ pub fn calculate(ctx: &GovernedContext, _payload: &str, _scale_ref: Option<&str>
 /// @layer: tool
 /// @human: Export PDF/CSV des indemnités km pour administration ; exécution seule.
 /// @do: expense_mileage_export_under_governance
-pub fn export(ctx: &GovernedContext, _payload: &str, _format: &str) -> Result<Vec<u8>, MiyuexpenseError> {
+pub fn export(
+    ctx: &GovernedContext,
+    _payload: &str,
+    _format: &str,
+) -> Result<Vec<u8>, MiyuexpenseError> {
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }

@@ -169,7 +169,10 @@ mod tests {
     #[test]
     fn test_extract_json_path_simple() {
         let json = serde_json::json!({"on": true, "brightness": 80});
-        assert_eq!(extract_json_path(&json, "on"), Some(&serde_json::json!(true)));
+        assert_eq!(
+            extract_json_path(&json, "on"),
+            Some(&serde_json::json!(true))
+        );
         assert_eq!(
             extract_json_path(&json, "brightness"),
             Some(&serde_json::json!(80))

@@ -5,9 +5,7 @@
 //! `cargo uninstall -p miyukini-central` fonctionnels.
 
 fn main() {
-    eprintln!(
-        "Miyukini Central: l'application est désormais lancée via l'app (apps/central)."
-    );
+    eprintln!("Miyukini Central: l'application est désormais lancée via l'app (apps/central).");
     eprintln!("Depuis la racine du dépôt: cargo run -p miyukini-central-native");
     eprintln!();
     eprintln!("Appuyez sur Entrée pour fermer...");

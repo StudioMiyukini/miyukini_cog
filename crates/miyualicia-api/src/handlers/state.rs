@@ -12,9 +12,7 @@ use axum::extract::State;
 use axum::Json;
 
 use crate::auth::{JwtAuth, JwtScope};
-use crate::dto::{
-    DeviceCapabilitiesDto, DeviceDto, DeviceStateDto, RoomDto, StateDto,
-};
+use crate::dto::{DeviceCapabilitiesDto, DeviceDto, DeviceStateDto, RoomDto, StateDto};
 use crate::errors::ApiError;
 use crate::router::AppState;
 

@@ -20,7 +20,7 @@ pub enum EnemyKind {
 
 impl EnemyKind {
     /// Taille (côté) en px : 10, 20, 30.
-    #[must_use] 
+    #[must_use]
     pub fn size(&self) -> f32 {
         match self {
             EnemyKind::Normal => size::MOBILE,
@@ -30,18 +30,20 @@ impl EnemyKind {
     }
 
     /// Vitesse (px/s) : base × (1 + vague/100), plafonnée. Plus la vague est haute, plus l'ennemi est rapide.
-    #[must_use] 
+    #[must_use]
     pub fn move_speed(&self, wave_number: u32) -> f32 {
         let factor = 1.0 + (wave_number as f32 / 100.0);
         match self {
             EnemyKind::Normal => (speed::ENEMY_NORMAL_BASE * factor).min(speed::ENEMY_NORMAL_MAX),
-            EnemyKind::MiniBoss => (speed::ENEMY_MINI_BOSS_BASE * factor).min(speed::ENEMY_MINI_BOSS_MAX),
+            EnemyKind::MiniBoss => {
+                (speed::ENEMY_MINI_BOSS_BASE * factor).min(speed::ENEMY_MINI_BOSS_MAX)
+            }
             EnemyKind::Boss => (speed::ENEMY_BOSS_BASE * factor).min(speed::ENEMY_BOSS_MAX),
         }
     }
 
     /// Dégâts au contact : 1, 3, 10.
-    #[must_use] 
+    #[must_use]
     pub fn contact_damage(&self) -> i32 {
         match self {
             EnemyKind::Normal => combat::ENEMY_CONTACT_NORMAL,
@@ -51,7 +53,7 @@ impl EnemyKind {
     }
 
     /// PV max (basés sur Constitution joueur) : ½×C, 2.5×C, 10×C.
-    #[must_use] 
+    #[must_use]
     pub fn hp_max_from_constitution(&self, constitution: i32) -> i32 {
         let normal_hp = (constitution / 2).max(1);
         match self {
@@ -87,19 +89,19 @@ pub struct Enemy {
 
 impl Enemy {
     /// Demi-taille pour hitbox.
-    #[must_use] 
+    #[must_use]
     pub fn half_size(&self) -> f32 {
         self.kind.size() / 2.0
     }
 
     /// Vitesse (px/s), dépend du numéro de vague.
-    #[must_use] 
+    #[must_use]
     pub fn move_speed(&self, wave_number: u32) -> f32 {
         self.kind.move_speed(wave_number)
     }
 
     /// Dégâts au contact.
-    #[must_use] 
+    #[must_use]
     pub fn contact_damage(&self) -> i32 {
         self.kind.contact_damage()
     }
@@ -116,14 +118,14 @@ impl Enemy {
     }
 
     /// true si l'ennemi doit clignoter (vient de prendre des dégâts).
-    #[must_use] 
+    #[must_use]
     pub fn is_flashing(&self) -> bool {
         self.damage_flash_start
             .is_some_and(|t| t.elapsed().as_secs_f32() < DAMAGE_FLASH_DURATION_S)
     }
 
     /// Distance au point (x, y).
-    #[must_use] 
+    #[must_use]
     pub fn dist_to(&self, x: f32, y: f32) -> f32 {
         let dx = self.x - x;
         let dy = self.y - y;

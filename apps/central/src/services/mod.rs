@@ -6,18 +6,19 @@
 //! - MarketView (catalogue de services)
 //! - ExternalServiceView (panneau de contrôle pour lancer un service externe)
 
+pub mod alicia;
+mod external_service_view;
 mod home;
 mod market;
-mod external_service_view;
-pub mod alicia;
+pub mod miyukini_whisper;
 pub mod miyucloud;
 
+pub use external_service_view::ExternalServiceView;
 pub use home::HomeView;
 pub use market::MarketView;
-pub use external_service_view::ExternalServiceView;
 
-use dioxus::prelude::*;
 use crate::state::use_app_state;
+use dioxus::prelude::*;
 
 /// Rendu de la vue correspondant à l'onglet actif.
 /// Les services sont désormais externes — Central affiche un panneau de lancement.
@@ -33,6 +34,7 @@ pub fn ActiveServiceView() -> Element {
             None => rsx! { HomeView {} },
             Some("market") => rsx! { MarketView {} },
             Some("alicia") => rsx! { alicia::AliciaView {} },
+            Some("miyukini-whisper") => rsx! { miyukini_whisper::MiyukiniWhisperView {} },
             Some("miyucloud") => rsx! { miyucloud::MiyuCloudView {} },
             Some(id) => rsx! {
                 ExternalServiceView { service_id: id.to_string() }

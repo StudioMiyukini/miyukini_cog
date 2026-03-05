@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuValidate ; expose les modules tools.
 /// @do: expose_miyuvalidate_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod errors;
@@ -17,8 +16,8 @@ pub mod sanitize;
 pub mod schema;
 
 pub use admin_cell::{
-    miyuvalidate_admin_cell, MiyuValidateAdminCell, MiyuValidateIdentification, MiyuValidateIntegrity,
-    MiyuValidateTestManifest, TOOLKIT_ID,
+    miyuvalidate_admin_cell, MiyuValidateAdminCell, MiyuValidateIdentification,
+    MiyuValidateIntegrity, MiyuValidateTestManifest, TOOLKIT_ID,
 };
 pub use context::GovernedContext;
 pub use errors::MiyuValidateError;

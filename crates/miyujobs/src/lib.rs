@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuJobs ; expose les modules tools.
 /// @do: expose_miyujobs_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

@@ -49,7 +49,10 @@ pub fn grid_render(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuw
     if !ctx.has_mandate() {
         return Err(MiyuwidgetsError::NoMandate);
     }
-    Ok(format!("<div class=\"grid\" data-payload=\"{}\"></div>", escape(payload)))
+    Ok(format!(
+        "<div class=\"grid\" data-payload=\"{}\"></div>",
+        escape(payload)
+    ))
 }
 
 /// @id: miyuwidgets_tool_web_widget_container_render
@@ -61,9 +64,15 @@ pub fn container_render(ctx: &GovernedContext, payload: &str) -> Result<String, 
     if !ctx.has_mandate() {
         return Err(MiyuwidgetsError::NoMandate);
     }
-    Ok(format!("<div class=\"container\" data-payload=\"{}\"></div>", escape(payload)))
+    Ok(format!(
+        "<div class=\"container\" data-payload=\"{}\"></div>",
+        escape(payload)
+    ))
 }
 
 fn escape(s: &str) -> String {
-    s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;")
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
 }

@@ -99,8 +99,14 @@ mod tests {
     fn test_command_log_entry_success() {
         let device_id = Uuid::new_v4();
         let cmd = DeviceCommand::simple(device_id, "on", CommandSource::Voice);
-        let entry =
-            CommandLogEntry::success(CommandSource::Voice, None, device_id, "Lampe salon", &cmd, 45);
+        let entry = CommandLogEntry::success(
+            CommandSource::Voice,
+            None,
+            device_id,
+            "Lampe salon",
+            &cmd,
+            45,
+        );
         assert!(entry.success);
         assert!(entry.error_message.is_none());
         assert_eq!(entry.latency_ms, Some(45));

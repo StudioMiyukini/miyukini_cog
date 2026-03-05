@@ -163,7 +163,10 @@ impl CentralAuthDb {
             );
             ",
         )?;
-        conn.execute("CREATE TABLE IF NOT EXISTS cog_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)", [])?;
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS cog_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
+            [],
+        )?;
         self.migrate_add_profile_columns(&conn)?;
         conn.execute_batch(
             r"
@@ -226,7 +229,11 @@ impl CentralAuthDb {
     }
 
     /// Connexion : email + mot de passe. Retourne le profil complet si valide.
-    pub fn sign_in(&self, email: &str, password: &str) -> Result<Option<CentralProfile>, AuthDbError> {
+    pub fn sign_in(
+        &self,
+        email: &str,
+        password: &str,
+    ) -> Result<Option<CentralProfile>, AuthDbError> {
         let email = email.trim();
         if email.is_empty() {
             return Ok(None);
@@ -260,7 +267,29 @@ impl CentralAuthDb {
             ))
         });
         match row {
-            Ok((id, email_val, hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin, genre, statut_marital, partenaire_genre, partenaire_nom, enfants_nombre, enfants_noms, profession, langue_maternelle)) => {
+            Ok((
+                id,
+                email_val,
+                hash,
+                pseudonyme,
+                nom,
+                prenom,
+                date_naissance,
+                telephone,
+                numero_voie,
+                rue,
+                code_postal,
+                ville,
+                is_admin,
+                genre,
+                statut_marital,
+                partenaire_genre,
+                partenaire_nom,
+                enfants_nombre,
+                enfants_noms,
+                profession,
+                langue_maternelle,
+            )) => {
                 if hash == hash_password(password) {
                     Ok(Some(CentralProfile {
                         id,
@@ -545,7 +574,9 @@ impl CentralAuthDb {
         let mut stmt = conn.prepare(
             "SELECT ref_id FROM profile_service_refs WHERE profile_id = ?1 AND service_key = ?2",
         )?;
-        let row = stmt.query_row(params![profile_id, service_key], |row| row.get::<_, String>(0));
+        let row = stmt.query_row(params![profile_id, service_key], |row| {
+            row.get::<_, String>(0)
+        });
         match row {
             Ok(ref_id) => Ok(Some(ref_id)),
             Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
@@ -694,7 +725,10 @@ impl CentralAuthDb {
     /// Supprime une sauvegarde par id. Ne modifie pas `profile_service_refs` (à faire côté appelant si ref_id pointait ici).
     pub fn delete_profile_save(&self, id: &str) -> Result<(), AuthDbError> {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        let n = conn.execute("DELETE FROM central_profile_saves WHERE id = ?1", params![id])?;
+        let n = conn.execute(
+            "DELETE FROM central_profile_saves WHERE id = ?1",
+            params![id],
+        )?;
         if n == 0 {
             return Err(AuthDbError(format!("Sauvegarde non trouvée: {id}")));
         }

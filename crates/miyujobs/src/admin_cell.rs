@@ -51,7 +51,7 @@ pub struct MiyuJobsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.jobs.miyujobs";
 
-#[must_use] 
+#[must_use]
 pub fn miyujobs_admin_cell(version: &str, fingerprint: &str) -> MiyuJobsAdminCell {
     MiyuJobsAdminCell {
         identification: MiyuJobsIdentification {
@@ -65,7 +65,9 @@ pub fn miyujobs_admin_cell(version: &str, fingerprint: &str) -> MiyuJobsAdminCel
                 id: "MiyukiniJobstest".to_string(),
                 name: "Test chemin complet MiyuJobs".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

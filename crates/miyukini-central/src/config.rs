@@ -24,7 +24,7 @@ pub struct SupabaseConfig {
 
 impl SupabaseConfig {
     /// Indique si une configuration Supabase utilisable est présente.
-    #[must_use] 
+    #[must_use]
     pub fn is_available(&self) -> bool {
         !self.project_id.as_deref().unwrap_or("").is_empty()
             && !self.anon_key.as_deref().unwrap_or("").is_empty()
@@ -40,7 +40,7 @@ impl SupabaseConfig {
 ///
 /// Ne modifie pas les variables d'environnement déjà définies.
 /// Retourne une config vide si le fichier est absent ou invalide.
-#[must_use] 
+#[must_use]
 pub fn load_supabase_config() -> SupabaseConfig {
     let path = find_env_file();
     let path = match path {
@@ -51,16 +51,28 @@ pub fn load_supabase_config() -> SupabaseConfig {
     match dotenvy::from_path(&path) {
         Ok(()) => {}
         Err(e) => {
-            eprintln!("[Central config] Fichier {} non chargé: {}", path.display(), e);
+            eprintln!(
+                "[Central config] Fichier {} non chargé: {}",
+                path.display(),
+                e
+            );
             return SupabaseConfig::default();
         }
     }
 
     SupabaseConfig {
-        project_id: std::env::var("SUPABASE_PROJECT_ID").ok().filter(|s| !s.is_empty()),
-        anon_key: std::env::var("SUPABASE_ANON_KEY").ok().filter(|s| !s.is_empty()),
-        service_role_key: std::env::var("SUPABASE_SERVICE_ROLE_KEY").ok().filter(|s| !s.is_empty()),
-        mother_db_url: std::env::var("MOTHER_DB_URL").ok().filter(|s| !s.is_empty()),
+        project_id: std::env::var("SUPABASE_PROJECT_ID")
+            .ok()
+            .filter(|s| !s.is_empty()),
+        anon_key: std::env::var("SUPABASE_ANON_KEY")
+            .ok()
+            .filter(|s| !s.is_empty()),
+        service_role_key: std::env::var("SUPABASE_SERVICE_ROLE_KEY")
+            .ok()
+            .filter(|s| !s.is_empty()),
+        mother_db_url: std::env::var("MOTHER_DB_URL")
+            .ok()
+            .filter(|s| !s.is_empty()),
     }
 }
 

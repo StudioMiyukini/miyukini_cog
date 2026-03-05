@@ -19,8 +19,13 @@ pub fn add(
         return Err(MiyusocialfeedError::NoMandate);
     }
     let user_id = ctx.mandate_id.clone();
-    let mut guard = store::reactions().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
-    guard.entry(post_id.to_string()).or_default().push((user_id, reaction_type.to_string()));
+    let mut guard = store::reactions()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    guard
+        .entry(post_id.to_string())
+        .or_default()
+        .push((user_id, reaction_type.to_string()));
     Ok(())
 }
 
@@ -39,7 +44,9 @@ pub fn remove(
         return Err(MiyusocialfeedError::NoMandate);
     }
     let user_id = ctx.mandate_id.clone();
-    let mut guard = store::reactions().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    let mut guard = store::reactions()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
     if let Some(v) = guard.get_mut(post_id) {
         v.retain(|(u, r)| !(u == &user_id && r == reaction_type));
     }
@@ -52,12 +59,27 @@ pub fn remove(
 /// @human: Liste les réactions.
 /// @do: reaction_list_under_governance
 /// tool.social.reaction.list
-pub fn list(ctx: &GovernedContext, post_id: &str) -> Result<Vec<ReactionItem>, MiyusocialfeedError> {
+pub fn list(
+    ctx: &GovernedContext,
+    post_id: &str,
+) -> Result<Vec<ReactionItem>, MiyusocialfeedError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialfeedError::NoMandate);
     }
-    let guard = store::reactions().lock().map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
-    let items = guard.get(post_id).map(|v| v.iter().map(|(user_id, reaction_type)| ReactionItem { user_id: user_id.clone(), reaction_type: reaction_type.clone() }).collect()).unwrap_or_default();
+    let guard = store::reactions()
+        .lock()
+        .map_err(|_| MiyusocialfeedError::InvalidInput("lock".into()))?;
+    let items = guard
+        .get(post_id)
+        .map(|v| {
+            v.iter()
+                .map(|(user_id, reaction_type)| ReactionItem {
+                    user_id: user_id.clone(),
+                    reaction_type: reaction_type.clone(),
+                })
+                .collect()
+        })
+        .unwrap_or_default();
     Ok(items)
 }
 

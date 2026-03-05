@@ -42,8 +42,7 @@ pub enum HealthStatus {
 /// @human: Métriques d'une instance.
 /// @do: represent_instance_metrics
 /// Métriques d'une instance.
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Metrics {
     /// @id: kindmother_observability_metrics_read_count
     /// @role: data
@@ -67,7 +66,6 @@ pub struct Metrics {
     /// @depends: kindmother_observability_metrics
     pub sync_count: u64,
 }
-
 
 /// @id: kindmother_observability_trait
 /// @role: infrastructure

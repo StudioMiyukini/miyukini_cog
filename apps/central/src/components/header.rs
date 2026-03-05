@@ -1,9 +1,9 @@
 //! Header principal Steam-like avec navigation par onglets.
 
-use dioxus::prelude::*;
 use crate::data::profile_display_name;
 use crate::state::{use_app_state, MainTab, OpenTab};
 use crate::theme::styles;
+use dioxus::prelude::*;
 
 /// Header principal de l'application.
 #[component]
@@ -12,8 +12,15 @@ pub fn Header() -> Element {
     let theme = state.read().current_theme;
     let c = theme.palette();
 
-    let display_name = state.read().current_user.as_ref().map_or_else(|| "Profil".to_string(), profile_display_name);
-    let initial = display_name.chars().next().map_or('?', |c| c.to_uppercase().next().unwrap_or(c));
+    let display_name = state
+        .read()
+        .current_user
+        .as_ref()
+        .map_or_else(|| "Profil".to_string(), profile_display_name);
+    let initial = display_name
+        .chars()
+        .next()
+        .map_or('?', |c| c.to_uppercase().next().unwrap_or(c));
 
     rsx! {
         header {

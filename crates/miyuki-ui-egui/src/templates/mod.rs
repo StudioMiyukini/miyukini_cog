@@ -5,17 +5,17 @@
 //! Templates define the overall screen structure for different game states
 //! (gameplay, menus, loading, dialog).
 
-pub mod gameplay;
-pub mod menu;
 pub mod character_select;
+pub mod dialog;
+pub mod gameplay;
 pub mod loading;
 pub mod lobby;
-pub mod dialog;
+pub mod menu;
 
 // Re-exports
-pub use gameplay::GameplayLayout;
-pub use menu::MenuLayout;
 pub use character_select::CharSelectLayout;
+pub use dialog::DialogLayout;
+pub use gameplay::GameplayLayout;
 pub use loading::LoadingLayout;
 pub use lobby::LobbyLayout;
-pub use dialog::DialogLayout;
+pub use menu::MenuLayout;

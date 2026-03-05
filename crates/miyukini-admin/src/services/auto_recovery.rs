@@ -28,7 +28,7 @@ impl AutoRecoveryService {
     /// @layer: operator
     /// @human: Construit le service auto-recovery.
     /// @do: create_auto_recovery_service
-    #[must_use] 
+    #[must_use]
     pub fn new(
         environment_state: Arc<EnvironmentStateService>,
         destruction_reinit: DestructionAndReinitService,

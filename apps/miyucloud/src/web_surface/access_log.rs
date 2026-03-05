@@ -13,6 +13,7 @@
 //!
 //! INVARIANT : L'IP brute n'est JAMAIS stockee.
 
+use axum::http::HeaderMap;
 use miyucloud::data::types::{AccessAction, AccessLogEntry};
 use miyucloud::data::MiyucloudDb;
 use miyucloud::errors::MiyucloudError;
@@ -55,6 +56,44 @@ pub fn hash_ip(ip: &str, salt: &[u8]) -> String {
         let _ = write!(acc, "{b:02x}");
         acc
     })
+}
+
+/// Extrait l'IP cliente depuis les en-tetes.
+///
+/// Si `trust_proxy` est actif, lit `X-Forwarded-For` puis `X-Real-IP`.
+/// Sinon, retourne `None` (l'IP socket n'est pas disponible dans ce handler).
+pub fn extract_client_ip(headers: &HeaderMap, trust_proxy: bool) -> Option<String> {
+    if trust_proxy {
+        if let Some(forwarded) = headers.get("X-Forwarded-For") {
+            if let Ok(s) = forwarded.to_str() {
+                if let Some(ip) = s.split(',').next() {
+                    let ip = ip.trim();
+                    if !ip.is_empty() {
+                        return Some(ip.to_string());
+                    }
+                }
+            }
+        }
+
+        if let Some(real_ip) = headers.get("X-Real-IP") {
+            if let Ok(s) = real_ip.to_str() {
+                let ip = s.trim();
+                if !ip.is_empty() {
+                    return Some(ip.to_string());
+                }
+            }
+        }
+    }
+
+    None
+}
+
+/// Extrait le User-Agent de la requete.
+pub fn extract_user_agent(headers: &HeaderMap) -> Option<String> {
+    headers
+        .get(axum::http::header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .map(ToString::to_string)
 }
 
 /// Enregistre un acces dans le journal.
@@ -182,5 +221,21 @@ mod tests {
         assert_eq!(entries.len(), 1);
         assert_eq!(entries[0].action, AccessAction::AuthFail);
         assert!(!entries[0].success);
+    }
+
+    #[test]
+    fn test_extract_client_ip_trust_proxy() {
+        let mut headers = HeaderMap::new();
+        headers.insert("X-Forwarded-For", "203.0.113.10, 10.0.0.1".parse().unwrap());
+        let ip = extract_client_ip(&headers, true);
+        assert_eq!(ip.as_deref(), Some("203.0.113.10"));
+    }
+
+    #[test]
+    fn test_extract_client_ip_no_trust_proxy() {
+        let mut headers = HeaderMap::new();
+        headers.insert("X-Real-IP", "203.0.113.11".parse().unwrap());
+        let ip = extract_client_ip(&headers, false);
+        assert!(ip.is_none());
     }
 }

@@ -1,8 +1,8 @@
 //! EXP-E13 — Mon compte exposant.
 
+use super::components::ActionButton;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::ActionButton;
 
 /// Page de gestion du compte exposant.
 #[component]
@@ -11,14 +11,32 @@ pub fn ExpCompte() -> Element {
     // Charger les données exposant
     let exposant = {
         let db = crate::use_db();
-        db.exposants_list(false).unwrap_or_default().into_iter().next()
+        db.exposants_list(false)
+            .unwrap_or_default()
+            .into_iter()
+            .next()
     };
 
-    let company_name = exposant.as_ref().and_then(|e| e.company_name.clone()).unwrap_or_default();
-    let email = exposant.as_ref().and_then(|e| e.contact_email.clone()).unwrap_or_default();
-    let phone = exposant.as_ref().and_then(|e| e.contact_phone.clone()).unwrap_or_default();
-    let siret = exposant.as_ref().and_then(|e| e.siret.clone()).unwrap_or_default();
-    let address = exposant.as_ref().and_then(|e| e.adresse.clone()).unwrap_or_default();
+    let company_name = exposant
+        .as_ref()
+        .and_then(|e| e.company_name.clone())
+        .unwrap_or_default();
+    let email = exposant
+        .as_ref()
+        .and_then(|e| e.contact_email.clone())
+        .unwrap_or_default();
+    let phone = exposant
+        .as_ref()
+        .and_then(|e| e.contact_phone.clone())
+        .unwrap_or_default();
+    let siret = exposant
+        .as_ref()
+        .and_then(|e| e.siret.clone())
+        .unwrap_or_default();
+    let address = exposant
+        .as_ref()
+        .and_then(|e| e.adresse.clone())
+        .unwrap_or_default();
 
     let company_input = use_signal(|| company_name.clone());
     let email_input = use_signal(|| email.clone());
@@ -223,7 +241,12 @@ fn FormField(label: &'static str, value: Signal<String>) -> Element {
 }
 
 #[component]
-fn SecurityRow(icon: &'static str, title: &'static str, description: &'static str, action: &'static str) -> Element {
+fn SecurityRow(
+    icon: &'static str,
+    title: &'static str,
+    description: &'static str,
+    action: &'static str,
+) -> Element {
     let c = use_palette();
 
     rsx! {

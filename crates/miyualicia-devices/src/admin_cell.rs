@@ -92,10 +92,7 @@ pub struct AliciaDevicesAdminCell {
 
 /// Construit la Cellule Admin AliciaDevices.
 #[must_use]
-pub fn alicia_devices_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> AliciaDevicesAdminCell {
+pub fn alicia_devices_admin_cell(version: &str, fingerprint: &str) -> AliciaDevicesAdminCell {
     AliciaDevicesAdminCell {
         identification: AliciaDevicesIdentification {
             id: TOOLKIT_ID.to_string(),
@@ -126,10 +123,7 @@ pub fn alicia_devices_admin_cell(
 ///
 /// Appeler une seule fois au demarrage ; les appels suivants retournent
 /// la meme reference.
-pub fn init_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> &'static AliciaDevicesAdminCell {
+pub fn init_admin_cell(version: &str, fingerprint: &str) -> &'static AliciaDevicesAdminCell {
     ADMIN_CELL.get_or_init(|| alicia_devices_admin_cell(version, fingerprint))
 }
 

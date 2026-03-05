@@ -10,7 +10,10 @@ use crate::errors::MiyuwebwayTrackerError;
 /// @human: Résout l'adresse Tracker (port 21000) ; exécution seule ; déterministe.
 /// @do: mws_address_tracker_default_under_governance
 /// Adresse par défaut du Tracker (port 21000). En production, préférer config ou env.
-pub fn tracker_default(ctx: &GovernedContext, host: Option<&str>) -> Result<String, MiyuwebwayTrackerError> {
+pub fn tracker_default(
+    ctx: &GovernedContext,
+    host: Option<&str>,
+) -> Result<String, MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }

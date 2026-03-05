@@ -9,7 +9,11 @@ use crate::errors::MiyupossalesError;
 /// @human: Ouvre une session caisse (ouverture de tiroir) ; WriteIntent KindMother.
 /// @do: cash_register_open_under_governance
 /// tool.pos.cash.register.open
-pub fn open(ctx: &GovernedContext, _store_id: &str, _register_id: &str) -> Result<String, MiyupossalesError> {
+pub fn open(
+    ctx: &GovernedContext,
+    _store_id: &str,
+    _register_id: &str,
+) -> Result<String, MiyupossalesError> {
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }

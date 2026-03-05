@@ -9,7 +9,11 @@ use crate::errors::MiyuexpenseError;
 /// @layer: tool
 /// @human: Enregistre un justificatif (photo/scan) ; WriteIntent KindMother.
 /// @do: expense_receipt_capture_under_governance
-pub fn capture(ctx: &GovernedContext, _claim_ref: &str, _payload: &str) -> Result<String, MiyuexpenseError> {
+pub fn capture(
+    ctx: &GovernedContext,
+    _claim_ref: &str,
+    _payload: &str,
+) -> Result<String, MiyuexpenseError> {
     if !ctx.has_mandate() {
         return Err(MiyuexpenseError::NoMandate);
     }

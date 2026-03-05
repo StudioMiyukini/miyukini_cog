@@ -131,16 +131,9 @@ mod tests {
         )
         .unwrap();
 
-        let link = ExternalShareOps::create_link(
-            &db,
-            Some(&file.id),
-            None,
-            "owner1",
-            None,
-            24,
-            None,
-        )
-        .unwrap();
+        let link =
+            ExternalShareOps::create_link(&db, Some(&file.id), None, "owner1", None, 24, None)
+                .unwrap();
 
         let sandbox = SandboxedStore::new(&db, &storage);
         let result = sandbox.verify_token(&link.token);

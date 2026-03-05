@@ -11,7 +11,9 @@ impl std::fmt::Display for MiyuclockError {
         match self {
             MiyuclockError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyuclockError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuclockError::InvalidDelta => write!(f, "Invalid time delta: t_now must be >= t_prev"),
+            MiyuclockError::InvalidDelta => {
+                write!(f, "Invalid time delta: t_now must be >= t_prev")
+            }
         }
     }
 }

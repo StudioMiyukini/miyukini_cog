@@ -37,7 +37,7 @@ impl Workflow {
     /// @human: Crée un nouveau workflow.
     /// @do: create_workflow
     /// @depends: masterbutler_workflow
-    #[must_use] 
+    #[must_use]
     pub fn new(id: WorkflowId, name: String) -> Self {
         Self { id, name }
     }

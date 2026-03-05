@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuHR ; expose les modules tools.
 /// @do: expose_miyuhr_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

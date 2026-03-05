@@ -30,7 +30,9 @@ pub struct MiyusocialfeedTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyusocialfeedIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyusocialfeedAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.social.feed";
 
-#[must_use] 
+#[must_use]
 pub fn miyusocialfeed_admin_cell(version: &str, fingerprint: &str) -> MiyusocialfeedAdminCell {
     MiyusocialfeedAdminCell {
         identification: MiyusocialfeedIdentification {
@@ -63,7 +65,9 @@ pub fn miyusocialfeed_admin_cell(version: &str, fingerprint: &str) -> Miyusocial
                 id: "Miyusocialfeed".to_string(),
                 name: "Test chemin complet Miyusocialfeed".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

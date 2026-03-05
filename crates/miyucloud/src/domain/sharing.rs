@@ -58,16 +58,12 @@ impl SharingOps {
         // Verify the target exists
         if let Some(fid) = file_id {
             if db.file_by_id(fid)?.is_none() {
-                return Err(MiyucloudError::NotFound(format!(
-                    "File {fid} not found"
-                )));
+                return Err(MiyucloudError::NotFound(format!("File {fid} not found")));
             }
         }
         if let Some(foid) = folder_id {
             if db.folder_by_id(foid)?.is_none() {
-                return Err(MiyucloudError::NotFound(format!(
-                    "Folder {foid} not found"
-                )));
+                return Err(MiyucloudError::NotFound(format!("Folder {foid} not found")));
             }
         }
 
@@ -184,7 +180,14 @@ mod tests {
     fn test_share_file_with_profile() {
         let (db, storage, km) = setup();
         let file = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
 
@@ -227,7 +230,14 @@ mod tests {
     fn test_shared_user_can_read() {
         let (db, storage, km) = setup();
         let file = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
 
@@ -256,7 +266,14 @@ mod tests {
     fn test_shared_user_cannot_write_if_read_only() {
         let (db, storage, km) = setup();
         let file = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
 
@@ -272,8 +289,7 @@ mod tests {
 
         // Verify write access is denied
         let perms = vec![perm];
-        let result =
-            crate::auth::permissions::verify_write_access("owner1", "user-2", &perms);
+        let result = crate::auth::permissions::verify_write_access("owner1", "user-2", &perms);
         assert!(result.is_err());
     }
 
@@ -281,7 +297,14 @@ mod tests {
     fn test_unshare_removes_permission() {
         let (db, storage, km) = setup();
         let file = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
 
@@ -311,7 +334,14 @@ mod tests {
     fn test_list_shared_with_me() {
         let (db, storage, km) = setup();
         let file = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "shared.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "shared.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
 

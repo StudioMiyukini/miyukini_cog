@@ -53,7 +53,11 @@ impl ServiceProcesses {
             tracing::warn!("Impossible de créer le répertoire de données: {e}");
         }
 
-        tracing::info!("Lancement du service '{}' depuis {:?}", service_id, service.binary_path);
+        tracing::info!(
+            "Lancement du service '{}' depuis {:?}",
+            service_id,
+            service.binary_path
+        );
 
         let child = Command::new(&service.binary_path)
             .env("MIYUKINI_SERVICE_ID", service_id)

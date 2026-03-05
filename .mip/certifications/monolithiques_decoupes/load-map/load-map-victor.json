@@ -1,0 +1,53 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "victor.threat_model":  [
+                                                 "cert.victor.cissp",
+                                                 "cert.victor.iso_27001"
+                                             ],
+                     "victor.audit_securite":  [
+                                                   "cert.victor.iso_27001",
+                                                   "cert.victor.ceh"
+                                               ],
+                     "victor.donnees_sante":  [
+                                                  "cert.victor.hds",
+                                                  "cert.victor.iso_27001"
+                                              ],
+                     "victor.caisse_fiscale":  [
+                                                   "cert.victor.nf525",
+                                                   "cert.victor.nf203"
+                                               ],
+                     "victor.archivage":  [
+                                              "cert.victor.nf461"
+                                          ],
+                     "victor.vie_privee":  [
+                                               "cert.victor.vp2"
+                                           ],
+                     "victor.pentest":  [
+                                            "cert.victor.ceh"
+                                        ],
+                     "victor.audit_nf525_control":  [
+                                                        "cert.victor.nf525"
+                                                    ],
+                     "victor.audit_cissp_control":  [
+                                                        "cert.victor.cissp"
+                                                    ],
+                     "victor.audit_hds_control":  [
+                                                      "cert.victor.hds"
+                                                  ],
+                     "victor.audit_critical_cyber":  [
+                                                         "cert.victor.iso_27001",
+                                                         "cert.victor.hds"
+                                                     ],
+                     "victor.audit_ceh_control":  [
+                                                      "cert.victor.ceh"
+                                                  ],
+                     "victor.audit_iso27001_control":  [
+                                                           "cert.victor.iso_27001"
+                                                       ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

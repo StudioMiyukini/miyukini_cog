@@ -1,8 +1,8 @@
 //! ORG-E19 — Budget d'une édition (revenus, dépenses, balance).
 
+use super::components::{Badge, StatCard};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, StatCard};
 
 #[component]
 pub fn OrgBudget(edition_id: String) -> Element {
@@ -18,7 +18,8 @@ pub fn OrgBudget(edition_id: String) -> Element {
     // Charger les entrées budgétaires
     let entries = {
         let db = crate::use_db();
-        db.budget_entries_by_edition(&edition_id).unwrap_or_default()
+        db.budget_entries_by_edition(&edition_id)
+            .unwrap_or_default()
     };
 
     let summary = {

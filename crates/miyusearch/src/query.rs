@@ -30,7 +30,9 @@ pub fn execute(
     if !ctx.has_mandate() {
         return Err(MiyusearchError::NoMandate);
     }
-    let guard = store::index().lock().map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
+    let guard = store::index()
+        .lock()
+        .map_err(|_| MiyusearchError::InvalidInput("lock".into()))?;
     let search_terms: Vec<&str> = terms.split_whitespace().filter(|s| !s.is_empty()).collect();
     let mut ids = Vec::new();
     let mut scores = Vec::new();

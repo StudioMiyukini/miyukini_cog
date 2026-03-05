@@ -1,9 +1,9 @@
 //! Dashboard JayXpose (XP-E01) — tableau de bord exposant avec donnees reelles.
 
+use super::components::{ActionButton, QuickAccessCard, StatCard};
+use super::{JayXposeSection, JayXposeState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{StatCard, QuickAccessCard, ActionButton};
-use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
@@ -13,25 +13,38 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
 
     // Charger les donnees reelles
     let exposant = db.exposant_by_id(&exposant_id).ok().flatten();
-    let product_count = db.produits_by_exposant(&exposant_id).map(|v| v.len()).unwrap_or(0);
-    let doc_count = db.documents_by_exposant(&exposant_id).map(|v| v.len()).unwrap_or(0);
-    let page_count = db.vitrine_pages_by_exposant(&exposant_id).map(|v| v.len()).unwrap_or(0);
-    let categories_count = db.categories_by_exposant(&exposant_id).map(|v| v.len()).unwrap_or(0);
+    let product_count = db
+        .produits_by_exposant(&exposant_id)
+        .map(|v| v.len())
+        .unwrap_or(0);
+    let doc_count = db
+        .documents_by_exposant(&exposant_id)
+        .map(|v| v.len())
+        .unwrap_or(0);
+    let page_count = db
+        .vitrine_pages_by_exposant(&exposant_id)
+        .map(|v| v.len())
+        .unwrap_or(0);
+    let categories_count = db
+        .categories_by_exposant(&exposant_id)
+        .map(|v| v.len())
+        .unwrap_or(0);
 
     // Docs expirants (dans 30 jours)
-    let expiring_docs = db.documents_by_exposant(&exposant_id)
+    let expiring_docs = db
+        .documents_by_exposant(&exposant_id)
         .unwrap_or_default()
         .into_iter()
-        .filter(|d| {
-            d.status.as_deref() == Some("valide") && d.expires_at.is_some()
-        })
+        .filter(|d| d.status.as_deref() == Some("valide") && d.expires_at.is_some())
         .count();
 
-    let company_name = exposant.as_ref()
+    let company_name = exposant
+        .as_ref()
         .and_then(|e| e.company_name.clone())
         .unwrap_or_else(|| "Mon entreprise".to_string());
 
-    let vitrine_status = exposant.as_ref()
+    let vitrine_status = exposant
+        .as_ref()
         .and_then(|e| e.vitrine_status.clone())
         .unwrap_or_else(|| "brouillon".to_string());
 

@@ -1,10 +1,10 @@
 //! Connexion — Retour d'un habitant connu. Miou accueille avec la voix (son + phrase).
 //! Pré-remplit l'email du dernier profil connecté.
 
-use dioxus::prelude::*;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::theme::styles;
+use dioxus::prelude::*;
 
 /// Étapes du rite de retour : Accueil → Clé.
 const STEP_ACCUEIL: u8 = 0;
@@ -45,7 +45,8 @@ pub fn Connexion() -> Element {
         let idx = (std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
-            .as_nanos() % 3) as usize;
+            .as_nanos()
+            % 3) as usize;
         miou_phrase_index.set(Some(idx));
     });
 
@@ -76,7 +77,11 @@ pub fn Connexion() -> Element {
 
     // Nom affiché pour l'accueil
     let display_name = if saved_pseudo.is_empty() {
-        saved_email.split('@').next().unwrap_or("habitant").to_string()
+        saved_email
+            .split('@')
+            .next()
+            .unwrap_or("habitant")
+            .to_string()
     } else {
         saved_pseudo.clone()
     };

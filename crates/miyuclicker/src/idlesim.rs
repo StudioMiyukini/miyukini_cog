@@ -329,10 +329,7 @@ pub fn deploy_soldats_to_cite(
     let cite = state
         .cites
         .iter_mut()
-        .find(|c| {
-            c.id == cite_id
-                && matches!(c.proprietaire, crate::state::Proprietaire::Joueur)
-        })
+        .find(|c| c.id == cite_id && matches!(c.proprietaire, crate::state::Proprietaire::Joueur))
         .ok_or_else(|| "Cité joueur introuvable".to_string())?;
     state.soldats -= count;
     cite.troupes += count;

@@ -6,9 +6,9 @@
 //! @layer: tool
 
 use miyusql::{
-    cache_get, cache_set, cache_invalidate, GovernedContext, MemoryExecutor, MiyuSQLError,
-    query_execute, query_prepare, schema_read, schema_read_table, tx_begin, tx_commit, tx_rollback,
-    MIYUKINI_SQLTEST_TABLE,
+    cache_get, cache_invalidate, cache_set, query_execute, query_prepare, schema_read,
+    schema_read_table, tx_begin, tx_commit, tx_rollback, GovernedContext, MemoryExecutor,
+    MiyuSQLError, MIYUKINI_SQLTEST_TABLE,
 };
 
 fn governed_ctx() -> GovernedContext {
@@ -155,7 +155,13 @@ fn msql_c_003_invalidate() {
 fn msql_s_001_read_schema_tables() {
     let ctx = governed_ctx();
     let exec = MemoryExecutor::new();
-    let _ = query_execute(&ctx, &format!("CREATE TABLE {}", MIYUKINI_SQLTEST_TABLE), &[], &exec).unwrap();
+    let _ = query_execute(
+        &ctx,
+        &format!("CREATE TABLE {}", MIYUKINI_SQLTEST_TABLE),
+        &[],
+        &exec,
+    )
+    .unwrap();
     let res = schema_read(&ctx, &exec).unwrap();
     assert!(!res.tables.is_empty());
     assert!(res.tables.iter().any(|t| t.name == MIYUKINI_SQLTEST_TABLE));
@@ -169,10 +175,19 @@ fn msql_s_001_read_schema_tables() {
 fn msql_s_002_read_schema_columns() {
     let ctx = governed_ctx();
     let exec = MemoryExecutor::new();
-    let _ = query_execute(&ctx, &format!("CREATE TABLE {}", MIYUKINI_SQLTEST_TABLE), &[], &exec).unwrap();
     let _ = query_execute(
         &ctx,
-        &format!("ALTER TABLE {} ADD COLUMN test_value text", MIYUKINI_SQLTEST_TABLE),
+        &format!("CREATE TABLE {}", MIYUKINI_SQLTEST_TABLE),
+        &[],
+        &exec,
+    )
+    .unwrap();
+    let _ = query_execute(
+        &ctx,
+        &format!(
+            "ALTER TABLE {} ADD COLUMN test_value text",
+            MIYUKINI_SQLTEST_TABLE
+        ),
         &[],
         &exec,
     )

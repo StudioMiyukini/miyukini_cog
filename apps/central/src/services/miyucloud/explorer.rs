@@ -10,18 +10,13 @@
 
 use dioxus::prelude::*;
 
+use super::components::{format_size, ActionButton, Breadcrumb, FileIcon, SizeLabel};
+use super::state::{CloudSection, FileEntry, FolderEntry, MiyuCloudState, SortField, ViewMode};
 use crate::state::use_app_state;
-use super::components::{ActionButton, Breadcrumb, FileIcon, SizeLabel, format_size};
-use super::state::{
-    CloudSection, FileEntry, FolderEntry, MiyuCloudState, SortField, ViewMode,
-};
 
 /// Explorateur de fichiers (zone principale droite).
 #[component]
-pub fn FileExplorer(
-    state: Signal<MiyuCloudState>,
-    on_upload: EventHandler<()>,
-) -> Element {
+pub fn FileExplorer(state: Signal<MiyuCloudState>, on_upload: EventHandler<()>) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
     let section = state.read().section;
@@ -43,10 +38,26 @@ pub fn FileExplorer(
     let is_trash = section == CloudSection::Trash;
     let section_title = if is_trash { "Corbeille" } else { "" };
 
-    let grid_active_bg = if view_mode == ViewMode::Grid { c.accent_blue } else { c.bg_hover };
-    let list_active_bg = if view_mode == ViewMode::List { c.accent_blue } else { c.bg_hover };
-    let grid_color = if view_mode == ViewMode::Grid { c.text_white } else { c.text_secondary };
-    let list_color = if view_mode == ViewMode::List { c.text_white } else { c.text_secondary };
+    let grid_active_bg = if view_mode == ViewMode::Grid {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let list_active_bg = if view_mode == ViewMode::List {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let grid_color = if view_mode == ViewMode::Grid {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
+    let list_color = if view_mode == ViewMode::List {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     let total_items = sorted_files.len() + sorted_folders.len();
     let total_size: u64 = sorted_files.iter().map(|f| f.size_bytes).sum();
@@ -495,7 +506,11 @@ fn sort_files(files: &[FileEntry], sort_by: SortField, asc: bool) -> Vec<FileEnt
             SortField::Date => a.updated_at.cmp(&b.updated_at),
             SortField::Type => a.mime_type.cmp(&b.mime_type),
         };
-        if asc { ord } else { ord.reverse() }
+        if asc {
+            ord
+        } else {
+            ord.reverse()
+        }
     });
     sorted
 }
@@ -508,7 +523,11 @@ fn sort_folders(folders: &[FolderEntry], sort_by: SortField, asc: bool) -> Vec<F
             SortField::Date => a.updated_at.cmp(&b.updated_at),
             _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
         };
-        if asc { ord } else { ord.reverse() }
+        if asc {
+            ord
+        } else {
+            ord.reverse()
+        }
     });
     sorted
 }

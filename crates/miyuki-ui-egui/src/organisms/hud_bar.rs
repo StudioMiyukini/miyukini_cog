@@ -11,12 +11,12 @@
 //! - Mana orb
 //! - XP bar (full width, very bottom)
 
-use egui::{Color32, Context, Pos2, Rect, Vec2};
-use miyuki_ui_tokens::palette::d2::{D2_PALETTE, D2MiscColors};
+use crate::atoms::belt_slot::BeltSlot;
 use crate::atoms::orb::{Orb, OrbType};
 use crate::atoms::skill_icon::{SkillIcon, SkillState};
-use crate::atoms::belt_slot::BeltSlot;
 use crate::convert::rgba_to_color32;
+use egui::{Color32, Context, Pos2, Rect, Vec2};
+use miyuki_ui_tokens::palette::d2::{D2MiscColors, D2_PALETTE};
 
 /// Data needed to render the complete HUD bar.
 pub struct HudBarData {
@@ -68,7 +68,8 @@ impl HudBar {
                 let bg = Color32::from_rgba_premultiplied(10, 8, 5, 230);
                 let border = rgba_to_color32(&D2_PALETTE.border_default);
                 ui.painter().rect_filled(rect, 0.0, bg);
-                ui.painter().rect_stroke(rect, 0.0, egui::Stroke::new(1.0, border));
+                ui.painter()
+                    .rect_stroke(rect, 0.0, egui::Stroke::new(1.0, border));
 
                 ui.horizontal(|ui| {
                     // Life orb
@@ -120,10 +121,7 @@ impl HudBar {
             .fixed_pos(Pos2::new(0.0, screen_h - 6.0))
             .show(ctx, |ui| {
                 let xp_width = screen_w * data.xp_pct.clamp(0.0, 1.0);
-                let bar_rect = Rect::from_min_size(
-                    Pos2::ZERO,
-                    Vec2::new(xp_width, 5.0),
-                );
+                let bar_rect = Rect::from_min_size(Pos2::ZERO, Vec2::new(xp_width, 5.0));
                 let gold = rgba_to_color32(&D2MiscColors::XP_BAR);
                 ui.painter().rect_filled(bar_rect, 0.0, gold);
             });
@@ -134,11 +132,7 @@ impl HudBar {
             .fixed_pos(Pos2::new(6.0, screen_h - 18.0))
             .show(ctx, |ui| {
                 let gold = rgba_to_color32(&D2_PALETTE.accent_primary);
-                ui.label(
-                    egui::RichText::new(&level_label)
-                        .color(gold)
-                        .size(11.0),
-                );
+                ui.label(egui::RichText::new(&level_label).color(gold).size(11.0));
             });
 
         // Gold display (bottom-right)
@@ -147,11 +141,7 @@ impl HudBar {
             .fixed_pos(Pos2::new(screen_w - 120.0, screen_h - 18.0))
             .show(ctx, |ui| {
                 let gold = rgba_to_color32(&D2_PALETTE.accent_primary);
-                ui.label(
-                    egui::RichText::new(&gold_label)
-                        .color(gold)
-                        .size(11.0),
-                );
+                ui.label(egui::RichText::new(&gold_label).color(gold).size(11.0));
             });
     }
 }

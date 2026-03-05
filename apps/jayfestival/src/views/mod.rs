@@ -3,84 +3,84 @@
 //! Architecture : facade publique (UNC) + espaces connectes (ORG/EXP/VIS).
 //! Donnees reelles via JayFestivalDb (crate::use_db()).
 
-mod sidebar;
 pub mod components;
-mod org_dashboard;
-mod org_editions;
-mod org_edition_hub;
-mod org_exposants;
-mod org_programme;
-mod org_budget;
-mod org_plan;
-mod exp_dashboard;
 mod exp_candidatures;
+mod exp_dashboard;
+mod org_budget;
+mod org_dashboard;
+mod org_edition_hub;
+mod org_editions;
+mod org_exposants;
+mod org_plan;
+mod org_programme;
+mod sidebar;
 mod vis_catalogue;
 
 // Phase 1 — Facade publique (UNC)
-mod unc_landing;
-mod unc_events;
-mod unc_directory;
-mod unc_search;
 mod unc_auth;
+mod unc_directory;
+mod unc_events;
+mod unc_landing;
+mod unc_search;
 
 // Phase 2 — Organisateur complet (nouveaux onglets hub + pages autonomes)
-mod org_parametres;
-mod org_documents;
 mod org_annonces;
-mod org_services;
-mod org_publication;
 mod org_compte;
+mod org_documents;
 mod org_equipe;
+mod org_parametres;
+mod org_publication;
+mod org_services;
 
 // Phase 3 — Exposant complet
-mod exp_participations;
 mod exp_agenda;
+mod exp_compte;
 mod exp_documents;
 mod exp_factures;
-mod exp_compte;
 mod exp_fiche_publique;
 mod exp_notifications;
+mod exp_participations;
 
 // Phase 4 — Visiteur complet
-mod vis_dashboard;
+mod vis_activites;
 mod vis_agenda;
 mod vis_billets;
-mod vis_reservations;
-mod vis_activites;
 mod vis_compte;
+mod vis_dashboard;
+mod vis_reservations;
 
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
 
-use sidebar::JayFestivalSidebar;
-use org_dashboard::OrgDashboard;
-use org_editions::OrgEditions;
-use org_edition_hub::OrgEditionHub;
-use org_compte::OrgCompte;
-use org_equipe::OrgEquipe;
-use exp_dashboard::ExpDashboard;
 use exp_candidatures::ExpCandidatures;
+use exp_dashboard::ExpDashboard;
+use org_compte::OrgCompte;
+use org_dashboard::OrgDashboard;
+use org_edition_hub::OrgEditionHub;
+use org_editions::OrgEditions;
+use org_equipe::OrgEquipe;
+use sidebar::JayFestivalSidebar;
 use vis_catalogue::VisCatalogue;
 
 // UNC imports
+use unc_auth::{UncConnexion, UncCtaModal, UncInscription, UncMentionsLegales};
+use unc_directory::{
+    UncExposantDetail, UncExposantsList, UncOrganisateurDetail, UncOrganisateursList,
+};
+use unc_events::{UncEventDetail, UncEventsList};
 use unc_landing::UncLanding;
-use unc_events::{UncEventsList, UncEventDetail};
-use unc_directory::{UncOrganisateursList, UncOrganisateurDetail, UncExposantsList, UncExposantDetail};
 use unc_search::UncSearch;
-use unc_auth::{UncCtaModal, UncConnexion, UncInscription, UncMentionsLegales};
 
 // -- State --
 
 /// Role actif dans JayFestival.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum JayFestivalRole {
     #[default]
     Organisateur,
     Exposant,
     Visiteur,
 }
-
 
 /// Section active pour utilisateur non connecte (UNC).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -487,7 +487,11 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
 #[component]
 fn NavLink(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     rsx! {
         button {

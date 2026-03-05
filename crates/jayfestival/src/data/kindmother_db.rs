@@ -506,7 +506,10 @@ impl JayFestivalDb {
     // --- Editions-Exposants ---
 
     /// Liste les participations d'une édition.
-    pub fn editions_exposants_by_edition(&self, edition_id: &str) -> Result<Vec<EditionExposant>, DbError> {
+    pub fn editions_exposants_by_edition(
+        &self,
+        edition_id: &str,
+    ) -> Result<Vec<EditionExposant>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, edition_id, is_accepted, is_validated, is_paid, assigned_stand, size_meters, candidature_date, motif_refus, status_candidature, created_at, updated_at FROM editions_exposants WHERE edition_id = ?1",
@@ -735,7 +738,10 @@ impl JayFestivalDb {
     }
 
     /// Recherche textuelle sur éditions, organisateurs, exposants.
-    pub fn search_all(&self, query: &str) -> Result<(Vec<Edition>, Vec<Organisateur>, Vec<Exposant>), DbError> {
+    pub fn search_all(
+        &self,
+        query: &str,
+    ) -> Result<(Vec<Edition>, Vec<Organisateur>, Vec<Exposant>), DbError> {
         let q = format!("%{}%", query.to_lowercase());
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
 

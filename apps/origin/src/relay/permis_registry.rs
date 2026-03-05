@@ -32,7 +32,10 @@ impl PermisRegistry {
     pub async fn register(&self, permis_id: String, expires_at: DateTime<Utc>) {
         let mut entries = self.entries.write().await;
         entries.insert(permis_id.clone(), expires_at);
-        debug!("Permis registered: {} (expires {:?})", permis_id, expires_at);
+        debug!(
+            "Permis registered: {} (expires {:?})",
+            permis_id, expires_at
+        );
     }
 
     /// Vérifie si un permis est valide (enregistré et non expiré).

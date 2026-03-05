@@ -1,0 +1,28 @@
+﻿{
+    "certs":  {
+                  "cert.maria.itil4":  {
+                                           "folder":  "itil4",
+                                           "agent":  "maria",
+                                           "name":  "ITIL 4",
+                                           "tldr":  "Services IT. SVS, 7 principes. PeopleCert."
+                                       },
+                  "cert.maria.pmp":  {
+                                         "folder":  "pmp",
+                                         "agent":  "maria",
+                                         "name":  "PMP (PMBOK 7)",
+                                         "tldr":  "Gestion projet. 12 principes, 8 domaines. PMI."
+                                     },
+                  "cert.maria.prince2":  {
+                                             "folder":  "prince2",
+                                             "agent":  "maria",
+                                             "name":  "PRINCE2",
+                                             "tldr":  "Gestion par Ã©tapes. 7 principes, 7 thÃ¨mes. AXELOS."
+                                         },
+                  "cert.maria.psm":  {
+                                         "folder":  "psm",
+                                         "agent":  "maria",
+                                         "name":  "PSM",
+                                         "tldr":  "Scrum. RÃ´les, events, artifacts. Scrum.org."
+                                     }
+              }
+}

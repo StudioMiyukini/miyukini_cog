@@ -30,7 +30,9 @@ pub struct MiyuwebwayParticipantTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuwebwayParticipantIntegrity {
@@ -49,8 +51,11 @@ pub struct MiyuwebwayParticipantAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.webway.participant";
 
-#[must_use] 
-pub fn miyuwebway_participant_admin_cell(version: &str, fingerprint: &str) -> MiyuwebwayParticipantAdminCell {
+#[must_use]
+pub fn miyuwebway_participant_admin_cell(
+    version: &str,
+    fingerprint: &str,
+) -> MiyuwebwayParticipantAdminCell {
     MiyuwebwayParticipantAdminCell {
         identification: MiyuwebwayParticipantIdentification {
             id: TOOLKIT_ID.to_string(),
@@ -63,7 +68,9 @@ pub fn miyuwebway_participant_admin_cell(version: &str, fingerprint: &str) -> Mi
                 id: "MiyuwebwayParticipant".to_string(),
                 name: "Test chemin complet MiyuwebwayParticipant".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

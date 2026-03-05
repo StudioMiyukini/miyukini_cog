@@ -1,0 +1,569 @@
+3575	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\web\pages.rs
+3271	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Analyse Technique Diablo II pour MGE.md
+2440	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\web\content.rs
+2251	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayxpose\src\screens\exp\e07_vitrine_presentation.rs
+2238	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Blueprint Moteur Sandbox MGE.md
+2204	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\ui_builder.rs
+2158	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Glossaire.md
+2155	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\loot.rs
+2130	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Extraction Systemes D2 OpenDiablo2 pour MGE.md
+2079	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\JayFestival - Analyse Approfondie Catakana Orga.md
+2031	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\JayFestival - Systeme Plan Interactif et Reservation Stands.md
+1972	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\app.rs
+1803	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\data\kindmother_db.rs
+1781	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayKonta\JayKonta - Mocks UI et Guide Implementation.md
+1682	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyukini-central\src\mws\mod.rs
+1665	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\instance\KindMother - Instance Model Contract.md
+1636	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayxpose\src\data\kindmother_db.rs
+1624	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\web\server.rs
+1593	c:\Users\miyuk\Cursor\Miyukini-COG\docs\implementation\Miyukini COG 0.1 - Documentation Implementation Reference.md
+1555	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayXpose\JayXpose - Parcours Developpement.md
+1531	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\implementation\LogisticsSteward - Reference Implementation Guidelines.md
+1454	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaymanga\src\data\kindmother_db.rs
+1370	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\api\Master Butler - Discovery API Contract.md
+1365	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\authority\KindMother - Authority Graph & Cross-Domain Contract.md
+1315	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - MVP Sandbox.md
+1291	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Extraction Architecture UO pour MGE.md
+1248	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\operations\Security - Operational Runbook.md
+1233	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayKonta\JayKonta - Analyse PR Concurrence Web.md
+1223	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\registry\Master Butler - Association Model Contract.md
+1220	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\api\KindMother - CoreDataAPI Contract.md
+1201	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\api\Master Butler - Permission API Contract.md
+1194	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyukini-admin\src\main.rs
+1193	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\Alicia Home Assistante - Plan Dev General.md
+1183	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\policy\StrongFather — Policy Language Specification.md
+1176	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Objets Armes Armures et Equipement.md
+1173	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\reference\Security - Examples & Use Cases.md
+1162	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\api\Master Butler - Capability API Contract.md
+1160	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\00_logique_metier\Odoo Inventory - Logique Metier Complete.md
+1154	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\tools\Master Butler - Toolkit Composition Contract.md
+1154	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykonta\src\data\kindmother_db.rs
+1144	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayShop\JayShop - Guide Implementation.md
+1143	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\tools\Master Butler - Tool Governance Contract.md
+1119	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniVoice\MiyukiniVoice - Specifications Techniques Phase 1.md
+1116	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\accompagnement-scolaire\BRAINSTORM-round3-construction.md
+1113	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\JayFestival - Plan du Service.md
+1095	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\mws_view.rs
+1083	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\registry\Master Butler - Capability Registry Contract.md
+1048	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\foundation\WorrySentinel - Documentation Fondatrice.md
+1044	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\implementation\Security - Reference Implementation Guidelines.md
+1037	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\relay\server.rs
+1034	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\implementation\KindMother - Systeme Persistance libSQL Migration.md
+1026	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\securite\MWS - Audit de Securite Complet.md
+1024	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaymanga\work_form.rs
+1021	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayManga\JayManga - Guide Implementation.md
+1009	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaymanga\src\views\work_form.rs
+1006	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miou-llm-bridge\src\proxy.rs
+993	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\home.rs
+993	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\sync_status.rs
+988	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\governance\LogisticsSteward - Violations & Anti-Patterns.md
+984	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Miyukini Webway Relay.md
+984	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\reference\Miyukini Conceptual References - Miyukini Webway Relay.md
+980	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\lifecycle\Caring Nanny - Performance & Scalability Contract.md
+979	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\implementation\Kernel - Reference Implementation Guidelines.md
+967	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\accompagnement-scolaire\BRAINSTORM-approfondissement.md
+965	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\deploiement\MWS - Implementation Origin Oracle Cloud.md
+965	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\tracker\server.rs
+964	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\governance\Caring Nanny - Violations & Anti-Patterns.md
+963	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\specs\miyualicia-api-spec.md
+959	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\game_loop.rs
+955	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\security\LogisticsSteward - Threat Model Contract.md
+952	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\governance\WorrySentinel - Violations & Anti-Patterns.md
+950	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\architecture\WorrySentinel - Core Interaction Contract.md
+950	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\specs\miyualicia-automations-spec.md
+948	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\observability\Master Butler - Observability Contract.md
+947	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\reference\LogisticsSteward - Examples & Use Cases.md
+938	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\game_state.rs
+937	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\implementation\BondingBrother - Reference Implementation Guidelines.md
+933	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\lifecycle\Caring Nanny - Testing & Validation Contract.md
+922	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\accompagnement-scolaire\BRAINSTORM-initial.md
+922	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\observability\Master Butler - Audit & Traceability Contract.md
+921	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayKoa\JayKoa - Design System Atomic.md
+921	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\integration\WorrySentinel - MiyukiniAdmin Integration Contract.md
+920	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Doctrine Securite Fondamentale.md
+916	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\reference\LogisticsSteward - Vocabulary & Glossary.md
+913	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\boundaries\KindMother - Runtime Boundary & Enforcement Contract.md
+913	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\architecture\Ever Buddy - Evolution Flows.md
+911	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Extraction Architecture UO ServUO ModernUO.md
+909	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\implementation\Border Guard - Reference Implementation Guidelines.md
+903	c:\Users\miyuk\Cursor\Miyukini-COG\docs\implementation\Miyukini - Reference Themes Graphiques et Central.md
+901	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\architecture\Security - Architecture & Components.md
+897	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\integration\WorrySentinel - CaringNanny Integration Contract.md
+897	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\registry\Master Butler - Permission Registry Contract.md
+893	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\architecture\Master Butler - Architecture & Flows.md
+890	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayxpose\src\data\types.rs
+889	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\integration\WorrySentinel - TAMR Integration Contract.md
+885	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\integration\Caring Nanny - BondingBrother Integration Contract.md
+877	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\integration\WorrySentinel - LogisticsSteward Integration Contract.md
+877	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayfestival\src\data\kindmother_db.rs
+875	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayrdv\src\domain\mod.rs
+874	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\security\Master Butler - Threat Model Contract.md
+874	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\mod.rs
+868	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\client.rs
+867	c:\Users\miyuk\Cursor\Miyukini-COG\README.md
+865	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\boundaries\KindMother - Internal Boundary Contract.md
+862	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\reference\StrongFather — FAQ & Common Questions.md
+860	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\architecture\LogisticsSteward - Core Interaction Contract.md
+852	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\operations\StrongFather — Performance & Scalability Contract.md
+848	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuwebway_participant\src\protocol.rs
+847	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\security\Master Butler - Access Control Contract.md
+846	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\degradation\WorrySentinel - Progressive Degradation Contract.md
+846	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\foundation\Ever Buddy - Documentation Fondatrice.md
+846	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyukini-central\src\auth\db_client.rs
+844	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\observability\KindMother - Observability & Audit Contract.md
+840	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\operations\Security - Threat Model Summary.md
+837	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\lifecycle\KindMother - Write Intent Lifecycle Contract.md
+829	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\implementation\Caring Nanny - Reference Implementation Guidelines.md
+827	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\observability\KindMother - Failure & Degradation Contract.md
+826	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\security\StrongFather — Security & Threat Model Contract.md
+825	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\contracts\governance\Security - Violations & Anti-Patterns.md
+822	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\lifecycle\StrongFather — Release & Freeze Contract.md
+822	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miou-llm-bridge\src\agents\builtin.rs
+819	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\sync\KindMother - Sync & Conflict Resolution Contract.md
+818	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\integration\LogisticsSteward - WorrySentinel Integration Contract.md
+817	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\integration\Master Butler - Operator Declaration Contract.md
+814	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\implementation\Master Butler - Reference Implementation Guidelines.md
+811	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\operations\StrongFather — Operational Runbook.md
+811	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\data\types.rs
+810	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\architecture\Ever Buddy - Core Interaction Contract.md
+802	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\instance\KindMother - Instance & Authority Domain Model Contract.md
+791	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\specs\nlu-bridge-interface.md
+789	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\org_exposants.rs
+786	c:\Users\miyuk\Cursor\Miyukini-COG\docs\spm-cms\adaptateurs\Miyukini Framework - Adaptateur ContentManager.md
+786	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\02_ui_ux\Odoo Inventory - Analyse UI UX.md
+786	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\admin\server.rs
+783	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\foundation\StrongFather - Documentation Fondatrice.md
+783	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\lifecycle\StrongFather — Migration & Compatibility Contract.md
+783	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykoa\src\data\kindmother_client_db.rs
+783	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\org_exposants.rs
+782	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykonta\src\data\kindmother_client_db.rs
+778	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\integration\Caring Nanny - StrongFather Integration Contract.md
+775	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\implementation\guidelines\StrongFather - Implementation Patterns.md
+771	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\JayRDV - Accessibilite Client et Parcours de Reservation.md
+771	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\reference\BondingBrother - Examples & Use Cases.md
+770	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jay1tribu\src\data\kindmother_db.rs
+767	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\JayRDV - Specification Complete du Service.md
+767	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniVoice\MiyukiniVoice - Document Fondateur.md
+764	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\reference\Caring Nanny - Glossaire et Terminologie.md
+762	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\integration\LogisticsSteward - Kernel Integration Contract.md
+756	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\governance\Ever Buddy - Violations & Anti-Patterns.md
+756	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\specs\miyualicia-mqtt-spec.md
+754	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\governance\LogisticsSteward - Invariants & Guarantees.md
+754	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\reference\Border Guard - Examples & Use Cases.md
+752	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\decision\StrongFather - Core Decision Contract.md
+749	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\06_guides_implementation\Odoo Accounting - Guide Implementation.md
+749	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\reference\Kernel - Vocabulary & Glossary.md
+749	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\testing\BondingBrother - Testing & Validation Contract.md
+749	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\compliance\KindMother - Adapter Compliance Contract.md
+749	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\specs\miyualicia-devices-spec.md
+748	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniLifeGame\MiyukiniLifeGame - Architecture Technique.md
+748	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\deploiement\MWS - Implementation Origin Hostinger.md
+746	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayshop\src\data\types.rs
+745	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\governance\Border Guard - Violations & Anti-Patterns.md
+744	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\degradation\LogisticsSteward - Degradation Strategy Contract.md
+741	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\security\KindMother - Threat Model & Attack Surface Contract.md
+739	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\integration\Master Butler - BondingBrother Integration Contract.md
+738	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\governance\Master Butler - Invariants & Guarantees.md
+733	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykoa\src\data\kindmother_db.rs
+731	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\implementation\WorrySentinel - Reference Implementation Guidelines.md
+731	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\levels\WorrySentinel - Trust States Governance Contract.md
+730	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\screens\rite_entree.rs
+728	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\implementation\StrongFather — Testing & Validation Contract.md
+726	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\integration\LogisticsSteward - MasterButler Integration Contract.md
+723	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\integration\Master Butler - LogisticsSteward Integration Contract.md
+723	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\foundation\KindMother - Documentation Fondatrice.md
+723	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\reference\Caring Nanny - Examples & Use Cases.md
+722	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\reference\Ever Buddy - Evolution Scenarios.md
+720	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayShop\JayShop - Ecrans et UI.md
+719	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\policy\StrongFather - Policy Engine Contract.md
+718	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\boundaries\Master Butler - Boundary & Scope Contract.md
+716	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\architecture\Border Guard - Core Interaction Contract.md
+714	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\implementation\Ever Buddy - Reference Implementation Guidelines.md
+713	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\resources\LogisticsSteward - Resource Arbitration Contract.md
+712	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\reference\WorrySentinel - Examples & Use Cases.md
+711	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\integration\Border Guard - BondingBrother Integration Contract.md
+711	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\integration\Border Guard - StrongFather Integration Contract.md
+710	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\integration\WorrySentinel - StrongFather Integration Contract.md
+709	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\architecture\Kernel - Architecture & Components.md
+708	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\observability\Caring Nanny - Propagation Flow Contract.md
+704	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykonta\src\backend\service.rs
+703	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyukini-central\src\auth\db.rs
+700	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\boundaries\Master Butler - Authority Limits Contract.md
+699	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykonta\src\domain\purse.rs
+698	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Bot\Bot - Moteur de Decision et Regles.md
+698	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\architecture\WorrySentinel - Architecture & Flows.md
+695	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\implementation\KindMother - Reference Implementation Guidelines.md
+695	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\unc_auth.rs
+691	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\unc_auth.rs
+690	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\governance\Caring Nanny - Error & Rejection Model.md
+690	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\protocol\types.rs
+689	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayxpose\src\screens\exp\e08_vitrine_preview.rs
+686	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\architecture\Security - Core Integration Map.md
+684	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\reference\Security - FAQ & Common Questions.md
+684	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\01_parcours_utilisateur\Odoo Inventory - Parcours Utilisateur Detailles.md
+683	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\integration\Border Guard - CaringNanny Integration Contract.md
+683	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayxpose\src\views\onboarding.rs
+682	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayxpose\onboarding.rs
+680	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\protocol\messages.rs
+678	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\governance\WorrySentinel - Invariants & Guarantees.md
+675	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Bot\Bot - Integration et Flux de Donnees.md
+675	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\integration\Master Butler - StrongFather Integration Contract.md
+674	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\integration\Caring Nanny - KindMother Integration Contract.md
+669	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\implementation\MiyukiniAdmin - Reference Implementation Guidelines.md
+669	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miou-llm-bridge\src\security.rs
+668	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\contracts\operations\Security - Operational Constraints Contract.md
+667	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\levels\WorrySentinel - Security Levels Governance Contract.md
+665	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\lifecycle\Caring Nanny - Versioning & Evolution Contract.md
+664	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\persistence\KindMother - Persistence & Storage Contract.md
+663	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\integration\LogisticsSteward - StrongFather Integration Contract.md
+662	c:\Users\miyuk\Cursor\Miyukini-COG\docs\implementation\Miyukini COG 0.1 - MSCM MIP Compliance Checklist.md
+659	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\architecture\Border Guard - Architecture & Flows.md
+658	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\06_guides_implementation\Odoo Inventory - Guide Implementation.md
+656	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miou-llm-bridge\src\inference.rs
+655	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\reference\Ever Buddy - FAQ & Common Questions.md
+653	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\architecture\LogisticsSteward - Architecture & Flows.md
+652	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\CRM\02_ui_ux\Odoo CRM - Analyse UI UX.md
+649	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Pyramide Architecture Complete.md
+648	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniWatch\MiyukiniWatch - Guide Implementation Complet.md
+648	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Project\05_integration_cog\Odoo Project - Guide Integration COG.md
+647	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayKoa\JayKoa - Ecrans et UI.md
+647	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Project\06_guides_implementation\Odoo Project - Guide Implementation.md
+646	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\governance\TAMR - Violations & Anti-Patterns.md
+644	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniLifeGame\MiyukiniLifeGame - Guide Implementation MVP.md
+643	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Objectif du projet.md
+643	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\foundation\Master Butler - Documentation Fondatrice.md
+643	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia-automations\src\engine.rs
+641	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\lifecycle\StrongFather — Versioning & Evolution Contract.md
+641	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\architecture\Master Butler - Internal State Machine.md
+639	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaymanga\src\views\onboarding.rs
+639	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaymanga\onboarding.rs
+637	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\verification\MWS - Passeport et Visa.md
+636	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\tracker\protocol.rs
+634	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaymanga\reader.rs
+631	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\evolution\BondingBrother - Migration & Compatibility Contract.md
+631	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jay1tribu\src\data\kindmother_client_db.rs
+628	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\integration\WorrySentinel - BorderGuard Integration Contract.md
+628	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaymanga\src\views\reader.rs
+627	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\intervention\TAMR - Intervention Points Contract.md
+626	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\Alicia Home Assistante - Presentation Produit.md
+623	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\foundation\TAMR - Documentation Fondatrice.md
+622	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\foundation\Caring Nanny - Documentation Fondatrice.md
+620	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\integration\LogisticsSteward - BondingBrother Integration Contract.md
+618	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuvoicecapture\src\vad.rs
+617	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\unc_directory.rs
+615	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\product\BondingBrother - Product Interface Contract.md
+614	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\governance\StrongFather - Invariants & Guarantees.md
+613	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Project\00_logique_metier\Odoo Project - Logique Metier Complete.md
+612	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\architecture\BondingBrother - Architecture & Flows.md
+608	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\unc_directory.rs
+607	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Odoo - Analyse Concurrentielle Complete.md
+607	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\05_integration_cog\Odoo Accounting - Guide Integration COG.md
+607	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\flows\BondingBrother - Bilateral Flow Contract.md
+607	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\intervention\TAMR - Intervention Types Contract.md
+606	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniLifeGame\MiyukiniLifeGame - Systeme de Civilisations.md
+606	c:\Users\miyuk\Cursor\Miyukini-COG\demos\mge-pathfinding-labyrinthe\src\main.rs
+605	c:\Users\miyuk\Cursor\Miyukini-COG\docs\spm-cms\adaptateurs\Miyukini Framework - Adaptateur HierarchyManager.md
+605	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\lifecycle\TAMR - Versioning & Evolution Contract.md
+605	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\integration\StrongFather - LogisticsSteward Integration Contract.md
+604	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\governance\Ever Buddy - Invariants & Guarantees.md
+604	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuclicker\src\state.rs
+601	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\integration\BondingBrother - StrongFather Integration Contract.md
+599	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\reference\Border Guard - Vocabulary & Glossary.md
+597	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\equivalents\Miyukini Conceptual References - Equivalents PoS Logiciel Caisse.md
+597	c:\Users\miyuk\Cursor\Miyukini-COG\crates\strongfather\src\policy.rs
+596	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\contracts\governance\Security - Invariants & Guarantees.md
+596	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\implementation\guidelines\StrongFather - Implementation Prohibitions.md
+595	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\integration\BondingBrother - LogisticsSteward Integration Contract.md
+594	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\ui\MiyukiniAdmin - DB Management Interface.md
+593	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\MasterButler\contracts\governance\Master Butler - Violations & Anti-Patterns.md
+593	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\web\market.rs
+591	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Sales\00_logique_metier\Odoo Sales - Logique Metier Complete.md
+591	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\auth\totp.rs
+590	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\JayFestival - Specification UI Conforme Catakana.md
+589	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Allumina - Audit Technique MVP 2026-02.md
+589	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Purchase\05_integration_cog\Odoo Purchase - Guide Integration COG.md
+589	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\03_integrations\Odoo Inventory - Integrations Cross App.md
+588	c:\Users\miyuk\Cursor\Miyukini-COG\docs\spm-cms\Miyukini Framework - Guide Adaptateurs Produits.md
+587	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\contracts\security\WorrySentinel - Threat Model Contract.md
+586	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayManga\JayManga - Portail Agrege et Decouverte.md
+585	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Bot\Bot - Banque de Templates.md
+585	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\04_specifications_miyukini\Odoo Accounting - Specifications Operateurs Miyukini.md
+584	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayKonta\publics\Purse\Purse - Parcours Developpement.md
+584	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuvoicecapture\src\capture.rs
+581	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\config.rs
+580	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Project\01_parcours_utilisateur\Odoo Project - Parcours Utilisateur Detailles.md
+578	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\integration\TAMR - BondingBrother Integration Contract.md
+578	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miyucloud\src\web_surface\share_page.rs
+576	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\04_specifications_miyukini\Odoo Inventory - Specifications Operateurs Miyukini.md
+575	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\architecture\KindMother - Internal State Machine (Informative).md
+574	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\reference\LogisticsSteward - FAQ & Common Questions.md
+573	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\policy\StrongFather - Policy Source Contract.md
+571	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuclicker\src\idlesim.rs
+569	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\resources\LogisticsSteward - Quota Definition Contract.md
+568	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\error\BondingBrother - Error & Rejection Model.md
+568	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaymanga\library.rs
+567	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\security\BondingBrother - Security & Threat Model Contract.md
+566	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\contracts\Kernel - Invariants & Guarantees.md
+566	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaymanga\src\views\library.rs
+564	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Project\02_ui_ux\Odoo Project - Analyse UI UX.md
+563	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\02_ui_ux\Odoo Accounting - Analyse UI UX.md
+562	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\contracts\Kernel - Security Boundaries Contract.md
+562	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaykonta\purse_recurring.rs
+560	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\architecture\KindMother - Client.md
+560	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\observability\Caring Nanny - Observation Flow Contract.md
+559	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Bot\Bot - Document Fondateur et Architecture.md
+559	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\flows\BondingBrother - Ecosystem-to-Product Flow.md
+558	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniAIStudio\BRAINSTORM-fondateur.md
+558	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lifegame-powers\src\lib.rs
+557	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\contracts\resources\LogisticsSteward - Priority Management Contract.md
+556	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia\src\nlu_fallback.rs
+555	c:\Users\miyuk\Cursor\Miyukini-COG\docs\alicia-home\Alicia Home Assistante - Rapport Fondateur.md
+554	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\flows\BondingBrother - Product-to-Ecosystem Flow.md
+554	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaykonta\src\views\purse_recurring.rs
+553	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Miou - Guide Implementation Complet.md
+553	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\foundation\Border Guard - Documentation Fondatrice.md
+553	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miyuclicker\src\views\mod.rs
+552	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Purchase\02_ui_ux\Odoo Purchase - Analyse UI UX.md
+551	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\archive\AUDIT_DOCUMENTATION.md
+551	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyukini-admin\src\db_unit_tests.rs
+550	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\protocoles\PROTOCOLE-brainstorming.md
+550	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Odoo - Parcours Utilisateur Detailles.md
+549	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayxpose\src\data\kindmother_client_db.rs
+549	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayrdv\src\data\memory_store.rs
+548	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\contracts\governance\Security - MIP Security Contract.md
+548	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\boundaries\StrongFather - Boundary & Isolation Contract.md
+548	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\intent\StrongFather - Intent Model Contract.md
+548	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\reference\KindMother - Adapter Examples (Conceptual, Non-Normative).md
+548	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\boundaries\Border Guard - Crossing Rules Contract.md
+548	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayfestival\src\data\kindmother_client_db.rs
+547	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\observability\Caring Nanny - State Model Contract.md
+546	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\boundaries\Border Guard - Trust Level Classification Contract.md
+545	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Vision Strategique.md
+545	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniVoice\MiyukiniVoice - Audit Documentation v1.md
+544	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\securite\MWS - Contre-Mesures Prioritaires.md
+544	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaymanga\sales.rs
+543	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\architecture\KindMother - Core Server.md
+543	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaymanga\src\views\sales.rs
+541	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\reference\BondingBrother - FAQ & Common Questions.md
+540	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayManga\JayManga - UI Mobile Terminal.md
+539	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\share_dialog.rs
+538	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\governance\Caring Nanny - Invariants et Garanties.md
+537	c:\Users\miyuk\Cursor\Miyukini-COG\docs\implementation\Miyukini COG - Portage Linux Guide.md
+537	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Purchase\01_parcours_utilisateur\Odoo Purchase - Parcours Utilisateur Detailles.md
+537	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Inventory\05_integration_cog\Odoo Inventory - Guide Integration COG.md
+537	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\testing\MiyukiniAdmin - Unit Tests Contract.md
+536	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayKoa\JayKoa - Document Fondateur.md
+536	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\relay\tunnel.rs
+534	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayShop\JayShop - Interfaces Inter-Services.md
+533	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\governance\BondingBrother - Violations & Anti-Patterns.md
+533	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\governance\Border Guard - Invariants & Guarantees.md
+532	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\offline\BondingBrother - Journaling Contract.md
+531	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\ui\MiyukiniAdmin - Dashboard & Metrics Display.md
+529	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\explorer.rs
+528	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\00_logique_metier\Odoo Accounting - Logique Metier Complete.md
+528	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyuclicker\mod.rs
+525	c:\Users\miyuk\Cursor\Miyukini-COG\crates\strongfather\src\decision.rs
+524	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Connexion Inter-COG.md
+524	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\authority\BondingBrother - Authority Delegation Contract.md
+524	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\decision\StrongFather - Decision Graph Specification.md
+523	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\reference\WorrySentinel - FAQ & Common Questions.md
+522	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\sync\engine.rs
+521	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\state.rs
+520	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\audit\StrongFather - Error & Rejection Model.md
+520	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\foundation\MiyukiniAdmin - Installation & Bootstrap Guide.md
+520	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykoa\src\test_runner.rs
+519	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\publics\UtilisateurNonConnecte\UtilisateurNonConnecte - Analyse des besoins.md
+519	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\equivalents\Miyukini Conceptual References - Equivalents Boutique CMS Reservation SaaS.md
+518	c:\Users\miyuk\Cursor\Miyukini-COG\docs\implementation\Miyukini COG 0.1 - Quick Reference Guide.md
+518	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\tests\integration_sync.rs
+517	c:\Users\miyuk\Cursor\Miyukini-COG\docs\implementation\Miyukini - Template Parcours Developpement Projet.md
+517	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\foundation\LogisticsSteward - Documentation Fondatrice.md
+516	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\audit\TAMR - Trace Contract.md
+515	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\integration\Border Guard - KindMother Integration Contract.md
+513	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\governance\MiyukiniAdmin - Violations & Anti-Patterns.md
+512	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\equivalents\Miyukini Conceptual References - Equivalents Suite Bureautique Collaborative Google.md
+511	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayManga\JayManga - Plan Implementation.md
+510	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuwebway_participant\src\tracker_client.rs
+509	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\mod.rs
+506	c:\Users\miyuk\Cursor\Miyukini-COG\tools\mip-generator\src\main.rs
+506	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Mobile WebApp Strategy.md
+506	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\equivalents\Miyukini Conceptual References - Equivalents Moteur Forum.md
+506	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\deploiement\MWS - Guide de Deploiement.md
+505	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\monitoring\MiyukiniAdmin - DB Metrics Contract.md
+505	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\org_plan.rs
+504	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - MiyukiniAdmin Status.md
+504	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\publics\UtilisateurNonConnecte\UtilisateurNonConnecte - Parcours et acces.md
+503	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Miyukini Webway System Normes et Standards.md
+503	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\reference\Miyukini Conceptual References - Miyukini Webway System Normes et Standards.md
+502	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\LogisticsSteward\LogisticsSteward - Audit Phase 3 Verification.md
+501	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\governance\StrongFather - Violations & Anti-Patterns.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayManga\JayManga - Document Fondateur.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniClicker\MiyukiniClicker - Boucles de Gameplay et Elements.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\publics\Clients\Clients - Analyse des besoins.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\publics\Professionnels\Professionnels - Parcours Capacites Livrables.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\publics\UtilisateurNonConnecte\UtilisateurNonConnecte - Analyse des besoins.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\performance\BondingBrother - Performance & Scalability Contract.md
+500	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\org_plan.rs
+499	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\BondingBrother - Gel et Versionnement v1.0.0.md
+499	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\integration\TAMR - StrongFather Integration Contract.md
+499	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\ui\MiyukiniAdmin - Security Control Panel.md
+499	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\mod.rs
+498	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\tracker\catalog.rs
+497	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuwebway_participant\src\mws_service.rs
+497	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia-automations\src\types.rs
+496	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\lifecycle\Security - Versioning & Evolution.md
+496	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\acteurs\MWS - Trackers.md
+496	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\security\Border Guard - Threat Model Contract.md
+495	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\integration\BondingBrother - KindMother Integration Contract.md
+495	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\audit\TAMR - Error & Rejection Model.md
+494	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia-automations\src\evaluator.rs
+493	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\architecture\StrongFather - Architecture & Flows.md
+492	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniLifeGame\MiyukiniLifeGame - Mecaniques de Jeu.md
+492	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\publics\Clients\Clients - Parcours Capacites Livrables.md
+491	c:\Users\miyuk\Cursor\Miyukini-COG\demos\mge-pathfinding-labyrinthe\src\chunk_data.rs
+490	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia\src\service.rs
+489	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\administration\MWS - MiyukiniAdmin.md
+488	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\evolution\BondingBrother - Versioning & Evolution Contract.md
+488	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\testing\MiyukiniAdmin - Cycle Tests Contract.md
+487	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Miyukini Webway Relay Protocol.md
+487	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\reference\Miyukini Conceptual References - Miyukini Webway Relay Protocol.md
+487	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\unc_events.rs
+486	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\reference\Security - Vocabulary & Glossary.md
+485	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\observability\Ever Buddy - Debt Tracking Contract.md
+482	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\KindMother\contracts\api\KindMother - Interface & Contrat d'Intégration.md
+481	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\01_parcours_utilisateur\Odoo Accounting - Parcours Utilisateur Detailles.md
+481	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykonta\src\domain\account.rs
+481	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\ui_assets.rs
+479	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Lois Autonomie Systeme.md
+478	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Purchase\06_guides_implementation\Odoo Purchase - Guide Implementation.md
+478	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\state.rs
+475	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\reference\JayFestival - Parcours Utilisateurs Schema Flux.md
+475	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\governance\BondingBrother - Invariants & Guarantees.md
+475	c:\Users\miyuk\Cursor\Miyukini-COG\apps\miyucloud\src\main.rs
+474	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\database\MiyukiniAdmin - DB Operations Contract.md
+474	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\protocol\frame.rs
+473	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\Allumina\Concept\Allumina - Caracteristiques Aptitudes et Competences.md
+473	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\auth\sessions.rs
+472	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Security Levels.md
+472	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Purchase\00_logique_metier\Odoo Purchase - Logique Metier Complete.md
+471	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniSurvivor\Miyukini Survivor - Gameplay et Mecaniques.md
+471	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\reference\Caring Nanny - FAQ & Common Questions.md
+471	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyuwebway_participant\src\relay_client.rs
+471	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\unc_events.rs
+471	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\alicia\state.rs
+470	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\WorrySentinel\reference\WorrySentinel - Vocabulary & Glossary.md
+469	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\observability\Ever Buddy - Metrics & Alerting Contract.md
+469	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\architecture\MiyukiniAdmin - Architecture & Flows.md
+468	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayRDV\publics\Professionnels\Professionnels - Analyse des besoins.md
+468	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\foundation\Security - Documentation Fondatrice.md
+468	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\ui\overlays.rs
+467	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\offline\BondingBrother - Offline & Deferred Authority Contract.md
+467	c:\Users\miyuk\Cursor\Miyukini-COG\crates\kindmother-client\tests\unit_tests.rs
+466	c:\Users\miyuk\Cursor\Miyukini-COG\docs\contrats\Template - Ecriture Enrichie Toolkits.md
+466	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\JayFestival - Plan Implementation.md
+466	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\product\BondingBrother - Extension & Specialization Contract.md
+465	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\protocole\MWS - Manifestes de Services.md
+465	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\architecture\Caring Nanny - Architecture et Composants.md
+463	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\implementation\guidelines\StrongFather - Implementation Overview.md
+463	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\audit\StrongFather - Audit & Trace Contract.md
+463	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\compatibility\Ever Buddy - Version Semantics Contract.md
+462	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\architecture\TAMR - Architecture & Flows.md
+462	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\security\TAMR - Security Contract.md
+461	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniLifeGame\MiyukiniLifeGame - Reference WorldBox.md
+461	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\ui\game_area.rs
+461	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaymanga\src\data\types.rs
+461	c:\Users\miyuk\Cursor\Miyukini-COG\.tmp_mip_repo_sync\agents\victor.md
+461	c:\Users\miyuk\Cursor\Miyukini-COG\.mip\agents\victor.md
+460	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\foundation\MiyukiniAdmin - Documentation Fondatrice.md
+459	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\CaringNanny\contracts\security\Caring Nanny - Security Implications Contract.md
+459	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia-automations\src\parser.rs
+456	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykonta\src\services\purse_service.rs
+456	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\relay\verification.rs
+455	c:\Users\miyuk\Cursor\Miyukini-COG\.tmp_mip_repo_push\README.md
+455	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\publics\Organisateurs\Organisateurs - Analyse des besoins.md
+455	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Sign\06_guides_implementation\Odoo Sign - Guide Implementation.md
+455	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\TAMR\contracts\governance\TAMR - Conformance & Certification Rules.md
+453	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\security\Border Guard - Security Levels Adaptation Contract.md
+452	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\governance\BondingBrother - Audit & Traceability Contract.md
+451	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\equivalents\Miyukini Conceptual References - Equivalents Reservation RDV en Ligne.md
+451	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\reference\Ever Buddy - Vocabulary & Glossary.md
+451	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\BorderGuard\contracts\boundaries\Border Guard - Boundary Definition Contract.md
+451	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\sync\peer_discovery.rs
+450	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\reference\BondingBrother - Vocabulary & Glossary.md
+450	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\governance\StrongFather - Conformance & Certification Rules.md
+449	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniVoice\MiyukiniVoice - Audit Implementation Phase 1.md
+449	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\export\archive.rs
+449	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\relay\metrics.rs
+448	c:\Users\miyuk\Cursor\Miyukini-COG\docs\spm-cms\adaptateurs\Miyukini Framework - Adaptateur SearchManager.md
+448	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Bot\Bot - Banque de Templates Volume 2.md
+448	c:\Users\miyuk\Cursor\Miyukini-COG\.tmp_mip_repo_push\modules\p0-details.md
+447	c:\Users\miyuk\Cursor\Miyukini-COG\.tmp_mip_repo_sync\modules\p0-details.md
+447	c:\Users\miyuk\Cursor\Miyukini-COG\.mip\modules\p0-details.md
+444	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Invoicing\06_guides_implementation\Odoo Invoicing - Guide Implementation.md
+443	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\lobbys\MWS - Lobbys Favoris et Amis.md
+443	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia\src\nlu_bridge.rs
+443	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jaymanga\profile.rs
+442	c:\Users\miyuk\Cursor\Miyukini-COG\docs\spm-cms\adaptateurs\Miyukini Framework - Adaptateur PublicationManager.md
+441	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayshop\src\data\kindmother_client_db.rs
+441	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jaymanga\src\views\profile.rs
+440	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\monitoring\MiyukiniAdmin - Consumption Metrics Contract.md
+440	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jaykoa\src\data\types.rs
+440	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\tracker\slug_registry.rs
+439	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miyukini Central - Ecrans et UI.md
+438	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Integrity Degradation System.md
+438	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Tools et Toolkits.md
+438	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\miyucloud\trash_view.rs
+437	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\architecture\MiyukiniAdmin - Core Interaction Contract.md
+436	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayManga\JayManga - UI Web Portal.md
+436	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniLifeGame\MiyukiniLifeGame - Document Fondateur.md
+436	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyauth\tests\unit_tests.rs
+435	c:\Users\miyuk\Cursor\Miyukini-COG\crates\jayrdv\src\data\types.rs
+435	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\relay\session.rs
+434	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyukiniwatch\src\data\db.rs
+433	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\offline\BondingBrother - Sync & Reconnection Contract.md
+433	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\security\Ever Buddy - Security Implications Contract.md
+432	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\MiyukiniCentral\Miou\Miou - Architecture LLM Cloud Inter-COG.md
+431	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\tests\Kernel - Tests Unitaires Specification.md
+430	c:\Users\miyuk\Cursor\Miyukini-COG\docs\kernel\reference\Kernel - FAQ & Common Questions.md
+430	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\implementation\MiyukiniAdmin - Implementation Security and Controls.md
+429	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Mandats et Equipes Operators.md
+428	c:\Users\miyuk\Cursor\Miyukini-COG\.tmp_mip_repo_sync\modules\workflow.md
+428	c:\Users\miyuk\Cursor\Miyukini-COG\.mip\modules\workflow.md
+427	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\protocoles\templates\TEMPLATE-brainstorm-service.md
+425	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Fleet\06_guides_implementation\Odoo Fleet - Guide Implementation.md
+424	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\architecture\BondingBrother - Core Interaction Contract.md
+423	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Documents\05_integration_cog\Odoo Documents - Guide Integration COG.md
+423	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\contracts\boundaries\StrongFather - Execution Prohibition Contract.md
+422	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\database\MiyukiniAdmin - Emergency DB Access Contract.md
+421	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Security Protocols.md
+421	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayShop\JayShop - Document Fondateur.md
+421	c:\Users\miyuk\Cursor\Miyukini-COG\crates\kindmother-service\src\database.rs
+420	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\foundation\Security - Gouvernance Cores Protection Donnees.md
+417	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyucloud\src\domain\file_ops.rs
+416	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\StrongFather\architecture\StrongFather - Integration Readiness Contract.md
+416	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayfestival\exp_participations.rs
+415	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Souverainete Environnement.md
+415	c:\Users\miyuk\Cursor\Miyukini-COG\docs\market\competitors\Odoo\Accounting\03_integrations\Odoo Accounting - Integrations Cross App.md
+414	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\equivalents\Miyukini Conceptual References - Equivalents Comptabilite Independants.md
+414	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\security\MiyukiniAdmin - Auth and First-Boot Contract.md
+413	c:\Users\miyuk\Cursor\Miyukini-COG\docs\miyukini-webway-system\securite\MWS - Quarantaine et Blacklist.md
+413	c:\Users\miyuk\Cursor\Miyukini-COG\crates\miyualicia-mqtt\src\zigbee2mqtt.rs
+412	c:\Users\miyuk\Cursor\Miyukini-COG\docs\cores\EverBuddy\contracts\lifecycle\Ever Buddy - Lifecycle States Contract.md
+412	c:\Users\miyuk\Cursor\Miyukini-COG\demos\mge-pathfinding-labyrinthe\src\render.rs
+412	c:\Users\miyuk\Cursor\Miyukini-COG\apps\jayfestival\src\views\exp_participations.rs
+411	c:\Users\miyuk\Cursor\Miyukini-COG\docs\security\Security - Gel et Versionnement v1.0.0.md
+410	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\operations\MiyukiniAdmin - Recovery Procedures.md
+410	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\jayxpose\vitrine.rs
+409	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\governance\BondingBrother - Responsibility Model Contract.md
+409	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\security\MiyukiniAdmin - Security Level Management Contract.md
+408	c:\Users\miyuk\Cursor\Miyukini-COG\docs\reference\Miyukini Conceptual References - Ecosystem Dependency Contract.md
+408	c:\Users\miyuk\Cursor\Miyukini-COG\.tmp_mip_repo_sync\skills\miyukini-mge\SKILL.md
+408	c:\Users\miyuk\Cursor\Miyukini-COG\.mip\skills\miyukini-mge\SKILL.md
+407	c:\Users\miyuk\Cursor\Miyukini-COG\crates\lord_of_the_castle\src\spritesheet.rs
+406	c:\Users\miyuk\Cursor\Miyukini-COG\crates\strongfather\src\intent.rs
+406	c:\Users\miyuk\Cursor\Miyukini-COG\apps\origin\src\relay\rate_limiter.rs
+405	c:\Users\miyuk\Cursor\Miyukini-COG\docs\spm-cms\modules\search\contrat.md
+405	c:\Users\miyuk\Cursor\Miyukini-COG\docs\services\JayFestival\publics\Visiteurs\Visiteurs - Analyse des besoins.md
+404	c:\Users\miyuk\Cursor\Miyukini-COG\apps\central\src\services\market\service_detail.rs
+403	c:\Users\miyuk\Cursor\Miyukini-COG\docs\interfaces\BondingBrother\contracts\product\BondingBrother - Product Adaptation Rules.md
+403	c:\Users\miyuk\Cursor\Miyukini-COG\docs\admin\MiyukiniAdmin\contracts\integration\MiyukiniAdmin - LogisticsSteward Integration Contract.md

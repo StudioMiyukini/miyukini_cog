@@ -179,7 +179,7 @@ impl MigrationServiceImpl {
     /// @human: Crée le service avec état stub (aucune migration par défaut).
     /// @do: create_migration_service
     /// @depends: miyukiniadmin_migration_service_impl
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -190,7 +190,7 @@ impl MigrationServiceImpl {
     /// @human: Initialise avec des enregistrements de démo.
     /// @do: seed_demo_migrations
     /// @depends: miyukiniadmin_migration_service_impl
-    #[must_use] 
+    #[must_use]
     pub fn with_seed(mut self) -> Self {
         self.applied = vec![MigrationRecord {
             migration_id: "20260101000000_init_schema".to_string(),

@@ -1,0 +1,34 @@
+﻿{
+    "certs":  {
+                  "cert.hugo.aws":  {
+                                        "folder":  "aws",
+                                        "agent":  "hugo",
+                                        "name":  "AWS",
+                                        "tldr":  "Cloud. Architectures, services. Amazon."
+                                    },
+                  "cert.hugo.cka":  {
+                                        "folder":  "cka",
+                                        "agent":  "hugo",
+                                        "name":  "CKA",
+                                        "tldr":  "Kubernetes admin. CNCF."
+                                    },
+                  "cert.hugo.devops":  {
+                                           "folder":  "DevOPS",
+                                           "agent":  "hugo",
+                                           "name":  "DevOps Foundation",
+                                           "tldr":  "CALMS, DORA. DevOps Institute."
+                                       },
+                  "cert.hugo.docker":  {
+                                           "folder":  "docker",
+                                           "agent":  "hugo",
+                                           "name":  "Docker",
+                                           "tldr":  "Conteneurisation. Dockerfile, Compose."
+                                       },
+                  "cert.hugo.terraform":  {
+                                              "folder":  "terraform",
+                                              "agent":  "hugo",
+                                              "name":  "Terraform",
+                                              "tldr":  "IaC. HCL, providers. HashiCorp."
+                                          }
+              }
+}

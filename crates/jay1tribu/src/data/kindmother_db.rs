@@ -184,7 +184,12 @@ impl Jay1TribuDb {
         rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
     }
 
-    pub fn friend_create(&self, profile_id: &str, friend_cog_id: &str, friend_pseudo: Option<&str>) -> Result<Friend, DbError> {
+    pub fn friend_create(
+        &self,
+        profile_id: &str,
+        friend_cog_id: &str,
+        friend_pseudo: Option<&str>,
+    ) -> Result<Friend, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let exists = conn
             .query_row(
@@ -194,7 +199,9 @@ impl Jay1TribuDb {
             )
             .is_ok();
         if exists {
-            return Err(DbError("Cet ami est déjà dans la liste (profile_id, friend_cog_id) uniques.".to_string()));
+            return Err(DbError(
+                "Cet ami est déjà dans la liste (profile_id, friend_cog_id) uniques.".to_string(),
+            ));
         }
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
@@ -266,7 +273,12 @@ impl Jay1TribuDb {
         Ok(rows.next().transpose()?)
     }
 
-    pub fn tribe_create(&self, name: &str, description: Option<&str>, creator_cog_id: &str) -> Result<Tribe, DbError> {
+    pub fn tribe_create(
+        &self,
+        name: &str,
+        description: Option<&str>,
+        creator_cog_id: &str,
+    ) -> Result<Tribe, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let now = now_rfc3339();
         let mut conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
@@ -301,7 +313,12 @@ impl Jay1TribuDb {
         })
     }
 
-    pub fn tribe_update(&self, id: &str, name: &str, description: Option<&str>) -> Result<(), DbError> {
+    pub fn tribe_update(
+        &self,
+        id: &str,
+        name: &str,
+        description: Option<&str>,
+    ) -> Result<(), DbError> {
         let now = now_rfc3339();
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         conn.execute(
@@ -320,8 +337,14 @@ impl Jay1TribuDb {
             .query_map(params![id], |row| row.get(0))?
             .collect::<Result<Vec<_>, _>>()?;
         for salon_id in &salon_ids {
-            conn.execute("DELETE FROM messages WHERE salon_id = ?1", params![salon_id])?;
-            conn.execute("DELETE FROM salon_members WHERE salon_id = ?1", params![salon_id])?;
+            conn.execute(
+                "DELETE FROM messages WHERE salon_id = ?1",
+                params![salon_id],
+            )?;
+            conn.execute(
+                "DELETE FROM salon_members WHERE salon_id = ?1",
+                params![salon_id],
+            )?;
         }
         conn.execute("DELETE FROM salons WHERE tribe_id = ?1", params![id])?;
         conn.execute("DELETE FROM tribes WHERE id = ?1", params![id])?;
@@ -378,7 +401,12 @@ impl Jay1TribuDb {
         Ok(rows.next().transpose()?)
     }
 
-    pub fn salon_create(&self, tribe_id: Option<&str>, name: &str, salon_type: SalonType) -> Result<Salon, DbError> {
+    pub fn salon_create(
+        &self,
+        tribe_id: Option<&str>,
+        name: &str,
+        salon_type: SalonType,
+    ) -> Result<Salon, DbError> {
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
@@ -441,7 +469,11 @@ impl Jay1TribuDb {
     }
 
     /// Trouve le salon direct existant entre deux COG (DAT-01 : au plus un salon direct par paire).
-    pub fn salon_find_direct_between(&self, cog_id_1: &str, cog_id_2: &str) -> Result<Option<Salon>, DbError> {
+    pub fn salon_find_direct_between(
+        &self,
+        cog_id_1: &str,
+        cog_id_2: &str,
+    ) -> Result<Option<Salon>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT s.id, s.tribe_id, s.name, s.salon_type, s.created_at
@@ -476,7 +508,12 @@ impl Jay1TribuDb {
         Ok(msgs)
     }
 
-    pub fn message_create(&self, salon_id: &str, sender_cog_id: &str, content: &str) -> Result<Message, DbError> {
+    pub fn message_create(
+        &self,
+        salon_id: &str,
+        sender_cog_id: &str,
+        content: &str,
+    ) -> Result<Message, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let is_member: bool = conn
             .query_row(
@@ -490,7 +527,9 @@ impl Jay1TribuDb {
                 e => Err(e),
             })?;
         if !is_member {
-            return Err(DbError("L'expéditeur n'est pas membre du salon.".to_string()));
+            return Err(DbError(
+                "L'expéditeur n'est pas membre du salon.".to_string(),
+            ));
         }
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
@@ -563,7 +602,10 @@ impl Jay1TribuDb {
     /// Supprime une entrée de livraison en attente.
     pub fn pending_delivery_delete(&self, pending_id: &str) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        conn.execute("DELETE FROM pending_deliveries WHERE id = ?1", params![pending_id])?;
+        conn.execute(
+            "DELETE FROM pending_deliveries WHERE id = ?1",
+            params![pending_id],
+        )?;
         Ok(())
     }
 
@@ -580,7 +622,11 @@ impl Jay1TribuDb {
              WHERE m.sender_cog_id = ?1 ORDER BY pd.created_at",
         )?;
         let rows = stmt.query_map(params![sender_cog_id], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+            ))
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
     }
@@ -602,7 +648,9 @@ impl Jay1TribuDb {
             )
             .is_ok();
         if exists {
-            return Err(DbError("Invitation déjà en attente pour ce COG.".to_string()));
+            return Err(DbError(
+                "Invitation déjà en attente pour ce COG.".to_string(),
+            ));
         }
         let id = uuid::Uuid::new_v4().to_string();
         let created_at = now_rfc3339();
@@ -635,7 +683,10 @@ impl Jay1TribuDb {
                 )
             })
             .map_err(|e| DbError(format!("Aucun rôle pour cette tribu: {}", e)))?;
-        conn.execute("UPDATE tribe_invitations SET status = 'accepted' WHERE id = ?1", params![invitation_id])?;
+        conn.execute(
+            "UPDATE tribe_invitations SET status = 'accepted' WHERE id = ?1",
+            params![invitation_id],
+        )?;
         let member_id = uuid::Uuid::new_v4().to_string();
         let joined_at = now_rfc3339();
         conn.execute(
@@ -648,7 +699,10 @@ impl Jay1TribuDb {
     /// Refuse une invitation (status = refused).
     pub fn tribe_invitation_refuse(&self, invitation_id: &str) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        conn.execute("UPDATE tribe_invitations SET status = 'refused' WHERE id = ?1 AND status = 'pending'", params![invitation_id])?;
+        conn.execute(
+            "UPDATE tribe_invitations SET status = 'refused' WHERE id = ?1 AND status = 'pending'",
+            params![invitation_id],
+        )?;
         Ok(())
     }
 
@@ -662,7 +716,11 @@ impl Jay1TribuDb {
             "SELECT id, tribe_id, inviter_cog_id FROM tribe_invitations WHERE invitee_cog_id = ?1 AND status = 'pending' ORDER BY created_at",
         )?;
         let rows = stmt.query_map(params![invitee_cog_id], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?))
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+            ))
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(DbError::from)
     }
@@ -721,7 +779,8 @@ mod tests {
     #[test]
     fn friend_create_duplicate_returns_error() {
         let db = mem_db();
-        db.friend_create("profile1", "cog-a", Some("Pseudo")).unwrap();
+        db.friend_create("profile1", "cog-a", Some("Pseudo"))
+            .unwrap();
         let err = db.friend_create("profile1", "cog-a", None).unwrap_err();
         assert!(err.0.contains("déjà dans la liste"));
     }
@@ -739,7 +798,10 @@ mod tests {
     #[test]
     fn salon_find_direct_between_and_dat01() {
         let db = mem_db();
-        assert!(db.salon_find_direct_between("cog-a", "cog-b").unwrap().is_none());
+        assert!(db
+            .salon_find_direct_between("cog-a", "cog-b")
+            .unwrap()
+            .is_none());
         let s1 = db.salon_create(None, "DM", SalonType::Direct).unwrap();
         db.salon_add_member(&s1.id, "cog-a").unwrap();
         db.salon_add_member(&s1.id, "cog-b").unwrap();
@@ -753,7 +815,9 @@ mod tests {
         let db = mem_db();
         let salon = db.salon_create(None, "DM", SalonType::Direct).unwrap();
         db.salon_add_member(&salon.id, "cog-a").unwrap();
-        let err = db.message_create(&salon.id, "cog-other", "Hello").unwrap_err();
+        let err = db
+            .message_create(&salon.id, "cog-other", "Hello")
+            .unwrap_err();
         assert!(err.0.contains("n'est pas membre"));
     }
 

@@ -1,0 +1,32 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+
+                 },
+    "fallback_par_phase":  {
+                               "p4.victor":  [
+                                                 "cert.victor.iso_27001",
+                                                 "cert.victor.cissp"
+                                             ],
+                               "p4.george":  [
+                                                 "cert.george.iso_19011",
+                                                 "cert.george.cisa"
+                                             ],
+                               "p4.hugo":  [
+                                               "cert.hugo.docker",
+                                               "cert.hugo.devops"
+                                           ],
+                               "p4.jean":  [
+                                               "cert.jean.prompt_eng"
+                                           ],
+                               "p4.victor.critical_cyber":  [
+                                                                "cert.victor.iso_27001",
+                                                                "cert.victor.hds"
+                                                            ],
+                               "p4.george.critical_cyber":  [
+                                                                "cert.george.cisa",
+                                                                "cert.george.rgpd"
+                                                            ]
+                           }
+}

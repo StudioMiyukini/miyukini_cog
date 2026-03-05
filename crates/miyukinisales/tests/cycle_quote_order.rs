@@ -1,7 +1,7 @@
 //! Test d'intégration : cycle devis → acceptation → commande.
 
 use miyukinisales::{
-    order_create_from_quote, order_confirm, quote_accept, quote_create, quote_send,
+    order_confirm, order_create_from_quote, quote_accept, quote_create, quote_send,
     MiyukiniSalesStore, OrderLine, OrderStatus, QuoteStatus,
 };
 
@@ -9,14 +9,7 @@ use miyukinisales::{
 fn cycle_quote_then_order() {
     let store = MiyukiniSalesStore::new();
 
-    let quote = quote_create(
-        &store,
-        "DEV-2026-001",
-        "client-1",
-        15000,
-        "2026-12-31",
-    )
-    .unwrap();
+    let quote = quote_create(&store, "DEV-2026-001", "client-1", 15000, "2026-12-31").unwrap();
     assert_eq!(quote.status, QuoteStatus::Draft);
     assert_eq!(quote.total_cents, 15000);
 

@@ -19,11 +19,16 @@ pub use admin_cell::{
     MiyucptaledgerIntegrity, MiyucptaledgerTestManifest, TOOLKIT_ID,
 };
 pub use bank::sync as bank_sync;
-pub use company::{siret_resolve as company_siret_resolve, structure_register as company_structure_register, structure_resolve as company_structure_resolve};
+pub use company::{
+    siret_resolve as company_siret_resolve, structure_register as company_structure_register,
+    structure_resolve as company_structure_resolve,
+};
 pub use context::GovernedContext;
 pub use errors::MiyucptaledgerError;
 pub use reconciliation::{record as reconciliation_record, suggest as reconciliation_suggest};
-pub use transaction::{categorize as transaction_categorize, vat_resolve as transaction_vat_resolve};
+pub use transaction::{
+    categorize as transaction_categorize, vat_resolve as transaction_vat_resolve,
+};
 
 #[cfg(test)]
 mod tests {

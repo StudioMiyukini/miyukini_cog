@@ -1,18 +1,18 @@
 //! ORG-E07 — Hub d'une édition (navigation par onglets).
 
+use super::components::TabButton;
+use super::org_annonces::OrgAnnonces;
+use super::org_budget::OrgBudget;
+use super::org_documents::OrgDocuments;
+use super::org_exposants::OrgExposants;
+use super::org_parametres::OrgParametres;
+use super::org_plan::OrgPlan;
+use super::org_programme::OrgProgramme;
+use super::org_publication::OrgPublication;
+use super::org_services::OrgServices;
+use super::{JayFestivalState, OrgEditionTab};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::TabButton;
-use super::{JayFestivalState, OrgEditionTab};
-use super::org_exposants::OrgExposants;
-use super::org_programme::OrgProgramme;
-use super::org_budget::OrgBudget;
-use super::org_plan::OrgPlan;
-use super::org_parametres::OrgParametres;
-use super::org_documents::OrgDocuments;
-use super::org_annonces::OrgAnnonces;
-use super::org_services::OrgServices;
-use super::org_publication::OrgPublication;
 
 #[component]
 pub fn OrgEditionHub(
@@ -153,8 +153,14 @@ fn EditionOverview(edition_id: String) -> Element {
     let c = use_palette();
     let (exposants_count, animations_count, budget_summary) = {
         let db = crate::use_db();
-        let exp = db.editions_exposants_by_edition(&edition_id).map(|v| v.len()).unwrap_or(0);
-        let anim = db.animations_by_edition(&edition_id).map(|v| v.len()).unwrap_or(0);
+        let exp = db
+            .editions_exposants_by_edition(&edition_id)
+            .map(|v| v.len())
+            .unwrap_or(0);
+        let anim = db
+            .animations_by_edition(&edition_id)
+            .map(|v| v.len())
+            .unwrap_or(0);
         let budget = db.budget_summary(&edition_id).unwrap_or_default();
         (exp, anim, budget)
     };

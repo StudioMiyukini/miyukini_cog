@@ -5,9 +5,9 @@
 //! Note : Code préparé pour fonctionnalités futures (recherche avancée).
 #![allow(dead_code)]
 
-use std::sync::Arc;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use super::pool::PoolManager;
@@ -106,7 +106,10 @@ impl Catalog {
     /// Récupère un service par ID.
     pub async fn get_service(&self, service_id: &str) -> Option<CatalogServiceEntry> {
         let services = self.services.read().await;
-        services.iter().find(|s| s.service_id == service_id).cloned()
+        services
+            .iter()
+            .find(|s| s.service_id == service_id)
+            .cloned()
     }
 
     /// Liste tous les lobbys publics.
@@ -459,15 +462,17 @@ mod tests {
         let catalog = Catalog::new(pool_manager);
 
         // Enregistrer un service
-        catalog.register_service(CatalogServiceEntry {
-            service_id: "jayfestival".to_string(),
-            version: "1.0.0".to_string(),
-            description: "Music festival management".to_string(),
-            category: "entertainment".to_string(),
-            download_url: None,
-            checksum: None,
-            published_at: chrono::Utc::now().to_rfc3339(),
-        }).await;
+        catalog
+            .register_service(CatalogServiceEntry {
+                service_id: "jayfestival".to_string(),
+                version: "1.0.0".to_string(),
+                description: "Music festival management".to_string(),
+                category: "entertainment".to_string(),
+                download_url: None,
+                checksum: None,
+                published_at: chrono::Utc::now().to_rfc3339(),
+            })
+            .await;
 
         // Lister
         let services = catalog.list_services().await;

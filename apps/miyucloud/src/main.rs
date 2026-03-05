@@ -16,6 +16,7 @@
 
 mod api;
 mod config;
+mod security_headers;
 mod web_surface;
 
 use config::MiyucloudConfig;
@@ -205,8 +206,8 @@ async fn handle_tls_connection(
     // Use tower::Service directly — axum::Router implements Service<Request<Body>>
     // whose Error = Infallible, and we convert it to a hyper service.
     let service = tower::ServiceBuilder::new().service(app);
-    let hyper_service = hyper::service::service_fn(
-        move |req: hyper::Request<hyper::body::Incoming>| {
+    let hyper_service =
+        hyper::service::service_fn(move |req: hyper::Request<hyper::body::Incoming>| {
             // Clone service for each request
             let mut svc = service.clone();
             async move {
@@ -219,14 +220,12 @@ async fn handle_tls_connection(
                 // Convert Infallible error to the expected error type
                 Ok::<_, std::convert::Infallible>(resp.expect("infallible"))
             }
-        },
-    );
+        });
 
-    if let Err(e) = hyper_util::server::conn::auto::Builder::new(
-        hyper_util::rt::TokioExecutor::new(),
-    )
-    .serve_connection(io, hyper_service)
-    .await
+    if let Err(e) =
+        hyper_util::server::conn::auto::Builder::new(hyper_util::rt::TokioExecutor::new())
+            .serve_connection(io, hyper_service)
+            .await
     {
         tracing::debug!("Web surface connection error from {addr}: {e}");
     }
@@ -314,8 +313,16 @@ fn base64_encode(data: &[u8]) -> String {
     let mut result = String::new();
     for chunk in data.chunks(3) {
         let b0 = u32::from(chunk[0]);
-        let b1 = if chunk.len() > 1 { u32::from(chunk[1]) } else { 0 };
-        let b2 = if chunk.len() > 2 { u32::from(chunk[2]) } else { 0 };
+        let b1 = if chunk.len() > 1 {
+            u32::from(chunk[1])
+        } else {
+            0
+        };
+        let b2 = if chunk.len() > 2 {
+            u32::from(chunk[2])
+        } else {
+            0
+        };
         let triple = (b0 << 16) | (b1 << 8) | b2;
         result.push(CHARS[((triple >> 18) & 0x3F) as usize] as char);
         result.push(CHARS[((triple >> 12) & 0x3F) as usize] as char);
@@ -347,7 +354,10 @@ fn base64_decode(input: &str) -> Result<Vec<u8>, miyucloud::errors::MiyucloudErr
         }
     }
 
-    let bytes: Vec<u8> = input.bytes().filter(|&b| b != b'\n' && b != b'\r').collect();
+    let bytes: Vec<u8> = input
+        .bytes()
+        .filter(|&b| b != b'\n' && b != b'\r')
+        .collect();
     if !bytes.len().is_multiple_of(4) {
         return Err(miyucloud::errors::MiyucloudError::Crypto(
             "Invalid base64 length".into(),
@@ -394,6 +404,7 @@ mod tests {
             owner_id: "test-owner".to_string(),
             web_port: 11442,
             web_enabled: false,
+            trust_proxy: false,
             tls_cert_path: None,
             tls_key_path: None,
         }

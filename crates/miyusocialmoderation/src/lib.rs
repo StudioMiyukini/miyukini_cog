@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuSocialModeration ; expose les modules tools.
 /// @do: expose_miyusocialmoderation_toolkit
-
 pub mod admin_cell;
 pub mod block;
 pub mod context;
@@ -19,8 +18,9 @@ pub mod report;
 mod store;
 
 pub use admin_cell::{
-    miyusocialmoderation_admin_cell, MiyusocialmoderationAdminCell, MiyusocialmoderationIdentification,
-    MiyusocialmoderationIntegrity, MiyusocialmoderationTestManifest, TOOLKIT_ID,
+    miyusocialmoderation_admin_cell, MiyusocialmoderationAdminCell,
+    MiyusocialmoderationIdentification, MiyusocialmoderationIntegrity,
+    MiyusocialmoderationTestManifest, TOOLKIT_ID,
 };
 pub use block::{add as block_add, list as block_list, remove as block_remove};
 pub use context::GovernedContext;

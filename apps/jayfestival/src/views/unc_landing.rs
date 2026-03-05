@@ -3,10 +3,10 @@
 //! Page d'accueil du catalogue d'evenements, accessible sans authentification.
 //! Affiche : hero, recherche, categories, prochains evenements, CTA inscription.
 
+use super::components::{format_date_range, EventCard};
+use super::{JayFestivalState, UncSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{UncSection, JayFestivalState};
-use super::components::{EventCard, format_date_range};
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()
@@ -235,7 +235,12 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
 
 /// Carte catégorie cliquable.
 #[component]
-fn CategoryCard(icon: &'static str, title: &'static str, count: usize, onclick: EventHandler<MouseEvent>) -> Element {
+fn CategoryCard(
+    icon: &'static str,
+    title: &'static str,
+    count: usize,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
     let c = use_palette();
     rsx! {
         div {

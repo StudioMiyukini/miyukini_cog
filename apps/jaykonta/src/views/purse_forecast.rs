@@ -1,11 +1,11 @@
 //! Ecran previsionnel budget — projection sur 6 ou 12 mois
 //! basee sur les transactions recurrentes et le solde actuel.
 
+use super::components::KpiCard;
+use super::JayKontaState;
 use chrono::Datelike;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::KpiCard;
-use super::JayKontaState;
 
 #[component]
 pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
@@ -29,16 +29,36 @@ pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
     };
 
     // Trouver le min/max du projected_balance pour la barre visuelle
-    let max_balance = fv.forecast.iter().map(|e| e.projected_balance).fold(f64::MIN, f64::max);
-    let min_balance = fv.forecast.iter().map(|e| e.projected_balance).fold(f64::MAX, f64::min);
+    let max_balance = fv
+        .forecast
+        .iter()
+        .map(|e| e.projected_balance)
+        .fold(f64::MIN, f64::max);
+    let min_balance = fv
+        .forecast
+        .iter()
+        .map(|e| e.projected_balance)
+        .fold(f64::MAX, f64::min);
     let balance_range = (max_balance - min_balance).max(1.0);
 
     // Detecter premier solde negatif
-    let first_negative = fv.forecast.iter().find(|e| e.projected_balance < 0.0).cloned();
+    let first_negative = fv
+        .forecast
+        .iter()
+        .find(|e| e.projected_balance < 0.0)
+        .cloned();
 
     // Formatter la detail du net mensuel
-    let net_detail = if fv.monthly_net >= 0.0 { "Excedent".to_string() } else { "Deficit".to_string() };
-    let net_icon = if fv.monthly_net >= 0.0 { "📈".to_string() } else { "📉".to_string() };
+    let net_detail = if fv.monthly_net >= 0.0 {
+        "Excedent".to_string()
+    } else {
+        "Deficit".to_string()
+    };
+    let net_icon = if fv.monthly_net >= 0.0 {
+        "📈".to_string()
+    } else {
+        "📉".to_string()
+    };
 
     rsx! {
         div {
@@ -183,14 +203,26 @@ fn render_forecast_row(
     balance_range: f64,
     c: &miyukini_service_ui::ThemePalette,
 ) -> Element {
-    let net_color = if entry.recurring_net >= 0.0 { c.accent_green } else { c.accent_red };
-    let balance_color = if entry.projected_balance >= 0.0 { c.accent_green } else { c.accent_red };
+    let net_color = if entry.recurring_net >= 0.0 {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
+    let balance_color = if entry.projected_balance >= 0.0 {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
     let bar_pct = if balance_range > 0.0 {
         ((entry.projected_balance - min_balance) / balance_range * 100.0).clamp(2.0, 100.0)
     } else {
         50.0
     };
-    let bar_color = if entry.projected_balance >= 0.0 { c.accent_green } else { c.accent_red };
+    let bar_color = if entry.projected_balance >= 0.0 {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
 
     rsx! {
         div {
@@ -234,11 +266,7 @@ fn render_forecast_row(
 // ── Composants internes ────────────────────────────────────────────
 
 #[component]
-fn HorizonBtn(
-    label: &'static str,
-    is_active: bool,
-    onclick: EventHandler<MouseEvent>,
-) -> Element {
+fn HorizonBtn(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
     let bg = if is_active { c.accent_blue } else { c.bg_hover };
     let color = if is_active { "white" } else { c.text_secondary };
@@ -257,7 +285,9 @@ fn build_forecast_direct(
     db: &jaykonta::data::JayKontaDb,
     months_ahead: u32,
 ) -> Option<jaykonta::domain::purse::BudgetForecastView> {
-    let account_id = db.ensure_account("purse", "default", "Budget personnel").ok()?;
+    let account_id = db
+        .ensure_account("purse", "default", "Budget personnel")
+        .ok()?;
     let balance = db.solde_purse().ok()?;
     let recurring = db.list_recurring(&account_id, true).ok()?;
     let (monthly_recurring_income, monthly_recurring_expense) =
@@ -322,9 +352,18 @@ fn french_month_label(month: &str) -> String {
     let mon: u32 = month[5..7].parse().unwrap_or(1);
     let year = &month[..4];
     let name = match mon {
-        1 => "Jan", 2 => "Fev", 3 => "Mar", 4 => "Avr",
-        5 => "Mai", 6 => "Juin", 7 => "Juil", 8 => "Aout",
-        9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec",
+        1 => "Jan",
+        2 => "Fev",
+        3 => "Mar",
+        4 => "Avr",
+        5 => "Mai",
+        6 => "Juin",
+        7 => "Juil",
+        8 => "Aout",
+        9 => "Sep",
+        10 => "Oct",
+        11 => "Nov",
+        12 => "Dec",
         _ => "?",
     };
     format!("{name} {year}")
@@ -349,12 +388,18 @@ fn compute_month_for_recurring(
     let mut expense = 0.0;
 
     for r in recurring {
-        if !r.is_active { continue; }
+        if !r.is_active {
+            continue;
+        }
         let start = NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d").unwrap_or(m_start);
-        if start >= m_end { continue; }
+        if start >= m_end {
+            continue;
+        }
         if let Some(ref end) = r.end_date {
             let end_d = NaiveDate::parse_from_str(end, "%Y-%m-%d").unwrap_or(m_end);
-            if end_d < m_start { continue; }
+            if end_d < m_start {
+                continue;
+            }
         }
 
         let occ = match r.frequency {

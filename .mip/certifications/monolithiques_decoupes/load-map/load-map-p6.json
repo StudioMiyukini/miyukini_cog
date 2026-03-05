@@ -1,0 +1,16 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+
+                 },
+    "fallback_par_phase":  {
+                               "p6.arianne":  [
+                                                  "cert.arianne.iso_9001"
+                                              ],
+                               "p6.jean":  [
+                                               "cert.jean.prompt_eng",
+                                               "cert.jean.finops"
+                                           ]
+                           }
+}

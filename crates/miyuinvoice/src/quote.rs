@@ -17,7 +17,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuinvoic
         return Err(MiyuinvoiceError::NoMandate);
     }
     let id = format!("quo:{}", UuidIdGenerator.generate());
-    let mut guard = store::quotes().lock().map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
+    let mut guard = store::quotes()
+        .lock()
+        .map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }
@@ -27,11 +29,17 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuinvoic
 /// @layer: tool
 /// @human: Met à jour un devis existant ; WriteIntent KindMother.
 /// @do: invoice_quote_update_under_governance
-pub fn update(ctx: &GovernedContext, quote_id: &str, payload: &str) -> Result<(), MiyuinvoiceError> {
+pub fn update(
+    ctx: &GovernedContext,
+    quote_id: &str,
+    payload: &str,
+) -> Result<(), MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }
-    let mut guard = store::quotes().lock().map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
+    let mut guard = store::quotes()
+        .lock()
+        .map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
     guard.insert(quote_id.to_string(), payload.to_string());
     Ok(())
 }
@@ -46,7 +54,9 @@ pub fn to_invoice(ctx: &GovernedContext, quote_id: &str) -> Result<String, Miyui
         return Err(MiyuinvoiceError::NoMandate);
     }
     let payload = {
-        let guard = store::quotes().lock().map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
+        let guard = store::quotes()
+            .lock()
+            .map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
         guard
             .get(quote_id)
             .cloned()

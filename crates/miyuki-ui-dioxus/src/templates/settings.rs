@@ -30,9 +30,8 @@ pub fn SettingsLayout(
 
     let bg_color = p.bg_base.to_css();
 
-    let container_style = format!(
-        "display: flex; height: 100vh; background: {bg_color}; overflow: hidden;"
-    );
+    let container_style =
+        format!("display: flex; height: 100vh; background: {bg_color}; overflow: hidden;");
 
     let content_style = "flex: 1; overflow-y: auto; padding: 24px;";
 

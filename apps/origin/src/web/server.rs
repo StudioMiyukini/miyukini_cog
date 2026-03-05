@@ -2,9 +2,11 @@
 
 use super::{api, content::ContentManager, forum_auth, market, pages};
 use crate::config::OriginConfig;
-use crate::relay::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
+use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
 use crate::relay::RelayServer;
-use crate::tracker::{catalog::Catalog, pool::PoolManager, slug_registry::SlugRegistry, CatalogVisitTracker};
+use crate::tracker::{
+    catalog::Catalog, pool::PoolManager, slug_registry::SlugRegistry, CatalogVisitTracker,
+};
 use bytes::Bytes;
 use std::sync::Arc;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
@@ -28,9 +30,13 @@ pub enum RouteResponse {
         body: Vec<u8>,
         filename: Option<String>,
     },
-    Redirect { location: String },
+    Redirect {
+        location: String,
+    },
     /// Réponse HTTP brute (Phase 2 tunnel) à transmettre telle quelle.
-    Raw { bytes: Vec<u8> },
+    Raw {
+        bytes: Vec<u8>,
+    },
 }
 
 /// Serveur web public.
@@ -129,7 +135,20 @@ impl WebServer {
                     let market_store = self.market_store.clone();
 
                     tokio::spawn(async move {
-                        if let Err(e) = handle_connection(stream, config, pool_mgr, content_mgr, visit_tracker, jayxpose_db, slug_registry, relay_ref, forum_auth_store, market_store).await {
+                        if let Err(e) = handle_connection(
+                            stream,
+                            config,
+                            pool_mgr,
+                            content_mgr,
+                            visit_tracker,
+                            jayxpose_db,
+                            slug_registry,
+                            relay_ref,
+                            forum_auth_store,
+                            market_store,
+                        )
+                        .await
+                        {
                             debug!("Connection error from {}: {}", addr, e);
                         }
                     });
@@ -191,7 +210,10 @@ async fn handle_connection(
             break;
         }
         // Extraire le Host header
-        if let Some(value) = line.strip_prefix("Host:").or_else(|| line.strip_prefix("host:")) {
+        if let Some(value) = line
+            .strip_prefix("Host:")
+            .or_else(|| line.strip_prefix("host:"))
+        {
             host_header = Some(value.trim().to_lowercase());
         }
         headers.push(line);
@@ -261,8 +283,11 @@ async fn handle_connection(
                     let remainder = &path_clean[20..]; // après "/api/market/package/"
                     let parts: Vec<&str> = remainder.splitn(2, '/').collect();
                     if parts.len() == 2 {
-                        if let Some(data) = market::api_market_download(store, parts[0], parts[1]).await {
-                            let filename = miyumarket::package::package_filename(parts[0], parts[1]);
+                        if let Some(data) =
+                            market::api_market_download(store, parts[0], parts[1]).await
+                        {
+                            let filename =
+                                miyumarket::package::package_filename(parts[0], parts[1]);
                             RouteResponse::Binary {
                                 status: "200 OK".to_string(),
                                 content_type: "application/octet-stream".to_string(),
@@ -273,7 +298,8 @@ async fn handle_connection(
                             RouteResponse::Normal {
                                 status: "404 Not Found".to_string(),
                                 content_type: "application/json".to_string(),
-                                body: r#"{"success":false,"error":"Package introuvable"}"#.to_string(),
+                                body: r#"{"success":false,"error":"Package introuvable"}"#
+                                    .to_string(),
                             }
                         }
                     } else {
@@ -310,7 +336,9 @@ async fn handle_connection(
                             buf_reader.read_exact(&mut body_bytes).await?;
                         }
                         let body_str = String::from_utf8_lossy(&body_bytes);
-                        let body = market::api_market_unpublish(store, parts[0], parts[1], &body_str).await;
+                        let body =
+                            market::api_market_unpublish(store, parts[0], parts[1], &body_str)
+                                .await;
                         RouteResponse::Normal {
                             status: "200 OK".to_string(),
                             content_type: "application/json".to_string(),
@@ -324,13 +352,11 @@ async fn handle_connection(
                         }
                     }
                 }
-                _ => {
-                    RouteResponse::Normal {
-                        status: "404 Not Found".to_string(),
-                        content_type: "application/json".to_string(),
-                        body: r#"{"success":false,"error":"Route Market inconnue"}"#.to_string(),
-                    }
-                }
+                _ => RouteResponse::Normal {
+                    status: "404 Not Found".to_string(),
+                    content_type: "application/json".to_string(),
+                    body: r#"{"success":false,"error":"Route Market inconnue"}"#.to_string(),
+                },
             };
             write_response(&mut writer, route_response).await?;
             return Ok(());
@@ -338,18 +364,18 @@ async fn handle_connection(
     }
 
     // Vérifier si la requête est pour un sous-domaine COG
-    let domain = config
-        .identity
-        .domain
-        .as_deref()
-        .unwrap_or("miyukini.com");
+    let domain = config.identity.domain.as_deref().unwrap_or("miyukini.com");
 
     if let Some(slug) = extract_cog_slug(host_header.as_deref(), domain) {
         // Construire la requête HTTP brute pour Phase 2 (inject via tunnel)
         let raw_request = format!(
             "{}\r\n{}\r\n\r\n",
             request_line.trim_end(),
-            headers.iter().map(|h| h.trim_end()).collect::<Vec<_>>().join("\r\n")
+            headers
+                .iter()
+                .map(|h| h.trim_end())
+                .collect::<Vec<_>>()
+                .join("\r\n")
         );
         let route_response = handle_cog_subdomain_request(
             &slug,
@@ -478,7 +504,10 @@ fn extract_cog_slug(host: Option<&str>, domain: &str) -> Option<String> {
     }
 
     // Ignorer les sous-domaines système
-    let reserved = ["www", "origin", "api", "admin", "relay", "tracker", "mail", "docs", "blog", "status", "forum"];
+    let reserved = [
+        "www", "origin", "api", "admin", "relay", "tracker", "mail", "docs", "blog", "status",
+        "forum",
+    ];
     if reserved.contains(&slug) {
         return None;
     }
@@ -511,7 +540,10 @@ async fn handle_cog_subdomain_request(
 
     // Phase 2 : inject via tunnel si le COG a une session Relay active
     if let Some(relay) = relay_ref {
-        match relay.inject_http_request(&cog_id, raw_request.clone()).await {
+        match relay
+            .inject_http_request(&cog_id, raw_request.clone())
+            .await
+        {
             Ok(response_bytes) => {
                 info!(
                     "COG subdomain Phase 2 (tunnel): {}.{} (cog_id: {})",
@@ -560,9 +592,7 @@ async fn handle_cog_subdomain_request(
                 }
             }
         }
-        None => {
-            cog_offline_page(slug, &cog_id, config)
-        }
+        None => cog_offline_page(slug, &cog_id, config),
     }
 }
 
@@ -627,7 +657,10 @@ async fn proxy_http_request(
         let status = headers_part
             .lines()
             .next()
-            .and_then(|line| line.strip_prefix("HTTP/1.1 ").or_else(|| line.strip_prefix("HTTP/1.0 ")))
+            .and_then(|line| {
+                line.strip_prefix("HTTP/1.1 ")
+                    .or_else(|| line.strip_prefix("HTTP/1.0 "))
+            })
             .unwrap_or("200 OK")
             .to_string();
 
@@ -660,11 +693,7 @@ async fn proxy_http_request(
 
 /// Page affichée quand le slug ne correspond à aucun COG enregistré.
 fn cog_not_found_page(slug: &str, config: &OriginConfig) -> RouteResponse {
-    let domain = config
-        .identity
-        .domain
-        .as_deref()
-        .unwrap_or("miyukini.com");
+    let domain = config.identity.domain.as_deref().unwrap_or("miyukini.com");
     let catalog_url = format!("https://{}/mws", domain);
     let slug_escaped = pages::html_escape(slug);
     let body = format!(
@@ -710,11 +739,7 @@ fn cog_not_found_page(slug: &str, config: &OriginConfig) -> RouteResponse {
 
 /// Page affichée quand le COG est enregistré mais offline / injoignable.
 fn cog_offline_page(slug: &str, cog_id: &str, config: &OriginConfig) -> RouteResponse {
-    let domain = config
-        .identity
-        .domain
-        .as_deref()
-        .unwrap_or("miyukini.com");
+    let domain = config.identity.domain.as_deref().unwrap_or("miyukini.com");
     let catalog_url = format!("https://{}/mws", domain);
     let slug_escaped = pages::html_escape(slug);
     let cog_escaped = pages::html_escape(cog_id);
@@ -776,7 +801,11 @@ async fn route_request(
 
     // Nettoyer le path
     let path_clean = path_only.trim_end_matches('/');
-    let path_clean = if path_clean.is_empty() { "/" } else { path_clean };
+    let path_clean = if path_clean.is_empty() {
+        "/"
+    } else {
+        path_clean
+    };
 
     match path_clean {
         // ═══════════════════════════════════════════════════════════════════
@@ -814,7 +843,8 @@ async fn route_request(
         // ═══════════════════════════════════════════════════════════════════
         _ if path_clean.starts_with("/files/") => {
             let filename = &path_clean[7..]; // Après "/files/"
-            if filename.is_empty() || filename.len() > 255
+            if filename.is_empty()
+                || filename.len() > 255
                 || filename.contains("..")
                 || filename.contains('\\')
                 || filename.contains('\0')
@@ -896,18 +926,16 @@ async fn route_request(
             }
         }
 
-        "/catalog" => {
-            RouteResponse::Redirect { location: "/mws".to_string() }
-        }
+        "/catalog" => RouteResponse::Redirect {
+            location: "/mws".to_string(),
+        },
 
         "/visit" => {
-            let cog_id = query
-                .split('&')
-                .find_map(|p| {
-                    let v = p.strip_prefix("cog_id=")?;
-                    let v = v.split('&').next().unwrap_or(v);
-                    urlencoding::decode(v).ok().map(|c| c.into_owned())
-                });
+            let cog_id = query.split('&').find_map(|p| {
+                let v = p.strip_prefix("cog_id=")?;
+                let v = v.split('&').next().unwrap_or(v);
+                urlencoding::decode(v).ok().map(|c| c.into_owned())
+            });
             match cog_id {
                 Some(id) if !id.is_empty() && id.len() <= 128 => {
                     if let Some(entry) = pool_mgr.find_cog(&id).await {
@@ -1040,10 +1068,10 @@ async fn route_request(
             let post_id = &path_clean[6..]; // Après "/blog/"
             if let Some(body) = pages::blog_post_page(content_mgr, post_id).await {
                 RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                    status: "200 OK".to_string(),
+                    content_type: "text/html".to_string(),
+                    body,
+                }
             } else {
                 not_found_page()
             }
@@ -1053,16 +1081,16 @@ async fn route_request(
             let post_id = &path_clean[10..]; // Après "/api/blog/"
             if let Some(body) = api::api_blog_post(content_mgr, post_id).await {
                 RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "application/json".to_string(),
-                body,
-            }
+                    status: "200 OK".to_string(),
+                    content_type: "application/json".to_string(),
+                    body,
+                }
             } else {
                 RouteResponse::Normal {
-                status: "404 Not Found".to_string(),
-                content_type: "application/json".to_string(),
-                body: r#"{"error": "Post not found"}"#.to_string(),
-            }
+                    status: "404 Not Found".to_string(),
+                    content_type: "application/json".to_string(),
+                    body: r#"{"error": "Post not found"}"#.to_string(),
+                }
             }
         }
 
@@ -1070,16 +1098,16 @@ async fn route_request(
             let category = &path_clean[15..]; // Après "/api/downloads/"
             if let Some(body) = api::api_downloads_by_category(content_mgr, category).await {
                 RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "application/json".to_string(),
-                body,
-            }
+                    status: "200 OK".to_string(),
+                    content_type: "application/json".to_string(),
+                    body,
+                }
             } else {
                 RouteResponse::Normal {
-                status: "404 Not Found".to_string(),
-                content_type: "application/json".to_string(),
-                body: r#"{"error": "Category not found"}"#.to_string(),
-            }
+                    status: "404 Not Found".to_string(),
+                    content_type: "application/json".to_string(),
+                    body: r#"{"error": "Category not found"}"#.to_string(),
+                }
             }
         }
 
@@ -1093,22 +1121,23 @@ async fn route_request(
                     if let Some(section) = content_mgr.get_doc_section(section_id).await {
                         let body = doc_section_page(&section);
                         RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                            status: "200 OK".to_string(),
+                            content_type: "text/html".to_string(),
+                            body,
+                        }
                     } else {
                         not_found_page()
                     }
                 }
                 [section_id, article_id] => {
-                    if let Some(article) = content_mgr.get_doc_article(section_id, article_id).await {
+                    if let Some(article) = content_mgr.get_doc_article(section_id, article_id).await
+                    {
                         let body = doc_article_page(section_id, &article);
                         RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                            status: "200 OK".to_string(),
+                            content_type: "text/html".to_string(),
+                            body,
+                        }
                     } else {
                         not_found_page()
                     }
@@ -1128,10 +1157,10 @@ async fn route_request(
                     [slug] => {
                         if let Some(body) = pages::vitrine_home_page(db, slug) {
                             RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                                status: "200 OK".to_string(),
+                                content_type: "text/html".to_string(),
+                                body,
+                            }
                         } else {
                             not_found_page()
                         }
@@ -1139,10 +1168,10 @@ async fn route_request(
                     [slug, "catalogue"] => {
                         if let Some(body) = pages::vitrine_catalogue_page(db, slug, None) {
                             RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                                status: "200 OK".to_string(),
+                                content_type: "text/html".to_string(),
+                                body,
+                            }
                         } else {
                             not_found_page()
                         }
@@ -1150,10 +1179,10 @@ async fn route_request(
                     [slug, "catalogue", produit_id] => {
                         if let Some(body) = pages::vitrine_produit_page(db, slug, produit_id) {
                             RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                                status: "200 OK".to_string(),
+                                content_type: "text/html".to_string(),
+                                body,
+                            }
                         } else {
                             not_found_page()
                         }
@@ -1161,10 +1190,10 @@ async fn route_request(
                     [slug, "presentation"] => {
                         if let Some(body) = pages::vitrine_presentation_page(db, slug) {
                             RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                                status: "200 OK".to_string(),
+                                content_type: "text/html".to_string(),
+                                body,
+                            }
                         } else {
                             not_found_page()
                         }
@@ -1172,10 +1201,10 @@ async fn route_request(
                     [slug, "contact"] => {
                         if let Some(body) = pages::vitrine_contact_page(db, slug) {
                             RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                                status: "200 OK".to_string(),
+                                content_type: "text/html".to_string(),
+                                body,
+                            }
                         } else {
                             not_found_page()
                         }
@@ -1191,10 +1220,10 @@ async fn route_request(
             if let Some(db) = jayxpose_db {
                 if let Some(body) = pages::vitrine_index_page(db) {
                     RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "text/html".to_string(),
-                body,
-            }
+                        status: "200 OK".to_string(),
+                        content_type: "text/html".to_string(),
+                        body,
+                    }
                 } else {
                     not_found_page()
                 }
@@ -1211,38 +1240,40 @@ async fn route_request(
                 [section_id] => {
                     if let Some(body) = api::api_doc_section(content_mgr, section_id).await {
                         RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "application/json".to_string(),
-                body,
-            }
+                            status: "200 OK".to_string(),
+                            content_type: "application/json".to_string(),
+                            body,
+                        }
                     } else {
                         RouteResponse::Normal {
-                status: "404 Not Found".to_string(),
-                content_type: "application/json".to_string(),
-                body: r#"{"error": "Section not found"}"#.to_string(),
-            }
+                            status: "404 Not Found".to_string(),
+                            content_type: "application/json".to_string(),
+                            body: r#"{"error": "Section not found"}"#.to_string(),
+                        }
                     }
                 }
                 [section_id, article_id] => {
-                    if let Some(body) = api::api_doc_article(content_mgr, section_id, article_id).await {
+                    if let Some(body) =
+                        api::api_doc_article(content_mgr, section_id, article_id).await
+                    {
                         RouteResponse::Normal {
-                status: "200 OK".to_string(),
-                content_type: "application/json".to_string(),
-                body,
-            }
+                            status: "200 OK".to_string(),
+                            content_type: "application/json".to_string(),
+                            body,
+                        }
                     } else {
                         RouteResponse::Normal {
-                status: "404 Not Found".to_string(),
-                content_type: "application/json".to_string(),
-                body: r#"{"error": "Article not found"}"#.to_string(),
-            }
+                            status: "404 Not Found".to_string(),
+                            content_type: "application/json".to_string(),
+                            body: r#"{"error": "Article not found"}"#.to_string(),
+                        }
                     }
                 }
                 _ => RouteResponse::Normal {
-                status: "404 Not Found".to_string(),
-                content_type: "application/json".to_string(),
-                body: r#"{"error": "Invalid path"}"#.to_string(),
-            },
+                    status: "404 Not Found".to_string(),
+                    content_type: "application/json".to_string(),
+                    body: r#"{"error": "Invalid path"}"#.to_string(),
+                },
             }
         }
 
@@ -1303,7 +1334,8 @@ fn not_found_page() -> RouteResponse {
         <a href="/">Retour à l'accueil</a>
     </div>
 </body>
-</html>"#.to_string();
+</html>"#
+        .to_string();
 
     RouteResponse::Normal {
         status: "404 Not Found".to_string(),
@@ -1314,7 +1346,8 @@ fn not_found_page() -> RouteResponse {
 
 /// Page d'une section de documentation.
 fn doc_section_page(section: &super::content::DocSection) -> String {
-    let articles_html: String = section.articles
+    let articles_html: String = section
+        .articles
         .iter()
         .map(|a| {
             format!(
@@ -1571,7 +1604,11 @@ pub(crate) fn simple_md_to_html(markdown: &str) -> String {
             }
             html.push_str(&format!("<h3>{}</h3>\n", md_links_to_html(&line[4..])));
         } else if line.starts_with("|") && line.contains('|') {
-            let cells: Vec<&str> = line.split('|').map(|s| s.trim()).filter(|s| !s.is_empty()).collect();
+            let cells: Vec<&str> = line
+                .split('|')
+                .map(|s| s.trim())
+                .filter(|s| !s.is_empty())
+                .collect();
             if !in_table {
                 html.push_str(r#"<table class="doc-table"><thead><tr>"#);
                 for cell in &cells {
@@ -1581,7 +1618,10 @@ pub(crate) fn simple_md_to_html(markdown: &str) -> String {
                 }
                 html.push_str("</tr></thead><tbody>");
                 in_table = true;
-            } else if cells.iter().all(|c| c.chars().all(|ch| ch == '-' || ch == ':')) {
+            } else if cells
+                .iter()
+                .all(|c| c.chars().all(|ch| ch == '-' || ch == ':'))
+            {
                 continue;
             } else {
                 html.push_str("<tr>");
@@ -1603,7 +1643,10 @@ pub(crate) fn simple_md_to_html(markdown: &str) -> String {
                 html.push_str("</tbody></table>\n");
                 in_table = false;
             }
-            html.push_str(&format!("<blockquote>{}</blockquote>\n", md_links_to_html(&line[2..])));
+            html.push_str(&format!(
+                "<blockquote>{}</blockquote>\n",
+                md_links_to_html(&line[2..])
+            ));
         } else {
             if in_table {
                 html.push_str("</tbody></table>\n");

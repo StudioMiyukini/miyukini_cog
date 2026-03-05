@@ -159,8 +159,8 @@ mod tests {
 
     #[test]
     fn test_xp_for_next_level() {
-        assert_eq!(gamification_xp_for_next_level(0), 100);   // → Lecteur
-        assert_eq!(gamification_xp_for_next_level(50), 50);   // → Lecteur
+        assert_eq!(gamification_xp_for_next_level(0), 100); // → Lecteur
+        assert_eq!(gamification_xp_for_next_level(50), 50); // → Lecteur
         assert_eq!(gamification_xp_for_next_level(100), 400); // → Passionné
         assert_eq!(gamification_xp_for_next_level(100_000), 0); // Max
     }

@@ -45,13 +45,16 @@ fn main() {
 
     // === Phase 1: Vérifier la présence de KindMother (lancer si besoin) ===
     tracing::info!("Vérification de la présence de KindMother...");
-    
+
     match kindmother_launcher::ensure_kindmother_running() {
         kindmother_launcher::LaunchResult::AlreadyRunning => {
             tracing::info!("KindMother était déjà en cours d'exécution.");
         }
         kindmother_launcher::LaunchResult::Launched(child) => {
-            tracing::info!("KindMother a été lancé par Central (PID: {:?}).", child.id());
+            tracing::info!(
+                "KindMother a été lancé par Central (PID: {:?}).",
+                child.id()
+            );
             // Stocker le handle pour garder le processus en vie
             if let Some(lock) = KINDMOTHER_PROCESS.get() {
                 if let Ok(mut guard) = lock.lock() {
@@ -104,7 +107,7 @@ fn main() {
     dioxus::LaunchBuilder::desktop()
         .with_cfg(config)
         .launch(app::App);
-    
+
     // === Phase 3: Nettoyage à la fermeture ===
     cleanup_kindmother();
 }
@@ -127,12 +130,14 @@ fn show_error_dialog(err: &str) {
         eprintln!("║ dans le même dossier que miyukini-central.exe.                ║");
         eprintln!("╚══════════════════════════════════════════════════════════════╝\n");
     }
-    
+
     #[cfg(not(windows))]
     {
         eprintln!("ERREUR CRITIQUE: Dépendances ou KindMother manquants.");
         eprintln!("{}", err);
-        eprintln!("Lancez Central depuis la racine du dépôt pour auto-construction de kindmother-server.");
+        eprintln!(
+            "Lancez Central depuis la racine du dépôt pour auto-construction de kindmother-server."
+        );
     }
 }
 

@@ -2,11 +2,11 @@
 //! Après le mot de passe : écran infos complémentaires (facultatif, par catégorie).
 //! Voir docs/services/MiyukiniCentral/Miyukini Central - Rite de Premiere Connexion.md
 
-use dioxus::prelude::*;
-use miyukini_central::auth::{CentralProfile, PASSWORD_MIN_LEN};
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
-use crate::theme::{Theme, styles};
+use crate::theme::{styles, Theme};
+use dioxus::prelude::*;
+use miyukini_central::auth::{CentralProfile, PASSWORD_MIN_LEN};
 
 /// Étapes du Rite : Nom → Email → Clé → Infos complémentaires.
 const STEP_NOM: u8 = 0;
@@ -30,7 +30,9 @@ const CAT_COUNT: u8 = 4;
 /// Vérifie un email de manière basique (contient @ et un point après).
 fn is_valid_email(email: &str) -> bool {
     let trimmed = email.trim();
-    if trimmed.len() < 5 { return false; }
+    if trimmed.len() < 5 {
+        return false;
+    }
     if let Some(at_pos) = trimmed.find('@') {
         let domain = &trimmed[at_pos + 1..];
         domain.contains('.') && !domain.starts_with('.') && !domain.ends_with('.')
@@ -55,10 +57,15 @@ impl PasswordChecks {
         let mut has_digit = false;
         let mut has_special = false;
         for c in password.chars() {
-            if c.is_ascii_uppercase() { has_upper = true; }
-            else if c.is_ascii_lowercase() { has_lower = true; }
-            else if c.is_ascii_digit() { has_digit = true; }
-            else { has_special = true; }
+            if c.is_ascii_uppercase() {
+                has_upper = true;
+            } else if c.is_ascii_lowercase() {
+                has_lower = true;
+            } else if c.is_ascii_digit() {
+                has_digit = true;
+            } else {
+                has_special = true;
+            }
         }
         Self {
             has_min_len: password.len() >= PASSWORD_MIN_LEN,
@@ -74,8 +81,16 @@ impl PasswordChecks {
     }
 
     fn score(&self) -> usize {
-        [self.has_min_len, self.has_upper, self.has_lower, self.has_digit, self.has_special]
-            .iter().filter(|&&b| b).count()
+        [
+            self.has_min_len,
+            self.has_upper,
+            self.has_lower,
+            self.has_digit,
+            self.has_special,
+        ]
+        .iter()
+        .filter(|&&b| b)
+        .count()
     }
 }
 
@@ -182,7 +197,6 @@ fn StepIndicator(current: u8, total: u8, theme: Theme) -> Element {
     }
 }
 
-
 #[component]
 fn RiteCatSituation(
     theme: Theme,
@@ -196,8 +210,16 @@ fn RiteCatSituation(
     let c = theme.palette();
     let show_partenaire = !statut_marital().is_empty() && statut_marital() != "Célibataire";
     let show_enfants = enfants_oui() == Some(true);
-    let bg_oui = if enfants_oui() == Some(true) { c.accent_blue } else { c.bg_hover };
-    let bg_non = if enfants_oui() == Some(false) { c.accent_blue } else { c.bg_hover };
+    let bg_oui = if enfants_oui() == Some(true) {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let bg_non = if enfants_oui() == Some(false) {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
     rsx! {
         p { style: "font-size: 13px; font-weight: 600; color: {c.text_white}; margin-bottom: 8px;", "Situation personnelle" }
         p { style: "font-size: 12px; color: {c.text_secondary}; margin-bottom: 8px;", "Statut relationnel" }
@@ -332,7 +354,8 @@ pub fn RiteEntree() -> Element {
     let pw = password.read().clone();
     let pw_checks = PasswordChecks::from_password(&pw);
     let pw_valid = pw_checks.all_valid();
-    let pw_match = !password_confirm.read().is_empty() && *password.read() == *password_confirm.read();
+    let pw_match =
+        !password_confirm.read().is_empty() && *password.read() == *password_confirm.read();
     let can_sign = pw_valid && pw_match;
 
     let on_sign_done = move |_| {
@@ -346,7 +369,9 @@ pub fn RiteEntree() -> Element {
             return;
         }
         if pass != pass_confirm {
-            error.write().push_str("Les deux clés ne correspondent pas.");
+            error
+                .write()
+                .push_str("Les deux clés ne correspondent pas.");
             return;
         }
         let auth_db = connections.read().auth_db.clone();
@@ -383,21 +408,47 @@ pub fn RiteEntree() -> Element {
             let profession_val = profession.read().trim().to_string();
             let langue_val = langue_maternelle.read().trim().to_string();
 
-            if !genre_val.is_empty() { profile.genre = Some(genre_val); }
-            if !date_val.is_empty() { profile.date_naissance = Some(date_val); }
-            if !ville_val.is_empty() { profile.ville = Some(ville_val); }
-            if !num_val.is_empty() { profile.numero_voie = Some(num_val); }
-            if !rue_val.is_empty() { profile.rue = Some(rue_val); }
-            if !cp_val.is_empty() { profile.code_postal = Some(cp_val); }
-            if !statut_val.is_empty() { profile.statut_marital = Some(statut_val); }
-            if !part_genre_val.is_empty() { profile.partenaire_genre = Some(part_genre_val); }
-            if !part_nom_val.is_empty() { profile.partenaire_nom = Some(part_nom_val); }
-            if let Ok(n) = enf_nb_str.parse::<i32>() {
-                if n > 0 { profile.enfants_nombre = Some(n); }
+            if !genre_val.is_empty() {
+                profile.genre = Some(genre_val);
             }
-            if !enf_noms_val.is_empty() { profile.enfants_noms = Some(enf_noms_val); }
-            if !profession_val.is_empty() { profile.profession = Some(profession_val); }
-            if !langue_val.is_empty() { profile.langue_maternelle = Some(langue_val); }
+            if !date_val.is_empty() {
+                profile.date_naissance = Some(date_val);
+            }
+            if !ville_val.is_empty() {
+                profile.ville = Some(ville_val);
+            }
+            if !num_val.is_empty() {
+                profile.numero_voie = Some(num_val);
+            }
+            if !rue_val.is_empty() {
+                profile.rue = Some(rue_val);
+            }
+            if !cp_val.is_empty() {
+                profile.code_postal = Some(cp_val);
+            }
+            if !statut_val.is_empty() {
+                profile.statut_marital = Some(statut_val);
+            }
+            if !part_genre_val.is_empty() {
+                profile.partenaire_genre = Some(part_genre_val);
+            }
+            if !part_nom_val.is_empty() {
+                profile.partenaire_nom = Some(part_nom_val);
+            }
+            if let Ok(n) = enf_nb_str.parse::<i32>() {
+                if n > 0 {
+                    profile.enfants_nombre = Some(n);
+                }
+            }
+            if !enf_noms_val.is_empty() {
+                profile.enfants_noms = Some(enf_noms_val);
+            }
+            if !profession_val.is_empty() {
+                profile.profession = Some(profession_val);
+            }
+            if !langue_val.is_empty() {
+                profile.langue_maternelle = Some(langue_val);
+            }
 
             if let Err(e) = connections.read().auth_db.update_profile(&profile) {
                 tracing::warn!("update_profile infos rite: {}", e);

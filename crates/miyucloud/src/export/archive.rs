@@ -180,8 +180,8 @@ pub fn import_archive(
     use crate::domain::file_ops::FileOps;
 
     let zip_file = std::fs::File::open(zip_path).map_err(MiyucloudError::Io)?;
-    let mut archive = zip::ZipArchive::new(zip_file)
-        .map_err(|e| MiyucloudError::Io(std::io::Error::other(e)))?;
+    let mut archive =
+        zip::ZipArchive::new(zip_file).map_err(|e| MiyucloudError::Io(std::io::Error::other(e)))?;
 
     let mut imported_files = Vec::new();
 
@@ -199,9 +199,7 @@ pub fn import_archive(
 
         // Read file content
         let mut data = Vec::new();
-        entry
-            .read_to_end(&mut data)
-            .map_err(MiyucloudError::Io)?;
+        entry.read_to_end(&mut data).map_err(MiyucloudError::Io)?;
 
         // Guess MIME type
         let mime_type = guess_mime_type(&name);
@@ -226,11 +224,7 @@ pub fn import_archive(
 
 /// Devine le type MIME d'un fichier a partir de son extension.
 fn guess_mime_type(filename: &str) -> String {
-    let ext = filename
-        .rsplit('.')
-        .next()
-        .unwrap_or("")
-        .to_lowercase();
+    let ext = filename.rsplit('.').next().unwrap_or("").to_lowercase();
 
     match ext.as_str() {
         "txt" => "text/plain",
@@ -389,15 +383,7 @@ mod tests {
         let km2 = KeyManager::from_master_key([99u8; 32]); // Different key!
 
         // Import
-        let imported = import_archive(
-            &db2,
-            &storage2,
-            &km2,
-            &zip_path,
-            None,
-            "owner-2",
-        )
-        .unwrap();
+        let imported = import_archive(&db2, &storage2, &km2, &zip_path, None, "owner-2").unwrap();
 
         assert_eq!(imported.len(), 1);
         assert_eq!(imported[0].name, "round-trip.txt");
@@ -414,7 +400,10 @@ mod tests {
         let zip_path = tmp.path().join("empty.zip");
         let result = export_folder(&db, &storage, &km, None, "owner-1", &zip_path);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("No files to export"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("No files to export"));
     }
 
     #[test]

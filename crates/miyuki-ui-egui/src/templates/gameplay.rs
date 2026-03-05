@@ -6,9 +6,9 @@
 //! bottom, panels (inventory, character, skill tree) overlay the game area,
 //! and the minimap sits in the top-right corner.
 
-use egui::Context;
 use crate::organisms::hud_bar::{HudBar, HudBarData};
 use crate::organisms::minimap::{Minimap, MinimapEntity};
+use egui::Context;
 
 /// Configuration for the gameplay layout.
 pub struct GameplayConfig {

@@ -160,7 +160,11 @@ mod tests {
         let kd2 = KeyDerivation::new(&temp_dir).unwrap();
         let key2 = kd2.derive_key("test_db").unwrap();
 
-        assert_eq!(key1.as_slice(), key2.as_slice(), "Keys should be deterministic");
+        assert_eq!(
+            key1.as_slice(),
+            key2.as_slice(),
+            "Keys should be deterministic"
+        );
 
         let _ = std::fs::remove_dir_all(&temp_dir);
     }

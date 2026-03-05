@@ -1,0 +1,16 @@
+﻿{
+    "certs":  {
+                  "cert.francois.istqb":  {
+                                              "folder":  "istqb",
+                                              "agent":  "francois",
+                                              "name":  "ISTQB",
+                                              "tldr":  "Test logiciel. Niveaux, types, techniques. ISTQB."
+                                          },
+                  "cert.francois.openapi":  {
+                                                "folder":  "openapi",
+                                                "agent":  "francois",
+                                                "name":  "OpenAPI 3.1",
+                                                "tldr":  "Spec API REST. Paths, schemas. OpenAPI Initiative."
+                                            }
+              }
+}

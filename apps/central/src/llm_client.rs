@@ -136,9 +136,15 @@ impl LlmClient {
     /// Liste les modèles chargés.
     pub async fn list_models(&self) -> Result<Vec<String>, LlmError> {
         let url = format!("{}/v1/models", self.base_url);
-        let resp = self.client.get(&url).send().await
+        let resp = self
+            .client
+            .get(&url)
+            .send()
+            .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
-        let body: ModelsResponse = resp.json().await
+        let body: ModelsResponse = resp
+            .json()
+            .await
             .map_err(|e| LlmError::Api(e.to_string()))?;
         Ok(body.data.into_iter().map(|m| m.id).collect())
     }
@@ -191,7 +197,12 @@ impl LlmClient {
             max_tokens: Some(512),
         };
 
-        let resp = self.client.post(&url).json(&req).send().await
+        let resp = self
+            .client
+            .post(&url)
+            .json(&req)
+            .send()
+            .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
 
         if !resp.status().is_success() {
@@ -200,10 +211,14 @@ impl LlmClient {
             return Err(LlmError::Api(format!("HTTP {status}: {body}")));
         }
 
-        let body: ChatResponse = resp.json().await
+        let body: ChatResponse = resp
+            .json()
+            .await
             .map_err(|e| LlmError::Api(e.to_string()))?;
 
-        body.choices.into_iter().next()
+        body.choices
+            .into_iter()
+            .next()
             .map(|c| c.message.content)
             .ok_or_else(|| LlmError::Api("Pas de réponse".into()))
     }

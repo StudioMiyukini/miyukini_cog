@@ -63,11 +63,7 @@ impl StorageBackend for LocalFsStorage {
         Ok(())
     }
 
-    fn read_chunk(
-        &self,
-        file_id: &str,
-        chunk_index: u32,
-    ) -> Result<Vec<u8>, MiyucloudError> {
+    fn read_chunk(&self, file_id: &str, chunk_index: u32) -> Result<Vec<u8>, MiyucloudError> {
         let path = self.chunk_path(file_id, chunk_index)?;
         if !path.exists() {
             return Err(MiyucloudError::NotFound(format!(

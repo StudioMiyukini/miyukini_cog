@@ -1,10 +1,10 @@
 //! Point d'entree binaire JayFestival (standalone).
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use jayfestival::data::JayFestivalDb;
-use jayfestival_app::{DbContext, views::JayFestivalView};
+use jayfestival_app::{views::JayFestivalView, DbContext};
 use miyukini_service_ui::{Theme, ThemeContext};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -32,15 +32,17 @@ fn main() {
 #[component]
 fn App() -> Element {
     // --- Theme context ---
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::Gaming }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::Gaming,
+        })
+    });
 
     // --- DB context ---
-    let data_dir = std::env::var("MIYUKINI_DATA_DIR")
-        .unwrap_or_else(|_| ".".to_string());
+    let data_dir = std::env::var("MIYUKINI_DATA_DIR").unwrap_or_else(|_| ".".to_string());
     let db_path = std::path::Path::new(&data_dir).join("jayfestival.db");
 
-    let db = JayFestivalDb::open(&db_path)
-        .expect("Impossible d'ouvrir la base JayFestival");
+    let db = JayFestivalDb::open(&db_path).expect("Impossible d'ouvrir la base JayFestival");
 
     use_context_provider(|| Signal::new(DbContext { db: Arc::new(db) }));
 

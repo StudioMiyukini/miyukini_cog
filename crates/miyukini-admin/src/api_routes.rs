@@ -33,7 +33,7 @@ impl APIRouter {
     /// @human: Crée un nouveau routeur API.
     /// @do: create_api_router
     /// @depends: miyukiniadmin_api_routes_router
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             handlers: std::collections::HashMap::new(),
@@ -56,7 +56,7 @@ impl APIRouter {
     /// @human: Route une requête vers le handler approprié.
     /// @do: route_request_to_handler
     /// @depends: miyukiniadmin_api_routes_router
-    #[must_use] 
+    #[must_use]
     pub fn route(&self, path: &str, method: &str) -> APIResponse {
         if let Some(handler) = self.handlers.get(path) {
             handler.handle_request(path, method)

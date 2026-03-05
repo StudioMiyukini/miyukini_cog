@@ -34,7 +34,9 @@ impl MiyukiniWatchDb {
                 .and_then(|s| s.to_str())
                 .unwrap_or("miyukiniwatch");
             let kd = KeyDerivation::new(data_dir).map_err(|e| MiyukiniWatchError::Db(e.0))?;
-            let pragma_key = kd.pragma_key_hex(db_name).map_err(|e| MiyukiniWatchError::Db(e.0))?;
+            let pragma_key = kd
+                .pragma_key_hex(db_name)
+                .map_err(|e| MiyukiniWatchError::Db(e.0))?;
             conn.pragma_update(None, "key", &pragma_key)
                 .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         }
@@ -49,7 +51,10 @@ impl MiyukiniWatchDb {
     }
 
     fn init_schema(&self) -> Result<(), MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         conn.execute_batch(
             r#"
             CREATE TABLE IF NOT EXISTS miyukiniwatch_metrics (
@@ -134,7 +139,10 @@ impl MiyukiniWatchDb {
 
     /// Insère une métrique (INSERT OR IGNORE pour déduplication).
     pub fn insert_metric(&self, m: &MetricRecord) -> Result<(), MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         conn.execute(
             r#"
             INSERT OR IGNORE INTO miyukiniwatch_metrics
@@ -159,7 +167,10 @@ impl MiyukiniWatchDb {
 
     /// Récupère les préférences (crée les valeurs par défaut si absent).
     pub fn get_prefs(&self, profile_id: &str) -> Result<Prefs, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let mut stmt = conn
             .prepare(
                 "SELECT collect_enabled, collect_sessions, collect_services, collect_friends,
@@ -204,7 +215,10 @@ impl MiyukiniWatchDb {
 
     /// Met à jour les préférences.
     pub fn set_prefs(&self, prefs: &Prefs) -> Result<(), MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let now = Local::now().to_rfc3339();
         conn.execute(
             r#"
@@ -248,7 +262,10 @@ impl MiyukiniWatchDb {
         details: Option<&str>,
         records_affected: Option<i64>,
     ) -> Result<(), MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let now = Local::now().to_rfc3339();
         conn.execute(
             "INSERT INTO miyukiniwatch_audit (profile_id, timestamp, event_type, details, records_affected)
@@ -261,7 +278,10 @@ impl MiyukiniWatchDb {
 
     /// Vérifie si des données existent pour le profil.
     pub fn has_data(&self, profile_id: &str) -> Result<bool, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let count: i64 = conn
             .query_row(
                 "SELECT COUNT(*) FROM miyukiniwatch_metrics WHERE profile_id=?1",
@@ -278,7 +298,10 @@ impl MiyukiniWatchDb {
         profile_id: &str,
         session_id: &str,
     ) -> Result<i64, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let count: i64 = conn
             .query_row(
                 "SELECT COUNT(*) FROM miyukiniwatch_metrics WHERE profile_id=?1 AND session_id=?2",
@@ -296,7 +319,10 @@ impl MiyukiniWatchDb {
         from_ts: &str,
         to_ts: &str,
     ) -> Result<i64, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let deleted = conn
             .execute(
                 "DELETE FROM miyukiniwatch_metrics WHERE profile_id=?1 AND timestamp>=?2 AND timestamp<=?3",
@@ -312,7 +338,10 @@ impl MiyukiniWatchDb {
         profile_id: &str,
         category_prefix: &str,
     ) -> Result<i64, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let pattern = format!("{}%", category_prefix);
         let deleted = conn
             .execute(
@@ -325,18 +354,33 @@ impl MiyukiniWatchDb {
 
     /// Efface tout pour un profil.
     pub fn delete_all(&self, profile_id: &str) -> Result<i64, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let m = conn
-            .execute("DELETE FROM miyukiniwatch_metrics WHERE profile_id=?1", params![profile_id])
+            .execute(
+                "DELETE FROM miyukiniwatch_metrics WHERE profile_id=?1",
+                params![profile_id],
+            )
             .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let d = conn
-            .execute("DELETE FROM miyukiniwatch_daily WHERE profile_id=?1", params![profile_id])
+            .execute(
+                "DELETE FROM miyukiniwatch_daily WHERE profile_id=?1",
+                params![profile_id],
+            )
             .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let w = conn
-            .execute("DELETE FROM miyukiniwatch_weekly WHERE profile_id=?1", params![profile_id])
+            .execute(
+                "DELETE FROM miyukiniwatch_weekly WHERE profile_id=?1",
+                params![profile_id],
+            )
             .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
-        conn.execute("DELETE FROM miyukiniwatch_globals WHERE profile_id=?1", params![profile_id])
-            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        conn.execute(
+            "DELETE FROM miyukiniwatch_globals WHERE profile_id=?1",
+            params![profile_id],
+        )
+        .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         Ok((m + d + w) as i64)
     }
 
@@ -346,7 +390,10 @@ impl MiyukiniWatchDb {
         profile_id: &str,
         limit: i32,
     ) -> Result<Vec<AuditEvent>, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let mut stmt = conn
             .prepare(
                 "SELECT id, profile_id, timestamp, event_type, details, records_affected
@@ -369,12 +416,19 @@ impl MiyukiniWatchDb {
                 })
             })
             .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(|e| MiyukiniWatchError::Db(e.to_string()))
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))
     }
 
     /// Requêtes brutes pour l'agrégation — dernier timestamp de session.
-    pub fn get_last_session_end(&self, profile_id: &str) -> Result<Option<String>, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+    pub fn get_last_session_end(
+        &self,
+        profile_id: &str,
+    ) -> Result<Option<String>, MiyukiniWatchError> {
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let mut stmt = conn
             .prepare(
                 "SELECT timestamp FROM miyukiniwatch_metrics
@@ -390,8 +444,15 @@ impl MiyukiniWatchDb {
     }
 
     /// Compteur global (ex. total_sessions).
-    pub fn get_global(&self, profile_id: &str, key: &str) -> Result<Option<i64>, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+    pub fn get_global(
+        &self,
+        profile_id: &str,
+        key: &str,
+    ) -> Result<Option<i64>, MiyukiniWatchError> {
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let mut stmt = conn
             .prepare("SELECT value FROM miyukiniwatch_globals WHERE profile_id=?1 AND key=?2")
             .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
@@ -408,7 +469,10 @@ impl MiyukiniWatchDb {
         profile_id: &str,
         before_ts: &str,
     ) -> Result<i64, MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let deleted = conn
             .execute(
                 "DELETE FROM miyukiniwatch_metrics WHERE profile_id=?1 AND timestamp < ?2",
@@ -419,8 +483,16 @@ impl MiyukiniWatchDb {
     }
 
     /// Met à jour un compteur global.
-    pub fn set_global(&self, profile_id: &str, key: &str, value: i64) -> Result<(), MiyukiniWatchError> {
-        let conn = self.conn.lock().map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
+    pub fn set_global(
+        &self,
+        profile_id: &str,
+        key: &str,
+        value: i64,
+    ) -> Result<(), MiyukiniWatchError> {
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|e| MiyukiniWatchError::Db(e.to_string()))?;
         let now = Local::now().to_rfc3339();
         conn.execute(
             "INSERT INTO miyukiniwatch_globals (profile_id, key, value, updated_at)

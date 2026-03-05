@@ -1,8 +1,8 @@
 //! Sidebar Market — navigation et recherche.
 
-use dioxus::prelude::*;
-use crate::state::use_app_state;
 use super::{MarketSection, MarketState};
+use crate::state::use_app_state;
+use dioxus::prelude::*;
 
 #[component]
 pub fn MarketSidebar(state: Signal<MarketState>) -> Element {
@@ -10,7 +10,12 @@ pub fn MarketSidebar(state: Signal<MarketState>) -> Element {
     let app = use_app_state();
 
     // Compteurs
-    let installed_count = app.read().services.iter().filter(|s| s.is_installed).count();
+    let installed_count = app
+        .read()
+        .services
+        .iter()
+        .filter(|s| s.is_installed)
+        .count();
     let update_count = state.read().available_updates.len();
 
     rsx! {
@@ -116,7 +121,11 @@ fn SidebarItem(
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {

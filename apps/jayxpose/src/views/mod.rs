@@ -3,28 +3,28 @@
 //! Architecture : sidebar + contenu dynamique par section (XP-E01..XP-E12).
 //! Données réelles via JayXposeDb (crate::use_db()).
 
-mod sidebar;
+mod catalogue;
 pub mod components;
 mod dashboard;
-mod entreprise;
-mod catalogue;
-mod produit_form;
-mod vitrine;
 mod documents;
+mod entreprise;
 mod fiche_publique;
 mod onboarding;
+mod produit_form;
+mod sidebar;
+mod vitrine;
 
 use dioxus::prelude::*;
 
-use sidebar::JayXposeSidebar;
-use dashboard::Dashboard;
-use entreprise::Entreprise;
 use catalogue::Catalogue;
-use produit_form::ProduitForm;
-use vitrine::Vitrine;
+use dashboard::Dashboard;
 use documents::Documents;
+use entreprise::Entreprise;
 use fiche_publique::FichePublique;
 use onboarding::JayXposeOnboarding;
+use produit_form::ProduitForm;
+use sidebar::JayXposeSidebar;
+use vitrine::Vitrine;
 
 // ── State ──────────────────────────────────────────────────────────────
 
@@ -61,7 +61,11 @@ pub fn JayXposeView() -> Element {
     let mut state = use_signal(JayXposeState::default);
 
     // Charger l'exposant courant au montage
-    let exposant = db.exposants_list_annuaire().unwrap_or_default().into_iter().next();
+    let exposant = db
+        .exposants_list_annuaire()
+        .unwrap_or_default()
+        .into_iter()
+        .next();
 
     // Mettre a jour l'ID exposant si disponible et pas encore set
     if state.read().exposant_id.is_none() {

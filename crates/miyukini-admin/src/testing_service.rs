@@ -51,7 +51,10 @@ mod tests {
     /// @depends: miyukiniadmin_testing_test_results
     #[test]
     fn test_results_creation() {
-        let results = TestResults { passed: 10, failed: 0 };
+        let results = TestResults {
+            passed: 10,
+            failed: 0,
+        };
         assert_eq!(results.passed, 10);
     }
 }

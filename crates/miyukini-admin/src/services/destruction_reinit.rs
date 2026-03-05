@@ -30,7 +30,7 @@ impl DestructionAndReinitService {
     /// @layer: operator
     /// @human: Construit le service destruction/réinit.
     /// @do: create_destruction_reinit_service
-    #[must_use] 
+    #[must_use]
     pub fn new(data_dir: PathBuf, pre_destruction_backup: PreDestructionBackupService) -> Self {
         Self {
             data_dir,
@@ -45,7 +45,10 @@ impl DestructionAndReinitService {
 
     /// Écrit la mémoire de corruption (Implementation §10.1 point 2).
     /// @id: miyukiniadmin_destruction_write_corruption_memory
-    async fn write_corruption_memory(&self, memory: &CorruptionMemory) -> Result<(), std::io::Error> {
+    async fn write_corruption_memory(
+        &self,
+        memory: &CorruptionMemory,
+    ) -> Result<(), std::io::Error> {
         let path = self.corruption_memory_path();
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).await?;

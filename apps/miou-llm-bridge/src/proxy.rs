@@ -11,8 +11,8 @@ use axum::{
 };
 use tower_http::cors::{Any, CorsLayer};
 
-use crate::agents::AgentRegistry;
 use crate::agents::custom::{CreateAgentRequest, UpdateAgentRequest};
+use crate::agents::AgentRegistry;
 use crate::config::SecurityConfig;
 use crate::context::{ContextRegistry, CreateContextRequest, UpdateContextRequest};
 use crate::fallback;
@@ -339,7 +339,9 @@ async fn chat_with_agent(
 
         match state.inference.chat_completion(chat_body).await {
             Ok(resp) => {
-                let content = resp.choices.first()
+                let content = resp
+                    .choices
+                    .first()
                     .and_then(|c| c.message.get("content"))
                     .and_then(|c| c.as_str())
                     .unwrap_or("Pas de réponse");
@@ -492,10 +494,7 @@ async fn list_contexts(State(state): State<ProxyState>) -> impl IntoResponse {
     Json(serde_json::json!({ "contexts": bases, "count": bases.len() }))
 }
 
-async fn get_context(
-    State(state): State<ProxyState>,
-    Path(id): Path<String>,
-) -> impl IntoResponse {
+async fn get_context(State(state): State<ProxyState>, Path(id): Path<String>) -> impl IntoResponse {
     match state.context_registry.get_base(&id) {
         Some(base) => Json(serde_json::json!({ "context": base })).into_response(),
         None => (
@@ -698,12 +697,8 @@ async fn inference_status(State(state): State<ProxyState>) -> impl IntoResponse 
     let active = state.inference.active_backend().await;
     let local_models = state.model_manager.scan_models();
 
-    let availability = fallback::probe_availability(
-        &state.client,
-        &state.upstream_url,
-        native_loaded,
-    )
-    .await;
+    let availability =
+        fallback::probe_availability(&state.client, &state.upstream_url, native_loaded).await;
 
     Json(serde_json::json!({
         "availability": availability,
@@ -758,13 +753,15 @@ async fn security_middleware(
     match crate::security::check_origin(Some(&source_ip), &headers, &state.security_config) {
         crate::security::OriginCheck::Allowed => {}
         crate::security::OriginCheck::Blocked(reason) => {
-            state.security_audit.log_event(crate::security::SecurityEvent {
-                timestamp: crate::security::epoch_now(),
-                kind: crate::security::SecurityEventKind::OriginBlocked,
-                source_ip: source_ip.clone(),
-                path: path.clone(),
-                details: reason.clone(),
-            });
+            state
+                .security_audit
+                .log_event(crate::security::SecurityEvent {
+                    timestamp: crate::security::epoch_now(),
+                    kind: crate::security::SecurityEventKind::OriginBlocked,
+                    source_ip: source_ip.clone(),
+                    path: path.clone(),
+                    details: reason.clone(),
+                });
             return (
                 StatusCode::FORBIDDEN,
                 Json(serde_json::json!({
@@ -779,13 +776,15 @@ async fn security_middleware(
     // 2. Auth Bearer globale (si activée)
     if state.security_config.require_auth_all {
         if let Err(msg) = crate::security::verify_auth_token(&headers, &state.auth_token) {
-            state.security_audit.log_event(crate::security::SecurityEvent {
-                timestamp: crate::security::epoch_now(),
-                kind: crate::security::SecurityEventKind::AuthFailed,
-                source_ip: source_ip.clone(),
-                path: path.clone(),
-                details: msg.to_string(),
-            });
+            state
+                .security_audit
+                .log_event(crate::security::SecurityEvent {
+                    timestamp: crate::security::epoch_now(),
+                    kind: crate::security::SecurityEventKind::AuthFailed,
+                    source_ip: source_ip.clone(),
+                    path: path.clone(),
+                    details: msg.to_string(),
+                });
             return (
                 StatusCode::UNAUTHORIZED,
                 Json(serde_json::json!({
@@ -815,16 +814,18 @@ async fn security_middleware(
                 };
 
                 if age > state.security_config.hmac_max_age_secs {
-                    state.security_audit.log_event(crate::security::SecurityEvent {
-                        timestamp: now,
-                        kind: crate::security::SecurityEventKind::HmacReplay,
-                        source_ip: source_ip.clone(),
-                        path: path.clone(),
-                        details: format!(
-                            "Timestamp expiré (age: {age}s, max: {}s)",
-                            state.security_config.hmac_max_age_secs
-                        ),
-                    });
+                    state
+                        .security_audit
+                        .log_event(crate::security::SecurityEvent {
+                            timestamp: now,
+                            kind: crate::security::SecurityEventKind::HmacReplay,
+                            source_ip: source_ip.clone(),
+                            path: path.clone(),
+                            details: format!(
+                                "Timestamp expiré (age: {age}s, max: {}s)",
+                                state.security_config.hmac_max_age_secs
+                            ),
+                        });
                     return (
                         StatusCode::FORBIDDEN,
                         Json(serde_json::json!({
@@ -890,10 +891,7 @@ async fn security_status_handler(State(state): State<ProxyState>) -> impl IntoRe
 // Proxy passthrough (catch-all vers LM Studio)
 // ═══════════════════════════════════════════════════════════════════════
 
-async fn proxy_handler(
-    State(state): State<ProxyState>,
-    req: Request<Body>,
-) -> impl IntoResponse {
+async fn proxy_handler(State(state): State<ProxyState>, req: Request<Body>) -> impl IntoResponse {
     if let Some(ref expected_token) = state.auth_token {
         let authorized = req
             .headers()
@@ -931,7 +929,9 @@ async fn proxy_handler(
         }
     };
 
-    let mut upstream_req = state.client.request(to_reqwest_method(&method), &upstream_uri);
+    let mut upstream_req = state
+        .client
+        .request(to_reqwest_method(&method), &upstream_uri);
 
     for (name, value) in &headers {
         match name.as_str() {

@@ -30,6 +30,8 @@ pub struct MiyucloudConfig {
     pub web_port: u16,
     /// Active ou desactive la surface web (defaut true).
     pub web_enabled: bool,
+    /// Fait confiance aux en-tetes proxy (X-Forwarded-For/X-Real-IP) pour l'IP cliente.
+    pub trust_proxy: bool,
     /// Chemin vers le certificat TLS PEM (si fourni, desactive auto-generation).
     pub tls_cert_path: Option<PathBuf>,
     /// Chemin vers la cle privee TLS PEM.
@@ -60,8 +62,8 @@ impl MiyucloudConfig {
 
         let passphrase = std::env::var("MIYUCLOUD_PASSPHRASE").ok();
 
-        let owner_id = std::env::var("MIYUCLOUD_OWNER_ID")
-            .unwrap_or_else(|_| "default-owner".to_string());
+        let owner_id =
+            std::env::var("MIYUCLOUD_OWNER_ID").unwrap_or_else(|_| "default-owner".to_string());
 
         let web_port = std::env::var("MIYUCLOUD_WEB_PORT")
             .ok()
@@ -71,13 +73,12 @@ impl MiyucloudConfig {
         let web_enabled = std::env::var("MIYUCLOUD_WEB_ENABLED")
             .map_or(true, |s| s != "0" && s.to_lowercase() != "false");
 
-        let tls_cert_path = std::env::var("MIYUCLOUD_TLS_CERT")
-            .ok()
-            .map(PathBuf::from);
+        let trust_proxy = std::env::var("MIYUCLOUD_TRUST_PROXY")
+            .map_or(false, |s| s == "1" || s.to_lowercase() == "true");
 
-        let tls_key_path = std::env::var("MIYUCLOUD_TLS_KEY")
-            .ok()
-            .map(PathBuf::from);
+        let tls_cert_path = std::env::var("MIYUCLOUD_TLS_CERT").ok().map(PathBuf::from);
+
+        let tls_key_path = std::env::var("MIYUCLOUD_TLS_KEY").ok().map(PathBuf::from);
 
         Self {
             api_port,
@@ -88,6 +89,7 @@ impl MiyucloudConfig {
             owner_id,
             web_port,
             web_enabled,
+            trust_proxy,
             tls_cert_path,
             tls_key_path,
         }

@@ -8,7 +8,7 @@
 //! La purge ecrase les chunks avec des zeros avant suppression (securite RGPD).
 //! Les elements en corbeille sont masques des listings normaux.
 
-use crate::data::types::{FolderContents};
+use crate::data::types::FolderContents;
 use crate::errors::MiyucloudError;
 use crate::storage::StorageBackend;
 
@@ -158,7 +158,14 @@ mod tests {
     fn test_trash_file_sets_is_trashed() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
         TrashOps::trash_file(&db, &entry.id).unwrap();
@@ -171,7 +178,14 @@ mod tests {
     fn test_restore_file_clears_is_trashed() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
         TrashOps::trash_file(&db, &entry.id).unwrap();
@@ -185,7 +199,14 @@ mod tests {
     fn test_purge_file_deletes_permanently() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "purge.txt", "text/plain", b"secret",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "purge.txt",
+            "text/plain",
+            b"secret",
         )
         .unwrap();
         let file_id = entry.id.clone();
@@ -198,7 +219,14 @@ mod tests {
     fn test_purge_deletes_storage_chunks() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "chunks.txt", "text/plain", b"some data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "chunks.txt",
+            "text/plain",
+            b"some data",
         )
         .unwrap();
         assert!(storage.exists(&entry.id).unwrap());
@@ -210,7 +238,14 @@ mod tests {
     fn test_list_trashed_files() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "test.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "test.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
         TrashOps::trash_file(&db, &entry.id).unwrap();
@@ -224,11 +259,25 @@ mod tests {
     fn test_empty_trash() {
         let (db, storage, km) = setup();
         let e1 = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "a.txt", "text/plain", b"aaa",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "a.txt",
+            "text/plain",
+            b"aaa",
         )
         .unwrap();
         let e2 = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "b.txt", "text/plain", b"bbb",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "b.txt",
+            "text/plain",
+            b"bbb",
         )
         .unwrap();
         TrashOps::trash_file(&db, &e1.id).unwrap();

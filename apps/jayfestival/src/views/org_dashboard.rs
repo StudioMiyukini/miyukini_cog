@@ -1,10 +1,10 @@
 //! ORG-E04 — Dashboard organisateur (stats réelles, éditions récentes, actions rapides).
 
+use super::components::{format_date_range, ActionButton, EventCard, StatCard};
+use super::{JayFestivalState, OrgSection};
 use dioxus::prelude::*;
 use jayfestival::data::Edition;
 use miyukini_service_ui::use_palette;
-use super::components::{ActionButton, EventCard, StatCard, format_date_range};
-use super::{JayFestivalState, OrgSection};
 
 #[component]
 pub fn OrgDashboard(

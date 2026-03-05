@@ -89,11 +89,7 @@ pub fn Button(
             p.text_primary.to_css(),
             "none".to_string(),
         ),
-        ButtonVariant::Danger => (
-            p.error.to_css(),
-            p.text_high.to_css(),
-            "none".to_string(),
-        ),
+        ButtonVariant::Danger => (p.error.to_css(), p.text_high.to_css(), "none".to_string()),
         ButtonVariant::IconOnly => (
             "transparent".to_string(),
             p.text_secondary.to_css(),

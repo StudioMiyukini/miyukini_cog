@@ -1,0 +1,251 @@
+﻿{
+    "generated_at":  "2026-03-05",
+    "scope":  "critical_cyber",
+    "entries":  [
+                    {
+                        "id":  "cert.critical_cyber.iso27001.001_entry",
+                        "cert":  "ISO/IEC 27001",
+                        "file":  ".mip/certifications/iso-iec_27001/critical_kb/KC-ISO27001-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.iso27001.002_obtention",
+                        "cert":  "ISO/IEC 27001",
+                        "file":  ".mip/certifications/iso-iec_27001/critical_kb/KC-ISO27001-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.iso27001.003_maintenance",
+                        "cert":  "ISO/IEC 27001",
+                        "file":  ".mip/certifications/iso-iec_27001/critical_kb/KC-ISO27001-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.iso27001.004_evidence",
+                        "cert":  "ISO/IEC 27001",
+                        "file":  ".mip/certifications/iso-iec_27001/critical_kb/KC-ISO27001-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.iso27001.005_control_check",
+                        "cert":  "ISO/IEC 27001",
+                        "file":  ".mip/certifications/iso-iec_27001/critical_kb/KC-ISO27001-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.hds.001_entry",
+                        "cert":  "HDS (France)",
+                        "file":  ".mip/certifications/hds/critical_kb/KC-HDS-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.hds.002_obtention",
+                        "cert":  "HDS (France)",
+                        "file":  ".mip/certifications/hds/critical_kb/KC-HDS-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.hds.003_maintenance",
+                        "cert":  "HDS (France)",
+                        "file":  ".mip/certifications/hds/critical_kb/KC-HDS-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.hds.004_evidence",
+                        "cert":  "HDS (France)",
+                        "file":  ".mip/certifications/hds/critical_kb/KC-HDS-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.hds.005_control_check",
+                        "cert":  "HDS (France)",
+                        "file":  ".mip/certifications/hds/critical_kb/KC-HDS-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cissp.001_entry",
+                        "cert":  "CISSP",
+                        "file":  ".mip/certifications/cissp/critical_kb/KC-CISSP-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cissp.002_obtention",
+                        "cert":  "CISSP",
+                        "file":  ".mip/certifications/cissp/critical_kb/KC-CISSP-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cissp.003_maintenance",
+                        "cert":  "CISSP",
+                        "file":  ".mip/certifications/cissp/critical_kb/KC-CISSP-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cissp.004_evidence",
+                        "cert":  "CISSP",
+                        "file":  ".mip/certifications/cissp/critical_kb/KC-CISSP-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cissp.005_control_check",
+                        "cert":  "CISSP",
+                        "file":  ".mip/certifications/cissp/critical_kb/KC-CISSP-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cisa.001_entry",
+                        "cert":  "CISA",
+                        "file":  ".mip/certifications/cisa/critical_kb/KC-CISA-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cisa.002_obtention",
+                        "cert":  "CISA",
+                        "file":  ".mip/certifications/cisa/critical_kb/KC-CISA-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cisa.003_maintenance",
+                        "cert":  "CISA",
+                        "file":  ".mip/certifications/cisa/critical_kb/KC-CISA-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cisa.004_evidence",
+                        "cert":  "CISA",
+                        "file":  ".mip/certifications/cisa/critical_kb/KC-CISA-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.cisa.005_control_check",
+                        "cert":  "CISA",
+                        "file":  ".mip/certifications/cisa/critical_kb/KC-CISA-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.ceh.001_entry",
+                        "cert":  "CEH",
+                        "file":  ".mip/certifications/ceh/critical_kb/KC-CEH-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.ceh.002_obtention",
+                        "cert":  "CEH",
+                        "file":  ".mip/certifications/ceh/critical_kb/KC-CEH-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.ceh.003_maintenance",
+                        "cert":  "CEH",
+                        "file":  ".mip/certifications/ceh/critical_kb/KC-CEH-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.ceh.004_evidence",
+                        "cert":  "CEH",
+                        "file":  ".mip/certifications/ceh/critical_kb/KC-CEH-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.ceh.005_control_check",
+                        "cert":  "CEH",
+                        "file":  ".mip/certifications/ceh/critical_kb/KC-CEH-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.rgpd.001_entry",
+                        "cert":  "RGPD (conformite)",
+                        "file":  ".mip/certifications/rgpd/critical_kb/KC-RGPD-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.rgpd.002_obtention",
+                        "cert":  "RGPD (conformite)",
+                        "file":  ".mip/certifications/rgpd/critical_kb/KC-RGPD-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.rgpd.003_maintenance",
+                        "cert":  "RGPD (conformite)",
+                        "file":  ".mip/certifications/rgpd/critical_kb/KC-RGPD-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.rgpd.004_evidence",
+                        "cert":  "RGPD (conformite)",
+                        "file":  ".mip/certifications/rgpd/critical_kb/KC-RGPD-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.rgpd.005_control_check",
+                        "cert":  "RGPD (conformite)",
+                        "file":  ".mip/certifications/rgpd/critical_kb/KC-RGPD-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.nf525.001_entry",
+                        "cert":  "NF525 / caisse securisee",
+                        "file":  ".mip/certifications/nf525/critical_kb/KC-NF525-001-entry.md",
+                        "topic":  "001-entry",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.nf525.002_obtention",
+                        "cert":  "NF525 / caisse securisee",
+                        "file":  ".mip/certifications/nf525/critical_kb/KC-NF525-002-obtention.md",
+                        "topic":  "002-obtention",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.nf525.003_maintenance",
+                        "cert":  "NF525 / caisse securisee",
+                        "file":  ".mip/certifications/nf525/critical_kb/KC-NF525-003-maintenance.md",
+                        "topic":  "003-maintenance",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.nf525.004_evidence",
+                        "cert":  "NF525 / caisse securisee",
+                        "file":  ".mip/certifications/nf525/critical_kb/KC-NF525-004-evidence.md",
+                        "topic":  "004-evidence",
+                        "role":  "cyber_compliance"
+                    },
+                    {
+                        "id":  "cert.critical_cyber.nf525.005_control_check",
+                        "cert":  "NF525 / caisse securisee",
+                        "file":  ".mip/certifications/nf525/critical_kb/KC-NF525-005-control-check.md",
+                        "topic":  "005-control-check",
+                        "role":  "cyber_compliance"
+                    }
+                ]
+}

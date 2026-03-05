@@ -3,9 +3,9 @@
 //! - E15: Attribution des stands
 //! - E16: Visualisation et export
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{ActionButton, Badge};
 
 /// Vue principale du plan de salle avec onglets.
 #[component]
@@ -14,12 +14,36 @@ pub fn OrgPlan(edition_id: String) -> Element {
     let mut active_tab = use_signal(|| "visualisation".to_string());
 
     let tab = active_tab.read().clone();
-    let tab_visu_bg = if tab == "visualisation" { c.accent_blue } else { c.bg_secondary };
-    let tab_visu_color = if tab == "visualisation" { "white" } else { c.text_primary };
-    let tab_zones_bg = if tab == "zones" { c.accent_blue } else { c.bg_secondary };
-    let tab_zones_color = if tab == "zones" { "white" } else { c.text_primary };
-    let tab_attrib_bg = if tab == "attribution" { c.accent_blue } else { c.bg_secondary };
-    let tab_attrib_color = if tab == "attribution" { "white" } else { c.text_primary };
+    let tab_visu_bg = if tab == "visualisation" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_visu_color = if tab == "visualisation" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_zones_bg = if tab == "zones" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_zones_color = if tab == "zones" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_attrib_bg = if tab == "attribution" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_attrib_color = if tab == "attribution" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -93,7 +117,8 @@ fn PlanVisualisationTab(edition_id: String) -> Element {
     // Charger les exposants de l'édition pour la légende
     let participations = {
         let db = crate::use_db();
-        db.editions_exposants_by_edition(&edition_id).unwrap_or_default()
+        db.editions_exposants_by_edition(&edition_id)
+            .unwrap_or_default()
     };
 
     let assigned_count = participations
@@ -195,7 +220,10 @@ fn StandCell(id: &'static str, status: &'static str, selected: Signal<Option<Str
 
     let (bg, border_color) = match status {
         "attribue" => (format!("{}40", c.accent_green), c.accent_green.to_string()),
-        "reserve" => (format!("{}40", c.accent_orange), c.accent_orange.to_string()),
+        "reserve" => (
+            format!("{}40", c.accent_orange),
+            c.accent_orange.to_string(),
+        ),
         _ => (c.bg_hover.to_string(), c.border.to_string()),
     };
 
@@ -313,7 +341,12 @@ fn PlanZonesTab(edition_id: String) -> Element {
 }
 
 #[component]
-fn ZoneCard(name: &'static str, stands_count: usize, surface: &'static str, color: &'static str) -> Element {
+fn ZoneCard(
+    name: &'static str,
+    stands_count: usize,
+    surface: &'static str,
+    color: &'static str,
+) -> Element {
     let c = use_palette();
 
     rsx! {
@@ -355,7 +388,8 @@ fn PlanAttributionTab(edition_id: String) -> Element {
     // Charger les participations
     let participations = {
         let db = crate::use_db();
-        db.editions_exposants_by_edition(&edition_id).unwrap_or_default()
+        db.editions_exposants_by_edition(&edition_id)
+            .unwrap_or_default()
     };
 
     // Charger les noms des exposants
@@ -377,7 +411,10 @@ fn PlanAttributionTab(edition_id: String) -> Element {
         .filter(|p| p.status_candidature.as_deref() == Some("acceptee"))
         .collect();
 
-    let assigned_count = accepted.iter().filter(|p| p.assigned_stand.is_some()).count();
+    let assigned_count = accepted
+        .iter()
+        .filter(|p| p.assigned_stand.is_some())
+        .count();
     let unassigned_count = accepted.len() - assigned_count;
 
     rsx! {

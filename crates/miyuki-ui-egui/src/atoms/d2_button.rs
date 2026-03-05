@@ -5,9 +5,9 @@
 //! Supports three visual variants: Primary (gold border + highlight),
 //! Secondary (muted stone), and Menu (large, centered text for menu screens).
 
-use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
-use miyuki_ui_tokens::palette::d2::{D2_PALETTE, D2MiscColors};
 use crate::convert::rgba_to_color32;
+use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
+use miyuki_ui_tokens::palette::d2::{D2MiscColors, D2_PALETTE};
 
 /// Visual variant for the D2 button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

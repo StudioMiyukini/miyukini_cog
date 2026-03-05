@@ -187,7 +187,8 @@ impl RelayMetrics {
     pub fn record_registration(&self, success: bool) {
         self.total_registrations.fetch_add(1, Ordering::Relaxed);
         if success {
-            self.successful_registrations.fetch_add(1, Ordering::Relaxed);
+            self.successful_registrations
+                .fetch_add(1, Ordering::Relaxed);
         } else {
             self.failed_registrations.fetch_add(1, Ordering::Relaxed);
         }
@@ -240,7 +241,8 @@ impl RelayMetrics {
     /// Enregistre un message reçu.
     pub fn record_message_received(&self, bytes: usize) {
         self.messages_received.fetch_add(1, Ordering::Relaxed);
-        self.bytes_received.fetch_add(bytes as u64, Ordering::Relaxed);
+        self.bytes_received
+            .fetch_add(bytes as u64, Ordering::Relaxed);
     }
 
     /// Enregistre un message envoyé.

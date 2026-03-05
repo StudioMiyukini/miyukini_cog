@@ -22,5 +22,7 @@ pub use context::GovernedContext;
 pub use errors::MiyauthError;
 pub use resolve::resolve as identity_resolve;
 pub use role::role as identity_role;
-pub use types::{Attestation, IdentityArtefacts, IdentityContext, IdentityRole, VerificationResult};
+pub use types::{
+    Attestation, IdentityArtefacts, IdentityContext, IdentityRole, VerificationResult,
+};
 pub use verify::verify as identity_verify;

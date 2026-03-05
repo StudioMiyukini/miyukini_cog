@@ -125,7 +125,12 @@ impl ServiceManifest {
         if self.id.is_empty() {
             return Err(ManifestError::MissingField("id".into()));
         }
-        if self.id.len() > 64 || !self.id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-') {
+        if self.id.len() > 64
+            || !self
+                .id
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+        {
             return Err(ManifestError::InvalidId(self.id.clone()));
         }
         if self.name.is_empty() {
@@ -209,7 +214,10 @@ mod tests {
             package_size: None,
             execution_mode: ExecutionMode::Standalone,
             binary_name: Some("jayxpose.exe".into()),
-            platforms: PlatformBinaries { windows_x64: Some("jayxpose.exe".into()), ..Default::default() },
+            platforms: PlatformBinaries {
+                windows_x64: Some("jayxpose.exe".into()),
+                ..Default::default()
+            },
         };
         let json = serde_json::to_string_pretty(&manifest).unwrap();
         let parsed: ServiceManifest = serde_json::from_str(&json).unwrap();

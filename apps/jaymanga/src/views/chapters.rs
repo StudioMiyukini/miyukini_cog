@@ -1,11 +1,11 @@
 //! Gestion des chapitres et pages d'une oeuvre manga.
 
+use super::components::{ActionButton, Badge, EmptyState, PageHeader};
+use super::{JayMangaSection, JayMangaState};
+use crate::use_db;
 use dioxus::prelude::*;
 use jaymanga::data::{Chapter, Page};
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, EmptyState, ActionButton, Badge};
-use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn Chapters(state: Signal<JayMangaState>) -> Element {
@@ -16,7 +16,9 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
     // Si aucune oeuvre selectionnee, afficher la liste des oeuvres
     if work_id.is_none() {
-        let works = db.work_list(&jaymanga::data::WorkFilters::default()).unwrap_or_default();
+        let works = db
+            .work_list(&jaymanga::data::WorkFilters::default())
+            .unwrap_or_default();
 
         return rsx! {
             div {
@@ -73,7 +75,10 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
     let work_id = work_id.unwrap();
     let work = db.work_by_id(&work_id).ok().flatten();
-    let work_title = work.as_ref().and_then(|w| w.title.clone()).unwrap_or_else(|| "Oeuvre".to_string());
+    let work_title = work
+        .as_ref()
+        .and_then(|w| w.title.clone())
+        .unwrap_or_else(|| "Oeuvre".to_string());
     let chapters = db.chapter_list_by_work(&work_id).unwrap_or_default();
     let chapter_count = chapters.len();
 

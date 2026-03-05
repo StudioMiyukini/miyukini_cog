@@ -16,7 +16,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuinvoic
         return Err(MiyuinvoiceError::NoMandate);
     }
     let id = format!("inv:{}", UuidIdGenerator.generate());
-    let mut guard = store::invoices().lock().map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
+    let mut guard = store::invoices()
+        .lock()
+        .map_err(|_| MiyuinvoiceError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }
@@ -26,7 +28,12 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuinvoic
 /// @layer: tool
 /// @human: Envoie une facture par canal fourni (email, etc.).
 /// @do: invoice_send_under_governance
-pub fn send(ctx: &GovernedContext, _invoice_id: &str, _channel: &str, _payload: Option<&str>) -> Result<(), MiyuinvoiceError> {
+pub fn send(
+    ctx: &GovernedContext,
+    _invoice_id: &str,
+    _channel: &str,
+    _payload: Option<&str>,
+) -> Result<(), MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
     }

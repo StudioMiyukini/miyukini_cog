@@ -72,4 +72,3 @@ pub fn govern_non_sql_create(
     });
     Ok(())
 }
-

@@ -2,11 +2,11 @@
 
 //! Character sheet organism -- attributes, derived stats, resistances.
 
+use crate::atoms::d2_label::D2Label;
+use crate::convert::rgba_to_color32;
+use crate::molecules::stat_row::{StatRow, StatVariant};
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::atoms::d2_label::D2Label;
-use crate::molecules::stat_row::{StatRow, StatVariant};
-use crate::convert::rgba_to_color32;
 
 /// Character data for the stat panel.
 pub struct CharacterSheetData {
@@ -58,12 +58,16 @@ impl CharacterSheet {
                 ui.vertical_centered(|ui| {
                     let gold_bright = rgba_to_color32(&D2_PALETTE.text_high);
                     ui.label(
-                        egui::RichText::new(&data.name).color(gold_bright).size(14.0),
+                        egui::RichText::new(&data.name)
+                            .color(gold_bright)
+                            .size(14.0),
                     );
                     let class_level = format!("{} - Nv {}", data.class, data.level);
                     let text_color = rgba_to_color32(&D2_PALETTE.text_primary);
                     ui.label(
-                        egui::RichText::new(&class_level).color(text_color).size(11.0),
+                        egui::RichText::new(&class_level)
+                            .color(text_color)
+                            .size(11.0),
                     );
                 });
                 ui.separator();
@@ -79,10 +83,18 @@ impl CharacterSheet {
                 // Base stats
                 D2Label::new("-- Stats de base --").show(ui);
                 let can_add = data.unspent_points > 0;
-                StatRow::base("Force", data.strength).can_add(can_add).show(ui);
-                StatRow::base("Dexterite", data.dexterity).can_add(can_add).show(ui);
-                StatRow::base("Vitalite", data.vitality).can_add(can_add).show(ui);
-                StatRow::base("Energie", data.energy).can_add(can_add).show(ui);
+                StatRow::base("Force", data.strength)
+                    .can_add(can_add)
+                    .show(ui);
+                StatRow::base("Dexterite", data.dexterity)
+                    .can_add(can_add)
+                    .show(ui);
+                StatRow::base("Vitalite", data.vitality)
+                    .can_add(can_add)
+                    .show(ui);
+                StatRow::base("Energie", data.energy)
+                    .can_add(can_add)
+                    .show(ui);
                 ui.separator();
 
                 // Derived stats

@@ -46,7 +46,9 @@ pub fn schedule_cron(
         return Err(MiyuJobsError::InvalidInput("job_id empty".into()));
     }
     if !validate_cron_five_fields(cron_expression) {
-        return Err(MiyuJobsError::InvalidInput("invalid cron expression".into()));
+        return Err(MiyuJobsError::InvalidInput(
+            "invalid cron expression".into(),
+        ));
     }
     let safe = cron_expression.trim().replace(' ', "_");
     Ok(format!("cron:{id}:{safe}"))

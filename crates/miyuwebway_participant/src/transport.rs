@@ -9,7 +9,11 @@ use crate::errors::MiyuwebwayParticipantError;
 /// @layer: tool
 /// @human: Envoie un message vers une adresse ; exécution seule ; adresse fournie par Cores.
 /// @do: mws_transport_send_under_governance
-pub fn send(ctx: &GovernedContext, _address: &str, _payload: &[u8]) -> Result<(), MiyuwebwayParticipantError> {
+pub fn send(
+    ctx: &GovernedContext,
+    _address: &str,
+    _payload: &[u8],
+) -> Result<(), MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }

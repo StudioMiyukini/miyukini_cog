@@ -376,10 +376,22 @@ mod tests {
 
     #[test]
     fn test_entry_type_readonly() {
-        assert!(!EntryType::Internal.is_readonly(), "Internal should NOT be readonly");
-        assert!(EntryType::ReflectJayFestival.is_readonly(), "ReflectJayFestival should be readonly");
-        assert!(EntryType::ReflectJayRDV.is_readonly(), "ReflectJayRDV should be readonly");
-        assert!(EntryType::ReflectOther.is_readonly(), "ReflectOther should be readonly");
+        assert!(
+            !EntryType::Internal.is_readonly(),
+            "Internal should NOT be readonly"
+        );
+        assert!(
+            EntryType::ReflectJayFestival.is_readonly(),
+            "ReflectJayFestival should be readonly"
+        );
+        assert!(
+            EntryType::ReflectJayRDV.is_readonly(),
+            "ReflectJayRDV should be readonly"
+        );
+        assert!(
+            EntryType::ReflectOther.is_readonly(),
+            "ReflectOther should be readonly"
+        );
     }
 
     #[test]
@@ -425,7 +437,10 @@ mod tests {
     #[test]
     fn test_default_user_settings() {
         let s = UserSettings::default();
-        assert!(s.profile_id.is_none(), "profile_id should be None by default");
+        assert!(
+            s.profile_id.is_none(),
+            "profile_id should be None by default"
+        );
         assert_eq!(s.default_view, "week");
         assert_eq!(s.week_start_day, 0);
         assert_eq!(s.day_start_hour, 8);
@@ -434,7 +449,9 @@ mod tests {
         assert_eq!(s.default_reminder_minutes, 30);
         assert!(s.use_24h_format, "use_24h_format should be true");
         assert!(!s.show_week_numbers, "show_week_numbers should be false");
-        assert!(!s.show_cancelled_events, "show_cancelled_events should be false");
+        assert!(
+            !s.show_cancelled_events,
+            "show_cancelled_events should be false"
+        );
     }
 }
-

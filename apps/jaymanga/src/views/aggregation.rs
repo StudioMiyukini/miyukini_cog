@@ -1,30 +1,41 @@
 //! Agregation JayManga — portail agrege, vendeurs indexes, configuration.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use crate::use_db;
 use super::components::{Badge, EmptyState, PageHeader, StatCard};
 use super::JayMangaState;
+use crate::use_db;
+use dioxus::prelude::*;
+use miyukini_service_ui::use_palette;
 
 #[component]
 pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
     let c = use_palette();
     let db = use_db();
 
-    let agg_config = db.aggregator_config_get()
+    let agg_config = db
+        .aggregator_config_get()
         .unwrap_or_else(|_| jaymanga::data::AggregatorConfig::defaults());
     let indexed_sellers = db.indexed_seller_list().unwrap_or_default();
-    let aggregated_entries = db.aggregated_entry_list(&jaymanga::data::AggregatorFilters::default()).unwrap_or_default();
+    let aggregated_entries = db
+        .aggregated_entry_list(&jaymanga::data::AggregatorFilters::default())
+        .unwrap_or_default();
 
     let is_enabled = agg_config.enabled.unwrap_or(false);
-    let portal_name = agg_config.name.clone().unwrap_or_else(|| "Portail Agrege".to_string());
+    let portal_name = agg_config
+        .name
+        .clone()
+        .unwrap_or_else(|| "Portail Agrege".to_string());
     let seller_count = indexed_sellers.len();
     let entry_count = aggregated_entries.len();
 
-    let online_sellers = indexed_sellers.iter()
+    let online_sellers = indexed_sellers
+        .iter()
         .filter(|s| s.online_status.as_deref() == Some("online"))
         .count();
-    let bg_toggle = if is_enabled { c.accent_red } else { c.accent_green };
+    let bg_toggle = if is_enabled {
+        c.accent_red
+    } else {
+        c.accent_green
+    };
 
     let db_toggle = db.clone();
 

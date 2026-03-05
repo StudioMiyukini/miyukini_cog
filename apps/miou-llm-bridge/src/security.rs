@@ -66,10 +66,12 @@ impl RateLimiter {
         let mut states = self.states.write().unwrap();
         let now = Instant::now();
 
-        let state = states.entry(identifier.to_string()).or_insert(RateLimitState {
-            count: 0,
-            window_start: now,
-        });
+        let state = states
+            .entry(identifier.to_string())
+            .or_insert(RateLimitState {
+                count: 0,
+                window_start: now,
+            });
 
         // Réinitialiser la fenêtre si expirée
         if now.duration_since(state.window_start) >= self.config.window {
@@ -79,7 +81,11 @@ impl RateLimiter {
 
         if state.count >= self.config.max_requests {
             let elapsed = now.duration_since(state.window_start);
-            let retry_after = self.config.window.as_secs().saturating_sub(elapsed.as_secs());
+            let retry_after = self
+                .config
+                .window
+                .as_secs()
+                .saturating_sub(elapsed.as_secs());
             Err(retry_after)
         } else {
             state.count += 1;
@@ -277,11 +283,7 @@ pub fn check_origin(
                 .and_then(|v| v.to_str().ok())
                 .map(|v| v.split(',').next().unwrap_or(v).trim())
         })
-        .or_else(|| {
-            headers
-                .get("x-real-ip")
-                .and_then(|v| v.to_str().ok())
-        })
+        .or_else(|| headers.get("x-real-ip").and_then(|v| v.to_str().ok()))
         .unwrap_or("unknown");
 
     // Nettoyer l'IP (enlever le port si présent, ex: "127.0.0.1:54321")
@@ -419,12 +421,18 @@ pub fn verify_hmac(
     };
 
     // Extraire les headers COG
-    let signature = match headers.get(HEADER_COG_SIGNATURE).and_then(|v| v.to_str().ok()) {
+    let signature = match headers
+        .get(HEADER_COG_SIGNATURE)
+        .and_then(|v| v.to_str().ok())
+    {
         Some(s) => s,
         None => return HmacCheck::NotConfigured, // Pas de signature = pas un appel inter-service
     };
 
-    let timestamp_str = match headers.get(HEADER_COG_TIMESTAMP).and_then(|v| v.to_str().ok()) {
+    let timestamp_str = match headers
+        .get(HEADER_COG_TIMESTAMP)
+        .and_then(|v| v.to_str().ok())
+    {
         Some(t) => t,
         None => return HmacCheck::Invalid("Header X-COG-Timestamp manquant".into()),
     };
@@ -519,7 +527,7 @@ pub fn sign_request(
 pub fn encrypt_response(plaintext: &[u8], key_hex: &str) -> Result<serde_json::Value, String> {
     use aes_gcm::{
         aead::{Aead, KeyInit, OsRng},
-        Aes256Gcm, AeadCore,
+        AeadCore, Aes256Gcm,
     };
 
     let key_bytes = hex::decode(key_hex).map_err(|e| format!("Clé hex invalide : {e}"))?;

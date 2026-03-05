@@ -9,7 +9,10 @@ use crate::errors::MiyushippingError;
 /// @layer: tool
 /// @human: Résout les zones de livraison applicables ; lecture gouvernée.
 /// @do: commerce_shipping_zones_resolve_under_governance
-pub fn resolve(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<Vec<String>, MiyushippingError> {
+pub fn resolve(
+    ctx: &GovernedContext,
+    _context_ref: Option<&str>,
+) -> Result<Vec<String>, MiyushippingError> {
     if !ctx.has_mandate() {
         return Err(MiyushippingError::NoMandate);
     }

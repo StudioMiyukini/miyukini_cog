@@ -5,26 +5,26 @@
 //! - Vue principale (semaine, jour, mois, planning)
 //! - Integration JayFestival et JayRDV (lecture reflechie)
 
-mod sidebar;
-mod components;
 mod calendar_view;
-mod week_view;
+mod components;
 mod day_view;
+mod event_form;
 mod month_view;
 mod schedule_view;
-mod event_form;
+mod sidebar;
 pub mod sync_service;
+mod week_view;
 
-pub use sidebar::JayKoaSidebar;
 pub use components::*;
-pub use week_view::WeekView;
 pub use day_view::DayView;
+pub use event_form::EventFormModal;
 pub use month_view::MonthView;
 pub use schedule_view::ScheduleView;
-pub use event_form::EventFormModal;
+pub use sidebar::JayKoaSidebar;
+pub use week_view::WeekView;
 
-use dioxus::prelude::*;
 use chrono::Datelike;
+use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
 
 /// Vue par defaut du calendrier.
@@ -108,7 +108,8 @@ pub fn JayKoaView() -> Element {
 
     // Mettre a jour les agendas visibles
     use_effect(move || {
-        let visible: Vec<String> = agendas_for_effect.iter()
+        let visible: Vec<String> = agendas_for_effect
+            .iter()
             .filter(|a| a.visible)
             .filter_map(|a| a.id.clone())
             .collect();
@@ -128,11 +129,13 @@ pub fn JayKoaView() -> Element {
                 (start, end)
             }
             CalendarViewMode::Month => {
-                let start = chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), 1).unwrap_or(date);
+                let start =
+                    chrono::NaiveDate::from_ymd_opt(date.year(), date.month(), 1).unwrap_or(date);
                 let end = if date.month() == 12 {
                     chrono::NaiveDate::from_ymd_opt(date.year() + 1, 1, 1).unwrap_or(date)
                 } else {
-                    chrono::NaiveDate::from_ymd_opt(date.year(), date.month() + 1, 1).unwrap_or(date)
+                    chrono::NaiveDate::from_ymd_opt(date.year(), date.month() + 1, 1)
+                        .unwrap_or(date)
                 } - chrono::Duration::days(1);
                 (start, end)
             }

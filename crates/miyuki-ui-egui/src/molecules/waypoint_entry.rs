@@ -2,9 +2,9 @@
 
 //! Waypoint entry molecule -- name + discovered/undiscovered state.
 
+use crate::convert::rgba_to_color32;
 use egui::{Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// A waypoint entry in the waypoint map.
 pub struct WaypointEntry<'a> {
@@ -49,12 +49,8 @@ impl<'a> WaypointEntry<'a> {
         };
 
         let response = ui.add(
-            egui::Label::new(
-                egui::RichText::new(self.name)
-                    .color(text_color)
-                    .size(11.0),
-            )
-            .sense(sense),
+            egui::Label::new(egui::RichText::new(self.name).color(text_color).size(11.0))
+                .sense(sense),
         );
 
         // Hover highlight for discovered waypoints

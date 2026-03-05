@@ -23,8 +23,8 @@ use tokio::sync::Mutex;
 use miyumarket::manifest::{ServiceManifest, ServiceSource, ServiceType};
 use miyumarket::package;
 use miyumarket::protocol::{
-    MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult,
-    PublishResponse, UnpublishResponse,
+    MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult, PublishResponse,
+    UnpublishResponse,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -42,8 +42,8 @@ pub struct MarketStore {
 impl MarketStore {
     /// Ouvre (ou crée) le MarketStore.
     pub fn open(db_path: impl AsRef<Path>, packages_dir: impl AsRef<Path>) -> Result<Self, String> {
-        let conn = Connection::open(db_path.as_ref())
-            .map_err(|e| format!("Market DB open: {e}"))?;
+        let conn =
+            Connection::open(db_path.as_ref()).map_err(|e| format!("Market DB open: {e}"))?;
 
         let store = Self {
             db: Arc::new(Mutex::new(conn)),
@@ -82,8 +82,9 @@ impl MarketStore {
             );
 
             CREATE INDEX IF NOT EXISTS idx_market_source ON market_services(source);
-            CREATE INDEX IF NOT EXISTS idx_market_developer ON market_services(developer);"
-        ).map_err(|e| format!("Market schema init: {e}"))?;
+            CREATE INDEX IF NOT EXISTS idx_market_developer ON market_services(developer);",
+        )
+        .map_err(|e| format!("Market schema init: {e}"))?;
         Ok(())
     }
 
@@ -135,11 +136,9 @@ impl MarketStore {
             "SELECT id, version, name, description, icon, service_type, source, developer,
                     min_central_ver, dependencies, permissions, tags, homepage,
                     checksum, package_size, download_count, downloadable, published_at
-             FROM market_services ORDER BY name"
+             FROM market_services ORDER BY name",
         ) {
-            if let Ok(rows) = stmt.query_map([], |row| {
-                Ok(row_to_entry(row))
-            }) {
+            if let Ok(rows) = stmt.query_map([], |row| Ok(row_to_entry(row))) {
                 for row in rows.flatten() {
                     if let Ok(entry) = row {
                         if entry.manifest.source == ServiceSource::Officiel {
@@ -162,16 +161,18 @@ impl MarketStore {
     /// Retourne le détail d'un service (dernière version).
     pub async fn get_service(&self, service_id: &str) -> Option<MarketEntry> {
         let conn = self.db.lock().await;
-        let mut stmt = conn.prepare(
-            "SELECT id, version, name, description, icon, service_type, source, developer,
+        let mut stmt = conn
+            .prepare(
+                "SELECT id, version, name, description, icon, service_type, source, developer,
                     min_central_ver, dependencies, permissions, tags, homepage,
                     checksum, package_size, download_count, downloadable, published_at
-             FROM market_services WHERE id = ?1 ORDER BY version DESC LIMIT 1"
-        ).ok()?;
+             FROM market_services WHERE id = ?1 ORDER BY version DESC LIMIT 1",
+            )
+            .ok()?;
 
-        stmt.query_row(rusqlite::params![service_id], |row| {
-            Ok(row_to_entry(row))
-        }).ok()?.ok()
+        stmt.query_row(rusqlite::params![service_id], |row| Ok(row_to_entry(row)))
+            .ok()?
+            .ok()
     }
 
     /// Recherche dans le catalogue.
@@ -186,11 +187,11 @@ impl MarketStore {
                     checksum, package_size, download_count, downloadable, published_at
              FROM market_services
              WHERE name LIKE ?1 OR description LIKE ?1 OR id LIKE ?1 OR tags LIKE ?1
-             ORDER BY download_count DESC"
+             ORDER BY download_count DESC",
         ) {
-            if let Ok(rows) = stmt.query_map(rusqlite::params![pattern], |row| {
-                Ok(row_to_entry(row))
-            }) {
+            if let Ok(rows) =
+                stmt.query_map(rusqlite::params![pattern], |row| Ok(row_to_entry(row)))
+            {
                 for row in rows.flatten() {
                     if let Ok(entry) = row {
                         results.push(entry);
@@ -219,7 +220,9 @@ impl MarketStore {
         developer_token: &str,
     ) -> Result<PublishResponse, String> {
         // 1. Valider le manifeste
-        manifest.validate().map_err(|e| format!("Manifeste invalide : {e}"))?;
+        manifest
+            .validate()
+            .map_err(|e| format!("Manifeste invalide : {e}"))?;
 
         // 2. Vérifier le token développeur
         self.verify_developer_token(developer_token, &manifest.developer)
@@ -235,8 +238,7 @@ impl MarketStore {
             std::fs::create_dir_all(parent)
                 .map_err(|e| format!("Création répertoire package : {e}"))?;
         }
-        std::fs::write(&full_path, package_data)
-            .map_err(|e| format!("Écriture package : {e}"))?;
+        std::fs::write(&full_path, package_data).map_err(|e| format!("Écriture package : {e}"))?;
 
         // 5. Enregistrer en base
         let conn = self.db.lock().await;
@@ -254,15 +256,25 @@ impl MarketStore {
               checksum, package_size, download_count, downloadable, published_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, 0, 1, ?16)",
             rusqlite::params![
-                manifest.id, manifest.version, manifest.name, manifest.description, manifest.icon,
-                stype.trim_matches('"'), source.trim_matches('"'),
-                manifest.developer, manifest.min_central_version,
-                deps, perms, tags,
+                manifest.id,
+                manifest.version,
+                manifest.name,
+                manifest.description,
+                manifest.icon,
+                stype.trim_matches('"'),
+                source.trim_matches('"'),
+                manifest.developer,
+                manifest.min_central_version,
+                deps,
+                perms,
+                tags,
                 manifest.homepage.as_deref().unwrap_or(""),
-                info.checksum, info.size as i64,
+                info.checksum,
+                info.size as i64,
                 now,
             ],
-        ).map_err(|e| format!("Insertion Market DB : {e}"))?;
+        )
+        .map_err(|e| format!("Insertion Market DB : {e}"))?;
 
         Ok(PublishResponse {
             service_id: manifest.id.clone(),
@@ -280,9 +292,12 @@ impl MarketStore {
         developer_token: &str,
     ) -> Result<UnpublishResponse, String> {
         // Vérifier que le service existe et que le token est valide
-        let entry = self.get_service(service_id).await
+        let entry = self
+            .get_service(service_id)
+            .await
             .ok_or_else(|| format!("Service '{service_id}' introuvable"))?;
-        self.verify_developer_token(developer_token, &entry.manifest.developer).await?;
+        self.verify_developer_token(developer_token, &entry.manifest.developer)
+            .await?;
 
         // Supprimer le fichier package
         let path = package::storage_path(service_id, version);
@@ -296,7 +311,8 @@ impl MarketStore {
         conn.execute(
             "DELETE FROM market_services WHERE id = ?1 AND version = ?2",
             rusqlite::params![service_id, version],
-        ).map_err(|e| format!("Suppression Market DB : {e}"))?;
+        )
+        .map_err(|e| format!("Suppression Market DB : {e}"))?;
 
         Ok(UnpublishResponse {
             service_id: service_id.to_string(),
@@ -321,7 +337,11 @@ impl MarketStore {
     }
 
     /// Vérifie un token développeur.
-    async fn verify_developer_token(&self, token: &str, expected_developer: &str) -> Result<(), String> {
+    async fn verify_developer_token(
+        &self,
+        token: &str,
+        expected_developer: &str,
+    ) -> Result<(), String> {
         // Phase 1 : vérification simple par token prédéfini
         // Phase 2 : intégration avec le système d'authentification Central/Origin
         if token.is_empty() {
@@ -377,8 +397,20 @@ fn row_to_entry(row: &rusqlite::Row<'_>) -> Result<MarketEntry, rusqlite::Error>
 
     Ok(MarketEntry {
         manifest: ServiceManifest {
-            id, name, description, icon, version, service_type, source, developer,
-            min_central_version, dependencies, permissions, tags, homepage, checksum,
+            id,
+            name,
+            description,
+            icon,
+            version,
+            service_type,
+            source,
+            developer,
+            min_central_version,
+            dependencies,
+            permissions,
+            tags,
+            homepage,
+            checksum,
             package_size: package_size.map(|s| s as u64),
             execution_mode: miyumarket::manifest::ExecutionMode::default(),
             binary_name: None,
@@ -541,7 +573,11 @@ pub async fn api_market_search(store: &MarketStore, query: &str) -> String {
 }
 
 /// GET /api/market/package/{id}/{version} — Téléchargement binaire.
-pub async fn api_market_download(store: &MarketStore, service_id: &str, version: &str) -> Option<Vec<u8>> {
+pub async fn api_market_download(
+    store: &MarketStore,
+    service_id: &str,
+    version: &str,
+) -> Option<Vec<u8>> {
     store.get_package_bytes(service_id, version).await
 }
 
@@ -552,7 +588,10 @@ pub async fn api_market_publish(store: &MarketStore, body: &str) -> String {
         Ok(publish_req) => {
             // Phase 1 : le package data est vide (seul le manifeste est enregistré)
             // Phase 2 : le body sera multipart avec le fichier .msp
-            match store.publish(&publish_req.manifest, &[], &publish_req.developer_token).await {
+            match store
+                .publish(&publish_req.manifest, &[], &publish_req.developer_token)
+                .await
+            {
                 Ok(resp) => {
                     let r = MarketResponse::ok(resp);
                     serde_json::to_string_pretty(&r).unwrap_or_default()
@@ -571,10 +610,17 @@ pub async fn api_market_publish(store: &MarketStore, body: &str) -> String {
 }
 
 /// DELETE /api/market/package/{id}/{version} — Retrait.
-pub async fn api_market_unpublish(store: &MarketStore, service_id: &str, version: &str, body: &str) -> String {
+pub async fn api_market_unpublish(
+    store: &MarketStore,
+    service_id: &str,
+    version: &str,
+    body: &str,
+) -> String {
     // Le body contient le developer_token
     #[derive(serde::Deserialize)]
-    struct TokenBody { developer_token: String }
+    struct TokenBody {
+        developer_token: String,
+    }
 
     let token = serde_json::from_str::<TokenBody>(body)
         .map(|t| t.developer_token)

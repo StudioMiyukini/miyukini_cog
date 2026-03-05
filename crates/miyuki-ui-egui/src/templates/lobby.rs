@@ -2,10 +2,10 @@
 
 //! Lobby layout template -- game browser + chat.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::d2_button::{D2Button, D2ButtonVariant};
 use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Game listing in the lobby.
 #[derive(Debug, Clone)]
@@ -65,7 +65,11 @@ impl LobbyLayout {
 
                 if games.is_empty() {
                     let muted = rgba_to_color32(&D2_PALETTE.text_muted);
-                    ui.label(egui::RichText::new("Aucune partie disponible").color(muted).size(12.0));
+                    ui.label(
+                        egui::RichText::new("Aucune partie disponible")
+                            .color(muted)
+                            .size(12.0),
+                    );
                 }
 
                 ui.add_space(16.0);

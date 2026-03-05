@@ -80,10 +80,7 @@ pub fn aggregator_similarity_score(
     // Genres en commun
     let genres_a = parse_json_vec(work_a.genres.as_deref());
     let genres_b = parse_json_vec(work_b.genres.as_deref());
-    let common_genres = genres_a
-        .iter()
-        .filter(|g| genres_b.contains(g))
-        .count();
+    let common_genres = genres_a.iter().filter(|g| genres_b.contains(g)).count();
     if !genres_a.is_empty() {
         score += (common_genres as f64 / genres_a.len() as f64) * 40.0;
     }
@@ -117,11 +114,7 @@ pub fn aggregator_is_cog_blocked(config: &AggregatorConfig, cog_id: &str) -> boo
 
 /// Vérifie si la fraîcheur du cache est acceptable.
 #[must_use]
-pub fn aggregator_cache_is_fresh(
-    cached_at: &str,
-    now: &str,
-    max_age_minutes: i32,
-) -> bool {
+pub fn aggregator_cache_is_fresh(cached_at: &str, now: &str, max_age_minutes: i32) -> bool {
     let cached = chrono::DateTime::parse_from_rfc3339(cached_at).ok();
     let current = chrono::DateTime::parse_from_rfc3339(now).ok();
 

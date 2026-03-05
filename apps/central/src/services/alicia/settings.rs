@@ -4,9 +4,9 @@
 //! API (port, token, endpoints), Systeme (version, toolkit, infos COG).
 //! Lit les donnees depuis le AliciaSnapshot partage.
 
-use dioxus::prelude::*;
-use crate::state::use_app_state;
 use super::state::AliciaSnapshot;
+use crate::state::use_app_state;
+use dioxus::prelude::*;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Composant principal
@@ -37,8 +37,16 @@ pub fn SettingsScreen() -> Element {
     let threshold_pct = format!("{:.0}%", wk.threshold * 100.0);
     let sample_rate_str = format!("{} Hz", wk.sample_rate);
     let score_mode = wk.score_mode.clone();
-    let band_pass_label = if wk.band_pass_filter { "Actif" } else { "Inactif" };
-    let gain_norm_label = if wk.gain_normalizer { "Actif" } else { "Inactif" };
+    let band_pass_label = if wk.band_pass_filter {
+        "Actif"
+    } else {
+        "Inactif"
+    };
+    let gain_norm_label = if wk.gain_normalizer {
+        "Actif"
+    } else {
+        "Inactif"
+    };
 
     let device_count = snap_ref.available_devices.len();
     let device_count_str = format!("{device_count} device(s) detecte(s)");

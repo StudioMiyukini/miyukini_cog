@@ -34,7 +34,11 @@ impl KindMotherClient {
     /// * `addr` - Adresse du service (ex: "127.0.0.1:50051")
     /// * `operator_id` - Identifiant de l'opérateur (ex: "jayxpose")
     /// * `database` - Nom de la base de données par défaut
-    pub async fn connect(addr: &str, operator_id: &str, database: &str) -> Result<Self, ClientError> {
+    pub async fn connect(
+        addr: &str,
+        operator_id: &str,
+        database: &str,
+    ) -> Result<Self, ClientError> {
         let stream = tokio::time::timeout(Duration::from_secs(10), TcpStream::connect(addr))
             .await
             .map_err(|_| ClientError::Timeout("Connection timeout".to_string()))?
@@ -131,12 +135,10 @@ impl KindMotherClient {
                 rows.into_iter()
                     .map(|row| {
                         row.as_object()
-                            .map(|obj| {
-                                obj.iter()
-                                    .map(|(k, v)| (k.clone(), v.clone()))
-                                    .collect()
+                            .map(|obj| obj.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
+                            .ok_or_else(|| {
+                                ClientError::Serialization("Invalid row format".to_string())
                             })
-                            .ok_or_else(|| ClientError::Serialization("Invalid row format".to_string()))
                     })
                     .collect()
             }

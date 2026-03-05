@@ -1,15 +1,15 @@
 //! Profil de progression JayManga — niveau, XP, streaks, badges, statistiques, historique.
 
+use super::components::{Badge, EmptyState, PageHeader, StatCard};
+use super::JayMangaState;
+use crate::use_db;
+use chrono::{Datelike, NaiveDate};
 use dioxus::prelude::*;
 use jaymanga::domain::gamification::{
     gamification_level_for_xp, gamification_level_progress, gamification_xp_for_next_level,
     LEVEL_THRESHOLDS,
 };
-use chrono::{Datelike, NaiveDate};
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, EmptyState, Badge, StatCard};
-use super::JayMangaState;
 
 #[component]
 pub fn Profile(state: Signal<JayMangaState>) -> Element {
@@ -21,17 +21,31 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
     let favorites = db.favorite_list().unwrap_or_default();
 
     let total_xp = progression.as_ref().and_then(|p| p.total_xp).unwrap_or(0);
-    let current_streak = progression.as_ref().and_then(|p| p.current_streak).unwrap_or(0);
-    let longest_streak = progression.as_ref().and_then(|p| p.longest_streak).unwrap_or(0);
-    let pages_read = progression.as_ref().and_then(|p| p.total_pages_read).unwrap_or(0);
-    let works_completed = progression.as_ref().and_then(|p| p.total_works_completed).unwrap_or(0);
+    let current_streak = progression
+        .as_ref()
+        .and_then(|p| p.current_streak)
+        .unwrap_or(0);
+    let longest_streak = progression
+        .as_ref()
+        .and_then(|p| p.longest_streak)
+        .unwrap_or(0);
+    let pages_read = progression
+        .as_ref()
+        .and_then(|p| p.total_pages_read)
+        .unwrap_or(0);
+    let works_completed = progression
+        .as_ref()
+        .and_then(|p| p.total_works_completed)
+        .unwrap_or(0);
     // genres_explored et cogs_visited sont des JSON Vec<String> — on compte les elements
-    let genres_explored = progression.as_ref()
+    let genres_explored = progression
+        .as_ref()
         .and_then(|p| p.genres_explored.as_ref())
         .and_then(|s| serde_json::from_str::<Vec<String>>(s).ok())
         .map(|v| v.len())
         .unwrap_or(0);
-    let cogs_visited = progression.as_ref()
+    let cogs_visited = progression
+        .as_ref()
         .and_then(|p| p.cogs_visited.as_ref())
         .and_then(|s| serde_json::from_str::<Vec<String>>(s).ok())
         .map(|v| v.len())

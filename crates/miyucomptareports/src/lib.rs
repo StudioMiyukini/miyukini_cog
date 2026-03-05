@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuComptaReports ; expose les modules tools.
 /// @do: expose_miyucomptareports_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod errors;
@@ -23,9 +22,7 @@ pub use admin_cell::{
 pub use context::GovernedContext;
 pub use errors::MiyucomptareportsError;
 pub use export::ledger as compta_export_ledger;
-pub use report::{
-    balance_generate, cashflow_generate, livre_recettes_generate, liasse_generate,
-};
+pub use report::{balance_generate, cashflow_generate, liasse_generate, livre_recettes_generate};
 
 #[cfg(test)]
 mod tests {
@@ -38,11 +35,17 @@ mod tests {
     #[test]
     fn reports_and_export() {
         let c = ctx();
-        assert!(livre_recettes_generate(&c, "2024-01-01", "2024-12-31").unwrap().is_empty());
+        assert!(livre_recettes_generate(&c, "2024-01-01", "2024-12-31")
+            .unwrap()
+            .is_empty());
         assert!(balance_generate(&c, "2024-12-31").unwrap().is_empty());
         assert!(liasse_generate(&c, "2024").unwrap().is_empty());
-        assert!(cashflow_generate(&c, "2024-01-01", "2024-12-31").unwrap().is_empty());
-        assert!(compta_export_ledger(&c, "csv", "2024-01-01", "2024-12-31").unwrap().is_empty());
+        assert!(cashflow_generate(&c, "2024-01-01", "2024-12-31")
+            .unwrap()
+            .is_empty());
+        assert!(compta_export_ledger(&c, "csv", "2024-01-01", "2024-12-31")
+            .unwrap()
+            .is_empty());
     }
 
     #[test]

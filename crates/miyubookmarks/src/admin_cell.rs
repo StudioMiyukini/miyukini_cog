@@ -30,7 +30,9 @@ pub struct MiyubookmarksTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyubookmarksIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyubookmarksAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.bookmarks";
 
-#[must_use] 
+#[must_use]
 pub fn miyubookmarks_admin_cell(version: &str, fingerprint: &str) -> MiyubookmarksAdminCell {
     MiyubookmarksAdminCell {
         identification: MiyubookmarksIdentification {
@@ -63,7 +65,9 @@ pub fn miyubookmarks_admin_cell(version: &str, fingerprint: &str) -> Miyubookmar
                 id: "Miyubookmarks".to_string(),
                 name: "Test chemin complet Miyubookmarks".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

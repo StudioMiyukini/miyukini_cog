@@ -7,9 +7,7 @@
 //! @do: persist_and_load_game_state_slots
 //! @human: 3 slots, JSON pretty-printed. Version 2.0 : ouvriers/bâtisseurs/soldats, 6 ressources, 3 bâtiments.
 
-use crate::state::{
-    Allocation, AllocationBatisseurs, Cite, Deplacement, GameState, Route,
-};
+use crate::state::{Allocation, AllocationBatisseurs, Cite, Deplacement, GameState, Route};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
@@ -291,7 +289,9 @@ pub fn slot_list(data_dir: &Path) -> Vec<SlotMetadata> {
                 .map(|save| {
                     format!(
                         "Pop: {}/{}, Ouvriers: {}, Bâtisseurs: {}, Soldats: {}",
-                        save.population.ouvriers + save.population.batisseurs + save.population.soldats,
+                        save.population.ouvriers
+                            + save.population.batisseurs
+                            + save.population.soldats,
                         save.buildings.maisons_lvl * 4,
                         save.population.ouvriers,
                         save.population.batisseurs,

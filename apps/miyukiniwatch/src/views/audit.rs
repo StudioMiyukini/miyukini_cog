@@ -1,9 +1,9 @@
 //! Ecran Historique des actions (audit) MiyukiniWatch.
 
+use crate::{use_db, use_profile_id};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
 use miyukiniwatch::MiyukiniWatchPresenter;
-use crate::{use_db, use_profile_id};
 
 const FMT_TIMESTAMP: &str = "%d/%m/%Y %H:%M";
 

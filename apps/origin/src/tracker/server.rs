@@ -20,7 +20,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tracing::{debug, error, info, warn};
 
-use crate::relay::rate_limiter::{RateLimiter, RateLimiterConfig, RateLimitResult};
+use crate::relay::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
 use crate::relay::PermisRegistry;
 
 use super::catalog::Catalog;
@@ -57,10 +57,7 @@ pub struct TrackerServer {
 impl TrackerServer {
     /// Crée un nouveau serveur tracker.
     #[must_use]
-    pub fn new(
-        config: Arc<OriginConfig>,
-        permis_registry: Option<Arc<PermisRegistry>>,
-    ) -> Self {
+    pub fn new(config: Arc<OriginConfig>, permis_registry: Option<Arc<PermisRegistry>>) -> Self {
         let pool_manager = Arc::new(PoolManager::new(
             config.tracker.pools.enable_version_isolation,
         ));
@@ -114,11 +111,8 @@ impl TrackerServer {
 
     /// Démarre le serveur tracker.
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let tracker_addr: SocketAddr = format!(
-            "{}:{}",
-            self.config.tracker.host, self.config.tracker.port
-        )
-        .parse()?;
+        let tracker_addr: SocketAddr =
+            format!("{}:{}", self.config.tracker.host, self.config.tracker.port).parse()?;
 
         let listener = TcpListener::bind(tracker_addr).await?;
         info!("📡 Tracker server listening on {}", tracker_addr);
@@ -174,7 +168,17 @@ impl TrackerServer {
         let slug_registry = Arc::clone(&self.slug_registry);
 
         tokio::spawn(async move {
-            if let Err(e) = Self::handle_connection(stream, peer_addr, pool_manager, config, permis_registry, slug_registry, Arc::clone(&metrics)).await {
+            if let Err(e) = Self::handle_connection(
+                stream,
+                peer_addr,
+                pool_manager,
+                config,
+                permis_registry,
+                slug_registry,
+                Arc::clone(&metrics),
+            )
+            .await
+            {
                 debug!("Tracker connection error from {}: {}", peer_addr, e);
             }
             metrics.record_connection_closed();
@@ -256,7 +260,16 @@ impl TrackerServer {
     ) -> Option<TrackerMessage> {
         match msg.header.message_type {
             TrackerMessageType::Announce => {
-                Self::handle_announce(&msg.payload, peer_addr, pool_manager, config, permis_registry, slug_registry, metrics).await
+                Self::handle_announce(
+                    &msg.payload,
+                    peer_addr,
+                    pool_manager,
+                    config,
+                    permis_registry,
+                    slug_registry,
+                    metrics,
+                )
+                .await
             }
             TrackerMessageType::Withdraw => {
                 Self::handle_withdraw(&msg.payload, pool_manager, slug_registry, metrics).await
@@ -282,11 +295,12 @@ impl TrackerServer {
             TrackerMessageType::JoinLobby => {
                 Self::handle_join_lobby(&msg.payload, pool_manager, config, metrics).await
             }
-            TrackerMessageType::GetStats => {
-                Self::handle_get_stats(pool_manager, metrics).await
-            }
+            TrackerMessageType::GetStats => Self::handle_get_stats(pool_manager, metrics).await,
             _ => {
-                warn!("Unhandled tracker message type: {:?}", msg.header.message_type);
+                warn!(
+                    "Unhandled tracker message type: {:?}",
+                    msg.header.message_type
+                );
                 None
             }
         }
@@ -340,7 +354,9 @@ impl TrackerServer {
         }
 
         // Récupérer ou créer le pool
-        let pool = pool_manager.get_or_create_pool(&announce.core_version).await;
+        let pool = pool_manager
+            .get_or_create_pool(&announce.core_version)
+            .await;
 
         // Si l'adresse annoncée est locale (127.0.0.1, localhost, 0.0.0.0, etc.),
         // la remplacer par l'IP réelle du COG (vue par le Tracker) + le port annoncé.
@@ -358,7 +374,8 @@ impl TrackerServer {
                 || addr_lower.starts_with("http://0.0.0.0");
 
             if is_local {
-                let port = announce.address
+                let port = announce
+                    .address
                     .rsplit(':')
                     .next()
                     .and_then(|p| p.trim_end_matches('/').parse::<u16>().ok())
@@ -380,23 +397,13 @@ impl TrackerServer {
             .await
         {
             Ok(slug) => {
-                let domain = config
-                    .identity
-                    .domain
-                    .as_deref()
-                    .unwrap_or("miyukini.com");
+                let domain = config.identity.domain.as_deref().unwrap_or("miyukini.com");
                 let subdomain = format!("{}.{}", slug, domain);
-                info!(
-                    "COG {} assigned subdomain: {}",
-                    announce.cog_id, subdomain
-                );
+                info!("COG {} assigned subdomain: {}", announce.cog_id, subdomain);
                 Some(subdomain)
             }
             Err(e) => {
-                warn!(
-                    "COG {} slug registration failed: {}",
-                    announce.cog_id, e
-                );
+                warn!("COG {} slug registration failed: {}", announce.cog_id, e);
                 None
             }
         };
@@ -446,7 +453,10 @@ impl TrackerServer {
                 match map.get("cog_id").and_then(|v| v.as_str()) {
                     Some(id) => id.to_string(),
                     None => {
-                        warn!("[Tracker] WITHDRAW payload objet sans champ cog_id: {:?}", map);
+                        warn!(
+                            "[Tracker] WITHDRAW payload objet sans champ cog_id: {:?}",
+                            map
+                        );
                         return None;
                     }
                 }
@@ -457,7 +467,11 @@ impl TrackerServer {
                 return None;
             }
             Err(e) => {
-                warn!("[Tracker] WITHDRAW payload invalide ({} octets): {}", payload.len(), e);
+                warn!(
+                    "[Tracker] WITHDRAW payload invalide ({} octets): {}",
+                    payload.len(),
+                    e
+                );
                 return None;
             }
         };
@@ -473,13 +487,19 @@ impl TrackerServer {
         for version in versions {
             if let Some(pool) = pool_manager.get_pool(&version).await {
                 if pool.mark_absent(&cog_id).await {
-                    info!("[Tracker] COG {} marqué absent dans le pool {}", &cog_id, version);
+                    info!(
+                        "[Tracker] COG {} marqué absent dans le pool {}",
+                        &cog_id, version
+                    );
                     marked = true;
                 }
             }
         }
         if !marked {
-            warn!("[Tracker] WITHDRAW pour cog_id={} mais COG introuvable dans les pools", &cog_id);
+            warn!(
+                "[Tracker] WITHDRAW pour cog_id={} mais COG introuvable dans les pools",
+                &cog_id
+            );
         }
 
         metrics.record_cog_withdrawn();
@@ -501,7 +521,11 @@ impl TrackerServer {
         let heartbeat = match HeartbeatPayload::parse(payload) {
             Ok(h) => h,
             Err(e) => {
-                warn!("[Tracker] Heartbeat payload invalide ({} octets): {}", payload.len(), e);
+                warn!(
+                    "[Tracker] Heartbeat payload invalide ({} octets): {}",
+                    payload.len(),
+                    e
+                );
                 return None;
             }
         };
@@ -518,7 +542,10 @@ impl TrackerServer {
             }
         }
         if !touched {
-            warn!("[Tracker] Heartbeat pour cog_id={} mais aucun pool trouvé", &heartbeat.cog_id);
+            warn!(
+                "[Tracker] Heartbeat pour cog_id={} mais aucun pool trouvé",
+                &heartbeat.cog_id
+            );
         }
 
         metrics.record_heartbeat();
@@ -546,7 +573,8 @@ impl TrackerServer {
             Err(_) => {
                 return Some(TrackerMessage::new(
                     TrackerMessageType::Error,
-                    ErrorPayload::new(error_codes::INTERNAL_ERROR, "Invalid search payload").to_bytes(),
+                    ErrorPayload::new(error_codes::INTERNAL_ERROR, "Invalid search payload")
+                        .to_bytes(),
                 ));
             }
         };
@@ -621,7 +649,8 @@ impl TrackerServer {
             Err(_) => {
                 return Some(TrackerMessage::new(
                     TrackerMessageType::Error,
-                    ErrorPayload::new(error_codes::INTERNAL_ERROR, "Invalid search payload").to_bytes(),
+                    ErrorPayload::new(error_codes::INTERNAL_ERROR, "Invalid search payload")
+                        .to_bytes(),
                 ));
             }
         };
@@ -748,7 +777,8 @@ impl TrackerServer {
         if let Some(pool) = pool_manager.get_pool(&cog.core_version).await {
             let mut lobbys = cog.lobbys.clone();
             lobbys.push(lobby);
-            pool.update_cog(&create.cog_id, cog.services.clone(), lobbys).await;
+            pool.update_cog(&create.cog_id, cog.services.clone(), lobbys)
+                .await;
         }
 
         metrics.record_lobby_created();
@@ -795,7 +825,8 @@ impl TrackerServer {
 
         // Sauvegarder
         if let Some(pool) = pool_manager.get_pool(&cog.core_version).await {
-            pool.update_cog(&update.cog_id, cog.services.clone(), lobbys).await;
+            pool.update_cog(&update.cog_id, cog.services.clone(), lobbys)
+                .await;
         }
 
         debug!("Lobby {} updated", update.lobby_id);
@@ -821,14 +852,16 @@ impl TrackerServer {
         let cog = pool_manager.find_cog(&delete.cog_id).await?;
 
         // Supprimer le lobby
-        let lobbys: Vec<_> = cog.lobbys
+        let lobbys: Vec<_> = cog
+            .lobbys
             .into_iter()
             .filter(|l| l.lobby_id != delete.lobby_id)
             .collect();
 
         // Sauvegarder
         if let Some(pool) = pool_manager.get_pool(&cog.core_version).await {
-            pool.update_cog(&delete.cog_id, cog.services.clone(), lobbys).await;
+            pool.update_cog(&delete.cog_id, cog.services.clone(), lobbys)
+                .await;
         }
 
         metrics.record_lobby_deleted();

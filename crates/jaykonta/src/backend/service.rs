@@ -6,8 +6,8 @@ use crate::domain::model::{
     IntegrationFlow, KpiMetric, OperatorItem, QuickAction, RiskSignal, ToolkitItem,
 };
 use crate::integrations::contracts::{
-    BudgetMovementPayload, DeadlineReminderPayload, IntegrationMeta, InvoiceEmitPayload,
-    IntegrationError, JayFestivalEvent, JayKoaReminderEvent, JayRDVEvent, PaymentRecordPayload,
+    BudgetMovementPayload, DeadlineReminderPayload, IntegrationError, IntegrationMeta,
+    InvoiceEmitPayload, JayFestivalEvent, JayKoaReminderEvent, JayRDVEvent, PaymentRecordPayload,
     QuoteCreatePayload, ReportByEditionPayload, ReportByProfessionalPayload,
 };
 use crate::integrations::pipeline::IntegrationPipeline;
@@ -65,7 +65,10 @@ impl JayKontaBackend {
     }
 
     /// Ingestion reelle CK-INT-01 (JayFestival -> JayKonta).
-    pub fn ingest_jayfestival_event(&self, event: JayFestivalEvent) -> Result<(), IntegrationError> {
+    pub fn ingest_jayfestival_event(
+        &self,
+        event: JayFestivalEvent,
+    ) -> Result<(), IntegrationError> {
         IntegrationPipeline::new(self.db.clone()).apply_jayfestival(event)
     }
 
@@ -94,7 +97,10 @@ impl JayKontaBackend {
 impl Default for JayKontaBackend {
     fn default() -> Self {
         Self::new_with_db("jaykonta.db").unwrap_or_else(|e| {
-            panic!("JayKonta: impossible d'ouvrir la base SQLite (KindMother fille): {}", e)
+            panic!(
+                "JayKonta: impossible d'ouvrir la base SQLite (KindMother fille): {}",
+                e
+            )
         })
     }
 }

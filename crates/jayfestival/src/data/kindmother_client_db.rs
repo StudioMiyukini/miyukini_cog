@@ -397,7 +397,9 @@ impl JayFestivalDb {
             .transpose()
     }
 
-    fn row_to_organisateur(row: &HashMap<String, serde_json::Value>) -> Result<Organisateur, DbError> {
+    fn row_to_organisateur(
+        row: &HashMap<String, serde_json::Value>,
+    ) -> Result<Organisateur, DbError> {
         Ok(Organisateur {
             id: Self::get_opt_string(row, "id"),
             name: Self::get_opt_string(row, "name"),

@@ -81,11 +81,7 @@ pub fn decide(context: &BotContext, state: &MiouState) -> DecisionResult {
         && !state.is_pause_recently_dismissed()
         && !state.categories_shown.contains(CAT_PAUSE_SANTE)
     {
-        return DecisionResult::category(
-            CAT_PAUSE_SANTE,
-            "session >= seuil_pause",
-            1,
-        );
+        return DecisionResult::category(CAT_PAUSE_SANTE, "session >= seuil_pause", 1);
     }
 
     // P2 : Rappel événement
@@ -94,11 +90,7 @@ pub fn decide(context: &BotContext, state: &MiouState) -> DecisionResult {
             // Vérifier si pas déjà rappelé (utiliser le nom comme ID simple)
             let event_id = event_name.replace(' ', "_").to_lowercase();
             if !state.is_event_reminded(&event_id) {
-                return DecisionResult::category(
-                    CAT_RAPPEL_EVENEMENT,
-                    "evenement < 1h",
-                    2,
-                );
+                return DecisionResult::category(CAT_RAPPEL_EVENEMENT, "evenement < 1h", 2);
             }
         }
     }
@@ -151,31 +143,19 @@ pub fn decide(context: &BotContext, state: &MiouState) -> DecisionResult {
 
     // P7 : Specs machine
     if context.specs_upgraded_since_last && !state.categories_shown.contains(CAT_SPECS_UPGRADE) {
-        return DecisionResult::category(
-            CAT_SPECS_UPGRADE,
-            "specs ameliorees",
-            7,
-        );
+        return DecisionResult::category(CAT_SPECS_UPGRADE, "specs ameliorees", 7);
     }
     if context.ram_available_mb > 0
         && context.ram_available_mb < 512
         && !state.categories_shown.contains(CAT_SPECS_RAM)
     {
-        return DecisionResult::category(
-            CAT_SPECS_RAM,
-            "RAM < 512 MB",
-            7,
-        );
+        return DecisionResult::category(CAT_SPECS_RAM, "RAM < 512 MB", 7);
     }
     if context.disk_free_gb > 0.0
         && context.disk_free_gb < 1.0
         && !state.categories_shown.contains(CAT_SPECS_STOCKAGE)
     {
-        return DecisionResult::category(
-            CAT_SPECS_STOCKAGE,
-            "disk < 1 GB",
-            7,
-        );
+        return DecisionResult::category(CAT_SPECS_STOCKAGE, "disk < 1 GB", 7);
     }
 
     // Silence par défaut

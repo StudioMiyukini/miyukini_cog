@@ -2,10 +2,10 @@
 
 //! Main menu organism -- title + menu buttons.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::d2_button::{D2Button, D2ButtonVariant};
 use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Action returned from the main menu.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -36,11 +36,7 @@ impl MainMenu {
                 ui.vertical_centered(|ui| {
                     // Title
                     let gold = rgba_to_color32(&D2_PALETTE.text_high);
-                    ui.label(
-                        egui::RichText::new("SODOMIGHT")
-                            .color(gold)
-                            .size(32.0),
-                    );
+                    ui.label(egui::RichText::new("SODOMIGHT").color(gold).size(32.0));
                     ui.add_space(20.0);
 
                     // Menu buttons

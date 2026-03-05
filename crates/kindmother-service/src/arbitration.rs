@@ -74,7 +74,7 @@ impl ArbitrationEngine {
         write_keywords.insert("UPDATE");
         write_keywords.insert("DELETE");
         write_keywords.insert("REPLACE");
-        
+
         let mut ddl_keywords = HashSet::new();
         ddl_keywords.insert("CREATE");
         ddl_keywords.insert("DROP");
@@ -82,7 +82,7 @@ impl ArbitrationEngine {
         ddl_keywords.insert("TRUNCATE");
         ddl_keywords.insert("VACUUM");
         ddl_keywords.insert("REINDEX");
-        
+
         Self {
             operators: Arc::new(RwLock::new(HashMap::new())),
             request_counts: Arc::new(RwLock::new(HashMap::new())),
@@ -100,7 +100,7 @@ impl ArbitrationEngine {
     /// Enregistre les opérateurs par défaut (COG services).
     pub async fn register_default_operators(&self) {
         // === Services famille Jay ===
-        
+
         // JayXpose - profil exposant, catalogue, vitrine
         self.register_operator(OperatorConfig {
             id: "jayxpose".to_string(),
@@ -142,7 +142,7 @@ impl ArbitrationEngine {
         .await;
 
         // === Hub Central ===
-        
+
         // Miyukini Central - hub de gestion, profils centraux, auth
         // Accès admin à sa propre base + lecture aux bases des services
         self.register_operator(OperatorConfig {
@@ -161,7 +161,7 @@ impl ArbitrationEngine {
         .await;
 
         // === Services de jeux ===
-        
+
         // Lord of the Castle - jeu survivor
         self.register_operator(OperatorConfig {
             id: "lord-of-the-castle".to_string(),
@@ -193,9 +193,9 @@ impl ArbitrationEngine {
     ) -> Result<(), ServiceError> {
         // 1. Vérifier que l'opérateur existe
         let operators = self.operators.read().await;
-        let operator = operators.get(operator_id).ok_or_else(|| {
-            ServiceError::UnknownOperator(operator_id.to_string())
-        })?;
+        let operator = operators
+            .get(operator_id)
+            .ok_or_else(|| ServiceError::UnknownOperator(operator_id.to_string()))?;
 
         // 2. Vérifier l'accès à la base
         let permission = operator.databases.get(database).ok_or_else(|| {
@@ -224,10 +224,7 @@ impl ArbitrationEngine {
         is_write: bool,
     ) -> Result<(), ServiceError> {
         let sql_upper = sql.to_uppercase();
-        let first_keyword = sql_upper
-            .split_whitespace()
-            .next()
-            .unwrap_or("");
+        let first_keyword = sql_upper.split_whitespace().next().unwrap_or("");
 
         // Vérifier les mots-clés DDL
         if self.ddl_keywords.contains(first_keyword) && *permission != Permission::Admin {
@@ -323,42 +320,62 @@ mod tests {
     #[tokio::test]
     async fn test_authorization() {
         let engine = ArbitrationEngine::new();
-        
-        engine.register_operator(OperatorConfig {
-            id: "test_op".to_string(),
-            databases: [("test_db".to_string(), Permission::ReadWrite)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0,
-        }).await;
+
+        engine
+            .register_operator(OperatorConfig {
+                id: "test_op".to_string(),
+                databases: [("test_db".to_string(), Permission::ReadWrite)]
+                    .into_iter()
+                    .collect(),
+                rate_limit: 0,
+            })
+            .await;
 
         // Devrait réussir
-        assert!(engine.authorize("test_op", "test_db", "SELECT * FROM users", false).await.is_ok());
-        assert!(engine.authorize("test_op", "test_db", "INSERT INTO users VALUES (?)", true).await.is_ok());
+        assert!(engine
+            .authorize("test_op", "test_db", "SELECT * FROM users", false)
+            .await
+            .is_ok());
+        assert!(engine
+            .authorize("test_op", "test_db", "INSERT INTO users VALUES (?)", true)
+            .await
+            .is_ok());
 
         // Devrait échouer - base non autorisée
-        assert!(engine.authorize("test_op", "other_db", "SELECT 1", false).await.is_err());
+        assert!(engine
+            .authorize("test_op", "other_db", "SELECT 1", false)
+            .await
+            .is_err());
 
         // Devrait échouer - opérateur inconnu
-        assert!(engine.authorize("unknown", "test_db", "SELECT 1", false).await.is_err());
+        assert!(engine
+            .authorize("unknown", "test_db", "SELECT 1", false)
+            .await
+            .is_err());
     }
 
     #[tokio::test]
     async fn test_read_only_permission() {
         let engine = ArbitrationEngine::new();
-        
-        engine.register_operator(OperatorConfig {
-            id: "reader".to_string(),
-            databases: [("db".to_string(), Permission::Read)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0,
-        }).await;
+
+        engine
+            .register_operator(OperatorConfig {
+                id: "reader".to_string(),
+                databases: [("db".to_string(), Permission::Read)].into_iter().collect(),
+                rate_limit: 0,
+            })
+            .await;
 
         // Lecture OK
-        assert!(engine.authorize("reader", "db", "SELECT * FROM t", false).await.is_ok());
+        assert!(engine
+            .authorize("reader", "db", "SELECT * FROM t", false)
+            .await
+            .is_ok());
 
         // Écriture interdite
-        assert!(engine.authorize("reader", "db", "INSERT INTO t VALUES (1)", true).await.is_err());
+        assert!(engine
+            .authorize("reader", "db", "INSERT INTO t VALUES (1)", true)
+            .await
+            .is_err());
     }
 }

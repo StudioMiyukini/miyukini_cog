@@ -217,12 +217,10 @@ mod tests {
 
         let result = decryptor.next_chunk();
         assert!(result.is_err(), "Should fail on corrupted chunk");
-        assert!(
-            result
-                .unwrap_err()
-                .to_string()
-                .contains("Decryption failed")
-        );
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Decryption failed"));
     }
 
     #[test]

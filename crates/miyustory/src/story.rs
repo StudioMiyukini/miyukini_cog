@@ -23,8 +23,18 @@ pub fn create(
     let id = format!("story:{}", UuidIdGenerator.generate());
     let author_id = ctx.mandate_id.clone();
     let expires_at = String::new();
-    let mut guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
-    guard.insert(id.clone(), (author_id, content_type.to_string(), payload.to_vec(), expires_at));
+    let mut guard = store::stories()
+        .lock()
+        .map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    guard.insert(
+        id.clone(),
+        (
+            author_id,
+            content_type.to_string(),
+            payload.to_vec(),
+            expires_at,
+        ),
+    );
     Ok(id)
 }
 
@@ -41,7 +51,9 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    let guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    let guard = store::stories()
+        .lock()
+        .map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
     let mut items: Vec<StoryItem> = guard
         .iter()
         .filter(|(_, (author_id, _, _, _))| {
@@ -70,7 +82,9 @@ pub fn get(ctx: &GovernedContext, story_id: &str) -> Result<StoryDetail, Miyusto
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    let guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    let guard = store::stories()
+        .lock()
+        .map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
     let (author_id, content_type, payload, expires_at) = guard
         .get(story_id)
         .ok_or_else(|| MiyustoryError::InvalidInput("story not found".into()))?
@@ -98,7 +112,9 @@ pub fn reaction_add(
     if !ctx.has_mandate() {
         return Err(MiyustoryError::NoMandate);
     }
-    let guard = store::stories().lock().map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
+    let guard = store::stories()
+        .lock()
+        .map_err(|_| MiyustoryError::InvalidInput("lock".into()))?;
     if !guard.contains_key(story_id) {
         return Err(MiyustoryError::InvalidInput("story not found".into()));
     }

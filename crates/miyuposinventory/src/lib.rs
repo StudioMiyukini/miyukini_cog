@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosInventory ; expose les modules tools.
 /// @do: expose_miyuposinventory_toolkit
-
 pub mod admin_cell;
 pub mod alert;
 pub mod context;
@@ -30,15 +29,23 @@ pub use admin_cell::{
 };
 pub use alert::{low_evaluate as alert_low_evaluate, AlertItem};
 pub use context::GovernedContext;
-pub use count::{record as count_record, reconcile as count_reconcile, start as count_start, ReconcileResult};
+pub use count::{
+    reconcile as count_reconcile, record as count_record, start as count_start, ReconcileResult,
+};
 pub use errors::MiyuposinventoryError;
 pub use history::{list as history_list, MovementItem};
 pub use import::{items as import_items, ImportResult};
 pub use label::print as label_print;
 pub use production::record as production_record;
-pub use purchase_order::{create as purchase_order_create, track as purchase_order_track, update as purchase_order_update, PurchaseOrderStatus};
+pub use purchase_order::{
+    create as purchase_order_create, track as purchase_order_track,
+    update as purchase_order_update, PurchaseOrderStatus,
+};
 pub use stock::{adjust as stock_adjust, get as stock_get, StockResult};
-pub use transfer::{create as transfer_create, execute as transfer_execute, list as transfer_list, TransferFilters, TransferItem};
+pub use transfer::{
+    create as transfer_create, execute as transfer_execute, list as transfer_list, TransferFilters,
+    TransferItem,
+};
 pub use valuation::report as valuation_report;
 
 #[cfg(test)]

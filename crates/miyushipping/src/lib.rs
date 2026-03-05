@@ -15,8 +15,8 @@ pub mod tracking;
 pub mod zones;
 
 pub use admin_cell::{
-    miyushipping_admin_cell, MiyushippingAdminCell, MiyushippingIdentification, MiyushippingIntegrity,
-    MiyushippingTestManifest, TOOLKIT_ID,
+    miyushipping_admin_cell, MiyushippingAdminCell, MiyushippingIdentification,
+    MiyushippingIntegrity, MiyushippingTestManifest, TOOLKIT_ID,
 };
 pub use context::GovernedContext;
 pub use errors::MiyushippingError;

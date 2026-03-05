@@ -1,0 +1,27 @@
+# Miyukini Whisper - service/app de dictee locale.
+
+[package]
+name = "miyukini-whisper-app"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Miyukini Whisper - dictee locale STT/TTS avec presets hardware"
+
+[dependencies]
+miyustt = { path = "../../crates/miyustt" }
+miyutts = { path = "../../crates/miyutts" }
+serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[lib]
+name = "miyukini_whisper_app"
+path = "src/lib.rs"
+
+[[bin]]
+name = "miyukini-whisper"
+path = "src/main.rs"
+
+[lints]
+workspace = true

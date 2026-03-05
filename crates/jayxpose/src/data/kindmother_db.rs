@@ -609,10 +609,9 @@ impl JayXposeDb {
     /// Insère un produit catalogue.
     pub fn produit_insert(&self, p: &ProduitCatalogue) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = p
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            p.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO produits_catalogue (id, exposant_id, name, description, price, currency, category_id, availability, is_featured, sort_order, created_at, updated_at)
@@ -639,7 +638,9 @@ impl JayXposeDb {
     pub fn produit_update(&self, p: &ProduitCatalogue) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let now = chrono::Utc::now().to_rfc3339();
-        let id = p.id.as_deref().ok_or_else(|| DbError("produit_update: id requis".to_string()))?;
+        let id =
+            p.id.as_deref()
+                .ok_or_else(|| DbError("produit_update: id requis".to_string()))?;
         conn.execute(
             "UPDATE produits_catalogue SET exposant_id=?1, name=?2, description=?3, price=?4, currency=?5, category_id=?6, availability=?7, is_featured=?8, sort_order=?9, updated_at=?10 WHERE id=?11",
             params![
@@ -667,7 +668,10 @@ impl JayXposeDb {
     }
 
     /// Liste les produits d'un exposant.
-    pub fn produits_by_exposant(&self, exposant_id: &str) -> Result<Vec<ProduitCatalogue>, DbError> {
+    pub fn produits_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<ProduitCatalogue>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, name, description, price, currency, category_id, availability, is_featured, sort_order, created_at, updated_at
@@ -729,10 +733,9 @@ impl JayXposeDb {
     /// Insère une catégorie de produit.
     pub fn categorie_insert(&self, c: &CategorieProduit) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = c
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            c.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO categories_produits (id, exposant_id, name, description, sort_order, created_at)
@@ -745,7 +748,9 @@ impl JayXposeDb {
     /// Met à jour une catégorie de produit existante.
     pub fn categorie_update(&self, c: &CategorieProduit) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = c.id.as_deref().ok_or_else(|| DbError("categorie_update: id requis".to_string()))?;
+        let id =
+            c.id.as_deref()
+                .ok_or_else(|| DbError("categorie_update: id requis".to_string()))?;
         conn.execute(
             "UPDATE categories_produits SET exposant_id=?1, name=?2, description=?3, sort_order=?4 WHERE id=?5",
             params![c.exposant_id, c.name, c.description, c.sort_order, id],
@@ -761,7 +766,10 @@ impl JayXposeDb {
     }
 
     /// Liste les catégories d'un exposant.
-    pub fn categories_by_exposant(&self, exposant_id: &str) -> Result<Vec<CategorieProduit>, DbError> {
+    pub fn categories_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<CategorieProduit>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, name, description, sort_order, created_at
@@ -787,10 +795,9 @@ impl JayXposeDb {
     /// Insère un visuel de produit.
     pub fn visuel_insert(&self, v: &ProduitVisuel) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = v
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            v.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO produits_visuels (id, produit_id, url, alt_text, is_primary, sort_order, created_at)
@@ -843,10 +850,9 @@ impl JayXposeDb {
     /// Insère un document professionnel.
     pub fn document_insert(&self, d: &DocumentProfessionnel) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = d
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            d.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO documents_professionnels (
@@ -882,7 +888,9 @@ impl JayXposeDb {
     pub fn document_update(&self, d: &DocumentProfessionnel) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let now = chrono::Utc::now().to_rfc3339();
-        let id = d.id.as_deref().ok_or_else(|| DbError("document_update: id requis".to_string()))?;
+        let id =
+            d.id.as_deref()
+                .ok_or_else(|| DbError("document_update: id requis".to_string()))?;
         conn.execute(
             "UPDATE documents_professionnels SET
                 exposant_id=?1, doc_type=?2, label=?3, file_url=?4, file_name=?5, file_size=?6,
@@ -915,12 +923,18 @@ impl JayXposeDb {
     /// Supprime un document professionnel par identifiant.
     pub fn document_delete(&self, id: &str) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        conn.execute("DELETE FROM documents_professionnels WHERE id = ?1", params![id])?;
+        conn.execute(
+            "DELETE FROM documents_professionnels WHERE id = ?1",
+            params![id],
+        )?;
         Ok(())
     }
 
     /// Liste les documents professionnels d'un exposant.
-    pub fn documents_by_exposant(&self, exposant_id: &str) -> Result<Vec<DocumentProfessionnel>, DbError> {
+    pub fn documents_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<DocumentProfessionnel>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, doc_type, label, file_url, file_name, file_size, mime_type,
@@ -979,10 +993,9 @@ impl JayXposeDb {
     /// Insère une version de document.
     pub fn document_version_insert(&self, v: &DocumentVersion) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = v
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            v.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO documents_versions (id, document_id, version, file_url, file_name, file_size, uploaded_at)
@@ -1001,7 +1014,10 @@ impl JayXposeDb {
     }
 
     /// Liste les versions d'un document.
-    pub fn document_versions_by_document(&self, document_id: &str) -> Result<Vec<DocumentVersion>, DbError> {
+    pub fn document_versions_by_document(
+        &self,
+        document_id: &str,
+    ) -> Result<Vec<DocumentVersion>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, document_id, version, file_url, file_name, file_size, uploaded_at
@@ -1028,10 +1044,9 @@ impl JayXposeDb {
     /// Insère un partage de document.
     pub fn partage_insert(&self, p: &DocumentPartage) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = p
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            p.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO documents_partages (
@@ -1108,10 +1123,9 @@ impl JayXposeDb {
     /// Insère ou remplace une page vitrine et retourne l'identifiant utilisé.
     pub fn vitrine_page_upsert_return_id(&self, v: &VitrinePage) -> Result<String, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = v
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            v.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT OR REPLACE INTO vitrine_pages (id, exposant_id, page_type, content, is_visible, sort_order, updated_at)
@@ -1130,7 +1144,10 @@ impl JayXposeDb {
     }
 
     /// Liste les pages vitrine d'un exposant.
-    pub fn vitrine_pages_by_exposant(&self, exposant_id: &str) -> Result<Vec<VitrinePage>, DbError> {
+    pub fn vitrine_pages_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<VitrinePage>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, page_type, content, is_visible, sort_order, updated_at
@@ -1157,7 +1174,10 @@ impl JayXposeDb {
         blocks: &[VitrineBlock],
     ) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        conn.execute("DELETE FROM vitrine_blocs WHERE page_id=?1", params![page_id])?;
+        conn.execute(
+            "DELETE FROM vitrine_blocs WHERE page_id=?1",
+            params![page_id],
+        )?;
         let now = chrono::Utc::now().to_rfc3339();
         for (idx, block) in blocks.iter().enumerate() {
             let id = block
@@ -1171,8 +1191,14 @@ impl JayXposeDb {
                 params![
                     id,
                     page_id,
-                    block.block_key.clone().unwrap_or_else(|| format!("blk-{}", idx + 1)),
-                    block.block_type.clone().unwrap_or_else(|| "text".to_string()),
+                    block
+                        .block_key
+                        .clone()
+                        .unwrap_or_else(|| format!("blk-{}", idx + 1)),
+                    block
+                        .block_type
+                        .clone()
+                        .unwrap_or_else(|| "text".to_string()),
                     block.props_json.clone().unwrap_or_else(|| "{}".to_string()),
                     block.position.unwrap_or(idx as i32),
                     now,
@@ -1234,10 +1260,9 @@ impl JayXposeDb {
     /// Insère un log de synchronisation.
     pub fn sync_log_insert(&self, l: &SyncLog) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = l
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            l.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO sync_logs
@@ -1258,7 +1283,11 @@ impl JayXposeDb {
     }
 
     /// Récupère les logs de sync d'un exposant (ordre récent d'abord).
-    pub fn sync_logs_by_exposant(&self, exposant_id: &str, limit: i64) -> Result<Vec<SyncLog>, DbError> {
+    pub fn sync_logs_by_exposant(
+        &self,
+        exposant_id: &str,
+        limit: i64,
+    ) -> Result<Vec<SyncLog>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, sync_source, sync_type, status, payload_json, error_message, created_at
@@ -1307,7 +1336,11 @@ impl JayXposeDb {
                 params![uuid::Uuid::new_v4().to_string(), produit_id, pos_sku, stock_qty, now, now],
             )?;
         }
-        let availability = if stock_qty <= 0 { "rupture" } else { "disponible" };
+        let availability = if stock_qty <= 0 {
+            "rupture"
+        } else {
+            "disponible"
+        };
         conn.execute(
             "UPDATE produits_catalogue SET availability=?1, updated_at=?2 WHERE id=?3",
             params![availability, now, produit_id],
@@ -1316,7 +1349,10 @@ impl JayXposeDb {
     }
 
     /// Retourne les liens stock PoS d'un exposant.
-    pub fn pos_stock_links_by_exposant(&self, exposant_id: &str) -> Result<Vec<PosStockLink>, DbError> {
+    pub fn pos_stock_links_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<PosStockLink>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT psl.id, psl.produit_id, psl.pos_sku, psl.stock_qty, psl.last_sync_at, psl.updated_at
@@ -1345,10 +1381,9 @@ impl JayXposeDb {
     /// Insère ou remplace une règle de confidentialité (INSERT OR REPLACE).
     pub fn confidentialite_upsert(&self, c: &ConfidentialiteProfil) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = c
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            c.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT OR REPLACE INTO confidentialite_profil (id, exposant_id, field_name, visibility, updated_at)
@@ -1359,7 +1394,10 @@ impl JayXposeDb {
     }
 
     /// Liste les règles de confidentialité d'un exposant.
-    pub fn confidentialite_by_exposant(&self, exposant_id: &str) -> Result<Vec<ConfidentialiteProfil>, DbError> {
+    pub fn confidentialite_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<ConfidentialiteProfil>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, field_name, visibility, updated_at
@@ -1388,10 +1426,9 @@ impl JayXposeDb {
     /// @layer: infra
     pub fn cms_article_insert(&self, a: &CmsArticle) -> Result<String, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = a
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            a.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO cms_articles (
@@ -1438,7 +1475,9 @@ impl JayXposeDb {
     pub fn cms_article_update(&self, a: &CmsArticle) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let now = chrono::Utc::now().to_rfc3339();
-        let id = a.id.as_deref().ok_or_else(|| DbError("cms_article_update: id requis".to_string()))?;
+        let id =
+            a.id.as_deref()
+                .ok_or_else(|| DbError("cms_article_update: id requis".to_string()))?;
         conn.execute(
             "UPDATE cms_articles SET
                 exposant_id=?1, title=?2, slug=?3, excerpt=?4, content=?5, article_type=?6,
@@ -1572,10 +1611,9 @@ impl JayXposeDb {
     /// Insère une catégorie CMS.
     pub fn cms_category_insert(&self, c: &CmsCategory) -> Result<String, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = c
-            .id
-            .clone()
-            .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+        let id =
+            c.id.clone()
+                .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO cms_categories (id, exposant_id, name, slug, description, color, sort_order, created_at)
@@ -1597,7 +1635,9 @@ impl JayXposeDb {
     /// Met à jour une catégorie CMS existante.
     pub fn cms_category_update(&self, c: &CmsCategory) -> Result<(), DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-        let id = c.id.as_deref().ok_or_else(|| DbError("cms_category_update: id requis".to_string()))?;
+        let id =
+            c.id.as_deref()
+                .ok_or_else(|| DbError("cms_category_update: id requis".to_string()))?;
         conn.execute(
             "UPDATE cms_categories SET exposant_id=?1, name=?2, slug=?3, description=?4, color=?5, sort_order=?6 WHERE id=?7",
             params![c.exposant_id, c.name, c.slug, c.description, c.color, c.sort_order, id],
@@ -1613,7 +1653,10 @@ impl JayXposeDb {
     }
 
     /// Liste les catégories CMS d'un exposant.
-    pub fn cms_categories_by_exposant(&self, exposant_id: &str) -> Result<Vec<CmsCategory>, DbError> {
+    pub fn cms_categories_by_exposant(
+        &self,
+        exposant_id: &str,
+    ) -> Result<Vec<CmsCategory>, DbError> {
         let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
         let mut stmt = conn.prepare(
             "SELECT id, exposant_id, name, slug, description, color, sort_order, created_at

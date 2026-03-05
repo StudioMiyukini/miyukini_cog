@@ -281,9 +281,9 @@ impl AudioCapture {
                 Arc::clone(&stats),
             )?,
             format => {
-                return Err(VoiceCaptureError::UnsupportedConfig(
-                    format!("Unsupported sample format: {format:?}"),
-                ));
+                return Err(VoiceCaptureError::UnsupportedConfig(format!(
+                    "Unsupported sample format: {format:?}"
+                )));
             }
         };
 
@@ -384,7 +384,9 @@ impl AudioCapture {
                         }
                         data.len()
                     };
-                    stats.total_samples.fetch_add(samples as u64, Ordering::Relaxed);
+                    stats
+                        .total_samples
+                        .fetch_add(samples as u64, Ordering::Relaxed);
                 },
                 move |err| {
                     err_stats.callback_errors.fetch_add(1, Ordering::Relaxed);
@@ -443,7 +445,9 @@ impl AudioCapture {
                         }
                         f32_data.len()
                     };
-                    stats.total_samples.fetch_add(samples as u64, Ordering::Relaxed);
+                    stats
+                        .total_samples
+                        .fetch_add(samples as u64, Ordering::Relaxed);
                 },
                 move |err| {
                     err_stats.callback_errors.fetch_add(1, Ordering::Relaxed);
@@ -502,7 +506,9 @@ impl AudioCapture {
                         }
                         f32_data.len()
                     };
-                    stats.total_samples.fetch_add(samples as u64, Ordering::Relaxed);
+                    stats
+                        .total_samples
+                        .fetch_add(samples as u64, Ordering::Relaxed);
                 },
                 move |err| {
                     err_stats.callback_errors.fetch_add(1, Ordering::Relaxed);

@@ -2,10 +2,10 @@
 
 //! NPC dialog organism -- portrait + text + interactive options.
 
+use crate::convert::rgba_to_color32;
+use crate::molecules::npc_option::NpcOption;
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::molecules::npc_option::NpcOption;
-use crate::convert::rgba_to_color32;
 
 /// NPC dialog data.
 pub struct NpcDialogData {

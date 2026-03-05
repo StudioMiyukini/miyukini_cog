@@ -3,7 +3,7 @@
 use crate::aggregates::compute_aggregates;
 use crate::data::MiyukiniWatchDb;
 use crate::errors::MiyukiniWatchError;
-use chrono::{Local, Duration};
+use chrono::{Duration, Local};
 use std::sync::Arc;
 
 /// Agrège les métriques et exécute les purges selon la rétention.

@@ -59,7 +59,11 @@ pub trait AdminCellReader: Send + Sync {
 /// Trait de vérification d'intégrité (collaboration TAMR).
 pub trait IntegrityVerifier: Send + Sync {
     /// Vérifie l'intégrité du module (contexte TAMR).
-    fn verify_integrity(&self, module_id: &str, integrity: &IntegrityMetadata) -> IntegrityVerificationResult;
+    fn verify_integrity(
+        &self,
+        module_id: &str,
+        integrity: &IntegrityMetadata,
+    ) -> IntegrityVerificationResult;
 }
 
 /// Service de tests des modules : découverte, lecture cellule Admin, exécution tests, intégrité.
@@ -90,7 +94,7 @@ where
     }
 
     /// Liste les modules présents (via Master Butler via BondingBrother).
-    #[must_use] 
+    #[must_use]
     pub fn discover_modules(&self) -> Vec<ModuleInfo> {
         self.discovery.discover_modules()
     }
@@ -104,7 +108,10 @@ where
 
     /// Exécute les tests embarqués du module (interprétation du manifeste par MiyukiniAdmin).
     /// Environnement de diagnostic ; pas de modification des données métier.
-    pub fn run_embedded_tests(&self, module_id: &str) -> Result<EmbeddedTestResults, ModuleTestingError> {
+    pub fn run_embedded_tests(
+        &self,
+        module_id: &str,
+    ) -> Result<EmbeddedTestResults, ModuleTestingError> {
         let cell = self.read_admin_cell(module_id)?;
         let now = chrono::Utc::now();
         let timestamp = now.to_rfc3339();
@@ -152,7 +159,10 @@ where
     }
 
     /// Vérifie l'intégrité du module en collaboration avec TAMR (via BondingBrother).
-    pub fn verify_integrity(&self, module_id: &str) -> Result<IntegrityVerificationResult, ModuleTestingError> {
+    pub fn verify_integrity(
+        &self,
+        module_id: &str,
+    ) -> Result<IntegrityVerificationResult, ModuleTestingError> {
         let cell = self.read_admin_cell(module_id)?;
         Ok(self
             .integrity_verifier
@@ -164,11 +174,12 @@ where
 fn execute_single_embedded_test(test: &EmbeddedTestDef) -> (TestVerdict, u64) {
     let start = std::time::Instant::now();
     // Stub : selon le critère "pass", on simule un verdict (en production : appel au module selon protocol).
-    let verdict = if test.criteria.pass == "zero_violations" || test.criteria.pass == "all_checks_ok" {
-        TestVerdict::Pass
-    } else {
-        TestVerdict::Pass
-    };
+    let verdict =
+        if test.criteria.pass == "zero_violations" || test.criteria.pass == "all_checks_ok" {
+            TestVerdict::Pass
+        } else {
+            TestVerdict::Pass
+        };
     let duration_ms = start.elapsed().as_millis() as u64;
     (verdict, duration_ms)
 }
@@ -184,7 +195,7 @@ pub struct StubModuleDiscovery {
 
 impl StubModuleDiscovery {
     /// Crée un discovery stub avec une liste vide.
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             modules: RwLock::new(Vec::new()),
@@ -221,7 +232,7 @@ pub struct StubAdminCellReader {
 
 impl StubAdminCellReader {
     /// Crée un reader stub vide.
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             cells: RwLock::new(HashMap::new()),
@@ -230,13 +241,20 @@ impl StubAdminCellReader {
 
     /// Enregistre la cellule Admin d'un module (démo / tests).
     pub fn register_cell(&self, module_id: String, cell: AdminCell) {
-        self.cells.write().expect("RwLock poisoned").insert(module_id, cell);
+        self.cells
+            .write()
+            .expect("RwLock poisoned")
+            .insert(module_id, cell);
     }
 }
 
 impl AdminCellReader for StubAdminCellReader {
     fn read_admin_cell(&self, module_id: &str) -> Option<AdminCell> {
-        self.cells.read().expect("RwLock poisoned").get(module_id).cloned()
+        self.cells
+            .read()
+            .expect("RwLock poisoned")
+            .get(module_id)
+            .cloned()
     }
 }
 
@@ -245,7 +263,11 @@ impl AdminCellReader for StubAdminCellReader {
 pub struct StubIntegrityVerifier;
 
 impl IntegrityVerifier for StubIntegrityVerifier {
-    fn verify_integrity(&self, module_id: &str, _integrity: &IntegrityMetadata) -> IntegrityVerificationResult {
+    fn verify_integrity(
+        &self,
+        module_id: &str,
+        _integrity: &IntegrityMetadata,
+    ) -> IntegrityVerificationResult {
         IntegrityVerificationResult {
             module_id: module_id.to_string(),
             conformant: true,

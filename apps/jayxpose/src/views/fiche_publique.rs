@@ -1,8 +1,8 @@
 //! Fiche publique / annuaire (XP-E12) — visibilite, confidentialite, apercu.
 
+use super::JayXposeState;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::JayXposeState;
 
 /// Champ avec selecteur de confidentialite.
 const PRIVACY_FIELDS: &[(&str, &str)] = &[
@@ -32,22 +32,56 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
 
     // Charger donnees
-    let exposant = db.exposant_by_id(&exposant_id).ok().flatten().unwrap_or_default();
+    let exposant = db
+        .exposant_by_id(&exposant_id)
+        .ok()
+        .flatten()
+        .unwrap_or_default();
     let products = db.produits_by_exposant(&exposant_id).unwrap_or_default();
-    let featured: Vec<_> = products.iter().filter(|p| p.is_featured.unwrap_or(false)).take(6).collect();
-    let confidentialite = db.confidentialite_by_exposant(&exposant_id).unwrap_or_default();
+    let featured: Vec<_> = products
+        .iter()
+        .filter(|p| p.is_featured.unwrap_or(false))
+        .take(6)
+        .collect();
+    let confidentialite = db
+        .confidentialite_by_exposant(&exposant_id)
+        .unwrap_or_default();
 
     let visible_annuaire = exposant.visible_annuaire.unwrap_or(false);
-    let vitrine_status = exposant.vitrine_status.clone().unwrap_or_else(|| "brouillon".to_string());
-    let company = exposant.company_name.clone().unwrap_or_else(|| "Mon entreprise".to_string());
+    let vitrine_status = exposant
+        .vitrine_status
+        .clone()
+        .unwrap_or_else(|| "brouillon".to_string());
+    let company = exposant
+        .company_name
+        .clone()
+        .unwrap_or_else(|| "Mon entreprise".to_string());
     let secteur = exposant.secteur.clone().unwrap_or_default();
-    let desc = exposant.description_short.clone().unwrap_or_else(|| "Aucune description.".to_string());
-    let slug_display = exposant.vitrine_slug.clone().unwrap_or_else(|| "---".to_string());
+    let desc = exposant
+        .description_short
+        .clone()
+        .unwrap_or_else(|| "Aucune description.".to_string());
+    let slug_display = exposant
+        .vitrine_slug
+        .clone()
+        .unwrap_or_else(|| "---".to_string());
 
     // Pre-calcul styles conditionnels
-    let vis_btn_bg = if visible_annuaire { c.accent_green.to_string() } else { c.bg_hover.to_string() };
-    let vis_btn_color = if visible_annuaire { "white".to_string() } else { c.text_secondary.to_string() };
-    let vis_btn_text = if visible_annuaire { "Visible ✓" } else { "Masque" };
+    let vis_btn_bg = if visible_annuaire {
+        c.accent_green.to_string()
+    } else {
+        c.bg_hover.to_string()
+    };
+    let vis_btn_color = if visible_annuaire {
+        "white".to_string()
+    } else {
+        c.text_secondary.to_string()
+    };
+    let vis_btn_text = if visible_annuaire {
+        "Visible ✓"
+    } else {
+        "Masque"
+    };
 
     rsx! {
         div {

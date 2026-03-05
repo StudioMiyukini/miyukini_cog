@@ -56,11 +56,7 @@ impl QuotaOps {
     ///
     /// `max_bytes == 0` signifie illimite.
     #[cfg(feature = "legacy-sqlite")]
-    pub fn set_max(
-        db: &MiyucloudDb,
-        owner_id: &str,
-        max_bytes: u64,
-    ) -> Result<(), MiyucloudError> {
+    pub fn set_max(db: &MiyucloudDb, owner_id: &str, max_bytes: u64) -> Result<(), MiyucloudError> {
         db.quota_set_max(owner_id, max_bytes)
     }
 }

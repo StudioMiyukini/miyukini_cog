@@ -4,9 +4,9 @@
 //! Flux : montant → categorie → valider.
 //! Contrats : CK-OP-02, CK-TK-11, CK-AUD-01.
 
+use super::{JayKontaState, PurseSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{JayKontaState, PurseSection};
 
 /// Categories rapides pour saisie express.
 const QUICK_CATEGORIES: &[(&str, &str)] = &[
@@ -242,11 +242,24 @@ pub fn PurseMovementForm(state: Signal<JayKontaState>) -> Element {
 }
 
 #[component]
-fn TypeButton(label: &'static str, is_active: bool, color: String, onclick: EventHandler<MouseEvent>) -> Element {
+fn TypeButton(
+    label: &'static str,
+    is_active: bool,
+    color: String,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
     let c = use_palette();
-    let bg = if is_active { format!("{color}20") } else { c.bg_secondary.to_string() };
+    let bg = if is_active {
+        format!("{color}20")
+    } else {
+        c.bg_secondary.to_string()
+    };
     let text_color = if is_active { &color } else { c.text_secondary };
-    let border = if is_active { format!("2px solid {color}") } else { format!("1px solid {}", c.border) };
+    let border = if is_active {
+        format!("2px solid {color}")
+    } else {
+        format!("1px solid {}", c.border)
+    };
 
     rsx! {
         button {

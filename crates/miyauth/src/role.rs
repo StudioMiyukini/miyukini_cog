@@ -11,7 +11,10 @@ use crate::types::{IdentityContext, IdentityRole};
 /// @human: Détermine le rôle identité à partir du contexte validé par KindMother.
 /// @do: identity_role_under_governance
 /// tool.identity.role — ne décide pas de l'autorisation.
-pub fn role(ctx: &GovernedContext, context: &IdentityContext) -> Result<IdentityRole, MiyauthError> {
+pub fn role(
+    ctx: &GovernedContext,
+    context: &IdentityContext,
+) -> Result<IdentityRole, MiyauthError> {
     if !ctx.has_mandate() {
         return Err(MiyauthError::NoMandate);
     }

@@ -36,13 +36,11 @@ pub mod errors;
 pub mod vad;
 
 pub use admin_cell::{
-    get_admin_cell, init_admin_cell, alicia_capture_admin_cell,
-    AliciaCaptureAdminCell, AliciaCaptureIdentification,
-    AliciaCaptureIntegrity, AliciaCaptureTestManifest, TOOLKIT_ID,
+    alicia_capture_admin_cell, get_admin_cell, init_admin_cell, AliciaCaptureAdminCell,
+    AliciaCaptureIdentification, AliciaCaptureIntegrity, AliciaCaptureTestManifest, TOOLKIT_ID,
 };
 pub use capture::{
-    AudioCapture, CaptureConfig, CaptureHandle, CaptureStats, CaptureStatsSnapshot,
-    OverflowPolicy,
+    AudioCapture, CaptureConfig, CaptureHandle, CaptureStats, CaptureStatsSnapshot, OverflowPolicy,
 };
 pub use context::VoiceCaptureContext;
 pub use devices::{AudioDeviceInfo, DeviceEnumerator};

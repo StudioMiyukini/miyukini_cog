@@ -1,7 +1,7 @@
 //! Construction du BotContext depuis les sources de données.
 
+use chrono::{DateTime, Timelike, Utc};
 use std::collections::HashMap;
-use chrono::{DateTime, Utc, Timelike};
 
 /// Contexte passé au moteur de décision et à l'injecteur de templates.
 /// Toutes les sources sont agrégées ici.
@@ -151,7 +151,11 @@ impl BotContextBuilder {
 
     /// Configure le profil utilisateur.
     pub fn with_profile(mut self, pseudo: String, langue: Option<String>) -> Self {
-        self.context.pseudo = if pseudo.is_empty() { "habitant".to_string() } else { pseudo };
+        self.context.pseudo = if pseudo.is_empty() {
+            "habitant".to_string()
+        } else {
+            pseudo
+        };
         self.context.langue = langue.unwrap_or_else(|| "fr".to_string());
         self
     }
@@ -191,7 +195,8 @@ impl BotContextBuilder {
         if let Some((_name, dt)) = &event {
             let now = Utc::now();
             let diff = dt.signed_duration_since(now);
-            self.context.evenement_dans_moins_d_une_heure = diff.num_hours() < 1 && diff.num_seconds() > 0;
+            self.context.evenement_dans_moins_d_une_heure =
+                diff.num_hours() < 1 && diff.num_seconds() > 0;
         }
         self.context.evenement_prochain = event;
         self

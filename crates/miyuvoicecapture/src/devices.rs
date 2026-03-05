@@ -164,8 +164,7 @@ impl DeviceEnumerator {
             .map(|d| d.name().to_string())
             .map_err(|e| VoiceCaptureError::DeviceEnumeration(e.to_string()))?;
 
-        let is_default = default_name
-            .is_some_and(|default| *default == name);
+        let is_default = default_name.is_some_and(|default| *default == name);
 
         let (sample_rates, channels) = self.query_supported_configs(device)?;
 

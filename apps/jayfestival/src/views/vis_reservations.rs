@@ -1,8 +1,8 @@
 //! VIS-E07 — Reservations visiteur.
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton};
 
 /// Gestion des réservations du visiteur.
 #[component]

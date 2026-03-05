@@ -10,8 +10,8 @@
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
 /// Adresse par défaut de KindMother.
 const KINDMOTHER_DEFAULT_ADDR: &str = "127.0.0.1:50051";
@@ -176,14 +176,12 @@ pub fn ensure_dependencies() -> Result<(), String> {
     })?;
 
     // Utiliser le même profile que Central (release si exe dans target/release)
-    let release = std::env::current_exe()
-        .ok()
-        .is_some_and(|exe_path| {
-            exe_path
-                .parent()
-                .and_then(std::path::Path::file_name)
-                .is_some_and(|n| n == "release")
-        });
+    let release = std::env::current_exe().ok().is_some_and(|exe_path| {
+        exe_path
+            .parent()
+            .and_then(std::path::Path::file_name)
+            .is_some_and(|n| n == "release")
+    });
 
     build_packages(
         &workspace_root,
@@ -208,21 +206,21 @@ fn find_kindmother_executable() -> Option<PathBuf> {
     // 1. Vérifier dans le même répertoire que l'exécutable Central
     if let Ok(exe_path) = std::env::current_exe() {
         let exe_dir = exe_path.parent()?;
-        
+
         // Windows: kindmother-server.exe, Unix: kindmother-server
         let km_name = if cfg!(windows) {
             "kindmother-server.exe"
         } else {
             "kindmother-server"
         };
-        
+
         let km_path = exe_dir.join(km_name);
         if km_path.exists() {
             tracing::info!("Found kindmother-server at {:?}", km_path);
             return Some(km_path);
         }
     }
-    
+
     // 2. Vérifier dans target/debug ou target/release (développement)
     if let Ok(cwd) = std::env::current_dir() {
         for profile in &["debug", "release"] {
@@ -231,7 +229,7 @@ fn find_kindmother_executable() -> Option<PathBuf> {
             } else {
                 "kindmother-server"
             };
-            
+
             let km_path = cwd.join("target").join(profile).join(km_name);
             if km_path.exists() {
                 tracing::info!("Found kindmother-server at {:?}", km_path);
@@ -239,7 +237,7 @@ fn find_kindmother_executable() -> Option<PathBuf> {
             }
         }
     }
-    
+
     // 3. Vérifier dans le PATH
     if let Ok(output) = Command::new(if cfg!(windows) { "where" } else { "which" })
         .arg("kindmother-server")
@@ -254,7 +252,7 @@ fn find_kindmother_executable() -> Option<PathBuf> {
             }
         }
     }
-    
+
     None
 }
 
@@ -263,7 +261,10 @@ fn find_kindmother_executable() -> Option<PathBuf> {
 fn is_installed_in_system_dir() -> bool {
     std::env::current_exe()
         .ok()
-        .and_then(|p| p.parent().map(|parent| parent.to_string_lossy().into_owned()))
+        .and_then(|p| {
+            p.parent()
+                .map(|parent| parent.to_string_lossy().into_owned())
+        })
         .map_or(false, |path| {
             path.contains("Program Files") || path.contains("Program Files (x86)")
         })
@@ -273,14 +274,22 @@ fn is_installed_in_system_dir() -> bool {
 fn kindmother_data_dir() -> PathBuf {
     if cfg!(windows) && is_installed_in_system_dir() {
         if let Ok(local) = std::env::var("LOCALAPPDATA") {
-            let data_dir = PathBuf::from(local).join("Miyukini-COG").join("data").join("kindmother");
-            tracing::info!("Installed app: using LOCALAPPDATA for KindMother data: {:?}", data_dir);
+            let data_dir = PathBuf::from(local)
+                .join("Miyukini-COG")
+                .join("data")
+                .join("kindmother");
+            tracing::info!(
+                "Installed app: using LOCALAPPDATA for KindMother data: {:?}",
+                data_dir
+            );
             return data_dir;
         }
     }
 
-    std::env::current_dir()
-        .map_or_else(|_| PathBuf::from("./data/kindmother"), |p| p.join("data").join("kindmother"))
+    std::env::current_dir().map_or_else(
+        |_| PathBuf::from("./data/kindmother"),
+        |p| p.join("data").join("kindmother"),
+    )
 }
 
 /// Lance le service KindMother.
@@ -293,9 +302,12 @@ fn launch_kindmother_process(exe_path: &PathBuf) -> Result<Child, String> {
     if let Err(e) = std::fs::create_dir_all(&data_dir) {
         tracing::warn!("Could not create data directory: {}", e);
     }
-    
+
     Command::new(exe_path)
-        .env("KINDMOTHER_DATA_DIR", data_dir.to_string_lossy().to_string())
+        .env(
+            "KINDMOTHER_DATA_DIR",
+            data_dir.to_string_lossy().to_string(),
+        )
         .env("KINDMOTHER_LISTEN_ADDR", KINDMOTHER_DEFAULT_ADDR)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
@@ -312,15 +324,15 @@ fn wait_for_kindmother_ready(addr: &str, max_attempts: u32) -> bool {
             attempt,
             max_attempts
         );
-        
+
         if is_kindmother_running(addr) {
             tracing::info!("KindMother is now ready after {} attempts", attempt);
             return true;
         }
-        
+
         thread::sleep(Duration::from_millis(RETRY_DELAY_MS));
     }
-    
+
     false
 }
 
@@ -335,15 +347,15 @@ fn wait_for_kindmother_ready(addr: &str, max_attempts: u32) -> bool {
 pub fn ensure_kindmother_running() -> LaunchResult {
     let addr = std::env::var("KINDMOTHER_LISTEN_ADDR")
         .unwrap_or_else(|_| KINDMOTHER_DEFAULT_ADDR.to_string());
-    
+
     tracing::info!("Checking if KindMother is running at {}", addr);
-    
+
     // Vérifier si déjà en cours d'exécution
     if is_kindmother_running(&addr) {
         tracing::info!("KindMother is already running at {}", addr);
         return LaunchResult::AlreadyRunning;
     }
-    
+
     // Trouver l'exécutable
     let Some(exe_path) = find_kindmother_executable() else {
         let msg = "Could not find kindmother-server executable. \
@@ -361,7 +373,7 @@ pub fn ensure_kindmother_running() -> LaunchResult {
             return LaunchResult::Failed(e);
         }
     };
-    
+
     // Attendre que le service soit prêt
     if wait_for_kindmother_ready(&addr, MAX_RETRY_ATTEMPTS) {
         tracing::info!("KindMother launched successfully");
@@ -378,7 +390,7 @@ pub fn ensure_kindmother_running() -> LaunchResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_is_kindmother_running_when_not_running() {
         // Sur un port probablement non utilisé

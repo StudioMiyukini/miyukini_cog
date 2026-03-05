@@ -2,10 +2,10 @@
 
 //! Minimap overlay organism.
 
-use egui::{Color32, Context, Pos2, Vec2};
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::minimap_marker::MarkerType;
 use crate::convert::rgba_to_color32;
+use egui::{Color32, Context, Pos2, Vec2};
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// A marker to display on the minimap.
 #[derive(Debug, Clone)]
@@ -23,12 +23,7 @@ pub struct Minimap;
 
 impl Minimap {
     /// Draw the minimap overlay at the top-right corner.
-    pub fn show(
-        ctx: &Context,
-        entities: &[MinimapEntity],
-        screen_w: f32,
-        minimap_size: f32,
-    ) {
+    pub fn show(ctx: &Context, entities: &[MinimapEntity], screen_w: f32, minimap_size: f32) {
         let margin = 10.0;
         let pos = Pos2::new(screen_w - minimap_size - margin, margin);
 

@@ -59,10 +59,7 @@ impl ConflictResolver {
     ///
     /// INVARIANT : cette methode ne supprime jamais de donnees. Elle cree
     /// toujours une copie supplementaire.
-    pub fn create_conflict_copy(
-        file_entry: &FileEntry,
-        remote_node_id: &str,
-    ) -> SyncConflict {
+    pub fn create_conflict_copy(file_entry: &FileEntry, remote_node_id: &str) -> SyncConflict {
         let now = chrono::Utc::now().to_rfc3339();
         let conflict_id = uuid::Uuid::new_v4().to_string();
 
@@ -146,14 +143,8 @@ mod tests {
     #[test]
     fn test_detect_conflict() {
         // Concurrent clocks -> conflict
-        let local = VectorClock::from_entries(vec![
-            ("node-a".into(), 2),
-            ("node-b".into(), 1),
-        ]);
-        let remote = VectorClock::from_entries(vec![
-            ("node-a".into(), 1),
-            ("node-b".into(), 2),
-        ]);
+        let local = VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]);
+        let remote = VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 2)]);
         let result = ConflictResolver::detect(&local, &remote);
         assert_eq!(result, Some(ConflictType::ConcurrentModification));
     }

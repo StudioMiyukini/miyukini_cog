@@ -22,8 +22,13 @@ pub fn create(
     }
     let id = format!("ban:{}", UuidIdGenerator.generate());
     let until_opt = until.map(String::from);
-    let mut guard = store::bans().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    guard.insert(id.clone(), (user_id.to_string(), reason.to_string(), until_opt));
+    let mut guard = store::bans()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard.insert(
+        id.clone(),
+        (user_id.to_string(), reason.to_string(), until_opt),
+    );
     Ok(id)
 }
 
@@ -37,13 +42,18 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<BanItem>, MiyumoderationforumEr
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let guard = store::bans().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    let items = guard.iter().map(|(id, (user_id, reason, until))| BanItem {
-        id: id.clone(),
-        user_id: user_id.clone(),
-        reason: reason.clone(),
-        until: until.clone(),
-    }).collect();
+    let guard = store::bans()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items = guard
+        .iter()
+        .map(|(id, (user_id, reason, until))| BanItem {
+            id: id.clone(),
+            user_id: user_id.clone(),
+            reason: reason.clone(),
+            until: until.clone(),
+        })
+        .collect();
     Ok(items)
 }
 

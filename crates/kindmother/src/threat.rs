@@ -126,7 +126,13 @@ mod tests {
     fn test_detector_default() {
         let detector = DefaultThreatDetector;
         let instance = InstanceState::new(InstanceType::Mother);
-        assert_eq!(detector.check_corruption(&instance.identity), ThreatLevel::None);
-        assert_eq!(detector.check_anomalies(&instance.identity), ThreatLevel::None);
+        assert_eq!(
+            detector.check_corruption(&instance.identity),
+            ThreatLevel::None
+        );
+        assert_eq!(
+            detector.check_anomalies(&instance.identity),
+            ThreatLevel::None
+        );
     }
 }

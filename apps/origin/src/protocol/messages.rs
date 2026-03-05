@@ -134,7 +134,9 @@ impl RegisterPayload {
     /// Retourne la version des Cores comme String (si UTF-8 valide).
     #[must_use]
     pub fn core_version_str(&self) -> Option<String> {
-        std::str::from_utf8(&self.core_version).ok().map(String::from)
+        std::str::from_utf8(&self.core_version)
+            .ok()
+            .map(String::from)
     }
 }
 
@@ -377,7 +379,11 @@ pub struct ClosePayload {
 impl ClosePayload {
     /// Crée un nouveau payload CLOSE.
     #[must_use]
-    pub fn new(session_id: [u8; SESSION_ID_SIZE], reason: CloseReason, message: impl Into<Bytes>) -> Self {
+    pub fn new(
+        session_id: [u8; SESSION_ID_SIZE],
+        reason: CloseReason,
+        message: impl Into<Bytes>,
+    ) -> Self {
         Self {
             session_id,
             reason,
@@ -469,7 +475,9 @@ impl ServiceBlockPayload {
         let block_len = buf.get_u32() as usize;
 
         if buf.remaining() < block_len {
-            return Err(FrameError::Malformed("SERVICE_BLOCK block incomplete".into()));
+            return Err(FrameError::Malformed(
+                "SERVICE_BLOCK block incomplete".into(),
+            ));
         }
 
         let encrypted_block = buf.copy_to_bytes(block_len);
@@ -665,13 +673,11 @@ mod tests {
     #[test]
     fn test_service_manifest_json() {
         let manifest = ServiceManifest {
-            services: vec![
-                ServiceEntry {
-                    id: "jayfestival".to_string(),
-                    version: "1.0.0".to_string(),
-                    mip_hash: "abc123".to_string(),
-                },
-            ],
+            services: vec![ServiceEntry {
+                id: "jayfestival".to_string(),
+                version: "1.0.0".to_string(),
+                mip_hash: "abc123".to_string(),
+            }],
         };
         let json = serde_json::to_string(&manifest).unwrap();
         let parsed: ServiceManifest = serde_json::from_str(&json).unwrap();

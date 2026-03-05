@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuDeclarations ; expose les modules tools.
 /// @do: expose_miyudeclarations_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod deadline;
@@ -44,7 +43,9 @@ mod tests {
         let c = ctx();
         let filters = DeclarationFilters::default();
         assert!(declaration_list(&c, &filters).unwrap().is_empty());
-        assert!(deadline_list(&c, "2024-01-01", "2024-12-31").unwrap().is_empty());
+        assert!(deadline_list(&c, "2024-01-01", "2024-12-31")
+            .unwrap()
+            .is_empty());
         let est = estimate_cotisations(&c, 0.0, "micro").unwrap();
         assert_eq!(est.total, 0.0);
         let tva = tva_prepare(&c, "2024-Q1").unwrap();

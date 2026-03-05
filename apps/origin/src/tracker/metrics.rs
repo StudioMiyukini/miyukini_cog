@@ -191,7 +191,8 @@ impl TrackerMetrics {
 
     /// Enregistre des bytes reçus.
     pub fn record_bytes_received(&self, bytes: usize) {
-        self.bytes_received.fetch_add(bytes as u64, Ordering::Relaxed);
+        self.bytes_received
+            .fetch_add(bytes as u64, Ordering::Relaxed);
     }
 
     /// Enregistre des bytes envoyés.

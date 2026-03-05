@@ -17,9 +17,9 @@ use chrono::Local;
 use kindmother_client::{ClientError, KindMotherClient};
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::OnceLock;
 use thiserror::Error;
 use tokio::sync::OnceCell;
-use std::sync::OnceLock;
 
 /// Erreur de base de données JayKonta (KindMother Client).
 #[derive(Error, Debug)]
@@ -94,7 +94,7 @@ fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
 }
 
 /// Base de données JayKonta via KindMother Client.
-/// 
+///
 /// Fournit une API synchrone pour la compatibilité avec le code existant.
 #[derive(Clone)]
 pub struct JayKontaDb {
@@ -252,7 +252,10 @@ impl JayKontaDb {
     pub async fn is_bootstrap_needed_async(&self) -> Result<bool, DbError> {
         let rows = self
             .client
-            .query("SELECT COUNT(*) as cnt FROM audit_log", Vec::<String>::new())
+            .query(
+                "SELECT COUNT(*) as cnt FROM audit_log",
+                Vec::<String>::new(),
+            )
             .await?;
 
         let count = rows
@@ -356,7 +359,10 @@ impl JayKontaDb {
     }
 
     /// Insère un paiement et met à jour la facture associée (async).
-    pub async fn insert_payment_and_update_invoice_async(&self, p: &PaymentRecord) -> Result<(), DbError> {
+    pub async fn insert_payment_and_update_invoice_async(
+        &self,
+        p: &PaymentRecord,
+    ) -> Result<(), DbError> {
         // Insert payment
         self.client
             .execute(
@@ -729,7 +735,9 @@ impl JayKontaDb {
     // Helpers
     // -----------------------------------------------------------------------
 
-    fn row_to_movement(row: &HashMap<String, serde_json::Value>) -> Result<MovementRecord, DbError> {
+    fn row_to_movement(
+        row: &HashMap<String, serde_json::Value>,
+    ) -> Result<MovementRecord, DbError> {
         Ok(MovementRecord {
             id: Self::get_string(row, "id"),
             scope: Self::get_string(row, "scope"),

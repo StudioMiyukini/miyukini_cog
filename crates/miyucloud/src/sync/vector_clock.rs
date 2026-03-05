@@ -190,10 +190,7 @@ mod tests {
     fn test_compare_before_subset() {
         // a = {node-a: 1}, b = {node-a: 1, node-b: 1} -> a < b
         let a = VectorClock::from_entries(vec![("node-a".into(), 1)]);
-        let b = VectorClock::from_entries(vec![
-            ("node-a".into(), 1),
-            ("node-b".into(), 1),
-        ]);
+        let b = VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 1)]);
         assert_eq!(a.compare(&b), ClockOrder::Before);
     }
 
@@ -208,10 +205,7 @@ mod tests {
     #[test]
     fn test_compare_after_superset() {
         // a = {node-a: 1, node-b: 2}, b = {node-a: 1} -> a > b
-        let a = VectorClock::from_entries(vec![
-            ("node-a".into(), 1),
-            ("node-b".into(), 2),
-        ]);
+        let a = VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 2)]);
         let b = VectorClock::from_entries(vec![("node-a".into(), 1)]);
         assert_eq!(a.compare(&b), ClockOrder::After);
     }
@@ -219,14 +213,8 @@ mod tests {
     #[test]
     fn test_compare_concurrent() {
         // a = {node-a: 2, node-b: 1}, b = {node-a: 1, node-b: 2} -> concurrent
-        let a = VectorClock::from_entries(vec![
-            ("node-a".into(), 2),
-            ("node-b".into(), 1),
-        ]);
-        let b = VectorClock::from_entries(vec![
-            ("node-a".into(), 1),
-            ("node-b".into(), 2),
-        ]);
+        let a = VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]);
+        let b = VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 2)]);
         assert_eq!(a.compare(&b), ClockOrder::Concurrent);
     }
 
@@ -240,10 +228,7 @@ mod tests {
 
     #[test]
     fn test_merge_takes_max() {
-        let mut a = VectorClock::from_entries(vec![
-            ("node-a".into(), 3),
-            ("node-b".into(), 1),
-        ]);
+        let mut a = VectorClock::from_entries(vec![("node-a".into(), 3), ("node-b".into(), 1)]);
         let b = VectorClock::from_entries(vec![
             ("node-a".into(), 1),
             ("node-b".into(), 5),
@@ -258,14 +243,8 @@ mod tests {
     #[test]
     fn test_merge_symmetric() {
         // merge(A, B) gives the same result as merge(B, A)
-        let a = VectorClock::from_entries(vec![
-            ("node-a".into(), 2),
-            ("node-b".into(), 1),
-        ]);
-        let b = VectorClock::from_entries(vec![
-            ("node-a".into(), 1),
-            ("node-b".into(), 3),
-        ]);
+        let a = VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]);
+        let b = VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 3)]);
 
         let mut a_merged = a.clone();
         a_merged.merge(&b);
@@ -286,10 +265,7 @@ mod tests {
 
     #[test]
     fn test_from_entries() {
-        let clock = VectorClock::from_entries(vec![
-            ("node-a".into(), 5),
-            ("node-b".into(), 3),
-        ]);
+        let clock = VectorClock::from_entries(vec![("node-a".into(), 5), ("node-b".into(), 3)]);
         assert_eq!(clock.get("node-a"), 5);
         assert_eq!(clock.get("node-b"), 3);
         assert!(!clock.is_empty());
@@ -297,10 +273,7 @@ mod tests {
 
     #[test]
     fn test_serialize_roundtrip() {
-        let clock = VectorClock::from_entries(vec![
-            ("node-a".into(), 5),
-            ("node-b".into(), 3),
-        ]);
+        let clock = VectorClock::from_entries(vec![("node-a".into(), 5), ("node-b".into(), 3)]);
         let json = serde_json::to_string(&clock).unwrap();
         let restored: VectorClock = serde_json::from_str(&json).unwrap();
         assert_eq!(clock, restored);

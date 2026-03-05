@@ -3,9 +3,9 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyucontactsError;
-use crate::friend::ContactItem;
 use crate::foe;
 use crate::friend;
+use crate::friend::ContactItem;
 
 /// @id: miyucontacts_tool_contacts_list
 /// @role: mutator

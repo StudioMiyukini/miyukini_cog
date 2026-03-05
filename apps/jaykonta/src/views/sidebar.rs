@@ -1,8 +1,8 @@
 //! Sidebar JayKonta — navigation Purse / Account.
 
+use super::{AccountSection, JayKontaSpace, JayKontaState, PurseSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{AccountSection, JayKontaSpace, JayKontaState, PurseSection};
 
 #[component]
 pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
@@ -78,7 +78,12 @@ pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
 }
 
 #[component]
-fn SpaceTab(label: &'static str, icon: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
+fn SpaceTab(
+    label: &'static str,
+    icon: &'static str,
+    is_active: bool,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
     let c = use_palette();
     let bg = if is_active { c.accent_blue } else { c.bg_hover };
     let color = if is_active { "white" } else { c.text_secondary };
@@ -94,10 +99,19 @@ fn SpaceTab(label: &'static str, icon: &'static str, is_active: bool, onclick: E
 }
 
 #[component]
-fn SidebarItem(icon: &'static str, label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
+fn SidebarItem(
+    icon: &'static str,
+    label: &'static str,
+    is_active: bool,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
     let c = use_palette();
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {

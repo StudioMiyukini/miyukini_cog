@@ -209,6 +209,82 @@ pub struct StorageStats {
     pub sync_peers: u64,
 }
 
+/// Session d'authentification active.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct AuthSession {
+    /// UUID v4 de session.
+    pub id: String,
+    /// ID du proprietaire.
+    pub owner_id: String,
+    /// Date de creation ISO 8601.
+    pub created_at: String,
+    /// Date d'expiration ISO 8601.
+    pub expires_at: String,
+    /// Date de derniere activite ISO 8601.
+    pub last_activity_at: String,
+    /// True si la session est verifiee 2FA.
+    pub totp_verified: bool,
+    /// Hash IP (optionnel).
+    #[serde(default)]
+    pub created_ip_hash: Option<String>,
+    /// User-Agent tronque (optionnel).
+    #[serde(default)]
+    pub created_ua: Option<String>,
+}
+
+/// Reponse de setup TOTP.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct TotpSetupData {
+    /// URI otpauth.
+    pub otpauth_uri: String,
+    /// Codes de recuperation affiches une seule fois.
+    pub recovery_codes: Vec<String>,
+}
+
+/// Statut onboarding.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct OnboardingStatus {
+    /// Etape courante (1..4).
+    pub current_step: u32,
+    /// Passphrase configuree.
+    pub passphrase_set: bool,
+    /// 2FA configuree.
+    pub totp_set: bool,
+    /// Stockage valide.
+    pub storage_verified: bool,
+    /// Onboarding termine.
+    pub completed: bool,
+    /// Date de completion.
+    #[serde(default)]
+    pub completed_at: Option<String>,
+}
+
+/// Metriques de health.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct HealthMetrics {
+    pub total_files: u64,
+    pub total_folders: u64,
+    pub total_size_bytes: u64,
+    pub active_share_links: u64,
+    pub active_sessions: u64,
+    pub sync_peers: u64,
+}
+
+/// Statut de sante detaille.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct HealthStatus {
+    pub status: String,
+    pub db_accessible: bool,
+    pub storage_accessible: bool,
+    pub storage_path: String,
+    pub disk_free_bytes: u64,
+    pub disk_total_bytes: u64,
+    pub file_count: u64,
+    pub total_size_bytes: u64,
+    pub uptime_seconds: u64,
+    pub metrics: HealthMetrics,
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // Types UI specifiques a Central
 // ════════════════════════════════════════════════════════════════════════════
@@ -473,6 +549,26 @@ pub struct MiyuCloudState {
     pub add_peer_ip: String,
     /// Saisie port pour ajout de pair.
     pub add_peer_port: String,
+    /// Sessions d'auth actives.
+    pub auth_sessions: Vec<AuthSession>,
+    /// 2FA activee.
+    pub totp_enabled: bool,
+    /// URI otpauth du setup courant.
+    pub totp_otpauth_uri: Option<String>,
+    /// Codes de recuperation recents.
+    pub recovery_codes: Vec<String>,
+    /// Modal recovery codes ouverte.
+    pub recovery_modal_open: bool,
+    /// Compte pour le setup TOTP.
+    pub totp_account_name: String,
+    /// Code TOTP saisi.
+    pub totp_code_input: String,
+    /// Code recovery saisi.
+    pub recovery_code_input: String,
+    /// Statut onboarding.
+    pub onboarding_status: Option<OnboardingStatus>,
+    /// Statut health detaille.
+    pub health_status: Option<HealthStatus>,
 }
 
 impl Default for MiyuCloudState {
@@ -516,6 +612,16 @@ impl Default for MiyuCloudState {
             add_peer_form_open: false,
             add_peer_ip: String::new(),
             add_peer_port: "11440".to_string(),
+            auth_sessions: Vec::new(),
+            totp_enabled: false,
+            totp_otpauth_uri: None,
+            recovery_codes: Vec::new(),
+            recovery_modal_open: false,
+            totp_account_name: "owner@miyucloud.local".to_string(),
+            totp_code_input: String::new(),
+            recovery_code_input: String::new(),
+            onboarding_status: None,
+            health_status: None,
         }
     }
 }

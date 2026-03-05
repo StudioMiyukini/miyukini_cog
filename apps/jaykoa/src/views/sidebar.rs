@@ -6,10 +6,10 @@
 //! - Liste des agendas avec filtrage
 //! - Services synchronises (JayFestival, JayRDV)
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use jaykoa::data::Agenda;
 use chrono::{Datelike, NaiveDate};
+use dioxus::prelude::*;
+use jaykoa::data::Agenda;
+use miyukini_service_ui::use_palette;
 
 /// Props pour la sidebar JayKoa.
 #[derive(Props, Clone, PartialEq)]
@@ -37,11 +37,15 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
     let mut displayed_month = use_signal(|| props.current_date);
 
     // Separer les agendas personnels et synchronises
-    let personal_agendas: Vec<_> = props.agendas.iter()
+    let personal_agendas: Vec<_> = props
+        .agendas
+        .iter()
         .filter(|a| a.source_service.is_none())
         .cloned()
         .collect();
-    let synced_agendas: Vec<_> = props.agendas.iter()
+    let synced_agendas: Vec<_> = props
+        .agendas
+        .iter()
         .filter(|a| a.source_service.is_some())
         .cloned()
         .collect();
@@ -171,7 +175,8 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
         NaiveDate::from_ymd_opt(year + 1, 1, 1)
     } else {
         NaiveDate::from_ymd_opt(year, month + 1, 1)
-    }.map_or(30, |d| d.pred_opt().unwrap_or(d).day());
+    }
+    .map_or(30, |d| d.pred_opt().unwrap_or(d).day());
 
     // Nombre de semaines a afficher
     let total_days = start_offset as u32 + days_in_month;
@@ -182,9 +187,18 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
 
     // Nom du mois en francais
     let month_name = match month {
-        1 => "Janvier", 2 => "Fevrier", 3 => "Mars", 4 => "Avril",
-        5 => "Mai", 6 => "Juin", 7 => "Juillet", 8 => "Aout",
-        9 => "Septembre", 10 => "Octobre", 11 => "Novembre", 12 => "Decembre",
+        1 => "Janvier",
+        2 => "Fevrier",
+        3 => "Mars",
+        4 => "Avril",
+        5 => "Mai",
+        6 => "Juin",
+        7 => "Juillet",
+        8 => "Aout",
+        9 => "Septembre",
+        10 => "Octobre",
+        11 => "Novembre",
+        12 => "Decembre",
         _ => "?",
     };
 

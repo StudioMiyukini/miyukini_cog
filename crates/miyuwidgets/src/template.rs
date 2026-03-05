@@ -14,16 +14,24 @@ pub fn resolve(ctx: &GovernedContext, template_id: &str) -> Result<String, Miyuw
     if !ctx.has_mandate() {
         return Err(MiyuwidgetsError::NoMandate);
     }
-    let guard = store::templates().lock().map_err(|_| MiyuwidgetsError::InvalidInput("lock".into()))?;
+    let guard = store::templates()
+        .lock()
+        .map_err(|_| MiyuwidgetsError::InvalidInput("lock".into()))?;
     Ok(guard.get(template_id).cloned().unwrap_or_default())
 }
 
 /// Enregistre un template (WriteIntent KindMother). Pour tests et usage applicatif.
-pub fn register(ctx: &GovernedContext, template_id: &str, content: &str) -> Result<(), MiyuwidgetsError> {
+pub fn register(
+    ctx: &GovernedContext,
+    template_id: &str,
+    content: &str,
+) -> Result<(), MiyuwidgetsError> {
     if !ctx.has_mandate() {
         return Err(MiyuwidgetsError::NoMandate);
     }
-    let mut guard = store::templates().lock().map_err(|_| MiyuwidgetsError::InvalidInput("lock".into()))?;
+    let mut guard = store::templates()
+        .lock()
+        .map_err(|_| MiyuwidgetsError::InvalidInput("lock".into()))?;
     guard.insert(template_id.to_string(), content.to_string());
     Ok(())
 }

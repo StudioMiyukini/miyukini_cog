@@ -59,14 +59,19 @@ impl JayRDVAdapter {
                 last_synced_at: Some(now.clone()),
                 ..Default::default()
             };
-            koa_db.reflect_upsert(&e).map_err(|e| JayRDVSyncError(e.to_string()))?;
+            koa_db
+                .reflect_upsert(&e)
+                .map_err(|e| JayRDVSyncError(e.to_string()))?;
             count += 1;
         }
         Ok(count)
     }
 
     /// Synchronise avec des données mock (stub lorsque aucun store JayRDV n'est fourni).
-    pub fn sync_appointments(koa_db: &Arc<JayKoaDb>, target_agenda_id: &str) -> Result<usize, JayRDVSyncError> {
+    pub fn sync_appointments(
+        koa_db: &Arc<JayKoaDb>,
+        target_agenda_id: &str,
+    ) -> Result<usize, JayRDVSyncError> {
         let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
         let mock = vec![
             (
@@ -112,7 +117,9 @@ impl JayRDVAdapter {
                 last_synced_at: Some(now.clone()),
                 ..Default::default()
             };
-            koa_db.reflect_upsert(&e).map_err(|e| JayRDVSyncError(e.to_string()))?;
+            koa_db
+                .reflect_upsert(&e)
+                .map_err(|e| JayRDVSyncError(e.to_string()))?;
             count += 1;
         }
         Ok(count)

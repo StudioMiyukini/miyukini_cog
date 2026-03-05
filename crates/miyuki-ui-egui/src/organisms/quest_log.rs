@@ -2,10 +2,10 @@
 
 //! Quest log organism -- 5 act tabs with quest entries.
 
+use crate::convert::rgba_to_color32;
+use crate::molecules::quest_entry::{QuestEntry, QuestState};
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::molecules::quest_entry::{QuestEntry, QuestState};
-use crate::convert::rgba_to_color32;
 
 /// Quest data for one act.
 #[derive(Debug, Clone)]

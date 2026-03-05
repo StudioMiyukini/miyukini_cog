@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::agents::AgentDef;
-use crate::security::{self, AuditLog, AuditEntry};
+use crate::security::{self, AuditEntry, AuditLog};
 use crate::skills::{SkillInfo, SkillRegistry};
 
 /// Nombre maximum d'itérations de la boucle tool calling.
@@ -217,8 +217,7 @@ pub async fn execute_tool_call(
         serde_json::from_str(&tool_call.function.arguments).unwrap_or_default();
 
     let args_value: serde_json::Value =
-        serde_json::from_str(&tool_call.function.arguments)
-            .unwrap_or(serde_json::Value::Null);
+        serde_json::from_str(&tool_call.function.arguments).unwrap_or(serde_json::Value::Null);
 
     // Exécuter le skill
     let result = SkillRegistry::execute(skill_id, &params).await;
@@ -315,8 +314,7 @@ pub async fn chat_with_tools(
 
                 // Exécuter chaque tool call
                 for tc in &tool_calls {
-                    let (tool_msg, log_entry) =
-                        execute_tool_call(tc, agent, audit_log).await;
+                    let (tool_msg, log_entry) = execute_tool_call(tc, agent, audit_log).await;
                     tool_calls_log.push(log_entry);
                     messages.push(tool_msg);
                 }
@@ -330,7 +328,9 @@ pub async fn chat_with_tools(
             }
             None => {
                 // Réponse textuelle normale — extraire le contenu
-                let content = response.choices.first()
+                let content = response
+                    .choices
+                    .first()
                     .and_then(|c| c.message.get("content"))
                     .and_then(|c| c.as_str())
                     .unwrap_or("Pas de réponse")

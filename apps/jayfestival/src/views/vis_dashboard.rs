@@ -1,8 +1,8 @@
 //! VIS-E04 — Dashboard visiteur.
 
+use super::components::StatCard;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::StatCard;
 
 /// Dashboard visiteur avec aperçu des événements et activités.
 #[component]
@@ -168,7 +168,12 @@ fn QuickAction(icon: &'static str, label: &'static str) -> Element {
 }
 
 #[component]
-fn ActivityItem(icon: &'static str, title: &'static str, description: &'static str, time: &'static str) -> Element {
+fn ActivityItem(
+    icon: &'static str,
+    title: &'static str,
+    description: &'static str,
+    time: &'static str,
+) -> Element {
     let c = use_palette();
 
     rsx! {

@@ -29,6 +29,9 @@ regex      = "1"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full", "test-util"] }
+axum = "0.8"
+miyustt = { path = "../miyustt" }
+miyutts = { path = "../miyutts" }
 
 [lints.rust]
 unsafe_code = "forbid"

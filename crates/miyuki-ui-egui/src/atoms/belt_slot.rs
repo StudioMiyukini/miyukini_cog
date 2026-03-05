@@ -5,9 +5,9 @@
 //! Belt slots hold consumables (potions, scrolls). They show a key binding
 //! label and optional quantity for stacks.
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Pos2, Response, Rounding, Stroke, Ui, Vec2};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// Belt slot size in logical pixels.
 pub const BELT_SLOT_SIZE: f32 = 36.0;
@@ -64,7 +64,11 @@ impl<'a> BeltSlot<'a> {
         // Item placeholder (colored rect for potions)
         if self.occupied {
             let item_rect = rect.shrink(5.0);
-            painter.rect_filled(item_rect, Rounding::same(2.0), Color32::from_rgb(160, 30, 30));
+            painter.rect_filled(
+                item_rect,
+                Rounding::same(2.0),
+                Color32::from_rgb(160, 30, 30),
+            );
 
             // Quantity
             if self.quantity > 0 {

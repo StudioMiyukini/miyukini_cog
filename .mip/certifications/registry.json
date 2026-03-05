@@ -1,0 +1,236 @@
+﻿{
+    "version":  "1.0",
+    "description":  "Source de vÃ©ritÃ© des certifications MIP. cert_id â†’ folder, agent, tldr.",
+    "certs":  {
+                  "cert.maria.pmp":  {
+                                         "folder":  "pmp",
+                                         "agent":  "maria",
+                                         "name":  "PMP (PMBOK 7)",
+                                         "tldr":  "Gestion projet. 12 principes, 8 domaines. PMI."
+                                     },
+                  "cert.maria.prince2":  {
+                                             "folder":  "prince2",
+                                             "agent":  "maria",
+                                             "name":  "PRINCE2",
+                                             "tldr":  "Gestion par Ã©tapes. 7 principes, 7 thÃ¨mes. AXELOS."
+                                         },
+                  "cert.maria.psm":  {
+                                         "folder":  "psm",
+                                         "agent":  "maria",
+                                         "name":  "PSM",
+                                         "tldr":  "Scrum. RÃ´les, events, artifacts. Scrum.org."
+                                     },
+                  "cert.maria.itil4":  {
+                                           "folder":  "itil4",
+                                           "agent":  "maria",
+                                           "name":  "ITIL 4",
+                                           "tldr":  "Services IT. SVS, 7 principes. PeopleCert."
+                                       },
+                  "cert.fabrice.pspo":  {
+                                            "folder":  "pspo",
+                                            "agent":  "fabrice",
+                                            "name":  "PSPO",
+                                            "tldr":  "Product Owner. Vision, backlog. Scrum.org."
+                                        },
+                  "cert.fabrice.lean_startup":  {
+                                                    "folder":  "lean_startup",
+                                                    "agent":  "fabrice",
+                                                    "name":  "Lean Startup",
+                                                    "tldr":  "Build-Measure-Learn, MVP. Eric Ries."
+                                                },
+                  "cert.denis.togaf":  {
+                                           "folder":  "togaf",
+                                           "agent":  "denis",
+                                           "name":  "TOGAF",
+                                           "tldr":  "Architecture entreprise. ADM 10 phases. Open Group."
+                                       },
+                  "cert.denis.iso_25010":  {
+                                               "folder":  "iso_25010",
+                                               "agent":  "denis",
+                                               "name":  "ISO 25010",
+                                               "tldr":  "QualitÃ© SQuaRE. 8 caractÃ©ristiques. ISO."
+                                           },
+                  "cert.denis.iso_12207":  {
+                                               "folder":  "iso_12207",
+                                               "agent":  "denis",
+                                               "name":  "ISO 12207",
+                                               "tldr":  "Cycle de vie logiciel. Accord, technique, support. ISO."
+                                           },
+                  "cert.francois.istqb":  {
+                                              "folder":  "istqb",
+                                              "agent":  "francois",
+                                              "name":  "ISTQB",
+                                              "tldr":  "Test logiciel. Niveaux, types, techniques. ISTQB."
+                                          },
+                  "cert.francois.openapi":  {
+                                                "folder":  "openapi",
+                                                "agent":  "francois",
+                                                "name":  "OpenAPI 3.1",
+                                                "tldr":  "Spec API REST. Paths, schemas. OpenAPI Initiative."
+                                            },
+                  "cert.lise.wcag":  {
+                                         "folder":  "wcag",
+                                         "agent":  "lise",
+                                         "name":  "WCAG 2.2",
+                                         "tldr":  "AccessibilitÃ©. 4 principes POUR, A/AA/AAA. W3C."
+                                     },
+                  "cert.lise.iso_9241":  {
+                                             "folder":  "iso_9241",
+                                             "agent":  "lise",
+                                             "name":  "ISO 9241",
+                                             "tldr":  "Ergonomie IHM. 7 principes. ISO."
+                                         },
+                  "cert.arianne.iso_9001":  {
+                                                "folder":  "iso_9001",
+                                                "agent":  "arianne",
+                                                "name":  "ISO 9001",
+                                                "tldr":  "Management qualitÃ©. PDCA, 10 clauses. ISO."
+                                            },
+                  "cert.arianne.six_sigma":  {
+                                                 "folder":  "six_sigma",
+                                                 "agent":  "arianne",
+                                                 "name":  "Six Sigma",
+                                                 "tldr":  "DMAIC, outils statistiques. ISO."
+                                             },
+                  "cert.arianne.iso_33001":  {
+                                                 "folder":  "iso_33001",
+                                                 "agent":  "arianne",
+                                                 "name":  "ISO 33001",
+                                                 "tldr":  "Ã‰valuation processus. 6 niveaux. Ex-SPICE."
+                                             },
+                  "cert.george.iso_19011":  {
+                                                "folder":  "iso_19011",
+                                                "agent":  "george",
+                                                "name":  "ISO 19011",
+                                                "tldr":  "Audit systÃ¨mes management. 7 principes. ISO."
+                                            },
+                  "cert.george.cisa":  {
+                                           "folder":  "cisa",
+                                           "agent":  "george",
+                                           "name":  "CISA",
+                                           "tldr":  "Audit SI. 5 domaines, COBIT. ISACA."
+                                       },
+                  "cert.george.rgpd":  {
+                                           "folder":  "rgpd",
+                                           "agent":  "george",
+                                           "name":  "RGPD",
+                                           "tldr":  "DonnÃ©es personnelles UE. 7 principes, DPO. RÃ¨glement 2016/679."
+                                       },
+                  "cert.victor.iso_27001":  {
+                                                "folder":  "iso-iec_27001",
+                                                "agent":  "victor",
+                                                "name":  "ISO 27001",
+                                                "tldr":  "SMSI. 93 contrÃ´les. ISO."
+                                            },
+                  "cert.victor.vp2":  {
+                                          "folder":  "vp2",
+                                          "agent":  "victor",
+                                          "name":  "VP2",
+                                          "tldr":  "Vie privÃ©e. MaturitÃ© RGPD. AFNOR/CNIL."
+                                      },
+                  "cert.victor.hds":  {
+                                          "folder":  "hds",
+                                          "agent":  "victor",
+                                          "name":  "HDS",
+                                          "tldr":  "Hebergement donnÃ©es santÃ©. 6 activitÃ©s.",
+                                          "mandatory_if":  "sante"
+                                      },
+                  "cert.victor.iso_20000":  {
+                                                "folder":  "iso-iec_20000-1",
+                                                "agent":  "victor",
+                                                "name":  "ISO 20000-1",
+                                                "tldr":  "Services IT. SMS, SLA. ISO."
+                                            },
+                  "cert.victor.nf461":  {
+                                            "folder":  "nf461",
+                                            "agent":  "victor",
+                                            "name":  "NF461",
+                                            "tldr":  "Archivage Ã©lectronique. AFNOR."
+                                        },
+                  "cert.victor.nf203":  {
+                                            "folder":  "nf203",
+                                            "agent":  "victor",
+                                            "name":  "NF203",
+                                            "tldr":  "Logiciel comptable. ISO 25051. AFNOR."
+                                        },
+                  "cert.victor.nf525":  {
+                                            "folder":  "nf525",
+                                            "agent":  "victor",
+                                            "name":  "NF525",
+                                            "tldr":  "ConformitÃ© fiscale caisse.",
+                                            "mandatory_if":  "caisse"
+                                        },
+                  "cert.victor.cmmi":  {
+                                           "folder":  "cmmi",
+                                           "agent":  "victor",
+                                           "name":  "CMMI v2.0",
+                                           "tldr":  "MaturitÃ© processus. 6 niveaux. ISACA."
+                                       },
+                  "cert.victor.cissp":  {
+                                            "folder":  "cissp",
+                                            "agent":  "victor",
+                                            "name":  "CISSP",
+                                            "tldr":  "Gouvernance sÃ©curitÃ©. 8 domaines. (ISC)Â²."
+                                        },
+                  "cert.victor.ceh":  {
+                                          "folder":  "ceh",
+                                          "agent":  "victor",
+                                          "name":  "CEH",
+                                          "tldr":  "Ethical hacking. Pentest. EC-Council."
+                                      },
+                  "cert.hugo.devops":  {
+                                           "folder":  "DevOPS",
+                                           "agent":  "hugo",
+                                           "name":  "DevOps Foundation",
+                                           "tldr":  "CALMS, DORA. DevOps Institute."
+                                       },
+                  "cert.hugo.aws":  {
+                                        "folder":  "aws",
+                                        "agent":  "hugo",
+                                        "name":  "AWS",
+                                        "tldr":  "Cloud. Architectures, services. Amazon."
+                                    },
+                  "cert.hugo.cka":  {
+                                        "folder":  "cka",
+                                        "agent":  "hugo",
+                                        "name":  "CKA",
+                                        "tldr":  "Kubernetes admin. CNCF."
+                                    },
+                  "cert.hugo.terraform":  {
+                                              "folder":  "terraform",
+                                              "agent":  "hugo",
+                                              "name":  "Terraform",
+                                              "tldr":  "IaC. HCL, providers. HashiCorp."
+                                          },
+                  "cert.hugo.docker":  {
+                                           "folder":  "docker",
+                                           "agent":  "hugo",
+                                           "name":  "Docker",
+                                           "tldr":  "Conteneurisation. Dockerfile, Compose."
+                                       },
+                  "cert.jean.finops":  {
+                                           "folder":  "finops",
+                                           "agent":  "jean",
+                                           "name":  "FinOps",
+                                           "tldr":  "CoÃ»ts cloud/inference. FinOps Foundation."
+                                       },
+                  "cert.jean.prompt_eng":  {
+                                               "folder":  "prompt_eng",
+                                               "agent":  "jean",
+                                               "name":  "Prompt Engineering",
+                                               "tldr":  "Compression, few-shot, CoT. LLM."
+                                           },
+                  "cert.jean.mlops":  {
+                                          "folder":  "mlops",
+                                          "agent":  "jean",
+                                          "name":  "MLOps",
+                                          "tldr":  "Cycle vie modÃ¨les. Versioning, drift."
+                                      },
+                  "cert.victor.critical_cyber":  {
+                                                     "folder":  "critical_cyber",
+                                                     "agent":  "victor",
+                                                     "name":  "Critical Cyber KB",
+                                                     "tldr":  "Base atomique de verification de controles cyber critiques."
+                                                 }
+              }
+}

@@ -11,11 +11,16 @@ use std::collections::HashMap;
 /// @human: Récupère le profil social.
 /// @do: social_profile_get_under_governance
 /// tool.social.profile.get
-pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<HashMap<String, String>, MiyusocialprofileError> {
+pub fn get(
+    ctx: &GovernedContext,
+    user_id: &str,
+) -> Result<HashMap<String, String>, MiyusocialprofileError> {
     if !ctx.has_mandate() {
         return Err(MiyusocialprofileError::NoMandate);
     }
-    let guard = store::profiles().lock().map_err(|_| MiyusocialprofileError::InvalidInput("lock".into()))?;
+    let guard = store::profiles()
+        .lock()
+        .map_err(|_| MiyusocialprofileError::InvalidInput("lock".into()))?;
     Ok(guard.get(user_id).cloned().unwrap_or_default())
 }
 
@@ -33,7 +38,9 @@ pub fn update(
     if !ctx.has_mandate() {
         return Err(MiyusocialprofileError::NoMandate);
     }
-    let mut guard = store::profiles().lock().map_err(|_| MiyusocialprofileError::InvalidInput("lock".into()))?;
+    let mut guard = store::profiles()
+        .lock()
+        .map_err(|_| MiyusocialprofileError::InvalidInput("lock".into()))?;
     let entry = guard.entry(user_id.to_string()).or_default();
     for (k, v) in data {
         entry.insert(k.clone(), v.clone());

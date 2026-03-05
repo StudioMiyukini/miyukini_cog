@@ -1,10 +1,10 @@
 //! EXP-E05/E06 — Participations exposant (liste et détail).
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton};
 #[allow(unused_imports)]
 use super::components::EmptyState;
+use super::components::{ActionButton, Badge};
+use dioxus::prelude::*;
+use miyukini_service_ui::use_palette;
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()
@@ -19,10 +19,16 @@ pub fn ExpParticipations() -> Element {
     // Charger l'exposant courant (premier de la DB pour la démo)
     let exposant = {
         let db = crate::use_db();
-        db.exposants_list(false).unwrap_or_default().into_iter().next()
+        db.exposants_list(false)
+            .unwrap_or_default()
+            .into_iter()
+            .next()
     };
 
-    let exp_id = exposant.as_ref().and_then(|e| e.id.clone()).unwrap_or_default();
+    let exp_id = exposant
+        .as_ref()
+        .and_then(|e| e.id.clone())
+        .unwrap_or_default();
 
     // Charger les participations de cet exposant via les éditions
     let participations: Vec<jayfestival::data::EditionExposant> = {
@@ -188,9 +194,18 @@ fn ParticipationCard(
         db.edition_by_id(&edition_id).ok().flatten()
     };
 
-    let name = edition.as_ref().and_then(|e| e.name.clone()).unwrap_or_else(|| "Evenement inconnu".to_string());
-    let location = edition.as_ref().and_then(|e| e.location.clone()).unwrap_or_default();
-    let date = edition.as_ref().and_then(|e| e.start_date.clone()).unwrap_or_default();
+    let name = edition
+        .as_ref()
+        .and_then(|e| e.name.clone())
+        .unwrap_or_else(|| "Evenement inconnu".to_string());
+    let location = edition
+        .as_ref()
+        .and_then(|e| e.location.clone())
+        .unwrap_or_default();
+    let date = edition
+        .as_ref()
+        .and_then(|e| e.start_date.clone())
+        .unwrap_or_default();
 
     let (status_label, status_color) = match status {
         "confirmee" => ("Confirmee", c.accent_green),
@@ -241,21 +256,41 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
     let participation = {
         let db = crate::use_db();
         // Note: On devrait avoir une méthode edition_exposant_by_id
-        db.editions_exposants_by_edition(&participation_id).ok().and_then(|v| v.into_iter().next())
+        db.editions_exposants_by_edition(&participation_id)
+            .ok()
+            .and_then(|v| v.into_iter().next())
     };
 
     // Charger l'édition associée
-    let edition_id = participation.as_ref().and_then(|p| p.edition_id.clone()).unwrap_or_default();
+    let edition_id = participation
+        .as_ref()
+        .and_then(|p| p.edition_id.clone())
+        .unwrap_or_default();
     let edition = {
         let db = crate::use_db();
         db.edition_by_id(&edition_id).ok().flatten()
     };
 
-    let name = edition.as_ref().and_then(|e| e.name.clone()).unwrap_or_else(|| "Evenement".to_string());
-    let location = edition.as_ref().and_then(|e| e.location.clone()).unwrap_or_default();
-    let date = edition.as_ref().and_then(|e| e.start_date.clone()).unwrap_or_default();
-    let stand = participation.as_ref().and_then(|p| p.assigned_stand.clone()).unwrap_or_else(|| "Non attribue".to_string());
-    let status = participation.as_ref().and_then(|p| p.status_candidature.clone()).unwrap_or_default();
+    let name = edition
+        .as_ref()
+        .and_then(|e| e.name.clone())
+        .unwrap_or_else(|| "Evenement".to_string());
+    let location = edition
+        .as_ref()
+        .and_then(|e| e.location.clone())
+        .unwrap_or_default();
+    let date = edition
+        .as_ref()
+        .and_then(|e| e.start_date.clone())
+        .unwrap_or_default();
+    let stand = participation
+        .as_ref()
+        .and_then(|p| p.assigned_stand.clone())
+        .unwrap_or_else(|| "Non attribue".to_string());
+    let status = participation
+        .as_ref()
+        .and_then(|p| p.status_candidature.clone())
+        .unwrap_or_default();
 
     let status_color = match status.as_str() {
         "acceptee" => c.accent_green.to_string(),

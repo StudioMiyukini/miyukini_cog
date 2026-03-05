@@ -120,10 +120,7 @@ pub struct AliciaCaptureAdminCell {
 /// @human: Construit la Cellule Admin AliciaCapture.
 /// @do: build_alicia_capture_admin_cell
 #[must_use]
-pub fn alicia_capture_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> AliciaCaptureAdminCell {
+pub fn alicia_capture_admin_cell(version: &str, fingerprint: &str) -> AliciaCaptureAdminCell {
     AliciaCaptureAdminCell {
         identification: AliciaCaptureIdentification {
             id: TOOLKIT_ID.to_string(),
@@ -132,24 +129,20 @@ pub fn alicia_capture_admin_cell(
             module_origin: "miyukini-alicia-capture".to_string(),
         },
         test_manifest: AliciaCaptureTestManifest {
-            tests: vec![
-                EmbeddedTestDef {
-                    id: "AliciaCaptureTest".to_string(),
-                    name: "Test chemin complet AliciaCapture (devices, capture, VAD, buffer)"
-                        .to_string(),
-                    protocol: "invoke".to_string(),
-                    criteria: TestCriteria {
-                        pass: "all_steps_ok".to_string(),
-                    },
+            tests: vec![EmbeddedTestDef {
+                id: "AliciaCaptureTest".to_string(),
+                name: "Test chemin complet AliciaCapture (devices, capture, VAD, buffer)"
+                    .to_string(),
+                protocol: "invoke".to_string(),
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
                 },
-            ],
+            }],
             result_format: "json".to_string(),
         },
         integrity: AliciaCaptureIntegrity {
             fingerprint: fingerprint.to_string(),
-            contracts: vec![
-                "AliciaCapture-Tool-Governance-Compliance".to_string(),
-            ],
+            contracts: vec!["AliciaCapture-Tool-Governance-Compliance".to_string()],
             core_versions: std::collections::HashMap::new(),
         },
     }
@@ -159,10 +152,7 @@ pub fn alicia_capture_admin_cell(
 ///
 /// Appeler une seule fois au demarrage ; les appels suivants retournent
 /// la meme reference.
-pub fn init_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> &'static AliciaCaptureAdminCell {
+pub fn init_admin_cell(version: &str, fingerprint: &str) -> &'static AliciaCaptureAdminCell {
     ADMIN_CELL.get_or_init(|| alicia_capture_admin_cell(version, fingerprint))
 }
 

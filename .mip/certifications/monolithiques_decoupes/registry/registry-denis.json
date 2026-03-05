@@ -1,0 +1,22 @@
+﻿{
+    "certs":  {
+                  "cert.denis.iso_12207":  {
+                                               "folder":  "iso_12207",
+                                               "agent":  "denis",
+                                               "name":  "ISO 12207",
+                                               "tldr":  "Cycle de vie logiciel. Accord, technique, support. ISO."
+                                           },
+                  "cert.denis.iso_25010":  {
+                                               "folder":  "iso_25010",
+                                               "agent":  "denis",
+                                               "name":  "ISO 25010",
+                                               "tldr":  "QualitÃ© SQuaRE. 8 caractÃ©ristiques. ISO."
+                                           },
+                  "cert.denis.togaf":  {
+                                           "folder":  "togaf",
+                                           "agent":  "denis",
+                                           "name":  "TOGAF",
+                                           "tldr":  "Architecture entreprise. ADM 10 phases. Open Group."
+                                       }
+              }
+}

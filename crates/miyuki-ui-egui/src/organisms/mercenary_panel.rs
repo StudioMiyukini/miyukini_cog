@@ -2,11 +2,11 @@
 
 //! Mercenary panel organism -- equipment + stats display.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
+use crate::convert::rgba_to_color32;
 use crate::molecules::equip_slot::{EquipItemData, EquipPosition, EquipSlot};
 use crate::molecules::stat_row::StatRow;
-use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Mercenary data.
 pub struct MercenaryData {

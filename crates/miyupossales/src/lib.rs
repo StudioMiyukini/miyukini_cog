@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosSales ; expose les modules tools.
 /// @do: expose_miyupossales_toolkit
-
 pub mod admin_cell;
 pub mod barcode;
 pub mod cash_movement;
@@ -39,11 +38,17 @@ pub use display::push as display_push;
 pub use errors::MiyupossalesError;
 pub use item::{modifier_apply, variant_resolve, VariantResult};
 pub use order::service_type_set as order_service_type_set;
-pub use receipt::{list as receipt_list, print as receipt_print, render as receipt_render, send as receipt_send, ReceiptFilters, ReceiptItem};
+pub use receipt::{
+    list as receipt_list, print as receipt_print, render as receipt_render, send as receipt_send,
+    ReceiptFilters, ReceiptItem,
+};
 pub use refund::record as refund_record;
 pub use sale::{add_item as sale_add_item, create as sale_create, remove_item as sale_remove_item};
 pub use store::{store_resolve, StoreResult};
-pub use ticket::{close as ticket_close, list as ticket_list, open as ticket_open, save as ticket_save, TicketFilters, TicketItem};
+pub use ticket::{
+    close as ticket_close, list as ticket_list, open as ticket_open, save as ticket_save,
+    TicketFilters, TicketItem,
+};
 
 #[cfg(test)]
 mod tests {

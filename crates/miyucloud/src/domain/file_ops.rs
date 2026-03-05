@@ -53,8 +53,7 @@ impl FileOps {
         for (i, chunk_data) in chunks.iter().enumerate() {
             let encrypted = crypto::encrypt_chunk(&file_key, chunk_data)?;
             if i == 0 {
-                first_nonce_b64 =
-                    Some(base64_encode(&encrypted.nonce));
+                first_nonce_b64 = Some(base64_encode(&encrypted.nonce));
             }
             // Serialize encrypted chunk: nonce (12) + ciphertext
             let mut stored = Vec::with_capacity(12 + encrypted.ciphertext.len());
@@ -281,7 +280,14 @@ mod tests {
         let (db, storage, km) = setup();
         let data = b"Hello, MiyuCloud!";
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "hello.txt", "text/plain", data,
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "hello.txt",
+            "text/plain",
+            data,
         )
         .unwrap();
         assert_eq!(entry.name, "hello.txt");
@@ -327,7 +333,14 @@ mod tests {
     fn test_rename_file() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "old.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "old.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
         FileOps::rename_file(&db, &entry.id, "new.txt").unwrap();
@@ -340,7 +353,14 @@ mod tests {
         let (db, storage, km) = setup();
         let folder = FileOps::create_folder(&db, "owner1", None, "Target").unwrap();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "file.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "file.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
         assert!(entry.parent_id.is_none());
@@ -354,7 +374,14 @@ mod tests {
     fn test_delete_file_trashes_it() {
         let (db, storage, km) = setup();
         let entry = FileOps::upload_file(
-            &db, &storage, &km, "owner1", None, "delete_me.txt", "text/plain", b"data",
+            &db,
+            &storage,
+            &km,
+            "owner1",
+            None,
+            "delete_me.txt",
+            "text/plain",
+            b"data",
         )
         .unwrap();
         FileOps::delete_file(&db, &entry.id).unwrap();

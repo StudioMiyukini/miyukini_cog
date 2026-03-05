@@ -6,8 +6,6 @@
 
 /// Backend fonctionnel (contrats, toolkits, operateurs, bornage).
 pub mod backend;
-/// Types ex-thème conservés pour le domaine (FeatureStatus).
-pub mod theme;
 /// Persistance locale KindMother Daughter (SQLite).
 pub mod data;
 /// Types de domaine JayKonta (Purse + Account).
@@ -16,3 +14,5 @@ pub mod domain;
 pub mod integrations;
 /// Services metier (PurseService, AuditService).
 pub mod services;
+/// Types ex-thème conservés pour le domaine (FeatureStatus).
+pub mod theme;

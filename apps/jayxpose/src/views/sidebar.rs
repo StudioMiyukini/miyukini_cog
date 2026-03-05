@@ -1,8 +1,8 @@
 //! Sidebar JayXpose — navigation par section (XP-E01..XP-E12).
 
+use super::{JayXposeSection, JayXposeState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn JayXposeSidebar(state: Signal<JayXposeState>) -> Element {
@@ -14,7 +14,10 @@ pub fn JayXposeSidebar(state: Signal<JayXposeState>) -> Element {
     let (product_count, doc_count, page_count) = if let Some(ref eid) = exposant_id {
         let prods = db.produits_by_exposant(eid).map(|v| v.len()).unwrap_or(0);
         let docs = db.documents_by_exposant(eid).map(|v| v.len()).unwrap_or(0);
-        let pages = db.vitrine_pages_by_exposant(eid).map(|v| v.len()).unwrap_or(0);
+        let pages = db
+            .vitrine_pages_by_exposant(eid)
+            .map(|v| v.len())
+            .unwrap_or(0);
         (prods, docs, pages)
     } else {
         (0, 0, 0)
@@ -105,7 +108,11 @@ fn SidebarItem(
 ) -> Element {
     let c = use_palette();
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {

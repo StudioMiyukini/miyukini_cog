@@ -1,8 +1,8 @@
 //! VIS-E09 — Activités visiteur (jeux, concours, pass).
 
+use super::components::{Badge, StatCard};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, StatCard};
 
 /// Hub des activités visiteur.
 #[component]

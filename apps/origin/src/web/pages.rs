@@ -371,14 +371,25 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
         content = content,
         home_active = if active_nav == "home" { "active" } else { "" },
         docs_active = if active_nav == "docs" { "active" } else { "" },
-        downloads_active = if active_nav == "downloads" { "active" } else { "" },
-        catalog_active = if active_nav == "catalog" || active_nav == "mws" { "active" } else { "" },
-        services_active = if active_nav == "services" { "active" } else { "" },
+        downloads_active = if active_nav == "downloads" {
+            "active"
+        } else {
+            ""
+        },
+        catalog_active = if active_nav == "catalog" || active_nav == "mws" {
+            "active"
+        } else {
+            ""
+        },
+        services_active = if active_nav == "services" {
+            "active"
+        } else {
+            ""
+        },
         about_active = if active_nav == "about" { "active" } else { "" },
         mip_active = if active_nav == "mip" { "active" } else { "" },
     )
 }
-
 
 /// Page d'accueil — Onboarding VN interactif avec Miou.
 pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> String {
@@ -432,7 +443,11 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
                     lobby.current_players,
                     lobby.max_players,
                     html_escape(version),
-                    if lobby.password_required { r#"<span class="lobby-lock">🔒</span>"# } else { "" }
+                    if lobby.password_required {
+                        r#"<span class="lobby-lock">🔒</span>"#
+                    } else {
+                        ""
+                    }
                 )
             })
             .collect()
@@ -1279,7 +1294,6 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
     layout("Miyukini COG", &content, "home")
 }
 
-
 /// Page de documentation.
 pub async fn docs_page(content_mgr: &ContentManager) -> String {
     let sections = content_mgr.get_doc_sections().await;
@@ -1287,7 +1301,8 @@ pub async fn docs_page(content_mgr: &ContentManager) -> String {
     let sections_html: String = sections
         .iter()
         .map(|s| {
-            let articles_html: String = s.articles
+            let articles_html: String = s
+                .articles
                 .iter()
                 .map(|a| {
                     format!(
@@ -1337,7 +1352,9 @@ pub async fn docs_page(content_mgr: &ContentManager) -> String {
 /// Seul Central est téléchargeable ici ; les services s'installent depuis l'app.
 pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     let downloads = content_mgr.get_downloads().await;
-    let central = downloads.iter().find(|d| d.category == DownloadCategory::Cog);
+    let central = downloads
+        .iter()
+        .find(|d| d.category == DownloadCategory::Cog);
 
     let (dl_url, dl_version, dl_size_mb, dl_notes) = match central {
         Some(d) => (
@@ -1346,12 +1363,7 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
             format!("{:.1}", d.size_bytes as f64 / 1_048_576.0),
             html_escape(&d.release_notes),
         ),
-        None => (
-            String::new(),
-            "—".into(),
-            "—".into(),
-            String::new(),
-        ),
+        None => (String::new(), "—".into(), "—".into(), String::new()),
     };
 
     let content = format!(
@@ -1645,10 +1657,10 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
     // Couleur de rareté par catégorie (style Genshin)
     let rarity_for = |id: &str| -> &str {
         match id {
-            "jayxpose" | "jayfestival" => "rarity-5",    // or — commerce
-            "jaykoa" | "jaykonta" => "rarity-4",          // violet — productivité
-            "jay1tribu" => "rarity-4",                    // violet — social
-            "jaymanga" | "miyukiniwatch" => "rarity-3",   // bleu — style de vie
+            "jayxpose" | "jayfestival" => "rarity-5",   // or — commerce
+            "jaykoa" | "jaykonta" => "rarity-4",        // violet — productivité
+            "jay1tribu" => "rarity-4",                  // violet — social
+            "jaymanga" | "miyukiniwatch" => "rarity-3", // bleu — style de vie
             "miyuclicker" | "lord_of_the_castle" => "rarity-5", // or — jeux
             _ => "rarity-3",
         }
@@ -1674,7 +1686,11 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
         .collect();
 
     // Slots vides pour remplir la grille (style inventaire)
-    let empty_count = if services.len() < 12 { 12 - services.len() } else { 0 };
+    let empty_count = if services.len() < 12 {
+        12 - services.len()
+    } else {
+        0
+    };
     let empty_slots: String = (0..empty_count)
         .map(|_| r#"<div class="inv-slot inv-empty"></div>"#.to_string())
         .collect();
@@ -2300,7 +2316,10 @@ pub async fn service_detail_page(content_mgr: &ContentManager, service_id: &str)
         html_escape(&service.name),
         screenshots_dots,
         if service.banner_url.is_some() {
-            format!(r#"<img src="{}" alt="Bannière" style="max-width: 100%; border-radius: 0.5rem;">"#, html_escape(service.banner_url.as_deref().unwrap_or("")))
+            format!(
+                r#"<img src="{}" alt="Bannière" style="max-width: 100%; border-radius: 0.5rem;">"#,
+                html_escape(service.banner_url.as_deref().unwrap_or(""))
+            )
         } else {
             "[petite bannière]".to_string()
         },
@@ -2309,7 +2328,10 @@ pub async fn service_detail_page(content_mgr: &ContentManager, service_id: &str)
         html_escape(&service.license),
         tags_html,
         if service.website_url.is_some() {
-            format!(r#"<a href="{}" class="btn btn-secondary btn-lg" target="_blank">Site Officiel</a>"#, html_escape(service.website_url.as_deref().unwrap_or("#")))
+            format!(
+                r#"<a href="{}" class="btn btn-secondary btn-lg" target="_blank">Site Officiel</a>"#,
+                html_escape(service.website_url.as_deref().unwrap_or("#"))
+            )
         } else {
             String::new()
         },
@@ -3136,7 +3158,10 @@ pub async fn blog_page(content_mgr: &ContentManager) -> String {
                 p.published_at.format("%d %B %Y"),
                 html_escape(&p.title),
                 html_escape(&p.summary),
-                p.tags.iter().map(|t| format!(r#"<span class="tag">{}</span>"#, html_escape(t))).collect::<String>()
+                p.tags
+                    .iter()
+                    .map(|t| format!(r#"<span class="tag">{}</span>"#, html_escape(t)))
+                    .collect::<String>()
             )
         })
         .collect();
@@ -3188,7 +3213,10 @@ pub async fn blog_post_page(content_mgr: &ContentManager, post_id: &str) -> Opti
         post.published_at.format("%d %B %Y"),
         html_escape(&post.author),
         html_escape(&post.title),
-        post.tags.iter().map(|t| format!(r#"<span class="tag">{}</span>"#, html_escape(t))).collect::<String>(),
+        post.tags
+            .iter()
+            .map(|t| format!(r#"<span class="tag">{}</span>"#, html_escape(t)))
+            .collect::<String>(),
         content_html
     );
 
@@ -3288,7 +3316,10 @@ fn simple_markdown_to_html(markdown: &str) -> String {
         } else if line.starts_with("- ") {
             html.push_str(&format!("<li>{}</li>\n", html_escape(&line[2..])));
         } else if line.starts_with("> ") {
-            html.push_str(&format!("<blockquote>{}</blockquote>\n", html_escape(&line[2..])));
+            html.push_str(&format!(
+                "<blockquote>{}</blockquote>\n",
+                html_escape(&line[2..])
+            ));
         } else {
             // Inline formatting
             let formatted = line
@@ -3335,17 +3366,30 @@ fn vitrine_layout(
     let base = format!("/vitrine/{}", html_escape(slug));
     let nav_home = if active == "home" { "active" } else { "" };
     let nav_catalogue = if active == "catalogue" { "active" } else { "" };
-    let nav_presentation = if active == "presentation" { "active" } else { "" };
+    let nav_presentation = if active == "presentation" {
+        "active"
+    } else {
+        ""
+    };
     let nav_contact = if active == "contact" { "active" } else { "" };
     let mut nav_extra = Vec::new();
     if show_catalogue {
-        nav_extra.push(format!(r#"<a href="{}/catalogue" class="{}">Catalogue</a>"#, base, nav_catalogue));
+        nav_extra.push(format!(
+            r#"<a href="{}/catalogue" class="{}">Catalogue</a>"#,
+            base, nav_catalogue
+        ));
     }
     if show_presentation {
-        nav_extra.push(format!(r#"<a href="{}/presentation" class="{}">Présentation</a>"#, base, nav_presentation));
+        nav_extra.push(format!(
+            r#"<a href="{}/presentation" class="{}">Présentation</a>"#,
+            base, nav_presentation
+        ));
     }
     if show_contact {
-        nav_extra.push(format!(r#"<a href="{}/contact" class="{}">Contact</a>"#, base, nav_contact));
+        nav_extra.push(format!(
+            r#"<a href="{}/contact" class="{}">Contact</a>"#,
+            base, nav_contact
+        ));
     }
     let nav_extra_s = nav_extra.join(" ");
     format!(
@@ -3405,7 +3449,11 @@ pub fn vitrine_index_page(db: &JayXposeDb) -> Option<String> {
     let exposants = db.exposants_list_annuaire().ok()?;
     let with_slug: Vec<_> = exposants
         .into_iter()
-        .filter(|e| e.vitrine_slug.as_deref().map_or(false, |s: &str| !s.is_empty()))
+        .filter(|e| {
+            e.vitrine_slug
+                .as_deref()
+                .map_or(false, |s: &str| !s.is_empty())
+        })
         .filter(|e| e.vitrine_status.as_deref() == Some("publiee"))
         .collect();
     let list: String = if with_slug.is_empty() {
@@ -3416,7 +3464,11 @@ pub fn vitrine_index_page(db: &JayXposeDb) -> Option<String> {
             .map(|e| {
                 let name = e.company_name.as_deref().unwrap_or("Sans nom");
                 let slug = e.vitrine_slug.as_deref().unwrap_or("");
-                format!(r#"<li><a href="/vitrine/{}">{}</a></li>"#, html_escape(slug), html_escape(name))
+                format!(
+                    r#"<li><a href="/vitrine/{}">{}</a></li>"#,
+                    html_escape(slug),
+                    html_escape(name)
+                )
             })
             .collect::<Vec<_>>()
             .join("\n")
@@ -3436,13 +3488,23 @@ pub fn vitrine_home_page(db: &JayXposeDb, slug: &str) -> Option<String> {
     let slogan = exposant.slogan.as_deref().unwrap_or("");
     let desc = exposant.description_short.as_deref().unwrap_or("");
     let banner = exposant.banner_url.as_deref().unwrap_or("");
-    let produits = db.produits_by_exposant(exposant.id.as_deref().unwrap_or("")).ok().unwrap_or_default();
-    let vedettes: Vec<_> = produits.into_iter().filter(|p| p.is_featured == Some(true)).take(6).collect();
+    let produits = db
+        .produits_by_exposant(exposant.id.as_deref().unwrap_or(""))
+        .ok()
+        .unwrap_or_default();
+    let vedettes: Vec<_> = produits
+        .into_iter()
+        .filter(|p| p.is_featured == Some(true))
+        .take(6)
+        .collect();
     let vedettes_html: String = vedettes
         .iter()
         .map(|p| {
             let name = p.name.as_deref().unwrap_or("Produit");
-            let price = p.price.map(|x| format!("{:.2} €", x)).unwrap_or_else(|| "Sur demande".to_string());
+            let price = p
+                .price
+                .map(|x| format!("{:.2} €", x))
+                .unwrap_or_else(|| "Sur demande".to_string());
             format!(
                 r#"<div class="v-card"><h4>{}</h4><p>{}</p></div>"#,
                 html_escape(name),
@@ -3453,7 +3515,10 @@ pub fn vitrine_home_page(db: &JayXposeDb, slug: &str) -> Option<String> {
     let hero_style = if banner.is_empty() {
         String::new()
     } else {
-        format!(r#" style="background-image: url('{}'); background-size: cover; min-height: 200px;""#, html_escape(banner))
+        format!(
+            r#" style="background-image: url('{}'); background-size: cover; min-height: 200px;""#,
+            html_escape(banner)
+        )
     };
     let content = format!(
         r#"<section class="v-hero"{}><h1>{}</h1><p>{}</p></section><p>{}</p><h2>Produits vedettes</h2><div class="v-grid">{}</div>"#,
@@ -3476,11 +3541,18 @@ pub fn vitrine_home_page(db: &JayXposeDb, slug: &str) -> Option<String> {
 }
 
 /// Page catalogue /vitrine/{slug}/catalogue (PUB-E04).
-pub fn vitrine_catalogue_page(db: &JayXposeDb, slug: &str, _category_id: Option<&str>) -> Option<String> {
+pub fn vitrine_catalogue_page(
+    db: &JayXposeDb,
+    slug: &str,
+    _category_id: Option<&str>,
+) -> Option<String> {
     let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
     let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
     let exposant_id = exposant.id.as_deref().unwrap_or("");
-    let produits = db.produits_by_exposant(exposant_id).ok().unwrap_or_default();
+    let produits = db
+        .produits_by_exposant(exposant_id)
+        .ok()
+        .unwrap_or_default();
     let base = format!("/vitrine/{}", html_escape(slug));
     let availability_label = |a: Option<&String>| -> String {
         let s: &str = a.map(|x| x.as_str()).unwrap_or("disponible");
@@ -3509,7 +3581,16 @@ pub fn vitrine_catalogue_page(db: &JayXposeDb, slug: &str, _category_id: Option<
         })
         .collect();
     let content = format!(r#"<h1>Catalogue</h1><div class="v-grid">{}</div>"#, cards);
-    Some(vitrine_layout("Catalogue", &content, slug, company_name, "catalogue", true, true, true))
+    Some(vitrine_layout(
+        "Catalogue",
+        &content,
+        slug,
+        company_name,
+        "catalogue",
+        true,
+        true,
+        true,
+    ))
 }
 
 /// Page fiche produit /vitrine/{slug}/catalogue/{id}.
@@ -3522,7 +3603,10 @@ pub fn vitrine_produit_page(db: &JayXposeDb, slug: &str, produit_id: &str) -> Op
     }
     let name = produit.name.as_deref().unwrap_or("Produit");
     let desc = produit.description.as_deref().unwrap_or("");
-    let price = produit.price.map(|x| format!("{:.2} €", x)).unwrap_or_else(|| "Sur demande".to_string());
+    let price = produit
+        .price
+        .map(|x| format!("{:.2} €", x))
+        .unwrap_or_else(|| "Sur demande".to_string());
     let availability = match produit.availability.as_deref().unwrap_or("disponible") {
         "rupture" => "Rupture",
         "sur_commande" => "Sur commande",
@@ -3537,21 +3621,47 @@ pub fn vitrine_produit_page(db: &JayXposeDb, slug: &str, produit_id: &str) -> Op
         html_escape(availability),
         html_escape(desc)
     );
-    Some(vitrine_layout(name, &content, slug, company_name, "catalogue", true, true, true))
+    Some(vitrine_layout(
+        name,
+        &content,
+        slug,
+        company_name,
+        "catalogue",
+        true,
+        true,
+        true,
+    ))
 }
 
 /// Page présentation /vitrine/{slug}/presentation (PUB-E05).
 pub fn vitrine_presentation_page(db: &JayXposeDb, slug: &str) -> Option<String> {
     let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
     let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
-    let pages = db.vitrine_pages_by_exposant(exposant.id.as_deref().unwrap_or("")).ok().unwrap_or_default();
-    let presentation = pages.into_iter().find(|p| p.page_type.as_deref() == Some("presentation") && p.is_visible == Some(true));
+    let pages = db
+        .vitrine_pages_by_exposant(exposant.id.as_deref().unwrap_or(""))
+        .ok()
+        .unwrap_or_default();
+    let presentation = pages
+        .into_iter()
+        .find(|p| p.page_type.as_deref() == Some("presentation") && p.is_visible == Some(true));
     let content_html = presentation
         .and_then(|p| p.content)
         .map(|c| simple_md_to_html(&c))
         .unwrap_or_else(|| r#"<p>Aucun contenu pour l'instant.</p>"#.to_string());
-    let content = format!(r#"<h1>Présentation</h1><div class="v-content">{}</div>"#, content_html);
-    Some(vitrine_layout("Présentation", &content, slug, company_name, "presentation", true, true, true))
+    let content = format!(
+        r#"<h1>Présentation</h1><div class="v-content">{}</div>"#,
+        content_html
+    );
+    Some(vitrine_layout(
+        "Présentation",
+        &content,
+        slug,
+        company_name,
+        "presentation",
+        true,
+        true,
+        true,
+    ))
 }
 
 /// Page contact /vitrine/{slug}/contact (PUB-E06).
@@ -3562,7 +3672,11 @@ pub fn vitrine_contact_page(db: &JayXposeDb, slug: &str) -> Option<String> {
     let phone = exposant.contact_phone.as_deref().unwrap_or("");
     let adresse = exposant.adresse_siege.as_deref().unwrap_or("");
     let site_web = exposant.site_web.as_deref().unwrap_or("");
-    let site_display = if site_web.is_empty() { "—".to_string() } else { html_escape(site_web) };
+    let site_display = if site_web.is_empty() {
+        "—".to_string()
+    } else {
+        html_escape(site_web)
+    };
     let coord = format!(
         r#"<p><strong>Contact</strong><br>Email: {}<br>Tél: {}<br>Adresse: {}<br>Site: {}"#,
         html_escape(email),
@@ -3570,6 +3684,18 @@ pub fn vitrine_contact_page(db: &JayXposeDb, slug: &str) -> Option<String> {
         html_escape(adresse),
         site_display
     );
-    let content = format!(r#"<h1>Contact</h1><div>{}</div><p>Formulaire de contact (à venir).</p>"#, coord);
-    Some(vitrine_layout("Contact", &content, slug, company_name, "contact", true, true, true))
+    let content = format!(
+        r#"<h1>Contact</h1><div>{}</div><p>Formulaire de contact (à venir).</p>"#,
+        coord
+    );
+    Some(vitrine_layout(
+        "Contact",
+        &content,
+        slug,
+        company_name,
+        "contact",
+        true,
+        true,
+        true,
+    ))
 }

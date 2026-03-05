@@ -1,6 +1,9 @@
 //! Pipeline d'integration CK-INT-01/02/03 + audit.
 
-use crate::data::{AuditRecord, InvoiceRecord, JayKontaDb, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord};
+use crate::data::{
+    AuditRecord, InvoiceRecord, JayKontaDb, MovementRecord, PaymentRecord, QuoteRecord,
+    ReminderRecord,
+};
 use crate::integrations::contracts::{
     IntegrationError, JayFestivalEvent, JayKoaReminderEvent, JayRDVEvent,
 };
@@ -35,7 +38,14 @@ impl IntegrationPipeline {
                     })
                     .map_err(|e| IntegrationError(e.to_string()))?;
 
-                self.audit(&meta, "quote.create", &payload.scope, &payload.quote_id, "ok", &payload)
+                self.audit(
+                    &meta,
+                    "quote.create",
+                    &payload.scope,
+                    &payload.quote_id,
+                    "ok",
+                    &payload,
+                )
             }
             JayFestivalEvent::InvoiceEmit(meta, payload) => {
                 self.db
@@ -114,7 +124,14 @@ impl IntegrationPipeline {
                     })
                     .map_err(|e| IntegrationError(e.to_string()))?;
 
-                self.audit(&meta, "quote.create", &payload.scope, &payload.quote_id, "ok", &payload)
+                self.audit(
+                    &meta,
+                    "quote.create",
+                    &payload.scope,
+                    &payload.quote_id,
+                    "ok",
+                    &payload,
+                )
             }
             JayRDVEvent::InvoiceEmit(meta, payload) => {
                 self.db

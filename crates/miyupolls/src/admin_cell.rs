@@ -30,7 +30,9 @@ pub struct MiyupollsTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyupollsIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyupollsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.content.polls";
 
-#[must_use] 
+#[must_use]
 pub fn miyupolls_admin_cell(version: &str, fingerprint: &str) -> MiyupollsAdminCell {
     MiyupollsAdminCell {
         identification: MiyupollsIdentification {
@@ -63,7 +65,9 @@ pub fn miyupolls_admin_cell(version: &str, fingerprint: &str) -> MiyupollsAdminC
                 id: "Miyupolls".to_string(),
                 name: "Test chemin complet Miyupolls".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

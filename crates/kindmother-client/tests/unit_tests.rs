@@ -27,7 +27,7 @@ fn kmc_p_001_serialize_query_request() {
     };
 
     let json = serde_json::to_value(&request).unwrap();
-    
+
     assert_eq!(json["type"], "Query");
     assert_eq!(json["operator_id"], "jayxpose");
     assert_eq!(json["database"], "jayxpose_db");
@@ -50,7 +50,7 @@ fn kmc_p_002_serialize_execute_request() {
     };
 
     let json = serde_json::to_value(&request).unwrap();
-    
+
     assert_eq!(json["type"], "Execute");
     assert_eq!(json["intent"], "create_edition");
 }
@@ -80,7 +80,7 @@ fn kmc_p_003_serialize_transaction_request() {
     };
 
     let json = serde_json::to_value(&request).unwrap();
-    
+
     assert_eq!(json["type"], "Transaction");
     assert_eq!(json["operations"].as_array().unwrap().len(), 2);
 }
@@ -96,7 +96,7 @@ fn kmc_p_004_serialize_health_check_request() {
     };
 
     let json = serde_json::to_value(&request).unwrap();
-    
+
     assert_eq!(json["type"], "HealthCheck");
     assert_eq!(json["database"], "test_db");
 }
@@ -113,7 +113,7 @@ fn kmc_p_005_serialize_database_info_request() {
     };
 
     let json = serde_json::to_value(&request).unwrap();
-    
+
     assert_eq!(json["type"], "DatabaseInfo");
     assert_eq!(json["operator_id"], "jaykoa");
 }
@@ -137,9 +137,14 @@ fn kmc_p_010_deserialize_query_result() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
-        Response::QueryResult { success, rows, row_count, error } => {
+        Response::QueryResult {
+            success,
+            rows,
+            row_count,
+            error,
+        } => {
             assert!(success);
             assert_eq!(rows.len(), 2);
             assert_eq!(row_count, 2);
@@ -164,9 +169,14 @@ fn kmc_p_011_deserialize_execute_result() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
-        Response::ExecuteResult { success, rows_affected, last_insert_id, error } => {
+        Response::ExecuteResult {
+            success,
+            rows_affected,
+            last_insert_id,
+            error,
+        } => {
             assert!(success);
             assert_eq!(rows_affected, 1);
             assert_eq!(last_insert_id, Some(42));
@@ -190,9 +200,13 @@ fn kmc_p_012_deserialize_transaction_result() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
-        Response::TransactionResult { success, results, error } => {
+        Response::TransactionResult {
+            success,
+            results,
+            error,
+        } => {
             assert!(success);
             assert_eq!(results, vec![1, 3]);
             assert!(error.is_none());
@@ -215,9 +229,13 @@ fn kmc_p_013_deserialize_health_check_result() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
-        Response::HealthCheckResult { healthy, status, latency_ms } => {
+        Response::HealthCheckResult {
+            healthy,
+            status,
+            latency_ms,
+        } => {
             assert!(healthy);
             assert_eq!(status, "OK");
             assert_eq!(latency_ms, 5);
@@ -243,9 +261,16 @@ fn kmc_p_014_deserialize_database_info_result() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
-        Response::DatabaseInfoResult { success, database, size_bytes, table_count, encrypted, error } => {
+        Response::DatabaseInfoResult {
+            success,
+            database,
+            size_bytes,
+            table_count,
+            encrypted,
+            error,
+        } => {
             assert!(success);
             assert_eq!(database, "test_db");
             assert_eq!(size_bytes, 1024000);
@@ -270,7 +295,7 @@ fn kmc_p_015_deserialize_error_response() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
         Response::Error { code, message } => {
             assert_eq!(code, "PERMISSION_DENIED");
@@ -292,10 +317,10 @@ fn kmc_p_015_deserialize_error_response() {
 fn kmc_e_001_error_display() {
     let err = ClientError::Connection("Connection refused".to_string());
     assert!(err.to_string().contains("Connection error"));
-    
+
     let err = ClientError::PermissionDenied("No access".to_string());
     assert!(err.to_string().contains("Permission denied"));
-    
+
     let err = ClientError::Timeout("Request timed out".to_string());
     assert!(err.to_string().contains("Timeout"));
 }
@@ -308,7 +333,7 @@ fn kmc_e_001_error_display() {
 fn kmc_e_002_error_from_io() {
     let io_err = std::io::Error::new(std::io::ErrorKind::ConnectionRefused, "refused");
     let client_err: ClientError = io_err.into();
-    
+
     match client_err {
         ClientError::Transport(msg) => assert!(msg.contains("refused")),
         _ => panic!("Expected Transport error"),
@@ -323,7 +348,7 @@ fn kmc_e_002_error_from_io() {
 fn kmc_e_003_error_from_json() {
     let json_err = serde_json::from_str::<Value>("invalid json").unwrap_err();
     let client_err: ClientError = json_err.into();
-    
+
     match client_err {
         ClientError::Serialization(msg) => assert!(!msg.is_empty()),
         _ => panic!("Expected Serialization error"),
@@ -351,8 +376,15 @@ fn kmc_e_004_error_variants() {
 
     // Chaque variante a un message d'erreur différent
     let messages: Vec<String> = errors.iter().map(|e| e.to_string()).collect();
-    let unique_count = messages.iter().collect::<std::collections::HashSet<_>>().len();
-    assert_eq!(unique_count, errors.len(), "All error variants should have unique messages");
+    let unique_count = messages
+        .iter()
+        .collect::<std::collections::HashSet<_>>()
+        .len();
+    assert_eq!(
+        unique_count,
+        errors.len(),
+        "All error variants should have unique messages"
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -372,7 +404,7 @@ fn kmc_o_001_operation_roundtrip() {
 
     let json = serde_json::to_string(&operation).unwrap();
     let parsed: Operation = serde_json::from_str(&json).unwrap();
-    
+
     assert_eq!(parsed.sql, operation.sql);
     assert_eq!(parsed.params, operation.params);
 }
@@ -428,7 +460,7 @@ fn kmc_r_002_response_with_error() {
     }"#;
 
     let response: Response = serde_json::from_str(json_str).unwrap();
-    
+
     match response {
         Response::QueryResult { success, error, .. } => {
             assert!(!success);
@@ -455,7 +487,7 @@ fn kmc_r_003_params_with_special_chars() {
 
     let json = serde_json::to_string(&request).unwrap();
     let parsed: Request = serde_json::from_str(&json).unwrap();
-    
+
     match parsed {
         Request::Execute { params, .. } => {
             assert!(params[0].contains("quote"));

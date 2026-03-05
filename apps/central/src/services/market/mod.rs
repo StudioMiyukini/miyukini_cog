@@ -3,17 +3,17 @@
 //! Interface de découverte, recherche, installation et désinstallation
 //! des services officiels et communautaires.
 
-mod sidebar;
 mod catalog;
 mod service_detail;
+mod sidebar;
 
-use dioxus::prelude::*;
-use crate::state::{use_app_state, use_service_manager};
 use crate::market_client::MarketClient;
+use crate::state::{use_app_state, use_service_manager};
+use dioxus::prelude::*;
 
-use sidebar::MarketSidebar;
 use catalog::MarketCatalog;
 use service_detail::ServiceDetail;
+use sidebar::MarketSidebar;
 
 // ── State ──────────────────────────────────────────────────────────────
 
@@ -87,7 +87,9 @@ pub fn MarketView() -> Element {
                             .official
                             .iter()
                             .chain(catalog.community.iter())
-                            .map(|entry| (entry.manifest.id.clone(), entry.manifest.version.clone()))
+                            .map(|entry| {
+                                (entry.manifest.id.clone(), entry.manifest.version.clone())
+                            })
                             .collect();
 
                         let updates = manager.check_updates(&catalog_versions);

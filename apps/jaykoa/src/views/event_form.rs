@@ -1,9 +1,9 @@
 //! Formulaire de creation/edition d'evenement JayKoa.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use jaykoa::data::{Agenda, TemporalEntry, EntryType, TemporalStatus};
 use chrono::Local;
+use dioxus::prelude::*;
+use jaykoa::data::{Agenda, EntryType, TemporalEntry, TemporalStatus};
+use miyukini_service_ui::use_palette;
 
 /// Props pour le modal de formulaire d'evenement.
 #[derive(Props, Clone, PartialEq)]
@@ -30,10 +30,14 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
     let mut all_day = use_signal(|| false);
 
     // Date et heure par defaut
-    let default_date = props.initial_datetime.as_ref()
+    let default_date = props
+        .initial_datetime
+        .as_ref()
         .and_then(|s| s.get(..10).map(String::from))
         .unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string());
-    let default_time = props.initial_datetime.as_ref()
+    let default_time = props
+        .initial_datetime
+        .as_ref()
         .and_then(|s| s.get(11..16).map(String::from))
         .unwrap_or_else(|| "09:00".to_string());
 
@@ -47,7 +51,9 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
     });
 
     // Agenda selectionne
-    let default_agenda = props.agendas.iter()
+    let default_agenda = props
+        .agendas
+        .iter()
         .find(|a| a.is_default)
         .or_else(|| props.agendas.first())
         .and_then(|a| a.id.clone())
@@ -55,7 +61,9 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
     let mut selected_agenda = use_signal(|| default_agenda);
 
     // Couleur
-    let agenda_color = props.agendas.iter()
+    let agenda_color = props
+        .agendas
+        .iter()
         .find(|a| a.id.as_ref() == Some(&selected_agenda.read().clone()))
         .and_then(|a| a.color.clone())
         .unwrap_or_else(|| "#4285F4".to_string());
@@ -84,11 +92,19 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
             id: Some(uuid::Uuid::new_v4().to_string()),
             agenda_id: Some(selected_agenda.read().clone()),
             title: Some(title.read().clone()),
-            description: if description.read().is_empty() { None } else { Some(description.read().clone()) },
+            description: if description.read().is_empty() {
+                None
+            } else {
+                Some(description.read().clone())
+            },
             start_datetime: Some(start_dt),
             end_datetime: Some(end_dt),
             all_day: *all_day.read(),
-            location: if location.read().is_empty() { None } else { Some(location.read().clone()) },
+            location: if location.read().is_empty() {
+                None
+            } else {
+                Some(location.read().clone())
+            },
             status: Some(TemporalStatus::Confirmed.as_str().to_string()),
             entry_type: Some(EntryType::Internal.as_str().to_string()),
             source_service: None,

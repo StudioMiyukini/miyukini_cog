@@ -1,9 +1,9 @@
 //! Fiche entreprise (XP-E02) — gestion du profil exposant enrichi.
 
+use super::components::{FormField, FormSection, FormTextarea, PageHeader};
+use super::JayXposeState;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{FormField, FormTextarea, FormSection, PageHeader};
-use super::JayXposeState;
 
 #[component]
 pub fn Entreprise(state: Signal<JayXposeState>) -> Element {
@@ -12,30 +12,59 @@ pub fn Entreprise(state: Signal<JayXposeState>) -> Element {
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
 
     // Charger le profil existant
-    let existing = db.exposant_by_id(&exposant_id).ok().flatten().unwrap_or_default();
+    let existing = db
+        .exposant_by_id(&exposant_id)
+        .ok()
+        .flatten()
+        .unwrap_or_default();
 
     // Signaux pour chaque champ
     let mut company_name = use_signal(|| existing.company_name.clone().unwrap_or_default());
     let mut legal_form = use_signal(|| existing.legal_form.clone().unwrap_or_default());
     let mut slogan = use_signal(|| existing.slogan.clone().unwrap_or_default());
-    let mut description_short = use_signal(|| existing.description_short.clone().unwrap_or_default());
+    let mut description_short =
+        use_signal(|| existing.description_short.clone().unwrap_or_default());
     let mut description_long = use_signal(|| existing.description_long.clone().unwrap_or_default());
     let mut contact_email = use_signal(|| existing.contact_email.clone().unwrap_or_default());
     let mut contact_phone = use_signal(|| existing.contact_phone.clone().unwrap_or_default());
     let mut adresse_siege = use_signal(|| existing.adresse_siege.clone().unwrap_or_default());
-    let mut adresse_correspondance = use_signal(|| existing.adresse_correspondance.clone().unwrap_or_default());
+    let mut adresse_correspondance =
+        use_signal(|| existing.adresse_correspondance.clone().unwrap_or_default());
     let mut siret = use_signal(|| existing.siret.clone().unwrap_or_default());
     let mut siren = use_signal(|| existing.siren.clone().unwrap_or_default());
     let mut code_ape = use_signal(|| existing.code_ape.clone().unwrap_or_default());
-    let mut num_immatriculation = use_signal(|| existing.num_immatriculation.clone().unwrap_or_default());
+    let mut num_immatriculation =
+        use_signal(|| existing.num_immatriculation.clone().unwrap_or_default());
     let mut secteur = use_signal(|| existing.secteur.clone().unwrap_or_default());
     let mut site_web = use_signal(|| existing.site_web.clone().unwrap_or_default());
-    let mut contact_fact_nom = use_signal(|| existing.contact_facturation_nom.clone().unwrap_or_default());
-    let mut contact_fact_email = use_signal(|| existing.contact_facturation_email.clone().unwrap_or_default());
-    let mut contact_fact_phone = use_signal(|| existing.contact_facturation_phone.clone().unwrap_or_default());
-    let mut contact_log_nom = use_signal(|| existing.contact_logistique_nom.clone().unwrap_or_default());
-    let mut contact_log_email = use_signal(|| existing.contact_logistique_email.clone().unwrap_or_default());
-    let mut contact_log_phone = use_signal(|| existing.contact_logistique_phone.clone().unwrap_or_default());
+    let mut contact_fact_nom =
+        use_signal(|| existing.contact_facturation_nom.clone().unwrap_or_default());
+    let mut contact_fact_email = use_signal(|| {
+        existing
+            .contact_facturation_email
+            .clone()
+            .unwrap_or_default()
+    });
+    let mut contact_fact_phone = use_signal(|| {
+        existing
+            .contact_facturation_phone
+            .clone()
+            .unwrap_or_default()
+    });
+    let mut contact_log_nom =
+        use_signal(|| existing.contact_logistique_nom.clone().unwrap_or_default());
+    let mut contact_log_email = use_signal(|| {
+        existing
+            .contact_logistique_email
+            .clone()
+            .unwrap_or_default()
+    });
+    let mut contact_log_phone = use_signal(|| {
+        existing
+            .contact_logistique_phone
+            .clone()
+            .unwrap_or_default()
+    });
     let mut social_facebook = use_signal(|| existing.social_facebook.clone().unwrap_or_default());
     let mut social_instagram = use_signal(|| existing.social_instagram.clone().unwrap_or_default());
     let mut social_linkedin = use_signal(|| existing.social_linkedin.clone().unwrap_or_default());

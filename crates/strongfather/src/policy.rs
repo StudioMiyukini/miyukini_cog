@@ -239,7 +239,7 @@ impl Policy {
     /// @human: Crée une nouvelle politique avec les composants obligatoires.
     /// @do: create_policy
     /// @depends: strongfather_policy
-    #[must_use] 
+    #[must_use]
     pub fn new(
         id: PolicyId,
         policy_type: PolicyType,
@@ -265,7 +265,7 @@ impl Policy {
     /// @human: Définit la priorité de la politique.
     /// @do: set_policy_priority
     /// @depends: strongfather_policy_new
-    #[must_use] 
+    #[must_use]
     pub fn with_priority(mut self, priority: PolicyPriorityLevel) -> Self {
         self.priority = priority;
         self
@@ -277,7 +277,7 @@ impl Policy {
     /// @human: Ajoute des métadonnées à la politique.
     /// @do: add_policy_metadata
     /// @depends: strongfather_policy_new
-    #[must_use] 
+    #[must_use]
     pub fn with_metadata(mut self, metadata: HashMap<String, String>) -> Self {
         self.metadata = metadata;
         self
@@ -289,7 +289,7 @@ impl Policy {
     /// @human: Définit les politiques élémentaires pour une politique composite.
     /// @do: set_composite_policies
     /// @depends: strongfather_policy_new
-    #[must_use] 
+    #[must_use]
     pub fn with_composite_policies(mut self, policies: Vec<PolicyId>) -> Self {
         self.composite_policies = Some(policies);
         self
@@ -301,7 +301,7 @@ impl Policy {
     /// @human: Vérifie si la politique est critique (RÈGLE-PRIO-2 : arrêt sur violation).
     /// @do: check_if_critical
     /// @depends: strongfather_policy
-    #[must_use] 
+    #[must_use]
     pub fn is_critical(&self) -> bool {
         self.priority == PolicyPriorityLevel::Critical
     }
@@ -330,7 +330,7 @@ impl PolicySet {
     /// @human: Crée un nouvel ensemble de politiques vide.
     /// @do: create_policy_set
     /// @depends: strongfather_policy_set
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             policies: HashMap::new(),
@@ -357,7 +357,7 @@ impl PolicySet {
     /// @human: Récupère une politique par son identifiant.
     /// @do: get_policy_by_id
     /// @depends: strongfather_policy_set_new
-    #[must_use] 
+    #[must_use]
     pub fn get(&self, id: &PolicyId) -> Option<&Policy> {
         self.policies.get(id)
     }
@@ -378,7 +378,7 @@ impl PolicySet {
     /// @human: Retourne le nombre de politiques dans l'ensemble.
     /// @do: count_policies
     /// @depends: strongfather_policy_set_new
-    #[must_use] 
+    #[must_use]
     pub fn len(&self) -> usize {
         self.policies.len()
     }
@@ -389,7 +389,7 @@ impl PolicySet {
     /// @human: Vérifie si l'ensemble est vide.
     /// @do: check_if_empty
     /// @depends: strongfather_policy_set_new
-    #[must_use] 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.policies.is_empty()
     }

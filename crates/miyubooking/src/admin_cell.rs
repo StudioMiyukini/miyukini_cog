@@ -30,7 +30,9 @@ pub struct MiyubookingTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyubookingIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyubookingAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.booking.reservations";
 
-#[must_use] 
+#[must_use]
 pub fn miyubooking_admin_cell(version: &str, fingerprint: &str) -> MiyubookingAdminCell {
     MiyubookingAdminCell {
         identification: MiyubookingIdentification {
@@ -63,7 +65,9 @@ pub fn miyubooking_admin_cell(version: &str, fingerprint: &str) -> MiyubookingAd
                 id: "Miyubooking".to_string(),
                 name: "Test chemin complet Miyubooking".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

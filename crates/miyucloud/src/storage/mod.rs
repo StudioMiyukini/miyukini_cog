@@ -8,9 +8,9 @@
 //! Fournit le trait `StorageBackend`, l'implementation filesystem local,
 //! le module de chunking et la verification d'integrite SHA-256.
 
-pub mod local_fs;
 pub mod chunking;
 pub mod integrity;
+pub mod local_fs;
 
 pub use chunking::Chunker;
 pub use integrity::{compute_sha256, verify_sha256};
@@ -32,11 +32,7 @@ pub trait StorageBackend {
     ) -> Result<(), MiyucloudError>;
 
     /// Lit un chunk pour un fichier donne.
-    fn read_chunk(
-        &self,
-        file_id: &str,
-        chunk_index: u32,
-    ) -> Result<Vec<u8>, MiyucloudError>;
+    fn read_chunk(&self, file_id: &str, chunk_index: u32) -> Result<Vec<u8>, MiyucloudError>;
 
     /// Supprime tous les chunks d'un fichier.
     fn delete_file(&self, file_id: &str) -> Result<(), MiyucloudError>;

@@ -6,12 +6,12 @@
 //! - MIYUKINI_DATA_DIR
 //! - MIYUKINI_PROFILE_ID
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use jay1tribu::Jay1TribuDb;
-use jay1tribu_app::DbContext;
 use jay1tribu_app::views::Jay1TribuView;
-use miyukini_service_ui::{ThemeContext, Theme};
+use jay1tribu_app::DbContext;
+use miyukini_service_ui::{Theme, ThemeContext};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -47,7 +47,11 @@ fn App() -> Element {
     });
 
     // Theme
-    use_context_provider(|| Signal::new(ThemeContext { theme: Theme::default() }));
+    use_context_provider(|| {
+        Signal::new(ThemeContext {
+            theme: Theme::default(),
+        })
+    });
 
     // DB Jay1Tribu
     let db_path = std::path::PathBuf::from(&data_dir).join("jay1tribu.db");

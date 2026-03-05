@@ -27,11 +27,7 @@ pub fn create(
 /// @human: Met à jour un brouillon ; WriteIntent KindMother.
 /// @do: pm_draft_update_under_governance
 /// tool.pm.draft.update — ne décide pas ; WriteIntent.
-pub fn update(
-    ctx: &GovernedContext,
-    _draft_id: &str,
-    _payload: &str,
-) -> Result<(), MiyupmError> {
+pub fn update(ctx: &GovernedContext, _draft_id: &str, _payload: &str) -> Result<(), MiyupmError> {
     if !ctx.has_mandate() {
         return Err(MiyupmError::NoMandate);
     }

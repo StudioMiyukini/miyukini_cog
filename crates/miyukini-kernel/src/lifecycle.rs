@@ -167,11 +167,9 @@ impl DefaultLifecycle {
     ///
     /// let mut lifecycle = DefaultLifecycle::new();
     /// ```
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
-        Self {
-            hooks: Vec::new(),
-        }
+        Self { hooks: Vec::new() }
     }
 }
 
@@ -200,8 +198,8 @@ mod tests {
     /// @depends: kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_shutdown_executes_hooks() {
-        use std::rc::Rc;
         use std::cell::RefCell;
+        use std::rc::Rc;
 
         let mut lifecycle = DefaultLifecycle::new();
         let called = Rc::new(RefCell::new(false));
@@ -224,18 +222,18 @@ mod tests {
     /// @depends: kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_shutdown_lifo_order() {
-        use std::rc::Rc;
         use std::cell::RefCell;
+        use std::rc::Rc;
 
         let mut lifecycle = DefaultLifecycle::new();
         let order = Rc::new(RefCell::new(Vec::new()));
 
         let order_clone = order.clone();
         lifecycle.register_shutdown_hook(move || order_clone.borrow_mut().push(1));
-        
+
         let order_clone = order.clone();
         lifecycle.register_shutdown_hook(move || order_clone.borrow_mut().push(2));
-        
+
         let order_clone = order.clone();
         lifecycle.register_shutdown_hook(move || order_clone.borrow_mut().push(3));
 
@@ -252,18 +250,18 @@ mod tests {
     /// @depends: kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_multiple_hooks() {
-        use std::rc::Rc;
         use std::cell::RefCell;
+        use std::rc::Rc;
 
         let mut lifecycle = DefaultLifecycle::new();
         let count = Rc::new(RefCell::new(0));
 
         let count_clone = count.clone();
         lifecycle.register_shutdown_hook(move || *count_clone.borrow_mut() += 1);
-        
+
         let count_clone = count.clone();
         lifecycle.register_shutdown_hook(move || *count_clone.borrow_mut() += 1);
-        
+
         let count_clone = count.clone();
         lifecycle.register_shutdown_hook(move || *count_clone.borrow_mut() += 1);
 
@@ -280,8 +278,8 @@ mod tests {
     /// @depends: kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_shutdown_idempotent() {
-        use std::rc::Rc;
         use std::cell::RefCell;
+        use std::rc::Rc;
 
         let mut lifecycle = DefaultLifecycle::new();
         let count = Rc::new(RefCell::new(0));
@@ -337,25 +335,25 @@ mod tests {
     /// @depends: kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_deterministic() {
-        use std::rc::Rc;
         use std::cell::RefCell;
+        use std::rc::Rc;
 
         let mut lifecycle1 = DefaultLifecycle::new();
         let order1 = Rc::new(RefCell::new(Vec::new()));
-        
+
         let order1_clone = order1.clone();
         lifecycle1.register_shutdown_hook(move || order1_clone.borrow_mut().push(1));
-        
+
         let order1_clone = order1.clone();
         lifecycle1.register_shutdown_hook(move || order1_clone.borrow_mut().push(2));
         lifecycle1.shutdown();
 
         let mut lifecycle2 = DefaultLifecycle::new();
         let order2 = Rc::new(RefCell::new(Vec::new()));
-        
+
         let order2_clone = order2.clone();
         lifecycle2.register_shutdown_hook(move || order2_clone.borrow_mut().push(1));
-        
+
         let order2_clone = order2.clone();
         lifecycle2.register_shutdown_hook(move || order2_clone.borrow_mut().push(2));
         lifecycle2.shutdown();

@@ -76,9 +76,11 @@ pub fn auth_sign_up(
     password: &str,
     user_type: &str,
 ) -> AuthResult<AuthSession> {
-    let user_id = db.profile_create(email, password, user_type).map_err(|e| AuthError {
-        message: format!("création compte: {e}"),
-    })?;
+    let user_id = db
+        .profile_create(email, password, user_type)
+        .map_err(|e| AuthError {
+            message: format!("création compte: {e}"),
+        })?;
     let profile = db.profile_by_id(&user_id).map_err(|e| AuthError {
         message: format!("lecture profil: {e}"),
     })?;
@@ -130,7 +132,10 @@ mod auth_tests {
             profile: Some(p),
         };
         assert!(s.profile.is_some());
-        assert_eq!(s.profile.as_ref().unwrap().user_type.as_deref(), Some("manager"));
+        assert_eq!(
+            s.profile.as_ref().unwrap().user_type.as_deref(),
+            Some("manager")
+        );
     }
 
     #[test]

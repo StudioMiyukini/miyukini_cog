@@ -32,17 +32,19 @@ pub mod transaction;
 
 pub use admin_cell::{
     miyusql_admin_cell, MiyuSQLAdminCell, MiyuSQLIdentification, MiyuSQLIntegrity,
-    MiyuSQLTestManifest, TOOLKIT_ID, MIYUKINI_SQLTEST_TABLE,
+    MiyuSQLTestManifest, MIYUKINI_SQLTEST_TABLE, TOOLKIT_ID,
 };
-pub use cache::{get as cache_get, invalidate as cache_invalidate, set as cache_set, CacheExecutor};
+pub use cache::{
+    get as cache_get, invalidate as cache_invalidate, set as cache_set, CacheExecutor,
+};
 pub use context::GovernedContext;
 pub use errors::MiyuSQLError;
+pub use memory::MemoryExecutor;
 pub use query::{execute as query_execute, prepare as query_prepare, QueryExecutor, QueryResult};
 pub use schema::{
-    read as schema_read, read_table as schema_read_table, SchemaExecutor, SchemaResult,
-    TableMeta, ColumnMeta,
+    read as schema_read, read_table as schema_read_table, ColumnMeta, SchemaExecutor, SchemaResult,
+    TableMeta,
 };
-pub use memory::MemoryExecutor;
 pub use transaction::{
     begin as tx_begin, commit as tx_commit, rollback as tx_rollback, TransactionExecutor,
 };

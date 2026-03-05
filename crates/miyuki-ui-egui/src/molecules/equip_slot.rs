@@ -5,10 +5,10 @@
 //! Used in the inventory panel's equipment area. Each slot has a fixed
 //! position name (e.g., "Tete", "Corps") and can hold one item.
 
-use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::quality_text::ItemQuality;
 use crate::convert::rgba_to_color32;
+use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Equipment slot position on the paperdoll.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -116,7 +116,11 @@ impl<'a> EquipSlot<'a> {
 
         if let Some(item_data) = self.item {
             // Draw item placeholder
-            painter.rect_filled(rect.shrink(4.0), Rounding::same(2.0), Color32::from_rgb(50, 40, 20));
+            painter.rect_filled(
+                rect.shrink(4.0),
+                Rounding::same(2.0),
+                Color32::from_rgb(50, 40, 20),
+            );
             let short_name: String = item_data.name.chars().take(4).collect();
             painter.text(
                 rect.center(),
@@ -151,10 +155,16 @@ mod tests {
     #[test]
     fn test_equip_position_labels() {
         let positions = [
-            EquipPosition::Head, EquipPosition::Body, EquipPosition::Belt,
-            EquipPosition::Boots, EquipPosition::Gloves, EquipPosition::Amulet,
-            EquipPosition::RingLeft, EquipPosition::RingRight,
-            EquipPosition::MainHand, EquipPosition::OffHand,
+            EquipPosition::Head,
+            EquipPosition::Body,
+            EquipPosition::Belt,
+            EquipPosition::Boots,
+            EquipPosition::Gloves,
+            EquipPosition::Amulet,
+            EquipPosition::RingLeft,
+            EquipPosition::RingRight,
+            EquipPosition::MainHand,
+            EquipPosition::OffHand,
         ];
         for pos in positions {
             assert!(!pos.label().is_empty());
@@ -164,7 +174,9 @@ mod tests {
     #[test]
     fn test_equip_slot_sizes_positive() {
         let positions = [
-            EquipPosition::Head, EquipPosition::Body, EquipPosition::Amulet,
+            EquipPosition::Head,
+            EquipPosition::Body,
+            EquipPosition::Amulet,
             EquipPosition::MainHand,
         ];
         for pos in positions {

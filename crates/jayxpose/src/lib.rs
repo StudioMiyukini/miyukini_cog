@@ -8,8 +8,8 @@
 //! Les modules UI (app, screens, theme, ui, app_state) ont été supprimés.
 //! Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
 
-pub mod data;
 pub mod auth;
+pub mod data;
 pub mod governance;
 
 /// Réexport pour les consommateurs (Origin, Central).

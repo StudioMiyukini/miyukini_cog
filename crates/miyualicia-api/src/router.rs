@@ -41,18 +41,12 @@ async fn inject_jwt_secret(
     mut request: axum::http::Request<axum::body::Body>,
     next: middleware::Next,
 ) -> axum::response::Response {
-    request
-        .extensions_mut()
-        .insert(state.jwt_secret.clone());
+    request.extensions_mut().insert(state.jwt_secret.clone());
     next.run(request).await
 }
 
 /// Construit le routeur axum complet avec tous les middlewares.
-pub fn build_router(
-    alicia: Arc<AliciaService>,
-    config: ApiConfig,
-    secret: Vec<u8>,
-) -> Router {
+pub fn build_router(alicia: Arc<AliciaService>, config: ApiConfig, secret: Vec<u8>) -> Router {
     let app_state = Arc::new(AppState {
         alicia,
         config: config.clone(),
@@ -109,9 +103,7 @@ async fn auth_token_handler(
 
     // Generer les scopes en fonction du client_id
     let scopes = match req.client_id.as_str() {
-        "admin" => vec![
-            crate::auth::JwtScope::Admin,
-        ],
+        "admin" => vec![crate::auth::JwtScope::Admin],
         _ => vec![
             crate::auth::JwtScope::Read,
             crate::auth::JwtScope::Write,
@@ -119,7 +111,10 @@ async fn auth_token_handler(
         ],
     };
 
-    let scope_names: Vec<String> = scopes.iter().map(std::string::ToString::to_string).collect();
+    let scope_names: Vec<String> = scopes
+        .iter()
+        .map(std::string::ToString::to_string)
+        .collect();
     let ttl = state.config.token_ttl_secs;
     let claims = crate::auth::JwtClaims::new(&req.client_id, scopes, ttl);
     let token = crate::auth::generate_token(&claims, &state.jwt_secret.0)?;

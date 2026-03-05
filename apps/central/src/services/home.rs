@@ -1,11 +1,11 @@
 //! Vue d'accueil (onglet Home) — Salon Genshin-like avec chat Miou.
 
-use dioxus::prelude::*;
-use crate::state::{use_app_state, MainTab, AppContext, ServiceInfo, MiouChatMsg};
-use crate::components::{ServiceGrid, ServiceFilter};
+use crate::components::{ServiceFilter, ServiceGrid};
+use crate::llm_client::{ChatMessage, LlmClient};
 use crate::miou::state::FrequenceBulles;
-use crate::llm_client::{LlmClient, ChatMessage};
+use crate::state::{use_app_state, AppContext, MainTab, MiouChatMsg, ServiceInfo};
 use chrono::{Local, Timelike};
+use dioxus::prelude::*;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // HomeView — dispatch selon l'onglet principal
@@ -88,8 +88,13 @@ fn build_suggestions(services: &[ServiceInfo], hour: u32) -> Vec<ServiceSuggesti
     }
 
     // Favoris de l'utilisateur
-    for svc in services.iter().filter(|s| s.is_installed && s.is_favorite && s.id != "market") {
-        if suggestions.iter().any(|su| su.service.id == svc.id) { continue; }
+    for svc in services
+        .iter()
+        .filter(|s| s.is_installed && s.is_favorite && s.id != "market")
+    {
+        if suggestions.iter().any(|su| su.service.id == svc.id) {
+            continue;
+        }
         suggestions.push(ServiceSuggestion {
             service: svc.clone(),
             reason: "Favori".to_string(),
@@ -97,8 +102,13 @@ fn build_suggestions(services: &[ServiceInfo], hour: u32) -> Vec<ServiceSuggesti
     }
 
     // Compléter avec les autres services installés
-    for svc in services.iter().filter(|s| s.is_installed && !s.is_favorite && s.id != "market") {
-        if suggestions.iter().any(|su| su.service.id == svc.id) { continue; }
+    for svc in services
+        .iter()
+        .filter(|s| s.is_installed && !s.is_favorite && s.id != "market")
+    {
+        if suggestions.iter().any(|su| su.service.id == svc.id) {
+            continue;
+        }
         suggestions.push(ServiceSuggestion {
             service: svc.clone(),
             reason: "Installé".to_string(),
@@ -118,8 +128,6 @@ fn SalonServiceMenu() -> Element {
         let s = state.read();
         build_suggestions(&s.services, hour)
     };
-
-
 
     rsx! {
         div {
@@ -169,7 +177,10 @@ fn SalonServiceMenu() -> Element {
 #[component]
 fn SalonMiouCenter() -> Element {
     let state = use_app_state();
-    let pseudo = state.read().current_user.as_ref()
+    let pseudo = state
+        .read()
+        .current_user
+        .as_ref()
         .and_then(|u| u.pseudonyme.clone())
         .unwrap_or_else(|| "Voyageur".to_string());
 
@@ -237,15 +248,25 @@ fn miou_greeting(pseudo: &str, hour: u32, services: &[ServiceInfo]) -> String {
 
     // Suggestion de service contextuelle
     let suggestion = match hour {
-        6..=9 => services.iter().find(|s| s.id == "jaykoa" && s.is_installed)
+        6..=9 => services
+            .iter()
+            .find(|s| s.id == "jaykoa" && s.is_installed)
             .map(|_| "Si tu veux, consulte JayKoa pour voir ton programme du jour."),
-        10..=12 => services.iter().find(|s| s.id == "jayxpose" && s.is_installed)
+        10..=12 => services
+            .iter()
+            .find(|s| s.id == "jayxpose" && s.is_installed)
             .map(|_| "C'est le bon moment pour mettre à jour JayXpose."),
-        13..=14 => services.iter().find(|s| s.id == "jaymanga" && s.is_installed)
+        13..=14 => services
+            .iter()
+            .find(|s| s.id == "jaymanga" && s.is_installed)
             .map(|_| "Petite pause manga sur JayManga ?"),
-        15..=18 => services.iter().find(|s| s.id == "jaykonta" && s.is_installed)
+        15..=18 => services
+            .iter()
+            .find(|s| s.id == "jaykonta" && s.is_installed)
             .map(|_| "JayKonta t'attend pour un point sur tes comptes."),
-        19..=22 => services.iter().find(|s| s.id == "miyuclicker" && s.is_installed)
+        19..=22 => services
+            .iter()
+            .find(|s| s.id == "miyuclicker" && s.is_installed)
             .map(|_| "Un petit Lord of the Click pour se détendre ?"),
         _ => None,
     };
@@ -266,7 +287,9 @@ fn MiouChatPanel() -> Element {
     {
         let s = app.read();
         if s.miou_chat_messages.is_empty() {
-            let pseudo = s.current_user.as_ref()
+            let pseudo = s
+                .current_user
+                .as_ref()
                 .and_then(|u| u.pseudonyme.clone())
                 .unwrap_or_else(|| "Voyageur".to_string());
             let hour = Local::now().hour();
@@ -292,7 +315,9 @@ fn MiouChatPanel() -> Element {
                 status.set(ChatStatus::Connecting);
                 let endpoint = {
                     let p = app.read();
-                    if p.miou_prefs.use_remote_session && !p.miou_prefs.remote_session_url.is_empty() {
+                    if p.miou_prefs.use_remote_session
+                        && !p.miou_prefs.remote_session_url.is_empty()
+                    {
                         p.miou_prefs.remote_session_url.clone()
                     } else {
                         p.miou_prefs.llm_endpoint.clone()
@@ -462,9 +487,10 @@ fn send_chat_message(
     status.set(ChatStatus::Sending);
 
     // Construire l'historique pour l'API
-    let mut api_messages = vec![
-        ChatMessage { role: "system".into(), content: MIOU_SYSTEM_PROMPT.into() },
-    ];
+    let mut api_messages = vec![ChatMessage {
+        role: "system".into(),
+        content: MIOU_SYSTEM_PROMPT.into(),
+    }];
     for msg in app.read().miou_chat_messages.iter() {
         api_messages.push(ChatMessage {
             role: msg.role.clone(),
@@ -541,7 +567,11 @@ fn SettingsSection() -> Element {
     let c = use_app_state().read().current_theme.palette();
     let mut show_miou_settings = use_signal(|| false);
 
-    let arrow_rotation = if show_miou_settings() { "90deg" } else { "0deg" };
+    let arrow_rotation = if show_miou_settings() {
+        "90deg"
+    } else {
+        "0deg"
+    };
     let miou_card_style = format!(
         "display: flex; align-items: center; gap: 16px; background: {}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s; border: 1px solid #ffd4e5;",
         c.bg_secondary
@@ -629,38 +659,99 @@ fn MiouSettingsPanel() -> Element {
         "display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid {};",
         c.border
     );
-    let row_style_last = "display: flex; align-items: center; justify-content: space-between; padding: 12px 0;";
+    let row_style_last =
+        "display: flex; align-items: center; justify-content: space-between; padding: 12px 0;";
     let label_style = format!("font-size: 14px; color: {};", c.text_white);
-    let desc_style = format!("font-size: 11px; color: {}; margin-top: 2px;", c.text_secondary);
+    let desc_style = format!(
+        "font-size: 11px; color: {}; margin-top: 2px;",
+        c.text_secondary
+    );
 
     let toggle_on = "width: 48px; height: 24px; background: #e91e63; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s;";
     let toggle_off = "width: 48px; height: 24px; background: #4a5568; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s;";
     let thumb_on = "width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: all 0.2s;";
     let thumb_off = "width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.2s;";
 
-    let btn_base = format!("padding: 6px 12px; border-radius: 4px; color: {}; font-size: 12px; cursor: pointer;", c.text_white);
-    let btn_active = format!("{} border: 1px solid #e91e63; background: rgba(233,30,99,0.2);", btn_base);
-    let btn_inactive = format!("{} border: 1px solid {}; background: transparent;", btn_base, c.border);
+    let btn_base = format!(
+        "padding: 6px 12px; border-radius: 4px; color: {}; font-size: 12px; cursor: pointer;",
+        c.text_white
+    );
+    let btn_active = format!(
+        "{} border: 1px solid #e91e63; background: rgba(233,30,99,0.2);",
+        btn_base
+    );
+    let btn_inactive = format!(
+        "{} border: 1px solid {}; background: transparent;",
+        btn_base, c.border
+    );
 
-    let bulles_toggle = if bulles_actives() { toggle_on } else { toggle_off };
-    let bulles_thumb = if bulles_actives() { thumb_on } else { thumb_off };
-    let rappels_toggle = if rappels_pause() { toggle_on } else { toggle_off };
+    let bulles_toggle = if bulles_actives() {
+        toggle_on
+    } else {
+        toggle_off
+    };
+    let bulles_thumb = if bulles_actives() {
+        thumb_on
+    } else {
+        thumb_off
+    };
+    let rappels_toggle = if rappels_pause() {
+        toggle_on
+    } else {
+        toggle_off
+    };
     let rappels_thumb = if rappels_pause() { thumb_on } else { thumb_off };
-    let voix_toggle = if voix_enabled() { toggle_on } else { toggle_off };
+    let voix_toggle = if voix_enabled() {
+        toggle_on
+    } else {
+        toggle_off
+    };
     let voix_thumb = if voix_enabled() { thumb_on } else { thumb_off };
     let tts_toggle = if tts_enabled() { toggle_on } else { toggle_off };
     let tts_thumb = if tts_enabled() { thumb_on } else { thumb_off };
 
-    let btn_discret = if matches!(frequence(), FrequenceBulles::Discret) { &btn_active } else { &btn_inactive };
-    let btn_normal = if matches!(frequence(), FrequenceBulles::Normal) { &btn_active } else { &btn_inactive };
-    let btn_bavard = if matches!(frequence(), FrequenceBulles::Bavard) { &btn_active } else { &btn_inactive };
+    let btn_discret = if matches!(frequence(), FrequenceBulles::Discret) {
+        &btn_active
+    } else {
+        &btn_inactive
+    };
+    let btn_normal = if matches!(frequence(), FrequenceBulles::Normal) {
+        &btn_active
+    } else {
+        &btn_inactive
+    };
+    let btn_bavard = if matches!(frequence(), FrequenceBulles::Bavard) {
+        &btn_active
+    } else {
+        &btn_inactive
+    };
 
-    let btn_1h = if seuil_pause() == 60 { &btn_active } else { &btn_inactive };
-    let btn_2h = if seuil_pause() == 120 { &btn_active } else { &btn_inactive };
-    let btn_3h = if seuil_pause() == 180 { &btn_active } else { &btn_inactive };
+    let btn_1h = if seuil_pause() == 60 {
+        &btn_active
+    } else {
+        &btn_inactive
+    };
+    let btn_2h = if seuil_pause() == 120 {
+        &btn_active
+    } else {
+        &btn_inactive
+    };
+    let btn_3h = if seuil_pause() == 180 {
+        &btn_active
+    } else {
+        &btn_inactive
+    };
 
-    let remote_toggle = if use_remote_session() { toggle_on } else { toggle_off };
-    let remote_thumb = if use_remote_session() { thumb_on } else { thumb_off };
+    let remote_toggle = if use_remote_session() {
+        toggle_on
+    } else {
+        toggle_off
+    };
+    let remote_thumb = if use_remote_session() {
+        thumb_on
+    } else {
+        thumb_off
+    };
 
     rsx! {
         div {

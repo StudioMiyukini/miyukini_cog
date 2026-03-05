@@ -1,9 +1,9 @@
 //! Vue Mois — Grille mensuelle compacte type Google Agenda.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use jaykoa::data::TemporalEntry;
 use chrono::{Datelike, NaiveDate};
+use dioxus::prelude::*;
+use jaykoa::data::TemporalEntry;
+use miyukini_service_ui::use_palette;
 
 /// Props pour la vue mois.
 #[derive(Props, Clone, PartialEq)]
@@ -37,14 +37,17 @@ pub fn MonthView(props: MonthViewProps) -> Element {
         NaiveDate::from_ymd_opt(props.year + 1, 1, 1)
     } else {
         NaiveDate::from_ymd_opt(props.year, props.month + 1, 1)
-    }.map_or(30, |d| d.pred_opt().unwrap_or(d).day());
+    }
+    .map_or(30, |d| d.pred_opt().unwrap_or(d).day());
 
     // Nombre de semaines a afficher (5 ou 6)
     let total_days = start_offset as u32 + days_in_month;
     let weeks = total_days.div_ceil(7).max(5);
 
     // Noms des jours
-    let weekday_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+    let weekday_names = [
+        "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche",
+    ];
 
     rsx! {
         div {
@@ -160,7 +163,10 @@ fn MonthEventPill(props: MonthEventPillProps) -> Element {
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");
 
     // Heure de debut
-    let time = props.entry.start_datetime.as_ref()
+    let time = props
+        .entry
+        .start_datetime
+        .as_ref()
         .and_then(|s| s.get(11..16))
         .unwrap_or("");
 

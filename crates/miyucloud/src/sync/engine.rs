@@ -101,10 +101,7 @@ impl SyncEngine {
 
     /// Retourne l'etat global de la synchronisation.
     #[cfg(feature = "legacy-sqlite")]
-    pub fn get_status(
-        &self,
-        db: &crate::data::MiyucloudDb,
-    ) -> Result<SyncStatus, MiyucloudError> {
+    pub fn get_status(&self, db: &crate::data::MiyucloudDb) -> Result<SyncStatus, MiyucloudError> {
         let peers = db.sync_peer_list()?;
         let peers_total = peers.len() as u32;
         let peers_online = peers.iter().filter(|p| p.is_trusted).count() as u32;
@@ -342,11 +339,7 @@ mod tests {
     use crate::sync::vector_clock::VectorClock;
 
     fn test_config() -> SyncEngineConfig {
-        SyncEngineConfig::new(
-            "test-cog".into(),
-            "test-owner".into(),
-            "test-pubkey".into(),
-        )
+        SyncEngineConfig::new("test-cog".into(), "test-owner".into(), "test-pubkey".into())
     }
 
     #[test]
@@ -454,10 +447,7 @@ mod tests {
             parent_id: None,
             checksum_sha256: "aaa".into(),
             size_bytes: 100,
-            clock: VectorClock::from_entries(vec![
-                ("node-a".into(), 2),
-                ("node-b".into(), 1),
-            ]),
+            clock: VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]),
             updated_at: "2026-03-01T00:00:00Z".into(),
         }];
 
@@ -467,10 +457,7 @@ mod tests {
             parent_id: None,
             checksum_sha256: "bbb".into(),
             size_bytes: 200,
-            clock: VectorClock::from_entries(vec![
-                ("node-a".into(), 1),
-                ("node-b".into(), 2),
-            ]),
+            clock: VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 2)]),
             updated_at: "2026-03-01T01:00:00Z".into(),
         }];
 

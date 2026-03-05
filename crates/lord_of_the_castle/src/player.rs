@@ -26,7 +26,7 @@ pub enum Dir8 {
 
 impl Dir8 {
     /// Vecteur unitaire (dx, dy) normalisé pour 1 px.
-    #[must_use] 
+    #[must_use]
     pub fn to_vector(self) -> (f32, f32) {
         use std::f32::consts::FRAC_1_SQRT_2;
         match self {
@@ -42,7 +42,7 @@ impl Dir8 {
     }
 
     /// Angle en radians (0 = Est, sens trigo). Pour cône d’attaque quand pas de curseur.
-    #[must_use] 
+    #[must_use]
     pub fn to_angle_rad(self) -> f32 {
         use std::f32::consts::FRAC_PI_2;
         match self {
@@ -98,13 +98,13 @@ pub struct Player {
 
 impl Player {
     /// PV max du joueur : Con*2 + For, minimum PLAYER_MIN_MAX.
-    #[must_use] 
+    #[must_use]
     pub fn hp_max_from_stats(stats: &CharacterStats) -> i32 {
         (stats.con * 2 + stats.for_).max(hp::PLAYER_MIN_MAX)
     }
 
     /// Nouveau joueur à la position donnée (sans création de personnage).
-    #[must_use] 
+    #[must_use]
     pub fn new(x: f32, y: f32) -> Self {
         let stats = CharacterStats::default();
         let hp_max = Self::hp_max_from_stats(&stats);
@@ -129,7 +129,7 @@ impl Player {
     }
 
     /// Crée un joueur après création de personnage : nom, sauvegarde, stats → agilité/luck dérivés.
-    #[must_use] 
+    #[must_use]
     pub fn from_creation(
         name: String,
         save_name: String,
@@ -161,32 +161,32 @@ impl Player {
     }
 
     /// Vitesse de déplacement (px/s) : 90 × (1 + Agilité/100).
-    #[must_use] 
+    #[must_use]
     pub fn move_speed(&self) -> f32 {
         speed::PLAYER_BASE * speed::PLAYER_SPEED_MULTIPLIER * (1.0 + (self.agility as f32 / 100.0))
     }
 
     /// Demi-taille hitbox (10×10 → 5).
-    #[must_use] 
+    #[must_use]
     pub fn half_size() -> f32 {
         size::MOBILE / 2.0
     }
 
     /// Portée attaque auto (px).
-    #[must_use] 
+    #[must_use]
     pub fn auto_attack_range() -> f32 {
         combat::AUTO_ATTACK_RANGE
     }
 
     /// Intervalle attaque auto (s).
-    #[must_use] 
+    #[must_use]
     pub fn auto_attack_interval_s() -> f32 {
         combat::AUTO_ATTACK_INTERVAL_S
     }
 
     /// Dégâts à main nue (sans arme équipée) : For + Con/2, minimum 1.
     /// Avec arme, utiliser GameState::player_auto_attack_damage (arme CàC = dégâts arme + For/2, distance = dégâts arme + Dex/2).
-    #[must_use] 
+    #[must_use]
     pub fn auto_attack_damage(&self) -> i32 {
         (self.stats.for_ + self.stats.con / 2).max(1)
     }

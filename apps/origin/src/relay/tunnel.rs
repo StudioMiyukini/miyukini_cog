@@ -272,9 +272,10 @@ impl TunnelManager {
                 sequence: 0,
                 timestamp: chrono::Utc::now().timestamp() as u64,
             };
-            sender.send(msg).await.map_err(|_| {
-                TunnelError::SendFailed(hex::encode(&session_id[..8]))
-            })?;
+            sender
+                .send(msg)
+                .await
+                .map_err(|_| TunnelError::SendFailed(hex::encode(&session_id[..8])))?;
             Ok(())
         } else {
             Err(TunnelError::SessionNotFound(hex::encode(&session_id[..8])))
@@ -296,9 +297,8 @@ impl TunnelManager {
                 .and_then(|ids| ids.first().copied())
         };
 
-        let tunnel_id = tunnel_id.ok_or_else(|| {
-            TunnelError::NoTunnelForSession(hex::encode(&from_session[..8]))
-        })?;
+        let tunnel_id = tunnel_id
+            .ok_or_else(|| TunnelError::NoTunnelForSession(hex::encode(&from_session[..8])))?;
 
         // Récupérer le tunnel
         let (dest_session, from_a) = {
@@ -333,9 +333,10 @@ impl TunnelManager {
                 timestamp: chrono::Utc::now().timestamp() as u64,
             };
 
-            sender.send(msg).await.map_err(|_| {
-                TunnelError::SendFailed(hex::encode(&dest_session[..8]))
-            })?;
+            sender
+                .send(msg)
+                .await
+                .map_err(|_| TunnelError::SendFailed(hex::encode(&dest_session[..8])))?;
 
             debug!(
                 "Relayed {} bytes from {} to {}",
@@ -346,7 +347,9 @@ impl TunnelManager {
 
             Ok(())
         } else {
-            Err(TunnelError::SessionNotFound(hex::encode(&dest_session[..8])))
+            Err(TunnelError::SessionNotFound(hex::encode(
+                &dest_session[..8],
+            )))
         }
     }
 

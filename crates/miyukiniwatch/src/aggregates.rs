@@ -104,9 +104,12 @@ pub fn compute_aggregates(
     // AGG_SESSION_RETURN / AGG_SESSION_SUMMARY — jours depuis dernière session
     let last_end = db.get_last_session_end(profile_id)?;
     let days_away = last_end.as_ref().and_then(|ts| {
-        chrono::DateTime::parse_from_rfc3339(ts)
-            .ok()
-            .map(|dt| (now - dt.with_timezone(&Local)).num_days().unsigned_abs().min(u32::MAX as u64) as u32)
+        chrono::DateTime::parse_from_rfc3339(ts).ok().map(|dt| {
+            (now - dt.with_timezone(&Local))
+                .num_days()
+                .unsigned_abs()
+                .min(u32::MAX as u64) as u32
+        })
     });
     let total_sessions = db.get_global(profile_id, "total_sessions")?;
     aggregates.push(Aggregate {

@@ -25,7 +25,11 @@ pub fn mark(
 /// @layer: tool
 /// @human: Liste le suivi lu (utilisateur/board).
 /// @do: forum_readtrack_list_under_governance
-pub fn list(ctx: &GovernedContext, _user_ref: &str, _board_id: Option<&str>) -> Result<Vec<String>, MiyuforumError> {
+pub fn list(
+    ctx: &GovernedContext,
+    _user_ref: &str,
+    _board_id: Option<&str>,
+) -> Result<Vec<String>, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }

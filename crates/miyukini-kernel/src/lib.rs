@@ -98,7 +98,7 @@ pub use time::{Clock, DefaultClock};
 /// @human: Ré-export du trait Logger, de l'enum Level et de DefaultLogger pour faciliter l'usage.
 /// @do: reexport_log_types
 /// @depends: kernel_module_log
-pub use log::{Level, Logger, DefaultLogger};
+pub use log::{DefaultLogger, Level, Logger};
 
 /// @id: kernel_reexport_lifecycle
 /// @role: infrastructure
@@ -106,4 +106,4 @@ pub use log::{Level, Logger, DefaultLogger};
 /// @human: Ré-export du trait Lifecycle et de DefaultLifecycle pour faciliter l'usage.
 /// @do: reexport_lifecycle_types
 /// @depends: kernel_module_lifecycle
-pub use lifecycle::{Lifecycle, DefaultLifecycle};
+pub use lifecycle::{DefaultLifecycle, Lifecycle};

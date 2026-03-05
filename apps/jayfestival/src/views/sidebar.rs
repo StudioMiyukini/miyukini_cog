@@ -1,10 +1,8 @@
 //! Sidebar JayFestival — navigation par role et sections.
 
+use super::{ExpSection, JayFestivalRole, JayFestivalState, OrgSection, VisSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{
-    ExpSection, JayFestivalRole, JayFestivalState, OrgSection, VisSection,
-};
 
 #[component]
 pub fn JayFestivalSidebar(state: Signal<JayFestivalState>) -> Element {
@@ -291,7 +289,11 @@ fn SidebarItem(
 ) -> Element {
     let c = use_palette();
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {

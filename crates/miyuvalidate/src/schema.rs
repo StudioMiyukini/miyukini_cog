@@ -28,15 +28,15 @@ pub fn check(
     if !ctx.has_mandate() {
         return Err(MiyuValidateError::NoMandate);
     }
-    let data_val: Value = serde_json::from_str(data)
-        .map_err(|e| MiyuValidateError::InvalidData(e.to_string()))?;
+    let data_val: Value =
+        serde_json::from_str(data).map_err(|e| MiyuValidateError::InvalidData(e.to_string()))?;
     let schema_val: Value = serde_json::from_str(schema)
         .map_err(|e| MiyuValidateError::InvalidSchema(e.to_string()))?;
     let mut error_codes = Vec::new();
     if let Some(required) = schema_val.get("required").and_then(Value::as_array) {
-        let obj = data_val.as_object().ok_or_else(|| {
-            MiyuValidateError::InvalidData("data is not an object".to_string())
-        })?;
+        let obj = data_val
+            .as_object()
+            .ok_or_else(|| MiyuValidateError::InvalidData("data is not an object".to_string()))?;
         for key in required {
             if let Some(k) = key.as_str() {
                 if !obj.contains_key(k) {
@@ -46,9 +46,9 @@ pub fn check(
         }
     }
     if let Some(properties) = schema_val.get("properties").and_then(Value::as_object) {
-        let obj = data_val.as_object().ok_or_else(|| {
-            MiyuValidateError::InvalidData("data is not an object".to_string())
-        })?;
+        let obj = data_val
+            .as_object()
+            .ok_or_else(|| MiyuValidateError::InvalidData("data is not an object".to_string()))?;
         for (key, type_spec) in properties {
             if let Some(v) = obj.get(key) {
                 if let Some(t) = type_spec.as_str() {

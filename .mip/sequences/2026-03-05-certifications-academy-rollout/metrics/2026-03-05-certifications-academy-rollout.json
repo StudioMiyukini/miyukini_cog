@@ -1,0 +1,43 @@
+﻿{
+    "project":  {
+                    "title":  "Certifications Academy Rollout",
+                    "description":  "Execution capstones des certifications pour tous les agents",
+                    "class":  "T3",
+                    "slug":  "certifications-academy-rollout",
+                    "mip_sequence_number":  1,
+                    "autonomy_mode":  "FULL"
+                },
+    "timestamps":  {
+                       "sequence_start":  "2026-03-05T00:00:00Z",
+                       "p0_start":  "2026-03-05T00:00:00Z",
+                       "p0_end":  "2026-03-05T00:00:00Z",
+                       "p3_start":  "2026-03-05T00:00:00Z",
+                       "p3_end":  "2026-03-05T10:15:00Z",
+                       "p4_start":  "2026-03-05T10:20:00Z",
+                       "p4_end":  "2026-03-05T10:30:00Z",
+                       "p5_start":  "2026-03-05T10:35:00Z",
+                       "p5_test_start":  "2026-03-05T10:40:00Z",
+                       "p5_test_end":  "2026-03-05T10:45:00Z",
+                       "p5_end":  "2026-03-05T10:50:00Z",
+                       "p6_start":  "2026-03-05T10:55:00Z",
+                       "p6_end":  "2026-03-05T11:05:00Z",
+                       "total_end":  "2026-03-05T11:05:00Z"
+                   },
+    "counters":  {
+                     "certifications_total":  37,
+                     "waves_total":  4,
+                     "waves_completed":  4,
+                     "capstones_initialized":  37,
+                     "capstones_completed":  37,
+                     "evidence_files":  37,
+                     "runbooks":  37,
+                     "ready_interne":  37,
+                     "ready_externe":  0,
+                     "not_ready":  0,
+                     "audits":  2,
+                     "audit_blockers":  0,
+                     "security_score":  94,
+                     "p5_verdict":  "ACCEPTE",
+                     "report_generated":  true
+                 }
+}

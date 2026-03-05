@@ -107,7 +107,12 @@ pub fn AppHeader(
          color: white; font-size: 12px; font-weight: 600; overflow: hidden;"
     );
 
-    let initials = user_name.chars().next().unwrap_or('?').to_uppercase().to_string();
+    let initials = user_name
+        .chars()
+        .next()
+        .unwrap_or('?')
+        .to_uppercase()
+        .to_string();
 
     rsx! {
         header { style: "{header_style}",

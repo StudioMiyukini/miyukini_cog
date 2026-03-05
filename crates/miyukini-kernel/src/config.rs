@@ -123,7 +123,7 @@ impl EnvConfig {
     ///
     /// let config = EnvConfig::from_env();
     /// ```
-    #[must_use] 
+    #[must_use]
     pub fn from_env() -> Self {
         Self {
             values: std::env::vars().collect(),
@@ -234,7 +234,11 @@ mod tests {
         let config = EnvConfig::from_env();
         // Vérifier qu'au moins PATH existe (variable système standard)
         // Note: PATH devrait exister sur tous les systèmes
-        assert!(config.get("PATH").is_some() || config.get("Path").is_some() || config.get("path").is_some());
+        assert!(
+            config.get("PATH").is_some()
+                || config.get("Path").is_some()
+                || config.get("path").is_some()
+        );
     }
 
     /// @id: test_config_no_business_logic
@@ -281,18 +285,21 @@ mod tests {
     fn test_config_deterministic() {
         // Définir une variable de test
         std::env::set_var("TEST_DETERMINISTIC", "value123");
-        
+
         // Créer deux configurations avec le même environnement
         let config1 = EnvConfig::from_env();
         let config2 = EnvConfig::from_env();
-        
+
         // Les deux doivent retourner la même valeur
-        assert_eq!(config1.get("TEST_DETERMINISTIC"), config2.get("TEST_DETERMINISTIC"));
+        assert_eq!(
+            config1.get("TEST_DETERMINISTIC"),
+            config2.get("TEST_DETERMINISTIC")
+        );
         assert_eq!(config1.get("TEST_DETERMINISTIC"), Some("value123"));
-        
+
         // Nettoyer
         std::env::remove_var("TEST_DETERMINISTIC");
-        
+
         // Vérifier que après suppression, les deux configurations retournent None
         // (si elles étaient recréées, mais ici elles gardent leur état initial)
         // Pour vraiment tester le déterminisme, on recrée après suppression
@@ -312,13 +319,13 @@ mod tests {
         std::env::set_var("TEST_KEY_1", "value1");
         std::env::set_var("TEST_KEY_2", "value2");
         std::env::set_var("TEST_KEY_3", "value3");
-        
+
         let config = EnvConfig::from_env();
-        
+
         assert_eq!(config.get("TEST_KEY_1"), Some("value1"));
         assert_eq!(config.get("TEST_KEY_2"), Some("value2"));
         assert_eq!(config.get("TEST_KEY_3"), Some("value3"));
-        
+
         std::env::remove_var("TEST_KEY_1");
         std::env::remove_var("TEST_KEY_2");
         std::env::remove_var("TEST_KEY_3");

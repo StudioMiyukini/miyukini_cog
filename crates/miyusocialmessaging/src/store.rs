@@ -17,6 +17,7 @@ pub(crate) fn conversation_messages() -> &'static Mutex<HashMap<String, Vec<Stri
 
 /// message_id -> (conversation_id, sender_id, content)
 pub(crate) fn messages() -> &'static Mutex<HashMap<String, (String, String, String)>> {
-    static MS: std::sync::OnceLock<Mutex<HashMap<String, (String, String, String)>>> = std::sync::OnceLock::new();
+    static MS: std::sync::OnceLock<Mutex<HashMap<String, (String, String, String)>>> =
+        std::sync::OnceLock::new();
     MS.get_or_init(|| Mutex::new(HashMap::new()))
 }

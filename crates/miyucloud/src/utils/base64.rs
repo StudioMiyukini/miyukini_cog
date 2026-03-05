@@ -15,9 +15,9 @@ pub fn encode(data: &[u8]) -> String {
 
 /// Decode une chaine base64 standard.
 pub fn decode(input: &str) -> Result<Vec<u8>, crate::errors::MiyucloudError> {
-    STANDARD
-        .decode(input)
-        .map_err(|e| crate::errors::MiyucloudError::InvalidInput(format!("base64 decode error: {e}")))
+    STANDARD.decode(input).map_err(|e| {
+        crate::errors::MiyucloudError::InvalidInput(format!("base64 decode error: {e}"))
+    })
 }
 
 #[cfg(test)]

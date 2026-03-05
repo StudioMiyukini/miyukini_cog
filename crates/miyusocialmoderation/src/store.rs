@@ -5,7 +5,8 @@ use std::sync::Mutex;
 
 /// report_id -> (target_type, target_id)
 pub(crate) fn reports() -> &'static Mutex<HashMap<String, (String, String)>> {
-    static R: std::sync::OnceLock<Mutex<HashMap<String, (String, String)>>> = std::sync::OnceLock::new();
+    static R: std::sync::OnceLock<Mutex<HashMap<String, (String, String)>>> =
+        std::sync::OnceLock::new();
     R.get_or_init(|| Mutex::new(HashMap::new()))
 }
 

@@ -59,7 +59,7 @@ pub struct Session {
     pub created_at: DateTime<Utc>,
     /// Dernière activité.
     pub last_activity: DateTime<Utc>,
-    
+
     // Informations du COG (remplies après REGISTER)
     /// Identifiant du COG.
     pub cog_id: Option<String>,
@@ -225,7 +225,11 @@ impl Session {
     /// Génère un identifiant de Permis.
     #[must_use]
     pub fn generate_permis_id(&self) -> String {
-        format!("permis-{}-{}", hex::encode(&self.id[..8]), Utc::now().timestamp())
+        format!(
+            "permis-{}-{}",
+            hex::encode(&self.id[..8]),
+            Utc::now().timestamp()
+        )
     }
 }
 
@@ -419,7 +423,9 @@ mod tests {
                 None,
             );
         }
-        manager.register_cog("test-cog".to_string(), session_id).await;
+        manager
+            .register_cog("test-cog".to_string(), session_id)
+            .await;
 
         // Get by cog_id
         assert!(manager.get_by_cog_id("test-cog").await.is_some());

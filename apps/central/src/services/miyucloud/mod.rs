@@ -10,6 +10,7 @@
 //! Layout 2 panneaux : sidebar gauche (220px) + zone principale (flex).
 //! Initialise le state et le client HTTP au montage.
 
+mod auth_security;
 mod client;
 mod components;
 mod explorer;
@@ -34,7 +35,7 @@ use settings::CloudSettings;
 use share_dialog::ShareDialog;
 use sidebar::CloudSidebar;
 use state::{BreadcrumbItem, CloudSection, FolderContents, MiyuCloudState, UploadProgress};
-use sync_status::{SyncStatusBadge, SyncPanel};
+use sync_status::{SyncPanel, SyncStatusBadge};
 use trash_view::TrashView;
 use upload::FileUploadZone;
 
@@ -498,10 +499,7 @@ fn format_share_date(iso: &str) -> String {
 // ════════════════════════════════════════════════════════════════════════════
 
 /// Lance le selecteur de fichiers et l'upload.
-fn trigger_upload(
-    mut state: Signal<MiyuCloudState>,
-    client: Signal<Option<MiyuCloudClient>>,
-) {
+fn trigger_upload(mut state: Signal<MiyuCloudState>, client: Signal<Option<MiyuCloudClient>>) {
     spawn(async move {
         // Ouvrir le selecteur de fichiers natif
         let file_path: Option<PathBuf> = tokio::task::spawn_blocking(|| {
@@ -735,7 +733,8 @@ fn mock_root_contents() -> FolderContents {
                 name: "README.md".to_string(),
                 mime_type: "text/markdown".to_string(),
                 size_bytes: 2_048,
-                checksum_sha256: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2".to_string(),
+                checksum_sha256: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+                    .to_string(),
                 encryption_iv: Some("base64iv==".to_string()),
                 chunk_count: 1,
                 is_trashed: false,
@@ -750,7 +749,8 @@ fn mock_root_contents() -> FolderContents {
                 name: "vacances_2026.jpg".to_string(),
                 mime_type: "image/jpeg".to_string(),
                 size_bytes: 3_458_000,
-                checksum_sha256: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3".to_string(),
+                checksum_sha256: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3"
+                    .to_string(),
                 encryption_iv: Some("base64iv2==".to_string()),
                 chunk_count: 14,
                 is_trashed: false,
@@ -765,7 +765,8 @@ fn mock_root_contents() -> FolderContents {
                 name: "rapport_annuel.pdf".to_string(),
                 mime_type: "application/pdf".to_string(),
                 size_bytes: 1_250_000,
-                checksum_sha256: "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4".to_string(),
+                checksum_sha256: "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4"
+                    .to_string(),
                 encryption_iv: Some("base64iv3==".to_string()),
                 chunk_count: 5,
                 is_trashed: false,
@@ -780,7 +781,8 @@ fn mock_root_contents() -> FolderContents {
                 name: "backup_2026-02.zip".to_string(),
                 mime_type: "application/zip".to_string(),
                 size_bytes: 52_430_000,
-                checksum_sha256: "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5".to_string(),
+                checksum_sha256: "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
+                    .to_string(),
                 encryption_iv: Some("base64iv4==".to_string()),
                 chunk_count: 200,
                 is_trashed: false,
@@ -795,7 +797,8 @@ fn mock_root_contents() -> FolderContents {
                 name: "ambient_track.mp3".to_string(),
                 mime_type: "audio/mpeg".to_string(),
                 size_bytes: 8_720_000,
-                checksum_sha256: "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6".to_string(),
+                checksum_sha256: "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6"
+                    .to_string(),
                 encryption_iv: Some("base64iv5==".to_string()),
                 chunk_count: 34,
                 is_trashed: false,

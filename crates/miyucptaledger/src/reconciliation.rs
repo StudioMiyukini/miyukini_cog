@@ -9,7 +9,10 @@ use crate::errors::MiyucptaledgerError;
 /// @layer: tool
 /// @human: Propose des rapprochements (sans décider) ; exécution seule.
 /// @do: compta_reconciliation_suggest_under_governance
-pub fn suggest(ctx: &GovernedContext, _context_ref: Option<&str>) -> Result<Vec<String>, MiyucptaledgerError> {
+pub fn suggest(
+    ctx: &GovernedContext,
+    _context_ref: Option<&str>,
+) -> Result<Vec<String>, MiyucptaledgerError> {
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);
     }

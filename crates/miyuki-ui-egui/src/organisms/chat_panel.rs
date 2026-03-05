@@ -2,10 +2,10 @@
 
 //! Chat panel organism -- message list + input field.
 
+use crate::convert::rgba_to_color32;
+use crate::molecules::chat_message::{ChatMessage, ChatType};
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::molecules::chat_message::{ChatMessage, ChatType};
-use crate::convert::rgba_to_color32;
 
 /// Chat message data.
 #[derive(Debug, Clone)]
@@ -55,7 +55,8 @@ impl ChatPanel {
                             .text_color(rgba_to_color32(&D2_PALETTE.text_primary)),
                     );
 
-                    if resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter))
+                    if resp.lost_focus()
+                        && ui.input(|i| i.key_pressed(egui::Key::Enter))
                         && !input_buffer.trim().is_empty()
                     {
                         sent = true;

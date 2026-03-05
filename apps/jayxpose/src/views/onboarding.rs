@@ -8,10 +8,10 @@
 //! 4. Contact — Email, téléphone, adresse
 //! 5. Félicitations — Profil créé, redirection vers le dashboard
 
+use super::components::{FormField, FormTextarea};
+use super::{JayXposeSection, JayXposeState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{FormField, FormTextarea};
-use super::{JayXposeState, JayXposeSection};
 
 /// Nombre total d'étapes de l'onboarding.
 const STEP_COUNT: u8 = 6;

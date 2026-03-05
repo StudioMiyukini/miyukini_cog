@@ -54,10 +54,7 @@ fn evaluate_single(condition: &Condition, snapshot: &HomeSnapshot) -> bool {
 ///
 /// Pour les proprietes contextuelles (`hour`, `weekday`), utilise le snapshot directement.
 /// Pour les proprietes DeviceState, cherche l'etat du dispositif dans le snapshot.
-fn get_actual_value(
-    condition: &Condition,
-    snapshot: &HomeSnapshot,
-) -> Option<serde_json::Value> {
+fn get_actual_value(condition: &Condition, snapshot: &HomeSnapshot) -> Option<serde_json::Value> {
     match &condition.device_id {
         // Proprietes contextuelles
         None => match condition.property.as_str() {
@@ -87,12 +84,8 @@ fn extract_device_property(
     match property {
         "on" => state.on.map(serde_json::Value::from),
         "brightness" => state.brightness.map(serde_json::Value::from),
-        "temperature_current" => state
-            .temperature_current
-            .map(|v| serde_json::json!(v)),
-        "temperature_target" => state
-            .temperature_target
-            .map(|v| serde_json::json!(v)),
+        "temperature_current" => state.temperature_current.map(|v| serde_json::json!(v)),
+        "temperature_target" => state.temperature_target.map(|v| serde_json::json!(v)),
         "humidity" => state.humidity.map(|v| serde_json::json!(v)),
         "motion" => state.motion.map(serde_json::Value::from),
         "contact" => state.contact.map(serde_json::Value::from),
@@ -113,20 +106,12 @@ fn extract_device_property(
 ///
 /// Supports : bool==bool, number op number, number Between [min, max].
 /// Retourne `false` si les types sont incompatibles.
-fn compare_json(
-    actual: &serde_json::Value,
-    op: ConditionOp,
-    expected: &serde_json::Value,
-) -> bool {
+fn compare_json(actual: &serde_json::Value, op: ConditionOp, expected: &serde_json::Value) -> bool {
     match op {
         ConditionOp::Eq => json_eq(actual, expected),
         ConditionOp::Ne => !json_eq(actual, expected),
-        ConditionOp::Gt => {
-            json_cmp(actual, expected) == Some(std::cmp::Ordering::Greater)
-        }
-        ConditionOp::Lt => {
-            json_cmp(actual, expected) == Some(std::cmp::Ordering::Less)
-        }
+        ConditionOp::Gt => json_cmp(actual, expected) == Some(std::cmp::Ordering::Greater),
+        ConditionOp::Lt => json_cmp(actual, expected) == Some(std::cmp::Ordering::Less),
         ConditionOp::Gte => {
             json_cmp(actual, expected).is_some_and(|ord| ord != std::cmp::Ordering::Less)
         }
@@ -157,10 +142,7 @@ fn json_eq(a: &serde_json::Value, b: &serde_json::Value) -> bool {
 }
 
 /// Comparaison ordonnee entre deux valeurs JSON numeriques.
-fn json_cmp(
-    a: &serde_json::Value,
-    b: &serde_json::Value,
-) -> Option<std::cmp::Ordering> {
+fn json_cmp(a: &serde_json::Value, b: &serde_json::Value) -> Option<std::cmp::Ordering> {
     let fa = a.as_f64()?;
     let fb = b.as_f64()?;
     fa.partial_cmp(&fb)
@@ -169,10 +151,7 @@ fn json_cmp(
 /// Verifie qu'une valeur est dans un intervalle [min, max] inclus.
 ///
 /// `expected` doit etre un tableau JSON de 2 elements : `[min, max]`.
-fn json_between(
-    actual: &serde_json::Value,
-    expected: &serde_json::Value,
-) -> bool {
+fn json_between(actual: &serde_json::Value, expected: &serde_json::Value) -> bool {
     let arr = match expected.as_array() {
         Some(a) if a.len() == 2 => a,
         _ => {

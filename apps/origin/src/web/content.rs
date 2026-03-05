@@ -345,7 +345,7 @@ impl ContentManager {
     /// Charge les articles de blog.
     async fn load_blog_posts(&self) {
         let mut posts = self.blog_posts.write().await;
-        
+
         posts.push(BlogPost {
             id: "miyukini-cog-announcement".to_string(),
             title: "Bienvenue dans l'écosystème Miyukini COG".to_string(),
@@ -372,7 +372,7 @@ impl ContentManager {
     /// Charge les annonces.
     async fn load_announcements(&self) {
         let mut announcements = self.announcements.write().await;
-        
+
         announcements.push(Announcement {
             id: "origin-online".to_string(),
             announcement_type: AnnouncementType::Release,
@@ -397,7 +397,7 @@ impl ContentManager {
     /// Charge les téléchargements.
     async fn load_downloads(&self) {
         let mut downloads = self.downloads.write().await;
-        
+
         // COG v0.2.0 - Installateur Windows
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
@@ -592,7 +592,8 @@ Vous avez un COG fonctionnel. Explorez maintenant :
         sections.push(DocSection {
             id: "architecture".to_string(),
             title: "Architecture et Stack".to_string(),
-            description: "La pyramide des strates et l'organisation technique de Miyukini COG".to_string(),
+            description: "La pyramide des strates et l'organisation technique de Miyukini COG"
+                .to_string(),
             icon: "🏛️".to_string(),
             articles: vec![
                 DocArticle {
@@ -643,7 +644,8 @@ miyukini-cog/
 │   ├── central/      # Hub principal
 │   └── origin/       # Serveur MWS
 └── docs/             # Documentation
-```"#.to_string(),
+```"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
                 DocArticle {
@@ -701,7 +703,8 @@ Ces lois gouvernent l'ensemble de l'architecture :
 5. **LOI-5** : Le coût doit être proportionnel au hardware
 6. **LOI-6** : L'autonomie n'empêche pas la fédération
 7. **LOI-7** : La strate Cores est immuable
-8. **LOI-8** : Migration = diplomatie entre environnements"#.to_string(),
+8. **LOI-8** : Migration = diplomatie entre environnements"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
             ],
@@ -1246,11 +1249,10 @@ Chaque Service déclare ses points TAMR : où l'utilisateur intervient (validati
             title: "Les Toolkits".to_string(),
             description: "Outils spécialisés gouvernés par les Cores".to_string(),
             icon: "🧰".to_string(),
-            articles: vec![
-                DocArticle {
-                    id: "overview".to_string(),
-                    title: "Vue d'ensemble des Toolkits".to_string(),
-                    content: r#"# Les Toolkits
+            articles: vec![DocArticle {
+                id: "overview".to_string(),
+                title: "Vue d'ensemble des Toolkits".to_string(),
+                content: r#"# Les Toolkits
 
 Les Toolkits sont des **outils spécialisés** de la strate 2. Ils exécutent mais ne décident pas.
 
@@ -1292,10 +1294,10 @@ impl GoverningCore for MyToolkit {
         CoreType::KindMother
     }
 }
-```"#.to_string(),
-                    updated_at: Utc::now(),
-                },
-            ],
+```"#
+                    .to_string(),
+                updated_at: Utc::now(),
+            }],
         });
 
         // ═══════════════════════════════════════════════════════════════════════
@@ -1500,7 +1502,8 @@ Le MWS est le réseau qui permet aux COGs de se découvrir et communiquer.
 ## Modes de fonctionnement
 
 - **Connecté** — Participe au réseau MWS
-- **Lone** — Isolé, données 100% locales"#.to_string(),
+- **Lone** — Isolé, données 100% locales"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
                 DocArticle {
@@ -1543,7 +1546,8 @@ Les COGs sont regroupés par version de Cores :
 1. COG A cherche COG B via le Tracker
 2. Le Tracker retourne l'adresse de COG B
 3. COG A se connecte via le Relay
-4. Communication chiffrée de bout en bout"#.to_string(),
+4. Communication chiffrée de bout en bout"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
                 DocArticle {
@@ -1589,7 +1593,8 @@ Les COGs sont regroupés par version de Cores :
 - TLS 1.3 obligatoire
 - Certificats vérifiés
 - Permis signé cryptographiquement
-- Rate limiting anti-DDoS"#.to_string(),
+- Rate limiting anti-DDoS"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
                 DocArticle {
@@ -1653,7 +1658,8 @@ Toutes les 30 secondes pour maintenir la présence.
 | T1 | Méfiance légère — Anomalie mineure |
 | T2 | Quarantaine — Comportement suspect |
 | T3 | Blacklist temporaire |
-| T4 | Blacklist permanente |"#.to_string(),
+| T4 | Blacklist permanente |"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
                 DocArticle {
@@ -1711,7 +1717,8 @@ Plusieurs Relays peuvent exister pour la redondance.
 ### États possibles
 - **Connecté** — Présent sur le réseau
 - **Lone** — Mode isolé, hors réseau
-- **Déconnecté** — En attente de connexion"#.to_string(),
+- **Déconnecté** — En attente de connexion"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
             ],
@@ -1781,7 +1788,8 @@ cargo clippy
 ### Documentation
 - Tous les éléments publics documentés
 - Exemples dans les docstrings
-- README pour chaque crate"#.to_string(),
+- README pour chaque crate"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
                 DocArticle {
@@ -1846,7 +1854,8 @@ impl MonServiceDb {
 Dans `apps/central/src/services/` :
 - Créer le module d'affichage
 - Ajouter au catalogue
-- Définir la sidebar et les vues"#.to_string(),
+- Définir la sidebar et les vues"#
+                        .to_string(),
                     updated_at: Utc::now(),
                 },
             ],
@@ -1986,7 +1995,8 @@ JayXpose s'intègre avec JayKonta pour la facturation et avec le MWS pour la pub
 
 ## Données souveraines
 
-Toutes vos données financières restent sur votre COG, jamais partagées sans votre accord."#.to_string(),
+Toutes vos données financières restent sur votre COG, jamais partagées sans votre accord."#
+                .to_string(),
             category: ServiceCategory::Outils,
             editor: "Miyukini".to_string(),
             cog_version: "0.1.0".to_string(),
@@ -2071,7 +2081,8 @@ JayKoa s'intègre avec JayFestival pour les événements publics et avec JayKont
 
 ## Mode hors ligne
 
-Le jeu continue à progresser même quand vous ne jouez pas, grâce à la simulation de temps écoulé."#.to_string(),
+Le jeu continue à progresser même quand vous ne jouez pas, grâce à la simulation de temps écoulé."#
+                .to_string(),
             category: ServiceCategory::Jeux,
             editor: "Miyukini".to_string(),
             cog_version: "0.1.0".to_string(),
@@ -2112,7 +2123,8 @@ Le jeu continue à progresser même quand vous ne jouez pas, grâce à la simula
 
 ## Lobbys publics
 
-Créez ou rejoignez des lobbys pour jouer avec d'autres membres du réseau Miyukini."#.to_string(),
+Créez ou rejoignez des lobbys pour jouer avec d'autres membres du réseau Miyukini."#
+                .to_string(),
             category: ServiceCategory::Jeux,
             editor: "Miyukini".to_string(),
             cog_version: "0.1.0".to_string(),
@@ -2369,7 +2381,8 @@ Persistance via KindMother avec chiffrement libSQL. Pipeline comptable vers JayK
             .cloned()
             .collect();
         active.sort_by(|a, b| {
-            b.priority.cmp(&a.priority)
+            b.priority
+                .cmp(&a.priority)
                 .then_with(|| b.published_at.cmp(&a.published_at))
         });
         active
@@ -2384,7 +2397,11 @@ Persistance via KindMother avec chiffrement libSQL. Pipeline comptable vers JayK
     /// Récupère les téléchargements par catégorie.
     pub async fn get_downloads_by_category(&self, category: DownloadCategory) -> Vec<Download> {
         let downloads = self.downloads.read().await;
-        downloads.iter().filter(|d| d.category == category).cloned().collect()
+        downloads
+            .iter()
+            .filter(|d| d.category == category)
+            .cloned()
+            .collect()
     }
 
     /// Récupère les sections de documentation.
@@ -2423,7 +2440,11 @@ Persistance via KindMother avec chiffrement libSQL. Pipeline comptable vers JayK
     /// Récupère les services par catégorie.
     pub async fn get_services_by_category(&self, category: ServiceCategory) -> Vec<ServiceInfo> {
         let services = self.services.read().await;
-        services.iter().filter(|s| s.category == category).cloned().collect()
+        services
+            .iter()
+            .filter(|s| s.category == category)
+            .cloned()
+            .collect()
     }
 
     /// Récupère les services gratuits.

@@ -21,7 +21,7 @@ pub enum Request {
         sql: String,
         params: Vec<String>,
     },
-    
+
     /// Requête d'écriture (INSERT, UPDATE, DELETE).
     Execute {
         operator_id: String,
@@ -30,7 +30,7 @@ pub enum Request {
         params: Vec<String>,
         intent: String,
     },
-    
+
     /// Transaction avec plusieurs opérations.
     Transaction {
         operator_id: String,
@@ -38,12 +38,10 @@ pub enum Request {
         operations: Vec<Operation>,
         intent: String,
     },
-    
+
     /// Vérification de santé.
-    HealthCheck {
-        database: Option<String>,
-    },
-    
+    HealthCheck { database: Option<String> },
+
     /// Informations sur une base de données.
     DatabaseInfo {
         operator_id: String,
@@ -71,7 +69,7 @@ pub enum Response {
         row_count: u64,
         error: Option<String>,
     },
-    
+
     /// Résultat d'une requête d'écriture.
     ExecuteResult {
         success: bool,
@@ -79,21 +77,21 @@ pub enum Response {
         last_insert_id: Option<i64>,
         error: Option<String>,
     },
-    
+
     /// Résultat d'une transaction.
     TransactionResult {
         success: bool,
         results: Vec<u64>,
         error: Option<String>,
     },
-    
+
     /// Résultat de vérification de santé.
     HealthCheckResult {
         healthy: bool,
         status: String,
         latency_ms: u64,
     },
-    
+
     /// Informations sur une base de données.
     DatabaseInfoResult {
         success: bool,
@@ -103,12 +101,9 @@ pub enum Response {
         encrypted: bool,
         error: Option<String>,
     },
-    
+
     /// Erreur générique.
-    Error {
-        code: String,
-        message: String,
-    },
+    Error { code: String, message: String },
 }
 
 impl Response {

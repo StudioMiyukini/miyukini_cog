@@ -1,0 +1,42 @@
+openapi: 3.1.0
+info:
+  title: MiyuSTT API
+  version: 0.1.0
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service status
+  /api/stt:
+    post:
+      summary: Batch transcription
+      parameters:
+        - in: header
+          name: X-Request-ID
+          required: false
+          schema:
+            type: string
+          description: Correlation ID inter-services.
+        - in: header
+          name: X-Source
+          required: false
+          schema:
+            type: string
+          description: Source appelante (ex: alicia-home).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Transcript payload
+  /api/stt/stream:
+    get:
+      summary: Streaming transcription (WS upgrade)
+      responses:
+        "101":
+          description: Protocol switch

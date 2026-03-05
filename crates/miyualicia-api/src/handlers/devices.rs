@@ -30,10 +30,7 @@ pub async fn list(
     claims.require_scope(&JwtScope::Read)?;
 
     let devices = state.alicia.registry_snapshot().await;
-    let dtos: Vec<DeviceDto> = devices
-        .iter()
-        .map(|(d, s)| device_to_dto(d, s))
-        .collect();
+    let dtos: Vec<DeviceDto> = devices.iter().map(|(d, s)| device_to_dto(d, s)).collect();
 
     Ok(Json(dtos))
 }

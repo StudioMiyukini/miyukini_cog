@@ -1,10 +1,10 @@
 //! Statistiques lecteurs JayManga — progression, favoris, badges.
 
+use super::components::{EmptyState, PageHeader, StatCard};
+use super::JayMangaState;
+use crate::use_db;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, StatCard, EmptyState};
-use super::JayMangaState;
 
 #[component]
 pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
@@ -16,10 +16,22 @@ pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
     let badges = db.badge_list().unwrap_or_default();
 
     let total_xp = progression.as_ref().and_then(|p| p.total_xp).unwrap_or(0);
-    let current_level = progression.as_ref().and_then(|p| p.current_level).unwrap_or(1);
-    let current_streak = progression.as_ref().and_then(|p| p.current_streak).unwrap_or(0);
-    let pages_read = progression.as_ref().and_then(|p| p.total_pages_read).unwrap_or(0);
-    let works_completed = progression.as_ref().and_then(|p| p.total_works_completed).unwrap_or(0);
+    let current_level = progression
+        .as_ref()
+        .and_then(|p| p.current_level)
+        .unwrap_or(1);
+    let current_streak = progression
+        .as_ref()
+        .and_then(|p| p.current_streak)
+        .unwrap_or(0);
+    let pages_read = progression
+        .as_ref()
+        .and_then(|p| p.total_pages_read)
+        .unwrap_or(0);
+    let works_completed = progression
+        .as_ref()
+        .and_then(|p| p.total_works_completed)
+        .unwrap_or(0);
 
     rsx! {
         div {

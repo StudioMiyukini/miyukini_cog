@@ -92,10 +92,7 @@ pub struct AliciaMqttAdminCell {
 
 /// Construit la Cellule Admin AliciaMqtt.
 #[must_use]
-pub fn alicia_mqtt_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> AliciaMqttAdminCell {
+pub fn alicia_mqtt_admin_cell(version: &str, fingerprint: &str) -> AliciaMqttAdminCell {
     AliciaMqttAdminCell {
         identification: AliciaMqttIdentification {
             id: TOOLKIT_ID.to_string(),
@@ -123,10 +120,7 @@ pub fn alicia_mqtt_admin_cell(
 }
 
 /// Initialise et retourne le singleton AdminCell.
-pub fn init_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> &'static AliciaMqttAdminCell {
+pub fn init_admin_cell(version: &str, fingerprint: &str) -> &'static AliciaMqttAdminCell {
     ADMIN_CELL.get_or_init(|| alicia_mqtt_admin_cell(version, fingerprint))
 }
 

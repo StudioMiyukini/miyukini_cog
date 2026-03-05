@@ -6,9 +6,9 @@
 
 pub mod views;
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use jayfestival::data::JayFestivalDb;
+use std::sync::Arc;
 
 /// Contexte de base de donnees partage dans l'arbre de composants.
 #[derive(Clone)]

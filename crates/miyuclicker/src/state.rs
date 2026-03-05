@@ -303,9 +303,9 @@ impl Default for GameState {
             soldats: 0,
 
             // Bâtiments initiaux
-            maisons_lvl: 3,   // pop max = 3×4 = 12
-            caserne_lvl: 1,   // soldats max = 1×5 = 5
-            guilde_lvl: 1,    // bâtisseurs max = 1×3 = 3
+            maisons_lvl: 3, // pop max = 3×4 = 12
+            caserne_lvl: 1, // soldats max = 1×5 = 5
+            guilde_lvl: 1,  // bâtisseurs max = 1×3 = 3
 
             // Pas de construction en cours
             construction_maison: 0.0,
@@ -590,7 +590,10 @@ impl GameState {
     /// @role: mutator
     #[must_use]
     pub fn new_game(slot_id: u8) -> Self {
-        let mut state = Self { slot_id, ..Default::default() };
+        let mut state = Self {
+            slot_id,
+            ..Default::default()
+        };
         state.cites.push(Cite {
             id: "ma_cite".to_string(),
             nom: "Ma cité".to_string(),

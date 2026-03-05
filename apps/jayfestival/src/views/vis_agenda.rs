@@ -10,10 +10,26 @@ pub fn VisAgenda() -> Element {
     let mut active_view = use_signal(|| "liste".to_string());
 
     let view = active_view.read().clone();
-    let view_liste_bg = if view == "liste" { c.accent_blue } else { c.bg_secondary };
-    let view_liste_color = if view == "liste" { "white" } else { c.text_primary };
-    let view_cal_bg = if view == "calendrier" { c.accent_blue } else { c.bg_secondary };
-    let view_cal_color = if view == "calendrier" { "white" } else { c.text_primary };
+    let view_liste_bg = if view == "liste" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let view_liste_color = if view == "liste" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let view_cal_bg = if view == "calendrier" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let view_cal_color = if view == "calendrier" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -135,7 +151,12 @@ fn AgendaListView() -> Element {
 }
 
 #[component]
-fn AgendaEvent(time: &'static str, title: &'static str, location: &'static str, event_type: &'static str) -> Element {
+fn AgendaEvent(
+    time: &'static str,
+    title: &'static str,
+    location: &'static str,
+    event_type: &'static str,
+) -> Element {
     let c = use_palette();
 
     let (icon, color) = match event_type {

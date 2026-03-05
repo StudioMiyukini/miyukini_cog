@@ -1,0 +1,31 @@
+{
+    email admin@example.com
+}
+
+miyucloud.example.com {
+    encode zstd gzip
+
+    @health path /health
+    handle @health {
+        reverse_proxy 127.0.0.1:11442
+    }
+
+    reverse_proxy 127.0.0.1:11442
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+
+    tls {
+        issuer acme
+    }
+
+    log {
+        output file /var/log/caddy/miyucloud-access.log
+        format json
+    }
+}

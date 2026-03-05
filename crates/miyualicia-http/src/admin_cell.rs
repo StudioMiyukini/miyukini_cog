@@ -92,10 +92,7 @@ pub struct AliciaHttpAdminCell {
 
 /// Construit la Cellule Admin AliciaHttp.
 #[must_use]
-pub fn alicia_http_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> AliciaHttpAdminCell {
+pub fn alicia_http_admin_cell(version: &str, fingerprint: &str) -> AliciaHttpAdminCell {
     AliciaHttpAdminCell {
         identification: AliciaHttpIdentification {
             id: TOOLKIT_ID.to_string(),
@@ -123,10 +120,7 @@ pub fn alicia_http_admin_cell(
 }
 
 /// Initialise et retourne le singleton AdminCell.
-pub fn init_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> &'static AliciaHttpAdminCell {
+pub fn init_admin_cell(version: &str, fingerprint: &str) -> &'static AliciaHttpAdminCell {
     ADMIN_CELL.get_or_init(|| alicia_http_admin_cell(version, fingerprint))
 }
 

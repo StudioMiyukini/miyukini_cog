@@ -1,0 +1,38 @@
+[Unit]
+Description=MiyuCloud Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=miyucloud
+Group=miyucloud
+WorkingDirectory=/opt/miyucloud/current
+EnvironmentFile=/etc/miyucloud/miyucloud.env
+ExecStart=/opt/miyucloud/current/miyucloud-server
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=30
+TimeoutStopSec=30
+LimitNOFILE=65535
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+ReadWritePaths=/var/lib/miyucloud /var/log/miyucloud
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

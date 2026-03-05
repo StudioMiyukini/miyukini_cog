@@ -76,6 +76,10 @@ next-env.d.ts
 .github-token
 supabase-catakana.env
 
+# MIP — Secrets (auth GitHub, VPS, API, etc.)
+.mip/secrets/*
+!.mip/secrets/README.md
+
 # JayFestival — base fille SQLite (KindMother)
 jayfestival.db
 jayfestival.db-journal

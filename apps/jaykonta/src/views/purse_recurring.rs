@@ -2,11 +2,11 @@
 //!
 //! Liste les recurrents actifs, permet d'en ajouter, suspendre, supprimer.
 
-use std::sync::Arc;
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
 use super::components::{ActionButton, Badge};
 use super::JayKontaState;
+use dioxus::prelude::*;
+use miyukini_service_ui::use_palette;
+use std::sync::Arc;
 
 #[component]
 pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
@@ -158,10 +158,18 @@ fn render_recurring_row(
     mut refresh_tick: Signal<u32>,
 ) -> Element {
     let is_income = item.direction == jaykonta::domain::purse::RecurringDirection::Income;
-    let amount_color = if is_income { c.accent_green } else { c.accent_red };
+    let amount_color = if is_income {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
     let sign = if is_income { "+" } else { "-" };
     let freq_label = item.frequency.label();
-    let status_color = if item.is_active { c.accent_green } else { c.text_muted };
+    let status_color = if item.is_active {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
     let status_label = if item.is_active { "Actif" } else { "Suspendu" };
     let opacity = if item.is_active { "1" } else { "0.5" };
 
@@ -254,7 +262,11 @@ fn render_recurring_row(
 #[component]
 fn SummaryCard(label: &'static str, amount: f64, positive: bool) -> Element {
     let c = use_palette();
-    let color = if positive { c.accent_green } else { c.accent_red };
+    let color = if positive {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
 
     rsx! {
         div {

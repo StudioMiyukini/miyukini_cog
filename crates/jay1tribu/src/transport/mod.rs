@@ -18,8 +18,9 @@ pub trait MwsTransportSender: Send + Sync {
     fn send(&self, to: &str, payload: &[u8]) -> Result<(), DispatchError>;
 }
 
-static REGISTERED_SENDER: std::sync::OnceLock<std::sync::Arc<dyn MwsTransportSender + Send + Sync>> =
-    std::sync::OnceLock::new();
+static REGISTERED_SENDER: std::sync::OnceLock<
+    std::sync::Arc<dyn MwsTransportSender + Send + Sync>,
+> = std::sync::OnceLock::new();
 
 /// Enregistre le sender MWS (à appeler par Central quand le Webway est connecté).
 /// Remplace tout sender précédent si appelé plusieurs fois (via OnceLock, seul le premier reste ; pour remplacer, utiliser un wrapper).
@@ -41,7 +42,8 @@ pub fn dispatch_to_recipient(
     recipient_cog_id: &str,
 ) -> Result<(), DispatchError> {
     if let Some(sender) = REGISTERED_SENDER.get() {
-        let payload = serde_json::to_vec(msg).map_err(|e| DispatchError::Transport(e.to_string()))?;
+        let payload =
+            serde_json::to_vec(msg).map_err(|e| DispatchError::Transport(e.to_string()))?;
         return sender.send(recipient_cog_id, &payload);
     }
     Ok(())
@@ -53,7 +55,9 @@ pub fn dispatch_to_recipients(
     msg: &Message,
     sender_cog_id: &str,
 ) -> Result<(), DispatchError> {
-    let recipient_ids = db.salon_member_cog_ids(&msg.salon_id).map_err(DispatchError::Db)?;
+    let recipient_ids = db
+        .salon_member_cog_ids(&msg.salon_id)
+        .map_err(DispatchError::Db)?;
     for cog_id in recipient_ids {
         if cog_id != sender_cog_id {
             let _ = dispatch_to_recipient(db, msg, sender_cog_id, &cog_id);

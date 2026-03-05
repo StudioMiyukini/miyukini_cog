@@ -2,9 +2,9 @@
 
 //! NPC dialog option molecule -- a clickable text option in NPC dialogs.
 
+use crate::convert::rgba_to_color32;
 use egui::{Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// An NPC dialog option.
 pub struct NpcOption<'a> {
@@ -38,12 +38,13 @@ impl<'a> NpcOption<'a> {
         };
 
         let response = ui.add(
-            egui::Label::new(
-                egui::RichText::new(self.text)
-                    .color(text_color)
-                    .size(12.0),
-            )
-            .sense(if self.enabled { egui::Sense::click() } else { egui::Sense::hover() }),
+            egui::Label::new(egui::RichText::new(self.text).color(text_color).size(12.0)).sense(
+                if self.enabled {
+                    egui::Sense::click()
+                } else {
+                    egui::Sense::hover()
+                },
+            ),
         );
 
         // Hover underline effect for enabled options
@@ -52,7 +53,10 @@ impl<'a> NpcOption<'a> {
             let underline_y = rect.max.y;
             let gold = rgba_to_color32(&D2_PALETTE.accent_primary_hover);
             ui.painter().line_segment(
-                [egui::Pos2::new(rect.min.x, underline_y), egui::Pos2::new(rect.max.x, underline_y)],
+                [
+                    egui::Pos2::new(rect.min.x, underline_y),
+                    egui::Pos2::new(rect.max.x, underline_y),
+                ],
                 egui::Stroke::new(1.0, gold),
             );
         }

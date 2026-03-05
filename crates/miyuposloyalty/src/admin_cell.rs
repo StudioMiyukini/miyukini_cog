@@ -30,7 +30,9 @@ pub struct MiyuposloyaltyTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuposloyaltyIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuposloyaltyAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.pos.miyuposloyalty";
 
-#[must_use] 
+#[must_use]
 pub fn miyuposloyalty_admin_cell(version: &str, fingerprint: &str) -> MiyuposloyaltyAdminCell {
     MiyuposloyaltyAdminCell {
         identification: MiyuposloyaltyIdentification {
@@ -63,7 +65,9 @@ pub fn miyuposloyalty_admin_cell(version: &str, fingerprint: &str) -> Miyuposloy
                 id: "Miyuposloyalty".to_string(),
                 name: "Test chemin complet Miyuposloyalty".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

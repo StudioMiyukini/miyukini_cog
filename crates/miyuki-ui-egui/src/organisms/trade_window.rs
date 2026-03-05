@@ -2,10 +2,10 @@
 
 //! Trade window organism -- two grids (yours/theirs) + gold + accept/cancel.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::d2_button::{D2Button, D2ButtonVariant};
 use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// Trade window data.
 pub struct TradeWindowData {
@@ -67,7 +67,11 @@ impl TradeWindow {
 
                         if data.other_accepted {
                             let accepted_color = rgba_to_color32(&D2_PALETTE.success);
-                            ui.label(egui::RichText::new("Accepte !").color(accepted_color).size(11.0));
+                            ui.label(
+                                egui::RichText::new("Accepte !")
+                                    .color(accepted_color)
+                                    .size(11.0),
+                            );
                         }
                     });
                 });

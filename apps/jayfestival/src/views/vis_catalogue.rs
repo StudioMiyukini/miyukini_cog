@@ -1,8 +1,8 @@
 //! VIS — Catalogue des éditions publiées + agenda visiteur.
 
+use super::components::{format_date_range, Badge, EmptyState};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, EmptyState, format_date_range};
 
 #[component]
 pub fn VisCatalogue() -> Element {

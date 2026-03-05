@@ -6,11 +6,7 @@
 //! concrete egui style system. All egui visual configuration should flow
 //! through these functions rather than hard-coding colors or sizes.
 
-use egui::{
-    Color32, Rounding, Shadow, Stroke, Style, Visuals,
-    style::Spacing,
-    vec2, Margin,
-};
+use egui::{style::Spacing, vec2, Color32, Margin, Rounding, Shadow, Stroke, Style, Visuals};
 use miyuki_ui_tokens::{Rgba, UiTheme};
 
 /// Convert a token [`Rgba`] to an egui [`Color32`].
@@ -36,10 +32,7 @@ pub fn theme_to_style(theme: &UiTheme) -> Style {
         window_stroke: Stroke::new(2.0, rgba_to_color32(&p.border_default)),
         window_rounding: Rounding::same(theme.radius.sm),
         window_shadow: Shadow {
-            offset: vec2(
-                theme.shadow.md.offset_x,
-                theme.shadow.md.offset_y,
-            ),
+            offset: vec2(theme.shadow.md.offset_x, theme.shadow.md.offset_y),
             blur: theme.shadow.md.blur,
             spread: theme.shadow.md.spread,
             color: rgba_to_color32(&theme.shadow.md.color),

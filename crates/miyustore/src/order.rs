@@ -12,7 +12,8 @@ struct OrderRecord {
     status: String,
 }
 
-static ORDERS: std::sync::OnceLock<Mutex<HashMap<String, OrderRecord>>> = std::sync::OnceLock::new();
+static ORDERS: std::sync::OnceLock<Mutex<HashMap<String, OrderRecord>>> =
+    std::sync::OnceLock::new();
 
 fn orders() -> &'static Mutex<HashMap<String, OrderRecord>> {
     ORDERS.get_or_init(|| Mutex::new(HashMap::new()))
@@ -28,7 +29,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreE
         return Err(MiyustoreError::NoMandate);
     }
     let id = format!("ord:{}", UuidIdGenerator.generate());
-    let mut guard = orders().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = orders()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     guard.insert(
         id.clone(),
         OrderRecord {
@@ -48,7 +51,9 @@ pub fn update(ctx: &GovernedContext, order_id: &str, payload: &str) -> Result<()
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let mut guard = orders().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = orders()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     if let Some(rec) = guard.get_mut(order_id) {
         rec.payload = payload.to_string();
     }
@@ -64,7 +69,9 @@ pub fn status(ctx: &GovernedContext, order_id: &str) -> Result<String, Miyustore
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let guard = orders().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let guard = orders()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     Ok(guard
         .get(order_id)
         .map(|r| r.status.as_str())
@@ -81,6 +88,8 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let guard = orders().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let guard = orders()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     Ok(guard.keys().cloned().collect())
 }

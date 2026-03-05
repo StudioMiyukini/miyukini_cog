@@ -2,10 +2,10 @@
 
 //! Waypoint map organism -- 5 act tabs with teleport destinations.
 
+use crate::convert::rgba_to_color32;
+use crate::molecules::waypoint_entry::WaypointEntry;
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::molecules::waypoint_entry::WaypointEntry;
-use crate::convert::rgba_to_color32;
 
 /// Waypoint data for one act.
 #[derive(Debug, Clone)]

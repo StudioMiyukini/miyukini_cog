@@ -92,8 +92,7 @@ mod tests {
             host: "127.0.0.1".to_string(),
             ..Default::default()
         };
-        let server =
-            AliciaApiServer::new(alicia, api_config, b"secret".to_vec());
+        let server = AliciaApiServer::new(alicia, api_config, b"secret".to_vec());
         let addr = server.listen_addr();
         assert_eq!(addr.port(), 9999);
         assert_eq!(
@@ -109,8 +108,7 @@ mod tests {
             ..Default::default()
         };
         let alicia = Arc::new(AliciaService::new(config));
-        let server =
-            AliciaApiServer::new(alicia, ApiConfig::default(), b"secret".to_vec());
+        let server = AliciaApiServer::new(alicia, ApiConfig::default(), b"secret".to_vec());
         let addr = server.listen_addr();
         assert_eq!(addr.port(), 7890);
     }

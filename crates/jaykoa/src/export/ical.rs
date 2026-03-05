@@ -25,7 +25,10 @@ pub fn entries_to_ical(entries: &[TemporalEntry], calendar_name: &str) -> String
     out.push_str("PRODID:-//Miyukini//JayKoa//FR\r\n");
     out.push_str("CALSCALE:GREGORIAN\r\n");
     out.push_str("METHOD:PUBLISH\r\n");
-    out.push_str(&format!("X-WR-CALNAME:{}\r\n", escape_ical_text(calendar_name)));
+    out.push_str(&format!(
+        "X-WR-CALNAME:{}\r\n",
+        escape_ical_text(calendar_name)
+    ));
 
     // --- VEVENTs ---
     for entry in entries {
@@ -107,10 +110,7 @@ pub fn entries_to_ical(entries: &[TemporalEntry], calendar_name: &str) -> String
 fn datetime_to_ical(dt_str: &str) -> String {
     // Supprime les séparateurs '-' et ':' tout en gardant le 'T'.
     // "2026-03-15T09:00:00" → "20260315T090000"
-    let cleaned: String = dt_str
-        .chars()
-        .filter(|c| *c != '-' && *c != ':')
-        .collect();
+    let cleaned: String = dt_str.chars().filter(|c| *c != '-' && *c != ':').collect();
     cleaned
 }
 

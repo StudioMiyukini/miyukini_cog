@@ -6,8 +6,5 @@
 pub mod adapter;
 
 pub use adapter::{
-    jaykonta_create_quote,
-    jaykonta_emit_invoice,
-    miyuinvoice_facade_quote_create,
-    JayKontaError,
+    jaykonta_create_quote, jaykonta_emit_invoice, miyuinvoice_facade_quote_create, JayKontaError,
 };

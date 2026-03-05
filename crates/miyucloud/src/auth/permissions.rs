@@ -32,8 +32,7 @@ pub fn verify_access(
     let required_level = required_permission_level(action);
 
     for perm in permissions {
-        if perm.grantee_id == requester_id
-            && permission_satisfies(perm.permission, required_level)
+        if perm.grantee_id == requester_id && permission_satisfies(perm.permission, required_level)
         {
             return Ok(());
         }

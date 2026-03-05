@@ -6,12 +6,11 @@
 //! - Pas de MwsViewState (Central-only) : online_ids = Vec vide en standalone
 
 use dioxus::prelude::*;
-use jay1tribu::{
-    get_friends_with_presence, is_webway_connected, process_pending_deliveries,
-};
+use jay1tribu::{get_friends_with_presence, is_webway_connected, process_pending_deliveries};
 
 /// Style de base pour un panneau (evite expressions complexes dans rsx!).
-const PANEL_BASE: &str = "background: #252540; border-radius: 8px; padding: 12px; overflow-y: auto;";
+const PANEL_BASE: &str =
+    "background: #252540; border-radius: 8px; padding: 12px; overflow-y: auto;";
 
 /// Vue principale du service Jay1Tribu (3 panneaux : amis | salons | chat).
 #[component]
@@ -155,7 +154,12 @@ pub fn Jay1TribuView(profile_id: Signal<String>) -> Element {
     let no_salon_msg = "Selectionnez une conversation.";
     let chat_title = selected_id
         .as_ref()
-        .and_then(|id| salons_list.iter().find(|s| s.id == *id).map(|s| s.name.clone()))
+        .and_then(|id| {
+            salons_list
+                .iter()
+                .find(|s| s.id == *id)
+                .map(|s| s.name.clone())
+        })
         .unwrap_or_else(|| "Chat".to_string());
 
     rsx! {

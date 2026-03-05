@@ -15,6 +15,7 @@ use axum::response::{IntoResponse, Response};
 use axum::Json;
 use miyucloud::data::types::{GranteeType, PermissionLevel};
 use miyucloud::domain::{ExternalShareOps, SharingOps};
+use miyucloud::utils::sanitize::validate_uuid;
 use serde::Deserialize;
 use std::sync::Arc;
 
@@ -42,6 +43,24 @@ pub async fn create_share_link(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateShareLinkBody>,
 ) -> Response {
+    if let Some(file_id) = &body.file_id {
+        if !validate_uuid(file_id) {
+            return error_response(
+                StatusCode::BAD_REQUEST,
+                "INVALID_FILE_ID",
+                "Invalid file id",
+            );
+        }
+    }
+    if let Some(folder_id) = &body.folder_id {
+        if !validate_uuid(folder_id) {
+            return error_response(
+                StatusCode::BAD_REQUEST,
+                "INVALID_FOLDER_ID",
+                "Invalid folder id",
+            );
+        }
+    }
     let db = &state.db;
     let creator_id = &state.config.owner_id;
 
@@ -91,6 +110,13 @@ pub async fn revoke_share_link(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            "INVALID_ID",
+            "Invalid share link id",
+        );
+    }
     let db = &state.db;
 
     match ExternalShareOps::revoke_link(db, &id) {
@@ -127,6 +153,24 @@ pub async fn create_share_permission(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateSharePermissionBody>,
 ) -> Response {
+    if let Some(file_id) = &body.file_id {
+        if !validate_uuid(file_id) {
+            return error_response(
+                StatusCode::BAD_REQUEST,
+                "INVALID_FILE_ID",
+                "Invalid file id",
+            );
+        }
+    }
+    if let Some(folder_id) = &body.folder_id {
+        if !validate_uuid(folder_id) {
+            return error_response(
+                StatusCode::BAD_REQUEST,
+                "INVALID_FOLDER_ID",
+                "Invalid folder id",
+            );
+        }
+    }
     let db = &state.db;
     let grantee_type = GranteeType::from_str_value(&body.grantee_type);
     let permission = PermissionLevel::from_str_value(&body.permission);
@@ -161,6 +205,13 @@ pub async fn list_permissions(
     State(state): State<Arc<AppState>>,
     Path(resource_id): Path<String>,
 ) -> Response {
+    if !validate_uuid(&resource_id) {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            "INVALID_RESOURCE_ID",
+            "Invalid resource id",
+        );
+    }
     let db = &state.db;
 
     match SharingOps::list_shares_for_resource(db, &resource_id) {
@@ -178,6 +229,13 @@ pub async fn delete_permission(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(
+            StatusCode::BAD_REQUEST,
+            "INVALID_ID",
+            "Invalid permission id",
+        );
+    }
     let db = &state.db;
 
     match SharingOps::unshare(db, &id) {

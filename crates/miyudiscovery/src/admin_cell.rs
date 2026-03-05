@@ -30,7 +30,9 @@ pub struct MiyudiscoveryTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyudiscoveryIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyudiscoveryAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.social.discovery";
 
-#[must_use] 
+#[must_use]
 pub fn miyudiscovery_admin_cell(version: &str, fingerprint: &str) -> MiyudiscoveryAdminCell {
     MiyudiscoveryAdminCell {
         identification: MiyudiscoveryIdentification {
@@ -63,7 +65,9 @@ pub fn miyudiscovery_admin_cell(version: &str, fingerprint: &str) -> Miyudiscove
                 id: "Miyudiscovery".to_string(),
                 name: "Test chemin complet Miyudiscovery".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

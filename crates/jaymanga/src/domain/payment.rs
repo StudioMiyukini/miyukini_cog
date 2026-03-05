@@ -31,10 +31,7 @@ pub enum PaymentError {
 /// Applique une promotion sur un prix (RM-05 : centimes).
 #[must_use]
 pub fn payment_apply_promotion(price: i64, promotion: &Promotion) -> i64 {
-    let discount_type = promotion
-        .discount_type
-        .as_deref()
-        .unwrap_or("percent");
+    let discount_type = promotion.discount_type.as_deref().unwrap_or("percent");
     let discount_value = promotion.discount_value.unwrap_or(0);
 
     match DiscountType::from_str(discount_type) {
@@ -49,12 +46,8 @@ pub fn payment_apply_promotion(price: i64, promotion: &Promotion) -> i64 {
 
 /// Expire les transactions pending au-delà de `max_age_days`.
 #[cfg(feature = "legacy-sqlite")]
-pub fn payment_expire_pending(
-    _db: &JayMangaDb,
-    max_age_days: i32,
-) -> Result<usize, PaymentError> {
-    let cutoff = chrono::Utc::now()
-        - chrono::Duration::days(i64::from(max_age_days));
+pub fn payment_expire_pending(_db: &JayMangaDb, max_age_days: i32) -> Result<usize, PaymentError> {
+    let cutoff = chrono::Utc::now() - chrono::Duration::days(i64::from(max_age_days));
     let cutoff_str = cutoff.to_rfc3339();
 
     // Récupérer les transactions pending plus anciennes que le cutoff

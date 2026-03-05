@@ -21,8 +21,17 @@ pub fn create(
         return Err(MiyumoderationforumError::NoMandate);
     }
     let id = format!("rep:{}", UuidIdGenerator.generate());
-    let mut guard = store::reports().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    guard.insert(id.clone(), (target_type.to_string(), target_id.to_string(), reason.to_string()));
+    let mut guard = store::reports()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    guard.insert(
+        id.clone(),
+        (
+            target_type.to_string(),
+            target_id.to_string(),
+            reason.to_string(),
+        ),
+    );
     Ok(id)
 }
 
@@ -36,13 +45,18 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ReportItem>, Miyumoderationforu
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let guard = store::reports().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    let items = guard.iter().map(|(id, (target_type, target_id, reason))| ReportItem {
-        id: id.clone(),
-        target_type: target_type.clone(),
-        target_id: target_id.clone(),
-        reason: reason.clone(),
-    }).collect();
+    let guard = store::reports()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items = guard
+        .iter()
+        .map(|(id, (target_type, target_id, reason))| ReportItem {
+            id: id.clone(),
+            target_type: target_type.clone(),
+            target_id: target_id.clone(),
+            reason: reason.clone(),
+        })
+        .collect();
     Ok(items)
 }
 

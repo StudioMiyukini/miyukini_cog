@@ -5,13 +5,13 @@
 //! - Le lancement/arrêt des processus service
 //! - L'installation/désinstallation depuis le Market
 
-pub mod registry;
-pub mod launcher;
 pub mod installer;
+pub mod launcher;
+pub mod registry;
 
-use std::sync::{Arc, Mutex};
-use registry::{InstalledService, ServiceRegistryData};
 use launcher::ServiceProcesses;
+use registry::{InstalledService, ServiceRegistryData};
+use std::sync::{Arc, Mutex};
 
 /// Service Manager — point d'entrée unique pour le cycle de vie des services.
 #[derive(Clone)]
@@ -70,7 +70,9 @@ impl ServiceManager {
     /// Lance un service installé. Retourne Ok si lancé, Err si échec.
     pub fn launch_service(&self, service_id: &str, profile_id: &str) -> Result<(), String> {
         let reg = self.registry.lock().unwrap_or_else(|e| e.into_inner());
-        let service = reg.services.get(service_id)
+        let service = reg
+            .services
+            .get(service_id)
             .ok_or_else(|| format!("Service '{service_id}' non installé"))?;
         self.processes.launch(service, profile_id)
     }
@@ -96,12 +98,17 @@ impl ServiceManager {
     /// Vérifie les mises à jour disponibles.
     /// Compare les versions installées avec celles du catalogue distant.
     /// Retourne les paires (service_id, version_installée, version_disponible).
-    pub fn check_updates(&self, catalog_versions: &[(String, String)]) -> Vec<(String, String, String)> {
+    pub fn check_updates(
+        &self,
+        catalog_versions: &[(String, String)],
+    ) -> Vec<(String, String, String)> {
         let reg = self.registry.lock().unwrap_or_else(|e| e.into_inner());
         let mut updates = Vec::new();
         for (service_id, available_version) in catalog_versions {
             if let Some(installed) = reg.services.get(service_id) {
-                if installed.manifest.version != *available_version && *available_version > installed.manifest.version {
+                if installed.manifest.version != *available_version
+                    && *available_version > installed.manifest.version
+                {
                     updates.push((
                         service_id.clone(),
                         installed.manifest.version.clone(),
@@ -114,7 +121,11 @@ impl ServiceManager {
     }
 
     /// Met à jour un service (même flow que l'installation : stop + réinstall).
-    pub fn update_from_package(&self, service_id: &str, package_bytes: &[u8]) -> Result<String, String> {
+    pub fn update_from_package(
+        &self,
+        service_id: &str,
+        package_bytes: &[u8],
+    ) -> Result<String, String> {
         // Arrêter le service s'il tourne
         if self.is_running(service_id) {
             self.stop_service(service_id)?;

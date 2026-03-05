@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuProfile ; expose les modules tools.
 /// @do: expose_miyuprofile_toolkit
-
 pub mod admin_cell;
 pub mod avatar;
 pub mod context;

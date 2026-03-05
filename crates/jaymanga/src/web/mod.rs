@@ -4,8 +4,8 @@
 //! Inclut le portail vendeur (catalogue, liseuse, panier)
 //! et le Portail Agrégé (vue inter-COG unifiée).
 
-pub mod portal;
 pub mod aggregator_portal;
+pub mod portal;
 
 // ---------------------------------------------------------------------------
 // Configuration

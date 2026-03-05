@@ -1,8 +1,8 @@
 //! ORG-E08 — Parametrage d'une edition (dates, lieu, theme, reglement).
 
+use super::components::ActionButton;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::ActionButton;
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()

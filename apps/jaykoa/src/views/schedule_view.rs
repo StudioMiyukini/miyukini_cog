@@ -1,9 +1,9 @@
 //! Vue Planning — Liste chronologique des evenements.
 
-use dioxus::prelude::*;
-use miyukini_service_ui::use_palette;
-use jaykoa::data::{TemporalEntry, TemporalConflict, EventSource, EntryType};
 use chrono::{Datelike, NaiveDate};
+use dioxus::prelude::*;
+use jaykoa::data::{EntryType, EventSource, TemporalConflict, TemporalEntry};
+use miyukini_service_ui::use_palette;
 
 /// Props pour la vue planning.
 #[derive(Props, Clone, PartialEq)]
@@ -22,17 +22,23 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
     let today = chrono::Local::now().date_naive();
 
     // Grouper les entrees par jour
-    let mut entries_by_day: std::collections::BTreeMap<String, Vec<&TemporalEntry>> = std::collections::BTreeMap::new();
+    let mut entries_by_day: std::collections::BTreeMap<String, Vec<&TemporalEntry>> =
+        std::collections::BTreeMap::new();
 
     for entry in &props.entries {
         if let Some(start) = &entry.start_datetime {
             let day = &start[..10]; // YYYY-MM-DD
-            entries_by_day.entry(day.to_string()).or_default().push(entry);
+            entries_by_day
+                .entry(day.to_string())
+                .or_default()
+                .push(entry);
         }
     }
 
     // IDs des entrees en conflit
-    let conflict_ids: Vec<String> = props.conflicts.iter()
+    let conflict_ids: Vec<String> = props
+        .conflicts
+        .iter()
         .flat_map(|c| [c.entry_a_id.clone(), c.entry_b_id.clone()])
         .flatten()
         .collect();
@@ -203,13 +209,19 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
 
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");
-    let entry_type = props.entry.entry_type.as_deref().map_or(EntryType::Internal, EntryType::from_str);
+    let entry_type = props
+        .entry
+        .entry_type
+        .as_deref()
+        .map_or(EntryType::Internal, EntryType::from_str);
     let is_readonly = entry_type.is_readonly();
 
     // Heure
     let time_label = if props.entry.all_day {
         "Journee entiere".to_string()
-    } else if let (Some(start), Some(end)) = (&props.entry.start_datetime, &props.entry.end_datetime) {
+    } else if let (Some(start), Some(end)) =
+        (&props.entry.start_datetime, &props.entry.end_datetime)
+    {
         let start_time = &start[11..16];
         let end_time = &end[11..16];
         format!("{start_time} — {end_time}")
@@ -218,7 +230,11 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     };
 
     // Source
-    let source = props.entry.source_service.as_deref().map(EventSource::from_str);
+    let source = props
+        .entry
+        .source_service
+        .as_deref()
+        .map(EventSource::from_str);
     let source_label = source.map(jaykoa::data::EventSource::display_label);
     let source_icon = match source {
         Some(EventSource::JayFestival) => Some("F"),

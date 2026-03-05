@@ -43,10 +43,7 @@ pub struct JayKoaConflict {
 /// @id: jaykoa_publish_edition
 /// @do: publie une édition vers JayKoa pour agrégation calendrier et détection conflits
 /// @layer: domain
-pub fn jaykoa_publish_edition(
-    _edition_id: &str,
-    _payload: &str,
-) -> Result<(), JayKoaError> {
+pub fn jaykoa_publish_edition(_edition_id: &str, _payload: &str) -> Result<(), JayKoaError> {
     // Alpha : pas de crate JayKoa ; stub.
     Err(JayKoaError {
         message: "JayKoa non intégré (alpha stub)".to_string(),

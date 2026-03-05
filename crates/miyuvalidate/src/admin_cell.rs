@@ -51,7 +51,7 @@ pub struct MiyuValidateAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.validate.miyuvalidate";
 
-#[must_use] 
+#[must_use]
 pub fn miyuvalidate_admin_cell(version: &str, fingerprint: &str) -> MiyuValidateAdminCell {
     MiyuValidateAdminCell {
         identification: MiyuValidateIdentification {
@@ -65,7 +65,9 @@ pub fn miyuvalidate_admin_cell(version: &str, fingerprint: &str) -> MiyuValidate
                 id: "MiyukiniValidatetest".to_string(),
                 name: "Test chemin complet MiyuValidate".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

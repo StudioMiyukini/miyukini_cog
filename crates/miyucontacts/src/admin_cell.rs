@@ -30,7 +30,9 @@ pub struct MiyucontactsTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyucontactsIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyucontactsAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.communication.contacts";
 
-#[must_use] 
+#[must_use]
 pub fn miyucontacts_admin_cell(version: &str, fingerprint: &str) -> MiyucontactsAdminCell {
     MiyucontactsAdminCell {
         identification: MiyucontactsIdentification {
@@ -63,7 +65,9 @@ pub fn miyucontacts_admin_cell(version: &str, fingerprint: &str) -> Miyucontacts
                 id: "Miyucontacts".to_string(),
                 name: "Test chemin complet Miyucontacts".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

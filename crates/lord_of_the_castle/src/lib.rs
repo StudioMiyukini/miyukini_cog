@@ -13,16 +13,16 @@
 
 pub mod app;
 pub mod castle;
-pub mod embedded_sprites;
-pub mod errors;
-pub mod save;
 pub mod character_creation;
 pub mod constants;
+pub mod embedded_sprites;
 pub mod enemies;
+pub mod errors;
 pub mod game_loop;
 pub mod game_state;
 pub mod loot;
 pub mod player;
+pub mod save;
 pub mod secondary_player;
 pub mod spritesheet;
 pub mod towers;

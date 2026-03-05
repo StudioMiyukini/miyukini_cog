@@ -94,10 +94,7 @@ impl HttpDeviceClient {
                         });
                     }
 
-                    let body = response
-                        .text()
-                        .await
-                        .unwrap_or_default();
+                    let body = response.text().await.unwrap_or_default();
                     // Tronquer a 512 caracteres
                     let body_truncated = if body.len() > 512 {
                         format!("{}...", &body[..512])
@@ -174,10 +171,7 @@ impl HttpDeviceClient {
                         });
                     }
 
-                    let body_text = response
-                        .text()
-                        .await
-                        .unwrap_or_default();
+                    let body_text = response.text().await.unwrap_or_default();
                     let body_truncated = if body_text.len() > 512 {
                         format!("{}...", &body_text[..512])
                     } else {
@@ -233,10 +227,7 @@ impl HttpDeviceClient {
 }
 
 /// Applique la configuration d'authentification a un `RequestBuilder`.
-fn apply_auth(
-    req: reqwest::RequestBuilder,
-    auth: &AuthConfig,
-) -> reqwest::RequestBuilder {
+fn apply_auth(req: reqwest::RequestBuilder, auth: &AuthConfig) -> reqwest::RequestBuilder {
     match auth {
         AuthConfig::None => req,
         AuthConfig::Basic { username, password } => req.basic_auth(username, Some(password)),

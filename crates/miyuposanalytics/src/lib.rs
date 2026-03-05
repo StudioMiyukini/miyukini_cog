@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosAnalytics ; expose les modules tools.
 /// @do: expose_miyuposanalytics_toolkit
-
 pub mod admin_cell;
 pub mod cash;
 pub mod context;

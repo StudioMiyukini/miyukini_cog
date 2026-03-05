@@ -13,7 +13,7 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct MediaQuery {
     pub viewport: Option<i32>,
-    pub dpr: Option<f64>,  // Device pixel ratio
+    pub dpr: Option<f64>, // Device pixel ratio
 }
 
 /// Headers pertinents pour la sélection de variante.

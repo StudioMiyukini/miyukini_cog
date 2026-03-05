@@ -1,8 +1,8 @@
 //! ORG-E25 — Publication et cloture (workflow de validation).
 
+use super::components::Badge;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::Badge;
 
 /// Workflow de publication d'une edition.
 #[component]
@@ -14,13 +14,22 @@ pub fn OrgPublication(edition_id: String) -> Element {
         db.edition_by_id(&edition_id).ok().flatten()
     };
 
-    let status = edition.as_ref().and_then(|e| e.status.clone()).unwrap_or_default();
+    let status = edition
+        .as_ref()
+        .and_then(|e| e.status.clone())
+        .unwrap_or_default();
 
     // Compteurs pour checklist
     let (exposants_count, animations_count) = {
         let db = crate::use_db();
-        let exp = db.editions_exposants_by_edition(&edition_id).map(|v| v.len()).unwrap_or(0);
-        let anim = db.animations_by_edition(&edition_id).map(|v| v.len()).unwrap_or(0);
+        let exp = db
+            .editions_exposants_by_edition(&edition_id)
+            .map(|v| v.len())
+            .unwrap_or(0);
+        let anim = db
+            .animations_by_edition(&edition_id)
+            .map(|v| v.len())
+            .unwrap_or(0);
         (exp, anim)
     };
 
@@ -163,8 +172,16 @@ fn PublicationActions(is_publishable: bool, status: String, edition_id: String) 
 
     let is_publish_active = is_publishable && status != "publie";
 
-    let publish_btn_bg = if is_publish_active { c.accent_blue } else { c.bg_hover };
-    let publish_btn_color = if is_publish_active { "white" } else { c.text_muted };
+    let publish_btn_bg = if is_publish_active {
+        c.accent_blue
+    } else {
+        c.bg_hover
+    };
+    let publish_btn_color = if is_publish_active {
+        "white"
+    } else {
+        c.text_muted
+    };
 
     rsx! {
         section {
@@ -293,7 +310,11 @@ fn HistoryItem(action: &'static str, date: &'static str, user: &'static str) -> 
 fn ChecklistItem(label: &'static str, description: String, checked: bool) -> Element {
     let c = use_palette();
     let icon = if checked { "✅" } else { "⬜" };
-    let color = if checked { c.accent_green } else { c.text_muted };
+    let color = if checked {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
 
     rsx! {
         div {

@@ -16,10 +16,10 @@ const BLOCKED_DOMAINS: &[&str] = &[
     "localhost",
     "127.0.0.1",
     "0.0.0.0",
-    "169.254.",  // Link-local
-    "10.",       // Réseau privé
-    "192.168.",  // Réseau privé
-    "172.16.",   // Réseau privé
+    "169.254.", // Link-local
+    "10.",      // Réseau privé
+    "192.168.", // Réseau privé
+    "172.16.",  // Réseau privé
 ];
 
 /// Métadonnées du skill.
@@ -27,14 +27,22 @@ pub fn info() -> SkillInfo {
     let mut params = HashMap::new();
     params.insert("url".into(), "URL à récupérer (obligatoire)".into());
     params.insert("method".into(), "Méthode HTTP (défaut: GET)".into());
-    params.insert("headers".into(), "Headers additionnels (objet clé-valeur)".into());
+    params.insert(
+        "headers".into(),
+        "Headers additionnels (objet clé-valeur)".into(),
+    );
     params.insert("body".into(), "Corps de la requête (pour POST/PUT)".into());
-    params.insert("timeout".into(), format!("Timeout en secondes (défaut {DEFAULT_TIMEOUT_SECS})"));
+    params.insert(
+        "timeout".into(),
+        format!("Timeout en secondes (défaut {DEFAULT_TIMEOUT_SECS})"),
+    );
 
     SkillInfo {
         id: "web_fetch".into(),
         name: "Recherche Web".into(),
-        description: "Récupère du contenu web (pages, API publiques). Restrictions de sécurité appliquées.".into(),
+        description:
+            "Récupère du contenu web (pages, API publiques). Restrictions de sécurité appliquées."
+                .into(),
         parameters: params,
         min_security_level: "sandboxed",
     }
@@ -61,7 +69,9 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             return SkillResult {
                 success: false,
                 output: serde_json::Value::Null,
-                error: Some(format!("Domaine bloqué par la politique de sécurité : {url}")),
+                error: Some(format!(
+                    "Domaine bloqué par la politique de sécurité : {url}"
+                )),
                 duration_ms: 0,
             };
         }

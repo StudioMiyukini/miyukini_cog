@@ -7,9 +7,9 @@
 //! - **Stamina** -- yellow-green bar above the belt area.
 //! - **Loading** -- wider gold bar for loading screens.
 
+use crate::convert::rgba_to_color32;
 use egui::{Rect, Response, Rounding, Ui, Vec2};
 use miyuki_ui_tokens::palette::d2::{D2MiscColors, D2_PALETTE};
-use crate::convert::rgba_to_color32;
 
 /// Visual variant for the progress bar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -76,7 +76,9 @@ impl D2ProgressBar {
         // Fill color based on variant
         let fill_color = match self.variant {
             ProgressBarVariant::Stamina => rgba_to_color32(&D2MiscColors::STAMINA),
-            ProgressBarVariant::Xp | ProgressBarVariant::Loading => rgba_to_color32(&D2MiscColors::XP_BAR),
+            ProgressBarVariant::Xp | ProgressBarVariant::Loading => {
+                rgba_to_color32(&D2MiscColors::XP_BAR)
+            }
         };
 
         // Draw fill

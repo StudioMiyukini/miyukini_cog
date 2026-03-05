@@ -13,8 +13,8 @@ pub mod errors;
 pub mod forecast;
 
 pub use admin_cell::{
-    miyutreasury_admin_cell, MiyutreasuryAdminCell, MiyutreasuryIdentification, MiyutreasuryIntegrity,
-    MiyutreasuryTestManifest, TOOLKIT_ID,
+    miyutreasury_admin_cell, MiyutreasuryAdminCell, MiyutreasuryIdentification,
+    MiyutreasuryIntegrity, MiyutreasuryTestManifest, TOOLKIT_ID,
 };
 pub use alert::check as alert_check;
 pub use context::GovernedContext;

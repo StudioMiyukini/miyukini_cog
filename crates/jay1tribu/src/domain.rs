@@ -55,7 +55,10 @@ impl std::fmt::Display for Jay1TribuDomainError {
             Self::Db(e) => write!(f, "{}", e),
             Self::WebwayRequired => write!(f, "Connexion au Webway requise"),
             Self::TransfertFichierReserveAmi => {
-                write!(f, "Les transferts de fichier ne peuvent se faire qu'entre amis")
+                write!(
+                    f,
+                    "Les transferts de fichier ne peuvent se faire qu'entre amis"
+                )
             }
         }
     }
@@ -70,8 +73,12 @@ impl From<DbError> for Jay1TribuDomainError {
 }
 
 /// Liste des amis pour un profil (toujours disponible en local).
-pub fn get_friends_list(db: &Jay1TribuDb, profile_id: &str) -> Result<Vec<Friend>, Jay1TribuDomainError> {
-    db.friend_list(profile_id).map_err(Jay1TribuDomainError::from)
+pub fn get_friends_list(
+    db: &Jay1TribuDb,
+    profile_id: &str,
+) -> Result<Vec<Friend>, Jay1TribuDomainError> {
+    db.friend_list(profile_id)
+        .map_err(Jay1TribuDomainError::from)
 }
 
 /// Liste des amis avec indicateur de présence. Si le Webway n'est pas connecté,
@@ -129,7 +136,11 @@ pub fn send_file(
     online_cog_ids: Option<&[String]>,
 ) -> Jay1TribuResult<Message> {
     let recipients = db.salon_member_cog_ids(salon_id)?;
-    let recipients_only: Vec<String> = recipients.iter().filter(|c| *c != sender_cog_id).cloned().collect();
+    let recipients_only: Vec<String> = recipients
+        .iter()
+        .filter(|c| *c != sender_cog_id)
+        .cloned()
+        .collect();
     check_can_transfer_file(db, sender_profile_id, &recipients_only)?;
     let content = if kind.eq_ignore_ascii_case("image") {
         "[image]".to_string()
@@ -146,7 +157,11 @@ pub fn send_file(
         }
         return Ok(msg);
     }
-    let online_set = online_cog_ids.map(|ids| ids.iter().cloned().collect::<std::collections::HashSet<_>>());
+    let online_set = online_cog_ids.map(|ids| {
+        ids.iter()
+            .cloned()
+            .collect::<std::collections::HashSet<_>>()
+    });
     for cog_id in &recipients {
         if *cog_id == sender_cog_id {
             continue;
@@ -207,7 +222,11 @@ pub fn send_message(
         return Ok(msg);
     }
     let recipients = db.salon_member_cog_ids(salon_id)?;
-    let online_set = online_cog_ids.map(|ids| ids.iter().cloned().collect::<std::collections::HashSet<_>>());
+    let online_set = online_cog_ids.map(|ids| {
+        ids.iter()
+            .cloned()
+            .collect::<std::collections::HashSet<_>>()
+    });
     for cog_id in &recipients {
         if *cog_id == sender_cog_id {
             continue;
@@ -244,7 +263,9 @@ pub fn process_pending_deliveries(
         let Some(msg) = db.message_by_id(&message_id)? else {
             continue;
         };
-        if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, &recipient_cog_id).is_ok() {
+        if crate::transport::dispatch_to_recipient(db, &msg, sender_cog_id, &recipient_cog_id)
+            .is_ok()
+        {
             db.pending_delivery_delete(&pending_id)?;
         }
     }
@@ -263,7 +284,8 @@ pub fn create_salon(
     } else {
         crate::data::SalonType::Collective
     };
-    db.salon_create(tribe_id, name, salon_type).map_err(Into::into)
+    db.salon_create(tribe_id, name, salon_type)
+        .map_err(Into::into)
 }
 
 /// Retourne le salon direct entre deux COG s'il existe, sinon None (DAT-01).
@@ -272,7 +294,8 @@ pub fn find_direct_salon_between(
     cog_id_1: &str,
     cog_id_2: &str,
 ) -> Jay1TribuResult<Option<Salon>> {
-    db.salon_find_direct_between(cog_id_1, cog_id_2).map_err(Into::into)
+    db.salon_find_direct_between(cog_id_1, cog_id_2)
+        .map_err(Into::into)
 }
 
 /// Trouve ou crée le salon direct entre deux COG (au plus un par paire, DAT-01).
@@ -299,7 +322,8 @@ pub fn create_tribe(
     description: Option<&str>,
     creator_cog_id: &str,
 ) -> Jay1TribuResult<crate::data::Tribe> {
-    db.tribe_create(name, description, creator_cog_id).map_err(Into::into)
+    db.tribe_create(name, description, creator_cog_id)
+        .map_err(Into::into)
 }
 
 // ---------- Invitations tribu (M4) ----------
@@ -320,12 +344,14 @@ pub fn invite_to_tribe(
 
 /// Accepte une invitation à une tribu (ajoute le membre avec rôle Membre).
 pub fn accept_tribe_invitation(db: &Jay1TribuDb, invitation_id: &str) -> Jay1TribuResult<()> {
-    db.tribe_invitation_accept(invitation_id).map_err(Into::into)
+    db.tribe_invitation_accept(invitation_id)
+        .map_err(Into::into)
 }
 
 /// Refuse une invitation à une tribu.
 pub fn refuse_tribe_invitation(db: &Jay1TribuDb, invitation_id: &str) -> Jay1TribuResult<()> {
-    db.tribe_invitation_refuse(invitation_id).map_err(Into::into)
+    db.tribe_invitation_refuse(invitation_id)
+        .map_err(Into::into)
 }
 
 /// Liste les invitations en attente pour un COG (invité).

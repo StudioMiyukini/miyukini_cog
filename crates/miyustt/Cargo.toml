@@ -1,0 +1,25 @@
+[package]
+name = "miyustt"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Toolkit MiyuSTT - transcription vocale locale FR/EN avec presets hardware"
+
+[dependencies]
+axum = { version = "0.8", features = ["ws"] }
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "2"
+serde_json = "1.0"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tower = { version = "0.5", features = ["util"] }
+
+[lints]
+workspace = true

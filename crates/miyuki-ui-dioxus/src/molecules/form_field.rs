@@ -43,15 +43,11 @@ pub fn FormField(
 
     let container_style = "display: flex; flex-direction: column; gap: 4px; width: 100%;";
 
-    let label_style = format!(
-        "font-size: {font_px}px; color: {label_color}; font-weight: 500;"
-    );
+    let label_style = format!("font-size: {font_px}px; color: {label_color}; font-weight: 500;");
 
     let has_error = error.is_some();
     let error_text = error.unwrap_or_default();
-    let error_style = format!(
-        "font-size: 12px; color: {error_color}; margin-top: 2px;"
-    );
+    let error_style = format!("font-size: 12px; color: {error_color}; margin-top: 2px;");
 
     rsx! {
         div { style: "{container_style}",

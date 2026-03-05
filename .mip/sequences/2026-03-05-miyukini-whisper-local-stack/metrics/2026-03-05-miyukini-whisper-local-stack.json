@@ -1,0 +1,78 @@
+{
+  "project": {
+    "title": "MiyuSTT + MiyuTTS + Miyukini Whisper (local-first)",
+    "description": "Creation de 2 toolkits vocaux API-first et d un service de dictee locale pour productivite clavier.",
+    "class": "T5",
+    "slug": "miyukini-whisper-local-stack",
+    "mip_sequence_number": 1,
+    "autonomy_mode": "FULL"
+  },
+  "timestamps": {
+    "sequence_start": "2026-03-05T10:05:00Z",
+    "p0_start": "2026-03-05T10:05:00Z",
+    "p0_end": "2026-03-05T10:35:00Z",
+    "autopilot_start": "2026-03-05T10:40:00Z",
+    "p3_start": "2026-03-05T10:40:00Z",
+    "p3_end": null,
+    "p4_start": null,
+    "p4_end": null,
+    "p5_start": null,
+    "p5_end": null,
+    "p5_test_start": null,
+    "p5_test_end": null,
+    "p6_start": null,
+    "p6_end": null,
+    "total_end": null
+  },
+  "counters": {
+    "lines_written": 0,
+    "lines_deleted": 0,
+    "packages_touched": [
+      "workspace",
+      "miyustt",
+      "miyutts",
+      "miyukini-whisper-app",
+      "miyukini-central-native",
+      "miyualicia",
+      "miyualicia-api"
+    ],
+    "packages_created": [
+      "miyustt",
+      "miyutts",
+      "miyukini-whisper"
+    ],
+    "files_created": 21,
+    "files_modified": 16,
+    "commits": 0,
+    "agents_engaged": [
+      "maria",
+      "denis",
+      "francois",
+      "lise",
+      "victor",
+      "george",
+      "hugo",
+      "jean",
+      "arianne",
+      "fabrice"
+    ],
+    "mip_loops": 1,
+    "unit_tests_total": 62,
+    "unit_tests_failed": 0,
+    "integration_tests_total": 2,
+    "integration_tests_failed": 0,
+    "global_tests_total": 62,
+    "global_tests_failed": 0,
+    "auto_corrections": 0,
+    "audits": 1,
+    "audit_defects": [],
+    "security_score": null,
+    "security_defects": [],
+    "infra_checks_passed": null,
+    "emergency_brakes": 0
+  },
+  "human_interventions": [],
+  "agent_questions": [],
+  "satisfaction": null,
+  "notes": "Gate P0 valide (APPROUVE, mode FULL). P3 en cours: STT ws+fallback, TTS wav, post-process local clean/rewrite timeout, diagnostics Central live. V5 termine (V1 contrat) avec Alicia STT/TTS + tests inter-services. Blocage infra courant: workspace reference `demos/mge-pathfinding-labyrinthe` absente."
+}

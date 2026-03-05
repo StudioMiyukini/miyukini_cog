@@ -14,8 +14,17 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ConversationItem>, Miyusocialme
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    let guard = store::conversations().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
-    let items = guard.iter().filter(|(_, participants)| participants.contains(&ctx.mandate_id)).map(|(id, participants)| ConversationItem { id: id.clone(), participant_ids: participants.clone() }).collect();
+    let guard = store::conversations()
+        .lock()
+        .map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let items = guard
+        .iter()
+        .filter(|(_, participants)| participants.contains(&ctx.mandate_id))
+        .map(|(id, participants)| ConversationItem {
+            id: id.clone(),
+            participant_ids: participants.clone(),
+        })
+        .collect();
     Ok(items)
 }
 
@@ -32,11 +41,25 @@ pub fn get(
     if !ctx.has_mandate() {
         return Err(MiyusocialmessagingError::NoMandate);
     }
-    let guard_conv = store::conversations().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
-    let participant_ids = guard_conv.get(conversation_id).ok_or_else(|| MiyusocialmessagingError::InvalidInput("conversation not found".into()))?.clone();
+    let guard_conv = store::conversations()
+        .lock()
+        .map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?;
+    let participant_ids = guard_conv
+        .get(conversation_id)
+        .ok_or_else(|| MiyusocialmessagingError::InvalidInput("conversation not found".into()))?
+        .clone();
     drop(guard_conv);
-    let message_ids = store::conversation_messages().lock().map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?.get(conversation_id).cloned().unwrap_or_default();
-    Ok(ConversationDetail { id: conversation_id.to_string(), participant_ids, message_ids })
+    let message_ids = store::conversation_messages()
+        .lock()
+        .map_err(|_| MiyusocialmessagingError::InvalidInput("lock".into()))?
+        .get(conversation_id)
+        .cloned()
+        .unwrap_or_default();
+    Ok(ConversationDetail {
+        id: conversation_id.to_string(),
+        participant_ids,
+        message_ids,
+    })
 }
 
 /// Élément conversation.

@@ -5,9 +5,9 @@
 //! Used in the skill hotbar and skill tree. The icon is a square frame
 //! with state-dependent coloring and an optional level indicator.
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
 use miyuki_ui_tokens::palette::d2::{D2MiscColors, D2_PALETTE};
-use crate::convert::rgba_to_color32;
 
 /// Skill visual state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -106,10 +106,7 @@ impl<'a> SkillIcon<'a> {
         // Cooldown overlay
         if self.state == SkillState::Cooldown && self.cooldown_pct > 0.0 {
             let cd_height = self.size * self.cooldown_pct;
-            let cd_rect = egui::Rect::from_min_size(
-                rect.min,
-                Vec2::new(self.size, cd_height),
-            );
+            let cd_rect = egui::Rect::from_min_size(rect.min, Vec2::new(self.size, cd_height));
             painter.rect_filled(
                 cd_rect,
                 Rounding::same(3.0),
@@ -120,11 +117,21 @@ impl<'a> SkillIcon<'a> {
         // Border
         let border_color = match self.state {
             SkillState::Active => rgba_to_color32(&D2MiscColors::SKILL_ACTIVE),
-            SkillState::Inactive | SkillState::Cooldown => rgba_to_color32(&D2_PALETTE.border_default),
+            SkillState::Inactive | SkillState::Cooldown => {
+                rgba_to_color32(&D2_PALETTE.border_default)
+            }
             SkillState::Locked => rgba_to_color32(&D2_PALETTE.border_subtle),
         };
-        let border_width = if self.state == SkillState::Active { 2.0 } else { 1.0 };
-        painter.rect_stroke(rect, Rounding::same(3.0), Stroke::new(border_width, border_color));
+        let border_width = if self.state == SkillState::Active {
+            2.0
+        } else {
+            1.0
+        };
+        painter.rect_stroke(
+            rect,
+            Rounding::same(3.0),
+            Stroke::new(border_width, border_color),
+        );
 
         // Level indicator (bottom-right)
         if self.level > 0 {

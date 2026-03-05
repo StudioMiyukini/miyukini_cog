@@ -6,7 +6,8 @@ use crate::errors::MiyubillingError;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-static SUBSCRIPTIONS: std::sync::OnceLock<Mutex<HashMap<String, String>>> = std::sync::OnceLock::new();
+static SUBSCRIPTIONS: std::sync::OnceLock<Mutex<HashMap<String, String>>> =
+    std::sync::OnceLock::new();
 
 fn subscriptions() -> &'static Mutex<HashMap<String, String>> {
     SUBSCRIPTIONS.get_or_init(|| Mutex::new(HashMap::new()))
@@ -24,7 +25,9 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyubillin
     use std::sync::atomic::{AtomicU64, Ordering};
     static NEXT: AtomicU64 = AtomicU64::new(1);
     let id = format!("sub:{}", NEXT.fetch_add(1, Ordering::Relaxed));
-    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
+    let mut guard = subscriptions()
+        .lock()
+        .map_err(|_| MiyubillingError::LockPoisoned)?;
     guard.insert(id.clone(), payload.to_string());
     Ok(id)
 }
@@ -34,11 +37,17 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyubillin
 /// @layer: tool
 /// @human: Met à jour une souscription ; WriteIntent KindMother.
 /// @do: billing_subscription_update_under_governance
-pub fn update(ctx: &GovernedContext, subscription_id: &str, payload: &str) -> Result<(), MiyubillingError> {
+pub fn update(
+    ctx: &GovernedContext,
+    subscription_id: &str,
+    payload: &str,
+) -> Result<(), MiyubillingError> {
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
+    let mut guard = subscriptions()
+        .lock()
+        .map_err(|_| MiyubillingError::LockPoisoned)?;
     guard.insert(subscription_id.to_string(), payload.to_string());
     Ok(())
 }
@@ -52,7 +61,9 @@ pub fn cancel(ctx: &GovernedContext, subscription_id: &str) -> Result<(), Miyubi
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    let mut guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
+    let mut guard = subscriptions()
+        .lock()
+        .map_err(|_| MiyubillingError::LockPoisoned)?;
     guard.insert(subscription_id.to_string(), "cancelled".to_string());
     Ok(())
 }
@@ -66,6 +77,11 @@ pub fn status(ctx: &GovernedContext, subscription_id: &str) -> Result<String, Mi
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);
     }
-    let guard = subscriptions().lock().map_err(|_| MiyubillingError::LockPoisoned)?;
-    Ok(guard.get(subscription_id).cloned().unwrap_or_else(|| "active".to_string()))
+    let guard = subscriptions()
+        .lock()
+        .map_err(|_| MiyubillingError::LockPoisoned)?;
+    Ok(guard
+        .get(subscription_id)
+        .cloned()
+        .unwrap_or_else(|| "active".to_string()))
 }

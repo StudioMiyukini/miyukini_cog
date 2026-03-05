@@ -79,7 +79,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     generate_stats(&blocks, &output_dir, files_processed.len())?;
 
     println!("Index MIP généré avec succès dans {:?}", output_dir);
-    println!("Total: {} blocs dans {} fichiers", blocks.len(), files_processed.len());
+    println!(
+        "Total: {} blocs dans {} fichiers",
+        blocks.len(),
+        files_processed.len()
+    );
 
     Ok(())
 }
@@ -107,7 +111,7 @@ fn scan_directory(
 fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn std::error::Error>> {
     let content = fs::read_to_string(file_path)?;
     let lines: Vec<&str> = content.lines().collect();
-    
+
     // Normaliser le chemin du fichier (relatif à la racine du workspace)
     let file_path_str = file_path
         .to_str()
@@ -178,12 +182,15 @@ fn parse_file(file_path: &Path, blocks: &mut Vec<Block>) -> Result<(), Box<dyn s
 
             // Détecter la fin du bloc de commentaires MSCM
             // Le bloc se termine quand on trouve une ligne de code Rust (pas un commentaire)
-            if in_comment_block && !trimmed.starts_with("///") && !trimmed.starts_with("//!")
-                && !trimmed.is_empty() {
-                    // On a trouvé le début du code, le bloc se termine ici
-                    block.end_line = find_block_end(&lines, line_num - 1);
-                    in_comment_block = false;
-                }
+            if in_comment_block
+                && !trimmed.starts_with("///")
+                && !trimmed.starts_with("//!")
+                && !trimmed.is_empty()
+            {
+                // On a trouvé le début du code, le bloc se termine ici
+                block.end_line = find_block_end(&lines, line_num - 1);
+                in_comment_block = false;
+            }
         }
     }
 
@@ -203,41 +210,41 @@ fn find_block_end(lines: &[&str], start_idx: usize) -> usize {
     // On cherche jusqu'à la prochaine définition (pub fn, pub struct, impl, etc.)
     // ou jusqu'à la fin du fichier
     let mut end_line = start_idx + 1;
-    
+
     for (idx, line) in lines.iter().enumerate().skip(start_idx) {
         let trimmed = line.trim();
-        
+
         // Ignorer les lignes vides et les commentaires
         if trimmed.is_empty() || trimmed.starts_with("///") || trimmed.starts_with("//!") {
             continue;
         }
-        
+
         // Si on trouve une nouvelle définition (pub, struct, enum, trait, impl, mod, use)
         // et qu'on a déjà trouvé du code, on s'arrête
-        if idx > start_idx + 1 && (
-            trimmed.starts_with("pub ") ||
-            trimmed.starts_with("struct ") ||
-            trimmed.starts_with("enum ") ||
-            trimmed.starts_with("trait ") ||
-            trimmed.starts_with("impl ") ||
-            trimmed.starts_with("mod ") ||
-            trimmed.starts_with("use ")
-        ) {
+        if idx > start_idx + 1
+            && (trimmed.starts_with("pub ")
+                || trimmed.starts_with("struct ")
+                || trimmed.starts_with("enum ")
+                || trimmed.starts_with("trait ")
+                || trimmed.starts_with("impl ")
+                || trimmed.starts_with("mod ")
+                || trimmed.starts_with("use "))
+        {
             // Retourner la ligne précédente
             return idx;
         }
-        
+
         // Si on trouve du code Rust (contient des accolades, point-virgule, etc.)
         if trimmed.contains('{') || trimmed.contains('}') || trimmed.contains(';') {
             end_line = idx + 1;
         }
     }
-    
+
     // Si on n'a pas trouvé de fin claire, utiliser la dernière ligne du fichier
     if end_line <= start_idx {
         end_line = lines.len();
     }
-    
+
     end_line
 }
 
@@ -267,26 +274,44 @@ fn generate_blocks(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn st
         .map(|b| {
             let mut obj = serde_json::Map::new();
             obj.insert("id".to_string(), serde_json::Value::String(b.id.clone()));
-            obj.insert("file".to_string(), serde_json::Value::String(b.file.clone()));
-            obj.insert("start_line".to_string(), serde_json::Value::Number(b.start_line.into()));
-            obj.insert("end_line".to_string(), serde_json::Value::Number(b.end_line.into()));
-            
+            obj.insert(
+                "file".to_string(),
+                serde_json::Value::String(b.file.clone()),
+            );
+            obj.insert(
+                "start_line".to_string(),
+                serde_json::Value::Number(b.start_line.into()),
+            );
+            obj.insert(
+                "end_line".to_string(),
+                serde_json::Value::Number(b.end_line.into()),
+            );
+
             if let Some(ref do_action) = b.do_action {
-                obj.insert("do".to_string(), serde_json::Value::String(do_action.clone()));
+                obj.insert(
+                    "do".to_string(),
+                    serde_json::Value::String(do_action.clone()),
+                );
             }
-            
+
             if let Some(ref role) = b.role {
                 obj.insert("role".to_string(), serde_json::Value::String(role.clone()));
             }
-            
+
             if let Some(ref layer) = b.layer {
-                obj.insert("layer".to_string(), serde_json::Value::String(layer.clone()));
+                obj.insert(
+                    "layer".to_string(),
+                    serde_json::Value::String(layer.clone()),
+                );
             }
-            
+
             if let Some(ref human) = b.human {
-                obj.insert("human".to_string(), serde_json::Value::String(human.clone()));
+                obj.insert(
+                    "human".to_string(),
+                    serde_json::Value::String(human.clone()),
+                );
             }
-            
+
             serde_json::Value::Object(obj)
         })
         .collect();
@@ -297,7 +322,10 @@ fn generate_blocks(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn st
     Ok(())
 }
 
-fn generate_hierarchy(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_hierarchy(
+    blocks: &[Block],
+    output_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut hierarchy: HashMap<String, Vec<String>> = HashMap::new();
 
     // Construire la hiérarchie basée sur les dépendances
@@ -349,17 +377,9 @@ fn generate_domains(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn s
 
     // Grouper par domaine basé sur le préfixe de l'ID (ex: kernel_*, config_*, etc.)
     for block in blocks {
-        let domain = block
-            .id
-            .split('_')
-            .next()
-            .unwrap_or("unknown")
-            .to_string();
-        
-        domains
-            .entry(domain)
-            .or_default()
-            .push(block.id.clone());
+        let domain = block.id.split('_').next().unwrap_or("unknown").to_string();
+
+        domains.entry(domain).or_default().push(block.id.clone());
     }
 
     let json = serde_json::to_string_pretty(&domains)?;
@@ -373,10 +393,7 @@ fn generate_layers(blocks: &[Block], output_dir: &Path) -> Result<(), Box<dyn st
 
     for block in blocks {
         let layer = block.layer.as_deref().unwrap_or("unknown").to_string();
-        layers
-            .entry(layer)
-            .or_default()
-            .push(block.id.clone());
+        layers.entry(layer).or_default().push(block.id.clone());
     }
 
     let json = serde_json::to_string_pretty(&layers)?;
@@ -494,12 +511,7 @@ fn calculate_depth(
 fn count_domains(blocks: &[Block]) -> usize {
     let mut domains = HashSet::new();
     for block in blocks {
-        let domain = block
-            .id
-            .split('_')
-            .next()
-            .unwrap_or("unknown")
-            .to_string();
+        let domain = block.id.split('_').next().unwrap_or("unknown").to_string();
         domains.insert(domain);
     }
     domains.len()

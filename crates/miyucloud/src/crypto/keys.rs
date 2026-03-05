@@ -130,13 +130,11 @@ impl KeyManager {
 fn argon2_params() -> argon2::Params {
     #[cfg(debug_assertions)]
     {
-        argon2::Params::new(4096, 1, 1, Some(32))
-            .expect("valid argon2 params")
+        argon2::Params::new(4096, 1, 1, Some(32)).expect("valid argon2 params")
     }
     #[cfg(not(debug_assertions))]
     {
-        argon2::Params::new(65536, 3, 4, Some(32))
-            .expect("valid argon2 params")
+        argon2::Params::new(65536, 3, 4, Some(32)).expect("valid argon2 params")
     }
 }
 
@@ -184,7 +182,11 @@ mod tests {
         let salt = KeyManager::generate_salt();
         let key = KeyManager::derive_master_key("test passphrase", &salt).unwrap();
         let canary = KeyManager::create_canary(&key).unwrap();
-        assert!(KeyManager::verify_passphrase(&key, &canary.ciphertext, &canary.nonce));
+        assert!(KeyManager::verify_passphrase(
+            &key,
+            &canary.ciphertext,
+            &canary.nonce
+        ));
 
         // Wrong key should fail
         let wrong_key = [0u8; 32];

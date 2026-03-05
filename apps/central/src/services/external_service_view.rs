@@ -3,8 +3,8 @@
 //! Quand un utilisateur ouvre un onglet de service, Central affiche ce panneau
 //! avec le statut, un bouton lancer/arrêter, et les infos du service.
 
-use dioxus::prelude::*;
 use crate::state::{use_app_state, use_service_manager};
+use dioxus::prelude::*;
 
 /// Panneau de contrôle d'un service externe (lancé en tant que processus indépendant).
 #[component]
@@ -13,7 +13,10 @@ pub fn ExternalServiceView(service_id: String) -> Element {
     let manager = use_service_manager();
     let c = state.read().current_theme.palette();
 
-    let service = state.read().services.iter()
+    let service = state
+        .read()
+        .services
+        .iter()
         .find(|s| s.id == service_id)
         .cloned();
 
@@ -29,11 +32,11 @@ pub fn ExternalServiceView(service_id: String) -> Element {
     };
 
     let status_color = if is_running {
-        "#10b981"  // Green
+        "#10b981" // Green
     } else if is_installed {
-        "#6b7280"  // Gray
+        "#6b7280" // Gray
     } else {
-        "#ef4444"  // Red
+        "#ef4444" // Red
     };
 
     if let Some(svc) = service {

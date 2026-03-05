@@ -9,13 +9,13 @@ use crate::protocol::{
 };
 use bytes::{Bytes, BytesMut};
 use std::sync::Arc;
+use std::sync::Once;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio::sync::RwLock;
-use tokio_rustls::rustls::{ClientConfig, RootCertStore};
 use tokio_rustls::rustls::crypto::ring::default_provider;
+use tokio_rustls::rustls::{ClientConfig, RootCertStore};
 use tokio_rustls::TlsConnector;
-use std::sync::Once;
 
 /// Initialise le CryptoProvider une seule fois.
 static CRYPTO_INIT: Once = Once::new();
@@ -203,9 +203,10 @@ impl RelayClient {
 
         let frame = RelayFrame::new(RelayMessageType::Register, register.to_origin_bytes());
 
-        tls_stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-            MiyuwebwayParticipantError::SendError(e.to_string())
-        })?;
+        tls_stream
+            .write_all(&frame.to_bytes())
+            .await
+            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
 
         debug!("REGISTER sent, waiting for response");
 
@@ -236,7 +237,10 @@ impl RelayClient {
                     // Phase 2 : démarrer le listener DATA si home_http_bind configuré
                     if let Some(ref home_http) = self.config.home_http_bind {
                         let home_http = home_http.clone();
-                        info!("Phase 2: starting relay listener, forwarding DATA to {}", home_http);
+                        info!(
+                            "Phase 2: starting relay listener, forwarding DATA to {}",
+                            home_http
+                        );
                         tokio::spawn(async move {
                             run_relay_listener(tls_stream, home_http).await;
                         });
@@ -258,32 +262,29 @@ impl RelayClient {
                     if verify.phase == VerifyPhase::PhaseA
                         && verify.result == VerifyResult::ExtendedRequired
                     {
-                        let key = self
-                            .config
-                            .core_conformity_key
-                            .as_deref()
-                            .ok_or_else(|| {
-                                MiyuwebwayParticipantError::RegistrationRejected(
-                                    "Relay requested CORE_KEY (strict verification) but \
+                        let key = self.config.core_conformity_key.as_deref().ok_or_else(|| {
+                            MiyuwebwayParticipantError::RegistrationRejected(
+                                "Relay requested CORE_KEY (strict verification) but \
                                      core_conformity_key is not set in config"
-                                        .to_string(),
-                                )
-                            })?;
-                        let core_key_payload = core_key_payload_bytes(&verify.session_id, key);
-                        let frame =
-                            RelayFrame::new(RelayMessageType::CoreKey, core_key_payload);
-                        tls_stream.write_all(&frame.to_bytes()).await.map_err(|e| {
-                            MiyuwebwayParticipantError::SendError(e.to_string())
+                                    .to_string(),
+                            )
                         })?;
+                        let core_key_payload = core_key_payload_bytes(&verify.session_id, key);
+                        let frame = RelayFrame::new(RelayMessageType::CoreKey, core_key_payload);
+                        tls_stream
+                            .write_all(&frame.to_bytes())
+                            .await
+                            .map_err(|e| MiyuwebwayParticipantError::SendError(e.to_string()))?;
                         debug!("CORE_KEY sent, waiting for REGISTER_OK");
                         response = self.read_frame(&mut tls_stream).await?;
                         continue;
                     }
                     if verify.result == VerifyResult::Fail {
                         let msg = String::from_utf8_lossy(&verify.message).to_string();
-                        return Err(MiyuwebwayParticipantError::RegistrationRejected(
-                            format!("Verification failed: {}", msg),
-                        ));
+                        return Err(MiyuwebwayParticipantError::RegistrationRejected(format!(
+                            "Verification failed: {}",
+                            msg
+                        )));
                     }
                     // Phase A Ok ou autre : lire la suite (REGISTER_OK attendu)
                     response = self.read_frame(&mut tls_stream).await?;
@@ -308,9 +309,10 @@ impl RelayClient {
         // Lire jusqu'à avoir une trame complète
         let mut temp = [0u8; 4096];
         loop {
-            let n = stream.read(&mut temp).await.map_err(|e| {
-                MiyuwebwayParticipantError::ReadError(e.to_string())
-            })?;
+            let n = stream
+                .read(&mut temp)
+                .await
+                .map_err(|e| MiyuwebwayParticipantError::ReadError(e.to_string()))?;
 
             if n == 0 {
                 return Err(MiyuwebwayParticipantError::ConnectionClosed);
@@ -380,8 +382,10 @@ async fn run_relay_listener(
                                     let err_body = format!(
                                         "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n"
                                     );
-                                    let err_frame =
-                                        RelayFrame::new(RelayMessageType::Data, Bytes::from(err_body));
+                                    let err_frame = RelayFrame::new(
+                                        RelayMessageType::Data,
+                                        Bytes::from(err_body),
+                                    );
                                     let _ = stream.write_all(&err_frame.to_bytes()).await;
                                 }
                             }
@@ -390,7 +394,10 @@ async fn run_relay_listener(
                             info!("Relay listener: received Close");
                             return;
                         }
-                        _ => debug!("Relay listener: ignoring message {:?}", frame.header.message_type),
+                        _ => debug!(
+                            "Relay listener: ignoring message {:?}",
+                            frame.header.message_type
+                        ),
                     }
                 }
             }

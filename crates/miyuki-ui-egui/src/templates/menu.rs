@@ -2,10 +2,10 @@
 
 //! Menu layout template -- dark background + centered panel.
 
+use crate::convert::rgba_to_color32;
+use crate::organisms::main_menu::{MainMenu, MainMenuAction};
 use egui::Context;
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::organisms::main_menu::{MainMenu, MainMenuAction};
-use crate::convert::rgba_to_color32;
 
 /// The menu layout template.
 pub struct MenuLayout;

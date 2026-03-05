@@ -5,8 +5,8 @@
 //! In D2, the belt has 4 columns (keys 1-4), each with 1-4 rows depending
 //! on belt type. This molecule draws one column.
 
-use egui::{Response, Ui};
 use crate::atoms::belt_slot::BeltSlot;
+use egui::{Response, Ui};
 
 /// Data for one potion/item in a belt slot.
 #[derive(Debug, Clone, Default)]
@@ -42,8 +42,7 @@ impl<'a> BeltColumn<'a> {
                 let key_label = format!("{key_base}");
 
                 let slot = if slot_data.quantity > 0 {
-                    BeltSlot::new(&key_label)
-                        .item(&slot_data.item_name, slot_data.quantity)
+                    BeltSlot::new(&key_label).item(&slot_data.item_name, slot_data.quantity)
                 } else {
                     BeltSlot::new(&key_label)
                 };
@@ -73,7 +72,10 @@ mod tests {
     #[test]
     fn test_belt_column_creation() {
         let slots = vec![
-            BeltSlotData { item_name: "Potion".to_string(), quantity: 5 },
+            BeltSlotData {
+                item_name: "Potion".to_string(),
+                quantity: 5,
+            },
             BeltSlotData::default(),
         ];
         let col = BeltColumn::new(0, &slots);

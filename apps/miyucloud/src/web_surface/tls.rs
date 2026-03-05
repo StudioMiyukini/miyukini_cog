@@ -70,11 +70,9 @@ pub fn generate_self_signed_cert(cert_path: &Path, key_path: &Path) -> Result<()
     }
 
     // Generate certificate
-    let mut params = rcgen::CertificateParams::new(vec![
-        "localhost".to_string(),
-        "127.0.0.1".to_string(),
-    ])
-    .map_err(|e| format!("Failed to create cert params: {e}"))?;
+    let mut params =
+        rcgen::CertificateParams::new(vec!["localhost".to_string(), "127.0.0.1".to_string()])
+            .map_err(|e| format!("Failed to create cert params: {e}"))?;
 
     params.not_after = rcgen::date_time_ymd(2027, 3, 1);
     params.not_before = rcgen::date_time_ymd(2026, 3, 1);
@@ -98,10 +96,8 @@ pub fn generate_self_signed_cert(cert_path: &Path, key_path: &Path) -> Result<()
     let cert_pem = cert.pem();
     let key_pem = key_pair.serialize_pem();
 
-    fs::write(cert_path, cert_pem.as_bytes())
-        .map_err(|e| format!("Failed to write cert: {e}"))?;
-    fs::write(key_path, key_pem.as_bytes())
-        .map_err(|e| format!("Failed to write key: {e}"))?;
+    fs::write(cert_path, cert_pem.as_bytes()).map_err(|e| format!("Failed to write cert: {e}"))?;
+    fs::write(key_path, key_pem.as_bytes()).map_err(|e| format!("Failed to write key: {e}"))?;
 
     Ok(())
 }
@@ -112,8 +108,7 @@ pub fn load_rustls_config(
     key_path: &Path,
 ) -> Result<Arc<rustls::ServerConfig>, String> {
     // Load certificate chain
-    let cert_file =
-        fs::File::open(cert_path).map_err(|e| format!("Failed to open cert: {e}"))?;
+    let cert_file = fs::File::open(cert_path).map_err(|e| format!("Failed to open cert: {e}"))?;
     let mut cert_reader = BufReader::new(cert_file);
     let certs: Vec<_> = rustls_pemfile::certs(&mut cert_reader)
         .collect::<Result<Vec<_>, _>>()
@@ -124,8 +119,7 @@ pub fn load_rustls_config(
     }
 
     // Load private key
-    let key_file =
-        fs::File::open(key_path).map_err(|e| format!("Failed to open key: {e}"))?;
+    let key_file = fs::File::open(key_path).map_err(|e| format!("Failed to open key: {e}"))?;
     let mut key_reader = BufReader::new(key_file);
     let key = rustls_pemfile::private_key(&mut key_reader)
         .map_err(|e| format!("Failed to parse key PEM: {e}"))?

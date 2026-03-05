@@ -12,9 +12,9 @@
 
 use miyunotify::context::GovernedContext;
 use miyunotify::email;
-use miyunotify::push;
-use miyunotify::inbox;
 use miyunotify::errors::MiyunotifyError;
+use miyunotify::inbox;
+use miyunotify::push;
 use std::fmt;
 
 /// Contexte gouverné alpha pour les appels Miyunotify depuis JayFestival.

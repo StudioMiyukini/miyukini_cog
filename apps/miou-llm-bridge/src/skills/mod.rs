@@ -67,7 +67,10 @@ impl SkillRegistry {
     }
 
     /// Exécute un skill par son ID.
-    pub async fn execute(skill_id: &str, params: &HashMap<String, serde_json::Value>) -> SkillResult {
+    pub async fn execute(
+        skill_id: &str,
+        params: &HashMap<String, serde_json::Value>,
+    ) -> SkillResult {
         let start = std::time::Instant::now();
 
         let result = match skill_id {
@@ -84,6 +87,9 @@ impl SkillRegistry {
         };
 
         let duration_ms = start.elapsed().as_millis() as u64;
-        SkillResult { duration_ms, ..result }
+        SkillResult {
+            duration_ms,
+            ..result
+        }
     }
 }

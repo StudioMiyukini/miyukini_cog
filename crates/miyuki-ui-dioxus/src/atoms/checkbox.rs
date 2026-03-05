@@ -52,11 +52,7 @@ pub fn Checkbox(
     };
     let text_color = p.text_primary.to_css();
     let opacity = if disabled { "0.5" } else { "1" };
-    let cursor = if disabled {
-        "not-allowed"
-    } else {
-        "pointer"
-    };
+    let cursor = if disabled { "not-allowed" } else { "pointer" };
 
     let indicator = if indeterminate {
         "-"
@@ -80,9 +76,7 @@ pub fn Checkbox(
          transition: all 150ms; flex-shrink: 0;"
     );
 
-    let label_style = format!(
-        "font-size: 14px; color: {text_color}; line-height: 1.4;"
-    );
+    let label_style = format!("font-size: 14px; color: {text_color}; line-height: 1.4;");
 
     let label_text = label.clone().unwrap_or_default();
     let has_label = label.is_some();

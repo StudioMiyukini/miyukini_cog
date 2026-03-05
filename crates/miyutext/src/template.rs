@@ -26,9 +26,7 @@ pub fn apply(
         if i + 4 <= bytes.len() && bytes[i] == b'{' && bytes[i + 1] == b'{' {
             let end = find_closing(bytes, i + 2);
             if let Some(close) = end {
-                let key = template[i + 2..close]
-                    .trim()
-                    .to_string();
+                let key = template[i + 2..close].trim().to_string();
                 let val = data.get(&key).map_or("", String::as_str);
                 out.push_str(val);
                 i = close + 2;

@@ -1,6 +1,6 @@
 //! Journalisation d'audit de MiyukiniAdmin
 
-use miyukini_kernel::{Logger, Level};
+use miyukini_kernel::{Level, Logger};
 
 /// @id: miyukiniadmin_audit_logger_trait
 /// @role: infrastructure
@@ -46,7 +46,7 @@ impl DefaultAuditLogger {
     /// @human: Crée un nouveau logger d'audit par défaut.
     /// @do: create_default_audit_logger
     /// @depends: miyukiniadmin_audit_logger_default
-    #[must_use] 
+    #[must_use]
     pub fn new(logger: Box<dyn Logger>) -> Self {
         Self { logger }
     }

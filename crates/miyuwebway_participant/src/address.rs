@@ -9,7 +9,10 @@ use crate::errors::MiyuwebwayParticipantError;
 /// @layer: tool
 /// @human: Résout l'adresse Tracker (port 21000) ; exécution seule ; déterministe.
 /// @do: mws_address_tracker_default_under_governance
-pub fn tracker_default(ctx: &GovernedContext, host: Option<&str>) -> Result<String, MiyuwebwayParticipantError> {
+pub fn tracker_default(
+    ctx: &GovernedContext,
+    host: Option<&str>,
+) -> Result<String, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }

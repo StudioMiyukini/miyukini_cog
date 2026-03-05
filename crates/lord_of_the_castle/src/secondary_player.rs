@@ -22,7 +22,7 @@ pub enum SecondaryPlayerKind {
 }
 
 impl SecondaryPlayerKind {
-    #[must_use] 
+    #[must_use]
     pub fn label(self) -> &'static str {
         match self {
             SecondaryPlayerKind::Tombilol => "Tombilol",
@@ -32,7 +32,7 @@ impl SecondaryPlayerKind {
     }
 
     /// PV max au niveau donné.
-    #[must_use] 
+    #[must_use]
     pub fn hp_max_at_level(self, level: u32) -> i32 {
         match self {
             SecondaryPlayerKind::Tombilol => 30 + level as i32,
@@ -42,7 +42,7 @@ impl SecondaryPlayerKind {
     }
 
     /// Portée d'attaque (px). Tombilol 30, Tal Ratchou 200 + level*2.
-    #[must_use] 
+    #[must_use]
     pub fn attack_range_at_level(self, level: u32) -> f32 {
         match self {
             SecondaryPlayerKind::Tombilol => 30.0,
@@ -52,7 +52,7 @@ impl SecondaryPlayerKind {
     }
 
     /// Intervalle entre deux attaques (secondes). Tombilol 1 - level*0.1 (min 0.2).
-    #[must_use] 
+    #[must_use]
     pub fn attack_interval_s_at_level(self, level: u32) -> f32 {
         match self {
             SecondaryPlayerKind::Tombilol => (1.0 - level as f32 * 0.1).max(0.2),
@@ -62,7 +62,7 @@ impl SecondaryPlayerKind {
     }
 
     /// Dégâts par attaque / projectile. Tombilol 1 + level, Tal Ratchou 0.2 * level (float dégâts gérés côté appelant).
-    #[must_use] 
+    #[must_use]
     pub fn damage_at_level(self, level: u32) -> f32 {
         match self {
             SecondaryPlayerKind::Tombilol => 1.0 + level as f32,
@@ -72,7 +72,7 @@ impl SecondaryPlayerKind {
     }
 
     /// Nombre de miliciens (Sergent Garcia). 6 + level*0.5 arrondi.
-    #[must_use] 
+    #[must_use]
     pub fn militiamen_count_at_level(self, level: u32) -> u32 {
         match self {
             SecondaryPlayerKind::SergentGarcia => 6 + (level as f32 * 0.5).floor() as u32,
@@ -100,7 +100,7 @@ pub struct SecondaryPlayer {
 }
 
 impl SecondaryPlayer {
-    #[must_use] 
+    #[must_use]
     pub fn half_size() -> f32 {
         crate::constants::size::MOBILE / 2.0
     }
@@ -117,7 +117,7 @@ impl SecondaryPlayer {
         self.hp <= 0
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_dead(&self) -> bool {
         self.hp <= 0
     }
@@ -129,7 +129,7 @@ impl SecondaryPlayer {
         self.hp = self.hp_max;
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn dist_to(&self, x: f32, y: f32) -> f32 {
         let dx = self.x - x;
         let dy = self.y - y;

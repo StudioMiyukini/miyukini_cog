@@ -10,10 +10,10 @@
 //!
 //! Alpha : appelle Miyubooking (slots_list, booking_create).
 
-use miyubooking::context::GovernedContext;
-use miyubooking::slots;
 use miyubooking::booking;
+use miyubooking::context::GovernedContext;
 use miyubooking::errors::MiyubookingError;
+use miyubooking::slots;
 use std::fmt;
 
 /// Contexte gouverné alpha pour les appels Miyubooking depuis JayFestival.
@@ -55,7 +55,8 @@ pub fn miyubooking_list_slots(
     duration_minutes: Option<u32>,
 ) -> Result<Vec<String>, MiyubookingAdapterError> {
     let ctx = jayfestival_booking_ctx();
-    slots::list(&ctx, resource_ref, date_range, duration_minutes).map_err(MiyubookingAdapterError::from)
+    slots::list(&ctx, resource_ref, date_range, duration_minutes)
+        .map_err(MiyubookingAdapterError::from)
 }
 
 /// Crée une réservation (atelier, billet, pass) via Miyubooking.

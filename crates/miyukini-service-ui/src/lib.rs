@@ -15,11 +15,11 @@
 //! Les nouvelles apps devraient utiliser `miyuki_ui_dioxus` directement.
 //! Ce crate reste disponible pour les apps existantes (jaymanga, jayfestival, etc.).
 
-pub mod theme;
 pub mod styles;
+pub mod theme;
 
-pub use theme::{Theme, ThemePalette, spacing};
 pub use styles as ui_styles;
+pub use theme::{spacing, Theme, ThemePalette};
 
 use dioxus::prelude::*;
 

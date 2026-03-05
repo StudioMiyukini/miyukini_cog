@@ -2,10 +2,10 @@
 
 //! Skill tree panel organism -- 3 tabs, grid of skill nodes with prerequisite lines.
 
+use crate::convert::rgba_to_color32;
+use crate::molecules::skill_node::{SkillNode, SkillNodeData};
 use egui::{Context, Pos2, Stroke};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::molecules::skill_node::{SkillNode, SkillNodeData};
-use crate::convert::rgba_to_color32;
 
 /// Data for one skill tree tab.
 #[derive(Debug, Clone)]
@@ -52,10 +52,11 @@ impl SkillTreePanel {
                         } else {
                             rgba_to_color32(&D2_PALETTE.text_secondary)
                         };
-                        let label = egui::RichText::new(&tab.name)
-                            .color(text_color)
-                            .size(12.0);
-                        if ui.add(egui::Label::new(label).sense(egui::Sense::click())).clicked() {
+                        let label = egui::RichText::new(&tab.name).color(text_color).size(12.0);
+                        if ui
+                            .add(egui::Label::new(label).sense(egui::Sense::click()))
+                            .clicked()
+                        {
                             // Tab switching would be handled by the caller
                         }
                         if i < 2 {
@@ -82,20 +83,20 @@ impl SkillTreePanel {
                     let max_rows = 6;
                     for row in 0..max_rows {
                         let row_u32 = row as u32;
-                        let row_skills: Vec<&SkillNodeData> = tab.skills.iter()
+                        let row_skills: Vec<&SkillNodeData> = tab
+                            .skills
+                            .iter()
                             .filter(|s| s.grid_row == row_u32)
                             .collect();
 
                         ui.horizontal(|ui| {
                             // Pad to align in 3-column grid
                             for col in 0..3_u32 {
-                                let skill_opt = row_skills.iter()
-                                    .find(|s| s.grid_col == col);
+                                let skill_opt = row_skills.iter().find(|s| s.grid_col == col);
 
                                 if let Some(skill) = skill_opt {
-                                    let resp = SkillNode::new(skill)
-                                        .points_available(has_points)
-                                        .show(ui);
+                                    let resp =
+                                        SkillNode::new(skill).points_available(has_points).show(ui);
                                     node_centers.push(resp.rect.center());
                                 } else {
                                     ui.add_space(node_size);
@@ -131,10 +132,7 @@ impl SkillTreePanel {
                             }
                             let start = node_centers[prereq_idx];
                             let line_color = if skill.prereqs_met { gold } else { gray };
-                            painter.line_segment(
-                                [start, end],
-                                Stroke::new(1.5, line_color),
-                            );
+                            painter.line_segment([start, end], Stroke::new(1.5, line_color));
                         }
                     }
                 });

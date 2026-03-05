@@ -43,7 +43,11 @@ pub fn content_panel(theme: Theme) -> String {
 pub fn nav_tab(theme: Theme, is_active: bool) -> String {
     let c = c(theme);
     let bg = if is_active { c.bg_main } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_primary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_primary
+    };
     let border_bottom = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {
@@ -66,7 +70,11 @@ pub fn nav_secondary(theme: Theme) -> String {
 #[allow(dead_code)]
 pub fn nav_item(theme: Theme, is_active: bool) -> String {
     let c = c(theme);
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     format!(
         "padding: 6px 12px; color: {}; font-size: 12px; cursor: pointer; border-radius: {}; transition: all 0.2s;",
         color, spacing::RADIUS
@@ -84,7 +92,11 @@ pub fn tab_bar(theme: Theme) -> String {
 pub fn service_tab(theme: Theme, is_active: bool) -> String {
     let c = c(theme);
     let bg = if is_active { c.bg_card } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     format!(
         "display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: {bg}; color: {color}; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; transition: all 0.2s;"
     )
@@ -117,7 +129,10 @@ pub fn service_icon_large(theme: Theme) -> String {
 }
 
 pub fn service_card_content(_theme: Theme) -> String {
-    format!("padding: {}; display: flex; flex-direction: column; gap: 4px;", spacing::PADDING_SM)
+    format!(
+        "padding: {}; display: flex; flex-direction: column; gap: 4px;",
+        spacing::PADDING_SM
+    )
 }
 
 pub fn service_title(theme: Theme) -> String {
@@ -200,7 +215,10 @@ pub fn modal_card(theme: Theme) -> String {
 
 pub fn modal_title(theme: Theme) -> String {
     let c = c(theme);
-    format!("margin: 0 0 20px 0; font-size: 18px; color: {};", c.text_primary)
+    format!(
+        "margin: 0 0 20px 0; font-size: 18px; color: {};",
+        c.text_primary
+    )
 }
 
 pub fn modal_body_text(theme: Theme) -> String {
@@ -256,13 +274,19 @@ pub fn form_card(theme: Theme) -> String {
 
 pub fn form_title(theme: Theme) -> String {
     let c = c(theme);
-    format!("font-size: 18px; margin-bottom: 24px; color: {};", c.text_primary)
+    format!(
+        "font-size: 18px; margin-bottom: 24px; color: {};",
+        c.text_primary
+    )
 }
 
 #[allow(dead_code)]
 pub fn form_hint(theme: Theme) -> String {
     let c = c(theme);
-    format!("font-size: 12px; color: {}; margin-top: 12px; font-style: italic;", c.text_secondary)
+    format!(
+        "font-size: 12px; color: {}; margin-top: 12px; font-style: italic;",
+        c.text_secondary
+    )
 }
 
 pub fn form_input(theme: Theme) -> String {
@@ -283,7 +307,10 @@ pub fn form_btn_primary(theme: Theme) -> String {
 
 pub fn form_error(theme: Theme) -> String {
     let c = c(theme);
-    format!("font-size: 12px; color: {}; margin-bottom: 8px;", c.accent_red)
+    format!(
+        "font-size: 12px; color: {}; margin-bottom: 8px;",
+        c.accent_red
+    )
 }
 
 #[allow(dead_code)]
@@ -307,7 +334,11 @@ pub fn sidebar(theme: Theme) -> String {
 pub fn sidebar_item(theme: Theme, is_active: bool) -> String {
     let c = c(theme);
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border_left = if is_active {
         format!("3px solid {}", c.accent_blue)
     } else {

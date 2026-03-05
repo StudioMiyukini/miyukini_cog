@@ -16,21 +16,21 @@ pub struct Work {
     pub id: Option<String>,
     pub series_id: Option<String>,
     pub title: Option<String>,
-    pub authors: Option<String>,             // JSON sérialisé Vec<Author>
-    pub genres: Option<String>,              // JSON sérialisé Vec<String>
+    pub authors: Option<String>, // JSON sérialisé Vec<Author>
+    pub genres: Option<String>,  // JSON sérialisé Vec<String>
     pub synopsis: Option<String>,
     pub cover_image_path: Option<String>,
-    pub language: Option<String>,            // ISO 639-1
+    pub language: Option<String>, // ISO 639-1
     pub volume_number: Option<i32>,
-    pub status: Option<String>,              // WorkStatus as_str
-    pub pricing_model: Option<String>,       // PricingModel as_str
-    pub price: Option<i64>,                  // centimes (RM-05)
-    pub currency: Option<String>,            // défaut "EUR"
+    pub status: Option<String>,        // WorkStatus as_str
+    pub pricing_model: Option<String>, // PricingModel as_str
+    pub price: Option<i64>,            // centimes (RM-05)
+    pub currency: Option<String>,      // défaut "EUR"
     pub demo_pages_count: Option<i32>,
-    pub reading_format: Option<String>,      // ReadingFormat as_str
+    pub reading_format: Option<String>, // ReadingFormat as_str
     pub allow_download: Option<bool>,
     pub total_pages: Option<i32>,
-    pub tags: Option<String>,                // JSON sérialisé Vec<String>
+    pub tags: Option<String>, // JSON sérialisé Vec<String>
     #[serde(default)]
     pub created_at: Option<String>,
     #[serde(default)]
@@ -164,19 +164,19 @@ pub struct Page {
     pub chapter_id: Option<String>,
     pub page_number: Option<i32>,
     pub original_image_path: Option<String>,
-    pub optimized_variants: Option<String>,   // JSON sérialisé Vec<ImageVariant>
+    pub optimized_variants: Option<String>, // JSON sérialisé Vec<ImageVariant>
     pub width: Option<i32>,
     pub height: Option<i32>,
-    pub file_size: Option<i64>,               // octets
-    pub optimization_status: Option<String>,  // OptimizationStatus as_str
+    pub file_size: Option<i64>,              // octets
+    pub optimization_status: Option<String>, // OptimizationStatus as_str
     pub sort_order: Option<i32>,
 }
 
 /// Variante optimisée d'une image de page.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ImageVariant {
-    pub profile: String,  // "hd", "sd", "mobile", "thumb"
-    pub format: String,   // "webp", "avif", "jpeg"
+    pub profile: String, // "hd", "sd", "mobile", "thumb"
+    pub format: String,  // "webp", "avif", "jpeg"
     pub path: String,
     pub width: i32,
     pub height: i32,
@@ -273,13 +273,13 @@ pub struct SellerConfig {
     pub default_allow_download: Option<bool>,
     pub accepted_payment_methods: Option<String>, // JSON
     pub currency: Option<String>,
-    pub reading_direction: Option<String>,        // "rtl" ou "ltr"
-    pub theme: Option<String>,                    // JSON personnalisation
+    pub reading_direction: Option<String>, // "rtl" ou "ltr"
+    pub theme: Option<String>,             // JSON personnalisation
     pub allow_aggregation: Option<bool>,
     pub federation_synopsis_length: Option<i32>,
     pub federation_include_prices: Option<bool>,
     pub payment_gateway: Option<String>,
-    pub gateway_config: Option<String>,           // JSON chiffré (niveau 3)
+    pub gateway_config: Option<String>, // JSON chiffré (niveau 3)
     #[serde(default)]
     pub created_at: Option<String>,
     #[serde(default)]
@@ -298,9 +298,9 @@ pub struct OptimizationConfig {
     pub quality_sd: Option<i32>,
     pub quality_mobile: Option<i32>,
     pub quality_thumb: Option<i32>,
-    pub output_format: Option<String>,        // "webp", "avif", "jpeg"
+    pub output_format: Option<String>, // "webp", "avif", "jpeg"
     pub generate_avif: Option<bool>,
-    pub active_profiles: Option<String>,      // JSON Vec<String>
+    pub active_profiles: Option<String>, // JSON Vec<String>
     pub max_concurrent_jobs: Option<i32>,
     pub jpeg_fallback: Option<bool>,
 }

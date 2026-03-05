@@ -14,11 +14,15 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
+use super::auth_security::{
+    HealthDashboard, OnboardingWizard, RecoveryCodesModal, SessionList, TotpSetupWizard,
+    TotpVerifyForm,
+};
 use super::client::MiyuCloudClient;
 use super::components::format_size;
 use super::state::MiyuCloudState;
 use super::sync_status::SyncSettingsSection;
+use crate::state::use_app_state;
 
 /// Vue des parametres MiyuCloud.
 #[component]
@@ -69,7 +73,11 @@ pub fn CloudSettings(
     let quota_bar_pct = if let Some(ref q) = quota {
         if q.max_bytes > 0 {
             let pct = (q.used_bytes * 100 / q.max_bytes) as u32;
-            if pct > 100 { 100 } else { pct }
+            if pct > 100 {
+                100
+            } else {
+                pct
+            }
         } else {
             0
         }
@@ -87,7 +95,11 @@ pub fn CloudSettings(
     let show_quota_bar = quota.as_ref().map_or(false, |q| q.max_bytes > 0);
 
     let web_status_label = if web_enabled { "Active" } else { "Desactive" };
-    let web_status_color = if web_enabled { c.accent_green } else { c.text_muted };
+    let web_status_color = if web_enabled {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
     let web_port_label = format!("{web_port}");
 
     // Charger les stats au montage
@@ -243,6 +255,31 @@ pub fn CloudSettings(
                     }
                 }
 
+                // Onboarding
+                SettingsSection {
+                    title: "Onboarding",
+                    icon: "\u{1F9ED}",
+                    OnboardingWizard { state: state, client: client }
+                }
+
+                // 2FA + sessions
+                SettingsSection {
+                    title: "Authentification",
+                    icon: "\u{1F510}",
+                    TotpSetupWizard { state: state, client: client }
+                    div { style: "height: 1px; background: {c.border}; margin: 8px 0;" }
+                    TotpVerifyForm { state: state, client: client }
+                    div { style: "height: 1px; background: {c.border}; margin: 8px 0;" }
+                    SessionList { state: state, client: client }
+                }
+
+                // Health dashboard
+                SettingsSection {
+                    title: "Sante",
+                    icon: "\u{1FA7A}",
+                    HealthDashboard { state: state, client: client }
+                }
+
                 // ═════════════════════════════════════════════════════════
                 // Section : Synchronisation P2P
                 // ═════════════════════════════════════════════════════════
@@ -253,6 +290,8 @@ pub fn CloudSettings(
                     SyncSettingsSection { state: state, client: client }
                 }
             }
+
+            RecoveryCodesModal { state: state }
         }
     }
 }
@@ -263,11 +302,7 @@ pub fn CloudSettings(
 
 /// Section de parametres avec titre et icone.
 #[component]
-fn SettingsSection(
-    title: &'static str,
-    icon: &'static str,
-    children: Element,
-) -> Element {
+fn SettingsSection(title: &'static str, icon: &'static str, children: Element) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
     rsx! {

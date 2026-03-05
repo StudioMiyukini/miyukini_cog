@@ -115,7 +115,6 @@ pub enum AdminRole {
     Audit,
 }
 
-
 impl std::fmt::Display for AdminRole {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

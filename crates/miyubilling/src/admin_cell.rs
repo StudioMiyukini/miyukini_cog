@@ -30,7 +30,9 @@ pub struct MiyubillingTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyubillingIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyubillingAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.billing.saas";
 
-#[must_use] 
+#[must_use]
 pub fn miyubilling_admin_cell(version: &str, fingerprint: &str) -> MiyubillingAdminCell {
     MiyubillingAdminCell {
         identification: MiyubillingIdentification {
@@ -63,7 +65,9 @@ pub fn miyubilling_admin_cell(version: &str, fingerprint: &str) -> MiyubillingAd
                 id: "Miyubilling".to_string(),
                 name: "Test chemin complet Miyubilling".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

@@ -21,7 +21,9 @@ pub fn create(
         return Err(MiyusocialmoderationError::NoMandate);
     }
     let id = format!("rep:{}", UuidIdGenerator.generate());
-    let mut guard = store::reports().lock().map_err(|_| MiyusocialmoderationError::InvalidInput("lock".into()))?;
+    let mut guard = store::reports()
+        .lock()
+        .map_err(|_| MiyusocialmoderationError::InvalidInput("lock".into()))?;
     guard.insert(id.clone(), (target_type.to_string(), target_id.to_string()));
     Ok(id)
 }
@@ -36,8 +38,17 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ReportItem>, Miyusocialmoderati
     if !ctx.has_mandate() {
         return Err(MiyusocialmoderationError::NoMandate);
     }
-    let guard = store::reports().lock().map_err(|_| MiyusocialmoderationError::InvalidInput("lock".into()))?;
-    let items = guard.iter().map(|(id, (target_type, target_id))| ReportItem { id: id.clone(), target_type: target_type.clone(), target_id: target_id.clone() }).collect();
+    let guard = store::reports()
+        .lock()
+        .map_err(|_| MiyusocialmoderationError::InvalidInput("lock".into()))?;
+    let items = guard
+        .iter()
+        .map(|(id, (target_type, target_id))| ReportItem {
+            id: id.clone(),
+            target_type: target_type.clone(),
+            target_id: target_id.clone(),
+        })
+        .collect();
     Ok(items)
 }
 

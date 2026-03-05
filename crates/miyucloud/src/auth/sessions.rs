@@ -24,7 +24,7 @@ const SESSION_EXPIRY_HOURS: i64 = 24;
 const INACTIVITY_TIMEOUT_HOURS: i64 = 2;
 
 /// Informations d'une session active.
-#[derive(Debug)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct SessionInfo {
     /// Identifiant unique de la session (UUID v4).
     pub id: String,
@@ -137,9 +137,7 @@ pub fn validate_session(
     let last_activity = parse_rfc3339(&row.last_activity_at)?;
     let inactivity_limit = Duration::hours(INACTIVITY_TIMEOUT_HOURS);
     if now - last_activity > inactivity_limit {
-        return Err(MiyucloudError::PermissionDenied(
-            "Session inactive".into(),
-        ));
+        return Err(MiyucloudError::PermissionDenied("Session inactive".into()));
     }
 
     db.session_update_activity(&row.id)?;
@@ -186,9 +184,7 @@ pub fn mark_totp_verified(
 }
 
 /// Purge les sessions expirees de la DB.
-pub fn purge_expired_sessions(
-    db: &crate::data::MiyucloudDb,
-) -> Result<u64, MiyucloudError> {
+pub fn purge_expired_sessions(db: &crate::data::MiyucloudDb) -> Result<u64, MiyucloudError> {
     db.session_purge_expired()
 }
 
@@ -234,8 +230,7 @@ mod tests {
         // Create MAX_SESSIONS_PER_OWNER sessions.
         let mut tokens = Vec::new();
         for _ in 0..MAX_SESSIONS_PER_OWNER {
-            let t = create_session(&db, &owner, None, None)
-                .expect("create_session should succeed");
+            let t = create_session(&db, &owner, None, None).expect("create_session should succeed");
             tokens.push(t);
         }
 
@@ -244,8 +239,8 @@ mod tests {
         assert_eq!(active.len(), MAX_SESSIONS_PER_OWNER as usize);
 
         // Create a 6th session — should evict the oldest.
-        let t6 = create_session(&db, &owner, None, None)
-            .expect("6th create_session should succeed");
+        let t6 =
+            create_session(&db, &owner, None, None).expect("6th create_session should succeed");
         tokens.push(t6);
 
         // The first token should now be revoked.
@@ -391,7 +386,10 @@ mod tests {
         assert_eq!(count, 3, "Should have revoked 3 sessions");
 
         let active = list_sessions(&db, &owner).expect("list should work");
-        assert!(active.is_empty(), "No sessions should be active after revoke_all");
+        assert!(
+            active.is_empty(),
+            "No sessions should be active after revoke_all"
+        );
     }
 
     #[test]
@@ -407,8 +405,15 @@ mod tests {
         revoke_session(&db, &row.id).expect("revoke ok");
 
         let active = list_sessions(&db, &owner).expect("list should work");
-        assert_eq!(active.len(), 1, "Only 1 active session after revoking 1 of 2");
-        assert_ne!(active[0].id, row.id, "Active session should not be the revoked one");
+        assert_eq!(
+            active.len(),
+            1,
+            "Only 1 active session after revoking 1 of 2"
+        );
+        assert_ne!(
+            active[0].id, row.id,
+            "Active session should not be the revoked one"
+        );
     }
 
     #[test]
@@ -416,12 +421,18 @@ mod tests {
         let (db, token, _owner) = create_test_session();
         let row = db.session_by_token(&token).expect("ok").expect("exists");
 
-        assert!(!row.totp_verified, "Newly created session should not be totp verified");
+        assert!(
+            !row.totp_verified,
+            "Newly created session should not be totp verified"
+        );
 
         mark_totp_verified(&db, &row.id).expect("mark_totp should succeed");
 
         let row_after = db.session_by_token(&token).expect("ok").expect("exists");
-        assert!(row_after.totp_verified, "Session should be totp verified after marking");
+        assert!(
+            row_after.totp_verified,
+            "Session should be totp verified after marking"
+        );
     }
 
     #[test]

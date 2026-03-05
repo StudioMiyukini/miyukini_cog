@@ -31,10 +31,7 @@ impl DefaultOrchestrator {
 
 impl Orchestrator for DefaultOrchestrator {
     fn execute(&mut self, _workflow: &Workflow, steps: &[Step]) -> Vec<StepResult> {
-        steps
-            .iter()
-            .map(|_step| StepResult::Success)
-            .collect()
+        steps.iter().map(|_step| StepResult::Success).collect()
     }
 }
 

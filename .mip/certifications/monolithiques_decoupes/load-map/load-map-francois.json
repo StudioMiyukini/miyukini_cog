@@ -1,0 +1,21 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "francois.unit_test":  [
+                                                "cert.francois.istqb"
+                                            ],
+                     "francois.integration_test":  [
+                                                       "cert.francois.istqb"
+                                                   ],
+                     "francois.api_design":  [
+                                                 "cert.francois.openapi"
+                                             ],
+                     "francois.api_impl":  [
+                                               "cert.francois.openapi"
+                                           ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

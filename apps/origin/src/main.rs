@@ -138,11 +138,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let slug_registry = tracker.slug_registry();
 
     // Base JayXpose optionnelle (pages vitrine publiques /vitrine/*)
-    let jayxpose_db: Option<std::sync::Arc<jayxpose::JayXposeDb>> = config
-        .tracker
-        .jayxpose_db_path
-        .as_ref()
-        .and_then(|path| {
+    let jayxpose_db: Option<std::sync::Arc<jayxpose::JayXposeDb>> =
+        config.tracker.jayxpose_db_path.as_ref().and_then(|path| {
             let p = std::path::Path::new(path);
             if p.exists() {
                 jayxpose::JayXposeDb::open(p).ok().map(Arc::new)
@@ -159,33 +156,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .tracker
         .forum_profiles_db_path
         .as_ref()
-        .and_then(|path| {
-            match web::forum_auth::ForumAuthStore::open(path) {
-                Ok(store) => {
-                    info!("Forum auth activée (/api/auth/forum/*) — base: {}", path);
-                    Some(Arc::new(store))
-                }
-                Err(e) => {
-                    error!("Forum auth: impossible d'ouvrir la base {}: {}", path, e);
-                    None
-                }
+        .and_then(|path| match web::forum_auth::ForumAuthStore::open(path) {
+            Ok(store) => {
+                info!("Forum auth activée (/api/auth/forum/*) — base: {}", path);
+                Some(Arc::new(store))
+            }
+            Err(e) => {
+                error!("Forum auth: impossible d'ouvrir la base {}: {}", path, e);
+                None
             }
         });
 
     // Créer le serveur relay (avant web pour Phase 2 : inject HTTP via tunnel)
-    let relay_arc: Option<Arc<RelayServer>> = match RelayServer::new(
-        Arc::clone(&config),
-        Some(Arc::clone(&permis_registry)),
-    )
-    .await
-    {
-        Ok(relay) => Some(Arc::new(relay)),
-        Err(e) => {
-            error!("Failed to create relay server: {}", e);
-            error!("Relay server disabled (TLS configuration issue?)");
-            None
-        }
-    };
+    let relay_arc: Option<Arc<RelayServer>> =
+        match RelayServer::new(Arc::clone(&config), Some(Arc::clone(&permis_registry))).await {
+            Ok(relay) => Some(Arc::new(relay)),
+            Err(e) => {
+                error!("Failed to create relay server: {}", e);
+                error!("Relay server disabled (TLS configuration issue?)");
+                None
+            }
+        };
 
     // Service Market (catalogue + packages)
     // Ouvert dans spawn_blocking car MarketStore::open utilise blocking_lock pour l'init SQLite.
@@ -197,7 +188,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let pkg_p = packages_dir.clone();
         match tokio::task::spawn_blocking(move || web::MarketStore::open(&db_p, &pkg_p)).await {
             Ok(Ok(store)) => {
-                info!("Service Market activé (/api/market/*) — base: {}", db_path.display());
+                info!(
+                    "Service Market activé (/api/market/*) — base: {}",
+                    db_path.display()
+                );
                 Some(Arc::new(store))
             }
             Ok(Err(e)) => {
@@ -223,8 +217,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Créer le serveur admin
-    let admin = AdminServer::new(Arc::clone(&config))
-        .with_pools(Arc::clone(&pool_manager));
+    let admin = AdminServer::new(Arc::clone(&config)).with_pools(Arc::clone(&pool_manager));
     let tracker_handle = {
         let tracker = tracker;
         tokio::spawn(async move {
@@ -268,7 +261,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("  Origin is running!");
     info!("  Relay:   {}:{}", config.relay.host, config.relay.port);
     info!("  Tracker: {}:{}", config.tracker.host, config.tracker.port);
-    info!("  Website: http://{}:{}", config.tracker.host, config.tracker.web_port);
+    info!(
+        "  Website: http://{}:{}",
+        config.tracker.host, config.tracker.web_port
+    );
     info!("  Admin:   {}:{}", config.admin.host, config.admin.port);
     info!("═══════════════════════════════════════════════════════════");
 

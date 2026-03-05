@@ -7,9 +7,8 @@
 //! @layer: toolkit
 
 use miyauth::{
-    GovernedContext, MiyauthError,
-    identity_attest, identity_resolve, identity_role, identity_verify,
-    IdentityArtefacts, IdentityContext, IdentityRole, VerificationResult,
+    identity_attest, identity_resolve, identity_role, identity_verify, GovernedContext,
+    IdentityArtefacts, IdentityContext, IdentityRole, MiyauthError, VerificationResult,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -57,7 +56,7 @@ fn mock_passport_valid_no_expiry() -> Vec<u8> {
 #[test]
 fn mauth_ctx_001_context_with_mandate() {
     let ctx = GovernedContext::new("mandate-123".to_string(), 3);
-    
+
     assert!(ctx.has_mandate());
     assert_eq!(ctx.mandate_id, "mandate-123");
     assert_eq!(ctx.security_level, 3);
@@ -70,7 +69,7 @@ fn mauth_ctx_001_context_with_mandate() {
 #[test]
 fn mauth_ctx_002_context_without_mandate() {
     let ctx = GovernedContext::new(String::new(), 1);
-    
+
     assert!(!ctx.has_mandate());
     assert!(ctx.mandate_id.is_empty());
 }
@@ -100,12 +99,12 @@ fn mauth_t_001_identity_role_variants() {
     let citizen = IdentityRole::Citizen;
     let visitor = IdentityRole::Visitor;
     let external = IdentityRole::External;
-    
+
     // Les rôles sont distincts
     assert_ne!(citizen, visitor);
     assert_ne!(visitor, external);
     assert_ne!(citizen, external);
-    
+
     // Clone fonctionne
     let citizen_clone = citizen;
     assert_eq!(citizen, citizen_clone);
@@ -118,7 +117,7 @@ fn mauth_t_001_identity_role_variants() {
 #[test]
 fn mauth_t_002_identity_context_creation() {
     let context = sample_identity_context(IdentityRole::Citizen);
-    
+
     assert_eq!(context.role, IdentityRole::Citizen);
     assert!(!context.opaque_id.is_empty());
 }
@@ -130,7 +129,7 @@ fn mauth_t_002_identity_context_creation() {
 #[test]
 fn mauth_t_003_identity_artefacts_all_fields() {
     let artefacts = sample_artefacts();
-    
+
     assert!(artefacts.passport_raw.is_some());
     assert!(artefacts.visa_raw.is_some());
     assert!(artefacts.session_ref.is_some());
@@ -143,7 +142,7 @@ fn mauth_t_003_identity_artefacts_all_fields() {
 #[test]
 fn mauth_t_004_identity_artefacts_empty() {
     let artefacts = IdentityArtefacts::default();
-    
+
     assert!(artefacts.passport_raw.is_none());
     assert!(artefacts.visa_raw.is_none());
     assert!(artefacts.session_ref.is_none());
@@ -158,7 +157,7 @@ fn mauth_t_005_verification_result_variants() {
     let valid = VerificationResult::Valid;
     let invalid = VerificationResult::Invalid;
     let expired = VerificationResult::Expired;
-    
+
     assert_ne!(valid, invalid);
     assert_ne!(valid, expired);
     assert_ne!(invalid, expired);
@@ -176,7 +175,7 @@ fn mauth_t_005_verification_result_variants() {
 fn mauth_e_001_error_no_mandate_display() {
     let err = MiyauthError::NoMandate;
     let msg = err.to_string();
-    
+
     assert!(msg.contains("no governed mandate"));
 }
 
@@ -188,7 +187,7 @@ fn mauth_e_001_error_no_mandate_display() {
 fn mauth_e_002_error_unimplemented_display() {
     let err = MiyauthError::Unimplemented;
     let msg = err.to_string();
-    
+
     assert!(msg.contains("not yet implemented"));
 }
 
@@ -200,7 +199,7 @@ fn mauth_e_002_error_unimplemented_display() {
 fn mauth_e_003_error_clone() {
     let err = MiyauthError::NoMandate;
     let err_clone = err.clone();
-    
+
     // Les deux ont le même message
     assert_eq!(err.to_string(), err_clone.to_string());
 }
@@ -217,9 +216,9 @@ fn mauth_e_003_error_clone() {
 fn mauth_tool_001_resolve_no_mandate() {
     let ctx = empty_ctx();
     let artefacts = sample_artefacts();
-    
+
     let result = identity_resolve(&ctx, &artefacts);
-    
+
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
 
@@ -231,9 +230,9 @@ fn mauth_tool_001_resolve_no_mandate() {
 fn mauth_tool_002_verify_no_mandate() {
     let ctx = empty_ctx();
     let passport_data = b"passport-raw-data";
-    
+
     let result = identity_verify(&ctx, passport_data);
-    
+
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
 
@@ -245,9 +244,9 @@ fn mauth_tool_002_verify_no_mandate() {
 fn mauth_tool_003_attest_no_mandate() {
     let ctx = empty_ctx();
     let identity_ctx = sample_identity_context(IdentityRole::Citizen);
-    
+
     let result = identity_attest(&ctx, &identity_ctx);
-    
+
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
 
@@ -259,9 +258,9 @@ fn mauth_tool_003_attest_no_mandate() {
 fn mauth_tool_004_role_no_mandate() {
     let ctx = empty_ctx();
     let identity_ctx = sample_identity_context(IdentityRole::Visitor);
-    
+
     let result = identity_role(&ctx, &identity_ctx);
-    
+
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
 
@@ -277,9 +276,9 @@ fn mauth_tool_004_role_no_mandate() {
 fn mauth_tool_010_resolve_with_mandate() {
     let ctx = governed_ctx();
     let artefacts = sample_artefacts();
-    
+
     let result = identity_resolve(&ctx, &artefacts);
-    
+
     assert!(result.is_ok());
     let context = result.unwrap();
     assert_eq!(context.role, IdentityRole::Citizen);
@@ -295,9 +294,9 @@ fn mauth_tool_010_resolve_with_mandate() {
 fn mauth_tool_011_verify_with_mandate() {
     let ctx = governed_ctx();
     let passport_data = mock_passport_valid_no_expiry();
-    
+
     let result = identity_verify(&ctx, &passport_data);
-    
+
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), VerificationResult::Valid);
 }
@@ -310,9 +309,9 @@ fn mauth_tool_011_verify_with_mandate() {
 fn mauth_tool_012_attest_with_mandate() {
     let ctx = governed_ctx();
     let identity_ctx = sample_identity_context(IdentityRole::Citizen);
-    
+
     let result = identity_attest(&ctx, &identity_ctx);
-    
+
     assert!(result.is_ok());
     let att = result.unwrap();
     assert!(!att.attestation_id.is_empty());
@@ -325,12 +324,16 @@ fn mauth_tool_012_attest_with_mandate() {
 #[test]
 fn mauth_tool_013_role_with_mandate() {
     let ctx = governed_ctx();
-    
+
     // Test avec chaque rôle
-    for role in [IdentityRole::Citizen, IdentityRole::Visitor, IdentityRole::External] {
+    for role in [
+        IdentityRole::Citizen,
+        IdentityRole::Visitor,
+        IdentityRole::External,
+    ] {
         let identity_ctx = sample_identity_context(role);
         let result = identity_role(&ctx, &identity_ctx);
-        
+
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), role);
     }
@@ -348,13 +351,13 @@ fn mauth_tool_013_role_with_mandate() {
 fn mauth_r_001_artefacts_empty_data() {
     let ctx = governed_ctx();
     let artefacts = IdentityArtefacts {
-        passport_raw: Some(vec![]),  // Passeport vide
+        passport_raw: Some(vec![]), // Passeport vide
         visa_raw: None,
-        session_ref: Some(String::new()),  // Session vide
+        session_ref: Some(String::new()), // Session vide
     };
-    
+
     let result = identity_resolve(&ctx, &artefacts);
-    
+
     assert!(result.is_ok());
     let context = result.unwrap();
     assert_eq!(context.role, IdentityRole::External);
@@ -369,9 +372,9 @@ fn mauth_r_001_artefacts_empty_data() {
 #[test]
 fn mauth_r_002_verify_empty_data() {
     let ctx = governed_ctx();
-    
+
     let result = identity_verify(&ctx, &[]);
-    
+
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), VerificationResult::Invalid);
 }
@@ -387,9 +390,9 @@ fn mauth_r_003_identity_context_empty_opaque_id() {
         role: IdentityRole::External,
         opaque_id: String::new(),
     };
-    
+
     let result = identity_role(&ctx, &identity_ctx);
-    
+
     // Le rôle doit toujours être retourné
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), IdentityRole::External);
@@ -407,7 +410,7 @@ fn mauth_r_003_identity_context_empty_opaque_id() {
 fn mauth_d_001_debug_identity_role() {
     let citizen = IdentityRole::Citizen;
     let debug_str = format!("{:?}", citizen);
-    
+
     assert!(debug_str.contains("Citizen"));
 }
 
@@ -419,7 +422,7 @@ fn mauth_d_001_debug_identity_role() {
 fn mauth_d_002_debug_verification_result() {
     let valid = VerificationResult::Valid;
     let debug_str = format!("{:?}", valid);
-    
+
     assert!(debug_str.contains("Valid"));
 }
 
@@ -431,6 +434,6 @@ fn mauth_d_002_debug_verification_result() {
 fn mauth_d_003_debug_error() {
     let err = MiyauthError::NoMandate;
     let debug_str = format!("{:?}", err);
-    
+
     assert!(debug_str.contains("NoMandate"));
 }

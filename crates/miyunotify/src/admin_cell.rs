@@ -30,7 +30,9 @@ pub struct MiyunotifyTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyunotifyIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyunotifyAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.notify.miyunotify";
 
-#[must_use] 
+#[must_use]
 pub fn miyunotify_admin_cell(version: &str, fingerprint: &str) -> MiyunotifyAdminCell {
     MiyunotifyAdminCell {
         identification: MiyunotifyIdentification {
@@ -63,7 +65,9 @@ pub fn miyunotify_admin_cell(version: &str, fingerprint: &str) -> MiyunotifyAdmi
                 id: "Miyunotify".to_string(),
                 name: "Test chemin complet Miyunotify".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

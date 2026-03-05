@@ -41,8 +41,7 @@ pub fn favorite_add(
     let existing = db.favorite_list()?;
     let key = format!("{seller_cog_id}:{work_id}");
     if existing.iter().any(|f| {
-        f.seller_cog_id.as_deref() == Some(seller_cog_id)
-            && f.work_id.as_deref() == Some(work_id)
+        f.seller_cog_id.as_deref() == Some(seller_cog_id) && f.work_id.as_deref() == Some(work_id)
     }) {
         return Err(FavoritesError::AlreadyExists(key));
     }

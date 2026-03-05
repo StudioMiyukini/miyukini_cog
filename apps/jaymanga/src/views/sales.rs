@@ -1,13 +1,13 @@
 //! Ventes JayManga — tableau de bord ventes complet : resume revenus,
 //! graphique 30 jours, transactions filtrables, licences, export.
 
+use super::components::{ActionButton, Badge, EmptyState, PageHeader, StatCard};
+use super::JayMangaState;
+use crate::use_db;
 use dioxus::prelude::*;
-use jaymanga::export::csv::{CsvTransactionRow, csv_generate};
+use jaymanga::export::csv::{csv_generate, CsvTransactionRow};
 use jaymanga::export::pdf::{SalesReportData, SalesReportSummary};
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, Badge, StatCard, EmptyState, ActionButton};
-use super::JayMangaState;
 
 /// Onglet actif dans les ventes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -24,16 +24,25 @@ pub fn Sales(state: Signal<JayMangaState>) -> Element {
     let db = use_db();
 
     let licenses = db.license_list_all().unwrap_or_default();
-    let transactions = db.transaction_list(&jaymanga::data::TransactionFilters::default()).unwrap_or_default();
+    let transactions = db
+        .transaction_list(&jaymanga::data::TransactionFilters::default())
+        .unwrap_or_default();
 
     let mut active_tab = use_signal(|| SalesTab::Overview);
 
     // -- Statistiques globales --
     let license_count = licenses.len();
-    let active_count = licenses.iter().filter(|l| l.status.as_deref() == Some("active")).count();
-    let _refunded_count = licenses.iter().filter(|l| l.status.as_deref() == Some("refunded")).count();
+    let active_count = licenses
+        .iter()
+        .filter(|l| l.status.as_deref() == Some("active"))
+        .count();
+    let _refunded_count = licenses
+        .iter()
+        .filter(|l| l.status.as_deref() == Some("refunded"))
+        .count();
 
-    let total_revenue_cents: i64 = licenses.iter()
+    let total_revenue_cents: i64 = licenses
+        .iter()
         .filter(|l| l.status.as_deref() == Some("active"))
         .filter_map(|l| l.amount_paid)
         .sum();
@@ -41,15 +50,27 @@ pub fn Sales(state: Signal<JayMangaState>) -> Element {
 
     // Revenus du mois (approximation par licences recentes)
     let now_prefix = chrono::Utc::now().format("%Y-%m").to_string();
-    let month_revenue_cents: i64 = licenses.iter()
+    let month_revenue_cents: i64 = licenses
+        .iter()
         .filter(|l| l.status.as_deref() == Some("active"))
-        .filter(|l| l.purchased_at.as_deref().unwrap_or("").starts_with(&now_prefix))
+        .filter(|l| {
+            l.purchased_at
+                .as_deref()
+                .unwrap_or("")
+                .starts_with(&now_prefix)
+        })
         .filter_map(|l| l.amount_paid)
         .sum();
     let month_revenue = format_amount(month_revenue_cents);
 
-    let month_sales = licenses.iter()
-        .filter(|l| l.purchased_at.as_deref().unwrap_or("").starts_with(&now_prefix))
+    let month_sales = licenses
+        .iter()
+        .filter(|l| {
+            l.purchased_at
+                .as_deref()
+                .unwrap_or("")
+                .starts_with(&now_prefix)
+        })
         .count();
 
     let avg_amount = if active_count > 0 {
@@ -121,8 +142,16 @@ fn SalesTabButton(
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
     let c = use_palette();
-    let border_color = if is_active { c.accent_blue } else { "transparent" };
-    let text_color = if is_active { c.text_white } else { c.text_secondary };
+    let border_color = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
+    let text_color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     rsx! {
         button {
@@ -136,9 +165,7 @@ fn SalesTabButton(
 // -- Vue d'ensemble --
 
 #[component]
-fn SalesOverview(
-    licenses: Vec<jaymanga::data::PurchaseLicense>,
-) -> Element {
+fn SalesOverview(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
     let c = use_palette();
 
     // Graphique 30 jours simplifie (barres textuelles)
@@ -148,18 +175,30 @@ fn SalesOverview(
         let day = now - chrono::Duration::days(i);
         let day_str = day.format("%m-%d").to_string();
         let day_prefix = day.format("%Y-%m-%d").to_string();
-        let rev: i64 = licenses.iter()
+        let rev: i64 = licenses
+            .iter()
             .filter(|l| l.status.as_deref() == Some("active"))
-            .filter(|l| l.purchased_at.as_deref().unwrap_or("").starts_with(&day_prefix))
+            .filter(|l| {
+                l.purchased_at
+                    .as_deref()
+                    .unwrap_or("")
+                    .starts_with(&day_prefix)
+            })
             .filter_map(|l| l.amount_paid)
             .sum();
         daily_revenue.push((day_str, rev));
     }
 
-    let max_rev = daily_revenue.iter().map(|(_, r)| *r).max().unwrap_or(1).max(1);
+    let max_rev = daily_revenue
+        .iter()
+        .map(|(_, r)| *r)
+        .max()
+        .unwrap_or(1)
+        .max(1);
 
     // Ventes recentes (dernieres 5)
-    let mut recent_licenses: Vec<_> = licenses.iter()
+    let mut recent_licenses: Vec<_> = licenses
+        .iter()
         .filter(|l| l.status.as_deref() == Some("active"))
         .collect();
     recent_licenses.sort_by(|a, b| {

@@ -36,7 +36,10 @@ impl Error for JayXposeError {}
 ///
 /// @id: jayxpose_get_profile
 /// @do: récupère le profil exposant pour l'utilisateur courant (mon compte).
-pub fn jayxpose_get_profile(db: &JayFestivalDb, user_id: &str) -> Result<JayXposeProfile, JayXposeError> {
+pub fn jayxpose_get_profile(
+    db: &JayFestivalDb,
+    user_id: &str,
+) -> Result<JayXposeProfile, JayXposeError> {
     let exposant = db
         .exposant_by_id(user_id)
         .map_err(|e| JayXposeError::Db(e.to_string()))?

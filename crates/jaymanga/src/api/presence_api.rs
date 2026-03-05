@@ -19,7 +19,7 @@ pub struct PresenceBatchRequest {
 #[derive(Debug, Clone, Serialize)]
 pub struct PresenceResponse {
     pub cog_id: String,
-    pub status: String,       // "online", "offline", "unknown"
+    pub status: String, // "online", "offline", "unknown"
     pub last_seen: Option<String>,
 }
 

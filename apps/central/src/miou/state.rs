@@ -1,8 +1,8 @@
 //! État et préférences Miou.
 
-use std::collections::{VecDeque, HashSet};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashSet, VecDeque};
 
 use super::bubble::BulleOutput;
 
@@ -153,14 +153,16 @@ impl MiouState {
 
     /// Enregistre une variante comme utilisée.
     pub fn record_variante(&mut self, categorie: &str, variante_id: &str) {
-        self.variantes_used.insert(format!("{}:{}", categorie, variante_id));
+        self.variantes_used
+            .insert(format!("{}:{}", categorie, variante_id));
         self.categories_shown.insert(categorie.to_string());
     }
 
     /// Vérifie si une variante a été utilisée.
     #[allow(dead_code)]
     pub fn is_variante_used(&self, categorie: &str, variante_id: &str) -> bool {
-        self.variantes_used.contains(&format!("{}:{}", categorie, variante_id))
+        self.variantes_used
+            .contains(&format!("{}:{}", categorie, variante_id))
     }
 
     /// Durée de la session en minutes.

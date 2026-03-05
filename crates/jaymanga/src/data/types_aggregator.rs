@@ -18,8 +18,8 @@ pub struct AggregatedCatalogEntry {
     pub seller_cog_id: Option<String>,
     pub work_id: Option<String>,
     pub title: Option<String>,
-    pub authors: Option<String>,              // JSON
-    pub genres: Option<String>,               // JSON
+    pub authors: Option<String>, // JSON
+    pub genres: Option<String>,  // JSON
     pub synopsis: Option<String>,
     pub cover_thumb_path: Option<String>,
     pub reading_format: Option<String>,
@@ -30,7 +30,7 @@ pub struct AggregatedCatalogEntry {
     pub total_pages: Option<i32>,
     pub demo_pages_count: Option<i32>,
     pub series_title: Option<String>,
-    pub tags: Option<String>,                 // JSON
+    pub tags: Option<String>, // JSON
     pub language: Option<String>,
     pub portal_url: Option<String>,
     pub published_at: Option<String>,
@@ -52,7 +52,7 @@ pub struct IndexedSeller {
     pub shop_description: Option<String>,
     pub avatar_path: Option<String>,
     pub work_count: Option<i32>,
-    pub online_status: Option<String>,        // OnlineStatus as_str
+    pub online_status: Option<String>, // OnlineStatus as_str
     #[serde(default)]
     pub last_synced_at: Option<String>,
     pub last_seen_online_at: Option<String>,
@@ -102,7 +102,7 @@ pub struct AggregatorConfig {
     pub max_indexed_cogs: Option<i32>,
     pub show_offline_works: Option<bool>,
     pub highlight_own_catalog: Option<bool>,
-    pub blocked_cogs: Option<String>,         // JSON Vec<String>
+    pub blocked_cogs: Option<String>, // JSON Vec<String>
 }
 
 impl AggregatorConfig {
@@ -132,7 +132,11 @@ mod tests {
 
     #[test]
     fn test_online_status_roundtrip() {
-        for s in [OnlineStatus::Online, OnlineStatus::Offline, OnlineStatus::Unknown] {
+        for s in [
+            OnlineStatus::Online,
+            OnlineStatus::Offline,
+            OnlineStatus::Unknown,
+        ] {
             assert_eq!(OnlineStatus::from_str(s.as_str()), s);
         }
     }

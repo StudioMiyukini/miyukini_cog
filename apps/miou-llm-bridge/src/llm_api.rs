@@ -5,12 +5,7 @@
 //! sans avoir besoin de leur propre client LLM.
 //! Utilise InferenceRouter : natif GGUF d'abord, upstream en backup.
 
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 
 use crate::catalog::CATALOG;
@@ -126,7 +121,9 @@ pub async fn llm_chat(
 
     match state.inference.chat_completion(body).await {
         Ok(resp) => {
-            let content = resp.choices.first()
+            let content = resp
+                .choices
+                .first()
                 .and_then(|c| c.message.get("content"))
                 .and_then(|c| c.as_str())
                 .unwrap_or("");
@@ -197,7 +194,9 @@ pub async fn llm_complete(
 
     match state.inference.chat_completion(body).await {
         Ok(resp) => {
-            let text = resp.choices.first()
+            let text = resp
+                .choices
+                .first()
                 .and_then(|c| c.message.get("content"))
                 .and_then(|c| c.as_str())
                 .unwrap_or("");
@@ -292,12 +291,8 @@ pub async fn llm_models(State(state): State<ProxyState>) -> impl IntoResponse {
 /// GET /v1/llm/status — État complet (disponibilité, backends, modèles).
 pub async fn llm_status(State(state): State<ProxyState>) -> impl IntoResponse {
     let native_loaded = state.inference.native.is_loaded();
-    let availability = fallback::probe_availability(
-        &state.client,
-        &state.upstream_url,
-        native_loaded,
-    )
-    .await;
+    let availability =
+        fallback::probe_availability(&state.client, &state.upstream_url, native_loaded).await;
 
     let upstream_ids = recommend::fetch_loaded_model_ids(&state).await;
     let local_models = state.model_manager.scan_models();

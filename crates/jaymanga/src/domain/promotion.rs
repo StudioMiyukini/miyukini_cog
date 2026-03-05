@@ -135,12 +135,7 @@ pub fn promotion_best_for_target<'a>(
 mod tests {
     use super::*;
 
-    fn make_promo(
-        discount_type: &str,
-        value: i64,
-        scope: &str,
-        active: bool,
-    ) -> Promotion {
+    fn make_promo(discount_type: &str, value: i64, scope: &str, active: bool) -> Promotion {
         Promotion {
             id: Some("promo-1".to_string()),
             discount_type: Some(discount_type.to_string()),

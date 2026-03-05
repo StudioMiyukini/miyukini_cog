@@ -100,19 +100,12 @@ impl SyncManifest {
     /// - `to_upload` : fichiers presents localement mais pas chez le pair,
     ///   ou fichiers plus recents localement (clock local > clock distant).
     /// - `conflicts` : fichiers avec des horloges concurrentes.
-    pub fn compute_diff(
-        local: &[ManifestEntry],
-        remote: &[ManifestEntry],
-    ) -> SyncDiff {
-        let local_map: HashMap<&str, &ManifestEntry> = local
-            .iter()
-            .map(|e| (e.file_id.as_str(), e))
-            .collect();
+    pub fn compute_diff(local: &[ManifestEntry], remote: &[ManifestEntry]) -> SyncDiff {
+        let local_map: HashMap<&str, &ManifestEntry> =
+            local.iter().map(|e| (e.file_id.as_str(), e)).collect();
 
-        let remote_map: HashMap<&str, &ManifestEntry> = remote
-            .iter()
-            .map(|e| (e.file_id.as_str(), e))
-            .collect();
+        let remote_map: HashMap<&str, &ManifestEntry> =
+            remote.iter().map(|e| (e.file_id.as_str(), e)).collect();
 
         let mut diff = SyncDiff::default();
 
@@ -216,8 +209,16 @@ mod tests {
     fn test_compute_diff_new_files() {
         let local: Vec<ManifestEntry> = vec![];
         let remote = vec![
-            make_entry("file-1", "abc", VectorClock::from_entries(vec![("node-b".into(), 1)])),
-            make_entry("file-2", "def", VectorClock::from_entries(vec![("node-b".into(), 1)])),
+            make_entry(
+                "file-1",
+                "abc",
+                VectorClock::from_entries(vec![("node-b".into(), 1)]),
+            ),
+            make_entry(
+                "file-2",
+                "def",
+                VectorClock::from_entries(vec![("node-b".into(), 1)]),
+            ),
         ];
 
         let diff = SyncManifest::compute_diff(&local, &remote);
@@ -228,9 +229,11 @@ mod tests {
 
     #[test]
     fn test_compute_diff_local_only_files() {
-        let local = vec![
-            make_entry("file-1", "abc", VectorClock::from_entries(vec![("node-a".into(), 1)])),
-        ];
+        let local = vec![make_entry(
+            "file-1",
+            "abc",
+            VectorClock::from_entries(vec![("node-a".into(), 1)]),
+        )];
         let remote: Vec<ManifestEntry> = vec![];
 
         let diff = SyncManifest::compute_diff(&local, &remote);
@@ -242,12 +245,16 @@ mod tests {
     #[test]
     fn test_compute_diff_updated_files() {
         // Local clock is older than remote -> download
-        let local = vec![
-            make_entry("file-1", "abc", VectorClock::from_entries(vec![("node-a".into(), 1)])),
-        ];
-        let remote = vec![
-            make_entry("file-1", "def", VectorClock::from_entries(vec![("node-a".into(), 2)])),
-        ];
+        let local = vec![make_entry(
+            "file-1",
+            "abc",
+            VectorClock::from_entries(vec![("node-a".into(), 1)]),
+        )];
+        let remote = vec![make_entry(
+            "file-1",
+            "def",
+            VectorClock::from_entries(vec![("node-a".into(), 2)]),
+        )];
 
         let diff = SyncManifest::compute_diff(&local, &remote);
         assert_eq!(diff.to_download.len(), 1);
@@ -258,12 +265,16 @@ mod tests {
     #[test]
     fn test_compute_diff_local_newer() {
         // Local clock is newer -> upload
-        let local = vec![
-            make_entry("file-1", "xyz", VectorClock::from_entries(vec![("node-a".into(), 5)])),
-        ];
-        let remote = vec![
-            make_entry("file-1", "abc", VectorClock::from_entries(vec![("node-a".into(), 2)])),
-        ];
+        let local = vec![make_entry(
+            "file-1",
+            "xyz",
+            VectorClock::from_entries(vec![("node-a".into(), 5)]),
+        )];
+        let remote = vec![make_entry(
+            "file-1",
+            "abc",
+            VectorClock::from_entries(vec![("node-a".into(), 2)]),
+        )];
 
         let diff = SyncManifest::compute_diff(&local, &remote);
         assert_eq!(diff.to_download.len(), 0);
@@ -286,20 +297,16 @@ mod tests {
     #[test]
     fn test_compute_diff_conflicts() {
         // Concurrent clocks -> conflict
-        let local = vec![
-            make_entry(
-                "file-1",
-                "abc",
-                VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]),
-            ),
-        ];
-        let remote = vec![
-            make_entry(
-                "file-1",
-                "def",
-                VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 2)]),
-            ),
-        ];
+        let local = vec![make_entry(
+            "file-1",
+            "abc",
+            VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]),
+        )];
+        let remote = vec![make_entry(
+            "file-1",
+            "def",
+            VectorClock::from_entries(vec![("node-a".into(), 1), ("node-b".into(), 2)]),
+        )];
 
         let diff = SyncManifest::compute_diff(&local, &remote);
         assert_eq!(diff.to_download.len(), 0);
@@ -312,9 +319,17 @@ mod tests {
     fn test_compute_diff_mixed() {
         let local = vec![
             // Only local
-            make_entry("file-local", "aaa", VectorClock::from_entries(vec![("node-a".into(), 1)])),
+            make_entry(
+                "file-local",
+                "aaa",
+                VectorClock::from_entries(vec![("node-a".into(), 1)]),
+            ),
             // Same on both
-            make_entry("file-same", "bbb", VectorClock::from_entries(vec![("node-a".into(), 2)])),
+            make_entry(
+                "file-same",
+                "bbb",
+                VectorClock::from_entries(vec![("node-a".into(), 2)]),
+            ),
             // Conflict
             make_entry(
                 "file-conflict",
@@ -324,9 +339,17 @@ mod tests {
         ];
         let remote = vec![
             // Only remote
-            make_entry("file-remote", "ddd", VectorClock::from_entries(vec![("node-b".into(), 1)])),
+            make_entry(
+                "file-remote",
+                "ddd",
+                VectorClock::from_entries(vec![("node-b".into(), 1)]),
+            ),
             // Same on both
-            make_entry("file-same", "bbb", VectorClock::from_entries(vec![("node-a".into(), 2)])),
+            make_entry(
+                "file-same",
+                "bbb",
+                VectorClock::from_entries(vec![("node-a".into(), 2)]),
+            ),
             // Conflict
             make_entry(
                 "file-conflict",

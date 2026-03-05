@@ -101,10 +101,7 @@ fn sync_appointments_from_store_creates_reflections() {
 
     let entries = db.entries_by_agenda(&agenda_id).expect("entries_by_agenda");
     assert_eq!(entries.len(), 2);
-    let titles: Vec<String> = entries
-        .iter()
-        .filter_map(|e| e.title.clone())
-        .collect();
+    let titles: Vec<String> = entries.iter().filter_map(|e| e.title.clone()).collect();
     assert!(titles.contains(&"RDV Test Alpha".to_string()));
     assert!(titles.contains(&"RDV Test Beta".to_string()));
     let source_ids: Vec<String> = entries

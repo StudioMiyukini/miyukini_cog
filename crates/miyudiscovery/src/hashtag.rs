@@ -23,10 +23,7 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<HashtagItem>, MiyudiscoveryErro
 /// @human: Récupère un hashtag et ses posts.
 /// @do: hashtag_get_under_governance
 /// tool.social.hashtag.get
-pub fn get(
-    ctx: &GovernedContext,
-    hashtag: &str,
-) -> Result<HashtagDetail, MiyudiscoveryError> {
+pub fn get(ctx: &GovernedContext, hashtag: &str) -> Result<HashtagDetail, MiyudiscoveryError> {
     if !ctx.has_mandate() {
         return Err(MiyudiscoveryError::NoMandate);
     }

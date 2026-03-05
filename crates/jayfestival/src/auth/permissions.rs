@@ -35,7 +35,7 @@ pub fn auth_user_type_from_profile(profile: &Profile) -> UserType {
 /// @id: auth_can_access_edition
 /// @do: indique si l'utilisateur peut accéder à une édition (admin, manager de l'édition, ou RLS exposant).
 /// @layer: domain
-#[must_use] 
+#[must_use]
 pub fn auth_can_access_edition(
     profile: &Profile,
     _edition_id: &str,

@@ -164,7 +164,9 @@ impl RateLimiter {
     /// Vérifie si un message est autorisé pour cette session.
     pub async fn check_message(&self, session_id: &[u8; 16]) -> RateLimitResult {
         let mut counters = self.session_counters.write().await;
-        let entry = counters.entry(*session_id).or_insert_with(SessionEntry::new);
+        let entry = counters
+            .entry(*session_id)
+            .or_insert_with(SessionEntry::new);
 
         // Réinitialiser la fenêtre si expirée
         if entry.window_start.elapsed() > Duration::from_secs(self.config.window_seconds) {

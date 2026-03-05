@@ -189,7 +189,10 @@ mod tests {
         let events = reader_xp_for_page_read(true, true, true);
         assert_eq!(events.len(), 4);
         let total: i64 = events.iter().map(|e| e.xp_gained).sum();
-        assert_eq!(total, XP_PER_PAGE + XP_CHAPTER_BONUS + XP_WORK_BONUS + XP_DAILY_BONUS);
+        assert_eq!(
+            total,
+            XP_PER_PAGE + XP_CHAPTER_BONUS + XP_WORK_BONUS + XP_DAILY_BONUS
+        );
     }
 
     #[test]

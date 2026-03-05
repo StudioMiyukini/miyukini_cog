@@ -2,10 +2,10 @@
 
 //! Loading screen layout template.
 
-use egui::Context;
-use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 use crate::atoms::progress_bar::{D2ProgressBar, ProgressBarVariant};
 use crate::convert::rgba_to_color32;
+use egui::Context;
+use miyuki_ui_tokens::palette::d2::D2_PALETTE;
 
 /// The loading screen layout template.
 pub struct LoadingLayout;

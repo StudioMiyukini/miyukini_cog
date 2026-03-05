@@ -75,24 +75,14 @@ pub fn Text(
             p.text_secondary.to_css(),
             "h6",
         ),
-        TextVariant::Body => (
-            t.body.px,
-            FontWeight::Regular,
-            p.text_primary.to_css(),
-            "p",
-        ),
+        TextVariant::Body => (t.body.px, FontWeight::Regular, p.text_primary.to_css(), "p"),
         TextVariant::Caption => (
             t.sm.px,
             FontWeight::Regular,
             p.text_secondary.to_css(),
             "span",
         ),
-        TextVariant::Overline => (
-            t.xs.px,
-            FontWeight::Medium,
-            p.text_muted.to_css(),
-            "span",
-        ),
+        TextVariant::Overline => (t.xs.px, FontWeight::Medium, p.text_muted.to_css(), "span"),
         TextVariant::Code => (
             t.sm.px,
             FontWeight::Regular,

@@ -1,0 +1,50 @@
+{
+  "project": {
+    "title": "Audit complet Miyukini COG — Inventaire, modularisation, MSCM, conformité",
+    "description": "Audit T5 COG hors MGE : inventaire standard MIP, fichiers monolithiques, indexation MSCM, remise en conformité, réorganisation environnement",
+    "class": "T5",
+    "slug": "central-improve-secure-update",
+    "mip_sequence_number": 1,
+    "autonomy_mode": "FULL"
+  },
+  "timestamps": {
+    "sequence_start": "2026-03-04T21:30:00Z",
+    "p0_start": "2026-03-04T21:30:00Z",
+    "p0_end": "2026-03-04T21:45:00Z",
+    "autopilot_start": null,
+    "p3_start": "2026-03-04T21:50:00Z", "p3_end": "2026-03-04T22:10:00Z",
+    "p4_start": null, "p4_end": null,
+    "p5_start": null, "p5_end": null,
+    "p5_test_start": null, "p5_test_end": null,
+    "p6_start": null, "p6_end": null,
+    "total_end": null
+  },
+  "counters": {
+    "lines_written": 0,
+    "lines_deleted": 0,
+    "packages_touched": [],
+    "packages_created": [],
+    "files_created": 8,
+    "files_modified": 2,
+    "commits": 0,
+    "agents_engaged": ["maria", "denis", "francois", "george", "arianne", "hugo"],
+    "mip_loops": 1,
+    "unit_tests_total": 0,
+    "unit_tests_failed": 0,
+    "integration_tests_total": 0,
+    "integration_tests_failed": 0,
+    "global_tests_total": 0,
+    "global_tests_failed": 0,
+    "auto_corrections": 0,
+    "audits": 2,
+    "audit_defects": [],
+    "security_score": null,
+    "security_defects": [],
+    "infra_checks_passed": null,
+    "emergency_brakes": 0
+  },
+  "human_interventions": [{"type": "phase_skip", "detail": "P5 skipped, go P6", "timestamp": "2026-03-04T22:15:00Z"}],
+  "agent_questions": [],
+  "satisfaction": null,
+  "notes": null
+}

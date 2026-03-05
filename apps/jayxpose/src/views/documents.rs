@@ -1,9 +1,9 @@
 //! Coffre-fort documentaire (XP-E09 + XP-E10) — liste, upload, partages.
 
+use super::components::{Badge, DocumentRow, EmptyState, FormSection};
+use super::JayXposeState;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{DocumentRow, EmptyState, FormSection, Badge};
-use super::JayXposeState;
 
 /// Sous-vue active dans Documents.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -27,14 +27,23 @@ pub fn Documents(state: Signal<JayXposeState>) -> Element {
     let partage_len = partages.len();
 
     // Alertes expiration
-    let expiring = documents.iter().filter(|d| {
-        d.status.as_deref() == Some("valide") && d.expires_at.is_some()
-    }).count();
+    let expiring = documents
+        .iter()
+        .filter(|d| d.status.as_deref() == Some("valide") && d.expires_at.is_some())
+        .count();
 
     // Pre-calcul styles conditionnels
     let is_partages_view = *view.read() == DocView::Partages;
-    let partage_btn_bg = if is_partages_view { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let partage_btn_color = if is_partages_view { "white".to_string() } else { c.text_secondary.to_string() };
+    let partage_btn_bg = if is_partages_view {
+        c.accent_blue.to_string()
+    } else {
+        c.bg_hover.to_string()
+    };
+    let partage_btn_color = if is_partages_view {
+        "white".to_string()
+    } else {
+        c.text_secondary.to_string()
+    };
 
     rsx! {
         div {
@@ -151,10 +160,7 @@ fn DocumentsList(
 
 /// Upload document (XP-E10).
 #[component]
-fn UploadDocument(
-    exposant_id: String,
-    on_done: EventHandler<()>,
-) -> Element {
+fn UploadDocument(exposant_id: String, on_done: EventHandler<()>) -> Element {
     let c = use_palette();
     let db = crate::use_db();
 
@@ -169,7 +175,11 @@ fn UploadDocument(
     let db_save = db.clone();
     let on_save = move |_| {
         let dt = doc_type.read().clone();
-        let label = if dt == "autre" { custom_label.read().clone() } else { dt.clone() };
+        let label = if dt == "autre" {
+            custom_label.read().clone()
+        } else {
+            dt.clone()
+        };
         let fname = file_name.read().trim().to_string();
 
         if fname.is_empty() {
@@ -293,10 +303,7 @@ fn UploadDocument(
 
 /// Liste des partages actifs.
 #[component]
-fn PartagesList(
-    exposant_id: String,
-    partages: Vec<jayxpose::data::DocumentPartage>,
-) -> Element {
+fn PartagesList(exposant_id: String, partages: Vec<jayxpose::data::DocumentPartage>) -> Element {
     let c = use_palette();
     let db = crate::use_db();
 

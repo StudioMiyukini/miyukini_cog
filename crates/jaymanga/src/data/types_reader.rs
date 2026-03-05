@@ -19,12 +19,12 @@ pub struct ReaderFavorite {
     pub work_id: Option<String>,
     pub cached_title: Option<String>,
     pub cached_cover_url: Option<String>,
-    pub cached_authors: Option<String>,       // JSON sérialisé
+    pub cached_authors: Option<String>, // JSON sérialisé
     pub cached_format: Option<String>,
-    pub purchase_status: Option<String>,      // PurchaseStatus as_str
+    pub purchase_status: Option<String>, // PurchaseStatus as_str
     pub last_read_chapter: Option<i32>,
     pub last_read_page: Option<i32>,
-    pub reading_progress: Option<f64>,        // 0.0 à 1.0
+    pub reading_progress: Option<f64>, // 0.0 à 1.0
     #[serde(default)]
     pub added_at: Option<String>,
     #[serde(default)]
@@ -70,7 +70,7 @@ impl PurchaseStatus {
 pub struct ReaderProgression {
     pub id: Option<String>,
     pub total_xp: Option<i64>,
-    pub current_level: Option<i32>,           // 1-8
+    pub current_level: Option<i32>, // 1-8
     pub current_streak: Option<i32>,
     pub longest_streak: Option<i32>,
     pub streak_shield_available: Option<bool>,
@@ -78,10 +78,10 @@ pub struct ReaderProgression {
     pub total_pages_read: Option<i64>,
     pub total_works_completed: Option<i32>,
     pub total_chapters_completed: Option<i32>,
-    pub genres_explored: Option<String>,      // JSON Vec<String>
-    pub formats_explored: Option<String>,     // JSON Vec<String>
-    pub cogs_visited: Option<String>,         // JSON Vec<String>
-    pub languages_read: Option<String>,       // JSON Vec<String>
+    pub genres_explored: Option<String>,  // JSON Vec<String>
+    pub formats_explored: Option<String>, // JSON Vec<String>
+    pub cogs_visited: Option<String>,     // JSON Vec<String>
+    pub languages_read: Option<String>,   // JSON Vec<String>
     pub onboarding_completed: Option<bool>,
     #[serde(default)]
     pub created_at: Option<String>,
@@ -98,9 +98,9 @@ pub struct ReaderProgression {
 #[serde(rename_all = "snake_case")]
 pub struct ReaderBadge {
     pub id: Option<String>,
-    pub badge_id: Option<String>,             // ex: "first_page", "centurion"
+    pub badge_id: Option<String>, // ex: "first_page", "centurion"
     pub badge_name: Option<String>,
-    pub badge_category: Option<String>,       // BadgeCategory as_str
+    pub badge_category: Option<String>, // BadgeCategory as_str
     #[serde(default)]
     pub earned_at: Option<String>,
 }
@@ -143,14 +143,22 @@ mod tests {
 
     #[test]
     fn test_purchase_status_roundtrip() {
-        for s in [PurchaseStatus::Demo, PurchaseStatus::Purchased, PurchaseStatus::Downloaded] {
+        for s in [
+            PurchaseStatus::Demo,
+            PurchaseStatus::Purchased,
+            PurchaseStatus::Downloaded,
+        ] {
             assert_eq!(PurchaseStatus::from_str(s.as_str()), s);
         }
     }
 
     #[test]
     fn test_badge_category_roundtrip() {
-        for c in [BadgeCategory::Reading, BadgeCategory::Regularity, BadgeCategory::Exploration] {
+        for c in [
+            BadgeCategory::Reading,
+            BadgeCategory::Regularity,
+            BadgeCategory::Exploration,
+        ] {
             assert_eq!(BadgeCategory::from_str(c.as_str()), c);
         }
     }

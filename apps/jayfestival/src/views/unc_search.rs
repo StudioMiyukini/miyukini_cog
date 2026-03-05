@@ -2,10 +2,10 @@
 //!
 //! Recherche sur evenements, organisateurs et exposants.
 
+use super::components::{format_date_range, Badge};
+use super::{JayFestivalState, UncSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{UncSection, JayFestivalState};
-use super::components::{Badge, format_date_range};
 
 fn opt_str(s: &Option<String>) -> String {
     s.clone().unwrap_or_default()
@@ -260,8 +260,16 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
 #[component]
 fn SearchTabButton(label: String, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
     let c = use_palette();
-    let color = if is_active { c.text_white } else { c.text_muted };
-    let border = if is_active { c.accent_blue } else { "transparent" };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_muted
+    };
+    let border = if is_active {
+        c.accent_blue
+    } else {
+        "transparent"
+    };
 
     rsx! {
         button {

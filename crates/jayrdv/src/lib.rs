@@ -19,7 +19,7 @@ pub use data::{
     Resource, Schedule, ScheduleOwner, Service, Slot, SlotStatus,
 };
 pub use domain::{
-    appointment_cancel, appointment_create, appointment_set_status, client_create, exception_create,
-    practitioner_create, professional_create, reminder_create, resource_create, schedule_create,
-    service_create, slot_create, slot_hold, slot_release, slot_release_expired,
+    appointment_cancel, appointment_create, appointment_set_status, client_create,
+    exception_create, practitioner_create, professional_create, reminder_create, resource_create,
+    schedule_create, service_create, slot_create, slot_hold, slot_release, slot_release_expired,
 };

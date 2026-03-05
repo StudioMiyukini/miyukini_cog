@@ -8,12 +8,12 @@ use std::path::Path;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tracing::{info, warn, error, debug, instrument};
+use tracing::{debug, error, info, instrument, warn};
 
 use crate::arbitration::ArbitrationEngine;
 use crate::database::EncryptedDatabase;
 use crate::errors::ServiceError;
-use crate::protocol::{Request, Response, Operation};
+use crate::protocol::{Operation, Request, Response};
 
 /// Serveur KindMother - point d'entrée unique pour la persistance.
 pub struct KindMotherServer {
@@ -136,7 +136,10 @@ impl KindMotherServer {
                 database,
                 sql,
                 params,
-            } => self.handle_query(&operator_id, &database, &sql, params).await,
+            } => {
+                self.handle_query(&operator_id, &database, &sql, params)
+                    .await
+            }
 
             Request::Execute {
                 operator_id,
@@ -159,7 +162,9 @@ impl KindMotherServer {
                     .await
             }
 
-            Request::HealthCheck { database } => self.handle_health_check(database.as_deref()).await,
+            Request::HealthCheck { database } => {
+                self.handle_health_check(database.as_deref()).await
+            }
 
             Request::DatabaseInfo {
                 operator_id,

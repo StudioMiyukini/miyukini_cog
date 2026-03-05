@@ -491,7 +491,14 @@ mod tests {
             "RDV test".into(),
             "2026-03-01T10:00:00+00:00".into(),
             "2026-03-01T11:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
         .unwrap();
         assert_eq!(a.status, AppointmentStatus::Pending);
@@ -508,7 +515,14 @@ mod tests {
             "Bad".into(),
             "2026-03-01T12:00:00+00:00".into(),
             "2026-03-01T10:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         );
         assert!(r.is_err());
     }
@@ -549,7 +563,14 @@ mod tests {
             "RDV".into(),
             "2026-03-01T10:00:00+00:00".into(),
             "2026-03-01T11:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
         .unwrap();
         let a2 = appointment_set_status(&store, &a.id, AppointmentStatus::Confirmed).unwrap();
@@ -564,7 +585,14 @@ mod tests {
             "RDV".into(),
             "2026-03-01T10:00:00+00:00".into(),
             "2026-03-01T11:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
         .unwrap();
         let r = appointment_set_status(&store, &a.id, AppointmentStatus::Cancelled);
@@ -581,12 +609,18 @@ mod tests {
             "RDV".into(),
             "2026-03-01T10:00:00+00:00".into(),
             "2026-03-01T11:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
         .unwrap();
         let cancelled =
-            appointment_cancel(&store, &a.id, CancelledBy::Client, Some("Empêché".into()))
-                .unwrap();
+            appointment_cancel(&store, &a.id, CancelledBy::Client, Some("Empêché".into())).unwrap();
         assert_eq!(cancelled.status, AppointmentStatus::Cancelled);
         assert_eq!(cancelled.cancelled_by, Some(CancelledBy::Client));
         assert_eq!(cancelled.cancellation_reason.as_deref(), Some("Empêché"));
@@ -600,7 +634,14 @@ mod tests {
             "RDV".into(),
             "2026-03-01T10:00:00+00:00".into(),
             "2026-03-01T11:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
         .unwrap();
         appointment_cancel(&store, &a.id, CancelledBy::Professional, None).unwrap();
@@ -749,7 +790,9 @@ mod tests {
         )
         .unwrap();
         assert_eq!(e.reason.as_deref(), Some("Congés"));
-        let list = store.exception_list(Some("pro-1"), Some("2026-08-01"), Some("2026-08-31")).unwrap();
+        let list = store
+            .exception_list(Some("pro-1"), Some("2026-08-01"), Some("2026-08-31"))
+            .unwrap();
         assert_eq!(list.len(), 1);
     }
 
@@ -814,7 +857,14 @@ mod tests {
             "RDV rappel".into(),
             "2026-03-01T10:00:00+00:00".into(),
             "2026-03-01T11:00:00+00:00".into(),
-            None, None, None, None, None, None, None, None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         )
         .unwrap();
         let r = reminder_create(
@@ -838,35 +888,61 @@ mod tests {
     fn full_booking_cycle() {
         let store = make_store();
 
-        let svc = service_create(&store, "Massage 60min".into(), None, 60, Some(80.0), None).unwrap();
+        let svc =
+            service_create(&store, "Massage 60min".into(), None, 60, Some(80.0), None).unwrap();
         let res = resource_create(&store, "Sophie".into(), Some("person".into())).unwrap();
-        let client = client_create(&store, "Charlie".into(), Some("c@test.com".into()), "+33611111111".into(), None).unwrap();
+        let client = client_create(
+            &store,
+            "Charlie".into(),
+            Some("c@test.com".into()),
+            "+33611111111".into(),
+            None,
+        )
+        .unwrap();
 
         let slot = slot_create(
-            &store, res.id.clone(), Some(svc.id.clone()),
-            "2026-04-01T14:00:00+00:00".into(), "2026-04-01T15:00:00+00:00".into(),
-        ).unwrap();
+            &store,
+            res.id.clone(),
+            Some(svc.id.clone()),
+            "2026-04-01T14:00:00+00:00".into(),
+            "2026-04-01T15:00:00+00:00".into(),
+        )
+        .unwrap();
 
         let held = slot_hold(&store, &slot.id, "web-session-42", 300).unwrap();
         assert_eq!(held.status, SlotStatus::Held);
 
         let appt = appointment_create(
-            &store, "Massage 60min — Charlie".into(),
-            "2026-04-01T14:00:00+00:00".into(), "2026-04-01T15:00:00+00:00".into(),
-            Some(res.id.clone()), Some(slot.id.clone()), Some(svc.id.clone()),
-            Some("c@test.com".into()), Some("Charlie".into()), Some("+33611111111".into()),
-            None, None,
-        ).unwrap();
+            &store,
+            "Massage 60min — Charlie".into(),
+            "2026-04-01T14:00:00+00:00".into(),
+            "2026-04-01T15:00:00+00:00".into(),
+            Some(res.id.clone()),
+            Some(slot.id.clone()),
+            Some(svc.id.clone()),
+            Some("c@test.com".into()),
+            Some("Charlie".into()),
+            Some("+33611111111".into()),
+            None,
+            None,
+        )
+        .unwrap();
 
-        let confirmed = appointment_set_status(&store, &appt.id, AppointmentStatus::Confirmed).unwrap();
+        let confirmed =
+            appointment_set_status(&store, &appt.id, AppointmentStatus::Confirmed).unwrap();
         assert_eq!(confirmed.status, AppointmentStatus::Confirmed);
         store.client_increment_appointments(&client.id).unwrap();
 
         let _reminder = reminder_create(
-            &store, appt.id.clone(), ReminderChannel::Sms, "2026-03-31T14:00:00+00:00".into(),
-        ).unwrap();
+            &store,
+            appt.id.clone(),
+            ReminderChannel::Sms,
+            "2026-03-31T14:00:00+00:00".into(),
+        )
+        .unwrap();
 
-        let completed = appointment_set_status(&store, &appt.id, AppointmentStatus::Completed).unwrap();
+        let completed =
+            appointment_set_status(&store, &appt.id, AppointmentStatus::Completed).unwrap();
         assert_eq!(completed.status, AppointmentStatus::Completed);
 
         let c_final = store.client_by_id(&client.id).unwrap().unwrap();

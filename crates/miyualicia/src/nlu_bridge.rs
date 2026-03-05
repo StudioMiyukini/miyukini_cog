@@ -42,12 +42,20 @@ pub enum NluError {
 /// Configuration du bridge NLU.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NluBridgeConfig {
-    /// URL de base du bridge. Defaut : "http://127.0.0.1:3003".
-    pub base_url: String,
+    /// URL de base du service STT. Defaut : "http://127.0.0.1:3003".
+    pub stt_base_url: String,
+    /// URL de base du service NLU. Defaut : "http://127.0.0.1:3003".
+    pub nlu_base_url: String,
+    /// URL de base du service TTS. Defaut : "http://127.0.0.1:3004".
+    pub tts_base_url: String,
     /// Timeout STT en millisecondes. Defaut : 5000.
     pub stt_timeout_ms: u64,
     /// Timeout NLU en millisecondes. Defaut : 3000.
     pub nlu_timeout_ms: u64,
+    /// Timeout TTS en millisecondes. Defaut : 4000.
+    pub tts_timeout_ms: u64,
+    /// Active le client TTS Alicia.
+    pub tts_enabled: bool,
     /// Pieces configurees (pour le contexte NLU).
     pub known_rooms: Vec<String>,
     /// Routines connues (pour le contexte NLU).
@@ -57,9 +65,13 @@ pub struct NluBridgeConfig {
 impl Default for NluBridgeConfig {
     fn default() -> Self {
         Self {
-            base_url: "http://127.0.0.1:3003".to_string(),
+            stt_base_url: "http://127.0.0.1:3003".to_string(),
+            nlu_base_url: "http://127.0.0.1:3003".to_string(),
+            tts_base_url: "http://127.0.0.1:3004".to_string(),
             stt_timeout_ms: 5000,
             nlu_timeout_ms: 3000,
+            tts_timeout_ms: 4000,
+            tts_enabled: false,
             known_rooms: vec![
                 "salon".to_string(),
                 "chambre-parentale".to_string(),
@@ -78,6 +90,7 @@ struct SttRequest<'a> {
     sample_rate: u32,
     model: &'static str,
     language: &'static str,
+    languages_hint: [&'static str; 2],
 }
 
 /// Reponse STT du bridge.
@@ -98,6 +111,16 @@ struct NluRequest<'a> {
     rooms: &'a [String],
     device_types: Vec<&'static str>,
     known_routines: &'a [String],
+}
+
+/// Requete TTS vers MiyuTTS.
+#[derive(Debug, Serialize)]
+struct TtsRequest<'a> {
+    text: &'a str,
+    voice: &'a str,
+    format: &'static str,
+    language: &'a str,
+    sample_rate: u32,
 }
 
 /// Reponse NLU du bridge.
@@ -135,7 +158,7 @@ impl NluBridge {
     /// Retourne `NluError::BridgeUnavailable` si le bridge est indisponible.
     /// Le fallback regex ne s'applique pas a la transcription audio.
     pub async fn transcribe(&self, samples: &[f32]) -> Result<String, NluError> {
-        let url = format!("{}/api/stt", self.config.base_url);
+        let url = format!("{}/api/stt", self.config.stt_base_url);
         let request_id = uuid::Uuid::new_v4().to_string();
 
         let body = SttRequest {
@@ -143,6 +166,7 @@ impl NluBridge {
             sample_rate: 16000,
             model: "whisper-local",
             language: "fr",
+            languages_hint: ["fr", "en"],
         };
 
         let timeout = Duration::from_millis(self.config.stt_timeout_ms);
@@ -174,9 +198,10 @@ impl NluBridge {
             return Err(NluError::HttpError(format!("HTTP {status}")));
         }
 
-        let stt_response: SttResponse = response.json().await.map_err(|e| {
-            NluError::InvalidResponse(format!("erreur parsing reponse STT : {e}"))
-        })?;
+        let stt_response: SttResponse = response
+            .json()
+            .await
+            .map_err(|e| NluError::InvalidResponse(format!("erreur parsing reponse STT : {e}")))?;
 
         Ok(stt_response.transcript)
     }
@@ -186,21 +211,14 @@ impl NluBridge {
     /// Si le bridge est indisponible, active le `FallbackNluParser` (regex).
     /// Retourne toujours un `Intent`, jamais d'erreur.
     pub async fn parse_intent(&self, transcript: &str) -> Intent {
-        let url = format!("{}/api/nlu", self.config.base_url);
+        let url = format!("{}/api/nlu", self.config.nlu_base_url);
         let request_id = uuid::Uuid::new_v4().to_string();
 
         let body = NluRequest {
             text: transcript,
             context: "home_automation",
             rooms: &self.config.known_rooms,
-            device_types: vec![
-                "light",
-                "shutter",
-                "thermostat",
-                "outlet",
-                "sensor",
-                "lock",
-            ],
+            device_types: vec!["light", "shutter", "thermostat", "outlet", "sensor", "lock"],
             known_routines: &self.config.known_routines,
         };
 
@@ -221,9 +239,7 @@ impl NluBridge {
                 match response.json::<BridgeNluResponse>().await {
                     Ok(nlu_response) => parse_bridge_response(&nlu_response, transcript),
                     Err(e) => {
-                        tracing::warn!(
-                            "Reponse NLU invalide, fallback regex active : {e}"
-                        );
+                        tracing::warn!("Reponse NLU invalide, fallback regex active : {e}");
                         self.fallback.parse(transcript)
                     }
                 }
@@ -244,7 +260,80 @@ impl NluBridge {
 
     /// Verifie si le bridge est joignable (health check).
     pub async fn is_available(&self) -> bool {
-        let url = format!("{}/api/health", self.config.base_url);
+        let url = format!("{}/api/health", self.config.nlu_base_url);
+        let timeout = Duration::from_millis(1000);
+
+        match self.client.get(&url).timeout(timeout).send().await {
+            Ok(response) => response.status().is_success(),
+            Err(_) => false,
+        }
+    }
+
+    /// Synthetise une reponse vocale via MiyuTTS.
+    pub async fn synthesize_tts(&self, text: &str, language: &str) -> Result<Vec<u8>, NluError> {
+        if !self.config.tts_enabled {
+            return Err(NluError::HttpError(
+                "client TTS Alicia desactive (tts_enabled=false)".to_string(),
+            ));
+        }
+        if text.trim().is_empty() {
+            return Err(NluError::InvalidResponse(
+                "texte TTS vide pour synthese".to_string(),
+            ));
+        }
+
+        let url = format!("{}/api/tts/wav", self.config.tts_base_url);
+        let request_id = uuid::Uuid::new_v4().to_string();
+        let voice = if language == "en" {
+            "en_female_01_compact"
+        } else {
+            "fr_female_01_compact"
+        };
+        let body = TtsRequest {
+            text,
+            voice,
+            format: "wav",
+            language,
+            sample_rate: 22050,
+        };
+        let timeout = Duration::from_millis(self.config.tts_timeout_ms);
+
+        let response = self
+            .client
+            .post(&url)
+            .header("X-Request-ID", &request_id)
+            .header("X-Source", "alicia-home")
+            .timeout(timeout)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| {
+                if e.is_timeout() {
+                    NluError::BridgeTimeout {
+                        timeout_ms: self.config.tts_timeout_ms,
+                    }
+                } else {
+                    NluError::BridgeUnavailable
+                }
+            })?;
+
+        if !response.status().is_success() {
+            return Err(NluError::HttpError(format!("HTTP {}", response.status())));
+        }
+
+        response
+            .bytes()
+            .await
+            .map(|b| b.to_vec())
+            .map_err(|e| NluError::InvalidResponse(format!("erreur parsing reponse TTS : {e}")))
+    }
+
+    /// Verifie si le service TTS est joignable.
+    pub async fn is_tts_available(&self) -> bool {
+        if !self.config.tts_enabled {
+            return false;
+        }
+        let url = format!("{}/api/health", self.config.tts_base_url);
         let timeout = Duration::from_millis(1000);
 
         match self.client.get(&url).timeout(timeout).send().await {
@@ -326,6 +415,18 @@ fn parse_bridge_response(response: &BridgeNluResponse, transcript: &str) -> Inte
 #[cfg(test)]
 mod tests {
     use super::*;
+    use axum::Router;
+
+    async fn spawn_router(router: Router) -> String {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("bind ephemeral port");
+        let addr = listener.local_addr().expect("local addr");
+        tokio::spawn(async move {
+            let _ = axum::serve(listener, router).await;
+        });
+        format!("http://{addr}")
+    }
 
     #[test]
     fn test_parse_bridge_response_control_device() {
@@ -334,10 +435,7 @@ mod tests {
             confidence: 0.97,
             slots: {
                 let mut m = HashMap::new();
-                m.insert(
-                    "device_type".to_string(),
-                    serde_json::json!("light"),
-                );
+                m.insert("device_type".to_string(), serde_json::json!("light"));
                 m.insert("room_id".to_string(), serde_json::json!("salon"));
                 m.insert("action".to_string(), serde_json::json!("on"));
                 m
@@ -366,10 +464,7 @@ mod tests {
             confidence: 0.99,
             slots: {
                 let mut m = HashMap::new();
-                m.insert(
-                    "routine_name".to_string(),
-                    serde_json::json!("bonne nuit"),
-                );
+                m.insert("routine_name".to_string(), serde_json::json!("bonne nuit"));
                 m
             },
         };
@@ -394,9 +489,13 @@ mod tests {
     #[test]
     fn test_nlu_bridge_config_default() {
         let config = NluBridgeConfig::default();
-        assert_eq!(config.base_url, "http://127.0.0.1:3003");
+        assert_eq!(config.stt_base_url, "http://127.0.0.1:3003");
+        assert_eq!(config.nlu_base_url, "http://127.0.0.1:3003");
+        assert_eq!(config.tts_base_url, "http://127.0.0.1:3004");
         assert_eq!(config.stt_timeout_ms, 5000);
         assert_eq!(config.nlu_timeout_ms, 3000);
+        assert_eq!(config.tts_timeout_ms, 4000);
+        assert!(!config.tts_enabled);
         assert_eq!(config.known_rooms.len(), 4);
         assert_eq!(config.known_routines.len(), 2);
     }
@@ -404,7 +503,7 @@ mod tests {
     #[tokio::test]
     async fn test_bridge_unavailable_parse_uses_fallback() {
         let config = NluBridgeConfig {
-            base_url: "http://127.0.0.1:1".to_string(), // port inaccessible
+            nlu_base_url: "http://127.0.0.1:1".to_string(), // port inaccessible
             stt_timeout_ms: 100,
             nlu_timeout_ms: 100,
             ..Default::default()
@@ -423,21 +522,69 @@ mod tests {
                 assert_eq!(device_type, "light");
                 assert_eq!(action, "on");
             }
-            other => panic!(
-                "attendu ControlDevice via fallback, obtenu {:?}",
-                other
-            ),
+            other => panic!("attendu ControlDevice via fallback, obtenu {:?}", other),
         }
     }
 
     #[tokio::test]
     async fn test_bridge_is_available_returns_false_when_unreachable() {
         let config = NluBridgeConfig {
-            base_url: "http://127.0.0.1:1".to_string(),
+            nlu_base_url: "http://127.0.0.1:1".to_string(),
             ..Default::default()
         };
         let client = reqwest::Client::new();
         let bridge = NluBridge::new(config, client);
         assert!(!bridge.is_available().await);
+    }
+
+    #[tokio::test]
+    async fn test_tts_disabled_returns_error() {
+        let bridge = NluBridge::new(NluBridgeConfig::default(), reqwest::Client::new());
+        let result = bridge.synthesize_tts("bonjour", "fr").await;
+        assert!(matches!(result, Err(NluError::HttpError(_))));
+    }
+
+    #[tokio::test]
+    async fn test_tts_availability_false_when_disabled() {
+        let bridge = NluBridge::new(NluBridgeConfig::default(), reqwest::Client::new());
+        assert!(!bridge.is_tts_available().await);
+    }
+
+    #[tokio::test]
+    async fn test_transcribe_contract_with_miyustt() {
+        let stt_url = spawn_router(miyustt::router()).await;
+        let config = NluBridgeConfig {
+            stt_base_url: stt_url,
+            ..Default::default()
+        };
+        let bridge = NluBridge::new(config, reqwest::Client::new());
+
+        let transcript = bridge
+            .transcribe(&[0.12, -0.08, 0.03, -0.02, 0.01])
+            .await
+            .expect("stt contract should return transcript");
+
+        assert!(!transcript.trim().is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_tts_contract_with_miyutts() {
+        let tts_url = spawn_router(miyutts::router()).await;
+        let config = NluBridgeConfig {
+            tts_base_url: tts_url,
+            tts_enabled: true,
+            ..Default::default()
+        };
+        let bridge = NluBridge::new(config, reqwest::Client::new());
+
+        assert!(bridge.is_tts_available().await);
+
+        let wav = bridge
+            .synthesize_tts("bonjour depuis alicia", "fr")
+            .await
+            .expect("tts contract should return wav bytes");
+
+        assert!(wav.len() > 44);
+        assert_eq!(&wav[0..4], b"RIFF");
     }
 }

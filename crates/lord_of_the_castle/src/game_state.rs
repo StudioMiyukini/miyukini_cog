@@ -9,20 +9,20 @@
 
 use crate::castle::Castle;
 use crate::character_creation::{CharacterStats, Stat};
+use crate::constants::{hp, speed};
 use crate::constants::{size, wave, TOWER_BASE_COST_GOLD};
 use crate::enemies::{Enemy, EnemyKind};
-use crate::troops::{Troop, TroopKind, TroopState};
-use crate::warrior_skills::{prerequisites_met, warrior_skill_def, WarriorSkillId};
-use crate::constants::{hp, speed};
 use crate::loot::{
     generate_loot, generate_merchant_pools, roll_identification_expert, roll_identification_self,
     InventoryEntry, ItemInstance, ItemSlot, LootDrop, LootKind, MerchantEntry,
 };
-use std::collections::HashMap;
 use crate::player::Player;
 use crate::secondary_player::{SecondaryPlayer, SecondaryPlayerKind, SecondaryProjectile};
 use crate::towers::{Tower, TowerProjectile};
+use crate::troops::{Troop, TroopKind, TroopState};
+use crate::warrior_skills::{prerequisites_met, warrior_skill_def, WarriorSkillId};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::time::Instant;
 
 /// Nombre maximum de slots d’inventaire.
@@ -149,11 +149,15 @@ pub struct GameState {
 
 impl GameState {
     /// Nouvel état : phase Préparation, vague 1, or 0, château au centre donné (joueur par défaut).
-    #[must_use] 
+    #[must_use]
     pub fn new(castle_center_x: f32, castle_center_y: f32) -> Self {
         let player_x = castle_center_x - 60.0;
         let player_y = castle_center_y;
-        Self::new_with_player(castle_center_x, castle_center_y, Player::new(player_x, player_y))
+        Self::new_with_player(
+            castle_center_x,
+            castle_center_y,
+            Player::new(player_x, player_y),
+        )
     }
 
     /// Nouvel état avec un joueur déjà créé (après parcours création de personnage).
@@ -223,7 +227,7 @@ impl GameState {
     }
 
     /// XP requise pour le niveau suivant : 100 + (niveau actuel).
-    #[must_use] 
+    #[must_use]
     pub fn xp_required_for_next_level(&self) -> u32 {
         100 + self.level
     }
@@ -260,7 +264,7 @@ impl GameState {
     }
 
     /// Bonus aux stats issus des compétences Guerrier (EncorePlusFort→For, Musculation→Con, Tireur→Dex).
-    #[must_use] 
+    #[must_use]
     pub fn stat_bonus_from_warrior_skills(&self) -> CharacterStats {
         use crate::warrior_skills::WarriorSkillId;
         let r = |id: WarriorSkillId| *self.warrior_skill_ranks.get(&id).unwrap_or(&0) as i32;
@@ -277,7 +281,7 @@ impl GameState {
     }
 
     /// Stats effectives = base (création + points de stat) + bonus (compétences). Utilisées dans toutes les formules.
-    #[must_use] 
+    #[must_use]
     pub fn effective_stats(&self) -> CharacterStats {
         let b = self.stat_bonus_from_warrior_skills();
         CharacterStats {
@@ -293,24 +297,27 @@ impl GameState {
     }
 
     /// PV max : formule sur stats effectives, puis bonus Pot de Wey (+15 % par niveau).
-    #[must_use] 
+    #[must_use]
     pub fn effective_hp_max(&self) -> i32 {
         let eff = self.effective_stats();
         let base_hp = (eff.con * 2 + eff.for_).max(hp::PLAYER_MIN_MAX);
-        let pot_rank = *self.warrior_skill_ranks.get(&WarriorSkillId::PotDeWey).unwrap_or(&0) as f32;
+        let pot_rank = *self
+            .warrior_skill_ranks
+            .get(&WarriorSkillId::PotDeWey)
+            .unwrap_or(&0) as f32;
         let mult = 1.0 + 0.15 * pot_rank;
         (base_hp as f32 * mult).floor() as i32
     }
 
     /// Vitesse de déplacement (px/s) : formule sur agilité effective (5 + Agi).
-    #[must_use] 
+    #[must_use]
     pub fn effective_move_speed(&self) -> f32 {
         let agi = 5 + self.effective_stats().agi.max(0);
         speed::PLAYER_BASE * speed::PLAYER_SPEED_MULTIPLIER * (1.0 + (agi as f32 / 100.0))
     }
 
     /// Nombre max de troupes (Charisme effectif).
-    #[must_use] 
+    #[must_use]
     pub fn max_troops(&self) -> usize {
         self.effective_stats().cha.max(0) as usize
     }
@@ -326,7 +333,7 @@ impl GameState {
     }
 
     /// Château occupe les cases (0,0), (1,0), (0,1), (1,1). Retourne true si on peut construire un bâtiment 2×2 dont le coin inférieur gauche est (cell_i, cell_j).
-    #[must_use] 
+    #[must_use]
     pub fn can_build_at_cell(&self, cell_i: i32, cell_j: i32) -> bool {
         // Pas de chevauchement avec le château (cases 0,0 à 1,1).
         let overlaps_castle = cell_i < 2 && cell_i + 2 > 0 && cell_j < 2 && cell_j + 2 > 0;
@@ -341,7 +348,8 @@ impl GameState {
             }
             let t_ci = ((t.x - self.castle.x) / cell_size).floor() as i32;
             let t_cj = ((t.y - self.castle.y) / cell_size).floor() as i32;
-            let overlaps = cell_i < t_ci + 2 && cell_i + 2 > t_ci && cell_j < t_cj + 2 && cell_j + 2 > t_cj;
+            let overlaps =
+                cell_i < t_ci + 2 && cell_i + 2 > t_ci && cell_j < t_cj + 2 && cell_j + 2 > t_cj;
             if overlaps {
                 return false;
             }
@@ -367,7 +375,11 @@ impl GameState {
 
     /// Recrute une troupe du type donné si la limite n'est pas atteinte. La troupe apparaît à côté du joueur, état InZone.
     pub fn recruit_troop(&mut self, kind: TroopKind) -> bool {
-        let count_active = self.troops.iter().filter(|t| t.is_active_in_squad()).count();
+        let count_active = self
+            .troops
+            .iter()
+            .filter(|t| t.is_active_in_squad())
+            .count();
         if count_active >= self.max_troops() {
             return false;
         }
@@ -460,8 +472,10 @@ impl GameState {
 
     /// Enregistre une ligne dans le log des dégâts joueur (max 50 lignes).
     pub fn record_player_damage(&mut self, damage: i32, enemy_id: u64) {
-        self.player_damage_log
-            .push(format!("Dégâts: {} (ennemi #{}), vague {}", damage, enemy_id, self.wave_number));
+        self.player_damage_log.push(format!(
+            "Dégâts: {} (ennemi #{}), vague {}",
+            damage, enemy_id, self.wave_number
+        ));
         if self.player_damage_log.len() > 50 {
             self.player_damage_log.remove(0);
         }
@@ -472,9 +486,12 @@ impl GameState {
     /// - Arme CàC : dégâts de l’arme + For/2 (min 1)
     /// - Arme à distance : dégâts de l’arme + Dex/2 (min 1)
     /// Armure totale du joueur (somme des armures effectives des pièces équipées). Réduction plate ; dégâts min subis = 1.
-    #[must_use] 
+    #[must_use]
     pub fn player_total_armor(&self) -> i32 {
-        self.equipped.values().map(super::loot::ItemInstance::effective_armor).sum()
+        self.equipped
+            .values()
+            .map(super::loot::ItemInstance::effective_armor)
+            .sum()
     }
 
     /// Applique des dégâts bruts au joueur (après armure : réduction plate, dégâts min = 1).
@@ -491,12 +508,19 @@ impl GameState {
     /// - Mains nues : For + Con/2 (min 1)
     /// - Arme CàC : dégâts de l'arme + For/2 (min 1)
     /// - Arme à distance : dégâts de l'arme + Dex/2 (min 1)
-    #[must_use] 
+    #[must_use]
     pub fn player_auto_attack_damage(&self) -> i32 {
         let eff = self.effective_stats();
         let main_hand = self.get_equipped(ItemSlot::MainHand);
-        let (weapon_dmg, is_ranged) = if let Some((d, r)) = main_hand.and_then(|w| w.effective_weapon_damage().map(|d| (d, w.is_ranged))) { (d, r) } else {
-            let baston = *self.warrior_skill_ranks.get(&WarriorSkillId::Baston).unwrap_or(&0) as i32;
+        let (weapon_dmg, is_ranged) = if let Some((d, r)) =
+            main_hand.and_then(|w| w.effective_weapon_damage().map(|d| (d, w.is_ranged)))
+        {
+            (d, r)
+        } else {
+            let baston = *self
+                .warrior_skill_ranks
+                .get(&WarriorSkillId::Baston)
+                .unwrap_or(&0) as i32;
             let for_unarmed = eff.for_ + baston;
             return (for_unarmed + eff.con / 2).max(1);
         };
@@ -508,7 +532,7 @@ impl GameState {
     }
 
     /// Constitution du joueur (pour PV ennemis) : 10 + Con effectif.
-    #[must_use] 
+    #[must_use]
     pub fn player_constitution(&self) -> i32 {
         (10 + self.effective_stats().con).max(1)
     }
@@ -522,7 +546,8 @@ impl GameState {
         self.player.x = self.castle.x;
         self.player.y = self.castle.y + 30.0;
         self.spawn_timer_s = 0.0; // premier spawn immédiat
-        self.spawn_quantity = (10 + (self.wave_number as i32 - 1) + self.wave_number as i32).max(1) as u32;
+        self.spawn_quantity =
+            (10 + (self.wave_number as i32 - 1) + self.wave_number as i32).max(1) as u32;
         self.enemies_spawned_this_wave = 0;
         self.enemies_killed_this_wave = 0;
         self.gold_collected_this_wave = 0;
@@ -540,7 +565,7 @@ impl GameState {
         self.wave_number += 1;
         self.enemies.clear();
         self.identified_this_phase = false; // une tentative d’ID par soi-même par phase
-        // spawn_quantity est recalculé au début de la prochaine bataille : 10 + (vague-1) + vague
+                                            // spawn_quantity est recalculé au début de la prochaine bataille : 10 + (vague-1) + vague
         self.spawn_rate_s = (self.spawn_rate_s * 0.99).max(0.5);
         if self.player.dead {
             self.player.revive_after_wave();
@@ -557,13 +582,14 @@ impl GameState {
         for _ in 0..count {
             let id = self.next_enemy_id;
             self.next_enemy_id += 1;
-            let kind = if self.wave_number > 0 && self.wave_number.is_multiple_of(10) && created == 0 {
-                EnemyKind::Boss
-            } else if rand_simple() < 0.15 {
-                EnemyKind::MiniBoss
-            } else {
-                EnemyKind::Normal
-            };
+            let kind =
+                if self.wave_number > 0 && self.wave_number.is_multiple_of(10) && created == 0 {
+                    EnemyKind::Boss
+                } else if rand_simple() < 0.15 {
+                    EnemyKind::MiniBoss
+                } else {
+                    EnemyKind::Normal
+                };
             let hp_max = kind.hp_max_from_constitution(constitution);
             self.enemies.push(Enemy {
                 id,
@@ -580,20 +606,20 @@ impl GameState {
     }
 
     /// Vague gagnée si plus d'ennemis et château vivant.
-    #[must_use] 
+    #[must_use]
     pub fn is_wave_won(&self) -> bool {
         self.phase == GamePhase::Battle && self.enemies.is_empty() && !self.castle.is_destroyed()
     }
 
     /// Game over si château détruit.
-    #[must_use] 
+    #[must_use]
     pub fn is_game_over(&self) -> bool {
         self.castle.is_destroyed()
     }
 
     /// Position aléatoire sur la bordure de la zone 800×800 (centre = château).
     /// Utilisé pour le spawn des ennemis n'importe où sur le périmètre.
-    #[must_use] 
+    #[must_use]
     pub fn random_spawn_position_on_border(&self) -> (f32, f32) {
         use crate::constants::COMBAT_SURFACE_SIZE;
         let half = COMBAT_SURFACE_SIZE / 2.0;
@@ -760,7 +786,9 @@ impl GameState {
         self.pending_level_up_notifications
             .push(format!("Joueur 2 : Niveau {} atteint !", sec.level));
         if sec.kind == SecondaryPlayerKind::SergentGarcia {
-            let extra = sec.kind.militiamen_count_at_level(sec.level)
+            let extra = sec
+                .kind
+                .militiamen_count_at_level(sec.level)
                 .saturating_sub(sec.kind.militiamen_count_at_level(sec.level - 1));
             for _ in 0..extra {
                 let troop_id = self.next_troop_id;
@@ -794,12 +822,8 @@ impl GameState {
             _ => return false,
         };
         let mut roll = || rand_simple();
-        let item = roll_identification_self(
-            &mut roll,
-            self.player.luck,
-            self.player.stats.sag,
-            slot,
-        );
+        let item =
+            roll_identification_self(&mut roll, self.player.luck, self.player.stats.sag, slot);
         self.inventory[slot_index] = InventoryEntry::Identified(item);
         self.identified_this_phase = true;
         true
@@ -861,7 +885,11 @@ impl GameState {
     }
 
     pub fn buy_merchant_accessory(&mut self, index: usize) -> bool {
-        let Some(entry) = self.merchant_accessories.get_mut(index).and_then(Option::take) else {
+        let Some(entry) = self
+            .merchant_accessories
+            .get_mut(index)
+            .and_then(Option::take)
+        else {
             return false;
         };
         if self.inventory.len() >= INVENTORY_MAX_SLOTS || self.gold < entry.price {
@@ -873,7 +901,7 @@ impl GameState {
         true
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_equipped(&self, slot: ItemSlot) -> Option<&ItemInstance> {
         self.equipped.get(&slot)
     }
@@ -892,7 +920,7 @@ impl GameState {
     }
 
     /// Peut-on équiper l’objet à l’index d’inventaire ? (slot libre ou place en inventaire pour l’objet actuellement équipé)
-    #[must_use] 
+    #[must_use]
     pub fn can_equip_from_inventory(&self, slot_index: usize) -> bool {
         let Some(InventoryEntry::Identified(ref item)) = self.inventory.get(slot_index) else {
             return false;

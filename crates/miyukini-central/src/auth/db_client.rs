@@ -459,7 +459,10 @@ impl CentralAuthDb {
                 Vec::<String>::new(),
             )
             .await?;
-        let v = rows.first().and_then(|r| r.get("value")).and_then(|v| v.as_str());
+        let v = rows
+            .first()
+            .and_then(|r| r.get("value"))
+            .and_then(|v| v.as_str());
         Ok(v.map_or(true, |s| s == "1"))
     }
 
@@ -505,7 +508,10 @@ impl CentralAuthDb {
         run_blocking(self.set_current_profile_id_async(profile_id))
     }
 
-    async fn set_current_profile_id_async(&self, profile_id: Option<&str>) -> Result<(), AuthDbError> {
+    async fn set_current_profile_id_async(
+        &self,
+        profile_id: Option<&str>,
+    ) -> Result<(), AuthDbError> {
         match profile_id {
             Some(id) => {
                 self.client
@@ -518,7 +524,11 @@ impl CentralAuthDb {
             }
             None => {
                 self.client
-                    .execute("DELETE FROM cog_meta WHERE key = 'current_profile_id'", Vec::<String>::new(), "delete_current_profile_id")
+                    .execute(
+                        "DELETE FROM cog_meta WHERE key = 'current_profile_id'",
+                        Vec::<String>::new(),
+                        "delete_current_profile_id",
+                    )
                     .await?;
             }
         }
@@ -532,13 +542,25 @@ impl CentralAuthDb {
 
     async fn reset_cog_to_virgin_async(&self) -> Result<(), AuthDbError> {
         self.client
-            .execute("DELETE FROM central_profile_saves", Vec::<String>::new(), "reset_cog")
+            .execute(
+                "DELETE FROM central_profile_saves",
+                Vec::<String>::new(),
+                "reset_cog",
+            )
             .await?;
         self.client
-            .execute("DELETE FROM profile_service_refs", Vec::<String>::new(), "reset_cog")
+            .execute(
+                "DELETE FROM profile_service_refs",
+                Vec::<String>::new(),
+                "reset_cog",
+            )
             .await?;
         self.client
-            .execute("DELETE FROM central_profiles", Vec::<String>::new(), "reset_cog")
+            .execute(
+                "DELETE FROM central_profiles",
+                Vec::<String>::new(),
+                "reset_cog",
+            )
             .await?;
         self.set_cog_virgin_async(true).await?;
         self.set_current_profile_id_async(None).await?;
@@ -567,9 +589,7 @@ impl CentralAuthDb {
             )
             .await?;
 
-        Ok(rows
-            .first()
-            .and_then(|r| Self::get_opt_string(r, "ref_id")))
+        Ok(rows.first().and_then(|r| Self::get_opt_string(r, "ref_id")))
     }
 
     /// Lie le profil à une ligne de la table du service (synchrone).
@@ -653,7 +673,10 @@ impl CentralAuthDb {
         run_blocking(self.get_profile_save_async(id))
     }
 
-    async fn get_profile_save_async(&self, id: &str) -> Result<Option<CentralProfileSave>, AuthDbError> {
+    async fn get_profile_save_async(
+        &self,
+        id: &str,
+    ) -> Result<Option<CentralProfileSave>, AuthDbError> {
         let rows = self
             .client
             .query(
@@ -789,7 +812,9 @@ impl CentralAuthDb {
     // Helpers
     // -----------------------------------------------------------------------
 
-    fn row_to_profile(row: &HashMap<String, serde_json::Value>) -> Result<CentralProfile, AuthDbError> {
+    fn row_to_profile(
+        row: &HashMap<String, serde_json::Value>,
+    ) -> Result<CentralProfile, AuthDbError> {
         Ok(CentralProfile {
             id: Self::get_string(row, "id"),
             email: Self::get_string(row, "email"),

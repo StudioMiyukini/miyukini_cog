@@ -25,7 +25,9 @@ pub fn add(ctx: &GovernedContext, cart_ref: &str, payload: &str) -> Result<Strin
         return Err(MiyustoreError::NoMandate);
     }
     let line_id = format!("line:{}", UuidIdGenerator.generate());
-    let mut guard = carts().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = carts()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     guard
         .entry(cart_ref.to_string())
         .or_default()
@@ -42,7 +44,9 @@ pub fn update(ctx: &GovernedContext, line_id: &str, payload: &str) -> Result<(),
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let mut guard = carts().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = carts()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     for lines in guard.values_mut() {
         if lines.contains_key(line_id) {
             lines.insert(line_id.to_string(), payload.to_string());
@@ -61,7 +65,9 @@ pub fn remove(ctx: &GovernedContext, line_id: &str) -> Result<(), MiyustoreError
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let mut guard = carts().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let mut guard = carts()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     for lines in guard.values_mut() {
         lines.remove(line_id);
     }
@@ -73,11 +79,17 @@ pub fn remove(ctx: &GovernedContext, line_id: &str) -> Result<(), MiyustoreError
 /// @layer: tool
 /// @human: Calcule totaux, taxes, livraison du panier ; règles fournies dans le flux.
 /// @do: commerce_cart_compute_under_governance
-pub fn compute(ctx: &GovernedContext, cart_ref: &str, _rules: Option<&str>) -> Result<String, MiyustoreError> {
+pub fn compute(
+    ctx: &GovernedContext,
+    cart_ref: &str,
+    _rules: Option<&str>,
+) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
     }
-    let guard = carts().lock().map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
+    let guard = carts()
+        .lock()
+        .map_err(|_| MiyustoreError::InvalidInput("lock".into()))?;
     let count = guard.get(cart_ref).map(|l| l.len()).unwrap_or(0);
     Ok(format!("total_lines:{count}"))
 }

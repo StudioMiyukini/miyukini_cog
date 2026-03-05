@@ -1,9 +1,9 @@
 //! Sidebar JayManga — navigation par section.
 
+use super::{JayMangaSection, JayMangaState};
+use crate::use_db;
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn JayMangaSidebar(state: Signal<JayMangaState>) -> Element {
@@ -11,7 +11,10 @@ pub fn JayMangaSidebar(state: Signal<JayMangaState>) -> Element {
     let db = use_db();
 
     // Compteurs reels
-    let work_count = db.work_list(&jaymanga::data::WorkFilters::default()).map(|v| v.len()).unwrap_or(0);
+    let work_count = db
+        .work_list(&jaymanga::data::WorkFilters::default())
+        .map(|v| v.len())
+        .unwrap_or(0);
     let series_count = db.series_list().map(|v| v.len()).unwrap_or(0);
     let license_count = db.license_list_all().map(|v| v.len()).unwrap_or(0);
     let favorite_count = db.favorite_list().map(|v| v.len()).unwrap_or(0);
@@ -161,7 +164,11 @@ fn SidebarItem(
 ) -> Element {
     let c = use_palette();
     let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
     let border = if is_active {
         format!("2px solid {}", c.accent_blue)
     } else {

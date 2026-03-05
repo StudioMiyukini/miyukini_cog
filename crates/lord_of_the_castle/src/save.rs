@@ -85,7 +85,16 @@ impl LordOfTheCastleDb {
     pub fn slot_list(&self) -> Vec<SlotMetadata> {
         let conn = match self.conn.lock() {
             Ok(c) => c,
-            Err(_) => return (1..=SAVE_SLOT_COUNT).map(|slot_id| SlotMetadata { slot_id, occupied: false, saved_at: None, summary: None }).collect(),
+            Err(_) => {
+                return (1..=SAVE_SLOT_COUNT)
+                    .map(|slot_id| SlotMetadata {
+                        slot_id,
+                        occupied: false,
+                        saved_at: None,
+                        summary: None,
+                    })
+                    .collect()
+            }
         };
         let mut out = Vec::with_capacity(SAVE_SLOT_COUNT as usize);
         for slot_id in 1..=SAVE_SLOT_COUNT {
@@ -125,8 +134,8 @@ impl LordOfTheCastleDb {
                 |r| r.get(0),
             )
             .map_err(|e| SaveError::Db(e.to_string()))?;
-        let state: GameState =
-            serde_json::from_str(&state_json).map_err(|e| SaveError::Serialization(e.to_string()))?;
+        let state: GameState = serde_json::from_str(&state_json)
+            .map_err(|e| SaveError::Serialization(e.to_string()))?;
         Ok(state)
     }
 
@@ -140,9 +149,7 @@ impl LordOfTheCastleDb {
         let saved_at = chrono::Utc::now().to_rfc3339();
         let summary = format!(
             "Vague {} • Or {} • Niv. {}",
-            state.wave_number,
-            state.gold,
-            state.level
+            state.wave_number, state.gold, state.level
         );
         let conn = self.conn.lock().map_err(|e| SaveError::Db(e.to_string()))?;
         conn.execute(

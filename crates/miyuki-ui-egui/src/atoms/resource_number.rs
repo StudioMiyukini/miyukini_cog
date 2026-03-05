@@ -4,9 +4,9 @@
 //!
 //! Used to display life/mana values on top of orbs, or standalone.
 
+use crate::convert::rgba_to_color32;
 use egui::{Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// A resource number display.
 pub struct ResourceNumber {
@@ -77,9 +77,7 @@ mod tests {
 
     #[test]
     fn test_resource_number_builder() {
-        let rn = ResourceNumber::new(50, 100)
-            .font_size(14.0)
-            .bright(true);
+        let rn = ResourceNumber::new(50, 100).font_size(14.0).bright(true);
         assert_eq!(rn.current, 50);
         assert_eq!(rn.max, 100);
         assert!((rn.font_size - 14.0).abs() < f32::EPSILON);

@@ -115,7 +115,7 @@ pub const TOOLKIT_ID: &str = "toolkit.calc.miyucalc";
 /// @layer: toolkit
 /// @human: Construit la Cellule Admin MiyuCalc.
 /// @do: build_miyucalc_admin_cell
-#[must_use] 
+#[must_use]
 pub fn miyucalc_admin_cell(version: &str, fingerprint: &str) -> MiyuCalcAdminCell {
     MiyuCalcAdminCell {
         identification: MiyuCalcIdentification {
@@ -137,9 +137,7 @@ pub fn miyucalc_admin_cell(version: &str, fingerprint: &str) -> MiyuCalcAdminCel
         },
         integrity: MiyuCalcIntegrity {
             fingerprint: fingerprint.to_string(),
-            contracts: vec![
-                "MiyuCalc-Tool-Governance-Compliance".to_string(),
-            ],
+            contracts: vec!["MiyuCalc-Tool-Governance-Compliance".to_string()],
             core_versions: std::collections::HashMap::new(),
         },
     }

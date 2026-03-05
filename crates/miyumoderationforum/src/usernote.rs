@@ -21,12 +21,19 @@ pub fn create(
     }
     let id = format!("note:{}", UuidIdGenerator.generate());
     {
-        let mut guard = store::usernotes().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+        let mut guard = store::usernotes()
+            .lock()
+            .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
         guard.insert(id.clone(), (user_id.to_string(), content.to_string()));
     }
     {
-        let mut guard = store::usernotes_by_user().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-        guard.entry(user_id.to_string()).or_default().push(id.clone());
+        let mut guard = store::usernotes_by_user()
+            .lock()
+            .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+        guard
+            .entry(user_id.to_string())
+            .or_default()
+            .push(id.clone());
     }
     Ok(id)
 }
@@ -44,13 +51,23 @@ pub fn list(
     if !ctx.has_mandate() {
         return Err(MiyumoderationforumError::NoMandate);
     }
-    let guard_ids = store::usernotes_by_user().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let guard_ids = store::usernotes_by_user()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
     let ids = guard_ids.get(user_id).cloned().unwrap_or_default();
     drop(guard_ids);
-    let guard_notes = store::usernotes().lock().map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
-    let items: Vec<UsernoteItem> = ids.into_iter().filter_map(|id| {
-        guard_notes.get(&id).map(|(_, content)| UsernoteItem { id, content: content.clone() })
-    }).collect();
+    let guard_notes = store::usernotes()
+        .lock()
+        .map_err(|_| MiyumoderationforumError::InvalidInput("lock".into()))?;
+    let items: Vec<UsernoteItem> = ids
+        .into_iter()
+        .filter_map(|id| {
+            guard_notes.get(&id).map(|(_, content)| UsernoteItem {
+                id,
+                content: content.clone(),
+            })
+        })
+        .collect();
     Ok(items)
 }
 

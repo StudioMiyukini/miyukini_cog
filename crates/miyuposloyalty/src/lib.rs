@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuPosLoyalty ; expose les modules tools.
 /// @do: expose_miyuposloyalty_toolkit
-
 pub mod admin_cell;
 pub mod context;
 pub mod customer;
@@ -29,7 +28,8 @@ pub use customer::{
 pub use errors::MiyuposloyaltyError;
 pub use loyalty::{
     balance_get as loyalty_balance_get, card_resolve as loyalty_card_resolve,
-    points_grant as loyalty_points_grant, points_redeem as loyalty_points_redeem, CardResolveResult,
+    points_grant as loyalty_points_grant, points_redeem as loyalty_points_redeem,
+    CardResolveResult,
 };
 
 #[cfg(test)]

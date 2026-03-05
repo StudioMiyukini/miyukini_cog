@@ -5,9 +5,9 @@
 //! Used inside inventory slots and equipment slots to represent an item
 //! with its rarity tier visible at a glance.
 
-use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
 use crate::atoms::quality_text::ItemQuality;
 use crate::atoms::slot_frame::CELL_PX;
+use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
 
 /// An item icon atom.
 pub struct ItemIcon<'a> {
@@ -94,8 +94,7 @@ mod tests {
 
     #[test]
     fn test_item_icon_builder() {
-        let icon = ItemIcon::new("Windforce", ItemQuality::Unique, 2, 4)
-            .identified(true);
+        let icon = ItemIcon::new("Windforce", ItemQuality::Unique, 2, 4).identified(true);
         assert_eq!(icon.name, "Windforce");
         assert_eq!(icon.quality, ItemQuality::Unique);
         assert_eq!(icon.cols, 2);
@@ -105,8 +104,7 @@ mod tests {
 
     #[test]
     fn test_item_icon_unidentified() {
-        let icon = ItemIcon::new("???", ItemQuality::Magic, 1, 1)
-            .identified(false);
+        let icon = ItemIcon::new("???", ItemQuality::Magic, 1, 1).identified(false);
         assert!(!icon.identified);
     }
 }

@@ -5,10 +5,9 @@
 
 use crate::data::{DbError, JayKontaDb};
 use crate::domain::purse::{
-    BudgetSummary, CreateBudget, CreateGoal, CreateMovement, CreateRecurring,
-    Goal, GoalSummary, MovementFilters, MovementsPage, OccasionalBudget,
-    PurseDashboardView, Category, RecurringTransaction, RecurringFrequency,
-    BudgetForecastView, ForecastEntry,
+    BudgetForecastView, BudgetSummary, Category, CreateBudget, CreateGoal, CreateMovement,
+    CreateRecurring, ForecastEntry, Goal, GoalSummary, MovementFilters, MovementsPage,
+    OccasionalBudget, PurseDashboardView, RecurringFrequency, RecurringTransaction,
 };
 use chrono::{Datelike, Local};
 use std::sync::Arc;
@@ -40,7 +39,9 @@ impl PurseService {
         let month = Local::now().format("%Y-%m").to_string();
         let balance = self.db.solde_purse()?;
         let (month_income, month_expense) = self.db.purse_month_totals(&self.account_id, &month)?;
-        let categories_breakdown = self.db.categories_breakdown_purse(&self.account_id, &month)?;
+        let categories_breakdown = self
+            .db
+            .categories_breakdown_purse(&self.account_id, &month)?;
 
         // Derniers mouvements (5)
         let filters = MovementFilters {
@@ -89,7 +90,11 @@ impl PurseService {
             balance,
             month_income,
             month_expense,
-            monthly_budget: if month_income > 0.0 { Some(month_income) } else { None },
+            monthly_budget: if month_income > 0.0 {
+                Some(month_income)
+            } else {
+                None
+            },
             budget_usage_pct,
             budget_remaining,
             currency: "EUR".to_string(),
@@ -120,13 +125,25 @@ impl PurseService {
 
     /// Liste les mouvements Purse avec filtres et pagination (CK-TK-11).
     pub fn list_movements(&self, filters: &MovementFilters) -> Result<MovementsPage, DbError> {
-        let per_page = if filters.per_page == 0 { 20 } else { filters.per_page };
+        let per_page = if filters.per_page == 0 {
+            20
+        } else {
+            filters.per_page
+        };
         let (items, total_count) = self.db.list_purse_movements(&self.account_id, filters)?;
         let total_pages = (total_count + per_page - 1) / per_page;
 
         // Calcul totaux revenus/depenses sur les items de la page
-        let total_income: f64 = items.iter().filter(|m| m.amount > 0.0).map(|m| m.amount).sum();
-        let total_expense: f64 = items.iter().filter(|m| m.amount < 0.0).map(|m| m.amount.abs()).sum();
+        let total_income: f64 = items
+            .iter()
+            .filter(|m| m.amount > 0.0)
+            .map(|m| m.amount)
+            .sum();
+        let total_expense: f64 = items
+            .iter()
+            .filter(|m| m.amount < 0.0)
+            .map(|m| m.amount.abs())
+            .sum();
 
         Ok(MovementsPage {
             items,
@@ -289,11 +306,14 @@ impl PurseService {
     // ─── Helpers prives ───────────────────────────────────────
 
     /// Calcule la prochaine echeance a partir d'une date de debut et frequence.
-    fn compute_next_due(start: &str, freq: &RecurringFrequency, day_of_month: Option<i32>) -> String {
+    fn compute_next_due(
+        start: &str,
+        freq: &RecurringFrequency,
+        day_of_month: Option<i32>,
+    ) -> String {
         use chrono::NaiveDate;
         let today = Local::now().date_naive();
-        let start_date = NaiveDate::parse_from_str(start, "%Y-%m-%d")
-            .unwrap_or(today);
+        let start_date = NaiveDate::parse_from_str(start, "%Y-%m-%d").unwrap_or(today);
 
         if start_date >= today {
             return start_date.format("%Y-%m-%d").to_string();
@@ -316,7 +336,12 @@ impl PurseService {
 
         // Ajuster au jour du mois si specifie (pour monthly/quarterly/yearly)
         if let Some(dom) = day_of_month {
-            if matches!(freq, RecurringFrequency::Monthly | RecurringFrequency::Quarterly | RecurringFrequency::Yearly) {
+            if matches!(
+                freq,
+                RecurringFrequency::Monthly
+                    | RecurringFrequency::Quarterly
+                    | RecurringFrequency::Yearly
+            ) {
                 let year = candidate.year();
                 let month = candidate.month();
                 let max_day = Self::days_in_month(year, month);
@@ -378,14 +403,12 @@ impl PurseService {
                 continue;
             }
             // Verifier que le recurrent est actif pendant ce mois
-            let start = NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d")
-                .unwrap_or(m_start);
+            let start = NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d").unwrap_or(m_start);
             if start >= m_end {
                 continue;
             }
             if let Some(ref end) = r.end_date {
-                let end_d = NaiveDate::parse_from_str(end, "%Y-%m-%d")
-                    .unwrap_or(m_end);
+                let end_d = NaiveDate::parse_from_str(end, "%Y-%m-%d").unwrap_or(m_end);
                 if end_d < m_start {
                     continue;
                 }
@@ -420,14 +443,22 @@ impl PurseService {
                 let start_month = chrono::NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d")
                     .map(|d| d.month())
                     .unwrap_or(1);
-                if (month + 12 - start_month) % 3 == 0 { 1 } else { 0 }
+                if (month + 12 - start_month) % 3 == 0 {
+                    1
+                } else {
+                    0
+                }
             }
             RecurringFrequency::Yearly => {
                 let month = _m_start.month();
                 let start_month = chrono::NaiveDate::parse_from_str(&r.start_date, "%Y-%m-%d")
                     .map(|d| d.month())
                     .unwrap_or(1);
-                if month == start_month { 1 } else { 0 }
+                if month == start_month {
+                    1
+                } else {
+                    0
+                }
             }
         }
     }

@@ -11,18 +11,29 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @layer: tool
 /// @human: Crée une révision pour un contenu ; WriteIntent KindMother.
 /// @do: content_revision_create_under_governance
-pub fn create(ctx: &GovernedContext, content_id: &str, payload: &str) -> Result<String, MiyucmsError> {
+pub fn create(
+    ctx: &GovernedContext,
+    content_id: &str,
+    payload: &str,
+) -> Result<String, MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
     let id = format!("rev:{}", UuidIdGenerator.generate());
     {
-        let mut guard = store::revisions().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+        let mut guard = store::revisions()
+            .lock()
+            .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
         guard.insert(id.clone(), (content_id.to_string(), payload.to_string()));
     }
     {
-        let mut guard = store::content_revisions().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
-        guard.entry(content_id.to_string()).or_default().push(id.clone());
+        let mut guard = store::content_revisions()
+            .lock()
+            .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+        guard
+            .entry(content_id.to_string())
+            .or_default()
+            .push(id.clone());
     }
     Ok(id)
 }
@@ -36,7 +47,9 @@ pub fn list(ctx: &GovernedContext, content_id: &str) -> Result<Vec<String>, Miyu
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let guard = store::content_revisions().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let guard = store::content_revisions()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
     let ids = guard.get(content_id).cloned().unwrap_or_default();
     Ok(ids)
 }
@@ -46,11 +59,17 @@ pub fn list(ctx: &GovernedContext, content_id: &str) -> Result<Vec<String>, Miyu
 /// @layer: tool
 /// @human: Restaure une révision ; décision StrongFather ; WriteIntent KindMother.
 /// @do: content_revision_restore_under_governance
-pub fn restore(ctx: &GovernedContext, _content_id: &str, revision_id: &str) -> Result<(), MiyucmsError> {
+pub fn restore(
+    ctx: &GovernedContext,
+    _content_id: &str,
+    revision_id: &str,
+) -> Result<(), MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let guard = store::revisions().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let guard = store::revisions()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
     if !guard.contains_key(revision_id) {
         return Err(MiyucmsError::InvalidInput("revision not found".into()));
     }
@@ -62,13 +81,27 @@ pub fn restore(ctx: &GovernedContext, _content_id: &str, revision_id: &str) -> R
 /// @layer: tool
 /// @human: Compare deux révisions ; lecture seule.
 /// @do: content_revision_compare_under_governance
-pub fn compare(ctx: &GovernedContext, revision_id_a: &str, revision_id_b: &str) -> Result<String, MiyucmsError> {
+pub fn compare(
+    ctx: &GovernedContext,
+    revision_id_a: &str,
+    revision_id_b: &str,
+) -> Result<String, MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
     }
-    let guard = store::revisions().lock().map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
-    let (_, payload_a) = guard.get(revision_id_a).ok_or_else(|| MiyucmsError::InvalidInput("revision not found".into()))?;
-    let (_, payload_b) = guard.get(revision_id_b).ok_or_else(|| MiyucmsError::InvalidInput("revision not found".into()))?;
-    let diff = if payload_a == payload_b { "identical" } else { "diff" };
+    let guard = store::revisions()
+        .lock()
+        .map_err(|_| MiyucmsError::InvalidInput("lock".into()))?;
+    let (_, payload_a) = guard
+        .get(revision_id_a)
+        .ok_or_else(|| MiyucmsError::InvalidInput("revision not found".into()))?;
+    let (_, payload_b) = guard
+        .get(revision_id_b)
+        .ok_or_else(|| MiyucmsError::InvalidInput("revision not found".into()))?;
+    let diff = if payload_a == payload_b {
+        "identical"
+    } else {
+        "diff"
+    };
     Ok(diff.to_string())
 }

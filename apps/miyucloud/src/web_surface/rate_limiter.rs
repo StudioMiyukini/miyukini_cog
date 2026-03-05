@@ -30,6 +30,8 @@ pub struct RateLimiterConfig {
     pub max_requests: u32,
     /// Duree de la fenetre.
     pub window: Duration,
+    /// Fait confiance aux en-tetes proxy pour extraire l'IP.
+    pub trust_proxy: bool,
 }
 
 impl Default for RateLimiterConfig {
@@ -37,6 +39,7 @@ impl Default for RateLimiterConfig {
         Self {
             max_requests: 10,
             window: Duration::from_secs(60),
+            trust_proxy: false,
         }
     }
 }
@@ -46,6 +49,8 @@ impl Default for RateLimiterConfig {
 pub struct RateLimiterState {
     /// Compteurs par IP.
     counters: Arc<Mutex<HashMap<String, Vec<Instant>>>>,
+    /// Compteur de requetes pour declencher des purges periodiques.
+    requests_seen: Arc<Mutex<u64>>,
     /// Configuration.
     config: RateLimiterConfig,
 }
@@ -55,6 +60,7 @@ impl RateLimiterState {
     pub fn new(config: RateLimiterConfig) -> Self {
         Self {
             counters: Arc::new(Mutex::new(HashMap::new())),
+            requests_seen: Arc::new(Mutex::new(0)),
             config,
         }
     }
@@ -63,9 +69,17 @@ impl RateLimiterState {
     ///
     /// Retourne `Ok(())` si la requete est autorisee, `Err(seconds_to_wait)` sinon.
     pub fn check(&self, ip: &str) -> Result<(), u64> {
-        let mut counters = self.counters.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut counters = self
+            .counters
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut requests_seen = self
+            .requests_seen
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let now = Instant::now();
         let window = self.config.window;
+        *requests_seen += 1;
 
         let timestamps = counters.entry(ip.to_string()).or_default();
 
@@ -82,6 +96,14 @@ impl RateLimiterState {
         }
 
         timestamps.push(now);
+
+        // Purge globale periodique pour eviter la croissance du HashMap.
+        if *requests_seen % 100 == 0 {
+            counters.retain(|_, ts| {
+                ts.retain(|t| now.duration_since(*t) < window);
+                !ts.is_empty()
+            });
+        }
         Ok(())
     }
 }
@@ -133,7 +155,7 @@ where
     }
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
-        let ip = extract_ip(&req);
+        let ip = extract_ip(&req, self.state.config.trust_proxy);
         let state = self.state.clone();
         let mut inner = self.inner.clone();
 
@@ -164,27 +186,11 @@ where
 
 /// Extrait l'adresse IP d'une requete.
 ///
-/// Verifie dans l'ordre : `X-Forwarded-For`, `X-Real-IP`, puis l'IP de connexion.
-fn extract_ip(req: &Request<Body>) -> String {
-    // Try X-Forwarded-For first
-    if let Some(forwarded) = req.headers().get("X-Forwarded-For") {
-        if let Ok(s) = forwarded.to_str() {
-            // Take the first IP in the chain
-            if let Some(ip) = s.split(',').next() {
-                return ip.trim().to_string();
-            }
-        }
-    }
-
-    // Try X-Real-IP
-    if let Some(real_ip) = req.headers().get("X-Real-IP") {
-        if let Ok(s) = real_ip.to_str() {
-            return s.trim().to_string();
-        }
-    }
-
-    // Fallback: use a placeholder (in production, use ConnectInfo)
-    "unknown".to_string()
+/// Si `trust_proxy` est actif, lit `X-Forwarded-For` puis `X-Real-IP`.
+/// Sinon retourne `unknown`.
+fn extract_ip(req: &Request<Body>, trust_proxy: bool) -> String {
+    crate::web_surface::access_log::extract_client_ip(req.headers(), trust_proxy)
+        .unwrap_or_else(|| "unknown".to_string())
 }
 
 #[cfg(test)]
@@ -196,6 +202,7 @@ mod tests {
         let config = RateLimiterConfig {
             max_requests: 3,
             window: Duration::from_secs(60),
+            trust_proxy: false,
         };
         let state = RateLimiterState::new(config);
 
@@ -209,6 +216,7 @@ mod tests {
         let config = RateLimiterConfig {
             max_requests: 2,
             window: Duration::from_secs(60),
+            trust_proxy: false,
         };
         let state = RateLimiterState::new(config);
 
@@ -224,6 +232,7 @@ mod tests {
         let config = RateLimiterConfig {
             max_requests: 1,
             window: Duration::from_secs(60),
+            trust_proxy: false,
         };
         let state = RateLimiterState::new(config);
 
@@ -243,6 +252,7 @@ mod tests {
         let config = RateLimiterConfig {
             max_requests: 1,
             window: Duration::from_secs(60),
+            trust_proxy: false,
         };
         let state = RateLimiterState::new(config);
 
@@ -250,5 +260,23 @@ mod tests {
         let retry_after = state.check("10.0.0.1").unwrap_err();
         assert!(retry_after > 0);
         assert!(retry_after <= 60);
+    }
+
+    #[test]
+    fn test_extract_ip_trust_proxy_false_returns_unknown() {
+        let req = Request::builder()
+            .header("X-Forwarded-For", "203.0.113.10")
+            .body(Body::empty())
+            .unwrap();
+        assert_eq!(extract_ip(&req, false), "unknown");
+    }
+
+    #[test]
+    fn test_extract_ip_trust_proxy_true_reads_forwarded() {
+        let req = Request::builder()
+            .header("X-Forwarded-For", "203.0.113.10, 10.0.0.1")
+            .body(Body::empty())
+            .unwrap();
+        assert_eq!(extract_ip(&req, true), "203.0.113.10");
     }
 }

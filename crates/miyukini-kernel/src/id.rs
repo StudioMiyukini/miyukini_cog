@@ -272,10 +272,10 @@ mod tests {
         let generator = UuidIdGenerator;
         let id1 = generator.generate();
         let id2 = generator.generate();
-        
+
         map.insert(id1, "value1");
         map.insert(id2, "value2");
-        
+
         assert_eq!(map.get(&id1), Some(&"value1"));
         assert_eq!(map.get(&id2), Some(&"value2"));
     }

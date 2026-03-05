@@ -48,12 +48,32 @@ pub fn run_all() -> JayKoaTestReport {
     let mut results = Vec::new();
 
     // --- Types (domain) ---
-    run("entry_type_roundtrip", run_entry_type_roundtrip, &mut results);
+    run(
+        "entry_type_roundtrip",
+        run_entry_type_roundtrip,
+        &mut results,
+    );
     run("entry_type_readonly", run_entry_type_readonly, &mut results);
-    run("temporal_status_roundtrip", run_temporal_status_roundtrip, &mut results);
-    run("event_source_roundtrip", run_event_source_roundtrip, &mut results);
-    run("calendar_type_roundtrip", run_calendar_type_roundtrip, &mut results);
-    run("default_user_settings", run_default_user_settings, &mut results);
+    run(
+        "temporal_status_roundtrip",
+        run_temporal_status_roundtrip,
+        &mut results,
+    );
+    run(
+        "event_source_roundtrip",
+        run_event_source_roundtrip,
+        &mut results,
+    );
+    run(
+        "calendar_type_roundtrip",
+        run_calendar_type_roundtrip,
+        &mut results,
+    );
+    run(
+        "default_user_settings",
+        run_default_user_settings,
+        &mut results,
+    );
 
     // --- DB ---
     run("db_open_and_init", run_db_open_and_init, &mut results);
@@ -61,12 +81,28 @@ pub fn run_all() -> JayKoaTestReport {
     run("db_entry_crud", run_db_entry_crud, &mut results);
     run("db_reflect_upsert", run_db_reflect_upsert, &mut results);
     run("db_detect_conflicts", run_db_detect_conflicts, &mut results);
-    run("db_detect_no_conflict", run_db_detect_no_conflict, &mut results);
-    run("db_check_conflict_api", run_db_check_conflict_api, &mut results);
-    run("db_settings_roundtrip", run_db_settings_roundtrip, &mut results);
+    run(
+        "db_detect_no_conflict",
+        run_db_detect_no_conflict,
+        &mut results,
+    );
+    run(
+        "db_check_conflict_api",
+        run_db_check_conflict_api,
+        &mut results,
+    );
+    run(
+        "db_settings_roundtrip",
+        run_db_settings_roundtrip,
+        &mut results,
+    );
 
     // --- Export iCal ---
-    run("ical_entries_to_ical", run_ical_entries_to_ical, &mut results);
+    run(
+        "ical_entries_to_ical",
+        run_ical_entries_to_ical,
+        &mut results,
+    );
 
     let passed = results.iter().filter(|r| r.passed).count() as u32;
     let failed = results.len() as u32 - passed;
@@ -377,7 +413,9 @@ fn run_db_reflect_upsert() -> Result<(), String> {
     if entry.title.as_deref() != Some("Festival opening (updated)") {
         return Err("reflect title after upsert mismatch".to_string());
     }
-    let entries = db.entries_by_agenda(&agenda_id).map_err(|e| e.to_string())?;
+    let entries = db
+        .entries_by_agenda(&agenda_id)
+        .map_err(|e| e.to_string())?;
     if entries.len() != 1 {
         return Err("upsert should not create duplicates".to_string());
     }

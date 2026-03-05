@@ -1,9 +1,9 @@
 //! Grille d'affichage des services.
 
-use dioxus::prelude::*;
-use crate::state::{use_app_state, ServiceInfo, ServiceType};
-use crate::theme::{Theme, styles};
 use super::ServiceCard;
+use crate::state::{use_app_state, ServiceInfo, ServiceType};
+use crate::theme::{styles, Theme};
+use dioxus::prelude::*;
 
 /// Filtre pour la grille de services.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -39,7 +39,10 @@ pub fn ServiceGrid(props: ServiceGridProps) -> Element {
     let mut current_filter = use_signal(|| props.filter);
 
     // Filtrer les services
-    let services: Vec<ServiceInfo> = state.read().services.iter()
+    let services: Vec<ServiceInfo> = state
+        .read()
+        .services
+        .iter()
         .filter(|s| {
             // Filtre de recherche
             let query = state.read().search_query.to_lowercase();
@@ -114,7 +117,11 @@ fn FilterButton(
 ) -> Element {
     let c = theme.palette();
     let bg = if is_active { c.accent_blue } else { c.bg_hover };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let color = if is_active {
+        c.text_white
+    } else {
+        c.text_secondary
+    };
 
     rsx! {
         button {

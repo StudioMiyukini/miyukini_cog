@@ -5,9 +5,9 @@
 //! Each item quality tier has a canonical D2 color. This atom renders text
 //! in the appropriate color for the given rarity.
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Response, Ui};
 use miyuki_ui_tokens::palette::d2::D2QualityColors;
-use crate::convert::rgba_to_color32;
 
 /// Item quality/rarity tier.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -155,8 +155,14 @@ mod tests {
     fn test_from_str_lossy() {
         assert_eq!(ItemQuality::from_str_lossy("magic"), ItemQuality::Magic);
         assert_eq!(ItemQuality::from_str_lossy("set"), ItemQuality::Set);
-        assert_eq!(ItemQuality::from_str_lossy("rune_word"), ItemQuality::RuneWord);
-        assert_eq!(ItemQuality::from_str_lossy("runeword"), ItemQuality::RuneWord);
+        assert_eq!(
+            ItemQuality::from_str_lossy("rune_word"),
+            ItemQuality::RuneWord
+        );
+        assert_eq!(
+            ItemQuality::from_str_lossy("runeword"),
+            ItemQuality::RuneWord
+        );
         assert_eq!(ItemQuality::from_str_lossy("unknown"), ItemQuality::Normal);
     }
 

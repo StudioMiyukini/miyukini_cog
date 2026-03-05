@@ -56,7 +56,10 @@ impl JayRdvStore {
     /// Insère un rendez-vous. Erreur si l'id existe déjà.
     pub fn appointment_create(&self, a: Appointment) -> Result<(), DbError> {
         let id = a.id.clone();
-        let mut map = self.appointments.write().map_err(|e| DbError(e.to_string()))?;
+        let mut map = self
+            .appointments
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
         if map.contains_key(&id) {
             return Err(DbError(format!("appointment already exists: {id}")));
         }
@@ -67,7 +70,10 @@ impl JayRdvStore {
     /// Met à jour un rendez-vous existant. Erreur si l'id n'existe pas.
     pub fn appointment_update(&self, a: Appointment) -> Result<(), DbError> {
         let id = a.id.clone();
-        let mut map = self.appointments.write().map_err(|e| DbError(e.to_string()))?;
+        let mut map = self
+            .appointments
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
         if map.contains_key(&id) {
             map.insert(id, a);
             Ok(())
@@ -78,7 +84,10 @@ impl JayRdvStore {
 
     /// Récupère un rendez-vous par id.
     pub fn appointment_by_id(&self, id: &str) -> Result<Option<Appointment>, DbError> {
-        let map = self.appointments.read().map_err(|e| DbError(e.to_string()))?;
+        let map = self
+            .appointments
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
@@ -95,7 +104,10 @@ impl JayRdvStore {
         let from_ts = from_date.and_then(|s| s.parse::<chrono::DateTime<Utc>>().ok());
         let to_ts = to_date.and_then(|s| s.parse::<chrono::DateTime<Utc>>().ok());
 
-        let map = self.appointments.read().map_err(|e| DbError(e.to_string()))?;
+        let map = self
+            .appointments
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Appointment> = map
             .values()
             .filter(|a| {
@@ -137,7 +149,10 @@ impl JayRdvStore {
 
     /// Supprime un rendez-vous par id.
     pub fn appointment_delete(&self, id: &str) -> Result<bool, DbError> {
-        let mut map = self.appointments.write().map_err(|e| DbError(e.to_string()))?;
+        let mut map = self
+            .appointments
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
         Ok(map.remove(id).is_some())
     }
 
@@ -212,7 +227,9 @@ impl JayRdvStore {
                 if s.status != SlotStatus::Held {
                     return false;
                 }
-                let Some(ref until_str) = s.held_until else { return false };
+                let Some(ref until_str) = s.held_until else {
+                    return false;
+                };
                 match until_str.parse::<chrono::DateTime<Utc>>() {
                     Ok(until) => until < now,
                     Err(_) => true, // format invalide : considérer comme expiré
@@ -262,7 +279,10 @@ impl JayRdvStore {
     }
 
     /// Liste les rappels d'un rendez-vous.
-    pub fn reminder_list_for_appointment(&self, appointment_id: &str) -> Result<Vec<Reminder>, DbError> {
+    pub fn reminder_list_for_appointment(
+        &self,
+        appointment_id: &str,
+    ) -> Result<Vec<Reminder>, DbError> {
         let map = self.reminders.read().map_err(|e| DbError(e.to_string()))?;
         let out: Vec<Reminder> = map
             .values()
@@ -404,7 +424,10 @@ impl JayRdvStore {
     /// Insère un professionnel.
     pub fn professional_create(&self, p: Professional) -> Result<(), DbError> {
         let id = p.id.clone();
-        let mut map = self.professionals.write().map_err(|e| DbError(e.to_string()))?;
+        let mut map = self
+            .professionals
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
         if map.contains_key(&id) {
             return Err(DbError(format!("professional already exists: {id}")));
         }
@@ -414,13 +437,19 @@ impl JayRdvStore {
 
     /// Récupère un professionnel par id.
     pub fn professional_by_id(&self, id: &str) -> Result<Option<Professional>, DbError> {
-        let map = self.professionals.read().map_err(|e| DbError(e.to_string()))?;
+        let map = self
+            .professionals
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Liste tous les professionnels.
     pub fn professional_list(&self) -> Result<Vec<Professional>, DbError> {
-        let map = self.professionals.read().map_err(|e| DbError(e.to_string()))?;
+        let map = self
+            .professionals
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Professional> = map.values().cloned().collect();
         out.sort_by(|a, b| a.name.cmp(&b.name));
         Ok(out)
@@ -433,7 +462,10 @@ impl JayRdvStore {
     /// Insère un praticien.
     pub fn practitioner_create(&self, p: Practitioner) -> Result<(), DbError> {
         let id = p.id.clone();
-        let mut map = self.practitioners.write().map_err(|e| DbError(e.to_string()))?;
+        let mut map = self
+            .practitioners
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
         if map.contains_key(&id) {
             return Err(DbError(format!("practitioner already exists: {id}")));
         }
@@ -443,13 +475,22 @@ impl JayRdvStore {
 
     /// Récupère un praticien par id.
     pub fn practitioner_by_id(&self, id: &str) -> Result<Option<Practitioner>, DbError> {
-        let map = self.practitioners.read().map_err(|e| DbError(e.to_string()))?;
+        let map = self
+            .practitioners
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         Ok(map.get(id).cloned())
     }
 
     /// Liste les praticiens (optionnellement par professional_id).
-    pub fn practitioner_list(&self, professional_id: Option<&str>) -> Result<Vec<Practitioner>, DbError> {
-        let map = self.practitioners.read().map_err(|e| DbError(e.to_string()))?;
+    pub fn practitioner_list(
+        &self,
+        professional_id: Option<&str>,
+    ) -> Result<Vec<Practitioner>, DbError> {
+        let map = self
+            .practitioners
+            .read()
+            .map_err(|e| DbError(e.to_string()))?;
         let mut out: Vec<Practitioner> = map
             .values()
             .filter(|p| professional_id.map_or(true, |pid| p.professional_id == pid))
@@ -488,7 +529,9 @@ impl JayRdvStore {
             .filter(|s| owner_id.map_or(true, |oid| s.owner_id == oid))
             .cloned()
             .collect();
-        out.sort_by(|a, b| (a.day_of_week, a.start_time.as_str()).cmp(&(b.day_of_week, b.start_time.as_str())));
+        out.sort_by(|a, b| {
+            (a.day_of_week, a.start_time.as_str()).cmp(&(b.day_of_week, b.start_time.as_str()))
+        });
         Ok(out)
     }
 
@@ -499,7 +542,10 @@ impl JayRdvStore {
     /// Insère une exception.
     pub fn exception_create(&self, e: Exception) -> Result<(), DbError> {
         let id = e.id.clone();
-        let mut map = self.exceptions.write().map_err(|e| DbError(e.to_string()))?;
+        let mut map = self
+            .exceptions
+            .write()
+            .map_err(|e| DbError(e.to_string()))?;
         if map.contains_key(&id) {
             return Err(DbError(format!("exception already exists: {id}")));
         }

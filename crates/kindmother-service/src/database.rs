@@ -12,7 +12,7 @@
 //! - Audit complet des opérations
 //! - Permissions fichiers restrictives
 
-use rusqlite::{params, Connection, OpenFlags, params_from_iter};
+use rusqlite::{params, params_from_iter, Connection, OpenFlags};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -69,7 +69,10 @@ impl EncryptedDatabase {
     }
 
     /// Ouvre ou récupère une connexion à une base de données.
-    pub async fn get_connection(&self, database: &str) -> Result<Arc<Mutex<Connection>>, ServiceError> {
+    pub async fn get_connection(
+        &self,
+        database: &str,
+    ) -> Result<Arc<Mutex<Connection>>, ServiceError> {
         // Vérifier le cache
         {
             let connections = self.connections.read().await;
@@ -202,11 +205,7 @@ impl EncryptedDatabase {
             .prepare(sql)
             .map_err(|e| ServiceError::Database(format!("Query prepare failed: {}", e)))?;
 
-        let column_names: Vec<String> = stmt
-            .column_names()
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
+        let column_names: Vec<String> = stmt.column_names().iter().map(|s| s.to_string()).collect();
 
         let rows_iter = stmt
             .query_map(params_from_iter(params), |row| {
@@ -236,7 +235,8 @@ impl EncryptedDatabase {
 
         let mut results = Vec::new();
         for row in rows_iter {
-            results.push(row.map_err(|e| ServiceError::Database(format!("Row fetch failed: {}", e)))?);
+            results
+                .push(row.map_err(|e| ServiceError::Database(format!("Row fetch failed: {}", e)))?);
         }
 
         Ok(results)
@@ -261,14 +261,17 @@ impl EncryptedDatabase {
         let last_insert_id = conn.last_insert_rowid();
 
         // Audit
-        self.audit_operation(&conn, AuditEntry {
-            operator_id,
-            operation: "execute",
-            intent,
-            sql,
-            rows_affected: rows_affected as u64,
-            success: true,
-        })?;
+        self.audit_operation(
+            &conn,
+            AuditEntry {
+                operator_id,
+                operation: "execute",
+                intent,
+                sql,
+                rows_affected: rows_affected as u64,
+                success: true,
+            },
+        )?;
 
         Ok((rows_affected as u64, Some(last_insert_id)))
     }
@@ -307,20 +310,27 @@ impl EncryptedDatabase {
 
         // Audit
         let total_affected: u64 = results.iter().sum();
-        self.audit_operation(&conn, AuditEntry {
-            operator_id,
-            operation: "transaction",
-            intent,
-            sql: "COMMIT",
-            rows_affected: total_affected,
-            success: true,
-        })?;
+        self.audit_operation(
+            &conn,
+            AuditEntry {
+                operator_id,
+                operation: "transaction",
+                intent,
+                sql: "COMMIT",
+                rows_affected: total_affected,
+                success: true,
+            },
+        )?;
 
         Ok(results)
     }
 
     /// Enregistre une opération dans l'audit.
-    fn audit_operation(&self, conn: &Connection, entry: AuditEntry<'_>) -> Result<(), ServiceError> {
+    fn audit_operation(
+        &self,
+        conn: &Connection,
+        entry: AuditEntry<'_>,
+    ) -> Result<(), ServiceError> {
         use sha2::{Digest, Sha256};
         let sql_hash = format!("{:x}", Sha256::digest(entry.sql.as_bytes()));
 

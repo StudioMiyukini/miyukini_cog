@@ -161,10 +161,7 @@ where
             .and_then(|v| v.to_str().ok())
             .map(String::from);
 
-        let jwt_secret = parts_ref
-            .extensions
-            .get::<JwtSecret>()
-            .cloned();
+        let jwt_secret = parts_ref.extensions.get::<JwtSecret>().cloned();
 
         async move {
             let header = auth_header.ok_or(ApiError::Unauthorized)?;
@@ -173,9 +170,8 @@ where
                 .strip_prefix("Bearer ")
                 .ok_or(ApiError::Unauthorized)?;
 
-            let secret = jwt_secret.ok_or_else(|| {
-                ApiError::InternalError("JWT secret non configure".to_string())
-            })?;
+            let secret = jwt_secret
+                .ok_or_else(|| ApiError::InternalError("JWT secret non configure".to_string()))?;
 
             let claims = verify_token(token, &secret.0)?;
             Ok(JwtAuth(claims))
@@ -192,11 +188,7 @@ mod tests {
     // TC-API-01 : generation et verification token roundtrip
     #[test]
     fn test_generate_and_verify_token_roundtrip() {
-        let claims = JwtClaims::new(
-            "test-client",
-            vec![JwtScope::Read, JwtScope::Write],
-            3600,
-        );
+        let claims = JwtClaims::new("test-client", vec![JwtScope::Read, JwtScope::Write], 3600);
         let token = generate_token(&claims, TEST_SECRET).expect("generate token");
         let verified = verify_token(&token, TEST_SECRET).expect("verify token");
         assert_eq!(verified.sub, "test-client");
@@ -232,11 +224,7 @@ mod tests {
     // TC-API-04 : has_scope correct
     #[test]
     fn test_claims_has_scope() {
-        let claims = JwtClaims::new(
-            "test-client",
-            vec![JwtScope::Read, JwtScope::History],
-            3600,
-        );
+        let claims = JwtClaims::new("test-client", vec![JwtScope::Read, JwtScope::History], 3600);
         assert!(claims.has_scope(&JwtScope::Read));
         assert!(claims.has_scope(&JwtScope::History));
         assert!(!claims.has_scope(&JwtScope::Write));

@@ -62,7 +62,10 @@ pub struct SchemaResult {
 /// @human: Lit les métadonnées du schéma (tables, colonnes) sans modifier.
 /// @do: read_schema_metadata
 /// tool.schema.read — lecture seule.
-pub fn read(ctx: &GovernedContext, executor: &dyn SchemaExecutor) -> Result<SchemaResult, MiyuSQLError> {
+pub fn read(
+    ctx: &GovernedContext,
+    executor: &dyn SchemaExecutor,
+) -> Result<SchemaResult, MiyuSQLError> {
     if !ctx.has_mandate() {
         return Err(MiyuSQLError::NoMandate);
     }
@@ -103,5 +106,9 @@ pub trait SchemaExecutor: Send + Sync {
     /// @layer: tool
     /// @human: Lit les métadonnées d'une table.
     /// @do: get_table_meta
-    fn read_table(&self, ctx: &GovernedContext, table_name: &str) -> Result<TableMeta, MiyuSQLError>;
+    fn read_table(
+        &self,
+        ctx: &GovernedContext,
+        table_name: &str,
+    ) -> Result<TableMeta, MiyuSQLError>;
 }

@@ -1,11 +1,11 @@
 //! Configuration boutique JayManga — parametres vendeur et optimisation images.
 
-use dioxus::prelude::*;
-use jaymanga::data::{SellerConfig, OptimizationConfig};
-use miyukini_service_ui::use_palette;
-use crate::use_db;
-use super::components::{PageHeader, FormField, FormTextarea, FormSection, ActionButton};
+use super::components::{ActionButton, FormField, FormSection, FormTextarea, PageHeader};
 use super::JayMangaState;
+use crate::use_db;
+use dioxus::prelude::*;
+use jaymanga::data::{OptimizationConfig, SellerConfig};
+use miyukini_service_ui::use_palette;
 
 #[component]
 pub fn Boutique(state: Signal<JayMangaState>) -> Element {
@@ -13,21 +13,33 @@ pub fn Boutique(state: Signal<JayMangaState>) -> Element {
     let db = use_db();
 
     let config = db.seller_config_get().ok().flatten().unwrap_or_default();
-    let opt_config = db.optimization_config_get().unwrap_or_else(|_| jaymanga::data::OptimizationConfig::defaults());
+    let opt_config = db
+        .optimization_config_get()
+        .unwrap_or_else(|_| jaymanga::data::OptimizationConfig::defaults());
 
     // Champs vendeur
     let mut shop_name = use_signal(|| config.shop_name.clone().unwrap_or_default());
     let mut shop_description = use_signal(|| config.shop_description.clone().unwrap_or_default());
     let mut default_demo_pages = use_signal(|| config.default_demo_pages.unwrap_or(5).to_string());
     let mut currency = use_signal(|| config.currency.clone().unwrap_or_else(|| "EUR".to_string()));
-    let mut reading_direction = use_signal(|| config.reading_direction.clone().unwrap_or_else(|| "rtl".to_string()));
+    let mut reading_direction = use_signal(|| {
+        config
+            .reading_direction
+            .clone()
+            .unwrap_or_else(|| "rtl".to_string())
+    });
     let mut allow_aggregation = use_signal(|| config.allow_aggregation.unwrap_or(true));
 
     // Champs optimisation
     let mut quality_hd = use_signal(|| opt_config.quality_hd.unwrap_or(85).to_string());
     let mut quality_sd = use_signal(|| opt_config.quality_sd.unwrap_or(80).to_string());
     let mut quality_mobile = use_signal(|| opt_config.quality_mobile.unwrap_or(75).to_string());
-    let mut output_format = use_signal(|| opt_config.output_format.clone().unwrap_or_else(|| "webp".to_string()));
+    let mut output_format = use_signal(|| {
+        opt_config
+            .output_format
+            .clone()
+            .unwrap_or_else(|| "webp".to_string())
+    });
     let mut max_jobs = use_signal(|| opt_config.max_concurrent_jobs.unwrap_or(2).to_string());
 
     let config_id = config.id.clone();

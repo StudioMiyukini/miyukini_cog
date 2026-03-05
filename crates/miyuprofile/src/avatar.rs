@@ -22,7 +22,9 @@ pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<Vec<u8>, MiyuprofileE
     if !ctx.has_mandate() {
         return Err(MiyuprofileError::NoMandate);
     }
-    let guard = avatars().lock().map_err(|_| MiyuprofileError::InvalidInput("lock".into()))?;
+    let guard = avatars()
+        .lock()
+        .map_err(|_| MiyuprofileError::InvalidInput("lock".into()))?;
     Ok(guard.get(user_id).cloned().unwrap_or_default())
 }
 
@@ -36,7 +38,9 @@ pub fn set(ctx: &GovernedContext, user_id: &str, payload: &[u8]) -> Result<(), M
     if !ctx.has_mandate() {
         return Err(MiyuprofileError::NoMandate);
     }
-    let mut guard = avatars().lock().map_err(|_| MiyuprofileError::InvalidInput("lock".into()))?;
+    let mut guard = avatars()
+        .lock()
+        .map_err(|_| MiyuprofileError::InvalidInput("lock".into()))?;
     guard.insert(user_id.to_string(), payload.to_vec());
     Ok(())
 }
@@ -51,6 +55,8 @@ pub fn resolve(ctx: &GovernedContext, user_id: &str) -> Result<Option<String>, M
     if !ctx.has_mandate() {
         return Err(MiyuprofileError::NoMandate);
     }
-    let guard = avatars().lock().map_err(|_| MiyuprofileError::InvalidInput("lock".into()))?;
+    let guard = avatars()
+        .lock()
+        .map_err(|_| MiyuprofileError::InvalidInput("lock".into()))?;
     Ok(guard.get(user_id).map(|_| format!("avatar:{user_id}")))
 }

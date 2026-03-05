@@ -12,8 +12,8 @@ pub mod types;
 mod kindmother_client_db;
 
 pub use types::{
-    Agenda, CalendarType, EntryType, EventSource, TemporalConflict, TemporalEntry,
-    TemporalStatus, UserSettings,
+    Agenda, CalendarType, EntryType, EventSource, TemporalConflict, TemporalEntry, TemporalStatus,
+    UserSettings,
 };
 
 pub use kindmother_client_db::{DbError, JayKoaDb};

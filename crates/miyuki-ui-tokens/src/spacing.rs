@@ -118,12 +118,14 @@ mod tests {
     fn test_scale_is_monotonically_increasing() {
         let s = SpacingScale::standard();
         let values = [
-            s.space_0, s.space_1, s.space_2, s.space_3, s.space_4,
-            s.space_5, s.space_6, s.space_8, s.space_10, s.space_12,
-            s.space_16,
+            s.space_0, s.space_1, s.space_2, s.space_3, s.space_4, s.space_5, s.space_6, s.space_8,
+            s.space_10, s.space_12, s.space_16,
         ];
         for window in values.windows(2) {
-            assert!(window[1] >= window[0], "Spacing scale must be monotonically increasing");
+            assert!(
+                window[1] >= window[0],
+                "Spacing scale must be monotonically increasing"
+            );
         }
     }
 }

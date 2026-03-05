@@ -107,8 +107,7 @@ pub fn alicia_automations_admin_cell(
             tests: vec![
                 EmbeddedTestDef {
                     id: "AliciaAutomationsEvaluatorTest".to_string(),
-                    name: "Test evaluateur de conditions (types, operators, snapshot)"
-                        .to_string(),
+                    name: "Test evaluateur de conditions (types, operators, snapshot)".to_string(),
                     protocol: "invoke".to_string(),
                     criteria: TestCriteria {
                         pass: "all_steps_ok".to_string(),
@@ -135,9 +134,7 @@ pub fn alicia_automations_admin_cell(
         },
         integrity: AliciaAutomationsIntegrity {
             fingerprint: fingerprint.to_string(),
-            contracts: vec![
-                "AliciaAutomations-Tool-Governance-Compliance".to_string(),
-            ],
+            contracts: vec!["AliciaAutomations-Tool-Governance-Compliance".to_string()],
             core_versions: std::collections::HashMap::new(),
         },
     }
@@ -147,10 +144,7 @@ pub fn alicia_automations_admin_cell(
 ///
 /// Appeler une seule fois au demarrage ; les appels suivants retournent
 /// la meme reference.
-pub fn init_admin_cell(
-    version: &str,
-    fingerprint: &str,
-) -> &'static AliciaAutomationsAdminCell {
+pub fn init_admin_cell(version: &str, fingerprint: &str) -> &'static AliciaAutomationsAdminCell {
     ADMIN_CELL.get_or_init(|| alicia_automations_admin_cell(version, fingerprint))
 }
 

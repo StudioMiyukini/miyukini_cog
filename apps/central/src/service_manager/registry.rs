@@ -3,10 +3,10 @@
 //! Stocké dans `%LOCALAPPDATA%/Miyukini-COG/services/registry.json`.
 //! Chaque service installé a un répertoire dédié avec son binaire et ses données.
 
+use miyumarket::manifest::ServiceManifest;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use miyumarket::manifest::ServiceManifest;
 
 /// Répertoire racine pour toutes les installations de services.
 /// Windows : `%LOCALAPPDATA%/Miyukini-COG/services/`
@@ -53,12 +53,10 @@ pub fn load_registry() -> ServiceRegistryData {
         return ServiceRegistryData::default();
     }
     match std::fs::read_to_string(&path) {
-        Ok(content) => {
-            serde_json::from_str(&content).unwrap_or_else(|e| {
-                tracing::warn!("Registre corrompu, réinitialisation: {e}");
-                ServiceRegistryData::default()
-            })
-        }
+        Ok(content) => serde_json::from_str(&content).unwrap_or_else(|e| {
+            tracing::warn!("Registre corrompu, réinitialisation: {e}");
+            ServiceRegistryData::default()
+        }),
         Err(e) => {
             tracing::warn!("Impossible de lire le registre: {e}");
             ServiceRegistryData::default()
@@ -76,8 +74,7 @@ pub fn save_registry(registry: &ServiceRegistryData) -> Result<(), String> {
     }
     let json = serde_json::to_string_pretty(registry)
         .map_err(|e| format!("Sérialisation du registre échouée: {e}"))?;
-    std::fs::write(&path, json)
-        .map_err(|e| format!("Écriture du registre échouée: {e}"))?;
+    std::fs::write(&path, json).map_err(|e| format!("Écriture du registre échouée: {e}"))?;
     tracing::debug!("Registre sauvegardé: {} services", registry.services.len());
     Ok(())
 }

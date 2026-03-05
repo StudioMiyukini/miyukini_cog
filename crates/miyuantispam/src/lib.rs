@@ -9,7 +9,6 @@
 /// @layer: toolkit
 /// @human: Point d'entrée du toolkit MiyuAntiSpam ; expose les modules tools.
 /// @do: expose_miyuantispam_toolkit
-
 pub mod admin_cell;
 pub mod captcha;
 pub mod context;
@@ -18,8 +17,8 @@ pub mod flood;
 pub mod rate_limit;
 
 pub use admin_cell::{
-    miyuantispam_admin_cell, MiyuantispamAdminCell, MiyuantispamIdentification, MiyuantispamIntegrity,
-    MiyuantispamTestManifest, TOOLKIT_ID,
+    miyuantispam_admin_cell, MiyuantispamAdminCell, MiyuantispamIdentification,
+    MiyuantispamIntegrity, MiyuantispamTestManifest, TOOLKIT_ID,
 };
 pub use captcha::{generate as captcha_generate, verify as captcha_verify};
 pub use context::GovernedContext;

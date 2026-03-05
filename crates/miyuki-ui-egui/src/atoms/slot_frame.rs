@@ -6,9 +6,9 @@
 //! equipment panels, and belt areas. The size is measured in grid cells,
 //! with each cell being 29x29 logical pixels (D2 standard).
 
+use crate::convert::rgba_to_color32;
 use egui::{Color32, Response, Rounding, Stroke, Ui, Vec2};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// Cell size in logical pixels (D2 standard: 29x29 for inventory).
 pub const CELL_PX: f32 = 29.0;
@@ -171,8 +171,13 @@ mod tests {
     #[test]
     fn test_all_slot_sizes_positive() {
         let sizes = [
-            SlotSize::S1x1, SlotSize::S1x2, SlotSize::S1x3, SlotSize::S1x4,
-            SlotSize::S2x2, SlotSize::S2x3, SlotSize::S2x4,
+            SlotSize::S1x1,
+            SlotSize::S1x2,
+            SlotSize::S1x3,
+            SlotSize::S1x4,
+            SlotSize::S2x2,
+            SlotSize::S2x3,
+            SlotSize::S2x4,
         ];
         for size in sizes {
             assert!(size.width_px() > 0.0);

@@ -35,7 +35,11 @@ pub trait Translator {
     /// @human: Traduit des données d'un format vers un autre.
     /// @do: translate_data
     /// @depends: bondingbrother_translator_trait
-    fn translate(&self, data: &[u8], translation: &Translation) -> Result<Vec<u8>, TranslationError>;
+    fn translate(
+        &self,
+        data: &[u8],
+        translation: &Translation,
+    ) -> Result<Vec<u8>, TranslationError>;
 }
 
 /// @id: bondingbrother_translation_error
@@ -79,7 +83,11 @@ impl DefaultTranslator {
 }
 
 impl Translator for DefaultTranslator {
-    fn translate(&self, data: &[u8], translation: &Translation) -> Result<Vec<u8>, TranslationError> {
+    fn translate(
+        &self,
+        data: &[u8],
+        translation: &Translation,
+    ) -> Result<Vec<u8>, TranslationError> {
         if translation.source_format == translation.target_format {
             Ok(data.to_vec())
         } else {

@@ -126,13 +126,11 @@ pub use api::{APIError, CoreDataAPI, WriteIntent, WriteOperation};
 /// @depends: kindmother_module_threat
 pub use threat::{DefaultThreatDetector, ThreatDetector, ThreatLevel};
 
+pub use miyusql_bridge::{MiyuSQLBridgeImpl, MiyuSQLExecutionBridge};
 /// @id: kindmother_reexport_observability
 /// @role: infrastructure
 /// @layer: core
 /// @human: Ré-export des types d'observabilité pour faciliter l'usage.
 /// @do: reexport_observability_types
 /// @depends: kindmother_module_observability
-pub use observability::{
-    DefaultObservability, HealthStatus, Metrics, Observability,
-};
-pub use miyusql_bridge::{MiyuSQLBridgeImpl, MiyuSQLExecutionBridge};
+pub use observability::{DefaultObservability, HealthStatus, Metrics, Observability};

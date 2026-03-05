@@ -42,7 +42,7 @@ pub struct TestingSuitesReport {
 }
 
 /// Exécute la suite Quick (COH-001, CONF-001 — Unit Tests Contract §8.1).
-#[must_use] 
+#[must_use]
 pub fn run_suite_quick(
     backend: Option<&dyn DbUnitTestBackend>,
     miyukinisqltest_backend: Option<&dyn crate::cycle_tests_runner::MiyukiniSQLtestBackend>,
@@ -56,7 +56,7 @@ pub fn run_suite_quick(
 }
 
 /// Exécute la suite Standard (tous COH, CONF-001 à CONF-003 — Unit Tests Contract §8.1).
-#[must_use] 
+#[must_use]
 pub fn run_suite_standard(
     backend: Option<&dyn DbUnitTestBackend>,
     miyukinisqltest_backend: Option<&dyn crate::cycle_tests_runner::MiyukiniSQLtestBackend>,
@@ -67,7 +67,7 @@ pub fn run_suite_standard(
 }
 
 /// Exécute la suite Full (tous les tests unitaires DB + MiyukiniSQLtest).
-#[must_use] 
+#[must_use]
 pub fn run_suite_full(
     backend: Option<&dyn DbUnitTestBackend>,
     miyukinisqltest_backend: Option<&dyn crate::cycle_tests_runner::MiyukiniSQLtestBackend>,
@@ -81,7 +81,7 @@ pub fn run_suite_full(
 /// @layer: operator
 /// @human: Exécute les suites (unit + MiyukiniSQLtest) et produit un rapport combiné.
 /// @do: run_suites_and_report
-#[must_use] 
+#[must_use]
 pub fn run_suites_and_report(
     suite_name: &str,
     unit_definitions: &[crate::db_unit_tests::DbUnitTestDefinition],

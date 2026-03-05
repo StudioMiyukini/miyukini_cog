@@ -12,6 +12,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use miyucloud::domain::FileOps;
+use miyucloud::utils::sanitize::validate_uuid;
 use serde::Deserialize;
 use std::sync::Arc;
 
@@ -29,6 +30,15 @@ pub async fn create_folder(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateFolderBody>,
 ) -> Response {
+    if let Some(pid) = &body.parent_id {
+        if !pid.is_empty() && !validate_uuid(pid) {
+            return error_response(
+                StatusCode::BAD_REQUEST,
+                "INVALID_PARENT_ID",
+                "Invalid parent folder id",
+            );
+        }
+    }
     if body.name.is_empty() {
         return error_response(
             StatusCode::BAD_REQUEST,
@@ -63,6 +73,18 @@ pub async fn update_folder(
     Path(id): Path<String>,
     Json(body): Json<UpdateFolderBody>,
 ) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(StatusCode::BAD_REQUEST, "INVALID_ID", "Invalid folder id");
+    }
+    if let Some(pid) = &body.parent_id {
+        if !pid.is_empty() && !validate_uuid(pid) {
+            return error_response(
+                StatusCode::BAD_REQUEST,
+                "INVALID_PARENT_ID",
+                "Invalid parent id",
+            );
+        }
+    }
     let db = &state.db;
     if let Some(name) = &body.name {
         if let Err(e) = FileOps::rename_folder(db, &id, name) {
@@ -106,10 +128,10 @@ pub async fn update_folder(
 }
 
 /// Supprime un dossier (soft delete -> corbeille).
-pub async fn delete_folder(
-    State(state): State<Arc<AppState>>,
-    Path(id): Path<String>,
-) -> Response {
+pub async fn delete_folder(State(state): State<Arc<AppState>>, Path(id): Path<String>) -> Response {
+    if !validate_uuid(&id) {
+        return error_response(StatusCode::BAD_REQUEST, "INVALID_ID", "Invalid folder id");
+    }
     let db = &state.db;
     match FileOps::delete_folder(db, &id) {
         Ok(()) => (StatusCode::OK, Json(serde_json::json!({"trashed": true}))).into_response(),

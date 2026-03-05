@@ -20,15 +20,15 @@ use crate::character_creation::{
     all_phrases, apply_phrase_effects, pick_three_phrases, CharacterStats, PhraseDef,
 };
 use crate::constants::{COMBAT_SURFACE_SIZE, TOWER_BASE_COST_GOLD};
+use crate::embedded_sprites::{
+    animation_frame_index, enemy_boss, enemy_miniboss, enemy_normal, player,
+};
 use crate::enemies::EnemyKind;
 use crate::game_loop::{move_player, move_secondary_player, tick_battle};
 use crate::game_state::{rand_simple, GamePhase, GameState};
 use crate::loot::{InventoryEntry, ItemSlot, LootKind};
 use crate::player::{Dir8, Player};
 use crate::save::{LordOfTheCastleDb, SlotMetadata};
-use crate::embedded_sprites::{
-    animation_frame_index, player, enemy_normal, enemy_miniboss, enemy_boss,
-};
 use crate::troops::TroopKind;
 use crate::warrior_skills::{warrior_skill_def, WarriorSkillId};
 use dioxus::prelude::*;
@@ -189,7 +189,9 @@ pub fn SurvivorApp() -> Element {
 
     let content = match screen() {
         Screen::MainMenu => rsx! { MainMenu { screen, game_state, active_slot } },
-        Screen::CharacterCreation => rsx! { CharacterCreationScreen { screen, game_state, active_slot } },
+        Screen::CharacterCreation => {
+            rsx! { CharacterCreationScreen { screen, game_state, active_slot } }
+        }
         Screen::Game => rsx! { GameScreen { screen, game_state, active_slot } },
     };
 
@@ -215,7 +217,11 @@ button:hover { filter: brightness(1.15); }
 // ─── Menu principal ───────────────────────────────────────────────────
 
 #[component]
-fn MainMenu(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, active_slot: Signal<Option<u8>>) -> Element {
+fn MainMenu(
+    screen: Signal<Screen>,
+    game_state: Signal<Option<GameState>>,
+    active_slot: Signal<Option<u8>>,
+) -> Element {
     let base_path = use_context::<Signal<PathBuf>>();
     let slots_resource = use_resource(move || {
         let path = base_path.read().clone();
@@ -334,7 +340,11 @@ impl CreationState {
 }
 
 #[component]
-fn CharacterCreationScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, active_slot: Signal<Option<u8>>) -> Element {
+fn CharacterCreationScreen(
+    screen: Signal<Screen>,
+    game_state: Signal<Option<GameState>>,
+    active_slot: Signal<Option<u8>>,
+) -> Element {
     let mut state = use_signal(CreationState::new);
     let base_path = use_context::<Signal<PathBuf>>();
 
@@ -543,7 +553,13 @@ fn CharacterCreationScreen(screen: Signal<Screen>, game_state: Signal<Option<Gam
 
 /// Ligne de stat pour le récapitulatif création.
 fn stat_row(short: &str, long: &str, value: i32) -> Element {
-    let val_color = if value > 0 { "#88cc88" } else if value < 0 { "#cc6666" } else { "#c6d4df" };
+    let val_color = if value > 0 {
+        "#88cc88"
+    } else if value < 0 {
+        "#cc6666"
+    } else {
+        "#c6d4df"
+    };
     let display = if value < 0 {
         format!("1({})", value)
     } else {
@@ -577,7 +593,11 @@ struct HeldKeys {
 }
 
 #[component]
-fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, active_slot: Signal<Option<u8>>) -> Element {
+fn GameScreen(
+    screen: Signal<Screen>,
+    game_state: Signal<Option<GameState>>,
+    active_slot: Signal<Option<u8>>,
+) -> Element {
     let mut active_panel = use_signal(|| Option::<Panel>::None);
     let mut dev_mode = use_signal(|| false);
     let mut build_mode = use_signal(|| false); // Mode construction RTS
@@ -644,7 +664,11 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
     let level = gs.level;
     let xp = gs.xp;
     let xp_needed = gs.xp_required_for_next_level();
-    let xp_pct = if xp_needed > 0 { (xp as f32 / xp_needed as f32 * 100.0).min(100.0) } else { 0.0 };
+    let xp_pct = if xp_needed > 0 {
+        (xp as f32 / xp_needed as f32 * 100.0).min(100.0)
+    } else {
+        0.0
+    };
     let player_hp = gs.player.hp;
     let player_hp_max = gs.player.hp_max;
     let player_dead = gs.player.dead;
@@ -679,16 +703,37 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
         .map(|e| {
             let color = match e.kind {
                 EnemyKind::Normal => {
-                    if e.is_flashing() { "#ffffff".to_string() } else { "#ff4444".to_string() }
+                    if e.is_flashing() {
+                        "#ffffff".to_string()
+                    } else {
+                        "#ff4444".to_string()
+                    }
                 }
                 EnemyKind::MiniBoss => {
-                    if e.is_flashing() { "#ffffff".to_string() } else { "#ff8800".to_string() }
+                    if e.is_flashing() {
+                        "#ffffff".to_string()
+                    } else {
+                        "#ff8800".to_string()
+                    }
                 }
                 EnemyKind::Boss => {
-                    if e.is_flashing() { "#ffffff".to_string() } else { "#cc44ff".to_string() }
+                    if e.is_flashing() {
+                        "#ffffff".to_string()
+                    } else {
+                        "#cc44ff".to_string()
+                    }
                 }
             };
-            (e.x, e.y, e.kind.size(), color, e.hp, e.hp_max, e.kind, e.is_flashing())
+            (
+                e.x,
+                e.y,
+                e.kind.size(),
+                color,
+                e.hp,
+                e.hp_max,
+                e.kind,
+                e.is_flashing(),
+            )
         })
         .collect();
 
@@ -701,11 +746,7 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
         .collect();
 
     // Projectiles tours
-    let proj_renders: Vec<(f32, f32)> = gs
-        .tower_projectiles
-        .iter()
-        .map(|p| (p.x, p.y))
-        .collect();
+    let proj_renders: Vec<(f32, f32)> = gs.tower_projectiles.iter().map(|p| (p.x, p.y)).collect();
 
     // Loot au sol
     let loot_renders: Vec<(f32, f32, String)> = gs
@@ -730,7 +771,11 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
         .collect();
 
     // Joueur secondaire
-    let sec_render = gs.secondary_player.as_ref().filter(|s| !s.is_dead()).map(|s| (s.x, s.y));
+    let sec_render = gs
+        .secondary_player
+        .as_ref()
+        .filter(|s| !s.is_dead())
+        .map(|s| (s.x, s.y));
 
     // Projectiles secondaires
     let sec_proj_renders: Vec<(f32, f32)> = gs
@@ -751,7 +796,8 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
     // ─── Pré-calcul des styles de rendu des entités ───
     let _tower_cost = TOWER_BASE_COST_GOLD;
 
-    let loot_styles: Vec<String> = loot_renders.iter()
+    let loot_styles: Vec<String> = loot_renders
+        .iter()
         .map(|(x, y, c)| entity_style(*x, *y, 5.0, c))
         .collect();
 
@@ -762,15 +808,22 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
     let castle_hp_outer_s = hp_bar_outer(castle_x, castle_y, 40.0);
     let castle_hp_fill_s = hp_bar_fill_style(castle_hp, castle_hp_max);
 
-    let tower_styles: Vec<(String, String, String)> = tower_renders.iter()
-        .map(|(x, y, hp, hm)| (
-            format!("{}border:1px solid #aa8833;border-radius:2px;", entity_style(*x, *y, 40.0, "#8b6914")),
-            hp_bar_outer(*x, *y, 40.0),
-            hp_bar_fill_style(*hp, *hm),
-        ))
+    let tower_styles: Vec<(String, String, String)> = tower_renders
+        .iter()
+        .map(|(x, y, hp, hm)| {
+            (
+                format!(
+                    "{}border:1px solid #aa8833;border-radius:2px;",
+                    entity_style(*x, *y, 40.0, "#8b6914")
+                ),
+                hp_bar_outer(*x, *y, 40.0),
+                hp_bar_fill_style(*hp, *hm),
+            )
+        })
         .collect();
 
-    let troop_styles: Vec<String> = troop_renders.iter()
+    let troop_styles: Vec<String> = troop_renders
+        .iter()
         .map(|(x, y, is_sec)| {
             let c = if *is_sec { "#22aa88" } else { "#44cc44" };
             format!("{}border-radius:50%;", entity_style(*x, *y, 10.0, c))
@@ -820,13 +873,24 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
         })
         .collect();
 
-    let sec_style = sec_render.map(|(x, y)|
-        format!("{}border:1px solid #66ffff;border-radius:50%;", entity_style(x, y, 10.0, "#00cccc"))
-    );
+    let sec_style = sec_render.map(|(x, y)| {
+        format!(
+            "{}border:1px solid #66ffff;border-radius:50%;",
+            entity_style(x, y, 10.0, "#00cccc")
+        )
+    });
 
     // ─ Rendu du joueur (sprite animé) ─
-    let player_sprite = if player_dead { &player::DEATH } else { &player::IDLE };
-    let player_frame = animation_frame_index(anim_elapsed, player_sprite.frame_count, player_sprite.frame_duration_s);
+    let player_sprite = if player_dead {
+        &player::DEATH
+    } else {
+        &player::IDLE
+    };
+    let player_frame = animation_frame_index(
+        anim_elapsed,
+        player_sprite.frame_count,
+        player_sprite.frame_duration_s,
+    );
     // Flip horizontal si le joueur regarde vers la gauche
     let player_facing_left = matches!(_player_dir, Dir8::W | Dir8::NW | Dir8::SW);
     let player_sprite_css = player_sprite.css_style(player_frame, player_facing_left);
@@ -842,7 +906,7 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
             "position:absolute;left:{player_left_px:.0}px;top:{player_top_px:.0}px;width:{player_size_px:.0}px;height:{player_size_px:.0}px;transform:translate(-50%,-50%);z-index:5;opacity:0.5;{player_sprite_css}"
         )
     };
-    
+
     // ─ Cône d'attaque du joueur (suit le curseur) ─
     let current_cursor_angle = cursor_angle();
     let attack_cone_style = if !player_dead && phase == GamePhase::Battle {
@@ -859,12 +923,24 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
         None
     };
 
-    let proj_styles: Vec<String> = proj_renders.iter()
-        .map(|(x, y)| format!("{}border-radius:50%;z-index:6;", entity_style(*x, *y, 3.0, "#cccccc")))
+    let proj_styles: Vec<String> = proj_renders
+        .iter()
+        .map(|(x, y)| {
+            format!(
+                "{}border-radius:50%;z-index:6;",
+                entity_style(*x, *y, 3.0, "#cccccc")
+            )
+        })
         .collect();
 
-    let sec_proj_styles: Vec<String> = sec_proj_renders.iter()
-        .map(|(x, y)| format!("{}border-radius:50%;z-index:6;", entity_style(*x, *y, 4.0, "#00ffff")))
+    let sec_proj_styles: Vec<String> = sec_proj_renders
+        .iter()
+        .map(|(x, y)| {
+            format!(
+                "{}border-radius:50%;z-index:6;",
+                entity_style(*x, *y, 4.0, "#00ffff")
+            )
+        })
         .collect();
 
     // ─── Grille de construction RTS ───
@@ -872,22 +948,23 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
     use crate::constants::size::CONSTRUCTION_CELL_SIZE;
     let grid_radius = 10i32; // Nombre de cellules autour du château
     let cell_size_world = CONSTRUCTION_CELL_SIZE; // 20.0 px
-    
-    let grid_cells: Vec<(i32, i32, bool, f32, f32)> = if phase == GamePhase::Preparation && build_mode() {
-        let mut cells = Vec::new();
-        for ci in -grid_radius..=grid_radius {
-            for cj in -grid_radius..=grid_radius {
-                // Convertir coordonnées de cellule en coordonnées monde
-                let world_x = castle_x + (ci as f32) * cell_size_world;
-                let world_y = castle_y + (cj as f32) * cell_size_world;
-                let can_build = gs.can_build_at_cell(ci, cj);
-                cells.push((ci, cj, can_build, world_x, world_y));
+
+    let grid_cells: Vec<(i32, i32, bool, f32, f32)> =
+        if phase == GamePhase::Preparation && build_mode() {
+            let mut cells = Vec::new();
+            for ci in -grid_radius..=grid_radius {
+                for cj in -grid_radius..=grid_radius {
+                    // Convertir coordonnées de cellule en coordonnées monde
+                    let world_x = castle_x + (ci as f32) * cell_size_world;
+                    let world_y = castle_y + (cj as f32) * cell_size_world;
+                    let can_build = gs.can_build_at_cell(ci, cj);
+                    cells.push((ci, cj, can_build, world_x, world_y));
+                }
             }
-        }
-        cells
-    } else {
-        Vec::new()
-    };
+            cells
+        } else {
+            Vec::new()
+        };
 
     // ─── Données pour les panneaux ───
     let stats = gs.effective_stats();
@@ -1079,19 +1156,19 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                             let coords = evt.element_coordinates();
                             let cursor_px_x = coords.x as f32;
                             let cursor_px_y = coords.y as f32;
-                            
+
                             let elem_size = SURFACE;
                             let cursor_world_x = (cursor_px_x / elem_size) * SURFACE;
                             let cursor_world_y = (cursor_px_y / elem_size) * SURFACE;
-                            
+
                             // Stocker pour la boucle de jeu (auto-attaque)
                             set_cursor_world(cursor_world_x, cursor_world_y);
-                            
+
                             // Calculer l'angle pour le cône visuel
                             if let Some(gs) = game_state.read().as_ref() {
                                 let px = gs.player.x;
                                 let py = gs.player.y;
-                                
+
                                 let dx = cursor_world_x - px;
                                 let dy = cursor_world_y - py;
                                 // atan2: 0°=droite, 90°=bas (Y vers le bas sur écran)
@@ -1100,7 +1177,7 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                                 // Donc: css_angle = atan2_angle + 90
                                 let angle_rad = dy.atan2(dx);
                                 let angle_deg = angle_rad.to_degrees() + 90.0;
-                                
+
                                 cursor_angle.set(angle_deg);
                             }
                         },
@@ -1112,15 +1189,15 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                                     let ci_copy = *ci;
                                     let cj_copy = *cj;
                                     let can_build_copy = *can_build;
-                                    let bg_color = if can_build_copy { 
-                                        "rgba(68, 204, 68, 0.3)" 
-                                    } else { 
-                                        "rgba(204, 68, 68, 0.2)" 
+                                    let bg_color = if can_build_copy {
+                                        "rgba(68, 204, 68, 0.3)"
+                                    } else {
+                                        "rgba(204, 68, 68, 0.2)"
                                     };
-                                    let border_color = if can_build_copy { 
-                                        "rgba(68, 204, 68, 0.6)" 
-                                    } else { 
-                                        "rgba(204, 68, 68, 0.4)" 
+                                    let border_color = if can_build_copy {
+                                        "rgba(68, 204, 68, 0.6)"
+                                    } else {
+                                        "rgba(204, 68, 68, 0.4)"
                                     };
                                     let hover_style = if can_build_copy {
                                         "cursor:pointer;"
@@ -1238,7 +1315,7 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                             p { style: "font-size:12px;color:#c6d4df;font-weight:600;margin-bottom:4px;", "🏗 Tour de base" }
                             p { style: "font-size:10px;color:#8f98a0;margin-bottom:6px;", "PV 100 • Portée 300px • Dmg 4" }
                             p { style: "font-size:10px;color:#ffcc00;margin-bottom:6px;", "Coût : {TOWER_BASE_COST_GOLD} or" }
-                            
+
                             // Bouton pour activer/désactiver le mode construction
                             {
                                 let is_build_mode = build_mode();
@@ -1256,7 +1333,7 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                                     }
                                 }
                             }
-                            
+
                             // Bouton construction rapide (trouve automatiquement une place)
                             button {
                                 style: "width:100%;padding:4px;background:#1a3a1a;color:#668866;border:1px solid #2a4a2a;border-radius:3px;cursor:pointer;font-size:10px;",
@@ -1270,9 +1347,9 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
                                 },
                                 "Auto-placer"
                             }
-                            
+
                             if build_mode() {
-                                p { 
+                                p {
                                     style: "font-size:9px;color:#88cc88;margin-top:6px;text-align:center;",
                                     "Cliquez sur une case verte pour construire"
                                 }
@@ -1693,10 +1770,21 @@ fn GameScreen(screen: Signal<Screen>, game_state: Signal<Option<GameState>>, act
 }
 
 /// Bouton pour ouvrir/fermer un panneau.
-fn panel_button(label: &str, panel: Panel, mut active: Signal<Option<Panel>>, dim: bool) -> Element {
+fn panel_button(
+    label: &str,
+    panel: Panel,
+    mut active: Signal<Option<Panel>>,
+    dim: bool,
+) -> Element {
     let is_active = active() == Some(panel);
     let bg = if is_active { "#2a4a6a" } else { "#232f3e" };
-    let color = if dim && !is_active { "#556677" } else if is_active { "#1a9fff" } else { "#c6d4df" };
+    let color = if dim && !is_active {
+        "#556677"
+    } else if is_active {
+        "#1a9fff"
+    } else {
+        "#c6d4df"
+    };
     let fw = if is_active { "600" } else { "400" };
     rsx! {
         button {
@@ -1735,10 +1823,22 @@ fn StatsContent(
     use crate::character_creation::Stat;
     let stat_list: Vec<(&str, &str, i32, i32, Stat)> = vec![
         ("For", "Force", base_stats.for_, eff_stats.for_, Stat::For),
-        ("Con", "Constitution", base_stats.con, eff_stats.con, Stat::Con),
+        (
+            "Con",
+            "Constitution",
+            base_stats.con,
+            eff_stats.con,
+            Stat::Con,
+        ),
         ("Agi", "Agilité", base_stats.agi, eff_stats.agi, Stat::Agi),
         ("Dex", "Dextérité", base_stats.dex, eff_stats.dex, Stat::Dex),
-        ("Int", "Intelligence", base_stats.int, eff_stats.int, Stat::Int),
+        (
+            "Int",
+            "Intelligence",
+            base_stats.int,
+            eff_stats.int,
+            Stat::Int,
+        ),
         ("Sag", "Sagesse", base_stats.sag, eff_stats.sag, Stat::Sag),
         ("Cha", "Charisme", base_stats.cha, eff_stats.cha, Stat::Cha),
         ("Luk", "Chance", base_stats.luk, eff_stats.luk, Stat::Luk),
@@ -1827,7 +1927,14 @@ fn SkillsContent(
             let can_learn = skill_pts > 0
                 && current < def.max_rank
                 && crate::warrior_skills::prerequisites_met(&skill_ranks, &def);
-            (id, def.name, def.effect_description, current, def.max_rank, can_learn)
+            (
+                id,
+                def.name,
+                def.effect_description,
+                current,
+                def.max_rank,
+                can_learn,
+            )
         })
         .collect();
 

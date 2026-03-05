@@ -35,11 +35,7 @@ pub fn print(ctx: &GovernedContext, _sale_id: &str) -> Result<(), MiyupossalesEr
 /// @human: Envoie le reçu par email (données fournies).
 /// @do: receipt_send_under_governance
 /// tool.pos.receipt.send
-pub fn send(
-    ctx: &GovernedContext,
-    _sale_id: &str,
-    _email: &str,
-) -> Result<(), MiyupossalesError> {
+pub fn send(ctx: &GovernedContext, _sale_id: &str, _email: &str) -> Result<(), MiyupossalesError> {
     if !ctx.has_mandate() {
         return Err(MiyupossalesError::NoMandate);
     }

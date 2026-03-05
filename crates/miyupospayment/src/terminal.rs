@@ -27,10 +27,7 @@ pub fn authorize(
 /// @human: Confirme (capture) un paiement CB précédemment autorisé.
 /// @do: terminal_capture_under_governance
 /// tool.payment.terminal.capture
-pub fn capture(
-    ctx: &GovernedContext,
-    _auth_id: &str,
-) -> Result<String, MiyupospaymentError> {
+pub fn capture(ctx: &GovernedContext, _auth_id: &str) -> Result<String, MiyupospaymentError> {
     if !ctx.has_mandate() {
         return Err(MiyupospaymentError::NoMandate);
     }

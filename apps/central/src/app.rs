@@ -2,19 +2,19 @@
 
 use std::sync::Arc;
 
-use dioxus::prelude::*;
-use crate::data::ServiceConnections;
-use crate::service_manager::ServiceManager;
-use crate::state::{AppContext, AppState, MainTab};
 use crate::components::{Header, TabBar};
-use crate::services::ActiveServiceView;
-use crate::theme::styles;
-use crate::screens::{RiteEntree, Connexion, ProfileWindow};
-use crate::miou::{
-    MiouBubbleOverlay, BulleOutput, BulleAction, ActionType,
-    BotContext, decide, select_variante, templates::generate_bulle,
-};
+use crate::data::ServiceConnections;
 use crate::miou::bubble::MIOU_CSS;
+use crate::miou::{
+    decide, select_variante, templates::generate_bulle, ActionType, BotContext, BulleAction,
+    BulleOutput, MiouBubbleOverlay,
+};
+use crate::screens::{Connexion, ProfileWindow, RiteEntree};
+use crate::service_manager::ServiceManager;
+use crate::services::ActiveServiceView;
+use crate::state::{AppContext, AppState, MainTab};
+use crate::theme::styles;
+use dioxus::prelude::*;
 
 /// Point d'entrée de l'application.
 #[component]
@@ -24,8 +24,8 @@ pub fn App() -> Element {
 
     use_context_provider(|| {
         let base_path = std::env::current_dir().unwrap_or_default();
-        let connections = ServiceConnections::open(&base_path)
-            .expect("Impossible d'ouvrir la base auth");
+        let connections =
+            ServiceConnections::open(&base_path).expect("Impossible d'ouvrir la base auth");
         let connections = Arc::new(connections);
         let auth_db = &*connections.auth_db;
         let is_cog_virgin = auth_db.is_cog_virgin().unwrap_or(true);
@@ -72,7 +72,9 @@ pub fn App() -> Element {
             && !state_read.rite_infos_pending
             && !state_read.miou_first_trigger_done
         {
-            let pseudo = state_read.current_user.as_ref()
+            let pseudo = state_read
+                .current_user
+                .as_ref()
                 .and_then(|u| u.pseudonyme.clone())
                 .unwrap_or_else(|| "habitant".to_string());
             let prefs = state_read.miou_prefs.clone();
@@ -109,7 +111,10 @@ pub fn App() -> Element {
                         current_bubble.set(Some(bulle.clone()));
 
                         ctx.state.write().miou_first_trigger_done = true;
-                        ctx.state.write().miou_state.record_bulle_shown(categorie, &template.id);
+                        ctx.state
+                            .write()
+                            .miou_state
+                            .record_bulle_shown(categorie, &template.id);
                     }
                 }
             });
@@ -123,7 +128,11 @@ pub fn App() -> Element {
             let bubble = current_bubble.read();
             if let Some(b) = bubble.as_ref() {
                 if b.categorie.contains("pause") {
-                    ctx_for_dismiss.state.write().miou_state.record_pause_dismissed();
+                    ctx_for_dismiss
+                        .state
+                        .write()
+                        .miou_state
+                        .record_pause_dismissed();
                 }
             }
         }
@@ -132,27 +141,29 @@ pub fn App() -> Element {
 
     // Handler pour actions de la bulle
     let mut ctx_for_action = ctx.clone();
-    let on_action = move |action: BulleAction| {
-        match action.action_type {
-            ActionType::Dismiss => {
-                current_bubble.set(None);
-            }
-            ActionType::Pause => {
-                ctx_for_action.state.write().miou_state.record_pause_dismissed();
-                current_bubble.set(None);
-            }
-            ActionType::OuvrirService => {
-                if let Some(service_id) = action.payload {
-                    let services = ctx_for_action.state.read().services.clone();
-                    if let Some(service) = services.iter().find(|s| s.id == service_id) {
-                        ctx_for_action.state.write().open_service(service);
-                    }
+    let on_action = move |action: BulleAction| match action.action_type {
+        ActionType::Dismiss => {
+            current_bubble.set(None);
+        }
+        ActionType::Pause => {
+            ctx_for_action
+                .state
+                .write()
+                .miou_state
+                .record_pause_dismissed();
+            current_bubble.set(None);
+        }
+        ActionType::OuvrirService => {
+            if let Some(service_id) = action.payload {
+                let services = ctx_for_action.state.read().services.clone();
+                if let Some(service) = services.iter().find(|s| s.id == service_id) {
+                    ctx_for_action.state.write().open_service(service);
                 }
-                current_bubble.set(None);
             }
-            ActionType::Custom => {
-                current_bubble.set(None);
-            }
+            current_bubble.set(None);
+        }
+        ActionType::Custom => {
+            current_bubble.set(None);
         }
     };
 

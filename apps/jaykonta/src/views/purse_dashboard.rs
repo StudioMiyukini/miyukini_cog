@@ -5,10 +5,10 @@
 //! Contrats : CK-OP-01, CK-TK-51.
 //! Performance : < 3s (NFR-PUR-04).
 
+use super::components::{ActionButton, KpiCard, MovementRow, ProgressBar};
+use super::{JayKontaState, PurseSection};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::{JayKontaState, PurseSection};
-use super::components::{KpiCard, MovementRow, ProgressBar, ActionButton};
 
 #[component]
 pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {

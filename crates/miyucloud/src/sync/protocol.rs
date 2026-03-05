@@ -233,10 +233,7 @@ mod tests {
             parent_id: Some("folder-1".into()),
             checksum_sha256: "deadbeef".into(),
             size_bytes: 65536,
-            clock: VectorClock::from_entries(vec![
-                ("node-a".into(), 2),
-                ("node-b".into(), 1),
-            ]),
+            clock: VectorClock::from_entries(vec![("node-a".into(), 2), ("node-b".into(), 1)]),
             updated_at: "2026-03-01T12:00:00Z".into(),
         };
         let json = serde_json::to_string(&entry).unwrap();

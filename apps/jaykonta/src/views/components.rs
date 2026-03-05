@@ -5,9 +5,19 @@ use miyukini_service_ui::use_palette;
 
 /// Carte KPI (valeur, delta, tendance).
 #[component]
-pub fn KpiCard(label: String, value: String, detail: String, icon: String, positive: bool) -> Element {
+pub fn KpiCard(
+    label: String,
+    value: String,
+    detail: String,
+    icon: String,
+    positive: bool,
+) -> Element {
     let c = use_palette();
-    let detail_color = if positive { c.accent_green } else { c.accent_red };
+    let detail_color = if positive {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
 
     rsx! {
         div {
@@ -27,7 +37,11 @@ pub fn KpiCard(label: String, value: String, detail: String, icon: String, posit
 #[component]
 pub fn AmountDisplay(amount: f64, currency: String) -> Element {
     let c = use_palette();
-    let color = if amount >= 0.0 { c.accent_green } else { c.accent_red };
+    let color = if amount >= 0.0 {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
     let formatted = format!("{amount:+.2} {currency}");
 
     rsx! {
@@ -39,8 +53,16 @@ pub fn AmountDisplay(amount: f64, currency: String) -> Element {
 #[component]
 pub fn ProgressBar(value: f64, max: f64, #[props(default)] color: String) -> Element {
     let c = use_palette();
-    let pct = if max > 0.0 { (value / max * 100.0).min(100.0) } else { 0.0 };
-    let bar_color = if color.is_empty() { c.accent_blue.to_string() } else { color };
+    let pct = if max > 0.0 {
+        (value / max * 100.0).min(100.0)
+    } else {
+        0.0
+    };
+    let bar_color = if color.is_empty() {
+        c.accent_blue.to_string()
+    } else {
+        color
+    };
     let bg_color = c.bg_hover;
 
     rsx! {
@@ -64,9 +86,19 @@ pub fn Badge(text: String, color: String) -> Element {
 
 /// Ligne de mouvement.
 #[component]
-pub fn MovementRow(description: String, date: String, category: String, amount: f64, currency: String) -> Element {
+pub fn MovementRow(
+    description: String,
+    date: String,
+    category: String,
+    amount: f64,
+    currency: String,
+) -> Element {
     let c = use_palette();
-    let amount_color = if amount >= 0.0 { c.accent_green } else { c.accent_red };
+    let amount_color = if amount >= 0.0 {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
     let amount_str = format!("{amount:+.2} {currency}");
 
     rsx! {
@@ -90,11 +122,28 @@ pub fn MovementRow(description: String, date: String, category: String, amount: 
 
 /// Bouton d'action.
 #[component]
-pub fn ActionButton(label: String, icon: String, #[props(default)] accent: bool, onclick: EventHandler<MouseEvent>) -> Element {
+pub fn ActionButton(
+    label: String,
+    icon: String,
+    #[props(default)] accent: bool,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
     let c = use_palette();
-    let bg = if accent { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let color = if accent { "white".to_string() } else { c.text_primary.to_string() };
-    let border = if accent { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let bg = if accent {
+        c.accent_blue.to_string()
+    } else {
+        c.bg_hover.to_string()
+    };
+    let color = if accent {
+        "white".to_string()
+    } else {
+        c.text_primary.to_string()
+    };
+    let border = if accent {
+        "none".to_string()
+    } else {
+        format!("1px solid {}", c.border)
+    };
 
     rsx! {
         button {

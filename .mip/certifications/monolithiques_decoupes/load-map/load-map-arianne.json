@@ -1,0 +1,19 @@
+﻿{
+    "version":  "1.0",
+    "description":  "TÃ¢che â†’ cert_ids Ã  charger. RÃ¨gle : max 2 certs/agent, jamais sans clÃ© load-map. RÃ©soudre via registry.json â†’ REFERENCE.md",
+    "load_map":  {
+                     "arianne.qualite_process":  [
+                                                     "cert.arianne.iso_9001"
+                                                 ],
+                     "arianne.amelioration":  [
+                                                  "cert.arianne.six_sigma",
+                                                  "cert.arianne.iso_33001"
+                                              ],
+                     "arianne.evaluation_process":  [
+                                                        "cert.arianne.iso_33001"
+                                                    ]
+                 },
+    "fallback_par_phase":  {
+
+                           }
+}

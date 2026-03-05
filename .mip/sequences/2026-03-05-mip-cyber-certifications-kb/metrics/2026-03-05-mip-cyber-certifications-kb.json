@@ -1,0 +1,32 @@
+﻿{
+    "notes":  "Sequence documentaire completee avec base critical_cyber atomique et routage registry/load-map actif.",
+    "timestamps":  {
+                       "p6_end":  "2026-03-05T10:05:00Z",
+                       "p4_end":  "2026-03-05T10:00:00Z",
+                       "p0_end":  "2026-03-05T09:25:00Z",
+                       "sequence_start":  "2026-03-05T09:20:00Z",
+                       "p3_end":  "2026-03-05T09:55:00Z",
+                       "p5_end":  "2026-03-05T10:02:00Z"
+                   },
+    "project":  {
+                    "title":  "MIP Cyber Certifications KB",
+                    "description":  "Base de connaissance cyber critique indexee MSCM, orientee verification de controle",
+                    "autonomy_mode":  "FULL",
+                    "class":  "T5",
+                    "slug":  "mip-cyber-certifications-kb"
+                },
+    "counters":  {
+                     "mip_loops":  1,
+                     "emergency_brakes":  0,
+                     "agents_engaged":  [
+                                            "maria",
+                                            "denis",
+                                            "victor",
+                                            "george",
+                                            "francois"
+                                        ],
+                     "audits":  1,
+                     "files_modified":  12,
+                     "files_created":  67
+                 }
+}

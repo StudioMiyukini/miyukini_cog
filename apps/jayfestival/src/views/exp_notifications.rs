@@ -10,10 +10,26 @@ pub fn ExpNotifications() -> Element {
     let mut filter = use_signal(|| "toutes".to_string());
 
     let current_filter = filter.read().clone();
-    let filter_toutes_bg = if current_filter == "toutes" { c.accent_blue } else { c.bg_secondary };
-    let filter_toutes_color = if current_filter == "toutes" { "white" } else { c.text_primary };
-    let filter_nonlues_bg = if current_filter == "non_lues" { c.accent_blue } else { c.bg_secondary };
-    let filter_nonlues_color = if current_filter == "non_lues" { "white" } else { c.text_primary };
+    let filter_toutes_bg = if current_filter == "toutes" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let filter_toutes_color = if current_filter == "toutes" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let filter_nonlues_bg = if current_filter == "non_lues" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let filter_nonlues_color = if current_filter == "non_lues" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -122,8 +138,16 @@ fn NotificationItem(
         _ => ("🔔", c.text_muted),
     };
 
-    let bg = if is_read { c.bg_secondary.to_string() } else { format!("{}15", c.accent_blue) };
-    let border = if is_read { "none".to_string() } else { format!("1px solid {}40", c.accent_blue) };
+    let bg = if is_read {
+        c.bg_secondary.to_string()
+    } else {
+        format!("{}15", c.accent_blue)
+    };
+    let border = if is_read {
+        "none".to_string()
+    } else {
+        format!("1px solid {}40", c.accent_blue)
+    };
     let font_weight = if is_read { "400" } else { "600" };
 
     rsx! {
@@ -227,7 +251,12 @@ fn NotificationSettings() -> Element {
 }
 
 #[component]
-fn NotificationSetting(title: &'static str, description: &'static str, email: bool, push: bool) -> Element {
+fn NotificationSetting(
+    title: &'static str,
+    description: &'static str,
+    email: bool,
+    push: bool,
+) -> Element {
     let c = use_palette();
 
     let email_bg = if email { c.accent_blue } else { c.bg_hover };

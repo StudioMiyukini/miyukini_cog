@@ -1,8 +1,8 @@
 //! EXP-E09/E10 — Documents exposant (liste et upload).
 
+use super::components::{ActionButton, Badge};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
-use super::components::{Badge, ActionButton};
 
 /// Gestion des documents exposant.
 #[component]
@@ -11,14 +11,46 @@ pub fn ExpDocuments() -> Element {
     let mut active_tab = use_signal(|| "tous".to_string());
 
     let tab = active_tab.read().clone();
-    let tab_tous_bg = if tab == "tous" { c.accent_blue } else { c.bg_secondary };
-    let tab_tous_color = if tab == "tous" { "white" } else { c.text_primary };
-    let tab_contrats_bg = if tab == "contrats" { c.accent_blue } else { c.bg_secondary };
-    let tab_contrats_color = if tab == "contrats" { "white" } else { c.text_primary };
-    let tab_factures_bg = if tab == "factures" { c.accent_blue } else { c.bg_secondary };
-    let tab_factures_color = if tab == "factures" { "white" } else { c.text_primary };
-    let tab_autres_bg = if tab == "autres" { c.accent_blue } else { c.bg_secondary };
-    let tab_autres_color = if tab == "autres" { "white" } else { c.text_primary };
+    let tab_tous_bg = if tab == "tous" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_tous_color = if tab == "tous" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_contrats_bg = if tab == "contrats" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_contrats_color = if tab == "contrats" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_factures_bg = if tab == "factures" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_factures_color = if tab == "factures" {
+        "white"
+    } else {
+        c.text_primary
+    };
+    let tab_autres_bg = if tab == "autres" {
+        c.accent_blue
+    } else {
+        c.bg_secondary
+    };
+    let tab_autres_color = if tab == "autres" {
+        "white"
+    } else {
+        c.text_primary
+    };
 
     rsx! {
         div {
@@ -113,7 +145,12 @@ pub fn ExpDocuments() -> Element {
 }
 
 #[component]
-fn DocumentRow(name: &'static str, doc_type: &'static str, date: &'static str, status: &'static str) -> Element {
+fn DocumentRow(
+    name: &'static str,
+    doc_type: &'static str,
+    date: &'static str,
+    status: &'static str,
+) -> Element {
     let c = use_palette();
 
     let icon = match doc_type {
@@ -231,7 +268,11 @@ fn RequiredItem(name: &'static str, provided: bool) -> Element {
     let c = use_palette();
 
     let icon = if provided { "✅" } else { "⬜" };
-    let color = if provided { c.accent_green } else { c.text_muted };
+    let color = if provided {
+        c.accent_green
+    } else {
+        c.text_muted
+    };
 
     rsx! {
         div {

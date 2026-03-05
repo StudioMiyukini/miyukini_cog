@@ -6,9 +6,7 @@
 //! @role: test
 //! @layer: tool
 
-use miyusql::{
-    query_execute, GovernedContext, MemoryExecutor, MIYUKINI_SQLTEST_TABLE,
-};
+use miyusql::{query_execute, GovernedContext, MemoryExecutor, MIYUKINI_SQLTEST_TABLE};
 
 const TEST_VALUE_COL: &str = "test_value";
 

@@ -21,5 +21,8 @@ pub use context::GovernedContext;
 pub use errors::MiyubillingError;
 pub use invoice::{generate as invoice_generate, list as invoice_list};
 pub use payment::record as payment_record;
-pub use subscription::{cancel as subscription_cancel, create as subscription_create, status as subscription_status, update as subscription_update};
+pub use subscription::{
+    cancel as subscription_cancel, create as subscription_create, status as subscription_status,
+    update as subscription_update,
+};
 pub use tenant::resolve as tenant_resolve;

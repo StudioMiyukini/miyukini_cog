@@ -26,7 +26,11 @@ pub fn generate(
     if !ctx.has_mandate() {
         return Err(MiyuExportError::NoMandate);
     }
-    let delim = if options.delimiter == '\0' { ',' } else { options.delimiter };
+    let delim = if options.delimiter == '\0' {
+        ','
+    } else {
+        options.delimiter
+    };
     let mut out = String::new();
     for row in rows {
         let escaped: Vec<String> = row
@@ -40,7 +44,8 @@ pub fn generate(
 }
 
 fn escape_csv_field(s: &str, delimiter: char) -> String {
-    let needs_quote = s.contains(delimiter) || s.contains('"') || s.contains('\n') || s.contains('\r');
+    let needs_quote =
+        s.contains(delimiter) || s.contains('"') || s.contains('\n') || s.contains('\r');
     if needs_quote {
         format!("\"{}\"", s.replace('"', "\"\""))
     } else {

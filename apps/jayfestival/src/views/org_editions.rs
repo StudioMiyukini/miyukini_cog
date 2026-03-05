@@ -1,16 +1,13 @@
 //! ORG-E05/E06 — Liste des éditions + création d'une nouvelle édition.
 
+use super::components::{format_date_range, ActionButton, EmptyState, EventCard};
+use super::{JayFestivalState, OrgEditionTab, OrgSection};
 use dioxus::prelude::*;
 use jayfestival::data::Edition;
 use miyukini_service_ui::use_palette;
-use super::components::{ActionButton, EventCard, EmptyState, format_date_range};
-use super::{JayFestivalState, OrgEditionTab, OrgSection};
 
 #[component]
-pub fn OrgEditions(
-    editions: Vec<Edition>,
-    state: Signal<JayFestivalState>,
-) -> Element {
+pub fn OrgEditions(editions: Vec<Edition>, state: Signal<JayFestivalState>) -> Element {
     let c = use_palette();
     let mut show_form = use_signal(|| false);
     let mut new_name = use_signal(String::new);

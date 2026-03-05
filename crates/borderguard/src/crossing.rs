@@ -39,7 +39,7 @@ impl CrossingRule {
     /// @human: Crée une nouvelle règle de franchissement.
     /// @do: create_crossing_rule
     /// @depends: borderguard_crossing_rule
-    #[must_use] 
+    #[must_use]
     pub fn new(boundary_id: String, min_trust_level: TrustLevel, allowed: bool) -> Self {
         Self {
             boundary_id,
@@ -89,11 +89,7 @@ mod tests {
     /// @depends: borderguard_crossing_rule_new
     #[test]
     fn test_crossing_rule_creation() {
-        let rule = CrossingRule::new(
-            "boundary-1".to_string(),
-            TrustLevel::Verified,
-            true,
-        );
+        let rule = CrossingRule::new("boundary-1".to_string(), TrustLevel::Verified, true);
         assert_eq!(rule.boundary_id, "boundary-1");
         assert_eq!(rule.min_trust_level, TrustLevel::Verified);
         assert!(rule.allowed);

@@ -1,9 +1,9 @@
 //! Ecran Parametres et vie privee MiyukiniWatch.
 
+use crate::{use_db, use_profile_id};
 use dioxus::prelude::*;
 use miyukini_service_ui::use_palette;
 use miyukiniwatch::{MiyukiniWatchPresenter, Prefs};
-use crate::{use_db, use_profile_id};
 
 #[component]
 pub fn ParamsScreen(prefs: Prefs) -> Element {
@@ -33,8 +33,16 @@ pub fn ParamsScreen(prefs: Prefs) -> Element {
         show_confirm_delete.set(false);
     };
 
-    let btn_bg = if local_prefs().collect_enabled { c.accent_green } else { c.bg_hover };
-    let btn_label = if local_prefs().collect_enabled { "Desactiver" } else { "Activer" };
+    let btn_bg = if local_prefs().collect_enabled {
+        c.accent_green
+    } else {
+        c.bg_hover
+    };
+    let btn_label = if local_prefs().collect_enabled {
+        "Desactiver"
+    } else {
+        "Activer"
+    };
 
     rsx! {
         div {

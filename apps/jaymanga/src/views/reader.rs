@@ -4,16 +4,15 @@
 //! Formats supportes : manga (RTL), webtoon (scroll vertical),
 //! landscape (16:9), comics (LTR), free.
 
-use dioxus::prelude::*;
-use jaymanga::domain::reader::{
-    reader_chapter_progress, reader_is_demo_page,
-    reader_next_page_index, reader_prev_page_index,
-};
-use jaymanga::domain::gamification::XP_PER_PAGE;
-use miyukini_service_ui::use_palette;
-use crate::use_db;
 use super::components::Badge;
 use super::{JayMangaSection, JayMangaState};
+use crate::use_db;
+use dioxus::prelude::*;
+use jaymanga::domain::gamification::XP_PER_PAGE;
+use jaymanga::domain::reader::{
+    reader_chapter_progress, reader_is_demo_page, reader_next_page_index, reader_prev_page_index,
+};
+use miyukini_service_ui::use_palette;
 
 // -- Etat interne de la liseuse --
 
@@ -97,8 +96,14 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     }
 
     let work = work.unwrap();
-    let work_title = work.title.clone().unwrap_or_else(|| "Sans titre".to_string());
-    let reading_format = work.reading_format.clone().unwrap_or_else(|| "manga".to_string());
+    let work_title = work
+        .title
+        .clone()
+        .unwrap_or_else(|| "Sans titre".to_string());
+    let reading_format = work
+        .reading_format
+        .clone()
+        .unwrap_or_else(|| "manga".to_string());
     let demo_pages = work.demo_pages_count.unwrap_or(5);
 
     // Chapitres et pages
@@ -121,7 +126,10 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     // Etat local de la liseuse
     let mut current_chapter_idx = use_signal(|| {
         if let Some(ref cid) = chapter_id_init {
-            chapters.iter().position(|ch| ch.id.as_deref() == Some(cid.as_str())).unwrap_or(0)
+            chapters
+                .iter()
+                .position(|ch| ch.id.as_deref() == Some(cid.as_str()))
+                .unwrap_or(0)
         } else {
             0
         }
@@ -145,21 +153,32 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
             let page_idx_val = *current_page_idx.read();
 
             // Calculer la progression globale approximative
-            let chapters_save = db_save.chapter_list_by_work(&work_id_save).unwrap_or_default();
+            let chapters_save = db_save
+                .chapter_list_by_work(&work_id_save)
+                .unwrap_or_default();
             let total_ch = chapters_save.len().max(1) as f64;
-            let pages_in_chap = chapters_save.get(chap_idx_val)
+            let pages_in_chap = chapters_save
+                .get(chap_idx_val)
                 .and_then(|ch| ch.page_count)
                 .unwrap_or(1) as f64;
-            let chap_progress = if pages_in_chap > 0.0 { (page_idx_val as f64 + 1.0) / pages_in_chap } else { 0.0 };
+            let chap_progress = if pages_in_chap > 0.0 {
+                (page_idx_val as f64 + 1.0) / pages_in_chap
+            } else {
+                0.0
+            };
             let global_progress = ((chap_idx_val as f64 + chap_progress) / total_ch).min(1.0);
 
-            let chapter_num = chapters_save.get(chap_idx_val)
+            let chapter_num = chapters_save
+                .get(chap_idx_val)
                 .and_then(|ch| ch.chapter_number)
                 .unwrap_or(0);
 
             // Mettre a jour le favori existant via favorite_update_progress(id, chapter, page, progress)
             if let Ok(favs) = db_save.favorite_list() {
-                if let Some(fav) = favs.iter().find(|f| f.work_id.as_deref() == Some(&work_id_save)) {
+                if let Some(fav) = favs
+                    .iter()
+                    .find(|f| f.work_id.as_deref() == Some(&work_id_save))
+                {
                     if let Some(ref fav_id) = fav.id {
                         let _ = db_save.favorite_update_progress(
                             fav_id,
@@ -190,9 +209,18 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     // Chapitre courant
     let chap_idx = *current_chapter_idx.read();
     let chapter = chapters.get(chap_idx).cloned();
-    let chapter_title = chapter.as_ref().and_then(|ch| ch.title.clone()).unwrap_or_default();
-    let chapter_num = chapter.as_ref().and_then(|ch| ch.chapter_number).unwrap_or(0);
-    let chapter_id = chapter.as_ref().and_then(|ch| ch.id.clone()).unwrap_or_default();
+    let chapter_title = chapter
+        .as_ref()
+        .and_then(|ch| ch.title.clone())
+        .unwrap_or_default();
+    let chapter_num = chapter
+        .as_ref()
+        .and_then(|ch| ch.chapter_number)
+        .unwrap_or(0);
+    let chapter_id = chapter
+        .as_ref()
+        .and_then(|ch| ch.id.clone())
+        .unwrap_or_default();
 
     // Pages du chapitre courant
     let pages = db.page_list_by_chapter(&chapter_id).unwrap_or_default();
@@ -205,8 +233,14 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     let progress_pct = (progress * 100.0) as i32;
 
     // Image a afficher
-    let has_image = current_page.as_ref().and_then(|p| p.original_image_path.as_ref()).is_some();
-    let page_number = current_page.as_ref().and_then(|p| p.page_number).unwrap_or(page_idx + 1);
+    let has_image = current_page
+        .as_ref()
+        .and_then(|p| p.original_image_path.as_ref())
+        .is_some();
+    let page_number = current_page
+        .as_ref()
+        .and_then(|p| p.page_number)
+        .unwrap_or(page_idx + 1);
     let is_demo = reader_is_demo_page(page_number, demo_pages);
 
     // Mode de lecture

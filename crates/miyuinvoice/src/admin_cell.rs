@@ -30,7 +30,9 @@ pub struct MiyuinvoiceTestManifest {
     pub result_format: String,
 }
 
-fn default_result_format() -> String { "json".to_string() }
+fn default_result_format() -> String {
+    "json".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuinvoiceIntegrity {
@@ -49,7 +51,7 @@ pub struct MiyuinvoiceAdminCell {
 
 pub const TOOLKIT_ID: &str = "toolkit.invoice.standalone";
 
-#[must_use] 
+#[must_use]
 pub fn miyuinvoice_admin_cell(version: &str, fingerprint: &str) -> MiyuinvoiceAdminCell {
     MiyuinvoiceAdminCell {
         identification: MiyuinvoiceIdentification {
@@ -63,7 +65,9 @@ pub fn miyuinvoice_admin_cell(version: &str, fingerprint: &str) -> MiyuinvoiceAd
                 id: "Miyuinvoice".to_string(),
                 name: "Test chemin complet Miyuinvoice".to_string(),
                 protocol: "invoke".to_string(),
-                criteria: TestCriteria { pass: "all_steps_ok".to_string() },
+                criteria: TestCriteria {
+                    pass: "all_steps_ok".to_string(),
+                },
             }],
             result_format: "json".to_string(),
         },

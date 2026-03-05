@@ -41,11 +41,27 @@ pub fn format(
     } else {
         (value, "", "")
     };
-    let sep_decimal = options.locale.as_deref().and_then(|l| {
-        if l.starts_with("fr") { Some(',') } else if l.starts_with("en") { Some('.') } else { None }
-    }).unwrap_or('.');
+    let sep_decimal = options
+        .locale
+        .as_deref()
+        .and_then(|l| {
+            if l.starts_with("fr") {
+                Some(',')
+            } else if l.starts_with("en") {
+                Some('.')
+            } else {
+                None
+            }
+        })
+        .unwrap_or('.');
     let sep_thousands = options.locale.as_deref().and_then(|l| {
-        if l.starts_with("fr") { Some(' ') } else if l.starts_with("en") { Some(',') } else { None }
+        if l.starts_with("fr") {
+            Some(' ')
+        } else if l.starts_with("en") {
+            Some(',')
+        } else {
+            None
+        }
     });
     let s = format_decimal(val, decimals, sep_decimal, sep_thousands);
     Ok(format!("{prefix}{s}{suffix}"))
@@ -62,7 +78,12 @@ fn currency_symbol(code: &str) -> &'static str {
     }
 }
 
-fn format_decimal(value: f64, decimals: u32, sep_decimal: char, sep_thousands: Option<char>) -> String {
+fn format_decimal(
+    value: f64,
+    decimals: u32,
+    sep_decimal: char,
+    sep_thousands: Option<char>,
+) -> String {
     let int_part = value.abs().trunc() as i64;
     let frac = (value.abs().fract() * 10_f64.powi(decimals as i32)).round() as u64;
     let int_str = int_part.unsigned_abs().to_string();

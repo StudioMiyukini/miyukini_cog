@@ -78,15 +78,11 @@ impl MqttClient {
         drop(status);
 
         let cfg = &self.inner.config;
-        let mut mqtt_options = rumqttc::MqttOptions::new(
-            &cfg.client_id,
-            &cfg.broker_host,
-            cfg.broker_port,
-        );
+        let mut mqtt_options =
+            rumqttc::MqttOptions::new(&cfg.client_id, &cfg.broker_host, cfg.broker_port);
         mqtt_options.set_keep_alive(Duration::from_secs(cfg.keepalive_secs));
 
-        let (client, mut eventloop) =
-            rumqttc::AsyncClient::new(mqtt_options, cfg.channel_capacity);
+        let (client, mut eventloop) = rumqttc::AsyncClient::new(mqtt_options, cfg.channel_capacity);
 
         *self.inner.client.lock().await = Some(client);
 
@@ -96,7 +92,11 @@ impl MqttClient {
                 match eventloop.poll().await {
                     Ok(rumqttc::Event::Incoming(rumqttc::Packet::ConnAck(_))) => {
                         *inner.status.lock().await = ConnectionStatus::Connected;
-                        tracing::info!("MQTT connecte a {}:{}", inner.config.broker_host, inner.config.broker_port);
+                        tracing::info!(
+                            "MQTT connecte a {}:{}",
+                            inner.config.broker_host,
+                            inner.config.broker_port
+                        );
                     }
                     Ok(rumqttc::Event::Incoming(rumqttc::Packet::Publish(publish))) => {
                         let qos = match publish.qos {
@@ -117,10 +117,8 @@ impl MqttClient {
                     Err(e) => {
                         tracing::warn!("Erreur event loop MQTT : {e}");
                         *inner.status.lock().await = ConnectionStatus::Reconnecting;
-                        tokio::time::sleep(Duration::from_secs(
-                            inner.config.reconnect_delay_secs,
-                        ))
-                        .await;
+                        tokio::time::sleep(Duration::from_secs(inner.config.reconnect_delay_secs))
+                            .await;
                     }
                 }
             }

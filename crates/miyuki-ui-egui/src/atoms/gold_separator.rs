@@ -5,9 +5,9 @@
 //! Used between sections in panels (inventory, character sheet, tooltips).
 //! Optionally features a central diamond ornament.
 
+use crate::convert::rgba_to_color32;
 use egui::{Pos2, Response, Stroke, Ui, Vec2};
 use miyuki_ui_tokens::palette::d2::D2_PALETTE;
-use crate::convert::rgba_to_color32;
 
 /// Separator style.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -85,11 +85,17 @@ impl GoldSeparator {
                 // Horizontal lines on each side of the diamond
                 let diamond_half = 4.0;
                 painter.line_segment(
-                    [Pos2::new(rect.min.x, y), Pos2::new(center.x - diamond_half - 2.0, y)],
+                    [
+                        Pos2::new(rect.min.x, y),
+                        Pos2::new(center.x - diamond_half - 2.0, y),
+                    ],
                     Stroke::new(1.0, dark_gold),
                 );
                 painter.line_segment(
-                    [Pos2::new(center.x + diamond_half + 2.0, y), Pos2::new(rect.max.x, y)],
+                    [
+                        Pos2::new(center.x + diamond_half + 2.0, y),
+                        Pos2::new(rect.max.x, y),
+                    ],
                     Stroke::new(1.0, dark_gold),
                 );
 

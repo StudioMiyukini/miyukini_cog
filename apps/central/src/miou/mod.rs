@@ -10,13 +10,13 @@
 //! - `state` : État Miou (préférences, session)
 //! - `bubble` : Composant UI et file d'attente
 
+pub mod bubble;
 pub mod context;
 pub mod engine;
-pub mod templates;
 pub mod state;
-pub mod bubble;
+pub mod templates;
 
+pub use bubble::{ActionType, BulleAction, BulleOutput, MiouBubbleOverlay};
 pub use context::BotContext;
 pub use engine::decide;
 pub use templates::select_variante;
-pub use bubble::{BulleOutput, BulleAction, ActionType, MiouBubbleOverlay};

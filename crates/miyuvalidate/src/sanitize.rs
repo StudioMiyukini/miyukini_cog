@@ -41,7 +41,9 @@ pub fn sanitize(
     match value_type {
         SanitizeValueType::String => {}
         SanitizeValueType::Number => {
-            let _ = s.parse::<f64>().map_err(|_| MiyuValidateError::InvalidData("not a number".to_string()))?;
+            let _ = s
+                .parse::<f64>()
+                .map_err(|_| MiyuValidateError::InvalidData("not a number".to_string()))?;
         }
         SanitizeValueType::List => {
             s = s

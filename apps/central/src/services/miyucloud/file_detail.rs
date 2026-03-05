@@ -10,9 +10,9 @@
 
 use dioxus::prelude::*;
 
-use crate::state::use_app_state;
-use super::components::{ActionButton, FileIcon, format_size};
+use super::components::{format_size, ActionButton, FileIcon};
 use super::state::{FileEntry, MiyuCloudState};
+use crate::state::use_app_state;
 
 /// Panel de detail d'un fichier selectionne.
 /// S'affiche a droite de l'explorateur quand un fichier est selectionne.
@@ -37,7 +37,11 @@ pub fn FileDetailPanel(
     let is_encrypted = file.encryption_iv.is_some();
 
     let size_label = format_size(file_size);
-    let encryption_label = if is_encrypted { "Chiffre (ChaCha20-Poly1305)" } else { "Non chiffre" };
+    let encryption_label = if is_encrypted {
+        "Chiffre (ChaCha20-Poly1305)"
+    } else {
+        "Non chiffre"
+    };
     let chunk_label = format!("{chunk_count} chunk(s)");
 
     // Checksum tronque pour l'affichage

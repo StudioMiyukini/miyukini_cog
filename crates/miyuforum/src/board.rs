@@ -10,7 +10,10 @@ use crate::errors::MiyuforumError;
 /// @human: Liste les forums/boards.
 /// @do: forum_board_list_under_governance
 /// tool.forum.board.list — lecture.
-pub fn list(ctx: &GovernedContext, _category_id: Option<&str>) -> Result<Vec<String>, MiyuforumError> {
+pub fn list(
+    ctx: &GovernedContext,
+    _category_id: Option<&str>,
+) -> Result<Vec<String>, MiyuforumError> {
     if !ctx.has_mandate() {
         return Err(MiyuforumError::NoMandate);
     }

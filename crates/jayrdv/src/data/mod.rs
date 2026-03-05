@@ -13,11 +13,11 @@ mod types;
 #[cfg(feature = "kindmother-only")]
 mod kindmother_client_db;
 
+#[cfg(feature = "kindmother-only")]
+pub use kindmother_client_db::JayRdvStore;
 pub use memory_store::DbError;
 #[cfg(not(feature = "kindmother-only"))]
 pub use memory_store::JayRdvStore;
-#[cfg(feature = "kindmother-only")]
-pub use kindmother_client_db::JayRdvStore;
 
 pub use types::{
     Appointment, AppointmentStatus, CancelledBy, Client, Exception, Practitioner, PractitionerRole,

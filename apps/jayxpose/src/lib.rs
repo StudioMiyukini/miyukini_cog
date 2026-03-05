@@ -6,9 +6,9 @@
 
 pub mod views;
 
-use std::sync::Arc;
 use dioxus::prelude::*;
 use jayxpose::data::JayXposeDb;
+use std::sync::Arc;
 
 /// Contexte DB partagé dans l'arbre Dioxus.
 #[derive(Clone)]

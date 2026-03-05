@@ -23,7 +23,11 @@ impl MiyukiniWatchCollector {
 
     /// Enregistre une métrique si la collecte est activée.
     /// Non bloquant : l'écriture est synchrone mais légère.
-    pub fn record(&self, profile_id: &str, record: &MetricRecord) -> Result<(), MiyukiniWatchError> {
+    pub fn record(
+        &self,
+        profile_id: &str,
+        record: &MetricRecord,
+    ) -> Result<(), MiyukiniWatchError> {
         let prefs = self.db.get_prefs(profile_id)?;
         if !prefs.collect_enabled {
             return Err(MiyukiniWatchError::CollectionDisabled);
@@ -35,7 +39,9 @@ impl MiyukiniWatchCollector {
             ));
         }
 
-        let count = self.db.count_metrics_for_session(profile_id, &record.session_id)?;
+        let count = self
+            .db
+            .count_metrics_for_session(profile_id, &record.session_id)?;
         if count >= MAX_METRICS_PER_SESSION {
             return Err(MiyukiniWatchError::VolumeLimitReached);
         }
@@ -187,7 +193,11 @@ impl MiyukiniWatchCollector {
     }
 
     /// Clic utilisateur (I-01) — agrégat uniquement, pas de cible.
-    pub fn record_click(&self, profile_id: &str, session_id: &str) -> Result<(), MiyukiniWatchError> {
+    pub fn record_click(
+        &self,
+        profile_id: &str,
+        session_id: &str,
+    ) -> Result<(), MiyukiniWatchError> {
         let record = MetricRecord {
             record_id: Uuid::new_v4().to_string(),
             profile_id: profile_id.to_string(),
