@@ -70,3 +70,12 @@ jayxpose, jayfestival, jaykoa, jaykonta, miyukiniwatch, jay1tribu (deprecie par 
 - Remplacement auth Legacy de Central par `Miyukini Connect` effectue avec migration progressive legacy -> Argon2id.
 - Gate P4 valide (score securite 71/100). Gate P5: ACCEPTE AVEC RESERVES (validation utilisateur explicite).
 - Reserves ouvertes: dette lint `jayrdv` hors perimetre et ajout `cargo-audit` en CI avant merge final.
+
+## MiyuCloud OxiCloud refonte (Mar 2026)
+
+- Sequence `2026-03-06-miyucloud-oxicloud-refonte` cloturee P0->P6. **SUCCES sans reserves.**
+- Livrables: crate `miyucloud-dav` (WebDAV/CalDAV/CardDAV), dedup SHA-256 + flate2, WOPI, thumbnails, integration Central.
+- 88 taches, 11 etapes + BUF, 287 tests. Score securite 97/100. Score efficience 18/20.
+- Patterns cles: `ContentAddressableStorage` trait, `cloud_content_blobs` + `cloud_file_blobs` SQL, `CspNonce` Tower UUID/req.
+- Piege FK tests: creer `FileEntry` via `db.file_create` avant `record_file_blob`.
+- MutexGuard: `drop(conn)` explicite avant appel recursif pour eviter deadlock.

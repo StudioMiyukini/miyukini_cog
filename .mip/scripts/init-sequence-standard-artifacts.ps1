@@ -115,19 +115,56 @@ $files["plans_p3/$date-$slug-plan.md"] = New-PlaceholderMarkdown -Title "Plan P3
 $files["plans_p3/etapes/index.md"] = @"
 # Index des etapes P3
 
-- etape-01.md
-- etape-02.md
-- etape-03.md
-- etape-04.md
-- etape-05.md
+## Vue d'ensemble
 
-Chaque etape est pre-creee pour permettre un suivi incremental.
+N taches, N etapes + buffer. DAG: E0 -> E1 -> ... -> En
+
+## Etapes
+
+| Fichier | Etape | Titre | Taches | Statut |
+|---------|-------|-------|--------|--------|
+| etape-00.md | E0 | [A definir] | 0 | A faire |
+| etape-01.md | E1 | [A definir] | 0 | A faire |
+| etape-02.md | E2 | [A definir] | 0 | A faire |
+| etape-03.md | E3 | [A definir] | 0 | A faire |
+| etape-04.md | E4 | [A definir] | 0 | A faire |
+| etape-buf.md | BUF | Buffer corrections (20%) | 0 | A faire |
 "@
 
-1..5 | ForEach-Object {
+0..4 | ForEach-Object {
     $n = $_.ToString("00")
-    $files["plans_p3/etapes/etape-$n.md"] = New-PlaceholderMarkdown -Title "Etape P3 $n" -Phase "P3" -Owner "Denis + agents"
+    $files["plans_p3/etapes/etape-$n.md"] = @"
+# E$n -- [Titre etape]
+
+## Statut : A faire
+## Depend de : [E precedente ou --]
+## Agents : [agents]
+## Taches : 0
+
+| # | Cat | Titre | Agent | Fichier(s) | Statut |
+|---|-----|-------|-------|------------|--------|
+| E$n-01 | CODE | [A definir] | [agent] | [fichier] | pending |
+
+## Commit message template
+``feat([crate]): E$n -- [description]``
+"@
 }
+
+$files["plans_p3/etapes/etape-buf.md"] = @"
+# BUF -- Buffer corrections (20%)
+
+## Statut : A faire
+## Depend de : [derniere etape]
+## Agents : [agents]
+## Taches : 0
+
+| # | Cat | Titre | Agent | Fichier(s) | Statut |
+|---|-----|-------|-------|------------|--------|
+| BUF-01 | FIX | [A definir selon corrections necessaires] | [agent] | [fichier] | pending |
+
+## Commit message template
+``fix([crate]): BUF -- corrections post-integration``
+"@
 
 $files["phases/p0-trace.md"] = New-PlaceholderMarkdown -Title "Trace P0" -Phase "P0" -Owner "Maria"
 $files["phases/p3-trace.md"] = New-PlaceholderMarkdown -Title "Trace P3" -Phase "P3" -Owner "Denis"
@@ -198,13 +235,36 @@ $files["audits/$date-$slug-p5-validation.md"] = New-PlaceholderMarkdown -Title "
 $files["rapports_finaux/$date-$slug-report.md"] = New-PlaceholderMarkdown -Title "Rapport final $slug" -Phase "P6" -Owner "Arianne"
 $files["metrics/$date-$slug.json"] = @"
 {
-  "sequence": "$leaf",
-  "created_at": "$((Get-Date).ToString("s"))",
-  "p0": {},
-  "p3": {},
-  "p4": {},
-  "p5": {},
-  "p6": {}
+  "schema": "mip-metrics-v2",
+  "sequence_name": "$leaf",
+  "classification": "UNKNOWN",
+  "mip_sequence_number": null,
+  "t0_timestamp": "$((Get-Date).ToString("s"))Z",
+  "t_end_timestamp": null,
+  "final_status": null,
+  "phases": {
+    "p0": {},
+    "p3": {},
+    "p4": {},
+    "p5": {},
+    "p6": {}
+  },
+  "summary": {
+    "tasks_done": 0,
+    "tasks_total": 0,
+    "tests_passing": 0,
+    "security_score_100": 0,
+    "efficiency_score_20": 0,
+    "cve_open": 0,
+    "blockers": 0,
+    "reverts": 0
+  },
+  "tokens": {
+    "total": null,
+    "by_phase": {}
+  },
+  "mip_loops": 0,
+  "autonomy_mode": null
 }
 "@
 
@@ -235,12 +295,16 @@ foreach ($t in $p0Times) {
 }
 
 $p3StepEntries = @()
-1..5 | ForEach-Object {
+0..4 | ForEach-Object {
     $n = $_.ToString("00")
     $p3StepEntries += [ordered]@{
-        label = "Etape $n"
+        label = "Etape E$n"
         path = "plans_p3/etapes/etape-$n.md"
     }
+}
+$p3StepEntries += [ordered]@{
+    label = "Etape BUF (buffer)"
+    path = "plans_p3/etapes/etape-buf.md"
 }
 
 $manifest = [ordered]@{
