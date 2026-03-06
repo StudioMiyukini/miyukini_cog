@@ -24,17 +24,12 @@
 | Anomalies bloquantes | ? | 0 | [ ] |
 | Reverts de commit | ? | 0 | [ ] |
 
-## Progression par phase
+## Progression par étapes
 
-| Phase | Statut | Date cloture |
+| Etape | Statut | Date et heure de cloture |
 |-------|--------|-------------|
-| P0 | A faire | - |
-| P1 | A faire | - |
-| P2 | A faire | - |
-| P3 | A faire | - |
-| P4 | A faire | - |
-| P5 | A faire | - |
-| P6 | A faire | - |
+| E[xx] | A faire | - |
+
 
 ## Risques surveilles
 

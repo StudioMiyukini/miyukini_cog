@@ -12,11 +12,11 @@
 
 ## Actions executees
 
-| Ordre | Agent | Action | Resultat |
-|-------|-------|--------|---------|
-| 1 | George | Verification conditions de validation | [?/9 OK] |
-| 2 | George | Verification livrables P3 | [?/? OK] |
-| 3 | Denis | Trace P5 | Termine |
+| Ordre | Agent | Action | Resultat | Commencé | Fini |
+|-------|-------|--------|---------|----------|------|
+| 1 | George | Verification conditions de validation | [?/9 OK] | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
+| 2 | George | Verification livrables P3 | [?/? OK] | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
+| 3 | Denis | Trace P5 | Termine | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
 
 ## Gate P5
 

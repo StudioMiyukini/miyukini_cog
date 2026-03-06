@@ -63,6 +63,7 @@
 | Score efficience | [?]/20 |
 | Anomalies bloquantes | 0 |
 | CVE ouvertes | 0 |
+| Durée total | [hh:mm - dd] |
 
 ---
 

@@ -13,8 +13,10 @@
 ## DAG des etapes
 
 ```
-E0 -> E1 -> E2 -> E3 -> E4 -> BUF
+E00 -> E01 -> ... -> E[N] -> BUF
 ```
+
+> Le nombre d'etapes est defini lors du P0 Temps 8 selon la complexite de la sequence.
 
 ## Etapes
 

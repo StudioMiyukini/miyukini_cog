@@ -1,17 +1,11 @@
 {
   "nodes": [
     { "id": "E00", "label": "E00 - [titre]", "status": "pending" },
-    { "id": "E01", "label": "E01 - [titre]", "status": "pending" },
-    { "id": "E02", "label": "E02 - [titre]", "status": "pending" },
-    { "id": "E03", "label": "E03 - [titre]", "status": "pending" },
-    { "id": "E04", "label": "E04 - [titre]", "status": "pending" },
-    { "id": "BUF", "label": "BUF - Buffer", "status": "pending" }
+    { "id": "...", "label": "... autant de noeuds que necessaire", "status": "pending" },
+    { "id": "BUF", "label": "BUF - Buffer corrections", "status": "pending" }
   ],
   "edges": [
-    { "from": "E00", "to": "E01" },
-    { "from": "E01", "to": "E02" },
-    { "from": "E02", "to": "E03" },
-    { "from": "E03", "to": "E04" },
-    { "from": "E04", "to": "BUF" }
+    { "from": "E00", "to": "..." },
+    { "from": "...", "to": "BUF" }
   ]
 }

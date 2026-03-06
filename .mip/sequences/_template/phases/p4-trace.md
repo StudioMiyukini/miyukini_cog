@@ -12,13 +12,13 @@
 
 ## Actions executees
 
-| Ordre | Agent | Action | Resultat |
-|-------|-------|--------|---------|
-| 1 | Victor | PASS-0 : controles fondamentaux | A faire |
-| 2 | Victor | PASS-01 : controles avances | A faire |
-| 3 | Victor | RAS : synthese securite /100 | A faire |
-| 4 | Jean | Audit efficience /20 | A faire |
-| 5 | George | Audit global qualite | A faire |
+| Ordre | Agent | Action | Resultat | Commencé | Fini |
+|-------|-------|--------|----------|----------|------|
+| 1 | Victor | PASS-0 : controles fondamentaux | A faire | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
+| 2 | Victor | PASS-01 : controles avances | A faire | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
+| 3 | Victor | RAS : synthese securite /100 | A faire | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
+| 4 | Jean | Audit efficience /20 | A faire | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
+| 5 | George | Audit global qualite | A faire | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
 
 ## Documents produits
 
@@ -31,3 +31,9 @@
 ## Anomalies P4
 
 [A completer]
+
+## Metriques P4
+
+- Duree : [hh:mm - dd]
+- Artefacts produits : [A completer]
+- Anomalies : [A completer]

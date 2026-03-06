@@ -1,4 +1,4 @@
-# Index des ressources - <sequence>
+# Index des ressources - DATE-SLUG
 
 > Fichier squelette rempli par Maria lors de la creation de la structure de sequence.
 > Liste des ressources necessaires: docs, certs, libs, IDs Context7, securite.
