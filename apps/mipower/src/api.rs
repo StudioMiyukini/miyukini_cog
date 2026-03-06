@@ -108,7 +108,7 @@ async fn artefact_handler(
     if !canonical_file.starts_with(&canonical_root) {
         return Err(ApiError::forbidden("Chemin hors du workspace MIP"));
     }
-    if !canonical_file.extension().map_or(false, |e| e == "md") {
+    if canonical_file.extension().is_none_or(|e| e != "md") {
         return Err(ApiError::bad_request("Seuls les fichiers .md sont accessibles"));
     }
 
@@ -165,7 +165,7 @@ fn count_done_in(dir: &PathBuf, prefix: &str, marker: &str) -> (usize, usize) {
     let files: Vec<_> = entries.filter_map(|e| e.ok())
         .filter(|e| {
             let n = e.file_name().to_string_lossy().to_string();
-            e.path().extension().map_or(false, |x| x == "md")
+            e.path().extension().is_some_and(|x| x == "md")
                 && n.starts_with(prefix)
                 && n != "etape-buf.md"
         })
@@ -225,7 +225,7 @@ fn walk_md(current: &PathBuf, root: &PathBuf, files: &mut Vec<String>) {
             if name != "ui" && name != "node_modules" && !name.starts_with('.') {
                 walk_md(&path, root, files);
             }
-        } else if path.extension().map_or(false, |e| e == "md") {
+        } else if path.extension().is_some_and(|e| e == "md") {
             if let Ok(rel) = path.strip_prefix(root) {
                 files.push(rel.to_string_lossy().replace('\\', "/").to_string());
             }
@@ -283,10 +283,7 @@ async fn init_sequence_handler(
     }
 
     let mip_root = state.mip_root.lock().unwrap().clone();
-    let date = input.date.as_deref().unwrap_or_else(|| {
-        // Use today — static fallback since we don't have chrono
-        "2026-03-07"
-    });
+    let date = input.date.as_deref().unwrap_or("2026-03-07");
 
     let folder_name = format!("{date}-{}", input.slug);
     let seq_path    = PathBuf::from(&mip_root).join(".mip").join("sequences").join(&folder_name);
