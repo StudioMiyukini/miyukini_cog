@@ -1,0 +1,51 @@
+﻿<!-- Generated-By: .mip/scripts/generate-sequence-finetuned-agents.ps1 -->
+# Agents fine-tuned de sequence
+
+- Sequence: 2026-03-05-miyukini-connect-auth-general
+- Date generation: 2026-03-05T18:25:58
+- Mode regeneration: update
+- Target phases: P3, P4, P5, P6, MASS
+- Besoins emerges: agent:denis, agent:hugo, agent:jean, agent:victor, cap:audit, cap:backend, cap:infra, cap:metrics, cap:security, cap:ui
+
+## Fichiers generes
+- agents/P3_arianne.md (source: .mip/agents/arianne/FULL_arianne.md, none (FULL-derived))
+- agents/P4_arianne.md (source: .mip/agents/arianne/FULL_arianne.md, none (FULL-derived))
+- agents/P5_arianne.md (source: .mip/agents/arianne/FULL_arianne.md, none (FULL-derived))
+- agents/P6_arianne.md (source: .mip/agents/arianne/FULL_arianne.md, none (FULL-derived))
+- agents/MASS_arianne.md (source: .mip/agents/arianne/FULL_arianne.md, none (FULL-derived))
+- agents/P3_denis.md (source: .mip/agents/denis/FULL_denis.md, none (FULL-derived))
+- agents/P4_denis.md (source: .mip/agents/denis/FULL_denis.md, none (FULL-derived))
+- agents/P5_denis.md (source: .mip/agents/denis/FULL_denis.md, none (FULL-derived))
+- agents/P6_denis.md (source: .mip/agents/denis/FULL_denis.md, none (FULL-derived))
+- agents/MASS_denis.md (source: .mip/agents/denis/FULL_denis.md, none (FULL-derived))
+- agents/P3_francois.md (source: .mip/agents/francois/FULL_francois.md, none (FULL-derived))
+- agents/P4_francois.md (source: .mip/agents/francois/FULL_francois.md, none (FULL-derived))
+- agents/P5_francois.md (source: .mip/agents/francois/FULL_francois.md, none (FULL-derived))
+- agents/P6_francois.md (source: .mip/agents/francois/FULL_francois.md, none (FULL-derived))
+- agents/MASS_francois.md (source: .mip/agents/francois/FULL_francois.md, none (FULL-derived))
+- agents/P3_george.md (source: .mip/agents/george/FULL_george.md, none (FULL-derived))
+- agents/P4_george.md (source: .mip/agents/george/FULL_george.md, none (FULL-derived))
+- agents/P5_george.md (source: .mip/agents/george/FULL_george.md, none (FULL-derived))
+- agents/P6_george.md (source: .mip/agents/george/FULL_george.md, none (FULL-derived))
+- agents/MASS_george.md (source: .mip/agents/george/FULL_george.md, none (FULL-derived))
+- agents/P3_hugo.md (source: .mip/agents/hugo/FULL_hugo.md, none (FULL-derived))
+- agents/P4_hugo.md (source: .mip/agents/hugo/FULL_hugo.md, none (FULL-derived))
+- agents/P5_hugo.md (source: .mip/agents/hugo/FULL_hugo.md, none (FULL-derived))
+- agents/P6_hugo.md (source: .mip/agents/hugo/FULL_hugo.md, none (FULL-derived))
+- agents/MASS_hugo.md (source: .mip/agents/hugo/FULL_hugo.md, none (FULL-derived))
+- agents/P3_jean.md (source: .mip/agents/jean/FULL_jean.md, none (FULL-derived))
+- agents/P4_jean.md (source: .mip/agents/jean/FULL_jean.md, none (FULL-derived))
+- agents/P5_jean.md (source: .mip/agents/jean/FULL_jean.md, none (FULL-derived))
+- agents/P6_jean.md (source: .mip/agents/jean/FULL_jean.md, none (FULL-derived))
+- agents/MASS_jean.md (source: .mip/agents/jean/FULL_jean.md, none (FULL-derived))
+- agents/P3_lise.md (source: .mip/agents/lise/FULL_lise.md, none (FULL-derived))
+- agents/P4_lise.md (source: .mip/agents/lise/FULL_lise.md, none (FULL-derived))
+- agents/P5_lise.md (source: .mip/agents/lise/FULL_lise.md, none (FULL-derived))
+- agents/P6_lise.md (source: .mip/agents/lise/FULL_lise.md, none (FULL-derived))
+- agents/MASS_lise.md (source: .mip/agents/lise/FULL_lise.md, none (FULL-derived))
+- agents/P3_victor.md (source: .mip/agents/victor/FULL_victor.md, none (FULL-derived))
+- agents/P4_victor.md (source: .mip/agents/victor/FULL_victor.md, none (FULL-derived))
+- agents/P5_victor.md (source: .mip/agents/victor/FULL_victor.md, none (FULL-derived))
+- agents/P6_victor.md (source: .mip/agents/victor/FULL_victor.md, none (FULL-derived))
+- agents/MASS_victor.md (source: .mip/agents/victor/FULL_victor.md, none (FULL-derived))
+

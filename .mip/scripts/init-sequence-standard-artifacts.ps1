@@ -354,7 +354,7 @@ Write-Host "Mini-site: $sequenceRoot\ui\index.html"
 $rebuildIndexScript = Join-Path $scriptDir "rebuild-sequences-index.ps1"
 if (Test-Path -LiteralPath $rebuildIndexScript) {
     try {
-        & $rebuildIndexScript | Out-Null
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $rebuildIndexScript | Out-Null
         Write-Host "Index sequences mis a jour: $(Join-Path (Resolve-Path (Join-Path $scriptDir "..")) "sequences\index.json")"
     } catch {
         Write-Warning "Impossible de regenerer sequences/index.json automatiquement: $($_.Exception.Message)"

@@ -11,11 +11,14 @@
 //! Initialise le state et le client HTTP au montage.
 
 mod auth_security;
+mod calendar_view;
 mod client;
 mod components;
+mod contacts_view;
 mod explorer;
 mod file_detail;
 mod settings;
+mod setup_wizard;
 mod share_dialog;
 mod sidebar;
 pub mod state;
@@ -27,14 +30,18 @@ use std::path::PathBuf;
 
 use dioxus::prelude::*;
 
+use crate::services::miyucloud_settings::load_miyucloud_config;
 use crate::state::use_app_state;
+use calendar_view::CalendarView;
 use client::MiyuCloudClient;
+use contacts_view::ContactsView;
 use explorer::FileExplorer;
 use file_detail::FileDetailPanel;
 use settings::CloudSettings;
+use setup_wizard::FirstLaunchSetupWizard;
 use share_dialog::ShareDialog;
 use sidebar::CloudSidebar;
-use state::{BreadcrumbItem, CloudSection, FolderContents, MiyuCloudState, UploadProgress};
+use state::{BreadcrumbItem, CloudSection, MiyuCloudState, UploadProgress};
 use sync_status::{SyncPanel, SyncStatusBadge};
 use trash_view::TrashView;
 use upload::FileUploadZone;
@@ -62,27 +69,58 @@ pub fn MiyuCloudView() -> Element {
         }
         drop(existing);
 
-        // TODO: lire le port et le token depuis la configuration du service
-        let http_client = MiyuCloudClient::new(11440, "dev-token");
+        let config = load_miyucloud_config();
+        // Batch all state writes into a single write to avoid triggering N re-renders
+        {
+            let mut s = state.write();
+            s.storage_path = config.storage_path.clone();
+            s.web_surface_enabled = config.web_enabled;
+            s.web_surface_port = config.web_port;
+            s.configured_quota_bytes = config.quota_bytes;
+            s.first_launch_completed = config.first_launch_completed;
+            s.setup_wizard_open = !config.first_launch_completed;
+            s.public_share_links_enabled = config.share_policy.public_links_enabled;
+            s.internal_sharing_enabled = config.share_policy.internal_sharing_enabled;
+            s.default_share_permission =
+                share_permission_to_state(config.share_policy.default_permission);
+            s.ssh_enabled = config.ssh.enabled;
+            s.ssh_host = config.ssh.host.clone();
+            s.ssh_port = config.ssh.port;
+            s.ssh_username = config.ssh.username.clone();
+            s.ssh_root_path = config.ssh.root_path.clone();
+            s.ssh_private_key_path = config.ssh.private_key_path.clone();
+            s.ssh_keepalive = config.ssh.keepalive;
+        }
+
+        let http_client = MiyuCloudClient::new(config.api_port, &config.cog_token);
         client.set(Some(http_client));
     });
 
-    // Charger le contenu du dossier courant quand il change
-    let folder_id = state.read().current_folder_id.clone();
-    let section = state.read().section;
+    // Derive reactive memos for folder_id and section to avoid re-running
+    // the loading effect on every unrelated state change.
+    let folder_id_memo = use_memo(move || state.read().current_folder_id.clone());
+    let section_memo = use_memo(move || state.read().section);
+    let reload_memo = use_memo(move || state.read().reload_counter);
+
+    // Charger le contenu du dossier courant quand il change (ou sur reload forcé)
     use_effect(move || {
-        let folder_to_load = folder_id.clone();
-        let current_section = section;
+        // Track folder_id, section, and reload_counter
+        let folder_to_load = folder_id_memo.read().clone();
+        let current_section = *section_memo.read();
+        let _reload = *reload_memo.read();
 
         spawn(async move {
             let http = {
-                let c = client.read();
+                let c = client.peek();
                 c.clone()
             };
             let Some(http) = http else { return };
 
-            state.write().loading = true;
-            state.write().error_message = None;
+            {
+                let mut s = state.write();
+                s.loading = true;
+                s.error_message = None;
+            }
 
             let result = if current_section == CloudSection::Trash {
                 http.list_trash().await
@@ -92,38 +130,39 @@ pub fn MiyuCloudView() -> Element {
 
             match result {
                 Ok(contents) => {
-                    state.write().current_contents = contents;
-                    state.write().loading = false;
-
-                    // Mettre a jour le folder_tree pour la sidebar
-                    let new_folders = state.read().current_contents.subfolders.clone();
-                    let mut tree = state.read().folder_tree.clone();
+                    let mut s = state.write();
+                    let new_folders = contents.subfolders.clone();
                     for f in &new_folders {
-                        if !tree.iter().any(|t| t.id == f.id) {
-                            tree.push(f.clone());
+                        if !s.folder_tree.iter().any(|t| t.id == f.id) {
+                            s.folder_tree.push(f.clone());
                         }
                     }
-                    state.write().folder_tree = tree;
+                    s.current_contents = contents;
+                    s.loading = false;
                 }
                 Err(e) => {
-                    state.write().loading = false;
-                    // Si le serveur n'est pas encore lance, on charge des donnees de demo
+                    let mut s = state.write();
+                    s.loading = false;
                     let is_connection_error = matches!(e, client::MiyuCloudClientError::Http(_));
                     if is_connection_error {
-                        state.write().current_contents = mock_root_contents();
-                        state.write().folder_tree = mock_folder_tree();
+                        s.error_message = Some(
+                            "Service MiyuCloud hors ligne. Verifiez que le service est demarre."
+                                .to_string(),
+                        );
                     } else {
-                        state.write().error_message = Some(format!("{e}"));
+                        s.error_message = Some(format!("{e}"));
                     }
                 }
             }
         });
     });
 
-    // Observer le changement de folder pour mettre a jour le breadcrumb
-    let current_folder = state.read().current_folder_id.clone();
-    let folder_tree = state.read().folder_tree.clone();
-    use_effect(move || {
+    // Calculer le breadcrumb comme etat derive (use_memo) au lieu de use_effect
+    // pour eviter le cycle ecriture-state -> re-render -> re-ecriture
+    let breadcrumb_memo = use_memo(move || {
+        let current_folder = state.read().current_folder_id.clone();
+        let folder_tree = state.read().folder_tree.clone();
+
         let mut crumbs = vec![BreadcrumbItem {
             id: None,
             name: "Mon Cloud".to_string(),
@@ -150,42 +189,40 @@ pub fn MiyuCloudView() -> Element {
                 }
             }
         }
-        state.write().breadcrumb = crumbs;
+        crumbs
     });
 
     // Listener pour la creation de dossier
-    let new_folder_pending = state.read().new_folder_dialog;
-    let new_folder_name_val = state.read().new_folder_name.clone();
+    let new_folder_dialog_memo = use_memo(move || state.read().new_folder_dialog);
+    let new_folder_name_memo = use_memo(move || state.read().new_folder_name.clone());
 
-    // Verifier si le dialog vient d'etre ferme avec un nom valide
-    // (on observe la transition close via un signal supplementaire)
     let mut prev_dialog_open = use_signal(|| false);
     use_effect(move || {
-        let was_open = *prev_dialog_open.read();
-        let is_open = new_folder_pending;
-        prev_dialog_open.set(is_open);
+        let is_open = *new_folder_dialog_memo.read();
+        let new_folder_name_val = new_folder_name_memo.read().clone();
+
+        let was_open = *prev_dialog_open.peek();
+        if was_open != is_open {
+            prev_dialog_open.set(is_open);
+        }
 
         if was_open && !is_open && !new_folder_name_val.is_empty() {
             let name = new_folder_name_val.clone();
             spawn(async move {
-                let parent = state.read().current_folder_id.clone();
+                let parent = state.peek().current_folder_id.clone();
                 let http = {
-                    let c = client.read();
+                    let c = client.peek();
                     c.clone()
                 };
                 let Some(http) = http else { return };
 
                 match http.create_folder(&name, parent.as_deref()).await {
                     Ok(new_folder) => {
-                        let mut contents = state.read().current_contents.clone();
-                        contents.subfolders.push(new_folder.clone());
-                        state.write().current_contents = contents;
-                        // Ajouter a l'arbre
-                        let mut tree = state.read().folder_tree.clone();
-                        if !tree.iter().any(|t| t.id == new_folder.id) {
-                            tree.push(new_folder);
+                        let mut s = state.write();
+                        if !s.folder_tree.iter().any(|t| t.id == new_folder.id) {
+                            s.folder_tree.push(new_folder.clone());
                         }
-                        state.write().folder_tree = tree;
+                        s.current_contents.subfolders.push(new_folder);
                     }
                     Err(e) => {
                         state.write().error_message = Some(format!("Echec creation dossier : {e}"));
@@ -194,11 +231,6 @@ pub fn MiyuCloudView() -> Element {
             });
         }
     });
-
-    let selected_file = state.read().selected_file.clone();
-    let current_section = section;
-    let share_dialog_open = state.read().share_dialog_open;
-    let sync_panel_open = state.read().sync_panel_open;
 
     rsx! {
         div {
@@ -219,93 +251,141 @@ pub fn MiyuCloudView() -> Element {
                     div {
                         style: "display: flex; align-items: center; gap: 8px;",
                         span { style: "font-size: 18px;",
-                            match current_section {
-                                CloudSection::Files => "\u{2601}",
-                                CloudSection::Shares => "\u{1F517}",
-                                CloudSection::Trash => "\u{1F5D1}",
-                                CloudSection::Settings => "\u{2699}",
+                            {
+                                let current_section = state.read().section;
+                                match current_section {
+                                    CloudSection::Files => "\u{2601}",
+                                    CloudSection::Calendar => "\u{1F4C5}",
+                                    CloudSection::Contacts => "\u{1F464}",
+                                    CloudSection::Shares => "\u{1F517}",
+                                    CloudSection::Trash => "\u{1F5D1}",
+                                    CloudSection::Settings => "\u{2699}",
+                                }
                             }
                         }
                         h3 { style: "font-size: 15px; color: {c.text_white}; margin: 0;",
-                            match current_section {
-                                CloudSection::Files => "MiyuCloud",
-                                CloudSection::Shares => "Partages",
-                                CloudSection::Trash => "Corbeille",
-                                CloudSection::Settings => "Parametres",
-                            }
-                        }
-                    }
-
-                    // Badge sync (toujours visible)
-                    SyncStatusBadge { state: state }
-                }
-
-            // Zone principale : routage par section
-            match current_section {
-                CloudSection::Files => rsx! {
-                    div {
-                        style: "flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;",
-
-                        // Zone d'upload (progression)
-                        FileUploadZone { state: state, client: client }
-
-                        // Explorateur + detail
-                        div {
-                            style: "flex: 1; display: flex; overflow: hidden;",
-
-                            // Explorateur (zone centrale)
-                            FileExplorer {
-                                state: state,
-                                on_upload: move |()| {
-                                    trigger_upload(state, client);
-                                },
-                            }
-
-                            // Panel detail (droite, si fichier selectionne)
-                            if let Some(ref file) = selected_file {
-                                FileDetailPanel {
-                                    state: state,
-                                    file: file.clone(),
-                                    on_download: move |file_id: String| {
-                                        trigger_download(file_id, client, state);
-                                    },
-                                    on_delete: move |file_id: String| {
-                                        trigger_delete(file_id, client, state);
-                                    },
-                                    on_rename: move |file_id: String| {
-                                        trigger_rename(file_id, client, state);
-                                    },
+                            {
+                                let current_section = state.read().section;
+                                match current_section {
+                                    CloudSection::Files => "MiyuCloud",
+                                    CloudSection::Calendar => "Calendrier",
+                                    CloudSection::Contacts => "Contacts",
+                                    CloudSection::Shares => "Partages",
+                                    CloudSection::Trash => "Corbeille",
+                                    CloudSection::Settings => "Parametres",
                                 }
                             }
                         }
                     }
-                },
-                CloudSection::Shares => rsx! {
+
                     div {
-                        style: "flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;",
-                        // Placeholder pour la vue partages (liste des liens actifs)
-                        SharesListView { state: state, client: client }
+                        style: "display: flex; align-items: center; gap: 10px;",
+
+                        // Interrupteur serveur MiyuCloud
+                        ServerToggle { state: state }
+
+                        // Badge sync (toujours visible)
+                        SyncStatusBadge { state: state }
                     }
-                },
-                CloudSection::Trash => rsx! {
-                    TrashView { state: state, client: client }
-                },
-                CloudSection::Settings => rsx! {
-                    CloudSettings { state: state, client: client }
-                },
+                }
+
+            // Zone principale : routage par section
+            {
+                let current_section = state.read().section;
+                match current_section {
+                    CloudSection::Files => rsx! {
+                        div {
+                            style: "flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;",
+
+                            // Zone d'upload (progression)
+                            FileUploadZone { state: state, client: client }
+
+                            // Explorateur + detail
+                            div {
+                                style: "flex: 1; display: flex; overflow: hidden;",
+
+                                // Explorateur (zone centrale)
+                                FileExplorer {
+                                    state: state,
+                                    breadcrumb_memo: breadcrumb_memo,
+                                    on_upload: move |()| {
+                                        trigger_upload(state, client);
+                                    },
+                                }
+
+                                // Panel detail (droite, si fichier selectionne)
+                                {
+                                    let selected_file = state.read().selected_file.clone();
+                                    if let Some(file) = selected_file {
+                                        rsx! {
+                                            FileDetailPanel {
+                                                state: state,
+                                                file: file.clone(),
+                                                on_download: move |file_id: String| {
+                                                    trigger_download(file_id, client, state);
+                                                },
+                                                on_delete: move |file_id: String| {
+                                                    trigger_delete(file_id, client, state);
+                                                },
+                                                on_rename: move |file_id: String| {
+                                                    trigger_rename(file_id, client, state);
+                                                },
+                                            }
+                                        }
+                                    } else {
+                                        rsx! {}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    CloudSection::Calendar => rsx! {
+                        CalendarView { state: state, client: client }
+                    },
+                    CloudSection::Contacts => rsx! {
+                        ContactsView { state: state, client: client }
+                    },
+                    CloudSection::Shares => rsx! {
+                        div {
+                            style: "flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;",
+                            SharesListView { state: state, client: client }
+                        }
+                    },
+                    CloudSection::Trash => rsx! {
+                        TrashView { state: state, client: client }
+                    },
+                    CloudSection::Settings => rsx! {
+                        CloudSettings { state: state, client: client }
+                    },
+                }
             }
 
             } // fin div zone principale avec header
 
             // Dialog de partage (overlay, au-dessus de tout)
-            if share_dialog_open {
+            if state.read().share_dialog_open {
                 ShareDialog { state: state, client: client }
             }
 
             // Panel sync P2P (overlay droite)
-            if sync_panel_open {
+            if state.read().sync_panel_open {
                 SyncPanel { state: state, client: client }
             }
+
+            FirstLaunchSetupWizard { state: state, client: client }
+        }
+    }
+}
+
+fn share_permission_to_state(
+    value: crate::services::miyucloud_settings::SharePermissionPreset,
+) -> state::PermissionLevel {
+    match value {
+        crate::services::miyucloud_settings::SharePermissionPreset::Read => {
+            state::PermissionLevel::Read
+        }
+        crate::services::miyucloud_settings::SharePermissionPreset::ReadWrite => {
+            state::PermissionLevel::ReadWrite
         }
     }
 }
@@ -495,6 +575,79 @@ fn format_share_date(iso: &str) -> String {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// ServerToggle — interrupteur marche/arret du service MiyuCloud
+// ════════════════════════════════════════════════════════════════════════════
+
+/// Bouton toggle pour demarrer/arreter le service MiyuCloud.
+#[component]
+fn ServerToggle(state: Signal<MiyuCloudState>) -> Element {
+    let c = use_app_state().read().current_theme.palette();
+    let service_manager = crate::state::use_service_manager();
+    let app_state = use_app_state();
+
+    let is_running = service_manager.is_running("miyucloud");
+    let dot_color = if is_running { c.accent_green } else { c.text_muted };
+    let label = if is_running { "Serveur actif" } else { "Serveur eteint" };
+    let btn_bg = if is_running { c.accent_green } else { c.bg_hover };
+
+    rsx! {
+        button {
+            style: "display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {btn_bg}18; border: 1px solid {btn_bg}40; border-radius: 16px; cursor: pointer; font-size: 12px; color: {c.text_secondary}; transition: all 0.2s;",
+            aria_label: if is_running { "Arreter le serveur MiyuCloud" } else { "Demarrer le serveur MiyuCloud" },
+            onclick: {
+                let service_manager = service_manager.clone();
+                move |_| {
+                    let sm = service_manager.clone();
+                    if sm.is_running("miyucloud") {
+                        if let Err(e) = sm.stop_service("miyucloud") {
+                            state.write().error_message = Some(format!("Arret echoue : {e}"));
+                        }
+                    } else {
+                        let profile_id = app_state
+                            .read()
+                            .current_user
+                            .as_ref()
+                            .map(|u| u.id.clone())
+                            .unwrap_or_default();
+                        match sm.launch_service("miyucloud", &profile_id) {
+                            Ok(()) => {
+                                // Attendre que le serveur soit pret (poll /health jusqu'a OK)
+                                spawn(async move {
+                                    let config = load_miyucloud_config();
+                                    let url = format!("http://127.0.0.1:{}/health", config.api_port);
+                                    let http = reqwest::Client::builder()
+                                        .timeout(std::time::Duration::from_secs(2))
+                                        .build()
+                                        .unwrap_or_default();
+                                    for _ in 0..10 {
+                                        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+                                        if let Ok(resp) = http.get(&url).send().await {
+                                            if resp.status().is_success() {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    state.write().error_message = None;
+                                    state.write().reload_counter += 1;
+                                });
+                            }
+                            Err(e) => {
+                                state.write().error_message =
+                                    Some(format!("Demarrage echoue : {e}"));
+                            }
+                        }
+                    }
+                }
+            },
+            span {
+                style: "display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {dot_color};",
+            }
+            span { "{label}" }
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // Actions async
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -672,206 +825,3 @@ fn trigger_rename(
     });
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// Mock data (utilise quand le serveur n'est pas encore lance)
-// ════════════════════════════════════════════════════════════════════════════
-
-/// Contenu racine de demonstration.
-#[allow(clippy::too_many_lines)]
-fn mock_root_contents() -> FolderContents {
-    use state::{FileEntry, FolderEntry};
-
-    FolderContents {
-        folder: None,
-        subfolders: vec![
-            FolderEntry {
-                id: "folder-photos".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "Photos".to_string(),
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-02-15T10:00:00Z".to_string(),
-                updated_at: "2026-02-28T14:30:00Z".to_string(),
-            },
-            FolderEntry {
-                id: "folder-docs".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "Documents".to_string(),
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-01-10T08:00:00Z".to_string(),
-                updated_at: "2026-02-25T09:15:00Z".to_string(),
-            },
-            FolderEntry {
-                id: "folder-projets".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "Projets".to_string(),
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-01-20T14:00:00Z".to_string(),
-                updated_at: "2026-03-01T11:00:00Z".to_string(),
-            },
-            FolderEntry {
-                id: "folder-musique".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "Musique".to_string(),
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-02-01T16:00:00Z".to_string(),
-                updated_at: "2026-02-20T18:45:00Z".to_string(),
-            },
-        ],
-        files: vec![
-            FileEntry {
-                id: "file-readme".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "README.md".to_string(),
-                mime_type: "text/markdown".to_string(),
-                size_bytes: 2_048,
-                checksum_sha256: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
-                    .to_string(),
-                encryption_iv: Some("base64iv==".to_string()),
-                chunk_count: 1,
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-02-20T10:30:00Z".to_string(),
-                updated_at: "2026-02-28T16:00:00Z".to_string(),
-            },
-            FileEntry {
-                id: "file-photo1".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "vacances_2026.jpg".to_string(),
-                mime_type: "image/jpeg".to_string(),
-                size_bytes: 3_458_000,
-                checksum_sha256: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3"
-                    .to_string(),
-                encryption_iv: Some("base64iv2==".to_string()),
-                chunk_count: 14,
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-02-25T12:00:00Z".to_string(),
-                updated_at: "2026-02-25T12:00:00Z".to_string(),
-            },
-            FileEntry {
-                id: "file-rapport".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "rapport_annuel.pdf".to_string(),
-                mime_type: "application/pdf".to_string(),
-                size_bytes: 1_250_000,
-                checksum_sha256: "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4"
-                    .to_string(),
-                encryption_iv: Some("base64iv3==".to_string()),
-                chunk_count: 5,
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-03-01T09:00:00Z".to_string(),
-                updated_at: "2026-03-01T09:00:00Z".to_string(),
-            },
-            FileEntry {
-                id: "file-backup".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "backup_2026-02.zip".to_string(),
-                mime_type: "application/zip".to_string(),
-                size_bytes: 52_430_000,
-                checksum_sha256: "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
-                    .to_string(),
-                encryption_iv: Some("base64iv4==".to_string()),
-                chunk_count: 200,
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-02-28T22:00:00Z".to_string(),
-                updated_at: "2026-02-28T22:00:00Z".to_string(),
-            },
-            FileEntry {
-                id: "file-track".to_string(),
-                parent_id: None,
-                owner_id: "user-1".to_string(),
-                name: "ambient_track.mp3".to_string(),
-                mime_type: "audio/mpeg".to_string(),
-                size_bytes: 8_720_000,
-                checksum_sha256: "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6"
-                    .to_string(),
-                encryption_iv: Some("base64iv5==".to_string()),
-                chunk_count: 34,
-                is_trashed: false,
-                trashed_at: None,
-                created_at: "2026-02-10T15:30:00Z".to_string(),
-                updated_at: "2026-02-10T15:30:00Z".to_string(),
-            },
-        ],
-    }
-}
-
-/// Arborescence de dossiers de demonstration pour la sidebar.
-fn mock_folder_tree() -> Vec<state::FolderEntry> {
-    vec![
-        state::FolderEntry {
-            id: "folder-photos".to_string(),
-            parent_id: None,
-            owner_id: "user-1".to_string(),
-            name: "Photos".to_string(),
-            is_trashed: false,
-            trashed_at: None,
-            created_at: "2026-02-15T10:00:00Z".to_string(),
-            updated_at: "2026-02-28T14:30:00Z".to_string(),
-        },
-        state::FolderEntry {
-            id: "folder-photos-2026".to_string(),
-            parent_id: Some("folder-photos".to_string()),
-            owner_id: "user-1".to_string(),
-            name: "2026".to_string(),
-            is_trashed: false,
-            trashed_at: None,
-            created_at: "2026-01-01T00:00:00Z".to_string(),
-            updated_at: "2026-02-28T14:30:00Z".to_string(),
-        },
-        state::FolderEntry {
-            id: "folder-photos-2025".to_string(),
-            parent_id: Some("folder-photos".to_string()),
-            owner_id: "user-1".to_string(),
-            name: "2025".to_string(),
-            is_trashed: false,
-            trashed_at: None,
-            created_at: "2025-01-01T00:00:00Z".to_string(),
-            updated_at: "2025-12-31T23:59:00Z".to_string(),
-        },
-        state::FolderEntry {
-            id: "folder-docs".to_string(),
-            parent_id: None,
-            owner_id: "user-1".to_string(),
-            name: "Documents".to_string(),
-            is_trashed: false,
-            trashed_at: None,
-            created_at: "2026-01-10T08:00:00Z".to_string(),
-            updated_at: "2026-02-25T09:15:00Z".to_string(),
-        },
-        state::FolderEntry {
-            id: "folder-projets".to_string(),
-            parent_id: None,
-            owner_id: "user-1".to_string(),
-            name: "Projets".to_string(),
-            is_trashed: false,
-            trashed_at: None,
-            created_at: "2026-01-20T14:00:00Z".to_string(),
-            updated_at: "2026-03-01T11:00:00Z".to_string(),
-        },
-        state::FolderEntry {
-            id: "folder-musique".to_string(),
-            parent_id: None,
-            owner_id: "user-1".to_string(),
-            name: "Musique".to_string(),
-            is_trashed: false,
-            trashed_at: None,
-            created_at: "2026-02-01T16:00:00Z".to_string(),
-            updated_at: "2026-02-20T18:45:00Z".to_string(),
-        },
-    ]
-}

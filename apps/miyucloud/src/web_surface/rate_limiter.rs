@@ -163,6 +163,11 @@ where
             match state.check(&ip) {
                 Ok(()) => inner.call(req).await,
                 Err(retry_after) => {
+                    tracing::warn!(
+                        ip = %ip,
+                        retry_after_secs = retry_after,
+                        "security: rate limit exceeded"
+                    );
                     let retry_str = retry_after.to_string();
                     let body = serde_json::json!({
                         "error": {

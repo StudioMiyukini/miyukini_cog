@@ -16,14 +16,21 @@
 
 mod api;
 mod config;
+mod connect_auth;
 mod security_headers;
 mod web_surface;
 
+use miyucloud_dav::caldav::service::CalDavService;
+use miyucloud_dav::carddav::service::CardDavService;
+
 use config::MiyucloudConfig;
+use connect_auth::{ConnectAuthManager, PendingQrChallenge, WebPortalSession};
 use miyucloud::crypto::KeyManager;
 use miyucloud::data::types::CryptoConfig;
 use miyucloud::data::MiyucloudDb;
+use miyucloud::domain::QuotaOps;
 use miyucloud::storage::local_fs::LocalFsStorage;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio_rustls::TlsAcceptor;
 
@@ -39,6 +46,16 @@ pub struct AppState {
     pub config: MiyucloudConfig,
     /// Sel derive HKDF pour le hashing RGPD des adresses IP.
     pub ip_salt: [u8; 32],
+    /// Pont Miyukini Connect pour le portail web.
+    pub connect_auth: ConnectAuthManager,
+    /// Sessions web actives du portail.
+    pub web_sessions: std::sync::Mutex<HashMap<String, WebPortalSession>>,
+    /// Challenges QR en attente d'approbation.
+    pub qr_challenges: std::sync::Mutex<HashMap<String, PendingQrChallenge>>,
+    /// Service CalDAV (calendriers + evenements).
+    pub caldav_svc: CalDavService,
+    /// Service CardDAV (carnets d'adresses + contacts).
+    pub carddav_svc: CardDavService,
 }
 
 #[tokio::main]
@@ -86,6 +103,33 @@ async fn main() {
 
     tracing::info!("Crypto bootstrap complete. Master key derived.");
 
+    if let Err(e) = QuotaOps::set_max(&db, &config.owner_id, config.default_quota_bytes) {
+        tracing::error!("Failed to apply default quota: {e}");
+        std::process::exit(1);
+    }
+
+    // 4. DAV services (CalDAV / CardDAV)
+    let dav_conn = match rusqlite::Connection::open(&config.dav_db_path) {
+        Ok(c) => c,
+        Err(e) => {
+            tracing::error!("Failed to open DAV database: {e}");
+            std::process::exit(1);
+        }
+    };
+    let dav_db = std::sync::Arc::new(std::sync::Mutex::new(dav_conn));
+
+    let caldav_svc = CalDavService::new(dav_db.clone());
+    if let Err(e) = caldav_svc.init_tables() {
+        tracing::error!("Failed to init CalDAV tables: {e}");
+        std::process::exit(1);
+    }
+
+    let carddav_svc = CardDavService::new(dav_db);
+    if let Err(e) = carddav_svc.init_tables() {
+        tracing::error!("Failed to init CardDAV tables: {e}");
+        std::process::exit(1);
+    }
+
     let ip_salt = crate::web_surface::access_log::derive_ip_salt(&config.cog_token);
     let state = Arc::new(AppState {
         db,
@@ -93,6 +137,11 @@ async fn main() {
         key_manager,
         config: config.clone(),
         ip_salt,
+        connect_auth: ConnectAuthManager::new(config.central_db_path.clone()),
+        web_sessions: std::sync::Mutex::new(HashMap::new()),
+        qr_challenges: std::sync::Mutex::new(HashMap::new()),
+        caldav_svc,
+        carddav_svc,
     });
 
     // --- API server (HTTP, localhost only) ---
@@ -405,8 +454,21 @@ mod tests {
             web_port: 11442,
             web_enabled: false,
             trust_proxy: false,
+            default_quota_bytes: 10 * 1024 * 1024 * 1024,
+            public_share_links_enabled: true,
+            internal_sharing_enabled: true,
+            default_share_permission: "read".to_string(),
+            ssh_enabled: false,
+            ssh_host: None,
+            ssh_port: 22,
+            ssh_username: None,
+            ssh_root_path: None,
+            ssh_private_key_path: None,
+            ssh_keepalive: true,
+            central_db_path: None,
             tls_cert_path: None,
             tls_key_path: None,
+            dav_db_path: std::path::PathBuf::from(":memory:"),
         }
     }
 

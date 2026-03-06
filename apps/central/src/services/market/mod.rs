@@ -8,7 +8,9 @@ mod service_detail;
 mod sidebar;
 
 use crate::market_client::MarketClient;
-use crate::state::{use_app_state, use_service_manager};
+use crate::state::{
+    market_entry_to_service_info, use_app_state, use_service_manager, ServiceInfo, ServiceRegistry,
+};
 use dioxus::prelude::*;
 
 use catalog::MarketCatalog;
@@ -59,13 +61,17 @@ pub struct MarketState {
     pub install_status: Option<(String, InstallStatus)>,
     /// Mises à jour disponibles : (service_id, version_installée, version_disponible).
     pub available_updates: Vec<(String, String, String)>,
+    /// Catalogue réellement chargé depuis Origin.
+    pub catalog_services: Vec<ServiceInfo>,
+    /// True quand une tentative de chargement distant a déjà été faite.
+    pub catalog_loaded: bool,
 }
 
 // ── Composant racine ───────────────────────────────────────────────────
 
 #[component]
 pub fn MarketView() -> Element {
-    let _app_state = use_app_state();
+    let app_state = use_app_state();
     let manager = use_service_manager();
     let state = use_signal(MarketState::default);
 
@@ -75,21 +81,24 @@ pub fn MarketView() -> Element {
         let mut state = state;
         use_effect(move || {
             let manager = manager.clone();
+            let mut app_state = app_state.clone();
             spawn(async move {
-                let origin_url = std::env::var("MIYUKINI_ORIGIN_URL")
-                    .unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
+                let origin_url = market_origin_url();
                 let client = MarketClient::new(&origin_url);
 
                 match client.fetch_catalog().await {
                     Ok(catalog) => {
-                        // Construire la liste (service_id, version_disponible)
-                        let catalog_versions: Vec<(String, String)> = catalog
+                        let remote_services = catalog
                             .official
+                            .into_iter()
+                            .chain(catalog.community.into_iter())
+                            .map(|entry| market_entry_to_service_info(entry, &manager))
+                            .collect::<Vec<_>>();
+
+                        // Construire la liste (service_id, version_disponible)
+                        let catalog_versions: Vec<(String, String)> = remote_services
                             .iter()
-                            .chain(catalog.community.iter())
-                            .map(|entry| {
-                                (entry.manifest.id.clone(), entry.manifest.version.clone())
-                            })
+                            .map(|entry| (entry.id.clone(), entry.version.clone()))
                             .collect();
 
                         let updates = manager.check_updates(&catalog_versions);
@@ -98,11 +107,19 @@ pub fn MarketView() -> Element {
                                 "Market: {} mise(s) à jour disponible(s)",
                                 updates.len()
                             );
-                            state.write().available_updates = updates;
                         }
+
+                        {
+                            let mut s = state.write();
+                            s.catalog_services = remote_services;
+                            s.catalog_loaded = true;
+                            s.available_updates = updates;
+                        }
+                        app_state.write().refresh_services(&manager);
                     }
                     Err(e) => {
-                        tracing::debug!("Vérification des mises à jour échouée: {e}");
+                        tracing::warn!("Chargement du Market Origin échoué: {e}");
+                        state.write().catalog_loaded = true;
                     }
                 }
             });
@@ -130,4 +147,30 @@ pub fn MarketView() -> Element {
             }
         }
     }
+}
+
+pub(super) fn market_origin_url() -> String {
+    std::env::var("MIYUKINI_ORIGIN_URL").unwrap_or_else(|_| "https://miyukini.com".to_string())
+}
+
+pub(super) fn visible_market_services(
+    manager: &crate::service_manager::ServiceManager,
+    state: &MarketState,
+) -> Vec<ServiceInfo> {
+    if state.catalog_services.is_empty() {
+        return ServiceRegistry::installed_services(manager);
+    }
+
+    let mut services = state.catalog_services.clone();
+    for svc in &mut services {
+        svc.is_installed = manager.is_installed(&svc.id);
+    }
+
+    for installed in ServiceRegistry::installed_only(manager) {
+        if installed.id != "market" && !services.iter().any(|svc| svc.id == installed.id) {
+            services.push(installed);
+        }
+    }
+
+    services
 }

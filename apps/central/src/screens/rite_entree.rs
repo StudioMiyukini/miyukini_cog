@@ -374,10 +374,12 @@ pub fn RiteEntree() -> Element {
                 .push_str("Les deux clés ne correspondent pas.");
             return;
         }
-        let auth_db = connections.read().auth_db.clone();
-        match auth_db.sign_up(&em, &pass, Some(pseudo.as_str())) {
+        let connections_ref = connections.read().clone();
+        match connections_ref.connect_sign_up(&em, &pass, Some(pseudo.as_str())) {
             Ok(profile) => {
-                let _ = auth_db.set_current_profile_id(Some(profile.id.as_str()));
+                let _ = connections_ref
+                    .auth_db
+                    .set_current_profile_id(Some(profile.id.as_str()));
                 profile_created.set(Some(profile.clone()));
                 let mut s = state.write();
                 s.current_user = Some(profile);

@@ -1,6 +1,0 @@
-[alias]
-ci-check = "clippy --workspace -- -D warnings"
-ci-test = "test --workspace"
-
-[build]
-jobs = 4

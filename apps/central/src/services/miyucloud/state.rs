@@ -123,6 +123,15 @@ pub enum PermissionLevel {
     ReadWrite,
 }
 
+impl PermissionLevel {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Read => "Lecture seule",
+            Self::ReadWrite => "Lecture et ecriture",
+        }
+    }
+}
+
 /// Element partage avec moi (fichier ou dossier + permission).
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct SharedWithMeEntry {
@@ -230,6 +239,15 @@ pub struct AuthSession {
     /// User-Agent tronque (optionnel).
     #[serde(default)]
     pub created_ua: Option<String>,
+}
+
+/// Challenge d'authentification web MiyuCloud en attente d'approbation.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct WebAuthChallenge {
+    pub id: String,
+    pub browser_label: String,
+    pub created_at: String,
+    pub expires_at: String,
 }
 
 /// Reponse de setup TOTP.
@@ -448,6 +466,59 @@ pub struct ResolveConflictRequest {
     pub resolution: String,
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// Types CalDAV / CardDAV pour Central UI
+// ════════════════════════════════════════════════════════════════════════════
+
+/// Calendrier (resume JSON du service CalDAV).
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct CalendarEntry {
+    pub owner_id: String,
+    pub name: String,
+    pub display_name: String,
+    pub color: Option<String>,
+    pub ctag: String,
+    pub created_at: String,
+}
+
+/// Evenement calendrier (resume JSON).
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct CalendarEvent {
+    pub uid: String,
+    pub calendar_name: String,
+    pub owner_id: String,
+    pub summary: String,
+    pub dtstart: String,
+    pub dtend: Option<String>,
+    pub location: Option<String>,
+    pub description: Option<String>,
+    pub etag: String,
+    pub updated_at: String,
+}
+
+/// Carnet d'adresses (resume JSON du service CardDAV).
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct AddressBookEntry {
+    pub owner_id: String,
+    pub name: String,
+    pub display_name: String,
+    pub ctag: String,
+    pub created_at: String,
+}
+
+/// Contact (resume JSON).
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct ContactEntry {
+    pub uid: String,
+    pub book_name: String,
+    pub owner_id: String,
+    pub full_name: String,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub etag: String,
+    pub updated_at: String,
+}
+
 /// Statut de synchronisation P2P pour l'UI.
 #[derive(Debug, Clone, Default)]
 pub struct SyncStatusInfo {
@@ -467,6 +538,10 @@ pub enum CloudSection {
     /// Explorateur de fichiers (par defaut).
     #[default]
     Files,
+    /// Calendrier CalDAV.
+    Calendar,
+    /// Contacts CardDAV.
+    Contacts,
     /// Partages (liens actifs + partages Tribu).
     Shares,
     /// Corbeille.
@@ -531,12 +606,38 @@ pub struct MiyuCloudState {
     pub storage_stats: StorageStats,
     /// Quota utilisateur (pour Settings).
     pub user_quota: Option<UserQuota>,
+    /// Quota configuré côté launcher (persisté dans Central).
+    pub configured_quota_bytes: u64,
+    /// Wizard initial MiyuCloud termine.
+    pub first_launch_completed: bool,
+    /// Wizard de setup visible.
+    pub setup_wizard_open: bool,
     /// Chemin de stockage (pour Settings).
     pub storage_path: String,
     /// Surface web activee (pour Settings).
     pub web_surface_enabled: bool,
     /// Port de la surface web (pour Settings).
     pub web_surface_port: u16,
+    /// Liens publics autorises.
+    pub public_share_links_enabled: bool,
+    /// Partage interne autorise.
+    pub internal_sharing_enabled: bool,
+    /// Permission de partage par defaut.
+    pub default_share_permission: PermissionLevel,
+    /// Profil SSH actif.
+    pub ssh_enabled: bool,
+    /// Hote SSH configure.
+    pub ssh_host: String,
+    /// Port SSH configure.
+    pub ssh_port: u16,
+    /// Utilisateur SSH configure.
+    pub ssh_username: String,
+    /// Racine distante SSH configuree.
+    pub ssh_root_path: String,
+    /// Cle privee SSH configuree.
+    pub ssh_private_key_path: String,
+    /// Keepalive SSH.
+    pub ssh_keepalive: bool,
     /// Pairs de synchronisation connus.
     pub sync_peers: Vec<SyncPeer>,
     /// Conflits de synchronisation en cours.
@@ -551,6 +652,8 @@ pub struct MiyuCloudState {
     pub add_peer_port: String,
     /// Sessions d'auth actives.
     pub auth_sessions: Vec<AuthSession>,
+    /// Challenges QR web en attente.
+    pub web_auth_challenges: Vec<WebAuthChallenge>,
     /// 2FA activee.
     pub totp_enabled: bool,
     /// URI otpauth du setup courant.
@@ -569,6 +672,32 @@ pub struct MiyuCloudState {
     pub onboarding_status: Option<OnboardingStatus>,
     /// Statut health detaille.
     pub health_status: Option<HealthStatus>,
+    /// Compteur de rechargement (incrementer pour forcer un reload).
+    pub reload_counter: u32,
+    // ── CalDAV ──
+    /// Calendriers connus.
+    pub calendars: Vec<CalendarEntry>,
+    /// Calendrier selectionne (nom).
+    pub selected_calendar: Option<String>,
+    /// Evenements du calendrier selectionne.
+    pub calendar_events: Vec<CalendarEvent>,
+    /// Evenement selectionne (uid).
+    pub selected_event_uid: Option<String>,
+    /// Mois affiche (1-12).
+    pub calendar_month: u32,
+    /// Annee affichee.
+    pub calendar_year: i32,
+    // ── CardDAV ──
+    /// Carnets d'adresses connus.
+    pub addressbooks: Vec<AddressBookEntry>,
+    /// Carnet selectionne (nom).
+    pub selected_addressbook: Option<String>,
+    /// Contacts du carnet selectionne.
+    pub contacts: Vec<ContactEntry>,
+    /// Contact selectionne (uid).
+    pub selected_contact_uid: Option<String>,
+    /// Filtre de recherche contacts.
+    pub contacts_search: String,
 }
 
 impl Default for MiyuCloudState {
@@ -603,9 +732,22 @@ impl Default for MiyuCloudState {
             confirm_purge_id: None,
             storage_stats: StorageStats::default(),
             user_quota: None,
+            configured_quota_bytes: 10 * 1024 * 1024 * 1024,
+            first_launch_completed: false,
+            setup_wizard_open: false,
             storage_path: String::new(),
             web_surface_enabled: false,
             web_surface_port: 11442,
+            public_share_links_enabled: true,
+            internal_sharing_enabled: true,
+            default_share_permission: PermissionLevel::Read,
+            ssh_enabled: false,
+            ssh_host: String::new(),
+            ssh_port: 22,
+            ssh_username: String::new(),
+            ssh_root_path: String::new(),
+            ssh_private_key_path: String::new(),
+            ssh_keepalive: true,
             sync_peers: Vec::new(),
             sync_conflicts: Vec::new(),
             sync_panel_open: false,
@@ -613,6 +755,7 @@ impl Default for MiyuCloudState {
             add_peer_ip: String::new(),
             add_peer_port: "11440".to_string(),
             auth_sessions: Vec::new(),
+            web_auth_challenges: Vec::new(),
             totp_enabled: false,
             totp_otpauth_uri: None,
             recovery_codes: Vec::new(),
@@ -622,6 +765,27 @@ impl Default for MiyuCloudState {
             recovery_code_input: String::new(),
             onboarding_status: None,
             health_status: None,
+            reload_counter: 0,
+            calendars: Vec::new(),
+            selected_calendar: None,
+            calendar_events: Vec::new(),
+            selected_event_uid: None,
+            calendar_month: {
+                let now = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+                // Approximate month from epoch seconds
+                let days = now / 86400;
+                let approx_month = ((days % 365) / 30) + 1;
+                approx_month.min(12) as u32
+            },
+            calendar_year: 2026,
+            addressbooks: Vec::new(),
+            selected_addressbook: None,
+            contacts: Vec::new(),
+            selected_contact_uid: None,
+            contacts_search: String::new(),
         }
     }
 }

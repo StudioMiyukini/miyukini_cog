@@ -521,10 +521,57 @@ pub struct RegisterAckPayload {
     /// ID du Permis de circulation (accord relay) — utilisé pour ANNOUNCE au Tracker.
     #[serde(default)]
     pub permis_id: Vec<u8>,
+    /// Liste des trackers officiels fournie par Origin via le Relay.
+    #[serde(default)]
+    pub official_trackers: Vec<String>,
+    /// Signature du bloc `official_trackers` si fournie.
+    #[serde(default)]
+    pub tracker_signature: Vec<u8>,
     /// Durée de validité en secondes (dérivé de permis_expires_at).
     pub ttl: u32,
     /// Intervalle de heartbeat en secondes (non présent dans Origin; défaut 30).
     pub heartbeat_interval: u32,
+}
+
+fn normalize_tracker_addresses(trackers: Vec<String>) -> Vec<String> {
+    let mut normalized = Vec::new();
+    for tracker in trackers {
+        let tracker = tracker.trim().to_string();
+        if tracker.is_empty() || normalized.iter().any(|existing| existing == &tracker) {
+            continue;
+        }
+        normalized.push(tracker);
+    }
+    normalized
+}
+
+fn parse_tracker_addresses(data: &[u8]) -> Option<Vec<String>> {
+    if data.is_empty() {
+        return Some(Vec::new());
+    }
+
+    if let Ok(trackers) = serde_json::from_slice::<Vec<String>>(data) {
+        return Some(normalize_tracker_addresses(trackers));
+    }
+
+    if let Ok(tracker) = serde_json::from_slice::<String>(data) {
+        return Some(normalize_tracker_addresses(vec![tracker]));
+    }
+
+    let text = std::str::from_utf8(data).ok()?.trim();
+    if text.is_empty() {
+        return Some(Vec::new());
+    }
+
+    let separators = [',', '\n', '\r'];
+    let trackers = text
+        .split(|c| separators.contains(&c))
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+
+    Some(normalize_tracker_addresses(trackers))
 }
 
 impl RegisterAckPayload {
@@ -563,8 +610,10 @@ impl RegisterAckPayload {
         if data.len() < i + tracker_len + 64 + 1 {
             return None;
         }
+        let official_trackers = parse_tracker_addresses(&data[i..i + tracker_len])?;
         i += tracker_len;
-        i += 64; // tracker_signature
+        let tracker_signature = data[i..i + 64].to_vec();
+        i += 64;
         let _status = data[i];
         let ttl = if permis_expires_at > 0 {
             let now = std::time::SystemTime::now()
@@ -579,6 +628,8 @@ impl RegisterAckPayload {
         Some(Self {
             session_id,
             permis_id,
+            official_trackers,
+            tracker_signature,
             ttl,
             heartbeat_interval: 30,
         })
@@ -844,5 +895,46 @@ impl CreateLobbyPayload {
     /// Sérialise en JSON.
     pub fn to_bytes(&self) -> Bytes {
         Bytes::from(serde_json::to_vec(self).unwrap_or_default())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bytes::{BufMut, BytesMut};
+
+    #[test]
+    fn parse_tracker_addresses_supports_json_array() {
+        let trackers =
+            parse_tracker_addresses(br#"["origin.example.net:21000","origin.example.net:21000"]"#)
+                .expect("tracker list");
+        assert_eq!(trackers, vec!["origin.example.net:21000".to_string()]);
+    }
+
+    #[test]
+    fn register_ack_payload_extracts_official_trackers() {
+        let tracker_addresses = br#"["origin.example.net:21000","backup.origin.example.net:21000"]"#;
+        let mut payload = BytesMut::new();
+        payload.extend_from_slice(&[1u8; SESSION_ID_SIZE]);
+        payload.put_u16(6);
+        payload.extend_from_slice(b"permis");
+        payload.put_u64(0);
+        payload.put_u16(0);
+        payload.put_u16(tracker_addresses.len() as u16);
+        payload.extend_from_slice(tracker_addresses);
+        payload.extend_from_slice(&[7u8; 64]);
+        payload.put_u8(0);
+
+        let ack = RegisterAckPayload::from_origin_bytes(&payload)
+            .expect("REGISTER_OK payload should parse");
+
+        assert_eq!(
+            ack.official_trackers,
+            vec![
+                "origin.example.net:21000".to_string(),
+                "backup.origin.example.net:21000".to_string()
+            ]
+        );
+        assert_eq!(ack.tracker_signature.len(), 64);
     }
 }

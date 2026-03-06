@@ -1,8 +1,8 @@
 //! Vue détaillée d'un service dans le Market.
 
-use super::{InstallStatus, MarketState};
+use super::{market_origin_url, visible_market_services, InstallStatus, MarketState};
 use crate::market_client::MarketClient;
-use crate::state::{use_app_state, use_service_manager, ServiceRegistry};
+use crate::state::{use_app_state, use_service_manager};
 use dioxus::prelude::*;
 
 #[component]
@@ -13,8 +13,8 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
 
     let service_id = state.read().selected_service_id.clone().unwrap_or_default();
 
-    // Chercher dans la liste complète (installés + catalogue)
-    let all_services = ServiceRegistry::installed_services(&manager);
+    // Chercher dans la liste réellement visible (catalogue Origin + installés locaux).
+    let all_services = visible_market_services(&manager, &state.read());
     let service = all_services.iter().find(|s| s.id == service_id).cloned();
 
     if let Some(svc) = service {
@@ -30,6 +30,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
         let svc_icon = svc.icon.clone();
         let svc_version = svc.version.clone();
         let svc_developer = svc.developer.clone();
+        let svc_downloadable = svc.downloadable;
 
         let icon_bg = format!("width: 100px; height: 100px; background: linear-gradient(135deg, {type_color}30, {type_color}10); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;");
         let type_badge_style = format!("display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: {type_color}15; border: 1px solid {type_color}30; border-radius: 6px; font-size: 12px; color: {type_color};");
@@ -166,7 +167,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                         }
 
                         // Bouton « Mettre à jour » si une nouvelle version est disponible
-                        if has_update {
+                        if has_update && svc_downloadable {
                             {
                                 let is_updating = state.read().install_status.as_ref()
                                     .map_or(false, |(id, st)| id == &svc_id && matches!(st, InstallStatus::Downloading | InstallStatus::Installing));
@@ -195,6 +196,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                 };
                                 let sid_u = sid_update.clone();
                                 let mgr_u = manager_update.clone();
+                                let mut app_state = app.clone();
 
                                 rsx! {
                                     div {
@@ -209,9 +211,8 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                                 let mut st = state;
                                                 st.write().install_status = Some((sid.clone(), InstallStatus::Downloading));
 
-                                                spawn(async move {
-                                                    let origin_url = std::env::var("MIYUKINI_ORIGIN_URL")
-                                                        .unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
+                                            spawn(async move {
+                                                    let origin_url = market_origin_url();
                                                     let client = MarketClient::new(&origin_url);
 
                                                     match client.download_package(&sid, &new_ver).await {
@@ -223,6 +224,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                                                     st.write().install_status = Some((sid.clone(), InstallStatus::Done));
                                                                     // Retirer de la liste des mises à jour disponibles
                                                                     st.write().available_updates.retain(|(id, _, _)| id != &sid);
+                                                                    app_state.write().refresh_services(&mgr);
                                                                 }
                                                                 Err(e) => {
                                                                     tracing::error!("Mise \u{e0} jour \u{e9}chou\u{e9}e: {e}");
@@ -254,10 +256,16 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                     }
                                 }
                             }
+                        } else if has_update {
+                            p {
+                                style: "font-size: 12px; color: {c.text_muted};",
+                                "La mise a jour n'est pas encore disponible au telechargement sur Origin."
+                            }
                         }
                     } else {
                         // Service non installé — téléchargement + installation
-                        {
+                        if svc_downloadable {
+                            {
                             let is_installing = state.read().install_status.as_ref()
                                 .map_or(false, |(id, st)| id == &svc_id && matches!(st, InstallStatus::Downloading | InstallStatus::Installing));
                             let install_error = state.read().install_status.as_ref()
@@ -286,6 +294,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                             let svc_id_install = svc_id.clone();
                             let svc_version_install = svc_version.clone();
                             let manager_install = manager.clone();
+                            let mut app_state = app.clone();
 
                             rsx! {
                                 div {
@@ -302,8 +311,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                             st.write().install_status = Some((sid.clone(), InstallStatus::Downloading));
 
                                             spawn(async move {
-                                                let origin_url = std::env::var("MIYUKINI_ORIGIN_URL")
-                                                    .unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
+                                                let origin_url = market_origin_url();
                                                 let client = MarketClient::new(&origin_url);
 
                                                 match client.download_package(&sid, &ver).await {
@@ -313,6 +321,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                                             Ok(installed_id) => {
                                                                 tracing::info!("Service installe: {installed_id}");
                                                                 st.write().install_status = Some((sid.clone(), InstallStatus::Done));
+                                                                app_state.write().refresh_services(&mgr);
                                                             }
                                                             Err(e) => {
                                                                 tracing::error!("Installation echouee: {e}");
@@ -335,6 +344,20 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                             "{err}"
                                         }
                                     }
+                                }
+                            }
+                        }
+                        } else {
+                            div {
+                                style: "display: flex; flex-direction: column; gap: 8px;",
+                                button {
+                                    style: "padding: 12px 32px; background: {c.bg_hover}; color: {c.text_muted}; border: 1px solid {c.border}; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: not-allowed;",
+                                    disabled: true,
+                                    "Installation indisponible"
+                                }
+                                p {
+                                    style: "font-size: 12px; color: {c.text_muted};",
+                                    "Le package Windows n'est pas encore publie sur Origin pour ce service."
                                 }
                             }
                         }

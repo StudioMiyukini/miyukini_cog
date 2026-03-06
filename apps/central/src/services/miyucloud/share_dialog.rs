@@ -73,9 +73,21 @@ pub fn ShareDialog(
     client: Signal<Option<MiyuCloudClient>>,
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
+    let public_links_enabled = state.read().public_share_links_enabled;
+    let internal_sharing_enabled = state.read().internal_sharing_enabled;
+    let web_surface_enabled = state.read().web_surface_enabled;
+    let web_surface_port = state.read().web_surface_port;
+    let external_links_available = public_links_enabled && web_surface_enabled;
+    let initial_tab = if external_links_available {
+        ShareTab::ExternalLink
+    } else if internal_sharing_enabled {
+        ShareTab::TribeShare
+    } else {
+        ShareTab::ExternalLink
+    };
 
     // Signaux locaux pour le formulaire
-    let mut active_tab = use_signal(|| ShareTab::ExternalLink);
+    let mut active_tab = use_signal(|| initial_tab);
     let mut expiration_index = use_signal(|| 2_usize); // 24h par defaut
     let mut password_enabled = use_signal(|| false);
     let mut password_value = use_signal(String::new);
@@ -87,7 +99,7 @@ pub fn ShareDialog(
     // Partage Tribu
     let mut grantee_id = use_signal(String::new);
     let mut grantee_type = use_signal(|| GranteeType::Profile);
-    let mut permission_level = use_signal(|| PermissionLevel::Read);
+    let mut permission_level = use_signal(|| state.read().default_share_permission);
 
     // Valeurs lues pour eviter les nested braces dans RSX
     let tab = *active_tab.read();
@@ -98,33 +110,61 @@ pub fn ShareDialog(
     let current_error = error_msg.read().clone();
     let generated_url = state.read().generated_share_url.clone();
     let has_generated_url = generated_url.is_some();
+    let external_link_notice =
+        share_availability_message(public_links_enabled, web_surface_enabled);
+    let tribe_share_notice = if internal_sharing_enabled {
+        None
+    } else {
+        Some("Le partage interne est desactive dans le setup MiyuCloud.")
+    };
 
     let link_tab_active = tab == ShareTab::ExternalLink;
     let tribe_tab_active = tab == ShareTab::TribeShare;
 
     let link_tab_bg = if link_tab_active {
         c.accent_blue
+    } else if !external_links_available {
+        c.bg_main
     } else {
         c.bg_hover
     };
     let link_tab_color = if link_tab_active {
         c.text_white
+    } else if !external_links_available {
+        c.text_muted
     } else {
         c.text_secondary
     };
     let tribe_tab_bg = if tribe_tab_active {
         c.accent_blue
+    } else if !internal_sharing_enabled {
+        c.bg_main
     } else {
         c.bg_hover
     };
     let tribe_tab_color = if tribe_tab_active {
         c.text_white
+    } else if !internal_sharing_enabled {
+        c.text_muted
     } else {
         c.text_secondary
     };
+    let link_tab_cursor = if external_links_available {
+        "pointer"
+    } else {
+        "not-allowed"
+    };
+    let tribe_tab_cursor = if internal_sharing_enabled {
+        "pointer"
+    } else {
+        "not-allowed"
+    };
 
-    let btn_opacity = if is_creating { "0.6" } else { "1" };
-    let btn_cursor = if is_creating {
+    let action_disabled = is_creating
+        || (link_tab_active && !external_links_available)
+        || (tribe_tab_active && !internal_sharing_enabled);
+    let btn_opacity = if action_disabled { "0.6" } else { "1" };
+    let btn_cursor = if action_disabled {
         "not-allowed"
     } else {
         "pointer"
@@ -174,13 +214,23 @@ pub fn ShareDialog(
                 div {
                     style: "display: flex; padding: 8px 20px 0; gap: 4px;",
                     button {
-                        style: "flex: 1; padding: 8px 12px; background: {link_tab_bg}; color: {link_tab_color}; border: none; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 13px; font-weight: 500;",
-                        onclick: move |_| active_tab.set(ShareTab::ExternalLink),
+                        style: "flex: 1; padding: 8px 12px; background: {link_tab_bg}; color: {link_tab_color}; border: none; border-radius: 6px 6px 0 0; cursor: {link_tab_cursor}; font-size: 13px; font-weight: 500;",
+                        disabled: !external_links_available,
+                        onclick: move |_| {
+                            if external_links_available {
+                                active_tab.set(ShareTab::ExternalLink);
+                            }
+                        },
                         "Lien externe"
                     }
                     button {
-                        style: "flex: 1; padding: 8px 12px; background: {tribe_tab_bg}; color: {tribe_tab_color}; border: none; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 13px; font-weight: 500;",
-                        onclick: move |_| active_tab.set(ShareTab::TribeShare),
+                        style: "flex: 1; padding: 8px 12px; background: {tribe_tab_bg}; color: {tribe_tab_color}; border: none; border-radius: 6px 6px 0 0; cursor: {tribe_tab_cursor}; font-size: 13px; font-weight: 500;",
+                        disabled: !internal_sharing_enabled,
+                        onclick: move |_| {
+                            if internal_sharing_enabled {
+                                active_tab.set(ShareTab::TribeShare);
+                            }
+                        },
                         "Partage Tribu"
                     }
                 }
@@ -194,6 +244,24 @@ pub fn ShareDialog(
                         div {
                             style: "padding: 8px 12px; background: {c.accent_red}20; border-left: 3px solid {c.accent_red}; border-radius: 4px; color: {c.accent_red}; font-size: 13px; margin-bottom: 12px;",
                             "{err}"
+                        }
+                    }
+
+                    if link_tab_active {
+                        if let Some(notice) = external_link_notice {
+                            div {
+                                style: "padding: 8px 12px; background: {c.bg_main}; border-left: 3px solid {c.accent_blue}; border-radius: 4px; color: {c.text_secondary}; font-size: 13px; margin-bottom: 12px;",
+                                "{notice}"
+                            }
+                        }
+                    }
+
+                    if tribe_tab_active {
+                        if let Some(notice) = tribe_share_notice {
+                            div {
+                                style: "padding: 8px 12px; background: {c.bg_main}; border-left: 3px solid {c.accent_blue}; border-radius: 4px; color: {c.text_secondary}; font-size: 13px; margin-bottom: 12px;",
+                                "{notice}"
+                            }
                         }
                     }
 
@@ -336,8 +404,16 @@ pub fn ShareDialog(
                         // Create button
                         button {
                             style: "width: 100%; padding: 10px 16px; background: {c.accent_blue}; color: white; border: none; border-radius: 6px; cursor: {btn_cursor}; font-size: 14px; font-weight: 600; opacity: {btn_opacity};",
-                            disabled: is_creating,
+                            disabled: action_disabled,
                             onclick: move |_| {
+                                if !external_links_available {
+                                    error_msg.set(Some(
+                                        share_availability_message(public_links_enabled, web_surface_enabled)
+                                            .unwrap_or("Les liens externes sont indisponibles.".to_string())
+                                    ));
+                                    return;
+                                }
+
                                 let pwd_enabled = *password_enabled.read();
                                 let pwd_val = password_value.read().clone();
                                 let max_dl_on = *max_downloads_enabled.read();
@@ -386,7 +462,8 @@ pub fn ShareDialog(
                                         Ok(link) => {
                                             // Construire l'URL de partage
                                             let share_url = format!(
-                                                "https://127.0.0.1:11442/share/{}",
+                                                "https://127.0.0.1:{}/share/{}",
+                                                web_surface_port,
                                                 link.token
                                             );
                                             state.write().generated_share_url = Some(share_url);
@@ -403,7 +480,13 @@ pub fn ShareDialog(
                                     }
                                 });
                             },
-                            if is_creating { "Creation en cours..." } else { "Creer le lien" }
+                            if is_creating {
+                                "Creation en cours..."
+                            } else if !external_links_available {
+                                "Liens externes indisponibles"
+                            } else {
+                                "Creer le lien"
+                            }
                         }
                     }
 
@@ -492,8 +575,15 @@ pub fn ShareDialog(
                             // Share button
                             button {
                                 style: "width: 100%; padding: 10px 16px; background: {c.accent_blue}; color: white; border: none; border-radius: 6px; cursor: {btn_cursor}; font-size: 14px; font-weight: 600; opacity: {btn_opacity};",
-                                disabled: is_creating,
+                                disabled: action_disabled,
                                 onclick: move |_| {
+                                    if !internal_sharing_enabled {
+                                        error_msg.set(Some(
+                                            "Le partage interne est desactive dans le setup MiyuCloud.".to_string()
+                                        ));
+                                        return;
+                                    }
+
                                     let gid = grantee_id.read().clone();
                                     if gid.is_empty() {
                                         error_msg.set(Some("Veuillez saisir l'ID du destinataire.".to_string()));
@@ -538,7 +628,13 @@ pub fn ShareDialog(
                                         }
                                     });
                                 },
-                                if is_creating { "Partage en cours..." } else { "Partager" }
+                                if is_creating {
+                                    "Partage en cours..."
+                                } else if !internal_sharing_enabled {
+                                    "Partage interne indisponible"
+                                } else {
+                                    "Partager"
+                                }
                             }
                         }
                     }
@@ -570,5 +666,21 @@ fn copy_to_clipboard(text: &str) {
         // Best-effort: log the URL
         let _ = text;
         tracing::info!("Share URL generated (clipboard not available on this platform)");
+    }
+}
+
+fn share_availability_message(
+    public_links_enabled: bool,
+    web_surface_enabled: bool,
+) -> Option<String> {
+    if !public_links_enabled {
+        Some("Les liens publics sont desactives dans le setup MiyuCloud.".to_string())
+    } else if !web_surface_enabled {
+        Some(
+            "La surface web MiyuCloud est desactivee. Active-la dans les reglages avant de partager un lien."
+                .to_string(),
+        )
+    } else {
+        None
     }
 }

@@ -11,10 +11,11 @@ use crate::miou::{
 };
 use crate::screens::{Connexion, ProfileWindow, RiteEntree};
 use crate::service_manager::ServiceManager;
-use crate::services::ActiveServiceView;
+use crate::services::{auto_connect_after_login, ActiveServiceView, MwsNetworkView, MwsViewState};
 use crate::state::{AppContext, AppState, MainTab};
 use crate::theme::styles;
 use dioxus::prelude::*;
+use miyukini_central::CentralMwsState;
 
 /// Point d'entrée de l'application.
 #[component]
@@ -52,6 +53,7 @@ pub fn App() -> Element {
     });
 
     let ctx = use_context::<AppContext>();
+    let mut mws_state = use_context_provider(|| Signal::new(MwsViewState::default()));
     let state = ctx.state;
     let is_cog_virgin = state.read().is_cog_virgin;
     let has_user = state.read().current_user.is_some();
@@ -119,6 +121,39 @@ pub fn App() -> Element {
                 }
             });
         }
+    });
+
+    let ctx_for_mws = ctx.clone();
+    use_effect(move || {
+        let current_user = ctx_for_mws.state.read().current_user.clone();
+        let Some(profile) = current_user else {
+            mws_state.write().boot_user_id = None;
+            return;
+        };
+
+        let should_boot = {
+            let mws = mws_state.read();
+            mws.config.should_connect()
+                && mws.config.auto_connect
+                && mws.boot_user_id.as_deref() != Some(profile.id.as_str())
+                && !matches!(
+                    mws.state,
+                    CentralMwsState::Connected
+                        | CentralMwsState::Connecting
+                        | CentralMwsState::RelayConnected
+                )
+        };
+
+        if !should_boot {
+            return;
+        }
+
+        mws_state.write().boot_user_id = Some(profile.id.clone());
+        let display_name = crate::data::profile_display_name(&profile);
+        let connections = ctx_for_mws.connections.read().clone();
+        spawn(async move {
+            auto_connect_after_login(mws_state, connections, display_name).await;
+        });
     });
 
     // Handler pour dismiss de la bulle
@@ -198,11 +233,7 @@ pub fn App() -> Element {
                                 let main_tab = state.read().main_tab;
                                 match main_tab {
                                     MainTab::Salon | MainTab::Bibliotheque => rsx! { ActiveServiceView {} },
-                                    MainTab::Communaute => rsx! {
-                                        div { style: "padding: 32px; color: #8f98a0;",
-                                            "Webway (MWS) — bient\u{f4}t disponible en service ind\u{e9}pendant."
-                                        }
-                                    },
+                                    MainTab::Communaute => rsx! { MwsNetworkView {} },
                                     MainTab::MesAmis => rsx! {
                                         div { style: "padding: 32px; color: #8f98a0;",
                                             "Service Jay1Tribu — installez-le depuis le Market."

@@ -343,12 +343,14 @@
         const [order, setOrder] = React.useState("desc");
         const [typeFilter, setTypeFilter] = React.useState("ALL");
         const [search, setSearch] = React.useState("");
+        const [indexGeneratedAt, setIndexGeneratedAt] = React.useState("");
 
         const loadSequences = async () => {
           try {
             setStatus("Lecture automatique de sequences/index.json...");
             const indexRaw = await fetchText(SEQUENCES_INDEX_PATH);
             const index = indexRaw ? JSON.parse(indexRaw) : {};
+            setIndexGeneratedAt(index?.generated_at || "");
             const entries = Array.isArray(index?.sequences) ? index.sequences : [];
             const rows = [];
             for (const entry of entries) {
@@ -434,9 +436,19 @@
             <div className="card">
               <h2>Portail MIP - Sequences</h2>
               <p className={status.startsWith("Erreur") ? "muted" : "ok"}>{status}</p>
-              <button className="primary" onClick={loadSequences}>
-                Rafraichir
-              </button>
+              {indexGeneratedAt && (
+                <p className="muted" style={{ fontSize: 12, margin: "4px 0 8px" }}>
+                  Index genere le : {indexGeneratedAt}
+                </p>
+              )}
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <button className="primary" onClick={loadSequences}>
+                  Rafraichir
+                </button>
+                <span className="muted" style={{ fontSize: 12 }}>
+                  Pour mettre a jour l'index : double-cliquer <code style={{ color: "var(--ok)" }}>open-portal.cmd</code> ou lancer <code style={{ color: "var(--ok)" }}>rebuild-sequences-index.ps1</code>
+                </span>
+              </div>
             </div>
 
             <div className="card">

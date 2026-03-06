@@ -24,8 +24,7 @@ declare -A SERVICE_BINS=(
     [miyukiniwatch]="miyukiniwatch"
     [jay1tribu]="jay1tribu"
     [jaymanga]="jaymanga"
-    [miyuclicker]="miyuclicker"
-    [lord_of_the_castle]="lord_of_the_castle"
+    [miyucloud]="miyucloud-server"
 )
 
 # Correspondance service_id → dossier du manifeste (crate source)
@@ -37,8 +36,7 @@ declare -A SERVICE_CRATE_DIRS=(
     [miyukiniwatch]="crates/miyukiniwatch"
     [jay1tribu]="crates/jay1tribu"
     [jaymanga]="crates/jaymanga"
-    [miyuclicker]="crates/miyuclicker"
-    [lord_of_the_castle]="crates/lord_of_the_castle"
+    [miyucloud]="crates/miyucloud"
 )
 
 # Correspondance service_id → package cargo (pour --bin)
@@ -50,8 +48,7 @@ declare -A SERVICE_PACKAGES=(
     [miyukiniwatch]="miyukiniwatch-app"
     [jay1tribu]="jay1tribu-app"
     [jaymanga]="jaymanga-app"
-    [miyuclicker]="miyuclicker-app"
-    [lord_of_the_castle]="lord_of_the_castle"
+    [miyucloud]="miyucloud-server"
 )
 
 # Services à traiter
@@ -101,7 +98,8 @@ for svc_id in "${SERVICES[@]}"; do
     fi
 
     echo "--- [$svc_id] Packaging .msp ---"
-    msp_file="$DIST_DIR/${svc_id}.msp"
+    version="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$manifest_file" | head -n1)"
+    msp_file="$DIST_DIR/${svc_id}-${version}.msp"
 
     # Créer un dossier temporaire pour le package
     tmp_dir=$(mktemp -d)

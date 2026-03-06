@@ -17,12 +17,37 @@ use miyucloud::domain::QuotaOps;
 use serde::Deserialize;
 use std::sync::Arc;
 
+#[derive(Deserialize)]
+pub struct UpdateQuotaBody {
+    pub max_bytes: u64,
+}
+
 /// Retourne le quota de l'utilisateur courant.
 pub async fn get_quota(State(state): State<Arc<AppState>>) -> Response {
     let db = &state.db;
     let owner_id = &state.config.owner_id;
 
     match QuotaOps::get_usage(db, owner_id) {
+        Ok(quota) => (StatusCode::OK, Json(quota)).into_response(),
+        Err(e) => error_response(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "INTERNAL_ERROR",
+            &e.to_string(),
+        ),
+    }
+}
+
+/// Met a jour le quota de l'utilisateur courant.
+pub async fn set_quota(
+    State(state): State<Arc<AppState>>,
+    Json(body): Json<UpdateQuotaBody>,
+) -> Response {
+    let db = &state.db;
+    let owner_id = &state.config.owner_id;
+
+    match QuotaOps::set_max(db, owner_id, body.max_bytes)
+        .and_then(|_| QuotaOps::get_usage(db, owner_id))
+    {
         Ok(quota) => (StatusCode::OK, Json(quota)).into_response(),
         Err(e) => error_response(
             StatusCode::INTERNAL_SERVER_ERROR,

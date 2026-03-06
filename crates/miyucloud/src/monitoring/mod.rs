@@ -186,14 +186,9 @@ pub fn collect_metrics(db: &crate::data::MiyucloudDb) -> Result<Metrics, Miyuclo
 /// Verifie l'espace disque disponible.
 ///
 /// Retourne `(free_bytes, total_bytes)` pour le volume contenant `path`.
-///
-/// NOTE: L'implementation actuelle retourne `(0, 0)` car une solution
-/// veritablement cross-platform necessite une dependance externe (ex: `sysinfo`)
-/// ou des appels plateforme-specifiques (`statvfs` sur Unix, `GetDiskFreeSpaceExW`
-/// sur Windows). Cette fonction compile et fonctionne sur toutes les cibles;
-/// les valeurs seront substituees lorsqu'un backend plateforme sera integre.
+/// Utilise des appels systeme via `std::process::Command` pour rester
+/// compatible avec `unsafe_code = "forbid"` et sans dependance externe.
 pub fn check_disk_space(path: &str) -> Result<(u64, u64), MiyucloudError> {
-    // Verify the path exists so callers get an early error for bad paths.
     let p = std::path::Path::new(path);
     if !p.exists() {
         return Err(MiyucloudError::NotFound(format!(
@@ -201,10 +196,70 @@ pub fn check_disk_space(path: &str) -> Result<(u64, u64), MiyucloudError> {
         )));
     }
 
-    // TODO: Platform-specific disk space retrieval.
-    // - Unix: libc::statvfs
-    // - Windows: winapi GetDiskFreeSpaceExW
-    // For now return (0, 0) as a safe placeholder.
+    disk_space_platform(p)
+}
+
+#[cfg(target_os = "windows")]
+fn disk_space_platform(path: &std::path::Path) -> Result<(u64, u64), MiyucloudError> {
+    let canonical = path.canonicalize().map_err(MiyucloudError::Io)?;
+    let path_str = canonical.to_string_lossy();
+    // UNC prefix from canonicalize: \\?\C:\...
+    let drive_letter = if path_str.starts_with(r"\\?\") && path_str.len() >= 7 {
+        &path_str[4..5]
+    } else if path_str.len() >= 2 && path_str.as_bytes()[1] == b':' {
+        &path_str[..1]
+    } else {
+        return Ok((0, 0));
+    };
+
+    let output = std::process::Command::new("powershell")
+        .args([
+            "-NoProfile",
+            "-Command",
+            &format!(
+                "Get-PSDrive -Name '{}' | Select-Object -Property Free,Used | ConvertTo-Json",
+                drive_letter
+            ),
+        ])
+        .output()
+        .map_err(MiyucloudError::Io)?;
+
+    if !output.status.success() {
+        return Ok((0, 0));
+    }
+
+    let text = String::from_utf8_lossy(&output.stdout);
+    if let Ok(val) = serde_json::from_str::<serde_json::Value>(text.trim()) {
+        let free = val["Free"].as_u64().unwrap_or(0);
+        let used = val["Used"].as_u64().unwrap_or(0);
+        let total = free + used;
+        Ok((free, total))
+    } else {
+        Ok((0, 0))
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn disk_space_platform(path: &std::path::Path) -> Result<(u64, u64), MiyucloudError> {
+    let output = std::process::Command::new("df")
+        .args(["-B1", "--output=avail,size"])
+        .arg(path)
+        .output()
+        .map_err(MiyucloudError::Io)?;
+
+    if !output.status.success() {
+        return Ok((0, 0));
+    }
+
+    let text = String::from_utf8_lossy(&output.stdout);
+    if let Some(line) = text.lines().nth(1) {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() >= 2 {
+            let free = parts[0].parse::<u64>().unwrap_or(0);
+            let total = parts[1].parse::<u64>().unwrap_or(0);
+            return Ok((free, total));
+        }
+    }
     Ok((0, 0))
 }
 
@@ -389,10 +444,10 @@ mod tests {
         let result = check_disk_space(&cwd_str);
         assert!(result.is_ok());
 
-        // Current placeholder returns (0, 0).
         let (free, total) = result.expect("already checked");
-        assert_eq!(free, 0);
-        assert_eq!(total, 0);
+        assert!(total > 0, "total disk space should be non-zero");
+        assert!(free > 0, "free disk space should be non-zero");
+        assert!(free <= total, "free should not exceed total");
     }
 
     #[test]

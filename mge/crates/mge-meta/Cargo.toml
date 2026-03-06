@@ -1,0 +1,13 @@
+[package]
+name = "mge-meta"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+mge-gameplay = { path = "../mge-gameplay" }
+mge-items = { path = "../mge-items" }
+mge-world = { path = "../mge-world" }
+
+[lints]
+workspace = true

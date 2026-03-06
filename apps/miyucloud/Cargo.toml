@@ -9,6 +9,10 @@ description = "MiyuCloud Server -- API REST + Surface web de partage securise"
 
 [dependencies]
 miyucloud = { path = "../../crates/miyucloud", features = ["legacy-sqlite"] }
+miyucloud-dav = { path = "../../crates/miyucloud-dav" }
+rusqlite = { version = "0.32", features = ["bundled"] }
+miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy-sqlite"] }
+miyukini-connect = { path = "../../crates/miyukini-connect" }
 miyukini-kernel = { path = "../../crates/miyukini-kernel" }
 axum = { version = "0.8", features = ["multipart"] }
 tokio = { version = "1", features = ["full"] }
@@ -29,6 +33,7 @@ rustls-pemfile = "2"
 tokio-rustls = "0.26"
 hyper = { version = "1", features = ["server", "http1", "http2"] }
 hyper-util = { version = "0.1", features = ["tokio", "server-auto", "http1", "http2"] }
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 
 [dev-dependencies]
 tempfile = "3"

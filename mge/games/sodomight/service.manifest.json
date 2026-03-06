@@ -1,0 +1,19 @@
+{
+  "id": "sodomight",
+  "name": "Sodomight",
+  "description": "ARPG isometrique dark fantasy propulse par Miyukini Game Engine.",
+  "icon": "🗡️",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage"],
+  "tags": ["arpg", "game", "diablo-like", "isometric"],
+  "execution_mode": "standalone",
+  "binary_name": "sodomight.exe",
+  "platforms": {
+    "windows_x64": "sodomight.exe"
+  }
+}

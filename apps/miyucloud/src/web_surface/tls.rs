@@ -16,6 +16,12 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+fn ensure_rustls_crypto_provider() {
+    if rustls::crypto::CryptoProvider::get_default().is_none() {
+        let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
+    }
+}
+
 /// Configuration TLS pour la surface web.
 #[derive(Debug, Clone)]
 pub struct TlsConfig {
@@ -107,6 +113,8 @@ pub fn load_rustls_config(
     cert_path: &Path,
     key_path: &Path,
 ) -> Result<Arc<rustls::ServerConfig>, String> {
+    ensure_rustls_crypto_provider();
+
     // Load certificate chain
     let cert_file = fs::File::open(cert_path).map_err(|e| format!("Failed to open cert: {e}"))?;
     let mut cert_reader = BufReader::new(cert_file);

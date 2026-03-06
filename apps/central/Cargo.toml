@@ -45,6 +45,7 @@ zip = "2"
 
 # Auth et profils Central (COG vierge, premier compte admin)
 miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy-sqlite"] }
+miyukini-connect = { path = "../../crates/miyukini-connect" }
 
 # MWS - Miyukini Webway System
 miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }

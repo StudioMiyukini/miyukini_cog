@@ -36,6 +36,18 @@ impl Default for TrackerClientConfig {
     }
 }
 
+fn normalize_tracker_addresses(trackers: Vec<String>) -> Vec<String> {
+    let mut normalized = Vec::new();
+    for tracker in trackers {
+        let tracker = tracker.trim().to_string();
+        if tracker.is_empty() || normalized.iter().any(|existing| existing == &tracker) {
+            continue;
+        }
+        normalized.push(tracker);
+    }
+    normalized
+}
+
 /// État de connexion au Tracker.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TrackerState {
@@ -72,23 +84,26 @@ pub struct TrackerAnnouncement {
 /// Client Tracker MWS (protocole aligné Origin).
 pub struct TrackerClient {
     /// Configuration.
-    config: TrackerClientConfig,
+    config: Arc<RwLock<TrackerClientConfig>>,
     /// État actuel.
     state: Arc<RwLock<TrackerState>>,
     /// Buffer de lecture.
     read_buffer: Arc<RwLock<BytesMut>>,
     /// Intervalle de heartbeat actuel.
     heartbeat_interval: Arc<RwLock<u32>>,
+    /// Liste des trackers officiels fournie par Origin.
+    official_trackers: Arc<RwLock<Vec<String>>>,
 }
 
 impl TrackerClient {
     /// Crée un nouveau client Tracker.
     pub fn new(config: TrackerClientConfig) -> Self {
         Self {
-            config,
+            config: Arc::new(RwLock::new(config)),
             state: Arc::new(RwLock::new(TrackerState::Disconnected)),
             read_buffer: Arc::new(RwLock::new(BytesMut::with_capacity(8192))),
             heartbeat_interval: Arc::new(RwLock::new(60)),
+            official_trackers: Arc::new(RwLock::new(Vec::new())),
         }
     }
 
@@ -97,23 +112,96 @@ impl TrackerClient {
         Self::new(TrackerClientConfig::default())
     }
 
+    /// Met à jour la liste des trackers officiels fournie par Origin.
+    pub async fn update_official_trackers(
+        &self,
+        trackers: Vec<String>,
+    ) -> Result<(), MiyuwebwayParticipantError> {
+        let trackers = normalize_tracker_addresses(trackers);
+        if trackers.is_empty() {
+            return Err(MiyuwebwayParticipantError::ProtocolError(
+                "Relay did not provide any official tracker".to_string(),
+            ));
+        }
+
+        {
+            let mut official = self.official_trackers.write().await;
+            *official = trackers.clone();
+        }
+
+        let mut config = self.config.write().await;
+        if !trackers.iter().any(|tracker| tracker == &config.tracker_address) {
+            info!(
+                "Configured tracker {} is not official, switching to {}",
+                config.tracker_address, trackers[0]
+            );
+            config.tracker_address = trackers[0].clone();
+        }
+
+        Ok(())
+    }
+
+    async fn tracker_endpoint(&self) -> Result<(String, u64), MiyuwebwayParticipantError> {
+        let official_trackers = self.official_trackers.read().await.clone();
+        let mut config = self.config.write().await;
+
+        if !official_trackers.is_empty()
+            && !official_trackers
+                .iter()
+                .any(|tracker| tracker == &config.tracker_address)
+        {
+            if let Some(fallback) = official_trackers.first() {
+                warn!(
+                    "Rejecting non-official tracker {}, switching to {}",
+                    config.tracker_address, fallback
+                );
+                config.tracker_address = fallback.clone();
+            }
+        }
+
+        let tracker_address = config.tracker_address.trim().to_string();
+        if tracker_address.is_empty() {
+            return Err(MiyuwebwayParticipantError::ProtocolError(
+                "No tracker configured".to_string(),
+            ));
+        }
+
+        if !official_trackers.is_empty()
+            && !official_trackers
+                .iter()
+                .any(|tracker| tracker == &tracker_address)
+        {
+            return Err(MiyuwebwayParticipantError::ProtocolError(format!(
+                "Tracker {tracker_address} is not in the official list"
+            )));
+        }
+
+        Ok((tracker_address, config.connect_timeout))
+    }
+
+    async fn connect_stream(&self) -> Result<(TcpStream, String), MiyuwebwayParticipantError> {
+        let (tracker_address, connect_timeout) = self.tracker_endpoint().await?;
+        let stream = tokio::time::timeout(
+            std::time::Duration::from_secs(connect_timeout),
+            TcpStream::connect(&tracker_address),
+        )
+        .await
+        .map_err(|_| MiyuwebwayParticipantError::Timeout)?
+        .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+
+        Ok((stream, tracker_address))
+    }
+
     /// Annonce le COG sur le réseau.
     pub async fn announce(
         &self,
         announcement: &TrackerAnnouncement,
     ) -> Result<(), MiyuwebwayParticipantError> {
+        let (mut stream, tracker_address) = self.connect_stream().await?;
         info!(
             "Announcing COG {} on Tracker at {}",
-            announcement.cog_id, self.config.tracker_address
+            announcement.cog_id, tracker_address
         );
-
-        // Connexion TCP
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| {
-                error!("TCP connection to Tracker failed: {}", e);
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
 
         {
             let mut state = self.state.write().await;
@@ -192,9 +280,7 @@ impl TrackerClient {
     ) -> Result<(), MiyuwebwayParticipantError> {
         debug!("Sending heartbeat to Tracker for COG {}", cog_id);
 
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+        let (mut stream, _) = self.connect_stream().await?;
 
         let payload = TrackerHeartbeatPayload {
             cog_id: cog_id.to_string(),
@@ -230,14 +316,11 @@ impl TrackerClient {
 
     /// Retire le COG du réseau.
     pub async fn withdraw(&self, cog_id: &str) -> Result<(), MiyuwebwayParticipantError> {
+        let (mut stream, tracker_address) = self.connect_stream().await?;
         info!(
             "[Withdraw] Envoi WITHDRAW pour COG {} au Tracker ({})",
-            cog_id, &self.config.tracker_address
+            cog_id, tracker_address
         );
-
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
 
         let payload = serde_json::json!({ "cog_id": cog_id });
         let payload_bytes = bytes::Bytes::from(serde_json::to_vec(&payload).unwrap_or_default());
@@ -293,9 +376,7 @@ impl TrackerClient {
     ) -> Result<Vec<CogInfo>, MiyuwebwayParticipantError> {
         debug!("Searching COGs on Tracker");
 
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+        let (mut stream, _) = self.connect_stream().await?;
 
         let payload = SearchCogsPayload {
             query: None,
@@ -339,9 +420,7 @@ impl TrackerClient {
     ) -> Result<Vec<LobbySearchResult>, MiyuwebwayParticipantError> {
         debug!("Searching lobbys on Tracker");
 
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+        let (mut stream, _) = self.connect_stream().await?;
 
         let payload = SearchLobbysPayload {
             query: name_filter,
@@ -389,9 +468,7 @@ impl TrackerClient {
     ) -> Result<String, MiyuwebwayParticipantError> {
         info!("Creating lobby '{}' on Tracker", lobby.name);
 
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+        let (mut stream, _) = self.connect_stream().await?;
 
         let payload = crate::protocol::CreateLobbyPayload {
             cog_id: cog_id.to_string(),
@@ -437,9 +514,7 @@ impl TrackerClient {
     ) -> Result<(), MiyuwebwayParticipantError> {
         info!("Deleting lobby {} on Tracker", lobby_id);
 
-        let mut stream = TcpStream::connect(&self.config.tracker_address)
-            .await
-            .map_err(|e| MiyuwebwayParticipantError::ConnectionFailed(e.to_string()))?;
+        let (mut stream, _) = self.connect_stream().await?;
 
         let payload = serde_json::json!({
             "cog_id": cog_id,
@@ -520,5 +595,34 @@ mod tests {
     fn test_default_config() {
         let config = TrackerClientConfig::default();
         assert_eq!(config.tracker_address, "miyukini.com:21000");
+    }
+
+    #[tokio::test]
+    async fn update_official_trackers_switches_to_origin_tracker() {
+        let client = TrackerClient::new(TrackerClientConfig {
+            tracker_address: "rogue.example.net:21000".to_string(),
+            ..TrackerClientConfig::default()
+        });
+
+        client
+            .update_official_trackers(vec![
+                "origin.example.net:21000".to_string(),
+                "backup.origin.example.net:21000".to_string(),
+            ])
+            .await
+            .expect("official tracker list should be accepted");
+
+        let config = client.config.read().await;
+        assert_eq!(config.tracker_address, "origin.example.net:21000");
+        drop(config);
+
+        let official = client.official_trackers.read().await.clone();
+        assert_eq!(
+            official,
+            vec![
+                "origin.example.net:21000".to_string(),
+                "backup.origin.example.net:21000".to_string()
+            ]
+        );
     }
 }

@@ -1,0 +1,208 @@
+﻿{
+    "generated_by":  ".mip/scripts/generate-sequence-finetuned-agents.ps1",
+    "sequence":  "2026-03-06-mge-sodomight",
+    "generated_at":  "2026-03-06T10:08:19",
+    "regeneration_mode":  "update",
+    "target_phases":  [
+                          "P3",
+                          "P4",
+                          "P5",
+                          "P6",
+                          "MASS"
+                      ],
+    "inputs":  [
+                   "phases/p0/temps/temps-04-inventaire.md",
+                   "phases/p0/temps/temps-05-securite.md",
+                   "specs/2026-03-06-mge-sodomight-spec.md",
+                   ".mip/agents/TEMPLATE_PHASE_AGENT.md"
+               ],
+    "need_signals":  [
+                         "cap:backend",
+                         "cap:security"
+                     ],
+    "class_detected":  "T5",
+    "agents":  [
+                   {
+                       "agent":  "denis",
+                       "phases":  [
+                                      "MASS",
+                                      "P3",
+                                      "P4",
+                                      "P5",
+                                      "P6"
+                                  ]
+                   },
+                   {
+                       "agent":  "francois",
+                       "phases":  [
+                                      "MASS",
+                                      "P3",
+                                      "P4",
+                                      "P5",
+                                      "P6"
+                                  ]
+                   },
+                   {
+                       "agent":  "george",
+                       "phases":  [
+                                      "MASS",
+                                      "P3",
+                                      "P4",
+                                      "P5",
+                                      "P6"
+                                  ]
+                   },
+                   {
+                       "agent":  "victor",
+                       "phases":  [
+                                      "MASS",
+                                      "P3",
+                                      "P4",
+                                      "P5",
+                                      "P6"
+                                  ]
+                   }
+               ],
+    "files":  [
+                  {
+                      "path":  "agents/P3_denis.md",
+                      "agent":  "denis",
+                      "phase":  "P3",
+                      "source_full":  ".mip/agents/denis/FULL_denis.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P4_denis.md",
+                      "agent":  "denis",
+                      "phase":  "P4",
+                      "source_full":  ".mip/agents/denis/FULL_denis.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P5_denis.md",
+                      "agent":  "denis",
+                      "phase":  "P5",
+                      "source_full":  ".mip/agents/denis/FULL_denis.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P6_denis.md",
+                      "agent":  "denis",
+                      "phase":  "P6",
+                      "source_full":  ".mip/agents/denis/FULL_denis.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/MASS_denis.md",
+                      "agent":  "denis",
+                      "phase":  "MASS",
+                      "source_full":  ".mip/agents/denis/FULL_denis.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P3_francois.md",
+                      "agent":  "francois",
+                      "phase":  "P3",
+                      "source_full":  ".mip/agents/francois/FULL_francois.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P4_francois.md",
+                      "agent":  "francois",
+                      "phase":  "P4",
+                      "source_full":  ".mip/agents/francois/FULL_francois.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P5_francois.md",
+                      "agent":  "francois",
+                      "phase":  "P5",
+                      "source_full":  ".mip/agents/francois/FULL_francois.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P6_francois.md",
+                      "agent":  "francois",
+                      "phase":  "P6",
+                      "source_full":  ".mip/agents/francois/FULL_francois.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/MASS_francois.md",
+                      "agent":  "francois",
+                      "phase":  "MASS",
+                      "source_full":  ".mip/agents/francois/FULL_francois.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P3_george.md",
+                      "agent":  "george",
+                      "phase":  "P3",
+                      "source_full":  ".mip/agents/george/FULL_george.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P4_george.md",
+                      "agent":  "george",
+                      "phase":  "P4",
+                      "source_full":  ".mip/agents/george/FULL_george.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P5_george.md",
+                      "agent":  "george",
+                      "phase":  "P5",
+                      "source_full":  ".mip/agents/george/FULL_george.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P6_george.md",
+                      "agent":  "george",
+                      "phase":  "P6",
+                      "source_full":  ".mip/agents/george/FULL_george.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/MASS_george.md",
+                      "agent":  "george",
+                      "phase":  "MASS",
+                      "source_full":  ".mip/agents/george/FULL_george.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P3_victor.md",
+                      "agent":  "victor",
+                      "phase":  "P3",
+                      "source_full":  ".mip/agents/victor/FULL_victor.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P4_victor.md",
+                      "agent":  "victor",
+                      "phase":  "P4",
+                      "source_full":  ".mip/agents/victor/FULL_victor.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P5_victor.md",
+                      "agent":  "victor",
+                      "phase":  "P5",
+                      "source_full":  ".mip/agents/victor/FULL_victor.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/P6_victor.md",
+                      "agent":  "victor",
+                      "phase":  "P6",
+                      "source_full":  ".mip/agents/victor/FULL_victor.md",
+                      "source_phase":  "none (FULL-derived)"
+                  },
+                  {
+                      "path":  "agents/MASS_victor.md",
+                      "agent":  "victor",
+                      "phase":  "MASS",
+                      "source_full":  ".mip/agents/victor/FULL_victor.md",
+                      "source_phase":  "none (FULL-derived)"
+                  }
+              ]
+}

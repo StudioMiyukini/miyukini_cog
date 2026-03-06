@@ -16,6 +16,12 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tower::{Layer, Service};
+use uuid::Uuid;
+
+/// CSP nonce injected per-request by the security headers middleware.
+/// Handlers extract this via `Extension<CspNonce>` to add `nonce="..."` to inline tags.
+#[derive(Clone)]
+pub struct CspNonce(pub String);
 
 static PERMISSIONS_POLICY: HeaderName = HeaderName::from_static("permissions-policy");
 static STRICT_TRANSPORT_SECURITY: HeaderName = HeaderName::from_static("strict-transport-security");
@@ -75,9 +81,13 @@ where
         self.inner.poll_ready(cx)
     }
 
-    fn call(&mut self, req: Request<Body>) -> Self::Future {
+    fn call(&mut self, mut req: Request<Body>) -> Self::Future {
         let mut inner = self.inner.clone();
         let profile = self.profile;
+
+        // Generate per-request CSP nonce and inject into request extensions.
+        let nonce = Uuid::new_v4().simple().to_string();
+        req.extensions_mut().insert(CspNonce(nonce.clone()));
 
         Box::pin(async move {
             let mut response = inner.call(req).await?;
@@ -94,14 +104,16 @@ where
             headers.insert(PRAGMA, HeaderValue::from_static("no-cache"));
 
             if matches!(profile, SecurityProfile::Web) {
-                headers.insert(
-                    CONTENT_SECURITY_POLICY,
-                    HeaderValue::from_static(
-                        "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; \
-                         object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; \
-                         script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self'",
-                    ),
+                let csp = format!(
+                    "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; \
+                     object-src 'none'; img-src 'self' data:; \
+                     style-src 'self' 'nonce-{nonce}'; \
+                     script-src 'self' 'nonce-{nonce}'; \
+                     connect-src 'self'; form-action 'self'"
                 );
+                if let Ok(value) = HeaderValue::from_str(&csp) {
+                    headers.insert(CONTENT_SECURITY_POLICY, value);
+                }
                 headers.insert(
                     STRICT_TRANSPORT_SECURITY.clone(),
                     HeaderValue::from_static("max-age=31536000; includeSubDomains"),

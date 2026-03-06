@@ -90,6 +90,7 @@ members = [
     "crates/miyukinibb",
     "crates/jaymanga",
     "crates/miyucloud",
+    "crates/miyucloud-dav",
 
     # === Alicia Home Assistante ===
     "crates/miyuvoicecapture",
@@ -128,6 +129,7 @@ members = [
     "tools/mip-configurator",
     "tools/toolkit-skeleton",
     "tools/toolkit-registry-export",
+    "crates/miyukini-connect",
 ]
 resolver = "2"
 

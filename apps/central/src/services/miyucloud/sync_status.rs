@@ -659,25 +659,7 @@ fn AddPeerForm(
                                     state.write().add_peer_port = "11440".to_string();
                                 }
                                 Err(e) => {
-                                    // Fallback : ajouter le pair localement en mode mock
-                                    let mock_peer = super::state::SyncPeer {
-                                        id: format!("peer-{ip}-{port}"),
-                                        cog_id,
-                                        name: Some(peer_name),
-                                        public_key,
-                                        is_trusted: false,
-                                        is_online: false,
-                                        last_seen: None,
-                                        last_sync: None,
-                                        created_at: None,
-                                    };
-                                    let mut peers = state.read().sync_peers.clone();
-                                    peers.push(mock_peer);
-                                    state.write().sync_peers = peers;
-                                    state.write().add_peer_form_open = false;
-                                    state.write().add_peer_ip = String::new();
-                                    state.write().add_peer_port = "11440".to_string();
-                                    state.write().error_message = Some(format!("Pair ajoute localement (serveur indisponible : {e})"));
+                                    state.write().error_message = Some(format!("Impossible d'ajouter le pair : {e}"));
                                 }
                             }
                         });
@@ -819,8 +801,6 @@ pub fn SyncSettingsSection(
 // ════════════════════════════════════════════════════════════════════════════
 
 /// Charge les donnees sync (pairs, conflits, statut) depuis le serveur.
-///
-/// En cas d'erreur de connexion, charge des donnees mock pour la demo.
 async fn load_sync_data(
     mut state: Signal<MiyuCloudState>,
     client: Signal<Option<MiyuCloudClient>>,
@@ -835,47 +815,34 @@ async fn load_sync_data(
     match http.list_peers().await {
         Ok(peers) => {
             let online_count = peers.iter().filter(|p| p.is_online).count() as u32;
-            state.write().sync_peers = peers;
-            state.write().sync_status.peers_online = online_count;
+            let mut s = state.write();
+            s.sync_peers = peers;
+            s.sync_status.peers_online = online_count;
         }
-        Err(_) => {
-            // Donnees mock si le serveur n'est pas lance
-            let mock_peers = mock_sync_peers();
-            let online = mock_peers.iter().filter(|p| p.is_online).count() as u32;
-            state.write().sync_peers = mock_peers;
-            state.write().sync_status.peers_online = online;
-        }
+        Err(_) => {}
     }
 
     // Charger le statut
     match http.get_sync_status().await {
         Ok(status) => {
-            state.write().sync_status.syncing = status.is_syncing;
-            state.write().sync_status.peers_online = status.peers_online;
-            state.write().sync_status.pending_conflicts = status.pending_conflicts;
-            state.write().sync_status.last_sync = status.last_sync;
+            let mut s = state.write();
+            s.sync_status.syncing = status.is_syncing;
+            s.sync_status.peers_online = status.peers_online;
+            s.sync_status.pending_conflicts = status.pending_conflicts;
+            s.sync_status.last_sync = status.last_sync;
         }
-        Err(_) => {
-            // Mock : statut par defaut, utilise les valeurs deja presentes
-        }
+        Err(_) => {}
     }
 
     // Charger les conflits
     match http.list_conflicts().await {
         Ok(conflicts) => {
             let pending = conflicts.iter().filter(|c| c.status == "pending").count() as u32;
-            state.write().sync_conflicts = conflicts;
-            state.write().sync_status.pending_conflicts = pending;
+            let mut s = state.write();
+            s.sync_conflicts = conflicts;
+            s.sync_status.pending_conflicts = pending;
         }
-        Err(_) => {
-            let mock_conflicts = mock_sync_conflicts();
-            let pending = mock_conflicts
-                .iter()
-                .filter(|c| c.status == "pending")
-                .count() as u32;
-            state.write().sync_conflicts = mock_conflicts;
-            state.write().sync_status.pending_conflicts = pending;
-        }
+        Err(_) => {}
     }
 }
 
@@ -933,73 +900,3 @@ fn format_sync_date(iso: &str) -> String {
     iso.to_string()
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// Mock data (utilise quand le serveur n'est pas lance)
-// ════════════════════════════════════════════════════════════════════════════
-
-/// Pairs de demonstration.
-fn mock_sync_peers() -> Vec<SyncPeer> {
-    vec![
-        SyncPeer {
-            id: "peer-001".to_string(),
-            cog_id: "cog-desktop-bureau".to_string(),
-            name: Some("Bureau (Desktop)".to_string()),
-            public_key: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6".to_string(),
-            is_trusted: true,
-            is_online: true,
-            last_seen: Some("2026-03-01T14:30:00Z".to_string()),
-            last_sync: Some("2026-03-01T14:25:00Z".to_string()),
-            created_at: Some("2026-01-15T10:00:00Z".to_string()),
-        },
-        SyncPeer {
-            id: "peer-002".to_string(),
-            cog_id: "cog-laptop-portable".to_string(),
-            name: Some("Portable (Laptop)".to_string()),
-            public_key: "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3".to_string(),
-            is_trusted: true,
-            is_online: false,
-            last_seen: Some("2026-02-28T18:00:00Z".to_string()),
-            last_sync: Some("2026-02-28T17:45:00Z".to_string()),
-            created_at: Some("2026-01-20T14:00:00Z".to_string()),
-        },
-        SyncPeer {
-            id: "peer-003".to_string(),
-            cog_id: "cog-nas-storage".to_string(),
-            name: Some("NAS Stockage".to_string()),
-            public_key: "1234abcd5678efab1234abcd5678efab".to_string(),
-            is_trusted: false,
-            is_online: true,
-            last_seen: Some("2026-03-01T14:00:00Z".to_string()),
-            last_sync: None,
-            created_at: Some("2026-02-01T08:00:00Z".to_string()),
-        },
-    ]
-}
-
-/// Conflits de demonstration.
-fn mock_sync_conflicts() -> Vec<SyncConflict> {
-    vec![
-        SyncConflict {
-            id: "conflict-001".to_string(),
-            file_name: "rapport_annuel.pdf".to_string(),
-            file_id: "file-rapport".to_string(),
-            local_modified: "2026-03-01T09:00:00Z".to_string(),
-            remote_modified: "2026-03-01T08:30:00Z".to_string(),
-            remote_node_id: "peer-001".to_string(),
-            status: "pending".to_string(),
-            created_at: Some("2026-03-01T09:05:00Z".to_string()),
-            resolved_at: None,
-        },
-        SyncConflict {
-            id: "conflict-002".to_string(),
-            file_name: "notes_projet.md".to_string(),
-            file_id: "file-notes".to_string(),
-            local_modified: "2026-02-28T16:00:00Z".to_string(),
-            remote_modified: "2026-02-28T17:00:00Z".to_string(),
-            remote_node_id: "peer-002".to_string(),
-            status: "pending".to_string(),
-            created_at: Some("2026-02-28T17:05:00Z".to_string()),
-            resolved_at: None,
-        },
-    ]
-}

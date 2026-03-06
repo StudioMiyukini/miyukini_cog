@@ -17,6 +17,7 @@ use argon2::Argon2;
 use hkdf::Hkdf;
 use rand::RngCore;
 use sha2::Sha256;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 /// Gestionnaire de cles cryptographiques.
 ///
@@ -25,6 +26,8 @@ use sha2::Sha256;
 ///
 /// INVARIANT : La master key n'est JAMAIS serialisee ou ecrite sur disque.
 /// L'implementation Debug masque volontairement la cle.
+/// La master key est automatiquement zeroisee a la destruction (ZeroizeOnDrop).
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct KeyManager {
     master_key: [u8; 32],
 }

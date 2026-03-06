@@ -399,7 +399,10 @@ async fn handle_connection(
         &pool_mgr,
         &content_mgr,
         &visit_tracker,
+        &config,
         jayxpose_db.as_deref(),
+        &slug_registry,
+        relay_ref.as_deref(),
     )
     .await;
 
@@ -794,7 +797,10 @@ async fn route_request(
     pool_mgr: &PoolManager,
     content_mgr: &ContentManager,
     visit_tracker: &CatalogVisitTracker,
+    config: &OriginConfig,
     jayxpose_db: Option<&jayxpose::JayXposeDb>,
+    slug_registry: &SlugRegistry,
+    relay_ref: Option<&RelayServer>,
 ) -> RouteResponse {
     // Séparer path et query string
     let (path_only, query) = path.split_once('?').unwrap_or((path, ""));
@@ -931,24 +937,21 @@ async fn route_request(
         },
 
         "/visit" => {
-            let cog_id = query.split('&').find_map(|p| {
-                let v = p.strip_prefix("cog_id=")?;
-                let v = v.split('&').next().unwrap_or(v);
-                urlencoding::decode(v).ok().map(|c| c.into_owned())
-            });
+            let cog_id = parse_cog_id_from_query(query);
             match cog_id {
                 Some(id) if !id.is_empty() && id.len() <= 128 => {
-                    if let Some(entry) = pool_mgr.find_cog(&id).await {
-                        visit_tracker.record_visit(&id).await;
-                        let location = if entry.address.starts_with("http") {
-                            entry.address
-                        } else {
-                            format!("http://{}/", entry.address)
-                        };
-                        RouteResponse::Redirect { location }
-                    } else {
-                        not_found_page()
-                    }
+                    let target_path =
+                        parse_visit_path_from_query(query).unwrap_or_else(|| "/".to_string());
+                    visit_tracker.record_visit(&id).await;
+                    handle_cog_visit_request(
+                        &id,
+                        &target_path,
+                        config,
+                        pool_mgr,
+                        slug_registry,
+                        relay_ref,
+                    )
+                    .await
                 }
                 _ => not_found_page(),
             }
@@ -1281,6 +1284,238 @@ async fn route_request(
         // 404
         // ═══════════════════════════════════════════════════════════════════
         _ => not_found_page(),
+    }
+}
+
+fn parse_cog_id_from_query(query: &str) -> Option<String> {
+    query.split('&').find_map(|part| {
+        let value = part.strip_prefix("cog_id=")?;
+        let value = value.split('&').next().unwrap_or(value);
+        urlencoding::decode(value)
+            .ok()
+            .map(|decoded| decoded.into_owned())
+    })
+}
+
+fn parse_visit_path_from_query(query: &str) -> Option<String> {
+    let raw_path = query.split('&').find_map(|part| {
+        let value = part.strip_prefix("path=")?;
+        let value = value.split('&').next().unwrap_or(value);
+        urlencoding::decode(value)
+            .ok()
+            .map(|decoded| decoded.into_owned())
+    })?;
+
+    normalize_visit_path(&raw_path)
+}
+
+fn normalize_visit_path(path: &str) -> Option<String> {
+    if path.is_empty() {
+        return Some("/".to_string());
+    }
+    if path.contains('\0') || path.contains('\r') || path.contains('\n') || path.contains("://") {
+        return None;
+    }
+
+    let normalized = if path.starts_with('/') {
+        path.to_string()
+    } else {
+        format!("/{}", path)
+    };
+
+    Some(normalized)
+}
+
+async fn handle_cog_visit_request(
+    cog_id: &str,
+    target_path: &str,
+    config: &OriginConfig,
+    pool_mgr: &PoolManager,
+    slug_registry: &SlugRegistry,
+    relay_ref: Option<&RelayServer>,
+) -> RouteResponse {
+    let slug = slug_registry
+        .get_slug(cog_id)
+        .await
+        .unwrap_or_else(|| SlugRegistry::sanitize_cog_id(cog_id));
+
+    let raw_request = format!(
+        "GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\nUser-Agent: MiyukiniOriginVisit/1.0\r\n\r\n",
+        target_path, cog_id
+    );
+
+    if let Some(relay) = relay_ref {
+        match relay
+            .inject_http_request(cog_id, Bytes::from(raw_request.clone()))
+            .await
+        {
+            Ok(response_bytes) => {
+                return rewrite_visit_raw_response(&response_bytes, cog_id);
+            }
+            Err(e) => {
+                debug!(
+                    "Visit tunnel unavailable for '{}' (slug '{}'), falling back to direct proxy: {}",
+                    cog_id, slug, e
+                );
+            }
+        }
+    }
+
+    match pool_mgr.find_cog(cog_id).await {
+        Some(entry) => {
+            let target_url = if entry.address.starts_with("http") {
+                format!("{}{}", entry.address.trim_end_matches('/'), target_path)
+            } else {
+                format!("http://{}{}", entry.address, target_path)
+            };
+
+            match proxy_http_request(&target_url).await {
+                Ok(response) => rewrite_visit_route_response(response, cog_id),
+                Err(e) => {
+                    warn!(
+                        "Visit proxy failed for cog '{}' (slug '{}', path '{}'): {}",
+                        cog_id, slug, target_path, e
+                    );
+                    cog_offline_page(&slug, cog_id, config)
+                }
+            }
+        }
+        None => cog_not_found_page(&slug, config),
+    }
+}
+
+fn rewrite_visit_route_response(route_response: RouteResponse, cog_id: &str) -> RouteResponse {
+    match route_response {
+        RouteResponse::Normal {
+            status,
+            content_type,
+            body,
+        } => {
+            if content_type.to_ascii_lowercase().starts_with("text/html") {
+                RouteResponse::Normal {
+                    status,
+                    content_type,
+                    body: rewrite_visit_html(&body, cog_id),
+                }
+            } else {
+                RouteResponse::Normal {
+                    status,
+                    content_type,
+                    body,
+                }
+            }
+        }
+        RouteResponse::Redirect { location } => RouteResponse::Redirect {
+            location: rewrite_visit_location(&location, cog_id),
+        },
+        RouteResponse::Binary { .. } => route_response,
+        RouteResponse::Raw { bytes } => rewrite_visit_raw_response(&bytes, cog_id),
+    }
+}
+
+fn rewrite_visit_raw_response(response: &[u8], cog_id: &str) -> RouteResponse {
+    let response_str = String::from_utf8_lossy(response);
+
+    if let Some(header_end) = response_str.find("\r\n\r\n") {
+        let body = &response_str[header_end + 4..];
+        let headers_part = &response_str[..header_end];
+
+        let status = headers_part
+            .lines()
+            .next()
+            .and_then(|line| {
+                line.strip_prefix("HTTP/1.1 ")
+                    .or_else(|| line.strip_prefix("HTTP/1.0 "))
+            })
+            .unwrap_or("200 OK")
+            .to_string();
+
+        let content_type = headers_part
+            .lines()
+            .find_map(|line| {
+                let lower = line.to_ascii_lowercase();
+                if lower.starts_with("content-type:") {
+                    Some(line.split_once(':')?.1.trim().to_string())
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_else(|| "text/html".to_string());
+
+        if status.starts_with("30") {
+            if let Some(location) = headers_part.lines().find_map(|line| {
+                let lower = line.to_ascii_lowercase();
+                if lower.starts_with("location:") {
+                    Some(line.split_once(':')?.1.trim().to_string())
+                } else {
+                    None
+                }
+            }) {
+                return RouteResponse::Redirect {
+                    location: rewrite_visit_location(&location, cog_id),
+                };
+            }
+        }
+
+        return RouteResponse::Normal {
+            status,
+            content_type: content_type.clone(),
+            body: if content_type.to_ascii_lowercase().starts_with("text/html") {
+                rewrite_visit_html(body, cog_id)
+            } else {
+                body.to_string()
+            },
+        };
+    }
+
+    RouteResponse::Raw {
+        bytes: response.to_vec(),
+    }
+}
+
+fn rewrite_visit_html(html: &str, cog_id: &str) -> String {
+    let mut output = html.to_string();
+    for attr in ["href", "src", "action"] {
+        output = rewrite_visit_attr_paths(&output, attr, cog_id);
+    }
+    output
+}
+
+fn rewrite_visit_attr_paths(html: &str, attr: &str, cog_id: &str) -> String {
+    let needle = format!("{attr}=\"/");
+    let mut rewritten = String::with_capacity(html.len());
+    let mut cursor = 0;
+
+    while let Some(found) = html[cursor..].find(&needle) {
+        let start = cursor + found;
+        let path_start = start + attr.len() + 2;
+        let Some(path_end_rel) = html[path_start..].find('"') else {
+            break;
+        };
+        let path_end = path_start + path_end_rel;
+        let path = &html[path_start..path_end];
+
+        rewritten.push_str(&html[cursor..start]);
+        rewritten.push_str(attr);
+        rewritten.push_str("=\"");
+        rewritten.push_str(&rewrite_visit_location(path, cog_id));
+        rewritten.push('"');
+        cursor = path_end + 1;
+    }
+
+    rewritten.push_str(&html[cursor..]);
+    rewritten
+}
+
+fn rewrite_visit_location(location: &str, cog_id: &str) -> String {
+    if location.starts_with('/') && !location.starts_with("//") {
+        format!(
+            "/visit?cog_id={}&path={}",
+            urlencoding::encode(cog_id),
+            urlencoding::encode(location)
+        )
+    } else {
+        location.to_string()
     }
 }
 
@@ -1664,4 +1899,55 @@ pub(crate) fn simple_md_to_html(markdown: &str) -> String {
     }
 
     html
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        extract_cog_slug, normalize_visit_path, parse_cog_id_from_query, rewrite_visit_location,
+    };
+
+    #[test]
+    fn parse_cog_id_from_query_decodes_value() {
+        let cog_id = parse_cog_id_from_query("foo=bar&cog_id=Mon%20COG&x=1");
+        assert_eq!(cog_id.as_deref(), Some("Mon COG"));
+    }
+
+    #[test]
+    fn extract_cog_slug_ignores_main_domain_and_reserved_hosts() {
+        assert_eq!(extract_cog_slug(Some("miyukini.com"), "miyukini.com"), None);
+        assert_eq!(
+            extract_cog_slug(Some("origin.miyukini.com"), "miyukini.com"),
+            None
+        );
+        assert_eq!(
+            extract_cog_slug(Some("miyukini-cog.miyukini.com"), "miyukini.com"),
+            Some("miyukini-cog".to_string())
+        );
+    }
+
+    #[test]
+    fn normalize_visit_path_rejects_absolute_urls() {
+        assert_eq!(
+            normalize_visit_path("jayxpose"),
+            Some("/jayxpose".to_string())
+        );
+        assert_eq!(
+            normalize_visit_path("/jayxpose"),
+            Some("/jayxpose".to_string())
+        );
+        assert_eq!(normalize_visit_path("https://evil.invalid"), None);
+    }
+
+    #[test]
+    fn rewrite_visit_location_wraps_root_relative_paths() {
+        assert_eq!(
+            rewrite_visit_location("/jayxpose/catalogue", "Miyukini"),
+            "/visit?cog_id=Miyukini&path=%2Fjayxpose%2Fcatalogue"
+        );
+        assert_eq!(
+            rewrite_visit_location("https://miyukini.com", "Miyukini"),
+            "https://miyukini.com"
+        );
+    }
 }

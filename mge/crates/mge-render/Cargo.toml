@@ -1,0 +1,16 @@
+[package]
+name = "mge-render"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+mge-content = { path = "../mge-content" }
+serde.workspace = true
+wgpu.workspace = true
+winit.workspace = true
+
+[lints]
+workspace = true

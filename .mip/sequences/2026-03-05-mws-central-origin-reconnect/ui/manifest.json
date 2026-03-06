@@ -1,0 +1,228 @@
+﻿{
+    "identity":  {
+                     "sequence":  "2026-03-05-mws-central-origin-reconnect",
+                     "date":  "2026-03-05",
+                     "slug":  "mws-central-origin-reconnect",
+                     "generated_at":  "2026-03-05T23:23:46"
+                 },
+    "tabs":  [
+                 {
+                     "id":  "p0",
+                     "label":  "P0",
+                     "groups":  [
+                                    {
+                                        "label":  "Documents P0",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Brief principal",
+                                                          "path":  "briefs/2026-03-05-mws-central-origin-reconnect.md"
+                                                      },
+                                                      {
+                                                          "label":  "Travail P0",
+                                                          "path":  "briefs/2026-03-05-mws-central-origin-reconnect-P0-travail.md"
+                                                      },
+                                                      {
+                                                          "label":  "Specification",
+                                                          "path":  "specs/2026-03-05-mws-central-origin-reconnect-spec.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace P0",
+                                                          "path":  "phases/p0-trace.md"
+                                                      }
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Agents fine-tuned",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Index agents sequence",
+                                                          "path":  "agents/index.md"
+                                                      },
+                                                      {
+                                                          "label":  "Manifest agents",
+                                                          "path":  "agents/manifest.json"
+                                                      }
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Temps P0",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Temps 01 - Exploration et brainstorming",
+                                                          "path":  "phases/p0/temps/temps-01-exploration.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 02 - Ideation",
+                                                          "path":  "phases/p0/temps/temps-02-ideation.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 03 - Analyse concurrentielle",
+                                                          "path":  "phases/p0/temps/temps-03-concurrence.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 04 - Inventaire prerequis",
+                                                          "path":  "phases/p0/temps/temps-04-inventaire.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 05 - Analyse securite",
+                                                          "path":  "phases/p0/temps/temps-05-securite.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 06 - Specification technique",
+                                                          "path":  "phases/p0/temps/temps-06-specification.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 07 - Generation agents fine-tuned",
+                                                          "path":  "phases/p0/temps/temps-07-agents-finetunes.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 08 - Plan execution",
+                                                          "path":  "phases/p0/temps/temps-08-plan-execution.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 09 - Audit faisabilite",
+                                                          "path":  "phases/p0/temps/temps-09-faisabilite.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 10 - Verification CI/CD",
+                                                          "path":  "phases/p0/temps/temps-10-cicd.md"
+                                                      },
+                                                      {
+                                                          "label":  "Temps 11 - Synthese et brief",
+                                                          "path":  "phases/p0/temps/temps-11-synthese-brief.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p3",
+                     "label":  "P3",
+                     "groups":  [
+                                    {
+                                        "label":  "GPI",
+                                        "files":  [
+                                                      {
+                                                          "label":  "GPI sequence",
+                                                          "path":  "gpi/2026-03-05-mws-central-origin-reconnect-gpi.md"
+                                                      }
+                                                  ]
+                                    },
+                                    {
+                                        "label":  "Taches par etapes",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Plan P3",
+                                                          "path":  "plans_p3/2026-03-05-mws-central-origin-reconnect-plan.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace P3",
+                                                          "path":  "phases/p3-trace.md"
+                                                      },
+                                                      {
+                                                          "label":  "Index etapes",
+                                                          "path":  "plans_p3/etapes/index.md"
+                                                      },
+                                                      {
+                                                          "label":  "Etape 01",
+                                                          "path":  "plans_p3/etapes/etape-01.md"
+                                                      },
+                                                      {
+                                                          "label":  "Etape 02",
+                                                          "path":  "plans_p3/etapes/etape-02.md"
+                                                      },
+                                                      {
+                                                          "label":  "Etape 03",
+                                                          "path":  "plans_p3/etapes/etape-03.md"
+                                                      },
+                                                      {
+                                                          "label":  "Etape 04",
+                                                          "path":  "plans_p3/etapes/etape-04.md"
+                                                      },
+                                                      {
+                                                          "label":  "Etape 05",
+                                                          "path":  "plans_p3/etapes/etape-05.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p4",
+                     "label":  "P4",
+                     "groups":  [
+                                    {
+                                        "label":  "Audits et securite",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Audit global",
+                                                          "path":  "audits/2026-03-05-mws-central-origin-reconnect.md"
+                                                      },
+                                                      {
+                                                          "label":  "PASS-0",
+                                                          "path":  "audits/2026-03-05-mws-central-origin-reconnect-pass-0.md"
+                                                      },
+                                                      {
+                                                          "label":  "PASS-01",
+                                                          "path":  "audits/2026-03-05-mws-central-origin-reconnect-pass-01.md"
+                                                      },
+                                                      {
+                                                          "label":  "RAS",
+                                                          "path":  "audits/2026-03-05-mws-central-origin-reconnect-ras.md"
+                                                      },
+                                                      {
+                                                          "label":  "Efficiency",
+                                                          "path":  "audits/2026-03-05-mws-central-origin-reconnect-efficiency.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace P4",
+                                                          "path":  "phases/p4-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "p5",
+                     "label":  "P5",
+                     "groups":  [
+                                    {
+                                        "label":  "Validation utilisateur",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Validation P5",
+                                                          "path":  "audits/2026-03-05-mws-central-origin-reconnect-p5-validation.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace P5",
+                                                          "path":  "phases/p5-trace.md"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 },
+                 {
+                     "id":  "rapport-final",
+                     "label":  "Rapport final",
+                     "groups":  [
+                                    {
+                                        "label":  "Cloture",
+                                        "files":  [
+                                                      {
+                                                          "label":  "Rapport final",
+                                                          "path":  "rapports_finaux/2026-03-05-mws-central-origin-reconnect-report.md"
+                                                      },
+                                                      {
+                                                          "label":  "Trace P6",
+                                                          "path":  "phases/p6-trace.md"
+                                                      },
+                                                      {
+                                                          "label":  "Metriques",
+                                                          "path":  "metrics/2026-03-05-mws-central-origin-reconnect.json"
+                                                      }
+                                                  ]
+                                    }
+                                ]
+                 }
+             ]
+}

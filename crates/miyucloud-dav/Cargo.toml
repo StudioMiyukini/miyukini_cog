@@ -1,0 +1,82 @@
+[package]
+name = "miyucloud-dav"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "MiyuCloud DAV -- WebDAV, CalDAV, CardDAV et WOPI pour MiyuCloud"
+
+[dependencies]
+miyucloud = { path = "../miyucloud", features = ["legacy-sqlite"] }
+miyukini-kernel = { path = "../miyukini-kernel" }
+kindmother = { path = "../kindmother" }
+
+# Web framework
+axum = { version = "0.8", features = ["multipart"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "limit", "trace"] }
+tokio = { version = "1", features = ["rt-multi-thread", "fs", "io-util"] }
+hyper = { version = "1", features = ["server", "http1"] }
+http = "1"
+
+# Serialisation
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# XML (WebDAV/CalDAV/CardDAV)
+quick-xml = { version = "0.37", features = ["serialize"] }
+
+# Types
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+mime_guess = "2"
+percent-encoding = "2"
+
+# Cache
+moka = { version = "0.12", features = ["future", "sync"] }
+
+# Crypto/Hash
+sha2 = "0.10"
+
+# Compression
+flate2 = "1"
+
+# Thumbnails
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
+
+# Async utilities
+async-stream = "0.3"
+
+# SQLite
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# Errors & Logging
+thiserror = "2"
+tracing = "0.1"
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["full", "test-util"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+module_name_repetitions = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_precision_loss = "allow"
+cast_lossless = "allow"
+too_many_lines = "allow"
+too_many_arguments = "allow"
+wildcard_imports = "allow"
+needless_pass_by_value = "allow"

@@ -118,6 +118,7 @@ pub struct ServiceInfo {
     pub is_favorite: bool,
     pub version: String,
     pub developer: String,
+    pub downloadable: bool,
 }
 
 /// Onglet ouvert dans la zone de contenu (service actif).
@@ -175,22 +176,18 @@ impl ServiceMeta {
             is_favorite: self.is_favorite,
             version: "0.1.0".into(),
             developer: "Miyukini".into(),
+            downloadable: false,
         }
     }
 }
 
 impl ServiceRegistry {
-    /// Liste les services installés (depuis le registre dynamique sur disque).
-    /// Le Market est toujours inclus comme service intégré.
-    pub fn installed_services(manager: &ServiceManager) -> Vec<ServiceInfo> {
+    /// Liste uniquement les services réellement installés (sans injecter le catalogue officiel).
+    pub fn installed_only(manager: &ServiceManager) -> Vec<ServiceInfo> {
         let installed = manager.installed_services();
-        let installed_ids: Vec<String> = installed.iter().map(|s| s.manifest.id.clone()).collect();
-
         let mut services: Vec<ServiceInfo> = Vec::new();
 
-        // Services installés : prioriser les métadonnées du registre
         for svc in &installed {
-            // Chercher dans le catalogue officiel pour enrichir
             let catalog_meta = OFFICIAL_CATALOG.iter().find(|m| m.id == svc.manifest.id);
             services.push(ServiceInfo {
                 id: svc.manifest.id.clone(),
@@ -210,8 +207,18 @@ impl ServiceRegistry {
                 is_favorite: catalog_meta.map_or(false, |m| m.is_favorite),
                 version: svc.manifest.version.clone(),
                 developer: svc.manifest.developer.clone(),
+                downloadable: false,
             });
         }
+
+        services
+    }
+
+    /// Liste les services installés (depuis le registre dynamique sur disque).
+    /// Le Market est toujours inclus comme service intégré.
+    pub fn installed_services(manager: &ServiceManager) -> Vec<ServiceInfo> {
+        let mut services: Vec<ServiceInfo> = Self::installed_only(manager);
+        let installed_ids: Vec<String> = services.iter().map(|s| s.id.clone()).collect();
 
         // Ajouter les services du catalogue officiel non installés (pour la liste complète)
         for meta in OFFICIAL_CATALOG {
@@ -233,6 +240,7 @@ impl ServiceRegistry {
             is_favorite: true,
             version: env!("CARGO_PKG_VERSION").into(),
             developer: "Miyukini".into(),
+            downloadable: false,
         });
 
         services
@@ -265,12 +273,12 @@ impl ServiceRegistry {
                 let official = catalog
                     .official
                     .into_iter()
-                    .map(|e| market_entry_to_service_info(e, true, manager))
+                    .map(|e| market_entry_to_service_info(e, manager))
                     .collect();
                 let community = catalog
                     .community
                     .into_iter()
-                    .map(|e| market_entry_to_service_info(e, false, manager))
+                    .map(|e| market_entry_to_service_info(e, manager))
                     .collect();
                 (official, community)
             }
@@ -292,7 +300,7 @@ impl ServiceRegistry {
             Ok(result) => result
                 .results
                 .into_iter()
-                .map(|e| market_entry_to_service_info(e, false, manager))
+                .map(|e| market_entry_to_service_info(e, manager))
                 .collect(),
             Err(e) => {
                 tracing::debug!("Market search failed: {e}");
@@ -303,9 +311,8 @@ impl ServiceRegistry {
 }
 
 /// Convertit un `MarketEntry` (protocole réseau) en `ServiceInfo` (état local).
-fn market_entry_to_service_info(
+pub fn market_entry_to_service_info(
     entry: miyumarket::protocol::MarketEntry,
-    is_official: bool,
     manager: &ServiceManager,
 ) -> ServiceInfo {
     let m = entry.manifest;
@@ -321,15 +328,15 @@ fn market_entry_to_service_info(
             miyumarket::manifest::ServiceType::SurfaceWeb => ServiceType::SurfaceWeb,
             miyumarket::manifest::ServiceType::InterCog => ServiceType::InterCog,
         },
-        source: if is_official {
-            ServiceSource::Officiel
-        } else {
-            ServiceSource::Tiers
+        source: match m.source {
+            miyumarket::manifest::ServiceSource::Officiel => ServiceSource::Officiel,
+            miyumarket::manifest::ServiceSource::Tiers => ServiceSource::Tiers,
         },
         is_installed,
         is_favorite: false,
         version: m.version,
         developer: m.developer,
+        downloadable: entry.downloadable,
     }
 }
 

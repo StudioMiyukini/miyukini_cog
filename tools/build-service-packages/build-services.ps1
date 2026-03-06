@@ -17,15 +17,14 @@ $TargetDir = "$WorkspaceRoot\target\release"
 
 # Correspondances
 $ServiceMap = @{
-    "jayxpose"           = @{ Bin = "jayxpose";           Pkg = "jayxpose-app";       Crate = "crates\jayxpose" }
-    "jayfestival"        = @{ Bin = "jayfestival";        Pkg = "jayfestival-app";    Crate = "crates\jayfestival" }
-    "jaykoa"             = @{ Bin = "jaykoa";             Pkg = "jaykoa-app";         Crate = "crates\jaykoa" }
-    "jaykonta"           = @{ Bin = "jaykonta";           Pkg = "jaykonta-app";       Crate = "crates\jaykonta" }
-    "miyukiniwatch"      = @{ Bin = "miyukiniwatch";      Pkg = "miyukiniwatch-app";  Crate = "crates\miyukiniwatch" }
-    "jay1tribu"          = @{ Bin = "jay1tribu";          Pkg = "jay1tribu-app";      Crate = "crates\jay1tribu" }
-    "jaymanga"           = @{ Bin = "jaymanga";           Pkg = "jaymanga-app";       Crate = "crates\jaymanga" }
-    "miyuclicker"        = @{ Bin = "miyuclicker";        Pkg = "miyuclicker-app";    Crate = "crates\miyuclicker" }
-    "lord_of_the_castle" = @{ Bin = "lord_of_the_castle"; Pkg = "lord_of_the_castle"; Crate = "crates\lord_of_the_castle" }
+    "jayxpose"      = @{ Bin = "jayxpose";      Pkg = "jayxpose-app";      Manifest = "crates\jayxpose\service.manifest.json" }
+    "jayfestival"   = @{ Bin = "jayfestival";   Pkg = "jayfestival-app";   Manifest = "crates\jayfestival\service.manifest.json" }
+    "jaykoa"        = @{ Bin = "jaykoa";        Pkg = "jaykoa-app";        Manifest = "crates\jaykoa\service.manifest.json" }
+    "jaykonta"      = @{ Bin = "jaykonta";      Pkg = "jaykonta-app";      Manifest = "crates\jaykonta\service.manifest.json" }
+    "miyukiniwatch" = @{ Bin = "miyukiniwatch"; Pkg = "miyukiniwatch-app"; Manifest = "crates\miyukiniwatch\service.manifest.json" }
+    "jay1tribu"     = @{ Bin = "jay1tribu";     Pkg = "jay1tribu-app";     Manifest = "crates\jay1tribu\service.manifest.json" }
+    "jaymanga"      = @{ Bin = "jaymanga";      Pkg = "jaymanga-app";      Manifest = "crates\jaymanga\service.manifest.json" }
+    "miyucloud"     = @{ Bin = "miyucloud-server"; Pkg = "miyucloud-server"; Manifest = "crates\miyucloud\service.manifest.json" }
 }
 
 if ($Services.Count -eq 0) {
@@ -48,8 +47,7 @@ foreach ($svcId in $Services) {
 
     $binName = $info.Bin
     $pkgName = $info.Pkg
-    $crateDir = $info.Crate
-    $manifestFile = "$WorkspaceRoot\$crateDir\service.manifest.json"
+    $manifestFile = "$WorkspaceRoot\$($info.Manifest)"
 
     if (-not (Test-Path $manifestFile)) {
         Write-Host "ERREUR: $manifestFile manquant" -ForegroundColor Red
@@ -69,9 +67,13 @@ foreach ($svcId in $Services) {
         continue
     }
 
+    $manifest = Get-Content $manifestFile | ConvertFrom-Json
+    $version = $manifest.version
+
     Write-Host "--- [$svcId] Packaging .msp ---" -ForegroundColor Yellow
-    $mspFile = "$DistDir\$svcId.msp"
-    $tmpDir = New-Item -ItemType Directory -Force -Path "$env:TEMP\msp_$svcId"
+    $mspFile = "$DistDir\$svcId-$version.msp"
+    $zipFile = "$DistDir\$svcId-$version.zip"
+    $tmpDir = New-Item -ItemType Directory -Force -Path "$env:TEMP\msp_$svcId-$([guid]::NewGuid().ToString('N'))"
 
     try {
         # Copier le manifeste
@@ -86,7 +88,9 @@ foreach ($svcId in $Services) {
 
         # Créer l'archive ZIP (.msp)
         if (Test-Path $mspFile) { Remove-Item $mspFile }
-        Compress-Archive -Path "$tmpDir\*" -DestinationPath $mspFile -Force
+        if (Test-Path $zipFile) { Remove-Item $zipFile }
+        Compress-Archive -Path "$tmpDir\*" -DestinationPath $zipFile -Force
+        Move-Item -Path $zipFile -Destination $mspFile -Force
 
         $size = (Get-Item $mspFile).Length / 1MB
         Write-Host "  -> $mspFile ($([math]::Round($size, 1)) MB)" -ForegroundColor Green

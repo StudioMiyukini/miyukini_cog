@@ -15,6 +15,8 @@ use crate::data::types::{
     ShareLink, SharePermission, SyncConflict, SyncPeer, TotpRow, UserQuota, VectorClockEntry,
 };
 use crate::errors::MiyucloudError;
+use crate::storage::compression::{decompress, maybe_compress};
+use crate::storage::dedup::{ContentAddressableStorage, ContentHash};
 use kindmother::{InstanceIdentity, InstanceType};
 use rusqlite::params;
 use std::path::Path;
@@ -37,6 +39,11 @@ impl MiyucloudDb {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, MiyucloudError> {
         let path = path.as_ref();
         let conn = rusqlite::Connection::open(path)?;
+        conn.execute_batch(
+            "PRAGMA journal_mode = WAL;
+             PRAGMA foreign_keys = ON;
+             PRAGMA busy_timeout = 5000;",
+        )?;
         let instance = InstanceIdentity::new(InstanceType::Daughter);
         let db = Self {
             conn: Mutex::new(conn),
@@ -266,6 +273,23 @@ impl MiyucloudDb {
                 completed         INTEGER NOT NULL DEFAULT 0,
                 completed_at      TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS cloud_content_blobs (
+                hash        TEXT PRIMARY KEY NOT NULL,
+                data        BLOB NOT NULL,
+                size        INTEGER NOT NULL,
+                compressed  INTEGER NOT NULL DEFAULT 0,
+                ref_count   INTEGER NOT NULL DEFAULT 1,
+                created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+            );
+            CREATE INDEX IF NOT EXISTS idx_content_blobs_hash ON cloud_content_blobs(hash);
+
+            CREATE TABLE IF NOT EXISTS cloud_file_blobs (
+                file_id   TEXT NOT NULL REFERENCES cloud_files(id) ON DELETE CASCADE,
+                blob_hash TEXT NOT NULL REFERENCES cloud_content_blobs(hash),
+                PRIMARY KEY (file_id, blob_hash)
+            );
+            CREATE INDEX IF NOT EXISTS idx_file_blobs_file ON cloud_file_blobs(file_id);
             ",
         )?;
         Ok(())
@@ -1604,6 +1628,142 @@ fn row_to_onboarding(row: &rusqlite::Row<'_>) -> rusqlite::Result<OnboardingRow>
     })
 }
 
+// -----------------------------------------------------------------------
+// ContentAddressableStorage
+// -----------------------------------------------------------------------
+
+impl ContentAddressableStorage for MiyucloudDb {
+    /// Store raw `data` as a deduplicated blob.
+    ///
+    /// If the blob already exists (same SHA-256 hash), increments its
+    /// ref_count and returns the existing hash.  Otherwise compresses
+    /// (if above threshold), inserts a new row, and returns the hash.
+    fn store_blob(&self, data: &[u8]) -> Result<ContentHash, MiyucloudError> {
+        let hash = ContentHash::from_data(data);
+        let hex = hash.to_hex();
+
+        if self.blob_exists(&hash)? {
+            self.increment_refcount(&hash)?;
+            return Ok(hash);
+        }
+
+        let (stored, compressed) = maybe_compress(data)?;
+        let size = data.len() as i64;
+        let conn = self.lock_conn()?;
+        conn.execute(
+            "INSERT OR IGNORE INTO cloud_content_blobs (hash, data, size, compressed, ref_count)
+             VALUES (?1, ?2, ?3, ?4, 1)",
+            params![hex, stored, size, compressed as i32],
+        )?;
+        Ok(hash)
+    }
+
+    /// Read and decompress (if needed) a stored blob by its hash.
+    fn read_blob(&self, hash: &ContentHash) -> Result<Vec<u8>, MiyucloudError> {
+        let hex = hash.to_hex();
+        let conn = self.lock_conn()?;
+        let (data, compressed): (Vec<u8>, bool) = conn
+            .query_row(
+                "SELECT data, compressed FROM cloud_content_blobs WHERE hash = ?1",
+                params![hex],
+                |row| Ok((row.get::<_, Vec<u8>>(0)?, row.get::<_, i32>(1)? != 0)),
+            )
+            .map_err(|e| MiyucloudError::Db(format!("blob not found ({hex}): {e}")))?;
+
+        if compressed {
+            decompress(&data)
+        } else {
+            Ok(data)
+        }
+    }
+
+    /// Return `true` if a blob with this hash already exists in the store.
+    fn blob_exists(&self, hash: &ContentHash) -> Result<bool, MiyucloudError> {
+        let hex = hash.to_hex();
+        let conn = self.lock_conn()?;
+        let count: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM cloud_content_blobs WHERE hash = ?1",
+            params![hex],
+            |row| row.get(0),
+        )?;
+        Ok(count > 0)
+    }
+
+    /// Increment the reference count of a blob (called on dedup hit).
+    fn increment_refcount(&self, hash: &ContentHash) -> Result<(), MiyucloudError> {
+        let hex = hash.to_hex();
+        let conn = self.lock_conn()?;
+        conn.execute(
+            "UPDATE cloud_content_blobs SET ref_count = ref_count + 1 WHERE hash = ?1",
+            params![hex],
+        )?;
+        Ok(())
+    }
+
+    /// Decrement the reference count; delete the blob when it reaches zero.
+    fn decrement_refcount(&self, hash: &ContentHash) -> Result<(), MiyucloudError> {
+        let hex = hash.to_hex();
+        let conn = self.lock_conn()?;
+        conn.execute(
+            "UPDATE cloud_content_blobs SET ref_count = ref_count - 1 WHERE hash = ?1",
+            params![hex],
+        )?;
+        conn.execute(
+            "DELETE FROM cloud_content_blobs WHERE hash = ?1 AND ref_count <= 0",
+            params![hex],
+        )?;
+        Ok(())
+    }
+}
+
+impl MiyucloudDb {
+    /// Associate a file ID with its content blob hash in `cloud_file_blobs`.
+    pub fn record_file_blob(
+        &self,
+        file_id: &str,
+        hash: &ContentHash,
+    ) -> Result<(), MiyucloudError> {
+        let hex = hash.to_hex();
+        let conn = self.lock_conn()?;
+        conn.execute(
+            "INSERT OR IGNORE INTO cloud_file_blobs (file_id, blob_hash) VALUES (?1, ?2)",
+            params![file_id, hex],
+        )?;
+        Ok(())
+    }
+
+    /// Remove the file→blob association and decrement the blob's ref_count.
+    pub fn remove_file_blob(
+        &self,
+        file_id: &str,
+        hash: &ContentHash,
+    ) -> Result<(), MiyucloudError> {
+        let hex = hash.to_hex();
+        let conn = self.lock_conn()?;
+        conn.execute(
+            "DELETE FROM cloud_file_blobs WHERE file_id = ?1 AND blob_hash = ?2",
+            params![file_id, hex],
+        )?;
+        drop(conn);
+        self.decrement_refcount(hash)
+    }
+
+    /// Return the blob hash associated with a file, if any.
+    pub fn file_blob_hash(&self, file_id: &str) -> Result<Option<ContentHash>, MiyucloudError> {
+        let conn = self.lock_conn()?;
+        let mut stmt =
+            conn.prepare("SELECT blob_hash FROM cloud_file_blobs WHERE file_id = ?1")?;
+        let mut rows = stmt.query_map(params![file_id], |row| row.get::<_, String>(0))?;
+        match rows.next() {
+            Some(r) => {
+                let hex = r.map_err(|e| MiyucloudError::Db(e.to_string()))?;
+                Ok(Some(ContentHash::from_hex(&hex)?))
+            }
+            None => Ok(None),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1801,5 +1961,87 @@ mod tests {
         let results = db.file_search("owner1", "photo").unwrap();
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].name, "photo_vacances.jpg");
+    }
+
+    // -------------------------------------------------------------------
+    // Dedup / ContentAddressableStorage tests (E2-06, E2-07, E2-08)
+    // -------------------------------------------------------------------
+
+    #[test]
+    fn test_dedup_store_and_read_blob() {
+        // E2-06: store a blob and retrieve the same bytes back
+        use crate::storage::dedup::ContentAddressableStorage;
+        let db = mem_db();
+        let data = b"hello dedup world";
+        let hash = db.store_blob(data).unwrap();
+        assert!(db.blob_exists(&hash).unwrap());
+        let retrieved = db.read_blob(&hash).unwrap();
+        assert_eq!(retrieved, data);
+    }
+
+    #[test]
+    fn test_dedup_upload_same_file_twice_one_blob() {
+        // E2-07: uploading the same content twice should produce one blob
+        // with ref_count = 2 and two distinct file→blob associations.
+        use crate::domain::dedup_ops;
+        let db = mem_db();
+        let data = b"deduplicated content";
+
+        // Create two distinct file entries so the FK constraint is satisfied
+        let fa = make_file("owner1", None);
+        let fb = make_file("owner1", None);
+        db.file_create(&fa).unwrap();
+        db.file_create(&fb).unwrap();
+
+        let hash1 = dedup_ops::dedup_upload(&db, data).unwrap();
+        db.record_file_blob(&fa.id, &hash1).unwrap();
+
+        let hash2 = dedup_ops::dedup_upload(&db, data).unwrap();
+        db.record_file_blob(&fb.id, &hash2).unwrap();
+
+        assert_eq!(hash1, hash2);
+
+        // Only one blob should exist
+        let conn = db.lock_conn().unwrap();
+        let count: i64 = conn
+            .query_row(
+                "SELECT COUNT(*) FROM cloud_content_blobs WHERE hash = ?1",
+                rusqlite::params![hash1.to_hex()],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(count, 1);
+
+        let ref_count: i64 = conn
+            .query_row(
+                "SELECT ref_count FROM cloud_content_blobs WHERE hash = ?1",
+                rusqlite::params![hash1.to_hex()],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(ref_count, 2);
+    }
+
+    #[test]
+    fn test_dedup_delete_decrements_refcount_and_removes() {
+        // E2-08: deleting the last reference to a blob removes it entirely.
+        use crate::domain::dedup_ops;
+        use crate::storage::dedup::ContentAddressableStorage;
+        let db = mem_db();
+        let data = b"ephemeral content";
+
+        // Create a real file entry to satisfy the FK constraint
+        let fx = make_file("owner1", None);
+        db.file_create(&fx).unwrap();
+
+        let hash = dedup_ops::dedup_upload(&db, data).unwrap();
+        db.record_file_blob(&fx.id, &hash).unwrap();
+        assert!(db.blob_exists(&hash).unwrap());
+
+        // Remove the file→blob link and decrement ref
+        db.remove_file_blob(&fx.id, &hash).unwrap();
+
+        // Blob should be gone (ref_count was 1, now 0 → deleted)
+        assert!(!db.blob_exists(&hash).unwrap());
     }
 }

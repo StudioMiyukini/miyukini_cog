@@ -13,11 +13,12 @@
 //! Le fichier est dechiffre en streaming (pas charge en memoire) via `StreamingDecryptor`.
 //! Les tokens expires retournent 410 Gone.
 
+use crate::security_headers::CspNonce;
 use crate::web_surface::access_log;
 use crate::web_surface::sandbox::SandboxedStore;
 use crate::AppState;
 use axum::body::Body;
-use axum::extract::{Path, State};
+use axum::extract::{Extension, Path, State};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::Json;
@@ -79,7 +80,11 @@ fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
 }
 
 /// Affiche la page de partage (HTML).
-pub async fn share_page(State(state): State<Arc<AppState>>, Path(token): Path<String>) -> Response {
+pub async fn share_page(
+    State(state): State<Arc<AppState>>,
+    Path(token): Path<String>,
+    Extension(CspNonce(nonce)): Extension<CspNonce>,
+) -> Response {
     let db = &state.db;
     let storage = &state.storage;
     let sandbox = SandboxedStore::new(db, storage);
@@ -98,16 +103,19 @@ pub async fn share_page(State(state): State<Arc<AppState>>, Path(token): Path<St
                 expires,
                 password_required,
                 &safe_token,
+                &nonce,
             );
             Html(html).into_response()
         }
         Err(e) => {
             let msg = e.to_string();
             if msg.contains("expired") || msg.contains("revoked") {
-                let html = render_gone_page();
+                tracing::warn!(reason = %msg, "security: share link expired/revoked access attempt");
+                let html = render_gone_page(&nonce);
                 (StatusCode::GONE, Html(html)).into_response()
             } else {
-                (StatusCode::NOT_FOUND, Html(render_not_found_page())).into_response()
+                tracing::warn!(reason = %msg, "security: share link invalid token access attempt");
+                (StatusCode::NOT_FOUND, Html(render_not_found_page(&nonce))).into_response()
             }
         }
     }
@@ -170,6 +178,11 @@ pub async fn share_auth(
         }
     }
 
+    tracing::warn!(
+        link_id = %link.id,
+        "security: share link password auth failed"
+    );
+
     let _ = access_log::log_access(
         db,
         Some(&link.id),
@@ -221,6 +234,7 @@ pub async fn share_download(
 
     // F-01 FIX: If link has password, verify session cookie before allowing download
     if link.has_password && !verify_session_cookie(&headers, &token, &state.config.cog_token) {
+        tracing::warn!(link_id = %link.id, "security: download attempt without valid session on password-protected link");
         return (StatusCode::UNAUTHORIZED, "Authentication required").into_response();
     }
 
@@ -282,26 +296,25 @@ fn render_share_page(
     expires_at: &str,
     password_required: bool,
     token: &str,
+    nonce: &str,
 ) -> String {
     let safe_name = miyucloud::utils::sanitize::html_escape(file_name);
     let safe_size = miyucloud::utils::sanitize::html_escape(file_size);
     let safe_expires = miyucloud::utils::sanitize::html_escape(expires_at);
+
+    // No inline `onclick` — registered via addEventListener in the <script> block.
     let password_form = if password_required {
         r#"<div id="password-section">
             <p>This file is password protected.</p>
             <input type="password" id="password" placeholder="Enter password" />
-            <button onclick="authenticate()">Unlock</button>
-            <p id="auth-error" style="color: #ff6b6b; display: none;">Incorrect password</p>
+            <button id="unlock-btn">Unlock</button>
+            <p id="auth-error" class="auth-error">Incorrect password</p>
         </div>"#
     } else {
         ""
     };
 
-    let download_display = if password_required {
-        "display: none;"
-    } else {
-        ""
-    };
+    let download_class = if password_required { " hidden" } else { "" };
 
     format!(
         r#"<!DOCTYPE html>
@@ -310,7 +323,7 @@ fn render_share_page(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MiyuCloud - Shared File</title>
-    <style>
+    <style nonce="{nonce}">
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }}
         .container {{ background: #16213e; border-radius: 12px; padding: 2rem; max-width: 480px; width: 90%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }}
@@ -321,6 +334,8 @@ fn render_share_page(
         .btn:hover {{ background: #6b73ff; }}
         input {{ background: #0f3460; border: 1px solid #333; color: #e0e0e0; padding: 0.6rem 1rem; border-radius: 6px; width: 100%; margin-bottom: 0.5rem; font-size: 1rem; }}
         .expires {{ color: #666; font-size: 0.8rem; margin-top: 1rem; }}
+        .auth-error {{ color: #ff6b6b; display: none; }}
+        .hidden {{ display: none; }}
     </style>
 </head>
 <body>
@@ -329,12 +344,12 @@ fn render_share_page(
         <h1>{safe_name}</h1>
         <p class="meta">{safe_size}</p>
         {password_form}
-        <div id="download-section" style="{download_display}">
+        <div id="download-section" class="btn-wrap{download_class}">
             <a href="/share/{token}/download" class="btn" aria-label="Download file">Download</a>
         </div>
         <p class="expires">This link expires on {safe_expires}</p>
     </div>
-    <script>
+    <script nonce="{nonce}">
         function authenticate() {{
             var pwd = document.getElementById('password').value;
             fetch('/share/{token}/auth', {{
@@ -344,26 +359,28 @@ fn render_share_page(
             }}).then(function(r) {{
                 if (r.ok) {{
                     document.getElementById('password-section').style.display = 'none';
-                    document.getElementById('download-section').style.display = '';
+                    document.getElementById('download-section').classList.remove('hidden');
                 }} else {{
-                    document.getElementById('auth-error').style.display = '';
+                    document.getElementById('auth-error').style.display = 'block';
                 }}
             }});
         }}
+        var unlockBtn = document.getElementById('unlock-btn');
+        if (unlockBtn) {{ unlockBtn.addEventListener('click', authenticate); }}
     </script>
 </body>
 </html>"#
     )
 }
 
-fn render_gone_page() -> String {
-    r#"<!DOCTYPE html>
+fn render_gone_page(nonce: &str) -> String {
+    let html = r#"<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MiyuCloud - Link Expired</title>
-    <style>
+    <style NONCE_PLACEHOLDER>
         body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { text-align: center; }
         h1 { color: #ff6b6b; }
@@ -375,17 +392,18 @@ fn render_gone_page() -> String {
         <p>This share link is no longer available.</p>
     </div>
 </body>
-</html>"#.to_string()
+</html>"#;
+    html.replace("NONCE_PLACEHOLDER", &format!("nonce=\"{nonce}\""))
 }
 
-fn render_not_found_page() -> String {
-    r#"<!DOCTYPE html>
+fn render_not_found_page(nonce: &str) -> String {
+    let html = r#"<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MiyuCloud - Not Found</title>
-    <style>
+    <style NONCE_PLACEHOLDER>
         body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { text-align: center; }
     </style>
@@ -396,7 +414,8 @@ fn render_not_found_page() -> String {
         <p>The requested page could not be found.</p>
     </div>
 </body>
-</html>"#.to_string()
+</html>"#;
+    html.replace("NONCE_PLACEHOLDER", &format!("nonce=\"{nonce}\""))
 }
 
 /// Formate une taille en octets de maniere lisible.

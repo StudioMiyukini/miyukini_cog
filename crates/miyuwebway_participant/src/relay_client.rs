@@ -91,6 +91,8 @@ pub struct RelaySession {
     pub permis_id: Option<Vec<u8>>,
     /// Scopes autorisés.
     pub scopes: Vec<String>,
+    /// Trackers officiels fournis par Origin.
+    pub official_trackers: Vec<String>,
     /// TTL restant en secondes.
     pub ttl: u32,
     /// Intervalle de heartbeat.
@@ -104,6 +106,7 @@ impl Default for RelaySession {
             state: RelaySessionState::Disconnected,
             permis_id: None,
             scopes: Vec::new(),
+            official_trackers: Vec::new(),
             ttl: 0,
             heartbeat_interval: 30,
         }
@@ -154,12 +157,20 @@ impl RelayClient {
         ensure_crypto_provider();
 
         // Connexion TCP
-        let stream = TcpStream::connect(&self.config.relay_address)
-            .await
-            .map_err(|e| {
-                error!("TCP connection failed: {}", e);
-                MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
-            })?;
+        let connect_timeout = std::time::Duration::from_secs(self.config.connect_timeout);
+        let stream = tokio::time::timeout(
+            connect_timeout,
+            TcpStream::connect(&self.config.relay_address),
+        )
+        .await
+        .map_err(|_| {
+            error!("TCP connection to Relay timed out");
+            MiyuwebwayParticipantError::Timeout
+        })?
+        .map_err(|e| {
+            error!("TCP connection failed: {}", e);
+            MiyuwebwayParticipantError::ConnectionFailed(e.to_string())
+        })?;
 
         debug!("TCP connected, starting TLS handshake");
 
@@ -175,10 +186,16 @@ impl RelayClient {
         let domain = rustls_pki_types::ServerName::try_from(self.config.tls_domain.clone())
             .map_err(|_| MiyuwebwayParticipantError::InvalidDomain)?;
 
-        let mut tls_stream = connector.connect(domain, stream).await.map_err(|e| {
-            error!("TLS handshake failed: {}", e);
-            MiyuwebwayParticipantError::TlsError(e.to_string())
-        })?;
+        let mut tls_stream = tokio::time::timeout(connect_timeout, connector.connect(domain, stream))
+            .await
+            .map_err(|_| {
+                error!("TLS handshake to Relay timed out");
+                MiyuwebwayParticipantError::Timeout
+            })?
+            .map_err(|e| {
+                error!("TLS handshake failed: {}", e);
+                MiyuwebwayParticipantError::TlsError(e.to_string())
+            })?;
 
         info!("TLS connection established");
 
@@ -233,6 +250,16 @@ impl RelayClient {
                         Some(ack.permis_id.clone())
                     };
                     session.scopes = vec!["tracker".to_string(), "relay".to_string()];
+                    session.official_trackers = ack.official_trackers.clone();
+                    if session.official_trackers.is_empty() {
+                        warn!("Relay did not provide any official tracker");
+                    } else {
+                        info!(
+                            "Relay provided {} official tracker(s): {:?}",
+                            session.official_trackers.len(),
+                            session.official_trackers
+                        );
+                    }
 
                     // Phase 2 : démarrer le listener DATA si home_http_bind configuré
                     if let Some(ref home_http) = self.config.home_http_bind {

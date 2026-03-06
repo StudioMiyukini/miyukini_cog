@@ -33,6 +33,8 @@ pub fn CloudSidebar(state: Signal<MiyuCloudState>) -> Element {
         .collect();
 
     let files_active = current_section == CloudSection::Files;
+    let calendar_active = current_section == CloudSection::Calendar;
+    let contacts_active = current_section == CloudSection::Contacts;
     let shares_active = current_section == CloudSection::Shares;
     let trash_active = current_section == CloudSection::Trash;
     let settings_active = current_section == CloudSection::Settings;
@@ -48,6 +50,22 @@ pub fn CloudSidebar(state: Signal<MiyuCloudState>) -> Element {
         c.text_secondary
     };
     let files_border = if files_active {
+        format!("2px solid {}", c.accent_blue)
+    } else {
+        "2px solid transparent".to_string()
+    };
+
+    let calendar_bg = if calendar_active { c.bg_hover } else { "transparent" };
+    let calendar_color = if calendar_active { c.text_white } else { c.text_secondary };
+    let calendar_border = if calendar_active {
+        format!("2px solid {}", c.accent_blue)
+    } else {
+        "2px solid transparent".to_string()
+    };
+
+    let contacts_bg = if contacts_active { c.bg_hover } else { "transparent" };
+    let contacts_color = if contacts_active { c.text_white } else { c.text_secondary };
+    let contacts_border = if contacts_active {
         format!("2px solid {}", c.accent_blue)
     } else {
         "2px solid transparent".to_string()
@@ -167,6 +185,31 @@ pub fn CloudSidebar(state: Signal<MiyuCloudState>) -> Element {
                             }
                         }
                     }
+                }
+
+                // Separateur
+                div { style: "height: 1px; background: {c.border}; margin: 8px 16px;" }
+
+                // Section Calendrier
+                button {
+                    style: "display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: {calendar_bg}; color: {calendar_color}; border: none; border-left: {calendar_border}; cursor: pointer; font-size: 13px; text-align: left; width: 100%; transition: all 0.15s;",
+                    onclick: move |_| {
+                        state.write().section = CloudSection::Calendar;
+                        state.write().selected_file = None;
+                    },
+                    span { "\u{1F4C5}" }
+                    span { "Calendrier" }
+                }
+
+                // Section Contacts
+                button {
+                    style: "display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: {contacts_bg}; color: {contacts_color}; border: none; border-left: {contacts_border}; cursor: pointer; font-size: 13px; text-align: left; width: 100%; transition: all 0.15s;",
+                    onclick: move |_| {
+                        state.write().section = CloudSection::Contacts;
+                        state.write().selected_file = None;
+                    },
+                    span { "\u{1F464}" }
+                    span { "Contacts" }
                 }
 
                 // Separateur

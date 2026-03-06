@@ -1,0 +1,63 @@
+{
+    "project": {
+        "title": "MiyuCloud Integration Fix",
+        "description": "Debloquer compilation, connecter Central au serveur, valider cycle E2E complet",
+        "class": "T3",
+        "slug": "miyucloud-integration-fix",
+        "mip_sequence_number": 1,
+        "autonomy_mode": "BIG_STEPS"
+    },
+    "timestamps": {
+        "sequence_start": "2026-03-06T10:30:00Z",
+        "p0_start": "2026-03-06T10:30:00Z",
+        "p0_end": "2026-03-06T10:45:00Z",
+        "autopilot_start": "2026-03-06T13:05:00Z",
+        "p3_start": "2026-03-06T13:05:00Z",
+        "p3_end": "2026-03-06T14:30:00Z",
+        "p4_start": null,
+        "p4_end": null,
+        "p5_start": null,
+        "p5_end": null,
+        "p5_test_start": null,
+        "p5_test_end": null,
+        "p6_start": null,
+        "p6_end": null,
+        "total_end": null
+    },
+    "counters": {
+        "lines_written": 45,
+        "lines_deleted": 12,
+        "packages_touched": ["miyucloud", "miyucloud-server", "miyukini-central-native"],
+        "packages_created": [],
+        "files_created": 0,
+        "files_modified": 2,
+        "commits": 0,
+        "agents_engaged": ["maria"],
+        "mip_loops": 0,
+        "unit_tests_total": 275,
+        "unit_tests_failed": 0,
+        "integration_tests_total": 16,
+        "integration_tests_failed": 0,
+        "global_tests_total": 328,
+        "global_tests_failed": 0,
+        "auto_corrections": 1,
+        "audits": 0,
+        "audit_defects": [],
+        "security_score": null,
+        "security_defects": [],
+        "infra_checks_passed": true,
+        "emergency_brakes": 0
+    },
+    "human_interventions": [
+        {
+            "phase": "P0",
+            "timestamp": "2026-03-06T13:05:00Z",
+            "description": "Brief approuve, mode BIG_STEPS confirme, lancement P3",
+            "type": "validation",
+            "impact": "none"
+        }
+    ],
+    "agent_questions": [],
+    "satisfaction": null,
+    "notes": "P3 termine. V0/V1 deja fonctionnels. V3 complete: disk_space reel, health dashboard enrichi, rate_limiter verifie. V2 (E2E manuels) deferes en P5. 328 tests passes, 0 echecs."
+}

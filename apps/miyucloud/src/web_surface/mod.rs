@@ -20,6 +20,7 @@
 //! INVARIANT : Chaque acces est journalise (IP hashee, UA tronque).
 
 pub mod access_log;
+pub mod portal;
 pub mod rate_limiter;
 pub mod sandbox;
 pub mod share_page;
@@ -55,12 +56,21 @@ pub fn web_surface_router(state: Arc<AppState>) -> Router {
     // Routes d'authentification avec rate limiter strict
     let auth_routes = Router::new()
         .route("/share/{token}/auth", post(share_page::share_auth))
+        .route("/auth/password", post(portal::password_login))
+        .route("/auth/qr", post(portal::create_qr_challenge))
+        .route("/auth/qr/{id}", get(portal::poll_qr_challenge))
         .layer(auth_rate_limiter);
 
     // Routes de consultation et telechargement avec rate limiter standard
     let share_routes = Router::new()
         .route("/share/{token}", get(share_page::share_page))
         .route("/share/{token}/download", get(share_page::share_download))
+        .route("/", get(portal::portal_home))
+        .route("/login", get(portal::login_page))
+        .route("/logout", post(portal::logout))
+        .route("/upload", post(portal::upload_file))
+        .route("/folders", post(portal::create_folder))
+        .route("/files/{id}/download", get(portal::download_file))
         .layer(share_rate_limiter);
 
     Router::new()
@@ -99,16 +109,42 @@ mod tests {
             web_port: 11442,
             web_enabled: true,
             trust_proxy: false,
+            default_quota_bytes: 10 * 1024 * 1024 * 1024,
+            public_share_links_enabled: true,
+            internal_sharing_enabled: true,
+            default_share_permission: "read".to_string(),
+            ssh_enabled: false,
+            ssh_host: None,
+            ssh_port: 22,
+            ssh_username: None,
+            ssh_root_path: None,
+            ssh_private_key_path: None,
+            ssh_keepalive: true,
+            central_db_path: None,
             tls_cert_path: None,
             tls_key_path: None,
+            dav_db_path: std::path::PathBuf::from(":memory:"),
         };
         let ip_salt = crate::web_surface::access_log::derive_ip_salt(&config.cog_token);
+
+        let dav_conn = rusqlite::Connection::open_in_memory().unwrap();
+        let dav_db = std::sync::Arc::new(std::sync::Mutex::new(dav_conn));
+        let caldav_svc = miyucloud_dav::caldav::service::CalDavService::new(dav_db.clone());
+        caldav_svc.init_tables().unwrap();
+        let carddav_svc = miyucloud_dav::carddav::service::CardDavService::new(dav_db);
+        carddav_svc.init_tables().unwrap();
+
         Arc::new(AppState {
             db,
             storage,
             key_manager: km,
             config,
             ip_salt,
+            connect_auth: crate::connect_auth::ConnectAuthManager::new(None),
+            web_sessions: std::sync::Mutex::new(std::collections::HashMap::new()),
+            qr_challenges: std::sync::Mutex::new(std::collections::HashMap::new()),
+            caldav_svc,
+            carddav_svc,
         })
     }
 

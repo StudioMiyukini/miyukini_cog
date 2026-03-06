@@ -1,10 +1,11 @@
 //! Connexion — Retour d'un habitant connu. Miou accueille avec la voix (son + phrase).
 //! Pré-remplit l'email du dernier profil connecté.
 
-use crate::data::use_service_connections;
+use crate::data::{connect_runtime_state, use_service_connections};
 use crate::state::use_app_state;
 use crate::theme::styles;
 use dioxus::prelude::*;
+use miyukini_connect::RuntimeState;
 
 /// Étapes du rite de retour : Accueil → Clé.
 const STEP_ACCUEIL: u8 = 0;
@@ -36,6 +37,14 @@ pub fn Connexion() -> Element {
     let mut error = use_signal(String::new);
     // Index de la phrase (et du son) Miou choisi au montage (0=a, 1=b, 2=c).
     let mut miou_phrase_index = use_signal(|| None::<usize>);
+    let runtime_state = connect_runtime_state(connections.read().as_ref());
+
+    let (runtime_label, runtime_color) = match runtime_state {
+        RuntimeState::OnlineFull => ("ONLINE_FULL", c.accent_green),
+        RuntimeState::OnlineDegraded => ("ONLINE_DEGRADED", c.accent_orange),
+        RuntimeState::Isolated => ("ISOLATED", c.accent_blue),
+        RuntimeState::Suspicious => ("SUSPICIOUS", c.accent_red),
+    };
 
     // À l'affichage de l'écran connexion avec compte connu : choisir une phrase Miou aléatoire.
     use_effect(move || {
@@ -58,10 +67,12 @@ pub fn Connexion() -> Element {
             error.write().push_str("Indique ton adresse e-mail.");
             return;
         }
-        let auth_db = connections.read().auth_db.clone();
-        match auth_db.sign_in(&em, &pass) {
+        let connections_ref = connections.read().clone();
+        match connections_ref.connect_sign_in(&em, &pass) {
             Ok(Some(profile)) => {
-                let _ = auth_db.set_current_profile_id(Some(profile.id.as_str()));
+                let _ = connections_ref
+                    .auth_db
+                    .set_current_profile_id(Some(profile.id.as_str()));
 
                 let mut s = state.write();
                 s.current_user = Some(profile);
@@ -149,6 +160,17 @@ pub fn Connexion() -> Element {
                     } else {
                         // Étape 2 (ou directe) : saisie email + clé
                         rsx! {
+                            div {
+                                style: "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 8px 10px; border: 1px solid {c.border}; border-radius: 6px; background: {c.bg_hover};",
+                                span {
+                                    style: "font-size: 11px; color: {c.text_muted}; letter-spacing: 0.04em;",
+                                    "Miyukini Connect"
+                                }
+                                span {
+                                    style: "font-size: 11px; color: {runtime_color}; font-weight: 600; letter-spacing: 0.04em;",
+                                    "{runtime_label}"
+                                }
+                            }
                             p {
                                 style: "{styles::form_title(theme)}",
                                 if has_saved {

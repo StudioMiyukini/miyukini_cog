@@ -16,14 +16,18 @@ use crate::state::use_app_state;
 
 /// Explorateur de fichiers (zone principale droite).
 #[component]
-pub fn FileExplorer(state: Signal<MiyuCloudState>, on_upload: EventHandler<()>) -> Element {
+pub fn FileExplorer(
+    state: Signal<MiyuCloudState>,
+    breadcrumb_memo: Memo<Vec<super::state::BreadcrumbItem>>,
+    on_upload: EventHandler<()>,
+) -> Element {
     let c = use_app_state().read().current_theme.palette();
 
     let section = state.read().section;
     let view_mode = state.read().view_mode;
     let sort_by = state.read().sort_by;
     let sort_asc = state.read().sort_asc;
-    let breadcrumb = state.read().breadcrumb.clone();
+    let breadcrumb = breadcrumb_memo.read().clone();
     let loading = state.read().loading;
     let error_msg = state.read().error_message.clone();
     let new_folder_open = state.read().new_folder_dialog;

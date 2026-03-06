@@ -32,10 +32,36 @@ pub struct MiyucloudConfig {
     pub web_enabled: bool,
     /// Fait confiance aux en-tetes proxy (X-Forwarded-For/X-Real-IP) pour l'IP cliente.
     pub trust_proxy: bool,
+    /// Quota par defaut impose au proprietaire courant.
+    pub default_quota_bytes: u64,
+    /// Active les liens de partage publics.
+    pub public_share_links_enabled: bool,
+    /// Active le partage interne profil/tribu.
+    pub internal_sharing_enabled: bool,
+    /// Permission de partage par defaut.
+    pub default_share_permission: String,
+    /// Active le profil de connexion SSH persistant.
+    pub ssh_enabled: bool,
+    /// Hote SSH cible.
+    pub ssh_host: Option<String>,
+    /// Port SSH.
+    pub ssh_port: u16,
+    /// Utilisateur SSH.
+    pub ssh_username: Option<String>,
+    /// Racine distante SSH.
+    pub ssh_root_path: Option<String>,
+    /// Cle privee SSH optionnelle.
+    pub ssh_private_key_path: Option<PathBuf>,
+    /// Demande des keepalive pour la session SSH.
+    pub ssh_keepalive: bool,
+    /// Chemin vers la base Central pour Miyukini Connect.
+    pub central_db_path: Option<PathBuf>,
     /// Chemin vers le certificat TLS PEM (si fourni, desactive auto-generation).
     pub tls_cert_path: Option<PathBuf>,
     /// Chemin vers la cle privee TLS PEM.
     pub tls_key_path: Option<PathBuf>,
+    /// Chemin de la base de donnees CalDAV/CardDAV (defaut `~/.miyucloud/dav.db`).
+    pub dav_db_path: PathBuf,
 }
 
 impl MiyucloudConfig {
@@ -76,9 +102,60 @@ impl MiyucloudConfig {
         let trust_proxy = std::env::var("MIYUCLOUD_TRUST_PROXY")
             .map_or(false, |s| s == "1" || s.to_lowercase() == "true");
 
+        let default_quota_bytes = std::env::var("MIYUCLOUD_DEFAULT_QUOTA_BYTES")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(10 * 1024 * 1024 * 1024);
+
+        let public_share_links_enabled = std::env::var("MIYUCLOUD_PUBLIC_SHARES_ENABLED")
+            .map_or(true, |s| s == "1" || s.to_lowercase() == "true");
+
+        let internal_sharing_enabled =
+            std::env::var("MIYUCLOUD_INTERNAL_SHARING_ENABLED")
+                .map_or(true, |s| s == "1" || s.to_lowercase() == "true");
+
+        let default_share_permission =
+            std::env::var("MIYUCLOUD_DEFAULT_SHARE_PERMISSION")
+                .unwrap_or_else(|_| "read".to_string());
+
+        let ssh_enabled = std::env::var("MIYUCLOUD_SSH_ENABLED")
+            .map_or(false, |s| s == "1" || s.to_lowercase() == "true");
+
+        let ssh_host = std::env::var("MIYUCLOUD_SSH_HOST")
+            .ok()
+            .filter(|s| !s.trim().is_empty());
+
+        let ssh_port = std::env::var("MIYUCLOUD_SSH_PORT")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(22);
+
+        let ssh_username = std::env::var("MIYUCLOUD_SSH_USERNAME")
+            .ok()
+            .filter(|s| !s.trim().is_empty());
+
+        let ssh_root_path = std::env::var("MIYUCLOUD_SSH_ROOT_PATH")
+            .ok()
+            .filter(|s| !s.trim().is_empty());
+
+        let ssh_private_key_path = std::env::var("MIYUCLOUD_SSH_PRIVATE_KEY_PATH")
+            .ok()
+            .filter(|s| !s.trim().is_empty())
+            .map(PathBuf::from);
+
+        let ssh_keepalive = std::env::var("MIYUCLOUD_SSH_KEEPALIVE")
+            .map_or(true, |s| s == "1" || s.to_lowercase() == "true");
+
+        let central_db_path = std::env::var("MIYUCLOUD_CENTRAL_DB_PATH")
+            .ok()
+            .map(PathBuf::from);
+
         let tls_cert_path = std::env::var("MIYUCLOUD_TLS_CERT").ok().map(PathBuf::from);
 
         let tls_key_path = std::env::var("MIYUCLOUD_TLS_KEY").ok().map(PathBuf::from);
+
+        let dav_db_path = std::env::var("MIYUCLOUD_DAV_DB_PATH")
+            .map_or_else(|_| base.join("dav.db"), PathBuf::from);
 
         Self {
             api_port,
@@ -90,8 +167,21 @@ impl MiyucloudConfig {
             web_port,
             web_enabled,
             trust_proxy,
+            default_quota_bytes,
+            public_share_links_enabled,
+            internal_sharing_enabled,
+            default_share_permission,
+            ssh_enabled,
+            ssh_host,
+            ssh_port,
+            ssh_username,
+            ssh_root_path,
+            ssh_private_key_path,
+            ssh_keepalive,
+            central_db_path,
             tls_cert_path,
             tls_key_path,
+            dav_db_path,
         }
     }
 }

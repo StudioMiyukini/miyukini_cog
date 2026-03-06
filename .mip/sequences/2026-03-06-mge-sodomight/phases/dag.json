@@ -1,0 +1,19 @@
+{
+  "sequence": "2026-03-06-mge-sodomight",
+  "class": "T5",
+  "phase": "P0",
+  "nodes": [
+    { "id": "T1", "name": "Exploration", "agent": "Maria", "depends_on": [] },
+    { "id": "T2", "name": "Ideation", "agent": "Maria+Lise", "depends_on": ["T1"] },
+    { "id": "T3", "name": "Concurrentiel", "agent": "Fabrice", "depends_on": ["T1"] },
+    { "id": "T4", "name": "Inventaire", "agent": "Denis+Hugo+Jean", "depends_on": ["T2", "T3"] },
+    { "id": "T5", "name": "Securite", "agent": "Victor", "depends_on": ["T4"] },
+    { "id": "T6", "name": "Spec", "agent": "Francois", "depends_on": ["T4", "T5"] },
+    { "id": "T7", "name": "Agents", "agent": "Maria", "depends_on": ["T6"] },
+    { "id": "T8", "name": "Plan P3", "agent": "Denis", "depends_on": ["T7"] },
+    { "id": "T9", "name": "Faisabilite", "agent": "Arianne+Jean", "depends_on": ["T8"] },
+    { "id": "T10", "name": "CI-CD", "agent": "Hugo", "depends_on": ["T8"] },
+    { "id": "T11", "name": "Brief", "agent": "Maria", "depends_on": ["T9", "T10"] }
+  ],
+  "status": "p0_ready_for_gate"
+}

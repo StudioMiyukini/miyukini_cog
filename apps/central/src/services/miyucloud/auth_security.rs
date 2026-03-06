@@ -20,6 +20,11 @@ pub fn TotpSetupWizard(
 ) -> Element {
     let c = use_app_state().read().current_theme.palette();
     let enabled = state.read().totp_enabled;
+    let status_color = if enabled {
+        c.accent_green
+    } else {
+        c.accent_red
+    };
     let account_name = state.read().totp_account_name.clone();
     let otpauth = state.read().totp_otpauth_uri.clone();
 
@@ -48,7 +53,7 @@ pub fn TotpSetupWizard(
                 style: "display: flex; align-items: center; gap: 8px;",
                 span { style: "font-size: 12px; color: {c.text_secondary};", "Statut 2FA :" }
                 span {
-                    style: "font-size: 12px; color: {if enabled { c.accent_green } else { c.accent_red }}; font-weight: 600;",
+                    style: "font-size: 12px; color: {status_color}; font-weight: 600;",
                     if enabled { "ACTIVE" } else { "INACTIVE" }
                 }
             }
@@ -511,6 +516,8 @@ pub fn HealthDashboard(
                     HealthCell { label: "Sessions".to_string(), value: h.metrics.active_sessions.to_string() }
                     HealthCell { label: "Partages".to_string(), value: h.metrics.active_share_links.to_string() }
                     HealthCell { label: "Stockage".to_string(), value: format_size(h.total_size_bytes) }
+                    HealthCell { label: "Disque libre".to_string(), value: if h.disk_total_bytes > 0 { format!("{} / {}", format_size(h.disk_free_bytes), format_size(h.disk_total_bytes)) } else { "N/A".to_string() } }
+                    HealthCell { label: "Uptime".to_string(), value: format_uptime(h.uptime_seconds) }
                 }
             }
             button {
@@ -593,6 +600,16 @@ fn HealthCell(label: String, value: String) -> Element {
             div { style: "font-size: 10px; color: {c.text_muted}; text-transform: uppercase;", "{label}" }
             div { style: "font-size: 12px; color: {c.text_primary}; font-weight: 600;", "{value}" }
         }
+    }
+}
+
+fn format_uptime(secs: u64) -> String {
+    let h = secs / 3600;
+    let m = (secs % 3600) / 60;
+    if h > 0 {
+        format!("{h}h {m}m")
+    } else {
+        format!("{m}m")
     }
 }
 

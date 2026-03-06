@@ -9,6 +9,8 @@
 //! le module de chunking et la verification d'integrite SHA-256.
 
 pub mod chunking;
+pub mod compression;
+pub mod dedup;
 pub mod integrity;
 pub mod local_fs;
 

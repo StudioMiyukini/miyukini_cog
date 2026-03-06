@@ -81,11 +81,11 @@ impl Default for CentralMwsConfig {
             relay_address: "miyukini.com:7000".to_string(),
             tracker_address: "miyukini.com:21000".to_string(),
             core_conformity_key: None,
-            public_address: "0.0.0.0:0".to_string(), // Sera détecté
+            public_address: "0.0.0.0:8090".to_string(),
             auto_heartbeat: true,
             auto_reconnect: true,
             present_without_services: true, // Se présente toujours
-            home_http_bind: None,           // Optionnel : "0.0.0.0:8080" pour exposer la Home
+            home_http_bind: Some("0.0.0.0:8090".to_string()),
             expose_jayxpose_vitrine: false,
             jayxpose_vitrine_base_url: None,
             subdomain_slug: None,
@@ -1715,6 +1715,8 @@ mod tests {
         assert!(config.auto_connect);
         assert!(config.auto_heartbeat);
         assert!(config.present_without_services);
+        assert_eq!(config.public_address, "0.0.0.0:8090");
+        assert_eq!(config.home_http_bind.as_deref(), Some("0.0.0.0:8090"));
     }
 
     #[test]

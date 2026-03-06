@@ -1,0 +1,71 @@
+{
+  "schema": "mip-metrics-v2",
+  "sequence_name": "2026-03-06-miyucloud-oxicloud-refonte",
+  "classification": "T5",
+  "mip_sequence_number": 11,
+  "t0_timestamp": "2026-03-06T13:43:48Z",
+  "t_end_timestamp": "2026-03-06T18:00:00Z",
+  "final_status": "SUCCES",
+  "phases": {
+    "p0": {
+      "start": "2026-03-06T13:43:48Z",
+      "end": "2026-03-06T14:25:30Z",
+      "status": "complete",
+      "duration_minutes": 42,
+      "temps_count": 12,
+      "artifacts_generated": 38
+    },
+    "p3": {
+      "start": "2026-03-06T14:25:30Z",
+      "end": "2026-03-06T17:00:00Z",
+      "status": "complete",
+      "etapes_total": 11,
+      "etapes_done": 11,
+      "tasks_total": 88,
+      "tasks_done": 88,
+      "tests_passing": 287,
+      "tests_failed": 0,
+      "corrections": 2,
+      "reverts": 0
+    },
+    "p4": {
+      "start": "2026-03-06T17:00:00Z",
+      "end": "2026-03-06T17:30:00Z",
+      "status": "complete",
+      "audits_produced": 5,
+      "security_score": 97,
+      "efficiency_score": 18,
+      "blockers": 0
+    },
+    "p5": {
+      "start": "2026-03-06T17:30:00Z",
+      "end": "2026-03-06T17:45:00Z",
+      "status": "complete",
+      "gate": "OUVERT",
+      "conditions_validated": 9,
+      "conditions_total": 9
+    },
+    "p6": {
+      "start": "2026-03-06T17:45:00Z",
+      "end": "2026-03-06T18:00:00Z",
+      "status": "complete",
+      "report_produced": true
+    }
+  },
+  "summary": {
+    "tasks_done": 88,
+    "tasks_total": 88,
+    "tests_passing": 287,
+    "security_score_100": 97,
+    "efficiency_score_20": 18,
+    "cve_open": 0,
+    "blockers": 0,
+    "reverts": 0
+  },
+  "tokens": {
+    "total": null,
+    "by_phase": {}
+  },
+  "mip_loops": 0,
+  "autonomy_mode": null
+}

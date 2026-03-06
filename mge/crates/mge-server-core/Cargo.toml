@@ -1,0 +1,14 @@
+[package]
+name = "mge-server-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+mge-core = { path = "../mge-core" }
+mge-net = { path = "../mge-net" }
+mge-proto = { path = "../mge-proto" }
+
+[lints]
+workspace = true

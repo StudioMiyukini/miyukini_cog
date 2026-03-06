@@ -84,6 +84,10 @@ where
             match token_header {
                 Some(token) if token_matches(&token, &expected) => inner.call(req).await,
                 _ => {
+                    tracing::warn!(
+                        path = %req.uri().path(),
+                        "security: API request with missing or invalid X-COG-Token"
+                    );
                     let response = error_response(
                         StatusCode::UNAUTHORIZED,
                         "UNAUTHORIZED",

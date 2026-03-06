@@ -10,12 +10,17 @@ pub mod alicia;
 mod external_service_view;
 mod home;
 mod market;
-pub mod miyukini_whisper;
 pub mod miyucloud;
+pub(crate) mod miyucloud_settings;
+pub mod miyukini_whisper;
+mod mws_settings;
+mod mws_view;
 
 pub use external_service_view::ExternalServiceView;
 pub use home::HomeView;
 pub use market::MarketView;
+pub(crate) use mws_view::auto_connect_after_login;
+pub use mws_view::{MwsNetworkView, MwsViewState};
 
 use crate::state::use_app_state;
 use dioxus::prelude::*;

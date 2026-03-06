@@ -51,6 +51,10 @@ pub enum MiyucloudError {
     /// Erreur de serialisation/deserialisation.
     #[error("Serialization error: {0}")]
     Serialization(String),
+
+    /// Erreur interne (catch-all pour les cas imprevus).
+    #[error("Internal error: {0}")]
+    Internal(String),
 }
 
 #[cfg(feature = "legacy-sqlite")]

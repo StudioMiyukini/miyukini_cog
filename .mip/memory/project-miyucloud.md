@@ -15,5 +15,7 @@
 
 **Crypto** : ChaCha20-Poly1305 at-rest, Argon2id + HKDF derivation, X25519 E2E, canary passphrase. Master key en RAM uniquement.
 **Decisions verrouillees** : D1 (P2P pur), D2 (surface web sandboxee), D3 (remplace Jay1Tribu), D4 (chiffrement obligatoire).
-**Metriques** : 66 fichiers, 18435 lignes, 257 tests (257 OK), 0 clippy warnings, MSCM 100%, audit securite 87/100.
+**Metriques** : 66 fichiers, 18435 lignes, 291+ tests (miyucloud 275+16 integ/sync, miyucloud-server 37), 0 clippy warnings, MSCM 100%, audit securite 87/100.
 **Defauts majeurs en attente** : F-01 (download sans session), F-02 (timing attack hash), F-03 (passphrase par defaut). Plans de correction dans `.mip/audits/2026-03-01-miyucloud-audit-securite.md`.
+**Monitoring** : `check_disk_space()` implemente (PowerShell Windows, df Unix). Health dashboard affiche DB, storage, fichiers, sessions, partages, stockage, disque libre, uptime. Rate limiter avec purge periodique (tous les 100 reqs).
+**Integration Central <-> Server** : Fonctionnelle. Env vars passes via `build_service_env()`, config dans `miyucloud-config.json`, auto-generation COG token + passphrase.

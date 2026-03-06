@@ -8,6 +8,7 @@ use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 
 use super::registry::InstalledService;
+use crate::services::miyucloud_settings::load_miyucloud_config;
 
 /// Processus en cours d'exécution pour un service.
 struct RunningService {
@@ -39,11 +40,15 @@ impl ServiceProcesses {
             }
         }
 
-        // Vérifier que le binaire existe
-        if !service.binary_path.exists() {
+        // En dev, préférer le binaire dans le même dossier que Central (target/debug/)
+        // pour éviter de devoir copier manuellement après chaque build.
+        let binary_path = dev_binary_override(&service.binary_path)
+            .unwrap_or_else(|| service.binary_path.clone());
+
+        if !binary_path.exists() {
             return Err(format!(
                 "Binaire introuvable : {}",
-                service.binary_path.display()
+                binary_path.display()
             ));
         }
 
@@ -53,20 +58,29 @@ impl ServiceProcesses {
             tracing::warn!("Impossible de créer le répertoire de données: {e}");
         }
 
+        let service_env = build_service_env(service, profile_id, &data_dir)?;
+
         tracing::info!(
             "Lancement du service '{}' depuis {:?}",
             service_id,
-            service.binary_path
+            binary_path
         );
 
-        let child = Command::new(&service.binary_path)
+        let mut command = Command::new(&binary_path);
+        command
             .env("MIYUKINI_SERVICE_ID", service_id)
             .env("MIYUKINI_DATA_DIR", data_dir.to_string_lossy().to_string())
             .env("MIYUKINI_PROFILE_ID", profile_id)
             .env("KINDMOTHER_LISTEN_ADDR", "127.0.0.1:50051")
             .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::inherit());
+
+        for (key, value) in &service_env {
+            command.env(key, value);
+        }
+
+        let child = command
             .spawn()
             .map_err(|e| format!("Échec du lancement de '{service_id}': {e}"))?;
 
@@ -126,5 +140,102 @@ impl ServiceProcesses {
     pub fn running_service_ids(&self) -> Vec<String> {
         let procs = self.processes.lock().unwrap_or_else(|e| e.into_inner());
         procs.keys().cloned().collect()
+    }
+}
+
+fn build_service_env(
+    service: &InstalledService,
+    profile_id: &str,
+    data_dir: &std::path::Path,
+) -> Result<HashMap<String, String>, String> {
+    let mut env = HashMap::new();
+
+    if service.manifest.id == "miyucloud" {
+        let config = load_miyucloud_config();
+        let current_dir =
+            std::env::current_dir().map_err(|e| format!("Lecture du répertoire courant: {e}"))?;
+        env.insert("MIYUCLOUD_PORT".to_string(), config.api_port.to_string());
+        env.insert("MIYUCLOUD_WEB_PORT".to_string(), config.web_port.to_string());
+        env.insert(
+            "MIYUCLOUD_WEB_ENABLED".to_string(),
+            if config.web_enabled { "1" } else { "0" }.to_string(),
+        );
+        env.insert("MIYUCLOUD_STORAGE_PATH".to_string(), config.storage_path);
+        env.insert(
+            "MIYUCLOUD_DB_PATH".to_string(),
+            data_dir.join("miyucloud.db").to_string_lossy().to_string(),
+        );
+        env.insert("MIYUCLOUD_COG_TOKEN".to_string(), config.cog_token);
+        env.insert(
+            "MIYUCLOUD_PASSPHRASE".to_string(),
+            config.encryption_passphrase,
+        );
+        env.insert("MIYUCLOUD_OWNER_ID".to_string(), profile_id.to_string());
+        env.insert(
+            "MIYUCLOUD_DEFAULT_QUOTA_BYTES".to_string(),
+            config.quota_bytes.to_string(),
+        );
+        env.insert(
+            "MIYUCLOUD_PUBLIC_SHARES_ENABLED".to_string(),
+            if config.share_policy.public_links_enabled {
+                "1"
+            } else {
+                "0"
+            }
+            .to_string(),
+        );
+        env.insert(
+            "MIYUCLOUD_INTERNAL_SHARING_ENABLED".to_string(),
+            if config.share_policy.internal_sharing_enabled {
+                "1"
+            } else {
+                "0"
+            }
+            .to_string(),
+        );
+        env.insert(
+            "MIYUCLOUD_DEFAULT_SHARE_PERMISSION".to_string(),
+            config.share_policy.default_permission.as_str().to_string(),
+        );
+        env.insert(
+            "MIYUCLOUD_SSH_ENABLED".to_string(),
+            if config.ssh.enabled { "1" } else { "0" }.to_string(),
+        );
+        env.insert("MIYUCLOUD_SSH_HOST".to_string(), config.ssh.host);
+        env.insert("MIYUCLOUD_SSH_PORT".to_string(), config.ssh.port.to_string());
+        env.insert("MIYUCLOUD_SSH_USERNAME".to_string(), config.ssh.username);
+        env.insert("MIYUCLOUD_SSH_ROOT_PATH".to_string(), config.ssh.root_path);
+        env.insert(
+            "MIYUCLOUD_SSH_PRIVATE_KEY_PATH".to_string(),
+            config.ssh.private_key_path,
+        );
+        env.insert(
+            "MIYUCLOUD_SSH_KEEPALIVE".to_string(),
+            if config.ssh.keepalive { "1" } else { "0" }.to_string(),
+        );
+        env.insert(
+            "MIYUCLOUD_CENTRAL_DB_PATH".to_string(),
+            current_dir.join("central.db").to_string_lossy().to_string(),
+        );
+    }
+
+    Ok(env)
+}
+
+/// En développement, si le binaire du service existe à côté de l'exécutable Central
+/// (ex. `target/debug/`), on le préfère au binaire de l'install dir.
+fn dev_binary_override(registered_path: &std::path::Path) -> Option<std::path::PathBuf> {
+    let bin_name = registered_path.file_name()?;
+    let central_dir = std::env::current_exe().ok()?.parent()?.to_path_buf();
+    let dev_path = central_dir.join(bin_name);
+    if dev_path.exists() && dev_path != registered_path {
+        tracing::debug!(
+            "Dev override: {} → {:?}",
+            registered_path.display(),
+            dev_path
+        );
+        Some(dev_path)
+    } else {
+        None
     }
 }

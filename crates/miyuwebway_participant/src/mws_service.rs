@@ -169,6 +169,15 @@ impl MwsService {
             *s = Some(session.clone());
         }
 
+        if session.official_trackers.is_empty() {
+            return Err(MiyuwebwayParticipantError::ProtocolError(
+                "Relay did not provide any official tracker".to_string(),
+            ));
+        }
+        self.tracker_client
+            .update_official_trackers(session.official_trackers.clone())
+            .await?;
+
         // 2. Annonce au Tracker
         {
             let mut state = self.state.write().await;

@@ -1,0 +1,19 @@
+{
+  "id": "miyucloud",
+  "name": "MiyuCloud",
+  "description": "Cloud prive chiffre du COG — fichiers, portail web authentifie, sync et partage securise",
+  "icon": "☁",
+  "version": "0.1.0",
+  "service_type": "inter_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "webway", "identity"],
+  "tags": ["cloud", "fichiers", "sync", "partage", "stockage"],
+  "execution_mode": "background",
+  "binary_name": "miyucloud-server.exe",
+  "platforms": {
+    "windows_x64": "miyucloud-server.exe"
+  }
+}

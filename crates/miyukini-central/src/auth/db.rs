@@ -190,6 +190,12 @@ impl CentralAuthDb {
             );
             CREATE INDEX IF NOT EXISTS idx_central_profile_saves_profile_service
                 ON central_profile_saves(profile_id, service_key);
+            CREATE TABLE IF NOT EXISTS connect_credentials (
+                profile_id TEXT PRIMARY KEY,
+                password_hash TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
+            );
             ",
         )?;
         Ok(())
@@ -500,6 +506,7 @@ impl CentralAuthDb {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
         conn.execute("DELETE FROM central_profile_saves", [])?;
         conn.execute("DELETE FROM profile_service_refs", [])?;
+        conn.execute("DELETE FROM connect_credentials", [])?;
         conn.execute("DELETE FROM central_profiles", [])?;
         conn.execute(
             "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('cog_virgin', '1')",
@@ -561,6 +568,40 @@ impl CentralAuthDb {
             profession: None,
             langue_maternelle: None,
         })
+    }
+
+    /// Enregistre (ou met a jour) un hash Argon2id Miyukini Connect pour un profil.
+    pub fn set_connect_password_hash(
+        &self,
+        profile_id: &str,
+        password_hash: &str,
+    ) -> Result<(), AuthDbError> {
+        if !password_hash.starts_with("$argon2id$") {
+            return Err(AuthDbError(
+                "Le hash Connect doit etre au format Argon2id.".to_string(),
+            ));
+        }
+        let now = chrono::Utc::now().to_rfc3339();
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO connect_credentials (profile_id, password_hash, updated_at) VALUES (?1, ?2, ?3)
+             ON CONFLICT(profile_id) DO UPDATE SET password_hash = excluded.password_hash, updated_at = excluded.updated_at",
+            params![profile_id, password_hash, now],
+        )?;
+        Ok(())
+    }
+
+    /// Retourne le hash Argon2id Miyukini Connect associe a un profil.
+    pub fn get_connect_password_hash(&self, profile_id: &str) -> Result<Option<String>, AuthDbError> {
+        let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+        let mut stmt =
+            conn.prepare("SELECT password_hash FROM connect_credentials WHERE profile_id = ?1")?;
+        let row = stmt.query_row(params![profile_id], |row| row.get::<_, String>(0));
+        match row {
+            Ok(hash) => Ok(Some(hash)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
     }
 
     /// Retourne l’ID de référence du profil vers la table du service (ex. id de sauvegarde de jeu).

@@ -42,6 +42,8 @@ pub struct MarketStore {
 impl MarketStore {
     /// Ouvre (ou crée) le MarketStore.
     pub fn open(db_path: impl AsRef<Path>, packages_dir: impl AsRef<Path>) -> Result<Self, String> {
+        std::fs::create_dir_all(packages_dir.as_ref())
+            .map_err(|e| format!("Market packages dir: {e}"))?;
         let conn =
             Connection::open(db_path.as_ref()).map_err(|e| format!("Market DB open: {e}"))?;
 
@@ -51,6 +53,7 @@ impl MarketStore {
         };
         store.init_schema_sync()?;
         store.seed_official_catalog_sync()?;
+        store.sync_package_metadata_sync()?;
         Ok(store)
     }
 
@@ -120,6 +123,57 @@ impl MarketStore {
             ).map_err(|e| format!("Market seed: {e}"))?;
         }
         Ok(())
+    }
+
+    /// Met à jour `downloadable`, `checksum` et `package_size` à partir des packages présents.
+    fn sync_package_metadata_sync(&self) -> Result<(), String> {
+        let conn = self.db.blocking_lock();
+        let mut stmt = conn
+            .prepare("SELECT id, version FROM market_services")
+            .map_err(|e| format!("Market package scan prepare: {e}"))?;
+        let rows = stmt
+            .query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            })
+            .map_err(|e| format!("Market package scan query: {e}"))?;
+
+        let mut entries = Vec::new();
+        for row in rows {
+            let (service_id, version) = row.map_err(|e| format!("Market package scan row: {e}"))?;
+            entries.push((service_id, version));
+        }
+        drop(stmt);
+
+        for (service_id, version) in entries {
+            let package_path = self.package_path(&service_id, &version);
+            if let Ok(bytes) = std::fs::read(&package_path) {
+                let checksum = package::sha256_hex(&bytes);
+                conn.execute(
+                    "UPDATE market_services
+                     SET downloadable = 1, checksum = ?3, package_size = ?4
+                     WHERE id = ?1 AND version = ?2",
+                    rusqlite::params![service_id, version, checksum, bytes.len() as i64,],
+                )
+                .map_err(|e| format!("Market package sync update: {e}"))?;
+            } else {
+                conn.execute(
+                    "UPDATE market_services
+                     SET downloadable = 0, checksum = '', package_size = 0
+                     WHERE id = ?1 AND version = ?2",
+                    rusqlite::params![service_id, version],
+                )
+                .map_err(|e| format!("Market package sync reset: {e}"))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn package_path(&self, service_id: &str, version: &str) -> PathBuf {
+        self.packages_dir
+            .join(service_id)
+            .join(version)
+            .join(package::package_filename(service_id, version))
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -233,7 +287,7 @@ impl MarketStore {
             .map_err(|e| format!("Package invalide : {e}"))?;
 
         // 4. Stocker le fichier package
-        let full_path = self.packages_dir.join(&info.storage_path);
+        let full_path = self.package_path(&manifest.id, &manifest.version);
         if let Some(parent) = full_path.parent() {
             std::fs::create_dir_all(parent)
                 .map_err(|e| format!("Création répertoire package : {e}"))?;
@@ -300,8 +354,7 @@ impl MarketStore {
             .await?;
 
         // Supprimer le fichier package
-        let path = package::storage_path(service_id, version);
-        let full_path = self.packages_dir.join(&path);
+        let full_path = self.package_path(service_id, version);
         if full_path.exists() {
             let _ = std::fs::remove_file(&full_path);
         }
@@ -322,18 +375,16 @@ impl MarketStore {
 
     /// Lit le contenu binaire d'un package pour le téléchargement.
     pub async fn get_package_bytes(&self, service_id: &str, version: &str) -> Option<Vec<u8>> {
-        // Incrémenter le compteur de téléchargements
-        {
-            let conn = self.db.lock().await;
-            let _ = conn.execute(
-                "UPDATE market_services SET download_count = download_count + 1 WHERE id = ?1 AND version = ?2",
-                rusqlite::params![service_id, version],
-            );
-        }
+        let full_path = self.package_path(service_id, version);
+        let bytes = std::fs::read(&full_path).ok()?;
 
-        let path = package::storage_path(service_id, version);
-        let full_path = self.packages_dir.join(&path);
-        std::fs::read(&full_path).ok()
+        let conn = self.db.lock().await;
+        let _ = conn.execute(
+            "UPDATE market_services SET download_count = download_count + 1 WHERE id = ?1 AND version = ?2",
+            rusqlite::params![service_id, version],
+        );
+
+        Some(bytes)
     }
 
     /// Vérifie un token développeur.
@@ -519,6 +570,19 @@ fn official_catalog_seed() -> Vec<ServiceManifest> {
             platforms: PlatformBinaries { windows_x64: Some("jaymanga.exe".into()), ..Default::default() },
         },
         ServiceManifest {
+            id: "miyucloud".into(), name: "MiyuCloud".into(),
+            description: "Cloud privé chiffré du COG — fichiers, portail web authentifié, sync et partage sécurisé".into(),
+            icon: "\u{2601}".into(), version: "0.1.0".into(),
+            service_type: ServiceType::InterCog, source: ServiceSource::Officiel,
+            developer: "Miyukini".into(), min_central_version: "0.2.0".into(),
+            dependencies: vec![], permissions: vec![ServicePermission::Storage, ServicePermission::Webway, ServicePermission::Identity],
+            tags: vec!["cloud".into(), "fichiers".into(), "sync".into(), "partage".into(), "stockage".into()],
+            homepage: None, checksum: None, package_size: None,
+            execution_mode: ExecutionMode::Background,
+            binary_name: Some("miyucloud-server.exe".into()),
+            platforms: PlatformBinaries { windows_x64: Some("miyucloud-server.exe".into()), ..Default::default() },
+        },
+        ServiceManifest {
             id: "miyuclicker".into(), name: "Lord of the Click".into(),
             description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)".into(),
             icon: "\u{1F3AE}".into(), version: "0.1.0".into(),
@@ -635,5 +699,80 @@ pub async fn api_market_unpublish(
             let r = MarketResponse::<UnpublishResponse>::err(e);
             serde_json::to_string_pretty(&r).unwrap_or_default()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_market_paths(name: &str) -> (PathBuf, PathBuf, PathBuf) {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("miyukini-market-{name}-{unique}"));
+        let db_path = root.join("market.db");
+        let packages_dir = root.join("packages");
+        (root, db_path, packages_dir)
+    }
+
+    #[test]
+    fn open_marks_seed_service_as_not_downloadable_without_package() {
+        let (root, db_path, packages_dir) = temp_market_paths("missing");
+        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+
+        let entry = runtime
+            .block_on(store.get_service("jayxpose"))
+            .expect("seeded service");
+        assert!(!entry.downloadable);
+
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn seed_contains_miyucloud_as_official_service() {
+        let (root, db_path, packages_dir) = temp_market_paths("miyucloud-seed");
+        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+
+        let entry = runtime
+            .block_on(store.get_service("miyucloud"))
+            .expect("seeded service");
+        assert_eq!(entry.manifest.id, "miyucloud");
+        assert_eq!(entry.manifest.service_type, ServiceType::InterCog);
+        assert_eq!(entry.manifest.source, ServiceSource::Officiel);
+        assert!(!entry.downloadable);
+
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn open_detects_package_in_packages_root_without_double_prefix() {
+        let (root, db_path, packages_dir) = temp_market_paths("present");
+        let package_path = packages_dir
+            .join("jayxpose")
+            .join("0.1.0")
+            .join(package::package_filename("jayxpose", "0.1.0"));
+        std::fs::create_dir_all(package_path.parent().expect("package parent")).expect("mkdir");
+        std::fs::write(&package_path, b"dummy package").expect("write package");
+
+        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+
+        let entry = runtime
+            .block_on(store.get_service("jayxpose"))
+            .expect("seeded service");
+        assert!(entry.downloadable);
+        assert_eq!(entry.manifest.package_size, Some(13));
+
+        let bytes = runtime
+            .block_on(store.get_package_bytes("jayxpose", "0.1.0"))
+            .expect("package bytes");
+        assert_eq!(bytes, b"dummy package");
+
+        let _ = std::fs::remove_dir_all(root);
     }
 }

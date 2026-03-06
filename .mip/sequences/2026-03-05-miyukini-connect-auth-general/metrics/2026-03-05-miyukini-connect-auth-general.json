@@ -1,0 +1,59 @@
+{
+  "sequence": "2026-03-05-miyukini-connect-auth-general",
+  "created_at": "2026-03-05T17:46:52",
+  "project": {
+    "title": "Miyukini Connect (authentification generale COG)",
+    "class": "T4",
+    "slug": "miyukini-connect-auth-general",
+    "autonomy_mode": "FULL"
+  },
+  "timestamps": {
+    "sequence_start": "2026-03-05T17:46:52",
+    "p0_start": null,
+    "p0_end": null,
+    "p3_start": null,
+    "p3_end": null,
+    "p4_start": null,
+    "p4_end": null,
+    "p5_start": null,
+    "p5_end": "2026-03-05T19:12:53Z",
+    "p6_start": "2026-03-05T19:12:53Z",
+    "p6_end": "2026-03-05T19:14:20Z",
+    "total_end": "2026-03-05T19:14:20Z"
+  },
+  "counters": {
+    "lines_written": 0,
+    "lines_deleted": 0,
+    "files_created": 89,
+    "files_modified": 9,
+    "commits": 0,
+    "mip_loops": 1,
+    "unit_tests_total": 24,
+    "unit_tests_failed": 0,
+    "integration_tests_total": 0,
+    "integration_tests_failed": 0,
+    "global_tests_total": 24,
+    "global_tests_failed": 0,
+    "security_score": 71,
+    "packages_touched": [
+      "workspace",
+      "miyukini-connect",
+      "miyukini-central",
+      "miyukini-central-native",
+      "miyucloud-server"
+    ]
+  },
+  "p0": {},
+  "p3": {},
+  "p4": {},
+  "p5": {
+    "status": "ACCEPTE_AVEC_RESERVES",
+    "validation_signal": "user: p5 valide",
+    "validated_at": "2026-03-05T19:12:53Z"
+  },
+  "p6": {
+    "status": "TERMINE",
+    "report_path": "rapports_finaux/2026-03-05-miyukini-connect-auth-general-report.md"
+  },
+  "notes": "P6 cloturee. Remplacement auth Legacy Central par Miyukini Connect effectue avec migration credentials legacy -> Argon2id. Reserves ouvertes: dette lint jayrdv hors perimetre et ajout cargo-audit en CI."
+}

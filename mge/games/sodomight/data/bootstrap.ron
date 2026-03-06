@@ -1,0 +1,20 @@
+(
+    game_id: "sodomight",
+    build_label: "p3-e01-e03-bootstrap",
+    window: (
+        title: "Sodomight - Camp de depart",
+        width: 1280,
+        height: 720,
+    ),
+    render: (
+        clear_rgba: (r: 0.109, g: 0.062, b: 0.035, a: 1.0),
+    ),
+    audio: (
+        listener_bus: "master",
+    ),
+    startup_scene: (
+        id: "act1_rogue_camp",
+        biome: "rogue_camp",
+        ambient_rgb: (r: 0.22, g: 0.16, b: 0.08),
+    ),
+)

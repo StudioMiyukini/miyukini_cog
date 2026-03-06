@@ -1,0 +1,20 @@
+{
+  "cfg": {
+    "profile": "cursor-composer-1.5",
+    "languages": "Rust",
+    "frameworks": "axum, Dioxus 0.6",
+    "db": "KindMother (SQLite), SQLCipher",
+    "build": "cargo build --workspace",
+    "test": "cargo test --workspace",
+    "lint": "cargo clippy --workspace -- -D warnings",
+    "fmt": "cargo fmt --all",
+    "security": "standard",
+    "deployment": "local / VPS",
+    "tool": "Cursor (Composer)",
+    "models": "claude-sonnet-4",
+    "budget": "à définir",
+    "subscriptionsEnabled": false,
+    "subscriptionsYaml": "anthropic:\\n  plan: pro\\n  tokens_period: 5000000\\n  period: monthly\\n  active: true\\n"
+  },
+  "saved_at": "2026-03-05T18:45:12.764Z"
+}

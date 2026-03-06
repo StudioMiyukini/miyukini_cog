@@ -10,6 +10,7 @@
 
 use crate::crypto::{self, KeyManager};
 use crate::data::types::{FileEntry, FolderContents, FolderEntry};
+use crate::domain::dedup_ops;
 use crate::errors::MiyucloudError;
 use crate::storage::{self, Chunker, StorageBackend};
 
@@ -79,6 +80,10 @@ impl FileOps {
             updated_at: now,
         };
         db.file_create(&file_entry)?;
+
+        // 5b. Dedup: store blob (or increment ref if duplicate) and link to file
+        let blob_hash = dedup_ops::dedup_upload(db, data)?;
+        db.record_file_blob(&file_entry.id, &blob_hash)?;
 
         // 6. Update quota
         db.quota_update_used(owner_id, data.len() as i64)?;

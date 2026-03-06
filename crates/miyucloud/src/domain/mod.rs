@@ -8,12 +8,14 @@
 //! Operations CRUD sur les fichiers et dossiers, corbeille avec suppression securisee,
 //! partage interne Tribu, liens de partage externe, quotas et migration Jay1Tribu.
 
+pub mod dedup_ops;
 pub mod external_share;
 pub mod file_ops;
 pub mod jay1tribu_migration;
 pub mod onboarding;
 pub mod quota;
 pub mod sharing;
+pub mod thumbnail_ops;
 pub mod trash;
 
 pub use external_share::ExternalShareOps;

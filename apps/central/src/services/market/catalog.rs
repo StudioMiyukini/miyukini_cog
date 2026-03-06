@@ -1,9 +1,7 @@
 //! Catalogue Market — grille de services avec filtres et recherche.
 
-use super::{MarketSection, MarketState};
-use crate::state::{
-    use_app_state, use_service_manager, ServiceInfo, ServiceRegistry, ServiceSource, ServiceType,
-};
+use super::{visible_market_services, MarketSection, MarketState};
+use crate::state::{use_app_state, use_service_manager, ServiceInfo, ServiceSource, ServiceType};
 use dioxus::prelude::*;
 
 #[component]
@@ -12,8 +10,8 @@ pub fn MarketCatalog(state: Signal<MarketState>) -> Element {
     let manager = use_service_manager();
     let c = app.read().current_theme.palette();
 
-    // Construire la liste complète : installés + disponibles (catalogue officiel)
-    let all_services = ServiceRegistry::installed_services(&manager);
+    // Construire la liste complète à partir du catalogue Origin, avec fallback local.
+    let all_services = visible_market_services(&manager, &state.read());
 
     // Appliquer les filtres
     let section = state.read().section;
@@ -188,12 +186,15 @@ fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
         .iter()
         .any(|(id, _, _)| id == &svc_id);
 
+    let is_downloadable = service.downloadable;
     let status_label = if has_update {
         "Mise \u{00e0} jour"
     } else if is_running {
         "En cours"
     } else if is_installed {
         "Install\u{00e9}"
+    } else if !is_downloadable {
+        "Indisponible"
     } else {
         "Installer"
     };
@@ -203,6 +204,8 @@ fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
         format!("{}20", "#10b981")
     } else if is_installed {
         format!("{}20", c.accent_green)
+    } else if !is_downloadable {
+        c.bg_hover.to_string()
     } else {
         format!("{}20", c.accent_blue)
     };
@@ -212,6 +215,8 @@ fn MarketCard(service: ServiceInfo, state: Signal<MarketState>) -> Element {
         "#10b981".to_string()
     } else if is_installed {
         c.accent_green.to_string()
+    } else if !is_downloadable {
+        c.text_muted.to_string()
     } else {
         c.accent_blue.to_string()
     };

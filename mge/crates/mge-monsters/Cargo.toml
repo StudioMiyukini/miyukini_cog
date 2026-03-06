@@ -1,0 +1,12 @@
+[package]
+name = "mge-monsters"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+mge-gameplay = { path = "../mge-gameplay" }
+mge-world = { path = "../mge-world" }
+
+[lints]
+workspace = true

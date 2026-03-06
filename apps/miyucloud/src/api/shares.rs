@@ -43,6 +43,13 @@ pub async fn create_share_link(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateShareLinkBody>,
 ) -> Response {
+    if !state.config.public_share_links_enabled {
+        return error_response(
+            StatusCode::FORBIDDEN,
+            "PUBLIC_SHARING_DISABLED",
+            "Les liens de partage publics sont desactives par la configuration MiyuCloud.",
+        );
+    }
     if let Some(file_id) = &body.file_id {
         if !validate_uuid(file_id) {
             return error_response(
@@ -153,6 +160,13 @@ pub async fn create_share_permission(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CreateSharePermissionBody>,
 ) -> Response {
+    if !state.config.internal_sharing_enabled {
+        return error_response(
+            StatusCode::FORBIDDEN,
+            "INTERNAL_SHARING_DISABLED",
+            "Le partage interne est desactive par la configuration MiyuCloud.",
+        );
+    }
     if let Some(file_id) = &body.file_id {
         if !validate_uuid(file_id) {
             return error_response(

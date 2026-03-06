@@ -1,7 +1,7 @@
 ﻿{
-    "generated_at":  "2026-03-05T17:08:27",
+    "generated_at":  "2026-03-06T18:15:05",
     "schema":  "mip-sequences-index-v2",
-    "count":  6,
+    "count":  11,
     "sequences":  [
                       {
                           "name":  "2026-03-04-central-improve-secure-update",
@@ -79,6 +79,21 @@
                           "brief_path":  "./sequences/2026-03-05-miyucloud-v2-reprise/briefs/2026-03-05-miyucloud-v2-reprise.md"
                       },
                       {
+                          "name":  "2026-03-05-miyukini-connect-auth-general",
+                          "date":  "2026-03-05",
+                          "slug":  "miyukini-connect-auth-general",
+                          "type":  "UNKNOWN",
+                          "sequence_start":  "2026-03-05",
+                          "updated":  "2026-03-05",
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
+                          "ui_path":  "./sequences/2026-03-05-miyukini-connect-auth-general/ui/index.html",
+                          "manifest_path":  "./sequences/2026-03-05-miyukini-connect-auth-general/ui/manifest.json",
+                          "metrics_path":  "./sequences/2026-03-05-miyukini-connect-auth-general/metrics/2026-03-05-miyukini-connect-auth-general.json",
+                          "brief_path":  "./sequences/2026-03-05-miyukini-connect-auth-general/briefs/2026-03-05-miyukini-connect-auth-general.md"
+                      },
+                      {
                           "name":  "2026-03-05-miyukini-whisper-local-stack",
                           "date":  "2026-03-05",
                           "slug":  "miyukini-whisper-local-stack",
@@ -92,6 +107,66 @@
                           "manifest_path":  "./sequences/2026-03-05-miyukini-whisper-local-stack/ui/manifest.json",
                           "metrics_path":  "./sequences/2026-03-05-miyukini-whisper-local-stack/metrics/2026-03-05-miyukini-whisper-local-stack.json",
                           "brief_path":  "./sequences/2026-03-05-miyukini-whisper-local-stack/briefs/2026-03-05-miyukini-whisper-local-stack.md"
+                      },
+                      {
+                          "name":  "2026-03-05-mws-central-origin-reconnect",
+                          "date":  "2026-03-05",
+                          "slug":  "mws-central-origin-reconnect",
+                          "type":  "UNKNOWN",
+                          "sequence_start":  "2026-03-05",
+                          "updated":  "2026-03-05",
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
+                          "ui_path":  "./sequences/2026-03-05-mws-central-origin-reconnect/ui/index.html",
+                          "manifest_path":  "./sequences/2026-03-05-mws-central-origin-reconnect/ui/manifest.json",
+                          "metrics_path":  "./sequences/2026-03-05-mws-central-origin-reconnect/metrics/2026-03-05-mws-central-origin-reconnect.json",
+                          "brief_path":  "./sequences/2026-03-05-mws-central-origin-reconnect/briefs/2026-03-05-mws-central-origin-reconnect.md"
+                      },
+                      {
+                          "name":  "2026-03-06-mge-sodomight",
+                          "date":  "2026-03-06",
+                          "slug":  "mge-sodomight",
+                          "type":  "T5",
+                          "sequence_start":  "2026-03-06",
+                          "updated":  "2026-03-06",
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
+                          "ui_path":  "./sequences/2026-03-06-mge-sodomight/ui/index.html",
+                          "manifest_path":  "./sequences/2026-03-06-mge-sodomight/ui/manifest.json",
+                          "metrics_path":  "./sequences/2026-03-06-mge-sodomight/metrics/2026-03-06-mge-sodomight.json",
+                          "brief_path":  "./sequences/2026-03-06-mge-sodomight/briefs/2026-03-06-mge-sodomight.md"
+                      },
+                      {
+                          "name":  "2026-03-06-miyucloud-integration-fix",
+                          "date":  "2026-03-06",
+                          "slug":  "miyucloud-integration-fix",
+                          "type":  "UNKNOWN",
+                          "sequence_start":  "2026-03-06",
+                          "updated":  "2026-03-06",
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
+                          "ui_path":  "./sequences/2026-03-06-miyucloud-integration-fix/ui/index.html",
+                          "manifest_path":  "./sequences/2026-03-06-miyucloud-integration-fix/ui/manifest.json",
+                          "metrics_path":  "./sequences/2026-03-06-miyucloud-integration-fix/metrics/2026-03-06-miyucloud-integration-fix.json",
+                          "brief_path":  "./sequences/2026-03-06-miyucloud-integration-fix/briefs/2026-03-06-miyucloud-integration-fix.md"
+                      },
+                      {
+                          "name":  "2026-03-06-miyucloud-oxicloud-refonte",
+                          "date":  "2026-03-06",
+                          "slug":  "miyucloud-oxicloud-refonte",
+                          "type":  "T5",
+                          "sequence_start":  "2026-03-06",
+                          "updated":  "2026-03-06",
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
+                          "ui_path":  "./sequences/2026-03-06-miyucloud-oxicloud-refonte/ui/index.html",
+                          "manifest_path":  "./sequences/2026-03-06-miyucloud-oxicloud-refonte/ui/manifest.json",
+                          "metrics_path":  "./sequences/2026-03-06-miyucloud-oxicloud-refonte/metrics/2026-03-06-miyucloud-oxicloud-refonte.json",
+                          "brief_path":  "./sequences/2026-03-06-miyucloud-oxicloud-refonte/briefs/2026-03-06-miyucloud-oxicloud-refonte.md"
                       }
                   ]
 }

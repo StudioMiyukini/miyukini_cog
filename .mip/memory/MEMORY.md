@@ -63,3 +63,10 @@ jayxpose, jayfestival, jaykoa, jaykonta, miyukiniwatch, jay1tribu (deprecie par 
 - Livrables: `miyustt`, `miyutts`, `miyukini-whisper-app`, integration Alicia + Central (scope sequence).
 - Gate P4 valide (score securite 84/100). Gate P5: ACCEPTE AVEC RESERVES.
 - Backlog reserves: hotkey globale, capture/injection texte systeme, rewrite bridge, docs/scripts onboarding.
+
+## Miyukini Connect auth general (Mar 2026)
+
+- Sequence `2026-03-05-miyukini-connect-auth-general` cloturee jusqu a P6.
+- Remplacement auth Legacy de Central par `Miyukini Connect` effectue avec migration progressive legacy -> Argon2id.
+- Gate P4 valide (score securite 71/100). Gate P5: ACCEPTE AVEC RESERVES (validation utilisateur explicite).
+- Reserves ouvertes: dette lint `jayrdv` hors perimetre et ajout `cargo-audit` en CI avant merge final.

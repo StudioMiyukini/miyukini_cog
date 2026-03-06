@@ -1,0 +1,13 @@
+﻿{
+  "sequence": "2026-03-05-mws-central-origin-reconnect",
+  "generated_at": "2026-03-05T23:23:46",
+  "regeneration_mode": "update",
+  "target_phases": ["P3", "P4", "P5", "P6", "MASS"],
+  "inputs": [
+    "phases/p0/temps/temps-04-inventaire.md",
+    "phases/p0/temps/temps-05-securite.md",
+    "specs/2026-03-05-mws-central-origin-reconnect-spec.md"
+  ],
+  "agents": [],
+  "files": []
+}
