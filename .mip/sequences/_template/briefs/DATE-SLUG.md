@@ -6,6 +6,7 @@
 - Phase : P0
 - Responsable principal : Maria
 - Classification : [STANDARD|URGENT|RECHERCHE]
+- Complexite : [C1 - mineure | C2 - faible | C3 - moyenne | C4 - elevee | C5 - strategique]
 - MIP sequence # : [N]
 
 ## TL;DR

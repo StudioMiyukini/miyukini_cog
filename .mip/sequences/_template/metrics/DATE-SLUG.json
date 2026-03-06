@@ -2,6 +2,7 @@
   "schema": "mip-metrics-v2",
   "sequence_name": "DATE-SLUG",
   "classification": "[STANDARD|URGENT|RECHERCHE]",
+  "complexite": "[C1|C2|C3|C4|C5]",
   "mip_sequence_number": "[N]",
   "t0_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
   "t_end_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",

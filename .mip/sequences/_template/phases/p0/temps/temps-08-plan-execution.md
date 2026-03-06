@@ -18,9 +18,17 @@ E00 -> E01 -> ... -> BUF
 
 ## Estimation
 
-| Etape | Taches | Agents | Complexite |
-|-------|--------|--------|-----------|
-| [A completer] | | | |
+## Complexite sequence
+
+**[C1 | C2 | C3 | C4 | C5]** — [justification]
+
+## Estimation par etape
+
+| Etape | Taches | Agents | Complexite etape |
+|-------|--------|--------|-----------------|
+| E00 | [N] | [agents] | [C1..C5] |
+| ... | | | |
+| BUF | [N] | [agents] | C1 |
 
 ## Risques execution
 

@@ -186,6 +186,18 @@ Les éléments suivants sont **invariants** — ils s'appliquent quel que soit l
 
 Note T2 : mini-plan Denis au demarrage de P3 (pas de phase P2 distincte).
 
+### Complexité de séquence C1-C5 (définie en P0 Temps 8 par Denis)
+
+| Complexité | Description |
+|-----------|-------------|
+| **C1** | Complexité mineure — petit fix |
+| **C2** | Complexité faible — grand fix, < 3 fichiers |
+| **C3** | Complexité moyenne — fonctionnalité |
+| **C4** | Complexité élevée — petit service COG |
+| **C5** | Complexité stratégique — App, services complexes/sensibles, architecture |
+
+**Qui définit** : Denis (P0 Temps 8). Inscrit dans le brief et dans `metrics/<date>-<slug>.json`.
+
 ---
 
 ## P0 — Cadrage complet en 11 temps (T3+, SEULE phase humaine)

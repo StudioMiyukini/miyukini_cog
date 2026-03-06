@@ -142,7 +142,7 @@ Maria reformule la demande, explore le contexte et guide l'utilisateur Ã  trav
 |---|----------|---------|
 | 4.1 | BÃ©nÃ©fice principal attendu ? LA chose qui DOIT fonctionner ? | T3-T5 |
 | 4.2 | Risques ou difficultÃ©s anticipÃ©s ? | T3-T5 |
-| 4.3 | Intuition sur la complexitÃ© ? (simple/modÃ©rÃ©e/complexe/trÃ¨s complexe) | T3-T5 |
+| 4.3 | Complexité de séquence ? (C1 mineur / C2 faible / C3 moyenne / C4 élevée / C5 stratégique) | T3-T5 |
 | 4.4 | `[OPT]` Importance stratÃ©gique ? (1-5) | T4-T5 |
 | 4.5 | `[OPT]` Que se passe-t-il si on NE fait PAS ce projet ? | T4-T5 |
 
