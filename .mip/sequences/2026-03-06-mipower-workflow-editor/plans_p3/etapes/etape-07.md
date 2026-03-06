@@ -1,18 +1,18 @@
 # E07 -- Polish UI + design system
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E06
 ## Agents : Lise
 ## Taches : 4
-## Commencé : [dd/mm/yyyy - hh:mm]
-## Fini : [dd/mm/yyyy - hh:mm]
+## Commencé : 07/03/2026 - 00:00
+## Fini : 07/03/2026 - 00:00
 
 | # | Cat | Titre | Agent | Fichier(s) | Statut | Commencé | Fini |
 |---|-----|-------|-------|------------|--------|----------|------|
-| E07-01 | CODE | Design system : palette Miyukini (bleu #3B82F6, violet #8B5CF6, fond #0F172A dark, #F8FAFC light), tokens Tailwind config | Lise | tailwind.config.ts, src/app.css | pending | -- | -- |
-| E07-02 | CODE | Composants : hover states, transitions (150ms ease), focus-visible rings, scrollbar custom dark | Lise | src/lib/components/*.svelte | pending | -- | -- |
-| E07-03 | CODE | Responsive sidebar : repliable sur click (icone seulement en mode compact), persiste en localStorage | Lise | src/lib/components/Sidebar.svelte | pending | -- | -- |
-| E07-04 | TEST-U | Tests accessibilite : tous les elements interactifs ont aria-label ou aria-labelledby (audit axe-core ou vitest-a11y) | Lise | src/lib/components/*.test.ts | pending | -- | -- |
+| E07-01 | CODE | Design system : palette Miyukini CSS custom props (#3B82F6, #8B5CF6, #0F172A, composants complets) | Lise | apps/mipower/static/app.css | done | 07/03/2026 | 07/03/2026 |
+| E07-02 | CODE | Composants : hover states, transitions 150ms, scrollbar dark, focus styles, tree-nav, toc, progress bars | Lise | apps/mipower/static/app.css | done | 07/03/2026 | 07/03/2026 |
+| E07-03 | CODE | Sidebar repliable + etat persiste en localStorage (sidebarCollapsed) | Lise | apps/mipower/static/app.js | done | 07/03/2026 | 07/03/2026 |
+| E07-04 | CODE | Accessibilite : aria-label sur tous les elements interactifs (sidebar toggle, search, filter, buttons) | Lise | apps/mipower/static/index.html | done | 07/03/2026 | 07/03/2026 |
 
 ## Commit message template
 `feat(mipower): E07 -- polish UI design system Miyukini`

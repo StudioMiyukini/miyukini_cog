@@ -1,4 +1,4 @@
-// MIPOWER — app.js (E03+E04+E05)
+// MIPOWER — app.js (E03+E04+E05+E06+E07)
 
 // ── État global ───────────────────────────────────────────
 
@@ -27,13 +27,22 @@ navItems.forEach(item => {
   });
 });
 
-// ── Sidebar toggle ────────────────────────────────────────
+// ── Sidebar toggle (persiste en localStorage) ─────────────
 
 const sidebar = document.getElementById('sidebar');
 const toggle  = document.getElementById('sidebarToggle');
+
+if (localStorage.getItem('sidebarCollapsed') === '1') {
+  sidebar?.classList.add('collapsed');
+  if (toggle) toggle.textContent = '›';
+}
+
 toggle?.addEventListener('click', () => {
   sidebar?.classList.toggle('collapsed');
-  toggle.textContent = sidebar?.classList.contains('collapsed') ? '›' : '‹';
+  const collapsed = sidebar?.classList.contains('collapsed');
+  toggle.textContent = collapsed ? '›' : '‹';
+  toggle.setAttribute('aria-label', collapsed ? 'Ouvrir la barre latérale' : 'Réduire la barre latérale');
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
 });
 
 // ── SSE — suivi live des modifications ────────────────────
@@ -327,6 +336,39 @@ document.getElementById('copyPrompt')?.addEventListener('click', () => {
       textarea.select();
       document.execCommand('copy');
     });
+  }
+});
+
+document.getElementById('initSequence')?.addEventListener('click', async () => {
+  const titleInput = document.getElementById('pb-title');
+  const rawTitle   = titleInput?.value?.trim() || '';
+  const slug       = rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const complexity = document.getElementById('pb-complexity')?.value || 'C5';
+  const statusEl   = document.getElementById('initStatus');
+
+  if (!slug) {
+    if (statusEl) { statusEl.textContent = 'Remplis le titre avant d\'initialiser.'; statusEl.style.display = 'block'; statusEl.className = 'init-status error'; }
+    return;
+  }
+
+  if (statusEl) { statusEl.textContent = 'Initialisation…'; statusEl.style.display = 'block'; statusEl.className = 'init-status'; }
+
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const res   = await fetch('/api/init-sequence', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, complexity, date: today }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (statusEl) { statusEl.textContent = `✓ ${data.path}`; statusEl.className = 'init-status success'; }
+      loadSequences();
+    } else {
+      if (statusEl) { statusEl.textContent = `Erreur : ${data.error || 'inconnue'}`; statusEl.className = 'init-status error'; }
+    }
+  } catch (e) {
+    if (statusEl) { statusEl.textContent = `Erreur : ${e.message}`; statusEl.className = 'init-status error'; }
   }
 });
 

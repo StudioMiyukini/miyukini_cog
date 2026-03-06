@@ -1,6 +1,6 @@
 # E01 -- Backend core (SQLite + modeles + IPC base)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E00
 ## Agents : Francois
 ## Taches : 6

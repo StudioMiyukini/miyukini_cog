@@ -327,8 +327,22 @@ input[type="text"]:focus, textarea:focus, select:focus {
   gap: 10px;
 }
 
-.output-header { display: flex; justify-content: space-between; align-items: center; }
+.output-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .output-header h3 { font-size: 15px; }
+
+.output-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.init-seq-group { display: flex; gap: 6px; align-items: center; }
+
+.init-status {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+.init-status.success { color: var(--color-success); }
+.init-status.error   { color: var(--color-error); }
 
 .prompt-textarea {
   flex: 1;

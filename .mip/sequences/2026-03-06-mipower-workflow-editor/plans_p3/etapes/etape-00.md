@@ -1,6 +1,6 @@
 # E00 -- Bootstrap workspace Tauri
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : --
 ## Agents : Francois
 ## Taches : 4

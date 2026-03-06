@@ -11,7 +11,7 @@
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <span class="logo">⚡ MIPOWER</span>
-        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Réduire sidebar">‹</button>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Réduire la barre latérale">‹</button>
       </div>
       <ul class="nav-list">
         <li><a href="#dashboard" class="nav-item active" data-view="dashboard">
@@ -37,8 +37,8 @@
         <header class="view-header">
           <h1>Séquences MIP</h1>
           <div class="header-actions">
-            <input type="text" id="searchInput" placeholder="Rechercher une séquence…" class="search-input" />
-            <select id="statusFilter" class="filter-select">
+            <input type="text" id="searchInput" placeholder="Rechercher une séquence…" class="search-input" aria-label="Rechercher une séquence" />
+            <select id="statusFilter" class="filter-select" aria-label="Filtrer par statut">
               <option value="">Tous les statuts</option>
               <option value="active">Actif</option>
               <option value="done">Terminé</option>
@@ -107,9 +107,22 @@
           <div class="prompt-output" id="promptOutput" style="display:none">
             <div class="output-header">
               <h3>Prompt généré</h3>
-              <button id="copyPrompt" class="btn-secondary">Copier</button>
+              <div class="output-actions">
+                <button id="copyPrompt" class="btn-secondary" aria-label="Copier le prompt dans le presse-papier">Copier</button>
+                <div class="init-seq-group">
+                  <select id="pb-complexity" aria-label="Complexité de la séquence">
+                    <option value="C1">C1 — Mineure</option>
+                    <option value="C2">C2 — Faible</option>
+                    <option value="C3">C3 — Moyenne</option>
+                    <option value="C4">C4 — Élevée</option>
+                    <option value="C5" selected>C5 — Stratégique</option>
+                  </select>
+                  <button id="initSequence" class="btn-primary" aria-label="Initialiser la structure de la séquence MIP">Init séquence</button>
+                </div>
+              </div>
             </div>
-            <textarea id="promptText" class="prompt-textarea" readonly></textarea>
+            <div id="initStatus" class="init-status" style="display:none"></div>
+            <textarea id="promptText" class="prompt-textarea" readonly aria-label="Prompt MIP généré"></textarea>
           </div>
         </div>
       </div>
@@ -121,7 +134,7 @@
         <div class="settings-form">
           <label>Chemin du workspace MIP (.mip/)
             <input type="text" id="mipRoot" placeholder="ex: C:\Users\miyuk\Cursor\Miyukini-COG" />
-            <button class="btn-secondary" id="saveMipRoot">Enregistrer</button>
+            <button class="btn-secondary" id="saveMipRoot" aria-label="Enregistrer le chemin MIP">Enregistrer</button>
           </label>
           <div id="settingsStatus" class="settings-status"></div>
         </div>

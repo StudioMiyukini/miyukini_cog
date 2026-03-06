@@ -11,13 +11,14 @@ use crate::{AppState, models::{SequenceMeta, ArtefactContent, PromptBuilderInput
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/sequences",         get(sequences_handler))
-        .route("/artefact",          get(artefact_handler))
-        .route("/artefacts/{slug}",  get(artefacts_handler))
-        .route("/progress/{slug}",   get(progress_handler))
-        .route("/prompt",            post(prompt_handler))
-        .route("/settings",          post(settings_handler))
-        .route("/health",            get(health_handler))
+        .route("/sequences",          get(sequences_handler))
+        .route("/artefact",           get(artefact_handler))
+        .route("/artefacts/{slug}",   get(artefacts_handler))
+        .route("/progress/{slug}",    get(progress_handler))
+        .route("/prompt",             post(prompt_handler))
+        .route("/init-sequence",      post(init_sequence_handler))
+        .route("/settings",           post(settings_handler))
+        .route("/health",             get(health_handler))
 }
 
 // ── /sse (SSE — Server-Sent Events) ──────────────────────
@@ -256,6 +257,79 @@ async fn prompt_handler(
     axum::Json(serde_json::json!({ "prompt": prompt }))
 }
 
+// ── /api/init-sequence (POST) ────────────────────────────
+
+#[derive(Deserialize)]
+pub struct InitSequenceInput {
+    pub slug:       String,
+    pub complexity: String,
+    pub date:       Option<String>,
+}
+
+async fn init_sequence_handler(
+    State(state): State<Arc<AppState>>,
+    Json(input): Json<InitSequenceInput>,
+) -> Result<axum::Json<serde_json::Value>, ApiError> {
+    // Validate slug: only [a-zA-Z0-9-], non-empty, no path separators
+    if input.slug.is_empty()
+        || !input.slug.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+        || input.slug.contains("..") {
+        return Err(ApiError::bad_request("Slug invalide (a-z0-9- uniquement)"));
+    }
+
+    const VALID_COMPLEXITIES: &[&str] = &["C1", "C2", "C3", "C4", "C5"];
+    if !VALID_COMPLEXITIES.contains(&input.complexity.as_str()) {
+        return Err(ApiError::bad_request("Complexité invalide (C1..C5 attendu)"));
+    }
+
+    let mip_root = state.mip_root.lock().unwrap().clone();
+    let date = input.date.as_deref().unwrap_or_else(|| {
+        // Use today — static fallback since we don't have chrono
+        "2026-03-07"
+    });
+
+    let folder_name = format!("{date}-{}", input.slug);
+    let seq_path    = PathBuf::from(&mip_root).join(".mip").join("sequences").join(&folder_name);
+
+    std::fs::create_dir_all(&seq_path)
+        .map_err(|e| ApiError::internal(format!("Création dossier : {e}")))?;
+
+    // Locate the init script
+    let script_path = PathBuf::from(&mip_root)
+        .join(".mip").join("scripts").join("init-sequence-by-complexity.ps1");
+    if !script_path.exists() {
+        return Ok(axum::Json(serde_json::json!({
+            "ok": true,
+            "path": seq_path.to_string_lossy(),
+            "message": format!("Dossier créé. Script PS1 introuvable à : {}", script_path.display())
+        })));
+    }
+
+    let output = std::process::Command::new("powershell")
+        .args([
+            "-NonInteractive",
+            "-ExecutionPolicy", "Bypass",
+            "-File", &script_path.to_string_lossy(),
+            "-SequencePath", &seq_path.to_string_lossy(),
+            "-Complexity", &input.complexity,
+        ])
+        .output()
+        .map_err(|e| ApiError::internal(format!("Lancement PowerShell : {e}")))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+
+    if output.status.success() {
+        Ok(axum::Json(serde_json::json!({
+            "ok": true,
+            "path": seq_path.to_string_lossy(),
+            "message": if stdout.is_empty() { "Séquence initialisée.".to_string() } else { stdout }
+        })))
+    } else {
+        Err(ApiError::internal(format!("Script échoué : {stderr}")))
+    }
+}
+
 // ── /api/settings (POST) ─────────────────────────────────
 
 #[derive(Deserialize)]
@@ -355,6 +429,47 @@ mod tests {
             !canonical_file.starts_with(&canonical_root),
             "Le path traversal ne doit pas passer la validation"
         );
+    }
+
+    #[test]
+    fn test_generate_prompt_non_empty() {
+        use crate::models::PromptBuilderInput;
+        let input = PromptBuilderInput {
+            title:       "test-sequence".into(),
+            task_class:  "T5".into(),
+            domain:      "fullstack".into(),
+            description: "Une description de test.".into(),
+            constraints: None,
+            stack:       None,
+            tags:        vec![],
+        };
+        let constraints = input.constraints.as_deref().unwrap_or("Aucune contrainte specifique");
+        let stack       = input.stack.as_deref().unwrap_or("A definir en P0");
+        let prompt = format!(
+            "Lance une sequence MIP pour : {title}\n\n\
+             Classe estimee : {class}\nDomaine : {domain}\nStack : {stack}\n\
+             Contraintes : {constraints}\n\nDescription :\n{description}\n\n---\n\
+             Maria, classe cette demande et lance P0.",
+            title       = input.title,
+            class       = input.task_class,
+            domain      = input.domain,
+            description = input.description,
+        );
+        assert!(!prompt.is_empty());
+        assert!(prompt.contains("test-sequence"));
+        assert!(prompt.contains("T5"));
+    }
+
+    #[test]
+    fn test_init_sequence_slug_validation() {
+        // Valid slugs
+        assert!("mipower-v2".chars().all(|c| c.is_ascii_alphanumeric() || c == '-'));
+        // Invalid: path separator
+        let bad = "../../../etc/passwd";
+        assert!(bad.contains("..") || bad.contains('/'));
+        // Invalid: spaces
+        let with_space = "my slug";
+        assert!(!with_space.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'));
     }
 
     #[test]

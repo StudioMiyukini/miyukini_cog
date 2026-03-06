@@ -1,6 +1,6 @@
 # E04 -- Lecteur rapport (Must work #1)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E03
 ## Agents : Lise
 ## Taches : 5

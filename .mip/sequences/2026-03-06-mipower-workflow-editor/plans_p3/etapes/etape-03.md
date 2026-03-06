@@ -1,6 +1,6 @@
 # E03 -- Dashboard frontend
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E01 (parallele avec E02)
 ## Agents : Lise
 ## Taches : 5

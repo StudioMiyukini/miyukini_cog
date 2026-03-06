@@ -1,6 +1,6 @@
 # E02 -- File watcher + indexation
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E01
 ## Agents : Francois
 ## Taches : 4

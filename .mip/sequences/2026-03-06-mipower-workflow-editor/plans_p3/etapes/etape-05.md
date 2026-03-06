@@ -1,6 +1,6 @@
 # E05 -- Suivi temps reel
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E02 (watcher) + E03 (dashboard)
 ## Agents : Francois (backend) + Lise (composant)
 ## Taches : 4
