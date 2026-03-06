@@ -1,53 +1,53 @@
 {
   "schema": "mip-metrics-v2",
   "sequence_name": "DATE-SLUG",
-  "classification": "UNKNOWN",
-  "mip_sequence_number": null,
-  "t0_timestamp": null,
-  "t_end_timestamp": null,
-  "final_status": null,
+  "classification": "[STANDARD|URGENT|RECHERCHE]",
+  "mip_sequence_number": "[N]",
+  "t0_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
+  "t_end_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
+  "final_status": "[SUCCES|ECHEC|PARTIEL]",
   "phases": {
     "p0": {
-      "start": null,
-      "end": null,
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
       "status": "pending",
-      "duration_minutes": null,
+      "duration_minutes": "[N]",
       "temps_count": 11,
-      "artifacts_generated": null
+      "artifacts_generated": "[N]"
     },
     "p3": {
-      "start": null,
-      "end": null,
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
       "status": "pending",
-      "etapes_total": null,
+      "etapes_total": "[N]",
       "etapes_done": 0,
-      "tasks_total": null,
+      "tasks_total": "[N]",
       "tasks_done": 0,
       "tests_passing": 0,
-      "tests_failed": null,
+      "tests_failed": "[N]",
       "corrections": 0,
       "reverts": 0
     },
     "p4": {
-      "start": null,
-      "end": null,
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
       "status": "pending",
       "audits_produced": 5,
-      "security_score": null,
-      "efficiency_score": null,
-      "blockers": null
+      "security_score": "[0-100]",
+      "efficiency_score": "[0-20]",
+      "blockers": "[N]"
     },
     "p5": {
-      "start": null,
-      "end": null,
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
       "status": "pending",
-      "gate": null,
-      "conditions_validated": null,
+      "gate": "[OUVERT|BLOQUE]",
+      "conditions_validated": "[N]",
       "conditions_total": 9
     },
     "p6": {
-      "start": null,
-      "end": null,
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
       "status": "pending",
       "report_produced": false
     }
@@ -63,9 +63,9 @@
     "reverts": 0
   },
   "tokens": {
-    "total": null,
+    "total": "[N]",
     "by_phase": {}
   },
   "mip_loops": 0,
-  "autonomy_mode": null
+  "autonomy_mode": "[standard|autonome]"
 }
