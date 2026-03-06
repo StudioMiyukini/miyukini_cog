@@ -121,22 +121,25 @@ T1 et T2 sont **inclus** dans la structure par séquence, avec un protocole all�
 
 1. Classifier (T1–T5)
 2. Déterminer slug (provisoire si T3+ : `in-progress` ou dérivé de la demande)
-3. Créer `.mip/sequences/YYYY-MM-DD-<slug>/` + sous-dossiers (briefs/, specs/, gpi/, phases/, plans_p3/, audits/, metrics/, rapports_finaux/, ressources/, agents/, ui/)
-4. Initialiser `<sequence>/metrics/YYYY-MM-DD-<slug>.json`
-5. Remplir ou copier `ressources/index.md` (squelette depuis `_template` si disponible)
-6. Après validation de la Gate P0, pré-créer tous les artefacts standards et le mini-site :
-   `powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-standard-artifacts.ps1 -SequencePath <sequence>`
+3. Créer `.mip/sequences/YYYY-MM-DD-<slug>/`
+4. **Script 1 — init base** (avant P0, obligatoire) :
+   `powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-base.ps1 -SequencePath <sequence>`
+   → Crée : brief, métriques, P0 T1 et T2.
+5. Exécuter P0 T1 (Exploration) puis P0 T2 (Idéation).
+6. Estimer la complexité C1-C5 (confirmée en T8 par Denis).
+7. **Script 2 — init par complexité** (fin de T2, obligatoire) :
+   `powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-by-complexity.ps1 -SequencePath <sequence> -Complexity <C1|C2|C3|C4|C5>`
+   → Crée les artefacts cumulatifs correspondant au niveau de complexité.
 
-### Pré-création standard post-Gate P0 (OBLIGATOIRE, T3+)
+### Artefacts créés par complexité
 
-Une fois le brief approuvé et le mode d'autonomie choisi, Maria initialise le **scaffold complet** des artefacts à venir pour que les agents n'aient qu'à compléter les fichiers existants.
-
-Artefacts pré-créés (nomenclature standard) :
-- P0 : `briefs/YYYY-MM-DD-<slug>.md`, `briefs/YYYY-MM-DD-<slug>-P0-travail.md`, `phases/p0-trace.md`, `phases/p0/temps/temps-01-...md` à `temps-11-...md`
-- P3 : `gpi/YYYY-MM-DD-<slug>-gpi.md`, `plans_p3/YYYY-MM-DD-<slug>-plan.md`, `plans_p3/etapes/etape-01.md` ... `etape-05.md`, `phases/p3-trace.md`
-- P4 : `audits/YYYY-MM-DD-<slug>.md`, `...-pass-0.md`, `...-pass-01.md`, `...-ras.md`, `...-efficiency.md`, `phases/p4-trace.md`
-- P5 : `audits/YYYY-MM-DD-<slug>-p5-validation.md`, `phases/p5-trace.md`
-- P6 : `rapports_finaux/YYYY-MM-DD-<slug>-report.md`, `phases/p6-trace.md`
+| Artefact | C1 | C2 | C3 | C4 | C5 |
+|----------|:--:|:--:|:--:|:--:|:--:|
+| brief + métriques + T1 + T2 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| plan P3 + etape-00 + p3-trace | ✓ | ✓ | ✓ | ✓ | ✓ |
+| etape-buf + p4/p5-trace + audits efficience/p5 | — | ✓ | ✓ | ✓ | ✓ |
+| P0-travail + spec + gpi + T3-T11 + audits sécu + rapport + ui | — | — | ✓ | ✓ | ✓ |
+| agents/ (index + manifest) | — | — | — | ✓ | ✓ |
 - Agents : `agents/index.md`, `agents/manifest.json`, `agents/<PHASE>_<agent>.md`
 - Suivi : `metrics/YYYY-MM-DD-<slug>.json`, `phases/dag.json`
 - UI : `ui/index.html`, `ui/manifest.json` (onglets standards : P0, P3, P4, P5, Rapport final)

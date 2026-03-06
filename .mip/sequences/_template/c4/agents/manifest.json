@@ -1,0 +1,13 @@
+{
+  "sequence": "DATE-SLUG",
+  "generated_at": "__TIMESTAMP__",
+  "regeneration_mode": "update",
+  "target_phases": ["P3", "P4", "P5", "P6", "MASS"],
+  "inputs": [
+    "phases/p0/temps/temps-04-inventaire.md",
+    "phases/p0/temps/temps-05-securite.md",
+    "specs/DATE-SLUG-spec.md"
+  ],
+  "agents": [],
+  "files": []
+}

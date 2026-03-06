@@ -1,0 +1,72 @@
+{
+  "schema": "mip-metrics-v2",
+  "sequence_name": "DATE-SLUG",
+  "classification": "[STANDARD|URGENT|RECHERCHE]",
+  "complexite": "[C1|C2|C3|C4|C5]",
+  "mip_sequence_number": "[N]",
+  "t0_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
+  "t_end_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
+  "final_status": "[SUCCES|ECHEC|PARTIEL]",
+  "phases": {
+    "p0": {
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
+      "status": "pending",
+      "duration_minutes": "[N]",
+      "temps_count": 11,
+      "artifacts_generated": "[N]"
+    },
+    "p3": {
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
+      "status": "pending",
+      "etapes_total": "[N]",
+      "etapes_done": 0,
+      "tasks_total": "[N]",
+      "tasks_done": 0,
+      "tests_passing": 0,
+      "tests_failed": "[N]",
+      "corrections": 0,
+      "reverts": 0
+    },
+    "p4": {
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
+      "status": "pending",
+      "audits_produced": 5,
+      "security_score": "[0-100]",
+      "efficiency_score": "[0-20]",
+      "blockers": "[N]"
+    },
+    "p5": {
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
+      "status": "pending",
+      "gate": "[OUVERT|BLOQUE]",
+      "conditions_validated": "[N]",
+      "conditions_total": 9
+    },
+    "p6": {
+      "start": "[YYYY-MM-DDThh:mm:ssZ]",
+      "end": "[YYYY-MM-DDThh:mm:ssZ]",
+      "status": "pending",
+      "report_produced": false
+    }
+  },
+  "summary": {
+    "tasks_done": 0,
+    "tasks_total": 0,
+    "tests_passing": 0,
+    "security_score_100": 0,
+    "efficiency_score_20": 0,
+    "cve_open": 0,
+    "blockers": 0,
+    "reverts": 0
+  },
+  "tokens": {
+    "total": "[N]",
+    "by_phase": {}
+  },
+  "mip_loops": 0,
+  "autonomy_mode": "[standard|autonome]"
+}

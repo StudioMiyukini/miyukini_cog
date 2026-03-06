@@ -1,0 +1,62 @@
+{
+  "sequence": "DATE-SLUG",
+  "generated_at": "THE-DATE",
+  "ui_version": "1.0.0",
+  "theme": "mip-default",
+  "panels": [
+    {
+      "id": "overview",
+      "title": "Vue d'ensemble",
+      "type": "summary",
+      "source": "briefs/DATE-SLUG.md"
+    },
+    {
+      "id": "plan",
+      "title": "Plan P3",
+      "type": "etapes",
+      "source": "plans_p3/etapes/index.md"
+    },
+    {
+      "id": "phases",
+      "title": "Phases",
+      "type": "trace",
+      "sources": [
+        "phases/p0-trace.md",
+        "phases/p3-trace.md",
+        "phases/p4-trace.md",
+        "phases/p5-trace.md",
+        "phases/p6-trace.md"
+      ]
+    },
+    {
+      "id": "audits",
+      "title": "Audits",
+      "type": "audit",
+      "sources": [
+        "audits/DATE-SLUG-pass-0.md",
+        "audits/DATE-SLUG-pass-01.md",
+        "audits/DATE-SLUG-ras.md",
+        "audits/DATE-SLUG-efficiency.md",
+        "audits/DATE-SLUG.md"
+      ]
+    },
+    {
+      "id": "gpi",
+      "title": "GPI",
+      "type": "indicators",
+      "source": "gpi/DATE-SLUG-gpi.md"
+    },
+    {
+      "id": "rapport",
+      "title": "Rapport Final",
+      "type": "report",
+      "source": "rapports_finaux/DATE-SLUG-report.md"
+    },
+    {
+      "id": "metrics",
+      "title": "Metriques",
+      "type": "metrics",
+      "source": "metrics/DATE-SLUG.json"
+    }
+  ]
+}
