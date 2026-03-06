@@ -2,15 +2,18 @@
 
 ## Vue d'ensemble
 
-N taches, N etapes + buffer. DAG: E0 -> E1 -> ... -> En
+[N] taches, [N] etapes + buffer (20%). DAG: E00 -> E01 -> ... -> E[N] -> BUF
+
+> Le nombre d'etapes est variable selon la complexite de la sequence.
+> Creer autant de fichiers etape-NN.md que necessaire en suivant le patron de etape-00.md.
+> L'etape BUF est toujours la derniere.
 
 ## Etapes
 
 | Fichier | Etape | Titre | Taches | Statut |
 |---------|-------|-------|--------|--------|
-| etape-00.md | E0 | [A definir] | 0 | A faire |
-| etape-01.md | E1 | [A definir] | 0 | A faire |
-| etape-02.md | E2 | [A definir] | 0 | A faire |
-| etape-03.md | E3 | [A definir] | 0 | A faire |
-| etape-04.md | E4 | [A definir] | 0 | A faire |
-| etape-buf.md | BUF | Buffer corrections (20%) | 0 | A faire |
+| etape-00.md | E00 | [A definir] | [N] | A faire |
+| etape-01.md | E01 | [A definir] | [N] | A faire |
+| ... | ... | ... | ... | ... |
+| etape-NN.md | E[N] | [A definir] | [N] | A faire |
+| etape-buf.md | BUF | Buffer corrections (20%) | [N] | A faire |
