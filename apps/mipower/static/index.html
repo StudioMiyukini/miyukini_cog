@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIPOWER — Miyukini Implementation Protocol Workflow Editor</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <div id="app">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">⚡ MIPOWER</span>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Réduire sidebar">‹</button>
+      </div>
+      <ul class="nav-list">
+        <li><a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">◈</span><span class="nav-label">Dashboard</span>
+        </a></li>
+        <li><a href="#report" class="nav-item" data-view="report">
+          <span class="nav-icon">◉</span><span class="nav-label">Rapport</span>
+        </a></li>
+        <li><a href="#builder" class="nav-item" data-view="builder">
+          <span class="nav-icon">✦</span><span class="nav-label">Prompt Builder</span>
+        </a></li>
+        <li><a href="#settings" class="nav-item" data-view="settings">
+          <span class="nav-icon">◎</span><span class="nav-label">Paramètres</span>
+        </a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <span class="version">v0.1.0 — E00</span>
+      </div>
+    </nav>
+
+    <main class="content" id="content">
+      <div id="view-dashboard" class="view active">
+        <header class="view-header">
+          <h1>Séquences MIP</h1>
+          <div class="header-actions">
+            <input type="text" id="searchInput" placeholder="Rechercher une séquence…" class="search-input" />
+            <select id="statusFilter" class="filter-select">
+              <option value="">Tous les statuts</option>
+              <option value="active">Actif</option>
+              <option value="done">Terminé</option>
+              <option value="archived">Archivé</option>
+            </select>
+          </div>
+        </header>
+        <div id="sequenceGrid" class="sequence-grid">
+          <div class="loading">Chargement des séquences…</div>
+        </div>
+      </div>
+
+      <div id="view-report" class="view">
+        <header class="view-header">
+          <h1>Lecteur de rapport</h1>
+        </header>
+        <div class="report-layout">
+          <aside class="artefact-tree" id="artefactTree">
+            <p class="empty-state">Sélectionne une séquence dans le dashboard.</p>
+          </aside>
+          <div class="report-content" id="reportContent">
+            <div class="report-toc" id="reportToc"></div>
+            <div class="report-body prose" id="reportBody">
+              <p class="empty-state">Aucun artefact sélectionné.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-builder" class="view">
+        <header class="view-header">
+          <h1>Prompt Builder</h1>
+        </header>
+        <div class="builder-layout">
+          <form id="promptForm" class="prompt-form">
+            <label>Titre de la séquence
+              <input type="text" id="pb-title" placeholder="ex: mipower-workflow-editor" required />
+            </label>
+            <label>Classe de tâche
+              <select id="pb-class">
+                <option value="T3">T3 — Feature modérée</option>
+                <option value="T4">T4 — Feature majeure</option>
+                <option value="T5" selected>T5 — Chantier stratégique</option>
+              </select>
+            </label>
+            <label>Domaine
+              <select id="pb-domain">
+                <option value="back">Back-end</option>
+                <option value="front">Front-end</option>
+                <option value="fullstack">Full-stack</option>
+                <option value="infra">Infra / DevOps</option>
+                <option value="other">Autre</option>
+              </select>
+            </label>
+            <label>Description de la demande
+              <textarea id="pb-desc" rows="4" placeholder="Décris ce que tu veux construire…" required></textarea>
+            </label>
+            <label>Contraintes techniques (optionnel)
+              <input type="text" id="pb-constraints" placeholder="ex: Rust uniquement, pas de cloud…" />
+            </label>
+            <label>Stack (optionnel)
+              <input type="text" id="pb-stack" placeholder="ex: Rust + axum + SQLite" />
+            </label>
+            <button type="submit" class="btn-primary">Générer le prompt MIP</button>
+          </form>
+          <div class="prompt-output" id="promptOutput" style="display:none">
+            <div class="output-header">
+              <h3>Prompt généré</h3>
+              <button id="copyPrompt" class="btn-secondary">Copier</button>
+            </div>
+            <textarea id="promptText" class="prompt-textarea" readonly></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-settings" class="view">
+        <header class="view-header">
+          <h1>Paramètres</h1>
+        </header>
+        <div class="settings-form">
+          <label>Chemin du workspace MIP (.mip/)
+            <input type="text" id="mipRoot" placeholder="ex: C:\Users\miyuk\Cursor\Miyukini-COG" />
+            <button class="btn-secondary" id="saveMipRoot">Enregistrer</button>
+          </label>
+          <div id="settingsStatus" class="settings-status"></div>
+        </div>
+      </div>
+    </main>
+
+    <div id="progressPanel" class="progress-panel" style="display:none">
+      <h3>Progression</h3>
+      <div id="progressBars"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>

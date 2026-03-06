@@ -123,6 +123,9 @@ members = [
     # === MGE (Miyukini Game Engine) ===
     # Workspace MGE indépendant : mge/ (voir mge/Cargo.toml)
 
+    # === MIPOWER — Workflow Editor ===
+    "apps/mipower",
+
     # === Outils internes ===
     "crates/miyukini-admin",
     "tools/mscm-generator",
