@@ -1,0 +1,71 @@
+{
+  "schema": "mip-metrics-v2",
+  "sequence_name": "DATE-SLUG",
+  "classification": "UNKNOWN",
+  "mip_sequence_number": null,
+  "t0_timestamp": null,
+  "t_end_timestamp": null,
+  "final_status": null,
+  "phases": {
+    "p0": {
+      "start": null,
+      "end": null,
+      "status": "pending",
+      "duration_minutes": null,
+      "temps_count": 11,
+      "artifacts_generated": null
+    },
+    "p3": {
+      "start": null,
+      "end": null,
+      "status": "pending",
+      "etapes_total": null,
+      "etapes_done": 0,
+      "tasks_total": null,
+      "tasks_done": 0,
+      "tests_passing": 0,
+      "tests_failed": null,
+      "corrections": 0,
+      "reverts": 0
+    },
+    "p4": {
+      "start": null,
+      "end": null,
+      "status": "pending",
+      "audits_produced": 5,
+      "security_score": null,
+      "efficiency_score": null,
+      "blockers": null
+    },
+    "p5": {
+      "start": null,
+      "end": null,
+      "status": "pending",
+      "gate": null,
+      "conditions_validated": null,
+      "conditions_total": 9
+    },
+    "p6": {
+      "start": null,
+      "end": null,
+      "status": "pending",
+      "report_produced": false
+    }
+  },
+  "summary": {
+    "tasks_done": 0,
+    "tasks_total": 0,
+    "tests_passing": 0,
+    "security_score_100": 0,
+    "efficiency_score_20": 0,
+    "cve_open": 0,
+    "blockers": 0,
+    "reverts": 0
+  },
+  "tokens": {
+    "total": null,
+    "by_phase": {}
+  },
+  "mip_loops": 0,
+  "autonomy_mode": null
+}
