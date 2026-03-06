@@ -5,6 +5,8 @@
 - Etat : A completer
 - Phase : P0
 - Responsable principal : Maria
+- Classification : [STANDARD|URGENT|RECHERCHE]
+- MIP sequence # : [N]
 
 ## TL;DR
 

@@ -8,18 +8,30 @@
 
 ## TL;DR
 
-[A completer]
+[A completer -- alimente T6 (spec), T8 (plan), et les agents P3]
 
-## Crates / dependances
+## Crates / modules a modifier
 
-| Crate | Version | Role | Raison |
-|-------|---------|------|--------|
-| [A completer] | | | |
+| Crate | Fichier(s) cible(s) | Type de modification | Raison |
+|-------|-------------------|---------------------|--------|
+| [crate] | [src/...] | [add/modify/remove] | [raison] |
 
-## Fichiers impactes
+## Nouvelles dependances Cargo
 
-[A completer]
+| Crate | Version | Feature flags | Raison |
+|-------|---------|--------------|--------|
+| [crate] | "[version]" | [features] | [raison] |
+
+## Tests existants concernes
+
+| Test | Fichier | Impact attendu |
+|------|---------|---------------|
+| [test_name] | [tests/...] | [A modifier / Compatible / A supprimer] |
 
 ## Prerequis infrastructure
 
-[A completer]
+[A completer -- ex: variables d'environnement, services externes, certs, ports]
+
+## Blocages potentiels
+
+[A completer -- conflits de version, breaking changes API, migrations]

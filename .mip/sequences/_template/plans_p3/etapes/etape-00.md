@@ -4,8 +4,8 @@
 ## Depend de : --
 ## Agents : [agents]
 ## Taches : 0
-## Commencé : 
-## fini :
+## Commencé : [dd/mm/yyyy - hh:mm]
+## Fini : [dd/mm/yyyy - hh:mm]
 
 | # | Cat | Titre | Agent | Fichier(s) | Statut | Commencé | Fini |
 |---|-----|-------|-------|------------|--------|----------|------|

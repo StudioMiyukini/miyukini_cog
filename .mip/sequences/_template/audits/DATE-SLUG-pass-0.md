@@ -21,7 +21,7 @@
 
 ## Taches executees
 
-- [A completer par tache E10-0x]
+- [A completer par tache E[N]-0x]
 
 ## Evidences
 

@@ -4,10 +4,12 @@
 ## Depend de : [derniere etape]
 ## Agents : [agents]
 ## Taches : 0
+## Commencé : [dd/mm/yyyy - hh:mm]
+## Fini : [dd/mm/yyyy - hh:mm]
 
-| # | Cat | Titre | Agent | Fichier(s) | Statut |
-|---|-----|-------|-------|------------|--------|
-| BUF-01 | FIX | [A definir selon corrections necessaires] | [agent] | [fichier] | pending |
+| # | Cat | Titre | Agent | Fichier(s) | Statut | Commencé | Fini |
+|---|-----|-------|-------|------------|--------|----------|------|
+| BUF-01 | FIX | [A definir selon corrections necessaires] | [agent] | [fichier] | pending | [dd/mm/yyyy - hh:mm] | [dd/mm/yyyy - hh:mm] |
 
 ## Commit message template
 `fix([crate]): BUF -- corrections post-integration`

@@ -34,11 +34,13 @@
 [A completer -- arbre des crates/modules livres]
 ```
 
-### Schema SQL ajoute
+### Structures livrees
 
-| Table | Description |
-|-------|------------|
-| [table] | [description] |
+> Selon le perimetre : schema SQL, types Rust cles, endpoints API, etc.
+
+| Element | Type | Description |
+|---------|------|------------|
+| [A completer] | [SQL table / Rust type / API endpoint] | [description] |
 
 ---
 
