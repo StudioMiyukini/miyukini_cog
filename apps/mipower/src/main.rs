@@ -17,6 +17,8 @@ use axum::{
     response::{Html, IntoResponse},
     http::StatusCode,
 };
+use api::sse_handler;
+use tokio::sync::broadcast;
 use tower_http::services::ServeDir;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -30,6 +32,7 @@ pub const PORT: u16 = 9765;
 pub struct AppState {
     pub db:       Mutex<rusqlite::Connection>,
     pub mip_root: Mutex<String>,
+    pub events:   broadcast::Sender<String>,
 }
 
 #[tokio::main]
@@ -41,7 +44,6 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // DB dans %APPDATA%/mipower/mipower.db (ou fallback local)
     let db_path = dirs_or_local();
     if let Some(parent) = db_path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -49,21 +51,41 @@ async fn main() -> anyhow::Result<()> {
     let conn = db::open(&db_path)?;
     tracing::info!("DB : {}", db_path.display());
 
-    // mip_root par defaut = repertoire courant
     let default_root = std::env::current_dir()
         .unwrap_or_default()
         .to_string_lossy()
         .to_string();
 
+    let (events_tx, _) = broadcast::channel::<String>(64);
+
     let state = Arc::new(AppState {
         db:       Mutex::new(conn),
-        mip_root: Mutex::new(default_root),
+        mip_root: Mutex::new(default_root.clone()),
+        events:   events_tx.clone(),
     });
+
+    // Lancer le file watcher sur sequences/
+    let seq_dir = {
+        let candidates = [
+            std::path::PathBuf::from(&default_root).join(".mip").join("sequences"),
+            std::path::PathBuf::from(&default_root).join("sequences"),
+        ];
+        candidates.into_iter().find(|p| p.exists())
+    };
+
+    if let Some(dir) = seq_dir {
+        if let Err(e) = watcher::start_watcher(&dir, events_tx) {
+            tracing::warn!("File watcher non demarre : {e}");
+        }
+    } else {
+        tracing::info!("sequences/ introuvable au demarrage — watcher desactive. Configurez mip_root.");
+    }
 
     let static_dir = static_dir_path();
 
     let app = Router::new()
         .route("/", get(index_handler))
+        .route("/sse", get(sse_handler))
         .nest("/api", api::router())
         .nest_service("/static", ServeDir::new(&static_dir))
         .fallback(not_found_handler)

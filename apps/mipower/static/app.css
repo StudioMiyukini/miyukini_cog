@@ -393,3 +393,111 @@ input[type="text"]:focus, textarea:focus, select:focus {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
+
+/* ── Card name ───────────────────────────────────────────── */
+
+.card-name {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Artefact Tree ───────────────────────────────────────── */
+
+.tree-nav { display: flex; flex-direction: column; gap: 12px; }
+
+.tree-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.tree-group ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+.tree-item {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tree-item:hover { background: var(--color-bg-elevated); color: var(--color-text); }
+.tree-item.active { background: color-mix(in srgb, var(--color-accent) 15%, transparent); color: var(--color-accent); }
+
+/* ── TOC ─────────────────────────────────────────────────── */
+
+.toc { font-size: 12px; }
+.toc ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.toc a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  display: block;
+  padding: 3px 0;
+  transition: color var(--transition);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toc a:hover { color: var(--color-accent); }
+
+/* ── Progress Panel ──────────────────────────────────────── */
+
+.progress-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 260px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  z-index: 100;
+}
+
+.progress-panel h3 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+}
+
+.progress-item { margin-bottom: 8px; }
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--color-bg-elevated);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 99px;
+  transition: width 400ms ease;
+}

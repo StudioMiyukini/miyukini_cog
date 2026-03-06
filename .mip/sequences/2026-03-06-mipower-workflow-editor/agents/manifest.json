@@ -1,0 +1,14 @@
+﻿{
+  "sequence": "2026-03-06-mipower-workflow-editor",
+  "generated_at": "2026-03-06T23:34:26Z",
+  "regeneration_mode": "update",
+  "target_phases": ["P3", "P4", "P5", "P6", "MASS"],
+  "inputs": [
+    "phases/p0/temps/temps-04-inventaire.md",
+    "phases/p0/temps/temps-05-securite.md",
+    "specs/2026-03-06-mipower-workflow-editor-spec.md"
+  ],
+  "agents": ["francois", "lise", "victor"],
+  "files": ["P3_francois.md", "P3_lise.md", "P4_victor.md"]
+}
+

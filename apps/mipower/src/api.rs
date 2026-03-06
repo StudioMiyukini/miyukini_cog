@@ -4,19 +4,38 @@ use axum::{
     extract::{Query, State, Json},
     http::StatusCode,
     routing::{get, post},
-    response::IntoResponse,
+    response::{IntoResponse, sse::{Event, KeepAlive, Sse}},
 };
 use serde::Deserialize;
 use crate::{AppState, models::{SequenceMeta, ArtefactContent, PromptBuilderInput, SequencesIndex}};
 
 pub fn router() -> Router<Arc<AppState>> {
     Router::new()
-        .route("/sequences",       get(sequences_handler))
-        .route("/artefact",        get(artefact_handler))
-        .route("/progress/{slug}", get(progress_handler))
-        .route("/prompt",          post(prompt_handler))
-        .route("/settings",        post(settings_handler))
-        .route("/health",          get(health_handler))
+        .route("/sequences",         get(sequences_handler))
+        .route("/artefact",          get(artefact_handler))
+        .route("/artefacts/{slug}",  get(artefacts_handler))
+        .route("/progress/{slug}",   get(progress_handler))
+        .route("/prompt",            post(prompt_handler))
+        .route("/settings",          post(settings_handler))
+        .route("/health",            get(health_handler))
+}
+
+// ── /sse (SSE — Server-Sent Events) ──────────────────────
+
+pub async fn sse_handler(
+    State(state): State<Arc<AppState>>,
+) -> Sse<impl futures::Stream<Item = Result<Event, std::convert::Infallible>>> {
+    let rx = state.events.subscribe();
+    let stream = futures::stream::unfold(rx, |mut rx| async move {
+        loop {
+            match rx.recv().await {
+                Ok(slug) => return Some((Ok(Event::default().data(slug)), rx)),
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                Err(_) => return None,
+            }
+        }
+    });
+    Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
 async fn health_handler() -> &'static str { "ok" }
@@ -157,6 +176,62 @@ fn count_done_in(dir: &PathBuf, prefix: &str, marker: &str) -> (usize, usize) {
     (done, total)
 }
 
+// ── /api/artefacts/:slug ──────────────────────────────────
+
+async fn artefacts_handler(
+    State(state): State<Arc<AppState>>,
+    axum::extract::Path(slug): axum::extract::Path<String>,
+) -> axum::Json<serde_json::Value> {
+    let mip_root = state.mip_root.lock().unwrap().clone();
+    let mip_root_path = PathBuf::from(&mip_root);
+
+    let Some(seq_dir) = find_seq_dir(&mip_root, &slug) else {
+        return axum::Json(serde_json::json!({ "slug": slug, "files": [] }));
+    };
+
+    let mut files = Vec::new();
+    walk_md(&seq_dir, &mip_root_path, &mut files);
+    files.sort();
+
+    axum::Json(serde_json::json!({
+        "slug": slug,
+        "path": seq_dir.strip_prefix(&mip_root_path)
+            .map(|p| p.to_string_lossy().replace('\\', "/"))
+            .unwrap_or_else(|_| seq_dir.to_string_lossy().to_string()),
+        "files": files
+    }))
+}
+
+fn find_seq_dir(mip_root: &str, slug: &str) -> Option<PathBuf> {
+    let base = find_sequences_dir(mip_root)?;
+    std::fs::read_dir(&base).ok()?.find_map(|e| {
+        let entry = e.ok()?;
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name.ends_with(&format!("-{slug}")) || name == slug {
+            Some(entry.path())
+        } else {
+            None
+        }
+    })
+}
+
+fn walk_md(current: &PathBuf, root: &PathBuf, files: &mut Vec<String>) {
+    let Ok(entries) = std::fs::read_dir(current) else { return; };
+    for entry in entries.filter_map(|e| e.ok()) {
+        let path = entry.path();
+        if path.is_dir() {
+            let name = path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+            if name != "ui" && name != "node_modules" && !name.starts_with('.') {
+                walk_md(&path, root, files);
+            }
+        } else if path.extension().map_or(false, |e| e == "md") {
+            if let Ok(rel) = path.strip_prefix(root) {
+                files.push(rel.to_string_lossy().replace('\\', "/").to_string());
+            }
+        }
+    }
+}
+
 // ── /api/prompt (POST) ────────────────────────────────────
 
 async fn prompt_handler(
@@ -256,9 +331,11 @@ mod tests {
         let tmp = NamedTempFile::new().unwrap();
         let conn = crate::db::open(tmp.path()).unwrap();
         std::mem::forget(tmp);
+        let (events_tx, _) = tokio::sync::broadcast::channel::<String>(8);
         Arc::new(AppState {
             db:       std::sync::Mutex::new(conn),
             mip_root: std::sync::Mutex::new(root.to_string()),
+            events:   events_tx,
         })
     }
 
