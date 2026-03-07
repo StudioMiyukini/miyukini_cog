@@ -71,6 +71,10 @@ impl JayXposeDb {
                 .map_err(|e| DbError(e.to_string()))?;
         }
 
+        conn.execute_batch(
+            "PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;",
+        )?;
+
         let instance = InstanceIdentity::new(InstanceType::Daughter);
         let db = Self {
             conn: Mutex::new(conn),

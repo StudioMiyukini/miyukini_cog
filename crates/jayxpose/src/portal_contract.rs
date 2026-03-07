@@ -104,3 +104,44 @@ impl PortalContract for JayXposePortalService {
         }))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::data::JayXposeDb;
+
+    fn make_service() -> JayXposePortalService {
+        let db = JayXposeDb::open(":memory:").expect("db in-memory");
+        JayXposePortalService::new(Arc::new(db))
+    }
+
+    #[test]
+    fn public_pages_returns_annuaire() {
+        let svc = make_service();
+        let pages = svc.public_pages().expect("public_pages ok");
+        let slugs: Vec<&str> = pages.iter().map(|p| p.slug.as_str()).collect();
+        assert!(slugs.contains(&"annuaire"), "slug annuaire absent: {slugs:?}");
+    }
+
+    #[test]
+    fn service_slug_and_name() {
+        let svc = make_service();
+        assert_eq!(svc.service_slug(), "jayxpose");
+        assert_eq!(svc.service_name(), "JayXpose");
+    }
+
+    #[test]
+    fn page_by_slug_annuaire_found() {
+        let svc = make_service();
+        let page = svc.page_by_slug("annuaire").expect("no error");
+        assert!(page.is_some());
+        assert_eq!(page.unwrap().slug, "annuaire");
+    }
+
+    #[test]
+    fn page_by_slug_unknown_returns_none() {
+        let svc = make_service();
+        let page = svc.page_by_slug("does-not-exist").expect("no error");
+        assert!(page.is_none());
+    }
+}

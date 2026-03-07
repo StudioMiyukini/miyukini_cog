@@ -104,3 +104,45 @@ impl PortalContract for JayFestivalPortalService {
         Ok(pages.into_iter().find(|p| p.slug == slug))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::data::JayFestivalDb;
+
+    fn make_service() -> JayFestivalPortalService {
+        let db = JayFestivalDb::open(":memory:").expect("db in-memory");
+        JayFestivalPortalService::new(Arc::new(db))
+    }
+
+    #[test]
+    fn public_pages_returns_editions_and_exposants() {
+        let svc = make_service();
+        let pages = svc.public_pages().expect("public_pages ok");
+        let slugs: Vec<&str> = pages.iter().map(|p| p.slug.as_str()).collect();
+        assert!(slugs.contains(&"editions"), "slug editions absent: {slugs:?}");
+        assert!(slugs.contains(&"exposants"), "slug exposants absent: {slugs:?}");
+    }
+
+    #[test]
+    fn service_slug_and_name() {
+        let svc = make_service();
+        assert_eq!(svc.service_slug(), "jayfestival");
+        assert_eq!(svc.service_name(), "JayFestival");
+    }
+
+    #[test]
+    fn page_by_slug_found() {
+        let svc = make_service();
+        let page = svc.page_by_slug("editions").expect("no error");
+        assert!(page.is_some());
+        assert_eq!(page.unwrap().slug, "editions");
+    }
+
+    #[test]
+    fn page_by_slug_not_found() {
+        let svc = make_service();
+        let page = svc.page_by_slug("does-not-exist").expect("no error");
+        assert!(page.is_none());
+    }
+}

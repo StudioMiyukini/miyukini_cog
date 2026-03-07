@@ -6,6 +6,7 @@
 //! Par défaut : legacy-sqlite. Full KM (kindmother-only) en cours de parité API.
 
 mod types;
+pub mod upload_validation;
 
 #[cfg(feature = "legacy-sqlite")]
 mod kindmother_db;
