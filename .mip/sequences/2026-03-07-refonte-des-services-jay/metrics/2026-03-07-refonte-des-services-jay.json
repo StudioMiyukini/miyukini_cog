@@ -1,73 +1,72 @@
-﻿{
+{
   "schema": "mip-metrics-v2",
   "sequence_name": "2026-03-07-refonte-des-services-jay",
-  "classification": "[STANDARD|URGENT|RECHERCHE]",
-  "complexite": "[C1|C2|C3|C4|C5]",
-  "mip_sequence_number": "[N]",
-  "t0_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
-  "t_end_timestamp": "[YYYY-MM-DDThh:mm:ssZ]",
-  "final_status": "[SUCCES|ECHEC|PARTIEL]",
+  "classification": "STANDARD",
+  "complexite": "C5",
+  "t0_timestamp": "2026-03-07T00:00:00Z",
+  "t_end_timestamp": "2026-03-07T23:59:00Z",
+  "final_status": "SUCCES",
   "phases": {
     "p0": {
-      "start": "[YYYY-MM-DDThh:mm:ssZ]",
-      "end": "[YYYY-MM-DDThh:mm:ssZ]",
-      "status": "pending",
-      "duration_minutes": "[N]",
+      "start": "2026-03-07T00:00:00Z",
+      "end": "2026-03-07T02:00:00Z",
+      "status": "done",
+      "duration_minutes": 120,
       "temps_count": 11,
-      "artifacts_generated": "[N]"
+      "artifacts_generated": 11
     },
     "p3": {
-      "start": "[YYYY-MM-DDThh:mm:ssZ]",
-      "end": "[YYYY-MM-DDThh:mm:ssZ]",
-      "status": "pending",
-      "etapes_total": "[N]",
-      "etapes_done": 0,
-      "tasks_total": "[N]",
-      "tasks_done": 0,
-      "tests_passing": 0,
-      "tests_failed": "[N]",
-      "corrections": 0,
+      "start": "2026-03-07T02:00:00Z",
+      "end": "2026-03-07T20:00:00Z",
+      "status": "done",
+      "etapes_total": 5,
+      "etapes_done": 5,
+      "tasks_total": 43,
+      "tasks_done": 33,
+      "tasks_deferred": 10,
+      "tests_passing": 40,
+      "tests_failed": 0,
+      "corrections": 5,
       "reverts": 0
     },
     "p4": {
-      "start": "[YYYY-MM-DDThh:mm:ssZ]",
-      "end": "[YYYY-MM-DDThh:mm:ssZ]",
-      "status": "pending",
+      "start": "2026-03-07T20:00:00Z",
+      "end": "2026-03-07T21:30:00Z",
+      "status": "done",
       "audits_produced": 5,
-      "security_score": "[0-100]",
-      "efficiency_score": "[0-20]",
-      "blockers": "[N]"
+      "security_score": 88,
+      "efficiency_score": 17,
+      "global_score": 89,
+      "blockers": 0
     },
     "p5": {
-      "start": "[YYYY-MM-DDThh:mm:ssZ]",
-      "end": "[YYYY-MM-DDThh:mm:ssZ]",
-      "status": "pending",
-      "gate": "[OUVERT|BLOQUE]",
-      "conditions_validated": "[N]",
-      "conditions_total": 9
+      "start": "2026-03-07T21:30:00Z",
+      "end": "2026-03-07T22:00:00Z",
+      "status": "done",
+      "gate": "OUVERT",
+      "conditions_validated": 9,
+      "conditions_total": 9,
+      "verdict": "ACCEPTE"
     },
     "p6": {
-      "start": "[YYYY-MM-DDThh:mm:ssZ]",
-      "end": "[YYYY-MM-DDThh:mm:ssZ]",
-      "status": "pending",
-      "report_produced": false
+      "start": "2026-03-07T22:00:00Z",
+      "end": "2026-03-07T22:30:00Z",
+      "status": "done",
+      "report_produced": true
     }
   },
   "summary": {
-    "tasks_done": 0,
-    "tasks_total": 0,
-    "tests_passing": 0,
-    "security_score_100": 0,
-    "efficiency_score_20": 0,
+    "tasks_done": 33,
+    "tasks_total": 43,
+    "tests_passing": 40,
+    "security_score_100": 88,
+    "efficiency_score_20": 17,
+    "global_score_100": 89,
     "cve_open": 0,
     "blockers": 0,
-    "reverts": 0
-  },
-  "tokens": {
-    "total": "[N]",
-    "by_phase": {}
+    "reverts": 0,
+    "commits": 9
   },
   "mip_loops": 0,
-  "autonomy_mode": "[standard|autonome]"
+  "autonomy_mode": "autonome"
 }
-
