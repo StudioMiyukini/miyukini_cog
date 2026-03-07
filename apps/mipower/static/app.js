@@ -297,37 +297,170 @@ async function loadProgress(slug) {
   }
 }
 
-// ── Prompt Builder ────────────────────────────────────────
+// ── Prompt Builder v2 ─────────────────────────────────────
+
+// État tags (tableau de strings)
+let pbTags = [];
+
+// ── Stack preset ──────────────────────────────────────────
+
+document.getElementById('pb-stack-preset')?.addEventListener('change', (e) => {
+  const val      = e.target.value;
+  const stackEl  = document.getElementById('pb-stack');
+  if (!stackEl) return;
+  if (val === '__autre__' || val === '') {
+    stackEl.value = '';
+    stackEl.placeholder = 'Saisie libre…';
+  } else {
+    stackEl.value = val;
+  }
+  updatePreview();
+});
+
+// ── Tags chips ────────────────────────────────────────────
+
+function renderTags() {
+  const list = document.getElementById('pb-tags-list');
+  if (!list) return;
+  list.innerHTML = pbTags.map((t, i) =>
+    `<span class="pb-tag-chip" data-idx="${i}" title="Clic pour supprimer">${t}</span>`
+  ).join('');
+  list.querySelectorAll('.pb-tag-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      pbTags.splice(Number(chip.dataset.idx), 1);
+      renderTags();
+      updatePreview();
+    });
+  });
+}
+
+document.getElementById('pb-tag-add')?.addEventListener('click', () => {
+  const input = document.getElementById('pb-tag-input');
+  if (!input) return;
+  const tag = input.value.trim();
+  if (tag && pbTags.length < 10 && !pbTags.includes(tag)) {
+    pbTags.push(tag);
+    input.value = '';
+    renderTags();
+    updatePreview();
+  }
+});
+
+document.getElementById('pb-tag-input')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('pb-tag-add')?.click(); }
+});
+
+// ── Lecture état formulaire ────────────────────────────────
+
+function getFormInput() {
+  const agents = Array.from(document.querySelectorAll('input[name="pb-agent"]:checked'))
+    .map(cb => cb.value);
+  return {
+    title:         document.getElementById('pb-title')?.value        || '',
+    task_class:    document.getElementById('pb-class')?.value        || 'T5',
+    domain:        document.getElementById('pb-domain')?.value       || 'fullstack',
+    description:   document.getElementById('pb-desc')?.value         || '',
+    constraints:   document.getElementById('pb-constraints')?.value  || '',
+    stack:         document.getElementById('pb-stack')?.value        || '',
+    autonomy_mode: document.getElementById('pb-autonomy')?.value     || '',
+    agents,
+    tags:          [...pbTags],
+    urgency:       document.getElementById('pb-urgency')?.checked    || false,
+    sensitive_data: document.getElementById('pb-sensitive')?.checked || false,
+    msw_toggle:    document.getElementById('pb-msw')?.checked        || false,
+  };
+}
+
+// ── Template JS local (miroir du template Rust) ───────────
+
+function buildPromptLocal(input) {
+  const stack       = input.stack       || 'A definir en P0';
+  const constraints = input.constraints || 'Aucune contrainte specifique';
+
+  const lines = [
+    `Lance une sequence MIP pour : ${input.title}`,
+    '',
+    `Classe estimee : ${input.task_class}`,
+    `Domaine : ${input.domain}`,
+    `Stack : ${stack}`,
+    `Contraintes : ${constraints}`,
+  ];
+
+  if (input.autonomy_mode) lines.push(`Mode autonomie : ${input.autonomy_mode}`);
+  if (input.urgency)        lines.push('Urgence : Oui');
+  if (input.sensitive_data) lines.push('Donnees sensibles : Oui');
+  if (input.msw_toggle)     lines.push('Mode Sans Web : Oui');
+  if (input.agents.length)  lines.push(`Agents actifs : ${input.agents.join(', ')}`);
+  if (input.tags.length)    lines.push(`Tags : ${input.tags.join(', ')}`);
+
+  lines.push('');
+  lines.push(`Description :\n${input.description}`);
+  lines.push('');
+  lines.push('---');
+  lines.push('Maria, classe cette demande et lance P0.');
+
+  return lines.join('\n');
+}
+
+// ── Preview live (debounce 300ms) ─────────────────────────
+
+let previewTimer = null;
+
+function updatePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => {
+    const textarea = document.getElementById('promptText');
+    if (!textarea) return;
+    textarea.value = buildPromptLocal(getFormInput());
+  }, 300);
+}
+
+// Attacher updatePreview à tous les champs de base
+['pb-title', 'pb-class', 'pb-domain', 'pb-desc', 'pb-constraints', 'pb-stack', 'pb-autonomy'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updatePreview);
+  document.getElementById(id)?.addEventListener('change', updatePreview);
+});
+
+// Agents + toggles
+document.querySelectorAll('input[name="pb-agent"]').forEach(cb => cb.addEventListener('change', updatePreview));
+['pb-urgency', 'pb-sensitive', 'pb-msw'].forEach(id => {
+  document.getElementById(id)?.addEventListener('change', updatePreview);
+});
+
+// ── Soumission formulaire (appel API serveur) ─────────────
 
 document.getElementById('promptForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const input = {
-    title:       document.getElementById('pb-title')?.value       || '',
-    task_class:  document.getElementById('pb-class')?.value       || 'T5',
-    domain:      document.getElementById('pb-domain')?.value      || 'fullstack',
-    description: document.getElementById('pb-desc')?.value        || '',
-    constraints: document.getElementById('pb-constraints')?.value || null,
-    stack:       document.getElementById('pb-stack')?.value       || null,
-    tags: [],
+  const input = getFormInput();
+  const body = {
+    title:          input.title,
+    task_class:     input.task_class,
+    domain:         input.domain,
+    description:    input.description,
+    constraints:    input.constraints || null,
+    stack:          input.stack       || null,
+    autonomy_mode:  input.autonomy_mode || null,
+    agents:         input.agents,
+    tags:           input.tags,
+    urgency:        input.urgency,
+    sensitive_data: input.sensitive_data,
+    msw_toggle:     input.msw_toggle,
   };
   try {
     const res  = await fetch('/api/prompt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
-    const output   = document.getElementById('promptOutput');
     const textarea = document.getElementById('promptText');
-    if (output && textarea) {
-      textarea.value = data.prompt || '';
-      output.style.display = 'flex';
-      output.style.flexDirection = 'column';
-    }
-  } catch (e) {
-    console.error('Erreur génération prompt', e);
+    if (textarea) textarea.value = data.prompt || '';
+  } catch (err) {
+    console.error('Erreur génération prompt', err);
   }
 });
+
+// ── Copier ────────────────────────────────────────────────
 
 document.getElementById('copyPrompt')?.addEventListener('click', () => {
   const textarea = document.getElementById('promptText');
@@ -339,18 +472,18 @@ document.getElementById('copyPrompt')?.addEventListener('click', () => {
   }
 });
 
+// ── Init séquence ─────────────────────────────────────────
+
 document.getElementById('initSequence')?.addEventListener('click', async () => {
-  const titleInput = document.getElementById('pb-title');
-  const rawTitle   = titleInput?.value?.trim() || '';
-  const slug       = rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const rawTitle  = document.getElementById('pb-title')?.value?.trim() || '';
+  const slug      = rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const complexity = document.getElementById('pb-complexity')?.value || 'C5';
-  const statusEl   = document.getElementById('initStatus');
+  const statusEl  = document.getElementById('initStatus');
 
   if (!slug) {
     if (statusEl) { statusEl.textContent = 'Remplis le titre avant d\'initialiser.'; statusEl.style.display = 'block'; statusEl.className = 'init-status error'; }
     return;
   }
-
   if (statusEl) { statusEl.textContent = 'Initialisation…'; statusEl.style.display = 'block'; statusEl.className = 'init-status'; }
 
   try {
@@ -367,10 +500,13 @@ document.getElementById('initSequence')?.addEventListener('click', async () => {
     } else {
       if (statusEl) { statusEl.textContent = `Erreur : ${data.error || 'inconnue'}`; statusEl.className = 'init-status error'; }
     }
-  } catch (e) {
-    if (statusEl) { statusEl.textContent = `Erreur : ${e.message}`; statusEl.className = 'init-status error'; }
+  } catch (err) {
+    if (statusEl) { statusEl.textContent = `Erreur : ${err.message}`; statusEl.className = 'init-status error'; }
   }
 });
+
+// Preview initiale au chargement
+updatePreview();
 
 // ── Init ──────────────────────────────────────────────────
 
