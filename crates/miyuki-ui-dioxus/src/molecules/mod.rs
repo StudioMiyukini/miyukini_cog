@@ -11,10 +11,12 @@ pub mod pagination;
 pub mod search_bar;
 pub mod stat_row;
 pub mod tab_item;
+pub mod empty_state;
 pub mod toast;
 
 pub use breadcrumb::{Breadcrumb, BreadcrumbItem};
 pub use card::Card;
+pub use empty_state::EmptyState;
 pub use dropdown::{Dropdown, DropdownItem};
 pub use form_field::FormField;
 pub use menu_item::MenuItem;
