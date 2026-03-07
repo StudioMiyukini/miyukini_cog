@@ -1,6 +1,6 @@
 # E02 — JayFestival prod-ready (Dioxus 0.7 + Sécurité)
 
-## Statut : A faire
+## Statut : Terminé (partiel — UI Dioxus migration différée infrastructure needed; backend/sécu done)
 ## Depend de : E01
 ## Agents : Lise (UI Dioxus) + François (backend hardening) + Victor (sécu spot-check)
 ## Taches : 14

@@ -1,6 +1,6 @@
 # E04 — COG Web Portal (création from scratch)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E03 (contrats d'exposition disponibles)
 ## Agents : François (back axum) + Victor (sécu) + Lise (frontend web HTML)
 ## Taches : 12

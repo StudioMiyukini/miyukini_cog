@@ -90,6 +90,7 @@ Quand un temps est SAUTE, Maria annonce dans le chat : `[HH:MM] P0 Temps X - SAU
 Maria reformule la demande, explore le contexte et guide l'utilisateur Ã  travers un questionnaire de brainstorming structurÃ©.
 
 **TÃ¢ches** :
+0. **Remplir la Section 0** (Orientation) depuis le premier prompt â€" avant toute question utilisateur
 1. **Reformuler** la demande utilisateur en termes prÃ©cis
 2. **Classifier** la demande (T1-T5)
 3. **Explorer le code existant** (Glob, Grep, Read) pour comprendre l'Ã©tat actuel
@@ -104,6 +105,22 @@ Maria reformule la demande, explore le contexte et guide l'utilisateur Ã  trav
 > Questions `[OPT]` sautÃ©es en T3 (R-P0-5). Maria annonce les questions sautÃ©es.
 > **T3** : 12 questions non-OPT | **T4** : 20 questions | **T5** : 21 questions + HMW
 > **Boucle MIP** : Reposer les sections 1 et 4 orientÃ©es sur les Ã©carts constatÃ©s.
+
+#### Section 0 â€” ORIENTER (deduction depuis le premier prompt)
+
+> **Pre-questionnaire** : Maria remplit ce tableau SEULE, avant de poser des questions.
+> Deduire les reponses evidentes du premier prompt. Mettre [?] si incertain.
+> Consigner dans `phases/p0/temps/temps-01-exploration.md` â€” Section 0.
+
+| # | Question | Action Maria |
+|---|----------|-------------|
+| 0.1 | Pourquoi exactement ? Quel probleme est resolu ? | Deduire du prompt |
+| 0.2 | Exemple concret d'usage attendu ? | Deduire du prompt |
+| 0.3 | Solution existante proche dans le projet ? | Grep/Glob rapide |
+| 0.4 | Pour qui ? (utilisateur final, persona) | Deduire du prompt |
+| 0.5 | Fonction Online / MWS requise ? | Deduire du prompt |
+| 0.6 | Open-source / forkable ou from scratch ? | Deduire du prompt |
+| 0.7 | Classification estimee (T1-T5) | Estimer depuis prompt |
 
 #### Section 1 â€” COMPRENDRE (Design Thinking + 5 Whys)
 
@@ -159,11 +176,15 @@ Maria reformule la demande, explore le contexte et guide l'utilisateur Ã  trav
 
 ## Temps 2 â€” IdÃ©ation (Maria + Lise en parallÃ¨le)
 
-**Maria** â€” Cadrage fonctionnel :
-1. Lister les **objectifs** (principal + secondaires)
-2. DÃ©finir le **pÃ©rimÃ¨tre** : IN / OUT explicites
-3. Identifier les **risques** et mitigations
-4. Proposer **2-3 approches techniques** avec pour/contre
+**Maria** â€” Cadrage fonctionnel et dÃ©composition :
+1. DÃ©finir le **pÃ©rimÃ¨tre** : IN / OUT explicites
+2. **DÃ©couper fonctionnellement** : blocs, prioritÃ©s MVP/V1/V2, agents pressentis
+3. DÃ©finir le **MVP** â€” version minimale viable
+4. Identifier les **dÃ©pendances** (internes/externes, statut)
+5. **Estimer la complexitÃ©** (C1-C5) avec justification
+6. Lister les **risques principaux** et mitigations envisagÃ©es
+7. Proposer **2-3 approches techniques** avec pour/contre et score
+8. Retenir **la solution** avec justification
 
 **Lise** (T3+ si aspect front/UI) â€” Direction visuelle :
 1. Analyser l'**UI existante** (thÃ¨me, composants, patterns)
@@ -405,8 +426,7 @@ Maria compile tout et prÃ©sente le brief en suivant la sÃ©quence R-P0-3 :
    - Lien vers le fichier complet : Â« Brief complet : `<sequence>/briefs/YYYY-MM-DD-<slug>.md` Â»
 6. **AskUserQuestion** â€” approbation : APPROUVÃ‰ / MODIFIÃ‰ / REJETÃ‰
 7. **SI APPROUVÃ‰ -> AskUserQuestion** â€” mode autonomie : FULL / BIG_STEPS / GUIDED (invariant I-4, aprÃ¨s lecture du brief)
-8. **SI APPROUVÃ‰ + mode choisi** : initialiser le scaffold standard de sÃ©quence (artefacts futurs + mini-site JSX) :
-   `powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-standard-artifacts.ps1 -SequencePath <sequence>`
+8. **SI APPROUVÃ‰ + mode choisi** : l'exÃ©cution dÃ©marre. Les artefacts sont dÃ©jÃ  initialisÃ©s (script 1 avant P0, script 2 fin de T2).
 
 ### ModÃ¨le de brief
 

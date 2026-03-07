@@ -100,12 +100,12 @@ En cas de doute, classer un cran au-dessus.
 - Detecte environnement, stack, outil IA, preferences utilisateur.
 - Initialise profils, agents et memoire de projet.
 
-### P0 - Cadrage (10 Temps, T3+)
+### P0 - Cadrage (11 Temps, T3+)
 
 - Phase humaine obligatoire.
 - Produit brief, spec, plan, risques, ressources, RPS securite.
 - Gate: brief approuve + mode autonomie choisi.
-- Action post-gate: scaffold standard artefacts + mini-site sequence.
+- Artefacts initialises par script 1 (avant P0) et script 2 (fin T2). Aucune action supplementaire post-gate.
 
 ### Git
 
@@ -165,6 +165,7 @@ Ce mode n'est pas le meme concept que le "mode profil LLM" (Mode 1-5 dans `ADAPT
   metrics/
   rapports_finaux/
   ressources/
+  agents/            (prompts agents fine-tuned, C4+)
   ui/                (index.html + manifest.json)
 ```
 
@@ -210,17 +211,23 @@ Puis ouvrir `http://127.0.0.1:8765/index.html`.
 
 ## 10) Scripts utiles
 
-| Script | Usage |
-| --- | --- |
-| `.mip/scripts/init-sequence-standard-artifacts.ps1` | Pre-creer tous les artefacts post-gate P0 |
-| `.mip/scripts/rebuild-sequences-index.ps1` | Regenerer `sequences/index.json` |
-| `.mip/scripts/lint-mip-coherence.ps1` | Verifier la coherence protocole |
-| `.mip/start-portal.ps1` / `.mip/start-portal.cmd` | Servir le portail MIP localement |
+| Script | Usage | Quand |
+| --- | --- | --- |
+| `.mip/scripts/init-sequence-base.ps1` | Creer les artefacts de base (brief, metriques, T1, T2) | Avant P0 (obligatoire) |
+| `.mip/scripts/init-sequence-by-complexity.ps1` | Creer les artefacts selon la complexite C1-C5 | Fin de T2 (obligatoire) |
+| `.mip/scripts/rebuild-sequences-index.ps1` | Regenerer `sequences/index.json` | Apres creation/archivage sequence |
+| `.mip/scripts/lint-mip-coherence.ps1` | Verifier la coherence protocole | Sur demande |
+| `.mip/start-portal.ps1` / `.mip/start-portal.cmd` | Servir le portail MIP localement | Pour consulter l'UI |
 
 Exemples:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-standard-artifacts.ps1 -SequencePath .mip/sequences/2026-03-05-mon-slug
+# Script 1 - avant P0
+powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-base.ps1 -SequencePath .mip/sequences/2026-03-05-mon-slug
+
+# Script 2 - fin T2, apres estimation de la complexite
+powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-by-complexity.ps1 -SequencePath .mip/sequences/2026-03-05-mon-slug -Complexity C3
+
 powershell -ExecutionPolicy Bypass -File .mip/scripts/rebuild-sequences-index.ps1
 powershell -ExecutionPolicy Bypass -File .mip/scripts/lint-mip-coherence.ps1
 ```
@@ -266,11 +273,12 @@ Terminologie a jour:
 ```text
 1. Classer la demande (T1-T5)
 2. Creer sequence YYYY-MM-DD-<slug>
-3. Executer P0 (si T3+)
-4. Valider brief + choisir FULL/BIG_STEPS/GUIDED
-5. Generer scaffold standard artefacts
-6. Executer P3 -> P4 -> P5
-7. Si accepte, finaliser P6
+3. Script 1 : init-sequence-base.ps1          (cree brief, metriques, T1, T2)
+4. Executer P0 T1 + T2 (si T3+ : T1-T11)
+5. Script 2 : init-sequence-by-complexity.ps1  (fin T2, complexite estimee C1-C5)
+6. Valider brief + choisir FULL/BIG_STEPS/GUIDED
+7. Executer P3 -> P4 -> P5
+8. Si accepte, finaliser P6
 ```
 
 ---

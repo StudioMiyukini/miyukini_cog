@@ -55,19 +55,21 @@ T11 (Maria, brief) --------------+
 
 ## Drill-down par temps (Read p0-details.md avec offset/limit)
 
-| Temps | Contenu |
-|-------|---------|
-| T1 + Questionnaire | Exploration, brainstorming, sections 1-5 |
-| T2 | Ideation Maria + Lise |
-| T3 | Analyse concurrentielle Fabrice |
-| T4 | Inventaire Denis+Hugo+Jean |
-| T5 | Securite Victor + RPS + volet GPI securite |
-| T6 | Spec Francois |
-| T7 | Generation agents fine-tuned de sequence |
-| T8 | Plan Denis |
-| T9 | Audit faisabilite Arianne+Jean |
-| T10 | CI/CD Hugo |
-| T11 | Synthese Maria, brief, gates |
+> Offsets approximatifs — peuvent varier si le fichier a ete edite. Ajuster de ±10 si la section n'apparait pas.
+
+| Temps | Contenu | Offset approx | Limit approx |
+|-------|---------|:-------------:|:------------:|
+| T1 + Questionnaire | Exploration, brainstorming, sections 0-5 (section 0 = orientation pre-questionnaire) | 88 | 75 |
+| T2 | Ideation Maria + Lise | 163 | 20 |
+| T3 | Analyse concurrentielle Fabrice | 183 | 15 |
+| T4 | Inventaire Denis+Hugo+Jean | 198 | 40 |
+| T5 | Securite Victor + RPS + volet GPI securite | 238 | 50 |
+| T6 | Spec Francois | 288 | 20 |
+| T7 | Generation agents fine-tuned de sequence | 308 | 25 |
+| T8 | Plan Denis | 333 | 30 |
+| T9 | Audit faisabilite Arianne+Jean | 363 | 25 |
+| T10 | CI/CD Hugo | 388 | 15 |
+| T11 | Synthese Maria, brief, gates | 403 | 100 |
 
 ---
 

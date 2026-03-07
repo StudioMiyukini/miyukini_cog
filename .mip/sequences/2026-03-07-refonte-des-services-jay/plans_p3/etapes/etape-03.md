@@ -1,6 +1,6 @@
 # E03 — JayXpose prod-ready + Contrats d'exposition Portal
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E01 (parallèle avec E02)
 ## Agents : Lise (UI) + François (backend + contrats)
 ## Taches : 12

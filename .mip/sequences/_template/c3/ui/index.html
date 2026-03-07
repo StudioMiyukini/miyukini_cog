@@ -35,6 +35,16 @@
       .viewer pre { background: #0a1328; border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow: auto; }
       .muted { color: var(--muted); }
       .ok { color: var(--ok); }
+      .phase-bar { display: flex; align-items: center; gap: 4px; margin: 8px 0 0; }
+      .phase-dot { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; font-size: 9px; font-weight: 700; border: 2px solid var(--line); background: #0a1328; color: var(--muted); }
+      .phase-dot.done { background: #14532d; border-color: #166534; color: #4ade80; }
+      .phase-dot.active { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
+      .phase-connector { flex: 0 0 14px; height: 2px; background: var(--line); }
+      .phase-connector.done { background: #166534; }
+      .status-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid; margin-left: 8px; vertical-align: middle; }
+      .sb-en_cours { background: #1e3a5f33; border-color: #2563eb; color: #93c5fd; }
+      .sb-termine { background: #14532d33; border-color: #166534; color: #4ade80; }
+      .sb-pause { background: #7c2d1233; border-color: #b45309; color: #fbbf24; }
       @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
     </style>
   </head>
@@ -92,6 +102,29 @@
           }
         }
         return set;
+      };
+
+      const PHASES = ["P0", "GIT", "P3", "P4", "P5", "P6"];
+      const phaseIdx = (p) => PHASES.indexOf((p || "").toUpperCase());
+      const STATUS_LABELS = { en_cours: "En cours", termine: "Termine", pause: "Pause" };
+
+      const PhaseBar = ({ currentPhase, status }) => {
+        const cur = phaseIdx(currentPhase);
+        const fin = status === "termine";
+        return (
+          <div className="phase-bar">
+            {PHASES.map((ph, i) => {
+              const done = fin || (cur >= 0 && cur > i);
+              const active = !fin && cur === i;
+              return (
+                <React.Fragment key={ph}>
+                  {i > 0 && <div className={"phase-connector" + (fin || (cur >= 0 && cur > i - 1) ? " done" : "")} />}
+                  <div className={"phase-dot" + (done ? " done" : active ? " active" : "")} title={ph}>{ph}</div>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        );
       };
 
       const App = () => {
@@ -185,9 +218,17 @@
               </div>
               <p className={status.startsWith("Erreur") ? "muted" : "ok"}>{status}</p>
               {manifest && (
-                <p className="muted">
-                  Sequence: <strong>{manifest.identity.sequence}</strong> | Date: {manifest.identity.date} | Slug: {manifest.identity.slug}
-                </p>
+                <>
+                  <p className="muted" style={{ margin: "4px 0 0" }}>
+                    Sequence: <strong>{manifest.identity.sequence}</strong> | Date: {manifest.identity.date} | Slug: {manifest.identity.slug}
+                    {manifest.identity?.status && (
+                      <span className={"status-badge sb-" + manifest.identity.status}>
+                        {STATUS_LABELS[manifest.identity.status] || manifest.identity.status}
+                      </span>
+                    )}
+                  </p>
+                  <PhaseBar currentPhase={manifest.identity?.current_phase || ""} status={manifest.identity?.status || ""} />
+                </>
               )}
               <div className="tabs">
                 {(manifest?.tabs || []).map((tab) => (

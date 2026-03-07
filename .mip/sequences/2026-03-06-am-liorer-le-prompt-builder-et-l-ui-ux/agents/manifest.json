@@ -1,0 +1,14 @@
+﻿{
+  "sequence": "2026-03-06-am-liorer-le-prompt-builder-et-l-ui-ux",
+  "generated_at": "2026-03-07T00:34:34Z",
+  "regeneration_mode": "update",
+  "target_phases": ["P3", "P4", "P5", "P6", "MASS"],
+  "inputs": [
+    "phases/p0/temps/temps-04-inventaire.md",
+    "phases/p0/temps/temps-05-securite.md",
+    "specs/2026-03-06-am-liorer-le-prompt-builder-et-l-ui-ux-spec.md"
+  ],
+  "agents": [],
+  "files": []
+}
+

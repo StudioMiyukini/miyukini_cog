@@ -12,8 +12,10 @@
 #   powershell -ExecutionPolicy Bypass -File init-sequence-by-complexity.ps1 `
 #     -SequencePath <chemin> -Complexity <C1|C2|C3|C4|C5>
 #
-# Application cumulative : C3 applique les deltas c1 + c2 + c3.
-# Les fichiers deja existants sont preserves (Ensure-File SKIP).
+# Application : C3 applique les deltas c3, c2, c1 (ordre descendant).
+# Le niveau le plus eleve est applique en premier pour que ses templates
+# priment sur les versions de meme nom des niveaux inferieurs.
+# Les niveaux inferieurs completent les fichiers manquants (Ensure-File SKIP).
 
 param(
     [Parameter(Mandatory = $true)]
@@ -75,7 +77,7 @@ function Apply-ComplexityDelta {
         return
     }
 
-    $files = Get-ChildItem -LiteralPath $DeltaDir -Recurse -File
+    $files = @(Get-ChildItem -LiteralPath $DeltaDir -Recurse -File)
     if ($files.Count -eq 0) {
         Write-Host "  (delta vide)"
         return
@@ -106,11 +108,11 @@ $scriptDir    = Split-Path -Parent $MyInvocation.MyCommand.Path
 $templateRoot = (Resolve-Path (Join-Path $scriptDir "..\sequences\_template")).Path
 
 $complexityLabels = @{
-    1 = "C1 — Mineure (petit fix)"
-    2 = "C2 — Faible (grand fix < 3 fichiers)"
-    3 = "C3 — Moyenne (fonctionnalite)"
-    4 = "C4 — Elevee (petit service COG)"
-    5 = "C5 — Strategique (App / services complexes / architecture)"
+    1 = "C1 - Mineure (petit fix)"
+    2 = "C2 - Faible (grand fix < 3 fichiers)"
+    3 = "C3 - Moyenne (fonctionnalite)"
+    4 = "C4 - Elevee (petit service COG)"
+    5 = "C5 - Strategique (App / services complexes / architecture)"
 }
 
 Write-Host ""
@@ -118,10 +120,9 @@ Write-Host "=== Initialisation par complexite : $($complexityLabels[$complexityN
 Write-Host "    Sequence : $leaf"
 Write-Host ""
 
-# --- Application cumulative des deltas c1..cN ---
+# --- Application des deltas cN..c1 (niveau le plus specifique en premier) ---
 
-1..$complexityNum | ForEach-Object {
-    $level    = $_
+for ($level = $complexityNum; $level -ge 1; $level--) {
     $label    = $complexityLabels[$level]
     $deltaDir = Join-Path $templateRoot "c$level"
 

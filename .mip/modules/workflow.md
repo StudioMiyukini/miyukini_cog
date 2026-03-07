@@ -114,7 +114,7 @@ Les artefacts spécifiques à une séquence (briefs, specs, plans, audits, rappo
 
 T1 et T2 sont **inclus** dans la structure par séquence, avec un protocole allégé :
 - **Slug** : dérivé de la demande (ex. `fix-typo-auth`, `fix-crash-login`)
-- **Structure** : Maria crée `.mip/sequences/YYYY-MM-DD-<slug>/` avec dossiers minimaux (briefs/, plans_p3/, audits/, metrics/)
+- **Structure** : Script 1 crée les artefacts de base (brief, métriques, T1, T2). Script 2 avec C1 ou C2 crée le plan minimal.
 - **Pas de P0** : pas de brainstorm, spec intégrée au mini-plan de Denis
 
 ### Checklist création séquence (Maria)
@@ -140,9 +140,6 @@ T1 et T2 sont **inclus** dans la structure par séquence, avec un protocole all�
 | etape-buf + p4/p5-trace + audits efficience/p5 | — | ✓ | ✓ | ✓ | ✓ |
 | P0-travail + spec + gpi + T3-T11 + audits sécu + rapport + ui | — | — | ✓ | ✓ | ✓ |
 | agents/ (index + manifest) | — | — | — | ✓ | ✓ |
-- Agents : `agents/index.md`, `agents/manifest.json`, `agents/<PHASE>_<agent>.md`
-- Suivi : `metrics/YYYY-MM-DD-<slug>.json`, `phases/dag.json`
-- UI : `ui/index.html`, `ui/manifest.json` (onglets standards : P0, P3, P4, P5, Rapport final)
 
 ---
 
@@ -232,49 +229,14 @@ P0 est **LA phase humaine** : elle détermine la direction. Pas de code avant la
 | 10 | Vérification pipeline CI/CD | Hugo (si CI/CD en place) | p0-details.md |
 | 11 | Synthèse et Brief | Maria | p0-details.md |
 
-### P0 Temps 5 — Analyse sécurité Victor (RPS)
-
-Le Temps 5 produit un **Rapport Préliminaire de Sécurité (RPS)**, dérivé des artefacts P0 disponibles au moment de l'analyse.
-
-**Entrées minimales** :
-- brief initial
-- inventaire prérequis (Temps 4)
-- contraintes légales connues
-- contexte infra disponible
-
-**Contenu obligatoire du RPS** :
-1. surfaces d'attaque et risques majeurs
-2. ressources sécurité requises (agents, outillage, contrôles)
-3. normes/certifications applicables (ISO 27001, HDS, NF525, etc.)
-4. niveau de sécurité requis par zone du scope
-5. conclusion avec **niveau de sécurité maximal requis**
-
-**Sorties obligatoires** :
-- ajout du RPS dans le brief P0
-- ajout dans `ressources/index.md` des compétences/certifications/procédures à charger en exécution
-
-### P0 GPI — Planification sécurité pilotée par Victor
-
-Après le Temps 5, Victor alimente la gouvernance de séquence (`<sequence>/gpi/`) avec un volet sécurité:
-
-1. sélection des implémentations sécurité à réaliser pendant la séquence
-2. planification (ordre, dépendances, critères de complétion)
-3. recherche d'un prompt/protocole existant réutilisable
-4. adaptation ou construction du prompt d'implémentation sécurité
-
-**Traçabilité attendue** :
-- décision GPI horodatée
-- lien vers ressources certifications chargées
-- lien vers tâches P3/P4 concernées
+> Détail sécurité P0 (RPS + GPI Victor) : `.mip/modules/p0-details.md`, Temps 5.
 
 **Gate P0** (déroulement strict) :
 1. Maria présente le brief complet à l'utilisateur
 2. L'utilisateur **lit le brief** (TL;DR + contenu)
 3. L'utilisateur **approuve ou rejette** le brief (approche, périmètre, plan)
 4. **SI approuvé** : l'utilisateur choisit le mode d'autonomie (FULL/BIG_STEPS/GUIDED) — **choix éclairé** après lecture du brief (invariant I-4)
-5. **SI approuvé + mode choisi** : Maria exécute l'initialisation des artefacts standard + mini-site JSX :
-   `powershell -ExecutionPolicy Bypass -File .mip/scripts/init-sequence-standard-artifacts.ps1 -SequencePath <sequence>`
-6. L'exécution démarre
+5. L'exécution démarre (artefacts déjà créés par les scripts 1 et 2 en début de séquence)
 
 **Gate stricte** : Pas de passage en exécution sans brief approuvé. Pas de choix d'autonomie sans lecture préalable du brief.
 

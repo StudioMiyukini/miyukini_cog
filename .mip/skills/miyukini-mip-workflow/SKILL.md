@@ -47,11 +47,13 @@ Ce skill est **modulaire**. Ce fichier contient le noyau du protocole. Les detai
 | Phase | Module a charger (Read) | Declencheur |
 |-------|------------------------|-------------|
 | SETUP | `.mip/modules/setup.md` | `.mip/environment.md` absent ou `/mip_setup` |
-| P0 | `.mip/modules/p0-details.md` | Debut de P0 (T3+) |
+| P0 index | `.mip/modules/p0-details-index.md` | Debut de P0 (T3+) — toujours en premier |
+| P0 detail | `.mip/modules/p0-details.md` offset/limit par Temps | Drill-down uniquement sur le Temps requis |
 | P3 | `.mip/modules/p3-execution.md` | Debut de P3 |
 | P4-P6 | `.mip/modules/p4-p5-p6.md` | Debut de P4 |
 | Metriques | `.mip/modules/metrics.md` | Init metriques (debut sequence) |
 | MASS | `.mip/modules/mass.md` | T4-T5 avec parallelisation |
+| Contexte agents | `.mip/modules/agent-context-map.md` | Chargement minimal par phase/agent |
 | Ref. outils IA | `.mip/modules/tools-reference.md` | Sur demande explicite |
 
 **Instruction** : Lire le module avec l'outil Read AVANT de commencer la phase correspondante. Ne PAS charger tous les modules au debut — charger uniquement le module de la phase en cours. Chemin canonique : `.mip/modules/<fichier>`.
@@ -95,6 +97,7 @@ Les elements suivants sont **invariants** — ils s'appliquent quel que soit le 
 | I-13 | **Frein d'urgence** | Arret automatique si bug bloquant apres 2 tentatives ou delta majeur |
 | I-14 | **Documents modulaires, 400 lignes max** | Tout artefact decoupe si depassement ; volet optimisation P4/P6 si depassement |
 | I-15 | **Boucle MIP bornee** | Comptage `mip_loops` ; apres 10 iterations, suggerer de reduire le scope |
+| I-16 | **Chargement agents borne par phase** | Charger `<PHASE>_<agent>.md` en premier ; escalader vers `FULL_<agent>.md` uniquement si justifie |
 
 > **Ce qui varie** : la stack technique, les commandes build/test/lint, les libs, la config CI/CD, le nombre d'agents mobilises par classe. Tout cela est configure dans `.mip/environment.md` (Phase SETUP).
 
@@ -107,12 +110,24 @@ Les elements suivants sont **invariants** — ils s'appliquent quel que soit le 
 | Classe | Critere | Phases |
 |--------|---------|--------|
 | **T1** | Micro-fix, 1 fichier, <20 lignes | P3 → P5 |
-| **T2** | Fix cible, 1-3 fichiers | P2 → P3 → P5 |
+| **T2** | Fix cible, 1-3 fichiers | P3 → P5 |
 | **T3** | Feature moderee, 3-10 fichiers | P0 → P3 → P4 → P5 → P6 |
 | **T4** | Feature majeure, 10+ fichiers | P0 → P3 → P4 → P5 → P6 |
 | **T5** | Chantier strategique | P0 → P3 → P4 → P5 → P6 |
 
 **Qui classifie** : Maria. En cas de doute, classer **UN CRAN AU-DESSUS**.
+
+### Complexite de sequence C1-C5 (definie en P0 T8 par Denis)
+
+| Complexite | Description |
+|-----------|-------------|
+| **C1** | Mineure — petit fix (1 fichier) |
+| **C2** | Faible — grand fix (< 3 fichiers) |
+| **C3** | Moyenne — fonctionnalite |
+| **C4** | Elevee — petit service COG |
+| **C5** | Strategique — App, services complexes, architecture |
+
+Inscrite dans le brief et `metrics/<date>-<slug>.json`. Determine les artefacts crees par `init-sequence-by-complexity.ps1`.
 
 ---
 
@@ -277,22 +292,12 @@ Le mode determine **combien de gates humaines** existent entre P0 et P5.
 
 ---
 
-## Efficience tokens — Connaissances pré-indexées
+## Efficience tokens — Chargement economique
 
-Chaque agent charge **uniquement ses fichiers pertinents** en debut de tache :
+> **Source unique** : `.mip/modules/agent-context-map.md` (matrice phase × agent).
+> Certifications : `.mip/skills/miyukini-mip-workflow/modules/token-loading.md` (max 2 par agent, via load-map.json).
 
-| Agent (role) | Fichiers a charger (chemin `.mip/memory/` sauf indication) |
-|-------|-------------------|
-| **Dev Back-End** (Francois) | `stack-patterns.md`, `api-contracts.md`, `test-templates.md`, `code-annotations-templates.md` |
-| **Dev Front-End** (Lise) | `stack-cheatsheet.md`, `api-contracts.md`, `project-file-map.md`, `code-annotations-templates.md` |
-| **Chef Dev** (Denis) | `project-file-map.md`, `stack-patterns.md`, `mip-decisions.md`, `patterns-and-lessons.md` |
-| **Audit Expert** (George) | `project-file-map.md`, `code-annotations-templates.md`, `patterns-and-lessons.md` |
-| **Expert Cybersecurite** (Victor) | `security-patterns.md`, `patterns-and-lessons.md`, `stack-patterns.md`, `project-file-map.md` |
-| **DevOps & Infra** (Hugo) | `project-file-map.md`, `.mip/environment.md` (section Infrastructure), `mip-decisions.md` |
-| **Responsable Efficience IA** (Jean) | `mip-performance-history.md`, `MEMORY.md`, `<sequence>/metrics/`, `.mip/agents/INDEX.md` |
-| **Team Manager** (Arianne) | `mip-decisions.md`, `patterns-and-lessons.md`, `mip-performance-history.md`, `team-skills-audit.md` |
-
-> Note : Tous les fichiers ci-dessus sont dans `.mip/memory/` (ou `.mip/` pour environment, metrics, agents). Miyukini COG : `rust-patterns.md`, `dioxus-cheatsheet.md`, `mscm-templates.md`.
+Regles cles : 1 Read = 1 besoin. `p0-details-index.md` avant `p0-details.md`. MASS < 80 lignes/worker. Escalader `FULL_agent.md` sur justification seulement (agents/INDEX.md).
 
 ---
 

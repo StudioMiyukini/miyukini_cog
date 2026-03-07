@@ -99,6 +99,18 @@ Get-ChildItem -LiteralPath $sequencesRoot -Directory |
             }
         }
 
+        $manifestJsonPath = Join-Path $_.FullName "ui\manifest.json"
+        $manifestData = $null
+        $currentPhase = ""
+        $seqStatus = ""
+        if (Test-Path -LiteralPath $manifestJsonPath) {
+            try {
+                $manifestData = Get-Content -LiteralPath $manifestJsonPath -Raw | ConvertFrom-Json -Depth 32
+                $currentPhase = (Get-PropValue -Object $manifestData -Path "identity.current_phase" -Default "").ToString()
+                $seqStatus = (Get-PropValue -Object $manifestData -Path "identity.status" -Default "").ToString()
+            } catch {}
+        }
+
         $type = (Get-PropValue -Object $metrics -Path "project.class" -Default "UNKNOWN").ToString().ToUpperInvariant()
         if ($type -notmatch "^T[1-5]$") {
             $type = "UNKNOWN"
@@ -149,6 +161,8 @@ Get-ChildItem -LiteralPath $sequencesRoot -Directory |
             manifest_path = "./sequences/$name/ui/manifest.json"
             metrics_path = $metricsPath
             brief_path = $briefPath
+            current_phase = $currentPhase
+            status = $seqStatus
         }
     }
 
