@@ -10,6 +10,7 @@ pub mod header;
 pub mod modal;
 pub mod navbar;
 pub mod notification_center;
+pub mod page_header;
 pub mod sidebar;
 pub mod tab_bar;
 
@@ -21,5 +22,6 @@ pub use header::{AppHeader, NavItem};
 pub use modal::{Modal, ModalSize};
 pub use navbar::{NavBar, NavBarItem};
 pub use notification_center::{NotifVariant, Notification, NotificationCenter};
+pub use page_header::PageHeader;
 pub use sidebar::{AppSidebar, SidebarItemData, SidebarSectionData};
 pub use tab_bar::{TabBar, TabData};
