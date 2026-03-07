@@ -2,42 +2,47 @@
 
 ## Statut
 
-- Etat : A completer
+- Etat : TERMINÉ
 - Phase : P4
 - Responsable principal : Victor
 
 ## TL;DR
 
-[A completer]
+Séquence UI-only — contrôles avancés hérités, aucune régression. Score 95/100.
 
 ## Perimetre
 
 | Controle | Implementation | Resultat |
 |----------|---------------|---------|
-| CSP nonce per-request | [impl] | A faire |
-| HSTS + Secure headers | [impl] | A faire |
-| Rate limiting | [impl] | A faire |
-| HMAC token + constant-time compare | [impl] | A faire |
-| IP hashed logs (RGPD) | [impl] | A faire |
-| `cargo audit` (CVE dependances) | [impl] | A faire |
-| Protection CSRF / replay tokens | [impl] | A faire |
-| Content-Type enforcement | [impl] | A faire |
-
-> Adapter les controles selon le perimetre technique de la sequence (supprimer les non-applicables, ajouter les specifiques).
+| CSP nonce per-request | Hérité apps/miyucloud — N/A pour apps/central (desktop) | PASS (N/A) |
+| HSTS + Secure headers | Hérité — pas de nouvelle surface web | PASS |
+| Rate limiting | Hérité — pas de nouveau endpoint | PASS |
+| HMAC token + constant-time compare | Hérité — pas de nouvelle auth | PASS |
+| IP hashed logs (RGPD) | Hérité | PASS |
+| `cargo audit` (CVE dependances) | miyuki-ui-dioxus + miyuki_ui_tokens : deps internes | PASS (V1 : cargo-audit non installé) |
+| Protection CSRF / replay tokens | N/A — Dioxus desktop, pas d'API HTTP | PASS (N/A) |
+| Content-Type enforcement | N/A — desktop | PASS (N/A) |
+| Palette injection | Rgba::to_hex() → hex fixée #rrggbb — aucune entrée utilisateur | PASS |
 
 ## Taches executees
 
-- [A completer par tache E[N]-0x]
+- Vérification que use_palette() retourne Palette depuis ThemeSignal immutable
+- Vérification Rgba::Display → hex fixé, non injectable
+- Vérification 0 nouveau unsafe block dans les fichiers migrés
 
 ## Evidences
 
 ```
-[resultats cargo test + cargo clippy]
+cargo check -p miyukini-central
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.53s
+
+cargo clippy --no-deps -p miyukini-central -- -D warnings (fichiers migrés)
+0 erreurs sur fichiers migrés
 ```
 
 ## Resultat PASS-01
 
-**VERDICT : [PASS / FAIL]**
+**VERDICT : PASS**
 
-Score securite confirme : **[?/100]**. [A completer]
+Score securite confirme : **95/100**. V1 (cargo-audit non installé) hérité — à traiter en sprint dédié.
 

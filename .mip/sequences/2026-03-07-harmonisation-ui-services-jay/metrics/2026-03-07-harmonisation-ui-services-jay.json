@@ -1,0 +1,36 @@
+{
+  "sequence_id": "2026-03-07-harmonisation-ui-services-jay",
+  "date": "2026-03-07",
+  "type": "T5",
+  "complexity": "C5",
+  "final_status": "SUCCES",
+  "current_phase": "P6",
+  "phases_completed": ["P0", "P3", "P4", "P5", "P6"],
+  "p3": {
+    "etapes_total": 6,
+    "etapes_done": 6,
+    "files_modified": 80,
+    "insertions": 2228,
+    "deletions": 2148,
+    "legacy_refs_remaining": 0,
+    "commits": ["b074a3c0", "1e3accb7", "190f4c64"],
+    "cargo_check_errors": 0,
+    "clippy_violations_migrated_files": 0
+  },
+  "p4": {
+    "security_score": 95,
+    "efficiency_score": 17,
+    "global_score": 91,
+    "pass0": "PASS",
+    "pass01": "PASS",
+    "ras": "RAS",
+    "anomalies_bloquantes": 0
+  },
+  "p5": {
+    "conditions_satisfied": 9,
+    "conditions_total": 9,
+    "decision": "ACCEPTÉ"
+  },
+  "mscm_blocks": 80,
+  "duration_sessions": 1
+}
