@@ -1,7 +1,7 @@
 ﻿{
-    "generated_at":  "2026-03-07T13:41:30",
+    "generated_at":  "2026-03-07T15:44:17",
     "schema":  "mip-sequences-index-v2",
-    "count":  16,
+    "count":  17,
     "sequences":  [
                       {
                           "name":  "2026-03-04-central-improve-secure-update",
@@ -242,38 +242,55 @@
                           "status":  ""
                       },
                       {
-                          "name":  "2026-03-07-mipower-refonte-dashboard-rapports",
+                          "name":  "2026-03-07-harmonisation-ui-services-jay",
                           "date":  "2026-03-07",
-                          "slug":  "mipower-refonte-dashboard-rapports",
-                          "type":  "T4",
+                          "slug":  "harmonisation-ui-services-jay",
+                          "type":  "UNKNOWN",
                           "sequence_start":  "2026-03-07",
                           "updated":  "2026-03-07",
                           "mscm_blocks":  0,
                           "mscm_files":  0,
-                          "security_score":  91,
+                          "security_score":  0,
+                          "ui_path":  "./sequences/2026-03-07-harmonisation-ui-services-jay/ui/index.html",
+                          "manifest_path":  "./sequences/2026-03-07-harmonisation-ui-services-jay/ui/manifest.json",
+                          "metrics_path":  "",
+                          "brief_path":  "./sequences/2026-03-07-harmonisation-ui-services-jay/briefs/2026-03-07-harmonisation-ui-services-jay-P0-travail.md",
+                          "current_phase":  "",
+                          "status":  ""
+                      },
+                      {
+                          "name":  "2026-03-07-mipower-refonte-dashboard-rapports",
+                          "date":  "2026-03-07",
+                          "slug":  "mipower-refonte-dashboard-rapports",
+                          "type":  "UNKNOWN",
+                          "sequence_start":  "2026-03-07",
+                          "updated":  "2026-03-07",
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
                           "ui_path":  "./sequences/2026-03-07-mipower-refonte-dashboard-rapports/ui/index.html",
                           "manifest_path":  "./sequences/2026-03-07-mipower-refonte-dashboard-rapports/ui/manifest.json",
                           "metrics_path":  "",
                           "brief_path":  "./sequences/2026-03-07-mipower-refonte-dashboard-rapports/briefs/2026-03-07-mipower-refonte-dashboard-rapports-P0-travail.md",
-                          "current_phase":  "P6",
-                          "status":  "done"
+                          "current_phase":  "",
+                          "status":  ""
                       },
                       {
                           "name":  "2026-03-07-refonte-des-services-jay",
                           "date":  "2026-03-07",
                           "slug":  "refonte-des-services-jay",
-                          "type":  "T5",
+                          "type":  "UNKNOWN",
                           "sequence_start":  "2026-03-07",
                           "updated":  "2026-03-07",
-                          "mscm_blocks":  80,
-                          "mscm_files":  80,
-                          "security_score":  88,
+                          "mscm_blocks":  0,
+                          "mscm_files":  0,
+                          "security_score":  0,
                           "ui_path":  "./sequences/2026-03-07-refonte-des-services-jay/ui/index.html",
                           "manifest_path":  "./sequences/2026-03-07-refonte-des-services-jay/ui/manifest.json",
                           "metrics_path":  "./sequences/2026-03-07-refonte-des-services-jay/metrics/2026-03-07-refonte-des-services-jay.json",
-                          "brief_path":  "./sequences/2026-03-07-refonte-des-services-jay/briefs/2026-03-07-refonte-des-services-jay-P0-travail.md",
-                          "current_phase":  "P6",
-                          "status":  "done"
+                          "brief_path":  "./sequences/2026-03-07-refonte-des-services-jay/briefs/2026-03-07-refonte-des-services-jay.md",
+                          "current_phase":  "",
+                          "status":  ""
                       }
                   ]
 }

@@ -1,0 +1,12 @@
+﻿{
+  "nodes": [
+    { "id": "E00", "label": "E00 - [titre]", "status": "pending" },
+    { "id": "...", "label": "... autant de noeuds que necessaire", "status": "pending" },
+    { "id": "BUF", "label": "BUF - Buffer corrections", "status": "pending" }
+  ],
+  "edges": [
+    { "from": "E00", "to": "..." },
+    { "from": "...", "to": "BUF" }
+  ]
+}
+
