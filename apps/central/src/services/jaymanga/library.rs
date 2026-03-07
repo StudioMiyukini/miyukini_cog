@@ -1,6 +1,7 @@
 //! Bibliothèque lecteur JayManga — 5 onglets (Favoris, Achats, Téléchargés, En cours, Terminés).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{EmptyState, Badge};
@@ -8,7 +9,7 @@ use super::{JayMangaSection, JayMangaState, LibraryTab};
 
 #[component]
 pub fn Library(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -56,7 +57,7 @@ pub fn Library(state: Signal<JayMangaState>) -> Element {
 
                 div {
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white};",
+                        style: "font-size: 24px; color: {p.text_high};",
                         "📚 Ma Bibliothèque JayManga"
                     }
                 }
@@ -67,19 +68,19 @@ pub fn Library(state: Signal<JayMangaState>) -> Element {
                     div {
                         style: "text-align: right;",
                         p {
-                            style: "font-size: 13px; color: {c.text_white}; font-weight: 500;",
+                            style: "font-size: 13px; color: {p.text_high}; font-weight: 500;",
                             "Niveau {level} — {level_name}"
                         }
                         div {
                             style: "display: flex; align-items: center; gap: 8px; margin-top: 4px;",
                             div {
-                                style: "width: 120px; height: 8px; background: {c.bg_hover}; border-radius: 4px; overflow: hidden;",
+                                style: "width: 120px; height: 8px; background: {p.bg_overlay}; border-radius: 4px; overflow: hidden;",
                                 div {
                                     style: "width: {progress_pct}%; height: 100%; background: #FFD700; border-radius: 4px; transition: width 0.3s;",
                                 }
                             }
                             span {
-                                style: "font-size: 11px; color: {c.text_muted};",
+                                style: "font-size: 11px; color: {p.text_muted};",
                                 {
                                     if xp_for_next > 0 {
                                         format!("{} / {} XP", total_xp, total_xp + xp_for_next)
@@ -107,7 +108,7 @@ pub fn Library(state: Signal<JayMangaState>) -> Element {
 
             // Onglets
             div {
-                style: "display: flex; gap: 4px; border-bottom: 1px solid {c.border}; padding-bottom: 0;",
+                style: "display: flex; gap: 4px; border-bottom: 1px solid {p.border_default}; padding-bottom: 0;",
 
                 TabButton { label: "Favoris", count: fav_count, is_active: active_tab == LibraryTab::Favorites, onclick: move |_| { state.write().library_tab = LibraryTab::Favorites; } }
                 TabButton { label: "Achats", count: purchases_count, is_active: active_tab == LibraryTab::Purchases, onclick: move |_| { state.write().library_tab = LibraryTab::Purchases; } }
@@ -147,9 +148,9 @@ fn TabButton(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let border_color = if is_active { c.accent_blue } else { "transparent" };
-    let text_color = if is_active { c.text_white } else { c.text_secondary };
+    let p = use_palette();
+    let border_color = if is_active { p.accent_primary } else { "transparent" };
+    let text_color = if is_active { p.text_high } else { p.text_secondary };
 
     rsx! {
         button {
@@ -158,7 +159,7 @@ fn TabButton(
 
             span { "{label}" }
             span {
-                style: "padding: 2px 8px; background: {c.bg_hover}; border-radius: 10px; font-size: 11px; color: {c.text_muted};",
+                style: "padding: 2px 8px; background: {p.bg_overlay}; border-radius: 10px; font-size: 11px; color: {p.text_muted};",
                 "{count}"
             }
         }
@@ -178,25 +179,25 @@ fn WorkCard(
     #[props(default)] is_downloaded: bool,
     #[props(default)] on_read: Option<EventHandler<MouseEvent>>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let progress_pct = (progress * 100.0) as i32;
-    let progress_color = if progress >= 1.0 { c.accent_green } else { c.accent_blue };
+    let progress_color = if progress >= 1.0 { p.success } else { p.accent_primary };
     let cog_indicator = if cog_online { "🟢" } else { "⚫" };
 
     let status_info = match status.as_str() {
-        "owned" => ("Acheté", c.accent_green),
-        "demo" => ("Démo", c.accent_blue),
+        "owned" => ("Acheté", p.success),
+        "demo" => ("Démo", p.accent_primary),
         "downloaded" => ("Téléchargé", "#8b5cf6"),
-        _ => ("—", c.text_muted),
+        _ => ("—", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border};",
+            style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {p.bg_secondary}; border-radius: 8px; border: 1px solid {p.border_default};",
 
             // Cover placeholder
             div {
-                style: "width: 56px; height: 80px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;",
+                style: "width: 56px; height: 80px; background: {p.bg_overlay}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;",
                 "📖"
             }
 
@@ -206,7 +207,7 @@ fn WorkCard(
                 div {
                     style: "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;",
                     h4 {
-                        style: "font-size: 14px; color: {c.text_white}; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
+                        style: "font-size: 14px; color: {p.text_high}; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
                         "{title}"
                     }
                     Badge { text: status_info.0.to_string(), color: status_info.1.to_string() }
@@ -217,7 +218,7 @@ fn WorkCard(
 
                 if !chapter_info.is_empty() {
                     p {
-                        style: "font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "{chapter_info}"
                     }
                 }
@@ -226,20 +227,20 @@ fn WorkCard(
                 div {
                     style: "display: flex; align-items: center; gap: 10px;",
                     div {
-                        style: "flex: 1; height: 6px; background: {c.bg_hover}; border-radius: 3px; overflow: hidden;",
+                        style: "flex: 1; height: 6px; background: {p.bg_overlay}; border-radius: 3px; overflow: hidden;",
                         div {
                             style: "width: {progress_pct}%; height: 100%; background: {progress_color}; border-radius: 3px; transition: width 0.3s;",
                         }
                     }
                     span {
-                        style: "font-size: 12px; color: {c.text_muted}; min-width: 35px; text-align: right;",
+                        style: "font-size: 12px; color: {p.text_muted}; min-width: 35px; text-align: right;",
                         "{progress_pct}%"
                     }
                 }
 
                 if !cog_name.is_empty() {
                     p {
-                        style: "font-size: 11px; color: {c.text_muted}; margin-top: 4px;",
+                        style: "font-size: 11px; color: {p.text_muted}; margin-top: 4px;",
                         "{cog_indicator} {cog_name}"
                     }
                 }
@@ -247,7 +248,7 @@ fn WorkCard(
 
             // Action
             button {
-                style: "padding: 8px 16px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; flex-shrink: 0;",
+                style: "padding: 8px 16px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; flex-shrink: 0;",
                 onclick: move |evt| {
                     if let Some(ref handler) = on_read {
                         handler.call(evt);
@@ -320,7 +321,7 @@ fn FavoritesTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<Ja
 
 #[component]
 fn PurchasesTab(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let active_licenses: Vec<_> = licenses.iter()
         .filter(|l| l.status.as_deref() == Some("active"))
@@ -353,10 +354,10 @@ fn PurchasesTab(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
 
                     rsx! {
                         div {
-                            style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border};",
+                            style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {p.bg_secondary}; border-radius: 8px; border: 1px solid {p.border_default};",
 
                             div {
-                                style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;",
+                                style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;",
                                 "🎫"
                             }
                             div {
@@ -364,18 +365,18 @@ fn PurchasesTab(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
                                 div {
                                     style: "display: flex; align-items: center; gap: 8px;",
                                     p {
-                                        style: "font-size: 14px; color: {c.text_white}; font-weight: 500;",
+                                        style: "font-size: 14px; color: {p.text_high}; font-weight: 500;",
                                         "Œuvre {work_short}"
                                     }
-                                    Badge { text: purchase_type, color: c.accent_blue.to_string() }
+                                    Badge { text: purchase_type, color: p.accent_primary.to_string() }
                                 }
                                 p {
-                                    style: "font-size: 12px; color: {c.text_muted}; margin-top: 2px;",
+                                    style: "font-size: 12px; color: {p.text_muted}; margin-top: 2px;",
                                     "Acheté le {date}"
                                 }
                             }
                             span {
-                                style: "font-size: 14px; color: {c.accent_green}; font-weight: 600;",
+                                style: "font-size: 14px; color: {p.success}; font-weight: 600;",
                                 "{amount_str}"
                             }
                         }
@@ -505,7 +506,7 @@ fn InProgressTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<J
 
 #[component]
 fn CompletedTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let completed: Vec<_> = favorites.iter()
         .filter(|f| f.reading_progress.unwrap_or(0.0) >= 1.0)
@@ -532,7 +533,7 @@ fn CompletedTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<Ja
 
                     rsx! {
                         button {
-                            style: "padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border}; text-align: center; cursor: pointer; color: {c.text_primary};",
+                            style: "padding: 16px; background: {p.bg_secondary}; border-radius: 8px; border: 1px solid {p.border_default}; text-align: center; cursor: pointer; color: {p.text_primary};",
                             onclick: move |_| {
                                 let mut s = state.write();
                                 s.reader_work_id = Some(work_id.clone());
@@ -541,21 +542,21 @@ fn CompletedTab(favorites: Vec<jaymanga::data::ReaderFavorite>, state: Signal<Ja
                             },
 
                             div {
-                                style: "width: 80px; height: 110px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 12px;",
+                                style: "width: 80px; height: 110px; background: {p.bg_overlay}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 12px;",
                                 "📖"
                             }
                             h4 {
-                                style: "font-size: 13px; color: {c.text_white}; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
+                                style: "font-size: 13px; color: {p.text_high}; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
                                 "{title}"
                             }
                             div {
                                 style: "display: flex; align-items: center; justify-content: center; gap: 6px;",
                                 span {
-                                    style: "font-size: 12px; color: {c.accent_green}; font-weight: 500;",
+                                    style: "font-size: 12px; color: {p.success}; font-weight: 500;",
                                     "✅ Terminé"
                                 }
                                 span {
-                                    style: "font-size: 11px; color: {c.accent_blue};",
+                                    style: "font-size: 11px; color: {p.accent_primary};",
                                     "Relire ▶"
                                 }
                             }

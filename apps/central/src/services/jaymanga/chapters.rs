@@ -1,6 +1,7 @@
 //! Gestion des chapitres et pages d'une œuvre manga.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::data::{Chapter, Page};
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -9,7 +10,7 @@ use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn Chapters(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let work_id = state.read().chapters_work_id.clone();
@@ -48,18 +49,18 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
                                 rsx! {
                                     button {
-                                        style: "padding: 20px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; cursor: pointer; text-align: left; color: {c.text_primary};",
+                                        style: "padding: 20px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; cursor: pointer; text-align: left; color: {p.text_primary};",
                                         onclick: move |_| {
                                             let mut s = state.write();
                                             s.chapters_work_id = Some(wid.clone());
                                         },
 
                                         h4 {
-                                            style: "font-size: 15px; color: {c.text_white}; margin-bottom: 4px;",
+                                            style: "font-size: 15px; color: {p.text_high}; margin-bottom: 4px;",
                                             "📖 {title}"
                                         }
                                         p {
-                                            style: "font-size: 12px; color: {c.text_muted};",
+                                            style: "font-size: 12px; color: {p.text_muted};",
                                             "{chapter_count} chapitre(s)"
                                         }
                                     }
@@ -91,7 +92,7 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
             div {
                 style: "display: flex; align-items: center; gap: 12px; margin-bottom: 8px;",
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                     onclick: move |_| { state.write().chapters_work_id = None; },
                     "← Toutes les œuvres"
                 }
@@ -110,11 +111,11 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
                 div {
                     style: "flex: 1;",
                     label {
-                        style: "font-size: 12px; color: {c.text_secondary}; display: block; margin-bottom: 4px;",
+                        style: "font-size: 12px; color: {p.text_secondary}; display: block; margin-bottom: 4px;",
                         "Titre du chapitre"
                     }
                     input {
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                         placeholder: "Titre du nouveau chapitre (optionnel)",
                         value: "{new_chapter_title}",
                         oninput: move |evt: FormEvent| { new_chapter_title.set(evt.value()); },
@@ -174,7 +175,7 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
                             rsx! {
                                 div {
-                                    style: "background: {c.bg_secondary}; border-radius: 4px; border: 1px solid {c.border}; overflow: hidden;",
+                                    style: "background: {p.bg_secondary}; border-radius: 4px; border: 1px solid {p.border_default}; overflow: hidden;",
 
                                     // En-tête chapitre
                                     div {
@@ -190,7 +191,7 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
                                         // Numéro
                                         div {
-                                            style: "width: 40px; height: 40px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: {c.accent_blue}; flex-shrink: 0;",
+                                            style: "width: 40px; height: 40px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: {p.accent_primary}; flex-shrink: 0;",
                                             "{chap_num}"
                                         }
 
@@ -200,26 +201,26 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
                                             div {
                                                 style: "display: flex; align-items: center; gap: 8px;",
                                                 p {
-                                                    style: "font-size: 14px; color: {c.text_white}; font-weight: 500;",
+                                                    style: "font-size: 14px; color: {p.text_high}; font-weight: 500;",
                                                     if chap_title.is_empty() {
                                                         "Chapitre {chap_num}"
                                                     } else {
                                                         "Chapitre {chap_num} — {chap_title}"
                                                     }
                                                 }
-                                                Badge { text: format!("{page_count} page(s)"), color: c.accent_blue.to_string() }
+                                                Badge { text: format!("{page_count} page(s)"), color: p.accent_primary.to_string() }
                                             }
                                         }
 
                                         // Chevron expand
                                         span {
-                                            style: "font-size: 12px; color: {c.text_muted}; transition: transform 0.2s;",
+                                            style: "font-size: 12px; color: {p.text_muted}; transition: transform 0.2s;",
                                             if is_expanded { "▼" } else { "▶" }
                                         }
 
                                         // Delete
                                         button {
-                                            style: "padding: 6px 10px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 11px;",
+                                            style: "padding: 6px 10px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 11px;",
                                             onclick: move |evt| {
                                                 evt.stop_propagation();
                                                 let db = &conns.read().jaymanga;
@@ -237,17 +238,17 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
                                             rsx! {
                                                 div {
-                                                    style: "padding: 0 16px 16px 16px; border-top: 1px solid {c.border};",
+                                                    style: "padding: 0 16px 16px 16px; border-top: 1px solid {p.border_default};",
 
                                                     // Bouton ajouter page
                                                     div {
                                                         style: "display: flex; align-items: center; justify-content: space-between; padding: 12px 0 8px;",
                                                         span {
-                                                            style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                                                            style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                                                             "Pages ({page_total})"
                                                         }
                                                         button {
-                                                            style: "padding: 4px 10px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;",
+                                                            style: "padding: 4px 10px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;",
                                                             onclick: move |_| {
                                                                 let db = &conns.read().jaymanga;
                                                                 let next_order = page_total as i32 + 1;
@@ -266,7 +267,7 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
                                                     if pages.is_empty() {
                                                         p {
-                                                            style: "font-size: 12px; color: {c.text_muted}; text-align: center; padding: 16px;",
+                                                            style: "font-size: 12px; color: {p.text_muted}; text-align: center; padding: 16px;",
                                                             "Aucune page — ajoutez des pages à ce chapitre."
                                                         }
                                                     } else {
@@ -283,26 +284,26 @@ pub fn Chapters(state: Signal<JayMangaState>) -> Element {
 
                                                                     rsx! {
                                                                         div {
-                                                                            style: "position: relative; padding: 8px; background: {c.bg_main}; border-radius: 4px; text-align: center;",
+                                                                            style: "position: relative; padding: 8px; background: {p.bg_base}; border-radius: 4px; text-align: center;",
 
                                                                             div {
-                                                                                style: "width: 100%; aspect-ratio: 3/4; background: {c.bg_hover}; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 4px;",
+                                                                                style: "width: 100%; aspect-ratio: 3/4; background: {p.bg_overlay}; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 4px;",
                                                                                 if has_original { "🖼️" } else { "📄" }
                                                                             }
                                                                             p {
-                                                                                style: "font-size: 11px; color: {c.text_secondary};",
+                                                                                style: "font-size: 11px; color: {p.text_secondary};",
                                                                                 "P.{page_num}"
                                                                             }
                                                                             if has_variants {
                                                                                 span {
-                                                                                    style: "font-size: 9px; color: {c.accent_green};",
+                                                                                    style: "font-size: 9px; color: {p.success};",
                                                                                     "✓ opt"
                                                                                 }
                                                                             }
 
                                                                             // Bouton supprimer
                                                                             button {
-                                                                                style: "position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: {c.accent_red}80; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center;",
+                                                                                style: "position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: {p.error}80; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center;",
                                                                                 onclick: move |_| {
                                                                                     let db = &conns.read().jaymanga;
                                                                                     let _ = db.page_delete(&pid_delete);

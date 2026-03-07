@@ -5,6 +5,7 @@
 //! @human: Ecran ORG-E25 JayFestival: publication et cloture (workflow de validation).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::Badge;
@@ -12,7 +13,7 @@ use super::components::Badge;
 /// Workflow de publication d'une edition.
 #[component]
 pub fn OrgPublication(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger l'édition
@@ -35,9 +36,9 @@ pub fn OrgPublication(edition_id: String) -> Element {
 
     // Calcul de la couleur du badge de statut
     let status_color = match status.as_str() {
-        "publie" | "en_cours" => c.accent_green.to_string(),
-        "brouillon" | "en_preparation" => c.accent_orange.to_string(),
-        _ => c.text_muted.to_string(),
+        "publie" | "en_cours" => p.success.to_string(),
+        "brouillon" | "en_preparation" => p.warning.to_string(),
+        _ => p.text_muted.to_string(),
     };
 
     rsx! {
@@ -50,13 +51,13 @@ pub fn OrgPublication(edition_id: String) -> Element {
 
                 div {
                     h3 {
-                        style: "font-size: 18px; color: {c.text_white}; margin-bottom: 4px;",
+                        style: "font-size: 18px; color: {p.text_high}; margin-bottom: 4px;",
                         "Publication de l'evenement"
                     }
                     div {
                         style: "display: flex; align-items: center; gap: 8px;",
                         span {
-                            style: "font-size: 13px; color: {c.text_muted};",
+                            style: "font-size: 13px; color: {p.text_muted};",
                             "Statut actuel :"
                         }
                         Badge {
@@ -88,7 +89,7 @@ pub fn OrgPublication(edition_id: String) -> Element {
 
 #[component]
 fn PublicationChecklist(exposants_count: usize, animations_count: usize) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let exp_desc = format!("{exposants_count} exposant(s) inscrit(s)");
     let anim_desc = format!("{animations_count} animation(s) programmee(s)");
@@ -96,12 +97,12 @@ fn PublicationChecklist(exposants_count: usize, animations_count: usize) -> Elem
     rsx! {
         section {
             h4 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Checklist avant publication"
             }
 
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 12px;",
@@ -148,11 +149,11 @@ fn PublicationChecklist(exposants_count: usize, animations_count: usize) -> Elem
 
 #[component]
 fn PublicationActions(is_publishable: bool, status: String, edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let publish_border = if is_publishable {
-        format!("2px solid {}", c.accent_green)
+        format!("2px solid {}", p.success)
     } else {
         "none".to_string()
     };
@@ -171,13 +172,13 @@ fn PublicationActions(is_publishable: bool, status: String, edition_id: String) 
 
     let is_publish_active = is_publishable && status != "publie";
 
-    let publish_btn_bg = if is_publish_active { c.accent_blue } else { c.bg_hover };
-    let publish_btn_color = if is_publish_active { "white" } else { c.text_muted };
+    let publish_btn_bg = if is_publish_active { p.accent_primary } else { p.bg_overlay };
+    let publish_btn_color = if is_publish_active { "white" } else { p.text_muted };
 
     rsx! {
         section {
             h4 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Actions"
             }
 
@@ -186,40 +187,40 @@ fn PublicationActions(is_publishable: bool, status: String, edition_id: String) 
 
                 // Prévisualisation
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                     div {
                         style: "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;",
                         span { style: "font-size: 24px;", "👁️" }
                         h5 {
-                            style: "font-size: 14px; color: {c.text_white};",
+                            style: "font-size: 14px; color: {p.text_high};",
                             "Previsualiser"
                         }
                     }
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; margin-bottom: 16px;",
+                        style: "font-size: 13px; color: {p.text_muted}; margin-bottom: 16px;",
                         "Voir l'evenement tel qu'il apparaitra pour les visiteurs"
                     }
                     button {
-                        style: "display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: {c.bg_hover}; border: none; border-radius: 6px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                        style: "display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: {p.bg_overlay}; border: none; border-radius: 6px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                         "🔍 Ouvrir apercu"
                     }
                 }
 
                 // Publication
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: {publish_border};",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: {publish_border};",
 
                     div {
                         style: "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;",
                         span { style: "font-size: 24px;", "🚀" }
                         h5 {
-                            style: "font-size: 14px; color: {c.text_white};",
+                            style: "font-size: 14px; color: {p.text_high};",
                             "Publier"
                         }
                     }
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; margin-bottom: 16px;",
+                        style: "font-size: 13px; color: {p.text_muted}; margin-bottom: 16px;",
                         "{publish_message}"
                     }
                     button {
@@ -243,19 +244,19 @@ fn PublicationActions(is_publishable: bool, status: String, edition_id: String) 
 
 #[component]
 fn PublicationHistory() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         section {
-            style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {c.border};",
+            style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {p.border_default};",
 
             h4 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Historique des actions"
             }
 
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 8px;",
@@ -278,18 +279,18 @@ fn PublicationHistory() -> Element {
 
 #[component]
 fn HistoryItem(action: &'static str, date: &'static str, user: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid {c.border};",
+            style: "display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid {p.border_default};",
 
             span {
-                style: "font-size: 13px; color: {c.text_primary};",
+                style: "font-size: 13px; color: {p.text_primary};",
                 "{action}"
             }
             span {
-                style: "font-size: 12px; color: {c.text_muted};",
+                style: "font-size: 12px; color: {p.text_muted};",
                 "{date} • {user}"
             }
         }
@@ -299,9 +300,9 @@ fn HistoryItem(action: &'static str, date: &'static str, user: &'static str) -> 
 /// Item de checklist.
 #[component]
 fn ChecklistItem(label: &'static str, description: String, checked: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let icon = if checked { "✅" } else { "⬜" };
-    let color = if checked { c.accent_green } else { c.text_muted };
+    let color = if checked { p.success } else { p.text_muted };
 
     rsx! {
         div {
@@ -317,7 +318,7 @@ fn ChecklistItem(label: &'static str, description: String, checked: bool) -> Ele
                     "{label}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{description}"
                 }
             }

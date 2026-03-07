@@ -5,29 +5,30 @@
 //! @human: Ecran VIS-E12 JayFestival: compte visiteur (profil, preferences).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::ActionButton;
 
 /// Mon compte visiteur.
 #[component]
 pub fn VisCompte() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
             style: "display: flex; flex-direction: column; gap: 24px; max-width: 800px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Mon compte"
             }
 
             // Informations personnelles
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Informations personnelles"
                 }
 
@@ -39,11 +40,11 @@ pub fn VisCompte() -> Element {
                         style: "flex-shrink: 0;",
 
                         div {
-                            style: "width: 100px; height: 100px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px;",
+                            style: "width: 100px; height: 100px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px;",
                             "👤"
                         }
                         button {
-                            style: "display: block; margin-top: 8px; padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                            style: "display: block; margin-top: 8px; padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                             "Modifier"
                         }
                     }
@@ -72,10 +73,10 @@ pub fn VisCompte() -> Element {
 
             // Préférences
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Preferences"
                 }
 
@@ -102,35 +103,35 @@ pub fn VisCompte() -> Element {
 
             // Points et historique
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Points de fidelite"
                 }
 
                 div {
-                    style: "display: flex; justify-content: space-between; align-items: center; padding: 16px; background: {c.accent_orange}20; border-radius: 8px; margin-bottom: 16px;",
+                    style: "display: flex; justify-content: space-between; align-items: center; padding: 16px; background: {p.warning}20; border-radius: 8px; margin-bottom: 16px;",
 
                     div {
                         span {
-                            style: "font-size: 14px; color: {c.text_muted}; display: block;",
+                            style: "font-size: 14px; color: {p.text_muted}; display: block;",
                             "Solde actuel"
                         }
                         span {
-                            style: "font-size: 32px; font-weight: bold; color: {c.accent_orange};",
+                            style: "font-size: 32px; font-weight: bold; color: {p.warning};",
                             "⭐ 350"
                         }
                     }
 
                     button {
-                        style: "padding: 10px 20px; background: {c.accent_orange}; border: none; border-radius: 6px; color: white; cursor: pointer;",
+                        style: "padding: 10px 20px; background: {p.warning}; border: none; border-radius: 6px; color: white; cursor: pointer;",
                         "Voir les recompenses"
                     }
                 }
 
                 h4 {
-                    style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 8px;",
+                    style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 8px;",
                     "Historique recent"
                 }
 
@@ -157,10 +158,10 @@ pub fn VisCompte() -> Element {
 
             // Sécurité
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Securite"
                 }
 
@@ -184,10 +185,10 @@ pub fn VisCompte() -> Element {
 
             // Zone danger
             section {
-                style: "background: {c.bg_secondary}; border: 1px solid {c.accent_red}40; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border: 1px solid {p.error}40; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.accent_red}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.error}; margin-bottom: 12px;",
                     "Zone dangereuse"
                 }
 
@@ -196,17 +197,17 @@ pub fn VisCompte() -> Element {
 
                     div {
                         p {
-                            style: "font-size: 14px; color: {c.text_primary}; margin-bottom: 4px;",
+                            style: "font-size: 14px; color: {p.text_primary}; margin-bottom: 4px;",
                             "Supprimer mon compte"
                         }
                         p {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "Cette action est irreversible"
                         }
                     }
 
                     button {
-                        style: "padding: 8px 16px; background: transparent; border: 1px solid {c.accent_red}; border-radius: 6px; color: {c.accent_red}; cursor: pointer;",
+                        style: "padding: 8px 16px; background: transparent; border: 1px solid {p.error}; border-radius: 6px; color: {p.error}; cursor: pointer;",
                         "Supprimer"
                     }
                 }
@@ -217,18 +218,18 @@ pub fn VisCompte() -> Element {
 
 #[component]
 fn FormField(label: &'static str, value: &'static str, field_type: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
             label {
-                style: "display: block; font-size: 12px; color: {c.text_muted}; margin-bottom: 4px;",
+                style: "display: block; font-size: 12px; color: {p.text_muted}; margin-bottom: 4px;",
                 "{label}"
             }
             input {
                 r#type: "{field_type}",
                 value: "{value}",
-                style: "width: 100%; padding: 10px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                style: "width: 100%; padding: 10px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
             }
         }
     }
@@ -236,22 +237,22 @@ fn FormField(label: &'static str, value: &'static str, field_type: &'static str)
 
 #[component]
 fn PreferenceToggle(label: &'static str, description: &'static str, enabled: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
-    let toggle_bg = if enabled { c.accent_blue } else { c.bg_hover };
+    let toggle_bg = if enabled { p.accent_primary } else { p.bg_overlay };
     let toggle_pos = if enabled { "20px" } else { "2px" };
 
     rsx! {
         div {
-            style: "display: flex; justify-content: space-between; align-items: center; padding: 12px; background: {c.bg_hover}; border-radius: 6px;",
+            style: "display: flex; justify-content: space-between; align-items: center; padding: 12px; background: {p.bg_overlay}; border-radius: 6px;",
 
             div {
                 p {
-                    style: "font-size: 14px; color: {c.text_primary}; margin-bottom: 2px;",
+                    style: "font-size: 14px; color: {p.text_primary}; margin-bottom: 2px;",
                     "{label}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{description}"
                 }
             }
@@ -268,25 +269,25 @@ fn PreferenceToggle(label: &'static str, description: &'static str, enabled: boo
 
 #[component]
 fn PointsHistoryRow(description: &'static str, points: i32, date: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (sign, color) = if points > 0 {
-        ("+", c.accent_green)
+        ("+", p.success)
     } else {
-        ("", c.accent_red)
+        ("", p.error)
     };
 
     rsx! {
         div {
-            style: "display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid {c.border};",
+            style: "display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid {p.border_default};",
 
             div {
                 p {
-                    style: "font-size: 13px; color: {c.text_primary};",
+                    style: "font-size: 13px; color: {p.text_primary};",
                     "{description}"
                 }
                 p {
-                    style: "font-size: 11px; color: {c.text_muted};",
+                    style: "font-size: 11px; color: {p.text_muted};",
                     "{date}"
                 }
             }
@@ -306,11 +307,11 @@ fn SecurityRow(
     value: &'static str,
     action: &'static str,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; justify-content: space-between; align-items: center; padding: 12px; background: {c.bg_hover}; border-radius: 6px;",
+            style: "display: flex; justify-content: space-between; align-items: center; padding: 12px; background: {p.bg_overlay}; border-radius: 6px;",
 
             div {
                 style: "display: flex; align-items: center; gap: 12px;",
@@ -318,18 +319,18 @@ fn SecurityRow(
                 span { style: "font-size: 20px;", "{icon}" }
                 div {
                     p {
-                        style: "font-size: 14px; color: {c.text_primary};",
+                        style: "font-size: 14px; color: {p.text_primary};",
                         "{label}"
                     }
                     p {
-                        style: "font-size: 12px; color: {c.text_muted};",
+                        style: "font-size: 12px; color: {p.text_muted};",
                         "{value}"
                     }
                 }
             }
 
             button {
-                style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                 "{action}"
             }
         }

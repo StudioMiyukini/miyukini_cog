@@ -5,6 +5,7 @@
 //! @human: Ecran ORG-E04 JayFestival: tableau de bord organisateur avec stats et editions recentes.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jayfestival::data::Edition;
 use crate::state::use_app_state;
 use super::components::{ActionButton, EventCard, StatCard, format_date_range};
@@ -18,7 +19,7 @@ pub fn OrgDashboard(
     editions: Vec<Edition>,
     state: Signal<JayFestivalState>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -29,7 +30,7 @@ pub fn OrgDashboard(
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Tableau de bord organisateur"
                 }
 
@@ -51,31 +52,31 @@ pub fn OrgDashboard(
                     label: "Editions".to_string(),
                     value: editions_count.to_string(),
                     icon: "📅".to_string(),
-                    color: c.accent_blue.to_string(),
+                    color: p.accent_primary.to_string(),
                 }
                 StatCard {
                     label: "Exposants".to_string(),
                     value: exposants_count.to_string(),
                     icon: "🏪".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
                 StatCard {
                     label: "Candidatures en attente".to_string(),
                     value: pending_count.to_string(),
                     icon: "📝".to_string(),
-                    color: c.accent_orange.to_string(),
+                    color: p.warning.to_string(),
                 }
             }
 
             // Éditions récentes
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-top: 8px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-top: 8px;",
                 "Editions recentes"
             }
 
             if editions.is_empty() {
                 div {
-                    style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: {c.text_muted}; background: {c.bg_secondary}; border-radius: 8px;",
+                    style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: {p.text_muted}; background: {p.bg_secondary}; border-radius: 8px;",
 
                     span {
                         style: "font-size: 48px; margin-bottom: 12px; opacity: 0.3;",

@@ -1,6 +1,7 @@
 //! Gestion des séries JayManga — regroupement d'œuvres en séries.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::data::Series;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -9,7 +10,7 @@ use super::JayMangaState;
 
 #[component]
 pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -133,7 +134,7 @@ pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
 
                             rsx! {
                                 div {
-                                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                                     div {
                                         style: "display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;",
@@ -145,15 +146,15 @@ pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
                                                 div {
                                                     style: "display: flex; align-items: center; gap: 8px;",
                                                     h3 {
-                                                        style: "font-size: 16px; color: {c.text_white}; font-weight: 600;",
+                                                        style: "font-size: 16px; color: {p.text_high}; font-weight: 600;",
                                                         "{title}"
                                                     }
-                                                    Badge { text: format!("{work_count_in_series} œuvre(s)"), color: c.accent_blue.to_string() }
-                                                    Badge { text: status.clone(), color: c.accent_green.to_string() }
+                                                    Badge { text: format!("{work_count_in_series} œuvre(s)"), color: p.accent_primary.to_string() }
+                                                    Badge { text: status.clone(), color: p.success.to_string() }
                                                 }
                                                 if !description.is_empty() {
                                                     p {
-                                                        style: "font-size: 12px; color: {c.text_secondary}; margin-top: 2px;",
+                                                        style: "font-size: 12px; color: {p.text_secondary}; margin-top: 2px;",
                                                         "{description}"
                                                     }
                                                 }
@@ -161,7 +162,7 @@ pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
                                         }
 
                                         button {
-                                            style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                                            style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                                             onclick: move |_| {
                                                 series_title.set(title_edit.clone());
                                                 series_synopsis.set(desc_edit.clone());
@@ -175,28 +176,28 @@ pub fn SeriesView(state: Signal<JayMangaState>) -> Element {
                                     // Œuvres de la série
                                     if !series_works.is_empty() {
                                         div {
-                                            style: "display: flex; gap: 8px; overflow-x: auto; padding-top: 8px; border-top: 1px solid {c.border};",
+                                            style: "display: flex; gap: 8px; overflow-x: auto; padding-top: 8px; border-top: 1px solid {p.border_default};",
 
                                             for work in series_works.iter() {
                                                 {
                                                     let wtitle = work.title.clone().unwrap_or_else(|| "Sans titre".to_string());
                                                     let wstatus = work.status.clone().unwrap_or_else(|| "draft".to_string());
                                                     let status_color = match wstatus.as_str() {
-                                                        "published" => c.accent_green,
-                                                        "draft" => c.text_muted,
-                                                        "archived" => c.accent_orange,
-                                                        _ => c.text_muted,
+                                                        "published" => p.success,
+                                                        "draft" => p.text_muted,
+                                                        "archived" => p.warning,
+                                                        _ => p.text_muted,
                                                     };
 
                                                     rsx! {
                                                         div {
-                                                            style: "min-width: 120px; padding: 12px; background: {c.bg_main}; border-radius: 4px; text-align: center;",
+                                                            style: "min-width: 120px; padding: 12px; background: {p.bg_base}; border-radius: 4px; text-align: center;",
                                                             div {
-                                                                style: "width: 60px; height: 80px; background: {c.bg_hover}; border-radius: 4px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
+                                                                style: "width: 60px; height: 80px; background: {p.bg_overlay}; border-radius: 4px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
                                                                 "📖"
                                                             }
                                                             p {
-                                                                style: "font-size: 11px; color: {c.text_white}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
+                                                                style: "font-size: 11px; color: {p.text_high}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
                                                                 "{wtitle}"
                                                             }
                                                             span {

@@ -7,6 +7,7 @@
 //! @human: Ecrans UNC-E02/E03 JayFestival: catalogue des evenements et fiche evenement.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::services::jaykoa::sync_service;
@@ -23,7 +24,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// UNC-E02 — Liste des evenements.
 #[component]
 pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let editions = {
@@ -56,14 +57,14 @@ pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
 
                 div {
                     button {
-                        style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                        style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::Landing;
                         },
                         "← Retour"
                     }
                     h1 {
-                        style: "font-size: 24px; color: {c.text_white}; margin-top: 8px;",
+                        style: "font-size: 24px; color: {p.text_high}; margin-top: 8px;",
                         "Evenements"
                     }
                 }
@@ -75,22 +76,22 @@ pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
 
                 // Panneau filtres
                 aside {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                     h3 {
-                        style: "font-size: 14px; color: {c.text_white}; margin-bottom: 16px;",
+                        style: "font-size: 14px; color: {p.text_high}; margin-bottom: 16px;",
                         "Filtres"
                     }
 
                     div {
                         style: "margin-bottom: 20px;",
                         label {
-                            style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 8px;",
+                            style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 8px;",
                             "Lieu"
                         }
                         input {
                             r#type: "text",
-                            style: "width: 100%; padding: 8px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 12px;",
+                            style: "width: 100%; padding: 8px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 12px;",
                             placeholder: "Ville, region...",
                             value: "{filter_location}",
                             oninput: move |evt| {
@@ -100,7 +101,7 @@ pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
                     }
 
                     button {
-                        style: "width: 100%; padding: 10px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                        style: "width: 100%; padding: 10px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                         onclick: move |_| {
                             filter_location.set(String::new());
                         },
@@ -111,13 +112,13 @@ pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
                 // Résultats
                 div {
                     p {
-                        style: "font-size: 13px; color: {c.text_secondary}; margin-bottom: 16px;",
+                        style: "font-size: 13px; color: {p.text_secondary}; margin-bottom: 16px;",
                         "{count} evenements"
                     }
 
                     if filtered.is_empty() {
                         div {
-                            style: "padding: 40px; text-align: center; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted};",
+                            style: "padding: 40px; text-align: center; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted};",
                             "Aucun evenement ne correspond a vos criteres"
                         }
                     } else {
@@ -151,7 +152,7 @@ pub fn UncEventsList(state: Signal<JayFestivalState>) -> Element {
 /// UNC-E03 — Fiche evenement detaillee.
 #[component]
 pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let edition_id = state.read().selected_edition_id.clone();
@@ -167,7 +168,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
     let Some(edition) = edition else {
         return rsx! {
             div {
-                style: "text-align: center; padding: 40px; color: {c.text_muted};",
+                style: "text-align: center; padding: 40px; color: {p.text_muted};",
                 "Evenement non trouve"
             }
         };
@@ -193,9 +194,9 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
     let status_str = opt_str(&edition.status);
     let status_color = match status_str.as_str() {
-        "publie" | "en_cours" => c.accent_green,
-        "brouillon" => c.accent_orange,
-        _ => c.text_muted,
+        "publie" | "en_cours" => p.success,
+        "brouillon" => p.warning,
+        _ => p.text_muted,
     };
 
     let name = opt_str(&edition.name);
@@ -209,7 +210,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
             // Navigation retour
             button {
-                style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
+                style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
                 onclick: move |_| {
                     state.write().unc_section = UncSection::Events;
                 },
@@ -218,7 +219,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
             // Bannière
             div {
-                style: "width: 100%; height: 200px; background: linear-gradient(135deg, {c.bg_secondary} 0%, {c.bg_hover} 100%); border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center;",
+                style: "width: 100%; height: 200px; background: linear-gradient(135deg, {p.bg_secondary} 0%, {p.bg_overlay} 100%); border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center;",
                 span {
                     style: "font-size: 64px; opacity: 0.5;",
                     "🎪"
@@ -233,7 +234,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                     style: "display: flex; align-items: center; gap: 12px; margin-bottom: 12px;",
 
                     h1 {
-                        style: "font-size: 28px; color: {c.text_white};",
+                        style: "font-size: 28px; color: {p.text_high};",
                         "{name}"
                     }
                     Badge {
@@ -243,7 +244,7 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                 }
 
                 div {
-                    style: "display: flex; gap: 24px; font-size: 14px; color: {c.text_secondary};",
+                    style: "display: flex; gap: 24px; font-size: 14px; color: {p.text_secondary};",
 
                     span { "📅 {date_range}" }
                     span { "📍 {location}" }
@@ -256,11 +257,11 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                     style: "margin-bottom: 32px;",
 
                     h2 {
-                        style: "font-size: 18px; color: {c.text_white}; margin-bottom: 12px;",
+                        style: "font-size: 18px; color: {p.text_high}; margin-bottom: 12px;",
                         "Description"
                     }
                     p {
-                        style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.6;",
+                        style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.6;",
                         "{theme}"
                     }
                 }
@@ -271,18 +272,18 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 32px;",
 
                 h2 {
-                    style: "font-size: 18px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 18px; color: {p.text_high}; margin-bottom: 12px;",
                     "Programme"
                 }
 
                 if animations.is_empty() {
                     p {
-                        style: "font-size: 14px; color: {c.text_muted};",
+                        style: "font-size: 14px; color: {p.text_muted};",
                         "Le programme sera bientot disponible"
                     }
                 } else {
                     div {
-                        style: "background: {c.bg_secondary}; border-radius: 8px; overflow: hidden;",
+                        style: "background: {p.bg_secondary}; border-radius: 8px; overflow: hidden;",
 
                         for anim in animations.iter().take(5) {
                             {
@@ -293,21 +294,21 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                                 rsx! {
                                     div {
                                         key: "{id_str}",
-                                        style: "display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid {c.border};",
+                                        style: "display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid {p.border_default};",
 
                                         span {
-                                            style: "font-size: 12px; color: {c.accent_blue}; min-width: 80px;",
+                                            style: "font-size: 12px; color: {p.accent_primary}; min-width: 80px;",
                                             "{start_time}"
                                         }
                                         div {
                                             style: "flex: 1;",
                                             p {
-                                                style: "font-size: 14px; color: {c.text_white};",
+                                                style: "font-size: 14px; color: {p.text_high};",
                                                 "{anim_name}"
                                             }
                                             if let Some(r) = room {
                                                 p {
-                                                    style: "font-size: 12px; color: {c.text_muted};",
+                                                    style: "font-size: 12px; color: {p.text_muted};",
                                                     "{r}"
                                                 }
                                             }
@@ -325,13 +326,13 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 32px;",
 
                 h2 {
-                    style: "font-size: 18px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 18px; color: {p.text_high}; margin-bottom: 12px;",
                     "Exposants ({exposants_count})"
                 }
 
                 if exposants.is_empty() {
                     p {
-                        style: "font-size: 14px; color: {c.text_muted};",
+                        style: "font-size: 14px; color: {p.text_muted};",
                         "Liste des exposants bientot disponible"
                     }
                 } else {
@@ -346,18 +347,18 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
                                 rsx! {
                                     div {
                                         key: "{exp_id_str}",
-                                        style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;",
+                                        style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;",
                                         onclick: move |_| {
                                             state.write().selected_exposant_id = exp_id_clone.clone();
                                             state.write().unc_section = UncSection::ExposantDetail;
                                         },
 
                                         div {
-                                            style: "width: 48px; height: 48px; margin: 0 auto 8px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;",
+                                            style: "width: 48px; height: 48px; margin: 0 auto 8px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;",
                                             "🧑‍💼"
                                         }
                                         p {
-                                            style: "font-size: 12px; color: {c.text_primary};",
+                                            style: "font-size: 12px; color: {p.text_primary};",
                                             "{company_name}"
                                         }
                                     }
@@ -370,10 +371,10 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
             // Ajouter au calendrier
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px; margin-bottom: 24px; text-align: center;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px; margin-bottom: 24px; text-align: center;",
 
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 12px;",
                     "Ajoutez cet evenement a votre agenda"
                 }
 
@@ -397,10 +398,10 @@ pub fn UncEventDetail(state: Signal<JayFestivalState>) -> Element {
 
             // CTA Exposant
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px; text-align: center;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px; text-align: center;",
 
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 16px;",
+                    style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 16px;",
                     "Vous etes professionnel ? Participez en tant qu'exposant"
                 }
 
@@ -424,12 +425,12 @@ fn EventListItem(
     edition: Edition,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let status_str = opt_str(&edition.status);
     let status_color = match status_str.as_str() {
-        "publie" | "en_cours" => c.accent_green,
-        "brouillon" => c.accent_orange,
-        _ => c.text_muted,
+        "publie" | "en_cours" => p.success,
+        "brouillon" => p.warning,
+        _ => p.text_muted,
     };
 
     let name = opt_str(&edition.name);
@@ -439,12 +440,12 @@ fn EventListItem(
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s;",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s;",
             onclick: move |evt| onclick.call(evt),
 
             // Image placeholder
             div {
-                style: "width: 80px; height: 80px; background: linear-gradient(135deg, {c.bg_hover} 0%, {c.bg_secondary} 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 32px;",
+                style: "width: 80px; height: 80px; background: linear-gradient(135deg, {p.bg_overlay} 0%, {p.bg_secondary} 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 32px;",
                 "🎪"
             }
 
@@ -453,11 +454,11 @@ fn EventListItem(
                 style: "flex: 1;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 4px;",
                     "{name}"
                 }
                 div {
-                    style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_secondary}; margin-bottom: 8px;",
+                    style: "display: flex; gap: 16px; font-size: 12px; color: {p.text_secondary}; margin-bottom: 8px;",
 
                     span { "📆 {date_range}" }
                     span { "📍 {location}" }
@@ -466,7 +467,7 @@ fn EventListItem(
                     div {
                         style: "display: flex; gap: 8px;",
                         span {
-                            style: "padding: 2px 8px; background: {c.bg_hover}; border-radius: 4px; font-size: 11px; color: {c.text_muted};",
+                            style: "padding: 2px 8px; background: {p.bg_overlay}; border-radius: 4px; font-size: 11px; color: {p.text_muted};",
                             "#{t}"
                         }
                     }
@@ -482,7 +483,7 @@ fn EventListItem(
                     color: status_color.to_string(),
                 }
                 span {
-                    style: "font-size: 12px; color: {c.accent_blue};",
+                    style: "font-size: 12px; color: {p.accent_primary};",
                     "Voir fiche →"
                 }
             }

@@ -5,6 +5,7 @@
 //! @human: Sidebar JayFestival: navigation par role (ORG/EXP/VIS) et sections.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::{
     ExpSection, JayFestivalRole, JayFestivalState, OrgSection, VisSection,
@@ -12,19 +13,19 @@ use super::{
 
 #[component]
 pub fn JayFestivalSidebar(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let current_role = state.read().role;
 
     rsx! {
         aside {
-            style: "width: 220px; background: {c.bg_secondary}; border-right: 1px solid {c.border}; padding: 16px 0; display: flex; flex-direction: column;",
+            style: "width: 220px; background: {p.bg_secondary}; border-right: 1px solid {p.border_default}; padding: 16px 0; display: flex; flex-direction: column;",
 
             // En-tête service
             div {
-                style: "padding: 0 16px 16px 16px; border-bottom: 1px solid {c.border};",
+                style: "padding: 0 16px 16px 16px; border-bottom: 1px solid {p.border_default};",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 8px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 8px;",
                     "JayFestival"
                 }
 
@@ -247,10 +248,10 @@ pub fn JayFestivalSidebar(state: Signal<JayFestivalState>) -> Element {
 
             // Déconnexion
             div {
-                style: "padding: 16px; border-top: 1px solid {c.border};",
+                style: "padding: 16px; border-top: 1px solid {p.border_default};",
 
                 button {
-                    style: "display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| {
                         // Reset state pour déconnexion
                         state.write().is_connected = false;
@@ -272,9 +273,9 @@ pub fn JayFestivalSidebar(state: Signal<JayFestivalState>) -> Element {
 /// Onglet de rôle compact.
 #[component]
 fn RoleTab(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_hover };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { p.bg_overlay };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {
@@ -293,11 +294,11 @@ fn SidebarItem(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.bg_overlay } else { "transparent" };
+    let color = if is_active { p.text_high } else { p.text_secondary };
     let border = if is_active {
-        format!("2px solid {}", c.accent_blue)
+        format!("2px solid {}", p.accent_primary)
     } else {
         "2px solid transparent".to_string()
     };

@@ -5,13 +5,14 @@
 //! @human: Ecran ORG-E21 JayFestival: gestion de l equipe organisatrice et invitations.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::{ActionButton, Badge};
 
 /// Page gestion de l'equipe organisateur.
 #[component]
 pub fn OrgEquipe() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let mut show_invite_form = use_signal(|| false);
 
@@ -35,7 +36,7 @@ pub fn OrgEquipe() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mon equipe"
                 }
 
@@ -50,10 +51,10 @@ pub fn OrgEquipe() -> Element {
             // Formulaire d'invitation
             if *show_invite_form.read() {
                 section {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px; margin-bottom: 24px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px; margin-bottom: 24px;",
 
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                        style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                         "Inviter un nouveau membre"
                     }
 
@@ -63,23 +64,23 @@ pub fn OrgEquipe() -> Element {
                         div {
                             style: "flex: 1;",
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                                 "Email"
                             }
                             input {
                                 r#type: "email",
-                                style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                                style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                                 placeholder: "email@example.com",
                             }
                         }
 
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                                 "Role"
                             }
                             select {
-                                style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                                style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
 
                                 option { value: "admin", "Admin" }
                                 option { value: "manager", "Manager" }
@@ -96,7 +97,7 @@ pub fn OrgEquipe() -> Element {
                         }
 
                         button {
-                            style: "padding: 10px 16px; background: transparent; border: none; color: {c.text_muted}; cursor: pointer; font-size: 13px;",
+                            style: "padding: 10px 16px; background: transparent; border: none; color: {p.text_muted}; cursor: pointer; font-size: 13px;",
                             onclick: move |_| show_invite_form.set(false),
                             "Annuler"
                         }
@@ -109,7 +110,7 @@ pub fn OrgEquipe() -> Element {
                 style: "margin-bottom: 32px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Membres ({membres.len()})"
                 }
 
@@ -118,11 +119,11 @@ pub fn OrgEquipe() -> Element {
 
                     for (name, email, role, status) in &membres {
                         div {
-                            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                             // Avatar
                             div {
-                                style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: {c.text_white};",
+                                style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: {p.text_high};",
                                 {name.chars().next().unwrap_or('?').to_string()}
                             }
 
@@ -130,11 +131,11 @@ pub fn OrgEquipe() -> Element {
                             div {
                                 style: "flex: 1;",
                                 p {
-                                    style: "font-size: 14px; color: {c.text_white};",
+                                    style: "font-size: 14px; color: {p.text_high};",
                                     "{name}"
                                 }
                                 p {
-                                    style: "font-size: 12px; color: {c.text_muted};",
+                                    style: "font-size: 12px; color: {p.text_muted};",
                                     "{email}"
                                 }
                             }
@@ -143,16 +144,16 @@ pub fn OrgEquipe() -> Element {
                             Badge {
                                 text: role.to_string(),
                                 color: match *role {
-                                    "Admin" => c.accent_red.to_string(),
-                                    "Manager" => c.accent_blue.to_string(),
-                                    _ => c.accent_green.to_string(),
+                                    "Admin" => p.error.to_string(),
+                                    "Manager" => p.accent_primary.to_string(),
+                                    _ => p.success.to_string(),
                                 },
                             }
 
                             // Statut
                             Badge {
                                 text: status.to_string(),
-                                color: if *status == "Actif" { c.accent_green.to_string() } else { c.accent_orange.to_string() },
+                                color: if *status == "Actif" { p.success.to_string() } else { p.warning.to_string() },
                             }
 
                             // Actions
@@ -160,11 +161,11 @@ pub fn OrgEquipe() -> Element {
                                 style: "display: flex; gap: 8px;",
 
                                 button {
-                                    style: "padding: 6px 10px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 11px;",
+                                    style: "padding: 6px 10px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 11px;",
                                     "Modifier"
                                 }
                                 button {
-                                    style: "padding: 6px 10px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_muted}; cursor: pointer; font-size: 11px;",
+                                    style: "padding: 6px 10px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_muted}; cursor: pointer; font-size: 11px;",
                                     "Retirer"
                                 }
                             }
@@ -176,13 +177,13 @@ pub fn OrgEquipe() -> Element {
             // Invitations en attente
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Invitations en attente ({invitations.len()})"
                 }
 
                 if invitations.is_empty() {
                     div {
-                        style: "padding: 20px; text-align: center; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted};",
+                        style: "padding: 20px; text-align: center; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted};",
                         "Aucune invitation en attente"
                     }
                 } else {
@@ -191,11 +192,11 @@ pub fn OrgEquipe() -> Element {
 
                         for (email, role, status, date) in &invitations {
                             div {
-                                style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                                style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                                 // Icône
                                 div {
-                                    style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;",
+                                    style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;",
                                     "📧"
                                 }
 
@@ -203,11 +204,11 @@ pub fn OrgEquipe() -> Element {
                                 div {
                                     style: "flex: 1;",
                                     p {
-                                        style: "font-size: 14px; color: {c.text_white};",
+                                        style: "font-size: 14px; color: {p.text_high};",
                                         "{email}"
                                     }
                                     p {
-                                        style: "font-size: 12px; color: {c.text_muted};",
+                                        style: "font-size: 12px; color: {p.text_muted};",
                                         "Invite le {date}"
                                     }
                                 }
@@ -215,13 +216,13 @@ pub fn OrgEquipe() -> Element {
                                 // Role
                                 Badge {
                                     text: role.to_string(),
-                                    color: c.accent_blue.to_string(),
+                                    color: p.accent_primary.to_string(),
                                 }
 
                                 // Statut
                                 Badge {
                                     text: status.to_string(),
-                                    color: c.accent_orange.to_string(),
+                                    color: p.warning.to_string(),
                                 }
 
                                 // Actions
@@ -229,11 +230,11 @@ pub fn OrgEquipe() -> Element {
                                     style: "display: flex; gap: 8px;",
 
                                     button {
-                                        style: "padding: 6px 10px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 11px;",
+                                        style: "padding: 6px 10px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 11px;",
                                         "Renvoyer"
                                     }
                                     button {
-                                        style: "padding: 6px 10px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_muted}; cursor: pointer; font-size: 11px;",
+                                        style: "padding: 6px 10px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_muted}; cursor: pointer; font-size: 11px;",
                                         "Annuler"
                                     }
                                 }
@@ -245,10 +246,10 @@ pub fn OrgEquipe() -> Element {
 
             // Rôles et permissions
             section {
-                style: "margin-top: 32px; padding-top: 32px; border-top: 1px solid {c.border};",
+                style: "margin-top: 32px; padding-top: 32px; border-top: 1px solid {p.border_default};",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Roles et permissions"
                 }
 
@@ -262,21 +263,21 @@ pub fn OrgEquipe() -> Element {
                         ("Lecteur", "Consultation uniquement", vec!["Voir les evenements", "Voir les statistiques"]),
                     ] {
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                             h4 {
-                                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 8px;",
+                                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 8px;",
                                 "{role}"
                             }
                             p {
-                                style: "font-size: 12px; color: {c.text_muted}; margin-bottom: 12px;",
+                                style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 12px;",
                                 "{desc}"
                             }
                             ul {
                                 style: "margin: 0; padding-left: 16px;",
                                 for perm in perms {
                                     li {
-                                        style: "font-size: 11px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                        style: "font-size: 11px; color: {p.text_secondary}; margin-bottom: 4px;",
                                         "{perm}"
                                     }
                                 }

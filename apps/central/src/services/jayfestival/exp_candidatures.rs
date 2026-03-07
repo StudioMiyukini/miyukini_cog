@@ -5,13 +5,14 @@
 //! @human: Ecrans EXP-E05/E08/E10 JayFestival: candidatures exposant et annuaire evenements.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, EmptyState};
 
 #[component]
 pub fn ExpCandidatures() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les éditions disponibles (annuaire)
@@ -25,13 +26,13 @@ pub fn ExpCandidatures() -> Element {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Candidatures"
             }
 
             // Annuaire des événements ouverts
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Evenements ouverts aux candidatures"
             }
 
@@ -55,18 +56,18 @@ pub fn ExpCandidatures() -> Element {
                             let conns_apply = conns;
                             rsx! {
                                 div {
-                                    style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 14px 16px;",
+                                    style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 14px 16px;",
 
                                     span { style: "font-size: 24px;", "🎪" }
 
                                     div {
                                         style: "flex: 1;",
                                         div {
-                                            style: "color: {c.text_white}; font-size: 14px; font-weight: 500;",
+                                            style: "color: {p.text_high}; font-size: 14px; font-weight: 500;",
                                             "{name}"
                                         }
                                         div {
-                                            style: "font-size: 12px; color: {c.text_secondary}; margin-top: 4px;",
+                                            style: "font-size: 12px; color: {p.text_secondary}; margin-top: 4px;",
                                             if !start.is_empty() {
                                                 span { "📆 {start}" }
                                             }
@@ -78,11 +79,11 @@ pub fn ExpCandidatures() -> Element {
 
                                     Badge {
                                         text: status.clone(),
-                                        color: c.text_secondary.to_string(),
+                                        color: p.text_secondary.to_string(),
                                     }
 
                                     button {
-                                        style: "padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                                        style: "padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                                         onclick: move |_| {
                                             // Déposer une candidature (utilise un exposant fictif pour la démo)
                                             let db = &conns_apply.read().jayfestival;

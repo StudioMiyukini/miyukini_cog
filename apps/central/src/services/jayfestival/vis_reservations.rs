@@ -5,13 +5,14 @@
 //! @human: Ecran VIS-E07 JayFestival: reservations visiteur.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
 
 /// Gestion des réservations du visiteur.
 #[component]
 pub fn VisReservations() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -22,7 +23,7 @@ pub fn VisReservations() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mes reservations"
                 }
 
@@ -37,7 +38,7 @@ pub fn VisReservations() -> Element {
             // Réservations à venir
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "A venir"
                 }
 
@@ -74,7 +75,7 @@ pub fn VisReservations() -> Element {
             // Réservations passées
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Passees"
                 }
 
@@ -104,32 +105,32 @@ fn ReservationCard(
     places: &'static str,
     status: &'static str,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (status_label, status_color) = match status {
-        "confirmee" => ("Confirmee", c.accent_green),
-        "en_attente" => ("En attente", c.accent_orange),
-        "terminee" => ("Terminee", c.text_muted),
-        "annulee" => ("Annulee", c.accent_red),
-        _ => ("Inconnue", c.text_muted),
+        "confirmee" => ("Confirmee", p.success),
+        "en_attente" => ("En attente", p.warning),
+        "terminee" => ("Terminee", p.text_muted),
+        "annulee" => ("Annulee", p.error),
+        _ => ("Inconnue", p.text_muted),
     };
 
     let border = if status == "confirmee" {
-        format!("1px solid {}40", c.accent_green)
+        format!("1px solid {}40", p.success)
     } else {
-        format!("1px solid {}", c.border)
+        format!("1px solid {}", p.border_default)
     };
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border: {border}; border-radius: 8px; padding: 16px;",
+            style: "background: {p.bg_secondary}; border: {border}; border-radius: 8px; padding: 16px;",
 
             div {
                 style: "display: flex; gap: 16px;",
 
                 // Icône
                 div {
-                    style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
+                    style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
                     "📅"
                 }
 
@@ -142,11 +143,11 @@ fn ReservationCard(
 
                         div {
                             h4 {
-                                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                                 "{title}"
                             }
                             p {
-                                style: "font-size: 12px; color: {c.text_muted};",
+                                style: "font-size: 12px; color: {p.text_muted};",
                                 "{event}"
                             }
                         }
@@ -158,7 +159,7 @@ fn ReservationCard(
                     }
 
                     div {
-                        style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_secondary};",
+                        style: "display: flex; gap: 16px; font-size: 12px; color: {p.text_secondary};",
 
                         span { "🕐 {date}" }
                         span { "📍 {location}" }
@@ -170,14 +171,14 @@ fn ReservationCard(
             // Actions pour les réservations à venir
             if status == "confirmee" || status == "en_attente" {
                 div {
-                    style: "display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid {c.border};",
+                    style: "display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid {p.border_default};",
 
                     button {
-                        style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                        style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                         "📅 Ajouter au calendrier"
                     }
                     button {
-                        style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                        style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                         "Annuler"
                     }
                 }

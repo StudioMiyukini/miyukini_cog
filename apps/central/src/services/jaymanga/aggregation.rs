@@ -1,6 +1,7 @@
 //! Agrégation JayManga — portail agrégé, vendeurs indexés, configuration.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, EmptyState, PageHeader, StatCard};
@@ -8,7 +9,7 @@ use super::JayMangaState;
 
 #[component]
 pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -25,7 +26,7 @@ pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
     let online_sellers = indexed_sellers.iter()
         .filter(|s| s.online_status.as_deref() == Some("online"))
         .count();
-    let bg_toggle = if is_enabled { c.accent_red } else { c.accent_green };
+    let bg_toggle = if is_enabled { p.error } else { p.success };
 
     rsx! {
         div {
@@ -38,16 +39,16 @@ pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
 
             // Statut
             div {
-                style: "display: flex; align-items: center; gap: 12px; padding: 16px; background: {c.bg_secondary}; border-radius: 8px;",
+                style: "display: flex; align-items: center; gap: 12px; padding: 16px; background: {p.bg_secondary}; border-radius: 8px;",
 
                 span { style: "font-size: 24px;", if is_enabled { "🟢" } else { "🔴" } }
                 div {
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white};",
+                        style: "font-size: 16px; color: {p.text_high};",
                         if is_enabled { "Portail agrégé actif" } else { "Portail agrégé désactivé" }
                     }
                     p {
-                        style: "font-size: 12px; color: {c.text_muted}; margin-top: 2px;",
+                        style: "font-size: 12px; color: {p.text_muted}; margin-top: 2px;",
                         if is_enabled {
                             {format!("Synchronisation toutes les {} minutes", agg_config.sync_interval_minutes.unwrap_or(30))}
                         } else {
@@ -75,14 +76,14 @@ pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
             div {
                 style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;",
 
-                StatCard { label: "Vendeurs indexés".to_string(), value: seller_count.to_string(), icon: "👤".to_string(), color: c.accent_blue.to_string() }
+                StatCard { label: "Vendeurs indexés".to_string(), value: seller_count.to_string(), icon: "👤".to_string(), color: p.accent_primary.to_string() }
                 StatCard { label: "Œuvres agrégées".to_string(), value: entry_count.to_string(), icon: "📚".to_string(), color: "#8b5cf6".to_string() }
-                StatCard { label: "En ligne".to_string(), value: online_sellers.to_string(), icon: "🟢".to_string(), color: c.accent_green.to_string() }
+                StatCard { label: "En ligne".to_string(), value: online_sellers.to_string(), icon: "🟢".to_string(), color: p.success.to_string() }
             }
 
             // Vendeurs indexés
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Vendeurs indexés"
             }
 
@@ -106,20 +107,20 @@ pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
                             let blocked = seller.blocked.unwrap_or(false);
 
                             let (status_color, status_label) = match online.as_str() {
-                                "online" => (c.accent_green, "En ligne"),
-                                "offline" => (c.text_muted, "Hors ligne"),
-                                _ => (c.accent_orange, "Inconnu"),
+                                "online" => (p.success, "En ligne"),
+                                "offline" => (p.text_muted, "Hors ligne"),
+                                _ => (p.warning, "Inconnu"),
                             };
 
                             let cid_block = cog_id.clone();
 
                             rsx! {
                                 div {
-                                    style: "display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 4px; border: 1px solid {c.border};",
+                                    style: "display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 4px; border: 1px solid {p.border_default};",
 
                                     // Avatar placeholder
                                     div {
-                                        style: "width: 40px; height: 40px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;",
+                                        style: "width: 40px; height: 40px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;",
                                         "👤"
                                     }
 
@@ -128,23 +129,23 @@ pub fn Aggregation(state: Signal<JayMangaState>) -> Element {
                                         div {
                                             style: "display: flex; align-items: center; gap: 8px;",
                                             p {
-                                                style: "font-size: 14px; color: {c.text_white}; font-weight: 500;",
+                                                style: "font-size: 14px; color: {p.text_high}; font-weight: 500;",
                                                 "{name}"
                                             }
                                             Badge { text: status_label.to_string(), color: status_color.to_string() }
                                             if blocked {
-                                                Badge { text: "Bloqué".to_string(), color: c.accent_red.to_string() }
+                                                Badge { text: "Bloqué".to_string(), color: p.error.to_string() }
                                             }
                                         }
                                         div {
-                                            style: "font-size: 12px; color: {c.text_muted}; margin-top: 2px;",
+                                            style: "font-size: 12px; color: {p.text_muted}; margin-top: 2px;",
                                             span { "{cog_short}" }
                                             span { " — {work_count} œuvre(s)" }
                                         }
                                     }
 
                                     button {
-                                        style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                                        style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                                         onclick: move |_| {
                                             let db = &conns.read().jaymanga;
                                             if let Ok(Some(mut s)) = db.indexed_seller_by_id(&cid_block) {

@@ -1,6 +1,7 @@
 //! Profil de progression JayManga — niveau, XP, streaks, badges, statistiques, historique.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::domain::gamification::{
     gamification_level_for_xp, gamification_level_progress, gamification_xp_for_next_level,
     LEVEL_THRESHOLDS,
@@ -13,7 +14,7 @@ use super::JayMangaState;
 
 #[component]
 pub fn Profile(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -64,7 +65,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
             // ── Niveau et XP ────────────────────────────────────────────
             div {
-                style: "background: {c.bg_secondary}; border-radius: 12px; padding: 24px; border: 1px solid {c.border};",
+                style: "background: {p.bg_secondary}; border-radius: 12px; padding: 24px; border: 1px solid {p.border_default};",
 
                 div {
                     style: "display: flex; align-items: center; gap: 20px;",
@@ -80,11 +81,11 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                         div {
                             style: "display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px;",
                             h3 {
-                                style: "font-size: 22px; color: {c.text_white}; font-weight: 700;",
+                                style: "font-size: 22px; color: {p.text_high}; font-weight: 700;",
                                 "{level_name}"
                             }
                             span {
-                                style: "font-size: 14px; color: {c.text_muted};",
+                                style: "font-size: 14px; color: {p.text_muted};",
                                 "Niveau {level}"
                             }
                         }
@@ -95,11 +96,11 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                             div {
                                 style: "display: flex; justify-content: space-between; margin-bottom: 4px;",
                                 span {
-                                    style: "font-size: 12px; color: {c.text_secondary};",
+                                    style: "font-size: 12px; color: {p.text_secondary};",
                                     "{total_xp} XP"
                                 }
                                 span {
-                                    style: "font-size: 12px; color: {c.text_muted};",
+                                    style: "font-size: 12px; color: {p.text_muted};",
                                     {
                                         if xp_for_next > 0 {
                                             format!("{} XP", next_level_xp)
@@ -110,14 +111,14 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                                 }
                             }
                             div {
-                                style: "width: 100%; height: 12px; background: {c.bg_hover}; border-radius: 6px; overflow: hidden;",
+                                style: "width: 100%; height: 12px; background: {p.bg_overlay}; border-radius: 6px; overflow: hidden;",
                                 div {
                                     style: "width: {progress_pct}%; height: 100%; background: linear-gradient(90deg, #FFD700, #FF6B35); border-radius: 6px; transition: width 0.5s;",
                                 }
                             }
                             if xp_for_next > 0 {
                                 p {
-                                    style: "font-size: 11px; color: {c.text_muted}; margin-top: 4px;",
+                                    style: "font-size: 11px; color: {p.text_muted}; margin-top: 4px;",
                                     "Encore {xp_for_next} XP pour atteindre le prochain niveau"
                                 }
                             }
@@ -133,9 +134,9 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                         {
                             let is_current = lvl == level;
                             let is_reached = total_xp >= threshold;
-                            let bg = if is_current { "#FFD70030".to_string() } else if is_reached { format!("{}20", c.accent_green) } else { c.bg_hover.to_string() };
-                            let text_c = if is_current { "#FFD700" } else if is_reached { c.accent_green } else { c.text_muted };
-                            let border = if is_current { "2px solid #FFD700".to_string() } else { format!("1px solid {}", c.border) };
+                            let bg = if is_current { "#FFD70030".to_string() } else if is_reached { format!("{}20", p.success) } else { p.bg_overlay.to_string() };
+                            let text_c = if is_current { "#FFD700" } else if is_reached { p.success } else { p.text_muted };
+                            let border = if is_current { "2px solid #FFD700".to_string() } else { format!("1px solid {}", p.border_default) };
 
                             rsx! {
                                 div {
@@ -149,7 +150,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                                         "{name}"
                                     }
                                     p {
-                                        style: "font-size: 9px; color: {c.text_muted}; margin-top: 2px;",
+                                        style: "font-size: 9px; color: {p.text_muted}; margin-top: 2px;",
                                         "{threshold} XP"
                                     }
                                 }
@@ -165,7 +166,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
                 // Streak actuel
                 div {
-                    style: "flex: 1; background: {c.bg_secondary}; border-radius: 12px; padding: 24px; border: 1px solid {c.border}; display: flex; align-items: center; gap: 16px;",
+                    style: "flex: 1; background: {p.bg_secondary}; border-radius: 12px; padding: 24px; border: 1px solid {p.border_default}; display: flex; align-items: center; gap: 16px;",
 
                     div {
                         style: "width: 64px; height: 64px; background: #FF450020; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0;",
@@ -177,7 +178,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                             "{current_streak} jours"
                         }
                         p {
-                            style: "font-size: 13px; color: {c.text_secondary};",
+                            style: "font-size: 13px; color: {p.text_secondary};",
                             "Série actuelle"
                         }
                     }
@@ -185,7 +186,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
                 // Record
                 div {
-                    style: "flex: 1; background: {c.bg_secondary}; border-radius: 12px; padding: 24px; border: 1px solid {c.border}; display: flex; align-items: center; gap: 16px;",
+                    style: "flex: 1; background: {p.bg_secondary}; border-radius: 12px; padding: 24px; border: 1px solid {p.border_default}; display: flex; align-items: center; gap: 16px;",
 
                     div {
                         style: "width: 64px; height: 64px; background: #FFD70020; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0;",
@@ -197,7 +198,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                             "{longest_streak} jours"
                         }
                         p {
-                            style: "font-size: 13px; color: {c.text_secondary};",
+                            style: "font-size: 13px; color: {p.text_secondary};",
                             "Record personnel"
                         }
                     }
@@ -220,10 +221,10 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
                 rsx! {
                     div {
-                        style: "background: {c.bg_secondary}; border-radius: 12px; padding: 20px; border: 1px solid {c.border};",
+                        style: "background: {p.bg_secondary}; border-radius: 12px; padding: 20px; border: 1px solid {p.border_default};",
 
                         h4 {
-                            style: "font-size: 13px; color: {c.text_white}; margin-bottom: 12px;",
+                            style: "font-size: 13px; color: {p.text_high}; margin-bottom: 12px;",
                             "📅 Cette semaine"
                         }
 
@@ -238,9 +239,9 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                                     let is_future = day_date > today;
                                     let label = day_labels[day_offset as usize];
 
-                                    let bg = if is_validated { "#FF450030".to_string() } else if is_today { format!("{}20", c.accent_blue) } else { c.bg_hover.to_string() };
-                                    let border_col = if is_today { c.accent_blue } else if is_validated { "#FF4500" } else { c.border };
-                                    let text_col = if is_future { c.text_muted } else if is_validated { "#FF4500" } else { c.text_secondary };
+                                    let bg = if is_validated { "#FF450030".to_string() } else if is_today { format!("{}20", p.accent_primary) } else { p.bg_overlay.to_string() };
+                                    let border_col = if is_today { p.accent_primary } else if is_validated { "#FF4500" } else { p.border_default };
+                                    let text_col = if is_future { p.text_muted } else if is_validated { "#FF4500" } else { p.text_secondary };
 
                                     let opacity = if is_future { "0.5" } else { "1" };
 
@@ -249,7 +250,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                                             style: "flex: 1; text-align: center; padding: 10px 4px; background: {bg}; border: 2px solid {border_col}; border-radius: 8px; opacity: {opacity};",
 
                                             p {
-                                                style: "font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                                                style: "font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                                                 "{label}"
                                             }
                                             p {
@@ -283,27 +284,27 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
             // ── Statistiques ────────────────────────────────────────────
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "📊 Statistiques"
             }
             div {
                 style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;",
 
-                StatCard { label: "Pages lues".to_string(), value: pages_read.to_string(), icon: "📄".to_string(), color: c.accent_blue.to_string() }
-                StatCard { label: "Œuvres terminées".to_string(), value: works_completed.to_string(), icon: "📚".to_string(), color: c.accent_green.to_string() }
+                StatCard { label: "Pages lues".to_string(), value: pages_read.to_string(), icon: "📄".to_string(), color: p.accent_primary.to_string() }
+                StatCard { label: "Œuvres terminées".to_string(), value: works_completed.to_string(), icon: "📚".to_string(), color: p.success.to_string() }
                 StatCard { label: "Temps de lecture".to_string(), value: reading_time_str.clone(), icon: "⏱️".to_string(), color: "#FF6B35".to_string() }
             }
             div {
                 style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;",
 
                 StatCard { label: "Genres explorés".to_string(), value: genres_explored.to_string(), icon: "🎭".to_string(), color: "#8b5cf6".to_string() }
-                StatCard { label: "COGs visités".to_string(), value: cogs_visited.to_string(), icon: "🌐".to_string(), color: c.accent_orange.to_string() }
+                StatCard { label: "COGs visités".to_string(), value: cogs_visited.to_string(), icon: "🌐".to_string(), color: p.warning.to_string() }
                 StatCard { label: "Favoris".to_string(), value: favorites.len().to_string(), icon: "❤️".to_string(), color: "#ef4444".to_string() }
             }
 
             // ── Badges ──────────────────────────────────────────────────
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "🏅 Badges ({badges.len()})"
             }
 
@@ -327,26 +328,26 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                                 .unwrap_or_default();
 
                             let (badge_icon, badge_color) = match category.as_str() {
-                                "reading" => ("📖", c.accent_blue),
+                                "reading" => ("📖", p.accent_primary),
                                 "social" => ("👥", "#8b5cf6"),
-                                "collection" => ("📚", c.accent_green),
+                                "collection" => ("📚", p.success),
                                 "streak" => ("🔥", "#FF4500"),
                                 "achievement" => ("🏆", "#FFD700"),
-                                _ => ("🏅", c.text_muted),
+                                _ => ("🏅", p.text_muted),
                             };
 
                             rsx! {
                                 div {
-                                    style: "padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 2px solid {badge_color}40; text-align: center;",
+                                    style: "padding: 16px; background: {p.bg_secondary}; border-radius: 8px; border: 2px solid {badge_color}40; text-align: center;",
 
                                     span { style: "font-size: 32px; display: block; margin-bottom: 8px;", "{badge_icon}" }
                                     h4 {
-                                        style: "font-size: 13px; color: {c.text_white}; font-weight: 600; margin-bottom: 4px;",
+                                        style: "font-size: 13px; color: {p.text_high}; font-weight: 600; margin-bottom: 4px;",
                                         "{name}"
                                     }
                                     if !description.is_empty() {
                                         p {
-                                            style: "font-size: 11px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                            style: "font-size: 11px; color: {p.text_secondary}; margin-bottom: 6px;",
                                             "{description}"
                                         }
                                     }
@@ -356,7 +357,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
                                     }
                                     if !earned.is_empty() {
                                         p {
-                                            style: "font-size: 10px; color: {c.text_muted}; margin-top: 4px;",
+                                            style: "font-size: 10px; color: {p.text_muted}; margin-top: 4px;",
                                             "Obtenu le {earned}"
                                         }
                                     }
@@ -369,7 +370,7 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
             // ── Historique de lecture ────────────────────────────────────
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "📜 Lectures récentes"
             }
 
@@ -409,25 +410,25 @@ pub fn Profile(state: Signal<JayMangaState>) -> Element {
 
                                     rsx! {
                                         div {
-                                            style: "display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: {c.bg_secondary}; border-radius: 4px;",
+                                            style: "display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: {p.bg_secondary}; border-radius: 4px;",
 
                                             span { style: "font-size: 16px;", "📖" }
                                             span {
-                                                style: "flex: 1; font-size: 13px; color: {c.text_white};",
+                                                style: "flex: 1; font-size: 13px; color: {p.text_high};",
                                                 "{title}"
                                             }
                                             if !chapter.is_empty() {
                                                 span {
-                                                    style: "font-size: 12px; color: {c.text_secondary};",
+                                                    style: "font-size: 12px; color: {p.text_secondary};",
                                                     "{chapter}"
                                                 }
                                             }
                                             span {
-                                                style: "font-size: 12px; color: {c.accent_blue};",
+                                                style: "font-size: 12px; color: {p.accent_primary};",
                                                 "{progress_pct}%"
                                             }
                                             span {
-                                                style: "font-size: 11px; color: {c.text_muted};",
+                                                style: "font-size: 11px; color: {p.text_muted};",
                                                 "{last_read}"
                                             }
                                         }

@@ -1,6 +1,7 @@
 //! Vue Planning — Liste chronologique des événements.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use jaykoa::data::{TemporalEntry, TemporalConflict, EventSource, EntryType};
 use chrono::{Datelike, NaiveDate};
@@ -42,14 +43,14 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
     if entries_by_day.is_empty() {
         return rsx! {
             div {
-                style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+                style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
                 
                 span {
                     style: "font-size: 48px; margin-bottom: 16px; opacity: 0.3;",
                     "📅"
                 }
                 h3 {
-                    style: "font-size: 18px; color: {c.text_secondary};",
+                    style: "font-size: 18px; color: {p.text_secondary};",
                     "Aucun événement"
                 }
                 p {
@@ -69,8 +70,8 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
                 {
                     let conflicts_count = props.conflicts.len();
                     let plural = if conflicts_count > 1 { "s" } else { "" };
-                    let alert_bg = format!("{}15", c.accent_orange);
-                    let alert_border = format!("{}40", c.accent_orange);
+                    let alert_bg = format!("{}15", p.warning);
+                    let alert_border = format!("{}40", p.warning);
                     
                     rsx! {
                         div {
@@ -80,7 +81,7 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
                                 style: "display: flex; align-items: center; gap: 8px;",
                                 span { style: "font-size: 18px;", "⚠️" }
                                 span {
-                                    style: "font-size: 14px; font-weight: 500; color: {c.accent_orange};",
+                                    style: "font-size: 14px; font-weight: 500; color: {p.warning};",
                                     "{conflicts_count} conflit{plural} détecté{plural}"
                                 }
                             }
@@ -88,7 +89,7 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
                             for conflict in props.conflicts.iter().take(3) {
                                 if let Some(desc) = &conflict.description {
                                     p {
-                                        style: "font-size: 12px; color: {c.text_secondary}; margin-top: 8px; padding-left: 26px;",
+                                        style: "font-size: 12px; color: {p.text_secondary}; margin-top: 8px; padding-left: 26px;",
                                         "{desc}"
                                     }
                                 }
@@ -124,8 +125,8 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
                     
                     {
                         let opacity = if is_past { "0.6" } else { "1" };
-                        let weekday_color = if is_today { c.accent_blue.to_string() } else { c.text_muted.to_string() };
-                        let day_num_color = if is_today { c.accent_blue.to_string() } else { c.text_primary.to_string() };
+                        let weekday_color = if is_today { p.accent_primary.to_string() } else { p.text_muted.to_string() };
+                        let day_num_color = if is_today { p.accent_primary.to_string() } else { p.text_primary.to_string() };
                         let day_num = date.day();
                         let year = date.year();
                         
@@ -153,12 +154,12 @@ pub fn ScheduleView(props: ScheduleViewProps) -> Element {
                                     
                                     // Ligne
                                     div {
-                                        style: "flex: 1; height: 1px; background: {c.border};",
+                                        style: "flex: 1; height: 1px; background: {p.border_default};",
                                     }
                                     
                                     // Mois année
                                     span {
-                                        style: "font-size: 12px; color: {c.text_muted};",
+                                        style: "font-size: 12px; color: {p.text_muted};",
                                         "{month} {year}"
                                     }
                                 }
@@ -230,14 +231,14 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     
     // Bordure de conflit
     let border = if props.has_conflict {
-        format!("3px solid {}", c.accent_orange)
+        format!("3px solid {}", p.warning)
     } else {
         format!("3px solid {color}")
     };
 
     rsx! {
         div {
-            style: "display: flex; gap: 16px; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 8px; border-left: {border}; cursor: pointer; transition: background 0.2s;",
+            style: "display: flex; gap: 16px; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 8px; border-left: {border}; cursor: pointer; transition: background 0.2s;",
             
             // Colonne heure
             div {
@@ -256,18 +257,18 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
                 div {
                     style: "display: flex; align-items: center; gap: 8px;",
                     span {
-                        style: "font-size: 14px; font-weight: 500; color: {c.text_white};",
+                        style: "font-size: 14px; font-weight: 500; color: {p.text_high};",
                         "{title}"
                     }
                     if is_readonly {
                         span {
-                            style: "font-size: 11px; padding: 2px 6px; background: {c.bg_hover}; border-radius: 4px; color: {c.text_muted};",
+                            style: "font-size: 11px; padding: 2px 6px; background: {p.bg_overlay}; border-radius: 4px; color: {p.text_muted};",
                             "🔒 Lecture seule"
                         }
                     }
                     if props.has_conflict {
                         span {
-                            style: "font-size: 11px; padding: 2px 6px; background: {c.accent_orange}20; border-radius: 4px; color: {c.accent_orange};",
+                            style: "font-size: 11px; padding: 2px 6px; background: {p.warning}20; border-radius: 4px; color: {p.warning};",
                             "⚠️ Conflit"
                         }
                     }
@@ -277,7 +278,7 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
                 if let Some(desc) = &props.entry.description {
                     if !desc.is_empty() {
                         p {
-                            style: "font-size: 12px; color: {c.text_secondary}; margin-top: 4px;",
+                            style: "font-size: 12px; color: {p.text_secondary}; margin-top: 4px;",
                             "{desc}"
                         }
                     }
@@ -290,7 +291,7 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
                     if let Some(loc) = &props.entry.location {
                         if !loc.is_empty() {
                             span {
-                                style: "font-size: 11px; color: {c.text_muted}; display: flex; align-items: center; gap: 4px;",
+                                style: "font-size: 11px; color: {p.text_muted}; display: flex; align-items: center; gap: 4px;",
                                 "📍 {loc}"
                             }
                         }
@@ -298,7 +299,7 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
                     
                     if let (Some(icon), Some(label)) = (source_icon, source_label) {
                         span {
-                            style: "font-size: 11px; color: {c.text_muted}; display: flex; align-items: center; gap: 4px;",
+                            style: "font-size: 11px; color: {p.text_muted}; display: flex; align-items: center; gap: 4px;",
                             "{icon} {label}"
                         }
                     }

@@ -5,24 +5,25 @@
 //! @human: Ecrans EXP-E09/E10 JayFestival: liste et upload des documents exposant.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
 
 /// Gestion des documents exposant.
 #[component]
 pub fn ExpDocuments() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut active_tab = use_signal(|| "tous".to_string());
 
     let tab = active_tab.read().clone();
-    let tab_tous_bg = if tab == "tous" { c.accent_blue } else { c.bg_secondary };
-    let tab_tous_color = if tab == "tous" { "white" } else { c.text_primary };
-    let tab_contrats_bg = if tab == "contrats" { c.accent_blue } else { c.bg_secondary };
-    let tab_contrats_color = if tab == "contrats" { "white" } else { c.text_primary };
-    let tab_factures_bg = if tab == "factures" { c.accent_blue } else { c.bg_secondary };
-    let tab_factures_color = if tab == "factures" { "white" } else { c.text_primary };
-    let tab_autres_bg = if tab == "autres" { c.accent_blue } else { c.bg_secondary };
-    let tab_autres_color = if tab == "autres" { "white" } else { c.text_primary };
+    let tab_tous_bg = if tab == "tous" { p.accent_primary } else { p.bg_secondary };
+    let tab_tous_color = if tab == "tous" { "white" } else { p.text_primary };
+    let tab_contrats_bg = if tab == "contrats" { p.accent_primary } else { p.bg_secondary };
+    let tab_contrats_color = if tab == "contrats" { "white" } else { p.text_primary };
+    let tab_factures_bg = if tab == "factures" { p.accent_primary } else { p.bg_secondary };
+    let tab_factures_color = if tab == "factures" { "white" } else { p.text_primary };
+    let tab_autres_bg = if tab == "autres" { p.accent_primary } else { p.bg_secondary };
+    let tab_autres_color = if tab == "autres" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -33,7 +34,7 @@ pub fn ExpDocuments() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mes documents"
                 }
 
@@ -118,7 +119,7 @@ pub fn ExpDocuments() -> Element {
 
 #[component]
 fn DocumentRow(name: &'static str, doc_type: &'static str, date: &'static str, status: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let icon = match doc_type {
         "contrat" => "📝",
@@ -130,29 +131,29 @@ fn DocumentRow(name: &'static str, doc_type: &'static str, date: &'static str, s
     };
 
     let (status_label, status_color) = match status {
-        "signe" => ("Signe", c.accent_green),
-        "payee" => ("Payee", c.accent_green),
-        "a_completer" => ("A completer", c.accent_orange),
-        "lu" => ("Lu", c.text_muted),
-        "valide" => ("Valide", c.accent_green),
-        "en_attente" => ("En attente", c.accent_orange),
-        _ => ("Inconnu", c.text_muted),
+        "signe" => ("Signe", p.success),
+        "payee" => ("Payee", p.success),
+        "a_completer" => ("A completer", p.warning),
+        "lu" => ("Lu", p.text_muted),
+        "valide" => ("Valide", p.success),
+        "en_attente" => ("En attente", p.warning),
+        _ => ("Inconnu", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
             span { style: "font-size: 24px;", "{icon}" }
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                     "{name}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "Ajoute le {date}"
                 }
             }
@@ -166,11 +167,11 @@ fn DocumentRow(name: &'static str, doc_type: &'static str, date: &'static str, s
                 style: "display: flex; gap: 8px;",
 
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "Voir"
                 }
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "📥"
                 }
             }
@@ -180,26 +181,26 @@ fn DocumentRow(name: &'static str, doc_type: &'static str, date: &'static str, s
 
 #[component]
 fn UploadZone() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "border: 2px dashed {c.border}; border-radius: 8px; padding: 32px; text-align: center;",
+            style: "border: 2px dashed {p.border_default}; border-radius: 8px; padding: 32px; text-align: center;",
 
             span {
                 style: "font-size: 40px; display: block; margin-bottom: 12px;",
                 "📤"
             }
             p {
-                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 8px;",
+                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 8px;",
                 "Glissez vos fichiers ici"
             }
             p {
-                style: "font-size: 12px; color: {c.text_muted}; margin-bottom: 16px;",
+                style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 16px;",
                 "ou cliquez pour parcourir (PDF, JPG, PNG - max 10 Mo)"
             }
             button {
-                style: "padding: 10px 20px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 14px;",
+                style: "padding: 10px 20px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 14px;",
                 "Parcourir"
             }
         }
@@ -208,14 +209,14 @@ fn UploadZone() -> Element {
 
 #[component]
 fn RequiredDocuments() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         section {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Documents requis pour votre prochaine participation"
             }
 
@@ -232,10 +233,10 @@ fn RequiredDocuments() -> Element {
 
 #[component]
 fn RequiredItem(name: &'static str, provided: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let icon = if provided { "✅" } else { "⬜" };
-    let color = if provided { c.accent_green } else { c.text_muted };
+    let color = if provided { p.success } else { p.text_muted };
 
     rsx! {
         div {
@@ -250,7 +251,7 @@ fn RequiredItem(name: &'static str, provided: bool) -> Element {
 
             if !provided {
                 button {
-                    style: "padding: 6px 12px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                     "Ajouter"
                 }
             }

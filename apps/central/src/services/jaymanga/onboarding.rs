@@ -8,6 +8,7 @@
 //!   5. Fin → accès au service
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Étape de l'onboarding JayManga.
@@ -23,7 +24,7 @@ pub enum OnboardingStep {
 /// Composant principal de l'onboarding.
 #[component]
 pub fn Onboarding(on_complete: EventHandler<bool>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let mut step = use_signal(|| OnboardingStep::Welcome);
     let mut wants_seller = use_signal(|| false);
@@ -102,7 +103,7 @@ pub fn Onboarding(on_complete: EventHandler<bool>) -> Element {
                                 } else if is_done {
                                     "#FF6B3580"
                                 } else {
-                                    c.bg_hover
+                                    p.bg_overlay
                                 };
                                 {
                                     let w = if is_current { 24 } else { 8 };
@@ -128,7 +129,7 @@ fn WelcomeStep(
     on_choose_reader: EventHandler<MouseEvent>,
     on_choose_seller: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -142,11 +143,11 @@ fn WelcomeStep(
 
             // Bulle de dialogue Miou
             div {
-                style: "background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 16px; padding: 24px 32px; position: relative; max-width: 520px;",
+                style: "background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 16px; padding: 24px 32px; position: relative; max-width: 520px;",
 
                 // Pointe de la bulle
                 div {
-                    style: "position: absolute; top: -8px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 16px; height: 16px; background: {c.bg_secondary}; border-left: 1px solid {c.border}; border-top: 1px solid {c.border};",
+                    style: "position: absolute; top: -8px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 16px; height: 16px; background: {p.bg_secondary}; border-left: 1px solid {p.border_default}; border-top: 1px solid {p.border_default};",
                 }
 
                 div {
@@ -157,11 +158,11 @@ fn WelcomeStep(
                         "Miou"
                     }
                     p {
-                        style: "font-size: 16px; color: {c.text_white}; line-height: 1.6;",
+                        style: "font-size: 16px; color: {p.text_high}; line-height: 1.6;",
                         "Bienvenue sur JayManga ! 📚"
                     }
                     p {
-                        style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.6;",
+                        style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.6;",
                         "Je suis Miou, ton guide dans l'univers JayManga. Avant de commencer, dis-moi comment tu veux utiliser le service :"
                     }
                 }
@@ -173,28 +174,28 @@ fn WelcomeStep(
 
                 // Carte Lecteur
                 button {
-                    style: "display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 32px; background: {c.bg_secondary}; border: 2px solid {c.border}; border-radius: 12px; cursor: pointer; transition: all 0.2s; min-width: 200px; color: {c.text_primary};",
+                    style: "display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 32px; background: {p.bg_secondary}; border: 2px solid {p.border_default}; border-radius: 12px; cursor: pointer; transition: all 0.2s; min-width: 200px; color: {p.text_primary};",
                     onmouseenter: move |_| {},
                     onclick: move |evt| on_choose_reader.call(evt),
 
                     span { style: "font-size: 40px;", "📖" }
-                    span { style: "font-size: 16px; font-weight: 600; color: {c.text_white};", "Lecteur" }
-                    span { style: "font-size: 12px; color: {c.text_muted}; line-height: 1.4;", "Lire, collectionner et suivre ta progression manga" }
+                    span { style: "font-size: 16px; font-weight: 600; color: {p.text_high};", "Lecteur" }
+                    span { style: "font-size: 12px; color: {p.text_muted}; line-height: 1.4;", "Lire, collectionner et suivre ta progression manga" }
                 }
 
                 // Carte Vendeur
                 button {
-                    style: "display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 32px; background: {c.bg_secondary}; border: 2px solid {c.border}; border-radius: 12px; cursor: pointer; transition: all 0.2s; min-width: 200px; color: {c.text_primary};",
+                    style: "display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 32px; background: {p.bg_secondary}; border: 2px solid {p.border_default}; border-radius: 12px; cursor: pointer; transition: all 0.2s; min-width: 200px; color: {p.text_primary};",
                     onclick: move |evt| on_choose_seller.call(evt),
 
                     span { style: "font-size: 40px;", "🏪" }
-                    span { style: "font-size: 16px; font-weight: 600; color: {c.text_white};", "Lecteur + Vendeur" }
-                    span { style: "font-size: 12px; color: {c.text_muted}; line-height: 1.4;", "Publier, vendre et gérer tes œuvres en plus de lire" }
+                    span { style: "font-size: 16px; font-weight: 600; color: {p.text_high};", "Lecteur + Vendeur" }
+                    span { style: "font-size: 12px; color: {p.text_muted}; line-height: 1.4;", "Publier, vendre et gérer tes œuvres en plus de lire" }
                 }
             }
 
             p {
-                style: "font-size: 11px; color: {c.text_muted}; margin-top: 4px;",
+                style: "font-size: 11px; color: {p.text_muted}; margin-top: 4px;",
                 "Tu pourras activer les fonctionnalités vendeur plus tard si tu changes d'avis."
             }
         }
@@ -205,7 +206,7 @@ fn WelcomeStep(
 
 #[component]
 fn ExplanationStep(is_seller: bool, on_next: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -219,7 +220,7 @@ fn ExplanationStep(is_seller: bool, on_next: EventHandler<MouseEvent>) -> Elemen
 
             // Bulle explication
             div {
-                style: "background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 16px; padding: 24px 32px; width: 100%;",
+                style: "background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 16px; padding: 24px 32px; width: 100%;",
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 16px;",
@@ -230,7 +231,7 @@ fn ExplanationStep(is_seller: bool, on_next: EventHandler<MouseEvent>) -> Elemen
                     }
 
                     p {
-                        style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.7;",
+                        style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.7;",
                         "JayManga est un service intégré à ton COG. Voici ce que tu peux faire :"
                     }
 
@@ -246,7 +247,7 @@ fn ExplanationStep(is_seller: bool, on_next: EventHandler<MouseEvent>) -> Elemen
 
                     if is_seller {
                         div {
-                            style: "border-top: 1px solid {c.border}; padding-top: 12px; margin-top: 4px;",
+                            style: "border-top: 1px solid {p.border_default}; padding-top: 12px; margin-top: 4px;",
 
                             p {
                                 style: "font-size: 13px; color: #FF6B35; font-weight: 500; margin-bottom: 8px;",
@@ -276,12 +277,12 @@ fn ExplanationStep(is_seller: bool, on_next: EventHandler<MouseEvent>) -> Elemen
 
 #[component]
 fn FeatureItem(icon: &'static str, text: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
             style: "display: flex; gap: 10px; align-items: flex-start;",
             span { style: "font-size: 16px; flex-shrink: 0;", "{icon}" }
-            p { style: "font-size: 13px; color: {c.text_secondary}; line-height: 1.5;", "{text}" }
+            p { style: "font-size: 13px; color: {p.text_secondary}; line-height: 1.5;", "{text}" }
         }
     }
 }
@@ -293,7 +294,7 @@ const BUTTON_DELAY_SECS: u64 = 4;
 
 #[component]
 fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut button_enabled = use_signal(|| false);
     let mut remaining_secs = use_signal(|| BUTTON_DELAY_SECS as i32);
     let mut checkbox_accepted = use_signal(|| false);
@@ -312,11 +313,11 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
     let remaining = *remaining_secs.read();
     let accepted = *checkbox_accepted.read();
     let enabled = *button_enabled.read();
-    let cb_border_color = if accepted { "#FF6B35" } else { c.border };
+    let cb_border_color = if accepted { "#FF6B35" } else { p.border_default };
     let cb_bg_color = if accepted { "#FF6B35" } else { "transparent" };
-    let btn_bg = if can_proceed { "#FF6B35" } else { c.bg_hover };
-    let btn_color = if can_proceed { "white" } else { c.text_muted };
-    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let btn_bg = if can_proceed { "#FF6B35" } else { p.bg_overlay };
+    let btn_color = if can_proceed { "white" } else { p.text_muted };
+    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", p.border_default) };
     let btn_cursor = if can_proceed { "pointer" } else { "not-allowed" };
 
     rsx! {
@@ -337,7 +338,7 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
                         "Miou"
                     }
                     p {
-                        style: "font-size: 15px; color: {c.text_white}; margin-top: 4px;",
+                        style: "font-size: 15px; color: {p.text_high}; margin-top: 4px;",
                         "Pour utiliser JayManga, tu dois accepter les conditions d'utilisation suivantes. Prends le temps de les lire."
                     }
                 }
@@ -345,13 +346,13 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
             // Corps du contrat
             div {
-                style: "background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 12px; padding: 24px; max-height: 400px; overflow-y: auto;",
+                style: "background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 12px; padding: 24px; max-height: 400px; overflow-y: auto;",
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 16px;",
 
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; font-weight: 600; text-align: center; padding-bottom: 12px; border-bottom: 1px solid {c.border};",
+                        style: "font-size: 16px; color: {p.text_high}; font-weight: 600; text-align: center; padding-bottom: 12px; border-bottom: 1px solid {p.border_default};",
                         "📜 Conditions d'utilisation — Lecteur JayManga"
                     }
 
@@ -413,7 +414,7 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
                     }
                 }
                 span {
-                    style: "font-size: 13px; color: {c.text_secondary}; cursor: pointer;",
+                    style: "font-size: 13px; color: {p.text_secondary}; cursor: pointer;",
                     onclick: move |_| {
                         let val = *checkbox_accepted.read();
                         checkbox_accepted.set(!val);
@@ -447,7 +448,7 @@ fn ReaderContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
 #[component]
 fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut button_enabled = use_signal(|| false);
     let mut remaining_secs = use_signal(|| BUTTON_DELAY_SECS as i32);
     let mut checkbox_accepted = use_signal(|| false);
@@ -466,11 +467,11 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
     let remaining = *remaining_secs.read();
     let accepted = *checkbox_accepted.read();
     let enabled = *button_enabled.read();
-    let cb_border_color = if accepted { "#FF6B35" } else { c.border };
+    let cb_border_color = if accepted { "#FF6B35" } else { p.border_default };
     let cb_bg_color = if accepted { "#FF6B35" } else { "transparent" };
-    let btn_bg = if can_proceed { "#FF6B35" } else { c.bg_hover };
-    let btn_color = if can_proceed { "white" } else { c.text_muted };
-    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let btn_bg = if can_proceed { "#FF6B35" } else { p.bg_overlay };
+    let btn_color = if can_proceed { "white" } else { p.text_muted };
+    let btn_border = if can_proceed { "none".to_string() } else { format!("1px solid {}", p.border_default) };
     let btn_cursor = if can_proceed { "pointer" } else { "not-allowed" };
 
     rsx! {
@@ -491,7 +492,7 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
                         "Miou"
                     }
                     p {
-                        style: "font-size: 15px; color: {c.text_white}; margin-top: 4px;",
+                        style: "font-size: 15px; color: {p.text_high}; margin-top: 4px;",
                         "Tu as choisi d'activer les fonctionnalités vendeur. Voici les engagements supplémentaires liés à cette activité."
                     }
                 }
@@ -499,13 +500,13 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
 
             // Corps du contrat vendeur
             div {
-                style: "background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 12px; padding: 24px; max-height: 400px; overflow-y: auto;",
+                style: "background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 12px; padding: 24px; max-height: 400px; overflow-y: auto;",
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 16px;",
 
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; font-weight: 600; text-align: center; padding-bottom: 12px; border-bottom: 1px solid {c.border};",
+                        style: "font-size: 16px; color: {p.text_high}; font-weight: 600; text-align: center; padding-bottom: 12px; border-bottom: 1px solid {p.border_default};",
                         "📜 Conditions d'utilisation — Vendeur JayManga"
                     }
 
@@ -572,7 +573,7 @@ fn SellerContractStep(on_accept: EventHandler<MouseEvent>) -> Element {
                     }
                 }
                 span {
-                    style: "font-size: 13px; color: {c.text_secondary}; cursor: pointer;",
+                    style: "font-size: 13px; color: {p.text_secondary}; cursor: pointer;",
                     onclick: move |_| {
                         let val = *checkbox_accepted.read();
                         checkbox_accepted.set(!val);
@@ -610,7 +611,7 @@ fn ContractSection(
     title: &'static str,
     text: &'static str,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -626,11 +627,11 @@ fn ContractSection(
                 style: "display: flex; flex-direction: column; gap: 4px; flex: 1;",
 
                 p {
-                    style: "font-size: 13px; color: {c.text_white}; font-weight: 600;",
+                    style: "font-size: 13px; color: {p.text_high}; font-weight: 600;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted}; line-height: 1.6;",
+                    style: "font-size: 12px; color: {p.text_muted}; line-height: 1.6;",
                     "{text}"
                 }
             }

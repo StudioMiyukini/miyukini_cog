@@ -1,6 +1,7 @@
 //! Dashboard JayManga — hub principal vendeur + lecteur.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::domain::gamification::{gamification_level_for_xp, gamification_level_progress};
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -9,7 +10,7 @@ use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les données réelles
@@ -77,18 +78,18 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
 
                 div {
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white};",
+                        style: "font-size: 24px; color: {p.text_high};",
                         "📚 {shop_name}"
                     }
                     div {
                         style: "display: flex; align-items: center; gap: 8px; margin-top: 4px;",
                         span {
-                            style: "padding: 4px 10px; background: {c.accent_green}20; color: {c.accent_green}; border-radius: 4px; font-size: 11px; font-weight: 500;",
+                            style: "padding: 4px 10px; background: {p.success}20; color: {p.success}; border-radius: 4px; font-size: 11px; font-weight: 500;",
                             "{published_count} publiée(s)"
                         }
                         if draft_count > 0 {
                             span {
-                                style: "padding: 4px 10px; background: {c.text_muted}20; color: {c.text_muted}; border-radius: 4px; font-size: 11px; font-weight: 500;",
+                                style: "padding: 4px 10px; background: {p.text_muted}20; color: {p.text_muted}; border-radius: 4px; font-size: 11px; font-weight: 500;",
                                 "{draft_count} brouillon(s)"
                             }
                         }
@@ -112,11 +113,11 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
                         onclick: move |_| { state.write().section = JayMangaSection::Profile; },
 
                         p {
-                            style: "font-size: 12px; color: {c.text_secondary};",
+                            style: "font-size: 12px; color: {p.text_secondary};",
                             "Nv.{level} {level_name}"
                         }
                         div {
-                            style: "width: 80px; height: 6px; background: {c.bg_hover}; border-radius: 3px; overflow: hidden; margin-top: 2px;",
+                            style: "width: 80px; height: 6px; background: {p.bg_overlay}; border-radius: 3px; overflow: hidden; margin-top: 2px;",
                             div {
                                 style: "width: {progress_pct}%; height: 100%; background: #FFD700; border-radius: 3px;",
                             }
@@ -129,9 +130,9 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
             div {
                 style: "display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;",
 
-                StatCard { label: "Œuvres".to_string(), value: work_count.to_string(), icon: "📖".to_string(), color: c.accent_blue.to_string() }
-                StatCard { label: "Chapitres".to_string(), value: chapter_count.to_string(), icon: "📑".to_string(), color: c.accent_orange.to_string() }
-                StatCard { label: "Revenus".to_string(), value: total_revenue, icon: "💰".to_string(), color: c.accent_green.to_string() }
+                StatCard { label: "Œuvres".to_string(), value: work_count.to_string(), icon: "📖".to_string(), color: p.accent_primary.to_string() }
+                StatCard { label: "Chapitres".to_string(), value: chapter_count.to_string(), icon: "📑".to_string(), color: p.warning.to_string() }
+                StatCard { label: "Revenus".to_string(), value: total_revenue, icon: "💰".to_string(), color: p.success.to_string() }
                 StatCard { label: "Ventes ce mois".to_string(), value: month_sales.to_string(), icon: "📅".to_string(), color: "#8b5cf6".to_string() }
             }
 
@@ -162,16 +163,16 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
             // Ventes récentes
             if !recent_licenses.is_empty() {
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                     div {
                         style: "display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;",
                         h3 {
-                            style: "font-size: 14px; color: {c.text_white};",
+                            style: "font-size: 14px; color: {p.text_high};",
                             "🛒 Ventes récentes"
                         }
                         button {
-                            style: "font-size: 12px; color: {c.accent_blue}; background: transparent; border: none; cursor: pointer;",
+                            style: "font-size: 12px; color: {p.accent_primary}; background: transparent; border: none; cursor: pointer;",
                             onclick: move |_| { state.write().section = JayMangaSection::Sales; },
                             "Voir tout →"
                         }
@@ -193,20 +194,20 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
 
                                 rsx! {
                                     div {
-                                        style: "display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid {c.border};",
+                                        style: "display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid {p.border_default};",
 
                                         span { style: "font-size: 16px;", "📖" }
                                         div {
                                             style: "flex: 1;",
-                                            span { style: "font-size: 13px; color: {c.text_white};", "par {buyer_short}" }
+                                            span { style: "font-size: 13px; color: {p.text_high};", "par {buyer_short}" }
                                         }
-                                        Badge { text: ptype, color: c.accent_blue.to_string() }
+                                        Badge { text: ptype, color: p.accent_primary.to_string() }
                                         span {
-                                            style: "font-size: 14px; color: {c.accent_green}; font-weight: 600; min-width: 60px; text-align: right;",
+                                            style: "font-size: 14px; color: {p.success}; font-weight: 600; min-width: 60px; text-align: right;",
                                             "{amount_str}"
                                         }
                                         span {
-                                            style: "font-size: 11px; color: {c.text_muted}; min-width: 40px;",
+                                            style: "font-size: 11px; color: {p.text_muted}; min-width: 40px;",
                                             "{date}"
                                         }
                                     }
@@ -235,10 +236,10 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
                 if !popular.is_empty() {
                     rsx! {
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                             h3 {
-                                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 16px;",
+                                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 16px;",
                                 "🏆 Œuvres populaires"
                             }
 
@@ -250,16 +251,16 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
                                         let title = work.title.clone().unwrap_or_else(|| "Sans titre".to_string());
                                         let status = work.status.clone().unwrap_or_else(|| "draft".to_string());
                                         let status_color = match status.as_str() {
-                                            "published" => c.accent_green,
-                                            "draft" => c.text_muted,
-                                            _ => c.text_muted,
+                                            "published" => p.success,
+                                            "draft" => p.text_muted,
+                                            _ => p.text_muted,
                                         };
                                         let read_count = *count;
                                         let wid_reader = work.id.clone().unwrap_or_default();
 
                                         rsx! {
                                             button {
-                                                style: "padding: 12px; background: {c.bg_main}; border-radius: 8px; border: 1px solid {c.border}; text-align: center; cursor: pointer; color: {c.text_primary};",
+                                                style: "padding: 12px; background: {p.bg_base}; border-radius: 8px; border: 1px solid {p.border_default}; text-align: center; cursor: pointer; color: {p.text_primary};",
                                                 onclick: move |_| {
                                                     let mut s = state.write();
                                                     s.reader_work_id = Some(wid_reader.clone());
@@ -268,15 +269,15 @@ pub fn Dashboard(state: Signal<JayMangaState>) -> Element {
                                                 },
 
                                                 div {
-                                                    style: "width: 60px; height: 84px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 8px;",
+                                                    style: "width: 60px; height: 84px; background: {p.bg_overlay}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 8px;",
                                                     "📖"
                                                 }
                                                 p {
-                                                    style: "font-size: 12px; color: {c.text_white}; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
+                                                    style: "font-size: 12px; color: {p.text_high}; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
                                                     "{title}"
                                                 }
                                                 p {
-                                                    style: "font-size: 11px; color: {c.accent_green}; margin-top: 2px;",
+                                                    style: "font-size: 11px; color: {p.success}; margin-top: 2px;",
                                                     "{read_count} vente(s)"
                                                 }
                                                 span {

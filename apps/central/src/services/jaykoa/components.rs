@@ -5,6 +5,7 @@
 //! - ConflictBadge : indicateur de conflit
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::CalendarViewMode;
 use jaykoa::data::{TemporalEntry, TemporalConflict, EventSource, EntryType};
@@ -59,7 +60,7 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: {c.bg_secondary}; border-bottom: 1px solid {c.border};",
+            style: "display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: {p.bg_secondary}; border-bottom: 1px solid {p.border_default};",
             
             // Partie gauche : navigation temporelle
             div {
@@ -67,10 +68,10 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
                 
                 // Bouton Aujourd'hui
                 {
-                    let today_color = if is_today_visible { c.text_muted.to_string() } else { c.text_primary.to_string() };
+                    let today_color = if is_today_visible { p.text_muted.to_string() } else { p.text_primary.to_string() };
                     rsx! {
                         button {
-                            style: "padding: 8px 16px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {today_color}; font-size: 13px; cursor: pointer; transition: all 0.2s;",
+                            style: "padding: 8px 16px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {today_color}; font-size: 13px; cursor: pointer; transition: all 0.2s;",
                             disabled: is_today_visible,
                             onclick: move |_| props.on_today.call(()),
                             "Aujourd'hui"
@@ -82,12 +83,12 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
                 div {
                     style: "display: flex; gap: 4px;",
                     button {
-                        style: "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                        style: "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer;",
                         onclick: move |_| props.on_prev.call(()),
                         "◀"
                     }
                     button {
-                        style: "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                        style: "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer;",
                         onclick: move |_| props.on_next.call(()),
                         "▶"
                     }
@@ -95,7 +96,7 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
                 
                 // Libellé de période
                 h2 {
-                    style: "font-size: 18px; font-weight: 500; color: {c.text_white}; margin: 0;",
+                    style: "font-size: 18px; font-weight: 500; color: {p.text_high}; margin: 0;",
                     "{period_label}"
                 }
                 
@@ -103,10 +104,10 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
                 if props.conflicts_count > 0 {
                     {
                         let plural = if props.conflicts_count > 1 { "s" } else { "" };
-                        let badge_bg = format!("{}20", c.accent_orange);
+                        let badge_bg = format!("{}20", p.warning);
                         rsx! {
                             span {
-                                style: "padding: 4px 8px; background: {badge_bg}; color: {c.accent_orange}; border-radius: 4px; font-size: 11px; font-weight: 500;",
+                                style: "padding: 4px 8px; background: {badge_bg}; color: {p.warning}; border-radius: 4px; font-size: 11px; font-weight: 500;",
                                 "⚠️ {props.conflicts_count} conflit{plural}"
                             }
                         }
@@ -116,13 +117,13 @@ pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
             
             // Partie droite : sélecteur de vue
             div {
-                style: "display: flex; gap: 4px; background: {c.bg_hover}; padding: 4px; border-radius: 6px;",
+                style: "display: flex; gap: 4px; background: {p.bg_overlay}; padding: 4px; border-radius: 6px;",
                 
                 for mode in [CalendarViewMode::Day, CalendarViewMode::Week, CalendarViewMode::Month, CalendarViewMode::Schedule] {
                     {
                         let is_active = props.view_mode == mode;
-                        let bg = if is_active { c.accent_blue.to_string() } else { "transparent".to_string() };
-                        let color = if is_active { "white".to_string() } else { c.text_secondary.to_string() };
+                        let bg = if is_active { p.accent_primary.to_string() } else { "transparent".to_string() };
+                        let color = if is_active { "white".to_string() } else { p.text_secondary.to_string() };
                         
                         rsx! {
                             button {
@@ -191,7 +192,7 @@ pub fn EventBlock(props: EventBlockProps) -> Element {
     
     // Style de bordure pour les conflits
     let border = if props.has_conflict {
-        format!("3px solid {}", c.accent_orange)
+        format!("3px solid {}", p.warning)
     } else {
         "none".to_string()
     };
@@ -265,7 +266,7 @@ pub fn ConflictBadge(props: ConflictBadgeProps) -> Element {
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: {c.accent_orange}15; border: 1px solid {c.accent_orange}40; border-radius: 6px;",
+            style: "display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: {p.warning}15; border: 1px solid {p.warning}40; border-radius: 6px;",
             
             span {
                 style: "font-size: 16px;",
@@ -273,7 +274,7 @@ pub fn ConflictBadge(props: ConflictBadgeProps) -> Element {
             }
             
             span {
-                style: "font-size: 12px; color: {c.accent_orange};",
+                style: "font-size: 12px; color: {p.warning};",
                 "{desc}"
             }
         }

@@ -4,6 +4,7 @@
 //! Navigation libre entre étapes. Indicateur de complétion par étape.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use dioxus::html::HasFileData;
 use jaymanga::data::{Work, Chapter, Page};
 use crate::data::use_service_connections;
@@ -74,7 +75,7 @@ impl EditorStep {
 
 #[component]
 pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let editing_id = state.read().editing_work_id.clone();
     let is_edit = editing_id.is_some();
@@ -139,16 +140,16 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                 div {
                     style: "display: flex; align-items: center; gap: 12px;",
                     button {
-                        style: "padding: 8px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                         onclick: move |_| { state.write().section = JayMangaSection::Catalogue; },
                         "← Retour"
                     }
                     h2 {
-                        style: "font-size: 22px; color: {c.text_white};",
+                        style: "font-size: 22px; color: {p.text_high};",
                         "{page_title}"
                     }
                     if is_edit {
-                        Badge { text: work_status.clone(), color: c.accent_green.to_string() }
+                        Badge { text: work_status.clone(), color: p.success.to_string() }
                     }
                 }
 
@@ -156,7 +157,7 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                     let completed = EditorStep::all().iter().filter(|s| step_complete(**s)).count();
                     rsx! {
                         span {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "{completed}/6 étapes complétées"
                         }
                     }
@@ -172,20 +173,20 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                         let is_current = *s == step;
                         let is_complete = step_complete(*s);
                         let bg = if is_current {
-                            format!("{}30", c.accent_blue)
+                            format!("{}30", p.accent_primary)
                         } else if is_complete {
-                            format!("{}20", c.accent_green)
+                            format!("{}20", p.success)
                         } else {
-                            c.bg_secondary.to_string()
+                            p.bg_secondary.to_string()
                         };
                         let border = if is_current {
-                            format!("2px solid {}", c.accent_blue)
+                            format!("2px solid {}", p.accent_primary)
                         } else if is_complete {
-                            format!("1px solid {}60", c.accent_green)
+                            format!("1px solid {}60", p.success)
                         } else {
-                            format!("1px solid {}", c.border)
+                            format!("1px solid {}", p.border_default)
                         };
-                        let text_c = if is_current { c.text_white } else if is_complete { c.accent_green } else { c.text_muted };
+                        let text_c = if is_current { p.text_high } else if is_complete { p.success } else { p.text_muted };
                         let step_val = *s;
 
                         rsx! {
@@ -203,7 +204,7 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                                 }
                                 if is_complete {
                                     span {
-                                        style: "font-size: 10px; color: {c.accent_green};",
+                                        style: "font-size: 10px; color: {p.success};",
                                         "✓"
                                     }
                                 }
@@ -315,8 +316,8 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                             }
 
                             div {
-                                style: "padding: 10px; background: {c.bg_main}; border-radius: 4px;",
-                                p { style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500; margin-bottom: 8px;", "Formats disponibles" }
+                                style: "padding: 10px; background: {p.bg_base}; border-radius: 4px;",
+                                p { style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500; margin-bottom: 8px;", "Formats disponibles" }
                                 div {
                                     style: "display: flex; flex-wrap: wrap; gap: 6px;",
                                     FormatBadge { name: "manga", description: "Droite → Gauche (RTL)" }
@@ -329,17 +330,17 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                         }
 
                         div {
-                            style: "padding: 16px; background: {c.bg_main}; border-radius: 4px; margin-top: 12px;",
-                            h4 { style: "font-size: 13px; color: {c.text_white}; margin-bottom: 8px;", "📊 Structure actuelle" }
+                            style: "padding: 16px; background: {p.bg_base}; border-radius: 4px; margin-top: 12px;",
+                            h4 { style: "font-size: 13px; color: {p.text_high}; margin-bottom: 8px;", "📊 Structure actuelle" }
                             div {
                                 style: "display: flex; gap: 20px; font-size: 13px;",
-                                span { style: "color: {c.text_secondary};", "Chapitres : " }
-                                span { style: "color: {c.text_white}; font-weight: 500;", {chapters.len().to_string()} }
-                                span { style: "color: {c.text_secondary}; margin-left: 16px;", "Pages totales : " }
-                                span { style: "color: {c.text_white}; font-weight: 500;", "{total_pages}" }
+                                span { style: "color: {p.text_secondary};", "Chapitres : " }
+                                span { style: "color: {p.text_high}; font-weight: 500;", {chapters.len().to_string()} }
+                                span { style: "color: {p.text_secondary}; margin-left: 16px;", "Pages totales : " }
+                                span { style: "color: {p.text_high}; font-weight: 500;", "{total_pages}" }
                             }
                             p {
-                                style: "font-size: 11px; color: {c.text_muted}; margin-top: 8px;",
+                                style: "font-size: 11px; color: {p.text_muted}; margin-top: 8px;",
                                 "Gérez les chapitres et pages depuis l'écran « Chapitres » du catalogue."
                             }
                         }
@@ -375,11 +376,11 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                         div {
                             style: "display: flex; align-items: center; gap: 12px; margin-top: 12px;",
                             label {
-                                style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                                style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                                 "Autoriser le téléchargement"
                             }
                             button {
-                                style: "padding: 8px 16px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                                style: "padding: 8px 16px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                                 onclick: move |_| { let val = *allow_download.read(); allow_download.set(!val); },
                                 if *allow_download.read() { "✅ Oui" } else { "❌ Non" }
                             }
@@ -397,10 +398,10 @@ pub fn WorkForm(state: Signal<JayMangaState>) -> Element {
                             };
                             rsx! {
                                 div {
-                                    style: "padding: 12px; background: {c.bg_main}; border-radius: 4px; margin-top: 12px; text-align: center;",
-                                    p { style: "font-size: 11px; color: {c.text_muted};", "Aperçu prix" }
-                                    p { style: "font-size: 24px; color: {c.accent_green}; font-weight: 700;", "{display_price}" }
-                                    p { style: "font-size: 11px; color: {c.text_muted};", "Modèle : {model}" }
+                                    style: "padding: 12px; background: {p.bg_base}; border-radius: 4px; margin-top: 12px; text-align: center;",
+                                    p { style: "font-size: 11px; color: {p.text_muted};", "Aperçu prix" }
+                                    p { style: "font-size: 24px; color: {p.success}; font-weight: 700;", "{display_price}" }
+                                    p { style: "font-size: 11px; color: {p.text_muted};", "Modèle : {model}" }
                                 }
                             }
                         }
@@ -565,7 +566,7 @@ fn is_image_file(path: &str) -> bool {
 
 #[component]
 fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Liste des fichiers sélectionnés (chemins)
@@ -577,8 +578,8 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
     // Drag hover
     let mut is_drag_over: Signal<bool> = use_signal(|| false);
 
-    let border_color = if *is_drag_over.read() { c.accent_blue } else { c.border };
-    let drop_bg = if *is_drag_over.read() { format!("{}15", c.accent_blue) } else { c.bg_main.to_string() };
+    let border_color = if *is_drag_over.read() { p.accent_primary } else { p.border_default };
+    let drop_bg = if *is_drag_over.read() { format!("{}15", p.accent_primary) } else { p.bg_base.to_string() };
 
     // Nombre de fichiers sélectionnés
     let file_count = selected_files.read().len();
@@ -617,7 +618,7 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
 
                 p { style: "font-size: 36px; margin-bottom: 12px;", "📁" }
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; font-weight: 500;",
+                    style: "font-size: 14px; color: {p.text_high}; font-weight: 500;",
                     if *is_drag_over.read() {
                         "Relâchez pour ajouter les fichiers"
                     } else {
@@ -625,17 +626,17 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                     }
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted}; margin-top: 4px;",
+                    style: "font-size: 12px; color: {p.text_muted}; margin-top: 4px;",
                     "Images (PNG, JPG, WebP) ou archives (ZIP, CBZ)"
                 }
                 p {
-                    style: "font-size: 11px; color: {c.text_muted}; margin-top: 12px;",
+                    style: "font-size: 11px; color: {p.text_muted}; margin-top: 12px;",
                     "— ou —"
                 }
 
                 // Input file caché + bouton visible
                 label {
-                    style: "display: inline-block; margin-top: 8px; padding: 8px 20px; background: {c.accent_blue}; color: white; border-radius: 4px; cursor: pointer; font-size: 13px;",
+                    style: "display: inline-block; margin-top: 8px; padding: 8px 20px; background: {p.accent_primary}; color: white; border-radius: 4px; cursor: pointer; font-size: 13px;",
                     "Sélectionner des fichiers"
                     input {
                         r#type: "file",
@@ -662,23 +663,23 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
             // ── Fichiers sélectionnés (avant import) ────────────────
             if file_count > 0 {
                 div {
-                    style: "margin-top: 16px; padding: 16px; background: {c.bg_main}; border-radius: 4px; border: 1px solid {c.border};",
+                    style: "margin-top: 16px; padding: 16px; background: {p.bg_base}; border-radius: 4px; border: 1px solid {p.border_default};",
 
                     div {
                         style: "display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;",
                         h4 {
-                            style: "font-size: 13px; color: {c.text_white};",
+                            style: "font-size: 13px; color: {p.text_high};",
                             "📎 {file_count} fichier(s) sélectionné(s)"
                         }
                         div {
                             style: "display: flex; gap: 8px;",
                             button {
-                                style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 11px;",
+                                style: "padding: 6px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 11px;",
                                 onclick: move |_| { selected_files.write().clear(); },
                                 "✕ Tout retirer"
                             }
                             button {
-                                style: "padding: 6px 16px; background: {c.accent_green}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px; font-weight: 500;",
+                                style: "padding: 6px 16px; background: {p.success}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px; font-weight: 500;",
                                 onclick: {
                                     let work_id = work_id.clone();
                                     move |_| {
@@ -763,10 +764,10 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                                 let idx_display = idx + 1;
                                 rsx! {
                                     div {
-                                        style: "display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: {c.bg_secondary}; border-radius: 2px; font-size: 11px;",
-                                        span { style: "color: {c.text_muted}; min-width: 20px;", "{idx_display}" }
+                                        style: "display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: {p.bg_secondary}; border-radius: 2px; font-size: 11px;",
+                                        span { style: "color: {p.text_muted}; min-width: 20px;", "{idx_display}" }
                                         span { style: "font-size: 12px;", "🖼️" }
-                                        span { style: "color: {c.text_secondary}; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;", "{filename}" }
+                                        span { style: "color: {p.text_secondary}; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;", "{filename}" }
                                     }
                                 }
                             }
@@ -778,22 +779,22 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
             // ── Statut d'import ──────────────────────────────────────
             if let Some(ref status) = *import_status.read() {
                 div {
-                    style: "padding: 10px 16px; background: {c.accent_green}15; border: 1px solid {c.accent_green}40; border-radius: 4px; margin-top: 12px;",
-                    p { style: "font-size: 12px; color: {c.accent_green};", "{status}" }
+                    style: "padding: 10px 16px; background: {p.success}15; border: 1px solid {p.success}40; border-radius: 4px; margin-top: 12px;",
+                    p { style: "font-size: 12px; color: {p.success};", "{status}" }
                 }
             }
 
             // ── Fichiers existants dans la DB ────────────────────────
             if is_edit || *imported_count.read() > 0 {
                 div {
-                    style: "padding: 16px; background: {c.bg_main}; border-radius: 4px; margin-top: 16px;",
+                    style: "padding: 16px; background: {p.bg_base}; border-radius: 4px; margin-top: 16px;",
                     div {
                         style: "display: flex; gap: 20px; align-items: center;",
                         span { style: "font-size: 24px;", "📊" }
                         div {
-                            p { style: "font-size: 13px; color: {c.text_white};", "Fichiers existants" }
+                            p { style: "font-size: 13px; color: {p.text_high};", "Fichiers existants" }
                             p {
-                                style: "font-size: 12px; color: {c.text_muted};",
+                                style: "font-size: 12px; color: {p.text_muted};",
                                 "{chapters_count} chapitre(s), {total_pages} page(s) importées"
                             }
                             if *imported_count.read() > 0 {
@@ -801,7 +802,7 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
                                     let imported_display = *imported_count.read();
                                     rsx! {
                                         p {
-                                            style: "font-size: 11px; color: {c.accent_green}; margin-top: 2px;",
+                                            style: "font-size: 11px; color: {p.success}; margin-top: 2px;",
                                             "+ {imported_display} page(s) ajoutée(s) cette session"
                                         }
                                     }
@@ -813,7 +814,7 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
             }
 
             p {
-                style: "font-size: 11px; color: {c.text_muted}; margin-top: 8px;",
+                style: "font-size: 11px; color: {p.text_muted}; margin-top: 8px;",
                 "Sélectionnez des images dans l'ordre des pages. Un chapitre sera automatiquement créé pour chaque lot importé."
             }
         }
@@ -824,7 +825,7 @@ fn StepFiles(is_edit: bool, chapters_count: usize, total_pages: usize, work_id: 
 
 #[component]
 fn StepOptimization(work_id: String, is_edit: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -866,9 +867,9 @@ fn StepOptimization(work_id: String, is_edit: bool) -> Element {
 
             if is_edit {
                 div {
-                    style: "padding: 20px; background: {c.bg_main}; border-radius: 8px; margin-top: 16px;",
+                    style: "padding: 20px; background: {p.bg_base}; border-radius: 8px; margin-top: 16px;",
 
-                    h4 { style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;", "État de l'optimisation" }
+                    h4 { style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;", "État de l'optimisation" }
 
                     div {
                         style: "display: flex; gap: 20px; align-items: center;",
@@ -880,13 +881,13 @@ fn StepOptimization(work_id: String, is_edit: bool) -> Element {
                                 let pct = if total > 0 { optimized * 100 / total } else { 0 };
                                 rsx! {
                                     div {
-                                        style: "width: 100%; height: 8px; background: {c.bg_hover}; border-radius: 4px; overflow: hidden;",
+                                        style: "width: 100%; height: 8px; background: {p.bg_overlay}; border-radius: 4px; overflow: hidden;",
                                         div {
-                                            style: "width: {pct}%; height: 100%; background: {c.accent_green}; border-radius: 4px;",
+                                            style: "width: {pct}%; height: 100%; background: {p.success}; border-radius: 4px;",
                                         }
                                     }
                                     div {
-                                        style: "display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: {c.text_muted};",
+                                        style: "display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: {p.text_muted};",
                                         span { "{optimized} optimisées" }
                                         span { "{pending} en attente" }
                                     }
@@ -896,7 +897,7 @@ fn StepOptimization(work_id: String, is_edit: bool) -> Element {
 
                         if pending > 0 {
                             button {
-                                style: "padding: 8px 16px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
+                                style: "padding: 8px 16px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
                                 "⚡ Re-optimiser"
                             }
                         }
@@ -905,7 +906,7 @@ fn StepOptimization(work_id: String, is_edit: bool) -> Element {
             }
 
             p {
-                style: "font-size: 11px; color: {c.text_muted}; margin-top: 8px;",
+                style: "font-size: 11px; color: {p.text_muted}; margin-top: 8px;",
                 "Les paramètres de compression sont configurés dans l'écran Boutique."
             }
         }
@@ -924,7 +925,7 @@ fn StepPublication(
     total_pages: usize,
     status: String,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let price_display = if pricing_model == "free" {
         "Gratuit".to_string()
@@ -939,10 +940,10 @@ fn StepPublication(
     rsx! {
         FormSection { title: "🚀 Publication".to_string(),
             div {
-                style: "padding: 24px; background: {c.bg_main}; border-radius: 8px;",
+                style: "padding: 24px; background: {p.bg_base}; border-radius: 8px;",
 
                 h3 {
-                    style: "font-size: 20px; color: {c.text_white}; margin-bottom: 16px; text-align: center;",
+                    style: "font-size: 20px; color: {p.text_high}; margin-bottom: 16px; text-align: center;",
                     "📖 {title}"
                 }
 
@@ -950,43 +951,43 @@ fn StepPublication(
                     style: "display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center;",
 
                     div {
-                        p { style: "font-size: 11px; color: {c.text_muted};", "Format" }
-                        p { style: "font-size: 14px; color: {c.text_white}; font-weight: 500;", "{reading_format}" }
+                        p { style: "font-size: 11px; color: {p.text_muted};", "Format" }
+                        p { style: "font-size: 14px; color: {p.text_high}; font-weight: 500;", "{reading_format}" }
                     }
                     div {
-                        p { style: "font-size: 11px; color: {c.text_muted};", "Chapitres" }
-                        p { style: "font-size: 14px; color: {c.text_white}; font-weight: 500;", "{chapters_count}" }
+                        p { style: "font-size: 11px; color: {p.text_muted};", "Chapitres" }
+                        p { style: "font-size: 14px; color: {p.text_high}; font-weight: 500;", "{chapters_count}" }
                     }
                     div {
-                        p { style: "font-size: 11px; color: {c.text_muted};", "Pages" }
-                        p { style: "font-size: 14px; color: {c.text_white}; font-weight: 500;", "{total_pages}" }
+                        p { style: "font-size: 11px; color: {p.text_muted};", "Pages" }
+                        p { style: "font-size: 14px; color: {p.text_high}; font-weight: 500;", "{total_pages}" }
                     }
                     div {
-                        p { style: "font-size: 11px; color: {c.text_muted};", "Prix" }
-                        p { style: "font-size: 14px; color: {c.accent_green}; font-weight: 500;", "{price_display}" }
+                        p { style: "font-size: 11px; color: {p.text_muted};", "Prix" }
+                        p { style: "font-size: 14px; color: {p.success}; font-weight: 500;", "{price_display}" }
                     }
                 }
             }
 
             div {
                 style: "display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px;",
-                span { style: "font-size: 13px; color: {c.text_secondary};", "Statut actuel :" }
-                Badge { text: status, color: c.accent_green.to_string() }
+                span { style: "font-size: 13px; color: {p.text_secondary};", "Statut actuel :" }
+                Badge { text: status, color: p.success.to_string() }
             }
 
             if ready {
                 div {
-                    style: "padding: 12px; background: {c.accent_green}15; border: 1px solid {c.accent_green}40; border-radius: 4px; margin-top: 12px; text-align: center;",
-                    p { style: "font-size: 14px; color: {c.accent_green}; font-weight: 600;", "✅ Prêt pour publication" }
-                    p { style: "font-size: 12px; color: {c.text_secondary}; margin-top: 4px;", "Cliquez sur « Publier » pour rendre cette œuvre disponible." }
+                    style: "padding: 12px; background: {p.success}15; border: 1px solid {p.success}40; border-radius: 4px; margin-top: 12px; text-align: center;",
+                    p { style: "font-size: 14px; color: {p.success}; font-weight: 600;", "✅ Prêt pour publication" }
+                    p { style: "font-size: 12px; color: {p.text_secondary}; margin-top: 4px;", "Cliquez sur « Publier » pour rendre cette œuvre disponible." }
                 }
             } else {
                 div {
-                    style: "padding: 12px; background: {c.accent_orange}15; border: 1px solid {c.accent_orange}40; border-radius: 4px; margin-top: 12px; text-align: center;",
-                    p { style: "font-size: 14px; color: {c.accent_orange}; font-weight: 600;", "⚠️ Étapes manquantes" }
-                    if title.is_empty() { p { style: "font-size: 12px; color: {c.text_muted};", "— Titre requis" } }
-                    if chapters_count == 0 { p { style: "font-size: 12px; color: {c.text_muted};", "— Au moins un chapitre requis" } }
-                    if total_pages == 0 { p { style: "font-size: 12px; color: {c.text_muted};", "— Au moins une page requise" } }
+                    style: "padding: 12px; background: {p.warning}15; border: 1px solid {p.warning}40; border-radius: 4px; margin-top: 12px; text-align: center;",
+                    p { style: "font-size: 14px; color: {p.warning}; font-weight: 600;", "⚠️ Étapes manquantes" }
+                    if title.is_empty() { p { style: "font-size: 12px; color: {p.text_muted};", "— Titre requis" } }
+                    if chapters_count == 0 { p { style: "font-size: 12px; color: {p.text_muted};", "— Au moins un chapitre requis" } }
+                    if total_pages == 0 { p { style: "font-size: 12px; color: {p.text_muted};", "— Au moins une page requise" } }
                 }
             }
         }
@@ -997,28 +998,28 @@ fn StepPublication(
 
 #[component]
 fn FormatBadge(name: &'static str, description: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "padding: 4px 10px; background: {c.bg_hover}; border-radius: 4px; font-size: 11px;",
+            style: "padding: 4px 10px; background: {p.bg_overlay}; border-radius: 4px; font-size: 11px;",
             title: "{description}",
-            span { style: "color: {c.text_white}; font-weight: 500;", "{name}" }
-            span { style: "color: {c.text_muted}; margin-left: 4px;", "— {description}" }
+            span { style: "color: {p.text_high}; font-weight: 500;", "{name}" }
+            span { style: "color: {p.text_muted}; margin-left: 4px;", "— {description}" }
         }
     }
 }
 
 #[component]
 fn OptConfigCard(label: &'static str, value: String, icon: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "padding: 16px; background: {c.bg_main}; border-radius: 4px; text-align: center;",
+            style: "padding: 16px; background: {p.bg_base}; border-radius: 4px; text-align: center;",
             span { style: "font-size: 24px;", "{icon}" }
-            p { style: "font-size: 11px; color: {c.text_muted}; margin-top: 4px;", "{label}" }
-            p { style: "font-size: 16px; color: {c.text_white}; font-weight: 600;", "{value}" }
+            p { style: "font-size: 11px; color: {p.text_muted}; margin-top: 4px;", "{label}" }
+            p { style: "font-size: 16px; color: {p.text_high}; font-weight: 600;", "{value}" }
         }
     }
 }

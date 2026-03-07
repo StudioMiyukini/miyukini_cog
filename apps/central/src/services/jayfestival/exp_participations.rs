@@ -5,6 +5,7 @@
 //! @human: Ecrans EXP-E05/E06 JayFestival: liste et detail des participations exposant.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
@@ -18,7 +19,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// Liste des participations de l'exposant.
 #[component]
 pub fn ExpParticipations() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut selected_participation = use_signal(|| None::<String>);
 
@@ -81,20 +82,20 @@ pub fn ExpParticipations() -> Element {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Mes participations"
             }
 
             // Participations confirmées
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Participations confirmees ({confirmed.len()})"
                 }
 
                 if confirmed.is_empty() {
                     div {
-                        style: "padding: 20px; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted}; text-align: center; font-size: 14px;",
+                        style: "padding: 20px; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted}; text-align: center; font-size: 14px;",
                         "Aucune participation confirmee"
                     }
                 }
@@ -121,13 +122,13 @@ pub fn ExpParticipations() -> Element {
             // Candidatures en attente
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Candidatures en attente ({pending.len()})"
                 }
 
                 if pending.is_empty() {
                     div {
-                        style: "padding: 20px; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted}; text-align: center; font-size: 14px;",
+                        style: "padding: 20px; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted}; text-align: center; font-size: 14px;",
                         "Aucune candidature en attente"
                     }
                 }
@@ -153,7 +154,7 @@ pub fn ExpParticipations() -> Element {
             if !past.is_empty() {
                 section {
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                        style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                         "Participations passees ({past.len()})"
                     }
 
@@ -186,7 +187,7 @@ fn ParticipationCard(
     status: &'static str,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les infos de l'édition
@@ -200,15 +201,15 @@ fn ParticipationCard(
     let date = edition.as_ref().and_then(|e| e.start_date.clone()).unwrap_or_default();
 
     let (status_label, status_color) = match status {
-        "confirmee" => ("Confirmee", c.accent_green),
-        "en_attente" => ("En attente", c.accent_orange),
-        "terminee" => ("Terminee", c.text_muted),
-        _ => ("Inconnu", c.text_muted),
+        "confirmee" => ("Confirmee", p.success),
+        "en_attente" => ("En attente", p.warning),
+        "terminee" => ("Terminee", p.text_muted),
+        _ => ("Inconnu", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer;",
+            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer;",
             onclick: move |evt| onclick.call(evt),
 
             span { style: "font-size: 28px;", "🎪" }
@@ -216,11 +217,11 @@ fn ParticipationCard(
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; font-weight: 500; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; font-weight: 500; margin-bottom: 4px;",
                     "{name}"
                 }
                 div {
-                    style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_muted};",
+                    style: "display: flex; gap: 16px; font-size: 12px; color: {p.text_muted};",
                     if !date.is_empty() {
                         span { "📆 {date}" }
                     }
@@ -242,7 +243,7 @@ fn ParticipationCard(
 /// Détail d'une participation.
 #[component]
 fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger la participation
@@ -266,9 +267,9 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
     let status = participation.as_ref().and_then(|p| p.status_candidature.clone()).unwrap_or_default();
 
     let status_color = match status.as_str() {
-        "acceptee" => c.accent_green.to_string(),
-        "en_attente" => c.accent_orange.to_string(),
-        _ => c.text_muted.to_string(),
+        "acceptee" => p.success.to_string(),
+        "en_attente" => p.warning.to_string(),
+        _ => p.text_muted.to_string(),
     };
 
     rsx! {
@@ -277,7 +278,7 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
 
             // Retour
             button {
-                style: "display: flex; align-items: center; gap: 8px; padding: 8px 0; background: none; border: none; color: {c.accent_blue}; cursor: pointer; font-size: 13px;",
+                style: "display: flex; align-items: center; gap: 8px; padding: 8px 0; background: none; border: none; color: {p.accent_primary}; cursor: pointer; font-size: 13px;",
                 onclick: move |_| on_back.call(()),
                 "← Retour aux participations"
             }
@@ -288,11 +289,11 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
 
                 div {
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white}; margin-bottom: 8px;",
+                        style: "font-size: 24px; color: {p.text_high}; margin-bottom: 8px;",
                         "{name}"
                     }
                     div {
-                        style: "display: flex; gap: 12px; font-size: 13px; color: {c.text_muted};",
+                        style: "display: flex; gap: 12px; font-size: 13px; color: {p.text_muted};",
                         if !date.is_empty() {
                             span { "📆 {date}" }
                         }
@@ -310,10 +311,10 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
 
             // Informations stand
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Mon stand"
                 }
 
@@ -329,10 +330,10 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
 
             // Documents
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Documents"
                 }
 
@@ -368,16 +369,16 @@ fn ParticipationDetail(participation_id: String, on_back: EventHandler<()>) -> E
 
 #[component]
 fn InfoField(label: &'static str, value: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
             span {
-                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                 "{label}"
             }
             span {
-                style: "font-size: 14px; color: {c.text_primary};",
+                style: "font-size: 14px; color: {p.text_primary};",
                 "{value}"
             }
         }
@@ -386,23 +387,23 @@ fn InfoField(label: &'static str, value: String) -> Element {
 
 #[component]
 fn DocumentItem(name: &'static str, status: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (icon, status_label, status_color) = match status {
-        "signe" => ("✅", "Signe", c.accent_green),
-        "a_remplir" => ("📝", "A remplir", c.accent_orange),
-        "lu" => ("👁️", "Lu", c.text_muted),
-        _ => ("📄", "En attente", c.text_muted),
+        "signe" => ("✅", "Signe", p.success),
+        "a_remplir" => ("📝", "A remplir", p.warning),
+        "lu" => ("👁️", "Lu", p.text_muted),
+        _ => ("📄", "En attente", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; padding: 12px; background: {c.bg_main}; border-radius: 6px;",
+            style: "display: flex; align-items: center; gap: 12px; padding: 12px; background: {p.bg_base}; border-radius: 6px;",
 
             span { style: "font-size: 16px;", "{icon}" }
 
             span {
-                style: "flex: 1; font-size: 13px; color: {c.text_primary};",
+                style: "flex: 1; font-size: 13px; color: {p.text_primary};",
                 "{name}"
             }
 
@@ -412,7 +413,7 @@ fn DocumentItem(name: &'static str, status: &'static str) -> Element {
             }
 
             button {
-                style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                 "Voir"
             }
         }

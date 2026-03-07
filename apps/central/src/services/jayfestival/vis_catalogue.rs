@@ -5,6 +5,7 @@
 //! @human: Ecran VIS JayFestival: catalogue des editions publiees et agenda visiteur.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::services::jaykoa::sync_service;
@@ -14,7 +15,7 @@ const DEFAULT_PROFILE: &str = "default";
 
 #[component]
 pub fn VisCatalogue() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les éditions (filtre publiées/en cours de préférence)
@@ -28,12 +29,12 @@ pub fn VisCatalogue() -> Element {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Catalogue des evenements"
             }
 
             p {
-                style: "font-size: 14px; color: {c.text_secondary};",
+                style: "font-size: 14px; color: {p.text_secondary};",
                 "Decouvrez les evenements, consultez les programmes et ajoutez-les a votre agenda."
             }
 
@@ -56,19 +57,19 @@ pub fn VisCatalogue() -> Element {
                             let theme_text = edition.theme.clone().unwrap_or_default();
                             let edition_id = edition.id.clone().unwrap_or_default();
                             let status_color = match status.as_str() {
-                                "en_cours" | "En cours" => c.accent_green,
-                                "publie" | "Publie" => c.accent_blue,
-                                _ => c.text_secondary,
+                                "en_cours" | "En cours" => p.success,
+                                "publie" | "Publie" => p.accent_primary,
+                                _ => p.text_secondary,
                             };
                             rsx! {
                                 div {
-                                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s;",
+                                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s;",
 
                                     // En-tête
                                     div {
                                         style: "display: flex; justify-content: space-between; align-items: flex-start;",
                                         h3 {
-                                            style: "font-size: 16px; color: {c.text_white};",
+                                            style: "font-size: 16px; color: {p.text_high};",
                                             "{name}"
                                         }
                                         Badge {
@@ -79,7 +80,7 @@ pub fn VisCatalogue() -> Element {
 
                                     // Détails
                                     div {
-                                        style: "display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: {c.text_secondary};",
+                                        style: "display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: {p.text_secondary};",
 
                                         div { "📆 {date_range}" }
                                         if !location.is_empty() {
@@ -92,7 +93,7 @@ pub fn VisCatalogue() -> Element {
 
                                     // Action — Ajouter au calendrier JayKoa
                                     button {
-                                        style: "align-self: flex-start; padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                                        style: "align-self: flex-start; padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                                         onclick: move |_| {
                                             if !edition_id.is_empty() {
                                                 let conns_ref = conns.read();

@@ -5,6 +5,7 @@
 //! @human: Ecran EXP-E14 JayFestival: apercu et edition de la fiche publique exposant.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
@@ -12,7 +13,7 @@ use super::components::{Badge, ActionButton};
 /// Gestion de la fiche publique exposant.
 #[component]
 pub fn ExpFichePublique() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut edit_mode = use_signal(|| false);
 
@@ -41,17 +42,17 @@ pub fn ExpFichePublique() -> Element {
 
                 div {
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white}; margin-bottom: 8px;",
+                        style: "font-size: 24px; color: {p.text_high}; margin-bottom: 8px;",
                         "Ma fiche publique"
                     }
                     div {
                         style: "display: flex; align-items: center; gap: 8px;",
                         Badge {
                             text: if visible { "Visible".to_string() } else { "Masquee".to_string() },
-                            color: if visible { c.accent_green.to_string() } else { c.text_muted.to_string() },
+                            color: if visible { p.success.to_string() } else { p.text_muted.to_string() },
                         }
                         span {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "dans l'annuaire public"
                         }
                     }
@@ -87,15 +88,15 @@ pub fn ExpFichePublique() -> Element {
 
             // Aperçu de la fiche
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px;",
 
                 // En-tête fiche
                 div {
-                    style: "display: flex; gap: 24px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid {c.border};",
+                    style: "display: flex; gap: 24px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid {p.border_default};",
 
                     // Logo
                     div {
-                        style: "width: 120px; height: 120px; background: {c.bg_main}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px;",
+                        style: "width: 120px; height: 120px; background: {p.bg_base}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px;",
                         "🏪"
                     }
 
@@ -106,12 +107,12 @@ pub fn ExpFichePublique() -> Element {
                         if is_editing {
                             input {
                                 r#type: "text",
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_white}; font-size: 20px; font-weight: 600; margin-bottom: 8px;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_high}; font-size: 20px; font-weight: 600; margin-bottom: 8px;",
                                 value: "{company_name}",
                             }
                         } else {
                             h3 {
-                                style: "font-size: 20px; color: {c.text_white}; margin-bottom: 8px;",
+                                style: "font-size: 20px; color: {p.text_high}; margin-bottom: 8px;",
                                 "{company_name}"
                             }
                         }
@@ -120,13 +121,13 @@ pub fn ExpFichePublique() -> Element {
                             if is_editing {
                                 input {
                                     r#type: "text",
-                                    style: "width: 100%; padding: 6px 10px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; font-size: 14px; font-style: italic; margin-bottom: 12px;",
+                                    style: "width: 100%; padding: 6px 10px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; font-size: 14px; font-style: italic; margin-bottom: 12px;",
                                     value: "{stand_name}",
                                     placeholder: "Nom commercial du stand",
                                 }
                             } else {
                                 p {
-                                    style: "font-size: 14px; color: {c.text_secondary}; font-style: italic; margin-bottom: 12px;",
+                                    style: "font-size: 14px; color: {p.text_secondary}; font-style: italic; margin-bottom: 12px;",
                                     "\"{stand_name}\""
                                 }
                             }
@@ -138,13 +139,13 @@ pub fn ExpFichePublique() -> Element {
                             if !category.is_empty() {
                                 Badge {
                                     text: category.clone(),
-                                    color: c.accent_blue.to_string(),
+                                    color: p.accent_primary.to_string(),
                                 }
                             }
 
                             if !site_web.is_empty() {
                                 span {
-                                    style: "font-size: 13px; color: {c.accent_blue};",
+                                    style: "font-size: 13px; color: {p.accent_primary};",
                                     "🌐 {site_web}"
                                 }
                             }
@@ -155,19 +156,19 @@ pub fn ExpFichePublique() -> Element {
                 // Description
                 div {
                     h4 {
-                        style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;",
+                        style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;",
                         "Description"
                     }
 
                     if is_editing {
                         textarea {
-                            style: "width: 100%; padding: 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px; resize: vertical; min-height: 120px;",
+                            style: "width: 100%; padding: 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px; resize: vertical; min-height: 120px;",
                             value: "{description}",
                             placeholder: "Decrivez votre activite, vos produits, vos services...",
                         }
                     } else {
                         p {
-                            style: "font-size: 14px; color: {c.text_primary}; line-height: 1.6;",
+                            style: "font-size: 14px; color: {p.text_primary}; line-height: 1.6;",
                             if description.is_empty() {
                                 "Aucune description renseignee"
                             } else {
@@ -180,10 +181,10 @@ pub fn ExpFichePublique() -> Element {
 
             // Paramètres de visibilité
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Visibilite"
                 }
 
@@ -210,10 +211,10 @@ pub fn ExpFichePublique() -> Element {
 
             // Statistiques
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Statistiques de la fiche"
                 }
 
@@ -231,22 +232,22 @@ pub fn ExpFichePublique() -> Element {
 
 #[component]
 fn VisibilityOption(title: &'static str, description: &'static str, enabled: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let toggle_bg = if enabled { c.accent_blue } else { c.bg_hover };
+    let p = use_palette();
+    let toggle_bg = if enabled { p.accent_primary } else { p.bg_overlay };
     let toggle_pos = if enabled { "right: 2px" } else { "left: 2px" };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; padding: 12px; background: {c.bg_main}; border-radius: 6px;",
+            style: "display: flex; align-items: center; gap: 16px; padding: 12px; background: {p.bg_base}; border-radius: 6px;",
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 2px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 2px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{description}"
                 }
             }
@@ -265,17 +266,17 @@ fn VisibilityOption(title: &'static str, description: &'static str, enabled: boo
 
 #[component]
 fn StatBox(label: &'static str, value: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_main}; border-radius: 8px; padding: 16px; text-align: center;",
+            style: "background: {p.bg_base}; border-radius: 8px; padding: 16px; text-align: center;",
             p {
-                style: "font-size: 24px; color: {c.text_white}; font-weight: 600; margin-bottom: 4px;",
+                style: "font-size: 24px; color: {p.text_high}; font-weight: 600; margin-bottom: 4px;",
                 "{value}"
             }
             p {
-                style: "font-size: 12px; color: {c.text_muted};",
+                style: "font-size: 12px; color: {p.text_muted};",
                 "{label}"
             }
         }

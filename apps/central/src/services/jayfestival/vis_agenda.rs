@@ -5,19 +5,20 @@
 //! @human: Ecran VIS-E05 JayFestival: agenda visiteur (animations, creneaux).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Agenda personnel du visiteur.
 #[component]
 pub fn VisAgenda() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut active_view = use_signal(|| "liste".to_string());
 
     let view = active_view.read().clone();
-    let view_liste_bg = if view == "liste" { c.accent_blue } else { c.bg_secondary };
-    let view_liste_color = if view == "liste" { "white" } else { c.text_primary };
-    let view_cal_bg = if view == "calendrier" { c.accent_blue } else { c.bg_secondary };
-    let view_cal_color = if view == "calendrier" { "white" } else { c.text_primary };
+    let view_liste_bg = if view == "liste" { p.accent_primary } else { p.bg_secondary };
+    let view_liste_color = if view == "liste" { "white" } else { p.text_primary };
+    let view_cal_bg = if view == "calendrier" { p.accent_primary } else { p.bg_secondary };
+    let view_cal_color = if view == "calendrier" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -28,7 +29,7 @@ pub fn VisAgenda() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mon agenda"
                 }
 
@@ -60,7 +61,7 @@ pub fn VisAgenda() -> Element {
 
 #[component]
 fn AgendaListView() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -69,7 +70,7 @@ fn AgendaListView() -> Element {
             // Aujourd'hui
             section {
                 h3 {
-                    style: "font-size: 14px; color: {c.text_muted}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_muted}; margin-bottom: 12px;",
                     "Aujourd'hui - Mardi 10 février"
                 }
 
@@ -94,7 +95,7 @@ fn AgendaListView() -> Element {
             // Demain
             section {
                 h3 {
-                    style: "font-size: 14px; color: {c.text_muted}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_muted}; margin-bottom: 12px;",
                     "Demain - Mercredi 11 février"
                 }
 
@@ -113,7 +114,7 @@ fn AgendaListView() -> Element {
             // Samedi
             section {
                 h3 {
-                    style: "font-size: 14px; color: {c.text_muted}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_muted}; margin-bottom: 12px;",
                     "Samedi 15 février"
                 }
 
@@ -140,25 +141,25 @@ fn AgendaListView() -> Element {
 
 #[component]
 fn AgendaEvent(time: &'static str, title: &'static str, location: &'static str, event_type: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (icon, color) = match event_type {
-        "visite" => ("🎪", c.accent_blue),
-        "reservation" => ("📅", c.accent_green),
-        "conference" => ("🎤", c.accent_orange),
-        "concours" => ("🏆", c.accent_blue),
-        _ => ("📌", c.text_muted),
+        "visite" => ("🎪", p.accent_primary),
+        "reservation" => ("📅", p.success),
+        "conference" => ("🎤", p.warning),
+        "concours" => ("🏆", p.accent_primary),
+        _ => ("📌", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 3px solid {color};",
+            style: "display: flex; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 3px solid {color};",
 
             // Heure
             div {
                 style: "width: 60px; text-align: center;",
                 span {
-                    style: "font-size: 16px; color: {c.text_white}; font-weight: 600;",
+                    style: "font-size: 16px; color: {p.text_high}; font-weight: 600;",
                     "{time}"
                 }
             }
@@ -170,18 +171,18 @@ fn AgendaEvent(time: &'static str, title: &'static str, location: &'static str, 
             div {
                 style: "flex: 1;",
                 h4 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "📍 {location}"
                 }
             }
 
             // Actions
             button {
-                style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                 "Voir"
             }
         }
@@ -190,28 +191,28 @@ fn AgendaEvent(time: &'static str, title: &'static str, location: &'static str, 
 
 #[component]
 fn AgendaCalendarView() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             // Navigation mois
             div {
                 style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;",
 
                 button {
-                    style: "padding: 8px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                    style: "padding: 8px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer;",
                     "←"
                 }
 
                 span {
-                    style: "font-size: 18px; color: {c.text_white}; font-weight: 600;",
+                    style: "font-size: 18px; color: {p.text_high}; font-weight: 600;",
                     "Février 2026"
                 }
 
                 button {
-                    style: "padding: 8px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer;",
+                    style: "padding: 8px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer;",
                     "→"
                 }
             }
@@ -222,7 +223,7 @@ fn AgendaCalendarView() -> Element {
 
                 for day in ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"] {
                     div {
-                        style: "text-align: center; font-size: 12px; color: {c.text_muted}; padding: 8px;",
+                        style: "text-align: center; font-size: 12px; color: {p.text_muted}; padding: 8px;",
                         "{day}"
                     }
                 }
@@ -242,8 +243,8 @@ fn AgendaCalendarView() -> Element {
                     {
                         let has_event = day == 10 || day == 11 || day == 15;
                         let is_today = day == 10;
-                        let bg = if is_today { c.accent_blue.to_string() } else if has_event { format!("{}20", c.accent_blue) } else { "transparent".to_string() };
-                        let color = if is_today { "white" } else { c.text_primary };
+                        let bg = if is_today { p.accent_primary.to_string() } else if has_event { format!("{}20", p.accent_primary) } else { "transparent".to_string() };
+                        let color = if is_today { "white" } else { p.text_primary };
                         rsx! {
                             div {
                                 style: "aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: {bg}; border-radius: 8px; cursor: pointer; position: relative;",
@@ -255,7 +256,7 @@ fn AgendaCalendarView() -> Element {
 
                                 if has_event && !is_today {
                                     div {
-                                        style: "width: 6px; height: 6px; background: {c.accent_blue}; border-radius: 50%; position: absolute; bottom: 6px;",
+                                        style: "width: 6px; height: 6px; background: {p.accent_primary}; border-radius: 50%; position: absolute; bottom: 6px;",
                                     }
                                 }
                             }

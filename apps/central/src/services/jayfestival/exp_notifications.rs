@@ -5,19 +5,20 @@
 //! @human: Ecran EXP-E15 JayFestival: centre de notifications exposant.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Centre de notifications exposant.
 #[component]
 pub fn ExpNotifications() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut filter = use_signal(|| "toutes".to_string());
 
     let current_filter = filter.read().clone();
-    let filter_toutes_bg = if current_filter == "toutes" { c.accent_blue } else { c.bg_secondary };
-    let filter_toutes_color = if current_filter == "toutes" { "white" } else { c.text_primary };
-    let filter_nonlues_bg = if current_filter == "non_lues" { c.accent_blue } else { c.bg_secondary };
-    let filter_nonlues_color = if current_filter == "non_lues" { "white" } else { c.text_primary };
+    let filter_toutes_bg = if current_filter == "toutes" { p.accent_primary } else { p.bg_secondary };
+    let filter_toutes_color = if current_filter == "toutes" { "white" } else { p.text_primary };
+    let filter_nonlues_bg = if current_filter == "non_lues" { p.accent_primary } else { p.bg_secondary };
+    let filter_nonlues_color = if current_filter == "non_lues" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -28,7 +29,7 @@ pub fn ExpNotifications() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Notifications"
                 }
 
@@ -47,7 +48,7 @@ pub fn ExpNotifications() -> Element {
                     }
 
                     button {
-                        style: "margin-left: 8px; padding: 8px 12px; background: {c.bg_secondary}; border: none; border-radius: 6px; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                        style: "margin-left: 8px; padding: 8px 12px; background: {p.bg_secondary}; border: none; border-radius: 6px; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                         "Tout marquer comme lu"
                     }
                 }
@@ -115,19 +116,19 @@ fn NotificationItem(
     time: &'static str,
     is_read: bool,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (icon, icon_color) = match notif_type {
-        "candidature" => ("🎫", c.accent_green),
-        "facture" => ("💰", c.accent_orange),
-        "message" => ("✉️", c.accent_blue),
-        "rappel" => ("⏰", c.accent_orange),
-        "info" => ("ℹ️", c.text_muted),
-        _ => ("🔔", c.text_muted),
+        "candidature" => ("🎫", p.success),
+        "facture" => ("💰", p.warning),
+        "message" => ("✉️", p.accent_primary),
+        "rappel" => ("⏰", p.warning),
+        "info" => ("ℹ️", p.text_muted),
+        _ => ("🔔", p.text_muted),
     };
 
-    let bg = if is_read { c.bg_secondary.to_string() } else { format!("{}15", c.accent_blue) };
-    let border = if is_read { "none".to_string() } else { format!("1px solid {}40", c.accent_blue) };
+    let bg = if is_read { p.bg_secondary.to_string() } else { format!("{}15", p.accent_primary) };
+    let border = if is_read { "none".to_string() } else { format!("1px solid {}40", p.accent_primary) };
     let font_weight = if is_read { "400" } else { "600" };
 
     rsx! {
@@ -148,31 +149,31 @@ fn NotificationItem(
                     style: "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;",
 
                     h4 {
-                        style: "font-size: 14px; color: {c.text_white}; font-weight: {font_weight};",
+                        style: "font-size: 14px; color: {p.text_high}; font-weight: {font_weight};",
                         "{title}"
                     }
 
                     if !is_read {
                         div {
-                            style: "width: 8px; height: 8px; background: {c.accent_blue}; border-radius: 50%;",
+                            style: "width: 8px; height: 8px; background: {p.accent_primary}; border-radius: 50%;",
                         }
                     }
                 }
 
                 p {
-                    style: "font-size: 13px; color: {c.text_secondary}; margin-bottom: 4px;",
+                    style: "font-size: 13px; color: {p.text_secondary}; margin-bottom: 4px;",
                     "{message}"
                 }
 
                 p {
-                    style: "font-size: 11px; color: {c.text_muted};",
+                    style: "font-size: 11px; color: {p.text_muted};",
                     "{time}"
                 }
             }
 
             // Actions
             button {
-                style: "padding: 4px 8px; background: transparent; border: none; color: {c.text_muted}; cursor: pointer; font-size: 16px;",
+                style: "padding: 4px 8px; background: transparent; border: none; color: {p.text_muted}; cursor: pointer; font-size: 16px;",
                 "⋯"
             }
         }
@@ -181,14 +182,14 @@ fn NotificationItem(
 
 #[component]
 fn NotificationSettings() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         section {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; margin-top: 16px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; margin-top: 16px;",
 
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Parametres de notification"
             }
 
@@ -232,25 +233,25 @@ fn NotificationSettings() -> Element {
 
 #[component]
 fn NotificationSetting(title: &'static str, description: &'static str, email: bool, push: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
-    let email_bg = if email { c.accent_blue } else { c.bg_hover };
+    let email_bg = if email { p.accent_primary } else { p.bg_overlay };
     let email_pos = if email { "right: 2px" } else { "left: 2px" };
-    let push_bg = if push { c.accent_blue } else { c.bg_hover };
+    let push_bg = if push { p.accent_primary } else { p.bg_overlay };
     let push_pos = if push { "right: 2px" } else { "left: 2px" };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; padding: 12px; background: {c.bg_main}; border-radius: 6px;",
+            style: "display: flex; align-items: center; gap: 16px; padding: 12px; background: {p.bg_base}; border-radius: 6px;",
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 2px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 2px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{description}"
                 }
             }
@@ -258,7 +259,7 @@ fn NotificationSetting(title: &'static str, description: &'static str, email: bo
             // Email toggle
             div {
                 style: "display: flex; align-items: center; gap: 8px;",
-                span { style: "font-size: 12px; color: {c.text_muted};", "Email" }
+                span { style: "font-size: 12px; color: {p.text_muted};", "Email" }
                 div {
                     style: "width: 36px; height: 20px; background: {email_bg}; border-radius: 10px; position: relative; cursor: pointer;",
                     div {
@@ -270,7 +271,7 @@ fn NotificationSetting(title: &'static str, description: &'static str, email: bo
             // Push toggle
             div {
                 style: "display: flex; align-items: center; gap: 8px;",
-                span { style: "font-size: 12px; color: {c.text_muted};", "Push" }
+                span { style: "font-size: 12px; color: {p.text_muted};", "Push" }
                 div {
                     style: "width: 36px; height: 20px; background: {push_bg}; border-radius: 10px; position: relative; cursor: pointer;",
                     div {

@@ -7,6 +7,7 @@
 //! - Services synchronisés (JayFestival, JayRDV)
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use jaykoa::data::Agenda;
 use chrono::{Datelike, NaiveDate};
@@ -49,13 +50,13 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
 
     rsx! {
         div {
-            style: "width: 280px; background: {c.bg_secondary}; border-right: 1px solid {c.border}; display: flex; flex-direction: column; overflow-y: auto;",
+            style: "width: 280px; background: {p.bg_secondary}; border-right: 1px solid {p.border_default}; display: flex; flex-direction: column; overflow-y: auto;",
             
             // Bouton Créer
             div {
                 style: "padding: 16px;",
                 button {
-                    style: "display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: {c.accent_blue}; color: white; border: none; border-radius: 24px; cursor: pointer; font-size: 14px; font-weight: 500; box-shadow: 0 2px 8px rgba(26, 159, 255, 0.3); transition: all 0.2s;",
+                    style: "display: flex; align-items: center; gap: 12px; padding: 12px 24px; background: {p.accent_primary}; color: white; border: none; border-radius: 24px; cursor: pointer; font-size: 14px; font-weight: 500; box-shadow: 0 2px 8px rgba(26, 159, 255, 0.3); transition: all 0.2s;",
                     onclick: move |_| props.on_create_event.call(()),
                     span { style: "font-size: 20px;", "+" }
                     "Créer"
@@ -71,13 +72,13 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
             }
             
             // Séparateur
-            div { style: "height: 1px; background: {c.border}; margin: 8px 16px;" }
+            div { style: "height: 1px; background: {p.border_default}; margin: 8px 16px;" }
             
             // Mes agendas
             div {
                 style: "padding: 8px 16px;",
                 h3 {
-                    style: "font-size: 11px; font-weight: 600; color: {c.text_muted}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;",
+                    style: "font-size: 11px; font-weight: 600; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;",
                     "Mes agendas"
                 }
                 for agenda in personal_agendas.iter() {
@@ -94,11 +95,11 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;",
                     h3 {
-                        style: "font-size: 11px; font-weight: 600; color: {c.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
+                        style: "font-size: 11px; font-weight: 600; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
                         "Services synchronisés"
                     }
                     button {
-                        style: "padding: 4px 8px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; font-size: 10px; cursor: pointer;",
+                        style: "padding: 4px 8px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; font-size: 10px; cursor: pointer;",
                         onclick: move |_| props.on_sync_jayfestival.call(()),
                         "🔄 Sync"
                     }
@@ -106,13 +107,13 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
                 
                 if synced_agendas.is_empty() {
                     div {
-                        style: "padding: 12px; background: {c.bg_hover}; border-radius: 4px; text-align: center;",
+                        style: "padding: 12px; background: {p.bg_overlay}; border-radius: 4px; text-align: center;",
                         p {
-                            style: "font-size: 12px; color: {c.text_muted}; margin-bottom: 8px;",
+                            style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 8px;",
                             "Aucun service synchronisé"
                         }
                         button {
-                            style: "padding: 6px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_link}; font-size: 11px; cursor: pointer;",
+                            style: "padding: 6px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.accent_primary}; font-size: 11px; cursor: pointer;",
                             onclick: move |_| props.on_sync_jayfestival.call(()),
                             "➕ Synchroniser JayFestival"
                         }
@@ -132,9 +133,9 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
             
             // Info JayKoa
             div {
-                style: "padding: 16px; border-top: 1px solid {c.border};",
+                style: "padding: 16px; border-top: 1px solid {p.border_default};",
                 p {
-                    style: "font-size: 10px; color: {c.text_muted}; text-align: center;",
+                    style: "font-size: 10px; color: {p.text_muted}; text-align: center;",
                     "JayKoa — Calendrier universel COG"
                 }
             }
@@ -199,7 +200,7 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;",
                 
                 button {
-                    style: "padding: 4px 8px; background: transparent; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 14px;",
+                    style: "padding: 4px 8px; background: transparent; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| {
                         let new_date = if month == 1 {
                             NaiveDate::from_ymd_opt(year - 1, 12, 1).unwrap_or(props.displayed_month)
@@ -212,12 +213,12 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
                 }
                 
                 span {
-                    style: "font-size: 13px; font-weight: 500; color: {c.text_primary};",
+                    style: "font-size: 13px; font-weight: 500; color: {p.text_primary};",
                     "{month_name} {year}"
                 }
                 
                 button {
-                    style: "padding: 4px 8px; background: transparent; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 14px;",
+                    style: "padding: 4px 8px; background: transparent; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| {
                         let new_date = if month == 12 {
                             NaiveDate::from_ymd_opt(year + 1, 1, 1).unwrap_or(props.displayed_month)
@@ -235,7 +236,7 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
                 style: "display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 4px;",
                 for day in weekdays.iter() {
                     span {
-                        style: "text-align: center; font-size: 10px; color: {c.text_muted}; padding: 4px 0;",
+                        style: "text-align: center; font-size: 10px; color: {p.text_muted}; padding: 4px 0;",
                         "{day}"
                     }
                 }
@@ -254,9 +255,9 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
                             let is_selected = date == props.selected_date;
                             
                             let bg = if is_selected {
-                                c.accent_blue.to_string()
+                                p.accent_primary.to_string()
                             } else if is_today {
-                                format!("{}40", c.accent_blue)
+                                format!("{}40", p.accent_primary)
                             } else {
                                 "transparent".to_string()
                             };
@@ -264,9 +265,9 @@ fn MiniCalendar(props: MiniCalendarProps) -> Element {
                             let color = if is_selected {
                                 "white"
                             } else if !is_current_month {
-                                c.text_muted
+                                p.text_muted
                             } else {
-                                c.text_primary
+                                p.text_primary
                             };
                             
                             rsx! {
@@ -333,7 +334,7 @@ fn AgendaItem(props: AgendaItemProps) -> Element {
             
             // Nom de l'agenda
             span {
-                style: "flex: 1; font-size: 13px; color: {c.text_primary}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;",
+                style: "flex: 1; font-size: 13px; color: {p.text_primary}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;",
                 "{name}"
             }
             

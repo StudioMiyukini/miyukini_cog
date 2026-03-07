@@ -2,6 +2,7 @@
 //! graphique 30 jours, transactions filtrables, licences, export.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::export::csv::{CsvTransactionRow, csv_generate};
 use jaymanga::export::pdf::{SalesReportData, SalesReportSummary};
 use crate::data::use_service_connections;
@@ -20,7 +21,7 @@ enum SalesTab {
 
 #[component]
 pub fn Sales(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -74,15 +75,15 @@ pub fn Sales(state: Signal<JayMangaState>) -> Element {
                 style: "display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;",
 
                 StatCard { label: "Revenus totaux".to_string(), value: total_revenue, icon: "💰".to_string(), color: "#10b981".to_string() }
-                StatCard { label: "Ce mois".to_string(), value: month_revenue, icon: "📅".to_string(), color: c.accent_blue.to_string() }
-                StatCard { label: "Ventes ce mois".to_string(), value: month_sales.to_string(), icon: "🛒".to_string(), color: c.accent_orange.to_string() }
-                StatCard { label: "Licences actives".to_string(), value: active_count.to_string(), icon: "✅".to_string(), color: c.accent_green.to_string() }
+                StatCard { label: "Ce mois".to_string(), value: month_revenue, icon: "📅".to_string(), color: p.accent_primary.to_string() }
+                StatCard { label: "Ventes ce mois".to_string(), value: month_sales.to_string(), icon: "🛒".to_string(), color: p.warning.to_string() }
+                StatCard { label: "Licences actives".to_string(), value: active_count.to_string(), icon: "✅".to_string(), color: p.success.to_string() }
                 StatCard { label: "Panier moyen".to_string(), value: avg_amount, icon: "📊".to_string(), color: "#8b5cf6".to_string() }
             }
 
             // Onglets
             div {
-                style: "display: flex; gap: 4px; border-bottom: 1px solid {c.border};",
+                style: "display: flex; gap: 4px; border-bottom: 1px solid {p.border_default};",
 
                 SalesTabButton { label: "Vue d'ensemble", is_active: *active_tab.read() == SalesTab::Overview, onclick: move |_| { active_tab.set(SalesTab::Overview); } }
                 SalesTabButton { label: "Transactions", is_active: *active_tab.read() == SalesTab::Transactions, onclick: move |_| { active_tab.set(SalesTab::Transactions); } }
@@ -121,9 +122,9 @@ fn SalesTabButton(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let border_color = if is_active { c.accent_blue } else { "transparent" };
-    let text_color = if is_active { c.text_white } else { c.text_secondary };
+    let p = use_palette();
+    let border_color = if is_active { p.accent_primary } else { "transparent" };
+    let text_color = if is_active { p.text_high } else { p.text_secondary };
 
     rsx! {
         button {
@@ -140,7 +141,7 @@ fn SalesTabButton(
 fn SalesOverview(
     licenses: Vec<jaymanga::data::PurchaseLicense>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     // Graphique 30 jours simplifié (barres textuelles)
     let now = chrono::Utc::now();
@@ -176,10 +177,10 @@ fn SalesOverview(
 
             // Graphique 30 jours
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                 h3 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 16px;",
                     "📈 Revenus — 30 derniers jours"
                 }
 
@@ -189,7 +190,7 @@ fn SalesOverview(
                     for (day, rev) in daily_revenue.iter() {
                         {
                             let height_pct = if *rev > 0 { (*rev as f64 / max_rev as f64 * 100.0).max(4.0) } else { 2.0 };
-                            let bg = if *rev > 0 { c.accent_green } else { c.bg_hover };
+                            let bg = if *rev > 0 { p.success } else { p.bg_overlay };
                             let amount = format_amount(*rev);
 
                             rsx! {
@@ -207,23 +208,23 @@ fn SalesOverview(
                 }
                 div {
                     style: "display: flex; justify-content: space-between; margin-top: 4px;",
-                    span { style: "font-size: 10px; color: {c.text_muted};", "il y a 30j" }
-                    span { style: "font-size: 10px; color: {c.text_muted};", "aujourd'hui" }
+                    span { style: "font-size: 10px; color: {p.text_muted};", "il y a 30j" }
+                    span { style: "font-size: 10px; color: {p.text_muted};", "aujourd'hui" }
                 }
             }
 
             // Ventes récentes
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                 h3 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;",
                     "🛒 Ventes récentes"
                 }
 
                 if recent_licenses.is_empty() {
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; text-align: center; padding: 20px;",
+                        style: "font-size: 13px; color: {p.text_muted}; text-align: center; padding: 20px;",
                         "Aucune vente récente"
                     }
                 } else {
@@ -247,14 +248,14 @@ fn SalesOverview(
                                         span { style: "font-size: 16px;", "📖" }
                                         div {
                                             style: "flex: 1;",
-                                            span { style: "font-size: 13px; color: {c.text_white};", "par {buyer_short}" }
+                                            span { style: "font-size: 13px; color: {p.text_high};", "par {buyer_short}" }
                                         }
                                         span {
-                                            style: "font-size: 14px; color: {c.accent_green}; font-weight: 600;",
+                                            style: "font-size: 14px; color: {p.success}; font-weight: 600;",
                                             "{amount_str}"
                                         }
                                         span {
-                                            style: "font-size: 11px; color: {c.text_muted};",
+                                            style: "font-size: 11px; color: {p.text_muted};",
                                             "{date}"
                                         }
                                     }
@@ -352,7 +353,7 @@ fn SalesOverview(
 
 #[component]
 fn TransactionsView(transactions: Vec<jaymanga::data::PaymentTransaction>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     if transactions.is_empty() {
         return rsx! {
@@ -370,7 +371,7 @@ fn TransactionsView(transactions: Vec<jaymanga::data::PaymentTransaction>) -> El
 
             // En-tête
             div {
-                style: "display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 8px 16px; font-size: 11px; color: {c.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
+                style: "display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 8px 16px; font-size: 11px; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
                 span { "ID" }
                 span { "Type" }
                 span { "Montant" }
@@ -393,33 +394,33 @@ fn TransactionsView(transactions: Vec<jaymanga::data::PaymentTransaction>) -> El
                         .unwrap_or_default();
 
                     let (status_color, status_label) = match status.as_str() {
-                        "completed" => (c.accent_green, "Complété"),
-                        "pending" => (c.accent_orange, "En attente"),
-                        "failed" => (c.accent_red, "Échoué"),
+                        "completed" => (p.success, "Complété"),
+                        "pending" => (p.warning, "En attente"),
+                        "failed" => (p.error, "Échoué"),
                         "refunded" => ("#8b5cf6", "Remboursé"),
-                        _ => (c.text_muted, "—"),
+                        _ => (p.text_muted, "—"),
                     };
 
                     rsx! {
                         div {
-                            style: "display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 4px; align-items: center;",
+                            style: "display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 4px; align-items: center;",
 
                             span {
-                                style: "font-size: 12px; color: {c.text_secondary}; font-family: monospace;",
+                                style: "font-size: 12px; color: {p.text_secondary}; font-family: monospace;",
                                 "{tx_short}"
                             }
-                            Badge { text: tx_type, color: c.accent_blue.to_string() }
+                            Badge { text: tx_type, color: p.accent_primary.to_string() }
                             span {
-                                style: "font-size: 13px; color: {c.accent_green}; font-weight: 500;",
+                                style: "font-size: 13px; color: {p.success}; font-weight: 500;",
                                 "{amount_str}"
                             }
                             Badge { text: status_label.to_string(), color: status_color.to_string() }
                             span {
-                                style: "font-size: 12px; color: {c.text_secondary};",
+                                style: "font-size: 12px; color: {p.text_secondary};",
                                 "{method}"
                             }
                             span {
-                                style: "font-size: 12px; color: {c.text_muted};",
+                                style: "font-size: 12px; color: {p.text_muted};",
                                 "{date}"
                             }
                         }
@@ -434,7 +435,7 @@ fn TransactionsView(transactions: Vec<jaymanga::data::PaymentTransaction>) -> El
 
 #[component]
 fn LicensesView(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     if licenses.is_empty() {
@@ -460,16 +461,16 @@ fn LicensesView(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
                 rsx! {
                     div {
                         style: "display: flex; gap: 12px; margin-bottom: 8px;",
-                        Badge { text: format!("{active} actives"), color: c.accent_green.to_string() }
-                        Badge { text: format!("{refunded} remboursées"), color: c.accent_orange.to_string() }
-                        Badge { text: format!("{expired} expirées"), color: c.text_muted.to_string() }
+                        Badge { text: format!("{active} actives"), color: p.success.to_string() }
+                        Badge { text: format!("{refunded} remboursées"), color: p.warning.to_string() }
+                        Badge { text: format!("{expired} expirées"), color: p.text_muted.to_string() }
                     }
                 }
             }
 
             // En-tête
             div {
-                style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px; gap: 12px; padding: 8px 16px; font-size: 11px; color: {c.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
+                style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px; gap: 12px; padding: 8px 16px; font-size: 11px; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
                 span { "Acheteur" }
                 span { "Type" }
                 span { "Montant" }
@@ -492,11 +493,11 @@ fn LicensesView(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
                         .unwrap_or_else(|| "—".to_string());
 
                     let (status_color, status_label) = match status.as_str() {
-                        "active" => (c.accent_green, "Active"),
-                        "refunded" => (c.accent_orange, "Remboursée"),
-                        "expired" => (c.text_muted, "Expirée"),
-                        "revoked" => (c.accent_red, "Révoquée"),
-                        _ => (c.text_muted, "—"),
+                        "active" => (p.success, "Active"),
+                        "refunded" => (p.warning, "Remboursée"),
+                        "expired" => (p.text_muted, "Expirée"),
+                        "revoked" => (p.error, "Révoquée"),
+                        _ => (p.text_muted, "—"),
                     };
 
                     let can_revoke = status == "active";
@@ -504,28 +505,28 @@ fn LicensesView(licenses: Vec<jaymanga::data::PurchaseLicense>) -> Element {
 
                     rsx! {
                         div {
-                            style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px; gap: 12px; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 4px; align-items: center;",
+                            style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px; gap: 12px; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 4px; align-items: center;",
 
                             span {
-                                style: "font-size: 13px; color: {c.text_primary};",
+                                style: "font-size: 13px; color: {p.text_primary};",
                                 "{buyer_short}"
                             }
                             span {
-                                style: "font-size: 12px; color: {c.text_secondary};",
+                                style: "font-size: 12px; color: {p.text_secondary};",
                                 "{purchase_type}"
                             }
                             span {
-                                style: "font-size: 13px; color: {c.accent_green}; font-weight: 500;",
+                                style: "font-size: 13px; color: {p.success}; font-weight: 500;",
                                 "{amount_display}"
                             }
                             Badge { text: status_label.to_string(), color: status_color.to_string() }
                             span {
-                                style: "font-size: 12px; color: {c.text_muted};",
+                                style: "font-size: 12px; color: {p.text_muted};",
                                 "{date}"
                             }
                             if can_revoke {
                                 button {
-                                    style: "padding: 4px 8px; background: transparent; border: 1px solid {c.accent_red}; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 11px;",
+                                    style: "padding: 4px 8px; background: transparent; border: 1px solid {p.error}; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 11px;",
                                     onclick: move |_| {
                                         let db = &conns.read().jaymanga;
                                         let _ = db.license_update_status(&lid_revoke, "revoked");

@@ -5,12 +5,13 @@
 //! @human: Ecran ORG-E24 JayFestival: activation des services visiteur (jeux, concours, reservations).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Configuration des services visiteur.
 #[component]
 pub fn OrgServices(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     // États des services
     let billetterie = use_signal(|| true);
@@ -25,12 +26,12 @@ pub fn OrgServices(edition_id: String) -> Element {
 
             // En-tête
             h3 {
-                style: "font-size: 18px; color: {c.text_white};",
+                style: "font-size: 18px; color: {p.text_high};",
                 "Services visiteur"
             }
 
             p {
-                style: "font-size: 14px; color: {c.text_secondary};",
+                style: "font-size: 14px; color: {p.text_secondary};",
                 "Activez les services disponibles pour les visiteurs de votre evenement."
             }
 
@@ -93,11 +94,11 @@ fn ServiceToggle(
     description: &'static str,
     enabled: Signal<bool>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let is_enabled = *enabled.read();
-    let bg = if is_enabled { c.bg_secondary } else { c.bg_main };
-    let border = if is_enabled { c.accent_blue } else { c.border };
-    let toggle_bg = if is_enabled { c.accent_blue } else { c.bg_hover };
+    let bg = if is_enabled { p.bg_secondary } else { p.bg_base };
+    let border = if is_enabled { p.accent_primary } else { p.border_default };
+    let toggle_bg = if is_enabled { p.accent_primary } else { p.bg_overlay };
     let toggle_pos = if is_enabled { "right: 2px" } else { "left: 2px" };
 
     rsx! {
@@ -122,18 +123,18 @@ fn ServiceToggle(
                     style: "display: flex; align-items: center; gap: 8px;",
 
                     h4 {
-                        style: "font-size: 14px; color: {c.text_white};",
+                        style: "font-size: 14px; color: {p.text_high};",
                         "{title}"
                     }
                     if is_enabled {
                         span {
-                            style: "display: inline-block; padding: 2px 8px; background: {c.accent_green}; color: white; border-radius: 4px; font-size: 11px; font-weight: 600;",
+                            style: "display: inline-block; padding: 2px 8px; background: {p.success}; color: white; border-radius: 4px; font-size: 11px; font-weight: 600;",
                             "Actif"
                         }
                     }
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted}; margin-top: 4px;",
+                    style: "font-size: 12px; color: {p.text_muted}; margin-top: 4px;",
                     "{description}"
                 }
             }
@@ -152,14 +153,14 @@ fn ServiceToggle(
 
 #[component]
 fn ServiceAdvancedConfig() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         section {
-            style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {c.border};",
+            style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {p.border_default};",
 
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Configuration avancee"
             }
 
@@ -178,14 +179,14 @@ fn ServiceAdvancedConfig() -> Element {
 
 #[component]
 fn PricingConfig() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             h4 {
-                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;",
+                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;",
                 "💰 Tarification billets"
             }
 
@@ -195,36 +196,36 @@ fn PricingConfig() -> Element {
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center;",
                     span {
-                        style: "font-size: 13px; color: {c.text_primary};",
+                        style: "font-size: 13px; color: {p.text_primary};",
                         "Entree standard"
                     }
                     input {
                         r#type: "number",
-                        style: "width: 80px; padding: 6px 8px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; text-align: right;",
+                        style: "width: 80px; padding: 6px 8px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; text-align: right;",
                         value: "10",
                     }
                 }
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center;",
                     span {
-                        style: "font-size: 13px; color: {c.text_primary};",
+                        style: "font-size: 13px; color: {p.text_primary};",
                         "Tarif reduit"
                     }
                     input {
                         r#type: "number",
-                        style: "width: 80px; padding: 6px 8px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; text-align: right;",
+                        style: "width: 80px; padding: 6px 8px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; text-align: right;",
                         value: "5",
                     }
                 }
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center;",
                     span {
-                        style: "font-size: 13px; color: {c.text_primary};",
+                        style: "font-size: 13px; color: {p.text_primary};",
                         "Pass VIP"
                     }
                     input {
                         r#type: "number",
-                        style: "width: 80px; padding: 6px 8px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; text-align: right;",
+                        style: "width: 80px; padding: 6px 8px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; text-align: right;",
                         value: "25",
                     }
                 }
@@ -235,14 +236,14 @@ fn PricingConfig() -> Element {
 
 #[component]
 fn CapacityConfig() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             h4 {
-                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;",
+                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;",
                 "📊 Capacite et jauges"
             }
 
@@ -252,24 +253,24 @@ fn CapacityConfig() -> Element {
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center;",
                     span {
-                        style: "font-size: 13px; color: {c.text_primary};",
+                        style: "font-size: 13px; color: {p.text_primary};",
                         "Capacite totale"
                     }
                     input {
                         r#type: "number",
-                        style: "width: 80px; padding: 6px 8px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; text-align: right;",
+                        style: "width: 80px; padding: 6px 8px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; text-align: right;",
                         value: "500",
                     }
                 }
                 label {
-                    style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {c.text_primary}; cursor: pointer;",
+                    style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {p.text_primary}; cursor: pointer;",
                     input {
                         r#type: "checkbox",
                     }
                     "Limiter les ventes par creneau"
                 }
                 label {
-                    style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {c.text_primary}; cursor: pointer;",
+                    style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {p.text_primary}; cursor: pointer;",
                     input {
                         r#type: "checkbox",
                     }

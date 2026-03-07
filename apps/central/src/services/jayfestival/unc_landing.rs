@@ -8,6 +8,7 @@
 //! @human: Ecran UNC-E01 JayFestival: landing page publique (hero, recherche, CTA inscription).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{UncSection, JayFestivalState};
@@ -20,7 +21,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// Page d'accueil UNC — Landing.
 #[component]
 pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les événements publiés
@@ -46,14 +47,14 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
 
             // Hero Section
             section {
-                style: "text-align: center; padding: 48px 24px; background: linear-gradient(135deg, {c.bg_secondary} 0%, {c.bg_main} 100%); border-radius: 12px; margin-bottom: 32px;",
+                style: "text-align: center; padding: 48px 24px; background: linear-gradient(135deg, {p.bg_secondary} 0%, {p.bg_base} 100%); border-radius: 12px; margin-bottom: 32px;",
 
                 h1 {
-                    style: "font-size: 32px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 32px; color: {p.text_high}; margin-bottom: 12px;",
                     "Decouvrez les evenements et festivals"
                 }
                 p {
-                    style: "font-size: 16px; color: {c.text_secondary}; margin-bottom: 24px;",
+                    style: "font-size: 16px; color: {p.text_secondary}; margin-bottom: 24px;",
                     "Trouvez votre prochain evenement, participez en tant qu'exposant ou organisez le votre"
                 }
 
@@ -65,7 +66,7 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
                         style: "display: flex; gap: 8px;",
 
                         input {
-                            style: "flex: 1; padding: 14px 16px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                            style: "flex: 1; padding: 14px 16px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                             r#type: "text",
                             placeholder: "Rechercher un evenement, organisateur, exposant...",
                             onkeypress: move |evt: KeyboardEvent| {
@@ -75,7 +76,7 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
                             },
                         }
                         button {
-                            style: "padding: 14px 24px; background: {c.accent_blue}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px;",
+                            style: "padding: 14px 24px; background: {p.accent_primary}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px;",
                             onclick: move |_| {
                                 state.write().unc_section = UncSection::Search;
                             },
@@ -125,11 +126,11 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
                     style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;",
 
                     h2 {
-                        style: "font-size: 20px; color: {c.text_white};",
+                        style: "font-size: 20px; color: {p.text_high};",
                         "Prochains evenements"
                     }
                     button {
-                        style: "padding: 8px 16px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::Events;
                         },
@@ -139,7 +140,7 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
 
                 if editions.is_empty() {
                     div {
-                        style: "padding: 40px; text-align: center; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted};",
+                        style: "padding: 40px; text-align: center; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted};",
                         "Aucun evenement disponible pour le moment"
                     }
                 } else {
@@ -178,7 +179,7 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 40px;",
 
                 h2 {
-                    style: "font-size: 20px; color: {c.text_white}; text-align: center; margin-bottom: 24px;",
+                    style: "font-size: 20px; color: {p.text_high}; text-align: center; margin-bottom: 24px;",
                     "Rejoignez la plateforme"
                 }
 
@@ -222,14 +223,14 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
 
             // Lien connexion
             div {
-                style: "text-align: center; padding: 24px; border-top: 1px solid {c.border};",
+                style: "text-align: center; padding: 24px; border-top: 1px solid {p.border_default};",
 
                 span {
-                    style: "color: {c.text_secondary}; font-size: 14px;",
+                    style: "color: {p.text_secondary}; font-size: 14px;",
                     "Deja inscrit ? "
                 }
                 button {
-                    style: "background: none; border: none; color: {c.accent_blue}; cursor: pointer; font-size: 14px;",
+                    style: "background: none; border: none; color: {p.accent_primary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Connexion;
                     },
@@ -243,10 +244,10 @@ pub fn UncLanding(state: Signal<JayFestivalState>) -> Element {
 /// Carte catégorie cliquable.
 #[component]
 fn CategoryCard(icon: &'static str, title: &'static str, count: usize, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: transform 0.2s, background 0.2s;",
+            style: "background: {p.bg_secondary}; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: transform 0.2s, background 0.2s;",
             onclick: move |evt| onclick.call(evt),
 
             span {
@@ -254,11 +255,11 @@ fn CategoryCard(icon: &'static str, title: &'static str, count: usize, onclick: 
                 "{icon}"
             }
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 4px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 4px;",
                 "{title}"
             }
             p {
-                style: "font-size: 13px; color: {c.text_muted};",
+                style: "font-size: 13px; color: {p.text_muted};",
                 "{count} disponibles"
             }
         }
@@ -274,25 +275,25 @@ fn RoleCard(
     cta: &'static str,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;",
+            style: "background: {p.bg_secondary}; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; text-align: center;",
 
             span {
                 style: "font-size: 40px; margin-bottom: 16px;",
                 "{icon}"
             }
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 8px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 8px;",
                 "{title}"
             }
             p {
-                style: "font-size: 13px; color: {c.text_secondary}; margin-bottom: 16px; flex: 1;",
+                style: "font-size: 13px; color: {p.text_secondary}; margin-bottom: 16px; flex: 1;",
                 "{description}"
             }
             button {
-                style: "width: 100%; padding: 10px 16px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
+                style: "width: 100%; padding: 10px 16px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
                 onclick: move |evt| onclick.call(evt),
                 "{cta}"
             }

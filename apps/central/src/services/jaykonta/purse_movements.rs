@@ -4,6 +4,7 @@
 //! Contrats : CK-TK-11.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{JayKontaState, PurseSection};
@@ -11,7 +12,7 @@ use super::components::{MovementRow, ActionButton};
 
 #[component]
 pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // State filtres
@@ -60,7 +61,7 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 22px; color: {c.text_white};",
+                    style: "font-size: 22px; color: {p.text_high};",
                     "Mouvements"
                 }
                 ActionButton {
@@ -96,28 +97,28 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
                 div { style: "flex: 1;" }
 
                 span {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{total_count} mouvements"
                 }
             }
 
             // Tableau
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                 if page_items.is_empty() {
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; text-align: center; padding: 40px;",
+                        style: "font-size: 13px; color: {p.text_muted}; text-align: center; padding: 40px;",
                         "Aucun mouvement pour les filtres selectionnes."
                     }
                 } else {
                     // En-tete
                     div {
-                        style: "display: flex; padding: 8px 16px; border-bottom: 1px solid {c.border}; margin-bottom: 8px;",
+                        style: "display: flex; padding: 8px 16px; border-bottom: 1px solid {p.border_default}; margin-bottom: 8px;",
 
-                        span { style: "flex: 1; font-size: 11px; color: {c.text_muted}; text-transform: uppercase;", "Description" }
-                        span { style: "width: 100px; font-size: 11px; color: {c.text_muted}; text-transform: uppercase;", "Date" }
-                        span { style: "width: 100px; font-size: 11px; color: {c.text_muted}; text-transform: uppercase; text-align: right;", "Montant" }
+                        span { style: "flex: 1; font-size: 11px; color: {p.text_muted}; text-transform: uppercase;", "Description" }
+                        span { style: "width: 100px; font-size: 11px; color: {p.text_muted}; text-transform: uppercase;", "Date" }
+                        span { style: "width: 100px; font-size: 11px; color: {p.text_muted}; text-transform: uppercase; text-align: right;", "Montant" }
                     }
 
                     div {
@@ -142,7 +143,7 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
                     style: "display: flex; justify-content: center; align-items: center; gap: 16px;",
 
                     button {
-                        style: "padding: 6px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 6px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                         disabled: current_page == 0,
                         onclick: move |_| {
                             let cur = *page.read();
@@ -156,13 +157,13 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
                         let display_page = current_page + 1;
                         rsx! {
                             span {
-                                style: "font-size: 13px; color: {c.text_secondary};",
+                                style: "font-size: 13px; color: {p.text_secondary};",
                                 "Page {display_page} / {total_pages}"
                             }
                         }
                     }
                     button {
-                        style: "padding: 6px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 6px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                         disabled: current_page + 1 >= total_pages,
                         onclick: move |_| {
                             let cur = *page.read();
@@ -175,31 +176,31 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
 
             // Totaux
             div {
-                style: "display: flex; justify-content: center; gap: 24px; padding: 16px; background: {c.bg_secondary}; border-radius: 8px;",
+                style: "display: flex; justify-content: center; gap: 24px; padding: 16px; background: {p.bg_secondary}; border-radius: 8px;",
 
                 div {
                     style: "text-align: center;",
-                    p { style: "font-size: 11px; color: {c.text_muted}; text-transform: uppercase;", "Revenus" }
-                    p { style: "font-size: 16px; font-weight: 600; color: {c.accent_green};", "+{total_income:.2} EUR" }
+                    p { style: "font-size: 11px; color: {p.text_muted}; text-transform: uppercase;", "Revenus" }
+                    p { style: "font-size: 16px; font-weight: 600; color: {p.success};", "+{total_income:.2} EUR" }
                 }
                 div {
-                    style: "width: 1px; background: {c.border};"
+                    style: "width: 1px; background: {p.border_default};"
                 }
                 div {
                     style: "text-align: center;",
-                    p { style: "font-size: 11px; color: {c.text_muted}; text-transform: uppercase;", "Depenses" }
-                    p { style: "font-size: 16px; font-weight: 600; color: {c.accent_red};", "-{total_expense:.2} EUR" }
+                    p { style: "font-size: 11px; color: {p.text_muted}; text-transform: uppercase;", "Depenses" }
+                    p { style: "font-size: 16px; font-weight: 600; color: {p.error};", "-{total_expense:.2} EUR" }
                 }
                 div {
-                    style: "width: 1px; background: {c.border};"
+                    style: "width: 1px; background: {p.border_default};"
                 }
                 {
-                    let net_color = if net >= 0.0 { c.accent_green } else { c.accent_red };
+                    let net_color = if net >= 0.0 { p.success } else { p.error };
                     let net_str = format!("{net:+.2} EUR");
                     rsx! {
                         div {
                             style: "text-align: center;",
-                            p { style: "font-size: 11px; color: {c.text_muted}; text-transform: uppercase;", "Solde net" }
+                            p { style: "font-size: 11px; color: {p.text_muted}; text-transform: uppercase;", "Solde net" }
                             p {
                                 style: "font-size: 16px; font-weight: 600; color: {net_color};",
                                 "{net_str}"
@@ -214,9 +215,9 @@ pub fn PurseMovements(state: Signal<JayKontaState>) -> Element {
 
 #[component]
 fn FilterButton(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_secondary };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { p.bg_secondary };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {

@@ -5,26 +5,27 @@
 //! @human: Composants UI reutilisables JayFestival: StatCard, Badge, TabButton, EmptyState.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Carte statistique avec bordure colorée.
 #[component]
 pub fn StatCard(label: String, value: String, icon: String, color: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 3px solid {color};",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 3px solid {color};",
 
             div {
                 style: "display: flex; justify-content: space-between; align-items: flex-start;",
 
                 div {
                     p {
-                        style: "font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                        style: "font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                         "{label}"
                     }
                     p {
-                        style: "font-size: 24px; font-weight: 600; color: {c.text_white};",
+                        style: "font-size: 24px; font-weight: 600; color: {p.text_high};",
                         "{value}"
                     }
                 }
@@ -40,9 +41,9 @@ pub fn StatCard(label: String, value: String, icon: String, color: String) -> El
 /// Bouton onglet réutilisable.
 #[component]
 pub fn TabButton(label: String, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_hover };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { p.bg_overlay };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {
@@ -72,10 +73,10 @@ pub fn ActionButton(
     #[props(default)] accent: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if accent { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let color = if accent { "white".to_string() } else { c.text_primary.to_string() };
-    let border = if accent { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let p = use_palette();
+    let bg = if accent { p.accent_primary.to_string() } else { p.bg_overlay.to_string() };
+    let color = if accent { "white".to_string() } else { p.text_primary.to_string() };
+    let border = if accent { "none".to_string() } else { format!("1px solid {}", p.border_default) };
 
     rsx! {
         button {
@@ -91,17 +92,17 @@ pub fn ActionButton(
 /// Section placeholder (fonctionnalité en cours).
 #[component]
 pub fn PlaceholderSection(title: &'static str, icon: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
 
             span {
                 style: "font-size: 64px; margin-bottom: 16px; opacity: 0.3;",
                 "{icon}"
             }
             h2 {
-                style: "font-size: 20px; color: {c.text_secondary};",
+                style: "font-size: 20px; color: {p.text_secondary};",
                 "{title}"
             }
             p {
@@ -115,17 +116,17 @@ pub fn PlaceholderSection(title: &'static str, icon: &'static str) -> Element {
 /// État vide (aucune donnée).
 #[component]
 pub fn EmptyState(title: String, message: String, icon: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: {c.text_muted};",
+            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: {p.text_muted};",
 
             span {
                 style: "font-size: 64px; margin-bottom: 16px; opacity: 0.3;",
                 "{icon}"
             }
             h2 {
-                style: "font-size: 20px; color: {c.text_secondary};",
+                style: "font-size: 20px; color: {p.text_secondary};",
                 "{title}"
             }
             p {
@@ -145,23 +146,23 @@ pub fn EventCard(
     status: String,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let status_color = match status.as_str() {
-        "en_preparation" | "En preparation" => c.accent_orange,
-        "en_cours" | "En cours" => c.accent_green,
-        "termine" | "Termine" => c.text_muted,
-        "publie" | "Publie" => c.accent_blue,
-        _ => c.text_secondary,
+        "en_preparation" | "En preparation" => p.warning,
+        "en_cours" | "En cours" => p.success,
+        "termine" | "Termine" => p.text_muted,
+        "publie" | "Publie" => p.accent_primary,
+        _ => p.text_secondary,
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s;",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s;",
             onclick: move |evt| onclick.call(evt),
 
             // Icône
             div {
-                style: "width: 60px; height: 60px; background: linear-gradient(135deg, {c.bg_hover} 0%, {c.bg_secondary} 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
+                style: "width: 60px; height: 60px; background: linear-gradient(135deg, {p.bg_overlay} 0%, {p.bg_secondary} 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
                 "🎪"
             }
 
@@ -170,11 +171,11 @@ pub fn EventCard(
                 style: "flex: 1;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 4px;",
                     "{name}"
                 }
                 div {
-                    style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_secondary};",
+                    style: "display: flex; gap: 16px; font-size: 12px; color: {p.text_secondary};",
 
                     span { "📆 {date}" }
                     span { "📍 {location}" }
@@ -189,7 +190,7 @@ pub fn EventCard(
 
             // Action
             button {
-                style: "padding: 8px 16px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 8px 16px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                 "Gerer →"
             }
         }

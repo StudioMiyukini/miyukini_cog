@@ -5,20 +5,21 @@
 //! @human: Ecran VIS-E09 JayFestival: activites visiteur (jeux, concours, pass).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::{Badge, StatCard};
 
 /// Hub des activités visiteur.
 #[component]
 pub fn VisActivites() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Activites"
             }
 
@@ -30,26 +31,26 @@ pub fn VisActivites() -> Element {
                     label: "Points cumules".to_string(),
                     value: "350".to_string(),
                     icon: "⭐".to_string(),
-                    color: c.accent_orange.to_string(),
+                    color: p.warning.to_string(),
                 }
                 StatCard {
                     label: "Jeux completes".to_string(),
                     value: "5".to_string(),
                     icon: "🎮".to_string(),
-                    color: c.accent_blue.to_string(),
+                    color: p.accent_primary.to_string(),
                 }
                 StatCard {
                     label: "Participations concours".to_string(),
                     value: "2".to_string(),
                     icon: "🏆".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
             }
 
             // Jeux disponibles
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Jeux disponibles"
                 }
 
@@ -90,7 +91,7 @@ pub fn VisActivites() -> Element {
             // Concours en cours
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Concours en cours"
                 }
 
@@ -117,7 +118,7 @@ pub fn VisActivites() -> Element {
             // Pass et récompenses
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Mes recompenses"
                 }
 
@@ -156,30 +157,30 @@ fn GameCard(
     reward: &'static str,
     progress: Option<(usize, usize)>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let progress_pct = progress.map_or(0, |(current, total)| (current * 100) / total);
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             div {
                 style: "display: flex; gap: 16px; margin-bottom: 16px;",
 
                 div {
-                    style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
+                    style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
                     "{icon}"
                 }
 
                 div {
                     style: "flex: 1;",
                     h4 {
-                        style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                        style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                         "{title}"
                     }
                     p {
-                        style: "font-size: 12px; color: {c.text_muted};",
+                        style: "font-size: 12px; color: {p.text_muted};",
                         "{description}"
                     }
                 }
@@ -193,19 +194,19 @@ fn GameCard(
                     div {
                         style: "display: flex; justify-content: space-between; margin-bottom: 4px;",
                         span {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "Progression"
                         }
                         span {
-                            style: "font-size: 12px; color: {c.text_primary};",
+                            style: "font-size: 12px; color: {p.text_primary};",
                             "{current}/{total}"
                         }
                     }
 
                     div {
-                        style: "width: 100%; height: 6px; background: {c.bg_hover}; border-radius: 3px; overflow: hidden;",
+                        style: "width: 100%; height: 6px; background: {p.bg_overlay}; border-radius: 3px; overflow: hidden;",
                         div {
-                            style: "width: {progress_pct}%; height: 100%; background: {c.accent_blue}; border-radius: 3px;",
+                            style: "width: {progress_pct}%; height: 100%; background: {p.accent_primary}; border-radius: 3px;",
                         }
                     }
                 }
@@ -215,12 +216,12 @@ fn GameCard(
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 span {
-                    style: "font-size: 13px; color: {c.accent_orange}; font-weight: 500;",
+                    style: "font-size: 13px; color: {p.warning}; font-weight: 500;",
                     "🎁 {reward}"
                 }
 
                 button {
-                    style: "padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 12px;",
+                    style: "padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 12px;",
                     "Jouer"
                 }
             }
@@ -236,14 +237,14 @@ fn ContestCard(
     participants: usize,
     is_participating: bool,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;",
 
             div {
-                style: "width: 56px; height: 56px; background: {c.accent_orange}20; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px;",
+                style: "width: 56px; height: 56px; background: {p.warning}20; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px;",
                 "🏆"
             }
 
@@ -251,15 +252,15 @@ fn ContestCard(
                 style: "flex: 1;",
 
                 h4 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 13px; color: {c.accent_orange}; margin-bottom: 4px;",
+                    style: "font-size: 13px; color: {p.warning}; margin-bottom: 4px;",
                     "🎁 {prize}"
                 }
                 div {
-                    style: "display: flex; gap: 12px; font-size: 12px; color: {c.text_muted};",
+                    style: "display: flex; gap: 12px; font-size: 12px; color: {p.text_muted};",
                     span { "⏰ {end_date}" }
                     span { "👥 {participants} participants" }
                 }
@@ -268,11 +269,11 @@ fn ContestCard(
             if is_participating {
                 Badge {
                     text: "Participe".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
             } else {
                 button {
-                    style: "padding: 10px 20px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
+                    style: "padding: 10px 20px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
                     "Participer"
                 }
             }
@@ -282,26 +283,26 @@ fn ContestCard(
 
 #[component]
 fn RewardCard(icon: &'static str, title: &'static str, cost: usize, available: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let opacity = if available { "1" } else { "0.5" };
-    let btn_bg = if available { c.accent_blue } else { c.bg_hover };
-    let btn_color = if available { "white" } else { c.text_muted };
+    let btn_bg = if available { p.accent_primary } else { p.bg_overlay };
+    let btn_color = if available { "white" } else { p.text_muted };
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; text-align: center; opacity: {opacity};",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; text-align: center; opacity: {opacity};",
 
             span {
                 style: "font-size: 40px; display: block; margin-bottom: 12px;",
                 "{icon}"
             }
             h4 {
-                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                 "{title}"
             }
             p {
-                style: "font-size: 13px; color: {c.accent_orange}; margin-bottom: 16px;",
+                style: "font-size: 13px; color: {p.warning}; margin-bottom: 16px;",
                 "⭐ {cost} points"
             }
             button {

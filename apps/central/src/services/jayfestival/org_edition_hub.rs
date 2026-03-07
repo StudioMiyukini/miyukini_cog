@@ -5,6 +5,7 @@
 //! @human: Ecran ORG-E07 JayFestival: hub edition avec navigation par onglets.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::TabButton;
@@ -25,7 +26,7 @@ pub fn OrgEditionHub(
     tab: OrgEditionTab,
     state: Signal<JayFestivalState>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger l'édition
@@ -48,7 +49,7 @@ pub fn OrgEditionHub(
                 style: "display: flex; align-items: center; gap: 12px;",
 
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                     onclick: move |_| {
                         state.write().org_section = super::OrgSection::Editions;
                     },
@@ -56,14 +57,14 @@ pub fn OrgEditionHub(
                 }
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "🎪 {edition_name}"
                 }
             }
 
             // Onglets
             div {
-                style: "display: flex; gap: 4px; border-bottom: 1px solid {c.border}; padding-bottom: 0; flex-wrap: wrap;",
+                style: "display: flex; gap: 4px; border-bottom: 1px solid {p.border_default}; padding-bottom: 0; flex-wrap: wrap;",
 
                 TabButton {
                     label: "Vue d'ensemble".to_string(),
@@ -157,7 +158,7 @@ pub fn OrgEditionHub(
 /// Vue d'ensemble d'une édition (stats synthétiques).
 #[component]
 fn EditionOverview(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let (exposants_count, animations_count, budget_summary) = {
@@ -180,25 +181,25 @@ fn EditionOverview(edition_id: String) -> Element {
                     label: "Exposants".to_string(),
                     value: exposants_count.to_string(),
                     icon: "🏪".to_string(),
-                    color: c.accent_blue.to_string(),
+                    color: p.accent_primary.to_string(),
                 }
                 super::components::StatCard {
                     label: "Animations".to_string(),
                     value: animations_count.to_string(),
                     icon: "🎭".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
                 super::components::StatCard {
                     label: "Revenus".to_string(),
                     value: format!("{:.0} EUR", budget_summary.total_revenus),
                     icon: "💰".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
                 super::components::StatCard {
                     label: "Balance".to_string(),
                     value: format!("{:.0} EUR", budget_summary.balance),
                     icon: "📊".to_string(),
-                    color: if budget_summary.balance >= 0.0 { c.accent_green.to_string() } else { c.accent_orange.to_string() },
+                    color: if budget_summary.balance >= 0.0 { p.success.to_string() } else { p.warning.to_string() },
                 }
             }
         }

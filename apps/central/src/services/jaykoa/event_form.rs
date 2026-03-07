@@ -1,6 +1,7 @@
 //! Formulaire de création/édition d'événement JayKoa.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use jaykoa::data::{Agenda, TemporalEntry, EntryType, TemporalStatus};
 use chrono::Local;
@@ -113,20 +114,20 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
             
             // Modal
             div {
-                style: "background: {c.bg_card}; border-radius: 12px; width: 480px; max-width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.3);",
+                style: "background: {p.bg_surface}; border-radius: 12px; width: 480px; max-width: 90vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.3);",
                 onclick: move |e| e.stop_propagation(),
                 
                 // Header
                 div {
-                    style: "display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid {c.border};",
+                    style: "display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid {p.border_default};",
                     
                     h2 {
-                        style: "font-size: 18px; font-weight: 500; color: {c.text_white}; margin: 0;",
+                        style: "font-size: 18px; font-weight: 500; color: {p.text_high}; margin: 0;",
                         "Nouvel événement"
                     }
                     
                     button {
-                        style: "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: {c.text_secondary}; cursor: pointer; border-radius: 4px; font-size: 18px;",
+                        style: "width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: {p.text_secondary}; cursor: pointer; border-radius: 4px; font-size: 18px;",
                         onclick: move |_| props.on_close.call(()),
                         "✕"
                     }
@@ -140,7 +141,7 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                     div {
                         style: "margin-bottom: 16px;",
                         input {
-                            style: "width: 100%; padding: 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 16px; box-sizing: border-box;",
+                            style: "width: 100%; padding: 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 16px; box-sizing: border-box;",
                             placeholder: "Ajouter un titre",
                             value: "{title}",
                             oninput: move |e| title.set(e.value()),
@@ -156,7 +157,7 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                             onchange: move |e| all_day.set(e.checked()),
                         }
                         label {
-                            style: "font-size: 13px; color: {c.text_secondary};",
+                            style: "font-size: 13px; color: {p.text_secondary};",
                             "Journée entière"
                         }
                     }
@@ -168,12 +169,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                         div {
                             style: "flex: 1;",
                             label {
-                                style: "display: block; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                                 "Début"
                             }
                             input {
                                 r#type: "date",
-                                style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                                 value: "{start_date}",
                                 oninput: move |e| start_date.set(e.value()),
                             }
@@ -183,12 +184,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                             div {
                                 style: "width: 120px;",
                                 label {
-                                    style: "display: block; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                                    style: "display: block; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                                     "Heure"
                                 }
                                 input {
                                     r#type: "time",
-                                    style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                                    style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                                     value: "{start_time}",
                                     oninput: move |e| start_time.set(e.value()),
                                 }
@@ -203,12 +204,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                         div {
                             style: "flex: 1;",
                             label {
-                                style: "display: block; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                                 "Fin"
                             }
                             input {
                                 r#type: "date",
-                                style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                                 value: "{end_date}",
                                 oninput: move |e| end_date.set(e.value()),
                             }
@@ -218,12 +219,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                             div {
                                 style: "width: 120px;",
                                 label {
-                                    style: "display: block; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                                    style: "display: block; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                                     "Heure"
                                 }
                                 input {
                                     r#type: "time",
-                                    style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                                    style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                                     value: "{end_time}",
                                     oninput: move |e| end_time.set(e.value()),
                                 }
@@ -235,12 +236,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                     div {
                         style: "margin-bottom: 16px;",
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                             span { "📍" }
                             "Lieu"
                         }
                         input {
-                            style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                            style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                             placeholder: "Ajouter un lieu",
                             value: "{location}",
                             oninput: move |e| location.set(e.value()),
@@ -251,12 +252,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                     div {
                         style: "margin-bottom: 16px;",
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                             span { "≡" }
                             "Description"
                         }
                         textarea {
-                            style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box; min-height: 80px; resize: vertical;",
+                            style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box; min-height: 80px; resize: vertical;",
                             placeholder: "Ajouter une description",
                             value: "{description}",
                             oninput: move |e| description.set(e.value()),
@@ -267,12 +268,12 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                     div {
                         style: "margin-bottom: 16px;",
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                             span { "📅" }
                             "Agenda"
                         }
                         select {
-                            style: "width: 100%; padding: 10px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px;",
+                            style: "width: 100%; padding: 10px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px;",
                             value: "{selected_agenda}",
                             onchange: move |e| {
                                 selected_agenda.set(e.value());
@@ -296,7 +297,7 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                     div {
                         style: "margin-bottom: 24px;",
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {c.text_muted}; margin-bottom: 8px;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 11px; color: {p.text_muted}; margin-bottom: 8px;",
                             span { "🎨" }
                             "Couleur"
                         }
@@ -322,16 +323,16 @@ pub fn EventFormModal(props: EventFormModalProps) -> Element {
                 
                 // Footer
                 div {
-                    style: "display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid {c.border};",
+                    style: "display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid {p.border_default};",
                     
                     button {
-                        style: "padding: 10px 20px; background: transparent; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_secondary}; font-size: 13px; cursor: pointer;",
+                        style: "padding: 10px 20px; background: transparent; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_secondary}; font-size: 13px; cursor: pointer;",
                         onclick: move |_| props.on_close.call(()),
                         "Annuler"
                     }
                     
                     {
-                        let save_bg = if can_save { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
+                        let save_bg = if can_save { p.accent_primary.to_string() } else { p.bg_overlay.to_string() };
                         let save_cursor = if can_save { "pointer" } else { "not-allowed" };
                         rsx! {
                             button {

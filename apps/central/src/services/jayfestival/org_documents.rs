@@ -5,12 +5,13 @@
 //! @human: Ecran ORG-E22 JayFestival: documents legaux organisateur (upload/telechargement).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Liste des documents d'une edition.
 #[component]
 pub fn OrgDocuments(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let selected_cat = use_signal(|| "Tous".to_string());
 
     rsx! {
@@ -22,12 +23,12 @@ pub fn OrgDocuments(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h3 {
-                    style: "font-size: 18px; color: {c.text_white};",
+                    style: "font-size: 18px; color: {p.text_high};",
                     "Documents de l'edition"
                 }
 
                 button {
-                    style: "display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
+                    style: "display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
                     "📄 Ajouter un document"
                 }
             }
@@ -46,17 +47,17 @@ pub fn OrgDocuments(edition_id: String) -> Element {
 
 #[component]
 fn DocumentCategories(selected: Signal<String>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let current = selected.read().clone();
 
-    let cat_tous_bg = if current == "Tous" { c.accent_blue } else { c.bg_secondary };
-    let cat_tous_color = if current == "Tous" { "white" } else { c.text_primary };
-    let cat_reg_bg = if current == "Reglementaire" { c.accent_blue } else { c.bg_secondary };
-    let cat_reg_color = if current == "Reglementaire" { "white" } else { c.text_primary };
-    let cat_con_bg = if current == "Contrats" { c.accent_blue } else { c.bg_secondary };
-    let cat_con_color = if current == "Contrats" { "white" } else { c.text_primary };
-    let cat_com_bg = if current == "Communication" { c.accent_blue } else { c.bg_secondary };
-    let cat_com_color = if current == "Communication" { "white" } else { c.text_primary };
+    let cat_tous_bg = if current == "Tous" { p.accent_primary } else { p.bg_secondary };
+    let cat_tous_color = if current == "Tous" { "white" } else { p.text_primary };
+    let cat_reg_bg = if current == "Reglementaire" { p.accent_primary } else { p.bg_secondary };
+    let cat_reg_color = if current == "Reglementaire" { "white" } else { p.text_primary };
+    let cat_con_bg = if current == "Contrats" { p.accent_primary } else { p.bg_secondary };
+    let cat_con_color = if current == "Contrats" { "white" } else { p.text_primary };
+    let cat_com_bg = if current == "Communication" { p.accent_primary } else { p.bg_secondary };
+    let cat_com_color = if current == "Communication" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -116,15 +117,15 @@ fn DocumentsList() -> Element {
 
 #[component]
 fn DocumentRow(name: &'static str, doc_icon: &'static str, filename: &'static str, size: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
             // Icône
             div {
-                style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
+                style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
                 "{doc_icon}"
             }
 
@@ -132,11 +133,11 @@ fn DocumentRow(name: &'static str, doc_icon: &'static str, filename: &'static st
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white};",
+                    style: "font-size: 14px; color: {p.text_high};",
                     "{name}"
                 }
                 div {
-                    style: "display: flex; gap: 12px; font-size: 12px; color: {c.text_muted};",
+                    style: "display: flex; gap: 12px; font-size: 12px; color: {p.text_muted};",
                     span { "{filename}" }
                     span { "{size}" }
                 }
@@ -147,11 +148,11 @@ fn DocumentRow(name: &'static str, doc_icon: &'static str, filename: &'static st
                 style: "display: flex; gap: 8px;",
 
                 button {
-                    style: "padding: 8px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 8px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "Telecharger"
                 }
                 button {
-                    style: "padding: 8px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 8px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                     "Supprimer"
                 }
             }
@@ -161,14 +162,14 @@ fn DocumentRow(name: &'static str, doc_icon: &'static str, filename: &'static st
 
 #[component]
 fn DocumentTemplates() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         section {
-            style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {c.border};",
+            style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {p.border_default};",
 
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Templates disponibles"
             }
 
@@ -194,22 +195,22 @@ fn DocumentTemplates() -> Element {
 
 #[component]
 fn TemplateCard(name: &'static str, description: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
             p {
-                style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                 "{name}"
             }
             p {
-                style: "font-size: 12px; color: {c.text_muted}; margin-bottom: 12px;",
+                style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 12px;",
                 "{description}"
             }
             button {
-                style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                 "Utiliser"
             }
         }

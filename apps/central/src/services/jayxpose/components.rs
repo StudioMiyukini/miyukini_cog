@@ -6,26 +6,27 @@
 //! @human: Composants UI reutilisables JayXpose: StatCard, Badge, ActionButton, EmptyState, FormField.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Carte statistique avec bordure coloree (XP-E01 dashboard).
 #[component]
 pub fn StatCard(label: String, value: String, icon: String, color: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 3px solid {color};",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 3px solid {color};",
 
             div {
                 style: "display: flex; justify-content: space-between; align-items: flex-start;",
 
                 div {
                     p {
-                        style: "font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                        style: "font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                         "{label}"
                     }
                     p {
-                        style: "font-size: 24px; font-weight: 600; color: {c.text_white};",
+                        style: "font-size: 24px; font-weight: 600; color: {p.text_high};",
                         "{value}"
                     }
                 }
@@ -57,10 +58,10 @@ pub fn ActionButton(
     #[props(default)] accent: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if accent { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let color = if accent { "white".to_string() } else { c.text_primary.to_string() };
-    let border = if accent { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let p = use_palette();
+    let bg = if accent { p.accent_primary.to_string() } else { p.bg_overlay.to_string() };
+    let color = if accent { "white".to_string() } else { p.text_primary.to_string() };
+    let border = if accent { "none".to_string() } else { format!("1px solid {}", p.border_default) };
 
     rsx! {
         button {
@@ -75,17 +76,17 @@ pub fn ActionButton(
 /// Section placeholder (fonctionnalite en cours).
 #[component]
 pub fn PlaceholderSection(title: &'static str, icon: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
 
             span {
                 style: "font-size: 64px; margin-bottom: 16px; opacity: 0.3;",
                 "{icon}"
             }
             h2 {
-                style: "font-size: 20px; color: {c.text_secondary};",
+                style: "font-size: 20px; color: {p.text_secondary};",
                 "{title}"
             }
             p {
@@ -105,17 +106,17 @@ pub fn EmptyState(
     #[props(default)] action_label: String,
     #[props(default)] on_action: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: {c.text_muted};",
+            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: {p.text_muted};",
 
             span {
                 style: "font-size: 64px; margin-bottom: 16px; opacity: 0.3;",
                 "{icon}"
             }
             h2 {
-                style: "font-size: 20px; color: {c.text_secondary};",
+                style: "font-size: 20px; color: {p.text_secondary};",
                 "{title}"
             }
             p {
@@ -124,7 +125,7 @@ pub fn EmptyState(
             }
             if !action_label.is_empty() {
                 button {
-                    style: "margin-top: 16px; padding: 10px 20px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;",
+                    style: "margin-top: 16px; padding: 10px 20px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;",
                     onclick: move |evt| on_action.call(evt),
                     "{action_label}"
                 }
@@ -143,7 +144,7 @@ pub fn PageHeader(
     #[props(default)] action_icon: String,
     #[props(default)] on_action: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
             style: "display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;",
@@ -152,19 +153,19 @@ pub fn PageHeader(
                 div {
                     style: "display: flex; align-items: center; gap: 12px;",
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white};",
+                        style: "font-size: 24px; color: {p.text_high};",
                         "{title}"
                     }
                     if let Some(n) = count {
                         span {
-                            style: "padding: 4px 10px; background: {c.bg_hover}; border-radius: 12px; font-size: 12px; color: {c.text_secondary};",
+                            style: "padding: 4px 10px; background: {p.bg_overlay}; border-radius: 12px; font-size: 12px; color: {p.text_secondary};",
                             "{n}"
                         }
                     }
                 }
                 if !subtitle.is_empty() {
                     p {
-                        style: "font-size: 13px; color: {c.text_secondary}; margin-top: 4px;",
+                        style: "font-size: 13px; color: {p.text_secondary}; margin-top: 4px;",
                         "{subtitle}"
                     }
                 }
@@ -192,7 +193,7 @@ pub fn FormField(
     #[props(default)] optional: bool,
     oninput: EventHandler<FormEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let ft = if field_type.is_empty() { "text" } else { &field_type };
 
     rsx! {
@@ -200,14 +201,14 @@ pub fn FormField(
             style: "display: flex; flex-direction: column; gap: 4px;",
 
             label {
-                style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                 "{label}"
                 if optional {
-                    span { style: "color: {c.text_muted}; font-weight: 400;", " (optionnel)" }
+                    span { style: "color: {p.text_muted}; font-weight: 400;", " (optionnel)" }
                 }
             }
             input {
-                style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; box-sizing: border-box;",
+                style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; box-sizing: border-box;",
                 r#type: "{ft}",
                 placeholder: "{placeholder}",
                 value: "{value}",
@@ -227,7 +228,7 @@ pub fn FormTextarea(
     #[props(default)] optional: bool,
     oninput: EventHandler<FormEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let r = if rows == 0 { 3 } else { rows };
 
     rsx! {
@@ -235,14 +236,14 @@ pub fn FormTextarea(
             style: "display: flex; flex-direction: column; gap: 4px;",
 
             label {
-                style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                 "{label}"
                 if optional {
-                    span { style: "color: {c.text_muted}; font-weight: 400;", " (optionnel)" }
+                    span { style: "color: {p.text_muted}; font-weight: 400;", " (optionnel)" }
                 }
             }
             textarea {
-                style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; resize: vertical; font-family: inherit; box-sizing: border-box;",
+                style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; resize: vertical; font-family: inherit; box-sizing: border-box;",
                 rows: "{r}",
                 placeholder: "{placeholder}",
                 value: "{value}",
@@ -255,13 +256,13 @@ pub fn FormTextarea(
 /// Section de formulaire avec titre.
 #[component]
 pub fn FormSection(title: String, children: Element) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
 
             h3 {
-                style: "font-size: 14px; color: {c.text_white}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {c.border};",
+                style: "font-size: 14px; color: {p.text_high}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {p.border_default};",
                 "{title}"
             }
             {children}
@@ -281,13 +282,13 @@ pub fn DocumentRow(
     on_view: EventHandler<MouseEvent>,
     on_delete: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let (status_color, status_label) = match status.as_str() {
-        "valide" => (c.accent_green, "Valide"),
-        "en_attente" => (c.accent_orange, "En attente"),
-        "expire" => (c.accent_red, "Expire"),
-        "rejete" => (c.accent_red, "Rejete"),
-        _ => (c.text_muted, "Inconnu"),
+        "valide" => (p.success, "Valide"),
+        "en_attente" => (p.warning, "En attente"),
+        "expire" => (p.error, "Expire"),
+        "rejete" => (p.error, "Rejete"),
+        _ => (p.text_muted, "Inconnu"),
     };
 
     let type_icon = match doc_type.as_str() {
@@ -305,7 +306,7 @@ pub fn DocumentRow(
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: {c.bg_hover}; border-radius: 4px;",
+            style: "display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: {p.bg_overlay}; border-radius: 4px;",
 
             // Icone type
             span { style: "font-size: 20px;", "{type_icon}" }
@@ -317,13 +318,13 @@ pub fn DocumentRow(
                 div {
                     style: "display: flex; align-items: center; gap: 8px;",
                     p {
-                        style: "font-size: 13px; color: {c.text_primary}; font-weight: 500;",
+                        style: "font-size: 13px; color: {p.text_primary}; font-weight: 500;",
                         "{label}"
                     }
                     Badge { text: status_label.to_string(), color: status_color.to_string() }
                 }
                 div {
-                    style: "display: flex; gap: 16px; font-size: 11px; color: {c.text_muted}; margin-top: 2px;",
+                    style: "display: flex; gap: 16px; font-size: 11px; color: {p.text_muted}; margin-top: 2px;",
                     span { "{file_name}" }
                     if !expires_at.is_empty() {
                         span { "Expire: {expires_at}" }
@@ -336,12 +337,12 @@ pub fn DocumentRow(
             div {
                 style: "display: flex; gap: 4px;",
                 button {
-                    style: "padding: 6px 10px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 11px;",
+                    style: "padding: 6px 10px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 11px;",
                     onclick: move |evt| on_view.call(evt),
                     "Voir"
                 }
                 button {
-                    style: "padding: 6px 10px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 11px;",
+                    style: "padding: 6px 10px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 11px;",
                     onclick: move |evt| on_delete.call(evt),
                     "Suppr."
                 }
@@ -358,16 +359,16 @@ pub fn QuickAccessCard(
     count: String,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         button {
-            style: "display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: {c.text_primary}; text-align: center; min-width: 120px;",
+            style: "display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: {p.text_primary}; text-align: center; min-width: 120px;",
             onclick: move |evt| onclick.call(evt),
 
             span { style: "font-size: 28px;", "{icon}" }
-            span { style: "font-size: 13px; font-weight: 500; color: {c.text_white};", "{title}" }
+            span { style: "font-size: 13px; font-weight: 500; color: {p.text_high};", "{title}" }
             if !count.is_empty() {
-                span { style: "font-size: 11px; color: {c.text_muted};", "{count}" }
+                span { style: "font-size: 11px; color: {p.text_muted};", "{count}" }
             }
         }
     }

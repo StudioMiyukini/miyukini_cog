@@ -3,6 +3,7 @@
 
 use chrono::Datelike;
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::KpiCard;
@@ -10,7 +11,7 @@ use super::JayKontaState;
 
 #[component]
 pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut months_ahead = use_signal(|| 6u32);
 
@@ -25,7 +26,7 @@ pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
     let Some(fv) = forecast_view else {
         return rsx! {
             div {
-                style: "display: flex; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+                style: "display: flex; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
                 p { "Impossible de charger le previsionnel. Verifiez la connexion JayKonta." }
             }
         };
@@ -53,11 +54,11 @@ pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
 
                 div {
                     h1 {
-                        style: "font-size: 24px; color: {c.text_white}; margin-bottom: 4px;",
+                        style: "font-size: 24px; color: {p.text_high}; margin-bottom: 4px;",
                         "Previsionnel Budget"
                     }
                     p {
-                        style: "font-size: 13px; color: {c.text_muted};",
+                        style: "font-size: 13px; color: {p.text_muted};",
                         "Projection basee sur vos {fv.active_recurring_count} transactions recurrentes actives"
                     }
                 }
@@ -115,16 +116,16 @@ pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
 
             // Tableau previsionnel
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Projection mois par mois"
                 }
 
                 // En-tete tableau
                 div {
-                    style: "display: grid; grid-template-columns: 100px 1fr 100px 100px 100px 120px; gap: 8px; padding: 8px 0; border-bottom: 1px solid {c.border}; font-size: 11px; color: {c.text_muted}; font-weight: 600; text-transform: uppercase;",
+                    style: "display: grid; grid-template-columns: 100px 1fr 100px 100px 100px 120px; gap: 8px; padding: 8px 0; border-bottom: 1px solid {p.border_default}; font-size: 11px; color: {p.text_muted}; font-weight: 600; text-transform: uppercase;",
 
                     span { "Mois" }
                     span { "Evolution" }
@@ -143,16 +144,16 @@ pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
             // Alerte si solde negatif prevu
             if let Some(ref neg) = first_negative {
                 div {
-                    style: "background: {c.accent_red}15; border: 1px solid {c.accent_red}40; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;",
+                    style: "background: {p.error}15; border: 1px solid {p.error}40; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;",
 
                     span { style: "font-size: 24px;", "⚠️" }
                     div {
                         p {
-                            style: "font-size: 14px; color: {c.accent_red}; font-weight: 500;",
+                            style: "font-size: 14px; color: {p.error}; font-weight: 500;",
                             "Attention : solde negatif prevu en {neg.month_label}"
                         }
                         p {
-                            style: "font-size: 12px; color: {c.text_muted}; margin-top: 4px;",
+                            style: "font-size: 12px; color: {p.text_muted}; margin-top: 4px;",
                             "Solde projete : {neg.projected_balance:.2} EUR. Pensez a ajuster vos depenses recurrentes ou a augmenter vos revenus."
                         }
                     }
@@ -160,16 +161,16 @@ pub fn PurseForecast(state: Signal<JayKontaState>) -> Element {
             }
             if first_negative.is_none() {
                 div {
-                    style: "background: {c.accent_green}15; border: 1px solid {c.accent_green}40; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;",
+                    style: "background: {p.success}15; border: 1px solid {p.success}40; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;",
 
                     span { style: "font-size: 24px;", "✅" }
                     div {
                         p {
-                            style: "font-size: 14px; color: {c.accent_green}; font-weight: 500;",
+                            style: "font-size: 14px; color: {p.success}; font-weight: 500;",
                             "Previsions positives"
                         }
                         p {
-                            style: "font-size: 12px; color: {c.text_muted}; margin-top: 4px;",
+                            style: "font-size: 12px; color: {p.text_muted}; margin-top: 4px;",
                             "Votre solde reste positif sur toute la periode projetee."
                         }
                     }
@@ -186,38 +187,38 @@ fn render_forecast_row(
     balance_range: f64,
     c: &crate::theme::ThemePalette,
 ) -> Element {
-    let net_color = if entry.recurring_net >= 0.0 { c.accent_green } else { c.accent_red };
-    let balance_color = if entry.projected_balance >= 0.0 { c.accent_green } else { c.accent_red };
+    let net_color = if entry.recurring_net >= 0.0 { p.success } else { p.error };
+    let balance_color = if entry.projected_balance >= 0.0 { p.success } else { p.error };
     let bar_pct = if balance_range > 0.0 {
         ((entry.projected_balance - min_balance) / balance_range * 100.0).clamp(2.0, 100.0)
     } else {
         50.0
     };
-    let bar_color = if entry.projected_balance >= 0.0 { c.accent_green } else { c.accent_red };
+    let bar_color = if entry.projected_balance >= 0.0 { p.success } else { p.error };
 
     rsx! {
         div {
-            style: "display: grid; grid-template-columns: 100px 1fr 100px 100px 100px 120px; gap: 8px; padding: 10px 0; border-bottom: 1px solid {c.border}20; align-items: center; font-size: 13px;",
+            style: "display: grid; grid-template-columns: 100px 1fr 100px 100px 100px 120px; gap: 8px; padding: 10px 0; border-bottom: 1px solid {p.border_default}20; align-items: center; font-size: 13px;",
 
             span {
-                style: "color: {c.text_primary}; font-weight: 500;",
+                style: "color: {p.text_primary}; font-weight: 500;",
                 "{entry.month_label}"
             }
 
             div {
-                style: "width: 100%; height: 6px; background: {c.bg_hover}; border-radius: 3px; overflow: hidden;",
+                style: "width: 100%; height: 6px; background: {p.bg_overlay}; border-radius: 3px; overflow: hidden;",
                 div {
                     style: "width: {bar_pct}%; height: 100%; background: {bar_color}; border-radius: 3px; transition: width 0.3s;",
                 }
             }
 
             span {
-                style: "text-align: right; color: {c.accent_green};",
+                style: "text-align: right; color: {p.success};",
                 "+{entry.recurring_income:.2}"
             }
 
             span {
-                style: "text-align: right; color: {c.accent_red};",
+                style: "text-align: right; color: {p.error};",
                 "-{entry.recurring_expense:.2}"
             }
 
@@ -242,9 +243,9 @@ fn HorizonBtn(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_hover };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { p.bg_overlay };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {

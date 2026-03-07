@@ -54,6 +54,7 @@ mod vis_activites;
 mod vis_compte;
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 
@@ -328,7 +329,7 @@ pub fn JayFestivalView() -> Element {
 /// Vue facade publique pour utilisateurs non connectés.
 #[component]
 fn UncFacade(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -336,7 +337,7 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
 
             // Header public
             header {
-                style: "display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid {c.border};",
+                style: "display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid {p.border_default};",
 
                 // Logo + Nav
                 div {
@@ -354,7 +355,7 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
                             "🎪"
                         }
                         span {
-                            style: "font-size: 16px; font-weight: 600; color: {c.text_white};",
+                            style: "font-size: 16px; font-weight: 600; color: {p.text_high};",
                             "JayFestival"
                         }
                     }
@@ -392,14 +393,14 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
                     style: "display: flex; align-items: center; gap: 12px;",
 
                     button {
-                        style: "padding: 8px 16px; background: transparent; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: transparent; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::Connexion;
                         },
                         "Connexion"
                     }
                     button {
-                        style: "padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::Inscription;
                         },
@@ -455,13 +456,13 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
 
             // Footer
             footer {
-                style: "padding: 16px 24px; border-top: 1px solid {c.border}; text-align: center;",
+                style: "padding: 16px 24px; border-top: 1px solid {p.border_default}; text-align: center;",
 
                 div {
-                    style: "display: flex; justify-content: center; gap: 24px; font-size: 12px; color: {c.text_muted};",
+                    style: "display: flex; justify-content: center; gap: 24px; font-size: 12px; color: {p.text_muted};",
 
                     button {
-                        style: "background: none; border: none; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                        style: "background: none; border: none; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::MentionsLegales;
                         },
@@ -469,7 +470,7 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
                     }
                     span { "•" }
                     button {
-                        style: "background: none; border: none; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                        style: "background: none; border: none; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::MentionsLegales;
                         },
@@ -477,7 +478,7 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
                     }
                     span { "•" }
                     button {
-                        style: "background: none; border: none; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                        style: "background: none; border: none; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::MentionsLegales;
                         },
@@ -485,7 +486,7 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
                     }
                     span { "•" }
                     button {
-                        style: "background: none; border: none; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                        style: "background: none; border: none; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::MentionsLegales;
                         },
@@ -500,8 +501,8 @@ fn UncFacade(state: Signal<JayFestivalState>) -> Element {
 /// Lien de navigation header.
 #[component]
 fn NavLink(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let p = use_palette();
+    let color = if is_active { p.text_high } else { p.text_secondary };
 
     rsx! {
         button {

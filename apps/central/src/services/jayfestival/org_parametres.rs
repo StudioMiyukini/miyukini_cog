@@ -5,6 +5,7 @@
 //! @human: Ecran ORG-E08 JayFestival: parametrage edition (dates, lieu, theme, reglement).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::ActionButton;
@@ -16,7 +17,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// Parametrage edition.
 #[component]
 pub fn OrgParametres(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger l'édition
@@ -28,7 +29,7 @@ pub fn OrgParametres(edition_id: String) -> Element {
     let Some(edition) = edition else {
         return rsx! {
             div {
-                style: "text-align: center; padding: 40px; color: {c.text_muted};",
+                style: "text-align: center; padding: 40px; color: {p.text_muted};",
                 "Edition non trouvee"
             }
         };
@@ -71,7 +72,7 @@ pub fn OrgParametres(edition_id: String) -> Element {
 
             // Titre
             h3 {
-                style: "font-size: 18px; color: {c.text_white};",
+                style: "font-size: 18px; color: {p.text_high};",
                 "Parametres de l'edition"
             }
 
@@ -82,12 +83,12 @@ pub fn OrgParametres(edition_id: String) -> Element {
                 // Nom
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Nom de l'evenement"
                     }
                     input {
                         r#type: "text",
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                         value: "{name}",
                         oninput: move |evt| name.set(evt.value()),
                     }
@@ -96,12 +97,12 @@ pub fn OrgParametres(edition_id: String) -> Element {
                 // Lieu
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Lieu"
                     }
                     input {
                         r#type: "text",
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                         value: "{location}",
                         oninput: move |evt| location.set(evt.value()),
                     }
@@ -110,12 +111,12 @@ pub fn OrgParametres(edition_id: String) -> Element {
                 // Date debut
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Date de debut"
                     }
                     input {
                         r#type: "date",
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                         value: "{start_date}",
                         oninput: move |evt| start_date.set(evt.value()),
                     }
@@ -124,12 +125,12 @@ pub fn OrgParametres(edition_id: String) -> Element {
                 // Date fin
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Date de fin"
                     }
                     input {
                         r#type: "date",
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                         value: "{end_date}",
                         oninput: move |evt| end_date.set(evt.value()),
                     }
@@ -138,11 +139,11 @@ pub fn OrgParametres(edition_id: String) -> Element {
                 // Statut
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Statut"
                     }
                     select {
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                         value: "{status}",
                         onchange: move |evt| status.set(evt.value()),
 
@@ -158,11 +159,11 @@ pub fn OrgParametres(edition_id: String) -> Element {
             // Theme / Description
             div {
                 label {
-                    style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                    style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                     "Theme / Description"
                 }
                 textarea {
-                    style: "width: 100%; padding: 10px 12px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px; min-height: 100px; resize: vertical;",
+                    style: "width: 100%; padding: 10px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px; min-height: 100px; resize: vertical;",
                     value: "{theme}",
                     oninput: move |evt| theme.set(evt.value()),
                 }
@@ -181,7 +182,7 @@ pub fn OrgParametres(edition_id: String) -> Element {
 
                 if *saved.read() {
                     span {
-                        style: "color: {c.accent_green}; font-size: 13px;",
+                        style: "color: {p.success}; font-size: 13px;",
                         "✓ Modifications enregistrees"
                     }
                 }
@@ -189,18 +190,18 @@ pub fn OrgParametres(edition_id: String) -> Element {
 
             // Section Reglement
             section {
-                style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {c.border};",
+                style: "margin-top: 24px; padding-top: 24px; border-top: 1px solid {p.border_default};",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Reglement de l'evenement"
                 }
 
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                     p {
-                        style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 16px;",
+                        style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 16px;",
                         "Definissez les regles de participation pour les exposants."
                     }
 
@@ -208,21 +209,21 @@ pub fn OrgParametres(edition_id: String) -> Element {
                         style: "display: flex; flex-direction: column; gap: 12px;",
 
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {c.text_primary}; cursor: pointer;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {p.text_primary}; cursor: pointer;",
                             input {
                                 r#type: "checkbox",
                             }
                             "Candidature obligatoire pour les exposants"
                         }
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {c.text_primary}; cursor: pointer;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {p.text_primary}; cursor: pointer;",
                             input {
                                 r#type: "checkbox",
                             }
                             "Paiement requis avant validation"
                         }
                         label {
-                            style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {c.text_primary}; cursor: pointer;",
+                            style: "display: flex; align-items: center; gap: 8px; font-size: 13px; color: {p.text_primary}; cursor: pointer;",
                             input {
                                 r#type: "checkbox",
                             }

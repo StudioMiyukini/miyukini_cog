@@ -7,6 +7,7 @@
 //! @human: Ecrans UNC-E11/E14 JayFestival: authentification et modals CTA (connexion, inscription, mentions).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{UncSection, JayFestivalRole, JayFestivalState};
@@ -20,7 +21,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// UNC-E11 — Modal CTA contextuel.
 #[component]
 pub fn UncCtaModal(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let action = state.read().cta_action.clone().unwrap_or_default();
     let (title, message, target_role) = match action.as_str() {
@@ -54,15 +55,15 @@ pub fn UncCtaModal(state: Signal<JayFestivalState>) -> Element {
             },
 
             div {
-                style: "background: {c.bg_main}; border-radius: 12px; padding: 32px; max-width: 400px; width: 90%;",
+                style: "background: {p.bg_base}; border-radius: 12px; padding: 32px; max-width: 400px; width: 90%;",
                 onclick: move |evt| evt.stop_propagation(),
 
                 h2 {
-                    style: "font-size: 20px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 20px; color: {p.text_high}; margin-bottom: 12px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 24px;",
+                    style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 24px;",
                     "{message}"
                 }
 
@@ -92,7 +93,7 @@ pub fn UncCtaModal(state: Signal<JayFestivalState>) -> Element {
                     }
 
                     button {
-                        style: "padding: 10px; background: transparent; border: none; color: {c.text_muted}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 10px; background: transparent; border: none; color: {p.text_muted}; cursor: pointer; font-size: 13px;",
                         onclick: move |_| {
                             state.write().unc_section = UncSection::Landing;
                         },
@@ -107,7 +108,7 @@ pub fn UncCtaModal(state: Signal<JayFestivalState>) -> Element {
 /// UNC-E12 — Page de connexion.
 #[component]
 pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let mut email = use_signal(String::new);
@@ -152,7 +153,7 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 style: "text-align: center; margin-bottom: 32px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Landing;
                     },
@@ -164,11 +165,11 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                     "🔐"
                 }
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-bottom: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-bottom: 8px;",
                     "Connexion"
                 }
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary};",
+                    style: "font-size: 14px; color: {p.text_secondary};",
                     "Connectez-vous a votre compte JayFestival"
                 }
             }
@@ -181,12 +182,12 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 // Email
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Email"
                     }
                     input {
                         r#type: "email",
-                        style: "width: 100%; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                         placeholder: "votre@email.com",
                         value: "{email}",
                         oninput: move |evt| email.set(evt.value()),
@@ -197,12 +198,12 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 // Mot de passe
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Mot de passe"
                     }
                     input {
                         r#type: "password",
-                        style: "width: 100%; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                         placeholder: "••••••••",
                         value: "{password}",
                         oninput: move |evt| password.set(evt.value()),
@@ -213,7 +214,7 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 // Erreur
                 if let Some(err) = error.read().as_ref() {
                     div {
-                        style: "padding: 12px; background: {c.accent_red}20; border-radius: 6px; color: {c.accent_red}; font-size: 13px;",
+                        style: "padding: 12px; background: {p.error}20; border-radius: 6px; color: {p.error}; font-size: 13px;",
                         "{err}"
                     }
                 }
@@ -221,7 +222,7 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 // Bouton submit
                 button {
                     r#type: "submit",
-                    style: "width: 100%; padding: 14px; background: {c.accent_blue}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px; font-weight: 500;",
+                    style: "width: 100%; padding: 14px; background: {p.accent_primary}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px; font-weight: 500;",
                     disabled: *loading.read(),
                     if *loading.read() { "Connexion..." } else { "Se connecter" }
                 }
@@ -232,11 +233,11 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
                 style: "text-align: center; margin-top: 24px;",
 
                 span {
-                    style: "color: {c.text_secondary}; font-size: 14px;",
+                    style: "color: {p.text_secondary}; font-size: 14px;",
                     "Pas encore de compte ? "
                 }
                 button {
-                    style: "background: none; border: none; color: {c.accent_blue}; cursor: pointer; font-size: 14px;",
+                    style: "background: none; border: none; color: {p.accent_primary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Inscription;
                     },
@@ -250,7 +251,7 @@ pub fn UncConnexion(state: Signal<JayFestivalState>) -> Element {
 /// UNC-E13 — Page d'inscription (choix type puis formulaire).
 #[component]
 pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let inscription_type = state.read().inscription_type.clone();
@@ -329,7 +330,7 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 style: "text-align: center; margin-bottom: 32px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
                     onclick: move |_| {
                         state.write().inscription_type = None;
                     },
@@ -341,11 +342,11 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                     "{type_icon}"
                 }
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-bottom: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-bottom: 8px;",
                     "Inscription {type_label}"
                 }
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary};",
+                    style: "font-size: 14px; color: {p.text_secondary};",
                     "Creez votre compte JayFestival"
                 }
             }
@@ -358,12 +359,12 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 // Email
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Email"
                     }
                     input {
                         r#type: "email",
-                        style: "width: 100%; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                         placeholder: "votre@email.com",
                         value: "{email}",
                         oninput: move |evt| email.set(evt.value()),
@@ -374,12 +375,12 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 // Mot de passe
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Mot de passe"
                     }
                     input {
                         r#type: "password",
-                        style: "width: 100%; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                         placeholder: "Minimum 6 caracteres",
                         value: "{password}",
                         oninput: move |evt| password.set(evt.value()),
@@ -390,12 +391,12 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 // Confirmation mot de passe
                 div {
                     label {
-                        style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                        style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                         "Confirmer le mot de passe"
                     }
                     input {
                         r#type: "password",
-                        style: "width: 100%; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                        style: "width: 100%; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                         placeholder: "••••••••",
                         value: "{password_confirm}",
                         oninput: move |evt| password_confirm.set(evt.value()),
@@ -406,7 +407,7 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 // Erreur
                 if let Some(err) = error.read().as_ref() {
                     div {
-                        style: "padding: 12px; background: {c.accent_red}20; border-radius: 6px; color: {c.accent_red}; font-size: 13px;",
+                        style: "padding: 12px; background: {p.error}20; border-radius: 6px; color: {p.error}; font-size: 13px;",
                         "{err}"
                     }
                 }
@@ -414,7 +415,7 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 // Bouton submit
                 button {
                     r#type: "submit",
-                    style: "width: 100%; padding: 14px; background: {c.accent_blue}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px; font-weight: 500;",
+                    style: "width: 100%; padding: 14px; background: {p.accent_primary}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px; font-weight: 500;",
                     disabled: *loading.read(),
                     if *loading.read() { "Inscription..." } else { "Creer mon compte" }
                 }
@@ -425,11 +426,11 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
                 style: "text-align: center; margin-top: 24px;",
 
                 span {
-                    style: "color: {c.text_secondary}; font-size: 14px;",
+                    style: "color: {p.text_secondary}; font-size: 14px;",
                     "Deja un compte ? "
                 }
                 button {
-                    style: "background: none; border: none; color: {c.accent_blue}; cursor: pointer; font-size: 14px;",
+                    style: "background: none; border: none; color: {p.accent_primary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Connexion;
                     },
@@ -443,7 +444,7 @@ pub fn UncInscription(state: Signal<JayFestivalState>) -> Element {
 /// Choix du type d'inscription.
 #[component]
 fn UncInscriptionChoice(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -454,7 +455,7 @@ fn UncInscriptionChoice(state: Signal<JayFestivalState>) -> Element {
                 style: "text-align: center; margin-bottom: 32px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Landing;
                     },
@@ -462,11 +463,11 @@ fn UncInscriptionChoice(state: Signal<JayFestivalState>) -> Element {
                 }
 
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-bottom: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-bottom: 8px;",
                     "Rejoindre JayFestival"
                 }
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary};",
+                    style: "font-size: 14px; color: {p.text_secondary};",
                     "Choisissez votre type de compte"
                 }
             }
@@ -508,11 +509,11 @@ fn UncInscriptionChoice(state: Signal<JayFestivalState>) -> Element {
                 style: "text-align: center; margin-top: 32px;",
 
                 span {
-                    style: "color: {c.text_secondary}; font-size: 14px;",
+                    style: "color: {p.text_secondary}; font-size: 14px;",
                     "Deja un compte ? "
                 }
                 button {
-                    style: "background: none; border: none; color: {c.accent_blue}; cursor: pointer; font-size: 14px;",
+                    style: "background: none; border: none; color: {p.accent_primary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Connexion;
                     },
@@ -531,11 +532,11 @@ fn InscriptionTypeCard(
     description: &'static str,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 2px solid transparent;",
+            style: "background: {p.bg_secondary}; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; border: 2px solid transparent;",
             onclick: move |evt| onclick.call(evt),
 
             span {
@@ -543,11 +544,11 @@ fn InscriptionTypeCard(
                 "{icon}"
             }
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 8px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 8px;",
                 "{title}"
             }
             p {
-                style: "font-size: 13px; color: {c.text_secondary};",
+                style: "font-size: 13px; color: {p.text_secondary};",
                 "{description}"
             }
         }
@@ -557,7 +558,7 @@ fn InscriptionTypeCard(
 /// UNC-E14 — Mentions legales / CGU / Confidentialite.
 #[component]
 pub fn UncMentionsLegales(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let active_tab = use_signal(|| "mentions".to_string());
     
@@ -576,21 +577,21 @@ pub fn UncMentionsLegales(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 24px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Landing;
                     },
                     "← Retour"
                 }
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-top: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-top: 8px;",
                     "Informations legales"
                 }
             }
 
             // Onglets
             div {
-                style: "display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid {c.border}; padding-bottom: 12px;",
+                style: "display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid {p.border_default}; padding-bottom: 12px;",
 
                 MentionsTab { label: "Mentions legales", id: "mentions", active_tab: active_tab, is_active: is_mentions }
                 MentionsTab { label: "CGU", id: "cgu", active_tab: active_tab, is_active: is_cgu }
@@ -600,7 +601,7 @@ pub fn UncMentionsLegales(state: Signal<JayFestivalState>) -> Element {
 
             // Contenu
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px;",
 
                 if is_mentions {
                     MentionsContent {}
@@ -621,9 +622,9 @@ pub fn UncMentionsLegales(state: Signal<JayFestivalState>) -> Element {
 
 #[component]
 fn MentionsTab(label: &'static str, id: &'static str, active_tab: Signal<String>, is_active: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let border = if is_active { c.accent_blue } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_muted };
+    let p = use_palette();
+    let border = if is_active { p.accent_primary } else { "transparent" };
+    let color = if is_active { p.text_high } else { p.text_muted };
     
     rsx! {
         button {
@@ -636,18 +637,18 @@ fn MentionsTab(label: &'static str, id: &'static str, active_tab: Signal<String>
 
 #[component]
 fn MentionsContent() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         h2 {
-            style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;",
+            style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;",
             "Mentions legales"
         }
         p {
-            style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.8;",
+            style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.8;",
             "JayFestival est un service de gestion d'evenements integre a l'ecosysteme Miyukini COG."
         }
         p {
-            style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.8; margin-top: 16px;",
+            style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.8; margin-top: 16px;",
             "Editeur : Miyukini — Contact : contact@miyukini.com"
         }
     }
@@ -655,14 +656,14 @@ fn MentionsContent() -> Element {
 
 #[component]
 fn CguContent() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         h2 {
-            style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;",
+            style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;",
             "Conditions Generales d'Utilisation"
         }
         p {
-            style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.8;",
+            style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.8;",
             "En utilisant JayFestival, vous acceptez les presentes conditions d'utilisation."
         }
     }
@@ -670,14 +671,14 @@ fn CguContent() -> Element {
 
 #[component]
 fn ConfidentialiteContent() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         h2 {
-            style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;",
+            style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;",
             "Politique de confidentialite"
         }
         p {
-            style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.8;",
+            style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.8;",
             "Vos donnees personnelles sont traitees conformement au RGPD. Elles ne sont jamais vendues a des tiers."
         }
     }
@@ -685,14 +686,14 @@ fn ConfidentialiteContent() -> Element {
 
 #[component]
 fn AccessibiliteContent() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         h2 {
-            style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;",
+            style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;",
             "Declaration d'accessibilite"
         }
         p {
-            style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.8;",
+            style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.8;",
             "JayFestival s'engage a rendre son service accessible a tous. Nous travaillons continuellement a ameliorer l'accessibilite de notre plateforme."
         }
     }

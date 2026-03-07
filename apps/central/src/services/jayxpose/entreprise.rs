@@ -5,6 +5,7 @@
 //! @human: Ecran XP-E02 JayXpose: gestion du profil exposant enrichi.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{FormField, FormTextarea, FormSection, PageHeader};
@@ -12,7 +13,7 @@ use super::JayXposeState;
 
 #[component]
 pub fn Entreprise(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
 
@@ -104,7 +105,7 @@ pub fn Entreprise(state: Signal<JayXposeState>) -> Element {
             // Message de sauvegarde
             if !save_message.read().is_empty() {
                 div {
-                    style: "padding: 10px 16px; background: {c.accent_green}15; border: 1px solid {c.accent_green}40; border-radius: 4px; font-size: 13px; color: {c.accent_green};",
+                    style: "padding: 10px 16px; background: {p.success}15; border: 1px solid {p.success}40; border-radius: 4px; font-size: 13px; color: {p.success};",
                     "{save_message}"
                 }
             }
@@ -200,7 +201,7 @@ pub fn Entreprise(state: Signal<JayXposeState>) -> Element {
             div {
                 style: "display: flex; justify-content: flex-end; padding-top: 8px;",
                 button {
-                    style: "padding: 12px 24px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;",
+                    style: "padding: 12px 24px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;",
                     onclick: on_save,
                     "💾 Enregistrer"
                 }

@@ -5,6 +5,7 @@
 //! @human: Ecrans XP-E06/07/08 JayXpose: parametres vitrine, pages et previsualisation.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use crate::services::MwsViewState;
@@ -22,7 +23,7 @@ enum VitrineTab {
 
 #[component]
 pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
     let mut active_tab = use_signal(|| VitrineTab::Parametres);
@@ -36,9 +37,9 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
 
     let vitrine_status = exposant.vitrine_status.clone().unwrap_or_else(|| "brouillon".to_string());
     let status_color = match vitrine_status.as_str() {
-        "publiee" => c.accent_green,
-        "suspendue" => c.accent_orange,
-        _ => c.text_muted,
+        "publiee" => p.success,
+        "suspendue" => p.warning,
+        _ => p.text_muted,
     };
 
     rsx! {
@@ -51,7 +52,7 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
 
                 div {
                     style: "display: flex; align-items: center; gap: 12px;",
-                    h2 { style: "font-size: 24px; color: {c.text_white};", "🏪 Ma vitrine" }
+                    h2 { style: "font-size: 24px; color: {p.text_high};", "🏪 Ma vitrine" }
                     Badge { text: vitrine_status.clone(), color: status_color.to_string() }
                 }
 
@@ -61,7 +62,7 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
 
                     if vitrine_status != "publiee" {
                         button {
-                            style: "padding: 8px 16px; background: {c.accent_green}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: {p.success}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
                             onclick: move |_| {
                                 let mut exp = exposant_publish.clone();
                                 exp.vitrine_status = Some("publiee".to_string());
@@ -91,7 +92,7 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
                     }
                     if vitrine_status == "publiee" {
                         button {
-                            style: "padding: 8px 16px; background: {c.accent_orange}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: {p.warning}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
                             onclick: move |_| {
                                 let mut exp = exposant_suspend.clone();
                                 exp.vitrine_status = Some("suspendue".to_string());
@@ -124,7 +125,7 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
 
             // Onglets
             div {
-                style: "display: flex; gap: 2px; border-bottom: 1px solid {c.border};",
+                style: "display: flex; gap: 2px; border-bottom: 1px solid {p.border_default};",
 
                 TabButton { label: "Parametres", is_active: *active_tab.read() == VitrineTab::Parametres, onclick: move |_| active_tab.set(VitrineTab::Parametres) }
                 TabButton { label: "Pages", is_active: *active_tab.read() == VitrineTab::Pages, onclick: move |_| active_tab.set(VitrineTab::Pages) }
@@ -150,7 +151,7 @@ pub fn Vitrine(state: Signal<JayXposeState>) -> Element {
 /// Onglet Parametres vitrine (XP-E06).
 #[component]
 fn VitrineParametres(exposant_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let exposant = {
@@ -183,7 +184,7 @@ fn VitrineParametres(exposant_id: String) -> Element {
 
             if !save_msg.read().is_empty() {
                 div {
-                    style: "padding: 10px 16px; background: {c.accent_green}15; border: 1px solid {c.accent_green}40; border-radius: 4px; font-size: 13px; color: {c.accent_green};",
+                    style: "padding: 10px 16px; background: {p.success}15; border: 1px solid {p.success}40; border-radius: 4px; font-size: 13px; color: {p.success};",
                     "{save_msg}"
                 }
             }
@@ -193,7 +194,7 @@ fn VitrineParametres(exposant_id: String) -> Element {
 
                 FormField { label: "Slug".to_string(), value: slug.read().clone(), placeholder: "mon-entreprise".to_string(), oninput: move |evt: FormEvent| slug.set(evt.value()) }
                 p {
-                    style: "font-size: 11px; color: {c.text_muted};",
+                    style: "font-size: 11px; color: {p.text_muted};",
                     "URL : https://vitrine.miyukini.local/{slug}"
                 }
             }
@@ -209,7 +210,7 @@ fn VitrineParametres(exposant_id: String) -> Element {
             div {
                 style: "display: flex; justify-content: flex-end;",
                 button {
-                    style: "padding: 10px 24px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;",
+                    style: "padding: 10px 24px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;",
                     onclick: on_save,
                     "💾 Enregistrer"
                 }
@@ -221,7 +222,7 @@ fn VitrineParametres(exposant_id: String) -> Element {
 /// Onglet Pages (gestion des pages vitrine).
 #[component]
 fn VitrinePages(exposant_id: String, pages: Vec<jayxpose::data::VitrinePage>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let page_types = ["accueil", "catalogue", "presentation", "contact"];
@@ -231,7 +232,7 @@ fn VitrinePages(exposant_id: String, pages: Vec<jayxpose::data::VitrinePage>) ->
             style: "display: flex; flex-direction: column; gap: 16px;",
 
             p {
-                style: "font-size: 13px; color: {c.text_secondary};",
+                style: "font-size: 13px; color: {p.text_secondary};",
                 "Gerez les pages de votre vitrine. Activez ou desactivez chaque page."
             }
 
@@ -256,24 +257,24 @@ fn VitrinePages(exposant_id: String, pages: Vec<jayxpose::data::VitrinePage>) ->
                         _ => pt,
                     };
 
-                    let status_color = if is_visible { c.accent_green } else { c.text_muted };
+                    let status_color = if is_visible { p.success } else { p.text_muted };
                     let status_text = if is_visible { "Active" } else { "Inactive" };
-                    let btn_bg = if is_visible { c.accent_green.to_string() } else { c.bg_hover.to_string() };
-                    let btn_color = if is_visible { "white".to_string() } else { c.text_secondary.to_string() };
+                    let btn_bg = if is_visible { p.success.to_string() } else { p.bg_overlay.to_string() };
+                    let btn_color = if is_visible { "white".to_string() } else { p.text_secondary.to_string() };
                     let btn_text = if is_visible { "Desactiver" } else { "Activer" };
                     let eid = exposant_id.clone();
 
                     rsx! {
                         div {
                             key: "{pt}",
-                            style: "display: flex; align-items: center; justify-content: space-between; padding: 16px; background: {c.bg_secondary}; border-radius: 8px;",
+                            style: "display: flex; align-items: center; justify-content: space-between; padding: 16px; background: {p.bg_secondary}; border-radius: 8px;",
 
                             div {
                                 style: "display: flex; align-items: center; gap: 12px;",
                                 span { style: "font-size: 24px;", "{pt_icon}" }
                                 div {
-                                    h4 { style: "font-size: 14px; color: {c.text_white};", "{pt_label}" }
-                                    p { style: "font-size: 11px; color: {c.text_muted};", "Type: {pt}" }
+                                    h4 { style: "font-size: 14px; color: {p.text_high};", "{pt_label}" }
+                                    p { style: "font-size: 11px; color: {p.text_muted};", "Type: {pt}" }
                                 }
                             }
 
@@ -285,7 +286,7 @@ fn VitrinePages(exposant_id: String, pages: Vec<jayxpose::data::VitrinePage>) ->
                                     "{status_text}"
                                 }
                                 button {
-                                    style: "padding: 6px 12px; background: {btn_bg}; color: {btn_color}; border: 1px solid {c.border}; border-radius: 4px; cursor: pointer; font-size: 12px;",
+                                    style: "padding: 6px 12px; background: {btn_bg}; color: {btn_color}; border: 1px solid {p.border_default}; border-radius: 4px; cursor: pointer; font-size: 12px;",
                                     onclick: move |_| {
                                         let page = jayxpose::data::VitrinePage {
                                             id: page_id.clone().or_else(|| Some(uuid::Uuid::new_v4().to_string())),
@@ -311,7 +312,7 @@ fn VitrinePages(exposant_id: String, pages: Vec<jayxpose::data::VitrinePage>) ->
 /// Onglet Preview (XP-E08).
 #[component]
 fn VitrinePreview(exposant_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jayxpose;
@@ -325,11 +326,11 @@ fn VitrinePreview(exposant_id: String) -> Element {
 
     rsx! {
         div {
-            style: "display: flex; flex-direction: column; gap: 20px; border: 1px solid {c.border}; border-radius: 8px; overflow: hidden;",
+            style: "display: flex; flex-direction: column; gap: 20px; border: 1px solid {p.border_default}; border-radius: 8px; overflow: hidden;",
 
             // Banniere
             div {
-                style: "background: linear-gradient(135deg, {c.accent_blue} 0%, #6366f1 100%); padding: 40px 32px; text-align: center;",
+                style: "background: linear-gradient(135deg, {p.accent_primary} 0%, #6366f1 100%); padding: 40px 32px; text-align: center;",
 
                 h1 { style: "font-size: 28px; color: white; font-weight: 700;", "{company}" }
                 if !slogan.is_empty() {
@@ -344,29 +345,29 @@ fn VitrinePreview(exposant_id: String) -> Element {
                 // Description
                 div {
                     style: "margin-bottom: 32px;",
-                    h2 { style: "font-size: 18px; color: {c.text_white}; margin-bottom: 8px;", "A propos" }
-                    p { style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.6;", "{desc}" }
+                    h2 { style: "font-size: 18px; color: {p.text_high}; margin-bottom: 8px;", "A propos" }
+                    p { style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.6;", "{desc}" }
                 }
 
                 // Produits vedettes
                 if !featured.is_empty() {
                     div {
-                        h2 { style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;", "Produits vedettes" }
+                        h2 { style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;", "Produits vedettes" }
                         div {
                             style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;",
 
                             for p in featured.iter() {
                                 div {
                                     key: "{p.id.as_deref().unwrap_or(\"\")}",
-                                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; text-align: center;",
+                                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; text-align: center;",
 
                                     div {
-                                        style: "width: 100%; height: 80px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 12px;",
+                                        style: "width: 100%; height: 80px; background: {p.bg_overlay}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 12px;",
                                         "📦"
                                     }
-                                    h3 { style: "font-size: 14px; color: {c.text_white};", "{p.name.as_deref().unwrap_or(\"Produit\")}" }
+                                    h3 { style: "font-size: 14px; color: {p.text_high};", "{p.name.as_deref().unwrap_or(\"Produit\")}" }
                                     p {
-                                        style: "font-size: 13px; color: {c.accent_blue}; margin-top: 4px;",
+                                        style: "font-size: 13px; color: {p.accent_primary}; margin-top: 4px;",
                                         {p.price.map_or_else(|| "Sur demande".to_string(), |pr| format!("{pr:.2} EUR"))}
                                     }
                                 }
@@ -377,10 +378,10 @@ fn VitrinePreview(exposant_id: String) -> Element {
 
                 // Contact
                 div {
-                    style: "margin-top: 32px; padding-top: 20px; border-top: 1px solid {c.border};",
-                    h2 { style: "font-size: 18px; color: {c.text_white}; margin-bottom: 12px;", "Contact" }
+                    style: "margin-top: 32px; padding-top: 20px; border-top: 1px solid {p.border_default};",
+                    h2 { style: "font-size: 18px; color: {p.text_high}; margin-bottom: 12px;", "Contact" }
                     div {
-                        style: "display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: {c.text_secondary};",
+                        style: "display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: {p.text_secondary};",
                         if let Some(ref email) = exposant.contact_email {
                             p { "📧 {email}" }
                         }
@@ -400,9 +401,9 @@ fn VitrinePreview(exposant_id: String) -> Element {
 /// Bouton onglet.
 #[component]
 fn TabButton(label: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { "transparent" };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { "transparent" };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {

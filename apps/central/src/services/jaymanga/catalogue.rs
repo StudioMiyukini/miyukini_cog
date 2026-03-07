@@ -1,6 +1,7 @@
 //! Catalogue JayManga — liste des œuvres avec gestion CRUD.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{PageHeader, Badge, EmptyState};
@@ -8,7 +9,7 @@ use super::{JayMangaSection, JayMangaState};
 
 #[component]
 pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -62,10 +63,10 @@ pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
                             let chapter_count = db.chapter_list_by_work(&work_id).map(|v| v.len()).unwrap_or(0);
 
                             let (status_color, status_label) = match status.as_str() {
-                                "published" => (c.accent_green, "Publié"),
-                                "draft" => (c.text_muted, "Brouillon"),
-                                "archived" => (c.accent_orange, "Archivé"),
-                                _ => (c.text_muted, "Inconnu"),
+                                "published" => (p.success, "Publié"),
+                                "draft" => (p.text_muted, "Brouillon"),
+                                "archived" => (p.warning, "Archivé"),
+                                _ => (p.text_muted, "Inconnu"),
                             };
 
                             let price_display = if pricing == "free" {
@@ -80,11 +81,11 @@ pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
 
                             rsx! {
                                 div {
-                                    style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border};",
+                                    style: "display: flex; align-items: center; gap: 16px; padding: 16px; background: {p.bg_secondary}; border-radius: 8px; border: 1px solid {p.border_default};",
 
                                     // Couverture placeholder
                                     div {
-                                        style: "width: 60px; height: 80px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;",
+                                        style: "width: 60px; height: 80px; background: {p.bg_overlay}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;",
                                         "📖"
                                     }
 
@@ -95,20 +96,20 @@ pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
                                         div {
                                             style: "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;",
                                             h4 {
-                                                style: "font-size: 15px; color: {c.text_white}; font-weight: 600;",
+                                                style: "font-size: 15px; color: {p.text_high}; font-weight: 600;",
                                                 "{title}"
                                             }
                                             Badge { text: status_label.to_string(), color: status_color.to_string() }
                                         }
 
                                         div {
-                                            style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_muted};",
+                                            style: "display: flex; gap: 16px; font-size: 12px; color: {p.text_muted};",
                                             span { "{chapter_count} chap." }
                                             span { "{total_pages} pages" }
                                             span { "{format}" }
                                             span { "{language}" }
                                             span {
-                                                style: "color: {c.accent_green};",
+                                                style: "color: {p.success};",
                                                 "{price_display}"
                                             }
                                         }
@@ -119,7 +120,7 @@ pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
                                         style: "display: flex; gap: 4px; flex-shrink: 0;",
 
                                         button {
-                                            style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                                            style: "padding: 6px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                                             onclick: move |_| {
                                                 let mut s = state.write();
                                                 s.chapters_work_id = Some(wid_chapters.clone());
@@ -128,7 +129,7 @@ pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
                                             "📑 Chapitres"
                                         }
                                         button {
-                                            style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                                            style: "padding: 6px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                                             onclick: move |_| {
                                                 let mut s = state.write();
                                                 s.editing_work_id = Some(wid_edit.clone());
@@ -137,7 +138,7 @@ pub fn Catalogue(state: Signal<JayMangaState>) -> Element {
                                             "✏️ Modifier"
                                         }
                                         button {
-                                            style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 12px;",
+                                            style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 12px;",
                                             onclick: move |_| {
                                                 let db = &conns.read().jaymanga;
                                                 let _ = db.work_delete(&wid_delete);

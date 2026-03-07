@@ -1,6 +1,7 @@
 //! Vue Semaine — Grille 7 jours × 24 heures type Google Agenda.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use jaykoa::data::{TemporalEntry, TemporalConflict};
 use chrono::{Datelike, NaiveDate, Timelike};
@@ -72,13 +73,13 @@ pub fn WeekView(props: WeekViewProps) -> Element {
             
             // Header avec jours de la semaine
             div {
-                style: "display: flex; border-bottom: 1px solid {c.border}; background: {c.bg_secondary}; flex-shrink: 0;",
+                style: "display: flex; border-bottom: 1px solid {p.border_default}; background: {p.bg_secondary}; flex-shrink: 0;",
                 
                 // Colonne des heures (vide en header)
                 div {
-                    style: "width: 60px; padding: 8px 0; border-right: 1px solid {c.border}; text-align: center;",
+                    style: "width: 60px; padding: 8px 0; border-right: 1px solid {p.border_default}; text-align: center;",
                     span {
-                        style: "font-size: 10px; color: {c.text_muted};",
+                        style: "font-size: 10px; color: {p.text_muted};",
                         "GMT+1"
                     }
                 }
@@ -87,19 +88,19 @@ pub fn WeekView(props: WeekViewProps) -> Element {
                 for (i, day) in days.iter().enumerate() {
                     {
                         let is_today = *day == today;
-                        let bg = if is_today { format!("{}20", c.accent_blue) } else { "transparent".to_string() };
-                        let day_num_color = if is_today { "white".to_string() } else { c.text_primary.to_string() };
-                        let day_num_bg = if is_today { c.accent_blue.to_string() } else { "transparent".to_string() };
+                        let bg = if is_today { format!("{}20", p.accent_primary) } else { "transparent".to_string() };
+                        let day_num_color = if is_today { "white".to_string() } else { p.text_primary.to_string() };
+                        let day_num_bg = if is_today { p.accent_primary.to_string() } else { "transparent".to_string() };
                         let day_num = day.day();
                         
                         rsx! {
                             div {
                                 key: "{day}",
-                                style: "flex: 1; padding: 8px 4px; text-align: center; background: {bg}; border-right: 1px solid {c.border};",
+                                style: "flex: 1; padding: 8px 4px; text-align: center; background: {bg}; border-right: 1px solid {p.border_default};",
                                 
                                 // Nom du jour
                                 div {
-                                    style: "font-size: 11px; color: {c.text_secondary}; text-transform: uppercase;",
+                                    style: "font-size: 11px; color: {p.text_secondary}; text-transform: uppercase;",
                                     "{weekday_names[i]}"
                                 }
                                 
@@ -117,10 +118,10 @@ pub fn WeekView(props: WeekViewProps) -> Element {
             // Zone journée entière
             if !all_day_entries.is_empty() {
                 div {
-                    style: "display: flex; border-bottom: 1px solid {c.border}; background: {c.bg_secondary}; min-height: 32px; flex-shrink: 0;",
+                    style: "display: flex; border-bottom: 1px solid {p.border_default}; background: {p.bg_secondary}; min-height: 32px; flex-shrink: 0;",
                     
                     div {
-                        style: "width: 60px; padding: 4px; border-right: 1px solid {c.border}; font-size: 10px; color: {c.text_muted};",
+                        style: "width: 60px; padding: 4px; border-right: 1px solid {p.border_default}; font-size: 10px; color: {p.text_muted};",
                         "Journée"
                     }
                     
@@ -145,7 +146,7 @@ pub fn WeekView(props: WeekViewProps) -> Element {
                             key: "hour-{hour}",
                             style: "height: {hour_height}px; padding-right: 8px; text-align: right; position: relative;",
                             span {
-                                style: "font-size: 10px; color: {c.text_muted}; position: absolute; top: -6px; right: 8px;",
+                                style: "font-size: 10px; color: {p.text_muted}; position: absolute; top: -6px; right: 8px;",
                                 "{hour:02}:00"
                             }
                         }
@@ -165,7 +166,7 @@ pub fn WeekView(props: WeekViewProps) -> Element {
                             rsx! {
                                 div {
                                     key: "day-col-{day}",
-                                    style: "flex: 1; position: relative; border-right: 1px solid {c.border};",
+                                    style: "flex: 1; position: relative; border-right: 1px solid {p.border_default};",
                                     
                                     // Lignes horaires
                                     for hour in hours.iter() {
@@ -176,12 +177,12 @@ pub fn WeekView(props: WeekViewProps) -> Element {
                                             rsx! {
                                                 div {
                                                     key: "slot-{hour}",
-                                                    style: "height: {hour_height}px; border-bottom: 1px solid {c.border}; cursor: pointer;",
+                                                    style: "height: {hour_height}px; border-bottom: 1px solid {p.border_default}; cursor: pointer;",
                                                     onclick: move |_| props.on_slot_click.call(datetime_clone.clone()),
                                                     
                                                     // Demi-heure
                                                     div {
-                                                        style: "height: 50%; border-bottom: 1px dashed {c.border}30;",
+                                                        style: "height: 50%; border-bottom: 1px dashed {p.border_default}30;",
                                                     }
                                                 }
                                             }
@@ -194,9 +195,9 @@ pub fn WeekView(props: WeekViewProps) -> Element {
                                             let top = (now_hour as f32 + now_minute as f32 / 60.0) * hour_height as f32;
                                             rsx! {
                                                 div {
-                                                    style: "position: absolute; left: 0; right: 0; top: {top}px; height: 2px; background: {c.accent_red}; z-index: 10;",
+                                                    style: "position: absolute; left: 0; right: 0; top: {top}px; height: 2px; background: {p.error}; z-index: 10;",
                                                     div {
-                                                        style: "width: 10px; height: 10px; background: {c.accent_red}; border-radius: 50%; position: absolute; left: -5px; top: -4px;",
+                                                        style: "width: 10px; height: 10px; background: {p.error}; border-radius: 50%; position: absolute; left: -5px; top: -4px;",
                                                     }
                                                 }
                                             }

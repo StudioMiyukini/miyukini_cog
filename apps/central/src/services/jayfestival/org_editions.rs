@@ -5,6 +5,7 @@
 //! @human: Ecrans ORG-E05/E06 JayFestival: liste des editions et formulaire de creation.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jayfestival::data::Edition;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -16,7 +17,7 @@ pub fn OrgEditions(
     editions: Vec<Edition>,
     state: Signal<JayFestivalState>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut show_form = use_signal(|| false);
     let mut new_name = use_signal(String::new);
@@ -33,7 +34,7 @@ pub fn OrgEditions(
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mes editions"
                 }
 
@@ -50,10 +51,10 @@ pub fn OrgEditions(
             // Formulaire de création (inline)
             if *show_form.read() {
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                        style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                         "Creer une nouvelle edition"
                     }
 
@@ -62,11 +63,11 @@ pub fn OrgEditions(
 
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Nom de l'edition *"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "text",
                                 placeholder: "Ex: Festival 2026",
                                 value: "{new_name}",
@@ -75,11 +76,11 @@ pub fn OrgEditions(
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Lieu"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "text",
                                 placeholder: "Ex: Paris Expo",
                                 value: "{new_location}",
@@ -88,11 +89,11 @@ pub fn OrgEditions(
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Date de debut"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "date",
                                 value: "{new_start}",
                                 oninput: move |evt| new_start.set(evt.value()),
@@ -100,11 +101,11 @@ pub fn OrgEditions(
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Date de fin"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "date",
                                 value: "{new_end}",
                                 oninput: move |evt| new_end.set(evt.value()),
@@ -116,12 +117,12 @@ pub fn OrgEditions(
                         style: "display: flex; gap: 8px; justify-content: flex-end;",
 
                         button {
-                            style: "padding: 8px 16px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                             onclick: move |_| show_form.set(false),
                             "Annuler"
                         }
                         button {
-                            style: "padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px;",
                             onclick: move |_| {
                                 let name = new_name.read().clone();
                                 if !name.is_empty() {

@@ -5,13 +5,14 @@
 //! @human: Ecran ORG-E19 JayFestival: tableau budgetaire edition (revenus, depenses, balance).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, StatCard};
 
 #[component]
 pub fn OrgBudget(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut show_form = use_signal(|| false);
     let mut new_label = use_signal(String::new);
@@ -44,19 +45,19 @@ pub fn OrgBudget(edition_id: String) -> Element {
                     label: "Revenus".to_string(),
                     value: format!("{:.2} EUR", summary.total_revenus),
                     icon: "💰".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
                 StatCard {
                     label: "Depenses".to_string(),
                     value: format!("{:.2} EUR", summary.total_depenses),
                     icon: "📉".to_string(),
-                    color: c.accent_orange.to_string(),
+                    color: p.warning.to_string(),
                 }
                 StatCard {
                     label: "Balance".to_string(),
                     value: format!("{:.2} EUR", summary.balance),
                     icon: "📊".to_string(),
-                    color: if summary.balance >= 0.0 { c.accent_green.to_string() } else { c.accent_orange.to_string() },
+                    color: if summary.balance >= 0.0 { p.success.to_string() } else { p.warning.to_string() },
                 }
             }
 
@@ -65,12 +66,12 @@ pub fn OrgBudget(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h3 {
-                    style: "font-size: 18px; color: {c.text_white};",
+                    style: "font-size: 18px; color: {p.text_high};",
                     "Ecritures budgetaires ({entries.len()})"
                 }
 
                 button {
-                    style: "padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px;",
+                    style: "padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px;",
                     onclick: move |_| show_form.set(!show_form()),
                     "➕ Nouvelle ecriture"
                 }
@@ -79,18 +80,18 @@ pub fn OrgBudget(edition_id: String) -> Element {
             // Formulaire d'ajout
             if *show_form.read() {
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {c.border};",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; border: 1px solid {p.border_default};",
 
                     div {
                         style: "display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;",
 
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Libelle *"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "text",
                                 placeholder: "Ex: Location salle",
                                 value: "{new_label}",
@@ -99,11 +100,11 @@ pub fn OrgBudget(edition_id: String) -> Element {
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Montant (EUR) *"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "number",
                                 step: "0.01",
                                 value: "{new_amount}",
@@ -112,11 +113,11 @@ pub fn OrgBudget(edition_id: String) -> Element {
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Type"
                             }
                             select {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 value: "{new_entry_type}",
                                 onchange: move |evt| new_entry_type.set(evt.value()),
 
@@ -126,11 +127,11 @@ pub fn OrgBudget(edition_id: String) -> Element {
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Categorie"
                             }
                             select {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 value: "{new_category}",
                                 onchange: move |evt| new_category.set(evt.value()),
 
@@ -145,11 +146,11 @@ pub fn OrgBudget(edition_id: String) -> Element {
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Date"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "date",
                                 value: "{new_date}",
                                 oninput: move |evt| new_date.set(evt.value()),
@@ -157,11 +158,11 @@ pub fn OrgBudget(edition_id: String) -> Element {
                         }
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 4px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 4px;",
                                 "Notes"
                             }
                             input {
-                                style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_white}; font-size: 13px; box-sizing: border-box;",
+                                style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_high}; font-size: 13px; box-sizing: border-box;",
                                 r#type: "text",
                                 placeholder: "Notes optionnelles",
                                 value: "{new_notes}",
@@ -174,12 +175,12 @@ pub fn OrgBudget(edition_id: String) -> Element {
                         style: "display: flex; gap: 8px; justify-content: flex-end;",
 
                         button {
-                            style: "padding: 8px 16px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                             onclick: move |_| show_form.set(false),
                             "Annuler"
                         }
                         button {
-                            style: "padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px;",
                             onclick: {
                                 let eid = edition_id.clone();
                                 move |_| {
@@ -216,7 +217,7 @@ pub fn OrgBudget(edition_id: String) -> Element {
             // Liste des entrées
             if entries.is_empty() {
                 div {
-                    style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: {c.text_muted}; background: {c.bg_secondary}; border-radius: 8px;",
+                    style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: {p.text_muted}; background: {p.bg_secondary}; border-radius: 8px;",
 
                     span { style: "font-size: 48px; margin-bottom: 12px; opacity: 0.3;", "💰" }
                     p { style: "font-size: 14px;", "Aucune ecriture budgetaire" }
@@ -233,21 +234,21 @@ pub fn OrgBudget(edition_id: String) -> Element {
                             let category = entry.category.clone().unwrap_or_else(|| "autre".to_string());
                             let date = entry.date.clone().unwrap_or_default();
                             let is_revenue = entry_type == "revenu";
-                            let color = if is_revenue { c.accent_green } else { c.accent_orange };
+                            let color = if is_revenue { p.success } else { p.warning };
                             let sign = if is_revenue { "+" } else { "-" };
                             rsx! {
                                 div {
-                                    style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 6px; padding: 10px 16px;",
+                                    style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 6px; padding: 10px 16px;",
 
                                     div {
                                         style: "flex: 1;",
                                         span {
-                                            style: "color: {c.text_white}; font-size: 13px;",
+                                            style: "color: {p.text_high}; font-size: 13px;",
                                             "{label}"
                                         }
                                         if !date.is_empty() {
                                             span {
-                                                style: "color: {c.text_muted}; font-size: 11px; margin-left: 8px;",
+                                                style: "color: {p.text_muted}; font-size: 11px; margin-left: 8px;",
                                                 "{date}"
                                             }
                                         }
@@ -255,7 +256,7 @@ pub fn OrgBudget(edition_id: String) -> Element {
 
                                     Badge {
                                         text: category.clone(),
-                                        color: c.text_secondary.to_string(),
+                                        color: p.text_secondary.to_string(),
                                     }
 
                                     span {

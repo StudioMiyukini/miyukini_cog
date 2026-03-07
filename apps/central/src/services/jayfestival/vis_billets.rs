@@ -5,20 +5,21 @@
 //! @human: Ecran VIS-E06 JayFestival: billets visiteur (achat, gestion).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
 
 /// Gestion des billets du visiteur.
 #[component]
 pub fn VisBillets() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut active_tab = use_signal(|| "actifs".to_string());
 
     let tab = active_tab.read().clone();
-    let tab_actifs_bg = if tab == "actifs" { c.accent_blue } else { c.bg_secondary };
-    let tab_actifs_color = if tab == "actifs" { "white" } else { c.text_primary };
-    let tab_passes_bg = if tab == "passes" { c.accent_blue } else { c.bg_secondary };
-    let tab_passes_color = if tab == "passes" { "white" } else { c.text_primary };
+    let tab_actifs_bg = if tab == "actifs" { p.accent_primary } else { p.bg_secondary };
+    let tab_actifs_color = if tab == "actifs" { "white" } else { p.text_primary };
+    let tab_passes_bg = if tab == "passes" { p.accent_primary } else { p.bg_secondary };
+    let tab_passes_color = if tab == "passes" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -29,7 +30,7 @@ pub fn VisBillets() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mes billets"
                 }
 
@@ -106,36 +107,36 @@ fn BilletCard(
     code: &'static str,
     status: &'static str,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (status_label, status_color) = match status {
-        "valide" => ("Valide", c.accent_green),
-        "utilise" => ("Utilise", c.text_muted),
-        "expire" => ("Expire", c.accent_red),
-        _ => ("Inconnu", c.text_muted),
+        "valide" => ("Valide", p.success),
+        "utilise" => ("Utilise", p.text_muted),
+        "expire" => ("Expire", p.error),
+        _ => ("Inconnu", p.text_muted),
     };
 
     let border = if status == "valide" {
-        format!("2px solid {}", c.accent_green)
+        format!("2px solid {}", p.success)
     } else {
-        format!("1px solid {}", c.border)
+        format!("1px solid {}", p.border_default)
     };
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border: {border}; border-radius: 12px; overflow: hidden;",
+            style: "background: {p.bg_secondary}; border: {border}; border-radius: 12px; overflow: hidden;",
 
             // En-tête
             div {
-                style: "background: {c.bg_hover}; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;",
+                style: "background: {p.bg_overlay}; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;",
 
                 div {
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; margin-bottom: 4px;",
+                        style: "font-size: 16px; color: {p.text_high}; margin-bottom: 4px;",
                         "{event_name}"
                     }
                     span {
-                        style: "font-size: 13px; color: {c.text_muted};",
+                        style: "font-size: 13px; color: {p.text_muted};",
                         "{ticket_type}"
                     }
                 }
@@ -178,14 +179,14 @@ fn BilletCard(
             // Actions
             if status == "valide" {
                 div {
-                    style: "padding: 16px 20px; border-top: 1px solid {c.border}; display: flex; gap: 12px;",
+                    style: "padding: 16px 20px; border-top: 1px solid {p.border_default}; display: flex; gap: 12px;",
 
                     button {
-                        style: "flex: 1; padding: 10px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
+                        style: "flex: 1; padding: 10px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
                         "📱 Afficher le QR Code"
                     }
                     button {
-                        style: "padding: 10px 16px; background: {c.bg_hover}; border: none; border-radius: 6px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 10px 16px; background: {p.bg_overlay}; border: none; border-radius: 6px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                         "📤 Partager"
                     }
                 }
@@ -196,17 +197,17 @@ fn BilletCard(
 
 #[component]
 fn InfoRow(label: &'static str, value: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
             style: "display: flex; gap: 12px;",
             span {
-                style: "font-size: 12px; color: {c.text_muted}; width: 60px;",
+                style: "font-size: 12px; color: {p.text_muted}; width: 60px;",
                 "{label}"
             }
             span {
-                style: "font-size: 13px; color: {c.text_primary};",
+                style: "font-size: 13px; color: {p.text_primary};",
                 "{value}"
             }
         }

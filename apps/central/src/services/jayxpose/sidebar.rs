@@ -5,13 +5,14 @@
 //! @human: Sidebar JayXpose: navigation par section (XP-E01 a XP-E12).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn JayXposeSidebar(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Compteurs reels
@@ -28,22 +29,22 @@ pub fn JayXposeSidebar(state: Signal<JayXposeState>) -> Element {
 
     rsx! {
         aside {
-            style: "width: 220px; background: {c.bg_secondary}; border-right: 1px solid {c.border}; padding: 16px 0; display: flex; flex-direction: column;",
+            style: "width: 220px; background: {p.bg_secondary}; border-right: 1px solid {p.border_default}; padding: 16px 0; display: flex; flex-direction: column;",
 
             // En-tete service
             div {
-                style: "padding: 0 16px 16px 16px; border-bottom: 1px solid {c.border};",
+                style: "padding: 0 16px 16px 16px; border-bottom: 1px solid {p.border_default};",
 
                 div {
                     style: "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;",
                     span { style: "font-size: 20px;", "🏪" }
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white};",
+                        style: "font-size: 16px; color: {p.text_high};",
                         "JayXpose"
                     }
                 }
                 p {
-                    style: "font-size: 11px; color: {c.text_muted};",
+                    style: "font-size: 11px; color: {p.text_muted};",
                     "Profil exposant & vitrine"
                 }
             }
@@ -87,7 +88,7 @@ pub fn JayXposeSidebar(state: Signal<JayXposeState>) -> Element {
                 }
 
                 // Separateur
-                div { style: "height: 1px; background: {c.border}; margin: 8px 16px;" }
+                div { style: "height: 1px; background: {p.border_default}; margin: 8px 16px;" }
 
                 SidebarItem {
                     icon: "👁️",
@@ -109,11 +110,11 @@ fn SidebarItem(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.bg_overlay } else { "transparent" };
+    let color = if is_active { p.text_high } else { p.text_secondary };
     let border = if is_active {
-        format!("2px solid {}", c.accent_blue)
+        format!("2px solid {}", p.accent_primary)
     } else {
         "2px solid transparent".to_string()
     };
@@ -127,7 +128,7 @@ fn SidebarItem(
             span { style: "flex: 1;", "{label}" }
             if let Some(ref count) = badge {
                 span {
-                    style: "padding: 2px 6px; background: {c.bg_hover}; border-radius: 10px; font-size: 10px; color: {c.text_muted};",
+                    style: "padding: 2px 6px; background: {p.bg_overlay}; border-radius: 10px; font-size: 10px; color: {p.text_muted};",
                     "{count}"
                 }
             }

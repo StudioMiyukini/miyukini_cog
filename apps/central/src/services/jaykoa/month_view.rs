@@ -1,6 +1,7 @@
 //! Vue Mois — Grille mensuelle compacte type Google Agenda.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use jaykoa::data::TemporalEntry;
 use chrono::{Datelike, NaiveDate};
@@ -53,11 +54,11 @@ pub fn MonthView(props: MonthViewProps) -> Element {
             
             // Header avec jours de la semaine
             div {
-                style: "display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid {c.border}; background: {c.bg_secondary}; flex-shrink: 0;",
+                style: "display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid {p.border_default}; background: {p.bg_secondary}; flex-shrink: 0;",
                 
                 for name in weekday_names.iter() {
                     div {
-                        style: "padding: 12px; text-align: center; font-size: 12px; font-weight: 500; color: {c.text_secondary}; text-transform: uppercase;",
+                        style: "padding: 12px; text-align: center; font-size: 12px; font-weight: 500; color: {p.text_secondary}; text-transform: uppercase;",
                         "{name}"
                     }
                 }
@@ -70,7 +71,7 @@ pub fn MonthView(props: MonthViewProps) -> Element {
                 for week in 0..weeks {
                     div {
                         key: "week-{week}",
-                        style: "display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid {c.border};",
+                        style: "display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid {p.border_default};",
                         
                         for day_of_week in 0..7u32 {
                             {
@@ -92,23 +93,23 @@ pub fn MonthView(props: MonthViewProps) -> Element {
                                     .collect();
                                 
                                 let bg = if is_today {
-                                    c.bg_hover.to_string()
+                                    p.bg_overlay.to_string()
                                 } else if !is_current_month {
-                                    c.bg_main.to_string()
+                                    p.bg_base.to_string()
                                 } else {
-                                    c.bg_card.to_string()
+                                    p.bg_surface.to_string()
                                 };
                                 
                                 {
-                                    let day_color = if is_today { "white".to_string() } else if !is_current_month { c.text_muted.to_string() } else { c.text_primary.to_string() };
-                                    let day_bg = if is_today { c.accent_blue.to_string() } else { "transparent".to_string() };
+                                    let day_color = if is_today { "white".to_string() } else if !is_current_month { p.text_muted.to_string() } else { p.text_primary.to_string() };
+                                    let day_bg = if is_today { p.accent_primary.to_string() } else { "transparent".to_string() };
                                     let day_num = date.day();
                                     let more_count = day_entries.len().saturating_sub(3);
                                     
                                     rsx! {
                                         div {
                                             key: "{date}",
-                                            style: "padding: 4px; border-right: 1px solid {c.border}; background: {bg}; min-height: 80px; cursor: pointer; overflow: hidden;",
+                                            style: "padding: 4px; border-right: 1px solid {p.border_default}; background: {bg}; min-height: 80px; cursor: pointer; overflow: hidden;",
                                             onclick: move |_| props.on_day_click.call(date),
                                             
                                             // Numéro du jour
@@ -132,7 +133,7 @@ pub fn MonthView(props: MonthViewProps) -> Element {
                                                 
                                                 if more_count > 0 {
                                                     span {
-                                                        style: "font-size: 10px; color: {c.text_link}; padding: 2px 4px;",
+                                                        style: "font-size: 10px; color: {p.accent_primary}; padding: 2px 4px;",
                                                         "+{more_count} autres"
                                                     }
                                                 }

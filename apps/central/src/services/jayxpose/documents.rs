@@ -5,6 +5,7 @@
 //! @human: Ecrans XP-E09/E10 JayXpose: coffre-fort documentaire (liste, upload, partages).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{DocumentRow, EmptyState, FormSection, Badge};
@@ -21,7 +22,7 @@ enum DocView {
 
 #[component]
 pub fn Documents(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
     let mut view = use_signal(|| DocView::Liste);
@@ -39,8 +40,8 @@ pub fn Documents(state: Signal<JayXposeState>) -> Element {
 
     // Pre-calcul styles conditionnels
     let is_partages_view = *view.read() == DocView::Partages;
-    let partage_btn_bg = if is_partages_view { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let partage_btn_color = if is_partages_view { "white".to_string() } else { c.text_secondary.to_string() };
+    let partage_btn_bg = if is_partages_view { p.accent_primary.to_string() } else { p.bg_overlay.to_string() };
+    let partage_btn_color = if is_partages_view { "white".to_string() } else { p.text_secondary.to_string() };
 
     rsx! {
         div {
@@ -52,9 +53,9 @@ pub fn Documents(state: Signal<JayXposeState>) -> Element {
 
                 div {
                     style: "display: flex; align-items: center; gap: 12px;",
-                    h2 { style: "font-size: 24px; color: {c.text_white};", "📁 Mes documents" }
+                    h2 { style: "font-size: 24px; color: {p.text_high};", "📁 Mes documents" }
                     span {
-                        style: "padding: 4px 10px; background: {c.bg_hover}; border-radius: 12px; font-size: 12px; color: {c.text_secondary};",
+                        style: "padding: 4px 10px; background: {p.bg_overlay}; border-radius: 12px; font-size: 12px; color: {p.text_secondary};",
                         "{doc_len}"
                     }
                 }
@@ -62,12 +63,12 @@ pub fn Documents(state: Signal<JayXposeState>) -> Element {
                 div {
                     style: "display: flex; gap: 8px;",
                     button {
-                        style: "padding: 8px 16px; background: {partage_btn_bg}; border: 1px solid {c.border}; border-radius: 4px; color: {partage_btn_color}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: {partage_btn_bg}; border: 1px solid {p.border_default}; border-radius: 4px; color: {partage_btn_color}; cursor: pointer; font-size: 13px;",
                         onclick: move |_| view.set(if *view.read() == DocView::Partages { DocView::Liste } else { DocView::Partages }),
                         "🔗 Partages ({partage_len})"
                     }
                     button {
-                        style: "padding: 8px 16px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
                         onclick: move |_| view.set(DocView::Upload),
                         "➕ Ajouter un document"
                     }
@@ -77,9 +78,9 @@ pub fn Documents(state: Signal<JayXposeState>) -> Element {
             // Alerte expiration
             if expiring > 0 {
                 div {
-                    style: "background: {c.accent_orange}15; border: 1px solid {c.accent_orange}40; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;",
+                    style: "background: {p.warning}15; border: 1px solid {p.warning}40; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;",
                     span { style: "font-size: 20px;", "⚠️" }
-                    p { style: "font-size: 13px; color: {c.accent_orange};", "{expiring} document(s) expirant prochainement" }
+                    p { style: "font-size: 13px; color: {p.warning};", "{expiring} document(s) expirant prochainement" }
                 }
             }
 
@@ -161,7 +162,7 @@ fn UploadDocument(
     exposant_id: String,
     on_done: EventHandler<()>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let mut doc_type = use_signal(|| "rib".to_string());
@@ -207,16 +208,16 @@ fn UploadDocument(
             style: "display: flex; flex-direction: column; gap: 20px; max-width: 600px;",
 
             button {
-                style: "align-self: flex-start; padding: 8px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                style: "align-self: flex-start; padding: 8px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                 onclick: move |_| on_done.call(()),
                 "← Retour"
             }
 
-            h3 { style: "font-size: 20px; color: {c.text_white};", "📤 Ajouter un document" }
+            h3 { style: "font-size: 20px; color: {p.text_high};", "📤 Ajouter un document" }
 
             if !save_msg.read().is_empty() {
                 div {
-                    style: "padding: 10px 16px; background: {c.accent_red}15; border: 1px solid {c.accent_red}40; border-radius: 4px; font-size: 13px; color: {c.accent_red};",
+                    style: "padding: 10px 16px; background: {p.error}15; border: 1px solid {p.error}40; border-radius: 4px; font-size: 13px; color: {p.error};",
                     "{save_msg}"
                 }
             }
@@ -226,9 +227,9 @@ fn UploadDocument(
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;", "Type" }
+                    label { style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;", "Type" }
                     select {
-                        style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                        style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                         onchange: move |evt| doc_type.set(evt.value()),
                         value: "{doc_type}",
 
@@ -265,7 +266,7 @@ fn UploadDocument(
                     oninput: move |evt: FormEvent| file_name.set(evt.value()),
                 }
 
-                p { style: "font-size: 11px; color: {c.text_muted};", "Formats acceptes : PDF, PNG, JPG. Max 10 Mo." }
+                p { style: "font-size: 11px; color: {p.text_muted};", "Formats acceptes : PDF, PNG, JPG. Max 10 Mo." }
             }
 
             FormSection {
@@ -283,12 +284,12 @@ fn UploadDocument(
             div {
                 style: "display: flex; justify-content: flex-end; gap: 8px;",
                 button {
-                    style: "padding: 10px 20px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 14px;",
+                    style: "padding: 10px 20px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| on_done.call(()),
                     "Annuler"
                 }
                 button {
-                    style: "padding: 10px 24px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;",
+                    style: "padding: 10px 24px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;",
                     onclick: on_save,
                     "💾 Enregistrer"
                 }
@@ -303,7 +304,7 @@ fn PartagesList(
     exposant_id: String,
     partages: Vec<jayxpose::data::DocumentPartage>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     if partages.is_empty() {
@@ -328,9 +329,9 @@ fn PartagesList(
                     let p_id_revoke = p_id.clone();
                     let status = partage.status.clone().unwrap_or_else(|| "demande".to_string());
                     let status_color = match status.as_str() {
-                        "accepte" => c.accent_green.to_string(),
-                        "refuse" | "revoque" => c.accent_red.to_string(),
-                        _ => c.accent_orange.to_string(),
+                        "accepte" => p.success.to_string(),
+                        "refuse" | "revoque" => p.error.to_string(),
+                        _ => p.warning.to_string(),
                     };
                     let doc_id_display = partage.document_id.clone().unwrap_or_else(|| "?".to_string());
                     let context = partage.target_context_type.clone();
@@ -340,19 +341,19 @@ fn PartagesList(
                     rsx! {
                         div {
                             key: "{p_id}",
-                            style: "display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 4px;",
+                            style: "display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 4px;",
 
                             div {
                                 div {
                                     style: "display: flex; align-items: center; gap: 8px;",
                                     span { style: "font-size: 16px;", "🔗" }
-                                    p { style: "font-size: 13px; color: {c.text_primary};",
+                                    p { style: "font-size: 13px; color: {p.text_primary};",
                                         "Document: {doc_id_display}"
                                     }
                                     Badge { text: status.clone(), color: status_color.clone() }
                                 }
                                 if let Some(ref ctx) = context {
-                                    p { style: "font-size: 11px; color: {c.text_muted}; margin-top: 2px;", "Contexte: {ctx}" }
+                                    p { style: "font-size: 11px; color: {p.text_muted}; margin-top: 2px;", "Contexte: {ctx}" }
                                 }
                             }
 
@@ -360,7 +361,7 @@ fn PartagesList(
                                 div {
                                     style: "display: flex; gap: 4px;",
                                     button {
-                                        style: "padding: 6px 12px; background: {c.accent_green}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
+                                        style: "padding: 6px 12px; background: {p.success}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
                                         onclick: move |_| {
                                             let db = &conns.read().jayxpose;
                                             let _ = db.partage_update_status(&p_id_accept, "accepte");
@@ -368,7 +369,7 @@ fn PartagesList(
                                         "Accepter"
                                     }
                                     button {
-                                        style: "padding: 6px 12px; background: {c.accent_red}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
+                                        style: "padding: 6px 12px; background: {p.error}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
                                         onclick: move |_| {
                                             let db = &conns.read().jayxpose;
                                             let _ = db.partage_update_status(&p_id_refuse, "refuse");
@@ -379,7 +380,7 @@ fn PartagesList(
                             }
                             if is_accepte {
                                 button {
-                                    style: "padding: 6px 12px; background: transparent; border: 1px solid {c.accent_red}; color: {c.accent_red}; border-radius: 4px; cursor: pointer; font-size: 12px;",
+                                    style: "padding: 6px 12px; background: transparent; border: 1px solid {p.error}; color: {p.error}; border-radius: 4px; cursor: pointer; font-size: 12px;",
                                     onclick: move |_| {
                                         let db = &conns.read().jayxpose;
                                         let _ = db.partage_update_status(&p_id_revoke, "revoque");

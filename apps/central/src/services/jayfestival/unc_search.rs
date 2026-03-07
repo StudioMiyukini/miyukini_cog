@@ -7,6 +7,7 @@
 //! @human: Ecran UNC-E10 JayFestival: recherche globale (evenements, organisateurs, exposants).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{UncSection, JayFestivalState};
@@ -19,7 +20,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// UNC-E10 — Page de recherche.
 #[component]
 pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let initial_query = state.read().search_query.clone().unwrap_or_default();
@@ -48,14 +49,14 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 24px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Landing;
                     },
                     "← Retour"
                 }
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-top: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-top: 8px;",
                     "Recherche"
                 }
             }
@@ -68,7 +69,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                     style: "display: flex; gap: 8px;",
 
                     input {
-                        style: "flex: 1; padding: 14px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                        style: "flex: 1; padding: 14px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                         r#type: "text",
                         placeholder: "Rechercher un evenement, organisateur, exposant...",
                         value: "{query}",
@@ -82,7 +83,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                         },
                     }
                     button {
-                        style: "padding: 14px 24px; background: {c.accent_blue}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px;",
+                        style: "padding: 14px 24px; background: {p.accent_primary}; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px;",
                         onclick: move |_| {
                             state.write().search_query = Some(query.read().clone());
                         },
@@ -93,7 +94,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
 
             // Onglets de filtrage
             div {
-                style: "display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid {c.border}; padding-bottom: 12px;",
+                style: "display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid {p.border_default}; padding-bottom: 12px;",
 
                 SearchTabButton {
                     label: format!("Tous ({total})"),
@@ -120,7 +121,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
             // Résultats
             if query_str.is_empty() {
                 div {
-                    style: "text-align: center; padding: 60px; color: {c.text_muted};",
+                    style: "text-align: center; padding: 60px; color: {p.text_muted};",
                     span {
                         style: "font-size: 48px; display: block; margin-bottom: 16px; opacity: 0.3;",
                         "🔍"
@@ -129,7 +130,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                 }
             } else if total == 0 {
                 div {
-                    style: "text-align: center; padding: 60px; color: {c.text_muted};",
+                    style: "text-align: center; padding: 60px; color: {p.text_muted};",
                     span {
                         style: "font-size: 48px; display: block; margin-bottom: 16px; opacity: 0.3;",
                         "😕"
@@ -145,7 +146,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                         section {
                             if tab == "all" {
                                 h2 {
-                                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                                     "Evenements"
                                 }
                             }
@@ -185,7 +186,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                         section {
                             if tab == "all" {
                                 h2 {
-                                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                                     "Organisateurs"
                                 }
                             }
@@ -223,7 +224,7 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
                         section {
                             if tab == "all" {
                                 h2 {
-                                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                                     "Exposants"
                                 }
                             }
@@ -265,9 +266,9 @@ pub fn UncSearch(state: Signal<JayFestivalState>) -> Element {
 /// Onglet de filtrage.
 #[component]
 fn SearchTabButton(label: String, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let color = if is_active { c.text_white } else { c.text_muted };
-    let border = if is_active { c.accent_blue } else { "transparent" };
+    let p = use_palette();
+    let color = if is_active { p.text_high } else { p.text_muted };
+    let border = if is_active { p.accent_primary } else { "transparent" };
 
     rsx! {
         button {
@@ -287,11 +288,11 @@ fn SearchResultItem(
     badge: Option<String>,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s;",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer; transition: background 0.2s;",
             onclick: move |evt| onclick.call(evt),
 
             span {
@@ -302,12 +303,12 @@ fn SearchResultItem(
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white};",
+                    style: "font-size: 14px; color: {p.text_high};",
                     "{title}"
                 }
                 if !subtitle.is_empty() {
                     p {
-                        style: "font-size: 12px; color: {c.text_muted};",
+                        style: "font-size: 12px; color: {p.text_muted};",
                         "{subtitle}"
                     }
                 }
@@ -316,12 +317,12 @@ fn SearchResultItem(
             if let Some(b) = badge {
                 Badge {
                     text: b,
-                    color: c.accent_blue.to_string(),
+                    color: p.accent_primary.to_string(),
                 }
             }
 
             span {
-                style: "font-size: 12px; color: {c.accent_blue};",
+                style: "font-size: 12px; color: {p.accent_primary};",
                 "→"
             }
         }

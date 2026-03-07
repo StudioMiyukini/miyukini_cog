@@ -24,6 +24,7 @@ pub use schedule_view::ScheduleView;
 pub use event_form::EventFormModal;
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use chrono::Datelike;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -181,7 +182,7 @@ pub fn JayKoaView() -> Element {
 
     rsx! {
         div {
-            style: "display: flex; height: 100%; background: {c.bg_main};",
+            style: "display: flex; height: 100%; background: {p.bg_base};",
             
             // Sidebar gauche
             JayKoaSidebar {
@@ -323,7 +324,7 @@ pub fn JayKoaView() -> Element {
                         },
                         CalendarViewMode::Year => rsx! {
                             div {
-                                style: "padding: 24px; color: {c.text_secondary}; text-align: center;",
+                                style: "padding: 24px; color: {p.text_secondary}; text-align: center;",
                                 "Vue Année — À implémenter"
                             }
                         },

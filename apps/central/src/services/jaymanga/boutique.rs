@@ -1,6 +1,7 @@
 //! Configuration boutique JayManga — paramètres vendeur et optimisation images.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::data::{SellerConfig, OptimizationConfig};
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -9,7 +10,7 @@ use super::JayMangaState;
 
 #[component]
 pub fn Boutique(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -88,11 +89,11 @@ pub fn Boutique(state: Signal<JayMangaState>) -> Element {
                     div {
                         style: "display: flex; flex-direction: column; gap: 4px;",
                         label {
-                            style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                            style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                             "Agrégation autorisée"
                         }
                         button {
-                            style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px; cursor: pointer; text-align: left;",
+                            style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px; cursor: pointer; text-align: left;",
                             onclick: move |_| {
                                 let current = *allow_aggregation.read();
                                 allow_aggregation.set(!current);

@@ -1,6 +1,7 @@
 //! Statistiques lecteurs JayManga — progression, favoris, badges.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{PageHeader, StatCard, EmptyState};
@@ -8,7 +9,7 @@ use super::JayMangaState;
 
 #[component]
 pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -36,15 +37,15 @@ pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
                 style: "display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;",
 
                 StatCard { label: "Niveau".to_string(), value: current_level.to_string(), icon: "⭐".to_string(), color: "#eab308".to_string() }
-                StatCard { label: "XP total".to_string(), value: total_xp.to_string(), icon: "✨".to_string(), color: c.accent_blue.to_string() }
-                StatCard { label: "Série actuelle".to_string(), value: format!("{current_streak}j"), icon: "🔥".to_string(), color: c.accent_orange.to_string() }
+                StatCard { label: "XP total".to_string(), value: total_xp.to_string(), icon: "✨".to_string(), color: p.accent_primary.to_string() }
+                StatCard { label: "Série actuelle".to_string(), value: format!("{current_streak}j"), icon: "🔥".to_string(), color: p.warning.to_string() }
                 StatCard { label: "Pages lues".to_string(), value: pages_read.to_string(), icon: "📄".to_string(), color: "#8b5cf6".to_string() }
-                StatCard { label: "Œuvres finies".to_string(), value: works_completed.to_string(), icon: "🏆".to_string(), color: c.accent_green.to_string() }
+                StatCard { label: "Œuvres finies".to_string(), value: works_completed.to_string(), icon: "🏆".to_string(), color: p.success.to_string() }
             }
 
             // Favoris
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "❤️ Favoris ({favorites.len()})"
             }
 
@@ -66,31 +67,31 @@ pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
                             let status = fav.purchase_status.clone().unwrap_or_else(|| "demo".to_string());
 
                             let status_color = match status.as_str() {
-                                "owned" => c.accent_green,
-                                "demo" => c.accent_blue,
-                                _ => c.text_muted,
+                                "owned" => p.success,
+                                "demo" => p.accent_primary,
+                                _ => p.text_muted,
                             };
 
                             rsx! {
                                 div {
-                                    style: "padding: 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border};",
+                                    style: "padding: 16px; background: {p.bg_secondary}; border-radius: 8px; border: 1px solid {p.border_default};",
 
                                     h4 {
-                                        style: "font-size: 13px; color: {c.text_white}; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
+                                        style: "font-size: 13px; color: {p.text_high}; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
                                         "{title}"
                                     }
 
                                     // Barre de progression
                                     div {
-                                        style: "width: 100%; height: 6px; background: {c.bg_hover}; border-radius: 3px; overflow: hidden; margin-bottom: 8px;",
+                                        style: "width: 100%; height: 6px; background: {p.bg_overlay}; border-radius: 3px; overflow: hidden; margin-bottom: 8px;",
                                         div {
-                                            style: "width: {progress_pct}%; height: 100%; background: {c.accent_blue}; border-radius: 3px;",
+                                            style: "width: {progress_pct}%; height: 100%; background: {p.accent_primary}; border-radius: 3px;",
                                         }
                                     }
 
                                     div {
                                         style: "display: flex; justify-content: space-between; font-size: 11px;",
-                                        span { style: "color: {c.text_muted};", "{progress_pct}%" }
+                                        span { style: "color: {p.text_muted};", "{progress_pct}%" }
                                         span { style: "color: {status_color};", "{status}" }
                                     }
                                 }
@@ -102,7 +103,7 @@ pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
 
             // Badges
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "🏅 Badges ({badges.len()})"
             }
 
@@ -135,16 +136,16 @@ pub fn ReaderStats(state: Signal<JayMangaState>) -> Element {
 
                             rsx! {
                                 div {
-                                    style: "display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: {c.bg_secondary}; border-radius: 8px; border: 1px solid {c.border};",
+                                    style: "display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: {p.bg_secondary}; border-radius: 8px; border: 1px solid {p.border_default};",
 
                                     span { style: "font-size: 20px;", "{badge_icon}" }
                                     div {
                                         p {
-                                            style: "font-size: 13px; color: {c.text_white}; font-weight: 500;",
+                                            style: "font-size: 13px; color: {p.text_high}; font-weight: 500;",
                                             "{name}"
                                         }
                                         p {
-                                            style: "font-size: 11px; color: {c.text_muted};",
+                                            style: "font-size: 11px; color: {p.text_muted};",
                                             "{earned}"
                                         }
                                     }

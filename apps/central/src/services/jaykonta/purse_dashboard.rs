@@ -6,6 +6,7 @@
 //! Performance : < 3s (NFR-PUR-04).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{JayKontaState, PurseSection};
@@ -13,7 +14,7 @@ use super::components::{KpiCard, MovementRow, ProgressBar, ActionButton};
 
 #[component]
 pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les donnees reelles
@@ -32,20 +33,20 @@ pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
 
             // Titre
             h2 {
-                style: "font-size: 22px; color: {c.text_white};",
+                style: "font-size: 22px; color: {p.text_high};",
                 "Tableau de bord — Purse"
             }
 
             // Solde principal
             div {
-                style: "background: {c.bg_secondary}; border-radius: 12px; padding: 24px;",
+                style: "background: {p.bg_secondary}; border-radius: 12px; padding: 24px;",
 
                 p {
-                    style: "font-size: 13px; color: {c.text_secondary}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;",
+                    style: "font-size: 13px; color: {p.text_secondary}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;",
                     "SOLDE ACTUEL"
                 }
                 p {
-                    style: "font-size: 36px; font-weight: 700; color: {c.text_white};",
+                    style: "font-size: 36px; font-weight: 700; color: {p.text_high};",
                     "{solde_str}"
                 }
             }
@@ -79,14 +80,14 @@ pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
 
             // Repartition par categorie (placeholder simplifie)
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Repartition par categorie"
                 }
                 p {
-                    style: "font-size: 13px; color: {c.text_muted}; text-align: center; padding: 24px;",
+                    style: "font-size: 13px; color: {p.text_muted}; text-align: center; padding: 24px;",
                     "Budget utilise : {budget_pct}"
                 }
                 ProgressBar {
@@ -97,20 +98,20 @@ pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
 
             // Derniers mouvements
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;",
 
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white};",
+                        style: "font-size: 16px; color: {p.text_high};",
                         "Derniers mouvements"
                     }
                 }
 
                 if movements.is_empty() {
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; text-align: center; padding: 32px;",
+                        style: "font-size: 13px; color: {p.text_muted}; text-align: center; padding: 32px;",
                         "Aucun mouvement enregistre. Commencez par ajouter une depense ou un revenu."
                     }
                 } else {
@@ -130,7 +131,7 @@ pub fn PurseDashboard(state: Signal<JayKontaState>) -> Element {
                 }
 
                 button {
-                    style: "margin-top: 16px; padding: 8px 16px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px; width: 100%;",
+                    style: "margin-top: 16px; padding: 8px 16px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px; width: 100%;",
                     onclick: move |_| {
                         state.write().purse_section = PurseSection::Mouvements;
                     },

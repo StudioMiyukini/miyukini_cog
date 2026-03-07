@@ -5,6 +5,7 @@
 //! landscape (16:9), comics (LTR), free.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::domain::reader::{
     reader_chapter_progress, reader_is_demo_page,
     reader_next_page_index, reader_prev_page_index,
@@ -66,7 +67,7 @@ impl ReadingMode {
 
 #[component]
 pub fn Reader(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let work_id = state.read().reader_work_id.clone();
@@ -76,7 +77,7 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     if work_id.is_none() {
         return rsx! {
             div {
-                style: "display: flex; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+                style: "display: flex; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
                 "Aucune œuvre sélectionnée."
             }
         };
@@ -91,7 +92,7 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     if work.is_none() {
         return rsx! {
             div {
-                style: "display: flex; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+                style: "display: flex; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
                 "Œuvre introuvable."
             }
         };
@@ -109,9 +110,9 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
         return rsx! {
             div {
                 style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px;",
-                p { style: "color: {c.text_muted}; font-size: 16px;", "Aucun chapitre disponible." }
+                p { style: "color: {p.text_muted}; font-size: 16px;", "Aucun chapitre disponible." }
                 button {
-                    style: "padding: 8px 16px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer;",
+                    style: "padding: 8px 16px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer;",
                     onclick: move |_| { state.write().section = JayMangaSection::Library; },
                     "← Retour à la bibliothèque"
                 }
@@ -251,7 +252,7 @@ pub fn Reader(state: Signal<JayMangaState>) -> Element {
     });
 
     // Couleur de fond liseuse
-    let reader_bg = if is_fs { "#1A1A2E" } else { c.bg_main };
+    let reader_bg = if is_fs { "#1A1A2E" } else { p.bg_base };
     let reader_height = if is_fs { "100vh" } else { "100%" };
     let zoom = *zoom_level.read();
     let zoom_pct = (zoom * 100.0) as i32;

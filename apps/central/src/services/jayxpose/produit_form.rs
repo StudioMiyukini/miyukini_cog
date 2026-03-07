@@ -5,6 +5,7 @@
 //! @human: Ecran XP-E04 JayXpose: formulaire de creation et modification de produit.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{FormField, FormTextarea, FormSection};
@@ -12,7 +13,7 @@ use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
     let editing_id = state.read().editing_product_id.clone();
@@ -90,12 +91,12 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                 style: "display: flex; align-items: center; gap: 12px;",
 
                 button {
-                    style: "padding: 8px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "padding: 8px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| { state.write().section = JayXposeSection::Catalogue; },
                     "← Retour"
                 }
                 h2 {
-                    style: "font-size: 20px; color: {c.text_white};",
+                    style: "font-size: 20px; color: {p.text_high};",
                     "{title}"
                 }
             }
@@ -103,7 +104,7 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
             // Message
             if !save_message.read().is_empty() {
                 div {
-                    style: "padding: 10px 16px; background: {c.accent_red}15; border: 1px solid {c.accent_red}40; border-radius: 4px; font-size: 13px; color: {c.accent_red};",
+                    style: "padding: 10px 16px; background: {p.error}15; border: 1px solid {p.error}40; border-radius: 4px; font-size: 13px; color: {p.error};",
                     "{save_message}"
                 }
             }
@@ -125,11 +126,11 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                         style: "display: flex; flex-direction: column; gap: 4px;",
 
                         label {
-                            style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                            style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                             "Categorie"
                         }
                         select {
-                            style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                            style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                             onchange: move |evt| category_id.set(evt.value()),
                             value: "{category_id}",
 
@@ -150,11 +151,11 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                     style: "display: flex; flex-direction: column; gap: 4px;",
 
                     label {
-                        style: "font-size: 12px; color: {c.text_secondary}; font-weight: 500;",
+                        style: "font-size: 12px; color: {p.text_secondary}; font-weight: 500;",
                         "Disponibilite"
                     }
                     select {
-                        style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                        style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                         onchange: move |evt| availability.set(evt.value()),
                         value: "{availability}",
 
@@ -174,7 +175,7 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                         onchange: move |evt| is_featured.set(evt.checked()),
                     }
                     label {
-                        style: "font-size: 13px; color: {c.text_primary};",
+                        style: "font-size: 13px; color: {p.text_primary};",
                         "⭐ Produit vedette (mis en avant sur la vitrine)"
                     }
                 }
@@ -185,7 +186,7 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                 style: "display: flex; justify-content: space-between; padding-top: 8px;",
 
                 button {
-                    style: "padding: 10px 20px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 14px;",
+                    style: "padding: 10px 20px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 14px;",
                     onclick: move |_| { state.write().section = JayXposeSection::Catalogue; },
                     "Annuler"
                 }
@@ -198,7 +199,7 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                             let del_id = editing_id_for_delete.clone().unwrap_or_default();
                             rsx! {
                                 button {
-                                    style: "padding: 10px 20px; background: {c.accent_red}15; border: 1px solid {c.accent_red}40; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 14px;",
+                                    style: "padding: 10px 20px; background: {p.error}15; border: 1px solid {p.error}40; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 14px;",
                                     onclick: move |_| {
                                         let db = &conns.read().jayxpose;
                                         let _ = db.produit_delete(&del_id);
@@ -211,7 +212,7 @@ pub fn ProduitForm(state: Signal<JayXposeState>) -> Element {
                     }
 
                     button {
-                        style: "padding: 10px 24px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;",
+                        style: "padding: 10px 24px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500;",
                         onclick: on_save,
                         "💾 Enregistrer"
                     }

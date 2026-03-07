@@ -5,24 +5,25 @@
 //! @human: Ecrans EXP-E07/E08 JayFestival: agenda exposant avec animations et creneaux.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Agenda de l'exposant.
 #[component]
 pub fn ExpAgenda() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut active_tab = use_signal(|| "semaine".to_string());
 
     // Note: Les animations seraient chargées depuis la DB
     // Pour la démo, on utilise des données statiques
 
     let tab = active_tab.read().clone();
-    let tab_jour_bg = if tab == "jour" { c.accent_blue } else { c.bg_secondary };
-    let tab_jour_color = if tab == "jour" { "white" } else { c.text_primary };
-    let tab_semaine_bg = if tab == "semaine" { c.accent_blue } else { c.bg_secondary };
-    let tab_semaine_color = if tab == "semaine" { "white" } else { c.text_primary };
-    let tab_mois_bg = if tab == "mois" { c.accent_blue } else { c.bg_secondary };
-    let tab_mois_color = if tab == "mois" { "white" } else { c.text_primary };
+    let tab_jour_bg = if tab == "jour" { p.accent_primary } else { p.bg_secondary };
+    let tab_jour_color = if tab == "jour" { "white" } else { p.text_primary };
+    let tab_semaine_bg = if tab == "semaine" { p.accent_primary } else { p.bg_secondary };
+    let tab_semaine_color = if tab == "semaine" { "white" } else { p.text_primary };
+    let tab_mois_bg = if tab == "mois" { p.accent_primary } else { p.bg_secondary };
+    let tab_mois_color = if tab == "mois" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -33,7 +34,7 @@ pub fn ExpAgenda() -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h2 {
-                    style: "font-size: 24px; color: {c.text_white};",
+                    style: "font-size: 24px; color: {p.text_high};",
                     "Mon agenda"
                 }
 
@@ -64,22 +65,22 @@ pub fn ExpAgenda() -> Element {
                 style: "display: flex; align-items: center; gap: 16px;",
 
                 button {
-                    style: "padding: 8px 12px; background: {c.bg_secondary}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 16px;",
+                    style: "padding: 8px 12px; background: {p.bg_secondary}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 16px;",
                     "←"
                 }
 
                 span {
-                    style: "font-size: 16px; color: {c.text_white}; font-weight: 500;",
+                    style: "font-size: 16px; color: {p.text_high}; font-weight: 500;",
                     "Semaine du 15 février 2026"
                 }
 
                 button {
-                    style: "padding: 8px 12px; background: {c.bg_secondary}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 16px;",
+                    style: "padding: 8px 12px; background: {p.bg_secondary}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 16px;",
                     "→"
                 }
 
                 button {
-                    style: "margin-left: auto; padding: 8px 16px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
+                    style: "margin-left: auto; padding: 8px 16px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px;",
                     "Aujourd'hui"
                 }
             }
@@ -98,7 +99,7 @@ pub fn ExpAgenda() -> Element {
             // Prochains événements
             section {
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                     "Prochains evenements"
                 }
 
@@ -133,17 +134,17 @@ pub fn ExpAgenda() -> Element {
 
 #[component]
 fn WeekView() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; overflow: hidden;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; overflow: hidden;",
 
             // En-têtes jours
             div {
-                style: "display: grid; grid-template-columns: 60px repeat(7, 1fr); border-bottom: 1px solid {c.border};",
+                style: "display: grid; grid-template-columns: 60px repeat(7, 1fr); border-bottom: 1px solid {p.border_default};",
 
-                div { style: "padding: 12px; font-size: 12px; color: {c.text_muted};", "" }
+                div { style: "padding: 12px; font-size: 12px; color: {p.text_muted};", "" }
                 DayHeader { day: "Lun", date: "10" }
                 DayHeader { day: "Mar", date: "11" }
                 DayHeader { day: "Mer", date: "12" }
@@ -173,16 +174,16 @@ fn WeekView() -> Element {
 
 #[component]
 fn DayHeader(day: &'static str, date: &'static str, #[props(default = false)] is_today: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_today { c.accent_blue } else { "transparent" };
-    let color = if is_today { "white" } else { c.text_primary };
+    let p = use_palette();
+    let bg = if is_today { p.accent_primary } else { "transparent" };
+    let color = if is_today { "white" } else { p.text_primary };
 
     rsx! {
         div {
             style: "padding: 12px; text-align: center;",
 
             p {
-                style: "font-size: 11px; color: {c.text_muted}; margin-bottom: 4px;",
+                style: "font-size: 11px; color: {p.text_muted}; margin-bottom: 4px;",
                 "{day}"
             }
             div {
@@ -195,14 +196,14 @@ fn DayHeader(day: &'static str, date: &'static str, #[props(default = false)] is
 
 #[component]
 fn TimeRow(hour: &'static str, has_event_at: Option<usize>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: grid; grid-template-columns: 60px repeat(7, 1fr); border-bottom: 1px solid {c.border}; min-height: 48px;",
+            style: "display: grid; grid-template-columns: 60px repeat(7, 1fr); border-bottom: 1px solid {p.border_default}; min-height: 48px;",
 
             div {
-                style: "padding: 4px 8px; font-size: 11px; color: {c.text_muted}; text-align: right;",
+                style: "padding: 4px 8px; font-size: 11px; color: {p.text_muted}; text-align: right;",
                 "{hour}"
             }
 
@@ -212,10 +213,10 @@ fn TimeRow(hour: &'static str, has_event_at: Option<usize>) -> Element {
                     let has_event = has_event_at.is_some_and(|idx| idx == i);
                     rsx! {
                         div {
-                            style: "border-left: 1px solid {c.border}; padding: 2px;",
+                            style: "border-left: 1px solid {p.border_default}; padding: 2px;",
                             if has_event {
                                 div {
-                                    style: "background: {c.accent_blue}40; border-left: 3px solid {c.accent_blue}; border-radius: 2px; padding: 2px 4px; font-size: 10px; color: {c.accent_blue};",
+                                    style: "background: {p.accent_primary}40; border-left: 3px solid {p.accent_primary}; border-radius: 2px; padding: 2px 4px; font-size: 10px; color: {p.accent_primary};",
                                     "Event"
                                 }
                             }
@@ -229,14 +230,14 @@ fn TimeRow(hour: &'static str, has_event_at: Option<usize>) -> Element {
 
 #[component]
 fn DayView() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             p {
-                style: "text-align: center; color: {c.text_muted}; font-size: 14px;",
+                style: "text-align: center; color: {p.text_muted}; font-size: 14px;",
                 "Vue jour - Selectionnez un jour pour voir le detail"
             }
         }
@@ -245,11 +246,11 @@ fn DayView() -> Element {
 
 #[component]
 fn MonthView() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             // En-têtes jours
             div {
@@ -257,7 +258,7 @@ fn MonthView() -> Element {
 
                 for day in ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"] {
                     div {
-                        style: "text-align: center; font-size: 11px; color: {c.text_muted}; padding: 8px;",
+                        style: "text-align: center; font-size: 11px; color: {p.text_muted}; padding: 8px;",
                         "{day}"
                     }
                 }
@@ -270,10 +271,10 @@ fn MonthView() -> Element {
                 for i in 1..=28 {
                     {
                         let has_event = i == 14 || i == 15 || i == 16;
-                        let bg = if has_event { c.accent_blue.to_string() + "20" } else { "transparent".to_string() };
+                        let bg = if has_event { p.accent_primary.to_string() + "20" } else { "transparent".to_string() };
                         rsx! {
                             div {
-                                style: "aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: {bg}; border-radius: 4px; font-size: 13px; color: {c.text_primary}; cursor: pointer;",
+                                style: "aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: {bg}; border-radius: 4px; font-size: 13px; color: {p.text_primary}; cursor: pointer;",
                                 "{i}"
                             }
                         }
@@ -286,36 +287,36 @@ fn MonthView() -> Element {
 
 #[component]
 fn AgendaItem(title: &'static str, time: &'static str, event_type: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (icon, color) = match event_type {
-        "preparation" => ("🔧", c.accent_orange),
-        "evenement" => ("🎪", c.accent_blue),
-        "animation" => ("🎤", c.accent_green),
-        "rdv" => ("📅", c.accent_blue),
-        _ => ("📌", c.text_muted),
+        "preparation" => ("🔧", p.warning),
+        "evenement" => ("🎪", p.accent_primary),
+        "animation" => ("🎤", p.success),
+        "rdv" => ("📅", p.accent_primary),
+        _ => ("📌", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px; border-left: 3px solid {color};",
+            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 12px 16px; border-left: 3px solid {color};",
 
             span { style: "font-size: 20px;", "{icon}" }
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 2px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 2px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{time}"
                 }
             }
 
             button {
-                style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                 "Voir"
             }
         }

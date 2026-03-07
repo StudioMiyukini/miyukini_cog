@@ -8,6 +8,7 @@
 //! @human: Ecrans ORG-E14/E16 JayFestival: plan de salle (zones, attribution stands, export).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{ActionButton, Badge};
@@ -15,16 +16,16 @@ use super::components::{ActionButton, Badge};
 /// Vue principale du plan de salle avec onglets.
 #[component]
 pub fn OrgPlan(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut active_tab = use_signal(|| "visualisation".to_string());
 
     let tab = active_tab.read().clone();
-    let tab_visu_bg = if tab == "visualisation" { c.accent_blue } else { c.bg_secondary };
-    let tab_visu_color = if tab == "visualisation" { "white" } else { c.text_primary };
-    let tab_zones_bg = if tab == "zones" { c.accent_blue } else { c.bg_secondary };
-    let tab_zones_color = if tab == "zones" { "white" } else { c.text_primary };
-    let tab_attrib_bg = if tab == "attribution" { c.accent_blue } else { c.bg_secondary };
-    let tab_attrib_color = if tab == "attribution" { "white" } else { c.text_primary };
+    let tab_visu_bg = if tab == "visualisation" { p.accent_primary } else { p.bg_secondary };
+    let tab_visu_color = if tab == "visualisation" { "white" } else { p.text_primary };
+    let tab_zones_bg = if tab == "zones" { p.accent_primary } else { p.bg_secondary };
+    let tab_zones_color = if tab == "zones" { "white" } else { p.text_primary };
+    let tab_attrib_bg = if tab == "attribution" { p.accent_primary } else { p.bg_secondary };
+    let tab_attrib_color = if tab == "attribution" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -35,7 +36,7 @@ pub fn OrgPlan(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h3 {
-                    style: "font-size: 18px; color: {c.text_white};",
+                    style: "font-size: 18px; color: {p.text_high};",
                     "Plan de salle"
                 }
 
@@ -58,7 +59,7 @@ pub fn OrgPlan(edition_id: String) -> Element {
 
             // Onglets
             div {
-                style: "display: flex; gap: 8px; border-bottom: 1px solid {c.border}; padding-bottom: 12px;",
+                style: "display: flex; gap: 8px; border-bottom: 1px solid {p.border_default}; padding-bottom: 12px;",
 
                 button {
                     style: "padding: 8px 16px; background: {tab_visu_bg}; border: none; border-radius: 6px; color: {tab_visu_color}; cursor: pointer; font-size: 13px;",
@@ -94,7 +95,7 @@ pub fn OrgPlan(edition_id: String) -> Element {
 /// ORG-E16: Visualisation du plan.
 #[component]
 fn PlanVisualisationTab(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les exposants de l'édition pour la légende
@@ -116,9 +117,9 @@ fn PlanVisualisationTab(edition_id: String) -> Element {
             div {
                 style: "display: flex; gap: 16px; font-size: 12px;",
 
-                LegendItem { color: c.accent_green.to_string(), label: format!("Attribue ({})", assigned_count) }
-                LegendItem { color: c.accent_orange.to_string(), label: "Reserve".to_string() }
-                LegendItem { color: c.bg_hover.to_string(), label: "Libre".to_string() }
+                LegendItem { color: p.success.to_string(), label: format!("Attribue ({})", assigned_count) }
+                LegendItem { color: p.warning.to_string(), label: "Reserve".to_string() }
+                LegendItem { color: p.bg_overlay.to_string(), label: "Libre".to_string() }
             }
 
             // Grille du plan
@@ -126,7 +127,7 @@ fn PlanVisualisationTab(edition_id: String) -> Element {
 
             // Info
             p {
-                style: "font-size: 13px; color: {c.text_muted}; font-style: italic;",
+                style: "font-size: 13px; color: {p.text_muted}; font-style: italic;",
                 "Cliquez sur un stand pour voir les details ou l'attribuer."
             }
         }
@@ -135,7 +136,7 @@ fn PlanVisualisationTab(edition_id: String) -> Element {
 
 #[component]
 fn LegendItem(color: String, label: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let bg_color = format!("{color}40");
 
     rsx! {
@@ -145,7 +146,7 @@ fn LegendItem(color: String, label: String) -> Element {
                 style: "width: 14px; height: 14px; background: {bg_color}; border: 1px solid {color}; border-radius: 2px;",
             }
             span {
-                style: "color: {c.text_secondary};",
+                style: "color: {p.text_secondary};",
                 "{label}"
             }
         }
@@ -197,24 +198,24 @@ fn PlanGrid() -> Element {
 
 #[component]
 fn StandCell(id: &'static str, status: &'static str, selected: Signal<Option<String>>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let is_selected = selected.read().as_deref() == Some(id);
 
     let (bg, border_color) = match status {
-        "attribue" => (format!("{}40", c.accent_green), c.accent_green.to_string()),
-        "reserve" => (format!("{}40", c.accent_orange), c.accent_orange.to_string()),
-        _ => (c.bg_hover.to_string(), c.border.to_string()),
+        "attribue" => (format!("{}40", p.success), p.success.to_string()),
+        "reserve" => (format!("{}40", p.warning), p.warning.to_string()),
+        _ => (p.bg_overlay.to_string(), p.border_default.to_string()),
     };
 
     let border = if is_selected {
-        format!("2px solid {}", c.accent_blue)
+        format!("2px solid {}", p.accent_primary)
     } else {
         format!("1px solid {border_color}")
     };
 
     rsx! {
         div {
-            style: "aspect-ratio: 1; background: {bg}; border: {border}; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: {c.text_secondary}; font-weight: 500; transition: all 0.2s;",
+            style: "aspect-ratio: 1; background: {bg}; border: {border}; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: {p.text_secondary}; font-weight: 500; transition: all 0.2s;",
             onclick: move |_| {
                 selected.set(Some(id.to_string()));
             },
@@ -226,7 +227,7 @@ fn StandCell(id: &'static str, status: &'static str, selected: Signal<Option<Str
 /// ORG-E14: Définition des zones.
 #[component]
 fn PlanZonesTab(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -237,7 +238,7 @@ fn PlanZonesTab(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 p {
-                    style: "font-size: 14px; color: {c.text_secondary};",
+                    style: "font-size: 14px; color: {p.text_secondary};",
                     "Definissez les differentes zones de votre espace d'exposition."
                 }
 
@@ -281,10 +282,10 @@ fn PlanZonesTab(edition_id: String) -> Element {
 
             // Configuration globale
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; margin-top: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; margin-top: 16px;",
 
                 h4 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 16px;",
                     "Configuration globale"
                 }
 
@@ -293,23 +294,23 @@ fn PlanZonesTab(edition_id: String) -> Element {
 
                     div {
                         label {
-                            style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                            style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                             "Surface totale"
                         }
                         input {
                             r#type: "text",
-                            style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                            style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                             value: "450 m²",
                         }
                     }
                     div {
                         label {
-                            style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                            style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                             "Nombre total de stands"
                         }
                         input {
                             r#type: "number",
-                            style: "width: 100%; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                            style: "width: 100%; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                             value: "24",
                         }
                     }
@@ -321,20 +322,20 @@ fn PlanZonesTab(edition_id: String) -> Element {
 
 #[component]
 fn ZoneCard(name: &'static str, stands_count: usize, surface: &'static str, color: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 4px solid {color};",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; border-left: 4px solid {color};",
 
             div {
                 style: "flex: 1;",
                 h4 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                     "{name}"
                 }
                 div {
-                    style: "display: flex; gap: 16px; font-size: 12px; color: {c.text_muted};",
+                    style: "display: flex; gap: 16px; font-size: 12px; color: {p.text_muted};",
                     span { "{stands_count} stands" }
                     span { "{surface}" }
                 }
@@ -343,11 +344,11 @@ fn ZoneCard(name: &'static str, stands_count: usize, surface: &'static str, colo
             div {
                 style: "display: flex; gap: 8px;",
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "Modifier"
                 }
                 button {
-                    style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_muted}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_muted}; cursor: pointer; font-size: 12px;",
                     "Supprimer"
                 }
             }
@@ -358,7 +359,7 @@ fn ZoneCard(name: &'static str, stands_count: usize, surface: &'static str, colo
 /// ORG-E15: Attribution des stands.
 #[component]
 fn PlanAttributionTab(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les participations
@@ -398,24 +399,24 @@ fn PlanAttributionTab(edition_id: String) -> Element {
                 style: "display: flex; gap: 16px;",
 
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; flex: 1; text-align: center;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; flex: 1; text-align: center;",
                     p {
-                        style: "font-size: 24px; color: {c.accent_green}; font-weight: 600;",
+                        style: "font-size: 24px; color: {p.success}; font-weight: 600;",
                         "{assigned_count}"
                     }
                     p {
-                        style: "font-size: 12px; color: {c.text_muted};",
+                        style: "font-size: 12px; color: {p.text_muted};",
                         "Stands attribues"
                     }
                 }
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; flex: 1; text-align: center;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; flex: 1; text-align: center;",
                     p {
-                        style: "font-size: 24px; color: {c.accent_orange}; font-weight: 600;",
+                        style: "font-size: 24px; color: {p.warning}; font-weight: 600;",
                         "{unassigned_count}"
                     }
                     p {
-                        style: "font-size: 12px; color: {c.text_muted};",
+                        style: "font-size: 12px; color: {p.text_muted};",
                         "En attente"
                     }
                 }
@@ -423,19 +424,19 @@ fn PlanAttributionTab(edition_id: String) -> Element {
 
             // Instructions
             p {
-                style: "font-size: 14px; color: {c.text_secondary};",
+                style: "font-size: 14px; color: {p.text_secondary};",
                 "Selectionnez un exposant puis cliquez sur un stand libre pour l'attribuer."
             }
 
             // Liste des exposants à attribuer
             h4 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Exposants en attente d'attribution"
             }
 
             if unassigned_count == 0 {
                 div {
-                    style: "padding: 20px; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted}; text-align: center; font-size: 14px;",
+                    style: "padding: 20px; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted}; text-align: center; font-size: 14px;",
                     "Tous les exposants ont un stand attribue"
                 }
             }
@@ -448,20 +449,20 @@ fn PlanAttributionTab(edition_id: String) -> Element {
                         .unwrap_or_else(|| "Exposant inconnu".to_string());
                     rsx! {
                         div {
-                            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px;",
+                            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 12px 16px;",
 
                             span {
-                                style: "flex: 1; font-size: 14px; color: {c.text_white};",
+                                style: "flex: 1; font-size: 14px; color: {p.text_high};",
                                 "{name}"
                             }
 
                             Badge {
                                 text: "Sans stand".to_string(),
-                                color: c.accent_orange.to_string(),
+                                color: p.warning.to_string(),
                             }
 
                             button {
-                                style: "padding: 6px 12px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                                style: "padding: 6px 12px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                                 "Attribuer"
                             }
                         }
@@ -471,7 +472,7 @@ fn PlanAttributionTab(edition_id: String) -> Element {
 
             // Exposants avec stand
             h4 {
-                style: "font-size: 16px; color: {c.text_white}; margin-top: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-top: 16px;",
                 "Exposants avec stand attribue"
             }
 
@@ -484,20 +485,20 @@ fn PlanAttributionTab(edition_id: String) -> Element {
                     let stand = p.assigned_stand.clone().unwrap_or_default();
                     rsx! {
                         div {
-                            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px;",
+                            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 12px 16px;",
 
                             span {
-                                style: "flex: 1; font-size: 14px; color: {c.text_white};",
+                                style: "flex: 1; font-size: 14px; color: {p.text_high};",
                                 "{name}"
                             }
 
                             Badge {
                                 text: format!("Stand {}", stand),
-                                color: c.accent_green.to_string(),
+                                color: p.success.to_string(),
                             }
 
                             button {
-                                style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                                style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                                 "Modifier"
                             }
                         }

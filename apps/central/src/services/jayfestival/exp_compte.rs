@@ -5,6 +5,7 @@
 //! @human: Ecran EXP-E13 JayFestival: mon compte exposant (profil, preferences).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::ActionButton;
@@ -12,7 +13,7 @@ use super::components::ActionButton;
 /// Page de gestion du compte exposant.
 #[component]
 pub fn ExpCompte() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les données exposant
@@ -38,16 +39,16 @@ pub fn ExpCompte() -> Element {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Mon compte"
             }
 
             // Informations générales
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Informations de l'entreprise"
                 }
 
@@ -75,11 +76,11 @@ pub fn ExpCompte() -> Element {
                 div {
                     style: "margin-top: 16px;",
                     label {
-                        style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                        style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                         "Adresse"
                     }
                     textarea {
-                        style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px; resize: vertical; min-height: 80px;",
+                        style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px; resize: vertical; min-height: 80px;",
                         value: "{address_input}",
                         oninput: move |evt| { address_input.set(evt.value()); },
                     }
@@ -100,10 +101,10 @@ pub fn ExpCompte() -> Element {
 
             // Logo et visuels
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Logo et visuels"
                 }
 
@@ -114,28 +115,28 @@ pub fn ExpCompte() -> Element {
                     div {
                         style: "text-align: center;",
                         div {
-                            style: "width: 120px; height: 120px; background: {c.bg_main}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 48px; margin-bottom: 12px;",
+                            style: "width: 120px; height: 120px; background: {p.bg_base}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 48px; margin-bottom: 12px;",
                             "🏪"
                         }
                         button {
-                            style: "padding: 8px 16px; background: {c.bg_hover}; border: none; border-radius: 6px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                            style: "padding: 8px 16px; background: {p.bg_overlay}; border: none; border-radius: 6px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                             "Changer le logo"
                         }
                     }
 
                     // Info format
                     div {
-                        style: "flex: 1; padding: 16px; background: {c.bg_main}; border-radius: 8px;",
+                        style: "flex: 1; padding: 16px; background: {p.bg_base}; border-radius: 8px;",
                         p {
-                            style: "font-size: 13px; color: {c.text_primary}; margin-bottom: 8px;",
+                            style: "font-size: 13px; color: {p.text_primary}; margin-bottom: 8px;",
                             "Formats acceptes : PNG, JPG, SVG"
                         }
                         p {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "Taille recommandee : 512x512 pixels minimum"
                         }
                         p {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "Poids maximum : 2 Mo"
                         }
                     }
@@ -144,10 +145,10 @@ pub fn ExpCompte() -> Element {
 
             // Sécurité
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Securite"
                 }
 
@@ -177,10 +178,10 @@ pub fn ExpCompte() -> Element {
 
             // Zone danger
             section {
-                style: "background: {c.bg_secondary}; border: 1px solid {c.accent_red}40; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border: 1px solid {p.error}40; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.accent_red}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.error}; margin-bottom: 16px;",
                     "Zone dangereuse"
                 }
 
@@ -189,17 +190,17 @@ pub fn ExpCompte() -> Element {
 
                     div {
                         p {
-                            style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                            style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                             "Supprimer mon compte"
                         }
                         p {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "Cette action est irreversible. Toutes vos donnees seront supprimees."
                         }
                     }
 
                     button {
-                        style: "padding: 8px 16px; background: transparent; border: 1px solid {c.accent_red}; border-radius: 6px; color: {c.accent_red}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: transparent; border: 1px solid {p.error}; border-radius: 6px; color: {p.error}; cursor: pointer; font-size: 13px;",
                         "Supprimer"
                     }
                 }
@@ -210,18 +211,18 @@ pub fn ExpCompte() -> Element {
 
 #[component]
 fn FormField(label: &'static str, value: Signal<String>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let val = value.read().clone();
 
     rsx! {
         div {
             label {
-                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                 "{label}"
             }
             input {
                 r#type: "text",
-                style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 13px;",
+                style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 13px;",
                 value: "{val}",
                 oninput: move |evt| { value.set(evt.value()); },
             }
@@ -231,28 +232,28 @@ fn FormField(label: &'static str, value: Signal<String>) -> Element {
 
 #[component]
 fn SecurityRow(icon: &'static str, title: &'static str, description: &'static str, action: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; padding: 12px; background: {c.bg_main}; border-radius: 6px;",
+            style: "display: flex; align-items: center; gap: 12px; padding: 12px; background: {p.bg_base}; border-radius: 6px;",
 
             span { style: "font-size: 20px;", "{icon}" }
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 2px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 2px;",
                     "{title}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{description}"
                 }
             }
 
             button {
-                style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                 "{action}"
             }
         }

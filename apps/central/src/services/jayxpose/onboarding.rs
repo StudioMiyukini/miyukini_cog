@@ -13,6 +13,7 @@
 //! @human: Onboarding JayXpose: parcours guide Miou en 6 etapes pour creation du profil exposant.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use crate::data::use_service_connections;
 use super::components::{FormField, FormTextarea};
@@ -104,7 +105,7 @@ fn miou_message(step: u8) -> MiouMessage {
 /// Indicateur de progression (cercles étapes).
 #[component]
 fn OnboardingProgress(current: u8, total: u8) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -114,7 +115,7 @@ fn OnboardingProgress(current: u8, total: u8) -> Element {
                 {
                     let is_done = i < current;
                     let is_current = i == current;
-                    let bg = if is_done || is_current { c.accent_blue } else { c.bg_hover };
+                    let bg = if is_done || is_current { p.accent_primary } else { p.bg_overlay };
                     let w = if is_current { "32px" } else { "24px" };
                     let opacity = if is_done { "0.6" } else { "1" };
                     rsx! {
@@ -132,7 +133,7 @@ fn OnboardingProgress(current: u8, total: u8) -> Element {
 /// Bulle Miou inline (style didacticiel, intégrée au flux onboarding).
 #[component]
 fn MiouBubbleInline(step: u8) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let msg = miou_message(step);
 
     rsx! {
@@ -161,7 +162,7 @@ fn MiouBubbleInline(step: u8) -> Element {
                         "Miou"
                     }
                     span {
-                        style: "font-size: 11px; color: {c.text_muted}; margin-left: 8px;",
+                        style: "font-size: 11px; color: {p.text_muted}; margin-left: 8px;",
                         "— {msg.titre}"
                     }
                 }
@@ -178,14 +179,14 @@ fn MiouBubbleInline(step: u8) -> Element {
                 div {
                     style: "display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; \
                             background: rgba(26, 159, 255, 0.08); border-radius: 6px; \
-                            border-left: 3px solid {c.accent_blue};",
+                            border-left: 3px solid {p.accent_primary};",
 
                     span {
                         style: "font-size: 14px; flex-shrink: 0; margin-top: 1px;",
                         "💡"
                     }
                     p {
-                        style: "font-size: 12px; line-height: 1.5; color: {c.text_secondary};",
+                        style: "font-size: 12px; line-height: 1.5; color: {p.text_secondary};",
                         "{msg.tip}"
                     }
                 }
@@ -198,7 +199,7 @@ fn MiouBubbleInline(step: u8) -> Element {
 
 #[component]
 pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut step = use_signal(|| STEP_BIENVENUE);
 
@@ -219,7 +220,7 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
     let disabled_btn = format!(
         "flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 14px; \
          cursor: not-allowed; background: {}; color: {}; opacity: 0.4; font-weight: 500;",
-        c.bg_hover, c.text_muted
+        p.bg_overlay, p.text_muted
     );
 
     // Style bouton suivant
@@ -227,7 +228,7 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
         "flex: 1; padding: 12px; background: {}; color: white; border: none; \
          border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; \
          transition: all 0.2s;",
-        c.accent_blue
+        p.accent_primary
     );
 
     // Style bouton retour
@@ -235,7 +236,7 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
         "flex: 1; padding: 12px; background: transparent; border: 1px solid {}; \
          border-radius: 6px; color: {}; cursor: pointer; font-size: 14px; \
          transition: all 0.2s;",
-        c.border, c.text_secondary
+        p.border_default, p.text_secondary
     );
 
     // Style bouton final
@@ -243,7 +244,7 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
         "flex: 1; padding: 14px; background: {}; color: white; border: none; \
          border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: 600; \
          transition: all 0.2s;",
-        c.accent_green
+        p.success
     );
 
     rsx! {
@@ -270,35 +271,35 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
 
                             // Carte Profil
                             div {
-                                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; \
-                                        border: 1px solid {c.border}; text-align: center;",
+                                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; \
+                                        border: 1px solid {p.border_default}; text-align: center;",
                                 span { style: "font-size: 28px; display: block; margin-bottom: 8px;", "🏢" }
-                                p { style: "font-size: 13px; font-weight: 500; color: {c.text_white}; margin-bottom: 4px;", "Profil entreprise" }
-                                p { style: "font-size: 11px; color: {c.text_muted};", "Ta carte d'identité pro" }
+                                p { style: "font-size: 13px; font-weight: 500; color: {p.text_high}; margin-bottom: 4px;", "Profil entreprise" }
+                                p { style: "font-size: 11px; color: {p.text_muted};", "Ta carte d'identité pro" }
                             }
                             // Carte Catalogue
                             div {
-                                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; \
-                                        border: 1px solid {c.border}; text-align: center;",
+                                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; \
+                                        border: 1px solid {p.border_default}; text-align: center;",
                                 span { style: "font-size: 28px; display: block; margin-bottom: 8px;", "📦" }
-                                p { style: "font-size: 13px; font-weight: 500; color: {c.text_white}; margin-bottom: 4px;", "Catalogue produits" }
-                                p { style: "font-size: 11px; color: {c.text_muted};", "Tes produits et services" }
+                                p { style: "font-size: 13px; font-weight: 500; color: {p.text_high}; margin-bottom: 4px;", "Catalogue produits" }
+                                p { style: "font-size: 11px; color: {p.text_muted};", "Tes produits et services" }
                             }
                             // Carte Vitrine
                             div {
-                                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; \
-                                        border: 1px solid {c.border}; text-align: center;",
+                                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; \
+                                        border: 1px solid {p.border_default}; text-align: center;",
                                 span { style: "font-size: 28px; display: block; margin-bottom: 8px;", "🪟" }
-                                p { style: "font-size: 13px; font-weight: 500; color: {c.text_white}; margin-bottom: 4px;", "Vitrine en ligne" }
-                                p { style: "font-size: 11px; color: {c.text_muted};", "Ton stand numérique" }
+                                p { style: "font-size: 13px; font-weight: 500; color: {p.text_high}; margin-bottom: 4px;", "Vitrine en ligne" }
+                                p { style: "font-size: 11px; color: {p.text_muted};", "Ton stand numérique" }
                             }
                             // Carte Documents
                             div {
-                                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; \
-                                        border: 1px solid {c.border}; text-align: center;",
+                                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; \
+                                        border: 1px solid {p.border_default}; text-align: center;",
                                 span { style: "font-size: 28px; display: block; margin-bottom: 8px;", "🔒" }
-                                p { style: "font-size: 13px; font-weight: 500; color: {c.text_white}; margin-bottom: 4px;", "Coffre-fort docs" }
-                                p { style: "font-size: 11px; color: {c.text_muted};", "Tes documents sécurisés" }
+                                p { style: "font-size: 13px; font-weight: 500; color: {p.text_high}; margin-bottom: 4px;", "Coffre-fort docs" }
+                                p { style: "font-size: 11px; color: {p.text_muted};", "Tes documents sécurisés" }
                             }
                         }
 
@@ -316,15 +317,15 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
                     STEP_VIE_PRIVEE => rsx! {
                         // Illustration sécurité
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; \
-                                    margin-bottom: 24px; border: 1px solid {c.border};",
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; \
+                                    margin-bottom: 24px; border: 1px solid {p.border_default};",
 
                             div {
                                 style: "display: flex; align-items: center; gap: 16px; margin-bottom: 16px;",
                                 span { style: "font-size: 36px;", "🛡️" }
                                 div {
-                                    p { style: "font-size: 14px; font-weight: 600; color: {c.text_white};", "Stockage 100% local" }
-                                    p { style: "font-size: 12px; color: {c.text_secondary}; margin-top: 2px;", "Tes données restent sur cet ordinateur" }
+                                    p { style: "font-size: 14px; font-weight: 600; color: {p.text_high};", "Stockage 100% local" }
+                                    p { style: "font-size: 12px; color: {p.text_secondary}; margin-top: 2px;", "Tes données restent sur cet ordinateur" }
                                 }
                             }
 
@@ -334,26 +335,26 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
                                 // Point 1
                                 div {
                                     style: "display: flex; align-items: center; gap: 10px;",
-                                    span { style: "color: {c.accent_green}; font-size: 14px; flex-shrink: 0;", "✓" }
-                                    p { style: "font-size: 13px; color: {c.text_primary};", "Base de données locale chiffrée" }
+                                    span { style: "color: {p.success}; font-size: 14px; flex-shrink: 0;", "✓" }
+                                    p { style: "font-size: 13px; color: {p.text_primary};", "Base de données locale chiffrée" }
                                 }
                                 // Point 2
                                 div {
                                     style: "display: flex; align-items: center; gap: 10px;",
-                                    span { style: "color: {c.accent_green}; font-size: 14px; flex-shrink: 0;", "✓" }
-                                    p { style: "font-size: 13px; color: {c.text_primary};", "Aucun envoi sur Internet sans ton accord" }
+                                    span { style: "color: {p.success}; font-size: 14px; flex-shrink: 0;", "✓" }
+                                    p { style: "font-size: 13px; color: {p.text_primary};", "Aucun envoi sur Internet sans ton accord" }
                                 }
                                 // Point 3
                                 div {
                                     style: "display: flex; align-items: center; gap: 10px;",
-                                    span { style: "color: {c.accent_green}; font-size: 14px; flex-shrink: 0;", "✓" }
-                                    p { style: "font-size: 13px; color: {c.text_primary};", "Tu choisis ce que tu publies" }
+                                    span { style: "color: {p.success}; font-size: 14px; flex-shrink: 0;", "✓" }
+                                    p { style: "font-size: 13px; color: {p.text_primary};", "Tu choisis ce que tu publies" }
                                 }
                                 // Point 4
                                 div {
                                     style: "display: flex; align-items: center; gap: 10px;",
-                                    span { style: "color: {c.accent_green}; font-size: 14px; flex-shrink: 0;", "✓" }
-                                    p { style: "font-size: 13px; color: {c.text_primary};", "Documents protégés dans un coffre-fort" }
+                                    span { style: "color: {p.success}; font-size: 14px; flex-shrink: 0;", "✓" }
+                                    p { style: "font-size: 13px; color: {p.text_primary};", "Documents protégés dans un coffre-fort" }
                                 }
                             }
                         }
@@ -376,12 +377,12 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
 
                     STEP_IDENTITE => rsx! {
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; \
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; \
                                     margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;",
 
                             h3 {
-                                style: "font-size: 14px; color: {c.text_white}; font-weight: 600; \
-                                        padding-bottom: 8px; border-bottom: 1px solid {c.border};",
+                                style: "font-size: 14px; color: {p.text_high}; font-weight: 600; \
+                                        padding-bottom: 8px; border-bottom: 1px solid {p.border_default};",
                                 "Identité de l'entreprise"
                             }
 
@@ -435,12 +436,12 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
 
                     STEP_DESCRIPTION => rsx! {
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; \
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; \
                                     margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;",
 
                             h3 {
-                                style: "font-size: 14px; color: {c.text_white}; font-weight: 600; \
-                                        padding-bottom: 8px; border-bottom: 1px solid {c.border};",
+                                style: "font-size: 14px; color: {p.text_high}; font-weight: 600; \
+                                        padding-bottom: 8px; border-bottom: 1px solid {p.border_default};",
                                 "Présentation"
                             }
 
@@ -480,12 +481,12 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
 
                     STEP_CONTACT => rsx! {
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; \
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; \
                                     margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px;",
 
                             h3 {
-                                style: "font-size: 14px; color: {c.text_white}; font-weight: 600; \
-                                        padding-bottom: 8px; border-bottom: 1px solid {c.border};",
+                                style: "font-size: 14px; color: {p.text_high}; font-weight: 600; \
+                                        padding-bottom: 8px; border-bottom: 1px solid {p.border_default};",
                                 "Coordonnées"
                             }
 
@@ -581,12 +582,12 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
                     _ => rsx! {
                         // Récapitulatif
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; \
-                                    margin-bottom: 24px; border: 1px solid {c.border};",
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; \
+                                    margin-bottom: 24px; border: 1px solid {p.border_default};",
 
                             h3 {
-                                style: "font-size: 14px; color: {c.text_white}; font-weight: 600; \
-                                        margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid {c.border};",
+                                style: "font-size: 14px; color: {p.text_high}; font-weight: 600; \
+                                        margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid {p.border_default};",
                                 "Récapitulatif"
                             }
 
@@ -596,31 +597,31 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
                                 // Nom entreprise
                                 div {
                                     style: "display: flex; gap: 8px;",
-                                    span { style: "font-size: 12px; color: {c.text_muted}; min-width: 100px;", "Entreprise" }
-                                    span { style: "font-size: 13px; color: {c.text_white}; font-weight: 500;", "{company_name}" }
+                                    span { style: "font-size: 12px; color: {p.text_muted}; min-width: 100px;", "Entreprise" }
+                                    span { style: "font-size: 13px; color: {p.text_high}; font-weight: 500;", "{company_name}" }
                                 }
 
                                 if !slogan.read().is_empty() {
                                     div {
                                         style: "display: flex; gap: 8px;",
-                                        span { style: "font-size: 12px; color: {c.text_muted}; min-width: 100px;", "Slogan" }
-                                        span { style: "font-size: 13px; color: {c.text_primary};", "{slogan}" }
+                                        span { style: "font-size: 12px; color: {p.text_muted}; min-width: 100px;", "Slogan" }
+                                        span { style: "font-size: 13px; color: {p.text_primary};", "{slogan}" }
                                     }
                                 }
 
                                 if !contact_email.read().is_empty() {
                                     div {
                                         style: "display: flex; gap: 8px;",
-                                        span { style: "font-size: 12px; color: {c.text_muted}; min-width: 100px;", "Email" }
-                                        span { style: "font-size: 13px; color: {c.text_primary};", "{contact_email}" }
+                                        span { style: "font-size: 12px; color: {p.text_muted}; min-width: 100px;", "Email" }
+                                        span { style: "font-size: 13px; color: {p.text_primary};", "{contact_email}" }
                                     }
                                 }
 
                                 if !contact_phone.read().is_empty() {
                                     div {
                                         style: "display: flex; gap: 8px;",
-                                        span { style: "font-size: 12px; color: {c.text_muted}; min-width: 100px;", "Téléphone" }
-                                        span { style: "font-size: 13px; color: {c.text_primary};", "{contact_phone}" }
+                                        span { style: "font-size: 12px; color: {p.text_muted}; min-width: 100px;", "Téléphone" }
+                                        span { style: "font-size: 13px; color: {p.text_primary};", "{contact_phone}" }
                                     }
                                 }
                             }
@@ -628,12 +629,12 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
 
                         // Prochaines étapes
                         div {
-                            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; \
-                                    margin-bottom: 24px; border: 1px solid {c.border};",
+                            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; \
+                                    margin-bottom: 24px; border: 1px solid {p.border_default};",
 
                             h3 {
-                                style: "font-size: 14px; color: {c.text_white}; font-weight: 600; \
-                                        margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid {c.border};",
+                                style: "font-size: 14px; color: {p.text_high}; font-weight: 600; \
+                                        margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid {p.border_default};",
                                 "Prochaines étapes"
                             }
 
@@ -644,24 +645,24 @@ pub fn JayXposeOnboarding(state: Signal<JayXposeState>) -> Element {
                                     style: "display: flex; align-items: center; gap: 12px;",
                                     span { style: "font-size: 20px;", "📦" }
                                     div {
-                                        p { style: "font-size: 13px; color: {c.text_white}; font-weight: 500;", "Ajouter des produits" }
-                                        p { style: "font-size: 11px; color: {c.text_muted};", "Enrichis ton catalogue avec tes produits et services" }
+                                        p { style: "font-size: 13px; color: {p.text_high}; font-weight: 500;", "Ajouter des produits" }
+                                        p { style: "font-size: 11px; color: {p.text_muted};", "Enrichis ton catalogue avec tes produits et services" }
                                     }
                                 }
                                 div {
                                     style: "display: flex; align-items: center; gap: 12px;",
                                     span { style: "font-size: 20px;", "🏢" }
                                     div {
-                                        p { style: "font-size: 13px; color: {c.text_white}; font-weight: 500;", "Compléter la fiche entreprise" }
-                                        p { style: "font-size: 11px; color: {c.text_muted};", "Informations juridiques, contacts, réseaux sociaux" }
+                                        p { style: "font-size: 13px; color: {p.text_high}; font-weight: 500;", "Compléter la fiche entreprise" }
+                                        p { style: "font-size: 11px; color: {p.text_muted};", "Informations juridiques, contacts, réseaux sociaux" }
                                     }
                                 }
                                 div {
                                     style: "display: flex; align-items: center; gap: 12px;",
                                     span { style: "font-size: 20px;", "🪟" }
                                     div {
-                                        p { style: "font-size: 13px; color: {c.text_white}; font-weight: 500;", "Configurer ta vitrine" }
-                                        p { style: "font-size: 11px; color: {c.text_muted};", "Personnalise ta page publique et choisis ce que tu montres" }
+                                        p { style: "font-size: 13px; color: {p.text_high}; font-weight: 500;", "Configurer ta vitrine" }
+                                        p { style: "font-size: 11px; color: {p.text_muted};", "Personnalise ta page publique et choisis ce que tu montres" }
                                     }
                                 }
                             }

@@ -1,6 +1,7 @@
 //! Gestion des promotions JayManga — réductions, campagnes promotionnelles.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use jaymanga::data::Promotion;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
@@ -9,7 +10,7 @@ use super::JayMangaState;
 
 #[component]
 pub fn Promotions(state: Signal<JayMangaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let db = &conns.read().jaymanga;
@@ -55,8 +56,8 @@ pub fn Promotions(state: Signal<JayMangaState>) -> Element {
             div {
                 style: "display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;",
 
-                StatCard { label: "Promotions actives".to_string(), value: active_count.to_string(), icon: "🎁".to_string(), color: c.accent_green.to_string() }
-                StatCard { label: "Total promotions".to_string(), value: promotions.len().to_string(), icon: "🏷️".to_string(), color: c.accent_blue.to_string() }
+                StatCard { label: "Promotions actives".to_string(), value: active_count.to_string(), icon: "🎁".to_string(), color: p.success.to_string() }
+                StatCard { label: "Total promotions".to_string(), value: promotions.len().to_string(), icon: "🏷️".to_string(), color: p.accent_primary.to_string() }
             }
 
             // Formulaire
@@ -150,7 +151,7 @@ pub fn Promotions(state: Signal<JayMangaState>) -> Element {
             } else {
                 // En-tête tableau
                 div {
-                    style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 8px 16px; font-size: 11px; color: {c.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
+                    style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 8px 16px; font-size: 11px; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
                     span { "Nom" }
                     span { "Réduction" }
                     span { "Cible" }
@@ -180,27 +181,27 @@ pub fn Promotions(state: Signal<JayMangaState>) -> Element {
                             };
 
                             let (status_color, status_label) = if is_active {
-                                (c.accent_green, "Active")
+                                (p.success, "Active")
                             } else {
-                                (c.text_muted, "Inactive")
+                                (p.text_muted, "Inactive")
                             };
 
                             rsx! {
                                 div {
-                                    style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 4px; align-items: center;",
+                                    style: "display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 4px; align-items: center;",
 
                                     span {
-                                        style: "font-size: 14px; color: {c.text_white}; font-weight: 600;",
+                                        style: "font-size: 14px; color: {p.text_high}; font-weight: 600;",
                                         "{name}"
                                     }
                                     span {
-                                        style: "font-size: 14px; color: {c.accent_green}; font-weight: 500;",
+                                        style: "font-size: 14px; color: {p.success}; font-weight: 500;",
                                         "{discount_display}"
                                     }
-                                    Badge { text: target, color: c.accent_blue.to_string() }
+                                    Badge { text: target, color: p.accent_primary.to_string() }
                                     Badge { text: status_label.to_string(), color: status_color.to_string() }
                                     span {
-                                        style: "font-size: 12px; color: {c.text_muted};",
+                                        style: "font-size: 12px; color: {p.text_muted};",
                                         "{expires}"
                                     }
                                 }

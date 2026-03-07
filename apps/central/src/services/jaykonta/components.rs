@@ -1,23 +1,24 @@
 //! Composants partages JayKonta — KpiCard, AmountDisplay, ProgressBar, Badge, PlaceholderSection.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 
 /// Carte KPI (valeur, delta, tendance).
 #[component]
 pub fn KpiCard(label: String, value: String, detail: String, icon: String, positive: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let detail_color = if positive { c.accent_green } else { c.accent_red };
+    let p = use_palette();
+    let detail_color = if positive { p.success } else { p.error };
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
             div {
                 style: "display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;",
 
                 span {
-                    style: "font-size: 13px; color: {c.text_secondary};",
+                    style: "font-size: 13px; color: {p.text_secondary};",
                     "{label}"
                 }
                 span {
@@ -27,7 +28,7 @@ pub fn KpiCard(label: String, value: String, detail: String, icon: String, posit
             }
 
             p {
-                style: "font-size: 28px; font-weight: 600; color: {c.text_white}; margin-bottom: 4px;",
+                style: "font-size: 28px; font-weight: 600; color: {p.text_high}; margin-bottom: 4px;",
                 "{value}"
             }
             span {
@@ -41,8 +42,8 @@ pub fn KpiCard(label: String, value: String, detail: String, icon: String, posit
 /// Affichage de montant colore (+vert / -rouge).
 #[component]
 pub fn AmountDisplay(amount: f64, currency: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let color = if amount >= 0.0 { c.accent_green } else { c.accent_red };
+    let p = use_palette();
+    let color = if amount >= 0.0 { p.success } else { p.error };
     let formatted = format!("{amount:+.2} {currency}");
 
     rsx! {
@@ -56,10 +57,10 @@ pub fn AmountDisplay(amount: f64, currency: String) -> Element {
 /// Barre de progression.
 #[component]
 pub fn ProgressBar(value: f64, max: f64, #[props(default)] color: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let pct = if max > 0.0 { (value / max * 100.0).min(100.0) } else { 0.0 };
-    let bar_color = if color.is_empty() { c.accent_blue.to_string() } else { color };
-    let bg_color = c.bg_hover;
+    let bar_color = if color.is_empty() { p.accent_primary.to_string() } else { color };
+    let bg_color = p.bg_overlay;
 
     rsx! {
         div {
@@ -92,13 +93,13 @@ pub fn MovementRow(
     amount: f64,
     currency: String,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let amount_color = if amount >= 0.0 { c.accent_green } else { c.accent_red };
+    let p = use_palette();
+    let amount_color = if amount >= 0.0 { p.success } else { p.error };
     let amount_str = format!("{amount:+.2} {currency}");
 
     rsx! {
         div {
-            style: "display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: {c.bg_hover}; border-radius: 4px;",
+            style: "display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: {p.bg_overlay}; border-radius: 4px;",
 
             div {
                 style: "flex: 1;",
@@ -107,18 +108,18 @@ pub fn MovementRow(
                     style: "display: flex; align-items: center; gap: 8px;",
 
                     p {
-                        style: "font-size: 13px; color: {c.text_primary};",
+                        style: "font-size: 13px; color: {p.text_primary};",
                         "{description}"
                     }
                     if !category.is_empty() {
                         span {
-                            style: "padding: 2px 8px; background: {c.bg_secondary}; border-radius: 3px; font-size: 10px; color: {c.text_muted};",
+                            style: "padding: 2px 8px; background: {p.bg_secondary}; border-radius: 3px; font-size: 10px; color: {p.text_muted};",
                             "{category}"
                         }
                     }
                 }
                 p {
-                    style: "font-size: 11px; color: {c.text_muted}; margin-top: 2px;",
+                    style: "font-size: 11px; color: {p.text_muted}; margin-top: 2px;",
                     "{date}"
                 }
             }
@@ -138,10 +139,10 @@ pub fn ActionButton(
     #[props(default)] accent: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if accent { c.accent_blue.to_string() } else { c.bg_hover.to_string() };
-    let color = if accent { "white".to_string() } else { c.text_primary.to_string() };
-    let border = if accent { "none".to_string() } else { format!("1px solid {}", c.border) };
+    let p = use_palette();
+    let bg = if accent { p.accent_primary.to_string() } else { p.bg_overlay.to_string() };
+    let color = if accent { "white".to_string() } else { p.text_primary.to_string() };
+    let border = if accent { "none".to_string() } else { format!("1px solid {}", p.border_default) };
 
     rsx! {
         button {
@@ -156,17 +157,17 @@ pub fn ActionButton(
 /// Section placeholder (fonctionnalite en cours).
 #[component]
 pub fn PlaceholderSection(title: &'static str, icon: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     rsx! {
         div {
-            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {c.text_muted};",
+            style: "display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: {p.text_muted};",
 
             span {
                 style: "font-size: 64px; margin-bottom: 16px; opacity: 0.3;",
                 "{icon}"
             }
             h2 {
-                style: "font-size: 20px; color: {c.text_secondary};",
+                style: "font-size: 20px; color: {p.text_secondary};",
                 "{title}"
             }
             p {

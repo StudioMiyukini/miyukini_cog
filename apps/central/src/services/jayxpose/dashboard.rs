@@ -5,6 +5,7 @@
 //! @human: Ecran XP-E01 JayXpose: tableau de bord exposant avec donnees reelles KindMother.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{StatCard, QuickAccessCard, ActionButton};
@@ -12,7 +13,7 @@ use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
 
@@ -42,9 +43,9 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
         .unwrap_or_else(|| "brouillon".to_string());
 
     let vitrine_color = match vitrine_status.as_str() {
-        "publiee" => c.accent_green,
-        "suspendue" => c.accent_orange,
-        _ => c.text_muted,
+        "publiee" => p.success,
+        "suspendue" => p.warning,
+        _ => p.text_muted,
     };
 
     // Completude profil
@@ -75,7 +76,7 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
 
                 div {
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white};",
+                        style: "font-size: 24px; color: {p.text_high};",
                         "🏪 {company_name}"
                     }
                     div {
@@ -90,22 +91,22 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
 
             // Jauge de completude du profil
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                 div {
                     style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;",
-                    span { style: "font-size: 13px; color: {c.text_secondary};", "Completude du profil" }
-                    span { style: "font-size: 13px; color: {c.text_white}; font-weight: 600;", "{profile_completion}%" }
+                    span { style: "font-size: 13px; color: {p.text_secondary};", "Completude du profil" }
+                    span { style: "font-size: 13px; color: {p.text_high}; font-weight: 600;", "{profile_completion}%" }
                 }
                 div {
-                    style: "width: 100%; height: 8px; background: {c.bg_hover}; border-radius: 4px; overflow: hidden;",
+                    style: "width: 100%; height: 8px; background: {p.bg_overlay}; border-radius: 4px; overflow: hidden;",
                     div {
-                        style: "width: {profile_completion}%; height: 100%; background: {c.accent_blue}; border-radius: 4px; transition: width 0.3s;",
+                        style: "width: {profile_completion}%; height: 100%; background: {p.accent_primary}; border-radius: 4px; transition: width 0.3s;",
                     }
                 }
                 if profile_completion < 100 {
                     p {
-                        style: "font-size: 11px; color: {c.text_muted}; margin-top: 8px;",
+                        style: "font-size: 11px; color: {p.text_muted}; margin-top: 8px;",
                         "Completez votre fiche entreprise pour ameliorer votre visibilite."
                     }
                 }
@@ -114,21 +115,21 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
             // Alertes documents expirants
             if expiring_docs > 0 {
                 div {
-                    style: "background: {c.accent_orange}15; border: 1px solid {c.accent_orange}40; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;",
+                    style: "background: {p.warning}15; border: 1px solid {p.warning}40; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;",
 
                     span { style: "font-size: 20px;", "⚠️" }
                     div {
                         p {
-                            style: "font-size: 13px; color: {c.accent_orange}; font-weight: 500;",
+                            style: "font-size: 13px; color: {p.warning}; font-weight: 500;",
                             "{expiring_docs} document(s) a surveiller"
                         }
                         p {
-                            style: "font-size: 11px; color: {c.text_secondary};",
+                            style: "font-size: 11px; color: {p.text_secondary};",
                             "Verifiez les dates d'expiration dans votre coffre-fort."
                         }
                     }
                     button {
-                        style: "margin-left: auto; padding: 6px 12px; background: {c.accent_orange}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
+                        style: "margin-left: auto; padding: 6px 12px; background: {p.warning}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;",
                         onclick: move |_| { state.write().section = JayXposeSection::Documents; },
                         "Voir"
                     }
@@ -139,15 +140,15 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
             div {
                 style: "display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;",
 
-                StatCard { label: "Produits".to_string(), value: product_count.to_string(), icon: "📦".to_string(), color: c.accent_blue.to_string() }
+                StatCard { label: "Produits".to_string(), value: product_count.to_string(), icon: "📦".to_string(), color: p.accent_primary.to_string() }
                 StatCard { label: "Categories".to_string(), value: categories_count.to_string(), icon: "🏷️".to_string(), color: "#8b5cf6".to_string() }
-                StatCard { label: "Documents".to_string(), value: doc_count.to_string(), icon: "📄".to_string(), color: c.accent_orange.to_string() }
-                StatCard { label: "Pages vitrine".to_string(), value: page_count.to_string(), icon: "🏪".to_string(), color: c.accent_green.to_string() }
+                StatCard { label: "Documents".to_string(), value: doc_count.to_string(), icon: "📄".to_string(), color: p.warning.to_string() }
+                StatCard { label: "Pages vitrine".to_string(), value: page_count.to_string(), icon: "🏪".to_string(), color: p.success.to_string() }
             }
 
             // Acces rapides
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Acces rapides"
             }
             div {
@@ -187,7 +188,7 @@ pub fn Dashboard(state: Signal<JayXposeState>) -> Element {
 
             // Actions rapides
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Actions rapides"
             }
             div {

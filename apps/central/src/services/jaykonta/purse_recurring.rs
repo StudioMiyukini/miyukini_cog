@@ -3,6 +3,7 @@
 //! Liste les recurrents actifs, permet d'en ajouter, suspendre, supprimer.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{ActionButton, Badge};
@@ -10,7 +11,7 @@ use super::JayKontaState;
 
 #[component]
 pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let mut show_form = use_signal(|| false);
     let mut refresh_tick = use_signal(|| 0u32);
@@ -57,11 +58,11 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
 
                 div {
                     h1 {
-                        style: "font-size: 24px; color: {c.text_white}; margin-bottom: 4px;",
+                        style: "font-size: 24px; color: {p.text_high}; margin-bottom: 4px;",
                         "Transactions recurrentes"
                     }
                     p {
-                        style: "font-size: 13px; color: {c.text_muted};",
+                        style: "font-size: 13px; color: {p.text_muted};",
                         "Gerez vos depenses et revenus periodiques"
                     }
                 }
@@ -110,14 +111,14 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
                 style: "display: flex; flex-direction: column; gap: 12px;",
 
                 h2 {
-                    style: "font-size: 18px; color: {c.accent_green}; display: flex; align-items: center; gap: 8px;",
+                    style: "font-size: 18px; color: {p.success}; display: flex; align-items: center; gap: 8px;",
                     span { "💵" }
                     span { "Revenus recurrents ({incomes.len()})" }
                 }
 
                 if incomes.is_empty() {
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; padding: 16px;",
+                        style: "font-size: 13px; color: {p.text_muted}; padding: 16px;",
                         "Aucun revenu recurrent. Ajoutez votre salaire, allocations, etc."
                     }
                 }
@@ -132,14 +133,14 @@ pub fn PurseRecurring(state: Signal<JayKontaState>) -> Element {
                 style: "display: flex; flex-direction: column; gap: 12px;",
 
                 h2 {
-                    style: "font-size: 18px; color: {c.accent_red}; display: flex; align-items: center; gap: 8px;",
+                    style: "font-size: 18px; color: {p.error}; display: flex; align-items: center; gap: 8px;",
                     span { "💸" }
                     span { "Depenses recurrentes ({expenses.len()})" }
                 }
 
                 if expenses.is_empty() {
                     p {
-                        style: "font-size: 13px; color: {c.text_muted}; padding: 16px;",
+                        style: "font-size: 13px; color: {p.text_muted}; padding: 16px;",
                         "Aucune depense recurrente. Ajoutez loyer, abonnements, etc."
                     }
                 }
@@ -160,10 +161,10 @@ fn render_recurring_row(
     mut refresh_tick: Signal<u32>,
 ) -> Element {
     let is_income = item.direction == jaykonta::domain::purse::RecurringDirection::Income;
-    let amount_color = if is_income { c.accent_green } else { c.accent_red };
+    let amount_color = if is_income { p.success } else { p.error };
     let sign = if is_income { "+" } else { "-" };
     let freq_label = item.frequency.label();
-    let status_color = if item.is_active { c.accent_green } else { c.text_muted };
+    let status_color = if item.is_active { p.success } else { p.text_muted };
     let status_label = if item.is_active { "Actif" } else { "Suspendu" };
     let opacity = if item.is_active { "1" } else { "0.5" };
 
@@ -179,7 +180,7 @@ fn render_recurring_row(
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: {c.bg_secondary}; border-radius: 6px; opacity: {opacity};",
+            style: "display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: {p.bg_secondary}; border-radius: 6px; opacity: {opacity};",
 
             // Info gauche
             div {
@@ -189,12 +190,12 @@ fn render_recurring_row(
                     style: "display: flex; align-items: center; gap: 8px;",
 
                     p {
-                        style: "font-size: 14px; color: {c.text_white}; font-weight: 500;",
+                        style: "font-size: 14px; color: {p.text_high}; font-weight: 500;",
                         "{desc}"
                     }
                     Badge {
                         text: freq_label.to_string(),
-                        color: c.accent_blue.to_string(),
+                        color: p.accent_primary.to_string(),
                     }
                     Badge {
                         text: status_label.to_string(),
@@ -203,7 +204,7 @@ fn render_recurring_row(
                 }
 
                 div {
-                    style: "display: flex; align-items: center; gap: 12px; font-size: 12px; color: {c.text_muted};",
+                    style: "display: flex; align-items: center; gap: 12px; font-size: 12px; color: {p.text_muted};",
 
                     if let Some(ref cn) = cat_name {
                         span { "{cn}" }
@@ -228,7 +229,7 @@ fn render_recurring_row(
                     style: "display: flex; gap: 6px;",
 
                     button {
-                        style: "padding: 6px 10px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 11px;",
+                        style: "padding: 6px 10px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 11px;",
                         onclick: move |_| {
                             let conns_r = conns.read();
                             let db = &conns_r.jaykonta;
@@ -238,7 +239,7 @@ fn render_recurring_row(
                         if item_active { "⏸ Suspendre" } else { "▶ Activer" }
                     }
                     button {
-                        style: "padding: 6px 10px; background: {c.bg_hover}; border: 1px solid {c.accent_red}40; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 11px;",
+                        style: "padding: 6px 10px; background: {p.bg_overlay}; border: 1px solid {p.error}40; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 11px;",
                         onclick: move |_| {
                             let conns_r = conns.read();
                             let db = &conns_r.jaykonta;
@@ -257,15 +258,15 @@ fn render_recurring_row(
 
 #[component]
 fn SummaryCard(label: &'static str, amount: f64, positive: bool) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let color = if positive { c.accent_green } else { c.accent_red };
+    let p = use_palette();
+    let color = if positive { p.success } else { p.error };
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
             p {
-                style: "font-size: 12px; color: {c.text_muted}; margin-bottom: 8px;",
+                style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 8px;",
                 "{label}"
             }
             p {
@@ -281,7 +282,7 @@ fn RecurringForm(
     on_save: EventHandler<MouseEvent>,
     on_cancel: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let mut direction = use_signal(|| "expense".to_string());
@@ -305,16 +306,16 @@ fn RecurringForm(
 
     let input_style = format!(
         "padding: 8px 12px; background: {}; border: 1px solid {}; border-radius: 4px; color: {}; font-size: 13px;",
-        c.bg_main, c.border, c.text_primary
+        p.bg_base, p.border_default, p.text_primary
     );
     let select_style = input_style.clone();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 24px; border: 1px solid {c.accent_blue}40;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 24px; border: 1px solid {p.accent_primary}40;",
 
             h3 {
-                style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                 "Nouvelle transaction recurrente"
             }
 
@@ -342,7 +343,7 @@ fn RecurringForm(
                 // Description
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Description" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Description" }
                     input {
                         style: "{input_style}",
                         r#type: "text",
@@ -355,7 +356,7 @@ fn RecurringForm(
                 // Montant
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Montant (EUR)" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Montant (EUR)" }
                     input {
                         style: "{input_style}",
                         r#type: "text",
@@ -368,7 +369,7 @@ fn RecurringForm(
                 // Frequence
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Frequence" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Frequence" }
                     select {
                         style: "{select_style}",
                         value: "{frequency}",
@@ -384,7 +385,7 @@ fn RecurringForm(
                 // Jour du mois
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Jour du mois (1-31)" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Jour du mois (1-31)" }
                     input {
                         style: "{input_style}",
                         r#type: "text",
@@ -397,7 +398,7 @@ fn RecurringForm(
                 // Categorie
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Categorie" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Categorie" }
                     select {
                         style: "{select_style}",
                         value: "{category_id}",
@@ -415,7 +416,7 @@ fn RecurringForm(
                 // Date de debut
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Date de debut" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Date de debut" }
                     input {
                         style: "{input_style}",
                         r#type: "text",
@@ -428,7 +429,7 @@ fn RecurringForm(
                 // Date de fin
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Date de fin (optionnel)" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Date de fin (optionnel)" }
                     input {
                         style: "{input_style}",
                         r#type: "text",
@@ -441,7 +442,7 @@ fn RecurringForm(
                 // Notes
                 div {
                     style: "display: flex; flex-direction: column; gap: 4px;",
-                    label { style: "font-size: 12px; color: {c.text_secondary};", "Notes (optionnel)" }
+                    label { style: "font-size: 12px; color: {p.text_secondary};", "Notes (optionnel)" }
                     input {
                         style: "{input_style}",
                         r#type: "text",
@@ -454,7 +455,7 @@ fn RecurringForm(
 
             if !error_msg().is_empty() {
                 p {
-                    style: "color: {c.accent_red}; font-size: 13px; margin-bottom: 12px;",
+                    style: "color: {p.error}; font-size: 13px; margin-bottom: 12px;",
                     "{error_msg}"
                 }
             }
@@ -464,12 +465,12 @@ fn RecurringForm(
                 style: "display: flex; gap: 12px; justify-content: flex-end;",
 
                 button {
-                    style: "padding: 10px 20px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "padding: 10px 20px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |evt| on_cancel.call(evt),
                     "Annuler"
                 }
                 button {
-                    style: "padding: 10px 20px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px; font-weight: 500;",
+                    style: "padding: 10px 20px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 13px; font-weight: 500;",
                     onclick: move |evt| {
                         // Validation
                         let amt: f64 = amount().parse().unwrap_or(0.0);
@@ -530,9 +531,9 @@ fn DirectionBtn(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_hover };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { p.bg_overlay };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {

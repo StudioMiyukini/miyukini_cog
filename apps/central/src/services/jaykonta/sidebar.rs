@@ -1,25 +1,26 @@
 //! Sidebar JayKonta — navigation Purse / Account.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::{AccountSection, JayKontaSpace, JayKontaState, PurseSection};
 
 #[component]
 pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let current_space = state.read().space;
     let is_purse = current_space == JayKontaSpace::Purse;
 
     rsx! {
         aside {
-            style: "width: 220px; background: {c.bg_secondary}; border-right: 1px solid {c.border}; padding: 16px 0; display: flex; flex-direction: column; gap: 0;",
+            style: "width: 220px; background: {p.bg_secondary}; border-right: 1px solid {p.border_default}; padding: 16px 0; display: flex; flex-direction: column; gap: 0;",
 
             // En-tete service
             div {
-                style: "padding: 0 16px 16px 16px; border-bottom: 1px solid {c.border};",
+                style: "padding: 0 16px 16px 16px; border-bottom: 1px solid {p.border_default};",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 8px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 8px;",
                     if is_purse { "JayBudget" } else { "JayKonta" }
                 }
 
@@ -101,7 +102,7 @@ pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
                     }
 
                     // Separateur
-                    div { style: "height: 1px; background: {c.border}; margin: 8px 16px;" }
+                    div { style: "height: 1px; background: {p.border_default}; margin: 8px 16px;" }
 
                     SidebarItem {
                         icon: "⚙️",
@@ -154,7 +155,7 @@ pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
                     }
 
                     // Separateur
-                    div { style: "height: 1px; background: {c.border}; margin: 8px 16px;" }
+                    div { style: "height: 1px; background: {p.border_default}; margin: 8px 16px;" }
 
                     SidebarItem {
                         icon: "⚙️",
@@ -167,10 +168,10 @@ pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
 
             // Bouton retour au selecteur
             div {
-                style: "padding: 12px 16px; border-top: 1px solid {c.border};",
+                style: "padding: 12px 16px; border-top: 1px solid {p.border_default};",
 
                 button {
-                    style: "display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_secondary}; cursor: pointer; font-size: 12px;",
+                    style: "display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; cursor: pointer; font-size: 12px;",
                     onclick: move |_| {
                         state.write().space = JayKontaSpace::Selector;
                     },
@@ -185,9 +186,9 @@ pub fn JayKontaSidebar(state: Signal<JayKontaState>) -> Element {
 /// Onglet de selection Purse/Account.
 #[component]
 fn SpaceTab(label: &'static str, icon: &'static str, is_active: bool, onclick: EventHandler<MouseEvent>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.accent_blue } else { c.bg_hover };
-    let color = if is_active { "white" } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.accent_primary } else { p.bg_overlay };
+    let color = if is_active { "white" } else { p.text_secondary };
 
     rsx! {
         button {
@@ -207,11 +208,11 @@ fn SidebarItem(
     is_active: bool,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
-    let bg = if is_active { c.bg_hover } else { "transparent" };
-    let color = if is_active { c.text_white } else { c.text_secondary };
+    let p = use_palette();
+    let bg = if is_active { p.bg_overlay } else { "transparent" };
+    let color = if is_active { p.text_high } else { p.text_secondary };
     let border = if is_active {
-        format!("2px solid {}", c.accent_blue)
+        format!("2px solid {}", p.accent_primary)
     } else {
         "2px solid transparent".to_string()
     };

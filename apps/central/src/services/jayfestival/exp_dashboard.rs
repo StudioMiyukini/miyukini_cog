@@ -5,13 +5,14 @@
 //! @human: Ecran EXP-E04 JayFestival: tableau de bord exposant avec candidatures et alertes.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{EmptyState, StatCard};
 
 #[component]
 pub fn ExpDashboard() -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger les données exposant (premier exposant de la DB pour la démo)
@@ -51,7 +52,7 @@ pub fn ExpDashboard() -> Element {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h2 {
-                style: "font-size: 24px; color: {c.text_white};",
+                style: "font-size: 24px; color: {p.text_high};",
                 "Bienvenue, {company}"
             }
 
@@ -63,56 +64,56 @@ pub fn ExpDashboard() -> Element {
                     label: "Candidatures en cours".to_string(),
                     value: pending_count.to_string(),
                     icon: "📝".to_string(),
-                    color: c.accent_orange.to_string(),
+                    color: p.warning.to_string(),
                 }
                 StatCard {
                     label: "Evenements disponibles".to_string(),
                     value: editions.len().to_string(),
                     icon: "📅".to_string(),
-                    color: c.accent_blue.to_string(),
+                    color: p.accent_primary.to_string(),
                 }
                 StatCard {
                     label: "Participations validees".to_string(),
                     value: "0".to_string(),
                     icon: "🎪".to_string(),
-                    color: c.accent_green.to_string(),
+                    color: p.success.to_string(),
                 }
             }
 
             // Alertes
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Alertes"
             }
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; color: {c.text_secondary}; font-size: 14px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; color: {p.text_secondary}; font-size: 14px;",
                 "Aucune alerte pour le moment."
             }
 
             // Prochain événement
             h3 {
-                style: "font-size: 16px; color: {c.text_white};",
+                style: "font-size: 16px; color: {p.text_high};",
                 "Prochain evenement"
             }
             if let Some(next) = editions.first() {
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;",
 
                     span { style: "font-size: 24px;", "🎪" }
                     div {
                         span {
-                            style: "color: {c.text_white}; font-size: 14px; font-weight: 500;",
+                            style: "color: {p.text_high}; font-size: 14px; font-weight: 500;",
                             "{next.name.clone().unwrap_or_default()}"
                         }
                         div {
-                            style: "font-size: 12px; color: {c.text_secondary}; margin-top: 4px;",
+                            style: "font-size: 12px; color: {p.text_secondary}; margin-top: 4px;",
                             "{next.start_date.clone().unwrap_or_default()} — {next.location.clone().unwrap_or_default()}"
                         }
                     }
                 }
             } else {
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; color: {c.text_muted}; text-align: center; font-size: 14px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; color: {p.text_muted}; text-align: center; font-size: 14px;",
                     "Aucun evenement a venir"
                 }
             }

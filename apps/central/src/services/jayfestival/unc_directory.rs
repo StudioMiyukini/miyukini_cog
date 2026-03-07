@@ -7,6 +7,7 @@
 //! @human: Ecrans UNC-E06/E09 JayFestival: annuaires publics organisateurs et exposants.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::{UncSection, JayFestivalState};
@@ -20,7 +21,7 @@ fn opt_str(s: &Option<String>) -> String {
 /// UNC-E06 — Liste des organisateurs.
 #[component]
 pub fn UncOrganisateursList(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let organisateurs = {
@@ -53,14 +54,14 @@ pub fn UncOrganisateursList(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 24px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Landing;
                     },
                     "← Retour"
                 }
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-top: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-top: 8px;",
                     "Organisateurs"
                 }
             }
@@ -71,7 +72,7 @@ pub fn UncOrganisateursList(state: Signal<JayFestivalState>) -> Element {
 
                 input {
                     r#type: "text",
-                    style: "width: 100%; max-width: 400px; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                    style: "width: 100%; max-width: 400px; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                     placeholder: "Rechercher un organisateur...",
                     value: "{search}",
                     oninput: move |evt| {
@@ -83,7 +84,7 @@ pub fn UncOrganisateursList(state: Signal<JayFestivalState>) -> Element {
             // Grille
             if filtered.is_empty() {
                 div {
-                    style: "padding: 40px; text-align: center; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted};",
+                    style: "padding: 40px; text-align: center; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted};",
                     "Aucun organisateur trouve"
                 }
             } else {
@@ -115,7 +116,7 @@ pub fn UncOrganisateursList(state: Signal<JayFestivalState>) -> Element {
 /// UNC-E07 — Fiche organisateur.
 #[component]
 pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let org_id = state.read().selected_organisateur_id.clone();
@@ -130,7 +131,7 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
     let Some(org) = organisateur else {
         return rsx! {
             div {
-                style: "text-align: center; padding: 40px; color: {c.text_muted};",
+                style: "text-align: center; padding: 40px; color: {p.text_muted};",
                 "Organisateur non trouve"
             }
         };
@@ -149,7 +150,7 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
 
             // Navigation retour
             button {
-                style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
+                style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
                 onclick: move |_| {
                     state.write().unc_section = UncSection::Organisateurs;
                 },
@@ -161,25 +162,25 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
                 style: "display: flex; gap: 24px; margin-bottom: 32px;",
 
                 div {
-                    style: "width: 120px; height: 120px; background: linear-gradient(135deg, {c.bg_secondary} 0%, {c.bg_hover} 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px;",
+                    style: "width: 120px; height: 120px; background: linear-gradient(135deg, {p.bg_secondary} 0%, {p.bg_overlay} 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px;",
                     "🏢"
                 }
 
                 div {
                     h1 {
-                        style: "font-size: 28px; color: {c.text_white}; margin-bottom: 8px;",
+                        style: "font-size: 28px; color: {p.text_high}; margin-bottom: 8px;",
                         "{name}"
                     }
                     if let Some(region) = &org.region {
                         p {
-                            style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 8px;",
+                            style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 8px;",
                             "📍 {region}"
                         }
                     }
                     if let Some(website) = &org.website {
                         a {
                             href: "{website}",
-                            style: "font-size: 14px; color: {c.accent_blue}; text-decoration: none;",
+                            style: "font-size: 14px; color: {p.accent_primary}; text-decoration: none;",
                             "🔗 {website}"
                         }
                     }
@@ -192,11 +193,11 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
                     style: "margin-bottom: 32px;",
 
                     h2 {
-                        style: "font-size: 18px; color: {c.text_white}; margin-bottom: 12px;",
+                        style: "font-size: 18px; color: {p.text_high}; margin-bottom: 12px;",
                         "A propos"
                     }
                     p {
-                        style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.6;",
+                        style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.6;",
                         "{desc}"
                     }
                 }
@@ -205,13 +206,13 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
             // Événements
             section {
                 h2 {
-                    style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;",
                     "Evenements organises"
                 }
 
                 if editions.is_empty() {
                     p {
-                        style: "font-size: 14px; color: {c.text_muted};",
+                        style: "font-size: 14px; color: {p.text_muted};",
                         "Aucun evenement publie"
                     }
                 } else {
@@ -228,29 +229,29 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
                                 rsx! {
                                     div {
                                         key: "{ed_id_str}",
-                                        style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer;",
+                                        style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px; cursor: pointer;",
                                         onclick: move |_| {
                                             state.write().selected_edition_id = ed_id_clone.clone();
                                             state.write().unc_section = UncSection::EventDetail;
                                         },
 
                                         div {
-                                            style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
+                                            style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;",
                                             "🎪"
                                         }
                                         div {
                                             style: "flex: 1;",
                                             p {
-                                                style: "font-size: 14px; color: {c.text_white};",
+                                                style: "font-size: 14px; color: {p.text_high};",
                                                 "{ed_name}"
                                             }
                                             p {
-                                                style: "font-size: 12px; color: {c.text_muted};",
+                                                style: "font-size: 12px; color: {p.text_muted};",
                                                 "{ed_start} — {ed_location}"
                                             }
                                         }
                                         span {
-                                            style: "font-size: 12px; color: {c.accent_blue};",
+                                            style: "font-size: 12px; color: {p.accent_primary};",
                                             "Voir →"
                                         }
                                     }
@@ -267,7 +268,7 @@ pub fn UncOrganisateurDetail(state: Signal<JayFestivalState>) -> Element {
 /// UNC-E08 — Liste des exposants.
 #[component]
 pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let exposants = {
@@ -307,14 +308,14 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
                 style: "margin-bottom: 24px;",
 
                 button {
-                    style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px;",
+                    style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| {
                         state.write().unc_section = UncSection::Landing;
                     },
                     "← Retour"
                 }
                 h1 {
-                    style: "font-size: 24px; color: {c.text_white}; margin-top: 8px;",
+                    style: "font-size: 24px; color: {p.text_high}; margin-top: 8px;",
                     "Exposants"
                 }
             }
@@ -325,7 +326,7 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
 
                 input {
                     r#type: "text",
-                    style: "flex: 1; max-width: 400px; padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                    style: "flex: 1; max-width: 400px; padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                     placeholder: "Rechercher un exposant...",
                     value: "{search}",
                     oninput: move |evt| {
@@ -334,7 +335,7 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
                 }
 
                 select {
-                    style: "padding: 12px 16px; background: {c.bg_secondary}; border: 1px solid {c.border}; border-radius: 8px; color: {c.text_primary}; font-size: 14px;",
+                    style: "padding: 12px 16px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 8px; color: {p.text_primary}; font-size: 14px;",
                     value: "{filter_category}",
                     onchange: move |evt| {
                         filter_category.set(evt.value());
@@ -352,7 +353,7 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
             // Grille
             if filtered.is_empty() {
                 div {
-                    style: "padding: 40px; text-align: center; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted};",
+                    style: "padding: 40px; text-align: center; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted};",
                     "Aucun exposant trouve"
                 }
             } else {
@@ -384,7 +385,7 @@ pub fn UncExposantsList(state: Signal<JayFestivalState>) -> Element {
 /// UNC-E09 — Fiche exposant.
 #[component]
 pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let exp_id = state.read().selected_exposant_id.clone();
@@ -399,7 +400,7 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
     let Some(exp) = exposant else {
         return rsx! {
             div {
-                style: "text-align: center; padding: 40px; color: {c.text_muted};",
+                style: "text-align: center; padding: 40px; color: {p.text_muted};",
                 "Exposant non trouve"
             }
         };
@@ -413,7 +414,7 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
 
             // Navigation retour
             button {
-                style: "background: none; border: none; color: {c.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
+                style: "background: none; border: none; color: {p.text_secondary}; cursor: pointer; font-size: 13px; margin-bottom: 16px;",
                 onclick: move |_| {
                     state.write().unc_section = UncSection::Exposants;
                 },
@@ -425,25 +426,25 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
                 style: "display: flex; gap: 24px; margin-bottom: 32px;",
 
                 div {
-                    style: "width: 120px; height: 120px; background: linear-gradient(135deg, {c.bg_secondary} 0%, {c.bg_hover} 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px;",
+                    style: "width: 120px; height: 120px; background: linear-gradient(135deg, {p.bg_secondary} 0%, {p.bg_overlay} 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 48px;",
                     "🧑‍💼"
                 }
 
                 div {
                     h1 {
-                        style: "font-size: 28px; color: {c.text_white}; margin-bottom: 8px;",
+                        style: "font-size: 28px; color: {p.text_high}; margin-bottom: 8px;",
                         "{company_name}"
                     }
                     if let Some(secteur) = &exp.secteur {
                         p {
-                            style: "font-size: 14px; color: {c.text_secondary}; margin-bottom: 8px;",
+                            style: "font-size: 14px; color: {p.text_secondary}; margin-bottom: 8px;",
                             "🏷️ {secteur}"
                         }
                     }
                     if let Some(category) = &exp.category {
                         Badge {
                             text: category.clone(),
-                            color: c.accent_blue.to_string(),
+                            color: p.accent_primary.to_string(),
                         }
                     }
                 }
@@ -455,11 +456,11 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
                     style: "margin-bottom: 32px;",
 
                     h2 {
-                        style: "font-size: 18px; color: {c.text_white}; margin-bottom: 12px;",
+                        style: "font-size: 18px; color: {p.text_high}; margin-bottom: 12px;",
                         "Description"
                     }
                     p {
-                        style: "font-size: 14px; color: {c.text_secondary}; line-height: 1.6;",
+                        style: "font-size: 14px; color: {p.text_secondary}; line-height: 1.6;",
                         "{desc}"
                     }
                 }
@@ -467,10 +468,10 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
 
             // Contact
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h2 {
-                    style: "font-size: 18px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 18px; color: {p.text_high}; margin-bottom: 16px;",
                     "Contact"
                 }
 
@@ -480,11 +481,11 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
                     if let Some(email) = &exp.contact_email {
                         div {
                             span {
-                                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                                 "Email"
                             }
                             span {
-                                style: "font-size: 14px; color: {c.text_primary};",
+                                style: "font-size: 14px; color: {p.text_primary};",
                                 "{email}"
                             }
                         }
@@ -492,11 +493,11 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
                     if let Some(phone) = &exp.contact_phone {
                         div {
                             span {
-                                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                                 "Telephone"
                             }
                             span {
-                                style: "font-size: 14px; color: {c.text_primary};",
+                                style: "font-size: 14px; color: {p.text_primary};",
                                 "{phone}"
                             }
                         }
@@ -504,12 +505,12 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
                     if let Some(site) = &exp.site_web {
                         div {
                             span {
-                                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                                 "Site web"
                             }
                             a {
                                 href: "{site}",
-                                style: "font-size: 14px; color: {c.accent_blue}; text-decoration: none;",
+                                style: "font-size: 14px; color: {p.accent_primary}; text-decoration: none;",
                                 "{site}"
                             }
                         }
@@ -517,11 +518,11 @@ pub fn UncExposantDetail(state: Signal<JayFestivalState>) -> Element {
                     if let Some(adresse) = &exp.adresse {
                         div {
                             span {
-                                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                                 "Adresse"
                             }
                             span {
-                                style: "font-size: 14px; color: {c.text_primary};",
+                                style: "font-size: 14px; color: {p.text_primary};",
                                 "{adresse}"
                             }
                         }
@@ -538,29 +539,29 @@ fn OrganisateurCard(
     organisateur: Organisateur,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let name = opt_str(&organisateur.name);
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 12px; padding: 20px; cursor: pointer; transition: transform 0.2s;",
+            style: "background: {p.bg_secondary}; border-radius: 12px; padding: 20px; cursor: pointer; transition: transform 0.2s;",
             onclick: move |evt| onclick.call(evt),
 
             div {
                 style: "display: flex; align-items: center; gap: 16px; margin-bottom: 12px;",
 
                 div {
-                    style: "width: 56px; height: 56px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;",
+                    style: "width: 56px; height: 56px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;",
                     "🏢"
                 }
                 div {
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white};",
+                        style: "font-size: 16px; color: {p.text_high};",
                         "{name}"
                     }
                     if let Some(region) = &organisateur.region {
                         p {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "📍 {region}"
                         }
                     }
@@ -568,7 +569,7 @@ fn OrganisateurCard(
             }
 
             span {
-                style: "font-size: 12px; color: {c.accent_blue};",
+                style: "font-size: 12px; color: {p.accent_primary};",
                 "Voir le profil →"
             }
         }
@@ -581,29 +582,29 @@ fn ExposantCard(
     exposant: Exposant,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let company_name = opt_str(&exposant.company_name);
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 12px; padding: 20px; cursor: pointer; transition: transform 0.2s;",
+            style: "background: {p.bg_secondary}; border-radius: 12px; padding: 20px; cursor: pointer; transition: transform 0.2s;",
             onclick: move |evt| onclick.call(evt),
 
             div {
                 style: "display: flex; align-items: center; gap: 16px; margin-bottom: 12px;",
 
                 div {
-                    style: "width: 56px; height: 56px; background: {c.bg_hover}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;",
+                    style: "width: 56px; height: 56px; background: {p.bg_overlay}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;",
                     "🧑‍💼"
                 }
                 div {
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white};",
+                        style: "font-size: 16px; color: {p.text_high};",
                         "{company_name}"
                     }
                     if let Some(secteur) = &exposant.secteur {
                         p {
-                            style: "font-size: 12px; color: {c.text_muted};",
+                            style: "font-size: 12px; color: {p.text_muted};",
                             "{secteur}"
                         }
                     }
@@ -613,7 +614,7 @@ fn ExposantCard(
             if let Some(cat) = &exposant.category {
                 Badge {
                     text: cat.clone(),
-                    color: c.accent_blue.to_string(),
+                    color: p.accent_primary.to_string(),
                 }
             }
         }

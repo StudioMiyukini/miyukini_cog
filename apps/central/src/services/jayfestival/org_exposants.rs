@@ -11,6 +11,7 @@
 //! @human: Ecrans ORG-E09/E18 JayFestival: gestion des exposants (candidatures, fiches, import CSV).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{Badge, ActionButton};
@@ -18,7 +19,7 @@ use super::components::{Badge, ActionButton};
 /// Vue principale des exposants avec onglets.
 #[component]
 pub fn OrgExposants(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let mut active_tab = use_signal(|| "candidatures".to_string());
     let mut selected_exposant = use_signal(|| None::<String>);
 
@@ -34,16 +35,16 @@ pub fn OrgExposants(edition_id: String) -> Element {
     }
 
     let tab = active_tab.read().clone();
-    let tab_cand_bg = if tab == "candidatures" { c.accent_blue } else { c.bg_secondary };
-    let tab_cand_color = if tab == "candidatures" { "white" } else { c.text_primary };
-    let tab_conf_bg = if tab == "confirmes" { c.accent_blue } else { c.bg_secondary };
-    let tab_conf_color = if tab == "confirmes" { "white" } else { c.text_primary };
-    let tab_devis_bg = if tab == "devis" { c.accent_blue } else { c.bg_secondary };
-    let tab_devis_color = if tab == "devis" { "white" } else { c.text_primary };
-    let tab_factures_bg = if tab == "factures" { c.accent_blue } else { c.bg_secondary };
-    let tab_factures_color = if tab == "factures" { "white" } else { c.text_primary };
-    let tab_import_bg = if tab == "import" { c.accent_blue } else { c.bg_secondary };
-    let tab_import_color = if tab == "import" { "white" } else { c.text_primary };
+    let tab_cand_bg = if tab == "candidatures" { p.accent_primary } else { p.bg_secondary };
+    let tab_cand_color = if tab == "candidatures" { "white" } else { p.text_primary };
+    let tab_conf_bg = if tab == "confirmes" { p.accent_primary } else { p.bg_secondary };
+    let tab_conf_color = if tab == "confirmes" { "white" } else { p.text_primary };
+    let tab_devis_bg = if tab == "devis" { p.accent_primary } else { p.bg_secondary };
+    let tab_devis_color = if tab == "devis" { "white" } else { p.text_primary };
+    let tab_factures_bg = if tab == "factures" { p.accent_primary } else { p.bg_secondary };
+    let tab_factures_color = if tab == "factures" { "white" } else { p.text_primary };
+    let tab_import_bg = if tab == "import" { p.accent_primary } else { p.bg_secondary };
+    let tab_import_color = if tab == "import" { "white" } else { p.text_primary };
 
     rsx! {
         div {
@@ -51,7 +52,7 @@ pub fn OrgExposants(edition_id: String) -> Element {
 
             // Onglets
             div {
-                style: "display: flex; gap: 8px; border-bottom: 1px solid {c.border}; padding-bottom: 12px;",
+                style: "display: flex; gap: 8px; border-bottom: 1px solid {p.border_default}; padding-bottom: 12px;",
 
                 button {
                     style: "padding: 8px 16px; background: {tab_cand_bg}; border: none; border-radius: 6px; color: {tab_cand_color}; cursor: pointer; font-size: 13px;",
@@ -109,7 +110,7 @@ pub fn OrgExposants(edition_id: String) -> Element {
 /// ORG-E09: Candidatures en attente.
 #[component]
 fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let participations = {
@@ -140,13 +141,13 @@ fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Eleme
             style: "display: flex; flex-direction: column; gap: 16px;",
 
             h3 {
-                style: "font-size: 18px; color: {c.text_white};",
+                style: "font-size: 18px; color: {p.text_high};",
                 "Candidatures en attente ({pending.len()})"
             }
 
             if pending.is_empty() {
                 div {
-                    style: "padding: 40px; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted}; text-align: center; font-size: 14px;",
+                    style: "padding: 40px; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted}; text-align: center; font-size: 14px;",
                     "Aucune candidature en attente"
                 }
             }
@@ -166,24 +167,24 @@ fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Eleme
                     let conns_r = conns;
                     rsx! {
                         div {
-                            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px;",
+                            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 12px 16px;",
 
                             div {
                                 style: "flex: 1; cursor: pointer;",
                                 onclick: move |_| on_select.call(exp_id_click.clone()),
                                 span {
-                                    style: "color: {c.text_white}; font-size: 14px;",
+                                    style: "color: {p.text_high}; font-size: 14px;",
                                     "{name}"
                                 }
                             }
 
                             Badge {
                                 text: "En attente".to_string(),
-                                color: c.accent_orange.to_string(),
+                                color: p.warning.to_string(),
                             }
 
                             button {
-                                style: "padding: 6px 12px; background: {c.accent_green}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                                style: "padding: 6px 12px; background: {p.success}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                                 onclick: move |_| {
                                     let db = &conns_a.read().jayfestival;
                                     let _ = db.editions_exposants_update_status(&pid_accept, "acceptee", None);
@@ -191,7 +192,7 @@ fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Eleme
                                 "Valider"
                             }
                             button {
-                                style: "padding: 6px 12px; background: {c.accent_orange}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                                style: "padding: 6px 12px; background: {p.warning}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                                 onclick: move |_| {
                                     let db = &conns_r.read().jayfestival;
                                     let _ = db.editions_exposants_update_status(&pid_refuse, "refusee", Some("Refusee par l'organisateur"));
@@ -209,7 +210,7 @@ fn CandidaturesTab(edition_id: String, on_select: EventHandler<String>) -> Eleme
 /// ORG-E10: Exposants confirmés.
 #[component]
 fn ConfirmesTab(edition_id: String, on_select: EventHandler<String>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     let participations = {
@@ -240,13 +241,13 @@ fn ConfirmesTab(edition_id: String, on_select: EventHandler<String>) -> Element 
             style: "display: flex; flex-direction: column; gap: 16px;",
 
             h3 {
-                style: "font-size: 18px; color: {c.text_white};",
+                style: "font-size: 18px; color: {p.text_high};",
                 "Exposants confirmes ({accepted.len()})"
             }
 
             if accepted.is_empty() {
                 div {
-                    style: "padding: 40px; background: {c.bg_secondary}; border-radius: 8px; color: {c.text_muted}; text-align: center; font-size: 14px;",
+                    style: "padding: 40px; background: {p.bg_secondary}; border-radius: 8px; color: {p.text_muted}; text-align: center; font-size: 14px;",
                     "Aucun exposant confirme"
                 }
             }
@@ -262,24 +263,24 @@ fn ConfirmesTab(edition_id: String, on_select: EventHandler<String>) -> Element 
                     let exp_id_click = exp_id.clone();
                     rsx! {
                         div {
-                            style: "display: flex; align-items: center; gap: 12px; background: {c.bg_secondary}; border-radius: 8px; padding: 12px 16px; cursor: pointer;",
+                            style: "display: flex; align-items: center; gap: 12px; background: {p.bg_secondary}; border-radius: 8px; padding: 12px 16px; cursor: pointer;",
                             onclick: move |_| on_select.call(exp_id_click.clone()),
 
                             div {
                                 style: "flex: 1;",
                                 span {
-                                    style: "color: {c.text_white}; font-size: 14px;",
+                                    style: "color: {p.text_high}; font-size: 14px;",
                                     "{name}"
                                 }
                                 span {
-                                    style: "color: {c.text_secondary}; font-size: 12px; margin-left: 12px;",
+                                    style: "color: {p.text_secondary}; font-size: 12px; margin-left: 12px;",
                                     "Stand: {stand}"
                                 }
                             }
 
                             Badge {
                                 text: "Confirme".to_string(),
-                                color: c.accent_green.to_string(),
+                                color: p.success.to_string(),
                             }
                         }
                     }
@@ -292,7 +293,7 @@ fn ConfirmesTab(edition_id: String, on_select: EventHandler<String>) -> Element 
 /// ORG-E11: Fiche détaillée d'un exposant.
 #[component]
 fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<()>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     // Charger l'exposant
@@ -320,10 +321,10 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
     let status = participation.as_ref().and_then(|p| p.status_candidature.clone()).unwrap_or_default();
 
     let status_color = match status.as_str() {
-        "acceptee" => c.accent_green.to_string(),
-        "en_attente" => c.accent_orange.to_string(),
-        "refusee" => c.accent_red.to_string(),
-        _ => c.text_muted.to_string(),
+        "acceptee" => p.success.to_string(),
+        "en_attente" => p.warning.to_string(),
+        "refusee" => p.error.to_string(),
+        _ => p.text_muted.to_string(),
     };
 
     rsx! {
@@ -332,7 +333,7 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
 
             // Retour
             button {
-                style: "display: flex; align-items: center; gap: 8px; padding: 8px 0; background: none; border: none; color: {c.accent_blue}; cursor: pointer; font-size: 13px;",
+                style: "display: flex; align-items: center; gap: 8px; padding: 8px 0; background: none; border: none; color: {p.accent_primary}; cursor: pointer; font-size: 13px;",
                 onclick: move |_| on_back.call(()),
                 "← Retour a la liste"
             }
@@ -343,7 +344,7 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
 
                 div {
                     h2 {
-                        style: "font-size: 24px; color: {c.text_white}; margin-bottom: 8px;",
+                        style: "font-size: 24px; color: {p.text_high}; margin-bottom: 8px;",
                         "{name}"
                     }
                     div {
@@ -353,7 +354,7 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
                             color: status_color,
                         }
                         span {
-                            style: "font-size: 13px; color: {c.text_muted};",
+                            style: "font-size: 13px; color: {p.text_muted};",
                             "Stand: {stand}"
                         }
                     }
@@ -378,10 +379,10 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
 
             // Informations de contact
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Informations de contact"
                 }
 
@@ -397,14 +398,14 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
             // Description
             if !description.is_empty() {
                 section {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                     h3 {
-                        style: "font-size: 16px; color: {c.text_white}; margin-bottom: 12px;",
+                        style: "font-size: 16px; color: {p.text_high}; margin-bottom: 12px;",
                         "Description"
                     }
                     p {
-                        style: "font-size: 14px; color: {c.text_primary}; line-height: 1.6;",
+                        style: "font-size: 14px; color: {p.text_primary}; line-height: 1.6;",
                         "{description}"
                     }
                 }
@@ -412,10 +413,10 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
 
             // Historique des actions
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h3 {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                     "Historique"
                 }
 
@@ -432,17 +433,17 @@ fn ExposantFiche(edition_id: String, exposant_id: String, on_back: EventHandler<
 
 #[component]
 fn ContactField(label: &'static str, value: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let display_value = if value.is_empty() { "Non renseigne".to_string() } else { value };
 
     rsx! {
         div {
             span {
-                style: "font-size: 12px; color: {c.text_muted}; display: block; margin-bottom: 4px;",
+                style: "font-size: 12px; color: {p.text_muted}; display: block; margin-bottom: 4px;",
                 "{label}"
             }
             span {
-                style: "font-size: 14px; color: {c.text_primary};",
+                style: "font-size: 14px; color: {p.text_primary};",
                 "{display_value}"
             }
         }
@@ -451,17 +452,17 @@ fn ContactField(label: &'static str, value: String) -> Element {
 
 #[component]
 fn HistoryEntry(action: &'static str, date: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid {c.border};",
+            style: "display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid {p.border_default};",
             span {
-                style: "font-size: 13px; color: {c.text_primary};",
+                style: "font-size: 13px; color: {p.text_primary};",
                 "{action}"
             }
             span {
-                style: "font-size: 12px; color: {c.text_muted};",
+                style: "font-size: 12px; color: {p.text_muted};",
                 "{date}"
             }
         }
@@ -471,7 +472,7 @@ fn HistoryEntry(action: &'static str, date: &'static str) -> Element {
 /// ORG-E12: Génération de devis.
 #[component]
 fn DevisTab(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -481,7 +482,7 @@ fn DevisTab(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h3 {
-                    style: "font-size: 18px; color: {c.text_white};",
+                    style: "font-size: 18px; color: {p.text_high};",
                     "Devis"
                 }
 
@@ -525,33 +526,33 @@ fn DevisTab(edition_id: String) -> Element {
 
 #[component]
 fn DevisRow(numero: &'static str, exposant: &'static str, montant: &'static str, status: &'static str, date: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (status_label, status_color) = match status {
-        "envoye" => ("Envoye", c.accent_blue),
-        "accepte" => ("Accepte", c.accent_green),
-        "refuse" => ("Refuse", c.accent_red),
-        _ => ("Brouillon", c.text_muted),
+        "envoye" => ("Envoye", p.accent_primary),
+        "accepte" => ("Accepte", p.success),
+        "refuse" => ("Refuse", p.error),
+        _ => ("Brouillon", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                     "{numero}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{exposant} • {date}"
                 }
             }
 
             span {
-                style: "font-size: 14px; color: {c.text_primary}; font-weight: 600;",
+                style: "font-size: 14px; color: {p.text_primary}; font-weight: 600;",
                 "{montant}"
             }
 
@@ -563,11 +564,11 @@ fn DevisRow(numero: &'static str, exposant: &'static str, montant: &'static str,
             div {
                 style: "display: flex; gap: 8px;",
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "Voir"
                 }
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "PDF"
                 }
             }
@@ -578,7 +579,7 @@ fn DevisRow(numero: &'static str, exposant: &'static str, montant: &'static str,
 /// ORG-E13: Vue des factures.
 #[component]
 fn FacturesTab(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
@@ -588,7 +589,7 @@ fn FacturesTab(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h3 {
-                    style: "font-size: 18px; color: {c.text_white};",
+                    style: "font-size: 18px; color: {p.text_high};",
                     "Factures"
                 }
 
@@ -641,17 +642,17 @@ fn FacturesTab(edition_id: String) -> Element {
 
 #[component]
 fn StatMini(label: &'static str, value: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; text-align: center;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; text-align: center;",
             p {
-                style: "font-size: 12px; color: {c.text_muted}; margin-bottom: 4px;",
+                style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 4px;",
                 "{label}"
             }
             p {
-                style: "font-size: 18px; color: {c.text_white}; font-weight: 600;",
+                style: "font-size: 18px; color: {p.text_high}; font-weight: 600;",
                 "{value}"
             }
         }
@@ -660,33 +661,33 @@ fn StatMini(label: &'static str, value: &'static str) -> Element {
 
 #[component]
 fn FactureRow(numero: &'static str, exposant: &'static str, montant: &'static str, status: &'static str, date: &'static str) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let (status_label, status_color) = match status {
-        "payee" => ("Payee", c.accent_green),
-        "en_attente" => ("En attente", c.accent_orange),
-        "annulee" => ("Annulee", c.accent_red),
-        _ => ("Brouillon", c.text_muted),
+        "payee" => ("Payee", p.success),
+        "en_attente" => ("En attente", p.warning),
+        "annulee" => ("Annulee", p.error),
+        _ => ("Brouillon", p.text_muted),
     };
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
             div {
                 style: "flex: 1;",
                 p {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 4px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 4px;",
                     "{numero}"
                 }
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "{exposant} • {date}"
                 }
             }
 
             span {
-                style: "font-size: 14px; color: {c.text_primary}; font-weight: 600;",
+                style: "font-size: 14px; color: {p.text_primary}; font-weight: 600;",
                 "{montant}"
             }
 
@@ -698,11 +699,11 @@ fn FactureRow(numero: &'static str, exposant: &'static str, montant: &'static st
             div {
                 style: "display: flex; gap: 8px;",
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "Voir"
                 }
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     "PDF"
                 }
             }
@@ -713,62 +714,62 @@ fn FactureRow(numero: &'static str, exposant: &'static str, montant: &'static st
 /// ORG-E18: Import CSV des exposants.
 #[component]
 fn ImportCsvTab(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     rsx! {
         div {
             style: "display: flex; flex-direction: column; gap: 24px;",
 
             h3 {
-                style: "font-size: 18px; color: {c.text_white};",
+                style: "font-size: 18px; color: {p.text_high};",
                 "Import CSV"
             }
 
             // Zone de drop
             div {
-                style: "border: 2px dashed {c.border}; border-radius: 8px; padding: 48px; text-align: center;",
+                style: "border: 2px dashed {p.border_default}; border-radius: 8px; padding: 48px; text-align: center;",
 
                 span {
                     style: "font-size: 48px; display: block; margin-bottom: 16px;",
                     "📄"
                 }
                 p {
-                    style: "font-size: 16px; color: {c.text_white}; margin-bottom: 8px;",
+                    style: "font-size: 16px; color: {p.text_high}; margin-bottom: 8px;",
                     "Glissez votre fichier CSV ici"
                 }
                 p {
-                    style: "font-size: 13px; color: {c.text_muted}; margin-bottom: 16px;",
+                    style: "font-size: 13px; color: {p.text_muted}; margin-bottom: 16px;",
                     "ou cliquez pour parcourir"
                 }
                 button {
-                    style: "padding: 10px 20px; background: {c.accent_blue}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 14px;",
+                    style: "padding: 10px 20px; background: {p.accent_primary}; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 14px;",
                     "Selectionner un fichier"
                 }
             }
 
             // Format attendu
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h4 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;",
                     "Format attendu"
                 }
 
                 p {
-                    style: "font-size: 13px; color: {c.text_primary}; margin-bottom: 12px;",
+                    style: "font-size: 13px; color: {p.text_primary}; margin-bottom: 12px;",
                     "Le fichier CSV doit contenir les colonnes suivantes :"
                 }
 
                 div {
-                    style: "font-family: monospace; background: {c.bg_main}; border-radius: 4px; padding: 12px; font-size: 12px; color: {c.text_secondary}; overflow-x: auto;",
+                    style: "font-family: monospace; background: {p.bg_base}; border-radius: 4px; padding: 12px; font-size: 12px; color: {p.text_secondary}; overflow-x: auto;",
                     "nom_entreprise,email,telephone,categorie,description"
                 }
 
                 div {
                     style: "margin-top: 16px;",
                     button {
-                        style: "padding: 8px 16px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                         "📥 Telecharger le template"
                     }
                 }
@@ -776,15 +777,15 @@ fn ImportCsvTab(edition_id: String) -> Element {
 
             // Historique des imports
             section {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                 h4 {
-                    style: "font-size: 14px; color: {c.text_white}; margin-bottom: 12px;",
+                    style: "font-size: 14px; color: {p.text_high}; margin-bottom: 12px;",
                     "Historique des imports"
                 }
 
                 div {
-                    style: "color: {c.text_muted}; font-size: 13px; text-align: center; padding: 20px;",
+                    style: "color: {p.text_muted}; font-size: 13px; text-align: center; padding: 20px;",
                     "Aucun import realise"
                 }
             }

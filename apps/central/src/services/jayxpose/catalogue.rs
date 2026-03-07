@@ -5,6 +5,7 @@
 //! @human: Ecrans XP-E03/E05 JayXpose: liste des produits et gestion des categories.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::components::{PageHeader, Badge, EmptyState};
@@ -12,7 +13,7 @@ use super::{JayXposeSection, JayXposeState};
 
 #[component]
 pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
     let mut show_categories = use_signal(|| false);
@@ -55,7 +56,7 @@ pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
                 style: "display: flex; align-items: center; gap: 12px;",
 
                 input {
-                    style: "flex: 1; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                    style: "flex: 1; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                     r#type: "text",
                     placeholder: "Rechercher un produit...",
                     value: "{search_query}",
@@ -63,7 +64,7 @@ pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
                 }
 
                 select {
-                    style: "padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                    style: "padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                     onchange: move |evt| filter_category.set(evt.value()),
 
                     option { value: "", "Toutes les categories" }
@@ -76,7 +77,7 @@ pub fn Catalogue(state: Signal<JayXposeState>) -> Element {
                 }
 
                 button {
-                    style: "padding: 10px 16px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 13px;",
+                    style: "padding: 10px 16px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 13px;",
                     onclick: move |_| show_categories.set(!show_categories()),
                     "🏷️ Categories ({categories.len()})"
                 }
@@ -138,7 +139,7 @@ fn ProductRow(
     on_edit: EventHandler<String>,
     on_delete: EventHandler<String>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let pid = product.id.clone().unwrap_or_default();
     let name = product.name.as_deref().unwrap_or("Sans nom");
@@ -147,10 +148,10 @@ fn ProductRow(
     let is_featured = product.is_featured.unwrap_or(false);
 
     let avail_color = match availability {
-        "disponible" => c.accent_green,
-        "rupture" => c.accent_red,
-        "sur_commande" => c.accent_orange,
-        _ => c.text_muted,
+        "disponible" => p.success,
+        "rupture" => p.error,
+        "sur_commande" => p.warning,
+        _ => p.text_muted,
     };
 
     let cat_name = product.category_id.as_ref()
@@ -163,11 +164,11 @@ fn ProductRow(
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: {c.bg_secondary}; border-radius: 4px; transition: background 0.15s;",
+            style: "display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: {p.bg_secondary}; border-radius: 4px; transition: background 0.15s;",
 
             // Icone / image placeholder
             div {
-                style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
+                style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
                 "📦"
             }
 
@@ -178,7 +179,7 @@ fn ProductRow(
                 div {
                     style: "display: flex; align-items: center; gap: 8px;",
                     p {
-                        style: "font-size: 14px; color: {c.text_white}; font-weight: 500;",
+                        style: "font-size: 14px; color: {p.text_high}; font-weight: 500;",
                         "{name}"
                     }
                     if is_featured {
@@ -187,7 +188,7 @@ fn ProductRow(
                     Badge { text: availability.to_string(), color: avail_color.to_string() }
                 }
                 div {
-                    style: "display: flex; gap: 16px; font-size: 11px; color: {c.text_muted}; margin-top: 2px;",
+                    style: "display: flex; gap: 16px; font-size: 11px; color: {p.text_muted}; margin-top: 2px;",
                     if !cat_name.is_empty() {
                         span { "🏷️ {cat_name}" }
                     }
@@ -199,12 +200,12 @@ fn ProductRow(
             div {
                 style: "display: flex; gap: 4px;",
                 button {
-                    style: "padding: 6px 12px; background: {c.bg_hover}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: {p.bg_overlay}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                     onclick: move |_| on_edit.call(pid_edit.clone()),
                     "✏️ Modifier"
                 }
                 button {
-                    style: "padding: 6px 12px; background: transparent; border: 1px solid {c.border}; border-radius: 4px; color: {c.accent_red}; cursor: pointer; font-size: 12px;",
+                    style: "padding: 6px 12px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.error}; cursor: pointer; font-size: 12px;",
                     onclick: move |_| on_delete.call(pid_delete.clone()),
                     "🗑️"
                 }
@@ -220,15 +221,15 @@ fn CategoriesPanel(
     categories: Vec<jayxpose::data::CategorieProduit>,
     new_category_name: Signal<String>,
 ) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
 
     rsx! {
         div {
-            style: "background: {c.bg_secondary}; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;",
+            style: "background: {p.bg_secondary}; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;",
 
             h3 {
-                style: "font-size: 14px; color: {c.text_white}; font-weight: 600;",
+                style: "font-size: 14px; color: {p.text_high}; font-weight: 600;",
                 "🏷️ Gestion des categories"
             }
 
@@ -236,13 +237,13 @@ fn CategoriesPanel(
             div {
                 style: "display: flex; gap: 8px;",
                 input {
-                    style: "flex: 1; padding: 8px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 13px;",
+                    style: "flex: 1; padding: 8px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 13px;",
                     placeholder: "Nom de la nouvelle categorie",
                     value: "{new_category_name}",
                     oninput: move |evt| new_category_name.set(evt.value()),
                 }
                 button {
-                    style: "padding: 8px 16px; background: {c.accent_blue}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
+                    style: "padding: 8px 16px; background: {p.accent_primary}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;",
                     onclick: move |_| {
                         let name = new_category_name.read().trim().to_string();
                         if !name.is_empty() {
@@ -264,17 +265,17 @@ fn CategoriesPanel(
             // Liste
             if categories.is_empty() {
                 p {
-                    style: "font-size: 12px; color: {c.text_muted}; text-align: center; padding: 8px;",
+                    style: "font-size: 12px; color: {p.text_muted}; text-align: center; padding: 8px;",
                     "Aucune categorie. Ajoutez-en une ci-dessus."
                 }
             } else {
                 for cat in categories.iter() {
                     div {
                         key: "{cat.id.as_deref().unwrap_or(\"\")}",
-                        style: "display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: {c.bg_hover}; border-radius: 4px;",
+                        style: "display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: {p.bg_overlay}; border-radius: 4px;",
 
                         span {
-                            style: "font-size: 13px; color: {c.text_primary};",
+                            style: "font-size: 13px; color: {p.text_primary};",
                             "{cat.name.as_deref().unwrap_or(\"Sans nom\")}"
                         }
 
@@ -282,7 +283,7 @@ fn CategoriesPanel(
                             let cat_id = cat.id.clone().unwrap_or_default();
                             rsx! {
                                 button {
-                                    style: "padding: 4px 8px; background: transparent; border: none; color: {c.accent_red}; cursor: pointer; font-size: 11px;",
+                                    style: "padding: 4px 8px; background: transparent; border: none; color: {p.error}; cursor: pointer; font-size: 11px;",
                                     onclick: move |_| {
                                         let db = &conns.read().jayxpose;
                                         let _ = db.categorie_delete(&cat_id);

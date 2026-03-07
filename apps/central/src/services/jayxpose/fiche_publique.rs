@@ -5,6 +5,7 @@
 //! @human: Ecran XP-E12 JayXpose: fiche publique exposant (visibilite, confidentialite, apercu).
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::data::use_service_connections;
 use crate::state::use_app_state;
 use super::JayXposeState;
@@ -32,7 +33,7 @@ const PRIVACY_LEVELS: &[(&str, &str)] = &[
 
 #[component]
 pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     let exposant_id = state.read().exposant_id.clone().unwrap_or_default();
 
@@ -51,8 +52,8 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
     let slug_display = exposant.vitrine_slug.as_deref().unwrap_or("---");
 
     // Pre-calcul styles conditionnels
-    let vis_btn_bg = if visible_annuaire { c.accent_green.to_string() } else { c.bg_hover.to_string() };
-    let vis_btn_color = if visible_annuaire { "white".to_string() } else { c.text_secondary.to_string() };
+    let vis_btn_bg = if visible_annuaire { p.success.to_string() } else { p.bg_overlay.to_string() };
+    let vis_btn_color = if visible_annuaire { "white".to_string() } else { p.text_secondary.to_string() };
     let vis_btn_text = if visible_annuaire { "Visible ✓" } else { "Masque" };
 
     rsx! {
@@ -61,26 +62,26 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
 
             // Header
             div {
-                h2 { style: "font-size: 24px; color: {c.text_white};", "👁️ Fiche publique" }
-                p { style: "font-size: 13px; color: {c.text_secondary}; margin-top: 4px;", "Gerez votre visibilite dans l'annuaire et la confidentialite de vos donnees." }
+                h2 { style: "font-size: 24px; color: {p.text_high};", "👁️ Fiche publique" }
+                p { style: "font-size: 13px; color: {p.text_secondary}; margin-top: 4px;", "Gerez votre visibilite dans l'annuaire et la confidentialite de vos donnees." }
             }
 
             // Visibilite annuaire
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
 
-                h3 { style: "font-size: 14px; color: {c.text_white}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {c.border};", "Visibilite" }
+                h3 { style: "font-size: 14px; color: {p.text_high}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {p.border_default};", "Visibilite" }
 
                 div {
                     style: "display: flex; align-items: center; justify-content: space-between;",
 
                     div {
-                        p { style: "font-size: 14px; color: {c.text_white};", "Visible dans l'annuaire" }
-                        p { style: "font-size: 12px; color: {c.text_muted}; margin-top: 2px;", "Votre fiche apparaitra dans l'annuaire public des exposants." }
+                        p { style: "font-size: 14px; color: {p.text_high};", "Visible dans l'annuaire" }
+                        p { style: "font-size: 12px; color: {p.text_muted}; margin-top: 2px;", "Votre fiche apparaitra dans l'annuaire public des exposants." }
                     }
 
                     button {
-                        style: "padding: 8px 16px; background: {vis_btn_bg}; color: {vis_btn_color}; border: 1px solid {c.border}; border-radius: 4px; cursor: pointer; font-size: 13px;",
+                        style: "padding: 8px 16px; background: {vis_btn_bg}; color: {vis_btn_color}; border: 1px solid {p.border_default}; border-radius: 4px; cursor: pointer; font-size: 13px;",
                         onclick: move |_| {
                             let mut exp = exposant.clone();
                             exp.visible_annuaire = Some(!visible_annuaire);
@@ -93,9 +94,9 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
 
                 if vitrine_status == "publiee" {
                     div {
-                        style: "display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: {c.bg_hover}; border-radius: 4px;",
+                        style: "display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: {p.bg_overlay}; border-radius: 4px;",
                         span { style: "font-size: 14px;", "🔗" }
-                        p { style: "font-size: 13px; color: {c.text_primary};",
+                        p { style: "font-size: 13px; color: {p.text_primary};",
                             "Vitrine publiee : vitrine.miyukini.local/{slug_display}"
                         }
                     }
@@ -104,12 +105,12 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
 
             // Confidentialite par champ
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
 
-                h3 { style: "font-size: 14px; color: {c.text_white}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {c.border};", "Confidentialite par champ" }
+                h3 { style: "font-size: 14px; color: {p.text_high}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {p.border_default};", "Confidentialite par champ" }
 
                 p {
-                    style: "font-size: 12px; color: {c.text_muted};",
+                    style: "font-size: 12px; color: {p.text_muted};",
                     "Choisissez le niveau de visibilite pour chaque donnee sensible."
                 }
 
@@ -128,12 +129,12 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
                         rsx! {
                             div {
                                 key: "{fk}",
-                                style: "display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid {c.border};",
+                                style: "display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid {p.border_default};",
 
-                                span { style: "font-size: 13px; color: {c.text_primary};", "{fl}" }
+                                span { style: "font-size: 13px; color: {p.text_primary};", "{fl}" }
 
                                 select {
-                                    style: "padding: 6px 10px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 4px; color: {c.text_primary}; font-size: 12px;",
+                                    style: "padding: 6px 10px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_primary}; font-size: 12px;",
                                     onchange: move |evt| {
                                         let conf = jayxpose::data::ConfidentialiteProfil {
                                             id: Some(uuid::Uuid::new_v4().to_string()),
@@ -169,16 +170,16 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
 
             // Apercu fiche publique
             div {
-                style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
+                style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;",
 
-                h3 { style: "font-size: 14px; color: {c.text_white}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {c.border};", "Apercu de la fiche publique" }
+                h3 { style: "font-size: 14px; color: {p.text_high}; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid {p.border_default};", "Apercu de la fiche publique" }
 
                 div {
-                    style: "border: 1px solid {c.border}; border-radius: 8px; overflow: hidden;",
+                    style: "border: 1px solid {p.border_default}; border-radius: 8px; overflow: hidden;",
 
                     // Banniere
                     div {
-                        style: "background: linear-gradient(135deg, {c.accent_blue} 0%, #6366f1 100%); padding: 20px; text-align: center;",
+                        style: "background: linear-gradient(135deg, {p.accent_primary} 0%, #6366f1 100%); padding: 20px; text-align: center;",
 
                         div {
                             style: "width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;",
@@ -193,11 +194,11 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
                     div {
                         style: "padding: 16px;",
 
-                        p { style: "font-size: 13px; color: {c.text_secondary}; margin-bottom: 16px;", "{desc}" }
+                        p { style: "font-size: 13px; color: {p.text_secondary}; margin-bottom: 16px;", "{desc}" }
 
                         if !featured.is_empty() {
                             div {
-                                h4 { style: "font-size: 14px; color: {c.text_white}; margin-bottom: 8px;", "Produits vedettes" }
+                                h4 { style: "font-size: 14px; color: {p.text_high}; margin-bottom: 8px;", "Produits vedettes" }
                                 div {
                                     style: "display: flex; gap: 8px; flex-wrap: wrap;",
                                     for p in featured.iter() {
@@ -207,7 +208,7 @@ pub fn FichePublique(state: Signal<JayXposeState>) -> Element {
                                             rsx! {
                                                 div {
                                                     key: "{pid}",
-                                                    style: "padding: 6px 12px; background: {c.bg_hover}; border-radius: 4px; font-size: 12px; color: {c.text_primary};",
+                                                    style: "padding: 6px 12px; background: {p.bg_overlay}; border-radius: 4px; font-size: 12px; color: {p.text_primary};",
                                                     "{pname}"
                                                 }
                                             }

@@ -5,13 +5,14 @@
 //! @human: Ecran ORG-E23 JayFestival: envoi annonces et notifications organisateur.
 
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::use_palette;
 use crate::state::use_app_state;
 use super::components::{ActionButton, Badge, EmptyState};
 
 /// Gestion des annonces d'une edition.
 #[component]
 pub fn OrgAnnonces(edition_id: String) -> Element {
-    let c = use_app_state().read().current_theme.palette();
+    let p = use_palette();
 
     let mut show_form = use_signal(|| false);
 
@@ -31,7 +32,7 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
                 style: "display: flex; justify-content: space-between; align-items: center;",
 
                 h3 {
-                    style: "font-size: 18px; color: {c.text_white};",
+                    style: "font-size: 18px; color: {p.text_high};",
                     "Annonces et communications"
                 }
 
@@ -48,10 +49,10 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
             // Formulaire nouvelle annonce
             if *show_form.read() {
                 div {
-                    style: "background: {c.bg_secondary}; border-radius: 8px; padding: 20px;",
+                    style: "background: {p.bg_secondary}; border-radius: 8px; padding: 20px;",
 
                     h4 {
-                        style: "font-size: 16px; color: {c.text_white}; margin-bottom: 16px;",
+                        style: "font-size: 16px; color: {p.text_high}; margin-bottom: 16px;",
                         "Creer une annonce"
                     }
 
@@ -60,23 +61,23 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
 
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                                 "Titre"
                             }
                             input {
                                 r#type: "text",
-                                style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                                style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
                                 placeholder: "Titre de l'annonce",
                             }
                         }
 
                         div {
                             label {
-                                style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                                 "Contenu"
                             }
                             textarea {
-                                style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px; min-height: 100px;",
+                                style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px; min-height: 100px;",
                                 placeholder: "Contenu de l'annonce...",
                             }
                         }
@@ -86,11 +87,11 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
 
                             div {
                                 label {
-                                    style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                    style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                                     "Destinataires"
                                 }
                                 select {
-                                    style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                                    style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
 
                                     option { value: "all", "Tous (exposants + visiteurs)" }
                                     option { value: "exposants", "Exposants uniquement" }
@@ -100,11 +101,11 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
 
                             div {
                                 label {
-                                    style: "display: block; font-size: 12px; color: {c.text_secondary}; margin-bottom: 6px;",
+                                    style: "display: block; font-size: 12px; color: {p.text_secondary}; margin-bottom: 6px;",
                                     "Canal"
                                 }
                                 select {
-                                    style: "width: 100%; padding: 10px 12px; background: {c.bg_main}; border: 1px solid {c.border}; border-radius: 6px; color: {c.text_primary}; font-size: 14px;",
+                                    style: "width: 100%; padding: 10px 12px; background: {p.bg_base}; border: 1px solid {p.border_default}; border-radius: 6px; color: {p.text_primary}; font-size: 14px;",
 
                                     option { value: "app", "Application uniquement" }
                                     option { value: "email", "Email" }
@@ -133,7 +134,7 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
                                 },
                             }
                             button {
-                                style: "padding: 10px 16px; background: transparent; border: none; color: {c.text_muted}; cursor: pointer; font-size: 13px;",
+                                style: "padding: 10px 16px; background: transparent; border: none; color: {p.text_muted}; cursor: pointer; font-size: 13px;",
                                 onclick: move |_| show_form.set(false),
                                 "Annuler"
                             }
@@ -155,11 +156,11 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
 
                     for (title, dest, date, status) in annonces {
                         div {
-                            style: "display: flex; align-items: center; gap: 16px; background: {c.bg_secondary}; border-radius: 8px; padding: 16px;",
+                            style: "display: flex; align-items: center; gap: 16px; background: {p.bg_secondary}; border-radius: 8px; padding: 16px;",
 
                             // Icône
                             div {
-                                style: "width: 48px; height: 48px; background: {c.bg_hover}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
+                                style: "width: 48px; height: 48px; background: {p.bg_overlay}; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;",
                                 "📢"
                             }
 
@@ -167,11 +168,11 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
                             div {
                                 style: "flex: 1;",
                                 p {
-                                    style: "font-size: 14px; color: {c.text_white};",
+                                    style: "font-size: 14px; color: {p.text_high};",
                                     "{title}"
                                 }
                                 div {
-                                    style: "display: flex; gap: 12px; font-size: 12px; color: {c.text_muted};",
+                                    style: "display: flex; gap: 12px; font-size: 12px; color: {p.text_muted};",
                                     span { "👥 {dest}" }
                                     span { "📅 {date}" }
                                 }
@@ -180,7 +181,7 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
                             // Badge statut
                             Badge {
                                 text: status.to_string(),
-                                color: if status == "publie" { c.accent_green.to_string() } else { c.accent_orange.to_string() },
+                                color: if status == "publie" { p.success.to_string() } else { p.warning.to_string() },
                             }
 
                             // Actions
@@ -188,12 +189,12 @@ pub fn OrgAnnonces(edition_id: String) -> Element {
                                 style: "display: flex; gap: 8px;",
 
                                 button {
-                                    style: "padding: 8px 12px; background: {c.bg_hover}; border: none; border-radius: 4px; color: {c.text_primary}; cursor: pointer; font-size: 12px;",
+                                    style: "padding: 8px 12px; background: {p.bg_overlay}; border: none; border-radius: 4px; color: {p.text_primary}; cursor: pointer; font-size: 12px;",
                                     "Modifier"
                                 }
                                 if status != "publie" {
                                     button {
-                                        style: "padding: 8px 12px; background: {c.accent_blue}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
+                                        style: "padding: 8px 12px; background: {p.accent_primary}; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 12px;",
                                         "Publier"
                                     }
                                 }
