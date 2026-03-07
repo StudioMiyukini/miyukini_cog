@@ -330,6 +330,7 @@ function renderTags() {
       pbTags.splice(Number(chip.dataset.idx), 1);
       renderTags();
       updatePreview();
+      saveToLocalStorage();
     });
   });
 }
@@ -343,6 +344,7 @@ document.getElementById('pb-tag-add')?.addEventListener('click', () => {
     input.value = '';
     renderTags();
     updatePreview();
+    saveToLocalStorage();
   }
 });
 
@@ -506,6 +508,90 @@ document.getElementById('initSequence')?.addEventListener('click', async () => {
 });
 
 // Preview initiale au chargement
+updatePreview();
+
+// ── localStorage — sauvegarde / restauration ──────────────
+
+const LS_KEYS = {
+  title:      'pb_title',
+  class:      'pb_class',
+  domain:     'pb_domain',
+  complexity: 'pb_complexity',
+  autonomy:   'pb_autonomy',
+  stack:      'pb_stack',
+  constraints:'pb_constraints',
+  agents:     'pb_agents',   // JSON array
+  tags:       'pb_tags',     // JSON array
+  urgency:    'pb_urgency',
+  sensitive:  'pb_sensitive',
+  msw:        'pb_msw',
+};
+
+function saveToLocalStorage() {
+  const agents = Array.from(document.querySelectorAll('input[name="pb-agent"]:checked')).map(cb => cb.value);
+  localStorage.setItem(LS_KEYS.title,       document.getElementById('pb-title')?.value        || '');
+  localStorage.setItem(LS_KEYS.class,       document.getElementById('pb-class')?.value        || 'T5');
+  localStorage.setItem(LS_KEYS.domain,      document.getElementById('pb-domain')?.value       || 'fullstack');
+  localStorage.setItem(LS_KEYS.complexity,  document.getElementById('pb-complexity')?.value   || 'C5');
+  localStorage.setItem(LS_KEYS.autonomy,    document.getElementById('pb-autonomy')?.value     || '');
+  localStorage.setItem(LS_KEYS.stack,       document.getElementById('pb-stack')?.value        || '');
+  localStorage.setItem(LS_KEYS.constraints, document.getElementById('pb-constraints')?.value  || '');
+  localStorage.setItem(LS_KEYS.agents,      JSON.stringify(agents));
+  localStorage.setItem(LS_KEYS.tags,        JSON.stringify(pbTags));
+  localStorage.setItem(LS_KEYS.urgency,     document.getElementById('pb-urgency')?.checked    ? '1' : '0');
+  localStorage.setItem(LS_KEYS.sensitive,   document.getElementById('pb-sensitive')?.checked  ? '1' : '0');
+  localStorage.setItem(LS_KEYS.msw,         document.getElementById('pb-msw')?.checked        ? '1' : '0');
+}
+
+function restoreFromLocalStorage() {
+  const set = (id, key) => {
+    const el = document.getElementById(id);
+    const val = localStorage.getItem(key);
+    if (el && val !== null) el.value = val;
+  };
+  const setCheck = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = localStorage.getItem(key) === '1';
+  };
+
+  set('pb-title',       LS_KEYS.title);
+  set('pb-class',       LS_KEYS.class);
+  set('pb-domain',      LS_KEYS.domain);
+  set('pb-complexity',  LS_KEYS.complexity);
+  set('pb-autonomy',    LS_KEYS.autonomy);
+  set('pb-stack',       LS_KEYS.stack);
+  set('pb-constraints', LS_KEYS.constraints);
+  setCheck('pb-urgency',  LS_KEYS.urgency);
+  setCheck('pb-sensitive', LS_KEYS.sensitive);
+  setCheck('pb-msw',      LS_KEYS.msw);
+
+  // Agents
+  try {
+    const savedAgents = JSON.parse(localStorage.getItem(LS_KEYS.agents) || '[]');
+    document.querySelectorAll('input[name="pb-agent"]').forEach(cb => {
+      cb.checked = savedAgents.includes(cb.value);
+    });
+  } catch { /* ignore */ }
+
+  // Tags
+  try {
+    pbTags = JSON.parse(localStorage.getItem(LS_KEYS.tags) || '[]');
+    renderTags();
+  } catch { pbTags = []; }
+}
+
+// Attacher saveToLocalStorage aux champs
+['pb-title', 'pb-class', 'pb-domain', 'pb-complexity', 'pb-autonomy', 'pb-stack', 'pb-constraints'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input',  saveToLocalStorage);
+  document.getElementById(id)?.addEventListener('change', saveToLocalStorage);
+});
+document.querySelectorAll('input[name="pb-agent"]').forEach(cb => cb.addEventListener('change', saveToLocalStorage));
+['pb-urgency', 'pb-sensitive', 'pb-msw'].forEach(id => {
+  document.getElementById(id)?.addEventListener('change', saveToLocalStorage);
+});
+
+// Restaurer au chargement
+restoreFromLocalStorage();
 updatePreview();
 
 // ── Init ──────────────────────────────────────────────────
