@@ -6,6 +6,14 @@
 //! @role: data @layer: service
 //! @human: Base SQLite JayFestival (Daughter KindMother) — schéma CRUD éditions/exposants/animations/budget.
 
+// Pre-existing patterns: large function signatures (legacy CRUD), complex row-mapper types.
+#![allow(
+    clippy::too_many_arguments,
+    clippy::type_complexity,
+    clippy::redundant_closure,
+    clippy::redundant_closure_for_method_calls
+)]
+
 use crate::data::types::{
     Animation, BudgetEntry, BudgetSummary, Edition, EditionExposant, Exposant, Organisateur,
     Profile,

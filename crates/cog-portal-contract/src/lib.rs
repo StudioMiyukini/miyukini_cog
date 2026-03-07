@@ -46,9 +46,9 @@ pub struct PublicPage {
 /// déléguer le rendu des pages de chaque service.
 pub trait PortalContract: Send + Sync {
     /// Slug du service (ex: `jayfestival`, `jayxpose`).
-    fn service_slug(&self) -> &str;
+    fn service_slug(&self) -> &'static str;
     /// Nom affiché du service (ex: `JayFestival`).
-    fn service_name(&self) -> &str;
+    fn service_name(&self) -> &'static str;
     /// Liste toutes les pages publiques du service.
     fn public_pages(&self) -> Result<Vec<PublicPage>, PortalError>;
     /// Retourne une page par son slug.

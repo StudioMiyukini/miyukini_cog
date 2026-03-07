@@ -5,7 +5,7 @@
 //! @role: domain @layer: domain
 //! @human: Types Serde JayFestival — Profile, Edition, Organisateur, Exposant, Animation, BudgetEntry.
 
-#![allow(missing_docs)]
+#![allow(missing_docs, clippy::should_implement_trait)]
 
 use serde::{Deserialize, Serialize};
 

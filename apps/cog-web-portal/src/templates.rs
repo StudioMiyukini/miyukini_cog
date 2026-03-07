@@ -4,6 +4,8 @@
 //! @role: ui @layer: app
 //! @human: Templates Portal — page d'accueil services, page de service, page d'erreur, formulaire contact.
 
+#![allow(clippy::format_collect)]
+
 use cog_portal_contract::PublicPage;
 
 /// Infos d'un service pour la page d'accueil.
@@ -59,8 +61,9 @@ pub fn render_service_home(
 
     let first_page_html = pages
         .first()
-        .map(|p| p.html_content.as_str())
-        .unwrap_or("<p>Aucun contenu disponible.</p>");
+        .map_or("<p>Aucun contenu disponible.</p>", |p| {
+            p.html_content.as_str()
+        });
 
     let content = format!(
         r#"<nav class="service-nav"><ul>{nav_links}</ul></nav>

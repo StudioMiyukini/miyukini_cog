@@ -6,6 +6,8 @@
 //!
 //! Adapté de apps/miyucloud/src/web_surface/rate_limiter.rs.
 
+#![allow(clippy::redundant_closure_for_method_calls)]
+
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::response::{IntoResponse, Response};
@@ -61,16 +63,15 @@ impl RateLimiterState {
         let window = self.config.window;
         let max = self.config.max_requests as usize;
 
-        let mut counters = match self.counters.lock() {
-            Ok(c) => c,
-            Err(_) => return true, // fail open
+        let Ok(mut counters) = self.counters.lock() else {
+            return true; // fail open
         };
 
         // Purge périodique toutes les 1000 requêtes.
         {
             let mut seen = self.requests_seen.lock().unwrap_or_else(|e| e.into_inner());
             *seen += 1;
-            if *seen % 1000 == 0 {
+            if seen.is_multiple_of(1000) {
                 counters.retain(|_, timestamps| {
                     timestamps.retain(|t| now.duration_since(*t) < window);
                     !timestamps.is_empty()

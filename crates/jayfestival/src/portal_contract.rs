@@ -24,12 +24,13 @@ impl JayFestivalPortalService {
     }
 }
 
+#[allow(clippy::format_collect)]
 impl PortalContract for JayFestivalPortalService {
-    fn service_slug(&self) -> &str {
+    fn service_slug(&self) -> &'static str {
         "jayfestival"
     }
 
-    fn service_name(&self) -> &str {
+    fn service_name(&self) -> &'static str {
         "JayFestival"
     }
 

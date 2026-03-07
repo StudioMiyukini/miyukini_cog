@@ -23,7 +23,7 @@ pub async fn service_home(
         .services
         .iter()
         .find(|s| s.service_slug() == service_slug)
-        .ok_or_else(|| StatusCode::NOT_FOUND)?;
+        .ok_or(StatusCode::NOT_FOUND)?;
 
     let pages = svc.public_pages().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
