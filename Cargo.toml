@@ -126,6 +126,9 @@ members = [
     # === MIPOWER — Workflow Editor ===
     "apps/mipower",
 
+    # === COG Web Portal — Portail HTTP externe ===
+    "apps/cog-web-portal",
+
     # === Outils internes ===
     "crates/miyukini-admin",
     "tools/mscm-generator",

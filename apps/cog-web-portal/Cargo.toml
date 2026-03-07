@@ -1,0 +1,32 @@
+# COG Web Portal — Portail HTTP générique multi-services Miyukini.
+# @id: cog_web_portal_cargo @do: declare_portal_package @role: infra @layer: service
+# @human: App standalone portail web HTTP exposant les services Jay aux utilisateurs externes.
+
+[package]
+name = "cog-web-portal"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "COG Web Portal — Portail HTTP externe exposant les surfaces web des services Jay"
+
+[dependencies]
+axum = { version = "0.8" }
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["limit", "trace"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+sha2 = "0.10"
+chrono = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "2"
+
+[[bin]]
+name = "cog-web-portal"
+path = "src/main.rs"
+
+[lints]
+workspace = true
