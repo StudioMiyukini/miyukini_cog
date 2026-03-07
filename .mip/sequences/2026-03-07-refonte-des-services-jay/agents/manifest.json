@@ -1,0 +1,14 @@
+﻿{
+  "sequence": "2026-03-07-refonte-des-services-jay",
+  "generated_at": "2026-03-07T13:41:29Z",
+  "regeneration_mode": "update",
+  "target_phases": ["P3", "P4", "P5", "P6", "MASS"],
+  "inputs": [
+    "phases/p0/temps/temps-04-inventaire.md",
+    "phases/p0/temps/temps-05-securite.md",
+    "specs/2026-03-07-refonte-des-services-jay-spec.md"
+  ],
+  "agents": [],
+  "files": []
+}
+
