@@ -640,3 +640,62 @@ details[open] .pb-advanced-summary::before { transform: rotate(90deg); }
   min-width: 38px;
   text-align: center;
 }
+
+/* ── Report header left ──────────────────────────────────── */
+
+.report-header-left { display: flex; flex-direction: column; gap: 2px; }
+.report-header-left h1 { font-size: 18px; font-weight: 600; }
+.report-seq-name { font-size: 12px; color: var(--color-text-muted); }
+
+/* ── Report Tabs Bar ─────────────────────────────────────── */
+
+.report-tabs-bar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  background: var(--color-bg-surface);
+}
+
+.report-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.report-tab:hover { border-color: var(--color-accent); color: var(--color-text); }
+.report-tab.active {
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.report-tab.tab-done { border-color: color-mix(in srgb, var(--color-success) 50%, var(--color-border)); }
+.report-tab.tab-done.active {
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.tab-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 99px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  min-width: 28px;
+  text-align: center;
+}
+.report-tab.active .tab-badge { color: inherit; border-color: currentColor; opacity: 0.8; }

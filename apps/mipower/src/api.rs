@@ -265,8 +265,8 @@ async fn prompt_handler(
     if input.title.is_empty() || input.title.len() > 200 {
         return Err(ApiError::bad_request("title : 1-200 caracteres requis"));
     }
-    if input.description.len() > 2000 {
-        return Err(ApiError::bad_request("description : max 2000 caracteres"));
+    if input.description.is_empty() || input.description.len() > 2000 {
+        return Err(ApiError::bad_request("description : 1-2000 caracteres requis"));
     }
     if input.constraints.as_deref().is_some_and(|c| c.len() > 500) {
         return Err(ApiError::bad_request("constraints : max 500 caracteres"));
@@ -413,8 +413,13 @@ async fn settings_handler(
     if root.is_empty() {
         return (StatusCode::BAD_REQUEST, axum::Json(serde_json::json!({ "error": "mip_root vide" })));
     }
-    *state.mip_root.lock().unwrap() = root.clone();
-    (StatusCode::OK, axum::Json(serde_json::json!({ "mip_root": root, "ok": true })))
+    // Canonicalize if the path exists to prevent traversal via symlinks
+    let canonical = std::path::Path::new(&root)
+        .canonicalize()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or(root);
+    *state.mip_root.lock().unwrap() = canonical.clone();
+    (StatusCode::OK, axum::Json(serde_json::json!({ "mip_root": canonical, "ok": true })))
 }
 
 // ── Helpers ───────────────────────────────────────────────

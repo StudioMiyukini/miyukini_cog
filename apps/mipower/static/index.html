@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MIPOWER — Miyukini Implementation Protocol Workflow Editor</title>
-  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/app.css?v=0.4.0" />
 </head>
 <body>
   <div id="app">
@@ -28,7 +28,7 @@
         </a></li>
       </ul>
       <div class="sidebar-footer">
-        <span class="version">v0.3.0 — E04</span>
+        <span class="version">v0.4.0 — tabs</span>
       </div>
     </nav>
 
@@ -60,7 +60,9 @@
 
       <div id="view-report" class="view">
         <header class="view-header">
-          <h1>Lecteur de rapport</h1>
+          <div class="report-header-left">
+            <h1 id="reportTitle">Lecteur de rapport</h1>
+          </div>
           <div class="report-header-controls">
             <div id="progressPills" class="progress-pills"></div>
             <div class="report-nav-group">
@@ -70,6 +72,7 @@
             </div>
           </div>
         </header>
+        <div class="report-tabs-bar" id="reportTabs"></div>
         <div class="report-layout">
           <aside class="artefact-tree" id="artefactTree">
             <p class="empty-state">Sélectionne une séquence dans le dashboard.</p>
@@ -248,6 +251,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=0.4.0"></script>
 </body>
 </html>

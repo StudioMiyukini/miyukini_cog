@@ -1,4 +1,4 @@
-// MIPOWER — app.js (v0.3.0)
+// MIPOWER — app.js v0.4.0
 
 // ── État global ───────────────────────────────────────────
 
@@ -7,6 +7,8 @@ let currentSlug     = null;
 let currentFiles    = [];   // [{path, done}] — artefacts de la séquence ouverte
 let currentFlatFiles = [];  // liste plate pour nav prev/next
 let currentFileIndex = -1;
+let currentTab       = null;          // onglet actif dans le rapport
+let tabGroupsMap     = {};            // { groupKey: [{full, done, label}] }
 
 // ── Navigation ────────────────────────────────────────────
 
@@ -177,8 +179,12 @@ async function openSequence(slug) {
   currentSlug = slug;
   switchView('report');
 
-  const tree = document.getElementById('artefactTree');
-  if (tree) tree.innerHTML = '<div class="loading">Chargement…</div>';
+  const tree    = document.getElementById('artefactTree');
+  const tabsBar = document.getElementById('reportTabs');
+  const title   = document.getElementById('reportTitle');
+  if (tree)    tree.innerHTML    = '<div class="loading">Chargement…</div>';
+  if (tabsBar) tabsBar.innerHTML = '';
+  if (title)   title.textContent = slug;
   document.getElementById('reportBody').innerHTML = '<p class="empty-state">Sélectionne un artefact.</p>';
   document.getElementById('reportToc').innerHTML  = '';
 
@@ -194,17 +200,34 @@ async function openSequence(slug) {
   renderProgressPills(slug);
 }
 
+// ── Labels lisibles des onglets ──────────────────────────
+
+const TAB_LABELS = {
+  briefs:   'Brief',
+  specs:    'Specs',
+  plans_p3: 'P3',
+  agents:   'Agents',
+  audits:   'P4',
+  phases:   'Phases',
+  _root:    'Racine',
+};
+
+const TAB_ORDER = ['briefs', 'specs', 'plans_p3', 'agents', 'audits', 'phases', '_root'];
+
 function renderArtefactTree(tree, files, seqRelPath) {
   if (!tree) return;
+  const tabsBar = document.getElementById('reportTabs');
+
   if (!files.length) {
     tree.innerHTML = '<p class="empty-state">Aucun artefact .md trouvé.</p>';
+    if (tabsBar) tabsBar.innerHTML = '';
     return;
   }
 
   // Normalise {path, done} ou string (compat)
   const normalised = files.map(f => typeof f === 'string' ? { path: f, done: false } : f);
-  currentFlatFiles  = normalised;
-  currentFileIndex  = -1;
+  currentFlatFiles = normalised;
+  currentFileIndex = -1;
   updateNavButtons();
 
   // Grouper par répertoire de premier niveau relatif à la séquence
@@ -216,30 +239,60 @@ function renderArtefactTree(tree, files, seqRelPath) {
     if (!groups[group]) groups[group] = [];
     groups[group].push({ full: f.path, done: f.done, label: parts[parts.length - 1] });
   }
+  tabGroupsMap = groups;
 
-  const ORDER = ['briefs', 'specs', 'plans_p3', 'agents', 'phases', '_root'];
-  const keys  = [...new Set([...ORDER.filter(k => groups[k]), ...Object.keys(groups).filter(k => !ORDER.includes(k))])];
+  const keys = [...new Set([
+    ...TAB_ORDER.filter(k => groups[k]),
+    ...Object.keys(groups).filter(k => !TAB_ORDER.includes(k)),
+  ])];
 
-  let html = '<nav class="tree-nav">';
-  for (const group of keys) {
-    const label = group === '_root' ? 'Racine' : group;
-    html += `<div class="tree-group"><div class="tree-group-label">${label}/</div><ul>`;
-    for (const item of groups[group]) {
-      const doneCls = item.done ? ' done' : ' pending';
-      html += `<li><button class="tree-item${doneCls}" data-path="${item.full}" title="${item.full}">${item.label}</button></li>`;
-    }
-    html += '</ul></div>';
+  // Rendre la barre d'onglets
+  if (tabsBar) {
+    tabsBar.innerHTML = keys.map(k => {
+      const total  = groups[k].length;
+      const done   = groups[k].filter(f => f.done).length;
+      const allDone = done === total && total > 0;
+      const cls    = allDone ? ' tab-done' : '';
+      const label  = TAB_LABELS[k] || k;
+      return `<button class="report-tab${cls}" data-tab="${k}">${label}<span class="tab-badge">${done}/${total}</span></button>`;
+    }).join('');
+
+    currentTab = keys[0] || null;
+    tabsBar.querySelector('.report-tab')?.classList.add('active');
+
+    tabsBar.querySelectorAll('.report-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabsBar.querySelectorAll('.report-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.tab;
+        renderTabPanel(tree, groups, currentTab);
+      });
+    });
   }
-  html += '</nav>';
-  tree.innerHTML = html;
+
+  // Afficher le premier onglet
+  renderTabPanel(tree, groups, currentTab);
 
   // Auto-charge le brief si disponible
   const brief = normalised.find(f => f.path.includes('/briefs/'));
   if (brief) loadArtefact(brief.path);
+}
 
-  tree.querySelectorAll('.tree-item').forEach(btn => {
+function renderTabPanel(panel, groups, tabKey) {
+  if (!panel) return;
+  if (!tabKey || !groups[tabKey]) { panel.innerHTML = ''; return; }
+  const items = groups[tabKey];
+  let html = '<nav class="tree-nav"><ul>';
+  for (const item of items) {
+    const doneCls = item.done ? ' done' : ' pending';
+    html += `<li><button class="tree-item${doneCls}" data-path="${item.full}" title="${item.full}">${item.label}</button></li>`;
+  }
+  html += '</ul></nav>';
+  panel.innerHTML = html;
+
+  panel.querySelectorAll('.tree-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      tree.querySelectorAll('.tree-item').forEach(b => b.classList.remove('active'));
+      panel.querySelectorAll('.tree-item').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       loadArtefact(btn.dataset.path);
     });
@@ -291,11 +344,28 @@ async function loadArtefact(path) {
       toc.innerHTML = tocHtml;
     }
 
-    // Marquer l'item actif dans l'arbre + mettre à jour index nav
+    // Marquer l'item actif + mettre à jour index nav
     const idx = currentFlatFiles.findIndex(f => (f.path || f) === path);
     if (idx !== -1) { currentFileIndex = idx; }
     updateNavButtons();
-    document.querySelectorAll('.tree-item').forEach(b => {
+
+    // Auto-switch onglet si nécessaire (nav prev/next cross-tab)
+    const tree    = document.getElementById('artefactTree');
+    const tabsBar = document.getElementById('reportTabs');
+    let targetTab = null;
+    for (const [k, items] of Object.entries(tabGroupsMap)) {
+      if (items.some(i => i.full === path)) { targetTab = k; break; }
+    }
+    if (targetTab && targetTab !== currentTab && tree) {
+      currentTab = targetTab;
+      tabsBar?.querySelectorAll('.report-tab').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === targetTab);
+      });
+      renderTabPanel(tree, tabGroupsMap, targetTab);
+    }
+
+    // Highlight item actif dans le panel courant
+    document.querySelectorAll('#artefactTree .tree-item').forEach(b => {
       b.classList.toggle('active', b.dataset.path === path);
     });
   } catch (e) {
