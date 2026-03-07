@@ -34,12 +34,14 @@ uuid = { version = "1", features = ["v4"] }
 chrono = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "2"
+cog-portal-contract = { path = "../cog-portal-contract", optional = true }
 
 [features]
 default = ["legacy-sqlite"]
 legacy-sqlite = ["rusqlite"]
 kindmother-only = []
 db-encryption = ["kindmother-db-key"]
+portal = ["cog-portal-contract"]
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript
 # Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md

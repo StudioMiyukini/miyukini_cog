@@ -23,6 +23,7 @@ chrono = "0.4"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 thiserror = "2"
+cog-portal-contract = { path = "../../crates/cog-portal-contract" }
 
 [[bin]]
 name = "cog-web-portal"

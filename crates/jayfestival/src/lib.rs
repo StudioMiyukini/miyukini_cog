@@ -11,3 +11,6 @@
 pub mod auth;
 pub mod data;
 pub mod services;
+
+#[cfg(feature = "portal")]
+pub mod portal_contract;

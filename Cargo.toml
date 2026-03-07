@@ -123,6 +123,9 @@ members = [
     # === MGE (Miyukini Game Engine) ===
     # Workspace MGE indépendant : mge/ (voir mge/Cargo.toml)
 
+    # === COG Portal Contract — Contrat d'exposition Portal ===
+    "crates/cog-portal-contract",
+
     # === MIPOWER — Workflow Editor ===
     "apps/mipower",
 

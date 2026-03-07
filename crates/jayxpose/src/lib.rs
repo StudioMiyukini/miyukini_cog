@@ -12,5 +12,8 @@ pub mod auth;
 pub mod data;
 pub mod governance;
 
+#[cfg(feature = "portal")]
+pub mod portal_contract;
+
 /// Réexport pour les consommateurs (Origin, Central).
 pub use data::JayXposeDb;
