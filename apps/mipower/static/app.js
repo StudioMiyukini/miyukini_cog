@@ -1,10 +1,12 @@
-// MIPOWER — app.js (E03+E04+E05+E06+E07)
+// MIPOWER — app.js (v0.3.0)
 
 // ── État global ───────────────────────────────────────────
 
-let allSequences = [];
-let currentSlug  = null;
-let currentFiles = [];
+let allSequences    = [];
+let currentSlug     = null;
+let currentFiles    = [];   // [{path, done}] — artefacts de la séquence ouverte
+let currentFlatFiles = [];  // liste plate pour nav prev/next
+let currentFileIndex = -1;
 
 // ── Navigation ────────────────────────────────────────────
 
@@ -52,7 +54,7 @@ sse.onmessage = (e) => {
   const slug = e.data.trim();
   loadSequences();
   if (currentSlug && currentSlug === slug) {
-    loadProgress(slug);
+    renderProgressPills(slug);
   }
 };
 sse.onerror = () => { /* reconnect automatique navigateur */ };
@@ -96,6 +98,31 @@ async function loadSequences() {
   }
 }
 
+const CLASS_ORDER = ['T1', 'T2', 'T3', 'T4', 'T5'];
+const STATUS_ORDER = ['active', 'done', 'archived'];
+
+function sortSequences(list) {
+  const sortBy = document.getElementById('sortBy')?.value || 'date-desc';
+  return [...list].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-asc':   return a.date.localeCompare(b.date);
+      case 'date-desc':  return b.date.localeCompare(a.date);
+      case 'name-asc':   return a.name.localeCompare(b.name);
+      case 'class-asc': {
+        const ia = CLASS_ORDER.indexOf(a.task_class || '');
+        const ib = CLASS_ORDER.indexOf(b.task_class || '');
+        return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+      }
+      case 'status': {
+        const ia = STATUS_ORDER.indexOf(a.status || 'active');
+        const ib = STATUS_ORDER.indexOf(b.status || 'active');
+        return ia - ib;
+      }
+      default: return b.date.localeCompare(a.date);
+    }
+  });
+}
+
 function renderSequences(grid) {
   if (!grid) return;
   if (!allSequences.length) {
@@ -112,7 +139,7 @@ function renderSequences(grid) {
     grid.innerHTML = '<div class="loading">Aucun résultat pour ce filtre.</div>';
     return;
   }
-  grid.innerHTML = filtered.map(s => sequenceCardHTML(s)).join('');
+  grid.innerHTML = sortSequences(filtered).map(s => sequenceCardHTML(s)).join('');
   grid.querySelectorAll('.sequence-card').forEach(card => {
     card.addEventListener('click', () => openSequence(card.dataset.slug));
   });
@@ -138,11 +165,10 @@ function sequenceCardHTML(s) {
     </div>`;
 }
 
-document.getElementById('searchInput')?.addEventListener('input', () => {
-  renderSequences(document.getElementById('sequenceGrid'));
-});
-document.getElementById('statusFilter')?.addEventListener('change', () => {
-  renderSequences(document.getElementById('sequenceGrid'));
+['searchInput', 'statusFilter', 'sortBy'].forEach(id => {
+  document.getElementById(id)?.addEventListener(id === 'searchInput' ? 'input' : 'change', () => {
+    renderSequences(document.getElementById('sequenceGrid'));
+  });
 });
 
 // ── Rapport — ouverture séquence ──────────────────────────
@@ -165,7 +191,7 @@ async function openSequence(slug) {
     if (tree) tree.innerHTML = `<div class="loading">Erreur : ${e.message}</div>`;
   }
 
-  loadProgress(slug);
+  renderProgressPills(slug);
 }
 
 function renderArtefactTree(tree, files, seqRelPath) {
@@ -175,15 +201,20 @@ function renderArtefactTree(tree, files, seqRelPath) {
     return;
   }
 
+  // Normalise {path, done} ou string (compat)
+  const normalised = files.map(f => typeof f === 'string' ? { path: f, done: false } : f);
+  currentFlatFiles  = normalised;
+  currentFileIndex  = -1;
+  updateNavButtons();
+
   // Grouper par répertoire de premier niveau relatif à la séquence
   const groups = {};
-  for (const f of files) {
-    // f est relatif à mip_root : ex. ".mip/sequences/2026-03-06-slug/briefs/brief.md"
-    const afterSeq = seqRelPath ? f.replace(seqRelPath + '/', '') : f;
+  for (const f of normalised) {
+    const afterSeq = seqRelPath ? f.path.replace(seqRelPath + '/', '') : f.path;
     const parts    = afterSeq.split('/');
     const group    = parts.length > 1 ? parts[0] : '_root';
     if (!groups[group]) groups[group] = [];
-    groups[group].push({ full: f, label: parts[parts.length - 1] });
+    groups[group].push({ full: f.path, done: f.done, label: parts[parts.length - 1] });
   }
 
   const ORDER = ['briefs', 'specs', 'plans_p3', 'agents', 'phases', '_root'];
@@ -194,7 +225,8 @@ function renderArtefactTree(tree, files, seqRelPath) {
     const label = group === '_root' ? 'Racine' : group;
     html += `<div class="tree-group"><div class="tree-group-label">${label}/</div><ul>`;
     for (const item of groups[group]) {
-      html += `<li><button class="tree-item" data-path="${item.full}" title="${item.full}">${item.label}</button></li>`;
+      const doneCls = item.done ? ' done' : ' pending';
+      html += `<li><button class="tree-item${doneCls}" data-path="${item.full}" title="${item.full}">${item.label}</button></li>`;
     }
     html += '</ul></div>';
   }
@@ -202,8 +234,8 @@ function renderArtefactTree(tree, files, seqRelPath) {
   tree.innerHTML = html;
 
   // Auto-charge le brief si disponible
-  const brief = files.find(f => f.includes('/briefs/'));
-  if (brief) loadArtefact(brief);
+  const brief = normalised.find(f => f.path.includes('/briefs/'));
+  if (brief) loadArtefact(brief.path);
 
   tree.querySelectorAll('.tree-item').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -259,7 +291,10 @@ async function loadArtefact(path) {
       toc.innerHTML = tocHtml;
     }
 
-    // Marquer l'item actif dans l'arbre
+    // Marquer l'item actif dans l'arbre + mettre à jour index nav
+    const idx = currentFlatFiles.findIndex(f => (f.path || f) === path);
+    if (idx !== -1) { currentFileIndex = idx; }
+    updateNavButtons();
     document.querySelectorAll('.tree-item').forEach(b => {
       b.classList.toggle('active', b.dataset.path === path);
     });
@@ -268,34 +303,50 @@ async function loadArtefact(path) {
   }
 }
 
-// ── E05 — Progression ─────────────────────────────────────
+// ── Progression pills (intégrées dans header rapport) ─────
 
-async function loadProgress(slug) {
-  const panel = document.getElementById('progressPanel');
-  const bars  = document.getElementById('progressBars');
-  if (!panel || !bars) return;
-
+async function renderProgressPills(slug) {
+  const pills = document.getElementById('progressPills');
+  if (!pills) return;
   try {
-    const res  = await fetch(`/api/progress/${encodeURIComponent(slug)}`);
-    const data = await res.json();
-    const phases = data.phases || [];
-    if (!phases.length || phases.every(p => p.total === 0)) {
-      panel.style.display = 'none';
-      return;
-    }
-    bars.innerHTML = phases.map(p => {
-      const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
-      return `
-        <div class="progress-item">
-          <div class="progress-label"><span>${p.phase}</span><span>${p.done}/${p.total}</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-        </div>`;
+    const res    = await fetch(`/api/progress/${encodeURIComponent(slug)}`);
+    const data   = await res.json();
+    const phases = (data.phases || []).filter(p => p.total > 0);
+    if (!phases.length) { pills.innerHTML = ''; return; }
+    pills.innerHTML = phases.map(p => {
+      const cls = p.done === p.total ? 'pill-done' : p.done > 0 ? 'pill-partial' : 'pill-pending';
+      return `<span class="progress-pill ${cls}" title="${p.phase}: ${p.done}/${p.total}">${p.phase}&nbsp;${p.done}/${p.total}</span>`;
     }).join('');
-    panel.style.display = 'block';
   } catch {
-    panel.style.display = 'none';
+    pills.innerHTML = '';
   }
 }
+
+// ── Navigation prev/next artefacts ───────────────────────
+
+function updateNavButtons() {
+  const prev    = document.getElementById('prevArtefact');
+  const next    = document.getElementById('nextArtefact');
+  const counter = document.getElementById('artefactCounter');
+  const n = currentFlatFiles.length;
+  if (prev)    prev.disabled    = currentFileIndex <= 0;
+  if (next)    next.disabled    = currentFileIndex >= n - 1 || n === 0;
+  if (counter) counter.textContent = n > 0 && currentFileIndex >= 0 ? `${currentFileIndex + 1}/${n}` : '';
+}
+
+document.getElementById('prevArtefact')?.addEventListener('click', () => {
+  if (currentFileIndex > 0) { currentFileIndex--; loadArtefact(currentFlatFiles[currentFileIndex].path); }
+});
+document.getElementById('nextArtefact')?.addEventListener('click', () => {
+  if (currentFileIndex < currentFlatFiles.length - 1) {
+    currentFileIndex++;
+    loadArtefact(currentFlatFiles[currentFileIndex].path);
+  }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.altKey && e.key === 'ArrowLeft')  document.getElementById('prevArtefact')?.click();
+  if (e.altKey && e.key === 'ArrowRight') document.getElementById('nextArtefact')?.click();
+});
 
 // ── Prompt Builder v2 ─────────────────────────────────────
 

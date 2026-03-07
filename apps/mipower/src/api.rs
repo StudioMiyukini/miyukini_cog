@@ -62,7 +62,19 @@ async fn sequences_handler(
     let index: SequencesIndex = serde_json::from_str(raw)
         .map_err(|e| ApiError::internal(format!("Parse index.json : {e}")))?;
 
-    let sequences: Vec<SequenceMeta> = index.sequences.into_iter().map(SequenceMeta::from).collect();
+    let seq_base = find_sequences_dir(&mip_root);
+    let sequences: Vec<SequenceMeta> = index.sequences.into_iter().map(|entry| {
+        let mut meta = SequenceMeta::from(entry);
+        if meta.status == "active" {
+            if let Some(ref base) = seq_base {
+                let seq_dir = base.join(&meta.name);
+                if seq_dir.exists() {
+                    meta.status = derive_status(&seq_dir);
+                }
+            }
+        }
+        meta
+    }).collect();
     let count = sequences.len();
 
     if let Ok(conn) = state.db.lock() {
@@ -137,27 +149,26 @@ async fn progress_handler(
         })
     });
 
-    let (p0_done, p0_total, p3_done, p3_total) = if let Some(dir) = seq_dir {
-        let p0 = count_done_in(
-            &dir.join("phases").join("p0").join("temps"),
-            "temps-", "Etat : TERMINE",
-        );
-        let p3 = count_done_in(
-            &dir.join("plans_p3").join("etapes"),
-            "etape-", "Statut : Terminé",
-        );
-        (p0.0, p0.1, p3.0, p3.1)
+    let phases = if let Some(dir) = seq_dir {
+        let p0  = count_done_in(&dir.join("phases").join("p0").join("temps"), "temps-", "Etat : TERMINE");
+        let p3  = count_done_in(&dir.join("plans_p3").join("etapes"), "etape-", "Statut : Terminé");
+        let buf = count_done_buf(&dir.join("plans_p3").join("etapes"), "Statut : Terminé");
+        let p4  = count_done_audits(&dir.join("audits"));
+        let p5  = trace_phase_progress(&dir.join("phases").join("p5-trace.md"));
+        let p6  = trace_phase_progress(&dir.join("phases").join("p6-trace.md"));
+        serde_json::json!([
+            { "phase": "P0",  "done": p0.0,  "total": p0.1  },
+            { "phase": "P3",  "done": p3.0,  "total": p3.1  },
+            { "phase": "BUF", "done": buf.0, "total": buf.1 },
+            { "phase": "P4",  "done": p4.0,  "total": p4.1  },
+            { "phase": "P5",  "done": p5.0,  "total": p5.1  },
+            { "phase": "P6",  "done": p6.0,  "total": p6.1  },
+        ])
     } else {
-        (0, 0, 0, 0)
+        serde_json::json!([])
     };
 
-    axum::Json(serde_json::json!({
-        "slug": slug,
-        "phases": [
-            { "phase": "P0", "done": p0_done, "total": p0_total },
-            { "phase": "P3", "done": p3_done, "total": p3_total },
-        ]
-    }))
+    axum::Json(serde_json::json!({ "slug": slug, "phases": phases }))
 }
 
 fn count_done_in(dir: &PathBuf, prefix: &str, marker: &str) -> (usize, usize) {
@@ -190,9 +201,12 @@ async fn artefacts_handler(
         return axum::Json(serde_json::json!({ "slug": slug, "files": [] }));
     };
 
-    let mut files = Vec::new();
-    walk_md(&seq_dir, &mip_root_path, &mut files);
-    files.sort();
+    let mut raw: Vec<(String, bool)> = Vec::new();
+    walk_md_with_status(&seq_dir, &mip_root_path, &mut raw);
+    raw.sort_by(|a, b| a.0.cmp(&b.0));
+    let files: Vec<serde_json::Value> = raw.into_iter()
+        .map(|(p, d)| serde_json::json!({ "path": p, "done": d }))
+        .collect();
 
     axum::Json(serde_json::json!({
         "slug": slug,
@@ -216,18 +230,22 @@ fn find_seq_dir(mip_root: &str, slug: &str) -> Option<PathBuf> {
     })
 }
 
-fn walk_md(current: &PathBuf, root: &PathBuf, files: &mut Vec<String>) {
+fn walk_md_with_status(current: &PathBuf, root: &PathBuf, files: &mut Vec<(String, bool)>) {
     let Ok(entries) = std::fs::read_dir(current) else { return; };
     for entry in entries.filter_map(|e| e.ok()) {
         let path = entry.path();
         if path.is_dir() {
             let name = path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
             if name != "ui" && name != "node_modules" && !name.starts_with('.') {
-                walk_md(&path, root, files);
+                walk_md_with_status(&path, root, files);
             }
         } else if path.extension().is_some_and(|e| e == "md") {
             if let Ok(rel) = path.strip_prefix(root) {
-                files.push(rel.to_string_lossy().replace('\\', "/").to_string());
+                let rel_path = rel.to_string_lossy().replace('\\', "/").to_string();
+                let done = std::fs::read_to_string(&path)
+                    .map(|c| c.contains("Etat : TERMINE") || c.contains("Statut : Terminé"))
+                    .unwrap_or(false);
+                files.push((rel_path, done));
             }
         }
     }
@@ -424,6 +442,50 @@ fn chrono_now() -> String {
     SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs().to_string()
 }
 
+/// Derive sequence status from p6-trace.md (fallback when index.json status is empty)
+fn derive_status(seq_dir: &std::path::Path) -> String {
+    let trace = seq_dir.join("phases").join("p6-trace.md");
+    if let Ok(content) = std::fs::read_to_string(&trace) {
+        if content.contains("SUCCES") { return "done".into(); }
+        if content.contains("REFUSE") || content.contains("abandonne") { return "archived".into(); }
+    }
+    "active".into()
+}
+
+/// Count audit files in a directory that are marked done
+fn count_done_audits(dir: &std::path::Path) -> (usize, usize) {
+    let Ok(entries) = std::fs::read_dir(dir) else { return (0, 0); };
+    let files: Vec<_> = entries.filter_map(|e| e.ok())
+        .filter(|e| e.path().extension().is_some_and(|x| x == "md"))
+        .collect();
+    let total = files.len();
+    let done = files.iter()
+        .filter(|e| std::fs::read_to_string(e.path())
+            .map(|c| c.contains("Etat : TERMINE") || c.contains("VERDICT : PASS"))
+            .unwrap_or(false))
+        .count();
+    (done, total)
+}
+
+/// Return (done, 1) for a phase trace file, or (0, 0) if absent
+fn trace_phase_progress(path: &std::path::Path) -> (usize, usize) {
+    if !path.exists() { return (0, 0); }
+    let done = std::fs::read_to_string(path)
+        .map(|c| c.contains("Etat : TERMINE") || c.contains("CLOTUREE") || c.contains("REFUSE"))
+        .unwrap_or(false);
+    (done as usize, 1)
+}
+
+/// Count etape-buf.md as done/pending (single file)
+fn count_done_buf(etapes_dir: &std::path::Path, marker: &str) -> (usize, usize) {
+    let path = etapes_dir.join("etape-buf.md");
+    if !path.exists() { return (0, 0); }
+    let done = std::fs::read_to_string(&path)
+        .map(|c| c.contains(marker))
+        .unwrap_or(false);
+    (done as usize, 1)
+}
+
 // ── Error type ────────────────────────────────────────────
 
 struct ApiError { status: StatusCode, message: String }
@@ -569,6 +631,36 @@ mod tests {
         // Invalid: spaces
         let with_space = "my slug";
         assert!(!with_space.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'));
+    }
+
+    /// E00 smoke — derive_status et trace_phase_progress
+    #[test]
+    fn test_smoke_e00_derive_status() {
+        let tmp = TempDir::new().unwrap();
+        // Sans p6-trace → active
+        assert_eq!(derive_status(&tmp.path().to_path_buf()), "active");
+        // Avec SUCCES → done
+        std::fs::create_dir_all(tmp.path().join("phases")).unwrap();
+        std::fs::write(tmp.path().join("phases").join("p6-trace.md"), "CLOTUREE -- SUCCES").unwrap();
+        assert_eq!(derive_status(&tmp.path().to_path_buf()), "done");
+    }
+
+    #[test]
+    fn test_smoke_e00_derive_status_archived() {
+        let tmp = TempDir::new().unwrap();
+        std::fs::create_dir_all(tmp.path().join("phases")).unwrap();
+        std::fs::write(tmp.path().join("phases").join("p6-trace.md"), "REFUSE par l'utilisateur").unwrap();
+        assert_eq!(derive_status(&tmp.path().to_path_buf()), "archived");
+    }
+
+    #[test]
+    fn test_smoke_e00_trace_phase_progress() {
+        let tmp = TempDir::new().unwrap();
+        let absent = tmp.path().join("nonexistent.md");
+        assert_eq!(trace_phase_progress(&absent), (0, 0));
+        let trace = tmp.path().join("p5-trace.md");
+        std::fs::write(&trace, "- Etat : TERMINE\n").unwrap();
+        assert_eq!(trace_phase_progress(&trace), (1, 1));
     }
 
     /// Smoke test RED — compile uniquement apres E01 (champs manquants dans PromptBuilderInput)

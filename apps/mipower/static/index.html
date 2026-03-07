@@ -28,7 +28,7 @@
         </a></li>
       </ul>
       <div class="sidebar-footer">
-        <span class="version">v0.2.0 — E04</span>
+        <span class="version">v0.3.0 — E04</span>
       </div>
     </nav>
 
@@ -44,6 +44,13 @@
               <option value="done">Terminé</option>
               <option value="archived">Archivé</option>
             </select>
+            <select id="sortBy" class="filter-select" aria-label="Trier par">
+              <option value="date-desc">Date (récent)</option>
+              <option value="date-asc">Date (ancien)</option>
+              <option value="name-asc">Nom A→Z</option>
+              <option value="class-asc">Classe T1→T5</option>
+              <option value="status">Statut</option>
+            </select>
           </div>
         </header>
         <div id="sequenceGrid" class="sequence-grid">
@@ -54,6 +61,14 @@
       <div id="view-report" class="view">
         <header class="view-header">
           <h1>Lecteur de rapport</h1>
+          <div class="report-header-controls">
+            <div id="progressPills" class="progress-pills"></div>
+            <div class="report-nav-group">
+              <button id="prevArtefact" class="btn-nav" aria-label="Artefact précédent" disabled>◀</button>
+              <span id="artefactCounter" class="artefact-counter"></span>
+              <button id="nextArtefact" class="btn-nav" aria-label="Artefact suivant" disabled>▶</button>
+            </div>
+          </div>
         </header>
         <div class="report-layout">
           <aside class="artefact-tree" id="artefactTree">
@@ -228,10 +243,6 @@
       </div>
     </main>
 
-    <div id="progressPanel" class="progress-panel" style="display:none">
-      <h3>Progression</h3>
-      <div id="progressBars"></div>
-    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
