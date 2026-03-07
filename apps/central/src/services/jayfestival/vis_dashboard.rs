@@ -1,4 +1,8 @@
-//! VIS-E04 — Dashboard visiteur.
+﻿//! VIS-E04 — Dashboard visiteur.
+//!
+//! @id: jf_vis_dashboard @do: render_vis_dashboard
+//! @role: ui @layer: service
+//! @human: Ecran VIS-E04 JayFestival: tableau de bord visiteur.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

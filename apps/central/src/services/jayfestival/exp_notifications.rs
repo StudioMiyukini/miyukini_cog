@@ -1,4 +1,8 @@
-//! EXP-E15 — Notifications exposant.
+﻿//! EXP-E15 — Notifications exposant.
+//!
+//! @id: jf_exp_notifications @do: render_exp_notifications
+//! @role: ui @layer: service
+//! @human: Ecran EXP-E15 JayFestival: centre de notifications exposant.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

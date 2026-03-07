@@ -1,5 +1,9 @@
 //! Types domaine JayFestival (profiles, editions, organisateurs, exposants).
 //! Alignés sur la référence base de données ; persistance via KindMother (SQLite fille).
+//!
+//! @id: jayfestival_types @do: define_domain_types
+//! @role: domain @layer: domain
+//! @human: Types Serde JayFestival — Profile, Edition, Organisateur, Exposant, Animation, BudgetEntry.
 
 #![allow(missing_docs)]
 

@@ -1,4 +1,8 @@
-//! ORG-E07 — Hub d'une édition (navigation par onglets).
+﻿//! ORG-E07 — Hub d'une édition (navigation par onglets).
+//!
+//! @id: jf_org_edition_hub @do: render_org_edition_hub
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E07 JayFestival: hub edition avec navigation par onglets.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

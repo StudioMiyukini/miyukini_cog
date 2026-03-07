@@ -1,4 +1,8 @@
-//! VIS-E12 — Compte visiteur.
+﻿//! VIS-E12 — Compte visiteur.
+//!
+//! @id: jf_vis_compte @do: render_vis_compte
+//! @role: ui @layer: service
+//! @human: Ecran VIS-E12 JayFestival: compte visiteur (profil, preferences).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

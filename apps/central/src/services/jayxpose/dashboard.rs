@@ -1,4 +1,8 @@
-//! Dashboard JayXpose (XP-E01) — tableau de bord exposant avec donnees reelles.
+﻿//! Dashboard JayXpose (XP-E01) — tableau de bord exposant avec donnees reelles.
+//!
+//! @id: jx_dashboard @do: render_dashboard
+//! @role: ui @layer: service
+//! @human: Ecran XP-E01 JayXpose: tableau de bord exposant avec donnees reelles KindMother.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

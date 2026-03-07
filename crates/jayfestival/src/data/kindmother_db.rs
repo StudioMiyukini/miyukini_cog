@@ -1,6 +1,10 @@
 //! Base de données fille SQLite JayFestival sous autorité KindMother.
 //!
 //! Instance Daughter : persistance locale via SQLite, identité KindMother pour gouvernance.
+//!
+//! @id: jayfestival_kindmother_db @do: persist_jayfestival_data_sqlite
+//! @role: data @layer: service
+//! @human: Base SQLite JayFestival (Daughter KindMother) — schéma CRUD éditions/exposants/animations/budget.
 
 use crate::data::types::{
     Animation, BudgetEntry, BudgetSummary, Edition, EditionExposant, Exposant, Organisateur,

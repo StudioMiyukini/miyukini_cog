@@ -1,4 +1,8 @@
-//! Ma vitrine — Parametres, pages et previsualisation (XP-E06/07/08).
+﻿//! Ma vitrine — Parametres, pages et previsualisation (XP-E06/07/08).
+//!
+//! @id: jx_vitrine @do: render_vitrine
+//! @role: ui @layer: service
+//! @human: Ecrans XP-E06/07/08 JayXpose: parametres vitrine, pages et previsualisation.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

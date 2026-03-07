@@ -1,7 +1,11 @@
-//! UNC-E01 — Landing JayFestival (facade publique).
+﻿//! UNC-E01 — Landing JayFestival (facade publique).
 //!
 //! Page d'accueil du catalogue d'evenements, accessible sans authentification.
 //! Affiche : hero, recherche, categories, prochains evenements, CTA inscription.
+//!
+//! @id: jf_unc_landing @do: render_unc_landing
+//! @role: ui @layer: service
+//! @human: Ecran UNC-E01 JayFestival: landing page publique (hero, recherche, CTA inscription).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

@@ -1,10 +1,14 @@
-//! ORG-E09/E10/E11/E12/E13/E18 — Exposants d'une édition.
+﻿//! ORG-E09/E10/E11/E12/E13/E18 — Exposants d'une édition.
 //! - E09: Liste des candidatures
 //! - E10: Liste des exposants confirmés
 //! - E11: Fiche détaillée exposant
 //! - E12: Génération devis
 //! - E13: Vue factures
 //! - E18: Import CSV
+//!
+//! @id: jf_org_exposants @do: render_org_exposants
+//! @role: ui @layer: service
+//! @human: Ecrans ORG-E09/E18 JayFestival: gestion des exposants (candidatures, fiches, import CSV).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

@@ -1,4 +1,8 @@
-//! ORG-E19 — Budget d'une édition (revenus, dépenses, balance).
+﻿//! ORG-E19 — Budget d'une édition (revenus, dépenses, balance).
+//!
+//! @id: jf_org_budget @do: render_org_budget
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E19 JayFestival: tableau budgetaire edition (revenus, depenses, balance).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

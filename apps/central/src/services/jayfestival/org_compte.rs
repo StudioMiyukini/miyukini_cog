@@ -1,4 +1,8 @@
-//! ORG-E20 — Mon compte organisateur.
+﻿//! ORG-E20 — Mon compte organisateur.
+//!
+//! @id: jf_org_compte @do: render_org_compte
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E20 JayFestival: mon compte organisateur (profil, parametres).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

@@ -1,4 +1,8 @@
-//! Fiche produit — creation / modification (XP-E04).
+﻿//! Fiche produit — creation / modification (XP-E04).
+//!
+//! @id: jx_produit_form @do: render_produit_form
+//! @role: ui @layer: service
+//! @human: Ecran XP-E04 JayXpose: formulaire de creation et modification de produit.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

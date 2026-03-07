@@ -1,4 +1,8 @@
-//! ORG-E22 — Documents et legal (upload/telechargement).
+﻿//! ORG-E22 — Documents et legal (upload/telechargement).
+//!
+//! @id: jf_org_documents @do: render_org_documents
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E22 JayFestival: documents legaux organisateur (upload/telechargement).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

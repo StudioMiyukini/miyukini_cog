@@ -1,4 +1,8 @@
-//! EXP-E05/E08/E10 — Candidatures exposant + annuaire événements.
+﻿//! EXP-E05/E08/E10 — Candidatures exposant + annuaire événements.
+//!
+//! @id: jf_exp_candidatures @do: render_exp_candidatures
+//! @role: ui @layer: service
+//! @human: Ecrans EXP-E05/E08/E10 JayFestival: candidatures exposant et annuaire evenements.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

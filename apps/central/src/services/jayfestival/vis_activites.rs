@@ -1,4 +1,8 @@
-//! VIS-E09 — Activités visiteur (jeux, concours, pass).
+﻿//! VIS-E09 — Activités visiteur (jeux, concours, pass).
+//!
+//! @id: jf_vis_activites @do: render_vis_activites
+//! @role: ui @layer: service
+//! @human: Ecran VIS-E09 JayFestival: activites visiteur (jeux, concours, pass).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

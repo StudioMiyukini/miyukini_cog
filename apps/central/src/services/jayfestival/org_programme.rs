@@ -1,4 +1,8 @@
-//! ORG-E17 — Programme et animations d'une édition.
+﻿//! ORG-E17 — Programme et animations d'une édition.
+//!
+//! @id: jf_org_programme @do: render_org_programme
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E17 JayFestival: programme et animations d une edition.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

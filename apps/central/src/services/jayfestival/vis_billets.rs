@@ -1,4 +1,8 @@
-//! VIS-E06 — Billets visiteur.
+﻿//! VIS-E06 — Billets visiteur.
+//!
+//! @id: jf_vis_billets @do: render_vis_billets
+//! @role: ui @layer: service
+//! @human: Ecran VIS-E06 JayFestival: billets visiteur (achat, gestion).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

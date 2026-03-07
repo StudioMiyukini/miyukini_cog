@@ -1,4 +1,8 @@
-//! ORG-E25 — Publication et cloture (workflow de validation).
+﻿//! ORG-E25 — Publication et cloture (workflow de validation).
+//!
+//! @id: jf_org_publication @do: render_org_publication
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E25 JayFestival: publication et cloture (workflow de validation).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

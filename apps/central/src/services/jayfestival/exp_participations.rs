@@ -1,4 +1,8 @@
-//! EXP-E05/E06 — Participations exposant (liste et détail).
+﻿//! EXP-E05/E06 — Participations exposant (liste et détail).
+//!
+//! @id: jf_exp_participations @do: render_exp_participations
+//! @role: ui @layer: service
+//! @human: Ecrans EXP-E05/E06 JayFestival: liste et detail des participations exposant.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

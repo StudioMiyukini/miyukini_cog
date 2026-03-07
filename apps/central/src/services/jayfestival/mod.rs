@@ -1,7 +1,11 @@
-//! Module JayFestival — vue complète avec gestion multi-rôle.
+﻿//! Module JayFestival — vue complète avec gestion multi-rôle.
 //!
 //! Architecture : facade publique (UNC) + espaces connectés (ORG/EXP/VIS).
 //! Données réelles via JayFestivalDb (conns.read().jayfestival).
+//!
+//! @id: jf_service_mod @do: declare_jayfestival_ui_service
+//! @role: ui @layer: service
+//! @human: Module UI JayFestival: routing multi-role UNC/ORG/EXP/VIS avec donnees reelles KindMother.
 
 mod sidebar;
 pub mod components;

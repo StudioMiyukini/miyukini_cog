@@ -1,4 +1,8 @@
-//! Fiche publique / annuaire (XP-E12) — visibilite, confidentialite, apercu.
+﻿//! Fiche publique / annuaire (XP-E12) — visibilite, confidentialite, apercu.
+//!
+//! @id: jx_fiche_publique @do: render_fiche_publique
+//! @role: ui @layer: service
+//! @human: Ecran XP-E12 JayXpose: fiche publique exposant (visibilite, confidentialite, apercu).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

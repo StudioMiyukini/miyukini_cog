@@ -1,6 +1,10 @@
-//! UNC-E11/E12/E13/E14 — Auth facade publique (CTA modal, Connexion, Inscription, Mentions).
+﻿//! UNC-E11/E12/E13/E14 — Auth facade publique (CTA modal, Connexion, Inscription, Mentions).
 //!
 //! Gestion de l'authentification et modals CTA pour utilisateurs non connectes.
+//!
+//! @id: jf_unc_auth @do: render_unc_auth
+//! @role: ui @layer: service
+//! @human: Ecrans UNC-E11/E14 JayFestival: authentification et modals CTA (connexion, inscription, mentions).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

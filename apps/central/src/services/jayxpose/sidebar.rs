@@ -1,4 +1,8 @@
-//! Sidebar JayXpose — navigation par section (XP-E01..XP-E12).
+﻿//! Sidebar JayXpose — navigation par section (XP-E01..XP-E12).
+//!
+//! @id: jx_sidebar @do: render_sidebar_navigation
+//! @role: ui @layer: service
+//! @human: Sidebar JayXpose: navigation par section (XP-E01 a XP-E12).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

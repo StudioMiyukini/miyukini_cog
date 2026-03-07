@@ -1,7 +1,11 @@
-//! Module JayXpose — profil exposant, catalogue, vitrine, coffre-fort documentaire.
+﻿//! Module JayXpose — profil exposant, catalogue, vitrine, coffre-fort documentaire.
 //!
 //! Architecture : sidebar + contenu dynamique par section (XP-E01..XP-E12).
 //! Données réelles via JayXposeDb (conns.read().jayxpose).
+//!
+//! @id: jx_service_mod @do: declare_jayxpose_ui_service
+//! @role: ui @layer: service
+//! @human: Module UI JayXpose: routing par section XP-E01..XP-E12 avec donnees reelles KindMother.
 
 mod sidebar;
 pub mod components;

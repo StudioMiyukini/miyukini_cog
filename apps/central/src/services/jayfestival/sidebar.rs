@@ -1,4 +1,8 @@
-//! Sidebar JayFestival — navigation par rôle et sections.
+﻿//! Sidebar JayFestival — navigation par rôle et sections.
+//!
+//! @id: jf_sidebar @do: render_sidebar_navigation
+//! @role: ui @layer: service
+//! @human: Sidebar JayFestival: navigation par role (ORG/EXP/VIS) et sections.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

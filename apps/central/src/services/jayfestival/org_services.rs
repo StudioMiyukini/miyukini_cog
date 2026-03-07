@@ -1,4 +1,8 @@
-//! ORG-E24 — Activation des services visiteur (jeux, concours, reservations).
+﻿//! ORG-E24 — Activation des services visiteur (jeux, concours, reservations).
+//!
+//! @id: jf_org_services @do: render_org_services
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E24 JayFestival: activation des services visiteur (jeux, concours, reservations).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

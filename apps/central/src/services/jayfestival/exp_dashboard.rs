@@ -1,4 +1,8 @@
-//! EXP-E04 — Dashboard exposant (candidatures, participations, alertes).
+﻿//! EXP-E04 — Dashboard exposant (candidatures, participations, alertes).
+//!
+//! @id: jf_exp_dashboard @do: render_exp_dashboard
+//! @role: ui @layer: service
+//! @human: Ecran EXP-E04 JayFestival: tableau de bord exposant avec candidatures et alertes.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

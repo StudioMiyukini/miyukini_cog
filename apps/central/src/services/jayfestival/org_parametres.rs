@@ -1,4 +1,8 @@
-//! ORG-E08 — Parametrage d'une edition (dates, lieu, theme, reglement).
+﻿//! ORG-E08 — Parametrage d'une edition (dates, lieu, theme, reglement).
+//!
+//! @id: jf_org_parametres @do: render_org_parametres
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E08 JayFestival: parametrage edition (dates, lieu, theme, reglement).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

@@ -1,4 +1,8 @@
-//! Composants partagés JayFestival — StatCard, Badge, TabButton, EmptyState, PlaceholderSection.
+﻿//! Composants partagés JayFestival — StatCard, Badge, TabButton, EmptyState, PlaceholderSection.
+//!
+//! @id: jf_components @do: export_shared_ui_components
+//! @role: ui @layer: service
+//! @human: Composants UI reutilisables JayFestival: StatCard, Badge, TabButton, EmptyState.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

@@ -2,6 +2,10 @@
 //!
 //! Règle: toute création non-SQL (brouillon en mémoire, template runtime, etc.)
 //! doit être validée par mandat puis tracée en audit.
+//!
+//! @id: jayxpose_governance @do: govern_non_sql_mutations
+//! @role: logic @layer: service
+//! @human: Gouvernance JayXpose — valide et trace les mutations non-SQL via mandat StrongFather.
 
 use crate::data::{JayXposeDb, SyncLog};
 use serde_json::Value;

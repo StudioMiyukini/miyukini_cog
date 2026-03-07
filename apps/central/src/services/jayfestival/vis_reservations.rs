@@ -1,4 +1,8 @@
-//! VIS-E07 — Reservations visiteur.
+﻿//! VIS-E07 — Reservations visiteur.
+//!
+//! @id: jf_vis_reservations @do: render_vis_reservations
+//! @role: ui @layer: service
+//! @human: Ecran VIS-E07 JayFestival: reservations visiteur.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

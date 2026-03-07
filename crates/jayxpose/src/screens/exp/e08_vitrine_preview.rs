@@ -1,4 +1,8 @@
 //! XP-E08 - Previsualisation vitrine.
+//!
+//! @id: jayxpose_screen_e08_vitrine_preview @do: render_vitrine_preview
+//! @role: ui @layer: service
+//! @human: Écran XP-E08 JayXpose — prévisualisation de la vitrine exposant avant publication.
 
 use crate::data::{JayXposeDb, PageBuilderBlock, PageBuilderDocument};
 use crate::screens::exp::ExpState;

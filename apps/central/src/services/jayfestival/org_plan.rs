@@ -1,7 +1,11 @@
-//! ORG-E14/E15/E16 — Plan de salle complet.
+﻿//! ORG-E14/E15/E16 — Plan de salle complet.
 //! - E14: Définition des zones
 //! - E15: Attribution des stands
 //! - E16: Visualisation et export
+//!
+//! @id: jf_org_plan @do: render_org_plan
+//! @role: ui @layer: service
+//! @human: Ecrans ORG-E14/E16 JayFestival: plan de salle (zones, attribution stands, export).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

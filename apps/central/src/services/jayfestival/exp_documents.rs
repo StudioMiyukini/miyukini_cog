@@ -1,4 +1,8 @@
-//! EXP-E09/E10 — Documents exposant (liste et upload).
+﻿//! EXP-E09/E10 — Documents exposant (liste et upload).
+//!
+//! @id: jf_exp_documents @do: render_exp_documents
+//! @role: ui @layer: service
+//! @human: Ecrans EXP-E09/E10 JayFestival: liste et upload des documents exposant.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

@@ -1,4 +1,8 @@
-//! EXP-E14 — Fiche publique exposant (aperçu et édition).
+﻿//! EXP-E14 — Fiche publique exposant (aperçu et édition).
+//!
+//! @id: jf_exp_fiche_publique @do: render_exp_fiche_publique
+//! @role: ui @layer: service
+//! @human: Ecran EXP-E14 JayFestival: apercu et edition de la fiche publique exposant.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

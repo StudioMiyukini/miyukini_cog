@@ -1,5 +1,9 @@
-//! Composants partages JayXpose — StatCard, Badge, ActionButton, EmptyState, PlaceholderSection,
+﻿//! Composants partages JayXpose — StatCard, Badge, ActionButton, EmptyState, PlaceholderSection,
 //! FormField, FormSection, DocumentRow.
+//!
+//! @id: jx_components @do: export_shared_ui_components
+//! @role: ui @layer: service
+//! @human: Composants UI reutilisables JayXpose: StatCard, Badge, ActionButton, EmptyState, FormField.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

@@ -1,4 +1,8 @@
-//! ORG-E23 — Annonces et notifications aux exposants/visiteurs.
+﻿//! ORG-E23 — Annonces et notifications aux exposants/visiteurs.
+//!
+//! @id: jf_org_annonces @do: render_org_annonces
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E23 JayFestival: envoi annonces et notifications organisateur.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

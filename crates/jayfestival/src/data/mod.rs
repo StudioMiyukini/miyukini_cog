@@ -1,5 +1,9 @@
 //! Persistance JayFestival via KindMother Service.
 //! Par défaut : legacy-sqlite. Full KM (kindmother-only) en cours de parité API.
+//!
+//! @id: jayfestival_data_mod @do: export_data_persistence
+//! @role: data @layer: service
+//! @human: Module de persistance JayFestival — exporte types et JayFestivalDb via KindMother.
 
 mod types;
 

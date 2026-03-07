@@ -1,4 +1,8 @@
-//! VIS — Catalogue des éditions publiées + agenda visiteur.
+﻿//! VIS — Catalogue des éditions publiées + agenda visiteur.
+//!
+//! @id: jf_vis_catalogue @do: render_vis_catalogue
+//! @role: ui @layer: service
+//! @human: Ecran VIS JayFestival: catalogue des editions publiees et agenda visiteur.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

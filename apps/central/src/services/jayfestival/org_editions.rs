@@ -1,4 +1,8 @@
-//! ORG-E05/E06 — Liste des éditions + création d'une nouvelle édition.
+﻿//! ORG-E05/E06 — Liste des éditions + création d'une nouvelle édition.
+//!
+//! @id: jf_org_editions @do: render_org_editions
+//! @role: ui @layer: service
+//! @human: Ecrans ORG-E05/E06 JayFestival: liste des editions et formulaire de creation.
 
 use dioxus::prelude::*;
 use jayfestival::data::Edition;

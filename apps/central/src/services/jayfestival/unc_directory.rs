@@ -1,6 +1,10 @@
-//! UNC-E06/E07/E08/E09 — Annuaires publics (organisateurs et exposants).
+﻿//! UNC-E06/E07/E08/E09 — Annuaires publics (organisateurs et exposants).
 //!
 //! Listes et fiches detaillees des organisateurs et exposants visibles au public.
+//!
+//! @id: jf_unc_directory @do: render_unc_directory
+//! @role: ui @layer: service
+//! @human: Ecrans UNC-E06/E09 JayFestival: annuaires publics organisateurs et exposants.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

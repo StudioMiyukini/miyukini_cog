@@ -1,4 +1,8 @@
-//! ORG-E04 — Dashboard organisateur (stats réelles, éditions récentes, actions rapides).
+﻿//! ORG-E04 — Dashboard organisateur (stats réelles, éditions récentes, actions rapides).
+//!
+//! @id: jf_org_dashboard @do: render_org_dashboard
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E04 JayFestival: tableau de bord organisateur avec stats et editions recentes.
 
 use dioxus::prelude::*;
 use jayfestival::data::Edition;

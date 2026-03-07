@@ -1,4 +1,8 @@
-//! Coffre-fort documentaire (XP-E09 + XP-E10) — liste, upload, partages.
+﻿//! Coffre-fort documentaire (XP-E09 + XP-E10) — liste, upload, partages.
+//!
+//! @id: jx_documents @do: render_documents_vault
+//! @role: ui @layer: service
+//! @human: Ecrans XP-E09/E10 JayXpose: coffre-fort documentaire (liste, upload, partages).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

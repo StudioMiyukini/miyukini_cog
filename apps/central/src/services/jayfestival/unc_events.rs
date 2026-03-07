@@ -1,6 +1,10 @@
-//! UNC-E02 / UNC-E03 — Liste des evenements et Fiche evenement (facade publique).
+﻿//! UNC-E02 / UNC-E03 — Liste des evenements et Fiche evenement (facade publique).
 //!
 //! Catalogue des evenements publies, filtres, et detail d'un evenement.
+//!
+//! @id: jf_unc_events @do: render_unc_events
+//! @role: ui @layer: service
+//! @human: Ecrans UNC-E02/E03 JayFestival: catalogue des evenements et fiche evenement.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

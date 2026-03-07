@@ -1,4 +1,8 @@
-//! EXP-E13 — Mon compte exposant.
+﻿//! EXP-E13 — Mon compte exposant.
+//!
+//! @id: jf_exp_compte @do: render_exp_compte
+//! @role: ui @layer: service
+//! @human: Ecran EXP-E13 JayFestival: mon compte exposant (profil, preferences).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

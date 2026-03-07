@@ -1,4 +1,8 @@
-//! VIS-E05 — Agenda visiteur.
+﻿//! VIS-E05 — Agenda visiteur.
+//!
+//! @id: jf_vis_agenda @do: render_vis_agenda
+//! @role: ui @layer: service
+//! @human: Ecran VIS-E05 JayFestival: agenda visiteur (animations, creneaux).
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

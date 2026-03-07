@@ -1,4 +1,8 @@
-//! EXP-E11/E12 — Factures et paiements exposant.
+﻿//! EXP-E11/E12 — Factures et paiements exposant.
+//!
+//! @id: jf_exp_factures @do: render_exp_factures
+//! @role: ui @layer: service
+//! @human: Ecrans EXP-E11/E12 JayFestival: factures et suivi des paiements exposant.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

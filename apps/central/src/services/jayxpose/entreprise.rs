@@ -1,4 +1,8 @@
-//! Fiche entreprise (XP-E02) — gestion du profil exposant enrichi.
+﻿//! Fiche entreprise (XP-E02) — gestion du profil exposant enrichi.
+//!
+//! @id: jx_entreprise @do: render_entreprise_profile
+//! @role: ui @layer: service
+//! @human: Ecran XP-E02 JayXpose: gestion du profil exposant enrichi.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

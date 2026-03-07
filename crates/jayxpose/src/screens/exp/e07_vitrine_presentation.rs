@@ -1,4 +1,8 @@
 //! XP-E07 - Page builder vitrine (refonte orientee Elementor).
+//!
+//! @id: jayxpose_screen_e07_vitrine_presentation @do: render_vitrine_page_builder
+//! @role: ui @layer: service
+//! @human: Écran XP-E07 JayXpose — constructeur de page vitrine exposant (blocs drag & drop).
 
 use crate::data::{JayXposeDb, PageBuilderBlock, PageBuilderDocument, VitrineBlock, VitrinePage};
 use crate::governance::{govern_non_sql_create, GovernanceContext};

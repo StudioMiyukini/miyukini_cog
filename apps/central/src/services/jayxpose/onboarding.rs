@@ -1,4 +1,4 @@
-//! Onboarding JayXpose — Parcours guidé par Miou pour la création du profil exposant.
+﻿//! Onboarding JayXpose — Parcours guidé par Miou pour la création du profil exposant.
 //!
 //! Didacticiel en 6 étapes avec Miou qui explique chaque bloc d'information :
 //! 0. Bienvenue — Miou explique JayXpose
@@ -7,6 +7,10 @@
 //! 3. Description — Résumé et présentation détaillée
 //! 4. Contact — Email, téléphone, adresse
 //! 5. Félicitations — Profil créé, redirection vers le dashboard
+//!
+//! @id: jx_onboarding @do: render_onboarding_flow
+//! @role: ui @layer: service
+//! @human: Onboarding JayXpose: parcours guide Miou en 6 etapes pour creation du profil exposant.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

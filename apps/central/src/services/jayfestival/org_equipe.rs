@@ -1,4 +1,8 @@
-//! ORG-E21 — Gestion de l'equipe et des invitations.
+﻿//! ORG-E21 — Gestion de l'equipe et des invitations.
+//!
+//! @id: jf_org_equipe @do: render_org_equipe
+//! @role: ui @layer: service
+//! @human: Ecran ORG-E21 JayFestival: gestion de l equipe organisatrice et invitations.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

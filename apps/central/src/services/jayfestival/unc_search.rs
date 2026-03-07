@@ -1,6 +1,10 @@
-//! UNC-E10 — Recherche globale (facade publique).
+﻿//! UNC-E10 — Recherche globale (facade publique).
 //!
 //! Recherche sur evenements, organisateurs et exposants.
+//!
+//! @id: jf_unc_search @do: render_unc_search
+//! @role: ui @layer: service
+//! @human: Ecran UNC-E10 JayFestival: recherche globale (evenements, organisateurs, exposants).
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

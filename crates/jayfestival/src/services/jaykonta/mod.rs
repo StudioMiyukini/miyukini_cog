@@ -2,6 +2,10 @@
 //!
 //! JayFestival consomme JayKonta pour budget édition et facturation exposants.
 //! Décision P0 : Miyuinvoice en façade, JayKonta en backend.
+//!
+//! @id: jayfestival_svc_jaykonta_mod @do: export_jaykonta_adapter
+//! @role: api @layer: service
+//! @human: Module intégration JayKonta/Miyuinvoice — devis et facturation exposants par édition.
 
 pub mod adapter;
 

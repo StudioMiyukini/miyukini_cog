@@ -1,4 +1,8 @@
-//! Catalogue produits (XP-E03 + XP-E05) — liste des produits + gestion categories.
+﻿//! Catalogue produits (XP-E03 + XP-E05) — liste des produits + gestion categories.
+//!
+//! @id: jx_catalogue @do: render_catalogue_produits
+//! @role: ui @layer: service
+//! @human: Ecrans XP-E03/E05 JayXpose: liste des produits et gestion des categories.
 
 use dioxus::prelude::*;
 use crate::data::use_service_connections;

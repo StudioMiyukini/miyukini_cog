@@ -1,4 +1,8 @@
-//! EXP-E07/E08 — Agenda exposant (animations, RDV, creneaux).
+﻿//! EXP-E07/E08 — Agenda exposant (animations, RDV, creneaux).
+//!
+//! @id: jf_exp_agenda @do: render_exp_agenda
+//! @role: ui @layer: service
+//! @human: Ecrans EXP-E07/E08 JayFestival: agenda exposant avec animations et creneaux.
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;
