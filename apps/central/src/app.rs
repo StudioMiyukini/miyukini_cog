@@ -15,6 +15,8 @@ use crate::services::{auto_connect_after_login, ActiveServiceView, MwsNetworkVie
 use crate::state::{AppContext, AppState, MainTab};
 use crate::theme::styles;
 use dioxus::prelude::*;
+use miyuki_ui_dioxus::context::provide_theme;
+use miyuki_ui_tokens::COG_THEME;
 use miyukini_central::CentralMwsState;
 
 /// Point d'entrée de l'application.
@@ -22,6 +24,9 @@ use miyukini_central::CentralMwsState;
 pub fn App() -> Element {
     // Initialiser le Service Manager (charge le registre des services installés)
     let service_manager = ServiceManager::init();
+
+    // Fournir le theme miyuki-ui-dioxus à tous les composants enfants.
+    provide_theme(COG_THEME.clone());
 
     use_context_provider(|| {
         let base_path = std::env::current_dir().unwrap_or_default();
