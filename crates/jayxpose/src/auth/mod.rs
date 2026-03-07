@@ -54,7 +54,7 @@ fn hash_password(password: &str) -> String {
 /// Cherche un exposant par contact_email, verifie le hash SHA-256 du mot de passe
 /// via le champ password_hash en base, et retourne une AuthSession en cas de succes.
 ///
-/// @id: jayxpose_auth_sign_in
+/// @id: jx_auth_sign_in
 /// @do: authentifie un exposant par email et mot de passe (exposants SQLite).
 /// @layer: app
 pub fn auth_sign_in(db: &JayXposeDb, email: &str, password: &str) -> AuthResult<AuthSession> {
@@ -84,7 +84,7 @@ pub fn auth_sign_in(db: &JayXposeDb, email: &str, password: &str) -> AuthResult<
 /// Cree un nouvel exposant avec UUID v4, hash le mot de passe en SHA-256,
 /// et retourne une AuthSession avec le profil nouvellement cree.
 ///
-/// @id: jayxpose_auth_sign_up
+/// @id: jx_auth_sign_up
 /// @do: cree un compte exposant (exposants SQLite).
 /// @layer: app
 pub fn auth_sign_up(
@@ -115,7 +115,7 @@ pub fn auth_sign_up(
 
 /// Deconnecte l'utilisateur (la session est geree par l'app, rien a faire cote serveur).
 ///
-/// @id: jayxpose_auth_sign_out
+/// @id: jx_auth_sign_out
 /// @do: deconnecte l'utilisateur.
 /// @layer: app
 pub fn auth_sign_out() -> AuthResult<()> {

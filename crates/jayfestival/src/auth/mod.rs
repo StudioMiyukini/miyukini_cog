@@ -1,11 +1,8 @@
 //! Service d'authentification JayFestival (base fille SQLite via KindMother).
 //!
-//! @id: auth_sign_in
-//! @do: authentifie un utilisateur par email et mot de passe (profiles SQLite).
-//! @id: auth_sign_up
-//! @do: crée un compte utilisateur (profiles SQLite).
-//! @id: auth_sign_out
-//! @do: déconnecte l'utilisateur (session côté app).
+//! @id: jf_auth_mod
+//! @do: expose_authentication_functions_jayfestival
+//! @role: auth @layer: service
 
 mod permissions;
 
@@ -46,7 +43,7 @@ pub struct AuthSession {
 
 /// Connexion par email et mot de passe (base fille KindMother).
 ///
-/// @id: auth_sign_in
+/// @id: jf_auth_sign_in
 /// @do: authentifie un utilisateur par email et mot de passe (profiles SQLite).
 pub fn auth_sign_in(db: &JayFestivalDb, email: &str, password: &str) -> AuthResult<AuthSession> {
     let profile = db
@@ -68,7 +65,7 @@ pub fn auth_sign_in(db: &JayFestivalDb, email: &str, password: &str) -> AuthResu
 
 /// Inscription par email et mot de passe (base fille KindMother).
 ///
-/// @id: auth_sign_up
+/// @id: jf_auth_sign_up
 /// @do: crée un compte utilisateur (profiles SQLite).
 pub fn auth_sign_up(
     db: &JayFestivalDb,
@@ -94,7 +91,7 @@ pub fn auth_sign_up(
 
 /// Déconnecte l'utilisateur (la session est gérée par l'app).
 ///
-/// @id: auth_sign_out
+/// @id: jf_auth_sign_out
 /// @do: déconnecte l'utilisateur.
 pub fn auth_sign_out() -> AuthResult<()> {
     Ok(())
