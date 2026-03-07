@@ -28,7 +28,7 @@
         </a></li>
       </ul>
       <div class="sidebar-footer">
-        <span class="version">v0.1.0 — E05</span>
+        <span class="version">v0.2.0 — E04</span>
       </div>
     </nav>
 
@@ -73,50 +73,136 @@
           <h1>Prompt Builder</h1>
         </header>
         <div class="builder-layout">
+
+          <!-- ── Colonne formulaire ─────────────────────────── -->
           <form id="promptForm" class="prompt-form">
+
             <label>Titre de la séquence
-              <input type="text" id="pb-title" placeholder="ex: mipower-workflow-editor" required />
+              <input type="text" id="pb-title" placeholder="ex: mipower-workflow-editor" maxlength="200" required />
             </label>
-            <label>Classe de tâche
-              <select id="pb-class">
-                <option value="T3">T3 — Feature modérée</option>
-                <option value="T4">T4 — Feature majeure</option>
-                <option value="T5" selected>T5 — Chantier stratégique</option>
+
+            <div class="pb-row">
+              <label>Classe de tâche
+                <select id="pb-class">
+                  <option value="T1">T1 — Micro-fix</option>
+                  <option value="T2">T2 — Fix cible</option>
+                  <option value="T3">T3 — Feature modérée</option>
+                  <option value="T4">T4 — Feature majeure</option>
+                  <option value="T5" selected>T5 — Chantier stratégique</option>
+                </select>
+              </label>
+              <label>Complexité
+                <select id="pb-complexity">
+                  <option value="C1">C1 — Mineure</option>
+                  <option value="C2">C2 — Faible</option>
+                  <option value="C3">C3 — Moyenne</option>
+                  <option value="C4">C4 — Élevée</option>
+                  <option value="C5" selected>C5 — Stratégique</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="pb-row">
+              <label>Domaine
+                <select id="pb-domain">
+                  <option value="back">Back-end</option>
+                  <option value="front">Front-end</option>
+                  <option value="fullstack" selected>Full-stack</option>
+                  <option value="infra">Infra / DevOps</option>
+                  <option value="ai-ml">AI / ML</option>
+                  <option value="securite">Sécurité</option>
+                  <option value="data">Data</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </label>
+              <label>Mode autonomie
+                <select id="pb-autonomy">
+                  <option value="">Non spécifié</option>
+                  <option value="FULL">FULL — Autopilot</option>
+                  <option value="BIG_STEPS">BIG_STEPS — Par phase</option>
+                  <option value="GUIDED">GUIDED — Supervisé</option>
+                </select>
+              </label>
+            </div>
+
+            <label>Stack technique
+              <select id="pb-stack-preset">
+                <option value="">Choisir une stack…</option>
+                <option value="Rust + axum + SQLite">Rust + axum + SQLite</option>
+                <option value="Rust + Dioxus">Rust + Dioxus</option>
+                <option value="Rust + axum + Dioxus">Rust + axum + Dioxus (fullstack)</option>
+                <option value="TypeScript + React">TypeScript + React</option>
+                <option value="TypeScript + Next.js">TypeScript + Next.js</option>
+                <option value="Python + FastAPI">Python + FastAPI</option>
+                <option value="Python + Django">Python + Django</option>
+                <option value="Go + Fiber">Go + Fiber</option>
+                <option value="Kotlin + Spring Boot">Kotlin + Spring Boot</option>
+                <option value="__autre__">Autre (saisie libre)</option>
               </select>
+              <input type="text" id="pb-stack" placeholder="ex: Rust + axum + SQLite" maxlength="200" />
             </label>
-            <label>Domaine
-              <select id="pb-domain">
-                <option value="back">Back-end</option>
-                <option value="front">Front-end</option>
-                <option value="fullstack">Full-stack</option>
-                <option value="infra">Infra / DevOps</option>
-                <option value="other">Autre</option>
-              </select>
-            </label>
+
             <label>Description de la demande
-              <textarea id="pb-desc" rows="4" placeholder="Décris ce que tu veux construire…" required></textarea>
+              <textarea id="pb-desc" rows="4" placeholder="Décris ce que tu veux construire…" maxlength="2000" required></textarea>
             </label>
+
             <label>Contraintes techniques (optionnel)
-              <input type="text" id="pb-constraints" placeholder="ex: Rust uniquement, pas de cloud…" />
+              <input type="text" id="pb-constraints" placeholder="ex: Rust uniquement, pas de cloud…" maxlength="500" />
             </label>
-            <label>Stack (optionnel)
-              <input type="text" id="pb-stack" placeholder="ex: Rust + axum + SQLite" />
-            </label>
+
+            <!-- ── Options avancées ────────────────────────── -->
+            <details id="pb-advanced" class="pb-advanced">
+              <summary class="pb-advanced-summary">Options avancées</summary>
+
+              <div class="pb-advanced-body">
+                <div class="pb-section-label">Agents MIP actifs</div>
+                <div class="pb-agents-grid">
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Maria" /> Maria</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Denis" /> Denis</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Lise" /> Lise</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Victor" /> Victor</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Hugo" /> Hugo</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Fabrice" /> Fabrice</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="George" /> George</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Jean" /> Jean</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Arianne" /> Arianne</label>
+                  <label class="pb-agent-label"><input type="checkbox" name="pb-agent" value="Francois" /> François</label>
+                </div>
+
+                <div class="pb-section-label">Tags</div>
+                <div class="pb-tags-input-row">
+                  <input type="text" id="pb-tag-input" placeholder="Ajouter un tag…" maxlength="50" />
+                  <button type="button" id="pb-tag-add" class="btn-secondary">Ajouter</button>
+                </div>
+                <div id="pb-tags-list" class="pb-tags-list"></div>
+
+                <div class="pb-toggles">
+                  <label class="pb-toggle-label">
+                    <input type="checkbox" id="pb-urgency" />
+                    <span>Urgent</span>
+                  </label>
+                  <label class="pb-toggle-label">
+                    <input type="checkbox" id="pb-sensitive" />
+                    <span>Données sensibles</span>
+                  </label>
+                  <label class="pb-toggle-label">
+                    <input type="checkbox" id="pb-msw" />
+                    <span>Mode Sans Web (offline)</span>
+                  </label>
+                </div>
+              </div>
+            </details>
+
             <button type="submit" class="btn-primary">Générer le prompt MIP</button>
           </form>
-          <div class="prompt-output" id="promptOutput" style="display:none">
-            <div class="output-header">
-              <h3>Prompt généré</h3>
-              <div class="output-actions">
+
+          <!-- ── Colonne preview ────────────────────────────── -->
+          <div class="prompt-preview" id="promptPreview">
+            <div class="preview-header">
+              <h3>Preview</h3>
+              <div class="preview-actions">
                 <button id="copyPrompt" class="btn-secondary" aria-label="Copier le prompt dans le presse-papier">Copier</button>
                 <div class="init-seq-group">
-                  <select id="pb-complexity" aria-label="Complexité de la séquence">
-                    <option value="C1">C1 — Mineure</option>
-                    <option value="C2">C2 — Faible</option>
-                    <option value="C3">C3 — Moyenne</option>
-                    <option value="C4">C4 — Élevée</option>
-                    <option value="C5" selected>C5 — Stratégique</option>
-                  </select>
                   <button id="initSequence" class="btn-primary" aria-label="Initialiser la structure de la séquence MIP">Init séquence</button>
                 </div>
               </div>
@@ -124,6 +210,7 @@
             <div id="initStatus" class="init-status" style="display:none"></div>
             <textarea id="promptText" class="prompt-textarea" readonly aria-label="Prompt MIP généré"></textarea>
           </div>
+
         </div>
       </div>
 
