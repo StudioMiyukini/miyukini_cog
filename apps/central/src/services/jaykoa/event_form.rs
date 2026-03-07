@@ -23,7 +23,7 @@ pub struct EventFormModalProps {
 #[component]
 pub fn EventFormModal(props: EventFormModalProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     // État du formulaire
     let mut title = use_signal(String::new);

@@ -24,7 +24,7 @@ pub struct WeekViewProps {
 #[component]
 pub fn WeekView(props: WeekViewProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let today = chrono::Local::now().date_naive();
     let now_hour = chrono::Local::now().hour();

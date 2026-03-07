@@ -33,7 +33,7 @@ pub struct JayKoaSidebarProps {
 #[component]
 pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     // État local pour le mois affiché dans le mini-calendrier
     let mut displayed_month = use_signal(|| props.current_date);
@@ -156,7 +156,7 @@ struct MiniCalendarProps {
 #[component]
 fn MiniCalendar(props: MiniCalendarProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let year = props.displayed_month.year();
     let month = props.displayed_month.month();
@@ -297,7 +297,7 @@ struct AgendaItemProps {
 #[component]
 fn AgendaItem(props: AgendaItemProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let color = props.agenda.color.as_deref().unwrap_or("#4285F4");
     let name = props.agenda.name.as_deref().unwrap_or("Sans nom");

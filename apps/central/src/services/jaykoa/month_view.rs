@@ -23,7 +23,7 @@ pub struct MonthViewProps {
 #[component]
 pub fn MonthView(props: MonthViewProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let today = chrono::Local::now().date_naive();
     

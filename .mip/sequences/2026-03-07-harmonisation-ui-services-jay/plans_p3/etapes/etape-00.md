@@ -1,6 +1,6 @@
 # E00 — Infrastructure provide_context + nouveaux composants miyuki-ui-dioxus
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : —
 ## Agents : Francois + Lise
 ## Taches : 8

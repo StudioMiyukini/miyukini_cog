@@ -1,6 +1,6 @@
 # E04 — JayManga UI refonte (14 fichiers)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E00
 ## Agents : Hugo
 ## Taches : 14

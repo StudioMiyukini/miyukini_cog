@@ -1,6 +1,6 @@
 # E05 — JayKoa UI refonte (7 fichiers)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E00
 ## Agents : Denis
 ## Taches : 7

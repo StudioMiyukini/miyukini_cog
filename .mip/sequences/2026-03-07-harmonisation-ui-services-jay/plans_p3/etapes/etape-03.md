@@ -1,6 +1,6 @@
 # E03 — JayKonta UI refonte (8 fichiers)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E00
 ## Agents : Hugo
 ## Taches : 8

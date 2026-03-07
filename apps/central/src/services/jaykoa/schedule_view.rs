@@ -19,7 +19,7 @@ pub struct ScheduleViewProps {
 #[component]
 pub fn ScheduleView(props: ScheduleViewProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let today = chrono::Local::now().date_naive();
     
@@ -202,7 +202,7 @@ struct ScheduleEventCardProps {
 #[component]
 fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");

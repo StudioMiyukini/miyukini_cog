@@ -27,7 +27,7 @@ pub struct CalendarHeaderProps {
 #[component]
 pub fn CalendarHeader(props: CalendarHeaderProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     // Formater le libellé de période selon la vue
     let period_label = match props.view_mode {
@@ -167,7 +167,7 @@ pub struct EventBlockProps {
 #[component]
 pub fn EventBlock(props: EventBlockProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
@@ -260,7 +260,7 @@ pub struct ConflictBadgeProps {
 #[component]
 pub fn ConflictBadge(props: ConflictBadgeProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let desc = props.conflict.description.as_deref().unwrap_or("Conflit détecté");
 

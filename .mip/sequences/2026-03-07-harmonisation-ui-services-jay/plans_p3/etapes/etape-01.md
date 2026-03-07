@@ -1,6 +1,6 @@
 # E01 — JayFestival UI refonte (15 fichiers)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E00
 ## Agents : Lise
 ## Taches : 15

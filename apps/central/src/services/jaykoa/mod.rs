@@ -87,7 +87,7 @@ impl Default for JayKoaState {
 #[component]
 pub fn JayKoaView() -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     let conns = use_service_connections();
     
     // État local JayKoa

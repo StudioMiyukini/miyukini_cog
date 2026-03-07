@@ -24,7 +24,7 @@ pub struct DayViewProps {
 #[component]
 pub fn DayView(props: DayViewProps) -> Element {
     let state = use_app_state();
-    let c = state.read().current_theme.palette();
+    let p = use_palette();
     
     let today = chrono::Local::now().date_naive();
     let now_hour = chrono::Local::now().hour();
@@ -228,7 +228,7 @@ struct AllDayEventLargeProps {
 #[component]
 fn AllDayEventLarge(props: AllDayEventLargeProps) -> Element {
     let state = use_app_state();
-    let _c = state.read().current_theme.palette();
+    let _p = use_palette();
     
     let color = props.entry.color.as_deref().unwrap_or("#4285F4");
     let title = props.entry.title.as_deref().unwrap_or("Sans titre");

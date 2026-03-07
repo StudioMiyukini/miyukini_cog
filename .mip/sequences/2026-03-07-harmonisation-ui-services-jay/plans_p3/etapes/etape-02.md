@@ -1,6 +1,6 @@
 # E02 — JayXpose UI refonte (11 fichiers)
 
-## Statut : A faire
+## Statut : Terminé
 ## Depend de : E00
 ## Agents : Lise
 ## Taches : 11
