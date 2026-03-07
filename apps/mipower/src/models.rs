@@ -53,12 +53,14 @@ pub struct ArtefactContent {
     pub content: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProgressInfo {
     pub slug:   String,
     pub phases: Vec<PhaseProgress>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PhaseProgress {
     pub phase: String,
@@ -68,13 +70,18 @@ pub struct PhaseProgress {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PromptBuilderInput {
-    pub title:       String,
-    pub task_class:  String,
-    pub domain:      String,
-    pub description: String,
-    pub constraints: Option<String>,
-    pub stack:       Option<String>,
-    pub tags:        Vec<String>,
+    pub title:          String,          // max 200c
+    pub task_class:     String,          // T1|T2|T3|T4|T5
+    pub domain:         String,          // back|front|fullstack|infra|ai-ml|securite|data|autre
+    pub description:    String,          // max 2000c
+    pub constraints:    Option<String>,  // max 500c
+    pub stack:          Option<String>,  // max 200c
+    pub autonomy_mode:  Option<String>,  // FULL|BIG_STEPS|GUIDED
+    pub agents:         Vec<String>,     // whitelist 10 agents MIP
+    pub tags:           Vec<String>,     // max 10, max 50c chacun
+    pub urgency:        bool,
+    pub sensitive_data: bool,
+    pub msw_toggle:     bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

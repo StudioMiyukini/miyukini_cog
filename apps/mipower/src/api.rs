@@ -235,26 +235,81 @@ fn walk_md(current: &PathBuf, root: &PathBuf, files: &mut Vec<String>) {
 
 // ── /api/prompt (POST) ────────────────────────────────────
 
+const VALID_TASK_CLASSES:   &[&str] = &["T1", "T2", "T3", "T4", "T5"];
+const VALID_DOMAINS:        &[&str] = &["back", "front", "fullstack", "infra", "ai-ml", "securite", "data", "autre"];
+const VALID_AUTONOMY_MODES: &[&str] = &["FULL", "BIG_STEPS", "GUIDED"];
+const VALID_AGENTS:         &[&str] = &["Maria", "Denis", "Lise", "Victor", "Hugo", "Fabrice", "George", "Jean", "Arianne", "Francois"];
+
 async fn prompt_handler(
     Json(input): Json<PromptBuilderInput>,
-) -> axum::Json<serde_json::Value> {
+) -> Result<axum::Json<serde_json::Value>, ApiError> {
+    // Validations longueur
+    if input.title.is_empty() || input.title.len() > 200 {
+        return Err(ApiError::bad_request("title : 1-200 caracteres requis"));
+    }
+    if input.description.len() > 2000 {
+        return Err(ApiError::bad_request("description : max 2000 caracteres"));
+    }
+    if input.constraints.as_deref().is_some_and(|c| c.len() > 500) {
+        return Err(ApiError::bad_request("constraints : max 500 caracteres"));
+    }
+    if input.stack.as_deref().is_some_and(|s| s.len() > 200) {
+        return Err(ApiError::bad_request("stack : max 200 caracteres"));
+    }
+
+    // Validations whitelist
+    if !VALID_TASK_CLASSES.contains(&input.task_class.as_str()) {
+        return Err(ApiError::bad_request("task_class invalide (T1..T5)"));
+    }
+    if !VALID_DOMAINS.contains(&input.domain.as_str()) {
+        return Err(ApiError::bad_request("domain invalide"));
+    }
+    if let Some(mode) = &input.autonomy_mode {
+        if !VALID_AUTONOMY_MODES.contains(&mode.as_str()) {
+            return Err(ApiError::bad_request("autonomy_mode invalide (FULL|BIG_STEPS|GUIDED)"));
+        }
+    }
+    if input.agents.len() > 10 || input.agents.iter().any(|a| !VALID_AGENTS.contains(&a.as_str())) {
+        return Err(ApiError::bad_request("agents invalides (max 10, whitelist MIP uniquement)"));
+    }
+    if input.tags.len() > 10 || input.tags.iter().any(|t| t.len() > 50) {
+        return Err(ApiError::bad_request("tags invalides (max 10, max 50c chacun)"));
+    }
+
+    // Construction du prompt
     let constraints = input.constraints.as_deref().unwrap_or("Aucune contrainte specifique");
-    let stack = input.stack.as_deref().unwrap_or("A definir en P0");
-    let prompt = format!(
-        "Lance une sequence MIP pour : {title}\n\n\
-         Classe estimee : {class}\n\
-         Domaine : {domain}\n\
-         Stack : {stack}\n\
-         Contraintes : {constraints}\n\n\
-         Description :\n{description}\n\n\
-         ---\n\
-         Maria, classe cette demande et lance P0.",
-        title       = input.title,
-        class       = input.task_class,
-        domain      = input.domain,
-        description = input.description,
-    );
-    axum::Json(serde_json::json!({ "prompt": prompt }))
+    let stack       = input.stack.as_deref().unwrap_or("A definir en P0");
+
+    let mut lines = vec![
+        format!("Lance une sequence MIP pour : {}", input.title),
+        String::new(),
+        format!("Classe estimee : {}", input.task_class),
+        format!("Domaine : {}", input.domain),
+        format!("Stack : {stack}"),
+        format!("Contraintes : {constraints}"),
+    ];
+
+    if let Some(mode) = &input.autonomy_mode {
+        lines.push(format!("Mode autonomie : {mode}"));
+    }
+    if input.urgency        { lines.push("Urgence : Oui".into()); }
+    if input.sensitive_data { lines.push("Donnees sensibles : Oui".into()); }
+    if input.msw_toggle     { lines.push("Mode Sans Web : Oui".into()); }
+    if !input.agents.is_empty() {
+        lines.push(format!("Agents actifs : {}", input.agents.join(", ")));
+    }
+    if !input.tags.is_empty() {
+        lines.push(format!("Tags : {}", input.tags.join(", ")));
+    }
+
+    lines.push(String::new());
+    lines.push(format!("Description :\n{}", input.description));
+    lines.push(String::new());
+    lines.push("---".into());
+    lines.push("Maria, classe cette demande et lance P0.".into());
+
+    let prompt = lines.join("\n");
+    Ok(axum::Json(serde_json::json!({ "prompt": prompt })))
 }
 
 // ── /api/init-sequence (POST) ────────────────────────────
@@ -432,29 +487,76 @@ mod tests {
     fn test_generate_prompt_non_empty() {
         use crate::models::PromptBuilderInput;
         let input = PromptBuilderInput {
-            title:       "test-sequence".into(),
-            task_class:  "T5".into(),
-            domain:      "fullstack".into(),
-            description: "Une description de test.".into(),
-            constraints: None,
-            stack:       None,
-            tags:        vec![],
+            title:          "test-sequence".into(),
+            task_class:     "T5".into(),
+            domain:         "fullstack".into(),
+            description:    "Une description de test.".into(),
+            constraints:    None,
+            stack:          None,
+            autonomy_mode:  None,
+            agents:         vec![],
+            tags:           vec![],
+            urgency:        false,
+            sensitive_data: false,
+            msw_toggle:     false,
         };
-        let constraints = input.constraints.as_deref().unwrap_or("Aucune contrainte specifique");
         let stack       = input.stack.as_deref().unwrap_or("A definir en P0");
+        let constraints = input.constraints.as_deref().unwrap_or("Aucune contrainte specifique");
         let prompt = format!(
-            "Lance une sequence MIP pour : {title}\n\n\
-             Classe estimee : {class}\nDomaine : {domain}\nStack : {stack}\n\
-             Contraintes : {constraints}\n\nDescription :\n{description}\n\n---\n\
-             Maria, classe cette demande et lance P0.",
-            title       = input.title,
-            class       = input.task_class,
-            domain      = input.domain,
-            description = input.description,
+            "Lance une sequence MIP pour : {}\n\nClasse estimee : {}\nDomaine : {}\nStack : {stack}\nContraintes : {constraints}\n\nDescription :\n{}\n\n---\nMaria, classe cette demande et lance P0.",
+            input.title, input.task_class, input.domain, input.description,
         );
         assert!(!prompt.is_empty());
         assert!(prompt.contains("test-sequence"));
         assert!(prompt.contains("T5"));
+    }
+
+    #[test]
+    fn test_generate_prompt_with_agents() {
+        use crate::models::PromptBuilderInput;
+        let input = PromptBuilderInput {
+            title:          "agents-test".into(),
+            task_class:     "T4".into(),
+            domain:         "back".into(),
+            description:    "Test agents.".into(),
+            constraints:    None,
+            stack:          None,
+            autonomy_mode:  None,
+            agents:         vec!["Maria".into(), "Victor".into()],
+            tags:           vec![],
+            urgency:        false,
+            sensitive_data: false,
+            msw_toggle:     false,
+        };
+        assert!(VALID_AGENTS.contains(&"Maria"));
+        assert!(VALID_AGENTS.contains(&"Victor"));
+        let agents_line = format!("Agents actifs : {}", input.agents.join(", "));
+        assert!(agents_line.contains("Maria"));
+        assert!(agents_line.contains("Victor"));
+        assert!(!input.agents.iter().any(|a| !VALID_AGENTS.contains(&a.as_str())));
+    }
+
+    #[test]
+    fn test_generate_prompt_with_autonomy_mode() {
+        use crate::models::PromptBuilderInput;
+        let input = PromptBuilderInput {
+            title:          "autonomy-test".into(),
+            task_class:     "T3".into(),
+            domain:         "fullstack".into(),
+            description:    "Test autonomy mode.".into(),
+            constraints:    None,
+            stack:          None,
+            autonomy_mode:  Some("FULL".into()),
+            agents:         vec![],
+            tags:           vec!["test".into()],
+            urgency:        true,
+            sensitive_data: true,
+            msw_toggle:     false,
+        };
+        assert!(VALID_AUTONOMY_MODES.contains(&input.autonomy_mode.as_deref().unwrap()));
+        assert!(input.urgency);
+        assert!(input.sensitive_data);
+        assert_eq!(input.tags, vec!["test"]);
     }
 
     #[test]
@@ -467,6 +569,27 @@ mod tests {
         // Invalid: spaces
         let with_space = "my slug";
         assert!(!with_space.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'));
+    }
+
+    /// Smoke test RED — compile uniquement apres E01 (champs manquants dans PromptBuilderInput)
+    #[test]
+    fn test_smoke_prompt_builder_v2_structure() {
+        use crate::models::PromptBuilderInput;
+        let _input = PromptBuilderInput {
+            title:          "smoke".into(),
+            task_class:     "T4".into(),
+            domain:         "fullstack".into(),
+            description:    "smoke test v2".into(),
+            constraints:    None,
+            stack:          None,
+            autonomy_mode:  Some("FULL".into()),
+            agents:         vec!["Maria".into(), "Denis".into()],
+            tags:           vec!["ui".into()],
+            urgency:        true,
+            sensitive_data: false,
+            msw_toggle:     false,
+        };
+        assert_eq!(_input.task_class, "T4");
     }
 
     #[test]
