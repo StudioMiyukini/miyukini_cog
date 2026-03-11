@@ -1,0 +1,74 @@
+{
+  "identity": {
+    "sequence": "2026-03-07-sodomight-dev-2",
+    "date": "2026-03-07",
+    "slug": "SLUG",
+    "type": "T?",
+    "complexity": "C3",
+    "current_phase": "P0",
+    "status": "en_cours"
+  },
+  "generated_at": "2026-03-07",
+  "ui_version": "2.0.0",
+  "tabs": [
+    {
+      "id": "overview",
+      "label": "Vue d'ensemble",
+      "groups": [
+        {
+          "label": "Brief & Plan",
+          "files": [
+            { "path": "briefs/2026-03-07-sodomight-dev-2.md", "label": "Brief" },
+            { "path": "plans_p3/etapes/index.md", "label": "Plan P3" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phases",
+      "label": "Phases",
+      "groups": [
+        {
+          "label": "Traces de phase",
+          "files": [
+            { "path": "phases/p0-trace.md", "label": "P0 Cadrage" },
+            { "path": "phases/p3-trace.md", "label": "P3 Implementation" },
+            { "path": "phases/p4-trace.md", "label": "P4 Audit" },
+            { "path": "phases/p5-trace.md", "label": "P5 Validation" },
+            { "path": "phases/p6-trace.md", "label": "P6 Rapport" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "audits",
+      "label": "Audits",
+      "groups": [
+        {
+          "label": "Audits P4",
+          "files": [
+            { "path": "audits/2026-03-07-sodomight-dev-2-pass-0.md", "label": "Pass 0" },
+            { "path": "audits/2026-03-07-sodomight-dev-2-pass-01.md", "label": "Pass 1" },
+            { "path": "audits/2026-03-07-sodomight-dev-2-ras.md", "label": "RAS" },
+            { "path": "audits/2026-03-07-sodomight-dev-2-efficiency.md", "label": "Efficience" },
+            { "path": "audits/2026-03-07-sodomight-dev-2.md", "label": "Audit principal" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rapport",
+      "label": "Rapport Final",
+      "groups": [
+        {
+          "label": "Resultats",
+          "files": [
+            { "path": "gpi/2026-03-07-sodomight-dev-2-gpi.md", "label": "GPI" },
+            { "path": "rapports_finaux/2026-03-07-sodomight-dev-2-report.md", "label": "Rapport Final" },
+            { "path": "metrics/2026-03-07-sodomight-dev-2.json", "label": "Metriques" }
+          ]
+        }
+      ]
+    }
+  ]
+}

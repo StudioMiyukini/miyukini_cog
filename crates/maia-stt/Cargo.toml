@@ -1,0 +1,48 @@
+# MAIA-STT — Moteur de transcription vocale pour MAIA.
+#
+# Crate SÉPARÉ de apps/maia pour éviter le conflit :
+#   rustpotter 3.0 (dans miyualicia-wakeword) requiert half ^2.5
+#   candle-core 0.9 (dans whisper-rs optionnel) requiert half =2.4.1
+#
+# whisper-rs = whisper.cpp Rust bindings — large-v3-turbo pour francais
+# miyualicia-capture = capture audio WASAPI/CPAL (existant)
+
+[package]
+name = "maia-stt"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "MAIA-STT — Moteur STT whisper.cpp pour MAIA (crate isolé sans rustpotter)"
+
+[lib]
+name = "maia_stt"
+path = "src/lib.rs"
+
+[dependencies]
+# Sérialisation / Logs
+serde       = { version = "1.0", features = ["derive"] }
+serde_json  = "1.0"
+tracing     = "0.1"
+
+# Audio I/O — capture micro (WASAPI / CPAL)
+miyualicia-capture = { path = "../miyuvoicecapture", package = "miyualicia-capture" }
+
+# Lecture/écriture WAV
+hound = "3.5"
+
+# Async
+tokio = { version = "1", features = ["sync", "rt"] }
+
+# STT — whisper.cpp via Rust bindings
+# Feature "whisper" active les bindings C++ (nécessite libclang + C++ compiler)
+# IMPORTANT: ne PAS ajouter rustpotter ici (conflit half ^2.5 vs =2.4.1 avec candle-core)
+whisper-rs = { version = "0.14", optional = true }
+
+[features]
+default = []
+# Activer pour la transcription réelle via whisper.cpp
+whisper = ["dep:whisper-rs"]
+
+[lints]
+workspace = true

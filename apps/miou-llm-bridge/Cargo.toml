@@ -1,21 +1,21 @@
-# Miyukini AI Studio — Service IA local pour l'écosystème COG.
-# Proxy HTTP + agents IA + skills + contextes + dégradation graduée.
+# MAIA — Miyukini AI Agents — moteur IA local (STT/LLM/TTS/skills/personas).
+# Anciennement miou-llm-bridge — renommé vers "maia" (S1-E01).
+# Le répertoire physique reste apps/miou-llm-bridge jusqu'au prochain refactor git mv.
 
 [package]
-name = "miou-llm-bridge"
+name = "maia"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "Miyukini AI Studio — Service IA local avec agents, skills et dégradation graduée"
+description = "MAIA — Miyukini AI Agents — moteur IA local (STT/LLM/TTS/skills/personas)"
 
 [[bin]]
-name = "miou-llm-bridge"
+name = "maia"
 path = "src/main.rs"
 
 [features]
 default = []
-cuda = ["llama-cpp-2/cuda"]
 
 [dependencies]
 # HTTP server
@@ -44,8 +44,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower-http = { version = "0.6", features = ["cors", "trace"] }
 tower = { version = "0.5", features = ["util"] }
 
-# Inférence GGUF native (moteur principal)
-llama-cpp-2 = { version = "0.1", features = ["sampler"] }
+# Audio output — TTS playback via Piper (S1-E06)
+rodio = { version = "0.21", default-features = false, features = ["playback", "wav"] }
+hound = "3.5"
 
 # Cryptographie (HMAC anti-MITM + AES-256-GCM chiffrement réponses)
 hmac = "0.12"
@@ -54,6 +55,9 @@ aes-gcm = "0.10"
 hex = "0.4"
 base64 = "0.22"
 rand = "0.8"
+
+# Identifiant de nœud TEAM (hostname)
+hostname = "0.4"
 
 [lints]
 workspace = true

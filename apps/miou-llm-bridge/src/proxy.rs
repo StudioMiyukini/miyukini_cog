@@ -18,7 +18,9 @@ use crate::context::{ContextRegistry, CreateContextRequest, UpdateContextRequest
 use crate::fallback;
 use crate::hardware::HardwareInfo;
 use crate::inference::InferenceRouter;
+use crate::mode::MaiaMode;
 use crate::model_manager::ModelManager;
+use crate::persona::PersonaConfig;
 use crate::security::{AuditLog, RateLimiter, SecurityAuditLog};
 use crate::skills::{SkillExecRequest, SkillRegistry};
 
@@ -38,6 +40,14 @@ pub struct ProxyState {
     pub model_manager: ModelManager,
     pub security_config: SecurityConfig,
     pub security_audit: SecurityAuditLog,
+    /// Persona active (None si aucun --profile passé).
+    pub active_persona: Option<PersonaConfig>,
+    /// Mode de fonctionnement (standalone / pro).
+    pub maia_mode: MaiaMode,
+    /// Timestamp de démarrage (epoch secondes).
+    pub started_at: u64,
+    /// Enregistré auprès du hub TEAM.
+    pub team_registered: bool,
 }
 
 /// Construit le routeur axum avec toutes les routes.
@@ -50,7 +60,9 @@ pub fn proxy_router(state: ProxyState) -> Router {
     // Routes publiques (health + UI — pas de vérification de sécurité)
     let public_routes = Router::new()
         .route("/", get(ui_handler))
-        .route("/health", get(health_handler));
+        .route("/health", get(health_handler))
+        // MAIA health endpoint — état complet pour TEAM et monitoring
+        .route("/maia/health", get(crate::health::health_handler));
 
     // Routes protégées (sécurité : origin + auth + HMAC)
     let protected_routes = Router::new()
@@ -666,7 +678,7 @@ async fn load_model(
     let path = model.path.clone();
     let display = model.display_name.clone();
 
-    match state.inference.native.load_model(path) {
+    match state.inference.native.load_model(path).await {
         Ok(name) => Json(serde_json::json!({
             "loaded": name,
             "display_name": display,
@@ -683,7 +695,7 @@ async fn load_model(
 
 async fn unload_model(State(state): State<ProxyState>) -> impl IntoResponse {
     let name = state.inference.native.loaded_model_name();
-    if state.inference.native.unload_model() {
+    if state.inference.native.unload_model().await {
         Json(serde_json::json!({ "unloaded": name }))
     } else {
         Json(serde_json::json!({ "message": "Aucun modèle chargé" }))

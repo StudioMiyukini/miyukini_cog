@@ -1,0 +1,48 @@
+# TEAM — Orchestrateur MAIA : registre nœuds, scheduler tâches, MIPOWER runner, MWS gateway.
+
+[package]
+name = "team"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "TEAM — Hub d'orchestration MAIA (nœuds, tâches, MIPOWER, MWS gateway)"
+
+[[bin]]
+name = "team"
+path = "src/main.rs"
+
+[features]
+default = []
+
+[dependencies]
+# HTTP server
+axum        = "0.8"
+tokio       = { version = "1", features = ["rt-multi-thread", "macros", "signal", "net", "time", "fs"] }
+tower-http  = { version = "0.6", features = ["cors", "trace"] }
+tower       = { version = "0.5", features = ["util"] }
+
+# HTTP client (appels vers nœuds MAIA)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# Sérialisation
+serde       = { version = "1.0", features = ["derive"] }
+serde_json  = "1.0"
+toml        = "0.8"
+
+# Persistance légère
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# Logging
+tracing             = "0.1"
+tracing-subscriber  = { version = "0.3", features = ["env-filter"] }
+
+# Utilitaires
+uuid    = { version = "1", features = ["v4"] }
+chrono  = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true

@@ -1,0 +1,23 @@
+{
+  "nodes": [
+    { "id": "E00", "label": "E00 - Dependances bytemuck", "status": "done" },
+    { "id": "E01", "label": "E01 - Shader WGSL sprite instancie", "status": "done" },
+    { "id": "E02", "label": "E02 - SpriteInstanceGpu + SpritePipeline::new()", "status": "done" },
+    { "id": "E03", "label": "E03 - GraphicsState::render(&batch) cable", "status": "done" },
+    { "id": "E04", "label": "E04 - AtlasHandle + MaterialHandle publics", "status": "done" },
+    { "id": "E05", "label": "E05 - Scene rogue_camp main.rs", "status": "done" },
+    { "id": "BUF", "label": "BUF - Tests + clippy + validation visuelle", "status": "done" }
+  ],
+  "edges": [
+    { "from": "E00", "to": "E01" },
+    { "from": "E01", "to": "E02" },
+    { "from": "E02", "to": "E03" },
+    { "from": "E03", "to": "E04" },
+    { "from": "E04", "to": "E05" },
+    { "from": "E05", "to": "BUF" }
+  ],
+  "gates": {
+    "BIG_STEPS_1": { "after": "E03", "type": "human_validation", "status": "passed" },
+    "BIG_STEPS_2": { "after": "E05", "type": "human_validation", "status": "passed" }
+  }
+}

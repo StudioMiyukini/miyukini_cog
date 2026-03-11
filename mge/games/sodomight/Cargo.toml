@@ -11,6 +11,7 @@ mge-audio = { path = "../../crates/mge-audio" }
 mge-content = { path = "../../crates/mge-content" }
 mge-core = { path = "../../crates/mge-core" }
 mge-net = { path = "../../crates/mge-net" }
+mge-sim = { path = "../../crates/mge-sim" }
 mge-render = { path = "../../crates/mge-render" }
 mge-replication = { path = "../../crates/mge-replication" }
 mge-save = { path = "../../crates/mge-save" }

@@ -24,8 +24,7 @@ tracing = "0.1"
 # Erreurs explicites
 thiserror = "2"
 
-# Pin half to 2.4 to avoid rand 0.8/0.9 conflict in candle-core 0.2.2
-# (candle-core uses rand 0.8 internally, but half >= 2.5 pulls rand 0.9)
+# Pin half pour garder candle-core 0.2.2 (rustpotter) compilable (rand 0.8 + half 2.4.x)
 half = "=2.4.1"
 
 [dev-dependencies]

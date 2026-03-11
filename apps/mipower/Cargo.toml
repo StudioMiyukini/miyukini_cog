@@ -1,8 +1,8 @@
 [package]
 name          = "mipower"
-version       = "0.1.0"
+version       = "0.2.0"
 edition       = "2021"
-description   = "MIPOWER — Miyukini Implementation Protocol Oriented Workflow Editor & Reviewer"
+description   = "MIPOWER — Miyukini Implementation Protocol Oriented Workflow Editor & Reviewer (Desktop Native)"
 authors       = ["Miyukini Contributors"]
 license       = "MIT OR Apache-2.0"
 
@@ -11,18 +11,32 @@ name = "mipower"
 path = "src/main.rs"
 
 [dependencies]
-axum          = { version = "0.8" }
-tokio         = { version = "1", features = ["full"] }
-serde         = { version = "1", features = ["derive"] }
-serde_json    = "1"
-rusqlite      = { version = "0.32", features = ["bundled"] }
-notify-debouncer-mini = "0.4"
-tower-http    = { version = "0.6", features = ["fs", "cors"] }
-anyhow        = "1"
-tracing       = "0.1"
+# UI native desktop — fenêtre standalone, WebView2, pas de navigateur externe
+dioxus         = { version = "0.7", features = ["desktop"] }
+
+# Rendu Markdown → HTML côté Rust (zéro JS)
+pulldown-cmark = "0.12"
+ammonia        = "4"
+
+# Base de données locale
+rusqlite       = { version = "0.32", features = ["bundled"] }
+
+# Sérialisation
+serde          = { version = "1", features = ["derive"] }
+serde_json     = "1"
+
+# Presse-papier natif (MIPOWER Starter — bouton Copier)
+arboard        = "3"
+
+# Async runtime
+tokio          = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+# Utilitaires
+anyhow         = "1"
+chrono         = { version = "0.4", features = ["serde"] }
+dirs           = "5"
+tracing        = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tokio-util    = { version = "0.7", features = ["io"] }
-futures       = "0.3"
 
 [dev-dependencies]
-tempfile      = "3"
+tempfile = "3"

@@ -7,6 +7,7 @@ license.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+bytemuck.workspace = true
 mge-content = { path = "../mge-content" }
 serde.workspace = true
 wgpu.workspace = true

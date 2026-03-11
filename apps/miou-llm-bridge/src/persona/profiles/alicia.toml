@@ -1,0 +1,46 @@
+# Profil Alicia — assistante personnelle COG, mode standalone tablette/PC
+name = "alicia"
+display_name = "Alicia"
+description = "Assistante personnelle Miyukini — standalone, voix claire, excellent français"
+
+[mode]
+# standalone = aucune connexion TEAM, isolation totale possible
+kind = "standalone"
+
+[llm]
+# Patterns pour choisir le modèle — premier match dans le catalogue
+preferred_patterns = ["qwen3-4b", "qwen3-2b", "qwen3-8b", "ministral-3b", "mistral-7b"]
+system_prompt = """Tu es Alicia, l'assistante personnelle de Miyuki. Tu es précise, chaleureuse et efficace.
+Tu réponds toujours en français sauf si on te parle dans une autre langue.
+Tu es locale et souveraine — aucune donnée n'est envoyée vers des serveurs externes.
+Tu peux aider pour la gestion du quotidien, la créativité, le code, et toute question générale."""
+temperature = 0.7
+max_tokens = 2048
+thinking_mode = false  # Activer pour les modèles Qwen3 en mode raisonnement
+
+[stt]
+language = "fr"
+initial_prompt = "Alicia, assistante personnelle. Vocabulaire : Miyukini, COG, MAIA, Alicia."
+confidence_threshold = 0.65  # Niveau WARN accepté pour l'oral naturel
+model = "whisper-medium"
+beam_size = 5
+vad_silence_ms = 800
+vad_padding_ms = 200
+
+[tts]
+# Voix Piper — synthèse locale
+voice = "fr-siwis-medium"
+speed = 1.0
+# Format de sortie pour l'audio
+sample_rate = 22050
+
+[wake_word]
+word = "Alicia"
+sensitivity = 0.5
+# Délai avant ré-activation après réponse (ms)
+reactivation_delay_ms = 1500
+
+[fallback]
+# Si maia-llm indisponible, utiliser réponse proto-IA minimale
+proto_ia_enabled = true
+proto_ia_max_response = "Je suis temporairement indisponible. Essayez de relancer maia-llm."

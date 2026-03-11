@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, initial-scale=1.0" />
+    <title>Catakana 2026 — La fantaisie dans la pop culture</title>
+    <!-- Polices chargées via Google Fonts si connexion disponible, sinon fallback système -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="particles-canvas"></canvas>
+      <div id="slides-wrapper"></div>
+      <div id="ui-layer">
+        <div id="progress-bar">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="slide-dots"></div>
+      </div>
+      <div id="nav-hint">← → Naviguer &nbsp;|&nbsp; Clic gauche/droit</div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

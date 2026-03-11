@@ -93,4 +93,4 @@ miyukini_cog.db
 miyukini_cog.db-journal
 
 # Forum phpBB-COG (clone séparé : https://github.com/StudioMiyukini/phpbb-COG)
-forum/
+forum/models/

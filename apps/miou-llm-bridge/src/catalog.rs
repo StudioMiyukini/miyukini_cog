@@ -34,7 +34,31 @@ pub struct CatalogEntry {
 
 /// Catalogue statique — ordonné par quality_score croissant.
 pub static CATALOG: &[CatalogEntry] = &[
-    // ── Tier 1 : Ultra-Light (4-8 GB RAM) ─────────────────────────
+    // ── Tier 1 : Ultra-Light (4-8 GB RAM) — Qwen3 famille ────────
+    CatalogEntry {
+        match_pattern: "qwen3-0.6b",
+        display_name: "Qwen3 0.6B",
+        params: "0.6B",
+        quantization: "Q4_K_M",
+        ram_required_mb: 512,
+        vram_preferred_mb: 0,
+        quality_score: 30,
+        french_score: 7,
+        min_tier: 1,
+        description: "Qwen3 0.6B — smartphone/tablette, raisonnement basique, bon français pour sa taille",
+    },
+    CatalogEntry {
+        match_pattern: "qwen3-2b",
+        display_name: "Qwen3 2B",
+        params: "2B",
+        quantization: "Q4_K_M",
+        ram_required_mb: 1_536,
+        vram_preferred_mb: 0,
+        quality_score: 38,
+        french_score: 8,
+        min_tier: 1,
+        description: "Qwen3 2B — léger, bon français, raisonnement thinking-mode activable",
+    },
     CatalogEntry {
         match_pattern: "smollm2-1.7b",
         display_name: "SmolLM2 1.7B Instruct",
@@ -84,6 +108,18 @@ pub static CATALOG: &[CatalogEntry] = &[
         min_tier: 2,
         description: "Google Gemma 3, bon multilingue (140+ langues)",
     },
+    CatalogEntry {
+        match_pattern: "qwen3-4b",
+        display_name: "Qwen3 4B",
+        params: "4B",
+        quantization: "Q4_K_M",
+        ram_required_mb: 2_816,
+        vram_preferred_mb: 2_048,
+        quality_score: 52,
+        french_score: 8,
+        min_tier: 2,
+        description: "Qwen3 4B — cible COG principale (tablette 8GB), thinking-mode, excellent français",
+    },
     // ── Tier 3 : Standard (16 GB RAM, 4-8 GB VRAM) ───────────────
     CatalogEntry {
         match_pattern: "mistral-7b",
@@ -121,6 +157,18 @@ pub static CATALOG: &[CatalogEntry] = &[
         min_tier: 3,
         description: "Meta Llama 3, fort usage général",
     },
+    CatalogEntry {
+        match_pattern: "qwen3-8b",
+        display_name: "Qwen3 8B",
+        params: "8B",
+        quantization: "Q4_K_M",
+        ram_required_mb: 5_376,
+        vram_preferred_mb: 4_096,
+        quality_score: 67,
+        french_score: 8,
+        min_tier: 3,
+        description: "Qwen3 8B — serveur standard, thinking-mode, très bon français, code, raisonnement",
+    },
     // ── Tier 4 : Power (32+ GB RAM, 8-12 GB VRAM) ────────────────
     CatalogEntry {
         match_pattern: "mistral-nemo",
@@ -145,6 +193,18 @@ pub static CATALOG: &[CatalogEntry] = &[
         french_score: 8,
         min_tier: 4,
         description: "Qwen3 14B, excellent raisonnement et multilingue",
+    },
+    CatalogEntry {
+        match_pattern: "qwen3-30b",
+        display_name: "Qwen3 30B-A3B (MoE)",
+        params: "30B-A3B",
+        quantization: "Q4_K_M",
+        ram_required_mb: 18_432,
+        vram_preferred_mb: 16_384,
+        quality_score: 82,
+        french_score: 8,
+        min_tier: 4,
+        description: "Qwen3 30B MoE (3B actifs) — qualité 70B avec mémoire ~18GB, thinking-mode avancé",
     },
     // ── Tier 5 : Heavy (64+ GB RAM, 16+ GB VRAM) ─────────────────
     CatalogEntry {

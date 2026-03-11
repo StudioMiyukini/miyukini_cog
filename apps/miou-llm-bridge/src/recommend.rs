@@ -1,8 +1,8 @@
 //! Moteur de recommandation LLM — sélectionne le meilleur modèle GGUF
-//! en fonction du hardware détecté et des modèles disponibles sur LM Studio.
+//! en fonction du hardware détecté et des modèles disponibles sur maia-llm.
 
 use axum::{extract::State, response::IntoResponse, Json};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::catalog::CATALOG;
 use crate::hardware::HardwareInfo;
@@ -19,7 +19,7 @@ pub struct HardwareResponse {
 /// Un modèle recommandé.
 #[derive(Debug, Clone, Serialize)]
 pub struct Recommendation {
-    /// ID du modèle sur LM Studio (à passer à /v1/chat/completions).
+    /// ID du modèle sur maia-llm (à passer à /v1/chat/completions).
     pub model_id: String,
     /// Nom affiché (depuis le catalogue).
     pub display_name: String,
@@ -46,41 +46,10 @@ pub struct RecommendResponse {
     pub candidates: Vec<Recommendation>,
     /// Tier hardware détecté.
     pub hardware_tier: String,
-    /// Nombre de modèles trouvés sur LM Studio.
+    /// Nombre de modèles trouvés sur maia-llm.
     pub models_available: usize,
 }
 
-// ── Types LM Studio API ─────────────────────────────────────────────────
-
-/// Modèle retourné par LM Studio GET /api/v1/models (v1 REST API).
-#[derive(Debug, Deserialize)]
-struct LmStudioModel {
-    #[serde(default)]
-    key: Option<String>,
-    #[serde(default)]
-    display_name: Option<String>,
-    #[serde(default)]
-    loaded_instances: Option<Vec<serde_json::Value>>,
-}
-
-/// Réponse de GET /api/v1/models (v1 REST API — liste TOUS les modèles).
-#[derive(Debug, Deserialize)]
-struct LmStudioModelsV1 {
-    #[serde(default)]
-    models: Vec<LmStudioModel>,
-}
-
-/// Modèle retourné par GET /v1/models (OpenAI-compatible — modèles CHARGÉS).
-#[derive(Debug, Deserialize)]
-struct OpenAiModel {
-    id: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct OpenAiModelsResponse {
-    #[serde(default)]
-    data: Vec<OpenAiModel>,
-}
 
 // ── Moteur de recommandation ─────────────────────────────────────────────
 
@@ -160,60 +129,16 @@ pub async fn hardware_handler(State(state): State<ProxyState>) -> impl IntoRespo
     })
 }
 
-/// GET /v1/recommend — interroge LM Studio, croise avec le catalogue.
+/// GET /v1/recommend — interroge maia-llm, croise avec le catalogue.
 pub async fn recommend_handler(State(state): State<ProxyState>) -> impl IntoResponse {
-    // 1. Récupérer TOUS les modèles téléchargés via l'API v1 de LM Studio
-    let available_ids = fetch_all_model_ids(&state).await;
+    // 1. Modèles GGUF disponibles sur maia-llm (GET /maia/llm/models)
+    let available_ids = state.inference.native.available_models().await;
 
-    // 2. Récupérer les modèles actuellement CHARGÉS (endpoint OpenAI-compatible)
-    let loaded_ids = fetch_loaded_model_ids(&state).await;
+    // 2. Modèle(s) actuellement chargé(s) dans maia-llm (GET /v1/models)
+    let loaded_ids = state.inference.native.loaded_models().await;
 
     // 3. Recommander
     let response = recommend(&state.hardware, &available_ids, &loaded_ids);
 
     Json(response)
-}
-
-/// Interroge GET /api/v1/models de LM Studio pour lister tous les modèles téléchargés.
-pub async fn fetch_all_model_ids(state: &ProxyState) -> Vec<String> {
-    let url = format!("{}/api/v1/models", state.upstream_url);
-    let resp = match state
-        .client
-        .get(&url)
-        .timeout(std::time::Duration::from_secs(10))
-        .send()
-        .await
-    {
-        Ok(r) if r.status().is_success() => r,
-        _ => return Vec::new(),
-    };
-
-    match resp.json::<LmStudioModelsV1>().await {
-        Ok(body) => body
-            .models
-            .into_iter()
-            .filter_map(|m| m.key.or(m.display_name))
-            .collect(),
-        Err(_) => Vec::new(),
-    }
-}
-
-/// Interroge GET /v1/models (OpenAI-compat) pour lister les modèles chargés.
-pub async fn fetch_loaded_model_ids(state: &ProxyState) -> Vec<String> {
-    let url = format!("{}/v1/models", state.upstream_url);
-    let resp = match state
-        .client
-        .get(&url)
-        .timeout(std::time::Duration::from_secs(5))
-        .send()
-        .await
-    {
-        Ok(r) if r.status().is_success() => r,
-        _ => return Vec::new(),
-    };
-
-    match resp.json::<OpenAiModelsResponse>().await {
-        Ok(body) => body.data.into_iter().map(|m| m.id).collect(),
-        Err(_) => Vec::new(),
-    }
 }

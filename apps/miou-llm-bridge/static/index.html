@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Miyukini AI Studio</title>
+<title>MAIA — Miyukini AI Agents</title>
 <style>
 :root {
   --bg-primary: #0f0f14;
@@ -486,7 +486,7 @@ body {
   width: 100%;
   min-height: 52px;
   max-height: 200px;
-  padding: 14px 52px 14px 18px;
+  padding: 14px 96px 14px 18px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -534,6 +534,93 @@ body {
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 8px;
+}
+
+/* ── PTT button ────────────────────────────────────────── */
+.ptt-btn {
+  position: absolute;
+  right: 52px;
+  bottom: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  transition: all 0.15s;
+}
+.ptt-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ptt-btn.recording {
+  background: var(--red);
+  color: white;
+  border-color: var(--red);
+  animation: ptt-pulse 1s ease-in-out infinite;
+}
+.ptt-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@keyframes ptt-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5); }
+  50%       { box-shadow: 0 0 0 8px rgba(248,113,113,0); }
+}
+
+/* ── Wake word button ──────────────────────────────────── */
+.wakeword-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.wakeword-btn:hover { border-color: var(--green); color: var(--green); }
+.wakeword-btn.active {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-bg);
+  animation: wake-breathe 2.5s ease-in-out infinite;
+}
+.wakeword-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── TTS button ────────────────────────────────────────── */
+.tts-btn {
+  padding: 5px 10px;
+  font-size: 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.tts-btn:hover { border-color: var(--orange); color: var(--orange); }
+.tts-btn.active {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: var(--orange-bg);
+  animation: wake-breathe 2.5s ease-in-out infinite;
+}
+.tts-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@keyframes wake-breathe {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Recording overlay on input ────────────────────────── */
+.input-box.recording {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px rgba(248,113,113,0.2);
 }
 
 /* ── Context selector ──────────────────────────────────── */
@@ -602,7 +689,7 @@ body {
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <h1>Miyukini AI Studio</h1>
+      <h1>MAIA</h1>
       <div class="subtitle">v<span id="version">0.1.0</span> &mdash; <span id="hw-tier">...</span></div>
     </div>
 
@@ -623,16 +710,24 @@ body {
 
     <div class="sidebar-status" id="status-bar">
       <div class="status-row">
-        <span class="status-label">Natif</span>
+        <span class="status-label">Mode</span>
+        <span class="status-value" id="status-mode">...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Persona</span>
+        <span class="status-value" id="status-persona">...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">LLM</span>
         <span class="status-value" id="status-native">...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">STT</span>
+        <span class="status-value" id="status-stt">...</span>
       </div>
       <div class="status-row">
         <span class="status-label">Upstream</span>
         <span class="status-value" id="status-upstream">...</span>
-      </div>
-      <div class="status-row">
-        <span class="status-label">Mode</span>
-        <span class="status-value" id="status-mode">...</span>
       </div>
     </div>
   </div>
@@ -648,6 +743,12 @@ body {
         </div>
       </div>
       <div class="main-header-actions">
+        <button class="tts-btn" id="tts-btn" onclick="toggleTTS()" title="Activer/désactiver la voix de réponse (TTS)">
+          <span>&#128266;</span>
+        </button>
+        <button class="wakeword-btn" id="wakeword-btn" onclick="toggleWakeword()" title="Activer la detection du mot de reveil 'Alicia'">
+          <span>&#127908;</span><span id="wakeword-label">Alicia</span>
+        </button>
         <button class="header-btn" onclick="clearChat()">Nouveau chat</button>
         <button class="header-btn" onclick="refreshAll()">Actualiser</button>
       </div>
@@ -656,8 +757,8 @@ body {
     <div class="chat-area" id="chat-area">
       <div class="chat-empty" id="empty-state">
         <div class="chat-empty-icon">&#127800;</div>
-        <h2>Bienvenue dans AI Studio</h2>
-        <p>Selectionnez un agent dans la barre laterale pour commencer une conversation. Chargez un modele GGUF ou connectez LM Studio en upstream.</p>
+        <h2>Bienvenue dans MAIA</h2>
+        <p>Selectionnez un agent dans la barre laterale pour commencer une conversation. Chargez un modele GGUF via maia-llm ou connectez un upstream en backup.</p>
       </div>
     </div>
 
@@ -671,10 +772,11 @@ body {
           onkeydown="handleKey(event)"
           oninput="autoResize(this)"
         ></textarea>
+        <button class="ptt-btn" id="ptt-btn" onclick="togglePTT()" title="Push to Talk (clic pour parler)">&#127908;</button>
         <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>&#9654;</button>
       </div>
-      <div class="input-hint">
-        Entree pour envoyer &bull; Shift+Entree pour un retour a la ligne
+      <div class="input-hint" id="input-hint">
+        Entree pour envoyer &bull; Shift+Entree pour un retour a la ligne &bull; &#127908; pour parler
       </div>
     </div>
   </div>
@@ -864,41 +966,70 @@ async function loadContexts() {
 // ── Status ─────────────────────────────────────────────────────────
 async function loadStatus() {
   try {
-    const data = await api('/status');
-    document.getElementById('version', data.version);
-    document.getElementById('hw-tier').textContent = data.hardware_tier || '?';
+    const data = await api('/maia/health');
 
-    const nEl = document.getElementById('status-native');
-    if (data.native_loaded) {
-      nEl.textContent = data.native_model || 'charge';
-      nEl.className = 'status-value online';
+    // Version + tier badge (header)
+    if (data.version) document.getElementById('version').textContent = data.version;
+    document.getElementById('hw-tier').textContent =
+      (data.hardware_tier || '?') + (data.hardware_tier_number ? ' T' + data.hardware_tier_number : '');
+
+    // Mode row
+    const mEl = document.getElementById('status-mode');
+    const modeLabel = data.mode
+      ? (data.mode.charAt(0).toUpperCase() + data.mode.slice(1))
+      : '?';
+    const isolated = data.llm?.isolated || false;
+    mEl.textContent = isolated ? modeLabel + ' (isolé)' : modeLabel;
+    mEl.className = 'status-value ' + (data.mode === 'pro' ? 'degraded' : 'online');
+
+    // Persona row + sync wake word
+    const pEl = document.getElementById('status-persona');
+    if (data.persona) {
+      pEl.textContent = data.persona.display_name || data.persona.name || '-';
+      pEl.className = 'status-value online';
+      syncWakeWordFromPersona(data.persona);
     } else {
-      nEl.textContent = (data.local_models_count || 0) + ' GGUF';
+      pEl.textContent = 'aucune';
+      pEl.className = 'status-value offline';
+    }
+
+    // LLM row
+    const nEl = document.getElementById('status-native');
+    const llm = data.llm || {};
+    if (llm.model_loaded && llm.model_name) {
+      nEl.textContent = llm.model_name;
+      nEl.className = 'status-value online';
+    } else if (llm.backend === 'upstream' || llm.upstream_available) {
+      nEl.textContent = 'upstream';
+      nEl.className = 'status-value degraded';
+    } else {
+      nEl.textContent = 'non chargé';
       nEl.className = 'status-value offline';
     }
 
+    // STT row
+    const sEl = document.getElementById('status-stt');
+    const caps = data.capabilities || {};
+    if (caps.stt) {
+      sEl.textContent = 'whisper';
+      sEl.className = 'status-value online';
+    } else {
+      sEl.textContent = 'désactivé';
+      sEl.className = 'status-value offline';
+    }
+
+    // Upstream row
     const uEl = document.getElementById('status-upstream');
-    if (data.upstream === 'connected') {
-      uEl.textContent = 'connecte';
+    if (llm.upstream_available) {
+      uEl.textContent = 'connecté';
       uEl.className = 'status-value online';
     } else {
       uEl.textContent = 'hors ligne';
       uEl.className = 'status-value offline';
     }
-
-    const mEl = document.getElementById('status-mode');
-    if (data.native_loaded) {
-      mEl.textContent = 'Natif (GGUF)';
-      mEl.className = 'status-value online';
-    } else if (data.upstream === 'connected') {
-      mEl.textContent = 'Upstream';
-      mEl.className = 'status-value degraded';
-    } else {
-      mEl.textContent = 'Fallback';
-      mEl.className = 'status-value offline';
-    }
   } catch (e) {
     document.getElementById('status-mode').textContent = 'erreur';
+    document.getElementById('status-mode').className = 'status-value offline';
   }
 }
 
@@ -1109,9 +1240,11 @@ async function sendMessage() {
     // Remove typing indicator
     state.messages = state.messages.filter(m => m.role !== 'typing');
 
+    const replyContent = data.content || data.error || 'Pas de reponse';
+    speakText(replyContent);
     state.messages.push({
       role: 'assistant',
-      content: data.content || data.error || 'Pas de reponse',
+      content: replyContent,
       agent: data.agent,
       model: data.model,
       backend: data.backend,
@@ -1180,8 +1313,264 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 4000);
 }
 
+// ── Voice Input (Web Speech API) ───────────────────────────────────
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let voiceState = {
+  pttActive: false,        // PTT en cours d'enregistrement
+  wakeActive: false,       // Wake word listener actif
+  ttsActive: false,        // TTS voix de réponse activée
+  pttRec: null,            // SpeechRecognition instance PTT
+  wakeRec: null,           // SpeechRecognition instance wake word
+  wakeWord: 'alicia',      // Mot de réveil (synchro avec la persona)
+  lang: 'fr-FR',
+};
+
+// Mise à jour du mot de réveil depuis la persona active
+function syncWakeWordFromPersona(personaData) {
+  if (personaData && personaData.wake_word) {
+    voiceState.wakeWord = personaData.wake_word.toLowerCase();
+    document.getElementById('wakeword-label').textContent = personaData.wake_word;
+  }
+}
+
+function voiceSupported() {
+  return !!SpeechRec;
+}
+
+function initVoice() {
+  const pttBtn = document.getElementById('ptt-btn');
+  const wakeBtn = document.getElementById('wakeword-btn');
+  const ttsBtn = document.getElementById('tts-btn');
+  if (!ttsSupported && ttsBtn) {
+    ttsBtn.disabled = true;
+    ttsBtn.title = 'TTS non supporté dans ce navigateur';
+  }
+  if (!voiceSupported()) {
+    pttBtn.disabled = true;
+    pttBtn.title = 'Necessaire : Chrome ou Edge';
+    wakeBtn.disabled = true;
+    wakeBtn.title = 'Necessaire : Chrome ou Edge';
+    return;
+  }
+}
+
+// ── PTT ─────────────────────────────────────────────────────────
+function togglePTT() {
+  if (!voiceSupported()) { toast('Chrome ou Edge requis pour la voix', 'error'); return; }
+  if (voiceState.pttActive) {
+    stopPTT(false);
+  } else {
+    startPTT();
+  }
+}
+
+function startPTT() {
+  if (voiceState.pttActive) return;
+
+  // Suspendre le wake word pendant le PTT
+  if (voiceState.wakeRec) { try { voiceState.wakeRec.stop(); } catch(e) {} voiceState.wakeRec = null; }
+
+  const pttBtn = document.getElementById('ptt-btn');
+  const input = document.getElementById('msg-input');
+  voiceState.pttActive = true;
+  pttBtn.classList.add('recording');
+  input.classList.add('recording');
+  input.placeholder = 'Parlez maintenant...';
+  document.getElementById('input-hint').textContent = 'Parlez... cliquez a nouveau pour annuler';
+
+  const rec = new SpeechRec();
+  rec.lang = voiceState.lang;
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  voiceState.pttRec = rec;
+
+  rec.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) { final += t; }
+      else { interim += t; }
+    }
+    // Afficher le transcript en temps reel dans l'input
+    if (final) {
+      input.value = final;
+      autoResize(input);
+    } else if (interim) {
+      input.value = interim;
+      autoResize(input);
+    }
+  };
+
+  rec.onend = () => {
+    const transcript = input.value.trim();
+    stopPTT(true);
+    if (transcript) {
+      // Auto-sélectionner l'agent persona si aucun n'est sélectionné
+      if (!state.selectedAgent) {
+        const wake = voiceState.wakeWord; // 'alicia'
+        const personaAgent = state.agents.find(a =>
+          a.id === wake || a.id.toLowerCase().includes(wake)
+        );
+        if (personaAgent) selectAgent(personaAgent.id);
+      }
+      if (state.selectedAgent) {
+        setTimeout(() => sendMessage(), 150);
+      }
+    }
+  };
+
+  rec.onerror = (e) => {
+    stopPTT(false);
+    if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      toast('Erreur micro : ' + e.error, 'error');
+    }
+  };
+
+  rec.start();
+}
+
+function stopPTT(keepText) {
+  voiceState.pttActive = false;
+  const pttBtn = document.getElementById('ptt-btn');
+  const input = document.getElementById('msg-input');
+  pttBtn.classList.remove('recording');
+  input.classList.remove('recording');
+  input.placeholder = 'Ecrivez votre message...';
+  document.getElementById('input-hint').textContent =
+    'Entree pour envoyer \u2022 Shift+Entree pour un retour a la ligne \u2022 \uD83C\uDF08 pour parler';
+  if (!keepText) { input.value = ''; autoResize(input); }
+  if (voiceState.pttRec) { try { voiceState.pttRec.stop(); } catch(e) {} voiceState.pttRec = null; }
+  // Reprendre le wake word si actif
+  if (voiceState.wakeActive) setTimeout(() => startWakeListener(), 600);
+}
+
+// ── Wake word ────────────────────────────────────────────────────
+function toggleWakeword() {
+  if (!voiceSupported()) { toast('Chrome ou Edge requis pour la voix', 'error'); return; }
+  voiceState.wakeActive = !voiceState.wakeActive;
+  const btn = document.getElementById('wakeword-btn');
+  if (voiceState.wakeActive) {
+    btn.classList.add('active');
+    startWakeListener();
+    toast('Dites "' + voiceState.wakeWord + '" pour activer Alicia', 'info');
+  } else {
+    btn.classList.remove('active');
+    stopWakeListener();
+    toast('Wake word desactive', 'info');
+  }
+}
+
+function startWakeListener() {
+  if (!voiceState.wakeActive || voiceState.pttActive) return;
+  if (voiceState.wakeRec) return; // deja actif
+
+  const rec = new SpeechRec();
+  rec.lang = voiceState.lang;
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  voiceState.wakeRec = rec;
+
+  rec.onresult = (e) => {
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const text = e.results[i][0].transcript.toLowerCase().trim();
+      if (text.includes(voiceState.wakeWord) && !voiceState.pttActive) {
+        // Wake word detecte !
+        voiceState.wakeRec = null;
+        try { rec.stop(); } catch(e) {}
+        // Animation visuelle + demarrer ecoute
+        document.getElementById('msg-input').value = '';
+        toast('Wake word detecte — je vous ecoute', 'success');
+        setTimeout(() => startPTT(), 400);
+        return;
+      }
+    }
+  };
+
+  rec.onend = () => {
+    voiceState.wakeRec = null;
+    // Redemarrer automatiquement sauf si desactive ou PTT actif
+    if (voiceState.wakeActive && !voiceState.pttActive) {
+      setTimeout(() => startWakeListener(), 400);
+    }
+  };
+
+  rec.onerror = (e) => {
+    voiceState.wakeRec = null;
+    if (e.error === 'no-speech') {
+      if (voiceState.wakeActive && !voiceState.pttActive) {
+        setTimeout(() => startWakeListener(), 400);
+      }
+    } else if (e.error !== 'aborted') {
+      voiceState.wakeActive = false;
+      document.getElementById('wakeword-btn').classList.remove('active');
+      toast('Wake word arrete : ' + e.error, 'error');
+    }
+  };
+
+  try { rec.start(); } catch(e) { voiceState.wakeRec = null; }
+}
+
+function stopWakeListener() {
+  if (voiceState.wakeRec) {
+    try { voiceState.wakeRec.stop(); } catch(e) {}
+    voiceState.wakeRec = null;
+  }
+}
+
+// ── TTS ─────────────────────────────────────────────────────────────
+const ttsSupported = 'speechSynthesis' in window;
+
+function toggleTTS() {
+  if (!ttsSupported) { toast('TTS non supporté dans ce navigateur', 'error'); return; }
+  voiceState.ttsActive = !voiceState.ttsActive;
+  const btn = document.getElementById('tts-btn');
+  if (voiceState.ttsActive) {
+    btn.classList.add('active');
+    toast('Voix activée', 'success');
+  } else {
+    btn.classList.remove('active');
+    window.speechSynthesis.cancel();
+    toast('Voix désactivée', 'info');
+  }
+}
+
+function speakText(text) {
+  if (!ttsSupported || !voiceState.ttsActive) return;
+  // Strip markdown and code blocks for cleaner speech
+  const clean = text
+    .replace(/```[\s\S]*?```/g, 'bloc de code')
+    .replace(/`[^`]+`/g, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/#+\s/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\n{2,}/g, '. ')
+    .replace(/\n/g, ' ')
+    .trim();
+
+  if (!clean) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = 'fr-FR';
+  utt.rate = 1.05;
+  utt.pitch = 1.0;
+
+  // Pick a French voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const frVoice = voices.find(v => v.lang.startsWith('fr') && v.localService)
+    || voices.find(v => v.lang.startsWith('fr'));
+  if (frVoice) utt.voice = frVoice;
+
+  window.speechSynthesis.speak(utt);
+}
+
 // ── Start ──────────────────────────────────────────────────────────
 init();
+initVoice();
 </script>
 </body>
 </html>

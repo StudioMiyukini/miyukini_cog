@@ -6,10 +6,14 @@ use std::collections::HashMap;
 pub struct AtlasHandle(u32);
 
 impl AtlasHandle {
-    /// Test-only constructor. Not for production use.
+    /// Create a handle from a raw atlas id.
+    pub const fn new(id: u32) -> Self {
+        Self(id)
+    }
+
     #[cfg(test)]
     pub(crate) fn new_test(id: u32) -> Self {
-        Self(id)
+        Self::new(id)
     }
 }
 
@@ -49,10 +53,14 @@ pub struct AtlasMeta {
 pub struct MaterialHandle(u32);
 
 impl MaterialHandle {
-    /// Test-only constructor. Not for production use.
+    /// Create a handle from a raw material id.
+    pub const fn new(id: u32) -> Self {
+        Self(id)
+    }
+
     #[cfg(test)]
     pub(crate) fn new_test(id: u32) -> Self {
-        Self(id)
+        Self::new(id)
     }
 }
 

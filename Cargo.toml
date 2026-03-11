@@ -92,6 +92,9 @@ members = [
     "crates/miyucloud",
     "crates/miyucloud-dav",
 
+    # === MAIA — Miyukini AI Agents ===
+    "crates/maia-stt",          # STT whisper.cpp — isolé de maia pour éviter conflit rustpotter/candle
+
     # === Alicia Home Assistante ===
     "crates/miyuvoicecapture",
     "crates/miyuwakeword",
@@ -114,8 +117,11 @@ members = [
     "apps/jay1tribu",
     "apps/jaymanga",
     "apps/miou-llm-bridge",
+    "apps/maia-llm",
+    "apps/team",
     "apps/miyukini-whisper",
     "apps/miyucloud",
+    "apps/alicia-mvp",
 
     # === MWS Origin ===
     "apps/origin",
@@ -183,3 +189,7 @@ needless_pass_by_value = "allow"
 similar_names = "allow"
 unreadable_literal = "allow"
 items_after_statements = "allow"
+
+[workspace.dependencies]
+# Partagé entre maia-llm et miou-llm-bridge — version unique pour éviter les conflits resolver
+llama-cpp-2 = { version = "=0.1.134", features = ["sampler"] }

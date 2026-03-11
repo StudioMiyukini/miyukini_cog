@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod pipeline;
 pub mod atlas;
 pub mod batch;
 pub mod camera;
@@ -28,6 +29,7 @@ pub struct GraphicsState {
     config: wgpu::SurfaceConfiguration,
     clear_color: Color,
     frames_rendered: u64,
+    sprite_pipeline: pipeline::SpritePipeline,
 }
 
 impl GraphicsState {
@@ -93,7 +95,9 @@ impl GraphicsState {
             a: profile.clear_rgba.a,
         };
 
-        Ok(Self { surface, device, queue, config, clear_color, frames_rendered: 0 })
+        let sprite_pipeline = pipeline::SpritePipeline::new(&device, &queue, format);
+
+        Ok(Self { surface, device, queue, config, clear_color, frames_rendered: 0, sprite_pipeline })
     }
 
     pub fn resize(&mut self, size: PhysicalSize<u32>) {
@@ -106,7 +110,7 @@ impl GraphicsState {
         self.surface.configure(&self.device, &self.config);
     }
 
-    pub fn render(&mut self) -> Result<()> {
+    pub fn render(&mut self, batch: &batch::SpriteBatch) -> Result<()> {
         let output = match self.surface.get_current_texture() {
             Ok(frame) => frame,
             Err(SurfaceError::Lost | SurfaceError::Outdated) => {
@@ -119,9 +123,10 @@ impl GraphicsState {
 
         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("mge.clear_encoder"),
+            label: Some("mge.frame_encoder"),
         });
 
+        // Clear pass
         {
             let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("mge.clear_pass"),
@@ -140,6 +145,11 @@ impl GraphicsState {
                 multiview_mask: None,
             });
         }
+
+        // Sprite pass (after clear — uses LoadOp::Load)
+        #[allow(clippy::cast_precision_loss)]
+        let viewport = [self.config.width as f32, self.config.height as f32];
+        self.sprite_pipeline.render(&self.queue, &mut encoder, &view, batch, viewport);
 
         self.queue.submit([encoder.finish()]);
         output.present();

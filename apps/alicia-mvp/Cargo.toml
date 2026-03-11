@@ -1,0 +1,49 @@
+[package]
+name = "alicia-mvp"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "MVP test harness — STT -> Alicia NLU -> TTS pipeline"
+
+[[bin]]
+name = "alicia-mvp"
+path = "src/main.rs"
+
+[dependencies]
+miyualicia          = { path = "../../crates/miyualicia" }
+miyualicia-devices  = { path = "../../crates/miyualicia-devices" }
+miyustt             = { path = "../../crates/miyustt" }
+miyutts             = { path = "../../crates/miyutts" }
+miyualicia-capture  = { path = "../../crates/miyuvoicecapture" }
+miyuwakeword        = { path = "../../crates/miyuwakeword", package = "miyualicia-wakeword" }
+
+tokio    = { version = "1", features = ["full"] }
+reqwest  = { version = "0.12", features = ["json"] }
+serde    = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap     = { version = "4", features = ["derive"] }
+tracing  = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+axum     = "0.8"
+rodio    = { version = "0.21", default-features = false, features = ["playback", "wav", "mp3"] }
+uuid     = { version = "1", features = ["v4"] }
+chrono   = "0.4"
+anyhow   = "1"
+base64   = "0.22"
+rusqlite = { version = "0.32", features = ["bundled"] }
+hound    = "3.5"
+rustpotter = "3.0"
+rustfft  = { version = "6", optional = true }
+
+# NOTE: candle-core 0.9 est incompatible avec rustpotter 3.0 (conflict half ^2.5 vs =2.4.1).
+# Le STT GPU Whisper sera dans un crate séparé (apps/miyuwhisper) sans rustpotter.
+# Garder ici uniquement rustfft pour mel-spectrogram si besoin futur sans candle.
+
+[features]
+default = []
+# Feature reservee — non activable tant que rustpotter depend de candle-core 0.2.2
+whisper-cuda = ["dep:rustfft"]
+
+[lints]
+workspace = true

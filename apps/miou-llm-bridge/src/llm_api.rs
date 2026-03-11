@@ -242,8 +242,8 @@ pub async fn llm_models(State(state): State<ProxyState>) -> impl IntoResponse {
         });
     }
 
-    // 2. Modèles upstream (LM Studio)
-    let upstream_ids = recommend::fetch_loaded_model_ids(&state).await;
+    // 2. Modèles chargés dans l'upstream (LM Studio / Ollama)
+    let upstream_ids: Vec<String> = fetch_upstream_model_ids(&state).await;
     for model_id in &upstream_ids {
         let model_lower = model_id.to_lowercase();
         let catalog_match = CATALOG
@@ -294,7 +294,7 @@ pub async fn llm_status(State(state): State<ProxyState>) -> impl IntoResponse {
     let availability =
         fallback::probe_availability(&state.client, &state.upstream_url, native_loaded).await;
 
-    let upstream_ids = recommend::fetch_loaded_model_ids(&state).await;
+    let upstream_ids: Vec<String> = fetch_upstream_model_ids(&state).await;
     let local_models = state.model_manager.scan_models();
     let active = state.inference.active_backend().await;
 
@@ -319,4 +319,34 @@ pub async fn llm_status(State(state): State<ProxyState>) -> impl IntoResponse {
         },
         "hardware_tier": state.hardware.tier.label(),
     }))
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+/// Liste les modèles chargés dans l'upstream (LM Studio/Ollama) via GET /v1/models.
+async fn fetch_upstream_model_ids(state: &ProxyState) -> Vec<String> {
+    let url = format!("{}/v1/models", state.upstream_url);
+    #[derive(serde::Deserialize)]
+    struct M {
+        id: String,
+    }
+    #[derive(serde::Deserialize)]
+    struct R {
+        #[serde(default)]
+        data: Vec<M>,
+    }
+    let resp = match state
+        .client
+        .get(&url)
+        .timeout(std::time::Duration::from_secs(5))
+        .send()
+        .await
+    {
+        Ok(r) if r.status().is_success() => r,
+        _ => return Vec::new(),
+    };
+    resp.json::<R>()
+        .await
+        .map(|r| r.data.into_iter().map(|m| m.id).collect())
+        .unwrap_or_default()
 }

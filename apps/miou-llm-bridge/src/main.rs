@@ -1,17 +1,17 @@
-//! Miyukini AI Studio — Service IA local pour l'écosystème COG.
+//! MAIA — Miyukini AI Agents — Service IA local pour l'écosystème COG.
 //!
-//! Moteur d'inférence GGUF natif + orchestrateur d'agents IA.
+//! Orchestrateur d'agents IA — délègue l'inférence GGUF à maia-llm (HTTP).
 //! Expose une API OpenAI-compatible enrichie avec :
-//! - Inférence GGUF native (llama-cpp-2) — moteur principal
+//! - Client HTTP vers maia-llm (GGUF local) — moteur principal
 //! - Proxy HTTP vers LM Studio / Ollama — backup
 //! - 17 agents spécialisés avec tool calling
 //! - Système de skills (fichiers, shell, web, services COG)
 //! - Bases de contexte pour enrichir les prompts
-//! - Dégradation graduée (natif → upstream → proto-IA)
+//! - Dégradation graduée (maia-llm → upstream → proto-IA)
 //!
 //! Usage :
-//!   miou-llm-bridge                     # config depuis bridge.toml ou défauts
-//!   MIYUKINI_DATA_DIR=./data miou-llm-bridge
+//!   maia                                # config depuis bridge.toml ou défauts
+//!   MIYUKINI_DATA_DIR=./data maia
 
 mod agents;
 mod catalog;
@@ -19,18 +19,23 @@ mod config;
 mod context;
 mod fallback;
 mod hardware;
+mod health;
 mod inference;
 mod llm_api;
+mod mode;
 mod model_manager;
+mod persona;
 mod proxy;
 mod recommend;
 mod security;
 mod skills;
+mod team_client;
 mod tools;
+mod voice;
 
 use agents::AgentRegistry;
 use context::ContextRegistry;
-use inference::{InferenceRouter, NativeBackend, UpstreamBackend};
+use inference::{InferenceRouter, MaiaLlmClient, UpstreamBackend};
 use model_manager::ModelManager;
 use proxy::{proxy_router, ProxyState};
 use security::{AuditLog, RateLimitConfig, RateLimiter, SecurityAuditLog};
@@ -40,11 +45,38 @@ async fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "miou_llm_bridge=info,tower_http=info".into()),
+                .unwrap_or_else(|_| "maia=info,tower_http=info".into()),
         )
         .init();
 
     let cfg = config::load_or_create();
+
+    // Timestamp de démarrage (pour uptime)
+    let started_at = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+
+    // Chargement persona (--profile <nom|chemin.toml>)
+    let active_persona = parse_profile_arg();
+
+    // Parse et valide le mode (--mode standalone|pro, --isolated, --team <url>)
+    let mode_config = mode::parse_mode_args();
+    mode::validate_mode(&mode_config);
+    let maia_mode = mode_config.mode;
+
+    // Validation --isolated : log et vérifier cohérence persona
+    if mode_config.isolated {
+        tracing::info!("Mode isolation strict activé — aucun socket réseau sortant");
+        if let Some(ref p) = active_persona {
+            if !p.mode.isolated {
+                tracing::warn!(
+                    "Persona '{}' n'est pas configurée en mode isolated mais --isolated est actif",
+                    p.name
+                );
+            }
+        }
+    }
 
     // Détection hardware au démarrage
     let hw = hardware::detect_hardware();
@@ -56,25 +88,32 @@ async fn main() {
     let audit_log = AuditLog::new(10_000);
     let security_audit = SecurityAuditLog::new(5_000);
 
-    // Initialisation du moteur d'inférence natif
-    let native_backend = NativeBackend::new(cfg.native.clone());
-    let model_manager = ModelManager::new(&cfg.native.models_dir);
-
-    // Client HTTP pour l'upstream (backup)
+    // Client HTTP partagé (maia-llm + upstream)
     let http_client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(120))
         .build()
         .expect("reqwest client");
 
+    // Client maia-llm (GGUF local — remplace NativeBackend llama-cpp-2)
+    // maia-llm tourne en parallèle sur le port 11435 par défaut.
+    let maia_llm_url = std::env::var("MAIA_LLM_URL")
+        .unwrap_or_else(|_| "http://localhost:11435".into());
+    let maia_client = MaiaLlmClient::new(
+        maia_llm_url.clone(),
+        cfg.auth_token.clone(),
+        http_client.clone(),
+    );
+    let model_manager = ModelManager::new(&cfg.native.models_dir);
+
+    // Backend upstream (LM Studio / Ollama — backup)
     let upstream_backend = UpstreamBackend::new(http_client.clone(), cfg.upstream_url.clone());
     let inference_router =
-        InferenceRouter::new(native_backend, upstream_backend, cfg.native.prefer_native);
+        InferenceRouter::new(maia_client, upstream_backend, cfg.native.prefer_native);
 
-    // Auto-load : charger le meilleur modèle GGUF disponible
+    // Auto-load : demander à maia-llm de charger le meilleur modèle disponible
     if cfg.native.auto_load {
         let local_models = model_manager.scan_models();
         if !local_models.is_empty() {
-            // Préférer le modèle par défaut de la config, sinon le recommandé
             let model_to_load = if let Some(ref default) = cfg.default_model {
                 model_manager.find_model(default)
             } else {
@@ -82,10 +121,12 @@ async fn main() {
             };
 
             if let Some(model) = model_to_load {
-                tracing::info!("Auto-chargement du modèle : {}", model.filename);
-                match inference_router.native.load_model(model.path.clone()) {
+                tracing::info!("Auto-chargement via maia-llm : {}", model.filename);
+                match inference_router.native.load_model(model.path.clone()).await {
                     Ok(name) => tracing::info!("Modèle chargé : {name}"),
-                    Err(e) => tracing::warn!("Échec du chargement auto : {e}"),
+                    Err(e) => tracing::warn!(
+                        "Échec du chargement auto (maia-llm disponible ?) : {e}"
+                    ),
                 }
             }
         }
@@ -94,6 +135,15 @@ async fn main() {
     let agent_count = agent_registry.list_agents().len();
     let local_model_count = model_manager.scan_models().len();
     let native_model = inference_router.native.loaded_model_name();
+
+    if let Some(ref p) = active_persona {
+        tracing::info!(
+            "Persona active : {} ({}, thinking={})",
+            p.display_name,
+            p.mode.kind,
+            p.llm.thinking_mode
+        );
+    }
 
     tracing::info!("╔══════════════════════════════════════════════════╗");
     tracing::info!(
@@ -188,7 +238,39 @@ async fn main() {
             "non (proxy seulement)"
         }
     );
+    if let Some(ref p) = active_persona {
+        let mode_label = if p.mode.isolated {
+            format!("{} (isolated)", p.mode.kind)
+        } else {
+            p.mode.kind.to_string()
+        };
+        tracing::info!("╠══════════════════════════════════════════════════╣");
+        tracing::info!("║  Persona  : {:<37}║", p.display_name);
+        tracing::info!("║  Mode     : {:<37}║", mode_label);
+        tracing::info!("║  Wake     : {:<37}║", p.wake_word.word);
+        tracing::info!("║  LLM pref : {:<37}║", p.llm.preferred_patterns.first().map(|s| s.as_str()).unwrap_or("-"));
+    }
     tracing::info!("╚══════════════════════════════════════════════════╝");
+
+    // Enregistrement TEAM (mode Pro uniquement)
+    let mut team_registered = false;
+    if maia_mode == mode::MaiaMode::Pro {
+        if let Some(team_url) = mode::resolve_team_url(&mode_config) {
+            let persona_name = active_persona.as_ref().map(|p| p.name.clone());
+            let node = team_client::NodeInfo::new(
+                hostname::get()
+                    .map(|h| h.to_string_lossy().to_string())
+                    .unwrap_or_else(|_| "maia-node".into()),
+                format!("http://localhost:{}", cfg.bind_addr.split(':').last().unwrap_or("11434")),
+                &hw,
+                maia_mode,
+                inference_router.native.loaded_model_name(),
+                persona_name,
+            );
+            let client = team_client::TeamClient::new(http_client.clone(), team_url, node);
+            team_registered = client.register().await;
+        }
+    }
 
     let state = ProxyState {
         client: http_client,
@@ -204,6 +286,10 @@ async fn main() {
         model_manager,
         security_config: cfg.security,
         security_audit,
+        active_persona,
+        maia_mode,
+        started_at,
+        team_registered,
     };
 
     let app = proxy_router(state);
@@ -225,6 +311,36 @@ async fn main() {
         });
 
     tracing::info!("AI Studio arrêté");
+}
+
+/// Parse l'argument `--profile <nom|chemin>` depuis les args CLI.
+/// Retourne None si absent, ou panic si le profil est invalide.
+fn parse_profile_arg() -> Option<persona::PersonaConfig> {
+    let args: Vec<String> = std::env::args().collect();
+    let pos = args.iter().position(|a| a == "--profile")?;
+    let name_or_path = args.get(pos + 1).unwrap_or_else(|| {
+        eprintln!("Erreur : --profile requiert un argument (ex: alicia, miou, sophie-guide)");
+        std::process::exit(1);
+    });
+
+    match persona::load_persona(name_or_path) {
+        Ok(p) => {
+            tracing::info!(
+                "Persona chargée : {} ({})",
+                p.display_name,
+                name_or_path
+            );
+            Some(p)
+        }
+        Err(e) => {
+            eprintln!("Erreur chargement persona '{}': {e}", name_or_path);
+            eprintln!(
+                "Personas disponibles : {}",
+                persona::builtin_personas().join(", ")
+            );
+            std::process::exit(1);
+        }
+    }
 }
 
 async fn shutdown_signal() {
