@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MiyuCloud">
+    <meta name="theme-color" content="#f97316">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+    <title data-i18n="app.title">Miyukini Cloud</title>
+    <!-- Apply saved theme immediately to prevent flash of light mode -->
+    <script src="/js/core/theme-init.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/views/inlineViewer.css">
+    <link rel="stylesheet" href="/css/views/favorites.css">
+    <link rel="stylesheet" href="/css/views/recent.css">
+    <link rel="stylesheet" href="/css/views/shared.css">
+    <link rel="stylesheet" href="/css/views/trash.css">
+    <link rel="stylesheet" href="/css/views/photos.css">
+    <link rel="stylesheet" href="/css/views/photosLightbox.css">
+
+    <!-- Scripts (defer: download in parallel, execute in order, after HTML parsed) -->
+    <script defer src="/js/core/i18n.js"></script>
+    <script defer src="/js/core/csrf.js"></script>
+    <script defer src="/js/core/languageSelector.js"></script>
+    <script defer src="/js/core/notifications.js"></script>
+    <script defer src="/js/core/modal.js"></script>
+    <script defer src="/js/core/formatters.js"></script>
+    <script defer src="/js/app/state.js"></script>
+    <script defer src="/js/app/uiFileTypes.js"></script>
+    <script defer src="/js/app/uiNotifications.js"></script>
+    <script defer src="/js/app/ui.js"></script>
+    <script defer src="/js/features/files/contextMenus.js"></script>
+    <script defer src="/js/features/files/fileOperations.js"></script>
+    <script defer src="/js/features/files/multiSelect.js"></script>
+    <script defer src="/js/features/files/search.js"></script>
+    <script defer src="/js/features/library/favorites.js"></script>
+    <script defer src="/js/features/library/recent.js"></script>
+    <script defer src="/js/features/library/photos.js"></script>
+    <script defer src="/js/features/library/photosLightbox.js"></script>
+    <script defer src="/js/features/sharing/fileSharing.js"></script>
+    <script defer src="/js/views/shared/sharedView.js"></script>
+    <script defer src="/js/features/files/inlineViewer.js"></script>
+    <script defer src="/js/features/files/wopiEditor.js"></script>
+    <script defer src="/js/core/icons.js"></script>
+    <script defer src="/js/app/navigation.js"></script>
+    <script defer src="/js/app/authSession.js"></script>
+    <script defer src="/js/app/userMenu.js"></script>
+    <script defer src="/js/app/filesView.js"></script>
+    <script defer src="/js/app/trashView.js"></script>
+    <script defer src="/js/app/searchView.js"></script>
+    <script defer src="/js/app/main.js"></script>
+    <script defer src="/js/app/bootstrap.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script defer src="/js/core/sw-register.js"></script>
+</head>
+<body>
+    <!-- Mobile sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <a href="/" class="logo-container">
+
+            <div class="logo">
+                <svg viewBox="0 0 500 500">
+                    <path d="M345 310c32 0 58-26 58-58s-26-58-58-58c-6.2 0-12 0.9-17.5 2.7C318 166 289 143 255 143c-34.3 0-63.1 22.6-73 53.7C176.9 195.7 171 195 165 195c-32 0-58 26-58 58s26 58 58 58h180z" fill="#fff"/>
+                </svg>
+            </div>
+            <div class="app-name">Miyukini Cloud</div>
+        </a>
+
+        <div class="nav-menu">
+            <div class="nav-item active">
+                <i class="fas fa-folder"></i>
+                <span data-i18n="nav.files">Files</span>
+            </div>
+            <div class="nav-item" id="nav-shared">
+                <i class="fas fa-share-alt"></i>
+                <span data-i18n="nav.shared">Shared</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-clock"></i>
+                <span data-i18n="nav.recent">Recent</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-star"></i>
+                <span data-i18n="nav.favorites">Favorites</span>
+            </div>
+            <div class="nav-item" id="nav-photos">
+                <i class="fas fa-images"></i>
+                <span data-i18n="nav.photos">Photos</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-trash"></i>
+                <span data-i18n="nav.trash">Trash</span>
+            </div>
+            <div class="nav-item" id="nav-mobile">
+                <i class="fas fa-mobile-alt"></i>
+                <span data-i18n="nav.mobile">Mobile</span>
+            </div>
+        </div>
+
+        <div class="storage-container">
+            <div class="storage-title"><i class="fas fa-database"></i> <span data-i18n="storage.title">Storage</span></div>
+            <div class="storage-bar">
+                <div class="storage-fill"></div>
+            </div>
+            <div class="storage-info" data-i18n="storage.calculating">Calculating...</div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <!-- Mobile menu toggle -->
+            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" data-i18n-placeholder="actions.search" placeholder="Search files, folders...">
+                <button id="search-button" class="search-button" data-i18n-title="actions.search_btn" title="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="user-controls">
+                <div id="language-selector"></div>
+
+                <!-- Notification Bell -->
+                <div class="notif-wrapper" id="notif-wrapper">
+                    <button class="notif-bell-btn" id="notif-bell-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notif-badge hidden" id="notif-badge">0</span>
+                    </button>
+                    <div class="notif-panel" id="notif-panel">
+                        <div class="notif-panel-header">
+                            <span class="notif-panel-title" data-i18n="notifications.title">Notifications</span>
+                            <button class="notif-clear-btn" id="notif-clear-btn" title="Clear all" aria-label="Clear all notifications">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <div class="notif-panel-body" id="notif-panel-body">
+                            <div class="notif-empty" id="notif-empty">
+                                <i class="fas fa-bell-slash"></i>
+                                <span data-i18n="notifications.empty">No notifications</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-menu-wrapper" id="user-menu-wrapper">
+                    <button class="user-avatar-btn" id="user-avatar-btn">
+                        <div class="user-avatar" id="user-avatar">AD</div>
+                    </button>
+                    <div class="user-menu" id="user-menu">
+                        <div class="user-menu-header">
+                            <div class="user-menu-avatar" id="user-menu-avatar">AD</div>
+                            <div class="user-menu-info">
+                                <div class="user-menu-name" id="user-menu-name">User</div>
+                                <div class="user-menu-email" id="user-menu-email">user@oxicloud.app</div>
+                            </div>
+                        </div>
+                        <div class="user-menu-role-badge hidden" id="user-menu-role-badge">
+                            <span class="role-badge role-badge-admin"><i class="fas fa-shield-alt"></i> Admin</span>
+                        </div>
+                        <div class="user-menu-storage">
+                            <div class="user-menu-storage-label">
+                                <i class="fas fa-database"></i>
+                                <span data-i18n="storage.title">Storage</span>
+                            </div>
+                            <div class="user-menu-storage-bar">
+                                <div class="user-menu-storage-fill" id="user-menu-storage-fill"></div>
+                            </div>
+                            <div class="user-menu-storage-text" id="user-menu-storage-text">0% used</div>
+                        </div>
+                        <div class="user-menu-divider"></div>
+                        <button class="user-menu-item user-menu-admin hidden" id="user-menu-admin">
+                            <i class="fas fa-cogs"></i>
+                            <span data-i18n="user_menu.admin_panel">Admin panel</span>
+                        </button>
+                        <button class="user-menu-item" id="user-menu-profile">
+                            <i class="fas fa-user-circle"></i>
+                            <span data-i18n="user_menu.profile">My profile</span>
+                        </button>
+                        <div class="user-menu-divider hidden" id="user-menu-admin-divider"></div>
+                        <button class="user-menu-item" id="user-menu-theme">
+                            <i class="fas fa-moon"></i>
+                            <span data-i18n="user_menu.appearance">Appearance</span>
+                            <div class="theme-toggle-pill" id="theme-toggle-pill">
+                                <div class="theme-toggle-knob"></div>
+                            </div>
+                        </button>
+                        <button class="user-menu-item" id="user-menu-about">
+                            <i class="fas fa-info-circle"></i>
+                            <span data-i18n="user_menu.about">About Miyukini Cloud</span>
+                        </button>
+                        <div class="user-menu-divider"></div>
+                        <button class="user-menu-item user-menu-logout" id="user-menu-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span data-i18n="actions.logout">Log out</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <h1 class="page-title" data-i18n="nav.files">Files</h1>
+
+            <div class="actions-bar">
+                <div class="action-buttons">
+                    <div class="upload-dropdown" id="upload-dropdown">
+                        <button class="btn btn-primary" id="upload-btn">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span data-i18n="actions.upload">Upload</span>
+                            <i class="fas fa-caret-down upload-caret"></i>
+                        </button>
+                        <div class="upload-dropdown-menu" id="upload-dropdown-menu">
+                            <button class="upload-dropdown-item" id="upload-files-btn">
+                                <i class="fas fa-file"></i>
+                                <span data-i18n="actions.upload_files">Upload files</span>
+                            </button>
+                            <button class="upload-dropdown-item" id="upload-folder-btn">
+                                <i class="fas fa-folder-open"></i>
+                                <span data-i18n="actions.upload_folder">Upload folder</span>
+                            </button>
+                            <button class="upload-dropdown-item" id="upload-photos-btn">
+                                <i class="fas fa-camera" style="color:#f97316"></i>
+                                <span data-i18n="actions.upload_photos">Photos & vid&eacute;os</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="new-folder-btn">
+                        <i class="fas fa-folder-plus"></i>
+                        <span data-i18n="actions.new_folder">New folder</span>
+                    </button>
+                </div>
+
+                <div class="view-toggle">
+                    <button class="toggle-btn active" id="grid-view-btn" title="Grid view">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="toggle-btn" id="list-view-btn" title="List view">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="dropzone" id="dropzone">
+                <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
+                <p data-i18n="dropzone.drag_files">Drag files here or click to select</p>
+                <input type="file" id="file-input" class="hidden" multiple>
+                <input type="file" id="folder-input" class="hidden" webkitdirectory directory multiple>
+                <div class="upload-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-i18n="breadcrumb.home">Home</span>
+            </div>
+
+            <!-- Files Container -->
+            <div class="files-container">
+                <!-- Grid View -->
+                <div class="files-grid" id="files-grid">
+                    <!-- Files will be populated here -->
+                </div>
+
+                <!-- List View (hidden by default) -->
+                <div class="files-list-view hidden" id="files-list-view">
+                    <div class="list-header">
+                        <div class="list-header-checkbox"><input type="checkbox" id="select-all-checkbox" title="Select all"></div>
+                        <div data-i18n="files.name">Name</div>
+                        <div data-i18n="files.type">Type</div>
+                        <div data-i18n="files.size">Size</div>
+                        <div data-i18n="files.modified">Modified</div>
+                    </div>
+                    <!-- Files will be populated here in list view -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Modal (for New Folder, Rename, etc.) -->
+    <div id="input-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i id="modal-icon" class="fas fa-folder-plus"></i>
+                </div>
+                <h3 id="modal-title" data-i18n="dialogs.new_folder_title">New folder</h3>
+                <button class="modal-close-btn" id="modal-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label id="modal-label" for="modal-input" data-i18n="dialogs.folder_name">Folder name</label>
+                <input type="text" id="modal-input" class="modal-input" placeholder="" autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel-btn" data-i18n="actions.cancel">Cancel</button>
+                <button class="btn btn-primary" id="modal-confirm-btn" data-i18n="actions.confirm">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="about-modal-overlay" id="about-modal-overlay">
+        <div class="about-modal">
+            <div class="about-modal-logo">
+                <i class="fas fa-cloud"></i>
+            </div>
+            <h2>Miyukini Cloud</h2>
+            <div class="about-version" id="about-version">v...</div>
+            <div class="about-description" data-i18n="user_menu.about_description">
+                Cloud storage platform built with Rust &amp; Clean Architecture. Fast, secure, and private.
+            </div>
+            <div class="about-tech">
+                <span class="about-tech-badge">Rust</span>
+                <span class="about-tech-badge">Axum</span>
+                <span class="about-tech-badge">PostgreSQL</span>
+                <span class="about-tech-badge">Clean Architecture</span>
+            </div>
+            <div class="about-links">
+                <a href="https://github.com" class="about-link" target="_blank" rel="noopener">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <a href="#" class="about-link" id="about-license-link">
+                    <i class="fas fa-file-alt"></i> MIT License
+                </a>
+            </div>
+            <button class="about-close-btn" id="about-close-btn" data-i18n="actions.close">Close</button>
+        </div>
+    </div>
+
+    <!-- Upload Progress Toast (hidden – driven by notification bell) -->
+    <div class="upload-toast hidden" id="upload-toast"></div>
+<script src="/js/core/pwa.js" defer></script>
+</body>
+</html>

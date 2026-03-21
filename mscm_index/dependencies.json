@@ -1294,5 +1294,61 @@
   ],
   "kindmother_threat_level_low": [
     "kindmother_threat_level"
+  ],
+  "miyucloud_handler_file_upload": [
+    "miyucloud_svc_file_upload",
+    "miyucloud_mw_auth",
+    "miyucloud_mime_validation",
+    "miyucloud_infra_audit_repo"
+  ],
+  "miyucloud_handler_auth": [
+    "miyucloud_svc_auth",
+    "miyucloud_mw_rate_limit"
+  ],
+  "miyucloud_handler_audit": [
+    "miyucloud_infra_audit_repo",
+    "miyucloud_mw_auth"
+  ],
+  "miyucloud_handler_gdpr": [
+    "miyucloud_port_gdpr",
+    "miyucloud_mw_auth"
+  ],
+  "miyucloud_svc_file_upload": [
+    "miyucloud_port_dedup",
+    "miyucloud_port_encryption",
+    "miyucloud_port_file_upload"
+  ],
+  "miyucloud_svc_auth": [
+    "miyucloud_port_auth_token_service",
+    "miyucloud_port_auth_password_hasher",
+    "miyucloud_port_auth_user_storage"
+  ],
+  "miyucloud_infra_jwt_service": [
+    "miyucloud_entity_session"
+  ],
+  "miyucloud_infra_dedup_service": [
+    "miyucloud_infra_blob_encryption"
+  ],
+  "miyucloud_infra_audit_repo": [
+    "miyucloud_entity_audit_event"
+  ],
+  "miyucloud_mw_auth": [
+    "miyucloud_infra_jwt_service"
+  ],
+  "miyucloud_mw_bandwidth": [
+    "miyucloud_di_app_state"
+  ],
+  "miyucloud_main": [
+    "miyucloud_di_factory",
+    "miyucloud_config_app",
+    "miyucloud_infra_dual_db_pools"
+  ],
+  "miyucloud_routes_protected": [
+    "miyucloud_handler_file_upload",
+    "miyucloud_handler_audit",
+    "miyucloud_handler_gdpr",
+    "miyucloud_handler_webdav",
+    "miyucloud_handler_caldav",
+    "miyucloud_handler_carddav"
   ]
 }

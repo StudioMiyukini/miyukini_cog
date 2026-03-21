@@ -1,0 +1,102 @@
+name: Docker Hub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to publish (e.g. v0.3.0)'
+        required: true
+
+env:
+  REGISTRY_IMAGE: diocrafts/oxicloud
+
+jobs:
+  # Run tests before publishing
+  test:
+    name: Pre-publish Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: oxicloud_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgres://postgres:postgres@localhost/oxicloud_test"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Initialize test database
+        run: psql -h localhost -U postgres -d oxicloud_test -f migrations/20260307000000_initial_schema.sql
+        env:
+          PGPASSWORD: postgres
+
+      - run: cargo test --workspace
+
+  # Build and push multi-arch image in a single job
+  build-and-push:
+    name: Build & Push Multi-Arch
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set version tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          # Strip leading 'v' if present for Docker tag
+          VERSION="${VERSION#v}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Multi-Arch Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}
+            ${{ env.REGISTRY_IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ env.VERSION }}
+
+      - name: Verify published image
+        run: |
+          docker pull ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}
+          docker image inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}
+          echo "✅ Image ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }} published successfully"

@@ -1,548 +1,578 @@
-//! MiyuCloud Server -- Point d'entree.
-//!
-//! @id: miyucloud_server_main
-//! @do: launch_dual_server_api_and_web_surface_with_crypto_bootstrap
-//! @role: entrypoint
-//! @layer: app
-//!
-//! Au demarrage :
-//! 1. Ouvrir la DB (init schema si necessaire)
-//! 2. Verifier si un sel Argon2 existe dans `cloud_crypto_config`
-//! 3. Si non : generer le sel, deriver la master key, creer le canary
-//! 4. Si oui : deriver la master key, verifier le canary
-//! 5. Lancer le serveur dual :
-//!    - API sur 127.0.0.1:{api_port} (HTTP, protege par X-COG-Token)
-//!    - Surface web sur 0.0.0.0:{web_port} (HTTPS, publique, sandboxee)
+#![allow(async_fn_in_trait)]
 
-mod api;
-mod config;
-mod connect_auth;
-mod security_headers;
-mod web_surface;
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use miyucloud_dav::caldav::service::CalDavService;
-use miyucloud_dav::carddav::service::CardDavService;
-
-use config::MiyucloudConfig;
-use connect_auth::{ConnectAuthManager, PendingQrChallenge, WebPortalSession};
-use miyucloud::crypto::KeyManager;
-use miyucloud::data::types::CryptoConfig;
-use miyucloud::data::MiyucloudDb;
-use miyucloud::domain::QuotaOps;
-use miyucloud::storage::local_fs::LocalFsStorage;
-use std::collections::HashMap;
+use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
-use tokio_rustls::TlsAcceptor;
+use std::time::Duration;
 
-/// Etat partage de l'application (accessible par tous les handlers).
-pub struct AppState {
-    /// Base de donnees MiyuCloud.
-    pub db: MiyucloudDb,
-    /// Backend de stockage.
-    pub storage: LocalFsStorage,
-    /// Gestionnaire de cles (master key en memoire).
-    pub key_manager: KeyManager,
-    /// Configuration du serveur.
-    pub config: MiyucloudConfig,
-    /// Sel derive HKDF pour le hashing RGPD des adresses IP.
-    pub ip_salt: [u8; 32],
-    /// Pont Miyukini Connect pour le portail web.
-    pub connect_auth: ConnectAuthManager,
-    /// Sessions web actives du portail.
-    pub web_sessions: std::sync::Mutex<HashMap<String, WebPortalSession>>,
-    /// Challenges QR en attente d'approbation.
-    pub qr_challenges: std::sync::Mutex<HashMap<String, PendingQrChallenge>>,
-    /// Service CalDAV (calendriers + evenements).
-    pub caldav_svc: CalDavService,
-    /// Service CardDAV (carnets d'adresses + contacts).
-    pub carddav_svc: CardDavService,
-}
+use socket2::{Domain, Protocol, Socket, TcpKeepalive, Type};
+
+use axum::Router;
+use axum::extract::DefaultBodyLimit;
+use tower_http::limit::RequestBodyLimitLayer;
+use tower_http::set_header::SetResponseHeaderLayer;
+use tower_http::trace::TraceLayer;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+/// Miyukini Cloud - Cloud Storage Platform
+///
+/// Miyukini Cloud is a NextCloud-like file storage system built in Rust with a focus on
+/// performance, security, and clean architecture. The system provides:
+///
+/// - File and folder management with rich metadata
+/// - User authentication and authorization
+/// - File trash system with automatic cleanup
+/// - Efficient handling of large files through parallel processing
+/// - Compression capabilities for bandwidth optimization
+/// - RESTful API and web interface
+///
+/// The architecture follows the Clean/Hexagonal Architecture pattern with:
+///
+/// - Domain Layer: Core business entities and repository interfaces (domain/*)
+/// - Application Layer: Use cases and service orchestration (application/*)
+/// - Infrastructure Layer: Technical implementations of repositories (infrastructure/*)
+/// - Interface Layer: API endpoints and web controllers (interfaces/*)
+///
+/// Dependencies are managed through dependency inversion, with high-level modules
+/// defining interfaces (ports) that low-level modules implement (adapters).
+///
+/// @author Miyukini Cloud Team
+use oxicloud::common;
+use oxicloud::infrastructure;
+use oxicloud::interfaces;
+
+use common::di::AppServiceFactory;
+use infrastructure::db::create_database_pools;
+use interfaces::{create_api_routes, create_public_api_routes, web::create_web_routes};
 
 #[tokio::main]
-async fn main() {
-    // Init tracing
-    tracing_subscriber::fmt::init();
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Load .env file if present (for local development)
+    dotenvy::dotenv().ok();
 
-    let config = MiyucloudConfig::from_env();
-    tracing::info!("MiyuCloud Server starting on port {}", config.api_port);
+    // Initialize tracing
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::new(
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+        ))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
-    // Ensure directories exist
-    if let Some(parent) = config.db_path.parent() {
-        if let Err(e) = std::fs::create_dir_all(parent) {
-            tracing::error!("Failed to create DB directory: {e}");
-            std::process::exit(1);
-        }
+    // Load configuration from environment variables
+    let config = common::config::AppConfig::from_env();
+
+    // Ensure storage and locales directories exist
+    let storage_path = config.storage_path.clone();
+    if !storage_path.exists() {
+        std::fs::create_dir_all(&storage_path).expect("Failed to create storage directory");
     }
+    // Locales are embedded in the binary via rust-embed — no filesystem path needed.
 
-    // 1. Open DB
-    let db = match MiyucloudDb::open(&config.db_path) {
-        Ok(db) => db,
-        Err(e) => {
-            tracing::error!("Failed to open database: {e}");
-            std::process::exit(1);
-        }
-    };
-
-    // 2. Open storage
-    let storage = match LocalFsStorage::new(config.storage_path.clone()) {
-        Ok(s) => s,
-        Err(e) => {
-            tracing::error!("Failed to initialize storage: {e}");
-            std::process::exit(1);
-        }
-    };
-
-    // 3. Crypto bootstrap
-    let key_manager = match bootstrap_crypto(&db, &config) {
-        Ok(km) => km,
-        Err(e) => {
-            tracing::error!("Crypto bootstrap failed: {e}");
-            std::process::exit(1);
-        }
-    };
-
-    tracing::info!("Crypto bootstrap complete. Master key derived.");
-
-    if let Err(e) = QuotaOps::set_max(&db, &config.owner_id, config.default_quota_bytes) {
-        tracing::error!("Failed to apply default quota: {e}");
-        std::process::exit(1);
-    }
-
-    // 4. DAV services (CalDAV / CardDAV)
-    let dav_conn = match rusqlite::Connection::open(&config.dav_db_path) {
-        Ok(c) => c,
-        Err(e) => {
-            tracing::error!("Failed to open DAV database: {e}");
-            std::process::exit(1);
-        }
-    };
-    let dav_db = std::sync::Arc::new(std::sync::Mutex::new(dav_conn));
-
-    let caldav_svc = CalDavService::new(dav_db.clone());
-    if let Err(e) = caldav_svc.init_tables() {
-        tracing::error!("Failed to init CalDAV tables: {e}");
-        std::process::exit(1);
-    }
-
-    let carddav_svc = CardDavService::new(dav_db);
-    if let Err(e) = carddav_svc.init_tables() {
-        tracing::error!("Failed to init CardDAV tables: {e}");
-        std::process::exit(1);
-    }
-
-    let ip_salt = crate::web_surface::access_log::derive_ip_salt(&config.cog_token);
-    let state = Arc::new(AppState {
-        db,
-        storage,
-        key_manager,
-        config: config.clone(),
-        ip_salt,
-        connect_auth: ConnectAuthManager::new(config.central_db_path.clone()),
-        web_sessions: std::sync::Mutex::new(HashMap::new()),
-        qr_challenges: std::sync::Mutex::new(HashMap::new()),
-        caldav_svc,
-        carddav_svc,
-    });
-
-    // --- API server (HTTP, localhost only) ---
-    let api_app = api::api_router(state.clone());
-    let api_addr = format!("127.0.0.1:{}", config.api_port);
-    tracing::info!("API server listening on {api_addr}");
-    let api_listener = match tokio::net::TcpListener::bind(&api_addr).await {
-        Ok(l) => l,
-        Err(e) => {
-            tracing::error!("Failed to bind API to {api_addr}: {e}");
-            std::process::exit(1);
-        }
-    };
-
-    // --- Web surface server (HTTPS, all interfaces) ---
-    if config.web_enabled {
-        let web_app = web_surface::web_surface_router(state.clone());
-        let web_addr = format!("0.0.0.0:{}", config.web_port);
-
-        // Resolve TLS config
-        let base_dir = config
-            .storage_path
-            .parent()
-            .unwrap_or_else(|| std::path::Path::new("."));
-        let tls_config = match (&config.tls_cert_path, &config.tls_key_path) {
-            (Some(cert), Some(key)) => web_surface::tls::TlsConfig {
-                cert_path: cert.clone(),
-                key_path: key.clone(),
-                auto_generate: false,
-            },
-            _ => web_surface::tls::TlsConfig::default_paths(base_dir),
-        };
-
-        let rustls_config = match tls_config.load_rustls_config() {
-            Ok(c) => c,
-            Err(e) => {
-                tracing::error!("TLS setup failed: {e}");
-                std::process::exit(1);
+    // Initialize database pools if auth is enabled
+    let db_pools = if config.features.enable_auth {
+        match create_database_pools(&config).await {
+            Ok(pools) => {
+                tracing::info!("PostgreSQL database pools initialized successfully");
+                Some(pools)
             }
-        };
-        let tls_acceptor = tokio_rustls::TlsAcceptor::from(rustls_config);
-
-        tracing::info!("Web surface listening on {web_addr} (HTTPS)");
-
-        let web_listener = match tokio::net::TcpListener::bind(&web_addr).await {
-            Ok(l) => l,
             Err(e) => {
-                tracing::error!("Failed to bind web surface to {web_addr}: {e}");
-                std::process::exit(1);
+                // SECURITY: fail-closed. If auth is required but the database
+                // is unreachable, the server MUST NOT start in public mode.
+                panic!(
+                    "FATAL: enable_auth=true but database connection failed: {}. \
+                     Refusing to start without authentication.",
+                    e
+                );
             }
-        };
-
-        // Spawn web surface server in a separate task
-        tokio::spawn(serve_tls(web_listener, tls_acceptor, web_app));
+        }
     } else {
-        tracing::info!("Web surface disabled by configuration");
-    }
-
-    // Run the API server on the main task
-    if let Err(e) = axum::serve(api_listener, api_app).await {
-        tracing::error!("API server error: {e}");
-        std::process::exit(1);
-    }
-}
-
-/// Serveur TLS acceptant les connexions HTTPS.
-///
-/// Chaque connexion TCP est upgraee en TLS via le `TlsAcceptor`,
-/// puis servie par le routeur axum via `hyper_util`.
-async fn serve_tls(
-    listener: tokio::net::TcpListener,
-    tls_acceptor: TlsAcceptor,
-    app: axum::Router,
-) {
-    loop {
-        let (stream, addr) = match listener.accept().await {
-            Ok(pair) => pair,
-            Err(e) => {
-                tracing::warn!("Web surface accept error: {e}");
-                continue;
-            }
-        };
-
-        let acceptor = tls_acceptor.clone();
-        let service = app.clone();
-
-        tokio::spawn(handle_tls_connection(acceptor, stream, addr, service));
-    }
-}
-
-/// Gere une connexion TLS individuelle.
-///
-/// Separe du `serve_tls` loop pour eviter les problemes de lifetime
-/// avec `hyper_util::server::conn::auto::Builder::serve_connection`.
-async fn handle_tls_connection(
-    acceptor: TlsAcceptor,
-    stream: tokio::net::TcpStream,
-    addr: std::net::SocketAddr,
-    app: axum::Router,
-) {
-    let tls_stream = match acceptor.accept(stream).await {
-        Ok(s) => s,
-        Err(e) => {
-            tracing::debug!("TLS handshake failed from {addr}: {e}");
-            return;
-        }
+        None
     };
 
-    let io = hyper_util::rt::TokioIo::new(tls_stream);
-
-    // Use tower::Service directly — axum::Router implements Service<Request<Body>>
-    // whose Error = Infallible, and we convert it to a hyper service.
-    let service = tower::ServiceBuilder::new().service(app);
-    let hyper_service =
-        hyper::service::service_fn(move |req: hyper::Request<hyper::body::Incoming>| {
-            // Clone service for each request
-            let mut svc = service.clone();
-            async move {
-                use tower::Service;
-                let (parts, body) = req.into_parts();
-                let body = axum::body::Body::new(body);
-                let req = axum::http::Request::from_parts(parts, body);
-                let resp: Result<axum::response::Response, std::convert::Infallible> =
-                    svc.call(req).await;
-                // Convert Infallible error to the expected error type
-                Ok::<_, std::convert::Infallible>(resp.expect("infallible"))
-            }
-        });
-
-    if let Err(e) =
-        hyper_util::server::conn::auto::Builder::new(hyper_util::rt::TokioExecutor::new())
-            .serve_connection(io, hyper_service)
-            .await
-    {
-        tracing::debug!("Web surface connection error from {addr}: {e}");
+    // Ensure locales directory exists for i18n
+    let locales_path = PathBuf::from("./static/locales");
+    if !locales_path.exists() {
+        std::fs::create_dir_all(&locales_path).expect("Failed to create locales directory");
     }
-}
 
-/// Bootstrap cryptographique au demarrage.
-///
-/// - Si aucune config crypto n'existe en DB : generer sel, deriver master key,
-///   creer le canary, stocker en DB.
-/// - Si config crypto existe : deriver master key depuis passphrase + sel,
-///   verifier le canary.
-fn bootstrap_crypto(
-    db: &MiyucloudDb,
-    config: &MiyucloudConfig,
-) -> Result<KeyManager, miyucloud::errors::MiyucloudError> {
-    let owner_id = &config.owner_id;
-    let passphrase = match config.passphrase.as_deref() {
-        Some(p) if !p.is_empty() => p,
-        _ => {
-            return Err(miyucloud::errors::MiyucloudError::Crypto(
-                "MIYUCLOUD_PASSPHRASE environment variable is required. \
-                 The server refuses to start without an explicit passphrase."
-                    .into(),
-            ));
+    // Build all services via the factory
+    let factory = AppServiceFactory::with_config(storage_path, locales_path, config.clone());
+
+    let app_state = factory.build_app_state(db_pools).await
+        .expect("Failed to build application state. If running in Docker, ensure the storage volume is writable by the oxicloud user (UID 1001)");
+
+    // Wrap in Arc so that Axum clones a single refcount per request
+    // instead of deep-copying ~42 Arc fields + 16 String/PathBuf allocations.
+    let app_state = Arc::new(app_state);
+
+    // Build application router
+    let api_routes = create_api_routes(&app_state);
+    let public_api_routes = create_public_api_routes(&app_state);
+    let web_routes = create_web_routes();
+
+    let mut app;
+
+    // Build CalDAV / CardDAV / WebDAV protocol routers (merged at top-level, not under /api)
+    use oxicloud::interfaces::api::handlers::caldav_handler;
+    use oxicloud::interfaces::api::handlers::carddav_handler;
+    use oxicloud::interfaces::api::handlers::webdav_handler;
+    let caldav_router = caldav_handler::caldav_routes();
+    let well_known_router = caldav_handler::well_known_routes();
+    let carddav_router = carddav_handler::carddav_routes();
+    let webdav_router = webdav_handler::webdav_routes();
+
+    // CalDAV/CardDAV only carry XML payloads — cap at 1 MB at the transport
+    // level so `body::to_bytes()` cannot be abused to OOM the server.
+    // WebDAV is excluded: its streaming PUT handler enforces its own per-upload
+    // limit from StorageConfig::max_upload_size.
+    let caldav_router = caldav_router.layer(RequestBodyLimitLayer::new(1_048_576));
+    let carddav_router = carddav_router.layer(RequestBodyLimitLayer::new(1_048_576));
+
+    // Build WOPI routes if enabled
+    use oxicloud::interfaces::api::handlers::wopi_handler;
+    let wopi_routes = if config.wopi.enabled {
+        if let (Some(token_svc), Some(lock_svc), Some(discovery_svc)) = (
+            &app_state.wopi_token_service,
+            &app_state.wopi_lock_service,
+            &app_state.wopi_discovery_service,
+        ) {
+            let wopi_base_url = std::env::var("OXICLOUD_WOPI_BASE_URL")
+                .map(|v| v.trim_end_matches('/').to_string())
+                .ok()
+                .filter(|v| !v.is_empty())
+                .unwrap_or_else(|| config.base_url());
+
+            let wopi_state = wopi_handler::WopiState {
+                token_service: token_svc.clone(),
+                lock_service: lock_svc.clone(),
+                discovery_service: discovery_svc.clone(),
+                app_state: app_state.clone(),
+                public_base_url: config.base_url(),
+                wopi_base_url,
+            };
+
+            let (protocol, api) = wopi_handler::wopi_routes(wopi_state);
+            Some((protocol, api))
+        } else {
+            None
         }
-    };
-
-    let existing = db.crypto_config_get(owner_id)?;
-
-    if let Some(crypto_cfg) = existing {
-        // Derive master key from existing salt
-        tracing::info!("Existing crypto config found, deriving master key...");
-        let salt_bytes = base64_decode(&crypto_cfg.argon2_salt)?;
-        let master_key = KeyManager::derive_master_key(passphrase, &salt_bytes)?;
-
-        // Verify canary if present
-        if let (Some(canary_ct), Some(canary_nonce)) =
-            (&crypto_cfg.canary_ciphertext, &crypto_cfg.canary_nonce)
-        {
-            let ct_bytes = base64_decode(canary_ct)?;
-            let nonce_bytes = base64_decode(canary_nonce)?;
-            if nonce_bytes.len() != 12 {
-                return Err(miyucloud::errors::MiyucloudError::Crypto(
-                    "Invalid canary nonce length".into(),
-                ));
-            }
-            let mut nonce = [0u8; 12];
-            nonce.copy_from_slice(&nonce_bytes);
-            if !KeyManager::verify_passphrase(&master_key, &ct_bytes, &nonce) {
-                return Err(miyucloud::errors::MiyucloudError::Crypto(
-                    "Wrong passphrase: canary verification failed".into(),
-                ));
-            }
-            tracing::info!("Passphrase verified via canary.");
-        }
-
-        Ok(KeyManager::from_master_key(master_key))
     } else {
-        // First start: generate salt, derive master key, create canary
-        tracing::info!("First start: generating crypto config...");
-        let salt = KeyManager::generate_salt();
-        let master_key = KeyManager::derive_master_key(passphrase, &salt)?;
-        let canary = KeyManager::create_canary(&master_key)?;
+        None
+    };
 
-        let now = chrono::Utc::now().to_rfc3339();
-        let crypto_cfg = CryptoConfig {
-            owner_id: owner_id.clone(),
-            argon2_salt: base64_encode(&salt),
-            canary_ciphertext: Some(base64_encode(&canary.ciphertext)),
-            canary_nonce: Some(base64_encode(&canary.nonce)),
-            key_version: 1,
-            created_at: now.clone(),
-            updated_at: now,
-        };
-        db.crypto_config_upsert(&crypto_cfg)?;
+    // Build Nextcloud routes if enabled
+    let nextcloud_router = if config.nextcloud.enabled {
+        use oxicloud::interfaces::nextcloud::routes::nextcloud_routes_with_state;
+        Some(nextcloud_routes_with_state(app_state.clone()))
+    } else {
+        None
+    };
 
-        tracing::info!("Crypto config stored in DB.");
-        Ok(KeyManager::from_master_key(master_key))
+    // Apply auth middleware to protected API routes when auth is enabled
+    if config.features.enable_auth {
+        // SECURITY: if auth is required, auth_service MUST be present at this
+        // point.  The earlier guards in di.rs and main.rs guarantee this, but
+        // add a defensive check so a future refactor cannot silently degrade.
+        assert!(
+            app_state.auth_service.is_some(),
+            "FATAL: enable_auth=true but auth_service is None. \
+             This should have been caught during initialization."
+        );
     }
-}
-
-/// Encode bytes en base64.
-fn base64_encode(data: &[u8]) -> String {
-    const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut result = String::new();
-    for chunk in data.chunks(3) {
-        let b0 = u32::from(chunk[0]);
-        let b1 = if chunk.len() > 1 {
-            u32::from(chunk[1])
-        } else {
-            0
+    if config.features.enable_auth {
+        use interfaces::api::handlers::auth_handler::{
+            auth_protected_routes, auth_public_routes, login_route, refresh_route, register_route,
+            setup_route,
         };
-        let b2 = if chunk.len() > 2 {
-            u32::from(chunk[2])
-        } else {
-            0
+        use oxicloud::interfaces::api::handlers::app_password_handler;
+        use oxicloud::interfaces::api::handlers::device_auth_handler;
+        use oxicloud::interfaces::middleware::auth::auth_middleware;
+        use oxicloud::interfaces::middleware::csrf::csrf_middleware;
+        use oxicloud::interfaces::middleware::rate_limit::{
+            RateLimiter, rate_limit_login, rate_limit_refresh, rate_limit_register,
         };
-        let triple = (b0 << 16) | (b1 << 8) | b2;
-        result.push(CHARS[((triple >> 18) & 0x3F) as usize] as char);
-        result.push(CHARS[((triple >> 12) & 0x3F) as usize] as char);
-        if chunk.len() > 1 {
-            result.push(CHARS[((triple >> 6) & 0x3F) as usize] as char);
-        } else {
-            result.push('=');
-        }
-        if chunk.len() > 2 {
-            result.push(CHARS[(triple & 0x3F) as usize] as char);
-        } else {
-            result.push('=');
-        }
-    }
-    result
-}
 
-/// Decode base64 en bytes.
-fn base64_decode(input: &str) -> Result<Vec<u8>, miyucloud::errors::MiyucloudError> {
-    fn char_val(c: u8) -> Option<u32> {
-        match c {
-            b'A'..=b'Z' => Some(u32::from(c - b'A')),
-            b'a'..=b'z' => Some(u32::from(c - b'a') + 26),
-            b'0'..=b'9' => Some(u32::from(c - b'0') + 52),
-            b'+' => Some(62),
-            b'/' => Some(63),
-            b'=' => Some(0),
-            _ => None,
-        }
-    }
-
-    let bytes: Vec<u8> = input
-        .bytes()
-        .filter(|&b| b != b'\n' && b != b'\r')
-        .collect();
-    if !bytes.len().is_multiple_of(4) {
-        return Err(miyucloud::errors::MiyucloudError::Crypto(
-            "Invalid base64 length".into(),
+        // ── Rate limiters (IP-based, in-memory via moka) ────────────────
+        let rl = &config.auth.rate_limit;
+        let login_limiter = Arc::new(RateLimiter::new(
+            rl.login_max_requests,
+            rl.login_window_secs,
+            100_000,
         ));
-    }
+        let register_limiter = Arc::new(RateLimiter::new(
+            rl.register_max_requests,
+            rl.register_window_secs,
+            100_000,
+        ));
+        let refresh_limiter = Arc::new(RateLimiter::new(
+            rl.refresh_max_requests,
+            rl.refresh_window_secs,
+            100_000,
+        ));
+        tracing::info!(
+            "Rate limiting enabled — login: {}/{} s, register: {}/{} s, refresh: {}/{} s",
+            rl.login_max_requests,
+            rl.login_window_secs,
+            rl.register_max_requests,
+            rl.register_window_secs,
+            rl.refresh_max_requests,
+            rl.refresh_window_secs,
+        );
 
-    let mut result = Vec::new();
-    for chunk in bytes.chunks(4) {
-        let a = char_val(chunk[0]).ok_or_else(|| {
-            miyucloud::errors::MiyucloudError::Crypto("Invalid base64 char".into())
-        })?;
-        let b = char_val(chunk[1]).ok_or_else(|| {
-            miyucloud::errors::MiyucloudError::Crypto("Invalid base64 char".into())
-        })?;
-        let c_val = char_val(chunk[2]).ok_or_else(|| {
-            miyucloud::errors::MiyucloudError::Crypto("Invalid base64 char".into())
-        })?;
-        let d = char_val(chunk[3]).ok_or_else(|| {
-            miyucloud::errors::MiyucloudError::Crypto("Invalid base64 char".into())
-        })?;
-        let triple = (a << 18) | (b << 12) | (c_val << 6) | d;
-        result.push((triple >> 16) as u8);
-        if chunk[2] != b'=' {
-            result.push((triple >> 8) as u8);
+        // Auth routes split by rate-limit policy
+        let auth_login = login_route()
+            .layer(axum::middleware::from_fn_with_state(
+                login_limiter.clone(),
+                rate_limit_login,
+            ))
+            .with_state(app_state.clone());
+        let auth_register = register_route()
+            .layer(axum::middleware::from_fn_with_state(
+                register_limiter.clone(),
+                rate_limit_register,
+            ))
+            .with_state(app_state.clone());
+        let auth_refresh = refresh_route()
+            .layer(axum::middleware::from_fn_with_state(
+                refresh_limiter.clone(),
+                rate_limit_refresh,
+            ))
+            .with_state(app_state.clone());
+        // Public auth routes (status, OIDC)
+        let auth_public = auth_public_routes().with_state(app_state.clone());
+        // Protected auth routes (/me, /change-password, /logout) — require auth + CSRF
+        let auth_protected = auth_protected_routes()
+            .layer(axum::middleware::from_fn(csrf_middleware))
+            .layer(axum::middleware::from_fn_with_state(
+                app_state.clone(),
+                auth_middleware,
+            ))
+            .with_state(app_state.clone());
+        // App password management routes — require auth + CSRF
+        let app_pw_protected = app_password_handler::app_password_routes()
+            .layer(axum::middleware::from_fn(csrf_middleware))
+            .layer(axum::middleware::from_fn_with_state(
+                app_state.clone(),
+                auth_middleware,
+            ))
+            .with_state(app_state.clone());
+        // One-time setup route — public, rate-limited like register
+        let setup_router = setup_route()
+            .layer(axum::middleware::from_fn_with_state(
+                register_limiter.clone(),
+                rate_limit_register,
+            ))
+            .with_state(app_state.clone());
+
+        // Device Authorization Grant (RFC 8628)
+        // Public endpoints: /api/auth/device/authorize + /api/auth/device/token
+        let device_public =
+            device_auth_handler::device_auth_public_routes().with_state(app_state.clone());
+        // Protected endpoints: /api/auth/device/verify, /api/auth/device/devices
+        let device_protected = device_auth_handler::device_auth_protected_routes()
+            .layer(axum::middleware::from_fn(csrf_middleware))
+            .layer(axum::middleware::from_fn_with_state(
+                app_state.clone(),
+                auth_middleware,
+            ))
+            .with_state(app_state.clone());
+
+        // Protected API routes — require valid JWT token + bandwidth throttling
+        let protected_api = api_routes
+            .layer(axum::middleware::from_fn_with_state(
+                app_state.clone(),
+                oxicloud::interfaces::middleware::bandwidth::bandwidth_middleware,
+            ))
+            .layer(axum::middleware::from_fn(csrf_middleware))
+            .layer(axum::middleware::from_fn_with_state(
+                app_state.clone(),
+                auth_middleware,
+            ));
+
+        // CalDAV/CardDAV/WebDAV with auth middleware (merged, not nested)
+        let caldav_protected = caldav_router.layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            auth_middleware,
+        ));
+        let carddav_protected = carddav_router.layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            auth_middleware,
+        ));
+        let webdav_protected = webdav_router.layer(axum::middleware::from_fn_with_state(
+            app_state.clone(),
+            auth_middleware,
+        ));
+
+        app = Router::new()
+            // Rate-limited auth endpoints (login, register, refresh)
+            .nest("/api/auth", auth_login)
+            .nest("/api/auth", auth_register)
+            .nest("/api/auth", auth_refresh)
+            // Public auth endpoints (status, OIDC)
+            .nest("/api/auth", auth_public)
+            // Protected auth endpoints (/me, /change-password, /logout)
+            .nest("/api/auth", auth_protected)
+            // App password management (create, list, revoke)
+            .nest("/api/auth", app_pw_protected)
+            // One-time setup endpoint — public, rate-limited
+            .nest("/api", setup_router)
+            // Device Auth Grant public endpoints (authorize + token polling)
+            .nest("/api/auth/device", device_public)
+            // Device Auth Grant protected endpoints (verify + device management)
+            .nest("/api/auth/device", device_protected)
+            // Public API routes (share access, i18n) — no auth required
+            .nest("/api", public_api_routes)
+            // All other API routes are protected by auth middleware
+            .nest("/api", protected_api)
+            // RFC 6764 well-known discovery (public, no auth — just redirects)
+            .merge(well_known_router.clone())
+            // CalDAV/CardDAV/WebDAV protocols merged at top-level for client compatibility
+            .merge(caldav_protected)
+            .merge(carddav_protected)
+            .merge(webdav_protected)
+            .merge(web_routes)
+            .layer(TraceLayer::new_for_http());
+
+        // Mount Nextcloud routes (uses its own Basic Auth middleware)
+        if let Some(nc_router) = nextcloud_router {
+            app = app.merge(nc_router.with_state(app_state.clone()));
         }
-        if chunk[3] != b'=' {
-            result.push(triple as u8);
+
+        // Mount WOPI routes (protocol routes use own token auth, API routes behind auth middleware)
+        if let Some((wopi_protocol, wopi_api)) = wopi_routes {
+            let wopi_api_protected = wopi_api
+                .layer(axum::middleware::from_fn(csrf_middleware))
+                .layer(axum::middleware::from_fn_with_state(
+                    app_state.clone(),
+                    auth_middleware,
+                ));
+            app = app
+                .nest("/wopi", wopi_protocol)
+                .nest("/api/wopi", wopi_api_protected);
+        }
+    } else {
+        // Auth disabled — no middleware applied
+        tracing::warn!("Authentication is DISABLED — all API routes are publicly accessible");
+        app = Router::new()
+            .nest("/api", public_api_routes)
+            .nest("/api", api_routes)
+            // RFC 6764 well-known discovery (just redirects)
+            .merge(well_known_router)
+            // CalDAV/CardDAV/WebDAV protocols merged at top-level
+            .merge(caldav_router)
+            .merge(carddav_router)
+            .merge(webdav_router)
+            .merge(web_routes)
+            .layer(TraceLayer::new_for_http());
+
+        // Mount Nextcloud routes
+        if let Some(nc_router) = nextcloud_router {
+            app = app.merge(nc_router.with_state(app_state.clone()));
+        }
+
+        // Mount WOPI routes (no auth middleware when auth is disabled)
+        if let Some((wopi_protocol, wopi_api)) = wopi_routes {
+            app = app.nest("/wopi", wopi_protocol).nest("/api/wopi", wopi_api);
         }
     }
-    Ok(result)
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    // Increase the default body limit to allow large file uploads.
+    // Uses architecture-appropriate limit: 10 GB on 64-bit, 1 GB on 32-bit.
+    // Without this Axum caps Multipart bodies at 2 MB.
+    #[cfg(target_pointer_width = "64")]
+    const BODY_LIMIT: usize = 10 * 1024 * 1024 * 1024; // 10 GB
+    #[cfg(target_pointer_width = "32")]
+    const BODY_LIMIT: usize = 1024 * 1024 * 1024; // 1 GB
+    app = app.layer(DefaultBodyLimit::max(BODY_LIMIT));
 
-    fn test_config() -> MiyucloudConfig {
-        MiyucloudConfig {
-            api_port: 11440,
-            storage_path: std::path::PathBuf::from("/tmp/test"),
-            db_path: std::path::PathBuf::from(":memory:"),
-            cog_token: "test-token".to_string(),
-            passphrase: Some("test-passphrase".to_string()),
-            owner_id: "test-owner".to_string(),
-            web_port: 11442,
-            web_enabled: false,
-            trust_proxy: false,
-            default_quota_bytes: 10 * 1024 * 1024 * 1024,
-            public_share_links_enabled: true,
-            internal_sharing_enabled: true,
-            default_share_permission: "read".to_string(),
-            ssh_enabled: false,
-            ssh_host: None,
-            ssh_port: 22,
-            ssh_username: None,
-            ssh_root_path: None,
-            ssh_private_key_path: None,
-            ssh_keepalive: true,
-            central_db_path: None,
-            tls_cert_path: None,
-            tls_key_path: None,
-            dav_db_path: std::path::PathBuf::from(":memory:"),
+    // ── HTTP compression (gzip + Brotli) ─────────────────────────────────
+    // Negotiates the best encoding via Accept-Encoding.  Skips responses
+    // that are already compressed or wouldn't benefit (images, video, etc.).
+    // Compatible with a future reverse proxy — if the proxy sees
+    // `Content-Encoding` it will pass the response through untouched.
+    {
+        use tower_http::compression::CompressionLayer;
+        use tower_http::compression::predicate::{NotForContentType, Predicate, SizeAbove};
+
+        let predicate = SizeAbove::new(256)
+            .and(NotForContentType::GRPC)
+            .and(NotForContentType::IMAGES)
+            .and(NotForContentType::SSE)
+            .and(NotForContentType::const_new("application/octet-stream"))
+            .and(NotForContentType::const_new("application/zip"))
+            .and(NotForContentType::const_new("application/gzip"))
+            .and(NotForContentType::const_new("application/x-tar"))
+            .and(NotForContentType::const_new("application/pdf"))
+            .and(NotForContentType::const_new("video/"))
+            .and(NotForContentType::const_new("audio/"));
+
+        app = app.layer(CompressionLayer::new().compress_when(predicate));
+    }
+
+    // ── Security headers ─────────────────────────────────────────────────
+    // Applied globally so every response (API, static, DAV) carries them.
+    use axum::http::HeaderValue;
+    use axum::http::header::HeaderName;
+
+    app = app
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("content-security-policy"),
+            // Note: 'unsafe-inline' is required for style-src because the
+            // frontend JavaScript dynamically sets inline styles (e.g.,
+            // element.style.display = 'none'). This is a common pattern
+            // for UI state management and cannot be easily migrated to
+            // external CSS classes without significant refactoring.
+            // frame-src: '*' only matches network schemes, so 'blob:' must be
+            // listed explicitly for inline PDF/document viewers.
+            // media-src: needed for blob: video/audio playback.
+            HeaderValue::from_static(
+                "default-src 'self'; \
+                 script-src 'self'; \
+                 style-src 'self' 'unsafe-inline'; \
+                 img-src 'self' data: blob:; \
+                 media-src 'self' blob:; \
+                 connect-src 'self'; \
+                 font-src 'self' data:; \
+                 frame-src * blob:; \
+                 frame-ancestors 'none'; \
+                 base-uri 'self'; \
+                 form-action 'self'",
+            ),
+        ))
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("x-content-type-options"),
+            HeaderValue::from_static("nosniff"),
+        ))
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("x-frame-options"),
+            HeaderValue::from_static("DENY"),
+        ))
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("referrer-policy"),
+            HeaderValue::from_static("strict-origin-when-cross-origin"),
+        ))
+        .layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("permissions-policy"),
+            HeaderValue::from_static("camera=(), microphone=(), geolocation=()"),
+        ));
+
+    // ── HSTS (Strict-Transport-Security) ────────────────────────────────
+    // Only enable when explicitly configured or when base URL uses HTTPS.
+    if config.security.enable_hsts || config.base_url().starts_with("https://") {
+        app = app.layer(SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("strict-transport-security"),
+            HeaderValue::from_static("max-age=63072000; includeSubDomains; preload"),
+        ));
+        tracing::info!("HSTS enabled (max-age=63072000, includeSubDomains, preload)");
+    }
+
+    // Start server — tuned socket for low-latency responses
+    let addr = SocketAddr::new(
+        config
+            .server_host
+            .parse()
+            .unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED)),
+        config.server_port,
+    );
+    // ── Start web connection manager (MWS tunnel, DDNS, Central client) ──
+    if let Some(ref mgr) = app_state.connection_manager {
+        if let Err(e) = mgr.start_all().await {
+            tracing::error!("Web connection manager failed to start: {}", e);
+        } else {
+            tracing::info!("Web connection manager started");
         }
     }
 
-    #[test]
-    fn test_first_start_generates_salt_and_stores_in_db() {
-        let db = MiyucloudDb::open(":memory:").unwrap();
-        let config = test_config();
-        let km = bootstrap_crypto(&db, &config).unwrap();
-        assert!(!km.master_key().iter().all(|&b| b == 0));
+    // Provide the fully-built state to the router
+    let app = app.with_state(app_state);
 
-        // Verify config was stored
-        let cfg = db.crypto_config_get("test-owner").unwrap();
-        assert!(cfg.is_some());
-        let cfg = cfg.unwrap();
-        assert!(!cfg.argon2_salt.is_empty());
-        assert!(cfg.canary_ciphertext.is_some());
-        assert!(cfg.canary_nonce.is_some());
+    // ── TLS / HTTPS support ─────────────────────────────────────────────
+    if config.tls.enabled {
+        let tls_addr = SocketAddr::new(
+            config
+                .server_host
+                .parse()
+                .unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED)),
+            config.tls.port,
+        );
+
+        // Auto-generate self-signed certificate if files don't exist
+        let cert_path = std::path::Path::new(&config.tls.cert_path);
+        let key_path = std::path::Path::new(&config.tls.key_path);
+
+        if !cert_path.exists() || !key_path.exists() {
+            if config.tls.auto_generate {
+                tracing::info!("Auto-generating self-signed TLS certificate...");
+                if let Some(parent) = cert_path.parent() {
+                    std::fs::create_dir_all(parent).ok();
+                }
+
+                let subject_alt_names = vec![
+                    "localhost".to_string(),
+                    "cloud.miyukini-home.org".to_string(),
+                    "*.miyukini-home.org".to_string(),
+                ];
+                let cert = rcgen::generate_simple_self_signed(subject_alt_names)
+                    .expect("Failed to generate self-signed certificate");
+
+                std::fs::write(cert_path, cert.cert.pem())
+                    .expect("Failed to write certificate file");
+                std::fs::write(key_path, cert.key_pair.serialize_pem())
+                    .expect("Failed to write private key file");
+
+                tracing::info!(
+                    "Self-signed certificate generated at {} and {}",
+                    config.tls.cert_path,
+                    config.tls.key_path
+                );
+            } else {
+                panic!(
+                    "FATAL: TLS enabled but certificate files not found: {} / {}. \
+                     Set OXICLOUD_TLS_AUTO_GENERATE=true or provide certificate files.",
+                    config.tls.cert_path, config.tls.key_path
+                );
+            }
+        }
+
+        let rustls_config = axum_server::tls_rustls::RustlsConfig::from_pem_file(
+            &config.tls.cert_path,
+            &config.tls.key_path,
+        )
+        .await
+        .expect("Failed to load TLS certificate");
+
+        tracing::info!("Starting Miyukini Cloud server on https://{}", tls_addr);
+
+        axum_server::bind_rustls(tls_addr, rustls_config)
+            .serve(app.into_make_service())
+            .await?;
+    } else {
+        // ── Plain HTTP ──────────────────────────────────────────────────
+        tracing::info!("Starting Miyukini Cloud server on http://{}", addr);
+
+        let socket = Socket::new(Domain::IPV4, Type::STREAM, Some(Protocol::TCP))?;
+        socket.set_reuse_address(true)?;
+        #[cfg(not(windows))]
+        socket.set_reuse_port(true)?;
+        socket.set_tcp_nodelay(true)?;
+        socket.set_keepalive(true)?;
+        socket.set_tcp_keepalive(
+            &TcpKeepalive::new()
+                .with_time(Duration::from_secs(60))
+                .with_interval(Duration::from_secs(10)),
+        )?;
+        socket.set_nonblocking(true)?;
+        socket.bind(&addr.into())?;
+        socket.listen(2048)?;
+
+        let listener = tokio::net::TcpListener::from_std(socket.into())?;
+        axum::serve(listener, app).await?;
     }
 
-    #[test]
-    fn test_subsequent_start_reads_salt_from_db() {
-        let db = MiyucloudDb::open(":memory:").unwrap();
-        let config = MiyucloudConfig {
-            passphrase: Some("my-secure-pass".to_string()),
-            owner_id: "test-owner-2".to_string(),
-            ..test_config()
-        };
+    tracing::info!("Server shutdown completed");
 
-        // First start
-        let km1 = bootstrap_crypto(&db, &config).unwrap();
-
-        // Second start (same passphrase)
-        let km2 = bootstrap_crypto(&db, &config).unwrap();
-
-        // Should derive the same master key
-        assert_eq!(km1.master_key(), km2.master_key());
-    }
-
-    #[test]
-    fn test_wrong_passphrase_rejects() {
-        let db = MiyucloudDb::open(":memory:").unwrap();
-        let config1 = MiyucloudConfig {
-            passphrase: Some("correct-passphrase".to_string()),
-            owner_id: "test-owner-3".to_string(),
-            ..test_config()
-        };
-
-        // First start with correct passphrase
-        bootstrap_crypto(&db, &config1).unwrap();
-
-        // Second start with wrong passphrase
-        let config2 = MiyucloudConfig {
-            passphrase: Some("wrong-passphrase".to_string()),
-            ..config1
-        };
-        let result = bootstrap_crypto(&db, &config2);
-        assert!(result.is_err());
-        let err = result.unwrap_err();
-        assert!(err.to_string().contains("Wrong passphrase"));
-    }
-
-    #[test]
-    fn test_base64_roundtrip() {
-        let data = b"Hello, World!";
-        let encoded = base64_encode(data);
-        let decoded = base64_decode(&encoded).unwrap();
-        assert_eq!(decoded, data);
-    }
-
-    #[test]
-    fn test_base64_nonce() {
-        let nonce = [1u8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        let encoded = base64_encode(&nonce);
-        let decoded = base64_decode(&encoded).unwrap();
-        assert_eq!(decoded, nonce);
-    }
+    Ok(())
 }

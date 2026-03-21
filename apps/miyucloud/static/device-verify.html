@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miyukini Cloud — Authorize Device</title>
+  <link rel="stylesheet" href="/css/views/device-verify.css">
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <h1><span>Oxi</span>Cloud</h1>
+    </div>
+
+    <!-- Step 1: Enter code -->
+    <div id="step-code">
+      <h2>Authorize Device</h2>
+      <p class="subtitle">Enter the code displayed on your WebDAV/CalDAV client to grant access.</p>
+      <label for="user-code">Device Code</label>
+      <input type="text" id="user-code" placeholder="ABCD-1234" maxlength="9" autocomplete="off" autofocus />
+      <div id="error-text" class="error-text hidden"></div>
+
+      <div id="device-info" class="device-info hidden">
+        <div class="row">
+          <span class="label">Client</span>
+          <span class="value" id="info-client">—</span>
+        </div>
+        <div class="row">
+          <span class="label">Scopes</span>
+          <span class="value" id="info-scopes">—</span>
+        </div>
+      </div>
+
+      <div class="actions hidden" id="action-buttons">
+        <button class="btn-deny" id="btn-deny">Deny</button>
+        <button class="btn-approve" id="btn-approve">Approve</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Result -->
+    <div id="status-success" class="status success hidden">
+      Device authorized successfully! You can close this page.
+    </div>
+    <div id="status-denied" class="status denied hidden">
+      Authorization denied. The client will not receive access.
+    </div>
+    <div id="status-error" class="status error hidden"></div>
+  </div>
+
+  <script src="/js/core/csrf.js"></script>
+  <script src="/js/views/device-verify/device-verify.js"></script>
+</body>
+</html>

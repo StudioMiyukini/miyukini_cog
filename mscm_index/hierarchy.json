@@ -850,5 +850,51 @@
   ],
   "everbuddy_migration_executor_trait": [
     "everbuddy_migration_executor_execute"
+  ],
+  "miyucloud_entity_user": [
+    "miyucloud_entity_user_role",
+    "miyucloud_entity_session",
+    "miyucloud_entity_app_password"
+  ],
+  "miyucloud_entity_audit_event": [
+    "miyucloud_entity_audit_action"
+  ],
+  "miyucloud_port_auth_token_service": [
+    "miyucloud_infra_jwt_service"
+  ],
+  "miyucloud_port_auth_password_hasher": [
+    "miyucloud_infra_password_hasher"
+  ],
+  "miyucloud_port_audit": [
+    "miyucloud_infra_audit_repo"
+  ],
+  "miyucloud_port_encryption": [
+    "miyucloud_infra_blob_encryption"
+  ],
+  "miyucloud_port_dedup": [
+    "miyucloud_infra_dedup_service"
+  ],
+  "miyucloud_svc_file_upload": [
+    "miyucloud_handler_file_upload"
+  ],
+  "miyucloud_svc_auth": [
+    "miyucloud_handler_auth"
+  ],
+  "miyucloud_config_app": [
+    "miyucloud_config_security",
+    "miyucloud_config_encryption"
+  ],
+  "miyucloud_di_factory": [
+    "miyucloud_di_app_state"
+  ],
+  "miyucloud_main": [
+    "miyucloud_routes_public",
+    "miyucloud_routes_protected"
+  ],
+  "miyucloud_migration_schema": [
+    "miyucloud_migration_audit",
+    "miyucloud_migration_rls",
+    "miyucloud_migration_consent",
+    "miyucloud_migration_incidents"
   ]
 }

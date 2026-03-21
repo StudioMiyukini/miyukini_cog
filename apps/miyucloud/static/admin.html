@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#f97316" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <title>Miyukini Cloud — Admin Panel</title>
+        <script src="/js/core/theme-init.js"></script>
+        <script src="/js/core/i18n.js" defer></script>
+        <script src="/js/core/icons.js" defer></script>
+        <script src="/js/core/formatters.js" defer></script>
+        <script src="/js/core/csrf.js" defer></script>
+        <link rel="stylesheet" href="/css/main.css" />
+        <link rel="stylesheet" href="/css/views/admin.css" />
+    </head>
+    <body>
+        <div class="admin-header">
+            <div class="admin-header-left">
+                <a href="/" class="admin-logo-link link-reset-flex">
+                    <div class="admin-logo">
+                        <svg viewBox="0 0 500 500">
+                            <path
+                                d="M345 310c32 0 58-26 58-58s-26-58-58-58c-6.2 0-12 0.9-17.5 2.7C318 166 289 143 255 143c-34.3 0-63.1 22.6-73 53.7C176.9 195.7 171 195 165 195c-32 0-58 26-58 58s26 58 58 58h180z"
+                            />
+                        </svg>
+                    </div>
+                    <span class="admin-title-text">Miyukini Cloud</span>
+                </a>
+                <span class="admin-title-separator">· <span data-i18n="admin.tab_dashboard">Admin</span></span>
+            </div>
+            <div class="admin-header-right">
+                <a href="/"
+                    ><i class="fas fa-arrow-left"></i> <span data-i18n="admin.back_to_app">Back to Miyukini Cloud</span></a
+                >
+            </div>
+        </div>
+
+        <div class="admin-container">
+            <div id="loading"><i class="fas fa-circle-notch"></i> <span data-i18n="admin.loading">Loading…</span></div>
+            <div id="access-denied">
+                <div class="access-icon"><i class="fas fa-lock"></i></div>
+                <h2 data-i18n="admin.access_denied">Access Denied</h2>
+                <p data-i18n="admin.access_denied_desc">Administrator privileges required to access this panel.</p>
+                <a href="/login"><i class="fas fa-sign-in-alt"></i> <span data-i18n="admin.sign_in">Sign in</span></a>
+            </div>
+
+            <div id="main-content">
+                <div class="admin-tabs">
+                    <button
+                        class="admin-tab active"
+                        id="tab-btn-dashboard"
+                    >
+                        <i class="fas fa-chart-pie"></i> <span data-i18n="admin.tab_dashboard">Dashboard</span>
+                    </button>
+                    <button class="admin-tab" id="tab-btn-users">
+                        <i class="fas fa-users"></i> <span data-i18n="admin.tab_users">Users</span>
+                    </button>
+                    <button class="admin-tab" id="tab-btn-oidc">
+                        <i class="fas fa-key"></i> <span data-i18n="admin.tab_oidc">SSO / OIDC</span>
+                    </button>
+                </div>
+
+                <div id="tab-dashboard" class="tab-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div
+                                class="stat-value text-blue"
+                                id="ds-total-users"
+                            >
+                                —
+                            </div>
+                            <div class="stat-label" data-i18n="admin.total_users">Total Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div
+                                class="stat-value text-green"
+                                id="ds-active-users"
+                            >
+                                —
+                            </div>
+                            <div class="stat-label" data-i18n="admin.active_users">Active Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div
+                                class="stat-value text-blue"
+                                id="ds-admin-users"
+                            >
+                                —
+                            </div>
+                            <div class="stat-label" data-i18n="admin.admins">Admins</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="ds-version">—</div>
+                            <div class="stat-label" data-i18n="admin.version">Version</div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card">
+                        <h2><i class="fas fa-hdd"></i> <span data-i18n="admin.storage_overview">Storage Overview</span></h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="ds-used">—</div>
+                                <div class="stat-label" data-i18n="admin.used">Used</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="ds-quota">—</div>
+                                <div class="stat-label" data-i18n="admin.total_quota">Total Quota</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="ds-usage-pct">
+                                    —
+                                </div>
+                                <div class="stat-label" data-i18n="admin.usage_pct">Usage %</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div
+                                class="progress-fill green width-zero"
+                                id="ds-bar"
+                            ></div>
+                        </div>
+                        <div class="mt-14">
+                            <div class="stats-grid">
+                                <div class="stat-card warn" id="ds-warn-card">
+                                    <div
+                                        class="stat-value text-orange"
+                                        id="ds-over80"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="stat-label" data-i18n="admin.users_over_80">
+                                        Users &gt;80% quota
+                                    </div>
+                                </div>
+                                <div
+                                    class="stat-card danger"
+                                    id="ds-danger-card"
+                                >
+                                    <div
+                                        class="stat-value text-red"
+                                        id="ds-overquota"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="stat-label" data-i18n="admin.users_over_quota">
+                                        Users over quota
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card">
+                        <h2><i class="fas fa-server"></i> <span data-i18n="admin.system">System</span></h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="ds-auth">—</div>
+                                <div class="stat-label" data-i18n="admin.auth_label">Auth</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="ds-oidc">—</div>
+                                <div class="stat-label" data-i18n="admin.oidc_label">OIDC</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="ds-quotas-flag">
+                                    —
+                                </div>
+                                <div class="stat-label" data-i18n="admin.quotas_label">Quotas</div>
+                            </div>
+                        </div>
+                        <div class="toggle-row toggle-row-strong">
+                            <label
+                                ><i
+                                    class="fas fa-user-plus icon-muted-right"
+                                ></i>
+                                <span data-i18n="admin.allow_registration">Allow public self-registration</span></label
+                            >
+                            <label class="switch"
+                                ><input
+                                    type="checkbox"
+                                    id="ds-registration"
+                                    checked /><span
+                                    class="slider"
+                                ></span
+                            ></label>
+                        </div>
+                        <div class="warning" id="registration-warning">
+                            <i class="fas fa-exclamation-triangle"></i> <span data-i18n="admin.registration_warning">Public registration is disabled. Only admins can create new users.</span>
+                        </div>
+                    </div>
+
+                    <!-- Mobile App Banner -->
+                    <div class="admin-card" style="background:linear-gradient(135deg,#f97316 0%,#ea580c 100%);color:white;border:none">
+                        <h2 style="color:white"><i class="fas fa-mobile-alt"></i> Application Mobile</h2>
+                        <p style="margin:4px 0 12px;opacity:0.9;font-size:14px">
+                            Miyukini Cloud est disponible en tant qu'application sur iPhone, Android et Desktop.
+                            Synchronisez vos photos automatiquement.
+                        </p>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap">
+                            <a href="/mobile" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:rgba(255,255,255,0.2);color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;backdrop-filter:blur(4px)">
+                                <i class="fab fa-apple"></i> iPhone
+                            </a>
+                            <a href="/mobile" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:rgba(255,255,255,0.2);color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;backdrop-filter:blur(4px)">
+                                <i class="fab fa-android"></i> Android
+                            </a>
+                            <a href="/mobile" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:rgba(255,255,255,0.2);color:white;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;backdrop-filter:blur(4px)">
+                                <i class="fas fa-camera"></i> Sync Photos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-users" class="tab-content">
+                    <div class="admin-card">
+                        <h2 class="h2-space-between">
+                            <span
+                                ><i class="fas fa-users-cog"></i> <span data-i18n="admin.user_management">User Management</span></span
+                            ><button
+                                class="btn btn-primary"
+                                id="btn-create-user"
+                            >
+                                <i class="fas fa-user-plus"></i> <span data-i18n="admin.create_user">Create User</span>
+                            </button>
+                        </h2>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="admin.col_user">User</th>
+                                        <th data-i18n="admin.col_role">Role</th>
+                                        <th data-i18n="admin.col_auth">Auth</th>
+                                        <th data-i18n="admin.col_status">Status</th>
+                                        <th data-i18n="admin.col_storage">Storage</th>
+                                        <th data-i18n="admin.col_last_login">Last Login</th>
+                                        <th data-i18n="admin.col_actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody">
+                                    <tr>
+                                        <td
+                                            colspan="7"
+                                            class="table-loading-cell"
+                                        >
+                                            <i
+                                                class="fas fa-spinner fa-spin"
+                                            ></i>
+                                            <span data-i18n="admin.loading_users">Loading users…</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <span id="users-info">—</span>
+                            <div class="flex-gap-6">
+                                <button
+                                    class="btn btn-sm btn-secondary"
+                                    id="prev-btn"
+                                    disabled
+                                >
+                                    <i class="fas fa-chevron-left"></i> <span data-i18n="admin.prev">Prev</span>
+                                </button>
+                                <button
+                                    class="btn btn-sm btn-secondary"
+                                    id="next-btn"
+                                >
+                                    <span data-i18n="admin.next">Next</span> <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-oidc" class="tab-content">
+                    <div class="admin-card">
+                        <h2>
+                            <i class="fas fa-shield-alt"></i> <span data-i18n="admin.sso_title">Single Sign-On (OIDC / SSO)</span>
+                        </h2>
+                        <div class="toggle-row">
+                            <label data-i18n="admin.enable_sso">Enable SSO Authentication</label>
+                            <label class="switch"
+                                ><input
+                                    type="checkbox"
+                                    id="oidc-enabled" /><span
+                                    class="slider"
+                                ></span
+                            ></label>
+                        </div>
+                        <div id="oidc-form">
+                            <div class="form-group">
+                                <label
+                                    ><span data-i18n="admin.provider_name">Provider Name</span>
+                                    <span id="badge-provider_name"></span
+                                ></label>
+                                <input
+                                    type="text"
+                                    id="provider-name"
+                                    placeholder="e.g., Authentik, Keycloak"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label
+                                    ><span data-i18n="admin.issuer_url">Issuer URL</span>
+                                    <span id="badge-issuer_url"></span
+                                ></label>
+                                <input
+                                    type="url"
+                                    id="issuer-url"
+                                    placeholder="https://auth.example.com/application/o/oxicloud/"
+                                />
+                                <small data-i18n="admin.issuer_url_hint"
+                                    >OpenID Connect issuer URL of your identity
+                                    provider</small
+                                >
+                            </div>
+                            <div class="oidc-discover-wrap">
+                                <button
+                                    class="btn btn-secondary btn-sm"
+                                    id="discover-btn"
+                                >
+                                    <i class="fas fa-search"></i> <span data-i18n="admin.auto_discover">Auto-discover</span>
+                                </button>
+                            </div>
+                            <div id="discovery-result"></div>
+                            <div class="form-group">
+                                <label
+                                    ><span data-i18n="admin.client_id">Client ID</span> <span id="badge-client_id"></span
+                                ></label>
+                                <input
+                                    type="text"
+                                    id="client-id"
+                                    placeholder="oxicloud"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label
+                                    ><span data-i18n="admin.client_secret">Client Secret</span>
+                                    <span id="badge-client_secret"></span
+                                ></label>
+                                <input
+                                    type="password"
+                                    id="client-secret"
+                                    placeholder="Leave empty to keep current value"
+                                    data-i18n-placeholder="admin.client_secret_placeholder"
+                                />
+                                <small id="secret-hint"
+                                    ><i
+                                        class="fas fa-check-circle secret-icon"
+                                    ></i>
+                                    <span data-i18n="admin.secret_configured">A client secret is already configured</span></small
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label
+                                    ><span data-i18n="admin.callback_url">Callback URL</span>
+                                    <small class="small-muted" data-i18n="admin.callback_url_hint"
+                                        >(register in your IdP)</small
+                                    ></label
+                                >
+                                <div class="readonly-field">
+                                    <span id="callback-url">—</span
+                                    ><button
+                                        id="btn-copy-callback"
+                                        title="Copy"
+                                    >
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <details>
+                                <summary>
+                                    <i
+                                        class="fas fa-sliders-h summary-icon-right"
+                                    ></i>
+                                    <span data-i18n="admin.advanced_settings">Advanced Settings</span>
+                                </summary>
+                                <div class="form-group">
+                                    <label
+                                        ><span data-i18n="admin.scopes">Scopes</span> <span id="badge-scopes"></span>
+                                    ></label>
+                                    <input
+                                        type="text"
+                                        id="scopes"
+                                        placeholder="openid profile email"
+                                    />
+                                </div>
+                                <div class="toggle-row">
+                                    <label data-i18n="admin.auto_provision"
+                                        >Auto-provision users on first
+                                        login</label
+                                    >
+                                    <label class="switch"
+                                        ><input
+                                            type="checkbox"
+                                            id="auto-provision"
+                                            checked /><span
+                                            class="slider"
+                                        ></span
+                                    ></label>
+                                </div>
+                                <div class="form-group">
+                                    <label
+                                        ><span data-i18n="admin.admin_groups">Admin Groups</span>
+                                        <span id="badge-admin_groups"></span>
+                                    ></label>
+                                    <input
+                                        type="text"
+                                        id="admin-groups"
+                                        placeholder="e.g., oxicloud-admins"
+                                    />
+                                    <small data-i18n="admin.admin_groups_hint"
+                                        >Comma-separated OIDC group names that
+                                        map to admin role</small
+                                    >
+                                </div>
+                                <div class="toggle-row">
+                                    <label data-i18n="admin.disable_password"
+                                        >Disable password login (OIDC
+                                        only)</label
+                                    >
+                                    <label class="switch"
+                                        ><input
+                                            type="checkbox"
+                                            id="disable-password" /><span
+                                            class="slider"
+                                        ></span
+                                    ></label>
+                                </div>
+                                <div class="warning" id="password-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span data-i18n="admin.password_warning">This will prevent ALL password-based logins!</span>
+                                </div>
+                            </details>
+                            <div class="oidc-actions">
+                                <button
+                                    class="btn btn-secondary"
+                                    id="btn-test-oidc"
+                                >
+                                    <i class="fas fa-vial"></i> <span data-i18n="admin.test_btn">Test</span>
+                                </button>
+                                <button
+                                    class="btn btn-primary"
+                                    id="save-btn"
+                                >
+                                    <i class="fas fa-save"></i> <span data-i18n="admin.save_btn">Save</span>
+                                </button>
+                            </div>
+                            <div id="oidc-status" class="alert"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="quota-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <h3>
+                    <i class="fas fa-box modal-title-icon"></i> <span data-i18n="admin.quota_modal_title">Update Storage Quota</span>
+                </h3>
+                <div class="form-group">
+                    <label><span data-i18n="admin.quota_user_label">User:</span> <strong id="qm-username"></strong></label>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="admin.new_quota">New Quota</label>
+                    <div class="quota-input-row">
+                        <input
+                            type="number"
+                            id="qm-value"
+                            min="0"
+                            step="1"
+                            class="flex-2"
+                        />
+                        <select id="qm-unit" class="select-qm-unit">
+                            <option value="1073741824">GB</option>
+                            <option value="1048576">MB</option>
+                            <option value="1099511627776">TB</option>
+                        </select>
+                    </div>
+                    <small data-i18n="admin.quota_unlimited_hint">Set to 0 for unlimited</small>
+                </div>
+                <div class="modal-actions">
+                    <button
+                        class="btn btn-secondary"
+                        id="btn-close-quota"
+                        data-i18n="admin.cancel"
+                    >
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" id="btn-save-quota">
+                        <i class="fas fa-save"></i> <span data-i18n="admin.save_btn">Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-user-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <h3>
+                    <i class="fas fa-user-plus modal-title-icon"></i> <span data-i18n="admin.create_user_title">Create New User</span>
+                </h3>
+                <div class="form-group">
+                    <label><span data-i18n="admin.username_label">Username</span> *</label>
+                    <input
+                        type="text"
+                        id="cu-username"
+                        placeholder="johndoe"
+                        data-i18n-placeholder="admin.username_placeholder"
+                        minlength="3"
+                        maxlength="32"
+                    />
+                    <small data-i18n="admin.username_hint">3–32 characters</small>
+                </div>
+                <div class="form-group">
+                    <label><span data-i18n="admin.password_label">Password</span> *</label>
+                    <input
+                        type="password"
+                        id="cu-password"
+                        placeholder="Min 8 characters"
+                        data-i18n-placeholder="admin.password_placeholder"
+                        minlength="8"
+                    />
+                </div>
+                <div class="form-group">
+                    <label
+                        ><span data-i18n="admin.email_label">Email</span>
+                        <small class="small-muted" data-i18n="admin.email_optional">(optional)</small></label
+                    >
+                    <input
+                        type="text"
+                        id="cu-email"
+                        placeholder="user@example.com (auto-generated if empty)"
+                        data-i18n-placeholder="admin.email_placeholder"
+                    />
+                </div>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label data-i18n="admin.role_label">Role</label>
+                        <select id="cu-role" class="select-cu-role">
+                            <option value="user" data-i18n="admin.role_user">User</option>
+                            <option value="admin" data-i18n="admin.role_admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label data-i18n="admin.quota_label">Quota</label>
+                        <div class="quota-row" style="display:flex;gap:8px;align-items:center">
+                            <input
+                                type="number"
+                                id="cu-quota-value"
+                                min="0"
+                                step="1"
+                                value="1"
+                                style="width:80px;padding:10px 8px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;text-align:center"
+                            />
+                            <select
+                                id="cu-quota-unit"
+                                class="select-cu-quota-unit"
+                            >
+                                <option value="1073741824">GB</option>
+                                <option value="1048576">MB</option>
+                                <option value="1099511627776">TB</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="cu-error" class="alert alert-no-margin"></div>
+                <div class="modal-actions">
+                    <button
+                        class="btn btn-secondary"
+                        id="btn-close-create-user"
+                        data-i18n="admin.cancel"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="btn btn-primary"
+                        id="cu-submit"
+                    >
+                        <i class="fas fa-user-plus"></i> <span data-i18n="admin.create_user">Create</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="reset-pw-modal" class="modal-overlay hidden">
+            <div class="modal">
+                <h3>
+                    <i class="fas fa-key modal-title-icon"></i> <span data-i18n="admin.reset_pw_title">Reset Password</span>
+                </h3>
+                <div class="form-group">
+                    <label><span data-i18n="admin.quota_user_label">User:</span> <strong id="rp-username"></strong></label>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="admin.new_password_label">New Password</label>
+                    <input
+                        type="password"
+                        id="rp-password"
+                        placeholder="Min 8 characters"
+                        minlength="8"
+                    />
+                </div>
+                <div id="rp-error" class="alert alert-no-margin"></div>
+                <div class="modal-actions">
+                    <button
+                        class="btn btn-secondary"
+                        id="btn-close-reset-pw"
+                        data-i18n="admin.cancel"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="btn btn-primary"
+                        id="rp-submit"
+                    >
+                        <i class="fas fa-save"></i> <span data-i18n="admin.reset_btn">Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm modal -->
+        <div id="confirm-modal" class="modal-overlay hidden">
+            <div class="modal modal-confirm">
+                <h3 id="confirm-title"><i class="fas fa-exclamation-circle modal-title-icon"></i> <span data-i18n="admin.confirm_action">Confirm Action</span></h3>
+                <p id="confirm-message"></p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="confirm-cancel" data-i18n="admin.confirm_no">Cancel</button>
+                    <button class="btn btn-danger" id="confirm-yes" data-i18n="admin.confirm_yes">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="/js/views/admin/admin.js" defer></script>
+    </body>
+</html>

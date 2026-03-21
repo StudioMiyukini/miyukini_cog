@@ -1,0 +1,38 @@
+<!-- Open this in a browser to generate PWA icons, then save each canvas as PNG -->
+<!-- Or use the inline SVG data URIs below -->
+<script>
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+sizes.forEach(size => {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Background circle
+  const cx = size / 2, cy = size / 2, r = size * 0.45;
+  ctx.fillStyle = '#f97316';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cloud icon (simplified)
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${size * 0.35}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('☁', cx, cy - size * 0.02);
+
+  // Letter M
+  ctx.fillStyle = '#0f172a';
+  ctx.font = `bold ${size * 0.22}px sans-serif`;
+  ctx.fillText('M', cx, cy + size * 0.05);
+
+  // Download link
+  const link = document.createElement('a');
+  link.download = `icon-${size}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.textContent = `Download ${size}x${size}`;
+  document.body.appendChild(link);
+  document.body.appendChild(document.createElement('br'));
+});
+</script>

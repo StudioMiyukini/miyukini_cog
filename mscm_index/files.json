@@ -2370,5 +2370,166 @@
   ],
   "crates/lord_of_the_castle/src/ui/game_screen.rs": [
     "lord_of_the_castle.ui.game_screen"
+  ],
+  "apps/miyucloud/src/domain/entities/user.rs": [
+    "miyucloud_entity_user",
+    "miyucloud_entity_user_role"
+  ],
+  "apps/miyucloud/src/domain/entities/file.rs": [
+    "miyucloud_entity_file"
+  ],
+  "apps/miyucloud/src/domain/entities/folder.rs": [
+    "miyucloud_entity_folder"
+  ],
+  "apps/miyucloud/src/domain/entities/session.rs": [
+    "miyucloud_entity_session"
+  ],
+  "apps/miyucloud/src/domain/entities/share.rs": [
+    "miyucloud_entity_share"
+  ],
+  "apps/miyucloud/src/domain/entities/calendar.rs": [
+    "miyucloud_entity_calendar"
+  ],
+  "apps/miyucloud/src/domain/entities/contact.rs": [
+    "miyucloud_entity_contact"
+  ],
+  "apps/miyucloud/src/domain/entities/audit_event.rs": [
+    "miyucloud_entity_audit_event",
+    "miyucloud_entity_audit_action"
+  ],
+  "apps/miyucloud/src/domain/entities/app_password.rs": [
+    "miyucloud_entity_app_password"
+  ],
+  "apps/miyucloud/src/application/ports/auth_ports.rs": [
+    "miyucloud_port_auth_password_hasher",
+    "miyucloud_port_auth_token_service",
+    "miyucloud_port_auth_user_storage"
+  ],
+  "apps/miyucloud/src/application/ports/file_ports.rs": [
+    "miyucloud_port_file_upload"
+  ],
+  "apps/miyucloud/src/application/ports/audit_ports.rs": [
+    "miyucloud_port_audit"
+  ],
+  "apps/miyucloud/src/application/ports/encryption_ports.rs": [
+    "miyucloud_port_encryption"
+  ],
+  "apps/miyucloud/src/application/ports/gdpr_ports.rs": [
+    "miyucloud_port_gdpr"
+  ],
+  "apps/miyucloud/src/application/ports/dedup_ports.rs": [
+    "miyucloud_port_dedup"
+  ],
+  "apps/miyucloud/src/application/services/file_upload_service.rs": [
+    "miyucloud_svc_file_upload"
+  ],
+  "apps/miyucloud/src/application/services/file_retrieval_service.rs": [
+    "miyucloud_svc_file_retrieval"
+  ],
+  "apps/miyucloud/src/application/services/folder_service.rs": [
+    "miyucloud_svc_folder"
+  ],
+  "apps/miyucloud/src/application/services/auth_application_service.rs": [
+    "miyucloud_svc_auth"
+  ],
+  "apps/miyucloud/src/application/services/calendar_service.rs": [
+    "miyucloud_svc_calendar"
+  ],
+  "apps/miyucloud/src/application/services/trash_service.rs": [
+    "miyucloud_svc_trash"
+  ],
+  "apps/miyucloud/src/application/services/share_service.rs": [
+    "miyucloud_svc_share"
+  ],
+  "apps/miyucloud/src/application/services/search_service.rs": [
+    "miyucloud_svc_search"
+  ],
+  "apps/miyucloud/src/infrastructure/services/jwt_service.rs": [
+    "miyucloud_infra_jwt_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/password_hasher.rs": [
+    "miyucloud_infra_password_hasher"
+  ],
+  "apps/miyucloud/src/infrastructure/services/dedup_service.rs": [
+    "miyucloud_infra_dedup_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/blob_encryption_service.rs": [
+    "miyucloud_infra_blob_encryption"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/audit_pg_repository.rs": [
+    "miyucloud_infra_audit_repo"
+  ],
+  "apps/miyucloud/src/infrastructure/services/file_content_cache.rs": [
+    "miyucloud_infra_file_content_cache"
+  ],
+  "apps/miyucloud/src/infrastructure/db.rs": [
+    "miyucloud_infra_dual_db_pools"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/auth.rs": [
+    "miyucloud_mw_auth"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/rate_limit.rs": [
+    "miyucloud_mw_rate_limit"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/csrf.rs": [
+    "miyucloud_mw_csrf"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/bandwidth.rs": [
+    "miyucloud_mw_bandwidth"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/file_handler.rs": [
+    "miyucloud_handler_file_upload"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/auth_handler.rs": [
+    "miyucloud_handler_auth"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/audit_handler.rs": [
+    "miyucloud_handler_audit"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/gdpr_handler.rs": [
+    "miyucloud_handler_gdpr"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/webdav_handler.rs": [
+    "miyucloud_handler_webdav"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/caldav_handler.rs": [
+    "miyucloud_handler_caldav"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/carddav_handler.rs": [
+    "miyucloud_handler_carddav"
+  ],
+  "apps/miyucloud/src/interfaces/api/routes.rs": [
+    "miyucloud_routes_public",
+    "miyucloud_routes_protected"
+  ],
+  "apps/miyucloud/src/common/config.rs": [
+    "miyucloud_config_app",
+    "miyucloud_config_security",
+    "miyucloud_config_encryption"
+  ],
+  "apps/miyucloud/src/common/di.rs": [
+    "miyucloud_di_factory",
+    "miyucloud_di_app_state"
+  ],
+  "apps/miyucloud/src/common/mime_detect.rs": [
+    "miyucloud_mime_validation"
+  ],
+  "apps/miyucloud/src/main.rs": [
+    "miyucloud_main"
+  ],
+  "apps/miyucloud/migrations/20260307000000_initial_schema.sql": [
+    "miyucloud_migration_schema"
+  ],
+  "apps/miyucloud/migrations/20260320000001_audit_log.sql": [
+    "miyucloud_migration_audit"
+  ],
+  "apps/miyucloud/migrations/20260320000002_row_level_security.sql": [
+    "miyucloud_migration_rls"
+  ],
+  "apps/miyucloud/migrations/20260320000003_gdpr_consent.sql": [
+    "miyucloud_migration_consent"
+  ],
+  "apps/miyucloud/migrations/20260320000004_security_incidents.sql": [
+    "miyucloud_migration_incidents"
   ]
 }

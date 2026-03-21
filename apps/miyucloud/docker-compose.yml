@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:18.2-alpine3.23
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: oxicloud
+    ports:
+      - "5432:5432"
+    networks:
+      - oxicloud
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  oxicloud:
+    image: oxicloud
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8086:8086"
+    networks:
+      - oxicloud
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - storage_data:/app/storage
+
+networks:
+  oxicloud:
+    driver: bridge
+
+volumes:
+  pg_data:
+  storage_data:

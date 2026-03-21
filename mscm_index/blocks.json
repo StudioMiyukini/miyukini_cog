@@ -15026,5 +15026,595 @@
     "layer": "core",
     "role": "test",
     "start_line": 108
+  },
+  {
+    "id": "miyucloud_entity_user",
+    "file": "apps/miyucloud/src/domain/entities/user.rs",
+    "start_line": 24,
+    "end_line": 346,
+    "do": "encapsulate_user_account",
+    "role": "data",
+    "layer": "kernel",
+    "human": "Entite utilisateur : auth, quota stockage, OIDC."
+  },
+  {
+    "id": "miyucloud_entity_user_role",
+    "file": "apps/miyucloud/src/domain/entities/user.rs",
+    "start_line": 7,
+    "end_line": 21,
+    "do": "define_rbac_roles",
+    "role": "security",
+    "layer": "kernel",
+    "human": "Enum RBAC admin/user."
+  },
+  {
+    "id": "miyucloud_entity_file",
+    "file": "apps/miyucloud/src/domain/entities/file.rs",
+    "start_line": 38,
+    "end_line": 415,
+    "do": "encapsulate_file_metadata",
+    "role": "data",
+    "layer": "kernel",
+    "human": "Metadonnees fichier (taille, path, etag, proprietaire)."
+  },
+  {
+    "id": "miyucloud_entity_folder",
+    "file": "apps/miyucloud/src/domain/entities/folder.rs",
+    "start_line": 10,
+    "end_line": 292,
+    "do": "encapsulate_folder_structure",
+    "role": "data",
+    "layer": "kernel",
+    "human": "Structure dossier (nom, path ltree, parent, proprietaire)."
+  },
+  {
+    "id": "miyucloud_entity_session",
+    "file": "apps/miyucloud/src/domain/entities/session.rs",
+    "start_line": 5,
+    "end_line": 104,
+    "do": "track_http_session",
+    "role": "security",
+    "layer": "kernel",
+    "human": "Session HTTP avec refresh token et expiration."
+  },
+  {
+    "id": "miyucloud_entity_share",
+    "file": "apps/miyucloud/src/domain/entities/share.rs",
+    "start_line": 8,
+    "end_line": 244,
+    "do": "manage_public_share_link",
+    "role": "data",
+    "layer": "domain",
+    "human": "Lien de partage public avec permissions et mot de passe."
+  },
+  {
+    "id": "miyucloud_entity_calendar",
+    "file": "apps/miyucloud/src/domain/entities/calendar.rs",
+    "start_line": 26,
+    "end_line": 295,
+    "do": "encapsulate_caldav_calendar",
+    "role": "data",
+    "layer": "domain",
+    "human": "Conteneur calendrier CalDAV."
+  },
+  {
+    "id": "miyucloud_entity_contact",
+    "file": "apps/miyucloud/src/domain/entities/contact.rs",
+    "start_line": 147,
+    "end_line": 449,
+    "do": "encapsulate_carddav_contact",
+    "role": "data",
+    "layer": "domain",
+    "human": "Entite contact CardDAV (vCard, emails, telephones)."
+  },
+  {
+    "id": "miyucloud_entity_audit_event",
+    "file": "apps/miyucloud/src/domain/entities/audit_event.rs",
+    "start_line": 118,
+    "end_line": 179,
+    "do": "record_security_audit_event",
+    "role": "security",
+    "layer": "kernel",
+    "human": "Entree immuable du journal d audit securite (ISO 27001)."
+  },
+  {
+    "id": "miyucloud_entity_audit_action",
+    "file": "apps/miyucloud/src/domain/entities/audit_event.rs",
+    "start_line": 10,
+    "end_line": 60,
+    "do": "enumerate_auditable_actions",
+    "role": "security",
+    "layer": "kernel",
+    "human": "Actions auditables : login, upload, download, admin, RGPD."
+  },
+  {
+    "id": "miyucloud_entity_app_password",
+    "file": "apps/miyucloud/src/domain/entities/app_password.rs",
+    "start_line": 12,
+    "end_line": 83,
+    "do": "manage_app_password_token",
+    "role": "security",
+    "layer": "domain",
+    "human": "Mot de passe applicatif pour WebDAV/CalDAV."
+  },
+  {
+    "id": "miyucloud_port_auth_password_hasher",
+    "file": "apps/miyucloud/src/application/ports/auth_ports.rs",
+    "start_line": 19,
+    "end_line": 25,
+    "do": "abstract_password_hashing",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port Argon2id pour hachage mots de passe."
+  },
+  {
+    "id": "miyucloud_port_auth_token_service",
+    "file": "apps/miyucloud/src/application/ports/auth_ports.rs",
+    "start_line": 50,
+    "end_line": 65,
+    "do": "abstract_jwt_token_ops",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port generation/validation JWT."
+  },
+  {
+    "id": "miyucloud_port_auth_user_storage",
+    "file": "apps/miyucloud/src/application/ports/auth_ports.rs",
+    "start_line": 71,
+    "end_line": 131,
+    "do": "abstract_user_persistence",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port persistance utilisateurs PostgreSQL."
+  },
+  {
+    "id": "miyucloud_port_file_upload",
+    "file": "apps/miyucloud/src/application/ports/file_ports.rs",
+    "start_line": 30,
+    "end_line": 89,
+    "do": "define_file_upload_contract",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port primaire upload fichier streaming."
+  },
+  {
+    "id": "miyucloud_port_audit",
+    "file": "apps/miyucloud/src/application/ports/audit_ports.rs",
+    "start_line": 12,
+    "end_line": 29,
+    "do": "abstract_audit_logging",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port journalisation audit persistant."
+  },
+  {
+    "id": "miyucloud_port_encryption",
+    "file": "apps/miyucloud/src/application/ports/encryption_ports.rs",
+    "start_line": 14,
+    "end_line": 40,
+    "do": "abstract_blob_encryption",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port chiffrement au repos AES-256-GCM."
+  },
+  {
+    "id": "miyucloud_port_gdpr",
+    "file": "apps/miyucloud/src/application/ports/gdpr_ports.rs",
+    "start_line": 47,
+    "end_line": 68,
+    "do": "abstract_gdpr_rights",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port droits individuels RGPD Art. 15-20."
+  },
+  {
+    "id": "miyucloud_port_dedup",
+    "file": "apps/miyucloud/src/application/ports/dedup_ports.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "abstract_content_dedup",
+    "role": "boundary",
+    "layer": "service",
+    "human": "Port deduplication contenu SHA-256."
+  },
+  {
+    "id": "miyucloud_svc_file_upload",
+    "file": "apps/miyucloud/src/application/services/file_upload_service.rs",
+    "start_line": 44,
+    "end_line": 82,
+    "do": "orchestrate_streaming_upload",
+    "role": "logic",
+    "layer": "service",
+    "human": "Orchestration upload streaming (hash-on-write, dedup)."
+  },
+  {
+    "id": "miyucloud_svc_file_retrieval",
+    "file": "apps/miyucloud/src/application/services/file_retrieval_service.rs",
+    "start_line": 28,
+    "end_line": 55,
+    "do": "orchestrate_file_download",
+    "role": "logic",
+    "layer": "service",
+    "human": "Telechargement multi-tier (cache, mmap, stream)."
+  },
+  {
+    "id": "miyucloud_svc_folder",
+    "file": "apps/miyucloud/src/application/services/folder_service.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "manage_folder_hierarchy",
+    "role": "logic",
+    "layer": "service",
+    "human": "CRUD dossiers avec hierarchie ltree."
+  },
+  {
+    "id": "miyucloud_svc_auth",
+    "file": "apps/miyucloud/src/application/services/auth_application_service.rs",
+    "start_line": 1,
+    "end_line": 100,
+    "do": "orchestrate_authentication",
+    "role": "security",
+    "layer": "service",
+    "human": "Login, register, OIDC, refresh token."
+  },
+  {
+    "id": "miyucloud_svc_calendar",
+    "file": "apps/miyucloud/src/application/services/calendar_service.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "manage_caldav_calendars",
+    "role": "logic",
+    "layer": "domain",
+    "human": "Gestion calendriers et evenements CalDAV."
+  },
+  {
+    "id": "miyucloud_svc_trash",
+    "file": "apps/miyucloud/src/application/services/trash_service.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "manage_trash_lifecycle",
+    "role": "logic",
+    "layer": "domain",
+    "human": "Corbeille : suppression douce et purge auto."
+  },
+  {
+    "id": "miyucloud_svc_share",
+    "file": "apps/miyucloud/src/application/services/share_service.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "manage_public_shares",
+    "role": "logic",
+    "layer": "domain",
+    "human": "Cycle de vie liens de partage publics."
+  },
+  {
+    "id": "miyucloud_svc_search",
+    "file": "apps/miyucloud/src/application/services/search_service.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "execute_fulltext_search",
+    "role": "logic",
+    "layer": "service",
+    "human": "Recherche plein texte fichiers (pg_trgm)."
+  },
+  {
+    "id": "miyucloud_infra_jwt_service",
+    "file": "apps/miyucloud/src/infrastructure/services/jwt_service.rs",
+    "start_line": 80,
+    "end_line": 96,
+    "do": "sign_validate_jwt_tokens",
+    "role": "security",
+    "layer": "infra",
+    "human": "JWT HS256 avec cache validation BLAKE3 et rotation cles."
+  },
+  {
+    "id": "miyucloud_infra_password_hasher",
+    "file": "apps/miyucloud/src/infrastructure/services/password_hasher.rs",
+    "start_line": 28,
+    "end_line": 57,
+    "do": "hash_passwords_argon2id",
+    "role": "security",
+    "layer": "infra",
+    "human": "Argon2id (64MiB, 3 iter) avec spawn_blocking."
+  },
+  {
+    "id": "miyucloud_infra_dedup_service",
+    "file": "apps/miyucloud/src/infrastructure/services/dedup_service.rs",
+    "start_line": 54,
+    "end_line": 66,
+    "do": "deduplicate_blob_storage",
+    "role": "storage",
+    "layer": "infra",
+    "human": "Stockage blobs content-addressable SHA-256/BLAKE3."
+  },
+  {
+    "id": "miyucloud_infra_blob_encryption",
+    "file": "apps/miyucloud/src/infrastructure/services/blob_encryption_service.rs",
+    "start_line": 24,
+    "end_line": 60,
+    "do": "encrypt_blobs_aes256gcm",
+    "role": "security",
+    "layer": "infra",
+    "human": "Chiffrement au repos AES-256-GCM (ISO 27001 A.8.24)."
+  },
+  {
+    "id": "miyucloud_infra_audit_repo",
+    "file": "apps/miyucloud/src/infrastructure/repositories/pg/audit_pg_repository.rs",
+    "start_line": 26,
+    "end_line": 40,
+    "do": "persist_audit_events_batched",
+    "role": "storage",
+    "layer": "infra",
+    "human": "Repo audit PostgreSQL avec batch async (mpsc+flush)."
+  },
+  {
+    "id": "miyucloud_infra_file_content_cache",
+    "file": "apps/miyucloud/src/infrastructure/services/file_content_cache.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "cache_hot_file_content",
+    "role": "storage",
+    "layer": "infra",
+    "human": "Cache moka fichiers frequents (<10MB, 512MB total)."
+  },
+  {
+    "id": "miyucloud_infra_dual_db_pools",
+    "file": "apps/miyucloud/src/infrastructure/db.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "manage_dual_pg_pools",
+    "role": "infra",
+    "layer": "infra",
+    "human": "Pools PG separes (user/maintenance) pour isolation."
+  },
+  {
+    "id": "miyucloud_mw_auth",
+    "file": "apps/miyucloud/src/interfaces/middleware/auth.rs",
+    "start_line": 26,
+    "end_line": 35,
+    "do": "extract_authenticated_user",
+    "role": "security",
+    "layer": "api",
+    "human": "Extracteur AuthUser depuis JWT/Basic/Cookie."
+  },
+  {
+    "id": "miyucloud_mw_rate_limit",
+    "file": "apps/miyucloud/src/interfaces/middleware/rate_limit.rs",
+    "start_line": 35,
+    "end_line": 80,
+    "do": "enforce_ip_rate_limiting",
+    "role": "security",
+    "layer": "api",
+    "human": "Rate limit IP sliding-window (moka cache)."
+  },
+  {
+    "id": "miyucloud_mw_csrf",
+    "file": "apps/miyucloud/src/interfaces/middleware/csrf.rs",
+    "start_line": 1,
+    "end_line": 70,
+    "do": "validate_csrf_double_submit",
+    "role": "security",
+    "layer": "api",
+    "human": "Protection CSRF double-submit cookie/header."
+  },
+  {
+    "id": "miyucloud_mw_bandwidth",
+    "file": "apps/miyucloud/src/interfaces/middleware/bandwidth.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "throttle_user_bandwidth",
+    "role": "security",
+    "layer": "api",
+    "human": "Limitation bande passante par utilisateur."
+  },
+  {
+    "id": "miyucloud_handler_file_upload",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/file_handler.rs",
+    "start_line": 49,
+    "end_line": 58,
+    "do": "handle_streaming_file_upload",
+    "role": "api",
+    "layer": "api",
+    "human": "Upload multipart streaming avec validation MIME et audit."
+  },
+  {
+    "id": "miyucloud_handler_auth",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/auth_handler.rs",
+    "start_line": 22,
+    "end_line": 39,
+    "do": "handle_auth_endpoints",
+    "role": "api",
+    "layer": "api",
+    "human": "Routes auth : login, register, OIDC, logout."
+  },
+  {
+    "id": "miyucloud_handler_audit",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/audit_handler.rs",
+    "start_line": 19,
+    "end_line": 77,
+    "do": "query_audit_log_admin",
+    "role": "api",
+    "layer": "api",
+    "human": "GET /api/admin/audit avec filtrage et pagination."
+  },
+  {
+    "id": "miyucloud_handler_gdpr",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/gdpr_handler.rs",
+    "start_line": 19,
+    "end_line": 74,
+    "do": "handle_gdpr_rights_requests",
+    "role": "api",
+    "layer": "api",
+    "human": "API droits RGPD : export, effacement, rectification."
+  },
+  {
+    "id": "miyucloud_handler_webdav",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/webdav_handler.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "handle_webdav_protocol",
+    "role": "api",
+    "layer": "api",
+    "human": "WebDAV RFC 4918 (PROPFIND, LOCK, PUT, GET)."
+  },
+  {
+    "id": "miyucloud_handler_caldav",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/caldav_handler.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "handle_caldav_protocol",
+    "role": "api",
+    "layer": "api",
+    "human": "CalDAV RFC 4791 (calendriers, evenements)."
+  },
+  {
+    "id": "miyucloud_handler_carddav",
+    "file": "apps/miyucloud/src/interfaces/api/handlers/carddav_handler.rs",
+    "start_line": 1,
+    "end_line": 50,
+    "do": "handle_carddav_protocol",
+    "role": "api",
+    "layer": "api",
+    "human": "CardDAV RFC 6352 (contacts, carnets d adresses)."
+  },
+  {
+    "id": "miyucloud_routes_public",
+    "file": "apps/miyucloud/src/interfaces/api/routes.rs",
+    "start_line": 30,
+    "end_line": 69,
+    "do": "define_public_api_routes",
+    "role": "api",
+    "layer": "api",
+    "human": "Routes publiques : partages, i18n, version."
+  },
+  {
+    "id": "miyucloud_routes_protected",
+    "file": "apps/miyucloud/src/interfaces/api/routes.rs",
+    "start_line": 76,
+    "end_line": 367,
+    "do": "define_protected_api_routes",
+    "role": "api",
+    "layer": "api",
+    "human": "Routes protegees : fichiers, dossiers, audit, RGPD."
+  },
+  {
+    "id": "miyucloud_config_app",
+    "file": "apps/miyucloud/src/common/config.rs",
+    "start_line": 536,
+    "end_line": 568,
+    "do": "load_config_from_env",
+    "role": "infra",
+    "layer": "core",
+    "human": "AppConfig::from_env() charge toutes les variables OXICLOUD_*."
+  },
+  {
+    "id": "miyucloud_config_security",
+    "file": "apps/miyucloud/src/common/config.rs",
+    "start_line": 499,
+    "end_line": 533,
+    "do": "configure_security_controls",
+    "role": "security",
+    "layer": "core",
+    "human": "SecurityConfig : MIME blocklist, cookies, HSTS, bandwidth."
+  },
+  {
+    "id": "miyucloud_config_encryption",
+    "file": "apps/miyucloud/src/common/config.rs",
+    "start_line": 469,
+    "end_line": 497,
+    "do": "configure_encryption_at_rest",
+    "role": "security",
+    "layer": "core",
+    "human": "EncryptionConfig : AES-256-GCM cle maitre."
+  },
+  {
+    "id": "miyucloud_di_factory",
+    "file": "apps/miyucloud/src/common/di.rs",
+    "start_line": 65,
+    "end_line": 88,
+    "do": "build_app_service_graph",
+    "role": "infra",
+    "layer": "core",
+    "human": "AppServiceFactory composition root hexagonale."
+  },
+  {
+    "id": "miyucloud_di_app_state",
+    "file": "apps/miyucloud/src/common/di.rs",
+    "start_line": 871,
+    "end_line": 915,
+    "do": "hold_global_di_container",
+    "role": "infra",
+    "layer": "core",
+    "human": "AppState conteneur DI global (42 services Arc-wrapped)."
+  },
+  {
+    "id": "miyucloud_mime_validation",
+    "file": "apps/miyucloud/src/common/mime_detect.rs",
+    "start_line": 55,
+    "end_line": 130,
+    "do": "validate_upload_mime_type",
+    "role": "security",
+    "layer": "core",
+    "human": "Validation MIME magic bytes + blocklist executables."
+  },
+  {
+    "id": "miyucloud_main",
+    "file": "apps/miyucloud/src/main.rs",
+    "start_line": 52,
+    "end_line": 493,
+    "do": "bootstrap_cloud_server",
+    "role": "infra",
+    "layer": "app",
+    "human": "Point d entree : config, DB, services, routes, ecoute TCP."
+  },
+  {
+    "id": "miyucloud_migration_schema",
+    "file": "apps/miyucloud/migrations/20260307000000_initial_schema.sql",
+    "start_line": 1,
+    "end_line": 200,
+    "do": "define_database_schema",
+    "role": "storage",
+    "layer": "infra",
+    "human": "Schema initial : auth, storage, caldav, carddav."
+  },
+  {
+    "id": "miyucloud_migration_audit",
+    "file": "apps/miyucloud/migrations/20260320000001_audit_log.sql",
+    "start_line": 1,
+    "end_line": 41,
+    "do": "create_audit_events_table",
+    "role": "security",
+    "layer": "infra",
+    "human": "Table audit.events (ISO 27001 A.8.15)."
+  },
+  {
+    "id": "miyucloud_migration_rls",
+    "file": "apps/miyucloud/migrations/20260320000002_row_level_security.sql",
+    "start_line": 1,
+    "end_line": 110,
+    "do": "enable_row_level_security",
+    "role": "security",
+    "layer": "infra",
+    "human": "RLS sur 6 tables (ISO 27001 A.8.3)."
+  },
+  {
+    "id": "miyucloud_migration_consent",
+    "file": "apps/miyucloud/migrations/20260320000003_gdpr_consent.sql",
+    "start_line": 1,
+    "end_line": 35,
+    "do": "create_consent_tracking_table",
+    "role": "security",
+    "layer": "infra",
+    "human": "Table auth.consents (RGPD Art. 6-7)."
+  },
+  {
+    "id": "miyucloud_migration_incidents",
+    "file": "apps/miyucloud/migrations/20260320000004_security_incidents.sql",
+    "start_line": 1,
+    "end_line": 30,
+    "do": "create_incident_tracking_table",
+    "role": "security",
+    "layer": "infra",
+    "human": "Table auth.security_incidents (RGPD Art. 33-34)."
   }
 ]

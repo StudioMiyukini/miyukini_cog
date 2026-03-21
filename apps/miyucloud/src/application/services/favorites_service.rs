@@ -1,0 +1,157 @@
+use std::collections::HashSet;
+use std::sync::Arc;
+
+use tracing::info;
+use uuid::Uuid;
+
+use crate::application::dtos::favorites_dto::{
+    BatchFavoritesResult, BatchFavoritesStats, FavoriteItemDto,
+};
+use crate::application::ports::favorites_ports::{FavoritesRepositoryPort, FavoritesUseCase};
+use crate::common::errors::{DomainError, ErrorKind, Result};
+use crate::infrastructure::repositories::pg::FavoritesPgRepository;
+
+/// Implementation of the FavoritesUseCase for managing user favorites.
+///
+/// Depends on `FavoritesRepositoryPort` (outbound port) instead of
+/// accessing the database directly, following hexagonal architecture.
+pub struct FavoritesService {
+    repo: Arc<FavoritesPgRepository>,
+}
+
+impl FavoritesService {
+    /// Create a new FavoritesService with the given repository port
+    pub fn new(repo: Arc<FavoritesPgRepository>) -> Self {
+        Self { repo }
+    }
+}
+
+impl FavoritesUseCase for FavoritesService {
+    /// Get all favorites for a user
+    async fn get_favorites(&self, user_id: Uuid) -> Result<Vec<FavoriteItemDto>> {
+        info!("Getting favorites for user: {}", user_id);
+        let favorites = self.repo.get_favorites(user_id).await?;
+        info!(
+            "Retrieved {} favorites for user {}",
+            favorites.len(),
+            user_id
+        );
+        Ok(favorites)
+    }
+
+    /// Add an item to user's favorites
+    async fn add_to_favorites(&self, user_id: Uuid, item_id: &str, item_type: &str) -> Result<()> {
+        info!(
+            "Adding {} '{}' to favorites for user {}",
+            item_type, item_id, user_id
+        );
+
+        if item_type != "file" && item_type != "folder" {
+            return Err(DomainError::new(
+                ErrorKind::InvalidInput,
+                "Favorites",
+                "Item type must be 'file' or 'folder'",
+            ));
+        }
+
+        self.repo.add_favorite(user_id, item_id, item_type).await?;
+        info!(
+            "Successfully added {} '{}' to favorites for user {}",
+            item_type, item_id, user_id
+        );
+        Ok(())
+    }
+
+    /// Remove an item from user's favorites
+    async fn remove_from_favorites(
+        &self,
+        user_id: Uuid,
+        item_id: &str,
+        item_type: &str,
+    ) -> Result<bool> {
+        info!(
+            "Removing {} '{}' from favorites for user {}",
+            item_type, item_id, user_id
+        );
+        let removed = self
+            .repo
+            .remove_favorite(user_id, item_id, item_type)
+            .await?;
+        info!(
+            "{} {} '{}' from favorites for user {}",
+            if removed {
+                "Successfully removed"
+            } else {
+                "Did not find"
+            },
+            item_type,
+            item_id,
+            user_id
+        );
+        Ok(removed)
+    }
+
+    /// Check if an item is in user's favorites
+    async fn is_favorite(&self, user_id: Uuid, item_id: &str, item_type: &str) -> Result<bool> {
+        info!(
+            "Checking if {} '{}' is favorite for user {}",
+            item_type, item_id, user_id
+        );
+        self.repo.is_favorite(user_id, item_id, item_type).await
+    }
+
+    async fn batch_add_to_favorites(
+        &self,
+        user_id: Uuid,
+        items: &[(String, String)],
+    ) -> Result<BatchFavoritesResult> {
+        info!(
+            "Batch adding {} items to favorites for user {}",
+            items.len(),
+            user_id
+        );
+
+        // Validate all item types
+        for (item_id, item_type) in items {
+            if item_type != "file" && item_type != "folder" {
+                return Err(DomainError::new(
+                    ErrorKind::InvalidInput,
+                    "Favorites",
+                    format!(
+                        "Item type must be 'file' or 'folder' for item '{}'",
+                        item_id
+                    ),
+                ));
+            }
+        }
+
+        let requested = items.len();
+        let inserted = self.repo.add_favorites_batch(user_id, items).await?;
+        let already_existed = requested as u64 - inserted;
+
+        info!(
+            "Batch favorites for user {}: {} requested, {} inserted, {} already existed",
+            user_id, requested, inserted, already_existed
+        );
+
+        // Return the full enriched list so the client can replace its cache
+        let favorites = self.repo.get_favorites(user_id).await?;
+
+        Ok(BatchFavoritesResult {
+            stats: BatchFavoritesStats {
+                requested,
+                inserted,
+                already_existed,
+            },
+            favorites,
+        })
+    }
+
+    async fn batch_check_favorites(
+        &self,
+        user_id: Uuid,
+        item_ids: &[(&str, &str)],
+    ) -> Result<HashSet<String>> {
+        self.repo.batch_check_favorites(user_id, item_ids).await
+    }
+}

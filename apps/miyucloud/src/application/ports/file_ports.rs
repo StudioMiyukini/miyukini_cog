@@ -1,0 +1,344 @@
+use bytes::Bytes;
+use futures::Stream;
+use std::path::Path;
+use std::pin::Pin;
+use std::sync::Arc;
+use uuid::Uuid;
+
+use crate::application::dtos::file_dto::FileDto;
+use crate::application::ports::storage_ports::CopyFolderTreeResult;
+use crate::application::services::file_management_service::FileManagementService;
+use crate::application::services::file_retrieval_service::FileRetrievalService;
+use crate::application::services::file_upload_service::FileUploadService;
+use crate::common::errors::DomainError;
+
+// ─────────────────────────────────────────────────────
+// Upload port
+// ─────────────────────────────────────────────────────
+
+/// Primary port for file upload operations.
+///
+/// **All upload paths converge on streaming-to-disk** — no method accepts
+/// `Vec<u8>` for content.  Even `create_file` / `update_file` (WebDAV
+/// helpers that receive `&[u8]`) spool to a temp file internally so that
+/// peak RAM stays at ~256 KB regardless of file size.
+///
+/// - Normal uploads: handler spools multipart to temp file → `upload_file_streaming`
+/// - Chunked uploads: chunks already on disk → `upload_file_from_path`
+/// - WebDAV PUT (new): handler streams to temp file → `update_file_streaming`
+/// - WebDAV PUT (small/compat): `create_file` / `update_file` spool internally
+pub trait FileUploadUseCase: Send + Sync + 'static {
+    /// Upload from a temp file already on disk (true streaming, ~256 KB RAM).
+    ///
+    /// When `pre_computed_hash` is `Some`, the blob store skips the hash
+    /// re-read — the handler already computed it during the multipart spool.
+    async fn upload_file_streaming(
+        &self,
+        name: String,
+        folder_id: Option<String>,
+        content_type: String,
+        temp_path: &Path,
+        size: u64,
+        pre_computed_hash: Option<String>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Upload from a file already assembled on disk (chunked uploads).
+    ///
+    /// Same as `upload_file_streaming` but with a separate name for clarity.
+    async fn upload_file_from_path(
+        &self,
+        name: String,
+        folder_id: Option<String>,
+        content_type: String,
+        file_path: &Path,
+        pre_computed_hash: Option<String>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Creates a new file at the specified path (for WebDAV)
+    async fn create_file(
+        &self,
+        parent_path: &str,
+        filename: &str,
+        content: &[u8],
+        content_type: &str,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Updates the content of an existing file (for WebDAV)
+    async fn update_file(
+        &self,
+        path: &str,
+        content: &[u8],
+        content_type: &str,
+        modified_at: Option<i64>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Streaming update — spools body to a temp file with incremental hash,
+    /// then atomically replaces the file content via dedup store.
+    ///
+    /// Peak RAM: ~256 KB regardless of file size.
+    /// Used by WebDAV PUT for large files.
+    async fn update_file_streaming(
+        &self,
+        path: &str,
+        temp_path: &Path,
+        size: u64,
+        content_type: &str,
+        pre_computed_hash: Option<String>,
+        modified_at: Option<i64>,
+    ) -> Result<FileDto, DomainError>;
+}
+
+// ─────────────────────────────────────────────────────
+// Retrieval / download port
+// ─────────────────────────────────────────────────────
+
+/// Optimized file content returned by the retrieval service.
+///
+/// The handler only needs to map each variant to the appropriate HTTP
+/// response; all caching / transcoding / mmap decisions happen in the
+/// application layer.
+pub enum OptimizedFileContent {
+    /// Small-file content (possibly transcoded / compressed) already in RAM.
+    Bytes {
+        data: Bytes,
+        mime_type: Arc<str>,
+        was_transcoded: bool,
+    },
+    /// Memory-mapped file (10–100 MB).
+    Mmap(Bytes),
+    /// Streaming download for very large files (≥100 MB).
+    Stream(Pin<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>>),
+}
+
+/// Primary port for file retrieval operations
+pub trait FileRetrievalUseCase: Send + Sync + 'static {
+    /// Gets a file by its ID (system/internal — no ownership check).
+    async fn get_file(&self, id: &str) -> Result<FileDto, DomainError>;
+
+    /// Gets a file by its ID, enforcing that `caller_id` is the owner.
+    ///
+    /// Returns `NotFound` if the file does not exist **or** belongs to
+    /// another user.  All user-facing handlers should use this method.
+    async fn get_file_owned(&self, id: &str, caller_id: Uuid) -> Result<FileDto, DomainError>;
+
+    /// Gets a file by its path (for WebDAV)
+    async fn get_file_by_path(&self, path: &str) -> Result<FileDto, DomainError>;
+
+    /// Lists files in a folder
+    async fn list_files(&self, folder_id: Option<&str>) -> Result<Vec<FileDto>, DomainError>;
+
+    /// Lists files in a folder, scoped to the authenticated user.
+    ///
+    /// Uses SQL-level `AND user_id` filtering — no in-memory post-filter.
+    /// All user-facing list handlers should use this method.
+    async fn list_files_owned(
+        &self,
+        folder_id: Option<&str>,
+        owner_id: Uuid,
+    ) -> Result<Vec<FileDto>, DomainError>;
+
+    /// Gets file content as a stream (for large files)
+    async fn get_file_stream(
+        &self,
+        id: &str,
+    ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError>;
+
+    /// Gets file content as a stream, enforcing that `caller_id` is the owner.
+    async fn get_file_stream_owned(
+        &self,
+        id: &str,
+        caller_id: Uuid,
+    ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError>;
+
+    /// Optimized multi-tier download.
+    ///
+    /// Internalises: write-behind lookup → content-cache → WebP transcode →
+    /// mmap → streaming, returning an `OptimizedFileContent` variant so the
+    /// handler only builds the HTTP response.
+    async fn get_file_optimized(
+        &self,
+        id: &str,
+        accept_webp: bool,
+        prefer_original: bool,
+    ) -> Result<(FileDto, OptimizedFileContent), DomainError>;
+
+    /// Ownership-scoped optimized download.
+    ///
+    /// Verifies `caller_id` owns the file before returning content.
+    /// All user-facing download handlers should use this.
+    async fn get_file_optimized_owned(
+        &self,
+        id: &str,
+        caller_id: Uuid,
+        accept_webp: bool,
+        prefer_original: bool,
+    ) -> Result<(FileDto, OptimizedFileContent), DomainError>;
+
+    /// Like `get_file_optimized` but accepts an already-fetched `FileDto`,
+    /// avoiding a redundant metadata query when the handler already has it.
+    async fn get_file_optimized_preloaded(
+        &self,
+        id: &str,
+        file_dto: FileDto,
+        accept_webp: bool,
+        prefer_original: bool,
+    ) -> Result<(FileDto, OptimizedFileContent), DomainError> {
+        // Default: ignore pre-fetched meta, re-fetch everything.
+        let _ = file_dto;
+        self.get_file_optimized(id, accept_webp, prefer_original)
+            .await
+    }
+
+    /// Range-based streaming for HTTP Range Requests (video seek, resumable DL).
+    async fn get_file_range_stream(
+        &self,
+        id: &str,
+        start: u64,
+        end: Option<u64>,
+    ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError>;
+
+    /// Ownership-scoped range stream — verifies caller owns the file first.
+    async fn get_file_range_stream_owned(
+        &self,
+        id: &str,
+        caller_id: Uuid,
+        start: u64,
+        end: Option<u64>,
+    ) -> Result<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>, DomainError>;
+
+    /// Streams every file in the subtree rooted at `folder_id`.
+    ///
+    /// Returns a streaming cursor — RAM stays O(1) per row.  Callers
+    /// consume incrementally (e.g. group into a HashMap by folder_id)
+    /// without materializing the full result set.
+    async fn stream_files_in_subtree(
+        &self,
+        folder_id: &str,
+    ) -> Result<Pin<Box<dyn Stream<Item = Result<FileDto, DomainError>> + Send>>, DomainError>;
+
+    /// Lists files in a folder with LIMIT/OFFSET pagination.
+    ///
+    /// Used by streaming WebDAV PROPFIND to avoid loading all files at once.
+    /// Default: falls back to `list_files` (loads all, then slices in memory).
+    async fn list_files_batch(
+        &self,
+        folder_id: Option<&str>,
+        offset: i64,
+        limit: i64,
+    ) -> Result<Vec<FileDto>, DomainError> {
+        let all = self.list_files(folder_id).await?;
+        Ok(all
+            .into_iter()
+            .skip(offset as usize)
+            .take(limit as usize)
+            .collect())
+    }
+
+    /// Like [`list_files_batch`], but scoped to a specific owner.
+    ///
+    /// Used by streaming WebDAV PROPFIND so that each user only sees their
+    /// own files, even in shared folder_id namespaces.
+    async fn list_files_batch_for_owner(
+        &self,
+        folder_id: Option<&str>,
+        owner_id: Uuid,
+        offset: i64,
+        limit: i64,
+    ) -> Result<Vec<FileDto>, DomainError> {
+        let all = self.list_files_batch(folder_id, offset, limit).await?;
+        let owner_str = owner_id.to_string();
+        Ok(all
+            .into_iter()
+            .filter(|f| f.owner_id.as_deref().is_some_and(|o| o == owner_str))
+            .collect())
+    }
+}
+
+// ─────────────────────────────────────────────────────
+// Management port (delete, move)
+// ─────────────────────────────────────────────────────
+
+/// Primary port for file management operations
+pub trait FileManagementUseCase: Send + Sync + 'static {
+    /// Moves a file to another folder (system/internal — no ownership check).
+    async fn move_file(
+        &self,
+        file_id: &str,
+        folder_id: Option<String>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Moves a file, enforcing that `caller_id` is the owner.
+    async fn move_file_owned(
+        &self,
+        file_id: &str,
+        caller_id: Uuid,
+        folder_id: Option<String>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Copies a file to another folder (zero-copy with dedup).
+    async fn copy_file(
+        &self,
+        file_id: &str,
+        target_folder_id: Option<String>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Copies a file, enforcing that `caller_id` is the owner.
+    async fn copy_file_owned(
+        &self,
+        file_id: &str,
+        caller_id: Uuid,
+        target_folder_id: Option<String>,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Renames a file (system/internal — no ownership check).
+    async fn rename_file(&self, file_id: &str, new_name: &str) -> Result<FileDto, DomainError>;
+
+    /// Renames a file, enforcing that `caller_id` is the owner.
+    async fn rename_file_owned(
+        &self,
+        file_id: &str,
+        caller_id: Uuid,
+        new_name: &str,
+    ) -> Result<FileDto, DomainError>;
+
+    /// Deletes a file (system/internal — no ownership check).
+    async fn delete_file(&self, id: &str) -> Result<(), DomainError>;
+
+    /// Deletes a file, enforcing that `caller_id` is the owner.
+    async fn delete_file_owned(&self, id: &str, caller_id: Uuid) -> Result<(), DomainError>;
+
+    /// Smart delete: trash-first with dedup reference cleanup.
+    ///
+    /// 1. Tries to move to trash (soft delete).
+    /// 2. Falls back to permanent delete if trash unavailable/failed.
+    /// 3. Decrements the dedup reference count for the content hash.
+    ///
+    /// Returns `Ok(true)` when trashed, `Ok(false)` when permanently deleted.
+    async fn delete_with_cleanup(&self, id: &str, user_id: Uuid) -> Result<bool, DomainError>;
+
+    /// Copies an entire folder subtree atomically (WebDAV COPY Depth: infinity).
+    ///
+    /// Creates a copy of `source_folder_id` (with optional name override) under
+    /// `target_parent_id`, including ALL sub-folders and files. Files are
+    /// zero-copy (blob ref_counts incremented in batch).
+    ///
+    /// Default: returns error (only available with PostgreSQL backend).
+    async fn copy_folder_tree(
+        &self,
+        _source_folder_id: &str,
+        _target_parent_id: Option<String>,
+        _dest_name: Option<String>,
+    ) -> Result<CopyFolderTreeResult, DomainError> {
+        Err(DomainError::internal_error(
+            "FileManagement",
+            "copy_folder_tree not implemented",
+        ))
+    }
+}
+
+/// Factory for creating file use case implementations
+pub trait FileUseCaseFactory: Send + Sync + 'static {
+    fn create_file_upload_use_case(&self) -> Arc<FileUploadService>;
+    fn create_file_retrieval_use_case(&self) -> Arc<FileRetrievalService>;
+    fn create_file_management_use_case(&self) -> Arc<FileManagementService>;
+}
