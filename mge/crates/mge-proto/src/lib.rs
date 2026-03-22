@@ -5,7 +5,7 @@ pub const PROTOCOL_VERSION: u32 = 2;
 // ─── Client → Server commands ─────────────────────────────────────────────────
 
 /// Commands that a client sends to the server.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ClientCommand {
     // Session
     JoinScene { scene_id: String },
@@ -22,12 +22,30 @@ pub enum ClientCommand {
     // PvP
     SetPvpFlag { hostile: bool },
     DuelChallenge { target_player_id: u64 },
+
+    // ---- Game actions (authoritative server validates) ----
+    /// Move to target position.
+    Move { target: [f32; 2], running: bool },
+    /// Attack an enemy by index in current zone.
+    Attack { enemy_index: u32 },
+    /// Use a skill toward a direction/position.
+    UseSkill { skill_id: u8, target: [f32; 2] },
+    /// Pick up an item drop by index.
+    PickupItem { drop_index: u32 },
+    /// Use a belt potion (slot 0-3).
+    UsePotion { belt_slot: u8 },
+    /// Sell an inventory item at vendor.
+    SellItem { inv_slot: u8 },
+    /// Harvest a gather node by index.
+    HarvestNode { node_index: u32 },
+    /// Chat message.
+    Chat { message: String },
 }
 
 // ─── Server → Client events ───────────────────────────────────────────────────
 
 /// Events the server pushes to clients.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ServerEvent {
     // Session
     SceneReady { scene_id: String },
@@ -42,6 +60,33 @@ pub enum ServerEvent {
     PartyUpdated { member_count: u32 },
     // PvP
     PvpFlagChanged { player_id: u64, hostile: bool },
+
+    // ---- Game state broadcasts ----
+    /// Another player's position/state update (broadcast to nearby clients).
+    PlayerSync {
+        player_id: u64,
+        pos: [f32; 2],
+        hp_frac: f32,
+        mp_frac: f32,
+        level: u32,
+        facing_right: bool,
+        running: bool,
+        active_skill: u8,
+    },
+    /// A player joined the current zone.
+    PlayerJoined { player_id: u64, name: String, level: u32 },
+    /// A player left the current zone.
+    PlayerLeft { player_id: u64 },
+    /// Chat message from another player.
+    ChatMessage { player_id: u64, name: String, message: String },
+    /// An enemy took damage (broadcast for visual sync).
+    EnemyDamaged { enemy_index: u32, new_hp: f32, attacker_id: u64 },
+    /// An enemy was killed.
+    EnemyKilled { enemy_index: u32, killer_id: u64, xp: f32 },
+    /// A gather node was harvested by someone.
+    NodeHarvested { node_index: u32, harvester_id: u64 },
+    /// Full zone snapshot on zone enter.
+    ZoneSnapshot { zone_id: u32, enemy_count: u32, node_count: u32 },
 }
 
 // ─── Snapshot envelope ────────────────────────────────────────────────────────

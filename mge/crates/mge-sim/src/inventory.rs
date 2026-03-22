@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::civil_skills::ResourceKind;
 use crate::entity::{Equipment, PotionKind};
 use crate::skill_disk::{ScrollItem, SlotContent};
 
@@ -13,6 +14,8 @@ pub enum InvItem {
     Potion(PotionKind),
     Scroll(ScrollItem),
     Gold(u32),
+    /// Harvest resource — stackable by ResourceKind.
+    Resource(ResourceKind, u32),
 }
 
 impl InvItem {
@@ -24,6 +27,7 @@ impl InvItem {
             Self::Potion(PotionKind::Mana) => b"MP POT",
             Self::Scroll(s) => s.content.short_label(),
             Self::Gold(_) => b"GOLD",
+            Self::Resource(kind, _) => kind.short_label(),
         }
     }
 
@@ -39,12 +43,34 @@ impl InvItem {
                 SlotContent::Active { .. } => [0.90, 0.55, 0.55, 1.0],
             },
             Self::Gold(_) => [1.0, 0.85, 0.25, 1.0],
+            Self::Resource(kind, _) => kind.inv_color(),
         }
     }
 
-    /// Can this item stack? Only gold stacks.
+    /// Can this item stack? Gold and Resources stack.
+    pub fn is_stackable(&self) -> bool {
+        matches!(self, Self::Gold(_) | Self::Resource(..))
+    }
+
+    /// Can this item stack? Only gold stacks (legacy compat).
     pub fn is_gold(&self) -> bool {
         matches!(self, Self::Gold(_))
+    }
+
+    /// Is this a harvest resource?
+    pub fn is_resource(&self) -> bool {
+        matches!(self, Self::Resource(..))
+    }
+
+    /// Sell value for vendor. Resources have tier-based prices.
+    pub fn sell_value(&self) -> u32 {
+        match self {
+            Self::Gold(_) => 0,
+            Self::Resource(kind, qty) => kind.sell_price() * qty,
+            Self::Potion(_) => 5,
+            Self::Scroll(_) => 8,
+            Self::Equipment(eq) => eq.rarity.base_sell_value() * (1 + eq.ilvl / 10),
+        }
     }
 }
 
@@ -97,7 +123,7 @@ impl Backpack {
         self.free() == 0
     }
 
-    /// Try to add an item. Gold stacks into existing gold slots first.
+    /// Try to add an item. Gold and Resources stack into matching slots first.
     /// Returns `true` if inserted, `false` if no room.
     pub fn add(&mut self, item: InvItem) -> bool {
         // Gold stacking
@@ -106,6 +132,17 @@ impl Backpack {
                 if let Some(InvItem::Gold(ref mut g)) = slot {
                     *g += amount;
                     return true;
+                }
+            }
+        }
+        // Resource stacking — merge into existing stack of same kind
+        if let InvItem::Resource(kind, qty) = item {
+            for slot in &mut self.slots {
+                if let Some(InvItem::Resource(ref sk, ref mut sq)) = slot {
+                    if *sk == kind {
+                        *sq += qty;
+                        return true;
+                    }
                 }
             }
         }
@@ -215,5 +252,36 @@ mod tests {
         assert_eq!(bp.count(), 1);
         let label = bp.get(0).unwrap().label();
         assert_eq!(label, b"+HP");
+    }
+
+    #[test]
+    fn resource_stacks() {
+        use crate::civil_skills::ResourceKind;
+        let mut bp = Backpack::new(4);
+        bp.add(InvItem::Resource(ResourceKind::BoisBrut, 3));
+        bp.add(InvItem::Resource(ResourceKind::BoisBrut, 5));
+        assert_eq!(bp.count(), 1); // stacked into one slot
+        if let Some(InvItem::Resource(kind, qty)) = bp.get(0) {
+            assert_eq!(*kind, ResourceKind::BoisBrut);
+            assert_eq!(*qty, 8);
+        } else {
+            panic!("expected resource");
+        }
+    }
+
+    #[test]
+    fn different_resources_separate_slots() {
+        use crate::civil_skills::ResourceKind;
+        let mut bp = Backpack::new(4);
+        bp.add(InvItem::Resource(ResourceKind::BoisBrut, 2));
+        bp.add(InvItem::Resource(ResourceKind::MineraiFer, 3));
+        assert_eq!(bp.count(), 2); // different kinds = different slots
+    }
+
+    #[test]
+    fn resource_sell_value() {
+        use crate::civil_skills::ResourceKind;
+        let item = InvItem::Resource(ResourceKind::Gemme, 4);
+        assert_eq!(item.sell_value(), 200); // 50 × 4
     }
 }

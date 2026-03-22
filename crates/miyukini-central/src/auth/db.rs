@@ -12,6 +12,7 @@
 //! - Un profil peut avoir plusieurs slots par service (slot 0, 1, 2…).
 
 use crate::auth::password::validate_password;
+use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 #[cfg(feature = "db-encryption")]
 use kindmother_db_key::KeyDerivation;
 use rusqlite::{params, Connection};
@@ -19,10 +20,48 @@ use sha2::{Digest, Sha256};
 use std::path::Path;
 use std::sync::Mutex;
 
-fn hash_password(password: &str) -> String {
+/// Hash SHA-256 legacy (pour rétrocompatibilité).
+fn hash_password_sha256(password: &str) -> String {
     let mut h = Sha256::new();
     h.update(password.as_bytes());
     format!("{:x}", h.finalize())
+}
+
+/// Hash Argon2id (recommandé pour la production).
+fn hash_password_argon2(password: &str) -> Result<String, String> {
+    let salt = SaltString::generate(&mut rand::thread_rng());
+    let argon2 = argon2::Argon2::default();
+    argon2
+        .hash_password(password.as_bytes(), &salt)
+        .map(|h| h.to_string())
+        .map_err(|e| format!("argon2 hash error: {e}"))
+}
+
+/// Vérifie un mot de passe contre un hash stocké (Argon2id ou SHA-256 legacy).
+fn verify_password(password: &str, stored_hash: &str) -> bool {
+    if stored_hash.starts_with("$argon2") {
+        if let Ok(parsed) = PasswordHash::new(stored_hash) {
+            return argon2::Argon2::default()
+                .verify_password(password.as_bytes(), &parsed)
+                .is_ok();
+        }
+        false
+    } else {
+        hash_password_sha256(password) == stored_hash
+    }
+}
+
+/// Migre un hash SHA-256 legacy vers Argon2id.
+fn upgrade_hash_if_legacy(conn: &Connection, profile_id: &str, password: &str, stored_hash: &str) {
+    if stored_hash.starts_with("$argon2") {
+        return;
+    }
+    if let Ok(new_hash) = hash_password_argon2(password) {
+        let _ = conn.execute(
+            "UPDATE central_profiles SET password_hash = ?1 WHERE id = ?2",
+            params![new_hash, profile_id],
+        );
+    }
 }
 
 /// Erreur de la base auth Central.
@@ -296,7 +335,11 @@ impl CentralAuthDb {
                 profession,
                 langue_maternelle,
             )) => {
-                if hash == hash_password(password) {
+                if verify_password(password, &hash) {
+                    // Migration progressive SHA-256 → Argon2id
+                    let conn_lock = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
+                    upgrade_hash_if_legacy(&conn_lock, &id, password, &hash);
+                    drop(conn_lock);
                     Ok(Some(CentralProfile {
                         id,
                         email: email_val,
@@ -532,7 +575,8 @@ impl CentralAuthDb {
         validate_password(password).map_err(|e| AuthDbError(e.to_string()))?;
         let is_first = self.list_profiles()?.is_empty();
         let id = uuid::Uuid::new_v4().to_string();
-        let hash = hash_password(password);
+        let hash = hash_password_argon2(password)
+            .map_err(|e| AuthDbError(format!("hash error: {e}")))?;
         let now = chrono::Utc::now().to_rfc3339();
         let is_admin = is_first;
         let pseudo_val = pseudonyme.map(|s| s.trim()).filter(|s| !s.is_empty());

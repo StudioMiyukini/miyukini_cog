@@ -113,6 +113,75 @@ pub fn auth_sign_up(
     })
 }
 
+/// Authentification déléguée via profil Central.
+///
+/// Cherche un exposant lié au `central_profile_id`. Si trouvé, retourne une
+/// AuthSession sans vérification de mot de passe (la vérification a déjà eu
+/// lieu côté Central/Origin).
+///
+/// @id: jx_auth_via_central
+/// @do: authentifie un exposant via son profil Central lié.
+/// @layer: app
+pub fn auth_via_central(
+    db: &JayXposeDb,
+    central_profile_id: &str,
+) -> AuthResult<Option<AuthSession>> {
+    let profile = db
+        .exposant_by_central_profile(central_profile_id)
+        .map_err(|e| AuthError {
+            message: format!("base de donnees: {e}"),
+        })?;
+
+    match profile {
+        Some(p) => {
+            let user_id = p.id.clone().unwrap_or_default();
+            Ok(Some(AuthSession {
+                user_id: user_id.clone(),
+                email: p.contact_email.clone(),
+                access_token: user_id,
+                profile: Some(p),
+            }))
+        }
+        None => Ok(None),
+    }
+}
+
+/// Inscription déléguée via profil Central (crée un exposant lié sans password autonome).
+///
+/// @id: jx_auth_sign_up_central
+/// @do: cree un compte exposant lié au profil Central.
+/// @layer: app
+pub fn auth_sign_up_central(
+    db: &JayXposeDb,
+    central_profile_id: &str,
+    email: &str,
+    company_name: &str,
+) -> AuthResult<AuthSession> {
+    // Vérifie qu'aucun exposant n'est déjà lié à ce profil Central
+    if let Ok(Some(_)) = db.exposant_by_central_profile(central_profile_id) {
+        return Err(AuthError {
+            message: "Un exposant est déjà lié à ce profil Central.".to_string(),
+        });
+    }
+
+    let user_id = db
+        .exposant_create_from_central(central_profile_id, email, company_name)
+        .map_err(|e| AuthError {
+            message: format!("creation compte: {e}"),
+        })?;
+
+    let profile = db.exposant_by_id(&user_id).map_err(|e| AuthError {
+        message: format!("lecture profil: {e}"),
+    })?;
+
+    Ok(AuthSession {
+        user_id: user_id.clone(),
+        email: Some(email.to_string()),
+        access_token: user_id,
+        profile,
+    })
+}
+
 /// Deconnecte l'utilisateur (la session est geree par l'app, rien a faire cote serveur).
 ///
 /// @id: jx_auth_sign_out

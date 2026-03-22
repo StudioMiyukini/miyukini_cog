@@ -15,16 +15,19 @@ export function Layout({ children }: LayoutProps) {
         </Link>
         <nav className={styles.nav}>
           <Link to="/">Accueil</Link>
-          <Link to="/docs">Documentation</Link>
-          <Link to="/cores">Les 8 Cores</Link>
+          <Link to="/onboarding">Decouvrir</Link>
           <Link to="/services">Services</Link>
-          <Link to="/demo" className={styles.cta}>Démo COG</Link>
+          <Link to="/cores">Architecture</Link>
+          <Link to="/docs">Docs</Link>
+          <Link to="/demo" className={styles.cta}>Demo</Link>
         </nav>
       </header>
       <main className={styles.main}>{children}</main>
       <footer className={styles.footer}>
-        <p>Miyukini COG — Environnement de gouvernance orchestré par des Cores.</p>
-        <p className={styles.footerMuted}>Documentation et site officiel. Ce site est informatif.</p>
+        <p>Miyukini COG — Votre ecosysteme numerique souverain.</p>
+        <p className={styles.footerMuted}>
+          Gratuit pour usage personnel. Licence commerciale disponible.
+        </p>
       </footer>
     </div>
   );

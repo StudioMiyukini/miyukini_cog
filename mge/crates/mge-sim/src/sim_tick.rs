@@ -1,3 +1,4 @@
+use crate::civil_skills::ResourceKind;
 use crate::constants::*;
 use crate::entity::*;
 use crate::player_state::PlayerState;
@@ -28,6 +29,12 @@ pub enum SimEvent {
         text: [u8; 40],
         len: usize,
         color: [f32; 4],
+    },
+    /// A gather node was harvested — resource should be added to inventory.
+    ResourceGathered {
+        resource: ResourceKind,
+        qty: u32,
+        pos: [f32; 2],
     },
 }
 
@@ -77,8 +84,13 @@ pub fn sim_tick(zone: &mut ZoneState, player: &mut PlayerState, events: &mut Vec
         f.life > 0
     });
 
-    // Enemy respawn
-    update_enemy_respawn(zone);
+    // Enemy respawn — skip if too close to player
+    update_enemy_respawn(zone, player);
+
+    // Gather node respawn
+    for node in &mut zone.gather_nodes {
+        node.update();
+    }
 
     // Mercenary
     update_mercenary(zone, player, events);
@@ -248,7 +260,13 @@ fn update_projectiles(zone: &mut ZoneState, player: &mut PlayerState, events: &m
     }
 }
 
-fn update_enemy_respawn(zone: &mut ZoneState) {
+/// Minimum distance from player for enemies to respawn (in tiles).
+const RESPAWN_SAFE_RADIUS: f32 = 4.0;
+/// How long to defer respawn when player is too close (frames).
+const RESPAWN_DEFER_TICKS: u32 = 120;
+
+fn update_enemy_respawn(zone: &mut ZoneState, player: &PlayerState) {
+    let pp = player.pos;
     for enemy in &mut zone.enemies {
         if enemy.alive {
             if enemy.fade_timer > 0 {
@@ -263,6 +281,12 @@ fn update_enemy_respawn(zone: &mut ZoneState) {
         if enemy.respawn_timer > 0 {
             enemy.respawn_timer -= 1;
             if enemy.respawn_timer == 0 {
+                // Prevent respawn if player is too close to the spawn point
+                let d = dist(pp, enemy.spawn);
+                if d < RESPAWN_SAFE_RADIUS {
+                    enemy.respawn_timer = RESPAWN_DEFER_TICKS;
+                    continue;
+                }
                 enemy.alive = true;
                 enemy.hp = enemy.max_hp;
                 enemy.pos = enemy.spawn;

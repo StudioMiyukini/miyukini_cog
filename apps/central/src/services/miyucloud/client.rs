@@ -14,7 +14,7 @@ use super::state::{
     AddressBookEntry, AuthSession, CalendarEntry, CalendarEvent, ContactEntry,
     CreateShareLinkRequest, CreateSharePermissionRequest, FileEntry, FolderContents, FolderEntry,
     HealthStatus, OnboardingStatus, RegisterPeerRequest, ResolveConflictRequest, ShareLink,
-    SharePermission, SharedWithMeEntry, StorageStats, SyncConflict, SyncPeer, SyncStatus,
+    SharePermission, StorageStats, SyncConflict, SyncPeer, SyncStatus,
     TotpSetupData, UserQuota, WebAuthChallenge,
 };
 
@@ -488,33 +488,6 @@ impl MiyuCloudClient {
 
         response
             .json::<SharePermission>()
-            .await
-            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
-    }
-
-    /// Liste les ressources partagees avec l'utilisateur courant.
-    pub async fn list_shared_with_me(&self) -> ClientResult<Vec<SharedWithMeEntry>> {
-        let url = format!("{}/api/shares/shared-with-me", self.base_url);
-
-        let response = self
-            .http
-            .get(&url)
-            .header("X-COG-Token", &self.cog_token)
-            .send()
-            .await
-            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
-
-        let status = response.status().as_u16();
-        if status != 200 {
-            let body = response.text().await.unwrap_or_default();
-            return Err(MiyuCloudClientError::ServerError {
-                status,
-                message: body,
-            });
-        }
-
-        response
-            .json::<Vec<SharedWithMeEntry>>()
             .await
             .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
     }
@@ -1276,28 +1249,6 @@ impl MiyuCloudClient {
             .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
     }
 
-    /// Supprime un calendrier.
-    pub async fn delete_calendar(&self, calendar_name: &str) -> ClientResult<()> {
-        let url = format!("{}/api/calendars/{calendar_name}", self.base_url);
-        let response = self
-            .http
-            .delete(&url)
-            .header("X-COG-Token", &self.cog_token)
-            .send()
-            .await
-            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
-
-        let status = response.status().as_u16();
-        if status != 200 && status != 204 {
-            let body = response.text().await.unwrap_or_default();
-            return Err(MiyuCloudClientError::ServerError {
-                status,
-                message: body,
-            });
-        }
-        Ok(())
-    }
-
     /// Liste les evenements d'un calendrier.
     pub async fn list_events(&self, calendar_name: &str) -> ClientResult<Vec<CalendarEvent>> {
         let url = format!("{}/api/calendars/{calendar_name}/events", self.base_url);
@@ -1322,62 +1273,6 @@ impl MiyuCloudClient {
             .json::<Vec<CalendarEvent>>()
             .await
             .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
-    }
-
-    /// Cree ou met a jour un evenement.
-    pub async fn upsert_event(
-        &self,
-        calendar_name: &str,
-        event: &serde_json::Value,
-    ) -> ClientResult<CalendarEvent> {
-        let url = format!("{}/api/calendars/{calendar_name}/events", self.base_url);
-        let response = self
-            .http
-            .post(&url)
-            .header("X-COG-Token", &self.cog_token)
-            .json(event)
-            .send()
-            .await
-            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
-
-        let status = response.status().as_u16();
-        if status != 200 && status != 201 {
-            let body = response.text().await.unwrap_or_default();
-            return Err(MiyuCloudClientError::ServerError {
-                status,
-                message: body,
-            });
-        }
-
-        response
-            .json::<CalendarEvent>()
-            .await
-            .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
-    }
-
-    /// Supprime un evenement.
-    pub async fn delete_event(&self, calendar_name: &str, uid: &str) -> ClientResult<()> {
-        let url = format!(
-            "{}/api/calendars/{calendar_name}/events/{uid}",
-            self.base_url
-        );
-        let response = self
-            .http
-            .delete(&url)
-            .header("X-COG-Token", &self.cog_token)
-            .send()
-            .await
-            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
-
-        let status = response.status().as_u16();
-        if status != 200 && status != 204 {
-            let body = response.text().await.unwrap_or_default();
-            return Err(MiyuCloudClientError::ServerError {
-                status,
-                message: body,
-            });
-        }
-        Ok(())
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -1444,28 +1339,6 @@ impl MiyuCloudClient {
             .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
     }
 
-    /// Supprime un carnet d'adresses.
-    pub async fn delete_addressbook(&self, book_name: &str) -> ClientResult<()> {
-        let url = format!("{}/api/addressbooks/{book_name}", self.base_url);
-        let response = self
-            .http
-            .delete(&url)
-            .header("X-COG-Token", &self.cog_token)
-            .send()
-            .await
-            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
-
-        let status = response.status().as_u16();
-        if status != 200 && status != 204 {
-            let body = response.text().await.unwrap_or_default();
-            return Err(MiyuCloudClientError::ServerError {
-                status,
-                message: body,
-            });
-        }
-        Ok(())
-    }
-
     /// Liste les contacts d'un carnet.
     pub async fn list_contacts(&self, book_name: &str) -> ClientResult<Vec<ContactEntry>> {
         let url = format!("{}/api/addressbooks/{book_name}/contacts", self.base_url);
@@ -1521,31 +1394,6 @@ impl MiyuCloudClient {
             .json::<ContactEntry>()
             .await
             .map_err(|e| MiyuCloudClientError::Parse(e.to_string()))
-    }
-
-    /// Supprime un contact.
-    pub async fn delete_contact(&self, book_name: &str, uid: &str) -> ClientResult<()> {
-        let url = format!(
-            "{}/api/addressbooks/{book_name}/contacts/{uid}",
-            self.base_url
-        );
-        let response = self
-            .http
-            .delete(&url)
-            .header("X-COG-Token", &self.cog_token)
-            .send()
-            .await
-            .map_err(|e| MiyuCloudClientError::Http(e.to_string()))?;
-
-        let status = response.status().as_u16();
-        if status != 200 && status != 204 {
-            let body = response.text().await.unwrap_or_default();
-            return Err(MiyuCloudClientError::ServerError {
-                status,
-                message: body,
-            });
-        }
-        Ok(())
     }
 
     async fn post_web_auth_challenge_action(

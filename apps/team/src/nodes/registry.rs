@@ -118,7 +118,7 @@ impl NodeRegistry {
     /// Enregistre un nouveau nœud (ou met à jour si déjà présent).
     pub fn register(&self, info: NodeInfo) {
         let id = info.id.clone();
-        let mut nodes = self.nodes.write().unwrap();
+        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
         let entry = nodes.entry(id).or_insert_with(|| NodeEntry::new(info.clone()));
         entry.info = info;
         entry.last_seen = Instant::now();
@@ -127,7 +127,7 @@ impl NodeRegistry {
 
     /// Met à jour le dernier heartbeat + health d'un nœud.
     pub fn heartbeat(&self, id: &str, health: NodeHealth, model_active: Option<String>, persona: Option<String>) {
-        let mut nodes = self.nodes.write().unwrap();
+        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
         if let Some(entry) = nodes.get_mut(id) {
             entry.update_health(health);
             entry.info.model_active = model_active;
@@ -137,7 +137,7 @@ impl NodeRegistry {
 
     /// Marque un nœud comme offline (désenregistrement propre).
     pub fn unregister(&self, id: &str) {
-        let mut nodes = self.nodes.write().unwrap();
+        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
         if let Some(entry) = nodes.get_mut(id) {
             entry.mark_offline();
         }
@@ -145,7 +145,7 @@ impl NodeRegistry {
 
     /// Marque les nœuds stale (pas vu depuis > threshold).
     pub fn mark_stale_nodes(&self, stale_threshold: Duration) {
-        let mut nodes = self.nodes.write().unwrap();
+        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
         for entry in nodes.values_mut() {
             if entry.status == NodeStatus::Online && entry.age() > stale_threshold {
                 entry.mark_stale();
@@ -166,12 +166,27 @@ impl NodeRegistry {
 
     /// Retourne tous les nœuds (tous statuts).
     pub fn all_nodes(&self) -> Vec<NodeEntry> {
-        self.nodes.read().unwrap().values().cloned().collect()
+        self.nodes.read().unwrap_or_else(|e| e.into_inner()).values().cloned().collect()
     }
 
     /// Retourne un nœud par ID.
     pub fn get(&self, id: &str) -> Option<NodeEntry> {
-        self.nodes.read().unwrap().get(id).cloned()
+        self.nodes.read().unwrap_or_else(|e| e.into_inner()).get(id).cloned()
+    }
+
+    /// Supprime les nœuds stale/offline non vus depuis > reap_threshold.
+    /// Retourne le nombre de nœuds supprimés.
+    pub fn reap_dead_nodes(&self, reap_threshold: Duration) -> usize {
+        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
+        let before = nodes.len();
+        nodes.retain(|_, entry| {
+            if entry.status == NodeStatus::Online {
+                return true;
+            }
+            // Garder les nœuds stale/offline récents (ex: pourrait revenir)
+            entry.age() < reap_threshold
+        });
+        before - nodes.len()
     }
 
     /// Nombre de nœuds online.
@@ -182,6 +197,11 @@ impl NodeRegistry {
             .values()
             .filter(|e| e.status == NodeStatus::Online)
             .count()
+    }
+
+    /// Nombre total de nœuds dans le registre.
+    pub fn total_count(&self) -> usize {
+        self.nodes.read().unwrap_or_else(|e| e.into_inner()).len()
     }
 }
 
@@ -230,6 +250,29 @@ mod tests {
         registry.mark_stale_nodes(Duration::from_millis(0));
         let node = registry.get("1").unwrap();
         assert_eq!(node.status, NodeStatus::Stale);
+    }
+
+    #[test]
+    fn test_reap_dead_nodes() {
+        let registry = NodeRegistry::new();
+        registry.register(make_node("1"));
+        registry.register(make_node("2"));
+        // Marquer stale avec seuil zéro puis reap immédiatement
+        registry.mark_stale_nodes(Duration::from_millis(0));
+        let reaped = registry.reap_dead_nodes(Duration::from_millis(0));
+        assert_eq!(reaped, 2);
+        assert_eq!(registry.total_count(), 0);
+    }
+
+    #[test]
+    fn test_reap_keeps_recent_stale() {
+        let registry = NodeRegistry::new();
+        registry.register(make_node("1"));
+        registry.mark_stale_nodes(Duration::from_millis(0));
+        // Reap avec seuil très long — ne devrait rien supprimer
+        let reaped = registry.reap_dead_nodes(Duration::from_secs(3600));
+        assert_eq!(reaped, 0);
+        assert_eq!(registry.total_count(), 1);
     }
 
     #[test]

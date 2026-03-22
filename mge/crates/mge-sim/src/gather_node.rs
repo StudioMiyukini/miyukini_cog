@@ -11,7 +11,7 @@ use crate::civil_skills::ResourceKind;
 // ---------------------------------------------------------------------------
 
 /// Catégorie visuelle et mécanique d'un nœud de récolte.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GatherNodeKind {
     /// Arbre — bûcheronage → bois
     Tree,
@@ -127,7 +127,7 @@ impl GatherNodeKind {
 // Instance d'un nœud de récolte dans le monde
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GatherNode {
     pub pos: [f32; 2],
     pub kind: GatherNodeKind,

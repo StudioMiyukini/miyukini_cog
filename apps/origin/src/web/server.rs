@@ -221,8 +221,8 @@ async fn handle_connection(
 
     debug!("{} {} (Host: {:?})", method, path, host_header);
 
-    // Auth forum : POST /api/auth/forum/* avec body JSON
-    if method == "POST" && path.starts_with("/api/auth/forum/") {
+    // Auth Central unifiée : POST /api/auth/* (forum, profile, session, security)
+    if method == "POST" && path.starts_with("/api/auth/") {
         if let Some(store) = &forum_auth_store {
             let len = content_length_from_headers(&headers).unwrap_or(0);
             let mut body = vec![0u8; len];

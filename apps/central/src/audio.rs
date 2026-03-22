@@ -72,16 +72,6 @@ fn play_mp3_sync(path: &PathBuf) -> Result<(), String> {
     }
 }
 
-fn rodio_play(file: std::fs::File, _path: &Path) -> Result<(), String> {
-    let stream_handle =
-        rodio::OutputStreamBuilder::open_default_stream().map_err(|e| e.to_string())?;
-    let sink = rodio::Sink::connect_new(stream_handle.mixer());
-    let source = rodio::Decoder::try_from(file).map_err(|e| e.to_string())?;
-    sink.append(source);
-    sink.sleep_until_end();
-    Ok(())
-}
-
 #[cfg(windows)]
 fn play_via_shell_windows(path: &Path) -> Result<(), String> {
     use std::process::Command;
@@ -92,6 +82,17 @@ fn play_via_shell_windows(path: &Path) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
     Ok(())
 }
+
+fn rodio_play(file: std::fs::File, _path: &Path) -> Result<(), String> {
+    let stream_handle =
+        rodio::OutputStreamBuilder::open_default_stream().map_err(|e| e.to_string())?;
+    let sink = rodio::Sink::connect_new(stream_handle.mixer());
+    let source = rodio::Decoder::try_from(file).map_err(|e| e.to_string())?;
+    sink.append(source);
+    sink.sleep_until_end();
+    Ok(())
+}
+
 
 // ============================================================================
 // TTS eSpeak pour Miou

@@ -869,6 +869,16 @@ impl ItemRarity {
             Self::Unique => [0.75, 0.55, 0.15, 1.0],
         }
     }
+
+    /// Base sell value (gold) per rarity tier.
+    pub fn base_sell_value(self) -> u32 {
+        match self {
+            Self::Normal => 5,
+            Self::Magic => 15,
+            Self::Rare => 40,
+            Self::Unique => 100,
+        }
+    }
 }
 
 impl EquipSlot {

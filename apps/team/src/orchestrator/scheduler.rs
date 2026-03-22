@@ -123,8 +123,8 @@ impl TaskScheduler {
         let entry = TaskEntry::new(task.clone());
         let key = (task.priority, entry.created_at.elapsed().subsec_nanos() as u128);
 
-        self.queue.lock().unwrap().insert(key, id.clone());
-        self.tasks.lock().unwrap().insert(id.clone(), entry);
+        self.queue.lock().unwrap_or_else(|e| e.into_inner()).insert(key, id.clone());
+        self.tasks.lock().unwrap_or_else(|e| e.into_inner()).insert(id.clone(), entry);
 
         tracing::info!("Tâche soumise : {id} (priority={})", task.priority);
         id
@@ -132,35 +132,35 @@ impl TaskScheduler {
 
     /// Prend la prochaine tâche en attente (FIFO prioritisé).
     pub fn next_pending(&self) -> Option<Task> {
-        let queue = self.queue.lock().unwrap();
-        let mut tasks = self.tasks.lock().unwrap();
+        let mut queue = self.queue.lock().unwrap_or_else(|e| e.into_inner());
+        let mut tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
 
-        for (key, id) in queue.iter() {
-            if let Some(entry) = tasks.get(id) {
+        // Trouver la première tâche pending dans l'ordre de priorité
+        let found = queue.iter().find_map(|(key, id)| {
+            tasks.get(id).and_then(|entry| {
                 if entry.status == TaskStatus::Pending {
-                    let task = entry.task.clone();
-                    let id = id.clone();
-                    let key = *key;
-                    drop(queue);
-                    if let Some(entry) = tasks.get_mut(&id) {
-                        entry.status = TaskStatus::Running;
-                        entry.started_at = Some(Instant::now());
-                    }
-                    // Re-lock queue pour supprimer
-                    let mut queue2 = self.queue.lock().unwrap();
-                    queue2.remove(&key);
-                    return Some(task);
+                    Some((*key, id.clone()))
+                } else {
+                    None
                 }
+            })
+        });
+
+        if let Some((key, id)) = found {
+            if let Some(entry) = tasks.get_mut(&id) {
+                entry.status = TaskStatus::Running;
+                entry.started_at = Some(Instant::now());
             }
-            let key = *key;
-            let _ = key; // pour le compilateur
+            queue.remove(&key);
+            tasks.get(&id).map(|e| e.task.clone())
+        } else {
+            None
         }
-        None
     }
 
     /// Marque une tâche comme terminée avec résultat.
     pub fn complete(&self, id: &str, result: serde_json::Value) {
-        let mut tasks = self.tasks.lock().unwrap();
+        let mut tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
         if let Some(entry) = tasks.get_mut(id) {
             entry.status = TaskStatus::Done;
             entry.result = Some(result);
@@ -170,7 +170,7 @@ impl TaskScheduler {
 
     /// Marque une tâche comme échouée.
     pub fn fail(&self, id: &str, error: impl Into<String>) {
-        let mut tasks = self.tasks.lock().unwrap();
+        let mut tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
         if let Some(entry) = tasks.get_mut(id) {
             entry.status = TaskStatus::Failed;
             entry.error = Some(error.into());
@@ -180,7 +180,7 @@ impl TaskScheduler {
 
     /// Retourne l'état d'une tâche.
     pub fn get_result(&self, id: &str) -> Option<TaskResult> {
-        let tasks = self.tasks.lock().unwrap();
+        let tasks = self.tasks.lock().unwrap_or_else(|e| e.into_inner());
         tasks.get(id).map(|entry| {
             let elapsed_ms = entry
                 .started_at

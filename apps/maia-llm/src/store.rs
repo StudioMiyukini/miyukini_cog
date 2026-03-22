@@ -8,6 +8,8 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
 /// Métadonnées d'un modèle GGUF détecté localement.
 #[derive(Debug, Clone, Serialize)]
@@ -29,10 +31,21 @@ pub struct GgufModel {
     pub sha256: Option<String>,
 }
 
+/// TTL du cache de scan (30 secondes).
+const SCAN_CACHE_TTL_SECS: u64 = 30;
+
+/// Cache interne pour éviter les scans filesystem répétés.
+#[derive(Debug)]
+struct ScanCache {
+    models: Vec<GgufModel>,
+    refreshed_at: Instant,
+}
+
 /// Store des modèles GGUF locaux.
 #[derive(Debug, Clone)]
 pub struct ModelStore {
     pub models_dir: PathBuf,
+    cache: Arc<Mutex<Option<ScanCache>>>,
 }
 
 impl ModelStore {
@@ -44,12 +57,41 @@ impl ModelStore {
                 tracing::warn!("Impossible de créer le dossier modèles {dir:?} : {e}");
             }
         }
-        Self { models_dir: dir }
+        Self { models_dir: dir, cache: Arc::new(Mutex::new(None)) }
+    }
+
+    /// Invalide le cache manuellement (ex: après ajout/suppression de modèle).
+    pub fn invalidate_cache(&self) {
+        *self.cache.lock().unwrap() = None;
     }
 
     /// Scanne le dossier et retourne tous les fichiers .gguf trouvés.
-    /// Triés par taille croissante.
+    /// Triés par taille croissante. Résultats mis en cache pendant 30s.
     pub fn scan(&self) -> Vec<GgufModel> {
+        // Vérifier le cache
+        {
+            let cache = self.cache.lock().unwrap();
+            if let Some(ref cached) = *cache {
+                if cached.refreshed_at.elapsed().as_secs() < SCAN_CACHE_TTL_SECS {
+                    return cached.models.clone();
+                }
+            }
+        }
+
+        // Cache expiré ou absent — scan filesystem
+        let models = self.scan_fs();
+
+        // Mettre en cache
+        *self.cache.lock().unwrap() = Some(ScanCache {
+            models: models.clone(),
+            refreshed_at: Instant::now(),
+        });
+
+        models
+    }
+
+    /// Scan filesystem brut (sans cache).
+    fn scan_fs(&self) -> Vec<GgufModel> {
         let mut models = Vec::new();
 
         let entries = match std::fs::read_dir(&self.models_dir) {
@@ -76,7 +118,6 @@ impl ModelStore {
                 let model_id = filename.trim_end_matches(".gguf").to_string();
                 let display_name = model_id.replace('-', " ").replace('_', " ");
 
-                // Lire le SHA-256 depuis le sidecar .sha256 si disponible (évite de hasher les GB)
                 let sha256 = read_sidecar_sha256(&path);
 
                 models.push(GgufModel {

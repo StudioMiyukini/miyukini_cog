@@ -3,6 +3,8 @@
 // Séparé du disque de combat (skill_disk.rs)
 // ---------------------------------------------------------------------------
 
+use serde::{Deserialize, Serialize};
+
 /// Les 11 compétences civiles.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
@@ -201,7 +203,7 @@ impl CivilSkillState {
 // ---------------------------------------------------------------------------
 
 /// Types de ressources récoltables.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum ResourceKind {
     // Bûcheronage
@@ -281,6 +283,64 @@ impl ResourceKind {
                 | Self::Fruit => 35,
             Self::MineraiOr | Self::FleurMagique => 55,
             Self::Gemme => 75,
+        }
+    }
+
+    /// Short label for inventory display (max ~8 bytes).
+    pub fn short_label(self) -> &'static [u8] {
+        match self {
+            Self::BoisBrut      => b"BOIS",
+            Self::BoisDur       => b"B.DUR",
+            Self::BoisAncien    => b"B.ANC",
+            Self::PierreBreute  => b"PIERRE",
+            Self::MineraiFer    => b"FER",
+            Self::MineraiArgent => b"ARGENT",
+            Self::MineraiOr     => b"OR",
+            Self::Gemme         => b"GEMME",
+            Self::HerbeCommune  => b"HERBE",
+            Self::HerbeRare     => b"H.RARE",
+            Self::Champignon    => b"CHAMPI",
+            Self::FleurMagique  => b"FLEUR",
+            Self::Ble           => b"BLE",
+            Self::Legume        => b"LEGUME",
+            Self::Fruit         => b"FRUIT",
+            Self::Cuir          => b"CUIR",
+            Self::Laine         => b"LAINE",
+            Self::Oeuf          => b"OEUF",
+            Self::Lait          => b"LAIT",
+        }
+    }
+
+    /// Color for inventory rendering [r, g, b, a].
+    pub fn inv_color(self) -> [f32; 4] {
+        match self {
+            Self::BoisBrut | Self::BoisDur | Self::BoisAncien
+                => [0.65, 0.45, 0.25, 1.0],
+            Self::PierreBreute | Self::MineraiFer
+                => [0.6, 0.6, 0.65, 1.0],
+            Self::MineraiArgent => [0.78, 0.78, 0.82, 1.0],
+            Self::MineraiOr     => [1.0, 0.85, 0.25, 1.0],
+            Self::Gemme         => [0.60, 0.20, 0.85, 1.0],
+            Self::HerbeCommune | Self::HerbeRare | Self::Champignon | Self::FleurMagique
+                => [0.4, 0.8, 0.4, 1.0],
+            Self::Ble | Self::Legume | Self::Fruit
+                => [0.7, 0.75, 0.3, 1.0],
+            Self::Cuir | Self::Laine | Self::Oeuf | Self::Lait
+                => [0.75, 0.55, 0.4, 1.0],
+        }
+    }
+
+    /// Sell price per unit at a vendor (in gold).
+    pub fn sell_price(self) -> u32 {
+        match self {
+            Self::BoisBrut | Self::PierreBreute | Self::HerbeCommune
+                | Self::Ble | Self::Cuir | Self::Oeuf => 2,
+            Self::BoisDur | Self::MineraiFer | Self::Champignon
+                | Self::Legume | Self::Laine | Self::Lait => 5,
+            Self::BoisAncien | Self::MineraiArgent | Self::HerbeRare
+                | Self::Fruit => 12,
+            Self::MineraiOr | Self::FleurMagique => 25,
+            Self::Gemme => 50,
         }
     }
 

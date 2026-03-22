@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::entity::*;
+use crate::gather_node::GatherNode;
 
 /// All authoritative state for a single zone instance.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,6 +15,8 @@ pub struct ZoneState {
     pub drops: Vec<ItemDrop>,
     pub lightning_bolts: Vec<LightningBolt>,
     pub floats: Vec<DamageFloat>,
+    /// Harvest nodes (trees, ore, herbs, etc.)
+    pub gather_nodes: Vec<GatherNode>,
 }
 
 impl ZoneState {
@@ -28,6 +31,7 @@ impl ZoneState {
             drops: Vec::new(),
             lightning_bolts: Vec::new(),
             floats: Vec::new(),
+            gather_nodes: Vec::new(),
         }
     }
 

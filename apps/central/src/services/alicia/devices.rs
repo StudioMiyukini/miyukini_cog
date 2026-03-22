@@ -33,16 +33,6 @@ impl DeviceType {
         }
     }
 
-    fn icon(self) -> &'static str {
-        match self {
-            Self::Light => "[L]",
-            Self::Shutter => "[V]",
-            Self::Sensor => "[S]",
-            Self::Switch => "[I]",
-            Self::Thermostat => "[T]",
-        }
-    }
-
     fn all() -> &'static [DeviceType] {
         &[
             Self::Light,

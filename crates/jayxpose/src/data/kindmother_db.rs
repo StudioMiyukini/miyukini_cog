@@ -81,6 +81,7 @@ impl JayXposeDb {
             instance,
         };
         db.init_schema()?;
+        db.migrate_central_profile_id()?;
         Ok(db)
     }
 
@@ -132,8 +133,11 @@ impl JayXposeDb {
                 seo_keywords TEXT,
                 created_at TEXT,
                 updated_at TEXT,
-                password_hash TEXT
+                password_hash TEXT,
+                central_profile_id TEXT
             );
+            CREATE INDEX IF NOT EXISTS idx_exposants_central_profile
+                ON exposants(central_profile_id);
             CREATE TABLE IF NOT EXISTS produits_catalogue (
                 id TEXT PRIMARY KEY,
                 exposant_id TEXT,
@@ -341,6 +345,22 @@ impl JayXposeDb {
         Ok(())
     }
 
+    /// Migration : ajoute la colonne `central_profile_id` si absente (bases existantes).
+    fn migrate_central_profile_id(&self) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let sql = "ALTER TABLE exposants ADD COLUMN central_profile_id TEXT";
+        if let Err(e) = conn.execute(sql, []) {
+            if !e.to_string().contains("duplicate column name") {
+                return Err(e.into());
+            }
+        }
+        // Index idempotent (CREATE IF NOT EXISTS dans init_schema couvre les nouvelles bases)
+        let _ = conn.execute_batch(
+            "CREATE INDEX IF NOT EXISTS idx_exposants_central_profile ON exposants(central_profile_id)",
+        );
+        Ok(())
+    }
+
     // -----------------------------------------------------------------------
     // Exposants
     // -----------------------------------------------------------------------
@@ -368,11 +388,11 @@ impl JayXposeDb {
                 secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
                 social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
                 vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
-                created_at, updated_at
+                created_at, updated_at, central_profile_id
             ) VALUES (
                 ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17,
                 ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29, ?30, ?31, ?32,
-                ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42
+                ?33, ?34, ?35, ?36, ?37, ?38, ?39, ?40, ?41, ?42, ?43
             )",
             params![
                 id,
@@ -417,6 +437,7 @@ impl JayXposeDb {
                 exp.seo_keywords,
                 created,
                 now,
+                exp.central_profile_id,
             ],
         )?;
         Ok(())
@@ -434,7 +455,7 @@ impl JayXposeDb {
                     secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
                     social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
                     vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
-                    created_at, updated_at
+                    created_at, updated_at, central_profile_id
              FROM exposants WHERE id = ?1",
         )?;
         let row = stmt.query_row(params![id], Self::row_to_exposant);
@@ -457,7 +478,7 @@ impl JayXposeDb {
                     secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
                     social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
                     vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
-                    created_at, updated_at
+                    created_at, updated_at, central_profile_id
              FROM exposants WHERE visible_annuaire = 1 ORDER BY company_name",
         )?;
         let rows = stmt.query_map([], Self::row_to_exposant)?;
@@ -491,7 +512,7 @@ impl JayXposeDb {
                     secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
                     social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
                     vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
-                    created_at, updated_at
+                    created_at, updated_at, central_profile_id
              FROM exposants WHERE vitrine_slug = ?1 AND vitrine_status = 'publiee'",
         )?;
         let row = stmt.query_row(params![slug], Self::row_to_exposant);
@@ -522,7 +543,7 @@ impl JayXposeDb {
                     secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
                     social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
                     vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
-                    created_at, updated_at
+                    created_at, updated_at, central_profile_id
              FROM exposants WHERE contact_email = ?1 AND password_hash = ?2",
         )?;
         let row = stmt.query_row(params![email, password_hash], |row| {
@@ -554,6 +575,80 @@ impl JayXposeDb {
             "INSERT INTO exposants (id, company_name, contact_email, password_hash, created_at, updated_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
             params![id, company_name, email, password_hash, now, now],
+        )?;
+        Ok(id)
+    }
+
+    /// Lie un exposant existant à un profil Central (fusion identité).
+    ///
+    /// @id: exposant_link_central
+    /// @do: link_exposant_to_central_profile
+    /// @layer: infra
+    pub fn exposant_link_central(
+        &self,
+        exposant_id: &str,
+        central_profile_id: &str,
+    ) -> Result<(), DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let now = chrono::Utc::now().to_rfc3339();
+        let n = conn.execute(
+            "UPDATE exposants SET central_profile_id = ?1, updated_at = ?2 WHERE id = ?3",
+            params![central_profile_id, now, exposant_id],
+        )?;
+        if n == 0 {
+            return Err(DbError(format!("Exposant non trouvé: {exposant_id}")));
+        }
+        Ok(())
+    }
+
+    /// Récupère l'exposant lié à un profil Central.
+    ///
+    /// @id: exposant_by_central_profile
+    /// @do: find_exposant_by_central_profile_id
+    /// @layer: infra
+    pub fn exposant_by_central_profile(
+        &self,
+        central_profile_id: &str,
+    ) -> Result<Option<ExposantProfile>, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let mut stmt = conn.prepare(
+            "SELECT id, company_name, legal_form, slogan, description_short, description_long,
+                    stand_name, contact_email, contact_phone, adresse_siege, adresse_correspondance,
+                    contact_facturation_nom, contact_facturation_email, contact_facturation_phone,
+                    contact_logistique_nom, contact_logistique_email, contact_logistique_phone,
+                    logo_url, banner_url, site_web, siret, siren, code_ape, num_immatriculation,
+                    secteur, tags, social_facebook, social_instagram, social_linkedin, social_tiktok,
+                    social_youtube, social_pinterest, social_x, visible_annuaire, vitrine_slug,
+                    vitrine_status, vitrine_colors, seo_title, seo_description, seo_keywords,
+                    created_at, updated_at, central_profile_id
+             FROM exposants WHERE central_profile_id = ?1",
+        )?;
+        let row = stmt.query_row(params![central_profile_id], Self::row_to_exposant);
+        match row {
+            Ok(e) => Ok(Some(e)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    /// Crée un exposant lié à un profil Central (sans password_hash autonome).
+    ///
+    /// @id: exposant_create_from_central
+    /// @do: create_exposant_linked_to_central_profile
+    /// @layer: infra
+    pub fn exposant_create_from_central(
+        &self,
+        central_profile_id: &str,
+        email: &str,
+        company_name: &str,
+    ) -> Result<String, DbError> {
+        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let id = uuid::Uuid::new_v4().to_string();
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            "INSERT INTO exposants (id, company_name, contact_email, central_profile_id, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![id, company_name, email, central_profile_id, now, now],
         )?;
         Ok(id)
     }
@@ -603,6 +698,7 @@ impl JayXposeDb {
             seo_keywords: row.get(39)?,
             created_at: row.get(40)?,
             updated_at: row.get(41)?,
+            central_profile_id: row.get::<_, Option<String>>(42).unwrap_or(None),
         })
     }
 

@@ -107,6 +107,9 @@ pub struct ExposantProfile {
     /// Date de dernière mise à jour.
     #[serde(default)]
     pub updated_at: Option<String>,
+    /// Identifiant du profil Central lié (fusion identité Central ↔ JayXpose).
+    /// Quand renseigné, l'authentification passe par le profil Central (Origin).
+    pub central_profile_id: Option<String>,
 }
 
 /// Produit du catalogue exposant (table `produits_catalogue`).

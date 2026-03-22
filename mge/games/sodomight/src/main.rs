@@ -4194,123 +4194,128 @@ impl SodomightApp {
     fn draw_hud(&mut self) {
         let vw = self.viewport[0];
         let vh = self.viewport[1];
-        let bar_h = 100.0;
+        // ---- Thinner D2-style HUD: 64px bar (was 100px) ----
+        let bar_h = 64.0;
         let bar_y = vh - bar_h;
 
+        // Main bar background + top frame line
         self.hud(0.0, bar_y, vw, bar_h, 0, C_HUD_BG);
-        self.hud(0.0, bar_y, vw, 3.0, 50, C_HUD_FRAME);
+        self.hud(0.0, bar_y, vw, 2.0, 50, C_HUD_FRAME);
 
-        // HP orb
-        let orb = 78.0;
-        let (hx, hy) = (10.0, bar_y + 10.0);
-        self.hud(hx - 3.0, hy - 3.0, orb + 6.0, orb + 6.0, 2, C_HUD_FRAME);
+        // HP orb — compact 52px (was 78px)
+        let orb = 52.0;
+        let orb_y = bar_y + 4.0;
+        let (hx, hy) = (6.0, orb_y);
+        self.hud(hx - 2.0, hy - 2.0, orb + 4.0, orb + 4.0, 2, C_HUD_FRAME);
         self.hud(hx, hy, orb, orb, 3, C_HP_BG);
         let hp_fill = orb * (self.player_hp / self.max_hp()).clamp(0.0, 1.0);
         self.hud(hx, hy + orb - hp_fill, orb, hp_fill, 4, C_HP);
         // HP text
         let (hp_buf, hp_len) = fmt_f32(self.player_hp);
-        let hp_tw = hp_len as f32 * 12.0;
-        self.draw_text(&hp_buf[..hp_len], hx + (orb - hp_tw) * 0.5, hy + orb * 0.5 - 7.0,
-                       2.0, [1.0, 1.0, 1.0, 0.9], 55);
-        self.draw_text(b"HP", hx + orb * 0.5 - 12.0, hy + orb - 18.0,
-                       1.5, [1.0, 0.85, 0.85, 0.6], 56);
+        let hp_tw = hp_len as f32 * 10.0;
+        self.draw_text(&hp_buf[..hp_len], hx + (orb - hp_tw) * 0.5, hy + orb * 0.5 - 5.0,
+                       1.5, [1.0, 1.0, 1.0, 0.9], 55);
 
-        // MP orb
-        let (mx, my) = (vw - 10.0 - orb, bar_y + 10.0);
-        self.hud(mx - 3.0, my - 3.0, orb + 6.0, orb + 6.0, 5, C_HUD_FRAME);
+        // MP orb — compact 52px
+        let (mx, my) = (vw - 6.0 - orb, orb_y);
+        self.hud(mx - 2.0, my - 2.0, orb + 4.0, orb + 4.0, 5, C_HUD_FRAME);
         self.hud(mx, my, orb, orb, 6, C_MP_BG);
         let mp_fill = orb * (self.player_mp / self.max_mp()).clamp(0.0, 1.0);
         self.hud(mx, my + orb - mp_fill, orb, mp_fill, 7, C_MP);
         // MP text
         let (mp_buf, mp_len) = fmt_f32(self.player_mp);
-        let mp_tw = mp_len as f32 * 12.0;
-        self.draw_text(&mp_buf[..mp_len], mx + (orb - mp_tw) * 0.5, my + orb * 0.5 - 7.0,
-                       2.0, [1.0, 1.0, 1.0, 0.9], 57);
-        self.draw_text(b"MP", mx + orb * 0.5 - 12.0, my + orb - 18.0,
-                       1.5, [0.85, 0.85, 1.0, 0.6], 58);
+        let mp_tw = mp_len as f32 * 10.0;
+        self.draw_text(&mp_buf[..mp_len], mx + (orb - mp_tw) * 0.5, my + orb * 0.5 - 5.0,
+                       1.5, [1.0, 1.0, 1.0, 0.9], 57);
 
-        // Belt slots
-        let slot = 36.0;
-        let gap = 4.0;
+        // ---- Central area: skills + belt ----
+        let inner_l = hx + orb + 8.0;       // after HP orb
+        let inner_r = mx - 8.0;              // before MP orb
+        let inner_w = inner_r - inner_l;
+
+        // Skill buttons — compact 28px (was 40px)
+        let sk = 28.0;
+        let sk_gap = 3.0;
+        let sky = bar_y + 6.0;
+
+        // Left skill pair (F1 Melee, F2 Fireball)
+        let melee_hl = if self.active_skill == SkillId::Melee { C_XP } else { C_SLOT };
+        let fire_hl = if self.active_skill == SkillId::Fireball { C_FIREBALL } else { C_SLOT };
+        self.hud(inner_l, sky, sk, sk, 19, C_SLOT_FR);
+        self.hud(inner_l + 1.0, sky + 1.0, sk - 2.0, sk - 2.0, 20, melee_hl);
+        self.draw_text(b"F1", inner_l + 2.0, sky + sk - 9.0, 0.8, [0.6, 0.6, 0.5, 0.5], 61);
+        self.hud(inner_l + sk + sk_gap, sky, sk, sk, 19, C_SLOT_FR);
+        self.hud(inner_l + sk + sk_gap + 1.0, sky + 1.0, sk - 2.0, sk - 2.0, 21, fire_hl);
+        self.draw_text(b"F2", inner_l + sk + sk_gap + 2.0, sky + sk - 9.0, 0.8, [0.6, 0.6, 0.5, 0.5], 62);
+
+        // Belt slots — compact 26px (was 36px), centered
+        let slot = 26.0;
+        let gap = 3.0;
         let belt_w = 4.0 * slot + 3.0 * gap;
-        let bx = (vw - belt_w) * 0.5;
-        let by = bar_y + 50.0;
+        let bx = inner_l + (inner_w - belt_w) * 0.5;
+        let by = bar_y + 36.0;
         let belt_labels: [&[u8]; 4] = [b"1", b"2", b"3", b"4"];
         for i in 0_u32..4 {
             let sx = bx + i as f32 * (slot + gap);
             self.hud(sx - 1.0, by - 1.0, slot + 2.0, slot + 2.0, 10 + i, C_SLOT_FR);
             self.hud(sx, by, slot, slot, 15 + i, C_SLOT);
-            // Belt key label
-            self.draw_text(belt_labels[i as usize], sx + 2.0, by + 2.0,
-                           1.0, [0.7, 0.7, 0.6, 0.5], 94 + i);
-            // Potion icon in belt slot
+            self.draw_text(belt_labels[i as usize], sx + 1.0, by + 1.0,
+                           0.8, [0.6, 0.6, 0.5, 0.4], 94 + i);
             if let Some(kind) = self.belt[i as usize] {
                 let c = match kind {
                     PotionKind::Health => C_HP_POT,
                     PotionKind::Mana => C_MP_POT,
                 };
-                self.hud(sx + 10.0, by + 4.0, 16.0, 28.0, 90 + i, c);
+                self.hud(sx + 6.0, by + 2.0, 14.0, 22.0, 90 + i, c);
             }
         }
 
-        // Gold counter
+        // Right skill trio (F3 Frost, F4 Lightning, F5 Teleport)
+        let frost_hl = if self.active_skill == SkillId::FrostBolt { C_FROST_BOLT } else { C_SLOT };
+        let lightning_hl = if self.active_skill == SkillId::ChainLightning { C_LIGHTNING } else { C_SLOT };
+        let tp_hl = if self.active_skill == SkillId::Teleport { C_PORTAL_CORE } else { C_SLOT };
+        let rsk = inner_r - 3.0 * (sk + sk_gap) + sk_gap;
+        self.hud(rsk, sky, sk, sk, 19, C_SLOT_FR);
+        self.hud(rsk + 1.0, sky + 1.0, sk - 2.0, sk - 2.0, 22, frost_hl);
+        self.draw_text(b"F3", rsk + 2.0, sky + sk - 9.0, 0.8, [0.6, 0.6, 0.5, 0.5], 63);
+        self.hud(rsk + sk + sk_gap, sky, sk, sk, 19, C_SLOT_FR);
+        self.hud(rsk + sk + sk_gap + 1.0, sky + 1.0, sk - 2.0, sk - 2.0, 23, lightning_hl);
+        self.draw_text(b"F4", rsk + sk + sk_gap + 2.0, sky + sk - 9.0, 0.8, [0.6, 0.6, 0.5, 0.5], 66);
+        self.hud(rsk + 2.0 * (sk + sk_gap), sky, sk, sk, 19, C_SLOT_FR);
+        self.hud(rsk + 2.0 * (sk + sk_gap) + 1.0, sky + 1.0, sk - 2.0, sk - 2.0, 24, tp_hl);
+        self.draw_text(b"F5", rsk + 2.0 * (sk + sk_gap) + 2.0, sky + sk - 9.0, 0.8, [0.6, 0.6, 0.5, 0.5], 67);
+
+        // Gold counter — centered above belt
         let (gold_buf, gold_len) = fmt_u32(self.player_gold);
-        let gold_tw = gold_len as f32 * 8.0 + 18.0;
-        self.hud(vw * 0.5 - gold_tw * 0.5, bar_y + 12.0, gold_tw, 16.0, 45, [0.0, 0.0, 0.0, 0.55]);
-        self.hud(vw * 0.5 - gold_tw * 0.5 + 2.0, bar_y + 14.0, 10.0, 10.0, 46, C_GOLD_DROP);
-        self.draw_text(&gold_buf[..gold_len], vw * 0.5 - gold_tw * 0.5 + 14.0, bar_y + 14.0,
-                       1.5, [0.95, 0.85, 0.35, 0.95], 59);
+        let gold_tw = gold_len as f32 * 7.0 + 14.0;
+        let gold_cx = inner_l + inner_w * 0.5;
+        self.hud(gold_cx - gold_tw * 0.5, bar_y + 5.0, gold_tw, 13.0, 45, [0.0, 0.0, 0.0, 0.55]);
+        self.hud(gold_cx - gold_tw * 0.5 + 2.0, bar_y + 6.5, 8.0, 8.0, 46, C_GOLD_DROP);
+        self.draw_text(&gold_buf[..gold_len], gold_cx - gold_tw * 0.5 + 12.0, bar_y + 6.0,
+                       1.2, [0.95, 0.85, 0.35, 0.95], 59);
 
         // Run indicator
         if self.running {
-            self.hud(vw * 0.5 + 50.0, bar_y + 12.0, 36.0, 16.0, 47, [0.20, 0.55, 0.20, 0.75]);
-            self.draw_text(b"RUN", vw * 0.5 + 53.0, bar_y + 14.0,
-                           1.5, [0.9, 1.0, 0.9, 0.9], 60);
+            self.hud(gold_cx + gold_tw * 0.5 + 4.0, bar_y + 5.0, 28.0, 13.0, 47, [0.20, 0.55, 0.20, 0.75]);
+            self.draw_text(b"RUN", gold_cx + gold_tw * 0.5 + 6.0, bar_y + 6.0,
+                           1.2, [0.9, 1.0, 0.9, 0.9], 60);
         }
 
-        // Skill buttons — highlight active skill
-        let sk = 40.0;
-        let sky = bar_y + 10.0;
-        // Left skill slots (F1 = Melee, F2 = Fireball)
-        let melee_hl = if self.active_skill == SkillId::Melee { C_XP } else { C_SLOT };
-        let fire_hl = if self.active_skill == SkillId::Fireball { C_FIREBALL } else { C_SLOT };
-        self.hud(bx - sk - 14.0, sky - 1.0, sk + 2.0, sk + 2.0, 19, C_SLOT_FR);
-        self.hud(bx - sk - 13.0, sky, sk, sk, 20, melee_hl);
-        self.draw_text(b"F1", bx - sk - 10.0, sky + sk - 10.0, 1.0, [0.7, 0.7, 0.6, 0.5], 61);
-        self.hud(bx - 2.0 * sk - 18.0, sky - 1.0, sk + 2.0, sk + 2.0, 19, C_SLOT_FR);
-        self.hud(bx - 2.0 * sk - 17.0, sky, sk, sk, 21, fire_hl);
-        self.draw_text(b"F2", bx - 2.0 * sk - 14.0, sky + sk - 10.0, 1.0, [0.7, 0.7, 0.6, 0.5], 62);
-        // Right skill slots (F3 = Frost Bolt, F4 = Chain Lightning)
-        let frost_hl = if self.active_skill == SkillId::FrostBolt { C_FROST_BOLT } else { C_SLOT };
-        let lightning_hl = if self.active_skill == SkillId::ChainLightning { C_LIGHTNING } else { C_SLOT };
-        let rr = bx + belt_w;
-        self.hud(rr + 12.0, sky - 1.0, sk + 2.0, sk + 2.0, 19, C_SLOT_FR);
-        self.hud(rr + 13.0, sky, sk, sk, 22, frost_hl);
-        self.draw_text(b"F3", rr + 16.0, sky + sk - 10.0, 1.0, [0.7, 0.7, 0.6, 0.5], 63);
-        self.hud(rr + sk + 16.0, sky - 1.0, sk + 2.0, sk + 2.0, 19, C_SLOT_FR);
-        self.hud(rr + sk + 17.0, sky, sk, sk, 23, lightning_hl);
-        self.draw_text(b"F4", rr + sk + 20.0, sky + sk - 10.0, 1.0, [0.7, 0.7, 0.6, 0.5], 66);
-        // F5 = Teleport
-        let tp_hl = if self.active_skill == SkillId::Teleport { C_PORTAL_CORE } else { C_SLOT };
-        self.hud(rr + 2.0 * sk + 20.0, sky - 1.0, sk + 2.0, sk + 2.0, 19, C_SLOT_FR);
-        self.hud(rr + 2.0 * sk + 21.0, sky, sk, sk, 24, tp_hl);
-        self.draw_text(b"F5", rr + 2.0 * sk + 24.0, sky + sk - 10.0, 1.0, [0.7, 0.7, 0.6, 0.5], 67);
-
-        // XP bar
-        let xp_ratio = (self.player_xp / (self.player_level as f32 * XP_PER_LEVEL)).clamp(0.0, 1.0);
-        self.hud(0.0, vh - 6.0, vw, 6.0, 30, [0.10, 0.08, 0.04, 1.0]);
-        self.hud(0.0, vh - 6.0, vw * xp_ratio, 6.0, 31, C_XP);
-
-        // Level
+        // Level badge — centered above gold
         let (lv_buf, lv_len) = fmt_u32(self.player_level);
         let mut lv_text = [0u8; 14];
         lv_text[..3].copy_from_slice(b"LV ");
         lv_text[3..3 + lv_len].copy_from_slice(&lv_buf[..lv_len]);
         let lv_total = 3 + lv_len;
-        let lv_tw = lv_total as f32 * 9.0 + 6.0;
-        self.hud((vw - lv_tw) * 0.5, bar_y + 4.0, lv_tw, 14.0, 40, [0.48, 0.40, 0.14, 0.88]);
-        self.draw_text(&lv_text[..lv_total], (vw - lv_tw) * 0.5 + 3.0, bar_y + 5.0,
-                       1.5, [1.0, 0.95, 0.60, 1.0], 64);
+        let lv_tw = lv_total as f32 * 7.0 + 4.0;
+        self.hud(gold_cx - lv_tw * 0.5, bar_y + 20.0, lv_tw, 12.0, 40, [0.48, 0.40, 0.14, 0.88]);
+        self.draw_text(&lv_text[..lv_total], gold_cx - lv_tw * 0.5 + 2.0, bar_y + 21.0,
+                       1.2, [1.0, 0.95, 0.60, 1.0], 64);
+
+        // XP bar — thinner 4px (was 6px)
+        let xp_ratio = (self.player_xp / (self.player_level as f32 * XP_PER_LEVEL)).clamp(0.0, 1.0);
+        self.hud(0.0, vh - 4.0, vw, 4.0, 30, [0.10, 0.08, 0.04, 1.0]);
+        self.hud(0.0, vh - 4.0, vw * xp_ratio, 4.0, 31, C_XP);
 
         // Zone name indicator (top-left)
         let zone_name: &[u8] = self.current_zone.label().as_bytes();
@@ -4341,7 +4346,7 @@ impl SodomightApp {
     fn draw_combat_log(&mut self) {
         let vh = self.viewport[1];
         let vw = self.viewport[0];
-        let bar_y = vh - 100.0;
+        let bar_y = vh - 64.0;
         let log_x = vw * 0.5 - 120.0;
         let base_y = bar_y - 14.0;
         let log_data: Vec<_> = self.log.iter().enumerate().map(|(i, e)| {

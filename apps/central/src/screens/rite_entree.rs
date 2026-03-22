@@ -295,12 +295,6 @@ fn RiteCatSituation(
     }
 }
 
-/// Fichiers voix Miou par étape (nom, email, clé).
-const VOIX_RITE: [&str; 3] = [
-    "login_new_ask_name.mp3",
-    "login_new_ask_email.mp3",
-    "login_new_ask_password.mp3",
-];
 
 #[component]
 pub fn RiteEntree() -> Element {

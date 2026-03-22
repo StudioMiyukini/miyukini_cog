@@ -132,17 +132,6 @@ impl PermissionLevel {
     }
 }
 
-/// Element partage avec moi (fichier ou dossier + permission).
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-pub struct SharedWithMeEntry {
-    /// Permission de partage.
-    pub permission: SharePermission,
-    /// Nom de la ressource partagee.
-    pub resource_name: String,
-    /// Nom du proprietaire.
-    pub owner_name: String,
-}
-
 /// Requete de creation de lien de partage.
 #[derive(Debug, Clone, Serialize)]
 pub struct CreateShareLinkRequest {
