@@ -623,6 +623,7 @@ impl AppServiceFactory {
                 crate::infrastructure::services::webdav_lock_service::create_webdav_lock_store(),
             audit_service: None,
             connection_manager: None,
+            gdpr_service: None,
             bandwidth_tracker: std::sync::OnceLock::new(),
             config: self.config.clone(),
         };
@@ -636,6 +637,18 @@ impl AppServiceFactory {
             );
             app_state.audit_service = Some(audit_repo);
             tracing::info!("Audit logging service initialized (ISO 27001 A.8.15)");
+
+            // GDPR service (RGPD Art. 15-20)
+            app_state.gdpr_service = Some(Arc::new(
+                crate::application::services::gdpr_service::GdprService::new(pool.clone()),
+            ));
+            tracing::info!("GDPR service initialized (RGPD Art. 15-20)");
+
+            // Session timeout cleanup (ISO 27001 A.8.5)
+            crate::infrastructure::services::session_timeout_service::start_session_cleanup(
+                pool.clone(),
+                crate::infrastructure::services::session_timeout_service::SessionTimeoutConfig::default(),
+            );
         }
 
         // 9b. Web Connection Manager (MWS tunnel, DDNS, Central client)
@@ -957,6 +970,8 @@ pub struct AppState {
     pub connection_manager: Option<
         Arc<crate::infrastructure::services::connection_manager::ConnectionManagerService>,
     >,
+    /// GDPR data subject rights service (RGPD Art. 15-20).
+    pub gdpr_service: Option<Arc<crate::application::services::gdpr_service::GdprService>>,
     /// Lazy-initialized bandwidth tracker for per-user throttling.
     pub bandwidth_tracker: std::sync::OnceLock<
         Arc<crate::interfaces::middleware::bandwidth::BandwidthTracker>,

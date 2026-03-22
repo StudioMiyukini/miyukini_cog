@@ -4,6 +4,7 @@ pub mod chunked_upload_service;
 pub mod connection_manager;
 pub mod ddns_service;
 pub mod mws_tunnel_service;
+pub mod session_timeout_service;
 pub mod compression_service;
 pub mod dedup_service;
 pub mod exif_service;

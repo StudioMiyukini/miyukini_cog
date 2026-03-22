@@ -11,6 +11,7 @@ pub mod file_retrieval_service;
 pub mod file_upload_service;
 pub mod file_use_case_factory;
 pub mod folder_service;
+pub mod gdpr_service;
 pub mod i18n_application_service;
 pub mod nextcloud_file_id_service;
 pub mod nextcloud_login_flow_service;
