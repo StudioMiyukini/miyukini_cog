@@ -22,7 +22,7 @@ use uuid::Uuid;
 /// App password token length (32 random alphanumeric chars after prefix).
 const TOKEN_LENGTH: usize = 32;
 /// Prefix for all app password tokens (makes them easily identifiable).
-const TOKEN_PREFIX: &str = "oxicloud-";
+const TOKEN_PREFIX: &str = "miyucloud-";
 
 // ── Nextcloud-format app password constants ──
 const NC_APP_PASSWORD_GROUPS: usize = 5;
@@ -272,7 +272,7 @@ impl AppPasswordService {
     ///
     /// Returns `(user_id, username, email, role)` on success.
     ///
-    /// Handles both `oxicloud-` format and Nextcloud format (`XXXXX-XXXXX-...`)
+    /// Handles both `miyucloud-` format and Nextcloud format (`XXXXX-XXXXX-...`)
     /// passwords. Uses prefix-based DB lookup to minimize Argon2id attempts.
     ///
     /// Successful verifications are cached for `BASIC_AUTH_CACHE_TTL_SECS`
@@ -307,7 +307,7 @@ impl AppPasswordService {
         }
 
         // Determine the password form and prefix for DB lookup.
-        // oxicloud- format: use raw password, prefix = first 17 chars
+        // miyucloud- format: use raw password, prefix = first 17 chars
         // NC format: normalize (strip dashes/whitespace, uppercase), prefix = first 8 chars
         let (verify_password, prefix) = if password.starts_with(TOKEN_PREFIX) {
             let pfx = password

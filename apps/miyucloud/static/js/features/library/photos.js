@@ -54,7 +54,7 @@ const photosView = {
             this._container = el;
         }
         if (!this._initialized) {
-            this.groupMode = localStorage.getItem('oxicloud-photos-group') || 'monthly';
+            this.groupMode = localStorage.getItem('miyucloud-photos-group') || 'monthly';
             this._initialized = true;
         }
     },
@@ -86,7 +86,7 @@ const photosView = {
     setGroupMode(mode) {
         if (this.groupMode === mode) return;
         this.groupMode = mode;
-        localStorage.setItem('oxicloud-photos-group', mode);
+        localStorage.setItem('miyucloud-photos-group', mode);
         this._renderedCount = 0;
         this._renderFull();
     },

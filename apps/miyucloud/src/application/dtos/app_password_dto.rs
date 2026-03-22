@@ -35,7 +35,7 @@ pub struct AppPasswordCreatedResponseDto {
     /// The label chosen by the user.
     pub label: String,
     /// The plain-text app password — shown only ONCE.
-    /// Format: `oxicloud-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
+    /// Format: `miyucloud-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
     pub password: String,
     /// The username to use with HTTP Basic Auth.
     pub username: String,

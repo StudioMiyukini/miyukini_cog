@@ -102,7 +102,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let factory = AppServiceFactory::with_config(storage_path, locales_path, config.clone());
 
     let app_state = factory.build_app_state(db_pools).await
-        .expect("Failed to build application state. If running in Docker, ensure the storage volume is writable by the oxicloud user (UID 1001)");
+        .expect("Failed to build application state. If running in Docker, ensure the storage volume is writable by the miyucloud user (UID 1001)");
 
     // Wrap in Arc so that Axum clones a single refcount per request
     // instead of deep-copying ~42 Arc fields + 16 String/PathBuf allocations.

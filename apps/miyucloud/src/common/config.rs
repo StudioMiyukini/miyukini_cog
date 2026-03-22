@@ -244,7 +244,7 @@ impl Default for DatabaseConfig {
     fn default() -> Self {
         Self {
             // Updated connection string with default credentials that PostgreSQL often uses
-            connection_string: "postgres://postgres:postgres@localhost:5432/oxicloud".to_string(),
+            connection_string: "postgres://postgres:postgres@localhost:5432/miyucloud".to_string(),
             max_connections: 20,
             min_connections: 5,
             connect_timeout_secs: 10,
@@ -330,7 +330,7 @@ impl Default for AuthConfig {
 pub struct OidcConfig {
     /// Whether OIDC authentication is enabled
     pub enabled: bool,
-    /// OIDC Issuer URL (e.g. https://authentik.example.com/application/o/oxicloud/)
+    /// OIDC Issuer URL (e.g. https://authentik.example.com/application/o/miyucloud/)
     pub issuer_url: String,
     /// OIDC Client ID
     pub client_id: String,

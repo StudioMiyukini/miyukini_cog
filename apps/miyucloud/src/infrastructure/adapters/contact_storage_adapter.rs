@@ -464,7 +464,7 @@ impl ContactUseCase for ContactStorageAdapter {
         let mut contact = Contact::from_raw(
             Uuid::new_v4(),
             address_book_id,
-            format!("{}@oxicloud", Uuid::new_v4()),
+            format!("{}@miyucloud", Uuid::new_v4()),
             dto.full_name,
             dto.first_name,
             dto.last_name,
@@ -578,7 +578,7 @@ impl ContactUseCase for ContactStorageAdapter {
             }
         }
 
-        let contact_uid = uid.unwrap_or_else(|| format!("{}@oxicloud", Uuid::new_v4()));
+        let contact_uid = uid.unwrap_or_else(|| format!("{}@miyucloud", Uuid::new_v4()));
 
         let contact = Contact::from_raw(
             Uuid::new_v4(),

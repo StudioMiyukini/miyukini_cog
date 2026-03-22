@@ -28,7 +28,7 @@ mod tests {
         ContactDto {
             id: "contact-001".to_string(),
             address_book_id: "ab-001".to_string(),
-            uid: "uid-contact-001@oxicloud".to_string(),
+            uid: "uid-contact-001@miyucloud".to_string(),
             full_name: Some("John Doe".to_string()),
             first_name: Some("John".to_string()),
             last_name: Some("Doe".to_string()),
@@ -75,7 +75,7 @@ mod tests {
         ContactDto {
             id: "contact-002".to_string(),
             address_book_id: "ab-001".to_string(),
-            uid: "uid-contact-002@oxicloud".to_string(),
+            uid: "uid-contact-002@miyucloud".to_string(),
             full_name: Some("Jane Smith".to_string()),
             first_name: None,
             last_name: None,
@@ -131,7 +131,7 @@ mod tests {
         );
         assert!(vcard.contains("BDAY:1990-05-15"), "Should contain birthday");
         assert!(
-            vcard.contains("UID:uid-contact-001@oxicloud"),
+            vcard.contains("UID:uid-contact-001@miyucloud"),
             "Should contain UID"
         );
         assert!(
@@ -149,7 +149,7 @@ mod tests {
         assert!(vcard.contains("VERSION:3.0"), "Should be vCard 3.0");
         assert!(vcard.contains("FN:Jane Smith"), "Should have full name");
         assert!(
-            vcard.contains("UID:uid-contact-002@oxicloud"),
+            vcard.contains("UID:uid-contact-002@miyucloud"),
             "Should have UID"
         );
         assert!(vcard.contains("END:VCARD"), "Should end correctly");

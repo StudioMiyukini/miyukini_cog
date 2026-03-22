@@ -710,7 +710,7 @@ impl AuthApplicationService {
         let email = dto
             .email
             .filter(|e| !e.trim().is_empty())
-            .unwrap_or_else(|| format!("{}@oxicloud.local", dto.username));
+            .unwrap_or_else(|| format!("{}@miyucloud.local", dto.username));
 
         // Check email uniqueness
         if self.user_storage.get_user_by_email(&email).await.is_ok() {

@@ -34,7 +34,7 @@ mod tests {
             end_time: Utc.with_ymd_and_hms(2025, 6, 15, 11, 0, 0).unwrap(),
             all_day: false,
             rrule: None,
-            ical_uid: "uid-evt-001@oxicloud".to_string(),
+            ical_uid: "uid-evt-001@miyucloud".to_string(),
             created_at: Utc.with_ymd_and_hms(2025, 1, 1, 0, 0, 0).unwrap(),
             updated_at: Utc.with_ymd_and_hms(2025, 1, 1, 0, 0, 0).unwrap(),
         }

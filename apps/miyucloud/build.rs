@@ -1,4 +1,4 @@
-//! build.rs — Static-asset pipeline for OxiCloud
+//! build.rs — Static-asset pipeline for Miyukini Cloud
 //!
 //! **Release mode** (`cargo build --release`):
 //!   1. Copies `static/` → `static-dist/` (processed mirror).
@@ -154,7 +154,7 @@ fn process_release(manifest_dir: &Path, static_dir: &Path, out_dir: &Path) {
     // index.html too (future use / embedded route)
     fs::write(out_dir.join("index.html"), &rewritten_index).expect("write out index.html");
 
-    eprintln!("cargo:warning=OxiCloud static-dist built ✓  CSS: {css_name}  JS: {js_name}");
+    eprintln!("cargo:warning=Miyukini Cloud static-dist built ✓  CSS: {css_name}  JS: {js_name}");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

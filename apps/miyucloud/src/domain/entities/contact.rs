@@ -191,7 +191,7 @@ impl Contact {
         Self {
             id: Uuid::new_v4(),
             address_book_id,
-            uid: format!("{}@oxicloud", Uuid::new_v4()),
+            uid: format!("{}@miyucloud", Uuid::new_v4()),
             full_name,
             first_name,
             last_name,
@@ -478,7 +478,7 @@ impl Default for Contact {
         Self {
             id: Uuid::new_v4(),
             address_book_id: Uuid::new_v4(),
-            uid: format!("{}@oxicloud", Uuid::new_v4()),
+            uid: format!("{}@miyucloud", Uuid::new_v4()),
             full_name: None,
             first_name: None,
             last_name: None,

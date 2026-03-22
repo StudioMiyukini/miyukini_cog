@@ -469,7 +469,7 @@ function setupEventListeners() {
     });
     
     // Load saved view preference
-    const savedView = localStorage.getItem('oxicloud-view');
+    const savedView = localStorage.getItem('miyucloud-view');
     if (savedView === 'list') {
         ui.switchToListView();
     } else {

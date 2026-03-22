@@ -196,7 +196,7 @@ async function setLocale(locale) {
     currentLocale = locale;
     
     // Save locale preference
-    localStorage.setItem('oxicloud-locale', locale);
+    localStorage.setItem('miyucloud-locale', locale);
     
     // Trigger an event for components to update
     window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale } }));
@@ -213,7 +213,7 @@ async function setLocale(locale) {
  */
 async function initI18n() {
     // Load saved locale preference
-    const savedLocale = localStorage.getItem('oxicloud-locale');
+    const savedLocale = localStorage.getItem('miyucloud-locale');
     if (savedLocale && supportedLocales.includes(savedLocale)) {
         currentLocale = savedLocale;
     }

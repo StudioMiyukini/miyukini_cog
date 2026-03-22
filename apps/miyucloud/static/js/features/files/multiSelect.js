@@ -431,7 +431,7 @@ const multiSelect = {
             const url  = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `oxicloud-download-${Date.now()}.zip`;
+            link.download = `miyucloud-download-${Date.now()}.zip`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

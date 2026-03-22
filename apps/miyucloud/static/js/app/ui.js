@@ -456,7 +456,7 @@ const ui = {
         gridViewBtn.classList.add('active');
         listViewBtn.classList.remove('active');
         window.app.currentView = 'grid';
-        localStorage.setItem('oxicloud-view', 'grid');
+        localStorage.setItem('miyucloud-view', 'grid');
     },
 
     /**
@@ -477,7 +477,7 @@ const ui = {
         gridViewBtn.classList.remove('active');
         listViewBtn.classList.add('active');
         window.app.currentView = 'list';
-        localStorage.setItem('oxicloud-view', 'list');
+        localStorage.setItem('miyucloud-view', 'list');
     },
 
     /**
@@ -654,7 +654,7 @@ const ui = {
         if (window.app && window.app.currentView === 'list') return 'list';
         if (window.app && window.app.currentView === 'grid') return 'grid';
 
-        const stored = localStorage.getItem('oxicloud-view');
+        const stored = localStorage.getItem('miyucloud-view');
         return stored === 'list' ? 'list' : 'grid';
     },
 
@@ -908,7 +908,7 @@ const ui = {
                 e.dataTransfer.setData('text/plain', info.id);
                 if (info.type === 'folder') {
                     e.dataTransfer.setData(
-                        'application/oxicloud-folder', 'true');
+                        'application/miyucloud-folder', 'true');
                 }
                 card.classList.add('dragging');
             });
@@ -949,7 +949,7 @@ const ui = {
 
                 const id = e.dataTransfer.getData('text/plain');
                 const isFolder =
-                    e.dataTransfer.getData('application/oxicloud-folder') === 'true';
+                    e.dataTransfer.getData('application/miyucloud-folder') === 'true';
 
                 if (id) {
                     if (isFolder) {

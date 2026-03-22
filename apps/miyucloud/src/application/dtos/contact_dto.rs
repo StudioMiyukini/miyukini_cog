@@ -89,7 +89,7 @@ impl Default for ContactDto {
         Self {
             id: uuid::Uuid::new_v4().to_string(),
             address_book_id: uuid::Uuid::new_v4().to_string(),
-            uid: format!("{}@oxicloud", uuid::Uuid::new_v4()),
+            uid: format!("{}@miyucloud", uuid::Uuid::new_v4()),
             full_name: None,
             first_name: None,
             last_name: None,

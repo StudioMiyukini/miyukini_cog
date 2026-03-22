@@ -1,5 +1,5 @@
 -- ============================================================
--- OxiCloud Unified Database Schema
+-- Miyukini Cloud Database Schema
 -- Applied automatically via sqlx migrations on startup.
 -- ============================================================
 -- Order: auth (base) → caldav → carddav

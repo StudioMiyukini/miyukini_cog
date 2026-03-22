@@ -791,7 +791,7 @@ pub async fn download_batch(
     let stream = tokio_util::io::ReaderStream::new(tokio_file);
     let body = axum::body::Body::from_stream(stream);
 
-    let filename = format!("oxicloud-download-{}.zip", chrono::Utc::now().timestamp());
+    let filename = format!("miyucloud-download-{}.zip", chrono::Utc::now().timestamp());
 
     let mut response = Response::builder()
         .status(StatusCode::OK)
