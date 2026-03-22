@@ -67,15 +67,15 @@ Indexes: `user_id`, `item_id`, `item_type`, `created_at`, composite `(user_id, i
 ```bash
 # Add file to favorites
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/favorites/file/abc-123"
+  "https://miyucloud.example.com/api/favorites/file/abc-123"
 
 # List favorites
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/favorites/"
+  "https://miyucloud.example.com/api/favorites/"
 
 # Remove from favorites
 curl -X DELETE -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/favorites/folder/def-456"
+  "https://miyucloud.example.com/api/favorites/folder/def-456"
 ```
 
 ---
@@ -143,15 +143,15 @@ Indexes: `user_id`, `item_id`, `item_type`, `accessed_at`, composite `(user_id, 
 ```bash
 # Record file access
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/recent/file/abc-123"
+  "https://miyucloud.example.com/api/recent/file/abc-123"
 
 # Get recent items (last 10)
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/recent/?limit=10"
+  "https://miyucloud.example.com/api/recent/?limit=10"
 
 # Clear history
 curl -X DELETE -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/recent/clear"
+  "https://miyucloud.example.com/api/recent/clear"
 ```
 
 ## DI Wiring

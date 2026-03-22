@@ -15,9 +15,9 @@ Step-by-step instructions for connecting native OS clients via WebDAV, CalDAV, a
 
 ### Connection Information
 
-- **Server URL**: `https://[your-oxicloud-server]/webdav/`
-- **Username**: Your OxiCloud username
-- **Password**: Your OxiCloud password
+- **Server URL**: `https://[your-miyucloud-server]/webdav/`
+- **Username**: Your Miyukini Cloud username
+- **Password**: Your Miyukini Cloud password
 
 ### Windows
 
@@ -27,9 +27,9 @@ Step-by-step instructions for connecting native OS clients via WebDAV, CalDAV, a
 2. Right-click on "This PC" and select "Add a network location"
 3. Click "Next"
 4. Select "Choose a custom network location" and click "Next"
-5. Enter the WebDAV URL: `https://[your-oxicloud-server]/webdav/`
+5. Enter the WebDAV URL: `https://[your-miyucloud-server]/webdav/`
 6. When prompted, enter your username and password
-7. Give the connection a name (e.g., "OxiCloud") and click "Next"
+7. Give the connection a name (e.g., "Miyukini Cloud") and click "Next"
 8. Click "Finish"
 
 Files now appear as a network drive in File Explorer.
@@ -39,7 +39,7 @@ Files now appear as a network drive in File Explorer.
 1. Open File Explorer
 2. Right-click on "This PC" and select "Map network drive"
 3. Choose a drive letter
-4. Enter the WebDAV URL: `https://[your-oxicloud-server]/webdav/`
+4. Enter the WebDAV URL: `https://[your-miyucloud-server]/webdav/`
 5. Check "Connect using different credentials"
 6. Click "Finish"
 7. Enter your username and password
@@ -63,7 +63,7 @@ To increase the file size limit:
 
 1. Open Finder
 2. From the menu bar, click "Go" > "Connect to Server" (or press Cmd+K)
-3. Enter the WebDAV URL: `https://[your-oxicloud-server]/webdav/`
+3. Enter the WebDAV URL: `https://[your-miyucloud-server]/webdav/`
 4. Click "Connect"
 5. Enter your username and password
 6. Click "Connect"
@@ -76,27 +76,27 @@ Files appear as a mounted drive in Finder.
 
 1. Open Files (Nautilus)
 2. Click the "+" button in the sidebar or press Ctrl+L
-3. Enter: `davs://[your-oxicloud-server]/webdav/`
+3. Enter: `davs://[your-miyucloud-server]/webdav/`
 4. Enter credentials when prompted
 5. Click "Connect"
 
 #### KDE (Dolphin)
 
 1. Open Dolphin
-2. In the address bar, enter: `webdavs://[your-oxicloud-server]/webdav/`
+2. In the address bar, enter: `webdavs://[your-miyucloud-server]/webdav/`
 3. Enter credentials when prompted
 4. Click "Connect"
 
 #### Command Line (davfs2)
 
 1. Install davfs2: `sudo apt-get install davfs2` (Debian/Ubuntu) or equivalent
-2. Create a mount point: `sudo mkdir /mnt/oxicloud`
-3. Edit `/etc/davfs2/secrets` and add: `/mnt/oxicloud [username] [password]`
-4. Mount: `sudo mount -t davfs https://[your-oxicloud-server]/webdav/ /mnt/oxicloud`
+2. Create a mount point: `sudo mkdir /mnt/miyucloud`
+3. Edit `/etc/davfs2/secrets` and add: `/mnt/miyucloud [username] [password]`
+4. Mount: `sudo mount -t davfs https://[your-miyucloud-server]/webdav/ /mnt/miyucloud`
 
 To auto-mount at boot, add to `/etc/fstab`:
 ```
-https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
+https://[your-miyucloud-server]/webdav/ /mnt/miyucloud davfs user,rw,auto 0 0
 ```
 
 ---
@@ -111,9 +111,9 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 2. Go to **Calendar** > **Add Account** > **Other CalDAV Account**
 3. Enter:
    - **Account Type**: Advanced
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
-   - **Server Address**: `https://[your-oxicloud-server]/caldav`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
+   - **Server Address**: `https://[your-miyucloud-server]/caldav`
 4. Click **Sign In**
 5. Select the calendars you want to sync and click **Done**
 
@@ -122,10 +122,10 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 1. Go to **Settings** > **Calendar** > **Accounts** > **Add Account** > **Other**
 2. Tap **Add CalDAV Account**
 3. Enter:
-   - **Server**: `https://[your-oxicloud-server]/caldav`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
-   - **Description**: OxiCloud Calendar (or any name)
+   - **Server**: `https://[your-miyucloud-server]/caldav`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
+   - **Description**: Miyukini Cloud Calendar (or any name)
 4. Tap **Next**
 5. Turn on **Calendars** and tap **Save**
 
@@ -135,7 +135,7 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 2. Right-click in the left pane and select **New Calendar**
 3. Select **On the Network** and click **Next**
 4. Choose **CalDAV** as the format
-5. Enter the location: `https://[your-oxicloud-server]/caldav/calendars/your-calendar-id`
+5. Enter the location: `https://[your-miyucloud-server]/caldav/calendars/your-calendar-id`
 6. Click **Next**
 7. Enter a name for the calendar and choose a color
 8. Click **Next** and then **Finish**
@@ -147,9 +147,9 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 2. Open DAVx5 and tap the **+** button
 3. Select **Login with URL and username**
 4. Enter:
-   - **Base URL**: `https://[your-oxicloud-server]/caldav`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
+   - **Base URL**: `https://[your-miyucloud-server]/caldav`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
 5. Tap **Connect**
 6. Select the calendars you want to sync
 7. Tap the checkbox to enable syncing
@@ -161,10 +161,10 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 3. Click **Synchronization Profiles**
 4. Click **Add** to create a new profile
 5. Enter:
-   - **Profile Name**: OxiCloud Calendar (or any name)
-   - **CalDAV URL**: `https://[your-oxicloud-server]/caldav/calendars/your-calendar-id`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
+   - **Profile Name**: Miyukini Cloud Calendar (or any name)
+   - **CalDAV URL**: `https://[your-miyucloud-server]/caldav/calendars/your-calendar-id`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
 6. Click **Test or discover settings**
 7. Select the Outlook calendar to sync with
 8. Click **OK** to save the profile
@@ -181,10 +181,10 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 2. Go to **Contacts** > **Add Account** > **Other contacts account**
 3. Select **CardDAV account**
 4. Enter:
-   - **Server**: `https://[your-oxicloud-server]/carddav`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
-   - **Description**: OxiCloud Contacts (or any name)
+   - **Server**: `https://[your-miyucloud-server]/carddav`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
+   - **Description**: Miyukini Cloud Contacts (or any name)
 5. Click **Sign In**
 
 #### iOS:
@@ -192,10 +192,10 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 1. Go to **Settings** > **Contacts** > **Accounts** > **Add Account** > **Other**
 2. Tap **Add CardDAV Account**
 3. Enter:
-   - **Server**: `https://[your-oxicloud-server]/carddav`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
-   - **Description**: OxiCloud Contacts (or any name)
+   - **Server**: `https://[your-miyucloud-server]/carddav`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
+   - **Description**: Miyukini Cloud Contacts (or any name)
 4. Tap **Next**
 5. Turn on **Contacts** and tap **Save**
 
@@ -205,8 +205,8 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 2. Click on **Tools** > **Address Book**
 3. Go to **File** > **New** > **Remote Address Book**
 4. Enter:
-   - **Name**: OxiCloud Contacts (or any name)
-   - **URL**: `https://[your-oxicloud-server]/carddav/address-books/your-address-book-id`
+   - **Name**: Miyukini Cloud Contacts (or any name)
+   - **URL**: `https://[your-miyucloud-server]/carddav/address-books/your-address-book-id`
 5. Click **OK**
 6. When prompted, enter your username and password
 
@@ -216,9 +216,9 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 2. Open DAVx5 and tap the **+** button
 3. Select **Login with URL and username**
 4. Enter:
-   - **Base URL**: `https://[your-oxicloud-server]/carddav`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
+   - **Base URL**: `https://[your-miyucloud-server]/carddav`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
 5. Tap **Connect**
 6. Select the address books you want to sync
 7. Tap the checkbox to enable syncing
@@ -231,10 +231,10 @@ https://[your-oxicloud-server]/webdav/ /mnt/oxicloud davfs user,rw,auto 0 0
 4. Click **Add** to create a new profile
 5. Select **CardDAV** as the synchronization resource
 6. Enter:
-   - **Profile Name**: OxiCloud Contacts (or any name)
-   - **CardDAV URL**: `https://[your-oxicloud-server]/carddav/address-books/your-address-book-id`
-   - **Username**: Your OxiCloud username
-   - **Password**: Your OxiCloud password
+   - **Profile Name**: Miyukini Cloud Contacts (or any name)
+   - **CardDAV URL**: `https://[your-miyucloud-server]/carddav/address-books/your-address-book-id`
+   - **Username**: Your Miyukini Cloud username
+   - **Password**: Your Miyukini Cloud password
 7. Click **Test or discover settings**
 8. Select the Outlook contacts folder to sync with
 9. Click **OK** to save the profile

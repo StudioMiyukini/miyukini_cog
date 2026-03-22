@@ -139,8 +139,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 1. Start PostgreSQL and create the database:
    ```bash
-   createdb oxicloud
-   psql -d oxicloud -f db/schema.sql
+   createdb miyucloud
+   psql -d miyucloud -f db/schema.sql
    ```
 
 2. Set environment variables:

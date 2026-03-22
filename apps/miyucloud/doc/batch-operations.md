@@ -124,17 +124,17 @@ Individual failures do not abort the batch. They get collected in the `failed` a
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"file_ids":["id-1","id-2","id-3"],"target_folder_id":"folder-abc"}' \
-  "https://oxicloud.example.com/api/batch/files/move"
+  "https://miyucloud.example.com/api/batch/files/move"
 
 # Delete folders recursively
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"folder_ids":["old-1","old-2"],"recursive":true}' \
-  "https://oxicloud.example.com/api/batch/folders/delete"
+  "https://miyucloud.example.com/api/batch/folders/delete"
 
 # Create multiple folders
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"folders":[{"name":"Docs","parent_id":null},{"name":"Photos","parent_id":"root-id"}]}' \
-  "https://oxicloud.example.com/api/batch/folders/create"
+  "https://miyucloud.example.com/api/batch/folders/create"
 ```

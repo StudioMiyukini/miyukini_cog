@@ -1,6 +1,6 @@
-# Contributing to OxiCloud
+# Contributing to Miyukini Cloud
 
-Thank you for your interest in contributing to OxiCloud! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Miyukini Cloud! This document provides guidelines and instructions for contributing to the project.
 
 ## Code of Conduct
 
@@ -8,7 +8,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ## How to Contribute
 
-There are many ways to contribute to OxiCloud:
+There are many ways to contribute to Miyukini Cloud:
 
 1. Reporting bugs
 2. Suggesting enhancements
@@ -32,7 +32,7 @@ If you find a bug, please create an issue with the following information:
 Enhancement suggestions are welcome! Please include:
 
 - A clear and detailed explanation of the feature
-- Why this feature would be useful to most OxiCloud users
+- Why this feature would be useful to most Miyukini Cloud users
 - Possible implementation approaches if you have ideas
 
 ### Pull Request Process
@@ -70,4 +70,4 @@ If you need help with the contribution process or have questions, feel free to:
 - Open an issue with your question
 - Reach out to the maintainers
 
-Thank you for contributing to OxiCloud!
+Thank you for contributing to Miyukini Cloud!

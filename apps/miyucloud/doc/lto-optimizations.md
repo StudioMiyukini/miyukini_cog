@@ -1,6 +1,6 @@
 # 05 - LTO Optimizations
 
-OxiCloud uses Link Time Optimization (LTO) to improve runtime performance. LTO allows the compiler to optimize across module boundaries during linking -- better inlining, dead code elimination, and more efficient binaries.
+Miyukini Cloud uses Link Time Optimization (LTO) to improve runtime performance. LTO allows the compiler to optimize across module boundaries during linking -- better inlining, dead code elimination, and more efficient binaries.
 
 ---
 

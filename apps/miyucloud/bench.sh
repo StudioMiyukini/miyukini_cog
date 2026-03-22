@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# OxiCloud Performance Benchmark v3
+# Miyukini Cloud Performance Benchmark v3
 # Detailed RAM (RSS/VmPeak/VmSwap) + CPU monitoring + huge file downloads
 #
 #  - Uploads: 1KB..500MB via API (above ~1GB the upload handler OOMs —
@@ -35,8 +35,8 @@ fail()   { printf "${RED}✗${NC} %s\n" "$1"; }
 # ── Server PID ───────────────────────────────────────────────────────────────
 SERVER_PID=""
 find_server_pid() {
-    SERVER_PID=$(pgrep -f "target/release/oxicloud" 2>/dev/null | head -1 || \
-                 pgrep -f "target/debug/oxicloud"   2>/dev/null | head -1 || echo "")
+    SERVER_PID=$(pgrep -f "target/release/miyucloud" 2>/dev/null | head -1 || \
+                 pgrep -f "target/debug/miyucloud"   2>/dev/null | head -1 || echo "")
     [[ -z "$SERVER_PID" ]] && { fail "Server PID not found"; exit 1; }
 }
 
@@ -136,14 +136,14 @@ inject_blob() {
     printf " done\n" >&2
 
     # Register blob in dedup index
-    docker exec -i $(docker ps -qf "name=postgres") psql -U postgres -d oxicloud -q <<SQL >/dev/null 2>&1
+    docker exec -i $(docker ps -qf "name=postgres") psql -U postgres -d miyucloud -q <<SQL >/dev/null 2>&1
 INSERT INTO storage.blobs (hash, size, content_type, ref_count)
 VALUES ('$hash', $size, 'application/octet-stream', 1)
 ON CONFLICT DO NOTHING;
 SQL
 
     # Register file metadata
-    file_id=$(docker exec -i $(docker ps -qf "name=postgres") psql -U postgres -d oxicloud -t -A <<SQL 2>/dev/null
+    file_id=$(docker exec -i $(docker ps -qf "name=postgres") psql -U postgres -d miyucloud -t -A <<SQL 2>/dev/null
 INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type)
 VALUES ('bench_${label}.bin', '$FOLDER_ID'::uuid, '$USER_ID', '$hash', $size, 'application/octet-stream')
 RETURNING id::text;
@@ -160,7 +160,7 @@ echo "test,size_bytes,direction,latency_ms,rss_before_mb,rss_peak_mb,rss_after_m
 
 find_server_pid
 
-header "OxiCloud Benchmark v3 — RAM + CPU + Huge Files"
+header "Miyukini Cloud Benchmark v3 — RAM + CPU + Huge Files"
 printf "  %-14s %s\n"   "Server"       "$BASE_URL"
 printf "  %-14s %s\n"   "PID"          "$SERVER_PID"
 printf "  %-14s %d MB\n" "RSS now"     $(mb $(get_rss_kb))

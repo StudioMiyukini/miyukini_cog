@@ -1,8 +1,8 @@
-# OxiCloud — Admin Settings
+# Miyukini Cloud — Admin Settings
 
 ## Overview
 
-OxiCloud provides an admin panel API for managing server settings, OIDC configuration, user management, and dashboard statistics. All admin endpoints require a valid JWT token with `role = "admin"`.
+Miyukini Cloud provides an admin panel API for managing server settings, OIDC configuration, user management, and dashboard statistics. All admin endpoints require a valid JWT token with `role = "admin"`.
 
 ## Architecture
 
@@ -58,14 +58,14 @@ All routes under `/api/admin`, require admin JWT.
 {
   "enabled": true,
   "issuer_url": "https://keycloak.example.com/realms/main",
-  "client_id": "oxicloud",
+  "client_id": "miyucloud",
   "client_secret_set": true,
   "scopes": "openid profile email",
   "auto_provision": true,
-  "admin_groups": "oxicloud-admins",
+  "admin_groups": "miyucloud-admins",
   "disable_password_login": false,
   "provider_name": "KeyCloak",
-  "callback_url": "https://oxicloud.example.com/api/auth/oidc/callback",
+  "callback_url": "https://miyucloud.example.com/api/auth/oidc/callback",
   "env_overrides": ["issuer_url", "client_id"]
 }
 ```
@@ -78,11 +78,11 @@ The `env_overrides` field lists which settings are overridden by environment var
 {
   "enabled": true,
   "issuer_url": "https://keycloak.example.com/realms/main",
-  "client_id": "oxicloud",
+  "client_id": "miyucloud",
   "client_secret": "new-secret",
   "scopes": "openid profile email",
   "auto_provision": true,
-  "admin_groups": "oxicloud-admins",
+  "admin_groups": "miyucloud-admins",
   "disable_password_login": false,
   "provider_name": "KeyCloak"
 }

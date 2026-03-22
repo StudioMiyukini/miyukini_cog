@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: oxicloud
+  repository: miyucloud
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -11,7 +11,7 @@ postgresql:
   auth:
     username: postgres
     password: "change_me_in_production"
-    database: oxicloud
+    database: miyucloud
   primary:
     persistence:
       enabled: true
@@ -71,6 +71,6 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
   tls: []
-  #  - secretName: oxicloud-tls
+  #  - secretName: miyucloud-tls
   #    hosts:
   #      - cloud.example.com

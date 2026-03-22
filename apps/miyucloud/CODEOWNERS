@@ -1,13 +1,13 @@
 # These owners will be the default owners for everything in the repo.
 # Unless a later match takes precedence, they will be requested for
 # review when someone opens a pull request.
-* @DioCrafts
+* @StudioMiyukini
 
 # Specific file and directory ownership
-/src/domain/          @DioCrafts
-/src/application/     @DioCrafts
-/src/infrastructure/  @DioCrafts
-/src/interfaces/      @DioCrafts
-/static/              @DioCrafts
-/db/                  @DioCrafts
-*.md                  @DioCrafts
+/src/domain/          @StudioMiyukini
+/src/application/     @StudioMiyukini
+/src/infrastructure/  @StudioMiyukini
+/src/interfaces/      @StudioMiyukini
+/static/              @StudioMiyukini
+/db/                  @StudioMiyukini
+*.md                  @StudioMiyukini

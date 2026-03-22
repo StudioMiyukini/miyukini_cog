@@ -41,7 +41,7 @@ pub trait ZipPort: Send + Sync + 'static {
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/folders/abc-123/download" \
+  "https://miyucloud.example.com/api/folders/abc-123/download" \
   -o my-folder.zip
 ```
 

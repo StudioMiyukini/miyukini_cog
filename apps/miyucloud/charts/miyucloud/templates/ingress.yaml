@@ -3,9 +3,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "oxicloud.fullname" . }}
+  name: {{ include "miyucloud.fullname" . }}
   labels:
-    {{- include "oxicloud.labels" . | nindent 4 }}
+    {{- include "miyucloud.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -34,31 +34,31 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "oxicloud.fullname" $ }}-wopi
+                name: {{ include "miyucloud.fullname" $ }}-wopi
                 port:
                   number: {{ .Values.wopi.collabora.service.port }}
           - path: /hosting
             pathType: Prefix
             backend:
               service:
-                name: {{ include "oxicloud.fullname" $ }}-wopi
+                name: {{ include "miyucloud.fullname" $ }}-wopi
                 port:
                   number: {{ .Values.wopi.collabora.service.port }}
           - path: /cool
             pathType: Prefix
             backend:
               service:
-                name: {{ include "oxicloud.fullname" $ }}-wopi
+                name: {{ include "miyucloud.fullname" $ }}-wopi
                 port:
                   number: {{ .Values.wopi.collabora.service.port }}
           {{- end }}
 
-          # Default Catch-All: Route everything else to OxiCloud
+          # Default Catch-All: Route everything else to Miyukini Cloud
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "oxicloud.fullname" $ }}
+                name: {{ include "miyucloud.fullname" $ }}
                 port:
                   number: {{ $.Values.service.port }}
 {{- end }}

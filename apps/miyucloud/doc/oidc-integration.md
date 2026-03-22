@@ -33,14 +33,14 @@ Environment variables use the **OXICLOUD_OIDC_*** prefix:
 
 ```bash
 OXICLOUD_OIDC_ENABLED=true
-OXICLOUD_OIDC_ISSUER_URL="https://authentik.example.com/application/o/oxicloud/"
+OXICLOUD_OIDC_ISSUER_URL="https://authentik.example.com/application/o/miyucloud/"
 OXICLOUD_OIDC_CLIENT_ID="your-client-id"
 OXICLOUD_OIDC_CLIENT_SECRET="your-client-secret"
-OXICLOUD_OIDC_REDIRECT_URI="https://oxicloud.example.com/api/auth/oidc/callback"
+OXICLOUD_OIDC_REDIRECT_URI="https://miyucloud.example.com/api/auth/oidc/callback"
 OXICLOUD_OIDC_SCOPES="openid profile email"
-OXICLOUD_OIDC_FRONTEND_URL="https://oxicloud.example.com"
+OXICLOUD_OIDC_FRONTEND_URL="https://miyucloud.example.com"
 OXICLOUD_OIDC_AUTO_PROVISION=true
-OXICLOUD_OIDC_ADMIN_GROUPS="oxicloud-admins"
+OXICLOUD_OIDC_ADMIN_GROUPS="miyucloud-admins"
 OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN=false
 OXICLOUD_OIDC_PROVIDER_NAME="Authentik"
 ```
@@ -234,18 +234,18 @@ KeyCloak setup via docker-compose:
 # docker-compose.yml
 version: '3'
 services:
-  oxicloud:
-    image: oxicloud:latest
+  miyucloud:
+    image: miyucloud:latest
     environment:
       OXICLOUD_OIDC_ENABLED: "true"
       OXICLOUD_OIDC_ISSUER_URL: "https://keycloak.example.com/realms/your-realm"
-      OXICLOUD_OIDC_CLIENT_ID: "oxicloud"
+      OXICLOUD_OIDC_CLIENT_ID: "miyucloud"
       OXICLOUD_OIDC_CLIENT_SECRET: "your-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://oxicloud.example.com/api/auth/oidc/callback"
+      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
       OXICLOUD_OIDC_SCOPES: "openid profile email"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://oxicloud.example.com"
+      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
       OXICLOUD_OIDC_AUTO_PROVISION: "true"
-      OXICLOUD_OIDC_ADMIN_GROUPS: "oxicloud-admins"
+      OXICLOUD_OIDC_ADMIN_GROUPS: "miyucloud-admins"
       OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
       OXICLOUD_OIDC_PROVIDER_NAME: "KeyCloak"
     ports:

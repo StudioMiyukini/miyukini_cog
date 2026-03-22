@@ -1,6 +1,6 @@
 # 21 - WebDAV Technical Spec
 
-OxiCloud's WebDAV implementation follows RFC 4918. Clients can perform file operations over HTTP, so desktop apps, mobile clients, and any WebDAV-compatible software can treat OxiCloud as a remote filesystem.
+Miyukini Cloud's WebDAV implementation follows RFC 4918. Clients can perform file operations over HTTP, so desktop apps, mobile clients, and any WebDAV-compatible software can treat Miyukini Cloud as a remote filesystem.
 
 Supported operations: file/folder browsing, uploads, downloads, create/delete/move resources, metadata retrieval and modification.
 
@@ -72,7 +72,7 @@ A typical WebDAV request flows through:
 7. Results go back to the adapter for XML formatting
 8. Handler returns the response with proper HTTP headers
 
-## Integration with OxiCloud
+## Integration with Miyukini Cloud
 
 ### File Operations
 Uses **FileService** for uploads, downloads, and management.
@@ -81,7 +81,7 @@ Uses **FileService** for uploads, downloads, and management.
 Uses **FolderService** for directory listing and manipulation. Maintains consistent behavior with the REST API.
 
 ### Authentication
-Same auth mechanisms as the rest of OxiCloud. Supports HTTP Basic Authentication for WebDAV clients.
+Same auth mechanisms as the rest of Miyukini Cloud. Supports HTTP Basic Authentication for WebDAV clients.
 
 ### Trash Integration
 Integrates with the trash system for file/folder deletion. WebDAV operations use the trash feature when available.

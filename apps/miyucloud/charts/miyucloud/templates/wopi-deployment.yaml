@@ -3,20 +3,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "oxicloud.fullname" . }}-wopi
+  name: {{ include "miyucloud.fullname" . }}-wopi
   labels:
-    {{- include "oxicloud.labels" . | nindent 4 }}
+    {{- include "miyucloud.labels" . | nindent 4 }}
     app.kubernetes.io/component: wopi
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "oxicloud.selectorLabels" . | nindent 6 }}
+      {{- include "miyucloud.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: wopi
   template:
     metadata:
       labels:
-        {{- include "oxicloud.selectorLabels" . | nindent 8 }}
+        {{- include "miyucloud.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: wopi
     spec:
       containers:
@@ -42,12 +42,12 @@ spec:
             - name: username
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "oxicloud.fullname" . }}-secret{{ end }}
+                  name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "miyucloud.fullname" . }}-secret{{ end }}
                   key: WOPI_ADMIN_USERNAME
             - name: password
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "oxicloud.fullname" . }}-secret{{ end }}
+                  name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "miyucloud.fullname" . }}-secret{{ end }}
                   key: WOPI_ADMIN_PASSWORD
           readinessProbe:
             httpGet:

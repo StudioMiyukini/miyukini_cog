@@ -1,12 +1,12 @@
 # 03 - Storage Safety
 
-OxiCloud ensures data integrity and durability through a combination of PostgreSQL transactional guarantees and atomic blob writes. The goal: writes either complete fully or not at all, data reaches persistent storage, and the system recovers from crashes or power loss.
+Miyukini Cloud ensures data integrity and durability through a combination of PostgreSQL transactional guarantees and atomic blob writes. The goal: writes either complete fully or not at all, data reaches persistent storage, and the system recovers from crashes or power loss.
 
 ---
 
 ## Storage Model
 
-OxiCloud uses a **100% blob storage model**:
+Miyukini Cloud uses a **100% blob storage model**:
 
 - **Metadata** (file names, folder hierarchy, sizes, MIME types, trash status) lives in **PostgreSQL** — protected by ACID transactions.
 - **File content** is stored as content-addressed blobs via **DedupService** at `.blobs/{prefix}/{hash}.blob` — protected by atomic writes and fsync.

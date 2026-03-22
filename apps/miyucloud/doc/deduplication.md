@@ -1,6 +1,6 @@
 # 06 - Deduplication
 
-OxiCloud uses **content-addressable deduplication** via SHA-256 hashing. Uploaded file content is hashed and stored in a central blob store. Identical files share the same blob, tracked by a reference counter. Disk savings scale with the number of duplicates.
+Miyukini Cloud uses **content-addressable deduplication** via SHA-256 hashing. Uploaded file content is hashed and stored in a central blob store. Identical files share the same blob, tracked by a reference counter. Disk savings scale with the number of duplicates.
 
 Deduplication is always enabled and non-fatal -- if dedup fails, file operations proceed normally with a warning log.
 
@@ -316,22 +316,22 @@ Located at the bottom of `src/infrastructure/services/dedup_service.rs`:
 # 1. Check if file already exists by hash
 HASH=$(sha256sum myfile.txt | cut -d' ' -f1)
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/dedup/check/$HASH"
+  "https://miyucloud.example.com/api/dedup/check/$HASH"
 
 # 2. Upload with dedup (if not exists)
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -F "file=@myfile.txt" \
-  "https://oxicloud.example.com/api/dedup/upload"
+  "https://miyucloud.example.com/api/dedup/upload"
 
 # 3. Get dedup statistics
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/dedup/stats"
+  "https://miyucloud.example.com/api/dedup/stats"
 
 # 4. Retrieve blob content
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/dedup/blob/$HASH" -o output.bin
+  "https://miyucloud.example.com/api/dedup/blob/$HASH" -o output.bin
 
 # 5. Recalculate stats with integrity check
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/dedup/recalculate"
+  "https://miyucloud.example.com/api/dedup/recalculate"
 ```

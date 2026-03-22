@@ -23,16 +23,16 @@ The WebDAV interface exposes file operations over HTTP at a single base path. Al
 The WebDAV interface lives at:
 
 ```
-https://[your-oxicloud-server]/webdav/
+https://[your-miyucloud-server]/webdav/
 ```
 
 All file and folder operations hang off this base path. Append the resource path to the URL.
 
 Examples:
-- Root folder: `https://[your-oxicloud-server]/webdav/`
-- File "document.pdf" in root: `https://[your-oxicloud-server]/webdav/document.pdf`
-- Folder "projects": `https://[your-oxicloud-server]/webdav/projects/`
-- File in subfolder: `https://[your-oxicloud-server]/webdav/projects/proposal.docx`
+- Root folder: `https://[your-miyucloud-server]/webdav/`
+- File "document.pdf" in root: `https://[your-miyucloud-server]/webdav/document.pdf`
+- Folder "projects": `https://[your-miyucloud-server]/webdav/projects/`
+- File in subfolder: `https://[your-miyucloud-server]/webdav/projects/proposal.docx`
 
 ## Authentication
 
@@ -57,7 +57,7 @@ Use the **PROPFIND** method with a **Depth** header:
 Request:
 ```http
 PROPFIND /webdav/projects/ HTTP/1.1
-Host: your-oxicloud-server
+Host: your-miyucloud-server
 Depth: 1
 Content-Type: application/xml
 Authorization: Basic [credentials]
@@ -96,7 +96,7 @@ Standard HTTP **GET**:
 
 ```http
 GET /webdav/projects/document.pdf HTTP/1.1
-Host: your-oxicloud-server
+Host: your-miyucloud-server
 Authorization: Basic [credentials]
 ```
 
@@ -118,7 +118,7 @@ Use HTTP **PUT** to upload or update a file:
 
 ```http
 PUT /webdav/projects/document.pdf HTTP/1.1
-Host: your-oxicloud-server
+Host: your-miyucloud-server
 Content-Type: application/pdf
 Content-Length: 12345
 Authorization: Basic [credentials]
@@ -134,7 +134,7 @@ Use the **MKCOL** method:
 
 ```http
 MKCOL /webdav/projects/new-folder HTTP/1.1
-Host: your-oxicloud-server
+Host: your-miyucloud-server
 Authorization: Basic [credentials]
 ```
 
@@ -146,8 +146,8 @@ Returns `201 Created` on success.
 
 ```http
 MOVE /webdav/old-location.pdf HTTP/1.1
-Host: your-oxicloud-server
-Destination: https://your-oxicloud-server/webdav/new-location.pdf
+Host: your-miyucloud-server
+Destination: https://your-miyucloud-server/webdav/new-location.pdf
 Authorization: Basic [credentials]
 ```
 
@@ -155,8 +155,8 @@ Authorization: Basic [credentials]
 
 ```http
 COPY /webdav/original.pdf HTTP/1.1
-Host: your-oxicloud-server
-Destination: https://your-oxicloud-server/webdav/copy.pdf
+Host: your-miyucloud-server
+Destination: https://your-miyucloud-server/webdav/copy.pdf
 Authorization: Basic [credentials]
 ```
 
@@ -168,7 +168,7 @@ Use HTTP **DELETE**:
 
 ```http
 DELETE /webdav/projects/document.pdf HTTP/1.1
-Host: your-oxicloud-server
+Host: your-miyucloud-server
 Authorization: Basic [credentials]
 ```
 
@@ -246,7 +246,7 @@ import xml.etree.ElementTree as ET
 
 # Set up authentication
 auth = HTTPBasicAuth('username', 'password')
-base_url = 'https://your-oxicloud-server/webdav'
+base_url = 'https://your-miyucloud-server/webdav'
 
 # 1. List directory contents
 headers = {'Depth': '1'}
@@ -350,7 +350,7 @@ Using the browser `fetch` API:
 
 ```javascript
 // Base configuration
-const baseUrl = 'https://your-oxicloud-server/webdav';
+const baseUrl = 'https://your-miyucloud-server/webdav';
 const credentials = btoa('username:password');
 const headers = {
   'Authorization': `Basic ${credentials}`
@@ -610,7 +610,7 @@ class WebDavClient
 // Example usage
 async Task RunExampleAsync()
 {
-    var client = new WebDavClient("https://your-oxicloud-server", "username", "password");
+    var client = new WebDavClient("https://your-miyucloud-server", "username", "password");
 
     // List directory
     try

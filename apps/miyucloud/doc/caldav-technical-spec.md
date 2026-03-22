@@ -236,4 +236,4 @@ Indexes: `idx_calendars_owner_id`, `idx_calendar_events_calendar_id`, `idx_calen
 
 See `dav-client-setup.md` for client-specific configuration instructions.
 
-CalDAV URL: `https://oxicloud.example.com/caldav/`
+CalDAV URL: `https://miyucloud.example.com/caldav/`

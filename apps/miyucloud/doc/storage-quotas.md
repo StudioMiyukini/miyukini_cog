@@ -39,7 +39,7 @@ Admins set per-user quotas through the admin API:
 curl -X PUT -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"quota_bytes": 10737418240}' \
-  "https://oxicloud.example.com/api/admin/users/{user_id}/quota"
+  "https://miyucloud.example.com/api/admin/users/{user_id}/quota"
 ```
 
 ## Dashboard Stats

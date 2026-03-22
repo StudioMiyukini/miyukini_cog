@@ -1,6 +1,6 @@
 # 07 - Chunked Uploads
 
-OxiCloud implements a TUS-like chunked upload protocol for large files (≥10 MB). Files are split into chunks (default 5 MB) that can be uploaded in parallel (up to 6 concurrent), with progress tracking, optional MD5 checksums, and automatic session expiration.
+Miyukini Cloud implements a TUS-like chunked upload protocol for large files (≥10 MB). Files are split into chunks (default 5 MB) that can be uploaded in parallel (up to 6 concurrent), with progress tracking, optional MD5 checksums, and automatic session expiration.
 
 ## Architecture
 
@@ -150,7 +150,7 @@ pub struct CompleteUploadResponse {
 RESPONSE=$(curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"filename":"large-file.zip","total_size":52428800}' \
-  "https://oxicloud.example.com/api/uploads")
+  "https://miyucloud.example.com/api/uploads")
 
 UPLOAD_ID=$(echo $RESPONSE | jq -r '.upload_id')
 CHUNK_SIZE=$(echo $RESPONSE | jq -r '.chunk_size')
@@ -161,15 +161,15 @@ for i in $(seq 0 $((TOTAL_CHUNKS - 1))); do
   dd if=large-file.zip bs=$CHUNK_SIZE skip=$i count=1 2>/dev/null | \
   curl -s -X PATCH -H "Authorization: Bearer $TOKEN" \
     --data-binary @- \
-    "https://oxicloud.example.com/api/uploads/$UPLOAD_ID?chunk_index=$i" &
+    "https://miyucloud.example.com/api/uploads/$UPLOAD_ID?chunk_index=$i" &
 done
 wait
 
 # 3. Complete upload
 curl -X POST -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/uploads/$UPLOAD_ID/complete"
+  "https://miyucloud.example.com/api/uploads/$UPLOAD_ID/complete"
 
 # 4. Check progress (optional)
 curl -I -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/uploads/$UPLOAD_ID"
+  "https://miyucloud.example.com/api/uploads/$UPLOAD_ID"
 ```

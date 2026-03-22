@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "oxicloud.fullname" . }}
+  name: {{ include "miyucloud.fullname" . }}
   labels:
-    {{- include "oxicloud.labels" . | nindent 4 }}
+    {{- include "miyucloud.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "oxicloud.fullname" . }}-headless
+  serviceName: {{ include "miyucloud.fullname" . }}-headless
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "oxicloud.selectorLabels" . | nindent 6 }}
+      {{- include "miyucloud.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "oxicloud.selectorLabels" . | nindent 8 }}
+        {{- include "miyucloud.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: oxicloud
+        - name: miyucloud
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -25,14 +25,14 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: {{ include "oxicloud.fullname" . }}-config
+                name: {{ include "miyucloud.fullname" . }}-config
             - secretRef:
-                name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "oxicloud.fullname" . }}-secret{{ end }}
+                name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "miyucloud.fullname" . }}-secret{{ end }}
           env:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "oxicloud.fullname" . }}-secret{{ end }}
+                  name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "miyucloud.fullname" . }}-secret{{ end }}
                   key: DB_PASSWORD
             - name: OXICLOUD_DB_CONNECTION_STRING
               value: "postgres://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql/{{ .Values.postgresql.auth.database }}"

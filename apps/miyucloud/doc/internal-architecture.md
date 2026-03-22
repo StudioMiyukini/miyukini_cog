@@ -1,6 +1,6 @@
 # 01 - Internal Architecture
 
-OxiCloud follows a **hexagonal (ports & adapters) architecture** organized in four layers:
+Miyukini Cloud follows a **hexagonal (ports & adapters) architecture** organized in four layers:
 
 ```
 Domain  →  Application  →  Infrastructure  →  Interfaces
@@ -12,7 +12,7 @@ All cross-layer dependencies point inward via trait-based ports. The DI containe
 
 ## Storage Model: 100% Blob Storage
 
-OxiCloud uses a **100% blob storage model** where:
+Miyukini Cloud uses a **100% blob storage model** where:
 
 - **File metadata** (name, folder, size, user, timestamps, trash status) is stored in **PostgreSQL** (`storage.files` table).
 - **File content** is stored as content-addressed blobs via **DedupService** at `.blobs/{prefix}/{hash}.blob`.

@@ -1,6 +1,6 @@
 # 19 - Database Transactions
 
-OxiCloud uses explicit transactions on PostgreSQL to guarantee data integrity. All transactional operations follow ACID properties:
+Miyukini Cloud uses explicit transactions on PostgreSQL to guarantee data integrity. All transactional operations follow ACID properties:
 
 - **Atomicity** -- all-or-nothing. If any part fails, the entire transaction fails.
 - **Consistency** -- the database moves from one valid state to another.
@@ -72,7 +72,7 @@ async fn create_user(&self, user: User) -> UserRepositoryResult<User> {
 
 ## Isolation Levels
 
-OxiCloud supports different transaction isolation levels via **with_transaction_isolation**:
+Miyukini Cloud supports different transaction isolation levels via **with_transaction_isolation**:
 
 ```rust
 // Ejemplo de uso con nivel de aislamiento específico

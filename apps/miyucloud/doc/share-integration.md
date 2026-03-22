@@ -297,7 +297,7 @@ pub fn create_share_service(&self, repos: &RepositoryServices)
 
 ### Accessing a Shared Resource
 
-1. Someone opens a shared link (e.g., `http://oxicloud.example/api/s/{token}`).
+1. Someone opens a shared link (e.g., `http://miyucloud.example/api/s/{token}`).
 2. Backend checks: valid token, not expired, password-protected or not.
 3. If password-protected, the user is prompted.
 4. Access counter increments.

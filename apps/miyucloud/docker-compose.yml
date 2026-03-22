@@ -5,11 +5,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: oxicloud
+      POSTGRES_DB: miyucloud
     ports:
       - "5432:5432"
     networks:
-      - oxicloud
+      - miyucloud
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,8 +18,8 @@ services:
       timeout: 5s
       retries: 5
 
-  oxicloud:
-    image: oxicloud
+  miyucloud:
+    image: miyucloud
     restart: always
     build:
       context: .
@@ -27,7 +27,7 @@ services:
     ports:
       - "8086:8086"
     networks:
-      - oxicloud
+      - miyucloud
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,7 +37,7 @@ services:
       - storage_data:/app/storage
 
 networks:
-  oxicloud:
+  miyucloud:
     driver: bridge
 
 volumes:

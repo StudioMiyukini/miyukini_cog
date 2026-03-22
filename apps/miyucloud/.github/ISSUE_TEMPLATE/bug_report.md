@@ -31,7 +31,7 @@ If applicable, add screenshots to help explain your problem.
 
 - OS: [e.g. Ubuntu 22.04, Windows 11]
 - Browser: [e.g. Chrome 120, Firefox 121]
-- OxiCloud Version: [e.g. 0.1.0]
+- Miyukini Cloud Version: [e.g. 0.1.0]
 - Rust Version: [e.g. 1.70.0]
 
 ## Additional Context

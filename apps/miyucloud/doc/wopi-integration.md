@@ -1,4 +1,4 @@
-# WOPI Integration Technical Report for OxiCloud
+# WOPI Integration Technical Report for Miyukini Cloud
 
 ## Table of Contents
 
@@ -7,8 +7,8 @@
 3. [CheckFileInfo Response JSON Structure](#3-checkfileinfo-response-json-structure)
 4. [WOPI Discovery XML](#4-wopi-discovery-xml)
 5. [Collabora Online vs OnlyOffice WOPI Differences](#5-collabora-online-vs-onlyoffice-wopi-differences)
-6. [OxiCloud Backend Changes](#6-oxicloud-backend-changes)
-7. [OxiCloud Frontend Changes](#7-oxicloud-frontend-changes)
+6. [Miyukini Cloud Backend Changes](#6-miyucloud-backend-changes)
+7. [Miyukini Cloud Frontend Changes](#7-miyucloud-frontend-changes)
 8. [Docker-Compose Additions](#8-docker-compose-additions)
 9. [Implementation Roadmap](#9-implementation-roadmap)
 
@@ -23,7 +23,7 @@ WOPI (Web Application Open Platform Interface) is a REST-based protocol that ena
 ```
 ┌──────────────────────┐         WOPI REST API           ┌──────────────────────┐
 │                      │◄──────────────────────────────► │                      │
-│  OxiCloud (WOPI Host)│  CheckFileInfo, GetFile,        │  Collabora / Only-   │
+│  Miyukini Cloud (WOPI Host)│  CheckFileInfo, GetFile,        │  Collabora / Only-   │
 │  Rust / Axum         │  PutFile, Lock, Unlock          │  Office (WOPI Client)│
 │                      │                                 │                      │
 │  /wopi/files/{id}    │                                 │  Document Editor     │
@@ -39,10 +39,10 @@ WOPI (Web Application Open Platform Interface) is a REST-based protocol that ena
 
 **Flow Summary:**
 
-1. User clicks "Edit in Office" on a file in OxiCloud's frontend.
-2. OxiCloud generates a **WOPI access token** and constructs a **host page URL**.
-3. The host page contains an iframe whose `src` points to the WOPI Client's **action URL** (obtained from WOPI discovery), with the `WOPISrc` pointing back to OxiCloud's WOPI endpoints.
-4. The WOPI Client (Collabora/OnlyOffice) calls OxiCloud's WOPI endpoints using the access token to:
+1. User clicks "Edit in Office" on a file in Miyukini Cloud's frontend.
+2. Miyukini Cloud generates a **WOPI access token** and constructs a **host page URL**.
+3. The host page contains an iframe whose `src` points to the WOPI Client's **action URL** (obtained from WOPI discovery), with the `WOPISrc` pointing back to Miyukini Cloud's WOPI endpoints.
+4. The WOPI Client (Collabora/OnlyOffice) calls Miyukini Cloud's WOPI endpoints using the access token to:
    - Get file metadata (`CheckFileInfo`)
    - Download the file (`GetFile`)
    - Lock the file (`Lock`)
@@ -209,7 +209,7 @@ Locks the file for editing.
 
 ### 4.1 What is WOPI Discovery?
 
-WOPI Discovery is the process by which OxiCloud (the WOPI host) learns the capabilities of the WOPI client (Collabora/OnlyOffice). The WOPI client exposes an XML document at a well-known URL that describes:
+WOPI Discovery is the process by which Miyukini Cloud (the WOPI host) learns the capabilities of the WOPI client (Collabora/OnlyOffice). The WOPI client exposes an XML document at a well-known URL that describes:
 
 - **Supported file types** (extensions)
 - **Available actions** (view, edit, editnew, etc.)
@@ -256,14 +256,14 @@ WOPI Discovery is the process by which OxiCloud (the WOPI host) learns the capab
 </wopi-discovery>
 ```
 
-### 4.4 How OxiCloud Uses Discovery
+### 4.4 How Miyukini Cloud Uses Discovery
 
 1. **Fetch and cache** the discovery XML from the configured WOPI client URL (refresh every 12–24 hours or on proof key validation failure).
 2. **Parse** the XML to build a map of `extension → { action_name → urlsrc }`.
 3. When a user wants to edit/view a file:
    - Look up the file extension in the map.
    - Get the `urlsrc` for the desired action (e.g., `edit`).
-   - **Transform** the URL: replace `WOPI_SOURCE` with OxiCloud's `WOPISrc` (the URL-encoded `CheckFileInfo` endpoint), and optionally replace `UI_LLCC` with the user's locale.
+   - **Transform** the URL: replace `WOPI_SOURCE` with Miyukini Cloud's `WOPISrc` (the URL-encoded `CheckFileInfo` endpoint), and optionally replace `UI_LLCC` with the user's locale.
 4. The transformed URL becomes the iframe `src` on the host page.
 
 ### 4.5 Action Requirements
@@ -326,7 +326,7 @@ WOPI Discovery is the process by which OxiCloud (the WOPI host) learns the capab
 
 ---
 
-## 6. OxiCloud Backend Changes
+## 6. Miyukini Cloud Backend Changes
 
 ### 6.1 New Configuration (`src/common/config.rs`)
 
@@ -341,7 +341,7 @@ pub struct WopiConfig {
     /// URL to the WOPI client's discovery endpoint
     /// e.g., "http://collabora:9980/hosting/discovery"
     pub discovery_url: String,
-    /// The public-facing base URL of OxiCloud (used for WOPISrc)
+    /// The public-facing base URL of Miyukini Cloud (used for WOPISrc)
     /// e.g., "https://cloud.example.com"
     pub public_base_url: String,
     /// Secret key for signing WOPI access tokens (HMAC-SHA256)
@@ -369,13 +369,13 @@ impl Default for WopiConfig {
 }
 ```
 
-**Environment variables** (following existing OxiCloud env pattern):
+**Environment variables** (following existing Miyukini Cloud env pattern):
 
 | Variable | Purpose | Example |
 |----------|---------|---------|
 | `WOPI_ENABLED` | Enable/disable WOPI | `true` |
 | `WOPI_DISCOVERY_URL` | Discovery endpoint of the editor | `http://collabora:9980/hosting/discovery` |
-| `WOPI_PUBLIC_BASE_URL` | Public URL of OxiCloud | `https://cloud.example.com` |
+| `WOPI_PUBLIC_BASE_URL` | Public URL of Miyukini Cloud | `https://cloud.example.com` |
 | `WOPI_SECRET` | HMAC secret for access tokens | `supersecretkey123` |
 | `WOPI_TOKEN_TTL` | Token lifetime in seconds | `86400` |
 
@@ -700,13 +700,13 @@ base64 = "0.22"         # Token encoding
 
 ---
 
-## 7. OxiCloud Frontend Changes
+## 7. Miyukini Cloud Frontend Changes
 
 ### 7.1 New JavaScript Module: `static/js/wopiEditor.js`
 
 ```javascript
 /**
- * OxiCloud WOPI Editor Integration
+ * Miyukini Cloud WOPI Editor Integration
  * Opens files in Collabora Online / OnlyOffice via WOPI protocol
  */
 class WopiEditor {
@@ -741,7 +741,7 @@ class WopiEditor {
    */
   async openEditor(fileId, fileName, action = 'edit') {
     try {
-      // 1. Request editor URL from OxiCloud API
+      // 1. Request editor URL from Miyukini Cloud API
       const response = await fetch(
         `/api/wopi/editor-url?file_id=${encodeURIComponent(fileId)}&action=${action}`,
         {
@@ -955,7 +955,7 @@ window.addEventListener('message', (event) => {
 
 ```yaml
 services:
-  # ... existing postgres and oxicloud services ...
+  # ... existing postgres and miyucloud services ...
 
   collabora:
     image: collabora/code:latest
@@ -963,10 +963,10 @@ services:
     cap_add:
       - MKNOD
     environment:
-      # Allow OxiCloud domain to use Collabora
-      - "aliasgroup1=http://oxicloud:8086"
+      # Allow Miyukini Cloud domain to use Collabora
+      - "aliasgroup1=http://miyucloud:8086"
       # Alternative: use domain= for regex pattern
-      # - "domain=oxicloud\\.example\\.com"
+      # - "domain=miyucloud\\.example\\.com"
       # Disable SSL (handled by reverse proxy)
       - "extra_params=--o:ssl.enable=false --o:ssl.termination=true"
       # Admin console credentials
@@ -977,16 +977,16 @@ services:
     ports:
       - "9980:9980"
     networks:
-      - oxicloud
+      - miyucloud
     depends_on:
-      - oxicloud
+      - miyucloud
 
-  # Update oxicloud service with WOPI env vars:
-  oxicloud:
+  # Update miyucloud service with WOPI env vars:
+  miyucloud:
     # ... existing config ...
     environment:
-      - "OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/oxicloud"
-      - "DATABASE_URL=postgres://postgres:postgres@postgres/oxicloud"
+      - "OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/miyucloud"
+      - "DATABASE_URL=postgres://postgres:postgres@postgres/miyucloud"
       # WOPI configuration
       - "WOPI_ENABLED=true"
       - "WOPI_DISCOVERY_URL=http://collabora:9980/hosting/discovery"
@@ -1006,18 +1006,18 @@ services:
     environment:
       # Enable WOPI mode
       - "WOPI_ENABLED=true"
-      # JWT secret (must match OxiCloud's WOPI secret)
+      # JWT secret (must match Miyukini Cloud's WOPI secret)
       - "JWT_SECRET=change-me-to-a-random-secret-key"
       - "JWT_ENABLED=true"
     ports:
       - "8088:80"
     networks:
-      - oxicloud
+      - miyucloud
     volumes:
       - onlyoffice_data:/var/www/onlyoffice/Data
       - onlyoffice_logs:/var/log/onlyoffice
     depends_on:
-      - oxicloud
+      - miyucloud
 
 volumes:
   # ... existing volumes ...
@@ -1035,9 +1035,9 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: oxicloud
+      POSTGRES_DB: miyucloud
     networks:
-      - oxicloud
+      - miyucloud
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql
@@ -1047,8 +1047,8 @@ services:
       timeout: 5s
       retries: 5
 
-  oxicloud:
-    image: oxicloud
+  miyucloud:
+    image: miyucloud
     restart: always
     build:
       context: .
@@ -1056,13 +1056,13 @@ services:
     ports:
       - "8086:8086"
     networks:
-      - oxicloud
+      - miyucloud
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - "OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/oxicloud"
-      - "DATABASE_URL=postgres://postgres:postgres@postgres/oxicloud"
+      - "OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/miyucloud"
+      - "DATABASE_URL=postgres://postgres:postgres@postgres/miyucloud"
       # WOPI configuration
       - "WOPI_ENABLED=true"
       - "WOPI_DISCOVERY_URL=http://collabora:9980/hosting/discovery"
@@ -1077,14 +1077,14 @@ services:
     cap_add:
       - MKNOD
     environment:
-      - "aliasgroup1=http://oxicloud:8086"
+      - "aliasgroup1=http://miyucloud:8086"
       - "extra_params=--o:ssl.enable=false --o:ssl.termination=true"
       - "username=admin"
       - "password=admin_password"
     ports:
       - "9980:9980"
     networks:
-      - oxicloud
+      - miyucloud
 
   # Optional: OnlyOffice alternative
   # onlyoffice:
@@ -1097,12 +1097,12 @@ services:
   #   ports:
   #     - "8088:80"
   #   networks:
-  #     - oxicloud
+  #     - miyucloud
   #   volumes:
   #     - onlyoffice_data:/var/www/onlyoffice/Data
 
 networks:
-  oxicloud:
+  miyucloud:
     driver: bridge
 
 volumes:
@@ -1135,9 +1135,9 @@ location ^~ /hosting/ {
     proxy_set_header Host $http_host;
 }
 
-# WOPI endpoints (OxiCloud)
+# WOPI endpoints (Miyukini Cloud)
 location ^~ /wopi/ {
-    proxy_pass http://oxicloud:8086;
+    proxy_pass http://miyucloud:8086;
     proxy_set_header Host $http_host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
@@ -1179,14 +1179,14 @@ location ^~ /wopi/ {
 
 ---
 
-## Key Architectural Notes for OxiCloud
+## Key Architectural Notes for Miyukini Cloud
 
 1. **WOPI routes go at `/wopi/` (top-level)**, following the same pattern as WebDAV/CalDAV/CardDAV which are merged at top-level in `main.rs` for protocol compliance.
 
-2. **WOPI uses its own authentication** (access tokens), not OxiCloud's JWT auth middleware. The WOPI routes should NOT be wrapped in `auth_middleware`. Instead, each WOPI handler validates the `access_token` query parameter internally.
+2. **WOPI uses its own authentication** (access tokens), not Miyukini Cloud's JWT auth middleware. The WOPI routes should NOT be wrapped in `auth_middleware`. Instead, each WOPI handler validates the `access_token` query parameter internally.
 
 3. **The existing `FileRetrievalService` and `FileManagementService`** in `AppState` already provide all the file operations needed (download, upload, rename, delete). WOPI handlers are thin adapters that call these existing services.
 
-4. **File IDs** in OxiCloud are already URL-safe strings (UUID-style), which satisfies the WOPI file ID requirement.
+4. **File IDs** in Miyukini Cloud are already URL-safe strings (UUID-style), which satisfies the WOPI file ID requirement.
 
 5. **The `InlineViewer`** already has a modal pattern that can be extended. The WOPI editor uses a similar full-screen modal approach but with an iframe instead of direct content rendering.

@@ -1,6 +1,6 @@
 # 02 - Deployment
 
-OxiCloud is deployed as a containerized application with PostgreSQL.
+Miyukini Cloud is deployed as a containerized application with PostgreSQL.
 
 ---
 
@@ -19,7 +19,7 @@ OxiCloud is deployed as a containerized application with PostgreSQL.
    docker compose up -d
    ```
 
-3. **Access OxiCloud:**
+3. **Access Miyukini Cloud:**
    Open `http://localhost:8086` in your browser.
 
 ### Docker Compose
@@ -30,7 +30,7 @@ services:
   postgres:
     image: postgres:17.4-alpine
     environment:
-      POSTGRES_DB: oxicloud
+      POSTGRES_DB: miyucloud
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
@@ -42,8 +42,8 @@ services:
       timeout: 5s
       retries: 5
 
-  oxicloud:
-    image: oxicloud:latest
+  miyucloud:
+    image: miyucloud:latest
     ports:
       - "8086:8086"
     env_file:
@@ -63,10 +63,10 @@ volumes:
 
 3-stage Alpine-based build:
 1. **Cacher** -- pre-builds dependency layer
-2. **Builder** -- compiles OxiCloud (`rust:1.93.0-alpine3.23`)
+2. **Builder** -- compiles Miyukini Cloud (`rust:1.93.0-alpine3.23`)
 3. **Runtime** -- minimal Alpine image (`alpine:3.23.3`) with `libgcc`, `ca-certificates`, `libpq`, `tzdata`, `su-exec`
 
-Non-root user: `oxicloud` (UID/GID 1001). Exposed port: `8086`. Entrypoint: `entrypoint.sh` (chown storage + drop privileges via `su-exec`).
+Non-root user: `miyucloud` (UID/GID 1001). Exposed port: `8086`. Entrypoint: `entrypoint.sh` (chown storage + drop privileges via `su-exec`).
 
 ---
 
@@ -86,7 +86,7 @@ Non-root user: `oxicloud` (UID/GID 1001). Exposed port: `8086`. Entrypoint: `ent
 
 | Variable | Default | Description |
 |---|---|---|
-| `OXICLOUD_DB_CONNECTION_STRING` | `postgres://postgres:postgres@localhost:5432/oxicloud` | PostgreSQL connection string |
+| `OXICLOUD_DB_CONNECTION_STRING` | `postgres://postgres:postgres@localhost:5432/miyucloud` | PostgreSQL connection string |
 | `OXICLOUD_DB_MAX_CONNECTIONS` | `20` | Max pool connections |
 | `OXICLOUD_DB_MIN_CONNECTIONS` | `5` | Min pool connections |
 
@@ -226,22 +226,22 @@ Hardcoded defaults in `src/common/config.rs`:
 - Helm
 
 ## 02 - Deployment
-Change the `charts/oxicloud/values.yaml` to match your setup.
+Change the `charts/miyucloud/values.yaml` to match your setup.
 
 To install the Chart run:
 ```bash
-helm upgrade --install oxicloud charts/oxicloud -f charts/oxicloud/values.yaml
+helm upgrade --install miyucloud charts/miyucloud -f charts/miyucloud/values.yaml
 ```
 
 ## 03 - Verification
 
 To verify your deployment run:
 ```bash
-kubectl get pods -n oxicloud
-kubectl logs statefulset/oxicloud -n oxicloud
+kubectl get pods -n miyucloud
+kubectl logs statefulset/miyucloud -n miyucloud
 ```
 
 If you have collabora enabled you want to check the logs:
 ```bash
-kubectl logs statefulset/oxicloud -n oxicloud | grep "WOPI discovery loaded"
+kubectl logs statefulset/miyucloud -n miyucloud | grep "WOPI discovery loaded"
 ```

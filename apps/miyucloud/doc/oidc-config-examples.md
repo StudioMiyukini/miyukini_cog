@@ -23,9 +23,9 @@ OXICLOUD_OIDC_PROVIDER_NAME="Display Name"
 OXICLOUD_OIDC_ISSUER_URL="https://provider.example.com/realms/your-realm"
 OXICLOUD_OIDC_CLIENT_ID="your-client-id"
 OXICLOUD_OIDC_CLIENT_SECRET="your-client-secret"
-OXICLOUD_OIDC_REDIRECT_URI="https://your-oxicloud.example.com/api/auth/oidc/callback"
+OXICLOUD_OIDC_REDIRECT_URI="https://your-miyucloud.example.com/api/auth/oidc/callback"
 OXICLOUD_OIDC_SCOPES="openid profile email"
-OXICLOUD_OIDC_FRONTEND_URL="https://your-oxicloud.example.com"
+OXICLOUD_OIDC_FRONTEND_URL="https://your-miyucloud.example.com"
 OXICLOUD_OIDC_AUTO_PROVISION="true"
 OXICLOUD_OIDC_ADMIN_GROUPS="admin-group"
 OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN="false"
@@ -39,16 +39,16 @@ OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN="false"
 
 1. Log into the Authentik admin panel
 2. Go to "Applications" -> "Create"
-3. Enter a name for the application (e.g. "OxiCloud")
+3. Enter a name for the application (e.g. "Miyukini Cloud")
 4. Select "OAuth2/OpenID Provider" as the provider type
 5. In the OAuth2 configuration:
-   - **Redirect URI/Callback URL**: `https://your-oxicloud.example.com/api/auth/oidc/callback`
+   - **Redirect URI/Callback URL**: `https://your-miyucloud.example.com/api/auth/oidc/callback`
    - **Client Type**: Confidential
    - **Client ID**: auto-generated (note it down)
    - **Client Secret**: auto-generated (note it down)
    - **Scopes**: openid, email, profile
 6. In the UI configuration:
-   - **Launch URL**: `https://your-oxicloud.example.com/`
+   - **Launch URL**: `https://your-miyucloud.example.com/`
    - **Icon**: optional
 
 ### 2. Configure for Authentik
@@ -57,17 +57,17 @@ OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN="false"
 # docker-compose.yml
 version: '3'
 services:
-  oxicloud:
-    image: oxicloud:latest
+  miyucloud:
+    image: miyucloud:latest
     environment:
       OXICLOUD_OIDC_ENABLED: "true"
       OXICLOUD_OIDC_PROVIDER_NAME: "Authentik"
-      OXICLOUD_OIDC_ISSUER_URL: "https://authentik.example.com/application/o/oxicloud"
+      OXICLOUD_OIDC_ISSUER_URL: "https://authentik.example.com/application/o/miyucloud"
       OXICLOUD_OIDC_CLIENT_ID: "your-authentik-client-id"
       OXICLOUD_OIDC_CLIENT_SECRET: "your-authentik-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://oxicloud.example.com/api/auth/oidc/callback"
+      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
       OXICLOUD_OIDC_SCOPES: "openid profile email"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://oxicloud.example.com"
+      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
       OXICLOUD_OIDC_AUTO_PROVISION: "true"
       OXICLOUD_OIDC_ADMIN_GROUPS: ""
       OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
@@ -93,15 +93,15 @@ identity_providers:
     cors:
       endpoints: ['authorization', 'token', 'revocation', 'introspection']
       allowed_origins:
-        - https://oxicloud.example.com
+        - https://miyucloud.example.com
     clients:
-      - id: oxicloud
-        description: OxiCloud
+      - id: miyucloud
+        description: Miyukini Cloud
         secret: your-secure-client-secret  # Change this
         public: false
         authorization_policy: two_factor
         redirect_uris:
-          - https://oxicloud.example.com/api/auth/oidc/callback
+          - https://miyucloud.example.com/api/auth/oidc/callback
         scopes: ['openid', 'profile', 'email', 'groups']
         userinfo_signing_algorithm: none
 ```
@@ -112,17 +112,17 @@ identity_providers:
 # docker-compose.yml
 version: '3'
 services:
-  oxicloud:
-    image: oxicloud:latest
+  miyucloud:
+    image: miyucloud:latest
     environment:
       OXICLOUD_OIDC_ENABLED: "true"
       OXICLOUD_OIDC_PROVIDER_NAME: "Authelia"
       OXICLOUD_OIDC_ISSUER_URL: "https://authelia.example.com"
-      OXICLOUD_OIDC_CLIENT_ID: "oxicloud"
+      OXICLOUD_OIDC_CLIENT_ID: "miyucloud"
       OXICLOUD_OIDC_CLIENT_SECRET: "your-secure-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://oxicloud.example.com/api/auth/oidc/callback"
+      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
       OXICLOUD_OIDC_SCOPES: "openid profile email groups"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://oxicloud.example.com"
+      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
       OXICLOUD_OIDC_AUTO_PROVISION: "true"
       OXICLOUD_OIDC_ADMIN_GROUPS: ""
       OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
@@ -142,13 +142,13 @@ services:
 2. Select your Realm
 3. Go to "Clients" -> "Create"
 4. Fill in the form:
-   - **Client ID**: `oxicloud`
+   - **Client ID**: `miyucloud`
    - **Client Protocol**: `openid-connect`
-   - **Root URL**: `https://oxicloud.example.com`
+   - **Root URL**: `https://miyucloud.example.com`
 5. In the client configuration:
    - **Access Type**: `confidential`
-   - **Valid Redirect URIs**: `https://oxicloud.example.com/api/auth/oidc/callback`
-   - **Web Origins**: `https://oxicloud.example.com` (or `+` to allow all origins)
+   - **Valid Redirect URIs**: `https://miyucloud.example.com/api/auth/oidc/callback`
+   - **Web Origins**: `https://miyucloud.example.com` (or `+` to allow all origins)
 6. Save the configuration
 7. Go to the "Credentials" tab and copy the generated "Secret"
 
@@ -158,19 +158,19 @@ services:
 # docker-compose.yml
 version: '3'
 services:
-  oxicloud:
-    image: oxicloud:latest
+  miyucloud:
+    image: miyucloud:latest
     environment:
       OXICLOUD_OIDC_ENABLED: "true"
       OXICLOUD_OIDC_PROVIDER_NAME: "KeyCloak"
       OXICLOUD_OIDC_ISSUER_URL: "https://keycloak.example.com/realms/your-realm"
-      OXICLOUD_OIDC_CLIENT_ID: "oxicloud"
+      OXICLOUD_OIDC_CLIENT_ID: "miyucloud"
       OXICLOUD_OIDC_CLIENT_SECRET: "your-keycloak-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://oxicloud.example.com/api/auth/oidc/callback"
+      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
       OXICLOUD_OIDC_SCOPES: "openid profile email"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://oxicloud.example.com"
+      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
       OXICLOUD_OIDC_AUTO_PROVISION: "true"
-      OXICLOUD_OIDC_ADMIN_GROUPS: "oxicloud-admins"
+      OXICLOUD_OIDC_ADMIN_GROUPS: "miyucloud-admins"
       OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
     ports:
       - "8086:8086"

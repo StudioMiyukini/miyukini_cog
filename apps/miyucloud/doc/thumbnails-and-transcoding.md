@@ -1,6 +1,6 @@
 # 08 - Thumbnails and Transcoding
 
-OxiCloud provides two image optimization features:
+Miyukini Cloud provides two image optimization features:
 
 - **Thumbnails**: on-demand generation of WebP thumbnails in 3 sizes, with background pre-generation on upload
 - **Image Transcoding**: automatic JPEG/PNG/GIF → WebP conversion based on browser `Accept` header

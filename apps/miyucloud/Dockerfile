@@ -11,7 +11,7 @@ COPY static static
 RUN mkdir -p src && \
     echo 'fn main() { println!("Dummy build for caching dependencies"); }' > src/main.rs && \
     cargo build --release && \
-    rm -rf src static-dist target/release/deps/oxicloud* target/release/build/oxicloud-*
+    rm -rf src static-dist target/release/deps/miyucloud* target/release/build/miyucloud-*
 # Stage 2: Build the application
 FROM rust:1.94.0-alpine3.23 AS builder
 WORKDIR /app
@@ -26,18 +26,18 @@ COPY src src
 COPY static static
 COPY migrations migrations
 # Build with all optimizations (DATABASE_URL only needed at compile-time for sqlx)
-ARG DATABASE_URL="postgres://postgres:postgres@localhost/oxicloud"
+ARG DATABASE_URL="postgres://postgres:postgres@localhost/miyucloud"
 RUN DATABASE_URL="${DATABASE_URL}" cargo build --release
 
 # Stage 3: Create minimal final image
 FROM alpine:3.23.3
 
 # OCI image metadata
-LABEL org.opencontainers.image.title="OxiCloud" \
+LABEL org.opencontainers.image.title="Miyukini Cloud" \
       org.opencontainers.image.description="Ultra-fast, secure & lightweight self-hosted cloud storage built in Rust" \
-      org.opencontainers.image.url="https://github.com/DioCrafts/OxiCloud" \
-      org.opencontainers.image.source="https://github.com/DioCrafts/OxiCloud" \
-      org.opencontainers.image.vendor="DioCrafts" \
+      org.opencontainers.image.url="https://github.com/StudioMiyukini/Miyukini Cloud" \
+      org.opencontainers.image.source="https://github.com/StudioMiyukini/Miyukini Cloud" \
+      org.opencontainers.image.vendor="StudioMiyukini" \
       org.opencontainers.image.licenses="MIT"
 
 # Install only necessary runtime dependencies and update packages
@@ -46,21 +46,21 @@ RUN apk --no-cache upgrade && \
     apk add --no-cache libgcc ca-certificates libpq tzdata su-exec
 
 # Create non-root user
-RUN addgroup -g 1001 -S oxicloud && \
-    adduser -u 1001 -S oxicloud -G oxicloud
+RUN addgroup -g 1001 -S miyucloud && \
+    adduser -u 1001 -S miyucloud -G miyucloud
 
 # Copy only the compiled binary
-COPY --from=builder /app/target/release/oxicloud /usr/local/bin/
-RUN chmod +x /usr/local/bin/oxicloud
+COPY --from=builder /app/target/release/miyucloud /usr/local/bin/
+RUN chmod +x /usr/local/bin/miyucloud
 
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy processed static files (bundled/minified by build.rs in release)
-COPY --from=builder --chown=oxicloud:oxicloud /app/static-dist /app/static
+COPY --from=builder --chown=miyucloud:miyucloud /app/static-dist /app/static
 # Create storage directory with proper permissions
-RUN mkdir -p /app/storage && chown -R oxicloud:oxicloud /app/storage
+RUN mkdir -p /app/storage && chown -R miyucloud:miyucloud /app/storage
 
 # Set working directory
 WORKDIR /app
@@ -68,8 +68,8 @@ WORKDIR /app
 # Expose application port
 EXPOSE 8086
 
-# Entrypoint fixes volume permissions then drops to oxicloud user.
+# Entrypoint fixes volume permissions then drops to miyucloud user.
 # The container starts as root so it can chown mounted volumes,
 # then su-exec drops privileges before running the application.
 ENTRYPOINT ["entrypoint.sh"]
-CMD ["oxicloud"]
+CMD ["miyucloud"]

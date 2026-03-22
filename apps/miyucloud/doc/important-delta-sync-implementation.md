@@ -38,7 +38,7 @@ Delta sync transfers only the modified parts of a file instead of the whole thin
 ### Current scenario (no delta sync)
 
 ```
-User has document.docx (50MB) on OxiCloud
+User has document.docx (50MB) on Miyukini Cloud
     │
     ▼
 Downloads full file (50MB) ──────────────────────► 50MB ↓
@@ -56,7 +56,7 @@ TOTAL: 100MB transferred to change one word
 ### Target scenario (with delta sync)
 
 ```
-User has document.docx (50MB) on OxiCloud
+User has document.docx (50MB) on Miyukini Cloud
     │
     ▼
 Downloads full file (50MB) ──────────────────────► 50MB ↓ (first time)

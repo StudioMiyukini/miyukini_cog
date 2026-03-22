@@ -1,6 +1,6 @@
-# OxiCloud TODO List
+# Miyukini Cloud TODO List
 
-This document contains the task list for the development of OxiCloud, a minimalist and efficient cloud storage system similar to NextCloud but optimized for performance.
+This document contains the task list for the development of Miyukini Cloud, a minimalist and efficient cloud storage system similar to NextCloud but optimized for performance.
 
 ## Phase 1: Basic File Functionalities
 

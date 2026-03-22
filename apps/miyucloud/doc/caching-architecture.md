@@ -1,6 +1,6 @@
 # 04 - Caching Architecture
 
-OxiCloud uses a multi-layer caching system spanning HTTP-level caching down to kernel-level memory mapping. Covers both uploads and downloads.
+Miyukini Cloud uses a multi-layer caching system spanning HTTP-level caching down to kernel-level memory mapping. Covers both uploads and downloads.
 
 ## Cache Layers Summary
 

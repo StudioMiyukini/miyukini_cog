@@ -77,13 +77,13 @@ All routes under `/api/search`, require authentication.
 ```bash
 # Simple search
 curl -H "Authorization: Bearer $TOKEN" \
-  "https://oxicloud.example.com/api/search/?query=report&type=pdf&limit=20"
+  "https://miyucloud.example.com/api/search/?query=report&type=pdf&limit=20"
 
 # Advanced search
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name_contains":"report","file_types":["pdf","docx"],"min_size":1024,"recursive":true,"limit":50}' \
-  "https://oxicloud.example.com/api/search/advanced"
+  "https://miyucloud.example.com/api/search/advanced"
 ```
 
 ## Implementation Details

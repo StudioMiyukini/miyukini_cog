@@ -25,7 +25,7 @@ Add any other context or screenshots about the feature request here.
 
 ## User Impact
 
-Describe how this feature would benefit users of OxiCloud.
+Describe how this feature would benefit users of Miyukini Cloud.
 
 ## Implementation Ideas
 
