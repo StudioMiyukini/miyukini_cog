@@ -113,8 +113,8 @@ impl DedupService {
                 .unwrap(),
         );
         Self {
-            blob_root: std::path::PathBuf::from("/tmp/oxicloud_stub_blobs"),
-            temp_root: std::path::PathBuf::from("/tmp/oxicloud_stub_temp"),
+            blob_root: std::path::PathBuf::from("/tmp/miyucloud_stub_blobs"),
+            temp_root: std::path::PathBuf::from("/tmp/miyucloud_stub_temp"),
             pool: stub_pool.clone(),
             maintenance_pool: stub_pool,
         }

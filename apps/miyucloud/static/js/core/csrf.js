@@ -1,7 +1,7 @@
 /**
  * CSRF double-submit cookie utility.
  *
- * Reads the `oxicloud_csrf` cookie (which is NOT HttpOnly) and provides
+ * Reads the `miyucloud_csrf` cookie (which is NOT HttpOnly) and provides
  * its value as the `X-CSRF-Token` header on mutating requests.
  *
  * Usage:
@@ -17,7 +17,7 @@
 function getCsrfToken() {
     const match = document.cookie
         .split('; ')
-        .find(row => row.startsWith('oxicloud_csrf='));
+        .find(row => row.startsWith('miyucloud_csrf='));
     return match ? match.split('=')[1] : '';
 }
 

@@ -12,9 +12,9 @@ const REFRESH_ENDPOINT = `${API_URL}/refresh`;
 
 // Storage keys — tokens are now in HttpOnly cookies (set by server).
 // Only non-sensitive display data is kept in localStorage.
-const USER_DATA_KEY = 'oxicloud_user';
+const USER_DATA_KEY = 'miyucloud_user';
 const LOCALE_KEY = 'miyucloud-locale';
-const FIRST_RUN_KEY = 'oxicloud_first_run_completed';
+const FIRST_RUN_KEY = 'miyucloud_first_run_completed';
 
 // Language selector texts (used before i18n is loaded)
 const LANGUAGE_TEXTS = {

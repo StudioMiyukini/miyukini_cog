@@ -51,7 +51,7 @@ impl CentralClientService {
             "urls": {
                 "mws": web_status.mws.as_ref().and_then(|s| s.public_url.clone()),
                 "ddns": web_status.ddns.as_ref().and_then(|s| s.public_url.clone()),
-                "local": format!("http://127.0.0.1:{}", std::env::var("OXICLOUD_SERVER_PORT").unwrap_or_else(|_| "8086".into())),
+                "local": format!("http://127.0.0.1:{}", std::env::var("MIYUCLOUD_SERVER_PORT").unwrap_or_else(|_| "8086".into())),
             },
             "capabilities": ["webdav", "caldav", "carddav", "wopi", "rest_api"],
         });

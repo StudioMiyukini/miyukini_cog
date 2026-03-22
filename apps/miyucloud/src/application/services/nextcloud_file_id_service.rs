@@ -39,7 +39,7 @@ impl NextcloudFileIdService {
     }
 
     /// Get the Miyukini Cloud file UUID from a Nextcloud numeric ID.
-    pub async fn get_oxicloud_id(&self, nc_file_id: i64) -> Result<String> {
+    pub async fn get_miyucloud_id(&self, nc_file_id: i64) -> Result<String> {
         let repo = self.repo.as_ref().ok_or_else(|| {
             DomainError::internal_error("NextcloudFileId", "Repository not initialized")
         })?;

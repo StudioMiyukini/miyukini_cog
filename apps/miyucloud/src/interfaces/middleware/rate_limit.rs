@@ -23,7 +23,7 @@ use std::net::SocketAddr;
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
-/// Cached value of `OXICLOUD_TRUST_PROXY_HEADERS` env var.
+/// Cached value of `MIYUCLOUD_TRUST_PROXY_HEADERS` env var.
 /// Read once on first access, never again — avoids a syscall per request.
 static TRUST_PROXY: OnceLock<bool> = OnceLock::new();
 
@@ -95,12 +95,12 @@ impl RateLimiter {
 /// Extract the most-likely real client IP from headers / connection info.
 ///
 /// Proxy headers (`X-Forwarded-For`, `X-Real-Ip`) are only trusted when
-/// `OXICLOUD_TRUST_PROXY_HEADERS=true` is set.  Without a trusted reverse
+/// `MIYUCLOUD_TRUST_PROXY_HEADERS=true` is set.  Without a trusted reverse
 /// proxy in front of the app, an attacker can spoof these headers to bypass
 /// rate limiting.
 pub fn extract_client_ip<B>(req: &Request<B>) -> String {
     let trust_proxy = *TRUST_PROXY.get_or_init(|| {
-        std::env::var("OXICLOUD_TRUST_PROXY_HEADERS")
+        std::env::var("MIYUCLOUD_TRUST_PROXY_HEADERS")
             .map(|v| v == "true" || v == "1")
             .unwrap_or(false)
     });

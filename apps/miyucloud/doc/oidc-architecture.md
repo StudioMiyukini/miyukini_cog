@@ -27,7 +27,7 @@ OpenID Connect (OIDC) authentication follows the Authorization Code Flow. The sy
 │            ▼                      ▼                      ▼             │
 │    ┌───────────────────────────────────────────────────────────────┐   │
 │    │                                                               │   │
-│    │                          OXICLOUD                             │   │
+│    │                          MIYUCLOUD                             │   │
 │    │                                                               │   │
 │    │   ┌───────────────┐      ┌───────────────┐                    │   │
 │    │   │               │      │               │                    │   │
@@ -129,12 +129,12 @@ Handles the client-side of the auth flow:
 
 ## Provider Configuration
 
-One OIDC provider is configured per instance via environment variables prefixed with **OXICLOUD_OIDC_***:
+One OIDC provider is configured per instance via environment variables prefixed with **MIYUCLOUD_OIDC_***:
 
 1. **Single provider** per instance.
-2. **Environment variables**: **OXICLOUD_OIDC_ENABLED**, **OXICLOUD_OIDC_ISSUER_URL**, **OXICLOUD_OIDC_CLIENT_ID**, **OXICLOUD_OIDC_CLIENT_SECRET**, etc.
-3. **Auto-provisioning**: users can be created automatically on first OIDC login (**OXICLOUD_OIDC_AUTO_PROVISION**).
-4. **Role mapping**: admin groups are configured via **OXICLOUD_OIDC_ADMIN_GROUPS**.
+2. **Environment variables**: **MIYUCLOUD_OIDC_ENABLED**, **MIYUCLOUD_OIDC_ISSUER_URL**, **MIYUCLOUD_OIDC_CLIENT_ID**, **MIYUCLOUD_OIDC_CLIENT_SECRET**, etc.
+3. **Auto-provisioning**: users can be created automatically on first OIDC login (**MIYUCLOUD_OIDC_AUTO_PROVISION**).
+4. **Role mapping**: admin groups are configured via **MIYUCLOUD_OIDC_ADMIN_GROUPS**.
 
 See `oidc-config-examples.md` for provider-specific configuration examples.
 

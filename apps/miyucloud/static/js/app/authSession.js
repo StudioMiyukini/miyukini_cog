@@ -3,7 +3,7 @@
  */
 
 async function refreshUserData() {
-    const USER_DATA_KEY = 'oxicloud_user';
+    const USER_DATA_KEY = 'miyucloud_user';
 
     try {
         console.log('Fetching /api/auth/me (cookie-based)...');
@@ -35,7 +35,7 @@ async function refreshUserData() {
 
 async function checkAuthentication() {
     try {
-        const USER_DATA_KEY = 'oxicloud_user';
+        const USER_DATA_KEY = 'miyucloud_user';
 
         const urlParams = new URLSearchParams(window.location.search);
         const oidcCode = urlParams.get('oidc_code');
@@ -145,7 +145,7 @@ async function checkAuthentication() {
         }
     } catch (error) {
         console.error('Error during authentication check:', error);
-        localStorage.removeItem('oxicloud_user');
+        localStorage.removeItem('miyucloud_user');
         window.location.href = '/login?source=auth_error';
     }
 }

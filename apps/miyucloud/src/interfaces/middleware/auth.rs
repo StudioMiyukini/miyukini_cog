@@ -15,7 +15,7 @@ pub use crate::application::dtos::user_dto::CurrentUser;
 use crate::application::ports::auth_ports::TokenServicePort;
 
 /// Marker inserted into request extensions when the user was authenticated
-/// via the `oxicloud_access` HttpOnly cookie rather than a Bearer/Basic header.
+/// via the `miyucloud_access` HttpOnly cookie rather than a Bearer/Basic header.
 /// The CSRF middleware uses this to decide whether CSRF validation is required.
 #[derive(Clone, Copy, Debug)]
 pub struct CookieAuthenticated;
@@ -148,7 +148,7 @@ impl IntoResponse for AuthError {
 /// 1. **Bearer JWT** — standard token in `Authorization: Bearer <token>`
 /// 2. **Basic Auth with App Passwords** — for DAV clients (DAVx⁵, Thunderbird, rclone)
 ///    that send `Authorization: Basic base64(username:app_password)`
-/// 3. **HttpOnly Cookie** — `oxicloud_access` cookie set by the login endpoint;
+/// 3. **HttpOnly Cookie** — `miyucloud_access` cookie set by the login endpoint;
 ///    used by browser-based sessions so tokens are never exposed to JS.
 ///
 /// Bearer is tried first; if no Bearer header is found, Basic is attempted,

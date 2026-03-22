@@ -1,8 +1,8 @@
 [package]
-name = "oxicloud"
+name = "miyucloud-server"
 version = "0.5.2"
 edition = "2024"
-default-run = "oxicloud"
+default-run = "miyucloud-server"
 
 
 [dependencies]

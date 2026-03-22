@@ -29,20 +29,20 @@ pub struct OidcConfig {
 }
 ```
 
-Environment variables use the **OXICLOUD_OIDC_*** prefix:
+Environment variables use the **MIYUCLOUD_OIDC_*** prefix:
 
 ```bash
-OXICLOUD_OIDC_ENABLED=true
-OXICLOUD_OIDC_ISSUER_URL="https://authentik.example.com/application/o/miyucloud/"
-OXICLOUD_OIDC_CLIENT_ID="your-client-id"
-OXICLOUD_OIDC_CLIENT_SECRET="your-client-secret"
-OXICLOUD_OIDC_REDIRECT_URI="https://miyucloud.example.com/api/auth/oidc/callback"
-OXICLOUD_OIDC_SCOPES="openid profile email"
-OXICLOUD_OIDC_FRONTEND_URL="https://miyucloud.example.com"
-OXICLOUD_OIDC_AUTO_PROVISION=true
-OXICLOUD_OIDC_ADMIN_GROUPS="miyucloud-admins"
-OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN=false
-OXICLOUD_OIDC_PROVIDER_NAME="Authentik"
+MIYUCLOUD_OIDC_ENABLED=true
+MIYUCLOUD_OIDC_ISSUER_URL="https://authentik.example.com/application/o/miyucloud/"
+MIYUCLOUD_OIDC_CLIENT_ID="your-client-id"
+MIYUCLOUD_OIDC_CLIENT_SECRET="your-client-secret"
+MIYUCLOUD_OIDC_REDIRECT_URI="https://miyucloud.example.com/api/auth/oidc/callback"
+MIYUCLOUD_OIDC_SCOPES="openid profile email"
+MIYUCLOUD_OIDC_FRONTEND_URL="https://miyucloud.example.com"
+MIYUCLOUD_OIDC_AUTO_PROVISION=true
+MIYUCLOUD_OIDC_ADMIN_GROUPS="miyucloud-admins"
+MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN=false
+MIYUCLOUD_OIDC_PROVIDER_NAME="Authentik"
 ```
 
 ## OIDC Service Implementation
@@ -237,17 +237,17 @@ services:
   miyucloud:
     image: miyucloud:latest
     environment:
-      OXICLOUD_OIDC_ENABLED: "true"
-      OXICLOUD_OIDC_ISSUER_URL: "https://keycloak.example.com/realms/your-realm"
-      OXICLOUD_OIDC_CLIENT_ID: "miyucloud"
-      OXICLOUD_OIDC_CLIENT_SECRET: "your-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
-      OXICLOUD_OIDC_SCOPES: "openid profile email"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
-      OXICLOUD_OIDC_AUTO_PROVISION: "true"
-      OXICLOUD_OIDC_ADMIN_GROUPS: "miyucloud-admins"
-      OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
-      OXICLOUD_OIDC_PROVIDER_NAME: "KeyCloak"
+      MIYUCLOUD_OIDC_ENABLED: "true"
+      MIYUCLOUD_OIDC_ISSUER_URL: "https://keycloak.example.com/realms/your-realm"
+      MIYUCLOUD_OIDC_CLIENT_ID: "miyucloud"
+      MIYUCLOUD_OIDC_CLIENT_SECRET: "your-client-secret"
+      MIYUCLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
+      MIYUCLOUD_OIDC_SCOPES: "openid profile email"
+      MIYUCLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
+      MIYUCLOUD_OIDC_AUTO_PROVISION: "true"
+      MIYUCLOUD_OIDC_ADMIN_GROUPS: "miyucloud-admins"
+      MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
+      MIYUCLOUD_OIDC_PROVIDER_NAME: "KeyCloak"
     ports:
       - "8086:8086"
     volumes:
@@ -259,7 +259,7 @@ See `oidc-config-examples.md` for more provider-specific configurations.
 ## Additional Notes
 
 1. **Security** -- always use HTTPS for OIDC connections. Ensure proper TLS configuration.
-2. **User mapping** -- OIDC users are identified by **oidc_provider** + **oidc_subject** in the **auth.users** table. Groups from OIDC can map to admin role via **OXICLOUD_OIDC_ADMIN_GROUPS**.
+2. **User mapping** -- OIDC users are identified by **oidc_provider** + **oidc_subject** in the **auth.users** table. Groups from OIDC can map to admin role via **MIYUCLOUD_OIDC_ADMIN_GROUPS**.
 3. **Single provider** -- one OIDC provider per instance. Managed via admin settings UI or environment variables.
 4. **Session management** -- after OIDC authentication, the backend generates its own JWT access/refresh tokens. Sessions work identically to password-based login from that point.
 5. **Access control** -- OIDC users share the same permissions model as local users. Admin role can be auto-assigned based on OIDC group membership.

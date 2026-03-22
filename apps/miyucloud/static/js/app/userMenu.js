@@ -28,7 +28,7 @@ function setupUserMenu() {
 
         if (!isOpen) {
             updateUserMenuData();
-            const USER_DATA_KEY = 'oxicloud_user';
+            const USER_DATA_KEY = 'miyucloud_user';
             const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
             const isAdmin = userData.role === 'admin';
             if (adminBtn) adminBtn.style.display = isAdmin ? 'flex' : 'none';
@@ -55,7 +55,7 @@ function setupUserMenu() {
 
         // Sync pill UI with current theme state
         function syncThemePill() {
-            const isDark = localStorage.getItem('oxicloud_theme') === 'dark';
+            const isDark = localStorage.getItem('miyucloud_theme') === 'dark';
             if (pill) {
                 if (isDark) {
                     pill.classList.add('active');
@@ -77,10 +77,10 @@ function setupUserMenu() {
         themeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             // Toggle theme based on current state, not pill state
-            const currentIsDark = localStorage.getItem('oxicloud_theme') === 'dark';
+            const currentIsDark = localStorage.getItem('miyucloud_theme') === 'dark';
             const newIsDark = !currentIsDark;
 
-            localStorage.setItem('oxicloud_theme', newIsDark ? 'dark' : 'light');
+            localStorage.setItem('miyucloud_theme', newIsDark ? 'dark' : 'light');
 
             if (newIsDark) {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -149,7 +149,7 @@ function setupUserMenu() {
 }
 
 function updateUserMenuData() {
-    const USER_DATA_KEY = 'oxicloud_user';
+    const USER_DATA_KEY = 'miyucloud_user';
     const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
 
     const nameEl = document.getElementById('user-menu-name');
@@ -192,7 +192,7 @@ async function fetchAppVersion() {
 }
 
 function showUserProfileModal() {
-    const USER_DATA_KEY = 'oxicloud_user';
+    const USER_DATA_KEY = 'miyucloud_user';
     const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
     const username = userData.username || 'User';
     const email = userData.email || '';
@@ -257,7 +257,7 @@ function showUserProfileModal() {
 }
 
 async function logout() {
-    const USER_DATA_KEY = 'oxicloud_user';
+    const USER_DATA_KEY = 'miyucloud_user';
 
     // Clear local state first to prevent login page from auto-refreshing
     localStorage.removeItem(USER_DATA_KEY);

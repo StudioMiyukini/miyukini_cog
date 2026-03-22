@@ -39,11 +39,11 @@ impl BlobEncryptionService {
             &base64::engine::general_purpose::STANDARD,
             &config.key_base64,
         )
-        .map_err(|e| format!("Invalid OXICLOUD_ENCRYPTION_KEY (base64): {}", e))?;
+        .map_err(|e| format!("Invalid MIYUCLOUD_ENCRYPTION_KEY (base64): {}", e))?;
 
         if key_bytes.len() != 32 {
             return Err(format!(
-                "OXICLOUD_ENCRYPTION_KEY must be exactly 32 bytes (256 bits), got {} bytes",
+                "MIYUCLOUD_ENCRYPTION_KEY must be exactly 32 bytes (256 bits), got {} bytes",
                 key_bytes.len()
             ));
         }

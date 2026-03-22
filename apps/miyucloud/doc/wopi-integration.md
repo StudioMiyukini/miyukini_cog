@@ -985,7 +985,7 @@ services:
   miyucloud:
     # ... existing config ...
     environment:
-      - "OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/miyucloud"
+      - "MIYUCLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/miyucloud"
       - "DATABASE_URL=postgres://postgres:postgres@postgres/miyucloud"
       # WOPI configuration
       - "WOPI_ENABLED=true"
@@ -1061,7 +1061,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - "OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/miyucloud"
+      - "MIYUCLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@postgres/miyucloud"
       - "DATABASE_URL=postgres://postgres:postgres@postgres/miyucloud"
       # WOPI configuration
       - "WOPI_ENABLED=true"

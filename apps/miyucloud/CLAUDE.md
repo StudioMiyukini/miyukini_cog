@@ -61,7 +61,7 @@ Hexagonal / Clean Architecture with four layers. Dependencies point inward only.
 
 - **`common/`** — Cross-cutting concerns.
   - `di.rs` — `AppServiceFactory` builds all services and produces `AppState` (the central DI container passed to Axum). This is the composition root.
-  - `config.rs` — `AppConfig::from_env()` loads all `OXICLOUD_*` env vars.
+  - `config.rs` — `AppConfig::from_env()` loads all `MIYUCLOUD_*` env vars.
 
 ### Key patterns
 
@@ -73,7 +73,7 @@ Hexagonal / Clean Architecture with four layers. Dependencies point inward only.
 
 - **Dual DB pools**: `DbPools` in `infrastructure/db.rs` separates user-facing queries from maintenance/background tasks to prevent starvation.
 
-- **Feature flags**: Major features (auth, trash, search, sharing, quotas) are toggled via `OXICLOUD_ENABLE_*` env vars in `FeaturesConfig`.
+- **Feature flags**: Major features (auth, trash, search, sharing, quotas) are toggled via `MIYUCLOUD_ENABLE_*` env vars in `FeaturesConfig`.
 
 - **UUID columns**: All ID columns use native PostgreSQL `UUID` type. SQL queries must use `::uuid` casts when passing string parameters to UUID columns.
 

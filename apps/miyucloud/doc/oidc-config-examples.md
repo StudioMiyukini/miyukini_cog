@@ -16,19 +16,19 @@ To enable OIDC, set these environment variables:
 
 ```bash
 # Enable OIDC
-OXICLOUD_OIDC_ENABLED=true
+MIYUCLOUD_OIDC_ENABLED=true
 
 # OIDC provider configuration
-OXICLOUD_OIDC_PROVIDER_NAME="Display Name"
-OXICLOUD_OIDC_ISSUER_URL="https://provider.example.com/realms/your-realm"
-OXICLOUD_OIDC_CLIENT_ID="your-client-id"
-OXICLOUD_OIDC_CLIENT_SECRET="your-client-secret"
-OXICLOUD_OIDC_REDIRECT_URI="https://your-miyucloud.example.com/api/auth/oidc/callback"
-OXICLOUD_OIDC_SCOPES="openid profile email"
-OXICLOUD_OIDC_FRONTEND_URL="https://your-miyucloud.example.com"
-OXICLOUD_OIDC_AUTO_PROVISION="true"
-OXICLOUD_OIDC_ADMIN_GROUPS="admin-group"
-OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN="false"
+MIYUCLOUD_OIDC_PROVIDER_NAME="Display Name"
+MIYUCLOUD_OIDC_ISSUER_URL="https://provider.example.com/realms/your-realm"
+MIYUCLOUD_OIDC_CLIENT_ID="your-client-id"
+MIYUCLOUD_OIDC_CLIENT_SECRET="your-client-secret"
+MIYUCLOUD_OIDC_REDIRECT_URI="https://your-miyucloud.example.com/api/auth/oidc/callback"
+MIYUCLOUD_OIDC_SCOPES="openid profile email"
+MIYUCLOUD_OIDC_FRONTEND_URL="https://your-miyucloud.example.com"
+MIYUCLOUD_OIDC_AUTO_PROVISION="true"
+MIYUCLOUD_OIDC_ADMIN_GROUPS="admin-group"
+MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN="false"
 ```
 
 ## Authentik
@@ -60,17 +60,17 @@ services:
   miyucloud:
     image: miyucloud:latest
     environment:
-      OXICLOUD_OIDC_ENABLED: "true"
-      OXICLOUD_OIDC_PROVIDER_NAME: "Authentik"
-      OXICLOUD_OIDC_ISSUER_URL: "https://authentik.example.com/application/o/miyucloud"
-      OXICLOUD_OIDC_CLIENT_ID: "your-authentik-client-id"
-      OXICLOUD_OIDC_CLIENT_SECRET: "your-authentik-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
-      OXICLOUD_OIDC_SCOPES: "openid profile email"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
-      OXICLOUD_OIDC_AUTO_PROVISION: "true"
-      OXICLOUD_OIDC_ADMIN_GROUPS: ""
-      OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
+      MIYUCLOUD_OIDC_ENABLED: "true"
+      MIYUCLOUD_OIDC_PROVIDER_NAME: "Authentik"
+      MIYUCLOUD_OIDC_ISSUER_URL: "https://authentik.example.com/application/o/miyucloud"
+      MIYUCLOUD_OIDC_CLIENT_ID: "your-authentik-client-id"
+      MIYUCLOUD_OIDC_CLIENT_SECRET: "your-authentik-client-secret"
+      MIYUCLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
+      MIYUCLOUD_OIDC_SCOPES: "openid profile email"
+      MIYUCLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
+      MIYUCLOUD_OIDC_AUTO_PROVISION: "true"
+      MIYUCLOUD_OIDC_ADMIN_GROUPS: ""
+      MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
     ports:
       - "8086:8086"
     volumes:
@@ -115,17 +115,17 @@ services:
   miyucloud:
     image: miyucloud:latest
     environment:
-      OXICLOUD_OIDC_ENABLED: "true"
-      OXICLOUD_OIDC_PROVIDER_NAME: "Authelia"
-      OXICLOUD_OIDC_ISSUER_URL: "https://authelia.example.com"
-      OXICLOUD_OIDC_CLIENT_ID: "miyucloud"
-      OXICLOUD_OIDC_CLIENT_SECRET: "your-secure-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
-      OXICLOUD_OIDC_SCOPES: "openid profile email groups"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
-      OXICLOUD_OIDC_AUTO_PROVISION: "true"
-      OXICLOUD_OIDC_ADMIN_GROUPS: ""
-      OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
+      MIYUCLOUD_OIDC_ENABLED: "true"
+      MIYUCLOUD_OIDC_PROVIDER_NAME: "Authelia"
+      MIYUCLOUD_OIDC_ISSUER_URL: "https://authelia.example.com"
+      MIYUCLOUD_OIDC_CLIENT_ID: "miyucloud"
+      MIYUCLOUD_OIDC_CLIENT_SECRET: "your-secure-client-secret"
+      MIYUCLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
+      MIYUCLOUD_OIDC_SCOPES: "openid profile email groups"
+      MIYUCLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
+      MIYUCLOUD_OIDC_AUTO_PROVISION: "true"
+      MIYUCLOUD_OIDC_ADMIN_GROUPS: ""
+      MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
     ports:
       - "8086:8086"
     volumes:
@@ -161,17 +161,17 @@ services:
   miyucloud:
     image: miyucloud:latest
     environment:
-      OXICLOUD_OIDC_ENABLED: "true"
-      OXICLOUD_OIDC_PROVIDER_NAME: "KeyCloak"
-      OXICLOUD_OIDC_ISSUER_URL: "https://keycloak.example.com/realms/your-realm"
-      OXICLOUD_OIDC_CLIENT_ID: "miyucloud"
-      OXICLOUD_OIDC_CLIENT_SECRET: "your-keycloak-client-secret"
-      OXICLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
-      OXICLOUD_OIDC_SCOPES: "openid profile email"
-      OXICLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
-      OXICLOUD_OIDC_AUTO_PROVISION: "true"
-      OXICLOUD_OIDC_ADMIN_GROUPS: "miyucloud-admins"
-      OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
+      MIYUCLOUD_OIDC_ENABLED: "true"
+      MIYUCLOUD_OIDC_PROVIDER_NAME: "KeyCloak"
+      MIYUCLOUD_OIDC_ISSUER_URL: "https://keycloak.example.com/realms/your-realm"
+      MIYUCLOUD_OIDC_CLIENT_ID: "miyucloud"
+      MIYUCLOUD_OIDC_CLIENT_SECRET: "your-keycloak-client-secret"
+      MIYUCLOUD_OIDC_REDIRECT_URI: "https://miyucloud.example.com/api/auth/oidc/callback"
+      MIYUCLOUD_OIDC_SCOPES: "openid profile email"
+      MIYUCLOUD_OIDC_FRONTEND_URL: "https://miyucloud.example.com"
+      MIYUCLOUD_OIDC_AUTO_PROVISION: "true"
+      MIYUCLOUD_OIDC_ADMIN_GROUPS: "miyucloud-admins"
+      MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN: "false"
     ports:
       - "8086:8086"
     volumes:
@@ -200,7 +200,7 @@ The OIDC provider is rejecting the redirect URI.
 ### Error: "User does not exist and auto-creation is disabled"
 
 **Fixes:**
-1. Enable auto-provisioning: `OXICLOUD_OIDC_AUTO_PROVISION="true"`
+1. Enable auto-provisioning: `MIYUCLOUD_OIDC_AUTO_PROVISION="true"`
 2. Or manually create the user before attempting OIDC login
 
 ### Error: "Could not extract user ID from claim"
@@ -209,7 +209,7 @@ The backend cannot find the user ID attribute in the token claims.
 
 **Fixes:**
 1. Verify the provider returns the `sub` claim in tokens
-2. Make sure scopes in **OXICLOUD_OIDC_SCOPES** include `openid`
+2. Make sure scopes in **MIYUCLOUD_OIDC_SCOPES** include `openid`
 3. Configure the provider to include the required claims in tokens
 
 See `oidc-architecture.md` and `oidc-integration.md` for deeper technical details.

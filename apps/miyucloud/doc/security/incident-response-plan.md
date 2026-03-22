@@ -45,6 +45,6 @@ detected -> assessed -> notified_authority -> notified_subjects -> resolved
 
 ## 5. Communication Channels
 
-- **Internal**: `OXICLOUD_INCIDENT_WEBHOOK_URL` (Slack/Teams webhook)
-- **Email**: `OXICLOUD_INCIDENT_EMAIL` (security team)
+- **Internal**: `MIYUCLOUD_INCIDENT_WEBHOOK_URL` (Slack/Teams webhook)
+- **Email**: `MIYUCLOUD_INCIDENT_EMAIL` (security team)
 - **Authority**: CNIL portal for RGPD breach notifications

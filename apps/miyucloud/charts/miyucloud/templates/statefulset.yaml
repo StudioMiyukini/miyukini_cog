@@ -34,7 +34,7 @@ spec:
                 secretKeyRef:
                   name: {{ if .Values.secrets.existingSecret }}{{ .Values.secrets.existingSecret }}{{ else }}{{ include "miyucloud.fullname" . }}-secret{{ end }}
                   key: DB_PASSWORD
-            - name: OXICLOUD_DB_CONNECTION_STRING
+            - name: MIYUCLOUD_DB_CONNECTION_STRING
               value: "postgres://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql/{{ .Values.postgresql.auth.database }}"
           volumeMounts:
             - name: storage-data

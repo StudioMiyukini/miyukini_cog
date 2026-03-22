@@ -138,7 +138,7 @@ pub struct ListUsersQueryDto { pub limit: Option<i64>, pub offset: Option<i64> }
 
 Settings resolve in this order (highest first):
 
-1. **Environment variables** (`OXICLOUD_OIDC_*`)
+1. **Environment variables** (`MIYUCLOUD_OIDC_*`)
 2. **Database settings** (`auth.admin_settings` table)
 3. **Defaults**
 

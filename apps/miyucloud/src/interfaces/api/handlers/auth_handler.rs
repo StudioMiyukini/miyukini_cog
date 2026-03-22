@@ -217,7 +217,7 @@ async fn login(
 
 /// Token refresh — accepts the refresh token from **either**:
 /// 1. JSON body `{ "refresh_token": "..." }` (API clients, backward compat)
-/// 2. HttpOnly cookie `oxicloud_refresh` (browsers)
+/// 2. HttpOnly cookie `miyucloud_refresh` (browsers)
 async fn refresh_token(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,

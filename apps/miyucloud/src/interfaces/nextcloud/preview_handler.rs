@@ -56,7 +56,7 @@ pub async fn handle_preview(
 
     // Look up the Miyukini Cloud file UUID from the Nextcloud ID
     let object_id = match state.nextcloud.as_ref() {
-        Some(nc) => match nc.file_ids.get_oxicloud_id(nc_file_id).await {
+        Some(nc) => match nc.file_ids.get_miyucloud_id(nc_file_id).await {
             Ok(id) => id,
             Err(_) => {
                 return Response::builder()

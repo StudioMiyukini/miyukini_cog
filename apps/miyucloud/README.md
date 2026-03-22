@@ -43,11 +43,11 @@ cargo run                       # Start server on port 8086
 Copy `example.env` to `.env` and configure:
 
 ```bash
-OXICLOUD_STORAGE_PATH=./storage
-OXICLOUD_SERVER_PORT=8086
-OXICLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@localhost:5432/oxicloud
-OXICLOUD_ENABLE_AUTH=true
-OXICLOUD_BASE_URL=https://cloud.example.com
+MIYUCLOUD_STORAGE_PATH=./storage
+MIYUCLOUD_SERVER_PORT=8086
+MIYUCLOUD_DB_CONNECTION_STRING=postgres://postgres:postgres@localhost:5432/miyucloud
+MIYUCLOUD_ENABLE_AUTH=true
+MIYUCLOUD_BASE_URL=https://cloud.example.com
 ```
 
 See `example.env` for all options.

@@ -113,5 +113,5 @@ Background job that runs every 24 hours to permanently delete items past the ret
 
 ## Configuration
 
-- **OXICLOUD_ENABLE_TRASH**: enable/disable the trash feature via **FeaturesConfig** (default: true)
-- **OXICLOUD_TRASH_RETENTION_DAYS**: days to keep items before automatic deletion (default: 30, via **StorageConfig**)
+- **MIYUCLOUD_ENABLE_TRASH**: enable/disable the trash feature via **FeaturesConfig** (default: true)
+- **MIYUCLOUD_TRASH_RETENTION_DAYS**: days to keep items before automatic deletion (default: 30, via **StorageConfig**)

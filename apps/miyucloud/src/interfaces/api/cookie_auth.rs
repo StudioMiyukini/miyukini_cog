@@ -2,10 +2,10 @@
 //!
 //! Tokens are set as `HttpOnly; SameSite=Lax` cookies so that
 //! browser-based JavaScript cannot read them (mitigates XSS token theft).
-//! The `Secure` flag is controlled by the `OXICLOUD_COOKIE_SECURE` env var
-//! (default: auto-detect from `OXICLOUD_BASE_URL`).
+//! The `Secure` flag is controlled by the `MIYUCLOUD_COOKIE_SECURE` env var
+//! (default: auto-detect from `MIYUCLOUD_BASE_URL`).
 //!
-//! A companion **non-HttpOnly** CSRF cookie (`oxicloud_csrf`) is set
+//! A companion **non-HttpOnly** CSRF cookie (`miyucloud_csrf`) is set
 //! alongside the auth cookies.  The frontend must read it and echo its
 //! value back as `X-CSRF-Token` on every state-changing request.
 //! A middleware (`csrf_middleware`) validates the match.
@@ -17,56 +17,56 @@ use axum::http::header::SET_COOKIE;
 use axum::http::{HeaderMap, HeaderValue};
 
 /// Cookie name for the JWT access token.
-pub const ACCESS_COOKIE: &str = "oxicloud_access";
+pub const ACCESS_COOKIE: &str = "miyucloud_access";
 /// Cookie name for the opaque refresh token.
-pub const REFRESH_COOKIE: &str = "oxicloud_refresh";
+pub const REFRESH_COOKIE: &str = "miyucloud_refresh";
 /// Cookie name for the CSRF double-submit token (readable by JS).
-pub const CSRF_COOKIE: &str = "oxicloud_csrf";
+pub const CSRF_COOKIE: &str = "miyucloud_csrf";
 /// Header the frontend must send with the CSRF token value.
 pub const CSRF_HEADER: &str = "x-csrf-token";
 
 /// Whether the `Secure` flag should be set on cookies.
 ///
 /// Resolution order:
-/// 1. `OXICLOUD_COOKIE_SECURE=true|false` — explicit override.
-/// 2. `OXICLOUD_BASE_URL` starts with `https` → `true`.
-/// 3. `OXICLOUD_BASE_URL` starts with `http` → `false`.
+/// 1. `MIYUCLOUD_COOKIE_SECURE=true|false` — explicit override.
+/// 2. `MIYUCLOUD_BASE_URL` starts with `https` → `true`.
+/// 3. `MIYUCLOUD_BASE_URL` starts with `http` → `false`.
 /// 4. **Default: `false`** for compatibility with HTTP deployments
-///    (Docker, local development). Set `OXICLOUD_COOKIE_SECURE=true`
+///    (Docker, local development). Set `MIYUCLOUD_COOKIE_SECURE=true`
 ///    explicitly for production HTTPS environments.
 fn cookie_secure() -> bool {
     // Priority 1: explicit env var override
-    if let Ok(v) = std::env::var("OXICLOUD_COOKIE_SECURE") {
+    if let Ok(v) = std::env::var("MIYUCLOUD_COOKIE_SECURE") {
         let secure = v == "true" || v == "1";
         if !secure {
             tracing::warn!(
-                "OXICLOUD_COOKIE_SECURE is explicitly disabled — \
+                "MIYUCLOUD_COOKIE_SECURE is explicitly disabled — \
                  cookies will be sent over plain HTTP. \
                  Do NOT use this in production."
             );
         }
         return secure;
     }
-    // Priority 2: OXICLOUD_FORCE_SECURE_COOKIES (SecurityConfig)
-    if let Ok(v) = std::env::var("OXICLOUD_FORCE_SECURE_COOKIES") {
+    // Priority 2: MIYUCLOUD_FORCE_SECURE_COOKIES (SecurityConfig)
+    if let Ok(v) = std::env::var("MIYUCLOUD_FORCE_SECURE_COOKIES") {
         if v == "true" || v == "1" {
             return true;
         }
     }
     // Priority 3: auto-detect from base URL
-    match std::env::var("OXICLOUD_BASE_URL") {
+    match std::env::var("MIYUCLOUD_BASE_URL") {
         Ok(url) if url.starts_with("https") => true,
         Ok(url) if url.starts_with("http://") => {
             tracing::info!(
-                "OXICLOUD_BASE_URL is HTTP — cookie Secure flag is OFF. \
-                 Set OXICLOUD_FORCE_SECURE_COOKIES=true to override if your proxy terminates TLS."
+                "MIYUCLOUD_BASE_URL is HTTP — cookie Secure flag is OFF. \
+                 Set MIYUCLOUD_FORCE_SECURE_COOKIES=true to override if your proxy terminates TLS."
             );
             false
         }
         _ => {
             tracing::info!(
-                "OXICLOUD_BASE_URL not set — defaulting to non-secure cookies \
-                 for HTTP compatibility. Set OXICLOUD_FORCE_SECURE_COOKIES=true for HTTPS deployments."
+                "MIYUCLOUD_BASE_URL not set — defaulting to non-secure cookies \
+                 for HTTP compatibility. Set MIYUCLOUD_FORCE_SECURE_COOKIES=true for HTTPS deployments."
             );
             false
         }

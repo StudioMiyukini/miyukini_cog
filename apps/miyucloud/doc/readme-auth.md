@@ -172,7 +172,7 @@ The auth system uses these tables in the **auth** schema:
 ## Implementation Details
 
 - **Password hashing**: Argon2id with memory cost 65536 (64MB), time cost 3, parallelism 4
-- **JWT secret**: configured via **OXICLOUD_JWT_SECRET** environment variable
+- **JWT secret**: configured via **MIYUCLOUD_JWT_SECRET** environment variable
 - **Token expiry**: access token 1 hour, refresh token 30 days (configurable)
 - **Database connection**: PostgreSQL with connection pooling
 - **Middleware**: auth middleware for protected routes

@@ -40,9 +40,9 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 /// defining interfaces (ports) that low-level modules implement (adapters).
 ///
 /// @author Miyukini Cloud Team
-use oxicloud::common;
-use oxicloud::infrastructure;
-use oxicloud::interfaces;
+use miyucloud_server::common;
+use miyucloud_server::infrastructure;
+use miyucloud_server::interfaces;
 
 use common::di::AppServiceFactory;
 use infrastructure::db::create_database_pools;
@@ -116,9 +116,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut app;
 
     // Build CalDAV / CardDAV / WebDAV protocol routers (merged at top-level, not under /api)
-    use oxicloud::interfaces::api::handlers::caldav_handler;
-    use oxicloud::interfaces::api::handlers::carddav_handler;
-    use oxicloud::interfaces::api::handlers::webdav_handler;
+    use miyucloud_server::interfaces::api::handlers::caldav_handler;
+    use miyucloud_server::interfaces::api::handlers::carddav_handler;
+    use miyucloud_server::interfaces::api::handlers::webdav_handler;
     let caldav_router = caldav_handler::caldav_routes();
     let well_known_router = caldav_handler::well_known_routes();
     let carddav_router = carddav_handler::carddav_routes();
@@ -132,14 +132,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let carddav_router = carddav_router.layer(RequestBodyLimitLayer::new(1_048_576));
 
     // Build WOPI routes if enabled
-    use oxicloud::interfaces::api::handlers::wopi_handler;
+    use miyucloud_server::interfaces::api::handlers::wopi_handler;
     let wopi_routes = if config.wopi.enabled {
         if let (Some(token_svc), Some(lock_svc), Some(discovery_svc)) = (
             &app_state.wopi_token_service,
             &app_state.wopi_lock_service,
             &app_state.wopi_discovery_service,
         ) {
-            let wopi_base_url = std::env::var("OXICLOUD_WOPI_BASE_URL")
+            let wopi_base_url = std::env::var("MIYUCLOUD_WOPI_BASE_URL")
                 .map(|v| v.trim_end_matches('/').to_string())
                 .ok()
                 .filter(|v| !v.is_empty())
@@ -165,7 +165,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build Nextcloud routes if enabled
     let nextcloud_router = if config.nextcloud.enabled {
-        use oxicloud::interfaces::nextcloud::routes::nextcloud_routes_with_state;
+        use miyucloud_server::interfaces::nextcloud::routes::nextcloud_routes_with_state;
         Some(nextcloud_routes_with_state(app_state.clone()))
     } else {
         None
@@ -187,11 +187,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             auth_protected_routes, auth_public_routes, login_route, refresh_route, register_route,
             setup_route,
         };
-        use oxicloud::interfaces::api::handlers::app_password_handler;
-        use oxicloud::interfaces::api::handlers::device_auth_handler;
-        use oxicloud::interfaces::middleware::auth::auth_middleware;
-        use oxicloud::interfaces::middleware::csrf::csrf_middleware;
-        use oxicloud::interfaces::middleware::rate_limit::{
+        use miyucloud_server::interfaces::api::handlers::app_password_handler;
+        use miyucloud_server::interfaces::api::handlers::device_auth_handler;
+        use miyucloud_server::interfaces::middleware::auth::auth_middleware;
+        use miyucloud_server::interfaces::middleware::csrf::csrf_middleware;
+        use miyucloud_server::interfaces::middleware::rate_limit::{
             RateLimiter, rate_limit_login, rate_limit_refresh, rate_limit_register,
         };
 
@@ -284,7 +284,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let protected_api = api_routes
             .layer(axum::middleware::from_fn_with_state(
                 app_state.clone(),
-                oxicloud::interfaces::middleware::bandwidth::bandwidth_middleware,
+                miyucloud_server::interfaces::middleware::bandwidth::bandwidth_middleware,
             ))
             .layer(axum::middleware::from_fn(csrf_middleware))
             .layer(axum::middleware::from_fn_with_state(
@@ -531,7 +531,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             } else {
                 panic!(
                     "FATAL: TLS enabled but certificate files not found: {} / {}. \
-                     Set OXICLOUD_TLS_AUTO_GENERATE=true or provide certificate files.",
+                     Set MIYUCLOUD_TLS_AUTO_GENERATE=true or provide certificate files.",
                     config.tls.cert_path, config.tls.key_path
                 );
             }

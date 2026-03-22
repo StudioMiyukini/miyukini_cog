@@ -2,7 +2,7 @@
 
 File and folder search with multi-criteria filtering, recursive traversal, pagination, and in-memory result caching. Two modes: a simple `GET` with query parameters, or an advanced `POST` with a full criteria body.
 
-Controlled by the feature flag **OXICLOUD_ENABLE_SEARCH** (default: `true`).
+Controlled by the feature flag **MIYUCLOUD_ENABLE_SEARCH** (default: `true`).
 
 ## Architecture
 

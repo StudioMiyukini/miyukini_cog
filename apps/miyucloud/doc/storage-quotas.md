@@ -1,6 +1,6 @@
 # 11 - Storage Quotas
 
-Per-user storage quotas track disk usage and can limit how much storage each user consumes. Controlled by the feature flag **OXICLOUD_ENABLE_USER_STORAGE_QUOTAS** (default: `false`).
+Per-user storage quotas track disk usage and can limit how much storage each user consumes. Controlled by the feature flag **MIYUCLOUD_ENABLE_USER_STORAGE_QUOTAS** (default: `false`).
 
 ## Architecture
 
@@ -61,7 +61,7 @@ The admin dashboard (`GET /api/admin/dashboard`) includes quota-related metrics:
 
 ```bash
 # Enable storage quotas (default: false)
-OXICLOUD_ENABLE_USER_STORAGE_QUOTAS=true
+MIYUCLOUD_ENABLE_USER_STORAGE_QUOTAS=true
 ```
 
 Part of **FeaturesConfig** in `src/common/config.rs`:

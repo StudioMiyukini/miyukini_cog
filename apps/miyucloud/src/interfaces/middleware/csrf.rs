@@ -2,7 +2,7 @@
 //!
 //! State-changing requests (`POST`, `PUT`, `DELETE`, `PATCH`) that were
 //! authenticated via an HttpOnly cookie (i.e. browser sessions) **must**
-//! include an `X-CSRF-Token` header whose value matches the `oxicloud_csrf`
+//! include an `X-CSRF-Token` header whose value matches the `miyucloud_csrf`
 //! cookie.  Requests authenticated via `Bearer` or `Basic` headers are
 //! exempt because they are not vulnerable to CSRF — the browser never
 //! attaches those automatically.

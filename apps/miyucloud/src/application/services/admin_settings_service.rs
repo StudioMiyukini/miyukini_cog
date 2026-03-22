@@ -47,18 +47,18 @@ impl AdminSettingsService {
     fn get_env_overrides(&self) -> Vec<String> {
         let mut out = Vec::new();
         let vars = [
-            ("OXICLOUD_OIDC_ENABLED", "enabled"),
-            ("OXICLOUD_OIDC_ISSUER_URL", "issuer_url"),
-            ("OXICLOUD_OIDC_CLIENT_ID", "client_id"),
-            ("OXICLOUD_OIDC_CLIENT_SECRET", "client_secret"),
-            ("OXICLOUD_OIDC_SCOPES", "scopes"),
-            ("OXICLOUD_OIDC_AUTO_PROVISION", "auto_provision"),
-            ("OXICLOUD_OIDC_ADMIN_GROUPS", "admin_groups"),
+            ("MIYUCLOUD_OIDC_ENABLED", "enabled"),
+            ("MIYUCLOUD_OIDC_ISSUER_URL", "issuer_url"),
+            ("MIYUCLOUD_OIDC_CLIENT_ID", "client_id"),
+            ("MIYUCLOUD_OIDC_CLIENT_SECRET", "client_secret"),
+            ("MIYUCLOUD_OIDC_SCOPES", "scopes"),
+            ("MIYUCLOUD_OIDC_AUTO_PROVISION", "auto_provision"),
+            ("MIYUCLOUD_OIDC_ADMIN_GROUPS", "admin_groups"),
             (
-                "OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN",
+                "MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN",
                 "disable_password_login",
             ),
-            ("OXICLOUD_OIDC_PROVIDER_NAME", "provider_name"),
+            ("MIYUCLOUD_OIDC_PROVIDER_NAME", "provider_name"),
         ];
         for (env_key, field_name) in &vars {
             if std::env::var(env_key).is_ok() {
@@ -71,37 +71,37 @@ impl AdminSettingsService {
     /// Apply environment variable overrides on top of a config
     fn apply_env_overrides(&self, config: &mut OidcConfig) {
         let e = &self.env_oidc_config;
-        if std::env::var("OXICLOUD_OIDC_ENABLED").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_ENABLED").is_ok() {
             config.enabled = e.enabled;
         }
-        if std::env::var("OXICLOUD_OIDC_ISSUER_URL").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_ISSUER_URL").is_ok() {
             config.issuer_url = e.issuer_url.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_CLIENT_ID").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_CLIENT_ID").is_ok() {
             config.client_id = e.client_id.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_CLIENT_SECRET").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_CLIENT_SECRET").is_ok() {
             config.client_secret = e.client_secret.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_SCOPES").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_SCOPES").is_ok() {
             config.scopes = e.scopes.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_REDIRECT_URI").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_REDIRECT_URI").is_ok() {
             config.redirect_uri = e.redirect_uri.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_FRONTEND_URL").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_FRONTEND_URL").is_ok() {
             config.frontend_url = e.frontend_url.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_AUTO_PROVISION").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_AUTO_PROVISION").is_ok() {
             config.auto_provision = e.auto_provision;
         }
-        if std::env::var("OXICLOUD_OIDC_ADMIN_GROUPS").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_ADMIN_GROUPS").is_ok() {
             config.admin_groups = e.admin_groups.clone();
         }
-        if std::env::var("OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN").is_ok() {
             config.disable_password_login = e.disable_password_login;
         }
-        if std::env::var("OXICLOUD_OIDC_PROVIDER_NAME").is_ok() {
+        if std::env::var("MIYUCLOUD_OIDC_PROVIDER_NAME").is_ok() {
             config.provider_name = e.provider_name.clone();
         }
     }
@@ -156,7 +156,7 @@ impl AdminSettingsService {
             .get("oidc.client_secret")
             .map(|s| !s.is_empty())
             .unwrap_or(false)
-            || std::env::var("OXICLOUD_OIDC_CLIENT_SECRET")
+            || std::env::var("MIYUCLOUD_OIDC_CLIENT_SECRET")
                 .map(|s| !s.is_empty())
                 .unwrap_or(false);
 
@@ -396,10 +396,10 @@ impl AdminSettingsService {
     // ========================================================================
 
     /// Check if public self-registration is enabled.
-    /// Priority: env var `OXICLOUD_DISABLE_REGISTRATION` > DB setting > default (true).
+    /// Priority: env var `MIYUCLOUD_DISABLE_REGISTRATION` > DB setting > default (true).
     pub async fn get_registration_enabled(&self) -> bool {
         // Env var override takes priority
-        if let Ok(val) = std::env::var("OXICLOUD_DISABLE_REGISTRATION") {
+        if let Ok(val) = std::env::var("MIYUCLOUD_DISABLE_REGISTRATION") {
             return !matches!(val.to_lowercase().as_str(), "true" | "1" | "yes");
         }
         // Check DB setting

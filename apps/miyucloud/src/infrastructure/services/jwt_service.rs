@@ -125,7 +125,7 @@ impl JwtTokenService {
         );
 
         // Load previous JWT secrets for key rotation support
-        let previous_secrets: Vec<String> = std::env::var("OXICLOUD_JWT_SECRET_PREVIOUS")
+        let previous_secrets: Vec<String> = std::env::var("MIYUCLOUD_JWT_SECRET_PREVIOUS")
             .ok()
             .filter(|s| !s.is_empty())
             .map(|s| s.split(',').map(|k| k.trim().to_string()).filter(|k| !k.is_empty()).collect())

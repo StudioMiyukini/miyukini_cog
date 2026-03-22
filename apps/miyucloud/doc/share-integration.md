@@ -364,4 +364,4 @@ HTTP status code mapping:
 - **Scalability**: for higher load, share metadata could be migrated to PostgreSQL using the same hexagonal architecture (implement `ShareRepository` with PgPool).
 - **Maintenance**: clear separation of concerns makes testing and maintenance straightforward.
 
-The sharing feature is enabled via `OXICLOUD_ENABLE_FILE_SHARING` configuration flag.
+The sharing feature is enabled via `MIYUCLOUD_ENABLE_FILE_SHARING` configuration flag.

@@ -1018,7 +1018,7 @@ mod tests {
     #[tokio::test]
     async fn test_persist_and_recover_session() {
         // Use a unique temp dir for this test
-        let base = std::env::temp_dir().join(format!("oxicloud_test_{}", Uuid::new_v4()));
+        let base = std::env::temp_dir().join(format!("miyucloud_test_{}", Uuid::new_v4()));
         let _ = fs::create_dir_all(&base).await;
 
         let service = ChunkedUploadService::new(base.clone()).await;
@@ -1071,7 +1071,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_full_upload_lifecycle() {
-        let base = std::env::temp_dir().join(format!("oxicloud_test_{}", Uuid::new_v4()));
+        let base = std::env::temp_dir().join(format!("miyucloud_test_{}", Uuid::new_v4()));
         let service = ChunkedUploadService::new(base.clone()).await;
 
         // 1. Create session (1024 bytes, 512 byte chunks → 2 chunks)
@@ -1143,7 +1143,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_cancel_removes_files() {
-        let base = std::env::temp_dir().join(format!("oxicloud_test_{}", Uuid::new_v4()));
+        let base = std::env::temp_dir().join(format!("miyucloud_test_{}", Uuid::new_v4()));
         let service = ChunkedUploadService::new(base.clone()).await;
 
         let resp = service
@@ -1174,7 +1174,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_recovery_skips_expired_sessions() {
-        let base = std::env::temp_dir().join(format!("oxicloud_test_{}", Uuid::new_v4()));
+        let base = std::env::temp_dir().join(format!("miyucloud_test_{}", Uuid::new_v4()));
         let _ = fs::create_dir_all(&base).await;
 
         // Manually create an expired session on disk
@@ -1218,7 +1218,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_recovery_downgrades_missing_chunk_files() {
-        let base = std::env::temp_dir().join(format!("oxicloud_test_{}", Uuid::new_v4()));
+        let base = std::env::temp_dir().join(format!("miyucloud_test_{}", Uuid::new_v4()));
         let _ = fs::create_dir_all(&base).await;
 
         let session_dir = base.join("partial-session");

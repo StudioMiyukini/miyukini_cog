@@ -312,7 +312,7 @@ impl Default for AuthConfig {
     fn default() -> Self {
         Self {
             // SECURITY: This default is intentionally insecure to force operators
-            // to set OXICLOUD_JWT_SECRET in production. The from_env() method
+            // to set MIYUCLOUD_JWT_SECRET in production. The from_env() method
             // will validate this and warn/panic if not configured.
             jwt_secret: String::new(),
             access_token_expiry_secs: 3600,     // 1 hour
@@ -375,37 +375,37 @@ impl OidcConfig {
     pub fn from_env() -> Self {
         use std::env;
         let mut cfg = Self::default();
-        if let Ok(v) = env::var("OXICLOUD_OIDC_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_ENABLED") {
             cfg.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_ISSUER_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_ISSUER_URL") {
             cfg.issuer_url = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_CLIENT_ID") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_CLIENT_ID") {
             cfg.client_id = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_CLIENT_SECRET") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_CLIENT_SECRET") {
             cfg.client_secret = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_REDIRECT_URI") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_REDIRECT_URI") {
             cfg.redirect_uri = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_SCOPES") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_SCOPES") {
             cfg.scopes = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_FRONTEND_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_FRONTEND_URL") {
             cfg.frontend_url = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_AUTO_PROVISION") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_AUTO_PROVISION") {
             cfg.auto_provision = v.parse::<bool>().unwrap_or(true);
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_ADMIN_GROUPS") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_ADMIN_GROUPS") {
             cfg.admin_groups = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN") {
             cfg.disable_password_login = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_PROVIDER_NAME") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_PROVIDER_NAME") {
             cfg.provider_name = v;
         }
         cfg
@@ -762,59 +762,59 @@ impl AppConfig {
         let mut config = Self::default();
 
         // Use environment variables to override default values
-        if let Ok(storage_path) = env::var("OXICLOUD_STORAGE_PATH") {
+        if let Ok(storage_path) = env::var("MIYUCLOUD_STORAGE_PATH") {
             config.storage_path = PathBuf::from(storage_path);
         }
 
-        if let Ok(static_path) = env::var("OXICLOUD_STATIC_PATH") {
+        if let Ok(static_path) = env::var("MIYUCLOUD_STATIC_PATH") {
             config.static_path = PathBuf::from(static_path);
         }
 
-        if let Ok(server_port) = env::var("OXICLOUD_SERVER_PORT")
+        if let Ok(server_port) = env::var("MIYUCLOUD_SERVER_PORT")
             && let Ok(port) = server_port.parse::<u16>()
         {
             config.server_port = port;
         }
 
-        if let Ok(server_host) = env::var("OXICLOUD_SERVER_HOST") {
+        if let Ok(server_host) = env::var("MIYUCLOUD_SERVER_HOST") {
             config.server_host = server_host;
         }
 
         // Database configuration
-        if let Ok(connection_string) = env::var("OXICLOUD_DB_CONNECTION_STRING") {
+        if let Ok(connection_string) = env::var("MIYUCLOUD_DB_CONNECTION_STRING") {
             config.database.connection_string = connection_string;
         }
 
         if let Ok(max_connections) =
-            env::var("OXICLOUD_DB_MAX_CONNECTIONS").map(|v| v.parse::<u32>())
+            env::var("MIYUCLOUD_DB_MAX_CONNECTIONS").map(|v| v.parse::<u32>())
             && let Ok(val) = max_connections
         {
             config.database.max_connections = val;
         }
 
         if let Ok(min_connections) =
-            env::var("OXICLOUD_DB_MIN_CONNECTIONS").map(|v| v.parse::<u32>())
+            env::var("MIYUCLOUD_DB_MIN_CONNECTIONS").map(|v| v.parse::<u32>())
             && let Ok(val) = min_connections
         {
             config.database.min_connections = val;
         }
 
         if let Ok(max_conn) =
-            env::var("OXICLOUD_DB_MAINTENANCE_MAX_CONNECTIONS").map(|v| v.parse::<u32>())
+            env::var("MIYUCLOUD_DB_MAINTENANCE_MAX_CONNECTIONS").map(|v| v.parse::<u32>())
             && let Ok(val) = max_conn
         {
             config.database.maintenance_max_connections = val;
         }
 
         if let Ok(min_conn) =
-            env::var("OXICLOUD_DB_MAINTENANCE_MIN_CONNECTIONS").map(|v| v.parse::<u32>())
+            env::var("MIYUCLOUD_DB_MAINTENANCE_MIN_CONNECTIONS").map(|v| v.parse::<u32>())
             && let Ok(val) = min_conn
         {
             config.database.maintenance_min_connections = val;
         }
 
         // Auth configuration
-        if let Some(jwt_secret) = env::var("OXICLOUD_JWT_SECRET")
+        if let Some(jwt_secret) = env::var("MIYUCLOUD_JWT_SECRET")
             .ok()
             .filter(|s| !s.is_empty())
         {
@@ -824,7 +824,7 @@ impl AppConfig {
             let len = jwt_secret.len();
             if config.features.enable_auth && len < 16 {
                 panic!(
-                    "FATAL: OXICLOUD_JWT_SECRET is dangerously short ({} bytes). \
+                    "FATAL: MIYUCLOUD_JWT_SECRET is dangerously short ({} bytes). \
                      Minimum: 32 bytes (256 bits) for HS256. \
                      Generate a secure secret with: openssl rand -hex 32",
                     len
@@ -832,7 +832,7 @@ impl AppConfig {
             } else if config.features.enable_auth && len < 32 {
                 tracing::warn!("==========================================================");
                 tracing::warn!(
-                    "OXICLOUD_JWT_SECRET is only {} bytes — recommended minimum is 32 (256 bits).",
+                    "MIYUCLOUD_JWT_SECRET is only {} bytes — recommended minimum is 32 (256 bits).",
                     len
                 );
                 tracing::warn!("Generate a stronger secret with: openssl rand -hex 32");
@@ -903,263 +903,263 @@ impl AppConfig {
         }
 
         if let Ok(access_token_expiry) =
-            env::var("OXICLOUD_ACCESS_TOKEN_EXPIRY_SECS").map(|v| v.parse::<i64>())
+            env::var("MIYUCLOUD_ACCESS_TOKEN_EXPIRY_SECS").map(|v| v.parse::<i64>())
             && let Ok(val) = access_token_expiry
         {
             config.auth.access_token_expiry_secs = val;
         }
 
         if let Ok(refresh_token_expiry) =
-            env::var("OXICLOUD_REFRESH_TOKEN_EXPIRY_SECS").map(|v| v.parse::<i64>())
+            env::var("MIYUCLOUD_REFRESH_TOKEN_EXPIRY_SECS").map(|v| v.parse::<i64>())
             && let Ok(val) = refresh_token_expiry
         {
             config.auth.refresh_token_expiry_secs = val;
         }
 
         // Argon2 hashing parameters
-        if let Ok(v) = env::var("OXICLOUD_HASH_MEMORY_COST").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_HASH_MEMORY_COST").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.hash_memory_cost = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_HASH_TIME_COST").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_HASH_TIME_COST").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.hash_time_cost = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_HASH_PARALLELISM").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_HASH_PARALLELISM").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.hash_parallelism = val;
         }
 
         // Rate limiting / account lockout
-        if let Ok(v) = env::var("OXICLOUD_RATE_LIMIT_LOGIN_MAX").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_RATE_LIMIT_LOGIN_MAX").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.login_max_requests = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_RATE_LIMIT_LOGIN_WINDOW_SECS").map(|v| v.parse::<u64>())
+        if let Ok(v) = env::var("MIYUCLOUD_RATE_LIMIT_LOGIN_WINDOW_SECS").map(|v| v.parse::<u64>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.login_window_secs = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_RATE_LIMIT_REGISTER_MAX").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_RATE_LIMIT_REGISTER_MAX").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.register_max_requests = val;
         }
         if let Ok(v) =
-            env::var("OXICLOUD_RATE_LIMIT_REGISTER_WINDOW_SECS").map(|v| v.parse::<u64>())
+            env::var("MIYUCLOUD_RATE_LIMIT_REGISTER_WINDOW_SECS").map(|v| v.parse::<u64>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.register_window_secs = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_RATE_LIMIT_REFRESH_MAX").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_RATE_LIMIT_REFRESH_MAX").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.refresh_max_requests = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_RATE_LIMIT_REFRESH_WINDOW_SECS").map(|v| v.parse::<u64>())
+        if let Ok(v) = env::var("MIYUCLOUD_RATE_LIMIT_REFRESH_WINDOW_SECS").map(|v| v.parse::<u64>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.refresh_window_secs = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_LOCKOUT_MAX_FAILURES").map(|v| v.parse::<u32>())
+        if let Ok(v) = env::var("MIYUCLOUD_LOCKOUT_MAX_FAILURES").map(|v| v.parse::<u32>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.lockout_max_failures = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_LOCKOUT_DURATION_SECS").map(|v| v.parse::<u64>())
+        if let Ok(v) = env::var("MIYUCLOUD_LOCKOUT_DURATION_SECS").map(|v| v.parse::<u64>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.lockout_duration_secs = val;
         }
 
         // Feature flags
-        if let Ok(enable_auth) = env::var("OXICLOUD_ENABLE_AUTH").map(|v| v.parse::<bool>())
+        if let Ok(enable_auth) = env::var("MIYUCLOUD_ENABLE_AUTH").map(|v| v.parse::<bool>())
             && let Ok(val) = enable_auth
         {
             config.features.enable_auth = val;
         }
 
         if let Ok(enable_user_storage_quotas) =
-            env::var("OXICLOUD_ENABLE_USER_STORAGE_QUOTAS").map(|v| v.parse::<bool>())
+            env::var("MIYUCLOUD_ENABLE_USER_STORAGE_QUOTAS").map(|v| v.parse::<bool>())
             && let Ok(val) = enable_user_storage_quotas
         {
             config.features.enable_user_storage_quotas = val;
         }
 
         if let Ok(enable_file_sharing) =
-            env::var("OXICLOUD_ENABLE_FILE_SHARING").map(|v| v.parse::<bool>())
+            env::var("MIYUCLOUD_ENABLE_FILE_SHARING").map(|v| v.parse::<bool>())
             && let Ok(val) = enable_file_sharing
         {
             config.features.enable_file_sharing = val;
         }
 
-        if let Ok(enable_trash) = env::var("OXICLOUD_ENABLE_TRASH").map(|v| v.parse::<bool>())
+        if let Ok(enable_trash) = env::var("MIYUCLOUD_ENABLE_TRASH").map(|v| v.parse::<bool>())
             && let Ok(val) = enable_trash
         {
             config.features.enable_trash = val;
         }
 
-        if let Ok(enable_search) = env::var("OXICLOUD_ENABLE_SEARCH").map(|v| v.parse::<bool>())
+        if let Ok(enable_search) = env::var("MIYUCLOUD_ENABLE_SEARCH").map(|v| v.parse::<bool>())
             && let Ok(val) = enable_search
         {
             config.features.enable_search = val;
         }
 
         // Storage limits
-        if let Ok(max_upload) = env::var("OXICLOUD_MAX_UPLOAD_SIZE").map(|v| v.parse::<usize>())
+        if let Ok(max_upload) = env::var("MIYUCLOUD_MAX_UPLOAD_SIZE").map(|v| v.parse::<usize>())
             && let Ok(val) = max_upload
         {
             config.storage.max_upload_size = val;
         }
 
         // OIDC configuration
-        if let Ok(v) = env::var("OXICLOUD_OIDC_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_ENABLED") {
             config.oidc.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_ISSUER_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_ISSUER_URL") {
             config.oidc.issuer_url = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_CLIENT_ID") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_CLIENT_ID") {
             config.oidc.client_id = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_CLIENT_SECRET") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_CLIENT_SECRET") {
             config.oidc.client_secret = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_REDIRECT_URI") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_REDIRECT_URI") {
             config.oidc.redirect_uri = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_SCOPES") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_SCOPES") {
             config.oidc.scopes = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_FRONTEND_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_FRONTEND_URL") {
             config.oidc.frontend_url = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_AUTO_PROVISION") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_AUTO_PROVISION") {
             config.oidc.auto_provision = v.parse::<bool>().unwrap_or(true);
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_ADMIN_GROUPS") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_ADMIN_GROUPS") {
             config.oidc.admin_groups = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_DISABLE_PASSWORD_LOGIN") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_DISABLE_PASSWORD_LOGIN") {
             config.oidc.disable_password_login = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_OIDC_PROVIDER_NAME") {
+        if let Ok(v) = env::var("MIYUCLOUD_OIDC_PROVIDER_NAME") {
             config.oidc.provider_name = v;
         }
 
         // Security configuration
-        if let Ok(v) = env::var("OXICLOUD_BLOCKED_MIME_TYPES") {
+        if let Ok(v) = env::var("MIYUCLOUD_BLOCKED_MIME_TYPES") {
             config.security.blocked_mime_types = v
                 .split(',')
                 .map(|s| s.trim().to_string())
                 .filter(|s| !s.is_empty())
                 .collect();
         }
-        if let Ok(v) = env::var("OXICLOUD_FORCE_SECURE_COOKIES") {
+        if let Ok(v) = env::var("MIYUCLOUD_FORCE_SECURE_COOKIES") {
             config.security.force_secure_cookies = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_BANDWIDTH_LIMIT_MB_PER_MIN")
+        if let Ok(v) = env::var("MIYUCLOUD_BANDWIDTH_LIMIT_MB_PER_MIN")
             && let Ok(val) = v.parse::<u64>()
         {
             config.security.bandwidth_limit_mb_per_min = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_ENABLE_HSTS") {
+        if let Ok(v) = env::var("MIYUCLOUD_ENABLE_HSTS") {
             config.security.enable_hsts = v.parse::<bool>().unwrap_or(false);
         }
 
         // Encryption at rest configuration
-        if let Ok(v) = env::var("OXICLOUD_ENCRYPTION_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_ENCRYPTION_ENABLED") {
             config.encryption.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_ENCRYPTION_KEY") {
+        if let Ok(v) = env::var("MIYUCLOUD_ENCRYPTION_KEY") {
             config.encryption.key_base64 = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_ENCRYPTION_ALGORITHM") {
+        if let Ok(v) = env::var("MIYUCLOUD_ENCRYPTION_ALGORITHM") {
             config.encryption.algorithm = v;
         }
         // Validate encryption config
         if config.encryption.enabled && config.encryption.key_base64.is_empty() {
             panic!(
-                "FATAL: OXICLOUD_ENCRYPTION_ENABLED=true but OXICLOUD_ENCRYPTION_KEY is not set. \
+                "FATAL: MIYUCLOUD_ENCRYPTION_ENABLED=true but MIYUCLOUD_ENCRYPTION_KEY is not set. \
                  Generate a key with: openssl rand -base64 32"
             );
         }
 
         // TLS configuration
-        if let Ok(v) = env::var("OXICLOUD_TLS_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_TLS_ENABLED") {
             config.tls.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_TLS_CERT") {
+        if let Ok(v) = env::var("MIYUCLOUD_TLS_CERT") {
             config.tls.cert_path = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_TLS_KEY") {
+        if let Ok(v) = env::var("MIYUCLOUD_TLS_KEY") {
             config.tls.key_path = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_TLS_PORT")
+        if let Ok(v) = env::var("MIYUCLOUD_TLS_PORT")
             && let Ok(val) = v.parse::<u16>()
         {
             config.tls.port = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_TLS_AUTO_GENERATE") {
+        if let Ok(v) = env::var("MIYUCLOUD_TLS_AUTO_GENERATE") {
             config.tls.auto_generate = v.parse::<bool>().unwrap_or(true);
         }
 
         // Web connection configuration (MWS tunnel, DDNS, Central client)
-        if let Ok(v) = env::var("OXICLOUD_MWS_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_MWS_ENABLED") {
             config.web_connection.mws.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_MWS_RELAY_ADDRESS") {
+        if let Ok(v) = env::var("MIYUCLOUD_MWS_RELAY_ADDRESS") {
             config.web_connection.mws.relay_address = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_MWS_TRACKER_ADDRESS") {
+        if let Ok(v) = env::var("MIYUCLOUD_MWS_TRACKER_ADDRESS") {
             config.web_connection.mws.tracker_address = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_MWS_COG_ID") {
+        if let Ok(v) = env::var("MIYUCLOUD_MWS_COG_ID") {
             config.web_connection.mws.cog_id = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_MWS_SUBDOMAIN") {
+        if let Ok(v) = env::var("MIYUCLOUD_MWS_SUBDOMAIN") {
             config.web_connection.mws.subdomain_slug = Some(v);
         }
 
-        if let Ok(v) = env::var("OXICLOUD_DDNS_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_ENABLED") {
             config.web_connection.ddns.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_DDNS_PROVIDER") {
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_PROVIDER") {
             config.web_connection.ddns.provider = match v.to_lowercase().as_str() {
                 "duckdns" => DdnsProvider::DuckDns,
                 "generic" => DdnsProvider::Generic,
                 _ => DdnsProvider::NoIp,
             };
         }
-        if let Ok(v) = env::var("OXICLOUD_DDNS_HOSTNAME") {
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_HOSTNAME") {
             config.web_connection.ddns.hostname = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_DDNS_TOKEN") {
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_TOKEN") {
             config.web_connection.ddns.token = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_DDNS_USERNAME") {
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_USERNAME") {
             config.web_connection.ddns.username = Some(v);
         }
-        if let Ok(v) = env::var("OXICLOUD_DDNS_UPDATE_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_UPDATE_URL") {
             config.web_connection.ddns.update_url = Some(v);
         }
-        if let Ok(v) = env::var("OXICLOUD_DDNS_INTERVAL")
+        if let Ok(v) = env::var("MIYUCLOUD_DDNS_INTERVAL")
             && let Ok(val) = v.parse::<u64>()
         {
             config.web_connection.ddns.update_interval_secs = val;
         }
 
-        if let Ok(v) = env::var("OXICLOUD_CENTRAL_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_CENTRAL_ENABLED") {
             config.web_connection.central.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_CENTRAL_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_CENTRAL_URL") {
             config.web_connection.central.central_url = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_CENTRAL_SERVICE_ID") {
+        if let Ok(v) = env::var("MIYUCLOUD_CENTRAL_SERVICE_ID") {
             config.web_connection.central.service_id = v;
         }
 
@@ -1170,27 +1170,27 @@ impl AppConfig {
                 || config.oidc.client_secret.is_empty())
         {
             tracing::error!(
-                "OIDC is enabled but OXICLOUD_OIDC_ISSUER_URL, OXICLOUD_OIDC_CLIENT_ID, or OXICLOUD_OIDC_CLIENT_SECRET are not set"
+                "OIDC is enabled but MIYUCLOUD_OIDC_ISSUER_URL, MIYUCLOUD_OIDC_CLIENT_ID, or MIYUCLOUD_OIDC_CLIENT_SECRET are not set"
             );
             config.oidc.enabled = false;
         }
 
         // WOPI configuration
-        if let Ok(v) = env::var("OXICLOUD_WOPI_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_WOPI_ENABLED") {
             config.wopi.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_WOPI_DISCOVERY_URL") {
+        if let Ok(v) = env::var("MIYUCLOUD_WOPI_DISCOVERY_URL") {
             config.wopi.discovery_url = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_WOPI_SECRET") {
+        if let Ok(v) = env::var("MIYUCLOUD_WOPI_SECRET") {
             config.wopi.secret = v;
         }
-        if let Ok(v) = env::var("OXICLOUD_WOPI_TOKEN_TTL_SECS")
+        if let Ok(v) = env::var("MIYUCLOUD_WOPI_TOKEN_TTL_SECS")
             && let Ok(val) = v.parse::<i64>()
         {
             config.wopi.token_ttl_secs = val;
         }
-        if let Ok(v) = env::var("OXICLOUD_WOPI_LOCK_TTL_SECS")
+        if let Ok(v) = env::var("MIYUCLOUD_WOPI_LOCK_TTL_SECS")
             && let Ok(val) = v.parse::<u64>()
         {
             config.wopi.lock_ttl_secs = val;
@@ -1203,16 +1203,16 @@ impl AppConfig {
         }
 
         // Nextcloud compatibility configuration
-        if let Ok(v) = env::var("OXICLOUD_NEXTCLOUD_ENABLED") {
+        if let Ok(v) = env::var("MIYUCLOUD_NEXTCLOUD_ENABLED") {
             config.nextcloud.enabled = v.parse::<bool>().unwrap_or(false);
         }
-        if let Ok(v) = env::var("OXICLOUD_NEXTCLOUD_INSTANCE_ID") {
+        if let Ok(v) = env::var("MIYUCLOUD_NEXTCLOUD_INSTANCE_ID") {
             let trimmed = v.trim();
             if !trimmed.is_empty() {
                 config.nextcloud.instance_id = trimmed.to_string();
             }
         }
-        if let Ok(v) = env::var("OXICLOUD_NEXTCLOUD_VERSION") {
+        if let Ok(v) = env::var("MIYUCLOUD_NEXTCLOUD_VERSION") {
             // Expected format: "28.0.4"
             let parts: Vec<&str> = v.trim().splitn(3, '.').collect();
             if parts.len() == 3
@@ -1245,12 +1245,12 @@ impl AppConfig {
     /// Build the public base URL for generating share links and other external URLs.
     ///
     /// Priority:
-    /// 1. `OXICLOUD_BASE_URL` env var (used as-is)
+    /// 1. `MIYUCLOUD_BASE_URL` env var (used as-is)
     /// 2. If `server_host` already contains a scheme (`http://` or `https://`),
     ///    treat it as a full origin and do **not** prepend a scheme or append a port.
     /// 3. Otherwise, fall back to `http://{server_host}:{server_port}`.
     pub fn base_url(&self) -> String {
-        if let Ok(explicit) = std::env::var("OXICLOUD_BASE_URL") {
+        if let Ok(explicit) = std::env::var("MIYUCLOUD_BASE_URL") {
             return explicit.trim_end_matches('/').to_string();
         }
 
