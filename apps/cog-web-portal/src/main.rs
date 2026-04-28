@@ -6,8 +6,8 @@
 //!
 //! ## Architecture
 //!
-//! - AppState: Vec<Arc<dyn PortalContract + Send + Sync>>
-//! - Routes: GET /, GET /:service, GET /:service/:slug, GET|POST /:service/contact
+//! - AppState: Vec<Arc<dyn PortalContract + Send + Sync>> + central_remote_addr
+//! - Routes: GET /, GET /:service, GET /:service/:slug, GET|POST /:service/contact, GET /central-remote, GET /central-remote/app
 //! - Sécurité: CSP nonce per-request, HSTS, rate limiting 60 req/min/IP, CSRF sur POST
 //! - DB path: PORTAL_JF_DB et PORTAL_JX_DB (env), défaut :memory: en développement
 
@@ -38,6 +38,8 @@ use security_headers::SecurityHeadersLayer;
 pub struct AppState {
     /// Services Portal enregistrés (JayFestival, JayXpose, …).
     pub services: Vec<Arc<dyn PortalContract + Send + Sync>>,
+    /// Adresse du serveur CentralRemote (ex: "127.0.0.1:8091"), si configuré.
+    pub central_remote_addr: Option<String>,
 }
 
 #[tokio::main]
@@ -58,6 +60,14 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(routes::home::home))
+        .route(
+            "/central-remote",
+            get(routes::central_remote::central_remote_login),
+        )
+        .route(
+            "/central-remote/app",
+            get(routes::central_remote::central_remote_app),
+        )
         .route("/:service", get(routes::service::service_home))
         .route(
             "/:service/contact",
@@ -111,7 +121,16 @@ pub fn build_app_state() -> AppState {
         }
     }
 
-    AppState { services }
+    // CentralRemote — adresse du serveur remote de Central (optionnel).
+    let central_remote_addr = std::env::var("PORTAL_CENTRAL_REMOTE_ADDR").ok();
+    if let Some(ref addr) = central_remote_addr {
+        info!("CentralRemote configured: {addr}");
+    }
+
+    AppState {
+        services,
+        central_remote_addr,
+    }
 }
 
 #[cfg(test)]

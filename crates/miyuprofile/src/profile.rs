@@ -1,13 +1,16 @@
 //! Tools MiyuProfile — tool.profile.get, tool.profile.update.
 //! Décision modification = StrongFather ; WriteIntent KindMother.
 //! Store par défaut en mémoire (persistance réelle déléguée à KindMother côté produit).
+//!
+//! Ce module conserve l'ancien `ProfileData` (champs plats) pour rétro-compatibilité.
+//! Le nouveau `CentralProfile` structuré est accessible via le module `store`.
 
 use crate::context::GovernedContext;
 use crate::errors::MiyuprofileError;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-/// Données profil.
+/// Données profil (format plat, rétro-compatible).
 #[derive(Debug, Clone, Default)]
 pub struct ProfileData {
     pub user_id: String,
@@ -24,7 +27,7 @@ fn default_store() -> &'static Mutex<HashMap<String, ProfileData>> {
 /// @id: miyuprofile_tool_profile_get
 /// @role: mutator
 /// @layer: tool
-/// @human: Récupère le profil.
+/// @human: Récupère le profil (format plat).
 /// @do: profile_get_under_governance
 /// tool.profile.get
 pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<ProfileData, MiyuprofileError> {
@@ -45,7 +48,7 @@ pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<ProfileData, Miyuprof
 /// @id: miyuprofile_tool_profile_update
 /// @role: mutator
 /// @layer: tool
-/// @human: Met à jour le profil ; WriteIntent KindMother.
+/// @human: Met à jour le profil (format plat) ; WriteIntent KindMother.
 /// @do: profile_update_under_governance
 /// tool.profile.update
 pub fn update(

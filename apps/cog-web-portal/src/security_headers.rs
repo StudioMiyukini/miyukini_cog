@@ -79,12 +79,17 @@ where
             headers.insert(CACHE_CONTROL, HeaderValue::from_static("no-store"));
             headers.insert(PRAGMA, HeaderValue::from_static("no-cache"));
 
+            // connect-src élargi pour CentralRemote (WS + HTTP vers le serveur remote).
+            let connect_src = match std::env::var("PORTAL_CENTRAL_REMOTE_ADDR") {
+                Ok(addr) => format!("connect-src 'self' http://{addr} ws://{addr}", addr = addr),
+                Err(_) => "connect-src 'self'".to_string(),
+            };
             let csp = format!(
                 "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; \
                  object-src 'none'; img-src 'self' data:; \
                  style-src 'self' 'nonce-{nonce}'; \
                  script-src 'self' 'nonce-{nonce}'; \
-                 connect-src 'self'; form-action 'self'"
+                 {connect_src}; form-action 'self'"
             );
             if let Ok(value) = HeaderValue::from_str(&csp) {
                 headers.insert(CONTENT_SECURITY_POLICY, value);

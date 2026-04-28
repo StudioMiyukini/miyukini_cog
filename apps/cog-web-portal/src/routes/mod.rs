@@ -4,6 +4,7 @@
 //! @role: api @layer: app
 //! @human: Module routes Portal — home, service, contact.
 
+pub mod central_remote;
 pub mod contact;
 pub mod home;
 pub mod service;
