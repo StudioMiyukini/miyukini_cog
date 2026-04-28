@@ -1,0 +1,40 @@
+[package]
+name = "jaymail"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Jay Mail — client email Miyukini (SMTP + IMAP)"
+
+[dependencies]
+# SMTP send
+lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1-rustls-tls", "builder"] }
+
+# IMAP fetch (synchrone, simple)
+imap = "3.0.0-alpha.15"
+native-tls = "0.2"
+
+# Parse RFC822
+mail-parser = "0.9"
+
+# Async runtime
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging
+tracing = "0.1"
+
+# Errors
+thiserror = "2"
+
+# Utils
+uuid = { version = "1", features = ["v4"] }
+
+[lints]
+workspace = true

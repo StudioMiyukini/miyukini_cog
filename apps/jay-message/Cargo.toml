@@ -1,0 +1,25 @@
+[package]
+name = "jay-message"
+version = "0.1.0"
+edition = "2021"
+description = "Jay Message — messagerie chiffrée E2E"
+authors = ["Miyukini Contributors"]
+license = "LicenseRef-Miyukini-Dual"
+
+[[bin]]
+name = "jay-message"
+path = "src/main.rs"
+
+[dependencies]
+dioxus = { version = "0.7.5", features = ["desktop"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+chrono = "0.4"
+
+jaymessage = { path = "../../crates/jaymessage" }
+miyukini-cog-bridge = { path = "../../crates/miyukini-cog-bridge" }
+
+[lints]
+workspace = true

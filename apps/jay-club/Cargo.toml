@@ -1,0 +1,24 @@
+[package]
+name = "jay-club"
+version = "0.1.0"
+edition = "2021"
+description = "JayClub — réseau social Miyukini (Instagram/Meta-like)"
+authors = ["Miyukini Contributors"]
+license = "LicenseRef-Miyukini-Dual"
+
+[[bin]]
+name = "jay-club"
+path = "src/main.rs"
+
+[dependencies]
+dioxus = { version = "0.7.5", features = ["desktop"] }
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+chrono = "0.4"
+
+jayclub = { path = "../../crates/jayclub" }
+
+[lints]
+workspace = true
