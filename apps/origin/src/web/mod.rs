@@ -5,9 +5,11 @@
 pub mod api;
 pub mod content;
 pub mod forum_auth;
+pub mod jaybureau;
 pub mod market;
 pub mod pages;
 pub mod server;
 
+pub use jaybureau::JayBureauState;
 pub use market::MarketStore;
 pub use server::WebServer;

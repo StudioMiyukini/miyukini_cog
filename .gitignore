@@ -94,3 +94,17 @@ miyukini_cog.db-journal
 
 # Forum phpBB-COG (clone séparé : https://github.com/StudioMiyukini/phpbb-COG)
 forum/models/
+
+# Central Mobile — APK builds (trop gros pour GitHub)
+*.apk
+central-mobile-debug.apk
+central-mobile-release.apk
+
+# JayClub — DB persistance
+jayclub.db
+jayclub.db-journal
+
+# Jay Bureau — DB
+jaybureau.db
+jaybureau.db-journal
+.git_token.md

@@ -1,0 +1,18 @@
+[package]
+name = "jaybureau-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Jay Bureau — types partagés et modèle de données (Docs, Sheets, Slides, Formulaires, Réunions)"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+thiserror = "2"
+rand = "0.8"
+
+[lints]
+workspace = true

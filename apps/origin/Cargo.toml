@@ -18,6 +18,8 @@ miyuwebway_tracker = { path = "../../crates/miyuwebway_tracker" }
 miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 jayxpose = { path = "../../crates/jayxpose" }
 miyumarket = { path = "../../crates/miyumarket" }
+jaybureau-core = { path = "../../crates/jaybureau-core" }
+jay-collab = { path = "../../crates/jay-collab" }
 
 # Async runtime
 tokio = { version = "1.36", features = ["full"] }

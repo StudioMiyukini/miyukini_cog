@@ -107,6 +107,7 @@ members = [
     
     # === Applications Natives (Dioxus) ===
     "apps/central",
+    "apps/central-mobile",
 
     # === Apps Standalone Services (lancées par Central ou indépendamment) ===
     "apps/jayxpose",
@@ -128,6 +129,29 @@ members = [
 
     # === MGE (Miyukini Game Engine) ===
     # Workspace MGE indépendant : mge/ (voir mge/Cargo.toml)
+
+    # === CentralRemote — Contrôle à distance de Central ===
+    "crates/central-remote-protocol",
+    "crates/central-remote",
+
+    # === COG Bridge — Connexion Android ↔ COG Host ===
+    "crates/miyukini-cog-bridge",
+
+    # === Jay Bureau — Suite bureautique collaborative ===
+    "crates/jaybureau-core",
+    "crates/jay-collab",
+    "crates/jayclub",
+    "crates/jaymail",
+    "crates/jaymessage",
+    "apps/jaybureau",
+    "apps/jay-docs",
+    "apps/jay-sheets",
+    "apps/jay-slides",
+    "apps/jay-formulaire",
+    "apps/jay-reunion",
+    "apps/jay-club",
+    "apps/jay-mail",
+    "apps/jay-message",
 
     # === COG Portal Contract — Contrat d'exposition Portal ===
     "crates/cog-portal-contract",
