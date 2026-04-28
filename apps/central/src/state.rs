@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use crate::data::ServiceConnections;
 use crate::miou::state::{MiouPreferences, MiouState};
+use crate::remote::RemoteState;
 use crate::service_manager::ServiceManager;
 use crate::theme::Theme;
 use dioxus::prelude::*;
@@ -15,6 +16,8 @@ pub struct AppContext {
     pub connections: Signal<Arc<ServiceConnections>>,
     pub state: Signal<AppState>,
     pub service_manager: ServiceManager,
+    /// État du CentralRemote (remote activé, adresse, clients connectés).
+    pub remote_state: Signal<RemoteState>,
 }
 
 /// Onglet principal de navigation (header).

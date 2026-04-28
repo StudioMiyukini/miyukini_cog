@@ -1,0 +1,20 @@
+[application]
+name = "Miyukini Central"
+identifier = "com.miyukini.central"
+default_platform = "android"
+
+[application.android]
+min_sdk_version = 26
+target_sdk_version = 34
+
+[bundle]
+name = "Miyukini Central"
+identifier = "com.miyukini.central"
+
+[bundle.android]
+min_sdk_version = 26
+target_sdk_version = 34
+jks_file = "debug.keystore"
+jks_password = "miyukini123"
+key_alias = "central-mobile"
+key_password = "miyukini123"

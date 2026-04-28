@@ -1,0 +1,18 @@
+# CentralRemote Protocol — Types partagés pour le contrôle à distance.
+# Crate léger sans dépendance serveur (pas d'axum/tower).
+# Utilisé par : central-remote (serveur desktop), central-mobile (client Android).
+
+[package]
+name = "central-remote-protocol"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Types protocole CentralRemote — commandes, événements, snapshots (sans serveur)"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lints]
+workspace = true

@@ -1,0 +1,43 @@
+# Miyukini COG Bridge — Connexion Android ↔ COG Host.
+# 3 modes : SSH tunnel, Whitelist LAN (mDNS), Clé API (Bearer token).
+# Compile pour desktop (tests) et Android (mobile).
+
+[package]
+name = "miyukini-cog-bridge"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Bridge de connexion entre Central Mobile et le COG Host (SSH, Whitelist, API Key)"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "net", "time"] }
+
+# SSH tunnel (pur Rust, compile pour Android)
+russh = "0.48"
+russh-keys = "0.48"
+
+# HTTP client (whitelist + API key modes)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Crypto (génération clé ed25519 pour SSH + E2E encryption)
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+chacha20poly1305 = "0.10"
+rand = "0.8"
+
+# Logging
+tracing = "0.1"
+
+# Utilities
+hex = "0.4"
+thiserror = "2"
+chrono = "0.4"
+
+[lints]
+workspace = true

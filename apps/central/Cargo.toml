@@ -60,6 +60,9 @@ miyualicia-wakeword = { path = "../../crates/miyuwakeword" }
 # File dialog natif (selecteur de fichiers pour MiyuCloud upload)
 rfd = "0.15"
 
+# CentralRemote — contrôle à distance depuis le navigateur
+central-remote = { path = "../../crates/central-remote" }
+
 # UI unifiee Miyukini (theme, composants, tokens)
 miyuki-ui-dioxus = { path = "../../crates/miyuki-ui-dioxus" }
 miyuki-ui-tokens = { path = "../../crates/miyuki-ui-tokens" }

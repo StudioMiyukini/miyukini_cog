@@ -1,12 +1,14 @@
 //! Composants UI reutilisables pour Miyukini Central.
 
 mod header;
+pub mod mobile_devices;
 mod service_card;
 pub mod service_grid;
 mod service_sidebar;
 mod tab_bar;
 
 pub use header::Header;
+pub use mobile_devices::MobileDevicesPanel;
 pub use service_card::ServiceCard;
 pub use service_grid::{ServiceFilter, ServiceGrid};
 #[allow(unused_imports)]

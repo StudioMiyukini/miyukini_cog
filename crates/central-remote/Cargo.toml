@@ -1,0 +1,37 @@
+# CentralRemote — Contrôle à distance de Central depuis le navigateur.
+# @id: central_remote_cargo @do: declare_central_remote_crate @role: infra @layer: toolkit
+# @human: Protocole + serveur embarqué pour le contrôle à distance de Central via le portail web.
+
+[package]
+name = "central-remote"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "CentralRemote — protocole et serveur embarqué pour le contrôle à distance de Central"
+
+[dependencies]
+axum = { version = "0.8", features = ["ws"] }
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "net"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+central-remote-protocol = { path = "../central-remote-protocol" }
+uuid = { version = "1", features = ["v4"] }
+hmac = "0.12"
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+chacha20poly1305 = "0.10"
+sha2 = "0.10"
+hex = "0.4"
+tracing = "0.1"
+chrono = "0.4"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors"] }
+futures-util = "0.3"
+tokio-stream = "0.1"
+
+# Auth — même stack que Central
+miyukini-central = { path = "../miyukini-central", features = ["legacy-sqlite"] }
+miyukini-connect = { path = "../miyukini-connect" }
+
+[lints]
+workspace = true

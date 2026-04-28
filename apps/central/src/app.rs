@@ -9,6 +9,7 @@ use crate::miou::{
     decide, select_variante, templates::generate_bulle, ActionType, BotContext, BulleAction,
     BulleOutput, MiouBubbleOverlay,
 };
+use crate::remote::{self, RemoteState};
 use crate::screens::{Connexion, ProfileWindow, RiteEntree};
 use crate::service_manager::ServiceManager;
 use crate::services::{auto_connect_after_login, ActiveServiceView, MwsNetworkView, MwsViewState};
@@ -54,6 +55,7 @@ pub fn App() -> Element {
             connections: Signal::new(connections),
             state: Signal::new(state),
             service_manager: service_manager.clone(),
+            remote_state: Signal::new(RemoteState::default()),
         }
     });
 
@@ -161,6 +163,33 @@ pub fn App() -> Element {
         });
     });
 
+    // === CentralRemote: sync state → bridge ===
+    let ctx_for_remote = ctx.clone();
+    use_effect(move || {
+        let state_read = ctx_for_remote.state.read();
+        let remote_read = ctx_for_remote.remote_state.read();
+        if remote_read.enabled && state_read.current_user.is_some() {
+            remote::sync_state_to_bridge(&state_read);
+        }
+    });
+
+    // === CentralRemote: process incoming commands (one-shot task) ===
+    let ctx_for_remote_cmds = ctx.clone();
+    use_effect(move || {
+        let remote_enabled = ctx_for_remote_cmds.remote_state.read().enabled;
+        if !remote_enabled {
+            return;
+        }
+        if let Some(mut rx) = remote::remote_bridge().take_command_receiver() {
+            let mut ctx_cmd = ctx_for_remote_cmds.clone();
+            spawn(async move {
+                while let Some(cmd) = rx.recv().await {
+                    remote::apply_remote_command(&mut ctx_cmd, cmd);
+                }
+            });
+        }
+    });
+
     // Handler pour dismiss de la bulle
     let mut ctx_for_dismiss = ctx.clone();
     let on_dismiss = move |_| {
@@ -252,7 +281,18 @@ pub fn App() -> Element {
                 footer {
                     style: "display: flex; align-items: center; justify-content: space-between; height: 24px; background: {c.bg_header}; padding: 0 16px; font-size: 11px; color: {c.text_muted}; border-top: 1px solid {c.border};",
                     span { "Miyukini Central v0.2.0" }
-                    span { "COG: Actif \u{2022} KindMother: Connect\u{e9}" }
+                    span {
+                        {
+                            let remote_enabled = ctx.remote_state.read().enabled;
+                            let remote_addr = ctx.remote_state.read().server_addr.clone();
+                            let base = "COG: Actif \u{2022} KindMother: Connect\u{e9}";
+                            if remote_enabled {
+                                format!("{base} \u{2022} Remote: {}", remote_addr.as_deref().unwrap_or("D\u{e9}marrage…"))
+                            } else {
+                                base.to_string()
+                            }
+                        }
+                    }
                 }
                 if state.read().show_profile_window {
                     ProfileWindow {}

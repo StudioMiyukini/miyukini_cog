@@ -11,6 +11,7 @@ mod kindmother_launcher;
 pub mod llm_client;
 pub mod market_client;
 mod miou;
+pub mod remote;
 mod screens;
 pub mod service_manager;
 mod services;

@@ -1,0 +1,81 @@
+# Miyukini Central Mobile — Client léger Android pour piloter le COG Host.
+# Dioxus 0.7 Mobile (WebView Android). Zéro DB locale — tout via le bridge.
+
+[package]
+name = "miyukini-central-mobile"
+version = "0.1.0"
+edition = "2021"
+description = "Central Mobile — client léger Android pour l'écosystème Miyukini COG"
+authors = ["Miyukini Contributors"]
+license = "LicenseRef-Miyukini-Dual"
+
+[[bin]]
+name = "central-mobile"
+path = "src/main.rs"
+
+[dependencies]
+# Dioxus Mobile (WebView Android)
+dioxus = { version = "0.7.5", features = ["mobile"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Async runtime
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# Utilities
+chrono = "0.4"
+uuid = { version = "1", features = ["v4"] }
+rand = "0.8"
+hex = "0.4"
+
+# === Crates internes Miyukini (portables Android) ===
+
+# Auth et profils
+miyukini-connect = { path = "../../crates/miyukini-connect" }
+
+# Market (protocole catalogue Origin)
+miyumarket = { path = "../../crates/miyumarket" }
+
+# MWS - Miyukini Webway System
+miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
+
+# Design tokens / thème
+miyuki-ui-tokens = { path = "../../crates/miyuki-ui-tokens" }
+
+# KindMother client (gRPC vers le COG Host via bridge)
+kindmother-client = { path = "../../crates/kindmother-client" }
+
+# Profil utilisateur
+miyuprofile = { path = "../../crates/miyuprofile" }
+
+# === Nouveaux crates pour Android ===
+
+# Bridge de connexion au COG Host (SSH, Whitelist, API Key)
+miyukini-cog-bridge = { path = "../../crates/miyukini-cog-bridge" }
+
+# Protocole CentralRemote (types sans axum)
+central-remote-protocol = { path = "../../crates/central-remote-protocol" }
+
+# WebSocket client pour CentralRemote
+tokio-tungstenite = "0.24"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+module_name_repetitions = "allow"
