@@ -1,7 +1,7 @@
 //! Module de base de données central - Adaptateurs KindMother.
 //!
 //! Fournit les abstractions et helpers communs pour les bases
-//! de données KindMother Daughter (jayfestival, jaykoa, jaykonta, jayxpose).
+//! de données KindMother Daughter (jaykoa, jaykonta).
 
 pub mod kindmother_adapter;
 

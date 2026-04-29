@@ -101,33 +101,13 @@ impl ArbitrationEngine {
     pub async fn register_default_operators(&self) {
         // === Services famille Jay ===
 
-        // JayXpose - profil exposant, catalogue, vitrine
-        self.register_operator(OperatorConfig {
-            id: "jayxpose".to_string(),
-            databases: [("jayxpose".to_string(), Permission::Admin)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0, // Illimité pour les services COG
-        })
-        .await;
-
         // JayKonta - comptabilité COG unifiée (Purse + Account)
         self.register_operator(OperatorConfig {
             id: "jaykonta".to_string(),
             databases: [("jaykonta".to_string(), Permission::Admin)]
                 .into_iter()
                 .collect(),
-            rate_limit: 0,
-        })
-        .await;
-
-        // JayFestival - festivals, éditions, exposants, visiteurs
-        self.register_operator(OperatorConfig {
-            id: "jayfestival".to_string(),
-            databases: [("jayfestival".to_string(), Permission::Admin)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0,
+            rate_limit: 0, // Illimité pour les services COG
         })
         .await;
 
@@ -149,9 +129,7 @@ impl ArbitrationEngine {
             id: "miyukini-central".to_string(),
             databases: [
                 ("central".to_string(), Permission::Admin),
-                ("jayxpose".to_string(), Permission::Read),
                 ("jaykonta".to_string(), Permission::Read),
-                ("jayfestival".to_string(), Permission::Read),
                 ("jaykoa".to_string(), Permission::Read),
             ]
             .into_iter()

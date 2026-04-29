@@ -436,32 +436,6 @@
     "jaykonta_emit_invoice",
     "jaykonta_kindmother_client_db"
   ],
-  "jayxpose": [
-    "jayxpose_get_profile",
-    "jayxpose_list_repertoire",
-    "jayxpose_fiche_by_id",
-    "jayxpose_get_profile",
-    "jayxpose_list_repertoire",
-    "jayxpose_fiche_by_id",
-    "jayxpose_profile_type",
-    "jayxpose_repertoire_filters",
-    "jayxpose_profile_type",
-    "jayxpose_repertoire_filters",
-    "jayxpose_auth_sign_in",
-    "jayxpose_auth_sign_up",
-    "jayxpose_auth_sign_out",
-    "jayxpose_auth_sign_in",
-    "jayxpose_auth_sign_up",
-    "jayxpose_auth_sign_out",
-    "jayxpose_kindmother_client_db",
-    "jayxpose_db_client_struct",
-    "jayxpose_kindmother_db",
-    "jayxpose_db_struct",
-    "jayxpose_db_open",
-    "jayxpose_data_module",
-    "jayxpose_data_types",
-    "jayxpose_lib_stub"
-  ],
   "miyubookmarks": [
     "miyubookmarks_tool_bookmark_add",
     "miyubookmarks_tool_bookmark_remove",
@@ -612,7 +586,6 @@
     "jaykoa_export_ical",
     "jaykoa_export_module",
     "jaykoa_lib",
-    "jaykoa_jayfestival_adapter",
     "jaykoa_jayrdv_adapter",
     "jaykoa_services_module",
     "jaykoa_test_runner"
@@ -1713,10 +1686,6 @@
     "miyuwidgets_tool_web_widget_button_render",
     "miyuwidgets_tool_web_widget_grid_render",
     "miyuwidgets_tool_web_widget_container_render"
-  ],
-  "jayfestival": [
-    "jayfestival_kindmother_client_db",
-    "jayfestival_lib_stub"
   ],
   "miyunotify": [
     "miyunotify_send_announcement",

@@ -72,7 +72,7 @@ pub struct Quote {
     pub validity_days: u32,
     /// Notes / conditions.
     pub notes: Option<String>,
-    /// Reference contexte (ex: edition JayFestival).
+    /// Reference contexte (ex: rendez-vous, projet).
     pub context_ref: Option<String>,
     /// Service source.
     pub source_service: Option<String>,

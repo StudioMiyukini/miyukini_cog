@@ -22,9 +22,7 @@ kindmother-client = { path = "../kindmother-client" }
 miyuwebway_participant = { path = "../miyuwebway_participant" }
 chrono = "0.4"
 dotenvy = "0.15"
-jayfestival = { path = "../jayfestival" }
 jaykoa = { path = "../jaykoa" }
-jayxpose = { path = "../jayxpose" }
 jaykonta = { path = "../jaykonta" }
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }

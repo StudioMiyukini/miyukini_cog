@@ -27,7 +27,7 @@ const STEPS = [
   {
     title: 'Des services concrets',
     content:
-      '**JayFestival** — organisez des marches et festivals. **JayKoa** — un calendrier qui agrege tout. **JayKonta** — gerez votre budget. **JayXpose** — creez votre vitrine artisan. **Miyukini Cloud** — votre cloud prive. **MAIA** — une IA locale. Et meme des **jeux** integres (Clicker, Tower Defense).',
+      '**JayKoa** — un calendrier qui agrege tout. **JayKonta** — gerez votre budget. **Miyukini Cloud** — votre cloud prive. **MAIA** — une IA locale. Et meme des **jeux** integres (Clicker, Tower Defense).',
     icon: '🎯',
     cta: 'Comment ca marche ?',
   },

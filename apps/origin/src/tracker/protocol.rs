@@ -620,7 +620,7 @@ mod tests {
             cog_id: "test-cog".to_string(),
             core_version: "1.0.0".to_string(),
             address: "127.0.0.1:12345".to_string(),
-            services: vec!["jayfestival".to_string()],
+            services: vec!["jaykoa".to_string()],
             permis_id: "permis-123".to_string(),
             slug: None,
         };

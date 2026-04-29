@@ -80,10 +80,6 @@ supabase-catakana.env
 .mip/secrets/*
 !.mip/secrets/README.md
 
-# JayFestival — base fille SQLite (KindMother)
-jayfestival.db
-jayfestival.db-journal
-
 # JayKoa — base fille SQLite (KindMother)
 jaykoa.db
 jaykoa.db-journal

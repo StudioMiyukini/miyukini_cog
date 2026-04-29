@@ -10,7 +10,6 @@ description = "JayKoa — Calendrier universel du COG (standalone)"
 
 [dependencies]
 jaykoa = { path = "../../crates/jaykoa" }
-jayfestival = { path = "../../crates/jayfestival" }
 kindmother = { path = "../../crates/kindmother" }
 miyukini-service-ui = { path = "../../crates/miyukini-service-ui" }
 dioxus = { version = "0.7", features = ["desktop"] }

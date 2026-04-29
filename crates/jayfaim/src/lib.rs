@@ -1,7 +1,7 @@
 //! JayFaim — Service réservation tables et restauration du COG.
 //!
 //! Domaine : tables, créneaux, réservations, convives.
-//! Intégration prévue : MiyuBooking, JayFestival (mode couplé), JayKonta (paiement).
+//! Intégration prévue : MiyuBooking, JayKonta (paiement).
 
 pub mod data;
 pub mod domain;

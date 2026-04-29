@@ -25,10 +25,8 @@
 | Service | Ce qu'il fait | Statut |
 |---|---|---|
 | **Miyukini Central** | Hub desktop — point d'entree unique vers tous vos services | Fonctionnel |
-| **JayFestival** | Gestion d'evenements et festivals (organisateur, exposant, visiteur) | Fonctionnel |
 | **JayKoa** | Calendrier universel — vue jour, semaine, mois, planning | Fonctionnel |
 | **JayKonta** | Budget personnel + comptabilite entreprise | Fonctionnel (Bourse) |
-| **JayXpose** | Profil exposant et vitrine produit pour artisans et createurs | Fonctionnel |
 | **Miyukini Cloud** | Cloud prive avec fichiers, calendriers, contacts (WebDAV/CalDAV/CardDAV) | Fonctionnel |
 | **Alicia** | Assistante domotique — controle vocal, MQTT, automatisations | MVP |
 | **MAIA** | IA locale (LLM, STT) — fonctionne sans internet | Fonctionnel |
@@ -91,10 +89,8 @@ Vous
   v
 Miyukini Central (le Hub)
   |
-  +---> JayFestival    (vos evenements)
   +---> JayKoa         (votre calendrier)
   +---> JayKonta       (vos finances)
-  +---> JayXpose       (votre vitrine)
   +---> Miyukini Cloud (vos fichiers)
   +---> Jeux           (vos loisirs)
   +---> ...

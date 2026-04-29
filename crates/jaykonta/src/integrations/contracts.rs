@@ -101,15 +101,6 @@ pub struct PaymentRecordPayload {
     pub paid_at: String,
 }
 
-/// Payload report.by_edition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReportByEditionPayload {
-    /// Reference edition.
-    pub edition_ref: String,
-    /// Scope.
-    pub scope: String,
-}
-
 /// Payload report.by_professional.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportByProfessionalPayload {
@@ -130,19 +121,6 @@ pub struct DeadlineReminderPayload {
     pub label: String,
     /// Contexte.
     pub context_ref: String,
-}
-
-/// Evenement JayFestival -> JayKonta (CK-INT-01).
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum JayFestivalEvent {
-    /// quote.create
-    QuoteCreate(IntegrationMeta, QuoteCreatePayload),
-    /// invoice.emit
-    InvoiceEmit(IntegrationMeta, InvoiceEmitPayload),
-    /// budget.movements.record
-    BudgetMovementRecord(IntegrationMeta, BudgetMovementPayload),
-    /// report.by_edition
-    ReportByEdition(IntegrationMeta, ReportByEditionPayload),
 }
 
 /// Evenement JayRDV -> JayKonta (CK-INT-02).

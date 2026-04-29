@@ -376,7 +376,7 @@ impl JayKoaDb {
 
     /// Vérifie s'il existe un conflit pour un profil sur un créneau donné.
     /// Retourne (conflit_existe, liste_des_conflits).
-    /// API consommable par les services externes (JayRDV, JayFestival).
+    /// API consommable par les services externes (JayRDV).
     pub fn check_conflict(&self, profile_id: &str, start: &str, end: &str) -> Result<(bool, Vec<crate::data::types::TemporalConflict>), DbError> {
         let agendas = self.agendas_by_profile(profile_id)?;
         let agenda_ids: Vec<String> = agendas.iter().filter(|a| a.visible).filter_map(|a| a.id.clone()).collect();
@@ -575,7 +575,7 @@ mod tests {
         let agenda_id = make_agenda(&db, profile, "Synced");
 
         let now = chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-        let source_svc = "jayfestival";
+        let source_svc = "jayrdv";
         let source_eid = "ext-event-42";
 
         // First insert (new reflect)
@@ -586,7 +586,7 @@ mod tests {
             title: Some("Festival opening".to_string()),
             start_datetime: Some("2026-07-01T18:00:00".to_string()),
             end_datetime: Some("2026-07-01T22:00:00".to_string()),
-            entry_type: Some("reflect_jayfestival".to_string()),
+            entry_type: Some("reflect_jayrdv".to_string()),
             source_service: Some(source_svc.to_string()),
             source_event_id: Some(source_eid.to_string()),
             status: Some("confirmed".to_string()),
@@ -609,7 +609,7 @@ mod tests {
             title: Some("Festival opening (updated)".to_string()),
             start_datetime: Some("2026-07-01T19:00:00".to_string()),
             end_datetime: Some("2026-07-01T23:00:00".to_string()),
-            entry_type: Some("reflect_jayfestival".to_string()),
+            entry_type: Some("reflect_jayrdv".to_string()),
             source_service: Some(source_svc.to_string()),
             source_event_id: Some(source_eid.to_string()),
             status: Some("confirmed".to_string()),

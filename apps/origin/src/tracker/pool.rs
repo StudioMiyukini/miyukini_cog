@@ -305,7 +305,7 @@ mod tests {
             core_version: "1.0.0".to_string(),
             address: "127.0.0.1:12345".to_string(),
             last_seen: Utc::now(),
-            services: vec!["jayfestival".to_string()],
+            services: vec!["jaykoa".to_string()],
             lobbys: vec![LobbyEntry {
                 lobby_id: "lobby-1".to_string(),
                 name: "Test Lobby".to_string(),

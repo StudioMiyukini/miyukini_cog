@@ -935,7 +935,6 @@ fn MwsConnectionButton(
 
 /// Connexion réelle au réseau MWS via CentralMwsManager et miyuwebway_participant.
 /// Active le serveur Home (page de présentation du COG) lorsque annoncé sur le Tracker.
-/// Si une vitrine JayXpose est publiée, la carte « Découvrir » est affichée sur la Home.
 /// `tick` est incrémenté après mise à jour pour forcer le re-render de l'UI (spawn → Dioxus).
 /// `display_name` est le pseudonyme ou l'email de l'utilisateur connecté — utilisé comme identifiant COG sur le Webway.
 async fn connect_with_manager_state(
@@ -973,28 +972,13 @@ async fn connect_with_manager_state(
         }
     }
 
-    let jayxpose_slug = None;
-    let expose_jayxpose_vitrine = config.expose_jayxpose_vitrine && jayxpose_slug.is_some();
-    if expose_jayxpose_vitrine && config.jayxpose_vitrine_base_url.is_none() {
-        if let Some(origin_url) = origin_url_from_env() {
-            config.jayxpose_vitrine_base_url = Some(origin_url);
-        }
-    }
-    config.expose_jayxpose_vitrine = expose_jayxpose_vitrine;
-
-    let services = if expose_jayxpose_vitrine {
-        vec!["jayxpose".to_string()]
-    } else {
-        Vec::new()
-    };
+    let services: Vec<String> = Vec::new();
 
     let manager = CentralMwsManager::new(
         config.clone(),
         current_cog_id(display_name),
         "0.1.0".to_string(),
         services,
-        jayxpose_slug,
-        None,
     );
 
     let result = if honor_auto_connect {

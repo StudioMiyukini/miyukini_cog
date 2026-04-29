@@ -137,20 +137,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pool_manager = tracker.pool_manager();
     let slug_registry = tracker.slug_registry();
 
-    // Base JayXpose optionnelle (pages vitrine publiques /vitrine/*)
-    let jayxpose_db: Option<std::sync::Arc<jayxpose::JayXposeDb>> =
-        config.tracker.jayxpose_db_path.as_ref().and_then(|path| {
-            let p = std::path::Path::new(path);
-            if p.exists() {
-                jayxpose::JayXposeDb::open(p).ok().map(Arc::new)
-            } else {
-                None
-            }
-        });
-    if jayxpose_db.is_some() {
-        info!("JayXpose vitrines publiques activées (/vitrine/*)");
-    }
-
     // Auth forum unifiée Central (profils synchronisés pour forum.miyukini.com)
     let forum_auth_store: Option<std::sync::Arc<web::forum_auth::ForumAuthStore>> = config
         .tracker
@@ -209,7 +195,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let web_server = WebServer::new(
         Arc::clone(&config),
         Arc::clone(&pool_manager),
-        jayxpose_db,
         slug_registry,
         relay_arc.clone(),
         forum_auth_store,

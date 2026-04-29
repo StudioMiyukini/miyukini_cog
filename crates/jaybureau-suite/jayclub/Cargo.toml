@@ -1,0 +1,24 @@
+[package]
+name = "jayclub"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "JayClub — réseau social Miyukini (refonte de Jay1Tribu, équivalent Instagram/Meta)"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+thiserror = "2"
+tracing = "0.1"
+
+# Persistence SQLite (production)
+rusqlite = { version = "0.32", features = ["bundled", "chrono"] }
+
+# Reuse Jay1Tribu pour amis/tribus
+jay1tribu = { path = "../../jay1tribu", features = ["legacy-sqlite"] }
+
+[lints]
+workspace = true

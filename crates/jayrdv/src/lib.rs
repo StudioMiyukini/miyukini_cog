@@ -7,7 +7,7 @@
 //! @human: Point d'entrée du service JayRDV (rendez-vous, créneaux, ressources, rappels).
 //!
 //! Domaine : créneaux, ressources, rendez-vous, statuts, rappels.
-//! Intégration : JayXpose (vitrine pro), JayKoa (agenda unifié), MiyuBooking, MiyuNotify.
+//! Intégration : JayKoa (agenda unifié), MiyuBooking, MiyuNotify.
 //! Exclusion : le domaine médical est couvert par JayBobo.
 
 pub mod data;

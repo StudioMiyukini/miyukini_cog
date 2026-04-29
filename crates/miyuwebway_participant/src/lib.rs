@@ -19,7 +19,7 @@
 //!     cog_id: "my-cog".to_string(),
 //!     core_version: "1.0.0".to_string(),
 //!     public_address: "127.0.0.1:8080".to_string(),
-//!     services: vec!["jayfestival".to_string()],
+//!     services: vec!["jaykoa".to_string()],
 //! };
 //!
 //! service.start(identity).await?;

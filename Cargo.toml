@@ -78,12 +78,10 @@ members = [
 
     # === Services (strate 7-8) - Backend only ===
     "crates/miyukini-central",
-    "crates/jayfestival",
     "crates/jaykoa",
     "crates/jayrdv",
     "crates/jayfaim",
     "crates/miyukinisales",
-    "crates/jayxpose",
     "crates/jaykonta",
     "crates/jay1tribu",
     "crates/miyukiniwatch",
@@ -110,8 +108,6 @@ members = [
     "apps/central-mobile",
 
     # === Apps Standalone Services (lancées par Central ou indépendamment) ===
-    "apps/jayxpose",
-    "apps/jayfestival",
     "apps/jaykoa",
     "apps/jaykonta",
     "apps/miyukiniwatch",
@@ -138,20 +134,22 @@ members = [
     "crates/miyukini-cog-bridge",
 
     # === Jay Bureau — Suite bureautique collaborative ===
-    "crates/jaybureau-core",
-    "crates/jay-collab",
-    "crates/jayclub",
-    "crates/jaymail",
-    "crates/jaymessage",
-    "apps/jaybureau",
-    "apps/jay-docs",
-    "apps/jay-sheets",
-    "apps/jay-slides",
-    "apps/jay-formulaire",
-    "apps/jay-reunion",
-    "apps/jay-club",
-    "apps/jay-mail",
-    "apps/jay-message",
+    # Crates fondations (jaybureau-suite/)
+    "crates/jaybureau-suite/jaybureau-core",
+    "crates/jaybureau-suite/jay-collab",
+    "crates/jaybureau-suite/jayclub",
+    "crates/jaybureau-suite/jaymail",
+    "crates/jaybureau-suite/jaymessage",
+    # Apps (jaybureau-suite/)
+    "apps/jaybureau-suite/hub",
+    "apps/jaybureau-suite/jay-docs",
+    "apps/jaybureau-suite/jay-sheets",
+    "apps/jaybureau-suite/jay-slides",
+    "apps/jaybureau-suite/jay-formulaire",
+    "apps/jaybureau-suite/jay-reunion",
+    "apps/jaybureau-suite/jay-club",
+    "apps/jaybureau-suite/jay-mail",
+    "apps/jaybureau-suite/jay-message",
 
     # === COG Portal Contract — Contrat d'exposition Portal ===
     "crates/cog-portal-contract",

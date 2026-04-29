@@ -13,7 +13,7 @@
 //! # Migration
 //!
 //! Les nouvelles apps devraient utiliser `miyuki_ui_dioxus` directement.
-//! Ce crate reste disponible pour les apps existantes (jaymanga, jayfestival, etc.).
+//! Ce crate reste disponible pour les apps existantes (jaymanga, jaykoa, etc.).
 
 pub mod styles;
 pub mod theme;

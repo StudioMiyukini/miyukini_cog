@@ -674,7 +674,7 @@ mod tests {
     fn test_service_manifest_json() {
         let manifest = ServiceManifest {
             services: vec![ServiceEntry {
-                id: "jayfestival".to_string(),
+                id: "jaykoa".to_string(),
                 version: "1.0.0".to_string(),
                 mip_hash: "abc123".to_string(),
             }],

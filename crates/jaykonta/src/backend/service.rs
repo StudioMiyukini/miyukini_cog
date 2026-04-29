@@ -6,9 +6,9 @@ use crate::domain::model::{
     IntegrationFlow, KpiMetric, OperatorItem, QuickAction, RiskSignal, ToolkitItem,
 };
 use crate::integrations::contracts::{
-    BudgetMovementPayload, DeadlineReminderPayload, IntegrationError, IntegrationMeta,
-    InvoiceEmitPayload, JayFestivalEvent, JayKoaReminderEvent, JayRDVEvent, PaymentRecordPayload,
-    QuoteCreatePayload, ReportByEditionPayload, ReportByProfessionalPayload,
+    DeadlineReminderPayload, IntegrationError, IntegrationMeta, InvoiceEmitPayload,
+    JayKoaReminderEvent, JayRDVEvent, PaymentRecordPayload, QuoteCreatePayload,
+    ReportByProfessionalPayload,
 };
 use crate::integrations::pipeline::IntegrationPipeline;
 use crate::theme::FeatureStatus;
@@ -64,14 +64,6 @@ impl JayKontaBackend {
         }
     }
 
-    /// Ingestion reelle CK-INT-01 (JayFestival -> JayKonta).
-    pub fn ingest_jayfestival_event(
-        &self,
-        event: JayFestivalEvent,
-    ) -> Result<(), IntegrationError> {
-        IntegrationPipeline::new(self.db.clone()).apply_jayfestival(event)
-    }
-
     /// Ingestion reelle CK-INT-02 (JayRDV -> JayKonta).
     pub fn ingest_jayrdv_event(&self, event: JayRDVEvent) -> Result<(), IntegrationError> {
         IntegrationPipeline::new(self.db.clone()).apply_jayrdv(event)
@@ -87,7 +79,6 @@ impl JayKontaBackend {
             return Ok(());
         }
         let pipeline = IntegrationPipeline::new(self.db.clone());
-        bootstrap_int_01(&pipeline);
         bootstrap_int_02(&pipeline);
         bootstrap_int_03(&pipeline);
         Ok(())
@@ -177,7 +168,7 @@ fn account_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
                 status: FeatureStatus::Build,
             },
             Capability {
-                name: "Integrations JayFestival/JayRDV",
+                name: "Integrations JayRDV",
                 status: FeatureStatus::Live,
             },
             Capability {
@@ -323,58 +314,6 @@ fn purse_view_model(db: &JayKontaDb, audit_count: i64) -> DashboardViewModel {
     }
 }
 
-fn bootstrap_int_01(pipeline: &IntegrationPipeline) {
-    let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-    let meta = IntegrationMeta {
-        contract_id: "CK-INT-01".to_string(),
-        actor_ref: "jayfestival:org-admin".to_string(),
-        occurred_at: now.clone(),
-    };
-    let _ = pipeline.apply_jayfestival(JayFestivalEvent::QuoteCreate(
-        meta.clone(),
-        QuoteCreatePayload {
-            quote_id: uuid::Uuid::new_v4().to_string(),
-            scope: "account".to_string(),
-            context_ref: "edition:summer-2026".to_string(),
-            counterparty_ref: "exhibitor:alfa-food".to_string(),
-            total: 2800.0,
-            currency: "EUR".to_string(),
-        },
-    ));
-    let _ = pipeline.apply_jayfestival(JayFestivalEvent::InvoiceEmit(
-        meta.clone(),
-        InvoiceEmitPayload {
-            invoice_id: uuid::Uuid::new_v4().to_string(),
-            scope: "account".to_string(),
-            context_ref: "edition:summer-2026".to_string(),
-            counterparty_ref: "exhibitor:alfa-food".to_string(),
-            quote_id: None,
-            total: 2800.0,
-            currency: "EUR".to_string(),
-            due_at: Some("2026-03-31T23:59:59".to_string()),
-        },
-    ));
-    let _ = pipeline.apply_jayfestival(JayFestivalEvent::BudgetMovementRecord(
-        meta.clone(),
-        BudgetMovementPayload {
-            movement_id: uuid::Uuid::new_v4().to_string(),
-            scope: "account".to_string(),
-            context_ref: "edition:summer-2026".to_string(),
-            category: "edition_income".to_string(),
-            amount: 2800.0,
-            currency: "EUR".to_string(),
-            movement_date: now.clone(),
-        },
-    ));
-    let _ = pipeline.apply_jayfestival(JayFestivalEvent::ReportByEdition(
-        meta,
-        ReportByEditionPayload {
-            edition_ref: "edition:summer-2026".to_string(),
-            scope: "account".to_string(),
-        },
-    ));
-}
-
 fn bootstrap_int_02(pipeline: &IntegrationPipeline) {
     let now = Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
     let invoice_id = uuid::Uuid::new_v4().to_string();
@@ -443,55 +382,11 @@ fn bootstrap_int_03(pipeline: &IntegrationPipeline) {
             context_ref: "purse-goal:month-control".to_string(),
         },
     });
-
-    let _ = pipeline.apply_jayfestival(JayFestivalEvent::BudgetMovementRecord(
-        IntegrationMeta {
-            contract_id: "CK-INT-01".to_string(),
-            actor_ref: "jayfestival:org-admin".to_string(),
-            occurred_at: now.clone(),
-        },
-        BudgetMovementPayload {
-            movement_id: uuid::Uuid::new_v4().to_string(),
-            scope: "purse".to_string(),
-            context_ref: "purse:monthly-budget".to_string(),
-            category: "budget_in".to_string(),
-            amount: 2300.0,
-            currency: "EUR".to_string(),
-            movement_date: now.clone(),
-        },
-    ));
-    let _ = pipeline.apply_jayfestival(JayFestivalEvent::BudgetMovementRecord(
-        IntegrationMeta {
-            contract_id: "CK-INT-01".to_string(),
-            actor_ref: "jayfestival:org-admin".to_string(),
-            occurred_at: now,
-        },
-        BudgetMovementPayload {
-            movement_id: uuid::Uuid::new_v4().to_string(),
-            scope: "purse".to_string(),
-            context_ref: "purse:monthly-budget".to_string(),
-            category: "food".to_string(),
-            amount: -680.0,
-            currency: "EUR".to_string(),
-            movement_date: Local::now().format("%Y-%m-%dT%H:%M:%S").to_string(),
-        },
-    ));
+    let _ = now;
 }
 
 fn common_integrations() -> Vec<IntegrationFlow> {
     vec![
-        IntegrationFlow {
-            source: "JayFestival",
-            operation: "quote.create",
-            contract: "CK-INT-01",
-            state: "active",
-        },
-        IntegrationFlow {
-            source: "JayFestival",
-            operation: "invoice.emit",
-            contract: "CK-INT-01",
-            state: "active",
-        },
         IntegrationFlow {
             source: "JayRDV",
             operation: "invoice.emit",
@@ -652,7 +547,7 @@ fn account_operators() -> Vec<OperatorItem> {
         },
         OperatorItem {
             name: "OP-ACCOUNT-INTEGRATION",
-            responsibility: "pipeline JayFestival/JayRDV",
+            responsibility: "pipeline JayRDV",
             audience: "Account",
             status: "live",
         },
@@ -686,7 +581,7 @@ fn implementation_items() -> Vec<ImplementationItem> {
     vec![
         ImplementationItem {
             phase: "Phase 1",
-            in_scope: "Purse coeur, Account coeur, devis/factures, paiements initiaux, integr. JayFestival/JayRDV",
+            in_scope: "Purse coeur, Account coeur, devis/factures, paiements initiaux, integr. JayRDV",
             out_scope: "rapprochement bancaire avance, portail client externe",
             exit_criteria: "Parcours P1..P6 couverts + contrats CK-SVC/CK-OP/CK-TK essentiels",
         },

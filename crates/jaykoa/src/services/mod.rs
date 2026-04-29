@@ -5,7 +5,5 @@
 //! @layer: infra
 //! INVARIANTS : Aucun booking, aucune logique métier externe, lecture seule stricte.
 
-/// Adaptateur JayFestival → JayKoa (éditions, dates, deadlines).
-pub mod jayfestival;
 /// Adaptateur JayRDV → JayKoa (rendez-vous confirmés).
 pub mod jayrdv;

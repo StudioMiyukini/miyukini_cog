@@ -1,6 +1,6 @@
 # Crate JayFaim — Service réservation tables / restauration (famille Jay).
 # Domaine : tables, créneaux, réservations, convives.
-# Intégration prévue : MiyuBooking, JayFestival (mode couplé), JayKonta (paiement).
+# Intégration prévue : MiyuBooking, JayKonta (paiement).
 
 [package]
 name = "jayfaim"

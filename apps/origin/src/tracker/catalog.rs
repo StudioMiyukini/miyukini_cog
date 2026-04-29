@@ -464,10 +464,10 @@ mod tests {
         // Enregistrer un service
         catalog
             .register_service(CatalogServiceEntry {
-                service_id: "jayfestival".to_string(),
+                service_id: "jaykoa".to_string(),
                 version: "1.0.0".to_string(),
-                description: "Music festival management".to_string(),
-                category: "entertainment".to_string(),
+                description: "Calendar and scheduling".to_string(),
+                category: "productivity".to_string(),
                 download_url: None,
                 checksum: None,
                 published_at: chrono::Utc::now().to_rfc3339(),
@@ -479,14 +479,14 @@ mod tests {
         assert_eq!(services.len(), 1);
 
         // Rechercher
-        let results = catalog.search_services("festival").await;
+        let results = catalog.search_services("calendar").await;
         assert_eq!(results.len(), 1);
 
         let results = catalog.search_services("unknown").await;
         assert_eq!(results.len(), 0);
 
         // Récupérer
-        assert!(catalog.get_service("jayfestival").await.is_some());
+        assert!(catalog.get_service("jaykoa").await.is_some());
         assert!(catalog.get_service("unknown").await.is_none());
     }
 

@@ -376,7 +376,7 @@ mod tests {
         assert_eq!(session.state, SessionState::VerifyingPhaseB);
 
         // Phase B
-        session.add_verified_service("jayfestival".to_string());
+        session.add_verified_service("jaykoa".to_string());
         assert_eq!(session.verified_services.len(), 1);
 
         // Phase C

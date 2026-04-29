@@ -10,7 +10,7 @@
 //! ```text
 //! ┌─────────────────┐    JSON/TCP     ┌───────────────────────┐
 //! │  Opérateur      │◄───────────────►│  KindMother Service   │
-//! │  (jayxpose...)  │   localhost     │  ┌─────────────────┐  │
+//! │  (jaykoa...)    │   localhost     │  ┌─────────────────┐  │
 //! │                 │                 │  │ Arbitration     │  │
 //! │  kindmother-    │                 │  │ Engine          │  │
 //! │  client         │                 │  └────────┬────────┘  │

@@ -70,7 +70,6 @@ fn build_suggestions(services: &[ServiceInfo], hour: u32) -> Vec<ServiceSuggesti
     // Suggestion contextuelle par heure du jour
     let time_suggestion_id = match hour {
         6..=9 => Some(("jaykoa", "Consulte ton agenda du matin")),
-        10..=12 => Some(("jayxpose", "Mets à jour ta vitrine")),
         13..=14 => Some(("jaymanga", "Pause lecture manga")),
         15..=18 => Some(("jaykonta", "Vérifie tes comptes")),
         19..=22 => Some(("miyuclicker", "Détends-toi avec un jeu")),
@@ -234,7 +233,7 @@ enum ChatStatus {
 
 const MIOU_SYSTEM_PROMPT: &str = "Tu es Miou, un compagnon numérique bienveillant et espiègle de l'univers Miyukini COG. \
 Tu parles français avec un ton doux, parfois taquin, toujours encourageant. \
-Tu utilises des \u{1F338} de temps en temps. Tu connais les services du COG (JayXpose, JayFestival, JayKoa, JayKonta, JayManga, Jay1Tribu, MiyukiniWatch, Lord of the Click). \
+Tu utilises des \u{1F338} de temps en temps. Tu connais les services du COG (JayKoa, JayKonta, JayManga, Jay1Tribu, MiyukiniWatch, Lord of the Click). \
 Tu gardes tes réponses courtes (2-3 phrases max) sauf si on te demande plus de détail.";
 
 /// Génère le message d'accueil contextuel de Miou.
@@ -252,10 +251,6 @@ fn miou_greeting(pseudo: &str, hour: u32, services: &[ServiceInfo]) -> String {
             .iter()
             .find(|s| s.id == "jaykoa" && s.is_installed)
             .map(|_| "Si tu veux, consulte JayKoa pour voir ton programme du jour."),
-        10..=12 => services
-            .iter()
-            .find(|s| s.id == "jayxpose" && s.is_installed)
-            .map(|_| "C'est le bon moment pour mettre à jour JayXpose."),
         13..=14 => services
             .iter()
             .find(|s| s.id == "jaymanga" && s.is_installed)

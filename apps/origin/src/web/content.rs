@@ -402,7 +402,7 @@ impl ContentManager {
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
             name: "Miyukini Central — Installateur Windows".to_string(),
-            description: "Installateur Miyukini Central v0.2.0 pour Windows — Inclut Central, KindMother, voix Miou et tous les Services (JayXpose, JayFestival, JayKonta, JayKoa, Jay1Tribu, JayManga, MiyukiniWatch, MiyuClicker, Lord of the Castle). Installation sans droits admin dans AppData.".to_string(),
+            description: "Installateur Miyukini Central v0.2.0 pour Windows — Inclut Central, KindMother, voix Miou et tous les Services (JayKonta, JayKoa, Jay1Tribu, JayManga, MiyukiniWatch, MiyuClicker, Lord of the Castle). Installation sans droits admin dans AppData.".to_string(),
             version: "0.2.0".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
@@ -460,7 +460,7 @@ Les solutions cloud traditionnelles vous rendent dépendant de services externes
 1. **Cores** — Les 8 décideurs immuables (StrongFather, KindMother, etc.)
 2. **Toolkits** — Outils spécialisés gouvernés par les Cores
 3. **Opérateurs** — Exécutants des décisions
-4. **Services** — Applications utilisateur (JayFestival, JayXpose, etc.)
+4. **Services** — Applications utilisateur (JayKoa, JayKonta, etc.)
 
 ## Prochaines étapes
 
@@ -556,8 +556,6 @@ L'écran de connexion apparaît. Si c'est un **COG vierge** :
 ## 3. Explorer les Services
 
 Dans la bibliothèque, vous trouverez les Services installés :
-- **JayFestival** — Gestion d'événements
-- **JayXpose** — Vitrine entreprise
 - **JayKonta** — Comptabilité
 - **JayKoa** — Calendrier
 
@@ -845,8 +843,6 @@ Aucun contournement possible. Toute lecture ou écriture passe par le client Kin
 ## Bases gérées
 
 - `central.db` — Profils, authentification, Mandats
-- `jayxpose.db` — Données JayXpose
-- `jayfestival.db` — Données JayFestival
 - `jaykonta.db` — Comptabilité
 - `jaykoa.db` — Calendrier
 
@@ -857,8 +853,8 @@ Lors de la vérification MWS, KindMother vérifie l'intégrité des données per
 ## API (via kindmother-client)
 
 ```rust
-let client = KindMotherClient::connect("127.0.0.1:50051", "jayxpose", "jayxpose").await?;
-let products = client.query("SELECT * FROM products WHERE active = ?", vec!["1"]).await?;
+let client = KindMotherClient::connect("127.0.0.1:50051", "jaykoa", "jaykoa").await?;
+let entries = client.query("SELECT * FROM entries WHERE active = ?", vec!["1"]).await?;
 ```
 
 **Voir aussi :** WriteIntent, Attestation d'environnement, StrongFather"#.to_string(),
@@ -1327,8 +1323,6 @@ Les Opérateurs sont les **exécutants** de la strate 3. Ils traduisent les déc
 
 | Opérateur | Fonction |
 |-----------|----------|
-| `jayxpose-operator` | Gestion des produits et vitrine |
-| `jayfestival-operator` | Gestion des éditions et exposants |
 | `jaykonta-operator` | Mouvements financiers |
 | `jaykoa-operator` | Événements calendrier |
 
@@ -1383,8 +1377,6 @@ Services de productivité de la gamme Jay :
 
 | Service | Description |
 |---------|-------------|
-| JayFestival | Gestion d'événements et festivals |
-| JayXpose | Vitrine et catalogue d'entreprise |
 | JayKonta | Comptabilité et finances |
 | JayKoa | Calendrier universel |
 | JayShop | Boutique en ligne |
@@ -1404,55 +1396,6 @@ Dans Central :
 2. Trouver le Service souhaité
 3. Cliquer sur "Installer"
 4. Le Service apparaît dans la Bibliothèque"#.to_string(),
-                    updated_at: Utc::now(),
-                },
-                DocArticle {
-                    id: "jayfestival".to_string(),
-                    title: "JayFestival".to_string(),
-                    content: r#"# JayFestival — Gestion d'événements
-
-Service complet de gestion d'événements, festivals et salons.
-
-## Fonctionnalités
-
-### Pour les organisateurs
-- Création et gestion d'éditions
-- Planning et programme
-- Gestion des exposants
-- Billetterie intégrée
-- Budget et finances
-- Communications et annonces
-
-### Pour les exposants
-- Inscription aux événements
-- Fiche publique de présentation
-- Gestion de l'agenda personnel
-- Notifications et messages
-
-### Pour les visiteurs
-- Consultation du catalogue
-- Achat de billets
-- Navigation dans le programme
-- Favoris et planning personnel
-
-## Architecture
-
-```
-JayFestival (Service)
-    ↓
-JayFestival Operator (Opérateur)
-    ↓
-KindMother (via client)
-    ↓
-jayfestival.db (SQLite)
-```
-
-## Multijoueur via MWS
-
-JayFestival utilise le Miyukini Webway System pour :
-- Synchroniser les données entre organisateurs
-- Permettre aux exposants de se connecter
-- Gérer la billetterie distribuée"#.to_string(),
                     updated_at: Utc::now(),
                 },
             ],
@@ -1617,7 +1560,7 @@ COG → TLS Handshake → Relay (port 7000)
 {
     "cog_id": "cog-abc123",
     "core_version": "0.1.0",
-    "services": ["jayfestival"],
+    "services": ["jaykoa"],
     "nonce": "...",
     "timestamp": 1707840000
 }
@@ -1643,7 +1586,7 @@ COG → TLS Handshake → Relay (port 7000)
     "cog_id": "cog-abc123",
     "permis_id": "...",
     "address": "192.168.1.100:8080",
-    "services": ["jayfestival"]
+    "services": ["jaykoa"]
 }
 ```
 
@@ -1868,102 +1811,6 @@ Dans `apps/central/src/services/` :
 
         // Services Jay (productivité)
         services.push(ServiceInfo {
-            id: "jayfestival".to_string(),
-            name: "JayFestival".to_string(),
-            short_description: "Gestion complète d'événements et festivals".to_string(),
-            full_description: r#"# JayFestival
-
-**JayFestival** est un service complet de gestion d'événements, festivals et salons professionnels.
-
-## Fonctionnalités principales
-
-### Pour les organisateurs
-- Création et gestion d'éditions
-- Planning et programme interactif
-- Gestion des exposants et participants
-- Billetterie intégrée
-- Budget et suivi financier
-- Communications et annonces
-
-### Pour les exposants
-- Inscription aux événements
-- Fiche publique de présentation
-- Gestion de l'agenda personnel
-- Notifications et messages
-
-### Pour les visiteurs
-- Consultation du catalogue
-- Achat de billets
-- Navigation dans le programme
-- Favoris et planning personnel
-
-## Intégration MWS
-
-JayFestival utilise le Miyukini Webway System pour :
-- Synchroniser les données entre organisateurs
-- Permettre aux exposants de se connecter depuis leur COG
-- Gérer la billetterie distribuée
-
-## Architecture
-
-Le service fonctionne via KindMother pour la persistance des données, garantissant la souveraineté des informations."#.to_string(),
-            category: ServiceCategory::Commerce,
-            editor: "Miyukini".to_string(),
-            cog_version: "0.1.0".to_string(),
-            service_type: ServiceType::Officiel,
-            license: "Propriétaire Miyukini".to_string(),
-            price: 0.0,
-            release_date: Utc::now() - chrono::Duration::days(30),
-            website_url: Some("https://miyukini.com/services/jayfestival".to_string()),
-            download_url: Some("/downloads".to_string()),
-            screenshots: vec![],
-            banner_url: None,
-        });
-
-        services.push(ServiceInfo {
-            id: "jayxpose".to_string(),
-            name: "JayXpose".to_string(),
-            short_description: "Vitrine et catalogue d'entreprise en ligne".to_string(),
-            full_description: r#"# JayXpose
-
-**JayXpose** permet de créer une vitrine professionnelle pour présenter vos produits et services.
-
-## Fonctionnalités
-
-### Gestion de l'entreprise
-- Fiche entreprise complète
-- Logo et bannière personnalisables
-- Informations de contact
-
-### Catalogue produits
-- Ajout et gestion des produits
-- Photos et descriptions
-- Prix et disponibilité
-- Catégorisation
-
-### Vitrine publique
-- Page d'accueil personnalisée
-- Catalogue consultable
-- Page de présentation
-- Formulaire de contact
-
-## Intégration
-
-JayXpose s'intègre avec JayKonta pour la facturation et avec le MWS pour la publication sur le réseau."#.to_string(),
-            category: ServiceCategory::Commerce,
-            editor: "Miyukini".to_string(),
-            cog_version: "0.1.0".to_string(),
-            service_type: ServiceType::Officiel,
-            license: "Propriétaire Miyukini".to_string(),
-            price: 0.0,
-            release_date: Utc::now() - chrono::Duration::days(25),
-            website_url: Some("https://miyukini.com/services/jayxpose".to_string()),
-            download_url: Some("/downloads".to_string()),
-            screenshots: vec![],
-            banner_url: None,
-        });
-
-        services.push(ServiceInfo {
             id: "jaykonta".to_string(),
             name: "JayKonta".to_string(),
             short_description: "Comptabilité et gestion financière personnelle".to_string(),
@@ -2039,7 +1886,7 @@ Toutes vos données financières restent sur votre COG, jamais partagées sans v
 
 ## Intégration
 
-JayKoa s'intègre avec JayFestival pour les événements publics et avec JayKonta pour les échéances financières."#.to_string(),
+JayKoa s'intègre avec JayKonta pour les échéances financières."#.to_string(),
             category: ServiceCategory::StyleDeVie,
             editor: "Miyukini".to_string(),
             cog_version: "0.1.0".to_string(),
@@ -2278,7 +2125,6 @@ Persistance via KindMother ou SQLite direct (optionnel). Transport via MwsTransp
 ## Intégrations
 
 - **JayKoa** : synchronisation avec le calendrier
-- **JayXpose** : publication de la page de réservation sur la vitrine
 - **MiyuNotify** : rappels automatiques
 
 ## Données souveraines
@@ -2332,9 +2178,7 @@ Toutes les données de rendez-vous restent sur votre COG. Aucun intermédiaire c
 
 ## Intégrations
 
-- **JayXpose** : synchronisation du catalogue produits et des stocks
 - **JayKonta** : pipeline comptable automatique (factures, TVA, rapports)
-- **JayFestival** : ventes lors d'événements
 
 ## Architecture
 

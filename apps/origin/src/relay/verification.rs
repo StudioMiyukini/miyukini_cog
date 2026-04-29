@@ -374,16 +374,16 @@ mod tests {
         let test_block = b"test-service-block-data";
         let block_hash = Sha256::digest(test_block).to_vec();
         verifier
-            .add_service_hash("jayfestival".to_string(), 0, block_hash)
+            .add_service_hash("jaykoa".to_string(), 0, block_hash)
             .await;
 
         // Test avec le bon bloc
-        let result = verifier.verify_phase_b("jayfestival", 0, test_block).await;
+        let result = verifier.verify_phase_b("jaykoa", 0, test_block).await;
         assert_eq!(result, VerifyResult::Ok);
 
         // Test avec un mauvais bloc
         let result = verifier
-            .verify_phase_b("jayfestival", 0, b"wrong-block")
+            .verify_phase_b("jaykoa", 0, b"wrong-block")
             .await;
         assert_eq!(result, VerifyResult::Fail);
 
@@ -404,7 +404,7 @@ mod tests {
             .security_level(1)
             .trust_state(0)
             .core_version("1.0.0")
-            .add_service("jayfestival")
+            .add_service("jaykoa")
             .build_json();
 
         let result = verifier.verify_phase_c(&health).await;
@@ -440,8 +440,8 @@ mod tests {
             .security_level(2)
             .trust_state(0)
             .core_version("1.0.0")
-            .add_service("jayfestival")
-            .add_service("jayxpose")
+            .add_service("jaykoa")
+            .add_service("jaykonta")
             .build_json();
 
         assert!(!health.is_empty());

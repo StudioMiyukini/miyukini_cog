@@ -153,8 +153,6 @@ struct ServiceMeta {
 
 /// Catalogue officiel complet — chaque service est décrit une seule fois.
 const OFFICIAL_CATALOG: &[ServiceMeta] = &[
-    ServiceMeta { id: "jayxpose",     name: "JayXpose",         description: "Profil exposant, catalogue produits, vitrine, coffre-fort documentaire", icon: "\u{1F3EA}", service_type: ServiceType::SurfaceWeb, is_favorite: true },
-    ServiceMeta { id: "jayfestival",  name: "JayFestival",      description: "Festivals, éditions, exposants, visiteurs",                              icon: "\u{1F4C5}", service_type: ServiceType::SurfaceWeb, is_favorite: false },
     ServiceMeta { id: "jaykoa",       name: "JayKoa",           description: "Calendrier universel du COG, récepteur temporel transversal",            icon: "\u{1F4C6}", service_type: ServiceType::InterneCog, is_favorite: false },
     ServiceMeta { id: "jaykonta",     name: "JayKonta",         description: "Comptabilité COG unifiée Purse + Account",                               icon: "\u{1F9EE}", service_type: ServiceType::InterneCog, is_favorite: true },
     ServiceMeta { id: "miyukiniwatch", name: "MiyukiniWatch",   description: "Tes habitudes et tes mesures — consulte, comprends, efface.",            icon: "\u{1F441}", service_type: ServiceType::InterneCog, is_favorite: false },

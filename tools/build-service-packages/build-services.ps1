@@ -17,8 +17,6 @@ $TargetDir = "$WorkspaceRoot\target\release"
 
 # Correspondances
 $ServiceMap = @{
-    "jayxpose"      = @{ Bin = "jayxpose";      Pkg = "jayxpose-app";      Manifest = "crates\jayxpose\service.manifest.json" }
-    "jayfestival"   = @{ Bin = "jayfestival";   Pkg = "jayfestival-app";   Manifest = "crates\jayfestival\service.manifest.json" }
     "jaykoa"        = @{ Bin = "jaykoa";        Pkg = "jaykoa-app";        Manifest = "crates\jaykoa\service.manifest.json" }
     "jaykonta"      = @{ Bin = "jaykonta";      Pkg = "jaykonta-app";      Manifest = "crates\jaykonta\service.manifest.json" }
     "miyukiniwatch" = @{ Bin = "miyukiniwatch"; Pkg = "miyukiniwatch-app"; Manifest = "crates\miyukiniwatch\service.manifest.json" }

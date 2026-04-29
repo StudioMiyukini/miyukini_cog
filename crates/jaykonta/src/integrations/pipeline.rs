@@ -1,11 +1,10 @@
 //! Pipeline d'integration CK-INT-01/02/03 + audit.
 
 use crate::data::{
-    AuditRecord, InvoiceRecord, JayKontaDb, MovementRecord, PaymentRecord, QuoteRecord,
-    ReminderRecord,
+    AuditRecord, InvoiceRecord, JayKontaDb, PaymentRecord, QuoteRecord, ReminderRecord,
 };
 use crate::integrations::contracts::{
-    IntegrationError, JayFestivalEvent, JayKoaReminderEvent, JayRDVEvent,
+    IntegrationError, JayKoaReminderEvent, JayRDVEvent,
 };
 use serde::Serialize;
 use std::sync::Arc;
@@ -19,92 +18,6 @@ impl IntegrationPipeline {
     /// Cree le pipeline pour une DB JayKonta.
     pub fn new(db: Arc<JayKontaDb>) -> Self {
         Self { db }
-    }
-
-    /// Applique un flux CK-INT-01 (JayFestival -> JayKonta).
-    pub fn apply_jayfestival(&self, event: JayFestivalEvent) -> Result<(), IntegrationError> {
-        match event {
-            JayFestivalEvent::QuoteCreate(meta, payload) => {
-                self.db
-                    .insert_quote(&QuoteRecord {
-                        id: payload.quote_id.clone(),
-                        scope: payload.scope.clone(),
-                        context_ref: payload.context_ref.clone(),
-                        counterparty_ref: payload.counterparty_ref.clone(),
-                        total: payload.total,
-                        currency: payload.currency.clone(),
-                        status: "sent".to_string(),
-                        created_at: meta.occurred_at.clone(),
-                    })
-                    .map_err(|e| IntegrationError(e.to_string()))?;
-
-                self.audit(
-                    &meta,
-                    "quote.create",
-                    &payload.scope,
-                    &payload.quote_id,
-                    "ok",
-                    &payload,
-                )
-            }
-            JayFestivalEvent::InvoiceEmit(meta, payload) => {
-                self.db
-                    .insert_invoice(&InvoiceRecord {
-                        id: payload.invoice_id.clone(),
-                        scope: payload.scope.clone(),
-                        context_ref: payload.context_ref.clone(),
-                        counterparty_ref: payload.counterparty_ref.clone(),
-                        quote_id: payload.quote_id.clone(),
-                        total: payload.total,
-                        paid_amount: 0.0,
-                        currency: payload.currency.clone(),
-                        status: "issued".to_string(),
-                        issued_at: meta.occurred_at.clone(),
-                        due_at: payload.due_at.clone(),
-                    })
-                    .map_err(|e| IntegrationError(e.to_string()))?;
-
-                self.audit(
-                    &meta,
-                    "invoice.emit",
-                    &payload.scope,
-                    &payload.invoice_id,
-                    "ok",
-                    &payload,
-                )
-            }
-            JayFestivalEvent::BudgetMovementRecord(meta, payload) => {
-                self.db
-                    .insert_movement(&MovementRecord {
-                        id: payload.movement_id.clone(),
-                        scope: payload.scope.clone(),
-                        context_ref: payload.context_ref.clone(),
-                        category: payload.category.clone(),
-                        amount: payload.amount,
-                        currency: payload.currency.clone(),
-                        movement_date: payload.movement_date.clone(),
-                        source_service: "jayfestival".to_string(),
-                    })
-                    .map_err(|e| IntegrationError(e.to_string()))?;
-
-                self.audit(
-                    &meta,
-                    "budget.movements.record",
-                    &payload.scope,
-                    &payload.movement_id,
-                    "ok",
-                    &payload,
-                )
-            }
-            JayFestivalEvent::ReportByEdition(meta, payload) => self.audit(
-                &meta,
-                "report.by_edition",
-                &payload.scope,
-                &payload.edition_ref,
-                "ok",
-                &payload,
-            ),
-        }
     }
 
     /// Applique un flux CK-INT-02 (JayRDV -> JayKonta).

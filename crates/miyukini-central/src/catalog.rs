@@ -7,8 +7,6 @@
 pub enum ServiceId {
     MiyuClicker,
     LordOfTheCastle,
-    JayFestival,
     JayKoa,
-    JayXpose,
     JayKonta,
 }

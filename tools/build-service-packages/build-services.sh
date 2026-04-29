@@ -17,8 +17,6 @@ TARGET_DIR="$WORKSPACE_ROOT/target/release"
 
 # Correspondance service_id → binary_name (nom du binaire cargo)
 declare -A SERVICE_BINS=(
-    [jayxpose]="jayxpose"
-    [jayfestival]="jayfestival"
     [jaykoa]="jaykoa"
     [jaykonta]="jaykonta"
     [miyukiniwatch]="miyukiniwatch"
@@ -29,8 +27,6 @@ declare -A SERVICE_BINS=(
 
 # Correspondance service_id → dossier du manifeste (crate source)
 declare -A SERVICE_CRATE_DIRS=(
-    [jayxpose]="crates/jayxpose"
-    [jayfestival]="crates/jayfestival"
     [jaykoa]="crates/jaykoa"
     [jaykonta]="crates/jaykonta"
     [miyukiniwatch]="crates/miyukiniwatch"
@@ -41,8 +37,6 @@ declare -A SERVICE_CRATE_DIRS=(
 
 # Correspondance service_id → package cargo (pour --bin)
 declare -A SERVICE_PACKAGES=(
-    [jayxpose]="jayxpose-app"
-    [jayfestival]="jayfestival-app"
     [jaykoa]="jaykoa-app"
     [jaykonta]="jaykonta-app"
     [miyukiniwatch]="miyukiniwatch-app"

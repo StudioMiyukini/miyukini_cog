@@ -55,7 +55,7 @@ export const STRATA: Stratum[] = [
     level: '7',
     name: 'Opérateurs',
     description: 'Entités fonctionnelles gouvernées. Services et UIs.',
-    examples: ['Miyukini Central', 'JayXpose', 'JayFestival', 'JayKonta', 'JayKoa', 'JayRDV'],
+    examples: ['Miyukini Central', 'JayKonta', 'JayKoa', 'JayRDV'],
   },
   {
     id: '9',

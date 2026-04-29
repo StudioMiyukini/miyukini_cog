@@ -32,7 +32,7 @@ pub struct Agenda {
     pub id: Option<String>,
     /// Identifiant du profil propriétaire (Central `profile_id`).
     pub profile_id: Option<String>,
-    /// Nom affiché du calendrier (ex: "Personnel", "JayFestival", "JayRDV").
+    /// Nom affiché du calendrier (ex: "Personnel", "JayRDV").
     pub name: Option<String>,
     /// Description optionnelle.
     pub description: Option<String>,
@@ -145,8 +145,6 @@ pub struct TemporalEntry {
 pub enum EntryType {
     /// Événement interne créé par l'utilisateur dans JayKoa.
     Internal,
-    /// Reflet d'un événement JayFestival (lecture seule).
-    ReflectJayFestival,
     /// Reflet d'un rendez-vous JayRDV (lecture seule).
     ReflectJayRDV,
     /// Reflet d'un service futur (lecture seule).
@@ -158,7 +156,6 @@ impl EntryType {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Internal => "internal",
-            Self::ReflectJayFestival => "reflect_jayfestival",
             Self::ReflectJayRDV => "reflect_jayrdv",
             Self::ReflectOther => "reflect_other",
         }
@@ -167,7 +164,6 @@ impl EntryType {
     pub fn from_str(s: &str) -> Self {
         match s {
             "internal" => Self::Internal,
-            "reflect_jayfestival" => Self::ReflectJayFestival,
             "reflect_jayrdv" => Self::ReflectJayRDV,
             "reflect_other" => Self::ReflectOther,
             _ => Self::Internal,
@@ -226,8 +222,6 @@ impl TemporalStatus {
 pub enum EventSource {
     /// Créé localement dans JayKoa.
     JayKoa,
-    /// Provient de JayFestival (éditions, dates, deadlines).
-    JayFestival,
     /// Provient de JayRDV (rendez-vous confirmés).
     JayRDV,
     /// Provient d'un service futur non encore défini.
@@ -239,7 +233,6 @@ impl EventSource {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::JayKoa => "jaykoa",
-            Self::JayFestival => "jayfestival",
             Self::JayRDV => "jayrdv",
             Self::Other => "other",
         }
@@ -248,7 +241,6 @@ impl EventSource {
     pub fn from_str(s: &str) -> Self {
         match s {
             "jaykoa" => Self::JayKoa,
-            "jayfestival" => Self::JayFestival,
             "jayrdv" => Self::JayRDV,
             _ => Self::Other,
         }
@@ -257,7 +249,6 @@ impl EventSource {
     pub fn display_label(self) -> &'static str {
         match self {
             Self::JayKoa => "JayKoa",
-            Self::JayFestival => "JayFestival",
             Self::JayRDV => "JayRDV",
             Self::Other => "Autre service",
         }
@@ -266,7 +257,6 @@ impl EventSource {
     pub fn default_color(self) -> &'static str {
         match self {
             Self::JayKoa => "#4285F4",
-            Self::JayFestival => "#E67C73",
             Self::JayRDV => "#33B679",
             Self::Other => "#8E8E93",
         }
@@ -364,7 +354,6 @@ mod tests {
     fn test_entry_type_roundtrip() {
         let variants = [
             EntryType::Internal,
-            EntryType::ReflectJayFestival,
             EntryType::ReflectJayRDV,
             EntryType::ReflectOther,
         ];
@@ -379,10 +368,6 @@ mod tests {
         assert!(
             !EntryType::Internal.is_readonly(),
             "Internal should NOT be readonly"
-        );
-        assert!(
-            EntryType::ReflectJayFestival.is_readonly(),
-            "ReflectJayFestival should be readonly"
         );
         assert!(
             EntryType::ReflectJayRDV.is_readonly(),
@@ -411,7 +396,6 @@ mod tests {
     fn test_event_source_roundtrip() {
         let variants = [
             EventSource::JayKoa,
-            EventSource::JayFestival,
             EventSource::JayRDV,
             EventSource::Other,
         ];

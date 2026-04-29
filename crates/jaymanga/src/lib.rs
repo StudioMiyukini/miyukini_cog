@@ -38,7 +38,7 @@ pub mod auth;
 /// gamification, agrégation).
 pub mod domain;
 
-/// Adaptateurs inter-services (MWS, JayXpose, JayKonta).
+/// Adaptateurs inter-services (MWS, JayKonta).
 pub mod services;
 
 /// Endpoints REST (surface web / Portail).

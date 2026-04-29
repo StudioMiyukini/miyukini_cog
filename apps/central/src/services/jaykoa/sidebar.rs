@@ -4,7 +4,7 @@
 //! - Bouton de création d'événement
 //! - Mini-calendrier (date picker)
 //! - Liste des agendas avec filtrage
-//! - Services synchronisés (JayFestival, JayRDV)
+//! - Services synchronisés (JayRDV)
 
 use dioxus::prelude::*;
 use miyuki_ui_dioxus::context::use_palette;
@@ -25,8 +25,6 @@ pub struct JayKoaSidebarProps {
     pub on_agenda_toggle: EventHandler<String>,
     /// Callback pour créer un nouvel événement.
     pub on_create_event: EventHandler<()>,
-    /// Callback pour synchroniser JayFestival.
-    pub on_sync_jayfestival: EventHandler<()>,
 }
 
 /// Sidebar JayKoa — Panneau latéral gauche.
@@ -90,35 +88,13 @@ pub fn JayKoaSidebar(props: JayKoaSidebarProps) -> Element {
             }
             
             // Services synchronisés
-            div {
-                style: "padding: 8px 16px;",
+            if !synced_agendas.is_empty() {
                 div {
-                    style: "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;",
+                    style: "padding: 8px 16px;",
                     h3 {
-                        style: "font-size: 11px; font-weight: 600; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px;",
+                        style: "font-size: 11px; font-weight: 600; color: {p.text_muted}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;",
                         "Services synchronisés"
                     }
-                    button {
-                        style: "padding: 4px 8px; background: transparent; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.text_secondary}; font-size: 10px; cursor: pointer;",
-                        onclick: move |_| props.on_sync_jayfestival.call(()),
-                        "🔄 Sync"
-                    }
-                }
-                
-                if synced_agendas.is_empty() {
-                    div {
-                        style: "padding: 12px; background: {p.bg_overlay}; border-radius: 4px; text-align: center;",
-                        p {
-                            style: "font-size: 12px; color: {p.text_muted}; margin-bottom: 8px;",
-                            "Aucun service synchronisé"
-                        }
-                        button {
-                            style: "padding: 6px 12px; background: {p.bg_secondary}; border: 1px solid {p.border_default}; border-radius: 4px; color: {p.accent_primary}; font-size: 11px; cursor: pointer;",
-                            onclick: move |_| props.on_sync_jayfestival.call(()),
-                            "➕ Synchroniser JayFestival"
-                        }
-                    }
-                } else {
                     for agenda in synced_agendas.iter() {
                         AgendaItem {
                             agenda: agenda.clone(),
@@ -306,7 +282,6 @@ fn AgendaItem(props: AgendaItemProps) -> Element {
     
     // Icône de source pour les agendas synchronisés
     let source_icon = match props.agenda.source_service.as_deref() {
-        Some("jayfestival") => Some("🎪"),
         Some("jayrdv") => Some("📅"),
         _ => None,
     };

@@ -45,9 +45,9 @@ pub struct PublicPage {
 /// Le COG Web Portal utilise ce trait via `Arc<dyn PortalContract>` pour
 /// déléguer le rendu des pages de chaque service.
 pub trait PortalContract: Send + Sync {
-    /// Slug du service (ex: `jayfestival`, `jayxpose`).
+    /// Slug du service (ex: `jaykoa`, `jaymanga`).
     fn service_slug(&self) -> &'static str;
-    /// Nom affiché du service (ex: `JayFestival`).
+    /// Nom affiché du service (ex: `JayKoa`).
     fn service_name(&self) -> &'static str;
     /// Liste toutes les pages publiques du service.
     fn public_pages(&self) -> Result<Vec<PublicPage>, PortalError>;

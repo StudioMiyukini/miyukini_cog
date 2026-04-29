@@ -131,7 +131,7 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
       {
         id: 'm4-2',
         title: 'Services Jay',
-        description: 'JayKoa, JayFestival, JayKonta, JayXpose, JayRDV',
+        description: 'JayKoa, JayKonta, JayRDV',
         status: 'in-progress',
       },
       {

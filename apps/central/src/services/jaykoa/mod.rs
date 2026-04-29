@@ -3,7 +3,7 @@
 //! Structure calquée sur Google Agenda :
 //! - Sidebar gauche (agendas, mini-calendrier, services synchronisés)
 //! - Vue principale (semaine, jour, mois, planning)
-//! - Intégration JayFestival et JayRDV (lecture réfléchie)
+//! - Intégration JayRDV (lecture réfléchie)
 
 mod sidebar;
 mod components;
@@ -13,7 +13,6 @@ mod day_view;
 mod month_view;
 mod schedule_view;
 mod event_form;
-pub mod sync_service;
 
 pub use sidebar::JayKoaSidebar;
 pub use components::*;
@@ -66,8 +65,6 @@ pub struct JayKoaState {
     pub show_event_form: bool,
     /// Date/heure pré-remplie pour nouveau événement.
     pub new_event_start: Option<String>,
-    /// Synchronisation JayFestival en cours.
-    pub syncing_jayfestival: bool,
 }
 
 impl Default for JayKoaState {
@@ -78,7 +75,6 @@ impl Default for JayKoaState {
             visible_agendas: Vec::new(),
             show_event_form: false,
             new_event_start: None,
-            syncing_jayfestival: false,
         }
     }
 }
@@ -204,20 +200,6 @@ pub fn JayKoaView() -> Element {
                 },
                 on_create_event: move |()| {
                     koa_state.write().show_event_form = true;
-                },
-                on_sync_jayfestival: move |()| {
-                    koa_state.write().syncing_jayfestival = true;
-                    // Lancer la synchronisation JayFestival (sync réelle via sync_service)
-                    let conns_ref = conns.read();
-                    let result = sync_service::JayFestivalSync::sync_all(
-                        &conns_ref.jaykoa,
-                        &conns_ref.jayfestival,
-                        DEFAULT_PROFILE,
-                    );
-                    if !result.errors.is_empty() {
-                        tracing::warn!("Sync JayFestival: {} erreur(s), {} éditions sync", result.errors.len(), result.synced_count);
-                    }
-                    koa_state.write().syncing_jayfestival = false;
                 },
             }
             

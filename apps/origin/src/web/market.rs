@@ -479,32 +479,6 @@ fn official_catalog_seed() -> Vec<ServiceManifest> {
 
     vec![
         ServiceManifest {
-            id: "jayxpose".into(), name: "JayXpose".into(),
-            description: "Profil exposant, catalogue produits, vitrine, coffre-fort documentaire".into(),
-            icon: "\u{1F3EA}".into(), version: "0.1.0".into(),
-            service_type: ServiceType::SurfaceWeb, source: ServiceSource::Officiel,
-            developer: "Miyukini".into(), min_central_version: "0.2.0".into(),
-            dependencies: vec![], permissions: vec![ServicePermission::Storage, ServicePermission::Webway, ServicePermission::Identity],
-            tags: vec!["commerce".into(), "exposant".into(), "vitrine".into()],
-            homepage: None, checksum: None, package_size: None,
-            execution_mode: ExecutionMode::Standalone,
-            binary_name: Some("jayxpose.exe".into()),
-            platforms: PlatformBinaries { windows_x64: Some("jayxpose.exe".into()), ..Default::default() },
-        },
-        ServiceManifest {
-            id: "jayfestival".into(), name: "JayFestival".into(),
-            description: "Festivals, éditions, exposants, visiteurs".into(),
-            icon: "\u{1F4C5}".into(), version: "0.1.0".into(),
-            service_type: ServiceType::SurfaceWeb, source: ServiceSource::Officiel,
-            developer: "Miyukini".into(), min_central_version: "0.2.0".into(),
-            dependencies: vec![], permissions: vec![ServicePermission::Storage, ServicePermission::Webway, ServicePermission::Identity, ServicePermission::Notifications],
-            tags: vec!["festival".into(), "evenement".into(), "exposant".into(), "visiteur".into()],
-            homepage: None, checksum: None, package_size: None,
-            execution_mode: ExecutionMode::Standalone,
-            binary_name: Some("jayfestival.exe".into()),
-            platforms: PlatformBinaries { windows_x64: Some("jayfestival.exe".into()), ..Default::default() },
-        },
-        ServiceManifest {
             id: "jaykoa".into(), name: "JayKoa".into(),
             description: "Calendrier universel du COG, récepteur temporel transversal".into(),
             icon: "\u{1F4C6}".into(), version: "0.1.0".into(),
@@ -725,7 +699,7 @@ mod tests {
         let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
 
         let entry = runtime
-            .block_on(store.get_service("jayxpose"))
+            .block_on(store.get_service("jaykoa"))
             .expect("seeded service");
         assert!(!entry.downloadable);
 
@@ -753,9 +727,9 @@ mod tests {
     fn open_detects_package_in_packages_root_without_double_prefix() {
         let (root, db_path, packages_dir) = temp_market_paths("present");
         let package_path = packages_dir
-            .join("jayxpose")
+            .join("jaykoa")
             .join("0.1.0")
-            .join(package::package_filename("jayxpose", "0.1.0"));
+            .join(package::package_filename("jaykoa", "0.1.0"));
         std::fs::create_dir_all(package_path.parent().expect("package parent")).expect("mkdir");
         std::fs::write(&package_path, b"dummy package").expect("write package");
 
@@ -763,13 +737,13 @@ mod tests {
         let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
 
         let entry = runtime
-            .block_on(store.get_service("jayxpose"))
+            .block_on(store.get_service("jaykoa"))
             .expect("seeded service");
         assert!(entry.downloadable);
         assert_eq!(entry.manifest.package_size, Some(13));
 
         let bytes = runtime
-            .block_on(store.get_package_bytes("jayxpose", "0.1.0"))
+            .block_on(store.get_package_bytes("jaykoa", "0.1.0"))
             .expect("package bytes");
         assert_eq!(bytes, b"dummy package");
 

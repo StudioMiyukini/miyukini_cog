@@ -80,7 +80,7 @@ pub struct Movement {
     pub movement_date: String,
     /// Budget occasionnel lie.
     pub budget: Option<BudgetRef>,
-    /// Service source (manual, jayfestival, jayrdv...).
+    /// Service source (manual, jayrdv...).
     pub source_service: Option<String>,
     /// Reference contexte metier.
     pub context_ref: Option<String>,

@@ -1,6 +1,6 @@
 # @id: cog_portal_contract_cargo @do: declare_portal_contract_crate @role: api @layer: service
 # @human: Crate contrat d'exposition Portal — définit PortalContract trait + types PublicPage/PortalError.
-# Shared par cog-web-portal, jayfestival, jayxpose pour typage commun.
+# Shared par cog-web-portal et services Jay pour typage commun.
 
 [package]
 name = "cog-portal-contract"

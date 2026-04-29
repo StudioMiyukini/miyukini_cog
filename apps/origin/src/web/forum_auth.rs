@@ -1,7 +1,7 @@
-//! Auth unifiée Miyukini Central — profils Central + JayXpose via Origin.
+//! Auth unifiée Miyukini Central — profils Central via Origin.
 //!
 //! Copie serveur des profils Central (email, password_hash, pseudonyme) pour
-//! validation des connexions forum ET JayXpose. Hachage Argon2id (migration
+//! validation des connexions forum. Hachage Argon2id (migration
 //! progressive depuis SHA256).
 //!
 //! Sécurité renforcée :
@@ -50,8 +50,6 @@ pub struct AuthValidationResult {
     pub session_token: String,
     /// Timestamp d'expiration du token (epoch seconds).
     pub expires_at: u64,
-    /// Indique si un profil JayXpose est lié.
-    pub has_jayxpose_profile: bool,
 }
 
 /// État de verrouillage d'un compte.
@@ -107,7 +105,6 @@ impl ForumAuthStore {
                 password_hash TEXT NOT NULL,
                 pseudonyme TEXT,
                 updated_at INTEGER NOT NULL,
-                has_jayxpose INTEGER NOT NULL DEFAULT 0,
                 last_login_at INTEGER,
                 failed_attempts INTEGER NOT NULL DEFAULT 0
             );
@@ -116,7 +113,6 @@ impl ForumAuthStore {
         .map_err(|e| e.to_string())?;
         // Migration : ajouter les nouvelles colonnes si absentes.
         for col in &[
-            ("has_jayxpose", "INTEGER NOT NULL DEFAULT 0"),
             ("last_login_at", "INTEGER"),
             ("failed_attempts", "INTEGER NOT NULL DEFAULT 0"),
         ] {
@@ -271,7 +267,7 @@ impl ForumAuthStore {
             .map_err(|_| "store lock poisoned".to_string())?;
         let mut stmt = conn
             .prepare(
-                "SELECT central_id, email, pseudonyme, password_hash, has_jayxpose
+                "SELECT central_id, email, pseudonyme, password_hash
                  FROM forum_profiles WHERE email = ?1",
             )
             .map_err(|e| e.to_string())?;
@@ -283,11 +279,10 @@ impl ForumAuthStore {
                     pseudonyme: row.get::<_, Option<String>>(2)?,
                 },
                 row.get::<_, String>(3)?,
-                row.get::<_, i64>(4).unwrap_or(0) != 0,
             ))
         });
         match row {
-            Ok((profile, stored_hash, has_jayxpose)) => {
+            Ok((profile, stored_hash)) => {
                 // Vérifier le verrouillage
                 if self.is_account_locked(&profile.id) {
                     warn!("Login attempt on locked account: {}", profile.id);
@@ -307,7 +302,6 @@ impl ForumAuthStore {
                         profile,
                         session_token: token,
                         expires_at,
-                        has_jayxpose_profile: has_jayxpose,
                     }))
                 } else {
                     self.record_failed_attempt(&profile.id);
@@ -356,66 +350,6 @@ impl ForumAuthStore {
         Ok(())
     }
 
-    /// Marque un profil Central comme ayant un profil JayXpose lié.
-    pub fn set_jayxpose_linked(
-        &self,
-        central_id: &str,
-        linked: bool,
-    ) -> Result<(), String> {
-        let conn = self
-            .conn
-            .lock()
-            .map_err(|_| "store lock poisoned".to_string())?;
-        conn.execute(
-            "UPDATE forum_profiles SET has_jayxpose = ?1 WHERE central_id = ?2",
-            rusqlite::params![if linked { 1i64 } else { 0i64 }, central_id],
-        )
-        .map_err(|e| e.to_string())?;
-        debug!(
-            "JayXpose link updated: central_id={}, linked={}",
-            central_id, linked
-        );
-        Ok(())
-    }
-
-    /// Sync un profil Central + liaison JayXpose en une seule opération.
-    pub fn sync_profile_with_jayxpose(
-        &self,
-        central_id: &str,
-        email: &str,
-        password_hash: &str,
-        pseudonyme: Option<&str>,
-        has_jayxpose: bool,
-    ) -> Result<(), String> {
-        let email = email.trim().to_lowercase();
-        if email.is_empty() || central_id.is_empty() {
-            return Err("central_id et email requis".to_string());
-        }
-        let now = epoch_secs() as i64;
-        let jx = if has_jayxpose { 1i64 } else { 0i64 };
-        let conn = self
-            .conn
-            .lock()
-            .map_err(|_| "store lock poisoned".to_string())?;
-        conn.execute(
-            "INSERT INTO forum_profiles (central_id, email, password_hash, pseudonyme, updated_at, has_jayxpose)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6)
-             ON CONFLICT(central_id) DO UPDATE SET
-               email = excluded.email,
-               password_hash = excluded.password_hash,
-               pseudonyme = excluded.pseudonyme,
-               updated_at = excluded.updated_at,
-               has_jayxpose = excluded.has_jayxpose",
-            rusqlite::params![central_id, email, password_hash, pseudonyme, now, jx],
-        )
-        .map_err(|e| e.to_string())?;
-        debug!(
-            "Profile synced with jayxpose flag: central_id={}, has_jayxpose={}",
-            central_id, has_jayxpose
-        );
-        Ok(())
-    }
-
     /// Retourne les informations de sécurité d'un profil (pour audit).
     pub fn get_security_info(&self, central_id: &str) -> Result<Option<serde_json::Value>, String> {
         let conn = self
@@ -424,7 +358,7 @@ impl ForumAuthStore {
             .map_err(|_| "store lock poisoned".to_string())?;
         let mut stmt = conn
             .prepare(
-                "SELECT email, has_jayxpose, last_login_at, failed_attempts,
+                "SELECT email, last_login_at, failed_attempts,
                         CASE WHEN password_hash LIKE '$argon2%' THEN 'argon2id' ELSE 'sha256_legacy' END as hash_algo
                  FROM forum_profiles WHERE central_id = ?1",
             )
@@ -433,10 +367,9 @@ impl ForumAuthStore {
             Ok(serde_json::json!({
                 "central_id": central_id,
                 "email": row.get::<_, String>(0)?,
-                "has_jayxpose": row.get::<_, i64>(1)? != 0,
-                "last_login_at": row.get::<_, Option<i64>>(2)?,
-                "failed_attempts": row.get::<_, i64>(3)?,
-                "hash_algorithm": row.get::<_, String>(4)?,
+                "last_login_at": row.get::<_, Option<i64>>(1)?,
+                "failed_attempts": row.get::<_, i64>(2)?,
+                "hash_algorithm": row.get::<_, String>(3)?,
                 "account_locked": false, // Mis à jour ci-dessous
             }))
         });
@@ -473,18 +406,6 @@ pub struct SyncRequest {
     /// Hash du mot de passe (Argon2id ou SHA256 legacy depuis Central).
     pub password_hash: String,
     pub pseudonyme: Option<String>,
-}
-
-/// Corps JSON pour POST /api/auth/profile/sync (sync complet avec JayXpose)
-#[derive(Debug, Deserialize)]
-pub struct ProfileSyncRequest {
-    pub central_id: String,
-    pub email: String,
-    pub password_hash: String,
-    pub pseudonyme: Option<String>,
-    /// Indique si un profil JayXpose est lié côté Central.
-    #[serde(default)]
-    pub has_jayxpose: bool,
 }
 
 /// Corps JSON pour POST /api/auth/session/verify
@@ -533,7 +454,6 @@ pub fn handle_api(path: &str, body: &[u8], store: &ForumAuthStore) -> super::ser
                     },
                     "session_token": result.session_token,
                     "expires_at": result.expires_at,
-                    "has_jayxpose_profile": result.has_jayxpose_profile
                 });
                 return json_response(200, &serde_json::to_string(&json).unwrap_or_default());
             }
@@ -563,33 +483,6 @@ pub fn handle_api(path: &str, body: &[u8], store: &ForumAuthStore) -> super::ser
             &req.email,
             &req.password_hash,
             req.pseudonyme.as_deref(),
-        ) {
-            Ok(()) => {
-                return json_response(200, r#"{"ok":true}"#);
-            }
-            Err(e) => {
-                return json_response(400, &format!(r#"{{"ok":false,"error":"{}"}}"#, e));
-            }
-        }
-    }
-
-    // --- POST /api/auth/profile/sync (sync complet Central + JayXpose) ---
-    if path_clean == "/api/auth/profile/sync" {
-        if body_str.len() > 4096 {
-            return json_response(400, r#"{"ok":false,"error":"payload too large"}"#);
-        }
-        let req: ProfileSyncRequest = match serde_json::from_str(body_str) {
-            Ok(r) => r,
-            Err(_) => {
-                return json_response(400, r#"{"ok":false,"error":"invalid json"}"#);
-            }
-        };
-        match store.sync_profile_with_jayxpose(
-            &req.central_id,
-            &req.email,
-            &req.password_hash,
-            req.pseudonyme.as_deref(),
-            req.has_jayxpose,
         ) {
             Ok(()) => {
                 return json_response(200, r#"{"ok":true}"#);

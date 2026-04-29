@@ -144,7 +144,6 @@ where
 fn run_entry_type_roundtrip() -> Result<(), String> {
     let variants = [
         EntryType::Internal,
-        EntryType::ReflectJayFestival,
         EntryType::ReflectJayRDV,
         EntryType::ReflectOther,
     ];
@@ -161,10 +160,7 @@ fn run_entry_type_readonly() -> Result<(), String> {
     if EntryType::Internal.is_readonly() {
         return Err("Internal should NOT be readonly".to_string());
     }
-    if !EntryType::ReflectJayFestival.is_readonly()
-        || !EntryType::ReflectJayRDV.is_readonly()
-        || !EntryType::ReflectOther.is_readonly()
-    {
+    if !EntryType::ReflectJayRDV.is_readonly() || !EntryType::ReflectOther.is_readonly() {
         return Err("Reflect* should be readonly".to_string());
     }
     Ok(())
@@ -188,7 +184,6 @@ fn run_temporal_status_roundtrip() -> Result<(), String> {
 fn run_event_source_roundtrip() -> Result<(), String> {
     let variants = [
         EventSource::JayKoa,
-        EventSource::JayFestival,
         EventSource::JayRDV,
         EventSource::Other,
     ];
@@ -364,7 +359,7 @@ fn run_db_reflect_upsert() -> Result<(), String> {
     let profile = "profile-reflect";
     let agenda_id = make_agenda(&db, profile, "Synced")?;
     let now = chrono::Local::now().format("%Y-%m-%dT%H:%M:%S").to_string();
-    let source_svc = "jayfestival";
+    let source_svc = "jayrdv";
     let source_eid = "ext-event-42";
     let reflect_id = uuid::Uuid::new_v4().to_string();
     let reflect = TemporalEntry {
@@ -373,7 +368,7 @@ fn run_db_reflect_upsert() -> Result<(), String> {
         title: Some("Festival opening".to_string()),
         start_datetime: Some("2026-07-01T18:00:00".to_string()),
         end_datetime: Some("2026-07-01T22:00:00".to_string()),
-        entry_type: Some("reflect_jayfestival".to_string()),
+        entry_type: Some("reflect_jayrdv".to_string()),
         source_service: Some(source_svc.to_string()),
         source_event_id: Some(source_eid.to_string()),
         status: Some("confirmed".to_string()),
@@ -397,7 +392,7 @@ fn run_db_reflect_upsert() -> Result<(), String> {
         title: Some("Festival opening (updated)".to_string()),
         start_datetime: Some("2026-07-01T19:00:00".to_string()),
         end_datetime: Some("2026-07-01T23:00:00".to_string()),
-        entry_type: Some("reflect_jayfestival".to_string()),
+        entry_type: Some("reflect_jayrdv".to_string()),
         source_service: Some(source_svc.to_string()),
         source_event_id: Some(source_eid.to_string()),
         status: Some("confirmed".to_string()),

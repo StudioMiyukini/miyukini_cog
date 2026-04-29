@@ -20,18 +20,18 @@ use serde_json::{json, Value};
 #[test]
 fn kmc_p_001_serialize_query_request() {
     let request = Request::Query {
-        operator_id: "jayxpose".to_string(),
-        database: "jayxpose_db".to_string(),
-        sql: "SELECT * FROM products WHERE active = ?".to_string(),
+        operator_id: "jaykoa".to_string(),
+        database: "jaykoa_db".to_string(),
+        sql: "SELECT * FROM entries WHERE active = ?".to_string(),
         params: vec!["1".to_string()],
     };
 
     let json = serde_json::to_value(&request).unwrap();
 
     assert_eq!(json["type"], "Query");
-    assert_eq!(json["operator_id"], "jayxpose");
-    assert_eq!(json["database"], "jayxpose_db");
-    assert_eq!(json["sql"], "SELECT * FROM products WHERE active = ?");
+    assert_eq!(json["operator_id"], "jaykoa");
+    assert_eq!(json["database"], "jaykoa_db");
+    assert_eq!(json["sql"], "SELECT * FROM entries WHERE active = ?");
     assert_eq!(json["params"], json!(["1"]));
 }
 
@@ -42,17 +42,17 @@ fn kmc_p_001_serialize_query_request() {
 #[test]
 fn kmc_p_002_serialize_execute_request() {
     let request = Request::Execute {
-        operator_id: "jayfestival".to_string(),
-        database: "jayfestival_db".to_string(),
-        sql: "INSERT INTO editions (name) VALUES (?)".to_string(),
-        params: vec!["Festival 2026".to_string()],
-        intent: "create_edition".to_string(),
+        operator_id: "jaykonta".to_string(),
+        database: "jaykonta_db".to_string(),
+        sql: "INSERT INTO movements (label) VALUES (?)".to_string(),
+        params: vec!["Loyer".to_string()],
+        intent: "create_movement".to_string(),
     };
 
     let json = serde_json::to_value(&request).unwrap();
 
     assert_eq!(json["type"], "Execute");
-    assert_eq!(json["intent"], "create_edition");
+    assert_eq!(json["intent"], "create_movement");
 }
 
 /// @id: KMC_P_003

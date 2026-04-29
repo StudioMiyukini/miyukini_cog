@@ -1,7 +1,7 @@
 # JayKoa — Calendrier universel du COG
 
 Récepteur temporel transversal. Reflète, agrège et orchestre le temps issu des
-autres Services (JayRDV, JayFestival).
+autres Services (JayRDV).
 
 ## Architecture
 

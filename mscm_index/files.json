@@ -235,15 +235,9 @@
     "miyupossales_tool_variant_resolve",
     "miyupossales_tool_modifier_apply"
   ],
-  "crates/jayfestival/src/data/kindmother_client_db.rs": [
-    "jayfestival_kindmother_client_db"
-  ],
   "crates/miyuposinventory/src/stock.rs": [
     "miyuposinventory_tool_stock_get",
     "miyuposinventory_tool_stock_adjust"
-  ],
-  "crates/jayxpose/src/lib.rs": [
-    "jayxpose_lib_stub"
   ],
   "crates/kindmother-db-adapter/src/lib.rs": [
     "kindmother_db_adapter"
@@ -394,14 +388,6 @@
   ],
   "crates/miyulocale/src/date.rs": [
     "miyulocale_tool_date_format"
-  ],
-  "crates/jayxpose/src/auth/mod.rs": [
-    "jayxpose_auth_sign_in",
-    "jayxpose_auth_sign_up",
-    "jayxpose_auth_sign_out",
-    "jayxpose_auth_sign_in",
-    "jayxpose_auth_sign_up",
-    "jayxpose_auth_sign_out"
   ],
   "crates/lord_of_the_castle/src/save.rs": [
     "lord_of_the_castle_save"
@@ -827,9 +813,6 @@
     "kindmother_reexport_threat",
     "kindmother_reexport_observability"
   ],
-  "crates/jayxpose/src/data/mod.rs": [
-    "jayxpose_data_module"
-  ],
   "crates/miyucontacts/src/foe.rs": [
     "miyucontacts_tool_foe_add",
     "miyucontacts_tool_foe_remove",
@@ -837,9 +820,6 @@
   ],
   "crates/miyubooking/src/participants.rs": [
     "miyubooking_tool_booking_participants_compute"
-  ],
-  "crates/jaykoa/src/services/jayfestival/adapter.rs": [
-    "jaykoa_jayfestival_adapter"
   ],
   "crates/lord_of_the_castle/src/secondary_player.rs": [
     "lord_of_the_castle_secondary_player"
@@ -957,16 +937,6 @@
     "miyucms_tool_media_upload",
     "miyucms_tool_media_serve",
     "miyucms_tool_media_transform"
-  ],
-  "crates/jayxpose/src/data/kindmother_db.rs": [
-    "jayxpose_kindmother_db",
-    "jayxpose_db_struct",
-    "jayxpose_db_open",
-    "exposant_upsert",
-    "exposant_by_email_password",
-    "exposant_create",
-    "cms_article_insert",
-    "cms_article_update"
   ],
   "crates/lifegame-world/src/biome.rs": [
     "lifegame.world.biome",
@@ -1245,10 +1215,6 @@
   "crates/miyuhr/src/schedule.rs": [
     "miyuhr_tool_schedule_get"
   ],
-  "crates/jayxpose/src/screens/exp/mod.rs": [
-    "router_exp",
-    "exp_navigate"
-  ],
   "crates/miyukini-kernel/src/config.rs": [
     "config_get",
     "envconfig_struct",
@@ -1275,12 +1241,6 @@
     "miyucalc_admin_integrity",
     "miyucalc_admin_cell_struct",
     "miyucalc_admin_cell_build"
-  ],
-  "crates/jayfestival/src/services/miyunotify/adapter.rs": [
-    "miyunotify_send_announcement",
-    "miyunotify_send_targeted",
-    "miyunotify_send_announcement",
-    "miyunotify_send_targeted"
   ],
   "crates/miyupospayment/src/cash.rs": [
     "miyupospayment_tool_cash_record"
@@ -1353,27 +1313,6 @@
     "lifegame.simulation.world_tick",
     "lifegame.simulation.tick_world_fn"
   ],
-  "crates/jayxpose/src/data/types.rs": [
-    "jayxpose_data_types",
-    "exposant_profile_type",
-    "produit_catalogue_type",
-    "categorie_produit_type",
-    "produit_visuel_type",
-    "document_professionnel_type",
-    "document_version_type",
-    "document_partage_type",
-    "vitrine_page_type",
-    "confidentialite_profil_type",
-    "doc_type_enum",
-    "doc_status_enum",
-    "vitrine_status_enum",
-    "availability_enum",
-    "cms_article_type",
-    "cms_category_type",
-    "visibility_enum",
-    "article_type_enum",
-    "article_status_enum"
-  ],
   "crates/kindmother-service/src/arbitration.rs": [
     "kindmother_service_arbitration"
   ],
@@ -1392,9 +1331,6 @@
   ],
   "crates/miyuexport/src/xlsx.rs": [
     "miyuexport_tool_xlsx_generate"
-  ],
-  "crates/jayfestival/src/lib.rs": [
-    "jayfestival_lib_stub"
   ],
   "crates/lord_of_the_castle/src/loot.rs": [
     "lord_of_the_castle_loot"
@@ -1479,12 +1415,6 @@
     "miyusocialfeed_tool_comment_list",
     "miyusocialfeed_tool_comment_delete"
   ],
-  "crates/jayfestival/src/services/miyuclock/adapter.rs": [
-    "miyuclock_now",
-    "miyuclock_attest_date",
-    "miyuclock_now",
-    "miyuclock_attest_date"
-  ],
   "crates/miyukini-admin/src/backup_service.rs": [
     "miyukiniadmin_backup_service_backup_record",
     "miyukiniadmin_backup_record_id",
@@ -1554,10 +1484,6 @@
     "everbuddy_migration_error",
     "everbuddy_migration_error_failed",
     "everbuddy_migration_test_creation"
-  ],
-  "crates/jayxpose/src/data/kindmother_client_db.rs": [
-    "jayxpose_kindmother_client_db",
-    "jayxpose_db_client_struct"
   ],
   "crates/miyuprofile/src/signature.rs": [
     "miyuprofile_tool_signature_get",
@@ -1648,14 +1574,6 @@
     "miyustore_tool_commerce_payment_capture",
     "miyustore_tool_commerce_payment_refund",
     "miyustore_tool_commerce_payment_status"
-  ],
-  "crates/jayfestival/src/services/jaykonta/adapter.rs": [
-    "jaykonta_create_quote",
-    "jaykonta_emit_invoice",
-    "miyuinvoice_facade",
-    "jaykonta_create_quote",
-    "jaykonta_emit_invoice",
-    "miyuinvoice_facade"
   ],
   "crates/mge-core/src/time.rs": [
     "mge.core.time"
@@ -1805,14 +1723,6 @@
     "miyuwidgets_tool_web_widget_grid_render",
     "miyuwidgets_tool_web_widget_container_render"
   ],
-  "crates/jayfestival/src/services/jayxpose/client.rs": [
-    "jayxpose_get_profile",
-    "jayxpose_list_repertoire",
-    "jayxpose_fiche_by_id",
-    "jayxpose_get_profile",
-    "jayxpose_list_repertoire",
-    "jayxpose_fiche_by_id"
-  ],
   "crates/miyuweb/src/form.rs": [
     "miyuweb_tool_web_form_validate"
   ],
@@ -1881,14 +1791,6 @@
     "miyuposkitchen_tool_order_push",
     "miyuposkitchen_tool_order_update_status"
   ],
-  "crates/jayfestival/src/auth/mod.rs": [
-    "auth_sign_in",
-    "auth_sign_up",
-    "auth_sign_out",
-    "auth_sign_in",
-    "auth_sign_up",
-    "auth_sign_out"
-  ],
   "crates/miyupossales/src/order.rs": [
     "miyupossales_tool_order_service_type_set"
   ],
@@ -1899,12 +1801,6 @@
   ],
   "crates/miyuantispam/src/rate_limit.rs": [
     "miyuantispam_tool_rate_limit_check"
-  ],
-  "crates/jayfestival/src/services/jaykoa/adapter.rs": [
-    "jaykoa_publish_edition",
-    "jaykoa_get_conflicts",
-    "jaykoa_publish_edition",
-    "jaykoa_get_conflicts"
   ],
   "crates/miyuprofile/src/field.rs": [
     "miyuprofile_tool_field_list",
@@ -1991,12 +1887,6 @@
     "borderguard_crossing_rules_add",
     "borderguard_crossing_test_rule_creation"
   ],
-  "crates/jayfestival/src/auth/permissions.rs": [
-    "auth_user_type_from_profile",
-    "auth_can_access_edition",
-    "auth_user_type_from_profile",
-    "auth_can_access_edition"
-  ],
   "crates/jaykoa/src/lib.rs": [
     "jaykoa_lib"
   ],
@@ -2043,12 +1933,6 @@
   ],
   "crates/miyuwebway_participant/src/transport.rs": [
     "miyuwebway_participant_mws_transport_send"
-  ],
-  "crates/jayfestival/src/services/miyubooking/adapter.rs": [
-    "miyubooking_list_slots",
-    "miyubooking_create_booking",
-    "miyubooking_list_slots",
-    "miyubooking_create_booking"
   ],
   "crates/miyukini-kernel/src/log.rs": [
     "kernel_log_level",
@@ -2195,12 +2079,6 @@
     "caringnanny_health_checker_trait",
     "caringnanny_health_checker_check",
     "caringnanny_health_test_status_equality"
-  ],
-  "crates/jayfestival/src/services/jayxpose/contract.rs": [
-    "jayxpose_profile_type",
-    "jayxpose_repertoire_filters",
-    "jayxpose_profile_type",
-    "jayxpose_repertoire_filters"
   ],
   "crates/borderguard/src/lib.rs": [
     "borderguard_module_boundary",

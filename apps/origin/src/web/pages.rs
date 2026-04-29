@@ -1,9 +1,7 @@
 //! Générateur de pages HTML pour le site web Origin.
 
-use super::content::{AnnouncementType, ContentManager, DownloadCategory, Platform};
-use super::server::simple_md_to_html;
+use super::content::{AnnouncementType, ContentManager, DownloadCategory};
 use crate::tracker::pool::PoolManager;
-use jayxpose::JayXposeDb;
 
 /// Génère le layout HTML de base.
 fn layout(title: &str, content: &str, active_nav: &str) -> String {
@@ -965,7 +963,7 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
       }},
       {{
         id: 'services', icon: '\u{{2728}}', title: 'Les services disponibles',
-        body: 'MiyukiniWatch (m\u00e9dias), Jay1Tribu (famille et amis), JayKoa (gestion quotidienne), JayXpose (partage pro)... Chaque service est int\u00e9gr\u00e9 dans ton COG et fonctionne hors-ligne.',
+        body: 'MiyukiniWatch (m\u00e9dias), Jay1Tribu (famille et amis), JayKoa (gestion quotidienne), JayKonta (compta perso). Chaque service est int\u00e9gr\u00e9 dans ton COG et fonctionne hors-ligne.',
         miou: 'C\u0027est comme avoir Netflix, WhatsApp et Google Drive... mais tout est \u00e0 toi\u00a0!',
         choices: null
       }},
@@ -1024,12 +1022,12 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
         miou: 'Fini les sueurs froides aux audits RGPD. Tout est chez vous, v\u00e9rifiable, souverain.',
         choices: [
           {{label: 'D\u00e9tails RGPD', reply: 'Un COG est RGPD-natif\u00a0: les donn\u00e9es ne quittent jamais vos locaux, le chiffrement est de bout en bout, et chaque acc\u00e8s est trac\u00e9 par les Cores. Pas besoin de DPO externe pour g\u00e9rer la conformit\u00e9\u00a0!'}},
-          {{label: 'Cas d\u0027usage', reply: 'Cabinets m\u00e9dicaux pour les dossiers patients, PME pour la gestion interne, \u00e9coles pour les donn\u00e9es \u00e9l\u00e8ves, artisans pour leur vitrine pro avec JayXpose\u2026 Partout o\u00f9 la souverainet\u00e9 des donn\u00e9es compte\u00a0!'}}
+          {{label: 'Cas d\u0027usage', reply: 'Cabinets m\u00e9dicaux pour les dossiers patients, PME pour la gestion interne, \u00e9coles pour les donn\u00e9es \u00e9l\u00e8ves, artisans pour leur compta locale\u2026 Partout o\u00f9 la souverainet\u00e9 des donn\u00e9es compte\u00a0!'}}
         ]
       }},
       {{
-        id: 'jayxpose', icon: '\u{{1f4ca}}', title: 'JayXpose : vitrine pro',
-        body: 'JayXpose transforme votre COG en vitrine professionnelle : catalogue produits, gestion commandes, communication clients. Tout int\u00e9gr\u00e9, tout souverain.',
+        id: 'jaykonta', icon: '\u{{1f9ee}}', title: 'JayKonta : compta unifi\u00e9e',
+        body: 'JayKonta unifie votre comptabilit\u00e9 personnelle et professionnelle dans votre COG : devis, factures, paiements, rapports. Tout int\u00e9gr\u00e9, tout souverain.',
         miou: 'Votre boutique en ligne, mais sans plateforme tierce qui prend une commission\u00a0!',
         choices: null
       }},
@@ -1606,12 +1604,10 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     <div class="gi-sep"></div>
 
     <div class="gi-note">
-        <h3>9 services officiels disponibles depuis Central</h3>
+        <h3>7 services officiels disponibles depuis Central</h3>
         <p>Ouvrez le Market dans Central pour installer, mettre &agrave; jour<br>
         et g&eacute;rer vos services en un clic.</p>
         <div class="gi-services-row">
-            <span class="gi-svc"><span class="gi-svc-icon">&#x1F3EA;</span> JayXpose</span>
-            <span class="gi-svc"><span class="gi-svc-icon">&#x1F4C5;</span> JayFestival</span>
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F4C6;</span> JayKoa</span>
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F9EE;</span> JayKonta</span>
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F4AC;</span> Jay1Tribu</span>
@@ -1641,8 +1637,6 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
     // Mapping service_id → emoji icon (from manifests)
     let icon_for = |id: &str| -> &str {
         match id {
-            "jayxpose" => "&#x1F3EA;",
-            "jayfestival" => "&#x1F4C5;",
             "jaykoa" => "&#x1F4C6;",
             "jaykonta" => "&#x1F9EE;",
             "miyukiniwatch" => "&#x1F441;",
@@ -1655,7 +1649,6 @@ pub async fn services_page(content_mgr: &ContentManager) -> String {
     // Couleur de rareté par catégorie (style Genshin)
     let rarity_for = |id: &str| -> &str {
         match id {
-            "jayxpose" | "jayfestival" => "rarity-5",   // or — commerce
             "jaykoa" | "jaykonta" => "rarity-4",        // violet — productivité
             "jay1tribu" => "rarity-4",                  // violet — social
             "jaymanga" | "miyukiniwatch" => "rarity-3", // bleu — style de vie
@@ -3344,355 +3337,3 @@ pub fn html_escape(s: &str) -> String {
         .replace('\'', "&#39;")
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Pages vitrine JayXpose (layout commun, données par KM, jumelles des natives)
-// Distinctes de la Home du portail. Voir docs/services/JayXpose/JayXpose - Pages Web Publiques Vitrine.md
-// ═══════════════════════════════════════════════════════════════════════════
-
-/// Layout commun des pages vitrine (tous COG). En-tête avec logo/nom, nav, contenu, pied.
-fn vitrine_layout(
-    title: &str,
-    content: &str,
-    slug: &str,
-    company_name: &str,
-    active: &str,
-    show_catalogue: bool,
-    show_presentation: bool,
-    show_contact: bool,
-) -> String {
-    let base = format!("/vitrine/{}", html_escape(slug));
-    let nav_home = if active == "home" { "active" } else { "" };
-    let nav_catalogue = if active == "catalogue" { "active" } else { "" };
-    let nav_presentation = if active == "presentation" {
-        "active"
-    } else {
-        ""
-    };
-    let nav_contact = if active == "contact" { "active" } else { "" };
-    let mut nav_extra = Vec::new();
-    if show_catalogue {
-        nav_extra.push(format!(
-            r#"<a href="{}/catalogue" class="{}">Catalogue</a>"#,
-            base, nav_catalogue
-        ));
-    }
-    if show_presentation {
-        nav_extra.push(format!(
-            r#"<a href="{}/presentation" class="{}">Présentation</a>"#,
-            base, nav_presentation
-        ));
-    }
-    if show_contact {
-        nav_extra.push(format!(
-            r#"<a href="{}/contact" class="{}">Contact</a>"#,
-            base, nav_contact
-        ));
-    }
-    let nav_extra_s = nav_extra.join(" ");
-    format!(
-        r#"<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{} — Vitrine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .v-root {{ --v-primary: #2563eb; --v-bg: #0a0a0f; --v-surface: #12121a; --v-text: #f0f0f5; --v-muted: #9ca3af; --v-border: rgba(37,99,235,0.2); }}
-        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Inter', sans-serif; background: var(--v-bg); color: var(--v-text); line-height: 1.6; min-height: 100vh; }}
-        .v-header {{ background: var(--v-surface); border-bottom: 1px solid var(--v-border); padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }}
-        .v-logo {{ font-weight: 700; font-size: 1.25rem; color: var(--v-primary); }}
-        .v-nav {{ display: flex; gap: 0.5rem; }}
-        .v-nav a {{ padding: 0.5rem 1rem; border-radius: 0.5rem; color: var(--v-muted); text-decoration: none; }}
-        .v-nav a:hover {{ color: var(--v-text); background: rgba(37,99,235,0.1); }}
-        .v-nav a.active {{ color: var(--v-primary); }}
-        main {{ max-width: 1000px; margin: 0 auto; padding: 2rem; }}
-        .v-hero {{ padding: 2rem 0; }}
-        .v-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }}
-        .v-card {{ background: var(--v-surface); border: 1px solid var(--v-border); border-radius: 0.5rem; padding: 1rem; }}
-        .v-price {{ font-weight: 600; color: var(--v-primary); margin: 0.25rem 0; }}
-        .v-avail {{ display: inline-block; font-size: 0.8rem; color: var(--v-muted); margin-top: 0.25rem; }}
-        .v-footer {{ margin-top: 3rem; padding: 1.5rem 2rem; border-top: 1px solid var(--v-border); color: var(--v-muted); font-size: 0.875rem; }}
-        .v-footer a {{ color: var(--v-primary); }}
-    </style>
-</head>
-<body class="v-root">
-    <header class="v-header">
-        <a href="{}" class="v-logo">{}</a>
-        <nav class="v-nav">
-            <a href="{}" class="{}">Accueil</a>
-            {}
-        </nav>
-    </header>
-    <main>{}</main>
-    <footer class="v-footer">
-        <a href="/">← Retour au portail Miyukini</a>
-    </footer>
-</body>
-</html>"#,
-        html_escape(title),
-        base,
-        html_escape(company_name),
-        base,
-        nav_home,
-        nav_extra_s,
-        content
-    )
-}
-
-/// Page index /vitrine — liste des vitrines ou message.
-pub fn vitrine_index_page(db: &JayXposeDb) -> Option<String> {
-    let exposants = db.exposants_list_annuaire().ok()?;
-    let with_slug: Vec<_> = exposants
-        .into_iter()
-        .filter(|e| {
-            e.vitrine_slug
-                .as_deref()
-                .map_or(false, |s: &str| !s.is_empty())
-        })
-        .filter(|e| e.vitrine_status.as_deref() == Some("publiee"))
-        .collect();
-    let list: String = if with_slug.is_empty() {
-        r#"<p>Aucune vitrine publiée pour le moment.</p>"#.to_string()
-    } else {
-        with_slug
-            .iter()
-            .map(|e| {
-                let name = e.company_name.as_deref().unwrap_or("Sans nom");
-                let slug = e.vitrine_slug.as_deref().unwrap_or("");
-                format!(
-                    r#"<li><a href="/vitrine/{}">{}</a></li>"#,
-                    html_escape(slug),
-                    html_escape(name)
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
-    };
-    let body = format!(
-        r#"<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Vitrines — Miyukini</title></head><body>
-        <h1>Vitrines exposants</h1><ul>{}</ul><p><a href="/">Retour à l'accueil</a></p></body></html>"#,
-        list
-    );
-    Some(body)
-}
-
-/// Page accueil vitrine /vitrine/{slug} (PUB-E03).
-pub fn vitrine_home_page(db: &JayXposeDb, slug: &str) -> Option<String> {
-    let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
-    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
-    let slogan = exposant.slogan.as_deref().unwrap_or("");
-    let desc = exposant.description_short.as_deref().unwrap_or("");
-    let banner = exposant.banner_url.as_deref().unwrap_or("");
-    let produits = db
-        .produits_by_exposant(exposant.id.as_deref().unwrap_or(""))
-        .ok()
-        .unwrap_or_default();
-    let vedettes: Vec<_> = produits
-        .into_iter()
-        .filter(|p| p.is_featured == Some(true))
-        .take(6)
-        .collect();
-    let vedettes_html: String = vedettes
-        .iter()
-        .map(|p| {
-            let name = p.name.as_deref().unwrap_or("Produit");
-            let price = p
-                .price
-                .map(|x| format!("{:.2} €", x))
-                .unwrap_or_else(|| "Sur demande".to_string());
-            format!(
-                r#"<div class="v-card"><h4>{}</h4><p>{}</p></div>"#,
-                html_escape(name),
-                html_escape(&price)
-            )
-        })
-        .collect();
-    let hero_style = if banner.is_empty() {
-        String::new()
-    } else {
-        format!(
-            r#" style="background-image: url('{}'); background-size: cover; min-height: 200px;""#,
-            html_escape(banner)
-        )
-    };
-    let content = format!(
-        r#"<section class="v-hero"{}><h1>{}</h1><p>{}</p></section><p>{}</p><h2>Produits vedettes</h2><div class="v-grid">{}</div>"#,
-        hero_style,
-        html_escape(company_name),
-        html_escape(slogan),
-        html_escape(desc),
-        vedettes_html
-    );
-    Some(vitrine_layout(
-        company_name,
-        &content,
-        slug,
-        company_name,
-        "home",
-        true,
-        true,
-        true,
-    ))
-}
-
-/// Page catalogue /vitrine/{slug}/catalogue (PUB-E04).
-pub fn vitrine_catalogue_page(
-    db: &JayXposeDb,
-    slug: &str,
-    _category_id: Option<&str>,
-) -> Option<String> {
-    let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
-    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
-    let exposant_id = exposant.id.as_deref().unwrap_or("");
-    let produits = db
-        .produits_by_exposant(exposant_id)
-        .ok()
-        .unwrap_or_default();
-    let base = format!("/vitrine/{}", html_escape(slug));
-    let availability_label = |a: Option<&String>| -> String {
-        let s: &str = a.map(|x| x.as_str()).unwrap_or("disponible");
-        match s {
-            "rupture" => "Rupture",
-            "sur_commande" => "Sur commande",
-            _ => "Disponible",
-        }
-        .to_string()
-    };
-    let cards: String = produits
-        .iter()
-        .map(|p| {
-            let id = p.id.as_deref().unwrap_or("");
-            let name = p.name.as_deref().unwrap_or("Produit");
-            let price = p.price.map(|x| format!("{:.2} €", x)).unwrap_or_else(|| "Sur demande".to_string());
-            let avail = availability_label(p.availability.as_ref());
-            format!(
-                r#"<a href="{}/catalogue/{}" class="v-card"><h4>{}</h4><p class="v-price">{}</p><span class="v-avail">{}</span></a>"#,
-                base,
-                html_escape(id),
-                html_escape(name),
-                html_escape(&price),
-                html_escape(&avail)
-            )
-        })
-        .collect();
-    let content = format!(r#"<h1>Catalogue</h1><div class="v-grid">{}</div>"#, cards);
-    Some(vitrine_layout(
-        "Catalogue",
-        &content,
-        slug,
-        company_name,
-        "catalogue",
-        true,
-        true,
-        true,
-    ))
-}
-
-/// Page fiche produit /vitrine/{slug}/catalogue/{id}.
-pub fn vitrine_produit_page(db: &JayXposeDb, slug: &str, produit_id: &str) -> Option<String> {
-    let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
-    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
-    let produit = db.produit_by_id(produit_id).ok()??;
-    if produit.exposant_id.as_deref() != exposant.id.as_deref() {
-        return None;
-    }
-    let name = produit.name.as_deref().unwrap_or("Produit");
-    let desc = produit.description.as_deref().unwrap_or("");
-    let price = produit
-        .price
-        .map(|x| format!("{:.2} €", x))
-        .unwrap_or_else(|| "Sur demande".to_string());
-    let availability = match produit.availability.as_deref().unwrap_or("disponible") {
-        "rupture" => "Rupture",
-        "sur_commande" => "Sur commande",
-        _ => "Disponible",
-    };
-    let base = format!("/vitrine/{}", html_escape(slug));
-    let content = format!(
-        r#"<p><a href="{}/catalogue">← Catalogue</a></p><h1>{}</h1><p class="v-price">{}</p><p class="v-avail">Disponibilité : {}</p><div>{}</div>"#,
-        base,
-        html_escape(name),
-        html_escape(&price),
-        html_escape(availability),
-        html_escape(desc)
-    );
-    Some(vitrine_layout(
-        name,
-        &content,
-        slug,
-        company_name,
-        "catalogue",
-        true,
-        true,
-        true,
-    ))
-}
-
-/// Page présentation /vitrine/{slug}/presentation (PUB-E05).
-pub fn vitrine_presentation_page(db: &JayXposeDb, slug: &str) -> Option<String> {
-    let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
-    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
-    let pages = db
-        .vitrine_pages_by_exposant(exposant.id.as_deref().unwrap_or(""))
-        .ok()
-        .unwrap_or_default();
-    let presentation = pages
-        .into_iter()
-        .find(|p| p.page_type.as_deref() == Some("presentation") && p.is_visible == Some(true));
-    let content_html = presentation
-        .and_then(|p| p.content)
-        .map(|c| simple_md_to_html(&c))
-        .unwrap_or_else(|| r#"<p>Aucun contenu pour l'instant.</p>"#.to_string());
-    let content = format!(
-        r#"<h1>Présentation</h1><div class="v-content">{}</div>"#,
-        content_html
-    );
-    Some(vitrine_layout(
-        "Présentation",
-        &content,
-        slug,
-        company_name,
-        "presentation",
-        true,
-        true,
-        true,
-    ))
-}
-
-/// Page contact /vitrine/{slug}/contact (PUB-E06).
-pub fn vitrine_contact_page(db: &JayXposeDb, slug: &str) -> Option<String> {
-    let exposant = db.exposant_by_vitrine_slug(slug).ok()??;
-    let company_name = exposant.company_name.as_deref().unwrap_or("Vitrine");
-    let email = exposant.contact_email.as_deref().unwrap_or("");
-    let phone = exposant.contact_phone.as_deref().unwrap_or("");
-    let adresse = exposant.adresse_siege.as_deref().unwrap_or("");
-    let site_web = exposant.site_web.as_deref().unwrap_or("");
-    let site_display = if site_web.is_empty() {
-        "—".to_string()
-    } else {
-        html_escape(site_web)
-    };
-    let coord = format!(
-        r#"<p><strong>Contact</strong><br>Email: {}<br>Tél: {}<br>Adresse: {}<br>Site: {}"#,
-        html_escape(email),
-        html_escape(phone),
-        html_escape(adresse),
-        site_display
-    );
-    let content = format!(
-        r#"<h1>Contact</h1><div>{}</div><p>Formulaire de contact (à venir).</p>"#,
-        coord
-    );
-    Some(vitrine_layout(
-        "Contact",
-        &content,
-        slug,
-        company_name,
-        "contact",
-        true,
-        true,
-        true,
-    ))
-}

@@ -428,7 +428,7 @@ impl MwsService {
     /// Met à jour les services exposés et envoie un RE-ANNOUNCE au Tracker.
     ///
     /// Cette méthode permet de modifier dynamiquement la liste des services
-    /// annoncés au réseau MWS (ex: activer/désactiver JayXpose).
+    /// annoncés au réseau MWS (ex: activer/désactiver JayKoa).
     pub async fn update_services(
         &self,
         services: Vec<String>,

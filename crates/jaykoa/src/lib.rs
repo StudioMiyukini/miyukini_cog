@@ -5,7 +5,7 @@
 //! @layer: infra
 //!
 //! JayKoa est un récepteur temporel transversal : il reflète, agrège et orchestre
-//! le temps issu des autres Services (JayFestival, JayRDV, futurs services).
+//! le temps issu des autres Services (JayRDV, futurs services).
 //! JayKoa ne crée jamais d'événement externe, ne modifie jamais un booking,
 //! ne calcule aucune disponibilité, ne décide jamais du temps.
 //!
@@ -19,7 +19,7 @@ pub mod aggregation;
 pub mod data;
 /// Module d'export (iCal, PDF futur).
 pub mod export;
-/// Adaptateurs inter-Services (lecture réfléchie JayFestival, JayRDV).
+/// Adaptateurs inter-Services (lecture réfléchie JayRDV).
 pub mod services;
 /// Runner des tests unitaires — exécutable depuis MiyukiniAdmin.
 pub mod test_runner;

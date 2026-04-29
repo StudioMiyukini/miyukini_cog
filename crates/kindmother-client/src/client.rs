@@ -32,7 +32,7 @@ impl KindMotherClient {
     ///
     /// # Arguments
     /// * `addr` - Adresse du service (ex: "127.0.0.1:50051")
-    /// * `operator_id` - Identifiant de l'opérateur (ex: "jayxpose")
+    /// * `operator_id` - Identifiant de l'opérateur (ex: "jaykoa")
     /// * `database` - Nom de la base de données par défaut
     pub async fn connect(
         addr: &str,

@@ -2,24 +2,19 @@
 //!
 //! @id: cog_web_portal_main @do: start_portal_http_server
 //! @role: infra @layer: app
-//! @human: Lance le serveur axum COG Web Portal avec JayFestival + JayXpose via PortalContract.
+//! @human: Lance le serveur axum COG Web Portal pour les services Jay via PortalContract.
 //!
 //! ## Architecture
 //!
 //! - AppState: Vec<Arc<dyn PortalContract + Send + Sync>> + central_remote_addr
 //! - Routes: GET /, GET /:service, GET /:service/:slug, GET|POST /:service/contact, GET /central-remote, GET /central-remote/app
 //! - Sécurité: CSP nonce per-request, HSTS, rate limiting 60 req/min/IP, CSRF sur POST
-//! - DB path: PORTAL_JF_DB et PORTAL_JX_DB (env), défaut :memory: en développement
 
 use std::sync::Arc;
 
 use axum::Router;
 use axum::routing::{get, post};
 use cog_portal_contract::PortalContract;
-use jayfestival::data::JayFestivalDb;
-use jayfestival::portal_contract::JayFestivalPortalService;
-use jayxpose::data::JayXposeDb;
-use jayxpose::portal_contract::JayXposePortalService;
 use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::{EnvFilter, fmt};
@@ -36,7 +31,7 @@ use security_headers::SecurityHeadersLayer;
 /// État partagé du Portal — services enregistrés.
 #[derive(Clone)]
 pub struct AppState {
-    /// Services Portal enregistrés (JayFestival, JayXpose, …).
+    /// Services Portal enregistrés.
     pub services: Vec<Arc<dyn PortalContract + Send + Sync>>,
     /// Adresse du serveur CentralRemote (ex: "127.0.0.1:8091"), si configuré.
     pub central_remote_addr: Option<String>,
@@ -91,35 +86,11 @@ async fn main() {
         .expect("server error");
 }
 
-/// Construit l'AppState en ouvrant les DBs des services configurés.
+/// Construit l'AppState. Les services Portal sont enregistrés ici lorsqu'ils
+/// sont disponibles ; pour l'instant aucun service n'est exposé tant que les
+/// adaptateurs PortalContract ne sont pas raccordés.
 pub fn build_app_state() -> AppState {
-    let mut services: Vec<Arc<dyn PortalContract + Send + Sync>> = Vec::new();
-
-    // JayFestival — chemin DB depuis env ou défaut développement.
-    let jf_path = std::env::var("PORTAL_JF_DB")
-        .unwrap_or_else(|_| ":memory:".to_string());
-    match JayFestivalDb::open(&jf_path) {
-        Ok(db) => {
-            info!("JayFestival DB opened: {jf_path}");
-            services.push(Arc::new(JayFestivalPortalService::new(Arc::new(db))));
-        }
-        Err(e) => {
-            tracing::warn!("JayFestival DB unavailable ({e}), service not registered");
-        }
-    }
-
-    // JayXpose — chemin DB depuis env ou défaut développement.
-    let jx_path = std::env::var("PORTAL_JX_DB")
-        .unwrap_or_else(|_| ":memory:".to_string());
-    match JayXposeDb::open(&jx_path) {
-        Ok(db) => {
-            info!("JayXpose DB opened: {jx_path}");
-            services.push(Arc::new(JayXposePortalService::new(Arc::new(db))));
-        }
-        Err(e) => {
-            tracing::warn!("JayXpose DB unavailable ({e}), service not registered");
-        }
-    }
+    let services: Vec<Arc<dyn PortalContract + Send + Sync>> = Vec::new();
 
     // CentralRemote — adresse du serveur remote de Central (optionnel).
     let central_remote_addr = std::env::var("PORTAL_CENTRAL_REMOTE_ADDR").ok();
@@ -138,23 +109,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn app_state_builds_with_memory_dbs() {
+    fn app_state_builds_empty() {
         let state = build_app_state();
-        // En développement, les deux services doivent être enregistrés.
-        assert_eq!(
-            state.services.len(),
-            2,
-            "jayfestival + jayxpose should both be registered"
+        assert!(
+            state.services.is_empty(),
+            "Aucun service Portal n'est enregistré tant que les adaptateurs ne sont pas raccordés"
         );
-        let slugs: Vec<&str> = state.services.iter().map(|s| s.service_slug()).collect();
-        assert!(slugs.contains(&"jayfestival"));
-        assert!(slugs.contains(&"jayxpose"));
-    }
-
-    #[test]
-    fn smoke_portal_implemented() {
-        // Remplace le RED E00 — le portail est implémenté en E04. GREEN.
-        let state = build_app_state();
-        assert!(!state.services.is_empty(), "Portal must have at least one service");
     }
 }

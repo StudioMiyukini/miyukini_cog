@@ -21,7 +21,7 @@ const STRATA: PyramidStratum[] = [
     level: '7',
     name: 'Opérateurs',
     description: 'Entités fonctionnelles gouvernées. Services et interfaces utilisateur.',
-    examples: ['Miyukini Central', 'JayXpose', 'JayFestival', 'JayKonta'],
+    examples: ['Miyukini Central', 'JayKonta', 'JayKoa'],
     color: '#f59e0b',
   },
   {

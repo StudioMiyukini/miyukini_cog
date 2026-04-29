@@ -224,7 +224,6 @@ fn ScheduleEventCard(props: ScheduleEventCardProps) -> Element {
     let source = props.entry.source_service.as_deref().map(EventSource::from_str);
     let source_label = source.map(jaykoa::data::EventSource::display_label);
     let source_icon = match source {
-        Some(EventSource::JayFestival) => Some("🎪"),
         Some(EventSource::JayRDV) => Some("📅"),
         _ => None,
     };

@@ -208,7 +208,6 @@ pub fn EventBlock(props: EventBlockProps) -> Element {
         .as_deref()
         .map(EventSource::from_str)
     {
-        Some(EventSource::JayFestival) => Some("F"),
         Some(EventSource::JayRDV) => Some("R"),
         _ => None,
     };

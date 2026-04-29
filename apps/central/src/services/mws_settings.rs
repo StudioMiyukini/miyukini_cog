@@ -51,7 +51,7 @@ pub fn apply_origin_url(config: &mut CentralMwsConfig, origin_url: &str) {
     if let Some(host) = origin_host(origin_url) {
         config.relay_address = format!("{host}:7000");
         config.tracker_address = format!("{host}:21000");
-        config.jayxpose_vitrine_base_url = Some(origin_url.to_string());
+        let _ = origin_url;
     }
 }
 
@@ -70,9 +70,6 @@ fn normalize_config(config: &mut CentralMwsConfig) {
             config.relay_address.trim().is_empty() || config.tracker_address.trim().is_empty();
         if uses_default_host || missing_host {
             apply_origin_url(config, &origin_url);
-        }
-        if config.jayxpose_vitrine_base_url.is_none() {
-            config.jayxpose_vitrine_base_url = Some(origin_url);
         }
     }
 
@@ -119,10 +116,6 @@ mod tests {
         apply_origin_url(&mut config, "https://origin.example.net:8443");
         assert_eq!(config.relay_address, "origin.example.net:7000");
         assert_eq!(config.tracker_address, "origin.example.net:21000");
-        assert_eq!(
-            config.jayxpose_vitrine_base_url.as_deref(),
-            Some("https://origin.example.net:8443")
-        );
     }
 
     #[test]

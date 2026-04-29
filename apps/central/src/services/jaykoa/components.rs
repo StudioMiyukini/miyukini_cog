@@ -185,7 +185,6 @@ pub fn EventBlock(props: EventBlockProps) -> Element {
     
     // Icône de source
     let source_icon = match props.entry.source_service.as_deref().map(EventSource::from_str) {
-        Some(EventSource::JayFestival) => Some("🎪"),
         Some(EventSource::JayRDV) => Some("📅"),
         _ => None,
     };

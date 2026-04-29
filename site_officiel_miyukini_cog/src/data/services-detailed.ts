@@ -79,8 +79,6 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
       { title: 'SEO optimisé', description: 'Référencement des pages publiques', icon: '🔍' },
     ],
     integrations: [
-      { serviceId: 'jayxpose', serviceName: 'JayXpose', description: 'Vitrines et catalogues publics' },
-      { serviceId: 'jayfestival', serviceName: 'JayFestival', description: 'Pages événements et billetterie' },
       { serviceId: 'jayrdv', serviceName: 'JayRDV', description: 'Réservation en ligne' },
     ],
     useCases: [
@@ -93,66 +91,6 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
   },
 
   // ============ SERVICES JAY ============
-  {
-    id: 'jayxpose',
-    name: 'JayXpose',
-    tagline: 'Votre identité professionnelle exposée',
-    shortDesc: 'Profil exposant, site vitrine, catalogue.',
-    longDesc: 'JayXpose est le Service dédié à l\'identité professionnelle. Il gère le profil entreprise, le catalogue produits, le page builder vitrine, le coffre-fort documentaire et l\'annuaire. Parfait pour les exposants, artisans et entreprises souhaitant se présenter.',
-    category: 'jay',
-    type: 2,
-    features: [
-      { title: 'Profil Entreprise', description: 'Fiche identité complète avec logo, description, contacts', icon: '🏢' },
-      { title: 'Catalogue Produits', description: 'Liste des produits/services avec photos et prix', icon: '📦' },
-      { title: 'Page Builder', description: 'Constructeur de site vitrine personnalisé', icon: '🎨' },
-      { title: 'Coffre-fort Documents', description: 'Stockage sécurisé des documents (CGV, certifications)', icon: '📁' },
-      { title: 'Annuaire', description: 'Référencement dans l\'annuaire Miyukini', icon: '📇' },
-    ],
-    integrations: [
-      { serviceId: 'jayfestival', serviceName: 'JayFestival', description: 'Fiche exposant sur les événements, répertoire exposants' },
-      { serviceId: 'jayshop', serviceName: 'JayShop', description: 'Synchronisation catalogue/stocks avec le point de vente' },
-      { serviceId: 'jaykonta', serviceName: 'JayKonta', description: 'Lien avec la comptabilité entreprise' },
-    ],
-    useCases: [
-      { title: 'Artisan exposant', description: 'Créer sa fiche pour participer aux marchés', persona: 'Artisan' },
-      { title: 'TPE/PME', description: 'Présenter son catalogue en ligne', persona: 'Entrepreneur' },
-      { title: 'Fournisseur B2B', description: 'Exposer son offre aux professionnels', persona: 'Grossiste' },
-    ],
-    status: 'production',
-    icon: '🎯',
-    color: '#f59e0b',
-  },
-  {
-    id: 'jayfestival',
-    name: 'JayFestival',
-    tagline: 'Organisez vos événements de A à Z',
-    shortDesc: 'Éditions, exposants, événements.',
-    longDesc: 'JayFestival est le Service B2B2C de gestion d\'événements et festivals. Il couvre les organisateurs, exposants et visiteurs avec des comptes cross-événements. Gestion de catalogue, inscriptions, billets, budget d\'édition et réservation de stands.',
-    category: 'jay',
-    type: 2,
-    features: [
-      { title: 'Gestion d\'Éditions', description: 'Créer et configurer des éditions d\'événements', icon: '📅' },
-      { title: 'Inscriptions Exposants', description: 'Formulaires et validation des participations', icon: '✅' },
-      { title: 'Plan & Stands', description: 'Gestion visuelle du plan et attribution des emplacements', icon: '🗺️' },
-      { title: 'Billetterie', description: 'Vente de billets visiteurs en ligne', icon: '🎫' },
-      { title: 'Budget Édition', description: 'Suivi financier de chaque édition', icon: '💰' },
-      { title: 'Programme', description: 'Planning des animations et activités', icon: '📋' },
-    ],
-    integrations: [
-      { serviceId: 'jayxpose', serviceName: 'JayXpose', description: 'Récupération des fiches exposants' },
-      { serviceId: 'jayfaim', serviceName: 'JayFaim', description: 'Gestion de la restauration sur site' },
-      { serviceId: 'jaykoa', serviceName: 'JayKoa', description: 'Synchronisation des dates dans l\'agenda' },
-      { serviceId: 'jaykonta', serviceName: 'JayKonta', description: 'Comptabilité des éditions' },
-    ],
-    useCases: [
-      { title: 'Marché de Noël', description: 'Organiser un marché saisonnier', persona: 'Organisateur' },
-      { title: 'Salon professionnel', description: 'Gérer un salon B2B avec exposants', persona: 'Association' },
-      { title: 'Festival culturel', description: 'Coordonner un festival multi-jours', persona: 'Collectivité' },
-    ],
-    status: 'production',
-    icon: '🎪',
-    color: '#ec4899',
-  },
   {
     id: 'jaykonta',
     name: 'JayKonta',
@@ -170,7 +108,6 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
       { title: 'Déclarations', description: 'Préparation des déclarations fiscales', icon: '📄' },
     ],
     integrations: [
-      { serviceId: 'jayfestival', serviceName: 'JayFestival', description: 'Flux financiers des éditions' },
       { serviceId: 'jayrdv', serviceName: 'JayRDV', description: 'Paiements des réservations' },
       { serviceId: 'jayfaim', serviceName: 'JayFaim', description: 'Revenus restauration' },
       { serviceId: 'jayshop', serviceName: 'JayShop', description: 'Ventes et encaissements' },
@@ -202,7 +139,6 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
     ],
     integrations: [
       { serviceId: 'jayrdv', serviceName: 'JayRDV', description: 'Synchronisation des rendez-vous' },
-      { serviceId: 'jayfestival', serviceName: 'JayFestival', description: 'Dates des éditions et participations' },
       { serviceId: 'jayfaim', serviceName: 'JayFaim', description: 'Réservations restaurant' },
     ],
     useCases: [
@@ -261,9 +197,7 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
       { title: 'Événements', description: 'Stocks temporaires pour marchés/salons', icon: '🎪' },
     ],
     integrations: [
-      { serviceId: 'jayxpose', serviceName: 'JayXpose', description: 'Synchronisation catalogue' },
       { serviceId: 'jaykonta', serviceName: 'JayKonta', description: 'Comptabilité des ventes' },
-      { serviceId: 'jayfestival', serviceName: 'JayFestival', description: 'Ventes sur événements' },
     ],
     useCases: [
       { title: 'Artisan créateur', description: 'Vendre ses créations en ligne et sur marchés', persona: 'Artisan' },
@@ -279,7 +213,7 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
     name: 'JayFaim',
     tagline: 'Restauration et commandes',
     shortDesc: 'Restauration, commandes, food trucks.',
-    longDesc: 'JayFaim est le Service de réservation de tables et commande en ligne pour restaurants, traiteurs et food trucks. Gestion des créneaux, menus et commandes. Intégration avec JayFestival pour la restauration sur site.',
+    longDesc: 'JayFaim est le Service de réservation de tables et commande en ligne pour restaurants, traiteurs et food trucks. Gestion des créneaux, menus et commandes.',
     category: 'jay',
     type: 2,
     features: [
@@ -291,7 +225,6 @@ export const SERVICES_DETAILED: ServiceDetailed[] = [
       { title: 'Événements', description: 'Restauration sur festivals et marchés', icon: '🎪' },
     ],
     integrations: [
-      { serviceId: 'jayfestival', serviceName: 'JayFestival', description: 'Stands restauration sur événements' },
       { serviceId: 'jayrdv', serviceName: 'JayRDV', description: 'Réservations de tables' },
       { serviceId: 'jaykonta', serviceName: 'JayKonta', description: 'Comptabilité restauration' },
       { serviceId: 'jaykoa', serviceName: 'JayKoa', description: 'Planning des services' },

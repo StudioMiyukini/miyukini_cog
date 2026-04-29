@@ -54,7 +54,7 @@ pub struct PlatformBinaries {
 /// Fichier : `service.manifest.json` dans le package.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServiceManifest {
-    /// Identifiant unique du service (ex: "jaymanga", "jayxpose").
+    /// Identifiant unique du service (ex: "jaymanga", "jaykoa").
     pub id: String,
     /// Nom d'affichage (ex: "JayManga").
     pub name: String,
@@ -93,7 +93,7 @@ pub struct ServiceManifest {
     /// Mode d'exécution (standalone = fenêtre propre, background = sans UI).
     #[serde(default)]
     pub execution_mode: ExecutionMode,
-    /// Nom du binaire dans le package (ex: "jayxpose.exe"). Déduit de l'id si absent.
+    /// Nom du binaire dans le package (ex: "jaykoa.exe"). Déduit de l'id si absent.
     #[serde(default)]
     pub binary_name: Option<String>,
     /// Binaires par plateforme (chemins relatifs dans le package).
@@ -197,25 +197,25 @@ mod tests {
     #[test]
     fn test_manifest_serde_roundtrip() {
         let manifest = ServiceManifest {
-            id: "jayxpose".into(),
-            name: "JayXpose".into(),
-            description: "Profil exposant".into(),
-            icon: "🏪".into(),
+            id: "jaykoa".into(),
+            name: "JayKoa".into(),
+            description: "Calendrier universel".into(),
+            icon: "📆".into(),
             version: "0.2.0".into(),
-            service_type: ServiceType::SurfaceWeb,
+            service_type: ServiceType::InterneCog,
             source: ServiceSource::Officiel,
             developer: "Miyukini".into(),
             min_central_version: "0.1.0".into(),
             dependencies: vec![],
-            permissions: vec![ServicePermission::Storage, ServicePermission::Webway],
-            tags: vec!["commerce".into()],
-            homepage: Some("https://miyukini.com/jayxpose".into()),
+            permissions: vec![ServicePermission::Storage, ServicePermission::Calendar],
+            tags: vec!["agenda".into()],
+            homepage: Some("https://miyukini.com/jaykoa".into()),
             checksum: None,
             package_size: None,
             execution_mode: ExecutionMode::Standalone,
-            binary_name: Some("jayxpose.exe".into()),
+            binary_name: Some("jaykoa.exe".into()),
             platforms: PlatformBinaries {
-                windows_x64: Some("jayxpose.exe".into()),
+                windows_x64: Some("jaykoa.exe".into()),
                 ..Default::default()
             },
         };

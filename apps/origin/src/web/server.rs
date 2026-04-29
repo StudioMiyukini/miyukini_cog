@@ -13,9 +13,6 @@ use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpListener;
 use tracing::{debug, error, info, warn};
 
-/// Base de données JayXpose (optionnelle) pour les pages vitrine publiques.
-pub type JayXposeDbRef = Arc<jayxpose::JayXposeDb>;
-
 /// Réponse HTTP : normale, binaire, redirection ou brute.
 pub enum RouteResponse {
     Normal {
@@ -46,8 +43,6 @@ pub struct WebServer {
     content_manager: Arc<ContentManager>,
     /// Suivi des visites catalogue -> Home (pour considérer un COG présent ~1 min après une visite).
     visit_tracker: Arc<CatalogVisitTracker>,
-    /// Base JayXpose (lecture seule) pour /vitrine/*. Absent si non configuré.
-    jayxpose_db: Option<JayXposeDbRef>,
     /// Registre des slugs de sous-domaines COG (pour le routage xxx.miyukini.com).
     slug_registry: Arc<SlugRegistry>,
     /// Relay pour Phase 2 : inject HTTP via tunnel (si session active).
@@ -62,14 +57,12 @@ pub struct WebServer {
 
 impl WebServer {
     /// Crée un nouveau serveur web.
-    /// Si `jayxpose_db` est fourni, les routes `/vitrine/*` sont activées.
     /// Si `relay_ref` est fourni, Phase 2 (inject HTTP via tunnel) est activée.
     /// Si `forum_auth_store` est fourni, les routes POST /api/auth/forum/validate et /sync sont activées.
     #[must_use]
     pub fn new(
         config: Arc<OriginConfig>,
         pool_manager: Arc<PoolManager>,
-        jayxpose_db: Option<JayXposeDbRef>,
         slug_registry: Arc<SlugRegistry>,
         relay_ref: Option<Arc<RelayServer>>,
         forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
@@ -90,7 +83,6 @@ impl WebServer {
             pool_manager,
             content_manager: Arc::new(ContentManager::new()),
             visit_tracker: Arc::new(CatalogVisitTracker::new()),
-            jayxpose_db,
             slug_registry,
             relay_ref,
             forum_auth_store,
@@ -128,7 +120,6 @@ impl WebServer {
                     let pool_mgr = Arc::clone(&self.pool_manager);
                     let content_mgr = Arc::clone(&self.content_manager);
                     let visit_tracker = Arc::clone(&self.visit_tracker);
-                    let jayxpose_db = self.jayxpose_db.clone();
                     let slug_registry = Arc::clone(&self.slug_registry);
                     let relay_ref = self.relay_ref.clone();
                     let forum_auth_store = self.forum_auth_store.clone();
@@ -141,7 +132,6 @@ impl WebServer {
                             pool_mgr,
                             content_mgr,
                             visit_tracker,
-                            jayxpose_db,
                             slug_registry,
                             relay_ref,
                             forum_auth_store,
@@ -181,7 +171,6 @@ async fn handle_connection(
     pool_mgr: Arc<PoolManager>,
     content_mgr: Arc<ContentManager>,
     visit_tracker: Arc<CatalogVisitTracker>,
-    jayxpose_db: Option<JayXposeDbRef>,
     slug_registry: Arc<SlugRegistry>,
     relay_ref: Option<Arc<RelayServer>>,
     forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
@@ -400,7 +389,6 @@ async fn handle_connection(
         &content_mgr,
         &visit_tracker,
         &config,
-        jayxpose_db.as_deref(),
         &slug_registry,
         relay_ref.as_deref(),
     )
@@ -798,7 +786,6 @@ async fn route_request(
     content_mgr: &ContentManager,
     visit_tracker: &CatalogVisitTracker,
     config: &OriginConfig,
-    jayxpose_db: Option<&jayxpose::JayXposeDb>,
     slug_registry: &SlugRegistry,
     relay_ref: Option<&RelayServer>,
 ) -> RouteResponse {
@@ -1146,92 +1133,6 @@ async fn route_request(
                     }
                 }
                 _ => not_found_page(),
-            }
-        }
-
-        // ═══════════════════════════════════════════════════════════════════
-        // Pages vitrine JayXpose (publiques, données par KM)
-        // ═══════════════════════════════════════════════════════════════════
-        _ if path_clean.starts_with("/vitrine/") => {
-            if let Some(db) = jayxpose_db {
-                let remainder = path_clean.strip_prefix("/vitrine/").unwrap_or("");
-                let segments: Vec<&str> = remainder.split('/').filter(|s| !s.is_empty()).collect();
-                match segments.as_slice() {
-                    [slug] => {
-                        if let Some(body) = pages::vitrine_home_page(db, slug) {
-                            RouteResponse::Normal {
-                                status: "200 OK".to_string(),
-                                content_type: "text/html".to_string(),
-                                body,
-                            }
-                        } else {
-                            not_found_page()
-                        }
-                    }
-                    [slug, "catalogue"] => {
-                        if let Some(body) = pages::vitrine_catalogue_page(db, slug, None) {
-                            RouteResponse::Normal {
-                                status: "200 OK".to_string(),
-                                content_type: "text/html".to_string(),
-                                body,
-                            }
-                        } else {
-                            not_found_page()
-                        }
-                    }
-                    [slug, "catalogue", produit_id] => {
-                        if let Some(body) = pages::vitrine_produit_page(db, slug, produit_id) {
-                            RouteResponse::Normal {
-                                status: "200 OK".to_string(),
-                                content_type: "text/html".to_string(),
-                                body,
-                            }
-                        } else {
-                            not_found_page()
-                        }
-                    }
-                    [slug, "presentation"] => {
-                        if let Some(body) = pages::vitrine_presentation_page(db, slug) {
-                            RouteResponse::Normal {
-                                status: "200 OK".to_string(),
-                                content_type: "text/html".to_string(),
-                                body,
-                            }
-                        } else {
-                            not_found_page()
-                        }
-                    }
-                    [slug, "contact"] => {
-                        if let Some(body) = pages::vitrine_contact_page(db, slug) {
-                            RouteResponse::Normal {
-                                status: "200 OK".to_string(),
-                                content_type: "text/html".to_string(),
-                                body,
-                            }
-                        } else {
-                            not_found_page()
-                        }
-                    }
-                    _ => not_found_page(),
-                }
-            } else {
-                not_found_page()
-            }
-        }
-
-        _ if path_clean == "/vitrine" => {
-            if let Some(db) = jayxpose_db {
-                if let Some(body) = pages::vitrine_index_page(db) {
-                    RouteResponse::Normal {
-                        status: "200 OK".to_string(),
-                        content_type: "text/html".to_string(),
-                        body,
-                    }
-                } else {
-                    not_found_page()
-                }
-            } else {
-                not_found_page()
             }
         }
 
@@ -1929,12 +1830,12 @@ mod tests {
     #[test]
     fn normalize_visit_path_rejects_absolute_urls() {
         assert_eq!(
-            normalize_visit_path("jayxpose"),
-            Some("/jayxpose".to_string())
+            normalize_visit_path("service"),
+            Some("/service".to_string())
         );
         assert_eq!(
-            normalize_visit_path("/jayxpose"),
-            Some("/jayxpose".to_string())
+            normalize_visit_path("/service"),
+            Some("/service".to_string())
         );
         assert_eq!(normalize_visit_path("https://evil.invalid"), None);
     }
@@ -1942,8 +1843,8 @@ mod tests {
     #[test]
     fn rewrite_visit_location_wraps_root_relative_paths() {
         assert_eq!(
-            rewrite_visit_location("/jayxpose/catalogue", "Miyukini"),
-            "/visit?cog_id=Miyukini&path=%2Fjayxpose%2Fcatalogue"
+            rewrite_visit_location("/service/catalogue", "Miyukini"),
+            "/visit?cog_id=Miyukini&path=%2Fservice%2Fcatalogue"
         );
         assert_eq!(
             rewrite_visit_location("https://miyukini.com", "Miyukini"),

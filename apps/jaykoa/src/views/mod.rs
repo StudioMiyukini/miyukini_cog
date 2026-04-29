@@ -3,7 +3,7 @@
 //! Structure calquee sur Google Agenda :
 //! - Sidebar gauche (agendas, mini-calendrier, services synchronises)
 //! - Vue principale (semaine, jour, mois, planning)
-//! - Integration JayFestival et JayRDV (lecture reflechie)
+//! - Integration JayRDV (lecture reflechie)
 
 mod calendar_view;
 mod components;
@@ -12,7 +12,6 @@ mod event_form;
 mod month_view;
 mod schedule_view;
 mod sidebar;
-pub mod sync_service;
 mod week_view;
 
 pub use components::*;
@@ -64,8 +63,6 @@ pub struct JayKoaState {
     pub show_event_form: bool,
     /// Date/heure pre-remplie pour nouveau evenement.
     pub new_event_start: Option<String>,
-    /// Synchronisation JayFestival en cours.
-    pub syncing_jayfestival: bool,
 }
 
 impl Default for JayKoaState {
@@ -76,7 +73,6 @@ impl Default for JayKoaState {
             visible_agendas: Vec::new(),
             show_event_form: false,
             new_event_start: None,
-            syncing_jayfestival: false,
         }
     }
 }
@@ -179,7 +175,6 @@ pub fn JayKoaView() -> Element {
 
     // Clone DB for closures
     let db_toggle = db.clone();
-    let db_sync = db.clone();
     let db_save = db.clone();
 
     let c_year = c.text_secondary.to_string();
@@ -206,13 +201,6 @@ pub fn JayKoaView() -> Element {
                 },
                 on_create_event: move |()| {
                     koa_state.write().show_event_form = true;
-                },
-                on_sync_jayfestival: move |()| {
-                    koa_state.write().syncing_jayfestival = true;
-                    // Standalone: sync JayFestival non disponible (necessite JayFestival DB).
-                    // TODO: implementer quand le service JayFestival est accessible en standalone.
-                    tracing::warn!("Sync JayFestival non disponible en mode standalone");
-                    koa_state.write().syncing_jayfestival = false;
                 },
             }
 
