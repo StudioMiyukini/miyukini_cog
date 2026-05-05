@@ -2,7 +2,7 @@
 
 ## Opérateurs (Strate 7)
 
-Les **Opérateurs** sont les entités fonctionnelles visibles par l’utilisateur : ce sont les « services » (JayXpose, JayKonta, Miou, etc.). Ils sont **gouvernés** par les Cores et **n’exécutent** pas eux-mêmes — ils passent par BondingBrother et les Outils.
+Les **Opérateurs** sont les entités fonctionnelles visibles par l’utilisateur : ce sont les « services » (JayKoa, JayKonta, Miou, etc.). Ils sont **gouvernés** par les Cores et **n’exécutent** pas eux-mêmes — ils passent par BondingBrother et les Outils.
 
 ## Termes Clés
 

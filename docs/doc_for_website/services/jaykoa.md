@@ -19,6 +19,6 @@
 
 ## Intégration
 
-- Utilisé par Central, JayXpose, JayKonta, JayFestival, etc.
+- Utilisé par Central, JayKonta, JayRDV, JayShop, etc.
 - Référence pour MiyuWidgets et les écrans des services
 - Niveaux de sécurité et protection des données documentés

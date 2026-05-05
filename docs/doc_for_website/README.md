@@ -15,7 +15,7 @@ Cette arborescence contient la **documentation structurée pour le site web** du
 - **cores/** — Les 8 Cores (StrongFather, KindMother, TAMR, BorderGuard, WorrySentinel, LogisticsSteward).
 - **interface/** — BondingBrother (Strate 5).
 - **tools/** — Vue d'ensemble des toolkits et fiches (MiyuAuth, MiyuSQL, MiyuWeb, Webway, etc.).
-- **services/** — Vue d'ensemble et fiches services (Central, Miou, JayXpose, JayKonta, etc.).
+- **services/** — Vue d'ensemble et fiches services (Central, Miou, JayKoa, JayKonta, etc.).
 - **mws/** — Miyukini Webway System (fondateur, architecture, Origin, Relays, Trackers, protocole, sécurité).
 - **security/** — Vue d'ensemble sécurité, niveaux, états de confiance, protection par les Cores.
 - **admin/** — MiyukiniAdmin (Strate 9).

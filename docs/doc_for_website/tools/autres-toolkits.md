@@ -121,7 +121,7 @@ Cette page présente les autres toolkits disponibles dans Miyukini, chacun avec 
 | Fuseaux | Conversion timezone |
 | Formatage | Affichage localisé |
 
-**Cas d'usage** : Planification dans JayRDV, événements JayFestival.
+**Cas d'usage** : Planification dans JayRDV, agenda universel JayKoa.
 
 ---
 

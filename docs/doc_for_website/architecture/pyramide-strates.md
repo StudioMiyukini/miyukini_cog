@@ -10,7 +10,7 @@ Le système Miyukini est organisé en **strates hiérarchiques**, chacune avec u
 ┌─────────────────────────────────────────┐
 │         STRATE 9 - MiyukiniAdmin        │  Opérateur Souverain
 ├─────────────────────────────────────────┤
-│         STRATE 7 - Opérateurs           │  JayXpose, JayKonta...
+│         STRATE 7 - Opérateurs           │  JayKoa, JayKonta...
 ├─────────────────────────────────────────┤
 │         STRATE 6 - Outils               │  MiyuAuth, MiyuSQL...
 ├─────────────────────────────────────────┤
@@ -132,11 +132,13 @@ Les Opérateurs sont les services visibles par l'utilisateur. Ils sont **gouvern
 
 | Opérateur | Domaine |
 |-----------|---------|
-| JayXpose | Portfolio professionnel |
+| JayKoa | Calendrier universel |
 | JayKonta | Comptabilité |
-| JayFestival | Événements |
 | JayRDV | Rendez-vous |
 | JayShop | Commerce |
+| JayFaim | Restauration et tables |
+| Jay Bureau | Suite collaborative |
+| Miyukini Cloud | Cloud privé |
 | Miyukini Central | Hub principal |
 | Miou | Assistant IA |
 

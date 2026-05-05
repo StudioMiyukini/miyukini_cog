@@ -7,10 +7,10 @@ JayShop est le service Miyukini dedie au **commerce et a la vente** :
 - vente en ligne (boutique web)
 - point de vente (PoS) en caisse
 - gestion des tickets et historique des ventes
-- **gestion des evenements/festivals** (fiches, couts, stock temporaire, benefices)
-- integration catalogue et stocks (JayXpose)
+- gestion des evenements ponctuels (fiches, couts, stock temporaire, benefices)
 - suivi comptable (JayKonta)
-- **integration JayFestival** (synchronisation automatique des participations)
+
+> **Note 2026-04-29 :** Les integrations JayXpose (catalogue) et JayFestival (festivals) ont ete retirees suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md). JayShop reste autonome sur son perimetre commerce.
 
 ## Documentation principale
 
@@ -26,7 +26,7 @@ JayShop est le service Miyukini dedie au **commerce et a la vente** :
 | Document | Role |
 |----------|------|
 | [JayShop - Guide Implementation](./JayShop%20-%20Guide%20Implementation.md) | Architecture crate, schema libSQL (KindMother), Operateurs et Kits, plan par phases, integration Central. |
-| [JayShop - Interfaces Inter-Services](./JayShop%20-%20Interfaces%20Inter-Services.md) | Contrats JayXpose, JayKonta, JayFestival, Central. |
+| [JayShop - Interfaces Inter-Services](./JayShop%20-%20Interfaces%20Inter-Services.md) | Contrats JayKonta, Central (sections JayXpose / JayFestival historiques retirees). |
 
 ## Reference
 
@@ -37,9 +37,8 @@ JayShop est le service Miyukini dedie au **commerce et a la vente** :
 
 ## Liaisons ecosysteme
 
-- [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) â€” Catalogue produits, stocks
 - [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) â€” Suivi comptable
-- [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) â€” **Gestion evenements, synchronisation participations**
 - [Miyukini Sales - Document Fondateur](../MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) â€” Socle Operateurs partages
+- [Services retires](../DEPRECATED.md)
 - [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md)
 

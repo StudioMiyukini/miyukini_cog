@@ -25,5 +25,5 @@
 
 ## Intégrations
 
-- Interfaces inter-services (JayXpose, autres Jay)
+- Interfaces inter-services (JayRDV, JayShop, JayKoa, autres Jay)
 - Opérateurs et toolkits (MiyuTreasury, MiyuSQL, MiyuAuth)

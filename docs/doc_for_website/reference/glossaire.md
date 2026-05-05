@@ -48,7 +48,7 @@ Ce glossaire donne les définitions normatives des termes utilisés dans la docu
 
 ### O
 
-- **Opérateur** — Entité de la Strate 7 ; service fonctionnel (JayXpose, JayKonta, etc.).
+- **Opérateur** — Entité de la Strate 7 ; service fonctionnel (JayKoa, JayKonta, etc.).
 - **Origin** — Voir MWS.
 - **Outil / Toolkit** — Strate 6 ; capacité exécutable (MiyuAuth, MiyuSQL, etc.) ; fait, ne décide pas.
 

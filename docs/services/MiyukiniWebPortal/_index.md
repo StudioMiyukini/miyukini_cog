@@ -33,10 +33,10 @@ Les Services de **Type 2** (Ã  surface web externe) exposent leurs faÃ§ades 
 
 | Service | Surface exposÃ©e |
 |---------|-----------------|
-| **JayXpose** | Vitrine, e-shop, annuaire exposants, blog public |
-| **JayFestival** | Catalogue Ã©vÃ©nements, inscriptions, billets, espace visiteur |
 | **JayRDV** | Page de rÃ©servation, parcours guest, annulation/modification |
 | **JayKonta** | Portail client (consultation factures, paiement) |
+| **JayShop** | Boutique en ligne et catalogue produit |
+| **JayManga** | Liseuse web, vitrine vendeur et Portail AgrÃ©gÃ© |
 
 ## Architecture simplifiÃ©e
 
@@ -62,7 +62,7 @@ Les Services de **Type 2** (Ã  surface web externe) exposent leurs faÃ§ades 
                             â”‚
                             â–¼
 â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Services (JayXpose, JayFestival, JayRDV, JayKonta, ...)     â”‚
+â”‚  Services (JayRDV, JayKonta, JayShop, JayManga, ...)         â”‚
 â”‚  (Exposent leurs capacitÃ©s au Portail)                       â”‚
 â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```

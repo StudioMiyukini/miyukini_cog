@@ -214,7 +214,7 @@ KindMother garantit :
 ### Exemple : Enregistrement d'un Document
 
 ```
-JayXpose : "Enregistrer ce portfolio"
+JayKonta : "Enregistrer cette facture"
                 │
                 ▼
 StrongFather : Orchestration

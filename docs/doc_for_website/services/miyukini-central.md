@@ -8,7 +8,7 @@
 
 > Central **rassemble** les services et **orchestre** l'expérience utilisateur.
 
-Central n'est pas un simple launcher : il gère la navigation, l'authentification, les préférences et l'intégration de tous les services (JayXpose, JayKonta, Miou, etc.).
+Central n'est pas un simple launcher : il gère la navigation, l'authentification, les préférences et l'intégration de tous les services (JayKoa, JayKonta, Miou, etc.).
 
 ## Fonctionnalités Principales
 
@@ -43,13 +43,14 @@ Central n'est pas un simple launcher : il gère la navigation, l'authentificatio
 
 Central affiche et lance :
 
-- JayXpose (portfolio)
+- JayKoa (calendrier universel)
 - JayKonta (comptabilité)
-- JayFestival (événements)
 - JayRDV (rendez-vous)
 - JayShop (boutique)
+- Jay Bureau (suite collaborative)
 - Miou (assistant)
 - MiyukiniWatch (métriques)
+- Miyukini Cloud (cloud privé)
 - MiyukiniClicker (jeu)
 - Et les autres services actifs sur le COG
 

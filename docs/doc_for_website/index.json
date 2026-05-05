@@ -253,15 +253,6 @@
       "order": 42
     },
     {
-      "id": "jayxpose",
-      "title": "JayXpose",
-      "description": "Gestion de portfolio et présence professionnelle",
-      "icon": "briefcase",
-      "path": "services/jayxpose.md",
-      "tags": ["services", "7", "specification"],
-      "order": 43
-    },
-    {
       "id": "jaykonta",
       "title": "JayKonta",
       "description": "Gestion comptable et financière",
@@ -273,20 +264,11 @@
     {
       "id": "jaykoa",
       "title": "JayKoa",
-      "description": "Système de design et composants UI",
-      "icon": "palette",
+      "description": "Calendrier universel du COG",
+      "icon": "calendar",
       "path": "services/jaykoa.md",
       "tags": ["services", "7", "specification"],
       "order": 45
-    },
-    {
-      "id": "jayfestival",
-      "title": "JayFestival",
-      "description": "Organisation d'événements et festivals",
-      "icon": "calendar",
-      "path": "services/jayfestival.md",
-      "tags": ["services", "7", "specification"],
-      "order": 46
     },
     {
       "id": "jayrdv",

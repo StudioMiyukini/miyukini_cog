@@ -39,7 +39,7 @@ Miyukini est structuré en **strates hiérarchiques**, de la réalité physique 
 | Strate | Nom | Description |
 |--------|-----|-------------|
 | **9** | MiyukiniAdmin | Opérateur souverain d'administration |
-| **7** | Opérateurs | Services fonctionnels (JayXpose, JayKonta...) |
+| **7** | Opérateurs | Services fonctionnels (JayKoa, JayKonta...) |
 | **6** | Outils | Capacités techniques (MiyuAuth, MiyuSQL...) |
 | **5** | Interface | BondingBrother (adaptation Cores ↔ Outils) |
 | **4** | Cores | 8 Cores de gouvernance immuables |
@@ -66,11 +66,13 @@ Miyukini propose une suite complète de services professionnels et personnels :
 
 - **Miyukini Central** : Hub principal et point d'accès
 - **Miou** : Assistant intelligent intégré
-- **JayXpose** : Portfolio et présence professionnelle
+- **JayKoa** : Calendrier universel du COG
 - **JayKonta** : Comptabilité et gestion financière
-- **JayFestival** : Organisation d'événements
 - **JayRDV** : Gestion de rendez-vous
-- **JayShop** : Commerce en ligne
+- **JayShop** : Commerce en ligne et point de vente
+- **Jay Bureau** : Suite collaborative (Docs, Sheets, Slides, Mail, Message)
+- **Miyukini Cloud** : Cloud privé (WebDAV, CalDAV, CardDAV)
+- **MAIA** : IA locale (LLM, STT) sans internet
 - Et plus encore...
 
 ## Réseau Webway (MWS)
@@ -85,9 +87,9 @@ Le **Miyukini Webway System** permet aux COGs de se découvrir et de communiquer
 
 Miyukini s'adresse à :
 
-- **Professionnels indépendants** (kiné, artisan, restaurateur) : JayRDV + JayKonta + JayXpose interconnectés, un seul COG, données unifiées
+- **Professionnels indépendants** (kiné, artisan, restaurateur) : JayRDV + JayKonta + JayKoa interconnectés, un seul COG, données unifiées
 - **Collectivités et associations** : déploiement sur mini PC ou NAS, budget maîtrisé, données citoyens en local
-- **Événements et festivals** : JayFestival en mode offline sur site, billetterie et catalogue sans réseau
+- **Équipes collaboratives** : suite Jay Bureau souveraine (documents, tableurs, présentations, messagerie chiffrée) sans cloud tiers
 - **Décideurs techniques** : éviter le lock-in vendor, traçabilité structurelle, évolution sans refonte
 - **Développeurs** : 49 Toolkits composables sous gouvernance, contrats clairs, pas de dépendance externe critique
 

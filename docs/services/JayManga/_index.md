@@ -49,7 +49,6 @@ JayManga est le service Miyukini dedie a la **lecture et la vente de manga en li
 ## Liaisons ecosysteme
 
 - [JayShop - Document Fondateur](../JayShop/JayShop%20-%20Document%20Fondateur.md) â€” Reference pour les patterns de vente
-- [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) â€” Reference pour la gestion de catalogue
 - [Miyukini Web Portal](../MiyukiniWebPortal/) â€” Surface web du Portail
 - [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) â€” Presence et decouverte
 - [MWS - Trackers](../../miyukini-webway-system/acteurs/MWS%20-%20Trackers.md) â€” Tracker, manifestes de services

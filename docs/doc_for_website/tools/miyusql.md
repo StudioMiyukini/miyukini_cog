@@ -295,7 +295,7 @@ MiyuSQL respecte :
 ### Sauvegarde Document
 
 ```
-JayXpose : "Sauvegarder portfolio"
+JayKonta : "Sauvegarder facture"
         │
         ▼
 KindMother : persist(data)

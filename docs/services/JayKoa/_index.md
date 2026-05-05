@@ -2,7 +2,9 @@
 
 ## Contexte
 
-**JayKoa** est le **calendrier universel du COG** â€” un Service transversal spÃ©cialisÃ© dans le domaine temporel. Il reflÃ¨te, agrÃ¨ge et orchestre le temps issu des autres Services de l'Ã©cosystÃ¨me Miyukini (JayRDV, JayFestival, futurs services).
+**JayKoa** est le **calendrier universel du COG** â€” un Service transversal spÃ©cialisÃ© dans le domaine temporel. Il reflÃ¨te, agrÃ¨ge et orchestre le temps issu des autres Services de l'Ã©cosystÃ¨me Miyukini (JayRDV, futurs services).
+
+> **Note 2026-04-29 :** L'intÃ©gration JayFestival a Ã©tÃ© retirÃ©e (service supprimÃ©). Voir [DEPRECATED](../DEPRECATED.md).
 
 ## PortÃ©e / Scope
 
@@ -22,7 +24,7 @@
 | [JayKoa - Audit Documentation et Manques](./JayKoa%20-%20Audit%20Documentation%20et%20Manques.md) | Audit de la documentation et manques pour un service complet. |
 | [JayKoa - Axes Amelioration et Plan Implementation](./JayKoa%20-%20Axes%20Amelioration%20et%20Plan%20Implementation.md) | Audit implementation complet : 10 axes, 34 taches, priorisation MVP/Post-MVP/Phase 2/Phase 3. |
 | [RÃ©fÃ©rence â€” Niveaux SÃ©curitÃ© et Protection](./reference/JayKoa%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | DÃ©tail des niveaux WorrySentinel (0â€“4) et des mesures de protection pour les donnÃ©es agenda. |
-| [RÃ©fÃ©rence â€” Integration Services Consommateurs](./reference/JayKoa%20-%20Integration%20Services%20Consommateurs.md) | SchÃ©mas d'intÃ©gration avec JayRDV, JayFestival, futurs services. |
+| [RÃ©fÃ©rence â€” Integration Services Consommateurs](./reference/JayKoa%20-%20Integration%20Services%20Consommateurs.md) | SchÃ©mas d'intÃ©gration avec JayRDV, futurs services (intÃ©gration JayFestival historique retirÃ©e). |
 | [RÃ©fÃ©rence â€” Referentiel Inspire Google Agenda](./reference/JayKoa%20-%20Referentiel%20Fonctionnel%20Inspire%20Google%20Agenda.md) | RÃ©fÃ©rentiel fonctionnel inspirÃ© de Google Agenda (vues, rappels, partage, libre/occupÃ©, calendriers multiples). |
 
 ## Arborescence
@@ -51,13 +53,12 @@ docs/services/JayKoa/
 | Service | Domaine temporel |
 |--------|------------------|
 | **JayRDV** | Rendez-vous confirmÃ©s, crÃ©neaux bloquÃ©s, modifications, annulations. |
-| **JayFestival** | Dates de festivals, inscriptions, deadlines, Ã©vÃ©nements favoris, participations. |
 | **Futurs services** | Tout Service du COG exposant des capacitÃ©s temporelles. |
 
 ## Voir aussi
 
 - [JayRDV - Document Fondateur](../JayRDV/JayRDV%20-%20Document%20Fondateur.md)
-- [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
+- [Services retirÃ©s](../DEPRECATED.md)
 - [Miyukini Conceptual References â€” Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 - [Politique de rÃ©sidence des donnÃ©es sensibles](..//..//miyukini-webway-system//reference//_index.md)
 

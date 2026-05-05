@@ -7,6 +7,8 @@ Il couvre deux points d'entree :
 - JayBudget (Purse) pour le personnel
 - JayKonta (Account) pour l'entreprise
 
+> **Note 2026-04-29 :** Le contrat CK-INT-01 (JayFestival -> JayKonta) a ete retire. Voir [DEPRECATED](../DEPRECATED.md).
+
 ## Documentation principale
 
 | Document | Role |
@@ -24,7 +26,8 @@ Il couvre deux points d'entree :
 
 ## Voir aussi
 
-- [Miyukini Festival Service](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
 - [JayRDV](../JayRDV/JayRDV%20-%20Document%20Fondateur.md)
+- [JayKoa](../JayKoa/_index.md)
+- [Services retires](../DEPRECATED.md)
 - [Politique de residence des donnees sensibles](..//..//miyukini-webway-system//reference//_index.md)
 

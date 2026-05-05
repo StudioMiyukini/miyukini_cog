@@ -8,11 +8,10 @@
 
 | Vous etes... | Miyukini vous apporte |
 |---|---|
-| **Artisan, createur, petite marque** | Vitrine produit, catalogue, fiche exposant, gestion de festivals |
-| **Organisateur d'evenements** | Gestion complete : editions, exposants, programme, billetterie, budget |
 | **Independant, auto-entrepreneur** | Comptabilite, devis, factures, suivi de tresorerie |
 | **Association, collectif** | Calendrier partage, rendez-vous, contacts, documents |
 | **Particulier** | Budget personnel, cloud prive, calendrier, jeux |
+| **Equipe collaborative** | Suite bureautique souveraine (docs, sheets, slides, mail, message) |
 | **Restaurateur, food truck** | Commande en ligne, reservation de tables, gestion de stock |
 | **Developpeur curieux** | Architecture gouvernee en Rust, 70+ crates, moteur de jeu, IA locale |
 
@@ -28,8 +27,11 @@
 | **JayKoa** | Calendrier universel — vue jour, semaine, mois, planning | Fonctionnel |
 | **JayKonta** | Budget personnel + comptabilite entreprise | Fonctionnel (Bourse) |
 | **Miyukini Cloud** | Cloud prive avec fichiers, calendriers, contacts (WebDAV/CalDAV/CardDAV) | Fonctionnel |
+| **Jay Bureau** | Suite collaborative (Docs, Sheets, Slides, Formulaire, Reunion, Club, Mail, Message) | Fonctionnel |
 | **Alicia** | Assistante domotique — controle vocal, MQTT, automatisations | MVP |
 | **MAIA** | IA locale (LLM, STT) — fonctionne sans internet | Fonctionnel |
+| **Miyukini Whisper** | Dictee locale STT/TTS avec presets hardware | Fonctionnel |
+| **MiyukiniWatch** | Tableau de bord metriques et habitudes | Fonctionnel |
 | **MiyukiniClicker** | Jeu idle/clicker avec strategie et gestion de cite | Jouable |
 | **MiyukiniSurvivor** | Jeu Survivor + Tower Defense — tours, troupes, vagues | Jouable |
 | **MGE (Game Engine)** | Moteur de jeu multijoueur — simulation, crafting, pathfinding | En cours |
@@ -40,10 +42,20 @@
 |---|---|
 | **JayRDV** | Prise de rendez-vous en ligne (B2B2C) |
 | **JayFaim** | Reservation de tables et commande en ligne |
+| **JayShop** | Boutique et point de vente unifies |
 | **MiyukiniSales** | Cycle complet devis, commandes, facturation, paiements |
 | **MIPowa** | Editeur de workflows visuels |
 | **Jay1Tribu** | Reseau social prive pour groupes et familles |
 | **JayManga** | Lecteur et bibliotheque manga/BD |
+
+### Services retires
+
+Voir [docs/services/DEPRECATED.md](docs/services/DEPRECATED.md) pour les details.
+
+| Service | Date de retrait | Raison |
+|---|---|---|
+| **JayXpose** | 2026-04-29 | Sortie du perimetre — vitrine professionnelle non priorisee |
+| **JayFestival** | 2026-04-29 | Sortie du perimetre — gestion de festivals non priorisee |
 
 ---
 
@@ -91,7 +103,9 @@ Miyukini Central (le Hub)
   |
   +---> JayKoa         (votre calendrier)
   +---> JayKonta       (vos finances)
+  +---> Jay Bureau     (vos documents collaboratifs)
   +---> Miyukini Cloud (vos fichiers)
+  +---> MAIA           (votre IA locale)
   +---> Jeux           (vos loisirs)
   +---> ...
 ```
@@ -125,7 +139,7 @@ Miyukini n'est pas un simple logiciel. C'est un **environnement gouverne** (COG 
   9 Cores de gouvernance
  49 Toolkits implementes (crates Rust)
  70+ crates dans le workspace
- 11 services et applications
+ 13 services et applications (dont 9 dans la suite Jay Bureau)
   2 jeux jouables
   1 moteur de jeu (MGE)
   1 assistante domotique (Alicia)
@@ -194,4 +208,4 @@ Details : [Politique de licence](docs/legal/Miyukini%20-%20Politique%20de%20Lice
 > *"Miyukini n'est pas un logiciel. C'est un environnement gouverne dans lequel vos services operent — souverainement, localement, sans compromis."*
 
 **Version** : 0.1.0
-**Derniere mise a jour** : 2026-03-22
+**Derniere mise a jour** : 2026-05-05
