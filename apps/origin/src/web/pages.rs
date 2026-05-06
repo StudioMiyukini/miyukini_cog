@@ -307,11 +307,13 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
             </a>
             <nav>
                 <a href="/" class="{home_active}">Accueil</a>
-                <a href="/mws" class="{catalog_active}">MWS</a>
                 <a href="/services" class="{services_active}">Services</a>
+                <a href="/pricing" class="{pricing_active}">Tarifs</a>
                 <a href="/downloads" class="{downloads_active}">Télécharger</a>
                 <a href="/docs" class="{docs_active}">Docs</a>
+                <a href="/mws" class="{catalog_active}">MWS</a>
                 <a href="/mip" class="{mip_active}">MIP</a>
+                <a href="/studio" class="{studio_active}">Studio</a>
                 <a href="/about" class="{about_active}">À propos</a>
                 <a href="/?onboarding=1" class="nav-miou-replay" title="Redécouvrir avec Miou" style="font-size:1.1rem;-webkit-text-fill-color:initial;">🌸</a>
             </nav>
@@ -325,12 +327,21 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
             <div>
                 <h4>Miyukini COG</h4>
                 <ul>
-                    <li><a href="/docs">Documentation</a></li>
                     <li><a href="/services">Les services</a></li>
+                    <li><a href="/pricing">Tarifs</a></li>
                     <li><a href="/downloads">Téléchargements</a></li>
+                    <li><a href="/docs">Documentation</a></li>
                     <li><a href="/mws">MWS</a></li>
-                    <li><a href="/about">À propos</a></li>
                     <li><a href="/blog">Dev Blog</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Studio Miyukini</h4>
+                <ul>
+                    <li><a href="/studio">Le Studio</a></li>
+                    <li><a href="/about">À propos du projet</a></li>
+                    <li><a href="mailto:studio.miyukini@gmail.com">Nous contacter</a></li>
+                    <li><a href="https://github.com/StudioMiyukini" target="_blank">GitHub</a></li>
                 </ul>
             </div>
             <div>
@@ -386,6 +397,12 @@ fn layout(title: &str, content: &str, active_nav: &str) -> String {
         },
         about_active = if active_nav == "about" { "active" } else { "" },
         mip_active = if active_nav == "mip" { "active" } else { "" },
+        pricing_active = if active_nav == "pricing" {
+            "active"
+        } else {
+            ""
+        },
+        studio_active = if active_nav == "studio" { "active" } else { "" },
     )
 }
 
@@ -552,16 +569,104 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
 <!--  HOME CONTENT (hidden during VN)      -->
 <!-- ══════════════════════════════════════ -->
 <div id="home-content" style="display:none">
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  HERO SOLUTION                        -->
+  <!-- ══════════════════════════════════════ -->
+  <section class="home-hero-solution">
+    <div class="home-hero-inner">
+      <div class="home-hero-badge">&#x1f338; Studio Miyukini &middot; Solution souveraine cl&eacute; en main</div>
+      <h1>Une solution num&eacute;rique compl&egrave;te,<br>sur <em>votre</em> machine.</h1>
+      <p class="home-hero-tagline">
+        Tous les services Miyukini (bureautique, comptabilit&eacute;, agenda, cloud priv&eacute;, IA locale&hellip;) en une seule installation.
+        Pas d&rsquo;abonnement cloud. Pas de licence par utilisateur. Vos donn&eacute;es restent chez vous, &agrave; vie.
+      </p>
+      <div class="home-hero-pricing-box">
+        <div class="home-hero-price">
+          <strong>2&nbsp;000&nbsp;&euro;</strong>
+          <span>Serveur complet par machine</span>
+        </div>
+        <div class="home-hero-price">
+          <strong>300&nbsp;&euro;</strong>
+          <span>Installation &amp; d&eacute;ploiement</span>
+        </div>
+        <div class="home-hero-price">
+          <strong>200&nbsp;&euro;<small>/an</small></strong>
+          <span>Support 1 an par machine</span>
+        </div>
+      </div>
+      <div class="home-hero-buttons">
+        <a href="/pricing" class="home-hero-btn primary">Voir les tarifs d&eacute;taill&eacute;s</a>
+        <a href="/downloads" class="home-hero-btn secondary">&#x2b07; Tester sur Windows (gratuit)</a>
+      </div>
+      <p class="home-hero-test-note">
+        &laquo;&nbsp;Testez sur votre machine en installant Central sur votre machine Windows.&nbsp;&raquo;
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  AVANTAGES                            -->
+  <!-- ══════════════════════════════════════ -->
+  <section class="home-advantages">
+    <h2 class="home-advantages-title">Pourquoi choisir Miyukini COG&nbsp;?</h2>
+    <div class="home-advantages-grid">
+      <div class="home-advantage">
+        <div class="home-advantage-icon">&#x1f3e0;</div>
+        <h3>Vos donn&eacute;es chez vous</h3>
+        <p>Base chiffr&eacute;e AES&#8209;256 sur votre disque. Aucun acc&egrave;s tiers, aucune t&eacute;l&eacute;m&eacute;trie, aucun cloud obligatoire.</p>
+      </div>
+      <div class="home-advantage">
+        <div class="home-advantage-icon">&#x1f4f6;</div>
+        <h3>Fonctionne hors&#8209;ligne</h3>
+        <p>Le COG accepte l&rsquo;isolement comme &eacute;tat normal. M&ecirc;me sans Internet, tout marche.</p>
+      </div>
+      <div class="home-advantage">
+        <div class="home-advantage-icon">&#x1f4b8;</div>
+        <h3>Z&eacute;ro abonnement</h3>
+        <p>Un paiement unique. 13+ services inclus. &Eacute;conomisez ~16&nbsp;000&nbsp;&euro; sur 5 ans vs. SaaS classique.</p>
+      </div>
+      <div class="home-advantage">
+        <div class="home-advantage-icon">&#x1f6e1;</div>
+        <h3>RGPD natif</h3>
+        <p>Donn&eacute;es locales = conformit&eacute; structurelle. Pas de DPA &agrave; signer, pas de DPO externe.</p>
+      </div>
+      <div class="home-advantage">
+        <div class="home-advantage-icon">&#x1f9e0;</div>
+        <h3>IA locale incluse</h3>
+        <p>MAIA (LLM + STT) tourne sur votre machine. Pas de prompt envoy&eacute; &agrave; OpenAI, Google ou autre.</p>
+      </div>
+      <div class="home-advantage">
+        <div class="home-advantage-icon">&#x1f6e0;</div>
+        <h3>Code Rust auditable</h3>
+        <p>70+ crates en Rust avec <code>unsafe_code = forbid</code>. Performance native, faille m&eacute;moire impossible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  NAVIGATION RAPIDE                    -->
+  <!-- ══════════════════════════════════════ -->
   <div class="home-nav-grid">
+    <a href="/pricing" class="home-nav-card home-nav-card-highlight">
+      <span class="home-nav-icon">&#x1f4b6;</span>
+      <span class="home-nav-title">Tarifs</span>
+      <span class="home-nav-desc">2&nbsp;000&nbsp;&euro; / machine, tout inclus</span>
+    </a>
     <a href="/downloads" class="home-nav-card">
       <span class="home-nav-icon">&#x1f4e5;</span>
       <span class="home-nav-title">T&eacute;l&eacute;charger</span>
-      <span class="home-nav-desc">Obtenir Miyukini Central</span>
+      <span class="home-nav-desc">Tester Central pour Windows</span>
     </a>
     <a href="/services" class="home-nav-card">
       <span class="home-nav-icon">&#x2728;</span>
       <span class="home-nav-title">Services</span>
-      <span class="home-nav-desc">D&eacute;couvrir les services</span>
+      <span class="home-nav-desc">13+ services inclus</span>
+    </a>
+    <a href="/studio" class="home-nav-card">
+      <span class="home-nav-icon">&#x1f338;</span>
+      <span class="home-nav-title">Studio Miyukini</span>
+      <span class="home-nav-desc">L&rsquo;atelier derri&egrave;re le projet</span>
     </a>
     <a href="/docs" class="home-nav-card">
       <span class="home-nav-icon">&#x1f4da;</span>
@@ -591,6 +696,19 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
       <div class="blog-list">{recent_posts}</div>
     </section>
   </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  CTA FINAL                             -->
+  <!-- ══════════════════════════════════════ -->
+  <section class="home-cta-final">
+    <h2>Pr&ecirc;t &agrave; reprendre le contr&ocirc;le&nbsp;?</h2>
+    <p>Trois &eacute;tapes simples, z&eacute;ro engagement avant le test.</p>
+    <div class="home-cta-buttons">
+      <a href="/downloads" class="home-hero-btn primary">1. Tester Central (gratuit)</a>
+      <a href="/studio" class="home-hero-btn secondary">2. D&eacute;couvrir le Studio</a>
+      <a href="mailto:studio.miyukini@gmail.com?subject=Demande%20de%20devis%20Miyukini%20COG" class="home-hero-btn secondary">3. Demander un devis</a>
+    </div>
+  </section>
 
   <div class="home-miou-float" id="home-miou-float">
     <span class="miou-char">&#x1f338;</span>
@@ -834,8 +952,133 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
 
 /* === HOME CONTENT === */
 #home-content {{ padding: 0; }}
+
+/* === HERO SOLUTION === */
+.home-hero-solution {{
+  position: relative; padding: 64px 32px 56px;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 20%, rgba(139,92,246,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 70% 80%, rgba(255,183,197,0.10) 0%, transparent 70%);
+  border-bottom: 1px solid rgba(255,183,197,0.12);
+}}
+.home-hero-inner {{
+  max-width: 980px; margin: 0 auto; text-align: center;
+}}
+.home-hero-badge {{
+  display: inline-block;
+  background: rgba(255,183,197,0.10); border: 1px solid rgba(255,183,197,0.25);
+  border-radius: 999px; padding: 6px 16px;
+  font-size: 0.85rem; color: #ffb7c5; font-weight: 600;
+  margin-bottom: 20px;
+}}
+.home-hero-inner h1 {{
+  font-size: 2.6rem; line-height: 1.2; font-weight: 700;
+  margin-bottom: 16px; color: #f5f5fa;
+}}
+.home-hero-inner h1 em {{
+  font-style: italic; color: #ffb7c5;
+}}
+.home-hero-tagline {{
+  font-size: 1.05rem; line-height: 1.65; color: rgba(255,255,255,0.75);
+  max-width: 760px; margin: 0 auto 28px;
+}}
+.home-hero-pricing-box {{
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  max-width: 720px; margin: 0 auto 28px;
+  background: rgba(20,20,40,0.55); border: 1px solid rgba(255,183,197,0.15);
+  border-radius: 16px; padding: 20px;
+}}
+.home-hero-price {{
+  display: flex; flex-direction: column; gap: 4px;
+  text-align: center;
+}}
+.home-hero-price strong {{
+  font-size: 1.65rem; color: #ffb7c5; font-weight: 700;
+}}
+.home-hero-price strong small {{
+  font-size: 0.85rem; color: rgba(255,183,197,0.7); font-weight: 500;
+}}
+.home-hero-price span {{
+  font-size: 0.78rem; color: rgba(255,255,255,0.6);
+}}
+.home-hero-buttons {{
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 16px;
+}}
+.home-hero-btn {{
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 10px;
+  font-size: 0.95rem; font-weight: 600; text-decoration: none;
+  transition: all 0.25s; border: 1px solid transparent;
+}}
+.home-hero-btn.primary {{
+  background: linear-gradient(135deg, #8b5cf6, #ffb7c5);
+  color: #0a0a0f;
+}}
+.home-hero-btn.primary:hover {{
+  transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,92,246,0.35);
+}}
+.home-hero-btn.secondary {{
+  background: rgba(255,255,255,0.05); color: #f5f5fa;
+  border-color: rgba(255,183,197,0.25);
+}}
+.home-hero-btn.secondary:hover {{
+  background: rgba(255,183,197,0.1); border-color: #ffb7c5;
+}}
+.home-hero-test-note {{
+  font-size: 0.9rem; color: rgba(255,183,197,0.85); font-style: italic;
+}}
+
+/* === AVANTAGES === */
+.home-advantages {{ padding: 56px 32px; }}
+.home-advantages-title {{
+  font-size: 1.6rem; text-align: center; color: #ffb7c5;
+  margin-bottom: 36px; font-weight: 700;
+}}
+.home-advantages-grid {{
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  max-width: 1100px; margin: 0 auto;
+}}
+.home-advantage {{
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,183,197,0.10);
+  border-radius: 14px; padding: 24px; transition: all 0.25s;
+}}
+.home-advantage:hover {{
+  background: rgba(255,183,197,0.05); border-color: rgba(255,183,197,0.25);
+  transform: translateY(-2px);
+}}
+.home-advantage-icon {{ font-size: 1.8rem; margin-bottom: 10px; }}
+.home-advantage h3 {{
+  font-size: 1.05rem; color: #ffb7c5; margin-bottom: 8px; font-weight: 600;
+}}
+.home-advantage p {{
+  font-size: 0.9rem; line-height: 1.55; color: rgba(255,255,255,0.7);
+}}
+.home-advantage code {{
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(139,92,246,0.15); padding: 1px 6px; border-radius: 4px;
+  font-size: 0.82rem; color: #c4b5fd;
+}}
+
+/* === CTA FINAL === */
+.home-cta-final {{
+  text-align: center; padding: 56px 32px 64px;
+  background: rgba(255,183,197,0.04);
+  border-top: 1px solid rgba(255,183,197,0.12);
+  border-bottom: 1px solid rgba(255,183,197,0.12);
+}}
+.home-cta-final h2 {{
+  font-size: 1.7rem; color: #ffb7c5; margin-bottom: 8px; font-weight: 700;
+}}
+.home-cta-final p {{
+  color: rgba(255,255,255,0.7); margin-bottom: 24px;
+}}
+.home-cta-buttons {{
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+}}
+
 .home-nav-grid {{
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
   padding: 24px 32px;
 }}
 .home-nav-card {{
@@ -851,6 +1094,14 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
 .home-nav-icon {{ font-size: 2rem; }}
 .home-nav-title {{ font-size: 1rem; font-weight: 600; color: #ffb7c5; }}
 .home-nav-desc {{ font-size: 0.8rem; color: rgba(255,255,255,0.5); }}
+.home-nav-card-highlight {{
+  border-color: rgba(255,183,197,0.4);
+  background: linear-gradient(135deg, rgba(139,92,246,0.10), rgba(255,183,197,0.06));
+}}
+.home-nav-card-highlight:hover {{
+  border-color: #ffb7c5;
+  background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(255,183,197,0.10));
+}}
 
 .home-stats-bar {{
   display: flex; justify-content: center; gap: 40px;
@@ -898,6 +1149,9 @@ pub async fn home_page(content_mgr: &ContentManager, pool_mgr: &PoolManager) -> 
   .vn-s3-miou {{ display: none; }}
   .home-nav-grid {{ grid-template-columns: repeat(2, 1fr); }}
   .home-sections {{ grid-template-columns: 1fr; }}
+  .home-hero-pricing-box {{ grid-template-columns: 1fr; }}
+  .home-hero-inner h1 {{ font-size: 1.9rem; }}
+  .home-advantages-grid {{ grid-template-columns: 1fr; }}
 }}
 </style>
 
@@ -2393,6 +2647,402 @@ pub fn about_page() -> String {
         "#;
 
     layout("À propos", &content, "about")
+}
+
+/// Page Tarifs — offre serveur complet + déploiement + support.
+pub fn pricing_page() -> String {
+    let content = r##"
+        <section class="hero" style="padding: 4rem 0 2rem;">
+            <h1>Une solution complète pour votre souveraineté numérique</h1>
+            <p style="max-width: 720px; margin: 0 auto 1rem;">Un seul investissement. Tous les services Miyukini sur votre matériel. Vos données restent chez vous, à vie.</p>
+            <p style="max-width: 720px; margin: 0 auto;"><strong style="color: var(--primary);">Pas d'abonnement cloud. Pas de licence par utilisateur. Pas de coûts cachés.</strong></p>
+        </section>
+
+        <section class="section">
+            <div class="grid grid-3" style="gap: 2rem;">
+                <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; border: 2px solid var(--primary);">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🖥️</div>
+                    <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Serveur Miyukini COG</h3>
+                    <div style="font-size: 3rem; font-weight: 700; margin: 1.5rem 0 0.25rem;">2 000 €</div>
+                    <div style="color: var(--text-muted); margin-bottom: 1.5rem;">par machine, paiement unique</div>
+                    <ul style="list-style: none; text-align: left; line-height: 2;">
+                        <li>✅ Le COG complet (Cores, Toolkits, Opérateurs)</li>
+                        <li>✅ Tous les services Jay (Bureau, Koa, Konta, RDV, Shop, Faim, Manga, 1Tribu)</li>
+                        <li>✅ Miyukini Cloud (WebDAV / CalDAV / CardDAV)</li>
+                        <li>✅ MAIA — IA locale (LLM + STT)</li>
+                        <li>✅ Alicia — Assistante domotique</li>
+                        <li>✅ Miyukini Webway System (P2P fédéré)</li>
+                        <li>✅ Mises à jour à vie</li>
+                        <li>✅ Code source consultable (licence COG)</li>
+                    </ul>
+                </div>
+
+                <div class="card" style="text-align: center; padding: 2.5rem 1.5rem;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🚀</div>
+                    <h3 style="margin-bottom: 0.5rem;">Installation & déploiement</h3>
+                    <div style="font-size: 3rem; font-weight: 700; margin: 1.5rem 0 0.25rem;">300 €</div>
+                    <div style="color: var(--text-muted); margin-bottom: 1.5rem;">forfait, paiement unique</div>
+                    <ul style="list-style: none; text-align: left; line-height: 2;">
+                        <li>✅ Installation sur votre matériel</li>
+                        <li>✅ Configuration des Cores et de KindMother</li>
+                        <li>✅ Activation du chiffrement AES-256</li>
+                        <li>✅ Paramétrage du COG (slug, adresses MWS)</li>
+                        <li>✅ Génération des certificats TLS</li>
+                        <li>✅ Onboarding utilisateur</li>
+                        <li>✅ Vérification de conformité MWS</li>
+                        <li>✅ Documentation imprimée</li>
+                    </ul>
+                </div>
+
+                <div class="card" style="text-align: center; padding: 2.5rem 1.5rem;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🛟</div>
+                    <h3 style="margin-bottom: 0.5rem;">Support 1 an</h3>
+                    <div style="font-size: 3rem; font-weight: 700; margin: 1.5rem 0 0.25rem;">200 €</div>
+                    <div style="color: var(--text-muted); margin-bottom: 1.5rem;">par machine et par an</div>
+                    <ul style="list-style: none; text-align: left; line-height: 2;">
+                        <li>✅ Support technique illimité</li>
+                        <li>✅ Email + ticket prioritaire</li>
+                        <li>✅ Réponse sous 48 h ouvrées</li>
+                        <li>✅ Mises à jour de sécurité</li>
+                        <li>✅ Accompagnement aux évolutions</li>
+                        <li>✅ Audit annuel de configuration</li>
+                        <li>✅ Restauration en cas d'incident</li>
+                        <li>✅ Renouvelable chaque année</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="text-align: center;">
+            <div class="card" style="display: inline-block; padding: 3rem 4rem; background: var(--gradient-1); border: none; max-width: 800px;">
+                <h2 style="font-size: 2rem; margin-bottom: 1rem; color: white;">Testez gratuitement avant d'investir</h2>
+                <p style="font-size: 1.15rem; color: rgba(255,255,255,0.92); margin-bottom: 1.5rem;">
+                    Téléchargez Miyukini Central pour Windows et essayez sur votre propre machine. Aucune carte bancaire, aucun compte cloud requis.
+                </p>
+                <p style="font-size: 1.05rem; color: rgba(255,255,255,0.92); margin-bottom: 2rem;">
+                    <strong>« Testez sur votre machine en installant Central sur votre machine Windows. »</strong>
+                </p>
+                <a href="/downloads" class="btn" style="background: white; color: var(--primary); font-size: 1.1rem; padding: 1rem 2.5rem;">⬇ Télécharger Central pour Windows</a>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Ce qui est inclus dans le serveur complet</h2>
+            <p class="section-subtitle">9 Cores · 49 Toolkits · 13+ Services · 70+ crates Rust</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="feature-icon">🏛️</div>
+                    <h3>Strate Cores et Toolkits</h3>
+                    <p>StrongFather, KindMother, TAMR, BorderGuard, WorrySentinel, LogisticsSteward, MasterButler, Everbuddy, BondingBrother. Plus 49 Toolkits métier (MiyuAuth, MiyuSQL, MiyuWeb, MiyuMedia, etc.) tous gouvernés.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Services productivité</h3>
+                    <p>JayKoa (calendrier universel), JayKonta (comptabilité Purse + Account), JayRDV (rendez-vous), JayShop (boutique + PoS), JayFaim (restauration), MiyukiniSales (cycle commercial complet).</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Suite Jay Bureau</h3>
+                    <p>Jay Docs, Jay Sheets, Jay Slides, Jay Formulaire, Jay Reunion (visio), Jay Club (réseau social), Jay Mail (SMTP/IMAP), Jay Message (E2E chiffré). Collaboration CRDT en temps réel.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">☁️</div>
+                    <h3>Cloud privé Miyukini Cloud</h3>
+                    <p>Vos fichiers, calendriers et contacts via WebDAV, CalDAV et CardDAV. Compatible avec Outlook, Apple Mail, Thunderbird, Joplin, RClone et tous les clients standards.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>IA locale (MAIA)</h3>
+                    <p>LLM via llama.cpp, reconnaissance vocale via Whisper, Miyukini Whisper pour la dictée, Alicia pour la domotique. Tout fonctionne hors ligne, sans cloud tiers.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Miyukini Webway System</h3>
+                    <p>Origin (relay + tracker + auth), Portal HTTP externe, fédération inter-COG en TLS 1.2+. Chaque COG reste souverain ; la connexion est optionnelle.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Comparatif : Miyukini vs SaaS classique</h2>
+            <p class="section-subtitle">Sur 5 ans pour une équipe de 10 personnes</p>
+            <div class="card" style="overflow-x: auto; padding: 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--bg-elevated);">
+                            <th style="text-align: left; padding: 1rem;">Poste</th>
+                            <th style="text-align: right; padding: 1rem;">Miyukini COG</th>
+                            <th style="text-align: right; padding: 1rem;">SaaS classique<br><small style="font-weight: 400; color: var(--text-muted);">(Google Workspace, Odoo, Calendly, Dropbox…)</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">Serveur / licences (5 ans)</td>
+                            <td style="padding: 1rem; text-align: right;">2 000 €</td>
+                            <td style="padding: 1rem; text-align: right;">~ 18 000 € (30 €/u/mois × 10 × 60)</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">Installation / onboarding</td>
+                            <td style="padding: 1rem; text-align: right;">300 €</td>
+                            <td style="padding: 1rem; text-align: right;">~ 1 500 € (consultant)</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">Support (5 ans)</td>
+                            <td style="padding: 1rem; text-align: right;">1 000 €</td>
+                            <td style="padding: 1rem; text-align: right;">Inclus mais limité (FAQ, chatbot)</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border); font-weight: 600;">
+                            <td style="padding: 1rem;">Total 5 ans</td>
+                            <td style="padding: 1rem; text-align: right; color: var(--success);">3 300 €</td>
+                            <td style="padding: 1rem; text-align: right; color: var(--error);">~ 19 500 €</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">Souveraineté des données</td>
+                            <td style="padding: 1rem; text-align: right;">✅ Vos serveurs</td>
+                            <td style="padding: 1rem; text-align: right;">❌ Serveurs tiers</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">Fonctionne hors-ligne</td>
+                            <td style="padding: 1rem; text-align: right;">✅ Oui</td>
+                            <td style="padding: 1rem; text-align: right;">❌ Non</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">RGPD natif</td>
+                            <td style="padding: 1rem; text-align: right;">✅ Données locales</td>
+                            <td style="padding: 1rem; text-align: right;">⚠️ DPA à signer</td>
+                        </tr>
+                        <tr style="border-top: 1px solid var(--border);">
+                            <td style="padding: 1rem;">Personnalisation</td>
+                            <td style="padding: 1rem; text-align: right;">✅ Code source</td>
+                            <td style="padding: 1rem; text-align: right;">❌ Limité au plan</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
+                <strong style="color: var(--success);">Économie estimée : ~ 16 000 € sur 5 ans</strong> — et vos données restent chez vous.
+            </p>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Pour qui ?</h2>
+            <p class="section-subtitle">Les profils qui tirent le meilleur parti de Miyukini</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>👔 PME, TPE</h3>
+                    <p>Comptabilité, agenda, documents, mails, messagerie chiffrée — toute l'infrastructure interne sur une seule machine. Pas d'abonnement à 30 € par utilisateur et par mois.</p>
+                </div>
+                <div class="card">
+                    <h3>🏥 Cabinets, praticiens</h3>
+                    <p>Dossiers patients, rendez-vous, facturation. RGPD natif puisque les données ne quittent jamais le cabinet. Pas de DPO externe à gérer pour la compliance.</p>
+                </div>
+                <div class="card">
+                    <h3>🏛️ Associations, collectivités</h3>
+                    <p>Adhérents, événements, comptes, communications. Déploiement sur mini-PC ou NAS, budget maîtrisé, données citoyens en local.</p>
+                </div>
+                <div class="card">
+                    <h3>🎨 Studios, agences créatives</h3>
+                    <p>Suite bureautique collaborative complète, cloud privé, visio, messagerie chiffrée. Travaillez en équipe sans donner vos créations à un tiers.</p>
+                </div>
+                <div class="card">
+                    <h3>🏫 Écoles, centres de formation</h3>
+                    <p>Calendrier partagé, messagerie, documents, espace élève. Données scolaires souveraines, conforme au RGPD scolaire.</p>
+                </div>
+                <div class="card">
+                    <h3>🛡️ Organisations sensibles</h3>
+                    <p>Avocats, journalistes, ONG, entreprises stratégiques : un environnement chiffré, hors-ligne, sans porte dérobée. Code Rust auditable.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Questions fréquentes</h2>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>Le prix de 2 000 € est-il par utilisateur ?</h3>
+                    <p><strong>Non.</strong> C'est un prix par <strong>machine</strong>. Vous pouvez avoir 1, 10 ou 100 utilisateurs sur le même COG, le tarif ne change pas. Les utilisateurs sont gérés en interne par votre Mandat Public d'Accès.</p>
+                </div>
+                <div class="card">
+                    <h3>Que se passe-t-il après 1 an de support ?</h3>
+                    <p>Le COG continue de fonctionner indéfiniment. Vous pouvez renouveler le support pour 200 €/an si vous voulez de l'assistance, ou vous en passer si vous êtes autonome. Aucun verrouillage.</p>
+                </div>
+                <div class="card">
+                    <h3>Puis-je migrer mes données depuis Google / Office 365 ?</h3>
+                    <p>Oui. Miyukini supporte les imports iCal, vCard, mbox, IMAP, CSV. La prestation d'installation à 300 € inclut un onboarding et un transfert basique des contacts, calendriers et documents.</p>
+                </div>
+                <div class="card">
+                    <h3>Quel matériel faut-il ?</h3>
+                    <p>Un PC ou serveur sous Windows ou Linux avec 8 Go de RAM minimum (16 Go recommandé) et 100 Go de stockage. Tout fonctionne sans GPU. Un NAS Synology ou un mini-PC Intel NUC suffisent pour une PME.</p>
+                </div>
+                <div class="card">
+                    <h3>Et si je veux plusieurs machines ?</h3>
+                    <p>Chaque machine fait son propre COG souverain. Le Miyukini Webway System permet aux COGs de communiquer entre eux comme des pays fédérés. Tarif : 2 000 € par machine, dégressif au-delà de 5 unités. Contactez-nous.</p>
+                </div>
+                <div class="card">
+                    <h3>Comment teste-t-on avant d'acheter ?</h3>
+                    <p>Téléchargez Miyukini Central pour Windows depuis la <a href="/downloads">page Téléchargements</a>. Tout fonctionne en local sans clé d'activation. Lorsque vous êtes convaincu, contactez-nous pour la prestation complète.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="text-align: center; padding: 3rem 0 4rem;">
+            <h2 class="section-title">Prêt à reprendre le contrôle ?</h2>
+            <p class="section-subtitle">Trois étapes simples, zéro engagement avant le test.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+                <a href="/downloads" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">1. Tester Central (gratuit)</a>
+                <a href="/studio" class="btn btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem;">2. Découvrir le Studio</a>
+                <a href="mailto:studio.miyukini@gmail.com?subject=Demande%20de%20devis%20Miyukini%20COG" class="btn btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem;">3. Demander un devis</a>
+            </div>
+            <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.95rem;">
+                Devis personnalisé pour les volumes &gt; 5 machines, l'hébergement managé ou les développements spécifiques.<br>
+                Contact : <a href="mailto:studio.miyukini@gmail.com">studio.miyukini@gmail.com</a>
+            </p>
+        </section>
+        "##;
+
+    layout("Tarifs", &content, "pricing")
+}
+
+/// Page Studio Miyukini — présentation de l'éditeur du projet.
+pub fn studio_page() -> String {
+    let content = r##"
+        <section class="hero" style="padding: 4rem 0;">
+            <h1>Studio Miyukini</h1>
+            <p style="max-width: 720px; margin: 0 auto;">L'atelier qui conçoit, développe et soutient l'écosystème Miyukini COG — un projet pilote dans le Vibe Coding au service de la souveraineté numérique.</p>
+        </section>
+
+        <section class="section">
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="feature-icon">🌸</div>
+                    <h3>Qui sommes-nous ?</h3>
+                    <p>Studio Miyukini est un studio indépendant fondé autour d'une idée simple : <strong>les utilisateurs ont le droit de garder leurs données chez eux</strong>. Plutôt que de l'écrire en pétition, nous l'avons écrit en code Rust.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Notre mission</h3>
+                    <p>Construire un environnement numérique gouverné, complet et abordable, qui remplace la majorité des SaaS d'une PME ou d'un cabinet par une solution locale, chiffrée, et qui fonctionne même sans Internet.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Notre méthode : le Vibe Coding</h3>
+                    <p>Miyukini COG est l'un des plus gros projets entièrement piloté en <strong>Vibe Coding</strong> : direction humaine, exécution par agents IA (Claude, GPT-4, Gemini) sous supervision continue. Nous avons développé nos propres protocoles (MIP, MSCM) pour rendre le code navigable et gouvernable par l'IA elle-même.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">🔬</div>
+                    <h3>Notre conviction</h3>
+                    <p>Le numérique souverain n'est pas un luxe d'État. C'est un standard qui devrait être accessible à tout indépendant, toute PME, toute association. Notre prix unique de 2 000 € par machine reflète cette conviction.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Notre approche</h2>
+            <p class="section-subtitle">Trois principes qui guident chaque décision technique</p>
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>🏛️ Gouvernance d'abord</h3>
+                    <p>Aucun composant n'est autonome. Chaque action passe par un Core. Chaque écriture est tracée. Le projet ressemble à un pays numérique avec ses ministères, ses lois et ses passeports.</p>
+                </div>
+                <div class="card">
+                    <h3>🦀 Rust uniquement</h3>
+                    <p>70+ crates en Rust avec <code>unsafe_code = "forbid"</code>. Performance native, zéro fuite mémoire, code auditable. Pas de framework lourd, pas de runtime exotique.</p>
+                </div>
+                <div class="card">
+                    <h3>📜 Documentation avant code</h3>
+                    <p>Document fondateur → Spec → Implémentation. Chaque module est documenté en français avant d'être écrit. Les protocoles MIP et MSCM rendent le projet navigable par les humains et l'IA.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Ce que nous proposons</h2>
+            <p class="section-subtitle">Une offre claire, sans surprise</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <h3>💼 La solution complète Miyukini COG</h3>
+                    <p>Serveur tout-en-un avec Cores, Toolkits, Services Jay, Cloud privé, IA locale, Webway System. <strong>2 000 € par machine, paiement unique.</strong></p>
+                    <p style="margin-top: 1rem;"><a href="/pricing" style="color: var(--primary); font-weight: 600;">Voir les tarifs détaillés →</a></p>
+                </div>
+                <div class="card">
+                    <h3>🚀 Installation et déploiement</h3>
+                    <p>Nous installons Miyukini COG sur votre matériel, configurons les Cores, activons le chiffrement, paramétrons votre Mandat Public d'Accès, formons vos utilisateurs. <strong>300 €, forfait.</strong></p>
+                </div>
+                <div class="card">
+                    <h3>🛟 Support technique</h3>
+                    <p>Email + ticket prioritaire, mises à jour, audit annuel, restauration en cas d'incident. <strong>200 €/machine/an, renouvelable.</strong></p>
+                </div>
+                <div class="card">
+                    <h3>🛠️ Développements spécifiques</h3>
+                    <p>Nouveau Service métier, intégration avec votre SI existant, adaptation d'un Toolkit. Devis sur mesure. Le code reste sous votre licence.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Quelques chiffres-clés du projet</h2>
+            <div class="grid grid-4">
+                <div class="card stat">
+                    <div class="stat-value">9</div>
+                    <div class="stat-label">Cores de gouvernance</div>
+                </div>
+                <div class="card stat">
+                    <div class="stat-value">49</div>
+                    <div class="stat-label">Toolkits métier</div>
+                </div>
+                <div class="card stat">
+                    <div class="stat-value">70+</div>
+                    <div class="stat-label">Crates Rust</div>
+                </div>
+                <div class="card stat">
+                    <div class="stat-value">13</div>
+                    <div class="stat-label">Services et applications</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Nous joindre</h2>
+            <p class="section-subtitle">Contact direct, pas de support de niveau 1</p>
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="feature-icon">✉️</div>
+                    <h3>Email</h3>
+                    <p><a href="mailto:studio.miyukini@gmail.com" style="font-family: monospace; font-size: 1.1rem;">studio.miyukini@gmail.com</a></p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Devis, prestations, questions techniques, partenariats.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">💻</div>
+                    <h3>GitHub</h3>
+                    <p><a href="https://github.com/StudioMiyukini" target="_blank" style="font-family: monospace; font-size: 1.1rem;">github.com/StudioMiyukini</a></p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Code source de Miyukini, MIP, phpBB-COG et autres projets.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Forum</h3>
+                    <p><a href="https://forum.miyukini.com" target="_blank" style="font-family: monospace; font-size: 1.1rem;">forum.miyukini.com</a></p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Communauté d'utilisateurs, retours d'expérience, entraide.</p>
+                </div>
+                <div class="card">
+                    <div class="feature-icon">📰</div>
+                    <h3>Dev Blog</h3>
+                    <p><a href="/blog" style="font-family: monospace; font-size: 1.1rem;">/blog</a></p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Notes techniques, journal de bord du développement, annonces.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="text-align: center; padding: 3rem 0 4rem;">
+            <div class="card" style="display: inline-block; padding: 2.5rem 3rem; max-width: 700px;">
+                <h2 style="margin-bottom: 1rem;">Vous voulez voir avant d'acheter ?</h2>
+                <p style="margin-bottom: 2rem; color: var(--text-muted);">Téléchargez Miyukini Central pour Windows et installez-le sur votre propre machine. Aucune carte bancaire, pas de compte cloud, tout fonctionne en local.</p>
+                <a href="/downloads" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">⬇ Télécharger Central</a>
+                <a href="/pricing" class="btn btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem; margin-left: 0.75rem;">Voir les tarifs</a>
+            </div>
+        </section>
+        "##;
+
+    layout("Studio Miyukini", &content, "studio")
 }
 
 /// Page MIP v2 & MSCM — Présentation et distribution du protocole.

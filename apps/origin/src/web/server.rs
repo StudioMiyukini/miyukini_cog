@@ -985,6 +985,24 @@ async fn route_request(
             }
         }
 
+        "/pricing" | "/tarifs" => {
+            let body = pages::pricing_page();
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+        }
+
+        "/studio" => {
+            let body = pages::studio_page();
+            RouteResponse::Normal {
+                status: "200 OK".to_string(),
+                content_type: "text/html".to_string(),
+                body,
+            }
+        }
+
         // ═══════════════════════════════════════════════════════════════════
         // API JSON
         // ═══════════════════════════════════════════════════════════════════
