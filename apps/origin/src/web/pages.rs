@@ -1,6 +1,6 @@
 //! Générateur de pages HTML pour le site web Origin.
 
-use super::content::{AnnouncementType, ContentManager, DownloadCategory};
+use super::content::{AnnouncementType, ContentManager, DownloadCategory, Platform};
 use crate::tracker::pool::PoolManager;
 
 /// Génère le layout HTML de base.
@@ -1601,22 +1601,26 @@ pub async fn docs_page(content_mgr: &ContentManager) -> String {
 }
 
 /// Page de téléchargements — style Genshin frost UI.
-/// Seul Central est téléchargeable ici ; les services s'installent depuis l'app.
+/// Seul Central est téléchargeable ici (Windows + Android) ; les services s'installent depuis l'app.
 pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     let downloads = content_mgr.get_downloads().await;
-    let central = downloads
-        .iter()
-        .find(|d| d.category == DownloadCategory::Cog);
 
-    let (dl_url, dl_version, dl_size_mb, dl_notes) = match central {
-        Some(d) => (
-            html_escape(&d.download_url),
-            html_escape(&d.version),
-            format!("{:.1}", d.size_bytes as f64 / 1_048_576.0),
-            html_escape(&d.release_notes),
-        ),
-        None => (String::new(), "—".into(), "—".into(), String::new()),
+    let pick = |platform: Platform| -> (String, String, String, String) {
+        match downloads.iter().find(|d| {
+            d.category == DownloadCategory::Cog && d.platforms.contains(&platform)
+        }) {
+            Some(d) => (
+                html_escape(&d.download_url),
+                html_escape(&d.version),
+                format!("{:.1}", d.size_bytes as f64 / 1_048_576.0),
+                html_escape(&d.release_notes),
+            ),
+            None => (String::new(), "—".into(), "—".into(), String::new()),
+        }
     };
+
+    let (win_url, win_version, win_size_mb, win_notes) = pick(Platform::Windows);
+    let (apk_url, apk_version, apk_size_mb, apk_notes) = pick(Platform::Android);
 
     let content = format!(
         r##"
@@ -1663,10 +1667,22 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     letter-spacing: 0.02em;
 }}
 
+/* ── Rangée de cartes ── */
+.gi-cards {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1100px;
+}}
+
 /* ── Carte centrale frost ── */
 .gi-card {{
     width: 100%;
-    max-width: 520px;
+    max-width: 480px;
+    flex: 1 1 380px;
     background: rgba(18,18,30,0.65);
     backdrop-filter: blur(24px) saturate(1.4);
     -webkit-backdrop-filter: blur(24px) saturate(1.4);
@@ -1679,6 +1695,10 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
     box-shadow:
         0 8px 40px rgba(0,0,0,0.35),
         inset 0 1px 0 rgba(255,255,255,0.04);
+}}
+.gi-card.android .gi-icon {{
+    background: linear-gradient(135deg, #34d399, #06b6d4);
+    box-shadow: 0 4px 24px rgba(52,211,153,0.35);
 }}
 
 /* icône app */
@@ -1826,33 +1846,63 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
 <div class="gi-page">
     <div class="gi-title">
         <h1>Miyukini Central</h1>
-        <p>Votre environnement COG, pr&ecirc;t &agrave; l&rsquo;emploi</p>
+        <p>Votre environnement COG, pr&ecirc;t &agrave; l&rsquo;emploi &mdash; Windows et Android</p>
     </div>
 
-    <div class="gi-card">
-        <div class="gi-icon">&#x1f3ee;</div>
-        <div class="gi-app-name">Miyukini Central</div>
-        <div class="gi-version">v{dl_version} &mdash; Windows x64</div>
+    <div class="gi-cards">
+        <div class="gi-card windows">
+            <div class="gi-icon">&#x1f3ee;</div>
+            <div class="gi-app-name">Central pour Windows</div>
+            <div class="gi-version">v{win_version} &mdash; Windows x64</div>
 
-        <p class="gi-desc">
-            Hub de gestion de votre COG. Inclut les 8 Cores syst&egrave;me,
-            KindMother, le client MWS Webway et les voix de Miou.<br>
-            Les services s&rsquo;installent directement depuis le Market int&eacute;gr&eacute;.
-        </p>
+            <p class="gi-desc">
+                Hub de gestion de votre COG. Inclut les 8 Cores syst&egrave;me,
+                KindMother, le client MWS Webway et les voix de Miou.<br>
+                Les services s&rsquo;installent directement depuis le Market int&eacute;gr&eacute;.
+            </p>
 
-        <div class="gi-badges">
-            <span class="gi-badge">8 Cores</span>
-            <span class="gi-badge">KindMother</span>
-            <span class="gi-badge">Webway MWS</span>
-            <span class="gi-badge">Voix Miou</span>
-            <span class="gi-badge">Service Market</span>
+            <div class="gi-badges">
+                <span class="gi-badge">8 Cores</span>
+                <span class="gi-badge">KindMother</span>
+                <span class="gi-badge">Webway MWS</span>
+                <span class="gi-badge">Voix Miou</span>
+                <span class="gi-badge">Service Market</span>
+            </div>
+
+            <a href="{win_url}" class="gi-dl-btn">
+                <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
+                T&eacute;l&eacute;charger .exe
+            </a>
+            <div class="gi-size">{win_size_mb} Mo &mdash; Installateur Windows (Inno Setup)</div>
+            <div class="gi-release">{win_notes}</div>
         </div>
 
-        <a href="{dl_url}" class="gi-dl-btn">
-            <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
-            T&eacute;l&eacute;charger
-        </a>
-        <div class="gi-size">{dl_size_mb} Mo &mdash; Installateur Windows (Inno Setup)</div>
+        <div class="gi-card android">
+            <div class="gi-icon">&#x1f4f1;</div>
+            <div class="gi-app-name">Central Mobile pour Android</div>
+            <div class="gi-version">v{apk_version} &mdash; Android 8.0+</div>
+
+            <p class="gi-desc">
+                Client l&eacute;ger Android pour piloter votre COG Host &agrave; distance.
+                Pairing par QR-code via COG Bridge, voix Miou, acc&egrave;s Market et Services.<br>
+                N&eacute;cessite un Central install&eacute; sur PC.
+            </p>
+
+            <div class="gi-badges">
+                <span class="gi-badge">COG Bridge</span>
+                <span class="gi-badge">Pairing QR</span>
+                <span class="gi-badge">CentralRemote</span>
+                <span class="gi-badge">Voix Miou</span>
+                <span class="gi-badge">Market</span>
+            </div>
+
+            <a href="{apk_url}" class="gi-dl-btn">
+                <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
+                T&eacute;l&eacute;charger .apk
+            </a>
+            <div class="gi-size">{apk_size_mb} Mo &mdash; APK Android (sideload)</div>
+            <div class="gi-release">{apk_notes}</div>
+        </div>
     </div>
 
     <div class="gi-sep"></div>
@@ -1871,14 +1921,16 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F3F0;</span> Miyukini Survivor</span>
         </div>
     </div>
-
-    <div class="gi-release">{dl_notes}</div>
 </div>
 "##,
-        dl_url = dl_url,
-        dl_version = dl_version,
-        dl_size_mb = dl_size_mb,
-        dl_notes = dl_notes,
+        win_url = win_url,
+        win_version = win_version,
+        win_size_mb = win_size_mb,
+        win_notes = win_notes,
+        apk_url = apk_url,
+        apk_version = apk_version,
+        apk_size_mb = apk_size_mb,
+        apk_notes = apk_notes,
     );
 
     layout("Télécharger", &content, "downloads")

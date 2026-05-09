@@ -406,12 +406,28 @@ impl ContentManager {
             version: "0.2.0".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
-            download_url: "https://miyukini.com/downloads/MiyukiniCentral-0.2.0-Setup.exe".to_string(),
+            download_url: "/files/MiyukiniCentral-0.2.0-Setup.exe".to_string(),
             size_bytes: 6_522_680,
             sha256: "".to_string(),
             published_at: Utc::now(),
             release_notes: "v0.2.0 — Service Market, refonte Central, JayManga, installation AppData sans admin.".to_string(),
             min_core_version: None,
+        });
+
+        // Central Mobile v0.1.0 - APK Android (client léger via COG Bridge)
+        downloads.push(Download {
+            id: "miyukini-central-mobile-android".to_string(),
+            name: "Miyukini Central Mobile — APK Android".to_string(),
+            description: "Client léger Android pour piloter votre COG Host à distance. Pairing par QR-code, voix Miou, accès Market et Services. Nécessite un Central installé sur PC.".to_string(),
+            version: "0.1.0".to_string(),
+            category: DownloadCategory::Cog,
+            platforms: vec![Platform::Android],
+            download_url: "/files/MiyukiniCentralMobile-0.1.0.apk".to_string(),
+            size_bytes: 18_874_368,
+            sha256: String::new(),
+            published_at: Utc::now(),
+            release_notes: "v0.1.0 — Première release Android : pairing COG Bridge, CentralRemote WebSocket, Market intégré.".to_string(),
+            min_core_version: Some("0.2.0".to_string()),
         });
     }
 
@@ -492,7 +508,7 @@ Les solutions cloud traditionnelles vous rendent dépendant de services externes
 ### Windows
 ```powershell
 # Télécharger l'installateur
-Invoke-WebRequest -Uri "https://miyukini.com/downloads/MiyukiniCentral-0.2.0-Setup.exe" -OutFile "MiyukiniCentral-Setup.exe"
+Invoke-WebRequest -Uri "https://miyukini.com/files/MiyukiniCentral-0.2.0-Setup.exe" -OutFile "MiyukiniCentral-Setup.exe"
 
 # Lancer l'installation guidée
 .\MiyukiniCentral-Setup.exe

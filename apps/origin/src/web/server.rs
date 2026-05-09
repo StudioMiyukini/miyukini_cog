@@ -877,6 +877,8 @@ async fn route_request(
                         "application/gzip"
                     } else if filename.ends_with(".exe") {
                         "application/vnd.microsoft.portable-executable"
+                    } else if filename.ends_with(".apk") {
+                        "application/vnd.android.package-archive"
                     } else {
                         "application/octet-stream"
                     };
