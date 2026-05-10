@@ -423,7 +423,7 @@ impl ContentManager {
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Android],
             download_url: "/files/MiyukiniCentralMobile-0.1.0.apk".to_string(),
-            size_bytes: 18_874_368,
+            size_bytes: 116_395_390,
             sha256: String::new(),
             published_at: Utc::now(),
             release_notes: "v0.1.0 — Première release Android : pairing COG Bridge, CentralRemote WebSocket, Market intégré.".to_string(),
