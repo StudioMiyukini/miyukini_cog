@@ -423,7 +423,7 @@ impl ContentManager {
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Android],
             download_url: "/files/MiyukiniCentralMobile-0.1.0.apk".to_string(),
-            size_bytes: 116_395_390,
+            size_bytes: 116_395_460,
             sha256: String::new(),
             published_at: Utc::now(),
             release_notes: "v0.1.0 — Première release Android : pairing COG Bridge, CentralRemote WebSocket, Market intégré.".to_string(),
@@ -1959,43 +1959,214 @@ Le jeu continue à progresser même quand vous ne jouez pas, grâce à la simula
             banner_url: None,
         });
 
+        // Suite Jay Bureau — bureautique collaborative
+
         services.push(ServiceInfo {
-            id: "lord-of-the-castle".to_string(),
-            name: "Lord of the Castle".to_string(),
-            short_description: "Tower defense coopératif en réseau".to_string(),
-            full_description: r#"# Lord of the Castle
+            id: "jaymail".to_string(),
+            name: "Jay Mail".to_string(),
+            short_description: "Client email Miyukini (SMTP + IMAP) — suite Jay Bureau".to_string(),
+            full_description: r#"# Jay Mail
 
-**Lord of the Castle** est un jeu de tower defense coopératif jouable en réseau via le MWS.
+**Jay Mail** est le client email de la suite Jay Bureau. Boîte de réception
+unifiée, écriture et envoi via SMTP, lecture via IMAP, le tout pilotable
+par Alicia.
 
-## Gameplay
+## Fonctionnalités
 
-### Défense
-- Construisez des tours de défense
-- Améliorez vos bâtiments
-- Gérez vos ressources
+### Boîte de réception
+- Inbox unifiée multi-comptes
+- Recherche plein texte locale
+- Filtres et tri
 
-### Vagues d'ennemis
-- Vagues progressives de difficulté
-- Types d'ennemis variés
-- Boss redoutables
+### Écriture & envoi
+- Composition avec destinataires, CC, BCC
+- Pièces jointes
+- File d'envoi avec reprise hors-ligne
 
-### Mode coopératif
-- Jouez avec d'autres COGs via le MWS
-- Partagez les ressources
-- Stratégie collaborative
+### Intégration Alicia
+- `send_mail` : envoi vocal d'un email
+- `list_recent_inbox` : lecture des derniers messages
+- `search_mail` : recherche par mots-clés
 
-## Lobbys publics
+## Données souveraines
 
-Créez ou rejoignez des lobbys pour jouer avec d'autres membres du réseau Miyukini."#
-                .to_string(),
-            category: ServiceCategory::Jeux,
+Comptes et messages chiffrés en local via KindMother. Aucun relais cloud."#.to_string(),
+            category: ServiceCategory::Social,
             editor: "Miyukini".to_string(),
-            cog_version: "0.1.0".to_string(),
+            cog_version: "0.2.0".to_string(),
             service_type: ServiceType::Officiel,
             license: "Propriétaire Miyukini".to_string(),
             price: 0.0,
-            release_date: Utc::now() - chrono::Duration::days(60),
-            website_url: Some("https://miyukini.com/games/lord-of-the-castle".to_string()),
+            release_date: Utc::now() - chrono::Duration::days(7),
+            website_url: Some("https://miyukini.com/services/jaymail".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jaymessage".to_string(),
+            name: "Jay Message".to_string(),
+            short_description: "Messagerie instantanée Miyukini — suite Jay Bureau".to_string(),
+            full_description: r#"# Jay Message
+
+**Jay Message** est la messagerie instantanée de la suite Jay Bureau, pensée
+pour les échanges courts entre collègues et contacts pro.
+
+## Fonctionnalités
+
+### Conversations
+- Fils 1-à-1 et de groupe
+- Présence et accusés de lecture
+- Historique local persistant
+
+### Recherche & navigation
+- Recherche dans les threads
+- Marquage non-lu / épinglage
+
+### Intégration Alicia
+- `send_message` : envoi vocal dans un thread
+- `list_recent_threads` : aperçu des conversations actives
+- `search_threads` : recherche par mots-clés
+
+## Transport
+
+Le transport passe par MWS chiffré pour les contacts COG ↔ COG, ou par
+passerelle sortante pour les contacts externes."#.to_string(),
+            category: ServiceCategory::Social,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.2.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(7),
+            website_url: Some("https://miyukini.com/services/jaymessage".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jaydocs".to_string(),
+            name: "Jay Docs".to_string(),
+            short_description: "Éditeur de documents collaboratif (alternative Google Docs)".to_string(),
+            full_description: r#"# Jay Docs
+
+**Jay Docs** est l'éditeur de documents collaboratif de la suite Jay Bureau.
+Rédaction en temps réel, partage entre COGs, formatage riche.
+
+## Fonctionnalités
+
+### Édition
+- Formatage riche (titres, listes, tableaux, images)
+- Historique de versions
+- Commentaires et suggestions
+
+### Collaboration
+- Édition simultanée multi-utilisateurs (CRDT)
+- Partage par lien ou invitation
+- Permissions lecture / écriture
+
+### Intégration Alicia
+- `create_document` : nouveau document avec titre + contenu initial
+- `list_my_documents` : recherche dans tes documents récents
+- `append_to_document` : ajoute du contenu à un doc existant
+
+## Stockage
+
+Documents stockés localement par défaut, partage via MWS chiffré."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.2.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(8),
+            website_url: Some("https://miyukini.com/services/jaydocs".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jaysheets".to_string(),
+            name: "Jay Sheets".to_string(),
+            short_description: "Tableur collaboratif (alternative Google Sheets)".to_string(),
+            full_description: r#"# Jay Sheets
+
+**Jay Sheets** est le tableur collaboratif de la suite Jay Bureau. Cellules,
+formules, mise en forme conditionnelle, partage temps réel.
+
+## Fonctionnalités
+
+### Cellules & formules
+- Formules arithmétiques et fonctions (SUM, AVG, IF, VLOOKUP, etc.)
+- Mise en forme conditionnelle
+- Graphiques intégrés
+
+### Collaboration
+- Édition simultanée (CRDT par cellule)
+- Commentaires sur cellules
+- Permissions par feuille
+
+### Intégration Alicia
+- `create_sheet` : nouvelle feuille
+- `list_my_sheets` : recherche dans tes tableurs
+- `write_cell` : écriture vocale dans une cellule précise
+
+## Compatibilité
+
+Import / export CSV, XLSX (ODS expérimental)."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.2.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(8),
+            website_url: Some("https://miyukini.com/services/jaysheets".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "jayslides".to_string(),
+            name: "Jay Slides".to_string(),
+            short_description: "Présentations collaboratives (alternative Google Slides)".to_string(),
+            full_description: r#"# Jay Slides
+
+**Jay Slides** est l'outil de présentations de la suite Jay Bureau.
+Diapositives, thèmes, animations, mode présentateur.
+
+## Fonctionnalités
+
+### Création de slides
+- Modèles et thèmes préconfigurés
+- Texte, images, formes, vidéos
+- Transitions et animations
+
+### Mode présentateur
+- Vue notes du speaker
+- Minuteur intégré
+- Télécommande via JayMessage
+
+### Intégration Alicia
+- `create_presentation` : nouvelle présentation
+- `list_my_presentations` : recherche dans tes diaporamas
+- `add_slide` : ajout vocal d'une diapositive
+
+## Export
+
+PDF, MP4 (vidéo), HTML (slideshow autonome)."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.2.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(8),
+            website_url: Some("https://miyukini.com/services/jayslides".to_string()),
             download_url: Some("/downloads".to_string()),
             screenshots: vec![],
             banner_url: None,
@@ -2159,54 +2330,138 @@ Toutes les données de rendez-vous restent sur votre COG. Aucun intermédiaire c
             banner_url: None,
         });
 
-        // Commerce & Point de vente
-        services.push(ServiceInfo {
-            id: "jayshop".to_string(),
-            name: "JayShop".to_string(),
-            short_description: "Point de vente et vente en ligne — caisse et tickets".to_string(),
-            full_description: r#"# JayShop
+        // Loisirs & Lecture
 
-**JayShop** est le service commerce famille Jay pour la gestion des ventes, du point de vente (PoS) et de la vente en ligne.
+        services.push(ServiceInfo {
+            id: "jaymanga".to_string(),
+            name: "JayManga".to_string(),
+            short_description: "Lecture et vente de manga — catalogue, lecteur, boutique".to_string(),
+            full_description: r#"# JayManga
+
+**JayManga** est le service manga de l'écosystème Miyukini : catalogue,
+lecteur en ligne, boutique d'achat et portail agrégé entre éditeurs.
 
 ## Fonctionnalités
 
-### Gestion des tickets (ventes)
-- Création de tickets : Draft → Open → Paid / Refunded / Cancelled
-- Source : Point de vente (PoS) ou vente en ligne
-- Historique complet des transactions
+### Lecteur
+- Lecture page par page ou défilement vertical
+- Marque-pages et progression synchronisée
+- Mode hors-ligne après téléchargement
 
-### Point de vente
-- Interface caisse rapide
-- Scan de produits
-- Calcul automatique des taxes (multi-taux)
-- Réductions et promotions prédéfinies
-- Gestion des sessions de caisse
+### Boutique & catalogue
+- Catalogue par série, auteur, genre
+- Acquisition à l'unité ou par abonnement
+- Suivi des sorties de tes séries favorites
 
-### Paiements
-- Encaissement multi-moyens
-- Rendu de monnaie
-- Suivi des paiements en attente
+### Portail
+- Vitrine agrégée pour les éditeurs partenaires
+- Partage de critiques entre lecteurs
 
-### Rapports et KPIs
-- Chiffre d'affaires par période
-- Produits les plus vendus
-- Rapports de caisse journaliers
+## Données
 
-## Intégrations
-
-- **JayKonta** : pipeline comptable automatique (factures, TVA, rapports)
-
-## Architecture
-
-Persistance via KindMother avec chiffrement libSQL. Pipeline comptable vers JayKonta automatisé."#.to_string(),
-            category: ServiceCategory::Commerce,
+Bibliothèque privée stockée sur ton COG ; les transactions passent par JayKonta."#.to_string(),
+            category: ServiceCategory::StyleDeVie,
             editor: "Miyukini".to_string(),
-            cog_version: "0.1.0".to_string(),
+            cog_version: "0.2.0".to_string(),
             service_type: ServiceType::Officiel,
             license: "Propriétaire Miyukini".to_string(),
             price: 0.0,
-            release_date: Utc::now() - chrono::Duration::days(3),
-            website_url: Some("https://miyukini.com/services/jayshop".to_string()),
+            release_date: Utc::now() - chrono::Duration::days(12),
+            website_url: Some("https://miyukini.com/services/jaymanga".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        // Stockage & introspection
+
+        services.push(ServiceInfo {
+            id: "miyucloud".to_string(),
+            name: "MiyuCloud".to_string(),
+            short_description: "Cloud privé chiffré du COG — fichiers, sync, partage sécurisé".to_string(),
+            full_description: r#"# MiyuCloud
+
+**MiyuCloud** est le cloud privé chiffré de ton COG. Stockage, synchronisation
+et partage de fichiers, avec un portail web authentifié pour y accéder depuis
+n'importe quel navigateur.
+
+## Fonctionnalités
+
+### Stockage
+- Arborescence de fichiers, dossiers, tags
+- Versioning automatique
+- Corbeille avec récupération
+
+### Synchronisation
+- Sync entre tes appareils (Central, mobile, web)
+- Sync sélective par dossier
+- Reprise après coupure réseau
+
+### Partage
+- Liens publics avec expiration et mot de passe
+- Partage COG ↔ COG via MWS
+- Permissions lecture / écriture par destinataire
+
+### Portail web
+- Accès via navigateur authentifié
+- Upload / download depuis n'importe où
+
+## Chiffrement
+
+Données chiffrées au repos (libSQL + filesystem), clés dérivées via KindMother.
+Le service tourne en arrière-plan sur ton COG."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.2.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(14),
+            website_url: Some("https://miyukini.com/services/miyucloud".to_string()),
+            download_url: Some("/downloads".to_string()),
+            screenshots: vec![],
+            banner_url: None,
+        });
+
+        services.push(ServiceInfo {
+            id: "miyukiniwatch".to_string(),
+            name: "MiyukiniWatch".to_string(),
+            short_description: "Tes habitudes et tes mesures — consulte, comprends, efface".to_string(),
+            full_description: r#"# MiyukiniWatch
+
+**MiyukiniWatch** observe localement comment tu utilises ton COG et te
+restitue ces données sous une forme lisible : usage par service, temps passé,
+patterns. Aucun envoi externe — tu peux consulter, comprendre, et effacer.
+
+## Fonctionnalités
+
+### Mesures
+- Temps passé par service
+- Fréquence d'usage
+- Heures actives / inactives
+
+### Insights
+- Habitudes détectées
+- Tendances sur 7 / 30 / 90 jours
+- Suggestions de Miou pour réduire ou organiser ton usage
+
+### Contrôle
+- Effacement complet sur demande
+- Pause d'observation à tout moment
+- Granularité du suivi paramétrable
+
+## Données souveraines
+
+Tout reste sur ton COG, jamais envoyé nulle part. Pensé pour t'aider, pas
+pour t'évaluer."#.to_string(),
+            category: ServiceCategory::Outils,
+            editor: "Miyukini".to_string(),
+            cog_version: "0.2.0".to_string(),
+            service_type: ServiceType::Officiel,
+            license: "Propriétaire Miyukini".to_string(),
+            price: 0.0,
+            release_date: Utc::now() - chrono::Duration::days(18),
+            website_url: Some("https://miyukini.com/services/miyukiniwatch".to_string()),
             download_url: Some("/downloads".to_string()),
             screenshots: vec![],
             banner_url: None,
