@@ -1,0 +1,50 @@
+# @id: jaycloud_client_crate_config
+# @do: declare_jaycloud_client_crate
+# @layer: 7
+# @human: Crate jaycloud-client — adaptateur ServiceClient pour le service JayCloud (sauvegarde cloud), exécutable par Alicia via le dispatcher.
+
+[package]
+name = "jaycloud-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Client Alicia → JayCloud — implémente miyualicia_dispatcher::ServiceClient en routant les intents (trigger_backup, list_snapshots, restore_file, share_file, list_app_passwords, revoke_app_password) vers un backend de sauvegarde pluggable."
+
+[dependencies]
+miyualicia-dispatcher = { path = "../miyualicia-dispatcher" }
+miyualicia-skills     = { path = "../miyualicia-skills" }
+
+serde       = { version = "1", features = ["derive"] }
+serde_json  = "1"
+async-trait = "0.1"
+thiserror   = "2"
+tracing     = "0.1"
+
+[dev-dependencies]
+tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+module_name_repetitions = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"
+unused_self = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+items_after_statements = "allow"

@@ -1,0 +1,61 @@
+# @id: jaycloud_crate_config
+# @do: declare_jaycloud_crate
+# @layer: 7
+# @human: Crate jaycloud — service de sauvegarde cloud souverain (héritier MiyuCloud + snapshots + restore + WebDAV).
+
+[package]
+name = "jaycloud"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "JayCloud — service de sauvegarde cloud souverain du COG : backup chiffré, snapshots complets + incrémentaux, restore sélectif, liens publics signés, exposition WebDAV (RFC 4918) pour outils tiers (rclone, restic, Duplicati)."
+
+[[bin]]
+name = "jaycloud"
+path = "src/main.rs"
+
+[lib]
+name = "jaycloud"
+path = "src/lib.rs"
+
+[dependencies]
+# Stack workspace
+serde       = { version = "1", features = ["derive"] }
+serde_json  = "1"
+tokio       = { version = "1", features = ["rt-multi-thread", "macros", "fs", "io-util", "sync", "time"] }
+async-trait = "0.1"
+thiserror   = "2"
+tracing     = "0.1"
+
+# Skeleton P2 : pas encore d'axum / dav-server / chacha20poly1305 / libsql / etc.
+# Ces dépendances seront ajoutées au fil des PRs (PR-2 PR-3 PR-4) selon le
+# plan d'implémentation de la Spec.
+
+[dev-dependencies]
+tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+module_name_repetitions = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"
+unused_self = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+items_after_statements = "allow"

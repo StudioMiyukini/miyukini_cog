@@ -102,7 +102,26 @@ members = [
     "crates/miyualicia-automations",
     "crates/miyualicia",
     "crates/miyualicia-api",
-    
+    "crates/miyualicia-skills",
+    "crates/miyualicia-memory",
+    "crates/miyualicia-dispatcher",
+    "crates/miyualicia-cores-gate",
+    "crates/jaykoa-client",
+    "crates/jaykonta-client",
+    "crates/jayrdv-client",
+    "crates/jaymail-client",
+    "crates/jaymessage-client",
+    "crates/jaydocs-client",
+    "crates/jaysheets-client",
+    "crates/jayslides-client",
+    "crates/jaymeteo-client",
+    "crates/jaycontact-client",
+
+    # === JayCloud — sauvegarde cloud souveraine (héritier MiyuCloud) ===
+    "crates/jaycloud",
+    "crates/jaycloud-client",
+    "crates/jaycloud-migrate",
+
     # === Applications Natives (Dioxus) ===
     "apps/central",
     "apps/central-mobile",

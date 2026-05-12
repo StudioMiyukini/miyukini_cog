@@ -1,0 +1,84 @@
+{
+  "id": "jaycloud",
+  "name": "JayCloud",
+  "description": "Service de sauvegarde cloud souverain du COG — backup chiffré, snapshots, restore, partage de liens, WebDAV.",
+  "icon": "☁",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "webway", "identity"],
+  "tags": ["cloud", "backup", "sauvegarde", "snapshots", "restore", "webdav"],
+  "execution_mode": "background",
+  "binary_name": "jaycloud.exe",
+  "platforms": {
+    "windows_x64": "jaycloud.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "trigger_backup",
+      "description": "Déclenche une sauvegarde immédiate. Si target_name est fourni, ne sauvegarde que cette cible ; sinon, déclenche toutes les cibles activées.",
+      "params": {
+        "target_name": { "type": "string", "required": false, "description": "Nom de la cible de backup à déclencher." }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "backup"
+    },
+    {
+      "intent": "list_snapshots",
+      "description": "Liste les snapshots les plus récents (toutes cibles ou filtrés par target_name).",
+      "params": {
+        "target_name": { "type": "string", "required": false },
+        "limit": { "type": "int", "required": false, "default": 10 }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "backup"
+    },
+    {
+      "intent": "restore_file",
+      "description": "Restaure un fichier précis depuis un snapshot vers un emplacement choisi (défaut : emplacement d'origine).",
+      "params": {
+        "snapshot_id": { "type": "string", "required": true },
+        "file_path": { "type": "string", "required": true, "description": "Chemin relatif du fichier dans le snapshot." },
+        "destination": { "type": "string", "required": false }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "backup"
+    },
+    {
+      "intent": "share_file",
+      "description": "Crée un lien public signé vers un fichier (snapshot ou Drive courant), avec expiration et mot de passe optionnels.",
+      "params": {
+        "file_path": { "type": "string", "required": true },
+        "expires_in_days": { "type": "int", "required": false, "default": 30 },
+        "password": { "type": "string", "required": false }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "backup"
+    },
+    {
+      "intent": "list_app_passwords",
+      "description": "Liste les jetons applicatifs WebDAV existants (nom, dernière utilisation, état révocation).",
+      "params": {},
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "backup"
+    },
+    {
+      "intent": "revoke_app_password",
+      "description": "Révoque un jeton applicatif WebDAV par son nom.",
+      "params": {
+        "name": { "type": "string", "required": true }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "backup"
+    }
+  ]
+}
