@@ -32,13 +32,28 @@ tokio       = { version = "1", features = ["rt-multi-thread", "macros", "fs", "i
 async-trait = "0.1"
 thiserror   = "2"
 tracing     = "0.1"
+chrono      = { version = "0.4", features = ["serde"] }
+uuid        = { version = "1", features = ["v4"] }
+hex         = "0.4"
 
-# Skeleton P2 : pas encore d'axum / dav-server / chacha20poly1305 / libsql / etc.
-# Ces dépendances seront ajoutées au fil des PRs (PR-2 PR-3 PR-4) selon le
-# plan d'implémentation de la Spec.
+# Crypto + intégrité (PR-2)
+sha2             = "0.10"
+chacha20poly1305 = "0.10"
+hkdf             = "0.12"
+rand             = "0.8"
+subtle           = "2"      # comparaisons constant-time
+base32           = "0.5"    # format app-passwords
+zstd             = "0.13"   # compression CAS
+
+# KindMother — pas d'API derive_key dédiée ; on l'utilise comme storage SQL
+# délégué (cf. miyucloud) et on dérive nos clés via HKDF par-dessus.
+kindmother-client = { path = "../kindmother-client" }
+
+# Note : axum / dav-server / askama / tower-sessions arrivent en PR-3 / PR-4 / PR-5.
 
 [dev-dependencies]
-tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+tokio    = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+tempfile = "3"
 
 [lints.rust]
 unsafe_code = "forbid"
