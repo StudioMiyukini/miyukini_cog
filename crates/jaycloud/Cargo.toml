@@ -49,6 +49,9 @@ zstd             = "0.13"   # compression CAS
 # délégué (cf. miyucloud) et on dérive nos clés via HKDF par-dessus.
 kindmother-client = { path = "../kindmother-client" }
 
+# Argon2 pour password_hash des liens partagés (PR-3.b).
+argon2 = "0.5"
+
 # Note : axum / dav-server / askama / tower-sessions arrivent en PR-3 / PR-4 / PR-5.
 
 [dev-dependencies]
