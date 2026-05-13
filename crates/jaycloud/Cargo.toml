@@ -52,6 +52,11 @@ kindmother-client = { path = "../kindmother-client" }
 # Argon2 pour password_hash des liens partagés (PR-3.b).
 argon2 = "0.5"
 
+# WebDAV (PR-4) — dav-server 0.11 (Apache-2.0) avec sa fondation RFC 4918.
+dav-server = "0.11"
+bytes      = "1"
+futures    = "0.3"
+
 # Note : axum / dav-server / askama / tower-sessions arrivent en PR-3 / PR-4 / PR-5.
 
 [dev-dependencies]
