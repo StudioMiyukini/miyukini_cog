@@ -132,6 +132,7 @@ impl ItemKind {
 pub struct EquipRequirements {
     pub min_strength: u32,
     pub min_dexterity: u32,
+    pub min_intelligence: u32,
     pub min_level: u32,
 }
 
@@ -194,7 +195,12 @@ mod tests {
             name: "Short Sword".into(),
             kind: ItemKind::Sword,
             max_sockets: 2,
-            requirements: EquipRequirements { min_strength: 10, min_dexterity: 0, min_level: 1 },
+            requirements: EquipRequirements {
+                min_strength: 10,
+                min_dexterity: 0,
+                min_intelligence: 0,
+                min_level: 1,
+            },
             ilvl: 1,
             two_handed: false,
         }

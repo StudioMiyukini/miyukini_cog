@@ -5,7 +5,14 @@ use crate::batch::SpriteBatch;
 
 /// Maximum number of sprite instances per draw call.
 /// Clamped before GPU upload (Victor rec. #1).
-pub const MAX_INSTANCES: usize = 16_384;
+///
+/// Raised to 64k: a textured isometric scene (per-tile floor speckles + decors)
+/// plus the full procedural UI (gradient panels, item/skill icons, tooltips)
+/// can exceed 16k quads in a frame. Because the batch is depth-sorted and the
+/// clamp drops the *tail*, overflow silently truncated the highest-sort-order
+/// quads — i.e. the on-top UI **text/tooltips** — making menu labels flicker or
+/// cut off ("REPRENDR…"). 64k gives ample headroom (≈3 MB instance buffer).
+pub const MAX_INSTANCES: usize = 65_536;
 
 /// GPU-side layout for one sprite instance — 48 bytes, std430-compatible.
 #[repr(C)]

@@ -20,6 +20,9 @@ pub struct UniqueDef {
     pub base_kind: ItemKind,
     pub min_ilvl: u32,
     pub mods: Vec<FixedMod>,
+    /// Short atmospheric line shown at the bottom of the tooltip.
+    #[serde(default)]
+    pub flavour: String,
 }
 
 /// One piece within a set.
@@ -68,6 +71,7 @@ pub fn mvp_uniques() -> Vec<UniqueDef> {
                 FixedMod { stat: StatKind::Strength, modifier: Modifier::Flat(5) },
                 FixedMod { stat: StatKind::Life, modifier: Modifier::Flat(25) },
             ],
+            flavour: String::new(),
         },
         UniqueDef {
             id: 2,
@@ -80,6 +84,7 @@ pub fn mvp_uniques() -> Vec<UniqueDef> {
                 FixedMod { stat: StatKind::ColdResist, modifier: Modifier::Flat(20) },
                 FixedMod { stat: StatKind::LightningResist, modifier: Modifier::Flat(20) },
             ],
+            flavour: String::new(),
         },
     ]
 }

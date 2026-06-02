@@ -5,6 +5,12 @@ use crate::character::Class;
 /// Unique skill identifier within a class's tree.
 pub type SkillId = u32;
 
+/// Per-skill hard cap on invested ranks. Enforced by
+/// [`SkillTree::can_learn`] — every higher layer (UI "+" button, save
+/// loader, debug grants) inherits the limit because the only mutating path
+/// is [`SkillTree::invest`], which goes through `can_learn` first.
+pub const MAX_SKILL_LEVEL: u32 = 20;
+
 /// The type of skill action.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SkillKind {
@@ -136,7 +142,7 @@ pub fn class_skill_stubs(class: Class) -> Vec<SkillDef> {
             min_level,
             prerequisites: prereqs,
             cost: SkillCost { mana_base: 4.0, mana_per_level: 1.0 },
-            max_level: 20,
+            max_level: MAX_SKILL_LEVEL,
         }
     };
 
@@ -268,6 +274,43 @@ mod tests {
             let stubs = class_skill_stubs(class);
             assert_eq!(stubs.len(), 3);
         }
+    }
+
+    #[test]
+    fn every_stub_caps_at_max_skill_level() {
+        let classes = [
+            Class::Warrior,
+            Class::Ranger,
+            Class::Sorceress,
+            Class::Necromancer,
+            Class::Paladin,
+            Class::Shaman,
+            Class::Assassin,
+        ];
+        for class in classes {
+            for def in class_skill_stubs(class) {
+                assert_eq!(def.max_level, MAX_SKILL_LEVEL, "{:?}/{} must cap at MAX_SKILL_LEVEL", class, def.name);
+            }
+        }
+        assert_eq!(MAX_SKILL_LEVEL, 20);
+    }
+
+    #[test]
+    fn invest_refuses_past_max_skill_level() {
+        let defs = warrior_skills();
+        let mut tree = SkillTree::new(Class::Warrior);
+        tree.add_points(MAX_SKILL_LEVEL + 5);
+        for _ in 0..MAX_SKILL_LEVEL {
+            assert!(tree.invest(&defs[0], 1).is_ok());
+        }
+        // 20 invested → further attempts are rejected by can_learn, leaving
+        // the remaining 5 points untouched.
+        assert_eq!(tree.level_of(defs[0].id), MAX_SKILL_LEVEL);
+        assert_eq!(
+            tree.invest(&defs[0], 1),
+            Err("skill already at max level"),
+        );
+        assert_eq!(tree.available_points, 5);
     }
 
     #[test]

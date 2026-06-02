@@ -21,6 +21,7 @@ members = [
   "crates/mge-sim",
   "crates/mge-ui",
   "games/sodomight",
+  "games/allumina",
   "tools/mge-asset-baker",
 ]
 

@@ -4,17 +4,20 @@ use crate::character::Class;
 use crate::stats::{CharacterStats, Modifier, StatKind, StatModifier};
 
 /// Max level cap.
-pub const MAX_LEVEL: u32 = 99;
+pub const MAX_LEVEL: u32 = 120;
 
 /// XP required to go from level `n` to `n+1`.
-/// Uses a D2-like exponential curve.
+/// Steep exponential curve: `floor(50 * 1.35^(level - 1))`. The high growth
+/// rate (1.35) makes each level cost markedly more than the last, so the early
+/// game ramps quickly but high levels are a real investment (the old 20×1.15
+/// curve let a player hit level 12 in a couple of minutes).
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn xp_for_level(level: u32) -> u64 {
     if level == 0 || level >= MAX_LEVEL {
         return u64::MAX;
     }
-    // Approximation: 500 * level^2 * (level as f64 * 0.02 + 1.0)
-    let l = u64::from(level);
-    500 * l * l + 10 * l * l * l / 10
+    let exp = f64::from(level - 1);
+    (50.0 * 1.35_f64.powf(exp)).floor() as u64
 }
 
 /// Total XP needed to reach a given level from 0.
@@ -23,7 +26,7 @@ pub fn total_xp_for_level(level: u32) -> u64 {
 }
 
 /// Stat points gained per level.
-pub const STAT_POINTS_PER_LEVEL: u32 = 5;
+pub const STAT_POINTS_PER_LEVEL: u32 = 10;
 
 /// Skill points gained per level.
 pub const SKILL_POINTS_PER_LEVEL: u32 = 1;
@@ -134,6 +137,27 @@ mod tests {
     fn xp_curve_increases_with_level() {
         assert!(xp_for_level(2) > xp_for_level(1));
         assert!(xp_for_level(50) > xp_for_level(10));
+    }
+
+    #[test]
+    fn xp_curve_level_one_is_fifty() {
+        assert_eq!(xp_for_level(1), 50);
+    }
+
+    #[test]
+    fn xp_curve_ramps_steeply() {
+        // 50 * 1.35^9 ≈ 745.
+        let v = xp_for_level(10);
+        assert!((600..=900).contains(&v), "xp_for_level(10) = {v}");
+        // Each level costs noticeably more than the previous.
+        assert!(xp_for_level(11) >= xp_for_level(10) * 13 / 10);
+    }
+
+    #[test]
+    fn xp_curve_caps_at_max_level() {
+        assert_eq!(xp_for_level(MAX_LEVEL), u64::MAX);
+        assert_eq!(xp_for_level(MAX_LEVEL + 1), u64::MAX);
+        assert_eq!(xp_for_level(0), u64::MAX);
     }
 
     #[test]

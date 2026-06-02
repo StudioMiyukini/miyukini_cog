@@ -97,6 +97,12 @@ pub struct ResolvedStats {
     pub mana_on_kill: i32,
 }
 
+/// Baseline values for stats that don't start at 0 in `CharacterStats::new`.
+/// `recompute()` layers modifiers on top of these.
+pub const BASE_DAMAGE_MIN: i32 = 1;
+pub const BASE_DAMAGE_MAX: i32 = 4;
+pub const BASE_MOVEMENT_SPEED: i32 = 100;
+
 impl ResolvedStats {
     /// Compute derived resource pools from primary attributes and class yields.
     #[allow(clippy::cast_precision_loss)]
@@ -115,7 +121,7 @@ impl ResolvedStats {
         (life, mana, stamina)
     }
 
-    /// Apply a list of modifiers to a base stat value.
+    /// Apply a list of modifiers to an integer base stat value.
     pub fn apply_modifiers(base: i32, mods: &[Modifier]) -> i32 {
         let flat: i32 = mods
             .iter()
@@ -127,6 +133,21 @@ impl ResolvedStats {
             .sum();
         let after_flat = base + flat;
         after_flat + (after_flat * pct / 100)
+    }
+
+    /// Apply a list of modifiers to a float base stat value (used for pools).
+    #[allow(clippy::cast_precision_loss)]
+    pub fn apply_modifiers_f32(base: f32, mods: &[Modifier]) -> f32 {
+        let flat: i32 = mods
+            .iter()
+            .filter_map(|m| if let Modifier::Flat(v) = m { Some(*v) } else { None })
+            .sum();
+        let pct: i32 = mods
+            .iter()
+            .filter_map(|m| if let Modifier::Percentage(v) = m { Some(*v) } else { None })
+            .sum();
+        let after_flat = base + flat as f32;
+        after_flat + after_flat * pct as f32 / 100.0
     }
 }
 
@@ -191,7 +212,30 @@ impl CharacterStats {
         self.modifiers.iter().filter(|m| m.stat == stat).map(|m| m.modifier).collect()
     }
 
-    fn recompute(&mut self) {
+    /// Primary attributes with `Flat(_)` modifiers applied — what combat,
+    /// pools, and gating should read instead of the raw `attributes` field
+    /// (which only tracks base + level-up allocation).
+    pub fn effective_attributes(&self) -> PrimaryAttributes {
+        let flat = |stat: StatKind| -> i32 {
+            self.modifiers
+                .iter()
+                .filter(|m| m.stat == stat)
+                .filter_map(|m| if let Modifier::Flat(v) = m.modifier { Some(v) } else { None })
+                .sum()
+        };
+        PrimaryAttributes {
+            strength: self.attributes.strength + flat(StatKind::Strength),
+            dexterity: self.attributes.dexterity + flat(StatKind::Dexterity),
+            vitality: self.attributes.vitality + flat(StatKind::Vitality),
+            energy: self.attributes.energy + flat(StatKind::Energy),
+        }
+    }
+
+    /// Recompute every resolved stat from `attributes` + `modifiers`. Call
+    /// after touching `modifiers` (equip/unequip, buffs, save load) or after
+    /// changing `attributes`/`level` (level up, stat point allocation).
+    pub fn recompute(&mut self) {
+        // Resists, magic/gold find, life-on-hit, mana-on-kill: pure modifier sums.
         self.resolved.fire_resist =
             ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::FireResist));
         self.resolved.cold_resist =
@@ -202,10 +246,52 @@ impl CharacterStats {
             ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::PoisonResist));
         self.resolved.magic_find =
             ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::MagicFind));
+        self.resolved.gold_find =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::GoldFind));
+        self.resolved.life_on_hit =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::LifeOnHit));
+        self.resolved.mana_on_kill =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::ManaOnKill));
+
+        // Defense, AR, block, crit, attack/cast speed: pure modifier sums.
         self.resolved.defense =
             ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::Defense));
         self.resolved.attack_rating =
             ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::AttackRating));
+        self.resolved.block_chance =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::BlockChance));
+        self.resolved.crit_chance =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::CritChance));
+        self.resolved.attack_speed =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::AttackSpeed));
+        self.resolved.cast_speed =
+            ResolvedStats::apply_modifiers(0, &self.mods_for(StatKind::CastSpeed));
+
+        // Damage and movement use non-zero baselines.
+        self.resolved.damage_min = ResolvedStats::apply_modifiers(
+            BASE_DAMAGE_MIN,
+            &self.mods_for(StatKind::DamageMin),
+        );
+        self.resolved.damage_max = ResolvedStats::apply_modifiers(
+            BASE_DAMAGE_MAX,
+            &self.mods_for(StatKind::DamageMax),
+        );
+        self.resolved.movement_speed = ResolvedStats::apply_modifiers(
+            BASE_MOVEMENT_SPEED,
+            &self.mods_for(StatKind::MovementSpeed),
+        );
+
+        // Pools scale off effective attributes (so +Vitality gear bumps life),
+        // then absorb any explicit +Life/+Mana/+Stamina affixes on top.
+        let eff = self.effective_attributes();
+        let base = self.class.base_stats();
+        let (life, mana, stamina) = ResolvedStats::compute_pools(&eff, &base, self.level);
+        self.resolved.life_max =
+            ResolvedStats::apply_modifiers_f32(life, &self.mods_for(StatKind::Life));
+        self.resolved.mana_max =
+            ResolvedStats::apply_modifiers_f32(mana, &self.mods_for(StatKind::Mana));
+        self.resolved.stamina_max =
+            ResolvedStats::apply_modifiers_f32(stamina, &self.mods_for(StatKind::Stamina));
     }
 }
 

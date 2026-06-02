@@ -29,6 +29,19 @@ pub struct SortKey {
     pub sub_order: u32,
 }
 
+impl SortKey {
+    /// Pack the key into a single monotonically-ordered integer so the per-frame
+    /// batch sort compares one scalar instead of a three-field tuple. `y_sort`
+    /// (signed) is biased into an order-preserving `u32`. The ordering is
+    /// identical to the derived `Ord` (layer → y_sort → sub_order).
+    #[inline]
+    #[must_use]
+    pub fn packed(self) -> u128 {
+        let biased_y = (self.y_sort as u32) ^ 0x8000_0000;
+        ((self.layer as u8 as u128) << 64) | ((biased_y as u128) << 32) | (self.sub_order as u128)
+    }
+}
+
 /// A single sprite draw command in the batch.
 #[derive(Debug, Clone)]
 pub struct SpriteInstance {
@@ -65,9 +78,11 @@ impl SpriteBatch {
         self.instances.push(instance);
     }
 
-    /// Sort all instances by sort key `(layer, y, sub_order)`.
+    /// Sort all instances by sort key `(layer, y, sub_order)`. Stable, so
+    /// equal-keyed instances keep insertion order (UI fills before their
+    /// borders, etc.); the packed scalar key keeps the comparison cheap.
     pub fn sort(&mut self) {
-        self.instances.sort_by(|a, b| a.sort_key.cmp(&b.sort_key));
+        self.instances.sort_by_key(|i| i.sort_key.packed());
     }
 
     /// Get sorted instances for iteration / GPU upload.
@@ -169,6 +184,26 @@ mod tests {
         assert_eq!(runs[0].2, 2); // first 2 with mat 0
         assert_eq!(runs[1].2, 2); // next 2 with mat 1
         assert_eq!(runs[2].2, 1); // last 1 with mat 0
+    }
+
+    #[test]
+    fn packed_key_ordering_matches_derived_ord() {
+        let keys = [
+            SortKey { layer: RenderLayer::Terrain, y_sort: -100, sub_order: 0 },
+            SortKey { layer: RenderLayer::Terrain, y_sort: 0, sub_order: 5 },
+            SortKey { layer: RenderLayer::Terrain, y_sort: i32::MIN, sub_order: 0 },
+            SortKey { layer: RenderLayer::Entities, y_sort: i32::MAX, sub_order: 1 },
+            SortKey { layer: RenderLayer::UiScreen, y_sort: -1, sub_order: u32::MAX },
+        ];
+        for a in keys {
+            for b in keys {
+                assert_eq!(
+                    a.cmp(&b),
+                    a.packed().cmp(&b.packed()),
+                    "packed ordering diverges from Ord for {a:?} vs {b:?}",
+                );
+            }
+        }
     }
 
     #[test]
