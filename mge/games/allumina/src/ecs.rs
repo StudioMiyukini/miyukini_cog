@@ -111,197 +111,225 @@ pub enum SkillFx {
     Poison,
 }
 
-/// The whole game state: components + resources.
-pub struct World {
-    next_id: u64,
+/// Generate the [`World`] struct together with its `new()` and `despawn()` from
+/// a single field list. `@stores` are `BTreeMap<Entity, _>` and `@sets` are
+/// `BTreeSet<Entity>` — both are cleared by `despawn`; `@resources` are
+/// everything else (each with its own `new()` initialiser, never touched by
+/// `despawn`). Because the per-entity stores are listed once and drive both the
+/// struct and `despawn`, a store can never be added to one without the other —
+/// closing the old "forgot to clear it in despawn" footgun.
+macro_rules! define_world {
+    (
+        @stores { $( $(#[$sm:meta])* $sn:ident : $st:ty ),* $(,)? }
+        @sets   { $( $(#[$em:meta])* $en:ident : $et:ty ),* $(,)? }
+        @resources { $( $(#[$rm:meta])* $rv:vis $rn:ident : $rt:ty ),* $(,)? }
+    ) => {
+        /// The whole game state: per-entity component stores + shared resources.
+        pub struct World {
+            $( $(#[$sm])* pub $sn: BTreeMap<Entity, $st>, )*
+            $( $(#[$em])* pub $en: BTreeSet<$et>, )*
+            $( $(#[$rm])* $rv $rn: $rt, )*
+        }
 
-    // ── Component stores ────────────────────────────────────────────────
-    pub positions: BTreeMap<Entity, Position2D>,
-    pub factions: BTreeMap<Entity, Faction>,
-    pub health: BTreeMap<Entity, Health>,
-    pub mana: BTreeMap<Entity, Mana>,
-    pub move_targets: BTreeMap<Entity, MoveTarget>,
-    pub combat: BTreeMap<Entity, Combat>,
-    pub player_tags: BTreeMap<Entity, PlayerTag>,
-    pub classes: BTreeMap<Entity, ClassType>,
-    pub stats: BTreeMap<Entity, Stats>,
-    pub progression: BTreeMap<Entity, Progression>,
-    pub equipment: BTreeMap<Entity, EquipmentSlots>,
-    pub inventory: BTreeMap<Entity, Inventory>,
-    pub skills: BTreeMap<Entity, SkillSlot>,
-    pub skill_trees: BTreeMap<Entity, SkillTree>,
-    /// Per-player set of unlocked branches identified by `(originating class,
-    /// branch index)`. Native branches are NOT stored — they are always
-    /// implicitly unlocked. Buying a foreign branch costs one skill point.
-    pub unlocked_branches: BTreeMap<Entity, Vec<(ClassType, u32)>>,
-    pub mob_tags: BTreeMap<Entity, MobTag>,
-    pub mob_types: BTreeMap<Entity, MobType>,
-    /// Links a live mob entity to its `SpawnPoint::stable_id()`, so the death
-    /// system can record it into `killed_mobs` and the next visit to the zone
-    /// can skip respawning it.
-    pub spawn_ids: BTreeMap<Entity, u64>,
-    pub aggro: BTreeMap<Entity, AggroRange>,
-    pub ground_items: BTreeMap<Entity, GroundItem>,
-    /// Client-side procedural animation state (render only).
-    pub animations: BTreeMap<Entity, AnimationController>,
-    /// Facing direction, updated by movement (travel vector) and combat (toward
-    /// the target). Read by the renderer to pick the directional pose.
-    pub directions: BTreeMap<Entity, Direction>,
-    /// Active attack buffs (e.g. War Cry).
-    pub buffs: BTreeMap<Entity, Buff>,
-    /// Active movement slows (e.g. Frost Nova).
-    pub slows: BTreeMap<Entity, Slow>,
-    /// Active invulnerability windows (seconds remaining; e.g. Dodge).
-    pub invuln: BTreeMap<Entity, f32>,
-    /// Active stuns (seconds remaining): the entity cannot act while > 0.
-    pub stuns: BTreeMap<Entity, f32>,
-    /// Active renversements (knockdowns): the entity is grounded and helpless.
-    pub knockdowns: BTreeMap<Entity, Knockdown>,
-    /// Active reculs (pushbacks): the entity is shoved and cannot act.
-    pub pushbacks: BTreeMap<Entity, Pushback>,
-    /// In-progress interruptible casts, keyed by the casting entity.
-    pub interruptibles: BTreeMap<Entity, Interruptible>,
-    /// Uninterruptible-animation windows (e.g. the Soldat melee techniques):
-    /// the entity ignores stuns/interruption while present.
-    pub unstoppable: BTreeMap<Entity, Unstoppable>,
-    /// Active locked melee combos ("Estocs"): a fixed run of guaranteed strikes
-    /// that also locks the owner's input until it finishes.
-    pub combo_locks: BTreeMap<Entity, ComboLock>,
-    /// Active poison damage-over-time effects.
-    pub dots: BTreeMap<Entity, Dot>,
-    /// Active defence-reduction debuffs.
-    pub def_debuffs: BTreeMap<Entity, DefDebuff>,
-    /// Active damage-reduction blessings.
-    pub resist: BTreeMap<Entity, Resist>,
-    /// Active battle orders (Soldat "Ordres"), each entity holding any number of
-    /// distinct concurrent orders.
-    pub order_buffs: BTreeMap<Entity, Vec<OrderBuff>>,
-    /// Active healing fields, keyed by their owning caster.
-    pub heal_fields: BTreeMap<Entity, HealField>,
-    /// Deployed traps.
-    pub traps: BTreeMap<Entity, Trap>,
-    /// Per-element damage resistances (Mage elemental branches read these).
-    pub elem_resists: BTreeMap<Entity, ElementResists>,
-    /// Active ground fire rectangles (Mage "Mur de flammes"), keyed by a spawned
-    /// zone entity.
-    pub flame_walls: BTreeMap<Entity, FlameWall>,
-    /// Active chilling fields (Mage "Blizzard"), keyed by a spawned zone entity.
-    pub blizzards: BTreeMap<Entity, BlizzardField>,
-    /// Active meteor barrages (Mage "Pluie de météores"), keyed by a spawned
-    /// zone entity.
-    pub meteor_fields: BTreeMap<Entity, MeteorField>,
-    /// Active frost-armour self-buffs (Mage "Armure de givre"), keyed by owner.
-    pub frost_armor: BTreeMap<Entity, FrostArmor>,
-    /// Active lightning-shield self-buffs (Mage "Bouclier de foudre"), keyed by
-    /// owner.
-    pub lightning_shield: BTreeMap<Entity, LightningShield>,
-    /// In-progress charged archer shots, keyed by their owner.
-    pub charging_shots: BTreeMap<Entity, ChargingShot>,
-    /// Active "Instinct du chasseur" buffs, keyed by owner.
-    pub hunter_instinct: BTreeMap<Entity, HunterInstinctBuff>,
-    /// Active arrow-rain zones (Archer "Pluie de flèches"), keyed by a spawned
-    /// zone entity.
-    pub arrow_rains: BTreeMap<Entity, ArrowRainField>,
-    /// The Clerc's currently toggled support aura (at most one per caster).
-    pub active_auras: BTreeMap<Entity, ActiveAura>,
-    /// Per-recipient aggregated aura bonuses, refreshed by aura ticks and read
-    /// live by combat/movement.
-    pub aura_bonuses: BTreeMap<Entity, AuraBonus>,
-    /// Mana reserved by the currently active aura (deducted from `mana.max`).
-    pub aura_reserved_mana: BTreeMap<Entity, f32>,
-    /// Mobs the Clerc has "Converted": they fight under [`Faction::Player`]
-    /// until the timer expires, then revert to their original faction.
-    pub converted: BTreeMap<Entity, Converted>,
-    /// Mobs the Clerc has "Pardoned": every attacker hitting them heals.
-    pub pardoned: BTreeMap<Entity, Pardoned>,
-    /// In-progress Résurrection casts, keyed by the casting Clerc.
-    pub resurrecting: BTreeMap<Entity, Resurrecting>,
-    /// NPC kinds (the merchant).
-    pub npcs: BTreeMap<Entity, NpcKind>,
-    /// Per-NPC display name + dialogue line.
-    pub npc_info: BTreeMap<Entity, NpcInfo>,
-    /// Merchant stocks, keyed by the NPC entity.
-    pub merchants: BTreeMap<Entity, Merchant>,
-    /// Per-boss special-attack state (slam/charge cooldowns + enrage latch).
-    pub boss_state: BTreeMap<Entity, BossState>,
-    /// Summoned allies (player invocations).
-    pub summon_tags: BTreeMap<Entity, SummonTag>,
-    /// Hired mercenary companions.
-    pub mercenary_tags: BTreeMap<Entity, MercenaryTag>,
-    /// Mercenary four-slot equipment.
-    pub merc_inventory: BTreeMap<Entity, MercInventory>,
-    /// Mercenary progression + ability/respawn timers.
-    pub merc_states: BTreeMap<Entity, MercState>,
-    /// In-flight ranged projectiles (homing). Not ECS entities: they have no
-    /// id and live only in this flat vector for the duration of their flight.
-    pub projectiles: Vec<Projectile>,
-    /// Procedurally-placed chests, keyed by entity so the standard despawn path
-    /// applies. Each chest carries its own position too (the entity also has a
-    /// [`Position2D`] so the renderer can pick it up the usual way).
-    pub chests: BTreeMap<Entity, Chest>,
-    /// Procedurally-placed non-walkable scenery for the current map. Mirrored
-    /// from [`MapData::obstacles`] every time the zone is entered.
-    pub obstacles: Vec<(f32, f32, ObstacleKind)>,
-    /// Entities flagged as "elite" by the procedural pack roller. The death
-    /// system reads this to grant bonus XP and crank up loot rarity.
-    pub elite_mobs: BTreeSet<Entity>,
+        impl World {
+            /// Remove an entity from every per-entity store. Generated from the
+            /// `@stores`/`@sets` list, so it always covers every store — the one
+            /// place the old hand-written `despawn` could silently miss one.
+            pub fn despawn(&mut self, e: Entity) {
+                $( self.$sn.remove(&e); )*
+                $( self.$en.remove(&e); )*
+            }
+        }
+    };
+}
 
-    // ── Resources ───────────────────────────────────────────────────────
-    pub map: MapData,
-    pub data: GameData,
-    pub rng: Rng,
-    pub camera: Camera,
-    pub input: PlayerInput,
-    pub net: NetworkState,
-    pub log: Vec<String>,
-    pub tick: u64,
-    pub dt: f32,
-    pub player_entity: Option<Entity>,
-    pub loot_queue: Vec<DeathDrop>,
-    /// Render-facing feedback drained by the renderer each frame.
-    pub render_events: Vec<RenderEvent>,
-    /// Class the player will spawn as (set before `run_startup`).
-    pub chosen_class: ClassType,
-    /// The zone the player is currently in.
-    pub zone: ZoneId,
-    /// A requested zone transition (target zone + arrival tile), applied by the
-    /// zone system next tick.
-    pub pending_zone: Option<(ZoneId, (i32, i32))>,
-    /// Per-zone list of `SpawnPoint::stable_id()`s the player has already
-    /// killed. Slain mobs stay dead across zone transitions for the lifetime
-    /// of the current run (cleared on new-game/load).
-    pub killed_mobs: BTreeMap<String, Vec<u64>>,
-    /// Active quests.
-    pub quests: QuestLog,
-    /// All waypoint beacons across every (non-boss) zone.
-    pub waypoints: Vec<Waypoint>,
-    /// Per-player set of waypoint ids the player has activated. Each player
-    /// has their own list so multiplayer keeps progress separate.
-    pub discovered_wps: BTreeMap<Entity, DiscoveredWaypoints>,
-    /// In-progress waypoint teleport casts (1s, interruptible by damage).
-    pub wp_teleport_casts: BTreeMap<Entity, WaypointTeleportCast>,
-    /// Floating-text feedback drained by the renderer ("Waypoint découvert !").
-    pub floating_texts: Vec<FloatingText>,
-    /// `(player, wp_id, wp_name)` triplets recorded by the waypoint system and
-    /// drained by the network layer to broadcast `WaypointDiscovered`.
-    pub waypoint_events: Vec<(Entity, u32, String)>,
-    /// Run-wide seed used by the procedural map generator. Defaults to the
-    /// World's RNG seed at construction time, and is overridden by the save
-    /// system to a hash of `SaveData::player_id` so a given run reproduces the
-    /// same procedural maps after a reload.
-    pub game_seed: u64,
-    /// Current difficulty (0 = Normal). Reshuffles procedural maps when bumped.
-    pub difficulty: u32,
-    /// The most recent enemy the player fought (see [`LastEnemy`]); drives the
-    /// "danger" readout on the character sheet. UI-only, reset on new game.
-    pub last_enemy: Option<LastEnemy>,
-    /// Dual-wield swing parity, keyed by attacker: `true` means the next melee
-    /// swing comes from the off-hand weapon. Flipped after each swing so a
-    /// two-weapon fighter alternates hands (and their individual damage).
-    pub dual_hand: BTreeMap<Entity, bool>,
-    /// Town-portal return point `(zone, tile)`: set when the player opens a
-    /// portal to town, consumed when they portal back from the village.
-    pub tp_return: Option<(ZoneId, (i32, i32))>,
+define_world! {
+    @stores {
+        positions: Position2D,
+        factions: Faction,
+        health: Health,
+        mana: Mana,
+        move_targets: MoveTarget,
+        combat: Combat,
+        player_tags: PlayerTag,
+        classes: ClassType,
+        stats: Stats,
+        progression: Progression,
+        equipment: EquipmentSlots,
+        inventory: Inventory,
+        skills: SkillSlot,
+        skill_trees: SkillTree,
+        /// Per-player set of unlocked branches identified by `(originating class,
+        /// branch index)`. Native branches are NOT stored — they are always
+        /// implicitly unlocked. Buying a foreign branch costs one skill point.
+        unlocked_branches: Vec<(ClassType, u32)>,
+        mob_tags: MobTag,
+        mob_types: MobType,
+        /// Links a live mob entity to its `SpawnPoint::stable_id()`, so the death
+        /// system can record it into `killed_mobs` and the next visit to the zone
+        /// can skip respawning it.
+        spawn_ids: u64,
+        aggro: AggroRange,
+        ground_items: GroundItem,
+        /// Client-side procedural animation state (render only).
+        animations: AnimationController,
+        /// Facing direction, updated by movement (travel vector) and combat (toward
+        /// the target). Read by the renderer to pick the directional pose.
+        directions: Direction,
+        /// Active attack buffs (e.g. War Cry).
+        buffs: Buff,
+        /// Active movement slows (e.g. Frost Nova).
+        slows: Slow,
+        /// Active invulnerability windows (seconds remaining; e.g. Dodge).
+        invuln: f32,
+        /// Active stuns (seconds remaining): the entity cannot act while > 0.
+        stuns: f32,
+        /// Active renversements (knockdowns): the entity is grounded and helpless.
+        knockdowns: Knockdown,
+        /// Active reculs (pushbacks): the entity is shoved and cannot act.
+        pushbacks: Pushback,
+        /// In-progress interruptible casts, keyed by the casting entity.
+        interruptibles: Interruptible,
+        /// Uninterruptible-animation windows (e.g. the Soldat melee techniques):
+        /// the entity ignores stuns/interruption while present.
+        unstoppable: Unstoppable,
+        /// Active locked melee combos ("Estocs"): a fixed run of guaranteed strikes
+        /// that also locks the owner's input until it finishes.
+        combo_locks: ComboLock,
+        /// Active poison damage-over-time effects.
+        dots: Dot,
+        /// Active defence-reduction debuffs.
+        def_debuffs: DefDebuff,
+        /// Active damage-reduction blessings.
+        resist: Resist,
+        /// Active battle orders (Soldat "Ordres"), each entity holding any number of
+        /// distinct concurrent orders.
+        order_buffs: Vec<OrderBuff>,
+        /// Active healing fields, keyed by their owning caster.
+        heal_fields: HealField,
+        /// Deployed traps.
+        traps: Trap,
+        /// Per-element damage resistances (Mage elemental branches read these).
+        elem_resists: ElementResists,
+        /// Active ground fire rectangles (Mage "Mur de flammes"), keyed by a spawned
+        /// zone entity.
+        flame_walls: FlameWall,
+        /// Active chilling fields (Mage "Blizzard"), keyed by a spawned zone entity.
+        blizzards: BlizzardField,
+        /// Active meteor barrages (Mage "Pluie de météores"), keyed by a spawned
+        /// zone entity.
+        meteor_fields: MeteorField,
+        /// Active frost-armour self-buffs (Mage "Armure de givre"), keyed by owner.
+        frost_armor: FrostArmor,
+        /// Active lightning-shield self-buffs (Mage "Bouclier de foudre"), keyed by
+        /// owner.
+        lightning_shield: LightningShield,
+        /// In-progress charged archer shots, keyed by their owner.
+        charging_shots: ChargingShot,
+        /// Active "Instinct du chasseur" buffs, keyed by owner.
+        hunter_instinct: HunterInstinctBuff,
+        /// Active arrow-rain zones (Archer "Pluie de flèches"), keyed by a spawned
+        /// zone entity.
+        arrow_rains: ArrowRainField,
+        /// The Clerc's currently toggled support aura (at most one per caster).
+        active_auras: ActiveAura,
+        /// Per-recipient aggregated aura bonuses, refreshed by aura ticks and read
+        /// live by combat/movement.
+        aura_bonuses: AuraBonus,
+        /// Mana reserved by the currently active aura (deducted from `mana.max`).
+        aura_reserved_mana: f32,
+        /// Mobs the Clerc has "Converted": they fight under [`Faction::Player`]
+        /// until the timer expires, then revert to their original faction.
+        converted: Converted,
+        /// Mobs the Clerc has "Pardoned": every attacker hitting them heals.
+        pardoned: Pardoned,
+        /// In-progress Résurrection casts, keyed by the casting Clerc.
+        resurrecting: Resurrecting,
+        /// NPC kinds (the merchant).
+        npcs: NpcKind,
+        /// Per-NPC display name + dialogue line.
+        npc_info: NpcInfo,
+        /// Merchant stocks, keyed by the NPC entity.
+        merchants: Merchant,
+        /// Per-boss special-attack state (slam/charge cooldowns + enrage latch).
+        boss_state: BossState,
+        /// Summoned allies (player invocations).
+        summon_tags: SummonTag,
+        /// Hired mercenary companions.
+        mercenary_tags: MercenaryTag,
+        /// Mercenary four-slot equipment.
+        merc_inventory: MercInventory,
+        /// Mercenary progression + ability/respawn timers.
+        merc_states: MercState,
+        /// Procedurally-placed chests, keyed by entity so the standard despawn path
+        /// applies (the entity also carries a [`Position2D`] for the renderer).
+        chests: Chest,
+        /// Per-player set of waypoint ids the player has activated. Each player
+        /// has their own list so multiplayer keeps progress separate.
+        discovered_wps: DiscoveredWaypoints,
+        /// In-progress waypoint teleport casts (1s, interruptible by damage).
+        wp_teleport_casts: WaypointTeleportCast,
+        /// Dual-wield swing parity, keyed by attacker: `true` means the next melee
+        /// swing comes from the off-hand weapon. Flipped after each swing.
+        dual_hand: bool,
+    }
+    @sets {
+        /// Entities flagged as "elite" by the procedural pack roller. The death
+        /// system reads this to grant bonus XP and crank up loot rarity.
+        elite_mobs: Entity,
+    }
+    @resources {
+        next_id: u64,
+        pub map: MapData,
+        pub data: GameData,
+        pub rng: Rng,
+        pub camera: Camera,
+        pub input: PlayerInput,
+        pub net: NetworkState,
+        pub log: Vec<String>,
+        pub tick: u64,
+        pub dt: f32,
+        pub player_entity: Option<Entity>,
+        pub loot_queue: Vec<DeathDrop>,
+        /// Render-facing feedback drained by the renderer each frame.
+        pub render_events: Vec<RenderEvent>,
+        /// Class the player will spawn as (set before `run_startup`).
+        pub chosen_class: ClassType,
+        /// The zone the player is currently in.
+        pub zone: ZoneId,
+        /// A requested zone transition (target zone + arrival tile), applied by the
+        /// zone system next tick.
+        pub pending_zone: Option<(ZoneId, (i32, i32))>,
+        /// Per-zone list of `SpawnPoint::stable_id()`s the player has already
+        /// killed (cleared on new-game/load). Keyed by zone, not entity.
+        pub killed_mobs: BTreeMap<String, Vec<u64>>,
+        /// Active quests.
+        pub quests: QuestLog,
+        /// All waypoint beacons across every (non-boss) zone.
+        pub waypoints: Vec<Waypoint>,
+        /// Floating-text feedback drained by the renderer ("Waypoint découvert !").
+        pub floating_texts: Vec<FloatingText>,
+        /// `(player, wp_id, wp_name)` triplets recorded by the waypoint system and
+        /// drained by the network layer to broadcast `WaypointDiscovered`.
+        pub waypoint_events: Vec<(Entity, u32, String)>,
+        /// Run-wide seed for the procedural map generator (overridden by the save
+        /// system to a hash of `SaveData::player_id` so a run reproduces its maps).
+        pub game_seed: u64,
+        /// Current difficulty (0 = Normal). Reshuffles procedural maps when bumped.
+        pub difficulty: u32,
+        /// The most recent enemy the player fought (drives the character-sheet
+        /// "danger" readout). UI-only, reset on new game.
+        pub last_enemy: Option<LastEnemy>,
+        /// Town-portal return point `(zone, tile)`: set when the player opens a
+        /// portal to town, consumed when they portal back from the village.
+        pub tp_return: Option<(ZoneId, (i32, i32))>,
+        /// In-flight ranged projectiles (homing). Not ECS entities: no id, they
+        /// live only in this flat vector for the duration of their flight.
+        pub projectiles: Vec<Projectile>,
+        /// Procedurally-placed non-walkable scenery for the current map. Mirrored
+        /// from [`MapData::obstacles`] every time the zone is entered.
+        pub obstacles: Vec<(f32, f32, ObstacleKind)>,
+    }
 }
 
 /// A snapshot of the most recent enemy the player traded blows with, kept so
@@ -426,6 +454,7 @@ impl World {
         }
     }
 
+
     /// Take all queued render-feedback events (used by the renderer per frame).
     pub fn drain_render_events(&mut self) -> Vec<RenderEvent> {
         std::mem::take(&mut self.render_events)
@@ -438,74 +467,6 @@ impl World {
         e
     }
 
-    /// Remove an entity from every component store.
-    pub fn despawn(&mut self, e: Entity) {
-        self.positions.remove(&e);
-        self.factions.remove(&e);
-        self.health.remove(&e);
-        self.mana.remove(&e);
-        self.move_targets.remove(&e);
-        self.combat.remove(&e);
-        self.player_tags.remove(&e);
-        self.classes.remove(&e);
-        self.stats.remove(&e);
-        self.progression.remove(&e);
-        self.equipment.remove(&e);
-        self.inventory.remove(&e);
-        self.skills.remove(&e);
-        self.skill_trees.remove(&e);
-        self.unlocked_branches.remove(&e);
-        self.mob_tags.remove(&e);
-        self.mob_types.remove(&e);
-        self.spawn_ids.remove(&e);
-        self.aggro.remove(&e);
-        self.ground_items.remove(&e);
-        self.animations.remove(&e);
-        self.dual_hand.remove(&e);
-        self.directions.remove(&e);
-        self.buffs.remove(&e);
-        self.slows.remove(&e);
-        self.invuln.remove(&e);
-        self.stuns.remove(&e);
-        self.knockdowns.remove(&e);
-        self.pushbacks.remove(&e);
-        self.interruptibles.remove(&e);
-        self.unstoppable.remove(&e);
-        self.combo_locks.remove(&e);
-        self.dots.remove(&e);
-        self.def_debuffs.remove(&e);
-        self.resist.remove(&e);
-        self.order_buffs.remove(&e);
-        self.heal_fields.remove(&e);
-        self.traps.remove(&e);
-        self.elem_resists.remove(&e);
-        self.flame_walls.remove(&e);
-        self.blizzards.remove(&e);
-        self.meteor_fields.remove(&e);
-        self.frost_armor.remove(&e);
-        self.lightning_shield.remove(&e);
-        self.charging_shots.remove(&e);
-        self.hunter_instinct.remove(&e);
-        self.arrow_rains.remove(&e);
-        self.active_auras.remove(&e);
-        self.aura_bonuses.remove(&e);
-        self.aura_reserved_mana.remove(&e);
-        self.converted.remove(&e);
-        self.pardoned.remove(&e);
-        self.resurrecting.remove(&e);
-        self.npcs.remove(&e);
-        self.npc_info.remove(&e);
-        self.merchants.remove(&e);
-        self.boss_state.remove(&e);
-        self.summon_tags.remove(&e);
-        self.mercenary_tags.remove(&e);
-        self.merc_inventory.remove(&e);
-        self.merc_states.remove(&e);
-        self.discovered_wps.remove(&e);
-        self.wp_teleport_casts.remove(&e);
-        self.chests.remove(&e);
-        self.elite_mobs.remove(&e);
-    }
 
     /// Snapshot of all live chest entities.
     pub fn chest_entities(&self) -> Vec<Entity> {
