@@ -12,8 +12,9 @@
 
 use super::figures::Shape;
 
-/// Soldat: flat steel helm with a visor band, broad armoured pauldrons, a
-/// belted steel-blue cuirass, plate skirt, and leather boots.
+/// Soldat: domed steel helm with a visor band, armoured pauldrons over a belted
+/// steel-blue cuirass, a short plate skirt, and greaved legs with boots. Taller,
+/// leaner proportions (smaller head, longer legs) than the old squat sprite.
 const SOLDIER: &[&str] = &[
     "................",
     "....mmmmmmmm....",
@@ -22,6 +23,7 @@ const SOLDIER: &[&str] = &[
     "....ssssssss....",
     "....ssessess....",
     "....ssssssss....",
+    "......ssss......",
     "..mmppppppppmm..",
     "..mppppppppppm..",
     "...pppppppppp...",
@@ -31,16 +33,17 @@ const SOLDIER: &[&str] = &[
     "...kkkkkkkkkk...",
     "....ddd..ddd....",
     "....ddd..ddd....",
-    "....ddd..ddd....",
+    "....ppp..ppp....",
+    "....ppp..ppp....",
     "....ddd..ddd....",
     "....ddd..ddd....",
     "....www..www....",
     "...wwww..wwww...",
-    "...wwww..wwww...",
+    "................",
 ];
 
-/// Clerc: a rounded cowl framing the face, a long flared robe (no legs) with a
-/// gold sash and a gilded hem.
+/// Clerc: a rounded cowl framing the face over a tall narrow neck, falling into
+/// a long flared robe (no legs) with a gold sash and a gilded hem.
 const CLERIC: &[&str] = &[
     "................",
     ".....pppppp.....",
@@ -48,53 +51,54 @@ const CLERIC: &[&str] = &[
     "....pssssssp....",
     "....psessesp....",
     "....pssssssp....",
+    "......ssss......",
     "....pppppppp....",
     "...pppppppppp...",
     "...pppppppppp...",
     "..pppppppppppp..",
-    "..pppppppppppp..",
     "..ppppggggpppp..",
     "..pppppppppppp..",
+    "..pppppppppppp..",
     ".pppppppppppppp.",
     ".pppppppppppppp.",
-    ".pgpppppppppgp..",
-    "pppppppppppppppp",
-    "pppppppppppppppp",
+    ".pppppppppppppp.",
     "pppppppppppppppp",
     "pppppppppppppppp",
     "gggggggggggggggg",
     ".pppppppppppppp.",
+    "................",
 ];
 
-/// Mage de guerre: a tall pointed hat with a wide brim, mid-length arcane robe,
-/// and stubby boots peeking under the hem (the orb is drawn as a weapon).
+/// Mage de guerre: a tall pointed hat with a wide brim, a slim neck, a
+/// mid-length arcane robe, and pointed boots peeking under the hem (the orb is
+/// drawn as a weapon by the renderer).
 const WARMAGE: &[&str] = &[
+    "................",
     ".......pp.......",
     "......pppp......",
     "......pppp......",
-    ".....pppppp.....",
     ".....pppppp.....",
     "...pppppppppp...",
     "....ssssssss....",
     "....ssessess....",
     "....ssssssss....",
+    "......ssss......",
     "...pppppppppp...",
     "...pppppppppp...",
     "..pppppppppppp..",
     "..pppppppppppp..",
-    "..pppppppppppp..",
     ".pppppppppppppp.",
     ".pppppppppppppp.",
-    "..dddddddddd....",
-    "....dd...dd.....",
-    "....dd...dd.....",
-    "....dd...dd.....",
-    "....ww...ww.....",
-    "....ww...ww.....",
+    "...dddddddddd...",
+    "...dddddddddd...",
+    ".....ww..ww.....",
+    ".....ww..ww.....",
+    ".....ww..ww.....",
+    "................",
 ];
 
-/// Archer: a short hood, a slim leather-strapped torso, a belt, and lean legs
-/// (the bow and quiver are layered on by the renderer).
+/// Archer: a short hood framing the face, a slim leather-strapped torso, a belt,
+/// and lean two-pixel legs (the bow and quiver are layered on by the renderer).
 const ARCHER: &[&str] = &[
     "................",
     ".....pppppp.....",
@@ -102,48 +106,52 @@ const ARCHER: &[&str] = &[
     "....pssssssp....",
     "....psessesp....",
     "....pssssssp....",
-    "....ssssssss....",
-    "...lppppppppl...",
-    "...wppppppppw...",
+    "......ssss......",
     "....pppppppp....",
+    "...spppppppps...",
     "....pppppppp....",
     "....wwwwwwww....",
     "....pppppppp....",
+    ".....pp..pp.....",
     ".....dd..dd.....",
-    ".....dd..dd.....",
-    ".....dd..dd.....",
+    ".....pp..pp.....",
+    ".....pp..pp.....",
     ".....dd..dd.....",
     ".....dd..dd.....",
     ".....ww..ww.....",
-    ".....ww..ww.....",
+    "................",
 ];
 
 /// Generic humanoid (mercs, NPCs, skeletons, zombies, robed casters): bare head
-/// with hair, a primary-coloured torso with shoulders, arms, legs, and boots.
-/// Skin/primary/eyes all come from the style, so the same grid reads as bone,
-/// rotting green, or robed magenta depending on the entity.
+/// with hair, a neck, a primary torso with shaded shoulder/arm columns and skin
+/// hands, then legs and boots. Skin/primary/eyes all come from the style, so the
+/// same grid reads as bone, rotting green, or robed magenta. Re-proportioned for
+/// a less chibi, more human silhouette (smaller head, neck, longer legs).
 const BRUTE: &[&str] = &[
     "................",
-    "......hhhh......",
+    ".....hhhhhh.....",
+    "....hhhhhhhh....",
     "....hssssssh....",
-    "....ssssssss....",
     "....ssessess....",
-    ".....ssssss.....",
-    "..sllpppppplls..",
-    "..sppppppppps...",
-    "..sppppppppps...",
-    "...pppppppppp...",
-    "...pppppppppp...",
-    "...pppppppppp...",
-    "...aaaaaaaaaa...",
-    "...dddddddddd...",
+    "....ssssssss....",
+    "......ssss......",
+    "...dppppppppd...",
+    "...dppppppppd...",
+    "...spppppppps...",
+    "....pppppppp....",
+    "....pppppppp....",
+    "....aaaaaaaa....",
+    "....dddddddd....",
     "....ddd..ddd....",
     "....ddd..ddd....",
-    "....ddd..ddd....",
+    "....ppp..ppp....",
+    "....ppp..ppp....",
+    "....ppp..ppp....",
     "....ddd..ddd....",
     "....ddd..ddd....",
     "....www..www....",
-    "....www..www....",
+    "...wwww..wwww...",
+    "................",
 ];
 
 /// Golem: a hulking stone block, full-width torso with boulder fists, glowing
