@@ -21,13 +21,12 @@ fn shade(c: Color, f: f32) -> Color {
     [(c[0] * f).clamp(0.0, 1.0), (c[1] * f).clamp(0.0, 1.0), (c[2] * f).clamp(0.0, 1.0), c[3]]
 }
 
-/// Base colour for a tile type, with a subtle checkerboard on the floor.
-fn tile_color(kind: TileType, x: i32, y: i32) -> Option<Color> {
-    let checker = (x + y) % 2 == 0;
+/// Base colour for a tile type. The floor is a single tone — the natural
+/// variation (grass vs. dirt) is added by `draw_grass` using coherent noise, so
+/// there is no artificial checkerboard.
+fn tile_color(kind: TileType, _x: i32, _y: i32) -> Option<Color> {
     match kind {
-        TileType::Floor | TileType::MobSpawn => {
-            Some(if checker { vertex::FLOOR } else { vertex::FLOOR_ALT })
-        }
+        TileType::Floor | TileType::MobSpawn => Some(vertex::FLOOR),
         TileType::PlayerSpawn => Some(vertex::SPAWN),
         TileType::Wall => Some(vertex::WALL),
         TileType::Exit => Some(vertex::EXIT),
@@ -380,33 +379,29 @@ fn draw_grass(
     bands: usize,
 ) {
     let n = shapes::tile_noise(tx, ty, 1);
-    // Some tiles are drier/browner (worn earth amid the grass) for a D2-style
-    // mottled wilderness rather than a uniform green lawn.
-    let dry = shapes::tile_noise(tx, ty, 41);
-    let f = 0.88 + 0.22 * n;
-    let varied = if dry > 0.70 {
-        // Shift toward khaki/brown for a dry patch.
-        let g = 0.80 + 0.30 * n;
-        [
-            (base[0] * (g + 0.22)).clamp(0.0, 1.0),
-            (base[1] * (g + 0.02)).clamp(0.0, 1.0),
-            (base[2] * (g - 0.10)).clamp(0.0, 1.0),
-            1.0,
-        ]
-    } else {
-        [(base[0] * f).clamp(0.0, 1.0), (base[1] * (f + 0.04)).clamp(0.0, 1.0), (base[2] * f).clamp(0.0, 1.0), 1.0]
-    };
+    // Coherent terrain variation: sample noise at a coarse (~3-tile) scale so
+    // grass and bare earth form large contiguous patches instead of a per-tile
+    // checker. `d` blends each tile from grass (0) toward dirt (1).
+    let region = shapes::tile_noise(tx.div_euclid(3), ty.div_euclid(3), 41);
+    let d = (((region - 0.52) * 3.0) + (n - 0.5) * 0.35).clamp(0.0, 1.0);
+    let sh = 0.90 + 0.16 * n;
+    let grass = [(base[0] * sh).clamp(0.0, 1.0), (base[1] * (sh + 0.04)).clamp(0.0, 1.0), (base[2] * sh).clamp(0.0, 1.0), 1.0];
+    let dirt = [(0.40 * sh).clamp(0.0, 1.0), (0.33 * sh).clamp(0.0, 1.0), (0.22 * sh).clamp(0.0, 1.0), 1.0];
+    let varied = [
+        grass[0] + (dirt[0] - grass[0]) * d,
+        grass[1] + (dirt[1] - grass[1]) * d,
+        grass[2] + (dirt[2] - grass[2]) * d,
+        1.0,
+    ];
     shapes::diamond(batch, center, w, h, varied, RenderLayer::Terrain, ys, 0, bands);
 
-    // Bare-earth patch: a cluster of brown blotches on the worn tiles, like the
-    // trampled dirt that breaks up D2's outdoor grass.
-    if shapes::tile_noise(tx, ty, 40) > 0.80 {
-        let dirt = [0.34, 0.27, 0.17, 1.0];
-        for salt in [42u32, 43, 44] {
+    // On dirt-heavy tiles, a couple of darker earth speckles for texture.
+    if d > 0.55 {
+        for salt in [42u32, 43] {
             let dx = (shapes::tile_noise(tx, ty, salt) - 0.5) * w * 0.40;
             let dy = (shapes::tile_noise(tx, ty, salt + 5) - 0.5) * h * 0.40;
-            let r = w * (0.12 + 0.08 * shapes::tile_noise(tx, ty, salt + 9));
-            shapes::ellipse(batch, center[0] + dx, center[1] + dy, r, r * 0.6, RenderLayer::Terrain, ys, 1, shade(dirt, 0.85 + 0.3 * n));
+            let r = w * (0.08 + 0.06 * shapes::tile_noise(tx, ty, salt + 9));
+            shapes::ellipse(batch, center[0] + dx, center[1] + dy, r, r * 0.6, RenderLayer::Terrain, ys, 1, shade(varied, 0.80));
         }
     }
 
@@ -636,11 +631,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn floor_checkerboards() {
+    fn floor_is_a_single_tone() {
+        // The checkerboard was removed: every floor tile shares one base colour,
+        // with variation added by coherent noise in `draw_grass`.
         let a = tile_color(TileType::Floor, 0, 0);
         let b = tile_color(TileType::Floor, 1, 0);
-        assert!(a.is_some() && b.is_some());
-        assert_ne!(a, b);
+        assert!(a.is_some());
+        assert_eq!(a, b);
+        assert_eq!(a, Some(vertex::FLOOR));
     }
 
     #[test]

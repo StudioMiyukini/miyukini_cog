@@ -118,6 +118,13 @@ impl PixelSprite {
         self.height
     }
 
+    /// Number of pixel columns (so callers can size horizontal pixels against a
+    /// target body *width*, keeping the figure slim independently of its height).
+    #[must_use]
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
     fn at(&self, x: u32, y: u32) -> Option<Color> {
         self.pixels[(y * self.width + x) as usize]
     }

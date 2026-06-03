@@ -407,8 +407,10 @@ fn draw_pixel_body(
     let pal = pixel_sprite::Palette::from_style(style);
     let sprite = pixel_sprite::PixelSprite::from_grid(sprites_data::grid(style.shape), &pal, away);
     let px = h / sprite.height() as f32;
-    // Stocky builds widen the pixel without stretching height; lean ones narrow.
-    let px_x = px * (0.78 + 0.30 * style.build).clamp(0.7, 1.7);
+    // Horizontal pixel size derives from the figure's *base width* (not its
+    // height), so a high-resolution grid still renders a slim figure instead of
+    // a near-square blob. Stocky builds widen it, lean ones narrow it.
+    let px_x = (w / sprite.width() as f32) * (0.82 + 0.22 * style.build).clamp(0.6, 1.5);
     // A small two-leg scissor offset drives the walk; idle bob is folded in via `bob`.
     let leg_swing = sample.swing * px;
     sprite.draw(batch, cx, feet_y, px, px_x, RenderLayer::Entities, ys, psub(P_TORSO), mirror, leg_swing, bob, tint);
