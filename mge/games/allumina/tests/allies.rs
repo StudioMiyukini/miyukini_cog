@@ -13,6 +13,8 @@ use allumina::plugins::player::PlayerCommand;
 use allumina::systems::mercenary::{
     active_mercenary, mercenary_ai_system, mercenary_update_system, recruit_mercenary, RESPAWN_TIME,
 };
+use allumina::systems::ai::ai_system;
+use allumina::systems::combat::resolve_attack;
 use allumina::systems::summon::{host_size, spawn_summon, summon_system, MAX_SUMMONS};
 use allumina::Entity;
 
@@ -335,6 +337,42 @@ fn elite_warrior_cleaves_nearby_enemies() {
 
     let after = app.world.health.get(&mob).unwrap().current;
     assert!(after < before, "the elite warrior should cleave the adjacent mob");
+}
+
+#[test]
+fn a_summon_that_hits_a_mob_pulls_its_aggro() {
+    let mut app = build_app_in(ClassType::Soldat, 21, ZoneId::GreenPlains);
+    let player = app.world.player_entity.unwrap();
+    let ppos = *app.world.positions.get(&player).unwrap();
+
+    let warrior = spawn_summon(&mut app.world, player, &summon::ELITE_WARRIORS)[0];
+    let wpos = *app.world.positions.get(&warrior).unwrap();
+
+    // A mob right beside the summon (well within any melee reach).
+    let mob = app.world.spawn();
+    app.world.positions.insert(mob, Position2D::new(wpos.x + 0.5, wpos.y));
+    app.world.health.insert(mob, Health::full(500.0));
+    app.world.mob_tags.insert(mob, MobTag);
+    app.world.mob_types.insert(mob, MobType { def_id: 1 });
+    app.world.aggro.insert(mob, AggroRange::new(6.0, 12.0, AiBehavior::Melee, ppos));
+    app.world.combat.insert(mob, Combat::new(1.4, 1.0));
+
+    // The summon strikes the mob → the mob records it as its aggressor.
+    resolve_attack(&mut app.world, warrior, mob, 1.0);
+    assert_eq!(app.world.aggressor.get(&mob), Some(&warrior), "the hit records the ally as aggressor");
+
+    // After the AI runs, the mob targets the summon, not the player.
+    ai_system(&mut app.world);
+    assert_eq!(
+        app.world.combat.get(&mob).and_then(|c| c.target),
+        Some(warrior),
+        "the provoked mob retaliates against the summon",
+    );
+
+    // When the summon dies, the mob forgets it and reverts to the player.
+    app.world.health.get_mut(&warrior).unwrap().current = 0.0;
+    ai_system(&mut app.world);
+    assert!(app.world.aggressor.get(&mob).is_none(), "a dead aggressor is forgotten");
 }
 
 // ── Mercenaries ───────────────────────────────────────────────────────────────

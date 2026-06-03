@@ -11,8 +11,6 @@ const MOB_SPEED: f32 = 3.2;
 
 pub fn ai_system(world: &mut World) {
     let Some(player) = world.player_entity else { return };
-    let Some(&player_pos) = world.positions.get(&player) else { return };
-    let player_alive = world.health.get(&player).is_some_and(|h| !h.is_empty());
     // Shared by the converted-mob branch so it doesn't re-scan all mobs per
     // converted mob (see `nearest_hostile_mob`).
     let mobs = MobSnapshot::build(world);
@@ -40,22 +38,45 @@ pub fn ai_system(world: &mut World) {
         }
         let Some(&pos) = world.positions.get(&e) else { continue };
 
+        // This mob's current foe: a living ally (summon/merc) that struck it
+        // pulls aggro off the player; otherwise the player. A stale aggressor
+        // (dead or despawned ally) is forgotten so the mob reverts to the player.
+        let foe = {
+            let valid = world.aggressor.get(&e).copied().filter(|a| {
+                world.health.get(a).is_some_and(|h| !h.is_empty())
+                    && world.positions.contains_key(a)
+            });
+            match valid {
+                Some(a) => a,
+                None => {
+                    world.aggressor.remove(&e);
+                    player
+                }
+            }
+        };
+        let Some(&foe_pos) = world.positions.get(&foe) else { continue };
+        let foe_alive = world.health.get(&foe).is_some_and(|h| !h.is_empty());
+
         // Pull static reach data, then drop the data borrow before mutating.
         let attack_range = world
             .mob_types
             .get(&e)
             .and_then(|m| world.data.mob(m.def_id))
             .map_or(1.5, |d| d.attack_range);
-        let dist_player = pos.distance(player_pos);
+        let dist_foe = pos.distance(foe_pos);
         let dist_home = pos.distance(aggro.home);
 
-        let next = if !player_alive {
+        // A mob struck by an ally is "provoked": it pursues that aggressor even
+        // beyond its normal aggro radius (it was attacked, not just approached).
+        let provoked = foe != player;
+        let next = if !foe_alive {
             AiState::Return
         } else if dist_home > aggro.leash {
             AiState::Return
-        } else if dist_player <= attack_range {
+        } else if dist_foe <= attack_range {
             AiState::Attack
-        } else if dist_player <= aggro.aggro
+        } else if provoked
+            || dist_foe <= aggro.aggro
             || matches!(aggro.state, AiState::Chase | AiState::Attack)
         {
             AiState::Chase
@@ -66,7 +87,7 @@ pub fn ai_system(world: &mut World) {
         match next {
             AiState::Attack => {
                 if let Some(c) = world.combat.get_mut(&e) {
-                    c.target = Some(player);
+                    c.target = Some(foe);
                 }
                 // Mobs hold their ground and fire/strike — no kiting/back-pedal,
                 // including ranged & casters.
@@ -79,17 +100,18 @@ pub fn ai_system(world: &mut World) {
                 let need_path =
                     world.move_targets.get(&e).is_none() || world.tick % 12 == 0;
                 if need_path {
-                    if let Some(path) =
-                        find_path(&world.map, pos.tile(), player_pos.tile())
-                    {
+                    if let Some(path) = find_path(&world.map, pos.tile(), foe_pos.tile()) {
                         if !path.is_empty() {
                             world.move_targets
-                                .insert(e, MoveTarget::new(player_pos, path, MOB_SPEED));
+                                .insert(e, MoveTarget::new(foe_pos, path, MOB_SPEED));
                         }
                     }
                 }
             }
             AiState::Return => {
+                // Returning home: forget the ally aggressor so the mob re-acquires
+                // the player by default next time it engages.
+                world.aggressor.remove(&e);
                 if let Some(c) = world.combat.get_mut(&e) {
                     c.target = None;
                 }

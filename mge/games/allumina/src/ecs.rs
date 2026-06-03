@@ -170,6 +170,10 @@ define_world! {
         /// can skip respawning it.
         spawn_ids: u64,
         aggro: AggroRange,
+        /// The ally (summon / mercenary) that last struck this mob. Set by
+        /// combat, read by the mob AI so a hit ally pulls the mob's aggro off
+        /// the player. Cleared when the mob leashes home or the ally vanishes.
+        aggressor: Entity,
         ground_items: GroundItem,
         /// Client-side procedural animation state (render only).
         animations: AnimationController,
@@ -379,6 +383,7 @@ impl World {
             mob_types: BTreeMap::new(),
             spawn_ids: BTreeMap::new(),
             aggro: BTreeMap::new(),
+            aggressor: BTreeMap::new(),
             ground_items: BTreeMap::new(),
             animations: BTreeMap::new(),
             directions: BTreeMap::new(),

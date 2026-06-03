@@ -792,6 +792,13 @@ pub fn resolve_attack(
     });
     // Any landed damage interrupts an in-progress cast (unless Unstoppable).
     try_interrupt(world, defender);
+    // A summon or mercenary that strikes a mob pulls its aggro onto itself, so
+    // the mob retaliates against the ally instead of beelining for the player.
+    let by_ally =
+        world.summon_tags.contains_key(&attacker) || world.mercenary_tags.contains_key(&attacker);
+    if by_ally && world.mob_tags.contains_key(&defender) {
+        world.aggressor.insert(defender, attacker);
+    }
     // The Mage's frost armour retaliates against melee attackers.
     reflect_frost(world, attacker, defender);
     // The Clerc's Aura de vengeance reflects a fraction of damage back.
