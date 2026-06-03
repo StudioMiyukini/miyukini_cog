@@ -6,8 +6,9 @@ use crate::ecs::{Entity, World};
 use crate::systems::movement::find_path;
 use crate::systems::spatial::MobSnapshot;
 
-/// Tiles per second a mob walks while chasing/returning.
-const MOB_SPEED: f32 = 3.2;
+/// Tiles per second a mob walks while chasing/returning. Halved (3.2 → 1.6) to
+/// slow enemy movement by 50%.
+const MOB_SPEED: f32 = 1.6;
 
 pub fn ai_system(world: &mut World) {
     let Some(player) = world.player_entity else { return };
