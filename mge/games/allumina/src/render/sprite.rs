@@ -56,12 +56,13 @@ pub fn push_quad(
     });
 }
 
-/// Base draw size (in unscaled pixels) for a character figure.
-pub const FIGURE_W: f32 = 26.0;
-pub const FIGURE_H: f32 = 40.0;
-/// Base draw size for a boss figure.
-pub const BOSS_W: f32 = 46.0;
-pub const BOSS_H: f32 = 70.0;
+/// Base draw size (in unscaled pixels) for a character figure. Doubled from the
+/// original 26×40 so entities read larger on screen.
+pub const FIGURE_W: f32 = 52.0;
+pub const FIGURE_H: f32 = 80.0;
+/// Base draw size for a boss figure (doubled from 46×70).
+pub const BOSS_W: f32 = 92.0;
+pub const BOSS_H: f32 = 140.0;
 /// Base draw size for a ground item.
 pub const ITEM_SIZE: f32 = 14.0;
 
