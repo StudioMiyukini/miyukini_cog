@@ -7,7 +7,7 @@
 
 use mge_render::batch::{RenderLayer, SpriteBatch};
 
-use crate::components::world::{ChestTier, Decor, DecorKind, ObstacleKind, TileType};
+use crate::components::world::{ChestTier, Decor, DecorKind, ObstacleKind, TileType, ZoneId};
 use crate::components::Position2D;
 use crate::ecs::World;
 use crate::plugins::isometric::{TILE_H, TILE_W};
@@ -78,6 +78,9 @@ pub fn draw_tilemap(batch: &mut SpriteBatch, cam: &Camera2D, world: &World) {
     // bounding box covers every visible tile (the on-screen test below trims the
     // diamond's corners). This avoids walking the whole map every frame.
     let (tx0, tx1, ty0, ty1) = visible_tile_bounds(cam, map.width, map.height);
+    // The Village reads as a settlement: a packed-earth + cobblestone ground
+    // instead of the wild grass of the hunting zones.
+    let in_town = matches!(world.zone, ZoneId::Village);
 
     for ty in ty0..=ty1 {
         for tx in tx0..=tx1 {
@@ -91,7 +94,11 @@ pub fn draw_tilemap(batch: &mut SpriteBatch, cam: &Camera2D, world: &World) {
 
             match kind {
                 TileType::Floor | TileType::MobSpawn => {
-                    draw_grass(batch, center, w, h, base, tx, ty, ys, bands);
+                    if in_town {
+                        draw_town_floor(batch, center, w, h, tx, ty, ys, bands);
+                    } else {
+                        draw_grass(batch, center, w, h, base, tx, ty, ys, bands);
+                    }
                 }
                 TileType::PlayerSpawn => {
                     draw_dais(batch, center, w, h, ys, bands);
@@ -440,6 +447,57 @@ fn draw_grass(
         let petal = if fl > 0.965 { [0.96, 0.86, 0.36, 1.0] } else { [0.93, 0.70, 0.86, 1.0] };
         shapes::rect(batch, fx - blade_w * 0.5, fy - blade_w, blade_w, blade_w * 2.2, RenderLayer::Decals, ys, 2, shade(varied, 0.7));
         shapes::rect(batch, fx - blade_w, fy - blade_w * 2.0, blade_w * 2.0, blade_w * 1.6, RenderLayer::Decals, ys, 2, petal);
+    }
+}
+
+/// A Village ground tile: packed earth with scattered cobblestones, so the town
+/// reads as a settled, paved square rather than wild grass. Some tiles stay
+/// mostly bare dirt, others gather a few stones, with sparse grass tufts in the
+/// cracks.
+#[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss, clippy::too_many_arguments)]
+fn draw_town_floor(
+    batch: &mut SpriteBatch,
+    center: [f32; 2],
+    w: f32,
+    h: f32,
+    tx: i32,
+    ty: i32,
+    ys: i32,
+    bands: usize,
+) {
+    let n = shapes::tile_noise(tx, ty, 1);
+    // Packed-earth base, faintly mottled.
+    let g = 0.86 + 0.26 * n;
+    let dirt = [(0.42 * g).clamp(0.0, 1.0), (0.34 * g).clamp(0.0, 1.0), (0.24 * g).clamp(0.0, 1.0), 1.0];
+    shapes::diamond(batch, center, w, h, dirt, RenderLayer::Terrain, ys, 0, bands);
+
+    // Cobblestones: rounded grey stones with a lit cap, denser on "paved" tiles.
+    let paved = shapes::tile_noise(tx, ty, 80);
+    let count = if paved > 0.55 { 5 } else { 2 };
+    for i in 0..count {
+        let sx = shapes::tile_noise(tx, ty, 50 + i);
+        if sx < 0.28 {
+            continue;
+        }
+        let sy = shapes::tile_noise(tx, ty, 60 + i);
+        let sz = shapes::tile_noise(tx, ty, 70 + i);
+        let ox = (sx - 0.5) * w * 0.56;
+        let oy = (sy - 0.5) * h * 0.56;
+        let r = w * (0.07 + 0.05 * sz);
+        let cob = if sz < 0.5 { [0.52, 0.50, 0.48, 1.0] } else { [0.45, 0.43, 0.42, 1.0] };
+        shapes::ellipse(batch, center[0] + ox, center[1] + oy, r, r * 0.66, RenderLayer::Decals, ys, 1, shade(cob, 0.78));
+        shapes::ellipse(batch, center[0] + ox, center[1] + oy - r * 0.18, r * 0.82, r * 0.5, RenderLayer::Decals, ys, 2, cob);
+    }
+
+    // A couple of grass tufts sprouting between the stones.
+    if shapes::tile_noise(tx, ty, 90) > 0.62 {
+        let blade_w = (w * 0.024).max(1.0);
+        for i in 0..2u32 {
+            let bx = (shapes::tile_noise(tx, ty, 92 + i) - 0.5) * w * 0.45;
+            let by = (shapes::tile_noise(tx, ty, 94 + i) - 0.5) * h * 0.45;
+            let bh = h * 0.10;
+            shapes::rect(batch, center[0] + bx, center[1] + by - bh, blade_w, bh, RenderLayer::Decals, ys, 3, [0.26, 0.34, 0.18, 1.0]);
+        }
     }
 }
 
