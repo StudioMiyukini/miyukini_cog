@@ -357,31 +357,47 @@ fn draw_grass(
     bands: usize,
 ) {
     let n = shapes::tile_noise(tx, ty, 1);
-    let f = 0.86 + 0.26 * n;
+    let f = 0.88 + 0.22 * n;
     let varied = [(base[0] * f).clamp(0.0, 1.0), (base[1] * (f + 0.04)).clamp(0.0, 1.0), (base[2] * f).clamp(0.0, 1.0), 1.0];
     shapes::diamond(batch, center, w, h, varied, RenderLayer::Terrain, ys, 0, bands);
 
-    // Two deterministic darker tufts near the tile centre.
-    for salt in [2u32, 3] {
-        let nx = shapes::tile_noise(tx, ty, salt);
-        let ny = shapes::tile_noise(tx, ty, salt + 10);
-        if nx < 0.45 {
+    // Scattered upright grass blades: thin tufts, alternating lighter and darker
+    // green, give the ground a fine texture that holds up next to the larger
+    // figures (replacing the old pair of flat blotches).
+    let blade_w = (w * 0.026).max(1.0);
+    for i in 0..6u32 {
+        let nx = shapes::tile_noise(tx, ty, 4 + i);
+        if nx < 0.34 {
             continue;
         }
-        let ox = (nx - 0.5) * w * 0.42;
-        let oy = (ny - 0.5) * h * 0.42;
-        let dot = w * (0.07 + 0.05 * ny);
+        let ny = shapes::tile_noise(tx, ty, 14 + i);
+        let nz = shapes::tile_noise(tx, ty, 24 + i);
+        let ox = (nx - 0.5) * w * 0.52;
+        let oy = (ny - 0.5) * h * 0.52;
+        let bh = h * (0.10 + 0.12 * nz);
+        // Front-lit blades brighten, shaded ones recede — reads as depth.
+        let col = shade(varied, if nz < 0.5 { 1.20 } else { 0.74 });
         shapes::rect(
             batch,
-            center[0] + ox - dot * 0.5,
-            center[1] + oy - dot * 0.3,
-            dot,
-            dot * 0.6,
+            center[0] + ox - blade_w * 0.5,
+            center[1] + oy - bh,
+            blade_w,
+            bh,
             RenderLayer::Decals,
             ys,
             1,
-            shade(varied, 0.72),
+            col,
         );
+    }
+
+    // A rare wildflower: a small warm dot on a stem.
+    let fl = shapes::tile_noise(tx, ty, 33);
+    if fl > 0.92 {
+        let fx = center[0] + (shapes::tile_noise(tx, ty, 34) - 0.5) * w * 0.42;
+        let fy = center[1] + (shapes::tile_noise(tx, ty, 35) - 0.5) * h * 0.42;
+        let petal = if fl > 0.965 { [0.96, 0.86, 0.36, 1.0] } else { [0.93, 0.70, 0.86, 1.0] };
+        shapes::rect(batch, fx - blade_w * 0.5, fy - blade_w, blade_w, blade_w * 2.2, RenderLayer::Decals, ys, 2, shade(varied, 0.7));
+        shapes::rect(batch, fx - blade_w, fy - blade_w * 2.0, blade_w * 2.0, blade_w * 1.6, RenderLayer::Decals, ys, 2, petal);
     }
 }
 
