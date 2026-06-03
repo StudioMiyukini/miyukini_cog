@@ -79,16 +79,16 @@ pub const GOLEM: Color = [0.52, 0.52, 0.56, 1.0];
 /// Caster mob robe — deep magenta.
 pub const CASTER_ROBE: Color = [0.62, 0.30, 0.72, 1.0];
 
-/// Walkable floor — muted green.
-pub const FLOOR: Color = [0.20, 0.42, 0.24, 1.0];
-/// Alternating floor checker — slightly darker green.
-pub const FLOOR_ALT: Color = [0.16, 0.36, 0.20, 1.0];
-/// Wall / blocker — brown.
-pub const WALL: Color = [0.40, 0.28, 0.16, 1.0];
+/// Walkable floor — muted desaturated olive-green (D2 Act-1 wilderness feel).
+pub const FLOOR: Color = [0.26, 0.33, 0.20, 1.0];
+/// Alternating floor checker — darker, drier olive.
+pub const FLOOR_ALT: Color = [0.21, 0.28, 0.17, 1.0];
+/// Wall / blocker — earthy brown.
+pub const WALL: Color = [0.38, 0.27, 0.16, 1.0];
 /// Exit / transition tile — teal.
 pub const EXIT: Color = [0.25, 0.70, 0.70, 1.0];
 /// Player-spawn marker tint blended into the floor.
-pub const SPAWN: Color = [0.30, 0.50, 0.30, 1.0];
+pub const SPAWN: Color = [0.33, 0.40, 0.25, 1.0];
 
 /// HUD panel background — translucent dark.
 pub const PANEL_BG: Color = [0.05, 0.05, 0.07, 0.85];

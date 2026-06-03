@@ -187,9 +187,12 @@ const CLOTH_YELLOW: Color = [0.90, 0.78, 0.30, 1.0];
 const GOLD: Color = [0.95, 0.82, 0.30, 1.0];
 const FIRE_HOT: Color = [1.0, 0.55, 0.12, 1.0];
 const FIRE_CORE: Color = [1.0, 0.92, 0.55, 1.0];
-const LEAF: Color = [0.18, 0.42, 0.20, 1.0];
-const LEAF_LIGHT: Color = [0.32, 0.58, 0.26, 1.0];
-const BUSH: Color = [0.26, 0.50, 0.24, 1.0];
+const LEAF: Color = [0.17, 0.33, 0.16, 1.0];
+const LEAF_DARK: Color = [0.11, 0.23, 0.11, 1.0];
+const LEAF_LIGHT: Color = [0.30, 0.46, 0.22, 1.0];
+const BUSH: Color = [0.20, 0.36, 0.18, 1.0];
+const BARK: Color = [0.32, 0.22, 0.13, 1.0];
+const BARK_DARK: Color = [0.22, 0.15, 0.09, 1.0];
 
 fn draw_fountain(batch: &mut SpriteBatch, c: [f32; 2], w: f32, h: f32, ys: i32, time: f32) {
     let pulse = 0.5 + 0.5 * (time * 2.4).sin();
@@ -309,21 +312,34 @@ fn draw_sign(batch: &mut SpriteBatch, c: [f32; 2], w: f32, h: f32, ys: i32) {
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 fn draw_tree(batch: &mut SpriteBatch, c: [f32; 2], w: f32, h: f32, ys: i32, tx: i32, ty: i32) {
     let n = shapes::tile_noise(tx, ty, 7);
-    let size = 0.85 + n * 0.30;
-    // Trunk.
-    shapes::rect(batch, c[0] - 2.5, c[1] - h * 0.05, 5.0, h * 0.30, RenderLayer::Decals, ys, 0, WOOD);
-    // Layered crown.
-    shapes::circle(batch, c[0], c[1] - h * 0.25, w * 0.30 * size, RenderLayer::Decals, ys, 1, LEAF);
-    shapes::circle(batch, c[0] - w * 0.10, c[1] - h * 0.32, w * 0.18 * size, RenderLayer::Decals, ys, 2, LEAF_LIGHT);
-    shapes::circle(batch, c[0] + w * 0.12, c[1] - h * 0.30, w * 0.16 * size, RenderLayer::Decals, ys, 2, LEAF_LIGHT);
+    let size = 0.90 + n * 0.35;
+    // Ground shadow grounds the trunk.
+    shapes::ellipse(batch, c[0], c[1] + h * 0.06, w * 0.26 * size, h * 0.09 * size, RenderLayer::Decals, ys, 0, [0.0, 0.0, 0.0, 0.28]);
+    // Trunk with a shaded inner side.
+    let trunk_h = h * 0.34;
+    shapes::rect(batch, c[0] - w * 0.045, c[1] - trunk_h + h * 0.06, w * 0.09, trunk_h, RenderLayer::Decals, ys, 1, BARK);
+    shapes::rect(batch, c[0] + w * 0.005, c[1] - trunk_h + h * 0.06, w * 0.04, trunk_h, RenderLayer::Decals, ys, 2, BARK_DARK);
+    // Layered crown: dark base mass, mid leaves, lit highlights.
+    let cy = c[1] - h * 0.28;
+    shapes::circle(batch, c[0], cy + h * 0.05, w * 0.34 * size, RenderLayer::Decals, ys, 3, LEAF_DARK);
+    shapes::circle(batch, c[0] - w * 0.14, cy, w * 0.22 * size, RenderLayer::Decals, ys, 4, LEAF);
+    shapes::circle(batch, c[0] + w * 0.15, cy + h * 0.01, w * 0.21 * size, RenderLayer::Decals, ys, 4, LEAF);
+    shapes::circle(batch, c[0], cy - h * 0.10, w * 0.20 * size, RenderLayer::Decals, ys, 5, LEAF);
+    shapes::circle(batch, c[0] - w * 0.10, cy - h * 0.12, w * 0.11 * size, RenderLayer::Decals, ys, 6, LEAF_LIGHT);
+    shapes::circle(batch, c[0] + w * 0.08, cy - h * 0.06, w * 0.09 * size, RenderLayer::Decals, ys, 6, LEAF_LIGHT);
 }
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 fn draw_bush(batch: &mut SpriteBatch, c: [f32; 2], w: f32, h: f32, ys: i32, tx: i32, ty: i32) {
     let n = shapes::tile_noise(tx, ty, 9);
-    let size = 0.80 + n * 0.35;
-    shapes::ellipse(batch, c[0], c[1] + h * 0.02, w * 0.22 * size, h * 0.14 * size, RenderLayer::Decals, ys, 0, BUSH);
-    shapes::ellipse(batch, c[0] - w * 0.06, c[1] - h * 0.02, w * 0.10 * size, h * 0.08 * size, RenderLayer::Decals, ys, 1, LEAF_LIGHT);
+    let size = 0.85 + n * 0.40;
+    // Shadow + a dense clump of leafy mounds with a couple of lit tufts.
+    shapes::ellipse(batch, c[0], c[1] + h * 0.06, w * 0.24 * size, h * 0.07 * size, RenderLayer::Decals, ys, 0, [0.0, 0.0, 0.0, 0.22]);
+    shapes::ellipse(batch, c[0], c[1], w * 0.24 * size, h * 0.16 * size, RenderLayer::Decals, ys, 1, LEAF_DARK);
+    shapes::ellipse(batch, c[0] - w * 0.12, c[1] - h * 0.01, w * 0.13 * size, h * 0.10 * size, RenderLayer::Decals, ys, 2, BUSH);
+    shapes::ellipse(batch, c[0] + w * 0.11, c[1] - h * 0.02, w * 0.12 * size, h * 0.09 * size, RenderLayer::Decals, ys, 2, BUSH);
+    shapes::ellipse(batch, c[0] - w * 0.05, c[1] - h * 0.05, w * 0.09 * size, h * 0.06 * size, RenderLayer::Decals, ys, 3, LEAF_LIGHT);
+    shapes::ellipse(batch, c[0] + w * 0.06, c[1] - h * 0.04, w * 0.07 * size, h * 0.05 * size, RenderLayer::Decals, ys, 3, LEAF_LIGHT);
 }
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_precision_loss)]
@@ -357,9 +373,35 @@ fn draw_grass(
     bands: usize,
 ) {
     let n = shapes::tile_noise(tx, ty, 1);
+    // Some tiles are drier/browner (worn earth amid the grass) for a D2-style
+    // mottled wilderness rather than a uniform green lawn.
+    let dry = shapes::tile_noise(tx, ty, 41);
     let f = 0.88 + 0.22 * n;
-    let varied = [(base[0] * f).clamp(0.0, 1.0), (base[1] * (f + 0.04)).clamp(0.0, 1.0), (base[2] * f).clamp(0.0, 1.0), 1.0];
+    let varied = if dry > 0.70 {
+        // Shift toward khaki/brown for a dry patch.
+        let g = 0.80 + 0.30 * n;
+        [
+            (base[0] * (g + 0.22)).clamp(0.0, 1.0),
+            (base[1] * (g + 0.02)).clamp(0.0, 1.0),
+            (base[2] * (g - 0.10)).clamp(0.0, 1.0),
+            1.0,
+        ]
+    } else {
+        [(base[0] * f).clamp(0.0, 1.0), (base[1] * (f + 0.04)).clamp(0.0, 1.0), (base[2] * f).clamp(0.0, 1.0), 1.0]
+    };
     shapes::diamond(batch, center, w, h, varied, RenderLayer::Terrain, ys, 0, bands);
+
+    // Bare-earth patch: a cluster of brown blotches on the worn tiles, like the
+    // trampled dirt that breaks up D2's outdoor grass.
+    if shapes::tile_noise(tx, ty, 40) > 0.80 {
+        let dirt = [0.34, 0.27, 0.17, 1.0];
+        for salt in [42u32, 43, 44] {
+            let dx = (shapes::tile_noise(tx, ty, salt) - 0.5) * w * 0.40;
+            let dy = (shapes::tile_noise(tx, ty, salt + 5) - 0.5) * h * 0.40;
+            let r = w * (0.12 + 0.08 * shapes::tile_noise(tx, ty, salt + 9));
+            shapes::ellipse(batch, center[0] + dx, center[1] + dy, r, r * 0.6, RenderLayer::Terrain, ys, 1, shade(dirt, 0.85 + 0.3 * n));
+        }
+    }
 
     // Scattered upright grass blades: thin tufts, alternating lighter and darker
     // green, give the ground a fine texture that holds up next to the larger
