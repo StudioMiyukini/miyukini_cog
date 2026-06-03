@@ -126,10 +126,12 @@ fn make_mob(id: u32, name: &str, behavior: AiBehavior, level: u32, dps_mult: f32
     // Base XP scales loosely with mob level so end-game mobs still feel like
     // they're worth pulling. Élites are multiplied at award-time (death.rs).
     let xp_reward = (u64::from(level) / 3).max(1);
+    // Intervals are the seconds between an enemy's attacks. They were halved in
+    // rate (i.e. doubled in duration) to slow enemy attack speed by 50%.
     let (attack_range, attack_interval, aggro, leash) = match behavior {
-        AiBehavior::Melee => (1.5, 1.1, 6.0, 12.0),
-        AiBehavior::Ranged => (6.5, 1.4, 8.0, 14.0),
-        AiBehavior::Caster => (7.5, 1.8, 9.0, 14.0),
+        AiBehavior::Melee => (1.5, 2.2, 6.0, 12.0),
+        AiBehavior::Ranged => (6.5, 2.8, 8.0, 14.0),
+        AiBehavior::Caster => (7.5, 3.6, 9.0, 14.0),
     };
     // Per-mob chance to drop an item. Kept low so loot feels meaningful (big
     // packs still yield a few drops); gems roll on a separate track in
@@ -184,7 +186,8 @@ fn make_boss(id: u32, name: &str, level: u32, hp_mult: f32, dps_mult: f32) -> Mo
         aggro: 14.0,
         leash: 40.0,
         attack_range: 2.0,
-        attack_interval: 1.2,
+        // Halved attack rate (doubled interval) like normal mobs: 1.2 → 2.4.
+        attack_interval: 2.4,
         drop_chance: 100,
         gold_min: 300 + u64::from(level) * 12,
         gold_max: 900 + u64::from(level) * 40,
