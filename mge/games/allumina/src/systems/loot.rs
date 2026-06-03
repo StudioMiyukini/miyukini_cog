@@ -627,6 +627,24 @@ mod tests {
     }
 
     #[test]
+    fn socketable_gear_frequently_rolls_sockets() {
+        use crate::data::maps::plains_map;
+        use crate::data::GameData;
+        use crate::ecs::World;
+        let mut world = World::new(plains_map(), GameData::load(), 7);
+        let (mut socketed, total) = (0u32, 200u64);
+        for i in 0..total {
+            let it = generate_item_with_rarity(&mut world, ItemKind::Sword, 20, 1000 + i, Rarity::Normal);
+            assert!(it.item.can_be_socketed(), "a sword must be socketable");
+            if it.sockets > 0 {
+                socketed += 1;
+            }
+        }
+        // Min-of-two over 0..=3 ⇒ roughly half of socketable gear gets a socket.
+        assert!(socketed as u64 > total / 3, "too few socketed swords: {socketed}/{total}");
+    }
+
+    #[test]
     fn open_chest_drops_loot_then_locks() {
         use crate::components::player::ClassType;
         use crate::components::world::{Chest, ChestTier};

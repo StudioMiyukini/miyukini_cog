@@ -131,7 +131,10 @@ fn make_mob(id: u32, name: &str, behavior: AiBehavior, level: u32, dps_mult: f32
         AiBehavior::Ranged => (6.5, 1.4, 8.0, 14.0),
         AiBehavior::Caster => (7.5, 1.8, 9.0, 14.0),
     };
-    let drop_chance = (60 + level.min(40)).min(95);
+    // Per-mob chance to drop an item. Kept low so loot feels meaningful (big
+    // packs still yield a few drops); gems roll on a separate track in
+    // `loot_system`, so this doesn't gate them.
+    let drop_chance = (14 + level.min(18)).min(32);
     let gold_min = 1 + u64::from(level) / 2;
     let gold_max = 20 + u64::from(level) * 4;
     MobDef {
