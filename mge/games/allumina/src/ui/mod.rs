@@ -21,6 +21,7 @@ pub mod lobby;
 pub mod merc_ui;
 pub mod minimap;
 pub mod mob_tooltip;
+pub mod craft;
 pub mod forge;
 pub mod quest_log;
 pub mod skill_tree_ui;
@@ -85,6 +86,12 @@ pub struct UiState {
     pub vendor_merchant: Option<Entity>,
     /// The blacksmith the forge (salvage) window is open for, if any.
     pub forge_smith: Option<Entity>,
+    /// Whether the 7×7 crafting table is open.
+    pub craft_open: bool,
+    /// The crafting-table layout (one material per filled cell).
+    pub craft_grid: crate::systems::craft::CraftGrid,
+    /// The material currently selected from the palette to paint cells with.
+    pub craft_selected: Option<crate::systems::forge::Material>,
     /// Inventory slot currently being dragged, if any.
     pub drag: Option<usize>,
     /// Inventory slot under the cursor this frame.
@@ -112,6 +119,9 @@ impl Default for UiState {
             show_waypoint: false,
             vendor_merchant: None,
             forge_smith: None,
+            craft_open: false,
+            craft_grid: [[None; crate::systems::craft::CRAFT_SIZE]; crate::systems::craft::CRAFT_SIZE],
+            craft_selected: None,
             drag: None,
             hover_inv: None,
             hover_equip: None,
@@ -148,6 +158,7 @@ impl UiState {
             || self.show_waypoint
             || self.vendor_merchant.is_some()
             || self.forge_smith.is_some()
+            || self.craft_open
             || self.merc_panel.is_some()
     }
 
@@ -163,6 +174,7 @@ impl UiState {
         self.show_menu = false;
         self.vendor_merchant = None;
         self.forge_smith = None;
+        self.craft_open = false;
         self.merc_panel = None;
         self.drag = None;
         was
@@ -478,6 +490,9 @@ pub fn draw(batch: &mut SpriteBatch, world: &World, ui: &mut UiState, viewport: 
     if ui.forge_smith.is_some() {
         forge::draw(batch, world, viewport, mouse);
     }
+    if ui.craft_open {
+        craft::draw(batch, world, ui, viewport, mouse);
+    }
     if let Some(merc) = ui.merc_panel {
         // If the shown companion is gone, fall back to another in the party,
         // else close the panel.
@@ -659,6 +674,34 @@ pub fn handle_left_press(world: &mut World, ui: &mut UiState, viewport: [f32; 2]
             }
         }
         if point_in(forge::panel_rect(viewport), mouse) {
+            return true;
+        }
+    }
+    // Crafting table: pick a palette material, paint cells with it, or forge.
+    if ui.craft_open {
+        if let Some(m) = craft::palette_at(viewport, mouse) {
+            ui.craft_selected = Some(m);
+            return true;
+        }
+        if let Some((cx, cy)) = craft::cell_at(viewport, mouse) {
+            // Place the selected material; clicking a cell that already holds it
+            // (or clicking with nothing selected) clears it.
+            ui.craft_grid[cy][cx] = if ui.craft_grid[cy][cx] == ui.craft_selected {
+                None
+            } else {
+                ui.craft_selected
+            };
+            return true;
+        }
+        if craft::craft_button_at(viewport, mouse) {
+            if let Some(player) = world.player_entity {
+                if crate::systems::craft::craft(world, player, &ui.craft_grid) {
+                    ui.craft_grid = [[None; crate::systems::craft::CRAFT_SIZE]; crate::systems::craft::CRAFT_SIZE];
+                }
+            }
+            return true;
+        }
+        if point_in(craft::panel_rect(viewport), mouse) {
             return true;
         }
     }

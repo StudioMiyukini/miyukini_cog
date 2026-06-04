@@ -280,6 +280,7 @@ impl GameApp {
             KeyCode::Digit6 => self.use_or_select_skill(5),
             KeyCode::KeyH => self.hire_next_merc(),
             KeyCode::KeyP => self.toggle_merc_panel(),
+            KeyCode::KeyK => self.ui.craft_open = !self.ui.craft_open,
             KeyCode::KeyT => self.town_portal(),
             KeyCode::KeyU => self.unsocket_hovered(),
             KeyCode::F5 => self.perform_autosave(0),

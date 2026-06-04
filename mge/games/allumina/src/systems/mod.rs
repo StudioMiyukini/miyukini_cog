@@ -5,6 +5,7 @@ pub mod balance;
 pub mod boss;
 pub mod cc;
 pub mod combat;
+pub mod craft;
 pub mod death;
 pub mod forge;
 pub mod level_up;

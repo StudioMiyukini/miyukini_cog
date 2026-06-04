@@ -66,6 +66,16 @@ impl Materials {
         self.counts[m as usize] = self.counts[m as usize].saturating_add(n);
     }
 
+    /// Deduct `n` of material `m` if the stock allows it. Returns whether it did.
+    pub fn take(&mut self, m: Material, n: u32) -> bool {
+        let slot = &mut self.counts[m as usize];
+        if *slot < n {
+            return false;
+        }
+        *slot -= n;
+        true
+    }
+
     #[must_use]
     pub fn total(&self) -> u32 {
         self.counts.iter().sum()
