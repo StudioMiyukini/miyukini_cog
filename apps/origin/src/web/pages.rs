@@ -1940,429 +1940,399 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
 pub async fn services_page(content_mgr: &ContentManager) -> String {
     let services = content_mgr.get_services().await;
 
-    // Mapping service_id → emoji icon (from manifests)
+    // Icône emoji dédiée par service — compréhension immédiate
     let icon_for = |id: &str| -> &str {
         match id {
-            "jaykoa" => "&#x1F4C6;",
-            "jaykonta" => "&#x1F9EE;",
-            "miyukiniwatch" => "&#x1F441;",
-            "jay1tribu" => "&#x1F4AC;",
-            "jaymanga" => "&#x1F4DA;",
-            _ => "&#x1F4E6;",
+            "jaykoa" => "&#x1F4C6;",              // 📆 calendrier
+            "jaykonta" => "&#x1F9EE;",            // 🧮 comptabilité
+            "miyuclicker" => "&#x1F3AE;",         // 🎮 jeu
+            "jaymail" => "&#x2709;&#xFE0F;",      // ✉️ email
+            "jaymessage" => "&#x1F4AC;",          // 💬 messagerie
+            "jaydocs" => "&#x1F4DD;",             // 📝 documents
+            "jaysheets" => "&#x1F4CA;",           // 📊 tableur
+            "jayslides" => "&#x1F5BC;&#xFE0F;",   // 🖼️ présentations
+            "miyukini-central" => "&#x1F3E0;",    // 🏠 hub
+            "jay1tribu" => "&#x1F465;",           // 👥 tribus / social
+            "jayrdv" => "&#x1F91D;",              // 🤝 rendez-vous
+            "jaymanga" => "&#x1F4DA;",            // 📚 manga
+            "miyucloud" => "&#x2601;&#xFE0F;",    // ☁️ cloud
+            "miyukiniwatch" => "&#x1F441;&#xFE0F;", // 👁️ suivi
+            _ => "&#x1F4E6;",                     // 📦 générique
         }
     };
 
-    // Couleur de rareté par catégorie (style Genshin)
-    let rarity_for = |id: &str| -> &str {
-        match id {
-            "jaykoa" | "jaykonta" => "rarity-4",        // violet — productivité
-            "jay1tribu" => "rarity-4",                  // violet — social
-            "jaymanga" | "miyukiniwatch" => "rarity-3", // bleu — style de vie
-            _ => "rarity-3",
+    // Classe d'accent couleur par catégorie (repère visuel immédiat)
+    let accent_for = |cat: &str| -> &str {
+        match cat {
+            "Outils" => "cat-outils",
+            "Social" => "cat-social",
+            "Jeux" => "cat-jeux",
+            "Style de vie" => "cat-vie",
+            "Commerce" => "cat-commerce",
+            "Développement" => "cat-dev",
+            _ => "cat-autre",
         }
     };
 
-    // Générer les slots d'inventaire
-    let inventory_slots: String = services
+    // Onglets de filtre : « Tous » + chaque catégorie présente (ordre d'apparition)
+    let mut cats: Vec<&str> = Vec::new();
+    for s in &services {
+        let l = s.category.label();
+        if !cats.contains(&l) {
+            cats.push(l);
+        }
+    }
+    let mut tabs = String::from(
+        r#"<button class="inv-tab active" data-filter="all">Tous</button>"#,
+    );
+    for c in &cats {
+        tabs.push_str(&format!(
+            r#"<button class="inv-tab" data-filter="{c}">{c}</button>"#,
+            c = html_escape(c),
+        ));
+    }
+
+    // Lignes d'inventaire (liste JRPG) — chaque ligne porte ses données,
+    // qui alimentent le panneau de détail lors de la sélection.
+    let rows: String = services
         .iter()
-        .map(|s| {
+        .enumerate()
+        .map(|(i, s)| {
             format!(
-                r#"<a href="/services/{id}" class="inv-slot {rarity}"
-                    data-name="{name}" data-desc="{desc}" data-cat="{cat}">
-                    <span class="inv-icon">{icon}</span>
-                </a>"#,
+                r#"<button type="button" class="inv-row {accent}{sel}" data-cat="{cat}"
+                    data-id="{id}" data-name="{name}" data-desc="{desc}"
+                    data-price="{price}" data-icon="{icon}" data-editor="{editor}"
+                    data-cogv="{cogv}" data-type="{stype}">
+                    <span class="inv-row-cursor">&#x25B6;</span>
+                    <span class="inv-row-icon">{icon}</span>
+                    <span class="inv-row-text">
+                        <span class="inv-row-name">{name}</span>
+                        <span class="inv-row-cat">{cat}</span>
+                    </span>
+                    <span class="inv-row-price">{price}</span>
+                </button>"#,
+                accent = accent_for(s.category.label()),
+                sel = if i == 0 { " selected" } else { "" },
                 id = html_escape(&s.id),
-                rarity = rarity_for(&s.id),
                 name = html_escape(&s.name),
-                desc = html_escape(&s.short_description),
                 cat = html_escape(s.category.label()),
+                desc = html_escape(&s.short_description),
+                price = html_escape(&s.price_label()),
                 icon = icon_for(&s.id),
+                editor = html_escape(&s.editor),
+                cogv = html_escape(&s.cog_version),
+                stype = html_escape(s.service_type.label()),
             )
         })
         .collect();
 
-    // Slots vides pour remplir la grille (style inventaire)
-    let empty_count = if services.len() < 12 {
-        12 - services.len()
-    } else {
-        0
-    };
-    let empty_slots: String = (0..empty_count)
-        .map(|_| r#"<div class="inv-slot inv-empty"></div>"#.to_string())
-        .collect();
+    let service_count = services.len();
 
     let content = format!(
         r##"
 <style>
-/* ═══ Genshin Inventory Page ═══ */
+/* ═══ Page Services — inventaire façon JRPG (liste + détail) ═══ */
 .inv-page {{
     position: relative;
     min-height: calc(100vh - 56px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem 1.5rem 3rem;
+    padding: 2.25rem 1.5rem 3.5rem;
     overflow: hidden;
 }}
 .inv-page::before {{
     content: '';
     position: absolute; inset: 0;
     background:
-        radial-gradient(ellipse 60% 50% at 25% 30%, rgba(100,160,255,0.10) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 40% at 75% 65%, rgba(139,92,246,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 25% 20%, rgba(100,160,255,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 78% 55%, rgba(139,92,246,0.08) 0%, transparent 70%),
         radial-gradient(ellipse 80% 60% at 50% 50%, rgba(6,182,212,0.05) 0%, transparent 80%);
     pointer-events: none;
     z-index: 0;
 }}
 .inv-page > * {{ position: relative; z-index: 1; }}
 
-/* ── Titre ── */
-.inv-header {{
-    text-align: center;
-    margin-bottom: 2rem;
+/* ── En-tête ── */
+.inv-header {{ text-align: center; margin-bottom: 1.4rem; max-width: 640px; }}
+.inv-header .miou-badge {{
+    display: inline-block;
+    font-size: 2.2rem;
+    filter: drop-shadow(0 4px 14px rgba(139,92,246,0.35));
+    animation: inv-float 3s ease-in-out infinite;
+}}
+@keyframes inv-float {{
+    0%, 100% {{ transform: translateY(0); }}
+    50% {{ transform: translateY(-6px); }}
 }}
 .inv-header h1 {{
-    font-size: 1.8rem;
+    font-size: 1.9rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     color: #e8e4f0;
     text-shadow: 0 0 30px rgba(139,92,246,0.25);
-    margin-bottom: 0.3rem;
+    margin: 0.35rem 0 0.3rem;
 }}
-.inv-header p {{
-    color: #9ca3af;
-    font-size: 0.88rem;
-    letter-spacing: 0.02em;
+.inv-header p {{ color: #9ca3af; font-size: 0.92rem; line-height: 1.5; }}
+.inv-header p em {{ color: #c4b5fd; font-style: normal; font-weight: 500; }}
+
+/* ── Onglets de filtre ── */
+.inv-tabs {{
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center; margin-bottom: 1.6rem; max-width: 900px;
+}}
+.inv-tab {{
+    font-size: 0.8rem; font-family: inherit; color: #c4b5fd;
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.22);
+    border-radius: 1.2rem; padding: 0.4rem 1rem;
+    cursor: pointer; transition: all 0.15s ease; user-select: none;
+}}
+.inv-tab:hover {{ background: rgba(139,92,246,0.18); color: #e2d9ff; }}
+.inv-tab.active {{
+    background: linear-gradient(135deg, #8b5cf6, #6d5cf6);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 14px rgba(139,92,246,0.35);
 }}
 
-/* ── Layout 3 panneaux ── */
-.inv-layout {{
+/* ── Coque liste + détail ── */
+.inv-shell {{
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 2rem;
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    gap: 1.25rem;
+    width: 100%; max-width: 1080px;
     align-items: start;
-    max-width: 1100px;
-    width: 100%;
 }}
 
-/* ── Panneau inventaire (gauche) ── */
-.inv-panel {{
-    background: rgba(18,18,30,0.55);
-    backdrop-filter: blur(20px) saturate(1.3);
-    -webkit-backdrop-filter: blur(20px) saturate(1.3);
-    border: 1px solid rgba(139,92,246,0.15);
-    border-radius: 1rem;
-    padding: 1.25rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03);
+/* ── Panneau liste (gauche) ── */
+.inv-list-panel {{
+    background: linear-gradient(180deg, rgba(20,20,34,0.75), rgba(13,13,23,0.75));
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border: 1px solid rgba(139,92,246,0.28);
+    border-radius: 0.9rem;
+    padding: 0.55rem;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.4), inset 0 0 26px rgba(139,92,246,0.06);
 }}
-.inv-panel-title {{
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #8b8a9e;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(139,92,246,0.12);
+.inv-list-head {{
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: #c4b5fd; padding: 0.55rem 0.6rem 0.6rem;
+    border-bottom: 1px solid rgba(139,92,246,0.18); margin-bottom: 0.35rem;
 }}
-.inv-grid {{
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+.inv-count {{ color: #7c7a90; letter-spacing: 0.05em; }}
+.inv-list {{
+    display: flex; flex-direction: column; gap: 2px;
+    max-height: 62vh; overflow-y: auto; padding-right: 2px;
 }}
+.inv-list::-webkit-scrollbar {{ width: 8px; }}
+.inv-list::-webkit-scrollbar-thumb {{ background: rgba(139,92,246,0.3); border-radius: 4px; }}
 
-/* ── Slot d'inventaire ── */
-.inv-slot {{
-    width: 72px; height: 72px;
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    overflow: hidden;
+/* ── Ligne d'inventaire ── */
+.inv-row {{
+    --accent: #8b5cf6; --accent-soft: rgba(139,92,246,0.14);
+    display: flex; align-items: center; gap: 0.55rem;
+    width: 100%; text-align: left; cursor: pointer;
+    background: transparent; border: none; border-left: 3px solid transparent;
+    border-radius: 0.5rem; padding: 0.5rem 0.55rem;
+    font-family: inherit; color: #d0cde0;
+    transition: background 0.14s ease, border-color 0.14s ease;
 }}
-.inv-slot::before {{
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: 0.5rem;
-    z-index: 0;
+.inv-row:hover {{ background: rgba(139,92,246,0.10); }}
+.inv-row.selected {{
+    background: linear-gradient(90deg, var(--accent-soft), rgba(139,92,246,0.02));
+    border-left-color: var(--accent);
 }}
-.inv-slot:hover {{
-    transform: scale(1.1);
-    z-index: 5;
+.inv-row-cursor {{
+    color: var(--accent); font-size: 0.68rem; width: 0.8rem; flex: none;
+    opacity: 0; transform: translateX(-4px); transition: all 0.14s ease;
 }}
-.inv-icon {{
-    font-size: 1.8rem;
-    position: relative;
-    z-index: 1;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+.inv-row.selected .inv-row-cursor {{ opacity: 1; transform: translateX(0); }}
+.inv-row-icon {{
+    width: 34px; height: 34px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: 0.45rem;
 }}
+.inv-row-text {{ display: flex; flex-direction: column; flex: 1; min-width: 0; }}
+.inv-row-name {{
+    font-size: 0.9rem; font-weight: 600; color: #f0eef7;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}}
+.inv-row-cat {{ font-size: 0.67rem; color: var(--accent); letter-spacing: 0.04em; }}
+.inv-row-price {{ font-size: 0.67rem; font-weight: 600; color: #34d399; flex: none; }}
 
-/* Raretés (couleurs Genshin) */
-.rarity-3 {{
-    background: linear-gradient(180deg, #3b5998 0%, #465f8f 50%, #5a7ab5 100%);
-    border: 1px solid rgba(90,122,181,0.5);
+/* ── Panneau détail (droite) ── */
+.inv-detail {{
+    --accent: #8b5cf6; --accent-soft: rgba(139,92,246,0.14);
+    position: sticky; top: 1rem;
+    background: linear-gradient(180deg, rgba(20,20,34,0.7), rgba(13,13,23,0.7));
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    border: 1px solid var(--accent);
+    border-radius: 0.9rem;
+    padding: 1.5rem 1.6rem;
+    min-height: 320px;
+    box-shadow: 0 10px 34px rgba(0,0,0,0.4), inset 0 0 30px var(--accent-soft);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }}
-.rarity-3::before {{
-    background: linear-gradient(180deg, transparent 60%, rgba(90,122,181,0.25) 100%);
+.inv-detail-hero {{ display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }}
+.inv-detail-icon {{
+    width: 72px; height: 72px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.6rem;
+    background: var(--accent-soft); border: 1px solid var(--accent);
+    border-radius: 1rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
 }}
-.rarity-4 {{
-    background: linear-gradient(180deg, #594580 0%, #6b4f96 50%, #8b6cb5 100%);
-    border: 1px solid rgba(139,108,181,0.5);
+.inv-detail-name {{ font-size: 1.5rem; font-weight: 700; color: #f4f2fb; margin: 0 0 0.35rem; }}
+.inv-detail-cat {{
+    display: inline-block; font-size: 0.68rem; text-transform: uppercase;
+    letter-spacing: 0.08em; font-weight: 600;
+    color: var(--accent); background: var(--accent-soft);
+    border-radius: 1rem; padding: 0.26rem 0.7rem;
 }}
-.rarity-4::before {{
-    background: linear-gradient(180deg, transparent 60%, rgba(139,108,181,0.25) 100%);
+.inv-detail-desc {{ font-size: 0.95rem; color: #c8c5d8; line-height: 1.6; margin: 0 0 1.3rem; }}
+.inv-detail-stats {{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem 1rem;
+    padding: 1rem 0; margin-bottom: 1.3rem;
+    border-top: 1px solid rgba(139,92,246,0.15);
+    border-bottom: 1px solid rgba(139,92,246,0.15);
 }}
-.rarity-5 {{
-    background: linear-gradient(180deg, #8b6914 0%, #a07d24 50%, #c9a535 100%);
-    border: 1px solid rgba(201,165,53,0.5);
+.inv-stat {{ display: flex; flex-direction: column; gap: 0.15rem; }}
+.inv-stat-k {{ font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: #8b8a9e; }}
+.inv-stat-v {{ font-size: 0.9rem; color: #e6e3f0; font-weight: 500; }}
+.inv-detail-btn {{
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), rgba(139,92,246,0.85));
+    color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+    padding: 0.7rem 1.4rem; border-radius: 0.6rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }}
-.rarity-5::before {{
-    background: linear-gradient(180deg, transparent 60%, rgba(201,165,53,0.25) 100%);
-}}
-.inv-slot:hover.rarity-3 {{ box-shadow: 0 0 18px rgba(90,122,181,0.5); }}
-.inv-slot:hover.rarity-4 {{ box-shadow: 0 0 18px rgba(139,108,181,0.5); }}
-.inv-slot:hover.rarity-5 {{ box-shadow: 0 0 18px rgba(201,165,53,0.5); }}
+.inv-detail-btn:hover {{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.45); }}
 
-/* Slot vide */
-.inv-empty {{
-    background: rgba(30,30,45,0.4);
-    border: 1px dashed rgba(255,255,255,0.06);
-    cursor: default;
-}}
-
-/* ── Mascotte Miou (centre) ── */
-.inv-mascot {{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 380px;
-    padding: 1rem;
-}}
-.miou-figure {{
-    width: 200px;
-    height: 280px;
-    background: radial-gradient(ellipse at center, rgba(139,92,246,0.08) 0%, transparent 70%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}}
-.miou-figure::after {{
-    content: '';
-    position: absolute;
-    bottom: 0;
-    width: 120px;
-    height: 20px;
-    background: radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, transparent 70%);
-    border-radius: 50%;
-}}
-.miou-emoji {{
-    font-size: 7rem;
-    filter: drop-shadow(0 8px 24px rgba(139,92,246,0.3));
-    animation: miou-float 3s ease-in-out infinite;
-}}
-@keyframes miou-float {{
-    0%, 100% {{ transform: translateY(0); }}
-    50% {{ transform: translateY(-8px); }}
-}}
-.miou-name {{
-    font-size: 0.85rem;
-    color: #c4b5fd;
-    letter-spacing: 0.05em;
-    margin-top: 0.5rem;
-    font-weight: 500;
-}}
-
-/* ── Dialogue Miou (droite) ── */
-.inv-dialogue {{
-    background: rgba(18,18,30,0.55);
-    backdrop-filter: blur(20px) saturate(1.3);
-    -webkit-backdrop-filter: blur(20px) saturate(1.3);
-    border: 1px solid rgba(139,92,246,0.15);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    max-width: 280px;
-    min-width: 240px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03);
-    position: relative;
-}}
-.inv-dialogue::before {{
-    content: '';
-    position: absolute;
-    left: -8px; top: 40px;
-    width: 0; height: 0;
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
-    border-right: 8px solid rgba(18,18,30,0.55);
-}}
-.dlg-speaker {{
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #c4b5fd;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(139,92,246,0.12);
-}}
-.dlg-text {{
-    font-size: 0.88rem;
-    color: #d0cde0;
-    line-height: 1.6;
-}}
-.dlg-text em {{
-    color: #c4b5fd;
-    font-style: normal;
-    font-weight: 500;
-}}
-
-/* ── Tooltip au curseur ── */
-.inv-tooltip {{
-    position: fixed;
-    pointer-events: none;
-    z-index: 999;
-    background: rgba(12,12,22,0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(139,92,246,0.25);
-    border-radius: 0.65rem;
-    padding: 0.85rem 1rem;
-    max-width: 260px;
-    opacity: 0;
-    transform: translateY(4px);
-    transition: opacity 0.15s, transform 0.15s;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.5);
-}}
-.inv-tooltip.visible {{
-    opacity: 1;
-    transform: translateY(0);
-}}
-.tt-name {{
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #f0f0f5;
-    margin-bottom: 0.15rem;
-}}
-.tt-cat {{
-    font-size: 0.7rem;
-    color: #c4b5fd;
-    letter-spacing: 0.03em;
-    margin-bottom: 0.4rem;
-}}
-.tt-desc {{
-    font-size: 0.78rem;
-    color: #9ca3af;
-    line-height: 1.45;
-    margin-bottom: 0.5rem;
-}}
-.tt-cta {{
-    font-size: 0.72rem;
-    color: #8b5cf6;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-}}
+/* Accents couleur par catégorie (partagés liste + détail) */
+.cat-outils   {{ --accent: #4f8ef7; --accent-soft: rgba(79,142,247,0.14); }}
+.cat-social   {{ --accent: #10b981; --accent-soft: rgba(16,185,129,0.14); }}
+.cat-jeux     {{ --accent: #f59e0b; --accent-soft: rgba(245,158,11,0.14); }}
+.cat-vie      {{ --accent: #ec4899; --accent-soft: rgba(236,72,153,0.14); }}
+.cat-commerce {{ --accent: #a855f7; --accent-soft: rgba(168,85,247,0.14); }}
+.cat-dev      {{ --accent: #6366f1; --accent-soft: rgba(99,102,241,0.14); }}
+.cat-autre    {{ --accent: #94a3b8; --accent-soft: rgba(148,163,184,0.14); }}
 
 /* ── Responsive ── */
-@media (max-width: 900px) {{
-    .inv-layout {{
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        justify-items: center;
-    }}
-    .inv-mascot {{ min-height: 200px; }}
-    .miou-figure {{ width: 140px; height: 180px; }}
-    .miou-emoji {{ font-size: 5rem; }}
-    .inv-dialogue {{ max-width: 100%; }}
-    .inv-dialogue::before {{ display: none; }}
-}}
-@media (max-width: 560px) {{
-    .inv-grid {{ grid-template-columns: repeat(3, 1fr); }}
-    .inv-slot {{ width: 64px; height: 64px; }}
-    .inv-icon {{ font-size: 1.5rem; }}
+@media (max-width: 820px) {{
+    .inv-shell {{ grid-template-columns: 1fr; }}
+    .inv-detail {{ position: static; }}
+    .inv-list {{ max-height: none; }}
+    .inv-header h1 {{ font-size: 1.55rem; }}
 }}
 </style>
 
 <div class="inv-page">
     <div class="inv-header">
+        <span class="miou-badge">&#x1F338;</span>
         <h1>Services Miyukini</h1>
-        <p>Survolez un service pour en savoir plus, cliquez pour ouvrir sa fiche</p>
+        <p>Choisis un service dans l&rsquo;inventaire&nbsp;— tous <em>gratuits</em> et disponibles
+        depuis le Market de Central. S&eacute;lectionne une ligne pour voir sa fiche.</p>
     </div>
 
-    <div class="inv-layout">
-        <!-- Inventaire (gauche) -->
-        <div class="inv-panel">
-            <div class="inv-panel-title">Inventaire des services</div>
-            <div class="inv-grid">
-                {inventory_slots}
-                {empty_slots}
+    <div class="inv-tabs">{tabs}</div>
+
+    <div class="inv-shell">
+        <!-- Liste (gauche) -->
+        <div class="inv-list-panel">
+            <div class="inv-list-head">
+                <span>Inventaire</span>
+                <span class="inv-count">{count} services</span>
+            </div>
+            <div class="inv-list" id="inv-list">
+                {rows}
             </div>
         </div>
 
-        <!-- Miou (centre) -->
-        <div class="inv-mascot">
-            <div class="miou-figure">
-                <span class="miou-emoji">&#x1F338;</span>
+        <!-- Détail (droite) -->
+        <div class="inv-detail cat-outils" id="inv-detail">
+            <div class="inv-detail-hero">
+                <span class="inv-detail-icon" id="d-icon"></span>
+                <div>
+                    <h2 class="inv-detail-name" id="d-name"></h2>
+                    <span class="inv-detail-cat" id="d-cat"></span>
+                </div>
             </div>
-            <span class="miou-name">Miou</span>
-        </div>
-
-        <!-- Dialogue (droite) -->
-        <div class="inv-dialogue">
-            <div class="dlg-speaker">Miou</div>
-            <div class="dlg-text">
-                Bienvenue dans l&rsquo;inventaire des services&nbsp;!<br><br>
-                Survole les ic&ocirc;nes &agrave; gauche pour d&eacute;couvrir chaque service.
-                Tous sont <em>gratuits</em> et disponibles depuis le Market de Central.<br><br>
-                Clique sur un service pour voir sa pr&eacute;sentation compl&egrave;te&nbsp;!
+            <p class="inv-detail-desc" id="d-desc"></p>
+            <div class="inv-detail-stats">
+                <div class="inv-stat"><span class="inv-stat-k">Prix</span><span class="inv-stat-v" id="d-price"></span></div>
+                <div class="inv-stat"><span class="inv-stat-k">Type</span><span class="inv-stat-v" id="d-type"></span></div>
+                <div class="inv-stat"><span class="inv-stat-k">&Eacute;diteur</span><span class="inv-stat-v" id="d-editor"></span></div>
+                <div class="inv-stat"><span class="inv-stat-k">COG min.</span><span class="inv-stat-v" id="d-cogv"></span></div>
             </div>
+            <a class="inv-detail-btn" id="d-link" href="#">Ouvrir la fiche &rarr;</a>
         </div>
     </div>
-</div>
-
-<!-- Tooltip flottant -->
-<div class="inv-tooltip" id="inv-tooltip">
-    <div class="tt-name" id="tt-name"></div>
-    <div class="tt-cat" id="tt-cat"></div>
-    <div class="tt-desc" id="tt-desc"></div>
-    <div class="tt-cta">Cliquez pour en savoir plus &rarr;</div>
 </div>
 
 <script>
 (function() {{
-    var tip = document.getElementById('inv-tooltip');
-    var slots = document.querySelectorAll('.inv-slot[data-name]');
+    var rows = document.querySelectorAll('.inv-row');
+    var tabs = document.querySelectorAll('.inv-tab');
+    var panel = document.getElementById('inv-detail');
+    var el = {{
+        icon: document.getElementById('d-icon'),
+        name: document.getElementById('d-name'),
+        cat: document.getElementById('d-cat'),
+        desc: document.getElementById('d-desc'),
+        price: document.getElementById('d-price'),
+        type: document.getElementById('d-type'),
+        editor: document.getElementById('d-editor'),
+        cogv: document.getElementById('d-cogv'),
+        link: document.getElementById('d-link')
+    }};
 
-    slots.forEach(function(slot) {{
-        slot.addEventListener('mouseenter', function() {{
-            document.getElementById('tt-name').textContent = slot.dataset.name;
-            document.getElementById('tt-cat').textContent = slot.dataset.cat;
-            document.getElementById('tt-desc').textContent = slot.dataset.desc;
-            tip.classList.add('visible');
-        }});
+    function select(row) {{
+        rows.forEach(function(r) {{ r.classList.remove('selected'); }});
+        row.classList.add('selected');
+        el.icon.textContent = row.dataset.icon;
+        el.name.textContent = row.dataset.name;
+        el.cat.textContent = row.dataset.cat;
+        el.desc.textContent = row.dataset.desc;
+        el.price.textContent = row.dataset.price;
+        el.type.textContent = row.dataset.type;
+        el.editor.textContent = row.dataset.editor;
+        el.cogv.textContent = row.dataset.cogv;
+        el.link.setAttribute('href', '/services/' + row.dataset.id);
+        var m = row.className.match(/cat-[a-z]+/);
+        panel.className = 'inv-detail ' + (m ? m[0] : 'cat-autre');
+    }}
 
-        slot.addEventListener('mousemove', function(e) {{
-            var x = e.clientX + 16;
-            var y = e.clientY + 16;
-            // Prevent tooltip from going off-screen
-            var rect = tip.getBoundingClientRect();
-            if (x + rect.width > window.innerWidth) x = e.clientX - rect.width - 8;
-            if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - 8;
-            tip.style.left = x + 'px';
-            tip.style.top = y + 'px';
-        }});
+    rows.forEach(function(row) {{
+        row.addEventListener('click', function() {{ select(row); }});
+    }});
 
-        slot.addEventListener('mouseleave', function() {{
-            tip.classList.remove('visible');
+    tabs.forEach(function(tab) {{
+        tab.addEventListener('click', function() {{
+            tabs.forEach(function(t) {{ t.classList.remove('active'); }});
+            tab.classList.add('active');
+            var f = tab.dataset.filter;
+            var firstVisible = null;
+            rows.forEach(function(r) {{
+                var show = (f === 'all' || r.dataset.cat === f);
+                r.style.display = show ? '' : 'none';
+                if (show && !firstVisible) firstVisible = r;
+            }});
+            var sel = document.querySelector('.inv-row.selected');
+            if (firstVisible && (!sel || sel.style.display === 'none')) select(firstVisible);
         }});
     }});
+
+    if (rows.length) select(rows[0]);
 }})();
 </script>
 "##,
-        inventory_slots = inventory_slots,
-        empty_slots = empty_slots,
+        tabs = tabs,
+        rows = rows,
+        count = service_count,
     );
 
     layout("Les services", &content, "services")
