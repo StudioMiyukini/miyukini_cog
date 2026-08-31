@@ -28,6 +28,13 @@ const translations = {};
  * @param {string} locale - The locale code to load (e.g., 'en', 'es')
  * @returns {Promise<object>} - A promise that resolves to the translations object
  */
+/*
+ * @id     cog.cloudI18n.loadTranslations
+ * @do     charger_traductions
+ * @role   donnee
+ * @layer  outil
+ * @human  Charge le dictionnaire de traductions d'une langue.
+ */
 async function loadTranslations(locale) {
     // Check if already loaded
     if (translations[locale]) {
@@ -57,6 +64,20 @@ async function loadTranslations(locale) {
  * @param {object} obj - The translations object
  * @param {string} path - The dot-notation path to the translation
  * @returns {string|null} - The translation value or null if not found
+ */
+/*
+ * @id     cog.cloudI18n
+ * @do     internationaliser
+ * @role   donnee
+ * @layer  outil
+ * @human  Internationalisation de Miyukini Cloud : traduction des clés, interpolation, et application des traductions au DOM.
+ */
+/*
+ * @id     cog.cloudI18n.getNestedValue
+ * @do     lire_valeur_imbriquee
+ * @role   donnee
+ * @layer  outil
+ * @human  Lit une valeur dans un objet de traductions par un chemin pointé.
  */
 function getNestedValue(obj, path) {
     // Try direct key match first
@@ -95,6 +116,13 @@ function getNestedValue(obj, path) {
  * @param {string} key - The translation key (dot notation, e.g., 'app.title')
  * @param {object} params - Parameters to replace in the translation (e.g., {name: 'John'})
  * @returns {string} - The translated string or the key itself if not found
+ */
+/*
+ * @id     cog.cloudI18n.t
+ * @do     traduire_cle
+ * @role   donnee
+ * @layer  outil
+ * @human  Traduit une clé dans la langue courante, avec paramètres.
  */
 function t(key, params = {}) {
     // Get translation from cache
@@ -170,6 +198,13 @@ function t(key, params = {}) {
  * @param {object} params - The parameters to replace
  * @returns {string} - The interpolated string
  */
+/*
+ * @id     cog.cloudI18n.interpolate
+ * @do     interpoler_traduction
+ * @role   donnee
+ * @layer  outil
+ * @human  Remplace les marqueurs d'un texte traduit par leurs valeurs.
+ */
 function interpolate(text, params) {
     return text.replace(/{{\s*([^}]+)\s*}}/g, (_, key) => {
         return params[key.trim()] !== undefined ? params[key.trim()] : `{{${key}}}`;
@@ -180,6 +215,13 @@ function interpolate(text, params) {
  * Change the current locale
  * @param {string} locale - The locale code to switch to
  * @returns {Promise<boolean>} - A promise that resolves to true if successful
+ */
+/*
+ * @id     cog.cloudI18n.setLocale
+ * @do     changer_langue
+ * @role   orchestration
+ * @layer  outil
+ * @human  Change la langue active, charge ses traductions et réapplique à la page.
  */
 async function setLocale(locale) {
     if (!supportedLocales.includes(locale)) {
@@ -211,6 +253,13 @@ async function setLocale(locale) {
  * Initialize the i18n system
  * @returns {Promise<void>}
  */
+/*
+ * @id     cog.cloudI18n.initI18n
+ * @do     initialiser_i18n
+ * @role   orchestration
+ * @layer  outil
+ * @human  Initialise l'internationalisation au démarrage (détection de langue, chargement, première traduction).
+ */
 async function initI18n() {
     // Load saved locale preference
     const savedLocale = localStorage.getItem('miyucloud-locale');
@@ -238,6 +287,13 @@ async function initI18n() {
 /**
  * Translate all elements with data-i18n attribute
  */
+/*
+ * @id     cog.cloudI18n.translatePage
+ * @do     traduire_page
+ * @role   ui
+ * @layer  outil
+ * @human  Applique les traductions à toute la page.
+ */
 function translatePage() {
     translateElement(document);
 }
@@ -246,6 +302,13 @@ function translatePage() {
  * Translate only elements within a given root (scoped).
  * Use this instead of translatePage() when you know which container changed.
  * @param {Element|Document} root - The root element to search within
+ */
+/*
+ * @id     cog.cloudI18n.translateElement
+ * @do     traduire_element
+ * @role   ui
+ * @layer  outil
+ * @human  Applique les traductions à un sous-arbre du DOM.
  */
 function translateElement(root) {
     // Use safeT instead of bare t() to avoid issues when other scripts
@@ -272,6 +335,13 @@ function translateElement(root) {
  * Get current locale
  * @returns {string} - The current locale code
  */
+/*
+ * @id     cog.cloudI18n.getCurrentLocale
+ * @do     lire_locale_courante
+ * @role   donnee
+ * @layer  outil
+ * @human  Renvoie la langue actuellement active.
+ */
 function getCurrentLocale() {
     return currentLocale;
 }
@@ -279,6 +349,13 @@ function getCurrentLocale() {
 /**
  * Get list of supported locales
  * @returns {Array<string>} - Array of supported locale codes
+ */
+/*
+ * @id     cog.cloudI18n.getSupportedLocales
+ * @do     lister_locales
+ * @role   donnee
+ * @layer  outil
+ * @human  Liste les langues prises en charge.
  */
 function getSupportedLocales() {
     return [...supportedLocales];
@@ -297,6 +374,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Self-contained t wrapper — does NOT call the global t() because other
 // scripts (e.g. admin.js) may shadow it, which would cause infinite recursion.
+/*
+ * @id     cog.cloudI18n.safeT
+ * @do     traduire_sans_echec
+ * @role   donnee
+ * @layer  outil
+ * @human  Traduit une clé en tolérant l'absence de traduction (repli sur la clé).
+ */
 function safeT(key, params = {}) {
     const localeData = translations[currentLocale];
     if (!localeData) {

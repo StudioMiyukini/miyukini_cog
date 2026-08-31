@@ -2,6 +2,20 @@
  * Search view orchestration logic
  */
 
+/*
+ * @id     cog.cloudSearchView
+ * @do     rechercher_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Vue de recherche : interroge le serveur et affiche les fichiers correspondant à la requête.
+ */
+/*
+ * @id     cog.cloudSearchView.performSearch
+ * @do     lancer_recherche
+ * @role   orchestration
+ * @layer  ui
+ * @human  Lance une recherche de fichiers et affiche les résultats triés.
+ */
 async function performSearch(query, sortBy) {
     const app = window.app;
 

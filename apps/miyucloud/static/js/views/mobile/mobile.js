@@ -70,6 +70,20 @@ var modalClose = document.getElementById('modal-close');
 var modalHandle = document.getElementById('modal-handle');
 var modalExpanded = true;
 
+/*
+ * @id     cog.cloudViewMobile
+ * @do     synchroniser_dossier_mobile
+ * @role   orchestration
+ * @layer  ui
+ * @human  Vue mobile de synchronisation : parcourt un dossier local, le compare au cloud et téléverse par lots avec suivi de progression.
+ */
+/*
+ * @id     cog.cloudViewMobile.showModal
+ * @do     afficher_modal_sync
+ * @role   ui
+ * @layer  ui
+ * @human  Affiche la fenêtre de progression de la synchronisation.
+ */
 function showModal(title) {
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
@@ -240,6 +254,13 @@ function resetAutoBtn() {
 // ═══════════════════════════════════════════════════════════════
 // STREAMING SYNC — scans directory progressively, uploads as it goes
 // ═══════════════════════════════════════════════════════════════
+/*
+ * @id     cog.cloudViewMobile.streamSyncFromDirectory
+ * @do     synchroniser_dossier
+ * @role   orchestration
+ * @layer  ui
+ * @human  Synchronise en flux un dossier local choisi : parcourt, compare et téléverse au fil de l'eau.
+ */
 function streamSyncFromDirectory(dirHandle) {
     showModal('Synchronisation photos');
     updateModal({ phase: 'comparing', scanned: 0, queued: 0, done: 0, errors: 0, total: 0 });
@@ -307,6 +328,13 @@ function streamSyncFromDirectory(dirHandle) {
 }
 
 // ── Scan directory recursively, call onFile for each media file ──
+/*
+ * @id     cog.cloudViewMobile.scanDirectory
+ * @do     parcourir_dossier
+ * @role   orchestration
+ * @layer  ui
+ * @human  Parcourt récursivement un dossier local et remonte chaque fichier trouvé.
+ */
 function scanDirectory(dirHandle, onFile, depth) {
     if (depth > 4) return Promise.resolve();
 
@@ -332,6 +360,13 @@ function scanDirectory(dirHandle, onFile, depth) {
 }
 
 // ── Process upload queue with concurrency control ──
+/*
+ * @id     cog.cloudViewMobile.startQueueProcessing
+ * @do     traiter_file_televersement
+ * @role   orchestration
+ * @layer  ui
+ * @human  Traite la file de fichiers à téléverser, avec limite de parallélisme et suivi.
+ */
 function startQueueProcessing(queue, stats) {
     var activeWorkers = 0;
     var queueIdx = 0;
@@ -391,6 +426,13 @@ function startQueueProcessing(queue, stats) {
     processNext();
 }
 
+/*
+ * @id     cog.cloudViewMobile.updateProgress
+ * @do     mettre_a_jour_progression
+ * @role   ui
+ * @layer  ui
+ * @human  Met à jour l'affichage de progression de la synchronisation.
+ */
 function updateProgress(stats) {
     if (stats.total > 0) {
         var pct = Math.round((stats.done / stats.total) * 100);
@@ -404,6 +446,13 @@ function updateProgress(stats) {
 // ═══════════════════════════════════════════════════════════════
 // FALLBACK SYNC — for webkitdirectory input (iOS, older browsers)
 // ═══════════════════════════════════════════════════════════════
+/*
+ * @id     cog.cloudViewMobile.syncWithCloudComparison
+ * @do     comparer_au_cloud
+ * @role   orchestration
+ * @layer  ui
+ * @human  Compare les fichiers locaux à ceux déjà dans le cloud pour n'envoyer que les manquants.
+ */
 function syncWithCloudComparison(localFiles) {
     syncStatus.classList.remove('hidden');
     syncLabel.textContent = 'V\u00e9rification de ' + localFiles.length + ' fichiers...';
@@ -437,6 +486,13 @@ function syncWithCloudComparison(localFiles) {
 // ═══════════════════════════════════════════════════════════════
 // BATCH UPLOAD — simple multi-file upload (no cloud comparison)
 // ═══════════════════════════════════════════════════════════════
+/*
+ * @id     cog.cloudViewMobile.startBatchUpload
+ * @do     lancer_televersement_lot
+ * @role   orchestration
+ * @layer  ui
+ * @human  Lance le téléversement d'un lot de fichiers avec liste et résumé de progression.
+ */
 function startBatchUpload(files, prefix, listEl, summaryEl) {
     listEl.innerHTML = '';
     summaryEl.classList.remove('hidden');
@@ -482,6 +538,13 @@ function startBatchUpload(files, prefix, listEl, summaryEl) {
 // SHARED HELPERS
 // ═══════════════════════════════════════════════════════════════
 
+/*
+ * @id     cog.cloudViewMobile.fetchExistingFileNames
+ * @do     lister_fichiers_existants
+ * @role   donnee
+ * @layer  ui
+ * @human  Récupère les noms des fichiers déjà présents dans le cloud, pour la comparaison.
+ */
 function fetchExistingFileNames() {
     var headers = {};
     if (typeof getCsrfHeaders === 'function') Object.assign(headers, getCsrfHeaders());
@@ -508,6 +571,13 @@ function fetchExistingFileNames() {
     return fetchPage(0).catch(function() { return allNames; });
 }
 
+/*
+ * @id     cog.cloudViewMobile.uploadFile
+ * @do     televerser_fichier
+ * @role   orchestration
+ * @layer  ui
+ * @human  Téléverse un fichier vers le cloud et renvoie le résultat.
+ */
 function uploadFile(file) {
     var form = new FormData();
     form.append('file', file);

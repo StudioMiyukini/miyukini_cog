@@ -1287,6 +1287,20 @@ const ui = {
  * Toggle selection state of a file/folder card.
  * Routes through the multiSelect module so batch actions know about selected items.
  */
+/*
+ * @id     cog.cloudUi
+ * @do     rendre_interface_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Boîte à outils d'interface de Miyukini Cloud : rendu des cartes fichiers, menus contextuels, sélection au lasso et dialogues de confirmation.
+ */
+/*
+ * @id     cog.cloudUi.toggleCardSelection
+ * @do     basculer_selection_carte
+ * @role   ui
+ * @layer  ui
+ * @human  Sélectionne ou désélectionne une carte de fichier.
+ */
 function toggleCardSelection(card, event) {
     if (window.multiSelect) {
         window.multiSelect.handleItemClick(card, event);
@@ -1297,6 +1311,13 @@ function toggleCardSelection(card, event) {
 
 /**
  * Show the context menu anchored next to a trigger element (the 3-dot button).
+ */
+/*
+ * @id     cog.cloudUi.showContextMenuAtElement
+ * @do     afficher_menu_contextuel
+ * @role   ui
+ * @layer  ui
+ * @human  Affiche un menu contextuel ancré à un élément déclencheur.
  */
 function showContextMenuAtElement(triggerElement, menuId) {
     // Hide any open menus first
@@ -1333,6 +1354,13 @@ function showContextMenuAtElement(triggerElement, menuId) {
 /**
  * Rubber band (lasso) selection — click + drag on empty grid area
  * to draw a rectangle and select all cards it touches.
+ */
+/*
+ * @id     cog.cloudUi.initRubberBandSelection
+ * @do     initialiser_selection_lasso
+ * @role   ui
+ * @layer  ui
+ * @human  Active la sélection au lasso (rectangle de sélection) sur la grille de fichiers.
  */
 function initRubberBandSelection() {
     // Create the visual rectangle element once
@@ -1460,6 +1488,13 @@ window.initRubberBandSelection = initRubberBandSelection;
  * @param {string} [options.cancelText='Cancelar'] - Text for cancel button
  * @param {boolean} [options.danger=false] - Use danger styling (red)
  * @returns {Promise<boolean>} true if confirmed, false if cancelled
+ */
+/*
+ * @id     cog.cloudUi.showConfirmDialog
+ * @do     confirmer_action
+ * @role   ui
+ * @layer  ui
+ * @human  Affiche une boîte de confirmation (action potentiellement destructive) et renvoie le choix.
  */
 function showConfirmDialog({ title, message, confirmText, cancelText, danger = true } = {}) {
     const ct = confirmText || (window.i18n ? window.i18n.t('actions.delete') : 'Delete');

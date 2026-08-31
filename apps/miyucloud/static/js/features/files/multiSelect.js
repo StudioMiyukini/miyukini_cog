@@ -540,4 +540,11 @@ const multiSelect = {
 };
 
 // Expose globally
+/*
+ * @id     cog.cloudMultiSelect
+ * @do     selectionner_multiple
+ * @role   ui
+ * @layer  ui
+ * @human  Sélection multiple : gère la sélection de plusieurs fichiers (clic, maj/ctrl, tout sélectionner) et les actions groupées.
+ */
 window.multiSelect = multiSelect;

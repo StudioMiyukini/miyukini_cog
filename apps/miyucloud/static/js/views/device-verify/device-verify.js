@@ -1,3 +1,10 @@
+/*
+ * @id     cog.cloudViewDeviceVerify
+ * @do     verifier_appareil
+ * @role   securite
+ * @layer  ui
+ * @human  Vue de vérification d'appareil : confirme un nouvel appareil lors de la connexion (double facteur / e-mail).
+ */
 // device-verify.js — Extracted from inline <script> in device-verify.html
 (function () {
   'use strict';

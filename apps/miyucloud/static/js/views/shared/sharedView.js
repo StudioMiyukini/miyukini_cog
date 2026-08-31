@@ -608,4 +608,11 @@ const sharedView = {
     }
 };
 
+/*
+ * @id     cog.cloudViewShared
+ * @do     afficher_fichiers_partages
+ * @role   ui
+ * @layer  ui
+ * @human  Vue « Partagés » : liste les fichiers partagés avec l'utilisateur et ceux qu'il a partagés.
+ */
 window.sharedView = sharedView;

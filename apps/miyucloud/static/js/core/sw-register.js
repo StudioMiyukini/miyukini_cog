@@ -1,3 +1,10 @@
+/*
+ * @id     cog.cloudSwRegister
+ * @do     enregistrer_service_worker
+ * @role   orchestration
+ * @layer  infra
+ * @human  Enregistre le service worker après le chargement de la page.
+ */
 // Service Worker registration — runs after page load.
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {

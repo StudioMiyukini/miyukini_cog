@@ -8,6 +8,20 @@
  * Tokens are now in HttpOnly cookies — no explicit Authorization header needed.
  * @returns {Object} Headers object
  */
+/*
+ * @id     cog.cloudFileOps
+ * @do     operer_sur_fichiers
+ * @role   orchestration
+ * @layer  domain
+ * @human  Opérations sur les fichiers : téléversement (par lots, avec progression), téléchargement, renommage, déplacement et suppression.
+ */
+/*
+ * @id     cog.cloudFileOps.getAuthHeaders
+ * @do     composer_entetes_auth
+ * @role   securite
+ * @layer  domain
+ * @human  Compose les en-têtes d'authentification (jeton, CSRF) pour les appels de fichiers.
+ */
 function getAuthHeaders() {
     return { ...getCsrfHeaders() };
 }

@@ -7,6 +7,20 @@
  * Sync the hidden class and inline display for the grid/list containers
  * based on the current view preference.
  */
+/*
+ * @id     cog.cloudNavigation
+ * @do     naviguer_entre_vues
+ * @role   ui
+ * @layer  ui
+ * @human  Navigation de Miyukini Cloud : bascule entre les vues (fichiers, partagés, favoris, récents, photos) et gère la barre latérale.
+ */
+/*
+ * @id     cog.cloudNavigation.syncViewContainers
+ * @do     synchroniser_conteneurs_vue
+ * @role   ui
+ * @layer  ui
+ * @human  Synchronise l'affichage des conteneurs de vue avec la section active.
+ */
 function syncViewContainers() {
     const filesGrid = document.getElementById('files-grid');
     const filesListView = document.getElementById('files-list-view');
@@ -24,6 +38,13 @@ function syncViewContainers() {
 /**
  * Hide both grid and list containers (used when switching to non-file views).
  */
+/*
+ * @id     cog.cloudNavigation.hideFileContainers
+ * @do     masquer_conteneurs_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Masque les conteneurs de fichiers lors d'un changement de vue.
+ */
 function hideFileContainers() {
     const filesGrid = document.getElementById('files-grid');
     const filesListView = document.getElementById('files-list-view');
@@ -33,6 +54,13 @@ function hideFileContainers() {
 
 /**
  * Mobile sidebar toggle functionality
+ */
+/*
+ * @id     cog.cloudNavigation.initSidebarToggle
+ * @do     initialiser_bascule_laterale
+ * @role   ui
+ * @layer  ui
+ * @human  Initialise l'ouverture/fermeture de la barre latérale (mobile).
  */
 function initSidebarToggle() {
 	const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -110,6 +138,13 @@ const VIEW_FLAGS = {
  * @param {HTMLElement} navItem - The nav item element
  * @returns {string|null} - Section name or null if not found
  */
+/*
+ * @id     cog.cloudNavigation.getSectionFromNavItem
+ * @do     resoudre_section_menu
+ * @role   ui
+ * @layer  ui
+ * @human  Déduit la section cible depuis un élément de menu cliqué.
+ */
 function getSectionFromNavItem(navItem) {
     const i18nKey = navItem.querySelector('span[data-i18n]')?.getAttribute('data-i18n');
     return i18nKey ? i18nKey.replace('nav.', '') : null;
@@ -118,6 +153,13 @@ function getSectionFromNavItem(navItem) {
 /**
  * Set the current active section, updating all view flags and nav UI.
  * @param {string} section - The section to activate ('files', 'shared', 'recent', 'favorites', 'trash')
+ */
+/*
+ * @id     cog.cloudNavigation.setCurrentSection
+ * @do     definir_section_courante
+ * @role   ui
+ * @layer  ui
+ * @human  Active une section de navigation et met à jour l'état visuel du menu.
  */
 function setCurrentSection(section) {
     // Set all view flags - true for active section, false for others
@@ -150,6 +192,13 @@ function setCurrentSection(section) {
     }
 }
 
+/*
+ * @id     cog.cloudNavigation.switchToSharedView
+ * @do     basculer_vue_partages
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule vers la vue des fichiers partagés.
+ */
 function switchToSharedView() {
     setCurrentSection('shared');
 
@@ -174,6 +223,13 @@ function switchToSharedView() {
     }
 }
 
+/*
+ * @id     cog.cloudNavigation.switchToFilesView
+ * @do     basculer_vue_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule vers la vue des fichiers (dossier courant).
+ */
 function switchToFilesView() {
     setCurrentSection('files');
 
@@ -199,6 +255,13 @@ function switchToFilesView() {
     window.loadFiles();
 }
 
+/*
+ * @id     cog.cloudNavigation.switchToFavoritesView
+ * @do     basculer_vue_favoris
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule vers la vue des favoris.
+ */
 function switchToFavoritesView() {
     setCurrentSection('favorites');
 
@@ -232,6 +295,13 @@ function switchToFavoritesView() {
     }
 }
 
+/*
+ * @id     cog.cloudNavigation.switchToRecentFilesView
+ * @do     basculer_vue_recents
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule vers la vue des fichiers récents.
+ */
 function switchToRecentFilesView() {
     setCurrentSection('recent');
 
@@ -265,6 +335,13 @@ function switchToRecentFilesView() {
     }
 }
 
+/*
+ * @id     cog.cloudNavigation.switchToPhotosView
+ * @do     basculer_vue_photos
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule vers la vue de la photothèque.
+ */
 function switchToPhotosView() {
     setCurrentSection('photos');
 

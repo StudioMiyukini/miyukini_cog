@@ -3,6 +3,13 @@
  * A simpler approach to viewing files that doesn't rely on complex DOM manipulation
  */
 
+/*
+ * @id     cog.cloudInlineViewer
+ * @do     previsualiser_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Visionneuse intégrée : affiche un fichier (image, texte, PDF…) en aperçu, sans manipulation DOM complexe.
+ */
 class InlineViewer {
   constructor() {
     this.setupViewer();

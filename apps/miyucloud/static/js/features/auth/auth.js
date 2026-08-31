@@ -149,11 +149,32 @@ const ALL_LANGUAGES = [
 ];
 
 // Check if this is a first run (no locale saved)
+/*
+ * @id     cog.cloudAuth
+ * @do     authentifier_utilisateur
+ * @role   securite
+ * @layer  domain
+ * @human  Authentification de Miyukini Cloud : connexion, inscription, jetons, OIDC, premier démarrage et sélection de langue de l'écran d'accueil.
+ */
+/*
+ * @id     cog.cloudAuth.isFirstRun
+ * @do     tester_premier_demarrage
+ * @role   rule
+ * @layer  domain
+ * @human  Dit si l'instance est à son premier démarrage (aucun compte créé).
+ */
 function isFirstRun() {
     return !localStorage.getItem(LOCALE_KEY);
 }
 
 // Check system status from the server
+/*
+ * @id     cog.cloudAuth.checkSystemStatus
+ * @do     verifier_etat_systeme
+ * @role   donnee
+ * @layer  domain
+ * @human  Interroge l'état du système (premier démarrage, OIDC activé, inscriptions ouvertes).
+ */
 async function checkSystemStatus() {
     try {
         const response = await fetch('/api/auth/status');
@@ -169,6 +190,13 @@ async function checkSystemStatus() {
 }
 
 // Detect user's browser language and return the best matching language from ALL_LANGUAGES
+/*
+ * @id     cog.cloudAuth.detectBrowserLanguage
+ * @do     detecter_langue_navigateur
+ * @role   donnee
+ * @layer  domain
+ * @human  Détecte la langue préférée du navigateur pour l'écran d'accueil.
+ */
 function detectBrowserLanguage() {
     const browserLangs = navigator.languages || [navigator.language || navigator.userLanguage || 'en'];
     for (const bl of browserLangs) {
@@ -180,6 +208,13 @@ function detectBrowserLanguage() {
 }
 
 // Build a language option element (card style)
+/*
+ * @id     cog.cloudAuth.buildLanguageCard
+ * @do     construire_carte_langue
+ * @role   ui
+ * @layer  domain
+ * @human  Construit la carte de choix d'une langue sur l'écran d'accueil.
+ */
 function buildLanguageCard(lang, isSelected) {
     const item = document.createElement('div');
     item.className = 'lang-picker-item' + (isSelected ? ' selected' : '');
@@ -196,6 +231,13 @@ function buildLanguageCard(lang, isSelected) {
 }
 
 // Initialize language selector panel with compact dropdown approach
+/*
+ * @id     cog.cloudAuth.initLanguageSelector
+ * @do     initialiser_choix_langue
+ * @role   ui
+ * @layer  domain
+ * @human  Initialise le sélecteur de langue de l'écran d'accueil.
+ */
 function initLanguageSelector() {
     const languagePanel = document.getElementById('language-panel');
     const continueBtn = document.getElementById('language-continue');
@@ -343,6 +385,13 @@ function initLanguageSelector() {
 }
 
 // Update language panel texts based on selected language
+/*
+ * @id     cog.cloudAuth.updateLanguagePanelTexts
+ * @do     traduire_panneau_accueil
+ * @role   ui
+ * @layer  domain
+ * @human  Met à jour les textes du panneau d'accueil selon la langue choisie.
+ */
 function updateLanguagePanelTexts(lang) {
     const texts = LANGUAGE_TEXTS[lang] || LANGUAGE_TEXTS.en;
     const titleEl = document.getElementById('language-title');
@@ -357,6 +406,13 @@ function updateLanguagePanelTexts(lang) {
 }
 
 // Show appropriate panel based on system status and first run
+/*
+ * @id     cog.cloudAuth.showInitialPanel
+ * @do     afficher_panneau_initial
+ * @role   ui
+ * @layer  domain
+ * @human  Affiche le bon panneau d'accueil selon l'état (création initiale, connexion, inscription).
+ */
 async function showInitialPanel() {
     const languagePanel = document.getElementById('language-panel');
     const loginPanel = document.getElementById('login-panel');
@@ -415,6 +471,13 @@ async function showInitialPanel() {
 }
 
 // Fetch OIDC provider info and configure the login UI
+/*
+ * @id     cog.cloudAuth.configureOidcLoginUI
+ * @do     configurer_connexion_oidc
+ * @role   securite
+ * @layer  domain
+ * @human  Configure l'interface de connexion pour le fournisseur OIDC lorsqu'il est activé.
+ */
 async function configureOidcLoginUI() {
     try {
         const response = await fetch('/api/auth/oidc/providers');
@@ -466,6 +529,13 @@ let loginForm, registerForm, adminSetupForm;
 let loginError, registerError, registerSuccess, adminSetupError;
 
 // Initialize DOM elements only if we're on the login page
+/*
+ * @id     cog.cloudAuth.initLoginElements
+ * @do     initialiser_formulaire_connexion
+ * @role   ui
+ * @layer  domain
+ * @human  Câble les éléments et écouteurs du formulaire de connexion/inscription.
+ */
 function initLoginElements() {
     // Check if we're on the login page
     if (!document.getElementById('login-form')) {
@@ -826,6 +896,13 @@ if (isLoginPage && adminSetupForm) {
 /**
  * Login with username and password
  */
+/*
+ * @id     cog.cloudAuth.login
+ * @do     connecter
+ * @role   securite
+ * @layer  domain
+ * @human  Connecte un utilisateur par identifiant et mot de passe, et ouvre la session.
+ */
 async function login(username, password) {
     try {
         console.log(`Attempting to login with username: ${username}`);
@@ -878,6 +955,13 @@ async function login(username, password) {
 /**
  * Register a new user
  */
+/*
+ * @id     cog.cloudAuth.register
+ * @do     inscrire
+ * @role   securite
+ * @layer  domain
+ * @human  Crée un compte utilisateur (ou le premier compte administrateur).
+ */
 async function register(username, email, password, role = 'user') {
     try {
         console.log(`Attempting to register user: ${username}`);
@@ -922,6 +1006,13 @@ async function register(username, email, password, role = 'user') {
 /**
  * Fetch current user data — relies on HttpOnly cookie (auto-sent).
  */
+/*
+ * @id     cog.cloudAuth.fetchUserData
+ * @do     recuperer_donnees_utilisateur
+ * @role   securite
+ * @layer  domain
+ * @human  Récupère les données du compte après authentification.
+ */
 async function fetchUserData() {
     try {
         const response = await fetch(ME_ENDPOINT, {
@@ -944,6 +1035,13 @@ async function fetchUserData() {
  * Refresh authentication token via the server's refresh endpoint.
  * The refresh-token cookie is sent automatically (HttpOnly, Path=/api/auth).
  * Returns true on success, false on failure.
+ */
+/*
+ * @id     cog.cloudAuth.refreshAuthToken
+ * @do     rafraichir_jeton
+ * @role   securite
+ * @layer  domain
+ * @human  Renouvelle le jeton d'authentification avant son expiration.
  */
 async function refreshAuthToken() {
     try {
@@ -1003,6 +1101,13 @@ async function refreshAuthToken() {
 /**
  * Check if this is the first run (no admin exists)
  */
+/*
+ * @id     cog.cloudAuth.checkFirstRun
+ * @do     verifier_premier_demarrage
+ * @role   donnee
+ * @layer  domain
+ * @human  Vérifie côté serveur s'il s'agit du premier démarrage (aucun compte).
+ */
 async function checkFirstRun() {
     try {
         console.log("Checking if this is first run");
@@ -1023,6 +1128,13 @@ async function checkFirstRun() {
 /**
  * Redirect to main application — no token check needed (cookies are opaque).
  */
+/*
+ * @id     cog.cloudAuth.redirectToMainApp
+ * @do     rediriger_vers_app
+ * @role   orchestration
+ * @layer  domain
+ * @human  Redirige vers l'application principale une fois authentifié.
+ */
 function redirectToMainApp() {
     console.log('Redirecting to main application');
     try {
@@ -1037,6 +1149,13 @@ function redirectToMainApp() {
 
 /**
  * Logout — tell the server to clear HttpOnly cookies, then redirect.
+ */
+/*
+ * @id     cog.cloudAuth.logout
+ * @do     deconnecter
+ * @role   securite
+ * @layer  domain
+ * @human  Ferme la session côté serveur et renvoie à l'écran de connexion.
  */
 async function logout() {
     try {

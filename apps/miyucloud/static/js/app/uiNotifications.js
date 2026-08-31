@@ -52,4 +52,11 @@ const uiNotifications = {
     }
 };
 
+/*
+ * @id     cog.cloudUiNotifications
+ * @do     notifier_ui
+ * @role   ui
+ * @layer  ui
+ * @human  Notifications d'interface : messages de succès/erreur propres aux actions de l'application.
+ */
 window.uiNotifications = uiNotifications;

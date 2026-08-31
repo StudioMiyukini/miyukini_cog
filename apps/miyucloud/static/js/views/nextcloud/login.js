@@ -1,3 +1,10 @@
+/*
+ * @id     cog.cloudViewNcLogin
+ * @do     connecter_nextcloud
+ * @role   securite
+ * @layer  ui
+ * @human  Page de connexion du pont Nextcloud : récupère le jeton dans l'URL et cible le formulaire d'autorisation.
+ */
 // Extract token from URL path and set form action
 var pathParts = window.location.pathname.split('/');
 var token = pathParts[pathParts.length - 1];

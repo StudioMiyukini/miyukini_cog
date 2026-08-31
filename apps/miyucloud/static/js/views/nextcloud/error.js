@@ -1,3 +1,10 @@
+/*
+ * @id     cog.cloudViewNcError
+ * @do     afficher_erreur_nextcloud
+ * @role   ui
+ * @layer  ui
+ * @human  Page d'erreur du pont Nextcloud : affiche le message correspondant au type d'erreur passé en URL.
+ */
 // Read error type from URL query parameter
 var params = new URLSearchParams(window.location.search);
 var errorType = params.get('type') || 'generic';

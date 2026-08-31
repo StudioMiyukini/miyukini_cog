@@ -5,6 +5,20 @@ const PAGE_SIZE = 50;
 let totalUsers = 0;
 
 /* ── i18n helper — falls back to key if i18n not ready ── */
+/*
+ * @id     cog.cloudViewAdmin
+ * @do     administrer_instance
+ * @role   securite
+ * @layer  ui
+ * @human  Console d'administration : tableau de bord, gestion des utilisateurs (rôles, quotas, mots de passe), inscriptions et réglages OIDC.
+ */
+/*
+ * @id     cog.cloudViewAdmin.t
+ * @do     traduire_cle_admin
+ * @role   ui
+ * @layer  ui
+ * @human  Raccourci de traduction local à la console d'admin.
+ */
 function t(key, params) {
   if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, params);
   // fallback: strip prefix and humanise
@@ -61,6 +75,13 @@ function timeAgo(dateStr) {
 }
 
 /* ── Custom confirm modal ── */
+/*
+ * @id     cog.cloudViewAdmin.showConfirm
+ * @do     confirmer_action_admin
+ * @role   ui
+ * @layer  ui
+ * @human  Demande confirmation avant une action d'administration sensible.
+ */
 function showConfirm(message) {
   return new Promise(function(resolve) {
     var overlay = document.getElementById('confirm-modal');
@@ -91,6 +112,13 @@ function showConfirm(message) {
 /* ── Tab switching with fade animation ── */
 let activeTabName = 'dashboard';
 
+/*
+ * @id     cog.cloudViewAdmin.switchTab
+ * @do     changer_onglet_admin
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule entre les onglets de la console d'admin.
+ */
 function switchTab(name, el) {
   if (name === activeTabName) return;
   var oldTab = document.getElementById('tab-' + activeTabName);
@@ -127,6 +155,13 @@ function switchTab(name, el) {
   if (name === 'dashboard') loadDashboard();
 }
 
+/*
+ * @id     cog.cloudViewAdmin.loadDashboard
+ * @do     charger_tableau_bord
+ * @role   donnee
+ * @layer  ui
+ * @human  Charge les indicateurs du tableau de bord (utilisateurs, stockage, activité).
+ */
 async function loadDashboard() {
   try {
     const resp = await fetch(API + '/admin/dashboard', { headers: headers(), credentials: 'same-origin' });
@@ -163,6 +198,13 @@ async function loadDashboard() {
   } catch (e) { console.error('Dashboard error', e); }
 }
 
+/*
+ * @id     cog.cloudViewAdmin.loadUsers
+ * @do     charger_utilisateurs
+ * @role   donnee
+ * @layer  ui
+ * @human  Charge la liste paginée des utilisateurs.
+ */
 async function loadUsers() {
   const tbody = document.getElementById('users-tbody');
   tbody.innerHTML = '<tr><td colspan="7" class="table-loading-cell"><i class="fas fa-spinner fa-spin"></i> ' + escapeHtml(t('admin.loading_users')) + '</td></tr>';
@@ -230,6 +272,13 @@ async function loadUsers() {
 function prevPage() { if (usersPage > 0) { usersPage--; loadUsers(); } }
 function nextPage() { if ((usersPage + 1) * PAGE_SIZE < totalUsers) { usersPage++; loadUsers(); } }
 
+/*
+ * @id     cog.cloudViewAdmin.toggleRole
+ * @do     basculer_role
+ * @role   securite
+ * @layer  ui
+ * @human  Bascule le rôle d'un utilisateur (utilisateur / administrateur).
+ */
 async function toggleRole(userId, currentRole) {
   const newRole = currentRole === 'admin' ? 'user' : 'admin';
   const ok = await showConfirm(t('admin.confirm_role_change', { role: newRole }));
@@ -242,6 +291,13 @@ async function toggleRole(userId, currentRole) {
   } catch (e) { alert(t('admin.error_network', { message: e.message })); }
 }
 
+/*
+ * @id     cog.cloudViewAdmin.toggleActive
+ * @do     basculer_activation
+ * @role   securite
+ * @layer  ui
+ * @human  Active ou désactive un compte utilisateur.
+ */
 async function toggleActive(userId, currentActive) {
   const msg = currentActive ? t('admin.confirm_deactivate') : t('admin.confirm_activate');
   const ok = await showConfirm(msg);
@@ -254,6 +310,13 @@ async function toggleActive(userId, currentActive) {
   } catch (e) { alert(t('admin.error_network', { message: e.message })); }
 }
 
+/*
+ * @id     cog.cloudViewAdmin.deleteUser
+ * @do     supprimer_utilisateur
+ * @role   securite
+ * @layer  ui
+ * @human  Supprime un compte utilisateur après confirmation.
+ */
 async function deleteUser(userId, username) {
   const ok = await showConfirm(t('admin.confirm_delete_user', { name: username }));
   if (!ok) return;
@@ -264,6 +327,13 @@ async function deleteUser(userId, username) {
 }
 
 let quotaUserId = '';
+/*
+ * @id     cog.cloudViewAdmin.openQuotaModal
+ * @do     ouvrir_modal_quota
+ * @role   ui
+ * @layer  ui
+ * @human  Ouvre la fenêtre de modification du quota d'un utilisateur.
+ */
 function openQuotaModal(userId, username, currentQuota) {
   quotaUserId = userId;
   document.getElementById('qm-username').textContent = username;
@@ -274,6 +344,13 @@ function openQuotaModal(userId, username, currentQuota) {
 }
 function closeQuotaModal() { hideElement('quota-modal'); }
 
+/*
+ * @id     cog.cloudViewAdmin.saveQuota
+ * @do     enregistrer_quota
+ * @role   orchestration
+ * @layer  ui
+ * @human  Enregistre le nouveau quota de stockage d'un utilisateur.
+ */
 async function saveQuota() {
   const val = parseFloat(document.getElementById('qm-value').value) || 0;
   const unit = parseInt(document.getElementById('qm-unit').value);
@@ -287,6 +364,13 @@ async function saveQuota() {
   } catch (e) { alert(t('admin.error_network', { message: e.message })); }
 }
 
+/*
+ * @id     cog.cloudViewAdmin.openCreateUserModal
+ * @do     ouvrir_modal_creation
+ * @role   ui
+ * @layer  ui
+ * @human  Ouvre la fenêtre de création d'un utilisateur.
+ */
 function openCreateUserModal() {
   document.getElementById('cu-username').value = '';
   document.getElementById('cu-password').value = '';
@@ -301,6 +385,13 @@ function openCreateUserModal() {
 }
 function closeCreateUserModal() { hideElement('create-user-modal'); }
 
+/*
+ * @id     cog.cloudViewAdmin.submitCreateUser
+ * @do     creer_utilisateur
+ * @role   securite
+ * @layer  ui
+ * @human  Crée un utilisateur à partir du formulaire d'admin.
+ */
 async function submitCreateUser() {
   const username = document.getElementById('cu-username').value.trim();
   const password = document.getElementById('cu-password').value;
@@ -338,6 +429,13 @@ async function submitCreateUser() {
 }
 
 let resetPwUserId = '';
+/*
+ * @id     cog.cloudViewAdmin.openResetPasswordModal
+ * @do     ouvrir_modal_reset
+ * @role   ui
+ * @layer  ui
+ * @human  Ouvre la fenêtre de réinitialisation du mot de passe d'un utilisateur.
+ */
 function openResetPasswordModal(userId, username) {
   resetPwUserId = userId;
   document.getElementById('rp-username').textContent = username;
@@ -349,6 +447,13 @@ function openResetPasswordModal(userId, username) {
 }
 function closeResetPasswordModal() { hideElement('reset-pw-modal'); }
 
+/*
+ * @id     cog.cloudViewAdmin.submitResetPassword
+ * @do     reinitialiser_mot_de_passe_admin
+ * @role   securite
+ * @layer  ui
+ * @human  Réinitialise le mot de passe d'un utilisateur depuis l'admin.
+ */
 async function submitResetPassword() {
   const password = document.getElementById('rp-password').value;
   const errorEl = document.getElementById('rp-error');
@@ -367,6 +472,13 @@ async function submitResetPassword() {
   btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> ' + escapeHtml(t('admin.reset_btn'));
 }
 
+/*
+ * @id     cog.cloudViewAdmin.toggleRegistration
+ * @do     basculer_inscriptions
+ * @role   securite
+ * @layer  ui
+ * @human  Ouvre ou ferme les inscriptions publiques de l'instance.
+ */
 async function toggleRegistration(enabled) {
   if (enabled) hideElement('registration-warning');
   else showElement('registration-warning', 'flex');
@@ -399,6 +511,13 @@ document.getElementById('disable-password').addEventListener('change', function(
   else hideElement('password-warning');
 });
 
+/*
+ * @id     cog.cloudViewAdmin.showOidcStatus
+ * @do     afficher_statut_oidc
+ * @role   ui
+ * @layer  ui
+ * @human  Affiche l'état de la configuration OIDC (succès/erreur).
+ */
 function showOidcStatus(msg, type) {
   const el = document.getElementById('oidc-status');
   el.textContent = msg;
@@ -410,6 +529,13 @@ function copyCallback() {
   navigator.clipboard.writeText(text);
 }
 
+/*
+ * @id     cog.cloudViewAdmin.testConnection
+ * @do     tester_connexion_oidc
+ * @role   orchestration
+ * @layer  ui
+ * @human  Teste la connexion au fournisseur OIDC configuré.
+ */
 async function testConnection() {
   const url = document.getElementById('issuer-url').value.trim();
   if (!url) { showOidcStatus('Enter an Issuer URL first', 'error'); return; }
@@ -429,6 +555,13 @@ async function testConnection() {
   btn.disabled = false; btn.innerHTML = '<i class="fas fa-search"></i> ' + escapeHtml(t('admin.auto_discover'));
 }
 
+/*
+ * @id     cog.cloudViewAdmin.saveOidcSettings
+ * @do     enregistrer_reglages_oidc
+ * @role   securite
+ * @layer  ui
+ * @human  Enregistre les réglages OIDC (fournisseur, client, endpoints).
+ */
 async function saveOidcSettings() {
   const btn = document.getElementById('save-btn');
   btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + escapeHtml(t('admin.saving'));
@@ -455,6 +588,13 @@ async function saveOidcSettings() {
   btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> ' + escapeHtml(t('admin.save_btn'));
 }
 
+/*
+ * @id     cog.cloudViewAdmin.init
+ * @do     initialiser_console_admin
+ * @role   orchestration
+ * @layer  ui
+ * @human  Initialise la console d'admin : vérifie les droits et charge le premier onglet.
+ */
 async function init() {
   try {
     const me = await fetch(API + '/auth/me', { headers: headers(), credentials: 'same-origin' });
@@ -492,6 +632,13 @@ async function init() {
   } catch (e) { console.error(e); showAccessDenied(); }
 }
 
+/*
+ * @id     cog.cloudViewAdmin.showAccessDenied
+ * @do     refuser_acces
+ * @role   securite
+ * @layer  ui
+ * @human  Affiche l'écran « accès refusé » pour un non-administrateur.
+ */
 function showAccessDenied() {
   hideElement('loading');
   showElement('access-denied');

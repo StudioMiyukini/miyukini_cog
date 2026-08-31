@@ -240,4 +240,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export for use in other modules
+/*
+ * @id     cog.cloudModal
+ * @do     gerer_modales
+ * @role   ui
+ * @layer  ui
+ * @human  Système de fenêtres modales de Miyukini Cloud : ouverture, fermeture, confirmation et saisie.
+ */
 window.Modal = Modal;

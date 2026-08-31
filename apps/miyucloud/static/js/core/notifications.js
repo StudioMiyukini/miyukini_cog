@@ -345,4 +345,11 @@ const notifications = (() => {
     };
 })();
 
+/*
+ * @id     cog.cloudNotifications
+ * @do     gerer_notifications
+ * @role   ui
+ * @layer  ui
+ * @human  Système de notifications de Miyukini Cloud : toasts, suivi des lots d'envoi de fichiers et messages de progression.
+ */
 window.notifications = notifications;

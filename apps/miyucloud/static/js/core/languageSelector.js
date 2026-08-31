@@ -12,6 +12,20 @@ const AVAILABLE_LOCALES = new Set([
 
 // Language codes, names, and flag emojis
 // Only returns languages that have a real locale file
+/*
+ * @id     cog.cloudLanguageSelector
+ * @do     selectionner_langue
+ * @role   ui
+ * @layer  ui
+ * @human  Sélecteur de langue : construit le menu déroulant des langues et applique le choix à la page.
+ */
+/*
+ * @id     cog.cloudLanguageSelector.getAvailableLanguages
+ * @do     lister_langues_disponibles
+ * @role   donnee
+ * @layer  ui
+ * @human  Liste les langues proposées dans le sélecteur.
+ */
 function getAvailableLanguages() {
     if (typeof ALL_LANGUAGES !== 'undefined') {
         return ALL_LANGUAGES
@@ -35,6 +49,13 @@ function getAvailableLanguages() {
 const rtlLanguages = ['fa', 'ar'];
 
 // Update HTML lang attribute and dir for RTL languages
+/*
+ * @id     cog.cloudLanguageSelector.updateHtmlAttributes
+ * @do     mettre_a_jour_attributs_langue
+ * @role   ui
+ * @layer  ui
+ * @human  Met à jour les attributs lang/dir du document selon la langue choisie.
+ */
 function updateHtmlAttributes(langCode) {
     const htmlElement = document.documentElement;
     
@@ -52,6 +73,13 @@ function updateHtmlAttributes(langCode) {
 /**
  * Creates and initializes a custom language selector component
  * @param {string} containerId - ID of the container element
+ */
+/*
+ * @id     cog.cloudLanguageSelector.createLanguageSelector
+ * @do     construire_selecteur_langue
+ * @role   ui
+ * @layer  ui
+ * @human  Construit le composant sélecteur de langue dans un conteneur.
  */
 function createLanguageSelector(containerId = 'language-selector') {
     // Get or create container
@@ -152,6 +180,13 @@ function createLanguageSelector(containerId = 'language-selector') {
 /**
  * Toggle dropdown open/closed
  */
+/*
+ * @id     cog.cloudLanguageSelector.toggleDropdown
+ * @do     basculer_menu_langue
+ * @role   ui
+ * @layer  ui
+ * @human  Ouvre ou ferme le menu déroulant des langues.
+ */
 function toggleDropdown(container) {
     const isOpen = container.classList.contains('open');
     if (isOpen) {
@@ -164,6 +199,13 @@ function toggleDropdown(container) {
 /**
  * Open dropdown
  */
+/*
+ * @id     cog.cloudLanguageSelector.openDropdown
+ * @do     ouvrir_menu_langue
+ * @role   ui
+ * @layer  ui
+ * @human  Ouvre le menu déroulant des langues.
+ */
 function openDropdown(container) {
     container.classList.add('open');
     const toggle = container.querySelector('.language-selector-toggle');
@@ -175,6 +217,13 @@ function openDropdown(container) {
 /**
  * Close dropdown
  */
+/*
+ * @id     cog.cloudLanguageSelector.closeDropdown
+ * @do     fermer_menu_langue
+ * @role   ui
+ * @layer  ui
+ * @human  Ferme le menu déroulant des langues.
+ */
 function closeDropdown(container) {
     container.classList.remove('open');
     const toggle = container.querySelector('.language-selector-toggle');
@@ -185,6 +234,13 @@ function closeDropdown(container) {
 
 /**
  * Select a language
+ */
+/*
+ * @id     cog.cloudLanguageSelector.selectLanguage
+ * @do     selectionner_langue_action
+ * @role   orchestration
+ * @layer  ui
+ * @human  Sélectionne une langue depuis le menu : applique la locale et met à jour l'affichage.
  */
 async function selectLanguage(langCode, container) {
     // Update i18n if available
@@ -201,6 +257,13 @@ async function selectLanguage(langCode, container) {
 
 /**
  * Update the UI to reflect selected language
+ */
+/*
+ * @id     cog.cloudLanguageSelector.updateSelectedLanguage
+ * @do     appliquer_langue_choisie
+ * @role   ui
+ * @layer  ui
+ * @human  Applique la langue choisie : bascule la locale et rafraîchit l'affichage du sélecteur.
  */
 function updateSelectedLanguage(langCode, container) {
     const languages = getAvailableLanguages();

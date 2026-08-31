@@ -232,4 +232,11 @@ const favorites = {
 };
 
 // Expose globally
+/*
+ * @id     cog.cloudFavorites
+ * @do     gerer_favoris
+ * @role   ui
+ * @layer  domain
+ * @human  Favoris : marque des fichiers comme favoris et affiche la collection.
+ */
 window.favorites = favorites;

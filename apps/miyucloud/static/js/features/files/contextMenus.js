@@ -1124,4 +1124,11 @@ const contextMenus = {
 };
 
 // Expose context menus module globally
+/*
+ * @id     cog.cloudContextMenus
+ * @do     gerer_menus_contextuels_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Menus contextuels des fichiers et dossiers : construit et gère les actions au clic droit (ouvrir, renommer, déplacer, supprimer…).
+ */
 window.contextMenus = contextMenus;

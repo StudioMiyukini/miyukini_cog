@@ -2,6 +2,20 @@
  * Trash view loading and rendering logic
  */
 
+/*
+ * @id     cog.cloudTrashView
+ * @do     afficher_corbeille
+ * @role   ui
+ * @layer  ui
+ * @human  Vue de la corbeille : liste les éléments supprimés et permet de les restaurer ou purger.
+ */
+/*
+ * @id     cog.cloudTrashView.loadTrashItems
+ * @do     charger_corbeille
+ * @role   orchestration
+ * @layer  ui
+ * @human  Charge et affiche les éléments présents dans la corbeille.
+ */
 async function loadTrashItems() {
     const elements = window.appElements;
 
@@ -44,6 +58,13 @@ async function loadTrashItems() {
     }
 }
 
+/*
+ * @id     cog.cloudTrashView.addTrashItemToView
+ * @do     ajouter_element_corbeille
+ * @role   ui
+ * @layer  ui
+ * @human  Ajoute un élément supprimé à l'affichage de la corbeille.
+ */
 function addTrashItemToView(item) {
     const elements = window.appElements;
     const isFile = item.item_type === 'file';

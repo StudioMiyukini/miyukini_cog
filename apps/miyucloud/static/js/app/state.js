@@ -3,6 +3,13 @@
  * Centralized mutable state for app and cached DOM references.
  */
 
+/*
+ * @id     cog.cloudState
+ * @do     detenir_etat_app
+ * @role   donnee
+ * @layer  domain
+ * @human  État global de Miyukini Cloud : vue et dossier courants, sélections, et références DOM mises en cache.
+ */
 window.app = {
     currentView: 'grid',
     currentPath: '',

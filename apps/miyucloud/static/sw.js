@@ -1,3 +1,10 @@
+/*
+ * @id     cog.cloudServiceWorker
+ * @do     servir_hors_ligne
+ * @role   orchestration
+ * @layer  infra
+ * @human  Service worker de la PWA Miyukini Cloud : met en cache les ressources et sert l'application hors ligne.
+ */
 // Miyukini Cloud Service Worker — PWA support
 const CACHE_NAME = 'miyucloud-cache-v1';
 const ASSETS_TO_CACHE = [

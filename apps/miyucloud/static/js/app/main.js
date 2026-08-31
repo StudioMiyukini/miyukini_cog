@@ -90,6 +90,20 @@ const ACTIONS_BAR_TEMPLATES = {
     `
 };
 
+/*
+ * @id     cog.cloudMain
+ * @do     orchestrer_application
+ * @role   orchestration
+ * @layer  ui
+ * @human  Chef d'orchestre de Miyukini Cloud : initialise l'app, câble les écouteurs, la barre d'actions et l'affichage du quota.
+ */
+/*
+ * @id     cog.cloudMain.setActionsBarMode
+ * @do     regler_barre_actions
+ * @role   ui
+ * @layer  ui
+ * @human  Bascule la barre d'actions selon le mode (sélection, navigation).
+ */
 function setActionsBarMode(mode, force = false) {
     if (!elements.actionsBar) return;
 
@@ -125,6 +139,13 @@ function setActionsBarMode(mode, force = false) {
     }
 }
 
+/*
+ * @id     cog.cloudMain.setupActionsBarDelegation
+ * @do     deleguer_actions_barre
+ * @role   ui
+ * @layer  ui
+ * @human  Câble la délégation d'événements sur la barre d'actions.
+ */
 function setupActionsBarDelegation() {
     if (actionsBarDelegationBound || !elements.actionsBar) return;
     actionsBarDelegationBound = true;
@@ -182,6 +203,13 @@ function setupActionsBarDelegation() {
 
 /**
  * Initialize the application
+ */
+/*
+ * @id     cog.cloudMain.initApp
+ * @do     initialiser_application
+ * @role   orchestration
+ * @layer  ui
+ * @human  Initialise l'application : vérifie la session, met en cache les éléments, câble les écouteurs et charge la vue de départ.
  */
 function initApp() {
     // Cache DOM elements
@@ -258,6 +286,13 @@ function initApp() {
 /**
  * Cache DOM elements for faster access
  */
+/*
+ * @id     cog.cloudMain.cacheElements
+ * @do     mettre_en_cache_elements
+ * @role   ui
+ * @layer  ui
+ * @human  Met en cache les références DOM fréquemment utilisées.
+ */
 function cacheElements() {
     elements.uploadBtn = document.getElementById('upload-btn');
     elements.dropzone = document.getElementById('dropzone');
@@ -278,6 +313,13 @@ function cacheElements() {
 /**
  * Setup the upload dropdown button and menu
  * Handles opening/closing the dropdown and triggering file/folder inputs
+ */
+/*
+ * @id     cog.cloudMain.setupUploadDropdown
+ * @do     configurer_menu_televersement
+ * @role   ui
+ * @layer  ui
+ * @human  Câble le menu déroulant d'envoi de fichiers (fichier, dossier, photo).
  */
 function setupUploadDropdown() {
     const uploadBtn = document.getElementById('upload-btn');
@@ -317,6 +359,13 @@ function setupUploadDropdown() {
 
 /**
  * Setup event listeners for main UI elements
+ */
+/*
+ * @id     cog.cloudMain.setupEventListeners
+ * @do     cabler_ecouteurs
+ * @role   ui
+ * @layer  ui
+ * @human  Câble tous les écouteurs d'événements globaux de l'application.
  */
 function setupEventListeners() {
     // Set up drag and drop
@@ -522,6 +571,13 @@ window.selectFolder = (id, name) => {
 /**
  * Update the storage usage display with the user's actual storage usage
  * @param {Object} userData - The user data object
+ */
+/*
+ * @id     cog.cloudMain.updateStorageUsageDisplay
+ * @do     afficher_usage_stockage
+ * @role   ui
+ * @layer  ui
+ * @human  Met à jour l'affichage de l'espace de stockage utilisé et du quota.
  */
 function updateStorageUsageDisplay(userData) {
     // Default values

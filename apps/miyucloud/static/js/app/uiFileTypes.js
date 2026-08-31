@@ -77,4 +77,11 @@ const uiFileTypes = {
     }
 };
 
+/*
+ * @id     cog.cloudUiFileTypes
+ * @do     typer_fichiers_ui
+ * @role   ui
+ * @layer  ui
+ * @human  Types de fichiers côté interface : associe extension/MIME à une icône et une catégorie d'affichage.
+ */
 window.uiFileTypes = uiFileTypes;

@@ -229,6 +229,13 @@ class WopiEditor {
 }
 
 // Global instance
+/*
+ * @id     cog.cloudWopiEditor
+ * @do     editer_documents_wopi
+ * @role   orchestration
+ * @layer  domain
+ * @human  Édition de documents en ligne via le protocole WOPI (Office/Collabora) : ouverture et intégration de l'éditeur.
+ */
 window.wopiEditor = new WopiEditor();
 
 // Prefetch supported extensions so canEdit() is fast on first use

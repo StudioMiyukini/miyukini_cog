@@ -2,6 +2,20 @@
  * Authentication/session bootstrap and home-folder resolution
  */
 
+/*
+ * @id     cog.cloudAuthSession
+ * @do     gerer_session_utilisateur
+ * @role   securite
+ * @layer  domain
+ * @human  Session utilisateur de Miyukini Cloud : rafraîchit les données du compte, vérifie l'authentification et résout le dossier racine.
+ */
+/*
+ * @id     cog.cloudAuthSession.refreshUserData
+ * @do     rafraichir_donnees_utilisateur
+ * @role   securite
+ * @layer  domain
+ * @human  Recharge les données du compte connecté depuis le serveur.
+ */
 async function refreshUserData() {
     const USER_DATA_KEY = 'miyucloud_user';
 
@@ -33,6 +47,13 @@ async function refreshUserData() {
     }
 }
 
+/*
+ * @id     cog.cloudAuthSession.checkAuthentication
+ * @do     verifier_authentification
+ * @role   securite
+ * @layer  domain
+ * @human  Vérifie que l'utilisateur est authentifié, sinon le redirige vers la connexion.
+ */
 async function checkAuthentication() {
     try {
         const USER_DATA_KEY = 'miyucloud_user';
@@ -150,6 +171,13 @@ async function checkAuthentication() {
     }
 }
 
+/*
+ * @id     cog.cloudAuthSession.resolveHomeFolder
+ * @do     resoudre_dossier_racine
+ * @role   donnee
+ * @layer  domain
+ * @human  Résout l'identifiant du dossier racine de l'utilisateur.
+ */
 async function resolveHomeFolder() {
     const app = window.app;
 

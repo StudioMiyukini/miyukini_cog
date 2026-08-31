@@ -2,6 +2,20 @@
  * User menu, profile modal and logout logic
  */
 
+/*
+ * @id     cog.cloudUserMenu
+ * @do     gerer_menu_utilisateur
+ * @role   ui
+ * @layer  ui
+ * @human  Menu utilisateur : profil, version de l'app, et déconnexion, dans le coin du compte.
+ */
+/*
+ * @id     cog.cloudUserMenu.setupUserMenu
+ * @do     initialiser_menu_utilisateur
+ * @role   ui
+ * @layer  ui
+ * @human  Câble le menu utilisateur et ses actions.
+ */
 function setupUserMenu() {
     const wrapper = document.getElementById('user-menu-wrapper');
     const avatarBtn = document.getElementById('user-avatar-btn');
@@ -148,6 +162,13 @@ function setupUserMenu() {
     fetchAppVersion();
 }
 
+/*
+ * @id     cog.cloudUserMenu.updateUserMenuData
+ * @do     rafraichir_menu_utilisateur
+ * @role   ui
+ * @layer  ui
+ * @human  Met à jour les informations affichées dans le menu utilisateur.
+ */
 function updateUserMenuData() {
     const USER_DATA_KEY = 'miyucloud_user';
     const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
@@ -176,6 +197,13 @@ function updateUserMenuData() {
     }
 }
 
+/*
+ * @id     cog.cloudUserMenu.fetchAppVersion
+ * @do     recuperer_version_app
+ * @role   donnee
+ * @layer  ui
+ * @human  Récupère la version de l'application à afficher dans le menu.
+ */
 async function fetchAppVersion() {
     try {
         const response = await fetch('/api/version');
@@ -191,6 +219,13 @@ async function fetchAppVersion() {
     }
 }
 
+/*
+ * @id     cog.cloudUserMenu.showUserProfileModal
+ * @do     afficher_profil_modal
+ * @role   ui
+ * @layer  ui
+ * @human  Ouvre la fenêtre modale du profil utilisateur.
+ */
 function showUserProfileModal() {
     const USER_DATA_KEY = 'miyucloud_user';
     const userData = JSON.parse(localStorage.getItem(USER_DATA_KEY) || '{}');
@@ -256,6 +291,13 @@ function showUserProfileModal() {
     });
 }
 
+/*
+ * @id     cog.cloudUserMenu.logout
+ * @do     deconnecter_utilisateur
+ * @role   securite
+ * @layer  ui
+ * @human  Déconnecte l'utilisateur et le renvoie à l'écran de connexion.
+ */
 async function logout() {
     const USER_DATA_KEY = 'miyucloud_user';
 

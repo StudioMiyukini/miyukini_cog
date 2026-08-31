@@ -220,4 +220,11 @@ const search = {
 };
 
 // Expose the search module globally
+/*
+ * @id     cog.cloudSearch
+ * @do     rechercher_dans_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Recherche de fichiers : champ de recherche, requêtes au serveur et affichage des résultats.
+ */
 window.search = search;

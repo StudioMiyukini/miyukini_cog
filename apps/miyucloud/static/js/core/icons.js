@@ -115,6 +115,20 @@ const _ICONS = {
  * @param {string} [extraClass]  Additional CSS classes
  * @returns {string} SVG markup string, or empty string if icon not found
  */
+/*
+ * @id     cog.cloudIcons
+ * @do     fournir_icones
+ * @role   ui
+ * @layer  outil
+ * @human  Jeu d'icônes SVG de Miyukini Cloud : rendu d'une icône par nom et remplacement des marqueurs d'icône dans le DOM.
+ */
+/*
+ * @id     cog.cloudIcons.oxiIcon
+ * @do     rendre_icone
+ * @role   ui
+ * @layer  outil
+ * @human  Renvoie le SVG d'une icône par son nom, avec classes optionnelles.
+ */
 function oxiIcon(name, extraClass) {
   const entry = _ICONS[name];
   if (!entry) return "";
@@ -131,6 +145,13 @@ function oxiIcon(name, extraClass) {
  * with FA classes, and this function post-processes them into SVGs.
  *
  * @param {Element} [container=document.body]  Scope of replacement
+ */
+/*
+ * @id     cog.cloudIcons.replaceIconsInElement
+ * @do     remplacer_icones
+ * @role   ui
+ * @layer  outil
+ * @human  Remplace les marqueurs d'icône par leurs SVG dans un conteneur.
  */
 function replaceIconsInElement(container) {
   if (!container) container = document.body;

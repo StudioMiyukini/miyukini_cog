@@ -2,6 +2,20 @@
  * Files view loading logic
  */
 
+/*
+ * @id     cog.cloudFilesView
+ * @do     afficher_fichiers
+ * @role   ui
+ * @layer  ui
+ * @human  Vue des fichiers : charge et affiche le contenu du dossier courant (grille ou liste).
+ */
+/*
+ * @id     cog.cloudFilesView.loadFiles
+ * @do     charger_fichiers
+ * @role   orchestration
+ * @layer  ui
+ * @human  Charge les fichiers et sous-dossiers du dossier courant et les rend à l'écran.
+ */
 async function loadFiles(options = {}) {
     const app = window.app;
     const elements = window.appElements;

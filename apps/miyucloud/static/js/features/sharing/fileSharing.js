@@ -198,6 +198,13 @@ const fileSharing = {
 };
 
 // Expose module globally
+/*
+ * @id     cog.cloudFileSharing
+ * @do     partager_fichiers
+ * @role   securite
+ * @layer  domain
+ * @human  Partage de fichiers : crée et gère les liens publics, leurs droits et notifications, et permet de les révoquer.
+ */
 window.fileSharing = fileSharing;
 
 // Global convenience functions that delegate to the module

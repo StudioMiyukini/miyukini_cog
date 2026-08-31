@@ -278,4 +278,11 @@ const photosLightbox = {
     }
 };
 
+/*
+ * @id     cog.cloudPhotosLightbox
+ * @do     afficher_photo_plein_ecran
+ * @role   ui
+ * @layer  ui
+ * @human  Visionneuse photo plein écran : affiche une photo en grand, avec navigation entre les clichés.
+ */
 window.photosLightbox = photosLightbox;

@@ -1,6 +1,20 @@
 const API = '/api';
 
 /* ── i18n helper — falls back to key if i18n not ready ── */
+/*
+ * @id     cog.cloudViewProfile
+ * @do     gerer_profil_utilisateur
+ * @role   securite
+ * @layer  ui
+ * @human  Vue du profil : change le mot de passe et gère les mots de passe d'application (création, révocation).
+ */
+/*
+ * @id     cog.cloudViewProfile.t
+ * @do     traduire_cle_profil
+ * @role   ui
+ * @layer  ui
+ * @human  Raccourci de traduction local à la vue profil.
+ */
 function t(key, params) {
   if (window.i18n && typeof window.i18n.t === 'function') return window.i18n.t(key, params);
   return key.split('.').pop().replace(/_/g, ' ');
@@ -29,6 +43,13 @@ function timeAgo(dateStr) {
   return d.toLocaleDateString();
 }
 
+/*
+ * @id     cog.cloudViewProfile.init
+ * @do     initialiser_vue_profil
+ * @role   orchestration
+ * @layer  ui
+ * @human  Initialise la vue profil : charge les infos du compte et les mots de passe d'application.
+ */
 async function init() {
   try {
     const resp = await fetch(API + '/auth/me', { headers: headers(), credentials: 'same-origin' });
@@ -97,6 +118,13 @@ function showError() {
   document.getElementById('auth-error').style.display = 'block';
 }
 
+/*
+ * @id     cog.cloudViewProfile.changePassword
+ * @do     changer_mot_de_passe
+ * @role   securite
+ * @layer  ui
+ * @human  Change le mot de passe du compte après vérification de l'ancien.
+ */
 async function changePassword(e) {
   e.preventDefault();
   const currentPw = document.getElementById('current-password').value;
@@ -181,6 +209,13 @@ function renderPwRow(pw) {
   return tr;
 }
 
+/*
+ * @id     cog.cloudViewProfile.loadAppPasswords
+ * @do     charger_mots_de_passe_app
+ * @role   securite
+ * @layer  ui
+ * @human  Charge la liste des mots de passe d'application du compte.
+ */
 async function loadAppPasswords() {
   try {
     const resp = await fetch(API + '/auth/app-passwords', { headers: headers(), credentials: 'same-origin' });
@@ -231,6 +266,13 @@ function toggleAutoPasswords() {
   chevron.className = isHidden ? 'fas fa-chevron-down' : 'fas fa-chevron-right';
 }
 
+/*
+ * @id     cog.cloudViewProfile.createAppPassword
+ * @do     creer_mot_de_passe_app
+ * @role   securite
+ * @layer  ui
+ * @human  Crée un nouveau mot de passe d'application (pour un client tiers).
+ */
 async function createAppPassword() {
   const labelInput = document.getElementById('app-pw-label');
   const label = labelInput.value.trim();
@@ -281,6 +323,13 @@ function copyAppPassword() {
   });
 }
 
+/*
+ * @id     cog.cloudViewProfile.revokeAppPassword
+ * @do     revoquer_mot_de_passe_app
+ * @role   securite
+ * @layer  ui
+ * @human  Révoque un mot de passe d'application existant.
+ */
 async function revokeAppPassword(id, label) {
   if (!confirm(t('profile.confirm_revoke', { label: label }))) return;
   try {

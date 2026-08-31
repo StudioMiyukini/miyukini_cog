@@ -152,4 +152,11 @@ const recent = {
 };
 
 // Expose globally
+/*
+ * @id     cog.cloudRecent
+ * @do     afficher_fichiers_recents
+ * @role   ui
+ * @layer  ui
+ * @human  Fichiers récents : liste les fichiers récemment consultés ou modifiés.
+ */
 window.recent = recent;

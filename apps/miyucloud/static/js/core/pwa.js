@@ -1,3 +1,10 @@
+/*
+ * @id     cog.cloudPwa
+ * @do     activer_pwa
+ * @role   orchestration
+ * @layer  infra
+ * @human  Intégration PWA : enregistrement du service worker et gestionnaires globaux (dont l'envoi direct de photos partagées).
+ */
 // PWA service worker registration + global handlers
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function() {});
@@ -51,6 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+/*
+ * @id     cog.cloudPwa.uploadPhotosDirectly
+ * @do     televerser_photos_directement
+ * @role   orchestration
+ * @layer  infra
+ * @human  Téléverse directement des photos reçues via le partage système de la PWA.
+ */
 function uploadPhotosDirectly(files) {
     var done = 0, errors = 0, total = files.length;
     var notif = document.createElement('div');

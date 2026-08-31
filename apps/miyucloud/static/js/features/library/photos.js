@@ -575,4 +575,11 @@ const photosView = {
     }
 };
 
+/*
+ * @id     cog.cloudPhotos
+ * @do     afficher_photetheque
+ * @role   ui
+ * @layer  ui
+ * @human  Photothèque : regroupe et affiche les photos de l'utilisateur, par date.
+ */
 window.photosView = photosView;
