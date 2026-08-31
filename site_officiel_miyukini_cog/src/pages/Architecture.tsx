@@ -46,6 +46,13 @@ const LAWS = [
   },
 ];
 
+/*
+ * @id     cog.pageArchitecture
+ * @do     afficher_architecture
+ * @role   ui
+ * @layer  ui
+ * @human  Page « Architecture » : présente la structure technique du système Cog.
+ */
 export function Architecture() {
   return (
     <div className={styles.wrapper}>

@@ -7,6 +7,13 @@ interface MiouMascotProps {
   className?: string;
 }
 
+/*
+ * @id     cog.compMiouMascot
+ * @do     afficher_mascotte
+ * @role   ui
+ * @layer  ui
+ * @human  Mascotte « Miou » : illustration animée de la mascotte du projet.
+ */
 export function MiouMascot({ size = 180, className }: MiouMascotProps) {
   return (
     <svg

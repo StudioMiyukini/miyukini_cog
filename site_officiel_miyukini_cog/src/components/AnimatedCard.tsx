@@ -14,6 +14,13 @@ interface AnimatedCardProps {
  * Card avec animations d'entrée (fade-in + slide-up) via Intersection Observer.
  * Supporte hover glow et clic.
  */
+/*
+ * @id     cog.compAnimatedCard
+ * @do     afficher_carte_animee
+ * @role   ui
+ * @layer  ui
+ * @human  Carte animée : carte qui se révèle ou réagit au survol.
+ */
 export function AnimatedCard({
   children,
   className = '',

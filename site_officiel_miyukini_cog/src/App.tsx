@@ -7,6 +7,13 @@ import { Cores } from './pages/Cores';
 import { Services } from './pages/Services';
 import { MockCog } from './pages/MockCog';
 
+/*
+ * @id     cog.siteApp
+ * @do     router_site
+ * @role   ui
+ * @layer  ui
+ * @human  Coquille du site officiel : routeur et mise en page commune de toutes les pages.
+ */
 function App() {
   return (
     <Layout>

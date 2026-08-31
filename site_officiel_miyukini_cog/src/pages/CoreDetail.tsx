@@ -3,6 +3,13 @@ import { getCoreById, getNextCore, getPrevCore } from '@/data/cores';
 import { AnimatedCard } from '@/components/AnimatedCard';
 import styles from './CoreDetail.module.css';
 
+/*
+ * @id     cog.pageCoreDetail
+ * @do     afficher_detail_coeur
+ * @role   ui
+ * @layer  ui
+ * @human  Page de détail d'un « cœur » (core) : description complète d'un module cognitif.
+ */
 export function CoreDetail() {
   const { coreId } = useParams<{ coreId: string }>();
   const core = coreId ? getCoreById(coreId) : undefined;

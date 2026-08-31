@@ -3,6 +3,13 @@ import { GLOSSARY } from '@/data/glossary';
 import { Card } from '@/components/Card';
 import styles from './Docs.module.css';
 
+/*
+ * @id     cog.pageDocs
+ * @do     afficher_documentation
+ * @role   ui
+ * @layer  ui
+ * @human  Page « Docs » : documentation du projet Cog.
+ */
 export function Docs() {
   return (
     <div className={styles.wrapper}>

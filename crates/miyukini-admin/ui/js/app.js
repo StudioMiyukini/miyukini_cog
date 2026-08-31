@@ -1,3 +1,10 @@
+/*
+ * @id     cog.adminApp
+ * @do     basculer_menu_admin
+ * @role   ui
+ * @layer  ui
+ * @human  UI de la console d'admin (crate Rust) : bascule du menu latéral en version mobile.
+ */
 /* MiyukiniAdmin — sidebar mobile toggle (vanilla JS) */
 (function () {
   function init() {

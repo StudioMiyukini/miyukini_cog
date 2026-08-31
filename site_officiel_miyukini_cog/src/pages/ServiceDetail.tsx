@@ -11,6 +11,13 @@ import { AnimatedCard } from '@/components/AnimatedCard';
 import { FeatureList } from '@/components/FeatureList';
 import styles from './ServiceDetail.module.css';
 
+/*
+ * @id     cog.pageServiceDetail
+ * @do     afficher_detail_service
+ * @role   ui
+ * @layer  ui
+ * @human  Page de détail d'un service : description complète d'une offre de l'écosystème.
+ */
 export function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>();
   const service = serviceId ? getServiceById(serviceId) : undefined;

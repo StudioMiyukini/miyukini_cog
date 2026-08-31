@@ -24,6 +24,13 @@ interface TimelineProps {
   statusColors: Record<TimelineStatus, string>;
 }
 
+/*
+ * @id     cog.compTimeline
+ * @do     afficher_chronologie
+ * @role   ui
+ * @layer  ui
+ * @human  Chronologie : phases de la feuille de route avec leur statut.
+ */
 export function Timeline({ phases, statusLabels, statusColors }: TimelineProps) {
   const [expandedPhase, setExpandedPhase] = useState<string | null>(
     phases.find((p) => p.status === 'in-progress')?.id || null

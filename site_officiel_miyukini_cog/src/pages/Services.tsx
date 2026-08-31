@@ -17,6 +17,13 @@ import styles from './Services.module.css';
 
 type CategoryFilter = 'all' | ServiceMeta['category'];
 
+/*
+ * @id     cog.pageServices
+ * @do     afficher_liste_services
+ * @role   ui
+ * @layer  ui
+ * @human  Page « Services » : catalogue des services de l'écosystème Miyukini.
+ */
 export function Services() {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const [selectedService, setSelectedService] = useState<ServiceMeta | null>(null);

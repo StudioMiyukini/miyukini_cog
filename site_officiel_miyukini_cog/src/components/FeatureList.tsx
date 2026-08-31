@@ -16,6 +16,13 @@ interface FeatureListProps {
  * Liste de features avec icônes et descriptions.
  * Affichage en grille configurable.
  */
+/*
+ * @id     cog.compFeatureList
+ * @do     lister_fonctionnalites
+ * @role   ui
+ * @layer  ui
+ * @human  Liste de fonctionnalités : grille de points-clés, en colonnes.
+ */
 export function FeatureList({ features, columns = 2, compact = false }: FeatureListProps) {
   return (
     <ul

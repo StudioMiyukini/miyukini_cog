@@ -2,6 +2,13 @@
  * Roadmap du projet Miyukini COG
  */
 
+/*
+ * @id     cog.dataRoadmap
+ * @do     definir_feuille_route
+ * @role   config
+ * @layer  domain
+ * @human  Données de la feuille de route : les phases du projet et leur statut.
+ */
 export type PhaseStatus = 'completed' | 'in-progress' | 'planned';
 
 export interface RoadmapMilestone {

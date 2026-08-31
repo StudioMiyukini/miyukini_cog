@@ -47,6 +47,13 @@ const STEPS = [
   },
 ];
 
+/*
+ * @id     cog.pageOnboarding
+ * @do     afficher_prise_en_main
+ * @role   ui
+ * @layer  ui
+ * @human  Page « Onboarding » : parcours de prise en main pour découvrir Cog.
+ */
 export function Onboarding() {
   const [step, setStep] = useState(0);
   const isLast = step === STEPS.length - 1;

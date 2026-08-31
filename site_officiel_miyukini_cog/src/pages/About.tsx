@@ -50,6 +50,13 @@ const PRINCIPLES = [
   },
 ];
 
+/*
+ * @id     cog.pageAbout
+ * @do     afficher_a_propos
+ * @role   ui
+ * @layer  ui
+ * @human  Page « À propos » : présentation du projet Cog et de sa vision.
+ */
 export function About() {
   return (
     <div className={styles.wrapper}>

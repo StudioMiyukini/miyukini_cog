@@ -70,6 +70,13 @@ interface PyramidDiagramProps {
   onSelectStratum?: (stratum: PyramidStratum | null) => void;
 }
 
+/*
+ * @id     cog.compPyramidDiagram
+ * @do     afficher_pyramide
+ * @role   ui
+ * @layer  ui
+ * @human  Diagramme en pyramide : strates du modèle Cog, sélectionnables.
+ */
 export function PyramidDiagram({ onSelectStratum }: PyramidDiagramProps) {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 

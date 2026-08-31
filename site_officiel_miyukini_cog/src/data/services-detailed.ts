@@ -3,6 +3,13 @@
  * Aligné sur la documentation Miyukini COG.
  */
 
+/*
+ * @id     cog.dataServicesDetailed
+ * @do     definir_services_detailles
+ * @role   config
+ * @layer  domain
+ * @human  Données détaillées des services : fonctionnalités complètes de chaque offre.
+ */
 export interface ServiceFeature {
   title: string;
   description: string;

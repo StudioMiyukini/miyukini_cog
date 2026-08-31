@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom';
 import styles from './Home.module.css';
 
+/*
+ * @id     cog.pageHome
+ * @do     afficher_accueil
+ * @role   ui
+ * @layer  ui
+ * @human  Page d'accueil du site officiel Cog.
+ */
 export function Home() {
   return (
     <div className={styles.hero}>

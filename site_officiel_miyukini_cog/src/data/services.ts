@@ -2,6 +2,13 @@
  * Services (Registre d'Opérateurs) — aligné sur le catalogue Miyukini Central.
  * Enrichi avec icônes, couleurs et type pour l'affichage inventaire.
  */
+/*
+ * @id     cog.dataServices
+ * @do     definir_services
+ * @role   config
+ * @layer  domain
+ * @human  Données des services : la liste et les métadonnées des offres de l'écosystème.
+ */
 export interface ServiceMeta {
   id: string;
   name: string;

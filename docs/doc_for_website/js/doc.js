@@ -1,3 +1,10 @@
+/*
+ * @id     cog.docsDoc
+ * @do     animer_page_doc
+ * @role   ui
+ * @layer  doc
+ * @human  Script du site de documentation : interactions de la page de doc (navigation, ancres, sommaire).
+ */
 (function () {
   'use strict';
 

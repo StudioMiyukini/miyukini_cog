@@ -2,6 +2,13 @@ import { CORES, TRUST_LEVELS, SECURITY_LEVELS } from '@/data/cores';
 import { Card } from '@/components/Card';
 import styles from './Cores.module.css';
 
+/*
+ * @id     cog.pageCores
+ * @do     afficher_liste_coeurs
+ * @role   ui
+ * @layer  ui
+ * @human  Page « Cores » : catalogue des cœurs cognitifs du système.
+ */
 export function Cores() {
   return (
     <div className={styles.wrapper}>

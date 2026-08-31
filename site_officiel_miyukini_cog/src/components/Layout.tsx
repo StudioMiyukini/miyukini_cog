@@ -5,6 +5,13 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+/*
+ * @id     cog.compLayout
+ * @do     encadrer_pages
+ * @role   ui
+ * @layer  ui
+ * @human  Mise en page commune : en-tête, navigation et pied, autour du contenu des pages.
+ */
 export function Layout({ children }: LayoutProps) {
   return (
     <div className={styles.wrapper}>

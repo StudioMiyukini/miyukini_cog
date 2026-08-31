@@ -1,6 +1,13 @@
 /**
  * Données des 8 Cores (Strate 4) — alignées sur la doc Miyukini COG.
  */
+/*
+ * @id     cog.dataCores
+ * @do     definir_coeurs
+ * @role   config
+ * @layer  domain
+ * @human  Données des cœurs cognitifs : la liste et le descriptif de chaque « core » du système.
+ */
 export interface Core {
   id: string;
   name: string;

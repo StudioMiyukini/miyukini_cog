@@ -1,3 +1,10 @@
+/*
+ * @id     cog.docsList
+ * @do     lister_doc
+ * @role   ui
+ * @layer  doc
+ * @human  Script du site de documentation : construit et filtre la liste/index des pages de doc.
+ */
 (function () {
   'use strict';
 

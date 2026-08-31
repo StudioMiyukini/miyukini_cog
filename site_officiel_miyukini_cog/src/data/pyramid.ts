@@ -1,6 +1,13 @@
 /**
  * Pyramide des strates Miyukini — référence architecture.
  */
+/*
+ * @id     cog.dataPyramid
+ * @do     definir_pyramide
+ * @role   config
+ * @layer  domain
+ * @human  Données de la pyramide : les strates du modèle Cog et leur contenu.
+ */
 export interface Stratum {
   id: string;
   level: string;

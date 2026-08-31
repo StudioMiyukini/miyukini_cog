@@ -1,3 +1,10 @@
+/*
+ * @id     cog.adminTheme
+ * @do     basculer_theme_admin
+ * @role   ui
+ * @layer  ui
+ * @human  UI de la console d'admin : bascule jour/nuit du thème, persistée en localStorage.
+ */
 /* MiyukiniAdmin — Daynight theme toggle (vanilla JS, localStorage) */
 (function () {
   var STORAGE_KEY = 'miyukini-admin-theme';

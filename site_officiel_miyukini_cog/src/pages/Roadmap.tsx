@@ -8,6 +8,13 @@ import {
 } from '@/data/roadmap';
 import styles from './Roadmap.module.css';
 
+/*
+ * @id     cog.pageRoadmap
+ * @do     afficher_feuille_route
+ * @role   ui
+ * @layer  ui
+ * @human  Page « Roadmap » : feuille de route du projet, phase par phase.
+ */
 export function Roadmap() {
   // Transformer les données pour le composant Timeline
   const timelinePhases = ROADMAP_PHASES.map((phase) => ({

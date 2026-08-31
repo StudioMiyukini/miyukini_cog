@@ -1,6 +1,13 @@
 /**
  * Glossaire — termes officiels Miyukini COG (extrait).
  */
+/*
+ * @id     cog.dataGlossary
+ * @do     definir_glossaire
+ * @role   config
+ * @layer  domain
+ * @human  Glossaire : les termes du projet et leurs définitions.
+ */
 export interface GlossaryTerm {
   term: string;
   definition: string;

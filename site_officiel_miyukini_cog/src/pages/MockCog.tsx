@@ -5,6 +5,13 @@ import styles from './MockCog.module.css';
 
 type View = 'home' | string;
 
+/*
+ * @id     cog.pageMockCog
+ * @do     demontrer_interface_cog
+ * @role   ui
+ * @layer  ui
+ * @human  Page « MockCog » : maquette interactive de l'interface du produit Cog.
+ */
 export function MockCog() {
   const [view, setView] = useState<View>('home');
   const [filter, setFilter] = useState<string>('all');
