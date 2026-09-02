@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_export_archive
 //! @do     implement_zip_export_import_with_manifest_json
-//! @role   export
+//@human ! @role   export
 //! @layer  domain
 //!
 //! L'export cree un ZIP contenant les fichiers dechiffres et un manifest.json

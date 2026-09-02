@@ -7,8 +7,8 @@
 // @id toolkit.alicia.automations.dispatcher
 // @role command_dispatcher_trait
 // @layer 6
-// @human Trait d'injection de dependances pour le dispatch des commandes Alicia.
 // @do define_dispatcher_trait_and_home_snapshot
+// @human Trait d'injection de dependances pour le dispatch des commandes Alicia.
 
 use std::collections::HashMap;
 

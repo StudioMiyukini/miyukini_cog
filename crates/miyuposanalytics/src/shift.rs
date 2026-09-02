@@ -6,8 +6,8 @@ use crate::errors::MiyuposanalyticsError;
 /// @id miyuposanalytics_tool_shift_close
 /// @role mutator
 /// @layer tool
-/// @human Clôture un shift caisse (comptage, écart) ; autorisation = StrongFather.
 /// @do shift_close_under_governance
+//@human / @human Clôture un shift caisse (comptage, écart) ; autorisation = StrongFather.
 /// tool.pos.shift.close
 pub fn close(
     ctx: &GovernedContext,

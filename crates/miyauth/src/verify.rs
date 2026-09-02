@@ -13,8 +13,8 @@ const MIN_LEN: usize = 1 + 8; // version + expiry_nanos
 /// @id miyauth_tool_identity_verify
 /// @role mutator
 /// @layer tool
-/// @human Vérifie l'intégrité et la validité d'un Passeport Utilisateur ou Visa de Connexion.
 /// @do identity_verify_under_governance
+//@human / @human Vérifie l'intégrité et la validité d'un Passeport Utilisateur ou Visa de Connexion.
 /// tool.identity.verify — ne décide pas de l'autorisation (ALLOW/DENY = StrongFather).
 pub fn verify(
     ctx: &GovernedContext,

@@ -18,8 +18,8 @@
 // @id toolkit.calc.miyucalc
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuCalc ; expose les modules tools, pas de capacité nouvelle.
 /// @do expose_miyucalc_toolkit
+//@human / @human Point d'entrée du toolkit MiyuCalc ; expose les modules tools, pas de capacité nouvelle.
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

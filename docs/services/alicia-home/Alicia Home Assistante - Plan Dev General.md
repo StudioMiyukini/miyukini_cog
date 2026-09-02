@@ -1,10 +1,10 @@
 # Alicia Home Assistante — Plan de Développement Général
 
-<!-- @id: doc.alicia-home.plan-dev-general -->
-<!-- @role: implementation-plan -->
-<!-- @layer: governance -->
-<!-- @human: Plan de développement exhaustif, phase par phase, fichier par fichier, pour François, Lise et George -->
-<!-- @do: guide_alicia_home_full_implementation -->
+<!-- @id doc.alicia-home.plan-dev-general -->
+<!-- @role implementation-plan -->
+<!-- @layer governance -->
+<!-- @human Plan de développement exhaustif, phase par phase, fichier par fichier, pour François, Lise et George -->
+<!-- @do guide_alicia_home_full_implementation -->
 
 **Auteur :** Maria, Chef de Projet — transmis à Denis pour coordination
 **Date :** 2026-03-01
@@ -191,9 +191,9 @@ crates/
   tracing = "0.1"
   ```
 - Fichier à créer : `crates/miyualicia-devices/src/lib.rs`
-  - @id: toolkit.alicia.devices
-  - @role: device_registry
-  - @layer: 6
+  - @id toolkit.alicia.devices
+  - @role device_registry
+  - @layer 6
   - Exports : `DeviceType`, `DeviceProtocol`, `DeviceCapabilities`, `DeviceConfig`, `Device`, `DeviceState`, `DeviceRegistry`, `DeviceError`
 - Fichier à créer : `crates/miyualicia-devices/src/types.rs`
   ```rust
@@ -230,9 +230,9 @@ crates/
   tracing = "0.1"
   ```
 - Fichier à créer : `crates/miyualicia-mqtt/src/lib.rs`
-  - @id: toolkit.alicia.mqtt
-  - @role: mqtt_protocol_adapter
-  - @layer: 6
+  - @id toolkit.alicia.mqtt
+  - @role mqtt_protocol_adapter
+  - @layer 6
   - Exports : `MqttConfig`, `MqttClient`, `MqttMessage`, `MqttError`
 - Fichier à créer : `crates/miyualicia-mqtt/src/config.rs`
   ```rust
@@ -277,9 +277,9 @@ crates/
   tracing = "0.1"
   ```
 - Fichier à créer : `crates/miyualicia-http/src/lib.rs`
-  - @id: toolkit.alicia.http
-  - @role: http_local_protocol_adapter
-  - @layer: 6
+  - @id toolkit.alicia.http
+  - @role http_local_protocol_adapter
+  - @layer 6
   - Exports : `HttpDeviceClient`, `HttpDeviceConfig`, `HttpError`
 - Fichier à créer : `crates/miyualicia-http/src/client.rs`
   - `HttpDeviceClient` avec timeout strict 2s
@@ -362,9 +362,9 @@ Créer `miyualicia`, l'orchestrateur central qui connecte : pipeline vocal, disp
   ```
 
 - Fichier à créer : `crates/miyualicia/src/lib.rs`
-  - @id: service.alicia.orchestrator
-  - @role: home_assistant_orchestrator
-  - @layer: 7
+  - @id service.alicia.orchestrator
+  - @role home_assistant_orchestrator
+  - @layer 7
   - Exports : `AliciaService`, `AliciaConfig`, `AliciaSnapshot`, `AliciaError`
 
 - Fichier à créer : `crates/miyualicia/src/service.rs`
@@ -554,9 +554,9 @@ Créer `crates/miyualicia-api` : serveur axum exposant l'API REST documentée da
   ```
 
 - Fichier à créer : `crates/miyualicia-api/src/lib.rs`
-  - @id: service.alicia.rest-api
-  - @role: http_api_gateway
-  - @layer: 7
+  - @id service.alicia.rest-api
+  - @role http_api_gateway
+  - @layer 7
   - Exports : `AliciaApiServer`, `ApiConfig`, `ApiError`
 
 - Fichier à créer : `crates/miyualicia-api/src/server.rs`
@@ -659,9 +659,9 @@ Créer `crates/miyualicia-automations` : scheduler, évaluateur de conditions, e
   ```
 
 - Fichier à créer : `crates/miyualicia-automations/src/lib.rs`
-  - @id: toolkit.alicia.automations
-  - @role: automation_engine
-  - @layer: 6
+  - @id toolkit.alicia.automations
+  - @role automation_engine
+  - @layer 6
   - Exports : `AutomationEngine`, `Automation`, `Trigger`, `Condition`, `Action`, `AutomationError`
 
 - Fichier à créer : `crates/miyualicia-automations/src/types.rs`

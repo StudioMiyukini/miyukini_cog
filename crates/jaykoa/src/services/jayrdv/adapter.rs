@@ -2,7 +2,7 @@
 //!
 //! @id     jaykoa_jayrdv_adapter
 //! @do     read_jayrdv_appointments_and_create_reflections
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //! Production : lirait via BondingBrother + Mandat de Permission.
 

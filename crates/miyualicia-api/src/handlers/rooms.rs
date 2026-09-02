@@ -3,8 +3,8 @@
 // @id service.alicia.api.handlers.rooms
 // @role rooms_handler
 // @layer 7
-// @human Endpoints pieces Alicia API.
 // @do handle_rooms_requests
+// @human Endpoints pieces Alicia API.
 
 use std::sync::Arc;
 

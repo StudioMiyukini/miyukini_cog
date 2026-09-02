@@ -154,9 +154,9 @@ Si le projet inclut un deploiement, Hugo le coordonne :
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.hugo -->
-<!-- @do: Responsabilites d'infrastructure swarm de Hugo -->
-<!-- @role: Hugo (DevOps) -->
+<!-- @id mass.agent.hugo -->
+<!-- @do Responsabilites d'infrastructure swarm de Hugo -->
+<!-- @role Hugo (DevOps) -->
 
 Hugo supporte l'infrastructure du swarm.
 

@@ -9,8 +9,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyucms_tool_media_upload
 /// @role mutator
 /// @layer tool
-/// @human Enregistre un média ; persistance KindMother.
 /// @do cms_media_upload_under_governance
+//@human / @human Enregistre un média ; persistance KindMother.
 pub fn upload(
     ctx: &GovernedContext,
     payload: &str,
@@ -31,8 +31,8 @@ pub fn upload(
 /// @id miyucms_tool_media_serve
 /// @role accessor
 /// @layer tool
-/// @human Sert un média (stream ou métadonnées) ; données fournies dans le flux.
 /// @do cms_media_serve_under_governance
+//@human / @human Sert un média (stream ou métadonnées) ; données fournies dans le flux.
 pub fn serve(
     ctx: &GovernedContext,
     media_ref: &str,
@@ -53,8 +53,8 @@ pub fn serve(
 /// @id miyucms_tool_media_transform
 /// @role accessor
 /// @layer tool
-/// @human Produit une variante (miniature, recadrage) ; données fournies ; pas de persistance directe.
 /// @do cms_media_transform_under_governance
+//@human / @human Produit une variante (miniature, recadrage) ; données fournies ; pas de persistance directe.
 pub fn transform(
     ctx: &GovernedContext,
     media_ref: &str,

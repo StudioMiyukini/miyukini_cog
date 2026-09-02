@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_auth_module
 //! @do     expose_permission_verification
-//! @role   auth
+//@human ! @role   auth
 //! @layer  domain
 
 pub mod permissions;

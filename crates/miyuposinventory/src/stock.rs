@@ -6,8 +6,8 @@ use crate::errors::MiyuposinventoryError;
 /// @id miyuposinventory_tool_stock_get
 /// @role mutator
 /// @layer tool
-/// @human Retourne le stock (et composants si applicable) pour un article/site.
 /// @do stock_get_under_governance
+//@human / @human Retourne le stock (et composants si applicable) pour un article/site.
 /// tool.inventory.stock.get
 pub fn get(
     ctx: &GovernedContext,
@@ -23,8 +23,8 @@ pub fn get(
 /// @id miyuposinventory_tool_stock_adjust
 /// @role mutator
 /// @layer tool
-/// @human Ajuste le stock (réception, casse, perte) ; décision = StrongFather ; WriteIntent KindMother.
 /// @do stock_adjust_under_governance
+//@human / @human Ajuste le stock (réception, casse, perte) ; décision = StrongFather ; WriteIntent KindMother.
 /// tool.inventory.stock.adjust
 pub fn adjust(
     ctx: &GovernedContext,

@@ -5,6 +5,7 @@
 //! @id     kindmother_client_unit_tests
 //! @role   test
 //! @layer  toolkit
+//! @do documenter_tests
 
 use kindmother_client::{ClientError, Operation, Request, Response};
 use serde_json::{json, Value};
@@ -16,7 +17,8 @@ use serde_json::{json, Value};
 /// @id KMC_P_001
 /// @role test
 /// @layer toolkit
-/// @human Sérialisation Request::Query - vérifie le format JSON d'une requête SELECT.
+/// @do kmc_p_001_serialize_query_request
+//@human / @human Sérialisation Request::Query - vérifie le format JSON d'une requête SELECT.
 #[test]
 fn kmc_p_001_serialize_query_request() {
     let request = Request::Query {
@@ -38,7 +40,8 @@ fn kmc_p_001_serialize_query_request() {
 /// @id KMC_P_002
 /// @role test
 /// @layer toolkit
-/// @human Sérialisation Request::Execute - vérifie le format JSON d'une requête d'écriture.
+/// @do kmc_p_002_serialize_execute_request
+//@human / @human Sérialisation Request::Execute - vérifie le format JSON d'une requête d'écriture.
 #[test]
 fn kmc_p_002_serialize_execute_request() {
     let request = Request::Execute {
@@ -58,7 +61,8 @@ fn kmc_p_002_serialize_execute_request() {
 /// @id KMC_P_003
 /// @role test
 /// @layer toolkit
-/// @human Sérialisation Request::Transaction - vérifie le format d'une transaction multi-opérations.
+/// @do kmc_p_003_serialize_transaction_request
+//@human / @human Sérialisation Request::Transaction - vérifie le format d'une transaction multi-opérations.
 #[test]
 fn kmc_p_003_serialize_transaction_request() {
     let operations = vec![
@@ -88,7 +92,8 @@ fn kmc_p_003_serialize_transaction_request() {
 /// @id KMC_P_004
 /// @role test
 /// @layer toolkit
-/// @human Sérialisation Request::HealthCheck - vérifie le format d'une requête de santé.
+/// @do kmc_p_004_serialize_health_check_request
+//@human / @human Sérialisation Request::HealthCheck - vérifie le format d'une requête de santé.
 #[test]
 fn kmc_p_004_serialize_health_check_request() {
     let request = Request::HealthCheck {
@@ -104,7 +109,8 @@ fn kmc_p_004_serialize_health_check_request() {
 /// @id KMC_P_005
 /// @role test
 /// @layer toolkit
-/// @human Sérialisation Request::DatabaseInfo - vérifie le format d'une requête d'info.
+/// @do kmc_p_005_serialize_database_info_request
+//@human / @human Sérialisation Request::DatabaseInfo - vérifie le format d'une requête d'info.
 #[test]
 fn kmc_p_005_serialize_database_info_request() {
     let request = Request::DatabaseInfo {
@@ -125,7 +131,8 @@ fn kmc_p_005_serialize_database_info_request() {
 /// @id KMC_P_010
 /// @role test
 /// @layer toolkit
-/// @human Désérialisation Response::QueryResult - vérifie le parsing d'un résultat SELECT.
+/// @do kmc_p_010_deserialize_query_result
+//@human / @human Désérialisation Response::QueryResult - vérifie le parsing d'un résultat SELECT.
 #[test]
 fn kmc_p_010_deserialize_query_result() {
     let json_str = r#"{
@@ -157,7 +164,8 @@ fn kmc_p_010_deserialize_query_result() {
 /// @id KMC_P_011
 /// @role test
 /// @layer toolkit
-/// @human Désérialisation Response::ExecuteResult - vérifie le parsing d'un résultat d'écriture.
+/// @do kmc_p_011_deserialize_execute_result
+//@human / @human Désérialisation Response::ExecuteResult - vérifie le parsing d'un résultat d'écriture.
 #[test]
 fn kmc_p_011_deserialize_execute_result() {
     let json_str = r#"{
@@ -189,7 +197,8 @@ fn kmc_p_011_deserialize_execute_result() {
 /// @id KMC_P_012
 /// @role test
 /// @layer toolkit
-/// @human Désérialisation Response::TransactionResult - vérifie le parsing d'un résultat de transaction.
+/// @do kmc_p_012_deserialize_transaction_result
+//@human / @human Désérialisation Response::TransactionResult - vérifie le parsing d'un résultat de transaction.
 #[test]
 fn kmc_p_012_deserialize_transaction_result() {
     let json_str = r#"{
@@ -218,7 +227,8 @@ fn kmc_p_012_deserialize_transaction_result() {
 /// @id KMC_P_013
 /// @role test
 /// @layer toolkit
-/// @human Désérialisation Response::HealthCheckResult - vérifie le parsing d'un résultat de santé.
+/// @do kmc_p_013_deserialize_health_check_result
+//@human / @human Désérialisation Response::HealthCheckResult - vérifie le parsing d'un résultat de santé.
 #[test]
 fn kmc_p_013_deserialize_health_check_result() {
     let json_str = r#"{
@@ -247,7 +257,8 @@ fn kmc_p_013_deserialize_health_check_result() {
 /// @id KMC_P_014
 /// @role test
 /// @layer toolkit
-/// @human Désérialisation Response::DatabaseInfoResult - vérifie le parsing des infos DB.
+/// @do kmc_p_014_deserialize_database_info_result
+//@human / @human Désérialisation Response::DatabaseInfoResult - vérifie le parsing des infos DB.
 #[test]
 fn kmc_p_014_deserialize_database_info_result() {
     let json_str = r#"{
@@ -285,7 +296,8 @@ fn kmc_p_014_deserialize_database_info_result() {
 /// @id KMC_P_015
 /// @role test
 /// @layer toolkit
-/// @human Désérialisation Response::Error - vérifie le parsing d'une erreur.
+/// @do kmc_p_015_deserialize_error_response
+//@human / @human Désérialisation Response::Error - vérifie le parsing d'une erreur.
 #[test]
 fn kmc_p_015_deserialize_error_response() {
     let json_str = r#"{
@@ -312,7 +324,8 @@ fn kmc_p_015_deserialize_error_response() {
 /// @id KMC_E_001
 /// @role test
 /// @layer toolkit
-/// @human ClientError Display - vérifie le format d'affichage des erreurs.
+/// @do kmc_e_001_error_display
+//@human / @human ClientError Display - vérifie le format d'affichage des erreurs.
 #[test]
 fn kmc_e_001_error_display() {
     let err = ClientError::Connection("Connection refused".to_string());
@@ -328,7 +341,8 @@ fn kmc_e_001_error_display() {
 /// @id KMC_E_002
 /// @role test
 /// @layer toolkit
-/// @human ClientError from io::Error - vérifie la conversion depuis std::io::Error.
+/// @do kmc_e_002_error_from_io
+//@human / @human ClientError from io::Error - vérifie la conversion depuis std::io::Error.
 #[test]
 fn kmc_e_002_error_from_io() {
     let io_err = std::io::Error::new(std::io::ErrorKind::ConnectionRefused, "refused");
@@ -343,7 +357,8 @@ fn kmc_e_002_error_from_io() {
 /// @id KMC_E_003
 /// @role test
 /// @layer toolkit
-/// @human ClientError from serde_json::Error - vérifie la conversion depuis erreur JSON.
+/// @do kmc_e_003_error_from_json
+//@human / @human ClientError from serde_json::Error - vérifie la conversion depuis erreur JSON.
 #[test]
 fn kmc_e_003_error_from_json() {
     let json_err = serde_json::from_str::<Value>("invalid json").unwrap_err();
@@ -358,7 +373,8 @@ fn kmc_e_003_error_from_json() {
 /// @id KMC_E_004
 /// @role test
 /// @layer toolkit
-/// @human ClientError variants - vérifie que toutes les variantes sont distinctes.
+/// @do kmc_e_004_error_variants
+//@human / @human ClientError variants - vérifie que toutes les variantes sont distinctes.
 #[test]
 fn kmc_e_004_error_variants() {
     let errors = vec![
@@ -394,7 +410,8 @@ fn kmc_e_004_error_variants() {
 /// @id KMC_O_001
 /// @role test
 /// @layer toolkit
-/// @human Operation sérialisation/désérialisation roundtrip.
+/// @do kmc_o_001_operation_roundtrip
+//@human / @human Operation sérialisation/désérialisation roundtrip.
 #[test]
 fn kmc_o_001_operation_roundtrip() {
     let operation = Operation {
@@ -412,7 +429,8 @@ fn kmc_o_001_operation_roundtrip() {
 /// @id KMC_O_002
 /// @role test
 /// @layer toolkit
-/// @human Operation avec params vides.
+/// @do kmc_o_002_operation_empty_params
+//@human / @human Operation avec params vides.
 #[test]
 fn kmc_o_002_operation_empty_params() {
     let operation = Operation {
@@ -431,7 +449,8 @@ fn kmc_o_002_operation_empty_params() {
 /// @id KMC_R_001
 /// @role test
 /// @layer toolkit
-/// @human Requête avec SQL vide - vérifie que la sérialisation accepte un SQL vide.
+/// @do kmc_r_001_request_empty_sql
+//@human / @human Requête avec SQL vide - vérifie que la sérialisation accepte un SQL vide.
 #[test]
 fn kmc_r_001_request_empty_sql() {
     let request = Request::Query {
@@ -448,7 +467,8 @@ fn kmc_r_001_request_empty_sql() {
 /// @id KMC_R_002
 /// @role test
 /// @layer toolkit
-/// @human Réponse avec erreur et succès false - vérifie le parsing cohérent.
+/// @do kmc_r_002_response_with_error
+//@human / @human Réponse avec erreur et succès false - vérifie le parsing cohérent.
 #[test]
 fn kmc_r_002_response_with_error() {
     let json_str = r#"{
@@ -474,7 +494,8 @@ fn kmc_r_002_response_with_error() {
 /// @id KMC_R_003
 /// @role test
 /// @layer toolkit
-/// @human Paramètres avec caractères spéciaux - vérifie l'échappement JSON.
+/// @do kmc_r_003_params_with_special_chars
+//@human / @human Paramètres avec caractères spéciaux - vérifie l'échappement JSON.
 #[test]
 fn kmc_r_003_params_with_special_chars() {
     let request = Request::Execute {

@@ -4,6 +4,7 @@
 //! @id     miyusql_unit_tests_module
 //! @role   test
 //! @layer  tool
+//! @do documenter_module
 
 use miyusql::{
     cache_get, cache_invalidate, cache_set, query_execute, query_prepare, schema_read,
@@ -22,7 +23,8 @@ fn empty_ctx() -> GovernedContext {
 /// @id MSQL_Q_001
 /// @role test
 /// @layer tool
-/// @human Execute SELECT valide — vérifie qu'une requête SELECT mandatee s'execute et retourne un résultat.
+/// @do msql_q_001_execute_select_valid
+//@human / @human Execute SELECT valide — vérifie qu'une requête SELECT mandatee s'execute et retourne un résultat.
 #[test]
 fn msql_q_001_execute_select_valid() {
     let ctx = governed_ctx();
@@ -38,7 +40,8 @@ fn msql_q_001_execute_select_valid() {
 /// @id MSQL_Q_002
 /// @role test
 /// @layer tool
-/// @human Prepare requête valide — vérifie que tool.query.prepare valide une requête sans l'exécuter.
+/// @do msql_q_002_prepare_valid
+//@human / @human Prepare requête valide — vérifie que tool.query.prepare valide une requête sans l'exécuter.
 #[test]
 fn msql_q_002_prepare_valid() {
     let ctx = governed_ctx();
@@ -50,7 +53,8 @@ fn msql_q_002_prepare_valid() {
 /// @id MSQL_Q_003
 /// @role test
 /// @layer tool
-/// @human Prepare requête invalide — vérifie que tool.query.prepare rejette une requête mal formée.
+/// @do msql_q_003_prepare_invalid
+//@human / @human Prepare requête invalide — vérifie que tool.query.prepare rejette une requête mal formée.
 #[test]
 fn msql_q_003_prepare_invalid() {
     let ctx = governed_ctx();
@@ -62,7 +66,8 @@ fn msql_q_003_prepare_invalid() {
 /// @id MSQL_Q_004
 /// @role test
 /// @layer tool
-/// @human No mandate — vérifie le refus sans mandat.
+/// @do msql_q_004_no_mandate
+//@human / @human No mandate — vérifie le refus sans mandat.
 #[test]
 fn msql_q_004_no_mandate() {
     let ctx = empty_ctx();
@@ -74,7 +79,8 @@ fn msql_q_004_no_mandate() {
 /// @id MSQL_T_001
 /// @role test
 /// @layer tool
-/// @human Begin / Commit — vérifie qu'une transaction begin + commit s'exécute correctement (sandbox).
+/// @do msql_t_001_begin_commit
+//@human / @human Begin / Commit — vérifie qu'une transaction begin + commit s'exécute correctement (sandbox).
 #[test]
 fn msql_t_001_begin_commit() {
     let ctx = governed_ctx();
@@ -86,7 +92,8 @@ fn msql_t_001_begin_commit() {
 /// @id MSQL_T_002
 /// @role test
 /// @layer tool
-/// @human Begin / Rollback — vérifie qu'un rollback annule les modifications (sandbox).
+/// @do msql_t_002_begin_rollback
+//@human / @human Begin / Rollback — vérifie qu'un rollback annule les modifications (sandbox).
 #[test]
 fn msql_t_002_begin_rollback() {
     let ctx = governed_ctx();
@@ -98,7 +105,8 @@ fn msql_t_002_begin_rollback() {
 /// @id MSQL_T_004
 /// @role test
 /// @layer tool
-/// @human No mandate pour transaction.
+/// @do msql_t_004_no_mandate
+//@human / @human No mandate pour transaction.
 #[test]
 fn msql_t_004_no_mandate() {
     let ctx = empty_ctx();
@@ -110,7 +118,8 @@ fn msql_t_004_no_mandate() {
 /// @id MSQL_C_001
 /// @role test
 /// @layer tool
-/// @human Set / Get — vérifie qu'une valeur enregistrée est récupérable (cache dédié test).
+/// @do msql_c_001_set_get
+//@human / @human Set / Get — vérifie qu'une valeur enregistrée est récupérable (cache dédié test).
 #[test]
 fn msql_c_001_set_get() {
     let ctx = governed_ctx();
@@ -123,7 +132,8 @@ fn msql_c_001_set_get() {
 /// @id MSQL_C_002
 /// @role test
 /// @layer tool
-/// @human Get absent — vérifie le comportement pour une clé inexistante.
+/// @do msql_c_002_get_absent
+//@human / @human Get absent — vérifie le comportement pour une clé inexistante.
 #[test]
 fn msql_c_002_get_absent() {
     let ctx = governed_ctx();
@@ -135,7 +145,8 @@ fn msql_c_002_get_absent() {
 /// @id MSQL_C_003
 /// @role test
 /// @layer tool
-/// @human Invalidate — vérifie qu'une entrée invalidee n'est plus retournée.
+/// @do msql_c_003_invalidate
+//@human / @human Invalidate — vérifie qu'une entrée invalidee n'est plus retournée.
 #[test]
 fn msql_c_003_invalidate() {
     let ctx = governed_ctx();
@@ -150,7 +161,8 @@ fn msql_c_003_invalidate() {
 /// @id MSQL_S_001
 /// @role test
 /// @layer tool
-/// @human Lecture schéma tables — vérifie que les métadonnées (tables) sont retournées.
+/// @do msql_s_001_read_schema_tables
+//@human / @human Lecture schéma tables — vérifie que les métadonnées (tables) sont retournées.
 #[test]
 fn msql_s_001_read_schema_tables() {
     let ctx = governed_ctx();
@@ -170,7 +182,8 @@ fn msql_s_001_read_schema_tables() {
 /// @id MSQL_S_002
 /// @role test
 /// @layer tool
-/// @human Lecture schéma colonnes — vérifie que les colonnes et types sont retournés pour une table.
+/// @do msql_s_002_read_schema_columns
+//@human / @human Lecture schéma colonnes — vérifie que les colonnes et types sont retournés pour une table.
 #[test]
 fn msql_s_002_read_schema_columns() {
     let ctx = governed_ctx();
@@ -200,7 +213,8 @@ fn msql_s_002_read_schema_columns() {
 /// @id MSQL_S_003
 /// @role test
 /// @layer tool
-/// @human Table inexistante — vérifie le comportement pour une table inexistante (retourne colonnes vides).
+/// @do msql_s_003_table_nonexistent
+//@human / @human Table inexistante — vérifie le comportement pour une table inexistante (retourne colonnes vides).
 #[test]
 fn msql_s_003_table_nonexistent() {
     let ctx = governed_ctx();

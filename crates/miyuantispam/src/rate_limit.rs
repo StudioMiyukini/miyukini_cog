@@ -7,8 +7,8 @@ use crate::errors::MiyuantispamError;
 /// @id miyuantispam_tool_rate_limit_check
 /// @role security
 /// @layer tool
-/// @human Vérifie la limite de tentatives (scope fourni).
 /// @do rate_limit_check_under_governance
+//@human / @human Vérifie la limite de tentatives (scope fourni).
 /// tool.antispam.rate_limit.check
 pub fn check(
     ctx: &GovernedContext,

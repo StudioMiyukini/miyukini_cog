@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_kindmother_db
 //! @do     provide_sqlite_persistence_for_miyucloud
-//! @role   persistence
+//@human ! @role   persistence
 //! @layer  infra
 //!
 //! CRUD complet pour fichiers, dossiers, liens de partage, permissions,

@@ -5,14 +5,14 @@
 /// @id miyucalc_errors
 /// @role infrastructure
 /// @layer toolkit
-/// @human Types d'erreur contractuels MiyuCalc.
 /// @do represent_execution_errors
+//@human / @human Types d'erreur contractuels MiyuCalc.
 
 /// @id miyucalc_error_enum
 /// @role data
 /// @layer toolkit
-/// @human Erreur d'exécution MiyuCalc.
 /// @do represent_miyucalc_error
+//@human / @human Erreur d'exécution MiyuCalc.
 #[derive(Debug, Clone)]
 pub enum MiyuCalcError {
     /// Exécution refusée : pas de mandat gouverné.

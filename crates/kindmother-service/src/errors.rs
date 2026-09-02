@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_service_errors
 //! @do     define_service_errors
-//! @layer  core
+//@human ! @layer  core
 
 use thiserror::Error;
 

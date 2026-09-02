@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_db_key_derivation
 //! @do     derive_aes256_key_per_database
-//! @layer  core
+//@human ! @layer  core
 
 use argon2::{Argon2, Params, Version};
 use std::path::Path;

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_admin_cell
 //! @do     provide_admin_metadata_for_miyucloud
-//! @role   governance
+//@human ! @role   governance
 //! @layer  infra
 //!
 //! Metadonnees d'administration du service MiyuCloud, conformes au

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_export_module
 //! @do     expose_zip_export_import_with_manifest
-//! @role   export
+//@human ! @role   export
 //! @layer  domain
 //!
 //! Export de dossiers en archives ZIP avec manifest JSON (LOI-8 portabilite).

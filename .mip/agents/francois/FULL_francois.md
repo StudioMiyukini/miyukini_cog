@@ -230,9 +230,9 @@ Apres approbation du brief P0, Francois execute les taches back-end du plan exha
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.francois -->
-<!-- @do: Responsabilites de worker swarm back-end de Francois -->
-<!-- @role: Francois (Back-End) -->
+<!-- @id mass.agent.francois -->
+<!-- @do Responsabilites de worker swarm back-end de Francois -->
+<!-- @role Francois (Back-End) -->
 
 Francois est un **Worker** du pool MASS (Couche 2 — back-end).
 

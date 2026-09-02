@@ -7,8 +7,8 @@
 // @id toolkit.narrative.miyustory
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuStory ; expose les modules tools.
 /// @do expose_miyustory_toolkit
+//@human / @human Point d'entrée du toolkit MiyuStory ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

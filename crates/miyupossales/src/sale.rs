@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_sale_create
 /// @role mutator
 /// @layer tool
-/// @human Crée une vente (ticket) à partir du contexte fourni ; WriteIntent KindMother.
 /// @do sale_create_under_governance
+//@human / @human Crée une vente (ticket) à partir du contexte fourni ; WriteIntent KindMother.
 /// tool.pos.sale.create
 pub fn create(ctx: &GovernedContext, _store_id: &str) -> Result<String, MiyupossalesError> {
     if !ctx.has_mandate() {
@@ -19,8 +19,8 @@ pub fn create(ctx: &GovernedContext, _store_id: &str) -> Result<String, Miyuposs
 /// @id miyupossales_tool_sale_add_item
 /// @role mutator
 /// @layer tool
-/// @human Ajoute une ligne (article, variante, modificateurs, qté) à une vente ; WriteIntent KindMother.
 /// @do sale_add_item_under_governance
+//@human / @human Ajoute une ligne (article, variante, modificateurs, qté) à une vente ; WriteIntent KindMother.
 /// tool.pos.sale.add_item
 pub fn add_item(
     ctx: &GovernedContext,
@@ -39,8 +39,8 @@ pub fn add_item(
 /// @id miyupossales_tool_sale_remove_item
 /// @role mutator
 /// @layer tool
-/// @human Retire une ligne d'une vente ; WriteIntent KindMother.
 /// @do sale_remove_item_under_governance
+//@human / @human Retire une ligne d'une vente ; WriteIntent KindMother.
 /// tool.pos.sale.remove_item
 pub fn remove_item(
     ctx: &GovernedContext,

@@ -47,8 +47,8 @@ pub fn register_slot(
 /// @id miyubooking_tool_booking_slots_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les créneaux disponibles ; contexte ressource, date, durée fourni.
 /// @do booking_slots_list_under_governance
+//@human / @human Liste les créneaux disponibles ; contexte ressource, date, durée fourni.
 pub fn list(
     ctx: &GovernedContext,
     resource_ref: &str,
@@ -72,8 +72,8 @@ pub fn list(
 /// @id miyubooking_tool_booking_slots_resolve
 /// @role accessor
 /// @layer tool
-/// @human Résout un créneau par identifiant ; lecture.
 /// @do booking_slots_resolve_under_governance
+//@human / @human Résout un créneau par identifiant ; lecture.
 pub fn resolve(ctx: &GovernedContext, slot_id: &str) -> Result<String, MiyubookingError> {
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);

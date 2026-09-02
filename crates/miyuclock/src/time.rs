@@ -12,8 +12,8 @@ use crate::errors::MiyuclockError;
 /// @id miyuclock_tool_time_now
 /// @role mutator
 /// @layer tool
-/// @human Retourne l'instant présent selon l'horloge locale (Kernel Clock).
 /// @do time_now_under_governance
+//@human / @human Retourne l'instant présent selon l'horloge locale (Kernel Clock).
 /// tool.time.now — pas de timezone imposée, pas de persistance.
 pub fn now(ctx: &GovernedContext) -> Result<SystemTime, MiyuclockError> {
     if !ctx.has_mandate() {
@@ -26,8 +26,8 @@ pub fn now(ctx: &GovernedContext) -> Result<SystemTime, MiyuclockError> {
 /// @id miyuclock_tool_time_now_injected
 /// @role mutator
 /// @layer tool
-/// @human Retourne l'instant présent avec horloge injectée (tests).
 /// @do time_now_with_clock
+//@human / @human Retourne l'instant présent avec horloge injectée (tests).
 pub fn now_with_clock<C: Clock>(
     ctx: &GovernedContext,
     clock: &C,
@@ -41,8 +41,8 @@ pub fn now_with_clock<C: Clock>(
 /// @id miyuclock_tool_time_delta
 /// @role mutator
 /// @layer tool
-/// @human Retourne la durée écoulée entre deux instants fournis dans le flux.
 /// @do time_delta_under_governance
+//@human / @human Retourne la durée écoulée entre deux instants fournis dans le flux.
 /// tool.time.delta — ne décide pas, ne persiste pas.
 pub fn delta(
     ctx: &GovernedContext,

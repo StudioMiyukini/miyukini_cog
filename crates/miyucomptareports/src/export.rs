@@ -7,8 +7,8 @@ use crate::errors::MiyucomptareportsError;
 /// @id miyucomptareports_tool_ledger_export
 /// @role mutator
 /// @layer tool
-/// @human Export des écritures (format fourni) ; autorisation = StrongFather.
 /// @do ledger_export_under_governance
+//@human / @human Export des écritures (format fourni) ; autorisation = StrongFather.
 /// tool.compta.export.ledger
 pub fn ledger(
     ctx: &GovernedContext,

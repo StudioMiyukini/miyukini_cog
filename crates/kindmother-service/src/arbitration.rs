@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_service_arbitration
 //! @do     enforce_access_control_and_validation
-//! @layer  core
+//@human ! @layer  core
 //!
 //! Le moteur d'arbitrage assure que :
 //! - Seuls les opérateurs autorisés peuvent accéder aux données

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_utils_constant_time
 //! @do     provide_constant_time_comparison_via_subtle
-//! @role   security
+//@human ! @role   security
 //! @layer  infra
 
 use subtle::ConstantTimeEq;

@@ -7,8 +7,8 @@ use crate::errors::MiyuexpenseError;
 /// @id miyuexpense_tool_expense_mileage_calculate
 /// @role accessor
 /// @layer tool
-/// @human Calcule les indemnités kilométriques selon barème fourni ; exécution seule.
 /// @do expense_mileage_calculate_under_governance
+//@human / @human Calcule les indemnités kilométriques selon barème fourni ; exécution seule.
 pub fn calculate(
     ctx: &GovernedContext,
     _payload: &str,
@@ -23,8 +23,8 @@ pub fn calculate(
 /// @id miyuexpense_tool_expense_mileage_export
 /// @role accessor
 /// @layer tool
-/// @human Export PDF/CSV des indemnités km pour administration ; exécution seule.
 /// @do expense_mileage_export_under_governance
+//@human / @human Export PDF/CSV des indemnités km pour administration ; exécution seule.
 pub fn export(
     ctx: &GovernedContext,
     _payload: &str,

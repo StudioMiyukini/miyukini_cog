@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_variant_resolve
 /// @role mutator
 /// @layer tool
-/// @human Résout une variante (taille, couleur, etc.) pour un article.
 /// @do variant_resolve_under_governance
+//@human / @human Résout une variante (taille, couleur, etc.) pour un article.
 /// tool.pos.item.variant.resolve
 pub fn variant_resolve(
     ctx: &GovernedContext,
@@ -23,8 +23,8 @@ pub fn variant_resolve(
 /// @id miyupossales_tool_modifier_apply
 /// @role mutator
 /// @layer tool
-/// @human Applique des modificateurs (add-ons) à une ligne.
 /// @do modifier_apply_under_governance
+//@human / @human Applique des modificateurs (add-ons) à une ligne.
 /// tool.pos.item.modifier.apply
 pub fn modifier_apply(
     ctx: &GovernedContext,

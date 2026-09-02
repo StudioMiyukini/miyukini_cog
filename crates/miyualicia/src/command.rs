@@ -6,8 +6,8 @@
 // @id service.alicia.command
 // @role command_dispatcher
 // @layer 7
-// @human Dispatching des commandes domotiques vers MQTT ou HTTP selon le protocole du device.
 // @do dispatch_device_commands
+// @human Dispatching des commandes domotiques vers MQTT ou HTTP selon le protocole du device.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

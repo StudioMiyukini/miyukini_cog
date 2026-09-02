@@ -3,8 +3,8 @@
 // @id service.alicia.api.handlers.state
 // @role state_handler
 // @layer 7
-// @human Endpoint etat complet de la maison Alicia.
 // @do respond_home_state
+// @human Endpoint etat complet de la maison Alicia.
 
 use std::sync::Arc;
 

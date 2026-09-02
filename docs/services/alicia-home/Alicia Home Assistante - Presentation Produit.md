@@ -1,10 +1,10 @@
 # Alicia Home Assistante -- Presentation Produit
 
-<!-- @id: doc.alicia-home.presentation-produit -->
-<!-- @role: product-review -->
-<!-- @layer: governance -->
-<!-- @human: Presentation produit complete d'Alicia Home Assistante, analyse PR par Fabrice -->
-<!-- @do: present_alicia_home_product_for_stakeholders -->
+<!-- @id doc.alicia-home.presentation-produit -->
+<!-- @role product-review -->
+<!-- @layer governance -->
+<!-- @human Presentation produit complete d'Alicia Home Assistante, analyse PR par Fabrice -->
+<!-- @do present_alicia_home_product_for_stakeholders -->
 
 **Auteur :** Fabrice, Analyste PR -- Miyukini AI Studio
 **Date :** 2026-03-01

@@ -7,8 +7,8 @@ use crate::errors::MiyuwebwayTrackerError;
 /// @id miyuwebway_tracker_mws_port_check
 /// @role accessor
 /// @layer tool
-/// @human Vérifie si un port est exclus MWS ; exécution seule ; déterministe.
 /// @do mws_port_check_under_governance
+//@human / @human Vérifie si un port est exclus MWS ; exécution seule ; déterministe.
 /// Port 21000 réservé MWS (Tracker).
 const MWS_TRACKER_PORT: u16 = 21000;
 

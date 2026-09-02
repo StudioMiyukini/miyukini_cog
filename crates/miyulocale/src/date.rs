@@ -17,8 +17,8 @@ pub struct DateFormatOptions {
 /// @id miyulocale_tool_date_format
 /// @role mutator
 /// @layer tool
-/// @human Formate une date/heure selon locale et options fournis.
 /// @do date_format_under_governance
+//@human / @human Formate une date/heure selon locale et options fournis.
 /// tool.locale.date.format
 pub fn format(
     ctx: &GovernedContext,

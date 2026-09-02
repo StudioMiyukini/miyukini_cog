@@ -6,8 +6,8 @@
 // @id toolkit.alicia.devices.registry
 // @role in_memory_registry
 // @layer 6
-// @human Registre in-memory thread-safe des dispositifs domotiques Alicia.
 // @do provide_device_registry_crud
+// @human Registre in-memory thread-safe des dispositifs domotiques Alicia.
 
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};

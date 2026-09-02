@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_client_errors
 //! @do     define_client_errors
-//! @layer  toolkit
+//@human ! @layer  toolkit
 
 use thiserror::Error;
 

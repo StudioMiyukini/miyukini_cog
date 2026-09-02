@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     manage_terrain_tiles_and_grid
-//! @human  Grille de terrain avec types de tuiles et propriétés
+//@human ! @human  Grille de terrain avec types de tuiles et propriétés
 
 use serde::{Deserialize, Serialize};
 use crate::ResourceDeposit;

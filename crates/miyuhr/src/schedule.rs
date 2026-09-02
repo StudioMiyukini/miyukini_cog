@@ -7,8 +7,8 @@ use crate::errors::MiyuhrError;
 /// @id miyuhr_tool_schedule_get
 /// @role mutator
 /// @layer tool
-/// @human Retourne le planning (shifts) pour un employé/période.
 /// @do schedule_get_under_governance
+//@human / @human Retourne le planning (shifts) pour un employé/période.
 /// tool.hr.schedule.get
 pub fn get(
     ctx: &GovernedContext,

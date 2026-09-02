@@ -2,7 +2,7 @@
 //!
 //! @id     miyukini_connect_errors
 //! @do     normalize_connect_errors
-//! @role   api
+//@human ! @role   api
 //! @layer  contract
 
 use crate::types::AuthMethod;

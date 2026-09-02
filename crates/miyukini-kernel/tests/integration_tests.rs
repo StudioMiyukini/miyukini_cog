@@ -20,8 +20,8 @@ use std::time::UNIX_EPOCH;
 /// @id test_integration_kernel_modules_work_together
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant que tous les modules du Kernel peuvent être utilisés ensemble sans conflit.
 /// @do verify_modules_integration
+//@human / @human Test vérifiant que tous les modules du Kernel peuvent être utilisés ensemble sans conflit.
 #[test]
 fn test_integration_kernel_modules_work_together() {
     // Config
@@ -53,8 +53,8 @@ fn test_integration_kernel_modules_work_together() {
 /// @id test_integration_config_id_integration
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'intégration entre Config et Id : génération d'ID depuis une config.
 /// @do verify_config_id_integration
+//@human / @human Test vérifiant l'intégration entre Config et Id : génération d'ID depuis une config.
 #[test]
 fn test_integration_config_id_integration() {
     let _config = EnvConfig::from_env();
@@ -72,8 +72,8 @@ fn test_integration_config_id_integration() {
 /// @id test_integration_time_log_integration
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'intégration entre Time et Log : logger avec timestamp.
 /// @do verify_time_log_integration
+//@human / @human Test vérifiant l'intégration entre Time et Log : logger avec timestamp.
 #[test]
 fn test_integration_time_log_integration() {
     let clock = DefaultClock;
@@ -92,8 +92,8 @@ fn test_integration_time_log_integration() {
 /// @id test_integration_lifecycle_log_integration
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'intégration entre Lifecycle et Log : logger dans un hook de shutdown.
 /// @do verify_lifecycle_log_integration
+//@human / @human Test vérifiant l'intégration entre Lifecycle et Log : logger dans un hook de shutdown.
 #[test]
 fn test_integration_lifecycle_log_integration() {
     let logger = DefaultLogger;
@@ -111,8 +111,8 @@ fn test_integration_lifecycle_log_integration() {
 /// @id test_integration_id_lifecycle_integration
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'intégration entre Id et Lifecycle : générer un ID dans un hook.
 /// @do verify_id_lifecycle_integration
+//@human / @human Test vérifiant l'intégration entre Id et Lifecycle : générer un ID dans un hook.
 #[test]
 fn test_integration_id_lifecycle_integration() {
     let id_generator = UuidIdGenerator;
@@ -130,8 +130,8 @@ fn test_integration_id_lifecycle_integration() {
 /// @id test_integration_invariant_k1_no_business_logic
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'invariant INV-K-1 : aucune logique métier dans le Kernel.
 /// @do verify_invariant_k1
+//@human / @human Test vérifiant l'invariant INV-K-1 : aucune logique métier dans le Kernel.
 #[test]
 fn test_integration_invariant_k1_no_business_logic() {
     // Vérifier qu'aucun module n'expose de types métier
@@ -150,8 +150,8 @@ fn test_integration_invariant_k1_no_business_logic() {
 /// @id test_integration_invariant_k2_no_external_dependency
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'invariant INV-K-2 : aucune dépendance externe critique. Tous les modules fonctionnent sans réseau.
 /// @do verify_invariant_k2
+//@human / @human Test vérifiant l'invariant INV-K-2 : aucune dépendance externe critique. Tous les modules fonctionnent sans réseau.
 #[test]
 fn test_integration_invariant_k2_no_external_dependency() {
     // Tous les modules doivent fonctionner sans réseau
@@ -174,8 +174,8 @@ fn test_integration_invariant_k2_no_external_dependency() {
 /// @id test_integration_invariant_k6_determinism
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'invariant INV-K-6 : déterminisme. Les opérations déterministes produisent le même résultat.
 /// @do verify_invariant_k6
+//@human / @human Test vérifiant l'invariant INV-K-6 : déterminisme. Les opérations déterministes produisent le même résultat.
 #[test]
 fn test_integration_invariant_k6_determinism() {
     // Parse déterministe
@@ -198,8 +198,8 @@ fn test_integration_invariant_k6_determinism() {
 /// @id test_integration_invariant_k7_explicability
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'invariant INV-K-7 : explicabilité. Les messages sont compréhensibles par un humain.
 /// @do verify_invariant_k7
+//@human / @human Test vérifiant l'invariant INV-K-7 : explicabilité. Les messages sont compréhensibles par un humain.
 #[test]
 fn test_integration_invariant_k7_explicability() {
     let logger = DefaultLogger;
@@ -217,8 +217,8 @@ fn test_integration_invariant_k7_explicability() {
 /// @id test_integration_invariant_k8_offline
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'invariant INV-K-8 : souveraineté locale. Tous les modules fonctionnent offline.
 /// @do verify_invariant_k8
+//@human / @human Test vérifiant l'invariant INV-K-8 : souveraineté locale. Tous les modules fonctionnent offline.
 #[test]
 fn test_integration_invariant_k8_offline() {
     // Tous les modules fonctionnent offline
@@ -241,8 +241,8 @@ fn test_integration_invariant_k8_offline() {
 /// @id test_integration_invariant_k10_governance
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant l'invariant INV-K-10 : gouvernance préservée. Le Kernel ne prend pas de décision autonome.
 /// @do verify_invariant_k10
+//@human / @human Test vérifiant l'invariant INV-K-10 : gouvernance préservée. Le Kernel ne prend pas de décision autonome.
 #[test]
 fn test_integration_invariant_k10_governance() {
     // Le Kernel fournit des primitives, ne prend pas de décision
@@ -262,8 +262,8 @@ fn test_integration_invariant_k10_governance() {
 /// @id test_integration_round_trip_id_config
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant le round-trip Id → Config → Id : un ID peut être stocké et récupéré depuis la config.
 /// @do verify_id_config_round_trip
+//@human / @human Test vérifiant le round-trip Id → Config → Id : un ID peut être stocké et récupéré depuis la config.
 #[test]
 fn test_integration_round_trip_id_config() {
     let id_generator = UuidIdGenerator;
@@ -286,8 +286,8 @@ fn test_integration_round_trip_id_config() {
 /// @id test_integration_lifecycle_shutdown_with_all_modules
 /// @role test
 /// @layer kernel
-/// @human Test vérifiant que shutdown() peut utiliser tous les modules du Kernel dans les hooks.
 /// @do verify_lifecycle_shutdown_integration
+//@human / @human Test vérifiant que shutdown() peut utiliser tous les modules du Kernel dans les hooks.
 #[test]
 fn test_integration_lifecycle_shutdown_with_all_modules() {
     let config = EnvConfig::from_env();

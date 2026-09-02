@@ -9,8 +9,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyucms_tool_content_comment_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un commentaire ; données fournies ; WriteIntent KindMother.
 /// @do content_comment_create_under_governance
+//@human / @human Crée un commentaire ; données fournies ; WriteIntent KindMother.
 pub fn create(
     ctx: &GovernedContext,
     content_id: &str,
@@ -41,8 +41,8 @@ pub fn create(
 /// @id miyucms_tool_content_comment_moderate
 /// @role mutator
 /// @layer tool
-/// @human Applique modération (approuver, rejeter) ; décision StrongFather ; WriteIntent KindMother.
 /// @do content_comment_moderate_under_governance
+//@human / @human Applique modération (approuver, rejeter) ; décision StrongFather ; WriteIntent KindMother.
 pub fn moderate(
     ctx: &GovernedContext,
     comment_id: &str,
@@ -67,8 +67,8 @@ pub fn moderate(
 /// @id miyucms_tool_content_comment_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les commentaires d'un contenu ; filtres fournis dans le flux.
 /// @do content_comment_list_under_governance
+//@human / @human Liste les commentaires d'un contenu ; filtres fournis dans le flux.
 pub fn list(
     ctx: &GovernedContext,
     content_id: &str,

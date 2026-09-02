@@ -33,48 +33,48 @@
 /// @id strongfather_module_intent
 /// @role infrastructure
 /// @layer core
-/// @human Module de modèle d'intention. Définit la structure des intentions soumises à StrongFather.
 /// @do expose_intent_module
+//@human / @human Module de modèle d'intention. Définit la structure des intentions soumises à StrongFather.
 /// Module de modèle d'intention
 pub mod intent;
 
 /// @id strongfather_module_policy
 /// @role infrastructure
 /// @layer core
-/// @human Module de modèle de politique. Définit la structure des politiques appliquées par StrongFather.
 /// @do expose_policy_module
+//@human / @human Module de modèle de politique. Définit la structure des politiques appliquées par StrongFather.
 /// Module de modèle de politique
 pub mod policy;
 
 /// @id strongfather_module_decision
 /// @role infrastructure
 /// @layer core
-/// @human Module de modèle de décision. Définit la structure des décisions produites par StrongFather.
 /// @do expose_decision_module
+//@human / @human Module de modèle de décision. Définit la structure des décisions produites par StrongFather.
 /// Module de modèle de décision
 pub mod decision;
 
 /// @id strongfather_module_policy_engine
 /// @role infrastructure
 /// @layer core
-/// @human Module de moteur de politiques. Applique les politiques pour évaluer des intentions.
 /// @do expose_policy_engine_module
+//@human / @human Module de moteur de politiques. Applique les politiques pour évaluer des intentions.
 /// Module de moteur de politiques
 pub mod policy_engine;
 
 /// @id strongfather_module_priority
 /// @role infrastructure
 /// @layer core
-/// @human Module de gestion des priorités. Calcule les priorités relatives des intentions.
 /// @do expose_priority_module
+//@human / @human Module de gestion des priorités. Calcule les priorités relatives des intentions.
 /// Module de gestion des priorités
 pub mod priority;
 
 /// @id strongfather_module_validator
 /// @role infrastructure
 /// @layer core
-/// @human Module de validation. Valide la structure des intentions avant évaluation.
 /// @do expose_validator_module
+//@human / @human Module de validation. Valide la structure des intentions avant évaluation.
 /// Module de validation
 pub mod validator;
 
@@ -83,16 +83,16 @@ pub mod validator;
 /// @id strongfather_reexport_intent
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types d'intention pour faciliter l'usage.
 /// @do reexport_intent_types
+//@human / @human Ré-export des types d'intention pour faciliter l'usage.
 /// @depends strongfather_module_intent
 pub use intent::{ActionType, CallContext, Constraint, Intent, IntentData, IntentState};
 
 /// @id strongfather_reexport_policy
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types de politique pour faciliter l'usage.
 /// @do reexport_policy_types
+//@human / @human Ré-export des types de politique pour faciliter l'usage.
 /// @depends strongfather_module_policy
 pub use policy::{
     Policy, PolicyCondition, PolicyEffect, PolicyId, PolicyPriorityLevel, PolicyResult, PolicyRule,
@@ -102,31 +102,31 @@ pub use policy::{
 /// @id strongfather_reexport_decision
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types de décision pour faciliter l'usage.
 /// @do reexport_decision_types
+//@human / @human Ré-export des types de décision pour faciliter l'usage.
 /// @depends strongfather_module_decision
 pub use decision::{Decision, DecisionMetadata, DecisionType, EvaluationContext, Justification};
 
 /// @id strongfather_reexport_policy_engine
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export du moteur de politiques pour faciliter l'usage.
 /// @do reexport_policy_engine
+//@human / @human Ré-export du moteur de politiques pour faciliter l'usage.
 /// @depends strongfather_module_policy_engine
 pub use policy_engine::{PolicyEngine, PolicyEngineError};
 
 /// @id strongfather_reexport_priority
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types de priorité pour faciliter l'usage.
 /// @do reexport_priority_types
+//@human / @human Ré-export des types de priorité pour faciliter l'usage.
 /// @depends strongfather_module_priority
 pub use priority::{Priority, PriorityCalculator};
 
 /// @id strongfather_reexport_validator
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export du validateur pour faciliter l'usage.
 /// @do reexport_validator
+//@human / @human Ré-export du validateur pour faciliter l'usage.
 /// @depends strongfather_module_validator
 pub use validator::{IntentValidator, ValidationError};

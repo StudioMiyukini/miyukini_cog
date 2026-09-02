@@ -7,8 +7,8 @@ use crate::errors::MiyubillingError;
 /// @id miyubilling_tool_billing_invoice_generate
 /// @role mutator
 /// @layer tool
-/// @human Génère une facture ; règles fournies ; WriteIntent KindMother.
 /// @do billing_invoice_generate_under_governance
+//@human / @human Génère une facture ; règles fournies ; WriteIntent KindMother.
 /// Stub : id facture généré (compteur) ; persistance = KindMother côté produit.
 pub fn generate(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyubillingError> {
     if !ctx.has_mandate() {
@@ -23,8 +23,8 @@ pub fn generate(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyubil
 /// @id miyubilling_tool_billing_invoice_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les factures ; filtres fournis ; lecture gouvernée.
 /// @do billing_invoice_list_under_governance
+//@human / @human Liste les factures ; filtres fournis ; lecture gouvernée.
 pub fn list(
     ctx: &GovernedContext,
     _filters: Option<&str>,

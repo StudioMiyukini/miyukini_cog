@@ -7,8 +7,8 @@ use crate::errors::MiyuforumError;
 /// @id miyuforum_tool_forum_category_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les catégories.
 /// @do forum_category_list_under_governance
+//@human / @human Liste les catégories.
 /// tool.forum.category.list — lecture.
 pub fn list(ctx: &GovernedContext) -> Result<Vec<String>, MiyuforumError> {
     if !ctx.has_mandate() {
@@ -20,8 +20,8 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<String>, MiyuforumError> {
 /// @id miyuforum_tool_forum_category_get
 /// @role accessor
 /// @layer tool
-/// @human Récupère une catégorie par identifiant.
 /// @do forum_category_get_under_governance
+//@human / @human Récupère une catégorie par identifiant.
 /// tool.forum.category.get — lecture.
 pub fn get(ctx: &GovernedContext, _category_id: &str) -> Result<String, MiyuforumError> {
     if !ctx.has_mandate() {
@@ -33,8 +33,8 @@ pub fn get(ctx: &GovernedContext, _category_id: &str) -> Result<String, Miyuforu
 /// @id miyuforum_tool_forum_category_create
 /// @role mutator
 /// @layer tool
-/// @human Crée une catégorie ; WriteIntent KindMother.
 /// @do forum_category_create_under_governance
+//@human / @human Crée une catégorie ; WriteIntent KindMother.
 /// tool.forum.category.create — ne décide pas ; WriteIntent.
 pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyuforumError> {
     if !ctx.has_mandate() {
@@ -46,8 +46,8 @@ pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyuforum
 /// @id miyuforum_tool_forum_category_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour une catégorie ; WriteIntent KindMother.
 /// @do forum_category_update_under_governance
+//@human / @human Met à jour une catégorie ; WriteIntent KindMother.
 /// tool.forum.category.update — ne décide pas ; WriteIntent.
 pub fn update(
     ctx: &GovernedContext,

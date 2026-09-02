@@ -22,7 +22,7 @@
 //!
 //! @id     muid_empty_state
 //! @do render_empty_state
-//! @role   ui
+//@human ! @role   ui
 //! @layer service
 //! @human  EmptyState — affiche un état vide avec icône, titre, description optionnelle et CTA optionnel.
 

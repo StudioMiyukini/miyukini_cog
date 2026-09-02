@@ -175,9 +175,9 @@ use zeroize::Zeroizing;
 /// La clÃ© n'est JAMAIS stockÃ©e sur disque.
 /// Elle est recalculÃ©e Ã  chaque dÃ©marrage du service.
 /// 
-/// @id: kindmother_derive_master_key
-/// @do: derive_encryption_key_from_local_secrets
-/// @layer: infra
+/// @id kindmother_derive_master_key
+/// @do derive_encryption_key_from_local_secrets
+/// @layer infra
 pub fn derive_master_key() -> Zeroizing<[u8; 32]> {
     // 1. RÃ©cupÃ©rer les composants locaux
     let machine_id = get_machine_id();
@@ -310,9 +310,9 @@ use zeroize::Zeroizing;
 
 /// Base de donnÃ©es chiffrÃ©e KindMother.
 /// 
-/// @id: kindmother_encrypted_db
-/// @do: manage_encrypted_database_connection
-/// @layer: infra
+/// @id kindmother_encrypted_db
+/// @do manage_encrypted_database_connection
+/// @layer infra
 pub struct EncryptedDatabase {
     db: Database,
     _key: Zeroizing<[u8; 32]>, // Garder en mÃ©moire pour la durÃ©e de vie
@@ -321,9 +321,9 @@ pub struct EncryptedDatabase {
 impl EncryptedDatabase {
     /// Ouvre ou crÃ©e une base de donnÃ©es chiffrÃ©e.
     /// 
-    /// @id: kindmother_db_open
-    /// @do: open_encrypted_database_with_derived_key
-    /// @layer: infra
+    /// @id kindmother_db_open
+    /// @do open_encrypted_database_with_derived_key
+    /// @layer infra
     pub async fn open(path: impl AsRef<Path>, key: Zeroizing<[u8; 32]>) -> Result<Self, DbError> {
         let encryption = EncryptionConfig::new(
             Cipher::Aes256Gcm,  // Standard NIST, compatible partout
@@ -652,9 +652,9 @@ use proto::kind_mother_service_client::KindMotherServiceClient;
 /// 
 /// ImplÃ©mente le trait Storage de kindmother.
 /// 
-/// @id: kindmother_client
-/// @do: provide_ipc_client_for_operators
-/// @layer: infra
+/// @id kindmother_client
+/// @do provide_ipc_client_for_operators
+/// @layer infra
 pub struct KindMotherClient {
     client: KindMotherServiceClient<Channel>,
     operator_id: String,

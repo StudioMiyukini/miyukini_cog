@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     manage_terrain_biomes_resources_generation
-//! @human  Opérateur gérant le monde physique : terrain, biomes, ressources naturelles
+//@human ! @human  Opérateur gérant le monde physique : terrain, biomes, ressources naturelles
 
 use serde::{Deserialize, Serialize};
 

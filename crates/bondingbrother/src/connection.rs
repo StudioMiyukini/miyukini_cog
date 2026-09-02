@@ -6,22 +6,22 @@ use std::collections::HashSet;
 /// @id bondingbrother_connection
 /// @role data
 /// @layer core
-/// @human Connexion entre un Opérateur et l'écosystème.
 /// @do represent_connection
+//@human / @human Connexion entre un Opérateur et l'écosystème.
 #[derive(Debug, Clone)]
 pub struct Connection {
     /// @id bondingbrother_connection_id
     /// @role data
     /// @layer core
-    /// @human Identifiant unique de la connexion.
     /// @do store_connection_id
+    //@human / @human Identifiant unique de la connexion.
     /// @depends bondingbrother_connection
     pub id: String,
     /// @id bondingbrother_connection_operator_id
     /// @role data
     /// @layer core
-    /// @human Identifiant de l'Opérateur connecté.
     /// @do store_operator_id
+    //@human / @human Identifiant de l'Opérateur connecté.
     /// @depends bondingbrother_connection
     pub operator_id: String,
 }
@@ -29,14 +29,14 @@ pub struct Connection {
 /// @id bondingbrother_connection_manager_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de gestion des connexions.
 /// @do define_connection_manager_contract
+//@human / @human Trait de gestion des connexions.
 pub trait ConnectionManager {
     /// @id bondingbrother_connection_manager_connect
     /// @role mutator
     /// @layer core
-    /// @human Établit une connexion avec un Opérateur.
     /// @do establish_connection
+    //@human / @human Établit une connexion avec un Opérateur.
     /// @depends bondingbrother_connection_manager_trait
     fn connect(&mut self, operator_id: &str) -> Result<Connection, ConnectionError>;
 }
@@ -44,15 +44,15 @@ pub trait ConnectionManager {
 /// @id bondingbrother_connection_error
 /// @role error
 /// @layer core
-/// @human Erreur de connexion.
 /// @do represent_connection_error
+//@human / @human Erreur de connexion.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ConnectionError {
     /// @id bondingbrother_connection_error_already_connected
     /// @role error
     /// @layer core
-    /// @human Opérateur déjà connecté.
     /// @do represent_already_connected_error
+    //@human / @human Opérateur déjà connecté.
     /// @depends bondingbrother_connection_error
     AlreadyConnected,
 }
@@ -103,8 +103,8 @@ mod tests {
     /// @id bondingbrother_connection_test_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une connexion.
     /// @do verify_connection_creation
+    //@human / @human Test de création d'une connexion.
     /// @depends bondingbrother_connection
     #[test]
     fn test_connection_creation() {

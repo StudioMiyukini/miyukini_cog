@@ -7,8 +7,8 @@ use crate::errors::MiyuforumError;
 /// @id miyuforum_tool_forum_board_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les forums/boards.
 /// @do forum_board_list_under_governance
+//@human / @human Liste les forums/boards.
 /// tool.forum.board.list — lecture.
 pub fn list(
     ctx: &GovernedContext,
@@ -23,8 +23,8 @@ pub fn list(
 /// @id miyuforum_tool_forum_board_get
 /// @role accessor
 /// @layer tool
-/// @human Récupère un board par identifiant.
 /// @do forum_board_get_under_governance
+//@human / @human Récupère un board par identifiant.
 /// tool.forum.board.get — lecture.
 pub fn get(ctx: &GovernedContext, _board_id: &str) -> Result<String, MiyuforumError> {
     if !ctx.has_mandate() {
@@ -36,8 +36,8 @@ pub fn get(ctx: &GovernedContext, _board_id: &str) -> Result<String, MiyuforumEr
 /// @id miyuforum_tool_forum_board_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un board ; WriteIntent KindMother.
 /// @do forum_board_create_under_governance
+//@human / @human Crée un board ; WriteIntent KindMother.
 /// tool.forum.board.create — ne décide pas ; WriteIntent.
 pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyuforumError> {
     if !ctx.has_mandate() {
@@ -49,8 +49,8 @@ pub fn create(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyuforum
 /// @id miyuforum_tool_forum_board_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour un board ; WriteIntent KindMother.
 /// @do forum_board_update_under_governance
+//@human / @human Met à jour un board ; WriteIntent KindMother.
 /// tool.forum.board.update — ne décide pas ; WriteIntent.
 pub fn update(
     ctx: &GovernedContext,

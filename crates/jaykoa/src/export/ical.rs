@@ -2,7 +2,7 @@
 //!
 //! @id     jaykoa_export_ical
 //! @do     generate_ical_from_temporal_entries
-//! @layer  domain
+//@human ! @layer  domain
 //! @human  Génère un fichier .ics conforme RFC 5545 à partir des TemporalEntry.
 //!         Chaque entrée devient un VEVENT. Pas de dépendance externe : format texte pur.
 //!         Propriétés custom X-JAYKOA-SOURCE et X-JAYKOA-ENTRY-TYPE pour traçabilité.

@@ -7,8 +7,8 @@ use std::collections::HashMap;
 /// @id miyupospayment_tool_split
 /// @role mutator
 /// @layer tool
-/// @human Répartit le paiement entre plusieurs moyens ; autorisation = StrongFather.
 /// @do payment_split_under_governance
+//@human / @human Répartit le paiement entre plusieurs moyens ; autorisation = StrongFather.
 /// tool.pos.payment.split
 pub fn split(
     ctx: &GovernedContext,

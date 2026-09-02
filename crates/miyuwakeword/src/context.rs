@@ -1,6 +1,6 @@
 //! @id toolkit.alicia.wakeword.context
 //! @do define_governed_context_for_wake_word
-//! @role governance_context
+//@human ! @role governance_context
 //! @layer 6
 //! @human Contexte de gouvernance standard pour le toolkit alicia-wakeword
 

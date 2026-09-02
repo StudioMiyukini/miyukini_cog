@@ -3,8 +3,8 @@
 // @id service.alicia.api.handlers.health
 // @role health_handler
 // @layer 7
-// @human Endpoint de sante Alicia API.
 // @do respond_health_status
+// @human Endpoint de sante Alicia API.
 
 use std::sync::Arc;
 

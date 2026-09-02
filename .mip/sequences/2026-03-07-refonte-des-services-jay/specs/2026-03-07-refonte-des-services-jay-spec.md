@@ -41,7 +41,7 @@ Miyukini COG — Refonte Services Jay
 
 ### AppState
 ```rust
-// @id: cog_portal_app_state @role: data @layer: service
+// @id cog_portal_app_state @role data @layer service
 pub struct AppState {
     pub cog_id: String,
     pub services: Vec<Arc<dyn PortalContract>>,
@@ -51,7 +51,7 @@ pub struct AppState {
 
 ### PortalContract trait
 ```rust
-// @id: portal_contract_trait @role: api @layer: service
+// @id portal_contract_trait @role api @layer service
 pub trait PortalContract: Send + Sync {
     fn service_slug(&self) -> &str;
     fn service_name(&self) -> &str;
@@ -104,8 +104,8 @@ let doubled = use_memo(use_reactive!(|count| count * 2));
 
 ### MSCM sur composants Dioxus
 ```rust
-//! @id: jayfestival_org_dashboard @do: render_org_dashboard
-//! @role: ui @layer: service @human: Tableau de bord organisateur JayFestival
+//! @id jayfestival_org_dashboard @do render_org_dashboard
+//! @role ui @layer service @human Tableau de bord organisateur JayFestival
 ```
 
 ## Spécification MSCM Audit
@@ -113,11 +113,11 @@ let doubled = use_memo(use_reactive!(|count| count * 2));
 ### Format canonique obligatoire
 ```rust
 // Sur fn/struct/enum pub — en-tête de fichier ou au-dessus du bloc
-//! @id: unique_snake_case_id
-//! @do: action_verb_object
-//! @role: security|data|logic|api|infra|domain|service|ui
-//! @layer: domain|infra|api|service|core|kernel
-//! @human: Description claire du bloc
+//! @id unique_snake_case_id
+//! @do action_verb_object
+//! @role security|data|logic|api|infra|domain|service|ui
+//! @layer domain|infra|api|service|core|kernel
+//! @human Description claire du bloc
 ```
 
 ### Critères d'audit

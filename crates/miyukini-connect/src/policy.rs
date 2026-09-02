@@ -2,7 +2,7 @@
 //!
 //! @id     miyukini_connect_policy
 //! @do     enforce_aal_and_factor_policy
-//! @role   security
+//@human ! @role   security
 //! @layer  domain
 
 use crate::types::{AuthMethod, PermissionTier, RuntimeState};

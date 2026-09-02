@@ -9,7 +9,7 @@
 //! @role wake_word_detection
 //! @layer 6
 //! @do detect_hey_alicia_wake_word_on_audio_stream
-//! @human Detection du mot-cle "Hey Alicia" sur flux audio continu via rustpotter
+//@human ! @human Detection du mot-cle "Hey Alicia" sur flux audio continu via rustpotter
 
 pub mod admin_cell;
 pub mod context;

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_vector_clock
 //! @do     implement_vector_clock_compare_merge
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Chaque modification d'un fichier incremente le compteur du noeud local.

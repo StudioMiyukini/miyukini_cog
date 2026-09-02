@@ -9,8 +9,8 @@ use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 /// @id miyauth_tool_identity_attest
 /// @role mutator
 /// @layer tool
-/// @human Produit une attestation d'identité à partir du contexte validé.
 /// @do identity_attest_under_governance
+//@human / @human Produit une attestation d'identité à partir du contexte validé.
 /// tool.identity.attest — ne crée pas la confiance.
 pub fn attest(
     ctx: &GovernedContext,

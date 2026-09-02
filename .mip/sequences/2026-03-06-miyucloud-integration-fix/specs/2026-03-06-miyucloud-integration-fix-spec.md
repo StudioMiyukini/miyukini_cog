@@ -1,9 +1,9 @@
 # Spec technique -- miyucloud-integration-fix
 
-<!-- @id: mip.spec.miyucloud-integration-fix -->
-<!-- @do: define_technical_spec_for_integration -->
-<!-- @role: spec -->
-<!-- @layer: S7-Operator -->
+<!-- @id mip.spec.miyucloud-integration-fix -->
+<!-- @do define_technical_spec_for_integration -->
+<!-- @role spec -->
+<!-- @layer S7-Operator -->
 
 ## 1. Perimetre technique
 

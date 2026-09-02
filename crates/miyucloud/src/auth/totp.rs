@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_auth_totp
 //! @do     provide_totp_setup_validate_recovery
-//! @role   auth
+//@human ! @role   auth
 //! @layer  domain
 //!
 //! Gere la configuration 2FA, la validation des codes TOTP,

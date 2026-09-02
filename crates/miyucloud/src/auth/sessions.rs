@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_auth_sessions
 //! @do     provide_session_create_validate_revoke
-//! @role   auth
+//@human ! @role   auth
 //! @layer  domain
 //!
 //! Sessions avec token 256-bit, expiration, inactivite,

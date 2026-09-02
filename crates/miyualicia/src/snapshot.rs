@@ -5,8 +5,8 @@
 // @id service.alicia.snapshot
 // @role state_snapshot
 // @layer 7
-// @human Snapshot de l'etat de la maison : pieces, dispositifs, MQTT, logs, wake word.
 // @do produce_alicia_home_state_snapshot
+// @human Snapshot de l'etat de la maison : pieces, dispositifs, MQTT, logs, wake word.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

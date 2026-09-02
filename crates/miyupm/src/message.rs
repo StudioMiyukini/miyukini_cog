@@ -7,8 +7,8 @@ use crate::errors::MiyupmError;
 /// @id miyupm_tool_pm_send
 /// @role mutator
 /// @layer tool
-/// @human Envoie un message privé ; autorisation StrongFather, WriteIntent KindMother.
 /// @do pm_send_under_governance
+//@human / @human Envoie un message privé ; autorisation StrongFather, WriteIntent KindMother.
 /// tool.pm.send — ne décide pas de l'autorisation.
 pub fn send(
     ctx: &GovernedContext,
@@ -25,8 +25,8 @@ pub fn send(
 /// @id miyupm_tool_pm_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les messages (dossier, filtres fournis).
 /// @do pm_list_under_governance
+//@human / @human Liste les messages (dossier, filtres fournis).
 /// tool.pm.list — lecture ; critères fournis.
 pub fn list(
     ctx: &GovernedContext,
@@ -42,8 +42,8 @@ pub fn list(
 /// @id miyupm_tool_pm_get
 /// @role accessor
 /// @layer tool
-/// @human Récupère un message par identifiant.
 /// @do pm_get_under_governance
+//@human / @human Récupère un message par identifiant.
 /// tool.pm.get — lecture.
 pub fn get(ctx: &GovernedContext, _message_id: &str) -> Result<String, MiyupmError> {
     if !ctx.has_mandate() {

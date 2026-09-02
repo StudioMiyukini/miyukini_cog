@@ -1,9 +1,9 @@
 ﻿# Brief P0 - Miyukini Connect (service d'authentification general)
 
-<!-- @id: mip.brief.miyukini-connect.auth-general -->
-<!-- @do: lancer_sequence_mip_connect_auth_online_offline -->
-<!-- @role: Maria (Chef de Projet) -->
-<!-- @layer: S7-Operator -->
+<!-- @id mip.brief.miyukini-connect.auth-general -->
+<!-- @do lancer_sequence_mip_connect_auth_online_offline -->
+<!-- @role Maria (Chef de Projet) -->
+<!-- @layer S7-Operator -->
 
 ## Classification
 

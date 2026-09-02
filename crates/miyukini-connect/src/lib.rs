@@ -3,7 +3,7 @@
 //!
 //! @id     miyukini_connect_lib
 //! @do     expose_connect_auth_modules
-//! @role   auth
+//@human ! @role   auth
 //! @layer  service
 
 pub mod audit;

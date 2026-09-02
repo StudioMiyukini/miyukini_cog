@@ -6,8 +6,8 @@ use crate::errors::MiyupospaymentError;
 /// @id miyupospayment_tool_check_record
 /// @role mutator
 /// @layer tool
-/// @human Enregistre un paiement chèque ; KindMother.
 /// @do check_record_under_governance
+//@human / @human Enregistre un paiement chèque ; KindMother.
 /// tool.pos.payment.check.record
 pub fn record(
     ctx: &GovernedContext,

@@ -2,7 +2,7 @@
 //!
 //! @id     miyukini_connect_types
 //! @do     define_connect_contracts
-//! @role   api
+//@human ! @role   api
 //! @layer  contract
 
 use serde::{Deserialize, Serialize};

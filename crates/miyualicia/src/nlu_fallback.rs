@@ -6,8 +6,8 @@
 // @id service.alicia.nlu-fallback
 // @role regex_nlu_fallback
 // @layer 7
-// @human Parser regex de secours pour NLU sans miou-llm-bridge.
 // @do parse_basic_home_commands_via_regex
+// @human Parser regex de secours pour NLU sans miou-llm-bridge.
 
 use crate::intent::Intent;
 use std::sync::LazyLock;

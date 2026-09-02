@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_module
 //! @do     expose_p2p_sync_engine_clocks_discovery_transport
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Fournit les horloges vectorielles, la detection/resolution de conflits,

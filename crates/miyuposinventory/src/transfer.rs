@@ -6,8 +6,8 @@ use crate::errors::MiyuposinventoryError;
 /// @id miyuposinventory_tool_transfer_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un transfert entre sites à partir de données fournies ; WriteIntent KindMother.
 /// @do transfer_create_under_governance
+//@human / @human Crée un transfert entre sites à partir de données fournies ; WriteIntent KindMother.
 /// tool.inventory.transfer.create
 pub fn create(
     ctx: &GovernedContext,
@@ -24,8 +24,8 @@ pub fn create(
 /// @id miyuposinventory_tool_transfer_execute
 /// @role mutator
 /// @layer tool
-/// @human Exécute (confirme) un transfert ; autorisation = StrongFather ; WriteIntent KindMother.
 /// @do transfer_execute_under_governance
+//@human / @human Exécute (confirme) un transfert ; autorisation = StrongFather ; WriteIntent KindMother.
 /// tool.inventory.transfer.execute
 pub fn execute(ctx: &GovernedContext, _transfer_id: &str) -> Result<(), MiyuposinventoryError> {
     if !ctx.has_mandate() {
@@ -37,8 +37,8 @@ pub fn execute(ctx: &GovernedContext, _transfer_id: &str) -> Result<(), Miyuposi
 /// @id miyuposinventory_tool_transfer_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les transferts (filtres fournis).
 /// @do transfer_list_under_governance
+//@human / @human Liste les transferts (filtres fournis).
 /// tool.inventory.transfer.list
 pub fn list(
     ctx: &GovernedContext,

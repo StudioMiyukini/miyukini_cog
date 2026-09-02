@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_module
 //! @do     expose_file_operations_trash_sharing_quota_migration
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Operations CRUD sur les fichiers et dossiers, corbeille avec suppression securisee,

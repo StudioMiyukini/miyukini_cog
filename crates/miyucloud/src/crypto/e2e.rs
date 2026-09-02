@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_crypto_e2e
 //! @do     implement_x25519_dh_ephemeral_e2e_encryption_with_pfs
-//! @role   crypto
+//@human ! @role   crypto
 //! @layer  infra
 //!
 //! Echange de cles X25519 Diffie-Hellman ephemere avec Perfect Forward Secrecy.

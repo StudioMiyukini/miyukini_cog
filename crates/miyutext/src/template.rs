@@ -8,8 +8,8 @@ use std::collections::HashMap;
 /// @id miyutext_tool_template_apply
 /// @role mutator
 /// @layer tool
-/// @human Substitue des placeholders dans un template avec des données fournies.
 /// @do template_apply_under_governance
+//@human / @human Substitue des placeholders dans un template avec des données fournies.
 /// tool.text.template.apply
 pub fn apply(
     ctx: &GovernedContext,

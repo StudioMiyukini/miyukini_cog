@@ -14,8 +14,8 @@ const DEFAULT_FONT_DIR: &str = "./fonts";
 /// @id miyuexport_tool_pdf_render
 /// @role mutator
 /// @layer tool
-/// @human Rend un PDF à partir d'un template et de données fournis.
 /// @do pdf_render_under_governance
+//@human / @human Rend un PDF à partir d'un template et de données fournis.
 /// tool.export.pdf.render — ne décide pas du contenu.
 pub fn render(
     ctx: &GovernedContext,

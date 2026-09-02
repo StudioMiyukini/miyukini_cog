@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_protocol
 //! @do     define_sync_protocol_messages_and_manifest_entry
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Definit les messages echanges entre pairs pendant la synchronisation :

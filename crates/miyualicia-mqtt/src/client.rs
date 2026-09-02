@@ -6,8 +6,8 @@
 // @id toolkit.alicia.mqtt.client
 // @role mqtt_async_client
 // @layer 6
-// @human Client MQTT async pour Alicia ; wrapping rumqttc, reconnexion, broadcast.
 // @do provide_mqtt_client_with_reconnection
+// @human Client MQTT async pour Alicia ; wrapping rumqttc, reconnexion, broadcast.
 
 use std::sync::Arc;
 use std::time::Duration;

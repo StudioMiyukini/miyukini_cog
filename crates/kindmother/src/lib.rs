@@ -31,56 +31,56 @@
 /// @id kindmother_module_state
 /// @role infrastructure
 /// @layer core
-/// @human Module de gestion d'état. Gère l'identité et l'état des instances (DB Mère, DB Filles).
 /// @do expose_state_module
+//@human / @human Module de gestion d'état. Gère l'identité et l'état des instances (DB Mère, DB Filles).
 /// Module de gestion d'état
 pub mod state;
 
 /// @id kindmother_module_storage
 /// @role infrastructure
 /// @layer core
-/// @human Module d'abstraction de la persistance. Masque SQLite et fournit une interface conceptuelle.
 /// @do expose_storage_module
+//@human / @human Module d'abstraction de la persistance. Masque SQLite et fournit une interface conceptuelle.
 /// Module d'abstraction de la persistance
 pub mod storage;
 
 /// @id kindmother_module_sync
 /// @role infrastructure
 /// @layer core
-/// @human Module de synchronisation. Gère la propagation des changements entre instances.
 /// @do expose_sync_module
+//@human / @human Module de synchronisation. Gère la propagation des changements entre instances.
 /// Module de synchronisation
 pub mod sync;
 
 /// @id kindmother_module_api
 /// @role infrastructure
 /// @layer core
-/// @human Module API CoreData. Expose les 10 opérations de la CoreDataAPI.
 /// @do expose_api_module
+//@human / @human Module API CoreData. Expose les 10 opérations de la CoreDataAPI.
 /// Module API CoreData
 pub mod api;
 
 /// @id kindmother_module_threat
 /// @role infrastructure
 /// @layer core
-/// @human Module de détection de menaces. Détecte la corruption et les anomalies.
 /// @do expose_threat_module
+//@human / @human Module de détection de menaces. Détecte la corruption et les anomalies.
 /// Module de détection de menaces
 pub mod threat;
 
 /// @id kindmother_module_observability
 /// @role infrastructure
 /// @layer core
-/// @human Module d'observabilité. Collecte les métriques et l'état de santé.
 /// @do expose_observability_module
+//@human / @human Module d'observabilité. Collecte les métriques et l'état de santé.
 /// Module d'observabilité
 pub mod observability;
 
 /// @id kindmother_module_miyusql_bridge
 /// @role infrastructure
 /// @layer core
-/// @human Pont KindMother ↔ MiyuSQL. Délégation de l'exécution SQL sous mandat.
 /// @do expose_miyusql_bridge
+//@human / @human Pont KindMother ↔ MiyuSQL. Délégation de l'exécution SQL sous mandat.
 /// Module pont MiyuSQL
 pub mod miyusql_bridge;
 
@@ -89,40 +89,40 @@ pub mod miyusql_bridge;
 /// @id kindmother_reexport_state
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types d'état pour faciliter l'usage.
 /// @do reexport_state_types
+//@human / @human Ré-export des types d'état pour faciliter l'usage.
 /// @depends kindmother_module_state
 pub use state::{InstanceIdentity, InstanceState, InstanceType};
 
 /// @id kindmother_reexport_storage
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types de stockage pour faciliter l'usage.
 /// @do reexport_storage_types
+//@human / @human Ré-export des types de stockage pour faciliter l'usage.
 /// @depends kindmother_module_storage
 pub use storage::{MemoryStorage, Storage, StorageError};
 
 /// @id kindmother_reexport_sync
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types de synchronisation pour faciliter l'usage.
 /// @do reexport_sync_types
+//@human / @human Ré-export des types de synchronisation pour faciliter l'usage.
 /// @depends kindmother_module_sync
 pub use sync::{DeltaOperation, Sync, SyncDelta, SyncError};
 
 /// @id kindmother_reexport_api
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types d'API pour faciliter l'usage.
 /// @do reexport_api_types
+//@human / @human Ré-export des types d'API pour faciliter l'usage.
 /// @depends kindmother_module_api
 pub use api::{APIError, CoreDataAPI, WriteIntent, WriteOperation};
 
 /// @id kindmother_reexport_threat
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types de détection de menaces pour faciliter l'usage.
 /// @do reexport_threat_types
+//@human / @human Ré-export des types de détection de menaces pour faciliter l'usage.
 /// @depends kindmother_module_threat
 pub use threat::{DefaultThreatDetector, ThreatDetector, ThreatLevel};
 
@@ -130,7 +130,7 @@ pub use miyusql_bridge::{MiyuSQLBridgeImpl, MiyuSQLExecutionBridge};
 /// @id kindmother_reexport_observability
 /// @role infrastructure
 /// @layer core
-/// @human Ré-export des types d'observabilité pour faciliter l'usage.
 /// @do reexport_observability_types
+//@human / @human Ré-export des types d'observabilité pour faciliter l'usage.
 /// @depends kindmother_module_observability
 pub use observability::{DefaultObservability, HealthStatus, Metrics, Observability};

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_engine
 //! @do     implement_p2p_sync_loop_with_discovery_diff_transfer_conflicts
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Boucle principale de synchronisation :

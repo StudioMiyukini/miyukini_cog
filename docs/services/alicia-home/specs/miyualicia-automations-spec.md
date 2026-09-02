@@ -1,10 +1,10 @@
 # Spec Technique — crate `miyualicia-automations`
 
-<!-- @id: spec.alicia.automations -->
-<!-- @role: technical-specification -->
-<!-- @layer: 6 -->
-<!-- @human: Specification technique complete du moteur d'automatisations domotiques -->
-<!-- @do: define_miyualicia_automations_crate_api -->
+<!-- @id spec.alicia.automations -->
+<!-- @role technical-specification -->
+<!-- @layer 6 -->
+<!-- @human Specification technique complete du moteur d'automatisations domotiques -->
+<!-- @do define_miyualicia_automations_crate_api -->
 
 **Auteur :** Denis, Chef Dev Senior — Miyukini AI Studio
 **Date :** 2026-03-01
@@ -115,11 +115,11 @@ tracing                 = "0.1"
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.automations
-// @role: automation_engine
-// @layer: 6
-// @human: Moteur de regles et routines Alicia ; triggers, conditions, actions, scheduler.
-// @do: schedule_and_execute_home_automations
+// @id toolkit.alicia.automations
+// @role automation_engine
+// @layer 6
+// @human Moteur de regles et routines Alicia ; triggers, conditions, actions, scheduler.
+// @do schedule_and_execute_home_automations
 
 pub mod admin_cell;
 pub mod engine;

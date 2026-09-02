@@ -7,8 +7,8 @@
 // @id toolkit.pos.miyupossales
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuPosSales ; expose les modules tools.
 /// @do expose_miyupossales_toolkit
+//@human / @human Point d'entrée du toolkit MiyuPosSales ; expose les modules tools.
 pub mod admin_cell;
 pub mod barcode;
 pub mod cash_movement;

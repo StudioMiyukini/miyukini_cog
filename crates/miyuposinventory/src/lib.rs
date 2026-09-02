@@ -7,8 +7,8 @@
 // @id toolkit.pos.miyuposinventory
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuPosInventory ; expose les modules tools.
 /// @do expose_miyuposinventory_toolkit
+//@human / @human Point d'entrée du toolkit MiyuPosInventory ; expose les modules tools.
 pub mod admin_cell;
 pub mod alert;
 pub mod context;

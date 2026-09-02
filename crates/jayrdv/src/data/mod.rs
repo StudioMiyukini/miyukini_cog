@@ -2,7 +2,7 @@
 //!
 //! @id     jayrdv_data
 //! @do     reexport_data_types_and_store
-//! @role   data
+//@human ! @role   data
 //! @layer  domain
 //!
 //! Par défaut : store mémoire. Avec feature `kindmother-only` : store KindMother (stub = délégation mémoire).

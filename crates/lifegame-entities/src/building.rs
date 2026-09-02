@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     define_building_structures_and_types
-//! @human  Structures et types de bâtiments constructibles
+//@human ! @human  Structures et types de bâtiments constructibles
 
 use serde::{Deserialize, Serialize};
 use crate::{EntityId, KingdomId, Vec2};

@@ -16,8 +16,8 @@ fn products() -> &'static Mutex<HashMap<String, String>> {
 /// @id miyustore_tool_commerce_product_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les produits ; filtres fournis.
 /// @do commerce_product_list_under_governance
+//@human / @human Liste les produits ; filtres fournis.
 pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -31,8 +31,8 @@ pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>
 /// @id miyustore_tool_commerce_product_resolve
 /// @role accessor
 /// @layer tool
-/// @human Résout un produit par identifiant ; lecture.
 /// @do commerce_product_resolve_under_governance
+//@human / @human Résout un produit par identifiant ; lecture.
 pub fn resolve(ctx: &GovernedContext, product_id: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -46,8 +46,8 @@ pub fn resolve(ctx: &GovernedContext, product_id: &str) -> Result<String, Miyust
 /// @id miyustore_tool_commerce_product_variations
 /// @role accessor
 /// @layer tool
-/// @human Liste les variations d'un produit ; lecture.
 /// @do commerce_product_variations_under_governance
+//@human / @human Liste les variations d'un produit ; lecture.
 pub fn variations(ctx: &GovernedContext, _product_id: &str) -> Result<Vec<String>, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -58,8 +58,8 @@ pub fn variations(ctx: &GovernedContext, _product_id: &str) -> Result<Vec<String
 /// @id miyustore_tool_commerce_product_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un produit ; WriteIntent KindMother ; décision StrongFather.
 /// @do commerce_product_create_under_governance
+//@human / @human Crée un produit ; WriteIntent KindMother ; décision StrongFather.
 pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -75,8 +75,8 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreE
 /// @id miyustore_tool_commerce_product_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour un produit ; WriteIntent KindMother.
 /// @do commerce_product_update_under_governance
+//@human / @human Met à jour un produit ; WriteIntent KindMother.
 pub fn update(
     ctx: &GovernedContext,
     product_id: &str,

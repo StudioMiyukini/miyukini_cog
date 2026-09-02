@@ -7,8 +7,8 @@ use crate::errors::MiyuwebwayTrackerError;
 /// @id miyuwebway_tracker_mws_transport_receive
 /// @role mutator
 /// @layer tool
-/// @human Reçoit un message sur un endpoint ; exécution seule ; port 21000 officiel.
 /// @do mws_transport_receive_under_governance
+//@human / @human Reçoit un message sur un endpoint ; exécution seule ; port 21000 officiel.
 /// Stub : délégation réseau vers Tracker (Origin) non implémentée.
 pub fn receive(ctx: &GovernedContext) -> Result<Vec<u8>, MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
@@ -22,8 +22,8 @@ pub fn receive(ctx: &GovernedContext) -> Result<Vec<u8>, MiyuwebwayTrackerError>
 /// @id miyuwebway_tracker_mws_transport_send
 /// @role mutator
 /// @layer tool
-/// @human Envoie un message (réponse, liste statuts) ; adresse fournie.
 /// @do mws_transport_send_under_governance
+//@human / @human Envoie un message (réponse, liste statuts) ; adresse fournie.
 /// Stub : délégation réseau non implémentée.
 pub fn send(
     ctx: &GovernedContext,

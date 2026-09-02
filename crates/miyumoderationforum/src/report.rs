@@ -8,8 +8,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyumoderationforum_tool_report_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un signalement ; WriteIntent KindMother.
 /// @do report_create_under_governance
+//@human / @human Crée un signalement ; WriteIntent KindMother.
 /// tool.moderation.report.create
 pub fn create(
     ctx: &GovernedContext,
@@ -38,8 +38,8 @@ pub fn create(
 /// @id miyumoderationforum_tool_report_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les signalements.
 /// @do report_list_under_governance
+//@human / @human Liste les signalements.
 /// tool.moderation.report.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<ReportItem>, MiyumoderationforumError> {
     if !ctx.has_mandate() {

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_crypto_at_rest
 //! @do     encrypt_decrypt_chunks_with_chacha20poly1305
-//! @role   crypto
+//@human ! @role   crypto
 //! @layer  infra
 //!
 //! Algorithme : ChaCha20-Poly1305 (AEAD).

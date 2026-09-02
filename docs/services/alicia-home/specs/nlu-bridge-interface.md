@@ -1,10 +1,10 @@
 # Spec Technique — Interface NLU avec `miou-llm-bridge`
 
-<!-- @id: spec.alicia.nlu-bridge -->
-<!-- @role: technical-specification -->
-<!-- @layer: 7 -->
-<!-- @human: Specification de l'interface NLU entre miyualicia et miou-llm-bridge -->
-<!-- @do: define_nlu_bridge_interface_for_alicia -->
+<!-- @id spec.alicia.nlu-bridge -->
+<!-- @role technical-specification -->
+<!-- @layer 7 -->
+<!-- @human Specification de l'interface NLU entre miyualicia et miou-llm-bridge -->
+<!-- @do define_nlu_bridge_interface_for_alicia -->
 
 **Auteur :** Denis, Chef Dev Senior — Miyukini AI Studio
 **Date :** 2026-03-01
@@ -46,11 +46,11 @@ Ce document ne couvre pas :
 ```rust
 // Fichier : crates/miyualicia/src/intent.rs
 //
-// @id: service.alicia.intent
-// @role: nlu_intent_taxonomy
-// @layer: 7
-// @human: Type Intent et taxonomie des intentions domotiques Alicia
-// @do: model_home_assistant_intents
+// @id service.alicia.intent
+// @role nlu_intent_taxonomy
+// @layer 7
+// @human Type Intent et taxonomie des intentions domotiques Alicia
+// @do model_home_assistant_intents
 
 use serde::{Deserialize, Serialize};
 
@@ -353,11 +353,11 @@ fn parse_bridge_response(response: &BridgeNluResponse) -> Intent {
 ```rust
 // Fichier : crates/miyualicia/src/nlu_bridge.rs
 //
-// @id: service.alicia.nlu-bridge
-// @role: nlu_client
-// @layer: 7
-// @human: Client HTTP vers miou-llm-bridge pour STT et NLU, avec fallback regex.
-// @do: transcribe_and_parse_voice_intent
+// @id service.alicia.nlu-bridge
+// @role nlu_client
+// @layer 7
+// @human Client HTTP vers miou-llm-bridge pour STT et NLU, avec fallback regex.
+// @do transcribe_and_parse_voice_intent
 
 use crate::errors::AliciaError;
 use crate::intent::Intent;
@@ -489,11 +489,11 @@ communes. Le mode degrade est logue avec `tracing::warn!`.
 ```rust
 // Fichier : crates/miyualicia/src/nlu_fallback.rs
 //
-// @id: service.alicia.nlu-fallback
-// @role: regex_nlu_fallback
-// @layer: 7
-// @human: Parser regex de secours pour NLU sans miou-llm-bridge.
-// @do: parse_basic_home_commands_via_regex
+// @id service.alicia.nlu-fallback
+// @role regex_nlu_fallback
+// @layer 7
+// @human Parser regex de secours pour NLU sans miou-llm-bridge.
+// @do parse_basic_home_commands_via_regex
 
 use crate::intent::Intent;
 use std::sync::LazyLock;

@@ -17,8 +17,8 @@ fn bookmarks() -> &'static Mutex<HashMap<String, Vec<BookmarkItem>>> {
 /// @id miyubookmarks_tool_bookmark_add
 /// @role mutator
 /// @layer tool
-/// @human Ajoute un signet (cible fournie) ; WriteIntent KindMother.
 /// @do bookmark_add_under_governance
+//@human / @human Ajoute un signet (cible fournie) ; WriteIntent KindMother.
 /// tool.bookmark.add
 pub fn add(
     ctx: &GovernedContext,
@@ -46,8 +46,8 @@ pub fn add(
 /// @id miyubookmarks_tool_bookmark_remove
 /// @role mutator
 /// @layer tool
-/// @human Supprime un signet ; WriteIntent KindMother.
 /// @do bookmark_remove_under_governance
+//@human / @human Supprime un signet ; WriteIntent KindMother.
 /// tool.bookmark.remove
 pub fn remove(ctx: &GovernedContext, bookmark_id: &str) -> Result<(), MiyubookmarksError> {
     if !ctx.has_mandate() {
@@ -65,8 +65,8 @@ pub fn remove(ctx: &GovernedContext, bookmark_id: &str) -> Result<(), Miyubookma
 /// @id miyubookmarks_tool_bookmark_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les signets (filtres fournis).
 /// @do bookmark_list_under_governance
+//@human / @human Liste les signets (filtres fournis).
 /// tool.bookmark.list
 pub fn list(
     ctx: &GovernedContext,

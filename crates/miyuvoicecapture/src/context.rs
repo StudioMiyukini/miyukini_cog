@@ -6,8 +6,8 @@
 // @id alicia_capture_context
 // @role data
 // @layer toolkit
-// @human Contexte de configuration runtime Alicia Capture.
 // @do hold_voice_capture_context
+// @human Contexte de configuration runtime Alicia Capture.
 
 use serde::{Deserialize, Serialize};
 

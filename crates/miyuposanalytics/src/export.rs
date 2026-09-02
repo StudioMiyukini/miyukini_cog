@@ -6,8 +6,8 @@ use crate::errors::MiyuposanalyticsError;
 /// @id miyuposanalytics_tool_export_spreadsheet
 /// @role mutator
 /// @layer tool
-/// @human Exporte des données en format tableur (données fournies).
 /// @do export_spreadsheet_under_governance
+//@human / @human Exporte des données en format tableur (données fournies).
 /// tool.data.export.spreadsheet
 pub fn spreadsheet(
     ctx: &GovernedContext,

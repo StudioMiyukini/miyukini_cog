@@ -15,8 +15,8 @@ fn payments() -> &'static Mutex<HashMap<String, String>> {
 /// @id miyustore_tool_commerce_payment_capture
 /// @role mutator
 /// @layer tool
-/// @human Capture un paiement ; autorisation StrongFather.
 /// @do commerce_payment_capture_under_governance
+//@human / @human Capture un paiement ; autorisation StrongFather.
 pub fn capture(
     ctx: &GovernedContext,
     payment_ref: &str,
@@ -35,8 +35,8 @@ pub fn capture(
 /// @id miyustore_tool_commerce_payment_refund
 /// @role mutator
 /// @layer tool
-/// @human Rembourse un paiement ; décision StrongFather ; WriteIntent si état géré.
 /// @do commerce_payment_refund_under_governance
+//@human / @human Rembourse un paiement ; décision StrongFather ; WriteIntent si état géré.
 pub fn refund(
     ctx: &GovernedContext,
     payment_ref: &str,
@@ -55,8 +55,8 @@ pub fn refund(
 /// @id miyustore_tool_commerce_payment_status
 /// @role accessor
 /// @layer tool
-/// @human Retourne le statut d'un paiement ; lecture gouvernée.
 /// @do commerce_payment_status_under_governance
+//@human / @human Retourne le statut d'un paiement ; lecture gouvernée.
 pub fn status(ctx: &GovernedContext, payment_ref: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);

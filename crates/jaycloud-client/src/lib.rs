@@ -20,8 +20,8 @@
 // @id service.jaycloud.alicia_client
 // @role alicia_to_jaycloud_adapter
 // @layer 7
-// @human Adaptateur Alicia → JayCloud : route les intents vers un backend pluggable.
 // @do bridge_alicia_to_jaycloud
+// @human Adaptateur Alicia → JayCloud : route les intents vers un backend pluggable.
 
 use std::sync::{Arc, RwLock};
 

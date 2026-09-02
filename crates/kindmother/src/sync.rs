@@ -8,61 +8,61 @@ use crate::state::InstanceIdentity;
 /// @id kindmother_sync_delta
 /// @role data
 /// @layer core
-/// @human Delta représentant les différences entre deux états pour la synchronisation.
 /// @do represent_sync_delta
+//@human / @human Delta représentant les différences entre deux états pour la synchronisation.
 /// Delta de synchronisation.
 #[derive(Debug, Clone)]
 pub struct SyncDelta {
     /// @id kindmother_sync_delta_entity_id
     /// @role data
     /// @layer core
-    /// @human Identifiant de l'entité modifiée.
     /// @do store_entity_id
+    //@human / @human Identifiant de l'entité modifiée.
     /// @depends kindmother_sync_delta
     pub entity_id: String,
     /// @id kindmother_sync_delta_operation
     /// @role data
     /// @layer core
-    /// @human Type d'opération (création, modification, suppression).
     /// @do store_operation_type
+    //@human / @human Type d'opération (création, modification, suppression).
     /// @depends kindmother_sync_delta
     pub operation: DeltaOperation,
     /// @id kindmother_sync_delta_data
     /// @role data
     /// @layer core
-    /// @human Données de l'entité (si création ou modification).
     /// @do store_entity_data
+    //@human / @human Données de l'entité (si création ou modification).
     /// @depends kindmother_sync_delta
     pub data: Option<Vec<u8>>,
 }
 
-/// @id kindmother_sync_delta_operation
+/// @id kindmother_sync_delta_operation_delta_operation_2
 /// @role data
 /// @layer core
-/// @human Type d'opération dans un delta de synchronisation.
 /// @do represent_delta_operation
+//@human / @human Type d'opération dans un delta de synchronisation.
 /// Type d'opération dans un delta.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DeltaOperation {
     /// @id kindmother_sync_delta_operation_create
     /// @role data
     /// @layer core
-    /// @human Création d'une nouvelle entité.
     /// @do represent_create_operation
+    //@human / @human Création d'une nouvelle entité.
     /// @depends kindmother_sync_delta_operation
     Create,
     /// @id kindmother_sync_delta_operation_update
     /// @role data
     /// @layer core
-    /// @human Modification d'une entité existante.
     /// @do represent_update_operation
+    //@human / @human Modification d'une entité existante.
     /// @depends kindmother_sync_delta_operation
     Update,
     /// @id kindmother_sync_delta_operation_delete
     /// @role data
     /// @layer core
-    /// @human Suppression d'une entité.
     /// @do represent_delete_operation
+    //@human / @human Suppression d'une entité.
     /// @depends kindmother_sync_delta_operation
     Delete,
 }
@@ -70,15 +70,15 @@ pub enum DeltaOperation {
 /// @id kindmother_sync_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de synchronisation entre instances. Gère la détection des deltas et la résolution de conflits.
 /// @do define_sync_contract
+//@human / @human Trait de synchronisation entre instances. Gère la détection des deltas et la résolution de conflits.
 /// Trait de synchronisation.
 pub trait Sync {
     /// @id kindmother_sync_compute_delta
     /// @role infrastructure
     /// @layer core
-    /// @human Calcule les deltas entre deux instances depuis le dernier point de synchronisation.
     /// @do compute_sync_deltas
+    //@human / @human Calcule les deltas entre deux instances depuis le dernier point de synchronisation.
     /// @depends kindmother_sync_trait
     /// Calcule les deltas entre deux instances.
     ///
@@ -99,8 +99,8 @@ pub trait Sync {
     /// @id kindmother_sync_apply_delta
     /// @role mutator
     /// @layer core
-    /// @human Applique un delta à une instance cible.
     /// @do apply_sync_delta
+    //@human / @human Applique un delta à une instance cible.
     /// @depends kindmother_sync_trait
     /// Applique un delta à une instance cible.
     ///
@@ -122,30 +122,30 @@ pub trait Sync {
 /// @id kindmother_sync_error
 /// @role error
 /// @layer core
-/// @human Erreur de synchronisation.
 /// @do represent_sync_error
+//@human / @human Erreur de synchronisation.
 /// Erreur de synchronisation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SyncError {
     /// @id kindmother_sync_error_conflict
     /// @role error
     /// @layer core
-    /// @human Conflit détecté lors de la synchronisation.
     /// @do represent_conflict_error
+    //@human / @human Conflit détecté lors de la synchronisation.
     /// @depends kindmother_sync_error
     Conflict(String),
     /// @id kindmother_sync_error_invalid_delta
     /// @role error
     /// @layer core
-    /// @human Delta invalide détecté.
     /// @do represent_invalid_delta_error
+    //@human / @human Delta invalide détecté.
     /// @depends kindmother_sync_error
     InvalidDelta(String),
     /// @id kindmother_sync_error_io
     /// @role error
     /// @layer core
-    /// @human Erreur d'entrée/sortie lors de la synchronisation.
     /// @do represent_io_error
+    //@human / @human Erreur d'entrée/sortie lors de la synchronisation.
     /// @depends kindmother_sync_error
     Io(String),
 }
@@ -169,8 +169,8 @@ mod tests {
     /// @id kindmother_sync_test_delta_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'un delta.
     /// @do verify_delta_creation
+    //@human / @human Test de création d'un delta.
     /// @depends kindmother_sync_delta
     #[test]
     fn test_delta_creation() {

@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     define_civilized_unit_structures_and_behaviors
-//! @human  Structures et comportements des unités civilisées (Humains, Orcs, Elfes, Nains)
+//@human ! @human  Structures et comportements des unités civilisées (Humains, Orcs, Elfes, Nains)
 
 use serde::{Deserialize, Serialize};
 use crate::{EntityId, KingdomId, Vec2};

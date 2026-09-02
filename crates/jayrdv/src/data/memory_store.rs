@@ -2,7 +2,7 @@
 //!
 //! @id     jayrdv_memory_store
 //! @do     provide_in_memory_persistence_for_jayrdv
-//! @role   data
+//@human ! @role   data
 //! @layer  infra
 //! @human  Implémente le stockage en mémoire (HashMap + RwLock) pour toutes les entités.
 //!         Persistance KindMother (full KM) à ajouter ultérieurement.

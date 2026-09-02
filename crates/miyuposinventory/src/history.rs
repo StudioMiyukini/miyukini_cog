@@ -6,8 +6,8 @@ use crate::errors::MiyuposinventoryError;
 /// @id miyuposinventory_tool_history_list
 /// @role mutator
 /// @layer tool
-/// @human Liste l'historique des mouvements (filtres fournis).
 /// @do history_list_under_governance
+//@human / @human Liste l'historique des mouvements (filtres fournis).
 /// tool.inventory.history.list
 pub fn list(
     ctx: &GovernedContext,

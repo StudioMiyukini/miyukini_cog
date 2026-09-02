@@ -17,8 +17,8 @@ pub struct InboxWriteResult {
 /// @id miyunotify_tool_inbox_write
 /// @role mutator
 /// @layer tool
-/// @human Écrit une entrée en boîte de réception in-app ; WriteIntent KindMother.
 /// @do inbox_write_under_governance
+//@human / @human Écrit une entrée en boîte de réception in-app ; WriteIntent KindMother.
 /// tool.notify.inbox.write — ne décide pas ; produit WriteIntent.
 pub fn write(
     ctx: &GovernedContext,

@@ -25,8 +25,8 @@
 //! @id service.media.jaymanga
 //! @role media_distribution
 //! @layer domain
-//! @human Service de lecture et vente de manga en ligne
 //! @do manage_manga_catalog_reading_sales
+//@human ! @human Service de lecture et vente de manga en ligne
 
 /// Couche persistance (types de domaine, base de données, feature flags).
 pub mod data;

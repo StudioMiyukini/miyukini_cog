@@ -7,8 +7,8 @@
 // @id toolkit.hr.miyuhr
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuHR ; expose les modules tools.
 /// @do expose_miyuhr_toolkit
+//@human / @human Point d'entrée du toolkit MiyuHR ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_quota
 //! @do     check_quota_before_upload_get_usage_set_max
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Le quota 0 signifie illimite. Le quota est verifie AVANT l'upload (pas apres).

@@ -3,15 +3,15 @@
 /// @id logisticssteward_optimization
 /// @role data
 /// @layer core
-/// @human Résultat d'optimisation avec recommandations.
 /// @do represent_optimization_result
+//@human / @human Résultat d'optimisation avec recommandations.
 #[derive(Debug, Clone)]
 pub struct Optimization {
     /// @id logisticssteward_optimization_recommendations
     /// @role data
     /// @layer core
-    /// @human Recommandations d'optimisation.
     /// @do store_optimization_recommendations
+    //@human / @human Recommandations d'optimisation.
     /// @depends logisticssteward_optimization
     pub recommendations: Vec<String>,
 }
@@ -19,14 +19,14 @@ pub struct Optimization {
 /// @id logisticssteward_optimizer_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait d'optimisation des ressources.
 /// @do define_optimizer_contract
+//@human / @human Trait d'optimisation des ressources.
 pub trait Optimizer {
     /// @id logisticssteward_optimizer_optimize
     /// @role infrastructure
     /// @layer core
-    /// @human Optimise l'utilisation des ressources.
     /// @do optimize_resources
+    //@human / @human Optimise l'utilisation des ressources.
     /// @depends logisticssteward_optimizer_trait
     fn optimize(&self) -> Optimization;
 }
@@ -38,8 +38,8 @@ mod tests {
     /// @id logisticssteward_optimization_test_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une optimisation.
     /// @do verify_optimization_creation
+    //@human / @human Test de création d'une optimisation.
     /// @depends logisticssteward_optimization
     #[test]
     fn test_optimization_creation() {

@@ -29,40 +29,40 @@
 /// @id kernel_module_config
 /// @role infrastructure
 /// @layer kernel
-/// @human Module de configuration. Fournit le mécanisme d'accès à la configuration, pas la politique.
 /// @do expose_config_module
+//@human / @human Module de configuration. Fournit le mécanisme d'accès à la configuration, pas la politique.
 /// Module de configuration
 pub mod config;
 
 /// @id kernel_module_id
 /// @role infrastructure
 /// @layer kernel
-/// @human Module d'identifiants. Fournit la génération d'identifiants uniques avec type opaque.
 /// @do expose_id_module
+//@human / @human Module d'identifiants. Fournit la génération d'identifiants uniques avec type opaque.
 /// Module d'identifiants
 pub mod id;
 
 /// @id kernel_module_time
 /// @role infrastructure
 /// @layer kernel
-/// @human Module d'abstraction du temps. Permet l'injection en test et évite les appels système dispersés.
 /// @do expose_time_module
+//@human / @human Module d'abstraction du temps. Permet l'injection en test et évite les appels système dispersés.
 /// Module d'abstraction du temps
 pub mod time;
 
 /// @id kernel_module_log
 /// @role infrastructure
 /// @layer kernel
-/// @human Module de logging structuré. Le produit choisit les backends et les formats.
 /// @do expose_log_module
+//@human / @human Module de logging structuré. Le produit choisit les backends et les formats.
 /// Module de logging
 pub mod log;
 
 /// @id kernel_module_lifecycle
 /// @role infrastructure
 /// @layer kernel
-/// @human Module de gestion du cycle de vie. Shutdown hooks uniquement, pas d'orchestration.
 /// @do expose_lifecycle_module
+//@human / @human Module de gestion du cycle de vie. Shutdown hooks uniquement, pas d'orchestration.
 /// Module de gestion du cycle de vie
 pub mod lifecycle;
 
@@ -71,39 +71,39 @@ pub mod lifecycle;
 /// @id kernel_reexport_config
 /// @role infrastructure
 /// @layer kernel
-/// @human Ré-export du trait Config et de EnvConfig pour faciliter l'usage.
 /// @do reexport_config_types
+//@human / @human Ré-export du trait Config et de EnvConfig pour faciliter l'usage.
 /// @depends kernel_module_config
 pub use config::{Config, EnvConfig};
 
 /// @id kernel_reexport_id
 /// @role infrastructure
 /// @layer kernel
-/// @human Ré-export des types Id, IdGenerator, UuidIdGenerator et IdParseError pour faciliter l'usage.
 /// @do reexport_id_types
+//@human / @human Ré-export des types Id, IdGenerator, UuidIdGenerator et IdParseError pour faciliter l'usage.
 /// @depends kernel_module_id
 pub use id::{Id, IdGenerator, IdParseError, UuidIdGenerator};
 
 /// @id kernel_reexport_time
 /// @role infrastructure
 /// @layer kernel
-/// @human Ré-export du trait Clock et de DefaultClock pour faciliter l'usage.
 /// @do reexport_time_types
+//@human / @human Ré-export du trait Clock et de DefaultClock pour faciliter l'usage.
 /// @depends kernel_module_time
 pub use time::{Clock, DefaultClock};
 
 /// @id kernel_reexport_log
 /// @role infrastructure
 /// @layer kernel
-/// @human Ré-export du trait Logger, de l'enum Level et de DefaultLogger pour faciliter l'usage.
 /// @do reexport_log_types
+//@human / @human Ré-export du trait Logger, de l'enum Level et de DefaultLogger pour faciliter l'usage.
 /// @depends kernel_module_log
 pub use log::{DefaultLogger, Level, Logger};
 
 /// @id kernel_reexport_lifecycle
 /// @role infrastructure
 /// @layer kernel
-/// @human Ré-export du trait Lifecycle et de DefaultLifecycle pour faciliter l'usage.
 /// @do reexport_lifecycle_types
+//@human / @human Ré-export du trait Lifecycle et de DefaultLifecycle pour faciliter l'usage.
 /// @depends kernel_module_lifecycle
 pub use lifecycle::{DefaultLifecycle, Lifecycle};

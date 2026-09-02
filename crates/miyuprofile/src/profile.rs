@@ -27,8 +27,8 @@ fn default_store() -> &'static Mutex<HashMap<String, ProfileData>> {
 /// @id miyuprofile_tool_profile_get
 /// @role mutator
 /// @layer tool
-/// @human Récupère le profil (format plat).
 /// @do profile_get_under_governance
+//@human / @human Récupère le profil (format plat).
 /// tool.profile.get
 pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<ProfileData, MiyuprofileError> {
     if !ctx.has_mandate() {
@@ -48,8 +48,8 @@ pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<ProfileData, Miyuprof
 /// @id miyuprofile_tool_profile_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour le profil (format plat) ; WriteIntent KindMother.
 /// @do profile_update_under_governance
+//@human / @human Met à jour le profil (format plat) ; WriteIntent KindMother.
 /// tool.profile.update
 pub fn update(
     ctx: &GovernedContext,

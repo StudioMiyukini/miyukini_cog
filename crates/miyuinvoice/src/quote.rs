@@ -10,8 +10,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyuinvoice_tool_invoice_quote_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un devis à partir de données fournies ; persistance = KindMother.
 /// @do invoice_quote_create_under_governance
+//@human / @human Crée un devis à partir de données fournies ; persistance = KindMother.
 pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
@@ -27,8 +27,8 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuinvoic
 /// @id miyuinvoice_tool_invoice_quote_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour un devis existant ; WriteIntent KindMother.
 /// @do invoice_quote_update_under_governance
+//@human / @human Met à jour un devis existant ; WriteIntent KindMother.
 pub fn update(
     ctx: &GovernedContext,
     quote_id: &str,
@@ -47,8 +47,8 @@ pub fn update(
 /// @id miyuinvoice_tool_invoice_quote_to_invoice
 /// @role mutator
 /// @layer tool
-/// @human Convertit un devis en facture ; décision = StrongFather.
 /// @do invoice_quote_to_invoice_under_governance
+//@human / @human Convertit un devis en facture ; décision = StrongFather.
 pub fn to_invoice(ctx: &GovernedContext, quote_id: &str) -> Result<String, MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);

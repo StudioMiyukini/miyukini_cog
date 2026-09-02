@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_transport
 //! @do     implement_tcp_transport_with_e2e_encryption
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Transport TCP pour echanger des messages de synchronisation entre pairs.

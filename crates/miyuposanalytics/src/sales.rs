@@ -6,8 +6,8 @@ use crate::errors::MiyuposanalyticsError;
 /// @id miyuposanalytics_tool_sales_trend
 /// @role mutator
 /// @layer tool
-/// @human Retourne tendance ventes (période, comparaison) ; données = KindMother.
 /// @do sales_trend_under_governance
+//@human / @human Retourne tendance ventes (période, comparaison) ; données = KindMother.
 /// tool.analytics.sales.trend
 pub fn trend(
     ctx: &GovernedContext,
@@ -23,8 +23,8 @@ pub fn trend(
 /// @id miyuposanalytics_tool_sales_by_item
 /// @role mutator
 /// @layer tool
-/// @human Retourne ventes par article (top N, filtres).
 /// @do sales_by_item_under_governance
+//@human / @human Retourne ventes par article (top N, filtres).
 /// tool.analytics.sales.by_item
 pub fn by_item(
     ctx: &GovernedContext,
@@ -41,8 +41,8 @@ pub fn by_item(
 /// @id miyuposanalytics_tool_sales_by_employee
 /// @role mutator
 /// @layer tool
-/// @human Retourne ventes agrégées par employé (filtres fournis).
 /// @do sales_by_employee_under_governance
+//@human / @human Retourne ventes agrégées par employé (filtres fournis).
 /// tool.analytics.sales.by_employee
 pub fn by_employee(
     ctx: &GovernedContext,

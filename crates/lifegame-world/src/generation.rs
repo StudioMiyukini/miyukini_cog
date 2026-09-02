@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     procedurally_generate_terrain_with_noise
-//! @human  Générateur de monde utilisant le bruit de Perlin
+//@human ! @human  Générateur de monde utilisant le bruit de Perlin
 
 use noise::{NoiseFn, Perlin};
 use crate::{TerrainGrid, TerrainType, WorldSize, ResourceDeposit, ResourceType};

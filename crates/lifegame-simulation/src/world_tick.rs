@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     execute_world_simulation_tick
-//! @human  Exécute toutes les mises à jour pour un tick de simulation
+//@human ! @human  Exécute toutes les mises à jour pour un tick de simulation
 
 use lifegame_entities::{EntityManager, BuildingType};
 use lifegame_world::TerrainGrid;

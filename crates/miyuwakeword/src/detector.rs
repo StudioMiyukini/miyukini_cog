@@ -1,6 +1,6 @@
 /// @id toolkit.alicia.wakeword.detector
 /// @do implement_wake_word_detection_with_rustpotter
-/// @role wake_word_detector
+//@human / @role wake_word_detector
 /// @layer 6
 /// @human Implementation du detecteur de wake word via rustpotter
 use std::path::Path;

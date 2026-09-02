@@ -5,8 +5,8 @@
 // @id toolkit.alicia.mqtt.zigbee2mqtt
 // @role z2m_protocol_adapter
 // @layer 6
-// @human Parsing et construction des payloads Zigbee2MQTT pour Alicia.
 // @do translate_z2m_to_alicia_types
+// @human Parsing et construction des payloads Zigbee2MQTT pour Alicia.
 
 use chrono::Utc;
 use miyualicia_devices::DeviceState;

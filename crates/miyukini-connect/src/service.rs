@@ -2,7 +2,7 @@
 //!
 //! @id     miyukini_connect_service
 //! @do     manage_auth_sessions_stepup_origin
-//! @role   auth
+//@human ! @role   auth
 //! @layer  domain
 
 use std::collections::{HashMap, HashSet};

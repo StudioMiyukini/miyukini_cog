@@ -3,43 +3,43 @@
 /// @id worrysentinel_degradation_state
 /// @role data
 /// @layer core
-/// @human État de dégradation du système (T0-T4).
 /// @do represent_degradation_state
+//@human / @human État de dégradation du système (T0-T4).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum DegradationState {
     /// @id worrysentinel_degradation_state_normal
     /// @role data
     /// @layer core
-    /// @human T0 - Normal (toutes capacités disponibles).
     /// @do represent_normal_state
+    //@human / @human T0 - Normal (toutes capacités disponibles).
     /// @depends worrysentinel_degradation_state
     Normal,
     /// @id worrysentinel_degradation_state_unstable
     /// @role data
     /// @layer core
-    /// @human T1 - Instable (log renforcé).
     /// @do represent_unstable_state
+    //@human / @human T1 - Instable (log renforcé).
     /// @depends worrysentinel_degradation_state
     Unstable,
     /// @id worrysentinel_degradation_state_degraded
     /// @role data
     /// @layer core
-    /// @human T2 - Dégradé (certaines capacités désactivées).
     /// @do represent_degraded_state
+    //@human / @human T2 - Dégradé (certaines capacités désactivées).
     /// @depends worrysentinel_degradation_state
     Degraded,
     /// @id worrysentinel_degradation_state_restricted
     /// @role data
     /// @layer core
-    /// @human T3 - Restreint (gel des produits non essentiels).
     /// @do represent_restricted_state
+    //@human / @human T3 - Restreint (gel des produits non essentiels).
     /// @depends worrysentinel_degradation_state
     Restricted,
     /// @id worrysentinel_degradation_state_blocked
     /// @role data
     /// @layer core
-    /// @human T4 - Bloqué (uniquement diagnostics).
     /// @do represent_blocked_state
+    //@human / @human T4 - Bloqué (uniquement diagnostics).
     /// @depends worrysentinel_degradation_state
     Blocked,
 }
@@ -47,15 +47,15 @@ pub enum DegradationState {
 /// @id worrysentinel_degradation
 /// @role data
 /// @layer core
-/// @human État de dégradation avec métadonnées.
 /// @do represent_degradation
+//@human / @human État de dégradation avec métadonnées.
 #[derive(Debug, Clone)]
 pub struct Degradation {
     /// @id worrysentinel_degradation_state_field
     /// @role data
     /// @layer core
-    /// @human État de dégradation.
     /// @do store_degradation_state
+    //@human / @human État de dégradation.
     /// @depends worrysentinel_degradation
     pub state: DegradationState,
 }
@@ -63,14 +63,14 @@ pub struct Degradation {
 /// @id worrysentinel_degradation_manager_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de gestion de la dégradation.
 /// @do define_degradation_manager_contract
+//@human / @human Trait de gestion de la dégradation.
 pub trait DegradationManager {
     /// @id worrysentinel_degradation_manager_get_current
     /// @role accessor
     /// @layer core
-    /// @human Récupère l'état de dégradation actuel.
     /// @do get_current_degradation
+    //@human / @human Récupère l'état de dégradation actuel.
     /// @depends worrysentinel_degradation_manager_trait
     fn get_current(&self) -> Degradation;
 }
@@ -112,8 +112,8 @@ mod tests {
     /// @id worrysentinel_degradation_test_state_ordering
     /// @role test
     /// @layer core
-    /// @human Test de l'ordre des états de dégradation.
     /// @do verify_degradation_state_ordering
+    //@human / @human Test de l'ordre des états de dégradation.
     /// @depends worrysentinel_degradation_state
     #[test]
     fn test_degradation_state_ordering() {

@@ -1,9 +1,9 @@
 ﻿# Brief de Cadrage P0 -- MiyuCloud v2 Reprise (Securite + Onboarding + Infrastructure)
 
-<!-- @id: mip.brief.miyucloud-v2.reprise -->
-<!-- @do: brief_p0_refait_sur_base_mip_v2 -->
-<!-- @role: Maria (Chef de Projet) -->
-<!-- @layer: S7-Operator -->
+<!-- @id mip.brief.miyucloud-v2.reprise -->
+<!-- @do brief_p0_refait_sur_base_mip_v2 -->
+<!-- @role Maria (Chef de Projet) -->
+<!-- @layer S7-Operator -->
 
 **Classification MIP** : T4 (Feature majeure)
 **Date** : 2026-03-05

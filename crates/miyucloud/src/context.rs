@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_context
 //! @do     provide_governed_context_for_miyucloud
-//! @role   governance
+//@human ! @role   governance
 //! @layer  infra
 //!
 //! Le `GovernedContext` centralise les references partagees entre les couches

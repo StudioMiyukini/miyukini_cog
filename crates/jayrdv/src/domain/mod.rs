@@ -2,7 +2,7 @@
 //!
 //! @id     jayrdv_domain
 //! @do     implement_jayrdv_business_logic
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //! @human  Couche domain pure — validations temporelles, cycles de vie des statuts,
 //!         hold/release de créneaux, gestion des annulations.

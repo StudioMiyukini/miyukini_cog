@@ -22,7 +22,7 @@
 //!
 //! @id     muid_page_header
 //! @do render_page_header
-//! @role   ui
+//@human ! @role   ui
 //! @layer service
 //! @human  PageHeader — en-tête de page avec titre, description optionnelle et slot d'action.
 

@@ -7,8 +7,8 @@ use crate::errors::MiyucomptareportsError;
 /// @id miyucomptareports_tool_livre_recettes_generate
 /// @role mutator
 /// @layer tool
-/// @human Génère le livre des recettes ; données = KindMother.
 /// @do livre_recettes_generate_under_governance
+//@human / @human Génère le livre des recettes ; données = KindMother.
 /// tool.compta.report.livre_recettes.generate
 pub fn livre_recettes_generate(
     ctx: &GovernedContext,
@@ -24,8 +24,8 @@ pub fn livre_recettes_generate(
 /// @id miyucomptareports_tool_balance_generate
 /// @role mutator
 /// @layer tool
-/// @human Génère bilan / compte de résultat ; lecture seule.
 /// @do balance_generate_under_governance
+//@human / @human Génère bilan / compte de résultat ; lecture seule.
 /// tool.compta.report.balance.generate
 pub fn balance_generate(
     ctx: &GovernedContext,
@@ -40,8 +40,8 @@ pub fn balance_generate(
 /// @id miyucomptareports_tool_liasse_generate
 /// @role mutator
 /// @layer tool
-/// @human Génère la liasse fiscale (export) ; autorisation = StrongFather.
 /// @do liasse_generate_under_governance
+//@human / @human Génère la liasse fiscale (export) ; autorisation = StrongFather.
 /// tool.compta.report.liasse.generate
 pub fn liasse_generate(
     ctx: &GovernedContext,
@@ -56,8 +56,8 @@ pub fn liasse_generate(
 /// @id miyucomptareports_tool_cashflow_generate
 /// @role mutator
 /// @layer tool
-/// @human Génère un rapport flux de trésorerie / prévisionnel.
 /// @do cashflow_generate_under_governance
+//@human / @human Génère un rapport flux de trésorerie / prévisionnel.
 /// tool.compta.report.cashflow.generate
 pub fn cashflow_generate(
     ctx: &GovernedContext,

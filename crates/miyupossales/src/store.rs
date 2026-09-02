@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_store_resolve
 /// @role mutator
 /// @layer tool
-/// @human Résout le magasin/point de vente courant pour le contexte.
 /// @do store_resolve_under_governance
+//@human / @human Résout le magasin/point de vente courant pour le contexte.
 /// tool.pos.context.store.resolve
 pub fn store_resolve(ctx: &GovernedContext) -> Result<StoreResult, MiyupossalesError> {
     if !ctx.has_mandate() {

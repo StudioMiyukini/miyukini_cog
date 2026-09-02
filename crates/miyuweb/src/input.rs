@@ -7,8 +7,8 @@ use crate::errors::MiyuwebError;
 /// @id miyuweb_tool_web_input_capture
 /// @role mutator
 /// @layer tool
-/// @human Capture une entrée utilisateur (clic, saisie, touche) et la transmet au flux gouverné.
 /// @do web_input_capture_under_governance
+//@human / @human Capture une entrée utilisateur (clic, saisie, touche) et la transmet au flux gouverné.
 /// tool.web.input.capture — ne décide pas de l'usage.
 pub fn capture(
     ctx: &GovernedContext,

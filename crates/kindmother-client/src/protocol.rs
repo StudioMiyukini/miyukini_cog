@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_client_protocol
 //! @do     define_client_protocol
-//! @layer  toolkit
+//@human ! @layer  toolkit
 
 use serde::{Deserialize, Serialize};
 

@@ -2,7 +2,7 @@
 //!
 //! @id     jayrdv_kindmother_client_db
 //! @do     provide_kindmother_backend_for_jayrdv
-//! @role   data
+//@human ! @role   data
 //! @layer  infra
 //! @human  Stub actuel : délègue au store mémoire. À remplacer par appels kindmother-client.
 

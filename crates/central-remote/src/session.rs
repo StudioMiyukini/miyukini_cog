@@ -2,7 +2,7 @@
 //!
 //! @id     central_remote_session
 //! @do manage_remote_auth_sessions
-//! @role   security
+//@human ! @role   security
 //! @layer toolkit
 //! @human  Tokens HMAC-SHA256 avec expiration pour les sessions remote.
 

@@ -3,8 +3,8 @@
 // @id toolkit.alicia.mqtt.errors
 // @role error_types
 // @layer 6
-// @human Erreurs MQTT Alicia : connexion, publication, souscription, parsing Z2M.
 // @do define_mqtt_error_types
+// @human Erreurs MQTT Alicia : connexion, publication, souscription, parsing Z2M.
 
 /// Erreurs du client MQTT Alicia.
 #[derive(Debug, thiserror::Error)]

@@ -12,114 +12,114 @@ use std::collections::HashMap;
 /// @id strongfather_policy_type
 /// @role domain_model
 /// @layer core
-/// @human Type de politique StrongFather. Définit la catégorie conceptuelle de la politique.
 /// @do define_policy_type
+//@human / @human Type de politique StrongFather. Définit la catégorie conceptuelle de la politique.
 /// Type de politique
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PolicyType {
     /// @id strongfather_policy_type_permission
     /// @role domain_model
     /// @layer core
-    /// @human Politique de permission - détermine si un acteur est autorisé à effectuer une action.
     /// @do represent_permission_policy
+    //@human / @human Politique de permission - détermine si un acteur est autorisé à effectuer une action.
     Permission,
     /// @id strongfather_policy_type_constraint
     /// @role domain_model
     /// @layer core
-    /// @human Politique de contrainte - définit des conditions qui doivent être satisfaites.
     /// @do represent_constraint_policy
+    //@human / @human Politique de contrainte - définit des conditions qui doivent être satisfaites.
     Constraint,
     /// @id strongfather_policy_type_priority
     /// @role domain_model
     /// @layer core
-    /// @human Politique de priorité - détermine l'ordre d'importance relative.
     /// @do represent_priority_policy
+    //@human / @human Politique de priorité - détermine l'ordre d'importance relative.
     Priority,
     /// @id strongfather_policy_type_validation
     /// @role domain_model
     /// @layer core
-    /// @human Politique de validation - définit des vérifications conceptuelles requises.
     /// @do represent_validation_policy
+    //@human / @human Politique de validation - définit des vérifications conceptuelles requises.
     Validation,
     /// @id strongfather_policy_type_composite
     /// @role domain_model
     /// @layer core
-    /// @human Politique composite - combine plusieurs politiques élémentaires.
     /// @do represent_composite_policy
+    //@human / @human Politique composite - combine plusieurs politiques élémentaires.
     Composite,
 }
 
 /// @id strongfather_policy_effect
 /// @role domain_model
 /// @layer core
-/// @human Effet d'une politique. Détermine l'impact de la politique sur l'évaluation.
 /// @do define_policy_effect
+//@human / @human Effet d'une politique. Détermine l'impact de la politique sur l'évaluation.
 /// Effet d'une politique
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyEffect {
     /// @id strongfather_policy_effect_authorize
     /// @role domain_model
     /// @layer core
-    /// @human Autorise l'intention selon la politique.
     /// @do represent_authorize_effect
+    //@human / @human Autorise l'intention selon la politique.
     Authorize,
     /// @id strongfather_policy_effect_deny
     /// @role domain_model
     /// @layer core
-    /// @human Interdit l'intention selon la politique.
     /// @do represent_deny_effect
+    //@human / @human Interdit l'intention selon la politique.
     Deny,
     /// @id strongfather_policy_effect_constrain
     /// @role domain_model
     /// @layer core
-    /// @human Contraint l'intention selon la politique.
     /// @do represent_constrain_effect
+    //@human / @human Contraint l'intention selon la politique.
     Constrain,
     /// @id strongfather_policy_effect_prioritize
     /// @role domain_model
     /// @layer core
-    /// @human Priorise l'intention selon la politique.
     /// @do represent_prioritize_effect
+    //@human / @human Priorise l'intention selon la politique.
     Prioritize,
     /// @id strongfather_policy_effect_validate
     /// @role domain_model
     /// @layer core
-    /// @human Valide l'intention selon la politique.
     /// @do represent_validate_effect
+    //@human / @human Valide l'intention selon la politique.
     Validate,
 }
 
 /// @id strongfather_policy_priority_level
 /// @role domain_model
 /// @layer core
-/// @human Niveau de priorité d'une politique. Détermine l'ordre d'évaluation.
 /// @do define_policy_priority_level
+//@human / @human Niveau de priorité d'une politique. Détermine l'ordre d'évaluation.
 /// Niveau de priorité d'une politique
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PolicyPriorityLevel {
     /// @id strongfather_policy_priority_critical
     /// @role domain_model
     /// @layer core
-    /// @human Priorité critique - évaluée en premier, arrêt immédiat si violée.
     /// @do represent_critical_priority
+    //@human / @human Priorité critique - évaluée en premier, arrêt immédiat si violée.
     Critical = 4,
     /// @id strongfather_policy_priority_important
     /// @role domain_model
     /// @layer core
-    /// @human Priorité importante - évaluée après les critiques.
     /// @do represent_important_priority
+    //@human / @human Priorité importante - évaluée après les critiques.
     Important = 3,
     /// @id strongfather_policy_priority_normal
     /// @role domain_model
     /// @layer core
-    /// @human Priorité normale - priorité standard par défaut.
     /// @do represent_normal_priority
+    //@human / @human Priorité normale - priorité standard par défaut.
     Normal = 2,
     /// @id strongfather_policy_priority_optional
     /// @role domain_model
     /// @layer core
-    /// @human Priorité optionnelle - évaluée en dernier.
     /// @do represent_optional_priority
+    //@human / @human Priorité optionnelle - évaluée en dernier.
     Optional = 1,
 }
 
@@ -127,8 +127,8 @@ impl Default for PolicyPriorityLevel {
     /// @id strongfather_policy_priority_default
     /// @role constructor
     /// @layer core
-    /// @human Priorité normale par défaut (RÈGLE-PRIO-4).
     /// @do provide_default_priority
+    //@human / @human Priorité normale par défaut (RÈGLE-PRIO-4).
     fn default() -> Self {
         Self::Normal
     }
@@ -137,98 +137,98 @@ impl Default for PolicyPriorityLevel {
 /// @id strongfather_policy_id
 /// @role domain_model
 /// @layer core
-/// @human Identifiant unique d'une politique (RÈGLE-STRUCT-1 : unicité).
 /// @do identify_policy
+//@human / @human Identifiant unique d'une politique (RÈGLE-STRUCT-1 : unicité).
 /// Identifiant de politique
 pub type PolicyId = String;
 
 /// @id strongfather_policy_condition
 /// @role domain_model
 /// @layer core
-/// @human Condition d'application d'une politique. Détermine quand la politique s'applique.
 /// @do represent_policy_condition
+//@human / @human Condition d'application d'une politique. Détermine quand la politique s'applique.
 /// Condition d'application d'une politique
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolicyCondition {
     /// @id strongfather_policy_condition_expression
     /// @role domain_model
     /// @layer core
-    /// @human Expression déclarative de la condition (représentation conceptuelle).
     /// @do express_condition
+    //@human / @human Expression déclarative de la condition (représentation conceptuelle).
     pub expression: String,
 }
 
 /// @id strongfather_policy_rule
 /// @role domain_model
 /// @layer core
-/// @human Règle déclarative d'une politique. Exprime ce qui est autorisé, interdit ou requis.
 /// @do represent_policy_rule
+//@human / @human Règle déclarative d'une politique. Exprime ce qui est autorisé, interdit ou requis.
 /// Règle déclarative d'une politique
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PolicyRule {
     /// @id strongfather_policy_rule_expression
     /// @role domain_model
     /// @layer core
-    /// @human Expression déclarative de la règle (représentation conceptuelle).
     /// @do express_rule
+    //@human / @human Expression déclarative de la règle (représentation conceptuelle).
     pub expression: String,
 }
 
 /// @id strongfather_policy
 /// @role domain_model
 /// @layer core
-/// @human Politique StrongFather. Règle déclarative et explicite pour évaluer des intentions.
 /// @do represent_policy
+//@human / @human Politique StrongFather. Règle déclarative et explicite pour évaluer des intentions.
 /// Politique StrongFather
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Policy {
-    /// @id strongfather_policy_id
+    /// @id strongfather_policy_id_id_2
     /// @role domain_model
     /// @layer core
-    /// @human Identifiant unique de la politique (RÈGLE-STRUCT-1).
     /// @do identify_policy
+    //@human / @human Identifiant unique de la politique (RÈGLE-STRUCT-1).
     pub id: PolicyId,
-    /// @id strongfather_policy_type
+    /// @id strongfather_policy_type_policy_type_2
     /// @role domain_model
     /// @layer core
-    /// @human Type de politique (RÈGLE-STRUCT-2 : type obligatoire).
     /// @do specify_policy_type
+    //@human / @human Type de politique (RÈGLE-STRUCT-2 : type obligatoire).
     pub policy_type: PolicyType,
-    /// @id strongfather_policy_condition
+    /// @id strongfather_policy_condition_condition_2
     /// @role domain_model
     /// @layer core
-    /// @human Condition d'application (RÈGLE-STRUCT-3 : condition obligatoire).
     /// @do specify_application_condition
+    //@human / @human Condition d'application (RÈGLE-STRUCT-3 : condition obligatoire).
     pub condition: PolicyCondition,
-    /// @id strongfather_policy_rule
+    /// @id strongfather_policy_rule_rule_2
     /// @role domain_model
     /// @layer core
-    /// @human Règle déclarative (RÈGLE-STRUCT-4 : règle obligatoire).
     /// @do specify_declarative_rule
+    //@human / @human Règle déclarative (RÈGLE-STRUCT-4 : règle obligatoire).
     pub rule: PolicyRule,
-    /// @id strongfather_policy_effect
+    /// @id strongfather_policy_effect_effect_2
     /// @role domain_model
     /// @layer core
-    /// @human Effet de la politique (RÈGLE-STRUCT-5 : effet obligatoire).
     /// @do specify_policy_effect
+    //@human / @human Effet de la politique (RÈGLE-STRUCT-5 : effet obligatoire).
     pub effect: PolicyEffect,
     /// @id strongfather_policy_priority
     /// @role domain_model
     /// @layer core
-    /// @human Priorité relative de la politique (optionnelle, défaut: Normal).
     /// @do specify_priority_level
+    //@human / @human Priorité relative de la politique (optionnelle, défaut: Normal).
     pub priority: PolicyPriorityLevel,
     /// @id strongfather_policy_metadata
     /// @role domain_model
     /// @layer core
-    /// @human Métadonnées descriptives (optionnelles).
     /// @do provide_metadata
+    //@human / @human Métadonnées descriptives (optionnelles).
     pub metadata: HashMap<String, String>,
     /// @id strongfather_policy_composite_policies
     /// @role domain_model
     /// @layer core
-    /// @human Politiques élémentaires pour une politique composite (optionnel).
     /// @do store_composite_policies
+    //@human / @human Politiques élémentaires pour une politique composite (optionnel).
     pub composite_policies: Option<Vec<PolicyId>>,
 }
 
@@ -236,8 +236,8 @@ impl Policy {
     /// @id strongfather_policy_new
     /// @role constructor
     /// @layer core
-    /// @human Crée une nouvelle politique avec les composants obligatoires.
     /// @do create_policy
+    //@human / @human Crée une nouvelle politique avec les composants obligatoires.
     /// @depends strongfather_policy
     #[must_use]
     pub fn new(
@@ -262,8 +262,8 @@ impl Policy {
     /// @id strongfather_policy_with_priority
     /// @role builder
     /// @layer core
-    /// @human Définit la priorité de la politique.
     /// @do set_policy_priority
+    //@human / @human Définit la priorité de la politique.
     /// @depends strongfather_policy_new
     #[must_use]
     pub fn with_priority(mut self, priority: PolicyPriorityLevel) -> Self {
@@ -274,8 +274,8 @@ impl Policy {
     /// @id strongfather_policy_with_metadata
     /// @role builder
     /// @layer core
-    /// @human Ajoute des métadonnées à la politique.
     /// @do add_policy_metadata
+    //@human / @human Ajoute des métadonnées à la politique.
     /// @depends strongfather_policy_new
     #[must_use]
     pub fn with_metadata(mut self, metadata: HashMap<String, String>) -> Self {
@@ -286,8 +286,8 @@ impl Policy {
     /// @id strongfather_policy_with_composite
     /// @role builder
     /// @layer core
-    /// @human Définit les politiques élémentaires pour une politique composite.
     /// @do set_composite_policies
+    //@human / @human Définit les politiques élémentaires pour une politique composite.
     /// @depends strongfather_policy_new
     #[must_use]
     pub fn with_composite_policies(mut self, policies: Vec<PolicyId>) -> Self {
@@ -298,8 +298,8 @@ impl Policy {
     /// @id strongfather_policy_is_critical
     /// @role query
     /// @layer core
-    /// @human Vérifie si la politique est critique (RÈGLE-PRIO-2 : arrêt sur violation).
     /// @do check_if_critical
+    //@human / @human Vérifie si la politique est critique (RÈGLE-PRIO-2 : arrêt sur violation).
     /// @depends strongfather_policy
     #[must_use]
     pub fn is_critical(&self) -> bool {
@@ -310,16 +310,16 @@ impl Policy {
 /// @id strongfather_policy_set
 /// @role domain_model
 /// @layer core
-/// @human Ensemble de politiques chargées depuis une source unique.
 /// @do represent_policy_set
+//@human / @human Ensemble de politiques chargées depuis une source unique.
 /// Ensemble de politiques
 #[derive(Debug, Clone)]
 pub struct PolicySet {
     /// @id strongfather_policy_set_policies
     /// @role domain_model
     /// @layer core
-    /// @human Collection de politiques indexée par identifiant.
     /// @do store_policies
+    //@human / @human Collection de politiques indexée par identifiant.
     policies: HashMap<PolicyId, Policy>,
 }
 
@@ -327,8 +327,8 @@ impl PolicySet {
     /// @id strongfather_policy_set_new
     /// @role constructor
     /// @layer core
-    /// @human Crée un nouvel ensemble de politiques vide.
     /// @do create_policy_set
+    //@human / @human Crée un nouvel ensemble de politiques vide.
     /// @depends strongfather_policy_set
     #[must_use]
     pub fn new() -> Self {
@@ -340,8 +340,8 @@ impl PolicySet {
     /// @id strongfather_policy_set_add
     /// @role mutator
     /// @layer core
-    /// @human Ajoute une politique à l'ensemble (VALID-STRUCT-1 : identifiant unique).
     /// @do add_policy_to_set
+    //@human / @human Ajoute une politique à l'ensemble (VALID-STRUCT-1 : identifiant unique).
     /// @depends strongfather_policy_set_new
     pub fn add(&mut self, policy: Policy) -> Result<(), String> {
         if self.policies.contains_key(&policy.id) {
@@ -354,8 +354,8 @@ impl PolicySet {
     /// @id strongfather_policy_set_get
     /// @role query
     /// @layer core
-    /// @human Récupère une politique par son identifiant.
     /// @do get_policy_by_id
+    //@human / @human Récupère une politique par son identifiant.
     /// @depends strongfather_policy_set_new
     #[must_use]
     pub fn get(&self, id: &PolicyId) -> Option<&Policy> {
@@ -365,8 +365,8 @@ impl PolicySet {
     /// @id strongfather_policy_set_iter
     /// @role query
     /// @layer core
-    /// @human Itère sur toutes les politiques de l'ensemble.
     /// @do iterate_policies
+    //@human / @human Itère sur toutes les politiques de l'ensemble.
     /// @depends strongfather_policy_set_new
     pub fn iter(&self) -> impl Iterator<Item = &Policy> {
         self.policies.values()
@@ -375,8 +375,8 @@ impl PolicySet {
     /// @id strongfather_policy_set_len
     /// @role query
     /// @layer core
-    /// @human Retourne le nombre de politiques dans l'ensemble.
     /// @do count_policies
+    //@human / @human Retourne le nombre de politiques dans l'ensemble.
     /// @depends strongfather_policy_set_new
     #[must_use]
     pub fn len(&self) -> usize {
@@ -386,8 +386,8 @@ impl PolicySet {
     /// @id strongfather_policy_set_is_empty
     /// @role query
     /// @layer core
-    /// @human Vérifie si l'ensemble est vide.
     /// @do check_if_empty
+    //@human / @human Vérifie si l'ensemble est vide.
     /// @depends strongfather_policy_set_new
     #[must_use]
     pub fn is_empty(&self) -> bool {
@@ -399,8 +399,8 @@ impl Default for PolicySet {
     /// @id strongfather_policy_set_default
     /// @role constructor
     /// @layer core
-    /// @human Crée un ensemble de politiques vide par défaut.
     /// @do create_default_policy_set
+    //@human / @human Crée un ensemble de politiques vide par défaut.
     fn default() -> Self {
         Self::new()
     }
@@ -409,60 +409,60 @@ impl Default for PolicySet {
 /// @id strongfather_policy_result
 /// @role domain_model
 /// @layer core
-/// @human Résultat d'évaluation d'une politique. Indique l'effet de la politique sur l'intention.
 /// @do represent_policy_evaluation_result
+//@human / @human Résultat d'évaluation d'une politique. Indique l'effet de la politique sur l'intention.
 /// Résultat d'évaluation d'une politique
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PolicyResult {
     /// @id strongfather_policy_result_satisfied
     /// @role domain_model
     /// @layer core
-    /// @human Politique satisfaite - l'intention respecte la politique.
     /// @do represent_satisfied_policy
+    //@human / @human Politique satisfaite - l'intention respecte la politique.
     Satisfied {
         /// @id strongfather_policy_result_satisfied_policy_id
         /// @role domain_model
         /// @layer core
-        /// @human Identifiant de la politique satisfaite.
         /// @do identify_satisfied_policy
+        //@human / @human Identifiant de la politique satisfaite.
         policy_id: PolicyId,
     },
     /// @id strongfather_policy_result_violated
     /// @role domain_model
     /// @layer core
-    /// @human Politique violée - l'intention viole la politique.
     /// @do represent_violated_policy
+    //@human / @human Politique violée - l'intention viole la politique.
     Violated {
         /// @id strongfather_policy_result_violated_policy_id
         /// @role domain_model
         /// @layer core
-        /// @human Identifiant de la politique violée.
         /// @do identify_violated_policy
+        //@human / @human Identifiant de la politique violée.
         policy_id: PolicyId,
         /// @id strongfather_policy_result_violated_reason
         /// @role domain_model
         /// @layer core
-        /// @human Raison de la violation.
         /// @do explain_violation
+        //@human / @human Raison de la violation.
         reason: String,
     },
     /// @id strongfather_policy_result_priority
     /// @role domain_model
     /// @layer core
-    /// @human Politique de priorité - établit une priorité pour l'intention.
     /// @do represent_priority_policy_result
+    //@human / @human Politique de priorité - établit une priorité pour l'intention.
     Priority {
         /// @id strongfather_policy_result_priority_policy_id
         /// @role domain_model
         /// @layer core
-        /// @human Identifiant de la politique de priorité.
         /// @do identify_priority_policy
+        //@human / @human Identifiant de la politique de priorité.
         policy_id: PolicyId,
         /// @id strongfather_policy_result_priority_value
         /// @role domain_model
         /// @layer core
-        /// @human Valeur de priorité établie.
         /// @do store_priority_value
+        //@human / @human Valeur de priorité établie.
         value: u32,
     },
 }
@@ -474,8 +474,8 @@ mod tests {
     /// @id strongfather_policy_test_create_basic
     /// @role test
     /// @layer core
-    /// @human Test de création d'une politique basique avec les composants obligatoires.
     /// @do test_basic_policy_creation
+    //@human / @human Test de création d'une politique basique avec les composants obligatoires.
     #[test]
     fn test_create_basic_policy() {
         let policy = Policy::new(
@@ -500,8 +500,8 @@ mod tests {
     /// @id strongfather_policy_test_create_with_priority
     /// @role test
     /// @layer core
-    /// @human Test de création d'une politique avec priorité critique.
     /// @do test_policy_with_priority
+    //@human / @human Test de création d'une politique avec priorité critique.
     #[test]
     fn test_create_policy_with_priority() {
         let policy = Policy::new(
@@ -524,8 +524,8 @@ mod tests {
     /// @id strongfather_policy_test_policy_set
     /// @role test
     /// @layer core
-    /// @human Test de gestion d'un ensemble de politiques.
     /// @do test_policy_set_operations
+    //@human / @human Test de gestion d'un ensemble de politiques.
     #[test]
     fn test_policy_set() {
         let mut set = PolicySet::new();
@@ -566,8 +566,8 @@ mod tests {
     /// @id strongfather_policy_test_all_types
     /// @role test
     /// @layer core
-    /// @human Test que tous les types de politiques sont bien définis.
     /// @do test_all_policy_types
+    //@human / @human Test que tous les types de politiques sont bien définis.
     #[test]
     fn test_all_policy_types() {
         let types = vec![

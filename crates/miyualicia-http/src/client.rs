@@ -6,8 +6,8 @@
 // @id toolkit.alicia.http.client
 // @role http_device_client
 // @layer 6
-// @human Client HTTP pour dispositifs locaux Alicia ; timeout, retry, auth Basic/Bearer.
 // @do provide_http_client_for_local_devices
+// @human Client HTTP pour dispositifs locaux Alicia ; timeout, retry, auth Basic/Bearer.
 
 use std::time::Duration;
 

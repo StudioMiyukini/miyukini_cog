@@ -16,8 +16,8 @@ pub struct LocaleNumberOptions {
 /// @id miyulocale_tool_number_format
 /// @role mutator
 /// @layer tool
-/// @human Formate un nombre selon locale et options fournis.
 /// @do number_format_under_governance
+//@human / @human Formate un nombre selon locale et options fournis.
 /// tool.locale.number.format
 pub fn format(
     ctx: &GovernedContext,

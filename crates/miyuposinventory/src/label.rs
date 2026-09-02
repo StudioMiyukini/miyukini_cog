@@ -6,8 +6,8 @@ use crate::errors::MiyuposinventoryError;
 /// @id miyuposinventory_tool_label_print
 /// @role mutator
 /// @layer tool
-/// @human Imprime une étiquette code-barres (données fournies).
 /// @do label_print_under_governance
+//@human / @human Imprime une étiquette code-barres (données fournies).
 /// tool.pos.label.print
 pub fn print(
     ctx: &GovernedContext,

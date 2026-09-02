@@ -2,7 +2,7 @@
 //!
 //! @id     jay1tribu_domain_types
 //! @do     define_jay1tribu_domain_model
-//! @role   data
+//@human ! @role   data
 //! @layer  domain
 //!
 //! Conformité : archives locales uniquement (C-1), persistance via KindMother (C-4).

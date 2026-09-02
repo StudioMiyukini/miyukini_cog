@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_external_share
 //! @do     create_revoke_access_list_external_share_links
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Liens de partage avec expiration obligatoire (min 1h, max 30 jours),

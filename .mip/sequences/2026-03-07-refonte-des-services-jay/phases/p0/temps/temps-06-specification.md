@@ -40,7 +40,7 @@ Spec complète dans `specs/2026-03-07-refonte-des-services-jay-spec.md`. Décisi
 - **Design system** : enrichir `miyuki-ui-dioxus` si composant manquant (StatCard, PageHeader, EmptyState, SidebarNav)
 
 ### MSCM
-- **Format** : `//! @id: snake_case_unique @do: action @role: role @layer: layer @human: description`
+- **Format** : `//! @id snake_case_unique @do action @role role @layer layer @human description`
 - **Obligatoire** : toute `fn pub`, tout `struct/enum pub`, tout `mod pub`, tout `impl` significatif
 - **Audit** : George lit la MSCM Checklist avant P3
 
@@ -48,7 +48,7 @@ Spec complète dans `specs/2026-03-07-refonte-des-services-jay-spec.md`. Décisi
 
 ### Trait `PortalContract` (à créer dans chaque crate Jay)
 ```rust
-// @id: portal_contract_trait @role: api @layer: service
+// @id portal_contract_trait @role api @layer service
 pub trait PortalContract: Send + Sync {
     fn service_slug(&self) -> &str;
     fn public_pages(&self) -> Vec<PublicPage>;

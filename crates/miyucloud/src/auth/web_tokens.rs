@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_auth_web_tokens
 //! @do     generate_validate_web_share_tokens_with_expiration_and_password
-//! @role   auth
+//@human ! @role   auth
 //! @layer  domain
 //!
 //! Genere des tokens non-predictibles (256 bits d'entropie), verifie

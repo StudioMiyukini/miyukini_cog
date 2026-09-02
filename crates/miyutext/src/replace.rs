@@ -16,8 +16,8 @@ pub enum ReplaceMode {
 /// @id miyutext_tool_replace
 /// @role mutator
 /// @layer tool
-/// @human Recherche et remplacement dans une chaîne ; retourne la chaîne modifiée.
 /// @do replace_under_governance
+//@human / @human Recherche et remplacement dans une chaîne ; retourne la chaîne modifiée.
 /// tool.text.replace
 pub fn replace(
     ctx: &GovernedContext,

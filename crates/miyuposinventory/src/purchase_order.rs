@@ -7,8 +7,8 @@ use std::collections::HashMap;
 /// @id miyuposinventory_tool_purchase_order_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un bon de commande fournisseur à partir de données fournies ; WriteIntent KindMother.
 /// @do purchase_order_create_under_governance
+//@human / @human Crée un bon de commande fournisseur à partir de données fournies ; WriteIntent KindMother.
 /// tool.inventory.purchase_order.create
 pub fn create(
     ctx: &GovernedContext,
@@ -24,8 +24,8 @@ pub fn create(
 /// @id miyuposinventory_tool_purchase_order_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour un bon de commande (réception partielle, etc.) ; WriteIntent KindMother.
 /// @do purchase_order_update_under_governance
+//@human / @human Met à jour un bon de commande (réception partielle, etc.) ; WriteIntent KindMother.
 /// tool.inventory.purchase_order.update
 pub fn update(
     ctx: &GovernedContext,
@@ -41,8 +41,8 @@ pub fn update(
 /// @id miyuposinventory_tool_purchase_order_track
 /// @role mutator
 /// @layer tool
-/// @human Retourne le statut / suivi d'un bon de commande.
 /// @do purchase_order_track_under_governance
+//@human / @human Retourne le statut / suivi d'un bon de commande.
 /// tool.inventory.purchase_order.track
 pub fn track(
     ctx: &GovernedContext,

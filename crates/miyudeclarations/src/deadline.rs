@@ -7,8 +7,8 @@ use crate::errors::MiyudeclarationsError;
 /// @id miyudeclarations_tool_deadline_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les échéances fiscales et sociales (données fournies).
 /// @do deadline_list_under_governance
+//@human / @human Liste les échéances fiscales et sociales (données fournies).
 /// tool.compta.declaration.deadline.list
 pub fn list(
     ctx: &GovernedContext,

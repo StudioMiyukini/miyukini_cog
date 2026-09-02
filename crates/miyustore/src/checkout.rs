@@ -8,8 +8,8 @@ use crate::order;
 /// @id miyustore_tool_commerce_checkout_validate
 /// @role accessor
 /// @layer tool
-/// @human Valide les données de checkout ; structure, champs ; pas d'écriture.
 /// @do commerce_checkout_validate_under_governance
+//@human / @human Valide les données de checkout ; structure, champs ; pas d'écriture.
 pub fn validate(ctx: &GovernedContext, payload: &str) -> Result<bool, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -20,8 +20,8 @@ pub fn validate(ctx: &GovernedContext, payload: &str) -> Result<bool, MiyustoreE
 /// @id miyustore_tool_commerce_checkout_submit
 /// @role mutator
 /// @layer tool
-/// @human Soumet le checkout et crée la commande ; WriteIntent KindMother ; décision StrongFather.
 /// @do commerce_checkout_submit_under_governance
+//@human / @human Soumet le checkout et crée la commande ; WriteIntent KindMother ; décision StrongFather.
 pub fn submit(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);

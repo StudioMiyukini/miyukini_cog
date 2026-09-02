@@ -7,8 +7,8 @@ use crate::store;
 /// @id miyusocialprofile_tool_follow_add
 /// @role mutator
 /// @layer tool
-/// @human Ajoute un abonnement (follow) ; WriteIntent KindMother.
 /// @do follow_add_under_governance
+//@human / @human Ajoute un abonnement (follow) ; WriteIntent KindMother.
 /// tool.social.follow.add
 pub fn add(
     ctx: &GovernedContext,
@@ -36,8 +36,8 @@ pub fn add(
 /// @id miyusocialprofile_tool_follow_remove
 /// @role mutator
 /// @layer tool
-/// @human Supprime un abonnement ; WriteIntent KindMother.
 /// @do follow_remove_under_governance
+//@human / @human Supprime un abonnement ; WriteIntent KindMother.
 /// tool.social.follow.remove
 pub fn remove(
     ctx: &GovernedContext,
@@ -67,8 +67,8 @@ pub fn remove(
 /// @id miyusocialprofile_tool_followers_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les abonnés.
 /// @do followers_list_under_governance
+//@human / @human Liste les abonnés.
 /// tool.social.followers.list
 pub fn followers_list(
     ctx: &GovernedContext,
@@ -86,8 +86,8 @@ pub fn followers_list(
 /// @id miyusocialprofile_tool_following_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les abonnements.
 /// @do following_list_under_governance
+//@human / @human Liste les abonnements.
 /// tool.social.following.list
 pub fn following_list(
     ctx: &GovernedContext,

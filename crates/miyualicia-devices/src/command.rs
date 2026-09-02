@@ -6,8 +6,8 @@
 // @id toolkit.alicia.devices.command
 // @role command_model
 // @layer 6
-// @human Modele de commande generique pour les dispositifs domotiques Alicia.
 // @do define_device_command_and_source
+// @human Modele de commande generique pour les dispositifs domotiques Alicia.
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

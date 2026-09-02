@@ -3,36 +3,36 @@
 /// @id borderguard_trust_level
 /// @role data
 /// @layer core
-/// @human Niveau de confiance pour une entité ou une interaction.
 /// @do represent_trust_level
+//@human / @human Niveau de confiance pour une entité ou une interaction.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TrustLevel {
     /// @id borderguard_trust_level_trusted
     /// @role data
     /// @layer core
-    /// @human Entité de confiance - vérifiée et approuvée.
     /// @do represent_trusted_level
+    //@human / @human Entité de confiance - vérifiée et approuvée.
     /// @depends borderguard_trust_level
     Trusted,
     /// @id borderguard_trust_level_verified
     /// @role data
     /// @layer core
-    /// @human Entité vérifiée - authentifiée mais pas encore approuvée.
     /// @do represent_verified_level
+    //@human / @human Entité vérifiée - authentifiée mais pas encore approuvée.
     /// @depends borderguard_trust_level
     Verified,
     /// @id borderguard_trust_level_unknown
     /// @role data
     /// @layer core
-    /// @human Entité inconnue - pas encore vérifiée.
     /// @do represent_unknown_level
+    //@human / @human Entité inconnue - pas encore vérifiée.
     /// @depends borderguard_trust_level
     Unknown,
     /// @id borderguard_trust_level_hostile
     /// @role data
     /// @layer core
-    /// @human Entité hostile - identifiée comme menaçante.
     /// @do represent_hostile_level
+    //@human / @human Entité hostile - identifiée comme menaçante.
     /// @depends borderguard_trust_level
     Hostile,
 }
@@ -65,14 +65,14 @@ impl Ord for TrustLevel {
 /// @id borderguard_trust_level_classifier
 /// @role infrastructure
 /// @layer core
-/// @human Trait de classification des niveaux de confiance.
 /// @do define_trust_classification_contract
+//@human / @human Trait de classification des niveaux de confiance.
 pub trait TrustLevelClassifier {
     /// @id borderguard_trust_level_classifier_classify
     /// @role infrastructure
     /// @layer core
-    /// @human Classifie le niveau de confiance d'une entité.
     /// @do classify_trust_level
+    //@human / @human Classifie le niveau de confiance d'une entité.
     /// @depends borderguard_trust_level_classifier
     fn classify(&self, entity_id: &str) -> TrustLevel;
 }
@@ -118,8 +118,8 @@ mod tests {
     /// @id borderguard_trust_level_test_ordering
     /// @role test
     /// @layer core
-    /// @human Test de l'ordre des niveaux de confiance.
     /// @do verify_trust_level_ordering
+    //@human / @human Test de l'ordre des niveaux de confiance.
     /// @depends borderguard_trust_level
     #[test]
     fn test_trust_level_ordering() {
@@ -131,7 +131,8 @@ mod tests {
     /// @id borderguard_classifier_test_default_unknown
     /// @role test
     /// @layer core
-    /// @human Entité non enregistrée retourne Unknown (INV-BG-4).
+    /// @do tester_classifier_default_unknown
+    //@human / @human Entité non enregistrée retourne Unknown (INV-BG-4).
     #[test]
     fn test_classifier_default_unknown() {
         let classifier = DefaultTrustLevelClassifier::new();
@@ -141,7 +142,8 @@ mod tests {
     /// @id borderguard_classifier_test_registered
     /// @role test
     /// @layer core
-    /// @human Entité enregistrée retourne le niveau défini.
+    /// @do tester_classifier_registered
+    //@human / @human Entité enregistrée retourne le niveau défini.
     #[test]
     fn test_classifier_registered() {
         let mut classifier = DefaultTrustLevelClassifier::new();

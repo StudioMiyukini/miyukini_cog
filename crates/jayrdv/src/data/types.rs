@@ -2,7 +2,7 @@
 //!
 //! @id     jayrdv_data_types
 //! @do     define_jayrdv_domain_model
-//! @role   data
+//@human ! @role   data
 //! @layer  domain
 //! @human  Modèle métier du service JayRDV — entités, statuts, énumérations.
 

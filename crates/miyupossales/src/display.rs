@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_display_push
 /// @role mutator
 /// @layer tool
-/// @human Envoie les données à afficher sur l'écran client.
 /// @do display_push_under_governance
+//@human / @human Envoie les données à afficher sur l'écran client.
 /// tool.pos.display.push
 pub fn push(
     ctx: &GovernedContext,

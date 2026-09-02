@@ -1,9 +1,9 @@
 # Brief de Cadrage P0 -- MiyuCloud Integration Fix
 
-<!-- @id: mip.brief.miyucloud-integration-fix -->
-<!-- @do: brief_p0_miyucloud_integration_from_scratch -->
-<!-- @role: Maria (Chef de Projet) -->
-<!-- @layer: S7-Operator -->
+<!-- @id mip.brief.miyucloud-integration-fix -->
+<!-- @do brief_p0_miyucloud_integration_from_scratch -->
+<!-- @role Maria (Chef de Projet) -->
+<!-- @layer S7-Operator -->
 
 **Classification MIP** : T3 (Integration & fix)
 **Date** : 2026-03-06

@@ -1,6 +1,6 @@
 /// @id toolkit.alicia.wakeword.admin_cell
 /// @do define_admin_cell_metadata_for_wake_word_toolkit
-/// @role governance_metadata
+//@human / @role governance_metadata
 /// @layer 6
 /// @human Metadonnees de gouvernance AdminCell pour le toolkit alicia-wakeword
 use serde::{Deserialize, Serialize};

@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_crypto_keys
 //! @do     derive_master_and_file_keys_with_argon2_hkdf
-//! @role   crypto
+//@human ! @role   crypto
 //! @layer  infra
 //!
 //! Hierarchie des cles :

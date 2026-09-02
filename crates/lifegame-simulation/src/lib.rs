@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     manage_game_loop_ticks_and_entity_ai
-//! @human  Opérateur orchestrant la simulation du monde et l'intelligence des entités
+//@human ! @human  Opérateur orchestrant la simulation du monde et l'intelligence des entités
 
 use serde::{Deserialize, Serialize};
 use lifegame_entities::{EntityManager, Vec2};

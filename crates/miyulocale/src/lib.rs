@@ -7,8 +7,8 @@
 // @id toolkit.locale.miyulocale
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuLocale ; expose les modules tools.
 /// @do expose_miyulocale_toolkit
+//@human / @human Point d'entrée du toolkit MiyuLocale ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod date;

@@ -5,8 +5,8 @@
 // @id service.alicia.nlu-bridge
 // @role nlu_client
 // @layer 7
-// @human Client HTTP vers miou-llm-bridge pour STT et NLU, avec fallback regex.
 // @do transcribe_and_parse_voice_intent
+// @human Client HTTP vers miou-llm-bridge pour STT et NLU, avec fallback regex.
 
 use std::collections::HashMap;
 use std::time::Duration;

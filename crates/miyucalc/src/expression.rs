@@ -11,8 +11,8 @@ use std::str::Chars;
 /// @id miyucalc_tool_expression_evaluate
 /// @role mutator
 /// @layer tool
-/// @human Évalue une expression mathématique fournie.
 /// @do evaluate_expression_under_governance
+//@human / @human Évalue une expression mathématique fournie.
 /// tool.calc.expression.evaluate — ne décide pas du contenu ni de l'autorisation.
 pub fn evaluate(ctx: &GovernedContext, expression: &str) -> Result<f64, MiyuCalcError> {
     if !ctx.has_mandate() {

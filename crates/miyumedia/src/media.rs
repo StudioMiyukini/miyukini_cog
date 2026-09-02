@@ -7,8 +7,8 @@ use crate::errors::MiyumediaError;
 /// @id miyumedia_tool_media_upload
 /// @role mutator
 /// @layer tool
-/// @human Enregistre un média ; à partir du flux ; persistance KindMother.
 /// @do media_upload_under_governance
+//@human / @human Enregistre un média ; à partir du flux ; persistance KindMother.
 pub fn upload(
     ctx: &GovernedContext,
     _payload: &str,
@@ -23,8 +23,8 @@ pub fn upload(
 /// @id miyumedia_tool_media_serve
 /// @role accessor
 /// @layer tool
-/// @human Sert un média (stream ou métadonnées) ; données fournies dans le flux.
 /// @do media_serve_under_governance
+//@human / @human Sert un média (stream ou métadonnées) ; données fournies dans le flux.
 pub fn serve(
     ctx: &GovernedContext,
     _media_ref: &str,
@@ -39,8 +39,8 @@ pub fn serve(
 /// @id miyumedia_tool_media_transform
 /// @role accessor
 /// @layer tool
-/// @human Produit une variante (miniature, recadrage) ; données fournies ; pas de décision politique.
 /// @do media_transform_under_governance
+//@human / @human Produit une variante (miniature, recadrage) ; données fournies ; pas de décision politique.
 pub fn transform(
     ctx: &GovernedContext,
     _media_ref: &str,

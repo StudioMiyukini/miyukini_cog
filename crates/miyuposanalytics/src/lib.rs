@@ -7,8 +7,8 @@
 // @id toolkit.pos.miyuposanalytics
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuPosAnalytics ; expose les modules tools.
 /// @do expose_miyuposanalytics_toolkit
+//@human / @human Point d'entrée du toolkit MiyuPosAnalytics ; expose les modules tools.
 pub mod admin_cell;
 pub mod cash;
 pub mod context;

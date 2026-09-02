@@ -215,7 +215,7 @@ Tous les fichiers source `.rs` portent les 4 annotations MSCM obligatoires. La h
 |---|----------|-------------|---------|----------------|
 | A-01 | Mineure | Noms de dossiers `miyuvoicecapture` et `miyuwakeword` non renommes (les package names Cargo sont corrects) | `crates/miyuvoicecapture/`, `crates/miyuwakeword/` | Renommer les dossiers en `miyualicia-capture` et `miyualicia-wakeword` pour coherence |
 | A-02 | Cosmetique | Methode `icon()` dans `DeviceType` non utilisee (dead code preparatoire) | `apps/central/src/services/alicia/devices.rs:36` | Ajouter `#[allow(dead_code)]` ou utiliser dans l'UI |
-| A-03 | Mineure | Annotations MSCM dans `miyuvoicecapture` utilisent un format legerement different (ex: `@layer: toolkit` au lieu de `@layer: 6`) | `crates/miyuvoicecapture/src/*.rs` | Harmoniser vers `@layer: 6` |
+| A-03 | Mineure | Annotations MSCM dans `miyuvoicecapture` utilisent un format legerement different (ex: `@layer toolkit` au lieu de `@layer 6`) | `crates/miyuvoicecapture/src/*.rs` | Harmoniser vers `@layer 6` |
 | A-04 | Cosmetique | Le `AliciaConfig::default()` initialise `mqtt: Some(MqttConfig::default())` mais le test `test_config_from_toml_minimal` confirme que TOML sans `[mqtt]` donne `None` -- le `Default` et le TOML sont incoherents | `crates/miyualicia/src/config.rs:171` | Decider si `Default` doit aussi etre `None` pour MQTT, ou documenter la difference |
 
 ---

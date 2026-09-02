@@ -448,9 +448,9 @@ Artefact : section securite dans `<sequence>/audits/YYYY-MM-DD-<slug>.md`
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.victor -->
-<!-- @do: Responsabilites de securite swarm de Victor -->
-<!-- @role: Victor (Cybersecurite) -->
+<!-- @id mass.agent.victor -->
+<!-- @do Responsabilites de securite swarm de Victor -->
+<!-- @role Victor (Cybersecurite) -->
 
 Victor intervient en **spot-check parallele** pendant le swarm.
 

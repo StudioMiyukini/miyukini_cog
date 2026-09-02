@@ -7,8 +7,8 @@
 // @id toolkit.accounting.miyucomptareports
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuComptaReports ; expose les modules tools.
 /// @do expose_miyucomptareports_toolkit
+//@human / @human Point d'entrée du toolkit MiyuComptaReports ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

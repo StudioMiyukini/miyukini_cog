@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_manifest
 //! @do     build_sync_manifest_from_db_and_compute_diff
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Le manifeste est la liste de tous les fichiers connus par un noeud,

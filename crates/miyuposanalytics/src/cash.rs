@@ -6,8 +6,8 @@ use crate::errors::MiyuposanalyticsError;
 /// @id miyuposanalytics_tool_cash_discrepancy
 /// @role mutator
 /// @layer tool
-/// @human Retourne l'écart caisse pour un shift.
 /// @do cash_discrepancy_under_governance
+//@human / @human Retourne l'écart caisse pour un shift.
 /// tool.analytics.cash.discrepancy
 pub fn discrepancy(
     ctx: &GovernedContext,

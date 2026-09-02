@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_monitoring
 //! @do     provide_health_check_metrics_disk_space
-//! @role   monitoring
+//@human ! @role   monitoring
 //! @layer  infra
 //!
 //! Health check detaille, collecte de metriques et

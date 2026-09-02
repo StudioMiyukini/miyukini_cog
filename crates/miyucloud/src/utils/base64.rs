@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_utils_base64
 //! @do     provide_base64_encode_decode_via_standard_crate
-//! @role   util
+//@human ! @role   util
 //! @layer  infra
 
 use base64_crate::engine::general_purpose::STANDARD;

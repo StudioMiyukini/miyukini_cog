@@ -5,8 +5,8 @@
 // @id service.alicia.api.config
 // @role api_configuration
 // @layer 7
-// @human Configuration API REST Alicia : port, JWT TTL, rate limit, CORS.
 // @do define_api_config
+// @human Configuration API REST Alicia : port, JWT TTL, rate limit, CORS.
 
 use serde::{Deserialize, Serialize};
 

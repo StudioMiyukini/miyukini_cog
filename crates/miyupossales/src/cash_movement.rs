@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_cash_movement_record
 /// @role mutator
 /// @layer tool
-/// @human Enregistre un mouvement espèces (entrée/sortie) ; WriteIntent KindMother.
 /// @do cash_movement_record_under_governance
+//@human / @human Enregistre un mouvement espèces (entrée/sortie) ; WriteIntent KindMother.
 /// tool.pos.cash.movement.record
 pub fn record(
     ctx: &GovernedContext,

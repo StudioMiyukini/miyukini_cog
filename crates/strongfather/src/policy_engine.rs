@@ -13,28 +13,28 @@ use crate::policy::{Policy, PolicyPriorityLevel, PolicyResult, PolicySet, Policy
 /// @id strongfather_policy_engine_error
 /// @role error
 /// @layer core
-/// @human Erreur du moteur de politiques. Indique un dysfonctionnement interne.
 /// @do represent_policy_engine_error
+//@human / @human Erreur du moteur de politiques. Indique un dysfonctionnement interne.
 /// Erreur du moteur de politiques
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PolicyEngineError {
     /// @id strongfather_policy_engine_error_consistency
     /// @role error
     /// @layer core
-    /// @human Erreur de cohérence - violation d'un invariant.
     /// @do represent_consistency_error
+    //@human / @human Erreur de cohérence - violation d'un invariant.
     ConsistencyError {
         /// @id strongfather_policy_engine_error_invariant
         /// @role error
         /// @layer core
-        /// @human Identifiant de l'invariant violé.
         /// @do identify_violated_invariant
+        //@human / @human Identifiant de l'invariant violé.
         violated_invariant: String,
         /// @id strongfather_policy_engine_error_reason
         /// @role error
         /// @layer core
-        /// @human Raison de l'erreur.
         /// @do explain_error
+        //@human / @human Raison de l'erreur.
         reason: String,
     },
 }
@@ -43,8 +43,8 @@ impl std::fmt::Display for PolicyEngineError {
     /// @id strongfather_policy_engine_error_display
     /// @role formatter
     /// @layer core
-    /// @human Formate l'erreur pour affichage.
     /// @do format_policy_engine_error
+    //@human / @human Formate l'erreur pour affichage.
     /// @depends strongfather_policy_engine_error
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -63,15 +63,15 @@ impl std::error::Error for PolicyEngineError {}
 /// @id strongfather_policy_engine
 /// @role service
 /// @layer core
-/// @human Moteur de politiques. Applique les politiques pour évaluer des intentions (G-POL-1 : évaluation déterministe).
 /// @do apply_policies_to_intent
+//@human / @human Moteur de politiques. Applique les politiques pour évaluer des intentions (G-POL-1 : évaluation déterministe).
 /// Moteur de politiques
 pub struct PolicyEngine {
     /// @id strongfather_policy_engine_policies
     /// @role service
     /// @layer core
-    /// @human Ensemble de politiques chargées depuis la source unique (INV-POL-SOURCE).
     /// @do store_policy_set
+    //@human / @human Ensemble de politiques chargées depuis la source unique (INV-POL-SOURCE).
     policies: PolicySet,
 }
 
@@ -79,8 +79,8 @@ impl PolicyEngine {
     /// @id strongfather_policy_engine_new
     /// @role constructor
     /// @layer core
-    /// @human Crée un nouveau moteur de politiques avec un ensemble de politiques.
     /// @do create_policy_engine
+    //@human / @human Crée un nouveau moteur de politiques avec un ensemble de politiques.
     /// @depends strongfather_policy_engine
     #[must_use]
     pub fn new(policies: PolicySet) -> Self {
@@ -90,8 +90,8 @@ impl PolicyEngine {
     /// @id strongfather_policy_engine_apply
     /// @role service
     /// @layer core
-    /// @human Applique les politiques applicables à une intention selon l'ordre de priorité (RÈGLE-PRIO-1, G-POL-3 : évaluation ordonnée).
     /// @do apply_policies_in_priority_order
+    //@human / @human Applique les politiques applicables à une intention selon l'ordre de priorité (RÈGLE-PRIO-1, G-POL-3 : évaluation ordonnée).
     /// @depends strongfather_policy_engine_new
     pub fn apply(&self, intent: &Intent) -> Result<Vec<PolicyResult>, PolicyEngineError> {
         // Sélectionner les politiques applicables
@@ -124,8 +124,8 @@ impl PolicyEngine {
     /// @id strongfather_policy_engine_select_applicable
     /// @role service
     /// @layer core
-    /// @human Sélectionne les politiques applicables à une intention selon leurs conditions d'application.
     /// @do select_policies_by_condition
+    //@human / @human Sélectionne les politiques applicables à une intention selon leurs conditions d'application.
     /// @depends strongfather_policy_engine_new
     fn select_applicable_policies(
         &self,
@@ -161,8 +161,8 @@ impl PolicyEngine {
     /// @id strongfather_policy_engine_evaluate_policy
     /// @role service
     /// @layer core
-    /// @human Évalue une politique individuelle pour une intention (INV-POL-3 : déterminisme).
     /// @do evaluate_single_policy
+    //@human / @human Évalue une politique individuelle pour une intention (INV-POL-3 : déterminisme).
     /// @depends strongfather_policy_engine_new
     fn evaluate_policy(
         &self,
@@ -235,8 +235,8 @@ mod tests {
     /// @id strongfather_policy_engine_test_create
     /// @role test
     /// @layer core
-    /// @human Test de création d'un moteur de politiques.
     /// @do test_policy_engine_creation
+    //@human / @human Test de création d'un moteur de politiques.
     #[test]
     fn test_create_policy_engine() {
         let policy_set = PolicySet::new();
@@ -248,8 +248,8 @@ mod tests {
     /// @id strongfather_policy_engine_test_apply_permission
     /// @role test
     /// @layer core
-    /// @human Test d'application d'une politique de permission.
     /// @do test_apply_permission_policy
+    //@human / @human Test d'application d'une politique de permission.
     #[test]
     fn test_apply_permission_policy() {
         let mut policy_set = PolicySet::new();
@@ -293,8 +293,8 @@ mod tests {
     /// @id strongfather_policy_engine_test_priority_order
     /// @role test
     /// @layer core
-    /// @human Test que les politiques sont évaluées dans l'ordre de priorité.
     /// @do test_policy_priority_ordering
+    //@human / @human Test que les politiques sont évaluées dans l'ordre de priorité.
     #[test]
     fn test_policy_priority_ordering() {
         let mut policy_set = PolicySet::new();

@@ -1,10 +1,10 @@
 # Spec Technique — crate `miyualicia-api`
 
-<!-- @id: spec.alicia.api -->
-<!-- @role: technical-specification -->
-<!-- @layer: 7 -->
-<!-- @human: Specification technique complete du serveur API REST JWT Alicia -->
-<!-- @do: define_miyualicia_api_crate_api -->
+<!-- @id spec.alicia.api -->
+<!-- @role technical-specification -->
+<!-- @layer 7 -->
+<!-- @human Specification technique complete du serveur API REST JWT Alicia -->
+<!-- @do define_miyualicia_api_crate_api -->
 
 **Auteur :** Denis, Chef Dev Senior — Miyukini AI Studio
 **Date :** 2026-03-01
@@ -130,11 +130,11 @@ tokio              = { version = "1", features = ["full", "test-util"] }
 
 #![forbid(unsafe_code)]
 
-// @id: service.alicia.rest-api
-// @role: http_api_gateway
-// @layer: 7
-// @human: Serveur REST JWT Alicia ; routes, auth, DTOs, handlers, rate limit.
-// @do: expose_alicia_home_as_rest_api
+// @id service.alicia.rest-api
+// @role http_api_gateway
+// @layer 7
+// @human Serveur REST JWT Alicia ; routes, auth, DTOs, handlers, rate limit.
+// @do expose_alicia_home_as_rest_api
 
 pub mod admin_cell;
 pub mod auth;

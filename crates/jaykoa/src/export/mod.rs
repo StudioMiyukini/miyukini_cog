@@ -2,6 +2,6 @@
 //!
 //! @id     jaykoa_export_module
 //! @do     provide_export_capabilities
-//! @layer  domain
+//@human ! @layer  domain
 
 pub mod ical;

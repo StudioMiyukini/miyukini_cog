@@ -205,9 +205,9 @@ George **enregistre les metriques** de l'audit dans `<sequence>/metrics/YYYY-MM-
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.george -->
-<!-- @do: Responsabilites d'audit coherence swarm de George -->
-<!-- @role: George (Audit) -->
+<!-- @id mass.agent.george -->
+<!-- @do Responsabilites d'audit coherence swarm de George -->
+<!-- @role George (Audit) -->
 
 George intervient en **P4 post-merge** pour verifier la coherence du swarm.
 

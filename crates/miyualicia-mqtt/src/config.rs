@@ -5,8 +5,8 @@
 // @id toolkit.alicia.mqtt.config
 // @role mqtt_configuration
 // @layer 6
-// @human Configuration du client MQTT : broker, keepalive, reconnexion.
 // @do define_mqtt_config
+// @human Configuration du client MQTT : broker, keepalive, reconnexion.
 
 use serde::{Deserialize, Serialize};
 

@@ -7,8 +7,8 @@
 // @id toolkit.alicia.http.adapters.generic
 // @role generic_device_adapter
 // @layer 6
-// @human Adaptateur JSON generique configurable pour dispositifs HTTP locaux.
 // @do translate_generic_json_to_device_state
+// @human Adaptateur JSON generique configurable pour dispositifs HTTP locaux.
 
 use chrono::Utc;
 use miyualicia_devices::DeviceState;

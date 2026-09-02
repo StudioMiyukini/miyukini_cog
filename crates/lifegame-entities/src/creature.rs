@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     define_creature_structures_and_types
-//! @human  Structures et types de créatures (animaux, monstres, boss)
+//@human ! @human  Structures et types de créatures (animaux, monstres, boss)
 
 use serde::{Deserialize, Serialize};
 use crate::{EntityId, Vec2};

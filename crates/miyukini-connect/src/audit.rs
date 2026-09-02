@@ -2,7 +2,7 @@
 //!
 //! @id     miyukini_connect_audit
 //! @do     track_auth_events_with_hash_chain
-//! @role   security
+//@human ! @role   security
 //! @layer  infrastructure
 
 use sha2::{Digest, Sha256};

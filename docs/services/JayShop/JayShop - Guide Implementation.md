@@ -104,9 +104,9 @@ crates/jayshop/
 ### 2.2 Cargo.toml
 
 ```toml
-# @id: jayshop_crate_config
-# @do: declare_jayshop_crate_and_dependencies
-# @layer: infra
+# @id jayshop_crate_config
+# @do declare_jayshop_crate_and_dependencies
+# @layer infra
 # Crate JayShop — Service officiel famille Jay (commerce, PoS, vente en ligne).
 # Persistance via KindMother Client → KindMother Service → libSQL chiffre.
 
@@ -153,9 +153,9 @@ pedantic = { level = "warn", priority = -1 }
 ```rust
 //! Bibliotheque JayShop — Service commerce, point de vente et vente en ligne.
 //!
-//! @id: jayshop_lib
-//! @do: expose_public_modules_jayshop
-//! @layer: infra
+//! @id jayshop_lib
+//! @do expose_public_modules_jayshop
+//! @layer infra
 //!
 //! JayShop s'appuie sur JayXpose pour le catalogue et les stocks,
 //! et transmet les donnees comptables a JayKonta.
@@ -585,9 +585,9 @@ pub enum DbError {
 
 /// Base de donnees JayShop via KindMother Client.
 ///
-/// @id: jayshop_db_client_struct
-/// @do: hold_kindmother_client_connection
-/// @layer: infra
+/// @id jayshop_db_client_struct
+/// @do hold_kindmother_client_connection
+/// @layer infra
 #[derive(Clone)]
 pub struct JayShopDb {
     client: Arc<KindMotherClient>,

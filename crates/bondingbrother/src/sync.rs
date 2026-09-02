@@ -3,22 +3,22 @@
 /// @id bondingbrother_sync_strategy
 /// @role data
 /// @layer core
-/// @human Stratégie de synchronisation.
 /// @do represent_sync_strategy
+//@human / @human Stratégie de synchronisation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SyncStrategy {
     /// @id bondingbrother_sync_strategy_immediate
     /// @role data
     /// @layer core
-    /// @human Synchronisation immédiate.
     /// @do represent_immediate_strategy
+    //@human / @human Synchronisation immédiate.
     /// @depends bondingbrother_sync_strategy
     Immediate,
     /// @id bondingbrother_sync_strategy_deferred
     /// @role data
     /// @layer core
-    /// @human Synchronisation différée.
     /// @do represent_deferred_strategy
+    //@human / @human Synchronisation différée.
     /// @depends bondingbrother_sync_strategy
     Deferred,
 }
@@ -26,14 +26,14 @@ pub enum SyncStrategy {
 /// @id bondingbrother_sync_manager_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de gestion de la synchronisation.
 /// @do define_sync_manager_contract
+//@human / @human Trait de gestion de la synchronisation.
 pub trait SyncManager {
     /// @id bondingbrother_sync_manager_sync
     /// @role mutator
     /// @layer core
-    /// @human Synchronise selon la stratégie.
     /// @do execute_sync
+    //@human / @human Synchronise selon la stratégie.
     /// @depends bondingbrother_sync_manager_trait
     fn sync(&mut self, strategy: SyncStrategy) -> Result<(), SyncError>;
 }
@@ -41,15 +41,15 @@ pub trait SyncManager {
 /// @id bondingbrother_sync_error
 /// @role error
 /// @layer core
-/// @human Erreur de synchronisation.
 /// @do represent_sync_error
+//@human / @human Erreur de synchronisation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SyncError {
     /// @id bondingbrother_sync_error_failed
     /// @role error
     /// @layer core
-    /// @human Échec de synchronisation.
     /// @do represent_failed_error
+    //@human / @human Échec de synchronisation.
     /// @depends bondingbrother_sync_error
     Failed(String),
 }
@@ -89,8 +89,8 @@ mod tests {
     /// @id bondingbrother_sync_test_strategy
     /// @role test
     /// @layer core
-    /// @human Test des stratégies de synchronisation.
     /// @do verify_sync_strategies
+    //@human / @human Test des stratégies de synchronisation.
     /// @depends bondingbrother_sync_strategy
     #[test]
     fn test_sync_strategies() {

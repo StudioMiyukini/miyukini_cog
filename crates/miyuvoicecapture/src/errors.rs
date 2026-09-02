@@ -6,8 +6,8 @@
 // @id alicia_capture_errors
 // @role infrastructure
 // @layer toolkit
-// @human Types d'erreur contractuels Alicia Capture.
 // @do represent_voice_capture_errors
+// @human Types d'erreur contractuels Alicia Capture.
 
 use thiserror::Error;
 

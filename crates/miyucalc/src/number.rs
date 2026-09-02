@@ -21,8 +21,8 @@ pub struct FormatOptions {
 /// @id miyucalc_tool_number_format
 /// @role mutator
 /// @layer tool
-/// @human Formate un nombre selon options fournies.
 /// @do format_number_under_governance
+//@human / @human Formate un nombre selon options fournies.
 /// tool.calc.number.format
 pub fn format(
     ctx: &GovernedContext,

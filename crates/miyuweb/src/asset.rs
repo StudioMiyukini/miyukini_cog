@@ -7,8 +7,8 @@ use crate::errors::MiyuwebError;
 /// @id miyuweb_tool_web_asset_serve
 /// @role accessor
 /// @layer tool
-/// @human Sert un asset (image, CSS, binaire) à partir de données fournies dans le flux.
 /// @do web_asset_serve_under_governance
+//@human / @human Sert un asset (image, CSS, binaire) à partir de données fournies dans le flux.
 /// tool.web.asset.serve — ne lit pas la base ; données fournies en entrée.
 pub fn serve(
     ctx: &GovernedContext,

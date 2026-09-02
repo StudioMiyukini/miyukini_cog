@@ -1,1354 +1,4048 @@
 {
-  "kindmother_reexport_state": [
-    "kindmother_module_state"
-  ],
-  "miyukiniadmin_monitoring_system_metrics_cores_health": [
-    "miyukiniadmin_monitoring_system_metrics"
-  ],
-  "tamr_taxonomy_name": [
-    "tamr_taxonomy"
-  ],
-  "miyusql_governed_context_struct": [
-    "miyusql_governed_context"
-  ],
-  "miyukiniadmin_api_routes_router_register": [
-    "miyukiniadmin_api_routes_router"
-  ],
-  "miyukiniadmin_audit_logger_test_default": [
-    "miyukiniadmin_audit_logger_default_new",
-    "miyukiniadmin_audit_logger_log_action"
-  ],
-  "kindmother_storage_error_not_found": [
-    "kindmother_storage_error"
-  ],
-  "miyukiniadmin_backup_test_restore": [
-    "miyukiniadmin_backup_service_restore"
-  ],
-  "test_log_no_business_logic": [
-    "kernel_logger_trait"
-  ],
-  "test_lifecycle_shutdown_lifo_order": [
-    "kernel_lifecycle_shutdown"
-  ],
-  "strongfather_priority_maximum": [
-    "strongfather_priority_value"
-  ],
-  "worrysentinel_degradation_state_degraded": [
-    "worrysentinel_degradation_state"
-  ],
-  "logisticssteward_allocation_resource_type": [
-    "logisticssteward_allocation"
-  ],
-  "test_lifecycle_no_init_hooks": [
-    "kernel_lifecycle_trait"
-  ],
-  "strongfather_policy_engine_select_applicable": [
-    "strongfather_policy_engine_new"
-  ],
-  "miyukiniadmin_database_service_get_instance_info": [
-    "miyukiniadmin_database_service_trait"
-  ],
-  "strongfather_intent_validator_validate": [
-    "strongfather_intent_validator_new"
-  ],
-  "masterbutler_step_name": [
-    "masterbutler_step"
-  ],
-  "worrysentinel_degradation_state_unstable": [
-    "worrysentinel_degradation_state"
-  ],
-  "bondingbrother_sync_manager_sync": [
-    "bondingbrother_sync_manager_trait"
-  ],
-  "miyukiniadmin_audit_logger_default_logger": [
-    "miyukiniadmin_audit_logger_default"
-  ],
-  "test_time_no_business_logic": [
-    "kernel_clock_trait"
-  ],
-  "kindmother_storage_error_corruption": [
-    "kindmother_storage_error"
-  ],
-  "masterbutler_step_result_failure": [
-    "masterbutler_step_result"
-  ],
-  "kindmother_sync_compute_delta": [
-    "kindmother_sync_trait"
-  ],
-  "everbuddy_compatibility_test_levels": [
-    "everbuddy_compatibility_level"
-  ],
-  "kindmother_observability_health_healthy": [
-    "kindmother_observability_health_status"
-  ],
-  "miyukiniadmin_audit_logger_default_new": [
-    "miyukiniadmin_audit_logger_default"
-  ],
-  "miyukiniadmin_apply_result_applied_count": [
-    "miyukiniadmin_migration_service_apply_result"
-  ],
-  "miyukiniadmin_testing_test_results_creation": [
-    "miyukiniadmin_testing_test_results"
-  ],
-  "test_id_generate_unique": [
-    "kernel_id_generator_generate"
-  ],
-  "test_id_deterministic_parse": [
-    "kernel_id_parse"
-  ],
-  "miyusql_context_security_level": [
-    "miyusql_governed_context_struct"
-  ],
-  "caringnanny_metrics_error_count": [
-    "caringnanny_metrics"
-  ],
-  "borderguard_trust_level_trusted": [
-    "borderguard_trust_level"
-  ],
-  "miyusql_error_syntax": [
-    "miyusql_error_enum"
-  ],
-  "everbuddy_compatibility_level_incompatible": [
-    "everbuddy_compatibility_level"
-  ],
-  "masterbutler_workflow_name": [
-    "masterbutler_workflow"
-  ],
-  "logisticssteward_resource_type_memory": [
-    "logisticssteward_resource_type"
-  ],
-  "caringnanny_metrics_event_count": [
-    "caringnanny_metrics"
-  ],
-  "miyukiniadmin_migration_impl_with_seed": [
-    "miyukiniadmin_migration_service_impl"
-  ],
-  "logisticssteward_allocation_manager_allocate": [
-    "logisticssteward_allocation_manager_trait"
-  ],
-  "miyukiniadmin_security_test_service_structure": [
-    "miyukiniadmin_security_service_trait"
-  ],
-  "miyusql_context_has_mandate": [
-    "miyusql_governed_context_struct"
-  ],
-  "test_time_no_external_dependency": [
-    "kernel_clock_now"
-  ],
-  "kindmother_threat_test_detector_default": [
-    "kindmother_threat_detector_default",
-    "kindmother_threat_detector_check_corruption"
-  ],
-  "everbuddy_migration_from_version": [
-    "everbuddy_migration"
-  ],
-  "bondingbrother_connection_operator_id": [
-    "bondingbrother_connection"
-  ],
-  "test_config_envconfig_from_env": [
-    "envconfig_from_env"
-  ],
-  "test_lifecycle_shutdown_executes_hooks": [
-    "kernel_lifecycle_shutdown"
-  ],
-  "strongfather_reexport_validator": [
-    "strongfather_module_validator"
-  ],
-  "kindmother_api_write_intent_data": [
-    "kindmother_api_write_intent"
-  ],
-  "kindmother_observability_test_default_metrics": [
-    "kindmother_observability_default",
-    "kindmother_observability_get_metrics"
-  ],
-  "miyukiniadmin_api_handler_handle_request": [
-    "miyukiniadmin_api_handler_trait"
-  ],
-  "miyukiniadmin_migration_service_impl": [
-    "miyukiniadmin_migration_service_trait"
-  ],
-  "strongfather_reexport_priority": [
-    "strongfather_module_priority"
-  ],
-  "strongfather_policy_with_priority": [
-    "strongfather_policy_new"
-  ],
-  "miyukiniadmin_config_backend_config_from_env": [
-    "miyukiniadmin_config_backend_config",
-    "kernel_config_get"
-  ],
-  "miyukiniadmin_migration_service_history": [
-    "miyukiniadmin_migration_service_trait"
-  ],
-  "kernel_reexport_config": [
-    "kernel_module_config"
-  ],
-  "worrysentinel_security_level_hardened": [
-    "worrysentinel_security_level"
-  ],
-  "masterbutler_workflow_id_field": [
-    "masterbutler_workflow"
-  ],
-  "kindmother_sync_test_delta_creation": [
-    "kindmother_sync_delta"
-  ],
-  "worrysentinel_threat_test_level_ordering": [
-    "worrysentinel_threat_level"
-  ],
-  "kernel_id_generator_generate": [
-    "kernel_id_generator_trait"
-  ],
-  "bondingbrother_connection_test_creation": [
-    "bondingbrother_connection"
-  ],
-  "worrysentinel_degradation_manager_get_current": [
-    "worrysentinel_degradation_manager_trait"
-  ],
-  "test_time_now_monotonic": [
-    "kernel_clock_now"
-  ],
-  "strongfather_decision_justification_new": [
-    "strongfather_decision_justification"
-  ],
-  "kindmother_storage_test_read_write": [
-    "kindmother_storage_memory_new",
-    "kindmother_storage_write",
-    "kindmother_storage_read"
-  ],
-  "strongfather_intent_with_metadata": [
-    "strongfather_intent_new"
-  ],
-  "borderguard_trust_level_test_ordering": [
-    "borderguard_trust_level"
-  ],
-  "strongfather_intent_validator_new": [
-    "strongfather_intent_validator"
-  ],
-  "tamr_taxonomy_manager_get": [
-    "tamr_taxonomy_manager_trait"
-  ],
-  "worrysentinel_security_level_public": [
-    "worrysentinel_security_level"
-  ],
-  "miyusql_admin_cell_struct": [
-    "miyusql_admin_cell"
-  ],
-  "tamr_classifier_classify": [
-    "tamr_classifier_trait"
-  ],
-  "borderguard_boundary_type_external": [
-    "borderguard_boundary_type"
-  ],
-  "miyukiniadmin_api_routes_router_handlers": [
-    "miyukiniadmin_api_routes_router"
-  ],
-  "miyukiniadmin_migration_service_apply": [
-    "miyukiniadmin_migration_service_trait"
-  ],
-  "caringnanny_observer_observe": [
-    "caringnanny_observer_trait"
-  ],
-  "test_log_all_levels": [
-    "kernel_logger_log"
-  ],
-  "miyukiniadmin_environment_state_service": [
-    "miyukiniadmin_models_environment_state"
-  ],
-  "miyukiniadmin_migration_impl_pending": [
-    "miyukiniadmin_migration_service_impl"
-  ],
-  "strongfather_policy_engine_new": [
-    "strongfather_policy_engine"
-  ],
-  "everbuddy_compatibility_checker_check": [
-    "everbuddy_compatibility_checker_trait"
-  ],
-  "everbuddy_version_test_creation": [
-    "everbuddy_version_new"
-  ],
-  "kindmother_instance_state_test_unique_ids": [
-    "kindmother_instance_state_new"
-  ],
-  "kindmother_api_error_not_found": [
-    "kindmother_api_error"
-  ],
-  "kindmother_storage_write": [
-    "kindmother_storage_trait"
-  ],
-  "miyukiniadmin_backup_service_list": [
-    "miyukiniadmin_backup_service_trait"
-  ],
-  "miyukiniadmin_migration_test_list": [
-    "miyukiniadmin_migration_service_impl_with_seed"
-  ],
-  "miyusql_error_execution": [
-    "miyusql_error_enum"
-  ],
-  "miyukiniadmin_database_test_instance_info": [
-    "miyukiniadmin_database_instance_info"
-  ],
-  "miyukiniadmin_pre_destruction_backup_service": [
-    "miyukiniadmin_backup_service_trait"
-  ],
-  "tamr_classification_taxonomy_id": [
-    "tamr_classification"
-  ],
-  "worrysentinel_degradation_state_normal": [
-    "worrysentinel_degradation_state"
-  ],
-  "everbuddy_migration_test_creation": [
-    "everbuddy_migration"
-  ],
-  "miyukiniadmin_backup_impl_backups": [
-    "miyukiniadmin_backup_service_impl"
-  ],
-  "strongfather_reexport_policy_engine": [
-    "strongfather_module_policy_engine"
-  ],
-  "strongfather_priority_calculator_new": [
-    "strongfather_priority_calculator"
-  ],
-  "strongfather_validator_error_new": [
-    "strongfather_validator_error"
-  ],
-  "kindmother_instance_identity_new": [
-    "kindmother_instance_identity",
-    "kernel_id_generator_generate"
-  ],
-  "worrysentinel_security_level_manager_get_current": [
-    "worrysentinel_security_level_manager_trait"
-  ],
-  "miyukiniadmin_backup_record_timestamp": [
-    "miyukiniadmin_backup_service_backup_record"
-  ],
-  "test_log_deterministic": [
-    "kernel_logger_log"
-  ],
-  "strongfather_policy_engine_error_display": [
-    "strongfather_policy_engine_error"
-  ],
-  "miyukiniadmin_backend_api_backups_list": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "strongfather_decision_with_metadata": [
-    "strongfather_decision_new"
-  ],
-  "tamr_taxonomy_terms": [
-    "tamr_taxonomy"
-  ],
-  "kernel_lifecycle_shutdown": [
-    "kernel_lifecycle_trait"
-  ],
-  "worrysentinel_threat_detector_detect": [
-    "worrysentinel_threat_detector_trait"
-  ],
-  "strongfather_priority_calculator_compare": [
-    "strongfather_priority_calculator_new"
-  ],
-  "miyukiniadmin_create_result_backup_id": [
-    "miyukiniadmin_backup_service_create_result"
-  ],
-  "worrysentinel_degradation_test_state_ordering": [
-    "worrysentinel_degradation_state"
-  ],
-  "miyukiniadmin_config_backend_config_tls_cert": [
-    "miyukiniadmin_config_backend_config"
-  ],
-  "kindmother_sync_error_conflict": [
-    "kindmother_sync_error"
-  ],
-  "config_get": [
-    "config_trait"
-  ],
-  "bondingbrother_connection_error_already_connected": [
-    "bondingbrother_connection_error"
-  ],
-  "test_log_level_enum": [
-    "kernel_log_level"
-  ],
-  "test_log_no_format_imposed": [
-    "kernel_logger_log"
-  ],
-  "kindmother_sync_delta_operation": [
-    "kindmother_sync_delta"
-  ],
-  "test_config_get_empty_key": [
-    "config_get"
-  ],
-  "test_time_deterministic_fake": [
-    "kernel_clock_trait"
-  ],
-  "strongfather_policy_set_len": [
-    "strongfather_policy_set_new"
-  ],
-  "test_time_now_returns_systemtime": [
-    "kernel_clock_now"
-  ],
-  "miyukiniadmin_bonding_brother_bridge_test_error": [
-    "miyukiniadmin_bonding_brother_bridge_error"
-  ],
-  "kindmother_api_error_permission_denied": [
-    "kindmother_api_error"
-  ],
-  "kindmother_reexport_threat": [
-    "kindmother_module_threat"
-  ],
-  "kindmother_instance_state_created_at": [
-    "kindmother_instance_state"
-  ],
-  "caringnanny_health_status_healthy": [
-    "caringnanny_health_status"
-  ],
-  "kindmother_api_write_operation_delete": [
-    "kindmother_api_write_operation"
-  ],
-  "miyukiniadmin_backup_test_list": [
-    "miyukiniadmin_backup_impl_with_seed"
-  ],
-  "miyukiniadmin_backend_main": [
-    "miyukiniadmin_config_backend_config_from_env",
-    "miyukiniadmin_services_environment_state_detect"
-  ],
-  "miyusql_error_timeout": [
-    "miyusql_error_enum"
-  ],
-  "kindmother_sync_delta_data": [
-    "kindmother_sync_delta"
-  ],
-  "logisticssteward_resource_type_disk": [
-    "logisticssteward_resource_type"
-  ],
-  "masterbutler_step_test_creation": [
-    "masterbutler_step"
-  ],
-  "miyukiniadmin_audit_logger_log_action": [
-    "miyukiniadmin_audit_logger_trait",
-    "kernel_logger_log"
-  ],
-  "miyukiniadmin_migration_service_list_applied": [
-    "miyukiniadmin_migration_service_trait"
-  ],
-  "miyusql_error_enum": [
-    "miyusql_errors"
-  ],
-  "kindmother_api_write_operation_update": [
-    "kindmother_api_write_operation"
-  ],
-  "kindmother_api_write_intent_operation": [
-    "kindmother_api_write_intent"
-  ],
-  "kindmother_threat_level_low": [
-    "kindmother_threat_level"
-  ],
-  "logisticssteward_optimizer_optimize": [
-    "logisticssteward_optimizer_trait"
-  ],
-  "logisticssteward_resource_manager_get": [
-    "logisticssteward_resource_manager_trait"
-  ],
-  "caringnanny_observer_event_state_change": [
-    "caringnanny_observer_event_type"
-  ],
-  "borderguard_crossing_rule_boundary_id": [
-    "borderguard_crossing_rule"
-  ],
-  "bondingbrother_translator_translate": [
-    "bondingbrother_translator_trait"
-  ],
-  "kindmother_reexport_api": [
-    "kindmother_module_api"
-  ],
-  "miyukiniadmin_backup_service_impl": [
-    "miyukiniadmin_backup_service_trait"
-  ],
-  "miyukiniadmin_backend_api_tables_list": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "miyukiniadmin_backend_api_table_update_row": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "miyukiniadmin_backend_api_migrations_apply": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "miyukiniadmin_destruction_reinit_service": [
-    "miyukiniadmin_models_corruption_memory",
-    "miyukiniadmin_services_environment_state"
-  ],
-  "miyukiniadmin_create_result_message": [
-    "miyukiniadmin_backup_service_create_result"
-  ],
-  "test_id_equality": [
-    "kernel_id_type"
-  ],
-  "strongfather_decision_eval_context_with_field": [
-    "strongfather_decision_eval_context_new"
-  ],
-  "strongfather_decision_with_evaluation_context": [
-    "strongfather_decision_new"
-  ],
-  "strongfather_decision_is_deferred": [
-    "strongfather_decision"
-  ],
-  "caringnanny_metrics_collector_get": [
-    "caringnanny_metrics_collector_trait"
-  ],
-  "bondingbrother_translation_source_format": [
-    "bondingbrother_translation"
-  ],
-  "borderguard_crossing_rules_rules": [
-    "borderguard_crossing_rules"
-  ],
-  "miyukiniadmin_auto_recovery_service": [
-    "miyukiniadmin_services_environment_state",
-    "miyukiniadmin_services_destruction_reinit"
-  ],
-  "kernel_logger_log": [
-    "kernel_logger_trait"
-  ],
-  "kindmother_storage_read": [
-    "kindmother_storage_trait"
-  ],
-  "strongfather_policy_new": [
-    "strongfather_policy"
-  ],
-  "borderguard_crossing_rules_add": [
-    "borderguard_crossing_rules"
-  ],
-  "strongfather_policy_set_is_empty": [
-    "strongfather_policy_set_new"
-  ],
-  "miyukiniadmin_create_result_success": [
-    "miyukiniadmin_backup_service_create_result"
-  ],
-  "worrysentinel_degradation_state_restricted": [
-    "worrysentinel_degradation_state"
-  ],
-  "miyukiniadmin_backend_api_migrations_list": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "kindmother_threat_level_none": [
-    "kindmother_threat_level"
-  ],
-  "test_lifecycle_shutdown_idempotent": [
-    "kernel_lifecycle_shutdown"
-  ],
-  "strongfather_reexport_intent": [
-    "strongfather_module_intent"
-  ],
-  "miyukiniadmin_backend_api_table_create_row": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "bondingbrother_translation_error_unsupported": [
-    "bondingbrother_translation_error"
-  ],
-  "test_log_default_logger": [
-    "kernel_logger_default"
-  ],
-  "strongfather_intent_with_priority": [
-    "strongfather_intent_new"
-  ],
-  "caringnanny_health_test_status_equality": [
-    "caringnanny_health_status"
-  ],
-  "miyukiniadmin_backup_impl_new": [
-    "miyukiniadmin_backup_service_impl"
-  ],
-  "kindmother_api_write_intent_entity_id": [
-    "kindmother_api_write_intent"
-  ],
-  "borderguard_trust_level_verified": [
-    "borderguard_trust_level"
-  ],
-  "miyukiniadmin_api_routes_router_route": [
-    "miyukiniadmin_api_routes_router"
-  ],
-  "miyukiniadmin_migration_impl_applied": [
-    "miyukiniadmin_migration_service_impl"
-  ],
-  "miyukiniadmin_monitoring_service_collect_metrics": [
-    "miyukiniadmin_monitoring_service_trait",
-    "caringnanny_metrics_collector_get"
-  ],
-  "test_config_get_missing_key": [
-    "config_get"
-  ],
-  "miyukiniadmin_migration_impl_new": [
-    "miyukiniadmin_migration_service_impl"
-  ],
-  "strongfather_policy_is_critical": [
-    "strongfather_policy"
-  ],
-  "worrysentinel_security_test_level_ordering": [
-    "worrysentinel_security_level"
-  ],
-  "kindmother_storage_delete": [
-    "kindmother_storage_trait"
-  ],
-  "miyukiniadmin_restore_result_success": [
-    "miyukiniadmin_backup_service_restore_result"
-  ],
-  "kernel_reexport_lifecycle": [
-    "kernel_module_lifecycle"
-  ],
-  "caringnanny_health_status_unhealthy": [
-    "caringnanny_health_status"
-  ],
-  "bondingbrother_sync_strategy_deferred": [
-    "bondingbrother_sync_strategy"
-  ],
-  "kindmother_observability_get_health": [
-    "kindmother_observability_trait"
-  ],
-  "miyukiniadmin_config_backend_config_tls_key": [
-    "miyukiniadmin_config_backend_config"
-  ],
-  "test_id_display_roundtrip": [
-    "kernel_id_display",
-    "kernel_id_parse"
-  ],
-  "test_time_no_timezone_logic": [
-    "kernel_clock_now"
-  ],
-  "strongfather_decision_new": [
-    "strongfather_decision"
-  ],
-  "strongfather_decision_is_refused": [
-    "strongfather_decision"
-  ],
-  "worrysentinel_degradation_state_field": [
-    "worrysentinel_degradation"
-  ],
-  "masterbutler_workflow_new": [
-    "masterbutler_workflow"
-  ],
-  "borderguard_crossing_rule_min_trust_level": [
-    "borderguard_crossing_rule"
-  ],
-  "kindmother_instance_state_test_mother_creation": [
-    "kindmother_instance_state_new"
-  ],
-  "bondingbrother_sync_test_strategy": [
-    "bondingbrother_sync_strategy"
-  ],
-  "everbuddy_migration_executor_execute": [
-    "everbuddy_migration_executor_trait"
-  ],
-  "logisticssteward_allocation_component_id": [
-    "logisticssteward_allocation"
-  ],
-  "logisticssteward_optimization_test_creation": [
-    "logisticssteward_optimization"
-  ],
-  "kindmother_storage_memory_new": [
-    "kindmother_storage_memory"
-  ],
-  "test_config_empty_value": [
-    "config_get"
-  ],
-  "kindmother_threat_detector_check_anomalies": [
-    "kindmother_threat_detector_trait"
-  ],
-  "kernel_id_parse": [
-    "kernel_id_type"
-  ],
-  "miyukiniadmin_backend_api_backups_create": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "test_lifecycle_multiple_hooks": [
-    "kernel_lifecycle_shutdown"
-  ],
-  "miyusql_error_connection": [
-    "miyusql_error_enum"
-  ],
-  "kindmother_instance_identity_is_mother": [
-    "kindmother_instance_identity"
-  ],
-  "strongfather_decision_metadata_with_field": [
-    "strongfather_decision_metadata_new"
-  ],
-  "strongfather_decision_is_ambiguous": [
-    "strongfather_decision"
-  ],
-  "strongfather_policy_with_metadata": [
-    "strongfather_policy_new"
-  ],
-  "strongfather_policy_set_add": [
-    "strongfather_policy_set_new"
-  ],
-  "borderguard_crossing_rule_new": [
-    "borderguard_crossing_rule"
-  ],
-  "masterbutler_step_result_success": [
-    "masterbutler_step_result"
-  ],
-  "miyukiniadmin_bonding_brother_bridge_error_connection_failed": [
-    "miyukiniadmin_bonding_brother_bridge_error"
-  ],
-  "tamr_metadata_values": [
-    "tamr_metadata"
-  ],
-  "kindmother_observability_metrics_read_count": [
-    "kindmother_observability_metrics"
-  ],
-  "kindmother_storage_memory_data": [
-    "kindmother_storage_memory"
-  ],
-  "strongfather_decision_metadata_new": [
-    "strongfather_decision_metadata"
-  ],
-  "kindmother_instance_identity_type": [
-    "kindmother_instance_identity"
-  ],
-  "worrysentinel_threat_level_low": [
-    "worrysentinel_threat_level"
-  ],
-  "miyukiniadmin_api_routes_test_router_creation": [
-    "miyukiniadmin_api_routes_router_new"
-  ],
-  "everbuddy_version_new": [
-    "everbuddy_version"
-  ],
-  "test_id_parse_valid_uuid": [
-    "kernel_id_parse"
-  ],
-  "miyukiniadmin_config_backend_config_https": [
-    "miyukiniadmin_config_backend_config"
-  ],
-  "kindmother_instance_identity_is_daughter": [
-    "kindmother_instance_identity"
-  ],
-  "miyukiniadmin_restore_result_message": [
-    "miyukiniadmin_backup_service_restore_result"
-  ],
-  "borderguard_boundary_new": [
-    "borderguard_boundary"
-  ],
-  "miyukiniadmin_migration_record_checksum": [
-    "miyukiniadmin_migration_service_migration_record"
-  ],
-  "miyukiniadmin_backup_record_size_bytes": [
-    "miyukiniadmin_backup_service_backup_record"
-  ],
-  "kernel_reexport_log": [
-    "kernel_module_log"
-  ],
-  "worrysentinel_security_level_critical": [
-    "worrysentinel_security_level"
-  ],
-  "miyukiniadmin_migration_record_result": [
-    "miyukiniadmin_migration_service_migration_record"
-  ],
-  "caringnanny_observer_system_event_message": [
-    "caringnanny_observer_system_event"
-  ],
-  "test_lifecycle_deterministic": [
-    "kernel_lifecycle_shutdown"
-  ],
-  "kernel_lifecycle_register_shutdown_hook": [
-    "kernel_lifecycle_trait"
-  ],
-  "bondingbrother_sync_error_failed": [
-    "bondingbrother_sync_error"
-  ],
-  "borderguard_boundary_type_internal": [
-    "borderguard_boundary_type"
-  ],
-  "miyukiniadmin_migration_test_apply_result": [
-    "miyukiniadmin_migration_service_apply"
-  ],
-  "miyukiniadmin_testing_test_results_failed": [
-    "miyukiniadmin_testing_test_results"
-  ],
-  "envconfig_from_env": [
-    "envconfig_struct"
-  ],
-  "worrysentinel_threat_level_medium": [
-    "worrysentinel_threat_level"
-  ],
-  "strongfather_policy_engine_evaluate_policy": [
-    "strongfather_policy_engine_new"
-  ],
-  "bondingbrother_connection_manager_connect": [
-    "bondingbrother_connection_manager_trait"
-  ],
-  "everbuddy_version_patch": [
-    "everbuddy_version"
-  ],
-  "kindmother_threat_level_critical": [
-    "kindmother_threat_level"
-  ],
-  "miyukiniadmin_bonding_brother_bridge_connect": [
-    "miyukiniadmin_bonding_brother_bridge_trait",
-    "bondingbrother_connection_manager_connect"
-  ],
-  "kindmother_sync_apply_delta": [
-    "kindmother_sync_trait"
-  ],
-  "miyukiniadmin_migration_record_id": [
-    "miyukiniadmin_migration_service_migration_record"
-  ],
-  "miyukiniadmin_monitoring_test_system_metrics": [
-    "miyukiniadmin_monitoring_system_metrics"
-  ],
-  "kernel_id_display": [
-    "kernel_id_type"
-  ],
-  "logisticssteward_allocation_test_creation": [
-    "logisticssteward_allocation"
-  ],
-  "bondingbrother_sync_strategy_immediate": [
-    "bondingbrother_sync_strategy"
-  ],
-  "test_config_get_existing_key": [
-    "config_get"
-  ],
-  "strongfather_priority_minimum": [
-    "strongfather_priority_value"
-  ],
-  "strongfather_validator_error_display": [
-    "strongfather_validator_error"
-  ],
-  "tamr_metadata_entity_id": [
-    "tamr_metadata"
-  ],
-  "worrysentinel_degradation_state_blocked": [
-    "worrysentinel_degradation_state"
-  ],
-  "borderguard_trust_level_hostile": [
-    "borderguard_trust_level"
-  ],
-  "caringnanny_observer_event_health_change": [
-    "caringnanny_observer_event_type"
-  ],
-  "kindmother_api_error_invalid_intent": [
-    "kindmother_api_error"
-  ],
-  "kindmother_instance_identity_id": [
-    "kindmother_instance_identity"
-  ],
-  "test_log_message_preserved": [
-    "kernel_logger_log"
-  ],
-  "kernel_reexport_id": [
-    "kernel_module_id"
-  ],
-  "bondingbrother_translation_target_format": [
-    "bondingbrother_translation"
-  ],
-  "borderguard_trust_level_unknown": [
-    "borderguard_trust_level"
-  ],
-  "kindmother_api_write_operation_create": [
-    "kindmother_api_write_operation"
-  ],
-  "test_id_parse_invalid_format": [
-    "kernel_id_parse"
-  ],
-  "everbuddy_version_major": [
-    "everbuddy_version"
-  ],
-  "kindmother_threat_level_medium": [
-    "kindmother_threat_level"
-  ],
-  "miyukiniadmin_permission_has_capability": [
-    "miyukiniadmin_permission_service"
-  ],
-  "miyusql_error_no_mandate": [
-    "miyusql_error_enum"
-  ],
-  "miyukiniadmin_database_instance_info_identity": [
-    "miyukiniadmin_database_instance_info"
-  ],
-  "strongfather_intent_with_constraints": [
-    "strongfather_intent_new"
-  ],
-  "kindmother_instance_type_mother": [
-    "kindmother_instance_type"
-  ],
-  "kindmother_reexport_storage": [
-    "kindmother_module_storage"
-  ],
-  "miyukiniadmin_migration_record_operator_id": [
-    "miyukiniadmin_migration_service_migration_record"
-  ],
-  "strongfather_policy_set_get": [
-    "strongfather_policy_set_new"
-  ],
-  "everbuddy_version_minor": [
-    "everbuddy_version"
-  ],
-  "miyusql_context_new": [
-    "miyusql_governed_context_struct"
-  ],
-  "kindmother_observability_test_default_health": [
-    "kindmother_observability_default",
-    "kindmother_observability_get_health"
-  ],
-  "worrysentinel_security_level_standard": [
-    "worrysentinel_security_level"
-  ],
-  "logisticssteward_resource_capacity": [
-    "logisticssteward_resource"
-  ],
-  "borderguard_boundary_id": [
-    "borderguard_boundary"
-  ],
-  "everbuddy_compatibility_level_compatible": [
-    "everbuddy_compatibility_level"
-  ],
-  "caringnanny_health_status_degraded": [
-    "caringnanny_health_status"
-  ],
-  "kindmother_instance_state_test_daughter_creation": [
-    "kindmother_instance_state_new"
-  ],
-  "caringnanny_health_checker_check": [
-    "caringnanny_health_checker_trait"
-  ],
-  "kindmother_api_submit_write_intent": [
-    "kindmother_api_coredata"
-  ],
-  "borderguard_boundary_test_creation": [
-    "borderguard_boundary_new"
-  ],
-  "miyukiniadmin_api_handler_test_response_creation": [
-    "miyukiniadmin_api_response"
-  ],
-  "kindmother_observability_health_unhealthy": [
-    "kindmother_observability_health_status"
-  ],
-  "borderguard_crossing_test_rule_creation": [
-    "borderguard_crossing_rule_new"
-  ],
-  "kindmother_sync_delta_entity_id": [
-    "kindmother_sync_delta"
-  ],
-  "kindmother_reexport_observability": [
-    "kindmother_module_observability"
-  ],
-  "logisticssteward_resource_type_cpu": [
-    "logisticssteward_resource_type"
-  ],
-  "everbuddy_migration_error_failed": [
-    "everbuddy_migration_error"
-  ],
-  "caringnanny_observer_test_event_creation": [
-    "caringnanny_observer_system_event"
-  ],
-  "miyukiniadmin_backup_record_id": [
-    "miyukiniadmin_backup_service_backup_record"
-  ],
-  "kindmother_observability_health_degraded": [
-    "kindmother_observability_health_status"
-  ],
-  "masterbutler_orchestrator_test_workflow_execution": [
-    "masterbutler_orchestrator_trait"
-  ],
-  "miyukiniadmin_backup_service_create": [
-    "miyukiniadmin_backup_service_trait"
-  ],
-  "miyukiniadmin_backup_service_restore": [
-    "miyukiniadmin_backup_service_trait"
-  ],
-  "miyukiniadmin_backend_api_migrations_history": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "miyukiniadmin_migration_service_list_pending": [
-    "miyukiniadmin_migration_service_trait"
-  ],
-  "miyukiniadmin_auth_service": [
-    "miyukiniadmin_models_admin_account",
-    "miyukiniadmin_models_session"
-  ],
-  "caringnanny_observer_system_event_component": [
-    "caringnanny_observer_system_event"
-  ],
-  "masterbutler_step_id": [
-    "masterbutler_step"
-  ],
-  "borderguard_boundary_type_integration": [
-    "borderguard_boundary_type"
-  ],
-  "borderguard_boundary_type": [
-    "borderguard_boundary"
-  ],
-  "test_config_get_case_sensitive": [
-    "config_get"
-  ],
-  "test_config_multiple_keys": [
-    "config_get"
-  ],
-  "bondingbrother_translation_test_creation": [
-    "bondingbrother_translation"
-  ],
-  "kernel_reexport_time": [
-    "kernel_module_time"
-  ],
-  "kernel_lifecycle_hooks": [
-    "kernel_lifecycle_default_struct"
-  ],
-  "kernel_lifecycle_new": [
-    "kernel_lifecycle_default_struct"
-  ],
-  "miyukiniadmin_security_service_get_security_level": [
-    "miyukiniadmin_security_service_trait",
-    "worrysentinel_security_level_manager_get_current"
-  ],
-  "test_log_no_external_dependency": [
-    "kernel_logger_log"
-  ],
-  "test_config_no_external_dependency": [
-    "envconfig_from_env"
-  ],
-  "kindmother_observability_get_metrics": [
-    "kindmother_observability_trait"
-  ],
-  "kindmother_threat_detector_check_corruption": [
-    "kindmother_threat_detector_trait"
-  ],
-  "logisticssteward_optimization_recommendations": [
-    "logisticssteward_optimization"
-  ],
-  "kindmother_storage_error_io": [
-    "kindmother_storage_error"
-  ],
-  "miyukiniadmin_config_backend_config_port": [
-    "miyukiniadmin_config_backend_config"
-  ],
-  "miyukiniadmin_testing_service_run_tests": [
-    "miyukiniadmin_testing_service_trait"
-  ],
-  "miyukiniadmin_api_response_status": [
-    "miyukiniadmin_api_response"
-  ],
-  "envconfig_values": [
-    "envconfig_struct"
-  ],
-  "kernel_clock_now": [
-    "kernel_clock_trait"
-  ],
-  "test_time_fake_clock_injection": [
-    "kernel_clock_trait"
-  ],
-  "strongfather_decision_is_accepted": [
-    "strongfather_decision"
-  ],
-  "kindmother_observability_metrics_write_count": [
-    "kindmother_observability_metrics"
-  ],
-  "strongfather_policy_set_iter": [
-    "strongfather_policy_set_new"
-  ],
-  "miyusql_context_mandate_id": [
-    "miyusql_governed_context_struct"
-  ],
-  "masterbutler_orchestrator_execute": [
-    "masterbutler_orchestrator_trait"
-  ],
-  "tamr_taxonomy_id": [
-    "tamr_taxonomy"
-  ],
-  "kindmother_instance_state_new": [
-    "kindmother_instance_state",
-    "kindmother_instance_identity_new",
-    "kernel_clock_now"
-  ],
-  "kindmother_sync_delta_operation_delete": [
-    "kindmother_sync_delta_operation"
-  ],
-  "everbuddy_version_manager_get_current": [
-    "everbuddy_version_manager_trait"
-  ],
-  "masterbutler_workflow_test_creation": [
-    "masterbutler_workflow_new"
-  ],
-  "strongfather_reexport_policy": [
-    "strongfather_module_policy"
-  ],
-  "strongfather_policy_set_new": [
-    "strongfather_policy_set"
-  ],
-  "everbuddy_migration_to_version": [
-    "everbuddy_migration"
-  ],
-  "test_lifecycle_no_business_logic": [
-    "kernel_lifecycle_trait"
-  ],
-  "worrysentinel_security_level_sensitive": [
-    "worrysentinel_security_level"
-  ],
-  "tamr_classification_terms": [
-    "tamr_classification"
-  ],
-  "envconfig_get_impl": [
+  "nodes": [
+    "COH_001",
+    "COH_002",
+    "COH_003",
+    "COH_004",
+    "COH_005",
+    "COH_006",
+    "CONF_001",
+    "KMC_E_001",
+    "KMC_E_002",
+    "KMC_E_003",
+    "KMC_E_004",
+    "KMC_O_001",
+    "KMC_O_002",
+    "KMC_P_001",
+    "KMC_P_002",
+    "KMC_P_003",
+    "KMC_P_004",
+    "KMC_P_005",
+    "KMC_P_010",
+    "KMC_P_011",
+    "KMC_P_012",
+    "KMC_P_013",
+    "KMC_P_014",
+    "KMC_P_015",
+    "KMC_R_001",
+    "KMC_R_002",
+    "KMC_R_003",
+    "MAUTH_CTX_001",
+    "MAUTH_CTX_002",
+    "MAUTH_CTX_003",
+    "MAUTH_D_001",
+    "MAUTH_D_002",
+    "MAUTH_D_003",
+    "MAUTH_E_001",
+    "MAUTH_E_002",
+    "MAUTH_E_003",
+    "MAUTH_R_001",
+    "MAUTH_R_002",
+    "MAUTH_R_003",
+    "MAUTH_TOOL_001",
+    "MAUTH_TOOL_002",
+    "MAUTH_TOOL_003",
+    "MAUTH_TOOL_004",
+    "MAUTH_TOOL_010",
+    "MAUTH_TOOL_011",
+    "MAUTH_TOOL_012",
+    "MAUTH_TOOL_013",
+    "MAUTH_T_001",
+    "MAUTH_T_002",
+    "MAUTH_T_003",
+    "MAUTH_T_004",
+    "MAUTH_T_005",
+    "MSQL_C_001",
+    "MSQL_C_002",
+    "MSQL_C_003",
+    "MSQL_Q_001",
+    "MSQL_Q_002",
+    "MSQL_Q_003",
+    "MSQL_Q_004",
+    "MSQL_S_001",
+    "MSQL_S_002",
+    "MSQL_S_003",
+    "MSQL_T_001",
+    "MSQL_T_002",
+    "MSQL_T_004",
+    "MUID-AppHeader",
+    "MUID-AppSidebar",
+    "MUID-Atoms",
+    "MUID-AuthLayout",
+    "MUID-Avatar",
+    "MUID-Badge",
+    "MUID-Breadcrumb",
+    "MUID-Button",
+    "MUID-Card",
+    "MUID-CardGrid",
+    "MUID-Checkbox",
+    "MUID-CommandPalette",
+    "MUID-Context",
+    "MUID-DashboardLayout",
+    "MUID-DataTable",
+    "MUID-DetailLayout",
+    "MUID-Divider",
+    "MUID-Dropdown",
+    "MUID-EmptyState",
+    "MUID-Form",
+    "MUID-FormField",
+    "MUID-FullscreenLayout",
+    "MUID-Icon",
+    "MUID-Lib",
+    "MUID-MenuItem",
+    "MUID-Modal",
+    "MUID-Molecules",
+    "MUID-NavBar",
+    "MUID-NotificationCenter",
+    "MUID-Organisms",
+    "MUID-PageHeader",
+    "MUID-Pagination",
+    "MUID-Progress",
+    "MUID-SearchBar",
+    "MUID-ServiceLayout",
+    "MUID-SettingsLayout",
+    "MUID-Slider",
+    "MUID-Spinner",
+    "MUID-SplitLayout",
+    "MUID-StatRow",
+    "MUID-StatusBadge",
+    "MUID-Styles",
+    "MUID-TabBar",
+    "MUID-TabItem",
+    "MUID-Templates",
+    "MUID-Text",
+    "MUID-TextInput",
+    "MUID-Toast",
+    "MUID-Toggle",
+    "MUID-Tooltip",
+    "MUIE-AtomsIndex",
+    "MUIE-BeltCol",
+    "MUIE-BeltSlot",
+    "MUIE-CharSelect",
+    "MUIE-CharSheet",
+    "MUIE-ChatMsg",
+    "MUIE-ChatPanel",
+    "MUIE-Convert",
+    "MUIE-Cube",
+    "MUIE-D2Button",
+    "MUIE-D2Label",
+    "MUIE-EquipSlot",
+    "MUIE-GoldSep",
+    "MUIE-HudBar",
+    "MUIE-InvPanel",
+    "MUIE-InvSlot",
+    "MUIE-ItemIcon",
+    "MUIE-ItemTooltip",
+    "MUIE-Lib",
+    "MUIE-MainMenu",
+    "MUIE-MercPanel",
+    "MUIE-Minimap",
+    "MUIE-MinimapMarker",
+    "MUIE-MolsIndex",
+    "MUIE-NpcDialog",
+    "MUIE-NpcOpt",
+    "MUIE-Orb",
+    "MUIE-OrgsIndex",
+    "MUIE-PartyMem",
+    "MUIE-PartyPanel",
+    "MUIE-PauseMenu",
+    "MUIE-ProgressBar",
+    "MUIE-QualityText",
+    "MUIE-QuestEntry",
+    "MUIE-QuestLog",
+    "MUIE-ResNum",
+    "MUIE-SkillIcon",
+    "MUIE-SkillNode",
+    "MUIE-SkillTree",
+    "MUIE-SlotFrame",
+    "MUIE-Stash",
+    "MUIE-StatRow",
+    "MUIE-Theme",
+    "MUIE-TmplCharSelect",
+    "MUIE-TmplDialog",
+    "MUIE-TmplGameplay",
+    "MUIE-TmplIndex",
+    "MUIE-TmplLoading",
+    "MUIE-TmplLobby",
+    "MUIE-TmplMenu",
+    "MUIE-Trade",
+    "MUIE-WPEntry",
+    "MUIE-WPMap",
+    "MUIT-Animation",
+    "MUIT-Color",
+    "MUIT-Lib",
+    "MUIT-Palette",
+    "MUIT-PaletteCog",
+    "MUIT-PaletteD2",
+    "MUIT-Radius",
+    "MUIT-Shadow",
+    "MUIT-Spacing",
+    "MUIT-Theme",
+    "MUIT-ThemeCog",
+    "MUIT-ThemeD2",
+    "MUIT-Themes",
+    "MUIT-Typography",
+    "MUIT-ZIndex",
+    "alicia_capture_admin_cell",
+    "alicia_capture_admin_cell_build",
+    "alicia_capture_admin_cell_struct",
+    "alicia_capture_admin_embedded_test_def",
+    "alicia_capture_admin_identification",
+    "alicia_capture_admin_integrity",
+    "alicia_capture_admin_test_criteria",
+    "alicia_capture_admin_test_manifest",
+    "alicia_capture_capture",
+    "alicia_capture_context",
+    "alicia_capture_devices",
+    "alicia_capture_errors",
+    "alicia_capture_vad",
+    "bondingbrother_connection",
+    "bondingbrother_connection_error",
+    "bondingbrother_connection_error_already_connected",
+    "bondingbrother_connection_id",
+    "bondingbrother_connection_manager_connect",
+    "bondingbrother_connection_manager_trait",
+    "bondingbrother_connection_operator_id",
+    "bondingbrother_connection_test_creation",
+    "bondingbrother_sync_error",
+    "bondingbrother_sync_error_failed",
+    "bondingbrother_sync_manager_sync",
+    "bondingbrother_sync_manager_trait",
+    "bondingbrother_sync_strategy",
+    "bondingbrother_sync_strategy_deferred",
+    "bondingbrother_sync_strategy_immediate",
+    "bondingbrother_sync_test_strategy",
+    "bondingbrother_translation",
+    "bondingbrother_translation_error",
+    "bondingbrother_translation_error_unsupported",
+    "bondingbrother_translation_source_format",
+    "bondingbrother_translation_target_format",
+    "bondingbrother_translation_test_creation",
+    "bondingbrother_translator_trait",
+    "bondingbrother_translator_translate",
+    "borderguard_boundary",
+    "borderguard_boundary_id",
+    "borderguard_boundary_name",
+    "borderguard_boundary_new",
+    "borderguard_boundary_test_creation",
+    "borderguard_boundary_type",
+    "borderguard_boundary_type_boundary_type_2",
+    "borderguard_boundary_type_external",
+    "borderguard_boundary_type_integration",
+    "borderguard_boundary_type_internal",
+    "borderguard_classifier_test_default_unknown",
+    "borderguard_classifier_test_registered",
+    "borderguard_crossing_rule",
+    "borderguard_crossing_rule_allowed",
+    "borderguard_crossing_rule_boundary_id",
+    "borderguard_crossing_rule_min_trust_level",
+    "borderguard_crossing_rule_new",
+    "borderguard_crossing_rules",
+    "borderguard_crossing_rules_add",
+    "borderguard_crossing_rules_rules",
+    "borderguard_crossing_test_rule_creation",
+    "borderguard_module_boundary",
+    "borderguard_module_crossing",
+    "borderguard_module_metadata",
+    "borderguard_module_registry",
+    "borderguard_module_trust_level",
+    "borderguard_trust_level",
+    "borderguard_trust_level_classifier",
+    "borderguard_trust_level_classifier_classify",
+    "borderguard_trust_level_hostile",
+    "borderguard_trust_level_test_ordering",
+    "borderguard_trust_level_trusted",
+    "borderguard_trust_level_unknown",
+    "borderguard_trust_level_verified",
+    "caringnanny_health_checker_check",
+    "caringnanny_health_checker_trait",
+    "caringnanny_health_status",
+    "caringnanny_health_status_degraded",
+    "caringnanny_health_status_healthy",
+    "caringnanny_health_status_unhealthy",
+    "caringnanny_health_test_status_equality",
+    "caringnanny_metrics",
+    "caringnanny_metrics_collector_get",
+    "caringnanny_metrics_collector_trait",
+    "caringnanny_metrics_error_count",
+    "caringnanny_metrics_event_count",
+    "caringnanny_metrics_test_default",
+    "caringnanny_observer_event_anomaly",
+    "caringnanny_observer_event_health_change",
+    "caringnanny_observer_event_state_change",
+    "caringnanny_observer_event_type",
+    "caringnanny_observer_observe",
+    "caringnanny_observer_system_event",
+    "caringnanny_observer_system_event_component",
+    "caringnanny_observer_system_event_message",
+    "caringnanny_observer_system_event_type",
+    "caringnanny_observer_test_event_creation",
+    "caringnanny_observer_trait",
+    "central",
+    "central.components",
+    "central.components.calendar",
+    "central.components.calendar.agenda_list",
+    "central.components.calendar.day_view",
+    "central.components.calendar.event_slot",
+    "central.components.calendar.mini_calendar",
+    "central.components.calendar.month_view",
+    "central.components.calendar.types",
+    "central.components.calendar.week_view",
+    "central.components.service_sidebar",
+    "central.services",
+    "central.services.lifegame",
+    "central.services.lifegame.canvas",
+    "central.services.lifegame.sidebar",
+    "central.services.lifegame.stats_bar",
+    "central.services.ui_assets",
+    "central.services.ui_builder",
+    "central_auth_kindmother_client_db",
+    "central_remote_bridge",
+    "central_remote_lib",
+    "central_remote_module",
+    "central_remote_server",
+    "central_remote_session",
+    "cog",
+    "cog.adminApp",
+    "cog.adminTheme",
+    "cog.cloudAuth",
+    "cog.cloudAuth.buildLanguageCard",
+    "cog.cloudAuth.checkFirstRun",
+    "cog.cloudAuth.checkSystemStatus",
+    "cog.cloudAuth.configureOidcLoginUI",
+    "cog.cloudAuth.detectBrowserLanguage",
+    "cog.cloudAuth.fetchUserData",
+    "cog.cloudAuth.initLanguageSelector",
+    "cog.cloudAuth.initLoginElements",
+    "cog.cloudAuth.isFirstRun",
+    "cog.cloudAuth.login",
+    "cog.cloudAuth.logout",
+    "cog.cloudAuth.redirectToMainApp",
+    "cog.cloudAuth.refreshAuthToken",
+    "cog.cloudAuth.register",
+    "cog.cloudAuth.showInitialPanel",
+    "cog.cloudAuth.updateLanguagePanelTexts",
+    "cog.cloudAuthSession",
+    "cog.cloudAuthSession.checkAuthentication",
+    "cog.cloudAuthSession.refreshUserData",
+    "cog.cloudAuthSession.resolveHomeFolder",
+    "cog.cloudBootstrap",
+    "cog.cloudContextMenus",
+    "cog.cloudCsrf",
+    "cog.cloudCsrf.getCsrfHeaders",
+    "cog.cloudCsrf.getCsrfToken",
+    "cog.cloudFavorites",
+    "cog.cloudFileOps",
+    "cog.cloudFileOps.getAuthHeaders",
+    "cog.cloudFileSharing",
+    "cog.cloudFilesView",
+    "cog.cloudFilesView.loadFiles",
+    "cog.cloudFormatters",
+    "cog.cloudFormatters.escapeHtml",
+    "cog.cloudFormatters.formatDateShort",
+    "cog.cloudFormatters.formatDateTime",
+    "cog.cloudFormatters.formatFileSize",
+    "cog.cloudFormatters.formatQuotaSize",
+    "cog.cloudFormatters.isTextViewable",
+    "cog.cloudI18n",
+    "cog.cloudI18n.getCurrentLocale",
+    "cog.cloudI18n.getNestedValue",
+    "cog.cloudI18n.getSupportedLocales",
+    "cog.cloudI18n.initI18n",
+    "cog.cloudI18n.interpolate",
+    "cog.cloudI18n.loadTranslations",
+    "cog.cloudI18n.safeT",
+    "cog.cloudI18n.setLocale",
+    "cog.cloudI18n.t",
+    "cog.cloudI18n.translateElement",
+    "cog.cloudI18n.translatePage",
+    "cog.cloudIcons",
+    "cog.cloudIcons.oxiIcon",
+    "cog.cloudIcons.replaceIconsInElement",
+    "cog.cloudInlineViewer",
+    "cog.cloudLanguageSelector",
+    "cog.cloudLanguageSelector.closeDropdown",
+    "cog.cloudLanguageSelector.createLanguageSelector",
+    "cog.cloudLanguageSelector.getAvailableLanguages",
+    "cog.cloudLanguageSelector.openDropdown",
+    "cog.cloudLanguageSelector.selectLanguage",
+    "cog.cloudLanguageSelector.toggleDropdown",
+    "cog.cloudLanguageSelector.updateHtmlAttributes",
+    "cog.cloudLanguageSelector.updateSelectedLanguage",
+    "cog.cloudMain",
+    "cog.cloudMain.cacheElements",
+    "cog.cloudMain.initApp",
+    "cog.cloudMain.setActionsBarMode",
+    "cog.cloudMain.setupActionsBarDelegation",
+    "cog.cloudMain.setupEventListeners",
+    "cog.cloudMain.setupUploadDropdown",
+    "cog.cloudMain.updateStorageUsageDisplay",
+    "cog.cloudModal",
+    "cog.cloudMultiSelect",
+    "cog.cloudNavigation",
+    "cog.cloudNavigation.getSectionFromNavItem",
+    "cog.cloudNavigation.hideFileContainers",
+    "cog.cloudNavigation.initSidebarToggle",
+    "cog.cloudNavigation.setCurrentSection",
+    "cog.cloudNavigation.switchToFavoritesView",
+    "cog.cloudNavigation.switchToFilesView",
+    "cog.cloudNavigation.switchToPhotosView",
+    "cog.cloudNavigation.switchToRecentFilesView",
+    "cog.cloudNavigation.switchToSharedView",
+    "cog.cloudNavigation.syncViewContainers",
+    "cog.cloudNotifications",
+    "cog.cloudPhotos",
+    "cog.cloudPhotosLightbox",
+    "cog.cloudPwa",
+    "cog.cloudPwa.uploadPhotosDirectly",
+    "cog.cloudRecent",
+    "cog.cloudSearch",
+    "cog.cloudSearchView",
+    "cog.cloudSearchView.performSearch",
+    "cog.cloudServiceWorker",
+    "cog.cloudState",
+    "cog.cloudSwRegister",
+    "cog.cloudThemeInit",
+    "cog.cloudTrashView",
+    "cog.cloudTrashView.addTrashItemToView",
+    "cog.cloudTrashView.loadTrashItems",
+    "cog.cloudUi",
+    "cog.cloudUi.initRubberBandSelection",
+    "cog.cloudUi.showConfirmDialog",
+    "cog.cloudUi.showContextMenuAtElement",
+    "cog.cloudUi.toggleCardSelection",
+    "cog.cloudUiFileTypes",
+    "cog.cloudUiNotifications",
+    "cog.cloudUserMenu",
+    "cog.cloudUserMenu.fetchAppVersion",
+    "cog.cloudUserMenu.logout",
+    "cog.cloudUserMenu.setupUserMenu",
+    "cog.cloudUserMenu.showUserProfileModal",
+    "cog.cloudUserMenu.updateUserMenuData",
+    "cog.cloudViewAdmin",
+    "cog.cloudViewAdmin.deleteUser",
+    "cog.cloudViewAdmin.init",
+    "cog.cloudViewAdmin.loadDashboard",
+    "cog.cloudViewAdmin.loadUsers",
+    "cog.cloudViewAdmin.openCreateUserModal",
+    "cog.cloudViewAdmin.openQuotaModal",
+    "cog.cloudViewAdmin.openResetPasswordModal",
+    "cog.cloudViewAdmin.saveOidcSettings",
+    "cog.cloudViewAdmin.saveQuota",
+    "cog.cloudViewAdmin.showAccessDenied",
+    "cog.cloudViewAdmin.showConfirm",
+    "cog.cloudViewAdmin.showOidcStatus",
+    "cog.cloudViewAdmin.submitCreateUser",
+    "cog.cloudViewAdmin.submitResetPassword",
+    "cog.cloudViewAdmin.switchTab",
+    "cog.cloudViewAdmin.t",
+    "cog.cloudViewAdmin.testConnection",
+    "cog.cloudViewAdmin.toggleActive",
+    "cog.cloudViewAdmin.toggleRegistration",
+    "cog.cloudViewAdmin.toggleRole",
+    "cog.cloudViewDeviceVerify",
+    "cog.cloudViewMobile",
+    "cog.cloudViewMobile.fetchExistingFileNames",
+    "cog.cloudViewMobile.scanDirectory",
+    "cog.cloudViewMobile.showModal",
+    "cog.cloudViewMobile.startBatchUpload",
+    "cog.cloudViewMobile.startQueueProcessing",
+    "cog.cloudViewMobile.streamSyncFromDirectory",
+    "cog.cloudViewMobile.syncWithCloudComparison",
+    "cog.cloudViewMobile.updateProgress",
+    "cog.cloudViewMobile.uploadFile",
+    "cog.cloudViewNcError",
+    "cog.cloudViewNcLogin",
+    "cog.cloudViewNcSuccess",
+    "cog.cloudViewProfile",
+    "cog.cloudViewProfile.changePassword",
+    "cog.cloudViewProfile.createAppPassword",
+    "cog.cloudViewProfile.init",
+    "cog.cloudViewProfile.loadAppPasswords",
+    "cog.cloudViewProfile.revokeAppPassword",
+    "cog.cloudViewProfile.t",
+    "cog.cloudViewShared",
+    "cog.cloudWopiEditor",
+    "cog.compAnimatedCard",
+    "cog.compCard",
+    "cog.compFeatureList",
+    "cog.compLayout",
+    "cog.compMiouMascot",
+    "cog.compPyramidDiagram",
+    "cog.compTimeline",
+    "cog.dataCores",
+    "cog.dataGlossary",
+    "cog.dataPyramid",
+    "cog.dataRoadmap",
+    "cog.dataServices",
+    "cog.dataServicesDetailed",
+    "cog.gameAllumina",
+    "cog.pageAbout",
+    "cog.pageArchitecture",
+    "cog.pageCoreDetail",
+    "cog.pageCores",
+    "cog.pageDocs",
+    "cog.pageHome",
+    "cog.pageMockCog",
+    "cog.pageOnboarding",
+    "cog.pageRoadmap",
+    "cog.pageServiceDetail",
+    "cog.pageServices",
+    "cog.siteApp",
+    "cog_portal_contract_lib",
+    "cog_web_portal_csrf",
+    "cog_web_portal_main",
+    "cog_web_portal_rate_limiter",
+    "cog_web_portal_route_central_remote",
+    "cog_web_portal_route_contact",
+    "cog_web_portal_route_home",
+    "cog_web_portal_route_service",
+    "cog_web_portal_routes_mod",
+    "cog_web_portal_security_headers",
+    "cog_web_portal_templates",
     "config_get",
-    "envconfig_struct"
-  ],
-  "logisticssteward_resource_test_creation": [
-    "logisticssteward_resource"
-  ],
-  "miyukiniadmin_permission_service": [
-    "miyukiniadmin_models_admin_role"
-  ],
-  "miyukiniadmin_backup_record_type": [
-    "miyukiniadmin_backup_service_backup_record"
-  ],
-  "miyukiniadmin_backend_api_table_delete_row": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "kindmother_observability_metrics_sync_count": [
-    "kindmother_observability_metrics"
-  ],
-  "test_lifecycle_register_hook": [
-    "kernel_lifecycle_register_shutdown_hook"
-  ],
-  "miyukiniadmin_backend_api_table_rows": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "kindmother_api_write_intent_id": [
-    "kindmother_api_write_intent"
-  ],
-  "kindmother_instance_type_daughter": [
-    "kindmother_instance_type"
-  ],
-  "borderguard_crossing_rule_allowed": [
-    "borderguard_crossing_rule"
-  ],
-  "miyukiniadmin_config_test_from_env": [
-    "miyukiniadmin_config_backend_config_from_env"
-  ],
-  "borderguard_trust_level_classifier_classify": [
-    "borderguard_trust_level_classifier"
-  ],
-  "kindmother_api_test_write_intent_creation": [
-    "kindmother_api_write_intent"
-  ],
-  "worrysentinel_threat_level_none": [
-    "worrysentinel_threat_level"
-  ],
-  "miyukiniadmin_config_backend_config_host": [
-    "miyukiniadmin_config_backend_config"
-  ],
-  "everbuddy_compatibility_level_field": [
-    "everbuddy_compatibility"
-  ],
-  "bondingbrother_connection_id": [
-    "bondingbrother_connection"
-  ],
-  "kindmother_sync_delta_operation_update": [
-    "kindmother_sync_delta_operation"
-  ],
-  "miyukiniadmin_api_routes_router_new": [
-    "miyukiniadmin_api_routes_router"
-  ],
-  "caringnanny_observer_system_event_type": [
-    "caringnanny_observer_system_event"
-  ],
-  "miyukiniadmin_backup_record_status": [
-    "miyukiniadmin_backup_service_backup_record"
-  ],
-  "miyukiniadmin_pending_migration_id": [
-    "miyukiniadmin_migration_service_pending_migration"
-  ],
-  "miyukiniadmin_env_state_detect": [
-    "miyukiniadmin_environment_state_service"
-  ],
-  "borderguard_boundary_name": [
-    "borderguard_boundary"
-  ],
-  "strongfather_intent_new": [
-    "strongfather_intent"
-  ],
-  "tamr_metadata_manager_get": [
-    "tamr_metadata_manager_trait"
-  ],
-  "miyukiniadmin_testing_test_results_passed": [
-    "miyukiniadmin_testing_test_results"
-  ],
-  "strongfather_policy_with_composite": [
-    "strongfather_policy_new"
-  ],
-  "tamr_taxonomy_test_creation": [
-    "tamr_taxonomy"
-  ],
-  "kindmother_sync_error_invalid_delta": [
-    "kindmother_sync_error"
-  ],
-  "test_id_no_external_dependency": [
-    "kernel_id_generator_generate"
-  ],
-  "miyukiniadmin_apply_result_status": [
-    "miyukiniadmin_migration_service_apply_result"
-  ],
-  "strongfather_decision_eval_context_new": [
-    "strongfather_decision_evaluation_context"
-  ],
-  "strongfather_reexport_decision": [
-    "strongfather_module_decision"
-  ],
-  "logisticssteward_allocation_error_insufficient": [
-    "logisticssteward_allocation_error"
-  ],
-  "miyukiniadmin_migration_record_applied_at": [
-    "miyukiniadmin_migration_service_migration_record"
-  ],
-  "test_id_no_business_logic": [
-    "kernel_id_type"
-  ],
-  "strongfather_priority_calculator_calculate": [
-    "strongfather_priority_calculator_new"
-  ],
-  "caringnanny_metrics_test_default": [
-    "caringnanny_metrics"
-  ],
-  "miyusql_admin_cell_build": [
-    "miyusql_admin_cell_struct"
-  ],
-  "tamr_classification_entity_id": [
-    "tamr_classification"
-  ],
-  "test_id_hash": [
-    "kernel_id_type"
-  ],
-  "kindmother_threat_level_high": [
-    "kindmother_threat_level"
-  ],
-  "miyukiniadmin_migration_record_duration_ms": [
-    "miyukiniadmin_migration_service_migration_record"
-  ],
-  "kindmother_reexport_sync": [
-    "kindmother_module_sync"
-  ],
-  "logisticssteward_resource_type_field": [
-    "logisticssteward_resource"
-  ],
-  "miyukiniadmin_pending_migration_description": [
-    "miyukiniadmin_migration_service_pending_migration"
-  ],
-  "logisticssteward_allocation_amount": [
-    "logisticssteward_allocation"
-  ],
-  "miyukiniadmin_api_response_body": [
-    "miyukiniadmin_api_response"
-  ],
-  "kindmother_storage_test_delete": [
-    "kindmother_storage_memory_new",
-    "kindmother_storage_write",
-    "kindmother_storage_delete"
-  ],
-  "test_config_deterministic": [
     "envconfig_from_env",
-    "config_get"
-  ],
-  "strongfather_priority_new": [
-    "strongfather_priority_value"
-  ],
-  "tamr_metadata_test_creation": [
-    "tamr_metadata"
-  ],
-  "miyukiniadmin_backup_impl_with_seed": [
-    "miyukiniadmin_backup_service_impl"
-  ],
-  "strongfather_decision_justification_with_reasoning": [
-    "strongfather_decision_justification_new"
-  ],
-  "worrysentinel_threat_level_high": [
-    "worrysentinel_threat_level"
-  ],
-  "kindmother_instance_state_identity": [
+    "envconfig_get_impl",
+    "envconfig_struct",
+    "envconfig_values",
+    "everbuddy_compatibility",
+    "everbuddy_compatibility_checker_check",
+    "everbuddy_compatibility_checker_trait",
+    "everbuddy_compatibility_level",
+    "everbuddy_compatibility_level_compatible",
+    "everbuddy_compatibility_level_field",
+    "everbuddy_compatibility_level_incompatible",
+    "everbuddy_compatibility_test_levels",
+    "everbuddy_migration",
+    "everbuddy_migration_error",
+    "everbuddy_migration_error_failed",
+    "everbuddy_migration_executor_execute",
+    "everbuddy_migration_executor_trait",
+    "everbuddy_migration_from_version",
+    "everbuddy_migration_test_creation",
+    "everbuddy_migration_to_version",
+    "everbuddy_version",
+    "everbuddy_version_major",
+    "everbuddy_version_manager_get_current",
+    "everbuddy_version_manager_trait",
+    "everbuddy_version_minor",
+    "everbuddy_version_new",
+    "everbuddy_version_patch",
+    "everbuddy_version_test_creation",
+    "jay1tribu_data_module",
+    "jay1tribu_domain",
+    "jay1tribu_domain_types",
+    "jay1tribu_kindmother_client_db",
+    "jay1tribu_kindmother_db",
+    "jay1tribu_lib",
+    "jay1tribu_transport",
+    "jaykoa_data_module",
+    "jaykoa_domain_types",
+    "jaykoa_export_ical",
+    "jaykoa_export_module",
+    "jaykoa_jayrdv_adapter",
+    "jaykoa_kindmother_client_db",
+    "jaykoa_kindmother_db",
+    "jaykoa_lib",
+    "jaykoa_services_module",
+    "jaykoa_test_runner",
+    "jaykonta_kindmother_client_db",
+    "jayrdv_data",
+    "jayrdv_data_types",
+    "jayrdv_domain",
+    "jayrdv_kindmother_client_db",
+    "jayrdv_lib",
+    "jayrdv_memory_store",
+    "kernel_clock_default",
+    "kernel_clock_default_struct",
+    "kernel_clock_fake",
+    "kernel_clock_now",
+    "kernel_clock_trait",
+    "kernel_id_display",
+    "kernel_id_generator_generate",
+    "kernel_id_generator_trait",
+    "kernel_id_generator_uuid",
+    "kernel_id_generator_uuid_struct",
+    "kernel_id_parse",
+    "kernel_id_parse_error",
+    "kernel_id_type",
+    "kernel_lifecycle_default",
+    "kernel_lifecycle_default_struct",
+    "kernel_lifecycle_hooks",
+    "kernel_lifecycle_new",
+    "kernel_lifecycle_register_shutdown_hook",
+    "kernel_lifecycle_shutdown",
+    "kernel_lifecycle_trait",
+    "kernel_log_level",
+    "kernel_logger_default",
+    "kernel_logger_default_struct",
+    "kernel_logger_log",
+    "kernel_logger_trait",
+    "kernel_module_config",
+    "kernel_module_id",
+    "kernel_module_lifecycle",
+    "kernel_module_log",
+    "kernel_module_time",
+    "kernel_reexport_config",
+    "kernel_reexport_id",
+    "kernel_reexport_lifecycle",
+    "kernel_reexport_log",
+    "kernel_reexport_time",
+    "kindmother_adapter",
+    "kindmother_api_coredata",
+    "kindmother_api_error",
+    "kindmother_api_error_invalid_intent",
+    "kindmother_api_error_not_found",
+    "kindmother_api_error_permission_denied",
+    "kindmother_api_read",
+    "kindmother_api_submit_write_intent",
+    "kindmother_api_test_write_intent_creation",
+    "kindmother_api_write_intent",
+    "kindmother_api_write_intent_data",
+    "kindmother_api_write_intent_entity_id",
+    "kindmother_api_write_intent_id",
+    "kindmother_api_write_intent_operation",
+    "kindmother_api_write_operation",
+    "kindmother_api_write_operation_create",
+    "kindmother_api_write_operation_delete",
+    "kindmother_api_write_operation_update",
+    "kindmother_client_errors",
+    "kindmother_client_impl",
+    "kindmother_client_protocol",
+    "kindmother_client_unit_tests",
+    "kindmother_db_key",
+    "kindmother_db_key_derivation",
+    "kindmother_instance_identity",
+    "kindmother_instance_identity_id",
+    "kindmother_instance_identity_is_daughter",
+    "kindmother_instance_identity_is_mother",
+    "kindmother_instance_identity_new",
+    "kindmother_instance_identity_type",
     "kindmother_instance_state",
-    "kindmother_instance_identity"
+    "kindmother_instance_state_created_at",
+    "kindmother_instance_state_identity",
+    "kindmother_instance_state_new",
+    "kindmother_instance_state_test_daughter_creation",
+    "kindmother_instance_state_test_mother_creation",
+    "kindmother_instance_state_test_unique_ids",
+    "kindmother_instance_type",
+    "kindmother_instance_type_daughter",
+    "kindmother_instance_type_mother",
+    "kindmother_miyusql_bridge_impl",
+    "kindmother_miyusql_bridge_trait",
+    "kindmother_module_api",
+    "kindmother_module_miyusql_bridge",
+    "kindmother_module_observability",
+    "kindmother_module_state",
+    "kindmother_module_storage",
+    "kindmother_module_sync",
+    "kindmother_module_threat",
+    "kindmother_observability_default",
+    "kindmother_observability_get_health",
+    "kindmother_observability_get_metrics",
+    "kindmother_observability_health_degraded",
+    "kindmother_observability_health_healthy",
+    "kindmother_observability_health_status",
+    "kindmother_observability_health_unhealthy",
+    "kindmother_observability_metrics",
+    "kindmother_observability_metrics_read_count",
+    "kindmother_observability_metrics_sync_count",
+    "kindmother_observability_metrics_write_count",
+    "kindmother_observability_test_default_health",
+    "kindmother_observability_test_default_metrics",
+    "kindmother_observability_trait",
+    "kindmother_reexport_api",
+    "kindmother_reexport_observability",
+    "kindmother_reexport_state",
+    "kindmother_reexport_storage",
+    "kindmother_reexport_sync",
+    "kindmother_reexport_threat",
+    "kindmother_service_arbitration",
+    "kindmother_service_database",
+    "kindmother_service_errors",
+    "kindmother_service_protocol",
+    "kindmother_service_server",
+    "kindmother_storage_delete",
+    "kindmother_storage_error",
+    "kindmother_storage_error_corruption",
+    "kindmother_storage_error_io",
+    "kindmother_storage_error_not_found",
+    "kindmother_storage_memory",
+    "kindmother_storage_memory_data",
+    "kindmother_storage_memory_new",
+    "kindmother_storage_read",
+    "kindmother_storage_test_delete",
+    "kindmother_storage_test_read_write",
+    "kindmother_storage_trait",
+    "kindmother_storage_write",
+    "kindmother_sync_apply_delta",
+    "kindmother_sync_compute_delta",
+    "kindmother_sync_delta",
+    "kindmother_sync_delta_data",
+    "kindmother_sync_delta_entity_id",
+    "kindmother_sync_delta_operation",
+    "kindmother_sync_delta_operation_create",
+    "kindmother_sync_delta_operation_delete",
+    "kindmother_sync_delta_operation_delta_operation_2",
+    "kindmother_sync_delta_operation_update",
+    "kindmother_sync_error",
+    "kindmother_sync_error_conflict",
+    "kindmother_sync_error_invalid_delta",
+    "kindmother_sync_error_io",
+    "kindmother_sync_test_delta_creation",
+    "kindmother_sync_trait",
+    "kindmother_threat_detector_check_anomalies",
+    "kindmother_threat_detector_check_corruption",
+    "kindmother_threat_detector_default",
+    "kindmother_threat_detector_trait",
+    "kindmother_threat_level",
+    "kindmother_threat_level_critical",
+    "kindmother_threat_level_high",
+    "kindmother_threat_level_low",
+    "kindmother_threat_level_medium",
+    "kindmother_threat_level_none",
+    "kindmother_threat_test_detector_default",
+    "lifegame",
+    "lifegame.ai",
+    "lifegame.ai.decide_action",
+    "lifegame.entities",
+    "lifegame.entities.building",
+    "lifegame.entities.building_struct",
+    "lifegame.entities.building_type",
+    "lifegame.entities.creature",
+    "lifegame.entities.creature_struct",
+    "lifegame.entities.creature_type",
+    "lifegame.entities.manager",
+    "lifegame.entities.race",
+    "lifegame.entities.unit",
+    "lifegame.entities.unit_struct",
+    "lifegame.operator",
+    "lifegame.operator.entities",
+    "lifegame.operator.powers",
+    "lifegame.operator.simulation",
+    "lifegame.operator.world",
+    "lifegame.powers",
+    "lifegame.powers.creation",
+    "lifegame.powers.destruction",
+    "lifegame.powers.manager",
+    "lifegame.simulation",
+    "lifegame.simulation.ai",
+    "lifegame.simulation.tick_world_fn",
+    "lifegame.simulation.world_tick",
+    "lifegame.world",
+    "lifegame.world.biome",
+    "lifegame.world.biome_struct",
+    "lifegame.world.biome_type",
+    "lifegame.world.generation",
+    "lifegame.world.generator",
+    "lifegame.world.terrain",
+    "lifegame.world.terrain_grid",
+    "lifegame.world.terrain_type",
+    "lifegame.world.tile",
+    "logisticssteward_allocation",
+    "logisticssteward_allocation_amount",
+    "logisticssteward_allocation_component_id",
+    "logisticssteward_allocation_error",
+    "logisticssteward_allocation_error_insufficient",
+    "logisticssteward_allocation_manager_allocate",
+    "logisticssteward_allocation_manager_trait",
+    "logisticssteward_allocation_resource_type",
+    "logisticssteward_allocation_test_creation",
+    "logisticssteward_optimization",
+    "logisticssteward_optimization_recommendations",
+    "logisticssteward_optimization_test_creation",
+    "logisticssteward_optimizer_optimize",
+    "logisticssteward_optimizer_trait",
+    "logisticssteward_resource",
+    "logisticssteward_resource_capacity",
+    "logisticssteward_resource_manager_get",
+    "logisticssteward_resource_manager_trait",
+    "logisticssteward_resource_test_creation",
+    "logisticssteward_resource_type",
+    "logisticssteward_resource_type_cpu",
+    "logisticssteward_resource_type_disk",
+    "logisticssteward_resource_type_field",
+    "logisticssteward_resource_type_memory",
+    "masterbutler_orchestrator_execute",
+    "masterbutler_orchestrator_test_workflow_execution",
+    "masterbutler_orchestrator_trait",
+    "masterbutler_step",
+    "masterbutler_step_id",
+    "masterbutler_step_name",
+    "masterbutler_step_result",
+    "masterbutler_step_result_failure",
+    "masterbutler_step_result_success",
+    "masterbutler_step_test_creation",
+    "masterbutler_workflow",
+    "masterbutler_workflow_id",
+    "masterbutler_workflow_id_field",
+    "masterbutler_workflow_name",
+    "masterbutler_workflow_new",
+    "masterbutler_workflow_test_creation",
+    "miyauth_tool_identity_attest",
+    "miyauth_tool_identity_resolve",
+    "miyauth_tool_identity_role",
+    "miyauth_tool_identity_verify",
+    "miyauth_unit_tests",
+    "miyuantispam_tool_captcha_generate",
+    "miyuantispam_tool_captcha_verify",
+    "miyuantispam_tool_flood_check",
+    "miyuantispam_tool_rate_limit_check",
+    "miyubilling_tool_billing_invoice_generate",
+    "miyubilling_tool_billing_invoice_list",
+    "miyubilling_tool_billing_payment_record",
+    "miyubilling_tool_billing_subscription_cancel",
+    "miyubilling_tool_billing_subscription_create",
+    "miyubilling_tool_billing_subscription_status",
+    "miyubilling_tool_billing_subscription_update",
+    "miyubilling_tool_billing_tenant_resolve",
+    "miyubooking_tool_booking_cancel",
+    "miyubooking_tool_booking_create",
+    "miyubooking_tool_booking_participants_compute",
+    "miyubooking_tool_booking_price_compute",
+    "miyubooking_tool_booking_resource_availability",
+    "miyubooking_tool_booking_resource_resolve",
+    "miyubooking_tool_booking_slots_list",
+    "miyubooking_tool_booking_slots_resolve",
+    "miyubooking_tool_booking_update",
+    "miyubookmarks_tool_bookmark_add",
+    "miyubookmarks_tool_bookmark_list",
+    "miyubookmarks_tool_bookmark_remove",
+    "miyucalc_admin_cell",
+    "miyucalc_admin_cell_build",
+    "miyucalc_admin_cell_struct",
+    "miyucalc_admin_embedded_test_def",
+    "miyucalc_admin_identification",
+    "miyucalc_admin_integrity",
+    "miyucalc_admin_test_criteria",
+    "miyucalc_admin_test_manifest",
+    "miyucalc_error_enum",
+    "miyucalc_errors",
+    "miyucalc_governed_context",
+    "miyucalc_governed_context_struct",
+    "miyucalc_tool_expression_evaluate",
+    "miyucalc_tool_number_format",
+    "miyucalc_tool_round",
+    "miyucalc_tool_unit_convert",
+    "miyuclock_tool_time_delta",
+    "miyuclock_tool_time_now",
+    "miyuclock_tool_time_now_injected",
+    "miyucloud_admin_cell",
+    "miyucloud_auth_module",
+    "miyucloud_auth_permissions",
+    "miyucloud_auth_security_components",
+    "miyucloud_auth_sessions",
+    "miyucloud_auth_totp",
+    "miyucloud_auth_web_tokens",
+    "miyucloud_calendar_view",
+    "miyucloud_central_view",
+    "miyucloud_contacts_view",
+    "miyucloud_context",
+    "miyucloud_crypto_at_rest",
+    "miyucloud_crypto_e2e",
+    "miyucloud_crypto_keys",
+    "miyucloud_crypto_module",
+    "miyucloud_crypto_streaming",
+    "miyucloud_data_module",
+    "miyucloud_domain_external_share",
+    "miyucloud_domain_file_ops",
+    "miyucloud_domain_jay1tribu_migration",
+    "miyucloud_domain_module",
+    "miyucloud_domain_onboarding",
+    "miyucloud_domain_quota",
+    "miyucloud_domain_sharing",
+    "miyucloud_domain_trash",
+    "miyucloud_domain_types",
+    "miyucloud_errors",
+    "miyucloud_explorer",
+    "miyucloud_export_archive",
+    "miyucloud_export_module",
+    "miyucloud_file_detail",
+    "miyucloud_http_client",
+    "miyucloud_integration_storage_crypto",
+    "miyucloud_integration_sync",
+    "miyucloud_kindmother_db",
+    "miyucloud_lib",
+    "miyucloud_monitoring",
+    "miyucloud_settings",
+    "miyucloud_share_dialog",
+    "miyucloud_sidebar",
+    "miyucloud_storage_chunking",
+    "miyucloud_storage_integrity",
+    "miyucloud_storage_local_fs",
+    "miyucloud_storage_module",
+    "miyucloud_sync_conflict",
+    "miyucloud_sync_engine",
+    "miyucloud_sync_manifest",
+    "miyucloud_sync_module",
+    "miyucloud_sync_peer_discovery",
+    "miyucloud_sync_protocol",
+    "miyucloud_sync_status",
+    "miyucloud_sync_transport",
+    "miyucloud_sync_vector_clock",
+    "miyucloud_trash_view",
+    "miyucloud_ui_components",
+    "miyucloud_ui_state",
+    "miyucloud_upload",
+    "miyucloud_utils_base64",
+    "miyucloud_utils_constant_time",
+    "miyucloud_utils_module",
+    "miyucloud_utils_sanitize",
+    "miyucms_tool_content_comment_create",
+    "miyucms_tool_content_comment_list",
+    "miyucms_tool_content_comment_moderate",
+    "miyucms_tool_content_create",
+    "miyucms_tool_content_publish",
+    "miyucms_tool_content_revision_compare",
+    "miyucms_tool_content_revision_create",
+    "miyucms_tool_content_revision_list",
+    "miyucms_tool_content_revision_restore",
+    "miyucms_tool_content_schedule",
+    "miyucms_tool_content_update",
+    "miyucms_tool_media_serve",
+    "miyucms_tool_media_transform",
+    "miyucms_tool_media_upload",
+    "miyucomptareports_tool_balance_generate",
+    "miyucomptareports_tool_cashflow_generate",
+    "miyucomptareports_tool_ledger_export",
+    "miyucomptareports_tool_liasse_generate",
+    "miyucomptareports_tool_livre_recettes_generate",
+    "miyucontacts_tool_contacts_list",
+    "miyucontacts_tool_foe_add",
+    "miyucontacts_tool_foe_list",
+    "miyucontacts_tool_foe_remove",
+    "miyucontacts_tool_friend_add",
+    "miyucontacts_tool_friend_list",
+    "miyucontacts_tool_friend_remove",
+    "miyucptaledger_tool_company_siret_resolve",
+    "miyucptaledger_tool_company_structure_register",
+    "miyucptaledger_tool_company_structure_resolve",
+    "miyucptaledger_tool_compta_bank_sync",
+    "miyucptaledger_tool_compta_reconciliation_record",
+    "miyucptaledger_tool_compta_reconciliation_suggest",
+    "miyucptaledger_tool_compta_transaction_categorize",
+    "miyucptaledger_tool_compta_transaction_vat_resolve",
+    "miyudeclarations_tool_deadline_list",
+    "miyudeclarations_tool_declaration_list",
+    "miyudeclarations_tool_estimate_cotisations",
+    "miyudeclarations_tool_tva_prepare",
+    "miyudeclarations_tool_tva_submit",
+    "miyudeclarations_tool_urssaf_prepare",
+    "miyudeclarations_tool_urssaf_submit",
+    "miyudiscovery_tool_discover_list",
+    "miyudiscovery_tool_hashtag_get",
+    "miyudiscovery_tool_hashtag_list",
+    "miyudiscovery_tool_hashtag_trending",
+    "miyudiscovery_tool_search",
+    "miyudiscovery_tool_trending_list",
+    "miyuexpense_tool_expense_claim_create",
+    "miyuexpense_tool_expense_claim_export",
+    "miyuexpense_tool_expense_claim_list",
+    "miyuexpense_tool_expense_claim_update",
+    "miyuexpense_tool_expense_claim_validate",
+    "miyuexpense_tool_expense_mileage_calculate",
+    "miyuexpense_tool_expense_mileage_export",
+    "miyuexpense_tool_expense_receipt_capture",
+    "miyuexpense_tool_expense_receipt_extract",
+    "miyuexport_tool_csv_generate",
+    "miyuexport_tool_pdf_render",
+    "miyuexport_tool_xlsx_generate",
+    "miyufeeds_tool_atom_board",
+    "miyufeeds_tool_atom_forum",
+    "miyufeeds_tool_atom_topic",
+    "miyuforum_tool_forum_board_create",
+    "miyuforum_tool_forum_board_get",
+    "miyuforum_tool_forum_board_list",
+    "miyuforum_tool_forum_board_update",
+    "miyuforum_tool_forum_category_create",
+    "miyuforum_tool_forum_category_get",
+    "miyuforum_tool_forum_category_list",
+    "miyuforum_tool_forum_category_update",
+    "miyuforum_tool_forum_post_create",
+    "miyuforum_tool_forum_post_get",
+    "miyuforum_tool_forum_post_list",
+    "miyuforum_tool_forum_post_update",
+    "miyuforum_tool_forum_readtrack_list",
+    "miyuforum_tool_forum_readtrack_mark",
+    "miyuforum_tool_forum_topic_announce",
+    "miyuforum_tool_forum_topic_create",
+    "miyuforum_tool_forum_topic_export_pdf",
+    "miyuforum_tool_forum_topic_export_text",
+    "miyuforum_tool_forum_topic_get",
+    "miyuforum_tool_forum_topic_list",
+    "miyuforum_tool_forum_topic_sticky",
+    "miyuforum_tool_forum_topic_update",
+    "miyuhr_tool_schedule_get",
+    "miyuhr_tool_time_clock_in",
+    "miyuhr_tool_time_clock_out",
+    "miyuinvoice_tool_invoice_create",
+    "miyuinvoice_tool_invoice_customer_list",
+    "miyuinvoice_tool_invoice_customer_resolve",
+    "miyuinvoice_tool_invoice_electronic_submit",
+    "miyuinvoice_tool_invoice_payment_link_generate",
+    "miyuinvoice_tool_invoice_quote_create",
+    "miyuinvoice_tool_invoice_quote_to_invoice",
+    "miyuinvoice_tool_invoice_quote_update",
+    "miyuinvoice_tool_invoice_reminder_send",
+    "miyuinvoice_tool_invoice_send",
+    "miyujobs_tool_queue_enqueue",
+    "miyujobs_tool_queue_process",
+    "miyujobs_tool_schedule_at",
+    "miyujobs_tool_schedule_cron",
+    "miyukini_connect_audit",
+    "miyukini_connect_errors",
+    "miyukini_connect_lib",
+    "miyukini_connect_policy",
+    "miyukini_connect_service",
+    "miyukini_connect_types",
+    "miyukiniadmin_admin_account",
+    "miyukiniadmin_admin_account_created_at",
+    "miyukiniadmin_admin_account_failed_attempts",
+    "miyukiniadmin_admin_account_id",
+    "miyukiniadmin_admin_account_last_login_at",
+    "miyukiniadmin_admin_account_locked_until",
+    "miyukiniadmin_admin_account_mfa_enabled",
+    "miyukiniadmin_admin_account_mfa_secret_encrypted",
+    "miyukiniadmin_admin_account_password_hash",
+    "miyukiniadmin_admin_account_role",
+    "miyukiniadmin_admin_account_updated_at",
+    "miyukiniadmin_admin_account_username",
+    "miyukiniadmin_admin_role_enum",
+    "miyukiniadmin_admin_session",
+    "miyukiniadmin_api_handler_handle_request",
+    "miyukiniadmin_api_handler_test_response_creation",
+    "miyukiniadmin_api_handler_trait",
+    "miyukiniadmin_api_response",
+    "miyukiniadmin_api_response_body",
+    "miyukiniadmin_api_response_status",
+    "miyukiniadmin_api_routes_router",
+    "miyukiniadmin_api_routes_router_handlers",
+    "miyukiniadmin_api_routes_router_new",
+    "miyukiniadmin_api_routes_router_register",
+    "miyukiniadmin_api_routes_router_route",
+    "miyukiniadmin_api_routes_test_router_creation",
+    "miyukiniadmin_app_state_admin_cell_reader",
+    "miyukiniadmin_app_state_auth_svc",
+    "miyukiniadmin_app_state_backups",
+    "miyukiniadmin_app_state_crud",
+    "miyukiniadmin_app_state_environment_state",
+    "miyukiniadmin_app_state_environment_state_svc (réservé pour middleware / re-détection)",
+    "miyukiniadmin_app_state_migrations",
+    "miyukiniadmin_app_state_module_discovery",
+    "miyukiniadmin_app_state_module_lifecycle_svc",
+    "miyukiniadmin_app_state_module_testing_svc",
+    "miyukiniadmin_app_state_permission_svc (réservé pour middleware permission)",
+    "miyukiniadmin_apply_result_applied_count",
+    "miyukiniadmin_apply_result_message",
+    "miyukiniadmin_apply_result_status",
+    "miyukiniadmin_audit_logger_default",
+    "miyukiniadmin_audit_logger_default_logger",
+    "miyukiniadmin_audit_logger_default_new",
+    "miyukiniadmin_audit_logger_log_action",
+    "miyukiniadmin_audit_logger_test_default",
+    "miyukiniadmin_audit_logger_trait",
+    "miyukiniadmin_auth_create_account",
+    "miyukiniadmin_auth_create_account_error",
+    "miyukiniadmin_auth_hash_password",
+    "miyukiniadmin_auth_load_registry",
+    "miyukiniadmin_auth_login",
+    "miyukiniadmin_auth_login_error",
+    "miyukiniadmin_auth_logout",
+    "miyukiniadmin_auth_save_registry",
+    "miyukiniadmin_auth_service",
+    "miyukiniadmin_auth_service_new",
+    "miyukiniadmin_auth_validate_session",
+    "miyukiniadmin_auth_verify_password",
+    "miyukiniadmin_auto_recovery_new",
+    "miyukiniadmin_auto_recovery_result",
+    "miyukiniadmin_auto_recovery_run",
+    "miyukiniadmin_auto_recovery_service",
+    "miyukiniadmin_backend_api_auth_login",
+    "miyukiniadmin_backend_api_auth_logout",
+    "miyukiniadmin_backend_api_backups_create",
+    "miyukiniadmin_backend_api_backups_list",
+    "miyukiniadmin_backend_api_backups_restore",
+    "miyukiniadmin_backend_api_backups_restore_body",
+    "miyukiniadmin_backend_api_migrations_apply",
+    "miyukiniadmin_backend_api_migrations_history",
+    "miyukiniadmin_backend_api_migrations_list",
+    "miyukiniadmin_backend_api_setup_create_admin",
+    "miyukiniadmin_backend_api_status",
+    "miyukiniadmin_backend_api_table_create_row",
+    "miyukiniadmin_backend_api_table_delete_row",
+    "miyukiniadmin_backend_api_table_get_row",
+    "miyukiniadmin_backend_api_table_rows",
+    "miyukiniadmin_backend_api_table_update_row",
+    "miyukiniadmin_backend_api_tables_list",
+    "miyukiniadmin_backend_app_state",
+    "miyukiniadmin_backend_health",
+    "miyukiniadmin_backend_main",
+    "miyukiniadmin_backend_require_session_layer",
+    "miyukiniadmin_backend_router_compromised_only",
+    "miyukiniadmin_backend_router_full",
+    "miyukiniadmin_backend_router_setup_only",
+    "miyukiniadmin_backend_serve_compromised",
+    "miyukiniadmin_backend_serve_dashboard",
+    "miyukiniadmin_backend_serve_database",
+    "miyukiniadmin_backend_serve_login_page",
+    "miyukiniadmin_backend_serve_setup",
+    "miyukiniadmin_backend_serve_setup_redirect",
+    "miyukiniadmin_backend_serve_tests",
+    "miyukiniadmin_backup_impl_backups",
+    "miyukiniadmin_backup_impl_new",
+    "miyukiniadmin_backup_impl_with_seed",
+    "miyukiniadmin_backup_record_id",
+    "miyukiniadmin_backup_record_size_bytes",
+    "miyukiniadmin_backup_record_status",
+    "miyukiniadmin_backup_record_timestamp",
+    "miyukiniadmin_backup_record_type",
+    "miyukiniadmin_backup_service_backup_record",
+    "miyukiniadmin_backup_service_create",
+    "miyukiniadmin_backup_service_create_result",
+    "miyukiniadmin_backup_service_impl",
+    "miyukiniadmin_backup_service_list",
+    "miyukiniadmin_backup_service_restore",
+    "miyukiniadmin_backup_service_restore_result",
+    "miyukiniadmin_backup_service_trait",
+    "miyukiniadmin_backup_test_list",
+    "miyukiniadmin_backup_test_restore",
+    "miyukiniadmin_bonding_brother_bridge_connect",
+    "miyukiniadmin_bonding_brother_bridge_error",
+    "miyukiniadmin_bonding_brother_bridge_error_connection_failed",
+    "miyukiniadmin_bonding_brother_bridge_test_error",
+    "miyukiniadmin_bonding_brother_bridge_trait",
+    "miyukiniadmin_capabilities_admin",
+    "miyukiniadmin_capabilities_audit",
+    "miyukiniadmin_capabilities_recovery_extra",
+    "miyukiniadmin_config_backend_config",
+    "miyukiniadmin_config_backend_config_from_env",
+    "miyukiniadmin_config_backend_config_host",
+    "miyukiniadmin_config_backend_config_https",
+    "miyukiniadmin_config_backend_config_port",
+    "miyukiniadmin_config_backend_config_tls_cert",
+    "miyukiniadmin_config_backend_config_tls_key",
+    "miyukiniadmin_config_test_from_env",
+    "miyukiniadmin_corruption_memory",
+    "miyukiniadmin_corruption_memory_previous_state",
+    "miyukiniadmin_corruption_memory_reason",
+    "miyukiniadmin_corruption_memory_reinitialised_at",
+    "miyukiniadmin_create_result_backup_id",
+    "miyukiniadmin_create_result_message",
+    "miyukiniadmin_create_result_success",
+    "miyukiniadmin_cycle_runner",
+    "miyukiniadmin_database_instance_info",
+    "miyukiniadmin_database_instance_info_identity",
+    "miyukiniadmin_database_service_get_instance_info",
+    "miyukiniadmin_database_service_trait",
+    "miyukiniadmin_database_test_instance_info",
+    "miyukiniadmin_db_unit_tests_module",
+    "miyukiniadmin_db_unit_tests_run_single",
+    "miyukiniadmin_db_unit_tests_run_suite",
+    "miyukiniadmin_destruction_reinit_new",
+    "miyukiniadmin_destruction_reinit_run",
+    "miyukiniadmin_destruction_reinit_service",
+    "miyukiniadmin_destruction_write_corruption_memory",
+    "miyukiniadmin_env_state_compromis",
+    "miyukiniadmin_env_state_detect",
+    "miyukiniadmin_env_state_initialise",
+    "miyukiniadmin_env_state_service_data_dir",
+    "miyukiniadmin_env_state_service_new",
+    "miyukiniadmin_env_state_verify_consistency",
+    "miyukiniadmin_env_state_verify_eip",
+    "miyukiniadmin_env_state_verify_registry",
+    "miyukiniadmin_env_state_verify_schema",
+    "miyukiniadmin_env_state_vierge",
+    "miyukiniadmin_env_state_write_bootstrap_schema_initial",
+    "miyukiniadmin_env_state_write_eip_stub",
+    "miyukiniadmin_environment_state_enum",
+    "miyukiniadmin_environment_state_service",
+    "miyukiniadmin_migration_impl_applied",
+    "miyukiniadmin_migration_impl_new",
+    "miyukiniadmin_migration_impl_pending",
+    "miyukiniadmin_migration_impl_with_seed",
+    "miyukiniadmin_migration_record_applied_at",
+    "miyukiniadmin_migration_record_checksum",
+    "miyukiniadmin_migration_record_duration_ms",
+    "miyukiniadmin_migration_record_id",
+    "miyukiniadmin_migration_record_operator_id",
+    "miyukiniadmin_migration_record_result",
+    "miyukiniadmin_migration_service_apply",
+    "miyukiniadmin_migration_service_apply_result",
+    "miyukiniadmin_migration_service_history",
+    "miyukiniadmin_migration_service_impl",
+    "miyukiniadmin_migration_service_list_applied",
+    "miyukiniadmin_migration_service_list_pending",
+    "miyukiniadmin_migration_service_migration_record",
+    "miyukiniadmin_migration_service_pending_migration",
+    "miyukiniadmin_migration_service_trait",
+    "miyukiniadmin_migration_test_apply_result",
+    "miyukiniadmin_migration_test_list",
+    "miyukiniadmin_miyukinisqltest_runner",
+    "miyukiniadmin_models_mod",
+    "miyukiniadmin_module_admin_cell",
+    "miyukiniadmin_module_api_handlers",
+    "miyukiniadmin_module_api_routes",
+    "miyukiniadmin_module_audit_logger",
+    "miyukiniadmin_module_backup_service",
+    "miyukiniadmin_module_bonding_brother_bridge",
+    "miyukiniadmin_module_config",
+    "miyukiniadmin_module_crud_state",
+    "miyukiniadmin_module_cycle_tests_runner",
+    "miyukiniadmin_module_database_service",
+    "miyukiniadmin_module_db_unit_tests",
+    "miyukiniadmin_module_migration_service",
+    "miyukiniadmin_module_models",
+    "miyukiniadmin_module_module_lifecycle_service",
+    "miyukiniadmin_module_module_testing_service",
+    "miyukiniadmin_module_monitoring_service",
+    "miyukiniadmin_module_security_service",
+    "miyukiniadmin_module_services",
+    "miyukiniadmin_module_testing_service",
+    "miyukiniadmin_module_testing_suites",
+    "miyukiniadmin_monitoring_service_collect_metrics",
+    "miyukiniadmin_monitoring_service_trait",
+    "miyukiniadmin_monitoring_system_metrics",
+    "miyukiniadmin_monitoring_system_metrics_cores_health",
+    "miyukiniadmin_monitoring_test_system_metrics",
+    "miyukiniadmin_pending_migration_description",
+    "miyukiniadmin_pending_migration_id",
+    "miyukiniadmin_permission_capabilities_for_role",
+    "miyukiniadmin_permission_has_capability",
+    "miyukiniadmin_permission_service",
+    "miyukiniadmin_permission_service_new",
+    "miyukiniadmin_pre_destruction_backup_new",
+    "miyukiniadmin_pre_destruction_backup_service",
+    "miyukiniadmin_pre_destruction_has_prior",
+    "miyukiniadmin_pre_destruction_result",
+    "miyukiniadmin_pre_destruction_run_if_needed",
+    "miyukiniadmin_restore_result_message",
+    "miyukiniadmin_restore_result_success",
+    "miyukiniadmin_role_admin",
+    "miyukiniadmin_role_audit",
+    "miyukiniadmin_role_recovery",
+    "miyukiniadmin_security_service_get_security_level",
+    "miyukiniadmin_security_service_trait",
+    "miyukiniadmin_security_test_service_structure",
+    "miyukiniadmin_services_mod",
+    "miyukiniadmin_session_account_id",
+    "miyukiniadmin_session_created_at",
+    "miyukiniadmin_session_expires_at",
+    "miyukiniadmin_session_id",
+    "miyukiniadmin_session_ip",
+    "miyukiniadmin_session_is_valid",
+    "miyukiniadmin_session_role",
+    "miyukiniadmin_session_user_agent",
+    "miyukiniadmin_testing_service_run_tests",
+    "miyukiniadmin_testing_service_trait",
+    "miyukiniadmin_testing_suites",
+    "miyukiniadmin_testing_suites_run_and_report",
+    "miyukiniadmin_testing_test_results",
+    "miyukiniadmin_testing_test_results_creation",
+    "miyukiniadmin_testing_test_results_failed",
+    "miyukiniadmin_testing_test_results_passed",
+    "miyulocale_tool_date_format",
+    "miyulocale_tool_number_format",
+    "miyulocale_tool_translate",
+    "miyumedia_tool_media_serve",
+    "miyumedia_tool_media_transform",
+    "miyumedia_tool_media_upload",
+    "miyumoderationforum_tool_ban_create",
+    "miyumoderationforum_tool_ban_list",
+    "miyumoderationforum_tool_post_delete",
+    "miyumoderationforum_tool_post_edit",
+    "miyumoderationforum_tool_post_lock",
+    "miyumoderationforum_tool_queue_get",
+    "miyumoderationforum_tool_queue_list",
+    "miyumoderationforum_tool_report_create",
+    "miyumoderationforum_tool_report_list",
+    "miyumoderationforum_tool_topic_copy",
+    "miyumoderationforum_tool_topic_delete",
+    "miyumoderationforum_tool_topic_lock",
+    "miyumoderationforum_tool_topic_merge",
+    "miyumoderationforum_tool_topic_move",
+    "miyumoderationforum_tool_topic_split",
+    "miyumoderationforum_tool_usernote_create",
+    "miyumoderationforum_tool_usernote_list",
+    "miyumoderationforum_tool_warning_create",
+    "miyumoderationforum_tool_warning_list",
+    "miyunotify_tool_email_send",
+    "miyunotify_tool_inbox_write",
+    "miyunotify_tool_push_send",
+    "miyupm_tool_pm_conversation_get",
+    "miyupm_tool_pm_conversation_list",
+    "miyupm_tool_pm_draft_create",
+    "miyupm_tool_pm_draft_list",
+    "miyupm_tool_pm_draft_update",
+    "miyupm_tool_pm_export",
+    "miyupm_tool_pm_folder_create",
+    "miyupm_tool_pm_folder_list",
+    "miyupm_tool_pm_folder_update",
+    "miyupm_tool_pm_get",
+    "miyupm_tool_pm_list",
+    "miyupm_tool_pm_send",
+    "miyupolls_tool_poll_create",
+    "miyupolls_tool_poll_list",
+    "miyupolls_tool_poll_result",
+    "miyupolls_tool_poll_vote",
+    "miyuposanalytics_tool_cash_discrepancy",
+    "miyuposanalytics_tool_export_spreadsheet",
+    "miyuposanalytics_tool_sales_by_employee",
+    "miyuposanalytics_tool_sales_by_item",
+    "miyuposanalytics_tool_sales_trend",
+    "miyuposanalytics_tool_shift_close",
+    "miyuposanalytics_tool_tax_report",
+    "miyuposinventory_tool_alert_low_evaluate",
+    "miyuposinventory_tool_count_reconcile",
+    "miyuposinventory_tool_count_record",
+    "miyuposinventory_tool_count_start",
+    "miyuposinventory_tool_history_list",
+    "miyuposinventory_tool_import_items",
+    "miyuposinventory_tool_label_print",
+    "miyuposinventory_tool_production_record",
+    "miyuposinventory_tool_purchase_order_create",
+    "miyuposinventory_tool_purchase_order_track",
+    "miyuposinventory_tool_purchase_order_update",
+    "miyuposinventory_tool_stock_adjust",
+    "miyuposinventory_tool_stock_get",
+    "miyuposinventory_tool_transfer_create",
+    "miyuposinventory_tool_transfer_execute",
+    "miyuposinventory_tool_transfer_list",
+    "miyuposinventory_tool_valuation_report",
+    "miyuposkitchen_tool_kitchen_print",
+    "miyuposkitchen_tool_order_push",
+    "miyuposkitchen_tool_order_update_status",
+    "miyuposkitchen_tool_service_type_set",
+    "miyuposkitchen_tool_ticket_preset_assign",
+    "miyuposloyalty_tool_balance_get",
+    "miyuposloyalty_tool_card_resolve",
+    "miyuposloyalty_tool_customer_address_get",
+    "miyuposloyalty_tool_customer_create",
+    "miyuposloyalty_tool_customer_get",
+    "miyuposloyalty_tool_customer_list",
+    "miyuposloyalty_tool_customer_note_add",
+    "miyuposloyalty_tool_customer_note_list",
+    "miyuposloyalty_tool_customer_update",
+    "miyuposloyalty_tool_points_grant",
+    "miyuposloyalty_tool_points_redeem",
+    "miyupospayment_tool_cash_record",
+    "miyupospayment_tool_check_record",
+    "miyupospayment_tool_split",
+    "miyupospayment_tool_terminal_authorize",
+    "miyupospayment_tool_terminal_capture",
+    "miyupossales_tool_barcode_parse",
+    "miyupossales_tool_cash_movement_record",
+    "miyupossales_tool_cash_register_close",
+    "miyupossales_tool_cash_register_open",
+    "miyupossales_tool_discount_apply",
+    "miyupossales_tool_display_push",
+    "miyupossales_tool_modifier_apply",
+    "miyupossales_tool_order_service_type_set",
+    "miyupossales_tool_receipt_list",
+    "miyupossales_tool_receipt_print",
+    "miyupossales_tool_receipt_render",
+    "miyupossales_tool_receipt_send",
+    "miyupossales_tool_refund_record",
+    "miyupossales_tool_sale_add_item",
+    "miyupossales_tool_sale_create",
+    "miyupossales_tool_sale_remove_item",
+    "miyupossales_tool_store_resolve",
+    "miyupossales_tool_ticket_close",
+    "miyupossales_tool_ticket_list",
+    "miyupossales_tool_ticket_open",
+    "miyupossales_tool_ticket_save",
+    "miyupossales_tool_variant_resolve",
+    "miyuprofile_tool_avatar_get",
+    "miyuprofile_tool_avatar_resolve",
+    "miyuprofile_tool_avatar_set",
+    "miyuprofile_tool_field_get",
+    "miyuprofile_tool_field_list",
+    "miyuprofile_tool_field_set",
+    "miyuprofile_tool_preferences_get",
+    "miyuprofile_tool_preferences_set",
+    "miyuprofile_tool_profile_get",
+    "miyuprofile_tool_profile_update",
+    "miyuprofile_tool_rank_list",
+    "miyuprofile_tool_rank_resolve",
+    "miyuprofile_tool_signature_get",
+    "miyuprofile_tool_signature_set",
+    "miyusearch_tool_search_index_update",
+    "miyusearch_tool_search_query_execute",
+    "miyusearch_tool_search_suggest",
+    "miyushipping_tool_commerce_shipping_label_create",
+    "miyushipping_tool_commerce_shipping_label_print",
+    "miyushipping_tool_commerce_shipping_rate",
+    "miyushipping_tool_commerce_shipping_rates_compare",
+    "miyushipping_tool_commerce_shipping_shipment_create",
+    "miyushipping_tool_commerce_shipping_shipment_list",
+    "miyushipping_tool_commerce_shipping_tracking_get",
+    "miyushipping_tool_commerce_shipping_zones_resolve",
+    "miyusocialfeed_tool_comment_create",
+    "miyusocialfeed_tool_comment_delete",
+    "miyusocialfeed_tool_comment_list",
+    "miyusocialfeed_tool_feed_list",
+    "miyusocialfeed_tool_post_create",
+    "miyusocialfeed_tool_post_delete",
+    "miyusocialfeed_tool_post_get",
+    "miyusocialfeed_tool_post_update",
+    "miyusocialfeed_tool_reaction_add",
+    "miyusocialfeed_tool_reaction_list",
+    "miyusocialfeed_tool_reaction_remove",
+    "miyusocialfeed_tool_share_create",
+    "miyusocialfeed_tool_share_list",
+    "miyusocialmessaging_tool_conversation_get",
+    "miyusocialmessaging_tool_conversation_list",
+    "miyusocialmessaging_tool_dm_get",
+    "miyusocialmessaging_tool_dm_list",
+    "miyusocialmessaging_tool_dm_reaction_add",
+    "miyusocialmessaging_tool_dm_reaction_remove",
+    "miyusocialmessaging_tool_dm_readmark_set",
+    "miyusocialmessaging_tool_dm_send",
+    "miyusocialmoderation_tool_block_add",
+    "miyusocialmoderation_tool_block_list",
+    "miyusocialmoderation_tool_block_remove",
+    "miyusocialmoderation_tool_post_delete",
+    "miyusocialmoderation_tool_report_create",
+    "miyusocialmoderation_tool_report_list",
+    "miyusocialprofile_tool_follow_add",
+    "miyusocialprofile_tool_follow_remove",
+    "miyusocialprofile_tool_followers_list",
+    "miyusocialprofile_tool_following_list",
+    "miyusocialprofile_tool_profile_get",
+    "miyusocialprofile_tool_profile_update",
+    "miyusql_admin_cell",
+    "miyusql_admin_cell_build",
+    "miyusql_admin_cell_struct",
+    "miyusql_admin_embedded_test_def",
+    "miyusql_admin_identification",
+    "miyusql_admin_integrity",
+    "miyusql_admin_test_criteria",
+    "miyusql_admin_test_manifest",
+    "miyusql_cache_executor_trait",
+    "miyusql_cache_get_impl",
+    "miyusql_cache_invalidate_impl",
+    "miyusql_cache_set_impl",
+    "miyusql_context_has_mandate",
+    "miyusql_context_mandate_id",
+    "miyusql_context_new",
+    "miyusql_context_security_level",
+    "miyusql_cycle_test_miyukinisqltest",
+    "miyusql_cycle_test_miyukinisqltest_run",
+    "miyusql_error_connection",
+    "miyusql_error_enum",
+    "miyusql_error_execution",
+    "miyusql_error_no_mandate",
+    "miyusql_error_syntax",
+    "miyusql_error_timeout",
+    "miyusql_errors",
+    "miyusql_executor_execute",
+    "miyusql_executor_prepare",
+    "miyusql_governed_context",
+    "miyusql_governed_context_struct",
+    "miyusql_memory_executor",
+    "miyusql_query_executor_trait",
+    "miyusql_query_result",
+    "miyusql_query_result_count",
+    "miyusql_query_result_rows",
+    "miyusql_schema_column_meta",
+    "miyusql_schema_column_name",
+    "miyusql_schema_column_type",
+    "miyusql_schema_columns",
+    "miyusql_schema_executor_trait",
+    "miyusql_schema_read_table_impl",
+    "miyusql_schema_read_tables_impl",
+    "miyusql_schema_result",
+    "miyusql_schema_table_meta",
+    "miyusql_schema_table_name",
+    "miyusql_schema_tables",
+    "miyusql_tool_cache_get",
+    "miyusql_tool_cache_invalidate",
+    "miyusql_tool_cache_set",
+    "miyusql_tool_query_execute",
+    "miyusql_tool_query_prepare",
+    "miyusql_tool_schema_read",
+    "miyusql_tool_schema_read_table",
+    "miyusql_tool_tx_begin",
+    "miyusql_tool_tx_commit",
+    "miyusql_tool_tx_rollback",
+    "miyusql_transaction_executor_trait",
+    "miyusql_tx_begin_impl",
+    "miyusql_tx_commit_impl",
+    "miyusql_tx_rollback_impl",
+    "miyusql_unit_tests_module",
+    "miyustore_tool_commerce_cart_add",
+    "miyustore_tool_commerce_cart_compute",
+    "miyustore_tool_commerce_cart_remove",
+    "miyustore_tool_commerce_cart_update",
+    "miyustore_tool_commerce_checkout_submit",
+    "miyustore_tool_commerce_checkout_validate",
+    "miyustore_tool_commerce_order_create",
+    "miyustore_tool_commerce_order_list",
+    "miyustore_tool_commerce_order_status",
+    "miyustore_tool_commerce_order_update",
+    "miyustore_tool_commerce_payment_capture",
+    "miyustore_tool_commerce_payment_refund",
+    "miyustore_tool_commerce_payment_status",
+    "miyustore_tool_commerce_product_create",
+    "miyustore_tool_commerce_product_list",
+    "miyustore_tool_commerce_product_resolve",
+    "miyustore_tool_commerce_product_update",
+    "miyustore_tool_commerce_product_variations",
+    "miyustore_tool_commerce_shipping_rate",
+    "miyustore_tool_commerce_shipping_zones_resolve",
+    "miyustory_tool_story_create",
+    "miyustory_tool_story_get",
+    "miyustory_tool_story_list",
+    "miyustory_tool_story_reaction_add",
+    "miyutext_tool_markdown_render",
+    "miyutext_tool_replace",
+    "miyutext_tool_sanitize",
+    "miyutext_tool_template_apply",
+    "miyutreasury_tool_treasury_alert_check",
+    "miyutreasury_tool_treasury_dashboard_aggregate",
+    "miyutreasury_tool_treasury_forecast_compute",
+    "miyuvalidate_tool_sanitize",
+    "miyuvalidate_tool_schema_check",
+    "miyuweb_tool_web_asset_serve",
+    "miyuweb_tool_web_event_dispatch",
+    "miyuweb_tool_web_form_validate",
+    "miyuweb_tool_web_html_render",
+    "miyuweb_tool_web_input_capture",
+    "miyuweb_tool_web_layout_render",
+    "miyuweb_tool_web_script_compile",
+    "miyuweb_tool_web_script_execute",
+    "miyuweb_tool_web_theme_resolve",
+    "miyuwebway_participant_mws_address_tracker_default",
+    "miyuwebway_participant_mws_cog_list_get",
+    "miyuwebway_participant_mws_cog_list_merge",
+    "miyuwebway_participant_mws_cog_list_update",
+    "miyuwebway_participant_mws_declaration_build",
+    "miyuwebway_participant_mws_declaration_sign",
+    "miyuwebway_participant_mws_declaration_validate",
+    "miyuwebway_participant_mws_declaration_verify",
+    "miyuwebway_participant_mws_discovery_request_build",
+    "miyuwebway_participant_mws_discovery_request_send",
+    "miyuwebway_participant_mws_port_check",
+    "miyuwebway_participant_mws_transport_send",
+    "miyuwebway_tracker_mws_address_tracker_default",
+    "miyuwebway_tracker_mws_cog_list_filter",
+    "miyuwebway_tracker_mws_cog_list_get",
+    "miyuwebway_tracker_mws_cog_list_merge",
+    "miyuwebway_tracker_mws_cog_list_update",
+    "miyuwebway_tracker_mws_declaration_validate_validate_2",
+    "miyuwebway_tracker_mws_declaration_verify",
+    "miyuwebway_tracker_mws_discovery_response_build",
+    "miyuwebway_tracker_mws_discovery_response_send",
+    "miyuwebway_tracker_mws_port_check",
+    "miyuwebway_tracker_mws_transport_receive",
+    "miyuwebway_tracker_mws_transport_send",
+    "miyuwidgets_tool_web_layout_apply",
+    "miyuwidgets_tool_web_template_resolve",
+    "miyuwidgets_tool_web_widget_button_render",
+    "miyuwidgets_tool_web_widget_container_render",
+    "miyuwidgets_tool_web_widget_grid_render",
+    "miyuwidgets_tool_web_widget_image_render",
+    "miyuwidgets_tool_web_widget_text_render",
+    "muid_empty_state",
+    "muid_page_header",
+    "muid_status_badge",
+    "origin",
+    "origin.relay",
+    "origin.relay.permis_registry",
+    "origin.tracker",
+    "origin.tracker.visit_tracker",
+    "service",
+    "service.alicia",
+    "service.alicia.api",
+    "service.alicia.api.admin",
+    "service.alicia.api.auth",
+    "service.alicia.api.config",
+    "service.alicia.api.dto",
+    "service.alicia.api.errors",
+    "service.alicia.api.handlers",
+    "service.alicia.api.handlers.capabilities",
+    "service.alicia.api.handlers.devices",
+    "service.alicia.api.handlers.health",
+    "service.alicia.api.handlers.history",
+    "service.alicia.api.handlers.rooms",
+    "service.alicia.api.handlers.state",
+    "service.alicia.api.router",
+    "service.alicia.api.server",
+    "service.alicia.capabilities_runtime",
+    "service.alicia.command",
+    "service.alicia.config",
+    "service.alicia.cores_gate",
+    "service.alicia.cores_gate.lib",
+    "service.alicia.dispatcher",
+    "service.alicia.dispatcher.core_gate",
+    "service.alicia.dispatcher.dispatcher",
+    "service.alicia.dispatcher.errors",
+    "service.alicia.dispatcher.lib",
+    "service.alicia.dispatcher.service_client",
+    "service.alicia.errors",
+    "service.alicia.intent",
+    "service.alicia.memory",
+    "service.alicia.memory.errors",
+    "service.alicia.memory.learning",
+    "service.alicia.memory.lib",
+    "service.alicia.memory.prompt",
+    "service.alicia.memory.store",
+    "service.alicia.memory.types",
+    "service.alicia.nlu-bridge",
+    "service.alicia.nlu-fallback",
+    "service.alicia.orchestrator",
+    "service.alicia.orchestrator.admin",
+    "service.alicia.rest-api",
+    "service.alicia.service",
+    "service.alicia.skills",
+    "service.alicia.skills.capability",
+    "service.alicia.skills.discovery",
+    "service.alicia.skills.errors",
+    "service.alicia.skills.lib",
+    "service.alicia.skills.manifest",
+    "service.alicia.skills.policy",
+    "service.alicia.skills.registry",
+    "service.alicia.skills.tooling",
+    "service.alicia.skills.watcher",
+    "service.alicia.snapshot",
+    "service.jaycloud",
+    "service.jaycloud.alicia_client",
+    "service.jaycontact",
+    "service.jaycontact.alicia_client",
+    "service.jaydocs",
+    "service.jaydocs.alicia_client",
+    "service.jaykoa",
+    "service.jaykoa.alicia_client",
+    "service.jaykonta",
+    "service.jaykonta.alicia_client",
+    "service.jaymail",
+    "service.jaymail.alicia_client",
+    "service.jaymessage",
+    "service.jaymessage.alicia_client",
+    "service.jaymeteo",
+    "service.jaymeteo.alicia_client",
+    "service.jayrdv",
+    "service.jayrdv.alicia_client",
+    "service.jaysheets",
+    "service.jaysheets.alicia_client",
+    "service.jayslides",
+    "service.jayslides.alicia_client",
+    "service.media",
+    "service.media.jaymanga",
+    "strongfather_decision",
+    "strongfather_decision_accepted_priority",
+    "strongfather_decision_ambiguous_clarifications",
+    "strongfather_decision_ambiguous_missing_information",
+    "strongfather_decision_deferred_context_required",
+    "strongfather_decision_deferred_reason",
+    "strongfather_decision_eval_context_default",
+    "strongfather_decision_eval_context_fields",
+    "strongfather_decision_eval_context_new",
+    "strongfather_decision_eval_context_with_field",
+    "strongfather_decision_evaluation_context",
+    "strongfather_decision_evaluation_context_evaluation_context_2",
+    "strongfather_decision_intent_id",
+    "strongfather_decision_is_accepted",
+    "strongfather_decision_is_ambiguous",
+    "strongfather_decision_is_deferred",
+    "strongfather_decision_is_refused",
+    "strongfather_decision_justification",
+    "strongfather_decision_justification_explanation",
+    "strongfather_decision_justification_justification_2",
+    "strongfather_decision_justification_new",
+    "strongfather_decision_justification_policy_references",
+    "strongfather_decision_justification_reasoning_steps",
+    "strongfather_decision_justification_with_reasoning",
+    "strongfather_decision_metadata",
+    "strongfather_decision_metadata_default",
+    "strongfather_decision_metadata_fields",
+    "strongfather_decision_metadata_metadata_2",
+    "strongfather_decision_metadata_new",
+    "strongfather_decision_metadata_with_field",
+    "strongfather_decision_new",
+    "strongfather_decision_policies_applied",
+    "strongfather_decision_refused_reason",
+    "strongfather_decision_refused_violated_policies",
+    "strongfather_decision_test_create_accepted",
+    "strongfather_decision_test_create_ambiguous",
+    "strongfather_decision_test_create_deferred",
+    "strongfather_decision_test_create_refused",
+    "strongfather_decision_test_justification",
+    "strongfather_decision_type",
+    "strongfather_decision_type_accepted",
+    "strongfather_decision_type_ambiguous",
+    "strongfather_decision_type_decision_type_2",
+    "strongfather_decision_type_deferred",
+    "strongfather_decision_type_refused",
+    "strongfather_decision_with_evaluation_context",
+    "strongfather_decision_with_metadata",
+    "strongfather_intent",
+    "strongfather_intent_action_creation",
+    "strongfather_intent_action_deletion",
+    "strongfather_intent_action_evaluation",
+    "strongfather_intent_action_modification",
+    "strongfather_intent_action_read",
+    "strongfather_intent_action_type",
+    "strongfather_intent_call_context",
+    "strongfather_intent_call_context_call_context_2",
+    "strongfather_intent_constraint",
+    "strongfather_intent_constraint_description",
+    "strongfather_intent_constraint_id",
+    "strongfather_intent_constraints",
+    "strongfather_intent_context_caller_identity",
+    "strongfather_intent_context_instance",
+    "strongfather_intent_context_origin",
+    "strongfather_intent_data",
+    "strongfather_intent_data_content",
+    "strongfather_intent_data_data_2",
+    "strongfather_intent_id",
+    "strongfather_intent_metadata",
+    "strongfather_intent_new",
+    "strongfather_intent_requested_priority",
+    "strongfather_intent_state",
+    "strongfather_intent_state_decided",
+    "strongfather_intent_state_in_evaluation",
+    "strongfather_intent_state_submitted",
+    "strongfather_intent_subject",
+    "strongfather_intent_test_all_action_types",
+    "strongfather_intent_test_create_basic",
+    "strongfather_intent_test_create_with_constraints",
+    "strongfather_intent_test_create_with_priority",
+    "strongfather_intent_type",
+    "strongfather_intent_validator",
+    "strongfather_intent_validator_default",
+    "strongfather_intent_validator_new",
+    "strongfather_intent_validator_validate",
+    "strongfather_intent_validator_validate_structure_only",
+    "strongfather_intent_with_constraints",
+    "strongfather_intent_with_metadata",
+    "strongfather_intent_with_priority",
+    "strongfather_module_decision",
+    "strongfather_module_intent",
+    "strongfather_module_policy",
+    "strongfather_module_policy_engine",
+    "strongfather_module_priority",
+    "strongfather_module_validator",
+    "strongfather_policy",
+    "strongfather_policy_composite_policies",
+    "strongfather_policy_condition",
+    "strongfather_policy_condition_condition_2",
+    "strongfather_policy_condition_expression",
+    "strongfather_policy_effect",
+    "strongfather_policy_effect_authorize",
+    "strongfather_policy_effect_constrain",
+    "strongfather_policy_effect_deny",
+    "strongfather_policy_effect_effect_2",
+    "strongfather_policy_effect_prioritize",
+    "strongfather_policy_effect_validate",
+    "strongfather_policy_engine",
+    "strongfather_policy_engine_apply",
+    "strongfather_policy_engine_error",
+    "strongfather_policy_engine_error_consistency",
+    "strongfather_policy_engine_error_display",
+    "strongfather_policy_engine_error_invariant",
+    "strongfather_policy_engine_error_reason",
+    "strongfather_policy_engine_evaluate_policy",
+    "strongfather_policy_engine_new",
+    "strongfather_policy_engine_policies",
+    "strongfather_policy_engine_select_applicable",
+    "strongfather_policy_engine_test_apply_permission",
+    "strongfather_policy_engine_test_create",
+    "strongfather_policy_engine_test_priority_order",
+    "strongfather_policy_id",
+    "strongfather_policy_id_id_2",
+    "strongfather_policy_is_critical",
+    "strongfather_policy_metadata",
+    "strongfather_policy_new",
+    "strongfather_policy_priority",
+    "strongfather_policy_priority_critical",
+    "strongfather_policy_priority_default",
+    "strongfather_policy_priority_important",
+    "strongfather_policy_priority_level",
+    "strongfather_policy_priority_normal",
+    "strongfather_policy_priority_optional",
+    "strongfather_policy_result",
+    "strongfather_policy_result_priority",
+    "strongfather_policy_result_priority_policy_id",
+    "strongfather_policy_result_priority_value",
+    "strongfather_policy_result_satisfied",
+    "strongfather_policy_result_satisfied_policy_id",
+    "strongfather_policy_result_violated",
+    "strongfather_policy_result_violated_policy_id",
+    "strongfather_policy_result_violated_reason",
+    "strongfather_policy_rule",
+    "strongfather_policy_rule_expression",
+    "strongfather_policy_rule_rule_2",
+    "strongfather_policy_set",
+    "strongfather_policy_set_add",
+    "strongfather_policy_set_default",
+    "strongfather_policy_set_get",
+    "strongfather_policy_set_is_empty",
+    "strongfather_policy_set_iter",
+    "strongfather_policy_set_len",
+    "strongfather_policy_set_new",
+    "strongfather_policy_set_policies",
+    "strongfather_policy_test_all_types",
+    "strongfather_policy_test_create_basic",
+    "strongfather_policy_test_create_with_priority",
+    "strongfather_policy_test_policy_set",
+    "strongfather_policy_type",
+    "strongfather_policy_type_composite",
+    "strongfather_policy_type_constraint",
+    "strongfather_policy_type_permission",
+    "strongfather_policy_type_policy_type_2",
+    "strongfather_policy_type_priority",
+    "strongfather_policy_type_validation",
+    "strongfather_policy_with_composite",
+    "strongfather_policy_with_metadata",
+    "strongfather_policy_with_priority",
+    "strongfather_priority_calculator",
+    "strongfather_priority_calculator_calculate",
+    "strongfather_priority_calculator_compare",
+    "strongfather_priority_calculator_default",
+    "strongfather_priority_calculator_new",
+    "strongfather_priority_default",
+    "strongfather_priority_maximum",
+    "strongfather_priority_minimum",
+    "strongfather_priority_new",
+    "strongfather_priority_test_calculate_with_policies",
+    "strongfather_priority_test_calculate_with_requested",
+    "strongfather_priority_test_compare",
+    "strongfather_priority_test_create",
+    "strongfather_priority_test_default",
+    "strongfather_priority_value",
+    "strongfather_priority_value_level",
+    "strongfather_reexport_decision",
+    "strongfather_reexport_intent",
+    "strongfather_reexport_policy",
+    "strongfather_reexport_policy_engine",
+    "strongfather_reexport_priority",
+    "strongfather_reexport_validator",
+    "strongfather_validator_error",
+    "strongfather_validator_error_display",
+    "strongfather_validator_error_message",
+    "strongfather_validator_error_missing_components",
+    "strongfather_validator_error_new",
+    "strongfather_validator_error_violated_rules",
+    "strongfather_validator_test_incomplete_context",
+    "strongfather_validator_test_missing_intent_id",
+    "strongfather_validator_test_missing_subject",
+    "strongfather_validator_test_valid_intent",
+    "tamr_classification",
+    "tamr_classification_entity_id",
+    "tamr_classification_taxonomy_id",
+    "tamr_classification_terms",
+    "tamr_classification_test_creation",
+    "tamr_classifier_classify",
+    "tamr_classifier_trait",
+    "tamr_metadata",
+    "tamr_metadata_entity_id",
+    "tamr_metadata_manager_get",
+    "tamr_metadata_manager_trait",
+    "tamr_metadata_test_creation",
+    "tamr_metadata_values",
+    "tamr_taxonomy",
+    "tamr_taxonomy_id",
+    "tamr_taxonomy_manager_get",
+    "tamr_taxonomy_manager_trait",
+    "tamr_taxonomy_name",
+    "tamr_taxonomy_terms",
+    "tamr_taxonomy_test_creation",
+    "test_config_deterministic",
+    "test_config_empty_value",
+    "test_config_envconfig_from_env",
+    "test_config_get_case_sensitive",
+    "test_config_get_empty_key",
+    "test_config_get_existing_key",
+    "test_config_get_missing_key",
+    "test_config_multiple_keys",
+    "test_config_no_business_logic",
+    "test_config_no_external_dependency",
+    "test_id_deterministic_parse",
+    "test_id_display_roundtrip",
+    "test_id_equality",
+    "test_id_generate_unique",
+    "test_id_hash",
+    "test_id_no_business_logic",
+    "test_id_no_external_dependency",
+    "test_id_parse_invalid_format",
+    "test_id_parse_valid_uuid",
+    "test_integration_config_id_integration",
+    "test_integration_id_lifecycle_integration",
+    "test_integration_invariant_k10_governance",
+    "test_integration_invariant_k1_no_business_logic",
+    "test_integration_invariant_k2_no_external_dependency",
+    "test_integration_invariant_k6_determinism",
+    "test_integration_invariant_k7_explicability",
+    "test_integration_invariant_k8_offline",
+    "test_integration_kernel_modules_work_together",
+    "test_integration_lifecycle_log_integration",
+    "test_integration_lifecycle_shutdown_with_all_modules",
+    "test_integration_round_trip_id_config",
+    "test_integration_time_log_integration",
+    "test_lifecycle_deterministic",
+    "test_lifecycle_multiple_hooks",
+    "test_lifecycle_no_business_logic",
+    "test_lifecycle_no_init_hooks",
+    "test_lifecycle_register_hook",
+    "test_lifecycle_shutdown_executes_hooks",
+    "test_lifecycle_shutdown_idempotent",
+    "test_lifecycle_shutdown_lifo_order",
+    "test_log_all_levels",
+    "test_log_default_logger",
+    "test_log_deterministic",
+    "test_log_level_enum",
+    "test_log_message_preserved",
+    "test_log_no_business_logic",
+    "test_log_no_external_dependency",
+    "test_log_no_format_imposed",
+    "test_time_deterministic_fake",
+    "test_time_fake_clock_injection",
+    "test_time_no_business_logic",
+    "test_time_no_external_dependency",
+    "test_time_no_timezone_logic",
+    "test_time_now_monotonic",
+    "test_time_now_returns_systemtime",
+    "toolkit",
+    "toolkit.accounting",
+    "toolkit.accounting.miyucomptareports",
+    "toolkit.accounting.miyudeclarations",
+    "toolkit.alicia",
+    "toolkit.alicia.automations",
+    "toolkit.alicia.automations.admin",
+    "toolkit.alicia.automations.dispatcher",
+    "toolkit.alicia.automations.engine",
+    "toolkit.alicia.automations.errors",
+    "toolkit.alicia.automations.evaluator",
+    "toolkit.alicia.automations.executor",
+    "toolkit.alicia.automations.parser",
+    "toolkit.alicia.automations.types",
+    "toolkit.alicia.capture",
+    "toolkit.alicia.devices",
+    "toolkit.alicia.devices.admin",
+    "toolkit.alicia.devices.command",
+    "toolkit.alicia.devices.errors",
+    "toolkit.alicia.devices.registry",
+    "toolkit.alicia.devices.types",
+    "toolkit.alicia.http",
+    "toolkit.alicia.http.adapters",
+    "toolkit.alicia.http.adapters.generic",
+    "toolkit.alicia.http.adapters.shelly",
+    "toolkit.alicia.http.admin",
+    "toolkit.alicia.http.client",
+    "toolkit.alicia.http.errors",
+    "toolkit.alicia.mqtt",
+    "toolkit.alicia.mqtt.admin",
+    "toolkit.alicia.mqtt.client",
+    "toolkit.alicia.mqtt.config",
+    "toolkit.alicia.mqtt.errors",
+    "toolkit.alicia.mqtt.message",
+    "toolkit.alicia.mqtt.topics",
+    "toolkit.alicia.mqtt.zigbee2mqtt",
+    "toolkit.alicia.wakeword",
+    "toolkit.alicia.wakeword.admin_cell",
+    "toolkit.alicia.wakeword.context",
+    "toolkit.alicia.wakeword.detector",
+    "toolkit.alicia.wakeword.errors",
+    "toolkit.alicia.wakeword.models",
+    "toolkit.calc",
+    "toolkit.calc.miyucalc",
+    "toolkit.communication",
+    "toolkit.communication.miyucontacts",
+    "toolkit.content",
+    "toolkit.content.miyubookmarks",
+    "toolkit.content.miyufeeds",
+    "toolkit.data",
+    "toolkit.data.miyusql",
+    "toolkit.discovery",
+    "toolkit.discovery.miyudiscovery",
+    "toolkit.export",
+    "toolkit.export.miyuexport",
+    "toolkit.hr",
+    "toolkit.hr.miyuhr",
+    "toolkit.identity",
+    "toolkit.identity.miyuprofile",
+    "toolkit.jobs",
+    "toolkit.jobs.miyujobs",
+    "toolkit.locale",
+    "toolkit.locale.miyulocale",
+    "toolkit.moderation",
+    "toolkit.moderation.miyumoderationforum",
+    "toolkit.narrative",
+    "toolkit.narrative.miyustory",
+    "toolkit.pos",
+    "toolkit.pos.miyuposanalytics",
+    "toolkit.pos.miyuposinventory",
+    "toolkit.pos.miyuposkitchen",
+    "toolkit.pos.miyuposloyalty",
+    "toolkit.pos.miyupospayment",
+    "toolkit.pos.miyupossales",
+    "toolkit.security",
+    "toolkit.security.miyuantispam",
+    "toolkit.social",
+    "toolkit.social.miyupolls",
+    "toolkit.social.miyusocialfeed",
+    "toolkit.social.miyusocialmessaging",
+    "toolkit.social.miyusocialmoderation",
+    "toolkit.social.miyusocialprofile",
+    "toolkit.text",
+    "toolkit.text.miyutext",
+    "toolkit.validate",
+    "toolkit.validate.miyuvalidate",
+    "worrysentinel_degradation",
+    "worrysentinel_degradation_manager_get_current",
+    "worrysentinel_degradation_manager_trait",
+    "worrysentinel_degradation_state",
+    "worrysentinel_degradation_state_blocked",
+    "worrysentinel_degradation_state_degraded",
+    "worrysentinel_degradation_state_field",
+    "worrysentinel_degradation_state_normal",
+    "worrysentinel_degradation_state_restricted",
+    "worrysentinel_degradation_state_unstable",
+    "worrysentinel_degradation_test_state_ordering",
+    "worrysentinel_security_level",
+    "worrysentinel_security_level_critical",
+    "worrysentinel_security_level_hardened",
+    "worrysentinel_security_level_manager_get_current",
+    "worrysentinel_security_level_manager_trait",
+    "worrysentinel_security_level_public",
+    "worrysentinel_security_level_sensitive",
+    "worrysentinel_security_level_standard",
+    "worrysentinel_security_test_level_ordering",
+    "worrysentinel_threat_detector_detect",
+    "worrysentinel_threat_detector_trait",
+    "worrysentinel_threat_level",
+    "worrysentinel_threat_level_critical",
+    "worrysentinel_threat_level_high",
+    "worrysentinel_threat_level_low",
+    "worrysentinel_threat_level_medium",
+    "worrysentinel_threat_level_none",
+    "worrysentinel_threat_test_level_ordering"
   ],
-  "test_config_no_business_logic": [
-    "envconfig_struct"
-  ],
-  "kindmother_sync_error_io": [
-    "kindmother_sync_error"
-  ],
-  "miyukiniadmin_backend_api_backups_restore": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "strongfather_policy_engine_apply": [
-    "strongfather_policy_engine_new"
-  ],
-  "miyukiniadmin_apply_result_message": [
-    "miyukiniadmin_migration_service_apply_result"
-  ],
-  "strongfather_intent_validator_validate_structure_only": [
-    "strongfather_intent_validator_new"
-  ],
-  "tamr_classification_test_creation": [
-    "tamr_classification"
-  ],
-  "worrysentinel_threat_level_critical": [
-    "worrysentinel_threat_level"
-  ],
-  "caringnanny_observer_event_anomaly": [
-    "caringnanny_observer_event_type"
-  ],
-  "kindmother_sync_delta_operation_create": [
-    "kindmother_sync_delta_operation"
-  ],
-  "miyukiniadmin_backend_api_table_get_row": [
-    "miyukiniadmin_backend_app_state"
-  ],
-  "kindmother_api_read": [
-    "kindmother_api_coredata"
-  ],
-  "miyucloud_handler_file_upload": [
-    "miyucloud_svc_file_upload",
-    "miyucloud_mw_auth",
-    "miyucloud_mime_validation",
-    "miyucloud_infra_audit_repo"
-  ],
-  "miyucloud_handler_auth": [
-    "miyucloud_svc_auth",
-    "miyucloud_mw_rate_limit"
-  ],
-  "miyucloud_handler_audit": [
-    "miyucloud_infra_audit_repo",
-    "miyucloud_mw_auth"
-  ],
-  "miyucloud_handler_gdpr": [
-    "miyucloud_port_gdpr",
-    "miyucloud_mw_auth"
-  ],
-  "miyucloud_svc_file_upload": [
-    "miyucloud_port_dedup",
-    "miyucloud_port_encryption",
-    "miyucloud_port_file_upload"
-  ],
-  "miyucloud_svc_auth": [
-    "miyucloud_port_auth_token_service",
-    "miyucloud_port_auth_password_hasher",
-    "miyucloud_port_auth_user_storage"
-  ],
-  "miyucloud_infra_jwt_service": [
-    "miyucloud_entity_session"
-  ],
-  "miyucloud_infra_dedup_service": [
-    "miyucloud_infra_blob_encryption"
-  ],
-  "miyucloud_infra_audit_repo": [
-    "miyucloud_entity_audit_event"
-  ],
-  "miyucloud_mw_auth": [
-    "miyucloud_infra_jwt_service"
-  ],
-  "miyucloud_mw_bandwidth": [
-    "miyucloud_di_app_state"
-  ],
-  "miyucloud_main": [
-    "miyucloud_di_factory",
-    "miyucloud_config_app",
-    "miyucloud_infra_dual_db_pools"
-  ],
-  "miyucloud_routes_protected": [
-    "miyucloud_handler_file_upload",
-    "miyucloud_handler_audit",
-    "miyucloud_handler_gdpr",
-    "miyucloud_handler_webdav",
-    "miyucloud_handler_caldav",
-    "miyucloud_handler_carddav"
+  "edges": [
+    {
+      "from": "central",
+      "to": "central.components",
+      "type": "parent"
+    },
+    {
+      "from": "central",
+      "to": "central.services",
+      "type": "parent"
+    },
+    {
+      "from": "central.components",
+      "to": "central.components.calendar",
+      "type": "parent"
+    },
+    {
+      "from": "central.components",
+      "to": "central.components.service_sidebar",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.agenda_list",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.day_view",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.event_slot",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.mini_calendar",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.month_view",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.types",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.week_view",
+      "type": "parent"
+    },
+    {
+      "from": "central.services",
+      "to": "central.services.lifegame",
+      "type": "parent"
+    },
+    {
+      "from": "central.services",
+      "to": "central.services.ui_assets",
+      "type": "parent"
+    },
+    {
+      "from": "central.services",
+      "to": "central.services.ui_builder",
+      "type": "parent"
+    },
+    {
+      "from": "central.services.lifegame",
+      "to": "central.services.lifegame.canvas",
+      "type": "parent"
+    },
+    {
+      "from": "central.services.lifegame",
+      "to": "central.services.lifegame.sidebar",
+      "type": "parent"
+    },
+    {
+      "from": "central.services.lifegame",
+      "to": "central.services.lifegame.stats_bar",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.adminApp",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.adminTheme",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudAuth",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudAuthSession",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudBootstrap",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudContextMenus",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudCsrf",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudFavorites",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudFileOps",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudFileSharing",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudFilesView",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudFormatters",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudI18n",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudIcons",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudInlineViewer",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudLanguageSelector",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudMain",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudModal",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudMultiSelect",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudNavigation",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudNotifications",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudPhotos",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudPhotosLightbox",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudPwa",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudRecent",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudSearch",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudSearchView",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudServiceWorker",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudState",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudSwRegister",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudThemeInit",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudTrashView",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudUi",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudUiFileTypes",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudUiNotifications",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudUserMenu",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewAdmin",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewDeviceVerify",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewMobile",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewNcError",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewNcLogin",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewNcSuccess",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewProfile",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudViewShared",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.cloudWopiEditor",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compAnimatedCard",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compCard",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compFeatureList",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compLayout",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compMiouMascot",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compPyramidDiagram",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.compTimeline",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.dataCores",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.dataGlossary",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.dataPyramid",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.dataRoadmap",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.dataServices",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.dataServicesDetailed",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.gameAllumina",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageAbout",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageArchitecture",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageCoreDetail",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageCores",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageDocs",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageHome",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageMockCog",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageOnboarding",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageRoadmap",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageServiceDetail",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.pageServices",
+      "type": "parent"
+    },
+    {
+      "from": "cog",
+      "to": "cog.siteApp",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.buildLanguageCard",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.checkFirstRun",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.checkSystemStatus",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.configureOidcLoginUI",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.detectBrowserLanguage",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.fetchUserData",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.initLanguageSelector",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.initLoginElements",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.isFirstRun",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.login",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.logout",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.redirectToMainApp",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.refreshAuthToken",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.register",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.showInitialPanel",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuth",
+      "to": "cog.cloudAuth.updateLanguagePanelTexts",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuthSession",
+      "to": "cog.cloudAuthSession.checkAuthentication",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuthSession",
+      "to": "cog.cloudAuthSession.refreshUserData",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudAuthSession",
+      "to": "cog.cloudAuthSession.resolveHomeFolder",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudCsrf",
+      "to": "cog.cloudCsrf.getCsrfHeaders",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudCsrf",
+      "to": "cog.cloudCsrf.getCsrfToken",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFileOps",
+      "to": "cog.cloudFileOps.getAuthHeaders",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFilesView",
+      "to": "cog.cloudFilesView.loadFiles",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFormatters",
+      "to": "cog.cloudFormatters.escapeHtml",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFormatters",
+      "to": "cog.cloudFormatters.formatDateShort",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFormatters",
+      "to": "cog.cloudFormatters.formatDateTime",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFormatters",
+      "to": "cog.cloudFormatters.formatFileSize",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFormatters",
+      "to": "cog.cloudFormatters.formatQuotaSize",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudFormatters",
+      "to": "cog.cloudFormatters.isTextViewable",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.getCurrentLocale",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.getNestedValue",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.getSupportedLocales",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.initI18n",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.interpolate",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.loadTranslations",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.safeT",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.setLocale",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.t",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.translateElement",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudI18n",
+      "to": "cog.cloudI18n.translatePage",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudIcons",
+      "to": "cog.cloudIcons.oxiIcon",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudIcons",
+      "to": "cog.cloudIcons.replaceIconsInElement",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.closeDropdown",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.createLanguageSelector",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.getAvailableLanguages",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.openDropdown",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.selectLanguage",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.toggleDropdown",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.updateHtmlAttributes",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudLanguageSelector",
+      "to": "cog.cloudLanguageSelector.updateSelectedLanguage",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.cacheElements",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.initApp",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.setActionsBarMode",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.setupActionsBarDelegation",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.setupEventListeners",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.setupUploadDropdown",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudMain",
+      "to": "cog.cloudMain.updateStorageUsageDisplay",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.getSectionFromNavItem",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.hideFileContainers",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.initSidebarToggle",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.setCurrentSection",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.switchToFavoritesView",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.switchToFilesView",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.switchToPhotosView",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.switchToRecentFilesView",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.switchToSharedView",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudNavigation",
+      "to": "cog.cloudNavigation.syncViewContainers",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudPwa",
+      "to": "cog.cloudPwa.uploadPhotosDirectly",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudSearchView",
+      "to": "cog.cloudSearchView.performSearch",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudTrashView",
+      "to": "cog.cloudTrashView.addTrashItemToView",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudTrashView",
+      "to": "cog.cloudTrashView.loadTrashItems",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUi",
+      "to": "cog.cloudUi.initRubberBandSelection",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUi",
+      "to": "cog.cloudUi.showConfirmDialog",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUi",
+      "to": "cog.cloudUi.showContextMenuAtElement",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUi",
+      "to": "cog.cloudUi.toggleCardSelection",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUserMenu",
+      "to": "cog.cloudUserMenu.fetchAppVersion",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUserMenu",
+      "to": "cog.cloudUserMenu.logout",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUserMenu",
+      "to": "cog.cloudUserMenu.setupUserMenu",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUserMenu",
+      "to": "cog.cloudUserMenu.showUserProfileModal",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudUserMenu",
+      "to": "cog.cloudUserMenu.updateUserMenuData",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.deleteUser",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.init",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.loadDashboard",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.loadUsers",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.openCreateUserModal",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.openQuotaModal",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.openResetPasswordModal",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.saveOidcSettings",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.saveQuota",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.showAccessDenied",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.showConfirm",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.showOidcStatus",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.submitCreateUser",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.submitResetPassword",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.switchTab",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.t",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.testConnection",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.toggleActive",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.toggleRegistration",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewAdmin",
+      "to": "cog.cloudViewAdmin.toggleRole",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.fetchExistingFileNames",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.scanDirectory",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.showModal",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.startBatchUpload",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.startQueueProcessing",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.streamSyncFromDirectory",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.syncWithCloudComparison",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.updateProgress",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewMobile",
+      "to": "cog.cloudViewMobile.uploadFile",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewProfile",
+      "to": "cog.cloudViewProfile.changePassword",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewProfile",
+      "to": "cog.cloudViewProfile.createAppPassword",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewProfile",
+      "to": "cog.cloudViewProfile.init",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewProfile",
+      "to": "cog.cloudViewProfile.loadAppPasswords",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewProfile",
+      "to": "cog.cloudViewProfile.revokeAppPassword",
+      "type": "parent"
+    },
+    {
+      "from": "cog.cloudViewProfile",
+      "to": "cog.cloudViewProfile.t",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame",
+      "to": "lifegame.ai",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame",
+      "to": "lifegame.entities",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame",
+      "to": "lifegame.operator",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame",
+      "to": "lifegame.powers",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame",
+      "to": "lifegame.simulation",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame",
+      "to": "lifegame.world",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.ai",
+      "to": "lifegame.ai.decide_action",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.building",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.building_struct",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.building_type",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.creature",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.creature_struct",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.creature_type",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.manager",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.race",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.unit",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.entities",
+      "to": "lifegame.entities.unit_struct",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.operator",
+      "to": "lifegame.operator.entities",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.operator",
+      "to": "lifegame.operator.powers",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.operator",
+      "to": "lifegame.operator.simulation",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.operator",
+      "to": "lifegame.operator.world",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.powers",
+      "to": "lifegame.powers.creation",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.powers",
+      "to": "lifegame.powers.destruction",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.powers",
+      "to": "lifegame.powers.manager",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.simulation",
+      "to": "lifegame.simulation.ai",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.simulation",
+      "to": "lifegame.simulation.tick_world_fn",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.simulation",
+      "to": "lifegame.simulation.world_tick",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.biome",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.biome_struct",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.biome_type",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.generation",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.generator",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.terrain",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.terrain_grid",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.terrain_type",
+      "type": "parent"
+    },
+    {
+      "from": "lifegame.world",
+      "to": "lifegame.world.tile",
+      "type": "parent"
+    },
+    {
+      "from": "origin",
+      "to": "origin.relay",
+      "type": "parent"
+    },
+    {
+      "from": "origin",
+      "to": "origin.tracker",
+      "type": "parent"
+    },
+    {
+      "from": "origin.relay",
+      "to": "origin.relay.permis_registry",
+      "type": "parent"
+    },
+    {
+      "from": "origin.tracker",
+      "to": "origin.tracker.visit_tracker",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.alicia",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaycloud",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaycontact",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaydocs",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaykoa",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaykonta",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaymail",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaymessage",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaymeteo",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jayrdv",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jaysheets",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.jayslides",
+      "type": "parent"
+    },
+    {
+      "from": "service",
+      "to": "service.media",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.api",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.capabilities_runtime",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.command",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.config",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.cores_gate",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.dispatcher",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.errors",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.intent",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.memory",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.nlu-bridge",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.nlu-fallback",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.orchestrator",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.rest-api",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.service",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.skills",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia",
+      "to": "service.alicia.snapshot",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.admin",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.auth",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.config",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.dto",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.errors",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.handlers",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.router",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api",
+      "to": "service.alicia.api.server",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api.handlers",
+      "to": "service.alicia.api.handlers.capabilities",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api.handlers",
+      "to": "service.alicia.api.handlers.devices",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api.handlers",
+      "to": "service.alicia.api.handlers.health",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api.handlers",
+      "to": "service.alicia.api.handlers.history",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api.handlers",
+      "to": "service.alicia.api.handlers.rooms",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.api.handlers",
+      "to": "service.alicia.api.handlers.state",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.cores_gate",
+      "to": "service.alicia.cores_gate.lib",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.dispatcher",
+      "to": "service.alicia.dispatcher.core_gate",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.dispatcher",
+      "to": "service.alicia.dispatcher.dispatcher",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.dispatcher",
+      "to": "service.alicia.dispatcher.errors",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.dispatcher",
+      "to": "service.alicia.dispatcher.lib",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.dispatcher",
+      "to": "service.alicia.dispatcher.service_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.memory",
+      "to": "service.alicia.memory.errors",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.memory",
+      "to": "service.alicia.memory.learning",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.memory",
+      "to": "service.alicia.memory.lib",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.memory",
+      "to": "service.alicia.memory.prompt",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.memory",
+      "to": "service.alicia.memory.store",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.memory",
+      "to": "service.alicia.memory.types",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.orchestrator",
+      "to": "service.alicia.orchestrator.admin",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.capability",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.discovery",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.errors",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.lib",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.manifest",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.policy",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.registry",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.tooling",
+      "type": "parent"
+    },
+    {
+      "from": "service.alicia.skills",
+      "to": "service.alicia.skills.watcher",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaycloud",
+      "to": "service.jaycloud.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaycontact",
+      "to": "service.jaycontact.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaydocs",
+      "to": "service.jaydocs.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaykoa",
+      "to": "service.jaykoa.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaykonta",
+      "to": "service.jaykonta.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaymail",
+      "to": "service.jaymail.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaymessage",
+      "to": "service.jaymessage.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaymeteo",
+      "to": "service.jaymeteo.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jayrdv",
+      "to": "service.jayrdv.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jaysheets",
+      "to": "service.jaysheets.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.jayslides",
+      "to": "service.jayslides.alicia_client",
+      "type": "parent"
+    },
+    {
+      "from": "service.media",
+      "to": "service.media.jaymanga",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.accounting",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.alicia",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.calc",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.communication",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.content",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.data",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.discovery",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.export",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.hr",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.identity",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.jobs",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.locale",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.moderation",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.narrative",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.pos",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.security",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.social",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.text",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit",
+      "to": "toolkit.validate",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.accounting",
+      "to": "toolkit.accounting.miyucomptareports",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.accounting",
+      "to": "toolkit.accounting.miyudeclarations",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia",
+      "to": "toolkit.alicia.automations",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia",
+      "to": "toolkit.alicia.capture",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia",
+      "to": "toolkit.alicia.devices",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia",
+      "to": "toolkit.alicia.http",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia",
+      "to": "toolkit.alicia.mqtt",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia",
+      "to": "toolkit.alicia.wakeword",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.admin",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.dispatcher",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.engine",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.errors",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.evaluator",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.executor",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.parser",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.automations",
+      "to": "toolkit.alicia.automations.types",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.devices",
+      "to": "toolkit.alicia.devices.admin",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.devices",
+      "to": "toolkit.alicia.devices.command",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.devices",
+      "to": "toolkit.alicia.devices.errors",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.devices",
+      "to": "toolkit.alicia.devices.registry",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.devices",
+      "to": "toolkit.alicia.devices.types",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.http",
+      "to": "toolkit.alicia.http.adapters",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.http",
+      "to": "toolkit.alicia.http.admin",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.http",
+      "to": "toolkit.alicia.http.client",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.http",
+      "to": "toolkit.alicia.http.errors",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.http.adapters",
+      "to": "toolkit.alicia.http.adapters.generic",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.http.adapters",
+      "to": "toolkit.alicia.http.adapters.shelly",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.admin",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.client",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.config",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.errors",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.message",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.topics",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.mqtt",
+      "to": "toolkit.alicia.mqtt.zigbee2mqtt",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.wakeword",
+      "to": "toolkit.alicia.wakeword.admin_cell",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.wakeword",
+      "to": "toolkit.alicia.wakeword.context",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.wakeword",
+      "to": "toolkit.alicia.wakeword.detector",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.wakeword",
+      "to": "toolkit.alicia.wakeword.errors",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.alicia.wakeword",
+      "to": "toolkit.alicia.wakeword.models",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.calc",
+      "to": "toolkit.calc.miyucalc",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.communication",
+      "to": "toolkit.communication.miyucontacts",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.content",
+      "to": "toolkit.content.miyubookmarks",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.content",
+      "to": "toolkit.content.miyufeeds",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.data",
+      "to": "toolkit.data.miyusql",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.discovery",
+      "to": "toolkit.discovery.miyudiscovery",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.export",
+      "to": "toolkit.export.miyuexport",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.hr",
+      "to": "toolkit.hr.miyuhr",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.identity",
+      "to": "toolkit.identity.miyuprofile",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.jobs",
+      "to": "toolkit.jobs.miyujobs",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.locale",
+      "to": "toolkit.locale.miyulocale",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.moderation",
+      "to": "toolkit.moderation.miyumoderationforum",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.narrative",
+      "to": "toolkit.narrative.miyustory",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.pos",
+      "to": "toolkit.pos.miyuposanalytics",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.pos",
+      "to": "toolkit.pos.miyuposinventory",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.pos",
+      "to": "toolkit.pos.miyuposkitchen",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.pos",
+      "to": "toolkit.pos.miyuposloyalty",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.pos",
+      "to": "toolkit.pos.miyupospayment",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.pos",
+      "to": "toolkit.pos.miyupossales",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.security",
+      "to": "toolkit.security.miyuantispam",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.social",
+      "to": "toolkit.social.miyupolls",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.social",
+      "to": "toolkit.social.miyusocialfeed",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.social",
+      "to": "toolkit.social.miyusocialmessaging",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.social",
+      "to": "toolkit.social.miyusocialmoderation",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.social",
+      "to": "toolkit.social.miyusocialprofile",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.text",
+      "to": "toolkit.text.miyutext",
+      "type": "parent"
+    },
+    {
+      "from": "toolkit.validate",
+      "to": "toolkit.validate.miyuvalidate",
+      "type": "parent"
+    }
   ]
 }

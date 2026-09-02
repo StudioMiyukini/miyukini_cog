@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_client_impl
 //! @do     implement_delegation_client
-//! @layer  toolkit
+//@human ! @layer  toolkit
 
 use std::collections::HashMap;
 use std::time::Duration;

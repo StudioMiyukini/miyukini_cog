@@ -244,9 +244,9 @@ Apres approbation du brief P0, Lise execute les taches front-end du plan exhaust
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.lise -->
-<!-- @do: Responsabilites de worker swarm front-end de Lise -->
-<!-- @role: Lise (Front-End) -->
+<!-- @id mass.agent.lise -->
+<!-- @do Responsabilites de worker swarm front-end de Lise -->
+<!-- @role Lise (Front-End) -->
 
 Lise est un **Worker** du pool MASS (Couche 2 — front-end).
 

@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     implement_unit_decision_making
-//! @human  Système de décision pour les unités civilisées
+//@human ! @human  Système de décision pour les unités civilisées
 
 use lifegame_entities::{Unit, EntityManager, Vec2};
 use lifegame_world::TerrainGrid;

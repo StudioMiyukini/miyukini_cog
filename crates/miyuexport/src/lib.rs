@@ -7,8 +7,8 @@
 // @id toolkit.export.miyuexport
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuExport ; expose les modules tools.
 /// @do expose_miyuexport_toolkit
+//@human / @human Point d'entrée du toolkit MiyuExport ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod csv;

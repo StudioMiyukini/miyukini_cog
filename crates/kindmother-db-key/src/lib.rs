@@ -6,7 +6,7 @@
 //!
 //! @id     kindmother_db_key
 //! @do     derive_encryption_keys_for_sqlite
-//! @layer  core
+//@human ! @layer  core
 
 mod key_derivation;
 

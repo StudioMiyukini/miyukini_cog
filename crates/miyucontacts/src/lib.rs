@@ -7,8 +7,8 @@
 // @id toolkit.communication.miyucontacts
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuContacts ; expose les modules tools.
 /// @do expose_miyucontacts_toolkit
+//@human / @human Point d'entrée du toolkit MiyuContacts ; expose les modules tools.
 pub mod admin_cell;
 pub mod contacts;
 pub mod context;

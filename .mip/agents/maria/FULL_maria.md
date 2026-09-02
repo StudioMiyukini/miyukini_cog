@@ -259,9 +259,9 @@ Maria est responsable de l'**administration de la Phase SETUP** lors de la premi
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.maria -->
-<!-- @do: Responsabilites d'orchestration swarm de Maria -->
-<!-- @role: Maria (PM) -->
+<!-- @id mass.agent.maria -->
+<!-- @do Responsabilites d'orchestration swarm de Maria -->
+<!-- @role Maria (PM) -->
 
 Maria est l'**Orchestrateur** du pattern MASS (Couche 1).
 

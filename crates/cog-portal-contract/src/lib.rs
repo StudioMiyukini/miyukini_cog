@@ -5,7 +5,7 @@
 //!
 //! @id     cog_portal_contract_lib
 //! @do define_portal_contract_interface
-//! @role   api
+//@human ! @role   api
 //! @layer service
 //! @human  PortalContract trait + PublicPage + PortalError — contrat d'exposition Portal partagé.
 

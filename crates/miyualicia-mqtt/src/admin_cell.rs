@@ -9,8 +9,8 @@ use std::sync::OnceLock;
 // @id toolkit.alicia.mqtt.admin
 // @role governance_cell
 // @layer 6
-// @human Cellule d'administration du crate miyualicia-mqtt.
 // @do identify_and_self_describe_miyualicia_mqtt
+// @human Cellule d'administration du crate miyualicia-mqtt.
 
 /// Identifiant canonique du toolkit.
 pub const TOOLKIT_ID: &str = "toolkit.alicia.mqtt";

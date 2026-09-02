@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_onboarding
 //! @do     provide_onboarding_status_checks_completion
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Gere le flux de premiere connexion : verification passphrase,

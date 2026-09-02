@@ -7,8 +7,8 @@
 // @id toolkit.content.miyubookmarks
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuBookmarks ; expose les modules tools.
 /// @do expose_miyubookmarks_toolkit
+//@human / @human Point d'entrée du toolkit MiyuBookmarks ; expose les modules tools.
 pub mod admin_cell;
 pub mod bookmark;
 pub mod context;

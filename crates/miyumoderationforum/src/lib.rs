@@ -7,8 +7,8 @@
 // @id toolkit.moderation.miyumoderationforum
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuModerationForum ; expose les modules tools.
 /// @do expose_miyumoderationforum_toolkit
+//@human / @human Point d'entrée du toolkit MiyuModerationForum ; expose les modules tools.
 pub mod admin_cell;
 pub mod ban;
 pub mod context;

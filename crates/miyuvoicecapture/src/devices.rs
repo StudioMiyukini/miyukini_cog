@@ -6,8 +6,8 @@
 // @id alicia_capture_devices
 // @role infrastructure
 // @layer toolkit
-// @human Enumeration des peripheriques audio, filtrage par nom/ID stable, hash blake3.
 // @do enumerate_audio_devices
+// @human Enumeration des peripheriques audio, filtrage par nom/ID stable, hash blake3.
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use serde::{Deserialize, Serialize};

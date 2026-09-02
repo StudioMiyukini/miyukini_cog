@@ -10,8 +10,8 @@ use crate::services::DestructionAndReinitService;
 /// @id miyukiniadmin_auto_recovery_service
 /// @role infrastructure
 /// @layer operator
-/// @human Tente recovery/rollback ; si échec, pre-destruction backup puis destruction/réinit.
 /// @do run_auto_recovery
+//@human / @human Tente recovery/rollback ; si échec, pre-destruction backup puis destruction/réinit.
 /// @depends miyukiniadmin_services_environment_state, miyukiniadmin_services_destruction_reinit
 #[derive(Clone)]
 pub struct AutoRecoveryService {
@@ -26,8 +26,8 @@ impl AutoRecoveryService {
     /// @id miyukiniadmin_auto_recovery_new
     /// @role constructor
     /// @layer operator
-    /// @human Construit le service auto-recovery.
     /// @do create_auto_recovery_service
+    //@human / @human Construit le service auto-recovery.
     #[must_use]
     pub fn new(
         environment_state: Arc<EnvironmentStateService>,
@@ -44,8 +44,8 @@ impl AutoRecoveryService {
     /// @id miyukiniadmin_auto_recovery_run
     /// @role mutator
     /// @layer operator
-    /// @human Exécute la recovery automatique (rollback stub puis destruction si échec).
     /// @do run_auto_recovery
+    //@human / @human Exécute la recovery automatique (rollback stub puis destruction si échec).
     pub async fn run(&self) -> AutoRecoveryResult {
         let recovery_ok = self.try_recovery().await;
         if recovery_ok {
@@ -80,6 +80,7 @@ impl AutoRecoveryService {
 
 /// Résultat de l'auto-recovery.
 /// @id miyukiniadmin_auto_recovery_result
+/// @do definir_auto_recovery_result
 #[derive(Debug, Clone)]
 pub struct AutoRecoveryResult {
     /// True si recovery réussie ou destruction/réinit réussie.

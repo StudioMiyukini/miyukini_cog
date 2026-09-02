@@ -143,11 +143,11 @@ fn test_client_execute() {
 ## Annotations MSCM dans les tests
 
 ```rust
-/// @id: service_test_creation
-/// @role: test
-/// @layer: service
-/// @human: Test de creation d'une entite.
-/// @do: verify_entity_creation
+/// @id service_test_creation
+/// @role test
+/// @layer service
+/// @human Test de creation d'une entite.
+/// @do verify_entity_creation
 #[test]
 fn test_create_entity() { ... }
 ```
@@ -173,7 +173,7 @@ cargo test -p miyusql cycle_
 1. **DB en memoire** : utiliser `:memory:` pour tests unitaires
 2. **Helpers partages** : `mem_db()`, `make_*()` dans chaque module test
 3. **Pas d'effets de bord** : chaque test est independant
-4. **Annotations MSCM** : `@role: test` pour les tests
+4. **Annotations MSCM** : `@role test` pour les tests
 5. **GovernedContext** : toujours fournir un mandat valide pour les tests MiyuSQL
 6. **Cycle MiyukiniSQLtest** : respecter la sequence complete (CREATE → ALTER → INSERT → SELECT → DELETE → DROP)
 

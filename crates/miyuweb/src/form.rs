@@ -7,8 +7,8 @@ use crate::errors::MiyuwebError;
 /// @id miyuweb_tool_web_form_validate
 /// @role accessor
 /// @layer tool
-/// @human Valide un formulaire (structure, champs) ; règles fournies dans le flux.
 /// @do web_form_validate_under_governance
+//@human / @human Valide un formulaire (structure, champs) ; règles fournies dans le flux.
 /// tool.web.form.validate — ne définit pas les règles métier.
 pub fn validate(
     ctx: &GovernedContext,

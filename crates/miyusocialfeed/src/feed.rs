@@ -8,8 +8,8 @@ use crate::store;
 /// @id miyusocialfeed_tool_feed_list
 /// @role mutator
 /// @layer tool
-/// @human Liste le flux ; filtres fournis.
 /// @do feed_list_under_governance
+//@human / @human Liste le flux ; filtres fournis.
 /// tool.social.feed.list
 pub fn list(
     ctx: &GovernedContext,

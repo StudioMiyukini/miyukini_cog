@@ -5,8 +5,8 @@
 // @id service.alicia.api.auth
 // @role jwt_authentication
 // @layer 7
-// @human JWT HS256 Alicia : claims, scopes, generation, verification, extractor axum.
 // @do provide_jwt_auth_for_alicia_api
+// @human JWT HS256 Alicia : claims, scopes, generation, verification, extractor axum.
 
 use std::sync::Arc;
 

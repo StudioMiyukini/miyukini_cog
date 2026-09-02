@@ -5,22 +5,22 @@ use std::collections::HashMap;
 /// @id tamr_metadata
 /// @role data
 /// @layer core
-/// @human Métadonnées associées à une entité.
 /// @do represent_metadata
+//@human / @human Métadonnées associées à une entité.
 #[derive(Debug, Clone)]
 pub struct Metadata {
     /// @id tamr_metadata_entity_id
     /// @role data
     /// @layer core
-    /// @human Identifiant de l'entité.
     /// @do store_entity_id
+    //@human / @human Identifiant de l'entité.
     /// @depends tamr_metadata
     pub entity_id: String,
     /// @id tamr_metadata_values
     /// @role data
     /// @layer core
-    /// @human Valeurs des métadonnées (clé -> valeur).
     /// @do store_metadata_values
+    //@human / @human Valeurs des métadonnées (clé -> valeur).
     /// @depends tamr_metadata
     pub values: HashMap<String, String>,
 }
@@ -28,14 +28,14 @@ pub struct Metadata {
 /// @id tamr_metadata_manager_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de gestion des métadonnées.
 /// @do define_metadata_manager_contract
+//@human / @human Trait de gestion des métadonnées.
 pub trait MetadataManager {
     /// @id tamr_metadata_manager_get
     /// @role accessor
     /// @layer core
-    /// @human Récupère les métadonnées d'une entité.
     /// @do get_entity_metadata
+    //@human / @human Récupère les métadonnées d'une entité.
     /// @depends tamr_metadata_manager_trait
     fn get(&self, entity_id: &str) -> Option<&Metadata>;
 }
@@ -73,8 +73,8 @@ mod tests {
     /// @id tamr_metadata_test_creation
     /// @role test
     /// @layer core
-    /// @human Test de création de métadonnées.
     /// @do verify_metadata_creation
+    //@human / @human Test de création de métadonnées.
     /// @depends tamr_metadata
     #[test]
     fn test_metadata_creation() {

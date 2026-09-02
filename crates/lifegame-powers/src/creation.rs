@@ -6,7 +6,7 @@
 //! @role   gameplay
 //! @layer  domain
 //! @do     implement_creation_powers
-//! @human  Pouvoirs de création de terrain et d'entités
+//@human ! @human  Pouvoirs de création de terrain et d'entités
 
 // Les pouvoirs de création sont implémentés dans lib.rs pour le MVP
 // Ce module servira pour l'extension future des pouvoirs

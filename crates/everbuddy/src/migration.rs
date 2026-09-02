@@ -3,22 +3,22 @@
 /// @id everbuddy_migration
 /// @role data
 /// @layer core
-/// @human Migration d'une version vers une autre.
 /// @do represent_migration
+//@human / @human Migration d'une version vers une autre.
 #[derive(Debug, Clone)]
 pub struct Migration {
     /// @id everbuddy_migration_from_version
     /// @role data
     /// @layer core
-    /// @human Version source.
     /// @do store_from_version
+    //@human / @human Version source.
     /// @depends everbuddy_migration
     pub from_version: String,
     /// @id everbuddy_migration_to_version
     /// @role data
     /// @layer core
-    /// @human Version cible.
     /// @do store_to_version
+    //@human / @human Version cible.
     /// @depends everbuddy_migration
     pub to_version: String,
 }
@@ -26,14 +26,14 @@ pub struct Migration {
 /// @id everbuddy_migration_executor_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait d'exécution de migration.
 /// @do define_migration_executor_contract
+//@human / @human Trait d'exécution de migration.
 pub trait MigrationExecutor {
     /// @id everbuddy_migration_executor_execute
     /// @role mutator
     /// @layer core
-    /// @human Exécute une migration.
     /// @do execute_migration
+    //@human / @human Exécute une migration.
     /// @depends everbuddy_migration_executor_trait
     fn execute(&mut self, migration: &Migration) -> Result<(), MigrationError>;
 }
@@ -41,15 +41,15 @@ pub trait MigrationExecutor {
 /// @id everbuddy_migration_error
 /// @role error
 /// @layer core
-/// @human Erreur de migration.
 /// @do represent_migration_error
+//@human / @human Erreur de migration.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MigrationError {
     /// @id everbuddy_migration_error_failed
     /// @role error
     /// @layer core
-    /// @human Échec de migration.
     /// @do represent_failed_error
+    //@human / @human Échec de migration.
     /// @depends everbuddy_migration_error
     Failed(String),
 }
@@ -98,8 +98,8 @@ mod tests {
     /// @id everbuddy_migration_test_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une migration.
     /// @do verify_migration_creation
+    //@human / @human Test de création d'une migration.
     /// @depends everbuddy_migration
     #[test]
     fn test_migration_creation() {

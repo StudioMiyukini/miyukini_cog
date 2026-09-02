@@ -2,7 +2,7 @@
 //!
 //! @id     central_remote_bridge
 //! @do share_state_central_remote
-//! @role   data
+//@human ! @role   data
 //! @layer toolkit
 //! @human  État partagé thread-safe entre Central UI et le serveur remote.
 //! Central écrit l'état, le serveur remote le lit et diffuse aux clients WebSocket.

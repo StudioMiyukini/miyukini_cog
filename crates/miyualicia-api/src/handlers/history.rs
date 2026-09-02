@@ -3,8 +3,8 @@
 // @id service.alicia.api.handlers.history
 // @role history_handler
 // @layer 7
-// @human Endpoint historique des commandes Alicia API.
 // @do handle_history_requests
+// @human Endpoint historique des commandes Alicia API.
 
 use std::sync::Arc;
 

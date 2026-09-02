@@ -5,7 +5,7 @@
 //!
 //! @id     jay1tribu_kindmother_client_db
 //! @do     persist_jay1tribu_data_via_kindmother_client
-//! @layer  infra
+//@human ! @layer  infra
 
 use crate::data::types::{Friend, Message, Salon, SalonType, Tribe};
 use kindmother::{InstanceIdentity, InstanceType};

@@ -10,8 +10,8 @@ use std::collections::HashSet;
 /// @id miyusearch_tool_search_suggest
 /// @role accessor
 /// @layer tool
-/// @human Produit des suggestions autocomplete à partir d'un préfixe et options fournis.
 /// @do search_suggest_under_governance
+//@human / @human Produit des suggestions autocomplete à partir d'un préfixe et options fournis.
 /// tool.search.suggest — ne décide pas ; préfixe fourni.
 pub fn suggest(
     ctx: &GovernedContext,

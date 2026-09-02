@@ -8,8 +8,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyumoderationforum_tool_usernote_create
 /// @role mutator
 /// @layer tool
-/// @human Crée une note modérateur ; WriteIntent KindMother.
 /// @do usernote_create_under_governance
+//@human / @human Crée une note modérateur ; WriteIntent KindMother.
 /// tool.moderation.usernote.create
 pub fn create(
     ctx: &GovernedContext,
@@ -41,8 +41,8 @@ pub fn create(
 /// @id miyumoderationforum_tool_usernote_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les notes modérateur.
 /// @do usernote_list_under_governance
+//@human / @human Liste les notes modérateur.
 /// tool.moderation.usernote.list
 pub fn list(
     ctx: &GovernedContext,

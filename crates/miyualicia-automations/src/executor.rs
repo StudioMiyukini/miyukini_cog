@@ -5,8 +5,8 @@
 // @id toolkit.alicia.automations.executor
 // @role action_executor
 // @layer 6
-// @human Executeur d'actions domotiques : commandes sequentielles avec delais.
 // @do execute_automation_actions_sequentially
+// @human Executeur d'actions domotiques : commandes sequentielles avec delais.
 
 use std::sync::Arc;
 

@@ -3,8 +3,8 @@
 // @id service.alicia.errors
 // @role error_types
 // @layer 7
-// @human Erreurs de l'orchestrateur Alicia : config, device, MQTT, NLU, commande.
 // @do define_alicia_error_types
+// @human Erreurs de l'orchestrateur Alicia : config, device, MQTT, NLU, commande.
 
 use miyualicia_devices::DeviceError;
 use miyualicia_http::HttpError;

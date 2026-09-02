@@ -2,7 +2,7 @@
 //!
 //! @id     jay1tribu_domain
 //! @do     orchestrate_messaging_tribes_friends_governed_by_webway
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Quand le COG n'est pas connecté au MWS :

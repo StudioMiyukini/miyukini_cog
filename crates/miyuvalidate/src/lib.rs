@@ -7,8 +7,8 @@
 // @id toolkit.validate.miyuvalidate
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuValidate ; expose les modules tools.
 /// @do expose_miyuvalidate_toolkit
+//@human / @human Point d'entrée du toolkit MiyuValidate ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

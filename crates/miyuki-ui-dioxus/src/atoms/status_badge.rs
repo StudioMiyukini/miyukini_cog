@@ -19,7 +19,7 @@
 //!
 //! @id     muid_status_badge
 //! @do render_status_badge
-//! @role   ui
+//@human ! @role   ui
 //! @layer service
 //! @human  StatusBadge — badge sémantique domaine (Active/Inactive/Pending/Archived/Draft).
 

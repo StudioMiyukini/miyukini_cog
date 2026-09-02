@@ -16,8 +16,8 @@
 // @id toolkit.alicia.mqtt
 // @role mqtt_protocol_adapter
 // @layer 6
-// @human Client MQTT async pour Alicia ; reconnexion, Z2M, topics, QoS.
 // @do provide_mqtt_transport_for_alicia
+// @human Client MQTT async pour Alicia ; reconnexion, Z2M, topics, QoS.
 
 pub mod admin_cell;
 pub mod client;

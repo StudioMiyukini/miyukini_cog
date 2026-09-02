@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_jay1tribu_migration
 //! @do     migrate_jay1tribu_attachments_to_miyucloud_non_destructive
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Migration non-destructive et idempotente : les fichiers originaux dans

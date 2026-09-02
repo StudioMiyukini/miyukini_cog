@@ -7,8 +7,8 @@ use crate::errors::MiyuJobsError;
 /// @id miyujobs_tool_schedule_at
 /// @role mutator
 /// @layer tool
-/// @human Planifie une exécution à une date/heure fournie ; autorisation = StrongFather.
 /// @do schedule_at_under_governance
+//@human / @human Planifie une exécution à une date/heure fournie ; autorisation = StrongFather.
 /// tool.jobs.schedule.at
 pub fn schedule_at(
     ctx: &GovernedContext,
@@ -29,8 +29,8 @@ pub fn schedule_at(
 /// @id miyujobs_tool_schedule_cron
 /// @role mutator
 /// @layer tool
-/// @human Planifie une exécution selon expression cron fournie ; autorisation = StrongFather.
 /// @do schedule_cron_under_governance
+//@human / @human Planifie une exécution selon expression cron fournie ; autorisation = StrongFather.
 /// tool.jobs.schedule.cron
 pub fn schedule_cron(
     ctx: &GovernedContext,

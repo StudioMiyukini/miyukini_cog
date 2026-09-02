@@ -5,14 +5,14 @@ use miyukini_kernel::{Level, Logger};
 /// @id miyukiniadmin_audit_logger_trait
 /// @role infrastructure
 /// @layer operator
-/// @human Trait de journalisation d'audit. Logge toutes les actions avec contexte complet.
 /// @do define_audit_logger_contract
+//@human / @human Trait de journalisation d'audit. Logge toutes les actions avec contexte complet.
 pub trait AuditLogger {
     /// @id miyukiniadmin_audit_logger_log_action
     /// @role mutator
     /// @layer operator
-    /// @human Logge une action avec son contexte complet.
     /// @do log_audit_action
+    //@human / @human Logge une action avec son contexte complet.
     /// @depends miyukiniadmin_audit_logger_trait, kernel_logger_log
     /// Logge une action d'audit.
     ///
@@ -26,15 +26,15 @@ pub trait AuditLogger {
 /// @id miyukiniadmin_audit_logger_default
 /// @role infrastructure
 /// @layer operator
-/// @human Journalisation d'audit par défaut utilisant le Logger du Kernel.
 /// @do provide_default_audit_logger
+//@human / @human Journalisation d'audit par défaut utilisant le Logger du Kernel.
 /// Journalisation d'audit par défaut.
 pub struct DefaultAuditLogger {
     /// @id miyukiniadmin_audit_logger_default_logger
     /// @role data
     /// @layer operator
-    /// @human Logger du Kernel utilisé pour l'audit.
     /// @do store_kernel_logger
+    //@human / @human Logger du Kernel utilisé pour l'audit.
     /// @depends miyukiniadmin_audit_logger_default
     logger: Box<dyn Logger>,
 }
@@ -43,8 +43,8 @@ impl DefaultAuditLogger {
     /// @id miyukiniadmin_audit_logger_default_new
     /// @role infrastructure
     /// @layer operator
-    /// @human Crée un nouveau logger d'audit par défaut.
     /// @do create_default_audit_logger
+    //@human / @human Crée un nouveau logger d'audit par défaut.
     /// @depends miyukiniadmin_audit_logger_default
     #[must_use]
     pub fn new(logger: Box<dyn Logger>) -> Self {
@@ -67,8 +67,8 @@ mod tests {
     /// @id miyukiniadmin_audit_logger_test_default
     /// @role test
     /// @layer operator
-    /// @human Test du logger d'audit par défaut.
     /// @do verify_default_audit_logger
+    //@human / @human Test du logger d'audit par défaut.
     /// @depends miyukiniadmin_audit_logger_default_new, miyukiniadmin_audit_logger_log_action
     #[test]
     fn test_default_audit_logger() {

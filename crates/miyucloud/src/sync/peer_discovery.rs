@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_sync_peer_discovery
 //! @do     discover_and_register_p2p_peers_via_lan_broadcast
-//! @role   sync
+//@human ! @role   sync
 //! @layer  infra
 //!
 //! Implementation simplifiee de la decouverte de pairs via broadcast UDP

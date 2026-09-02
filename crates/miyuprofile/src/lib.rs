@@ -28,8 +28,8 @@
 // @id toolkit.identity.miyuprofile
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuProfile Central ; expose les modules tools.
 /// @do expose_miyuprofile_toolkit
+//@human / @human Point d'entrée du toolkit MiyuProfile Central ; expose les modules tools.
 
 // ── Modules existants (rétro-compatibles) ────────────────────────
 pub mod admin_cell;

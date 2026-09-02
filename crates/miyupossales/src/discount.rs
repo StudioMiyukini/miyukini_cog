@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_discount_apply
 /// @role mutator
 /// @layer tool
-/// @human Applique une remise (article ou reçu) ; règles = StrongFather ; WriteIntent KindMother.
 /// @do discount_apply_under_governance
+//@human / @human Applique une remise (article ou reçu) ; règles = StrongFather ; WriteIntent KindMother.
 /// tool.pos.discount.apply
 pub fn apply(
     ctx: &GovernedContext,

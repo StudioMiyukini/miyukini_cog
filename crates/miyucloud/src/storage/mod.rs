@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_storage_module
 //! @do     expose_storage_backend_and_utilities
-//! @role   storage
+//@human ! @role   storage
 //! @layer  infra
 //!
 //! Fournit le trait `StorageBackend`, l'implementation filesystem local,

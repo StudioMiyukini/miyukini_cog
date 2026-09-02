@@ -18,8 +18,8 @@
 // @id alicia_capture_vad
 // @role processing
 // @layer toolkit
-// @human Voice Activity Detection base sur energie RMS avec debounce et pre-buffer.
 // @do detect_voice_activity
+// @human Voice Activity Detection base sur energie RMS avec debounce et pre-buffer.
 
 use serde::{Deserialize, Serialize};
 

@@ -8,44 +8,44 @@ use crate::state::InstanceIdentity;
 /// @id kindmother_threat_level
 /// @role data
 /// @layer core
-/// @human Niveau de menace détecté.
 /// @do represent_threat_level
+//@human / @human Niveau de menace détecté.
 /// Niveau de menace.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ThreatLevel {
     /// @id kindmother_threat_level_none
     /// @role data
     /// @layer core
-    /// @human Aucune menace détectée.
     /// @do represent_no_threat
+    //@human / @human Aucune menace détectée.
     /// @depends kindmother_threat_level
     None,
     /// @id kindmother_threat_level_low
     /// @role data
     /// @layer core
-    /// @human Menace faible détectée.
     /// @do represent_low_threat
+    //@human / @human Menace faible détectée.
     /// @depends kindmother_threat_level
     Low,
     /// @id kindmother_threat_level_medium
     /// @role data
     /// @layer core
-    /// @human Menace moyenne détectée.
     /// @do represent_medium_threat
+    //@human / @human Menace moyenne détectée.
     /// @depends kindmother_threat_level
     Medium,
     /// @id kindmother_threat_level_high
     /// @role data
     /// @layer core
-    /// @human Menace élevée détectée.
     /// @do represent_high_threat
+    //@human / @human Menace élevée détectée.
     /// @depends kindmother_threat_level
     High,
     /// @id kindmother_threat_level_critical
     /// @role data
     /// @layer core
-    /// @human Menace critique détectée (corruption).
     /// @do represent_critical_threat
+    //@human / @human Menace critique détectée (corruption).
     /// @depends kindmother_threat_level
     Critical,
 }
@@ -53,15 +53,15 @@ pub enum ThreatLevel {
 /// @id kindmother_threat_detector_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de détection de menaces. Détecte la corruption et les anomalies.
 /// @do define_threat_detection_contract
+//@human / @human Trait de détection de menaces. Détecte la corruption et les anomalies.
 /// Trait de détection de menaces.
 pub trait ThreatDetector {
     /// @id kindmother_threat_detector_check_corruption
     /// @role infrastructure
     /// @layer core
-    /// @human Vérifie la corruption dans une instance.
     /// @do check_instance_corruption
+    //@human / @human Vérifie la corruption dans une instance.
     /// @depends kindmother_threat_detector_trait
     /// Vérifie la corruption dans une instance.
     ///
@@ -77,8 +77,8 @@ pub trait ThreatDetector {
     /// @id kindmother_threat_detector_check_anomalies
     /// @role infrastructure
     /// @layer core
-    /// @human Vérifie les anomalies dans les opérations d'une instance.
     /// @do check_instance_anomalies
+    //@human / @human Vérifie les anomalies dans les opérations d'une instance.
     /// @depends kindmother_threat_detector_trait
     /// Vérifie les anomalies dans les opérations.
     ///
@@ -95,8 +95,8 @@ pub trait ThreatDetector {
 /// @id kindmother_threat_detector_default
 /// @role infrastructure
 /// @layer core
-/// @human Détecteur de menaces par défaut. Implémentation basique pour les tests.
 /// @do provide_default_threat_detector
+//@human / @human Détecteur de menaces par défaut. Implémentation basique pour les tests.
 /// Détecteur de menaces par défaut.
 #[derive(Debug, Default)]
 pub struct DefaultThreatDetector;
@@ -119,8 +119,8 @@ mod tests {
     /// @id kindmother_threat_test_detector_default
     /// @role test
     /// @layer core
-    /// @human Test du détecteur de menaces par défaut.
     /// @do verify_default_threat_detector
+    //@human / @human Test du détecteur de menaces par défaut.
     /// @depends kindmother_threat_detector_default, kindmother_threat_detector_check_corruption
     #[test]
     fn test_detector_default() {

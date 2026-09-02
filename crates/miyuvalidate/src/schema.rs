@@ -17,8 +17,8 @@ pub struct SchemaCheckResult {
 /// @id miyuvalidate_tool_schema_check
 /// @role mutator
 /// @layer tool
-/// @human Valide des données selon un schéma fourni ; retourne succès ou liste d'erreurs.
 /// @do schema_check_under_governance
+//@human / @human Valide des données selon un schéma fourni ; retourne succès ou liste d'erreurs.
 /// tool.validate.schema.check
 pub fn check(
     ctx: &GovernedContext,

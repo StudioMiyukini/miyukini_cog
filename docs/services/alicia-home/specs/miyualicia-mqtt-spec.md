@@ -1,10 +1,10 @@
 # Spec Technique — crate `miyualicia-mqtt`
 
-<!-- @id: spec.alicia.mqtt -->
-<!-- @role: technical-specification -->
-<!-- @layer: 6 -->
-<!-- @human: Specification technique complete du crate client MQTT et bridge Zigbee2MQTT -->
-<!-- @do: define_miyualicia_mqtt_crate_api -->
+<!-- @id spec.alicia.mqtt -->
+<!-- @role technical-specification -->
+<!-- @layer 6 -->
+<!-- @human Specification technique complete du crate client MQTT et bridge Zigbee2MQTT -->
+<!-- @do define_miyualicia_mqtt_crate_api -->
 
 **Auteur :** Denis, Chef Dev Senior — Miyukini AI Studio
 **Date :** 2026-03-01
@@ -106,11 +106,11 @@ tracing            = "0.1"
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.mqtt
-// @role: mqtt_protocol_adapter
-// @layer: 6
-// @human: Client MQTT async pour Alicia ; reconnexion, Z2M, topics, QoS.
-// @do: provide_mqtt_transport_for_alicia
+// @id toolkit.alicia.mqtt
+// @role mqtt_protocol_adapter
+// @layer 6
+// @human Client MQTT async pour Alicia ; reconnexion, Z2M, topics, QoS.
+// @do provide_mqtt_transport_for_alicia
 
 pub mod admin_cell;
 pub mod client;

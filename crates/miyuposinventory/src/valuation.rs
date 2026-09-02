@@ -6,8 +6,8 @@ use crate::errors::MiyuposinventoryError;
 /// @id miyuposinventory_tool_valuation_report
 /// @role mutator
 /// @layer tool
-/// @human Retourne un rapport de valorisation (coût / marge potentielle) ; lecture seule.
 /// @do valuation_report_under_governance
+//@human / @human Retourne un rapport de valorisation (coût / marge potentielle) ; lecture seule.
 /// tool.inventory.valuation.report
 pub fn report(
     ctx: &GovernedContext,

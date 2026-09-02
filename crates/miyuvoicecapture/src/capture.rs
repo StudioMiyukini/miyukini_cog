@@ -6,8 +6,8 @@
 // @id alicia_capture_capture
 // @role processing
 // @layer toolkit
-// @human Capture audio via cpal, callback ecriture ring buffer, demarrage/arret streams.
 // @do capture_audio_stream
+// @human Capture audio via cpal, callback ecriture ring buffer, demarrage/arret streams.
 
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;

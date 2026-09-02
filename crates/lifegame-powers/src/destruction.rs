@@ -6,7 +6,7 @@
 //! @role   gameplay
 //! @layer  domain
 //! @do     implement_destruction_powers
-//! @human  Pouvoirs de destruction et catastrophes naturelles
+//@human ! @human  Pouvoirs de destruction et catastrophes naturelles
 
 // Les pouvoirs de destruction sont implémentés dans lib.rs pour le MVP
 // Ce module servira pour l'extension future des pouvoirs

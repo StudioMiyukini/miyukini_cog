@@ -16,8 +16,8 @@ pub struct SanitizePolicy {
 /// @id miyutext_tool_sanitize
 /// @role security
 /// @layer tool
-/// @human Sanitise une chaîne pour affichage sécurisé (XSS, échappement HTML).
 /// @do sanitize_under_governance
+//@human / @human Sanitise une chaîne pour affichage sécurisé (XSS, échappement HTML).
 /// tool.text.sanitize — politique fournie.
 pub fn sanitize(
     ctx: &GovernedContext,

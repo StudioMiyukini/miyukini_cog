@@ -1,6 +1,6 @@
 # Plan P3 -- miyucloud-integration-fix
 
-<!-- @id: mip.plan.miyucloud-integration-fix -->
+<!-- @id mip.plan.miyucloud-integration-fix -->
 
 ## Vagues et taches
 

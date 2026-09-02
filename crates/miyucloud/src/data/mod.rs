@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_data_module
 //! @do     expose_domain_types_and_persistence
-//! @role   data
+//@human ! @role   data
 //! @layer  domain
 //!
 //! `legacy-sqlite` : acces SQLite direct.

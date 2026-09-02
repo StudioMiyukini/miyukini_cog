@@ -19,8 +19,8 @@ use crate::models::{AdminAccount, AdminRole, AdminSession};
 /// @id miyukiniadmin_auth_service
 /// @role infrastructure
 /// @layer operator
-/// @human Authentification : login, session, rate limit (stub).
 /// @do authenticate_admin
+//@human / @human Authentification : login, session, rate limit (stub).
 /// @depends miyukiniadmin_models_admin_account, miyukiniadmin_models_session
 #[derive(Clone)]
 pub struct AuthService {
@@ -38,8 +38,8 @@ impl AuthService {
     /// @id miyukiniadmin_auth_service_new
     /// @role constructor
     /// @layer operator
-    /// @human Construit le service d'authentification.
     /// @do create_auth_service
+    //@human / @human Construit le service d'authentification.
     #[must_use]
     pub fn new(data_dir: PathBuf) -> Self {
         Self {
@@ -57,6 +57,7 @@ impl AuthService {
 
     /// Hash du mot de passe (Argon2id).
     /// @id miyukiniadmin_auth_hash_password
+    /// @do hash_password
     fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
@@ -67,6 +68,7 @@ impl AuthService {
 
     /// Vérifie le mot de passe contre un hash.
     /// @id miyukiniadmin_auth_verify_password
+    /// @do verify_password
     fn verify_password(password: &str, hash: &str) -> Result<(), argon2::password_hash::Error> {
         let parsed = PasswordHash::new(hash)?;
         Argon2::default().verify_password(password.as_bytes(), &parsed)
@@ -74,6 +76,7 @@ impl AuthService {
 
     /// Charge le registre admin depuis le fichier (ou vide).
     /// @id miyukiniadmin_auth_load_registry
+    /// @do load_registry
     pub async fn load_registry(&self) -> Result<Vec<AdminAccount>, std::io::Error> {
         let path = self.admin_registry_path();
         if !fs::metadata(&path)
@@ -90,6 +93,7 @@ impl AuthService {
 
     /// Enregistre le registre admin.
     /// @id miyukiniadmin_auth_save_registry
+    /// @do save_registry
     pub async fn save_registry(&self, accounts: &[AdminAccount]) -> Result<(), std::io::Error> {
         let path = self.admin_registry_path();
         if let Some(parent) = path.parent() {
@@ -104,8 +108,8 @@ impl AuthService {
     /// @id miyukiniadmin_auth_login
     /// @role mutator
     /// @layer operator
-    /// @human Authentifie un admin et crée une session.
     /// @do login_admin
+    //@human / @human Authentifie un admin et crée une session.
     pub async fn login(
         &self,
         username: &str,
@@ -156,8 +160,8 @@ impl AuthService {
     /// @id miyukiniadmin_auth_validate_session
     /// @role accessor
     /// @layer operator
-    /// @human Vérifie qu'une session est valide et non expirée.
     /// @do validate_session
+    //@human / @human Vérifie qu'une session est valide et non expirée.
     pub async fn validate_session(&self, session_id: &str) -> Option<AdminSession> {
         let sessions = self.sessions.write().await;
         let session = sessions.get(session_id).cloned();
@@ -174,6 +178,7 @@ impl AuthService {
 
     /// Déconnexion : supprime la session.
     /// @id miyukiniadmin_auth_logout
+    /// @do logout
     pub async fn logout(&self, session_id: &str) {
         let mut sessions = self.sessions.write().await;
         sessions.remove(session_id);
@@ -182,6 +187,7 @@ impl AuthService {
     /// Crée un compte admin (pour parcours setup ou par un admin avec capacité).
     /// Hash Argon2id, rôle par défaut Admin.
     /// @id miyukiniadmin_auth_create_account
+    /// @do create_account
     pub async fn create_account(
         &self,
         username: &str,
@@ -227,6 +233,7 @@ impl AuthService {
 
 /// Erreur de login (réponse générique pour ne pas fuiter d'information).
 /// @id miyukiniadmin_auth_login_error
+/// @do definir_login_error
 #[derive(Debug)]
 pub enum LoginError {
     /// Identifiants invalides ou compte inexistant.
@@ -237,6 +244,7 @@ pub enum LoginError {
 
 /// Erreur de création de compte.
 /// @id miyukiniadmin_auth_create_account_error
+/// @do definir_create_account_error
 #[derive(Debug)]
 pub enum CreateAccountError {
     /// Politique violée (ex. mot de passe trop court).

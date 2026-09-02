@@ -3,29 +3,29 @@
 /// @id everbuddy_version
 /// @role data
 /// @layer core
-/// @human Version d'un composant ou du système.
 /// @do represent_version
+//@human / @human Version d'un composant ou du système.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Version {
     /// @id everbuddy_version_major
     /// @role data
     /// @layer core
-    /// @human Numéro majeur de version.
     /// @do store_major_version
+    //@human / @human Numéro majeur de version.
     /// @depends everbuddy_version
     pub major: u32,
     /// @id everbuddy_version_minor
     /// @role data
     /// @layer core
-    /// @human Numéro mineur de version.
     /// @do store_minor_version
+    //@human / @human Numéro mineur de version.
     /// @depends everbuddy_version
     pub minor: u32,
     /// @id everbuddy_version_patch
     /// @role data
     /// @layer core
-    /// @human Numéro de patch de version.
     /// @do store_patch_version
+    //@human / @human Numéro de patch de version.
     /// @depends everbuddy_version
     pub patch: u32,
 }
@@ -34,8 +34,8 @@ impl Version {
     /// @id everbuddy_version_new
     /// @role infrastructure
     /// @layer core
-    /// @human Crée une nouvelle version.
     /// @do create_version
+    //@human / @human Crée une nouvelle version.
     /// @depends everbuddy_version
     #[must_use]
     pub fn new(major: u32, minor: u32, patch: u32) -> Self {
@@ -50,14 +50,14 @@ impl Version {
 /// @id everbuddy_version_manager_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de gestion des versions.
 /// @do define_version_manager_contract
+//@human / @human Trait de gestion des versions.
 pub trait VersionManager {
     /// @id everbuddy_version_manager_get_current
     /// @role accessor
     /// @layer core
-    /// @human Récupère la version actuelle.
     /// @do get_current_version
+    //@human / @human Récupère la version actuelle.
     /// @depends everbuddy_version_manager_trait
     fn get_current(&self) -> Version;
 }
@@ -102,8 +102,8 @@ mod tests {
     /// @id everbuddy_version_test_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une version.
     /// @do verify_version_creation
+    //@human / @human Test de création d'une version.
     /// @depends everbuddy_version_new
     #[test]
     fn test_version_creation() {

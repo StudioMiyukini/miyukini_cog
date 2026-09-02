@@ -19,8 +19,8 @@
 /// @id kernel_log_level
 /// @role infrastructure
 /// @layer kernel
-/// @human Niveaux de log alignés sur la façade standard. Le kernel définit son propre Level, pas de ré-export de log::Level.
 /// @do define_log_levels
+//@human / @human Niveaux de log alignés sur la façade standard. Le kernel définit son propre Level, pas de ré-export de log::Level.
 /// Niveaux de log alignés sur la façade standard.
 ///
 /// Le kernel définit son propre type `Level` pour éviter de ré-exporter
@@ -47,8 +47,8 @@ pub enum Level {
 /// @id kernel_logger_trait
 /// @role infrastructure
 /// @layer kernel
-/// @human Trait de logging générique. Le produit choisit le backend et le format. Une seule méthode log() pour rester minimal.
 /// @do define_logging_contract
+//@human / @human Trait de logging générique. Le produit choisit le backend et le format. Une seule méthode log() pour rester minimal.
 /// Trait de logging générique.
 ///
 /// Le trait `Logger` permet d'injecter différentes stratégies de logging.
@@ -68,8 +68,8 @@ pub trait Logger {
     /// @id kernel_logger_log
     /// @role infrastructure
     /// @layer kernel
-    /// @human Log un message avec un niveau donné. Le produit formate le message avant l'appel si nécessaire.
     /// @do log_message_with_level
+    //@human / @human Log un message avec un niveau donné. Le produit formate le message avant l'appel si nécessaire.
     /// @depends kernel_logger_trait
     /// Log un message avec un niveau donné.
     ///
@@ -96,8 +96,8 @@ pub trait Logger {
 /// @id kernel_logger_default
 /// @role infrastructure
 /// @layer kernel
-/// @human Logger par défaut : écrit sur stderr. Minimal et remplaçable. Le produit peut utiliser un Logger custom.
 /// @do log_to_stderr
+//@human / @human Logger par défaut : écrit sur stderr. Minimal et remplaçable. Le produit peut utiliser un Logger custom.
 /// Logger par défaut : écrit sur stderr.
 ///
 /// Cette implémentation est minimale et remplaçable. Elle écrit simplement
@@ -117,8 +117,8 @@ impl Logger for DefaultLogger {
 /// @id kernel_logger_default_struct
 /// @role infrastructure
 /// @layer kernel
-/// @human Structure du logger par défaut. Type unitaire sans état.
 /// @do represent_default_logger
+//@human / @human Structure du logger par défaut. Type unitaire sans état.
 /// Logger par défaut.
 ///
 /// Type unitaire sans état. Peut être instancié et réutilisé.
@@ -132,8 +132,8 @@ mod tests {
     /// @id test_log_all_levels
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que tous les niveaux de log sont acceptés sans panic.
     /// @do verify_all_levels_accepted
+    //@human / @human Test vérifiant que tous les niveaux de log sont acceptés sans panic.
     /// @depends kernel_logger_log
     #[test]
     fn test_log_all_levels() {
@@ -149,8 +149,8 @@ mod tests {
     /// @id test_log_message_preserved
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que le message passé est loggé tel quel (ou au moins accepté).
     /// @do verify_message_preserved
+    //@human / @human Test vérifiant que le message passé est loggé tel quel (ou au moins accepté).
     /// @depends kernel_logger_log
     #[test]
     fn test_log_message_preserved() {
@@ -163,8 +163,8 @@ mod tests {
     /// @id test_log_level_enum
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que tous les niveaux de l'enum Level existent et sont utilisables.
     /// @do verify_level_enum_complete
+    //@human / @human Test vérifiant que tous les niveaux de l'enum Level existent et sont utilisables.
     /// @depends kernel_log_level
     #[test]
     fn test_log_level_enum() {
@@ -186,8 +186,8 @@ mod tests {
     /// @id test_log_default_logger
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que DefaultLogger fonctionne sans panic.
     /// @do verify_default_logger_works
+    //@human / @human Test vérifiant que DefaultLogger fonctionne sans panic.
     /// @depends kernel_logger_default
     #[test]
     fn test_log_default_logger() {
@@ -199,8 +199,8 @@ mod tests {
     /// @id test_log_no_format_imposed
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'aucun format n'est imposé. Le produit peut formater le message avant l'appel.
     /// @do verify_no_format_imposed
+    //@human / @human Test vérifiant qu'aucun format n'est imposé. Le produit peut formater le message avant l'appel.
     /// @depends kernel_logger_log
     #[test]
     fn test_log_no_format_imposed() {
@@ -215,8 +215,8 @@ mod tests {
     /// @id test_log_no_business_logic
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'aucun événement métier prédéfini n'existe, conformément à INV-K-1.
     /// @do verify_no_business_events
+    //@human / @human Test vérifiant qu'aucun événement métier prédéfini n'existe, conformément à INV-K-1.
     /// @depends kernel_logger_trait
     #[test]
     fn test_log_no_business_logic() {
@@ -230,8 +230,8 @@ mod tests {
     /// @id test_log_no_external_dependency
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que Logger fonctionne sans réseau, conformément à INV-K-2. Pas de backend obligatoire.
     /// @do verify_no_network_required
+    //@human / @human Test vérifiant que Logger fonctionne sans réseau, conformément à INV-K-2. Pas de backend obligatoire.
     /// @depends kernel_logger_log
     #[test]
     fn test_log_no_external_dependency() {
@@ -245,8 +245,8 @@ mod tests {
     /// @id test_log_deterministic
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que log() est déterministe : même appel → même sortie, conformément à INV-K-6.
     /// @do verify_log_determinism
+    //@human / @human Test vérifiant que log() est déterministe : même appel → même sortie, conformément à INV-K-6.
     /// @depends kernel_logger_log
     #[test]
     fn test_log_deterministic() {

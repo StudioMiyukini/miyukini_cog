@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_lib
 //! @do     expose_public_modules_miyucloud
-//! @role   service
+//@human ! @role   service
 //! @layer  infra
 //!
 //! Crate bibliotheque pour MiyuCloud. Fournit les types domaine, la persistance

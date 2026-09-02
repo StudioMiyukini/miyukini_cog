@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_storage_local_fs
 //! @do     implement_local_filesystem_storage_backend
-//! @role   storage
+//@human ! @role   storage
 //! @layer  infra
 //!
 //! Structure de stockage :

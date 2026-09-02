@@ -221,9 +221,9 @@ Artefact : `<sequence>/rapports_finaux/YYYY-MM-DD-<slug>-report.md`
 
 ## MASS â€” Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.arianne -->
-<!-- @do: Responsabilites de capitalisation swarm d'Arianne -->
-<!-- @role: Arianne (QA/Memoire) -->
+<!-- @id mass.agent.arianne -->
+<!-- @do Responsabilites de capitalisation swarm d'Arianne -->
+<!-- @role Arianne (QA/Memoire) -->
 
 Arianne capitalise les apprentissages swarm en **P6**.
 

@@ -7,8 +7,8 @@ pub mod corruption_memory;
 /// @id miyukiniadmin_models_mod
 /// @role infrastructure
 /// @layer operator
-/// @human Module modèles (environment_state, admin_account, session, corruption_memory).
 /// @do expose_models
+//@human / @human Module modèles (environment_state, admin_account, session, corruption_memory).
 pub mod environment_state;
 pub mod session;
 

@@ -15,8 +15,8 @@ pub struct CsvOptions {
 /// @id miyuexport_tool_csv_generate
 /// @role mutator
 /// @layer tool
-/// @human Génère un fichier CSV à partir de données et options fournis.
 /// @do csv_generate_under_governance
+//@human / @human Génère un fichier CSV à partir de données et options fournis.
 /// tool.export.csv.generate
 pub fn generate(
     ctx: &GovernedContext,

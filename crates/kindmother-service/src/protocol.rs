@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_service_protocol
 //! @do     define_ipc_protocol
-//! @layer  core
+//@human ! @layer  core
 //!
 //! Protocole simple basé sur JSON avec framing par longueur.
 //! Format: [4 bytes length (big endian)][JSON payload]

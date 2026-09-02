@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_errors
 //! @do     define_miyucloud_error_types
-//! @role   error
+//@human ! @role   error
 //! @layer  infra
 //!
 //! Enum central `MiyucloudError` couvrant toutes les couches du service :

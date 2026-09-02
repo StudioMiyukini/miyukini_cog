@@ -191,9 +191,9 @@ Jean et Arianne collaborent pour capitaliser :
 
 ## MASS — Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.jean -->
-<!-- @do: Responsabilites d'efficience IA dans le swarm -->
-<!-- @role: Jean (Responsable Efficience IA) -->
+<!-- @id mass.agent.jean -->
+<!-- @do Responsabilites d'efficience IA dans le swarm -->
+<!-- @role Jean (Responsable Efficience IA) -->
 
 Jean optimise l'efficience du swarm.
 

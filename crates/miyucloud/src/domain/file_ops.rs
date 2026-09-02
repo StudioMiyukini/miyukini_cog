@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_file_ops
 //! @do     implement_file_upload_download_crud
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Upload : donnees -> chunking -> chiffrement at-rest -> ecriture storage -> insertion DB

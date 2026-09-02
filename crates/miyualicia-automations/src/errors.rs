@@ -6,8 +6,8 @@
 // @id toolkit.alicia.automations.errors
 // @role error_types
 // @layer 6
-// @human Erreurs du moteur d'automatisations Alicia : NotFound, ValidationError, ParseError, etc.
 // @do define_automation_error_types
+// @human Erreurs du moteur d'automatisations Alicia : NotFound, ValidationError, ParseError, etc.
 
 use uuid::Uuid;
 

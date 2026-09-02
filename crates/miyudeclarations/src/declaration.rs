@@ -7,8 +7,8 @@ use crate::errors::MiyudeclarationsError;
 /// @id miyudeclarations_tool_declaration_list
 /// @role mutator
 /// @layer tool
-/// @human Liste l'historique des déclarations (filtres fournis).
 /// @do declaration_list_under_governance
+//@human / @human Liste l'historique des déclarations (filtres fournis).
 /// tool.compta.declaration.list
 pub fn list(
     ctx: &GovernedContext,

@@ -3,43 +3,43 @@
 /// @id worrysentinel_threat_level
 /// @role data
 /// @layer core
-/// @human Niveau de menace détecté.
 /// @do represent_threat_level
+//@human / @human Niveau de menace détecté.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ThreatLevel {
     /// @id worrysentinel_threat_level_none
     /// @role data
     /// @layer core
-    /// @human Aucune menace détectée.
     /// @do represent_no_threat
+    //@human / @human Aucune menace détectée.
     /// @depends worrysentinel_threat_level
     None,
     /// @id worrysentinel_threat_level_low
     /// @role data
     /// @layer core
-    /// @human Menace faible.
     /// @do represent_low_threat
+    //@human / @human Menace faible.
     /// @depends worrysentinel_threat_level
     Low,
     /// @id worrysentinel_threat_level_medium
     /// @role data
     /// @layer core
-    /// @human Menace moyenne.
     /// @do represent_medium_threat
+    //@human / @human Menace moyenne.
     /// @depends worrysentinel_threat_level
     Medium,
     /// @id worrysentinel_threat_level_high
     /// @role data
     /// @layer core
-    /// @human Menace élevée.
     /// @do represent_high_threat
+    //@human / @human Menace élevée.
     /// @depends worrysentinel_threat_level
     High,
     /// @id worrysentinel_threat_level_critical
     /// @role data
     /// @layer core
-    /// @human Menace critique.
     /// @do represent_critical_threat
+    //@human / @human Menace critique.
     /// @depends worrysentinel_threat_level
     Critical,
 }
@@ -47,14 +47,14 @@ pub enum ThreatLevel {
 /// @id worrysentinel_threat_detector_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de détection de menaces.
 /// @do define_threat_detector_contract
+//@human / @human Trait de détection de menaces.
 pub trait ThreatDetector {
     /// @id worrysentinel_threat_detector_detect
     /// @role infrastructure
     /// @layer core
-    /// @human Détecte les menaces dans le système.
     /// @do detect_threats
+    //@human / @human Détecte les menaces dans le système.
     /// @depends worrysentinel_threat_detector_trait
     fn detect(&self) -> ThreatLevel;
 }
@@ -112,8 +112,8 @@ mod tests {
     /// @id worrysentinel_threat_test_level_ordering
     /// @role test
     /// @layer core
-    /// @human Test de l'ordre des niveaux de menace.
     /// @do verify_threat_level_ordering
+    //@human / @human Test de l'ordre des niveaux de menace.
     /// @depends worrysentinel_threat_level
     #[test]
     fn test_threat_level_ordering() {

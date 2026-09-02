@@ -22,8 +22,8 @@ fn orders() -> &'static Mutex<HashMap<String, OrderRecord>> {
 /// @id miyustore_tool_commerce_order_create
 /// @role mutator
 /// @layer tool
-/// @human Crée une commande ; WriteIntent KindMother (souvent via checkout.submit).
 /// @do commerce_order_create_under_governance
+//@human / @human Crée une commande ; WriteIntent KindMother (souvent via checkout.submit).
 pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -45,8 +45,8 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyustoreE
 /// @id miyustore_tool_commerce_order_update
 /// @role mutator
 /// @layer tool
-/// @human Met à jour une commande (statut, champs) ; WriteIntent KindMother.
 /// @do commerce_order_update_under_governance
+//@human / @human Met à jour une commande (statut, champs) ; WriteIntent KindMother.
 pub fn update(ctx: &GovernedContext, order_id: &str, payload: &str) -> Result<(), MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -63,8 +63,8 @@ pub fn update(ctx: &GovernedContext, order_id: &str, payload: &str) -> Result<()
 /// @id miyustore_tool_commerce_order_status
 /// @role accessor
 /// @layer tool
-/// @human Retourne le statut d'une commande ; lecture.
 /// @do commerce_order_status_under_governance
+//@human / @human Retourne le statut d'une commande ; lecture.
 pub fn status(ctx: &GovernedContext, order_id: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -82,8 +82,8 @@ pub fn status(ctx: &GovernedContext, order_id: &str) -> Result<String, Miyustore
 /// @id miyustore_tool_commerce_order_list
 /// @role accessor
 /// @layer tool
-/// @human Liste les commandes ; filtres fournis.
 /// @do commerce_order_list_under_governance
+//@human / @human Liste les commandes ; filtres fournis.
 pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);

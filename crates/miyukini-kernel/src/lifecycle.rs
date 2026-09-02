@@ -19,8 +19,8 @@
 /// @id kernel_lifecycle_trait
 /// @role infrastructure
 /// @layer kernel
-/// @human Trait de gestion du cycle de vie (shutdown uniquement). L'initialisation reste au produit. Pas d'orchestration de workflows métier.
 /// @do define_lifecycle_contract
+//@human / @human Trait de gestion du cycle de vie (shutdown uniquement). L'initialisation reste au produit. Pas d'orchestration de workflows métier.
 /// Trait de gestion du cycle de vie : shutdown hooks uniquement.
 ///
 /// Le contrat parle d'« ordre d'init » et d'« arrêt ». L'**init** reste au produit
@@ -40,8 +40,8 @@ pub trait Lifecycle {
     /// @id kernel_lifecycle_register_shutdown_hook
     /// @role infrastructure
     /// @layer kernel
-    /// @human Enregistre un hook d'arrêt. Les hooks sont exécutés en ordre LIFO lors de shutdown().
     /// @do register_shutdown_hook
+    //@human / @human Enregistre un hook d'arrêt. Les hooks sont exécutés en ordre LIFO lors de shutdown().
     /// @depends kernel_lifecycle_trait
     /// Enregistre un hook d'arrêt.
     ///
@@ -75,8 +75,8 @@ pub trait Lifecycle {
     /// @id kernel_lifecycle_shutdown
     /// @role infrastructure
     /// @layer kernel
-    /// @human Exécute tous les hooks d'arrêt enregistrés en ordre LIFO. Un second appel est implémentation-dépendant.
     /// @do execute_shutdown_hooks
+    //@human / @human Exécute tous les hooks d'arrêt enregistrés en ordre LIFO. Un second appel est implémentation-dépendant.
     /// @depends kernel_lifecycle_trait
     /// Exécute tous les hooks d'arrêt enregistrés.
     ///
@@ -105,8 +105,8 @@ pub trait Lifecycle {
 /// @id kernel_lifecycle_default
 /// @role infrastructure
 /// @layer kernel
-/// @human Implémentation par défaut du trait Lifecycle. Stocke les hooks dans un Vec et les exécute en LIFO.
 /// @do manage_shutdown_hooks
+//@human / @human Implémentation par défaut du trait Lifecycle. Stocke les hooks dans un Vec et les exécute en LIFO.
 /// Gestion du cycle de vie : shutdown hooks uniquement.
 ///
 /// Cette implémentation stocke les hooks dans un `Vec` et les exécute en ordre
@@ -131,8 +131,8 @@ impl Lifecycle for DefaultLifecycle {
 /// @id kernel_lifecycle_default_struct
 /// @role infrastructure
 /// @layer kernel
-/// @human Structure du lifecycle par défaut. Stocke les hooks dans un Vec pour exécution LIFO.
 /// @do store_shutdown_hooks
+//@human / @human Structure du lifecycle par défaut. Stocke les hooks dans un Vec pour exécution LIFO.
 /// Gestion du cycle de vie par défaut.
 ///
 /// Stocke les hooks d'arrêt dans un `Vec` pour exécution en ordre LIFO.
@@ -141,8 +141,8 @@ pub struct DefaultLifecycle {
     /// @id kernel_lifecycle_hooks
     /// @role storage
     /// @layer kernel
-    /// @human Stockage interne des hooks d'arrêt. Exécutés en ordre LIFO lors de shutdown().
     /// @do store_hooks
+    //@human / @human Stockage interne des hooks d'arrêt. Exécutés en ordre LIFO lors de shutdown().
     /// @depends kernel_lifecycle_default_struct
     hooks: Vec<Box<dyn FnMut()>>,
 }
@@ -151,8 +151,8 @@ impl DefaultLifecycle {
     /// @id kernel_lifecycle_new
     /// @role constructor
     /// @layer kernel
-    /// @human Crée une nouvelle instance de DefaultLifecycle avec un Vec vide de hooks.
     /// @do create_lifecycle_instance
+    //@human / @human Crée une nouvelle instance de DefaultLifecycle avec un Vec vide de hooks.
     /// @depends kernel_lifecycle_default_struct
     /// Crée une nouvelle instance de `DefaultLifecycle`.
     ///
@@ -180,8 +180,8 @@ mod tests {
     /// @id test_lifecycle_register_hook
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'un hook peut être enregistré sans erreur.
     /// @do verify_hook_registration
+    //@human / @human Test vérifiant qu'un hook peut être enregistré sans erreur.
     /// @depends kernel_lifecycle_register_shutdown_hook
     #[test]
     fn test_lifecycle_register_hook() {
@@ -193,8 +193,8 @@ mod tests {
     /// @id test_lifecycle_shutdown_executes_hooks
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que shutdown() exécute les hooks enregistrés.
     /// @do verify_hooks_execution
+    //@human / @human Test vérifiant que shutdown() exécute les hooks enregistrés.
     /// @depends kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_shutdown_executes_hooks() {
@@ -217,8 +217,8 @@ mod tests {
     /// @id test_lifecycle_shutdown_lifo_order
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que shutdown() exécute les hooks en ordre LIFO (dernier enregistré = premier exécuté).
     /// @do verify_lifo_order
+    //@human / @human Test vérifiant que shutdown() exécute les hooks en ordre LIFO (dernier enregistré = premier exécuté).
     /// @depends kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_shutdown_lifo_order() {
@@ -245,8 +245,8 @@ mod tests {
     /// @id test_lifecycle_multiple_hooks
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que tous les hooks sont exécutés, même s'il y en a plusieurs.
     /// @do verify_all_hooks_executed
+    //@human / @human Test vérifiant que tous les hooks sont exécutés, même s'il y en a plusieurs.
     /// @depends kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_multiple_hooks() {
@@ -273,8 +273,8 @@ mod tests {
     /// @id test_lifecycle_shutdown_idempotent
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'un second appel à shutdown() est idempotent (no-op pour DefaultLifecycle).
     /// @do verify_shutdown_idempotence
+    //@human / @human Test vérifiant qu'un second appel à shutdown() est idempotent (no-op pour DefaultLifecycle).
     /// @depends kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_shutdown_idempotent() {
@@ -298,8 +298,8 @@ mod tests {
     /// @id test_lifecycle_no_init_hooks
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'aucun hook d'init n'existe. Seulement shutdown (pas d'orchestration).
     /// @do verify_no_init_hooks
+    //@human / @human Test vérifiant qu'aucun hook d'init n'existe. Seulement shutdown (pas d'orchestration).
     /// @depends kernel_lifecycle_trait
     #[test]
     fn test_lifecycle_no_init_hooks() {
@@ -313,8 +313,8 @@ mod tests {
     /// @id test_lifecycle_no_business_logic
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'aucun hook métier prédéfini n'existe, conformément à INV-K-1.
     /// @do verify_no_business_hooks
+    //@human / @human Test vérifiant qu'aucun hook métier prédéfini n'existe, conformément à INV-K-1.
     /// @depends kernel_lifecycle_trait
     #[test]
     fn test_lifecycle_no_business_logic() {
@@ -330,8 +330,8 @@ mod tests {
     /// @id test_lifecycle_deterministic
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que l'ordre d'exécution est déterministe : même ordre d'enregistrement → même ordre d'exécution, conformément à INV-K-6.
     /// @do verify_order_determinism
+    //@human / @human Test vérifiant que l'ordre d'exécution est déterministe : même ordre d'enregistrement → même ordre d'exécution, conformément à INV-K-6.
     /// @depends kernel_lifecycle_shutdown
     #[test]
     fn test_lifecycle_deterministic() {

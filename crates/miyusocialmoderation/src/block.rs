@@ -7,8 +7,8 @@ use crate::store;
 /// @id miyusocialmoderation_tool_block_add
 /// @role mutator
 /// @layer tool
-/// @human Bloque un utilisateur ; WriteIntent KindMother.
 /// @do block_add_under_governance
+//@human / @human Bloque un utilisateur ; WriteIntent KindMother.
 /// tool.social.block.add
 pub fn add(
     ctx: &GovernedContext,
@@ -31,8 +31,8 @@ pub fn add(
 /// @id miyusocialmoderation_tool_block_remove
 /// @role mutator
 /// @layer tool
-/// @human Débloque un utilisateur ; WriteIntent KindMother.
 /// @do block_remove_under_governance
+//@human / @human Débloque un utilisateur ; WriteIntent KindMother.
 /// tool.social.block.remove
 pub fn remove(
     ctx: &GovernedContext,
@@ -55,8 +55,8 @@ pub fn remove(
 /// @id miyusocialmoderation_tool_block_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les utilisateurs bloqués.
 /// @do block_list_under_governance
+//@human / @human Liste les utilisateurs bloqués.
 /// tool.social.block.list
 pub fn list(
     ctx: &GovernedContext,

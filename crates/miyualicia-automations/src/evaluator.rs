@@ -6,8 +6,8 @@
 // @id toolkit.alicia.automations.evaluator
 // @role condition_evaluator
 // @layer 6
-// @human Evaluateur de conditions domotiques : proprietes DeviceState, contexte (heure, jour).
 // @do evaluate_automation_conditions
+// @human Evaluateur de conditions domotiques : proprietes DeviceState, contexte (heure, jour).
 
 use crate::dispatcher::HomeSnapshot;
 use crate::types::{Condition, ConditionOp};

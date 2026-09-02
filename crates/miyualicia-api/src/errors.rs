@@ -5,8 +5,8 @@
 // @id service.alicia.api.errors
 // @role error_types
 // @layer 7
-// @human Erreurs API REST Alicia avec mapping HTTP status codes.
 // @do define_api_error_types
+// @human Erreurs API REST Alicia avec mapping HTTP status codes.
 
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};

@@ -12,14 +12,14 @@ use miyusql::{
 /// @id kindmother_miyusql_bridge
 /// @role infrastructure
 /// @layer core
-/// @human Trait de délégation d'exécution SQL à MiyuSQL sous mandat KindMother.
 /// @do delegate_execution_to_miyusql
+//@human / @human Trait de délégation d'exécution SQL à MiyuSQL sous mandat KindMother.
 /// KindMother invoque ce bridge après validation WriteIntent pour exécution effective.
 /// @id kindmother_miyusql_bridge_trait
 /// @role infrastructure
 /// @layer core
-/// @human Interface de délégation SQL vers MiyuSQL (mandat, execute, prepare, tx, cache, schema).
 /// @do define_miyusql_bridge_trait
+//@human / @human Interface de délégation SQL vers MiyuSQL (mandat, execute, prepare, tx, cache, schema).
 pub trait MiyuSQLExecutionBridge: Send + Sync {
     /// Exécute une requête sous mandat gouverné (après validation WriteIntent si écriture).
     fn execute_query(
@@ -81,8 +81,8 @@ pub trait MiyuSQLExecutionBridge: Send + Sync {
 /// @id kindmother_miyusql_bridge_impl
 /// @role infrastructure
 /// @layer core
-/// @human Implémentation du bridge qui délègue à un exécuteur unique (Query + Transaction + Schema).
 /// @do implement_miyusql_bridge
+//@human / @human Implémentation du bridge qui délègue à un exécuteur unique (Query + Transaction + Schema).
 /// Utilise les types MiyuSQL (GovernedContext, execute/prepare/tx/schema).
 pub struct MiyuSQLBridgeImpl<E>
 where

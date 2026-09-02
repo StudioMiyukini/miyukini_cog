@@ -7,8 +7,8 @@
 // @id toolkit.security.miyuantispam
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuAntiSpam ; expose les modules tools.
 /// @do expose_miyuantispam_toolkit
+//@human / @human Point d'entrée du toolkit MiyuAntiSpam ; expose les modules tools.
 pub mod admin_cell;
 pub mod captcha;
 pub mod context;

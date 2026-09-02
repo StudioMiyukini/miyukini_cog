@@ -7,8 +7,8 @@
 // @id toolkit.pos.miyupospayment
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuPosPayment ; expose les modules tools.
 /// @do expose_miyupospayment_toolkit
+//@human / @human Point d'entrée du toolkit MiyuPosPayment ; expose les modules tools.
 pub mod admin_cell;
 pub mod cash;
 pub mod check;

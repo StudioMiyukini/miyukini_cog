@@ -7,8 +7,8 @@ use crate::errors::MiyudiscoveryError;
 /// @id miyudiscovery_tool_trending_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les tendances (posts, sujets) ; politique StrongFather.
 /// @do trending_list_under_governance
+//@human / @human Liste les tendances (posts, sujets) ; politique StrongFather.
 /// tool.social.trending.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<TrendingItem>, MiyudiscoveryError> {
     if !ctx.has_mandate() {

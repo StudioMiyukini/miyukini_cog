@@ -7,8 +7,8 @@ use crate::errors::MiyuwebwayParticipantError;
 /// @id miyuwebway_participant_mws_discovery_request_build
 /// @role mutator
 /// @layer tool
-/// @human Construit une requête de découverte ; exécution seule.
 /// @do mws_discovery_request_build_under_governance
+//@human / @human Construit une requête de découverte ; exécution seule.
 pub fn request_build(
     ctx: &GovernedContext,
     payload: Option<&str>,
@@ -22,8 +22,8 @@ pub fn request_build(
 /// @id miyuwebway_participant_mws_discovery_request_send
 /// @role mutator
 /// @layer tool
-/// @human Envoie une requête de découverte ; Trackers fournis par Cores.
 /// @do mws_discovery_request_send_under_governance
+//@human / @human Envoie une requête de découverte ; Trackers fournis par Cores.
 pub fn request_send(
     ctx: &GovernedContext,
     _trackers: &[String],

@@ -8,8 +8,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 /// @id miyubilling_tool_billing_payment_record
 /// @role mutator
 /// @layer tool
-/// @human Enregistre un paiement reçu ; décision StrongFather ; WriteIntent KindMother.
 /// @do billing_payment_record_under_governance
+//@human / @human Enregistre un paiement reçu ; décision StrongFather ; WriteIntent KindMother.
 pub fn record(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyubillingError> {
     if !ctx.has_mandate() {
         return Err(MiyubillingError::NoMandate);

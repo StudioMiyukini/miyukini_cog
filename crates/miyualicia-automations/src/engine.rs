@@ -6,8 +6,8 @@
 // @id toolkit.alicia.automations.engine
 // @role automation_scheduler
 // @layer 6
-// @human Moteur central des automatisations Alicia : registre, evenements, evaluation, execution.
 // @do schedule_and_execute_home_automations
+// @human Moteur central des automatisations Alicia : registre, evenements, evaluation, execution.
 
 use std::collections::HashMap;
 use std::sync::Arc;

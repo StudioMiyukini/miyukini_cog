@@ -7,8 +7,8 @@ use crate::errors::MiyudeclarationsError;
 /// @id miyudeclarations_tool_urssaf_prepare
 /// @role mutator
 /// @layer tool
-/// @human Prépare les données de déclaration URSSAF (CA, etc.).
 /// @do urssaf_prepare_under_governance
+//@human / @human Prépare les données de déclaration URSSAF (CA, etc.).
 /// tool.compta.declaration.urssaf.prepare
 pub fn prepare(
     ctx: &GovernedContext,
@@ -23,8 +23,8 @@ pub fn prepare(
 /// @id miyudeclarations_tool_urssaf_submit
 /// @role mutator
 /// @layer tool
-/// @human Soumet la déclaration URSSAF (télédéclaration) ; autorisation = StrongFather.
 /// @do urssaf_submit_under_governance
+//@human / @human Soumet la déclaration URSSAF (télédéclaration) ; autorisation = StrongFather.
 /// tool.compta.declaration.urssaf.submit
 pub fn submit(
     ctx: &GovernedContext,

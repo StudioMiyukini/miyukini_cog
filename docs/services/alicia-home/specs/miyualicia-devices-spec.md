@@ -1,10 +1,10 @@
 # Spec Technique — crate `miyualicia-devices`
 
-<!-- @id: spec.alicia.devices -->
-<!-- @role: technical-specification -->
-<!-- @layer: 6 -->
-<!-- @human: Specification technique complete du crate registre de dispositifs domotiques -->
-<!-- @do: define_miyualicia_devices_crate_api -->
+<!-- @id spec.alicia.devices -->
+<!-- @role technical-specification -->
+<!-- @layer 6 -->
+<!-- @human Specification technique complete du crate registre de dispositifs domotiques -->
+<!-- @do define_miyualicia_devices_crate_api -->
 
 **Auteur :** Denis, Chef Dev Senior — Miyukini AI Studio
 **Date :** 2026-03-01
@@ -96,11 +96,11 @@ tracing     = "0.1"
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.devices
-// @role: device_registry
-// @layer: 6
-// @human: Registre central des dispositifs domotiques Alicia ; types, etat, commandes.
-// @do: expose_device_registry_and_types
+// @id toolkit.alicia.devices
+// @role device_registry
+// @layer 6
+// @human Registre central des dispositifs domotiques Alicia ; types, etat, commandes.
+// @do expose_device_registry_and_types
 
 pub mod admin_cell;
 pub mod command;
@@ -601,11 +601,11 @@ pub enum DeviceError {
 ## 8. `src/admin_cell.rs`
 
 ```rust
-// @id: toolkit.alicia.devices.admin
-// @role: governance_cell
-// @layer: 6
-// @human: Cellule d'administration du crate miyualicia-devices
-// @do: identify_and_self_describe_miyualicia_devices
+// @id toolkit.alicia.devices.admin
+// @role governance_cell
+// @layer 6
+// @human Cellule d'administration du crate miyualicia-devices
+// @do identify_and_self_describe_miyualicia_devices
 
 pub const TOOLKIT_ID: &str = "toolkit.alicia.devices";
 pub const TOOLKIT_VERSION: &str = env!("CARGO_PKG_VERSION");

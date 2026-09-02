@@ -7,8 +7,8 @@ use crate::errors::MiyuwebError;
 /// @id miyuweb_tool_web_html_render
 /// @role mutator
 /// @layer tool
-/// @human Rend du HTML à partir de données et template fournis dans le flux.
 /// @do web_html_render_under_governance
+//@human / @human Rend du HTML à partir de données et template fournis dans le flux.
 /// tool.web.html.render — ne décide pas du contenu.
 pub fn render(ctx: &GovernedContext, template: &str, _data: &str) -> Result<String, MiyuwebError> {
     if !ctx.has_mandate() {

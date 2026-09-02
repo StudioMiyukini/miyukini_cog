@@ -2,7 +2,7 @@
 //!
 //! @id     jaykoa_kindmother_db
 //! @do     provide_sqlite_persistence_for_jaykoa
-//! @role   persistence
+//@human ! @role   persistence
 //! @layer  infra
 //! @human  Instance Daughter : persistance locale via SQLite, identité KindMother.
 //!

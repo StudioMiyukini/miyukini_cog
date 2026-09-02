@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_crypto_module
 //! @do     expose_crypto_key_management_and_encryption
-//! @role   crypto
+//@human ! @role   crypto
 //! @layer  infra
 //!
 //! Fournit la gestion des cles (derivation Argon2id, HKDF) et le chiffrement

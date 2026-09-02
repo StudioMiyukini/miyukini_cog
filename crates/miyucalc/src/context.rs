@@ -5,14 +5,14 @@
 /// @id miyucalc_governed_context
 /// @role data
 /// @layer toolkit
-/// @human Contexte gouverné pour l'exécution MiyuCalc (mandat, niveau sécurité, pas d'identité Opérateur).
 /// @do represent_governed_context
+//@human / @human Contexte gouverné pour l'exécution MiyuCalc (mandat, niveau sécurité, pas d'identité Opérateur).
 
 /// @id miyucalc_governed_context_struct
 /// @role data
 /// @layer toolkit
-/// @human Contexte d'exécution gouverné.
 /// @do hold_governed_context
+//@human / @human Contexte d'exécution gouverné.
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     /// Identifiant du mandat d'exécution.

@@ -7,8 +7,8 @@
 // @id toolkit.pos.miyuposloyalty
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuPosLoyalty ; expose les modules tools.
 /// @do expose_miyuposloyalty_toolkit
+//@human / @human Point d'entrée du toolkit MiyuPosLoyalty ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod customer;

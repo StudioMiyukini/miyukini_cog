@@ -2,7 +2,7 @@
 //!
 //! @id     jay1tribu_lib
 //! @do     expose_public_modules_jay1tribu
-//! @role   service
+//@human ! @role   service
 //! @layer  infra
 //!
 //! Les fonctionnalités de **chat** (envoi/réception en temps réel) et de **tribu**

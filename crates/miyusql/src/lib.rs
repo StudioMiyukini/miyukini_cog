@@ -18,8 +18,8 @@
 // @id toolkit.data.miyusql
 // @role infrastructure
 // @layer toolkit
-// @human Point d'entrée du toolkit MiyuSQL ; expose les modules tools, pas de capacité nouvelle.
 // @do expose_miyusql_toolkit
+// @human Point d'entrée du toolkit MiyuSQL ; expose les modules tools, pas de capacité nouvelle.
 
 pub mod admin_cell;
 pub mod cache;

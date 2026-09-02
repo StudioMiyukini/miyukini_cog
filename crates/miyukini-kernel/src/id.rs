@@ -21,8 +21,8 @@ use uuid::Uuid;
 /// @id kernel_id_type
 /// @role infrastructure
 /// @layer kernel
-/// @human Type opaque pour les identifiants uniques. Le format interne n'est pas garanti et ne doit pas être persisté ou interprété sans passer par les APIs du produit.
 /// @do represent_unique_identifier
+//@human / @human Type opaque pour les identifiants uniques. Le format interne n'est pas garanti et ne doit pas être persisté ou interprété sans passer par les APIs du produit.
 /// Identifiant opaque. Le format interne n'est pas garanti.
 ///
 /// Le type `Id` encapsule un identifiant unique de manière opaque.
@@ -41,8 +41,8 @@ impl Id {
     /// @id kernel_id_parse
     /// @role infrastructure
     /// @layer kernel
-    /// @human Parse un identifiant depuis sa représentation textuelle. Le format supporté peut changer ; utiliser Display pour la sérialisation.
     /// @do parse_id_from_string
+    //@human / @human Parse un identifiant depuis sa représentation textuelle. Le format supporté peut changer ; utiliser Display pour la sérialisation.
     /// @depends kernel_id_type
     /// Parse un identifiant depuis sa représentation textuelle.
     ///
@@ -83,8 +83,8 @@ impl std::fmt::Display for Id {
     /// @id kernel_id_display
     /// @role infrastructure
     /// @layer kernel
-    /// @human Formatage de l'identifiant en représentation textuelle pour sérialisation. Utiliser avec Id::parse pour round-trip.
     /// @do format_id_as_string
+    //@human / @human Formatage de l'identifiant en représentation textuelle pour sérialisation. Utiliser avec Id::parse pour round-trip.
     /// @depends kernel_id_type
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
@@ -94,8 +94,8 @@ impl std::fmt::Display for Id {
 /// @id kernel_id_parse_error
 /// @role infrastructure
 /// @layer kernel
-/// @human Erreur de parsing d'identifiant. Type minimal avec Debug, Display, Error.
 /// @do represent_parse_error
+//@human / @human Erreur de parsing d'identifiant. Type minimal avec Debug, Display, Error.
 /// Erreur de parsing d'identifiant.
 ///
 /// Type minimal d'erreur pour le parsing d'identifiants.
@@ -120,8 +120,8 @@ impl std::error::Error for IdParseError {}
 /// @id kernel_id_generator_trait
 /// @role infrastructure
 /// @layer kernel
-/// @human Trait pour générer des identifiants uniques. Le produit peut implémenter des générateurs déterministes si nécessaire.
 /// @do generate_unique_id
+//@human / @human Trait pour générer des identifiants uniques. Le produit peut implémenter des générateurs déterministes si nécessaire.
 /// Trait pour générer des identifiants uniques.
 ///
 /// Le trait `IdGenerator` permet d'injecter différentes stratégies de génération
@@ -136,8 +136,8 @@ pub trait IdGenerator {
     /// @id kernel_id_generator_generate
     /// @role infrastructure
     /// @layer kernel
-    /// @human Génère un nouvel identifiant unique. En v0.1, non déterministe (UUID v4).
     /// @do generate_new_id
+    //@human / @human Génère un nouvel identifiant unique. En v0.1, non déterministe (UUID v4).
     /// @depends kernel_id_generator_trait
     /// Génère un nouvel identifiant unique.
     ///
@@ -162,8 +162,8 @@ pub trait IdGenerator {
 /// @id kernel_id_generator_uuid
 /// @role infrastructure
 /// @layer kernel
-/// @human Générateur d'identifiants basé sur UUID v4. Génération non déterministe.
 /// @do generate_uuid_v4_id
+//@human / @human Générateur d'identifiants basé sur UUID v4. Génération non déterministe.
 /// Générateur d'identifiants basé sur UUID v4.
 ///
 /// Cette implémentation génère des identifiants uniques de manière non déterministe
@@ -178,8 +178,8 @@ impl IdGenerator for UuidIdGenerator {
 /// @id kernel_id_generator_uuid_struct
 /// @role infrastructure
 /// @layer kernel
-/// @human Structure du générateur UUID. Type unitaire sans état.
 /// @do represent_uuid_generator
+//@human / @human Structure du générateur UUID. Type unitaire sans état.
 /// Générateur d'identifiants UUID v4.
 ///
 /// Type unitaire sans état. Peut être instancié et réutilisé.
@@ -193,8 +193,8 @@ mod tests {
     /// @id test_id_generate_unique
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que deux IDs générés sont différents, garantissant l'unicité.
     /// @do verify_id_uniqueness
+    //@human / @human Test vérifiant que deux IDs générés sont différents, garantissant l'unicité.
     /// @depends kernel_id_generator_generate
     #[test]
     fn test_id_generate_unique() {
@@ -207,8 +207,8 @@ mod tests {
     /// @id test_id_display_roundtrip
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant le round-trip Display → parse → même Id.
     /// @do verify_id_round_trip
+    //@human / @human Test vérifiant le round-trip Display → parse → même Id.
     /// @depends kernel_id_display, kernel_id_parse
     #[test]
     fn test_id_display_roundtrip() {
@@ -222,8 +222,8 @@ mod tests {
     /// @id test_id_parse_valid_uuid
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que parse() réussit avec un UUID valide.
     /// @do verify_valid_uuid_parsing
+    //@human / @human Test vérifiant que parse() réussit avec un UUID valide.
     /// @depends kernel_id_parse
     #[test]
     fn test_id_parse_valid_uuid() {
@@ -235,8 +235,8 @@ mod tests {
     /// @id test_id_parse_invalid_format
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que parse() retourne une erreur pour un format invalide.
     /// @do verify_invalid_format_error
+    //@human / @human Test vérifiant que parse() retourne une erreur pour un format invalide.
     /// @depends kernel_id_parse
     #[test]
     fn test_id_parse_invalid_format() {
@@ -248,8 +248,8 @@ mod tests {
     /// @id test_id_equality
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que Id implémente Eq et PartialEq correctement.
     /// @do verify_id_equality
+    //@human / @human Test vérifiant que Id implémente Eq et PartialEq correctement.
     /// @depends kernel_id_type
     #[test]
     fn test_id_equality() {
@@ -262,8 +262,8 @@ mod tests {
     /// @id test_id_hash
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que Id peut être utilisé comme clé dans une HashMap.
     /// @do verify_id_hash_usage
+    //@human / @human Test vérifiant que Id peut être utilisé comme clé dans une HashMap.
     /// @depends kernel_id_type
     #[test]
     fn test_id_hash() {
@@ -283,8 +283,8 @@ mod tests {
     /// @id test_id_no_business_logic
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant qu'aucun type métier (UserId, OrderId) n'existe, conformément à INV-K-1.
     /// @do verify_no_business_types
+    //@human / @human Test vérifiant qu'aucun type métier (UserId, OrderId) n'existe, conformément à INV-K-1.
     /// @depends kernel_id_type
     #[test]
     fn test_id_no_business_logic() {
@@ -298,8 +298,8 @@ mod tests {
     /// @id test_id_no_external_dependency
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que la génération fonctionne sans réseau, conformément à INV-K-2.
     /// @do verify_no_network_required
+    //@human / @human Test vérifiant que la génération fonctionne sans réseau, conformément à INV-K-2.
     /// @depends kernel_id_generator_generate
     #[test]
     fn test_id_no_external_dependency() {
@@ -313,8 +313,8 @@ mod tests {
     /// @id test_id_deterministic_parse
     /// @role test
     /// @layer kernel
-    /// @human Test vérifiant que parse() est déterministe : même string → même Id, conformément à INV-K-6.
     /// @do verify_parse_determinism
+    //@human / @human Test vérifiant que parse() est déterministe : même string → même Id, conformément à INV-K-6.
     /// @depends kernel_id_parse
     #[test]
     fn test_id_deterministic_parse() {

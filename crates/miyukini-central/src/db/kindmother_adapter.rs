@@ -8,7 +8,7 @@
 //!
 //! @id     kindmother_adapter
 //! @do     provide_common_utility_functions
-//! @layer  infra
+//@human ! @layer  infra
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers pour les conversions de types courants

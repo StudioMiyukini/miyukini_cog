@@ -5,29 +5,29 @@ use crate::resource::ResourceType;
 /// @id logisticssteward_allocation
 /// @role data
 /// @layer core
-/// @human Allocation d'une ressource à un composant.
 /// @do represent_resource_allocation
+//@human / @human Allocation d'une ressource à un composant.
 #[derive(Debug, Clone)]
 pub struct Allocation {
     /// @id logisticssteward_allocation_resource_type
     /// @role data
     /// @layer core
-    /// @human Type de ressource allouée.
     /// @do store_resource_type
+    //@human / @human Type de ressource allouée.
     /// @depends logisticssteward_allocation
     pub resource_type: ResourceType,
     /// @id logisticssteward_allocation_component_id
     /// @role data
     /// @layer core
-    /// @human Identifiant du composant auquel la ressource est allouée.
     /// @do store_component_id
+    //@human / @human Identifiant du composant auquel la ressource est allouée.
     /// @depends logisticssteward_allocation
     pub component_id: String,
     /// @id logisticssteward_allocation_amount
     /// @role data
     /// @layer core
-    /// @human Quantité allouée.
     /// @do store_allocation_amount
+    //@human / @human Quantité allouée.
     /// @depends logisticssteward_allocation
     pub amount: u64,
 }
@@ -35,14 +35,14 @@ pub struct Allocation {
 /// @id logisticssteward_allocation_manager_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait de gestion des allocations.
 /// @do define_allocation_manager_contract
+//@human / @human Trait de gestion des allocations.
 pub trait AllocationManager {
     /// @id logisticssteward_allocation_manager_allocate
     /// @role mutator
     /// @layer core
-    /// @human Alloue une ressource à un composant.
     /// @do allocate_resource
+    //@human / @human Alloue une ressource à un composant.
     /// @depends logisticssteward_allocation_manager_trait
     fn allocate(
         &mut self,
@@ -55,15 +55,15 @@ pub trait AllocationManager {
 /// @id logisticssteward_allocation_error
 /// @role error
 /// @layer core
-/// @human Erreur d'allocation.
 /// @do represent_allocation_error
+//@human / @human Erreur d'allocation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AllocationError {
     /// @id logisticssteward_allocation_error_insufficient
     /// @role error
     /// @layer core
-    /// @human Ressources insuffisantes.
     /// @do represent_insufficient_error
+    //@human / @human Ressources insuffisantes.
     /// @depends logisticssteward_allocation_error
     InsufficientResources,
 }
@@ -127,8 +127,8 @@ mod tests {
     /// @id logisticssteward_allocation_test_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une allocation.
     /// @do verify_allocation_creation
+    //@human / @human Test de création d'une allocation.
     /// @depends logisticssteward_allocation
     #[test]
     fn test_allocation_creation() {

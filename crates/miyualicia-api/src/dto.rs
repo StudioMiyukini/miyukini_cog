@@ -5,8 +5,8 @@
 // @id service.alicia.api.dto
 // @role data_transfer_objects
 // @layer 7
-// @human DTOs request/response JSON Alicia API.
 // @do define_api_request_response_types
+// @human DTOs request/response JSON Alicia API.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

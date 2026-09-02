@@ -9,8 +9,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyuinvoice_tool_invoice_create
 /// @role mutator
 /// @layer tool
-/// @human Crée une facture (métier indépendant) à partir de données fournies ; WriteIntent KindMother.
 /// @do invoice_create_under_governance
+//@human / @human Crée une facture (métier indépendant) à partir de données fournies ; WriteIntent KindMother.
 pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
@@ -26,8 +26,8 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyuinvoic
 /// @id miyuinvoice_tool_invoice_send
 /// @role mutator
 /// @layer tool
-/// @human Envoie une facture par canal fourni (email, etc.).
 /// @do invoice_send_under_governance
+//@human / @human Envoie une facture par canal fourni (email, etc.).
 pub fn send(
     ctx: &GovernedContext,
     _invoice_id: &str,

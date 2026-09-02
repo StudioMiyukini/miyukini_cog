@@ -5,8 +5,8 @@
 // @id toolkit.alicia.devices.types
 // @role domain_types
 // @layer 6
-// @human Types de domaine des dispositifs domotiques : DeviceType, DeviceProtocol, Device, DeviceState.
 // @do define_device_domain_types
+// @human Types de domaine des dispositifs domotiques : DeviceType, DeviceProtocol, Device, DeviceState.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

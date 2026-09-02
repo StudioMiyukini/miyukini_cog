@@ -9,8 +9,8 @@ use std::sync::OnceLock;
 // @id alicia_capture_admin_cell
 // @role data
 // @layer toolkit
-// @human Cellule Admin Alicia Capture : identification, manifeste de test, integrite.
 // @do expose_admin_cell
+// @human Cellule Admin Alicia Capture : identification, manifeste de test, integrite.
 
 /// Identifiant canonique du toolkit.
 pub const TOOLKIT_ID: &str = "toolkit.alicia.capture";
@@ -21,8 +21,8 @@ static ADMIN_CELL: OnceLock<AliciaCaptureAdminCell> = OnceLock::new();
 /// @id alicia_capture_admin_identification
 /// @role data
 /// @layer toolkit
-/// @human Identification du module (toolkit.alicia.capture).
 /// @do store_identification
+//@human / @human Identification du module (toolkit.alicia.capture).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct AliciaCaptureIdentification {
@@ -39,8 +39,8 @@ pub struct AliciaCaptureIdentification {
 /// @id alicia_capture_admin_test_criteria
 /// @role data
 /// @layer toolkit
-/// @human Criteres de succes/echec pour un test embarque.
 /// @do store_test_criteria
+//@human / @human Criteres de succes/echec pour un test embarque.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TestCriteria {
@@ -51,8 +51,8 @@ pub struct TestCriteria {
 /// @id alicia_capture_admin_embedded_test_def
 /// @role data
 /// @layer toolkit
-/// @human Definition d'un test dans le manifeste.
 /// @do store_embedded_test_def
+//@human / @human Definition d'un test dans le manifeste.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmbeddedTestDef {
     /// Identifiant du test.
@@ -68,8 +68,8 @@ pub struct EmbeddedTestDef {
 /// @id alicia_capture_admin_test_manifest
 /// @role data
 /// @layer toolkit
-/// @human Manifeste de test embarque.
 /// @do store_test_manifest
+//@human / @human Manifeste de test embarque.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AliciaCaptureTestManifest {
     /// Liste des tests declares.
@@ -86,8 +86,8 @@ fn default_result_format() -> String {
 /// @id alicia_capture_admin_integrity
 /// @role data
 /// @layer toolkit
-/// @human Metadonnees d'integrite pour verification TAMR.
 /// @do store_integrity_metadata
+//@human / @human Metadonnees d'integrite pour verification TAMR.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AliciaCaptureIntegrity {
     /// Empreinte du module (hash).
@@ -102,8 +102,8 @@ pub struct AliciaCaptureIntegrity {
 /// @id alicia_capture_admin_cell_struct
 /// @role data
 /// @layer toolkit
-/// @human Cellule Admin complete AliciaCapture.
 /// @do represent_admin_cell
+//@human / @human Cellule Admin complete AliciaCapture.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AliciaCaptureAdminCell {
     /// Identification du module.
@@ -117,8 +117,8 @@ pub struct AliciaCaptureAdminCell {
 /// @id alicia_capture_admin_cell_build
 /// @role mutator
 /// @layer toolkit
-/// @human Construit la Cellule Admin AliciaCapture.
 /// @do build_alicia_capture_admin_cell
+//@human / @human Construit la Cellule Admin AliciaCapture.
 #[must_use]
 pub fn alicia_capture_admin_cell(version: &str, fingerprint: &str) -> AliciaCaptureAdminCell {
     AliciaCaptureAdminCell {

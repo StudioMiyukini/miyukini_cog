@@ -1,6 +1,6 @@
 /// @id toolkit.alicia.wakeword.models
 /// @do manage_wake_word_model_files
-/// @role model_management
+//@human / @role model_management
 /// @layer 6
 /// @human Gestion des fichiers modeles wake word (chargement, validation, metadonnees)
 use std::path::Path;

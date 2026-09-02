@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     manage_world_entities_units_buildings_creatures
-//! @human  Opérateur gérant toutes les entités vivantes et construites du monde
+//@human ! @human  Opérateur gérant toutes les entités vivantes et construites du monde
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

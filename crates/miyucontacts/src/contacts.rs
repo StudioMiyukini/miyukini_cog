@@ -10,8 +10,8 @@ use crate::friend::ContactItem;
 /// @id miyucontacts_tool_contacts_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les contacts (type fourni).
 /// @do contacts_list_under_governance
+//@human / @human Liste les contacts (type fourni).
 /// tool.contacts.list
 pub fn list(
     ctx: &GovernedContext,

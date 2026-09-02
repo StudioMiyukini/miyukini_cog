@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_service_server
 //! @do     implement_tcp_json_server
-//! @layer  core
+//@human ! @layer  core
 
 use std::path::Path;
 use std::sync::Arc;

@@ -6,7 +6,7 @@
 //! @role   gameplay
 //! @layer  domain
 //! @do     manage_divine_powers_and_god_actions
-//! @human  Opérateur gérant tous les pouvoirs divins (création, destruction, créatures, magie)
+//@human ! @human  Opérateur gérant tous les pouvoirs divins (création, destruction, créatures, magie)
 
 use serde::{Deserialize, Serialize};
 use lifegame_entities::{EntityManager, Unit, Creature, Vec2, Race, CreatureType};

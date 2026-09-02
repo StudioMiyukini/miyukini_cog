@@ -5,8 +5,8 @@
 // @id service.alicia.api.server
 // @role axum_server
 // @layer 7
-// @human Serveur axum Alicia API ; demarrage, bind, shutdown propre.
 // @do start_alicia_api_server
+// @human Serveur axum Alicia API ; demarrage, bind, shutdown propre.
 
 use std::net::SocketAddr;
 use std::sync::Arc;

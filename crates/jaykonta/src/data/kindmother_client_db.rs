@@ -8,7 +8,7 @@
 //!
 //! @id     jaykonta_kindmother_client_db
 //! @do     persist_jaykonta_data_via_kindmother_client
-//! @layer  infra
+//@human ! @layer  infra
 
 use crate::data::types::{
     AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,

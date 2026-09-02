@@ -8,8 +8,8 @@ pub mod destruction_reinit;
 /// @id miyukiniadmin_services_mod
 /// @role infrastructure
 /// @layer operator
-/// @human Module services (environment_state, auth, permission, recovery).
 /// @do expose_services
+//@human / @human Module services (environment_state, auth, permission, recovery).
 pub mod environment_state;
 pub mod permission;
 pub mod pre_destruction_backup;

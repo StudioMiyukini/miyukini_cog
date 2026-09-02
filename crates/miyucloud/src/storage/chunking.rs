@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_storage_chunking
 //! @do     split_and_reassemble_file_data_in_chunks
-//! @role   storage
+//@human ! @role   storage
 //! @layer  infra
 //!
 //! Taille de chunk par defaut : 256 KB. Configurable.

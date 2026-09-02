@@ -213,9 +213,9 @@ Chaque etape est **loggee via TodoWrite** + **horodatee** dans les metriques.
 
 ## MASS â€” Responsabilites Swarm (Agent Swarm)
 
-<!-- @id: mass.agent.denis -->
-<!-- @do: Responsabilites de merge coordination swarm de Denis -->
-<!-- @role: Denis (Chef Dev) -->
+<!-- @id mass.agent.denis -->
+<!-- @do Responsabilites de merge coordination swarm de Denis -->
+<!-- @role Denis (Chef Dev) -->
 
 Denis est le **Merge Coordinator** du pattern MASS (Couche 3).
 

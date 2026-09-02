@@ -20,8 +20,8 @@
 // @id service.jaycloud
 // @role backup_storage_service
 // @layer 7
-// @human Service Miyukini de sauvegarde cloud souverain.
 // @do provide_cloud_backup_service
+// @human Service Miyukini de sauvegarde cloud souverain.
 
 pub mod adapters;
 pub mod config;

@@ -6,8 +6,8 @@ use crate::errors::MiyuposinventoryError;
 /// @id miyuposinventory_tool_import_items
 /// @role mutator
 /// @layer tool
-/// @human Importe des articles à partir d'un flux structuré (ex. CSV) ; persistance = KindMother.
 /// @do import_items_under_governance
+//@human / @human Importe des articles à partir d'un flux structuré (ex. CSV) ; persistance = KindMother.
 /// tool.inventory.import.items
 pub fn items(
     ctx: &GovernedContext,

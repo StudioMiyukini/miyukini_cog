@@ -3,29 +3,29 @@
 /// @id caringnanny_observer_event_type
 /// @role data
 /// @layer core
-/// @human Type d'événement système observé.
 /// @do represent_event_type
+//@human / @human Type d'événement système observé.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventType {
     /// @id caringnanny_observer_event_state_change
     /// @role data
     /// @layer core
-    /// @human Changement d'état système.
     /// @do represent_state_change_event
+    //@human / @human Changement d'état système.
     /// @depends caringnanny_observer_event_type
     StateChange,
     /// @id caringnanny_observer_event_anomaly
     /// @role data
     /// @layer core
-    /// @human Anomalie détectée.
     /// @do represent_anomaly_event
+    //@human / @human Anomalie détectée.
     /// @depends caringnanny_observer_event_type
     Anomaly,
     /// @id caringnanny_observer_event_health_change
     /// @role data
     /// @layer core
-    /// @human Changement d'état de santé.
     /// @do represent_health_change_event
+    //@human / @human Changement d'état de santé.
     /// @depends caringnanny_observer_event_type
     HealthChange,
 }
@@ -33,29 +33,29 @@ pub enum EventType {
 /// @id caringnanny_observer_system_event
 /// @role data
 /// @layer core
-/// @human Événement système observé.
 /// @do represent_system_event
+//@human / @human Événement système observé.
 #[derive(Debug, Clone)]
 pub struct SystemEvent {
     /// @id caringnanny_observer_system_event_type
     /// @role data
     /// @layer core
-    /// @human Type d'événement.
     /// @do store_event_type
+    //@human / @human Type d'événement.
     /// @depends caringnanny_observer_system_event
     pub event_type: EventType,
     /// @id caringnanny_observer_system_event_component
     /// @role data
     /// @layer core
-    /// @human Composant concerné.
     /// @do store_component_id
+    //@human / @human Composant concerné.
     /// @depends caringnanny_observer_system_event
     pub component: String,
     /// @id caringnanny_observer_system_event_message
     /// @role data
     /// @layer core
-    /// @human Message descriptif de l'événement.
     /// @do store_event_message
+    //@human / @human Message descriptif de l'événement.
     /// @depends caringnanny_observer_system_event
     pub message: String,
 }
@@ -63,14 +63,14 @@ pub struct SystemEvent {
 /// @id caringnanny_observer_trait
 /// @role infrastructure
 /// @layer core
-/// @human Trait d'observation d'événements système.
 /// @do define_observer_contract
+//@human / @human Trait d'observation d'événements système.
 pub trait Observer {
     /// @id caringnanny_observer_observe
     /// @role infrastructure
     /// @layer core
-    /// @human Observe un événement système.
     /// @do observe_system_event
+    //@human / @human Observe un événement système.
     /// @depends caringnanny_observer_trait
     fn observe(&mut self, event: SystemEvent);
 }
@@ -108,8 +108,8 @@ mod tests {
     /// @id caringnanny_observer_test_event_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'un événement système.
     /// @do verify_event_creation
+    //@human / @human Test de création d'un événement système.
     /// @depends caringnanny_observer_system_event
     #[test]
     fn test_event_creation() {

@@ -7,8 +7,8 @@ use crate::store;
 /// @id miyusocialfeed_tool_reaction_add
 /// @role mutator
 /// @layer tool
-/// @human Ajoute une réaction ; WriteIntent KindMother.
 /// @do reaction_add_under_governance
+//@human / @human Ajoute une réaction ; WriteIntent KindMother.
 /// tool.social.reaction.add
 pub fn add(
     ctx: &GovernedContext,
@@ -32,8 +32,8 @@ pub fn add(
 /// @id miyusocialfeed_tool_reaction_remove
 /// @role mutator
 /// @layer tool
-/// @human Supprime une réaction ; WriteIntent KindMother.
 /// @do reaction_remove_under_governance
+//@human / @human Supprime une réaction ; WriteIntent KindMother.
 /// tool.social.reaction.remove
 pub fn remove(
     ctx: &GovernedContext,
@@ -56,8 +56,8 @@ pub fn remove(
 /// @id miyusocialfeed_tool_reaction_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les réactions.
 /// @do reaction_list_under_governance
+//@human / @human Liste les réactions.
 /// tool.social.reaction.list
 pub fn list(
     ctx: &GovernedContext,

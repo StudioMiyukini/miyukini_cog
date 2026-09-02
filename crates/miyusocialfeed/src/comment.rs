@@ -8,8 +8,8 @@ use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 /// @id miyusocialfeed_tool_comment_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un commentaire ; WriteIntent KindMother.
 /// @do comment_create_under_governance
+//@human / @human Crée un commentaire ; WriteIntent KindMother.
 /// tool.social.comment.create
 pub fn create(
     ctx: &GovernedContext,
@@ -42,8 +42,8 @@ pub fn create(
 /// @id miyusocialfeed_tool_comment_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les commentaires.
 /// @do comment_list_under_governance
+//@human / @human Liste les commentaires.
 /// tool.social.comment.list
 pub fn list(ctx: &GovernedContext, post_id: &str) -> Result<Vec<CommentItem>, MiyusocialfeedError> {
     if !ctx.has_mandate() {
@@ -73,8 +73,8 @@ pub fn list(ctx: &GovernedContext, post_id: &str) -> Result<Vec<CommentItem>, Mi
 /// @id miyusocialfeed_tool_comment_delete
 /// @role mutator
 /// @layer tool
-/// @human Supprime un commentaire ; WriteIntent KindMother.
 /// @do comment_delete_under_governance
+//@human / @human Supprime un commentaire ; WriteIntent KindMother.
 /// tool.social.comment.delete
 pub fn delete(ctx: &GovernedContext, comment_id: &str) -> Result<(), MiyusocialfeedError> {
     if !ctx.has_mandate() {

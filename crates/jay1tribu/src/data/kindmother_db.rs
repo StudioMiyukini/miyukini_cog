@@ -2,7 +2,7 @@
 //!
 //! @id     jay1tribu_kindmother_db
 //! @do     provide_sqlite_persistence_for_jay1tribu
-//! @role   persistence
+//@human ! @role   persistence
 //! @layer  infra
 //!
 //! Archives locales uniquement ; envoi/réception en temps réel requièrent le Webway.

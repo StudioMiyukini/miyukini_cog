@@ -8,8 +8,8 @@ use std::collections::HashMap;
 /// @id miyulocale_tool_translate
 /// @role mutator
 /// @layer tool
-/// @human Résout une clé de traduction dans un catalogue fourni.
 /// @do translate_under_governance
+//@human / @human Résout une clé de traduction dans un catalogue fourni.
 /// tool.locale.translate
 pub fn translate(
     ctx: &GovernedContext,

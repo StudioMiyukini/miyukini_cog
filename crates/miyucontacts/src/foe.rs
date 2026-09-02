@@ -8,8 +8,8 @@ use crate::store;
 /// @id miyucontacts_tool_foe_add
 /// @role mutator
 /// @layer tool
-/// @human Ajoute un ennemi ; WriteIntent KindMother.
 /// @do foe_add_under_governance
+//@human / @human Ajoute un ennemi ; WriteIntent KindMother.
 /// tool.contacts.foe.add
 pub fn add(ctx: &GovernedContext, target_id: &str) -> Result<(), MiyucontactsError> {
     if !ctx.has_mandate() {
@@ -30,8 +30,8 @@ pub fn add(ctx: &GovernedContext, target_id: &str) -> Result<(), MiyucontactsErr
 /// @id miyucontacts_tool_foe_remove
 /// @role mutator
 /// @layer tool
-/// @human Supprime un ennemi ; WriteIntent KindMother.
 /// @do foe_remove_under_governance
+//@human / @human Supprime un ennemi ; WriteIntent KindMother.
 /// tool.contacts.foe.remove
 pub fn remove(ctx: &GovernedContext, target_id: &str) -> Result<(), MiyucontactsError> {
     if !ctx.has_mandate() {
@@ -50,8 +50,8 @@ pub fn remove(ctx: &GovernedContext, target_id: &str) -> Result<(), Miyucontacts
 /// @id miyucontacts_tool_foe_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les ennemis.
 /// @do foe_list_under_governance
+//@human / @human Liste les ennemis.
 /// tool.contacts.foe.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<ContactItem>, MiyucontactsError> {
     if !ctx.has_mandate() {

@@ -35,8 +35,8 @@ fn polls() -> &'static Mutex<HashMap<String, PollRecord>> {
 /// @id miyupolls_tool_poll_create
 /// @role mutator
 /// @layer tool
-/// @human Crée un sondage ; WriteIntent KindMother.
 /// @do poll_create_under_governance
+//@human / @human Crée un sondage ; WriteIntent KindMother.
 /// tool.poll.create
 pub fn create(
     ctx: &GovernedContext,
@@ -70,8 +70,8 @@ pub fn create(
 /// @id miyupolls_tool_poll_vote
 /// @role mutator
 /// @layer tool
-/// @human Enregistre un vote ; WriteIntent KindMother.
 /// @do poll_vote_under_governance
+//@human / @human Enregistre un vote ; WriteIntent KindMother.
 /// tool.poll.vote
 pub fn vote(ctx: &GovernedContext, poll_id: &str, option_id: &str) -> Result<(), MiyupollsError> {
     if !ctx.has_mandate() {
@@ -93,8 +93,8 @@ pub fn vote(ctx: &GovernedContext, poll_id: &str, option_id: &str) -> Result<(),
 /// @id miyupolls_tool_poll_list
 /// @role mutator
 /// @layer tool
-/// @human Liste les sondages.
 /// @do poll_list_under_governance
+//@human / @human Liste les sondages.
 /// tool.poll.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<PollItem>, MiyupollsError> {
     if !ctx.has_mandate() {
@@ -109,8 +109,8 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<PollItem>, MiyupollsError> {
 /// @id miyupolls_tool_poll_result
 /// @role mutator
 /// @layer tool
-/// @human Récupère les résultats (agrégés) ; pas d'écriture.
 /// @do poll_result_under_governance
+//@human / @human Récupère les résultats (agrégés) ; pas d'écriture.
 /// tool.poll.result
 pub fn result(ctx: &GovernedContext, poll_id: &str) -> Result<PollResult, MiyupollsError> {
     if !ctx.has_mandate() {

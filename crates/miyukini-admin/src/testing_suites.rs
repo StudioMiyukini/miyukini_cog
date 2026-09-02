@@ -13,8 +13,8 @@ use std::time::Duration;
 /// @id miyukiniadmin_testing_suites
 /// @role infrastructure
 /// @layer operator
-/// @human Suites de tests Quick/Standard/Full (unit + cycle).
 /// @do run_suites_and_report
+//@human / @human Suites de tests Quick/Standard/Full (unit + cycle).
 
 /// Nom des suites (Unit Tests Contract §8.1).
 /// Suite rapide : COH-001 et CONF-001 uniquement.
@@ -79,8 +79,8 @@ pub fn run_suite_full(
 /// @id miyukiniadmin_testing_suites_run_and_report
 /// @role mutator
 /// @layer operator
-/// @human Exécute les suites (unit + MiyukiniSQLtest) et produit un rapport combiné.
 /// @do run_suites_and_report
+//@human / @human Exécute les suites (unit + MiyukiniSQLtest) et produit un rapport combiné.
 #[must_use]
 pub fn run_suites_and_report(
     suite_name: &str,

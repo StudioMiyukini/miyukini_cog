@@ -6,8 +6,8 @@
 // @id toolkit.alicia.automations.admin
 // @role governance_cell
 // @layer 6
-// @human Cellule d'administration du crate miyualicia-automations.
 // @do identify_and_self_describe_miyualicia_automations
+// @human Cellule d'administration du crate miyualicia-automations.
 
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;

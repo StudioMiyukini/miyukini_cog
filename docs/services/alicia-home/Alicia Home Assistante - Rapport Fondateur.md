@@ -1,10 +1,10 @@
 # Rapport Fondateur — Alicia Home Assistante
 
-<!-- @id: doc.alicia-home.rapport-fondateur -->
-<!-- @role: project-charter -->
-<!-- @layer: governance -->
-<!-- @human: Rapport fondateur complet du projet Alicia Home Assistante — transformation de MiyukiniVoice -->
-<!-- @do: define_alicia_home_project_scope_and_plan -->
+<!-- @id doc.alicia-home.rapport-fondateur -->
+<!-- @role project-charter -->
+<!-- @layer governance -->
+<!-- @human Rapport fondateur complet du projet Alicia Home Assistante — transformation de MiyukiniVoice -->
+<!-- @do define_alicia_home_project_scope_and_plan -->
 
 **Auteur :** Maria, Chef de Projet Miyukini AI Studio
 **Date :** 2026-03-01

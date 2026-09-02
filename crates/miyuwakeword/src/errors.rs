@@ -1,6 +1,6 @@
 //! @id toolkit.alicia.wakeword.errors
 //! @do define_error_types_for_wake_word_detection
-//! @role error_definition
+//@human ! @role error_definition
 //! @layer 6
 //! @human Types d'erreur explicites pour la detection de wake word
 

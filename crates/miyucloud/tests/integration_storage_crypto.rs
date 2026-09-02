@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_integration_storage_crypto
 //! @do     test_full_upload_download_flow
-//! @role   test
+//@human ! @role   test
 //! @layer  integration
 //!
 //! Ce test couvre le flux complet :

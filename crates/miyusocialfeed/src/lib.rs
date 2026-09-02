@@ -7,8 +7,8 @@
 // @id toolkit.social.miyusocialfeed
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuSocialFeed ; expose les modules tools.
 /// @do expose_miyusocialfeed_toolkit
+//@human / @human Point d'entrée du toolkit MiyuSocialFeed ; expose les modules tools.
 pub mod admin_cell;
 pub mod comment;
 pub mod context;

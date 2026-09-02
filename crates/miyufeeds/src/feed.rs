@@ -61,8 +61,8 @@ fn unix_days_to_ymd(days: i64) -> (i64, i64, i64) {
 /// @id miyufeeds_tool_atom_board
 /// @role mutator
 /// @layer tool
-/// @human Génère un flux ATOM pour le board.
 /// @do feed_atom_board_under_governance
+//@human / @human Génère un flux ATOM pour le board.
 /// tool.feed.atom.board
 pub fn atom_board(ctx: &GovernedContext, board_id: &str) -> Result<Vec<u8>, MiyufeedsError> {
     if !ctx.has_mandate() {
@@ -76,8 +76,8 @@ pub fn atom_board(ctx: &GovernedContext, board_id: &str) -> Result<Vec<u8>, Miyu
 /// @id miyufeeds_tool_atom_forum
 /// @role mutator
 /// @layer tool
-/// @human Génère un flux ATOM pour un forum.
 /// @do feed_atom_forum_under_governance
+//@human / @human Génère un flux ATOM pour un forum.
 /// tool.feed.atom.forum
 pub fn atom_forum(ctx: &GovernedContext, forum_id: &str) -> Result<Vec<u8>, MiyufeedsError> {
     if !ctx.has_mandate() {
@@ -91,8 +91,8 @@ pub fn atom_forum(ctx: &GovernedContext, forum_id: &str) -> Result<Vec<u8>, Miyu
 /// @id miyufeeds_tool_atom_topic
 /// @role mutator
 /// @layer tool
-/// @human Génère un flux ATOM pour un topic.
 /// @do feed_atom_topic_under_governance
+//@human / @human Génère un flux ATOM pour un topic.
 /// tool.feed.atom.topic
 pub fn atom_topic(ctx: &GovernedContext, topic_id: &str) -> Result<Vec<u8>, MiyufeedsError> {
     if !ctx.has_mandate() {

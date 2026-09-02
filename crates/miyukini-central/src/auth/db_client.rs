@@ -8,7 +8,7 @@
 //!
 //! @id     central_auth_kindmother_client_db
 //! @do     persist_central_auth_data_via_kindmother_client
-//! @layer  infra
+//@human ! @layer  infra
 
 use crate::auth::password::validate_password;
 use kindmother_client::{ClientError, KindMotherClient};

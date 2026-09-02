@@ -13,8 +13,8 @@
 // @id toolkit.alicia.mqtt.topics
 // @role topic_builder
 // @layer 6
-// @human Construction et parsing des topics MQTT Alicia et Zigbee2MQTT.
 // @do build_and_parse_mqtt_topics
+// @human Construction et parsing des topics MQTT Alicia et Zigbee2MQTT.
 
 /// Helper pour construire et parser les topics MQTT Alicia.
 pub struct AliciaTopic;

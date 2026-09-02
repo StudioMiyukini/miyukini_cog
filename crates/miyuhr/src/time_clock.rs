@@ -38,8 +38,8 @@ fn now_utc() -> String {
 /// @id miyuhr_tool_time_clock_in
 /// @role mutator
 /// @layer tool
-/// @human Enregistre une entrée (début de shift) ; heures = KindMother.
 /// @do time_clock_in_under_governance
+//@human / @human Enregistre une entrée (début de shift) ; heures = KindMother.
 /// tool.hr.time_clock.in
 pub fn clock_in(ctx: &GovernedContext, employee_id: &str) -> Result<String, MiyuhrError> {
     if !ctx.has_mandate() {
@@ -66,8 +66,8 @@ pub fn clock_in(ctx: &GovernedContext, employee_id: &str) -> Result<String, Miyu
 /// @id miyuhr_tool_time_clock_out
 /// @role mutator
 /// @layer tool
-/// @human Enregistre une sortie (fin de shift).
 /// @do time_clock_out_under_governance
+//@human / @human Enregistre une sortie (fin de shift).
 /// tool.hr.time_clock.out
 pub fn clock_out(ctx: &GovernedContext, employee_id: &str) -> Result<String, MiyuhrError> {
     if !ctx.has_mandate() {

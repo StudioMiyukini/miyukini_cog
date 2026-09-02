@@ -2,7 +2,7 @@
 //!
 //! @id     kindmother_service_database
 //! @do     manage_sqlite_databases_isolated
-//! @layer  core
+//@human ! @layer  core
 //!
 //! Ce module gère les bases de données SQLite de manière isolée.
 //! KindMother Service est le seul processus autorisé à accéder aux fichiers DB.

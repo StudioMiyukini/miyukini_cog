@@ -6,7 +6,7 @@
 //! @role   simulation
 //! @layer  domain
 //! @do     manage_climate_zones_and_biomes
-//! @human  Définition des biomes et leurs caractéristiques
+//@human ! @human  Définition des biomes et leurs caractéristiques
 
 use serde::{Deserialize, Serialize};
 

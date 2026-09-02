@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_trash
 //! @do     implement_trash_restore_purge_operations
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! La purge ecrase les chunks avec des zeros avant suppression (securite RGPD).

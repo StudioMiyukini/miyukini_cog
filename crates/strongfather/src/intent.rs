@@ -12,192 +12,192 @@ use std::collections::HashMap;
 /// @id strongfather_intent_type
 /// @role domain_model
 /// @layer core
-/// @human Type d'action d'une intention. Définit la catégorie conceptuelle de l'action à évaluer.
 /// @do define_action_type
+//@human / @human Type d'action d'une intention. Définit la catégorie conceptuelle de l'action à évaluer.
 /// Type d'action d'une intention
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ActionType {
     /// @id strongfather_intent_action_creation
     /// @role domain_model
     /// @layer core
-    /// @human Intention de créer une nouvelle entité ou un nouveau fait.
     /// @do represent_creation_action
+    //@human / @human Intention de créer une nouvelle entité ou un nouveau fait.
     Creation,
     /// @id strongfather_intent_action_modification
     /// @role domain_model
     /// @layer core
-    /// @human Intention de modifier une entité ou un fait existant.
     /// @do represent_modification_action
+    //@human / @human Intention de modifier une entité ou un fait existant.
     Modification,
     /// @id strongfather_intent_action_deletion
     /// @role domain_model
     /// @layer core
-    /// @human Intention de supprimer une entité ou un fait existant.
     /// @do represent_deletion_action
+    //@human / @human Intention de supprimer une entité ou un fait existant.
     Deletion,
     /// @id strongfather_intent_action_read
     /// @role domain_model
     /// @layer core
-    /// @human Intention de lire une entité ou un fait (évaluation d'accès).
     /// @do represent_read_action
+    //@human / @human Intention de lire une entité ou un fait (évaluation d'accès).
     Read,
     /// @id strongfather_intent_action_evaluation
     /// @role domain_model
     /// @layer core
-    /// @human Intention d'évaluer une condition ou un état sans action.
     /// @do represent_evaluation_action
+    //@human / @human Intention d'évaluer une condition ou un état sans action.
     Evaluation,
 }
 
 /// @id strongfather_intent_call_context
 /// @role domain_model
 /// @layer core
-/// @human Contexte d'appel d'une intention. Décrit qui soumet l'intention et dans quel cadre.
 /// @do represent_call_context
+//@human / @human Contexte d'appel d'une intention. Décrit qui soumet l'intention et dans quel cadre.
 /// Contexte d'appel d'une intention
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CallContext {
     /// @id strongfather_intent_context_caller_identity
     /// @role domain_model
     /// @layer core
-    /// @human Identifiant de l'appelant qui soumet l'intention.
     /// @do identify_caller
+    //@human / @human Identifiant de l'appelant qui soumet l'intention.
     pub caller_identity: String,
     /// @id strongfather_intent_context_origin
     /// @role domain_model
     /// @layer core
-    /// @human Origine de l'appel (produit, adaptateur).
     /// @do identify_origin
+    //@human / @human Origine de l'appel (produit, adaptateur).
     pub origin: String,
     /// @id strongfather_intent_context_instance
     /// @role domain_model
     /// @layer core
-    /// @human Instance concernée par l'intention.
     /// @do identify_instance
+    //@human / @human Instance concernée par l'intention.
     pub instance: String,
 }
 
 /// @id strongfather_intent_constraint
 /// @role domain_model
 /// @layer core
-/// @human Contrainte explicite fournie par l'appelant. Condition supplémentaire à respecter.
 /// @do represent_constraint
+//@human / @human Contrainte explicite fournie par l'appelant. Condition supplémentaire à respecter.
 /// Contrainte explicite d'une intention
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Constraint {
     /// @id strongfather_intent_constraint_id
     /// @role domain_model
     /// @layer core
-    /// @human Identifiant unique de la contrainte.
     /// @do identify_constraint
+    //@human / @human Identifiant unique de la contrainte.
     pub id: String,
     /// @id strongfather_intent_constraint_description
     /// @role domain_model
     /// @layer core
-    /// @human Description déclarative de la contrainte.
     /// @do describe_constraint
+    //@human / @human Description déclarative de la contrainte.
     pub description: String,
 }
 
 /// @id strongfather_intent_data
 /// @role domain_model
 /// @layer core
-/// @human Données descriptives associées à l'intention. Informations non-exécutables.
 /// @do represent_intent_data
+//@human / @human Données descriptives associées à l'intention. Informations non-exécutables.
 /// Données d'une intention
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IntentData {
     /// @id strongfather_intent_data_content
     /// @role domain_model
     /// @layer core
-    /// @human Contenu descriptif des données (représentation conceptuelle, pas technique).
     /// @do store_data_content
+    //@human / @human Contenu descriptif des données (représentation conceptuelle, pas technique).
     pub content: HashMap<String, String>,
 }
 
 /// @id strongfather_intent_state
 /// @role domain_model
 /// @layer core
-/// @human État du cycle de vie d'une intention dans StrongFather.
 /// @do represent_intent_lifecycle_state
+//@human / @human État du cycle de vie d'une intention dans StrongFather.
 /// État du cycle de vie d'une intention
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IntentState {
     /// @id strongfather_intent_state_submitted
     /// @role domain_model
     /// @layer core
-    /// @human L'intention a été soumise à StrongFather pour évaluation.
     /// @do mark_intent_submitted
+    //@human / @human L'intention a été soumise à StrongFather pour évaluation.
     Submitted,
     /// @id strongfather_intent_state_in_evaluation
     /// @role domain_model
     /// @layer core
-    /// @human L'intention est en cours d'évaluation selon les politiques.
     /// @do mark_intent_in_evaluation
+    //@human / @human L'intention est en cours d'évaluation selon les politiques.
     InEvaluation,
     /// @id strongfather_intent_state_decided
     /// @role domain_model
     /// @layer core
-    /// @human Une décision a été produite pour l'intention.
     /// @do mark_intent_decided
+    //@human / @human Une décision a été produite pour l'intention.
     Decided,
 }
 
 /// @id strongfather_intent
 /// @role domain_model
 /// @layer core
-/// @human Intention soumise à StrongFather pour évaluation. Représente une demande conceptuelle d'évaluation.
 /// @do represent_intent
+//@human / @human Intention soumise à StrongFather pour évaluation. Représente une demande conceptuelle d'évaluation.
 /// Intention StrongFather
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intent {
     /// @id strongfather_intent_id
     /// @role domain_model
     /// @layer core
-    /// @human Identifiant unique de l'intention (INV-ID-GLOBAL : unicité globale).
     /// @do identify_intent
+    //@human / @human Identifiant unique de l'intention (INV-ID-GLOBAL : unicité globale).
     pub intent_id: String,
     /// @id strongfather_intent_action_type
     /// @role domain_model
     /// @layer core
-    /// @human Type d'action de l'intention (R-TYPE-1 : exactement un type).
     /// @do specify_action_type
+    //@human / @human Type d'action de l'intention (R-TYPE-1 : exactement un type).
     pub action_type: ActionType,
     /// @id strongfather_intent_subject
     /// @role domain_model
     /// @layer core
-    /// @human Sujet de l'intention - entité, fait ou concept sur lequel porte l'intention (R-SUBJ-1).
     /// @do specify_subject
+    //@human / @human Sujet de l'intention - entité, fait ou concept sur lequel porte l'intention (R-SUBJ-1).
     pub subject: String,
-    /// @id strongfather_intent_call_context
+    /// @id strongfather_intent_call_context_call_context_2
     /// @role domain_model
     /// @layer core
-    /// @human Contexte d'appel obligatoire (R-CTX-1 : contexte complet).
     /// @do provide_call_context
+    //@human / @human Contexte d'appel obligatoire (R-CTX-1 : contexte complet).
     pub call_context: CallContext,
-    /// @id strongfather_intent_data
+    /// @id strongfather_intent_data_data_2
     /// @role domain_model
     /// @layer core
-    /// @human Données associées à l'intention (R-DATA-1 : données obligatoires, peuvent être vides).
     /// @do provide_intent_data
+    //@human / @human Données associées à l'intention (R-DATA-1 : données obligatoires, peuvent être vides).
     pub data: IntentData,
     /// @id strongfather_intent_requested_priority
     /// @role domain_model
     /// @layer core
-    /// @human Priorité demandée par l'appelant (R-PRIO-1 : optionnelle, indicative).
     /// @do request_priority
+    //@human / @human Priorité demandée par l'appelant (R-PRIO-1 : optionnelle, indicative).
     pub requested_priority: Option<u32>,
     /// @id strongfather_intent_constraints
     /// @role domain_model
     /// @layer core
-    /// @human Contraintes explicites fournies par l'appelant (R-CONSTR-1 : optionnelles).
     /// @do provide_constraints
+    //@human / @human Contraintes explicites fournies par l'appelant (R-CONSTR-1 : optionnelles).
     pub constraints: Vec<Constraint>,
     /// @id strongfather_intent_metadata
     /// @role domain_model
     /// @layer core
-    /// @human Métadonnées de traçabilité (R-META-1 : optionnelles, informatives).
     /// @do provide_metadata
+    //@human / @human Métadonnées de traçabilité (R-META-1 : optionnelles, informatives).
     pub metadata: HashMap<String, String>,
 }
 
@@ -205,8 +205,8 @@ impl Intent {
     /// @id strongfather_intent_new
     /// @role constructor
     /// @layer core
-    /// @human Crée une nouvelle intention avec les composants obligatoires.
     /// @do create_intent
+    //@human / @human Crée une nouvelle intention avec les composants obligatoires.
     /// @depends strongfather_intent
     #[must_use]
     pub fn new(
@@ -231,8 +231,8 @@ impl Intent {
     /// @id strongfather_intent_with_priority
     /// @role builder
     /// @layer core
-    /// @human Ajoute une priorité demandée à l'intention.
     /// @do add_requested_priority
+    //@human / @human Ajoute une priorité demandée à l'intention.
     /// @depends strongfather_intent_new
     #[must_use]
     pub fn with_priority(mut self, priority: u32) -> Self {
@@ -243,8 +243,8 @@ impl Intent {
     /// @id strongfather_intent_with_constraints
     /// @role builder
     /// @layer core
-    /// @human Ajoute des contraintes explicites à l'intention.
     /// @do add_constraints
+    //@human / @human Ajoute des contraintes explicites à l'intention.
     /// @depends strongfather_intent_new
     #[must_use]
     pub fn with_constraints(mut self, constraints: Vec<Constraint>) -> Self {
@@ -255,8 +255,8 @@ impl Intent {
     /// @id strongfather_intent_with_metadata
     /// @role builder
     /// @layer core
-    /// @human Ajoute des métadonnées de traçabilité à l'intention.
     /// @do add_metadata
+    //@human / @human Ajoute des métadonnées de traçabilité à l'intention.
     /// @depends strongfather_intent_new
     #[must_use]
     pub fn with_metadata(mut self, metadata: HashMap<String, String>) -> Self {
@@ -272,8 +272,8 @@ mod tests {
     /// @id strongfather_intent_test_create_basic
     /// @role test
     /// @layer core
-    /// @human Test de création d'une intention basique avec les composants obligatoires.
     /// @do test_basic_intent_creation
+    //@human / @human Test de création d'une intention basique avec les composants obligatoires.
     #[test]
     fn test_create_basic_intent() {
         let context = CallContext {
@@ -305,8 +305,8 @@ mod tests {
     /// @id strongfather_intent_test_create_with_priority
     /// @role test
     /// @layer core
-    /// @human Test de création d'une intention avec priorité demandée.
     /// @do test_intent_with_priority
+    //@human / @human Test de création d'une intention avec priorité demandée.
     #[test]
     fn test_create_intent_with_priority() {
         let context = CallContext {
@@ -334,8 +334,8 @@ mod tests {
     /// @id strongfather_intent_test_create_with_constraints
     /// @role test
     /// @layer core
-    /// @human Test de création d'une intention avec contraintes explicites.
     /// @do test_intent_with_constraints
+    //@human / @human Test de création d'une intention avec contraintes explicites.
     #[test]
     fn test_create_intent_with_constraints() {
         let context = CallContext {
@@ -369,8 +369,8 @@ mod tests {
     /// @id strongfather_intent_test_all_action_types
     /// @role test
     /// @layer core
-    /// @human Test que tous les types d'action sont bien définis.
     /// @do test_all_action_types
+    //@human / @human Test que tous les types d'action sont bien définis.
     #[test]
     fn test_all_action_types() {
         let context = CallContext {

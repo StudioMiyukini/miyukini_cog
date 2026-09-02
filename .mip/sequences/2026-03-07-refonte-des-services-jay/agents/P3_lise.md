@@ -8,7 +8,7 @@ Dev front-end — Refonte UI JayFestival + JayXpose avec Dioxus 0.7 et design sy
 
 - Stack : Dioxus 0.7 + `crates/miyuki-ui-dioxus` (atoms/molecules/organisms)
 - Context7 IDs : `/dioxuslabs/dioxus/v0.7.2` + `/llmstxt/dioxuslabs_learn_0_7_llms-full_txt`
-- MSCM sur tous les composants : `//! @id: ... @do: ... @role: ui @layer: service @human: ...`
+- MSCM sur tous les composants : `//! @id ... @do ... @role ui @layer service @human ...`
 - Pattern palette : `let c = use_app_state().read().current_theme.palette();`
 - Pas d'inline styles orphelins — utiliser composants miyuki-ui-dioxus
 

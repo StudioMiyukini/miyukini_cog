@@ -6,14 +6,14 @@ use std::fmt;
 /// @id miyukiniadmin_api_routes_router
 /// @role infrastructure
 /// @layer operator
-/// @human Routeur API qui dispatch les requêtes vers les handlers appropriés.
 /// @do route_api_requests
+//@human / @human Routeur API qui dispatch les requêtes vers les handlers appropriés.
 pub struct APIRouter {
     /// @id miyukiniadmin_api_routes_router_handlers
     /// @role data
     /// @layer operator
-    /// @human Handlers enregistrés pour chaque route.
     /// @do store_route_handlers
+    //@human / @human Handlers enregistrés pour chaque route.
     /// @depends miyukiniadmin_api_routes_router
     handlers: std::collections::HashMap<String, Box<dyn APIHandler>>,
 }
@@ -30,8 +30,8 @@ impl APIRouter {
     /// @id miyukiniadmin_api_routes_router_new
     /// @role infrastructure
     /// @layer operator
-    /// @human Crée un nouveau routeur API.
     /// @do create_api_router
+    //@human / @human Crée un nouveau routeur API.
     /// @depends miyukiniadmin_api_routes_router
     #[must_use]
     pub fn new() -> Self {
@@ -43,8 +43,8 @@ impl APIRouter {
     /// @id miyukiniadmin_api_routes_router_register
     /// @role mutator
     /// @layer operator
-    /// @human Enregistre un handler pour une route.
     /// @do register_route_handler
+    //@human / @human Enregistre un handler pour une route.
     /// @depends miyukiniadmin_api_routes_router
     pub fn register(&mut self, path: &str, handler: Box<dyn APIHandler>) {
         self.handlers.insert(path.to_string(), handler);
@@ -53,8 +53,8 @@ impl APIRouter {
     /// @id miyukiniadmin_api_routes_router_route
     /// @role infrastructure
     /// @layer operator
-    /// @human Route une requête vers le handler approprié.
     /// @do route_request_to_handler
+    //@human / @human Route une requête vers le handler approprié.
     /// @depends miyukiniadmin_api_routes_router
     #[must_use]
     pub fn route(&self, path: &str, method: &str) -> APIResponse {
@@ -82,8 +82,8 @@ mod tests {
     /// @id miyukiniadmin_api_routes_test_router_creation
     /// @role test
     /// @layer operator
-    /// @human Test de création d'un routeur API.
     /// @do verify_api_router_creation
+    //@human / @human Test de création d'un routeur API.
     /// @depends miyukiniadmin_api_routes_router_new
     #[test]
     fn test_router_creation() {

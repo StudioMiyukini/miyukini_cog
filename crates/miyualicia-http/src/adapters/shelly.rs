@@ -13,8 +13,8 @@
 // @id toolkit.alicia.http.adapters.shelly
 // @role shelly_device_adapter
 // @layer 6
-// @human Parsing API Shelly Gen1/Gen2 vers DeviceState Alicia.
 // @do translate_shelly_responses_to_device_state
+// @human Parsing API Shelly Gen1/Gen2 vers DeviceState Alicia.
 
 use chrono::Utc;
 use miyualicia_devices::DeviceState;

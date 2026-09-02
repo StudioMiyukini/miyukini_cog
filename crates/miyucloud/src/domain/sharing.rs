@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_sharing
 //! @do     share_unshare_files_folders_with_profiles_and_tribes
-//! @role   domain
+//@human ! @role   domain
 //! @layer  domain
 //!
 //! Le partage interne permet de donner acces a des fichiers ou dossiers

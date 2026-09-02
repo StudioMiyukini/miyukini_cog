@@ -7,8 +7,8 @@
 // @id toolkit.social.miyupolls
 /// @role infrastructure
 /// @layer toolkit
-/// @human Point d'entrée du toolkit MiyuPolls ; expose les modules tools.
 /// @do expose_miyupolls_toolkit
+//@human / @human Point d'entrée du toolkit MiyuPolls ; expose les modules tools.
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

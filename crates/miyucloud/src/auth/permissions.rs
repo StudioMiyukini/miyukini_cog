@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_auth_permissions
 //! @do     verify_access_permissions_for_resources
-//! @role   auth
+//@human ! @role   auth
 //! @layer  domain
 //!
 //! Le proprietaire a toujours tous les droits. Les beneficiaires de partage

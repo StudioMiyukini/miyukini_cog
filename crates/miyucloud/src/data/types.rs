@@ -2,7 +2,7 @@
 //!
 //! @id     miyucloud_domain_types
 //! @do     define_miyucloud_domain_model
-//! @role   data
+//@human ! @role   data
 //! @layer  domain
 //!
 //! Tous les types domaine pour les fichiers, dossiers, partages, pairs de sync,

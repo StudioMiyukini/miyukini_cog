@@ -2,7 +2,7 @@
 //!
 //! @id     jayrdv_lib
 //! @do     expose_jayrdv_public_api_and_modules
-//! @role   service
+//@human ! @role   service
 //! @layer  infra
 //! @human  Point d'entrée du service JayRDV (rendez-vous, créneaux, ressources, rappels).
 //!

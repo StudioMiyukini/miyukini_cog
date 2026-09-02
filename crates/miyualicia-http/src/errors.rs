@@ -3,8 +3,8 @@
 // @id toolkit.alicia.http.errors
 // @role error_types
 // @layer 6
-// @human Erreurs HTTP Alicia : timeout, connexion, parsing, authentification.
 // @do define_http_error_types
+// @human Erreurs HTTP Alicia : timeout, connexion, parsing, authentification.
 
 /// Erreurs du client HTTP Alicia.
 #[derive(Debug, thiserror::Error)]

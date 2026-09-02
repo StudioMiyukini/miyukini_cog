@@ -7,8 +7,8 @@ use crate::store;
 /// @id miyumoderationforum_tool_post_edit
 /// @role mutator
 /// @layer tool
-/// @human Édite un post (modération) ; WriteIntent KindMother.
 /// @do post_edit_under_governance
+//@human / @human Édite un post (modération) ; WriteIntent KindMother.
 /// tool.forum.post.edit
 pub fn edit(
     ctx: &GovernedContext,
@@ -31,8 +31,8 @@ pub fn edit(
 /// @id miyumoderationforum_tool_post_lock
 /// @role mutator
 /// @layer tool
-/// @human Verrouille un post ; WriteIntent KindMother.
 /// @do post_lock_under_governance
+//@human / @human Verrouille un post ; WriteIntent KindMother.
 /// tool.forum.post.lock
 pub fn lock(ctx: &GovernedContext, post_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
@@ -51,8 +51,8 @@ pub fn lock(ctx: &GovernedContext, post_id: &str) -> Result<(), Miyumoderationfo
 /// @id miyumoderationforum_tool_post_delete
 /// @role mutator
 /// @layer tool
-/// @human Supprime un post ; WriteIntent KindMother.
 /// @do post_delete_under_governance
+//@human / @human Supprime un post ; WriteIntent KindMother.
 /// tool.forum.post.delete
 pub fn delete(ctx: &GovernedContext, post_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {

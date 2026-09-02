@@ -6,8 +6,8 @@
 // @id service.alicia.intent
 // @role nlu_intent_taxonomy
 // @layer 7
-// @human Type Intent et taxonomie des intentions domotiques Alicia.
 // @do model_home_assistant_intents
+// @human Type Intent et taxonomie des intentions domotiques Alicia.
 
 use serde::{Deserialize, Serialize};
 

@@ -12,28 +12,28 @@ use crate::intent::Intent;
 /// @id strongfather_validator_error
 /// @role error
 /// @layer core
-/// @human Erreur de validation d'intention. Indique les violations structurelles détectées.
 /// @do represent_validation_error
+//@human / @human Erreur de validation d'intention. Indique les violations structurelles détectées.
 /// Erreur de validation
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidationError {
     /// @id strongfather_validator_error_missing_components
     /// @role error
     /// @layer core
-    /// @human Liste des composants obligatoires manquants.
     /// @do list_missing_components
+    //@human / @human Liste des composants obligatoires manquants.
     pub missing_components: Vec<String>,
     /// @id strongfather_validator_error_violated_rules
     /// @role error
     /// @layer core
-    /// @human Liste des règles violées.
     /// @do list_violated_rules
+    //@human / @human Liste des règles violées.
     pub violated_rules: Vec<String>,
     /// @id strongfather_validator_error_message
     /// @role error
     /// @layer core
-    /// @human Message d'erreur descriptif.
     /// @do describe_error
+    //@human / @human Message d'erreur descriptif.
     pub message: String,
 }
 
@@ -41,8 +41,8 @@ impl ValidationError {
     /// @id strongfather_validator_error_new
     /// @role constructor
     /// @layer core
-    /// @human Crée une nouvelle erreur de validation.
     /// @do create_validation_error
+    //@human / @human Crée une nouvelle erreur de validation.
     /// @depends strongfather_validator_error
     #[must_use]
     pub fn new(
@@ -62,8 +62,8 @@ impl std::fmt::Display for ValidationError {
     /// @id strongfather_validator_error_display
     /// @role formatter
     /// @layer core
-    /// @human Formate l'erreur de validation pour affichage.
     /// @do format_validation_error
+    //@human / @human Formate l'erreur de validation pour affichage.
     /// @depends strongfather_validator_error
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.message)?;
@@ -82,8 +82,8 @@ impl std::error::Error for ValidationError {}
 /// @id strongfather_intent_validator
 /// @role service
 /// @layer core
-/// @human Validateur d'intentions. Valide la structure et la cohérence d'une intention avant évaluation.
 /// @do validate_intent_structure
+//@human / @human Validateur d'intentions. Valide la structure et la cohérence d'une intention avant évaluation.
 /// Validateur d'intentions
 pub struct IntentValidator;
 
@@ -91,8 +91,8 @@ impl IntentValidator {
     /// @id strongfather_intent_validator_new
     /// @role constructor
     /// @layer core
-    /// @human Crée un nouveau validateur d'intentions.
     /// @do create_intent_validator
+    //@human / @human Crée un nouveau validateur d'intentions.
     /// @depends strongfather_intent_validator
     #[must_use]
     pub fn new() -> Self {
@@ -102,8 +102,8 @@ impl IntentValidator {
     /// @id strongfather_intent_validator_validate
     /// @role service
     /// @layer core
-    /// @human Valide la structure d'une intention selon les règles du Intent Model Contract (section 6).
     /// @do validate_intent_according_to_contract
+    //@human / @human Valide la structure d'une intention selon les règles du Intent Model Contract (section 6).
     /// @depends strongfather_intent_validator_new
     pub fn validate(&self, intent: &Intent) -> Result<(), ValidationError> {
         let mut missing_components = Vec::new();
@@ -161,8 +161,8 @@ impl IntentValidator {
     /// @id strongfather_intent_validator_validate_structure_only
     /// @role service
     /// @layer core
-    /// @human Valide uniquement la structure de base (composants obligatoires présents).
     /// @do validate_basic_structure
+    //@human / @human Valide uniquement la structure de base (composants obligatoires présents).
     /// @depends strongfather_intent_validator_new
     pub fn validate_structure_only(&self, intent: &Intent) -> Result<(), ValidationError> {
         self.validate(intent)
@@ -173,8 +173,8 @@ impl Default for IntentValidator {
     /// @id strongfather_intent_validator_default
     /// @role constructor
     /// @layer core
-    /// @human Crée un validateur d'intentions par défaut.
     /// @do create_default_intent_validator
+    //@human / @human Crée un validateur d'intentions par défaut.
     fn default() -> Self {
         Self::new()
     }
@@ -189,8 +189,8 @@ mod tests {
     /// @id strongfather_validator_test_valid_intent
     /// @role test
     /// @layer core
-    /// @human Test de validation d'une intention valide.
     /// @do test_valid_intent_validation
+    //@human / @human Test de validation d'une intention valide.
     #[test]
     fn test_validate_valid_intent() {
         let validator = IntentValidator::new();
@@ -217,8 +217,8 @@ mod tests {
     /// @id strongfather_validator_test_missing_intent_id
     /// @role test
     /// @layer core
-    /// @human Test de validation d'une intention sans identifiant.
     /// @do test_missing_intent_id_validation
+    //@human / @human Test de validation d'une intention sans identifiant.
     #[test]
     fn test_validate_missing_intent_id() {
         let validator = IntentValidator::new();
@@ -250,8 +250,8 @@ mod tests {
     /// @id strongfather_validator_test_missing_subject
     /// @role test
     /// @layer core
-    /// @human Test de validation d'une intention sans sujet.
     /// @do test_missing_subject_validation
+    //@human / @human Test de validation d'une intention sans sujet.
     #[test]
     fn test_validate_missing_subject() {
         let validator = IntentValidator::new();
@@ -283,8 +283,8 @@ mod tests {
     /// @id strongfather_validator_test_incomplete_context
     /// @role test
     /// @layer core
-    /// @human Test de validation d'une intention avec contexte incomplet.
     /// @do test_incomplete_context_validation
+    //@human / @human Test de validation d'une intention avec contexte incomplet.
     #[test]
     fn test_validate_incomplete_context() {
         let validator = IntentValidator::new();

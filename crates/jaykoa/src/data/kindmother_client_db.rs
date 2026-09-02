@@ -8,7 +8,7 @@
 //!
 //! @id     jaykoa_kindmother_client_db
 //! @do     persist_jaykoa_data_via_kindmother_client
-//! @layer  infra
+//@human ! @layer  infra
 
 use crate::data::types::{Agenda, TemporalConflict, TemporalEntry, UserSettings};
 use kindmother::{InstanceIdentity, InstanceType};

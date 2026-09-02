@@ -3,8 +3,8 @@
 // @id toolkit.alicia.mqtt.message
 // @role message_types
 // @layer 6
-// @human Types de messages MQTT : MqttMessage (sortant), MqttIncoming (entrant), QosLevel.
 // @do define_mqtt_message_types
+// @human Types de messages MQTT : MqttMessage (sortant), MqttIncoming (entrant), QosLevel.
 
 use serde::{Deserialize, Serialize};
 

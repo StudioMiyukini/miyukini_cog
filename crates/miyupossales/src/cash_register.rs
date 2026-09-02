@@ -6,8 +6,8 @@ use crate::errors::MiyupossalesError;
 /// @id miyupossales_tool_cash_register_open
 /// @role mutator
 /// @layer tool
-/// @human Ouvre une session caisse (ouverture de tiroir) ; WriteIntent KindMother.
 /// @do cash_register_open_under_governance
+//@human / @human Ouvre une session caisse (ouverture de tiroir) ; WriteIntent KindMother.
 /// tool.pos.cash.register.open
 pub fn open(
     ctx: &GovernedContext,
@@ -23,8 +23,8 @@ pub fn open(
 /// @id miyupossales_tool_cash_register_close
 /// @role mutator
 /// @layer tool
-/// @human Clôture une session caisse (comptage, écart) ; WriteIntent KindMother.
 /// @do cash_register_close_under_governance
+//@human / @human Clôture une session caisse (comptage, écart) ; WriteIntent KindMother.
 /// tool.pos.cash.register.close
 pub fn close(
     ctx: &GovernedContext,

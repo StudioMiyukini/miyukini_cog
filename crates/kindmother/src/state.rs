@@ -8,23 +8,23 @@ use miyukini_kernel::{Id, IdGenerator, UuidIdGenerator};
 /// @id kindmother_instance_type
 /// @role data
 /// @layer core
-/// @human Type d'instance de base de données. Distingue une DB Mère d'une DB Fille.
 /// @do represent_instance_type
+//@human / @human Type d'instance de base de données. Distingue une DB Mère d'une DB Fille.
 /// Type d'instance de base de données.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum InstanceType {
     /// @id kindmother_instance_type_mother
     /// @role data
     /// @layer core
-    /// @human DB Mère - source de vérité unique et autorité centrale.
     /// @do represent_mother_instance
+    //@human / @human DB Mère - source de vérité unique et autorité centrale.
     /// @depends kindmother_instance_type
     Mother,
     /// @id kindmother_instance_type_daughter
     /// @role data
     /// @layer core
-    /// @human DB Fille - instance locale dérivée fonctionnant en mode offline-first.
     /// @do represent_daughter_instance
+    //@human / @human DB Fille - instance locale dérivée fonctionnant en mode offline-first.
     /// @depends kindmother_instance_type
     Daughter,
 }
@@ -32,23 +32,23 @@ pub enum InstanceType {
 /// @id kindmother_instance_identity
 /// @role data
 /// @layer core
-/// @human Identité unique d'une instance de base de données. Permet de distinguer les instances et de tracer l'origine des données.
 /// @do represent_instance_identity
+//@human / @human Identité unique d'une instance de base de données. Permet de distinguer les instances et de tracer l'origine des données.
 /// Identité unique d'une instance de base de données.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct InstanceIdentity {
     /// @id kindmother_instance_identity_id
     /// @role data
     /// @layer core
-    /// @human Identifiant unique de l'instance, généré par le kernel.
     /// @do store_instance_id
+    //@human / @human Identifiant unique de l'instance, généré par le kernel.
     /// @depends kindmother_instance_identity
     pub id: Id,
     /// @id kindmother_instance_identity_type
     /// @role data
     /// @layer core
-    /// @human Type de l'instance (Mère ou Fille).
     /// @do store_instance_type
+    //@human / @human Type de l'instance (Mère ou Fille).
     /// @depends kindmother_instance_identity
     pub instance_type: InstanceType,
 }
@@ -57,8 +57,8 @@ impl InstanceIdentity {
     /// @id kindmother_instance_identity_new
     /// @role infrastructure
     /// @layer core
-    /// @human Crée une nouvelle identité d'instance avec un identifiant unique généré.
     /// @do create_instance_identity
+    //@human / @human Crée une nouvelle identité d'instance avec un identifiant unique généré.
     /// @depends kindmother_instance_identity, kernel_id_generator_generate
     /// Crée une nouvelle identité d'instance.
     ///
@@ -81,8 +81,8 @@ impl InstanceIdentity {
     /// @id kindmother_instance_identity_is_mother
     /// @role accessor
     /// @layer core
-    /// @human Vérifie si l'instance est une DB Mère.
     /// @do check_if_mother_instance
+    //@human / @human Vérifie si l'instance est une DB Mère.
     /// @depends kindmother_instance_identity
     /// Vérifie si l'instance est une DB Mère.
     #[must_use]
@@ -93,8 +93,8 @@ impl InstanceIdentity {
     /// @id kindmother_instance_identity_is_daughter
     /// @role accessor
     /// @layer core
-    /// @human Vérifie si l'instance est une DB Fille.
     /// @do check_if_daughter_instance
+    //@human / @human Vérifie si l'instance est une DB Fille.
     /// @depends kindmother_instance_identity
     /// Vérifie si l'instance est une DB Fille.
     #[must_use]
@@ -106,23 +106,23 @@ impl InstanceIdentity {
 /// @id kindmother_instance_state
 /// @role data
 /// @layer core
-/// @human État d'une instance de base de données. Contient l'identité et les métadonnées de l'instance.
 /// @do represent_instance_state
+//@human / @human État d'une instance de base de données. Contient l'identité et les métadonnées de l'instance.
 /// État d'une instance de base de données.
 #[derive(Debug, Clone)]
 pub struct InstanceState {
     /// @id kindmother_instance_state_identity
     /// @role data
     /// @layer core
-    /// @human Identité de l'instance.
     /// @do store_instance_identity
+    //@human / @human Identité de l'instance.
     /// @depends kindmother_instance_state, kindmother_instance_identity
     pub identity: InstanceIdentity,
     /// @id kindmother_instance_state_created_at
     /// @role data
     /// @layer core
-    /// @human Moment de création de l'instance (horodatage).
     /// @do store_creation_timestamp
+    //@human / @human Moment de création de l'instance (horodatage).
     /// @depends kindmother_instance_state
     pub created_at: std::time::SystemTime,
 }
@@ -131,8 +131,8 @@ impl InstanceState {
     /// @id kindmother_instance_state_new
     /// @role infrastructure
     /// @layer core
-    /// @human Crée un nouvel état d'instance avec une identité générée.
     /// @do create_instance_state
+    //@human / @human Crée un nouvel état d'instance avec une identité générée.
     /// @depends kindmother_instance_state, kindmother_instance_identity_new, kernel_clock_now
     /// Crée un nouvel état d'instance.
     ///
@@ -159,8 +159,8 @@ mod tests {
     /// @id kindmother_instance_state_test_mother_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une instance Mère.
     /// @do verify_mother_instance_creation
+    //@human / @human Test de création d'une instance Mère.
     /// @depends kindmother_instance_state_new
     #[test]
     fn test_mother_instance_creation() {
@@ -172,8 +172,8 @@ mod tests {
     /// @id kindmother_instance_state_test_daughter_creation
     /// @role test
     /// @layer core
-    /// @human Test de création d'une instance Fille.
     /// @do verify_daughter_instance_creation
+    //@human / @human Test de création d'une instance Fille.
     /// @depends kindmother_instance_state_new
     #[test]
     fn test_daughter_instance_creation() {
@@ -185,8 +185,8 @@ mod tests {
     /// @id kindmother_instance_state_test_unique_ids
     /// @role test
     /// @layer core
-    /// @human Test que chaque instance a un identifiant unique.
     /// @do verify_unique_instance_ids
+    //@human / @human Test que chaque instance a un identifiant unique.
     /// @depends kindmother_instance_state_new
     #[test]
     fn test_unique_ids() {
