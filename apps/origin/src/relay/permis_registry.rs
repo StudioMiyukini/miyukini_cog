@@ -1,8 +1,8 @@
-//! @id: origin.relay.permis_registry
-//! @do: store_and_validate_permis_issued_by_relay
-//! @role: security
-//! @layer: domain
-//! @human: Registre des permis délivrés par le Relay (conformité R-011).
+//! @id     origin.relay.permis_registry
+//! @do     store_and_validate_permis_issued_by_relay
+//! @role   security
+//! @layer  domain
+//! @human  Registre des permis délivrés par le Relay (conformité R-011).
 //!
 //! Permet au Tracker de vérifier qu'un permis_id présenté dans une ANNOUNCE
 //! a bien été délivré par le Relay (conformité R-011 / contrôle de présence).

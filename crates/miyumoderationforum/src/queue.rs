@@ -4,11 +4,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyumoderationforumError;
 use crate::store;
 
-/// @id: miyumoderationforum_tool_queue_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste la file d'attente de modération.
-/// @do: moderation_queue_list_under_governance
+/// @id miyumoderationforum_tool_queue_list
+/// @role mutator
+/// @layer tool
+/// @human Liste la file d'attente de modération.
+/// @do moderation_queue_list_under_governance
 /// tool.moderation.queue.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<QueueItem>, MiyumoderationforumError> {
     if !ctx.has_mandate() {
@@ -27,11 +27,11 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<QueueItem>, Miyumoderationforum
     Ok(items)
 }
 
-/// @id: miyumoderationforum_tool_queue_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère un élément de la file.
-/// @do: moderation_queue_get_under_governance
+/// @id miyumoderationforum_tool_queue_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère un élément de la file.
+/// @do moderation_queue_get_under_governance
 /// tool.moderation.queue.get
 pub fn get(
     ctx: &GovernedContext,

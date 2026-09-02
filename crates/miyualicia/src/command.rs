@@ -3,11 +3,11 @@
 //! Route les commandes vers le bon adaptateur protocole (MQTT ou HTTP)
 //! et trace chaque execution dans le journal d'activite.
 
-// @id: service.alicia.command
-// @role: command_dispatcher
-// @layer: 7
-// @human: Dispatching des commandes domotiques vers MQTT ou HTTP selon le protocole du device.
-// @do: dispatch_device_commands
+// @id service.alicia.command
+// @role command_dispatcher
+// @layer 7
+// @human Dispatching des commandes domotiques vers MQTT ou HTTP selon le protocole du device.
+// @do dispatch_device_commands
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

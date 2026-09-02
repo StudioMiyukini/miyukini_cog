@@ -1,4 +1,8 @@
-// @id: MUIE-NpcDialog @do: npc-dialog-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-NpcDialog
+// @do npc-dialog-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! NPC dialog organism -- portrait + text + interactive options.
 

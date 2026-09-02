@@ -1,8 +1,10 @@
 //! Bridge entre Central (Dioxus) et le serveur CentralRemote.
 //!
-//! @id: central_remote_bridge @do: share_state_central_remote
-//! @role: data @layer: toolkit
-//! @human: État partagé thread-safe entre Central UI et le serveur remote.
+//! @id     central_remote_bridge
+//! @do share_state_central_remote
+//! @role   data
+//! @layer toolkit
+//! @human  État partagé thread-safe entre Central UI et le serveur remote.
 //! Central écrit l'état, le serveur remote le lit et diffuse aux clients WebSocket.
 
 use crate::protocol::{RemoteCommand, RemoteEvent, RemoteServiceInfo, RemoteSnapshot, RemoteTab};

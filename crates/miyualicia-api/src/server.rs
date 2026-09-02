@@ -2,11 +2,11 @@
 //!
 //! Lance le serveur axum sur le port configure.
 
-// @id: service.alicia.api.server
-// @role: axum_server
-// @layer: 7
-// @human: Serveur axum Alicia API ; demarrage, bind, shutdown propre.
-// @do: start_alicia_api_server
+// @id service.alicia.api.server
+// @role axum_server
+// @layer 7
+// @human Serveur axum Alicia API ; demarrage, bind, shutdown propre.
+// @do start_alicia_api_server
 
 use std::net::SocketAddr;
 use std::sync::Arc;

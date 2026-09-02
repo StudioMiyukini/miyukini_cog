@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupospaymentError;
 
-/// @id: miyupospayment_tool_check_record
-/// @role: mutator
-/// @layer: tool
-/// @human: Enregistre un paiement chèque ; KindMother.
-/// @do: check_record_under_governance
+/// @id miyupospayment_tool_check_record
+/// @role mutator
+/// @layer tool
+/// @human Enregistre un paiement chèque ; KindMother.
+/// @do check_record_under_governance
 /// tool.pos.payment.check.record
 pub fn record(
     ctx: &GovernedContext,

@@ -1,10 +1,10 @@
 //! JayRDV — Service rendez-vous et réservation en ligne du COG.
 //!
-//! @id: jayrdv_lib
-//! @do: expose_jayrdv_public_api_and_modules
-//! @role: service
-//! @layer: infra
-//! @human: Point d'entrée du service JayRDV (rendez-vous, créneaux, ressources, rappels).
+//! @id     jayrdv_lib
+//! @do     expose_jayrdv_public_api_and_modules
+//! @role   service
+//! @layer  infra
+//! @human  Point d'entrée du service JayRDV (rendez-vous, créneaux, ressources, rappels).
 //!
 //! Domaine : créneaux, ressources, rendez-vous, statuts, rappels.
 //! Intégration : JayKoa (agenda unifié), MiyuBooking, MiyuNotify.

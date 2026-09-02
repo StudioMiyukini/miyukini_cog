@@ -1,10 +1,10 @@
 //! Vue Jour generique — Grille horaire sur une journee unique.
 //!
-//! @id: central.components.calendar.day_view
-//! @do: render_generic_day_calendar_view
-//! @role: ui
-//! @layer: ui
-//! @human: Vue calendrier jour generique reutilisable
+//! @id     central.components.calendar.day_view
+//! @do     render_generic_day_calendar_view
+//! @role   ui
+//! @layer  ui
+//! @human  Vue calendrier jour generique reutilisable
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

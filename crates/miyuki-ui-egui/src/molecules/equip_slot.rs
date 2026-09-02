@@ -1,4 +1,8 @@
-// @id: MUIE-EquipSlot @do: equip-slot-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-EquipSlot
+// @do equip-slot-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Equipment slot molecule -- paperdoll slot with label and item display.
 //!

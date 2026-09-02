@@ -1,4 +1,8 @@
-// @id: MUID-Text @do: text-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Text
+// @do text-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Text atom with semantic variants.
 //!

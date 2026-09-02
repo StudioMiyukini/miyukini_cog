@@ -6,11 +6,11 @@
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
-// @id: alicia_capture_admin_cell
-// @role: data
-// @layer: toolkit
-// @human: Cellule Admin Alicia Capture : identification, manifeste de test, integrite.
-// @do: expose_admin_cell
+// @id alicia_capture_admin_cell
+// @role data
+// @layer toolkit
+// @human Cellule Admin Alicia Capture : identification, manifeste de test, integrite.
+// @do expose_admin_cell
 
 /// Identifiant canonique du toolkit.
 pub const TOOLKIT_ID: &str = "toolkit.alicia.capture";
@@ -18,11 +18,11 @@ pub const TOOLKIT_ID: &str = "toolkit.alicia.capture";
 /// Singleton AdminCell (pattern OnceLock Miyukini).
 static ADMIN_CELL: OnceLock<AliciaCaptureAdminCell> = OnceLock::new();
 
-/// @id: alicia_capture_admin_identification
-/// @role: data
-/// @layer: toolkit
-/// @human: Identification du module (toolkit.alicia.capture).
-/// @do: store_identification
+/// @id alicia_capture_admin_identification
+/// @role data
+/// @layer toolkit
+/// @human Identification du module (toolkit.alicia.capture).
+/// @do store_identification
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct AliciaCaptureIdentification {
@@ -36,11 +36,11 @@ pub struct AliciaCaptureIdentification {
     pub module_origin: String,
 }
 
-/// @id: alicia_capture_admin_test_criteria
-/// @role: data
-/// @layer: toolkit
-/// @human: Criteres de succes/echec pour un test embarque.
-/// @do: store_test_criteria
+/// @id alicia_capture_admin_test_criteria
+/// @role data
+/// @layer toolkit
+/// @human Criteres de succes/echec pour un test embarque.
+/// @do store_test_criteria
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TestCriteria {
@@ -48,11 +48,11 @@ pub struct TestCriteria {
     pub pass: String,
 }
 
-/// @id: alicia_capture_admin_embedded_test_def
-/// @role: data
-/// @layer: toolkit
-/// @human: Definition d'un test dans le manifeste.
-/// @do: store_embedded_test_def
+/// @id alicia_capture_admin_embedded_test_def
+/// @role data
+/// @layer toolkit
+/// @human Definition d'un test dans le manifeste.
+/// @do store_embedded_test_def
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmbeddedTestDef {
     /// Identifiant du test.
@@ -65,11 +65,11 @@ pub struct EmbeddedTestDef {
     pub criteria: TestCriteria,
 }
 
-/// @id: alicia_capture_admin_test_manifest
-/// @role: data
-/// @layer: toolkit
-/// @human: Manifeste de test embarque.
-/// @do: store_test_manifest
+/// @id alicia_capture_admin_test_manifest
+/// @role data
+/// @layer toolkit
+/// @human Manifeste de test embarque.
+/// @do store_test_manifest
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AliciaCaptureTestManifest {
     /// Liste des tests declares.
@@ -83,11 +83,11 @@ fn default_result_format() -> String {
     "json".to_string()
 }
 
-/// @id: alicia_capture_admin_integrity
-/// @role: data
-/// @layer: toolkit
-/// @human: Metadonnees d'integrite pour verification TAMR.
-/// @do: store_integrity_metadata
+/// @id alicia_capture_admin_integrity
+/// @role data
+/// @layer toolkit
+/// @human Metadonnees d'integrite pour verification TAMR.
+/// @do store_integrity_metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AliciaCaptureIntegrity {
     /// Empreinte du module (hash).
@@ -99,11 +99,11 @@ pub struct AliciaCaptureIntegrity {
     pub core_versions: std::collections::HashMap<String, String>,
 }
 
-/// @id: alicia_capture_admin_cell_struct
-/// @role: data
-/// @layer: toolkit
-/// @human: Cellule Admin complete AliciaCapture.
-/// @do: represent_admin_cell
+/// @id alicia_capture_admin_cell_struct
+/// @role data
+/// @layer toolkit
+/// @human Cellule Admin complete AliciaCapture.
+/// @do represent_admin_cell
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AliciaCaptureAdminCell {
     /// Identification du module.
@@ -114,11 +114,11 @@ pub struct AliciaCaptureAdminCell {
     pub integrity: AliciaCaptureIntegrity,
 }
 
-/// @id: alicia_capture_admin_cell_build
-/// @role: mutator
-/// @layer: toolkit
-/// @human: Construit la Cellule Admin AliciaCapture.
-/// @do: build_alicia_capture_admin_cell
+/// @id alicia_capture_admin_cell_build
+/// @role mutator
+/// @layer toolkit
+/// @human Construit la Cellule Admin AliciaCapture.
+/// @do build_alicia_capture_admin_cell
 #[must_use]
 pub fn alicia_capture_admin_cell(version: &str, fingerprint: &str) -> AliciaCaptureAdminCell {
     AliciaCaptureAdminCell {

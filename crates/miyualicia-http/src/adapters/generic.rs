@@ -4,11 +4,11 @@
 //! et les champs de `DeviceState`. Utile pour les dispositifs qui
 //! n'ont pas d'adaptateur dedie.
 
-// @id: toolkit.alicia.http.adapters.generic
-// @role: generic_device_adapter
-// @layer: 6
-// @human: Adaptateur JSON generique configurable pour dispositifs HTTP locaux.
-// @do: translate_generic_json_to_device_state
+// @id toolkit.alicia.http.adapters.generic
+// @role generic_device_adapter
+// @layer 6
+// @human Adaptateur JSON generique configurable pour dispositifs HTTP locaux.
+// @do translate_generic_json_to_device_state
 
 use chrono::Utc;
 use miyualicia_devices::DeviceState;

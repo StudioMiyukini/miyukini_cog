@@ -1,9 +1,9 @@
 //! Types domaine Jay1Tribu — Amis, tribus, salons, messages.
 //!
-//! @id: jay1tribu_domain_types
-//! @do: define_jay1tribu_domain_model
-//! @role: data
-//! @layer: domain
+//! @id     jay1tribu_domain_types
+//! @do     define_jay1tribu_domain_model
+//! @role   data
+//! @layer  domain
 //!
 //! Conformité : archives locales uniquement (C-1), persistance via KindMother (C-4).
 //! Présence et envoi en temps réel requièrent une connexion au Webway (MWS).

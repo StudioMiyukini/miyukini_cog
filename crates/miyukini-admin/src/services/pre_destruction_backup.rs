@@ -7,12 +7,12 @@ use std::sync::Arc;
 
 use crate::backup_service::{BackupService, BackupServiceImpl, CreateBackupResult};
 
-/// @id: miyukiniadmin_pre_destruction_backup_service
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Sauvegarde comprimée avant destruction si pas de sauvegarde locale antérieure.
-/// @do: run_pre_destruction_backup_if_needed
-/// @depends: miyukiniadmin_backup_service_trait
+/// @id miyukiniadmin_pre_destruction_backup_service
+/// @role infrastructure
+/// @layer operator
+/// @human Sauvegarde comprimée avant destruction si pas de sauvegarde locale antérieure.
+/// @do run_pre_destruction_backup_if_needed
+/// @depends miyukiniadmin_backup_service_trait
 #[derive(Clone)]
 pub struct PreDestructionBackupService {
     /// Service backup (liste + create).
@@ -24,11 +24,11 @@ pub struct PreDestructionBackupService {
 
 impl PreDestructionBackupService {
     /// Crée le service.
-    /// @id: miyukiniadmin_pre_destruction_backup_new
-    /// @role: constructor
-    /// @layer: operator
-    /// @human: Construit le service pre-destruction backup.
-    /// @do: create_pre_destruction_backup_service
+    /// @id miyukiniadmin_pre_destruction_backup_new
+    /// @role constructor
+    /// @layer operator
+    /// @human Construit le service pre-destruction backup.
+    /// @do create_pre_destruction_backup_service
     #[must_use]
     pub fn new(backup_service: Arc<BackupServiceImpl>, backups_dir: PathBuf) -> Self {
         Self {
@@ -38,17 +38,17 @@ impl PreDestructionBackupService {
     }
 
     /// Vérifie s'il existe au moins une sauvegarde locale antérieure (avant ce cycle).
-    /// @id: miyukiniadmin_pre_destruction_has_prior
+    /// @id miyukiniadmin_pre_destruction_has_prior
     fn has_prior_local_backup(&self) -> bool {
         !self.backup_service.list().is_empty()
     }
 
     /// Exécute la sauvegarde pre-destruction si aucune sauvegarde locale antérieure (Implementation §9.2).
-    /// @id: miyukiniadmin_pre_destruction_run_if_needed
-    /// @role: mutator
-    /// @layer: operator
-    /// @human: Crée un backup avant destruction si aucun backup existant.
-    /// @do: run_pre_destruction_backup_if_needed
+    /// @id miyukiniadmin_pre_destruction_run_if_needed
+    /// @role mutator
+    /// @layer operator
+    /// @human Crée un backup avant destruction si aucun backup existant.
+    /// @do run_pre_destruction_backup_if_needed
     #[must_use]
     pub fn run_if_needed(&self) -> PreDestructionBackupResult {
         if self.has_prior_local_backup() {
@@ -80,7 +80,7 @@ impl PreDestructionBackupService {
 }
 
 /// Résultat de la sauvegarde pre-destruction.
-/// @id: miyukiniadmin_pre_destruction_result
+/// @id miyukiniadmin_pre_destruction_result
 #[derive(Debug, Clone)]
 pub struct PreDestructionBackupResult {
     /// True si un backup a été tenté/créé.

@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupossalesError;
 
-/// @id: miyupossales_tool_refund_record
-/// @role: mutator
-/// @layer: tool
-/// @human: Enregistre un remboursement (item ou reçu) ; autorisation = StrongFather ; WriteIntent KindMother.
-/// @do: refund_record_under_governance
+/// @id miyupossales_tool_refund_record
+/// @role mutator
+/// @layer tool
+/// @human Enregistre un remboursement (item ou reçu) ; autorisation = StrongFather ; WriteIntent KindMother.
+/// @do refund_record_under_governance
 /// tool.pos.refund.record
 pub fn record(
     ctx: &GovernedContext,

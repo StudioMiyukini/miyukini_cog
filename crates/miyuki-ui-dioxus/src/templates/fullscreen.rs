@@ -1,4 +1,8 @@
-// @id: MUID-FullscreenLayout @do: fullscreen-template @role: component @layer: 6 @human: miyuk
+// @id MUID-FullscreenLayout
+// @do fullscreen-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Fullscreen layout with centered content.
 //!

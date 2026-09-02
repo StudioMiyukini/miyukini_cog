@@ -1,9 +1,9 @@
 //! Module d'authentification et de permissions MiyuCloud.
 //!
-//! @id: miyucloud_auth_module
-//! @do: expose_permission_verification
-//! @role: auth
-//! @layer: domain
+//! @id     miyucloud_auth_module
+//! @do     expose_permission_verification
+//! @role   auth
+//! @layer  domain
 
 pub mod permissions;
 pub mod sessions;

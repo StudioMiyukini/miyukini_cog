@@ -6,11 +6,11 @@ use crate::errors::MiyumoderationforumError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyumoderationforum_tool_topic_lock
-/// @role: mutator
-/// @layer: tool
-/// @human: Verrouille un topic ; WriteIntent KindMother.
-/// @do: topic_lock_under_governance
+/// @id miyumoderationforum_tool_topic_lock
+/// @role mutator
+/// @layer tool
+/// @human Verrouille un topic ; WriteIntent KindMother.
+/// @do topic_lock_under_governance
 /// tool.forum.topic.lock
 pub fn lock(ctx: &GovernedContext, topic_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
@@ -26,11 +26,11 @@ pub fn lock(ctx: &GovernedContext, topic_id: &str) -> Result<(), Miyumoderationf
     Ok(())
 }
 
-/// @id: miyumoderationforum_tool_topic_move
-/// @role: mutator
-/// @layer: tool
-/// @human: Déplace un topic ; WriteIntent KindMother.
-/// @do: topic_move_under_governance
+/// @id miyumoderationforum_tool_topic_move
+/// @role mutator
+/// @layer tool
+/// @human Déplace un topic ; WriteIntent KindMother.
+/// @do topic_move_under_governance
 /// tool.forum.topic.move
 pub fn r#move(
     ctx: &GovernedContext,
@@ -50,11 +50,11 @@ pub fn r#move(
     Ok(())
 }
 
-/// @id: miyumoderationforum_tool_topic_merge
-/// @role: mutator
-/// @layer: tool
-/// @human: Fusionne des topics ; WriteIntent KindMother.
-/// @do: topic_merge_under_governance
+/// @id miyumoderationforum_tool_topic_merge
+/// @role mutator
+/// @layer tool
+/// @human Fusionne des topics ; WriteIntent KindMother.
+/// @do topic_merge_under_governance
 /// tool.forum.topic.merge
 pub fn merge(
     ctx: &GovernedContext,
@@ -73,11 +73,11 @@ pub fn merge(
     Ok(())
 }
 
-/// @id: miyumoderationforum_tool_topic_split
-/// @role: mutator
-/// @layer: tool
-/// @human: Scinde un topic ; WriteIntent KindMother.
-/// @do: topic_split_under_governance
+/// @id miyumoderationforum_tool_topic_split
+/// @role mutator
+/// @layer tool
+/// @human Scinde un topic ; WriteIntent KindMother.
+/// @do topic_split_under_governance
 /// tool.forum.topic.split
 pub fn split(
     ctx: &GovernedContext,
@@ -103,11 +103,11 @@ pub fn split(
     Ok(new_id)
 }
 
-/// @id: miyumoderationforum_tool_topic_delete
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime un topic ; WriteIntent KindMother.
-/// @do: topic_delete_under_governance
+/// @id miyumoderationforum_tool_topic_delete
+/// @role mutator
+/// @layer tool
+/// @human Supprime un topic ; WriteIntent KindMother.
+/// @do topic_delete_under_governance
 /// tool.forum.topic.delete
 pub fn delete(ctx: &GovernedContext, topic_id: &str) -> Result<(), MiyumoderationforumError> {
     if !ctx.has_mandate() {
@@ -122,11 +122,11 @@ pub fn delete(ctx: &GovernedContext, topic_id: &str) -> Result<(), Miyumoderatio
     Ok(())
 }
 
-/// @id: miyumoderationforum_tool_topic_copy
-/// @role: mutator
-/// @layer: tool
-/// @human: Copie un topic ; WriteIntent KindMother.
-/// @do: topic_copy_under_governance
+/// @id miyumoderationforum_tool_topic_copy
+/// @role mutator
+/// @layer tool
+/// @human Copie un topic ; WriteIntent KindMother.
+/// @do topic_copy_under_governance
 /// tool.forum.topic.copy
 pub fn copy(
     ctx: &GovernedContext,

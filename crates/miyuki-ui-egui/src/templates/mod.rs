@@ -1,4 +1,8 @@
-// @id: MUIE-TmplIndex @do: template-exports @role: exports @layer: 6 @human: miyuk
+// @id MUIE-TmplIndex
+// @do template-exports
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Template-level layouts -- full-screen compositions of organisms.
 //!

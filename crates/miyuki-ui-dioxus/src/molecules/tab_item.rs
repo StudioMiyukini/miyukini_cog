@@ -1,4 +1,8 @@
-// @id: MUID-TabItem @do: tab-item-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-TabItem
+// @do tab-item-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Tab item molecule for tab bars and navigation.
 //!

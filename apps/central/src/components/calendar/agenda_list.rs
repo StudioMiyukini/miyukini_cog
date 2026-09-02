@@ -1,10 +1,10 @@
 //! Composant liste d'agenda — Affichage en liste des événements.
 //!
-//! @id: central.components.calendar.agenda_list
-//! @do: render_agenda_list_item
-//! @role: ui
-//! @layer: ui
-//! @human: Composant item de liste d'agenda
+//! @id     central.components.calendar.agenda_list
+//! @do     render_agenda_list_item
+//! @role   ui
+//! @layer  ui
+//! @human  Composant item de liste d'agenda
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

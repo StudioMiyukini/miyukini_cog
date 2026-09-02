@@ -4,11 +4,11 @@
 //! Kit d'outils discovery social (hashtag, trending, discover, search). Politique = StrongFather.
 //! Alignement MIP : domaine `social`, layer tool/toolkit.
 
-// @id: toolkit.discovery.miyudiscovery
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuDiscovery ; expose les modules tools.
-/// @do: expose_miyudiscovery_toolkit
+// @id toolkit.discovery.miyudiscovery
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuDiscovery ; expose les modules tools.
+/// @do expose_miyudiscovery_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod discover;

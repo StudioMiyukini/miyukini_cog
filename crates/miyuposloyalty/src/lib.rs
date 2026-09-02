@@ -4,11 +4,11 @@
 //! Kit d'outils CRM et fidélité PoS (customer, loyalty). WriteIntent KindMother.
 //! Alignement MIP : domaine `pos`, layer tool/toolkit.
 
-// @id: toolkit.pos.miyuposloyalty
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuPosLoyalty ; expose les modules tools.
-/// @do: expose_miyuposloyalty_toolkit
+// @id toolkit.pos.miyuposloyalty
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuPosLoyalty ; expose les modules tools.
+/// @do expose_miyuposloyalty_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod customer;

@@ -6,9 +6,9 @@
 //! L'API publique est **synchrone** pour maintenir la compatibilité avec le code existant.
 //! En interne, les appels async sont exécutés via le runtime Tokio.
 //!
-//! @id: jaykonta_kindmother_client_db
-//! @do: persist_jaykonta_data_via_kindmother_client
-//! @layer: infra
+//! @id     jaykonta_kindmother_client_db
+//! @do     persist_jaykonta_data_via_kindmother_client
+//! @layer  infra
 
 use crate::data::types::{
     AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,

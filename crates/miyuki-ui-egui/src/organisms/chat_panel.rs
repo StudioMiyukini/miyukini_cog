@@ -1,4 +1,8 @@
-// @id: MUIE-ChatPanel @do: chat-panel-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-ChatPanel
+// @do chat-panel-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Chat panel organism -- message list + input field.
 

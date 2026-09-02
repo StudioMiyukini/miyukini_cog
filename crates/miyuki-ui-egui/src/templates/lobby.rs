@@ -1,4 +1,8 @@
-// @id: MUIE-TmplLobby @do: lobby-template @role: template @layer: 6 @human: miyuk
+// @id MUIE-TmplLobby
+// @do lobby-template
+// @role template
+// @layer 6
+// @human miyuk
 
 //! Lobby layout template -- game browser + chat.
 

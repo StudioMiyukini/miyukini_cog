@@ -1,8 +1,10 @@
 //! Tokens CSRF pour les formulaires POST du COG Web Portal.
 //!
-//! @id: cog_web_portal_csrf @do: generate_validate_csrf_tokens
-//! @role: security @layer: app
-//! @human: CSRF Portal — génère et valide des tokens HMAC-SHA256 avec fenêtre de 10 minutes.
+//! @id     cog_web_portal_csrf
+//! @do generate_validate_csrf_tokens
+//! @role   security
+//! @layer app
+//! @human  CSRF Portal — génère et valide des tokens HMAC-SHA256 avec fenêtre de 10 minutes.
 
 use hmac::{Hmac, Mac};
 use sha2::Sha256;

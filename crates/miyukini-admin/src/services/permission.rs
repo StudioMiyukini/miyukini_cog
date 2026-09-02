@@ -6,17 +6,17 @@ use std::collections::HashSet;
 
 use crate::models::AdminRole;
 
-/// @id: miyukiniadmin_permission_service
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Vérification des capacités par rôle (RBAC).
-/// @do: check_capability_for_role
-/// @depends: miyukiniadmin_models_admin_role
+/// @id miyukiniadmin_permission_service
+/// @role infrastructure
+/// @layer operator
+/// @human Vérification des capacités par rôle (RBAC).
+/// @do check_capability_for_role
+/// @depends miyukiniadmin_models_admin_role
 #[derive(Clone, Default)]
 pub struct PermissionService;
 
 /// Capacités Admin (Permission Contract §5.1) — sans admin.db.recovery ni création Recovery.
-/// @id: miyukiniadmin_capabilities_admin
+/// @id miyukiniadmin_capabilities_admin
 const CAPABILITIES_ADMIN: &[&str] = &[
     "admin.dashboard.read",
     "admin.navigation.read",
@@ -52,11 +52,11 @@ const CAPABILITIES_ADMIN: &[&str] = &[
 ];
 
 /// Capacités supplémentaires Recovery (Permission Contract §5.2).
-/// @id: miyukiniadmin_capabilities_recovery_extra
+/// @id miyukiniadmin_capabilities_recovery_extra
 const CAPABILITIES_RECOVERY_EXTRA: &[&str] = &["admin.db.recovery"];
 
 /// Capacités Audit (Permission Contract §5.3) — lecture seule.
-/// @id: miyukiniadmin_capabilities_audit
+/// @id miyukiniadmin_capabilities_audit
 const CAPABILITIES_AUDIT: &[&str] = &[
     "admin.dashboard.read",
     "admin.navigation.read",
@@ -73,23 +73,23 @@ const CAPABILITIES_AUDIT: &[&str] = &[
 
 impl PermissionService {
     /// Construit le service.
-    /// @id: miyukiniadmin_permission_service_new
-    /// @role: constructor
-    /// @layer: operator
-    /// @human: Crée le service RBAC.
-    /// @do: create_permission_service
+    /// @id miyukiniadmin_permission_service_new
+    /// @role constructor
+    /// @layer operator
+    /// @human Crée le service RBAC.
+    /// @do create_permission_service
     #[must_use]
     pub fn new() -> Self {
         Self
     }
 
     /// Retourne true si le rôle possède la capacité (Permission Contract §5).
-    /// @id: miyukiniadmin_permission_has_capability
-    /// @role: accessor
-    /// @layer: operator
-    /// @human: Vérifie si le rôle a la capacité demandée.
-    /// @do: has_capability
-    /// @depends: miyukiniadmin_permission_service
+    /// @id miyukiniadmin_permission_has_capability
+    /// @role accessor
+    /// @layer operator
+    /// @human Vérifie si le rôle a la capacité demandée.
+    /// @do has_capability
+    /// @depends miyukiniadmin_permission_service
     #[must_use]
     pub fn has_capability(&self, role: AdminRole, capability: &str) -> bool {
         let set = self.capabilities_for_role(role);
@@ -97,7 +97,7 @@ impl PermissionService {
     }
 
     /// Ensemble des capacités pour un rôle.
-    /// @id: miyukiniadmin_permission_capabilities_for_role
+    /// @id miyukiniadmin_permission_capabilities_for_role
     fn capabilities_for_role(&self, role: AdminRole) -> HashSet<&'static str> {
         match role {
             AdminRole::Admin => CAPABILITIES_ADMIN.iter().copied().collect(),

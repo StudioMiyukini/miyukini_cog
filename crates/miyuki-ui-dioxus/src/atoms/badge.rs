@@ -1,4 +1,8 @@
-// @id: MUID-Badge @do: badge-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Badge
+// @do badge-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Badge atom for labels, statuses, and counters.
 //!

@@ -1,9 +1,9 @@
 //! Base de données fille SQLite Jay1Tribu (KindMother Daughter).
 //!
-//! @id: jay1tribu_kindmother_db
-//! @do: provide_sqlite_persistence_for_jay1tribu
-//! @role: persistence
-//! @layer: infra
+//! @id     jay1tribu_kindmother_db
+//! @do     provide_sqlite_persistence_for_jay1tribu
+//! @role   persistence
+//! @layer  infra
 //!
 //! Archives locales uniquement ; envoi/réception en temps réel requièrent le Webway.
 

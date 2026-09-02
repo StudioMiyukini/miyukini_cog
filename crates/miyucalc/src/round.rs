@@ -18,11 +18,11 @@ pub enum RoundMode {
     Truncate,
 }
 
-/// @id: miyucalc_tool_round
-/// @role: mutator
-/// @layer: tool
-/// @human: Arrondit une valeur selon mode et précision fournis.
-/// @do: round_under_governance
+/// @id miyucalc_tool_round
+/// @role mutator
+/// @layer tool
+/// @human Arrondit une valeur selon mode et précision fournis.
+/// @do round_under_governance
 /// tool.calc.round
 pub fn round(
     ctx: &GovernedContext,

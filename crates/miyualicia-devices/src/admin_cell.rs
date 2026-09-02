@@ -6,11 +6,11 @@
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
-// @id: toolkit.alicia.devices.admin
-// @role: governance_cell
-// @layer: 6
-// @human: Cellule d'administration du crate miyualicia-devices.
-// @do: identify_and_self_describe_miyualicia_devices
+// @id toolkit.alicia.devices.admin
+// @role governance_cell
+// @layer 6
+// @human Cellule d'administration du crate miyualicia-devices.
+// @do identify_and_self_describe_miyualicia_devices
 
 /// Identifiant canonique du toolkit.
 pub const TOOLKIT_ID: &str = "toolkit.alicia.devices";

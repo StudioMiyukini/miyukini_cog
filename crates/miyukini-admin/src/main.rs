@@ -35,44 +35,44 @@ use std::{env, fs};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
-/// @id: miyukiniadmin_backend_app_state
-/// @role: data
-/// @layer: operator
-/// @human: État partagé de l'application (CRUD, migrations, backups, état environnement, auth).
-/// @do: hold_shared_app_state
+/// @id miyukiniadmin_backend_app_state
+/// @role data
+/// @layer operator
+/// @human État partagé de l'application (CRUD, migrations, backups, état environnement, auth).
+/// @do hold_shared_app_state
 #[derive(Clone)]
 struct AppState {
-    /// @id: miyukiniadmin_app_state_environment_state
-    /// @role: data
-    /// @layer: operator
-    /// @human: État détecté au démarrage (Vierge, Initialise, Compromis).
-    /// @do: store_environment_state
+    /// @id miyukiniadmin_app_state_environment_state
+    /// @role data
+    /// @layer operator
+    /// @human État détecté au démarrage (Vierge, Initialise, Compromis).
+    /// @do store_environment_state
     environment_state: EnvironmentState,
-    /// @id: miyukiniadmin_app_state_crud
+    /// @id miyukiniadmin_app_state_crud
     crud: Arc<CrudState>,
-    /// @id: miyukiniadmin_app_state_migrations
+    /// @id miyukiniadmin_app_state_migrations
     migrations: Arc<MigrationServiceImpl>,
-    /// @id: miyukiniadmin_app_state_backups
+    /// @id miyukiniadmin_app_state_backups
     backups: Arc<BackupServiceImpl>,
-    /// @id: miyukiniadmin_app_state_environment_state_svc (réservé pour middleware / re-détection)
+    /// @id miyukiniadmin_app_state_environment_state_svc (réservé pour middleware / re-détection)
     #[allow(dead_code)]
     environment_state_svc: Arc<EnvironmentStateService>,
-    /// @id: miyukiniadmin_app_state_auth_svc
+    /// @id miyukiniadmin_app_state_auth_svc
     auth_svc: Arc<AuthService>,
-    /// @id: miyukiniadmin_app_state_permission_svc (réservé pour middleware permission)
+    /// @id miyukiniadmin_app_state_permission_svc (réservé pour middleware permission)
     #[allow(dead_code)]
     permission_svc: Arc<PermissionService>,
-    /// @id: miyukiniadmin_app_state_module_testing_svc
+    /// @id miyukiniadmin_app_state_module_testing_svc
     /// Service de tests des modules (découverte, cellule Admin, tests embarqués, intégrité TAMR).
     module_testing_svc:
         Arc<ModuleTestingService<StubModuleDiscovery, StubAdminCellReader, StubIntegrityVerifier>>,
-    /// @id: miyukiniadmin_app_state_module_lifecycle_svc
+    /// @id miyukiniadmin_app_state_module_lifecycle_svc
     /// Service de cycle de vie des modules (add, lock, unlock, delete).
     module_lifecycle_svc: Arc<ModuleLifecycleService>,
-    /// @id: miyukiniadmin_app_state_module_discovery
+    /// @id miyukiniadmin_app_state_module_discovery
     /// Stub de découverte (pour enregistrement après add).
     module_discovery: Arc<StubModuleDiscovery>,
-    /// @id: miyukiniadmin_app_state_admin_cell_reader
+    /// @id miyukiniadmin_app_state_admin_cell_reader
     /// Stub reader cellule Admin (pour enregistrement après add).
     admin_cell_reader: Arc<StubAdminCellReader>,
 }
@@ -103,7 +103,7 @@ fn is_public_path(path: &str) -> bool {
 }
 
 /// Middleware : exige une session valide pour les routes protégées ; sinon redirection ou 401.
-/// @id: miyukiniadmin_backend_require_session_layer
+/// @id miyukiniadmin_backend_require_session_layer
 async fn require_session_layer(
     State(state): State<Arc<AppState>>,
     req: axum::extract::Request,
@@ -131,12 +131,12 @@ async fn require_session_layer(
     }
 }
 
-/// @id: miyukiniadmin_backend_main
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Point d'entrée principal du backend MiyukiniAdmin (détection état + routage conditionnel).
-/// @do: start_backend_server
-/// @depends: miyukiniadmin_config_backend_config_from_env, miyukiniadmin_services_environment_state_detect
+/// @id miyukiniadmin_backend_main
+/// @role infrastructure
+/// @layer operator
+/// @human Point d'entrée principal du backend MiyukiniAdmin (détection état + routage conditionnel).
+/// @do start_backend_server
+/// @depends miyukiniadmin_config_backend_config_from_env, miyukiniadmin_services_environment_state_detect
 #[tokio::main]
 async fn main() {
     let env_config = EnvConfig::from_env();
@@ -247,7 +247,7 @@ async fn main() {
 
 /// Routes lorsque l'environnement est VIERGE : uniquement /setup, /health, /api/status, /api/setup/create-admin (Auth and First-Boot §5).
 /// Cores et kernel actifs ; outils opérateurs et services désactivés. Seule la page de création du premier profil Admin est accessible.
-/// @id: miyukiniadmin_backend_router_setup_only
+/// @id miyukiniadmin_backend_router_setup_only
 fn router_setup_only(state: Arc<AppState>, _ui_path: PathBuf) -> Router {
     Router::new()
         .route("/", get(serve_setup_redirect))
@@ -259,7 +259,7 @@ fn router_setup_only(state: Arc<AppState>, _ui_path: PathBuf) -> Router {
 }
 
 /// Routes lorsque l'environnement est INITIALISE : dashboard, API, login (Implementation §13.2).
-/// @id: miyukiniadmin_backend_router_full
+/// @id miyukiniadmin_backend_router_full
 fn router_full(state: Arc<AppState>, ui_path: PathBuf) -> Router {
     Router::new()
         .route("/", get(serve_dashboard))
@@ -302,7 +302,7 @@ fn router_full(state: Arc<AppState>, ui_path: PathBuf) -> Router {
 }
 
 /// Routes lorsque l'environnement est COMPROMIS : page « Environnement compromis » et /health (Auth and First-Boot §7).
-/// @id: miyukiniadmin_backend_router_compromised_only
+/// @id miyukiniadmin_backend_router_compromised_only
 fn router_compromised_only(state: Arc<AppState>, ui_path: PathBuf) -> Router {
     Router::new()
         .route("/", get(serve_compromised))
@@ -312,25 +312,25 @@ fn router_compromised_only(state: Arc<AppState>, ui_path: PathBuf) -> Router {
 }
 
 /// Redirection vers /setup lorsque l'environnement est VIERGE (Auth and First-Boot §5).
-/// @id: miyukiniadmin_backend_serve_setup_redirect
+/// @id miyukiniadmin_backend_serve_setup_redirect
 async fn serve_setup_redirect() -> impl IntoResponse {
     axum::response::Redirect::to("/setup")
 }
 
 /// Page parcours Futur Admin (installation) lorsque l'environnement est VIERGE.
-/// @id: miyukiniadmin_backend_serve_setup
+/// @id miyukiniadmin_backend_serve_setup
 async fn serve_setup() -> impl IntoResponse {
     Html(SETUP_HTML)
 }
 
 /// Page « Environnement compromis » lorsque l'état est COMPROMIS (Auth and First-Boot §7).
-/// @id: miyukiniadmin_backend_serve_compromised
+/// @id miyukiniadmin_backend_serve_compromised
 async fn serve_compromised() -> impl IntoResponse {
     Html(COMPROMISED_HTML)
 }
 
 /// Page login (environnement INITIALISE).
-/// @id: miyukiniadmin_backend_serve_login_page
+/// @id miyukiniadmin_backend_serve_login_page
 async fn serve_login_page() -> impl IntoResponse {
     Html(LOGIN_HTML)
 }
@@ -352,7 +352,7 @@ struct CreateAdminBody {
 
 /// POST /api/setup/create-admin : création du premier compte admin et génération EIP (First-boot).
 /// Accepté uniquement en état VIERGE. Crée admin_registry, EIP stub et bootstrap_schema puis demande redémarrage.
-/// @id: miyukiniadmin_backend_api_setup_create_admin
+/// @id miyukiniadmin_backend_api_setup_create_admin
 async fn api_setup_create_admin(
     State(state): State<Arc<AppState>>,
     JsonExtract(body): JsonExtract<CreateAdminBody>,
@@ -430,7 +430,7 @@ async fn api_setup_create_admin(
 }
 
 /// POST /api/auth/login : authentification admin ; en cas de succès, pose le cookie de session (HttpOnly).
-/// @id: miyukiniadmin_backend_api_auth_login
+/// @id miyukiniadmin_backend_api_auth_login
 async fn api_auth_login(
     State(state): State<Arc<AppState>>,
     JsonExtract(body): JsonExtract<LoginBody>,
@@ -468,7 +468,7 @@ async fn api_auth_login(
 }
 
 /// POST /api/auth/logout : invalide la session et efface le cookie.
-/// @id: miyukiniadmin_backend_api_auth_logout
+/// @id miyukiniadmin_backend_api_auth_logout
 async fn api_auth_logout(
     State(state): State<Arc<AppState>>,
     req: axum::extract::Request,
@@ -485,11 +485,11 @@ async fn api_auth_logout(
     res
 }
 
-/// @id: miyukiniadmin_backend_serve_dashboard
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Sert la page d'accueil MiyukiniAdmin (protégée par session).
-/// @do: serve_dashboard_html
+/// @id miyukiniadmin_backend_serve_dashboard
+/// @role infrastructure
+/// @layer operator
+/// @human Sert la page d'accueil MiyukiniAdmin (protégée par session).
+/// @do serve_dashboard_html
 async fn serve_dashboard() -> impl IntoResponse {
     let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("ui")
@@ -500,20 +500,20 @@ async fn serve_dashboard() -> impl IntoResponse {
     }
 }
 
-/// @id: miyukiniadmin_backend_health
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Endpoint de santé pour le monitoring.
-/// @do: health_check
+/// @id miyukiniadmin_backend_health
+/// @role infrastructure
+/// @layer operator
+/// @human Endpoint de santé pour le monitoring.
+/// @do health_check
 async fn health() -> Json<serde_json::Value> {
     Json(serde_json::json!({ "status": "ok", "service": "miyukini-admin" }))
 }
 
-/// @id: miyukiniadmin_backend_api_status
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Statut API pour l'administration. En VIERGE, seuls les endpoints du parcours setup sont listés.
-/// @do: api_status
+/// @id miyukiniadmin_backend_api_status
+/// @role infrastructure
+/// @layer operator
+/// @human Statut API pour l'administration. En VIERGE, seuls les endpoints du parcours setup sont listés.
+/// @do api_status
 async fn api_status(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let env_state = state.environment_state.to_string();
     let (endpoints, note) = if state.environment_state == EnvironmentState::Vierge {
@@ -560,12 +560,12 @@ async fn api_status(State(state): State<Arc<AppState>>) -> Json<serde_json::Valu
     Json(payload)
 }
 
-/// @id: miyukiniadmin_backend_api_tables_list
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Liste des tables (CRUD).
-/// @do: api_list_tables
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_tables_list
+/// @role infrastructure
+/// @layer operator
+/// @human Liste des tables (CRUD).
+/// @do api_list_tables
+/// @depends miyukiniadmin_backend_app_state
 async fn api_tables_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let tables = state.crud.tables.read().await;
     let names: Vec<&String> = tables.keys().collect();
@@ -580,12 +580,12 @@ struct Pagination {
     per_page: Option<u32>,
 }
 
-/// @id: miyukiniadmin_backend_api_table_rows
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Lignes d'une table (paginées).
-/// @do: api_table_rows
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_table_rows
+/// @role infrastructure
+/// @layer operator
+/// @human Lignes d'une table (paginées).
+/// @do api_table_rows
+/// @depends miyukiniadmin_backend_app_state
 async fn api_table_rows(
     State(state): State<Arc<AppState>>,
     Path(name): Path<String>,
@@ -614,12 +614,12 @@ async fn api_table_rows(
     }))
 }
 
-/// @id: miyukiniadmin_backend_api_table_create_row
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Création d'une ligne.
-/// @do: api_create_row
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_table_create_row
+/// @role infrastructure
+/// @layer operator
+/// @human Création d'une ligne.
+/// @do api_create_row
+/// @depends miyukiniadmin_backend_app_state
 async fn api_table_create_row(
     State(state): State<Arc<AppState>>,
     Path(name): Path<String>,
@@ -637,12 +637,12 @@ async fn api_table_create_row(
     Json(serde_json::json!({ "status": "created", "table": name, "id": id, "row": body }))
 }
 
-/// @id: miyukiniadmin_backend_api_table_get_row
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Une ligne par ID (index 1-based).
-/// @do: api_get_row
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_table_get_row
+/// @role infrastructure
+/// @layer operator
+/// @human Une ligne par ID (index 1-based).
+/// @do api_get_row
+/// @depends miyukiniadmin_backend_app_state
 async fn api_table_get_row(
     State(state): State<Arc<AppState>>,
     Path((name, id)): Path<(String, String)>,
@@ -663,12 +663,12 @@ async fn api_table_get_row(
     Json(serde_json::json!({ "table": name, "id": id, "row": row }))
 }
 
-/// @id: miyukiniadmin_backend_api_table_update_row
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Mise à jour d'une ligne.
-/// @do: api_update_row
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_table_update_row
+/// @role infrastructure
+/// @layer operator
+/// @human Mise à jour d'une ligne.
+/// @do api_update_row
+/// @depends miyukiniadmin_backend_app_state
 async fn api_table_update_row(
     State(state): State<Arc<AppState>>,
     Path((name, id)): Path<(String, String)>,
@@ -694,12 +694,12 @@ async fn api_table_update_row(
     Json(serde_json::json!({ "status": "updated", "table": name, "id": id }))
 }
 
-/// @id: miyukiniadmin_backend_api_table_delete_row
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Suppression d'une ligne.
-/// @do: api_delete_row
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_table_delete_row
+/// @role infrastructure
+/// @layer operator
+/// @human Suppression d'une ligne.
+/// @do api_delete_row
+/// @depends miyukiniadmin_backend_app_state
 async fn api_table_delete_row(
     State(state): State<Arc<AppState>>,
     Path((name, id)): Path<(String, String)>,
@@ -717,12 +717,12 @@ async fn api_table_delete_row(
     Json(serde_json::json!({ "status": "deleted", "table": name, "id": id }))
 }
 
-/// @id: miyukiniadmin_backend_api_migrations_list
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Liste des migrations (appliquées et en attente).
-/// @do: api_migrations_list
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_migrations_list
+/// @role infrastructure
+/// @layer operator
+/// @human Liste des migrations (appliquées et en attente).
+/// @do api_migrations_list
+/// @depends miyukiniadmin_backend_app_state
 async fn api_migrations_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let applied = state.migrations.list_applied();
     let pending = state.migrations.list_pending();
@@ -732,12 +732,12 @@ async fn api_migrations_list(State(state): State<Arc<AppState>>) -> Json<serde_j
     }))
 }
 
-/// @id: miyukiniadmin_backend_api_migrations_history
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Historique complet des migrations.
-/// @do: api_migrations_history
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_migrations_history
+/// @role infrastructure
+/// @layer operator
+/// @human Historique complet des migrations.
+/// @do api_migrations_history
+/// @depends miyukiniadmin_backend_app_state
 async fn api_migrations_history(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let history = state.migrations.history();
     Json(serde_json::json!({
@@ -745,12 +745,12 @@ async fn api_migrations_history(State(state): State<Arc<AppState>>) -> Json<serd
     }))
 }
 
-/// @id: miyukiniadmin_backend_api_migrations_apply
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Applique les migrations en attente (stub ; StrongFather + KindMother en production).
-/// @do: api_migrations_apply
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_migrations_apply
+/// @role infrastructure
+/// @layer operator
+/// @human Applique les migrations en attente (stub ; StrongFather + KindMother en production).
+/// @do api_migrations_apply
+/// @depends miyukiniadmin_backend_app_state
 async fn api_migrations_apply(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let result = state.migrations.apply_pending();
     Json(serde_json::json!({
@@ -760,12 +760,12 @@ async fn api_migrations_apply(State(state): State<Arc<AppState>>) -> Json<serde_
     }))
 }
 
-/// @id: miyukiniadmin_backend_api_backups_list
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Liste des sauvegardes.
-/// @do: api_backups_list
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_backups_list
+/// @role infrastructure
+/// @layer operator
+/// @human Liste des sauvegardes.
+/// @do api_backups_list
+/// @depends miyukiniadmin_backend_app_state
 async fn api_backups_list(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let backups = state.backups.list();
     Json(serde_json::json!({
@@ -773,12 +773,12 @@ async fn api_backups_list(State(state): State<Arc<AppState>>) -> Json<serde_json
     }))
 }
 
-/// @id: miyukiniadmin_backend_api_backups_create
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Crée une sauvegarde (stub ; KindMother en production).
-/// @do: api_backups_create
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_backups_create
+/// @role infrastructure
+/// @layer operator
+/// @human Crée une sauvegarde (stub ; KindMother en production).
+/// @do api_backups_create
+/// @depends miyukiniadmin_backend_app_state
 async fn api_backups_create(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
     let result = state.backups.create();
     Json(serde_json::json!({
@@ -788,23 +788,23 @@ async fn api_backups_create(State(state): State<Arc<AppState>>) -> Json<serde_js
     }))
 }
 
-/// @id: miyukiniadmin_backend_api_backups_restore_body
-/// @role: data
-/// @layer: operator
-/// @human: Corps de la requête restore.
-/// @do: represent_restore_request
+/// @id miyukiniadmin_backend_api_backups_restore_body
+/// @role data
+/// @layer operator
+/// @human Corps de la requête restore.
+/// @do represent_restore_request
 #[derive(serde::Deserialize)]
 struct RestoreBackupBody {
     backup_id: String,
     justification: Option<String>,
 }
 
-/// @id: miyukiniadmin_backend_api_backups_restore
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Restaure depuis un backup (StrongFather + KindMother en production).
-/// @do: api_backups_restore
-/// @depends: miyukiniadmin_backend_app_state
+/// @id miyukiniadmin_backend_api_backups_restore
+/// @role infrastructure
+/// @layer operator
+/// @human Restaure depuis un backup (StrongFather + KindMother en production).
+/// @do api_backups_restore
+/// @depends miyukiniadmin_backend_app_state
 async fn api_backups_restore(
     State(state): State<Arc<AppState>>,
     JsonExtract(body): JsonExtract<RestoreBackupBody>,
@@ -1025,11 +1025,11 @@ async fn api_tests_flow() -> Json<serde_json::Value> {
     }))
 }
 
-/// @id: miyukiniadmin_backend_serve_database
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Sert la page Database (Daynight) depuis ui/database.html.
-/// @do: serve_database_html
+/// @id miyukiniadmin_backend_serve_database
+/// @role infrastructure
+/// @layer operator
+/// @human Sert la page Database (Daynight) depuis ui/database.html.
+/// @do serve_database_html
 async fn serve_database() -> impl IntoResponse {
     let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("ui")
@@ -1040,11 +1040,11 @@ async fn serve_database() -> impl IntoResponse {
     }
 }
 
-/// @id: miyukiniadmin_backend_serve_tests
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Sert la page Tests (Daynight) depuis ui/tests.html.
-/// @do: serve_tests_html
+/// @id miyukiniadmin_backend_serve_tests
+/// @role infrastructure
+/// @layer operator
+/// @human Sert la page Tests (Daynight) depuis ui/tests.html.
+/// @do serve_tests_html
 async fn serve_tests() -> impl IntoResponse {
     let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("ui")

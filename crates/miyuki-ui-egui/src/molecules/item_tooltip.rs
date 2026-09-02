@@ -1,4 +1,8 @@
-// @id: MUIE-ItemTooltip @do: item-tooltip-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-ItemTooltip
+// @do item-tooltip-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! D2-style item tooltip -- the most complex molecule.
 //!

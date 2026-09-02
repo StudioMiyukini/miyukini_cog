@@ -5,11 +5,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyuLocaleError;
 use std::collections::HashMap;
 
-/// @id: miyulocale_tool_translate
-/// @role: mutator
-/// @layer: tool
-/// @human: Résout une clé de traduction dans un catalogue fourni.
-/// @do: translate_under_governance
+/// @id miyulocale_tool_translate
+/// @role mutator
+/// @layer tool
+/// @human Résout une clé de traduction dans un catalogue fourni.
+/// @do translate_under_governance
 /// tool.locale.translate
 pub fn translate(
     ctx: &GovernedContext,

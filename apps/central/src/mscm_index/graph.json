@@ -1,0 +1,125 @@
+{
+  "nodes": [
+    "central",
+    "central.components",
+    "central.components.calendar",
+    "central.components.calendar.agenda_list",
+    "central.components.calendar.day_view",
+    "central.components.calendar.event_slot",
+    "central.components.calendar.mini_calendar",
+    "central.components.calendar.month_view",
+    "central.components.calendar.types",
+    "central.components.calendar.week_view",
+    "central.components.service_sidebar",
+    "central.services",
+    "central.services.lifegame",
+    "central.services.lifegame.canvas",
+    "central.services.lifegame.sidebar",
+    "central.services.lifegame.stats_bar",
+    "central.services.ui_assets",
+    "central.services.ui_builder",
+    "central_remote_module",
+    "miyucloud_auth_security_components",
+    "miyucloud_calendar_view",
+    "miyucloud_central_view",
+    "miyucloud_contacts_view",
+    "miyucloud_explorer",
+    "miyucloud_file_detail",
+    "miyucloud_http_client",
+    "miyucloud_settings",
+    "miyucloud_share_dialog",
+    "miyucloud_sidebar",
+    "miyucloud_sync_status",
+    "miyucloud_trash_view",
+    "miyucloud_ui_components",
+    "miyucloud_ui_state",
+    "miyucloud_upload"
+  ],
+  "edges": [
+    {
+      "from": "central",
+      "to": "central.components",
+      "type": "parent"
+    },
+    {
+      "from": "central",
+      "to": "central.services",
+      "type": "parent"
+    },
+    {
+      "from": "central.components",
+      "to": "central.components.calendar",
+      "type": "parent"
+    },
+    {
+      "from": "central.components",
+      "to": "central.components.service_sidebar",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.agenda_list",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.day_view",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.event_slot",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.mini_calendar",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.month_view",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.types",
+      "type": "parent"
+    },
+    {
+      "from": "central.components.calendar",
+      "to": "central.components.calendar.week_view",
+      "type": "parent"
+    },
+    {
+      "from": "central.services",
+      "to": "central.services.lifegame",
+      "type": "parent"
+    },
+    {
+      "from": "central.services",
+      "to": "central.services.ui_assets",
+      "type": "parent"
+    },
+    {
+      "from": "central.services",
+      "to": "central.services.ui_builder",
+      "type": "parent"
+    },
+    {
+      "from": "central.services.lifegame",
+      "to": "central.services.lifegame.canvas",
+      "type": "parent"
+    },
+    {
+      "from": "central.services.lifegame",
+      "to": "central.services.lifegame.sidebar",
+      "type": "parent"
+    },
+    {
+      "from": "central.services.lifegame",
+      "to": "central.services.lifegame.stats_bar",
+      "type": "parent"
+    }
+  ]
+}

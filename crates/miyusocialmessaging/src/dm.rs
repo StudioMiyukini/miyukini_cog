@@ -5,11 +5,11 @@ use crate::errors::MiyusocialmessagingError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyusocialmessaging_tool_dm_send
-/// @role: mutator
-/// @layer: tool
-/// @human: Envoie un DM ; WriteIntent KindMother.
-/// @do: dm_send_under_governance
+/// @id miyusocialmessaging_tool_dm_send
+/// @role mutator
+/// @layer tool
+/// @human Envoie un DM ; WriteIntent KindMother.
+/// @do dm_send_under_governance
 /// tool.social.dm.send
 pub fn send(
     ctx: &GovernedContext,
@@ -47,11 +47,11 @@ pub fn send(
     Ok(id)
 }
 
-/// @id: miyusocialmessaging_tool_dm_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les messages d'une conversation.
-/// @do: dm_list_under_governance
+/// @id miyusocialmessaging_tool_dm_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les messages d'une conversation.
+/// @do dm_list_under_governance
 /// tool.social.dm.list
 pub fn list(
     ctx: &GovernedContext,
@@ -81,11 +81,11 @@ pub fn list(
     Ok(items)
 }
 
-/// @id: miyusocialmessaging_tool_dm_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère un message.
-/// @do: dm_get_under_governance
+/// @id miyusocialmessaging_tool_dm_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère un message.
+/// @do dm_get_under_governance
 /// tool.social.dm.get
 pub fn get(ctx: &GovernedContext, message_id: &str) -> Result<DmItem, MiyusocialmessagingError> {
     if !ctx.has_mandate() {
@@ -105,11 +105,11 @@ pub fn get(ctx: &GovernedContext, message_id: &str) -> Result<DmItem, Miyusocial
     })
 }
 
-/// @id: miyusocialmessaging_tool_dm_reaction_add
-/// @role: mutator
-/// @layer: tool
-/// @human: Ajoute une réaction à un DM ; WriteIntent KindMother.
-/// @do: dm_reaction_add_under_governance
+/// @id miyusocialmessaging_tool_dm_reaction_add
+/// @role mutator
+/// @layer tool
+/// @human Ajoute une réaction à un DM ; WriteIntent KindMother.
+/// @do dm_reaction_add_under_governance
 /// tool.social.dm.reaction.add
 pub fn reaction_add(
     ctx: &GovernedContext,
@@ -131,11 +131,11 @@ pub fn reaction_add(
     Ok(())
 }
 
-/// @id: miyusocialmessaging_tool_dm_reaction_remove
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime une réaction ; WriteIntent KindMother.
-/// @do: dm_reaction_remove_under_governance
+/// @id miyusocialmessaging_tool_dm_reaction_remove
+/// @role mutator
+/// @layer tool
+/// @human Supprime une réaction ; WriteIntent KindMother.
+/// @do dm_reaction_remove_under_governance
 /// tool.social.dm.reaction.remove
 pub fn reaction_remove(
     ctx: &GovernedContext,
@@ -157,11 +157,11 @@ pub fn reaction_remove(
     Ok(())
 }
 
-/// @id: miyusocialmessaging_tool_dm_readmark_set
-/// @role: mutator
-/// @layer: tool
-/// @human: Marque comme lu ; WriteIntent KindMother.
-/// @do: dm_readmark_set_under_governance
+/// @id miyusocialmessaging_tool_dm_readmark_set
+/// @role mutator
+/// @layer tool
+/// @human Marque comme lu ; WriteIntent KindMother.
+/// @do dm_readmark_set_under_governance
 /// tool.social.dm.readmark.set
 pub fn readmark_set(
     ctx: &GovernedContext,

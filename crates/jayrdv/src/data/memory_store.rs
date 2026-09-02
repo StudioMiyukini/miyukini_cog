@@ -1,10 +1,10 @@
 //! Store en mémoire pour JayRDV (v0).
 //!
-//! @id: jayrdv_memory_store
-//! @do: provide_in_memory_persistence_for_jayrdv
-//! @role: data
-//! @layer: infra
-//! @human: Implémente le stockage en mémoire (HashMap + RwLock) pour toutes les entités.
+//! @id     jayrdv_memory_store
+//! @do     provide_in_memory_persistence_for_jayrdv
+//! @role   data
+//! @layer  infra
+//! @human  Implémente le stockage en mémoire (HashMap + RwLock) pour toutes les entités.
 //!         Persistance KindMother (full KM) à ajouter ultérieurement.
 
 use crate::data::types::{

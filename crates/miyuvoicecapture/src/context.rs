@@ -3,11 +3,11 @@
 //! Contient les parametres de capture audio, VAD, et buffer
 //! utilises a l'initialisation du toolkit.
 
-// @id: alicia_capture_context
-// @role: data
-// @layer: toolkit
-// @human: Contexte de configuration runtime Alicia Capture.
-// @do: hold_voice_capture_context
+// @id alicia_capture_context
+// @role data
+// @layer toolkit
+// @human Contexte de configuration runtime Alicia Capture.
+// @do hold_voice_capture_context
 
 use serde::{Deserialize, Serialize};
 

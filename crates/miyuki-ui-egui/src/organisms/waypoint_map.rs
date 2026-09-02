@@ -1,4 +1,8 @@
-// @id: MUIE-WPMap @do: waypoint-map-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-WPMap
+// @do waypoint-map-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Waypoint map organism -- 5 act tabs with teleport destinations.
 

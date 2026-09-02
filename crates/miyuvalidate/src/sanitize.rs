@@ -19,11 +19,11 @@ pub struct SanitizePolicy {
     pub trim: bool,
 }
 
-/// @id: miyuvalidate_tool_sanitize
-/// @role: security
-/// @layer: tool
-/// @human: Sanitise une valeur selon type et politique fournis.
-/// @do: sanitize_under_governance
+/// @id miyuvalidate_tool_sanitize
+/// @role security
+/// @layer tool
+/// @human Sanitise une valeur selon type et politique fournis.
+/// @do sanitize_under_governance
 /// tool.validate.sanitize
 pub fn sanitize(
     ctx: &GovernedContext,

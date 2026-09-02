@@ -1,4 +1,8 @@
-// @id: MUID-DataTable @do: data-table-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-DataTable
+// @do data-table-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Data table organism for tabular data display.
 //!

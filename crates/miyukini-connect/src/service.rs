@@ -1,9 +1,9 @@
 //! Core service logic for Miyukini Connect.
 //!
-//! @id: miyukini_connect_service
-//! @do: manage_auth_sessions_stepup_origin
-//! @role: auth
-//! @layer: domain
+//! @id     miyukini_connect_service
+//! @do     manage_auth_sessions_stepup_origin
+//! @role   auth
+//! @layer  domain
 
 use std::collections::{HashMap, HashSet};
 use std::time::{SystemTime, UNIX_EPOCH};

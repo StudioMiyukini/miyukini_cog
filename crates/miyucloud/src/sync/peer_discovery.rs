@@ -1,9 +1,9 @@
 //! Decouverte de pairs P2P via broadcast UDP LAN.
 //!
-//! @id: miyucloud_sync_peer_discovery
-//! @do: discover_and_register_p2p_peers_via_lan_broadcast
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_peer_discovery
+//! @do     discover_and_register_p2p_peers_via_lan_broadcast
+//! @role   sync
+//! @layer  infra
 //!
 //! Implementation simplifiee de la decouverte de pairs via broadcast UDP
 //! sur le LAN (port 11443). Compatible Windows, Linux et macOS.

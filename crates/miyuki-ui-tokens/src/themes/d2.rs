@@ -1,4 +1,8 @@
-// @id: MUIT-ThemeD2 @do: d2-theme @role: config @layer: 5 @human: miyuk
+// @id MUIT-ThemeD2
+// @do d2-theme
+// @role config
+// @layer 5
+// @human miyuk
 
 use crate::animation::TransitionScale;
 use crate::palette::d2::D2_PALETTE;

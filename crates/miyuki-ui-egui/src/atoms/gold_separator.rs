@@ -1,4 +1,8 @@
-// @id: MUIE-GoldSep @do: gold-separator-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-GoldSep
+// @do gold-separator-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Gold separator line -- D2-style horizontal divider.
 //!

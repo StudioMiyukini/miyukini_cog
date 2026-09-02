@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyushippingError;
 
-/// @id: miyushipping_tool_commerce_shipping_zones_resolve
-/// @role: accessor
-/// @layer: tool
-/// @human: Résout les zones de livraison applicables ; lecture gouvernée.
-/// @do: commerce_shipping_zones_resolve_under_governance
+/// @id miyushipping_tool_commerce_shipping_zones_resolve
+/// @role accessor
+/// @layer tool
+/// @human Résout les zones de livraison applicables ; lecture gouvernée.
+/// @do commerce_shipping_zones_resolve_under_governance
 pub fn resolve(
     ctx: &GovernedContext,
     _context_ref: Option<&str>,

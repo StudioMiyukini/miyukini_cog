@@ -4,11 +4,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyusocialmessagingError;
 use crate::store;
 
-/// @id: miyusocialmessaging_tool_conversation_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les conversations.
-/// @do: conversation_list_under_governance
+/// @id miyusocialmessaging_tool_conversation_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les conversations.
+/// @do conversation_list_under_governance
 /// tool.social.conversation.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<ConversationItem>, MiyusocialmessagingError> {
     if !ctx.has_mandate() {
@@ -28,11 +28,11 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<ConversationItem>, Miyusocialme
     Ok(items)
 }
 
-/// @id: miyusocialmessaging_tool_conversation_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère une conversation (fil).
-/// @do: conversation_get_under_governance
+/// @id miyusocialmessaging_tool_conversation_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère une conversation (fil).
+/// @do conversation_get_under_governance
 /// tool.social.conversation.get
 pub fn get(
     ctx: &GovernedContext,

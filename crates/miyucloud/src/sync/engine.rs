@@ -1,9 +1,9 @@
 //! Moteur de synchronisation P2P.
 //!
-//! @id: miyucloud_sync_engine
-//! @do: implement_p2p_sync_loop_with_discovery_diff_transfer_conflicts
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_engine
+//! @do     implement_p2p_sync_loop_with_discovery_diff_transfer_conflicts
+//! @role   sync
+//! @layer  infra
 //!
 //! Boucle principale de synchronisation :
 //! 1. Decouverte des pairs (scan LAN toutes les 30s)

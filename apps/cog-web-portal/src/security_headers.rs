@@ -1,8 +1,10 @@
 //! Middleware de headers HTTP de sécurité — COG Web Portal.
 //!
-//! @id: cog_web_portal_security_headers @do: add_security_headers_csp_hsts
-//! @role: security @layer: app
-//! @human: Middleware sécurité Portal — CSP nonce per-request, HSTS, X-Frame-Options, Permissions-Policy.
+//! @id     cog_web_portal_security_headers
+//! @do add_security_headers_csp_hsts
+//! @role   security
+//! @layer app
+//! @human  Middleware sécurité Portal — CSP nonce per-request, HSTS, X-Frame-Options, Permissions-Policy.
 //!
 //! Pattern copié de apps/miyucloud/src/security_headers.rs (même codebase).
 

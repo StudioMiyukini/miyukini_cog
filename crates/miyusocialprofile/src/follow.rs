@@ -4,11 +4,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyusocialprofileError;
 use crate::store;
 
-/// @id: miyusocialprofile_tool_follow_add
-/// @role: mutator
-/// @layer: tool
-/// @human: Ajoute un abonnement (follow) ; WriteIntent KindMother.
-/// @do: follow_add_under_governance
+/// @id miyusocialprofile_tool_follow_add
+/// @role mutator
+/// @layer tool
+/// @human Ajoute un abonnement (follow) ; WriteIntent KindMother.
+/// @do follow_add_under_governance
 /// tool.social.follow.add
 pub fn add(
     ctx: &GovernedContext,
@@ -33,11 +33,11 @@ pub fn add(
     Ok(())
 }
 
-/// @id: miyusocialprofile_tool_follow_remove
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime un abonnement ; WriteIntent KindMother.
-/// @do: follow_remove_under_governance
+/// @id miyusocialprofile_tool_follow_remove
+/// @role mutator
+/// @layer tool
+/// @human Supprime un abonnement ; WriteIntent KindMother.
+/// @do follow_remove_under_governance
 /// tool.social.follow.remove
 pub fn remove(
     ctx: &GovernedContext,
@@ -64,11 +64,11 @@ pub fn remove(
     Ok(())
 }
 
-/// @id: miyusocialprofile_tool_followers_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les abonnés.
-/// @do: followers_list_under_governance
+/// @id miyusocialprofile_tool_followers_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les abonnés.
+/// @do followers_list_under_governance
 /// tool.social.followers.list
 pub fn followers_list(
     ctx: &GovernedContext,
@@ -83,11 +83,11 @@ pub fn followers_list(
     Ok(guard.get(user_id).cloned().unwrap_or_default())
 }
 
-/// @id: miyusocialprofile_tool_following_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les abonnements.
-/// @do: following_list_under_governance
+/// @id miyusocialprofile_tool_following_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les abonnements.
+/// @do following_list_under_governance
 /// tool.social.following.list
 pub fn following_list(
     ctx: &GovernedContext,

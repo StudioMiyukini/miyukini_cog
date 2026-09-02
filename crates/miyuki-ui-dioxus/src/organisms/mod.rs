@@ -1,4 +1,8 @@
-// @id: MUID-Organisms @do: organisms-module @role: exports @layer: 6 @human: miyuk
+// @id MUID-Organisms
+// @do organisms-module
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Organism-level UI components (composed of atoms and molecules).
 

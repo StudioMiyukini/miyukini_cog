@@ -1,4 +1,8 @@
-// @id: MUID-Lib @do: public-api @role: exports @layer: 6 @human: miyuk
+// @id MUID-Lib
+// @do public-api
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Dioxus 0.6 UI component library for the Miyukini ecosystem.
 //!

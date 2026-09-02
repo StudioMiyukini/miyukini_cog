@@ -1,9 +1,9 @@
 //! Logique métier Jay1Tribu : envoi de messages et sync tribu requièrent le Webway.
 //!
-//! @id: jay1tribu_domain
-//! @do: orchestrate_messaging_tribes_friends_governed_by_webway
-//! @role: domain
-//! @layer: domain
+//! @id     jay1tribu_domain
+//! @do     orchestrate_messaging_tribes_friends_governed_by_webway
+//! @role   domain
+//! @layer  domain
 //!
 //! Quand le COG n'est pas connecté au MWS :
 //! - Lecture locale (amis, tribus, salons, messages) fonctionne.

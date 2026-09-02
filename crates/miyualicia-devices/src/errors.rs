@@ -1,10 +1,10 @@
 //! Types d'erreur du registre de dispositifs.
 
-// @id: toolkit.alicia.devices.errors
-// @role: error_types
-// @layer: 6
-// @human: Erreurs du registre de dispositifs Alicia : NotFound, AlreadyExists, etc.
-// @do: define_device_error_types
+// @id toolkit.alicia.devices.errors
+// @role error_types
+// @layer 6
+// @human Erreurs du registre de dispositifs Alicia : NotFound, AlreadyExists, etc.
+// @do define_device_error_types
 
 use uuid::Uuid;
 

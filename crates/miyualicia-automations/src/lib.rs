@@ -18,11 +18,11 @@
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.automations
-// @role: automation_engine
-// @layer: 6
-// @human: Moteur de regles et routines Alicia ; triggers, conditions, actions, scheduler.
-// @do: schedule_and_execute_home_automations
+// @id toolkit.alicia.automations
+// @role automation_engine
+// @layer 6
+// @human Moteur de regles et routines Alicia ; triggers, conditions, actions, scheduler.
+// @do schedule_and_execute_home_automations
 
 pub mod admin_cell;
 pub mod dispatcher;

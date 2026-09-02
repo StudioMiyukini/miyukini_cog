@@ -1,4 +1,8 @@
-// @id: MUID-Breadcrumb @do: breadcrumb-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-Breadcrumb
+// @do breadcrumb-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Breadcrumb navigation molecule.
 //!

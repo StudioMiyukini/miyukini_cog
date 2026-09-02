@@ -1,9 +1,9 @@
 //! Composants reutilisables MiyuCloud : Breadcrumb, FileIcon, SizeLabel.
 //!
-//! @id: miyucloud_ui_components
-//! @do: provide_reusable_cloud_ui_atoms
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_ui_components
+//! @do     provide_reusable_cloud_ui_atoms
+//! @role   component
+//! @layer  presentation
 //!
 //! Atoms et molecules pour l'UI MiyuCloud. Tous les styles sont extraits
 //! en variables locales avant le bloc RSX (piege Dioxus 0.6).

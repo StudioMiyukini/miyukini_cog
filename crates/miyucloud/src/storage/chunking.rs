@@ -1,9 +1,9 @@
 //! Decoupe et reassemblage de fichiers en chunks.
 //!
-//! @id: miyucloud_storage_chunking
-//! @do: split_and_reassemble_file_data_in_chunks
-//! @role: storage
-//! @layer: infra
+//! @id     miyucloud_storage_chunking
+//! @do     split_and_reassemble_file_data_in_chunks
+//! @role   storage
+//! @layer  infra
 //!
 //! Taille de chunk par defaut : 256 KB. Configurable.
 //! Le dernier chunk peut etre plus petit que la taille cible.

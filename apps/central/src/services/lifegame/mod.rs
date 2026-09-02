@@ -1,10 +1,10 @@
 //! Vue jouable Miyukini Life Game — God Simulator intégré à Central.
 //!
-//! @id: central.services.lifegame
-//! @role: ui
-//! @layer: domain
-//! @do: render_lifegame_godview_with_terrain_powers_and_simulation
-//! @human: Jeu complet : canvas pixel art, pouvoirs divins, contrôle du temps, stats.
+//! @id     central.services.lifegame
+//! @role   ui
+//! @layer  domain
+//! @do     render_lifegame_godview_with_terrain_powers_and_simulation
+//! @human  Jeu complet : canvas pixel art, pouvoirs divins, contrôle du temps, stats.
 
 use dioxus::prelude::*;
 use lifegame_entities::{EntityManager, Vec2};

@@ -5,22 +5,22 @@
 
 use crate::state::InstanceIdentity;
 
-/// @id: kindmother_storage_trait
-/// @role: infrastructure
-/// @layer: core
-/// @human: Trait d'abstraction de la persistance. Masque les détails d'implémentation (SQLite) et fournit une interface conceptuelle.
-/// @do: define_storage_contract
+/// @id kindmother_storage_trait
+/// @role infrastructure
+/// @layer core
+/// @human Trait d'abstraction de la persistance. Masque les détails d'implémentation (SQLite) et fournit une interface conceptuelle.
+/// @do define_storage_contract
 /// Trait d'abstraction de la persistance.
 ///
 /// Ce trait définit l'interface conceptuelle pour la persistance sans exposer SQLite.
 /// Les adaptateurs utilisent cette interface pour stocker et récupérer des données.
 pub trait Storage {
-    /// @id: kindmother_storage_read
-    /// @role: accessor
-    /// @layer: core
-    /// @human: Lit une entité depuis la persistance par son identifiant.
-    /// @do: read_entity_by_id
-    /// @depends: kindmother_storage_trait
+    /// @id kindmother_storage_read
+    /// @role accessor
+    /// @layer core
+    /// @human Lit une entité depuis la persistance par son identifiant.
+    /// @do read_entity_by_id
+    /// @depends kindmother_storage_trait
     /// Lit une entité depuis la persistance.
     ///
     /// # Arguments
@@ -33,12 +33,12 @@ pub trait Storage {
     /// Les données de l'entité si elle existe, None sinon.
     fn read(&self, instance: &InstanceIdentity, entity_id: &str) -> Option<Vec<u8>>;
 
-    /// @id: kindmother_storage_write
-    /// @role: mutator
-    /// @layer: core
-    /// @human: Écrit une entité dans la persistance.
-    /// @do: write_entity
-    /// @depends: kindmother_storage_trait
+    /// @id kindmother_storage_write
+    /// @role mutator
+    /// @layer core
+    /// @human Écrit une entité dans la persistance.
+    /// @do write_entity
+    /// @depends kindmother_storage_trait
     /// Écrit une entité dans la persistance.
     ///
     /// # Arguments
@@ -57,12 +57,12 @@ pub trait Storage {
         data: &[u8],
     ) -> Result<(), StorageError>;
 
-    /// @id: kindmother_storage_delete
-    /// @role: mutator
-    /// @layer: core
-    /// @human: Supprime une entité de la persistance.
-    /// @do: delete_entity
-    /// @depends: kindmother_storage_trait
+    /// @id kindmother_storage_delete
+    /// @role mutator
+    /// @layer core
+    /// @human Supprime une entité de la persistance.
+    /// @do delete_entity
+    /// @depends kindmother_storage_trait
     /// Supprime une entité de la persistance.
     ///
     /// # Arguments
@@ -76,34 +76,34 @@ pub trait Storage {
     fn delete(&mut self, instance: &InstanceIdentity, entity_id: &str) -> Result<(), StorageError>;
 }
 
-/// @id: kindmother_storage_error
-/// @role: error
-/// @layer: core
-/// @human: Erreur de persistance. Masque les détails d'implémentation SQLite.
-/// @do: represent_storage_error
+/// @id kindmother_storage_error
+/// @role error
+/// @layer core
+/// @human Erreur de persistance. Masque les détails d'implémentation SQLite.
+/// @do represent_storage_error
 /// Erreur de persistance.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StorageError {
-    /// @id: kindmother_storage_error_not_found
-    /// @role: error
-    /// @layer: core
-    /// @human: Entité non trouvée dans la persistance.
-    /// @do: represent_not_found_error
-    /// @depends: kindmother_storage_error
+    /// @id kindmother_storage_error_not_found
+    /// @role error
+    /// @layer core
+    /// @human Entité non trouvée dans la persistance.
+    /// @do represent_not_found_error
+    /// @depends kindmother_storage_error
     NotFound,
-    /// @id: kindmother_storage_error_corruption
-    /// @role: error
-    /// @layer: core
-    /// @human: Corruption détectée dans la persistance.
-    /// @do: represent_corruption_error
-    /// @depends: kindmother_storage_error
+    /// @id kindmother_storage_error_corruption
+    /// @role error
+    /// @layer core
+    /// @human Corruption détectée dans la persistance.
+    /// @do represent_corruption_error
+    /// @depends kindmother_storage_error
     Corruption,
-    /// @id: kindmother_storage_error_io
-    /// @role: error
-    /// @layer: core
-    /// @human: Erreur d'entrée/sortie lors de l'accès à la persistance.
-    /// @do: represent_io_error
-    /// @depends: kindmother_storage_error
+    /// @id kindmother_storage_error_io
+    /// @role error
+    /// @layer core
+    /// @human Erreur d'entrée/sortie lors de l'accès à la persistance.
+    /// @do represent_io_error
+    /// @depends kindmother_storage_error
     Io(String),
 }
 
@@ -119,30 +119,30 @@ impl std::fmt::Display for StorageError {
 
 impl std::error::Error for StorageError {}
 
-/// @id: kindmother_storage_memory
-/// @role: infrastructure
-/// @layer: core
-/// @human: Implémentation mémoire de Storage pour les tests. Utilise une HashMap en mémoire.
-/// @do: provide_memory_storage
+/// @id kindmother_storage_memory
+/// @role infrastructure
+/// @layer core
+/// @human Implémentation mémoire de Storage pour les tests. Utilise une HashMap en mémoire.
+/// @do provide_memory_storage
 /// Implémentation mémoire de Storage pour les tests.
 #[derive(Debug, Default)]
 pub struct MemoryStorage {
-    /// @id: kindmother_storage_memory_data
-    /// @role: data
-    /// @layer: core
-    /// @human: Données stockées en mémoire (instance_id -> entity_id -> data).
-    /// @do: store_memory_data
-    /// @depends: kindmother_storage_memory
+    /// @id kindmother_storage_memory_data
+    /// @role data
+    /// @layer core
+    /// @human Données stockées en mémoire (instance_id -> entity_id -> data).
+    /// @do store_memory_data
+    /// @depends kindmother_storage_memory
     data: std::collections::HashMap<String, std::collections::HashMap<String, Vec<u8>>>,
 }
 
 impl MemoryStorage {
-    /// @id: kindmother_storage_memory_new
-    /// @role: infrastructure
-    /// @layer: core
-    /// @human: Crée un nouveau stockage mémoire.
-    /// @do: create_memory_storage
-    /// @depends: kindmother_storage_memory
+    /// @id kindmother_storage_memory_new
+    /// @role infrastructure
+    /// @layer core
+    /// @human Crée un nouveau stockage mémoire.
+    /// @do create_memory_storage
+    /// @depends kindmother_storage_memory
     /// Crée un nouveau stockage mémoire.
     #[must_use]
     pub fn new() -> Self {
@@ -186,12 +186,12 @@ mod tests {
     use super::*;
     use crate::state::{InstanceState, InstanceType};
 
-    /// @id: kindmother_storage_test_read_write
-    /// @role: test
-    /// @layer: core
-    /// @human: Test lecture/écriture dans le stockage mémoire.
-    /// @do: verify_read_write_operations
-    /// @depends: kindmother_storage_memory_new, kindmother_storage_write, kindmother_storage_read
+    /// @id kindmother_storage_test_read_write
+    /// @role test
+    /// @layer core
+    /// @human Test lecture/écriture dans le stockage mémoire.
+    /// @do verify_read_write_operations
+    /// @depends kindmother_storage_memory_new, kindmother_storage_write, kindmother_storage_read
     #[test]
     fn test_read_write() {
         let mut storage = MemoryStorage::new();
@@ -204,12 +204,12 @@ mod tests {
         assert_eq!(read_data, data);
     }
 
-    /// @id: kindmother_storage_test_delete
-    /// @role: test
-    /// @layer: core
-    /// @human: Test suppression dans le stockage mémoire.
-    /// @do: verify_delete_operation
-    /// @depends: kindmother_storage_memory_new, kindmother_storage_write, kindmother_storage_delete
+    /// @id kindmother_storage_test_delete
+    /// @role test
+    /// @layer core
+    /// @human Test suppression dans le stockage mémoire.
+    /// @do verify_delete_operation
+    /// @depends kindmother_storage_memory_new, kindmother_storage_write, kindmother_storage_delete
     #[test]
     fn test_delete() {
         let mut storage = MemoryStorage::new();

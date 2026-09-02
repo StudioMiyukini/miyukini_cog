@@ -1,10 +1,10 @@
 //! Types de messages MQTT entrants et sortants.
 
-// @id: toolkit.alicia.mqtt.message
-// @role: message_types
-// @layer: 6
-// @human: Types de messages MQTT : MqttMessage (sortant), MqttIncoming (entrant), QosLevel.
-// @do: define_mqtt_message_types
+// @id toolkit.alicia.mqtt.message
+// @role message_types
+// @layer 6
+// @human Types de messages MQTT : MqttMessage (sortant), MqttIncoming (entrant), QosLevel.
+// @do define_mqtt_message_types
 
 use serde::{Deserialize, Serialize};
 

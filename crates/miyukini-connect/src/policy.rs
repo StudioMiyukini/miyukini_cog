@@ -1,9 +1,9 @@
 //! Policy engine for AAL and factor availability.
 //!
-//! @id: miyukini_connect_policy
-//! @do: enforce_aal_and_factor_policy
-//! @role: security
-//! @layer: domain
+//! @id     miyukini_connect_policy
+//! @do     enforce_aal_and_factor_policy
+//! @role   security
+//! @layer  domain
 
 use crate::types::{AuthMethod, PermissionTier, RuntimeState};
 

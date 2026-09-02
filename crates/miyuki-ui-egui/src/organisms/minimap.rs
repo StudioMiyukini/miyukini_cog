@@ -1,4 +1,8 @@
-// @id: MUIE-Minimap @do: minimap-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-Minimap
+// @do minimap-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Minimap overlay organism.
 

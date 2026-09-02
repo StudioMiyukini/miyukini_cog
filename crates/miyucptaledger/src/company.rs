@@ -6,11 +6,11 @@ use crate::errors::MiyucptaledgerError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyucptaledger_tool_company_structure_resolve
-/// @role: accessor
-/// @layer: tool
-/// @human: Résout la structure juridique courante (micro, EURL, etc.) pour le contexte ; lecture.
-/// @do: company_structure_resolve_under_governance
+/// @id miyucptaledger_tool_company_structure_resolve
+/// @role accessor
+/// @layer tool
+/// @human Résout la structure juridique courante (micro, EURL, etc.) pour le contexte ; lecture.
+/// @do company_structure_resolve_under_governance
 pub fn structure_resolve(
     ctx: &GovernedContext,
     context_ref: Option<&str>,
@@ -28,11 +28,11 @@ pub fn structure_resolve(
         .unwrap_or_else(|| "micro".to_string()))
 }
 
-/// @id: miyucptaledger_tool_company_structure_register
-/// @role: mutator
-/// @layer: tool
-/// @human: Enregistre une structure ; WriteIntent KindMother.
-/// @do: company_structure_register_under_governance
+/// @id miyucptaledger_tool_company_structure_register
+/// @role mutator
+/// @layer tool
+/// @human Enregistre une structure ; WriteIntent KindMother.
+/// @do company_structure_register_under_governance
 pub fn structure_register(
     ctx: &GovernedContext,
     payload: &str,
@@ -48,11 +48,11 @@ pub fn structure_register(
     Ok(id)
 }
 
-/// @id: miyucptaledger_tool_company_siret_resolve
-/// @role: accessor
-/// @layer: tool
-/// @human: Récupère les informations depuis SIRET/INSEE ; lecture seule.
-/// @do: company_siret_resolve_under_governance
+/// @id miyucptaledger_tool_company_siret_resolve
+/// @role accessor
+/// @layer tool
+/// @human Récupère les informations depuis SIRET/INSEE ; lecture seule.
+/// @do company_siret_resolve_under_governance
 pub fn siret_resolve(ctx: &GovernedContext, siret: &str) -> Result<String, MiyucptaledgerError> {
     if !ctx.has_mandate() {
         return Err(MiyucptaledgerError::NoMandate);

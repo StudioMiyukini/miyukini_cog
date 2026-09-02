@@ -2,18 +2,18 @@
 //!
 //! Gestion des zones climatiques et biomes.
 //!
-//! @id: lifegame.world.biome
-//! @role: simulation
-//! @layer: domain
-//! @do: manage_climate_zones_and_biomes
-//! @human: Définition des biomes et leurs caractéristiques
+//! @id     lifegame.world.biome
+//! @role   simulation
+//! @layer  domain
+//! @do     manage_climate_zones_and_biomes
+//! @human  Définition des biomes et leurs caractéristiques
 
 use serde::{Deserialize, Serialize};
 
 /// Type de biome
 ///
-/// @id: lifegame.world.biome_type
-/// @do: enumerate_biome_types
+/// @id lifegame.world.biome_type
+/// @do enumerate_biome_types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum BiomeType {
     /// Océan
@@ -153,8 +153,8 @@ impl BiomeType {
 
 /// Un biome dans le monde
 ///
-/// @id: lifegame.world.biome_struct
-/// @do: represent_biome_region
+/// @id lifegame.world.biome_struct
+/// @do represent_biome_region
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Biome {
     /// Type de biome

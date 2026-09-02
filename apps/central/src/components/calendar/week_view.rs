@@ -1,10 +1,10 @@
 //! Vue Semaine generique — Grille 7 jours × 24 heures.
 //!
-//! @id: central.components.calendar.week_view
-//! @do: render_generic_week_calendar_view
-//! @role: ui
-//! @layer: ui
-//! @human: Vue calendrier semaine generique reutilisable
+//! @id     central.components.calendar.week_view
+//! @do     render_generic_week_calendar_view
+//! @role   ui
+//! @layer  ui
+//! @human  Vue calendrier semaine generique reutilisable
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

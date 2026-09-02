@@ -1,10 +1,10 @@
 //! MiyuCloud -- Cloud prive dans Central.
 //!
-//! @id: miyucloud_central_view
-//! @do: provide_miyucloud_ui_in_central
-//! @role: view
-//! @layer: presentation
-//! @human: Lise (Dev Front-End)
+//! @id     miyucloud_central_view
+//! @do     provide_miyucloud_ui_in_central
+//! @role   view
+//! @layer  presentation
+//! @human  Lise (Dev Front-End)
 //!
 //! Point d'entree du service MiyuCloud dans Central.
 //! Layout 2 panneaux : sidebar gauche (220px) + zone principale (flex).

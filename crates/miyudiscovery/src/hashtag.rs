@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyudiscoveryError;
 
-/// @id: miyudiscovery_tool_hashtag_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les hashtags.
-/// @do: hashtag_list_under_governance
+/// @id miyudiscovery_tool_hashtag_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les hashtags.
+/// @do hashtag_list_under_governance
 /// tool.social.hashtag.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<HashtagItem>, MiyudiscoveryError> {
     if !ctx.has_mandate() {
@@ -17,11 +17,11 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<HashtagItem>, MiyudiscoveryErro
     Ok(Vec::new())
 }
 
-/// @id: miyudiscovery_tool_hashtag_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère un hashtag et ses posts.
-/// @do: hashtag_get_under_governance
+/// @id miyudiscovery_tool_hashtag_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère un hashtag et ses posts.
+/// @do hashtag_get_under_governance
 /// tool.social.hashtag.get
 pub fn get(ctx: &GovernedContext, hashtag: &str) -> Result<HashtagDetail, MiyudiscoveryError> {
     if !ctx.has_mandate() {
@@ -33,11 +33,11 @@ pub fn get(ctx: &GovernedContext, hashtag: &str) -> Result<HashtagDetail, Miyudi
     })
 }
 
-/// @id: miyudiscovery_tool_hashtag_trending
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les hashtags tendance ; politique StrongFather.
-/// @do: hashtag_trending_under_governance
+/// @id miyudiscovery_tool_hashtag_trending
+/// @role mutator
+/// @layer tool
+/// @human Liste les hashtags tendance ; politique StrongFather.
+/// @do hashtag_trending_under_governance
 /// tool.social.hashtag.trending
 pub fn trending(ctx: &GovernedContext) -> Result<Vec<HashtagItem>, MiyudiscoveryError> {
     if !ctx.has_mandate() {

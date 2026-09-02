@@ -5,11 +5,11 @@ use crate::errors::MiyusocialfeedError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyusocialfeed_tool_post_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée une publication ; WriteIntent KindMother.
-/// @do: post_create_under_governance
+/// @id miyusocialfeed_tool_post_create
+/// @role mutator
+/// @layer tool
+/// @human Crée une publication ; WriteIntent KindMother.
+/// @do post_create_under_governance
 /// tool.social.post.create
 pub fn create(
     ctx: &GovernedContext,
@@ -28,11 +28,11 @@ pub fn create(
     Ok(id)
 }
 
-/// @id: miyusocialfeed_tool_post_update
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour une publication ; WriteIntent KindMother.
-/// @do: post_update_under_governance
+/// @id miyusocialfeed_tool_post_update
+/// @role mutator
+/// @layer tool
+/// @human Met à jour une publication ; WriteIntent KindMother.
+/// @do post_update_under_governance
 /// tool.social.post.update
 pub fn update(
     ctx: &GovernedContext,
@@ -52,11 +52,11 @@ pub fn update(
     Ok(())
 }
 
-/// @id: miyusocialfeed_tool_post_delete
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime une publication ; WriteIntent KindMother.
-/// @do: post_delete_under_governance
+/// @id miyusocialfeed_tool_post_delete
+/// @role mutator
+/// @layer tool
+/// @human Supprime une publication ; WriteIntent KindMother.
+/// @do post_delete_under_governance
 /// tool.social.post.delete
 pub fn delete(ctx: &GovernedContext, post_id: &str) -> Result<(), MiyusocialfeedError> {
     if !ctx.has_mandate() {
@@ -71,11 +71,11 @@ pub fn delete(ctx: &GovernedContext, post_id: &str) -> Result<(), Miyusocialfeed
     Ok(())
 }
 
-/// @id: miyusocialfeed_tool_post_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère une publication.
-/// @do: post_get_under_governance
+/// @id miyusocialfeed_tool_post_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère une publication.
+/// @do post_get_under_governance
 /// tool.social.post.get
 pub fn get(ctx: &GovernedContext, post_id: &str) -> Result<PostItem, MiyusocialfeedError> {
     if !ctx.has_mandate() {

@@ -1,4 +1,8 @@
-// @id: MUIE-InvSlot @do: inventory-slot-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-InvSlot
+// @do inventory-slot-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Inventory slot molecule -- a slot frame with an optional item icon.
 //!

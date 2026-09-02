@@ -1,4 +1,8 @@
-// @id: MUID-Avatar @do: avatar-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Avatar
+// @do avatar-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Avatar atom displaying a user image or initials fallback.
 //!

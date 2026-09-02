@@ -1,10 +1,10 @@
 //! Handler pour GET /state.
 
-// @id: service.alicia.api.handlers.state
-// @role: state_handler
-// @layer: 7
-// @human: Endpoint etat complet de la maison Alicia.
-// @do: respond_home_state
+// @id service.alicia.api.handlers.state
+// @role state_handler
+// @layer 7
+// @human Endpoint etat complet de la maison Alicia.
+// @do respond_home_state
 
 use std::sync::Arc;
 

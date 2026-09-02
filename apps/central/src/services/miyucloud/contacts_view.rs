@@ -1,9 +1,9 @@
 //! Vue contacts CardDAV dans Central.
 //!
-//! @id: miyucloud_contacts_view
-//! @do: display_carddav_addressbooks_contacts
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_contacts_view
+//! @do     display_carddav_addressbooks_contacts
+//! @role   component
+//! @layer  presentation
 //!
 //! Affiche la liste des carnets d'adresses (sidebar gauche) et la liste
 //! des contacts du carnet selectionne avec recherche.

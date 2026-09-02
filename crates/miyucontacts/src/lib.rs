@@ -4,11 +4,11 @@
 //! Kit d'outils contacts (friend, foe, list). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `communication`, layer tool/toolkit.
 
-// @id: toolkit.communication.miyucontacts
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuContacts ; expose les modules tools.
-/// @do: expose_miyucontacts_toolkit
+// @id toolkit.communication.miyucontacts
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuContacts ; expose les modules tools.
+/// @do expose_miyucontacts_toolkit
 pub mod admin_cell;
 pub mod contacts;
 pub mod context;

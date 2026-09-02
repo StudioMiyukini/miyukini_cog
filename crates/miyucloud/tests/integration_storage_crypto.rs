@@ -1,9 +1,9 @@
 //! Test d'integration : flux complet storage + crypto.
 //!
-//! @id: miyucloud_integration_storage_crypto
-//! @do: test_full_upload_download_flow
-//! @role: test
-//! @layer: integration
+//! @id     miyucloud_integration_storage_crypto
+//! @do     test_full_upload_download_flow
+//! @role   test
+//! @layer  integration
 //!
 //! Ce test couvre le flux complet :
 //! donnees -> chunk -> chiffrer -> ecrire -> lire -> dechiffrer -> reassembler -> verifier SHA-256

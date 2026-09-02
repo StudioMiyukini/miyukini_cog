@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuposanalyticsError;
 
-/// @id: miyuposanalytics_tool_cash_discrepancy
-/// @role: mutator
-/// @layer: tool
-/// @human: Retourne l'écart caisse pour un shift.
-/// @do: cash_discrepancy_under_governance
+/// @id miyuposanalytics_tool_cash_discrepancy
+/// @role mutator
+/// @layer tool
+/// @human Retourne l'écart caisse pour un shift.
+/// @do cash_discrepancy_under_governance
 /// tool.analytics.cash.discrepancy
 pub fn discrepancy(
     ctx: &GovernedContext,

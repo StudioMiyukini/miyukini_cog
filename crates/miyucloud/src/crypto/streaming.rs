@@ -1,9 +1,9 @@
 //! Dechiffrement streaming pour le partage web.
 //!
-//! @id: miyucloud_crypto_streaming
-//! @do: decrypt_file_chunks_streaming_constant_memory
-//! @role: crypto
-//! @layer: infra
+//! @id     miyucloud_crypto_streaming
+//! @do     decrypt_file_chunks_streaming_constant_memory
+//! @role   crypto
+//! @layer  infra
 //!
 //! Lit les chunks un par un depuis le storage, dechiffre chaque chunk
 //! individuellement et retourne un iterateur de donnees claires.

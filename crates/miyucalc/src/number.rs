@@ -18,11 +18,11 @@ pub struct FormatOptions {
     pub locale: Option<String>,
 }
 
-/// @id: miyucalc_tool_number_format
-/// @role: mutator
-/// @layer: tool
-/// @human: Formate un nombre selon options fournies.
-/// @do: format_number_under_governance
+/// @id miyucalc_tool_number_format
+/// @role mutator
+/// @layer tool
+/// @human Formate un nombre selon options fournies.
+/// @do format_number_under_governance
 /// tool.calc.number.format
 pub fn format(
     ctx: &GovernedContext,

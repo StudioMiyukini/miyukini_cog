@@ -1,10 +1,10 @@
 //! Composant ServiceSidebar generique pour les services Miyukini.
 //!
-//! @id: central.components.service_sidebar
-//! @do: render_generic_service_sidebar_with_roles_and_sections
-//! @role: ui
-//! @layer: ui
-//! @human: Sidebar generique reutilisable pour tous les services Jay*
+//! @id     central.components.service_sidebar
+//! @do     render_generic_service_sidebar_with_roles_and_sections
+//! @role   ui
+//! @layer  ui
+//! @human  Sidebar generique reutilisable pour tous les services Jay*
 //!
 //! Note: API publique réutilisable — certains builders/variants ne sont
 //! pas encore consommés mais font partie du contrat du composant.

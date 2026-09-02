@@ -1,9 +1,9 @@
 //! MiyuCloud -- Cloud prive auto-heberge, chiffre et pair-a-pair.
 //!
-//! @id: miyucloud_lib
-//! @do: expose_public_modules_miyucloud
-//! @role: service
-//! @layer: infra
+//! @id     miyucloud_lib
+//! @do     expose_public_modules_miyucloud
+//! @role   service
+//! @layer  infra
 //!
 //! Crate bibliotheque pour MiyuCloud. Fournit les types domaine, la persistance
 //! KindMother, le stockage fichiers, le chiffrement at-rest, l'authentification

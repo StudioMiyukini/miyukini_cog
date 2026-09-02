@@ -1,4 +1,8 @@
-// @id: MUIT-ThemeCog @do: cog-theme @role: config @layer: 5 @human: miyuk
+// @id MUIT-ThemeCog
+// @do cog-theme
+// @role config
+// @layer 5
+// @human miyuk
 
 use crate::animation::TransitionScale;
 use crate::palette::cog::COG_PALETTE;

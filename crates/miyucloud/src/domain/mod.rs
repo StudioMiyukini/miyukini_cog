@@ -1,9 +1,9 @@
 //! Logique metier MiyuCloud.
 //!
-//! @id: miyucloud_domain_module
-//! @do: expose_file_operations_trash_sharing_quota_migration
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_module
+//! @do     expose_file_operations_trash_sharing_quota_migration
+//! @role   domain
+//! @layer  domain
 //!
 //! Operations CRUD sur les fichiers et dossiers, corbeille avec suppression securisee,
 //! partage interne Tribu, liens de partage externe, quotas et migration Jay1Tribu.

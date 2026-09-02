@@ -5,11 +5,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyunotifyError;
 
-/// @id: miyunotify_tool_email_send
-/// @role: mutator
-/// @layer: tool
-/// @human: Envoie un email ; autorisation fournie par le flux (StrongFather).
-/// @do: email_send_under_governance
+/// @id miyunotify_tool_email_send
+/// @role mutator
+/// @layer tool
+/// @human Envoie un email ; autorisation fournie par le flux (StrongFather).
+/// @do email_send_under_governance
 /// tool.notify.email.send — ne décide pas de l'autorisation.
 pub fn send(
     ctx: &GovernedContext,

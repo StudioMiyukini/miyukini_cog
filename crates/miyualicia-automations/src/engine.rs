@@ -3,11 +3,11 @@
 //! `AutomationEngine` gere le cycle complet : declenchement, evaluation des conditions,
 //! execution des actions. Il maintient un registre d'automatisations et un canal d'evenements.
 
-// @id: toolkit.alicia.automations.engine
-// @role: automation_scheduler
-// @layer: 6
-// @human: Moteur central des automatisations Alicia : registre, evenements, evaluation, execution.
-// @do: schedule_and_execute_home_automations
+// @id toolkit.alicia.automations.engine
+// @role automation_scheduler
+// @layer 6
+// @human Moteur central des automatisations Alicia : registre, evenements, evaluation, execution.
+// @do schedule_and_execute_home_automations
 
 use std::collections::HashMap;
 use std::sync::Arc;

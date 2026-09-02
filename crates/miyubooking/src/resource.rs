@@ -28,11 +28,11 @@ pub fn register_resource(
     Ok(())
 }
 
-/// @id: miyubooking_tool_booking_resource_resolve
-/// @role: accessor
-/// @layer: tool
-/// @human: Résout une ressource (salle, équipement) ; contraintes fournies par KindMother.
-/// @do: booking_resource_resolve_under_governance
+/// @id miyubooking_tool_booking_resource_resolve
+/// @role accessor
+/// @layer tool
+/// @human Résout une ressource (salle, équipement) ; contraintes fournies par KindMother.
+/// @do booking_resource_resolve_under_governance
 pub fn resolve(
     ctx: &GovernedContext,
     _constraints: Option<&str>,
@@ -49,11 +49,11 @@ pub fn resolve(
     Ok("res:default".to_string())
 }
 
-/// @id: miyubooking_tool_booking_resource_availability
-/// @role: accessor
-/// @layer: tool
-/// @human: Retourne la disponibilité d'une ressource sur une plage donnée ; lecture gouvernée.
-/// @do: booking_resource_availability_under_governance
+/// @id miyubooking_tool_booking_resource_availability
+/// @role accessor
+/// @layer tool
+/// @human Retourne la disponibilité d'une ressource sur une plage donnée ; lecture gouvernée.
+/// @do booking_resource_availability_under_governance
 pub fn availability(
     ctx: &GovernedContext,
     _resource_id: &str,

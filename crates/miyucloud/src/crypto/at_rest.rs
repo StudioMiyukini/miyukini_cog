@@ -1,9 +1,9 @@
 //! Chiffrement at-rest ChaCha20-Poly1305.
 //!
-//! @id: miyucloud_crypto_at_rest
-//! @do: encrypt_decrypt_chunks_with_chacha20poly1305
-//! @role: crypto
-//! @layer: infra
+//! @id     miyucloud_crypto_at_rest
+//! @do     encrypt_decrypt_chunks_with_chacha20poly1305
+//! @role   crypto
+//! @layer  infra
 //!
 //! Algorithme : ChaCha20-Poly1305 (AEAD).
 //! Nonce : 12 bytes genere aleatoirement via `rand::OsRng`.

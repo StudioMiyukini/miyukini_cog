@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyucptaledgerError;
 
-/// @id: miyucptaledger_tool_compta_transaction_categorize
-/// @role: mutator
-/// @layer: tool
-/// @human: Catégorise une écriture ; exécution ; règles fournies.
-/// @do: compta_transaction_categorize_under_governance
+/// @id miyucptaledger_tool_compta_transaction_categorize
+/// @role mutator
+/// @layer tool
+/// @human Catégorise une écriture ; exécution ; règles fournies.
+/// @do compta_transaction_categorize_under_governance
 pub fn categorize(
     ctx: &GovernedContext,
     _transaction_ref: &str,
@@ -20,11 +20,11 @@ pub fn categorize(
     Ok("default".to_string())
 }
 
-/// @id: miyucptaledger_tool_compta_transaction_vat_resolve
-/// @role: accessor
-/// @layer: tool
-/// @human: Rattache un taux TVA à une écriture ; lecture/résolution.
-/// @do: compta_transaction_vat_resolve_under_governance
+/// @id miyucptaledger_tool_compta_transaction_vat_resolve
+/// @role accessor
+/// @layer tool
+/// @human Rattache un taux TVA à une écriture ; lecture/résolution.
+/// @do compta_transaction_vat_resolve_under_governance
 pub fn vat_resolve(
     ctx: &GovernedContext,
     _transaction_ref: &str,

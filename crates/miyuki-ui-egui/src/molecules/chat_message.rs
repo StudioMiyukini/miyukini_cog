@@ -1,4 +1,8 @@
-// @id: MUIE-ChatMsg @do: chat-message-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-ChatMsg
+// @do chat-message-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Chat message molecule -- colored pseudo + text.
 

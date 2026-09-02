@@ -1,4 +1,8 @@
-// @id: MUIE-InvPanel @do: inventory-panel-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-InvPanel
+// @do inventory-panel-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Inventory panel organism -- equipment slots + 10x4 item grid + gold display.
 

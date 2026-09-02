@@ -1,9 +1,9 @@
 //! Verification d'integrite SHA-256.
 //!
-//! @id: miyucloud_storage_integrity
-//! @do: compute_and_verify_sha256_checksums
-//! @role: integrity
-//! @layer: infra
+//! @id     miyucloud_storage_integrity
+//! @do     compute_and_verify_sha256_checksums
+//! @role   integrity
+//! @layer  infra
 //!
 //! Fournit le calcul et la verification de checksums SHA-256 pour les fichiers.
 //! Les hashes sont retournes en hexadecimal lowercase.

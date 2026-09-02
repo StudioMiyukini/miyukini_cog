@@ -4,11 +4,11 @@
 //! Kit d'outils de validation et sanitization (schéma, sanitize). Schéma et politique fournis dans le flux.
 //! Alignement MIP : domaine `validate`, layer tool/toolkit.
 
-// @id: toolkit.validate.miyuvalidate
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuValidate ; expose les modules tools.
-/// @do: expose_miyuvalidate_toolkit
+// @id toolkit.validate.miyuvalidate
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuValidate ; expose les modules tools.
+/// @do expose_miyuvalidate_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

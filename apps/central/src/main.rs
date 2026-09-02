@@ -1,3 +1,9 @@
+//! @id     central
+//! @do     lancer_central
+//! @role   orchestration
+//! @layer  app
+//! @human  Application Miyukini Central : hub de gestion des services COG (interface Steam-like), racine du projet.
+//!
 //! Miyukini Central — Standalone Launcher
 //!
 //! Hub de gestion des Services COG avec interface Steam-like.

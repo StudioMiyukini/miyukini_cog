@@ -1,9 +1,9 @@
 //! Detection et resolution des conflits de synchronisation.
 //!
-//! @id: miyucloud_sync_conflict
-//! @do: detect_and_resolve_sync_conflicts_no_silent_loss
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_conflict
+//! @do     detect_and_resolve_sync_conflicts_no_silent_loss
+//! @role   sync
+//! @layer  infra
 //!
 //! INVARIANT CRITIQUE : jamais de perte silencieuse de donnees.
 //! Quand deux horloges sont concurrentes, une copie de conflit est creee

@@ -1,8 +1,8 @@
 //! Persistance JayKoa via KindMother Service.
 //!
-//! @id: jaykoa_data_module
-//! @do: expose_domain_types_and_persistence
-//! @layer: domain
+//! @id     jaykoa_data_module
+//! @do     expose_domain_types_and_persistence
+//! @layer  domain
 //!
 //! Full KM : délégation exclusive au service KindMother (kindmother-client).
 

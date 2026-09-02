@@ -13,11 +13,11 @@ pub struct LocaleNumberOptions {
     pub decimals: Option<u32>,
 }
 
-/// @id: miyulocale_tool_number_format
-/// @role: mutator
-/// @layer: tool
-/// @human: Formate un nombre selon locale et options fournis.
-/// @do: number_format_under_governance
+/// @id miyulocale_tool_number_format
+/// @role mutator
+/// @layer tool
+/// @human Formate un nombre selon locale et options fournis.
+/// @do number_format_under_governance
 /// tool.locale.number.format
 pub fn format(
     ctx: &GovernedContext,

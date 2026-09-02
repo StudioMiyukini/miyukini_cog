@@ -1,0 +1,29 @@
+{
+  "central": [
+    "central.components",
+    "central.services"
+  ],
+  "central.components": [
+    "central.components.calendar",
+    "central.components.service_sidebar"
+  ],
+  "central.components.calendar": [
+    "central.components.calendar.agenda_list",
+    "central.components.calendar.day_view",
+    "central.components.calendar.event_slot",
+    "central.components.calendar.mini_calendar",
+    "central.components.calendar.month_view",
+    "central.components.calendar.types",
+    "central.components.calendar.week_view"
+  ],
+  "central.services": [
+    "central.services.lifegame",
+    "central.services.ui_assets",
+    "central.services.ui_builder"
+  ],
+  "central.services.lifegame": [
+    "central.services.lifegame.canvas",
+    "central.services.lifegame.sidebar",
+    "central.services.lifegame.stats_bar"
+  ]
+}

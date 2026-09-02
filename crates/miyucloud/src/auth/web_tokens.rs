@@ -1,9 +1,9 @@
 //! Tokens temporaires pour la surface web de partage.
 //!
-//! @id: miyucloud_auth_web_tokens
-//! @do: generate_validate_web_share_tokens_with_expiration_and_password
-//! @role: auth
-//! @layer: domain
+//! @id     miyucloud_auth_web_tokens
+//! @do     generate_validate_web_share_tokens_with_expiration_and_password
+//! @role   auth
+//! @layer  domain
 //!
 //! Genere des tokens non-predictibles (256 bits d'entropie), verifie
 //! l'expiration, la revocation, le nombre max de telechargements et le

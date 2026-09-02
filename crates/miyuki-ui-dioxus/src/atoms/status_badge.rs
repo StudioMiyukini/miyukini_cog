@@ -1,4 +1,8 @@
-// @id: MUID-StatusBadge @do: status-badge-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-StatusBadge
+// @do status-badge-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! StatusBadge atom — domaine-specific status indicator built on Badge.
 //!
@@ -13,9 +17,11 @@
 //! }
 //! ```
 //!
-//! @id: muid_status_badge @do: render_status_badge
-//! @role: ui @layer: service
-//! @human: StatusBadge — badge sémantique domaine (Active/Inactive/Pending/Archived/Draft).
+//! @id     muid_status_badge
+//! @do render_status_badge
+//! @role   ui
+//! @layer service
+//! @human  StatusBadge — badge sémantique domaine (Active/Inactive/Pending/Archived/Draft).
 
 use dioxus::prelude::*;
 

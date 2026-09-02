@@ -10,88 +10,88 @@
 use crate::intent::Intent;
 use crate::policy::PolicyResult;
 
-/// @id: strongfather_priority_value
-/// @role: domain_model
-/// @layer: core
-/// @human: Valeur de priorité relative d'une intention. Ordre d'importance par rapport à d'autres intentions.
-/// @do: represent_priority_value
+/// @id strongfather_priority_value
+/// @role domain_model
+/// @layer core
+/// @human Valeur de priorité relative d'une intention. Ordre d'importance par rapport à d'autres intentions.
+/// @do represent_priority_value
 /// Valeur de priorité
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Priority {
-    /// @id: strongfather_priority_value_level
-    /// @role: domain_model
-    /// @layer: core
-    /// @human: Niveau de priorité (0 = minimum, valeurs plus élevées = plus prioritaire).
-    /// @do: store_priority_level
+    /// @id strongfather_priority_value_level
+    /// @role domain_model
+    /// @layer core
+    /// @human Niveau de priorité (0 = minimum, valeurs plus élevées = plus prioritaire).
+    /// @do store_priority_level
     pub value: u32,
 }
 
 impl Priority {
-    /// @id: strongfather_priority_new
-    /// @role: constructor
-    /// @layer: core
-    /// @human: Crée une nouvelle priorité avec une valeur donnée.
-    /// @do: create_priority
-    /// @depends: strongfather_priority_value
+    /// @id strongfather_priority_new
+    /// @role constructor
+    /// @layer core
+    /// @human Crée une nouvelle priorité avec une valeur donnée.
+    /// @do create_priority
+    /// @depends strongfather_priority_value
     #[must_use]
     pub fn new(value: u32) -> Self {
         Self { value }
     }
 
-    /// @id: strongfather_priority_minimum
-    /// @role: constant
-    /// @layer: core
-    /// @human: Priorité minimale (0).
-    /// @do: provide_minimum_priority
-    /// @depends: strongfather_priority_value
+    /// @id strongfather_priority_minimum
+    /// @role constant
+    /// @layer core
+    /// @human Priorité minimale (0).
+    /// @do provide_minimum_priority
+    /// @depends strongfather_priority_value
     pub const MINIMUM: Priority = Priority { value: 0 };
 
-    /// @id: strongfather_priority_maximum
-    /// @role: constant
-    /// @layer: core
-    /// @human: Priorité maximale (u32::MAX).
-    /// @do: provide_maximum_priority
-    /// @depends: strongfather_priority_value
+    /// @id strongfather_priority_maximum
+    /// @role constant
+    /// @layer core
+    /// @human Priorité maximale (u32::MAX).
+    /// @do provide_maximum_priority
+    /// @depends strongfather_priority_value
     pub const MAXIMUM: Priority = Priority { value: u32::MAX };
 }
 
 impl Default for Priority {
-    /// @id: strongfather_priority_default
-    /// @role: constructor
-    /// @layer: core
-    /// @human: Priorité par défaut (0).
-    /// @do: provide_default_priority
+    /// @id strongfather_priority_default
+    /// @role constructor
+    /// @layer core
+    /// @human Priorité par défaut (0).
+    /// @do provide_default_priority
     fn default() -> Self {
         Self::MINIMUM
     }
 }
 
-/// @id: strongfather_priority_calculator
-/// @role: service
-/// @layer: core
-/// @human: Calculateur de priorité. Détermine la priorité relative d'une intention selon les politiques.
-/// @do: calculate_intent_priority
+/// @id strongfather_priority_calculator
+/// @role service
+/// @layer core
+/// @human Calculateur de priorité. Détermine la priorité relative d'une intention selon les politiques.
+/// @do calculate_intent_priority
 /// Calculateur de priorité
 pub struct PriorityCalculator;
 
 impl PriorityCalculator {
-    /// @id: strongfather_priority_calculator_new
-    /// @role: constructor
-    /// @layer: core
-    /// @human: Crée un nouveau calculateur de priorité.
-    /// @do: create_priority_calculator
-    /// @depends: strongfather_priority_calculator
+    /// @id strongfather_priority_calculator_new
+    /// @role constructor
+    /// @layer core
+    /// @human Crée un nouveau calculateur de priorité.
+    /// @do create_priority_calculator
+    /// @depends strongfather_priority_calculator
     #[must_use]
     pub fn new() -> Self {
         Self
     }
 
-    /// @id: strongfather_priority_calculator_calculate
-    /// @role: service
-    /// @layer: core
-    /// @human: Calcule la priorité d'une intention selon les politiques de priorité applicables et la priorité demandée.
-    /// @do: calculate_priority_from_policies
-    /// @depends: strongfather_priority_calculator_new
+    /// @id strongfather_priority_calculator_calculate
+    /// @role service
+    /// @layer core
+    /// @human Calcule la priorité d'une intention selon les politiques de priorité applicables et la priorité demandée.
+    /// @do calculate_priority_from_policies
+    /// @depends strongfather_priority_calculator_new
     #[must_use]
     pub fn calculate(&self, intent: &Intent, policy_results: &[PolicyResult]) -> Priority {
         // R-PRIO-3 : La priorité finale est déterminée par StrongFather, pas par l'appelant
@@ -112,12 +112,12 @@ impl PriorityCalculator {
         Priority::new(calculated_priority)
     }
 
-    /// @id: strongfather_priority_calculator_compare
-    /// @role: service
-    /// @layer: core
-    /// @human: Compare deux priorités pour déterminer l'ordre relatif.
-    /// @do: compare_priorities
-    /// @depends: strongfather_priority_calculator_new
+    /// @id strongfather_priority_calculator_compare
+    /// @role service
+    /// @layer core
+    /// @human Compare deux priorités pour déterminer l'ordre relatif.
+    /// @do compare_priorities
+    /// @depends strongfather_priority_calculator_new
     #[must_use]
     pub fn compare(&self, a: &Priority, b: &Priority) -> std::cmp::Ordering {
         a.value.cmp(&b.value)
@@ -125,11 +125,11 @@ impl PriorityCalculator {
 }
 
 impl Default for PriorityCalculator {
-    /// @id: strongfather_priority_calculator_default
-    /// @role: constructor
-    /// @layer: core
-    /// @human: Crée un calculateur de priorité par défaut.
-    /// @do: create_default_priority_calculator
+    /// @id strongfather_priority_calculator_default
+    /// @role constructor
+    /// @layer core
+    /// @human Crée un calculateur de priorité par défaut.
+    /// @do create_default_priority_calculator
     fn default() -> Self {
         Self::new()
     }
@@ -142,33 +142,33 @@ mod tests {
     use crate::policy::PolicyResult;
     use std::collections::HashMap;
 
-    /// @id: strongfather_priority_test_create
-    /// @role: test
-    /// @layer: core
-    /// @human: Test de création d'une priorité.
-    /// @do: test_priority_creation
+    /// @id strongfather_priority_test_create
+    /// @role test
+    /// @layer core
+    /// @human Test de création d'une priorité.
+    /// @do test_priority_creation
     #[test]
     fn test_create_priority() {
         let priority = Priority::new(10);
         assert_eq!(priority.value, 10);
     }
 
-    /// @id: strongfather_priority_test_default
-    /// @role: test
-    /// @layer: core
-    /// @human: Test de la priorité par défaut.
-    /// @do: test_default_priority
+    /// @id strongfather_priority_test_default
+    /// @role test
+    /// @layer core
+    /// @human Test de la priorité par défaut.
+    /// @do test_default_priority
     #[test]
     fn test_default_priority() {
         let priority = Priority::default();
         assert_eq!(priority.value, 0);
     }
 
-    /// @id: strongfather_priority_test_calculate_with_requested
-    /// @role: test
-    /// @layer: core
-    /// @human: Test de calcul de priorité avec priorité demandée.
-    /// @do: test_calculate_with_requested_priority
+    /// @id strongfather_priority_test_calculate_with_requested
+    /// @role test
+    /// @layer core
+    /// @human Test de calcul de priorité avec priorité demandée.
+    /// @do test_calculate_with_requested_priority
     #[test]
     fn test_calculate_with_requested_priority() {
         let calculator = PriorityCalculator::new();
@@ -196,11 +196,11 @@ mod tests {
         assert_eq!(priority.value, 5);
     }
 
-    /// @id: strongfather_priority_test_calculate_with_policies
-    /// @role: test
-    /// @layer: core
-    /// @human: Test de calcul de priorité avec politiques de priorité.
-    /// @do: test_calculate_with_priority_policies
+    /// @id strongfather_priority_test_calculate_with_policies
+    /// @role test
+    /// @layer core
+    /// @human Test de calcul de priorité avec politiques de priorité.
+    /// @do test_calculate_with_priority_policies
     #[test]
     fn test_calculate_with_priority_policies() {
         let calculator = PriorityCalculator::new();
@@ -232,11 +232,11 @@ mod tests {
         assert_eq!(priority.value, 10);
     }
 
-    /// @id: strongfather_priority_test_compare
-    /// @role: test
-    /// @layer: core
-    /// @human: Test de comparaison de priorités.
-    /// @do: test_priority_comparison
+    /// @id strongfather_priority_test_compare
+    /// @role test
+    /// @layer core
+    /// @human Test de comparaison de priorités.
+    /// @do test_priority_comparison
     #[test]
     fn test_compare_priorities() {
         let calculator = PriorityCalculator::new();

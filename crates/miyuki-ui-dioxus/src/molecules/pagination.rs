@@ -1,4 +1,8 @@
-// @id: MUID-Pagination @do: pagination-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-Pagination
+// @do pagination-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Pagination molecule for navigating through pages.
 //!

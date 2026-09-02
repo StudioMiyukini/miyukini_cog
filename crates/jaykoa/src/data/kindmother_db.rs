@@ -1,10 +1,10 @@
 //! Base de données fille SQLite JayKoa sous autorité KindMother.
 //!
-//! @id: jaykoa_kindmother_db
-//! @do: provide_sqlite_persistence_for_jaykoa
-//! @role: persistence
-//! @layer: infra
-//! @human: Instance Daughter : persistance locale via SQLite, identité KindMother.
+//! @id     jaykoa_kindmother_db
+//! @do     provide_sqlite_persistence_for_jaykoa
+//! @role   persistence
+//! @layer  infra
+//! @human  Instance Daughter : persistance locale via SQLite, identité KindMother.
 //!
 //! INVARIANTS :
 //! - Aucun accès direct au stockage depuis l'UI

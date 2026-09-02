@@ -6,11 +6,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyusearchError;
 use crate::store;
 
-/// @id: miyusearch_tool_search_index_update
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour l'index ; document, champs, identifiant fournis dans le flux.
-/// @do: search_index_update_under_governance
+/// @id miyusearch_tool_search_index_update
+/// @role mutator
+/// @layer tool
+/// @human Met à jour l'index ; document, champs, identifiant fournis dans le flux.
+/// @do search_index_update_under_governance
 /// tool.search.index.update — ne décide pas ; critères fournis.
 pub fn update(
     ctx: &GovernedContext,

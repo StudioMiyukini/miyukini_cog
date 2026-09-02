@@ -1,9 +1,9 @@
 //! Messages du protocole de synchronisation P2P.
 //!
-//! @id: miyucloud_sync_protocol
-//! @do: define_sync_protocol_messages_and_manifest_entry
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_protocol
+//! @do     define_sync_protocol_messages_and_manifest_entry
+//! @role   sync
+//! @layer  infra
 //!
 //! Definit les messages echanges entre pairs pendant la synchronisation :
 //! demandes de manifeste, echanges de chunks, notifications de modification,

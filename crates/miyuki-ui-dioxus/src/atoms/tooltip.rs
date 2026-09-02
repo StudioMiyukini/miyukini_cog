@@ -1,4 +1,8 @@
-// @id: MUID-Tooltip @do: tooltip-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Tooltip
+// @do tooltip-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Tooltip atom displaying contextual information on hover.
 //!

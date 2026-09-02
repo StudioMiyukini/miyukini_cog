@@ -1,10 +1,10 @@
 //! Composants calendrier generiques pour Miyukini Central.
 //!
-//! @id: central.components.calendar
-//! @do: provide_reusable_calendar_views
-//! @role: ui
-//! @layer: ui
-//! @human: Composants calendrier reutilisables (jour, semaine, mois)
+//! @id     central.components.calendar
+//! @do     provide_reusable_calendar_views
+//! @role   ui
+//! @layer  ui
+//! @human  Composants calendrier reutilisables (jour, semaine, mois)
 //!
 //! Ce module fournit des composants calendrier generiques utilisables
 //! par tous les services (JayKoa, JayFestival, etc.).

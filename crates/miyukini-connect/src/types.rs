@@ -1,9 +1,9 @@
 //! Shared contract types for Miyukini Connect APIs.
 //!
-//! @id: miyukini_connect_types
-//! @do: define_connect_contracts
-//! @role: api
-//! @layer: contract
+//! @id     miyukini_connect_types
+//! @do     define_connect_contracts
+//! @role   api
+//! @layer  contract
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

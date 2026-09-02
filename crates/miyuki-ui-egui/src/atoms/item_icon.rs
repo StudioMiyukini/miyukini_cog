@@ -1,4 +1,8 @@
-// @id: MUIE-ItemIcon @do: item-icon-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-ItemIcon
+// @do item-icon-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Item icon with quality-colored overlay border.
 //!

@@ -6,11 +6,11 @@
 //!   absolue, seul le contenu s'adapte (principe 9-patch vectoriel).
 //! - **PNG data URL** (base64) : curseurs pixel-art à taille fixe.
 //!
-//! @id: central.services.ui_assets
-//! @do: provide_ui_asset_generators_and_embedded_sprites
-//! @role: ui
-//! @layer: infra
-//! @human: Générateurs SVG paramétriques et sprites PNG embarqués pour l'UI Builder
+//! @id     central.services.ui_assets
+//! @do     provide_ui_asset_generators_and_embedded_sprites
+//! @role   ui
+//! @layer  infra
+//! @human  Générateurs SVG paramétriques et sprites PNG embarqués pour l'UI Builder
 
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 

@@ -2,11 +2,11 @@
 //!
 //! `TriggerType`, `ConditionOp`, `Condition`, `Action`, `Automation`.
 
-// @id: toolkit.alicia.automations.types
-// @role: automation_domain_types
-// @layer: 6
-// @human: Types de domaine des automatisations : triggers, conditions, actions, automation.
-// @do: define_automation_domain_types
+// @id toolkit.alicia.automations.types
+// @role automation_domain_types
+// @layer 6
+// @human Types de domaine des automatisations : triggers, conditions, actions, automation.
+// @do define_automation_domain_types
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,8 @@
+//! @id     central.services
+//! @do     regrouper_services
+//! @role   orchestration
+//! @layer  app
+//! @human  Services applicatifs de Miyukini Central (métier, remote, jeux).
 //! Vues des services dans Miyukini Central.
 //!
 //! Central est un launcher standalone : les services sont des binaires indépendants.

@@ -1,4 +1,8 @@
-// @id: MUIT-PaletteCog @do: cog-palette @role: token @layer: 5 @human: miyuk
+// @id MUIT-PaletteCog
+// @do cog-palette
+// @role token
+// @layer 5
+// @human miyuk
 
 use super::Palette;
 use crate::color::Rgba;

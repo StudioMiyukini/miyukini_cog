@@ -1,8 +1,8 @@
 //! Bibliothèque JayKoa — Calendrier universel du COG.
 //!
-//! @id: jaykoa_lib
-//! @do: expose_public_modules_jaykoa
-//! @layer: infra
+//! @id     jaykoa_lib
+//! @do     expose_public_modules_jaykoa
+//! @layer  infra
 //!
 //! JayKoa est un récepteur temporel transversal : il reflète, agrège et orchestre
 //! le temps issu des autres Services (JayRDV, futurs services).

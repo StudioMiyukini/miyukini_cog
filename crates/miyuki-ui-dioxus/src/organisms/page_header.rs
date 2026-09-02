@@ -1,4 +1,8 @@
-// @id: MUID-PageHeader @do: page-header-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-PageHeader
+// @do page-header-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! PageHeader organism — per-page heading with title, description, breadcrumb, and action slot.
 //!
@@ -16,9 +20,11 @@
 //! }
 //! ```
 //!
-//! @id: muid_page_header @do: render_page_header
-//! @role: ui @layer: service
-//! @human: PageHeader — en-tête de page avec titre, description optionnelle et slot d'action.
+//! @id     muid_page_header
+//! @do render_page_header
+//! @role   ui
+//! @layer service
+//! @human  PageHeader — en-tête de page avec titre, description optionnelle et slot d'action.
 
 use dioxus::prelude::*;
 

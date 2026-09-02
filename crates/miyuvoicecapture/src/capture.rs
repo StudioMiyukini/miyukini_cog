@@ -3,11 +3,11 @@
 //! Gere le demarrage/arret des streams audio cpal, la conversion
 //! vers f32 mono 16kHz, et l'ecriture dans un ring buffer SPSC.
 
-// @id: alicia_capture_capture
-// @role: processing
-// @layer: toolkit
-// @human: Capture audio via cpal, callback ecriture ring buffer, demarrage/arret streams.
-// @do: capture_audio_stream
+// @id alicia_capture_capture
+// @role processing
+// @layer toolkit
+// @human Capture audio via cpal, callback ecriture ring buffer, demarrage/arret streams.
+// @do capture_audio_stream
 
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;

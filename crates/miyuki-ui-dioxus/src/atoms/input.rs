@@ -1,4 +1,8 @@
-// @id: MUID-TextInput @do: text-input-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-TextInput
+// @do text-input-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Text input atom with type variants and error state.
 //!

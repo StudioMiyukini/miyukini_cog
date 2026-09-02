@@ -1,9 +1,9 @@
 //! Error contracts for Miyukini Connect.
 //!
-//! @id: miyukini_connect_errors
-//! @do: normalize_connect_errors
-//! @role: api
-//! @layer: contract
+//! @id     miyukini_connect_errors
+//! @do     normalize_connect_errors
+//! @role   api
+//! @layer  contract
 
 use crate::types::AuthMethod;
 use thiserror::Error;

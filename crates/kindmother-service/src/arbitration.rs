@@ -1,8 +1,8 @@
 //! Moteur d'arbitrage - contrôle d'accès et validation des requêtes.
 //!
-//! @id: kindmother_service_arbitration
-//! @do: enforce_access_control_and_validation
-//! @layer: core
+//! @id     kindmother_service_arbitration
+//! @do     enforce_access_control_and_validation
+//! @layer  core
 //!
 //! Le moteur d'arbitrage assure que :
 //! - Seuls les opérateurs autorisés peuvent accéder aux données

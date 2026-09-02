@@ -1,9 +1,9 @@
 //! Wizard d'onboarding premiere connexion MiyuCloud.
 //!
-//! @id: miyucloud_domain_onboarding
-//! @do: provide_onboarding_status_checks_completion
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_onboarding
+//! @do     provide_onboarding_status_checks_completion
+//! @role   domain
+//! @layer  domain
 //!
 //! Gere le flux de premiere connexion : verification passphrase,
 //! configuration 2FA, verification stockage, completion.

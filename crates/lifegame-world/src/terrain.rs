@@ -2,19 +2,19 @@
 //!
 //! Gestion des tuiles et de la grille de terrain.
 //!
-//! @id: lifegame.world.terrain
-//! @role: simulation
-//! @layer: domain
-//! @do: manage_terrain_tiles_and_grid
-//! @human: Grille de terrain avec types de tuiles et propriétés
+//! @id     lifegame.world.terrain
+//! @role   simulation
+//! @layer  domain
+//! @do     manage_terrain_tiles_and_grid
+//! @human  Grille de terrain avec types de tuiles et propriétés
 
 use serde::{Deserialize, Serialize};
 use crate::ResourceDeposit;
 
 /// Type de terrain pour une tuile
 ///
-/// @id: lifegame.world.terrain_type
-/// @do: enumerate_terrain_types
+/// @id lifegame.world.terrain_type
+/// @do enumerate_terrain_types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum TerrainType {
     /// Eau profonde — navigation bateau uniquement
@@ -113,8 +113,8 @@ impl TerrainType {
 
 /// Une tuile du monde
 ///
-/// @id: lifegame.world.tile
-/// @do: represent_single_terrain_tile
+/// @id lifegame.world.tile
+/// @do represent_single_terrain_tile
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tile {
     /// Type de terrain
@@ -199,8 +199,8 @@ pub enum TileEffect {
 
 /// Grille de terrain du monde
 ///
-/// @id: lifegame.world.terrain_grid
-/// @do: manage_2d_grid_of_tiles
+/// @id lifegame.world.terrain_grid
+/// @do manage_2d_grid_of_tiles
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TerrainGrid {
     /// Largeur en tuiles

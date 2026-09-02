@@ -3,9 +3,9 @@
 //! Délégation exclusive au service KindMother ; pas d'accès SQLite direct.
 //! API synchrone (block_on sur le runtime Tokio) pour compatibilité avec le domaine.
 //!
-//! @id: jay1tribu_kindmother_client_db
-//! @do: persist_jay1tribu_data_via_kindmother_client
-//! @layer: infra
+//! @id     jay1tribu_kindmother_client_db
+//! @do     persist_jay1tribu_data_via_kindmother_client
+//! @layer  infra
 
 use crate::data::types::{Friend, Message, Salon, SalonType, Tribe};
 use kindmother::{InstanceIdentity, InstanceType};

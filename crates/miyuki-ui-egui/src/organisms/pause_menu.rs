@@ -1,4 +1,8 @@
-// @id: MUIE-PauseMenu @do: pause-menu-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-PauseMenu
+// @do pause-menu-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Pause menu organism -- overlay with resume/options/save/quit.
 

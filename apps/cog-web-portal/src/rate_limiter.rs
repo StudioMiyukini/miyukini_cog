@@ -1,8 +1,10 @@
 //! Rate limiter IP-based pour le COG Web Portal.
 //!
-//! @id: cog_web_portal_rate_limiter @do: limit_request_rate_per_ip
-//! @role: security @layer: app
-//! @human: Rate limiter Portal — fenêtre glissante par IP, 60 req/min, retourne 429 avec Retry-After.
+//! @id     cog_web_portal_rate_limiter
+//! @do limit_request_rate_per_ip
+//! @role   security
+//! @layer app
+//! @human  Rate limiter Portal — fenêtre glissante par IP, 60 req/min, retourne 429 avec Retry-After.
 //!
 //! Adapté de apps/miyucloud/src/web_surface/rate_limiter.rs.
 

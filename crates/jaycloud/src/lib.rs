@@ -17,11 +17,11 @@
 #![doc(html_root_url = "https://docs.miyukini.com/jaycloud")]
 #![allow(dead_code)]
 
-// @id: service.jaycloud
-// @role: backup_storage_service
-// @layer: 7
-// @human: Service Miyukini de sauvegarde cloud souverain.
-// @do: provide_cloud_backup_service
+// @id service.jaycloud
+// @role backup_storage_service
+// @layer 7
+// @human Service Miyukini de sauvegarde cloud souverain.
+// @do provide_cloud_backup_service
 
 pub mod adapters;
 pub mod config;

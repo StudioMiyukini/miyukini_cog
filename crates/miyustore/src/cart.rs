@@ -15,11 +15,11 @@ fn carts() -> &'static Mutex<HashMap<String, CartLines>> {
     CARTS.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-/// @id: miyustore_tool_commerce_cart_add
-/// @role: mutator
-/// @layer: tool
-/// @human: Ajoute une ligne au panier ; WriteIntent KindMother.
-/// @do: commerce_cart_add_under_governance
+/// @id miyustore_tool_commerce_cart_add
+/// @role mutator
+/// @layer tool
+/// @human Ajoute une ligne au panier ; WriteIntent KindMother.
+/// @do commerce_cart_add_under_governance
 pub fn add(ctx: &GovernedContext, cart_ref: &str, payload: &str) -> Result<String, MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -35,11 +35,11 @@ pub fn add(ctx: &GovernedContext, cart_ref: &str, payload: &str) -> Result<Strin
     Ok(line_id)
 }
 
-/// @id: miyustore_tool_commerce_cart_update
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour une ligne du panier ; WriteIntent KindMother.
-/// @do: commerce_cart_update_under_governance
+/// @id miyustore_tool_commerce_cart_update
+/// @role mutator
+/// @layer tool
+/// @human Met à jour une ligne du panier ; WriteIntent KindMother.
+/// @do commerce_cart_update_under_governance
 pub fn update(ctx: &GovernedContext, line_id: &str, payload: &str) -> Result<(), MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -56,11 +56,11 @@ pub fn update(ctx: &GovernedContext, line_id: &str, payload: &str) -> Result<(),
     Ok(())
 }
 
-/// @id: miyustore_tool_commerce_cart_remove
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime une ligne du panier ; WriteIntent KindMother.
-/// @do: commerce_cart_remove_under_governance
+/// @id miyustore_tool_commerce_cart_remove
+/// @role mutator
+/// @layer tool
+/// @human Supprime une ligne du panier ; WriteIntent KindMother.
+/// @do commerce_cart_remove_under_governance
 pub fn remove(ctx: &GovernedContext, line_id: &str) -> Result<(), MiyustoreError> {
     if !ctx.has_mandate() {
         return Err(MiyustoreError::NoMandate);
@@ -74,11 +74,11 @@ pub fn remove(ctx: &GovernedContext, line_id: &str) -> Result<(), MiyustoreError
     Ok(())
 }
 
-/// @id: miyustore_tool_commerce_cart_compute
-/// @role: accessor
-/// @layer: tool
-/// @human: Calcule totaux, taxes, livraison du panier ; règles fournies dans le flux.
-/// @do: commerce_cart_compute_under_governance
+/// @id miyustore_tool_commerce_cart_compute
+/// @role accessor
+/// @layer tool
+/// @human Calcule totaux, taxes, livraison du panier ; règles fournies dans le flux.
+/// @do commerce_cart_compute_under_governance
 pub fn compute(
     ctx: &GovernedContext,
     cart_ref: &str,

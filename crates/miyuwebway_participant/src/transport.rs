@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuwebwayParticipantError;
 
-/// @id: miyuwebway_participant_mws_transport_send
-/// @role: mutator
-/// @layer: tool
-/// @human: Envoie un message vers une adresse ; exécution seule ; adresse fournie par Cores.
-/// @do: mws_transport_send_under_governance
+/// @id miyuwebway_participant_mws_transport_send
+/// @role mutator
+/// @layer tool
+/// @human Envoie un message vers une adresse ; exécution seule ; adresse fournie par Cores.
+/// @do mws_transport_send_under_governance
 pub fn send(
     ctx: &GovernedContext,
     _address: &str,

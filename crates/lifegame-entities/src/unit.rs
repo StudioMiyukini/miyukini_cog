@@ -2,19 +2,19 @@
 //!
 //! Représente les entités intelligentes appartenant à une race civilisée.
 //!
-//! @id: lifegame.entities.unit
-//! @role: simulation
-//! @layer: domain
-//! @do: define_civilized_unit_structures_and_behaviors
-//! @human: Structures et comportements des unités civilisées (Humains, Orcs, Elfes, Nains)
+//! @id     lifegame.entities.unit
+//! @role   simulation
+//! @layer  domain
+//! @do     define_civilized_unit_structures_and_behaviors
+//! @human  Structures et comportements des unités civilisées (Humains, Orcs, Elfes, Nains)
 
 use serde::{Deserialize, Serialize};
 use crate::{EntityId, KingdomId, Vec2};
 
 /// Race d'une unité civilisée
 ///
-/// @id: lifegame.entities.race
-/// @do: enumerate_playable_races
+/// @id lifegame.entities.race
+/// @do enumerate_playable_races
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum Race {
     /// Humains — équilibrés, adaptables, expansion rapide
@@ -133,8 +133,8 @@ pub struct Armor {
 
 /// Unité civilisée complète
 ///
-/// @id: lifegame.entities.unit_struct
-/// @do: represent_civilized_entity_with_needs_and_stats
+/// @id lifegame.entities.unit_struct
+/// @do represent_civilized_entity_with_needs_and_stats
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Unit {
     /// Identifiant unique

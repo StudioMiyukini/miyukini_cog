@@ -1,10 +1,10 @@
 //! Indicateur de synchronisation P2P et panel de gestion des pairs/conflits.
 //!
-//! @id: miyucloud_sync_status
-//! @do: display_sync_status_badge_and_panel
-//! @role: component
-//! @layer: presentation
-//! @human: Lise (Dev Front-End)
+//! @id     miyucloud_sync_status
+//! @do     display_sync_status_badge_and_panel
+//! @role   component
+//! @layer  presentation
+//! @human  Lise (Dev Front-End)
 //!
 //! Ce module fournit :
 //! - `SyncStatusBadge` : badge compact dans le header MiyuCloud (pairs en ligne, conflits, etat sync)

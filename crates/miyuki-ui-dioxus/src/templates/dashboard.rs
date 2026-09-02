@@ -1,4 +1,8 @@
-// @id: MUID-DashboardLayout @do: dashboard-template @role: component @layer: 6 @human: miyuk
+// @id MUID-DashboardLayout
+// @do dashboard-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Dashboard layout template with header, optional sidebar, and scrollable content.
 //!

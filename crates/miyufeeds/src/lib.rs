@@ -4,11 +4,11 @@
 //! Kit d'outils flux ATOM (board, forum, topic). Lecture = KindMother ; décision accès = StrongFather.
 //! Alignement MIP : domaine `content`, layer tool/toolkit.
 
-// @id: toolkit.content.miyufeeds
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuFeeds ; expose les modules tools.
-/// @do: expose_miyufeeds_toolkit
+// @id toolkit.content.miyufeeds
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuFeeds ; expose les modules tools.
+/// @do expose_miyufeeds_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

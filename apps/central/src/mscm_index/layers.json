@@ -1,0 +1,46 @@
+{
+  "app": [
+    "central",
+    "central.services",
+    "central_remote_module"
+  ],
+  "domain": [
+    "central.components.calendar.types",
+    "central.services.lifegame",
+    "central.services.lifegame.canvas",
+    "central.services.lifegame.sidebar",
+    "central.services.lifegame.stats_bar"
+  ],
+  "infra": [
+    "central.services.ui_assets"
+  ],
+  "presentation": [
+    "miyucloud_auth_security_components",
+    "miyucloud_calendar_view",
+    "miyucloud_central_view",
+    "miyucloud_contacts_view",
+    "miyucloud_explorer",
+    "miyucloud_file_detail",
+    "miyucloud_http_client",
+    "miyucloud_settings",
+    "miyucloud_share_dialog",
+    "miyucloud_sidebar",
+    "miyucloud_sync_status",
+    "miyucloud_trash_view",
+    "miyucloud_ui_components",
+    "miyucloud_ui_state",
+    "miyucloud_upload"
+  ],
+  "ui": [
+    "central.components",
+    "central.components.calendar",
+    "central.components.calendar.agenda_list",
+    "central.components.calendar.day_view",
+    "central.components.calendar.event_slot",
+    "central.components.calendar.mini_calendar",
+    "central.components.calendar.month_view",
+    "central.components.calendar.week_view",
+    "central.components.service_sidebar",
+    "central.services.ui_builder"
+  ]
+}

@@ -6,11 +6,11 @@ use crate::errors::MiyucmsError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyucms_tool_content_revision_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée une révision pour un contenu ; WriteIntent KindMother.
-/// @do: content_revision_create_under_governance
+/// @id miyucms_tool_content_revision_create
+/// @role mutator
+/// @layer tool
+/// @human Crée une révision pour un contenu ; WriteIntent KindMother.
+/// @do content_revision_create_under_governance
 pub fn create(
     ctx: &GovernedContext,
     content_id: &str,
@@ -38,11 +38,11 @@ pub fn create(
     Ok(id)
 }
 
-/// @id: miyucms_tool_content_revision_list
-/// @role: accessor
-/// @layer: tool
-/// @human: Liste les révisions d'un contenu ; lecture gouvernée.
-/// @do: content_revision_list_under_governance
+/// @id miyucms_tool_content_revision_list
+/// @role accessor
+/// @layer tool
+/// @human Liste les révisions d'un contenu ; lecture gouvernée.
+/// @do content_revision_list_under_governance
 pub fn list(ctx: &GovernedContext, content_id: &str) -> Result<Vec<String>, MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
@@ -54,11 +54,11 @@ pub fn list(ctx: &GovernedContext, content_id: &str) -> Result<Vec<String>, Miyu
     Ok(ids)
 }
 
-/// @id: miyucms_tool_content_revision_restore
-/// @role: mutator
-/// @layer: tool
-/// @human: Restaure une révision ; décision StrongFather ; WriteIntent KindMother.
-/// @do: content_revision_restore_under_governance
+/// @id miyucms_tool_content_revision_restore
+/// @role mutator
+/// @layer tool
+/// @human Restaure une révision ; décision StrongFather ; WriteIntent KindMother.
+/// @do content_revision_restore_under_governance
 pub fn restore(
     ctx: &GovernedContext,
     _content_id: &str,
@@ -76,11 +76,11 @@ pub fn restore(
     Ok(())
 }
 
-/// @id: miyucms_tool_content_revision_compare
-/// @role: accessor
-/// @layer: tool
-/// @human: Compare deux révisions ; lecture seule.
-/// @do: content_revision_compare_under_governance
+/// @id miyucms_tool_content_revision_compare
+/// @role accessor
+/// @layer tool
+/// @human Compare deux révisions ; lecture seule.
+/// @do content_revision_compare_under_governance
 pub fn compare(
     ctx: &GovernedContext,
     revision_id_a: &str,

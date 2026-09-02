@@ -1,4 +1,8 @@
-// @id: MUID-SettingsLayout @do: settings-template @role: component @layer: 6 @human: miyuk
+// @id MUID-SettingsLayout
+// @do settings-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Settings page layout with sidebar navigation and content area.
 //!

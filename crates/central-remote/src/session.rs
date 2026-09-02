@@ -1,8 +1,10 @@
 //! Gestion des sessions authentifiées CentralRemote.
 //!
-//! @id: central_remote_session @do: manage_remote_auth_sessions
-//! @role: security @layer: toolkit
-//! @human: Tokens HMAC-SHA256 avec expiration pour les sessions remote.
+//! @id     central_remote_session
+//! @do manage_remote_auth_sessions
+//! @role   security
+//! @layer toolkit
+//! @human  Tokens HMAC-SHA256 avec expiration pour les sessions remote.
 
 use hmac::{Hmac, Mac};
 use sha2::Sha256;

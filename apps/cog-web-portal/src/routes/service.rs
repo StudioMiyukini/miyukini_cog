@@ -1,8 +1,10 @@
 //! Routes de service — GET /:service et GET /:service/:slug.
 //!
-//! @id: cog_web_portal_route_service @do: render_portal_service_pages
-//! @role: api @layer: app
-//! @human: Routes service Portal — page d'accueil service et page par slug.
+//! @id     cog_web_portal_route_service
+//! @do render_portal_service_pages
+//! @role   api
+//! @layer app
+//! @human  Routes service Portal — page d'accueil service et page par slug.
 
 use axum::Extension;
 use axum::extract::{Path, State};

@@ -1,9 +1,9 @@
 //! Operations CRUD sur les fichiers et dossiers MiyuCloud.
 //!
-//! @id: miyucloud_domain_file_ops
-//! @do: implement_file_upload_download_crud
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_file_ops
+//! @do     implement_file_upload_download_crud
+//! @role   domain
+//! @layer  domain
 //!
 //! Upload : donnees -> chunking -> chiffrement at-rest -> ecriture storage -> insertion DB
 //! Download : lecture DB -> lecture storage -> dechiffrement -> reassemblage -> verification SHA-256

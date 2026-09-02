@@ -1,4 +1,8 @@
-// @id: MUIE-TmplCharSelect @do: char-select-template @role: template @layer: 6 @human: miyuk
+// @id MUIE-TmplCharSelect
+// @do char-select-template
+// @role template
+// @layer 6
+// @human miyuk
 
 //! Character selection layout template.
 

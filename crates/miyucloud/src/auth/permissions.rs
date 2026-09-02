@@ -1,9 +1,9 @@
 //! Verification des permissions d'acces aux fichiers et dossiers.
 //!
-//! @id: miyucloud_auth_permissions
-//! @do: verify_access_permissions_for_resources
-//! @role: auth
-//! @layer: domain
+//! @id     miyucloud_auth_permissions
+//! @do     verify_access_permissions_for_resources
+//! @role   auth
+//! @layer  domain
 //!
 //! Le proprietaire a toujours tous les droits. Les beneficiaires de partage
 //! sont verifies selon leur niveau de permission (read, read_write).

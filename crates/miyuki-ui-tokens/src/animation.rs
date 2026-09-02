@@ -1,4 +1,8 @@
-// @id: MUIT-Animation @do: animation-tokens @role: token @layer: 5 @human: miyuk
+// @id MUIT-Animation
+// @do animation-tokens
+// @role token
+// @layer 5
+// @human miyuk
 
 /// Transition duration in milliseconds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

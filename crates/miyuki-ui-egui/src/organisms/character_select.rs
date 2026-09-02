@@ -1,4 +1,8 @@
-// @id: MUIE-CharSelect @do: character-select-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-CharSelect
+// @do character-select-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Character selection screen organism.
 

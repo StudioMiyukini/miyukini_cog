@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyubillingError;
 
-/// @id: miyubilling_tool_billing_invoice_generate
-/// @role: mutator
-/// @layer: tool
-/// @human: Génère une facture ; règles fournies ; WriteIntent KindMother.
-/// @do: billing_invoice_generate_under_governance
+/// @id miyubilling_tool_billing_invoice_generate
+/// @role mutator
+/// @layer tool
+/// @human Génère une facture ; règles fournies ; WriteIntent KindMother.
+/// @do billing_invoice_generate_under_governance
 /// Stub : id facture généré (compteur) ; persistance = KindMother côté produit.
 pub fn generate(ctx: &GovernedContext, _payload: &str) -> Result<String, MiyubillingError> {
     if !ctx.has_mandate() {
@@ -20,11 +20,11 @@ pub fn generate(ctx: &GovernedContext, _payload: &str) -> Result<String, Miyubil
     Ok(format!("inv:{n}"))
 }
 
-/// @id: miyubilling_tool_billing_invoice_list
-/// @role: accessor
-/// @layer: tool
-/// @human: Liste les factures ; filtres fournis ; lecture gouvernée.
-/// @do: billing_invoice_list_under_governance
+/// @id miyubilling_tool_billing_invoice_list
+/// @role accessor
+/// @layer tool
+/// @human Liste les factures ; filtres fournis ; lecture gouvernée.
+/// @do billing_invoice_list_under_governance
 pub fn list(
     ctx: &GovernedContext,
     _filters: Option<&str>,

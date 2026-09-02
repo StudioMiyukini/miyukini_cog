@@ -1,10 +1,10 @@
 //! Barre de statistiques pour Life Game.
 //!
-//! @id: central.services.lifegame.stats_bar
-//! @role: ui
-//! @layer: domain
-//! @do: render_game_statistics_bar_with_population_and_time
-//! @human: Barre inférieure avec stats détaillées.
+//! @id     central.services.lifegame.stats_bar
+//! @role   ui
+//! @layer  domain
+//! @do     render_game_statistics_bar_with_population_and_time
+//! @human  Barre inférieure avec stats détaillées.
 
 use dioxus::prelude::*;
 use super::{LifeGameLocalState, BG_PANEL, BORDER, TEXT_LIGHT, TEXT_MUTED};

@@ -1,9 +1,9 @@
 //! Test d'integration : synchronisation P2P complette.
 //!
-//! @id: miyucloud_integration_sync
-//! @do: test_sync_manifest_diff_conflict_export_import_flow
-//! @role: test
-//! @layer: integration
+//! @id     miyucloud_integration_sync
+//! @do     test_sync_manifest_diff_conflict_export_import_flow
+//! @role   test
+//! @layer  integration
 //!
 //! Ce test couvre le flux de synchronisation P2P :
 //! - Construction de manifeste depuis la DB

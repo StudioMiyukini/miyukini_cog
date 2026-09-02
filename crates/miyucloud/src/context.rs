@@ -1,9 +1,9 @@
 //! Contexte gouverne MiyuCloud.
 //!
-//! @id: miyucloud_context
-//! @do: provide_governed_context_for_miyucloud
-//! @role: governance
-//! @layer: infra
+//! @id     miyucloud_context
+//! @do     provide_governed_context_for_miyucloud
+//! @role   governance
+//! @layer  infra
 //!
 //! Le `GovernedContext` centralise les references partagees entre les couches
 //! du service : identifiant proprietaire, chemin de stockage, etc.

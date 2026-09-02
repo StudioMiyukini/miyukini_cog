@@ -1,10 +1,10 @@
 //! Types d'erreur de l'orchestrateur Alicia.
 
-// @id: service.alicia.errors
-// @role: error_types
-// @layer: 7
-// @human: Erreurs de l'orchestrateur Alicia : config, device, MQTT, NLU, commande.
-// @do: define_alicia_error_types
+// @id service.alicia.errors
+// @role error_types
+// @layer 7
+// @human Erreurs de l'orchestrateur Alicia : config, device, MQTT, NLU, commande.
+// @do define_alicia_error_types
 
 use miyualicia_devices::DeviceError;
 use miyualicia_http::HttpError;

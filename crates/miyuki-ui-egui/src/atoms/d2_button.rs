@@ -1,4 +1,8 @@
-// @id: MUIE-D2Button @do: d2-button-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-D2Button
+// @do d2-button-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Diablo 2 style button with stone background and gold text.
 //!

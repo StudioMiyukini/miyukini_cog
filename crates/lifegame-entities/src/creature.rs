@@ -2,19 +2,19 @@
 //!
 //! Représente les animaux, monstres et créatures magiques.
 //!
-//! @id: lifegame.entities.creature
-//! @role: simulation
-//! @layer: domain
-//! @do: define_creature_structures_and_types
-//! @human: Structures et types de créatures (animaux, monstres, boss)
+//! @id     lifegame.entities.creature
+//! @role   simulation
+//! @layer  domain
+//! @do     define_creature_structures_and_types
+//! @human  Structures et types de créatures (animaux, monstres, boss)
 
 use serde::{Deserialize, Serialize};
 use crate::{EntityId, Vec2};
 
 /// Type de créature
 ///
-/// @id: lifegame.entities.creature_type
-/// @do: enumerate_creature_types
+/// @id lifegame.entities.creature_type
+/// @do enumerate_creature_types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum CreatureType {
     // === Animaux neutres ===
@@ -199,8 +199,8 @@ pub enum CreatureBehavior {
 
 /// Créature dans le monde
 ///
-/// @id: lifegame.entities.creature_struct
-/// @do: represent_creature_entity_with_behavior
+/// @id lifegame.entities.creature_struct
+/// @do represent_creature_entity_with_behavior
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Creature {
     /// Identifiant unique

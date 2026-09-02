@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyudeclarationsError;
 
-/// @id: miyudeclarations_tool_tva_prepare
-/// @role: mutator
-/// @layer: tool
-/// @human: Prépare la déclaration TVA.
-/// @do: tva_prepare_under_governance
+/// @id miyudeclarations_tool_tva_prepare
+/// @role mutator
+/// @layer tool
+/// @human Prépare la déclaration TVA.
+/// @do tva_prepare_under_governance
 /// tool.compta.declaration.tva.prepare
 pub fn prepare(
     ctx: &GovernedContext,
@@ -20,11 +20,11 @@ pub fn prepare(
     Ok(TvaPrepareResult::default())
 }
 
-/// @id: miyudeclarations_tool_tva_submit
-/// @role: mutator
-/// @layer: tool
-/// @human: Soumet la déclaration TVA ; autorisation = StrongFather.
-/// @do: tva_submit_under_governance
+/// @id miyudeclarations_tool_tva_submit
+/// @role mutator
+/// @layer tool
+/// @human Soumet la déclaration TVA ; autorisation = StrongFather.
+/// @do tva_submit_under_governance
 /// tool.compta.declaration.tva.submit
 pub fn submit(
     ctx: &GovernedContext,

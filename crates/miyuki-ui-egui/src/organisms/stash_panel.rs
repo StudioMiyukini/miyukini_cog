@@ -1,4 +1,8 @@
-// @id: MUIE-Stash @do: stash-panel-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-Stash
+// @do stash-panel-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Stash panel organism -- shared stash with tabs and grid.
 

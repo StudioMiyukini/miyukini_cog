@@ -1,4 +1,8 @@
-// @id: MUID-ServiceLayout @do: service-template @role: component @layer: 6 @human: miyuk
+// @id MUID-ServiceLayout
+// @do service-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Service page layout with header, sidebar, and scrollable content.
 //!

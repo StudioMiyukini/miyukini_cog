@@ -5,17 +5,17 @@
 
 use serde::{Deserialize, Serialize};
 
-/// @id: miyukiniadmin_cycle_runner
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Runner des tests de cycle (PERF, LAT, LOAD, RES).
-/// @do: run_cycle_tests
+/// @id miyukiniadmin_cycle_runner
+/// @role infrastructure
+/// @layer operator
+/// @human Runner des tests de cycle (PERF, LAT, LOAD, RES).
+/// @do run_cycle_tests
 
-/// @id: miyukiniadmin_miyukinisqltest_runner
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Runner du test MiyukiniSQLtest (chemin complet 8 étapes).
-/// @do: run_miyukinisqltest
+/// @id miyukiniadmin_miyukinisqltest_runner
+/// @role infrastructure
+/// @layer operator
+/// @human Runner du test MiyukiniSQLtest (chemin complet 8 étapes).
+/// @do run_miyukinisqltest
 
 /// Verdict d'un test de cycle (Cycle Tests Contract §7.3).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

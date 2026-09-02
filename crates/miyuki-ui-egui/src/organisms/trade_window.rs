@@ -1,4 +1,8 @@
-// @id: MUIE-Trade @do: trade-window-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-Trade
+// @do trade-window-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Trade window organism -- two grids (yours/theirs) + gold + accept/cancel.
 

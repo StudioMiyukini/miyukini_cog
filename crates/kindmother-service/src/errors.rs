@@ -1,8 +1,8 @@
 //! Erreurs du service KindMother.
 //!
-//! @id: kindmother_service_errors
-//! @do: define_service_errors
-//! @layer: core
+//! @id     kindmother_service_errors
+//! @do     define_service_errors
+//! @layer  core
 
 use thiserror::Error;
 

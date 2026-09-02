@@ -1,10 +1,10 @@
 //! Types domaine JayRDV : rendez-vous, créneaux, ressources, services, clients, rappels.
 //!
-//! @id: jayrdv_data_types
-//! @do: define_jayrdv_domain_model
-//! @role: data
-//! @layer: domain
-//! @human: Modèle métier du service JayRDV — entités, statuts, énumérations.
+//! @id     jayrdv_data_types
+//! @do     define_jayrdv_domain_model
+//! @role   data
+//! @layer  domain
+//! @human  Modèle métier du service JayRDV — entités, statuts, énumérations.
 
 use serde::{Deserialize, Serialize};
 

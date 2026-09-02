@@ -1,8 +1,8 @@
 //! Client KindMother - délégation vers le service de persistance.
 //!
-//! @id: kindmother_client_impl
-//! @do: implement_delegation_client
-//! @layer: toolkit
+//! @id     kindmother_client_impl
+//! @do     implement_delegation_client
+//! @layer  toolkit
 
 use std::collections::HashMap;
 use std::time::Duration;

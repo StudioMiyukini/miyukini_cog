@@ -2,11 +2,11 @@
 //!
 //! Generation, verification et extraction de tokens JWT.
 
-// @id: service.alicia.api.auth
-// @role: jwt_authentication
-// @layer: 7
-// @human: JWT HS256 Alicia : claims, scopes, generation, verification, extractor axum.
-// @do: provide_jwt_auth_for_alicia_api
+// @id service.alicia.api.auth
+// @role jwt_authentication
+// @layer 7
+// @human JWT HS256 Alicia : claims, scopes, generation, verification, extractor axum.
+// @do provide_jwt_auth_for_alicia_api
 
 use std::sync::Arc;
 

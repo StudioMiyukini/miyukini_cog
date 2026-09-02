@@ -1,4 +1,8 @@
-// @id: MUIE-BeltCol @do: belt-column-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-BeltCol
+// @do belt-column-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Belt column molecule -- a vertical stack of 4 belt slots.
 //!

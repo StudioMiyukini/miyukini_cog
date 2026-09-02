@@ -4,11 +4,11 @@
 //! Kit d'outils flux social (post, feed, reaction, share, comment). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `social`, layer tool/toolkit.
 
-// @id: toolkit.social.miyusocialfeed
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuSocialFeed ; expose les modules tools.
-/// @do: expose_miyusocialfeed_toolkit
+// @id toolkit.social.miyusocialfeed
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuSocialFeed ; expose les modules tools.
+/// @do expose_miyusocialfeed_toolkit
 pub mod admin_cell;
 pub mod comment;
 pub mod context;

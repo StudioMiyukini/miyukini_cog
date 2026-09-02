@@ -1,10 +1,10 @@
 //! Sidebar des pouvoirs divins pour Life Game.
 //!
-//! @id: central.services.lifegame.sidebar
-//! @role: ui
-//! @layer: domain
-//! @do: render_divine_powers_palette_with_terrain_brushes
-//! @human: Palette des pouvoirs divins et pinceaux de terrain.
+//! @id     central.services.lifegame.sidebar
+//! @role   ui
+//! @layer  domain
+//! @do     render_divine_powers_palette_with_terrain_brushes
+//! @human  Palette des pouvoirs divins et pinceaux de terrain.
 
 use dioxus::prelude::*;
 use lifegame_world::TerrainType;

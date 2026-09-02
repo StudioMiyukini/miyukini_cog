@@ -1,9 +1,9 @@
 //! Gestion des sessions serveur MiyuCloud.
 //!
-//! @id: miyucloud_auth_sessions
-//! @do: provide_session_create_validate_revoke
-//! @role: auth
-//! @layer: domain
+//! @id     miyucloud_auth_sessions
+//! @do     provide_session_create_validate_revoke
+//! @role   auth
+//! @layer  domain
 //!
 //! Sessions avec token 256-bit, expiration, inactivite,
 //! et flag totp_verified pour la 2FA.

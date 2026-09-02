@@ -1,10 +1,10 @@
 //! Handlers pour les routes /rooms.
 
-// @id: service.alicia.api.handlers.rooms
-// @role: rooms_handler
-// @layer: 7
-// @human: Endpoints pieces Alicia API.
-// @do: handle_rooms_requests
+// @id service.alicia.api.handlers.rooms
+// @role rooms_handler
+// @layer 7
+// @human Endpoints pieces Alicia API.
+// @do handle_rooms_requests
 
 use std::sync::Arc;
 

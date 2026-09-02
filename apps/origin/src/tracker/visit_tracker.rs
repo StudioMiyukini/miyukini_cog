@@ -1,8 +1,8 @@
-//! @id: origin.tracker.visit_tracker
-//! @do: track_catalog_to_home_visits_for_presence
-//! @role: data
-//! @layer: domain
-//! @human: Suivi des visites catalogue → Home COG pour présence.
+//! @id     origin.tracker.visit_tracker
+//! @do     track_catalog_to_home_visits_for_presence
+//! @role   data
+//! @layer  domain
+//! @human  Suivi des visites catalogue → Home COG pour présence.
 //!
 //! Permet au Tracker de considérer un COG comme « présent » si un utilisateur
 //! est passé par le catalogue vers le Home du COG récemment (~1 min), en plus du heartbeat.

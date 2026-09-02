@@ -6,11 +6,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuCalcError;
 
-/// @id: miyucalc_tool_unit_convert
-/// @role: mutator
-/// @layer: tool
-/// @human: Convertit une valeur d'une unité vers une autre.
-/// @do: convert_unit_under_governance
+/// @id miyucalc_tool_unit_convert
+/// @role mutator
+/// @layer tool
+/// @human Convertit une valeur d'une unité vers une autre.
+/// @do convert_unit_under_governance
 /// tool.calc.unit.convert
 pub fn convert(
     ctx: &GovernedContext,

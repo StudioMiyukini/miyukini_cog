@@ -1,4 +1,8 @@
-// @id: MUIT-Palette @do: palette-types @role: token @layer: 5 @human: miyuk
+// @id MUIT-Palette
+// @do palette-types
+// @role token
+// @layer 5
+// @human miyuk
 
 pub mod cog;
 pub mod d2;

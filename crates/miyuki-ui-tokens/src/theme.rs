@@ -1,4 +1,8 @@
-// @id: MUIT-Theme @do: theme-composition @role: token @layer: 5 @human: miyuk
+// @id MUIT-Theme
+// @do theme-composition
+// @role token
+// @layer 5
+// @human miyuk
 
 use crate::animation::TransitionScale;
 use crate::palette::Palette;

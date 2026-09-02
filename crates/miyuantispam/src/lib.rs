@@ -4,11 +4,11 @@
 //! Kit d'outils antispam (captcha, flood, rate_limit). Décision bloquer = StrongFather.
 //! Alignement MIP : domaine `security`, layer tool/toolkit.
 
-// @id: toolkit.security.miyuantispam
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuAntiSpam ; expose les modules tools.
-/// @do: expose_miyuantispam_toolkit
+// @id toolkit.security.miyuantispam
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuAntiSpam ; expose les modules tools.
+/// @do expose_miyuantispam_toolkit
 pub mod admin_cell;
 pub mod captcha;
 pub mod context;

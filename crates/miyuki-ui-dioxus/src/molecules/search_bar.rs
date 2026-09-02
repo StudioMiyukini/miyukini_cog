@@ -1,4 +1,8 @@
-// @id: MUID-SearchBar @do: search-bar-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-SearchBar
+// @do search-bar-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Search bar molecule composing a text input with a search icon.
 //!

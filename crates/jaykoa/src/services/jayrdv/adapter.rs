@@ -1,9 +1,9 @@
 //! Adaptateur JayRDV → JayKoa : lecture réfléchie (store JayRDV ou stub).
 //!
-//! @id: jaykoa_jayrdv_adapter
-//! @do: read_jayrdv_appointments_and_create_reflections
-//! @role: sync
-//! @layer: infra
+//! @id     jaykoa_jayrdv_adapter
+//! @do     read_jayrdv_appointments_and_create_reflections
+//! @role   sync
+//! @layer  infra
 //! Production : lirait via BondingBrother + Mandat de Permission.
 
 use crate::data::types::{EntryType, EventSource, TemporalEntry, TemporalStatus};

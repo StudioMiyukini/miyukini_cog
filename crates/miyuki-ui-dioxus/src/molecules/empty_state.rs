@@ -1,4 +1,8 @@
-// @id: MUID-EmptyState @do: empty-state-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-EmptyState
+// @do empty-state-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! EmptyState molecule — placeholder display when a list or view has no content.
 //!
@@ -16,9 +20,11 @@
 //! }
 //! ```
 //!
-//! @id: muid_empty_state @do: render_empty_state
-//! @role: ui @layer: service
-//! @human: EmptyState — affiche un état vide avec icône, titre, description optionnelle et CTA optionnel.
+//! @id     muid_empty_state
+//! @do render_empty_state
+//! @role   ui
+//! @layer service
+//! @human  EmptyState — affiche un état vide avec icône, titre, description optionnelle et CTA optionnel.
 
 use dioxus::prelude::*;
 

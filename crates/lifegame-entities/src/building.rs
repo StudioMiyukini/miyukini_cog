@@ -2,19 +2,19 @@
 //!
 //! Représente les structures construites par les civilisations.
 //!
-//! @id: lifegame.entities.building
-//! @role: simulation
-//! @layer: domain
-//! @do: define_building_structures_and_types
-//! @human: Structures et types de bâtiments constructibles
+//! @id     lifegame.entities.building
+//! @role   simulation
+//! @layer  domain
+//! @do     define_building_structures_and_types
+//! @human  Structures et types de bâtiments constructibles
 
 use serde::{Deserialize, Serialize};
 use crate::{EntityId, KingdomId, Vec2};
 
 /// Type de bâtiment
 ///
-/// @id: lifegame.entities.building_type
-/// @do: enumerate_building_types
+/// @id lifegame.entities.building_type
+/// @do enumerate_building_types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum BuildingType {
     /// Maison — logement pour 4 unités
@@ -158,8 +158,8 @@ impl BuildingType {
 
 /// Bâtiment construit
 ///
-/// @id: lifegame.entities.building_struct
-/// @do: represent_constructed_building_with_state
+/// @id lifegame.entities.building_struct
+/// @do represent_constructed_building_with_state
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Building {
     /// Identifiant unique

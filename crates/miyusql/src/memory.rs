@@ -12,11 +12,11 @@ use crate::transaction::TransactionExecutor;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-// @id: miyusql_memory_executor
-// @role: infrastructure
-// @layer: tool
-// @human: Exécuteur en mémoire pour tests (tables, cache, transactions).
-// @do: implement_memory_executor
+// @id miyusql_memory_executor
+// @role infrastructure
+// @layer tool
+// @human Exécuteur en mémoire pour tests (tables, cache, transactions).
+// @do implement_memory_executor
 // État partagé : tables (nom -> lignes), cache (clé -> valeur), transactions.
 
 /// Alias pour une ligne de table (colonne -> valeur).

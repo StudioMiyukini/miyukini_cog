@@ -1,4 +1,8 @@
-// @id: MUID-Card @do: card-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-Card
+// @do card-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Card molecule with optional header, body, and footer.
 //!

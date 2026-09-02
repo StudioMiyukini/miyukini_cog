@@ -1,4 +1,8 @@
-// @id: MUIT-Themes @do: theme-catalog @role: exports @layer: 5 @human: miyuk
+// @id MUIT-Themes
+// @do theme-catalog
+// @role exports
+// @layer 5
+// @human miyuk
 
 //! Pre-built theme constants.
 //!

@@ -3,9 +3,11 @@
 //! Ce crate définit l'interface que tout service Jay doit implémenter
 //! pour être exposé via le COG Web Portal.
 //!
-//! @id: cog_portal_contract_lib @do: define_portal_contract_interface
-//! @role: api @layer: service
-//! @human: PortalContract trait + PublicPage + PortalError — contrat d'exposition Portal partagé.
+//! @id     cog_portal_contract_lib
+//! @do define_portal_contract_interface
+//! @role   api
+//! @layer service
+//! @human  PortalContract trait + PublicPage + PortalError — contrat d'exposition Portal partagé.
 
 use serde::{Deserialize, Serialize};
 

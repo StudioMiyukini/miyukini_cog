@@ -1,10 +1,10 @@
 //! Types d'erreur du client MQTT Alicia.
 
-// @id: toolkit.alicia.mqtt.errors
-// @role: error_types
-// @layer: 6
-// @human: Erreurs MQTT Alicia : connexion, publication, souscription, parsing Z2M.
-// @do: define_mqtt_error_types
+// @id toolkit.alicia.mqtt.errors
+// @role error_types
+// @layer 6
+// @human Erreurs MQTT Alicia : connexion, publication, souscription, parsing Z2M.
+// @do define_mqtt_error_types
 
 /// Erreurs du client MQTT Alicia.
 #[derive(Debug, thiserror::Error)]

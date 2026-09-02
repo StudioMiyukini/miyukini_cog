@@ -1,10 +1,10 @@
 //! Logique métier JayRDV : création, validation, mise à jour d'entités.
 //!
-//! @id: jayrdv_domain
-//! @do: implement_jayrdv_business_logic
-//! @role: domain
-//! @layer: domain
-//! @human: Couche domain pure — validations temporelles, cycles de vie des statuts,
+//! @id     jayrdv_domain
+//! @do     implement_jayrdv_business_logic
+//! @role   domain
+//! @layer  domain
+//! @human  Couche domain pure — validations temporelles, cycles de vie des statuts,
 //!         hold/release de créneaux, gestion des annulations.
 
 use crate::data::{

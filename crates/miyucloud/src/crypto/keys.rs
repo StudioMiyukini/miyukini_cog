@@ -1,9 +1,9 @@
 //! Gestion des cles cryptographiques MiyuCloud.
 //!
-//! @id: miyucloud_crypto_keys
-//! @do: derive_master_and_file_keys_with_argon2_hkdf
-//! @role: crypto
-//! @layer: infra
+//! @id     miyucloud_crypto_keys
+//! @do     derive_master_and_file_keys_with_argon2_hkdf
+//! @role   crypto
+//! @layer  infra
 //!
 //! Hierarchie des cles :
 //! - Passphrase utilisateur (jamais stockee)

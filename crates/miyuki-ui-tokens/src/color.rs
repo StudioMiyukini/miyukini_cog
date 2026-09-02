@@ -1,4 +1,8 @@
-// @id: MUIT-Color @do: color-type @role: token @layer: 5 @human: miyuk
+// @id MUIT-Color
+// @do color-type
+// @role token
+// @layer 5
+// @human miyuk
 
 /// RGBA color with 8 bits per channel.
 ///

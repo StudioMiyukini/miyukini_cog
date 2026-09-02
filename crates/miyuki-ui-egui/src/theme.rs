@@ -1,4 +1,8 @@
-// @id: MUIE-Theme @do: theme-application @role: bridge @layer: 6 @human: miyuk
+// @id MUIE-Theme
+// @do theme-application
+// @role bridge
+// @layer 6
+// @human miyuk
 
 //! Theme application for egui contexts.
 //!

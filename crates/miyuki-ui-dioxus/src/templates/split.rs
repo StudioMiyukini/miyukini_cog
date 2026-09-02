@@ -1,4 +1,8 @@
-// @id: MUID-SplitLayout @do: split-template @role: component @layer: 6 @human: miyuk
+// @id MUID-SplitLayout
+// @do split-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Split panel layout dividing the viewport into left and right sections.
 //!

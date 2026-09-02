@@ -1,9 +1,9 @@
 //! Corbeille MiyuCloud : suppression douce, restauration, purge securisee.
 //!
-//! @id: miyucloud_domain_trash
-//! @do: implement_trash_restore_purge_operations
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_trash
+//! @do     implement_trash_restore_purge_operations
+//! @role   domain
+//! @layer  domain
 //!
 //! La purge ecrase les chunks avec des zeros avant suppression (securite RGPD).
 //! Les elements en corbeille sont masques des listings normaux.

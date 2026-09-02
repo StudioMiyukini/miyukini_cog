@@ -1,4 +1,8 @@
-// @id: MUIE-NpcOpt @do: npc-option-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-NpcOpt
+// @do npc-option-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! NPC dialog option molecule -- a clickable text option in NPC dialogs.
 

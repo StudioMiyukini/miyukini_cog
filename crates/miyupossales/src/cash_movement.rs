@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupossalesError;
 
-/// @id: miyupossales_tool_cash_movement_record
-/// @role: mutator
-/// @layer: tool
-/// @human: Enregistre un mouvement espèces (entrée/sortie) ; WriteIntent KindMother.
-/// @do: cash_movement_record_under_governance
+/// @id miyupossales_tool_cash_movement_record
+/// @role mutator
+/// @layer tool
+/// @human Enregistre un mouvement espèces (entrée/sortie) ; WriteIntent KindMother.
+/// @do cash_movement_record_under_governance
 /// tool.pos.cash.movement.record
 pub fn record(
     ctx: &GovernedContext,

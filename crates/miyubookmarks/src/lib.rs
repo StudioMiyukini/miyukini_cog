@@ -4,11 +4,11 @@
 //! Kit d'outils signets (add, remove, list). Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `content`, layer tool/toolkit.
 
-// @id: toolkit.content.miyubookmarks
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuBookmarks ; expose les modules tools.
-/// @do: expose_miyubookmarks_toolkit
+// @id toolkit.content.miyubookmarks
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuBookmarks ; expose les modules tools.
+/// @do expose_miyubookmarks_toolkit
 pub mod admin_cell;
 pub mod bookmark;
 pub mod context;

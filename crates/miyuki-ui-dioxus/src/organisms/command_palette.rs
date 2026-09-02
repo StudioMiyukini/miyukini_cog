@@ -1,4 +1,8 @@
-// @id: MUID-CommandPalette @do: command-palette-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-CommandPalette
+// @do command-palette-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Command palette organism for quick actions.
 //!

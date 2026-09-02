@@ -25,11 +25,11 @@
 //! Décision = StrongFather ; WriteIntent KindMother.
 //! Alignement MIP : domaine `identity`, layer tool/toolkit.
 
-// @id: toolkit.identity.miyuprofile
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuProfile Central ; expose les modules tools.
-/// @do: expose_miyuprofile_toolkit
+// @id toolkit.identity.miyuprofile
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuProfile Central ; expose les modules tools.
+/// @do expose_miyuprofile_toolkit
 
 // ── Modules existants (rétro-compatibles) ────────────────────────
 pub mod admin_cell;

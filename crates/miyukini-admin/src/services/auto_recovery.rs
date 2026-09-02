@@ -7,12 +7,12 @@ use std::sync::Arc;
 use crate::services::environment_state::EnvironmentStateService;
 use crate::services::DestructionAndReinitService;
 
-/// @id: miyukiniadmin_auto_recovery_service
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Tente recovery/rollback ; si échec, pre-destruction backup puis destruction/réinit.
-/// @do: run_auto_recovery
-/// @depends: miyukiniadmin_services_environment_state, miyukiniadmin_services_destruction_reinit
+/// @id miyukiniadmin_auto_recovery_service
+/// @role infrastructure
+/// @layer operator
+/// @human Tente recovery/rollback ; si échec, pre-destruction backup puis destruction/réinit.
+/// @do run_auto_recovery
+/// @depends miyukiniadmin_services_environment_state, miyukiniadmin_services_destruction_reinit
 #[derive(Clone)]
 pub struct AutoRecoveryService {
     /// Détection d'état (pour cohérence ; non utilisé pendant run).
@@ -23,11 +23,11 @@ pub struct AutoRecoveryService {
 
 impl AutoRecoveryService {
     /// Crée le service.
-    /// @id: miyukiniadmin_auto_recovery_new
-    /// @role: constructor
-    /// @layer: operator
-    /// @human: Construit le service auto-recovery.
-    /// @do: create_auto_recovery_service
+    /// @id miyukiniadmin_auto_recovery_new
+    /// @role constructor
+    /// @layer operator
+    /// @human Construit le service auto-recovery.
+    /// @do create_auto_recovery_service
     #[must_use]
     pub fn new(
         environment_state: Arc<EnvironmentStateService>,
@@ -41,11 +41,11 @@ impl AutoRecoveryService {
 
     /// Tente la recovery ; si échec, sauvegarde pre-destruction puis destruction/réinit (Implementation §8.2).
     /// Politique : pas de rollback réel (stub) — on considère recovery en échec et on lance destruction.
-    /// @id: miyukiniadmin_auto_recovery_run
-    /// @role: mutator
-    /// @layer: operator
-    /// @human: Exécute la recovery automatique (rollback stub puis destruction si échec).
-    /// @do: run_auto_recovery
+    /// @id miyukiniadmin_auto_recovery_run
+    /// @role mutator
+    /// @layer operator
+    /// @human Exécute la recovery automatique (rollback stub puis destruction si échec).
+    /// @do run_auto_recovery
     pub async fn run(&self) -> AutoRecoveryResult {
         let recovery_ok = self.try_recovery().await;
         if recovery_ok {
@@ -79,7 +79,7 @@ impl AutoRecoveryService {
 }
 
 /// Résultat de l'auto-recovery.
-/// @id: miyukiniadmin_auto_recovery_result
+/// @id miyukiniadmin_auto_recovery_result
 #[derive(Debug, Clone)]
 pub struct AutoRecoveryResult {
     /// True si recovery réussie ou destruction/réinit réussie.

@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyudiscoveryError;
 
-/// @id: miyudiscovery_tool_discover_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste le contenu explore ; filtres fournis.
-/// @do: discover_list_under_governance
+/// @id miyudiscovery_tool_discover_list
+/// @role mutator
+/// @layer tool
+/// @human Liste le contenu explore ; filtres fournis.
+/// @do discover_list_under_governance
 /// tool.social.discover.list
 pub fn list(
     ctx: &GovernedContext,

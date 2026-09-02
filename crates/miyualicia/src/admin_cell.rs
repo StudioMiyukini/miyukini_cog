@@ -6,11 +6,11 @@
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
-// @id: service.alicia.orchestrator.admin
-// @role: governance_cell
-// @layer: 7
-// @human: Cellule d'administration du crate miyualicia (orchestrateur).
-// @do: identify_and_self_describe_miyualicia
+// @id service.alicia.orchestrator.admin
+// @role governance_cell
+// @layer 7
+// @human Cellule d'administration du crate miyualicia (orchestrateur).
+// @do identify_and_self_describe_miyualicia
 
 /// Identifiant canonique du service.
 pub const SERVICE_ID: &str = "service.alicia.orchestrator";

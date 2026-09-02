@@ -1,4 +1,8 @@
-// @id: MUIE-SkillTree @do: skill-tree-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-SkillTree
+// @do skill-tree-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Skill tree panel organism -- 3 tabs, grid of skill nodes with prerequisite lines.
 

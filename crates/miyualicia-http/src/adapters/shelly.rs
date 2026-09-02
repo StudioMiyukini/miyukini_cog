@@ -10,11 +10,11 @@
 //! - Etat switch : `POST http://{ip}/rpc` body `{"id":1,"method":"Switch.GetStatus","params":{"id":0}}`
 //! - Commande switch : `POST http://{ip}/rpc` body `{"id":1,"method":"Switch.Set","params":{"id":0,"on":true}}`
 
-// @id: toolkit.alicia.http.adapters.shelly
-// @role: shelly_device_adapter
-// @layer: 6
-// @human: Parsing API Shelly Gen1/Gen2 vers DeviceState Alicia.
-// @do: translate_shelly_responses_to_device_state
+// @id toolkit.alicia.http.adapters.shelly
+// @role shelly_device_adapter
+// @layer 6
+// @human Parsing API Shelly Gen1/Gen2 vers DeviceState Alicia.
+// @do translate_shelly_responses_to_device_state
 
 use chrono::Utc;
 use miyualicia_devices::DeviceState;

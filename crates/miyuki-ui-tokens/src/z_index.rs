@@ -1,4 +1,8 @@
-// @id: MUIT-ZIndex @do: z-index-scale @role: token @layer: 5 @human: miyuk
+// @id MUIT-ZIndex
+// @do z-index-scale
+// @role token
+// @layer 5
+// @human miyuk
 
 /// Z-index scale for stacking context management.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

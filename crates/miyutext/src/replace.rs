@@ -13,11 +13,11 @@ pub enum ReplaceMode {
     Regex,
 }
 
-/// @id: miyutext_tool_replace
-/// @role: mutator
-/// @layer: tool
-/// @human: Recherche et remplacement dans une chaîne ; retourne la chaîne modifiée.
-/// @do: replace_under_governance
+/// @id miyutext_tool_replace
+/// @role mutator
+/// @layer tool
+/// @human Recherche et remplacement dans une chaîne ; retourne la chaîne modifiée.
+/// @do replace_under_governance
 /// tool.text.replace
 pub fn replace(
     ctx: &GovernedContext,

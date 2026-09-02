@@ -1,9 +1,9 @@
 //! Manifeste de synchronisation et calcul de diff bidirectionnel.
 //!
-//! @id: miyucloud_sync_manifest
-//! @do: build_sync_manifest_from_db_and_compute_diff
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_manifest
+//! @do     build_sync_manifest_from_db_and_compute_diff
+//! @role   sync
+//! @layer  infra
 //!
 //! Le manifeste est la liste de tous les fichiers connus par un noeud,
 //! avec leur horloge vectorielle et leur checksum. La comparaison de

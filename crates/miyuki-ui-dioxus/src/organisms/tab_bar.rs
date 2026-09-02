@@ -1,4 +1,8 @@
-// @id: MUID-TabBar @do: tab-bar-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-TabBar
+// @do tab-bar-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Tab bar organism managing a list of tabs.
 //!

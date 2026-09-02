@@ -1,4 +1,8 @@
-// @id: MUID-Styles @do: css-conversion @role: util @layer: 6 @human: miyuk
+// @id MUID-Styles
+// @do css-conversion
+// @role util
+// @layer 6
+// @human miyuk
 
 //! CSS inline style helpers converting design tokens to CSS strings.
 //!

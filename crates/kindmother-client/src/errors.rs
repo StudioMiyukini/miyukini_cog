@@ -1,8 +1,8 @@
 //! Erreurs du client KindMother.
 //!
-//! @id: kindmother_client_errors
-//! @do: define_client_errors
-//! @layer: toolkit
+//! @id     kindmother_client_errors
+//! @do     define_client_errors
+//! @layer  toolkit
 
 use thiserror::Error;
 

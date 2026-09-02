@@ -1,9 +1,9 @@
 //! Types d'erreur centraux pour MiyuCloud.
 //!
-//! @id: miyucloud_errors
-//! @do: define_miyucloud_error_types
-//! @role: error
-//! @layer: infra
+//! @id     miyucloud_errors
+//! @do     define_miyucloud_error_types
+//! @role   error
+//! @layer  infra
 //!
 //! Enum central `MiyucloudError` couvrant toutes les couches du service :
 //! IO, persistance, chiffrement, integrite, permissions, quotas, validation.

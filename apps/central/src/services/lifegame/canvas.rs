@@ -1,10 +1,10 @@
 //! Canvas pixel art pour afficher le monde Life Game.
 //!
-//! @id: central.services.lifegame.canvas
-//! @role: ui
-//! @layer: domain
-//! @do: render_terrain_grid_as_pixel_art_with_mouse_interaction
-//! @human: Rendu du terrain en grille colorée avec zoom, pan et pinceaux.
+//! @id     central.services.lifegame.canvas
+//! @role   ui
+//! @layer  domain
+//! @do     render_terrain_grid_as_pixel_art_with_mouse_interaction
+//! @human  Rendu du terrain en grille colorée avec zoom, pan et pinceaux.
 
 use dioxus::prelude::*;
 use lifegame_world::TerrainType;

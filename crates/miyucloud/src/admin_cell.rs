@@ -1,9 +1,9 @@
 //! Cellule d'administration MiyuCloud (gouvernance COG).
 //!
-//! @id: miyucloud_admin_cell
-//! @do: provide_admin_metadata_for_miyucloud
-//! @role: governance
-//! @layer: infra
+//! @id     miyucloud_admin_cell
+//! @do     provide_admin_metadata_for_miyucloud
+//! @role   governance
+//! @layer  infra
 //!
 //! Metadonnees d'administration du service MiyuCloud, conformes au
 //! pattern `AdminCell` du workspace Miyukini.

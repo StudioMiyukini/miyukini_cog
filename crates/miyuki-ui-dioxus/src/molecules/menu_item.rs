@@ -1,4 +1,8 @@
-// @id: MUID-MenuItem @do: menu-item-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-MenuItem
+// @do menu-item-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Menu item molecule for navigation and action lists.
 //!

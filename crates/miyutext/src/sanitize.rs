@@ -13,11 +13,11 @@ pub struct SanitizePolicy {
     pub allowed_tags: Vec<String>,
 }
 
-/// @id: miyutext_tool_sanitize
-/// @role: security
-/// @layer: tool
-/// @human: Sanitise une chaîne pour affichage sécurisé (XSS, échappement HTML).
-/// @do: sanitize_under_governance
+/// @id miyutext_tool_sanitize
+/// @role security
+/// @layer tool
+/// @human Sanitise une chaîne pour affichage sécurisé (XSS, échappement HTML).
+/// @do sanitize_under_governance
 /// tool.text.sanitize — politique fournie.
 pub fn sanitize(
     ctx: &GovernedContext,

@@ -20,11 +20,11 @@
 
 #![forbid(unsafe_code)]
 
-// @id: service.alicia.rest-api
-// @role: http_api_gateway
-// @layer: 7
-// @human: Serveur REST JWT Alicia ; routes, auth, DTOs, handlers, rate limit.
-// @do: expose_alicia_home_as_rest_api
+// @id service.alicia.rest-api
+// @role http_api_gateway
+// @layer 7
+// @human Serveur REST JWT Alicia ; routes, auth, DTOs, handlers, rate limit.
+// @do expose_alicia_home_as_rest_api
 
 pub mod admin_cell;
 pub mod auth;

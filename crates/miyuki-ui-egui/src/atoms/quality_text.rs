@@ -1,4 +1,8 @@
-// @id: MUIE-QualityText @do: quality-text-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-QualityText
+// @do quality-text-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Quality-colored text for item names.
 //!

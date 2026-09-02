@@ -3,11 +3,11 @@
 //! `evaluate_conditions` evalue une liste de conditions contre le snapshot
 //! de la maison (ET logique). Liste vide = toujours vrai.
 
-// @id: toolkit.alicia.automations.evaluator
-// @role: condition_evaluator
-// @layer: 6
-// @human: Evaluateur de conditions domotiques : proprietes DeviceState, contexte (heure, jour).
-// @do: evaluate_automation_conditions
+// @id toolkit.alicia.automations.evaluator
+// @role condition_evaluator
+// @layer 6
+// @human Evaluateur de conditions domotiques : proprietes DeviceState, contexte (heure, jour).
+// @do evaluate_automation_conditions
 
 use crate::dispatcher::HomeSnapshot;
 use crate::types::{Condition, ConditionOp};

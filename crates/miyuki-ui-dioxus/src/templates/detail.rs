@@ -1,4 +1,8 @@
-// @id: MUID-DetailLayout @do: detail-template @role: component @layer: 6 @human: miyuk
+// @id MUID-DetailLayout
+// @do detail-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Detail page layout with header, optional side panel, and content.
 //!

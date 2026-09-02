@@ -1,9 +1,9 @@
 //! Sidebar MiyuCloud -- arborescence dossiers + sections.
 //!
-//! @id: miyucloud_sidebar
-//! @do: navigate_folder_tree
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_sidebar
+//! @do     navigate_folder_tree
+//! @role   component
+//! @layer  presentation
 //!
 //! Panneau gauche fixe (220px) avec :
 //! - Arborescence des dossiers (expand/collapse)

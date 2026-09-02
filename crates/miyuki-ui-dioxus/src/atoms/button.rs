@@ -1,4 +1,8 @@
-// @id: MUID-Button @do: button-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Button
+// @do button-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Button atom with multiple variants and sizes.
 //!

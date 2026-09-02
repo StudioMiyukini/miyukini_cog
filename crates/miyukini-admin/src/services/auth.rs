@@ -16,12 +16,12 @@ use uuid::Uuid;
 
 use crate::models::{AdminAccount, AdminRole, AdminSession};
 
-/// @id: miyukiniadmin_auth_service
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Authentification : login, session, rate limit (stub).
-/// @do: authenticate_admin
-/// @depends: miyukiniadmin_models_admin_account, miyukiniadmin_models_session
+/// @id miyukiniadmin_auth_service
+/// @role infrastructure
+/// @layer operator
+/// @human Authentification : login, session, rate limit (stub).
+/// @do authenticate_admin
+/// @depends miyukiniadmin_models_admin_account, miyukiniadmin_models_session
 #[derive(Clone)]
 pub struct AuthService {
     /// Répertoire de données (admin_registry.json).
@@ -35,11 +35,11 @@ pub struct AuthService {
 
 impl AuthService {
     /// Crée le service avec un répertoire de données.
-    /// @id: miyukiniadmin_auth_service_new
-    /// @role: constructor
-    /// @layer: operator
-    /// @human: Construit le service d'authentification.
-    /// @do: create_auth_service
+    /// @id miyukiniadmin_auth_service_new
+    /// @role constructor
+    /// @layer operator
+    /// @human Construit le service d'authentification.
+    /// @do create_auth_service
     #[must_use]
     pub fn new(data_dir: PathBuf) -> Self {
         Self {
@@ -56,7 +56,7 @@ impl AuthService {
     }
 
     /// Hash du mot de passe (Argon2id).
-    /// @id: miyukiniadmin_auth_hash_password
+    /// @id miyukiniadmin_auth_hash_password
     fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
@@ -66,14 +66,14 @@ impl AuthService {
     }
 
     /// Vérifie le mot de passe contre un hash.
-    /// @id: miyukiniadmin_auth_verify_password
+    /// @id miyukiniadmin_auth_verify_password
     fn verify_password(password: &str, hash: &str) -> Result<(), argon2::password_hash::Error> {
         let parsed = PasswordHash::new(hash)?;
         Argon2::default().verify_password(password.as_bytes(), &parsed)
     }
 
     /// Charge le registre admin depuis le fichier (ou vide).
-    /// @id: miyukiniadmin_auth_load_registry
+    /// @id miyukiniadmin_auth_load_registry
     pub async fn load_registry(&self) -> Result<Vec<AdminAccount>, std::io::Error> {
         let path = self.admin_registry_path();
         if !fs::metadata(&path)
@@ -89,7 +89,7 @@ impl AuthService {
     }
 
     /// Enregistre le registre admin.
-    /// @id: miyukiniadmin_auth_save_registry
+    /// @id miyukiniadmin_auth_save_registry
     pub async fn save_registry(&self, accounts: &[AdminAccount]) -> Result<(), std::io::Error> {
         let path = self.admin_registry_path();
         if let Some(parent) = path.parent() {
@@ -101,11 +101,11 @@ impl AuthService {
 
     /// Login : vérifie username/password, crée une session (Authentication Contract §11.2).
     /// Réponse générique en cas d'échec : « Identifiants invalides ».
-    /// @id: miyukiniadmin_auth_login
-    /// @role: mutator
-    /// @layer: operator
-    /// @human: Authentifie un admin et crée une session.
-    /// @do: login_admin
+    /// @id miyukiniadmin_auth_login
+    /// @role mutator
+    /// @layer operator
+    /// @human Authentifie un admin et crée une session.
+    /// @do login_admin
     pub async fn login(
         &self,
         username: &str,
@@ -153,11 +153,11 @@ impl AuthService {
     }
 
     /// Valide une session par token (session_id) ; retourne la session si valide.
-    /// @id: miyukiniadmin_auth_validate_session
-    /// @role: accessor
-    /// @layer: operator
-    /// @human: Vérifie qu'une session est valide et non expirée.
-    /// @do: validate_session
+    /// @id miyukiniadmin_auth_validate_session
+    /// @role accessor
+    /// @layer operator
+    /// @human Vérifie qu'une session est valide et non expirée.
+    /// @do validate_session
     pub async fn validate_session(&self, session_id: &str) -> Option<AdminSession> {
         let sessions = self.sessions.write().await;
         let session = sessions.get(session_id).cloned();
@@ -173,7 +173,7 @@ impl AuthService {
     }
 
     /// Déconnexion : supprime la session.
-    /// @id: miyukiniadmin_auth_logout
+    /// @id miyukiniadmin_auth_logout
     pub async fn logout(&self, session_id: &str) {
         let mut sessions = self.sessions.write().await;
         sessions.remove(session_id);
@@ -181,7 +181,7 @@ impl AuthService {
 
     /// Crée un compte admin (pour parcours setup ou par un admin avec capacité).
     /// Hash Argon2id, rôle par défaut Admin.
-    /// @id: miyukiniadmin_auth_create_account
+    /// @id miyukiniadmin_auth_create_account
     pub async fn create_account(
         &self,
         username: &str,
@@ -226,7 +226,7 @@ impl AuthService {
 }
 
 /// Erreur de login (réponse générique pour ne pas fuiter d'information).
-/// @id: miyukiniadmin_auth_login_error
+/// @id miyukiniadmin_auth_login_error
 #[derive(Debug)]
 pub enum LoginError {
     /// Identifiants invalides ou compte inexistant.
@@ -236,7 +236,7 @@ pub enum LoginError {
 }
 
 /// Erreur de création de compte.
-/// @id: miyukiniadmin_auth_create_account_error
+/// @id miyukiniadmin_auth_create_account_error
 #[derive(Debug)]
 pub enum CreateAccountError {
     /// Politique violée (ex. mot de passe trop court).

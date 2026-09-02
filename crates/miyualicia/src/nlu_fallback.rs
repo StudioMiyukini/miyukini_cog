@@ -3,11 +3,11 @@
 //! Couvre les commandes P0 les plus courantes uniquement.
 //! Pour les commandes ambigues ou non reconnues, retourne `Intent::Unknown`.
 
-// @id: service.alicia.nlu-fallback
-// @role: regex_nlu_fallback
-// @layer: 7
-// @human: Parser regex de secours pour NLU sans miou-llm-bridge.
-// @do: parse_basic_home_commands_via_regex
+// @id service.alicia.nlu-fallback
+// @role regex_nlu_fallback
+// @layer 7
+// @human Parser regex de secours pour NLU sans miou-llm-bridge.
+// @do parse_basic_home_commands_via_regex
 
 use crate::intent::Intent;
 use std::sync::LazyLock;

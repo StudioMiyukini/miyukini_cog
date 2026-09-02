@@ -3,11 +3,11 @@
 //! Timeout 2 secondes par defaut, 1 retry automatique sur echec temporaire.
 //! Support de l'authentification Basic et Bearer.
 
-// @id: toolkit.alicia.http.client
-// @role: http_device_client
-// @layer: 6
-// @human: Client HTTP pour dispositifs locaux Alicia ; timeout, retry, auth Basic/Bearer.
-// @do: provide_http_client_for_local_devices
+// @id toolkit.alicia.http.client
+// @role http_device_client
+// @layer 6
+// @human Client HTTP pour dispositifs locaux Alicia ; timeout, retry, auth Basic/Bearer.
+// @do provide_http_client_for_local_devices
 
 use std::time::Duration;
 

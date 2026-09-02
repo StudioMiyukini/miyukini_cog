@@ -1,10 +1,10 @@
 #![allow(missing_docs)]
 //! Miyukini Connect local-first authentication service.
 //!
-//! @id: miyukini_connect_lib
-//! @do: expose_connect_auth_modules
-//! @role: auth
-//! @layer: service
+//! @id     miyukini_connect_lib
+//! @do     expose_connect_auth_modules
+//! @role   auth
+//! @layer  service
 
 pub mod audit;
 pub mod errors;

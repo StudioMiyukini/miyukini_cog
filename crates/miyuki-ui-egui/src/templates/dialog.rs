@@ -1,4 +1,8 @@
-// @id: MUIE-TmplDialog @do: dialog-template @role: template @layer: 6 @human: miyuk
+// @id MUIE-TmplDialog
+// @do dialog-template
+// @role template
+// @layer 6
+// @human miyuk
 
 //! Dialog layout template -- NPC interaction with darkened game backdrop.
 

@@ -1,4 +1,8 @@
-// @id: MUID-AuthLayout @do: auth-template @role: component @layer: 6 @human: miyuk
+// @id MUID-AuthLayout
+// @do auth-template
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Authentication layout with centered card on a fullscreen background.
 //!

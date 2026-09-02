@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuforumError;
 
-/// @id: miyuforum_tool_forum_readtrack_mark
-/// @role: mutator
-/// @layer: tool
-/// @human: Marque comme lu ; WriteIntent KindMother.
-/// @do: forum_readtrack_mark_under_governance
+/// @id miyuforum_tool_forum_readtrack_mark
+/// @role mutator
+/// @layer tool
+/// @human Marque comme lu ; WriteIntent KindMother.
+/// @do forum_readtrack_mark_under_governance
 pub fn mark(
     ctx: &GovernedContext,
     _target_ref: &str,
@@ -20,11 +20,11 @@ pub fn mark(
     Ok(())
 }
 
-/// @id: miyuforum_tool_forum_readtrack_list
-/// @role: accessor
-/// @layer: tool
-/// @human: Liste le suivi lu (utilisateur/board).
-/// @do: forum_readtrack_list_under_governance
+/// @id miyuforum_tool_forum_readtrack_list
+/// @role accessor
+/// @layer tool
+/// @human Liste le suivi lu (utilisateur/board).
+/// @do forum_readtrack_list_under_governance
 pub fn list(
     ctx: &GovernedContext,
     _user_ref: &str,

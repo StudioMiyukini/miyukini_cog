@@ -2,11 +2,11 @@
 //!
 //! Chargee depuis `alicia.toml` a la racine du repertoire de donnees.
 
-// @id: service.alicia.config
-// @role: configuration
-// @layer: 7
-// @human: Configuration TOML de l'orchestrateur Alicia : MQTT, API, NLU, pieces, wake word.
-// @do: define_alicia_config
+// @id service.alicia.config
+// @role configuration
+// @layer 7
+// @human Configuration TOML de l'orchestrateur Alicia : MQTT, API, NLU, pieces, wake word.
+// @do define_alicia_config
 
 use serde::{Deserialize, Serialize};
 use std::path::Path;

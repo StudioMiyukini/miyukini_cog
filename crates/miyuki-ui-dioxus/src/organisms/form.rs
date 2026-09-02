@@ -1,4 +1,8 @@
-// @id: MUID-Form @do: form-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-Form
+// @do form-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Form organism with title, fields, and submit/cancel actions.
 //!

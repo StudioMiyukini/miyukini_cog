@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupossalesError;
 
-/// @id: miyupossales_tool_variant_resolve
-/// @role: mutator
-/// @layer: tool
-/// @human: Résout une variante (taille, couleur, etc.) pour un article.
-/// @do: variant_resolve_under_governance
+/// @id miyupossales_tool_variant_resolve
+/// @role mutator
+/// @layer tool
+/// @human Résout une variante (taille, couleur, etc.) pour un article.
+/// @do variant_resolve_under_governance
 /// tool.pos.item.variant.resolve
 pub fn variant_resolve(
     ctx: &GovernedContext,
@@ -20,11 +20,11 @@ pub fn variant_resolve(
     Ok(VariantResult::default())
 }
 
-/// @id: miyupossales_tool_modifier_apply
-/// @role: mutator
-/// @layer: tool
-/// @human: Applique des modificateurs (add-ons) à une ligne.
-/// @do: modifier_apply_under_governance
+/// @id miyupossales_tool_modifier_apply
+/// @role mutator
+/// @layer tool
+/// @human Applique des modificateurs (add-ons) à une ligne.
+/// @do modifier_apply_under_governance
 /// tool.pos.item.modifier.apply
 pub fn modifier_apply(
     ctx: &GovernedContext,

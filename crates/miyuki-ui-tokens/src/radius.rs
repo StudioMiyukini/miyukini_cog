@@ -1,4 +1,8 @@
-// @id: MUIT-Radius @do: radius-scale @role: token @layer: 5 @human: miyuk
+// @id MUIT-Radius
+// @do radius-scale
+// @role token
+// @layer 5
+// @human miyuk
 
 /// Border radius scale.
 #[derive(Debug, Clone, Copy, PartialEq)]

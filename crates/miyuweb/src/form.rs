@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuwebError;
 
-/// @id: miyuweb_tool_web_form_validate
-/// @role: accessor
-/// @layer: tool
-/// @human: Valide un formulaire (structure, champs) ; règles fournies dans le flux.
-/// @do: web_form_validate_under_governance
+/// @id miyuweb_tool_web_form_validate
+/// @role accessor
+/// @layer tool
+/// @human Valide un formulaire (structure, champs) ; règles fournies dans le flux.
+/// @do web_form_validate_under_governance
 /// tool.web.form.validate — ne définit pas les règles métier.
 pub fn validate(
     ctx: &GovernedContext,

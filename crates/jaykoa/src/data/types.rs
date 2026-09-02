@@ -1,10 +1,10 @@
 //! Types domaine JayKoa — Modèle métier du calendrier universel.
 //!
-//! @id: jaykoa_domain_types
-//! @do: define_jaykoa_domain_model
-//! @role: data
-//! @layer: domain
-//! @human: Agenda, événement interne, reflet externe, engagement temporel,
+//! @id     jaykoa_domain_types
+//! @do     define_jaykoa_domain_model
+//! @role   data
+//! @layer  domain
+//! @human  Agenda, événement interne, reflet externe, engagement temporel,
 //!         source, statut, conflit (visualisation uniquement).
 //!
 //! INVARIANTS (Document Fondateur §4) :

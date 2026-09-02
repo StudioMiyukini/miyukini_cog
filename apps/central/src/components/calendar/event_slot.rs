@@ -1,10 +1,10 @@
 //! Rendu d'un événement dans la grille calendrier.
 //!
-//! @id: central.components.calendar.event_slot
-//! @do: render_calendar_event_block
-//! @role: ui
-//! @layer: ui
-//! @human: Composant de rendu d'un événement dans les grilles jour/semaine
+//! @id     central.components.calendar.event_slot
+//! @do     render_calendar_event_block
+//! @role   ui
+//! @layer  ui
+//! @human  Composant de rendu d'un événement dans les grilles jour/semaine
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

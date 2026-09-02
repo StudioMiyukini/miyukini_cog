@@ -5,11 +5,11 @@ use crate::errors::MiyumoderationforumError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyumoderationforum_tool_ban_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée un bannissement ; WriteIntent KindMother.
-/// @do: ban_create_under_governance
+/// @id miyumoderationforum_tool_ban_create
+/// @role mutator
+/// @layer tool
+/// @human Crée un bannissement ; WriteIntent KindMother.
+/// @do ban_create_under_governance
 /// tool.moderation.ban.create
 pub fn create(
     ctx: &GovernedContext,
@@ -32,11 +32,11 @@ pub fn create(
     Ok(id)
 }
 
-/// @id: miyumoderationforum_tool_ban_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les bannissements.
-/// @do: ban_list_under_governance
+/// @id miyumoderationforum_tool_ban_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les bannissements.
+/// @do ban_list_under_governance
 /// tool.moderation.ban.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<BanItem>, MiyumoderationforumError> {
     if !ctx.has_mandate() {

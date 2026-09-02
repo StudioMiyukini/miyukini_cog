@@ -1,9 +1,9 @@
 //! Base de donnees fille SQLite MiyuCloud (KindMother Daughter).
 //!
-//! @id: miyucloud_kindmother_db
-//! @do: provide_sqlite_persistence_for_miyucloud
-//! @role: persistence
-//! @layer: infra
+//! @id     miyucloud_kindmother_db
+//! @do     provide_sqlite_persistence_for_miyucloud
+//! @role   persistence
+//! @layer  infra
 //!
 //! CRUD complet pour fichiers, dossiers, liens de partage, permissions,
 //! pairs sync, horloges vectorielles, conflits, journal d'acces, quotas

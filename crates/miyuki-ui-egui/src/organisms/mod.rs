@@ -1,4 +1,8 @@
-// @id: MUIE-OrgsIndex @do: organism-exports @role: exports @layer: 6 @human: miyuk
+// @id MUIE-OrgsIndex
+// @do organism-exports
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Organism-level UI components -- full panels and complex layouts.
 //!

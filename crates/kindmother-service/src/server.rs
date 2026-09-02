@@ -1,8 +1,8 @@
 //! Serveur TCP/JSON KindMother.
 //!
-//! @id: kindmother_service_server
-//! @do: implement_tcp_json_server
-//! @layer: core
+//! @id     kindmother_service_server
+//! @do     implement_tcp_json_server
+//! @layer  core
 
 use std::path::Path;
 use std::sync::Arc;

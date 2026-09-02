@@ -1,9 +1,9 @@
 //! Types domaine MiyuCloud.
 //!
-//! @id: miyucloud_domain_types
-//! @do: define_miyucloud_domain_model
-//! @role: data
-//! @layer: domain
+//! @id     miyucloud_domain_types
+//! @do     define_miyucloud_domain_model
+//! @role   data
+//! @layer  domain
 //!
 //! Tous les types domaine pour les fichiers, dossiers, partages, pairs de sync,
 //! horloges vectorielles, conflits, journal d'acces, quotas et statistiques.

@@ -1,4 +1,8 @@
-// @id: MUID-Context @do: theme-context @role: provider @layer: 6 @human: miyuk
+// @id MUID-Context
+// @do theme-context
+// @role provider
+// @layer 6
+// @human miyuk
 
 //! Theme context and hooks for Dioxus components.
 //!

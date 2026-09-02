@@ -3,11 +3,11 @@
 //! Utilise cpal pour lister les peripheriques d'entree/sortie via le host natif
 //! (WASAPI sur Windows). Genere un identifiant stable par device via blake3.
 
-// @id: alicia_capture_devices
-// @role: infrastructure
-// @layer: toolkit
-// @human: Enumeration des peripheriques audio, filtrage par nom/ID stable, hash blake3.
-// @do: enumerate_audio_devices
+// @id alicia_capture_devices
+// @role infrastructure
+// @layer toolkit
+// @human Enumeration des peripheriques audio, filtrage par nom/ID stable, hash blake3.
+// @do enumerate_audio_devices
 
 use cpal::traits::{DeviceTrait, HostTrait};
 use serde::{Deserialize, Serialize};

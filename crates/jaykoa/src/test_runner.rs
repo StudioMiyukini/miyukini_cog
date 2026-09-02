@@ -1,9 +1,9 @@
 //! Runner des tests unitaires JayKoa — exécutable depuis MiyukiniAdmin.
 //!
-//! @id: jaykoa_test_runner
-//! @do: run_all_unit_tests_and_return_report
-//! @layer: infra
-//! @human: Exécute les mêmes scénarios que les tests #[cfg(test)] et retourne un rapport
+//! @id     jaykoa_test_runner
+//! @do     run_all_unit_tests_and_return_report
+//! @layer  infra
+//! @human  Exécute les mêmes scénarios que les tests #[cfg(test)] et retourne un rapport
 //!         sérialisable (JSON) pour affichage dans la console MiyukiniAdmin.
 
 use crate::data::types::{

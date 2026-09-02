@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupossalesError;
 
-/// @id: miyupossales_tool_display_push
-/// @role: mutator
-/// @layer: tool
-/// @human: Envoie les données à afficher sur l'écran client.
-/// @do: display_push_under_governance
+/// @id miyupossales_tool_display_push
+/// @role mutator
+/// @layer tool
+/// @human Envoie les données à afficher sur l'écran client.
+/// @do display_push_under_governance
 /// tool.pos.display.push
 pub fn push(
     ctx: &GovernedContext,

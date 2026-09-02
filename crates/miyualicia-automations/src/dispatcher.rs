@@ -4,11 +4,11 @@
 //! pour eviter la dependance circulaire. `HomeSnapshot` fournit un instantane
 //! de l'etat de la maison pour l'evaluateur de conditions.
 
-// @id: toolkit.alicia.automations.dispatcher
-// @role: command_dispatcher_trait
-// @layer: 6
-// @human: Trait d'injection de dependances pour le dispatch des commandes Alicia.
-// @do: define_dispatcher_trait_and_home_snapshot
+// @id toolkit.alicia.automations.dispatcher
+// @role command_dispatcher_trait
+// @layer 6
+// @human Trait d'injection de dependances pour le dispatch des commandes Alicia.
+// @do define_dispatcher_trait_and_home_snapshot
 
 use std::collections::HashMap;
 

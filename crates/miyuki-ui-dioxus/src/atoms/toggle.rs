@@ -1,4 +1,8 @@
-// @id: MUID-Toggle @do: toggle-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Toggle
+// @do toggle-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Toggle switch atom.
 //!

@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuhrError;
 
-/// @id: miyuhr_tool_schedule_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Retourne le planning (shifts) pour un employé/période.
-/// @do: schedule_get_under_governance
+/// @id miyuhr_tool_schedule_get
+/// @role mutator
+/// @layer tool
+/// @human Retourne le planning (shifts) pour un employé/période.
+/// @do schedule_get_under_governance
 /// tool.hr.schedule.get
 pub fn get(
     ctx: &GovernedContext,

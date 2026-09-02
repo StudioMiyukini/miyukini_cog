@@ -1,10 +1,10 @@
 //! Handler pour GET /history.
 
-// @id: service.alicia.api.handlers.history
-// @role: history_handler
-// @layer: 7
-// @human: Endpoint historique des commandes Alicia API.
-// @do: handle_history_requests
+// @id service.alicia.api.handlers.history
+// @role history_handler
+// @layer 7
+// @human Endpoint historique des commandes Alicia API.
+// @do handle_history_requests
 
 use std::sync::Arc;
 

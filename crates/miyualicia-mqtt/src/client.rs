@@ -3,11 +3,11 @@
 //! Encapsule `rumqttc::AsyncClient` et son event loop.
 //! Reconnexion automatique transparente en arriere-plan.
 
-// @id: toolkit.alicia.mqtt.client
-// @role: mqtt_async_client
-// @layer: 6
-// @human: Client MQTT async pour Alicia ; wrapping rumqttc, reconnexion, broadcast.
-// @do: provide_mqtt_client_with_reconnection
+// @id toolkit.alicia.mqtt.client
+// @role mqtt_async_client
+// @layer 6
+// @human Client MQTT async pour Alicia ; wrapping rumqttc, reconnexion, broadcast.
+// @do provide_mqtt_client_with_reconnection
 
 use std::sync::Arc;
 use std::time::Duration;

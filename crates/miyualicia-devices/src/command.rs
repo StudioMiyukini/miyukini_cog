@@ -3,11 +3,11 @@
 //! `DeviceCommand` represente une action a envoyer a un dispositif physique.
 //! `CommandSource` trace l'origine de la commande pour l'audit trail.
 
-// @id: toolkit.alicia.devices.command
-// @role: command_model
-// @layer: 6
-// @human: Modele de commande generique pour les dispositifs domotiques Alicia.
-// @do: define_device_command_and_source
+// @id toolkit.alicia.devices.command
+// @role command_model
+// @layer 6
+// @human Modele de commande generique pour les dispositifs domotiques Alicia.
+// @do define_device_command_and_source
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

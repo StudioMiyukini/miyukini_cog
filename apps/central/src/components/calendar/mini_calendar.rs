@@ -1,10 +1,10 @@
 //! Mini calendrier / picker de date.
 //!
-//! @id: central.components.calendar.mini_calendar
-//! @do: render_mini_date_picker_calendar
-//! @role: ui
-//! @layer: ui
-//! @human: Petit calendrier pour sélection de date
+//! @id     central.components.calendar.mini_calendar
+//! @do     render_mini_date_picker_calendar
+//! @role   ui
+//! @layer  ui
+//! @human  Petit calendrier pour sélection de date
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

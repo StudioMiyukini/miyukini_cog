@@ -1,4 +1,8 @@
-// @id: MUID-Spinner @do: spinner-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Spinner
+// @do spinner-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Spinner/loading indicator atom.
 //!

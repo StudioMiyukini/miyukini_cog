@@ -7,26 +7,26 @@ use tokio::fs;
 
 use crate::models::EnvironmentState;
 
-/// @id: miyukiniadmin_environment_state_service
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Détection état environnement (VIERGE, INITIALISE, COMPROMIS) via artefacts locaux.
-/// @do: detect_environment_state
-/// @depends: miyukiniadmin_models_environment_state
+/// @id miyukiniadmin_environment_state_service
+/// @role infrastructure
+/// @layer operator
+/// @human Détection état environnement (VIERGE, INITIALISE, COMPROMIS) via artefacts locaux.
+/// @do detect_environment_state
+/// @depends miyukiniadmin_models_environment_state
 #[derive(Clone)]
 pub struct EnvironmentStateService {
     /// Répertoire de données (EIP blob, registre admin, schéma bootstrap).
-    /// @id: miyukiniadmin_env_state_service_data_dir
+    /// @id miyukiniadmin_env_state_service_data_dir
     data_dir: PathBuf,
 }
 
 impl EnvironmentStateService {
     /// Crée le service avec un répertoire de données.
-    /// @id: miyukiniadmin_env_state_service_new
-    /// @role: constructor
-    /// @layer: operator
-    /// @human: Construit le service avec le répertoire de données.
-    /// @do: create_environment_state_service
+    /// @id miyukiniadmin_env_state_service_new
+    /// @role constructor
+    /// @layer operator
+    /// @human Construit le service avec le répertoire de données.
+    /// @do create_environment_state_service
     #[must_use]
     pub fn new(data_dir: PathBuf) -> Self {
         Self { data_dir }
@@ -57,7 +57,7 @@ impl EnvironmentStateService {
 
     /// Vérifie l'intégrité EIP (stub : présence = valide pour implémentation minimale).
     /// En production : déchiffrer avec clé dérivée, vérifier tag AEAD, integrity_hash.
-    /// @id: miyukiniadmin_env_state_verify_eip
+    /// @id miyukiniadmin_env_state_verify_eip
     async fn verify_eip_integrity(&self) -> Result<bool, std::io::Error> {
         let path = self.eip_path();
         if !Self::has_artifact(&path).await {
@@ -71,7 +71,7 @@ impl EnvironmentStateService {
     }
 
     /// Vérifie le registre admin : structure valide, au moins un compte non révoqué.
-    /// @id: miyukiniadmin_env_state_verify_registry
+    /// @id miyukiniadmin_env_state_verify_registry
     async fn verify_admin_registry(&self) -> Result<bool, std::io::Error> {
         let path = self.admin_registry_path();
         if !Self::has_artifact(&path).await {
@@ -86,7 +86,7 @@ impl EnvironmentStateService {
     }
 
     /// Vérifie l'intégrité du schéma bootstrap (présence et contenu minimal).
-    /// @id: miyukiniadmin_env_state_verify_schema
+    /// @id miyukiniadmin_env_state_verify_schema
     async fn verify_schema_integrity(&self) -> Result<bool, std::io::Error> {
         let path = self.bootstrap_schema_path();
         if !Self::has_artifact(&path).await {
@@ -99,19 +99,19 @@ impl EnvironmentStateService {
     }
 
     /// Cohérence globale : EIP + registre + schéma cohérents (stub : pas d'incohérence détectée).
-    /// @id: miyukiniadmin_env_state_verify_consistency
+    /// @id miyukiniadmin_env_state_verify_consistency
     async fn verify_global_consistency(&self) -> Result<(), std::io::Error> {
         let _ = self;
         Ok(())
     }
 
     /// Détecte l'état de l'environnement (Auth and First-Boot §4.1).
-    /// @id: miyukiniadmin_env_state_detect
-    /// @role: accessor
-    /// @layer: operator
-    /// @human: Détecte VIERGE / INITIALISE / COMPROMIS selon artefacts et intégrité.
-    /// @do: detect_environment_state
-    /// @depends: miyukiniadmin_environment_state_service
+    /// @id miyukiniadmin_env_state_detect
+    /// @role accessor
+    /// @layer operator
+    /// @human Détecte VIERGE / INITIALISE / COMPROMIS selon artefacts et intégrité.
+    /// @do detect_environment_state
+    /// @depends miyukiniadmin_environment_state_service
     pub async fn detect(&self) -> Result<EnvironmentState, std::io::Error> {
         let has_eip = Self::has_artifact(&self.eip_path()).await;
         let has_admin_registry = Self::has_artifact(&self.admin_registry_path()).await;
@@ -152,11 +152,11 @@ impl EnvironmentStateService {
 
     /// Crée le blob EIP minimal (First-boot — Auth and First-Boot §5).
     /// Stub : contenu non vide pour que verify_eip_integrity soit valide.
-    /// @id: miyukiniadmin_env_state_write_eip_stub
-    /// @role: mutator
-    /// @layer: operator
-    /// @human: Génère l'artefact EIP initial pour passage à INITIALISE.
-    /// @do: write_eip_stub
+    /// @id miyukiniadmin_env_state_write_eip_stub
+    /// @role mutator
+    /// @layer operator
+    /// @human Génère l'artefact EIP initial pour passage à INITIALISE.
+    /// @do write_eip_stub
     pub async fn write_eip_stub(&self) -> Result<(), std::io::Error> {
         let path = self.eip_path();
         if let Some(parent) = path.parent() {
@@ -169,11 +169,11 @@ impl EnvironmentStateService {
 
     /// Crée le schéma bootstrap initial (First-boot — Auth and First-Boot §5).
     /// Contenu minimal avec "version" pour que verify_schema_integrity soit valide.
-    /// @id: miyukiniadmin_env_state_write_bootstrap_schema_initial
-    /// @role: mutator
-    /// @layer: operator
-    /// @human: Génère l'artefact schéma bootstrap pour passage à INITIALISE.
-    /// @do: write_bootstrap_schema_initial
+    /// @id miyukiniadmin_env_state_write_bootstrap_schema_initial
+    /// @role mutator
+    /// @layer operator
+    /// @human Génère l'artefact schéma bootstrap pour passage à INITIALISE.
+    /// @do write_bootstrap_schema_initial
     pub async fn write_bootstrap_schema_initial(&self) -> Result<(), std::io::Error> {
         let path = self.bootstrap_schema_path();
         if let Some(parent) = path.parent() {

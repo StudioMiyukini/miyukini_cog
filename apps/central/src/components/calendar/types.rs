@@ -1,10 +1,10 @@
 //! Types generiques pour les composants calendrier.
 //!
-//! @id: central.components.calendar.types
-//! @do: define_generic_calendar_types_and_traits
-//! @role: data
-//! @layer: domain
-//! @human: Types generiques pour calendrier (events, slots, modes)
+//! @id     central.components.calendar.types
+//! @do     define_generic_calendar_types_and_traits
+//! @role   data
+//! @layer  domain
+//! @human  Types generiques pour calendrier (events, slots, modes)
 //!
 //! Note: types generiques réutilisables — certains ne sont pas encore
 //! consommés mais font partie de l'API publique du module calendrier.

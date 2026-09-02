@@ -1,4 +1,8 @@
-// @id: MUIT-Typography @do: font-tokens @role: token @layer: 5 @human: miyuk
+// @id MUIT-Typography
+// @do font-tokens
+// @role token
+// @layer 5
+// @human miyuk
 
 /// Font family specification.
 ///

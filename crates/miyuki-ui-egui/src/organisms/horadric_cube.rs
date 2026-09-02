@@ -1,4 +1,8 @@
-// @id: MUIE-Cube @do: horadric-cube-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-Cube
+// @do horadric-cube-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Horadric cube organism -- 3x4 grid + transmute button.
 

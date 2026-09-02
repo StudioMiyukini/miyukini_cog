@@ -1,4 +1,8 @@
-// @id: MUID-Templates @do: templates-module @role: exports @layer: 6 @human: miyuk
+// @id MUID-Templates
+// @do templates-module
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Template-level page layouts.
 

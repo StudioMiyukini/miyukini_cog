@@ -1,4 +1,8 @@
-// @id: MUIE-SkillIcon @do: skill-icon-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-SkillIcon
+// @do skill-icon-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Skill icon atom -- displays a skill with its state (active/inactive/locked).
 //!

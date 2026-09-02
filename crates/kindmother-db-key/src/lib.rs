@@ -4,9 +4,9 @@
 //! via SQLCipher. Utilise Argon2id (OWASP 2024) et un secret d'installation
 //! stocké localement.
 //!
-//! @id: kindmother_db_key
-//! @do: derive_encryption_keys_for_sqlite
-//! @layer: core
+//! @id     kindmother_db_key
+//! @do     derive_encryption_keys_for_sqlite
+//! @layer  core
 
 mod key_derivation;
 

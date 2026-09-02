@@ -1,4 +1,8 @@
-// @id: MUIE-StatRow @do: stat-row-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-StatRow
+// @do stat-row-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Stat row molecule -- label + value + optional "+" button.
 //!

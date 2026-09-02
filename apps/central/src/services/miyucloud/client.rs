@@ -1,9 +1,9 @@
 //! Client HTTP pour communiquer avec miyucloud-server.
 //!
-//! @id: miyucloud_http_client
-//! @do: communicate_with_miyucloud_server
-//! @role: client
-//! @layer: presentation
+//! @id     miyucloud_http_client
+//! @do     communicate_with_miyucloud_server
+//! @role   client
+//! @layer  presentation
 //!
 //! Pattern identique a `apps/central/src/llm_client.rs` :
 //! communication via HTTP localhost avec header `X-COG-Token`.

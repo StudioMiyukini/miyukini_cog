@@ -3,11 +3,11 @@
 //! Produit par le pipeline NLU (bridge ou fallback regex) a partir
 //! d'une transcription vocale ou d'une commande textuelle.
 
-// @id: service.alicia.intent
-// @role: nlu_intent_taxonomy
-// @layer: 7
-// @human: Type Intent et taxonomie des intentions domotiques Alicia.
-// @do: model_home_assistant_intents
+// @id service.alicia.intent
+// @role nlu_intent_taxonomy
+// @layer 7
+// @human Type Intent et taxonomie des intentions domotiques Alicia.
+// @do model_home_assistant_intents
 
 use serde::{Deserialize, Serialize};
 

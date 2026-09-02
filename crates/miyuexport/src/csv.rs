@@ -12,11 +12,11 @@ pub struct CsvOptions {
     pub locale: Option<String>,
 }
 
-/// @id: miyuexport_tool_csv_generate
-/// @role: mutator
-/// @layer: tool
-/// @human: Génère un fichier CSV à partir de données et options fournis.
-/// @do: csv_generate_under_governance
+/// @id miyuexport_tool_csv_generate
+/// @role mutator
+/// @layer tool
+/// @human Génère un fichier CSV à partir de données et options fournis.
+/// @do csv_generate_under_governance
 /// tool.export.csv.generate
 pub fn generate(
     ctx: &GovernedContext,

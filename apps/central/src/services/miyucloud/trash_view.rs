@@ -1,10 +1,10 @@
 //! Vue corbeille MiyuCloud -- liste des elements supprimes.
 //!
-//! @id: miyucloud_trash_view
-//! @do: display_and_manage_trashed_items
-//! @role: component
-//! @layer: presentation
-//! @human: Lise (Dev Front-End)
+//! @id     miyucloud_trash_view
+//! @do     display_and_manage_trashed_items
+//! @role   component
+//! @layer  presentation
+//! @human  Lise (Dev Front-End)
 //!
 //! Affiche les fichiers et dossiers en corbeille avec :
 //! - Date de mise en corbeille

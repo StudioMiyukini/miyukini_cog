@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyushippingError;
 
-/// @id: miyushipping_tool_commerce_shipping_rate
-/// @role: accessor
-/// @layer: tool
-/// @human: Calcule le tarif de livraison ; panier/zone fourni ; règles KindMother ou flux.
-/// @do: commerce_shipping_rate_under_governance
+/// @id miyushipping_tool_commerce_shipping_rate
+/// @role accessor
+/// @layer tool
+/// @human Calcule le tarif de livraison ; panier/zone fourni ; règles KindMother ou flux.
+/// @do commerce_shipping_rate_under_governance
 pub fn rate(
     ctx: &GovernedContext,
     _cart_or_parcel_ref: &str,
@@ -20,11 +20,11 @@ pub fn rate(
     Ok("0".to_string())
 }
 
-/// @id: miyushipping_tool_commerce_shipping_rates_compare
-/// @role: accessor
-/// @layer: tool
-/// @human: Compare les tarifs de plusieurs transporteurs ; colis donné ; lecture.
-/// @do: commerce_shipping_rates_compare_under_governance
+/// @id miyushipping_tool_commerce_shipping_rates_compare
+/// @role accessor
+/// @layer tool
+/// @human Compare les tarifs de plusieurs transporteurs ; colis donné ; lecture.
+/// @do commerce_shipping_rates_compare_under_governance
 pub fn rates_compare(
     ctx: &GovernedContext,
     _parcel_ref: &str,

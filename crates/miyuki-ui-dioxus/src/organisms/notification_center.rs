@@ -1,4 +1,8 @@
-// @id: MUID-NotificationCenter @do: notification-center-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-NotificationCenter
+// @do notification-center-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Notification center organism for managing notifications.
 //!

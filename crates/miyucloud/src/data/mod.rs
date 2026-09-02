@@ -1,9 +1,9 @@
 //! Persistance MiyuCloud via KindMother (Instance Daughter).
 //!
-//! @id: miyucloud_data_module
-//! @do: expose_domain_types_and_persistence
-//! @role: data
-//! @layer: domain
+//! @id     miyucloud_data_module
+//! @do     expose_domain_types_and_persistence
+//! @role   data
+//! @layer  domain
 //!
 //! `legacy-sqlite` : acces SQLite direct.
 //! `kindmother-only` : delegation au service KindMother.

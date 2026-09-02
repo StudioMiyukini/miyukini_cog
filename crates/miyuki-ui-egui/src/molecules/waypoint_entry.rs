@@ -1,4 +1,8 @@
-// @id: MUIE-WPEntry @do: waypoint-entry-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-WPEntry
+// @do waypoint-entry-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Waypoint entry molecule -- name + discovered/undiscovered state.
 

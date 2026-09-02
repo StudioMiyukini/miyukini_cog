@@ -1,4 +1,8 @@
-// @id: MUID-Modal @do: modal-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-Modal
+// @do modal-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Modal dialog organism with backdrop and configurable size.
 //!

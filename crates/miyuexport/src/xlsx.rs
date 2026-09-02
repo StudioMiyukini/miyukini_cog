@@ -13,11 +13,11 @@ pub struct XlsxOptions {
     pub number_format: Option<String>,
 }
 
-/// @id: miyuexport_tool_xlsx_generate
-/// @role: mutator
-/// @layer: tool
-/// @human: Génère un fichier XLSX à partir de données et options fournis.
-/// @do: xlsx_generate_under_governance
+/// @id miyuexport_tool_xlsx_generate
+/// @role mutator
+/// @layer tool
+/// @human Génère un fichier XLSX à partir de données et options fournis.
+/// @do xlsx_generate_under_governance
 /// tool.export.xlsx.generate
 pub fn generate(
     ctx: &GovernedContext,

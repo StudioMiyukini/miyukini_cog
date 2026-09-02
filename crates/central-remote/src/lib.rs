@@ -1,8 +1,10 @@
 //! CentralRemote — contrôle à distance de Central depuis le navigateur.
 //!
-//! @id: central_remote_lib @do: expose_central_remote_api
-//! @role: toolkit @layer: toolkit
-//! @human: Protocole (commandes/événements), session auth, et serveur embarqué pour
+//! @id     central_remote_lib
+//! @do expose_central_remote_api
+//! @role   toolkit
+//! @layer toolkit
+//! @human  Protocole (commandes/événements), session auth, et serveur embarqué pour
 //! le contrôle de Central via le portail web COG.
 //!
 //! ## Architecture

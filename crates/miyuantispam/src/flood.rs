@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuantispamError;
 
-/// @id: miyuantispam_tool_flood_check
-/// @role: security
-/// @layer: tool
-/// @human: Vérifie le flood (scope fourni) ; seuils = flux ou KindMother.
-/// @do: flood_check_under_governance
+/// @id miyuantispam_tool_flood_check
+/// @role security
+/// @layer tool
+/// @human Vérifie le flood (scope fourni) ; seuils = flux ou KindMother.
+/// @do flood_check_under_governance
 /// tool.antispam.flood.check
 pub fn check(
     ctx: &GovernedContext,

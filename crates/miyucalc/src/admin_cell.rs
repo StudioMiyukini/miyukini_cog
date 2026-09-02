@@ -5,17 +5,17 @@
 
 use serde::{Deserialize, Serialize};
 
-/// @id: miyucalc_admin_cell
-/// @role: data
-/// @layer: toolkit
-/// @human: Cellule Admin MiyuCalc : identification, manifeste de test, intégrité.
-/// @do: expose_admin_cell
+/// @id miyucalc_admin_cell
+/// @role data
+/// @layer toolkit
+/// @human Cellule Admin MiyuCalc : identification, manifeste de test, intégrité.
+/// @do expose_admin_cell
 
-/// @id: miyucalc_admin_identification
-/// @role: data
-/// @layer: toolkit
-/// @human: Identification du module (toolkit.calc.miyucalc).
-/// @do: store_identification
+/// @id miyucalc_admin_identification
+/// @role data
+/// @layer toolkit
+/// @human Identification du module (toolkit.calc.miyucalc).
+/// @do store_identification
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct MiyuCalcIdentification {
@@ -29,11 +29,11 @@ pub struct MiyuCalcIdentification {
     pub module_origin: String,
 }
 
-/// @id: miyucalc_admin_test_criteria
-/// @role: data
-/// @layer: toolkit
-/// @human: Critères de succès/échec pour un test embarqué.
-/// @do: store_test_criteria
+/// @id miyucalc_admin_test_criteria
+/// @role data
+/// @layer toolkit
+/// @human Critères de succès/échec pour un test embarqué.
+/// @do store_test_criteria
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TestCriteria {
@@ -41,11 +41,11 @@ pub struct TestCriteria {
     pub pass: String,
 }
 
-/// @id: miyucalc_admin_embedded_test_def
-/// @role: data
-/// @layer: toolkit
-/// @human: Définition d'un test dans le manifeste.
-/// @do: store_embedded_test_def
+/// @id miyucalc_admin_embedded_test_def
+/// @role data
+/// @layer toolkit
+/// @human Définition d'un test dans le manifeste.
+/// @do store_embedded_test_def
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmbeddedTestDef {
     /// Identifiant du test.
@@ -58,11 +58,11 @@ pub struct EmbeddedTestDef {
     pub criteria: TestCriteria,
 }
 
-/// @id: miyucalc_admin_test_manifest
-/// @role: data
-/// @layer: toolkit
-/// @human: Manifeste de test embarqué.
-/// @do: store_test_manifest
+/// @id miyucalc_admin_test_manifest
+/// @role data
+/// @layer toolkit
+/// @human Manifeste de test embarqué.
+/// @do store_test_manifest
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuCalcTestManifest {
     /// Liste des tests déclarés.
@@ -76,11 +76,11 @@ fn default_result_format() -> String {
     "json".to_string()
 }
 
-/// @id: miyucalc_admin_integrity
-/// @role: data
-/// @layer: toolkit
-/// @human: Métadonnées d'intégrité pour vérification TAMR.
-/// @do: store_integrity_metadata
+/// @id miyucalc_admin_integrity
+/// @role data
+/// @layer toolkit
+/// @human Métadonnées d'intégrité pour vérification TAMR.
+/// @do store_integrity_metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuCalcIntegrity {
     /// Empreinte du module (hash).
@@ -92,11 +92,11 @@ pub struct MiyuCalcIntegrity {
     pub core_versions: std::collections::HashMap<String, String>,
 }
 
-/// @id: miyucalc_admin_cell_struct
-/// @role: data
-/// @layer: toolkit
-/// @human: Cellule Admin complète MiyuCalc.
-/// @do: represent_admin_cell
+/// @id miyucalc_admin_cell_struct
+/// @role data
+/// @layer toolkit
+/// @human Cellule Admin complète MiyuCalc.
+/// @do represent_admin_cell
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuCalcAdminCell {
     /// Identification du module (toolkit.calc.miyucalc).
@@ -110,11 +110,11 @@ pub struct MiyuCalcAdminCell {
 /// ToolkitId canonique (Documentation Fondatrice).
 pub const TOOLKIT_ID: &str = "toolkit.calc.miyucalc";
 
-/// @id: miyucalc_admin_cell_build
-/// @role: mutator
-/// @layer: toolkit
-/// @human: Construit la Cellule Admin MiyuCalc.
-/// @do: build_miyucalc_admin_cell
+/// @id miyucalc_admin_cell_build
+/// @role mutator
+/// @layer toolkit
+/// @human Construit la Cellule Admin MiyuCalc.
+/// @do build_miyucalc_admin_cell
 #[must_use]
 pub fn miyucalc_admin_cell(version: &str, fingerprint: &str) -> MiyuCalcAdminCell {
     MiyuCalcAdminCell {

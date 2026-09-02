@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuposinventoryError;
 
-/// @id: miyuposinventory_tool_history_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste l'historique des mouvements (filtres fournis).
-/// @do: history_list_under_governance
+/// @id miyuposinventory_tool_history_list
+/// @role mutator
+/// @layer tool
+/// @human Liste l'historique des mouvements (filtres fournis).
+/// @do history_list_under_governance
 /// tool.inventory.history.list
 pub fn list(
     ctx: &GovernedContext,

@@ -1,9 +1,9 @@
 //! Transport TCP chiffre E2E pour la synchronisation P2P.
 //!
-//! @id: miyucloud_sync_transport
-//! @do: implement_tcp_transport_with_e2e_encryption
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_transport
+//! @do     implement_tcp_transport_with_e2e_encryption
+//! @role   sync
+//! @layer  infra
 //!
 //! Transport TCP pour echanger des messages de synchronisation entre pairs.
 //! Tous les messages sont chiffres avec la cle de session E2E (ChaCha20-Poly1305).

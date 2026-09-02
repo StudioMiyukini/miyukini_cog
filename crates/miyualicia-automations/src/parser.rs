@@ -2,11 +2,11 @@
 //!
 //! Format : `[[automations]]` array dans un fichier TOML.
 
-// @id: toolkit.alicia.automations.parser
-// @role: toml_parser
-// @layer: 6
-// @human: Parseur TOML pour les automatisations domotiques Alicia.
-// @do: parse_toml_automation_files
+// @id toolkit.alicia.automations.parser
+// @role toml_parser
+// @layer 6
+// @human Parseur TOML pour les automatisations domotiques Alicia.
+// @do parse_toml_automation_files
 
 use chrono::Utc;
 use serde::Deserialize;

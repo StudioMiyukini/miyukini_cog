@@ -1,4 +1,8 @@
-// @id: MUIE-SkillNode @do: skill-node-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-SkillNode
+// @do skill-node-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Skill tree node molecule -- icon + level + prerequisite connection point.
 //!

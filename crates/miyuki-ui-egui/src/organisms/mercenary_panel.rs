@@ -1,4 +1,8 @@
-// @id: MUIE-MercPanel @do: mercenary-panel-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-MercPanel
+// @do mercenary-panel-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Mercenary panel organism -- equipment + stats display.
 

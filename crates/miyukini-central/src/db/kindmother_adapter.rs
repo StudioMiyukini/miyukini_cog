@@ -6,9 +6,9 @@
 //! Depuis la migration libSQL, l'accès base de données passe exclusivement
 //! par `kindmother-client`. Ce module ne conserve que les helpers purs.
 //!
-//! @id: kindmother_adapter
-//! @do: provide_common_utility_functions
-//! @layer: infra
+//! @id     kindmother_adapter
+//! @do     provide_common_utility_functions
+//! @layer  infra
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers pour les conversions de types courants

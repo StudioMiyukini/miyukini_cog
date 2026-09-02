@@ -1,4 +1,8 @@
-// @id: MUIE-CharSheet @do: character-sheet-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-CharSheet
+// @do character-sheet-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Character sheet organism -- attributes, derived stats, resistances.
 

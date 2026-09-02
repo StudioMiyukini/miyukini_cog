@@ -3,11 +3,11 @@
 //! Erreurs de capture audio, enumeration devices, VAD, buffer.
 //! Pas de `unwrap()` en production -- chaque erreur est typee et propagee.
 
-// @id: alicia_capture_errors
-// @role: infrastructure
-// @layer: toolkit
-// @human: Types d'erreur contractuels Alicia Capture.
-// @do: represent_voice_capture_errors
+// @id alicia_capture_errors
+// @role infrastructure
+// @layer toolkit
+// @human Types d'erreur contractuels Alicia Capture.
+// @do represent_voice_capture_errors
 
 use thiserror::Error;
 

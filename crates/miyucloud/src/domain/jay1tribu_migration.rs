@@ -1,9 +1,9 @@
 //! Migration des pieces jointes Jay1Tribu vers MiyuCloud.
 //!
-//! @id: miyucloud_domain_jay1tribu_migration
-//! @do: migrate_jay1tribu_attachments_to_miyucloud_non_destructive
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_jay1tribu_migration
+//! @do     migrate_jay1tribu_attachments_to_miyucloud_non_destructive
+//! @role   domain
+//! @layer  domain
 //!
 //! Migration non-destructive et idempotente : les fichiers originaux dans
 //! Jay1Tribu ne sont PAS supprimes. La correspondance est enregistree dans

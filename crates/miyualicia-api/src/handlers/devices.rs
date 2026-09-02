@@ -1,10 +1,10 @@
 //! Handlers pour les routes /devices.
 
-// @id: service.alicia.api.handlers.devices
-// @role: device_command_handler
-// @layer: 7
-// @human: Endpoints dispositifs et commandes Alicia API.
-// @do: handle_device_requests_and_commands
+// @id service.alicia.api.handlers.devices
+// @role device_command_handler
+// @layer 7
+// @human Endpoints dispositifs et commandes Alicia API.
+// @do handle_device_requests_and_commands
 
 use std::sync::Arc;
 

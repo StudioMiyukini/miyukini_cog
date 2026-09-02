@@ -7,15 +7,15 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::Duration;
 
-/// @id: miyukiniadmin_db_unit_tests_module
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Module des tests unitaires DB (cohérence, conformité, structure, sécurité).
-/// @do: expose_db_unit_tests
+/// @id miyukiniadmin_db_unit_tests_module
+/// @role infrastructure
+/// @layer operator
+/// @human Module des tests unitaires DB (cohérence, conformité, structure, sécurité).
+/// @do expose_db_unit_tests
 
-/// @id: COH_001
-/// @role: test
-/// @layer: operator
+/// @id COH_001
+/// @role test
+/// @layer operator
 /// Verdict possible pour un test unitaire (Unit Tests Contract §7.1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -32,9 +32,9 @@ pub enum UnitTestVerdict {
     Error,
 }
 
-/// @id: COH_002
-/// @role: test
-/// @layer: operator
+/// @id COH_002
+/// @role test
+/// @layer operator
 /// Sévérité d'un test (Unit Tests Contract §7.2).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -51,9 +51,9 @@ pub enum TestSeverity {
     Info,
 }
 
-/// @id: COH_003
-/// @role: test
-/// @layer: operator
+/// @id COH_003
+/// @role test
+/// @layer operator
 /// Définition d'un test unitaire DB (id, nom, catégorie, critères, sévérité).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbUnitTestDefinition {
@@ -73,9 +73,9 @@ pub struct DbUnitTestDefinition {
     pub severity: TestSeverity,
 }
 
-/// @id: COH_004
-/// @role: test
-/// @layer: operator
+/// @id COH_004
+/// @role test
+/// @layer operator
 /// Résultat d'un test unitaire individuel.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbUnitTestResult {
@@ -95,9 +95,9 @@ pub struct DbUnitTestResult {
     pub recommendation: Option<String>,
 }
 
-/// @id: COH_005
-/// @role: test
-/// @layer: operator
+/// @id COH_005
+/// @role test
+/// @layer operator
 /// Résumé d'une suite de tests (Unit Tests Contract §9.1).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbUnitTestSummary {
@@ -115,9 +115,9 @@ pub struct DbUnitTestSummary {
     pub errors: u32,
 }
 
-/// @id: COH_006
-/// @role: test
-/// @layer: operator
+/// @id COH_006
+/// @role test
+/// @layer operator
 /// Rapport complet d'exécution des tests unitaires DB.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DbUnitTestReport {
@@ -139,9 +139,9 @@ pub struct DbUnitTestReport {
     pub recommendations: Vec<Recommendation>,
 }
 
-/// @id: CONF_001
-/// @role: test
-/// @layer: operator
+/// @id CONF_001
+/// @role test
+/// @layer operator
 /// Recommandation associée à un échec ou avertissement.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Recommendation {
@@ -428,9 +428,9 @@ pub trait DbUnitTestBackend: Send + Sync {
     ) -> Result<HashMap<String, u64>, String>;
 }
 
-/// @id: miyukiniadmin_db_unit_tests_run_single
-/// @role: mutator
-/// @layer: operator
+/// @id miyukiniadmin_db_unit_tests_run_single
+/// @role mutator
+/// @layer operator
 /// Exécute un seul test unitaire DB et retourne le résultat.
 #[must_use]
 pub fn run_single_test(
@@ -489,9 +489,9 @@ pub fn run_single_test(
     }
 }
 
-/// @id: miyukiniadmin_db_unit_tests_run_suite
-/// @role: mutator
-/// @layer: operator
+/// @id miyukiniadmin_db_unit_tests_run_suite
+/// @role mutator
+/// @layer operator
 /// Exécute une suite de tests (Quick, Standard, Full) et produit un rapport.
 #[must_use]
 pub fn run_suite(

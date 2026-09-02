@@ -1,4 +1,8 @@
-// @id: MUIE-MainMenu @do: main-menu-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-MainMenu
+// @do main-menu-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Main menu organism -- title + menu buttons.
 

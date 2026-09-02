@@ -5,11 +5,11 @@
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
-// @id: service.alicia.api.admin
-// @role: governance_cell
-// @layer: 7
-// @human: Cellule d'administration du crate miyualicia-api.
-// @do: identify_and_self_describe_miyualicia_api
+// @id service.alicia.api.admin
+// @role governance_cell
+// @layer 7
+// @human Cellule d'administration du crate miyualicia-api.
+// @do identify_and_self_describe_miyualicia_api
 
 /// Identifiant canonique du service.
 pub const SERVICE_ID: &str = "service.alicia.rest-api";

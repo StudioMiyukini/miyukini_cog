@@ -1,4 +1,8 @@
-// @id: MUIE-SlotFrame @do: slot-frame-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-SlotFrame
+// @do slot-frame-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Inventory and equipment slot frames.
 //!

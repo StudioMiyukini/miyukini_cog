@@ -2,19 +2,19 @@
 //!
 //! Génération de mondes avec Perlin noise.
 //!
-//! @id: lifegame.world.generation
-//! @role: simulation
-//! @layer: domain
-//! @do: procedurally_generate_terrain_with_noise
-//! @human: Générateur de monde utilisant le bruit de Perlin
+//! @id     lifegame.world.generation
+//! @role   simulation
+//! @layer  domain
+//! @do     procedurally_generate_terrain_with_noise
+//! @human  Générateur de monde utilisant le bruit de Perlin
 
 use noise::{NoiseFn, Perlin};
 use crate::{TerrainGrid, TerrainType, WorldSize, ResourceDeposit, ResourceType};
 
 /// Générateur de monde procédural
 ///
-/// @id: lifegame.world.generator
-/// @do: generate_terrain_biomes_resources
+/// @id lifegame.world.generator
+/// @do generate_terrain_biomes_resources
 pub struct WorldGenerator {
     /// Seed de génération
     seed: u64,

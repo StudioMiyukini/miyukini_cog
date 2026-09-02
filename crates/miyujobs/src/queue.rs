@@ -50,11 +50,11 @@ fn default_store() -> &'static Mutex<QueueStore> {
     DEFAULT_STORE.get_or_init(|| Mutex::new(QueueStore::default()))
 }
 
-/// @id: miyujobs_tool_queue_enqueue
-/// @role: mutator
-/// @layer: tool
-/// @human: Enfile une tâche (payload, queue, options fournis) ; autorisation = StrongFather.
-/// @do: queue_enqueue_under_governance
+/// @id miyujobs_tool_queue_enqueue
+/// @role mutator
+/// @layer tool
+/// @human Enfile une tâche (payload, queue, options fournis) ; autorisation = StrongFather.
+/// @do queue_enqueue_under_governance
 /// tool.jobs.queue.enqueue
 pub fn enqueue(
     ctx: &GovernedContext,
@@ -98,11 +98,11 @@ pub struct ProcessResult {
     pub task_ids: Vec<String>,
 }
 
-/// @id: miyujobs_tool_queue_process
-/// @role: mutator
-/// @layer: tool
-/// @human: Traite jusqu'à batch_size tâches en attente ; handler à appeler côté flux sur les payloads.
-/// @do: queue_process_under_governance
+/// @id miyujobs_tool_queue_process
+/// @role mutator
+/// @layer tool
+/// @human Traite jusqu'à batch_size tâches en attente ; handler à appeler côté flux sur les payloads.
+/// @do queue_process_under_governance
 /// tool.jobs.queue.process
 pub fn process(
     ctx: &GovernedContext,

@@ -5,11 +5,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyuantispamError;
 use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 
-/// @id: miyuantispam_tool_captcha_generate
-/// @role: mutator
-/// @layer: tool
-/// @human: Génère un défi CAPTCHA.
-/// @do: captcha_generate_under_governance
+/// @id miyuantispam_tool_captcha_generate
+/// @role mutator
+/// @layer tool
+/// @human Génère un défi CAPTCHA.
+/// @do captcha_generate_under_governance
 /// tool.antispam.captcha.generate
 pub fn generate(ctx: &GovernedContext) -> Result<String, MiyuantispamError> {
     if !ctx.has_mandate() {
@@ -20,11 +20,11 @@ pub fn generate(ctx: &GovernedContext) -> Result<String, MiyuantispamError> {
     Ok(format!("cap:{id}"))
 }
 
-/// @id: miyuantispam_tool_captcha_verify
-/// @role: mutator
-/// @layer: tool
-/// @human: Vérifie une réponse CAPTCHA.
-/// @do: captcha_verify_under_governance
+/// @id miyuantispam_tool_captcha_verify
+/// @role mutator
+/// @layer tool
+/// @human Vérifie une réponse CAPTCHA.
+/// @do captcha_verify_under_governance
 /// tool.antispam.captcha.verify
 pub fn verify(
     ctx: &GovernedContext,

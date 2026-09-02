@@ -1,9 +1,9 @@
 //! Fonctions de sanitisation pour la securite web.
 //!
-//! @id: miyucloud_utils_sanitize
-//! @do: provide_html_escape_filename_sanitize_functions
-//! @role: security
-//! @layer: infra
+//! @id     miyucloud_utils_sanitize
+//! @do     provide_html_escape_filename_sanitize_functions
+//! @role   security
+//! @layer  infra
 
 /// Echappe les caracteres HTML dangereux (&, <, >, ", ').
 ///

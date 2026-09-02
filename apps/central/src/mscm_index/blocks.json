@@ -1,0 +1,342 @@
+[
+  {
+    "id": "central",
+    "file": "main.rs",
+    "start_line": 1,
+    "end_line": 163,
+    "role": "orchestration",
+    "layer": "app",
+    "do": "lancer_central",
+    "human": "Application Miyukini Central : hub de gestion des services COG (interface Steam-like), racine du projet."
+  },
+  {
+    "id": "central.components",
+    "file": "components/mod.rs",
+    "start_line": 1,
+    "end_line": 23,
+    "role": "ui",
+    "layer": "ui",
+    "do": "regrouper_composants",
+    "human": "Composants UI réutilisables de Miyukini Central. Composants UI reutilisables pour Miyukini Central."
+  },
+  {
+    "id": "central.components.calendar",
+    "file": "components/calendar/mod.rs",
+    "start_line": 1,
+    "end_line": 22,
+    "role": "ui",
+    "layer": "ui",
+    "do": "provide_reusable_calendar_views",
+    "human": "Composants calendrier reutilisables (jour, semaine, mois)"
+  },
+  {
+    "id": "central.components.calendar.agenda_list",
+    "file": "components/calendar/agenda_list.rs",
+    "start_line": 1,
+    "end_line": 72,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_agenda_list_item",
+    "human": "Composant item de liste d'agenda"
+  },
+  {
+    "id": "central.components.calendar.day_view",
+    "file": "components/calendar/day_view.rs",
+    "start_line": 1,
+    "end_line": 338,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_generic_day_calendar_view",
+    "human": "Vue calendrier jour generique reutilisable"
+  },
+  {
+    "id": "central.components.calendar.event_slot",
+    "file": "components/calendar/event_slot.rs",
+    "start_line": 1,
+    "end_line": 189,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_calendar_event_block",
+    "human": "Composant de rendu d'un événement dans les grilles jour/semaine"
+  },
+  {
+    "id": "central.components.calendar.mini_calendar",
+    "file": "components/calendar/mini_calendar.rs",
+    "start_line": 1,
+    "end_line": 163,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_mini_date_picker_calendar",
+    "human": "Petit calendrier pour sélection de date"
+  },
+  {
+    "id": "central.components.calendar.month_view",
+    "file": "components/calendar/month_view.rs",
+    "start_line": 1,
+    "end_line": 234,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_generic_month_calendar_view",
+    "human": "Vue calendrier mois generique reutilisable"
+  },
+  {
+    "id": "central.components.calendar.types",
+    "file": "components/calendar/types.rs",
+    "start_line": 1,
+    "end_line": 298,
+    "role": "data",
+    "layer": "domain",
+    "do": "define_generic_calendar_types_and_traits",
+    "human": "Types generiques pour calendrier (events, slots, modes)"
+  },
+  {
+    "id": "central.components.calendar.week_view",
+    "file": "components/calendar/week_view.rs",
+    "start_line": 1,
+    "end_line": 340,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_generic_week_calendar_view",
+    "human": "Vue calendrier semaine generique reutilisable"
+  },
+  {
+    "id": "central.components.service_sidebar",
+    "file": "components/service_sidebar.rs",
+    "start_line": 1,
+    "end_line": 375,
+    "role": "ui",
+    "layer": "ui",
+    "do": "render_generic_service_sidebar_with_roles_and_sections",
+    "human": "Sidebar generique reutilisable pour tous les services Jay*"
+  },
+  {
+    "id": "central.services",
+    "file": "services/mod.rs",
+    "start_line": 1,
+    "end_line": 56,
+    "role": "orchestration",
+    "layer": "app",
+    "do": "regrouper_services",
+    "human": "Services applicatifs de Miyukini Central (métier, remote, jeux). Vues des services dans Miyukini Central."
+  },
+  {
+    "id": "central.services.lifegame",
+    "file": "services/lifegame/mod.rs",
+    "start_line": 1,
+    "end_line": 256,
+    "role": "ui",
+    "layer": "domain",
+    "do": "render_lifegame_godview_with_terrain_powers_and_simulation",
+    "human": "Jeu complet : canvas pixel art, pouvoirs divins, contrôle du temps, stats."
+  },
+  {
+    "id": "central.services.lifegame.canvas",
+    "file": "services/lifegame/canvas.rs",
+    "start_line": 1,
+    "end_line": 253,
+    "role": "ui",
+    "layer": "domain",
+    "do": "render_terrain_grid_as_pixel_art_with_mouse_interaction",
+    "human": "Rendu du terrain en grille colorée avec zoom, pan et pinceaux."
+  },
+  {
+    "id": "central.services.lifegame.sidebar",
+    "file": "services/lifegame/sidebar.rs",
+    "start_line": 1,
+    "end_line": 294,
+    "role": "ui",
+    "layer": "domain",
+    "do": "render_divine_powers_palette_with_terrain_brushes",
+    "human": "Palette des pouvoirs divins et pinceaux de terrain."
+  },
+  {
+    "id": "central.services.lifegame.stats_bar",
+    "file": "services/lifegame/stats_bar.rs",
+    "start_line": 1,
+    "end_line": 100,
+    "role": "ui",
+    "layer": "domain",
+    "do": "render_game_statistics_bar_with_population_and_time",
+    "human": "Barre inférieure avec stats détaillées."
+  },
+  {
+    "id": "central.services.ui_assets",
+    "file": "services/ui_assets.rs",
+    "start_line": 1,
+    "end_line": 481,
+    "role": "ui",
+    "layer": "infra",
+    "do": "provide_ui_asset_generators_and_embedded_sprites",
+    "human": "Générateurs SVG paramétriques et sprites PNG embarqués pour l'UI Builder"
+  },
+  {
+    "id": "central.services.ui_builder",
+    "file": "services/ui_builder.rs",
+    "start_line": 1,
+    "end_line": 2199,
+    "role": "ui",
+    "layer": "ui",
+    "do": "display_ui_assets_showcase_with_interactive_preview",
+    "human": "Vue vitrine interactive des assets UI Miyukini (panneaux, boutons, barres, curseurs)"
+  },
+  {
+    "id": "central_remote_module",
+    "file": "remote.rs",
+    "start_line": 1,
+    "end_line": 158,
+    "role": "infra",
+    "layer": "app",
+    "do": "manage_remote_server_lifecycle",
+    "human": "Gère le cycle de vie du serveur CentralRemote et la synchronisation entre l'état Dioxus de Central et le bridge remote."
+  },
+  {
+    "id": "miyucloud_auth_security_components",
+    "file": "services/miyucloud/auth_security.rs",
+    "start_line": 1,
+    "end_line": 623,
+    "role": "component",
+    "layer": "presentation",
+    "do": "provide_totp_sessions_onboarding_health_ui",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_calendar_view",
+    "file": "services/miyucloud/calendar_view.rs",
+    "start_line": 1,
+    "end_line": 351,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_caldav_calendars_events",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_central_view",
+    "file": "services/miyucloud/mod.rs",
+    "start_line": 1,
+    "end_line": 827,
+    "role": "view",
+    "layer": "presentation",
+    "do": "provide_miyucloud_ui_in_central",
+    "human": "Lise (Dev Front-End)"
+  },
+  {
+    "id": "miyucloud_contacts_view",
+    "file": "services/miyucloud/contacts_view.rs",
+    "start_line": 1,
+    "end_line": 293,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_carddav_addressbooks_contacts",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_explorer",
+    "file": "services/miyucloud/explorer.rs",
+    "start_line": 1,
+    "end_line": 552,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_files_and_folders",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_file_detail",
+    "file": "services/miyucloud/file_detail.rs",
+    "start_line": 1,
+    "end_line": 250,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_file_metadata_and_actions",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_http_client",
+    "file": "services/miyucloud/client.rs",
+    "start_line": 1,
+    "end_line": 1526,
+    "role": "client",
+    "layer": "presentation",
+    "do": "communicate_with_miyucloud_server",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_settings",
+    "file": "services/miyucloud/settings.rs",
+    "start_line": 1,
+    "end_line": 702,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_and_manage_miyucloud_settings",
+    "human": "Lise (Dev Front-End)"
+  },
+  {
+    "id": "miyucloud_share_dialog",
+    "file": "services/miyucloud/share_dialog.rs",
+    "start_line": 1,
+    "end_line": 686,
+    "role": "component",
+    "layer": "presentation",
+    "do": "create_share_links_and_permissions",
+    "human": "Lise (Dev Front-End)"
+  },
+  {
+    "id": "miyucloud_sidebar",
+    "file": "services/miyucloud/sidebar.rs",
+    "start_line": 1,
+    "end_line": 372,
+    "role": "component",
+    "layer": "presentation",
+    "do": "navigate_folder_tree",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_sync_status",
+    "file": "services/miyucloud/sync_status.rs",
+    "start_line": 1,
+    "end_line": 902,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_sync_status_badge_and_panel",
+    "human": "Lise (Dev Front-End)"
+  },
+  {
+    "id": "miyucloud_trash_view",
+    "file": "services/miyucloud/trash_view.rs",
+    "start_line": 1,
+    "end_line": 436,
+    "role": "component",
+    "layer": "presentation",
+    "do": "display_and_manage_trashed_items",
+    "human": "Lise (Dev Front-End)"
+  },
+  {
+    "id": "miyucloud_ui_components",
+    "file": "services/miyucloud/components.rs",
+    "start_line": 1,
+    "end_line": 261,
+    "role": "component",
+    "layer": "presentation",
+    "do": "provide_reusable_cloud_ui_atoms",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_ui_state",
+    "file": "services/miyucloud/state.rs",
+    "start_line": 1,
+    "end_line": 780,
+    "role": "state",
+    "layer": "presentation",
+    "do": "manage_miyucloud_ui_state",
+    "human": ""
+  },
+  {
+    "id": "miyucloud_upload",
+    "file": "services/miyucloud/upload.rs",
+    "start_line": 1,
+    "end_line": 159,
+    "role": "component",
+    "layer": "presentation",
+    "do": "upload_files_to_cloud",
+    "human": ""
+  }
+]

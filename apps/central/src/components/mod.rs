@@ -1,3 +1,8 @@
+//! @id     central.components
+//! @do     regrouper_composants
+//! @role   ui
+//! @layer  ui
+//! @human  Composants UI réutilisables de Miyukini Central.
 //! Composants UI reutilisables pour Miyukini Central.
 
 mod header;

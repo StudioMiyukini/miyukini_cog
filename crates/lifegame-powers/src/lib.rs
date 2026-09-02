@@ -2,11 +2,11 @@
 //!
 //! Gestion des pouvoirs divins du joueur.
 //!
-//! @id: lifegame.operator.powers
-//! @role: gameplay
-//! @layer: domain
-//! @do: manage_divine_powers_and_god_actions
-//! @human: Opérateur gérant tous les pouvoirs divins (création, destruction, créatures, magie)
+//! @id     lifegame.operator.powers
+//! @role   gameplay
+//! @layer  domain
+//! @do     manage_divine_powers_and_god_actions
+//! @human  Opérateur gérant tous les pouvoirs divins (création, destruction, créatures, magie)
 
 use serde::{Deserialize, Serialize};
 use lifegame_entities::{EntityManager, Unit, Creature, Vec2, Race, CreatureType};
@@ -167,8 +167,8 @@ impl PowerType {
 
 /// Gestionnaire des pouvoirs divins
 ///
-/// @id: lifegame.powers.manager
-/// @do: manage_power_usage_and_cooldowns
+/// @id lifegame.powers.manager
+/// @do manage_power_usage_and_cooldowns
 #[derive(Debug, Clone, Default)]
 pub struct PowerManager {
     /// Dernière utilisation de chaque pouvoir (timestamp)

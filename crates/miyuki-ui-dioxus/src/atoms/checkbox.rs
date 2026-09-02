@@ -1,4 +1,8 @@
-// @id: MUID-Checkbox @do: checkbox-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Checkbox
+// @do checkbox-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Checkbox atom with label and indeterminate state.
 //!

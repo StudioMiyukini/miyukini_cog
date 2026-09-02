@@ -1,4 +1,8 @@
-// @id: MUID-CardGrid @do: card-grid-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-CardGrid
+// @do card-grid-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Card grid organism for responsive grid layouts.
 //!

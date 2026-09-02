@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuposkitchenError;
 
-/// @id: miyuposkitchen_tool_service_type_set
-/// @role: mutator
-/// @layer: tool
-/// @human: Définit le type de service (sur place / à emporter / livraison).
-/// @do: service_type_set_under_governance
+/// @id miyuposkitchen_tool_service_type_set
+/// @role mutator
+/// @layer tool
+/// @human Définit le type de service (sur place / à emporter / livraison).
+/// @do service_type_set_under_governance
 /// tool.pos.order.service_type.set
 pub fn set(
     ctx: &GovernedContext,

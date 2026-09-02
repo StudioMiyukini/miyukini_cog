@@ -15,11 +15,11 @@ pub struct QueryResult {
     pub scores: Vec<f64>,
 }
 
-/// @id: miyusearch_tool_search_query_execute
-/// @role: accessor
-/// @layer: tool
-/// @human: Exécute une requête full-text ; terme(s), filtres, options fournis.
-/// @do: search_query_execute_under_governance
+/// @id miyusearch_tool_search_query_execute
+/// @role accessor
+/// @layer tool
+/// @human Exécute une requête full-text ; terme(s), filtres, options fournis.
+/// @do search_query_execute_under_governance
 /// tool.search.query.execute — ne décide pas ; critères fournis.
 pub fn execute(
     ctx: &GovernedContext,

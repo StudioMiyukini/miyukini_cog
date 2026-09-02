@@ -2,11 +2,11 @@
 //!
 //! Gestion des entités du monde : unités civilisées, bâtiments, créatures.
 //!
-//! @id: lifegame.operator.entities
-//! @role: simulation
-//! @layer: domain
-//! @do: manage_world_entities_units_buildings_creatures
-//! @human: Opérateur gérant toutes les entités vivantes et construites du monde
+//! @id     lifegame.operator.entities
+//! @role   simulation
+//! @layer  domain
+//! @do     manage_world_entities_units_buildings_creatures
+//! @human  Opérateur gérant toutes les entités vivantes et construites du monde
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -67,8 +67,8 @@ impl std::ops::Sub for Vec2 {
 
 /// Gestionnaire centralisé de toutes les entités
 ///
-/// @id: lifegame.entities.manager
-/// @do: centralize_entity_storage_and_queries
+/// @id lifegame.entities.manager
+/// @do centralize_entity_storage_and_queries
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct EntityManager {
     /// Toutes les unités civilisées

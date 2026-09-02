@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyudeclarationsError;
 
-/// @id: miyudeclarations_tool_estimate_cotisations
-/// @role: mutator
-/// @layer: tool
-/// @human: Calcule une estimation des cotisations (micro) à partir de CA fourni.
-/// @do: estimate_cotisations_under_governance
+/// @id miyudeclarations_tool_estimate_cotisations
+/// @role mutator
+/// @layer tool
+/// @human Calcule une estimation des cotisations (micro) à partir de CA fourni.
+/// @do estimate_cotisations_under_governance
 /// tool.compta.declaration.estimate.cotisations
 pub fn cotisations(
     ctx: &GovernedContext,

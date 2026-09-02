@@ -11,11 +11,11 @@ use std::path::Path;
 /// Répertoire par défaut pour les polices (LiberationSans : *-Regular.ttf, etc.).
 const DEFAULT_FONT_DIR: &str = "./fonts";
 
-/// @id: miyuexport_tool_pdf_render
-/// @role: mutator
-/// @layer: tool
-/// @human: Rend un PDF à partir d'un template et de données fournis.
-/// @do: pdf_render_under_governance
+/// @id miyuexport_tool_pdf_render
+/// @role mutator
+/// @layer tool
+/// @human Rend un PDF à partir d'un template et de données fournis.
+/// @do pdf_render_under_governance
 /// tool.export.pdf.render — ne décide pas du contenu.
 pub fn render(
     ctx: &GovernedContext,

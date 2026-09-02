@@ -2,11 +2,11 @@
 //!
 //! Logique de décision des unités.
 //!
-//! @id: lifegame.simulation.ai
-//! @role: simulation
-//! @layer: domain
-//! @do: implement_unit_decision_making
-//! @human: Système de décision pour les unités civilisées
+//! @id     lifegame.simulation.ai
+//! @role   simulation
+//! @layer  domain
+//! @do     implement_unit_decision_making
+//! @human  Système de décision pour les unités civilisées
 
 use lifegame_entities::{Unit, EntityManager, Vec2};
 use lifegame_world::TerrainGrid;
@@ -14,8 +14,8 @@ use crate::UnitAction;
 
 /// Décide l'action d'une unité basée sur ses besoins et son environnement
 ///
-/// @id: lifegame.ai.decide_action
-/// @do: determine_best_action_for_unit
+/// @id lifegame.ai.decide_action
+/// @do determine_best_action_for_unit
 #[must_use]
 pub fn decide_unit_action(unit: &Unit, entities: &EntityManager, terrain: &TerrainGrid) -> UnitAction {
     // Priorité 1 : Survie

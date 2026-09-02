@@ -2,11 +2,11 @@
 //!
 //! Chargee depuis la section `[api]` de `alicia.toml`.
 
-// @id: service.alicia.api.config
-// @role: api_configuration
-// @layer: 7
-// @human: Configuration API REST Alicia : port, JWT TTL, rate limit, CORS.
-// @do: define_api_config
+// @id service.alicia.api.config
+// @role api_configuration
+// @layer 7
+// @human Configuration API REST Alicia : port, JWT TTL, rate limit, CORS.
+// @do define_api_config
 
 use serde::{Deserialize, Serialize};
 

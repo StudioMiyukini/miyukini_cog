@@ -1,10 +1,10 @@
 //! Dialog de creation de partage MiyuCloud.
 //!
-//! @id: miyucloud_share_dialog
-//! @do: create_share_links_and_permissions
-//! @role: component
-//! @layer: presentation
-//! @human: Lise (Dev Front-End)
+//! @id     miyucloud_share_dialog
+//! @do     create_share_links_and_permissions
+//! @role   component
+//! @layer  presentation
+//! @human  Lise (Dev Front-End)
 //!
 //! Modal pour creer des liens de partage externes ou des partages internes
 //! (Tribu/profil). Gere deux onglets : "Lien externe" et "Partage Tribu".

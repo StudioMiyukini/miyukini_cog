@@ -1,9 +1,9 @@
 //! Partage interne Tribu — permissions lecture/ecriture.
 //!
-//! @id: miyucloud_domain_sharing
-//! @do: share_unshare_files_folders_with_profiles_and_tribes
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_sharing
+//! @do     share_unshare_files_folders_with_profiles_and_tribes
+//! @role   domain
+//! @layer  domain
 //!
 //! Le partage interne permet de donner acces a des fichiers ou dossiers
 //! a des profils ou des tribus entieres, avec un niveau de permission

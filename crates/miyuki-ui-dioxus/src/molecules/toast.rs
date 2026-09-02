@@ -1,4 +1,8 @@
-// @id: MUID-Toast @do: toast-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-Toast
+// @do toast-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Toast notification molecule.
 //!

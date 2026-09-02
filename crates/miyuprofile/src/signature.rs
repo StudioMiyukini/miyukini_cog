@@ -9,11 +9,11 @@ use std::sync::Mutex;
 
 // ── Signature texte (rétro-compatible) ───────────────────────────
 
-/// @id: miyuprofile_tool_signature_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère la signature texte.
-/// @do: signature_get_under_governance
+/// @id miyuprofile_tool_signature_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère la signature texte.
+/// @do signature_get_under_governance
 /// tool.profile.signature.get
 pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<String, MiyuprofileError> {
     if !ctx.has_mandate() {
@@ -23,11 +23,11 @@ pub fn get(ctx: &GovernedContext, user_id: &str) -> Result<String, MiyuprofileEr
     Ok(p.fields.get("signature").cloned().unwrap_or_default())
 }
 
-/// @id: miyuprofile_tool_signature_set
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour la signature texte ; WriteIntent KindMother.
-/// @do: signature_set_under_governance
+/// @id miyuprofile_tool_signature_set
+/// @role mutator
+/// @layer tool
+/// @human Met à jour la signature texte ; WriteIntent KindMother.
+/// @do signature_set_under_governance
 /// tool.profile.signature.set
 pub fn set(ctx: &GovernedContext, user_id: &str, content: &str) -> Result<(), MiyuprofileError> {
     if !ctx.has_mandate() {

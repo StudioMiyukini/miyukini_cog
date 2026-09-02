@@ -11,11 +11,11 @@
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.http
-// @role: http_protocol_adapter
-// @layer: 6
-// @human: Client HTTP pour dispositifs domotiques locaux Alicia ; Shelly, generique, timeout.
-// @do: provide_http_transport_for_local_devices
+// @id toolkit.alicia.http
+// @role http_protocol_adapter
+// @layer 6
+// @human Client HTTP pour dispositifs domotiques locaux Alicia ; Shelly, generique, timeout.
+// @do provide_http_transport_for_local_devices
 
 pub mod adapters;
 pub mod admin_cell;

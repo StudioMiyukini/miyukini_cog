@@ -29,11 +29,11 @@ fn default_ranks() -> Vec<RankItem> {
     ]
 }
 
-/// @id: miyuprofile_tool_rank_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les rangs ; règles StrongFather.
-/// @do: rank_list_under_governance
+/// @id miyuprofile_tool_rank_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les rangs ; règles StrongFather.
+/// @do rank_list_under_governance
 /// tool.profile.rank.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<RankItem>, MiyuprofileError> {
     if !ctx.has_mandate() {
@@ -42,11 +42,11 @@ pub fn list(ctx: &GovernedContext) -> Result<Vec<RankItem>, MiyuprofileError> {
     Ok(default_ranks())
 }
 
-/// @id: miyuprofile_tool_rank_resolve
-/// @role: mutator
-/// @layer: tool
-/// @human: Résout le rang utilisateur ; règles StrongFather.
-/// @do: rank_resolve_under_governance
+/// @id miyuprofile_tool_rank_resolve
+/// @role mutator
+/// @layer tool
+/// @human Résout le rang utilisateur ; règles StrongFather.
+/// @do rank_resolve_under_governance
 /// tool.profile.rank.resolve
 pub fn resolve(ctx: &GovernedContext, user_id: &str) -> Result<String, MiyuprofileError> {
     if !ctx.has_mandate() {

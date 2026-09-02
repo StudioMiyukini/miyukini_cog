@@ -13,11 +13,11 @@ fn bookings() -> &'static Mutex<HashMap<String, String>> {
     BOOKINGS.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-/// @id: miyubooking_tool_booking_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée une réservation ; WriteIntent KindMother ; décision StrongFather.
-/// @do: booking_create_under_governance
+/// @id miyubooking_tool_booking_create
+/// @role mutator
+/// @layer tool
+/// @human Crée une réservation ; WriteIntent KindMother ; décision StrongFather.
+/// @do booking_create_under_governance
 pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyubookingError> {
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);
@@ -30,11 +30,11 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, Miyubookin
     Ok(id)
 }
 
-/// @id: miyubooking_tool_booking_update
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour une réservation (déplacement, prolongation) ; WriteIntent KindMother.
-/// @do: booking_update_under_governance
+/// @id miyubooking_tool_booking_update
+/// @role mutator
+/// @layer tool
+/// @human Met à jour une réservation (déplacement, prolongation) ; WriteIntent KindMother.
+/// @do booking_update_under_governance
 pub fn update(
     ctx: &GovernedContext,
     booking_id: &str,
@@ -50,11 +50,11 @@ pub fn update(
     Ok(())
 }
 
-/// @id: miyubooking_tool_booking_cancel
-/// @role: mutator
-/// @layer: tool
-/// @human: Annule une réservation ; décision StrongFather ; WriteIntent KindMother.
-/// @do: booking_cancel_under_governance
+/// @id miyubooking_tool_booking_cancel
+/// @role mutator
+/// @layer tool
+/// @human Annule une réservation ; décision StrongFather ; WriteIntent KindMother.
+/// @do booking_cancel_under_governance
 pub fn cancel(ctx: &GovernedContext, booking_id: &str) -> Result<(), MiyubookingError> {
     if !ctx.has_mandate() {
         return Err(MiyubookingError::NoMandate);

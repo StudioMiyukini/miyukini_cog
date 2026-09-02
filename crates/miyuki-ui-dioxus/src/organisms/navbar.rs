@@ -1,4 +1,8 @@
-// @id: MUID-NavBar @do: nav-bar-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-NavBar
+// @do nav-bar-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Navigation bar organism for top-level navigation.
 //!

@@ -1,8 +1,10 @@
 //! Routes CentralRemote — contrôle à distance de Central depuis le portail web.
 //!
-//! @id: cog_web_portal_route_central_remote @do: serve_central_remote_ui
-//! @role: api @layer: app
-//! @human: Routes /central-remote : page de login, UI remote, proxy WebSocket.
+//! @id     cog_web_portal_route_central_remote
+//! @do serve_central_remote_ui
+//! @role   api
+//! @layer app
+//! @human  Routes /central-remote : page de login, UI remote, proxy WebSocket.
 
 use axum::Extension;
 use axum::extract::State;

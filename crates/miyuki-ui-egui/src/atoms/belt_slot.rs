@@ -1,4 +1,8 @@
-// @id: MUIE-BeltSlot @do: belt-slot-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-BeltSlot
+// @do belt-slot-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Belt potion slot -- one cell in the 4-column belt.
 //!

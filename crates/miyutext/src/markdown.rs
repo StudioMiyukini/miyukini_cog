@@ -14,11 +14,11 @@ pub struct MarkdownOptions {
     pub safe: bool,
 }
 
-/// @id: miyutext_tool_markdown_render
-/// @role: mutator
-/// @layer: tool
-/// @human: Rend du markdown fourni en HTML ; options (extensions, safe) fournies.
-/// @do: markdown_render_under_governance
+/// @id miyutext_tool_markdown_render
+/// @role mutator
+/// @layer tool
+/// @human Rend du markdown fourni en HTML ; options (extensions, safe) fournies.
+/// @do markdown_render_under_governance
 /// tool.text.markdown.render — ne décide pas du contenu.
 pub fn render(
     ctx: &GovernedContext,

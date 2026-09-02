@@ -1,4 +1,8 @@
-// @id: MUIE-HudBar @do: hud-bar-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-HudBar
+// @do hud-bar-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! HUD bar organism -- the complete bottom-of-screen gameplay interface.
 //!

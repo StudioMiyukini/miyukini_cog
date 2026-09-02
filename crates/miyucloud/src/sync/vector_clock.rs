@@ -1,9 +1,9 @@
 //! Horloges vectorielles pour la synchronisation P2P.
 //!
-//! @id: miyucloud_sync_vector_clock
-//! @do: implement_vector_clock_compare_merge
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_vector_clock
+//! @do     implement_vector_clock_compare_merge
+//! @role   sync
+//! @layer  infra
 //!
 //! Chaque modification d'un fichier incremente le compteur du noeud local.
 //! La comparaison de deux horloges permet de determiner l'ordre causal

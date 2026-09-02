@@ -1,9 +1,9 @@
 //! Gestion des quotas de stockage par utilisateur.
 //!
-//! @id: miyucloud_domain_quota
-//! @do: check_quota_before_upload_get_usage_set_max
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_quota
+//! @do     check_quota_before_upload_get_usage_set_max
+//! @role   domain
+//! @layer  domain
 //!
 //! Le quota 0 signifie illimite. Le quota est verifie AVANT l'upload (pas apres).
 //! `used_bytes` est mis a jour apres chaque upload et chaque purge.

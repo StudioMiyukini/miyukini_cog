@@ -5,18 +5,18 @@
 
 use serde::{Deserialize, Serialize};
 
-// @id: miyusql_admin_cell
-// @role: data
-// @layer: toolkit
-// @human: Cellule Admin MiyuSQL : identification, manifeste (MiyukiniSQLtest), intégrité.
-// @do: expose_admin_cell
+// @id miyusql_admin_cell
+// @role data
+// @layer toolkit
+// @human Cellule Admin MiyuSQL : identification, manifeste (MiyukiniSQLtest), intégrité.
+// @do expose_admin_cell
 // Format déclaratif lisible par MiyukiniAdmin.
 
-/// @id: miyusql_admin_identification
-/// @role: data
-/// @layer: toolkit
-/// @human: Identification du module (toolkit.data.miyusql).
-/// @do: store_identification
+/// @id miyusql_admin_identification
+/// @role data
+/// @layer toolkit
+/// @human Identification du module (toolkit.data.miyusql).
+/// @do store_identification
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct MiyuSQLIdentification {
@@ -30,11 +30,11 @@ pub struct MiyuSQLIdentification {
     pub module_origin: String,
 }
 
-/// @id: miyusql_admin_test_criteria
-/// @role: data
-/// @layer: toolkit
-/// @human: Critères de succès/échec pour un test embarqué.
-/// @do: store_test_criteria
+/// @id miyusql_admin_test_criteria
+/// @role data
+/// @layer toolkit
+/// @human Critères de succès/échec pour un test embarqué.
+/// @do store_test_criteria
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TestCriteria {
@@ -42,11 +42,11 @@ pub struct TestCriteria {
     pub pass: String,
 }
 
-/// @id: miyusql_admin_embedded_test_def
-/// @role: data
-/// @layer: toolkit
-/// @human: Définition d'un test dans le manifeste (MiyukiniSQLtest).
-/// @do: store_embedded_test_def
+/// @id miyusql_admin_embedded_test_def
+/// @role data
+/// @layer toolkit
+/// @human Définition d'un test dans le manifeste (MiyukiniSQLtest).
+/// @do store_embedded_test_def
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmbeddedTestDef {
     /// Identifiant du test (MiyukiniSQLtest).
@@ -59,11 +59,11 @@ pub struct EmbeddedTestDef {
     pub criteria: TestCriteria,
 }
 
-/// @id: miyusql_admin_test_manifest
-/// @role: data
-/// @layer: toolkit
-/// @human: Manifeste de test embarqué (MiyukiniSQLtest E2E).
-/// @do: store_test_manifest
+/// @id miyusql_admin_test_manifest
+/// @role data
+/// @layer toolkit
+/// @human Manifeste de test embarqué (MiyukiniSQLtest E2E).
+/// @do store_test_manifest
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuSQLTestManifest {
     /// Liste des tests déclarés (MiyukiniSQLtest).
@@ -77,11 +77,11 @@ fn default_result_format() -> String {
     "json".to_string()
 }
 
-/// @id: miyusql_admin_integrity
-/// @role: data
-/// @layer: toolkit
-/// @human: Métadonnées d'intégrité pour vérification TAMR.
-/// @do: store_integrity_metadata
+/// @id miyusql_admin_integrity
+/// @role data
+/// @layer toolkit
+/// @human Métadonnées d'intégrité pour vérification TAMR.
+/// @do store_integrity_metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuSQLIntegrity {
     /// Empreinte du module (hash).
@@ -93,12 +93,12 @@ pub struct MiyuSQLIntegrity {
     pub core_versions: std::collections::HashMap<String, String>,
 }
 
-/// @id: miyusql_admin_cell_struct
-/// @role: data
-/// @layer: toolkit
-/// @human: Cellule Admin complète MiyuSQL.
-/// @do: represent_admin_cell
-/// @depends: miyusql_admin_cell
+/// @id miyusql_admin_cell_struct
+/// @role data
+/// @layer toolkit
+/// @human Cellule Admin complète MiyuSQL.
+/// @do represent_admin_cell
+/// @depends miyusql_admin_cell
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MiyuSQLAdminCell {
     /// Identification du module (toolkit.data.miyusql).
@@ -115,12 +115,12 @@ pub const TOOLKIT_ID: &str = "toolkit.data.miyusql";
 /// Nom de la table dédiée au test cycle MiyukiniSQLtest (Cycle Tests Contract).
 pub const MIYUKINI_SQLTEST_TABLE: &str = "MiyukiniSQLtest";
 
-/// @id: miyusql_admin_cell_build
-/// @role: mutator
-/// @layer: toolkit
-/// @human: Construit la Cellule Admin MiyuSQL (identification, manifeste MiyukiniSQLtest, intégrité).
-/// @do: build_miyusql_admin_cell
-/// @depends: miyusql_admin_cell_struct
+/// @id miyusql_admin_cell_build
+/// @role mutator
+/// @layer toolkit
+/// @human Construit la Cellule Admin MiyuSQL (identification, manifeste MiyukiniSQLtest, intégrité).
+/// @do build_miyusql_admin_cell
+/// @depends miyusql_admin_cell_struct
 #[must_use]
 pub fn miyusql_admin_cell(version: &str, fingerprint: &str) -> MiyuSQLAdminCell {
     MiyuSQLAdminCell {

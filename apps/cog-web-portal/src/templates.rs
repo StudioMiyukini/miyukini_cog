@@ -1,8 +1,10 @@
 //! Templates HTML du COG Web Portal.
 //!
-//! @id: cog_web_portal_templates @do: render_html_portal_pages
-//! @role: ui @layer: app
-//! @human: Templates Portal — page d'accueil services, page de service, page d'erreur, formulaire contact.
+//! @id     cog_web_portal_templates
+//! @do render_html_portal_pages
+//! @role   ui
+//! @layer app
+//! @human  Templates Portal — page d'accueil services, page de service, page d'erreur, formulaire contact.
 
 #![allow(clippy::format_collect)]
 

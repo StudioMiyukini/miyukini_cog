@@ -2,11 +2,11 @@
 //!
 //! Logique de simulation pour chaque tick.
 //!
-//! @id: lifegame.simulation.world_tick
-//! @role: simulation
-//! @layer: domain
-//! @do: execute_world_simulation_tick
-//! @human: Exécute toutes les mises à jour pour un tick de simulation
+//! @id     lifegame.simulation.world_tick
+//! @role   simulation
+//! @layer  domain
+//! @do     execute_world_simulation_tick
+//! @human  Exécute toutes les mises à jour pour un tick de simulation
 
 use lifegame_entities::{EntityManager, BuildingType};
 use lifegame_world::TerrainGrid;
@@ -28,8 +28,8 @@ pub struct TickResult {
 
 /// Exécute un tick de simulation sur le monde
 ///
-/// @id: lifegame.simulation.tick_world_fn
-/// @do: process_single_simulation_tick
+/// @id lifegame.simulation.tick_world_fn
+/// @do process_single_simulation_tick
 pub fn tick_world(
     entities: &mut EntityManager,
     terrain: &TerrainGrid,

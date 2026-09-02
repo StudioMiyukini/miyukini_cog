@@ -1,8 +1,10 @@
 //! Module CentralRemote — démarrage/arrêt du serveur remote et sync de l'état.
 //!
-//! @id: central_remote_module @do: manage_remote_server_lifecycle
-//! @role: infra @layer: app
-//! @human: Gère le cycle de vie du serveur CentralRemote et la synchronisation
+//! @id     central_remote_module
+//! @do manage_remote_server_lifecycle
+//! @role   infra
+//! @layer app
+//! @human  Gère le cycle de vie du serveur CentralRemote et la synchronisation
 //! entre l'état Dioxus de Central et le bridge remote.
 
 use central_remote::bridge::RemoteBridge;

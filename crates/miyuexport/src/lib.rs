@@ -4,11 +4,11 @@
 //! Kit d'outils d'export (CSV, XLSX, PDF). Données et options fournies dans le flux.
 //! Alignement MIP : domaine `export`, layer tool/toolkit.
 
-// @id: toolkit.export.miyuexport
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuExport ; expose les modules tools.
-/// @do: expose_miyuexport_toolkit
+// @id toolkit.export.miyuexport
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuExport ; expose les modules tools.
+/// @do expose_miyuexport_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod csv;

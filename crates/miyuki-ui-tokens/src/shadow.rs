@@ -1,4 +1,8 @@
-// @id: MUIT-Shadow @do: shadow-scale @role: token @layer: 5 @human: miyuk
+// @id MUIT-Shadow
+// @do shadow-scale
+// @role token
+// @layer 5
+// @human miyuk
 
 use crate::color::Rgba;
 

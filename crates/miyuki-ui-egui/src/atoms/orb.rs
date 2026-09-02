@@ -1,4 +1,8 @@
-// @id: MUIE-Orb @do: orb-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-Orb
+// @do orb-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Life and mana orbs -- the signature D2 HUD element.
 //!

@@ -1,4 +1,8 @@
-// @id: MUIE-TmplGameplay @do: gameplay-template @role: template @layer: 6 @human: miyuk
+// @id MUIE-TmplGameplay
+// @do gameplay-template
+// @role template
+// @layer 6
+// @human miyuk
 
 //! Gameplay layout template -- HUD + game area + overlay panels.
 //!

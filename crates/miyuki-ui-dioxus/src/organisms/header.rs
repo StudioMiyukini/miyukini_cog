@@ -1,4 +1,8 @@
-// @id: MUID-AppHeader @do: app-header-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-AppHeader
+// @do app-header-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Application header organism with navigation, search, and user profile.
 //!

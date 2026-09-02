@@ -1,9 +1,9 @@
 //! Synchronisation P2P chiffree E2E pour MiyuCloud.
 //!
-//! @id: miyucloud_sync_module
-//! @do: expose_p2p_sync_engine_clocks_discovery_transport
-//! @role: sync
-//! @layer: infra
+//! @id     miyucloud_sync_module
+//! @do     expose_p2p_sync_engine_clocks_discovery_transport
+//! @role   sync
+//! @layer  infra
 //!
 //! Fournit les horloges vectorielles, la detection/resolution de conflits,
 //! le protocole de messages, la construction de manifeste, la decouverte

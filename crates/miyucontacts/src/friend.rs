@@ -12,11 +12,11 @@ pub struct ContactItem {
     pub contact_type: String,
 }
 
-/// @id: miyucontacts_tool_friend_add
-/// @role: mutator
-/// @layer: tool
-/// @human: Ajoute un ami ; WriteIntent KindMother.
-/// @do: friend_add_under_governance
+/// @id miyucontacts_tool_friend_add
+/// @role mutator
+/// @layer tool
+/// @human Ajoute un ami ; WriteIntent KindMother.
+/// @do friend_add_under_governance
 /// tool.contacts.friend.add
 pub fn add(ctx: &GovernedContext, target_id: &str) -> Result<(), MiyucontactsError> {
     if !ctx.has_mandate() {
@@ -34,11 +34,11 @@ pub fn add(ctx: &GovernedContext, target_id: &str) -> Result<(), MiyucontactsErr
     Ok(())
 }
 
-/// @id: miyucontacts_tool_friend_remove
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime un ami ; WriteIntent KindMother.
-/// @do: friend_remove_under_governance
+/// @id miyucontacts_tool_friend_remove
+/// @role mutator
+/// @layer tool
+/// @human Supprime un ami ; WriteIntent KindMother.
+/// @do friend_remove_under_governance
 /// tool.contacts.friend.remove
 pub fn remove(ctx: &GovernedContext, target_id: &str) -> Result<(), MiyucontactsError> {
     if !ctx.has_mandate() {
@@ -54,11 +54,11 @@ pub fn remove(ctx: &GovernedContext, target_id: &str) -> Result<(), Miyucontacts
     Ok(())
 }
 
-/// @id: miyucontacts_tool_friend_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les amis.
-/// @do: friend_list_under_governance
+/// @id miyucontacts_tool_friend_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les amis.
+/// @do friend_list_under_governance
 /// tool.contacts.friend.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<ContactItem>, MiyucontactsError> {
     if !ctx.has_mandate() {

@@ -2,11 +2,11 @@
 //!
 //! Chaque variante se traduit en un code HTTP et un body JSON d'erreur standard.
 
-// @id: service.alicia.api.errors
-// @role: error_types
-// @layer: 7
-// @human: Erreurs API REST Alicia avec mapping HTTP status codes.
-// @do: define_api_error_types
+// @id service.alicia.api.errors
+// @role error_types
+// @layer 7
+// @human Erreurs API REST Alicia avec mapping HTTP status codes.
+// @do define_api_error_types
 
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};

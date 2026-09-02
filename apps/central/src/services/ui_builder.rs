@@ -4,11 +4,11 @@
 //! les bordures gardent leur épaisseur absolue, seul le contenu s'adapte.
 //! Les curseurs restent en PNG pixel-art à taille fixe.
 //!
-//! @id: central.services.ui_builder
-//! @do: display_ui_assets_showcase_with_interactive_preview
-//! @role: ui
-//! @layer: ui
-//! @human: Vue vitrine interactive des assets UI Miyukini (panneaux, boutons, barres, curseurs)
+//! @id     central.services.ui_builder
+//! @do     display_ui_assets_showcase_with_interactive_preview
+//! @role   ui
+//! @layer  ui
+//! @human  Vue vitrine interactive des assets UI Miyukini (panneaux, boutons, barres, curseurs)
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

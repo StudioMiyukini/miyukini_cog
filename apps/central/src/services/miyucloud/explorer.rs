@@ -1,9 +1,9 @@
 //! Explorateur de fichiers MiyuCloud -- vue principale.
 //!
-//! @id: miyucloud_explorer
-//! @do: display_files_and_folders
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_explorer
+//! @do     display_files_and_folders
+//! @role   component
+//! @layer  presentation
 //!
 //! Vue principale du cloud : grille/liste de fichiers avec tri, navigation
 //! dans les dossiers, breadcrumb, boutons Upload et Nouveau dossier.

@@ -21,11 +21,11 @@ pub fn register(
     Ok(())
 }
 
-/// @id: miyuinvoice_tool_invoice_customer_resolve
-/// @role: accessor
-/// @layer: tool
-/// @human: Résout un client (facturation) par identifiant ; lecture.
-/// @do: invoice_customer_resolve_under_governance
+/// @id miyuinvoice_tool_invoice_customer_resolve
+/// @role accessor
+/// @layer tool
+/// @human Résout un client (facturation) par identifiant ; lecture.
+/// @do invoice_customer_resolve_under_governance
 pub fn resolve(ctx: &GovernedContext, customer_id: &str) -> Result<String, MiyuinvoiceError> {
     if !ctx.has_mandate() {
         return Err(MiyuinvoiceError::NoMandate);
@@ -40,11 +40,11 @@ pub fn resolve(ctx: &GovernedContext, customer_id: &str) -> Result<String, Miyui
     Ok(payload)
 }
 
-/// @id: miyuinvoice_tool_invoice_customer_list
-/// @role: accessor
-/// @layer: tool
-/// @human: Liste les clients (filtres fournis) pour facturation ; lecture.
-/// @do: invoice_customer_list_under_governance
+/// @id miyuinvoice_tool_invoice_customer_list
+/// @role accessor
+/// @layer tool
+/// @human Liste les clients (filtres fournis) pour facturation ; lecture.
+/// @do invoice_customer_list_under_governance
 pub fn list(
     ctx: &GovernedContext,
     _filters: Option<&str>,

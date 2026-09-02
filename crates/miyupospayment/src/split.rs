@@ -4,11 +4,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyupospaymentError;
 use std::collections::HashMap;
 
-/// @id: miyupospayment_tool_split
-/// @role: mutator
-/// @layer: tool
-/// @human: Répartit le paiement entre plusieurs moyens ; autorisation = StrongFather.
-/// @do: payment_split_under_governance
+/// @id miyupospayment_tool_split
+/// @role mutator
+/// @layer tool
+/// @human Répartit le paiement entre plusieurs moyens ; autorisation = StrongFather.
+/// @do payment_split_under_governance
 /// tool.pos.payment.split
 pub fn split(
     ctx: &GovernedContext,

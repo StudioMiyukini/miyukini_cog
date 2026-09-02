@@ -7,11 +7,11 @@ use crate::errors::MiyusearchError;
 use crate::store;
 use std::collections::HashSet;
 
-/// @id: miyusearch_tool_search_suggest
-/// @role: accessor
-/// @layer: tool
-/// @human: Produit des suggestions autocomplete à partir d'un préfixe et options fournis.
-/// @do: search_suggest_under_governance
+/// @id miyusearch_tool_search_suggest
+/// @role accessor
+/// @layer tool
+/// @human Produit des suggestions autocomplete à partir d'un préfixe et options fournis.
+/// @do search_suggest_under_governance
 /// tool.search.suggest — ne décide pas ; préfixe fourni.
 pub fn suggest(
     ctx: &GovernedContext,

@@ -2,18 +2,18 @@
 //!
 //! Scénario E2E 8 étapes : WriteIntent → validations Cores (simulées par mandat) →
 //! création table MiyukiniSQLtest → colonne → insert → read → assertion → delete + teardown.
-//! @id: miyusql_cycle_test_miyukinisqltest
-//! @role: test
-//! @layer: tool
+//! @id     miyusql_cycle_test_miyukinisqltest
+//! @role   test
+//! @layer  tool
 
 use miyusql::{query_execute, GovernedContext, MemoryExecutor, MIYUKINI_SQLTEST_TABLE};
 
 const TEST_VALUE_COL: &str = "test_value";
 
-/// @id: miyusql_cycle_test_miyukinisqltest_run
-/// @role: test
-/// @layer: tool
-/// @human: Exécute le scénario MiyukiniSQLtest complet (8 étapes).
+/// @id miyusql_cycle_test_miyukinisqltest_run
+/// @role test
+/// @layer tool
+/// @human Exécute le scénario MiyukiniSQLtest complet (8 étapes).
 #[test]
 fn cycle_miyukinisqltest_full_path() {
     let ctx = GovernedContext::new("mandate-miyukinisqltest".to_string(), 2);

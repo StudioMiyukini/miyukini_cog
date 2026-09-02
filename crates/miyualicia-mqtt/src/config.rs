@@ -2,11 +2,11 @@
 //!
 //! Chargee depuis la section `[mqtt]` de `alicia.toml`.
 
-// @id: toolkit.alicia.mqtt.config
-// @role: mqtt_configuration
-// @layer: 6
-// @human: Configuration du client MQTT : broker, keepalive, reconnexion.
-// @do: define_mqtt_config
+// @id toolkit.alicia.mqtt.config
+// @role mqtt_configuration
+// @layer 6
+// @human Configuration du client MQTT : broker, keepalive, reconnexion.
+// @do define_mqtt_config
 
 use serde::{Deserialize, Serialize};
 

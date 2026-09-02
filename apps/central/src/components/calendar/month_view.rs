@@ -1,10 +1,10 @@
 //! Vue Mois generique — Grille mensuelle compacte.
 //!
-//! @id: central.components.calendar.month_view
-//! @do: render_generic_month_calendar_view
-//! @role: ui
-//! @layer: ui
-//! @human: Vue calendrier mois generique reutilisable
+//! @id     central.components.calendar.month_view
+//! @do     render_generic_month_calendar_view
+//! @role   ui
+//! @layer  ui
+//! @human  Vue calendrier mois generique reutilisable
 
 use dioxus::prelude::*;
 use crate::state::use_app_state;

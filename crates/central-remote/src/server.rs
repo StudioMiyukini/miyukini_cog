@@ -1,8 +1,10 @@
 //! Serveur HTTP + WebSocket embarqué pour CentralRemote.
 //!
-//! @id: central_remote_server @do: run_embedded_remote_server
-//! @role: infra @layer: toolkit
-//! @human: Serveur Axum lancé par Central quand le remote est activé.
+//! @id     central_remote_server
+//! @do run_embedded_remote_server
+//! @role   infra
+//! @layer toolkit
+//! @human  Serveur Axum lancé par Central quand le remote est activé.
 //! Expose : POST /auth (login), GET /ws (WebSocket), GET /status (santé).
 
 use crate::bridge::RemoteBridge;

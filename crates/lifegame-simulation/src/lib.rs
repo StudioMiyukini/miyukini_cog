@@ -2,11 +2,11 @@
 //!
 //! Gestion de la boucle de jeu, ticks, et AI des entités.
 //!
-//! @id: lifegame.operator.simulation
-//! @role: simulation
-//! @layer: domain
-//! @do: manage_game_loop_ticks_and_entity_ai
-//! @human: Opérateur orchestrant la simulation du monde et l'intelligence des entités
+//! @id     lifegame.operator.simulation
+//! @role   simulation
+//! @layer  domain
+//! @do     manage_game_loop_ticks_and_entity_ai
+//! @human  Opérateur orchestrant la simulation du monde et l'intelligence des entités
 
 use serde::{Deserialize, Serialize};
 use lifegame_entities::{EntityManager, Vec2};

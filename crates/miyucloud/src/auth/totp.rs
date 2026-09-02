@@ -1,9 +1,9 @@
 //! Authentification a deux facteurs TOTP (RFC 6238).
 //!
-//! @id: miyucloud_auth_totp
-//! @do: provide_totp_setup_validate_recovery
-//! @role: auth
-//! @layer: domain
+//! @id     miyucloud_auth_totp
+//! @do     provide_totp_setup_validate_recovery
+//! @role   auth
+//! @layer  domain
 //!
 //! Gere la configuration 2FA, la validation des codes TOTP,
 //! et les codes de recuperation chiffres.

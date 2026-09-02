@@ -1,10 +1,10 @@
 //! Parametres MiyuCloud dans Central.
 //!
-//! @id: miyucloud_settings
-//! @do: display_and_manage_miyucloud_settings
-//! @role: component
-//! @layer: presentation
-//! @human: Lise (Dev Front-End)
+//! @id     miyucloud_settings
+//! @do     display_and_manage_miyucloud_settings
+//! @role   component
+//! @layer  presentation
+//! @human  Lise (Dev Front-End)
 //!
 //! Affiche les parametres de configuration MiyuCloud :
 //! - Chemin de stockage + espace utilise/disponible

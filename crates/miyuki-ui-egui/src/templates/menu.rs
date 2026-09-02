@@ -1,4 +1,8 @@
-// @id: MUIE-TmplMenu @do: menu-template @role: template @layer: 6 @human: miyuk
+// @id MUIE-TmplMenu
+// @do menu-template
+// @role template
+// @layer 6
+// @human miyuk
 
 //! Menu layout template -- dark background + centered panel.
 

@@ -1,4 +1,8 @@
-// @id: MUID-FormField @do: form-field-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-FormField
+// @do form-field-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Form field molecule composing a label, input, and error message.
 //!

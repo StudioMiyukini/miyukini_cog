@@ -4,11 +4,11 @@
 //! Kit d'outils déclarations fiscales et sociales (URSSAF, TVA, deadline, list, estimate).
 //! Alignement MIP : domaine `compta`, layer tool/toolkit.
 
-// @id: toolkit.accounting.miyudeclarations
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuDeclarations ; expose les modules tools.
-/// @do: expose_miyudeclarations_toolkit
+// @id toolkit.accounting.miyudeclarations
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuDeclarations ; expose les modules tools.
+/// @do expose_miyudeclarations_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod deadline;

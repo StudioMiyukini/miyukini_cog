@@ -14,11 +14,11 @@ pub struct SchemaCheckResult {
     pub error_codes: Vec<String>,
 }
 
-/// @id: miyuvalidate_tool_schema_check
-/// @role: mutator
-/// @layer: tool
-/// @human: Valide des données selon un schéma fourni ; retourne succès ou liste d'erreurs.
-/// @do: schema_check_under_governance
+/// @id miyuvalidate_tool_schema_check
+/// @role mutator
+/// @layer tool
+/// @human Valide des données selon un schéma fourni ; retourne succès ou liste d'erreurs.
+/// @do schema_check_under_governance
 /// tool.validate.schema.check
 pub fn check(
     ctx: &GovernedContext,

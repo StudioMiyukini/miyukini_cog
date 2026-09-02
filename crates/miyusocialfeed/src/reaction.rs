@@ -4,11 +4,11 @@ use crate::context::GovernedContext;
 use crate::errors::MiyusocialfeedError;
 use crate::store;
 
-/// @id: miyusocialfeed_tool_reaction_add
-/// @role: mutator
-/// @layer: tool
-/// @human: Ajoute une réaction ; WriteIntent KindMother.
-/// @do: reaction_add_under_governance
+/// @id miyusocialfeed_tool_reaction_add
+/// @role mutator
+/// @layer tool
+/// @human Ajoute une réaction ; WriteIntent KindMother.
+/// @do reaction_add_under_governance
 /// tool.social.reaction.add
 pub fn add(
     ctx: &GovernedContext,
@@ -29,11 +29,11 @@ pub fn add(
     Ok(())
 }
 
-/// @id: miyusocialfeed_tool_reaction_remove
-/// @role: mutator
-/// @layer: tool
-/// @human: Supprime une réaction ; WriteIntent KindMother.
-/// @do: reaction_remove_under_governance
+/// @id miyusocialfeed_tool_reaction_remove
+/// @role mutator
+/// @layer tool
+/// @human Supprime une réaction ; WriteIntent KindMother.
+/// @do reaction_remove_under_governance
 /// tool.social.reaction.remove
 pub fn remove(
     ctx: &GovernedContext,
@@ -53,11 +53,11 @@ pub fn remove(
     Ok(())
 }
 
-/// @id: miyusocialfeed_tool_reaction_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les réactions.
-/// @do: reaction_list_under_governance
+/// @id miyusocialfeed_tool_reaction_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les réactions.
+/// @do reaction_list_under_governance
 /// tool.social.reaction.list
 pub fn list(
     ctx: &GovernedContext,

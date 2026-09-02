@@ -5,11 +5,11 @@ use crate::errors::MiyumoderationforumError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyumoderationforum_tool_warning_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée un avertissement ; WriteIntent KindMother.
-/// @do: warning_create_under_governance
+/// @id miyumoderationforum_tool_warning_create
+/// @role mutator
+/// @layer tool
+/// @human Crée un avertissement ; WriteIntent KindMother.
+/// @do warning_create_under_governance
 /// tool.moderation.warning.create
 pub fn create(
     ctx: &GovernedContext,
@@ -27,11 +27,11 @@ pub fn create(
     Ok(id)
 }
 
-/// @id: miyumoderationforum_tool_warning_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les avertissements.
-/// @do: warning_list_under_governance
+/// @id miyumoderationforum_tool_warning_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les avertissements.
+/// @do warning_list_under_governance
 /// tool.moderation.warning.list
 pub fn list(ctx: &GovernedContext) -> Result<Vec<WarningItem>, MiyumoderationforumError> {
     if !ctx.has_mandate() {

@@ -22,11 +22,11 @@
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.capture
-// @role: infrastructure
-// @layer: toolkit
-// @human: Point d'entree du toolkit Alicia Capture ; expose capture audio, VAD, devices.
-// @do: expose_alicia_capture_toolkit
+// @id toolkit.alicia.capture
+// @role infrastructure
+// @layer toolkit
+// @human Point d'entree du toolkit Alicia Capture ; expose capture audio, VAD, devices.
+// @do expose_alicia_capture_toolkit
 
 pub mod admin_cell;
 pub mod capture;

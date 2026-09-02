@@ -1,4 +1,8 @@
-// @id: MUID-Atoms @do: atoms-module @role: exports @layer: 6 @human: miyuk
+// @id MUID-Atoms
+// @do atoms-module
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Atomic-level UI components (smallest reusable elements).
 

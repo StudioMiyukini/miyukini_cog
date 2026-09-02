@@ -1,4 +1,8 @@
-// @id: MUID-Molecules @do: molecules-module @role: exports @layer: 6 @human: miyuk
+// @id MUID-Molecules
+// @do molecules-module
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Molecule-level UI components (composed of atoms).
 

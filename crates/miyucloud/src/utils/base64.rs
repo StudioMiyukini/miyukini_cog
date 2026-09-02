@@ -1,9 +1,9 @@
 //! Utilitaire base64 centralise (remplace les impls manuelles).
 //!
-//! @id: miyucloud_utils_base64
-//! @do: provide_base64_encode_decode_via_standard_crate
-//! @role: util
-//! @layer: infra
+//! @id     miyucloud_utils_base64
+//! @do     provide_base64_encode_decode_via_standard_crate
+//! @role   util
+//! @layer  infra
 
 use base64_crate::engine::general_purpose::STANDARD;
 use base64_crate::Engine;

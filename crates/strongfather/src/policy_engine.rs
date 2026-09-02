@@ -10,42 +10,42 @@
 use crate::intent::Intent;
 use crate::policy::{Policy, PolicyPriorityLevel, PolicyResult, PolicySet, PolicyType};
 
-/// @id: strongfather_policy_engine_error
-/// @role: error
-/// @layer: core
-/// @human: Erreur du moteur de politiques. Indique un dysfonctionnement interne.
-/// @do: represent_policy_engine_error
+/// @id strongfather_policy_engine_error
+/// @role error
+/// @layer core
+/// @human Erreur du moteur de politiques. Indique un dysfonctionnement interne.
+/// @do represent_policy_engine_error
 /// Erreur du moteur de politiques
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PolicyEngineError {
-    /// @id: strongfather_policy_engine_error_consistency
-    /// @role: error
-    /// @layer: core
-    /// @human: Erreur de cohérence - violation d'un invariant.
-    /// @do: represent_consistency_error
+    /// @id strongfather_policy_engine_error_consistency
+    /// @role error
+    /// @layer core
+    /// @human Erreur de cohérence - violation d'un invariant.
+    /// @do represent_consistency_error
     ConsistencyError {
-        /// @id: strongfather_policy_engine_error_invariant
-        /// @role: error
-        /// @layer: core
-        /// @human: Identifiant de l'invariant violé.
-        /// @do: identify_violated_invariant
+        /// @id strongfather_policy_engine_error_invariant
+        /// @role error
+        /// @layer core
+        /// @human Identifiant de l'invariant violé.
+        /// @do identify_violated_invariant
         violated_invariant: String,
-        /// @id: strongfather_policy_engine_error_reason
-        /// @role: error
-        /// @layer: core
-        /// @human: Raison de l'erreur.
-        /// @do: explain_error
+        /// @id strongfather_policy_engine_error_reason
+        /// @role error
+        /// @layer core
+        /// @human Raison de l'erreur.
+        /// @do explain_error
         reason: String,
     },
 }
 
 impl std::fmt::Display for PolicyEngineError {
-    /// @id: strongfather_policy_engine_error_display
-    /// @role: formatter
-    /// @layer: core
-    /// @human: Formate l'erreur pour affichage.
-    /// @do: format_policy_engine_error
-    /// @depends: strongfather_policy_engine_error
+    /// @id strongfather_policy_engine_error_display
+    /// @role formatter
+    /// @layer core
+    /// @human Formate l'erreur pour affichage.
+    /// @do format_policy_engine_error
+    /// @depends strongfather_policy_engine_error
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PolicyEngineError::ConsistencyError {
@@ -60,39 +60,39 @@ impl std::fmt::Display for PolicyEngineError {
 
 impl std::error::Error for PolicyEngineError {}
 
-/// @id: strongfather_policy_engine
-/// @role: service
-/// @layer: core
-/// @human: Moteur de politiques. Applique les politiques pour évaluer des intentions (G-POL-1 : évaluation déterministe).
-/// @do: apply_policies_to_intent
+/// @id strongfather_policy_engine
+/// @role service
+/// @layer core
+/// @human Moteur de politiques. Applique les politiques pour évaluer des intentions (G-POL-1 : évaluation déterministe).
+/// @do apply_policies_to_intent
 /// Moteur de politiques
 pub struct PolicyEngine {
-    /// @id: strongfather_policy_engine_policies
-    /// @role: service
-    /// @layer: core
-    /// @human: Ensemble de politiques chargées depuis la source unique (INV-POL-SOURCE).
-    /// @do: store_policy_set
+    /// @id strongfather_policy_engine_policies
+    /// @role service
+    /// @layer core
+    /// @human Ensemble de politiques chargées depuis la source unique (INV-POL-SOURCE).
+    /// @do store_policy_set
     policies: PolicySet,
 }
 
 impl PolicyEngine {
-    /// @id: strongfather_policy_engine_new
-    /// @role: constructor
-    /// @layer: core
-    /// @human: Crée un nouveau moteur de politiques avec un ensemble de politiques.
-    /// @do: create_policy_engine
-    /// @depends: strongfather_policy_engine
+    /// @id strongfather_policy_engine_new
+    /// @role constructor
+    /// @layer core
+    /// @human Crée un nouveau moteur de politiques avec un ensemble de politiques.
+    /// @do create_policy_engine
+    /// @depends strongfather_policy_engine
     #[must_use]
     pub fn new(policies: PolicySet) -> Self {
         Self { policies }
     }
 
-    /// @id: strongfather_policy_engine_apply
-    /// @role: service
-    /// @layer: core
-    /// @human: Applique les politiques applicables à une intention selon l'ordre de priorité (RÈGLE-PRIO-1, G-POL-3 : évaluation ordonnée).
-    /// @do: apply_policies_in_priority_order
-    /// @depends: strongfather_policy_engine_new
+    /// @id strongfather_policy_engine_apply
+    /// @role service
+    /// @layer core
+    /// @human Applique les politiques applicables à une intention selon l'ordre de priorité (RÈGLE-PRIO-1, G-POL-3 : évaluation ordonnée).
+    /// @do apply_policies_in_priority_order
+    /// @depends strongfather_policy_engine_new
     pub fn apply(&self, intent: &Intent) -> Result<Vec<PolicyResult>, PolicyEngineError> {
         // Sélectionner les politiques applicables
         let applicable_policies = self.select_applicable_policies(intent)?;
@@ -121,12 +121,12 @@ impl PolicyEngine {
         Ok(results)
     }
 
-    /// @id: strongfather_policy_engine_select_applicable
-    /// @role: service
-    /// @layer: core
-    /// @human: Sélectionne les politiques applicables à une intention selon leurs conditions d'application.
-    /// @do: select_policies_by_condition
-    /// @depends: strongfather_policy_engine_new
+    /// @id strongfather_policy_engine_select_applicable
+    /// @role service
+    /// @layer core
+    /// @human Sélectionne les politiques applicables à une intention selon leurs conditions d'application.
+    /// @do select_policies_by_condition
+    /// @depends strongfather_policy_engine_new
     fn select_applicable_policies(
         &self,
         intent: &Intent,
@@ -158,12 +158,12 @@ impl PolicyEngine {
         Ok(applicable)
     }
 
-    /// @id: strongfather_policy_engine_evaluate_policy
-    /// @role: service
-    /// @layer: core
-    /// @human: Évalue une politique individuelle pour une intention (INV-POL-3 : déterminisme).
-    /// @do: evaluate_single_policy
-    /// @depends: strongfather_policy_engine_new
+    /// @id strongfather_policy_engine_evaluate_policy
+    /// @role service
+    /// @layer core
+    /// @human Évalue une politique individuelle pour une intention (INV-POL-3 : déterminisme).
+    /// @do evaluate_single_policy
+    /// @depends strongfather_policy_engine_new
     fn evaluate_policy(
         &self,
         policy: &Policy,
@@ -232,11 +232,11 @@ mod tests {
     use crate::policy::{Policy, PolicyCondition, PolicyEffect, PolicyRule, PolicySet};
     use std::collections::HashMap;
 
-    /// @id: strongfather_policy_engine_test_create
-    /// @role: test
-    /// @layer: core
-    /// @human: Test de création d'un moteur de politiques.
-    /// @do: test_policy_engine_creation
+    /// @id strongfather_policy_engine_test_create
+    /// @role test
+    /// @layer core
+    /// @human Test de création d'un moteur de politiques.
+    /// @do test_policy_engine_creation
     #[test]
     fn test_create_policy_engine() {
         let policy_set = PolicySet::new();
@@ -245,11 +245,11 @@ mod tests {
         assert!(true);
     }
 
-    /// @id: strongfather_policy_engine_test_apply_permission
-    /// @role: test
-    /// @layer: core
-    /// @human: Test d'application d'une politique de permission.
-    /// @do: test_apply_permission_policy
+    /// @id strongfather_policy_engine_test_apply_permission
+    /// @role test
+    /// @layer core
+    /// @human Test d'application d'une politique de permission.
+    /// @do test_apply_permission_policy
     #[test]
     fn test_apply_permission_policy() {
         let mut policy_set = PolicySet::new();
@@ -290,11 +290,11 @@ mod tests {
         assert!(!results.is_empty());
     }
 
-    /// @id: strongfather_policy_engine_test_priority_order
-    /// @role: test
-    /// @layer: core
-    /// @human: Test que les politiques sont évaluées dans l'ordre de priorité.
-    /// @do: test_policy_priority_ordering
+    /// @id strongfather_policy_engine_test_priority_order
+    /// @role test
+    /// @layer core
+    /// @human Test que les politiques sont évaluées dans l'ordre de priorité.
+    /// @do test_policy_priority_ordering
     #[test]
     fn test_policy_priority_ordering() {
         let mut policy_set = PolicySet::new();

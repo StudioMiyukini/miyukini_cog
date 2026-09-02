@@ -1,9 +1,9 @@
 //! Etat local de l'UI MiyuCloud dans Central.
 //!
-//! @id: miyucloud_ui_state
-//! @do: manage_miyucloud_ui_state
-//! @role: state
-//! @layer: presentation
+//! @id     miyucloud_ui_state
+//! @do     manage_miyucloud_ui_state
+//! @role   state
+//! @layer  presentation
 //!
 //! Les types domaine sont definis localement en attendant que le crate `miyucloud`
 //! exporte ses types publics. Chaque type porte un commentaire de remplacement futur.

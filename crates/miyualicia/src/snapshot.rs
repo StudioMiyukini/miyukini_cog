@@ -2,11 +2,11 @@
 //!
 //! Utilise par l'UI Dioxus et l'API REST pour exposer l'etat courant.
 
-// @id: service.alicia.snapshot
-// @role: state_snapshot
-// @layer: 7
-// @human: Snapshot de l'etat de la maison : pieces, dispositifs, MQTT, logs, wake word.
-// @do: produce_alicia_home_state_snapshot
+// @id service.alicia.snapshot
+// @role state_snapshot
+// @layer 7
+// @human Snapshot de l'etat de la maison : pieces, dispositifs, MQTT, logs, wake word.
+// @do produce_alicia_home_state_snapshot
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyudiscoveryError;
 
-/// @id: miyudiscovery_tool_search
-/// @role: mutator
-/// @layer: tool
-/// @human: Recherche sociale (scope=social) ; lecture.
-/// @do: social_search_under_governance
+/// @id miyudiscovery_tool_search
+/// @role mutator
+/// @layer tool
+/// @human Recherche sociale (scope=social) ; lecture.
+/// @do social_search_under_governance
 /// tool.social.search
 pub fn search(
     ctx: &GovernedContext,

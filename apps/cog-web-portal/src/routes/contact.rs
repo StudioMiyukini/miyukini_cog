@@ -1,8 +1,10 @@
 //! Route de contact — GET et POST /:service/contact.
 //!
-//! @id: cog_web_portal_route_contact @do: handle_contact_form_with_csrf
-//! @role: api @layer: app
-//! @human: Contact Portal — formulaire GET (avec token CSRF) et POST (validation CSRF + champs).
+//! @id     cog_web_portal_route_contact
+//! @do handle_contact_form_with_csrf
+//! @role   api
+//! @layer app
+//! @human  Contact Portal — formulaire GET (avec token CSRF) et POST (validation CSRF + champs).
 
 use axum::Extension;
 use axum::extract::{Form, Path, State};

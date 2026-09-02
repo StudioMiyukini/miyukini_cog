@@ -6,11 +6,11 @@ use crate::errors::MiyuprofileError;
 use crate::profile;
 use std::collections::HashMap;
 
-/// @id: miyuprofile_tool_preferences_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère les préférences.
-/// @do: preferences_get_under_governance
+/// @id miyuprofile_tool_preferences_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère les préférences.
+/// @do preferences_get_under_governance
 /// tool.profile.preferences.get
 pub fn get(
     ctx: &GovernedContext,
@@ -23,11 +23,11 @@ pub fn get(
     Ok(p.fields)
 }
 
-/// @id: miyuprofile_tool_preferences_set
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour les préférences ; WriteIntent KindMother.
-/// @do: preferences_set_under_governance
+/// @id miyuprofile_tool_preferences_set
+/// @role mutator
+/// @layer tool
+/// @human Met à jour les préférences ; WriteIntent KindMother.
+/// @do preferences_set_under_governance
 /// tool.profile.preferences.set
 pub fn set(
     ctx: &GovernedContext,

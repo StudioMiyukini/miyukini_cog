@@ -1,9 +1,9 @@
 //! Jay1Tribu — Service de messagerie P2P (tribus, salons, amis).
 //!
-//! @id: jay1tribu_lib
-//! @do: expose_public_modules_jay1tribu
-//! @role: service
-//! @layer: infra
+//! @id     jay1tribu_lib
+//! @do     expose_public_modules_jay1tribu
+//! @role   service
+//! @layer  infra
 //!
 //! Les fonctionnalités de **chat** (envoi/réception en temps réel) et de **tribu**
 //! (sync avec les membres, présence) ne fonctionnent pleinement que si le COG est

@@ -1,8 +1,10 @@
 //! Route GET / — page d'accueil du COG Web Portal.
 //!
-//! @id: cog_web_portal_route_home @do: render_portal_home_page
-//! @role: api @layer: app
-//! @human: GET / — liste les services enregistrés dans le Portal.
+//! @id     cog_web_portal_route_home
+//! @do render_portal_home_page
+//! @role   api
+//! @layer app
+//! @human  GET / — liste les services enregistrés dans le Portal.
 
 use axum::Extension;
 use axum::extract::State;

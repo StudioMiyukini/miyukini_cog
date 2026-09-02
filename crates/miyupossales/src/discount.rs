@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupossalesError;
 
-/// @id: miyupossales_tool_discount_apply
-/// @role: mutator
-/// @layer: tool
-/// @human: Applique une remise (article ou reçu) ; règles = StrongFather ; WriteIntent KindMother.
-/// @do: discount_apply_under_governance
+/// @id miyupossales_tool_discount_apply
+/// @role mutator
+/// @layer tool
+/// @human Applique une remise (article ou reçu) ; règles = StrongFather ; WriteIntent KindMother.
+/// @do discount_apply_under_governance
 /// tool.pos.discount.apply
 pub fn apply(
     ctx: &GovernedContext,

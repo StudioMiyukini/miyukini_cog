@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyupmError;
 
-/// @id: miyupm_tool_pm_draft_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée un brouillon ; WriteIntent KindMother.
-/// @do: pm_draft_create_under_governance
+/// @id miyupm_tool_pm_draft_create
+/// @role mutator
+/// @layer tool
+/// @human Crée un brouillon ; WriteIntent KindMother.
+/// @do pm_draft_create_under_governance
 /// tool.pm.draft.create — ne décide pas ; WriteIntent.
 pub fn create(
     ctx: &GovernedContext,
@@ -21,11 +21,11 @@ pub fn create(
     Ok(String::new())
 }
 
-/// @id: miyupm_tool_pm_draft_update
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour un brouillon ; WriteIntent KindMother.
-/// @do: pm_draft_update_under_governance
+/// @id miyupm_tool_pm_draft_update
+/// @role mutator
+/// @layer tool
+/// @human Met à jour un brouillon ; WriteIntent KindMother.
+/// @do pm_draft_update_under_governance
 /// tool.pm.draft.update — ne décide pas ; WriteIntent.
 pub fn update(ctx: &GovernedContext, _draft_id: &str, _payload: &str) -> Result<(), MiyupmError> {
     if !ctx.has_mandate() {
@@ -34,11 +34,11 @@ pub fn update(ctx: &GovernedContext, _draft_id: &str, _payload: &str) -> Result<
     Ok(())
 }
 
-/// @id: miyupm_tool_pm_draft_list
-/// @role: accessor
-/// @layer: tool
-/// @human: Liste les brouillons.
-/// @do: pm_draft_list_under_governance
+/// @id miyupm_tool_pm_draft_list
+/// @role accessor
+/// @layer tool
+/// @human Liste les brouillons.
+/// @do pm_draft_list_under_governance
 /// tool.pm.draft.list — lecture.
 pub fn list(ctx: &GovernedContext, _filters: Option<&str>) -> Result<Vec<String>, MiyupmError> {
     if !ctx.has_mandate() {

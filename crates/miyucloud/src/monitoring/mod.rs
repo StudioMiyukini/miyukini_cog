@@ -1,9 +1,9 @@
 //! Monitoring et metriques MiyuCloud.
 //!
-//! @id: miyucloud_monitoring
-//! @do: provide_health_check_metrics_disk_space
-//! @role: monitoring
-//! @layer: infra
+//! @id     miyucloud_monitoring
+//! @do     provide_health_check_metrics_disk_space
+//! @role   monitoring
+//! @layer  infra
 //!
 //! Health check detaille, collecte de metriques et
 //! verification de l'espace disque pour le stockage.

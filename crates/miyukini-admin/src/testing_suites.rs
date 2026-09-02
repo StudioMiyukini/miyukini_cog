@@ -10,11 +10,11 @@ use crate::db_unit_tests::{
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-/// @id: miyukiniadmin_testing_suites
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Suites de tests Quick/Standard/Full (unit + cycle).
-/// @do: run_suites_and_report
+/// @id miyukiniadmin_testing_suites
+/// @role infrastructure
+/// @layer operator
+/// @human Suites de tests Quick/Standard/Full (unit + cycle).
+/// @do run_suites_and_report
 
 /// Nom des suites (Unit Tests Contract §8.1).
 /// Suite rapide : COH-001 et CONF-001 uniquement.
@@ -76,11 +76,11 @@ pub fn run_suite_full(
     run_suites_and_report(SUITE_FULL, &defs, backend, miyukinisqltest_backend)
 }
 
-/// @id: miyukiniadmin_testing_suites_run_and_report
-/// @role: mutator
-/// @layer: operator
-/// @human: Exécute les suites (unit + MiyukiniSQLtest) et produit un rapport combiné.
-/// @do: run_suites_and_report
+/// @id miyukiniadmin_testing_suites_run_and_report
+/// @role mutator
+/// @layer operator
+/// @human Exécute les suites (unit + MiyukiniSQLtest) et produit un rapport combiné.
+/// @do run_suites_and_report
 #[must_use]
 pub fn run_suites_and_report(
     suite_name: &str,

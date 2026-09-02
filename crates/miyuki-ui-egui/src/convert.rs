@@ -1,4 +1,8 @@
-// @id: MUIE-Convert @do: token-conversion @role: bridge @layer: 6 @human: miyuk
+// @id MUIE-Convert
+// @do token-conversion
+// @role bridge
+// @layer 6
+// @human miyuk
 
 //! Conversion from [`miyuki_ui_tokens`] types to egui types.
 //!

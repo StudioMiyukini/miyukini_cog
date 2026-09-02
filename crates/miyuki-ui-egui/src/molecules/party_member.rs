@@ -1,4 +1,8 @@
-// @id: MUIE-PartyMem @do: party-member-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-PartyMem
+// @do party-member-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Party member molecule -- name, class, level, and action buttons.
 

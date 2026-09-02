@@ -1,4 +1,8 @@
-// @id: MUIE-AtomsIndex @do: atom-exports @role: exports @layer: 6 @human: miyuk
+// @id MUIE-AtomsIndex
+// @do atom-exports
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Atomic UI components -- smallest visual building blocks.
 //!

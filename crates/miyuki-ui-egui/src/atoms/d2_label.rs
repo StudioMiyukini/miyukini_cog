@@ -1,4 +1,8 @@
-// @id: MUIE-D2Label @do: d2-label-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-D2Label
+// @do d2-label-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! D2-style label with gold text and optional shadow.
 //!

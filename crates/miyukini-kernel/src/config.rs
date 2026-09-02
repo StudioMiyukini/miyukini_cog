@@ -33,12 +33,12 @@ use std::collections::HashMap;
 ///
 /// Cette signature est gelée et ne peut pas être modifiée sans version majeure.
 pub trait Config {
-    /// @id: config_get
-    /// @role: accessor
-    /// @layer: kernel
-    /// @human: Récupère une valeur de configuration par sa clé. Retourne None si la clé n'existe pas.
-    /// @do: get_config_by_key
-    /// @depends: config_trait
+    /// @id config_get
+    /// @role accessor
+    /// @layer kernel
+    /// @human Récupère une valeur de configuration par sa clé. Retourne None si la clé n'existe pas.
+    /// @do get_config_by_key
+    /// @depends config_trait
     /// Récupère une valeur de configuration par sa clé.
     ///
     /// # Arguments
@@ -63,11 +63,11 @@ pub trait Config {
     fn get(&self, key: &str) -> Option<&str>;
 }
 
-/// @id: envconfig_struct
-/// @role: implementation
-/// @layer: kernel
-/// @human: Implémentation par défaut du trait Config utilisant les variables d'environnement. Charge toutes les variables d'environnement au moment de la création.
-/// @do: load_env_config
+/// @id envconfig_struct
+/// @role implementation
+/// @layer kernel
+/// @human Implémentation par défaut du trait Config utilisant les variables d'environnement. Charge toutes les variables d'environnement au moment de la création.
+/// @do load_env_config
 /// Configuration chargée depuis les variables d'environnement.
 ///
 /// Le produit choisit ses clés et ses valeurs.
@@ -85,22 +85,22 @@ pub trait Config {
 /// - INV-K-1 : Aucune logique métier (pas de clés prédéfinies)
 #[derive(Debug, Clone)]
 pub struct EnvConfig {
-    /// @id: envconfig_values
-    /// @role: storage
-    /// @layer: kernel
-    /// @human: Stockage interne des variables d'environnement sous forme de HashMap clé-valeur.
-    /// @do: store_env_vars
-    /// @depends: envconfig_struct
+    /// @id envconfig_values
+    /// @role storage
+    /// @layer kernel
+    /// @human Stockage interne des variables d'environnement sous forme de HashMap clé-valeur.
+    /// @do store_env_vars
+    /// @depends envconfig_struct
     values: HashMap<String, String>,
 }
 
 impl EnvConfig {
-    /// @id: envconfig_from_env
-    /// @role: constructor
-    /// @layer: kernel
-    /// @human: Charge la configuration depuis les variables d'environnement. Ne retourne pas d'erreur car std::env::vars() est infaillible.
-    /// @do: load_from_environment
-    /// @depends: envconfig_struct
+    /// @id envconfig_from_env
+    /// @role constructor
+    /// @layer kernel
+    /// @human Charge la configuration depuis les variables d'environnement. Ne retourne pas d'erreur car std::env::vars() est infaillible.
+    /// @do load_from_environment
+    /// @depends envconfig_struct
     /// Charge la configuration depuis les variables d'environnement.
     ///
     /// Cette méthode collecte toutes les variables d'environnement disponibles
@@ -132,12 +132,12 @@ impl EnvConfig {
 }
 
 impl Config for EnvConfig {
-    /// @id: envconfig_get_impl
-    /// @role: implementation
-    /// @layer: kernel
-    /// @human: Implémentation de la méthode get du trait Config pour EnvConfig. Recherche la clé dans la HashMap interne et retourne une référence à la valeur si trouvée.
-    /// @do: get_from_env_map
-    /// @depends: config_get, envconfig_struct
+    /// @id envconfig_get_impl
+    /// @role implementation
+    /// @layer kernel
+    /// @human Implémentation de la méthode get du trait Config pour EnvConfig. Recherche la clé dans la HashMap interne et retourne une référence à la valeur si trouvée.
+    /// @do get_from_env_map
+    /// @depends config_get, envconfig_struct
     /// Implémentation de `Config::get` pour `EnvConfig`.
     ///
     /// Recherche la clé dans la HashMap interne et retourne une référence
@@ -166,12 +166,12 @@ impl Config for EnvConfig {
 mod tests {
     use super::*;
 
-    /// @id: test_config_get_existing_key
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que get() retourne la valeur correcte pour une clé existante dans la configuration.
-    /// @do: verify_get_existing_key
-    /// @depends: config_get
+    /// @id test_config_get_existing_key
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que get() retourne la valeur correcte pour une clé existante dans la configuration.
+    /// @do verify_get_existing_key
+    /// @depends config_get
     #[test]
     fn test_config_get_existing_key() {
         std::env::set_var("TEST_CONFIG_KEY", "test_value");
@@ -180,24 +180,24 @@ mod tests {
         std::env::remove_var("TEST_CONFIG_KEY");
     }
 
-    /// @id: test_config_get_missing_key
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que get() retourne None pour une clé absente de la configuration.
-    /// @do: verify_get_missing_key
-    /// @depends: config_get
+    /// @id test_config_get_missing_key
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que get() retourne None pour une clé absente de la configuration.
+    /// @do verify_get_missing_key
+    /// @depends config_get
     #[test]
     fn test_config_get_missing_key() {
         let config = EnvConfig::from_env();
         assert_eq!(config.get("NONEXISTENT_KEY_12345"), None);
     }
 
-    /// @id: test_config_get_empty_key
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant le comportement de get() avec une clé vide. Retourne None car aucune variable d'environnement ne peut avoir une clé vide.
-    /// @do: verify_get_empty_key
-    /// @depends: config_get
+    /// @id test_config_get_empty_key
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant le comportement de get() avec une clé vide. Retourne None car aucune variable d'environnement ne peut avoir une clé vide.
+    /// @do verify_get_empty_key
+    /// @depends config_get
     #[test]
     fn test_config_get_empty_key() {
         let config = EnvConfig::from_env();
@@ -205,12 +205,12 @@ mod tests {
         assert_eq!(config.get(""), None);
     }
 
-    /// @id: test_config_get_case_sensitive
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que get() est sensible à la casse. Les clés avec casse différente sont considérées comme différentes.
-    /// @do: verify_case_sensitivity
-    /// @depends: config_get
+    /// @id test_config_get_case_sensitive
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que get() est sensible à la casse. Les clés avec casse différente sont considérées comme différentes.
+    /// @do verify_case_sensitivity
+    /// @depends config_get
     #[test]
     fn test_config_get_case_sensitive() {
         std::env::set_var("TEST_CASE_KEY", "lowercase_value");
@@ -222,12 +222,12 @@ mod tests {
         std::env::remove_var("TEST_CASE_KEY");
     }
 
-    /// @id: test_config_envconfig_from_env
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que EnvConfig::from_env() fonctionne correctement et charge les variables d'environnement.
-    /// @do: verify_from_env_works
-    /// @depends: envconfig_from_env
+    /// @id test_config_envconfig_from_env
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que EnvConfig::from_env() fonctionne correctement et charge les variables d'environnement.
+    /// @do verify_from_env_works
+    /// @depends envconfig_from_env
     #[test]
     fn test_config_envconfig_from_env() {
         // Vérifier que from_env() ne panique pas
@@ -241,12 +241,12 @@ mod tests {
         );
     }
 
-    /// @id: test_config_no_business_logic
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant qu'aucune clé métier n'est prédéfinie dans le Kernel, conformément à INV-K-1 (Aucune logique métier).
-    /// @do: verify_no_business_keys
-    /// @depends: envconfig_struct
+    /// @id test_config_no_business_logic
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant qu'aucune clé métier n'est prédéfinie dans le Kernel, conformément à INV-K-1 (Aucune logique métier).
+    /// @do verify_no_business_keys
+    /// @depends envconfig_struct
     #[test]
     fn test_config_no_business_logic() {
         // Vérifier qu'aucune clé métier n'est prédéfinie
@@ -259,12 +259,12 @@ mod tests {
         assert_eq!(config.get("PRODUCT_CATEGORY"), None);
     }
 
-    /// @id: test_config_no_external_dependency
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que EnvConfig fonctionne sans réseau, conformément à INV-K-2 (Aucune dépendance externe critique).
-    /// @do: verify_no_network_required
-    /// @depends: envconfig_from_env
+    /// @id test_config_no_external_dependency
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que EnvConfig fonctionne sans réseau, conformément à INV-K-2 (Aucune dépendance externe critique).
+    /// @do verify_no_network_required
+    /// @depends envconfig_from_env
     #[test]
     fn test_config_no_external_dependency() {
         // Ce test vérifie que from_env() fonctionne sans réseau
@@ -275,12 +275,12 @@ mod tests {
         assert!(config.get("SOME_KEY").is_none() || config.get("SOME_KEY").is_some());
     }
 
-    /// @id: test_config_deterministic
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant le déterminisme de Config, conformément à INV-K-6. Même état d'environnement doit produire le même résultat.
-    /// @do: verify_determinism
-    /// @depends: envconfig_from_env, config_get
+    /// @id test_config_deterministic
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant le déterminisme de Config, conformément à INV-K-6. Même état d'environnement doit produire le même résultat.
+    /// @do verify_determinism
+    /// @depends envconfig_from_env, config_get
     #[test]
     fn test_config_deterministic() {
         // Définir une variable de test
@@ -308,12 +308,12 @@ mod tests {
         assert_eq!(config3.get("TEST_DETERMINISTIC"), None);
     }
 
-    /// @id: test_config_multiple_keys
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que plusieurs clés peuvent être récupérées correctement depuis la configuration.
-    /// @do: verify_multiple_keys
-    /// @depends: config_get
+    /// @id test_config_multiple_keys
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que plusieurs clés peuvent être récupérées correctement depuis la configuration.
+    /// @do verify_multiple_keys
+    /// @depends config_get
     #[test]
     fn test_config_multiple_keys() {
         std::env::set_var("TEST_KEY_1", "value1");
@@ -331,12 +331,12 @@ mod tests {
         std::env::remove_var("TEST_KEY_3");
     }
 
-    /// @id: test_config_empty_value
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que get() retourne Some("") pour une clé existante avec une valeur vide, pas None.
-    /// @do: verify_empty_value_handling
-    /// @depends: config_get
+    /// @id test_config_empty_value
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que get() retourne Some("") pour une clé existante avec une valeur vide, pas None.
+    /// @do verify_empty_value_handling
+    /// @depends config_get
     #[test]
     fn test_config_empty_value() {
         std::env::set_var("TEST_EMPTY_VALUE", "");

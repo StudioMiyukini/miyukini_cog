@@ -1,4 +1,8 @@
-// @id: MUID-Progress @do: progress-bar-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Progress
+// @do progress-bar-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Progress bar atom with linear variant.
 //!

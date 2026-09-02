@@ -1,4 +1,8 @@
-// @id: MUIE-TmplLoading @do: loading-template @role: template @layer: 6 @human: miyuk
+// @id MUIE-TmplLoading
+// @do loading-template
+// @role template
+// @layer 6
+// @human miyuk
 
 //! Loading screen layout template.
 

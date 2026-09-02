@@ -1,9 +1,9 @@
 //! Gestion des liens de partage web externes.
 //!
-//! @id: miyucloud_domain_external_share
-//! @do: create_revoke_access_list_external_share_links
-//! @role: domain
-//! @layer: domain
+//! @id     miyucloud_domain_external_share
+//! @do     create_revoke_access_list_external_share_links
+//! @role   domain
+//! @layer  domain
 //!
 //! Liens de partage avec expiration obligatoire (min 1h, max 30 jours),
 //! mot de passe optionnel, compteur de telechargements et revocation instantanee.

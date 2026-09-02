@@ -1,4 +1,8 @@
-// @id: MUID-Divider @do: divider-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Divider
+// @do divider-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Divider atom for visual separation.
 //!

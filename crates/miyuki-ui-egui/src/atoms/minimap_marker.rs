@@ -1,4 +1,8 @@
-// @id: MUIE-MinimapMarker @do: minimap-marker-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-MinimapMarker
+// @do minimap-marker-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Minimap marker -- small colored dots/icons on the minimap overlay.
 

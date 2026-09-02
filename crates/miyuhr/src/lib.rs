@@ -4,11 +4,11 @@
 //! Kit d'outils RH (time_clock, schedule). Persistance = KindMother (WriteIntent).
 //! Alignement MIP : domaine `hr`, layer tool/toolkit.
 
-// @id: toolkit.hr.miyuhr
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuHR ; expose les modules tools.
-/// @do: expose_miyuhr_toolkit
+// @id toolkit.hr.miyuhr
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuHR ; expose les modules tools.
+/// @do expose_miyuhr_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

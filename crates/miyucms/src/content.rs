@@ -19,11 +19,11 @@ fn contents() -> &'static Mutex<HashMap<String, ContentRecord>> {
     CONTENTS.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-/// @id: miyucms_tool_content_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée un brouillon de contenu ; données fournies ; WriteIntent KindMother.
-/// @do: content_create_under_governance
+/// @id miyucms_tool_content_create
+/// @role mutator
+/// @layer tool
+/// @human Crée un brouillon de contenu ; données fournies ; WriteIntent KindMother.
+/// @do content_create_under_governance
 pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
@@ -42,11 +42,11 @@ pub fn create(ctx: &GovernedContext, payload: &str) -> Result<String, MiyucmsErr
     Ok(id)
 }
 
-/// @id: miyucms_tool_content_update
-/// @role: mutator
-/// @layer: tool
-/// @human: Met à jour un contenu ; WriteIntent KindMother.
-/// @do: content_update_under_governance
+/// @id miyucms_tool_content_update
+/// @role mutator
+/// @layer tool
+/// @human Met à jour un contenu ; WriteIntent KindMother.
+/// @do content_update_under_governance
 pub fn update(ctx: &GovernedContext, content_id: &str, payload: &str) -> Result<(), MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
@@ -60,11 +60,11 @@ pub fn update(ctx: &GovernedContext, content_id: &str, payload: &str) -> Result<
     Ok(())
 }
 
-/// @id: miyucms_tool_content_publish
-/// @role: mutator
-/// @layer: tool
-/// @human: Marque un contenu comme publié ; décision StrongFather.
-/// @do: content_publish_under_governance
+/// @id miyucms_tool_content_publish
+/// @role mutator
+/// @layer tool
+/// @human Marque un contenu comme publié ; décision StrongFather.
+/// @do content_publish_under_governance
 pub fn publish(ctx: &GovernedContext, content_id: &str) -> Result<(), MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);
@@ -78,11 +78,11 @@ pub fn publish(ctx: &GovernedContext, content_id: &str) -> Result<(), MiyucmsErr
     Ok(())
 }
 
-/// @id: miyucms_tool_content_schedule
-/// @role: mutator
-/// @layer: tool
-/// @human: Planifie une publication ; date/heure fournie ; WriteIntent KindMother.
-/// @do: content_schedule_under_governance
+/// @id miyucms_tool_content_schedule
+/// @role mutator
+/// @layer tool
+/// @human Planifie une publication ; date/heure fournie ; WriteIntent KindMother.
+/// @do content_schedule_under_governance
 pub fn schedule(ctx: &GovernedContext, content_id: &str, _at: &str) -> Result<(), MiyucmsError> {
     if !ctx.has_mandate() {
         return Err(MiyucmsError::NoMandate);

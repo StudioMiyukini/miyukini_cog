@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuposinventoryError;
 
-/// @id: miyuposinventory_tool_alert_low_evaluate
-/// @role: mutator
-/// @layer: tool
-/// @human: Évalue les articles sous seuil bas (données seuils fournies).
-/// @do: alert_low_evaluate_under_governance
+/// @id miyuposinventory_tool_alert_low_evaluate
+/// @role mutator
+/// @layer tool
+/// @human Évalue les articles sous seuil bas (données seuils fournies).
+/// @do alert_low_evaluate_under_governance
 /// tool.inventory.alert.low.evaluate
 pub fn low_evaluate(
     ctx: &GovernedContext,

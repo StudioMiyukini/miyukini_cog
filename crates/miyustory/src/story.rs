@@ -6,11 +6,11 @@ use crate::errors::MiyustoryError;
 use crate::store;
 use miyukini_kernel::{IdGenerator as _, UuidIdGenerator};
 
-/// @id: miyustory_tool_story_create
-/// @role: mutator
-/// @layer: tool
-/// @human: Crée une story ; WriteIntent KindMother.
-/// @do: story_create_under_governance
+/// @id miyustory_tool_story_create
+/// @role mutator
+/// @layer tool
+/// @human Crée une story ; WriteIntent KindMother.
+/// @do story_create_under_governance
 /// tool.social.story.create
 pub fn create(
     ctx: &GovernedContext,
@@ -38,11 +38,11 @@ pub fn create(
     Ok(id)
 }
 
-/// @id: miyustory_tool_story_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste les stories ; filtres fournis.
-/// @do: story_list_under_governance
+/// @id miyustory_tool_story_list
+/// @role mutator
+/// @layer tool
+/// @human Liste les stories ; filtres fournis.
+/// @do story_list_under_governance
 /// tool.social.story.list
 pub fn list(
     ctx: &GovernedContext,
@@ -72,11 +72,11 @@ pub fn list(
     Ok(items)
 }
 
-/// @id: miyustory_tool_story_get
-/// @role: mutator
-/// @layer: tool
-/// @human: Récupère une story.
-/// @do: story_get_under_governance
+/// @id miyustory_tool_story_get
+/// @role mutator
+/// @layer tool
+/// @human Récupère une story.
+/// @do story_get_under_governance
 /// tool.social.story.get
 pub fn get(ctx: &GovernedContext, story_id: &str) -> Result<StoryDetail, MiyustoryError> {
     if !ctx.has_mandate() {
@@ -98,11 +98,11 @@ pub fn get(ctx: &GovernedContext, story_id: &str) -> Result<StoryDetail, Miyusto
     })
 }
 
-/// @id: miyustory_tool_story_reaction_add
-/// @role: mutator
-/// @layer: tool
-/// @human: Ajoute une réaction à une story ; WriteIntent KindMother.
-/// @do: story_reaction_add_under_governance
+/// @id miyustory_tool_story_reaction_add
+/// @role mutator
+/// @layer tool
+/// @human Ajoute une réaction à une story ; WriteIntent KindMother.
+/// @do story_reaction_add_under_governance
 /// tool.social.story.reaction.add
 pub fn reaction_add(
     ctx: &GovernedContext,

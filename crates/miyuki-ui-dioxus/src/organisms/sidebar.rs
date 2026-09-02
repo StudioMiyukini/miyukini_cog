@@ -1,4 +1,8 @@
-// @id: MUID-AppSidebar @do: app-sidebar-organism @role: component @layer: 6 @human: miyuk
+// @id MUID-AppSidebar
+// @do app-sidebar-organism
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Application sidebar organism with sections and items.
 //!

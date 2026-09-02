@@ -1,4 +1,8 @@
-// @id: MUID-StatRow @do: stat-row-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-StatRow
+// @do stat-row-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Stat row molecule displaying a label-value pair with optional trend indicator.
 //!

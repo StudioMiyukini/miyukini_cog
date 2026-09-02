@@ -7,11 +7,11 @@ use crate::errors::MiyauthError;
 use crate::types::{IdentityArtefacts, IdentityContext, IdentityRole};
 use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 
-/// @id: miyauth_tool_identity_resolve
-/// @role: mutator
-/// @layer: tool
-/// @human: Résout le contexte d'identité à partir des artefacts fournis.
-/// @do: identity_resolve_under_governance
+/// @id miyauth_tool_identity_resolve
+/// @role mutator
+/// @layer tool
+/// @human Résout le contexte d'identité à partir des artefacts fournis.
+/// @do identity_resolve_under_governance
 /// tool.identity.resolve — ne décide pas de la confiance.
 pub fn resolve(
     ctx: &GovernedContext,

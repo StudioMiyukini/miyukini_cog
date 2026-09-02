@@ -3,11 +3,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuposinventoryError;
 
-/// @id: miyuposinventory_tool_count_start
-/// @role: mutator
-/// @layer: tool
-/// @human: Démarre une session d'inventaire physique ; WriteIntent KindMother.
-/// @do: count_start_under_governance
+/// @id miyuposinventory_tool_count_start
+/// @role mutator
+/// @layer tool
+/// @human Démarre une session d'inventaire physique ; WriteIntent KindMother.
+/// @do count_start_under_governance
 /// tool.inventory.count.start
 pub fn start(ctx: &GovernedContext, _site_id: &str) -> Result<String, MiyuposinventoryError> {
     if !ctx.has_mandate() {
@@ -16,11 +16,11 @@ pub fn start(ctx: &GovernedContext, _site_id: &str) -> Result<String, Miyuposinv
     Ok("count:stub".to_string())
 }
 
-/// @id: miyuposinventory_tool_count_record
-/// @role: mutator
-/// @layer: tool
-/// @human: Enregistre un comptage (article, quantité) pour une session ; WriteIntent KindMother.
-/// @do: count_record_under_governance
+/// @id miyuposinventory_tool_count_record
+/// @role mutator
+/// @layer tool
+/// @human Enregistre un comptage (article, quantité) pour une session ; WriteIntent KindMother.
+/// @do count_record_under_governance
 /// tool.inventory.count.record
 pub fn record(
     ctx: &GovernedContext,
@@ -34,11 +34,11 @@ pub fn record(
     Ok(())
 }
 
-/// @id: miyuposinventory_tool_count_reconcile
-/// @role: mutator
-/// @layer: tool
-/// @human: Clôture un comptage et propose/applique les écarts ; décision = StrongFather.
-/// @do: count_reconcile_under_governance
+/// @id miyuposinventory_tool_count_reconcile
+/// @role mutator
+/// @layer tool
+/// @human Clôture un comptage et propose/applique les écarts ; décision = StrongFather.
+/// @do count_reconcile_under_governance
 /// tool.inventory.count.reconcile
 pub fn reconcile(
     ctx: &GovernedContext,

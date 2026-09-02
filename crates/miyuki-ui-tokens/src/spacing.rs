@@ -1,4 +1,8 @@
-// @id: MUIT-Spacing @do: spacing-scale @role: token @layer: 5 @human: miyuk
+// @id MUIT-Spacing
+// @do spacing-scale
+// @role token
+// @layer 5
+// @human miyuk
 
 /// Spacing scale based on a 4px unit.
 ///

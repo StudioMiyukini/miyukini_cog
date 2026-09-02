@@ -1,4 +1,8 @@
-// @id: MUIE-QuestLog @do: quest-log-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-QuestLog
+// @do quest-log-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Quest log organism -- 5 act tabs with quest entries.
 

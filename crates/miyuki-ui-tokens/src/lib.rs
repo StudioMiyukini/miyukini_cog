@@ -1,4 +1,8 @@
-// @id: MUIT-Lib @do: public-api @role: exports @layer: 5 @human: miyuk
+// @id MUIT-Lib
+// @do public-api
+// @role exports
+// @layer 5
+// @human miyuk
 
 //! Design tokens agnostiques pour l'ecosysteme UI Miyukini.
 //!

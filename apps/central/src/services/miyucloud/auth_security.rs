@@ -1,9 +1,9 @@
 //! Composants 2FA, sessions, onboarding et health MiyuCloud.
 //!
-//! @id: miyucloud_auth_security_components
-//! @do: provide_totp_sessions_onboarding_health_ui
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_auth_security_components
+//! @do     provide_totp_sessions_onboarding_health_ui
+//! @role   component
+//! @layer  presentation
 
 use dioxus::prelude::*;
 

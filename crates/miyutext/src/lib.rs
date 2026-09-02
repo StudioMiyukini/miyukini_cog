@@ -4,11 +4,11 @@
 //! Kit d'outils de traitement de texte (markdown, replace, template, sanitize). Contenu fourni dans le flux ; pas de décision métier.
 //! Alignement MIP : domaine `text`, layer tool/toolkit.
 
-// @id: toolkit.text.miyutext
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuText ; expose les modules tools.
-/// @do: expose_miyutext_toolkit
+// @id toolkit.text.miyutext
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuText ; expose les modules tools.
+/// @do expose_miyutext_toolkit
 pub mod admin_cell;
 pub mod context;
 pub mod errors;

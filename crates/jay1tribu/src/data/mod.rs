@@ -1,9 +1,9 @@
 //! Persistance Jay1Tribu via KindMother (Instance Daughter).
 //!
-//! @id: jay1tribu_data_module
-//! @do: expose_domain_types_and_persistence
-//! @role: data
-//! @layer: domain
+//! @id     jay1tribu_data_module
+//! @do     expose_domain_types_and_persistence
+//! @role   data
+//! @layer  domain
 //!
 //! legacy-sqlite : accès SQLite direct. kindmother-only : délégation au service KindMother.
 

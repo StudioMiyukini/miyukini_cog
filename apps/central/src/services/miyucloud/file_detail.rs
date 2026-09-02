@@ -1,9 +1,9 @@
 //! Panel de detail fichier MiyuCloud.
 //!
-//! @id: miyucloud_file_detail
-//! @do: display_file_metadata_and_actions
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_file_detail
+//! @do     display_file_metadata_and_actions
+//! @role   component
+//! @layer  presentation
 //!
 //! Affiche les metadonnees d'un fichier selectionne et propose
 //! des actions : telecharger, supprimer, renommer, partager (Phase B).

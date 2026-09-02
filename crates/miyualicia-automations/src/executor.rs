@@ -2,11 +2,11 @@
 //!
 //! Execute une sequence d'actions sequentiellement, avec delais optionnels.
 
-// @id: toolkit.alicia.automations.executor
-// @role: action_executor
-// @layer: 6
-// @human: Executeur d'actions domotiques : commandes sequentielles avec delais.
-// @do: execute_automation_actions_sequentially
+// @id toolkit.alicia.automations.executor
+// @role action_executor
+// @layer 6
+// @human Executeur d'actions domotiques : commandes sequentielles avec delais.
+// @do execute_automation_actions_sequentially
 
 use std::sync::Arc;
 

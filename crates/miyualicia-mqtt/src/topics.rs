@@ -10,11 +10,11 @@
 //! - Requetes  : `zigbee2mqtt/{friendly_name}/get`
 //! - Devices   : `zigbee2mqtt/bridge/devices`
 
-// @id: toolkit.alicia.mqtt.topics
-// @role: topic_builder
-// @layer: 6
-// @human: Construction et parsing des topics MQTT Alicia et Zigbee2MQTT.
-// @do: build_and_parse_mqtt_topics
+// @id toolkit.alicia.mqtt.topics
+// @role topic_builder
+// @layer 6
+// @human Construction et parsing des topics MQTT Alicia et Zigbee2MQTT.
+// @do build_and_parse_mqtt_topics
 
 /// Helper pour construire et parser les topics MQTT Alicia.
 pub struct AliciaTopic;

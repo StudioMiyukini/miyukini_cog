@@ -1,4 +1,8 @@
-// @id: MUIE-ProgressBar @do: progress-bar-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-ProgressBar
+// @do progress-bar-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! D2-style progress bars for XP, stamina, and loading indicators.
 //!

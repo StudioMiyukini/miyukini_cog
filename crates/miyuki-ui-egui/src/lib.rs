@@ -1,4 +1,8 @@
-// @id: MUIE-Lib @do: public-api @role: exports @layer: 6 @human: miyuk
+// @id MUIE-Lib
+// @do public-api
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! D2-style egui components for the Miyukini Game Engine.
 //!

@@ -1,4 +1,8 @@
-// @id: MUID-Slider @do: slider-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Slider
+// @do slider-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Slider/range input atom.
 //!

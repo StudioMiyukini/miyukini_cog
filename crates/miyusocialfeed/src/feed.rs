@@ -5,11 +5,11 @@ use crate::errors::MiyusocialfeedError;
 use crate::post::PostItem;
 use crate::store;
 
-/// @id: miyusocialfeed_tool_feed_list
-/// @role: mutator
-/// @layer: tool
-/// @human: Liste le flux ; filtres fournis.
-/// @do: feed_list_under_governance
+/// @id miyusocialfeed_tool_feed_list
+/// @role mutator
+/// @layer tool
+/// @human Liste le flux ; filtres fournis.
+/// @do feed_list_under_governance
 /// tool.social.feed.list
 pub fn list(
     ctx: &GovernedContext,

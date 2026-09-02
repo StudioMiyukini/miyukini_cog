@@ -1,4 +1,8 @@
-// @id: MUID-Icon @do: icon-atom @role: component @layer: 6 @human: miyuk
+// @id MUID-Icon
+// @do icon-atom
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Icon atom rendering a text/emoji glyph at configurable sizes.
 //!

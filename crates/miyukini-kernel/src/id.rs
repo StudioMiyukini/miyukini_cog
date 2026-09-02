@@ -18,11 +18,11 @@
 
 use uuid::Uuid;
 
-/// @id: kernel_id_type
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Type opaque pour les identifiants uniques. Le format interne n'est pas garanti et ne doit pas être persisté ou interprété sans passer par les APIs du produit.
-/// @do: represent_unique_identifier
+/// @id kernel_id_type
+/// @role infrastructure
+/// @layer kernel
+/// @human Type opaque pour les identifiants uniques. Le format interne n'est pas garanti et ne doit pas être persisté ou interprété sans passer par les APIs du produit.
+/// @do represent_unique_identifier
 /// Identifiant opaque. Le format interne n'est pas garanti.
 ///
 /// Le type `Id` encapsule un identifiant unique de manière opaque.
@@ -38,12 +38,12 @@ use uuid::Uuid;
 pub struct Id(Uuid);
 
 impl Id {
-    /// @id: kernel_id_parse
-    /// @role: infrastructure
-    /// @layer: kernel
-    /// @human: Parse un identifiant depuis sa représentation textuelle. Le format supporté peut changer ; utiliser Display pour la sérialisation.
-    /// @do: parse_id_from_string
-    /// @depends: kernel_id_type
+    /// @id kernel_id_parse
+    /// @role infrastructure
+    /// @layer kernel
+    /// @human Parse un identifiant depuis sa représentation textuelle. Le format supporté peut changer ; utiliser Display pour la sérialisation.
+    /// @do parse_id_from_string
+    /// @depends kernel_id_type
     /// Parse un identifiant depuis sa représentation textuelle.
     ///
     /// Le format supporté (UUID aujourd'hui) peut changer — la documentation
@@ -80,22 +80,22 @@ impl Id {
 }
 
 impl std::fmt::Display for Id {
-    /// @id: kernel_id_display
-    /// @role: infrastructure
-    /// @layer: kernel
-    /// @human: Formatage de l'identifiant en représentation textuelle pour sérialisation. Utiliser avec Id::parse pour round-trip.
-    /// @do: format_id_as_string
-    /// @depends: kernel_id_type
+    /// @id kernel_id_display
+    /// @role infrastructure
+    /// @layer kernel
+    /// @human Formatage de l'identifiant en représentation textuelle pour sérialisation. Utiliser avec Id::parse pour round-trip.
+    /// @do format_id_as_string
+    /// @depends kernel_id_type
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-/// @id: kernel_id_parse_error
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Erreur de parsing d'identifiant. Type minimal avec Debug, Display, Error.
-/// @do: represent_parse_error
+/// @id kernel_id_parse_error
+/// @role infrastructure
+/// @layer kernel
+/// @human Erreur de parsing d'identifiant. Type minimal avec Debug, Display, Error.
+/// @do represent_parse_error
 /// Erreur de parsing d'identifiant.
 ///
 /// Type minimal d'erreur pour le parsing d'identifiants.
@@ -117,11 +117,11 @@ impl std::fmt::Display for IdParseError {
 
 impl std::error::Error for IdParseError {}
 
-/// @id: kernel_id_generator_trait
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Trait pour générer des identifiants uniques. Le produit peut implémenter des générateurs déterministes si nécessaire.
-/// @do: generate_unique_id
+/// @id kernel_id_generator_trait
+/// @role infrastructure
+/// @layer kernel
+/// @human Trait pour générer des identifiants uniques. Le produit peut implémenter des générateurs déterministes si nécessaire.
+/// @do generate_unique_id
 /// Trait pour générer des identifiants uniques.
 ///
 /// Le trait `IdGenerator` permet d'injecter différentes stratégies de génération
@@ -133,12 +133,12 @@ impl std::error::Error for IdParseError {}
 ///
 /// Cette signature est gelée et ne peut pas être modifiée sans version majeure.
 pub trait IdGenerator {
-    /// @id: kernel_id_generator_generate
-    /// @role: infrastructure
-    /// @layer: kernel
-    /// @human: Génère un nouvel identifiant unique. En v0.1, non déterministe (UUID v4).
-    /// @do: generate_new_id
-    /// @depends: kernel_id_generator_trait
+    /// @id kernel_id_generator_generate
+    /// @role infrastructure
+    /// @layer kernel
+    /// @human Génère un nouvel identifiant unique. En v0.1, non déterministe (UUID v4).
+    /// @do generate_new_id
+    /// @depends kernel_id_generator_trait
     /// Génère un nouvel identifiant unique.
     ///
     /// En v0.1, la génération est non déterministe (UUID v4).
@@ -159,11 +159,11 @@ pub trait IdGenerator {
     fn generate(&self) -> Id;
 }
 
-/// @id: kernel_id_generator_uuid
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Générateur d'identifiants basé sur UUID v4. Génération non déterministe.
-/// @do: generate_uuid_v4_id
+/// @id kernel_id_generator_uuid
+/// @role infrastructure
+/// @layer kernel
+/// @human Générateur d'identifiants basé sur UUID v4. Génération non déterministe.
+/// @do generate_uuid_v4_id
 /// Générateur d'identifiants basé sur UUID v4.
 ///
 /// Cette implémentation génère des identifiants uniques de manière non déterministe
@@ -175,11 +175,11 @@ impl IdGenerator for UuidIdGenerator {
     }
 }
 
-/// @id: kernel_id_generator_uuid_struct
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Structure du générateur UUID. Type unitaire sans état.
-/// @do: represent_uuid_generator
+/// @id kernel_id_generator_uuid_struct
+/// @role infrastructure
+/// @layer kernel
+/// @human Structure du générateur UUID. Type unitaire sans état.
+/// @do represent_uuid_generator
 /// Générateur d'identifiants UUID v4.
 ///
 /// Type unitaire sans état. Peut être instancié et réutilisé.
@@ -190,12 +190,12 @@ pub struct UuidIdGenerator;
 mod tests {
     use super::*;
 
-    /// @id: test_id_generate_unique
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que deux IDs générés sont différents, garantissant l'unicité.
-    /// @do: verify_id_uniqueness
-    /// @depends: kernel_id_generator_generate
+    /// @id test_id_generate_unique
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que deux IDs générés sont différents, garantissant l'unicité.
+    /// @do verify_id_uniqueness
+    /// @depends kernel_id_generator_generate
     #[test]
     fn test_id_generate_unique() {
         let generator = UuidIdGenerator;
@@ -204,12 +204,12 @@ mod tests {
         assert_ne!(id1, id2);
     }
 
-    /// @id: test_id_display_roundtrip
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant le round-trip Display → parse → même Id.
-    /// @do: verify_id_round_trip
-    /// @depends: kernel_id_display, kernel_id_parse
+    /// @id test_id_display_roundtrip
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant le round-trip Display → parse → même Id.
+    /// @do verify_id_round_trip
+    /// @depends kernel_id_display, kernel_id_parse
     #[test]
     fn test_id_display_roundtrip() {
         let generator = UuidIdGenerator;
@@ -219,12 +219,12 @@ mod tests {
         assert_eq!(id, parsed);
     }
 
-    /// @id: test_id_parse_valid_uuid
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que parse() réussit avec un UUID valide.
-    /// @do: verify_valid_uuid_parsing
-    /// @depends: kernel_id_parse
+    /// @id test_id_parse_valid_uuid
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que parse() réussit avec un UUID valide.
+    /// @do verify_valid_uuid_parsing
+    /// @depends kernel_id_parse
     #[test]
     fn test_id_parse_valid_uuid() {
         let valid_uuid = "550e8400-e29b-41d4-a716-446655440000";
@@ -232,12 +232,12 @@ mod tests {
         assert_eq!(id.to_string(), valid_uuid);
     }
 
-    /// @id: test_id_parse_invalid_format
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que parse() retourne une erreur pour un format invalide.
-    /// @do: verify_invalid_format_error
-    /// @depends: kernel_id_parse
+    /// @id test_id_parse_invalid_format
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que parse() retourne une erreur pour un format invalide.
+    /// @do verify_invalid_format_error
+    /// @depends kernel_id_parse
     #[test]
     fn test_id_parse_invalid_format() {
         assert!(Id::parse("not-a-uuid").is_err());
@@ -245,12 +245,12 @@ mod tests {
         assert!(Id::parse("123").is_err());
     }
 
-    /// @id: test_id_equality
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que Id implémente Eq et PartialEq correctement.
-    /// @do: verify_id_equality
-    /// @depends: kernel_id_type
+    /// @id test_id_equality
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que Id implémente Eq et PartialEq correctement.
+    /// @do verify_id_equality
+    /// @depends kernel_id_type
     #[test]
     fn test_id_equality() {
         let generator = UuidIdGenerator;
@@ -259,12 +259,12 @@ mod tests {
         assert_eq!(id1, id2);
     }
 
-    /// @id: test_id_hash
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que Id peut être utilisé comme clé dans une HashMap.
-    /// @do: verify_id_hash_usage
-    /// @depends: kernel_id_type
+    /// @id test_id_hash
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que Id peut être utilisé comme clé dans une HashMap.
+    /// @do verify_id_hash_usage
+    /// @depends kernel_id_type
     #[test]
     fn test_id_hash() {
         use std::collections::HashMap;
@@ -280,12 +280,12 @@ mod tests {
         assert_eq!(map.get(&id2), Some(&"value2"));
     }
 
-    /// @id: test_id_no_business_logic
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant qu'aucun type métier (UserId, OrderId) n'existe, conformément à INV-K-1.
-    /// @do: verify_no_business_types
-    /// @depends: kernel_id_type
+    /// @id test_id_no_business_logic
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant qu'aucun type métier (UserId, OrderId) n'existe, conformément à INV-K-1.
+    /// @do verify_no_business_types
+    /// @depends kernel_id_type
     #[test]
     fn test_id_no_business_logic() {
         // Vérifier qu'aucun type métier n'existe
@@ -295,12 +295,12 @@ mod tests {
         // Si on pouvait faire : let _user_id: UserId = ... cela violerait INV-K-1
     }
 
-    /// @id: test_id_no_external_dependency
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que la génération fonctionne sans réseau, conformément à INV-K-2.
-    /// @do: verify_no_network_required
-    /// @depends: kernel_id_generator_generate
+    /// @id test_id_no_external_dependency
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que la génération fonctionne sans réseau, conformément à INV-K-2.
+    /// @do verify_no_network_required
+    /// @depends kernel_id_generator_generate
     #[test]
     fn test_id_no_external_dependency() {
         // Ce test vérifie que generate() fonctionne sans réseau
@@ -310,12 +310,12 @@ mod tests {
         // Le fait que le test passe confirme INV-K-2
     }
 
-    /// @id: test_id_deterministic_parse
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que parse() est déterministe : même string → même Id, conformément à INV-K-6.
-    /// @do: verify_parse_determinism
-    /// @depends: kernel_id_parse
+    /// @id test_id_deterministic_parse
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que parse() est déterministe : même string → même Id, conformément à INV-K-6.
+    /// @do verify_parse_determinism
+    /// @depends kernel_id_parse
     #[test]
     fn test_id_deterministic_parse() {
         let uuid_str = "550e8400-e29b-41d4-a716-446655440000";

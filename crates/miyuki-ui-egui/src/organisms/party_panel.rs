@@ -1,4 +1,8 @@
-// @id: MUIE-PartyPanel @do: party-panel-organism @role: organism @layer: 6 @human: miyuk
+// @id MUIE-PartyPanel
+// @do party-panel-organism
+// @role organism
+// @layer 6
+// @human miyuk
 
 //! Party panel organism -- list of party members with actions.
 

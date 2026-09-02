@@ -1,10 +1,10 @@
 //! Handler pour GET /health (non protege).
 
-// @id: service.alicia.api.handlers.health
-// @role: health_handler
-// @layer: 7
-// @human: Endpoint de sante Alicia API.
-// @do: respond_health_status
+// @id service.alicia.api.handlers.health
+// @role health_handler
+// @layer 7
+// @human Endpoint de sante Alicia API.
+// @do respond_health_status
 
 use std::sync::Arc;
 

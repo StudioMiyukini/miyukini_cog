@@ -11,11 +11,11 @@
 
 #![forbid(unsafe_code)]
 
-// @id: toolkit.alicia.devices
-// @role: device_registry
-// @layer: 6
-// @human: Registre central des dispositifs domotiques Alicia ; types, etat, commandes.
-// @do: expose_device_registry_and_types
+// @id toolkit.alicia.devices
+// @role device_registry
+// @layer 6
+// @human Registre central des dispositifs domotiques Alicia ; types, etat, commandes.
+// @do expose_device_registry_and_types
 
 pub mod admin_cell;
 pub mod command;

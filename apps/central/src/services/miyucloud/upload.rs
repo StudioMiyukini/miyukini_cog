@@ -1,9 +1,9 @@
 //! Composant upload MiyuCloud -- televersement de fichiers.
 //!
-//! @id: miyucloud_upload
-//! @do: upload_files_to_cloud
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_upload
+//! @do     upload_files_to_cloud
+//! @role   component
+//! @layer  presentation
 //!
 //! Bouton de selection de fichiers natif + barre de progression.
 //! Utilise `rfd` (native file dialog) via spawn_blocking.

@@ -1,4 +1,8 @@
-// @id: MUIE-QuestEntry @do: quest-entry-molecule @role: molecule @layer: 6 @human: miyuk
+// @id MUIE-QuestEntry
+// @do quest-entry-molecule
+// @role molecule
+// @layer 6
+// @human miyuk
 
 //! Quest entry molecule -- icon + name + completion state.
 

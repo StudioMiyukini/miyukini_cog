@@ -4,11 +4,11 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyuwebwayParticipantError;
 
-/// @id: miyuwebway_participant_mws_declaration_build
-/// @role: mutator
-/// @layer: tool
-/// @human: Construit un message de déclaration conforme MWS ; exécution seule.
-/// @do: mws_declaration_build_under_governance
+/// @id miyuwebway_participant_mws_declaration_build
+/// @role mutator
+/// @layer tool
+/// @human Construit un message de déclaration conforme MWS ; exécution seule.
+/// @do mws_declaration_build_under_governance
 pub fn build(ctx: &GovernedContext, payload: &str) -> Result<Vec<u8>, MiyuwebwayParticipantError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
@@ -16,11 +16,11 @@ pub fn build(ctx: &GovernedContext, payload: &str) -> Result<Vec<u8>, Miyuwebway
     Ok(payload.as_bytes().to_vec())
 }
 
-/// @id: miyuwebway_participant_mws_declaration_sign
-/// @role: mutator
-/// @layer: tool
-/// @human: Signe une déclaration ; exécution seule ; clé gouvernée.
-/// @do: mws_declaration_sign_under_governance
+/// @id miyuwebway_participant_mws_declaration_sign
+/// @role mutator
+/// @layer tool
+/// @human Signe une déclaration ; exécution seule ; clé gouvernée.
+/// @do mws_declaration_sign_under_governance
 pub fn sign(
     ctx: &GovernedContext,
     declaration: &[u8],
@@ -31,11 +31,11 @@ pub fn sign(
     Ok(declaration.to_vec())
 }
 
-/// @id: miyuwebway_participant_mws_declaration_validate
-/// @role: accessor
-/// @layer: tool
-/// @human: Valide le format d'une déclaration ; exécution seule.
-/// @do: mws_declaration_validate_under_governance
+/// @id miyuwebway_participant_mws_declaration_validate
+/// @role accessor
+/// @layer tool
+/// @human Valide le format d'une déclaration ; exécution seule.
+/// @do mws_declaration_validate_under_governance
 pub fn validate(
     ctx: &GovernedContext,
     declaration: &[u8],
@@ -46,11 +46,11 @@ pub fn validate(
     Ok(!declaration.is_empty())
 }
 
-/// @id: miyuwebway_participant_mws_declaration_verify
-/// @role: accessor
-/// @layer: tool
-/// @human: Vérifie la signature d'une déclaration ; exécution seule.
-/// @do: mws_declaration_verify_under_governance
+/// @id miyuwebway_participant_mws_declaration_verify
+/// @role accessor
+/// @layer tool
+/// @human Vérifie la signature d'une déclaration ; exécution seule.
+/// @do mws_declaration_verify_under_governance
 pub fn verify(
     ctx: &GovernedContext,
     _declaration: &[u8],

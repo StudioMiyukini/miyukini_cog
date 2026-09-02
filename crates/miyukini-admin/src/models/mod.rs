@@ -4,11 +4,11 @@
 
 pub mod admin_account;
 pub mod corruption_memory;
-/// @id: miyukiniadmin_models_mod
-/// @role: infrastructure
-/// @layer: operator
-/// @human: Module modèles (environment_state, admin_account, session, corruption_memory).
-/// @do: expose_models
+/// @id miyukiniadmin_models_mod
+/// @role infrastructure
+/// @layer operator
+/// @human Module modèles (environment_state, admin_account, session, corruption_memory).
+/// @do expose_models
 pub mod environment_state;
 pub mod session;
 

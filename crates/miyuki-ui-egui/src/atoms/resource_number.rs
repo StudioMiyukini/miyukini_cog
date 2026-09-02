@@ -1,4 +1,8 @@
-// @id: MUIE-ResNum @do: resource-number-atom @role: atom @layer: 6 @human: miyuk
+// @id MUIE-ResNum
+// @do resource-number-atom
+// @role atom
+// @layer 6
+// @human miyuk
 
 //! Resource number display -- current/max text overlay for orbs and bars.
 //!

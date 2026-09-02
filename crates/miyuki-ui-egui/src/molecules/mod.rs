@@ -1,4 +1,8 @@
-// @id: MUIE-MolsIndex @do: molecule-exports @role: exports @layer: 6 @human: miyuk
+// @id MUIE-MolsIndex
+// @do molecule-exports
+// @role exports
+// @layer 6
+// @human miyuk
 
 //! Molecule-level UI components -- compositions of atoms.
 //!

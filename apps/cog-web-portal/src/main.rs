@@ -1,8 +1,10 @@
 //! COG Web Portal — Portail HTTP multi-services Miyukini.
 //!
-//! @id: cog_web_portal_main @do: start_portal_http_server
-//! @role: infra @layer: app
-//! @human: Lance le serveur axum COG Web Portal pour les services Jay via PortalContract.
+//! @id     cog_web_portal_main
+//! @do start_portal_http_server
+//! @role   infra
+//! @layer app
+//! @human  Lance le serveur axum COG Web Portal pour les services Jay via PortalContract.
 //!
 //! ## Architecture
 //!

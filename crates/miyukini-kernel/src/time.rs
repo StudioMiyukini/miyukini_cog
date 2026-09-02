@@ -18,11 +18,11 @@
 
 use std::time::SystemTime;
 
-/// @id: kernel_clock_trait
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Trait d'abstraction du temps pour tests et injection. Le produit peut implémenter un FakeClock pour les tests.
-/// @do: provide_time_abstraction
+/// @id kernel_clock_trait
+/// @role infrastructure
+/// @layer kernel
+/// @human Trait d'abstraction du temps pour tests et injection. Le produit peut implémenter un FakeClock pour les tests.
+/// @do provide_time_abstraction
 /// Trait d'abstraction du temps.
 ///
 /// Le trait `Clock` permet d'injecter différentes sources de temps, notamment
@@ -39,12 +39,12 @@ use std::time::SystemTime;
 /// - INV-K-6 : Déterminisme (injection permet tests déterministes)
 /// - INV-K-8 : Souveraineté locale (pas de NTP obligatoire)
 pub trait Clock {
-    /// @id: kernel_clock_now
-    /// @role: infrastructure
-    /// @layer: kernel
-    /// @human: Retourne l'heure courante du système. Le produit peut convertir en timestamp si nécessaire.
-    /// @do: get_current_time
-    /// @depends: kernel_clock_trait
+    /// @id kernel_clock_now
+    /// @role infrastructure
+    /// @layer kernel
+    /// @human Retourne l'heure courante du système. Le produit peut convertir en timestamp si nécessaire.
+    /// @do get_current_time
+    /// @depends kernel_clock_trait
     /// Retourne l'heure courante du système.
     ///
     /// Le type de retour est `SystemTime` de la bibliothèque standard.
@@ -73,11 +73,11 @@ pub trait Clock {
     fn now(&self) -> SystemTime;
 }
 
-/// @id: kernel_clock_default
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Horloge système par défaut. Utilise SystemTime::now() pour obtenir l'heure courante.
-/// @do: provide_system_time
+/// @id kernel_clock_default
+/// @role infrastructure
+/// @layer kernel
+/// @human Horloge système par défaut. Utilise SystemTime::now() pour obtenir l'heure courante.
+/// @do provide_system_time
 /// Horloge système par défaut.
 ///
 /// Cette implémentation utilise `SystemTime::now()` pour obtenir l'heure courante
@@ -89,11 +89,11 @@ impl Clock for DefaultClock {
     }
 }
 
-/// @id: kernel_clock_default_struct
-/// @role: infrastructure
-/// @layer: kernel
-/// @human: Structure de l'horloge par défaut. Type unitaire sans état.
-/// @do: represent_default_clock
+/// @id kernel_clock_default_struct
+/// @role infrastructure
+/// @layer kernel
+/// @human Structure de l'horloge par défaut. Type unitaire sans état.
+/// @do represent_default_clock
 /// Horloge système par défaut.
 ///
 /// Type unitaire sans état. Peut être instancié et réutilisé.
@@ -105,12 +105,12 @@ mod tests {
     use super::*;
     use std::time::{Duration, UNIX_EPOCH};
 
-    /// @id: test_time_now_returns_systemtime
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que now() retourne un SystemTime valide.
-    /// @do: verify_systemtime_return
-    /// @depends: kernel_clock_now
+    /// @id test_time_now_returns_systemtime
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que now() retourne un SystemTime valide.
+    /// @do verify_systemtime_return
+    /// @depends kernel_clock_now
     #[test]
     fn test_time_now_returns_systemtime() {
         let clock = DefaultClock;
@@ -119,12 +119,12 @@ mod tests {
         assert!(now.duration_since(UNIX_EPOCH).is_ok());
     }
 
-    /// @id: test_time_now_monotonic
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que now() retourne un temps monotone (croissant).
-    /// @do: verify_time_monotonicity
-    /// @depends: kernel_clock_now
+    /// @id test_time_now_monotonic
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que now() retourne un temps monotone (croissant).
+    /// @do verify_time_monotonicity
+    /// @depends kernel_clock_now
     #[test]
     fn test_time_now_monotonic() {
         let clock = DefaultClock;
@@ -136,12 +136,12 @@ mod tests {
         assert!(t2 >= t1 || t2.duration_since(t1).unwrap() < Duration::from_millis(5));
     }
 
-    /// @id: test_time_fake_clock_injection
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant qu'un FakeClock peut être injecté pour les tests avec now() constant.
-    /// @do: verify_fake_clock_injection
-    /// @depends: kernel_clock_trait
+    /// @id test_time_fake_clock_injection
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant qu'un FakeClock peut être injecté pour les tests avec now() constant.
+    /// @do verify_fake_clock_injection
+    /// @depends kernel_clock_trait
     #[test]
     fn test_time_fake_clock_injection() {
         let fixed_time = UNIX_EPOCH + Duration::from_secs(1234567890);
@@ -149,12 +149,12 @@ mod tests {
         assert_eq!(fake_clock.now(), fixed_time);
     }
 
-    /// @id: test_time_no_timezone_logic
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant qu'aucune logique de timezone n'est implémentée. Retourne SystemTime, pas de conversion.
-    /// @do: verify_no_timezone_logic
-    /// @depends: kernel_clock_now
+    /// @id test_time_no_timezone_logic
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant qu'aucune logique de timezone n'est implémentée. Retourne SystemTime, pas de conversion.
+    /// @do verify_no_timezone_logic
+    /// @depends kernel_clock_now
     #[test]
     fn test_time_no_timezone_logic() {
         let clock = DefaultClock;
@@ -164,12 +164,12 @@ mod tests {
         let _: SystemTime = now; // Compile si c'est bien SystemTime
     }
 
-    /// @id: test_time_no_business_logic
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant qu'aucune logique métier (calcul de dates d'expiration) n'est implémentée, conformément à INV-K-1.
-    /// @do: verify_no_business_logic
-    /// @depends: kernel_clock_trait
+    /// @id test_time_no_business_logic
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant qu'aucune logique métier (calcul de dates d'expiration) n'est implémentée, conformément à INV-K-1.
+    /// @do verify_no_business_logic
+    /// @depends kernel_clock_trait
     #[test]
     fn test_time_no_business_logic() {
         // Vérifier qu'aucune méthode métier n'existe
@@ -179,12 +179,12 @@ mod tests {
         // Si on pouvait faire : clock.expiration_date(), cela violerait INV-K-1
     }
 
-    /// @id: test_time_no_external_dependency
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant que Clock fonctionne sans réseau, conformément à INV-K-2. Pas de NTP obligatoire.
-    /// @do: verify_no_network_required
-    /// @depends: kernel_clock_now
+    /// @id test_time_no_external_dependency
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant que Clock fonctionne sans réseau, conformément à INV-K-2. Pas de NTP obligatoire.
+    /// @do verify_no_network_required
+    /// @depends kernel_clock_now
     #[test]
     fn test_time_no_external_dependency() {
         // Ce test vérifie que now() fonctionne sans réseau
@@ -194,12 +194,12 @@ mod tests {
         // Le fait que le test passe confirme INV-K-2
     }
 
-    /// @id: test_time_deterministic_fake
-    /// @role: test
-    /// @layer: kernel
-    /// @human: Test vérifiant qu'un FakeClock est déterministe : même FakeClock → même résultat, conformément à INV-K-6.
-    /// @do: verify_fake_clock_determinism
-    /// @depends: kernel_clock_trait
+    /// @id test_time_deterministic_fake
+    /// @role test
+    /// @layer kernel
+    /// @human Test vérifiant qu'un FakeClock est déterministe : même FakeClock → même résultat, conformément à INV-K-6.
+    /// @do verify_fake_clock_determinism
+    /// @depends kernel_clock_trait
     #[test]
     fn test_time_deterministic_fake() {
         let fixed_time = UNIX_EPOCH + Duration::from_secs(1234567890);
@@ -210,11 +210,11 @@ mod tests {
     }
 
     /// FakeClock pour les tests
-    /// @id: kernel_clock_fake
-    /// @role: test_utility
-    /// @layer: kernel
-    /// @human: Horloge factice pour les tests avec temps fixe. Permet de rendre les tests déterministes.
-    /// @do: provide_fixed_time_for_tests
+    /// @id kernel_clock_fake
+    /// @role test_utility
+    /// @layer kernel
+    /// @human Horloge factice pour les tests avec temps fixe. Permet de rendre les tests déterministes.
+    /// @do provide_fixed_time_for_tests
     #[cfg(test)]
     pub struct FakeClock {
         fixed_time: SystemTime,

@@ -1,4 +1,8 @@
-// @id: MUID-Dropdown @do: dropdown-molecule @role: component @layer: 6 @human: miyuk
+// @id MUID-Dropdown
+// @do dropdown-molecule
+// @role component
+// @layer 6
+// @human miyuk
 
 //! Dropdown menu molecule.
 //!

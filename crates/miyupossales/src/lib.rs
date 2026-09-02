@@ -4,11 +4,11 @@
 //! Kit d'outils caisse et ventes PoS (sale, ticket, discount, refund, receipt, item, cash_register, cash_movement, barcode, store, display, order). WriteIntent KindMother.
 //! Alignement MIP : domaine `pos`, layer tool/toolkit.
 
-// @id: toolkit.pos.miyupossales
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Point d'entrée du toolkit MiyuPosSales ; expose les modules tools.
-/// @do: expose_miyupossales_toolkit
+// @id toolkit.pos.miyupossales
+/// @role infrastructure
+/// @layer toolkit
+/// @human Point d'entrée du toolkit MiyuPosSales ; expose les modules tools.
+/// @do expose_miyupossales_toolkit
 pub mod admin_cell;
 pub mod barcode;
 pub mod cash_movement;

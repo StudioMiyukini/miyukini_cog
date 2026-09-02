@@ -1,9 +1,9 @@
 //! Abstraction transport MWS pour Jay1Tribu.
 //!
-//! @id: jay1tribu_transport
-//! @do: dispatch_messages_via_mws_to_recipients
-//! @role: transport
-//! @layer: infra
+//! @id     jay1tribu_transport
+//! @do     dispatch_messages_via_mws_to_recipients
+//! @role   transport
+//! @layer  infra
 //!
 //! Envoi des messages vers les COGs destinataires via le MWS. L'appelant (ex. Central)
 //! enregistre un `MwsTransportSender` (ex. délégation à miyuwebway_participant::transport::send).

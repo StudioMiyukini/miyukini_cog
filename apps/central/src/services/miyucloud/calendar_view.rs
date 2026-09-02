@@ -1,9 +1,9 @@
 //! Vue calendrier CalDAV dans Central.
 //!
-//! @id: miyucloud_calendar_view
-//! @do: display_caldav_calendars_events
-//! @role: component
-//! @layer: presentation
+//! @id     miyucloud_calendar_view
+//! @do     display_caldav_calendars_events
+//! @role   component
+//! @layer  presentation
 //!
 //! Affiche la liste des calendriers (sidebar gauche) et une grille
 //! mensuelle avec les evenements du calendrier selectionne.

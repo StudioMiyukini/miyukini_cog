@@ -2,17 +2,17 @@
 //!
 //! Refus d'exécution, erreurs techniques, pas de fuite de données métier (BOUND-*).
 
-/// @id: miyucalc_errors
-/// @role: infrastructure
-/// @layer: toolkit
-/// @human: Types d'erreur contractuels MiyuCalc.
-/// @do: represent_execution_errors
+/// @id miyucalc_errors
+/// @role infrastructure
+/// @layer toolkit
+/// @human Types d'erreur contractuels MiyuCalc.
+/// @do represent_execution_errors
 
-/// @id: miyucalc_error_enum
-/// @role: data
-/// @layer: toolkit
-/// @human: Erreur d'exécution MiyuCalc.
-/// @do: represent_miyucalc_error
+/// @id miyucalc_error_enum
+/// @role data
+/// @layer toolkit
+/// @human Erreur d'exécution MiyuCalc.
+/// @do represent_miyucalc_error
 #[derive(Debug, Clone)]
 pub enum MiyuCalcError {
     /// Exécution refusée : pas de mandat gouverné.

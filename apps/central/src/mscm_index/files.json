@@ -1,0 +1,104 @@
+{
+  "components/calendar/agenda_list.rs": [
+    "central.components.calendar.agenda_list"
+  ],
+  "components/calendar/day_view.rs": [
+    "central.components.calendar.day_view"
+  ],
+  "components/calendar/event_slot.rs": [
+    "central.components.calendar.event_slot"
+  ],
+  "components/calendar/mini_calendar.rs": [
+    "central.components.calendar.mini_calendar"
+  ],
+  "components/calendar/mod.rs": [
+    "central.components.calendar"
+  ],
+  "components/calendar/month_view.rs": [
+    "central.components.calendar.month_view"
+  ],
+  "components/calendar/types.rs": [
+    "central.components.calendar.types"
+  ],
+  "components/calendar/week_view.rs": [
+    "central.components.calendar.week_view"
+  ],
+  "components/mod.rs": [
+    "central.components"
+  ],
+  "components/service_sidebar.rs": [
+    "central.components.service_sidebar"
+  ],
+  "main.rs": [
+    "central"
+  ],
+  "remote.rs": [
+    "central_remote_module"
+  ],
+  "services/lifegame/canvas.rs": [
+    "central.services.lifegame.canvas"
+  ],
+  "services/lifegame/mod.rs": [
+    "central.services.lifegame"
+  ],
+  "services/lifegame/sidebar.rs": [
+    "central.services.lifegame.sidebar"
+  ],
+  "services/lifegame/stats_bar.rs": [
+    "central.services.lifegame.stats_bar"
+  ],
+  "services/miyucloud/auth_security.rs": [
+    "miyucloud_auth_security_components"
+  ],
+  "services/miyucloud/calendar_view.rs": [
+    "miyucloud_calendar_view"
+  ],
+  "services/miyucloud/client.rs": [
+    "miyucloud_http_client"
+  ],
+  "services/miyucloud/components.rs": [
+    "miyucloud_ui_components"
+  ],
+  "services/miyucloud/contacts_view.rs": [
+    "miyucloud_contacts_view"
+  ],
+  "services/miyucloud/explorer.rs": [
+    "miyucloud_explorer"
+  ],
+  "services/miyucloud/file_detail.rs": [
+    "miyucloud_file_detail"
+  ],
+  "services/miyucloud/mod.rs": [
+    "miyucloud_central_view"
+  ],
+  "services/miyucloud/settings.rs": [
+    "miyucloud_settings"
+  ],
+  "services/miyucloud/share_dialog.rs": [
+    "miyucloud_share_dialog"
+  ],
+  "services/miyucloud/sidebar.rs": [
+    "miyucloud_sidebar"
+  ],
+  "services/miyucloud/state.rs": [
+    "miyucloud_ui_state"
+  ],
+  "services/miyucloud/sync_status.rs": [
+    "miyucloud_sync_status"
+  ],
+  "services/miyucloud/trash_view.rs": [
+    "miyucloud_trash_view"
+  ],
+  "services/miyucloud/upload.rs": [
+    "miyucloud_upload"
+  ],
+  "services/mod.rs": [
+    "central.services"
+  ],
+  "services/ui_assets.rs": [
+    "central.services.ui_assets"
+  ],
+  "services/ui_builder.rs": [
+    "central.services.ui_builder"
+  ]
+}
