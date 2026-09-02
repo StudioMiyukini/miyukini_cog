@@ -1,3 +1,9 @@
+//! @id     central_services_miyukiniwatch_audit
+//! @do     definir_fmt_timestamp
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyukiniwatch audit ».
+
 //! Écran Historique des actions (audit) MiyukiniWatch.
 
 use dioxus::prelude::*;

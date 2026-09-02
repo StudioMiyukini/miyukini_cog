@@ -1,3 +1,9 @@
+//! @id     miyutts_lib
+//! @do     definir_tts_preset
+//! @role   orchestration
+//! @layer  core
+//! @human  miyutts — module « lib ».
+
 //! MiyuTTS toolkit (V1 initiale).
 //!
 //! Fournit:

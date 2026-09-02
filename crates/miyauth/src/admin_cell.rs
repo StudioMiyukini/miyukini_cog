@@ -1,3 +1,9 @@
+//! @id     miyauth_admin_cell
+//! @do     definir_miyauth_identification
+//! @role   securite
+//! @layer  core
+//! @human  miyauth — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

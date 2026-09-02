@@ -1,3 +1,9 @@
+//! @id     miyuclock_errors
+//! @do     definir_miyuclock_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuclock — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuclockError {
     NoMandate,

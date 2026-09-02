@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_contact
+//! @do     definir_address_book
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities contact ».
+
 use chrono::{DateTime, NaiveDate, Utc};
 use uuid::Uuid;
 

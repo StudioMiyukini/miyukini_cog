@@ -1,3 +1,9 @@
+//! @id     miyuwebway_tracker_admin_cell
+//! @do     definir_miyuwebway_tracker_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway tracker — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

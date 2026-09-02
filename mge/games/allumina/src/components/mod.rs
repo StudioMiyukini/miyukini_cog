@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_mod
+//! @do     declarer_module_cc
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components mod ».
+
 //! Pure-data components. No logic beyond trivial constructors/queries lives here;
 //! all behaviour is driven by `systems` running over these via the `World`.
 

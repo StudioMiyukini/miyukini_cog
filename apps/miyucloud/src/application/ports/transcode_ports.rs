@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_transcode_ports
+//! @do     definir_output_format
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports transcode ports ».
+
 //! Image Transcode Port - Application layer abstraction for image transcoding.
 //!
 //! This module defines the port (trait) for on-demand image format conversion

@@ -1,3 +1,9 @@
+//! @id     jaycloud_operators_share_op
+//! @do     definir_token_bytes
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « operators share op ».
+
 //! `share_op` — gestion des liens publics signés.
 //!
 //! Un `ShareLink` pointe vers un fichier d'un snapshot, optionnellement

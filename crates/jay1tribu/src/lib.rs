@@ -1,6 +1,6 @@
 //! Jay1Tribu — Service de messagerie P2P (tribus, salons, amis).
 //!
-//! @id     jay1tribu_lib
+//! @id     crate_jay1tribu_lib
 //! @do     expose_public_modules_jay1tribu
 //@human ! @role   service
 //! @layer  infra

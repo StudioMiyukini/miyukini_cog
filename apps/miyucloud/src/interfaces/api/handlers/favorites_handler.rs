@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_favorites_handler
+//! @do     definir_batch_favorite_item
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers favorites handler ».
+
 use axum::{
     Json,
     extract::{Path, State},

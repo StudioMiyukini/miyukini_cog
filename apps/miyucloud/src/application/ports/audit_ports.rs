@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_audit_ports
+//! @do     definir_trait_audit_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports audit ports ».
+
 //! Audit logging port — hexagonal boundary for persistent security audit trail.
 //!
 //! Implementations live in `infrastructure/repositories/pg/audit_pg_repository.rs`.

@@ -1,3 +1,9 @@
+//! @id     central_app
+//! @do     app
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « app ».
+
 //! Application principale Miyukini Central.
 
 use std::sync::Arc;

@@ -1,3 +1,9 @@
+//! @id     miyucms_store
+//! @do     definir_revisions
+//! @role   donnee
+//! @layer  core
+//! @human  miyucms — module « store ».
+
 //! Store en mémoire MiyuCMS (révisions, médias, commentaires). Persistance réelle = KindMother.
 
 use std::collections::HashMap;

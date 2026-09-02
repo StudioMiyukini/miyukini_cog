@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_mod
+//! @do     declarer_module_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa mod ».
+
 //! Module JayKoa — Calendrier universel du COG.
 //!
 //! Structure calquée sur Google Agenda :

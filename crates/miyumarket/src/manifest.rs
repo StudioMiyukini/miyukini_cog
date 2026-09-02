@@ -1,3 +1,9 @@
+//! @id     miyumarket_manifest
+//! @do     definir_service_type
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumarket — module « manifest ».
+
 //! Manifeste d'un service — décrit ce qu'un service expose et requiert.
 //!
 //! Chaque package service contient un `service.manifest.json` à la racine.

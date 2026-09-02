@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_sidebar
+//! @do     jay_konta_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views sidebar ».
+
 //! Sidebar JayKonta — navigation Purse / Account.
 
 use super::{AccountSection, JayKontaSpace, JayKontaState, PurseSection};

@@ -1,3 +1,9 @@
+//! @id     origin_relay_mod
+//! @do     declarer_module_metrics
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay mod ».
+
 //! Serveur Relay MWS Origin.
 //!
 //! Gère les connexions des COGs, la vérification de conformité,

@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_reconnect
+//! @do     definir_reconnect_config
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « reconnect ».
+
 //! Reconnexion automatique avec backoff exponentiel.
 //!
 //! En cas de perte de connexion, le bridge tente de se reconnecter

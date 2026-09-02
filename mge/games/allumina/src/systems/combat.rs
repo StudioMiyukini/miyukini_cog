@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_combat
+//! @do     definir_attacker_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems combat ».
+
 //! Combat resolution using the Allumina (Diablo-like) damage formulas:
 //!
 //! * `ATK   = (base_dmg + weapon_dmg) * (1 + primary_stat / 100)`

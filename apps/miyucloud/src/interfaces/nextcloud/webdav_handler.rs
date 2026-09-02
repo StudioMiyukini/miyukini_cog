@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_webdav_handler
+//! @do     definir_trait_xml_result_ext
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud webdav handler ».
+
 use axum::{
     body::{self, Body},
     http::{HeaderName, Request, StatusCode, header},

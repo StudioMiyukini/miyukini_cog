@@ -1,3 +1,9 @@
+//! @id     games_allumina_network_prediction
+//! @do     definir_input
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « network prediction ».
+
 //! Client-side movement prediction and server reconciliation.
 //!
 //! The client applies its own movement inputs immediately (so the local avatar

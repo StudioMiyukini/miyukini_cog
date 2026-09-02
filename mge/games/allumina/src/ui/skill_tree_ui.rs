@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_skill_tree_ui
+//! @do     definir_hotbar_max
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui skill tree ui ».
+
 //! Skill-tree window.
 //!
 //! Built around *branches*: a class natively owns three branches, and a player

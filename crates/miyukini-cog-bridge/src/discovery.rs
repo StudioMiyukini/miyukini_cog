@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_discovery
+//! @do     definir_discovery_port
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « discovery ».
+
 //! Découverte automatique du COG Host sur le réseau local.
 //!
 //! Utilise un broadcast UDP simple pour détecter le Central Desktop

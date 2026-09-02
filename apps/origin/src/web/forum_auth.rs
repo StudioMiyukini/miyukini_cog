@@ -1,3 +1,9 @@
+//! @id     origin_web_forum_auth
+//! @do     definir_max_failed_attempts
+//! @role   securite
+//! @layer  app
+//! @human  origin — module « web forum auth ».
+
 //! Auth unifiée Miyukini Central — profils Central via Origin.
 //!
 //! Copie serveur des profils Central (email, password_hash, pseudonyme) pour

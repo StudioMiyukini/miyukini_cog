@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_visual_state
+//! @do     definir_widget_state
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « visual state ».
+
 use serde::{Deserialize, Serialize};
 
 /// Visual state of an interactive UI element.

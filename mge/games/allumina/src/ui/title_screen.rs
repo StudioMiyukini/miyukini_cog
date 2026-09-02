@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_title_screen
+//! @do     definir_title_action
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui title screen ».
+
 //! The starting screen: big "ALLUMINA" logo, dark background with drifting
 //! ember motes, and a menu (Nouvelle partie / Charger partie / Multijoueur /
 //! Quitter). Driven by a tiny state machine that the renderer's `GameApp`

@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_session_pg_repository
+//! @do     implementer_session_repository_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg session pg repository ».
+
 use chrono::Utc;
 use futures::future::BoxFuture;
 use sqlx::{PgPool, Row};

@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_settings_pg_repository
+//! @do     definir_settings_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg settings pg repository ».
+
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::sync::Arc;

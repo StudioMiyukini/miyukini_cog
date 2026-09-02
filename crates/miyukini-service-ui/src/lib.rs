@@ -1,3 +1,9 @@
+//! @id     miyukini_service_ui_lib
+//! @do     declarer_module_styles
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-service-ui — module « lib ».
+
 //! Fondations UI partagees entre tous les services standalone Miyukini.
 //!
 //! **Ce crate est une facade de retrocompatibilite.** Le code canonique vit

@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_sqlite_store
+//! @do     definir_sqlite_store
+//! @role   donnee
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub sqlite store ».
+
 //! Backend SQLite pour JayClub — persistence production.
 //!
 //! Schema :

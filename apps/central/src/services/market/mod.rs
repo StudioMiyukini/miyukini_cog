@@ -1,3 +1,9 @@
+//! @id     central_services_market_mod
+//! @do     declarer_module_catalog
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services market mod ».
+
 //! Service Market — Catalogue des services Miyukini.
 //!
 //! Interface de découverte, recherche, installation et désinstallation

@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_entity
+//! @do     definir_resistances
+//! @role   donnee
+//! @layer  core
+//! @human  crates mge-sim — module « entity ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::constants::*;

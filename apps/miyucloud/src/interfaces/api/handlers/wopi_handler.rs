@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_wopi_handler
+//! @do     definir_wopi_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers wopi handler ».
+
 //! WOPI protocol handler.
 //!
 //! Implements the WOPI host endpoints called by document editors

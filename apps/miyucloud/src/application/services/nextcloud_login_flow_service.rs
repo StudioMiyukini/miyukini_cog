@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_nextcloud_login_flow_service
+//! @do     definir_max_pending_flows
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services nextcloud login flow service ».
+
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};

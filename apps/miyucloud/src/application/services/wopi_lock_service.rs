@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_wopi_lock_service
+//! @do     definir_lock_entry
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services wopi lock service ».
+
 //! In-memory WOPI lock service.
 //!
 //! Manages file locks required by the WOPI protocol for concurrent editing.

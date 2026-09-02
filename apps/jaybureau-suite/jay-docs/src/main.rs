@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_docs_main
+//! @do     declarer_module_toolbar
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-docs main ».
+
 //! Jay Docs — éditeur de documents collaboratif.
 //!
 //! MVP : éditeur texte simple avec CRDT Yrs, barre d'outils basique,

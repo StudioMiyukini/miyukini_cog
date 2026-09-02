@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_password_hasher
+//! @do     definir_argon2_password_hasher
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services password hasher ».
+
 //! Argon2-based password hasher implementation.
 //!
 //! This module provides a secure password hashing implementation using the Argon2id

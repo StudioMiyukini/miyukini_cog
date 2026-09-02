@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_login_v2_handler
+//! @do     html_with_csp
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud login v2 handler ».
+
 use axum::{
     extract::{Path, Query, State},
     http::{HeaderMap, StatusCode, header},

@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_skill_icon
+//! @do     definir_fire
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render skill icon ».
+
 //! Procedural skill glyphs keyed to a cast's [`SkillFx`], shared by the HUD
 //! hotbar and the skill-tree rows so each ability reads at a glance instead of
 //! showing a bare letter. Built from the [`shapes`](super::shapes) quad

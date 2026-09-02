@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_ddns_service
+//! @do     definir_ddns_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services ddns service ».
+
 //! Dynamic DNS client — supports No-IP, DuckDNS, and generic update protocols.
 //!
 //! Spawns a background Tokio task that periodically detects the public IP

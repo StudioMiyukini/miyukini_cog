@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_constants
+//! @do     definir_zone_count
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « constants ».
+
 // ---------------------------------------------------------------------------
 // Gameplay constants (shared between server and client)
 // ---------------------------------------------------------------------------

@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_dedup_handler
+//! @do     definir_global_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers dedup handler ».
+
 use axum::{
     body::Body,
     extract::{Multipart, Path, State},

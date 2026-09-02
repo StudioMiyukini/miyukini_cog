@@ -1,3 +1,9 @@
+//! @id     miyusocialmessaging_errors
+//! @do     definir_miyusocialmessaging_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyusocialmessaging — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyusocialmessagingError {
     NoMandate,

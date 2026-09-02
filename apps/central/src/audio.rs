@@ -1,3 +1,9 @@
+//! @id     central_audio
+//! @do     resolve_voice_path
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « audio ».
+
 //! Lecture audio (voix Miou) — joue un MP3 en arrière-plan sans bloquer l'UI.
 
 use std::path::{Path, PathBuf};

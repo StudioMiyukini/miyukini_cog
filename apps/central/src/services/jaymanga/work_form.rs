@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_work_form
+//! @do     definir_editor_step
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga work form ».
+
 //! Éditeur d'œuvre manga multi-étapes.
 //!
 //! 6 étapes : Fichiers, Métadonnées, Format/Structure, Prix/Démo, Optimisation, Publication.

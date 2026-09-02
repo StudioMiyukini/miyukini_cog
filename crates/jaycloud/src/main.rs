@@ -1,3 +1,9 @@
+//! @id     jaycloud_main
+//! @do     main
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « main ».
+
 //! Binaire `jaycloud` — bootstrap du service de sauvegarde cloud.
 //!
 //! En P2 (skeleton), ce binaire se contente de logger son démarrage et

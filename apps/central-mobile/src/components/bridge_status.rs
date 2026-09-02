@@ -1,3 +1,9 @@
+//! @id     central_mobile_components_bridge_status
+//! @do     bridge_status_bar
+//! @role   ui
+//! @layer  app
+//! @human  central-mobile — module « components bridge status ».
+
 //! Indicateur de statut du bridge (barre en haut de l'écran).
 
 use dioxus::prelude::*;

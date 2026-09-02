@@ -1,3 +1,9 @@
+//! @id     jaymanga_services_mws_manifests
+//! @do     definir_mws_manifest_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « services mws manifests ».
+
 //! Publication et mise à jour des manifestes JayManga sur le Tracker MWS.
 //!
 //! Le COG vendeur publie un manifeste de service décrivant sa boutique manga

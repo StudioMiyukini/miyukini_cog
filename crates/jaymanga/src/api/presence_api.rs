@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_presence_api
+//! @do     definir_presence_batch_request
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api presence api ».
+
 //! Endpoints REST de présence MWS pour JayManga.
 //!
 //! Vérification de la disponibilité des COGs vendeurs,

@@ -1,3 +1,9 @@
+//! @id     central_services_market_catalog
+//! @do     market_catalog
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services market catalog ».
+
 //! Catalogue Market — grille de services avec filtres et recherche.
 
 use super::{visible_market_services, MarketSection, MarketState};

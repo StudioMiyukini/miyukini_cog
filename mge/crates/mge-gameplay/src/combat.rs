@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_combat
+//! @do     definir_damage_type
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « combat ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::actions::{EntityId, WorldPos};

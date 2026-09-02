@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_summon
+//! @do     definir_max_summons
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems summon ».
+
 //! Summon behaviour: spawning invocations from a profile, their allied AI
 //! (mirror of the mob FSM but targeting enemies), and their lifecycle (timed
 //! expiry, death, dismissal when the owner dies). Summons reuse the shared

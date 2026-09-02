@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_types
+//! @do     definir_calendar
+//! @role   donnee
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav types ».
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

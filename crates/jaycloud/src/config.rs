@@ -1,3 +1,9 @@
+//! @id     jaycloud_config
+//! @do     definir_jay_cloud_config
+//! @role   config
+//! @layer  core
+//! @human  jaycloud — module « config ».
+
 //! Configuration runtime du service JayCloud.
 //!
 //! Annexe C de la Spec liste les variables d'environnement attendues.

@@ -1,3 +1,9 @@
+//! @id     miyucptaledger_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucptaledger — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuComptaLedger — toolkit.compta.ledger
 //!

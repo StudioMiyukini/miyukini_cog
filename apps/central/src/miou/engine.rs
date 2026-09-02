@@ -1,3 +1,9 @@
+//! @id     central_miou_engine
+//! @do     definir_cat_accueil_matin
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « miou engine ».
+
 //! Moteur de décision Miou — détermine quelle bulle afficher.
 
 use super::context::BotContext;

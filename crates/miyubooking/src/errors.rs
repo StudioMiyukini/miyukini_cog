@@ -1,3 +1,9 @@
+//! @id     miyubooking_errors
+//! @do     definir_miyubooking_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubooking — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyubookingError {
     NoMandate,

@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_library
+//! @do     library
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga library ».
+
 //! Bibliothèque lecteur JayManga — 5 onglets (Favoris, Achats, Téléchargés, En cours, Terminés).
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_webdav_parser
+//! @do     definir_dav_method
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « webdav parser ».
+
 use crate::common::dav_error::DavError;
 use crate::common::xml_security;
 

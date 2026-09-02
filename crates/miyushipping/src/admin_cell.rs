@@ -1,3 +1,9 @@
+//! @id     miyushipping_admin_cell
+//! @do     definir_miyushipping_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyushipping — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

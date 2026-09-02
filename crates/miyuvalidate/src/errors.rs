@@ -1,3 +1,9 @@
+//! @id     miyuvalidate_errors
+//! @do     definir_miyu_validate_error
+//! @role   rule
+//! @layer  core
+//! @human  miyuvalidate — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuValidateError {
     NoMandate,

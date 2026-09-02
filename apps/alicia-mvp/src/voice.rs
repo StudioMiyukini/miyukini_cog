@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_voice
+//! @do     capture_speech
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « voice ».
+
 //! Mode voix : micro -> STT -> NLU -> intent -> TTS -> haut-parleur.
 
 use std::io::{self, Write as _};

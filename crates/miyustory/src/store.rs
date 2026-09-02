@@ -1,3 +1,9 @@
+//! @id     miyustory_store
+//! @do     stories
+//! @role   donnee
+//! @layer  core
+//! @human  miyustory — module « store ».
+
 //! Store en mémoire MiyuStory (id → author_id, content_type, payload, expires_at).
 
 use std::collections::HashMap;

@@ -1,3 +1,9 @@
+//! @id     jaykonta_services_audit_service
+//! @do     definir_audit_service
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « services audit service ».
+
 //! AuditService — journalisation des ecritures (CK-AUD-01).
 //!
 //! Toute operation d'ecriture (mouvement, devis, facture, paiement)

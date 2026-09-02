@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_auth_application_service
+//! @do     definir_oidc_callback_result
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « application services auth application service ».
+
 use crate::application::dtos::user_dto::{
     AuthResponseDto, ChangePasswordDto, LoginDto, RefreshTokenDto, RegisterDto, UserDto,
 };

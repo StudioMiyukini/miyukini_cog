@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_combat
+//! @do     definir_combat_plugin
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins combat ».
+
 //! Wires combat resolution and death handling into the schedule.
 
 use crate::app::{App, PhaseId, Plugin};

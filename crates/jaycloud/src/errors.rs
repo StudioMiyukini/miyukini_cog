@@ -1,3 +1,9 @@
+//! @id     jaycloud_errors
+//! @do     definir_jay_cloud_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « errors ».
+
 //! Erreurs unifiées du service JayCloud.
 
 /// Erreurs renvoyées par les Opérateurs JayCloud.

@@ -1,3 +1,9 @@
+//! @id     miyauth_types
+//! @do     definir_identity_context
+//! @role   securite
+//! @layer  core
+//! @human  miyauth — module « types ».
+
 //! Types d'identité MiyuAuth (contexte, rôle, artefacts, attestation, vérification).
 //! Pas de données sensibles exposées (BOUND-*).
 

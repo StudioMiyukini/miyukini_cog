@@ -1,3 +1,9 @@
+//! @id     miyucptaledger_admin_cell
+//! @do     definir_miyucptaledger_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucptaledger — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

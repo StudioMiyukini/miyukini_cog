@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_world
+//! @do     definir_tile_type
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components world ».
+
 //! Tilemap data components.
 
 use serde::{Deserialize, Serialize};

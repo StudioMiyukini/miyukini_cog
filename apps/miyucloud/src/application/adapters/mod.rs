@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_adapters_mod
+//! @do     declarer_module_caldav_adapter
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application adapters mod ».
+
 //! Adapters module for translating between external protocols and internal models
 
 pub mod caldav_adapter;

@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_mod
+//! @do     declarer_module_api
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces mod ».
+
 pub mod api;
 pub mod errors;
 pub mod middleware;

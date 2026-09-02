@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_vendor
+//! @do     definir_vendor_action
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « vendor ».
+
 use serde::{Deserialize, Serialize};
 
 /// Type of vendor interaction.

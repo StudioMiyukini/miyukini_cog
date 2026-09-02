@@ -1,3 +1,9 @@
+//! @id     caringnanny_lib
+//! @do     declarer_module_health
+//! @role   orchestration
+//! @layer  core
+//! @human  caringnanny — module « lib ».
+
 //! # CaringNanny
 //!
 //! Moteur d'observation et monitoring du Miyukini Core System.

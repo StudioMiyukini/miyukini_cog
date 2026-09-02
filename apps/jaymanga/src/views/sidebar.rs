@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_sidebar
+//! @do     jay_manga_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views sidebar ».
+
 //! Sidebar JayManga — navigation par section.
 
 use super::{JayMangaSection, JayMangaState};

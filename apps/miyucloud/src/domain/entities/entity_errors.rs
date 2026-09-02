@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_entity_errors
+//! @do     definir_file_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities entity errors ».
+
 //! Pure domain entity errors
 //!
 //! This module defines domain entity-specific errors

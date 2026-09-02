@@ -1,3 +1,9 @@
+//! @id     miyuinvoice_lib
+//! @do     declarer_module_admin_cell
+//! @role   ui
+//! @layer  core
+//! @human  miyuinvoice — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuInvoice — toolkit.invoice.standalone
 //!

@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_services_i18n_service
+//! @do     definir_i18n_error
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « domain services i18n service ».
+
 use thiserror::Error;
 
 /// Error types for i18n service operations

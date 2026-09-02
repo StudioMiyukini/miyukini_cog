@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_exif_service
+//! @do     definir_exif_metadata
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services exif service ».
+
 //! EXIF metadata extraction from image files.
 //!
 //! Uses `kamadak-exif` to parse EXIF headers from JPEG/TIFF/HEIF images.

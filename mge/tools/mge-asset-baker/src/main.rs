@@ -1,3 +1,9 @@
+//! @id     tools_mge_asset_baker_main
+//! @do     definir_baked_sprite
+//! @role   orchestration
+//! @layer  core
+//! @human  tools mge-asset-baker — module « main ».
+
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::fs;

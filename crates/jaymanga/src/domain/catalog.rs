@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_catalog
+//! @do     definir_catalog_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain catalog ».
+
 //! Logique de gestion du catalogue vendeur JayManga.
 //!
 //! Import d'oeuvres (fichiers, dossiers, archives), gestion des séries,

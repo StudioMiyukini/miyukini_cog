@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_lib
+//! @do     declarer_module_doc
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core lib ».
+
 //! Jay Bureau — types partagés entre toutes les apps bureautiques.
 //!
 //! Chaque document (Doc, Sheet, Slide, Form, Meeting) possède :

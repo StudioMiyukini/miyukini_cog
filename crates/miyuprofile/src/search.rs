@@ -1,3 +1,9 @@
+//! @id     miyuprofile_search
+//! @do     definir_search_result
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « search ».
+
 //! Recherche transversale — index et requêtes sur toutes les sections.
 //!
 //! Permet de retrouver rapidement une information à travers

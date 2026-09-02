@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_quest
+//! @do     definir_quest_status
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « quest ».
+
 use serde::{Deserialize, Serialize};
 
 /// Quest state progression.

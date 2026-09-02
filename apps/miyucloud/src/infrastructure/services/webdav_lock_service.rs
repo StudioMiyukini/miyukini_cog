@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_webdav_lock_service
+//! @do     definir_default_lock_timeout_secs
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services webdav lock service ».
+
 //! WebDAV lock store backed by Moka (in-memory cache with per-entry TTL).
 //!
 //! Locks are automatically evicted when their timeout expires, preventing

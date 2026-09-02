@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_dashboard
+//! @do     dashboard
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views dashboard ».
+
 //! Dashboard JayManga — hub principal vendeur + lecteur.
 
 use super::components::{ActionButton, Badge, QuickAccessCard, StatCard};

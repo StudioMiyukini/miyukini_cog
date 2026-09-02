@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_waypoint_ui
+//! @do     definir_row_h
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui waypoint ui ».
+
 //! Waypoint travel menu (toggled with W).
 //!
 //! Lists every waypoint, highlighting:

@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_mod
+//! @do     declarer_module_components
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views mod ».
+
 //! Module JayKonta — comptabilite unifiee Purse + Account.
 //!
 //! Architecture : sidebar + contenu dynamique par espace (Purse/Account).

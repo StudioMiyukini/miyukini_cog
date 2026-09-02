@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_runtime
+//! @do     definir_service_args
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « runtime ».
+
 //! Runtime partage entre tous les modes d'Alicia (text, voice, listen).
 //!
 //! `AliciaRuntime` encapsule :

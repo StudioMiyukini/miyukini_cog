@@ -1,3 +1,9 @@
+//! @id     kindmother_service_lib
+//! @do     declarer_module_arbitration
+//! @role   orchestration
+//! @layer  core
+//! @human  kindmother-service — module « lib ».
+
 //! # KindMother Service
 //!
 //! Serveur de persistance SQLite isolé.

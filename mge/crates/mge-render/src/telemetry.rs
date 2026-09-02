@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_telemetry
+//! @do     definir_frame_telemetry
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « telemetry ».
+
 use serde::{Deserialize, Serialize};
 
 /// Per-frame rendering telemetry snapshot.

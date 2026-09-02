@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_share_ports
+//! @do     definir_trait_share_use_case
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports share ports ».
+
 use uuid::Uuid;
 
 use crate::{

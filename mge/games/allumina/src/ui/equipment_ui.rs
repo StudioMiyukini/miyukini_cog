@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_equipment_ui
+//! @do     expected_kind
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui equipment ui ».
+
 //! Equipment window.
 //!
 //! `render_equipment` is the text version (headless); `draw` paints the

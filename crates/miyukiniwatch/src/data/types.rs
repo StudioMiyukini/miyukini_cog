@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_data_types
+//! @do     definir_time_slot
+//! @role   donnee
+//! @layer  core
+//! @human  miyukiniwatch — module « data types ».
+
 //! Types de données MiyukiniWatch.
 //!
 //! Structures de données pour la collecte de métriques, préférences et audit.

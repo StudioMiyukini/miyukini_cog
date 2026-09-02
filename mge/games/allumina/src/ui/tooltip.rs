@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_tooltip
+//! @do     definir_white
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui tooltip ».
+
 //! Diablo-style item tooltip.
 //!
 //! `item_tooltip` is the text version (headless); `draw` paints a bordered box

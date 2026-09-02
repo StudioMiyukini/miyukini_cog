@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_app_password
+//! @do     definir_app_password
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities app password ».
+
 //! App Password entity.
 //!
 //! Represents an application-specific password that clients (like DAVx⁵, Thunderbird)

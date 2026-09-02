@@ -1,3 +1,9 @@
+//! @id     team_orchestrator_router
+//! @do     definir_node_selector
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « orchestrator router ».
+
 //! Sélection de nœud pour une tâche — routage vers le meilleur nœud disponible.
 
 use crate::nodes::registry::{NodeEntry, NodeRegistry, NodeStatus};

@@ -1,3 +1,9 @@
+//! @id     maia_stt_vad
+//! @do     definir_vad_config
+//! @role   orchestration
+//! @layer  core
+//! @human  maia-stt — module « vad ».
+
 //! Voice Activity Detection (VAD) — détection de parole dans le flux audio.
 //!
 //! Algorithme RMS-threshold :

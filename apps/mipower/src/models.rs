@@ -1,3 +1,9 @@
+//! @id     mipower_models
+//! @do     definir_index_entry
+//! @role   donnee
+//! @layer  app
+//! @human  mipower — module « models ».
+
 use serde::{Deserialize, Serialize};
 
 /// Entree dans sequences/index.json (format MIP index v2)

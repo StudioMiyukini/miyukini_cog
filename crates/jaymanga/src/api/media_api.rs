@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_media_api
+//! @do     definir_media_query
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api media api ».
+
 //! Endpoints REST media JayManga.
 //!
 //! Service des images de pages (variantes optimisées) et des couvertures.

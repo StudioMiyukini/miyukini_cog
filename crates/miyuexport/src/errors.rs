@@ -1,3 +1,9 @@
+//! @id     miyuexport_errors
+//! @do     definir_miyu_export_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuexport — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuExportError {
     NoMandate,

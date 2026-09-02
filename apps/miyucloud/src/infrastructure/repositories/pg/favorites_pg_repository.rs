@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_favorites_pg_repository
+//! @do     definir_favorites_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg favorites pg repository ».
+
 use sqlx::{PgPool, Row};
 use std::collections::HashSet;
 use std::sync::Arc;

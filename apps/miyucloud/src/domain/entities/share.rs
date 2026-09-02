@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_share
+//! @do     definir_share
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities share ».
+
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 

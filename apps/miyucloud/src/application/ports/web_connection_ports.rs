@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_web_connection_ports
+//! @do     definir_connection_status
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports web connection ports ».
+
 //! Web connection management ports — MWS tunnel, DDNS, and Central client.
 
 use crate::common::errors::DomainError;

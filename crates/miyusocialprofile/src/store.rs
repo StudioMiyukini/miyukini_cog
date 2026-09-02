@@ -1,3 +1,9 @@
+//! @id     miyusocialprofile_store
+//! @do     profiles
+//! @role   donnee
+//! @layer  core
+//! @human  miyusocialprofile — module « store ».
+
 //! Store en mémoire MiyuSocialProfile (profils, follow).
 
 use std::collections::HashMap;

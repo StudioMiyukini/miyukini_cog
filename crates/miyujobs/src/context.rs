@@ -1,3 +1,9 @@
+//! @id     miyujobs_context
+//! @do     definir_governed_context
+//! @role   orchestration
+//! @layer  core
+//! @human  miyujobs — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

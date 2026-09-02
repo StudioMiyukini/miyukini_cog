@@ -1,3 +1,9 @@
+//! @id     miyuclicker_lib
+//! @do     declarer_module_views
+//! @role   orchestration
+//! @layer  app
+//! @human  miyuclicker — module « lib ».
+
 //! MiyuClicker (Lord of the Click) — App standalone Dioxus.
 pub mod views;
 

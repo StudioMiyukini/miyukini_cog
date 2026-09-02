@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_payment
+//! @do     definir_payment_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain payment ».
+
 //! Logique de paiement et gestion des licences JayManga.
 //!
 //! Création de licences, vérification, remboursement, expiration,

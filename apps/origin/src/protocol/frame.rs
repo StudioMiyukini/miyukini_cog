@@ -1,3 +1,9 @@
+//! @id     origin_protocol_frame
+//! @do     definir_frame_error
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « protocol frame ».
+
 //! Parsing et construction des trames binaires du protocole MWS Relay.
 //!
 //! Format de trame :

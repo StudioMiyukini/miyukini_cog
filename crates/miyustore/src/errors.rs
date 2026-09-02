@@ -1,3 +1,9 @@
+//! @id     miyustore_errors
+//! @do     definir_miyustore_error
+//! @role   donnee
+//! @layer  core
+//! @human  miyustore — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyustoreError {
     NoMandate,

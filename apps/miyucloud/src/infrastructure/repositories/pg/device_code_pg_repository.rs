@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_device_code_pg_repository
+//! @do     definir_device_code_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg device code pg repository ».
+
 //! PostgreSQL repository for Device Authorization Grant (RFC 8628) codes.
 
 use sqlx::{PgPool, Row};

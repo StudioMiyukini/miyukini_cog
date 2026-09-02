@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_demo
+//! @do     build_demo_service
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « demo ».
+
 //! Service demo, devices factices, generation de reponses templates,
 //! lancement d'applications, et reconnaissance faciale.
 

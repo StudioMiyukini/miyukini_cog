@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_skills
+//! @do     definir_branch
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data skills ».
+
 //! Active skill definitions per class — the usable hotbar actives, with their
 //! cast behaviour ([`SkillEffect`]) and visual flavour ([`SkillFx`]). Each class
 //! ends with its summon skills (three for the Soldat, two for the others).

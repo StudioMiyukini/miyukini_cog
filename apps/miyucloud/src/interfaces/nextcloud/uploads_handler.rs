@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_uploads_handler
+//! @do     handle_nc_uploads
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud uploads handler ».
+
 use axum::{
     body::{self, Body},
     http::{Request, StatusCode, header},

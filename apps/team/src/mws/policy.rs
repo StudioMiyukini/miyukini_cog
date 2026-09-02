@@ -1,3 +1,9 @@
+//! @id     team_mws_policy
+//! @do     is_allowed_destination
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « mws policy ».
+
 //! Politique d'isolation MWS.
 
 use crate::config::IsolationPolicy;

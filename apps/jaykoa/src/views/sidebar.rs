@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_sidebar
+//! @do     definir_jay_koa_sidebar_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views sidebar ».
+
 //! Sidebar JayKoa — Panneau lateral gauche type Google Agenda.
 //!
 //! Contient :

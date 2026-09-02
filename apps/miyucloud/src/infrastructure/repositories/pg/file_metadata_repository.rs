@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_file_metadata_repository
+//! @do     definir_metadata_row
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg file metadata repository ».
+
 //! PostgreSQL repository for image/video EXIF metadata.
 
 use chrono::{DateTime, Utc};

@@ -1,3 +1,9 @@
+//! @id     jaykonta_integrations_contracts
+//! @do     definir_integration_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « integrations contracts ».
+
 //! Payloads types pour CK-INT-01/02/03.
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     miyuprofile_reminders
+//! @do     definir_reminder_priority
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « reminders ».
+
 //! Rappels et échéances — suivi automatique des dates clés.
 //!
 //! Génère des rappels à partir des dates d'expiration des documents,

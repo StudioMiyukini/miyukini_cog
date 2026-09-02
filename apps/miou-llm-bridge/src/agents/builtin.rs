@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_agents_builtin
+//! @do     builtin_agents
+//! @role   ui
+//! @layer  app
+//! @human  miou-llm-bridge — module « agents builtin ».
+
 //! Agents pré-construits — L'Équipe Miyukini AI Studio.
 //!
 //! 17 agents nommés avec personnalités, rôles spécialisés et system prompts.

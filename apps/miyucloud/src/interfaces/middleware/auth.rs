@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_middleware_auth
+//! @do     definir_cookie_authenticated
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « interfaces middleware auth ».
+
 use axum::{
     extract::{FromRequestParts, Request, State},
     http::{HeaderMap, StatusCode, header, request::Parts},

@@ -1,3 +1,9 @@
+//! @id     central_services_alicia_settings
+//! @do     settings_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services alicia settings ».
+
 //! Ecran Parametres globaux Alicia Home Assistante.
 //!
 //! Sections : Audio (wake word, modele), MQTT (broker, client),

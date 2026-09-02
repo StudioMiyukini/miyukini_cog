@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymail_message
+//! @do     definir_address
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymail message ».
+
 //! Types Email, Address, Draft.
 
 use serde::{Deserialize, Serialize};

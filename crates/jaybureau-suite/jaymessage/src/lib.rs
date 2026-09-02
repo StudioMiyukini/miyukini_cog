@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_lib
+//! @do     declarer_module_attachments
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage lib ».
+
 //! Jay Message — messagerie chiffrée de bout en bout.
 //!
 //! ## Modèle cryptographique

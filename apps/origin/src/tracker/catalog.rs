@@ -1,3 +1,9 @@
+//! @id     origin_tracker_catalog
+//! @do     definir_cog_absent_threshold_seconds
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker catalog ».
+
 //! Catalogue web MWS.
 //!
 //! Expose les services, lobbys et COGs via HTTP.

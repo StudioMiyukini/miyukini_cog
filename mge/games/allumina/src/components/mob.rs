@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_mob
+//! @do     definir_mob_tag
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components mob ».
+
 //! Monster components.
 
 use serde::{Deserialize, Serialize};

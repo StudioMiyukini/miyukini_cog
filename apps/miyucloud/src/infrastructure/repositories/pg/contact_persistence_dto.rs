@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_contact_persistence_dto
+//! @do     definir_email_persistence_dto
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg contact persistence dto ».
+
 //! Persistence DTOs for Contact entities
 //!
 //! These DTOs are used for JSONB serialization/deserialization in PostgreSQL.

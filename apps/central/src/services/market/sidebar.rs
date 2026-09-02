@@ -1,3 +1,9 @@
+//! @id     central_services_market_sidebar
+//! @do     market_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services market sidebar ».
+
 //! Sidebar Market — navigation et recherche.
 
 use super::{MarketSection, MarketState};

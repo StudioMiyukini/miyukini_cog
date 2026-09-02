@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_zone
+//! @do     definir_zone_id
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « zone ».
+
 use serde::{Deserialize, Serialize};
 
 /// Unique zone identifier.

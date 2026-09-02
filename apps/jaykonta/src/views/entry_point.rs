@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_entry_point
+//! @do     entry_point_selector
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views entry point ».
+
 //! Ecran de selection Purse / Account.
 
 use super::{JayKontaSpace, JayKontaState};

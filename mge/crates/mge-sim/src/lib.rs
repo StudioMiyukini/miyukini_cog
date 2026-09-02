@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_lib
+//! @do     declarer_module_entity
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « lib ».
+
 pub mod entity;
 pub mod inventory;
 pub mod player_state;

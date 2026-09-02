@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_dedup_ops
+//! @do     dedup_upload
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud — module « domain dedup ops ».
+
 use crate::errors::MiyucloudError;
 use crate::storage::dedup::{ContentAddressableStorage, ContentHash};
 

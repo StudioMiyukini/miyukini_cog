@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_file_blob_write_repository
+//! @do     definir_file_blob_write_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg file blob write repository ».
+
 //! PostgreSQL + Blob-backed file write repository.
 //!
 //! Implements `FileWritePort` using:

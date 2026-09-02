@@ -1,3 +1,9 @@
+//! @id     origin_relay_session
+//! @do     definir_session_state
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay session ».
+
 //! Session de connexion relay.
 //!
 //! Représente une connexion active entre un COG et le relay.

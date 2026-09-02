@@ -1,3 +1,9 @@
+//! @id     miyuhr_errors
+//! @do     definir_miyuhr_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuhr — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuhrError {
     NoMandate,

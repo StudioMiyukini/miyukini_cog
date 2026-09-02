@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_kindmother_client_db
+//! @do     definir_db_error
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data kindmother client db ».
+
 //! Implémentation KindMother Client (feature `kindmother-only`) pour JayManga.
 //!
 //! Utilise le client KindMother (IPC/gRPC) avec singleton global.

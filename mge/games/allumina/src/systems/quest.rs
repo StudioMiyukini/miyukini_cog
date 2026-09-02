@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_quest
+//! @do     quest_system
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems quest ».
+
 //! Quest tracking. Kill/pickup hooks live in the death/pickup paths; this
 //! system polls gold and zone each tick, then grants rewards for any quest that
 //! has just completed.

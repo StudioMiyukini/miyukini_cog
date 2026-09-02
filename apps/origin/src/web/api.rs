@@ -1,3 +1,9 @@
+//! @id     origin_web_api
+//! @do     api_blog
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « web api ».
+
 //! API REST pour le site web Origin.
 
 use super::content::{ContentManager, DownloadCategory};

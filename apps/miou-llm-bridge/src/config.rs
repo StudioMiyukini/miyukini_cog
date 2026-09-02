@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_config
+//! @do     definir_bridge_config
+//! @role   config
+//! @layer  app
+//! @human  miou-llm-bridge — module « config ».
+
 //! Configuration du Miyukini AI Studio.
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_enterprise
+//! @do     definir_enterprise_role
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections enterprise ».
+
 //! Section entreprise — informations sur les entreprises liées à l'utilisateur.
 //!
 //! SIRET, statut juridique, activité, rôle de l'utilisateur dans l'entreprise.

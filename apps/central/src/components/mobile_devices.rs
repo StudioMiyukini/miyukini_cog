@@ -1,3 +1,9 @@
+//! @id     central_components_mobile_devices
+//! @do     mobile_devices_panel
+//! @role   ui
+//! @layer  app
+//! @human  central — module « components mobile devices ».
+
 //! Composant UI pour gérer les devices mobiles appairés au COG Host.
 //!
 //! Affiche la liste des devices en attente d'approbation et ceux déjà appairés.

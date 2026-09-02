@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_transition
+//! @do     definir_zone_load_state
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « transition ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::zone::ZoneId;

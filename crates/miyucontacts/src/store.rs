@@ -1,3 +1,9 @@
+//! @id     miyucontacts_store
+//! @do     definir_contacts_store
+//! @role   donnee
+//! @layer  core
+//! @human  miyucontacts — module « store ».
+
 //! Store partagé ami/ennemi (en mémoire).
 
 use std::collections::{HashMap, HashSet};

@@ -1,3 +1,9 @@
+//! @id     miyuposkitchen_errors
+//! @do     definir_miyuposkitchen_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposkitchen — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuposkitchenError {
     NoMandate,

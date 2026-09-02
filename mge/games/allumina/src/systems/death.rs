@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_death
+//! @do     scale_xp_for_level_diff
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems death ».
+
 //! Death handling: mobs drop loot and grant XP; the player respawns.
 
 use crate::components::mob::{AiBehavior, AiState};

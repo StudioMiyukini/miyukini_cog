@@ -1,3 +1,9 @@
+//! @id     central_services_miyukiniwatch_dashboard
+//! @do     dashboard_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyukiniwatch dashboard ».
+
 //! Écran Tableau de bord MiyukiniWatch.
 
 use dioxus::prelude::*;

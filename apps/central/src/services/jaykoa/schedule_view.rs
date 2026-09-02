@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_schedule_view
+//! @do     definir_schedule_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa schedule view ».
+
 //! Vue Planning — Liste chronologique des événements.
 
 use dioxus::prelude::*;

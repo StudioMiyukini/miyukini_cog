@@ -1,3 +1,9 @@
+//! @id     miyukinisales_domain_mod
+//! @do     quote_create
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukinisales — module « domain mod ».
+
 //! Logique métier MiyukiniSales : création devis, conversion en commande, statuts.
 
 use chrono::Utc;

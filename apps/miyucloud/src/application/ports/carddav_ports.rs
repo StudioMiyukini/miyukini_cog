@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_carddav_ports
+//! @do     definir_card_dav_repository_error
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports carddav ports ».
+
 use crate::application::dtos::address_book_dto::{
     AddressBookDto, CreateAddressBookDto, ShareAddressBookDto, UnshareAddressBookDto,
     UpdateAddressBookDto,

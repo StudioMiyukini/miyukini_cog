@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_progression
+//! @do     definir_progression_flags
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « progression ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::quests::{QuestLog, QuestStatus};

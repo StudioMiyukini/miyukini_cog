@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_aggregation
+//! @do     aggregation
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga aggregation ».
+
 //! Agrégation JayManga — portail agrégé, vendeurs indexés, configuration.
 
 use dioxus::prelude::*;

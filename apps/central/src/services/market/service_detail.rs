@@ -1,3 +1,9 @@
+//! @id     central_services_market_service_detail
+//! @do     service_detail
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services market service detail ».
+
 //! Vue détaillée d'un service dans le Market.
 
 use super::{market_origin_url, visible_market_services, InstallStatus, MarketState};

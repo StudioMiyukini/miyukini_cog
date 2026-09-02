@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_purse_movements
+//! @do     purse_movements
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views purse movements ».
+
 //! Liste des mouvements Purse — P2.
 //!
 //! Composants : FilterBar, MouvementsTable (paginee), TotauxSummary, Pagination.

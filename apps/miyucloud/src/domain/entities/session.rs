@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_session
+//! @do     definir_session
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities session ».
+
 use chrono::{DateTime, Duration, Utc};
 use uuid::Uuid;
 

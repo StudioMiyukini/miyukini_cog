@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_services
+//! @do     definir_service_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « services ».
+
 use serde::{Deserialize, Serialize};
 
 /// A logical MMO-ready service boundary.

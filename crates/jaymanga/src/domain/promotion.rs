@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_promotion
+//! @do     definir_promotion_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain promotion ».
+
 //! Logique de gestion des promotions JayManga.
 //!
 //! Création, validation, et vérification d'applicabilité des promotions

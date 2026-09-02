@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_class_select
+//! @do     definir_default_name
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui class select ».
+
 //! Class-selection screen. Four side-by-side panels show a silhouette + name +
 //! description + stat bars + starting weapon + role; the player picks one and
 //! confirms a character name to enter the game.

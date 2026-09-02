@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_mercenary
+//! @do     definir_mercenary_plugin
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins mercenary ».
+
 //! Wires mercenary AI and lifecycle into the schedule.
 
 use crate::app::{App, PhaseId, Plugin};

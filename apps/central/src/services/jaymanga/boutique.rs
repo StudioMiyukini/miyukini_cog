@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_boutique
+//! @do     boutique
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga boutique ».
+
 //! Configuration boutique JayManga — paramètres vendeur et optimisation images.
 
 use dioxus::prelude::*;

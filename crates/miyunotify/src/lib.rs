@@ -1,3 +1,9 @@
+//! @id     miyunotify_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyunotify — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuNotify — toolkit.notify.miyunotify
 //!

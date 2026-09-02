@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_wopi_discovery_service
+//! @do     definir_wopi_action
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services wopi discovery service ».
+
 //! WOPI Discovery service.
 //!
 //! Fetches and caches the WOPI discovery XML from the editor (Collabora/OnlyOffice).

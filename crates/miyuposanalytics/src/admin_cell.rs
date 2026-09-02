@@ -1,3 +1,9 @@
+//! @id     miyuposanalytics_admin_cell
+//! @do     definir_miyuposanalytics_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposanalytics — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

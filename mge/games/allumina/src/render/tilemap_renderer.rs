@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_tilemap_renderer
+//! @do     shade
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render tilemap renderer ».
+
 //! Isometric tilemap rendering. The sprite pipeline only draws axis-aligned
 //! quads, so each diamond tile is approximated by a small stack of centred
 //! horizontal bands. On top of the flat diamonds we layer cheap detailing:

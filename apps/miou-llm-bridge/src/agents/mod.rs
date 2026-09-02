@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_agents_mod
+//! @do     declarer_module_builtin
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « agents mod ».
+
 //! Système d'agents IA — Miyukini AI Studio.
 //!
 //! Chaque agent possède :

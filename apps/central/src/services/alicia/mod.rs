@@ -1,3 +1,9 @@
+//! @id     central_services_alicia_mod
+//! @do     declarer_module_automations
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services alicia mod ».
+
 //! Alicia Home Assistante — Assistant vocal local pour la domotique.
 //!
 //! Interface : tableau de bord, configuration des pieces, dispositifs,

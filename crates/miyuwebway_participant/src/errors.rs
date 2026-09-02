@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_errors
+//! @do     definir_miyuwebway_participant_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « errors ».
+
 //! Erreurs du kit MiyuWebway Participant.
 
 use thiserror::Error;

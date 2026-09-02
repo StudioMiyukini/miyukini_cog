@@ -1,3 +1,9 @@
+//! @id     maia_llm_api_chat
+//! @do     definir_chat_request
+//! @role   orchestration
+//! @layer  app
+//! @human  maia-llm — module « api chat ».
+
 //! POST /v1/chat/completions — inférence normal + streaming SSE.
 //!
 //! Compatible avec l'API OpenAI (format messages, stream flag, temperature, max_tokens).

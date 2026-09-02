@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_voice_pipeline
+//! @do     definir_pipeline_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « voice pipeline ».
+
 //! State machine du pipeline voix MAIA.
 //!
 //! ## États

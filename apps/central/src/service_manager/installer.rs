@@ -1,3 +1,9 @@
+//! @id     central_service_manager_installer
+//! @do     install_package
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « service manager installer ».
+
 //! Installation et désinstallation de packages service (.msp).
 //!
 //! Un package .msp est une archive ZIP contenant :

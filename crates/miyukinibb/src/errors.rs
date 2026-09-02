@@ -1,3 +1,9 @@
+//! @id     miyukinibb_errors
+//! @do     definir_miyukini_bb_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukinibb — module « errors ».
+
 //! Erreurs du service MiyukiniBB.
 
 use thiserror::Error;

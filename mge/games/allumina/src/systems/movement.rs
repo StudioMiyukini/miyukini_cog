@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_movement
+//! @do     definir_straight
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems movement ».
+
 //! Movement integration plus an A* pathfinder over the tilemap.
 
 use std::cmp::Reverse;

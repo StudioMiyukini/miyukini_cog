@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_camp
+//! @do     definir_tile_pos
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « camp ».
+
 use serde::{Deserialize, Serialize};
 
 /// World-space 2-D position (tile coordinates).

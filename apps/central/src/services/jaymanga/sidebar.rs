@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_sidebar
+//! @do     jay_manga_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga sidebar ».
+
 //! Sidebar JayManga — navigation par section.
 
 use dioxus::prelude::*;

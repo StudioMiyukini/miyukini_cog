@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_carddav_service
+//! @do     definir_card_dav_service
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « carddav service ».
+
 use rusqlite::params;
 use std::sync::{Arc, Mutex};
 

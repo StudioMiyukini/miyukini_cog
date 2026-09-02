@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_content
+//! @do     definir_content_plugin
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins content ».
+
 //! Act I content: merchant spawning, zone transitions, the boss slam, and
 //! quest tracking.
 

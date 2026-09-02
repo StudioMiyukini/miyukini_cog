@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_routes
+//! @do     nextcloud_routes_with_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud routes ».
+
 use axum::{
     Router,
     body::Body,

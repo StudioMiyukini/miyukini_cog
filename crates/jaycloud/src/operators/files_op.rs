@@ -1,3 +1,9 @@
+//! @id     jaycloud_operators_files_op
+//! @do     definir_files_op_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « operators files op ».
+
 //! `files_op` — Opérateur de stockage de fichiers, héritier MiyuCloud.
 //!
 //! En PR-2 (P3.a), cette implémentation reste **minimale** :

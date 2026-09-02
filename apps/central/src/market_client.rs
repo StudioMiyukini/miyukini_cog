@@ -1,3 +1,9 @@
+//! @id     central_market_client
+//! @do     definir_market_client
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « market client ».
+
 //! Client Market -- Communication HTTPS avec Origin pour le catalogue et les packages.
 
 use miyumarket::manifest::ServiceManifest;

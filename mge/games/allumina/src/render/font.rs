@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_font
+//! @do     definir_cell
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render font ».
+
 //! A tiny 5x7 bitmap font rendered as coloured quads. No external font assets:
 //! each glyph is a 7-row bitmask (5 columns, bit 4 = leftmost), and runs of set
 //! pixels in a row are coalesced into a single quad to keep the batch small.

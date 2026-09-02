@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_calendar_event_repository
+//! @do     definir_calendar_event_repository_result
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories calendar event repository ».
+
 use crate::common::errors::DomainError;
 use crate::domain::entities::calendar_event::CalendarEvent;
 use chrono::{DateTime, Utc};

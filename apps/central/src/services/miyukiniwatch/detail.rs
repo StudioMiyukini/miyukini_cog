@@ -1,3 +1,9 @@
+//! @id     central_services_miyukiniwatch_detail
+//! @do     detail_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyukiniwatch detail ».
+
 //! Écran Détail des métriques MiyukiniWatch.
 
 use dioxus::prelude::*;

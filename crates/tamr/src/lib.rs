@@ -1,3 +1,9 @@
+//! @id     tamr_lib
+//! @do     declarer_module_classification
+//! @role   orchestration
+//! @layer  core
+//! @human  tamr — module « lib ».
+
 //! # TAMR
 //!
 //! Gestionnaire de taxonomies et métadonnées du Miyukini Core System.

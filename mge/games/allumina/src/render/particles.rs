@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_particles
+//! @do     definir_shape
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render particles ».
+
 //! A lightweight particle system for combat/loot feedback. Particles are small
 //! coloured quads with world-space position, velocity, gravity, and a lifetime;
 //! they fade out as they age. Purely cosmetic (client-side only), so it carries

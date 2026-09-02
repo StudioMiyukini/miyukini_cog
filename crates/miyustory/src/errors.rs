@@ -1,3 +1,9 @@
+//! @id     miyustory_errors
+//! @do     definir_miyustory_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyustory — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyustoryError {
     NoMandate,

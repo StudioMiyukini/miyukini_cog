@@ -1,3 +1,9 @@
+//! @id     miyuinvoice_admin_cell
+//! @do     definir_miyuinvoice_identification
+//! @role   ui
+//! @layer  core
+//! @human  miyuinvoice — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

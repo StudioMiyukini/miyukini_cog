@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_month_view
+//! @do     definir_month_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa month view ».
+
 //! Vue Mois — Grille mensuelle compacte type Google Agenda.
 
 use dioxus::prelude::*;

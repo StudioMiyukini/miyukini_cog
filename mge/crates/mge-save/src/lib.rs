@@ -1,3 +1,9 @@
+//! @id     crates_mge_save_lib
+//! @do     definir_player_profile
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-save — module « lib ».
+
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{env, fs, path::PathBuf};

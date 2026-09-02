@@ -1,3 +1,9 @@
+//! @id     crates_mge_monsters_ai
+//! @do     definir_ai_behavior
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-monsters — module « ai ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::roster::MonsterRole;

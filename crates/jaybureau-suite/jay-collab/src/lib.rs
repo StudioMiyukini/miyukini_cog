@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_collab_lib
+//! @do     declarer_module_client
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jay-collab lib ».
+
 //! Jay Collab — moteur de collaboration temps réel.
 //!
 //! Fournit :

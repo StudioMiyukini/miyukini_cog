@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_runner
+//! @do     definir_walkthrough_step
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « runner ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::boss::act1_boss;

@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_sales
+//! @do     definir_sales_tab
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views sales ».
+
 //! Ventes JayManga — tableau de bord ventes complet : resume revenus,
 //! graphique 30 jours, transactions filtrables, licences, export.
 

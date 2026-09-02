@@ -1,3 +1,9 @@
+//! @id     mipower_state
+//! @do     definir_view
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « state ».
+
 //! État global de l'application MIPOWER.
 
 use crate::models::SequenceMeta;

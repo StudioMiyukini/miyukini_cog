@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_calendar_service
+//! @do     definir_calendar_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services calendar service ».
+
 use chrono::{DateTime, Utc};
 use std::sync::Arc;
 use uuid::Uuid;

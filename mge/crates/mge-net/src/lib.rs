@@ -1,3 +1,9 @@
+//! @id     crates_mge_net_lib
+//! @do     definir_net_mode
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-net — module « lib ».
+
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------

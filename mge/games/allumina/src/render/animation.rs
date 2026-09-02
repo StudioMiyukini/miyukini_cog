@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_animation
+//! @do     definir_anim_state
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render animation ».
+
 //! Animation state for entities. With no sprite sheets, "animation" is
 //! procedural: each state modulates the placeholder quad's scale and tint
 //! (idle bob, walk bounce, attack lunge, hit flash, crit white-out, death

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_trash_dto
+//! @do     definir_trashed_item_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos trash dto ».
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 

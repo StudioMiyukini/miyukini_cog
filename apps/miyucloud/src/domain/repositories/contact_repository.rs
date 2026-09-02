@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_contact_repository
+//! @do     definir_contact_repository_result
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories contact repository ».
+
 use std::result::Result;
 use uuid::Uuid;
 

@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_skills_file_ops
+//! @do     definir_default_sandbox
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « skills file ops ».
+
 //! Skill : Opérations sur les fichiers.
 //!
 //! Permet aux agents de lire, écrire, lister et rechercher dans les fichiers.

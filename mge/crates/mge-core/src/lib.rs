@@ -1,3 +1,9 @@
+//! @id     crates_mge_core_lib
+//! @do     definir_runtime_stage
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-core — module « lib ».
+
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 

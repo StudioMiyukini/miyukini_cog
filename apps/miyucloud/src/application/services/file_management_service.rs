@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_file_management_service
+//! @do     definir_file_management_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services file management service ».
+
 use std::sync::Arc;
 
 use crate::application::dtos::file_dto::FileDto;

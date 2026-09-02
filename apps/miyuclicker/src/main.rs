@@ -1,3 +1,9 @@
+//! @id     miyuclicker_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  miyuclicker — module « main ».
+
 //! Point d'entree binaire Lord of the Click / MiyuClicker (standalone).
 
 use dioxus::prelude::*;

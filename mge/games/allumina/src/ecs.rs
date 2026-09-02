@@ -1,3 +1,9 @@
+//! @id     games_allumina_ecs
+//! @do     definir_entity
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « ecs ».
+
 //! A minimal, deterministic ECS. Entity-keyed component stores plus shared
 //! resources live in one `World`; systems are plain `fn(&mut World)` run by the
 //! `App` scheduler. `BTreeMap` storage keeps iteration order stable so the

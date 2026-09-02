@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_caldav_handler
+//! @do     definir_header_dav
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers caldav handler ».
+
 /**
  * CalDAV Handler Module
  *

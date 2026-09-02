@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_address_book_dto
+//! @do     definir_address_book_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos address book dto ».
+
 use crate::domain::entities::contact::AddressBook;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

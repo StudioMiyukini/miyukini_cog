@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_identity
+//! @do     definir_civility
+//! @role   donnee
+//! @layer  core
+//! @human  miyuprofile — module « sections identity ».
+
 //! Section identité — état civil, nationalité, numéros officiels.
 //!
 //! Données fondamentales d'identification de la personne physique.

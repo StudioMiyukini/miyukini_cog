@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_hub_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « hub main ».
+
 //! Jay Bureau — hub lanceur de la suite bureautique.
 //!
 //! Liste les apps (Docs, Sheets, Slides, Formulaire, Réunion) et les documents

@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_gamification
+//! @do     definir_xp_per_page
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain gamification ».
+
 //! Système de gamification JayManga.
 //!
 //! XP par page/chapitre/oeuvre, niveaux (Curieux → Légendaire),

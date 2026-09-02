@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_shell
+//! @do     definir_screen
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « shell ».
+
 use serde::{Deserialize, Serialize};
 
 /// Top-level screens the game can be in.

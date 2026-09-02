@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_crafting
+//! @do     definir_recipe_ingredient
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « crafting ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::rarity::Rarity;

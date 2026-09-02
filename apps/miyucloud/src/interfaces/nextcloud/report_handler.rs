@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_report_handler
+//! @do     handle_nc_report
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud report handler ».
+
 use axum::{
     body::{self, Body},
     http::{Request, StatusCode, header},

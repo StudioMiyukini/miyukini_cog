@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_mod
+//! @do     declarer_module_ai
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems mod ».
+
 //! Behaviour: each system runs over the `World` in a fixed phase order.
 
 pub mod ai;

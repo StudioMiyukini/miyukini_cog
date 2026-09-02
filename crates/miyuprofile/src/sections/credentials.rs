@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_credentials
+//! @do     definir_credential_category
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections credentials ».
+
 //! Section identifiants — mots de passe, comptes en ligne, codes PIN.
 //!
 //! Les mots de passe sont stockés chiffrés (jamais en clair).

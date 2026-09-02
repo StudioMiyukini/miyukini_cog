@@ -1,3 +1,9 @@
+//! @id     team_main
+//! @do     declarer_module_api
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « main ».
+
 //! TEAM — Hub d'orchestration MAIA.
 //!
 //! Centralise les nœuds MAIA, orchestre les tâches, expose la MWS gateway.

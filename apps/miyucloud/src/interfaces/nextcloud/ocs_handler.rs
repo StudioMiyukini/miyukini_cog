@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_ocs_handler
+//! @do     ocs_ok
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud ocs handler ».
+
 use axum::Json;
 use axum::{
     extract::{Path, State},

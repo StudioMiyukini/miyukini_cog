@@ -1,3 +1,9 @@
+//! @id     team_nodes_heartbeat
+//! @do     definir_maia_health_response
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « nodes heartbeat ».
+
 //! Heartbeat — poll des nœuds MAIA toutes les N secondes.
 //!
 //! Pour chaque nœud Online dans le registre, envoie GET /maia/health.

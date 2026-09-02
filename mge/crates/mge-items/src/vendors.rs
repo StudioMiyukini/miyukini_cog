@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_vendors
+//! @do     definir_vendor_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « vendors ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::economy::{buy_price, sell_price};

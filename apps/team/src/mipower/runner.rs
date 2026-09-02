@@ -1,3 +1,9 @@
+//! @id     team_mipower_runner
+//! @do     definir_step_result
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « mipower runner ».
+
 //! Exécuteur d'étapes MIPOWER — dispatche vers les nœuds MAIA.
 //!
 //! Chaque étape = POST /v1/agents/{agent_id}/chat vers le nœud sélectionné.

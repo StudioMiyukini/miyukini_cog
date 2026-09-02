@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_file_system_i18n_service
+//! @do     definir_file_system_i18n_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services file system i18n service ».
+
 use serde_json::Value;
 use std::collections::HashMap;
 use std::path::PathBuf;

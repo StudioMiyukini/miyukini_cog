@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_mod
+//! @do     declarer_module_types
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data mod ».
+
 //! Couche persistance JayManga.
 //!
 //! Feature flags :

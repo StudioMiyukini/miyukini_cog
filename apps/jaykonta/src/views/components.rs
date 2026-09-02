@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_components
+//! @do     kpi_card
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views components ».
+
 //! Composants partages JayKonta — KpiCard, AmountDisplay, ProgressBar, Badge, PlaceholderSection.
 
 use dioxus::prelude::*;

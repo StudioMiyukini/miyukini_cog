@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_sheet
+//! @do     definir_sheet_data
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core sheet ».
+
 //! Types pour Jay Sheets (tableur collaboratif).
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_cc
+//! @do     definir_cast_window
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems cc ».
+
 //! Crowd-control ticking: renversement (knockdown), recul (pushback), and the
 //! interruption check. The application helpers (`apply_knockdown`,
 //! `apply_pushback*`, `try_interrupt`) live in [`crate::systems::combat`]; these

@@ -1,3 +1,9 @@
+//! @id     miyucptaledger_store
+//! @do     structures
+//! @role   donnee
+//! @layer  core
+//! @human  miyucptaledger — module « store ».
+
 //! Store en mémoire MiyuComptaLedger. Persistance réelle = KindMother.
 
 use std::collections::HashMap;

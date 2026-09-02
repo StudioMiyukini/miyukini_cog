@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_file_repository
+//! @do     definir_trait_file_read_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories file repository ».
+
 //! Domain persistence port for the File entity.
 //!
 //! Defines the contract that any file storage implementation must fulfill.

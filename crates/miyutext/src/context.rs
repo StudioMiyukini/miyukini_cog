@@ -1,3 +1,9 @@
+//! @id     miyutext_context
+//! @do     definir_governed_context
+//! @role   orchestration
+//! @layer  core
+//! @human  miyutext — module « context ».
+
 //! Contexte gouverné pour l'exécution MiyuText (BOUND-5).
 
 #[derive(Debug, Clone)]

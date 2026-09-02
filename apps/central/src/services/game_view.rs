@@ -1,3 +1,9 @@
+//! @id     central_services_game_view
+//! @do     definir_game_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services game view ».
+
 //! Vue pour Lord of the Click (MiyuClicker).
 //! Miyukini Survivor est intégré via SurvivorEmbed dans l'onglet lord_of_the_castle.
 

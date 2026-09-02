@@ -1,3 +1,9 @@
+//! @id     central_remote_pairing
+//! @do     definir_pairing_manager
+//! @role   orchestration
+//! @layer  core
+//! @human  central-remote — module « pairing ».
+
 //! Appairage mobile — gestion des devices autorisés et tokens API.
 //!
 //! Endpoints pour permettre à Central Mobile (Android) de se connecter

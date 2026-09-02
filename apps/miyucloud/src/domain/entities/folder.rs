@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_folder
+//! @do     definir_folder
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities folder ».
+
 use uuid::Uuid;
 
 use crate::domain::services::path_service::StoragePath;

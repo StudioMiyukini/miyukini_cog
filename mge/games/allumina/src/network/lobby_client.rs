@@ -1,3 +1,9 @@
+//! @id     games_allumina_network_lobby_client
+//! @do     definir_connect_timeout
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « network lobby client ».
+
 //! Non-blocking TCP client used by the renderer to talk to the lobby server.
 //!
 //! Unlike [`super::client::run_client`] (which runs a scripted blocking demo

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_i18n_application_service
+//! @do     definir_i18n_application_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services i18n application service ».
+
 use std::sync::Arc;
 
 use crate::domain::services::i18n_service::{I18nResult, I18nService, Locale};

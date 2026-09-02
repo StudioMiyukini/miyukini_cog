@@ -1,3 +1,9 @@
+//! @id     miyunotify_admin_cell
+//! @do     definir_miyunotify_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyunotify — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

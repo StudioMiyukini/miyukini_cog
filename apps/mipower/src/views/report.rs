@@ -1,3 +1,9 @@
+//! @id     mipower_views_report
+//! @do     definir_phase_order
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « views report ».
+
 use crate::models::SequenceMeta;
 use crate::render::md_to_html;
 use crate::state::{load_sequences, MipowerCtx, Notification, View};

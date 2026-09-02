@@ -1,3 +1,9 @@
+//! @id     origin_main
+//! @do     declarer_module_admin
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « main ».
+
 //! Miyukini Webway System Origin
 //!
 //! Point central de vérité du MWS : relay + tracker + registre + site web.

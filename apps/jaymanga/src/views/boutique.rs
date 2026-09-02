@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_boutique
+//! @do     boutique
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views boutique ».
+
 //! Configuration boutique JayManga — parametres vendeur et optimisation images.
 
 use super::components::{ActionButton, FormField, FormSection, FormTextarea, PageHeader};

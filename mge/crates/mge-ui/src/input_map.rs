@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_input_map
+//! @do     definir_game_action
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « input map ».
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

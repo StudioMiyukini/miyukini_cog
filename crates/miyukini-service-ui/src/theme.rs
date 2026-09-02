@@ -1,3 +1,9 @@
+//! @id     miyukini_service_ui_theme
+//! @do     definir_theme
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-service-ui — module « theme ».
+
 //! Thèmes visuels Miyukini. Le thème actuel "Gaming" reprend la DA type Steam.
 
 /// Thème visuel sélectionnable.

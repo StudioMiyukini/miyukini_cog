@@ -1,3 +1,9 @@
+//! @id     jaykonta_lib_2
+//! @do     declarer_module_backend
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « lib ».
+
 //! Bibliotheque JayKonta - service comptabilite unifie Purse + Account.
 //!
 //! Note: UI migrée vers Tauri + React/TypeScript.

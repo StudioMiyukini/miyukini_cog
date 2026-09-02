@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_onboarding
+//! @do     definir_onboarding_step
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views onboarding ».
+
 //! Onboarding JayManga — phase initiale avec Miou.
 //!
 //! Flow :

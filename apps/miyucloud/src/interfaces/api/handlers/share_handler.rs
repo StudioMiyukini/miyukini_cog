@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_share_handler
+//! @do     definir_get_shares_query
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers share handler ».
+
 use std::sync::Arc;
 use uuid::Uuid;
 

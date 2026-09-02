@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_skills_web_fetch
+//! @do     definir_default_timeout_secs
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « skills web fetch ».
+
 //! Skill : Recherche et récupération web.
 //!
 //! Permet aux agents de récupérer du contenu web (pages, API publiques).

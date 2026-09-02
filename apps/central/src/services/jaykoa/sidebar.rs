@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_sidebar
+//! @do     definir_jay_koa_sidebar_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa sidebar ».
+
 //! Sidebar JayKoa — Panneau latéral gauche type Google Agenda.
 //!
 //! Contient :

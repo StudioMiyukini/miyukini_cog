@@ -1,3 +1,9 @@
+//! @id     jayfaim_lib
+//! @do     declarer_module_data
+//! @role   orchestration
+//! @layer  core
+//! @human  jayfaim — module « lib ».
+
 //! JayFaim — Service réservation tables et restauration du COG.
 //!
 //! Domaine : tables, créneaux, réservations, convives.

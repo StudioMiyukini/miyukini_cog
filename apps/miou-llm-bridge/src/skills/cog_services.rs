@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_skills_cog_services
+//! @do     definir_cog_base_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « skills cog services ».
+
 //! Skill : Interaction avec les services COG.
 //!
 //! Permet aux agents d'interagir avec les services Miyukini installés

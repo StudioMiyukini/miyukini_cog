@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_image_transcode_service
+//! @do     definir_max_transcode_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services image transcode service ».
+
 //! Image Transcoding Service - WebP On-Demand Conversion
 //!
 //! Automatically transcodes images to WebP format when the browser supports it,

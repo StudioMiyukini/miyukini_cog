@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_middleware_rate_limit
+//! @do     definir_trust_proxy
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces middleware rate limit ».
+
 //! IP-based rate limiting middleware for authentication endpoints.
 //!
 //! Uses `moka` TTL caches (already a project dependency) to track request

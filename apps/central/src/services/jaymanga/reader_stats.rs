@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_reader_stats
+//! @do     reader_stats
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga reader stats ».
+
 //! Statistiques lecteurs JayManga — progression, favoris, badges.
 
 use dioxus::prelude::*;

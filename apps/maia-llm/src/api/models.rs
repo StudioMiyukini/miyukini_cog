@@ -1,3 +1,9 @@
+//! @id     maia_llm_api_models
+//! @do     definir_open_ai_model_entry
+//! @role   orchestration
+//! @layer  app
+//! @human  maia-llm — module « api models ».
+
 //! Endpoints de gestion des modèles.
 //!
 //! GET    /v1/models                      — modèles chargés (OpenAI-compat)

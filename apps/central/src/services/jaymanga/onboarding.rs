@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_onboarding
+//! @do     definir_onboarding_step
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga onboarding ».
+
 //! Onboarding JayManga — phase initiale avec Miou.
 //!
 //! Flow :

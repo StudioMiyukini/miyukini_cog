@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_charsheet
+//! @do     definir_primary_stat
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « charsheet ».
+
 use serde::{Deserialize, Serialize};
 
 /// Primary attribute.

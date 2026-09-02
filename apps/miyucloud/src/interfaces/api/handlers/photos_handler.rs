@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_photos_handler
+//! @do     definir_photos_query_params
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers photos handler ».
+
 use axum::{
     Json,
     extract::{Query, State},

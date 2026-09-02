@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_quest
+//! @do     definir_quest_kind
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components quest ».
+
 //! Quest log for Act I. Five simple objectives tracked by event hooks (kills,
 //! pickups) and per-tick polling (gold, current zone).
 

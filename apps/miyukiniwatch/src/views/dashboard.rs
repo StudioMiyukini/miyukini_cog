@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_views_dashboard
+//! @do     dashboard_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « views dashboard ».
+
 //! Ecran Tableau de bord MiyukiniWatch.
 
 use crate::{use_db, use_profile_id};

@@ -1,3 +1,9 @@
+//! @id     miyukini_admin_admin_cell
+//! @do     definir_module_type
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-admin — module « admin cell ».
+
 //! Types pour la Cellule Admin et le manifeste de test embarqué (Module Testing and Lifecycle Contract).
 //!
 //! La Cellule Admin est la surface qu'un module expose uniquement à MiyukiniAdmin :

@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_federation_api
+//! @do     definir_federation_info_response
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api federation api ».
+
 //! Endpoints REST de la fédération JayManga (opt-in).
 //!
 //! API exposée aux COGs agrégateurs pour collecter le catalogue

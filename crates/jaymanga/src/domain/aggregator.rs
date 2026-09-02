@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_aggregator
+//! @do     definir_aggregator_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain aggregator ».
+
 //! Logique d'agrégation inter-COG JayManga (Portail Agrégé).
 //!
 //! Collecte les catalogues des COGs JayManga via le MWS,

@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_stats
+//! @do     definir_equipment_source_max
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems stats ».
+
 //! Player stat recomputation: sums the base sheet plus every equipped affix
 //! and refreshes the cached pools that depend on it.
 //!

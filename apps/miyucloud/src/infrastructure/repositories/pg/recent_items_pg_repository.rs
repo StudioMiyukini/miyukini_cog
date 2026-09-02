@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_recent_items_pg_repository
+//! @do     definir_recent_items_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg recent items pg repository ».
+
 use sqlx::{PgPool, Row};
 use std::sync::Arc;
 use tracing::error;

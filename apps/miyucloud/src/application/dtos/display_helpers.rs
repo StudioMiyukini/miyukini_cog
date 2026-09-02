@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_display_helpers
+//! @do     ext_of
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos display helpers ».
+
 //! Shared display helpers for DTOs.
 //!
 //! These functions centralise the mime→icon / mime→category / size→human-string

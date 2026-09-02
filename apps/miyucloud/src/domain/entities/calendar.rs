@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_calendar
+//! @do     definir_calendar
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities calendar ».
+
 use chrono::{DateTime, Utc};
 /**
  * Calendar Entity

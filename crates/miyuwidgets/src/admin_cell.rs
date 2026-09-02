@@ -1,3 +1,9 @@
+//! @id     miyuwidgets_admin_cell
+//! @do     definir_miyuwidgets_identification
+//! @role   ui
+//! @layer  core
+//! @human  miyuwidgets — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

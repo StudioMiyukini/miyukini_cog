@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_routes
+//! @do     get_version
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api routes ».
+
 use crate::application::services::batch_operations::BatchOperationService;
 use crate::common::di::AppState;
 use axum::{

@@ -1,3 +1,9 @@
+//! @id     miyucloud_common_mime_detect
+//! @do     definir_magic_bytes_len
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « common mime detect ».
+
 //! MIME type detection using magic bytes (infer) + extension fallback (mime_guess).
 //!
 //! Priority order:

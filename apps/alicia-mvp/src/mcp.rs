@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_mcp
+//! @do     definir_mcp_tool_def
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « mcp ».
+
 //! Client MCP (Model Context Protocol) minimal pour Alicia.
 //!
 //! Connecte a des serveurs MCP via stdio, decouvre leurs outils,

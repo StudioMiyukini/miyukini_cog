@@ -1,3 +1,9 @@
+//! @id     miyudiscovery_errors
+//! @do     definir_miyudiscovery_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyudiscovery — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyudiscoveryError {
     NoMandate,

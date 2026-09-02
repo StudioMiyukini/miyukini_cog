@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_device_auth_dto
+//! @do     definir_device_authorize_request_dto
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « application dtos device auth dto ».
+
 //! DTOs for OAuth 2.0 Device Authorization Grant (RFC 8628).
 
 use serde::{Deserialize, Serialize};

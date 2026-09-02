@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_mod
+//! @do     declarer_module_contact
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections mod ».
+
 //! Sections structurées du profil Central.
 //!
 //! Chaque section modélise un domaine de données personnelles

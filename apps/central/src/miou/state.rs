@@ -1,3 +1,9 @@
+//! @id     central_miou_state
+//! @do     definir_frequence_bulles
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « miou state ».
+
 //! État et préférences Miou.
 
 use chrono::{DateTime, Utc};

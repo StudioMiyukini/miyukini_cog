@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymail_config
+//! @do     definir_tls_mode
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymail config ».
+
 //! Configuration de comptes mail.
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_runewords
+//! @do     definir_runeword_mod
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « runewords ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_gameplay::stats::{Modifier, StatKind};

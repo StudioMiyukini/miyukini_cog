@@ -1,6 +1,6 @@
 //! Bibliothèque JayKoa — Calendrier universel du COG.
 //!
-//! @id     jaykoa_lib
+//! @id     crate_jaykoa_lib
 //! @do     expose_public_modules_jaykoa
 //@human ! @layer  infra
 //!

@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_mod
+//! @do     declarer_module_chat
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui mod ».
+
 //! In-game UI.
 //!
 //! Two layers live here:

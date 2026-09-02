@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_zip_service
+//! @do     definir_zip_error
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services zip service ».
+
 use crate::application::services::file_retrieval_service::FileRetrievalService;
 use crate::application::services::folder_service::FolderService;
 use crate::{

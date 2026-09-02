@@ -1,3 +1,9 @@
+//! @id     jaycloud_operators_restore_op
+//! @do     definir_restore_op_error
+//! @role   donnee
+//! @layer  core
+//! @human  jaycloud — module « operators restore op ».
+
 //! `restore_op` — récupération de fichiers depuis un snapshot.
 //!
 //! Trois modes :

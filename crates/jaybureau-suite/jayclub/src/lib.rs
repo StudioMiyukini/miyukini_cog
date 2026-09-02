@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_lib
+//! @do     declarer_module_feed
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub lib ».
+
 //! JayClub — réseau social Miyukini.
 //!
 //! Refonte modernisée de Jay1Tribu, qui devient le pendant Miyukini de Meta :

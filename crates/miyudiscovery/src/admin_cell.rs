@@ -1,3 +1,9 @@
+//! @id     miyudiscovery_admin_cell
+//! @do     definir_miyudiscovery_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyudiscovery — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

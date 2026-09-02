@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_health
+//! @do     definir_doctor_entry
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections health ».
+
 //! Section santé — carnet de santé, ordonnances, médecins, allergies.
 //!
 //! Données médicales personnelles pour suivi et constitution de dossiers.

@@ -1,3 +1,9 @@
+//! @id     borderguard_registry
+//! @do     definir_boundary_registry
+//! @role   securite
+//! @layer  core
+//! @human  borderguard — module « registry ».
+
 //! Registre en mémoire des frontières (INV-BG-5, INV-BG-8). Consultation uniquement ; pas de persistance directe (INV-BG-2).
 
 use std::collections::HashMap;

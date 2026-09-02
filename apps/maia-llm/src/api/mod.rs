@@ -1,3 +1,9 @@
+//! @id     maia_llm_api_mod
+//! @do     declarer_module_chat
+//! @role   orchestration
+//! @layer  app
+//! @human  maia-llm — module « api mod ».
+
 //! Routeur axum de maia-llm.
 
 pub mod chat;

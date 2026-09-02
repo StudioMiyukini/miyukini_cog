@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_reader
+//! @do     definir_reading_mode
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views reader ».
+
 //! Liseuse native JayManga — affichage des pages, navigation,
 //! progression, XP temps reel, raccourcis clavier.
 //!

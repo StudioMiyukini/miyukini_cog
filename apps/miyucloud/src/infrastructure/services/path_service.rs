@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_path_service
+//! @do     definir_path_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services path service ».
+
 //! PathService - Infrastructure service for storage path management
 //!
 //! This service was moved from domain/services because it implements application traits

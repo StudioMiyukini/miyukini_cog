@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_trash_repository
+//! @do     definir_trait_trash_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories trash repository ».
+
 use uuid::Uuid;
 
 use crate::common::errors::Result;

@@ -1,3 +1,9 @@
+//! @id     jaycloud_adapters_webdav
+//! @do     definir_jay_cloud_dav_fs
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « adapters webdav ».
+
 //! Adaptateur WebDAV (RFC 4918) — branche `dav-server` 0.11 sur `FilesOp`.
 //!
 //! Ce module expose un `DavHandler` consommable par n'importe quel runtime

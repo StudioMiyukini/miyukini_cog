@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_view
+//! @do     jay_konta_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta view ».
+
 //! Vue du service JayKonta — donnees reelles via JayKontaDb.
 
 use dioxus::prelude::*;

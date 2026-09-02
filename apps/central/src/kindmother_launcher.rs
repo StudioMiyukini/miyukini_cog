@@ -1,3 +1,9 @@
+//! @id     central_kindmother_launcher
+//! @do     definir_kindmother_default_addr
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « kindmother launcher ».
+
 //! Gestion du lancement automatique de KindMother.
 //!
 //! Ordre au démarrage de Central :

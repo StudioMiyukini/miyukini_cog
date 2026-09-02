@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_docs_toolbar
+//! @do     toolbar
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-docs toolbar ».
+
 //! Barre d'outils de Jay Docs.
 
 use dioxus::prelude::*;

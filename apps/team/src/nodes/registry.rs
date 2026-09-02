@@ -1,3 +1,9 @@
+//! @id     team_nodes_registry
+//! @do     definir_node_mode
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « nodes registry ».
+
 //! Registre des nœuds MAIA — stocke l'état de chaque nœud enregistré.
 
 use std::collections::HashMap;

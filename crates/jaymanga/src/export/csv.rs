@@ -1,3 +1,9 @@
+//! @id     jaymanga_export_csv
+//! @do     definir_csv_export_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « export csv ».
+
 //! Export CSV des transactions de vente JayManga.
 //!
 //! Génération de fichiers CSV filtrés par période pour le vendeur.

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_thumbnail_ports
+//! @do     definir_thumbnail_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports thumbnail ports ».
+
 //! Thumbnail Port - Application layer abstraction for thumbnail generation.
 //!
 //! This module defines the port (trait) for thumbnail operations,

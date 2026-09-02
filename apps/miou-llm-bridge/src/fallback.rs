@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_fallback
+//! @do     definir_llm_availability
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « fallback ».
+
 //! Proto-IA de secours — mode hors-ligne / isolement.
 //!
 //! Quand aucun LLM n'est disponible (ni distant, ni local), ce module

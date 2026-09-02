@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_day_view
+//! @do     definir_day_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa day view ».
+
 //! Vue Jour — Grille horaire sur une journée unique.
 
 use dioxus::prelude::*;

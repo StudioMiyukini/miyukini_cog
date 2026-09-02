@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_search_dto
+//! @do     definir_search_criteria_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos search dto ».
+
 use serde::{Deserialize, Serialize};
 
 /**

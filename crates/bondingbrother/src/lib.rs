@@ -1,3 +1,9 @@
+//! @id     bondingbrother_lib
+//! @do     declarer_module_connection
+//! @role   orchestration
+//! @layer  core
+//! @human  bondingbrother — module « lib ».
+
 //! # BondingBrother
 //!
 //! Stratégie de liaison gouvernée du Miyukini Core System.

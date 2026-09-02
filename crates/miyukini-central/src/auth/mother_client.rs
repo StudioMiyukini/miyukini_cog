@@ -1,3 +1,9 @@
+//! @id     miyukini_central_auth_mother_client
+//! @do     definir_mother_client_error
+//! @role   securite
+//! @layer  core
+//! @human  miyukini-central — module « auth mother client ».
+
 //! Client de validation des ID de profils auprès de la DB mère.
 //!
 //! À la première connexion à internet puis à intervalle régulier, l'environnement

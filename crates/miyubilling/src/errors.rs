@@ -1,3 +1,9 @@
+//! @id     miyubilling_errors
+//! @do     definir_miyubilling_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubilling — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyubillingError {
     NoMandate,

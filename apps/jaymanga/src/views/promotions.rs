@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_promotions
+//! @do     promotions
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views promotions ».
+
 //! Gestion des promotions JayManga — reductions, campagnes promotionnelles.
 
 use super::components::{

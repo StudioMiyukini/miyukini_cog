@@ -1,3 +1,9 @@
+//! @id     central_services_mws_settings
+//! @do     definir_app_dir
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services mws settings ».
+
 //! Configuration persistée du Webway dans Central.
 
 use miyukini_central::CentralMwsConfig;

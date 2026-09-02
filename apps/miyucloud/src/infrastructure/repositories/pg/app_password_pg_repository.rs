@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_app_password_pg_repository
+//! @do     definir_app_password_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg app password pg repository ».
+
 //! PostgreSQL repository for App Passwords.
 
 use crate::application::ports::auth_ports::AppPasswordStoragePort;

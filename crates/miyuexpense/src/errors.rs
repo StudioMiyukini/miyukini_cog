@@ -1,3 +1,9 @@
+//! @id     miyuexpense_errors
+//! @do     definir_miyuexpense_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuexpense — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuexpenseError {
     NoMandate,

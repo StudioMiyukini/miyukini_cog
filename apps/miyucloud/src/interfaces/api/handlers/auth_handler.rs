@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_auth_handler
+//! @do     auth_public_routes
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers auth handler ».
+
 use axum::{
     Router,
     extract::{Json, Query, State},

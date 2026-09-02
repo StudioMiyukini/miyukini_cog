@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_adapters_calendar_storage_adapter
+//! @do     definir_calendar_storage_adapter
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure adapters calendar storage adapter ».
+
 //! Calendar Storage Adapter
 //!
 //! This adapter implements the `CalendarStoragePort` application port using

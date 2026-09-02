@@ -1,3 +1,9 @@
+//! @id     kindmother_client_lib
+//! @do     declarer_module_client
+//! @role   orchestration
+//! @layer  core
+//! @human  kindmother-client — module « lib ».
+
 //! # KindMother Client
 //!
 //! Client de délégation vers le service KindMother.

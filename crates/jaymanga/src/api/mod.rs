@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_mod
+//! @do     declarer_module_catalog_api
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api mod ».
+
 //! Endpoints REST pour le Portail web JayManga.
 //!
 //! Routes publiques (catalogue, media, liseuse, fédération)

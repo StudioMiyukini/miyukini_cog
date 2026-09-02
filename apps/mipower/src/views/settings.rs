@@ -1,3 +1,9 @@
+//! @id     mipower_views_settings
+//! @do     settings
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « views settings ».
+
 use crate::state::{MipowerCtx, Notification, View};
 use dioxus::prelude::*;
 

@@ -1,3 +1,9 @@
+//! @id     games_allumina_rng
+//! @do     definir_rng
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « rng ».
+
 //! Deterministic, dependency-free RNG (`SplitMix64`).
 //!
 //! The MGE workspace ships no `rand` crate; combat/loot formulas need a

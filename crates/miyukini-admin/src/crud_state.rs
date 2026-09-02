@@ -1,3 +1,9 @@
+//! @id     miyukini_admin_crud_state
+//! @do     definir_crud_state
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-admin — module « crud state ».
+
 //! État partagé pour le CRUD tables / données (demo — à remplacer par KindMother en production).
 
 use std::collections::HashMap;

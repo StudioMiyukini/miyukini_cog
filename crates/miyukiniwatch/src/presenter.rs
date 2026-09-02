@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_presenter
+//! @do     definir_miyukini_watch_presenter
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukiniwatch — module « presenter ».
+
 //! Opérateur Presenter — consultation, effacement, paramètres.
 
 use crate::aggregates::compute_aggregates;

@@ -1,3 +1,9 @@
+//! @id     jaykonta_lib
+//! @do     declarer_module_views
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « lib ».
+
 //! JayKonta — App standalone Dioxus.
 //!
 //! Comptabilité COG unifiée Purse + Account.

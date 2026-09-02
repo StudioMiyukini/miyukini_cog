@@ -1,3 +1,9 @@
+//! @id     jaymanga_services_mws_discovery
+//! @do     definir_mws_discovery_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « services mws discovery ».
+
 //! Découverte de COGs JayManga via les trackers MWS.
 //!
 //! Interroge les trackers pour trouver les COGs qui publient

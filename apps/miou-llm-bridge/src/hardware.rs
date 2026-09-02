@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_hardware
+//! @do     definir_hardware_info
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « hardware ».
+
 //! Détection hardware du host — CPU, RAM, GPU/VRAM.
 //!
 //! Utilise `sysinfo` pour CPU/RAM et `wmic` (Windows) pour le GPU.

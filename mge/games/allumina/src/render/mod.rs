@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_mod
+//! @do     declarer_module_animation
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render mod ».
+
 //! The Allumina renderer: an isometric 2D presenter on top of the engine's
 //! `mge-render` wgpu sprite pipeline (instanced, tinted unit quads) driven by a
 //! `winit` event loop. There are no art assets — everything (tiles, entities,

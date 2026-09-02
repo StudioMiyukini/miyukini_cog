@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_doc
+//! @do     definir_document_meta
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core doc ».
+
 //! Types pour Jay Docs (document texte riche).
 //!
 //! Le contenu temps-réel est géré par Yrs (dans jay-collab).

@@ -1,3 +1,9 @@
+//! @id     miyucloud_common_errors
+//! @do     fournir_common_errors
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « common errors ».
+
 //! Application errors
 //!
 //! This module re-exports domain errors for compatibility.

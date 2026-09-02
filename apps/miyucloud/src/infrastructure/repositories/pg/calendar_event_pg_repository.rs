@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_calendar_event_pg_repository
+//! @do     definir_calendar_event_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg calendar event pg repository ».
+
 use chrono::{DateTime, Utc};
 use sqlx::{PgPool, Row, types::Uuid};
 use std::sync::Arc;

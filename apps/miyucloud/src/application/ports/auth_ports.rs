@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_auth_ports
+//! @do     definir_trait_password_hasher_port
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « application ports auth ports ».
+
 use crate::common::errors::DomainError;
 use crate::domain::entities::app_password::AppPassword;
 use crate::domain::entities::device_code::DeviceCode;

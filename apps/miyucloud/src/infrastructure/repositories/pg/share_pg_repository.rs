@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_share_pg_repository
+//! @do     definir_share_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg share pg repository ».
+
 use sqlx::{PgPool, Row};
 use std::sync::Arc;
 use uuid::Uuid;

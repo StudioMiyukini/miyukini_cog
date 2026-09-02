@@ -1,3 +1,9 @@
+//! @id     miyucloud_lib
+//! @do     declarer_module_application
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « lib ».
+
 #![allow(async_fn_in_trait)]
 
 // Export the main project modules

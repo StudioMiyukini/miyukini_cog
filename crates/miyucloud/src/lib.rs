@@ -1,6 +1,6 @@
 //! MiyuCloud -- Cloud prive auto-heberge, chiffre et pair-a-pair.
 //!
-//! @id     miyucloud_lib
+//! @id     crate_miyucloud_lib
 //! @do     expose_public_modules_miyucloud
 //@human ! @role   service
 //! @layer  infra

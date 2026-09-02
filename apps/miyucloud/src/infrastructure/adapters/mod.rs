@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_adapters_mod
+//! @do     declarer_module_calendar_storage_adapter
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure adapters mod ».
+
 //! Infrastructure Adapters
 //!
 //! This module contains adapters that bridge the gap between domain repositories

@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_camera
+//! @do     definir_min_zoom
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins camera ».
+
 //! Camera that follows the player, with zoom and free-scroll support.
 
 use crate::app::{App, PhaseId, Plugin};

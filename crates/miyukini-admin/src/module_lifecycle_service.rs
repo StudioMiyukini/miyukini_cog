@@ -1,3 +1,9 @@
+//! @id     miyukini_admin_module_lifecycle_service
+//! @do     definir_module_lifecycle_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-admin — module « module lifecycle service ».
+
 //! Service de cycle de vie des modules (Module Testing and Lifecycle Contract).
 //!
 //! Actions exclusives à MiyukiniAdmin : ajout, verrouillage/déverrouillage, suppression d'un module.

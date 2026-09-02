@@ -1,3 +1,9 @@
+//! @id     central_mobile_services_market
+//! @do     market_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « services market ».
+
 //! Vue Market — catalogue des services (lecture seule).
 
 use dioxus::prelude::*;

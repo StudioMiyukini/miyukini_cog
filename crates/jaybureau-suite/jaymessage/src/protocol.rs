@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_protocol
+//! @do     definir_message_type
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage protocol ».
+
 //! Types protocole pour les messages chiffres.
 
 use crate::{ConversationId, UserId};

@@ -1,3 +1,9 @@
+//! @id     central_state
+//! @do     definir_app_context
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « state ».
+
 //! État global de l'application Miyukini Central.
 
 use std::sync::Arc;

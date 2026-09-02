@@ -1,3 +1,9 @@
+//! @id     miyukini_central_auth_mod
+//! @do     declarer_module_mother_client
+//! @role   securite
+//! @layer  core
+//! @human  miyukini-central — module « auth mod ».
+
 //! Authentification Miyukini Central (Miyukini COG) via KindMother Service.
 //!
 //! Connexion et création de compte dans une fenêtre frame ; mot de passe complexe.

@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_e2e
+//! @do     definir_nonce_size
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « e2e ».
+
 //! Chiffrement de bout en bout (E2E) entre le client Android et le COG Host.
 //!
 //! ## Protocole

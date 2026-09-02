@@ -1,3 +1,9 @@
+//! @id     ui_builder_state
+//! @do     definir_app_state
+//! @role   ui
+//! @layer  app
+//! @human  ui-builder — module « state ».
+
 //! État minimal pour le UI Builder standalone.
 //!
 //! Fournit `use_app_state()` compatible avec `ui_builder.rs` de Central,

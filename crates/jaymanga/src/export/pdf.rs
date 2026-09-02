@@ -1,3 +1,9 @@
+//! @id     jaymanga_export_pdf
+//! @do     definir_pdf_report_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « export pdf ».
+
 //! Rapport PDF synthétique des ventes JayManga.
 //!
 //! Génération de données structurées pour un rapport vendeur.

@@ -1,3 +1,9 @@
+//! @id     central_mobile_components_service_card
+//! @do     service_card
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « components service card ».
+
 //! Carte de service (version mobile, compacte).
 
 use dioxus::prelude::*;

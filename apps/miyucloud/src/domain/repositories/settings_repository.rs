@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_settings_repository
+//! @do     definir_trait_settings_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories settings repository ».
+
 use crate::common::errors::DomainError;
 use std::collections::HashMap;
 use uuid::Uuid;

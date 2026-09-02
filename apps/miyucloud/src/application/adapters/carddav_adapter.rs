@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_adapters_carddav_adapter
+//! @do     definir_card_dav_report_type
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application adapters carddav adapter ».
+
 use quick_xml::{
     Reader, Writer,
     events::{BytesEnd, BytesStart, BytesText, Event},

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_device_auth_service
+//! @do     definir_device_code_lifetime_secs
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « application services device auth service ».
+
 //! OAuth 2.0 Device Authorization Grant service (RFC 8628).
 //!
 //! Orchestrates the full device flow:

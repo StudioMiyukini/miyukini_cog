@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_download
+//! @do     definir_download_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain download ».
+
 //! Logique de téléchargement hors-ligne JayManga.
 //!
 //! Vérification des droits de téléchargement, intégrité SHA-256,

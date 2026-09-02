@@ -1,3 +1,9 @@
+//! @id     miyubilling_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubilling — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuBilling — toolkit.billing.saas
 //!

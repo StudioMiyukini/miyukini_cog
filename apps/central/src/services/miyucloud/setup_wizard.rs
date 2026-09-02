@@ -1,3 +1,9 @@
+//! @id     central_services_miyucloud_setup_wizard
+//! @do     first_launch_setup_wizard
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyucloud setup wizard ».
+
 use dioxus::prelude::*;
 
 use super::client::MiyuCloudClient;

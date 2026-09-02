@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_batch
+//! @do     definir_render_layer
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « batch ».
+
 use crate::atlas::{AtlasHandle, MaterialHandle, SpriteRect};
 use serde::{Deserialize, Serialize};
 

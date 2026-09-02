@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_message_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-message main ».
+
 //! Jay Message — messagerie chiffree E2E.
 
 use dioxus::prelude::*;

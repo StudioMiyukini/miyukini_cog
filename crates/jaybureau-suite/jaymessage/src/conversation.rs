@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_conversation
+//! @do     definir_conversation_kind
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage conversation ».
+
 //! Modele de conversation.
 
 use crate::{ConversationId, UserId};

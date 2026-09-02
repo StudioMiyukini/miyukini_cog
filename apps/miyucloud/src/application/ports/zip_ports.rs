@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_zip_ports
+//! @do     definir_trait_zip_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports zip ports ».
+
 //! ZIP Port - Application layer abstraction for ZIP archive creation.
 //!
 //! This module defines the port (trait) for ZIP operations,

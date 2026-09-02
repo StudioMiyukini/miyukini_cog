@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_week_view
+//! @do     definir_week_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa week view ».
+
 //! Vue Semaine — Grille 7 jours × 24 heures type Google Agenda.
 
 use dioxus::prelude::*;

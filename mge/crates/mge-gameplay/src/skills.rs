@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_skills
+//! @do     definir_skill_id
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « skills ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::character::Class;

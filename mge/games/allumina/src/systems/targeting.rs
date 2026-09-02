@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_targeting
+//! @do     living_mobs
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems targeting ».
+
 //! Area-of-effect target selection. Every skill that hits "the living enemies
 //! in some shape" used to re-spell the same `mob filter → health check →
 //! position check` pipeline; this module is the single source of that logic,

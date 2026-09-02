@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_items
+//! @do     kind_id
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data items ».
+
 //! Base item templates and unique definitions.
 
 use mge_items::item::{BaseItemDef, EquipRequirements, ItemKind};

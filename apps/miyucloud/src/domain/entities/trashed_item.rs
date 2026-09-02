@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_trashed_item
+//! @do     definir_trashed_item_type
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities trashed item ».
+
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 

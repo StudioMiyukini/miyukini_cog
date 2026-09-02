@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_kindmother_db
+//! @do     definir_db_error
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data kindmother db ».
+
 //! Implémentation SQLite directe (feature `legacy-sqlite`) pour JayManga.
 //!
 //! Utilise rusqlite avec `Mutex<Connection>` pour la thread-safety.

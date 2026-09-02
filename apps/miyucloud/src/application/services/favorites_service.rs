@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_favorites_service
+//! @do     definir_favorites_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services favorites service ».
+
 use std::collections::HashSet;
 use std::sync::Arc;
 

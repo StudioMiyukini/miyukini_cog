@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_user_dto
+//! @do     definir_user_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos user dto ».
+
 use crate::domain::entities::user::User;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

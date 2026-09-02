@@ -1,3 +1,9 @@
+//! @id     miyunotify_errors
+//! @do     definir_miyunotify_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyunotify — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyunotifyError {
     NoMandate,

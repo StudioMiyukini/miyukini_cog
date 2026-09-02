@@ -1,3 +1,9 @@
+//! @id     miyukini_central_mws_mod
+//! @do     definir_central_mws_config
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-central — module « mws mod ».
+
 //! Module MWS — Miyukini Webway System pour le Central.
 //!
 //! Fournit l'intégration du réseau MWS au COG Central, permettant :

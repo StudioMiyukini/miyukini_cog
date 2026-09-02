@@ -1,3 +1,9 @@
+//! @id     central_mobile_app
+//! @do     app
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « app ».
+
 //! Composant racine de Central Mobile.
 //!
 //! Gère le flux : Appairage → Connexion → Dashboard.

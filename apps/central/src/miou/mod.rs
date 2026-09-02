@@ -1,3 +1,9 @@
+//! @id     central_miou_mod
+//! @do     declarer_module_bubble
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « miou mod ».
+
 //! Module Miou — Avatar et mascotte du COG.
 //!
 //! Miou est le canal privilégié par lequel le COG s'adresse à l'utilisateur :

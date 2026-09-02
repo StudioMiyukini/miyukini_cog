@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_vertex
+//! @do     definir_color
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render vertex ».
+
 //! Vertex/colour primitives for the 2D sprite renderer.
 //!
 //! The GPU-side vertex layout and instanced quad pipeline live in `mge-render`

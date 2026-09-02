@@ -1,3 +1,9 @@
+//! @id     worrysentinel_lib
+//! @do     declarer_module_degradation
+//! @role   orchestration
+//! @layer  core
+//! @human  worrysentinel — module « lib ».
+
 //! # WorrySentinel
 //!
 //! Détecteur de menaces et dégradation du Miyukini Core System.

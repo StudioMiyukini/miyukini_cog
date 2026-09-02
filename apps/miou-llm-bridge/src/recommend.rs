@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_recommend
+//! @do     definir_hardware_response
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « recommend ».
+
 //! Moteur de recommandation LLM — sélectionne le meilleur modèle GGUF
 //! en fonction du hardware détecté et des modèles disponibles sur maia-llm.
 

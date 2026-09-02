@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_menu
+//! @do     definir_menu_section
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « menu ».
+
 use serde::{Deserialize, Serialize};
 
 /// System menu section.

@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_forge
+//! @do     definir_material
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems forge ».
+
 //! The blacksmith's forge: recycle (salvage) gear into crafting materials.
 //! Recycling an item destroys it and credits the player's material stock,
 //! scaled by the item's level, rarity, and what it's made of.

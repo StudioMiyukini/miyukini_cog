@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_dedup_service
+//! @do     definir_stream_chunk_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services dedup service ».
+
 //! Content-Addressable Storage with Deduplication (PostgreSQL-backed)
 //!
 //! Implements hash-based deduplication to eliminate redundant file storage.

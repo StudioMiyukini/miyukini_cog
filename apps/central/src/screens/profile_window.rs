@@ -1,3 +1,9 @@
+//! @id     central_screens_profile_window
+//! @do     profile_window
+//! @role   ui
+//! @layer  app
+//! @human  central — module « screens profile window ».
+
 //! Fenêtre (overlay) Profil : infos du compte, thème, option réinitialisation COG (tests).
 
 use crate::data::{profile_display_name, use_service_connections};

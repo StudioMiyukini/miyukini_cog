@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_isometric
+//! @do     definir_tile_w
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins isometric ».
+
 //! Isometric projection. World tile coordinates map to screen pixels via the
 //! classic 2:1 diamond transform.
 

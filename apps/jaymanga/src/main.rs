@@ -1,3 +1,9 @@
+//! @id     jaymanga_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « main ».
+
 //! Point d'entree binaire JayManga (standalone).
 
 use dioxus::prelude::*;

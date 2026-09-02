@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_quest_log
+//! @do     panel_rect
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui quest log ».
+
 //! Quest log window: lists Act I objectives with live progress.
 
 use mge_render::batch::{RenderLayer, SpriteBatch};

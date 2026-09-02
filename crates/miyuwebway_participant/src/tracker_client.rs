@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_tracker_client
+//! @do     definir_tracker_client_config
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « tracker client ».
+
 //! Client Tracker MWS — Communication avec le Tracker Origin.
 //!
 //! Gère l'annonce, le heartbeat, et la découverte de COGs/lobbys.

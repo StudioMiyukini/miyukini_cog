@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_profile
+//! @do     profile
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views profile ».
+
 //! Profil de progression JayManga — niveau, XP, streaks, badges, statistiques, historique.
 
 use super::components::{Badge, EmptyState, PageHeader, StatCard};

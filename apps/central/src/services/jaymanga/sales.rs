@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_sales
+//! @do     definir_sales_tab
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga sales ».
+
 //! Ventes JayManga — tableau de bord ventes complet : résumé revenus,
 //! graphique 30 jours, transactions filtrables, licences, export.
 

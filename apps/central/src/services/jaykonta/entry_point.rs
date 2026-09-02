@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_entry_point
+//! @do     entry_point_selector
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta entry point ».
+
 //! Ecran de selection Purse / Account.
 
 use dioxus::prelude::*;

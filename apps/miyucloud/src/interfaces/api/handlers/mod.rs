@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_mod
+//! @do     declarer_module_admin_handler
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers mod ».
+
 pub mod admin_handler;
 pub mod app_password_handler;
 pub mod audit_handler;

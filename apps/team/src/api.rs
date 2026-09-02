@@ -1,3 +1,9 @@
+//! @id     team_api
+//! @do     register_node
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « api ».
+
 //! Routes d'enregistrement et heartbeat des nœuds MAIA.
 
 use axum::{

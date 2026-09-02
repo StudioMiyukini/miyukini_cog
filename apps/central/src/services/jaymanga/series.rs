@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_series
+//! @do     series_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga series ».
+
 //! Gestion des séries JayManga — regroupement d'œuvres en séries.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_health
+//! @do     definir_maia_health
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « health ».
+
 //! Endpoint GET /maia/health — état complet du service MAIA.
 //!
 //! Retourne :

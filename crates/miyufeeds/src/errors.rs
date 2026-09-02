@@ -1,3 +1,9 @@
+//! @id     miyufeeds_errors
+//! @do     definir_miyufeeds_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyufeeds — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyufeedsError {
     NoMandate,

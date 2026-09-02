@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_mercenary
+//! @do     definir_merc_type
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components mercenary ».
+
 //! Mercenary components. A mercenary is an NPC companion hired at the village
 //! that follows the player, fights at their side, gains a share of their XP, and
 //! respawns a while after dying. Behaviour lives in

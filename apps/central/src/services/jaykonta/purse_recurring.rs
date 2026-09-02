@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_purse_recurring
+//! @do     purse_recurring
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta purse recurring ».
+
 //! Ecran transactions recurrentes (depenses et revenus).
 //!
 //! Liste les recurrents actifs, permet d'en ajouter, suspendre, supprimer.

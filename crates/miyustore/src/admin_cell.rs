@@ -1,3 +1,9 @@
+//! @id     miyustore_admin_cell
+//! @do     definir_miyustore_identification
+//! @role   donnee
+//! @layer  core
+//! @human  miyustore — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

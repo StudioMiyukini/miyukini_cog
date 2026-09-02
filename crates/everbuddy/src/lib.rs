@@ -1,3 +1,9 @@
+//! @id     everbuddy_lib
+//! @do     declarer_module_compatibility
+//! @role   orchestration
+//! @layer  core
+//! @human  everbuddy — module « lib ».
+
 //! # EverBuddy
 //!
 //! Gestionnaire de compatibilité et migration du Miyukini Core System.

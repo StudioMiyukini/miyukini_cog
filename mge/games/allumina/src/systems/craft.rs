@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_craft
+//! @do     definir_craft_size
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems craft ».
+
 //! Shaped crafting on a 7×7 grid, Minecraft-style: the player lays out crafting
 //! materials in a pattern and a matching recipe yields an item. Matching is
 //! shape-based and position-independent — both the player's grid and the recipe

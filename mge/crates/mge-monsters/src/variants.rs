@@ -1,3 +1,9 @@
+//! @id     crates_mge_monsters_variants
+//! @do     definir_elite_affix
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-monsters — module « variants ».
+
 use serde::{Deserialize, Serialize};
 
 /// Affixes that can be applied to an elite or champion monster.

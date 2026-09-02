@@ -1,3 +1,9 @@
+//! @id     crates_mge_proto_lib
+//! @do     definir_protocol_version
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-proto — module « lib ».
+
 use serde::{Deserialize, Serialize};
 
 pub const PROTOCOL_VERSION: u32 = 2;

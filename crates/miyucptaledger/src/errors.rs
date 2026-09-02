@@ -1,3 +1,9 @@
+//! @id     miyucptaledger_errors
+//! @do     definir_miyucptaledger_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucptaledger — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyucptaledgerError {
     NoMandate,

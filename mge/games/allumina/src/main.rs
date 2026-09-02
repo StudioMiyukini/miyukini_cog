@@ -1,3 +1,9 @@
+//! @id     games_allumina_main
+//! @do     definir_dt
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « main ».
+
 //! Allumina entry point.
 //!
 //! * Default: open a window and play (isometric wgpu renderer + winit loop).

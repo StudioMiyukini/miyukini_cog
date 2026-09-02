@@ -1,3 +1,9 @@
+//! @id     jay1tribu_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  jay1tribu — module « main ».
+
 //! Point d'entree binaire Jay1Tribu (standalone).
 //! Lance par Central (ServiceManager) ou directement par l'utilisateur.
 //!

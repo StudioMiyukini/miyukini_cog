@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_level_up
+//! @do     level_up_system
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems level up ».
+
 //! Synchronise stats with progression on level up. Allumina hands the player
 //! 10 unspent attribute points per level (see `STAT_POINTS_PER_LEVEL`) which
 //! they distribute manually via the character sheet — no auto-allocation.

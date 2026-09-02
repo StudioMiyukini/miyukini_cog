@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_skill_clerc
+//! @do     definir_clerc_levels
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems skill clerc ».
+
 //! Clerc: the SOUTIEN / BÉNI / DIVIN branches — aura toggles, level curves,
 //! and the support status ticks (auras, conversion, pardon, resurrection).
 //! Shared helpers are reached via `super`.

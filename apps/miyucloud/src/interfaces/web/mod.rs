@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_web_mod
+//! @do     create_web_routes
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces web mod ».
+
 use crate::common::config::AppConfig;
 use crate::common::di::AppState;
 use axum::http::header::{CACHE_CONTROL, HeaderValue};

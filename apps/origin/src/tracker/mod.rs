@@ -1,3 +1,9 @@
+//! @id     origin_tracker_mod
+//! @do     declarer_module_catalog
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker mod ».
+
 //! Serveur Tracker MWS Origin.
 //!
 //! Gère les pools de COGs, le catalogue et les connexions.

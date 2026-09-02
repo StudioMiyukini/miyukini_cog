@@ -1,3 +1,9 @@
+//! @id     miyumarket_package
+//! @do     definir_package_extension
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumarket — module « package ».
+
 //! Package service — format du paquet distribué via le Market.
 //!
 //! # Format du package

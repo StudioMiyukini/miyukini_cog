@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_skill_soldat
+//! @do     grand_coup_mult
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems skill soldat ».
+
 //! Soldat: melee-technique damage curves (Grand coup / Taille / Estocs) and
 //! the battle-order system (synergies, bonuses, application + per-tick upkeep).
 //! Shared helpers (`lf`, `skill_level_by_id`, `emit_fx`) are reached via `super`.

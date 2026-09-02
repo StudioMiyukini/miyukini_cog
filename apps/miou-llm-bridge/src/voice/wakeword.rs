@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_voice_wakeword
+//! @do     definir_wake_word_event
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « voice wakeword ».
+
 //! Pont IPC vers le détecteur de mot de réveil (rustpotter).
 //!
 //! rustpotter est dans un binaire/service séparé (`miyualicia-wakeword`) pour

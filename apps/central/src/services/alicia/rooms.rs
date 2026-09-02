@@ -1,3 +1,9 @@
+//! @id     central_services_alicia_rooms
+//! @do     rooms_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services alicia rooms ».
+
 //! Ecran Configuration des pieces Alicia Home Assistante.
 //!
 //! Grille 2x2 avec les 4 pieces surveillees.

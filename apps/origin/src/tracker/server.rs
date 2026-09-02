@@ -1,3 +1,9 @@
+//! @id     origin_tracker_server
+//! @do     definir_tracker_server
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker server ».
+
 //! Serveur Tracker TCP.
 //!
 //! Écoute sur le port 21000 et gère la découverte des COGs et lobbys.

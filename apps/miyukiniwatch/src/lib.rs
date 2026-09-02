@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_lib
+//! @do     declarer_module_views
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « lib ».
+
 //! MiyukiniWatch — App standalone Dioxus.
 //!
 //! Mesure des habitudes au service de Miou.

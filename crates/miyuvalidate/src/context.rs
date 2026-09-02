@@ -1,3 +1,9 @@
+//! @id     miyuvalidate_context
+//! @do     definir_governed_context
+//! @role   rule
+//! @layer  core
+//! @human  miyuvalidate — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

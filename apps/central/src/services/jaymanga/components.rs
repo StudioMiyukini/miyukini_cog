@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_components
+//! @do     stat_card
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga components ».
+
 //! Composants partagés JayManga — StatCard, Badge, ActionButton, EmptyState, PageHeader.
 
 use dioxus::prelude::*;

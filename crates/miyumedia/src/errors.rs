@@ -1,3 +1,9 @@
+//! @id     miyumedia_errors
+//! @do     definir_miyumedia_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumedia — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyumediaError {
     NoMandate,

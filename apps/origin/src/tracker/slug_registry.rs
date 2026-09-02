@@ -1,3 +1,9 @@
+//! @id     origin_tracker_slug_registry
+//! @do     definir_reserved_slugs
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker slug registry ».
+
 //! Registre des slugs de sous-domaines COG.
 //!
 //! Associe un slug (sous-domaine) à un `cog_id` pour le routage

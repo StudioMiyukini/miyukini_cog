@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_folder_repository
+//! @do     definir_trait_folder_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories folder repository ».
+
 //! Domain persistence port for the Folder entity.
 //!
 //! Defines the contract that any folder storage implementation

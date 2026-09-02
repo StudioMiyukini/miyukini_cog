@@ -1,3 +1,9 @@
+//! @id     central_miou_context
+//! @do     definir_bot_context
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « miou context ».
+
 //! Construction du BotContext depuis les sources de données.
 
 use chrono::{DateTime, Timelike, Utc};

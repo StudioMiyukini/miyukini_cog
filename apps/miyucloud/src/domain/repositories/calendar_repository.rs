@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_calendar_repository
+//! @do     definir_calendar_repository_result
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories calendar repository ».
+
 use crate::common::errors::DomainError;
 use crate::domain::entities::calendar::Calendar;
 use uuid::Uuid;

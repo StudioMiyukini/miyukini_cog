@@ -1,3 +1,9 @@
+//! @id     crates_mge_nav_lib
+//! @do     definir_nav_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-nav — module « lib ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,3 +1,9 @@
+//! @id     miyutreasury_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyutreasury — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuTreasury — toolkit.treasury.forecast
 //!

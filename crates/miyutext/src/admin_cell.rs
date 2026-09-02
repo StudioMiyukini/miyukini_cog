@@ -1,3 +1,9 @@
+//! @id     miyutext_admin_cell
+//! @do     definir_miyu_text_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyutext — module « admin cell ».
+
 //! Cellule Admin MiyuText. Exposée uniquement à MiyukiniAdmin.
 
 use serde::{Deserialize, Serialize};

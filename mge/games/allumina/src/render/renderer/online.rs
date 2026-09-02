@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_renderer_online
+//! @do     implementer_game_app
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render renderer online ».
+
 //! Online (multiplayer) frame path for [`GameApp`]: pumping the network
 //! client, applying server snapshots with local prediction, handling in-game
 //! messages, and the multiplayer HUD. Compiled only with the `netcode` feature.

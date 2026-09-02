@@ -1,3 +1,9 @@
+//! @id     miyukini_whisper_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukini-whisper — module « main ».
+
 //! Entree binaire Miyukini Whisper.
 
 use miyukini_whisper_app::{run, WhisperConfig};

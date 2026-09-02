@@ -1,3 +1,9 @@
+//! @id     games_allumina_network_snapshot_renderer
+//! @do     decode_offhand
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « network snapshot renderer ».
+
 //! Snapshot → render bridge for the online multiplayer client.
 //!
 //! In online mode the simulation runs on the server: the client never ticks an

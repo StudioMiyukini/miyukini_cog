@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_reader_stats
+//! @do     reader_stats
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views reader stats ».
+
 //! Statistiques lecteurs JayManga — progression, favoris, badges.
 
 use super::components::{EmptyState, PageHeader, StatCard};

@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_harness
+//! @do     definir_authority_mode
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « harness ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_world::zone::ZoneId;

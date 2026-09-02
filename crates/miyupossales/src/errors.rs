@@ -1,3 +1,9 @@
+//! @id     miyupossales_errors
+//! @do     definir_miyupossales_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupossales — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyupossalesError {
     NoMandate,

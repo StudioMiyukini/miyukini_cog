@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_user
+//! @do     definir_user_role
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities user ».
+
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 

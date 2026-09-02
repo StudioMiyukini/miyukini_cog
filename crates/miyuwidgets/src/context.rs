@@ -1,3 +1,9 @@
+//! @id     miyuwidgets_context
+//! @do     definir_governed_context
+//! @role   ui
+//! @layer  core
+//! @human  miyuwidgets — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

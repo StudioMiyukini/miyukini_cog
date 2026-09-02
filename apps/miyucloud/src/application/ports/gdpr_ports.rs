@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_gdpr_ports
+//! @do     definir_user_data_export
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports gdpr ports ».
+
 //! GDPR individual rights port — RGPD Art. 15-20.
 //!
 //! Provides data export, erasure ("right to be forgotten"), and rectification.

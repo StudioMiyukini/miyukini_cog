@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_party
+//! @do     definir_max_party_size
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « party ».
+
 use serde::{Deserialize, Serialize};
 
 /// Maximum party size.

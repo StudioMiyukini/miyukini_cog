@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_service
+//! @do     definir_cal_dav_service
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav service ».
+
 use rusqlite::params;
 use std::sync::{Arc, Mutex};
 

@@ -1,3 +1,9 @@
+//! @id     miyubookmarks_errors
+//! @do     definir_miyubookmarks_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubookmarks — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyubookmarksError {
     NoMandate,

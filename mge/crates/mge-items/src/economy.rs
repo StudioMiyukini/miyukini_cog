@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_economy
+//! @do     definir_gold
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « economy ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::item::{ItemFamily, ItemKind};

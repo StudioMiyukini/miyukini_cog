@@ -1,3 +1,9 @@
+//! @id     jaycloud_files_encryption
+//! @do     fournir_files_encryption
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « files encryption ».
+
 //! Chiffrement bloc spécifique au filesystem (wrap autour de `kits::crypto_kit`).
 //!
 //! Implémentation en PR-2 (P3.a). API attendue :

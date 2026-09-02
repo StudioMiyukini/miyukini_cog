@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_admin_handler
+//! @do     admin_routes
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers admin handler ».
+
 use axum::{
     Router,
     extract::{Json, Path, Query, State},

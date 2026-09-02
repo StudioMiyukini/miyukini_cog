@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_voice_tts
+//! @do     definir_piper_config
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « voice tts ».
+
 //! Gestion TTS — synthèse vocale via le sous-processus Piper.
 //!
 //! Piper lit le texte sur stdin et écrit du PCM WAV sur stdout.

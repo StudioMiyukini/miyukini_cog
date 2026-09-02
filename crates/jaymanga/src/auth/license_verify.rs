@@ -1,3 +1,9 @@
+//! @id     jaymanga_auth_license_verify
+//! @do     license_verify_access
+//! @role   securite
+//! @layer  core
+//! @human  jaymanga — module « auth license verify ».
+
 //! Vérification des licences d'achat JayManga.
 //!
 //! Contrôle l'accès aux pages payantes en vérifiant qu'une licence

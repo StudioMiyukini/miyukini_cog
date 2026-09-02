@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_scheduler
+//! @do     definir_task_type
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « scheduler ».
+
 //! Scheduler pour Alicia — taches one-shot et cron.
 //!
 //! Stocke les taches dans SQLite, verifie toutes les 30s si une tache est due.

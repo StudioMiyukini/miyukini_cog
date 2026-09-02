@@ -1,3 +1,9 @@
+//! @id     central_mobile_screens_connexion
+//! @do     definir_connexion_status
+//! @role   ui
+//! @layer  app
+//! @human  central-mobile — module « screens connexion ».
+
 //! Écran de connexion — login utilisateur COG.
 //!
 //! Flow :

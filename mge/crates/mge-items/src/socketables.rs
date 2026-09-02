@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_socketables
+//! @do     definir_socketable_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « socketables ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_gameplay::stats::{Modifier, StatKind};

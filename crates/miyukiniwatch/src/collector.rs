@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_collector
+//! @do     definir_max_metrics_per_session
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukiniwatch — module « collector ».
+
 //! Opérateur Collector — collecte passive des métriques.
 
 use crate::data::{MetricRecord, MiyukiniWatchDb, Prefs, TimeSlot};

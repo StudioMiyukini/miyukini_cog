@@ -1,3 +1,9 @@
+//! @id     central_services_home
+//! @do     home_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services home ».
+
 //! Vue d'accueil (onglet Home) — Salon Genshin-like avec chat Miou.
 
 use crate::components::{ServiceFilter, ServiceGrid};

@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_hud
+//! @do     definir_orb_kind
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « hud ».
+
 use serde::{Deserialize, Serialize};
 
 /// Resource orb type (life or resource).

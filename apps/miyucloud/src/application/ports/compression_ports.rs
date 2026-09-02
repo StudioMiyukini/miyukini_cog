@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_compression_ports
+//! @do     definir_compression_level
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports compression ports ».
+
 //! Compression Port - Application layer abstraction for compression services.
 //!
 //! This module defines the port (trait) for compression operations,

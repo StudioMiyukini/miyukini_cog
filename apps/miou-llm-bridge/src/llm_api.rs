@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_llm_api
+//! @do     definir_llm_chat_request
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « llm api ».
+
 //! API LLM partagée — endpoints pour les services COG.
 //!
 //! Permet aux autres services de l'écosystème Miyukini (JayKonta, JayKoa,

@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_sprite
+//! @do     y_sort
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render sprite ».
+
 //! Sprite drawing: places world entities into the batch as tinted quads,
 //! depth-sorted by isometric Y so nearer entities overdraw farther ones.
 //!

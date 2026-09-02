@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_skill_archer
+//! @do     definir_archer_levels
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems skill archer ».
+
 //! Archer: the three thematic branches (Tir / Piège / Agilité). Pure
 //! per-skill level curves; shared helpers (`lf`) are reached via `super`.
 

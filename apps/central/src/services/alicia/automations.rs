@@ -1,3 +1,9 @@
+//! @id     central_services_alicia_automations
+//! @do     definir_automation_example
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services alicia automations ».
+
 //! Ecran Automatisations Alicia Home Assistante.
 //!
 //! Affiche les automatisations configurees (trigger -> conditions -> actions).

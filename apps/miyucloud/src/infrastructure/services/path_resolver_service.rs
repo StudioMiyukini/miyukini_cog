@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_path_resolver_service
+//! @do     definir_resolved_resource
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services path resolver service ».
+
 //! Single-query WebDAV path resolver.
 //!
 //! Replaces the double-query pattern (`get_folder_by_path` + `get_file_by_path`)

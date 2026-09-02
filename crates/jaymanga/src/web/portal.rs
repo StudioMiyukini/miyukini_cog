@@ -1,3 +1,9 @@
+//! @id     jaymanga_web_portal
+//! @do     definir_catalog_page_context
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « web portal ».
+
 //! Portail vendeur JayManga (catalogue public, liseuse web).
 //!
 //! Définit les structures de données pour le rendu SSR des templates

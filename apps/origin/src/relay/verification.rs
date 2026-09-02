@@ -1,3 +1,9 @@
+//! @id     origin_relay_verification
+//! @do     definir_verification_error
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay verification ».
+
 //! Vérification de conformité MWS.
 //!
 //! Implémente les trois phases de vérification :

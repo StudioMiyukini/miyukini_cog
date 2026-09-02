@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_feed
+//! @do     definir_feed_filter
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub feed ».
+
 //! Feed JayClub — timeline algorithmique.
 
 use crate::UserId;

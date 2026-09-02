@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_world_map
+//! @do     definir_chunk_coord
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « world map ».
+
 use crate::constants::*;
 use crate::entity::*;
 

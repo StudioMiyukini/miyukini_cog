@@ -1,3 +1,9 @@
+//! @id     team_config
+//! @do     definir_team_config
+//! @role   config
+//! @layer  app
+//! @human  team — module « config ».
+
 //! Configuration TEAM.
 
 use serde::{Deserialize, Serialize};

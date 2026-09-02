@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_file_upload_service
+//! @do     extract_username_from_path
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services file upload service ».
+
 use std::path::Path;
 use std::sync::Arc;
 

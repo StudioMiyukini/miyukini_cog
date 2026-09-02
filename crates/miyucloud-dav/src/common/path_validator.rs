@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_common_path_validator
+//! @do     validate_dav_path
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « common path validator ».
+
 use super::dav_error::DavError;
 
 /// Validates and normalizes a WebDAV path.

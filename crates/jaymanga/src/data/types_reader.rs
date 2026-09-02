@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_types_reader
+//! @do     definir_reader_favorite
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data types reader ».
+
 //! Types de domaine pour le lecteur JayManga.
 //!
 //! Définit : ReaderFavorite, ReaderProgression, ReaderBadge,

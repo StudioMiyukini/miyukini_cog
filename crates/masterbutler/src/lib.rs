@@ -1,3 +1,9 @@
+//! @id     masterbutler_lib
+//! @do     declarer_module_orchestrator
+//! @role   orchestration
+//! @layer  core
+//! @human  masterbutler — module « lib ».
+
 //! # MasterButler
 //!
 //! Orchestrateur de workflows du Miyukini Core System.

@@ -1,3 +1,9 @@
+//! @id     miyucomptareports_context
+//! @do     definir_governed_context
+//! @role   donnee
+//! @layer  core
+//! @human  miyucomptareports — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

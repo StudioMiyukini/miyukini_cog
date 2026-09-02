@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_club_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-club main ».
+
 //! JayClub — reseau social Miyukini.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     origin_tracker_protocol
+//! @do     definir_tracker_protocol_version
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker protocol ».
+
 //! Protocole Tracker.
 //!
 //! Messages binaires pour la communication avec le Tracker.

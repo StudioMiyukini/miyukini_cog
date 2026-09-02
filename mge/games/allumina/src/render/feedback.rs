@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_feedback
+//! @do     definir_damage_number
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « render feedback ».
+
 //! Transient combat feedback the renderer owns (not part of the sim):
 //! floating damage numbers and fading corpses. Fed by the sim's
 //! [`crate::ecs::RenderEvent`] stream each frame.

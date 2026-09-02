@@ -1,3 +1,9 @@
+//! @id     central_components_service_card
+//! @do     definir_service_card_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « components service card ».
+
 //! Carte d'un service (affichage dans la grille).
 
 use crate::state::{use_app_state, ServiceInfo};

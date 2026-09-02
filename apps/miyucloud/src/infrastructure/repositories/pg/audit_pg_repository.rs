@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_audit_pg_repository
+//! @do     definir_batch_size
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg audit pg repository ».
+
 //! PostgreSQL-backed audit log repository with batched async inserts.
 //!
 //! Events are sent to an mpsc channel and flushed in batches (every 100ms

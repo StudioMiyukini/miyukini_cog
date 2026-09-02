@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_transaction_utils
+//! @do     with_transaction
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg transaction utils ».
+
 use sqlx::{Error as SqlxError, PgPool, Postgres, Transaction};
 use std::sync::Arc;
 use tracing::{debug, error, info};

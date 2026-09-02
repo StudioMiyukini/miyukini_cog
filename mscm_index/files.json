@@ -1,4 +1,100 @@
 {
+  "apps/alicia-mvp/src/demo.rs": [
+    "alicia_mvp_demo"
+  ],
+  "apps/alicia-mvp/src/listen.rs": [
+    "alicia_mvp_listen"
+  ],
+  "apps/alicia-mvp/src/main.rs": [
+    "alicia_mvp_main"
+  ],
+  "apps/alicia-mvp/src/mcp.rs": [
+    "alicia_mvp_mcp"
+  ],
+  "apps/alicia-mvp/src/nlu.rs": [
+    "alicia_mvp_nlu"
+  ],
+  "apps/alicia-mvp/src/providers.rs": [
+    "alicia_mvp_providers"
+  ],
+  "apps/alicia-mvp/src/runtime.rs": [
+    "alicia_mvp_runtime"
+  ],
+  "apps/alicia-mvp/src/scheduler.rs": [
+    "alicia_mvp_scheduler"
+  ],
+  "apps/alicia-mvp/src/shell.rs": [
+    "alicia_mvp_shell"
+  ],
+  "apps/alicia-mvp/src/skills.rs": [
+    "alicia_mvp_skills"
+  ],
+  "apps/alicia-mvp/src/stt_whisper.rs": [
+    "alicia_mvp_stt_whisper"
+  ],
+  "apps/alicia-mvp/src/tools.rs": [
+    "alicia_mvp_tools"
+  ],
+  "apps/alicia-mvp/src/train.rs": [
+    "alicia_mvp_train"
+  ],
+  "apps/alicia-mvp/src/voice.rs": [
+    "alicia_mvp_voice"
+  ],
+  "apps/central-mobile/src/app.rs": [
+    "central_mobile_app"
+  ],
+  "apps/central-mobile/src/bridge.rs": [
+    "central_mobile_bridge"
+  ],
+  "apps/central-mobile/src/components/bottom_nav.rs": [
+    "central_mobile_components_bottom_nav"
+  ],
+  "apps/central-mobile/src/components/bridge_status.rs": [
+    "central_mobile_components_bridge_status"
+  ],
+  "apps/central-mobile/src/components/service_card.rs": [
+    "central_mobile_components_service_card"
+  ],
+  "apps/central-mobile/src/main.rs": [
+    "central_mobile_main"
+  ],
+  "apps/central-mobile/src/platform.rs": [
+    "central_mobile_platform"
+  ],
+  "apps/central-mobile/src/screens/connexion.rs": [
+    "central_mobile_screens_connexion"
+  ],
+  "apps/central-mobile/src/screens/pairing.rs": [
+    "central_mobile_screens_pairing"
+  ],
+  "apps/central-mobile/src/services/home.rs": [
+    "central_mobile_services_home"
+  ],
+  "apps/central-mobile/src/services/market.rs": [
+    "central_mobile_services_market"
+  ],
+  "apps/central-mobile/src/services/miou_chat.rs": [
+    "central_mobile_services_miou_chat"
+  ],
+  "apps/central-mobile/src/services/mws_status.rs": [
+    "central_mobile_services_mws_status"
+  ],
+  "apps/central-mobile/src/services/remote_control.rs": [
+    "central_mobile_services_remote_control"
+  ],
+  "apps/central-mobile/src/state.rs": [
+    "central_mobile_state"
+  ],
+  "apps/central-mobile/src/theme.rs": [
+    "central_mobile_theme"
+  ],
+  "apps/central/src/app.rs": [
+    "central_app"
+  ],
+  "apps/central/src/audio.rs": [
+    "central_audio"
+  ],
   "apps/central/src/components/calendar/agenda_list.rs": [
     "central.components.calendar.agenda_list"
   ],
@@ -23,17 +119,224 @@
   "apps/central/src/components/calendar/week_view.rs": [
     "central.components.calendar.week_view"
   ],
+  "apps/central/src/components/header.rs": [
+    "central_components_header"
+  ],
+  "apps/central/src/components/mobile_devices.rs": [
+    "central_components_mobile_devices"
+  ],
   "apps/central/src/components/mod.rs": [
     "central.components"
+  ],
+  "apps/central/src/components/service_card.rs": [
+    "central_components_service_card"
+  ],
+  "apps/central/src/components/service_grid.rs": [
+    "central_components_service_grid"
   ],
   "apps/central/src/components/service_sidebar.rs": [
     "central.components.service_sidebar"
   ],
+  "apps/central/src/components/tab_bar.rs": [
+    "central_components_tab_bar"
+  ],
+  "apps/central/src/data.rs": [
+    "central_data"
+  ],
+  "apps/central/src/kindmother_launcher.rs": [
+    "central_kindmother_launcher"
+  ],
+  "apps/central/src/llm_client.rs": [
+    "central_llm_client"
+  ],
   "apps/central/src/main.rs": [
     "central"
   ],
+  "apps/central/src/market_client.rs": [
+    "central_market_client"
+  ],
+  "apps/central/src/miou/bubble.rs": [
+    "central_miou_bubble"
+  ],
+  "apps/central/src/miou/context.rs": [
+    "central_miou_context"
+  ],
+  "apps/central/src/miou/engine.rs": [
+    "central_miou_engine"
+  ],
+  "apps/central/src/miou/mod.rs": [
+    "central_miou_mod"
+  ],
+  "apps/central/src/miou/state.rs": [
+    "central_miou_state"
+  ],
+  "apps/central/src/miou/templates.rs": [
+    "central_miou_templates"
+  ],
   "apps/central/src/remote.rs": [
     "central_remote_module"
+  ],
+  "apps/central/src/screens/connexion.rs": [
+    "central_screens_connexion"
+  ],
+  "apps/central/src/screens/mod.rs": [
+    "central_screens_mod"
+  ],
+  "apps/central/src/screens/profile_window.rs": [
+    "central_screens_profile_window"
+  ],
+  "apps/central/src/screens/rite_entree.rs": [
+    "central_screens_rite_entree"
+  ],
+  "apps/central/src/service_manager/installer.rs": [
+    "central_service_manager_installer"
+  ],
+  "apps/central/src/service_manager/launcher.rs": [
+    "central_service_manager_launcher"
+  ],
+  "apps/central/src/service_manager/mod.rs": [
+    "central_service_manager_mod"
+  ],
+  "apps/central/src/service_manager/registry.rs": [
+    "central_service_manager_registry"
+  ],
+  "apps/central/src/services/alicia/automations.rs": [
+    "central_services_alicia_automations"
+  ],
+  "apps/central/src/services/alicia/devices.rs": [
+    "central_services_alicia_devices"
+  ],
+  "apps/central/src/services/alicia/mod.rs": [
+    "central_services_alicia_mod"
+  ],
+  "apps/central/src/services/alicia/rooms.rs": [
+    "central_services_alicia_rooms"
+  ],
+  "apps/central/src/services/alicia/settings.rs": [
+    "central_services_alicia_settings"
+  ],
+  "apps/central/src/services/alicia/state.rs": [
+    "central_services_alicia_state"
+  ],
+  "apps/central/src/services/external_service_view.rs": [
+    "central_services_external_service_view"
+  ],
+  "apps/central/src/services/game_view.rs": [
+    "central_services_game_view"
+  ],
+  "apps/central/src/services/home.rs": [
+    "central_services_home"
+  ],
+  "apps/central/src/services/jay1tribu/mod.rs": [
+    "central_services_jay1tribu_mod"
+  ],
+  "apps/central/src/services/jaykoa/calendar_view.rs": [
+    "central_services_jaykoa_calendar_view"
+  ],
+  "apps/central/src/services/jaykoa/components.rs": [
+    "central_services_jaykoa_components"
+  ],
+  "apps/central/src/services/jaykoa/day_view.rs": [
+    "central_services_jaykoa_day_view"
+  ],
+  "apps/central/src/services/jaykoa/event_form.rs": [
+    "central_services_jaykoa_event_form"
+  ],
+  "apps/central/src/services/jaykoa/mod.rs": [
+    "central_services_jaykoa_mod"
+  ],
+  "apps/central/src/services/jaykoa/month_view.rs": [
+    "central_services_jaykoa_month_view"
+  ],
+  "apps/central/src/services/jaykoa/schedule_view.rs": [
+    "central_services_jaykoa_schedule_view"
+  ],
+  "apps/central/src/services/jaykoa/sidebar.rs": [
+    "central_services_jaykoa_sidebar"
+  ],
+  "apps/central/src/services/jaykoa/week_view.rs": [
+    "central_services_jaykoa_week_view"
+  ],
+  "apps/central/src/services/jaykonta/components.rs": [
+    "central_services_jaykonta_components"
+  ],
+  "apps/central/src/services/jaykonta/entry_point.rs": [
+    "central_services_jaykonta_entry_point"
+  ],
+  "apps/central/src/services/jaykonta/mod.rs": [
+    "central_services_jaykonta_mod"
+  ],
+  "apps/central/src/services/jaykonta/purse_dashboard.rs": [
+    "central_services_jaykonta_purse_dashboard"
+  ],
+  "apps/central/src/services/jaykonta/purse_forecast.rs": [
+    "central_services_jaykonta_purse_forecast"
+  ],
+  "apps/central/src/services/jaykonta/purse_movement_form.rs": [
+    "central_services_jaykonta_purse_movement_form"
+  ],
+  "apps/central/src/services/jaykonta/purse_movements.rs": [
+    "central_services_jaykonta_purse_movements"
+  ],
+  "apps/central/src/services/jaykonta/purse_recurring.rs": [
+    "central_services_jaykonta_purse_recurring"
+  ],
+  "apps/central/src/services/jaykonta/sidebar.rs": [
+    "central_services_jaykonta_sidebar"
+  ],
+  "apps/central/src/services/jaykonta_view.rs": [
+    "central_services_jaykonta_view"
+  ],
+  "apps/central/src/services/jaymanga/aggregation.rs": [
+    "central_services_jaymanga_aggregation"
+  ],
+  "apps/central/src/services/jaymanga/boutique.rs": [
+    "central_services_jaymanga_boutique"
+  ],
+  "apps/central/src/services/jaymanga/catalogue.rs": [
+    "central_services_jaymanga_catalogue"
+  ],
+  "apps/central/src/services/jaymanga/chapters.rs": [
+    "central_services_jaymanga_chapters"
+  ],
+  "apps/central/src/services/jaymanga/components.rs": [
+    "central_services_jaymanga_components"
+  ],
+  "apps/central/src/services/jaymanga/dashboard.rs": [
+    "central_services_jaymanga_dashboard"
+  ],
+  "apps/central/src/services/jaymanga/library.rs": [
+    "central_services_jaymanga_library"
+  ],
+  "apps/central/src/services/jaymanga/mod.rs": [
+    "central_services_jaymanga_mod"
+  ],
+  "apps/central/src/services/jaymanga/onboarding.rs": [
+    "central_services_jaymanga_onboarding"
+  ],
+  "apps/central/src/services/jaymanga/profile.rs": [
+    "central_services_jaymanga_profile"
+  ],
+  "apps/central/src/services/jaymanga/promotions.rs": [
+    "central_services_jaymanga_promotions"
+  ],
+  "apps/central/src/services/jaymanga/reader.rs": [
+    "central_services_jaymanga_reader"
+  ],
+  "apps/central/src/services/jaymanga/reader_stats.rs": [
+    "central_services_jaymanga_reader_stats"
+  ],
+  "apps/central/src/services/jaymanga/sales.rs": [
+    "central_services_jaymanga_sales"
+  ],
+  "apps/central/src/services/jaymanga/series.rs": [
+    "central_services_jaymanga_series"
+  ],
+  "apps/central/src/services/jaymanga/sidebar.rs": [
+    "central_services_jaymanga_sidebar"
+  ],
+  "apps/central/src/services/jaymanga/work_form.rs": [
+    "central_services_jaymanga_work_form"
   ],
   "apps/central/src/services/lifegame/canvas.rs": [
     "central.services.lifegame.canvas"
@@ -46,6 +349,18 @@
   ],
   "apps/central/src/services/lifegame/stats_bar.rs": [
     "central.services.lifegame.stats_bar"
+  ],
+  "apps/central/src/services/market/catalog.rs": [
+    "central_services_market_catalog"
+  ],
+  "apps/central/src/services/market/mod.rs": [
+    "central_services_market_mod"
+  ],
+  "apps/central/src/services/market/service_detail.rs": [
+    "central_services_market_service_detail"
+  ],
+  "apps/central/src/services/market/sidebar.rs": [
+    "central_services_market_sidebar"
   ],
   "apps/central/src/services/miyucloud/auth_security.rs": [
     "miyucloud_auth_security_components"
@@ -74,6 +389,9 @@
   "apps/central/src/services/miyucloud/settings.rs": [
     "miyucloud_settings"
   ],
+  "apps/central/src/services/miyucloud/setup_wizard.rs": [
+    "central_services_miyucloud_setup_wizard"
+  ],
   "apps/central/src/services/miyucloud/share_dialog.rs": [
     "miyucloud_share_dialog"
   ],
@@ -92,14 +410,50 @@
   "apps/central/src/services/miyucloud/upload.rs": [
     "miyucloud_upload"
   ],
+  "apps/central/src/services/miyucloud_settings.rs": [
+    "central_services_miyucloud_settings"
+  ],
+  "apps/central/src/services/miyukini_whisper/mod.rs": [
+    "central_services_miyukini_whisper_mod"
+  ],
+  "apps/central/src/services/miyukiniwatch/audit.rs": [
+    "central_services_miyukiniwatch_audit"
+  ],
+  "apps/central/src/services/miyukiniwatch/dashboard.rs": [
+    "central_services_miyukiniwatch_dashboard"
+  ],
+  "apps/central/src/services/miyukiniwatch/detail.rs": [
+    "central_services_miyukiniwatch_detail"
+  ],
+  "apps/central/src/services/miyukiniwatch/mod.rs": [
+    "central_services_miyukiniwatch_mod"
+  ],
+  "apps/central/src/services/miyukiniwatch/params.rs": [
+    "central_services_miyukiniwatch_params"
+  ],
   "apps/central/src/services/mod.rs": [
     "central.services"
+  ],
+  "apps/central/src/services/mws_settings.rs": [
+    "central_services_mws_settings"
+  ],
+  "apps/central/src/services/mws_view.rs": [
+    "central_services_mws_view"
+  ],
+  "apps/central/src/services/service_view.rs": [
+    "central_services_service_view"
   ],
   "apps/central/src/services/ui_assets.rs": [
     "central.services.ui_assets"
   ],
   "apps/central/src/services/ui_builder.rs": [
     "central.services.ui_builder"
+  ],
+  "apps/central/src/state.rs": [
+    "central_state"
+  ],
+  "apps/central/src/theme.rs": [
+    "central_theme"
   ],
   "apps/cog-web-portal/src/csrf.rs": [
     "cog_web_portal_csrf"
@@ -130,6 +484,975 @@
   ],
   "apps/cog-web-portal/src/templates.rs": [
     "cog_web_portal_templates"
+  ],
+  "apps/jay1tribu/src/lib.rs": [
+    "jay1tribu_lib"
+  ],
+  "apps/jay1tribu/src/main.rs": [
+    "jay1tribu_main"
+  ],
+  "apps/jay1tribu/src/views/mod.rs": [
+    "jay1tribu_views_mod"
+  ],
+  "apps/jaybureau-suite/hub/src/main.rs": [
+    "jaybureau_suite_hub_main"
+  ],
+  "apps/jaybureau-suite/jay-club/src/main.rs": [
+    "jaybureau_suite_jay_club_main"
+  ],
+  "apps/jaybureau-suite/jay-docs/src/main.rs": [
+    "jaybureau_suite_jay_docs_main"
+  ],
+  "apps/jaybureau-suite/jay-docs/src/presence_bar.rs": [
+    "jaybureau_suite_jay_docs_presence_bar"
+  ],
+  "apps/jaybureau-suite/jay-docs/src/toolbar.rs": [
+    "jaybureau_suite_jay_docs_toolbar"
+  ],
+  "apps/jaybureau-suite/jay-formulaire/src/main.rs": [
+    "jaybureau_suite_jay_formulaire_main"
+  ],
+  "apps/jaybureau-suite/jay-mail/src/main.rs": [
+    "jaybureau_suite_jay_mail_main"
+  ],
+  "apps/jaybureau-suite/jay-message/src/main.rs": [
+    "jaybureau_suite_jay_message_main"
+  ],
+  "apps/jaybureau-suite/jay-reunion/src/main.rs": [
+    "jaybureau_suite_jay_reunion_main"
+  ],
+  "apps/jaybureau-suite/jay-sheets/src/main.rs": [
+    "jaybureau_suite_jay_sheets_main"
+  ],
+  "apps/jaybureau-suite/jay-slides/src/main.rs": [
+    "jaybureau_suite_jay_slides_main"
+  ],
+  "apps/jaykoa/src/lib.rs": [
+    "jaykoa_lib"
+  ],
+  "apps/jaykoa/src/main.rs": [
+    "jaykoa_main"
+  ],
+  "apps/jaykoa/src/views/calendar_view.rs": [
+    "jaykoa_views_calendar_view"
+  ],
+  "apps/jaykoa/src/views/components.rs": [
+    "jaykoa_views_components"
+  ],
+  "apps/jaykoa/src/views/day_view.rs": [
+    "jaykoa_views_day_view"
+  ],
+  "apps/jaykoa/src/views/event_form.rs": [
+    "jaykoa_views_event_form"
+  ],
+  "apps/jaykoa/src/views/mod.rs": [
+    "jaykoa_views_mod"
+  ],
+  "apps/jaykoa/src/views/month_view.rs": [
+    "jaykoa_views_month_view"
+  ],
+  "apps/jaykoa/src/views/schedule_view.rs": [
+    "jaykoa_views_schedule_view"
+  ],
+  "apps/jaykoa/src/views/sidebar.rs": [
+    "jaykoa_views_sidebar"
+  ],
+  "apps/jaykoa/src/views/week_view.rs": [
+    "jaykoa_views_week_view"
+  ],
+  "apps/jaykonta/src/lib.rs": [
+    "jaykonta_lib"
+  ],
+  "apps/jaykonta/src/main.rs": [
+    "jaykonta_main"
+  ],
+  "apps/jaykonta/src/views/components.rs": [
+    "jaykonta_views_components"
+  ],
+  "apps/jaykonta/src/views/entry_point.rs": [
+    "jaykonta_views_entry_point"
+  ],
+  "apps/jaykonta/src/views/mod.rs": [
+    "jaykonta_views_mod"
+  ],
+  "apps/jaykonta/src/views/purse_dashboard.rs": [
+    "jaykonta_views_purse_dashboard"
+  ],
+  "apps/jaykonta/src/views/purse_forecast.rs": [
+    "jaykonta_views_purse_forecast"
+  ],
+  "apps/jaykonta/src/views/purse_movement_form.rs": [
+    "jaykonta_views_purse_movement_form"
+  ],
+  "apps/jaykonta/src/views/purse_movements.rs": [
+    "jaykonta_views_purse_movements"
+  ],
+  "apps/jaykonta/src/views/purse_recurring.rs": [
+    "jaykonta_views_purse_recurring"
+  ],
+  "apps/jaykonta/src/views/sidebar.rs": [
+    "jaykonta_views_sidebar"
+  ],
+  "apps/jaymanga/src/lib.rs": [
+    "jaymanga_lib"
+  ],
+  "apps/jaymanga/src/main.rs": [
+    "jaymanga_main"
+  ],
+  "apps/jaymanga/src/views/aggregation.rs": [
+    "jaymanga_views_aggregation"
+  ],
+  "apps/jaymanga/src/views/boutique.rs": [
+    "jaymanga_views_boutique"
+  ],
+  "apps/jaymanga/src/views/catalogue.rs": [
+    "jaymanga_views_catalogue"
+  ],
+  "apps/jaymanga/src/views/chapters.rs": [
+    "jaymanga_views_chapters"
+  ],
+  "apps/jaymanga/src/views/components.rs": [
+    "jaymanga_views_components"
+  ],
+  "apps/jaymanga/src/views/dashboard.rs": [
+    "jaymanga_views_dashboard"
+  ],
+  "apps/jaymanga/src/views/library.rs": [
+    "jaymanga_views_library"
+  ],
+  "apps/jaymanga/src/views/mod.rs": [
+    "jaymanga_views_mod"
+  ],
+  "apps/jaymanga/src/views/onboarding.rs": [
+    "jaymanga_views_onboarding"
+  ],
+  "apps/jaymanga/src/views/profile.rs": [
+    "jaymanga_views_profile"
+  ],
+  "apps/jaymanga/src/views/promotions.rs": [
+    "jaymanga_views_promotions"
+  ],
+  "apps/jaymanga/src/views/reader.rs": [
+    "jaymanga_views_reader"
+  ],
+  "apps/jaymanga/src/views/reader_stats.rs": [
+    "jaymanga_views_reader_stats"
+  ],
+  "apps/jaymanga/src/views/sales.rs": [
+    "jaymanga_views_sales"
+  ],
+  "apps/jaymanga/src/views/series.rs": [
+    "jaymanga_views_series"
+  ],
+  "apps/jaymanga/src/views/sidebar.rs": [
+    "jaymanga_views_sidebar"
+  ],
+  "apps/jaymanga/src/views/work_form.rs": [
+    "jaymanga_views_work_form"
+  ],
+  "apps/maia-llm/src/api/chat.rs": [
+    "maia_llm_api_chat"
+  ],
+  "apps/maia-llm/src/api/health.rs": [
+    "maia_llm_api_health"
+  ],
+  "apps/maia-llm/src/api/mod.rs": [
+    "maia_llm_api_mod"
+  ],
+  "apps/maia-llm/src/api/models.rs": [
+    "maia_llm_api_models"
+  ],
+  "apps/maia-llm/src/auth.rs": [
+    "maia_llm_auth"
+  ],
+  "apps/maia-llm/src/config.rs": [
+    "maia_llm_config"
+  ],
+  "apps/maia-llm/src/engine.rs": [
+    "maia_llm_engine"
+  ],
+  "apps/maia-llm/src/main.rs": [
+    "maia_llm_main"
+  ],
+  "apps/maia-llm/src/store.rs": [
+    "maia_llm_store"
+  ],
+  "apps/miou-llm-bridge/src/agents/builtin.rs": [
+    "miou_llm_bridge_agents_builtin"
+  ],
+  "apps/miou-llm-bridge/src/agents/custom.rs": [
+    "miou_llm_bridge_agents_custom"
+  ],
+  "apps/miou-llm-bridge/src/agents/mod.rs": [
+    "miou_llm_bridge_agents_mod"
+  ],
+  "apps/miou-llm-bridge/src/catalog.rs": [
+    "miou_llm_bridge_catalog"
+  ],
+  "apps/miou-llm-bridge/src/config.rs": [
+    "miou_llm_bridge_config"
+  ],
+  "apps/miou-llm-bridge/src/context.rs": [
+    "miou_llm_bridge_context"
+  ],
+  "apps/miou-llm-bridge/src/fallback.rs": [
+    "miou_llm_bridge_fallback"
+  ],
+  "apps/miou-llm-bridge/src/hardware.rs": [
+    "miou_llm_bridge_hardware"
+  ],
+  "apps/miou-llm-bridge/src/health.rs": [
+    "miou_llm_bridge_health"
+  ],
+  "apps/miou-llm-bridge/src/inference.rs": [
+    "miou_llm_bridge_inference"
+  ],
+  "apps/miou-llm-bridge/src/llm_api.rs": [
+    "miou_llm_bridge_llm_api"
+  ],
+  "apps/miou-llm-bridge/src/main.rs": [
+    "miou_llm_bridge_main"
+  ],
+  "apps/miou-llm-bridge/src/mode.rs": [
+    "miou_llm_bridge_mode"
+  ],
+  "apps/miou-llm-bridge/src/model_manager.rs": [
+    "miou_llm_bridge_model_manager"
+  ],
+  "apps/miou-llm-bridge/src/persona/mod.rs": [
+    "miou_llm_bridge_persona_mod"
+  ],
+  "apps/miou-llm-bridge/src/proxy.rs": [
+    "miou_llm_bridge_proxy"
+  ],
+  "apps/miou-llm-bridge/src/recommend.rs": [
+    "miou_llm_bridge_recommend"
+  ],
+  "apps/miou-llm-bridge/src/security.rs": [
+    "miou_llm_bridge_security"
+  ],
+  "apps/miou-llm-bridge/src/skills/cog_services.rs": [
+    "miou_llm_bridge_skills_cog_services"
+  ],
+  "apps/miou-llm-bridge/src/skills/file_ops.rs": [
+    "miou_llm_bridge_skills_file_ops"
+  ],
+  "apps/miou-llm-bridge/src/skills/mod.rs": [
+    "miou_llm_bridge_skills_mod"
+  ],
+  "apps/miou-llm-bridge/src/skills/shell_exec.rs": [
+    "miou_llm_bridge_skills_shell_exec"
+  ],
+  "apps/miou-llm-bridge/src/skills/web_fetch.rs": [
+    "miou_llm_bridge_skills_web_fetch"
+  ],
+  "apps/miou-llm-bridge/src/team_client.rs": [
+    "miou_llm_bridge_team_client"
+  ],
+  "apps/miou-llm-bridge/src/tools.rs": [
+    "miou_llm_bridge_tools"
+  ],
+  "apps/miou-llm-bridge/src/voice/mod.rs": [
+    "miou_llm_bridge_voice_mod"
+  ],
+  "apps/miou-llm-bridge/src/voice/pipeline.rs": [
+    "miou_llm_bridge_voice_pipeline"
+  ],
+  "apps/miou-llm-bridge/src/voice/tts.rs": [
+    "miou_llm_bridge_voice_tts"
+  ],
+  "apps/miou-llm-bridge/src/voice/wakeword.rs": [
+    "miou_llm_bridge_voice_wakeword"
+  ],
+  "apps/mipower/src/db.rs": [
+    "mipower_db"
+  ],
+  "apps/mipower/src/init.rs": [
+    "mipower_init"
+  ],
+  "apps/mipower/src/main.rs": [
+    "mipower_main"
+  ],
+  "apps/mipower/src/models.rs": [
+    "mipower_models"
+  ],
+  "apps/mipower/src/render.rs": [
+    "mipower_render"
+  ],
+  "apps/mipower/src/state.rs": [
+    "mipower_state"
+  ],
+  "apps/mipower/src/views/dashboard.rs": [
+    "mipower_views_dashboard"
+  ],
+  "apps/mipower/src/views/mod.rs": [
+    "mipower_views_mod"
+  ],
+  "apps/mipower/src/views/report.rs": [
+    "mipower_views_report"
+  ],
+  "apps/mipower/src/views/settings.rs": [
+    "mipower_views_settings"
+  ],
+  "apps/mipower/src/views/starter.rs": [
+    "mipower_views_starter"
+  ],
+  "apps/miyuclicker/src/lib.rs": [
+    "miyuclicker_lib"
+  ],
+  "apps/miyuclicker/src/main.rs": [
+    "miyuclicker_main"
+  ],
+  "apps/miyuclicker/src/views/mod.rs": [
+    "miyuclicker_views_mod"
+  ],
+  "apps/miyucloud/build.rs": [
+    "miyucloud_build"
+  ],
+  "apps/miyucloud/src/application/adapters/caldav_adapter.rs": [
+    "miyucloud_application_adapters_caldav_adapter"
+  ],
+  "apps/miyucloud/src/application/adapters/carddav_adapter.rs": [
+    "miyucloud_application_adapters_carddav_adapter"
+  ],
+  "apps/miyucloud/src/application/adapters/mod.rs": [
+    "miyucloud_application_adapters_mod"
+  ],
+  "apps/miyucloud/src/application/adapters/webdav_adapter.rs": [
+    "miyucloud_application_adapters_webdav_adapter"
+  ],
+  "apps/miyucloud/src/application/dtos/address_book_dto.rs": [
+    "miyucloud_application_dtos_address_book_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/app_password_dto.rs": [
+    "miyucloud_application_dtos_app_password_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/calendar_dto.rs": [
+    "miyucloud_application_dtos_calendar_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/contact_dto.rs": [
+    "miyucloud_application_dtos_contact_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/device_auth_dto.rs": [
+    "miyucloud_application_dtos_device_auth_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/display_helpers.rs": [
+    "miyucloud_application_dtos_display_helpers"
+  ],
+  "apps/miyucloud/src/application/dtos/favorites_dto.rs": [
+    "miyucloud_application_dtos_favorites_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/file_dto.rs": [
+    "miyucloud_application_dtos_file_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/folder_dto.rs": [
+    "miyucloud_application_dtos_folder_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/folder_listing_dto.rs": [
+    "miyucloud_application_dtos_folder_listing_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/i18n_dto.rs": [
+    "miyucloud_application_dtos_i18n_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/mod.rs": [
+    "miyucloud_application_dtos_mod"
+  ],
+  "apps/miyucloud/src/application/dtos/pagination.rs": [
+    "miyucloud_application_dtos_pagination"
+  ],
+  "apps/miyucloud/src/application/dtos/recent_dto.rs": [
+    "miyucloud_application_dtos_recent_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/search_dto.rs": [
+    "miyucloud_application_dtos_search_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/settings_dto.rs": [
+    "miyucloud_application_dtos_settings_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/share_dto.rs": [
+    "miyucloud_application_dtos_share_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/trash_dto.rs": [
+    "miyucloud_application_dtos_trash_dto"
+  ],
+  "apps/miyucloud/src/application/dtos/user_dto.rs": [
+    "miyucloud_application_dtos_user_dto"
+  ],
+  "apps/miyucloud/src/application/mod.rs": [
+    "miyucloud_application_mod"
+  ],
+  "apps/miyucloud/src/application/ports/audit_ports.rs": [
+    "miyucloud_application_ports_audit_ports"
+  ],
+  "apps/miyucloud/src/application/ports/auth_ports.rs": [
+    "miyucloud_application_ports_auth_ports"
+  ],
+  "apps/miyucloud/src/application/ports/cache_ports.rs": [
+    "miyucloud_application_ports_cache_ports"
+  ],
+  "apps/miyucloud/src/application/ports/calendar_ports.rs": [
+    "miyucloud_application_ports_calendar_ports"
+  ],
+  "apps/miyucloud/src/application/ports/carddav_ports.rs": [
+    "miyucloud_application_ports_carddav_ports"
+  ],
+  "apps/miyucloud/src/application/ports/chunked_upload_ports.rs": [
+    "miyucloud_application_ports_chunked_upload_ports"
+  ],
+  "apps/miyucloud/src/application/ports/compression_ports.rs": [
+    "miyucloud_application_ports_compression_ports"
+  ],
+  "apps/miyucloud/src/application/ports/dedup_ports.rs": [
+    "miyucloud_application_ports_dedup_ports"
+  ],
+  "apps/miyucloud/src/application/ports/encryption_ports.rs": [
+    "miyucloud_application_ports_encryption_ports"
+  ],
+  "apps/miyucloud/src/application/ports/favorites_ports.rs": [
+    "miyucloud_application_ports_favorites_ports"
+  ],
+  "apps/miyucloud/src/application/ports/file_ports.rs": [
+    "miyucloud_application_ports_file_ports"
+  ],
+  "apps/miyucloud/src/application/ports/gdpr_ports.rs": [
+    "miyucloud_application_ports_gdpr_ports"
+  ],
+  "apps/miyucloud/src/application/ports/inbound.rs": [
+    "miyucloud_application_ports_inbound"
+  ],
+  "apps/miyucloud/src/application/ports/mod.rs": [
+    "miyucloud_application_ports_mod"
+  ],
+  "apps/miyucloud/src/application/ports/outbound.rs": [
+    "miyucloud_application_ports_outbound"
+  ],
+  "apps/miyucloud/src/application/ports/recent_ports.rs": [
+    "miyucloud_application_ports_recent_ports"
+  ],
+  "apps/miyucloud/src/application/ports/share_ports.rs": [
+    "miyucloud_application_ports_share_ports"
+  ],
+  "apps/miyucloud/src/application/ports/storage_ports.rs": [
+    "miyucloud_application_ports_storage_ports"
+  ],
+  "apps/miyucloud/src/application/ports/thumbnail_ports.rs": [
+    "miyucloud_application_ports_thumbnail_ports"
+  ],
+  "apps/miyucloud/src/application/ports/transcode_ports.rs": [
+    "miyucloud_application_ports_transcode_ports"
+  ],
+  "apps/miyucloud/src/application/ports/trash_ports.rs": [
+    "miyucloud_application_ports_trash_ports"
+  ],
+  "apps/miyucloud/src/application/ports/web_connection_ports.rs": [
+    "miyucloud_application_ports_web_connection_ports"
+  ],
+  "apps/miyucloud/src/application/ports/zip_ports.rs": [
+    "miyucloud_application_ports_zip_ports"
+  ],
+  "apps/miyucloud/src/application/services/admin_settings_service.rs": [
+    "miyucloud_application_services_admin_settings_service"
+  ],
+  "apps/miyucloud/src/application/services/app_password_service.rs": [
+    "miyucloud_application_services_app_password_service"
+  ],
+  "apps/miyucloud/src/application/services/auth_application_service.rs": [
+    "miyucloud_application_services_auth_application_service"
+  ],
+  "apps/miyucloud/src/application/services/batch_operations.rs": [
+    "miyucloud_application_services_batch_operations"
+  ],
+  "apps/miyucloud/src/application/services/calendar_service.rs": [
+    "miyucloud_application_services_calendar_service"
+  ],
+  "apps/miyucloud/src/application/services/contact_service.rs": [
+    "miyucloud_application_services_contact_service"
+  ],
+  "apps/miyucloud/src/application/services/device_auth_service.rs": [
+    "miyucloud_application_services_device_auth_service"
+  ],
+  "apps/miyucloud/src/application/services/favorites_service.rs": [
+    "miyucloud_application_services_favorites_service"
+  ],
+  "apps/miyucloud/src/application/services/file_management_service.rs": [
+    "miyucloud_application_services_file_management_service"
+  ],
+  "apps/miyucloud/src/application/services/file_retrieval_service.rs": [
+    "miyucloud_application_services_file_retrieval_service"
+  ],
+  "apps/miyucloud/src/application/services/file_upload_service.rs": [
+    "miyucloud_application_services_file_upload_service"
+  ],
+  "apps/miyucloud/src/application/services/file_use_case_factory.rs": [
+    "miyucloud_application_services_file_use_case_factory"
+  ],
+  "apps/miyucloud/src/application/services/folder_service.rs": [
+    "miyucloud_application_services_folder_service"
+  ],
+  "apps/miyucloud/src/application/services/gdpr_service.rs": [
+    "miyucloud_application_services_gdpr_service"
+  ],
+  "apps/miyucloud/src/application/services/i18n_application_service.rs": [
+    "miyucloud_application_services_i18n_application_service"
+  ],
+  "apps/miyucloud/src/application/services/mod.rs": [
+    "miyucloud_application_services_mod"
+  ],
+  "apps/miyucloud/src/application/services/nextcloud_file_id_service.rs": [
+    "miyucloud_application_services_nextcloud_file_id_service"
+  ],
+  "apps/miyucloud/src/application/services/nextcloud_login_flow_service.rs": [
+    "miyucloud_application_services_nextcloud_login_flow_service"
+  ],
+  "apps/miyucloud/src/application/services/recent_service.rs": [
+    "miyucloud_application_services_recent_service"
+  ],
+  "apps/miyucloud/src/application/services/search_service.rs": [
+    "miyucloud_application_services_search_service"
+  ],
+  "apps/miyucloud/src/application/services/share_service.rs": [
+    "miyucloud_application_services_share_service"
+  ],
+  "apps/miyucloud/src/application/services/storage_usage_service.rs": [
+    "miyucloud_application_services_storage_usage_service"
+  ],
+  "apps/miyucloud/src/application/services/trash_service.rs": [
+    "miyucloud_application_services_trash_service"
+  ],
+  "apps/miyucloud/src/application/services/wopi_lock_service.rs": [
+    "miyucloud_application_services_wopi_lock_service"
+  ],
+  "apps/miyucloud/src/application/services/wopi_token_service.rs": [
+    "miyucloud_application_services_wopi_token_service"
+  ],
+  "apps/miyucloud/src/common/config.rs": [
+    "miyucloud_common_config"
+  ],
+  "apps/miyucloud/src/common/di.rs": [
+    "miyucloud_common_di"
+  ],
+  "apps/miyucloud/src/common/errors.rs": [
+    "miyucloud_common_errors"
+  ],
+  "apps/miyucloud/src/common/mime_detect.rs": [
+    "miyucloud_common_mime_detect"
+  ],
+  "apps/miyucloud/src/common/mod.rs": [
+    "miyucloud_common_mod"
+  ],
+  "apps/miyucloud/src/common/stubs.rs": [
+    "miyucloud_common_stubs"
+  ],
+  "apps/miyucloud/src/domain/entities/app_password.rs": [
+    "miyucloud_domain_entities_app_password"
+  ],
+  "apps/miyucloud/src/domain/entities/audit_event.rs": [
+    "miyucloud_domain_entities_audit_event"
+  ],
+  "apps/miyucloud/src/domain/entities/calendar.rs": [
+    "miyucloud_domain_entities_calendar"
+  ],
+  "apps/miyucloud/src/domain/entities/calendar_event.rs": [
+    "miyucloud_domain_entities_calendar_event"
+  ],
+  "apps/miyucloud/src/domain/entities/contact.rs": [
+    "miyucloud_domain_entities_contact"
+  ],
+  "apps/miyucloud/src/domain/entities/device_code.rs": [
+    "miyucloud_domain_entities_device_code"
+  ],
+  "apps/miyucloud/src/domain/entities/entity_errors.rs": [
+    "miyucloud_domain_entities_entity_errors"
+  ],
+  "apps/miyucloud/src/domain/entities/file.rs": [
+    "miyucloud_domain_entities_file"
+  ],
+  "apps/miyucloud/src/domain/entities/folder.rs": [
+    "miyucloud_domain_entities_folder"
+  ],
+  "apps/miyucloud/src/domain/entities/mod.rs": [
+    "miyucloud_domain_entities_mod"
+  ],
+  "apps/miyucloud/src/domain/entities/session.rs": [
+    "miyucloud_domain_entities_session"
+  ],
+  "apps/miyucloud/src/domain/entities/share.rs": [
+    "miyucloud_domain_entities_share"
+  ],
+  "apps/miyucloud/src/domain/entities/trashed_item.rs": [
+    "miyucloud_domain_entities_trashed_item"
+  ],
+  "apps/miyucloud/src/domain/entities/user.rs": [
+    "miyucloud_domain_entities_user"
+  ],
+  "apps/miyucloud/src/domain/errors.rs": [
+    "miyucloud_domain_errors"
+  ],
+  "apps/miyucloud/src/domain/mod.rs": [
+    "miyucloud_domain_mod"
+  ],
+  "apps/miyucloud/src/domain/repositories/address_book_repository.rs": [
+    "miyucloud_domain_repositories_address_book_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/calendar_event_repository.rs": [
+    "miyucloud_domain_repositories_calendar_event_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/calendar_repository.rs": [
+    "miyucloud_domain_repositories_calendar_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/contact_repository.rs": [
+    "miyucloud_domain_repositories_contact_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/file_repository.rs": [
+    "miyucloud_domain_repositories_file_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/folder_repository.rs": [
+    "miyucloud_domain_repositories_folder_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/mod.rs": [
+    "miyucloud_domain_repositories_mod"
+  ],
+  "apps/miyucloud/src/domain/repositories/session_repository.rs": [
+    "miyucloud_domain_repositories_session_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/settings_repository.rs": [
+    "miyucloud_domain_repositories_settings_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/share_repository.rs": [
+    "miyucloud_domain_repositories_share_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/trash_repository.rs": [
+    "miyucloud_domain_repositories_trash_repository"
+  ],
+  "apps/miyucloud/src/domain/repositories/user_repository.rs": [
+    "miyucloud_domain_repositories_user_repository"
+  ],
+  "apps/miyucloud/src/domain/services/i18n_service.rs": [
+    "miyucloud_domain_services_i18n_service"
+  ],
+  "apps/miyucloud/src/domain/services/mod.rs": [
+    "miyucloud_domain_services_mod"
+  ],
+  "apps/miyucloud/src/domain/services/path_service.rs": [
+    "miyucloud_domain_services_path_service"
+  ],
+  "apps/miyucloud/src/infrastructure/adapters/calendar_storage_adapter.rs": [
+    "miyucloud_infrastructure_adapters_calendar_storage_adapter"
+  ],
+  "apps/miyucloud/src/infrastructure/adapters/contact_storage_adapter.rs": [
+    "miyucloud_infrastructure_adapters_contact_storage_adapter"
+  ],
+  "apps/miyucloud/src/infrastructure/adapters/error_adapters.rs": [
+    "miyucloud_infrastructure_adapters_error_adapters"
+  ],
+  "apps/miyucloud/src/infrastructure/adapters/mod.rs": [
+    "miyucloud_infrastructure_adapters_mod"
+  ],
+  "apps/miyucloud/src/infrastructure/auth_factory.rs": [
+    "miyucloud_infrastructure_auth_factory"
+  ],
+  "apps/miyucloud/src/infrastructure/db.rs": [
+    "miyucloud_infrastructure_db"
+  ],
+  "apps/miyucloud/src/infrastructure/mod.rs": [
+    "miyucloud_infrastructure_mod"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/mod.rs": [
+    "miyucloud_infrastructure_repositories_mod"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/address_book_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_address_book_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/app_password_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_app_password_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/audit_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_audit_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/calendar_event_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_calendar_event_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/calendar_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_calendar_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/contact_group_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_contact_group_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/contact_persistence_dto.rs": [
+    "miyucloud_infrastructure_repositories_pg_contact_persistence_dto"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/contact_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_contact_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/device_code_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_device_code_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/favorites_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_favorites_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/file_blob_read_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_file_blob_read_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/file_blob_write_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_file_blob_write_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/file_metadata_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_file_metadata_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/folder_db_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_folder_db_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/mod.rs": [
+    "miyucloud_infrastructure_repositories_pg_mod"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/nextcloud_object_id_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_nextcloud_object_id_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/recent_items_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_recent_items_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/session_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_session_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/settings_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_settings_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/share_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_share_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/transaction_utils.rs": [
+    "miyucloud_infrastructure_repositories_pg_transaction_utils"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/trash_db_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_trash_db_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/repositories/pg/user_pg_repository.rs": [
+    "miyucloud_infrastructure_repositories_pg_user_pg_repository"
+  ],
+  "apps/miyucloud/src/infrastructure/services/blob_encryption_service.rs": [
+    "miyucloud_infrastructure_services_blob_encryption_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/central_client_service.rs": [
+    "miyucloud_infrastructure_services_central_client_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/chunked_upload_service.rs": [
+    "miyucloud_infrastructure_services_chunked_upload_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/compression_service.rs": [
+    "miyucloud_infrastructure_services_compression_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/connection_manager.rs": [
+    "miyucloud_infrastructure_services_connection_manager"
+  ],
+  "apps/miyucloud/src/infrastructure/services/ddns_service.rs": [
+    "miyucloud_infrastructure_services_ddns_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/dedup_service.rs": [
+    "miyucloud_infrastructure_services_dedup_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/exif_service.rs": [
+    "miyucloud_infrastructure_services_exif_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/file_content_cache.rs": [
+    "miyucloud_infrastructure_services_file_content_cache"
+  ],
+  "apps/miyucloud/src/infrastructure/services/file_system_i18n_service.rs": [
+    "miyucloud_infrastructure_services_file_system_i18n_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/image_transcode_service.rs": [
+    "miyucloud_infrastructure_services_image_transcode_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/jwt_service.rs": [
+    "miyucloud_infrastructure_services_jwt_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/login_lockout_service.rs": [
+    "miyucloud_infrastructure_services_login_lockout_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/mod.rs": [
+    "miyucloud_infrastructure_services_mod"
+  ],
+  "apps/miyucloud/src/infrastructure/services/mws_tunnel_service.rs": [
+    "miyucloud_infrastructure_services_mws_tunnel_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/nextcloud_chunked_upload_service.rs": [
+    "miyucloud_infrastructure_services_nextcloud_chunked_upload_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/oidc_service.rs": [
+    "miyucloud_infrastructure_services_oidc_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/password_hasher.rs": [
+    "miyucloud_infrastructure_services_password_hasher"
+  ],
+  "apps/miyucloud/src/infrastructure/services/path_resolver_service.rs": [
+    "miyucloud_infrastructure_services_path_resolver_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/path_service.rs": [
+    "miyucloud_infrastructure_services_path_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/session_timeout_service.rs": [
+    "miyucloud_infrastructure_services_session_timeout_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/thumbnail_service.rs": [
+    "miyucloud_infrastructure_services_thumbnail_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/trash_cleanup_service.rs": [
+    "miyucloud_infrastructure_services_trash_cleanup_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/webdav_lock_service.rs": [
+    "miyucloud_infrastructure_services_webdav_lock_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/wopi_discovery_service.rs": [
+    "miyucloud_infrastructure_services_wopi_discovery_service"
+  ],
+  "apps/miyucloud/src/infrastructure/services/zip_service.rs": [
+    "miyucloud_infrastructure_services_zip_service"
+  ],
+  "apps/miyucloud/src/interfaces/api/cookie_auth.rs": [
+    "miyucloud_interfaces_api_cookie_auth"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/admin_handler.rs": [
+    "miyucloud_interfaces_api_handlers_admin_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/app_password_handler.rs": [
+    "miyucloud_interfaces_api_handlers_app_password_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/audit_handler.rs": [
+    "miyucloud_interfaces_api_handlers_audit_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/auth_handler.rs": [
+    "miyucloud_interfaces_api_handlers_auth_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/batch_handler.rs": [
+    "miyucloud_interfaces_api_handlers_batch_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/caldav_handler.rs": [
+    "miyucloud_interfaces_api_handlers_caldav_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/carddav_handler.rs": [
+    "miyucloud_interfaces_api_handlers_carddav_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/chunked_upload_handler.rs": [
+    "miyucloud_interfaces_api_handlers_chunked_upload_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/connection_handler.rs": [
+    "miyucloud_interfaces_api_handlers_connection_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/dedup_handler.rs": [
+    "miyucloud_interfaces_api_handlers_dedup_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/device_auth_handler.rs": [
+    "miyucloud_interfaces_api_handlers_device_auth_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/favorites_handler.rs": [
+    "miyucloud_interfaces_api_handlers_favorites_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/file_handler.rs": [
+    "miyucloud_interfaces_api_handlers_file_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/folder_handler.rs": [
+    "miyucloud_interfaces_api_handlers_folder_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/gdpr_handler.rs": [
+    "miyucloud_interfaces_api_handlers_gdpr_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/i18n_handler.rs": [
+    "miyucloud_interfaces_api_handlers_i18n_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/mod.rs": [
+    "miyucloud_interfaces_api_handlers_mod"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/photos_handler.rs": [
+    "miyucloud_interfaces_api_handlers_photos_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/recent_handler.rs": [
+    "miyucloud_interfaces_api_handlers_recent_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/search_handler.rs": [
+    "miyucloud_interfaces_api_handlers_search_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/share_handler.rs": [
+    "miyucloud_interfaces_api_handlers_share_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/trash_handler.rs": [
+    "miyucloud_interfaces_api_handlers_trash_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/webdav_handler.rs": [
+    "miyucloud_interfaces_api_handlers_webdav_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/handlers/wopi_handler.rs": [
+    "miyucloud_interfaces_api_handlers_wopi_handler"
+  ],
+  "apps/miyucloud/src/interfaces/api/mod.rs": [
+    "miyucloud_interfaces_api_mod"
+  ],
+  "apps/miyucloud/src/interfaces/api/routes.rs": [
+    "miyucloud_interfaces_api_routes"
+  ],
+  "apps/miyucloud/src/interfaces/errors.rs": [
+    "miyucloud_interfaces_errors"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/auth.rs": [
+    "miyucloud_interfaces_middleware_auth"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/bandwidth.rs": [
+    "miyucloud_interfaces_middleware_bandwidth"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/csrf.rs": [
+    "miyucloud_interfaces_middleware_csrf"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/mod.rs": [
+    "miyucloud_interfaces_middleware_mod"
+  ],
+  "apps/miyucloud/src/interfaces/middleware/rate_limit.rs": [
+    "miyucloud_interfaces_middleware_rate_limit"
+  ],
+  "apps/miyucloud/src/interfaces/mod.rs": [
+    "miyucloud_interfaces_mod"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/avatar_handler.rs": [
+    "miyucloud_interfaces_nextcloud_avatar_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/basic_auth_middleware.rs": [
+    "miyucloud_interfaces_nextcloud_basic_auth_middleware"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/login_v2_handler.rs": [
+    "miyucloud_interfaces_nextcloud_login_v2_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/mod.rs": [
+    "miyucloud_interfaces_nextcloud_mod"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/ocs_handler.rs": [
+    "miyucloud_interfaces_nextcloud_ocs_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/preview_handler.rs": [
+    "miyucloud_interfaces_nextcloud_preview_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/report_handler.rs": [
+    "miyucloud_interfaces_nextcloud_report_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/routes.rs": [
+    "miyucloud_interfaces_nextcloud_routes"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/status_handler.rs": [
+    "miyucloud_interfaces_nextcloud_status_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/trashbin_handler.rs": [
+    "miyucloud_interfaces_nextcloud_trashbin_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/uploads_handler.rs": [
+    "miyucloud_interfaces_nextcloud_uploads_handler"
+  ],
+  "apps/miyucloud/src/interfaces/nextcloud/webdav_handler.rs": [
+    "miyucloud_interfaces_nextcloud_webdav_handler"
+  ],
+  "apps/miyucloud/src/interfaces/web/mod.rs": [
+    "miyucloud_interfaces_web_mod"
+  ],
+  "apps/miyucloud/src/lib.rs": [
+    "miyucloud_lib"
+  ],
+  "apps/miyucloud/src/main.rs": [
+    "miyucloud_main"
   ],
   "apps/miyucloud/static/js/app/authSession.js": [
     "cog.cloudAuthSession",
@@ -375,11 +1698,182 @@
   "apps/miyucloud/static/sw.js": [
     "cog.cloudServiceWorker"
   ],
+  "apps/miyukini-whisper/src/lib.rs": [
+    "miyukini_whisper_lib"
+  ],
+  "apps/miyukini-whisper/src/main.rs": [
+    "miyukini_whisper_main"
+  ],
+  "apps/miyukiniwatch/src/lib.rs": [
+    "miyukiniwatch_lib"
+  ],
+  "apps/miyukiniwatch/src/main.rs": [
+    "miyukiniwatch_main"
+  ],
+  "apps/miyukiniwatch/src/views/audit.rs": [
+    "miyukiniwatch_views_audit"
+  ],
+  "apps/miyukiniwatch/src/views/dashboard.rs": [
+    "miyukiniwatch_views_dashboard"
+  ],
+  "apps/miyukiniwatch/src/views/detail.rs": [
+    "miyukiniwatch_views_detail"
+  ],
+  "apps/miyukiniwatch/src/views/mod.rs": [
+    "miyukiniwatch_views_mod"
+  ],
+  "apps/miyukiniwatch/src/views/params.rs": [
+    "miyukiniwatch_views_params"
+  ],
+  "apps/origin/src/admin/mod.rs": [
+    "origin_admin_mod"
+  ],
+  "apps/origin/src/admin/server.rs": [
+    "origin_admin_server"
+  ],
+  "apps/origin/src/config.rs": [
+    "origin_config"
+  ],
+  "apps/origin/src/main.rs": [
+    "origin_main"
+  ],
+  "apps/origin/src/protocol/frame.rs": [
+    "origin_protocol_frame"
+  ],
+  "apps/origin/src/protocol/messages.rs": [
+    "origin_protocol_messages"
+  ],
+  "apps/origin/src/protocol/mod.rs": [
+    "origin_protocol_mod"
+  ],
+  "apps/origin/src/protocol/types.rs": [
+    "origin_protocol_types"
+  ],
+  "apps/origin/src/relay/metrics.rs": [
+    "origin_relay_metrics"
+  ],
+  "apps/origin/src/relay/mod.rs": [
+    "origin_relay_mod"
+  ],
   "apps/origin/src/relay/permis_registry.rs": [
     "origin.relay.permis_registry"
   ],
+  "apps/origin/src/relay/rate_limiter.rs": [
+    "origin_relay_rate_limiter"
+  ],
+  "apps/origin/src/relay/server.rs": [
+    "origin_relay_server"
+  ],
+  "apps/origin/src/relay/session.rs": [
+    "origin_relay_session"
+  ],
+  "apps/origin/src/relay/tunnel.rs": [
+    "origin_relay_tunnel"
+  ],
+  "apps/origin/src/relay/verification.rs": [
+    "origin_relay_verification"
+  ],
+  "apps/origin/src/tracker/catalog.rs": [
+    "origin_tracker_catalog"
+  ],
+  "apps/origin/src/tracker/metrics.rs": [
+    "origin_tracker_metrics"
+  ],
+  "apps/origin/src/tracker/mod.rs": [
+    "origin_tracker_mod"
+  ],
+  "apps/origin/src/tracker/pool.rs": [
+    "origin_tracker_pool"
+  ],
+  "apps/origin/src/tracker/protocol.rs": [
+    "origin_tracker_protocol"
+  ],
+  "apps/origin/src/tracker/server.rs": [
+    "origin_tracker_server"
+  ],
+  "apps/origin/src/tracker/slug_registry.rs": [
+    "origin_tracker_slug_registry"
+  ],
   "apps/origin/src/tracker/visit_tracker.rs": [
     "origin.tracker.visit_tracker"
+  ],
+  "apps/origin/src/web/api.rs": [
+    "origin_web_api"
+  ],
+  "apps/origin/src/web/content.rs": [
+    "origin_web_content"
+  ],
+  "apps/origin/src/web/forum_auth.rs": [
+    "origin_web_forum_auth"
+  ],
+  "apps/origin/src/web/jaybureau.rs": [
+    "origin_web_jaybureau"
+  ],
+  "apps/origin/src/web/market.rs": [
+    "origin_web_market"
+  ],
+  "apps/origin/src/web/mod.rs": [
+    "origin_web_mod"
+  ],
+  "apps/origin/src/web/server.rs": [
+    "origin_web_server"
+  ],
+  "apps/team/src/api.rs": [
+    "team_api"
+  ],
+  "apps/team/src/config.rs": [
+    "team_config"
+  ],
+  "apps/team/src/main.rs": [
+    "team_main"
+  ],
+  "apps/team/src/mipower/mod.rs": [
+    "team_mipower_mod"
+  ],
+  "apps/team/src/mipower/runner.rs": [
+    "team_mipower_runner"
+  ],
+  "apps/team/src/mipower/sequence.rs": [
+    "team_mipower_sequence"
+  ],
+  "apps/team/src/mws/mod.rs": [
+    "team_mws_mod"
+  ],
+  "apps/team/src/mws/policy.rs": [
+    "team_mws_policy"
+  ],
+  "apps/team/src/mws/routes.rs": [
+    "team_mws_routes"
+  ],
+  "apps/team/src/nodes/heartbeat.rs": [
+    "team_nodes_heartbeat"
+  ],
+  "apps/team/src/nodes/mod.rs": [
+    "team_nodes_mod"
+  ],
+  "apps/team/src/nodes/registry.rs": [
+    "team_nodes_registry"
+  ],
+  "apps/team/src/orchestrator/mod.rs": [
+    "team_orchestrator_mod"
+  ],
+  "apps/team/src/orchestrator/router.rs": [
+    "team_orchestrator_router"
+  ],
+  "apps/team/src/orchestrator/scheduler.rs": [
+    "team_orchestrator_scheduler"
+  ],
+  "apps/ui-builder/src/main.rs": [
+    "ui_builder_main"
+  ],
+  "apps/ui-builder/src/services/mod.rs": [
+    "ui_builder_services_mod"
+  ],
+  "apps/ui-builder/src/state.rs": [
+    "ui_builder_state"
+  ],
+  "apps/ui-builder/src/theme.rs": [
+    "ui_builder_theme"
   ],
   "crates/bondingbrother/src/connection.rs": [
     "bondingbrother_connection",
@@ -390,6 +1884,9 @@
     "bondingbrother_connection_manager_trait",
     "bondingbrother_connection_operator_id",
     "bondingbrother_connection_test_creation"
+  ],
+  "crates/bondingbrother/src/lib.rs": [
+    "bondingbrother_lib"
   ],
   "crates/bondingbrother/src/sync.rs": [
     "bondingbrother_sync_error",
@@ -441,6 +1938,12 @@
     "borderguard_module_registry",
     "borderguard_module_trust_level"
   ],
+  "crates/borderguard/src/metadata.rs": [
+    "borderguard_metadata"
+  ],
+  "crates/borderguard/src/registry.rs": [
+    "borderguard_registry"
+  ],
   "crates/borderguard/src/trust_level.rs": [
     "borderguard_classifier_test_default_unknown",
     "borderguard_classifier_test_registered",
@@ -461,6 +1964,9 @@
     "caringnanny_health_status_healthy",
     "caringnanny_health_status_unhealthy",
     "caringnanny_health_test_status_equality"
+  ],
+  "crates/caringnanny/src/lib.rs": [
+    "caringnanny_lib"
   ],
   "crates/caringnanny/src/metrics.rs": [
     "caringnanny_metrics",
@@ -483,11 +1989,23 @@
     "caringnanny_observer_test_event_creation",
     "caringnanny_observer_trait"
   ],
+  "crates/central-remote-protocol/src/lib.rs": [
+    "central_remote_protocol_lib"
+  ],
   "crates/central-remote/src/bridge.rs": [
     "central_remote_bridge"
   ],
+  "crates/central-remote/src/discovery.rs": [
+    "central_remote_discovery"
+  ],
   "crates/central-remote/src/lib.rs": [
     "central_remote_lib"
+  ],
+  "crates/central-remote/src/pairing.rs": [
+    "central_remote_pairing"
+  ],
+  "crates/central-remote/src/protocol.rs": [
+    "central_remote_protocol"
   ],
   "crates/central-remote/src/server.rs": [
     "central_remote_server"
@@ -507,6 +2025,9 @@
     "everbuddy_compatibility_level_field",
     "everbuddy_compatibility_level_incompatible",
     "everbuddy_compatibility_test_levels"
+  ],
+  "crates/everbuddy/src/lib.rs": [
+    "everbuddy_lib"
   ],
   "crates/everbuddy/src/migration.rs": [
     "everbuddy_migration",
@@ -544,16 +2065,187 @@
     "jay1tribu_domain"
   ],
   "crates/jay1tribu/src/lib.rs": [
-    "jay1tribu_lib"
+    "crate_jay1tribu_lib"
   ],
   "crates/jay1tribu/src/transport/mod.rs": [
     "jay1tribu_transport"
   ],
+  "crates/jaybureau-suite/jay-collab/src/client.rs": [
+    "jaybureau_suite_jay_collab_client"
+  ],
+  "crates/jaybureau-suite/jay-collab/src/lib.rs": [
+    "jaybureau_suite_jay_collab_lib"
+  ],
+  "crates/jaybureau-suite/jay-collab/src/presence.rs": [
+    "jaybureau_suite_jay_collab_presence"
+  ],
+  "crates/jaybureau-suite/jay-collab/src/room.rs": [
+    "jaybureau_suite_jay_collab_room"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/doc.rs": [
+    "jaybureau_suite_jaybureau_core_doc"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/form.rs": [
+    "jaybureau_suite_jaybureau_core_form"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/lib.rs": [
+    "jaybureau_suite_jaybureau_core_lib"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/meeting.rs": [
+    "jaybureau_suite_jaybureau_core_meeting"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/permission.rs": [
+    "jaybureau_suite_jaybureau_core_permission"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/sheet.rs": [
+    "jaybureau_suite_jaybureau_core_sheet"
+  ],
+  "crates/jaybureau-suite/jaybureau-core/src/slide.rs": [
+    "jaybureau_suite_jaybureau_core_slide"
+  ],
+  "crates/jaybureau-suite/jayclub/src/feed.rs": [
+    "jaybureau_suite_jayclub_feed"
+  ],
+  "crates/jaybureau-suite/jayclub/src/lib.rs": [
+    "jaybureau_suite_jayclub_lib"
+  ],
+  "crates/jaybureau-suite/jayclub/src/notification.rs": [
+    "jaybureau_suite_jayclub_notification"
+  ],
+  "crates/jaybureau-suite/jayclub/src/post.rs": [
+    "jaybureau_suite_jayclub_post"
+  ],
+  "crates/jaybureau-suite/jayclub/src/profile.rs": [
+    "jaybureau_suite_jayclub_profile"
+  ],
+  "crates/jaybureau-suite/jayclub/src/sqlite_store.rs": [
+    "jaybureau_suite_jayclub_sqlite_store"
+  ],
+  "crates/jaybureau-suite/jayclub/src/store.rs": [
+    "jaybureau_suite_jayclub_store"
+  ],
+  "crates/jaybureau-suite/jayclub/src/story.rs": [
+    "jaybureau_suite_jayclub_story"
+  ],
+  "crates/jaybureau-suite/jaymail/src/config.rs": [
+    "jaybureau_suite_jaymail_config"
+  ],
+  "crates/jaybureau-suite/jaymail/src/imap_client.rs": [
+    "jaybureau_suite_jaymail_imap_client"
+  ],
+  "crates/jaybureau-suite/jaymail/src/lib.rs": [
+    "jaybureau_suite_jaymail_lib"
+  ],
+  "crates/jaybureau-suite/jaymail/src/mailbox.rs": [
+    "jaybureau_suite_jaymail_mailbox"
+  ],
+  "crates/jaybureau-suite/jaymail/src/message.rs": [
+    "jaybureau_suite_jaymail_message"
+  ],
+  "crates/jaybureau-suite/jaymail/src/smtp_client.rs": [
+    "jaybureau_suite_jaymail_smtp_client"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/attachments.rs": [
+    "jaybureau_suite_jaymessage_attachments"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/conversation.rs": [
+    "jaybureau_suite_jaymessage_conversation"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/groups.rs": [
+    "jaybureau_suite_jaymessage_groups"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/identity.rs": [
+    "jaybureau_suite_jaymessage_identity"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/lib.rs": [
+    "jaybureau_suite_jaymessage_lib"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/protocol.rs": [
+    "jaybureau_suite_jaymessage_protocol"
+  ],
+  "crates/jaybureau-suite/jaymessage/src/session.rs": [
+    "jaybureau_suite_jaymessage_session"
+  ],
   "crates/jaycloud-client/src/lib.rs": [
     "service.jaycloud.alicia_client"
   ],
+  "crates/jaycloud-migrate/src/main.rs": [
+    "jaycloud_migrate_main"
+  ],
+  "crates/jaycloud/src/adapters/api.rs": [
+    "jaycloud_adapters_api"
+  ],
+  "crates/jaycloud/src/adapters/auth_routes.rs": [
+    "jaycloud_adapters_auth_routes"
+  ],
+  "crates/jaycloud/src/adapters/mod.rs": [
+    "jaycloud_adapters_mod"
+  ],
+  "crates/jaycloud/src/adapters/ui.rs": [
+    "jaycloud_adapters_ui"
+  ],
+  "crates/jaycloud/src/adapters/webdav.rs": [
+    "jaycloud_adapters_webdav"
+  ],
+  "crates/jaycloud/src/config.rs": [
+    "jaycloud_config"
+  ],
+  "crates/jaycloud/src/errors.rs": [
+    "jaycloud_errors"
+  ],
+  "crates/jaycloud/src/files/davfs.rs": [
+    "jaycloud_files_davfs"
+  ],
+  "crates/jaycloud/src/files/encryption.rs": [
+    "jaycloud_files_encryption"
+  ],
+  "crates/jaycloud/src/files/mod.rs": [
+    "jaycloud_files_mod"
+  ],
+  "crates/jaycloud/src/files/tree.rs": [
+    "jaycloud_files_tree"
+  ],
+  "crates/jaycloud/src/kits/cas_kit.rs": [
+    "jaycloud_kits_cas_kit"
+  ],
+  "crates/jaycloud/src/kits/crypto_kit.rs": [
+    "jaycloud_kits_crypto_kit"
+  ],
+  "crates/jaycloud/src/kits/dav_xml_kit.rs": [
+    "jaycloud_kits_dav_xml_kit"
+  ],
+  "crates/jaycloud/src/kits/mod.rs": [
+    "jaycloud_kits_mod"
+  ],
+  "crates/jaycloud/src/kits/storage_kit.rs": [
+    "jaycloud_kits_storage_kit"
+  ],
+  "crates/jaycloud/src/kits/token_kit.rs": [
+    "jaycloud_kits_token_kit"
+  ],
   "crates/jaycloud/src/lib.rs": [
     "service.jaycloud"
+  ],
+  "crates/jaycloud/src/main.rs": [
+    "jaycloud_main"
+  ],
+  "crates/jaycloud/src/operators/auth_op.rs": [
+    "jaycloud_operators_auth_op"
+  ],
+  "crates/jaycloud/src/operators/files_op.rs": [
+    "jaycloud_operators_files_op"
+  ],
+  "crates/jaycloud/src/operators/mod.rs": [
+    "jaycloud_operators_mod"
+  ],
+  "crates/jaycloud/src/operators/restore_op.rs": [
+    "jaycloud_operators_restore_op"
+  ],
+  "crates/jaycloud/src/operators/share_op.rs": [
+    "jaycloud_operators_share_op"
+  ],
+  "crates/jaycloud/src/operators/snapshots_op.rs": [
+    "jaycloud_operators_snapshots_op"
   ],
   "crates/jaycontact-client/src/lib.rs": [
     "service.jaycontact.alicia_client"
@@ -561,8 +2253,26 @@
   "crates/jaydocs-client/src/lib.rs": [
     "service.jaydocs.alicia_client"
   ],
+  "crates/jayfaim/src/data/memory_store.rs": [
+    "jayfaim_data_memory_store"
+  ],
+  "crates/jayfaim/src/data/mod.rs": [
+    "jayfaim_data_mod"
+  ],
+  "crates/jayfaim/src/data/types.rs": [
+    "jayfaim_data_types"
+  ],
+  "crates/jayfaim/src/domain/mod.rs": [
+    "jayfaim_domain_mod"
+  ],
+  "crates/jayfaim/src/lib.rs": [
+    "jayfaim_lib"
+  ],
   "crates/jaykoa-client/src/lib.rs": [
     "service.jaykoa.alicia_client"
+  ],
+  "crates/jaykoa/src/aggregation.rs": [
+    "jaykoa_aggregation"
   ],
   "crates/jaykoa/src/data/kindmother_client_db.rs": [
     "jaykoa_kindmother_client_db"
@@ -583,10 +2293,13 @@
     "jaykoa_export_module"
   ],
   "crates/jaykoa/src/lib.rs": [
-    "jaykoa_lib"
+    "crate_jaykoa_lib"
   ],
   "crates/jaykoa/src/services/jayrdv/adapter.rs": [
     "jaykoa_jayrdv_adapter"
+  ],
+  "crates/jaykoa/src/services/jayrdv/mod.rs": [
+    "jaykoa_services_jayrdv_mod"
   ],
   "crates/jaykoa/src/services/mod.rs": [
     "jaykoa_services_module"
@@ -597,14 +2310,188 @@
   "crates/jaykonta-client/src/lib.rs": [
     "service.jaykonta.alicia_client"
   ],
+  "crates/jaykonta/src/backend/mod.rs": [
+    "jaykonta_backend_mod"
+  ],
+  "crates/jaykonta/src/backend/service.rs": [
+    "jaykonta_backend_service"
+  ],
   "crates/jaykonta/src/data/kindmother_client_db.rs": [
     "jaykonta_kindmother_client_db"
+  ],
+  "crates/jaykonta/src/data/kindmother_db.rs": [
+    "jaykonta_data_kindmother_db"
+  ],
+  "crates/jaykonta/src/data/mod.rs": [
+    "jaykonta_data_mod"
+  ],
+  "crates/jaykonta/src/data/types.rs": [
+    "jaykonta_data_types"
+  ],
+  "crates/jaykonta/src/domain/account.rs": [
+    "jaykonta_domain_account"
+  ],
+  "crates/jaykonta/src/domain/mod.rs": [
+    "jaykonta_domain_mod"
+  ],
+  "crates/jaykonta/src/domain/model.rs": [
+    "jaykonta_domain_model"
+  ],
+  "crates/jaykonta/src/domain/purse.rs": [
+    "jaykonta_domain_purse"
+  ],
+  "crates/jaykonta/src/integrations/contracts.rs": [
+    "jaykonta_integrations_contracts"
+  ],
+  "crates/jaykonta/src/integrations/mod.rs": [
+    "jaykonta_integrations_mod"
+  ],
+  "crates/jaykonta/src/integrations/pipeline.rs": [
+    "jaykonta_integrations_pipeline"
+  ],
+  "crates/jaykonta/src/lib.rs": [
+    "jaykonta_lib_2"
+  ],
+  "crates/jaykonta/src/services/audit_service.rs": [
+    "jaykonta_services_audit_service"
+  ],
+  "crates/jaykonta/src/services/mod.rs": [
+    "jaykonta_services_mod"
+  ],
+  "crates/jaykonta/src/services/purse_service.rs": [
+    "jaykonta_services_purse_service"
+  ],
+  "crates/jaykonta/src/theme.rs": [
+    "jaykonta_theme"
   ],
   "crates/jaymail-client/src/lib.rs": [
     "service.jaymail.alicia_client"
   ],
+  "crates/jaymanga/src/api/catalog_api.rs": [
+    "jaymanga_api_catalog_api"
+  ],
+  "crates/jaymanga/src/api/federation_api.rs": [
+    "jaymanga_api_federation_api"
+  ],
+  "crates/jaymanga/src/api/media_api.rs": [
+    "jaymanga_api_media_api"
+  ],
+  "crates/jaymanga/src/api/mod.rs": [
+    "jaymanga_api_mod"
+  ],
+  "crates/jaymanga/src/api/payment_api.rs": [
+    "jaymanga_api_payment_api"
+  ],
+  "crates/jaymanga/src/api/presence_api.rs": [
+    "jaymanga_api_presence_api"
+  ],
+  "crates/jaymanga/src/api/reader_api.rs": [
+    "jaymanga_api_reader_api"
+  ],
+  "crates/jaymanga/src/auth/license_verify.rs": [
+    "jaymanga_auth_license_verify"
+  ],
+  "crates/jaymanga/src/auth/mod.rs": [
+    "jaymanga_auth_mod"
+  ],
+  "crates/jaymanga/src/auth/permissions.rs": [
+    "jaymanga_auth_permissions"
+  ],
+  "crates/jaymanga/src/data/kindmother_client_db.rs": [
+    "jaymanga_data_kindmother_client_db"
+  ],
+  "crates/jaymanga/src/data/kindmother_db.rs": [
+    "jaymanga_data_kindmother_db"
+  ],
+  "crates/jaymanga/src/data/mod.rs": [
+    "jaymanga_data_mod"
+  ],
+  "crates/jaymanga/src/data/types.rs": [
+    "jaymanga_data_types"
+  ],
+  "crates/jaymanga/src/data/types_aggregator.rs": [
+    "jaymanga_data_types_aggregator"
+  ],
+  "crates/jaymanga/src/data/types_federation.rs": [
+    "jaymanga_data_types_federation"
+  ],
+  "crates/jaymanga/src/data/types_payment.rs": [
+    "jaymanga_data_types_payment"
+  ],
+  "crates/jaymanga/src/data/types_reader.rs": [
+    "jaymanga_data_types_reader"
+  ],
+  "crates/jaymanga/src/domain/aggregator.rs": [
+    "jaymanga_domain_aggregator"
+  ],
+  "crates/jaymanga/src/domain/catalog.rs": [
+    "jaymanga_domain_catalog"
+  ],
+  "crates/jaymanga/src/domain/download.rs": [
+    "jaymanga_domain_download"
+  ],
+  "crates/jaymanga/src/domain/favorites.rs": [
+    "jaymanga_domain_favorites"
+  ],
+  "crates/jaymanga/src/domain/gamification.rs": [
+    "jaymanga_domain_gamification"
+  ],
+  "crates/jaymanga/src/domain/mod.rs": [
+    "jaymanga_domain_mod"
+  ],
+  "crates/jaymanga/src/domain/optimizer.rs": [
+    "jaymanga_domain_optimizer"
+  ],
+  "crates/jaymanga/src/domain/payment.rs": [
+    "jaymanga_domain_payment"
+  ],
+  "crates/jaymanga/src/domain/promotion.rs": [
+    "jaymanga_domain_promotion"
+  ],
+  "crates/jaymanga/src/domain/reader.rs": [
+    "jaymanga_domain_reader"
+  ],
+  "crates/jaymanga/src/export/csv.rs": [
+    "jaymanga_export_csv"
+  ],
+  "crates/jaymanga/src/export/mod.rs": [
+    "jaymanga_export_mod"
+  ],
+  "crates/jaymanga/src/export/pdf.rs": [
+    "jaymanga_export_pdf"
+  ],
   "crates/jaymanga/src/lib.rs": [
     "service.media.jaymanga"
+  ],
+  "crates/jaymanga/src/services/jaykonta/adapter.rs": [
+    "jaymanga_services_jaykonta_adapter"
+  ],
+  "crates/jaymanga/src/services/jaykonta/mod.rs": [
+    "jaymanga_services_jaykonta_mod"
+  ],
+  "crates/jaymanga/src/services/mod.rs": [
+    "jaymanga_services_mod"
+  ],
+  "crates/jaymanga/src/services/mws/discovery.rs": [
+    "jaymanga_services_mws_discovery"
+  ],
+  "crates/jaymanga/src/services/mws/manifests.rs": [
+    "jaymanga_services_mws_manifests"
+  ],
+  "crates/jaymanga/src/services/mws/mod.rs": [
+    "jaymanga_services_mws_mod"
+  ],
+  "crates/jaymanga/src/services/mws/presence.rs": [
+    "jaymanga_services_mws_presence"
+  ],
+  "crates/jaymanga/src/web/aggregator_portal.rs": [
+    "jaymanga_web_aggregator_portal"
+  ],
+  "crates/jaymanga/src/web/mod.rs": [
+    "jaymanga_web_mod"
+  ],
+  "crates/jaymanga/src/web/portal.rs": [
+    "jaymanga_web_portal"
   ],
   "crates/jaymessage-client/src/lib.rs": [
     "service.jaymessage.alicia_client"
@@ -645,6 +2532,9 @@
   "crates/kindmother-client/src/errors.rs": [
     "kindmother_client_errors"
   ],
+  "crates/kindmother-client/src/lib.rs": [
+    "kindmother_client_lib"
+  ],
   "crates/kindmother-client/src/protocol.rs": [
     "kindmother_client_protocol"
   ],
@@ -671,6 +2561,9 @@
     "KMC_R_003",
     "kindmother_client_unit_tests"
   ],
+  "crates/kindmother-db-adapter/src/lib.rs": [
+    "kindmother_db_adapter_lib"
+  ],
   "crates/kindmother-db-key/src/key_derivation.rs": [
     "kindmother_db_key_derivation"
   ],
@@ -680,11 +2573,17 @@
   "crates/kindmother-service/src/arbitration.rs": [
     "kindmother_service_arbitration"
   ],
+  "crates/kindmother-service/src/bin/kindmother_server.rs": [
+    "kindmother_service_bin_kindmother_server"
+  ],
   "crates/kindmother-service/src/database.rs": [
     "kindmother_service_database"
   ],
   "crates/kindmother-service/src/errors.rs": [
     "kindmother_service_errors"
+  ],
+  "crates/kindmother-service/src/lib.rs": [
+    "kindmother_service_lib"
   ],
   "crates/kindmother-service/src/protocol.rs": [
     "kindmother_service_protocol"
@@ -879,6 +2778,9 @@
     "logisticssteward_allocation_resource_type",
     "logisticssteward_allocation_test_creation"
   ],
+  "crates/logisticssteward/src/lib.rs": [
+    "logisticssteward_lib"
+  ],
   "crates/logisticssteward/src/optimization.rs": [
     "logisticssteward_optimization",
     "logisticssteward_optimization_recommendations",
@@ -897,6 +2799,24 @@
     "logisticssteward_resource_type_disk",
     "logisticssteward_resource_type_field",
     "logisticssteward_resource_type_memory"
+  ],
+  "crates/maia-stt/src/confidence.rs": [
+    "maia_stt_confidence"
+  ],
+  "crates/maia-stt/src/lib.rs": [
+    "maia_stt_lib"
+  ],
+  "crates/maia-stt/src/pipeline.rs": [
+    "maia_stt_pipeline"
+  ],
+  "crates/maia-stt/src/vad.rs": [
+    "maia_stt_vad"
+  ],
+  "crates/maia-stt/src/whisper.rs": [
+    "maia_stt_whisper"
+  ],
+  "crates/masterbutler/src/lib.rs": [
+    "masterbutler_lib"
   ],
   "crates/masterbutler/src/orchestrator.rs": [
     "masterbutler_orchestrator_execute",
@@ -920,14 +2840,29 @@
     "masterbutler_workflow_new",
     "masterbutler_workflow_test_creation"
   ],
+  "crates/miyauth/src/admin_cell.rs": [
+    "miyauth_admin_cell"
+  ],
   "crates/miyauth/src/attest.rs": [
     "miyauth_tool_identity_attest"
+  ],
+  "crates/miyauth/src/context.rs": [
+    "miyauth_context"
+  ],
+  "crates/miyauth/src/errors.rs": [
+    "miyauth_errors"
+  ],
+  "crates/miyauth/src/lib.rs": [
+    "miyauth_lib"
   ],
   "crates/miyauth/src/resolve.rs": [
     "miyauth_tool_identity_resolve"
   ],
   "crates/miyauth/src/role.rs": [
     "miyauth_tool_identity_role"
+  ],
+  "crates/miyauth/src/types.rs": [
+    "miyauth_types"
   ],
   "crates/miyauth/src/verify.rs": [
     "miyauth_tool_identity_verify"
@@ -1191,9 +3126,18 @@
   "crates/miyualicia/src/snapshot.rs": [
     "service.alicia.snapshot"
   ],
+  "crates/miyuantispam/src/admin_cell.rs": [
+    "miyuantispam_admin_cell"
+  ],
   "crates/miyuantispam/src/captcha.rs": [
     "miyuantispam_tool_captcha_generate",
     "miyuantispam_tool_captcha_verify"
+  ],
+  "crates/miyuantispam/src/context.rs": [
+    "miyuantispam_context"
+  ],
+  "crates/miyuantispam/src/errors.rs": [
+    "miyuantispam_errors"
   ],
   "crates/miyuantispam/src/flood.rs": [
     "miyuantispam_tool_flood_check"
@@ -1204,9 +3148,21 @@
   "crates/miyuantispam/src/rate_limit.rs": [
     "miyuantispam_tool_rate_limit_check"
   ],
+  "crates/miyubilling/src/admin_cell.rs": [
+    "miyubilling_admin_cell"
+  ],
+  "crates/miyubilling/src/context.rs": [
+    "miyubilling_context"
+  ],
+  "crates/miyubilling/src/errors.rs": [
+    "miyubilling_errors"
+  ],
   "crates/miyubilling/src/invoice.rs": [
     "miyubilling_tool_billing_invoice_generate",
     "miyubilling_tool_billing_invoice_list"
+  ],
+  "crates/miyubilling/src/lib.rs": [
+    "miyubilling_lib"
   ],
   "crates/miyubilling/src/payment.rs": [
     "miyubilling_tool_billing_payment_record"
@@ -1220,10 +3176,22 @@
   "crates/miyubilling/src/tenant.rs": [
     "miyubilling_tool_billing_tenant_resolve"
   ],
+  "crates/miyubooking/src/admin_cell.rs": [
+    "miyubooking_admin_cell"
+  ],
   "crates/miyubooking/src/booking.rs": [
     "miyubooking_tool_booking_cancel",
     "miyubooking_tool_booking_create",
     "miyubooking_tool_booking_update"
+  ],
+  "crates/miyubooking/src/context.rs": [
+    "miyubooking_context"
+  ],
+  "crates/miyubooking/src/errors.rs": [
+    "miyubooking_errors"
+  ],
+  "crates/miyubooking/src/lib.rs": [
+    "miyubooking_lib"
   ],
   "crates/miyubooking/src/participants.rs": [
     "miyubooking_tool_booking_participants_compute"
@@ -1239,10 +3207,19 @@
     "miyubooking_tool_booking_slots_list",
     "miyubooking_tool_booking_slots_resolve"
   ],
+  "crates/miyubookmarks/src/admin_cell.rs": [
+    "miyubookmarks_admin_cell"
+  ],
   "crates/miyubookmarks/src/bookmark.rs": [
     "miyubookmarks_tool_bookmark_add",
     "miyubookmarks_tool_bookmark_list",
     "miyubookmarks_tool_bookmark_remove"
+  ],
+  "crates/miyubookmarks/src/context.rs": [
+    "miyubookmarks_context"
+  ],
+  "crates/miyubookmarks/src/errors.rs": [
+    "miyubookmarks_errors"
   ],
   "crates/miyubookmarks/src/lib.rs": [
     "toolkit.content.miyubookmarks"
@@ -1280,10 +3257,124 @@
   "crates/miyucalc/src/unit.rs": [
     "miyucalc_tool_unit_convert"
   ],
+  "crates/miyuclock/src/admin_cell.rs": [
+    "miyuclock_admin_cell"
+  ],
+  "crates/miyuclock/src/context.rs": [
+    "miyuclock_context"
+  ],
+  "crates/miyuclock/src/errors.rs": [
+    "miyuclock_errors"
+  ],
+  "crates/miyuclock/src/lib.rs": [
+    "miyuclock_lib"
+  ],
   "crates/miyuclock/src/time.rs": [
     "miyuclock_tool_time_delta",
     "miyuclock_tool_time_now",
     "miyuclock_tool_time_now_injected"
+  ],
+  "crates/miyucloud-dav/src/caldav/handlers.rs": [
+    "miyucloud_dav_caldav_handlers"
+  ],
+  "crates/miyucloud-dav/src/caldav/ical.rs": [
+    "miyucloud_dav_caldav_ical"
+  ],
+  "crates/miyucloud-dav/src/caldav/mod.rs": [
+    "miyucloud_dav_caldav_mod"
+  ],
+  "crates/miyucloud-dav/src/caldav/router.rs": [
+    "miyucloud_dav_caldav_router"
+  ],
+  "crates/miyucloud-dav/src/caldav/schema.rs": [
+    "miyucloud_dav_caldav_schema"
+  ],
+  "crates/miyucloud-dav/src/caldav/service.rs": [
+    "miyucloud_dav_caldav_service"
+  ],
+  "crates/miyucloud-dav/src/caldav/types.rs": [
+    "miyucloud_dav_caldav_types"
+  ],
+  "crates/miyucloud-dav/src/carddav/handlers.rs": [
+    "miyucloud_dav_carddav_handlers"
+  ],
+  "crates/miyucloud-dav/src/carddav/mod.rs": [
+    "miyucloud_dav_carddav_mod"
+  ],
+  "crates/miyucloud-dav/src/carddav/router.rs": [
+    "miyucloud_dav_carddav_router"
+  ],
+  "crates/miyucloud-dav/src/carddav/schema.rs": [
+    "miyucloud_dav_carddav_schema"
+  ],
+  "crates/miyucloud-dav/src/carddav/service.rs": [
+    "miyucloud_dav_carddav_service"
+  ],
+  "crates/miyucloud-dav/src/carddav/types.rs": [
+    "miyucloud_dav_carddav_types"
+  ],
+  "crates/miyucloud-dav/src/carddav/vcard.rs": [
+    "miyucloud_dav_carddav_vcard"
+  ],
+  "crates/miyucloud-dav/src/common/dav_error.rs": [
+    "miyucloud_dav_common_dav_error"
+  ],
+  "crates/miyucloud-dav/src/common/dav_store.rs": [
+    "miyucloud_dav_common_dav_store"
+  ],
+  "crates/miyucloud-dav/src/common/mod.rs": [
+    "miyucloud_dav_common_mod"
+  ],
+  "crates/miyucloud-dav/src/common/path_validator.rs": [
+    "miyucloud_dav_common_path_validator"
+  ],
+  "crates/miyucloud-dav/src/common/xml_security.rs": [
+    "miyucloud_dav_common_xml_security"
+  ],
+  "crates/miyucloud-dav/src/lib.rs": [
+    "miyucloud_dav_lib"
+  ],
+  "crates/miyucloud-dav/src/thumbnails/cache.rs": [
+    "miyucloud_dav_thumbnails_cache"
+  ],
+  "crates/miyucloud-dav/src/thumbnails/handler.rs": [
+    "miyucloud_dav_thumbnails_handler"
+  ],
+  "crates/miyucloud-dav/src/thumbnails/mod.rs": [
+    "miyucloud_dav_thumbnails_mod"
+  ],
+  "crates/miyucloud-dav/src/webdav/handlers.rs": [
+    "miyucloud_dav_webdav_handlers"
+  ],
+  "crates/miyucloud-dav/src/webdav/mod.rs": [
+    "miyucloud_dav_webdav_mod"
+  ],
+  "crates/miyucloud-dav/src/webdav/parser.rs": [
+    "miyucloud_dav_webdav_parser"
+  ],
+  "crates/miyucloud-dav/src/webdav/properties.rs": [
+    "miyucloud_dav_webdav_properties"
+  ],
+  "crates/miyucloud-dav/src/webdav/response.rs": [
+    "miyucloud_dav_webdav_response"
+  ],
+  "crates/miyucloud-dav/src/webdav/router.rs": [
+    "miyucloud_dav_webdav_router"
+  ],
+  "crates/miyucloud-dav/src/wopi/auth.rs": [
+    "miyucloud_dav_wopi_auth"
+  ],
+  "crates/miyucloud-dav/src/wopi/discovery.rs": [
+    "miyucloud_dav_wopi_discovery"
+  ],
+  "crates/miyucloud-dav/src/wopi/handlers.rs": [
+    "miyucloud_dav_wopi_handlers"
+  ],
+  "crates/miyucloud-dav/src/wopi/mod.rs": [
+    "miyucloud_dav_wopi_mod"
+  ],
+  "crates/miyucloud-dav/src/wopi/router.rs": [
+    "miyucloud_dav_wopi_router"
   ],
   "crates/miyucloud/src/admin_cell.rs": [
     "miyucloud_admin_cell"
@@ -1330,6 +3421,9 @@
   "crates/miyucloud/src/data/types.rs": [
     "miyucloud_domain_types"
   ],
+  "crates/miyucloud/src/domain/dedup_ops.rs": [
+    "miyucloud_domain_dedup_ops"
+  ],
   "crates/miyucloud/src/domain/external_share.rs": [
     "miyucloud_domain_external_share"
   ],
@@ -1351,6 +3445,9 @@
   "crates/miyucloud/src/domain/sharing.rs": [
     "miyucloud_domain_sharing"
   ],
+  "crates/miyucloud/src/domain/thumbnail_ops.rs": [
+    "miyucloud_domain_thumbnail_ops"
+  ],
   "crates/miyucloud/src/domain/trash.rs": [
     "miyucloud_domain_trash"
   ],
@@ -1364,13 +3461,19 @@
     "miyucloud_export_module"
   ],
   "crates/miyucloud/src/lib.rs": [
-    "miyucloud_lib"
+    "crate_miyucloud_lib"
   ],
   "crates/miyucloud/src/monitoring/mod.rs": [
     "miyucloud_monitoring"
   ],
   "crates/miyucloud/src/storage/chunking.rs": [
     "miyucloud_storage_chunking"
+  ],
+  "crates/miyucloud/src/storage/compression.rs": [
+    "miyucloud_storage_compression"
+  ],
+  "crates/miyucloud/src/storage/dedup.rs": [
+    "miyucloud_storage_dedup"
   ],
   "crates/miyucloud/src/storage/integrity.rs": [
     "miyucloud_storage_integrity"
@@ -1423,6 +3526,9 @@
   "crates/miyucloud/tests/integration_sync.rs": [
     "miyucloud_integration_sync"
   ],
+  "crates/miyucms/src/admin_cell.rs": [
+    "miyucms_admin_cell"
+  ],
   "crates/miyucms/src/comment.rs": [
     "miyucms_tool_content_comment_create",
     "miyucms_tool_content_comment_list",
@@ -1434,6 +3540,15 @@
     "miyucms_tool_content_schedule",
     "miyucms_tool_content_update"
   ],
+  "crates/miyucms/src/context.rs": [
+    "miyucms_context"
+  ],
+  "crates/miyucms/src/errors.rs": [
+    "miyucms_errors"
+  ],
+  "crates/miyucms/src/lib.rs": [
+    "miyucms_lib"
+  ],
   "crates/miyucms/src/media.rs": [
     "miyucms_tool_media_serve",
     "miyucms_tool_media_transform",
@@ -1444,6 +3559,18 @@
     "miyucms_tool_content_revision_create",
     "miyucms_tool_content_revision_list",
     "miyucms_tool_content_revision_restore"
+  ],
+  "crates/miyucms/src/store.rs": [
+    "miyucms_store"
+  ],
+  "crates/miyucomptareports/src/admin_cell.rs": [
+    "miyucomptareports_admin_cell"
+  ],
+  "crates/miyucomptareports/src/context.rs": [
+    "miyucomptareports_context"
+  ],
+  "crates/miyucomptareports/src/errors.rs": [
+    "miyucomptareports_errors"
   ],
   "crates/miyucomptareports/src/export.rs": [
     "miyucomptareports_tool_ledger_export"
@@ -1457,8 +3584,17 @@
     "miyucomptareports_tool_liasse_generate",
     "miyucomptareports_tool_livre_recettes_generate"
   ],
+  "crates/miyucontacts/src/admin_cell.rs": [
+    "miyucontacts_admin_cell"
+  ],
   "crates/miyucontacts/src/contacts.rs": [
     "miyucontacts_tool_contacts_list"
+  ],
+  "crates/miyucontacts/src/context.rs": [
+    "miyucontacts_context"
+  ],
+  "crates/miyucontacts/src/errors.rs": [
+    "miyucontacts_errors"
   ],
   "crates/miyucontacts/src/foe.rs": [
     "miyucontacts_tool_foe_add",
@@ -1473,6 +3609,12 @@
   "crates/miyucontacts/src/lib.rs": [
     "toolkit.communication.miyucontacts"
   ],
+  "crates/miyucontacts/src/store.rs": [
+    "miyucontacts_store"
+  ],
+  "crates/miyucptaledger/src/admin_cell.rs": [
+    "miyucptaledger_admin_cell"
+  ],
   "crates/miyucptaledger/src/bank.rs": [
     "miyucptaledger_tool_compta_bank_sync"
   ],
@@ -1481,19 +3623,40 @@
     "miyucptaledger_tool_company_structure_register",
     "miyucptaledger_tool_company_structure_resolve"
   ],
+  "crates/miyucptaledger/src/context.rs": [
+    "miyucptaledger_context"
+  ],
+  "crates/miyucptaledger/src/errors.rs": [
+    "miyucptaledger_errors"
+  ],
+  "crates/miyucptaledger/src/lib.rs": [
+    "miyucptaledger_lib"
+  ],
   "crates/miyucptaledger/src/reconciliation.rs": [
     "miyucptaledger_tool_compta_reconciliation_record",
     "miyucptaledger_tool_compta_reconciliation_suggest"
   ],
+  "crates/miyucptaledger/src/store.rs": [
+    "miyucptaledger_store"
+  ],
   "crates/miyucptaledger/src/transaction.rs": [
     "miyucptaledger_tool_compta_transaction_categorize",
     "miyucptaledger_tool_compta_transaction_vat_resolve"
+  ],
+  "crates/miyudeclarations/src/admin_cell.rs": [
+    "miyudeclarations_admin_cell"
+  ],
+  "crates/miyudeclarations/src/context.rs": [
+    "miyudeclarations_context"
   ],
   "crates/miyudeclarations/src/deadline.rs": [
     "miyudeclarations_tool_deadline_list"
   ],
   "crates/miyudeclarations/src/declaration.rs": [
     "miyudeclarations_tool_declaration_list"
+  ],
+  "crates/miyudeclarations/src/errors.rs": [
+    "miyudeclarations_errors"
   ],
   "crates/miyudeclarations/src/estimate.rs": [
     "miyudeclarations_tool_estimate_cotisations"
@@ -1509,8 +3672,17 @@
     "miyudeclarations_tool_urssaf_prepare",
     "miyudeclarations_tool_urssaf_submit"
   ],
+  "crates/miyudiscovery/src/admin_cell.rs": [
+    "miyudiscovery_admin_cell"
+  ],
+  "crates/miyudiscovery/src/context.rs": [
+    "miyudiscovery_context"
+  ],
   "crates/miyudiscovery/src/discover.rs": [
     "miyudiscovery_tool_discover_list"
+  ],
+  "crates/miyudiscovery/src/errors.rs": [
+    "miyudiscovery_errors"
   ],
   "crates/miyudiscovery/src/hashtag.rs": [
     "miyudiscovery_tool_hashtag_get",
@@ -1526,12 +3698,24 @@
   "crates/miyudiscovery/src/trending.rs": [
     "miyudiscovery_tool_trending_list"
   ],
+  "crates/miyuexpense/src/admin_cell.rs": [
+    "miyuexpense_admin_cell"
+  ],
   "crates/miyuexpense/src/claim.rs": [
     "miyuexpense_tool_expense_claim_create",
     "miyuexpense_tool_expense_claim_export",
     "miyuexpense_tool_expense_claim_list",
     "miyuexpense_tool_expense_claim_update",
     "miyuexpense_tool_expense_claim_validate"
+  ],
+  "crates/miyuexpense/src/context.rs": [
+    "miyuexpense_context"
+  ],
+  "crates/miyuexpense/src/errors.rs": [
+    "miyuexpense_errors"
+  ],
+  "crates/miyuexpense/src/lib.rs": [
+    "miyuexpense_lib"
   ],
   "crates/miyuexpense/src/mileage.rs": [
     "miyuexpense_tool_expense_mileage_calculate",
@@ -1541,8 +3725,17 @@
     "miyuexpense_tool_expense_receipt_capture",
     "miyuexpense_tool_expense_receipt_extract"
   ],
+  "crates/miyuexport/src/admin_cell.rs": [
+    "miyuexport_admin_cell"
+  ],
+  "crates/miyuexport/src/context.rs": [
+    "miyuexport_context"
+  ],
   "crates/miyuexport/src/csv.rs": [
     "miyuexport_tool_csv_generate"
+  ],
+  "crates/miyuexport/src/errors.rs": [
+    "miyuexport_errors"
   ],
   "crates/miyuexport/src/lib.rs": [
     "toolkit.export.miyuexport"
@@ -1553,6 +3746,15 @@
   "crates/miyuexport/src/xlsx.rs": [
     "miyuexport_tool_xlsx_generate"
   ],
+  "crates/miyufeeds/src/admin_cell.rs": [
+    "miyufeeds_admin_cell"
+  ],
+  "crates/miyufeeds/src/context.rs": [
+    "miyufeeds_context"
+  ],
+  "crates/miyufeeds/src/errors.rs": [
+    "miyufeeds_errors"
+  ],
   "crates/miyufeeds/src/feed.rs": [
     "miyufeeds_tool_atom_board",
     "miyufeeds_tool_atom_forum",
@@ -1560,6 +3762,9 @@
   ],
   "crates/miyufeeds/src/lib.rs": [
     "toolkit.content.miyufeeds"
+  ],
+  "crates/miyuforum/src/admin_cell.rs": [
+    "miyuforum_admin_cell"
   ],
   "crates/miyuforum/src/board.rs": [
     "miyuforum_tool_forum_board_create",
@@ -1572,6 +3777,15 @@
     "miyuforum_tool_forum_category_get",
     "miyuforum_tool_forum_category_list",
     "miyuforum_tool_forum_category_update"
+  ],
+  "crates/miyuforum/src/context.rs": [
+    "miyuforum_context"
+  ],
+  "crates/miyuforum/src/errors.rs": [
+    "miyuforum_errors"
+  ],
+  "crates/miyuforum/src/lib.rs": [
+    "miyuforum_lib"
   ],
   "crates/miyuforum/src/post.rs": [
     "miyuforum_tool_forum_post_create",
@@ -1593,6 +3807,15 @@
     "miyuforum_tool_forum_topic_sticky",
     "miyuforum_tool_forum_topic_update"
   ],
+  "crates/miyuhr/src/admin_cell.rs": [
+    "miyuhr_admin_cell"
+  ],
+  "crates/miyuhr/src/context.rs": [
+    "miyuhr_context"
+  ],
+  "crates/miyuhr/src/errors.rs": [
+    "miyuhr_errors"
+  ],
   "crates/miyuhr/src/lib.rs": [
     "toolkit.hr.miyuhr"
   ],
@@ -1603,6 +3826,12 @@
     "miyuhr_tool_time_clock_in",
     "miyuhr_tool_time_clock_out"
   ],
+  "crates/miyuinvoice/src/admin_cell.rs": [
+    "miyuinvoice_admin_cell"
+  ],
+  "crates/miyuinvoice/src/context.rs": [
+    "miyuinvoice_context"
+  ],
   "crates/miyuinvoice/src/customer.rs": [
     "miyuinvoice_tool_invoice_customer_list",
     "miyuinvoice_tool_invoice_customer_resolve"
@@ -1610,9 +3839,15 @@
   "crates/miyuinvoice/src/electronic.rs": [
     "miyuinvoice_tool_invoice_electronic_submit"
   ],
+  "crates/miyuinvoice/src/errors.rs": [
+    "miyuinvoice_errors"
+  ],
   "crates/miyuinvoice/src/invoice.rs": [
     "miyuinvoice_tool_invoice_create",
     "miyuinvoice_tool_invoice_send"
+  ],
+  "crates/miyuinvoice/src/lib.rs": [
+    "miyuinvoice_lib"
   ],
   "crates/miyuinvoice/src/payment_link.rs": [
     "miyuinvoice_tool_invoice_payment_link_generate"
@@ -1624,6 +3859,18 @@
   ],
   "crates/miyuinvoice/src/reminder.rs": [
     "miyuinvoice_tool_invoice_reminder_send"
+  ],
+  "crates/miyuinvoice/src/store.rs": [
+    "miyuinvoice_store"
+  ],
+  "crates/miyujobs/src/admin_cell.rs": [
+    "miyujobs_admin_cell"
+  ],
+  "crates/miyujobs/src/context.rs": [
+    "miyujobs_context"
+  ],
+  "crates/miyujobs/src/errors.rs": [
+    "miyujobs_errors"
   ],
   "crates/miyujobs/src/lib.rs": [
     "toolkit.jobs.miyujobs"
@@ -1993,6 +4240,9 @@
   "crates/miyuki-ui-tokens/src/z_index.rs": [
     "MUIT-ZIndex"
   ],
+  "crates/miyukini-admin/src/admin_cell.rs": [
+    "miyukini_admin_admin_cell"
+  ],
   "crates/miyukini-admin/src/api_handlers.rs": [
     "miyukiniadmin_api_handler_handle_request",
     "miyukiniadmin_api_handler_test_response_creation",
@@ -2058,6 +4308,9 @@
     "miyukiniadmin_config_backend_config_tls_cert",
     "miyukiniadmin_config_backend_config_tls_key",
     "miyukiniadmin_config_test_from_env"
+  ],
+  "crates/miyukini-admin/src/crud_state.rs": [
+    "miyukini_admin_crud_state"
   ],
   "crates/miyukini-admin/src/cycle_tests_runner.rs": [
     "miyukiniadmin_cycle_runner",
@@ -2220,6 +4473,12 @@
     "miyukiniadmin_session_role",
     "miyukiniadmin_session_user_agent"
   ],
+  "crates/miyukini-admin/src/module_lifecycle_service.rs": [
+    "miyukini_admin_module_lifecycle_service"
+  ],
+  "crates/miyukini-admin/src/module_testing_service.rs": [
+    "miyukini_admin_module_testing_service"
+  ],
   "crates/miyukini-admin/src/monitoring_service.rs": [
     "miyukiniadmin_monitoring_service_collect_metrics",
     "miyukiniadmin_monitoring_service_trait",
@@ -2307,11 +4566,71 @@
   "crates/miyukini-admin/ui/js/theme.js": [
     "cog.adminTheme"
   ],
+  "crates/miyukini-central/src/auth/db.rs": [
+    "miyukini_central_auth_db"
+  ],
   "crates/miyukini-central/src/auth/db_client.rs": [
     "central_auth_kindmother_client_db"
   ],
+  "crates/miyukini-central/src/auth/mod.rs": [
+    "miyukini_central_auth_mod"
+  ],
+  "crates/miyukini-central/src/auth/mother_client.rs": [
+    "miyukini_central_auth_mother_client"
+  ],
+  "crates/miyukini-central/src/auth/password.rs": [
+    "miyukini_central_auth_password"
+  ],
+  "crates/miyukini-central/src/catalog.rs": [
+    "miyukini_central_catalog"
+  ],
+  "crates/miyukini-central/src/config.rs": [
+    "miyukini_central_config"
+  ],
   "crates/miyukini-central/src/db/kindmother_adapter.rs": [
     "kindmother_adapter"
+  ],
+  "crates/miyukini-central/src/db/mod.rs": [
+    "miyukini_central_db_mod"
+  ],
+  "crates/miyukini-central/src/lib.rs": [
+    "miyukini_central_lib"
+  ],
+  "crates/miyukini-central/src/main.rs": [
+    "miyukini_central_main"
+  ],
+  "crates/miyukini-central/src/mws/mod.rs": [
+    "miyukini_central_mws_mod"
+  ],
+  "crates/miyukini-central/src/services/miyuclicker.rs": [
+    "miyukini_central_services_miyuclicker"
+  ],
+  "crates/miyukini-central/src/services/mod.rs": [
+    "miyukini_central_services_mod"
+  ],
+  "crates/miyukini-cog-bridge/src/apikey.rs": [
+    "miyukini_cog_bridge_apikey"
+  ],
+  "crates/miyukini-cog-bridge/src/bridge.rs": [
+    "miyukini_cog_bridge_bridge"
+  ],
+  "crates/miyukini-cog-bridge/src/discovery.rs": [
+    "miyukini_cog_bridge_discovery"
+  ],
+  "crates/miyukini-cog-bridge/src/e2e.rs": [
+    "miyukini_cog_bridge_e2e"
+  ],
+  "crates/miyukini-cog-bridge/src/lib.rs": [
+    "miyukini_cog_bridge_lib"
+  ],
+  "crates/miyukini-cog-bridge/src/reconnect.rs": [
+    "miyukini_cog_bridge_reconnect"
+  ],
+  "crates/miyukini-cog-bridge/src/ssh.rs": [
+    "miyukini_cog_bridge_ssh"
+  ],
+  "crates/miyukini-cog-bridge/src/whitelist.rs": [
+    "miyukini_cog_bridge_whitelist"
   ],
   "crates/miyukini-connect/src/audit.rs": [
     "miyukini_connect_audit"
@@ -2440,8 +4759,80 @@
     "test_integration_round_trip_id_config",
     "test_integration_time_log_integration"
   ],
+  "crates/miyukini-service-ui/src/lib.rs": [
+    "miyukini_service_ui_lib"
+  ],
+  "crates/miyukini-service-ui/src/styles.rs": [
+    "miyukini_service_ui_styles"
+  ],
+  "crates/miyukini-service-ui/src/theme.rs": [
+    "miyukini_service_ui_theme"
+  ],
+  "crates/miyukinibb/src/client.rs": [
+    "miyukinibb_client"
+  ],
+  "crates/miyukinibb/src/errors.rs": [
+    "miyukinibb_errors"
+  ],
+  "crates/miyukinibb/src/lib.rs": [
+    "miyukinibb_lib"
+  ],
+  "crates/miyukinibb/src/types.rs": [
+    "miyukinibb_types"
+  ],
+  "crates/miyukinisales/src/data/memory_store.rs": [
+    "miyukinisales_data_memory_store"
+  ],
+  "crates/miyukinisales/src/data/mod.rs": [
+    "miyukinisales_data_mod"
+  ],
+  "crates/miyukinisales/src/data/types.rs": [
+    "miyukinisales_data_types"
+  ],
+  "crates/miyukinisales/src/domain/mod.rs": [
+    "miyukinisales_domain_mod"
+  ],
+  "crates/miyukinisales/src/lib.rs": [
+    "miyukinisales_lib"
+  ],
+  "crates/miyukiniwatch/src/aggregates.rs": [
+    "miyukiniwatch_aggregates"
+  ],
+  "crates/miyukiniwatch/src/aggregator.rs": [
+    "miyukiniwatch_aggregator"
+  ],
+  "crates/miyukiniwatch/src/collector.rs": [
+    "miyukiniwatch_collector"
+  ],
+  "crates/miyukiniwatch/src/data/db.rs": [
+    "miyukiniwatch_data_db"
+  ],
+  "crates/miyukiniwatch/src/data/mod.rs": [
+    "miyukiniwatch_data_mod"
+  ],
+  "crates/miyukiniwatch/src/data/types.rs": [
+    "miyukiniwatch_data_types"
+  ],
+  "crates/miyukiniwatch/src/errors.rs": [
+    "miyukiniwatch_errors"
+  ],
+  "crates/miyukiniwatch/src/lib.rs": [
+    "miyukiniwatch_lib_2"
+  ],
+  "crates/miyukiniwatch/src/presenter.rs": [
+    "miyukiniwatch_presenter"
+  ],
+  "crates/miyulocale/src/admin_cell.rs": [
+    "miyulocale_admin_cell"
+  ],
+  "crates/miyulocale/src/context.rs": [
+    "miyulocale_context"
+  ],
   "crates/miyulocale/src/date.rs": [
     "miyulocale_tool_date_format"
+  ],
+  "crates/miyulocale/src/errors.rs": [
+    "miyulocale_errors"
   ],
   "crates/miyulocale/src/lib.rs": [
     "toolkit.locale.miyulocale"
@@ -2452,14 +4843,47 @@
   "crates/miyulocale/src/translate.rs": [
     "miyulocale_tool_translate"
   ],
+  "crates/miyumarket/src/lib.rs": [
+    "miyumarket_lib"
+  ],
+  "crates/miyumarket/src/manifest.rs": [
+    "miyumarket_manifest"
+  ],
+  "crates/miyumarket/src/package.rs": [
+    "miyumarket_package"
+  ],
+  "crates/miyumarket/src/protocol.rs": [
+    "miyumarket_protocol"
+  ],
+  "crates/miyumedia/src/admin_cell.rs": [
+    "miyumedia_admin_cell"
+  ],
+  "crates/miyumedia/src/context.rs": [
+    "miyumedia_context"
+  ],
+  "crates/miyumedia/src/errors.rs": [
+    "miyumedia_errors"
+  ],
+  "crates/miyumedia/src/lib.rs": [
+    "miyumedia_lib"
+  ],
   "crates/miyumedia/src/media.rs": [
     "miyumedia_tool_media_serve",
     "miyumedia_tool_media_transform",
     "miyumedia_tool_media_upload"
   ],
+  "crates/miyumoderationforum/src/admin_cell.rs": [
+    "miyumoderationforum_admin_cell"
+  ],
   "crates/miyumoderationforum/src/ban.rs": [
     "miyumoderationforum_tool_ban_create",
     "miyumoderationforum_tool_ban_list"
+  ],
+  "crates/miyumoderationforum/src/context.rs": [
+    "miyumoderationforum_context"
+  ],
+  "crates/miyumoderationforum/src/errors.rs": [
+    "miyumoderationforum_errors"
   ],
   "crates/miyumoderationforum/src/lib.rs": [
     "toolkit.moderation.miyumoderationforum"
@@ -2477,6 +4901,9 @@
     "miyumoderationforum_tool_report_create",
     "miyumoderationforum_tool_report_list"
   ],
+  "crates/miyumoderationforum/src/store.rs": [
+    "miyumoderationforum_store"
+  ],
   "crates/miyumoderationforum/src/topic.rs": [
     "miyumoderationforum_tool_topic_copy",
     "miyumoderationforum_tool_topic_delete",
@@ -2493,14 +4920,32 @@
     "miyumoderationforum_tool_warning_create",
     "miyumoderationforum_tool_warning_list"
   ],
+  "crates/miyunotify/src/admin_cell.rs": [
+    "miyunotify_admin_cell"
+  ],
+  "crates/miyunotify/src/context.rs": [
+    "miyunotify_context"
+  ],
   "crates/miyunotify/src/email.rs": [
     "miyunotify_tool_email_send"
+  ],
+  "crates/miyunotify/src/errors.rs": [
+    "miyunotify_errors"
   ],
   "crates/miyunotify/src/inbox.rs": [
     "miyunotify_tool_inbox_write"
   ],
+  "crates/miyunotify/src/lib.rs": [
+    "miyunotify_lib"
+  ],
   "crates/miyunotify/src/push.rs": [
     "miyunotify_tool_push_send"
+  ],
+  "crates/miyupm/src/admin_cell.rs": [
+    "miyupm_admin_cell"
+  ],
+  "crates/miyupm/src/context.rs": [
+    "miyupm_context"
   ],
   "crates/miyupm/src/conversation.rs": [
     "miyupm_tool_pm_conversation_get",
@@ -2511,6 +4956,9 @@
     "miyupm_tool_pm_draft_list",
     "miyupm_tool_pm_draft_update"
   ],
+  "crates/miyupm/src/errors.rs": [
+    "miyupm_errors"
+  ],
   "crates/miyupm/src/export.rs": [
     "miyupm_tool_pm_export"
   ],
@@ -2519,10 +4967,22 @@
     "miyupm_tool_pm_folder_list",
     "miyupm_tool_pm_folder_update"
   ],
+  "crates/miyupm/src/lib.rs": [
+    "miyupm_lib"
+  ],
   "crates/miyupm/src/message.rs": [
     "miyupm_tool_pm_get",
     "miyupm_tool_pm_list",
     "miyupm_tool_pm_send"
+  ],
+  "crates/miyupolls/src/admin_cell.rs": [
+    "miyupolls_admin_cell"
+  ],
+  "crates/miyupolls/src/context.rs": [
+    "miyupolls_context"
+  ],
+  "crates/miyupolls/src/errors.rs": [
+    "miyupolls_errors"
   ],
   "crates/miyupolls/src/lib.rs": [
     "toolkit.social.miyupolls"
@@ -2533,8 +4993,17 @@
     "miyupolls_tool_poll_result",
     "miyupolls_tool_poll_vote"
   ],
+  "crates/miyuposanalytics/src/admin_cell.rs": [
+    "miyuposanalytics_admin_cell"
+  ],
   "crates/miyuposanalytics/src/cash.rs": [
     "miyuposanalytics_tool_cash_discrepancy"
+  ],
+  "crates/miyuposanalytics/src/context.rs": [
+    "miyuposanalytics_context"
+  ],
+  "crates/miyuposanalytics/src/errors.rs": [
+    "miyuposanalytics_errors"
   ],
   "crates/miyuposanalytics/src/export.rs": [
     "miyuposanalytics_tool_export_spreadsheet"
@@ -2553,13 +5022,22 @@
   "crates/miyuposanalytics/src/tax.rs": [
     "miyuposanalytics_tool_tax_report"
   ],
+  "crates/miyuposinventory/src/admin_cell.rs": [
+    "miyuposinventory_admin_cell"
+  ],
   "crates/miyuposinventory/src/alert.rs": [
     "miyuposinventory_tool_alert_low_evaluate"
+  ],
+  "crates/miyuposinventory/src/context.rs": [
+    "miyuposinventory_context"
   ],
   "crates/miyuposinventory/src/count.rs": [
     "miyuposinventory_tool_count_reconcile",
     "miyuposinventory_tool_count_record",
     "miyuposinventory_tool_count_start"
+  ],
+  "crates/miyuposinventory/src/errors.rs": [
+    "miyuposinventory_errors"
   ],
   "crates/miyuposinventory/src/history.rs": [
     "miyuposinventory_tool_history_list"
@@ -2593,6 +5071,15 @@
   "crates/miyuposinventory/src/valuation.rs": [
     "miyuposinventory_tool_valuation_report"
   ],
+  "crates/miyuposkitchen/src/admin_cell.rs": [
+    "miyuposkitchen_admin_cell"
+  ],
+  "crates/miyuposkitchen/src/context.rs": [
+    "miyuposkitchen_context"
+  ],
+  "crates/miyuposkitchen/src/errors.rs": [
+    "miyuposkitchen_errors"
+  ],
   "crates/miyuposkitchen/src/kitchen.rs": [
     "miyuposkitchen_tool_kitchen_print",
     "miyuposkitchen_tool_order_push",
@@ -2607,6 +5094,12 @@
   "crates/miyuposkitchen/src/ticket.rs": [
     "miyuposkitchen_tool_ticket_preset_assign"
   ],
+  "crates/miyuposloyalty/src/admin_cell.rs": [
+    "miyuposloyalty_admin_cell"
+  ],
+  "crates/miyuposloyalty/src/context.rs": [
+    "miyuposloyalty_context"
+  ],
   "crates/miyuposloyalty/src/customer.rs": [
     "miyuposloyalty_tool_customer_address_get",
     "miyuposloyalty_tool_customer_create",
@@ -2615,6 +5108,9 @@
     "miyuposloyalty_tool_customer_note_add",
     "miyuposloyalty_tool_customer_note_list",
     "miyuposloyalty_tool_customer_update"
+  ],
+  "crates/miyuposloyalty/src/errors.rs": [
+    "miyuposloyalty_errors"
   ],
   "crates/miyuposloyalty/src/lib.rs": [
     "toolkit.pos.miyuposloyalty"
@@ -2625,11 +5121,20 @@
     "miyuposloyalty_tool_points_grant",
     "miyuposloyalty_tool_points_redeem"
   ],
+  "crates/miyupospayment/src/admin_cell.rs": [
+    "miyupospayment_admin_cell"
+  ],
   "crates/miyupospayment/src/cash.rs": [
     "miyupospayment_tool_cash_record"
   ],
   "crates/miyupospayment/src/check.rs": [
     "miyupospayment_tool_check_record"
+  ],
+  "crates/miyupospayment/src/context.rs": [
+    "miyupospayment_context"
+  ],
+  "crates/miyupospayment/src/errors.rs": [
+    "miyupospayment_errors"
   ],
   "crates/miyupospayment/src/lib.rs": [
     "toolkit.pos.miyupospayment"
@@ -2641,6 +5146,9 @@
     "miyupospayment_tool_terminal_authorize",
     "miyupospayment_tool_terminal_capture"
   ],
+  "crates/miyupossales/src/admin_cell.rs": [
+    "miyupossales_admin_cell"
+  ],
   "crates/miyupossales/src/barcode.rs": [
     "miyupossales_tool_barcode_parse"
   ],
@@ -2651,11 +5159,17 @@
     "miyupossales_tool_cash_register_close",
     "miyupossales_tool_cash_register_open"
   ],
+  "crates/miyupossales/src/context.rs": [
+    "miyupossales_context"
+  ],
   "crates/miyupossales/src/discount.rs": [
     "miyupossales_tool_discount_apply"
   ],
   "crates/miyupossales/src/display.rs": [
     "miyupossales_tool_display_push"
+  ],
+  "crates/miyupossales/src/errors.rs": [
+    "miyupossales_errors"
   ],
   "crates/miyupossales/src/item.rs": [
     "miyupossales_tool_modifier_apply",
@@ -2690,10 +5204,22 @@
     "miyupossales_tool_ticket_open",
     "miyupossales_tool_ticket_save"
   ],
+  "crates/miyuprofile/src/admin_cell.rs": [
+    "miyuprofile_admin_cell"
+  ],
   "crates/miyuprofile/src/avatar.rs": [
     "miyuprofile_tool_avatar_get",
     "miyuprofile_tool_avatar_resolve",
     "miyuprofile_tool_avatar_set"
+  ],
+  "crates/miyuprofile/src/context.rs": [
+    "miyuprofile_context"
+  ],
+  "crates/miyuprofile/src/errors.rs": [
+    "miyuprofile_errors"
+  ],
+  "crates/miyuprofile/src/export.rs": [
+    "miyuprofile_export"
   ],
   "crates/miyuprofile/src/field.rs": [
     "miyuprofile_tool_field_get",
@@ -2715,22 +5241,91 @@
     "miyuprofile_tool_rank_list",
     "miyuprofile_tool_rank_resolve"
   ],
+  "crates/miyuprofile/src/reminders.rs": [
+    "miyuprofile_reminders"
+  ],
+  "crates/miyuprofile/src/search.rs": [
+    "miyuprofile_search"
+  ],
+  "crates/miyuprofile/src/sections/contact.rs": [
+    "miyuprofile_sections_contact"
+  ],
+  "crates/miyuprofile/src/sections/contracts.rs": [
+    "miyuprofile_sections_contracts"
+  ],
+  "crates/miyuprofile/src/sections/credentials.rs": [
+    "miyuprofile_sections_credentials"
+  ],
+  "crates/miyuprofile/src/sections/documents.rs": [
+    "miyuprofile_sections_documents"
+  ],
+  "crates/miyuprofile/src/sections/enterprise.rs": [
+    "miyuprofile_sections_enterprise"
+  ],
+  "crates/miyuprofile/src/sections/finance.rs": [
+    "miyuprofile_sections_finance"
+  ],
+  "crates/miyuprofile/src/sections/health.rs": [
+    "miyuprofile_sections_health"
+  ],
+  "crates/miyuprofile/src/sections/identity.rs": [
+    "miyuprofile_sections_identity"
+  ],
+  "crates/miyuprofile/src/sections/mod.rs": [
+    "miyuprofile_sections_mod"
+  ],
+  "crates/miyuprofile/src/sections/professional.rs": [
+    "miyuprofile_sections_professional"
+  ],
   "crates/miyuprofile/src/signature.rs": [
     "miyuprofile_tool_signature_get",
     "miyuprofile_tool_signature_set"
   ],
+  "crates/miyuprofile/src/store.rs": [
+    "miyuprofile_store"
+  ],
+  "crates/miyuprofile/src/vault.rs": [
+    "miyuprofile_vault"
+  ],
+  "crates/miyusearch/src/admin_cell.rs": [
+    "miyusearch_admin_cell"
+  ],
+  "crates/miyusearch/src/context.rs": [
+    "miyusearch_context"
+  ],
+  "crates/miyusearch/src/errors.rs": [
+    "miyusearch_errors"
+  ],
   "crates/miyusearch/src/index.rs": [
     "miyusearch_tool_search_index_update"
+  ],
+  "crates/miyusearch/src/lib.rs": [
+    "miyusearch_lib"
   ],
   "crates/miyusearch/src/query.rs": [
     "miyusearch_tool_search_query_execute"
   ],
+  "crates/miyusearch/src/store.rs": [
+    "miyusearch_store"
+  ],
   "crates/miyusearch/src/suggest.rs": [
     "miyusearch_tool_search_suggest"
+  ],
+  "crates/miyushipping/src/admin_cell.rs": [
+    "miyushipping_admin_cell"
+  ],
+  "crates/miyushipping/src/context.rs": [
+    "miyushipping_context"
+  ],
+  "crates/miyushipping/src/errors.rs": [
+    "miyushipping_errors"
   ],
   "crates/miyushipping/src/label.rs": [
     "miyushipping_tool_commerce_shipping_label_create",
     "miyushipping_tool_commerce_shipping_label_print"
+  ],
+  "crates/miyushipping/src/lib.rs": [
+    "miyushipping_lib"
   ],
   "crates/miyushipping/src/rate.rs": [
     "miyushipping_tool_commerce_shipping_rate",
@@ -2746,10 +5341,19 @@
   "crates/miyushipping/src/zones.rs": [
     "miyushipping_tool_commerce_shipping_zones_resolve"
   ],
+  "crates/miyusocialfeed/src/admin_cell.rs": [
+    "miyusocialfeed_admin_cell"
+  ],
   "crates/miyusocialfeed/src/comment.rs": [
     "miyusocialfeed_tool_comment_create",
     "miyusocialfeed_tool_comment_delete",
     "miyusocialfeed_tool_comment_list"
+  ],
+  "crates/miyusocialfeed/src/context.rs": [
+    "miyusocialfeed_context"
+  ],
+  "crates/miyusocialfeed/src/errors.rs": [
+    "miyusocialfeed_errors"
   ],
   "crates/miyusocialfeed/src/feed.rs": [
     "miyusocialfeed_tool_feed_list"
@@ -2772,6 +5376,15 @@
     "miyusocialfeed_tool_share_create",
     "miyusocialfeed_tool_share_list"
   ],
+  "crates/miyusocialfeed/src/store.rs": [
+    "miyusocialfeed_store"
+  ],
+  "crates/miyusocialmessaging/src/admin_cell.rs": [
+    "miyusocialmessaging_admin_cell"
+  ],
+  "crates/miyusocialmessaging/src/context.rs": [
+    "miyusocialmessaging_context"
+  ],
   "crates/miyusocialmessaging/src/conversation.rs": [
     "miyusocialmessaging_tool_conversation_get",
     "miyusocialmessaging_tool_conversation_list"
@@ -2784,13 +5397,28 @@
     "miyusocialmessaging_tool_dm_readmark_set",
     "miyusocialmessaging_tool_dm_send"
   ],
+  "crates/miyusocialmessaging/src/errors.rs": [
+    "miyusocialmessaging_errors"
+  ],
   "crates/miyusocialmessaging/src/lib.rs": [
     "toolkit.social.miyusocialmessaging"
+  ],
+  "crates/miyusocialmessaging/src/store.rs": [
+    "miyusocialmessaging_store"
+  ],
+  "crates/miyusocialmoderation/src/admin_cell.rs": [
+    "miyusocialmoderation_admin_cell"
   ],
   "crates/miyusocialmoderation/src/block.rs": [
     "miyusocialmoderation_tool_block_add",
     "miyusocialmoderation_tool_block_list",
     "miyusocialmoderation_tool_block_remove"
+  ],
+  "crates/miyusocialmoderation/src/context.rs": [
+    "miyusocialmoderation_context"
+  ],
+  "crates/miyusocialmoderation/src/errors.rs": [
+    "miyusocialmoderation_errors"
   ],
   "crates/miyusocialmoderation/src/lib.rs": [
     "toolkit.social.miyusocialmoderation"
@@ -2801,6 +5429,18 @@
   "crates/miyusocialmoderation/src/report.rs": [
     "miyusocialmoderation_tool_report_create",
     "miyusocialmoderation_tool_report_list"
+  ],
+  "crates/miyusocialmoderation/src/store.rs": [
+    "miyusocialmoderation_store"
+  ],
+  "crates/miyusocialprofile/src/admin_cell.rs": [
+    "miyusocialprofile_admin_cell"
+  ],
+  "crates/miyusocialprofile/src/context.rs": [
+    "miyusocialprofile_context"
+  ],
+  "crates/miyusocialprofile/src/errors.rs": [
+    "miyusocialprofile_errors"
   ],
   "crates/miyusocialprofile/src/follow.rs": [
     "miyusocialprofile_tool_follow_add",
@@ -2814,6 +5454,9 @@
   "crates/miyusocialprofile/src/profile.rs": [
     "miyusocialprofile_tool_profile_get",
     "miyusocialprofile_tool_profile_update"
+  ],
+  "crates/miyusocialprofile/src/store.rs": [
+    "miyusocialprofile_store"
   ],
   "crates/miyusql/src/admin_cell.rs": [
     "miyusql_admin_cell",
@@ -2911,6 +5554,9 @@
     "MSQL_T_004",
     "miyusql_unit_tests_module"
   ],
+  "crates/miyustore/src/admin_cell.rs": [
+    "miyustore_admin_cell"
+  ],
   "crates/miyustore/src/cart.rs": [
     "miyustore_tool_commerce_cart_add",
     "miyustore_tool_commerce_cart_compute",
@@ -2920,6 +5566,15 @@
   "crates/miyustore/src/checkout.rs": [
     "miyustore_tool_commerce_checkout_submit",
     "miyustore_tool_commerce_checkout_validate"
+  ],
+  "crates/miyustore/src/context.rs": [
+    "miyustore_context"
+  ],
+  "crates/miyustore/src/errors.rs": [
+    "miyustore_errors"
+  ],
+  "crates/miyustore/src/lib.rs": [
+    "miyustore_lib"
   ],
   "crates/miyustore/src/order.rs": [
     "miyustore_tool_commerce_order_create",
@@ -2943,14 +5598,38 @@
     "miyustore_tool_commerce_shipping_rate",
     "miyustore_tool_commerce_shipping_zones_resolve"
   ],
+  "crates/miyustory/src/admin_cell.rs": [
+    "miyustory_admin_cell"
+  ],
+  "crates/miyustory/src/context.rs": [
+    "miyustory_context"
+  ],
+  "crates/miyustory/src/errors.rs": [
+    "miyustory_errors"
+  ],
   "crates/miyustory/src/lib.rs": [
     "toolkit.narrative.miyustory"
+  ],
+  "crates/miyustory/src/store.rs": [
+    "miyustory_store"
   ],
   "crates/miyustory/src/story.rs": [
     "miyustory_tool_story_create",
     "miyustory_tool_story_get",
     "miyustory_tool_story_list",
     "miyustory_tool_story_reaction_add"
+  ],
+  "crates/miyustt/src/lib.rs": [
+    "miyustt_lib"
+  ],
+  "crates/miyutext/src/admin_cell.rs": [
+    "miyutext_admin_cell"
+  ],
+  "crates/miyutext/src/context.rs": [
+    "miyutext_context"
+  ],
+  "crates/miyutext/src/errors.rs": [
+    "miyutext_errors"
   ],
   "crates/miyutext/src/lib.rs": [
     "toolkit.text.miyutext"
@@ -2967,14 +5646,38 @@
   "crates/miyutext/src/template.rs": [
     "miyutext_tool_template_apply"
   ],
+  "crates/miyutreasury/src/admin_cell.rs": [
+    "miyutreasury_admin_cell"
+  ],
   "crates/miyutreasury/src/alert.rs": [
     "miyutreasury_tool_treasury_alert_check"
+  ],
+  "crates/miyutreasury/src/context.rs": [
+    "miyutreasury_context"
   ],
   "crates/miyutreasury/src/dashboard.rs": [
     "miyutreasury_tool_treasury_dashboard_aggregate"
   ],
+  "crates/miyutreasury/src/errors.rs": [
+    "miyutreasury_errors"
+  ],
   "crates/miyutreasury/src/forecast.rs": [
     "miyutreasury_tool_treasury_forecast_compute"
+  ],
+  "crates/miyutreasury/src/lib.rs": [
+    "miyutreasury_lib"
+  ],
+  "crates/miyutts/src/lib.rs": [
+    "miyutts_lib"
+  ],
+  "crates/miyuvalidate/src/admin_cell.rs": [
+    "miyuvalidate_admin_cell"
+  ],
+  "crates/miyuvalidate/src/context.rs": [
+    "miyuvalidate_context"
+  ],
+  "crates/miyuvalidate/src/errors.rs": [
+    "miyuvalidate_errors"
   ],
   "crates/miyuvalidate/src/lib.rs": [
     "toolkit.validate.miyuvalidate"
@@ -3031,8 +5734,17 @@
   "crates/miyuwakeword/src/models.rs": [
     "toolkit.alicia.wakeword.models"
   ],
+  "crates/miyuweb/src/admin_cell.rs": [
+    "miyuweb_admin_cell"
+  ],
   "crates/miyuweb/src/asset.rs": [
     "miyuweb_tool_web_asset_serve"
+  ],
+  "crates/miyuweb/src/context.rs": [
+    "miyuweb_context"
+  ],
+  "crates/miyuweb/src/errors.rs": [
+    "miyuweb_errors"
   ],
   "crates/miyuweb/src/event.rs": [
     "miyuweb_tool_web_event_dispatch"
@@ -3049,6 +5761,9 @@
   "crates/miyuweb/src/layout.rs": [
     "miyuweb_tool_web_layout_render"
   ],
+  "crates/miyuweb/src/lib.rs": [
+    "miyuweb_lib"
+  ],
   "crates/miyuweb/src/script.rs": [
     "miyuweb_tool_web_script_compile",
     "miyuweb_tool_web_script_execute"
@@ -3059,10 +5774,16 @@
   "crates/miyuwebway_participant/src/address.rs": [
     "miyuwebway_participant_mws_address_tracker_default"
   ],
+  "crates/miyuwebway_participant/src/admin_cell.rs": [
+    "miyuwebway_participant_admin_cell"
+  ],
   "crates/miyuwebway_participant/src/cog_list.rs": [
     "miyuwebway_participant_mws_cog_list_get",
     "miyuwebway_participant_mws_cog_list_merge",
     "miyuwebway_participant_mws_cog_list_update"
+  ],
+  "crates/miyuwebway_participant/src/context.rs": [
+    "miyuwebway_participant_context"
   ],
   "crates/miyuwebway_participant/src/declaration.rs": [
     "miyuwebway_participant_mws_declaration_build",
@@ -3074,8 +5795,29 @@
     "miyuwebway_participant_mws_discovery_request_build",
     "miyuwebway_participant_mws_discovery_request_send"
   ],
+  "crates/miyuwebway_participant/src/errors.rs": [
+    "miyuwebway_participant_errors"
+  ],
+  "crates/miyuwebway_participant/src/lib.rs": [
+    "miyuwebway_participant_lib"
+  ],
+  "crates/miyuwebway_participant/src/mws_service.rs": [
+    "miyuwebway_participant_mws_service"
+  ],
   "crates/miyuwebway_participant/src/port.rs": [
     "miyuwebway_participant_mws_port_check"
+  ],
+  "crates/miyuwebway_participant/src/protocol.rs": [
+    "miyuwebway_participant_protocol"
+  ],
+  "crates/miyuwebway_participant/src/relay_client.rs": [
+    "miyuwebway_participant_relay_client"
+  ],
+  "crates/miyuwebway_participant/src/store.rs": [
+    "miyuwebway_participant_store"
+  ],
+  "crates/miyuwebway_participant/src/tracker_client.rs": [
+    "miyuwebway_participant_tracker_client"
   ],
   "crates/miyuwebway_participant/src/transport.rs": [
     "miyuwebway_participant_mws_transport_send"
@@ -3083,11 +5825,17 @@
   "crates/miyuwebway_tracker/src/address.rs": [
     "miyuwebway_tracker_mws_address_tracker_default"
   ],
+  "crates/miyuwebway_tracker/src/admin_cell.rs": [
+    "miyuwebway_tracker_admin_cell"
+  ],
   "crates/miyuwebway_tracker/src/cog_list.rs": [
     "miyuwebway_tracker_mws_cog_list_filter",
     "miyuwebway_tracker_mws_cog_list_get",
     "miyuwebway_tracker_mws_cog_list_merge",
     "miyuwebway_tracker_mws_cog_list_update"
+  ],
+  "crates/miyuwebway_tracker/src/context.rs": [
+    "miyuwebway_tracker_context"
   ],
   "crates/miyuwebway_tracker/src/declaration.rs": [
     "miyuwebway_tracker_mws_declaration_validate_validate_2",
@@ -3097,6 +5845,12 @@
     "miyuwebway_tracker_mws_discovery_response_build",
     "miyuwebway_tracker_mws_discovery_response_send"
   ],
+  "crates/miyuwebway_tracker/src/errors.rs": [
+    "miyuwebway_tracker_errors"
+  ],
+  "crates/miyuwebway_tracker/src/lib.rs": [
+    "miyuwebway_tracker_lib"
+  ],
   "crates/miyuwebway_tracker/src/port.rs": [
     "miyuwebway_tracker_mws_port_check"
   ],
@@ -3104,8 +5858,23 @@
     "miyuwebway_tracker_mws_transport_receive",
     "miyuwebway_tracker_mws_transport_send"
   ],
+  "crates/miyuwidgets/src/admin_cell.rs": [
+    "miyuwidgets_admin_cell"
+  ],
+  "crates/miyuwidgets/src/context.rs": [
+    "miyuwidgets_context"
+  ],
+  "crates/miyuwidgets/src/errors.rs": [
+    "miyuwidgets_errors"
+  ],
   "crates/miyuwidgets/src/layout.rs": [
     "miyuwidgets_tool_web_layout_apply"
+  ],
+  "crates/miyuwidgets/src/lib.rs": [
+    "miyuwidgets_lib"
+  ],
+  "crates/miyuwidgets/src/store.rs": [
+    "miyuwidgets_store"
   ],
   "crates/miyuwidgets/src/template.rs": [
     "miyuwidgets_tool_web_template_resolve"
@@ -3389,6 +6158,9 @@
     "tamr_classifier_classify",
     "tamr_classifier_trait"
   ],
+  "crates/tamr/src/lib.rs": [
+    "tamr_lib"
+  ],
   "crates/tamr/src/metadata.rs": [
     "tamr_metadata",
     "tamr_metadata_entity_id",
@@ -3419,6 +6191,9 @@
     "worrysentinel_degradation_state_unstable",
     "worrysentinel_degradation_test_state_ordering"
   ],
+  "crates/worrysentinel/src/lib.rs": [
+    "worrysentinel_lib"
+  ],
   "crates/worrysentinel/src/security_level.rs": [
     "worrysentinel_security_level",
     "worrysentinel_security_level_critical",
@@ -3441,8 +6216,626 @@
     "worrysentinel_threat_level_none",
     "worrysentinel_threat_test_level_ordering"
   ],
+  "mge/crates/mge-audio/src/lib.rs": [
+    "crates_mge_audio_lib"
+  ],
+  "mge/crates/mge-content/src/lib.rs": [
+    "crates_mge_content_lib"
+  ],
+  "mge/crates/mge-core/src/lib.rs": [
+    "crates_mge_core_lib"
+  ],
+  "mge/crates/mge-gameplay/src/actions.rs": [
+    "crates_mge_gameplay_actions"
+  ],
+  "mge/crates/mge-gameplay/src/character.rs": [
+    "crates_mge_gameplay_character"
+  ],
+  "mge/crates/mge-gameplay/src/combat.rs": [
+    "crates_mge_gameplay_combat"
+  ],
+  "mge/crates/mge-gameplay/src/effects.rs": [
+    "crates_mge_gameplay_effects"
+  ],
+  "mge/crates/mge-gameplay/src/lib.rs": [
+    "crates_mge_gameplay_lib"
+  ],
+  "mge/crates/mge-gameplay/src/progression.rs": [
+    "crates_mge_gameplay_progression"
+  ],
+  "mge/crates/mge-gameplay/src/skills.rs": [
+    "crates_mge_gameplay_skills"
+  ],
+  "mge/crates/mge-gameplay/src/stats.rs": [
+    "crates_mge_gameplay_stats"
+  ],
+  "mge/crates/mge-input/src/lib.rs": [
+    "crates_mge_input_lib"
+  ],
+  "mge/crates/mge-items/src/affixes.rs": [
+    "crates_mge_items_affixes"
+  ],
+  "mge/crates/mge-items/src/charms.rs": [
+    "crates_mge_items_charms"
+  ],
+  "mge/crates/mge-items/src/crafting.rs": [
+    "crates_mge_items_crafting"
+  ],
+  "mge/crates/mge-items/src/economy.rs": [
+    "crates_mge_items_economy"
+  ],
+  "mge/crates/mge-items/src/item.rs": [
+    "crates_mge_items_item"
+  ],
+  "mge/crates/mge-items/src/lib.rs": [
+    "crates_mge_items_lib"
+  ],
+  "mge/crates/mge-items/src/loot.rs": [
+    "crates_mge_items_loot"
+  ],
+  "mge/crates/mge-items/src/rarity.rs": [
+    "crates_mge_items_rarity"
+  ],
+  "mge/crates/mge-items/src/runewords.rs": [
+    "crates_mge_items_runewords"
+  ],
+  "mge/crates/mge-items/src/simulator.rs": [
+    "crates_mge_items_simulator"
+  ],
+  "mge/crates/mge-items/src/socketables.rs": [
+    "crates_mge_items_socketables"
+  ],
+  "mge/crates/mge-items/src/sockets.rs": [
+    "crates_mge_items_sockets"
+  ],
+  "mge/crates/mge-items/src/uniques.rs": [
+    "crates_mge_items_uniques"
+  ],
+  "mge/crates/mge-items/src/vendors.rs": [
+    "crates_mge_items_vendors"
+  ],
+  "mge/crates/mge-meta/src/hardcore.rs": [
+    "crates_mge_meta_hardcore"
+  ],
+  "mge/crates/mge-meta/src/harness.rs": [
+    "crates_mge_meta_harness"
+  ],
+  "mge/crates/mge-meta/src/ladder.rs": [
+    "crates_mge_meta_ladder"
+  ],
+  "mge/crates/mge-meta/src/lib.rs": [
+    "crates_mge_meta_lib"
+  ],
+  "mge/crates/mge-meta/src/mercenary.rs": [
+    "crates_mge_meta_mercenary"
+  ],
+  "mge/crates/mge-meta/src/party.rs": [
+    "crates_mge_meta_party"
+  ],
+  "mge/crates/mge-meta/src/pvp.rs": [
+    "crates_mge_meta_pvp"
+  ],
+  "mge/crates/mge-meta/src/services.rs": [
+    "crates_mge_meta_services"
+  ],
+  "mge/crates/mge-monsters/src/ai.rs": [
+    "crates_mge_monsters_ai"
+  ],
+  "mge/crates/mge-monsters/src/lib.rs": [
+    "crates_mge_monsters_lib"
+  ],
+  "mge/crates/mge-monsters/src/roster.rs": [
+    "crates_mge_monsters_roster"
+  ],
+  "mge/crates/mge-monsters/src/scripts.rs": [
+    "crates_mge_monsters_scripts"
+  ],
+  "mge/crates/mge-monsters/src/variants.rs": [
+    "crates_mge_monsters_variants"
+  ],
+  "mge/crates/mge-nav/src/lib.rs": [
+    "crates_mge_nav_lib"
+  ],
+  "mge/crates/mge-net/src/lib.rs": [
+    "crates_mge_net_lib"
+  ],
+  "mge/crates/mge-proto/src/lib.rs": [
+    "crates_mge_proto_lib"
+  ],
+  "mge/crates/mge-render/src/animation.rs": [
+    "crates_mge_render_animation"
+  ],
+  "mge/crates/mge-render/src/atlas.rs": [
+    "crates_mge_render_atlas"
+  ],
+  "mge/crates/mge-render/src/batch.rs": [
+    "crates_mge_render_batch"
+  ],
+  "mge/crates/mge-render/src/camera.rs": [
+    "crates_mge_render_camera"
+  ],
+  "mge/crates/mge-render/src/lib.rs": [
+    "crates_mge_render_lib"
+  ],
+  "mge/crates/mge-render/src/lighting.rs": [
+    "crates_mge_render_lighting"
+  ],
+  "mge/crates/mge-render/src/pass.rs": [
+    "crates_mge_render_pass"
+  ],
+  "mge/crates/mge-render/src/pipeline.rs": [
+    "crates_mge_render_pipeline"
+  ],
+  "mge/crates/mge-render/src/quality.rs": [
+    "crates_mge_render_quality"
+  ],
+  "mge/crates/mge-render/src/telemetry.rs": [
+    "crates_mge_render_telemetry"
+  ],
+  "mge/crates/mge-render/src/vfx.rs": [
+    "crates_mge_render_vfx"
+  ],
+  "mge/crates/mge-replication/src/lib.rs": [
+    "crates_mge_replication_lib"
+  ],
+  "mge/crates/mge-save/src/lib.rs": [
+    "crates_mge_save_lib"
+  ],
+  "mge/crates/mge-sim/src/civil_skills.rs": [
+    "crates_mge_sim_civil_skills"
+  ],
+  "mge/crates/mge-sim/src/constants.rs": [
+    "crates_mge_sim_constants"
+  ],
+  "mge/crates/mge-sim/src/entity.rs": [
+    "crates_mge_sim_entity"
+  ],
+  "mge/crates/mge-sim/src/gather_node.rs": [
+    "crates_mge_sim_gather_node"
+  ],
+  "mge/crates/mge-sim/src/inventory.rs": [
+    "crates_mge_sim_inventory"
+  ],
+  "mge/crates/mge-sim/src/lib.rs": [
+    "crates_mge_sim_lib"
+  ],
+  "mge/crates/mge-sim/src/player_state.rs": [
+    "crates_mge_sim_player_state"
+  ],
+  "mge/crates/mge-sim/src/sim_tick.rs": [
+    "crates_mge_sim_sim_tick"
+  ],
+  "mge/crates/mge-sim/src/skill_disk.rs": [
+    "crates_mge_sim_skill_disk"
+  ],
+  "mge/crates/mge-sim/src/spatial.rs": [
+    "crates_mge_sim_spatial"
+  ],
+  "mge/crates/mge-sim/src/world_map.rs": [
+    "crates_mge_sim_world_map"
+  ],
+  "mge/crates/mge-sim/src/zone_state.rs": [
+    "crates_mge_sim_zone_state"
+  ],
+  "mge/crates/mge-ui/src/charsheet.rs": [
+    "crates_mge_ui_charsheet"
+  ],
+  "mge/crates/mge-ui/src/debug.rs": [
+    "crates_mge_ui_debug"
+  ],
+  "mge/crates/mge-ui/src/feedback.rs": [
+    "crates_mge_ui_feedback"
+  ],
+  "mge/crates/mge-ui/src/hud.rs": [
+    "crates_mge_ui_hud"
+  ],
+  "mge/crates/mge-ui/src/input_map.rs": [
+    "crates_mge_ui_input_map"
+  ],
+  "mge/crates/mge-ui/src/inventory.rs": [
+    "crates_mge_ui_inventory"
+  ],
+  "mge/crates/mge-ui/src/lib.rs": [
+    "crates_mge_ui_lib"
+  ],
+  "mge/crates/mge-ui/src/menu.rs": [
+    "crates_mge_ui_menu"
+  ],
+  "mge/crates/mge-ui/src/quest.rs": [
+    "crates_mge_ui_quest"
+  ],
+  "mge/crates/mge-ui/src/shell.rs": [
+    "crates_mge_ui_shell"
+  ],
+  "mge/crates/mge-ui/src/stash.rs": [
+    "crates_mge_ui_stash"
+  ],
+  "mge/crates/mge-ui/src/tooltip.rs": [
+    "crates_mge_ui_tooltip"
+  ],
+  "mge/crates/mge-ui/src/vendor.rs": [
+    "crates_mge_ui_vendor"
+  ],
+  "mge/crates/mge-ui/src/visual_state.rs": [
+    "crates_mge_ui_visual_state"
+  ],
+  "mge/crates/mge-world/src/boss.rs": [
+    "crates_mge_world_boss"
+  ],
+  "mge/crates/mge-world/src/camp.rs": [
+    "crates_mge_world_camp"
+  ],
+  "mge/crates/mge-world/src/chunks.rs": [
+    "crates_mge_world_chunks"
+  ],
+  "mge/crates/mge-world/src/events.rs": [
+    "crates_mge_world_events"
+  ],
+  "mge/crates/mge-world/src/lib.rs": [
+    "crates_mge_world_lib"
+  ],
+  "mge/crates/mge-world/src/progression.rs": [
+    "crates_mge_world_progression"
+  ],
+  "mge/crates/mge-world/src/quests.rs": [
+    "crates_mge_world_quests"
+  ],
+  "mge/crates/mge-world/src/randomize.rs": [
+    "crates_mge_world_randomize"
+  ],
+  "mge/crates/mge-world/src/runner.rs": [
+    "crates_mge_world_runner"
+  ],
+  "mge/crates/mge-world/src/secondary.rs": [
+    "crates_mge_world_secondary"
+  ],
+  "mge/crates/mge-world/src/transition.rs": [
+    "crates_mge_world_transition"
+  ],
+  "mge/crates/mge-world/src/waypoints.rs": [
+    "crates_mge_world_waypoints"
+  ],
+  "mge/crates/mge-world/src/zone.rs": [
+    "crates_mge_world_zone"
+  ],
+  "mge/games/allumina/build.rs": [
+    "games_allumina_build"
+  ],
+  "mge/games/allumina/src/app.rs": [
+    "games_allumina_app"
+  ],
+  "mge/games/allumina/src/components/cc.rs": [
+    "games_allumina_components_cc"
+  ],
+  "mge/games/allumina/src/components/equipment.rs": [
+    "games_allumina_components_equipment"
+  ],
+  "mge/games/allumina/src/components/item.rs": [
+    "games_allumina_components_item"
+  ],
+  "mge/games/allumina/src/components/mercenary.rs": [
+    "games_allumina_components_mercenary"
+  ],
+  "mge/games/allumina/src/components/mob.rs": [
+    "games_allumina_components_mob"
+  ],
+  "mge/games/allumina/src/components/mod.rs": [
+    "games_allumina_components_mod"
+  ],
+  "mge/games/allumina/src/components/npc.rs": [
+    "games_allumina_components_npc"
+  ],
+  "mge/games/allumina/src/components/player.rs": [
+    "games_allumina_components_player"
+  ],
+  "mge/games/allumina/src/components/projectile.rs": [
+    "games_allumina_components_projectile"
+  ],
+  "mge/games/allumina/src/components/quest.rs": [
+    "games_allumina_components_quest"
+  ],
+  "mge/games/allumina/src/components/skill.rs": [
+    "games_allumina_components_skill"
+  ],
+  "mge/games/allumina/src/components/summon.rs": [
+    "games_allumina_components_summon"
+  ],
+  "mge/games/allumina/src/components/world.rs": [
+    "games_allumina_components_world"
+  ],
+  "mge/games/allumina/src/data/affixes.rs": [
+    "games_allumina_data_affixes"
+  ],
+  "mge/games/allumina/src/data/classes.rs": [
+    "games_allumina_data_classes"
+  ],
+  "mge/games/allumina/src/data/items.rs": [
+    "games_allumina_data_items"
+  ],
+  "mge/games/allumina/src/data/mercenary.rs": [
+    "games_allumina_data_mercenary"
+  ],
+  "mge/games/allumina/src/data/mobs.rs": [
+    "games_allumina_data_mobs"
+  ],
+  "mge/games/allumina/src/data/mod.rs": [
+    "games_allumina_data_mod"
+  ],
+  "mge/games/allumina/src/data/skills.rs": [
+    "games_allumina_data_skills"
+  ],
+  "mge/games/allumina/src/data/summon.rs": [
+    "games_allumina_data_summon"
+  ],
+  "mge/games/allumina/src/data/uniques.rs": [
+    "games_allumina_data_uniques"
+  ],
+  "mge/games/allumina/src/ecs.rs": [
+    "games_allumina_ecs"
+  ],
+  "mge/games/allumina/src/lib.rs": [
+    "games_allumina_lib"
+  ],
+  "mge/games/allumina/src/main.rs": [
+    "games_allumina_main"
+  ],
+  "mge/games/allumina/src/network/interpolation.rs": [
+    "games_allumina_network_interpolation"
+  ],
+  "mge/games/allumina/src/network/lobby_client.rs": [
+    "games_allumina_network_lobby_client"
+  ],
+  "mge/games/allumina/src/network/prediction.rs": [
+    "games_allumina_network_prediction"
+  ],
+  "mge/games/allumina/src/network/snapshot_renderer.rs": [
+    "games_allumina_network_snapshot_renderer"
+  ],
+  "mge/games/allumina/src/plugins/camera.rs": [
+    "games_allumina_plugins_camera"
+  ],
+  "mge/games/allumina/src/plugins/cc.rs": [
+    "games_allumina_plugins_cc"
+  ],
+  "mge/games/allumina/src/plugins/combat.rs": [
+    "games_allumina_plugins_combat"
+  ],
+  "mge/games/allumina/src/plugins/content.rs": [
+    "games_allumina_plugins_content"
+  ],
+  "mge/games/allumina/src/plugins/inventory.rs": [
+    "games_allumina_plugins_inventory"
+  ],
+  "mge/games/allumina/src/plugins/isometric.rs": [
+    "games_allumina_plugins_isometric"
+  ],
+  "mge/games/allumina/src/plugins/loot.rs": [
+    "games_allumina_plugins_loot"
+  ],
+  "mge/games/allumina/src/plugins/mercenary.rs": [
+    "games_allumina_plugins_mercenary"
+  ],
+  "mge/games/allumina/src/plugins/mob_ai.rs": [
+    "games_allumina_plugins_mob_ai"
+  ],
+  "mge/games/allumina/src/plugins/mod.rs": [
+    "games_allumina_plugins_mod"
+  ],
+  "mge/games/allumina/src/plugins/network.rs": [
+    "games_allumina_plugins_network"
+  ],
+  "mge/games/allumina/src/plugins/skills.rs": [
+    "games_allumina_plugins_skills"
+  ],
+  "mge/games/allumina/src/plugins/summon.rs": [
+    "games_allumina_plugins_summon"
+  ],
+  "mge/games/allumina/src/plugins/tilemap.rs": [
+    "games_allumina_plugins_tilemap"
+  ],
+  "mge/games/allumina/src/render/animation.rs": [
+    "games_allumina_render_animation"
+  ],
+  "mge/games/allumina/src/render/camera.rs": [
+    "games_allumina_render_camera"
+  ],
+  "mge/games/allumina/src/render/feedback.rs": [
+    "games_allumina_render_feedback"
+  ],
+  "mge/games/allumina/src/render/figures.rs": [
+    "games_allumina_render_figures"
+  ],
+  "mge/games/allumina/src/render/font.rs": [
+    "games_allumina_render_font"
+  ],
+  "mge/games/allumina/src/render/item_icon.rs": [
+    "games_allumina_render_item_icon"
+  ],
+  "mge/games/allumina/src/render/mod.rs": [
+    "games_allumina_render_mod"
+  ],
+  "mge/games/allumina/src/render/particles.rs": [
+    "games_allumina_render_particles"
+  ],
+  "mge/games/allumina/src/render/pixel_sprite.rs": [
+    "games_allumina_render_pixel_sprite"
+  ],
+  "mge/games/allumina/src/render/renderer.rs": [
+    "games_allumina_render_renderer"
+  ],
+  "mge/games/allumina/src/render/renderer/input.rs": [
+    "games_allumina_render_renderer_input"
+  ],
+  "mge/games/allumina/src/render/renderer/online.rs": [
+    "games_allumina_render_renderer_online"
+  ],
+  "mge/games/allumina/src/render/shapes.rs": [
+    "games_allumina_render_shapes"
+  ],
+  "mge/games/allumina/src/render/skill_fx.rs": [
+    "games_allumina_render_skill_fx"
+  ],
+  "mge/games/allumina/src/render/skill_icon.rs": [
+    "games_allumina_render_skill_icon"
+  ],
+  "mge/games/allumina/src/render/sprite.rs": [
+    "games_allumina_render_sprite"
+  ],
+  "mge/games/allumina/src/render/sprites_data.rs": [
+    "games_allumina_render_sprites_data"
+  ],
+  "mge/games/allumina/src/render/tilemap_renderer.rs": [
+    "games_allumina_render_tilemap_renderer"
+  ],
+  "mge/games/allumina/src/render/vertex.rs": [
+    "games_allumina_render_vertex"
+  ],
+  "mge/games/allumina/src/rng.rs": [
+    "games_allumina_rng"
+  ],
+  "mge/games/allumina/src/save.rs": [
+    "games_allumina_save"
+  ],
+  "mge/games/allumina/src/systems/ai.rs": [
+    "games_allumina_systems_ai"
+  ],
+  "mge/games/allumina/src/systems/balance.rs": [
+    "games_allumina_systems_balance"
+  ],
+  "mge/games/allumina/src/systems/boss.rs": [
+    "games_allumina_systems_boss"
+  ],
+  "mge/games/allumina/src/systems/cc.rs": [
+    "games_allumina_systems_cc"
+  ],
+  "mge/games/allumina/src/systems/combat.rs": [
+    "games_allumina_systems_combat"
+  ],
+  "mge/games/allumina/src/systems/craft.rs": [
+    "games_allumina_systems_craft"
+  ],
+  "mge/games/allumina/src/systems/death.rs": [
+    "games_allumina_systems_death"
+  ],
+  "mge/games/allumina/src/systems/forge.rs": [
+    "games_allumina_systems_forge"
+  ],
+  "mge/games/allumina/src/systems/level_up.rs": [
+    "games_allumina_systems_level_up"
+  ],
+  "mge/games/allumina/src/systems/loot.rs": [
+    "games_allumina_systems_loot"
+  ],
+  "mge/games/allumina/src/systems/mercenary.rs": [
+    "games_allumina_systems_mercenary"
+  ],
+  "mge/games/allumina/src/systems/mod.rs": [
+    "games_allumina_systems_mod"
+  ],
+  "mge/games/allumina/src/systems/movement.rs": [
+    "games_allumina_systems_movement"
+  ],
+  "mge/games/allumina/src/systems/projectile.rs": [
+    "games_allumina_systems_projectile"
+  ],
+  "mge/games/allumina/src/systems/quest.rs": [
+    "games_allumina_systems_quest"
+  ],
+  "mge/games/allumina/src/systems/skill.rs": [
+    "games_allumina_systems_skill"
+  ],
+  "mge/games/allumina/src/systems/skill/archer.rs": [
+    "games_allumina_systems_skill_archer"
+  ],
+  "mge/games/allumina/src/systems/skill/clerc.rs": [
+    "games_allumina_systems_skill_clerc"
+  ],
+  "mge/games/allumina/src/systems/skill/fields.rs": [
+    "games_allumina_systems_skill_fields"
+  ],
+  "mge/games/allumina/src/systems/skill/mage.rs": [
+    "games_allumina_systems_skill_mage"
+  ],
+  "mge/games/allumina/src/systems/skill/soldat.rs": [
+    "games_allumina_systems_skill_soldat"
+  ],
+  "mge/games/allumina/src/systems/spatial.rs": [
+    "games_allumina_systems_spatial"
+  ],
+  "mge/games/allumina/src/systems/stats.rs": [
+    "games_allumina_systems_stats"
+  ],
+  "mge/games/allumina/src/systems/summon.rs": [
+    "games_allumina_systems_summon"
+  ],
+  "mge/games/allumina/src/systems/targeting.rs": [
+    "games_allumina_systems_targeting"
+  ],
+  "mge/games/allumina/src/systems/vendor.rs": [
+    "games_allumina_systems_vendor"
+  ],
+  "mge/games/allumina/src/systems/waypoint.rs": [
+    "games_allumina_systems_waypoint"
+  ],
+  "mge/games/allumina/src/ui/chat.rs": [
+    "games_allumina_ui_chat"
+  ],
+  "mge/games/allumina/src/ui/class_select.rs": [
+    "games_allumina_ui_class_select"
+  ],
+  "mge/games/allumina/src/ui/craft.rs": [
+    "games_allumina_ui_craft"
+  ],
+  "mge/games/allumina/src/ui/equipment_ui.rs": [
+    "games_allumina_ui_equipment_ui"
+  ],
+  "mge/games/allumina/src/ui/forge.rs": [
+    "games_allumina_ui_forge"
+  ],
+  "mge/games/allumina/src/ui/hud.rs": [
+    "games_allumina_ui_hud"
+  ],
+  "mge/games/allumina/src/ui/inventory_ui.rs": [
+    "games_allumina_ui_inventory_ui"
+  ],
+  "mge/games/allumina/src/ui/lobby.rs": [
+    "games_allumina_ui_lobby"
+  ],
+  "mge/games/allumina/src/ui/merc_ui.rs": [
+    "games_allumina_ui_merc_ui"
+  ],
+  "mge/games/allumina/src/ui/minimap.rs": [
+    "games_allumina_ui_minimap"
+  ],
+  "mge/games/allumina/src/ui/mob_tooltip.rs": [
+    "games_allumina_ui_mob_tooltip"
+  ],
+  "mge/games/allumina/src/ui/mod.rs": [
+    "games_allumina_ui_mod"
+  ],
+  "mge/games/allumina/src/ui/quest_log.rs": [
+    "games_allumina_ui_quest_log"
+  ],
+  "mge/games/allumina/src/ui/skill_tree_ui.rs": [
+    "games_allumina_ui_skill_tree_ui"
+  ],
+  "mge/games/allumina/src/ui/title_screen.rs": [
+    "games_allumina_ui_title_screen"
+  ],
+  "mge/games/allumina/src/ui/tooltip.rs": [
+    "games_allumina_ui_tooltip"
+  ],
+  "mge/games/allumina/src/ui/vendor.rs": [
+    "games_allumina_ui_vendor"
+  ],
+  "mge/games/allumina/src/ui/waypoint_ui.rs": [
+    "games_allumina_ui_waypoint_ui"
+  ],
   "mge/games/allumina/web/game.js": [
     "cog.gameAllumina"
+  ],
+  "mge/tools/mge-asset-baker/src/main.rs": [
+    "tools_mge_asset_baker_main"
   ],
   "site_officiel_miyukini_cog/src/App.tsx": [
     "cog.siteApp"

@@ -1,3 +1,9 @@
+//! @id     miyucloud_common_di
+//! @do     definir_app_service_factory
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « common di ».
+
 use sqlx::PgPool;
 use std::path::PathBuf;
 use std::sync::Arc;

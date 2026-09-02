@@ -1,3 +1,9 @@
+//! @id     central_services_service_view
+//! @do     definir_service_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services service view ».
+
 //! Vue générique pour un service.
 
 use dioxus::prelude::*;

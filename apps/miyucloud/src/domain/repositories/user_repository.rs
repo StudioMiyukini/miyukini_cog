@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_user_repository
+//! @do     definir_user_repository_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories user repository ».
+
 use crate::common::errors::DomainError;
 use crate::domain::entities::user::{User, UserRole};
 use uuid::Uuid;

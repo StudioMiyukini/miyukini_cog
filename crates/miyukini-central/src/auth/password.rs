@@ -1,3 +1,9 @@
+//! @id     miyukini_central_auth_password
+//! @do     definir_password_min_len
+//! @role   securite
+//! @layer  core
+//! @human  miyukini-central — module « auth password ».
+
 //! Validation du mot de passe Miyukini COG.
 //!
 //! Règles : 8 caractères minimum, au moins une lettre, un chiffre,

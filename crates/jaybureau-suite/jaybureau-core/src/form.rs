@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_form
+//! @do     definir_form_schema
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core form ».
+
 //! Types pour Jay Formulaire (questionnaires collaboratifs).
 
 use crate::UserId;

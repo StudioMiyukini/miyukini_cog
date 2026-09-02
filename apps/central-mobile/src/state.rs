@@ -1,3 +1,9 @@
+//! @id     central_mobile_state
+//! @do     definir_app_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « state ».
+
 //! État global de Central Mobile.
 //!
 //! Version simplifiée de l'AppState desktop — pas de ServiceManager,

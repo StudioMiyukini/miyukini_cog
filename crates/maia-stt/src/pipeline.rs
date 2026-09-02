@@ -1,3 +1,9 @@
+//! @id     maia_stt_pipeline
+//! @do     definir_pipeline_config
+//! @role   orchestration
+//! @layer  core
+//! @human  maia-stt — module « pipeline ».
+
 //! Pipeline STT complet : audio PCM → VAD → normalize → whisper → TranscriptResult.
 //!
 //! ## Flux

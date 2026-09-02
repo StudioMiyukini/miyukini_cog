@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_errors
+//! @do     definir_app_error
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces errors ».
+
 //! HTTP/API Error types for the interfaces layer.
 //!
 //! This module contains error types specific to the HTTP/API layer.

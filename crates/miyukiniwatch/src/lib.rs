@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_lib_2
+//! @do     declarer_module_aggregates
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukiniwatch — module « lib ».
+
 //! MiyukiniWatch — Service silencieux de mesure des habitudes.
 //!
 //! Collecte passivement des métriques d'usage (sessions, services, amis, clics)

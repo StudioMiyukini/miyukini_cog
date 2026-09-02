@@ -1,3 +1,9 @@
+//! @id     miyuwidgets_store
+//! @do     templates
+//! @role   donnee
+//! @layer  core
+//! @human  miyuwidgets — module « store ».
+
 //! Store en mémoire MiyuWidgets (templates, layouts).
 
 use std::collections::HashMap;

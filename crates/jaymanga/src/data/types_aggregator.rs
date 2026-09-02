@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_types_aggregator
+//! @do     definir_aggregated_catalog_entry
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data types aggregator ».
+
 //! Types de domaine pour l'agrégation inter-COG JayManga.
 //!
 //! Définit : AggregatedCatalogEntry, IndexedSeller, AggregatorConfig,

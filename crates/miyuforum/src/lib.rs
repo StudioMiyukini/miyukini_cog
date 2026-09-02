@@ -1,3 +1,9 @@
+//! @id     miyuforum_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuforum — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuForum — toolkit.community.forum
 //!

@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_dashboard
+//! @do     dashboard
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga dashboard ».
+
 //! Dashboard JayManga — hub principal vendeur + lecteur.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     jaykonta_domain_model
+//! @do     definir_entry_point
+//! @role   donnee
+//! @layer  core
+//! @human  jaykonta — module « domain model ».
+
 //! Modele de domaine JayKonta (MVP implementation).
 
 use crate::theme::FeatureStatus;

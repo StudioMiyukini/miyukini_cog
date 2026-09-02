@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_middleware_csrf
+//! @do     definir_safe_methods
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces middleware csrf ».
+
 //! CSRF double-submit cookie middleware.
 //!
 //! State-changing requests (`POST`, `PUT`, `DELETE`, `PATCH`) that were

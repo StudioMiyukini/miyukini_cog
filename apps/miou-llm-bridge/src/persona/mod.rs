@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_persona_mod
+//! @do     definir_profile_alicia
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « persona mod ».
+
 //! Système de personas TOML pour MAIA.
 //!
 //! Chaque persona définit le comportement complet de l'agent : modèle LLM préféré,

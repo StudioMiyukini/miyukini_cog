@@ -1,3 +1,9 @@
+//! @id     central_service_manager_registry
+//! @do     services_root_dir
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « service manager registry ».
+
 //! Registre persisté des services installés.
 //!
 //! Stocké dans `%LOCALAPPDATA%/Miyukini-COG/services/registry.json`.

@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_progression
+//! @do     definir_max_level
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « progression ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::character::Class;

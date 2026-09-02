@@ -1,3 +1,9 @@
+//! @id     miyuwebway_tracker_errors
+//! @do     definir_miyuwebway_tracker_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway tracker — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuwebwayTrackerError {
     NoMandate,

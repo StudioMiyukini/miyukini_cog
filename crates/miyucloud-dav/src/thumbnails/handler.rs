@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_thumbnails_handler
+//! @do     definir_thumbnail_params
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « thumbnails handler ».
+
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};

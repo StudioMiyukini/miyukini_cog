@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_gdpr_service
+//! @do     definir_gdpr_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services gdpr service ».
+
 //! GDPR Data Subject Rights implementation — RGPD Art. 15-20.
 //!
 //! Provides actual data export, erasure, and rectification.

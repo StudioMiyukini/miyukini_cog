@@ -1,3 +1,9 @@
+//! @id     miyulocale_admin_cell
+//! @do     definir_miyu_locale_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyulocale — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

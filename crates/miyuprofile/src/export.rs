@@ -1,3 +1,9 @@
+//! @id     miyuprofile_export
+//! @do     definir_dossier_template
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « export ».
+
 //! Export — constitution de dossiers et extraction de données.
 //!
 //! Permet de constituer rapidement un dossier d'inscription,

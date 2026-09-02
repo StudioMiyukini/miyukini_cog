@@ -1,3 +1,9 @@
+//! @id     miyupm_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupm — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuPM — toolkit.communication.pm
 //!

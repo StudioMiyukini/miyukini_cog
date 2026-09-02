@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_mode
+//! @do     definir_maia_mode
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « mode ».
+
 //! Mode de fonctionnement de MAIA — Standalone ou Pro.
 //!
 //! - **Standalone** : Aucune connexion vers un hub TEAM. Peut être isolé

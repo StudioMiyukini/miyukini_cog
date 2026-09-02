@@ -1,3 +1,9 @@
+//! @id     central_mobile_services_home
+//! @do     home_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « services home ».
+
 //! Vue Salon — écran d'accueil simplifié.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_item_icon
+//! @do     definir_steel
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render item icon ».
+
 //! Procedural item icons: one expressive per-kind glyph plus a rarity glow,
 //! shared by the inventory grid, the equipment paperdoll, the drag ghost, and
 //! ground drops. Everything is built from the axis-aligned quad primitives in

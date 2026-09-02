@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_bridge
+//! @do     definir_connection_mode
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « bridge ».
+
 //! Trait `CogBridge` — interface unifiée pour les 3 modes de connexion.
 //!
 //! Toutes les communications passent par un chiffrement E2E (X25519 + ChaCha20-Poly1305)

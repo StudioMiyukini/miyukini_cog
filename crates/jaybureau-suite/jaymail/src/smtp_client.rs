@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymail_smtp_client
+//! @do     send_email
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymail smtp client ».
+
 //! Envoi de mails via SMTP avec `lettre`.
 
 use crate::config::{SmtpConfig, TlsMode};

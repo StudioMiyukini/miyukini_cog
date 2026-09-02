@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_views_audit
+//! @do     definir_fmt_timestamp
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « views audit ».
+
 //! Ecran Historique des actions (audit) MiyukiniWatch.
 
 use crate::{use_db, use_profile_id};

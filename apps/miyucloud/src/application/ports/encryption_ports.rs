@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_encryption_ports
+//! @do     definir_trait_blob_encryption_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports encryption ports ».
+
 //! Blob encryption port — hexagonal boundary for encryption at rest.
 //!
 //! ISO 27001 A.8.24, RGPD Art.32, HDS mandatory.

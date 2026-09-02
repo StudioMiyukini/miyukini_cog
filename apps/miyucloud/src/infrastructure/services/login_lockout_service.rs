@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_login_lockout_service
+//! @do     definir_failure_record
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services login lockout service ».
+
 //! Account lockout service — blocks login for an account after N consecutive
 //! failed attempts.
 //!

@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_profile
+//! @do     profile
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga profile ».
+
 //! Profil de progression JayManga — niveau, XP, streaks, badges, statistiques, historique.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     central_services_miyukiniwatch_mod
+//! @do     declarer_module_dashboard
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyukiniwatch mod ».
+
 //! MiyukiniWatch — Service silencieux de mesure des habitudes.
 //!
 //! Interface : tableau de bord, détail, paramètres, audit.

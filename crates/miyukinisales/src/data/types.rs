@@ -1,3 +1,9 @@
+//! @id     miyukinisales_data_types
+//! @do     definir_quote_status
+//! @role   donnee
+//! @layer  core
+//! @human  miyukinisales — module « data types ».
+
 //! Types domaine MiyukiniSales : devis, commandes, lignes, statuts.
 //!
 //! Modèle métier : devis (quote) → conversion en commande (order) ; lignes de commande.

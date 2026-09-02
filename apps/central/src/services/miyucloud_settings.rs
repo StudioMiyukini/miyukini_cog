@@ -1,3 +1,9 @@
+//! @id     central_services_miyucloud_settings
+//! @do     definir_app_dir
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyucloud settings ».
+
 //! Configuration persisted for MiyuCloud inside Central.
 
 use crate::service_manager::registry::service_install_dir;

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_app_password_dto
+//! @do     definir_create_app_password_request_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos app password dto ».
+
 //! DTOs for App Password (application-specific passwords for DAV clients).
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     mipower_db
+//! @do     open
+//! @role   donnee
+//! @layer  app
+//! @human  mipower — module « db ».
+
 use anyhow::Result;
 use rusqlite::Connection;
 use std::path::Path;

@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_reader
+//! @do     definir_reader_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain reader ».
+
 //! Logique de lecture JayManga.
 //!
 //! Gestion de la progression de lecture, navigation par pages,

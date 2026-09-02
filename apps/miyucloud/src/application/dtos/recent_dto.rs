@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_recent_dto
+//! @do     definir_recent_item_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos recent dto ».
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 

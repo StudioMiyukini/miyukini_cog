@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_recent_service
+//! @do     definir_recent_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services recent service ».
+
 use crate::application::dtos::recent_dto::RecentItemDto;
 use crate::application::ports::recent_ports::{RecentItemsRepositoryPort, RecentItemsUseCase};
 use crate::common::errors::{DomainError, ErrorKind, Result};

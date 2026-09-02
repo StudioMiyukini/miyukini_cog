@@ -1,3 +1,9 @@
+//! @id     jayfaim_domain_mod
+//! @do     table_create
+//! @role   orchestration
+//! @layer  core
+//! @human  jayfaim — module « domain mod ».
+
 //! Logique métier JayFaim : tables, créneaux, réservations, convives.
 
 use chrono::Utc;

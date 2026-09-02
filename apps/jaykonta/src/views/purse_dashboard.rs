@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_purse_dashboard
+//! @do     purse_dashboard
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views purse dashboard ».
+
 //! Dashboard Purse — P1.
 //!
 //! Composants : SoldeCard, DepensesBudgetCards, CategorieChart,

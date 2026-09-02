@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_webdav_handlers
+//! @do     definir_dav_prefix
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « webdav handlers ».
+
 use axum::body::Body;
 use axum::extract::{Request, State};
 use axum::http::StatusCode;

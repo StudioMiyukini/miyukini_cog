@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_skill_fields
+//! @do     in_rect
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems skill fields ».
+
 //! Timed ground-effect "fields" spawned by skills: flame walls, blizzards,
 //! meteor barrages, lightning shields, and arrow-rain zones. Each advances its
 //! own timer(s), strikes the enemies in its footprint, and despawns when spent.

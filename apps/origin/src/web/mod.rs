@@ -1,3 +1,9 @@
+//! @id     origin_web_mod
+//! @do     declarer_module_api
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « web mod ».
+
 //! Serveur Web Origin — Site public MWS.
 //!
 //! Expose le site web officiel Miyukini sur le port 8080.

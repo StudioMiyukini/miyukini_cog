@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_series
+//! @do     series_view
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views series ».
+
 //! Gestion des series JayManga — regroupement d'oeuvres en series.
 
 use super::components::{

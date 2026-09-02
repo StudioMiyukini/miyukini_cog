@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_permission
+//! @do     definir_role
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core permission ».
+
 //! Permissions et partage de documents (ACL).
 
 use crate::UserId;

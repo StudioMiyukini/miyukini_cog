@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_voice_mod
+//! @do     declarer_module_pipeline
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « voice mod ».
+
 //! Pipeline voix MAIA — wake word → STT → LLM → TTS.
 //!
 //! ## Modules

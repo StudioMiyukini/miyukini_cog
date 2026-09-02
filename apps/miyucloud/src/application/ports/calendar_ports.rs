@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_calendar_ports
+//! @do     definir_trait_calendar_storage_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports calendar ports ».
+
 use crate::application::dtos::calendar_dto::{
     CalendarDto, CalendarEventDto, CreateCalendarDto, CreateEventDto, CreateEventICalDto,
     UpdateCalendarDto, UpdateEventDto,

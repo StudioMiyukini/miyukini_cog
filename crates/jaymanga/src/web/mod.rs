@@ -1,3 +1,9 @@
+//! @id     jaymanga_web_mod
+//! @do     declarer_module_aggregator_portal
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « web mod ».
+
 //! Module web pour le Portail JayManga.
 //!
 //! Templates HTML (SSR) et configuration du serveur web Portail.

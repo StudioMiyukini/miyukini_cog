@@ -1,3 +1,9 @@
+//! @id     origin_tracker_pool
+//! @do     definir_cog_entry
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker pool ».
+
 //! Pools de COGs par version.
 //!
 //! Gère l'isolation des COGs par version des Cores.

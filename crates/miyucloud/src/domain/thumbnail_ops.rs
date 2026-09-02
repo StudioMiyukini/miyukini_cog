@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_thumbnail_ops
+//! @do     is_thumbnailable
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud — module « domain thumbnail ops ».
+
 use crate::errors::MiyucloudError;
 
 /// Supported image formats for thumbnail generation

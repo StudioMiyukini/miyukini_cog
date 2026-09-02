@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_collab_room
+//! @do     definir_broadcast_capacity
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jay-collab room ».
+
 //! Salle de collaboration côté serveur.
 //!
 //! Une Room tient l'état Yrs partagé pour un document et broadcaste les updates

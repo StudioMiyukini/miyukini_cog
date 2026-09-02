@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_skill_disk
+//! @do     definir_grid_cols
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « skill disk ».
+
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------

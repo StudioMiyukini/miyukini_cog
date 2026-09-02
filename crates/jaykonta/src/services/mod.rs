@@ -1,3 +1,9 @@
+//! @id     jaykonta_services_mod
+//! @do     declarer_module_audit_service
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « services mod ».
+
 //! Services metier JayKonta.
 //!
 //! Chaque service encapsule la logique metier d'un domaine fonctionnel,

@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_classes
+//! @do     definir_class_def
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data classes ».
+
 //! Per-class flavour and starting loadout.
 
 use mge_items::item::ItemKind;

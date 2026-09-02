@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_sockets
+//! @do     definir_socketed_item
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « sockets ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::item::{Item, ItemFamily};

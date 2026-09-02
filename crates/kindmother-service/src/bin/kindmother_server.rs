@@ -1,3 +1,9 @@
+//! @id     kindmother_service_bin_kindmother_server
+//! @do     definir_config
+//! @role   orchestration
+//! @layer  core
+//! @human  kindmother-service — module « bin kindmother server ».
+
 //! Point d'entrée du serveur KindMother.
 //!
 //! Lance le service KindMother qui est le seul interlocuteur autorisé

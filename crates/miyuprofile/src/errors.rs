@@ -1,3 +1,9 @@
+//! @id     miyuprofile_errors
+//! @do     definir_miyuprofile_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuprofileError {
     NoMandate,

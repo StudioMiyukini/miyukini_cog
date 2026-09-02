@@ -1,3 +1,9 @@
+//! @id     miyudeclarations_errors
+//! @do     definir_miyudeclarations_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyudeclarations — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyudeclarationsError {
     NoMandate,

@@ -1,3 +1,9 @@
+//! @id     miyuclock_admin_cell
+//! @do     definir_miyuclock_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuclock — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

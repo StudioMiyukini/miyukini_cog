@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_atlas
+//! @do     definir_atlas_handle
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « atlas ».
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

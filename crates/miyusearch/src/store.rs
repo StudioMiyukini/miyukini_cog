@@ -1,3 +1,9 @@
+//! @id     miyusearch_store
+//! @do     definir_index
+//! @role   donnee
+//! @layer  core
+//! @human  miyusearch — module « store ».
+
 //! Store en mémoire pour l'index MiyuSearch (dérivation ; persistance réelle = KindMother).
 //! Partagé par index.update, query.execute, suggest.
 

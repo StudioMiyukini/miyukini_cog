@@ -1,3 +1,9 @@
+//! @id     central_theme
+//! @do     declarer_module_styles
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « theme ».
+
 //! Themes visuels Miyukini Central.
 //!
 //! Ce module est une facade qui re-exporte les types et styles depuis

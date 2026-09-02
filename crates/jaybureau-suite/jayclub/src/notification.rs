@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_notification
+//! @do     definir_notification_kind
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub notification ».
+
 //! Notifications JayClub.
 
 use crate::{ItemId, UserId};

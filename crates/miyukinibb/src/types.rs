@@ -1,3 +1,9 @@
+//! @id     miyukinibb_types
+//! @do     definir_forum_profile_sync
+//! @role   donnee
+//! @layer  core
+//! @human  miyukinibb — module « types ».
+
 //! Types du service MiyukiniBB.
 //!
 //! Contrat d’échange avec l’API auth forum sur Origin.

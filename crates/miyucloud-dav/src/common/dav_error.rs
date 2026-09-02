@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_common_dav_error
+//! @do     definir_dav_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « common dav error ».
+
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 

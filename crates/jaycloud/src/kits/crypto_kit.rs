@@ -1,3 +1,9 @@
+//! @id     jaycloud_kits_crypto_kit
+//! @do     definir_key_len
+//! @role   securite
+//! @layer  core
+//! @human  jaycloud — module « kits crypto kit ».
+
 //! `crypto_kit` — wrapper ChaCha20-Poly1305 pour chiffrement bloc.
 //!
 //! Aligné sur le pattern `miyucloud::crypto::at_rest` : AEAD avec nonce

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_mod
+//! @do     declarer_module_address_book_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos mod ».
+
 pub mod address_book_dto;
 pub mod app_password_dto;
 pub mod calendar_dto;

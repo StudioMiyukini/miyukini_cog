@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_chapters
+//! @do     chapters
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga chapters ».
+
 //! Gestion des chapitres et pages d'une œuvre manga.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_thumbnail_service
+//! @do     definir_thumbnail_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services thumbnail service ».
+
 use bytes::Bytes;
 use image::codecs::jpeg::JpegEncoder;
 use image::imageops::FilterType;

@@ -1,3 +1,9 @@
+//! @id     jaymanga_web_aggregator_portal
+//! @do     definir_aggregate_page_context
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « web aggregator portal ».
+
 //! Portail Agrégé JayManga (vue inter-COG unifiée).
 //!
 //! Structures de données pour le rendu SSR du Portail Agrégé,

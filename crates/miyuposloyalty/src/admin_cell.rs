@@ -1,3 +1,9 @@
+//! @id     miyuposloyalty_admin_cell
+//! @do     definir_miyuposloyalty_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposloyalty — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

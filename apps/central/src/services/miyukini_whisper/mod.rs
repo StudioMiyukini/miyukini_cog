@@ -1,3 +1,9 @@
+//! @id     central_services_miyukini_whisper_mod
+//! @do     miyukini_whisper_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyukini whisper mod ».
+
 //! Vue de configuration et test Miyukini Whisper (V3 squelette).
 
 use dioxus::prelude::*;

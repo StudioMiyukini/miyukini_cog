@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_purse_movement_form
+//! @do     definir_quick_categories
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta purse movement form ».
+
 //! Formulaire de mouvement rapide Purse — P2.
 //!
 //! Objectif : saisie complete en < 2s, max 3 actions (NFR-PUR-05, NFR-PUR-06).

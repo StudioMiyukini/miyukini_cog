@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_app_password_service
+//! @do     definir_token_length
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services app password service ».
+
 //! App Password application service.
 //!
 //! Orchestrates creation, verification, listing, and revocation of

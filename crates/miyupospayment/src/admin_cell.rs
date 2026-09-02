@@ -1,3 +1,9 @@
+//! @id     miyupospayment_admin_cell
+//! @do     definir_miyupospayment_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupospayment — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

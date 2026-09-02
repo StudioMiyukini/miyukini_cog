@@ -1,3 +1,9 @@
+//! @id     miyustore_lib
+//! @do     declarer_module_admin_cell
+//! @role   donnee
+//! @layer  core
+//! @human  miyustore — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuStore — toolkit.commerce.store
 //!

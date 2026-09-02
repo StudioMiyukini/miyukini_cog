@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_main
+//! @do     declarer_module_demo
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « main ».
+
 //! Alicia MVP — test harness pour le parcours STT -> NLU -> TTS.
 //!
 //! Modes :

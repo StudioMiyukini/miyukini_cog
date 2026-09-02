@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_contracts
+//! @do     definir_contract_type
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections contracts ».
+
 //! Section contrats — contrats de travail, assurances, abonnements, baux.
 //!
 //! Suivi des engagements contractuels, échéances, et procédures

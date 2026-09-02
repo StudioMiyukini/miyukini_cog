@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_adapters_caldav_adapter
+//! @do     definir_cal_dav_report_type
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application adapters caldav adapter ».
+
 use chrono::{DateTime, Utc};
 use quick_xml::{
     Reader, Writer,

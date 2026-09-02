@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_wopi_auth
+//! @do     definir_wopi_token_validator
+//! @role   securite
+//! @layer  core
+//! @human  miyucloud-dav — module « wopi auth ».
+
 use crate::common::dav_error::DavError;
 use sha2::{Sha256, Digest};
 

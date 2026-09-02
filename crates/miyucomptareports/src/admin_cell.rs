@@ -1,3 +1,9 @@
+//! @id     miyucomptareports_admin_cell
+//! @do     definir_miyucomptareports_identification
+//! @role   donnee
+//! @layer  core
+//! @human  miyucomptareports — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,3 +1,9 @@
+//! @id     miyusearch_errors
+//! @do     definir_miyusearch_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyusearch — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyusearchError {
     NoMandate,

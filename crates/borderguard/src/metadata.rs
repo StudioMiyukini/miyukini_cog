@@ -1,3 +1,9 @@
+//! @id     borderguard_metadata
+//! @do     definir_boundary_metadata
+//! @role   securite
+//! @layer  core
+//! @human  borderguard — module « metadata ».
+
 //! Métadonnées de traçabilité pour les définitions BorderGuard (INV-BG-8).
 
 /// Métadonnées obligatoires pour toute frontière ou règle (traçabilité complète).

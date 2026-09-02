@@ -1,3 +1,9 @@
+//! @id     central_mobile_services_remote_control
+//! @do     remote_control_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « services remote control ».
+
 //! Vue Remote Control — pilotage du Central Desktop.
 
 use dioxus::prelude::*;

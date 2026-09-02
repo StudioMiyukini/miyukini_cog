@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_trashbin_handler
+//! @do     definir_header_dav
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud trashbin handler ».
+
 use axum::{
     body::Body,
     http::{HeaderName, Request, StatusCode, header},

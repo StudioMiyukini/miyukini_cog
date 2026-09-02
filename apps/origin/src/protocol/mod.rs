@@ -1,3 +1,9 @@
+//! @id     origin_protocol_mod
+//! @do     declarer_module_frame
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « protocol mod ».
+
 //! Protocole MWS Relay — Version 1.
 //!
 //! Ce module implémente le protocole binaire de communication entre

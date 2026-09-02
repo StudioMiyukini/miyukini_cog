@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_stats
+//! @do     definir_primary_attributes
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « stats ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::character::{BaseStats, Class};

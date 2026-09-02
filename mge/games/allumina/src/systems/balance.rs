@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_balance
+//! @do     definir_crit_base_pct
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems balance ».
+
 //! Central tuning knobs for the combat & character model. Gathering the scalar
 //! constants here (instead of scattering them across `combat.rs` / `stats.rs`)
 //! gives one place to read and adjust balance, and one place the balance tests

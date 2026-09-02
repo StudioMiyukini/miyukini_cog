@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_skill_mage
+//! @do     definir_mage_levels
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems skill mage ».
+
 //! Mage de guerre: the three elemental branches (Fire / Frost / Lightning).
 //! Per-skill level curves and the chain-lightning resolver, split out of the
 //! parent `skill` module. Shared helpers (`lf`, `emit_fx`, `resolve_spell`) are

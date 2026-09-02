@@ -1,3 +1,9 @@
+//! @id     origin_protocol_messages
+//! @do     definir_register_payload
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « protocol messages ».
+
 //! Messages spécifiques du protocole MWS Relay.
 //!
 //! Structures pour parser et construire les payloads des différents types de messages.

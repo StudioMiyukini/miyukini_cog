@@ -1,3 +1,9 @@
+//! @id     logisticssteward_lib
+//! @do     declarer_module_allocation
+//! @role   orchestration
+//! @layer  core
+//! @human  logisticssteward — module « lib ».
+
 //! # LogisticsSteward
 //!
 //! Gestionnaire de ressources et optimisation du Miyukini Core System.

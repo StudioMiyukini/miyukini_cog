@@ -1,3 +1,9 @@
+//! @id     miyukini_central_config
+//! @do     definir_env_filename
+//! @role   config
+//! @layer  core
+//! @human  miyukini-central — module « config ».
+
 //! Chargement de la configuration Central (env, Supabase Catakana).
 //!
 //! Charge `supabase-catakana.env` depuis le répertoire courant ou la racine

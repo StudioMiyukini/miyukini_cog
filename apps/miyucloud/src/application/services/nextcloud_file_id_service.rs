@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_nextcloud_file_id_service
+//! @do     definir_nextcloud_file_id_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services nextcloud file id service ».
+
 use std::sync::Arc;
 
 use crate::common::errors::{DomainError, ErrorKind, Result};

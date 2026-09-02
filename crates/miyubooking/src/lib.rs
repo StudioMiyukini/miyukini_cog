@@ -1,3 +1,9 @@
+//! @id     miyubooking_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubooking — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuBooking — toolkit.booking.reservations
 //!

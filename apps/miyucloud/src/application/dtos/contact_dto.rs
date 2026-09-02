@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_contact_dto
+//! @do     definir_email_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos contact dto ».
+
 use crate::domain::entities::contact::{Address, Contact, ContactGroup, Email, Phone};
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};

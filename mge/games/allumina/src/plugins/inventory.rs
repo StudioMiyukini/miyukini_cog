@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_inventory
+//! @do     ground_item_decay_system
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins inventory ».
+
 //! Inventory & equipment operations plus ground-item lifetime management.
 
 use mge_items::affixes::ItemAffixes;

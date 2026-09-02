@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_inventory
+//! @do     definir_inv_item
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « inventory ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::civil_skills::ResourceKind;

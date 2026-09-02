@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_device_code
+//! @do     definir_device_code_status
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities device code ».
+
 //! Device Authorization Code entity (RFC 8628).
 //!
 //! Represents a pending or completed OAuth 2.0 Device Authorization Grant flow.

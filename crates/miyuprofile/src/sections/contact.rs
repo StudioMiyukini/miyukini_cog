@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_contact
+//! @do     definir_contact_type
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections contact ».
+
 //! Section coordonnées — adresses, téléphones, emails, sites web.
 //!
 //! Chaque entrée porte un label (personnel, professionnel, urgence…)

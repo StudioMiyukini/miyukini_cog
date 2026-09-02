@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_character
+//! @do     definir_class
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « character ».
+
 use serde::{Deserialize, Serialize};
 
 /// The seven playable archetypes.

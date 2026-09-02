@@ -1,3 +1,9 @@
+//! @id     miyucloud_main
+//! @do     definir_global
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « main ».
+
 #![allow(async_fn_in_trait)]
 
 #[global_allocator]

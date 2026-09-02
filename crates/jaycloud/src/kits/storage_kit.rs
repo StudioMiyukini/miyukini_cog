@@ -1,3 +1,9 @@
+//! @id     jaycloud_kits_storage_kit
+//! @do     definir_jaycloud_database
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « kits storage kit ».
+
 //! `storage_kit` — wrapper KindMother pour la persistance JayCloud.
 //!
 //! Au lieu de tirer une dépendance `libsql` ou `rusqlite` directe,

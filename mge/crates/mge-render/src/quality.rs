@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_quality
+//! @do     definir_quality_tier
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « quality ».
+
 use serde::{Deserialize, Serialize};
 
 /// Quality tier that controls rendering fidelity.

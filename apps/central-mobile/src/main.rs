@@ -1,3 +1,9 @@
+//! @id     central_mobile_main
+//! @do     declarer_module_app
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « main ».
+
 //! Miyukini Central Mobile — point d'entrée Android.
 //!
 //! Client léger Dioxus Mobile pour piloter le COG Host depuis Android.

@@ -1,3 +1,9 @@
+//! @id     miyumoderationforum_store
+//! @do     queue_items
+//! @role   donnee
+//! @layer  core
+//! @human  miyumoderationforum — module « store ».
+
 //! Store en mémoire MiyuModerationForum. Décision ALLOW/DENY = StrongFather (hors toolkit).
 
 use std::collections::HashMap;

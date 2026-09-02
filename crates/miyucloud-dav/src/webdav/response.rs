@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_webdav_response
+//! @do     definir_dav_property
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « webdav response ».
+
 use quick_xml::Writer;
 use quick_xml::events::{BytesEnd, BytesStart, BytesText, Event};
 use std::io::Cursor;

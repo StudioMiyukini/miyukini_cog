@@ -1,3 +1,9 @@
+//! @id     crates_mge_monsters_roster
+//! @do     definir_monster_family
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-monsters — module « roster ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_world::zone::{Biome, ZoneId};

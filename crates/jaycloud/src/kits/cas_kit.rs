@@ -1,3 +1,9 @@
+//! @id     jaycloud_kits_cas_kit
+//! @do     definir_blob_hash
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « kits cas kit ».
+
 //! `cas_kit` — Content-Addressed Storage.
 //!
 //! Stocke des blobs sur disque, **adressés par hash SHA-256 du plaintext**.

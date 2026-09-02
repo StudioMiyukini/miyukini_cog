@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_share_repository
+//! @do     definir_share_repository_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories share repository ».
+
 use thiserror::Error;
 use uuid::Uuid;
 

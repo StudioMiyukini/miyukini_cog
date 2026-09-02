@@ -1,3 +1,9 @@
+//! @id     crates_mge_monsters_scripts
+//! @do     definir_script_trigger
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-monsters — module « scripts ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_world::zone::ZoneId;

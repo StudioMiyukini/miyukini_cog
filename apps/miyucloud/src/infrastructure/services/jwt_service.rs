@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_jwt_service
+//! @do     definir_jwt_claims
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services jwt service ».
+
 //! JWT-based token service implementation.
 //!
 //! This module provides JWT token generation and validation functionality,

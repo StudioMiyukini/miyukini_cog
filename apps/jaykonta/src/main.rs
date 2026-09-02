@@ -1,3 +1,9 @@
+//! @id     jaykonta_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « main ».
+
 //! Point d'entrée binaire JayKonta (standalone).
 //!
 //! Initialise la DB KindMother, les providers de contexte (thème + DB),

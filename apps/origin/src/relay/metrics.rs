@@ -1,3 +1,9 @@
+//! @id     origin_relay_metrics
+//! @do     definir_relay_metrics
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay metrics ».
+
 //! Métriques et statistiques du Relay.
 //!
 //! Collecte des métriques pour le monitoring et le débogage.

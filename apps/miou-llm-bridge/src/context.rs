@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_context
+//! @do     definir_context_category
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « context ».
+
 //! Bases de contexte — mémoire structurée pour les agents.
 //!
 //! Permet de stocker et récupérer des données de contexte pour enrichir

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_storage_usage_service
+//! @do     definir_storage_usage_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services storage usage service ».
+
 use crate::application::ports::auth_ports::UserStoragePort;
 use crate::application::ports::storage_ports::StorageUsagePort;
 use crate::common::errors::DomainError;

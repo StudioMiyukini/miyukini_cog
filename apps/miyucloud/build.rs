@@ -1,3 +1,9 @@
+//! @id     miyucloud_build
+//! @do     definir_html_include
+//! @role   ui
+//! @layer  app
+//! @human  miyucloud — module « build ».
+
 //! build.rs — Static-asset pipeline for Miyukini Cloud
 //!
 //! **Release mode** (`cargo build --release`):

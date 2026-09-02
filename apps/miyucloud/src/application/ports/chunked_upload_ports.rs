@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_chunked_upload_ports
+//! @do     definir_default_chunk_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports chunked upload ports ».
+
 //! Chunked Upload Port - Application layer abstraction for resumable chunked uploads.
 //!
 //! This module defines the port (trait) and DTOs for chunked/resumable upload

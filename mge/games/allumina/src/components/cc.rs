@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_cc
+//! @do     definir_knockdown
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components cc ».
+
 //! Crowd-control components: knockdown, pushback (recul), and the interruptible
 //! cast marker. All three are pure data ticked by [`crate::systems::cc`]; the
 //! [`Unstoppable`](crate::components::skill::Unstoppable) window makes an entity

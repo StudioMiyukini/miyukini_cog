@@ -1,3 +1,9 @@
+//! @id     miyupospayment_errors
+//! @do     definir_miyupospayment_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupospayment — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyupospaymentError {
     NoMandate,

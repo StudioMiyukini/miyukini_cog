@@ -1,3 +1,9 @@
+//! @id     miyukini_central_main
+//! @do     main
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-central — module « main ».
+
 //! Binaire minimal Miyukini Central.
 //!
 //! L'UI principale est migrée vers l'app Tauri (apps/central).

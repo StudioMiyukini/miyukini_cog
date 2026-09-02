@@ -1,3 +1,9 @@
+//! @id     miyauth_errors
+//! @do     definir_miyauth_error
+//! @role   securite
+//! @layer  core
+//! @human  miyauth — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyauthError {
     NoMandate,

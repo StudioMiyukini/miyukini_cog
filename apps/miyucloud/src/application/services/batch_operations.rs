@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_batch_operations
+//! @do     definir_batch_operation_error
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services batch operations ».
+
 use async_zip::base::write::ZipFileWriter;
 use async_zip::{Compression, ZipEntryBuilder};
 use futures::io::AsyncWriteExt as FuturesWriteExt;

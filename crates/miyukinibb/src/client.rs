@@ -1,3 +1,9 @@
+//! @id     miyukinibb_client
+//! @do     definir_sync_path
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukinibb — module « client ».
+
 //! Client API MiyukiniBB (Origin).
 //!
 //! Synchronise les profils Central vers la copie serveur pour l’auth forum.

@@ -1,3 +1,9 @@
+//! @id     miyusocialmessaging_store
+//! @do     conversations
+//! @role   donnee
+//! @layer  core
+//! @human  miyusocialmessaging — module « store ».
+
 //! Store en mémoire MiyuSocialMessaging (conversations, messages).
 
 use std::collections::HashMap;

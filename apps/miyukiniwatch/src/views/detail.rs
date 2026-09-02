@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_views_detail
+//! @do     detail_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « views detail ».
+
 //! Ecran Detail des metriques MiyukiniWatch.
 
 use crate::{use_db, use_profile_id};

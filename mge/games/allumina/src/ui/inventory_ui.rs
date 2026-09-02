@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_inventory_ui
+//! @do     draw
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui inventory ui ».
+
 //! Inventory window: the 10x4 backpack grid.
 //!
 //! `render_inventory` is the text version (headless); `draw` paints the

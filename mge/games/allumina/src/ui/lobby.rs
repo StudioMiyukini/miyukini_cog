@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_lobby
+//! @do     definir_auto_refresh_secs
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui lobby ».
+
 //! The multiplayer lobby screen.
 //!
 //! After the network client receives a [`crate::network::protocol::ServerMessage::LoginAccepted`]

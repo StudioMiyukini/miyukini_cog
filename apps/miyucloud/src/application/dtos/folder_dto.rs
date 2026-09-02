@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_folder_dto
+//! @do     definir_create_folder_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos folder dto ».
+
 use std::sync::Arc;
 
 use crate::domain::entities::folder::Folder;

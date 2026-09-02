@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_groups
+//! @do     definir_group_key
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage groups ».
+
 //! Chiffrement de groupe — Sender Keys.
 //!
 //! Modele :

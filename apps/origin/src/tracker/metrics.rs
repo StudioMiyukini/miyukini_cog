@@ -1,3 +1,9 @@
+//! @id     origin_tracker_metrics
+//! @do     definir_tracker_metrics
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « tracker metrics ».
+
 //! Métriques du Tracker.
 //!
 //! Statistiques et compteurs pour le monitoring.

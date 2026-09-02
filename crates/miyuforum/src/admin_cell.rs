@@ -1,3 +1,9 @@
+//! @id     miyuforum_admin_cell
+//! @do     definir_miyuforum_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuforum — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

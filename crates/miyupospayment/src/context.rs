@@ -1,3 +1,9 @@
+//! @id     miyupospayment_context
+//! @do     definir_governed_context
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupospayment — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

@@ -1,3 +1,9 @@
+//! @id     miyusocialprofile_errors
+//! @do     definir_miyusocialprofile_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyusocialprofile — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyusocialprofileError {
     NoMandate,

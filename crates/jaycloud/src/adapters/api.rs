@@ -1,3 +1,9 @@
+//! @id     jaycloud_adapters_api
+//! @do     definir_backup_api_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « adapters api ».
+
 //! API REST interne du service JayCloud.
 //!
 //! En P3.b, ce module expose la **logique** des handlers REST sous forme de

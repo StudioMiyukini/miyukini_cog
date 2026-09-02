@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_summon
+//! @do     definir_summon_profile
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data summon ».
+
 //! Static tuning for each summon kind. The summon system reads a profile to
 //! size the new ally relative to the owner's power (a percentage of the owner's
 //! life, damage, and defence) and to drive its behaviour (melee/ranged, mobile

@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_pvp
+//! @do     definir_pvp_consent
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « pvp ».
+
 use serde::{Deserialize, Serialize};
 
 /// Consent level for `PvP` interactions.

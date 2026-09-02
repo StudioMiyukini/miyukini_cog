@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_contact_service
+//! @do     definir_contact_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services contact service ».
+
 use chrono::Utc;
 use std::sync::Arc;
 use uuid::Uuid;

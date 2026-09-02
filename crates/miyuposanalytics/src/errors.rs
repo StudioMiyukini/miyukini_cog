@@ -1,3 +1,9 @@
+//! @id     miyuposanalytics_errors
+//! @do     definir_miyuposanalytics_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposanalytics — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuposanalyticsError {
     NoMandate,

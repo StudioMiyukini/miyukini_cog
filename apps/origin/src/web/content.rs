@@ -1,3 +1,9 @@
+//! @id     origin_web_content
+//! @do     definir_blog_post
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « web content ».
+
 //! Contenu dynamique du site web Origin.
 //!
 //! Gère les articles de blog, annonces et téléchargements.

@@ -1,3 +1,9 @@
+//! @id     jaykonta_data_types
+//! @do     definir_movement_record
+//! @role   donnee
+//! @layer  core
+//! @human  jaykonta — module « data types ».
+
 //! Types de persistance JayKonta.
 
 /// Mouvement de grand livre ou budget.

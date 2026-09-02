@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_audit_event
+//! @do     definir_audit_action
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities audit event ».
+
 //! Audit event domain entity for persistent security logging.
 
 use chrono::{DateTime, Utc};

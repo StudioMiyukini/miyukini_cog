@@ -1,3 +1,9 @@
+//! @id     miyucloud_common_config
+//! @do     definir_cache_config
+//! @role   config
+//! @layer  app
+//! @human  miyucloud — module « common config ».
+
 use std::env;
 use std::path::PathBuf;
 use std::time::Duration;

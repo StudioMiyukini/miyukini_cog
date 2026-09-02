@@ -1,3 +1,9 @@
+//! @id     miyusearch_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyusearch — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuSearch — toolkit.search.miyusearch
 //!

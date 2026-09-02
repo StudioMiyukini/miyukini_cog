@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_ssh
+//! @do     definir_forwarded_ports
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « ssh ».
+
 //! Mode SSH — tunnel sécurisé vers le COG Host avec port forwarding.
 //!
 //! Utilise `russh` (client SSH pur Rust) pour établir un tunnel chiffré.

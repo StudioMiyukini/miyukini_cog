@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_pass
+//! @do     definir_pass_descriptor
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « pass ».
+
 use crate::batch::{RenderLayer, SpriteBatch};
 
 /// Describes which layers a render pass will draw.

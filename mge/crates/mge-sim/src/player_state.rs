@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_player_state
+//! @do     definir_player_state
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « player state ».
+
 use crate::constants::*;
 use crate::entity::*;
 

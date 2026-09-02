@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_preview_handler
+//! @do     definir_preview_params
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud preview handler ».
+
 //! Nextcloud-compatible preview/thumbnail endpoint.
 //!
 //! Maps Nextcloud preview requests to Miyukini Cloud's thumbnail service.

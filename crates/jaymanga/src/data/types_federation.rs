@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_types_federation
+//! @do     definir_federation_info
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data types federation ».
+
 //! Types pour l'API de fédération inter-COG JayManga.
 //!
 //! Utilisés par l'API `/api/jaymanga/federation/*` pour exposer un résumé

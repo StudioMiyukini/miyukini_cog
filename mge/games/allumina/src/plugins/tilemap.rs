@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_tilemap
+//! @do     tilemap_load_system
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins tilemap ».
+
 //! Tilemap loading and an ASCII debug renderer (stands in for tile sprites).
 
 use crate::app::{App, Plugin};

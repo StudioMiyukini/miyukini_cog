@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_animation
+//! @do     definir_direction
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « animation ».
+
 use serde::{Deserialize, Serialize};
 
 /// Cardinal + diagonal directions for sprite facing.

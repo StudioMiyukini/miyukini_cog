@@ -1,3 +1,9 @@
+//! @id     central_screens_connexion
+//! @do     definir_step_accueil
+//! @role   ui
+//! @layer  app
+//! @human  central — module « screens connexion ».
+
 //! Connexion — Retour d'un habitant connu. Miou accueille avec la voix (son + phrase).
 //! Pré-remplit l'email du dernier profil connecté.
 

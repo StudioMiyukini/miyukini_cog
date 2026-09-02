@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_folder_service
+//! @do     definir_folder_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services folder service ».
+
 use crate::application::dtos::folder_dto::{
     CreateFolderDto, FolderDto, MoveFolderDto, RenameFolderDto,
 };

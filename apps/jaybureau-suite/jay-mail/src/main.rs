@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_mail_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-mail main ».
+
 //! Jay Mail — client email.
 
 use dioxus::prelude::*;

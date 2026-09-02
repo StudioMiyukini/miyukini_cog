@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_charms
+//! @do     definir_charm_size
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « charms ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_gameplay::stats::{Modifier, StatKind};

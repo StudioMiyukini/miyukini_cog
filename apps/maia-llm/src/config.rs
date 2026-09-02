@@ -1,3 +1,9 @@
+//! @id     maia_llm_config
+//! @do     definir_maia_llm_config
+//! @role   config
+//! @layer  app
+//! @human  maia-llm — module « config ».
+
 //! Configuration de MAIA-LLM.
 
 use serde::{Deserialize, Serialize};

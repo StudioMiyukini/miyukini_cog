@@ -1,3 +1,9 @@
+//! @id     mipower_init
+//! @do     definir_init_log
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « init ».
+
 use anyhow::{Context, Result};
 use std::path::{Path, PathBuf};
 

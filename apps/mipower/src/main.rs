@@ -1,3 +1,9 @@
+//! @id     mipower_main
+//! @do     declarer_module_db
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « main ».
+
 use dioxus::prelude::*;
 
 mod db;

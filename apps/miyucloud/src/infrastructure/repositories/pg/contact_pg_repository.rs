@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_contact_pg_repository
+//! @do     definir_contact_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg contact pg repository ».
+
 use chrono::Utc;
 use serde_json::Value as JsonValue;
 use sqlx::{PgPool, Row, types::Uuid};

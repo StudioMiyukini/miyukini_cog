@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_merc_ui
+//! @do     expected_kind
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui merc ui ».
+
 //! Mercenary equipment panel (toggled with `P`).
 //!
 //! A compact paperdoll for the player's active companion: the same ten slots as

@@ -1,3 +1,9 @@
+//! @id     team_orchestrator_scheduler
+//! @do     definir_task_status
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « orchestrator scheduler ».
+
 //! File de tâches — FIFO prioritisée pour les requêtes entrant dans TEAM.
 
 use std::collections::BTreeMap;

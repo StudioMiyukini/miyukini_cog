@@ -1,3 +1,9 @@
+//! @id     miyuposloyalty_errors
+//! @do     definir_miyuposloyalty_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposloyalty — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuposloyaltyError {
     NoMandate,

@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_model_manager
+//! @do     definir_local_model
+//! @role   donnee
+//! @layer  app
+//! @human  miou-llm-bridge — module « model manager ».
+
 //! Gestion des modèles GGUF locaux — scan, métadonnées, chargement.
 
 use serde::Serialize;

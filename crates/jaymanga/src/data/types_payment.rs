@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_types_payment
+//! @do     definir_purchase_license
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data types payment ».
+
 //! Types de domaine pour le paiement et les licences JayManga.
 //!
 //! Définit : PurchaseLicense, PaymentTransaction, Promotion, CartItem,

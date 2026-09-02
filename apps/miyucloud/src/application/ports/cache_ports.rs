@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_cache_ports
+//! @do     definir_write_behind_stats_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports cache ports ».
+
 //! Cache Ports — Application-layer abstractions for all caching concerns.
 //!
 //! This module defines ports (traits) for:

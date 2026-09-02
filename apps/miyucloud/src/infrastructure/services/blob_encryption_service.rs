@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_blob_encryption_service
+//! @do     definir_nonce_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services blob encryption service ».
+
 //! AES-256-GCM blob encryption service for encryption at rest.
 //!
 //! File format: `[12-byte nonce][ciphertext][16-byte GCM auth tag]`

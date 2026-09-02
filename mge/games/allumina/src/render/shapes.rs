@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_shapes
+//! @do     rect
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render shapes ».
+
 //! Procedural shape helpers built on the single primitive [`push_quad`].
 //!
 //! The sprite pipeline only draws axis-aligned coloured quads, so every richer

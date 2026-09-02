@@ -1,3 +1,9 @@
+//! @id     jaymanga_auth_mod
+//! @do     declarer_module_license_verify
+//! @role   securite
+//! @layer  core
+//! @human  jaymanga — module « auth mod ».
+
 //! Authentification et permissions JayManga.
 //!
 //! Gère les rôles (Admin/Vendeur, Lecteur authentifié, Visiteur),

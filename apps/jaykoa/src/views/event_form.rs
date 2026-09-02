@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_event_form
+//! @do     definir_event_form_modal_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views event form ».
+
 //! Formulaire de creation/edition d'evenement JayKoa.
 
 use chrono::Local;

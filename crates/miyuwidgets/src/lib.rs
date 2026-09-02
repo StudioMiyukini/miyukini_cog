@@ -1,3 +1,9 @@
+//! @id     miyuwidgets_lib
+//! @do     declarer_module_admin_cell
+//! @role   ui
+//! @layer  core
+//! @human  miyuwidgets — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuWidgets — toolkit.web.widgets
 //!

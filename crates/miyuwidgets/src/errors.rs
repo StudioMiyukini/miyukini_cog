@@ -1,3 +1,9 @@
+//! @id     miyuwidgets_errors
+//! @do     definir_miyuwidgets_error
+//! @role   ui
+//! @layer  core
+//! @human  miyuwidgets — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuwidgetsError {
     NoMandate,

@@ -1,3 +1,9 @@
+//! @id     miyucloud_storage_compression
+//! @do     definir_compression_threshold
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud — module « storage compression ».
+
 use crate::errors::MiyucloudError;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;

@@ -1,3 +1,9 @@
+//! @id     jaycloud_kits_token_kit
+//! @do     definir_token_prefix
+//! @role   securite
+//! @layer  core
+//! @human  jaycloud — module « kits token kit ».
+
 //! `token_kit` — jetons applicatifs WebDAV.
 //!
 //! Format :

@@ -1,3 +1,9 @@
+//! @id     jaykonta_data_kindmother_db
+//! @do     definir_db_error
+//! @role   donnee
+//! @layer  core
+//! @human  jaykonta — module « data kindmother db ».
+
 //! Base locale SQLite JayKonta (KindMother Daughter).
 //!
 //! Schema complet : 14 tables, triggers, vues.

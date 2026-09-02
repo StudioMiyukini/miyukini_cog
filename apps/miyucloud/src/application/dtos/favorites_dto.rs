@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_favorites_dto
+//! @do     definir_favorite_item_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos favorites dto ».
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 

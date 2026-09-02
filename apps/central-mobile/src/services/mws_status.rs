@@ -1,3 +1,9 @@
+//! @id     central_mobile_services_mws_status
+//! @do     mws_status_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « services mws status ».
+
 //! Vue MWS Status — état du réseau Webway.
 
 use dioxus::prelude::*;

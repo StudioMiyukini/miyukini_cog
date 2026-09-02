@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymail_mailbox
+//! @do     definir_mailbox_kind
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymail mailbox ».
+
 //! Gestion des dossiers de mail (Inbox, Sent, Drafts, Trash).
 
 use serde::{Deserialize, Serialize};

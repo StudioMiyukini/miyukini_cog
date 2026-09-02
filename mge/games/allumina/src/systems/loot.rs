@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_loot
+//! @do     definir_max_item_level
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems loot ».
+
 //! Loot generation: rarity rolls, affix rolls, and ground-item spawning.
 //!
 //! Rarity distribution (per the design): Normal 70%, Magic 20%, Rare 8%,

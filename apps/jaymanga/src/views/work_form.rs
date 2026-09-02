@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_work_form
+//! @do     definir_editor_step
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views work form ».
+
 //! Editeur d'oeuvre manga multi-etapes.
 //!
 //! 6 etapes : Fichiers, Metadonnees, Format/Structure, Prix/Demo, Optimisation, Publication.

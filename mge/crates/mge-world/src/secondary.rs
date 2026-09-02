@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_secondary
+//! @do     definir_secondary_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « secondary ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::zone::ZoneId;

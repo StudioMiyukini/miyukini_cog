@@ -1,3 +1,9 @@
+//! @id     miyushipping_errors
+//! @do     definir_miyushipping_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyushipping — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyushippingError {
     NoMandate,

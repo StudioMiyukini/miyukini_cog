@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_inventory
+//! @do     definir_equip_slot
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « inventory ».
+
 use serde::{Deserialize, Serialize};
 
 /// Equipment slot on the paper-doll.

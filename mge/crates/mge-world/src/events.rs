@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_events
+//! @do     definir_world_event_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « events ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::camp::TilePos;

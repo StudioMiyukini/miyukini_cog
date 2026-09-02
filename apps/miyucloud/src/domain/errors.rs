@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_errors
+//! @do     definir_result
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « domain errors ».
+
 //! Domain errors
 //!
 //! This module contains domain-specific error types.

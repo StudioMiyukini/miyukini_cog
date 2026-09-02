@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_carddav_types
+//! @do     definir_address_book
+//! @role   donnee
+//! @layer  core
+//! @human  miyucloud-dav — module « carddav types ».
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

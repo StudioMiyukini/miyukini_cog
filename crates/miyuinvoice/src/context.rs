@@ -1,3 +1,9 @@
+//! @id     miyuinvoice_context
+//! @do     definir_governed_context
+//! @role   ui
+//! @layer  core
+//! @human  miyuinvoice — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

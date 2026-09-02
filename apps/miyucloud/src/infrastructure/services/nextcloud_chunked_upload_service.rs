@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_nextcloud_chunked_upload_service
+//! @do     definir_nextcloud_chunked_upload_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services nextcloud chunked upload service ».
+
 use std::path::PathBuf;
 use tokio::fs;
 use tokio::io::AsyncWriteExt;

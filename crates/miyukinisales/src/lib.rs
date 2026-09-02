@@ -1,3 +1,9 @@
+//! @id     miyukinisales_lib
+//! @do     declarer_module_data
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukinisales — module « lib ».
+
 //! MiyukiniSales — Service devis et ventes du COG.
 //!
 //! Domaine : devis, commandes, lignes, statuts.

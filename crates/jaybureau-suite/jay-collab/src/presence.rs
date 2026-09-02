@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_collab_presence
+//! @do     definir_user_colors
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jay-collab presence ».
+
 //! Gestion de la présence (cursors, sélections, utilisateurs en ligne).
 
 use jaybureau_core::{Presence, UserId};

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_admin_settings_service
+//! @do     definir_admin_settings_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services admin settings service ».
+
 use std::sync::Arc;
 use uuid::Uuid;
 

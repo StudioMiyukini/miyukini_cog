@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_lib
+//! @do     declarer_module_apikey
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « lib ».
+
 //! Miyukini COG Bridge — connexion Android ↔ COG Host.
 //!
 //! Fournit une abstraction unifiée pour connecter Central Mobile au COG Host

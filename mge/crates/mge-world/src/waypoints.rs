@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_waypoints
+//! @do     definir_waypoint
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « waypoints ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::camp::TilePos;

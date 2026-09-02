@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_tools
+//! @do     definir_max_tool_iterations
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « tools ».
+
 //! Tool calling — conversion skills → OpenAI function calling + boucle d'exécution.
 //!
 //! Quand un agent chatte avec un LLM qui supporte le tool calling,

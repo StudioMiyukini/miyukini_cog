@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_calendar_view
+//! @do     definir_calendar_main_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views calendar view ».
+
 //! Vue calendrier wrapper — Composant conteneur pour les differentes vues.
 
 use dioxus::prelude::*;

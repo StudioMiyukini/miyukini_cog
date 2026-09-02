@@ -1,3 +1,9 @@
+//! @id     jaycloud_files_tree
+//! @do     definir_tree_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « files tree ».
+
 //! Arborescence virtuelle — chemins canoniques + anti path-traversal.
 //!
 //! Toute écriture / lecture / suppression passe par `canonical_path` qui :

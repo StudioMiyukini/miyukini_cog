@@ -1,3 +1,9 @@
+//! @id     miyuinvoice_errors
+//! @do     definir_miyuinvoice_error
+//! @role   ui
+//! @layer  core
+//! @human  miyuinvoice — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuinvoiceError {
     NoMandate,

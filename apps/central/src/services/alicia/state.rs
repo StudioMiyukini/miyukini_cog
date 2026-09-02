@@ -1,3 +1,9 @@
+//! @id     central_services_alicia_state
+//! @do     definir_rooms
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services alicia state ».
+
 //! State bridge Alicia Home Assistante — couple les crates backend avec l'UI Dioxus.
 //!
 //! Gere le cycle de vie des captures audio (1 par piece), les threads de

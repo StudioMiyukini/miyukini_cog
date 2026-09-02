@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_schedule_view
+//! @do     definir_schedule_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views schedule view ».
+
 //! Vue Planning — Liste chronologique des evenements.
 
 use chrono::{Datelike, NaiveDate};

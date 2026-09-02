@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_inbound
+//! @do     definir_trait_folder_use_case
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports inbound ».
+
 use std::sync::Arc;
 
 use uuid::Uuid;

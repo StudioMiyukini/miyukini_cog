@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_trash_handler
+//! @do     get_trash_items
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers trash handler ».
+
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;

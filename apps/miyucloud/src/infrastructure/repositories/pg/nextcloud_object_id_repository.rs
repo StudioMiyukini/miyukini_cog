@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_nextcloud_object_id_repository
+//! @do     definir_nextcloud_object_id_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg nextcloud object id repository ».
+
 use sqlx::{PgPool, Row};
 use std::sync::Arc;
 

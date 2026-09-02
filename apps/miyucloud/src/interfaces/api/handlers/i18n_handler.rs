@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_i18n_handler
+//! @do     definir_app_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers i18n handler ».
+
 use axum::{
     Json,
     extract::{Path, Query, State},

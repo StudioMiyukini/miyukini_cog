@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_tools
+//! @do     definir_tool_context
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « tools ».
+
 //! Outils agentiques pour Alicia.
 //!
 //! Chaque outil est une fonction async qui recoit des arguments JSON

@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_rarity
+//! @do     definir_rarity
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « rarity ».
+
 use serde::{Deserialize, Serialize};
 
 /// Item rarity tier (D2-like).

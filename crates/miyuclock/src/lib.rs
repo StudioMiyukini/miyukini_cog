@@ -1,3 +1,9 @@
+//! @id     miyuclock_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuclock — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuClock — toolkit.kernel.miyuclock
 //!

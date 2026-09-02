@@ -1,3 +1,9 @@
+//! @id     games_allumina_build
+//! @do     main
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « build ».
+
 //! Build script: on Windows, embed the application icon and version metadata
 //! into the executable so it looks like a proper distributable (taskbar icon,
 //! Explorer "Details" tab). No-op on every other platform and whenever the

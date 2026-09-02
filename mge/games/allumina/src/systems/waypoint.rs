@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_waypoint
+//! @do     definir_discovery_radius
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems waypoint ».
+
 //! Waypoint discovery + teleport cast.
 //!
 //! Walking within `DISCOVERY_RADIUS` of an undiscovered, non-boss-zone beacon

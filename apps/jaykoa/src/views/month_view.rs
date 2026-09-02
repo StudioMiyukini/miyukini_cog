@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_month_view
+//! @do     definir_month_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views month view ».
+
 //! Vue Mois — Grille mensuelle compacte type Google Agenda.
 
 use chrono::{Datelike, NaiveDate};

@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_errors
+//! @do     definir_miyukini_watch_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukiniwatch — module « errors ».
+
 //! Erreurs MiyukiniWatch.
 
 use thiserror::Error;

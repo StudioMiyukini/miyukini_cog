@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_router
+//! @do     caldav_router
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav router ».
+
 use axum::Router;
 use axum::routing::any;
 

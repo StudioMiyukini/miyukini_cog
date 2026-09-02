@@ -1,3 +1,9 @@
+//! @id     miyukini_central_catalog
+//! @do     definir_service_id
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-central — module « catalog ».
+
 //! Catalogue des Services du Hub (identifiants).
 //! Utilisé par l'app Tauri / API ; l'UI eGUI a été supprimée.
 

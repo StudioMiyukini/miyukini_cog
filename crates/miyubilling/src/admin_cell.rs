@@ -1,3 +1,9 @@
+//! @id     miyubilling_admin_cell
+//! @do     definir_miyubilling_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubilling — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

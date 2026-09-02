@@ -1,3 +1,9 @@
+//! @id     jaykonta_domain_purse
+//! @do     definir_purse_account
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « domain purse ».
+
 //! Types de domaine Purse (budget personnel).
 //!
 //! Couvre les entites : compte Purse, mouvements, categories,

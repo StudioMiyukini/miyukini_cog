@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_ladder
+//! @do     definir_ladder_type
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « ladder ».
+
 use serde::{Deserialize, Serialize};
 
 /// Type of ladder season.

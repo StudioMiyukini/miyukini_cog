@@ -1,3 +1,9 @@
+//! @id     games_allumina_network_interpolation
+//! @do     definir_interp_delay
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « network interpolation ».
+
 //! Entity interpolation for *remote* entities (other players, mobs).
 //!
 //! Snapshots arrive at the server tick rate (20 Hz) but the client renders at

@@ -1,3 +1,9 @@
+//! @id     maia_llm_store
+//! @do     definir_gguf_model
+//! @role   donnee
+//! @layer  app
+//! @human  maia-llm — module « store ».
+
 //! Store des modèles GGUF — scan, index, recommandation par RAM.
 //!
 //! SHA-256 content-addressed : chaque .gguf peut avoir un fichier sidecar

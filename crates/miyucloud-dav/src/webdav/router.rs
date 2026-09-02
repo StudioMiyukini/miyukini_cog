@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_webdav_router
+//! @do     webdav_router
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « webdav router ».
+
 use axum::Router;
 use axum::routing::any;
 

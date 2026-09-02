@@ -1,3 +1,9 @@
+//! @id     miyukinibb_lib
+//! @do     declarer_module_client
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukinibb — module « lib ».
+
 //! MiyukiniBB — Service forum (phpBB adapté pour Miyukini COG).
 //!
 //! Le **compte forum** est le **profil Central** : auth unifiée via l’API Origin.

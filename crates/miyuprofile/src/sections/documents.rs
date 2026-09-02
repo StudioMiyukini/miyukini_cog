@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_documents
+//! @do     definir_document_type
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections documents ».
+
 //! Section documents officiels — CNI, passeport, permis, titres, etc.
 //!
 //! Métadonnées des pièces d'identité et documents administratifs.

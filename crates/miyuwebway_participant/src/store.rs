@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_store
+//! @do     cog_list
+//! @role   donnee
+//! @layer  core
+//! @human  miyuwebway participant — module « store ».
+
 //! Store en mémoire liste COG (MiyuWebwayParticipant). Persistance réelle = KindMother.
 
 use std::collections::HashMap;

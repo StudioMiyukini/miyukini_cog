@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_file_retrieval_service
+//! @do     definir_cache_threshold
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services file retrieval service ».
+
 use bytes::{Bytes, BytesMut};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;

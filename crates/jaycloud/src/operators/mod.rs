@@ -1,3 +1,9 @@
+//! @id     jaycloud_operators_mod
+//! @do     declarer_module_auth_op
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « operators mod ».
+
 //! Couche 2 — Opérateurs (logique métier).
 //!
 //! - `files_op`     : storage chiffré, héritier MiyuCloud (PR-2).

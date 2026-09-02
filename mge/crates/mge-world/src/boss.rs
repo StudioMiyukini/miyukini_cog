@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_boss
+//! @do     definir_boss_phase
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « boss ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::zone::ZoneId;

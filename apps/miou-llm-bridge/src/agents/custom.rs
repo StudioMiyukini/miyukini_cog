@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_agents_custom
+//! @do     definir_create_agent_request
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « agents custom ».
+
 //! Agents personnalisés — CRUD d'agents définis par l'utilisateur.
 //!
 //! Persistés en JSON dans le répertoire de données du bridge.

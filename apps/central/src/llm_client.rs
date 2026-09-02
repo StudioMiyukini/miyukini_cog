@@ -1,3 +1,9 @@
+//! @id     central_llm_client
+//! @do     definir_default_bridge_url
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « llm client ».
+
 //! Client LLM — API OpenAI-compatible pour le chat Miou.
 //!
 //! Pointe vers le bridge MiouLLM (par défaut localhost:11435)

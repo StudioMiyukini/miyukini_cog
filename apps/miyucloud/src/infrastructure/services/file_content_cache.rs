@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_file_content_cache
+//! @do     definir_file_content_cache_config
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services file content cache ».
+
 use bytes::Bytes;
 use moka::future::Cache;
 use std::sync::Arc;

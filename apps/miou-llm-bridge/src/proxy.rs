@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_proxy
+//! @do     definir_proxy_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « proxy ».
+
 //! Routeur HTTP — proxy passthrough + API agents/skills/contextes.
 
 use axum::{

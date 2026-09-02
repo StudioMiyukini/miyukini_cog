@@ -1,3 +1,9 @@
+//! @id     games_allumina_lib
+//! @do     declarer_module_app
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « lib ».
+
 //! Allumina — an isometric ARPG prototype built on the Miyukini Game Engine.
 //!
 //! Architecture: a small deterministic ECS ([`ecs::World`]) driven by an

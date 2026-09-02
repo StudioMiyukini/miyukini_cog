@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_central_client_service
+//! @do     definir_central_client_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services central client service ».
+
 //! Central (Miyukini COG) client — registers miyucloud as a managed service
 //! and periodically reports health status.
 

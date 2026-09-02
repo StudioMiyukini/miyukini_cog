@@ -1,3 +1,9 @@
+//! @id     jaykonta_backend_service
+//! @do     definir_jay_konta_backend
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « backend service ».
+
 //! Backend JayKonta : lecture depuis persistance + ingestion des flux CK-INT.
 
 use crate::data::{DbError, JayKontaDb};

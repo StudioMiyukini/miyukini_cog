@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_skill_fx
+//! @do     definir_fire
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render skill fx ».
+
 //! Maps a cast skill's [`SkillFx`] flavour to particle effects. Kept separate
 //! so Phase 4 can enrich each skill's visuals (projectile trails, AoE rings)
 //! without touching the renderer's event loop.

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_file_ports
+//! @do     definir_trait_file_upload_use_case
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports file ports ».
+
 use bytes::Bytes;
 use futures::Stream;
 use std::path::Path;

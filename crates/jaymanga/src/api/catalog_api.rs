@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_catalog_api
+//! @do     definir_catalog_query
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api catalog api ».
+
 //! Endpoints REST du catalogue JayManga.
 //!
 //! Routes publiques pour consulter les oeuvres publiées, les séries,

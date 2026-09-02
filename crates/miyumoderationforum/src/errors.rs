@@ -1,3 +1,9 @@
+//! @id     miyumoderationforum_errors
+//! @do     definir_miyumoderationforum_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumoderationforum — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyumoderationforumError {
     NoMandate,

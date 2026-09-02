@@ -1,3 +1,9 @@
+//! @id     jayfaim_data_types
+//! @do     definir_reservation_status
+//! @role   donnee
+//! @layer  core
+//! @human  jayfaim — module « data types ».
+
 //! Types domaine JayFaim : tables, créneaux, réservations, convives.
 //!
 //! Modèle : lieu/établissement → tables → créneaux de réservation → réservations (convives).

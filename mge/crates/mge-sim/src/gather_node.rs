@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_gather_node
+//! @do     definir_gather_node_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « gather node ».
+
 // ---------------------------------------------------------------------------
 // Gather Nodes — arbres, gisements et autres ressources récoltables
 // Séparation logique (ici) / rendu (sodomight/main.rs)

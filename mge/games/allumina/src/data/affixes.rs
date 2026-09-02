@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_affixes
+//! @do     definir_affix_slot
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data affixes ».
+
 //! Allumina's procedural affix pool, Diablo-2 style.
 //!
 //! Each affix is a *prefix* or a *suffix*, belongs to a *family* (no two affixes

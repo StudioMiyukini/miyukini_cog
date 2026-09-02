@@ -1,3 +1,9 @@
+//! @id     miyucloud_storage_dedup
+//! @do     definir_content_hash
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud — module « storage dedup ».
+
 use crate::errors::MiyucloudError;
 use sha2::{Digest, Sha256};
 

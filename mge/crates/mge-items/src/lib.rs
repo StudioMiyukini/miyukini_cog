@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_lib
+//! @do     declarer_module_affixes
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « lib ».
+
 pub mod affixes;
 pub mod charms;
 pub mod crafting;

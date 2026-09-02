@@ -1,3 +1,9 @@
+//! @id     miyusocialfeed_admin_cell
+//! @do     definir_miyusocialfeed_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyusocialfeed — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

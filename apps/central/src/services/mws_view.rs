@@ -1,3 +1,9 @@
+//! @id     central_services_mws_view
+//! @do     definir_central_jay1_tribu_sender
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services mws view ».
+
 //! Vue MWS — Interface réseau Miyukini Webway System.
 //!
 //! Affiche l'état de connexion au réseau MWS et permet de :

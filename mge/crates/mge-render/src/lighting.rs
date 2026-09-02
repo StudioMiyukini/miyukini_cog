@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_lighting
+//! @do     definir_ambient_light
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « lighting ».
+
 use serde::{Deserialize, Serialize};
 
 /// Global directional light for a biome.

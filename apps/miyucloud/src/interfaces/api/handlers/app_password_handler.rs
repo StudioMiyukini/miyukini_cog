@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_app_password_handler
+//! @do     app_password_routes
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers app password handler ».
+
 //! HTTP handlers for App Password management.
 //!
 //! All endpoints require JWT authentication (the user must be logged in to

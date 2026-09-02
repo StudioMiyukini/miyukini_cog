@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_auth_factory
+//! @do     definir_result
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « infrastructure auth factory ».
+
 use sqlx::PgPool;
 use std::sync::Arc;
 

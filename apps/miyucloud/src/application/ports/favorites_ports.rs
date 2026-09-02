@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_favorites_ports
+//! @do     definir_trait_favorites_use_case
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports favorites ports ».
+
 use std::collections::HashSet;
 
 use uuid::Uuid;

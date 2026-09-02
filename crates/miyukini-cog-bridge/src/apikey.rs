@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_apikey
+//! @do     connect
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « apikey ».
+
 //! Mode Clé API — authentification par token Bearer.
 //!
 //! Le Central Desktop génère un token signé, affiché en QR code.

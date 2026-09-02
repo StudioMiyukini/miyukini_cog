@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_quests
+//! @do     definir_quest_objective
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « quests ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::zone::ZoneId;

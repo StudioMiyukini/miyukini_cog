@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_chapters
+//! @do     chapters
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views chapters ».
+
 //! Gestion des chapitres et pages d'une oeuvre manga.
 
 use super::components::{ActionButton, Badge, EmptyState, PageHeader};

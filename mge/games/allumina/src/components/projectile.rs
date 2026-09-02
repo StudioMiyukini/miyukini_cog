@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_projectile
+//! @do     definir_projectile
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components projectile ».
+
 //! In-flight projectiles spawned by ranged auto-attacks. Stored on the
 //! [`crate::ecs::World`] as a flat `Vec`: they aren't ECS entities (no id,
 //! no components — they're short-lived and homing).

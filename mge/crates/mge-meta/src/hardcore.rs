@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_hardcore
+//! @do     definir_hardcore_flag
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « hardcore ».
+
 use serde::{Deserialize, Serialize};
 
 /// Hardcore flag attached to a character save.

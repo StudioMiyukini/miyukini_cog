@@ -1,3 +1,9 @@
+//! @id     central_remote_discovery
+//! @do     definir_discovery_port
+//! @role   orchestration
+//! @layer  core
+//! @human  central-remote — module « discovery ».
+
 //! Listener UDP pour la découverte LAN par les clients mobiles.
 //!
 //! Écoute le broadcast UDP sur le port `DISCOVERY_PORT` et répond

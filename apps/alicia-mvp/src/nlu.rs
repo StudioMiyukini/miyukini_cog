@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_nlu
+//! @do     definir_default_response_prompt
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « nlu ».
+
 //! Moteur NLU : LLM (via API OpenAI-compatible) ou regex fallback.
 //! Boucle agentique avec tool calling.
 

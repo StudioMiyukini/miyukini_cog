@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_affixes
+//! @do     definir_affix_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « affixes ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_gameplay::stats::{Modifier, StatKind};

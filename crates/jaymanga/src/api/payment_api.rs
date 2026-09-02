@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_payment_api
+//! @do     definir_add_to_cart_request
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api payment api ».
+
 //! Endpoints REST du paiement JayManga.
 //!
 //! Panier, checkout, webhooks passerelle, vérification de licences.

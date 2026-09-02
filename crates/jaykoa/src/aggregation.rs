@@ -1,3 +1,9 @@
+//! @id     jaykoa_aggregation
+//! @do     compute_conflicts
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykoa — module « aggregation ».
+
 //! Agrégation temporelle et détection de conflits.
 //!
 //! JayKoa reflète et agrège ; ne décide pas du temps. Les conflits sont

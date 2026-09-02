@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_network
+//! @do     definir_net_mode
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins network ».
+
 //! Networking stub. Defines the client/server scaffolding the game will grow
 //! into; for the MVP it only drains a local outbox.
 

@@ -1,3 +1,9 @@
+//! @id     team_mws_routes
+//! @do     submit_task
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « mws routes ».
+
 //! Routes MWS (Miyukini Web Service) gateway.
 //!
 //! POST /api/task        — soumet une tâche

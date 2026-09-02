@@ -1,3 +1,9 @@
+//! @id     maia_stt_confidence
+//! @do     definir_confidence_config
+//! @role   orchestration
+//! @layer  core
+//! @human  maia-stt — module « confidence ».
+
 //! Score de confiance de transcription.
 //!
 //! Whisper produit des log-probabilités par token.

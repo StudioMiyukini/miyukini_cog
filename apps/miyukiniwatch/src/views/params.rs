@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_views_params
+//! @do     params_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « views params ».
+
 //! Ecran Parametres et vie privee MiyukiniWatch.
 
 use crate::{use_db, use_profile_id};

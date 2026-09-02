@@ -1,3 +1,9 @@
+//! @id     mipower_views_starter
+//! @do     definir_valid_agents
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « views starter ».
+
 use crate::state::{MipowerCtx, Notification, View};
 use dioxus::prelude::*;
 

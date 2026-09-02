@@ -1,3 +1,9 @@
+//! @id     central_mobile_services_miou_chat
+//! @do     miou_chat_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « services miou chat ».
+
 //! Vue Miou Chat — chat IA.
 
 use dioxus::prelude::*;

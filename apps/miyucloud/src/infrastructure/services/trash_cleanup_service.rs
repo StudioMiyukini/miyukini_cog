@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_trash_cleanup_service
+//! @do     definir_trash_cleanup_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services trash cleanup service ».
+
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time;

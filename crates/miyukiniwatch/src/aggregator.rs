@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_aggregator
+//! @do     definir_miyukini_watch_aggregator
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukiniwatch — module « aggregator ».
+
 //! Opérateur Aggregator — agrégation périodique et purge.
 
 use crate::aggregates::compute_aggregates;

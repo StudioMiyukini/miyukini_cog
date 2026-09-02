@@ -1,3 +1,9 @@
+//! @id     maia_llm_api_health
+//! @do     definir_llm_health
+//! @role   orchestration
+//! @layer  app
+//! @human  maia-llm — module « api health ».
+
 //! GET /maia/llm/health — état du moteur d'inférence.
 
 use axum::{extract::State, response::IntoResponse, Json};

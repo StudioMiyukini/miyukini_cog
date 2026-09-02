@@ -1,3 +1,9 @@
+//! @id     jaycloud_adapters_mod
+//! @do     declarer_module_api
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « adapters mod ».
+
 //! Couche 1 — Adaptateurs (protocoles exposés).
 //!
 //! - `webdav` : adaptateur WebDAV (RFC 4918) via `dav-server` (PR-4).

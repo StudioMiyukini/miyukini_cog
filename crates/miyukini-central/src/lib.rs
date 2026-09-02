@@ -1,3 +1,9 @@
+//! @id     miyukini_central_lib
+//! @do     declarer_module_auth
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-central — module « lib ».
+
 //! Bibliothèque Miyukini Central - Hub de gestion des Services.
 //!
 //! ## Modules

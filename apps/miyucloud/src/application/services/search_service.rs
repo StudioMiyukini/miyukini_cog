@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_search_service
+//! @do     definir_search_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services search service ».
+
 use std::cmp::Reverse;
 use std::sync::Arc;
 use std::time::{Duration, Instant};

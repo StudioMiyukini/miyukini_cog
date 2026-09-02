@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_settings_dto
+//! @do     definir_oidc_settings_dto
+//! @role   config
+//! @layer  app
+//! @human  miyucloud — module « application dtos settings dto ».
+
 use serde::{Deserialize, Serialize};
 
 // ============================================================================

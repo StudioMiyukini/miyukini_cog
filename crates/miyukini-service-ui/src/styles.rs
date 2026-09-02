@@ -1,3 +1,9 @@
+//! @id     miyukini_service_ui_styles
+//! @do     c
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-service-ui — module « styles ».
+
 //! Styles dérivés du thème — fonctions de style réutilisables.
 //!
 //! Chaque fonction prend un `Theme` et retourne un `String` CSS inline.

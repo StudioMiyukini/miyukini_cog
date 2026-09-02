@@ -1,3 +1,9 @@
+//! @id     miyuwebway_tracker_lib
+//! @do     declarer_module_address
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway tracker — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuWebwayTracker — toolkit.webway.tracker
 //!

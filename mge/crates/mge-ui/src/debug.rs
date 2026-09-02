@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_debug
+//! @do     definir_debug_tab
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « debug ».
+
 use serde::{Deserialize, Serialize};
 
 /// Debug panel categories.

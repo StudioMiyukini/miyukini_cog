@@ -1,3 +1,9 @@
+//! @id     central_components_service_grid
+//! @do     definir_service_filter
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « components service grid ».
+
 //! Grille d'affichage des services.
 
 use super::ServiceCard;

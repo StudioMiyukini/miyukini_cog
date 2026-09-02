@@ -1,3 +1,9 @@
+//! @id     miyukini_cog_bridge_whitelist
+//! @do     connect
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-cog-bridge — module « whitelist ».
+
 //! Mode Whitelist — connexion directe HTTP en LAN.
 //!
 //! Le COG Host expose un endpoint de validation sur le réseau local.

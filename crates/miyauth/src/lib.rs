@@ -1,3 +1,9 @@
+//! @id     miyauth_lib
+//! @do     declarer_module_admin_cell
+//! @role   securite
+//! @layer  core
+//! @human  miyauth — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuAuth — toolkit.identity.miyauth
 //!

@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_mercenary
+//! @do     definir_respawn_time
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems mercenary ».
+
 //! Mercenary behaviour: recruitment at the village, an AI that follows the
 //! player and fights at their side (with per-archetype quirks), and a lifecycle
 //! pass that shares the player's XP, levels the merc up, and handles death +

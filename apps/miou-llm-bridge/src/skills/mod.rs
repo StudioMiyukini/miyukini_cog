@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_skills_mod
+//! @do     declarer_module_cog_services
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « skills mod ».
+
 //! Système de Skills — capacités exécutables par les agents.
 //!
 //! Chaque skill est un outil que les agents peuvent invoquer pour interagir

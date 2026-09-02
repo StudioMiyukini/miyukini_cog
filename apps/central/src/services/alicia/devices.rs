@@ -1,3 +1,9 @@
+//! @id     central_services_alicia_devices
+//! @do     definir_device_type
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services alicia devices ».
+
 //! Ecran Dispositifs Alicia Home Assistante.
 //!
 //! Liste complete de tous les dispositifs domotiques de la maison.

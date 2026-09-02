@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_slides_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-slides main ».
+
 //! Jay Slides — presentations collaboratives.
 
 use dioxus::prelude::*;

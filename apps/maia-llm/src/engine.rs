@@ -1,3 +1,9 @@
+//! @id     maia_llm_engine
+//! @do     definir_stream_msg
+//! @role   orchestration
+//! @layer  app
+//! @human  maia-llm — module « engine ».
+
 //! Moteur d'inférence GGUF — wrapper Rust autour de llama.cpp via llama-cpp-2.
 //!
 //! Architecture :

@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_relay_client
+//! @do     definir_crypto_init
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « relay client ».
+
 //! Client Relay MWS — Connexion TLS à Origin pour enregistrement et permis.
 //!
 //! Gère la connexion au Relay, l'enregistrement en 3 phases, et le heartbeat.

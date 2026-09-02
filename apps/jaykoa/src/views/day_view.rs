@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_day_view
+//! @do     definir_day_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views day view ».
+
 //! Vue Jour — Grille horaire sur une journee unique.
 
 use super::components::EventBlock;

@@ -1,3 +1,9 @@
+//! @id     miyucloud_common_stubs
+//! @do     definir_stub_zip_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « common stubs ».
+
 //! Stub/Dummy implementations for dependency injection.
 //!
 //! These no-op implementations are used exclusively by `AppState::default()`

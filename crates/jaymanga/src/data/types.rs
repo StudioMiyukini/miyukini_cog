@@ -1,3 +1,9 @@
+//! @id     jaymanga_data_types
+//! @do     definir_work
+//! @role   donnee
+//! @layer  core
+//! @human  jaymanga — module « data types ».
+
 //! Types de domaine principaux pour JayManga.
 //!
 //! Définit les entités catalogue : Work, Chapter, Page, Series,

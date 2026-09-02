@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_protocol
+//! @do     definir_session_id_size
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « protocol ».
+
 //! Protocole MWS — Messages et types pour la communication avec Origin.
 //!
 //! Définit les structures de messages pour le Relay et le Tracker.

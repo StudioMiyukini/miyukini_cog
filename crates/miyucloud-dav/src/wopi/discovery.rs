@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_wopi_discovery
+//! @do     definir_check_file_info_response
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « wopi discovery ».
+
 use axum::extract::{Path, Query, State};
 use axum::response::{IntoResponse, Response};
 use axum::Json;

@@ -1,3 +1,9 @@
+//! @id     miyuantispam_errors
+//! @do     definir_miyuantispam_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuantispam — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuantispamError {
     NoMandate,

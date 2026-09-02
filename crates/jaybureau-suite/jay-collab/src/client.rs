@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_collab_client
+//! @do     definir_collab_error
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jay-collab client ».
+
 //! Client WebSocket pour la collaboration temps réel.
 
 use crate::presence::PresenceManager;

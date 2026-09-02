@@ -1,3 +1,9 @@
+//! @id     jaycloud_operators_auth_op
+//! @do     definir_session
+//! @role   securite
+//! @layer  core
+//! @human  jaycloud — module « operators auth op ».
+
 //! `auth_op` — sessions web et jetons applicatifs WebDAV.
 //!
 //! En PR-2 (P3.a), les sessions et app-passwords sont **en mémoire**.

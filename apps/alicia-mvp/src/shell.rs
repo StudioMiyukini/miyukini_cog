@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_shell
+//! @do     definir_default_timeout_secs
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « shell ».
+
 //! Execution de commandes shell sandboxee pour Alicia.
 //!
 //! Whitelist de commandes, blocklist de patterns dangereux,

@@ -1,3 +1,9 @@
+//! @id     jaymanga_lib
+//! @do     declarer_module_views
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « lib ».
+
 //! JayManga — App standalone Dioxus.
 //!
 //! Fournit le module `views` (migré depuis Central) et le contexte DB.

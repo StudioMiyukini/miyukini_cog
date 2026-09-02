@@ -1,3 +1,9 @@
+//! @id     miyumedia_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumedia — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuMedia — toolkit.content.media
 //!

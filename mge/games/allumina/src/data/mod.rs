@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_mod
+//! @do     declarer_module_affixes
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data mod ».
+
 //! Static game data: class/skill/item/affix/mob/map definitions.
 
 pub mod affixes;

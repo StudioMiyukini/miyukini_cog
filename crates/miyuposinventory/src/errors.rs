@@ -1,3 +1,9 @@
+//! @id     miyuposinventory_errors
+//! @do     definir_miyuposinventory_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposinventory — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuposinventoryError {
     NoMandate,

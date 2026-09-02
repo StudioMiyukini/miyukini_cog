@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_folder_listing_dto
+//! @do     definir_folder_listing_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos folder listing dto ».
+
 use serde::Serialize;
 
 use super::file_dto::FileDto;

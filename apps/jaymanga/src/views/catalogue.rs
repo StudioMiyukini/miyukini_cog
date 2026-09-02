@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_catalogue
+//! @do     catalogue
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views catalogue ».
+
 //! Catalogue JayManga — liste des oeuvres avec gestion CRUD.
 
 use super::components::{Badge, EmptyState, PageHeader};

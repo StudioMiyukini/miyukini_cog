@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_slide
+//! @do     definir_slide_deck
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core slide ».
+
 //! Types pour Jay Slides (présentation collaborative).
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_docs_presence_bar
+//! @do     presence_bar
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-docs presence bar ».
+
 //! Barre de présence affichant les participants actifs.
 
 use dioxus::prelude::*;

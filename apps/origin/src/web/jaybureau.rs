@@ -1,3 +1,9 @@
+//! @id     origin_web_jaybureau
+//! @do     definir_jay_bureau_state
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « web jaybureau ».
+
 //! Module Jay Bureau côté serveur — stockage des documents + salles de collab.
 //!
 //! Routes REST :

@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_equipment
+//! @do     definir_equipped_item
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components equipment ».
+
 //! Equipped-gear components.
 
 use std::collections::HashMap;

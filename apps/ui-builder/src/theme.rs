@@ -1,3 +1,9 @@
+//! @id     ui_builder_theme
+//! @do     definir_theme
+//! @role   ui
+//! @layer  app
+//! @human  ui-builder — module « theme ».
+
 //! Thème visuel minimal pour le UI Builder standalone.
 //!
 //! Copie allégée de `apps/central/src/theme.rs` — seules la palette et le thème

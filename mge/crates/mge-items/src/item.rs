@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_item
+//! @do     definir_equip_slot
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « item ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::rarity::Rarity;

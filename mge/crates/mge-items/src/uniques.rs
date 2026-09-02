@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_uniques
+//! @do     definir_fixed_mod
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « uniques ».
+
 use serde::{Deserialize, Serialize};
 
 use mge_gameplay::stats::{Modifier, StatKind};

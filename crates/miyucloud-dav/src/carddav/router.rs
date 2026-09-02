@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_carddav_router
+//! @do     carddav_router
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « carddav router ».
+
 use axum::Router;
 use axum::routing::any;
 

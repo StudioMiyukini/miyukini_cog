@@ -1,3 +1,9 @@
+//! @id     jaymanga_services_jaykonta_adapter
+//! @do     definir_jay_konta_adapter_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « services jaykonta adapter ».
+
 //! Adaptateur d'export transactions JayManga → JayKonta.
 //!
 //! Convertit les transactions de paiement JayManga en écritures

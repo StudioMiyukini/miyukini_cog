@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_npc
+//! @do     definir_npc_kind
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components npc ».
+
 //! Non-combat NPCs.
 
 use crate::components::item::ItemInstance;

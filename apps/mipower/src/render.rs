@@ -1,3 +1,9 @@
+//! @id     mipower_render
+//! @do     md_to_html
+//! @role   ui
+//! @layer  app
+//! @human  mipower — module « render ».
+
 //! Rendu Markdown → HTML avec pulldown-cmark + ammonia.
 //! Zéro JavaScript : tout se passe côté Rust avant injection dans le WebView.
 

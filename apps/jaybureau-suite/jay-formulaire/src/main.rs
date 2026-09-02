@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_formulaire_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-formulaire main ».
+
 //! Jay Formulaire — créateur de formulaires et sondages.
 
 use dioxus::prelude::*;

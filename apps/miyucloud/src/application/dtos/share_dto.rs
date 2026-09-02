@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_share_dto
+//! @do     definir_share_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos share dto ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entities::share::{Share, SharePermissions};

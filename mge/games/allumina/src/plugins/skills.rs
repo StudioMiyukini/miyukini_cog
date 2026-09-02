@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_skills
+//! @do     definir_skills_plugin
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins skills ».
+
 //! Wires active-skill execution into the schedule.
 
 use crate::app::{App, PhaseId, Plugin};

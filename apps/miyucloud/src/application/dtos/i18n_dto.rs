@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_i18n_dto
+//! @do     definir_locale_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos i18n dto ».
+
 use crate::domain::services::i18n_service::Locale;
 use serde::{Deserialize, Serialize};
 

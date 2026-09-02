@@ -1,3 +1,9 @@
+//! @id     origin_config
+//! @do     definir_config_error
+//! @role   config
+//! @layer  app
+//! @human  origin — module « config ».
+
 //! Configuration d'Origin.
 //!
 //! Parse le fichier de configuration TOML (origin.toml).

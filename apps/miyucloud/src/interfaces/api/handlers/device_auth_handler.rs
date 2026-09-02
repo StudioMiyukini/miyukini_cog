@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_device_auth_handler
+//! @do     device_auth_public_routes
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers device auth handler ».
+
 //! HTTP handlers for OAuth 2.0 Device Authorization Grant (RFC 8628).
 //!
 //! Endpoints:

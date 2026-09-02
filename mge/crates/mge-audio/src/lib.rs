@@ -1,3 +1,9 @@
+//! @id     crates_mge_audio_lib
+//! @do     definir_audio_backend
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-audio — module « lib ».
+
 use serde::{Deserialize, Serialize};
 
 pub type AudioBackend = kira::DefaultBackend;

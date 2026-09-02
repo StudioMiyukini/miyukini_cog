@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_item
+//! @do     is_ranged
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components item ».
+
 //! Item components. Built on `mge-items` (base defs, rarity, affixes) plus a
 //! thin `ItemInstance` that carries the rolled affixes and a display name.
 

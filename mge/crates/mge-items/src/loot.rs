@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_loot
+//! @do     definir_loot_entry
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « loot ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::item::ItemKind;

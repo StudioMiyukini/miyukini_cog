@@ -1,3 +1,9 @@
+//! @id     jaymanga_api_reader_api
+//! @do     definir_save_progress_request
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « api reader api ».
+
 //! Endpoints REST du lecteur JayManga.
 //!
 //! Sauvegarde et récupération de la progression de lecture,

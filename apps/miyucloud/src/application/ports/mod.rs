@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_mod
+//! @do     declarer_module_audit_ports
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports mod ».
+
 pub mod audit_ports;
 pub mod auth_ports;
 pub mod encryption_ports;

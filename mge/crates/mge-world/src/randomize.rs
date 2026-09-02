@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_randomize
+//! @do     definir_zone_gen_rules
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « randomize ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::chunks::{Chunk, ChunkLibrary, TileKind};

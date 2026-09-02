@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_purse_movements
+//! @do     purse_movements
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta purse movements ».
+
 //! Liste des mouvements Purse — P2.
 //!
 //! Composants : FilterBar, MouvementsTable (paginee), TotauxSummary, Pagination.

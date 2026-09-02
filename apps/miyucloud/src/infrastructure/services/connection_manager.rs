@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_connection_manager
+//! @do     definir_connection_manager_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services connection manager ».
+
 //! Connection Manager — orchestrates MWS tunnel, DDNS, and Central client.
 
 use crate::application::ports::web_connection_ports::WebConnectionStatus;

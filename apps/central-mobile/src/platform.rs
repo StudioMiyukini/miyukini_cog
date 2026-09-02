@@ -1,3 +1,9 @@
+//! @id     central_mobile_platform
+//! @do     is_android
+//! @role   orchestration
+//! @layer  app
+//! @human  central-mobile — module « platform ».
+
 //! Détection de plateforme et identité unique du device.
 //!
 //! Génère un `device_id` stable et unique à partir de :

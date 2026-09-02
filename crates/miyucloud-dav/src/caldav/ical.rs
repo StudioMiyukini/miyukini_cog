@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_ical
+//! @do     extract_vevent_summary
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav ical ».
+
 use crate::common::dav_error::DavError;
 
 /// Minimal iCalendar parser for VCALENDAR/VEVENT extraction

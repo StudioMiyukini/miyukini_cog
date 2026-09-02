@@ -1,3 +1,9 @@
+//! @id     maia_llm_auth
+//! @do     auth_middleware
+//! @role   securite
+//! @layer  app
+//! @human  maia-llm — module « auth ».
+
 //! Middleware d'authentification Bearer (Authorization: Bearer <key> ou X-MAIA-Key: <key>).
 //! La clé est injectée via `axum::Extension<Option<String>>`.
 //! Si la clé est None, toutes les requêtes sont acceptées.

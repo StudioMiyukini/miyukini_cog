@@ -1,3 +1,9 @@
+//! @id     crates_mge_items_simulator
+//! @do     definir_drop_stats
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-items — module « simulator ».
+
 //! Drop and economy simulator for offline balance analysis.
 
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_admin_cell
+//! @do     definir_miyuwebway_participant_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

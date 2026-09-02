@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_library
+//! @do     library
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views library ».
+
 //! Bibliotheque lecteur JayManga — 5 onglets (Favoris, Achats, Telecharges, En cours, Termines).
 
 use super::components::{Badge, EmptyState};

@@ -1,3 +1,9 @@
+//! @id     ui_builder_main
+//! @do     declarer_module_state
+//! @role   ui
+//! @layer  app
+//! @human  ui-builder — module « main ».
+
 //! Miyukini UI Builder — Exécutable standalone
 //!
 //! Lance uniquement la vitrine des assets UI (panneaux, boutons, barres, curseurs)

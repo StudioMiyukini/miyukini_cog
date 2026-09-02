@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_adapters_contact_storage_adapter
+//! @do     definir_contact_storage_adapter
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure adapters contact storage adapter ».
+
 //! Contact Storage Adapter
 //!
 //! This adapter implements the `AddressBookUseCase` and `ContactUseCase` application ports

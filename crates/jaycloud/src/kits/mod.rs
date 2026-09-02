@@ -1,3 +1,9 @@
+//! @id     jaycloud_kits_mod
+//! @do     declarer_module_cas_kit
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « kits mod ».
+
 //! Couche 3 — Kits (bibliothèques internes transversales, sans état persistant).
 //!
 //! - `cas_kit`     : Content-Addressed Storage — blobs adressés par SHA-256.

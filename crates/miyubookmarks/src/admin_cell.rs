@@ -1,3 +1,9 @@
+//! @id     miyubookmarks_admin_cell
+//! @do     definir_miyubookmarks_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyubookmarks — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

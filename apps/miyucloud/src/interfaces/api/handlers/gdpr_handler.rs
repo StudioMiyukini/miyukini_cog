@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_gdpr_handler
+//! @do     definir_global_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers gdpr handler ».
+
 //! GDPR individual rights API handler — RGPD Art. 15-20.
 //!
 //! Provides actual data export, erasure, and rectification via GdprService.

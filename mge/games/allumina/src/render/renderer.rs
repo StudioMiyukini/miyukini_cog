@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_renderer
+//! @do     declarer_module_input
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render renderer ».
+
 //! The winit application: owns the simulation [`App`], the wgpu
 //! [`GraphicsState`], and per-frame input. Each `RedrawRequested` advances the
 //! sim by the frame delta, rebuilds the sprite batch (tilemap → entities →

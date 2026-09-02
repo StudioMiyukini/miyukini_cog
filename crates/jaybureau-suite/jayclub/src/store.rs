@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_store
+//! @do     definir_jay_club_store
+//! @role   donnee
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub store ».
+
 //! Store en memoire de JayClub (MVP, a remplacer par KindMother).
 
 use crate::profile::Follow;

@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_mob_tooltip
+//! @do     definir_bg
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui mob tooltip ».
+
 //! Floating mob tooltip: shown when the cursor hovers an enemy. Displays the
 //! mob's name, level and its elemental resistance/immunity profile so the
 //! player can adapt their build (the late-game zones gate progression behind

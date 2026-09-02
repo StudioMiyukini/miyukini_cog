@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_mobs
+//! @do     definir_mob_def
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data mobs ».
+
 //! Static monster definitions and their drop profiles.
 //!
 //! Forty-two normal mobs are grouped into fourteen level tiers (one tier per

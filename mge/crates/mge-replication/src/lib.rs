@@ -1,3 +1,9 @@
+//! @id     crates_mge_replication_lib
+//! @do     definir_interest_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-replication — module « lib ».
+
 use mge_proto::{DeltaSnapshot, SnapshotEnvelope};
 use serde::{Deserialize, Serialize};
 

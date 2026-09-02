@@ -1,3 +1,9 @@
+//! @id     miyukinisales_data_memory_store
+//! @do     definir_db_error
+//! @role   donnee
+//! @layer  core
+//! @human  miyukinisales — module « data memory store ».
+
 //! Store en mémoire pour MiyukiniSales (devis et commandes).
 
 use std::collections::HashMap;

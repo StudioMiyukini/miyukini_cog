@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_aggregation
+//! @do     aggregation
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views aggregation ».
+
 //! Agregation JayManga — portail agrege, vendeurs indexes, configuration.
 
 use super::components::{Badge, EmptyState, PageHeader, StatCard};

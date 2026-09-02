@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_security
+//! @do     definir_rate_limit_config
+//! @role   securite
+//! @layer  app
+//! @human  miou-llm-bridge — module « security ».
+
 //! Sécurité — Auth, rate limiting, audit, sandboxing, anti-MITM, chiffrement.
 //!
 //! Garantit la sécurité des données, des requêtes et la disponibilité.

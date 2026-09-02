@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_spatial
+//! @do     definir_mob_snapshot
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems spatial ».
+
 //! Per-system proximity snapshots. Many allied-AI and AoE queries used to call
 //! [`World::mob_entities`] (which allocates a `Vec`) once *per ally, per frame*,
 //! re-scanning every mob each time. [`MobSnapshot`] captures the living-mob

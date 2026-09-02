@@ -1,3 +1,9 @@
+//! @id     miyukini_central_services_miyuclicker
+//! @do     definir_miyu_clicker_service
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-central — module « services miyuclicker ».
+
 //! Service Lord of the Click — intégré dans le body de Miyukini Central.
 //!
 //! Point d'accès utilisateur unique : Miyukini Central (CANON-CENTRAL).

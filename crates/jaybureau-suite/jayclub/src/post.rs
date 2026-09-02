@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_post
+//! @do     definir_post_visibility
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub post ».
+
 //! Post JayClub — unite de contenu publiee dans le feed.
 
 use crate::{ItemId, UserId};

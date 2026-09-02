@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_carddav_handlers
+//! @do     definir_carddav_prefix
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « carddav handlers ».
+
 use axum::body::Body;
 use axum::extract::{Request, State};
 use axum::http::StatusCode;

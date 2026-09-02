@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_carddav_schema
+//! @do     create_carddav_tables
+//! @role   donnee
+//! @layer  core
+//! @human  miyucloud-dav — module « carddav schema ».
+
 use rusqlite::Connection;
 
 pub fn create_carddav_tables(conn: &Connection) -> rusqlite::Result<()> {

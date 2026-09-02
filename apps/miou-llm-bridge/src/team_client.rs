@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_team_client
+//! @do     definir_node_info
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « team client ».
+
 //! Client TEAM — enregistrement et heartbeat vers le hub TEAM (mode Pro uniquement).
 //!
 //! En mode Pro, MAIA :

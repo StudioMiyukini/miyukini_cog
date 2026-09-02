@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « main ».
+
 //! Point d'entree binaire MiyukiniWatch (standalone).
 //!
 //! Initialise la DB KindMother, les providers de contexte (theme + DB + profil),

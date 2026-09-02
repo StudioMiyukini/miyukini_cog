@@ -1,3 +1,9 @@
+//! @id     jay1tribu_lib
+//! @do     declarer_module_views
+//! @role   orchestration
+//! @layer  app
+//! @human  jay1tribu — module « lib ».
+
 //! Jay1Tribu — App standalone Dioxus.
 //!
 //! Messagerie P2P, tribus, salons et amis.

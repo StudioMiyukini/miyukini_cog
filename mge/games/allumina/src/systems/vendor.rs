@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_vendor
+//! @do     price
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems vendor ».
+
 //! Village NPCs: every non-combat villager (merchants, healer, blacksmith,
 //! quest giver, recruiter) is spawned from the map's `npc_spawns` list.
 //! Merchant kinds also get a buyable stock generated here.

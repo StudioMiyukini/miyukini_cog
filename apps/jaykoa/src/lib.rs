@@ -1,3 +1,9 @@
+//! @id     jaykoa_lib
+//! @do     declarer_module_views
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « lib ».
+
 //! JayKoa — App standalone Dioxus (Calendrier universel).
 //!
 //! Utilise `miyukini-service-ui` pour le theme et les styles.

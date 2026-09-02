@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_event_form
+//! @do     definir_event_form_modal_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa event form ».
+
 //! Formulaire de création/édition d'événement JayKoa.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     central_miou_templates
+//! @do     definir_template
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « miou templates ».
+
 //! Banque de templates Miou et injection de variables.
 
 use super::bubble::{ActionType, BulleAction, BulleOutput};

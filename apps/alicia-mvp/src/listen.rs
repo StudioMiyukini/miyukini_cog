@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_listen
+//! @do     spawn_manual_trigger
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « listen ».
+
 //! Mode always-on : ecoute permanente avec detection de wake word.
 //!
 //! Boucle : capture micro → VAD → Rustpotter → (wake word detecte)

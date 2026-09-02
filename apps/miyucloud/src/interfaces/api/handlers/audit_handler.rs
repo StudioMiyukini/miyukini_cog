@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_audit_handler
+//! @do     definir_global_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers audit handler ».
+
 //! Admin API handler for querying the persistent audit log.
 //!
 //! Requires admin role (uses admin_guard like all admin endpoints).

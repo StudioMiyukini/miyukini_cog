@@ -1,3 +1,9 @@
+//! @id     crates_mge_world_chunks
+//! @do     definir_tile_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-world — module « chunks ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::zone::Biome;

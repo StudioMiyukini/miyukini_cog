@@ -1,3 +1,9 @@
+//! @id     origin_protocol_types
+//! @do     definir_protocol_version
+//! @role   donnee
+//! @layer  app
+//! @human  origin — module « protocol types ».
+
 //! Types fondamentaux du protocole MWS Relay.
 //!
 //! Définit les énumérations et structures de base utilisées dans

@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_vfx
+//! @do     definir_vfx_kind
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « vfx ».
+
 use crate::atlas::AtlasHandle;
 use serde::{Deserialize, Serialize};
 

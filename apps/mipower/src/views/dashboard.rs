@@ -1,3 +1,9 @@
+//! @id     mipower_views_dashboard
+//! @do     definir_class_order
+//! @role   orchestration
+//! @layer  app
+//! @human  mipower — module « views dashboard ».
+
 use crate::models::SequenceMeta;
 use crate::state::{View, load_sequences, MipowerCtx};
 use dioxus::prelude::*;

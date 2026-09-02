@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_sprites_data
+//! @do     definir_soldier
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « render sprites data ».
+
 //! Authored pixel-art grids, one per [`Shape`]. Each grid is a column of rows,
 //! one character per pixel, resolved against a
 //! [`Palette`](super::pixel_sprite::Palette):

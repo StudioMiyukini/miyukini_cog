@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_share_service
+//! @do     definir_share_service_error
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services share service ».
+
 use std::sync::Arc;
 
 use thiserror::Error;

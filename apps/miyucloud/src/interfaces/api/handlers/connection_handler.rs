@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_connection_handler
+//! @do     definir_global_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers connection handler ».
+
 //! Admin API handler for web connection management.
 //!
 //! Provides endpoints to view status and control MWS tunnel and DDNS modes.

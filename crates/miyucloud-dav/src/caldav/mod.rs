@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_mod
+//! @do     declarer_module_handlers
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav mod ».
+
 pub mod handlers;
 pub mod ical;
 pub mod service;

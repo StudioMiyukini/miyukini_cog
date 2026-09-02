@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_chat
+//! @do     definir_visible
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui chat ».
+
 //! Chat / event-log box. For now it mirrors the sim's event log (combat, loot,
 //! level-ups); once multiplayer lands (Phase 5) the same panel shows
 //! `ChatBroadcast` messages from other players.

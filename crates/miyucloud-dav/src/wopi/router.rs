@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_wopi_router
+//! @do     wopi_router
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « wopi router ».
+
 use axum::Router;
 use axum::routing::get;
 

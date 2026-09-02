@@ -1,3 +1,9 @@
+//! @id     miyuvalidate_admin_cell
+//! @do     definir_miyu_validate_identification
+//! @role   rule
+//! @layer  core
+//! @human  miyuvalidate — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

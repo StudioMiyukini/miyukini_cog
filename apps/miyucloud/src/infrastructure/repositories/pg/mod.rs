@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_mod
+//! @do     declarer_module_address_book_pg_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg mod ».
+
 mod address_book_pg_repository;
 pub mod audit_pg_repository;
 mod app_password_pg_repository;

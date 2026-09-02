@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_wopi_handlers
+//! @do     handle_get_file
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « wopi handlers ».
+
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};

@@ -1,3 +1,9 @@
+//! @id     miyuprofile_store
+//! @do     definir_central_store
+//! @role   donnee
+//! @layer  core
+//! @human  miyuprofile — module « store ».
+
 //! Store centralisé — accès gouverné au CentralProfile.
 //!
 //! Store en mémoire (persistance réelle déléguée à KindMother côté produit).

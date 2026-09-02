@@ -1,3 +1,9 @@
+//! @id     miyauth_context
+//! @do     definir_governed_context
+//! @role   securite
+//! @layer  core
+//! @human  miyauth — module « context ».
+
 #[derive(Debug, Clone)]
 pub struct GovernedContext {
     pub mandate_id: String,

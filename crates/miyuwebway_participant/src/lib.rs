@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_lib
+//! @do     declarer_module_address
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuWebwayParticipant — toolkit.webway.participant
 //!

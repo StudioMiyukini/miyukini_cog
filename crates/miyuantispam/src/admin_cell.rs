@@ -1,3 +1,9 @@
+//! @id     miyuantispam_admin_cell
+//! @do     definir_miyuantispam_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuantispam — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

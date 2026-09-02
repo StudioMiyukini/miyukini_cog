@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_mod
+//! @do     declarer_module_calendar_view
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views mod ».
+
 //! Module JayKoa — Calendrier universel du COG.
 //!
 //! Structure calquee sur Google Agenda :

@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_file_blob_read_repository
+//! @do     definir_media_file_row
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg file blob read repository ».
+
 //! PostgreSQL + Blob-backed file read repository.
 //!
 //! Implements `FileReadPort` using:

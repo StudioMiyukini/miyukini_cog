@@ -1,3 +1,9 @@
+//! @id     jaycloud_migrate_main
+//! @do     main
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud-migrate — module « main ».
+
 //! Binaire `jaycloud-migrate` — outil one-shot de migration MiyuCloud →
 //! JayCloud.
 //!

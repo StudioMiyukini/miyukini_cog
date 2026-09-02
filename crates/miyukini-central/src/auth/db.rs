@@ -1,3 +1,9 @@
+//! @id     miyukini_central_auth_db
+//! @do     hash_password_sha256
+//! @role   securite
+//! @layer  core
+//! @human  miyukini-central — module « auth db ».
+
 //! Base de données des profils Miyukini COG (Central).
 //!
 //! Le profil central est la base pour les autres services. Chaque service peut

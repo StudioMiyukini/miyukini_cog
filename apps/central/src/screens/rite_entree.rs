@@ -1,3 +1,9 @@
+//! @id     central_screens_rite_entree
+//! @do     definir_step_nom
+//! @role   ui
+//! @layer  app
+//! @human  central — module « screens rite entree ».
+
 //! Rite d'Entrée — Création du premier compte (COG vierge). Miou accompagne à la voix.
 //! Après le mot de passe : écran infos complémentaires (facultatif, par catégorie).
 //! Voir docs/services/MiyukiniCentral/Miyukini Central - Rite de Premiere Connexion.md

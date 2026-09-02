@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_common_dav_store
+//! @do     definir_dav_resource
+//! @role   donnee
+//! @layer  core
+//! @human  miyucloud-dav — module « common dav store ».
+
 use crate::common::dav_error::DavError;
 use miyucloud::crypto::KeyManager;
 use miyucloud::data::types::{FileEntry, FolderEntry};

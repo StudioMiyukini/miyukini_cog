@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_tooltip
+//! @do     definir_rarity
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « tooltip ».
+
 use serde::{Deserialize, Serialize};
 
 /// Rarity tier affecting tooltip border color and label.

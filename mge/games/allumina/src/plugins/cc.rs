@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_cc
+//! @do     definir_cc_plugin
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins cc ».
+
 //! Wires the crowd-control ticking (knockdown, recul, interruption) into the
 //! schedule.
 

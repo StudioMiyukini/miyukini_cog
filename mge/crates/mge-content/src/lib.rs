@@ -1,3 +1,9 @@
+//! @id     crates_mge_content_lib
+//! @do     definir_window_profile
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-content — module « lib ».
+
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};

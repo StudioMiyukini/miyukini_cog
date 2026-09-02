@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_session_repository
+//! @do     definir_session_repository_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories session repository ».
+
 use crate::common::errors::DomainError;
 use crate::domain::entities::session::Session;
 use uuid::Uuid;

@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_actions
+//! @do     definir_entity_id
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « actions ».
+
 use serde::{Deserialize, Serialize};
 
 /// An entity identifier (lightweight, ECS-style).

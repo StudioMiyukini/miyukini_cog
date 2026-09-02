@@ -1,3 +1,9 @@
+//! @id     jaycloud_operators_snapshots_op
+//! @do     definir_snapshot_kind
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « operators snapshots op ».
+
 //! `snapshots_op` — création, listing, rétention des snapshots.
 //!
 //! Un snapshot est un instantané d'un `FilesOp` à un moment donné. Il est

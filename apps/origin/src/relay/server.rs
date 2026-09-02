@@ -1,3 +1,9 @@
+//! @id     origin_relay_server
+//! @do     definir_http_injector
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay server ».
+
 //! Serveur Relay TCP + TLS.
 //!
 //! Écoute sur le port 7000 et gère les connexions des COGs.

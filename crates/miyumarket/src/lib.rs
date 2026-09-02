@@ -1,3 +1,9 @@
+//! @id     miyumarket_lib
+//! @do     declarer_module_manifest
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumarket — module « lib ».
+
 //! Miyukini Service Market — Protocole partagé entre Central (client) et Origin (serveur).
 //!
 //! Ce crate définit les types, manifestes et messages utilisés par le Market

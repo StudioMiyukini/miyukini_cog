@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_boss
+//! @do     definir_slam_cd
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems boss ».
+
 //! Boss behaviour: a three-part fight on top of the boss's normal melee.
 //!
 //! * **Slam** — a periodic ground shockwave that hits anything within

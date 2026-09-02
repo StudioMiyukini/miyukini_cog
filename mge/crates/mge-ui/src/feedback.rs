@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_feedback
+//! @do     definir_feedback_event
+//! @role   donnee
+//! @layer  core
+//! @human  crates mge-ui — module « feedback ».
+
 use serde::{Deserialize, Serialize};
 
 /// A feedback event to be dispatched to visual/audio systems.

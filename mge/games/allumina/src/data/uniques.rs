@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_uniques
+//! @do     f
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data uniques ».
+
 //! Named Unique items for Allumina — 5 uniques per (item type × 20-level tier).
 //!
 //! Tiers (by `level_req`): 1-20, 21-40, 41-60, 61-80, 81-100.

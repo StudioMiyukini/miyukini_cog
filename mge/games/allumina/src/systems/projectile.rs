@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_projectile
+//! @do     definir_arrow_speed
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems projectile ».
+
 //! Homing projectiles spawned by ranged auto-attacks.
 //!
 //! On each tick every projectile steers toward its target's current position,

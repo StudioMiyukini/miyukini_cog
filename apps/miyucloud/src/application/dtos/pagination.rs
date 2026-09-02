@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_pagination
+//! @do     definir_pagination_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos pagination ».
+
 use serde::{Deserialize, Serialize};
 
 /// A DTO to represent pagination information

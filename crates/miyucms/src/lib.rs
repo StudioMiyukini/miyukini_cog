@@ -1,3 +1,9 @@
+//! @id     miyucms_lib
+//! @do     declarer_module_admin_cell
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucms — module « lib ».
+
 #![allow(missing_docs)]
 //! # MiyuCMS — toolkit.content.cms
 //!

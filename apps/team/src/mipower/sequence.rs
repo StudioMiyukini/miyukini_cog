@@ -1,3 +1,9 @@
+//! @id     team_mipower_sequence
+//! @do     definir_sequence_step
+//! @role   orchestration
+//! @layer  app
+//! @human  team — module « mipower sequence ».
+
 //! Parsing des séquences MIPOWER depuis `.mip/sequences/`.
 //!
 //! Chaque séquence est un dossier contenant :

@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_skills
+//! @do     definir_skill_def
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « skills ».
+
 //! Systeme de skills Markdown pour Alicia.
 //!
 //! Les skills sont des fichiers `.md` dans `{workspace}/skills/`

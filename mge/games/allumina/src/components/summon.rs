@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_summon
+//! @do     definir_summon_type
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components summon ».
+
 //! Summon (invocation) components. A summon is a short-lived or permanent ally
 //! spawned by a player skill; it fights mobs on the player's side and inherits a
 //! fraction of the player's power. Behaviour lives in [`crate::systems::summon`].

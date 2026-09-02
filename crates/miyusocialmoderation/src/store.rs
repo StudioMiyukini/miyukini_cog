@@ -1,3 +1,9 @@
+//! @id     miyusocialmoderation_store
+//! @do     reports
+//! @role   donnee
+//! @layer  core
+//! @human  miyusocialmoderation — module « store ».
+
 //! Store en mémoire MiyuSocialModeration (reports, blocks).
 
 use std::collections::HashMap;

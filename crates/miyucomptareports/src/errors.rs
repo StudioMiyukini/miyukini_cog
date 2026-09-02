@@ -1,3 +1,9 @@
+//! @id     miyucomptareports_errors
+//! @do     definir_miyucomptareports_error
+//! @role   donnee
+//! @layer  core
+//! @human  miyucomptareports — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyucomptareportsError {
     NoMandate,

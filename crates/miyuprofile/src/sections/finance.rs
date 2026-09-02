@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_finance
+//! @do     definir_account_type
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections finance ».
+
 //! Section finance — coordonnées bancaires, moyens de paiement.
 //!
 //! Données nécessaires pour remplir des formulaires de prélèvement,

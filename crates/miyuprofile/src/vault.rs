@@ -1,3 +1,9 @@
+//! @id     miyuprofile_vault
+//! @do     definir_vault_entry
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « vault ».
+
 //! Vault — stockage binaire chiffré de documents numérisés.
 //!
 //! Scans de CNI, ordonnances, contrats signés, RIB, diplômes, etc.

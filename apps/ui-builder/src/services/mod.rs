@@ -1,3 +1,9 @@
+//! @id     ui_builder_services_mod
+//! @do     declarer_module_ui_assets
+//! @role   orchestration
+//! @layer  app
+//! @human  ui-builder — module « services mod ».
+
 //! Modules services réutilisés depuis Central via `#[path]`.
 //!
 //! Les fichiers sources restent dans `apps/central/src/services/` — on les

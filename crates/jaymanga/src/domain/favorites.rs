@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_favorites
+//! @do     definir_favorites_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain favorites ».
+
 //! Logique de gestion des favoris cross-COG JayManga.
 //!
 //! Ajout/suppression de favoris, mise à jour du cache de métadonnées,

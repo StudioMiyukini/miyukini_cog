@@ -1,3 +1,9 @@
+//! @id     miyupossales_admin_cell
+//! @do     definir_miyupossales_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupossales — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

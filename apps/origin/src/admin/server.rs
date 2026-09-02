@@ -1,3 +1,9 @@
+//! @id     origin_admin_server
+//! @do     definir_max_login_attempts
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « admin server ».
+
 //! Serveur HTTP d'administration MiyukiniAdmin Origin.
 //!
 //! Expose les endpoints d'administration sur le port 8081.

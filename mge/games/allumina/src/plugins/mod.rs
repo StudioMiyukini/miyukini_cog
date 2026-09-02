@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_mod
+//! @do     declarer_module_camera
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins mod ».
+
 //! Plugins bundle systems and register them against execution phases.
 
 pub mod camera;

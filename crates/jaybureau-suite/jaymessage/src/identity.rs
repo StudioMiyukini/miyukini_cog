@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_identity
+//! @do     definir_identity_key
+//! @role   donnee
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage identity ».
+
 //! Cles d'identite long-terme (ed25519).
 
 use crate::{JayMessageError, Result, UserId};

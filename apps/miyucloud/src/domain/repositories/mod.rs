@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_mod
+//! @do     declarer_module_address_book_repository
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories mod ».
+
 pub mod address_book_repository;
 pub mod calendar_event_repository;
 pub mod calendar_repository;

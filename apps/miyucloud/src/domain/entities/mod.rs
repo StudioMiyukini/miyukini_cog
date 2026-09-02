@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_entities_mod
+//! @do     declarer_module_app_password
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain entities mod ».
+
 pub mod app_password;
 pub mod audit_event;
 pub mod calendar;

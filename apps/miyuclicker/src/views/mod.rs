@@ -1,3 +1,9 @@
+//! @id     miyuclicker_views_mod
+//! @do     definir_speeds
+//! @role   orchestration
+//! @layer  app
+//! @human  miyuclicker — module « views mod ».
+
 //! Vue Lord of the Click (MiyukiniClicker) — UI Dioxus complete.
 //!
 //! Ressources, allocations, batiments, conversions, clics manuels, vitesse, sauvegarde.

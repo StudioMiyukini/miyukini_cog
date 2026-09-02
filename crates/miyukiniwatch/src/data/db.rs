@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_data_db
+//! @do     definir_miyukini_watch_db
+//! @role   donnee
+//! @layer  core
+//! @human  miyukiniwatch — module « data db ».
+
 //! Base de données MiyukiniWatch sous autorité KindMother.
 //!
 //! Instance Daughter : persistance locale via SQLite chiffré.

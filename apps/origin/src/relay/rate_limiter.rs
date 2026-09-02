@@ -1,3 +1,9 @@
+//! @id     origin_relay_rate_limiter
+//! @do     definir_rate_limiter_config
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay rate limiter ».
+
 //! Rate limiter pour le Relay.
 //!
 //! Protège contre les abus et les attaques par déni de service.

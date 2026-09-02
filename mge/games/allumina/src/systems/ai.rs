@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_ai
+//! @do     definir_mob_speed
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems ai ».
+
 //! Monster AI: an Idle → Chase → Attack → Return state machine.
 
 use crate::components::mob::AiState;

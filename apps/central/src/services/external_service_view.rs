@@ -1,3 +1,9 @@
+//! @id     central_services_external_service_view
+//! @do     external_service_view
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services external service view ».
+
 //! Vue d'un service externe — panneau de contrôle pour lancer/arrêter un service.
 //!
 //! Quand un utilisateur ouvre un onglet de service, Central affiche ce panneau

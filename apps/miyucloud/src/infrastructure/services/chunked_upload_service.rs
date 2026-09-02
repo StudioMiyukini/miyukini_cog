@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_chunked_upload_service
+//! @do     definir_chunked_upload_threshold
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services chunked upload service ».
+
 //! Chunked Upload Service — TUS-like Protocol for Large File Uploads
 //!
 //! Enables parallel chunk uploads for files >10 MB with:

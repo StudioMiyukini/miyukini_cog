@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_thumbnails_cache
+//! @do     definir_thumbnail_cache
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « thumbnails cache ».
+
 use moka::sync::Cache;
 use std::sync::Arc;
 

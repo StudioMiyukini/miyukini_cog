@@ -1,3 +1,9 @@
+//! @id     jaymanga_auth_permissions
+//! @do     definir_user_type
+//! @role   securite
+//! @layer  core
+//! @human  jaymanga — module « auth permissions ».
+
 //! Rôles et permissions JayManga.
 
 /// Type d'utilisateur JayManga.

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_adapters_webdav_adapter
+//! @do     definir_result
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application adapters webdav adapter ».
+
 use crate::application::dtos::file_dto::FileDto;
 use crate::application::dtos::folder_dto::FolderDto;
 use chrono::Utc;

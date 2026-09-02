@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymail_imap_client
+//! @do     fetch_inbox
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymail imap client ».
+
 //! Reception de mails via IMAP.
 //!
 //! Note MVP : implementation simplifiee retournant des emails demo.

@@ -1,3 +1,9 @@
+//! @id     miyuposkitchen_admin_cell
+//! @do     definir_miyuposkitchen_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposkitchen — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

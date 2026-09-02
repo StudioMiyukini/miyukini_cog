@@ -1,3 +1,9 @@
+//! @id     jaykonta_views_purse_forecast
+//! @do     purse_forecast
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykonta — module « views purse forecast ».
+
 //! Ecran previsionnel budget — projection sur 6 ou 12 mois
 //! basee sur les transactions recurrentes et le solde actuel.
 

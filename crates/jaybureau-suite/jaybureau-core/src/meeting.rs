@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaybureau_core_meeting
+//! @do     definir_meeting_status
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaybureau-core meeting ».
+
 //! Types pour Jay Réunion (conférences audio/vidéo collaboratives).
 
 use crate::UserId;

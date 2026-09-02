@@ -1,3 +1,9 @@
+//! @id     miyusocialmessaging_admin_cell
+//! @do     definir_miyusocialmessaging_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyusocialmessaging — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

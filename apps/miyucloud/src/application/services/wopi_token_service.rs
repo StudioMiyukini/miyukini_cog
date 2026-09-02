@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_wopi_token_service
+//! @do     definir_wopi_token_claims
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « application services wopi token service ».
+
 //! WOPI access token service.
 //!
 //! Generates and validates WOPI-scoped JWT tokens that are separate from

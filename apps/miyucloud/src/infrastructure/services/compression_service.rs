@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_compression_service
+//! @do     definir_compression_level
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services compression service ».
+
 use bytes::Bytes;
 use flate2::Compression;
 use flate2::bufread::GzDecoder;

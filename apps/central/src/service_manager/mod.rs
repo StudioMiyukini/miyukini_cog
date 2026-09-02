@@ -1,3 +1,9 @@
+//! @id     central_service_manager_mod
+//! @do     declarer_module_installer
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « service manager mod ».
+
 //! Gestion du cycle de vie des services — installation, lancement, arrêt, mise à jour.
 //!
 //! Chaque service est un binaire indépendant. Central gère :

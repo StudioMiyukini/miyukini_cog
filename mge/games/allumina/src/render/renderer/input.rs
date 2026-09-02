@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_renderer_input
+//! @do     implementer_game_app
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render renderer input ».
+
 //! Input handling for [`GameApp`]: mouse-press routing, per-state keyboard
 //! handlers, and the action dispatchers they feed. Split out of `renderer.rs`
 //! to keep the application shell focused on the frame loop and state machine.

@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_mod
+//! @do     declarer_module_aggregator
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain mod ».
+
 //! Logique métier JayManga.
 //!
 //! Modules de domaine pour le catalogue, la liseuse, l'optimisation,

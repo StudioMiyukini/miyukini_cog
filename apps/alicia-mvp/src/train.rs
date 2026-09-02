@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_train
+//! @do     definir_min_samples
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « train ».
+
 //! Utilitaire d'entrainement du wake word "Alicia".
 //!
 //! Enregistre 3-8 echantillons WAV depuis le micro, puis construit

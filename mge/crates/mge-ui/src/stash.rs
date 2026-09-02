@@ -1,3 +1,9 @@
+//! @id     crates_mge_ui_stash
+//! @do     definir_stash_tab
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-ui — module « stash ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::inventory::{InventoryGrid, ItemRef};

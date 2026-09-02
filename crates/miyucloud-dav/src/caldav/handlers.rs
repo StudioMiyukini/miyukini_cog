@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_handlers
+//! @do     definir_caldav_prefix
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav handlers ».
+
 use axum::body::Body;
 use axum::extract::{Request, State};
 use axum::http::StatusCode;

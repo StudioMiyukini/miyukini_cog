@@ -1,3 +1,9 @@
+//! @id     miyusocialfeed_store
+//! @do     posts
+//! @role   donnee
+//! @layer  core
+//! @human  miyusocialfeed — module « store ».
+
 //! Store en mémoire MiyuSocialFeed (posts, comments, reactions, shares).
 
 use std::collections::HashMap;

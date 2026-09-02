@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_basic_auth_middleware
+//! @do     definir_nextcloud_auth_error
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud basic auth middleware ».
+
 use axum::{
     extract::{Request, State},
     http::{HeaderMap, StatusCode, header},

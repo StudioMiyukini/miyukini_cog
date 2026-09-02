@@ -1,3 +1,9 @@
+//! @id     central_remote_protocol_lib
+//! @do     definir_remote_command
+//! @role   orchestration
+//! @layer  core
+//! @human  central-remote-protocol — module « lib ».
+
 //! Protocole CentralRemote — commandes, événements et snapshots.
 //!
 //! Types partagés entre Central Desktop (serveur) et Central Mobile (client Android)

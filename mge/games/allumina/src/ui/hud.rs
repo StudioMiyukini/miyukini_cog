@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_hud
+//! @do     draw
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui hud ».
+
 //! HUD: life/mana orbs and the XP bar.
 //!
 //! `render_hud` is the text version (headless); `draw` paints the interactive

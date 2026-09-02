@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_oidc_service
+//! @do     definir_oidc_cache_ttl
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services oidc service ».
+
 //! OpenID Connect (OIDC) service implementation.
 //!
 //! Handles OIDC discovery, authorization URL generation, code exchange,

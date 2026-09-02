@@ -1,3 +1,9 @@
+//! @id     games_allumina_save
+//! @do     definir_save_version
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « save ».
+
 //! Persistent character saves.
 //!
 //! JSON files written to a `saves/` directory next to the binary. Each save is

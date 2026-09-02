@@ -1,3 +1,9 @@
+//! @id     jaykonta_integrations_pipeline
+//! @do     definir_integration_pipeline
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « integrations pipeline ».
+
 //! Pipeline d'integration CK-INT-01/02/03 + audit.
 
 use crate::data::{

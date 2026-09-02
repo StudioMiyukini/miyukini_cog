@@ -1,3 +1,9 @@
+//! @id     miyucontacts_errors
+//! @do     definir_miyucontacts_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucontacts — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyucontactsError {
     NoMandate,

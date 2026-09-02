@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_reader
+//! @do     definir_reading_mode
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga reader ».
+
 //! Liseuse native JayManga — affichage des pages, navigation,
 //! progression, XP temps réel, raccourcis clavier.
 //!

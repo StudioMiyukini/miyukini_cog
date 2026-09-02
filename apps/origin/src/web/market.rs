@@ -1,3 +1,9 @@
+//! @id     origin_web_market
+//! @do     definir_market_store
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « web market ».
+
 //! Service Market — Stockage et API côté Origin.
 //!
 //! Gère le catalogue des services, le stockage des packages et les endpoints REST.

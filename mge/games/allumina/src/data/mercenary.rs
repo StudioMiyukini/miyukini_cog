@@ -1,3 +1,9 @@
+//! @id     games_allumina_data_mercenary
+//! @do     definir_merc_profile
+//! @role   donnee
+//! @layer  core
+//! @human  games allumina — module « data mercenary ».
+
 //! Static tuning for each mercenary archetype: recruitment cost, per-level stat
 //! growth, combat reach, and starting weapon. The mercenary system reads a
 //! profile to (re)compute a merc's resolved stats from its level and gear.

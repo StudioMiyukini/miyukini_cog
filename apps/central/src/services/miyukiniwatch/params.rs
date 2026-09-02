@@ -1,3 +1,9 @@
+//! @id     central_services_miyukiniwatch_params
+//! @do     params_screen
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services miyukiniwatch params ».
+
 //! Écran Paramètres et vie privée MiyukiniWatch.
 
 use dioxus::prelude::*;

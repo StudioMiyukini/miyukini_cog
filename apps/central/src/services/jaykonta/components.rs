@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_components
+//! @do     kpi_card
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta components ».
+
 //! Composants partages JayKonta — KpiCard, AmountDisplay, ProgressBar, Badge, PlaceholderSection.
 
 use dioxus::prelude::*;

@@ -1,3 +1,9 @@
+//! @id     miyuposinventory_admin_cell
+//! @do     definir_miyuposinventory_identification
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuposinventory — module « admin cell ».
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

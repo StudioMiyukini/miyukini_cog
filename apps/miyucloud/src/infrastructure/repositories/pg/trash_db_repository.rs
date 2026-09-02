@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_trash_db_repository
+//! @do     definir_default_retention_days
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg trash db repository ».
+
 //! PostgreSQL-backed trash repository.
 //!
 //! Implements `TrashRepository` using soft-delete columns in `storage.files`

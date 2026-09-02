@@ -1,3 +1,9 @@
+//! @id     miyupolls_errors
+//! @do     definir_miyupolls_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupolls — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyupollsError {
     NoMandate,

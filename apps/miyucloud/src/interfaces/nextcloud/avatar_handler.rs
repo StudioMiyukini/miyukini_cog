@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_avatar_handler
+//! @do     handle_avatar
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud avatar handler ».
+
 use axum::{
     extract::{Path, State},
     http::{StatusCode, header},

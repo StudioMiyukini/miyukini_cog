@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_session_timeout_service
+//! @do     definir_session_timeout_config
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services session timeout service ».
+
 //! Session timeout enforcement — ISO 27001 A.8.5
 //!
 //! Implements absolute and idle timeout for user sessions.

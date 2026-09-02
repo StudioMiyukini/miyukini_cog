@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_calendar_view
+//! @do     definir_calendar_main_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa calendar view ».
+
 //! Vue calendrier wrapper — Composant conteneur pour les différentes vues.
 
 use dioxus::prelude::*;

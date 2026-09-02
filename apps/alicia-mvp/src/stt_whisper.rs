@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_stt_whisper
+//! @do     definir_sample_rate
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « stt whisper ».
+
 //! STT local Whisper via candle-transformers (CUDA ou CPU).
 //!
 //! NOTE: Cette feature est bloquée par un conflit de dépendances :

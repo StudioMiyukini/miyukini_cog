@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_camera
+//! @do     definir_camera2_d
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render camera ».
+
 //! Render-side camera: turns world tile coordinates into screen pixels and
 //! back, applying the follow-camera centre, zoom, and viewport.
 //!

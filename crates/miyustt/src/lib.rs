@@ -1,3 +1,9 @@
+//! @id     miyustt_lib
+//! @do     definir_stt_preset
+//! @role   orchestration
+//! @layer  core
+//! @human  miyustt — module « lib ».
+
 //! MiyuSTT toolkit (V1 initiale).
 //!
 //! Fournit:

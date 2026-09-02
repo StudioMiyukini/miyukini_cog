@@ -1,3 +1,9 @@
+//! @id     jaymanga_domain_optimizer
+//! @do     definir_optimizer_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « domain optimizer ».
+
 //! Optimisation et compression des images de pages JayManga.
 //!
 //! Génère des variantes optimisées (HD, SD, mobile, thumb) en WebP

@@ -1,3 +1,9 @@
+//! @id     jaymanga_services_mws_presence
+//! @do     definir_mws_presence_error
+//! @role   orchestration
+//! @layer  core
+//! @human  jaymanga — module « services mws presence ».
+
 //! Requêtes de présence MWS pour JayManga.
 //!
 //! Vérification de la disponibilité des COGs vendeurs

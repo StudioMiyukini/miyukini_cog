@@ -1,3 +1,9 @@
+//! @id     maia_llm_main
+//! @do     declarer_module_api
+//! @role   orchestration
+//! @layer  app
+//! @human  maia-llm — module « main ».
+
 //! MAIA-LLM — Service d'inférence GGUF local.
 //!
 //! Usage : `maia-llm serve [--bind 0.0.0.0:11435] [--models-dir ./models] [--config maia-llm.toml]`

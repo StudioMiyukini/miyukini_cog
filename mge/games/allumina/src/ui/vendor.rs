@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_vendor
+//! @do     definir_row_h
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui vendor ».
+
 //! Vendor window: buy from the merchant's stock (left) or sell from the
 //! backpack (right). Click a row to transact.
 

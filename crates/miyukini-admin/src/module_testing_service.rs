@@ -1,3 +1,9 @@
+//! @id     miyukini_admin_module_testing_service
+//! @do     definir_module_testing_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukini-admin — module « module testing service ».
+
 //! Service de tests des modules (Module Testing and Lifecycle Contract).
 //!
 //! Seul MiyukiniAdmin peut exécuter les tests embarqués et interpréter le manifeste.

@@ -1,3 +1,9 @@
+//! @id     jay1tribu_views_mod
+//! @do     definir_panel_base
+//! @role   orchestration
+//! @layer  app
+//! @human  jay1tribu — module « views mod ».
+
 //! Vue Jay1Tribu — Tribus, amis et discussions.
 //! Layout 3 panneaux type Steam/Discord : amis | salons | chat.
 //!

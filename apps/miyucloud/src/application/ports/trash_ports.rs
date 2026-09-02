@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_trash_ports
+//! @do     definir_trait_trash_use_case
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports trash ports ».
+
 use uuid::Uuid;
 
 use crate::application::dtos::trash_dto::TrashedItemDto;

@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_zone_state
+//! @do     definir_zone_state
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « zone state ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::entity::*;

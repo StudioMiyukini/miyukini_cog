@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_nextcloud_status_handler
+//! @do     handle_status
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces nextcloud status handler ».
+
 use axum::Json;
 use axum::extract::State;
 use axum::response::{IntoResponse, Response};

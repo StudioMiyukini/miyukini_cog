@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_carddav_vcard
+//! @do     extract_vcard_fn
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « carddav vcard ».
+
 use crate::common::dav_error::DavError;
 
 pub fn extract_vcard_fn(vcard_data: &str) -> Option<String> {

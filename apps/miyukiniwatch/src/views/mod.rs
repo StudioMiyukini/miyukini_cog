@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_views_mod
+//! @do     declarer_module_audit
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukiniwatch — module « views mod ».
+
 //! MiyukiniWatch — Service silencieux de mesure des habitudes.
 //!
 //! Interface : tableau de bord, detail, parametres, audit.

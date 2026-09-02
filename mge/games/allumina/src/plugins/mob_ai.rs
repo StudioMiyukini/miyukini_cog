@@ -1,3 +1,9 @@
+//! @id     games_allumina_plugins_mob_ai
+//! @do     spawn_mobs_system
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « plugins mob ai ».
+
 //! Mob spawning and AI scheduling.
 
 use crate::app::{App, PhaseId, Plugin};

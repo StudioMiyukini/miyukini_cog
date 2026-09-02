@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_sidebar
+//! @do     jay_konta_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta sidebar ».
+
 //! Sidebar JayKonta — navigation Purse / Account.
 
 use dioxus::prelude::*;

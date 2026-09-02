@@ -1,3 +1,9 @@
+//! @id     central_mobile_components_bottom_nav
+//! @do     bottom_nav
+//! @role   ui
+//! @layer  app
+//! @human  central-mobile — module « components bottom nav ».
+
 //! Barre de navigation inférieure (4 onglets).
 
 use dioxus::prelude::*;

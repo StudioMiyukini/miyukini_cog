@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_figures
+//! @do     definir_direction
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render figures ».
+
 //! Expressive procedural figures: directional humanoid silhouettes (one per
 //! player class), stone golems, and the boss, assembled from the
 //! [`shapes`](super::shapes) quad primitives.

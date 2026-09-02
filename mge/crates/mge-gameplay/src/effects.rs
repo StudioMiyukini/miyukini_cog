@@ -1,3 +1,9 @@
+//! @id     crates_mge_gameplay_effects
+//! @do     definir_duration
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-gameplay — module « effects ».
+
 use serde::{Deserialize, Serialize};
 
 use crate::actions::EntityId;

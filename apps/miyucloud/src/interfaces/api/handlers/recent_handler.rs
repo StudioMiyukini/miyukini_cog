@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_recent_handler
+//! @do     definir_get_recent_params
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers recent handler ».
+
 use axum::{
     Json,
     extract::{Path, Query, State},

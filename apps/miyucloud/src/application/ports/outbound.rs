@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_outbound
+//! @do     definir_trait_storage_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports outbound ».
+
 use std::path::PathBuf;
 
 use crate::common::errors::DomainError;

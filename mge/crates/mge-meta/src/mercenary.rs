@@ -1,3 +1,9 @@
+//! @id     crates_mge_meta_mercenary
+//! @do     definir_merc_type
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-meta — module « mercenary ».
+
 use serde::{Deserialize, Serialize};
 
 /// Mercenary archetype available for hire.

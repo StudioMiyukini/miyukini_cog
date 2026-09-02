@@ -1,3 +1,9 @@
+//! @id     miyuwebway_participant_mws_service
+//! @do     definir_mws_service_config
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuwebway participant — module « mws service ».
+
 //! Service MWS — Coordonne la connexion au réseau Miyukini Webway.
 //!
 //! Service de haut niveau qui gère le Relay, le Tracker, et le heartbeat automatique.

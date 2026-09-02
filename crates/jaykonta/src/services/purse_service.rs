@@ -1,3 +1,9 @@
+//! @id     jaykonta_services_purse_service
+//! @do     definir_purse_service
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « services purse service ».
+
 //! PurseService — logique metier budget personnel.
 //!
 //! Responsabilites : dashboard, mouvements, categories, budgets, objectifs.

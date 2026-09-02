@@ -1,3 +1,9 @@
+//! @id     miyupossales_context
+//! @do     definir_governed_context
+//! @role   orchestration
+//! @layer  core
+//! @human  miyupossales — module « context ».
+
 //! Contexte gouverné pour l'exécution MiyuPosSales (BOUND-5).
 
 #[derive(Debug, Clone)]

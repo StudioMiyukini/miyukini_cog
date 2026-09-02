@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_catalog
+//! @do     definir_catalog_entry
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « catalog ».
+
 //! Catalogue statique de modèles GGUF recommandés pour LM Studio.
 //!
 //! Chaque entrée définit un modèle avec ses exigences hardware et un score

@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_common_xml_security
+//! @do     definir_max_xml_size
+//! @role   securite
+//! @layer  core
+//! @human  miyucloud-dav — module « common xml security ».
+
 use super::dav_error::DavError;
 use quick_xml::events::Event;
 use quick_xml::Reader;

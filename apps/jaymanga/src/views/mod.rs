@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_mod
+//! @do     declarer_module_aggregation
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views mod ».
+
 //! Module JayManga — lecture et vente de manga en ligne.
 //!
 //! Architecture : sidebar + contenu dynamique par section.

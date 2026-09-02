@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_webdav_handler
+//! @do     definir_path_segment_encode_set
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers webdav handler ».
+
 /**
  * WebDAV Handler Module
  *

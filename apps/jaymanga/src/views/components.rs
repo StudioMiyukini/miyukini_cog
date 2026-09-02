@@ -1,3 +1,9 @@
+//! @id     jaymanga_views_components
+//! @do     stat_card
+//! @role   orchestration
+//! @layer  app
+//! @human  jaymanga — module « views components ».
+
 //! Composants partages JayManga — StatCard, Badge, ActionButton, EmptyState, PageHeader.
 
 use dioxus::prelude::*;

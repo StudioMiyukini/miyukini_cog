@@ -1,3 +1,9 @@
+//! @id     jaykonta_data_mod
+//! @do     declarer_module_types
+//! @role   donnee
+//! @layer  core
+//! @human  jaykonta — module « data mod ».
+
 //! Persistance JayKonta via KindMother Service.
 //! Par défaut : legacy-sqlite. Full KM (kindmother-only) en cours de parité API.
 

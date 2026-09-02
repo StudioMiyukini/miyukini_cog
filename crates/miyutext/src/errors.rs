@@ -1,3 +1,9 @@
+//! @id     miyutext_errors
+//! @do     definir_miyu_text_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyutext — module « errors ».
+
 //! Types d'erreur contractuels MiyuText (BOUND-*).
 
 #[derive(Debug, Clone)]

@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_catalogue
+//! @do     catalogue
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga catalogue ».
+
 //! Catalogue JayManga — liste des œuvres avec gestion CRUD.
 
 use dioxus::prelude::*;

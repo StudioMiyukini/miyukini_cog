@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymail_lib
+//! @do     declarer_module_config
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymail lib ».
+
 //! Jay Mail — client email Miyukini.
 //!
 //! Fournit :

@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_skill
+//! @do     definir_skill_effect
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components skill ».
+
 //! Skill components. The skill *tree* (passive progression) reuses
 //! `mge-gameplay`; the *hotbar* of usable actives is Allumina-specific.
 

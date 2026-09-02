@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_search_handler
+//! @do     definir_search_handler
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers search handler ».
+
 use axum::{
     extract::{Json, Query, State},
     http::StatusCode,

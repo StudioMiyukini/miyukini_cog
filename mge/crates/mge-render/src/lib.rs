@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_lib
+//! @do     declarer_module_animation
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « lib ».
+
 pub mod animation;
 pub mod pipeline;
 pub mod atlas;

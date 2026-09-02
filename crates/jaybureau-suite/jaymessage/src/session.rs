@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_session
+//! @do     definir_session_store
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage session ».
+
 //! Sessions E2E par conversation.
 //!
 //! Reutilise `miyukini_cog_bridge::e2e::E2eSession` (ChaCha20-Poly1305).

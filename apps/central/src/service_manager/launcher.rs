@@ -1,3 +1,9 @@
+//! @id     central_service_manager_launcher
+//! @do     definir_running_service
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « service manager launcher ».
+
 //! Lancement et arrêt des processus de services.
 //!
 //! Chaque service est un binaire indépendant lancé en tant que processus fils.

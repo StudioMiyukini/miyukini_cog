@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_forge
+//! @do     definir_row_h
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui forge ».
+
 //! Forge window: recycle a backpack item (left column) into crafting
 //! materials, whose running totals show on the right. Click an item row to
 //! salvage it.

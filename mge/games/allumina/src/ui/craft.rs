@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_craft
+//! @do     definir_cell
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui craft ».
+
 //! The 7×7 crafting table: paint materials into the grid, see the matched
 //! recipe, and forge it. Pick a material from the palette (right), left-click
 //! grid cells to place it (right-click to clear), then hit "Fabriquer".

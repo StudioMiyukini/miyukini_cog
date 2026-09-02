@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_inference
+//! @do     definir_chat_message
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « inference ».
+
 //! Couche d'inférence — abstraction qui route vers maia-llm ou l'upstream.
 //!
 //! Architecture :

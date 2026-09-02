@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_trash_service
+//! @do     definir_trash_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services trash service ».
+
 use std::sync::Arc;
 use tracing::{debug, error, info, instrument, warn};
 use uuid::Uuid;

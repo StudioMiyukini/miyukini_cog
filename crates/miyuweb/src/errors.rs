@@ -1,3 +1,9 @@
+//! @id     miyuweb_errors
+//! @do     definir_miyuweb_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuweb — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuwebError {
     NoMandate,

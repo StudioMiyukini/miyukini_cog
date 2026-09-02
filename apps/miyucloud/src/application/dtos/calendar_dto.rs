@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_calendar_dto
+//! @do     definir_calendar_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos calendar dto ».
+
 use crate::domain::entities::calendar::Calendar;
 use crate::domain::entities::calendar_event::CalendarEvent;
 use chrono::{DateTime, Utc};

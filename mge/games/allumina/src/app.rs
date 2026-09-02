@@ -1,3 +1,9 @@
+//! @id     games_allumina_app
+//! @do     definir_game_state
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « app ».
+
 //! The application shell: plugins register systems into phases, and the
 //! scheduler runs them in ascending `PhaseId` order each tick.
 

@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_folder_handler
+//! @do     definir_app_state
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers folder handler ».
+
 use axum::{
     Json,
     body::Body,

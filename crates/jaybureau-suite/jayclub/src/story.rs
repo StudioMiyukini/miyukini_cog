@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_story
+//! @do     definir_story_ttl_secs
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub story ».
+
 //! Stories JayClub — contenu ephemere 24h.
 
 use crate::{ItemId, UserId};

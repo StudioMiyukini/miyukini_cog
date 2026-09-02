@@ -1,3 +1,9 @@
+//! @id     maia_stt_lib
+//! @do     declarer_module_confidence
+//! @role   orchestration
+//! @layer  core
+//! @human  maia-stt — module « lib ».
+
 //! MAIA-STT — Moteur de transcription vocale (whisper.cpp via whisper-rs).
 //!
 //! # Architecture

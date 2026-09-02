@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_folder_db_repository
+//! @do     definir_folder_row
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg folder db repository ».
+
 //! PostgreSQL-backed folder repository.
 //!
 //! Implements `FolderRepository` (and thus `FolderStoragePort`) using the

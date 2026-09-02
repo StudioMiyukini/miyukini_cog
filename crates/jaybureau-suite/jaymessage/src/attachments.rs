@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jaymessage_attachments
+//! @do     definir_message_attachment
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jaymessage attachments ».
+
 //! Pieces jointes des messages — uploadees chiffrees dans MiyuCloud.
 
 use serde::{Deserialize, Serialize};

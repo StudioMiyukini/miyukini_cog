@@ -1,3 +1,9 @@
+//! @id     central_miou_bubble
+//! @do     definir_action_type
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « miou bubble ».
+
 //! Composant UI bulle Miou et structures associées.
 
 use dioxus::prelude::*;

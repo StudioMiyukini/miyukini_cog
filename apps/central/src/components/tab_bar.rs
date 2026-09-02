@@ -1,3 +1,9 @@
+//! @id     central_components_tab_bar
+//! @do     tab_bar
+//! @role   ui
+//! @layer  app
+//! @human  central — module « components tab bar ».
+
 //! Barre d'onglets des services ouverts.
 
 use crate::state::use_app_state;

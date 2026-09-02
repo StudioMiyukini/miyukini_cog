@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_repositories_pg_user_pg_repository
+//! @do     implementer_user_repository_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure repositories pg user pg repository ».
+
 use futures::future::BoxFuture;
 use sqlx::{PgPool, Row};
 use std::sync::Arc;

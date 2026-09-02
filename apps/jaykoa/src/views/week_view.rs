@@ -1,3 +1,9 @@
+//! @id     jaykoa_views_week_view
+//! @do     definir_week_view_props
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « views week view ».
+
 //! Vue Semaine — Grille 7 jours x 24 heures type Google Agenda.
 
 use super::components::EventBlock;

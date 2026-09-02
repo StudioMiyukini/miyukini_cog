@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_db
+//! @do     definir_db_error
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « infrastructure db ».
+
 use crate::common::config::AppConfig;
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use std::time::Duration;

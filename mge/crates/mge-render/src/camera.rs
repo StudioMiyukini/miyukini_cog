@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_camera
+//! @do     definir_iso_camera
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « camera ».
+
 /// Isometric camera with world-to-screen and screen-to-world conversions.
 ///
 /// Uses a standard 2:1 isometric projection (tile width = 2 * tile height).

@@ -1,3 +1,9 @@
+//! @id     miyuinvoice_store
+//! @do     definir_customers
+//! @role   donnee
+//! @layer  core
+//! @human  miyuinvoice — module « store ».
+
 //! Store en mémoire MiyuInvoice (clients, factures, devis). Persistance réelle = KindMother.
 
 use std::collections::HashMap;

@@ -1,3 +1,9 @@
+//! @id     jayfaim_data_memory_store
+//! @do     definir_db_error
+//! @role   donnee
+//! @layer  core
+//! @human  jayfaim — module « data memory store ».
+
 //! Store en mémoire pour JayFaim (tables, créneaux, réservations, convives).
 
 use std::collections::HashMap;

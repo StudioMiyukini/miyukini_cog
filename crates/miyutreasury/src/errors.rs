@@ -1,3 +1,9 @@
+//! @id     miyutreasury_errors
+//! @do     definir_miyutreasury_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyutreasury — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyutreasuryError {
     NoMandate,

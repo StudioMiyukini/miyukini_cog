@@ -1,3 +1,9 @@
+//! @id     alicia_mvp_providers
+//! @do     definir_llm_provider
+//! @role   orchestration
+//! @layer  app
+//! @human  alicia-mvp — module « providers ».
+
 //! Multi-provider LLM avec health check et fallback.
 //!
 //! Chaque provider est un endpoint OpenAI-compatible (LM Studio, Ollama, etc.)

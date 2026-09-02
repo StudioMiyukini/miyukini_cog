@@ -1,3 +1,9 @@
+//! @id     central_data
+//! @do     definir_service_connections
+//! @role   donnee
+//! @layer  app
+//! @human  central — module « data ».
+
 //! Couche données : connexion auth Central.
 //!
 //! Les services sont désormais des binaires indépendants qui gèrent leurs propres bases de données.

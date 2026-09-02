@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_civil_skills
+//! @do     definir_civil_skill_id
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « civil skills ».
+
 // ---------------------------------------------------------------------------
 // Civil Skills — système de compétences artisanales / civiles
 // Séparé du disque de combat (skill_disk.rs)

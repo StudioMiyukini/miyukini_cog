@@ -1,3 +1,9 @@
+//! @id     jaykoa_main
+//! @do     main
+//! @role   orchestration
+//! @layer  app
+//! @human  jaykoa — module « main ».
+
 //! Point d'entree binaire JayKoa (standalone).
 //!
 //! Initialise la DB KindMother, les providers de contexte (theme + DB),

@@ -1,3 +1,9 @@
+//! @id     games_allumina_systems_skill
+//! @do     declarer_module_fields
+//! @role   orchestration
+//! @layer  core
+//! @human  games allumina — module « systems skill ».
+
 //! Active-skill execution: cooldowns, mana, status timers, and the per-effect
 //! resolution for all twelve class skills (single target, self/target AoE,
 //! chain, buff, dash, blink, frost-nova slow, trap, dodge).

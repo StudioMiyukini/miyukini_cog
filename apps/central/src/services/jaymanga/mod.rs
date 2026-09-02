@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_mod
+//! @do     declarer_module_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga mod ».
+
 //! Module JayManga — lecture et vente de manga en ligne.
 //!
 //! Architecture : sidebar + contenu dynamique par section.

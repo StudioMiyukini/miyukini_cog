@@ -1,3 +1,9 @@
+//! @id     miyukini_whisper_lib
+//! @do     definir_output_profile
+//! @role   orchestration
+//! @layer  app
+//! @human  miyukini-whisper — module « lib ».
+
 //! Miyukini Whisper (squelette V0).
 //!
 //! Cette crate assemble les toolkits MiyuSTT/MiyuTTS et expose

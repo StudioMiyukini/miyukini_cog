@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_storage_ports
+//! @do     definir_trait_file_read_port
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports storage ports ».
+
 use bytes::Bytes;
 use futures::Stream;
 use serde_json::Value;

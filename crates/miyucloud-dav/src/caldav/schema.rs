@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_caldav_schema
+//! @do     create_caldav_tables
+//! @role   donnee
+//! @layer  core
+//! @human  miyucloud-dav — module « caldav schema ».
+
 use rusqlite::Connection;
 
 pub fn create_caldav_tables(conn: &Connection) -> rusqlite::Result<()> {

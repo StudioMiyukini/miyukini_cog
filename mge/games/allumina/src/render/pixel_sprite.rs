@@ -1,3 +1,9 @@
+//! @id     games_allumina_render_pixel_sprite
+//! @do     shade
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « render pixel sprite ».
+
 //! Procedural pixel-art sprites: an `NxM` grid of coloured cells, each rendered
 //! as one small quad so the body reads as hand-placed pixels instead of smooth
 //! geometric shapes.

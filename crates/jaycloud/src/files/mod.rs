@@ -1,3 +1,9 @@
+//! @id     jaycloud_files_mod
+//! @do     declarer_module_davfs
+//! @role   orchestration
+//! @layer  core
+//! @human  jaycloud — module « files mod ».
+
 //! Module `files` — code héritier de MiyuCloud (DT-07 de la Spec).
 //!
 //! - `davfs`      : impl `dav-server::DavFileSystem` pour exposer le CAS via WebDAV (PR-4).

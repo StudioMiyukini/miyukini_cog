@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_spatial
+//! @do     definir_spatial_grid
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « spatial ».
+
 use std::collections::HashMap;
 
 /// Uniform-grid spatial index for fast proximity queries.

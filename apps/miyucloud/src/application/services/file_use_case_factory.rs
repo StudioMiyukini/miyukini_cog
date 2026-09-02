@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_file_use_case_factory
+//! @do     definir_app_file_use_case_factory
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services file use case factory ».
+
 use std::sync::Arc;
 
 use crate::application::ports::file_ports::FileUseCaseFactory;

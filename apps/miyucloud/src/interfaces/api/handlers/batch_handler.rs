@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_batch_handler
+//! @do     definir_max_batch_size
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers batch handler ».
+
 use axum::{
     extract::{Json, State},
     http::StatusCode,

@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_sheets_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-sheets main ».
+
 //! Jay Sheets — tableur collaboratif.
 
 use dioxus::prelude::*;

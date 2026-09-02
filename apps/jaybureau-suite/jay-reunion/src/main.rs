@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jay_reunion_main
+//! @do     main
+//! @role   ui
+//! @layer  app
+//! @human  jaybureau-suite — module « jay-reunion main ».
+
 //! Jay Réunion — visioconférence collaborative.
 //!
 //! MVP : interface de salle (lobby + vue pre-call). La vidéo WebRTC sera

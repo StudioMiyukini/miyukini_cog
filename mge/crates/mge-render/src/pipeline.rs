@@ -1,3 +1,9 @@
+//! @id     crates_mge_render_pipeline
+//! @do     definir_max_instances
+//! @role   ui
+//! @layer  core
+//! @human  crates mge-render — module « pipeline ».
+
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
 

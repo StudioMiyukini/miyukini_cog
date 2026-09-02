@@ -1,3 +1,9 @@
+//! @id     jaykonta_domain_account
+//! @do     definir_counterparty
+//! @role   orchestration
+//! @layer  core
+//! @human  jaykonta — module « domain account ».
+
 //! Types de domaine Account (comptabilite entreprise).
 //!
 //! Couvre les entites : contrepartie, devis, lignes devis, facture,

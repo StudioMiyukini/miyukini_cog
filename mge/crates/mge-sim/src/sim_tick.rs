@@ -1,3 +1,9 @@
+//! @id     crates_mge_sim_sim_tick
+//! @do     definir_sim_event
+//! @role   orchestration
+//! @layer  core
+//! @human  crates mge-sim — module « sim tick ».
+
 use crate::civil_skills::ResourceKind;
 use crate::constants::*;
 use crate::entity::*;

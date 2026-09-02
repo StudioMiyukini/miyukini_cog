@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_services_mws_tunnel_service
+//! @do     definir_mws_tunnel_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure services mws tunnel service ».
+
 //! MWS Tunnel Service — wraps `miyuwebway_participant::MwsService` for
 //! registering Miyukini Cloud as a COG on the Webway network.
 //!

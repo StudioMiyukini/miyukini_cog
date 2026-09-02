@@ -1,3 +1,9 @@
+//! @id     miyucloud_infrastructure_adapters_error_adapters
+//! @do     implementer_from
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « infrastructure adapters error adapters ».
+
 //! Infrastructure Error Adapters
 //!
 //! This module contains error conversion adapters for infrastructure-specific errors.

@@ -1,3 +1,9 @@
+//! @id     central_components_header
+//! @do     header
+//! @role   ui
+//! @layer  app
+//! @human  central — module « components header ».
+
 //! Header principal Steam-like avec navigation par onglets.
 
 use crate::data::profile_display_name;

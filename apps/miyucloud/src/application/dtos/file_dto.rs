@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_dtos_file_dto
+//! @do     definir_file_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application dtos file dto ».
+
 use std::sync::Arc;
 
 use crate::domain::entities::file::File;

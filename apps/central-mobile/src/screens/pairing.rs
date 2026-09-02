@@ -1,3 +1,9 @@
+//! @id     central_mobile_screens_pairing
+//! @do     definir_pairing_step
+//! @role   ui
+//! @layer  app
+//! @human  central-mobile — module « screens pairing ».
+
 //! Écran d'appairage — connexion initiale au COG Host.
 //!
 //! Flow :

@@ -1,3 +1,9 @@
+//! @id     games_allumina_ui_minimap
+//! @do     definir_map_w
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « ui minimap ».
+
 //! Minimap: a simplified top-down view of the current map in the top-right
 //! corner. Walls/floor are tinted cells; the player, mobs, and loot are dots.
 

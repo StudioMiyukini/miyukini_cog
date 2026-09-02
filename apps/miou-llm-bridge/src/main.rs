@@ -1,3 +1,9 @@
+//! @id     miou_llm_bridge_main
+//! @do     declarer_module_agents
+//! @role   orchestration
+//! @layer  app
+//! @human  miou-llm-bridge — module « main ».
+
 //! MAIA — Miyukini AI Agents — Service IA local pour l'écosystème COG.
 //!
 //! Orchestrateur d'agents IA — délègue l'inférence GGUF à maia-llm (HTTP).

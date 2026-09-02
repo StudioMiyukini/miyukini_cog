@@ -1,3 +1,9 @@
+//! @id     origin_relay_tunnel
+//! @do     definir_tunnel_message
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « relay tunnel ».
+
 //! Tunnels de données entre COGs.
 //!
 //! Gère le relaying de données entre COGs connectés via le Relay.

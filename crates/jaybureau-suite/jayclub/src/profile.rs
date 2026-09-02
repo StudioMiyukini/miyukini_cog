@@ -1,3 +1,9 @@
+//! @id     jaybureau_suite_jayclub_profile
+//! @do     definir_profile
+//! @role   ui
+//! @layer  core
+//! @human  jaybureau-suite — module « jayclub profile ».
+
 //! Profil JayClub — bio, avatar, follows.
 
 use crate::UserId;

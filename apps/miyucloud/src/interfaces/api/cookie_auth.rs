@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_cookie_auth
+//! @do     definir_access_cookie
+//! @role   securite
+//! @layer  app
+//! @human  miyucloud — module « interfaces api cookie auth ».
+
 //! HttpOnly cookie helpers for secure token transport.
 //!
 //! Tokens are set as `HttpOnly; SameSite=Lax` cookies so that

@@ -1,3 +1,9 @@
+//! @id     miyumarket_protocol
+//! @do     definir_market_response
+//! @role   orchestration
+//! @layer  core
+//! @human  miyumarket — module « protocol ».
+
 //! Protocole Market — Messages échangés entre Central (client) et Origin (serveur).
 //!
 //! # Endpoints

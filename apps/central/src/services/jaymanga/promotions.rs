@@ -1,3 +1,9 @@
+//! @id     central_services_jaymanga_promotions
+//! @do     promotions
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaymanga promotions ».
+
 //! Gestion des promotions JayManga — réductions, campagnes promotionnelles.
 
 use dioxus::prelude::*;

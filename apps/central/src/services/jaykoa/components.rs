@@ -1,3 +1,9 @@
+//! @id     central_services_jaykoa_components
+//! @do     definir_calendar_header_props
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykoa components ».
+
 //! Composants UI réutilisables pour JayKoa.
 //!
 //! - CalendarHeader : barre d'en-tête avec navigation et sélecteur de vue

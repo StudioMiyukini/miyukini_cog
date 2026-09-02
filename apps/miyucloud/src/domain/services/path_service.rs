@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_services_path_service
+//! @do     definir_storage_path
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « domain services path service ».
+
 //! StoragePath - Domain Value Object for representing storage paths
 //!
 //! This module contains only the StoragePath Value Object which is part of the pure domain.

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_services_mod
+//! @do     declarer_module_admin_settings_service
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application services mod ».
+
 pub mod admin_settings_service;
 pub mod app_password_service;
 pub mod auth_application_service;

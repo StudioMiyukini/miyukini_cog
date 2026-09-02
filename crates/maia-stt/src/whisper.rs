@@ -1,3 +1,9 @@
+//! @id     maia_stt_whisper
+//! @do     definir_whisper_config
+//! @role   orchestration
+//! @layer  core
+//! @human  maia-stt — module « whisper ».
+
 //! Wrapper whisper-rs pour la transcription MAIA-STT.
 //!
 //! Compilé seulement avec la feature "whisper" (nécessite whisper.cpp compilé).

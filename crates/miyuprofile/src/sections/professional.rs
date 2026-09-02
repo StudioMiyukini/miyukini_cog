@@ -1,3 +1,9 @@
+//! @id     miyuprofile_sections_professional
+//! @do     definir_skill_level
+//! @role   orchestration
+//! @layer  core
+//! @human  miyuprofile — module « sections professional ».
+
 //! Section professionnelle — CV, expériences, compétences, formations.
 //!
 //! Données structurées pour exposer un CV, constituer un dossier

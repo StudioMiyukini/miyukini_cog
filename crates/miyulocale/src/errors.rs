@@ -1,3 +1,9 @@
+//! @id     miyulocale_errors
+//! @do     definir_miyu_locale_error
+//! @role   orchestration
+//! @layer  core
+//! @human  miyulocale — module « errors ».
+
 #[derive(Debug, Clone)]
 pub enum MiyuLocaleError {
     NoMandate,

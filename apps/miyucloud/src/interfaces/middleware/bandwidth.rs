@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_middleware_bandwidth
+//! @do     definir_bandwidth_counter
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces middleware bandwidth ».
+
 //! Per-user bandwidth throttling middleware.
 //!
 //! Tracks bytes transferred per authenticated user within a sliding window.

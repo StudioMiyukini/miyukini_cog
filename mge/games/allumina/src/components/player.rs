@@ -1,3 +1,9 @@
+//! @id     games_allumina_components_player
+//! @do     definir_player_tag
+//! @role   ui
+//! @layer  core
+//! @human  games allumina — module « components player ».
+
 //! Player-identity components. Stats and progression reuse `mge-gameplay`.
 
 use serde::{Deserialize, Serialize};

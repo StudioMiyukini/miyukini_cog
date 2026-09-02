@@ -1,3 +1,9 @@
+//! @id     origin_web_server
+//! @do     definir_route_response
+//! @role   orchestration
+//! @layer  app
+//! @human  origin — module « web server ».
+
 //! Serveur Web Origin — Implémentation HTTP.
 
 use super::{api, content::ContentManager, forum_auth, market, pages};

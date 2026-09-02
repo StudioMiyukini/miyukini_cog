@@ -1,3 +1,9 @@
+//! @id     miyukiniwatch_aggregates
+//! @do     definir_aggregate_id
+//! @role   orchestration
+//! @layer  core
+//! @human  miyukiniwatch — module « aggregates ».
+
 //! Calcul des agrégats exposés à Miou.
 //!
 //! Les structures de données d'agrégation ont des champs auto-explicatifs.

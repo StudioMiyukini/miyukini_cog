@@ -1,3 +1,9 @@
+//! @id     central_services_jaykonta_mod
+//! @do     declarer_module_sidebar
+//! @role   orchestration
+//! @layer  app
+//! @human  central — module « services jaykonta mod ».
+
 //! Module JayKonta — comptabilite unifiee Purse + Account.
 //!
 //! Architecture : sidebar + contenu dynamique par espace (Purse/Account).

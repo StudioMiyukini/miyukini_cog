@@ -1,3 +1,9 @@
+//! @id     miyucloud_domain_repositories_address_book_repository
+//! @do     definir_address_book_repository_result
+//! @role   donnee
+//! @layer  app
+//! @human  miyucloud — module « domain repositories address book repository ».
+
 use std::result::Result;
 use uuid::Uuid;
 

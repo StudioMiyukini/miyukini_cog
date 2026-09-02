@@ -1,3 +1,9 @@
+//! @id     miyucloud_dav_webdav_properties
+//! @do     resource_properties
+//! @role   orchestration
+//! @layer  core
+//! @human  miyucloud-dav — module « webdav properties ».
+
 use crate::common::dav_error::DavError;
 use crate::webdav::response::DavProperty;
 

@@ -1,3 +1,9 @@
+//! @id     miyucloud_application_ports_dedup_ports
+//! @do     definir_blob_metadata_dto
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « application ports dedup ports ».
+
 //! Deduplication Port - Application layer abstraction for content-addressable storage.
 //!
 //! This module defines the port (trait) and DTOs for deduplication operations,

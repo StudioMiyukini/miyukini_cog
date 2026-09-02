@@ -1,3 +1,9 @@
+//! @id     miyucloud_interfaces_api_handlers_chunked_upload_handler
+//! @do     definir_create_upload_request
+//! @role   orchestration
+//! @layer  app
+//! @human  miyucloud — module « interfaces api handlers chunked upload handler ».
+
 //! Chunked Upload Handler - TUS-like Protocol Endpoints
 //!
 //! Provides HTTP endpoints for resumable, parallel chunk uploads:
