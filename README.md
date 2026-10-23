@@ -34,7 +34,6 @@
 | **MiyukiniWatch** | Tableau de bord metriques et habitudes | Fonctionnel |
 | **MiyukiniClicker** | Jeu idle/clicker avec strategie et gestion de cite | Jouable |
 | **MiyukiniSurvivor** | Jeu Survivor + Tower Defense — tours, troupes, vagues | Jouable |
-| **MGE (Game Engine)** | Moteur de jeu multijoueur — simulation, crafting, pathfinding | En cours |
 
 ### Services en preparation
 
@@ -141,7 +140,6 @@ Miyukini n'est pas un simple logiciel. C'est un **environnement gouverne** (COG 
  70+ crates dans le workspace
  13 services et applications (dont 9 dans la suite Jay Bureau)
   2 jeux jouables
-  1 moteur de jeu (MGE)
   1 assistante domotique (Alicia)
   1 IA locale (MAIA — LLM + STT)
   1 cloud prive (Miyukini Cloud)

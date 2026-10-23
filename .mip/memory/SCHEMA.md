@@ -20,7 +20,6 @@
 ├── user-profile.md
 ├── certifications-index.md
 ├── patterns-and-lessons.md
-├── project-mge.md
 ├── project-miyuki-ui.md
 ├── project-miyucloud.md
 ├── project-file-map.md
@@ -59,7 +58,7 @@ Chaque fichier memoire doit commencer par un bloc MSCM :
 | `mem.master` | Vue d'ensemble | `mem.master.cog` |
 | `mem.profile` | Profil utilisateur | `mem.profile.user` |
 | `mem.patterns` | Patterns et lecons | `mem.patterns.lessons` |
-| `mem.project` | Projet/chantier | `mem.project.mge`, `mem.project.miyucloud` |
+| `mem.project` | Projet/chantier | `mem.project.miyucloud` |
 | `mem.index` | Index routage | `mem.index.certifications` |
 
 ### @role

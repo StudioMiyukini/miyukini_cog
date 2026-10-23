@@ -11,7 +11,7 @@
 ## Flux de chargement
 
 ```
-Tache (ex: refactor MGE) -> INDEX.md -> project-mge.md, patterns-and-lessons.md
+Tache (ex: refactor MiyuCloud) -> INDEX.md -> project-miyucloud.md, patterns-and-lessons.md
 Tache (ex: P0 cadrage)  -> MEMORY.md (vue d'ensemble)
 Tache (ex: P3 implementation) -> patterns-and-lessons.md (obligatoire)
 ```
@@ -22,7 +22,6 @@ Tache (ex: P3 implementation) -> patterns-and-lessons.md (obligatoire)
 |---------|---------|---------------|-----|
 | MEMORY.md | Vue d'ensemble, patterns top 5, erreurs top 3, etats | P0, P3, P6 | mem.master.cog |
 | patterns-and-lessons.md | Patterns, erreurs, anti-patterns | Avant P3, review code | mem.patterns.lessons |
-| project-mge.md | MGE decisions, architecture 4 couches, render reforge | Taches MGE | mem.project.mge |
 | project-miyuki-ui.md | Miyuki UI (tokens, dioxus, egui) | Taches UI, migration | mem.project.miyuki_ui |
 | project-miyucloud.md | MiyuCloud architecture, crypto, defauts en attente | Taches MiyuCloud | mem.project.miyucloud |
 | certifications-index.md | Index certifications | Audit, P0, P6 | mem.index.certifications |

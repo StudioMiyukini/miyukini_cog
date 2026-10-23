@@ -142,9 +142,6 @@ members = [
     # === MWS Origin ===
     "apps/origin",
 
-    # === MGE (Miyukini Game Engine) ===
-    # Workspace MGE indépendant : mge/ (voir mge/Cargo.toml)
-
     # === CentralRemote — Contrôle à distance de Central ===
     "crates/central-remote-protocol",
     "crates/central-remote",
