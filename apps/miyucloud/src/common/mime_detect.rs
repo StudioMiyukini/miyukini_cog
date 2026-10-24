@@ -104,14 +104,39 @@ pub async fn refine_content_type_from_file(
 /// 1. Always checks magic bytes regardless of the claimed type.
 /// 2. Rejects files whose detected type is in the blocklist.
 /// 3. Detects mismatches between claimed and actual type for executables.
+/// Explicit magic-byte detection of executable formats (ELF, PE/MZ, Mach-O).
+fn detect_executable(buf: &[u8]) -> Option<&'static str> {
+    const MACHO: [[u8; 4]; 6] = [
+        [0xFE, 0xED, 0xFA, 0xCE],
+        [0xFE, 0xED, 0xFA, 0xCF],
+        [0xCE, 0xFA, 0xED, 0xFE],
+        [0xCF, 0xFA, 0xED, 0xFE],
+        [0xCA, 0xFE, 0xBA, 0xBE],
+        [0xBE, 0xBA, 0xFE, 0xCA],
+    ];
+    if buf.starts_with(b"\x7fELF") {
+        Some("application/x-executable")
+    } else if buf.starts_with(b"MZ") {
+        Some("application/x-msdownload")
+    } else if buf.len() >= 4 && MACHO.iter().any(|m| buf[..4] == m[..]) {
+        Some("application/x-mach-binary")
+    } else {
+        None
+    }
+}
+
 pub fn validate_upload_mime(
     buf: &[u8],
     filename: &str,
     claimed: &str,
     blocked_types: &[String],
 ) -> Result<String, String> {
-    // Always detect via magic bytes for security (don't trust client blindly)
-    let detected = infer::get(buf).map(|k| k.mime_type().to_string());
+    // Always detect via magic bytes for security (don't trust client blindly).
+    // Executable formats are recognised explicitly first: `infer` does not
+    // report a short ELF header, which let an executable pass as an image.
+    let detected = detect_executable(buf)
+        .map(str::to_string)
+        .or_else(|| infer::get(buf).map(|k| k.mime_type().to_string()));
 
     // Check if detected type is blocked
     if let Some(ref detected_mime) = detected {
@@ -314,6 +339,15 @@ mod tests {
         let result = validate_upload_mime(elf, "safe.jpg", "image/jpeg", &blocked);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("blocked"));
+    }
+
+    #[test]
+    fn detects_executable_formats() {
+        assert_eq!(detect_executable(b"\x7fELF\x02\x01"), Some("application/x-executable"));
+        assert_eq!(detect_executable(b"MZ\x90\x00"), Some("application/x-msdownload"));
+        assert_eq!(detect_executable(&[0xCF, 0xFA, 0xED, 0xFE, 0, 0]), Some("application/x-mach-binary"));
+        assert_eq!(detect_executable(b"\x89PNG\r\n"), None);
+        assert_eq!(detect_executable(b"M"), None);
     }
 
     #[test]
