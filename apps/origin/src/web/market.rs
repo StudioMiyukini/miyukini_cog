@@ -19,11 +19,20 @@
 //! | POST    | /api/market/publish                  | Publication d'un package           |
 //! | DELETE  | /api/market/package/{id}/{version}   | Retrait d'un package               |
 //!
-//! # Sécurité (fail-closed)
+//! # Sécurité (fail-closed, inventaire #14 : plus de jeton partagé)
 //!
-//! - publish / unpublish exigent le jeton développeur/admin défini par la
-//!   variable d'environnement `MIYUKINI_MARKET_DEV_TOKEN` (>= 32 caractères),
-//!   comparé en temps constant. Variable absente → routes désactivées (503).
+//! - publish / unpublish sont des **requêtes signées** ([`miyauth::http`], usages
+//!   `origin/market-publication` et `origin/market-retrait`) par une clé d'éditeur
+//!   **officiel** épinglée dans `[market] editeurs_officiels` (décision 4 : paquets
+//!   officiels uniquement). Liste vide → routes désactivées (503). Les en-têtes
+//!   (clé épinglée, horodatage ± 5 min, nonce non rejoué) sont contrôlés **avant** la
+//!   lecture du corps ([`MarketStore::controler_entetes`]).
+//! - Le corps de publication (`miyumarket::protocol::encoder_corps_publication`)
+//!   porte le manifeste du catalogue et le **paquet signé** (`MSPS`) : son sceau
+//!   (`ManifestePaquet`) doit être signé par **la même** clé officielle que la
+//!   requête, et couvrir l'id, la version, le binaire et l'archive.
+//! - Une version publiée ne peut pas être remplacée par un contenu différent
+//!   (republication identique : sans effet).
 //! - `id` (`[a-z0-9_-]{1,64}`) et `version` (semver strict) sont validés avant
 //!   toute construction de chemin disque (anti-traversée).
 
@@ -34,13 +43,24 @@ use chrono::Utc;
 use rusqlite::Connection;
 use tokio::sync::Mutex;
 
-use super::forum_auth::secrets_equal;
+use miyauth::http::{
+    verifier_requete_signee, EntetesSignees, RefusHttp, RegistreNonces, ENTETE_HORODATAGE, ENTETE_NONCE,
+    ENTETE_SIGNATAIRE, ENTETE_SIGNATURE,
+};
 use miyumarket::manifest::{ServiceManifest, ServiceSource, ServiceType};
 use miyumarket::package;
 use miyumarket::protocol::{
-    MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult, PublishResponse,
-    UnpublishResponse,
+    decoder_corps_publication, MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult,
+    PublishResponse, UnpublishResponse, USAGE_PUBLICATION, USAGE_RETRAIT,
 };
+use miyumarket::signature::verifier_paquet;
+use miyusceau::{AncresDeConfiance, NiveauConfiance};
+use std::collections::HashSet;
+
+use super::forum_auth::header_value;
+
+/// Chemin signé de la publication.
+pub const CHEMIN_PUBLICATION: &str = "/api/market/publish";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MarketStore — Persistence SQLite + stockage fichiers
@@ -52,14 +72,35 @@ pub struct MarketStore {
     db: Arc<Mutex<Connection>>,
     /// Répertoire racine pour le stockage des packages.
     packages_dir: PathBuf,
-    /// Jeton développeur/admin (None = publication/retrait désactivés).
-    developer_token: Option<String>,
+    /// Clés publiques des éditeurs officiels (vide = publication/retrait désactivés).
+    editeurs_officiels: HashSet<[u8; 32]>,
+    /// Nonces des requêtes signées déjà acceptées.
+    nonces: RegistreNonces,
 }
 
-/// Variable d'environnement portant le jeton développeur/admin du Market.
-pub const DEV_TOKEN_ENV: &str = "MIYUKINI_MARKET_DEV_TOKEN";
-/// Longueur minimale du jeton développeur.
-const DEV_TOKEN_MIN_LEN: usize = 32;
+/// Refus d'une opération d'écriture du Market : statut HTTP + message.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RefusMarket {
+    /// Statut HTTP (400, 401, 409, 503…).
+    pub statut: u16,
+    /// Message.
+    pub message: String,
+}
+
+impl RefusMarket {
+    fn new(statut: u16, message: impl Into<String>) -> Self {
+        Self { statut, message: message.into() }
+    }
+
+    fn auth(e: &RefusHttp) -> Self {
+        tracing::warn!("Market : requête signée refusée : {e}");
+        if e.statut() == 503 {
+            Self::new(503, "Service saturé")
+        } else {
+            Self::new(401, "Requête non autorisée")
+        }
+    }
+}
 
 /// Valide l'identifiant d'un package : `[a-z0-9_-]{1,64}`.
 #[must_use]
@@ -105,7 +146,11 @@ pub fn is_valid_version(v: &str) -> bool {
 
 impl MarketStore {
     /// Ouvre (ou crée) le MarketStore.
-    pub fn open(db_path: impl AsRef<Path>, packages_dir: impl AsRef<Path>) -> Result<Self, String> {
+    pub fn open(
+        db_path: impl AsRef<Path>,
+        packages_dir: impl AsRef<Path>,
+        editeurs_officiels: &[[u8; 32]],
+    ) -> Result<Self, String> {
         std::fs::create_dir_all(packages_dir.as_ref())
             .map_err(|e| format!("Market packages dir: {e}"))?;
         let conn =
@@ -114,13 +159,12 @@ impl MarketStore {
         let store = Self {
             db: Arc::new(Mutex::new(conn)),
             packages_dir: packages_dir.as_ref().to_path_buf(),
-            developer_token: load_dev_token_from_env(),
+            editeurs_officiels: editeurs_officiels.iter().copied().collect(),
+            nonces: RegistreNonces::default(),
         };
-        if store.developer_token.is_none() {
+        if store.editeurs_officiels.is_empty() {
             tracing::warn!(
-                "{} absent ou trop court (< {} caractères) : publication/retrait Market désactivés",
-                DEV_TOKEN_ENV,
-                DEV_TOKEN_MIN_LEN
+                "[market] editeurs_officiels vide : publication/retrait Market désactivés"
             );
         }
         store.init_schema_sync()?;
@@ -129,21 +173,55 @@ impl MarketStore {
         Ok(store)
     }
 
-    /// Définit le jeton développeur (config/tests). Trop court ou vide → désactivé.
-    #[must_use]
-    pub fn with_developer_token(mut self, token: &str) -> Self {
-        self.developer_token = if token.len() >= DEV_TOKEN_MIN_LEN {
-            Some(token.to_string())
-        } else {
-            None
-        };
-        self
-    }
-
-    /// Publication/retrait activés (jeton configuré) ?
+    /// Publication/retrait activés (au moins un éditeur officiel épinglé) ?
     #[must_use]
     pub fn publish_enabled(&self) -> bool {
-        self.developer_token.is_some()
+        !self.editeurs_officiels.is_empty()
+    }
+
+    /// Contrôle des en-têtes signés **avant** lecture du corps : clé d'éditeur
+    /// officiel épinglée, horodatage, nonce non déjà vu.
+    pub fn controler_entetes(&self, headers: &[String], maintenant: u64) -> Result<EntetesSignees, RefusMarket> {
+        if !self.publish_enabled() {
+            return Err(RefusMarket::new(503, "Publication désactivée"));
+        }
+        let entetes = EntetesSignees::analyser(
+            header_value(headers, ENTETE_SIGNATAIRE).as_deref(),
+            header_value(headers, ENTETE_HORODATAGE).as_deref(),
+            header_value(headers, ENTETE_NONCE).as_deref(),
+            header_value(headers, ENTETE_SIGNATURE).as_deref(),
+        )
+        .map_err(|e| RefusMarket::auth(&e))?;
+        if !self.editeurs_officiels.contains(&entetes.signataire) {
+            return Err(RefusMarket::auth(&RefusHttp::SignataireNonAutorise));
+        }
+        entetes
+            .controler_horodatage(maintenant, self.nonces.fenetre())
+            .map_err(|e| RefusMarket::auth(&e))?;
+        if self.nonces.deja_vu(&entetes.kid(), &entetes.nonce) {
+            return Err(RefusMarket::auth(&RefusHttp::Rejeu));
+        }
+        Ok(entetes)
+    }
+
+    /// Vérifie complètement une requête signée (re-contrôle de l'épinglage inclus).
+    fn verifier_requete(
+        &self,
+        entetes: &EntetesSignees,
+        usage: &str,
+        methode: &str,
+        chemin: &str,
+        corps: &[u8],
+        maintenant: u64,
+    ) -> Result<(), RefusMarket> {
+        if !self.publish_enabled() {
+            return Err(RefusMarket::new(503, "Publication désactivée"));
+        }
+        if !self.editeurs_officiels.contains(&entetes.signataire) {
+            return Err(RefusMarket::auth(&RefusHttp::SignataireNonAutorise));
+        }
+        verifier_requete_signee(entetes, usage, methode, chemin, corps, &self.nonces, maintenant)
+            .map_err(|e| RefusMarket::auth(&e))
     }
 
     /// Initialise le schéma de la base.
@@ -363,37 +441,73 @@ impl MarketStore {
     // Publication
     // ═══════════════════════════════════════════════════════════════════════
 
-    /// Publie un package (manifeste + données brutes).
+    /// Publie un paquet signé (requête signée d'un éditeur officiel, voir l'en-tête du module).
     pub async fn publish(
         &self,
-        manifest: &ServiceManifest,
-        package_data: &[u8],
-        developer_token: &str,
-    ) -> Result<PublishResponse, String> {
-        // 1. Valider le manifeste
+        entetes: &EntetesSignees,
+        corps: &[u8],
+        maintenant: u64,
+    ) -> Result<PublishResponse, RefusMarket> {
+        // 1. Requête signée par un éditeur officiel épinglé (avant tout décodage).
+        self.verifier_requete(entetes, USAGE_PUBLICATION, "POST", CHEMIN_PUBLICATION, corps, maintenant)?;
+
+        // 2. Manifeste du catalogue : valide, officiel, id/version utilisables.
+        let (manifest, paquet) = decoder_corps_publication(corps).map_err(|e| RefusMarket::new(400, e))?;
         manifest
             .validate()
-            .map_err(|e| format!("Manifeste invalide : {e}"))?;
-
-        // 2. Vérifier le token développeur (fail-closed)
-        self.verify_developer_token(developer_token, &manifest.developer)?;
-
-        // 3. Calculer le checksum et valider le package
-        let info = package::validate_package(package_data, manifest)
-            .map_err(|e| format!("Package invalide : {e}"))?;
-
-        // 4. Stocker le fichier package
+            .map_err(|e| RefusMarket::new(400, format!("Manifeste invalide : {e}")))?;
+        if manifest.source != ServiceSource::Officiel {
+            return Err(RefusMarket::new(400, "Seuls les paquets officiels sont acceptés"));
+        }
         let full_path = self
             .package_path(&manifest.id, &manifest.version)
-            .ok_or_else(|| "Identifiant ou version de package invalide".to_string())?;
+            .ok_or_else(|| RefusMarket::new(400, "Identifiant ou version de package invalide"))?;
+
+        // 3. Sceau du paquet : même clé officielle que la requête, id/version/archive couverts.
+        let mut ancres = AncresDeConfiance::new();
+        ancres
+            .ajouter(&entetes.signataire, NiveauConfiance::Souverain)
+            .map_err(|_| RefusMarket::new(401, "Clé d'éditeur invalide"))?;
+        let verifie = verifier_paquet(paquet, &manifest.id, Some(&manifest.version), &ancres, maintenant)
+            .map_err(|e| RefusMarket::new(400, format!("Paquet refusé : {e}")))?;
+        if verifie.manifeste().nom_binaire != manifest.binary_name {
+            return Err(RefusMarket::new(400, "binary_name différent de la valeur signée"));
+        }
+        let checksum = package::sha256_hex(paquet);
+        let size = paquet.len() as u64;
+
+        let conn = self.db.lock().await;
+        // 4. Pas de substitution d'une version déjà publiée.
+        let existant: Option<(bool, String)> = conn
+            .query_row(
+                "SELECT downloadable, COALESCE(checksum, '') FROM market_services WHERE id = ?1 AND version = ?2",
+                rusqlite::params![manifest.id, manifest.version],
+                |r| Ok((r.get::<_, bool>(0)?, r.get::<_, String>(1)?)),
+            )
+            .ok();
+        if let Some((true, ancien)) = &existant {
+            if ancien != &checksum {
+                return Err(RefusMarket::new(409, "Version déjà publiée avec un contenu différent"));
+            }
+            return Ok(PublishResponse {
+                service_id: manifest.id.clone(),
+                version: manifest.version.clone(),
+                checksum,
+                package_size: size,
+            });
+        }
+
+        // 5. Écriture atomique du paquet signé (tel quel : Central revérifie le sceau).
         if let Some(parent) = full_path.parent() {
             std::fs::create_dir_all(parent)
-                .map_err(|e| format!("Création répertoire package : {e}"))?;
+                .map_err(|e| RefusMarket::new(500, format!("Création répertoire package : {e}")))?;
         }
-        std::fs::write(&full_path, package_data).map_err(|e| format!("Écriture package : {e}"))?;
+        let tmp = full_path.with_extension("tmp");
+        std::fs::write(&tmp, paquet)
+            .and_then(|()| std::fs::rename(&tmp, &full_path))
+            .map_err(|e| RefusMarket::new(500, format!("Écriture package : {e}")))?;
 
-        // 5. Enregistrer en base
-        let conn = self.db.lock().await;
+        // 6. Enregistrement en base.
         let stype = serde_json::to_string(&manifest.service_type).unwrap_or_default();
         let source = serde_json::to_string(&manifest.source).unwrap_or_default();
         let deps = serde_json::to_string(&manifest.dependencies).unwrap_or_default();
@@ -421,49 +535,54 @@ impl MarketStore {
                 perms,
                 tags,
                 manifest.homepage.as_deref().unwrap_or(""),
-                info.checksum,
-                info.size as i64,
+                checksum,
+                i64::try_from(size).unwrap_or(i64::MAX),
                 now,
             ],
         )
-        .map_err(|e| format!("Insertion Market DB : {e}"))?;
+        .map_err(|e| RefusMarket::new(500, format!("Insertion Market DB : {e}")))?;
+        tracing::info!(
+            "Market : {} {} publié par l'éditeur officiel {}",
+            manifest.id,
+            manifest.version,
+            hex::encode(&entetes.kid()[..8])
+        );
 
         Ok(PublishResponse {
             service_id: manifest.id.clone(),
             version: manifest.version.clone(),
-            checksum: info.checksum,
-            package_size: info.size,
+            checksum,
+            package_size: size,
         })
     }
 
-    /// Retire un package du Market.
+    /// Retire un package du Market (requête signée d'un éditeur officiel, corps vide).
     pub async fn unpublish(
         &self,
+        entetes: &EntetesSignees,
         service_id: &str,
         version: &str,
-        developer_token: &str,
-    ) -> Result<UnpublishResponse, String> {
-        // Le token est vérifié en premier (fail-closed), puis les paramètres de chemin.
-        self.verify_developer_token(developer_token, "")?;
+        maintenant: u64,
+    ) -> Result<UnpublishResponse, RefusMarket> {
+        // Les paramètres de chemin ne servent au disque qu'après validation.
         let full_path = self
             .package_path(service_id, version)
-            .ok_or_else(|| "Identifiant ou version de package invalide".to_string())?;
+            .ok_or_else(|| RefusMarket::new(400, "Identifiant ou version de package invalide"))?;
+        let chemin = format!("/api/market/package/{service_id}/{version}");
+        self.verifier_requete(entetes, USAGE_RETRAIT, "DELETE", &chemin, b"", maintenant)?;
         self.get_service(service_id)
             .await
-            .ok_or_else(|| format!("Service '{service_id}' introuvable"))?;
+            .ok_or_else(|| RefusMarket::new(404, format!("Service '{service_id}' introuvable")))?;
 
-        // Supprimer le fichier package
         if full_path.exists() {
             let _ = std::fs::remove_file(&full_path);
         }
-
-        // Supprimer de la base
         let conn = self.db.lock().await;
         conn.execute(
             "DELETE FROM market_services WHERE id = ?1 AND version = ?2",
             rusqlite::params![service_id, version],
         )
-        .map_err(|e| format!("Suppression Market DB : {e}"))?;
+        .map_err(|e| RefusMarket::new(500, format!("Suppression Market DB : {e}")))?;
 
         Ok(UnpublishResponse {
             service_id: service_id.to_string(),
@@ -485,29 +604,6 @@ impl MarketStore {
         Some(bytes)
     }
 
-    /// Vérifie un token développeur/admin contre la configuration (temps constant).
-    /// Configuration absente → refus systématique (fail-closed).
-    fn verify_developer_token(
-        &self,
-        token: &str,
-        _expected_developer: &str,
-    ) -> Result<(), String> {
-        let Some(expected) = self.developer_token.as_deref() else {
-            return Err("Publication désactivée (jeton non configuré)".into());
-        };
-        if token.is_empty() || !secrets_equal(token, expected) {
-            tracing::warn!("Market : jeton développeur invalide");
-            return Err("Token développeur invalide".into());
-        }
-        Ok(())
-    }
-}
-
-/// Charge le jeton développeur depuis l'environnement.
-fn load_dev_token_from_env() -> Option<String> {
-    let v = std::env::var(DEV_TOKEN_ENV).ok()?;
-    let v = v.trim();
-    (v.len() >= DEV_TOKEN_MIN_LEN).then(|| v.to_string())
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -698,64 +794,40 @@ pub async fn api_market_download(
     store.get_package_bytes(service_id, version).await
 }
 
-/// POST /api/market/publish — Publication (body JSON).
-pub async fn api_market_publish(store: &MarketStore, body: &str) -> String {
-    let req: Result<miyumarket::protocol::PublishRequest, _> = serde_json::from_str(body);
-    match req {
-        Ok(publish_req) => {
-            // Phase 1 : le package data est vide (seul le manifeste est enregistré)
-            // Phase 2 : le body sera multipart avec le fichier .msp
-            match store
-                .publish(&publish_req.manifest, &[], &publish_req.developer_token)
-                .await
-            {
-                Ok(resp) => {
-                    let r = MarketResponse::ok(resp);
-                    serde_json::to_string_pretty(&r).unwrap_or_default()
-                }
-                Err(e) => {
-                    let r = MarketResponse::<PublishResponse>::err(e);
-                    serde_json::to_string_pretty(&r).unwrap_or_default()
-                }
-            }
-        }
-        Err(e) => {
-            let r = MarketResponse::<PublishResponse>::err(format!("JSON invalide : {e}"));
-            serde_json::to_string_pretty(&r).unwrap_or_default()
-        }
+/// Réponse JSON d'une opération d'écriture : `(statut HTTP, corps)`.
+fn reponse_ecriture<T: serde::Serialize>(resultat: Result<T, RefusMarket>) -> (u16, String) {
+    match resultat {
+        Ok(data) => (200, serde_json::to_string_pretty(&MarketResponse::ok(data)).unwrap_or_default()),
+        Err(e) => (
+            e.statut,
+            serde_json::to_string_pretty(&MarketResponse::<()>::err(e.message)).unwrap_or_default(),
+        ),
     }
 }
 
-/// DELETE /api/market/package/{id}/{version} — Retrait.
+/// POST /api/market/publish — Publication (corps binaire signé, en-têtes déjà analysés).
+pub async fn api_market_publish(
+    store: &MarketStore,
+    entetes: &EntetesSignees,
+    corps: &[u8],
+    maintenant: u64,
+) -> (u16, String) {
+    reponse_ecriture(store.publish(entetes, corps, maintenant).await)
+}
+
+/// DELETE /api/market/package/{id}/{version} — Retrait (requête signée, corps vide).
 pub async fn api_market_unpublish(
     store: &MarketStore,
+    entetes: &EntetesSignees,
     service_id: &str,
     version: &str,
-    body: &str,
-) -> String {
-    // Le body contient le developer_token
-    #[derive(serde::Deserialize)]
-    struct TokenBody {
-        developer_token: String,
-    }
-
-    let token = serde_json::from_str::<TokenBody>(body)
-        .map(|t| t.developer_token)
-        .unwrap_or_default();
-
-    match store.unpublish(service_id, version, &token).await {
-        Ok(resp) => {
-            let r = MarketResponse::ok(resp);
-            serde_json::to_string_pretty(&r).unwrap_or_default()
-        }
-        Err(e) => {
-            let r = MarketResponse::<UnpublishResponse>::err(e);
-            serde_json::to_string_pretty(&r).unwrap_or_default()
-        }
-    }
+    maintenant: u64,
+) -> (u16, String) {
+    reponse_ecriture(store.unpublish(entetes, service_id, version, maintenant).await)
 }
 
 #[cfg(test)]
+#[allow(clippy::many_single_char_names)]
 mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -774,7 +846,7 @@ mod tests {
     #[test]
     fn open_marks_seed_service_as_not_downloadable_without_package() {
         let (root, db_path, packages_dir) = temp_market_paths("missing");
-        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        let store = MarketStore::open(&db_path, &packages_dir, &[]).expect("market store");
         let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
 
         let entry = runtime
@@ -788,7 +860,7 @@ mod tests {
     #[test]
     fn seed_contains_miyucloud_as_official_service() {
         let (root, db_path, packages_dir) = temp_market_paths("miyucloud-seed");
-        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        let store = MarketStore::open(&db_path, &packages_dir, &[]).expect("market store");
         let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
 
         let entry = runtime
@@ -812,7 +884,7 @@ mod tests {
         std::fs::create_dir_all(package_path.parent().expect("package parent")).expect("mkdir");
         std::fs::write(&package_path, b"dummy package").expect("write package");
 
-        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        let store = MarketStore::open(&db_path, &packages_dir, &[]).expect("market store");
         let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
 
         let entry = runtime
@@ -829,7 +901,60 @@ mod tests {
         let _ = std::fs::remove_dir_all(root);
     }
 
-    const TEST_TOKEN: &str = "market-dev-token-0123456789abcdefghij";
+    use miyauth::http::signer_requete;
+    use miyumarket::protocol::encoder_corps_publication;
+    use miyumarket::signature::signer_paquet;
+    use miyusceau::CleSignature;
+
+    fn maintenant() -> u64 {
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
+    }
+
+    fn entetes_brutes(e: &EntetesSignees) -> Vec<String> {
+        e.en_entetes().iter().map(|(k, v)| format!("{k}: {v}\r\n")).collect()
+    }
+
+    fn manifeste(id: &str, version: &str, source: ServiceSource) -> ServiceManifest {
+        let mut m = official_catalog_seed().remove(0);
+        m.id = id.to_string();
+        m.version = version.to_string();
+        m.source = source;
+        m.binary_name = Some(format!("{id}.exe"));
+        m
+    }
+
+    /// Corps de publication : manifeste + paquet scellé par `cle_paquet`.
+    fn corps(m: &ServiceManifest, archive: &[u8], cle_paquet: &CleSignature) -> Vec<u8> {
+        let paquet = signer_paquet(archive, &m.id, &m.version, m.binary_name.as_deref(), cle_paquet).unwrap();
+        encoder_corps_publication(m, &paquet).unwrap()
+    }
+
+    /// Contrôle des en-têtes puis publication (comme le serveur).
+    fn publier(store: &MarketStore, cle_requete: &CleSignature, corps: &[u8]) -> Result<PublishResponse, RefusMarket> {
+        let t = maintenant();
+        let e = signer_requete(cle_requete, USAGE_PUBLICATION, "POST", CHEMIN_PUBLICATION, corps, t);
+        let e = store.controler_entetes(&entetes_brutes(&e), t)?;
+        tokio::runtime::Runtime::new().unwrap().block_on(store.publish(&e, corps, t))
+    }
+
+    struct Banc {
+        root: PathBuf,
+        store: MarketStore,
+        officiel: CleSignature,
+    }
+
+    fn banc(nom: &str) -> Banc {
+        let (root, db_path, packages_dir) = temp_market_paths(nom);
+        let officiel = CleSignature::generer();
+        let store = MarketStore::open(&db_path, &packages_dir, &[officiel.cle_publique()]).expect("market store");
+        Banc { root, store, officiel }
+    }
+
+    impl Drop for Banc {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.root);
+        }
+    }
 
     #[test]
     fn version_et_id_valides_et_invalides() {
@@ -846,51 +971,102 @@ mod tests {
 
     #[test]
     fn package_path_refuse_la_traversee() {
-        let (root, db_path, packages_dir) = temp_market_paths("traversal");
-        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
-        assert!(store.package_path("jaykoa", "../x").is_none());
-        assert!(store.package_path("../jaykoa", "1.0.0").is_none());
-        assert!(store.package_path("jaykoa", "1.0.0").is_some());
+        let b = banc("traversal");
+        assert!(b.store.package_path("jaykoa", "../x").is_none());
+        assert!(b.store.package_path("../jaykoa", "1.0.0").is_none());
+        assert!(b.store.package_path("jaykoa", "1.0.0").is_some());
         let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
-        assert!(runtime
-            .block_on(store.get_package_bytes("jaykoa", "../x"))
-            .is_none());
-        let _ = std::fs::remove_dir_all(root);
+        assert!(runtime.block_on(b.store.get_package_bytes("jaykoa", "../x")).is_none());
     }
 
     #[test]
-    fn token_developpeur_invalide_ou_absent_refuse() {
-        let (root, db_path, packages_dir) = temp_market_paths("token");
-        let store = MarketStore::open(&db_path, &packages_dir)
-            .expect("market store")
-            .with_developer_token(TEST_TOKEN);
-        assert!(store.publish_enabled());
-        assert!(store.verify_developer_token("", "dev").is_err());
-        assert!(store.verify_developer_token("mauvais", "dev").is_err());
-        assert!(store.verify_developer_token(TEST_TOKEN, "dev").is_ok());
+    fn publication_signee_officielle_acceptee_et_telechargeable() {
+        let b = banc("pub-ok");
+        let m = manifeste("svcok", "1.0.0", ServiceSource::Officiel);
+        let c = corps(&m, b"PK\x03\x04 archive", &b.officiel);
+        let r = publier(&b.store, &b.officiel, &c).expect("publication");
+        assert_eq!(r.service_id, "svcok");
+        let runtime = tokio::runtime::Runtime::new().unwrap();
+        let octets = runtime.block_on(b.store.get_package_bytes("svcok", "1.0.0")).expect("paquet stocké");
+        assert!(miyumarket::signature::est_paquet_signe(&octets));
+        assert_eq!(package::sha256_hex(&octets), r.checksum);
+        // Republication identique : sans effet ; contenu différent : refus (pas de substitution).
+        assert!(publier(&b.store, &b.officiel, &c).is_ok());
+        let autre = corps(&m, b"PK\x03\x04 autre archive", &b.officiel);
+        assert_eq!(publier(&b.store, &b.officiel, &autre).unwrap_err().statut, 409);
+    }
 
-        // Config absente : tout est refusé, même un jeton « plausible ».
-        let store = store.with_developer_token("");
+    #[test]
+    fn publication_non_signee_forgee_rejouee_ou_editeur_inconnu_refusee() {
+        let b = banc("pub-ko");
+        let m = manifeste("svcko", "1.0.0", ServiceSource::Officiel);
+        let c = corps(&m, b"PK archive", &b.officiel);
+        let t = maintenant();
+        // Aucun en-tête signé (ancien schéma à jeton).
+        assert_eq!(b.store.controler_entetes(&[], t).unwrap_err().statut, 401);
+        // Éditeur non épinglé.
+        let inconnu = CleSignature::generer();
+        assert_eq!(publier(&b.store, &inconnu, &corps(&m, b"PK archive", &inconnu)).unwrap_err().statut, 401);
+        // Requête officielle, paquet scellé par une autre clé.
+        assert_eq!(publier(&b.store, &b.officiel, &corps(&m, b"PK archive", &inconnu)).unwrap_err().statut, 400);
+        // Paquet tiers.
+        let tiers = manifeste("svcko", "1.0.0", ServiceSource::Tiers);
+        assert_eq!(publier(&b.store, &b.officiel, &corps(&tiers, b"PK archive", &b.officiel)).unwrap_err().statut, 400);
+        // binary_name du catalogue différent de la valeur signée.
+        let mut m2 = m.clone();
+        let paquet = signer_paquet(b"PK archive", &m.id, &m.version, Some("autre.exe"), &b.officiel).unwrap();
+        m2.binary_name = Some("svcko.exe".into());
+        let c2 = encoder_corps_publication(&m2, &paquet).unwrap();
+        assert_eq!(publier(&b.store, &b.officiel, &c2).unwrap_err().statut, 400);
+        // Corps altéré après signature.
+        let e = signer_requete(&b.officiel, USAGE_PUBLICATION, "POST", CHEMIN_PUBLICATION, &c, t);
+        let mut altere = c.clone();
+        let n = altere.len();
+        altere[n - 1] ^= 1;
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        assert_eq!(rt.block_on(b.store.publish(&e, &altere, t)).unwrap_err().statut, 401);
+        // Requête valide une fois, puis rejeu refusé (en-têtes et vérification).
+        assert!(rt.block_on(b.store.publish(&e, &c, t)).is_ok());
+        assert_eq!(b.store.controler_entetes(&entetes_brutes(&e), t).unwrap_err().statut, 401);
+        assert_eq!(rt.block_on(b.store.publish(&e, &c, t)).unwrap_err().statut, 401);
+        // Requête périmée.
+        let vieille = signer_requete(&b.officiel, USAGE_PUBLICATION, "POST", CHEMIN_PUBLICATION, &c, t - 3600);
+        assert_eq!(b.store.controler_entetes(&entetes_brutes(&vieille), t).unwrap_err().statut, 401);
+        // Signature d'un retrait présentée comme publication (séparation des usages).
+        let retrait = signer_requete(&b.officiel, USAGE_RETRAIT, "POST", CHEMIN_PUBLICATION, &c, t);
+        assert_eq!(rt.block_on(b.store.publish(&retrait, &c, t)).unwrap_err().statut, 401);
+    }
+
+    #[test]
+    fn sans_editeur_officiel_publication_desactivee() {
+        let (root, db_path, packages_dir) = temp_market_paths("disabled");
+        let store = MarketStore::open(&db_path, &packages_dir, &[]).expect("market store");
         assert!(!store.publish_enabled());
-        assert!(store.verify_developer_token(TEST_TOKEN, "dev").is_err());
-        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
-        assert!(runtime
-            .block_on(store.unpublish("jaykoa", "0.1.0", TEST_TOKEN))
-            .is_err());
+        let cle = CleSignature::generer();
+        let e = signer_requete(&cle, USAGE_PUBLICATION, "POST", CHEMIN_PUBLICATION, b"", maintenant());
+        assert_eq!(store.controler_entetes(&entetes_brutes(&e), maintenant()).unwrap_err().statut, 503);
         let _ = std::fs::remove_dir_all(root);
     }
 
     #[test]
-    fn unpublish_refuse_version_traversante_meme_avec_bon_token() {
-        let (root, db_path, packages_dir) = temp_market_paths("unpub");
-        let store = MarketStore::open(&db_path, &packages_dir)
-            .expect("market store")
-            .with_developer_token(TEST_TOKEN);
-        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
-        let err = runtime
-            .block_on(store.unpublish("jaykoa", "../x", TEST_TOKEN))
-            .expect_err("doit être refusé");
-        assert!(err.contains("invalide"));
-        let _ = std::fs::remove_dir_all(root);
+    fn retrait_signe_accepte_et_refus() {
+        let b = banc("unpub");
+        let m = manifeste("svcdel", "1.0.0", ServiceSource::Officiel);
+        publier(&b.store, &b.officiel, &corps(&m, b"PK archive", &b.officiel)).unwrap();
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let t = maintenant();
+        let chemin = "/api/market/package/svcdel/1.0.0";
+        // Traversée refusée même signée.
+        let e = signer_requete(&b.officiel, USAGE_RETRAIT, "DELETE", "/api/market/package/svcdel/../x", b"", t);
+        assert_eq!(rt.block_on(b.store.unpublish(&e, "svcdel", "../x", t)).unwrap_err().statut, 400);
+        // Inconnu, puis signature d'un autre chemin.
+        let inconnu = signer_requete(&CleSignature::generer(), USAGE_RETRAIT, "DELETE", chemin, b"", t);
+        assert_eq!(rt.block_on(b.store.unpublish(&inconnu, "svcdel", "1.0.0", t)).unwrap_err().statut, 401);
+        let autre = signer_requete(&b.officiel, USAGE_RETRAIT, "DELETE", "/api/market/package/jaykoa/0.1.0", b"", t);
+        assert_eq!(rt.block_on(b.store.unpublish(&autre, "svcdel", "1.0.0", t)).unwrap_err().statut, 401);
+        // Valide.
+        let e = signer_requete(&b.officiel, USAGE_RETRAIT, "DELETE", chemin, b"", t);
+        assert!(rt.block_on(b.store.unpublish(&e, "svcdel", "1.0.0", t)).is_ok());
+        assert!(rt.block_on(b.store.get_package_bytes("svcdel", "1.0.0")).is_none());
     }
 }

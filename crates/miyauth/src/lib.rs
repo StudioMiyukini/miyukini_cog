@@ -16,6 +16,8 @@ pub mod admin_cell;
 pub mod attest;
 pub mod context;
 pub mod errors;
+#[cfg(feature = "http")]
+pub mod http;
 pub mod pairwise;
 pub mod passeport;
 pub mod resolve;

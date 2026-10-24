@@ -168,7 +168,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .tracker
         .forum_profiles_db_path
         .as_ref()
-        .and_then(|path| match web::forum_auth::ForumAuthStore::open(path) {
+        .and_then(|path| match web::forum_auth::ParametresForum::depuis_config(&config.forum)
+            .and_then(|parametres| web::forum_auth::ForumAuthStore::open(path, parametres))
+        {
             Ok(store) => {
                 info!("Forum auth activée (/api/auth/forum/*) — base: {}", path);
                 Some(Arc::new(store))
@@ -199,12 +201,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Service Market (catalogue + packages)
     // Ouvert dans spawn_blocking car MarketStore::open utilise blocking_lock pour l'init SQLite.
     let data_dir = config.registry.data_dir.clone();
-    let market_store: Option<Arc<web::MarketStore>> = {
+    let editeurs_officiels: Result<Vec<[u8; 32]>, String> = config
+        .market
+        .editeurs_officiels
+        .iter()
+        .map(|c| {
+            miyumarket::signature::cle_publique_depuis_hex(c)
+                .ok_or_else(|| format!("market.editeurs_officiels : clé invalide « {c} »"))
+        })
+        .collect();
+    let market_store: Option<Arc<web::MarketStore>> = match editeurs_officiels {
+        Err(e) => {
+            error!("Service Market désactivé : {}", e);
+            None
+        }
+        Ok(editeurs_officiels) => {
         let db_path = std::path::Path::new(&data_dir).join("market.db");
         let packages_dir = std::path::Path::new(&data_dir).join("packages");
         let db_p = db_path.clone();
         let pkg_p = packages_dir.clone();
-        match tokio::task::spawn_blocking(move || web::MarketStore::open(&db_p, &pkg_p)).await {
+        match tokio::task::spawn_blocking(move || web::MarketStore::open(&db_p, &pkg_p, &editeurs_officiels)).await {
             Ok(Ok(store)) => {
                 info!(
                     "Service Market activé (/api/market/*) — base: {}",
@@ -220,6 +236,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 error!("Service Market: spawn_blocking panicked: {}", e);
                 None
             }
+        }
         }
     };
 

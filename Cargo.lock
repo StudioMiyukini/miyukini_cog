@@ -6978,6 +6978,7 @@ dependencies = [
  "jaykoa-client",
  "jaykonta-client",
  "jaymeteo-client",
+ "miyauth",
  "miyualicia-capture",
  "miyualicia-wakeword",
  "miyuki-ui-dioxus",
@@ -7056,11 +7057,12 @@ dependencies = [
  "chrono",
  "ed25519-dalek",
  "hex",
- "hmac",
  "jay-collab",
  "jaybureau-core",
+ "miyauth",
  "miyukini-kernel",
  "miyumarket",
+ "miyusceau",
  "miyuwebway_participant",
  "miyuwebway_tracker",
  "rand 0.8.5",
@@ -7106,6 +7108,8 @@ dependencies = [
 name = "miyukinibb"
 version = "0.1.0"
 dependencies = [
+ "miyauth",
+ "miyusceau",
  "serde",
  "serde_json",
  "thiserror 2.0.18",

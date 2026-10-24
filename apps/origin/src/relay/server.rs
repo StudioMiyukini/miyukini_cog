@@ -45,7 +45,7 @@ use super::tunnel::{TunnelManager, TunnelMessage};
 use super::verification::Verifier;
 use crate::config::OriginConfig;
 use crate::protocol::{
-    CoreKeyPayload, Frame, MessageType, RegisterErrPayload, RegisterErrorCode, RegisterOkPayload,
+    Frame, MessageType, RegisterErrPayload, RegisterErrorCode, RegisterOkPayload,
     RegisterPayload, ServiceBlockPayload, VerifyPhase, VerifyResult, VerifyResultPayload,
     ED25519_SIGNATURE_SIZE, SESSION_ID_SIZE,
 };
@@ -249,7 +249,6 @@ impl RelayServer {
         let tls_acceptor = Self::setup_tls(&config).await?;
         let mut serveur = Self::sans_tls(config, permis_registry, identites)?;
         serveur.tls_acceptor = Some(tls_acceptor);
-        serveur.ctx.verifier.load_keys().await.ok();
         Ok(serveur)
     }
 
@@ -261,15 +260,15 @@ impl RelayServer {
     ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
         if !config.relay.strict_verification {
             warn!(
-                "Relay en mode NON STRICT (relay.strict_verification = false) : la Phase A \
-                 (clé Cores) et la Phase C sont ignorées. La preuve d'identité signée reste exigée."
+                "Relay en mode NON STRICT (relay.strict_verification = false) : la Phase C \
+                 (santé déclarée) est ignorée. La preuve d'identité signée reste exigée."
             );
         }
 
         let sessions = Arc::new(SessionManager::new(i64::from(
             config.limits.tunnel_timeout_seconds,
         )));
-        let verifier = Arc::new(Verifier::new(config.cores.keys_dir.clone()));
+        let verifier = Arc::new(Verifier::new());
 
         // Préparer la liste des trackers
         let tracker_addresses = serde_json::to_vec(&vec![format!(
@@ -850,26 +849,40 @@ impl RelayServer {
         }
         ctx.sessions.register_cog(cog_id.clone(), session_id).await;
 
-        // Mode strict : demander CORE_KEY (Phase A) puis Phase C, pas de REGISTER_OK ici
-        if ctx.config.relay.strict_verification {
-            let response = VerifyResultPayload::new(
-                session_id,
-                VerifyPhase::PhaseA,
-                VerifyResult::ExtendedRequired,
-                Bytes::from_static(b"Send CORE_KEY"),
-            );
-            return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
+        // Phase A (lot 2, inventaire #17) : la preuve d'identité REGISTER vérifiée
+        // ci-dessus (signature du défi par la clé dont `cog_id` est l'empreinte, clé
+        // épinglée compatible) EST la Phase A. L'ancienne « clé de conformité des Cores »,
+        // statique et livrée dans chaque binaire, n'entre plus dans aucune décision : plus
+        // de CORE_KEY demandé (la doc gelée ne spécifie pas d'attestation de build scellée).
+        let phase_a = Verifier::verify_phase_a(session.read().await.identite_verifiee);
+        metrics.record_phase_a(phase_a == VerifyResult::Ok);
+        if phase_a != VerifyResult::Ok {
+            session.write().await.close();
+            return Self::refus(RegisterErrorCode::AuthFailed, b"Signed identity proof required");
         }
+        session.write().await.complete_phase_a();
 
-        // Mode non strict (explicite, journalisé au démarrage) : pas de Phase A/C,
-        // mais identité prouvée ci-dessus.
-        {
-            let mut s = session.write().await;
-            s.phase_a_passed = true;
-            s.phase_c_passed = true;
+        if ctx.config.relay.strict_verification {
+            // Mode strict : Phase C (santé déclarée de l'environnement) avant le permis.
+            let environment_health = session.read().await.environment_health.clone().unwrap_or_else(Bytes::new);
+            let phase_c_ok = ctx.verifier.verify_phase_c(&environment_health).await == VerifyResult::Ok;
+            metrics.record_phase_c(phase_c_ok);
+            if !phase_c_ok {
+                let mut s = session.write().await;
+                s.state = SessionState::VerifyingPhaseC;
+                let response = VerifyResultPayload::new(
+                    session_id,
+                    VerifyPhase::PhaseC,
+                    VerifyResult::Fail,
+                    Bytes::from_static(b"Environment health check failed"),
+                );
+                return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
+            }
+        } else {
+            // Mode non strict (explicite, journalisé au démarrage) : pas de Phase C.
+            metrics.record_phase_c(true);
         }
-        metrics.record_phase_a(true);
-        metrics.record_phase_c(true);
+        session.write().await.phase_c_passed = true;
 
         Some(Self::delivrer_permis(session, ctx, &cog_id, client_ip).await)
     }
@@ -946,78 +959,20 @@ impl RelayServer {
         Frame::new(MessageType::RegisterOk, response.to_bytes())
     }
 
-    /// Traite un message `CORE_KEY`.
+    /// Traite un message `CORE_KEY` : **obsolète** (inventaire #17).
     ///
-    /// Accepté uniquement après un REGISTER dont l'identité a été prouvée, en Phase A.
+    /// La clé statique des Cores ne prouve rien (elle est dans chaque binaire) et n'est
+    /// plus demandée ; un `CORE_KEY` reçu est une erreur de protocole, refusée sans
+    /// effet sur la session (aucune phase n'en dépend).
     async fn handle_core_key(
-        payload: &Bytes,
-        session: &Arc<RwLock<Session>>,
+        _payload: &Bytes,
+        _session: &Arc<RwLock<Session>>,
         ctx: &ContexteRelay,
-        client_ip: std::net::IpAddr,
+        _client_ip: std::net::IpAddr,
     ) -> Option<Frame> {
-        let metrics = &ctx.metrics;
-        let core_key = match CoreKeyPayload::parse(payload.clone()) {
-            Ok(k) => k,
-            Err(e) => {
-                warn!("Failed to parse CORE_KEY: {}", e);
-                metrics.record_parse_error();
-                return None;
-            }
-        };
-
-        let (core_version, cog_id, session_id) = {
-            let s = session.read().await;
-            if !s.identite_verifiee || s.state != SessionState::VerifyingPhaseA {
-                warn!("CORE_KEY refused: no proven identity or wrong phase");
-                metrics.record_protocol_error();
-                return Self::refus(RegisterErrorCode::AuthFailed, b"REGISTER proof required first");
-            }
-            (
-                s.core_version.clone().unwrap_or_default(),
-                s.cog_id.clone().unwrap_or_default(),
-                s.id,
-            )
-        };
-        if core_key.session_id != session_id {
-            metrics.record_protocol_error();
-            return Self::refus(RegisterErrorCode::AuthFailed, b"Session mismatch");
-        }
-
-        let result = ctx.verifier.verify_phase_a(&core_version, &core_key.key).await;
-        let passed_a = result == VerifyResult::Ok;
-        metrics.record_phase_a(passed_a);
-
-        if !passed_a {
-            ctx.rate_limiter.record_failed_registration(client_ip).await;
-            let response =
-                VerifyResultPayload::new(session_id, VerifyPhase::PhaseA, result, Bytes::new());
-            return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
-        }
-
-        session.write().await.complete_phase_a();
-
-        // Après Phase A OK : Phase C puis REGISTER_OK
-        let environment_health = {
-            let s = session.read().await;
-            s.environment_health.clone().unwrap_or_else(Bytes::new)
-        };
-        let phase_c_result = ctx.verifier.verify_phase_c(&environment_health).await;
-        let phase_c_ok = phase_c_result == VerifyResult::Ok;
-        metrics.record_phase_c(phase_c_ok);
-
-        if !phase_c_ok {
-            let mut s = session.write().await;
-            s.state = SessionState::VerifyingPhaseC;
-            let response = VerifyResultPayload::new(
-                session_id,
-                VerifyPhase::PhaseC,
-                VerifyResult::Fail,
-                Bytes::from_static(b"Environment health check failed"),
-            );
-            return Some(Frame::new(MessageType::VerifyResult, response.to_bytes()));
-        }
-
-        Some(Self::delivrer_permis(session, ctx, &cog_id, client_ip).await)
+        warn!("CORE_KEY obsolète reçu : ignoré (Phase A = identité REGISTER signée)");
+        ctx.metrics.record_protocol_error();
+        Self::refus(RegisterErrorCode::AuthFailed, b"CORE_KEY obsolete")
     }
 
     /// Traite un message `SERVICE_BLOCK` (identité prouvée requise).
@@ -1295,7 +1250,7 @@ mod tests {
         let (session, r) = enregistrer(&serveur, &identite).await;
         assert_eq!(
             r.expect("réponse").header.message_type,
-            MessageType::VerifyResult
+            MessageType::RegisterOk
         );
         let defi = session.read().await.defi;
         let payload = register_client(&identite.cog_id()).to_origin_bytes_signe(
@@ -1312,14 +1267,9 @@ mod tests {
     #[tokio::test]
     async fn flux_strict_complet_et_permis_lie() {
         let (serveur, permis, identites) = serveur(true);
-        serveur
-            .ctx
-            .verifier
-            .add_core_key("1.0.0".to_string(), Sha256::digest(b"cle-cores").to_vec())
-            .await;
         let identite = IdentiteCog::generer();
 
-        // CORE_KEY avant REGISTER : refusé.
+        // CORE_KEY (obsolète) avant REGISTER : refusé, sans effet.
         let session_anonyme = serveur.ctx.sessions.create(adresse()).await;
         let id_anonyme = session_anonyme.read().await.id;
         let mut ck = BytesMut::new();
@@ -1330,14 +1280,19 @@ mod tests {
             .await
             .expect("réponse");
         assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+        assert!(session_anonyme.read().await.permis.is_none());
 
-        // REGISTER signé → VERIFY_RESULT (Phase A demandée).
+        // #17 : REGISTER signé → REGISTER_OK directement (Phase A = identité prouvée,
+        // Phase C passée), sans aucune clé de Cores. Permis lié au cog_id prouvé.
         let (session, r) = enregistrer(&serveur, &identite).await;
-        assert_eq!(r.expect("réponse").header.message_type, MessageType::VerifyResult);
-        // Pas encore épinglé : les phases du mode strict ne sont pas passées.
-        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_none());
+        assert_eq!(r.expect("réponse").header.message_type, MessageType::RegisterOk);
+        let permis_id = session.read().await.permis.clone().expect("permis").permis_id;
+        assert!(permis.is_valid_for(&permis_id, &identite.cog_id()).await);
+        assert!(!permis.is_valid_for(&permis_id, &IdentiteCog::generer().cog_id()).await);
+        // Épinglé seulement à la délivrance du permis.
+        assert_eq!(identites.cle_epinglee(&identite.cog_id()).await, Some(identite.cle_publique()));
 
-        // CORE_KEY → REGISTER_OK, permis lié au cog_id prouvé.
+        // Une ancienne clé de Cores envoyée après coup ne change rien (refus, permis conservé).
         let id = session.read().await.id;
         let mut ck = BytesMut::new();
         ck.extend_from_slice(&id);
@@ -1346,25 +1301,18 @@ mod tests {
         let r = RelayServer::handle_core_key(&ck.freeze(), &session, &serveur.ctx, adresse().ip())
             .await
             .expect("réponse");
-        assert_eq!(r.header.message_type, MessageType::RegisterOk);
-        let permis_id = session.read().await.permis.clone().expect("permis").permis_id;
-        assert!(permis.is_valid_for(&permis_id, &identite.cog_id()).await);
-        assert!(!permis.is_valid_for(&permis_id, &IdentiteCog::generer().cog_id()).await);
-        // Épinglé seulement après la délivrance du permis.
-        assert_eq!(
-            identites.cle_epinglee(&identite.cog_id()).await,
-            Some(identite.cle_publique())
-        );
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+    }
+
+    #[tokio::test]
+    async fn phase_a_refusee_sans_identite_prouvee() {
+        assert_eq!(Verifier::verify_phase_a(false), VerifyResult::Fail);
+        assert_eq!(Verifier::verify_phase_a(true), VerifyResult::Ok);
     }
 
     #[tokio::test]
     async fn register_echoue_n_epingle_rien() {
         let (serveur, _, identites) = serveur(true);
-        serveur
-            .ctx
-            .verifier
-            .add_core_key("1.0.0".to_string(), Sha256::digest(b"cle-cores").to_vec())
-            .await;
 
         // Preuve invalide (mauvais défi) : aucun épinglage.
         let identite = IdentiteCog::generer();
@@ -1380,52 +1328,27 @@ mod tests {
         assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
         assert!(identites.cle_epinglee(&identite.cog_id()).await.is_none());
 
-        // Preuve valide mais Phase A échouée (mauvaise clé Cores) : aucun épinglage.
-        let identite = IdentiteCog::generer();
-        let (session, r) = enregistrer(&serveur, &identite).await;
-        assert_eq!(r.expect("réponse").header.message_type, MessageType::VerifyResult);
-        let id = session.read().await.id;
-        let mut ck = BytesMut::new();
-        ck.extend_from_slice(&id);
-        ck.extend_from_slice(&(9u16).to_be_bytes());
-        ck.extend_from_slice(b"mauvaise!");
-        let r = RelayServer::handle_core_key(&ck.freeze(), &session, &serveur.ctx, adresse().ip())
+        // REGISTER non signé : aucun épinglage, aucune place consommée.
+        let autre = IdentiteCog::generer();
+        let session = serveur.ctx.sessions.create(adresse()).await;
+        let payload = register_client(&autre.cog_id()).to_origin_bytes();
+        let r = RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip())
             .await
             .expect("réponse");
-        assert_eq!(r.header.message_type, MessageType::VerifyResult);
-        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_none());
-
-        // Aucune place du registre consommée.
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
         assert_eq!(identites.nombre().await, 0);
     }
 
     #[tokio::test]
     async fn permis_refuse_si_cle_epinglee_entre_temps() {
-        // Course : une autre clé est épinglée entre REGISTER et la délivrance du permis.
-        let (serveur, permis, identites) = serveur(true);
-        serveur
-            .ctx
-            .verifier
-            .add_core_key("1.0.0".to_string(), Sha256::digest(b"cle-cores").to_vec())
-            .await;
+        // Une autre clé est épinglée pour ce cog_id : REGISTER refusé, aucun permis.
+        let (serveur, _, identites) = serveur(true);
         let identite = IdentiteCog::generer();
-        let (session, _) = enregistrer(&serveur, &identite).await;
-        identites
-            .epingler(&identite.cog_id(), &[0x22; 32])
-            .await
-            .expect("épinglage");
-        let id = session.read().await.id;
-        let mut ck = BytesMut::new();
-        ck.extend_from_slice(&id);
-        ck.extend_from_slice(&(9u16).to_be_bytes());
-        ck.extend_from_slice(b"cle-cores");
-        let r = RelayServer::handle_core_key(&ck.freeze(), &session, &serveur.ctx, adresse().ip())
-            .await
-            .expect("réponse");
-        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+        identites.epingler(&identite.cog_id(), &[0x22; 32]).await.expect("épinglage");
+        let (session, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(code_refus(&r.expect("réponse")), Some(RegisterErrorCode::AuthFailed));
         assert_eq!(session.read().await.state, SessionState::Closed);
         assert!(session.read().await.permis.is_none());
-        let _ = permis;
     }
 
     #[tokio::test]

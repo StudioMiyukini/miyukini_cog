@@ -7,9 +7,16 @@
 //! Vérification de conformité MWS.
 //!
 //! Implémente les trois phases de vérification :
-//! - Phase A : Clé de conformité des Cores
+//! - Phase A : identité signée du COG (preuve REGISTER vérifiée par le Relay)
 //! - Phase B : Blocs de code MIP des Services
 //! - Phase C : Santé de l'environnement
+//!
+//! Sortie du lot 2 (inventaire des secrets partagés #17) : l'ancienne Phase A
+//! comparait une « clé de conformité des Cores » statique par version, livrée dans
+//! **chaque** binaire (donc connue de tous) — aucune valeur de sécurité. La doc gelée
+//! ne spécifie pas d'attestation de build scellée ; choix fail-closed : la Phase A ne
+//! repose plus que sur l'identité REGISTER signée (`cog_id` = empreinte de la clé,
+//! défi du Relay signé, clé épinglée compatible). `[cores] keys_dir` est ignoré.
 //!
 //! Note : Code préparé pour fonctionnalités futures (Phase B étendue).
 #![allow(dead_code)]
@@ -17,7 +24,6 @@
 use bytes::Bytes;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
-use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, info, warn};
@@ -43,57 +49,17 @@ impl std::fmt::Display for VerificationError {
 impl std::error::Error for VerificationError {}
 
 /// Vérificateur de conformité.
+#[derive(Default)]
 pub struct Verifier {
-    /// Clés de conformité connues (version → hash).
-    core_keys: Arc<RwLock<HashMap<String, Vec<u8>>>>,
     /// Hashes MIP des services connus (service_id → block_index → hash).
     service_hashes: Arc<RwLock<HashMap<String, HashMap<u32, Vec<u8>>>>>,
-    /// Chemin du répertoire des clés.
-    keys_dir: String,
 }
 
 impl Verifier {
     /// Crée un nouveau vérificateur.
     #[must_use]
-    pub fn new(keys_dir: String) -> Self {
-        Self {
-            core_keys: Arc::new(RwLock::new(HashMap::new())),
-            service_hashes: Arc::new(RwLock::new(HashMap::new())),
-            keys_dir,
-        }
-    }
-
-    /// Charge les clés de conformité depuis le disque.
-    pub async fn load_keys(&self) -> Result<(), std::io::Error> {
-        let keys_path = Path::new(&self.keys_dir);
-        if !keys_path.exists() {
-            warn!("Keys directory does not exist: {}", self.keys_dir);
-            return Ok(());
-        }
-
-        let mut core_keys = self.core_keys.write().await;
-
-        // Charger les fichiers .key
-        let mut entries = tokio::fs::read_dir(keys_path).await?;
-        while let Some(entry) = entries.next_entry().await? {
-            let path = entry.path();
-            if path.extension().and_then(|e| e.to_str()) == Some("key") {
-                if let Some(version) = path.file_stem().and_then(|s| s.to_str()) {
-                    let content = tokio::fs::read(&path).await?;
-                    let hash = Sha256::digest(&content).to_vec();
-                    core_keys.insert(version.to_string(), hash);
-                    info!("Loaded core key for version: {}", version);
-                }
-            }
-        }
-
-        Ok(())
-    }
-
-    /// Ajoute une clé de conformité.
-    pub async fn add_core_key(&self, version: String, key_hash: Vec<u8>) {
-        let mut keys = self.core_keys.write().await;
-        keys.insert(version, key_hash);
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Ajoute un hash de service.
@@ -104,38 +70,19 @@ impl Verifier {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Phase A : Vérification de la clé Cores
+    // Phase A : identité signée (plus de clé statique des Cores)
     // ─────────────────────────────────────────────────────────────────────────
 
-    /// Vérifie la clé de conformité des Cores (Phase A).
-    pub async fn verify_phase_a(&self, core_version: &str, provided_key: &[u8]) -> VerifyResult {
-        debug!("Phase A: Verifying core key for version {}", core_version);
-
-        let keys = self.core_keys.read().await;
-
-        // Chercher la clé pour cette version
-        if let Some(expected_hash) = keys.get(core_version) {
-            // Calculer le hash de la clé fournie
-            let provided_hash = Sha256::digest(provided_key);
-
-            // Comparaison en temps constant (pas de fuite par la durée).
-            let egal = provided_hash.len() == expected_hash.len()
-                && provided_hash
-                    .iter()
-                    .zip(expected_hash.iter())
-                    .fold(0u8, |acc, (a, b)| acc | (a ^ b))
-                    == 0;
-            if egal {
-                info!("Phase A: Core key verified for version {}", core_version);
-                VerifyResult::Ok
-            } else {
-                warn!("Phase A: Core key mismatch for version {}", core_version);
-                VerifyResult::Fail
-            }
+    /// Phase A : réussie si et seulement si la preuve d'identité REGISTER a été
+    /// vérifiée pour la session (fail-closed).
+    #[must_use]
+    pub fn verify_phase_a(identite_verifiee: bool) -> VerifyResult {
+        if identite_verifiee {
+            debug!("Phase A: signed REGISTER identity verified");
+            VerifyResult::Ok
         } else {
-            // Version inconnue - demander une vérification étendue
-            warn!("Phase A: Unknown core version {}", core_version);
-            VerifyResult::ExtendedRequired
+            warn!("Phase A: no verified signed identity");
+            VerifyResult::Fail
         }
     }
 
@@ -357,31 +304,15 @@ impl EnvironmentHealthBuilder {
 mod tests {
     use super::*;
 
-    #[tokio::test]
-    async fn test_phase_a_verification() {
-        let verifier = Verifier::new("test_keys".to_string());
-
-        // Ajouter une clé de test
-        let test_key = b"test-core-key-1.0.0";
-        let key_hash = Sha256::digest(test_key).to_vec();
-        verifier.add_core_key("1.0.0".to_string(), key_hash).await;
-
-        // Test avec la bonne clé
-        let result = verifier.verify_phase_a("1.0.0", test_key).await;
-        assert_eq!(result, VerifyResult::Ok);
-
-        // Test avec une mauvaise clé
-        let result = verifier.verify_phase_a("1.0.0", b"wrong-key").await;
-        assert_eq!(result, VerifyResult::Fail);
-
-        // Test avec une version inconnue
-        let result = verifier.verify_phase_a("2.0.0", test_key).await;
-        assert_eq!(result, VerifyResult::ExtendedRequired);
+    #[test]
+    fn test_phase_a_identite_seule() {
+        assert_eq!(Verifier::verify_phase_a(true), VerifyResult::Ok);
+        assert_eq!(Verifier::verify_phase_a(false), VerifyResult::Fail);
     }
 
     #[tokio::test]
     async fn test_phase_b_verification() {
-        let verifier = Verifier::new("test_keys".to_string());
+        let verifier = Verifier::new();
 
         // Ajouter un hash de service
         let test_block = b"test-service-block-data";
@@ -409,7 +340,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_phase_c_verification() {
-        let verifier = Verifier::new("test_keys".to_string());
+        let verifier = Verifier::new();
 
         // Rapport de santé valide
         let health = EnvironmentHealthBuilder::new()

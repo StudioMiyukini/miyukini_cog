@@ -53,7 +53,8 @@ pub struct OriginConfig {
     /// Configuration du Registre de Services.
     pub registry: RegistryConfig,
 
-    /// Configuration des clés de conformité.
+    /// Ancienne section des clés de conformité (ignorée depuis le lot 2, voir [`CoresConfig`]).
+    #[serde(default)]
     pub cores: CoresConfig,
 
     /// Configuration des politiques.
@@ -82,6 +83,14 @@ pub struct OriginConfig {
     /// Configuration du serveur web (isolement de /visit, proxy direct).
     #[serde(default)]
     pub web: WebConfig,
+
+    /// Authentification forum (passeport + visa, sync signée par COG).
+    #[serde(default)]
+    pub forum: ForumConfig,
+
+    /// Market : clés d'éditeurs officiels autorisés à publier.
+    #[serde(default)]
+    pub market: MarketConfig,
 }
 
 impl OriginConfig {
@@ -339,11 +348,55 @@ pub struct RegistryConfig {
     pub data_dir: String,
 }
 
-/// Configuration des clés de conformité.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Ancienne configuration des « clés de conformité des Cores » (Phase A du Relay).
+///
+/// Sortie du lot 2 (inventaire #17) : la clé statique par version était livrée dans
+/// chaque binaire et n'apportait aucune sécurité. Elle ne participe plus à aucune
+/// décision de confiance ; la section reste lisible pour ne pas casser les
+/// configurations existantes, mais `keys_dir` est **ignoré**.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CoresConfig {
-    /// Répertoire des clés.
+    /// Ignoré (conservé pour compatibilité de lecture).
+    #[serde(default)]
     pub keys_dir: String,
+}
+
+/// COG reconnu par Origin pour la connexion forum : sa clé d'émission de passeports.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CogReconnuConfig {
+    /// `cog_id` du COG (26 caractères base32).
+    pub cog_id: String,
+    /// Clé publique Ed25519 d'émission (64 caractères hexadécimaux).
+    pub cle_emission: String,
+}
+
+/// Authentification forum (inventaire #11 à #13, sortie du lot 2).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct ForumConfig {
+    /// Graine (32 o, fichier `0600`, créée si absente) de la clé avec laquelle Origin,
+    /// COG hôte, scelle les visas forum. Absente : connexion par passeport désactivée.
+    #[serde(default)]
+    pub cle_emission_path: Option<String>,
+    /// COG dont Origin accepte les passeports (ancres directes, niveau « reconnu »).
+    #[serde(default)]
+    pub cogs_reconnus: Vec<CogReconnuConfig>,
+    /// Clés publiques d'identité (hex) des COG autorisés à appeler `/api/auth/forum/sync`
+    /// (`cog_id` = empreinte de la clé). Vide : route désactivée (503).
+    #[serde(default)]
+    pub sync_cles: Vec<String>,
+    /// Connexion historique email + mot de passe (`/api/auth/forum/validate`) pour les
+    /// personnes sans COG. **Désactivée par défaut** ; à activer explicitement.
+    #[serde(default)]
+    pub password_login: bool,
+}
+
+/// Market (inventaire #14, sortie du lot 2).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MarketConfig {
+    /// Clés publiques (hex) des éditeurs **officiels** épinglés : seules à pouvoir publier
+    /// ou retirer un paquet (décision 4 : paquets officiels uniquement). Vide : désactivé.
+    #[serde(default)]
+    pub editeurs_officiels: Vec<String>,
 }
 
 /// Configuration des politiques.
@@ -600,9 +653,7 @@ impl Default for OriginConfig {
             registry: RegistryConfig {
                 data_dir: "data/registry".to_string(),
             },
-            cores: CoresConfig {
-                keys_dir: "data/keys".to_string(),
-            },
+            cores: CoresConfig::default(),
             policies: PoliciesConfig {
                 data_dir: "data/policies".to_string(),
                 quarantine_escalation: default_quarantine_escalation(),
@@ -614,6 +665,8 @@ impl Default for OriginConfig {
             logging: LoggingConfig::default(),
             limits: LimitsConfig::default(),
             web: WebConfig::default(),
+            forum: ForumConfig::default(),
+            market: MarketConfig::default(),
         }
     }
 }
@@ -692,6 +745,43 @@ data_dir = "p"
         let config: OriginConfig = toml::from_str(toml).expect("parse");
         assert!(!config.relay.strict_verification);
         assert_eq!(config.relay.identite_relay(&config.identity), "miyukini.com");
+    }
+
+    #[test]
+    fn sections_forum_market_et_cores_facultatif() {
+        let toml = r#"
+[identity]
+role = "origin"
+ip = "1.2.3.4"
+[relay]
+[tracker]
+[tls]
+cert_path = "a"
+key_path = "b"
+[auth]
+token_file = "t"
+[registry]
+data_dir = "d"
+[policies]
+data_dir = "p"
+[forum]
+cle_emission_path = "/var/lib/miyukini/forum.cle"
+sync_cles = ["00"]
+[[forum.cogs_reconnus]]
+cog_id = "aaaaaaaaaaaaaaaaaaaaaaaaaa"
+cle_emission = "11"
+[market]
+editeurs_officiels = ["22"]
+"#;
+        let config: OriginConfig = toml::from_str(toml).expect("parse");
+        // `[cores]` absent : accepté (ignoré depuis le lot 2).
+        assert_eq!(config.cores.keys_dir, "");
+        // Mot de passe : désactivé tant que non écrit explicitement.
+        assert!(!config.forum.password_login);
+        assert_eq!(config.forum.cogs_reconnus.len(), 1);
+        assert_eq!(config.market.editeurs_officiels, vec!["22".to_string()]);
+        let defaut = OriginConfig::default();
+        assert!(defaut.forum.cle_emission_path.is_none() && defaut.market.editeurs_officiels.is_empty());
     }
 
     #[test]

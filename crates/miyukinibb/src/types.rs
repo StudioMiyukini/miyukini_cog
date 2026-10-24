@@ -17,7 +17,7 @@ pub struct ForumProfileSync {
     pub central_id: String,
     /// Email (identifiant de connexion forum).
     pub email: String,
-    /// Hash SHA256 hex du mot de passe (identique à Central).
+    /// Hash Argon2id (`$argon2id$…`) du mot de passe ; tout autre format est refusé par Origin.
     pub password_hash: String,
     /// Pseudonyme affiché (optionnel).
     pub pseudonyme: Option<String>,

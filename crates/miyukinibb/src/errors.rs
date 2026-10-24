@@ -17,7 +17,7 @@ pub enum MiyukiniBbError {
 
     /// Appel HTTP vers Origin échoué.
     #[error("Appel HTTP: {0}")]
-    Http(#[from] ureq::Error),
+    Http(Box<ureq::Error>),
 
     /// Réponse API non 200 (détail dans le corps).
     #[error("API Origin: {status} — {body}")]

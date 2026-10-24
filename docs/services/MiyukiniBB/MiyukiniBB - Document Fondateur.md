@@ -35,7 +35,7 @@ La **base de données de MiyukiniBB** est hébergée sur **Origin** :
 
 2. **Origin**  
    Héberge les données et le forum :
-   - **API** : `POST /api/auth/forum/sync` (mise à jour de la table `forum_profiles`), `POST /api/auth/forum/validate` (validation email + mot de passe).
+   - **API** (sortie du lot 2, aucun secret partagé) : `POST /api/auth/forum/defi` + `POST /api/auth/forum/login` (passeport du COG d'origine + preuve de possession → visa forum ≤ 15 min), `POST /api/auth/session/verify` (visa + nouvelle preuve de possession), `POST /api/auth/forum/sync` (requête signée par la clé d'identité d'un COG épinglé dans `[forum] sync_cles`), `POST /api/auth/forum/validate` (email + mot de passe, **seulement si** `[forum] password_login = true`, désactivé par défaut).
    - **Base forum_profiles** (SQLite) : copie des profils Central pour l’auth unifiée.
    - **Forum phpBB** : base phpBB + application, servie depuis le site Origin (ex. `forum.miyukini.com` ou chemin dédié).
 
@@ -51,12 +51,12 @@ Les comptes du forum sont nommés **comptes MiyukiniBB** : ce sont les **profils
 
 Le crate Rust `crates/miyukinibb` fournit :
 
-- **`MiyukiniBbClient`** : client pour l’API Origin (configuré avec l’URL de base).
+- **`MiyukiniBbClient`** : client pour l’API Origin (URL de base `https://` + clé d'identité du COG, `miyusceau::CleSignature`, qui signe chaque requête).
 - **`sync_profile`** : envoi d’un profil (central_id, email, password_hash, pseudonyme) vers `POST /api/auth/forum/sync`.
 - **`ForumProfileSync`** : type de données pour le sync.
 - **`MiyukiniBbError`** : erreurs (URL invalide, HTTP, API, profil invalide).
 
-Utilisation typique depuis Central (ou un outil d’import) : après création ou mise à jour d’un profil, appeler `MiyukiniBbClient::new(origin_url)?.sync_profile(&ForumProfileSync::new(...))` pour que l’utilisateur puisse se connecter au forum.
+Utilisation typique depuis Central (ou un outil d’import) : après création ou mise à jour d’un profil, appeler `MiyukiniBbClient::new(origin_url, cle_cog)?.sync_profile(&ForumProfileSync::new(...))` (hash Argon2id obligatoire) pour que l’utilisateur puisse se connecter au forum.
 
 ## Déploiement
 

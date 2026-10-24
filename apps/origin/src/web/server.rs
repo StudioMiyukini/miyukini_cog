@@ -317,6 +317,35 @@ fn content_length_checked(headers: &[String], max: usize) -> Result<usize, BodyE
     Ok(0)
 }
 
+/// Horloge système (secondes Unix).
+fn epoch_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs())
+}
+
+/// Réponse JSON du Market avec son statut HTTP.
+fn market_json(code: u16, body: String) -> RouteResponse {
+    let status = match code {
+        200 => "200 OK",
+        400 => "400 Bad Request",
+        401 => "401 Unauthorized",
+        404 => "404 Not Found",
+        409 => "409 Conflict",
+        503 => "503 Service Unavailable",
+        _ => "500 Internal Server Error",
+    };
+    RouteResponse::Normal { status: status.to_string(), content_type: "application/json".to_string(), body }
+}
+
+/// Refus d'une écriture Market (avant lecture du corps).
+fn market_refus(e: &market::RefusMarket) -> RouteResponse {
+    market_json(
+        e.statut,
+        serde_json::json!({ "success": false, "error": e.message }).to_string(),
+    )
+}
+
 /// Réponse d'erreur pour un corps rejeté.
 fn body_error_response(e: &BodyError) -> RouteResponse {
     let (status, msg) = match e {
@@ -433,10 +462,15 @@ async fn handle_connection(
         }
     }
 
-    // Auth Central unifiée : POST /api/auth/* (forum, profile, session, security)
+    // Auth forum : POST /api/auth/* (passeport + visa + PoP, sync signée par COG).
+    // En-têtes contrôlés avant toute lecture du corps (borné à TAILLE_MAX_CORPS_AUTH).
     if method == "POST" && path.starts_with("/api/auth/") {
         if let Some(store) = &forum_auth_store {
-            let len = match content_length_checked(&headers, MAX_DEFAULT_BODY) {
+            if let Some(refus) = forum_auth::precontrole(path, &headers, store.as_ref()) {
+                write_response(&mut writer, refus).await?;
+                return Ok(());
+            }
+            let len = match content_length_checked(&headers, forum_auth::TAILLE_MAX_CORPS_AUTH) {
                 Ok(n) => n,
                 Err(e) => {
                     write_response(&mut writer, body_error_response(&e)).await?;
@@ -525,56 +559,42 @@ async fn handle_connection(
                         }
                     }
                 }
-                // POST /api/market/publish
-                ("POST", "/api/market/publish") => {
-                    if !store.publish_enabled() {
-                        RouteResponse::Normal {
-                            status: "503 Service Unavailable".to_string(),
-                            content_type: "application/json".to_string(),
-                            body: r#"{"success":false,"error":"Publication désactivée"}"#
-                                .to_string(),
-                        }
-                    } else {
-                        match content_length_checked(&headers, MAX_PACKAGE_BODY) {
+                // POST /api/market/publish — requête signée par un éditeur officiel.
+                // En-têtes (clé épinglée, horodatage, nonce) contrôlés AVANT de lire le corps.
+                ("POST", market::CHEMIN_PUBLICATION) => {
+                    let maintenant = epoch_secs();
+                    match store.controler_entetes(&headers, maintenant) {
+                        Err(e) => market_refus(&e),
+                        Ok(entetes) => match content_length_checked(&headers, MAX_PACKAGE_BODY) {
                             Err(e) => body_error_response(&e),
                             Ok(len) => {
                                 let body_bytes = read_body(&mut buf_reader, len).await?;
-                                let body_str = String::from_utf8_lossy(&body_bytes);
-                                let body = market::api_market_publish(store, &body_str).await;
-                                RouteResponse::Normal {
-                                    status: "200 OK".to_string(),
-                                    content_type: "application/json".to_string(),
-                                    body,
-                                }
+                                let (code, body) =
+                                    market::api_market_publish(store, &entetes, &body_bytes, maintenant).await;
+                                market_json(code, body)
                             }
-                        }
+                        },
                     }
                 }
                 // DELETE /api/market/package/{id}/{version}
                 ("DELETE", _) if path_clean.starts_with("/api/market/package/") => {
                     let remainder = &path_clean[20..];
                     let parts: Vec<&str> = remainder.splitn(2, '/').collect();
-                    if parts.len() == 2 && !store.publish_enabled() {
-                        RouteResponse::Normal {
-                            status: "503 Service Unavailable".to_string(),
-                            content_type: "application/json".to_string(),
-                            body: r#"{"success":false,"error":"Retrait désactivé"}"#.to_string(),
-                        }
-                    } else if parts.len() == 2 {
-                        match content_length_checked(&headers, MAX_DEFAULT_BODY) {
-                            Err(e) => body_error_response(&e),
-                            Ok(len) => {
-                                let body_bytes = read_body(&mut buf_reader, len).await?;
-                                let body_str = String::from_utf8_lossy(&body_bytes);
-                                let body = market::api_market_unpublish(
-                                    store, parts[0], parts[1], &body_str,
+                    if parts.len() == 2 {
+                        // Requête signée, corps vide obligatoire (rien n'est lu).
+                        let maintenant = epoch_secs();
+                        match (
+                            store.controler_entetes(&headers, maintenant),
+                            content_length_checked(&headers, 0),
+                        ) {
+                            (Err(e), _) => market_refus(&e),
+                            (_, Err(e)) => body_error_response(&e),
+                            (Ok(entetes), Ok(_)) => {
+                                let (code, body) = market::api_market_unpublish(
+                                    store, &entetes, parts[0], parts[1], maintenant,
                                 )
                                 .await;
-                                RouteResponse::Normal {
-                                    status: "200 OK".to_string(),
-                                    content_type: "application/json".to_string(),
-                                    body,
-                                }
+                                market_json(code, body)
                             }
                         }
                     } else {

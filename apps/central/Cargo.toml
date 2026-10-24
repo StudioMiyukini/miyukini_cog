@@ -58,6 +58,7 @@ miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 miyumarket = { path = "../../crates/miyumarket" }
 # Sceau v1 : ancres de confiance des éditeurs Market (CA-01)
 miyusceau = { path = "../../crates/miyusceau" }
+miyauth = { path = "../../crates/miyauth", features = ["http"] }
 # Porte StrongFather obligatoire (K-11) : Market, lancement, secrets (ré-exporte strongfather)
 bondingbrother = { path = "../../crates/bondingbrother" }
 

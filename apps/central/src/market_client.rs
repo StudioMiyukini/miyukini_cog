@@ -9,8 +9,11 @@
 use miyumarket::manifest::ServiceManifest;
 use sha2::{Digest, Sha256};
 use miyumarket::protocol::{
-    MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult, PublishRequest, PublishResponse,
+    encoder_corps_publication, MarketCatalog, MarketEntry, MarketResponse, MarketSearchResult,
+    PublishResponse, UnpublishResponse, USAGE_PUBLICATION, USAGE_RETRAIT,
 };
+use miyauth::http::signer_requete;
+use miyusceau::CleSignature;
 
 /// Client HTTP pour le Service Market d'Origin.
 #[derive(Debug, Clone)]
@@ -127,6 +130,12 @@ pub fn require_signed_envelope(package_bytes: &[u8]) -> Result<(), MarketError> 
     }
 }
 
+fn maintenant() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs())
+}
+
 impl MarketClient {
     /// Crée un nouveau client Market.
     /// Refuse toute URL Origin non HTTPS (hors localhost en build debug).
@@ -216,37 +225,80 @@ impl MarketClient {
         Ok(bytes)
     }
 
-    /// Publie un service sur le Market (pour les développeurs).
+    /// Publie un paquet signé sur le Market (éditeur officiel uniquement).
+    ///
+    /// Sortie du lot 2 (inventaire #14) : plus de jeton développeur. Le corps
+    /// (`encoder_corps_publication` : manifeste + paquet `MSPS`) est envoyé dans une
+    /// requête **signée par la clé d'éditeur** (`miyauth::http`, usage
+    /// `origin/market-publication`) ; le paquet doit être scellé par la même clé
+    /// (`miyumarket-signer`), épinglée côté Origin dans `[market] editeurs_officiels`.
     pub async fn publish(
         &self,
-        manifest: ServiceManifest,
-        developer_token: &str,
+        manifest: &ServiceManifest,
+        paquet_signe: &[u8],
+        cle_editeur: &CleSignature,
     ) -> Result<PublishResponse, MarketError> {
-        let url = format!("{}/api/market/publish", self.origin_url);
-        let req = PublishRequest {
-            manifest,
-            developer_token: developer_token.to_string(),
-        };
-
-        let response = self
+        if !miyumarket::signature::est_paquet_signe(paquet_signe) {
+            return Err(MarketError::NonSigne);
+        }
+        let chemin = "/api/market/publish";
+        let corps = encoder_corps_publication(manifest, paquet_signe).map_err(MarketError::Server)?;
+        let entetes = signer_requete(cle_editeur, USAGE_PUBLICATION, "POST", chemin, &corps, maintenant());
+        let url = format!("{}{chemin}", self.origin_url);
+        let mut requete = self
             .client
             .post(&url)
-            .json(&req)
+            .header(reqwest::header::CONTENT_TYPE, "application/octet-stream");
+        for (nom, valeur) in entetes.en_entetes() {
+            requete = requete.header(nom, valeur);
+        }
+        let body = Self::envoyer(requete.body(corps), &url).await?;
+        let resp: MarketResponse<PublishResponse> =
+            serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
+        unwrap_response(resp, "Réponse vide de publication")
+    }
+
+    /// Retire une version publiée (requête signée par la clé d'éditeur, corps vide).
+    pub async fn unpublish(
+        &self,
+        service_id: &str,
+        version: &str,
+        cle_editeur: &CleSignature,
+    ) -> Result<UnpublishResponse, MarketError> {
+        validate_path_segment("Identifiant de service", service_id)?;
+        validate_path_segment("Version", version)?;
+        let chemin = format!("/api/market/package/{service_id}/{version}");
+        let entetes = signer_requete(cle_editeur, USAGE_RETRAIT, "DELETE", &chemin, b"", maintenant());
+        let url = format!("{}{chemin}", self.origin_url);
+        let mut requete = self.client.delete(&url);
+        for (nom, valeur) in entetes.en_entetes() {
+            requete = requete.header(nom, valeur);
+        }
+        let body = Self::envoyer(requete, &url).await?;
+        let resp: MarketResponse<UnpublishResponse> =
+            serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
+        unwrap_response(resp, "Réponse vide de retrait")
+    }
+
+    /// Envoie une requête d'écriture ; le message d'erreur du serveur est conservé.
+    async fn envoyer(requete: reqwest::RequestBuilder, url: &str) -> Result<String, MarketError> {
+        let response = requete
             .send()
             .await
-            .map_err(|e| MarketError::Network(format!("POST {url}: {e}")))?;
-
-        let response = response
-            .error_for_status()
-            .map_err(|e| MarketError::Network(format!("POST {url}: {e}")))?;
+            .map_err(|e| MarketError::Network(format!("{url}: {e}")))?;
+        let statut = response.status();
         let body = response
             .text()
             .await
             .map_err(|e| MarketError::Network(format!("Lecture réponse {url}: {e}")))?;
-
-        let resp: MarketResponse<PublishResponse> =
-            serde_json::from_str(&body).map_err(|e| MarketError::Parse(e.to_string()))?;
-        unwrap_response(resp, "Réponse vide de publication")
+        if !statut.is_success() {
+            let message = serde_json::from_str::<MarketResponse<serde_json::Value>>(&body)
+                .ok()
+                .and_then(|r| r.error)
+                .unwrap_or_else(|| statut.to_string());
+            return Err(MarketError::Server(format!("{statut} : {message}")));
+        }
+        Ok(body)
     }
 
     async fn http_get_text(&self, url: &str) -> Result<String, MarketError> {
@@ -336,5 +388,22 @@ mod tests {
             Err(MarketError::NonSigne)
         ));
         assert!(require_signed_envelope(b"MSPS\x01....").is_ok());
+    }
+
+    #[tokio::test]
+    async fn publication_sans_jeton_paquet_non_signe_refuse_avant_envoi() {
+        let client = MarketClient::new("https://127.0.0.1:9").unwrap();
+        let manifest: ServiceManifest = serde_json::from_value(serde_json::json!({
+            "id": "svc", "name": "Svc", "description": "", "icon": "", "version": "1.0.0",
+            "service_type": "interne_cog", "source": "officiel", "developer": "Miyukini",
+            "min_central_version": "0.2.0"
+        }))
+        .unwrap();
+        let cle = CleSignature::generer();
+        assert!(matches!(
+            client.publish(&manifest, b"PK\x03\x04 zip nu", &cle).await,
+            Err(MarketError::NonSigne)
+        ));
+        assert!(client.unpublish("../x", "1.0.0", &cle).await.is_err());
     }
 }

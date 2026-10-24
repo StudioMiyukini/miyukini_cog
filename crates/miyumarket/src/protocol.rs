@@ -89,13 +89,62 @@ pub struct MarketSearchResult {
 // Requêtes vers le serveur Market (Origin)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/// Requête de publication (body JSON accompagnant le POST multipart).
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PublishRequest {
-    /// Manifeste du service (lu depuis service.manifest.json dans le package).
-    pub manifest: ServiceManifest,
-    /// Token d'authentification du développeur.
-    pub developer_token: String,
+/// Usage (séparation de domaine) de la requête signée de publication.
+pub const USAGE_PUBLICATION: &str = "origin/market-publication";
+/// Usage (séparation de domaine) de la requête signée de retrait.
+pub const USAGE_RETRAIT: &str = "origin/market-retrait";
+/// Entête du corps de publication.
+pub const MAGIC_CORPS_PUBLICATION: &[u8; 4] = b"MSPB";
+/// Version du format du corps de publication.
+pub const VERSION_CORPS_PUBLICATION: u8 = 0x01;
+/// Taille maximale du manifeste JSON dans le corps de publication.
+pub const TAILLE_MAX_MANIFESTE_PUBLICATION: usize = 64 * 1024;
+const TAILLE_ENTETE_CORPS: usize = 4 + 1 + 4;
+
+/// Corps binaire de `POST /api/market/publish` (plus de jeton : sortie du lot 2).
+///
+/// ```text
+/// "MSPB" (4) | 0x01 (1) | longueur du manifeste u32 BE (4) | manifeste JSON | paquet signé (.msp « MSPS »)
+/// ```
+///
+/// La requête entière est signée par la clé d'éditeur (en-têtes `X-Miyu-*`,
+/// usage [`USAGE_PUBLICATION`]) et le paquet porte son propre sceau d'éditeur :
+/// Origin exige que les deux signataires soient la même clé officielle épinglée.
+pub fn encoder_corps_publication(manifest: &ServiceManifest, paquet_signe: &[u8]) -> Result<Vec<u8>, String> {
+    let json = serde_json::to_vec(manifest).map_err(|e| format!("manifeste : {e}"))?;
+    if json.len() > TAILLE_MAX_MANIFESTE_PUBLICATION {
+        return Err("manifeste trop volumineux".to_string());
+    }
+    let longueur = u32::try_from(json.len()).map_err(|_| "manifeste trop volumineux".to_string())?;
+    let mut corps = Vec::with_capacity(TAILLE_ENTETE_CORPS + json.len() + paquet_signe.len());
+    corps.extend_from_slice(MAGIC_CORPS_PUBLICATION);
+    corps.push(VERSION_CORPS_PUBLICATION);
+    corps.extend_from_slice(&longueur.to_be_bytes());
+    corps.extend_from_slice(&json);
+    corps.extend_from_slice(paquet_signe);
+    Ok(corps)
+}
+
+/// Décode strictement un corps de publication → `(manifeste, paquet signé)`.
+pub fn decoder_corps_publication(corps: &[u8]) -> Result<(ServiceManifest, &[u8]), String> {
+    if corps.len() < TAILLE_ENTETE_CORPS || &corps[..4] != MAGIC_CORPS_PUBLICATION {
+        return Err("corps de publication invalide (entête)".to_string());
+    }
+    if corps[4] != VERSION_CORPS_PUBLICATION {
+        return Err("version du corps de publication inconnue".to_string());
+    }
+    let longueur = u32::from_be_bytes([corps[5], corps[6], corps[7], corps[8]]) as usize;
+    if longueur == 0 || longueur > TAILLE_MAX_MANIFESTE_PUBLICATION {
+        return Err("longueur de manifeste hors bornes".to_string());
+    }
+    let fin = TAILLE_ENTETE_CORPS + longueur;
+    let json = corps.get(TAILLE_ENTETE_CORPS..fin).ok_or_else(|| "manifeste tronqué".to_string())?;
+    let manifest: ServiceManifest = serde_json::from_slice(json).map_err(|e| format!("manifeste JSON invalide : {e}"))?;
+    let paquet = &corps[fin..];
+    if paquet.is_empty() {
+        return Err("paquet signé absent".to_string());
+    }
+    Ok((manifest, paquet))
 }
 
 /// Réponse de publication.
@@ -157,4 +206,40 @@ fn urlencoding(s: &str) -> String {
         .replace('&', "%26")
         .replace('=', "%3D")
         .replace('?', "%3F")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn manifeste() -> ServiceManifest {
+        serde_json::from_value(serde_json::json!({
+            "id": "svc", "name": "Svc", "description": "", "icon": "", "version": "1.0.0",
+            "service_type": "interne_cog", "source": "officiel", "developer": "Miyukini",
+            "min_central_version": "0.2.0"
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn corps_publication_aller_retour() {
+        let corps = encoder_corps_publication(&manifeste(), b"MSPS paquet").unwrap();
+        let (m, p) = decoder_corps_publication(&corps).unwrap();
+        assert_eq!(m.id, "svc");
+        assert_eq!(p, b"MSPS paquet");
+    }
+
+    #[test]
+    fn corps_publication_malforme_refuse() {
+        let corps = encoder_corps_publication(&manifeste(), b"x").unwrap();
+        assert!(decoder_corps_publication(&corps[..corps.len() - 1]).is_err());
+        assert!(decoder_corps_publication(b"MSPB").is_err());
+        let mut v = corps.clone();
+        v[4] = 2;
+        assert!(decoder_corps_publication(&v).is_err());
+        let mut v = corps;
+        v[5] = 0xff;
+        assert!(decoder_corps_publication(&v).is_err());
+        assert!(decoder_corps_publication(b"{\"manifest\":{}}").is_err());
+    }
 }

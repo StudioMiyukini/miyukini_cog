@@ -17,6 +17,8 @@ miyukini-kernel = { path = "../../crates/miyukini-kernel" }
 miyuwebway_tracker = { path = "../../crates/miyuwebway_tracker" }
 miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 miyumarket = { path = "../../crates/miyumarket" }
+miyauth = { path = "../../crates/miyauth", features = ["http"] }
+miyusceau = { path = "../../crates/miyusceau" }
 jaybureau-core = { path = "../../crates/jaybureau-suite/jaybureau-core" }
 jay-collab = { path = "../../crates/jaybureau-suite/jay-collab" }
 
@@ -36,7 +38,6 @@ toml = "0.8"
 
 # Crypto
 sha2 = "0.10"
-hmac = "0.12"
 ed25519-dalek = { version = "2.1", features = ["serde", "rand_core"] }
 rand = "0.8"
 argon2 = { version = "0.5", features = ["password-hash"] }
