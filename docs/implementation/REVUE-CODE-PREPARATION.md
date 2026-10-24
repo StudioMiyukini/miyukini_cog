@@ -121,7 +121,9 @@
 | R-020 | moyenne | ✅ (cde0cb2c) — jay-collab : `set_acl` retire le membre mais ne coupe pas son flux d'événements (révocation incomplète) — jeton d'annulation par connexion | C-12 |
 | R-021 | moyenne | ✅ (cde0cb2c) — jay-collab : plafond anti-rejeu global → saturation par un seul utilisateur ; ACL avant enregistrement du nonce, plafond par identité | C-13 |
 | R-022 | moyenne | ✅ (cde0cb2c) — jay-collab : jeton de jonction sans audience (serveur) → relais possible vers un autre serveur pendant 120 s ; ajouter l'identité du serveur ou un défi-réponse | C-23 |
-| R-023 | haute | Mobile : si le handshake E2E échoue, la connexion continue en clair et envoie email + mot de passe ; route COG `/api/bridge/e2e-handshake` absente, identités non provisionnées au pairing | C-12, C-23 |
+| R-023 | haute | ✅ (3e34112f) — Mobile : si le handshake E2E échoue, la connexion continue en clair et envoie email + mot de passe ; route COG `/api/bridge/e2e-handshake` absente, identités non provisionnées au pairing | C-12, C-23 |
+| R-024 | moyenne | Pairing mobile : Central (bureau) n'affiche pas encore le code de confirmation → confiance au premier usage sur HTTP ; liste blanche des appareils non persistée | C-22 |
+| R-025 | moyenne | `/auth` en clair accepté depuis la machine locale : un proxy inverse local rendrait toute requête « locale » ; prévoir le refus total derrière proxy | C-12 |
 
 ## 7. Livrables
 
