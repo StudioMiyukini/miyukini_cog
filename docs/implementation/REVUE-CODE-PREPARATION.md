@@ -124,6 +124,9 @@
 | R-023 | haute | ✅ (3e34112f) — Mobile : si le handshake E2E échoue, la connexion continue en clair et envoie email + mot de passe ; route COG `/api/bridge/e2e-handshake` absente, identités non provisionnées au pairing | C-12, C-23 |
 | R-024 | moyenne | Pairing mobile : Central (bureau) n'affiche pas encore le code de confirmation → confiance au premier usage sur HTTP ; liste blanche des appareils non persistée | C-22 |
 | R-025 | moyenne | `/auth` en clair accepté depuis la machine locale : un proxy inverse local rendrait toute requête « locale » ; prévoir le refus total derrière proxy | C-12 |
+| R-026 | haute | Pairing : code de confirmation à 6 chiffres dérivé des seules clés, sans engagement → MITM par recherche de collision (~10⁶ essais) ; engagement préalable (hash de clé + nonce) avec nonces des deux côtés dans le code, ou empreinte complète / QR affiché par Central | C-23, C-24 |
+| R-027 | moyenne | Pairing : une demande en attente peut être écrasée par une autre clé ; l'approbation ne vérifie pas la clé ou le code vus par l'administrateur | C-12 |
+| R-028 | moyenne | Pairing : file d'attente plafonnée sans durée de vie → saturation ; TTL (10 min) et limite par source | C-13 |
 
 ## 7. Livrables
 
