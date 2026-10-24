@@ -595,7 +595,8 @@ mod tests {
 
     fn ancres(cle: &miyusceau::CleSignature) -> AncresDeConfiance {
         let mut a = AncresDeConfiance::new();
-        a.ajouter(&cle.cle_publique(), miyusceau::NiveauConfiance::Reconnu).unwrap();
+        // Éditeur officiel (Souverain) : seuls les officiels installent (décision 2026-10-24).
+        a.ajouter(&cle.cle_publique(), miyusceau::NiveauConfiance::Souverain).unwrap();
         a
     }
 

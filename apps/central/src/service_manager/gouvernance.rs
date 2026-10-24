@@ -314,10 +314,12 @@ mod tests {
         let g = base();
         for op in [OperationMarket::Installer, OperationMarket::MettreAJour] {
             assert!(autorise(&g, &signe(op, "svc", Provenance::SigneeOfficielle)));
-            assert!(autorise(&g, &signe(op, "svc", Provenance::SigneeTierce)));
+            // Éditeurs épinglés localement : refusés (officiels seulement, 2026-10-24).
+            assert!(!autorise(&g, &signe(op, "svc", Provenance::SigneeTierce)));
             assert!(autorise(&g, &signe(op, "miyucloud", Provenance::SigneeOfficielle)));
         }
-        assert!(autorise(&g, &signe(OperationMarket::Lancer, "svc", Provenance::SigneeTierce)));
+        assert!(autorise(&g, &signe(OperationMarket::Lancer, "svc", Provenance::SigneeOfficielle)));
+        assert!(!autorise(&g, &signe(OperationMarket::Lancer, "svc", Provenance::SigneeTierce)));
         assert!(autorise(
             &g,
             &signe(OperationMarket::InjecterSecrets, "miyucloud", Provenance::SigneeOfficielle)

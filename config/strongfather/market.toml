@@ -57,17 +57,8 @@ rule = "data.operation in ['installer', 'mettre_a_jour'] && data.provenance == '
 actions = ["creation", "modification"]
 subjects = ["central.market"]
 
-# Éditeurs épinglés localement (market-editeurs.json, niveau « reconnu ») : comportement
-# actuel conservé tant que la clé officielle d'Origin n'est pas compilée dans Central.
-# Supprimer cette politique pour n'accepter que les éditeurs officiels.
-[[policy]]
-id = "market-installer-editeur-epingle-local"
-type = "permission"
-effect = "authorize"
-rule = "data.operation in ['installer', 'mettre_a_jour'] && data.provenance == 'signee_tierce' && data.niveau_confiance == 'reconnu' && data.id_reserve == 'false'"
-[policy.target]
-actions = ["creation", "modification"]
-subjects = ["central.market"]
+# Décision du propriétaire (2026-10-24) : seuls les éditeurs officiels installent ;
+# les éditeurs épinglés localement (market-editeurs.json) ne sont plus autorisés.
 
 # Dérogation de développement : seulement en build debug (meta.build fixé par le code
 # compilé, jamais `debug` en release) et seulement si MIYUKINI_MARKET_DEV_NON_SIGNE=1
@@ -95,10 +86,10 @@ subjects = ["central.market"]
 # ── Lancement ───────────────────────────────────────────────────────────────────────
 
 [[policy]]
-id = "services-lancer-signe"
+id = "services-lancer-officiel"
 type = "permission"
 effect = "authorize"
-rule = "data.operation == 'lancer' && data.provenance in ['signee_officielle', 'signee_tierce']"
+rule = "data.operation == 'lancer' && data.provenance == 'signee_officielle' && data.niveau_confiance == 'souverain'"
 [policy.target]
 actions = ["creation"]
 subjects = ["central.services"]
