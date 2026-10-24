@@ -39,6 +39,7 @@ use std::time::Duration;
 use crate::application::dtos::search_dto::SearchCriteriaDto;
 use crate::application::ports::storage_ports::FileReadPort;
 use crate::common::errors::DomainError;
+use crate::domain::entities::etat_cdr::EtatCdr;
 use crate::domain::entities::file::File;
 use crate::domain::services::path_service::StoragePath;
 use crate::infrastructure::services::dedup_service::DedupService;
@@ -169,6 +170,45 @@ impl FileBlobReadRepository {
 
         self.hash_cache.insert(file_id.to_owned(), hash.clone());
         Ok(hash)
+    }
+
+    /// État CDR d'un fichier (EX-45). Jamais mis en cache : l'état change
+    /// avec le contenu. Fichier absent → `NotFound`.
+    pub async fn get_etat_cdr(&self, file_id: &str) -> Result<EtatCdr, DomainError> {
+        let etat = sqlx::query_scalar::<_, String>(
+            "SELECT etat_cdr FROM storage.files WHERE id = $1::uuid",
+        )
+        .bind(file_id)
+        .fetch_optional(self.pool.as_ref())
+        .await
+        .map_err(|e| DomainError::internal_error("FileBlobRead", format!("etat_cdr: {e}")))?
+        .ok_or_else(|| DomainError::not_found("File", file_id))?;
+        Ok(EtatCdr::depuis_stockage(&etat))
+    }
+
+    /// Parmi `file_ids`, ceux dont l'état CDR est `quarantaine` (EX-45).
+    pub async fn ids_en_quarantaine(
+        &self,
+        file_ids: &[String],
+    ) -> Result<std::collections::HashSet<String>, DomainError> {
+        if file_ids.is_empty() {
+            return Ok(std::collections::HashSet::new());
+        }
+        let ids: Vec<Uuid> = file_ids
+            .iter()
+            .filter_map(|id| Uuid::parse_str(id).ok())
+            .collect();
+        let rows = sqlx::query_scalar::<_, String>(
+            "SELECT id::text FROM storage.files \
+              WHERE id = ANY($1::uuid[]) AND etat_cdr = 'quarantaine'",
+        )
+        .bind(&ids)
+        .fetch_all(self.pool.as_ref())
+        .await
+        .map_err(|e| {
+            DomainError::internal_error("FileBlobRead", format!("ids_en_quarantaine: {e}"))
+        })?;
+        Ok(rows.into_iter().collect())
     }
 
     /// Lists all image/video files for a user, sorted by capture date (EXIF) or

@@ -184,6 +184,8 @@ async fn store_assembled(
     size: u64,
     oc_mtime: Option<i64>,
 ) -> Result<String, AppError> {
+    // EX-45 : `update_file_content_by_id` / `upload_file_from_path` passent le
+    // fichier assemblé dans l'entonnoir CDR avant rangement.
     let upload_service = &state.applications.file_upload_service;
 
     // Detect content type via magic bytes + extension fallback.
@@ -207,7 +209,7 @@ async fn store_assembled(
                     oc_mtime,
                 )
                 .await
-                .map_err(|e| AppError::internal_error(format!("Failed to update file: {}", e)))?;
+                .map_err(|e| AppError::ecriture_fichier(e, "Failed to update file"))?;
             Ok(dto.etag)
         }
         None => {
@@ -230,7 +232,7 @@ async fn store_assembled(
                     None,
                 )
                 .await
-                .map_err(|e| AppError::internal_error(format!("Failed to create file: {}", e)))?;
+                .map_err(|e| AppError::ecriture_fichier(e, "Failed to create file"))?;
             Ok(dto.etag)
         }
     }

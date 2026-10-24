@@ -309,6 +309,16 @@ async fn handle_get(
         None => return Err(AppError::not_found("File not found")),
     };
 
+    // EX-45 : un client DAV ne peut pas exprimer l'accord explicite exigé
+    // pour un fichier en quarantaine CDR → 403 (fermé par défaut).
+    let etat = file_service
+        .etat_cdr(&file.id)
+        .await
+        .map_err(|e| AppError::internal_error(format!("Failed to read file: {}", e)))?;
+    if !etat.autorise_lecture_dav() {
+        return Err(AppError::non_desarme_dav());
+    }
+
     let stream = file_service
         .get_file_stream_owned(&file.id, user.id)
         .await
@@ -586,7 +596,7 @@ async fn handle_put(
                     oc_mtime,
                 )
                 .await
-                .map_err(|e| AppError::internal_error(format!("Failed to update file: {}", e)))?;
+                .map_err(|e| AppError::ecriture_fichier(e, "Failed to update file"))?;
 
             Ok(Response::builder()
                 .status(StatusCode::NO_CONTENT)
@@ -606,7 +616,7 @@ async fn handle_put(
                     Some(spooled.hash),
                 )
                 .await
-                .map_err(|e| AppError::internal_error(format!("Failed to create file: {}", e)))?;
+                .map_err(|e| AppError::ecriture_fichier(e, "Failed to create file"))?;
 
             Ok(Response::builder()
                 .status(StatusCode::CREATED)

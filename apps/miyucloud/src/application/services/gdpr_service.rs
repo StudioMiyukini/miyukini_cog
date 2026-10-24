@@ -29,63 +29,58 @@ impl GdprRightsPort for GdprService {
     async fn export_user_data(&self, user_id: Uuid) -> Result<UserDataExport, DomainError> {
         use sqlx::Row;
 
-        let user = sqlx::query(
-            "SELECT username, email FROM auth.users WHERE id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool.as_ref())
-        .await
-        .map_err(|e| DomainError::internal_error("GDPR", format!("User query failed: {}", e)))?;
+        let user = sqlx::query("SELECT username, email FROM auth.users WHERE id = $1::uuid")
+            .bind(user_id)
+            .fetch_one(self.pool.as_ref())
+            .await
+            .map_err(|e| {
+                DomainError::internal_error("GDPR", format!("User query failed: {}", e))
+            })?;
 
-        let files_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM storage.files WHERE user_id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool.as_ref())
-        .await
-        .unwrap_or(0);
+        let files_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM storage.files WHERE user_id = $1::uuid")
+                .bind(user_id)
+                .fetch_one(self.pool.as_ref())
+                .await
+                .unwrap_or(0);
 
-        let folders_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM storage.folders WHERE user_id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool.as_ref())
-        .await
-        .unwrap_or(0);
+        let folders_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM storage.folders WHERE user_id = $1::uuid")
+                .bind(user_id)
+                .fetch_one(self.pool.as_ref())
+                .await
+                .unwrap_or(0);
 
-        let calendars_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM caldav.calendars WHERE owner_id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool.as_ref())
-        .await
-        .unwrap_or(0);
+        let calendars_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM caldav.calendars WHERE owner_id = $1::uuid")
+                .bind(user_id)
+                .fetch_one(self.pool.as_ref())
+                .await
+                .unwrap_or(0);
 
         let contacts_count: i64 = sqlx::query_scalar(
             "SELECT COUNT(*) FROM carddav.contacts c \
              JOIN carddav.address_books ab ON c.address_book_id = ab.id \
-             WHERE ab.owner_id = $1::uuid"
+             WHERE ab.owner_id = $1::uuid",
         )
         .bind(user_id)
         .fetch_one(self.pool.as_ref())
         .await
         .unwrap_or(0);
 
-        let shares_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM storage.shares WHERE created_by = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool.as_ref())
-        .await
-        .unwrap_or(0);
+        let shares_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM storage.shares WHERE created_by = $1::uuid")
+                .bind(user_id)
+                .fetch_one(self.pool.as_ref())
+                .await
+                .unwrap_or(0);
 
-        let audit_events_count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM audit.events WHERE user_id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(self.pool.as_ref())
-        .await
-        .unwrap_or(0);
+        let audit_events_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM audit.events WHERE user_id = $1::uuid")
+                .bind(user_id)
+                .fetch_one(self.pool.as_ref())
+                .await
+                .unwrap_or(0);
 
         Ok(UserDataExport {
             user_id,
@@ -107,60 +102,81 @@ impl GdprRightsPort for GdprService {
         user_id: Uuid,
         reason: &str,
     ) -> Result<ErasureReport, DomainError> {
-        let mut tx = self.pool.begin().await
-            .map_err(|e| DomainError::internal_error("GDPR", format!("Transaction failed: {}", e)))?;
+        let mut tx = self.pool.begin().await.map_err(|e| {
+            DomainError::internal_error("GDPR", format!("Transaction failed: {}", e))
+        })?;
 
         // Count before deletion
-        let files_deleted: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM storage.files WHERE user_id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(&mut *tx)
-        .await
-        .unwrap_or(0);
+        let files_deleted: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM storage.files WHERE user_id = $1::uuid")
+                .bind(user_id)
+                .fetch_one(&mut *tx)
+                .await
+                .unwrap_or(0);
 
-        let folders_deleted: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM storage.folders WHERE user_id = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(&mut *tx)
-        .await
-        .unwrap_or(0);
+        let folders_deleted: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM storage.folders WHERE user_id = $1::uuid")
+                .bind(user_id)
+                .fetch_one(&mut *tx)
+                .await
+                .unwrap_or(0);
 
-        let shares_revoked: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM storage.shares WHERE created_by = $1::uuid"
-        )
-        .bind(user_id)
-        .fetch_one(&mut *tx)
-        .await
-        .unwrap_or(0);
+        let shares_revoked: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM storage.shares WHERE created_by = $1::uuid")
+                .bind(user_id)
+                .fetch_one(&mut *tx)
+                .await
+                .unwrap_or(0);
 
         // Delete user data in dependency order
         sqlx::query("DELETE FROM storage.shares WHERE created_by = $1::uuid")
-            .bind(user_id).execute(&mut *tx).await.ok();
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await
+            .ok();
         sqlx::query("DELETE FROM storage.files WHERE user_id = $1::uuid")
-            .bind(user_id).execute(&mut *tx).await.ok();
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await
+            .ok();
         sqlx::query("DELETE FROM storage.folders WHERE user_id = $1::uuid")
-            .bind(user_id).execute(&mut *tx).await.ok();
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await
+            .ok();
 
         // Delete CalDAV/CardDAV data
         sqlx::query(
             "DELETE FROM caldav.calendar_events WHERE calendar_id IN \
-             (SELECT id FROM caldav.calendars WHERE owner_id = $1::uuid)"
-        ).bind(user_id).execute(&mut *tx).await.ok();
+             (SELECT id FROM caldav.calendars WHERE owner_id = $1::uuid)",
+        )
+        .bind(user_id)
+        .execute(&mut *tx)
+        .await
+        .ok();
         sqlx::query("DELETE FROM caldav.calendars WHERE owner_id = $1::uuid")
-            .bind(user_id).execute(&mut *tx).await.ok();
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await
+            .ok();
 
         sqlx::query(
             "DELETE FROM carddav.contacts WHERE address_book_id IN \
-             (SELECT id FROM carddav.address_books WHERE owner_id = $1::uuid)"
-        ).bind(user_id).execute(&mut *tx).await.ok();
+             (SELECT id FROM carddav.address_books WHERE owner_id = $1::uuid)",
+        )
+        .bind(user_id)
+        .execute(&mut *tx)
+        .await
+        .ok();
         sqlx::query("DELETE FROM carddav.address_books WHERE owner_id = $1::uuid")
-            .bind(user_id).execute(&mut *tx).await.ok();
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await
+            .ok();
 
         // Revoke all sessions
         let sessions_revoked = sqlx::query(
-            "UPDATE auth.sessions SET revoked = true WHERE user_id = $1::uuid AND NOT revoked"
+            "UPDATE auth.sessions SET revoked = true WHERE user_id = $1::uuid AND NOT revoked",
         )
         .bind(user_id)
         .execute(&mut *tx)
@@ -172,7 +188,7 @@ impl GdprRightsPort for GdprService {
         let audit_anonymized = sqlx::query(
             "UPDATE audit.events SET username = 'DELETED', \
              user_agent = NULL, ip_address = NULL \
-             WHERE user_id = $1::uuid"
+             WHERE user_id = $1::uuid",
         )
         .bind(user_id)
         .execute(&mut *tx)
@@ -185,7 +201,7 @@ impl GdprRightsPort for GdprService {
             "UPDATE auth.users SET active = false, \
              email = 'deleted-' || id::text || '@erased.local', \
              password_hash = 'ERASED' \
-             WHERE id = $1::uuid"
+             WHERE id = $1::uuid",
         )
         .bind(user_id)
         .execute(&mut *tx)
@@ -195,7 +211,7 @@ impl GdprRightsPort for GdprService {
         // Record erasure in audit log
         sqlx::query(
             "INSERT INTO audit.events (user_id, username, action, resource_type, outcome, details) \
-             VALUES ($1, 'SYSTEM', 'gdpr_erase', 'user', 'success', $2::jsonb)"
+             VALUES ($1, 'SYSTEM', 'gdpr_erase', 'user', 'success', $2::jsonb)",
         )
         .bind(user_id)
         .bind(serde_json::json!({ "reason": reason }))
@@ -203,12 +219,16 @@ impl GdprRightsPort for GdprService {
         .await
         .ok();
 
-        tx.commit().await
+        tx.commit()
+            .await
             .map_err(|e| DomainError::internal_error("GDPR", format!("Commit failed: {}", e)))?;
 
         tracing::info!(
             "GDPR erasure completed for user {}: {} files, {} folders, {} shares deleted",
-            user_id, files_deleted, folders_deleted, shares_revoked
+            user_id,
+            files_deleted,
+            folders_deleted,
+            shares_revoked
         );
 
         Ok(ErasureReport {
@@ -235,7 +255,9 @@ impl GdprRightsPort for GdprService {
                 .bind(email)
                 .execute(self.pool.as_ref())
                 .await
-                .map_err(|e| DomainError::internal_error("GDPR", format!("Email update failed: {}", e)))?;
+                .map_err(|e| {
+                    DomainError::internal_error("GDPR", format!("Email update failed: {}", e))
+                })?;
         }
 
         if let Some(ref username) = updates.username {
@@ -244,13 +266,15 @@ impl GdprRightsPort for GdprService {
                 .bind(username)
                 .execute(self.pool.as_ref())
                 .await
-                .map_err(|e| DomainError::internal_error("GDPR", format!("Username update failed: {}", e)))?;
+                .map_err(|e| {
+                    DomainError::internal_error("GDPR", format!("Username update failed: {}", e))
+                })?;
         }
 
         // Record rectification in audit
         sqlx::query(
             "INSERT INTO audit.events (user_id, action, resource_type, outcome, details) \
-             VALUES ($1, 'gdpr_rectify', 'user', 'success', $2::jsonb)"
+             VALUES ($1, 'gdpr_rectify', 'user', 'success', $2::jsonb)",
         )
         .bind(user_id)
         .bind(serde_json::json!({

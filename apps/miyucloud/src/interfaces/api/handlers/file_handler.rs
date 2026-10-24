@@ -23,6 +23,9 @@ use crate::application::ports::file_ports::{
 use crate::application::ports::storage_ports::{FileReadPort, StorageUsagePort};
 use crate::application::ports::thumbnail_ports::ThumbnailPort;
 use crate::common::di::AppState;
+use crate::domain::entities::etat_cdr::{
+    ENTETE_ETAT_CDR, EtatCdr, MESSAGE_QUARANTAINE, PARAM_ACCORD_NON_DESARME, accord_explicite,
+};
 use crate::interfaces::errors::AppError;
 use crate::interfaces::middleware::auth::AuthUser;
 use std::sync::Arc;
@@ -224,11 +227,12 @@ impl FileHandler {
                             content_type,
                             &temp_path,
                             0,
-                            Some(hash.clone()),
+                            Some(hash),
                         )
                         .await
                         .map_err(Self::domain_error_response)?;
-                    return Ok((dto, hash));
+                    let stored_hash = dto.etag.clone();
+                    return Ok((dto, stored_hash));
                 }
 
                 // Finalize hash
@@ -275,7 +279,10 @@ impl FileHandler {
                     return Err(Self::quota_error_response(err));
                 }
 
-                // ── Streaming upload (temp file → blob store, hash pre-computed) ─
+                // ── Streaming upload (CDR funnel → blob store) ──────────
+                // EX-45 : `upload_file_streaming` passe le fichier dans le CDR
+                // avant rangement ; le blob et le hachage stockés sont ceux des
+                // octets reconstruits (renvoyés via `file.etag`).
                 match upload_service
                     .upload_file_streaming(
                         filename.clone(),
@@ -302,17 +309,20 @@ impl FileHandler {
                                 .with_resource(&file.id)
                                 .with_details(serde_json::json!({
                                     "filename": &filename,
-                                    "size": total_size,
+                                    "size": file.size,
+                                    "received_size": total_size,
+                                    "etat_cdr": &file.etat_cdr,
                                 })),
                             );
                         }
                         tracing::info!(
                             "✅ STREAMING UPLOAD: {} ({} bytes, ID: {})",
                             filename,
-                            total_size,
+                            file.size,
                             file.id
                         );
-                        return Ok((file, hash));
+                        let stored_hash = file.etag.clone();
+                        return Ok((file, stored_hash));
                     }
                     Err(err) => {
                         let _ = tokio::fs::remove_file(&temp_path).await;
@@ -392,6 +402,20 @@ impl FileHandler {
                 .body(Body::empty())
                 .unwrap()
                 .into_response();
+        }
+
+        // ── EX-45 : aucune vignette pour un fichier non désarmé ────────
+        // (quarantaine ou antérieur au CDR), y compris depuis le cache : le
+        // contenu a pu être remplacé depuis la génération de la vignette.
+        match state
+            .repositories
+            .file_read_repository
+            .get_etat_cdr(&id)
+            .await
+        {
+            Ok(etat) if etat.autorise_traitement_contenu() => {}
+            Ok(etat) => return Self::sans_vignette(etat),
+            Err(err) => return AppError::from(err).into_response(),
         }
 
         // ── Cache-first path (Solution A) ────────────────────────────
@@ -521,6 +545,35 @@ impl FileHandler {
             return AppError::from(err).into_response();
         }
 
+        // EX-45 : pas de vignette pour un fichier non désarmé.
+        match state
+            .repositories
+            .file_read_repository
+            .get_etat_cdr(&id)
+            .await
+        {
+            Ok(etat) if etat.autorise_traitement_contenu() => {}
+            Ok(etat) => {
+                return AppError::forbidden(format!(
+                    "Vignette refusée : fichier non désarmé (état CDR « {etat} »)"
+                ))
+                .into_response();
+            }
+            Err(err) => return AppError::from(err).into_response(),
+        }
+
+        // EX-45 : la vignette fournie par le client est un fichier entrant —
+        // désarmée par le CDR avant tout décodage par le service de vignettes.
+        let body = match state
+            .applications
+            .desarmement_service
+            .desarmer_image(body.to_vec())
+            .await
+        {
+            Ok(reconstruit) => Bytes::from(reconstruit.octets),
+            Err(err) => return AppError::from(err).into_response(),
+        };
+
         // Validate, re-encode to WebP, and store
         match thumbnail_service
             .store_external_thumbnail(&id, thumb_size.into(), body)
@@ -559,6 +612,12 @@ impl FileHandler {
             }
         };
 
+        // ── EX-45 : état CDR (jamais en cache, suit le contenu) ────────
+        let etat = match retrieval.etat_cdr(&id).await {
+            Ok(etat) => etat,
+            Err(err) => return AppError::from(err).into_response(),
+        };
+
         // ── Metadata-only request ────────────────────────────────────
         if params
             .get("metadata")
@@ -574,11 +633,31 @@ impl FileHandler {
                     "mime_type": file_dto.mime_type,
                     "folder_id": file_dto.folder_id,
                     "created_at": file_dto.created_at,
-                    "modified_at": file_dto.modified_at
+                    "modified_at": file_dto.modified_at,
+                    "etat_cdr": etat.as_str(),
                 })),
             )
                 .into_response();
         }
+
+        // ── EX-45 : quarantaine → accord explicite obligatoire ───────
+        let accord = accord_explicite(params.get(PARAM_ACCORD_NON_DESARME).map(String::as_str));
+        if !etat.autorise_telechargement(accord) {
+            return Self::refus_non_desarme(etat);
+        }
+        // Non désarmé : servi en pièce jointe opaque, jamais transcodé ni
+        // affiché en ligne (aucun composant COG n'ouvre le contenu).
+        let ouvrable = etat.autorise_traitement_contenu();
+        let mime_servi: std::sync::Arc<str> = if ouvrable {
+            file_dto.mime_type.clone()
+        } else {
+            std::sync::Arc::from("application/octet-stream")
+        };
+        let disposition_params = if ouvrable {
+            params.clone()
+        } else {
+            HashMap::new()
+        };
 
         let etag = format!("\"{}-{}\"", id, file_dto.modified_at);
 
@@ -607,7 +686,7 @@ impl FileHandler {
                     let end = *range.end();
                     let range_length = end - start + 1;
                     let disposition =
-                        Self::content_disposition(&file_dto.name, &file_dto.mime_type, &params);
+                        Self::content_disposition(&file_dto.name, &mime_servi, &disposition_params);
 
                     match retrieval
                         .get_file_range_stream_owned(&id, auth_user.id, start, Some(end + 1))
@@ -616,7 +695,8 @@ impl FileHandler {
                         Ok(stream) => {
                             return Response::builder()
                                 .status(StatusCode::PARTIAL_CONTENT)
-                                .header(header::CONTENT_TYPE, &*file_dto.mime_type)
+                                .header(header::CONTENT_TYPE, &*mime_servi)
+                                .header(ENTETE_ETAT_CDR, etat.as_str())
                                 .header(header::CONTENT_DISPOSITION, &disposition)
                                 .header(header::CONTENT_LENGTH, range_length)
                                 .header(
@@ -650,15 +730,18 @@ impl FileHandler {
         }
 
         // ── Normal download (delegated to service) ───────────────────
-        let disposition = Self::content_disposition(&file_dto.name, &file_dto.mime_type, &params);
+        let disposition =
+            Self::content_disposition(&file_dto.name, &mime_servi, &disposition_params);
 
-        let accept_webp = headers
-            .get(header::ACCEPT)
-            .and_then(|v| v.to_str().ok())
-            .is_some_and(|a| a.contains("image/webp"));
-        let prefer_original = params
-            .get("original")
-            .is_some_and(|v| v == "true" || v == "1");
+        let accept_webp = ouvrable
+            && headers
+                .get(header::ACCEPT)
+                .and_then(|v| v.to_str().ok())
+                .is_some_and(|a| a.contains("image/webp"));
+        let prefer_original = !ouvrable
+            || params
+                .get("original")
+                .is_some_and(|v| v == "true" || v == "1");
 
         // Use the ownership-scoped optimized download.
         // Ownership was already verified by get_file_owned above,
@@ -670,11 +753,22 @@ impl FileHandler {
             Ok((_file, content)) => match content {
                 OptimizedFileContent::Bytes {
                     data, mime_type, ..
-                } => Self::build_cached_response(data, &mime_type, &disposition, &etag)
-                    .into_response(),
+                } => {
+                    let servi = if ouvrable {
+                        mime_type
+                    } else {
+                        mime_servi.clone()
+                    };
+                    let mut resp = Self::build_cached_response(data, &servi, &disposition, &etag);
+                    if let Ok(v) = header::HeaderValue::from_str(etat.as_str()) {
+                        resp.headers_mut().insert(ENTETE_ETAT_CDR, v);
+                    }
+                    resp.into_response()
+                }
                 OptimizedFileContent::Mmap(mmap_data) => Response::builder()
                     .status(StatusCode::OK)
-                    .header(header::CONTENT_TYPE, &*file_dto.mime_type)
+                    .header(header::CONTENT_TYPE, &*mime_servi)
+                    .header(ENTETE_ETAT_CDR, etat.as_str())
                     .header(header::CONTENT_DISPOSITION, &disposition)
                     .header(header::CONTENT_LENGTH, mmap_data.len())
                     .header(header::ETAG, &etag)
@@ -688,7 +782,8 @@ impl FileHandler {
                     .into_response(),
                 OptimizedFileContent::Stream(pinned_stream) => Response::builder()
                     .status(StatusCode::OK)
-                    .header(header::CONTENT_TYPE, &*file_dto.mime_type)
+                    .header(header::CONTENT_TYPE, &*mime_servi)
+                    .header(ENTETE_ETAT_CDR, etat.as_str())
                     .header(header::CONTENT_DISPOSITION, &disposition)
                     .header(header::CONTENT_LENGTH, file_dto.size)
                     .header(header::ETAG, &etag)
@@ -773,10 +868,13 @@ impl FileHandler {
         // Generate thumbnails for supported images in background.
         // The blob_hash was already computed during the hash-on-write spool,
         // so we resolve the physical path directly — no extra DB round-trip.
-        if state
-            .core
-            .thumbnail_service
-            .is_supported_image(&file.mime_type)
+        // EX-45 : seuls les fichiers désarmés sont ouverts pour les vignettes.
+        let desarme = file.etat_cdr.as_deref() == Some(EtatCdr::Desarme.as_str());
+        if desarme
+            && state
+                .core
+                .thumbnail_service
+                .is_supported_image(&file.mime_type)
         {
             let file_id = file.id.clone();
             let thumbnail_service = state.core.thumbnail_service.clone();
@@ -998,6 +1096,34 @@ impl FileHandler {
         format!("{disposition}; filename=\"{ascii_safe}\"; filename*=UTF-8''{encoded}")
     }
 
+    /// Réponse « pas de vignette » pour un fichier non désarmé (EX-45).
+    fn sans_vignette(etat: EtatCdr) -> Response<Body> {
+        Response::builder()
+            .status(StatusCode::NO_CONTENT)
+            .header(header::CACHE_CONTROL, "no-store")
+            .header(ENTETE_ETAT_CDR, etat.as_str())
+            .body(Body::empty())
+            .unwrap()
+    }
+
+    /// Refus de téléchargement d'un fichier en quarantaine sans accord (EX-45).
+    fn refus_non_desarme(etat: EtatCdr) -> Response<Body> {
+        let mut resp = (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({
+                "error": MESSAGE_QUARANTAINE,
+                "error_type": "NonDesarme",
+                "etat_cdr": etat.as_str(),
+                "parametre_accord": PARAM_ACCORD_NON_DESARME,
+            })),
+        )
+            .into_response();
+        if let Ok(v) = header::HeaderValue::from_str(etat.as_str()) {
+            resp.headers_mut().insert(ENTETE_ETAT_CDR, v);
+        }
+        resp
+    }
+
     /// Build a 201 Created JSON response.
     fn created_json_response(file: &crate::application::dtos::file_dto::FileDto) -> Response<Body> {
         Response::builder()
@@ -1050,4 +1176,39 @@ impl FileHandler {
 pub struct MoveFilePayload {
     /// Target folder ID (None means root)
     pub folder_id: Option<String>,
+}
+
+#[cfg(test)]
+mod tests_cdr {
+    use super::*;
+
+    #[test]
+    fn quarantaine_sans_accord_refusee_avec_explication() {
+        let resp = FileHandler::refus_non_desarme(EtatCdr::Quarantaine);
+        assert_eq!(resp.status(), StatusCode::FORBIDDEN);
+        assert_eq!(resp.headers().get(ENTETE_ETAT_CDR).unwrap(), "quarantaine");
+    }
+
+    #[test]
+    fn pas_de_vignette_pour_non_desarme() {
+        for etat in [EtatCdr::Quarantaine, EtatCdr::Inconnu] {
+            let resp = FileHandler::sans_vignette(etat);
+            assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+            assert_eq!(resp.headers().get(ENTETE_ETAT_CDR).unwrap(), etat.as_str());
+        }
+    }
+
+    #[test]
+    fn non_desarme_servi_en_piece_jointe() {
+        // Le gestionnaire passe un type opaque et aucun paramètre `inline`.
+        let d = FileHandler::content_disposition(
+            "doc.pdf",
+            "application/octet-stream",
+            &HashMap::new(),
+        );
+        assert!(d.starts_with("attachment;"));
+        assert!(accord_explicite(Some("1")));
+        assert!(!EtatCdr::Quarantaine.autorise_telechargement(false));
+        assert!(EtatCdr::Quarantaine.autorise_telechargement(true));
+    }
 }

@@ -104,6 +104,23 @@ pub async fn handle_preview(
             .unwrap();
     }
 
+    // EX-45 : aucun aperçu pour un fichier non désarmé (quarantaine CDR ou
+    // antérieur au CDR) — le contenu n'est jamais ouvert.
+    match state
+        .repositories
+        .file_read_repository
+        .get_etat_cdr(&object_id)
+        .await
+    {
+        Ok(etat) if etat.autorise_traitement_contenu() => {}
+        _ => {
+            return Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .body(Body::from("Preview not available for this file"))
+                .unwrap();
+        }
+    }
+
     // Determine thumbnail size based on request params
     let thumb_size = if params.force_icon == Some(1) {
         ThumbnailSize::Icon

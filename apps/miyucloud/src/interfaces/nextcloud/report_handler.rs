@@ -274,6 +274,7 @@ fn file_dto_from_search(fr: &crate::application::dtos::search_dto::SearchFileRes
         owner_id: None,
         sort_date: None,
         etag: String::new(),
+        etat_cdr: None,
     }
 }
 

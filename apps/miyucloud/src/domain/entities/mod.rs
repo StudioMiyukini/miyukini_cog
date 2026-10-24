@@ -12,6 +12,7 @@ pub mod calendar_event;
 pub mod contact;
 pub mod device_code;
 pub mod entity_errors;
+pub mod etat_cdr;
 pub mod file;
 pub mod folder;
 pub mod session;

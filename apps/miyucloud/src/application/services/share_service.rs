@@ -124,6 +124,18 @@ impl ShareService {
                             item_id
                         ))
                     })?;
+                // EX-45 : aucun lien public vers un fichier non désarmé
+                // (quarantaine ou antérieur au CDR) — fermé par défaut.
+                let etat = self
+                    .file_repository
+                    .get_etat_cdr(item_id)
+                    .await
+                    .map_err(|e| ShareServiceError::Repository(e.to_string()))?;
+                if !etat.autorise_lien_public() {
+                    return Err(ShareServiceError::AccessDenied(format!(
+                        "lien public refusé : fichier non désarmé (état CDR « {etat} »)"
+                    )));
+                }
             }
             ShareItemType::Folder => {
                 self.folder_repository

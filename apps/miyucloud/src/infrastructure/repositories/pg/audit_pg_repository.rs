@@ -46,8 +46,7 @@ impl AuditPgRepository {
         let mut batch: Vec<AuditEvent> = Vec::with_capacity(BATCH_SIZE);
 
         loop {
-            let timeout =
-                tokio::time::sleep(std::time::Duration::from_millis(FLUSH_INTERVAL_MS));
+            let timeout = tokio::time::sleep(std::time::Duration::from_millis(FLUSH_INTERVAL_MS));
             tokio::pin!(timeout);
 
             tokio::select! {
@@ -84,7 +83,7 @@ impl AuditPgRepository {
                     "INSERT INTO audit.events \
                      (id, timestamp, user_id, username, action, resource_type, \
                       resource_id, ip_address, user_agent, details, outcome) \
-                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8::inet, $9, $10, $11)"
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8::inet, $9, $10, $11)",
                 )
                 .bind(event.id)
                 .bind(event.timestamp)
@@ -142,7 +141,7 @@ impl AuditPort for AuditPgRepository {
                AND ($5::timestamptz IS NULL OR timestamp <= $5) \
                AND ($6::text IS NULL OR outcome = $6) \
              ORDER BY timestamp DESC \
-             LIMIT $7 OFFSET $8"
+             LIMIT $7 OFFSET $8",
         )
         .bind(filter.user_id)
         .bind(&filter.action)
@@ -167,7 +166,7 @@ impl AuditPort for AuditPgRepository {
                AND ($3::text IS NULL OR resource_type = $3) \
                AND ($4::timestamptz IS NULL OR timestamp >= $4) \
                AND ($5::timestamptz IS NULL OR timestamp <= $5) \
-               AND ($6::text IS NULL OR outcome = $6)"
+               AND ($6::text IS NULL OR outcome = $6)",
         )
         .bind(filter.user_id)
         .bind(&filter.action)

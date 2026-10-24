@@ -1167,9 +1167,25 @@ const fileOps = {
      */
     async downloadFile(fileId, fileName) {
         try {
-            const response = await fetch(`/api/files/${fileId}`, {
+            let response = await fetch(`/api/files/${fileId}`, {
                 headers: getAuthHeaders()
             });
+            // EX-45 : fichier en quarantaine CDR (non désarmé) — le serveur
+            // exige une action explicite de l'utilisateur avant de le servir.
+            if (response.status === 403) {
+                const detail = await response.clone().json().catch(() => null);
+                if (detail && detail.error_type === 'NonDesarme') {
+                    const accord = window.confirm(
+                        `« ${fileName} » n'a pas pu être désarmé (quarantaine).\n\n` +
+                        `${detail.error}\n\nTélécharger quand même ce fichier non désarmé ?`
+                    );
+                    if (!accord) return;
+                    response = await fetch(
+                        `/api/files/${fileId}?${encodeURIComponent(detail.parametre_accord || 'accepter_non_desarme')}=1`,
+                        { headers: getAuthHeaders() }
+                    );
+                }
+            }
             if (response.ok) {
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);

@@ -182,6 +182,7 @@ impl PathResolverService {
                     owner_id: uid,
                     sort_date: None,
                     etag: String::new(),
+                    etat_cdr: None,
                 }))
             }
         }

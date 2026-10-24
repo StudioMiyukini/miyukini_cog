@@ -13,6 +13,7 @@ use crate::application::dtos::file_dto::FileDto;
 use crate::application::ports::file_ports::{FileRetrievalUseCase, OptimizedFileContent};
 use crate::application::ports::storage_ports::FileReadPort;
 use crate::common::errors::DomainError;
+use crate::domain::entities::etat_cdr::EtatCdr;
 use crate::infrastructure::repositories::pg::file_blob_read_repository::FileBlobReadRepository;
 use crate::infrastructure::services::file_content_cache::FileContentCache;
 use crate::infrastructure::services::image_transcode_service::{
@@ -58,6 +59,19 @@ impl FileRetrievalService {
             content_cache: Some(content_cache),
             transcode: Some(transcode),
         }
+    }
+
+    /// État CDR du fichier (EX-45, décision A-004).
+    pub async fn etat_cdr(&self, id: &str) -> Result<EtatCdr, DomainError> {
+        self.file_read.get_etat_cdr(id).await
+    }
+
+    /// Identifiants en quarantaine CDR parmi `ids` (exclus des archives ZIP).
+    pub async fn ids_en_quarantaine(
+        &self,
+        ids: &[String],
+    ) -> Result<std::collections::HashSet<String>, DomainError> {
+        self.file_read.ids_en_quarantaine(ids).await
     }
 
     // ── private helpers ──────────────────────────────────────────

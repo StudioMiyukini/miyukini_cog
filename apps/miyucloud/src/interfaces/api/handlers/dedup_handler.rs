@@ -219,9 +219,25 @@ impl DedupHandler {
                 return json_error(StatusCode::BAD_REQUEST, "Empty file not allowed");
             }
 
+            // EX-45 : le blob déposé passe par le CDR ; sans ligne de fichier,
+            // aucune quarantaine n'est représentable → seuls les contenus
+            // reconstruits sont acceptés (400 sinon).
+            let issue = match state
+                .applications
+                .desarmement_service
+                .desarmer_sans_quarantaine(temp.path(), &content_type)
+                .await
+            {
+                Ok(issue) => issue,
+                Err(e) => {
+                    tracing::warn!("Dedup upload refused by CDR: {}", e);
+                    return AppError::from(e).into_response();
+                }
+            };
+
             // Store with deduplication (streaming from disk, constant RAM).
             return match dedup
-                .store_from_file(temp.path(), Some(content_type), Some(spooled.hash))
+                .store_from_file(temp.path(), Some(issue.type_mime), issue.hachage)
                 .await
             {
                 Ok(result) => {

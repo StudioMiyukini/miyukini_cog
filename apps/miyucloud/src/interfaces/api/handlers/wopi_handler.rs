@@ -88,6 +88,11 @@ async fn check_file_info(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
+    if let Err(status) = exiger_desarme(&state, &file_id).await {
+        return status.into_response();
+    }
+
     // Fetch file metadata
     let file = match state
         .app_state
@@ -145,6 +150,11 @@ async fn get_file(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
+    if let Err(status) = exiger_desarme(&state, &file_id).await {
+        return status.into_response();
+    }
+
     match state
         .app_state
         .applications
@@ -186,6 +196,11 @@ async fn put_file(
 
     if claims.file_id != file_id || !claims.can_write {
         return StatusCode::UNAUTHORIZED.into_response();
+    }
+
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
+    if let Err(status) = exiger_desarme(&state, &file_id).await {
+        return status.into_response();
     }
 
     // Check lock
@@ -322,6 +337,11 @@ async fn file_operations(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
+    if let Err(status) = exiger_desarme(&state, &file_id).await {
+        return status.into_response();
+    }
+
     let override_header = headers
         .get("X-WOPI-Override")
         .and_then(|v| v.to_str().ok())
@@ -394,6 +414,22 @@ pub struct EditorUrlResponse {
     pub access_token_ttl: i64,
 }
 
+/// EX-45 : seul un fichier désarmé peut être ouvert par un éditeur WOPI.
+/// Quarantaine ou état inconnu → 403 ; fichier introuvable → 404.
+async fn exiger_desarme(state: &WopiState, file_id: &str) -> Result<(), StatusCode> {
+    match state
+        .app_state
+        .applications
+        .file_retrieval_service
+        .etat_cdr(file_id)
+        .await
+    {
+        Ok(etat) if etat.autorise_traitement_contenu() => Ok(()),
+        Ok(_) => Err(StatusCode::FORBIDDEN),
+        Err(_) => Err(StatusCode::NOT_FOUND),
+    }
+}
+
 /// Determines if `caller_id` can access `file_id` and with what permissions.
 ///
 /// Uses the SQL-level ownership check (`get_file_owned`) so that files
@@ -439,6 +475,16 @@ pub async fn get_editor_url(
         Ok(result) => result,
         Err(status) => return status.into_response(),
     };
+
+    // EX-45 : édition WOPI refusée pour tout fichier non désarmé (quarantaine
+    // ou antérieur au CDR) — fermé par défaut.
+    if let Err(status) = exiger_desarme(&state, &params.file_id).await {
+        return (
+            status,
+            "Édition refusée : fichier non désarmé (CDR), jamais ouvert par un éditeur",
+        )
+            .into_response();
+    }
 
     // Extract extension from filename
     let extension = file.name.rsplit('.').next().unwrap_or("").to_lowercase();
@@ -506,6 +552,11 @@ async fn host_page(
 
     if claims.file_id != file_id {
         return StatusCode::UNAUTHORIZED.into_response();
+    }
+
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
+    if let Err(status) = exiger_desarme(&state, &file_id).await {
+        return status.into_response();
     }
 
     // Re-verify ownership even though the token was valid — defence in depth.

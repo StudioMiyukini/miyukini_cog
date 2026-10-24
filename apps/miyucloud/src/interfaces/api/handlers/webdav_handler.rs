@@ -738,6 +738,16 @@ async fn handle_get(
         f
     };
 
+    // EX-45 : quarantaine CDR → 403 (un client DAV ne peut pas exprimer
+    // l'accord explicite exigé).
+    let etat = file_retrieval_service
+        .etat_cdr(&file.id)
+        .await
+        .map_err(|e| AppError::internal_error(format!("Failed to stream file: {}", e)))?;
+    if !etat.autorise_lecture_dav() {
+        return Err(AppError::non_desarme_dav());
+    }
+
     // Stream file content — constant ~64 KB memory regardless of file size
     let stream = file_retrieval_service
         .get_file_stream(&file.id)
@@ -985,7 +995,17 @@ async fn handle_put(
         }
     }
 
-    // ── Atomic store: temp file → dedup blob + DB metadata update ──
+    // EX-45 : le CDR se fonde sur le type déclaré ; un client DAV générique
+    // n'en envoie souvent aucun (octet-stream) — affiner par signature et
+    // extension comme les autres chemins, sinon tout irait en quarantaine.
+    let content_type = crate::common::mime_detect::refine_content_type_from_file(
+        &temp_path,
+        crate::common::mime_detect::filename_from_path(&path),
+        &content_type,
+    )
+    .await;
+
+    // ── Atomic store: temp file → CDR funnel (EX-45) → dedup blob + DB ──
     let result = file_upload_service
         .update_file_streaming(
             &path,
@@ -1005,10 +1025,7 @@ async fn handle_put(
             .status(StatusCode::NO_CONTENT)
             .body(Body::empty())
             .unwrap()),
-        Err(e) => Err(AppError::internal_error(format!(
-            "Failed to put file: {}",
-            e
-        ))),
+        Err(e) => Err(AppError::ecriture_fichier(e, "Failed to put file")),
     }
 }
 

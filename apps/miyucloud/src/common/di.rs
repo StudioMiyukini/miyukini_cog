@@ -14,6 +14,7 @@ use crate::application::services::admin_settings_service::AdminSettingsService;
 use crate::application::services::auth_application_service::AuthApplicationService;
 
 use crate::application::ports::file_ports::FileUseCaseFactory;
+use crate::application::services::desarmement_service::DesarmementService;
 use crate::application::services::favorites_service::FavoritesService;
 use crate::application::services::folder_service::FolderService;
 use crate::application::services::i18n_application_service::I18nApplicationService;
@@ -251,10 +252,16 @@ impl AppServiceFactory {
 
         // Refactored services with all infrastructure ports
         // In blob model, dedup is handled by the repository — no separate write-behind needed
-        let file_upload_service = Arc::new(FileUploadService::new_with_read(
-            repos.file_write_repository.clone(),
-            repos.file_read_repository.clone(),
-        ));
+        // EX-45 / A-004 : entonnoir CDR unique, partagé par tous les chemins
+        // d'écriture (téléversements, WebDAV, Nextcloud, WOPI, vignettes).
+        let desarmement_service = Arc::new(DesarmementService::default());
+        let file_upload_service = Arc::new(
+            FileUploadService::new_with_read(
+                repos.file_write_repository.clone(),
+                repos.file_read_repository.clone(),
+            )
+            .with_desarmement(desarmement_service.clone()),
+        );
 
         let file_retrieval_service = Arc::new(FileRetrievalService::new_with_cache(
             repos.file_read_repository.clone(),
@@ -294,6 +301,7 @@ impl AppServiceFactory {
             // Traits for abstraction
             folder_service,
             file_upload_service,
+            desarmement_service,
             file_retrieval_service,
             file_management_service,
             file_use_case_factory,
@@ -917,6 +925,9 @@ pub struct ApplicationServices {
     // Traits for abstraction
     pub folder_service: Arc<FolderService>,
     pub file_upload_service: Arc<FileUploadService>,
+    /// Entonnoir CDR (EX-45) — aussi utilisé hors `FileUploadService`
+    /// (vignettes fournies par le client, dépôt de blob administrateur).
+    pub desarmement_service: Arc<DesarmementService>,
     pub file_retrieval_service: Arc<FileRetrievalService>,
     pub file_management_service: Arc<FileManagementService>,
     pub file_use_case_factory: Arc<dyn FileUseCaseFactory>,

@@ -67,6 +67,12 @@ pub struct FileDto {
     /// Used for WebDAV/Nextcloud ETag headers. Omitted from REST API JSON.
     #[serde(skip)]
     pub etag: String,
+
+    /// État CDR (EX-45) : `desarme`, `quarantaine` ou `inconnu`. Renseigné par
+    /// les chemins d'écriture (réponse de téléversement) et les métadonnées ;
+    /// omis du JSON quand il n'a pas été lu.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub etat_cdr: Option<String>,
 }
 
 impl From<File> for FileDto {
@@ -97,6 +103,7 @@ impl From<File> for FileDto {
             owner_id: parts.owner_id.map(|u| u.to_string()),
             sort_date: None,
             etag: parts.etag,
+            etat_cdr: None,
         }
     }
 }
@@ -138,6 +145,7 @@ impl FileDto {
             owner_id: None,
             etag: String::new(),
             sort_date: None,
+            etat_cdr: None,
         }
     }
 }

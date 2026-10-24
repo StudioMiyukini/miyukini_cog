@@ -10,9 +10,9 @@
 
 use crate::common::errors::DomainError;
 use bytes::Bytes;
+use futures::Stream;
 use std::path::Path;
 use std::pin::Pin;
-use futures::Stream;
 
 /// Port for encrypting/decrypting file blobs at rest.
 ///
@@ -30,7 +30,10 @@ pub trait BlobEncryptionPort: Send + Sync + 'static {
         &self,
         path: &Path,
     ) -> impl std::future::Future<
-        Output = Result<Pin<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>>, DomainError>,
+        Output = Result<
+            Pin<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>>,
+            DomainError,
+        >,
     > + Send;
 
     /// Decrypt an encrypted file fully into memory.

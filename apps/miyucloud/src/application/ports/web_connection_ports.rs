@@ -47,5 +47,7 @@ pub struct WebConnectionStatus {
 pub trait ConnectionManagerPort: Send + Sync + 'static {
     fn start(&self) -> impl std::future::Future<Output = Result<(), DomainError>> + Send;
     fn stop(&self) -> impl std::future::Future<Output = Result<(), DomainError>> + Send;
-    fn status(&self) -> impl std::future::Future<Output = Result<WebConnectionStatus, DomainError>> + Send;
+    fn status(
+        &self,
+    ) -> impl std::future::Future<Output = Result<WebConnectionStatus, DomainError>> + Send;
 }

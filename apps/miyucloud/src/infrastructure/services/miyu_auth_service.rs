@@ -413,8 +413,14 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
         let hote = self.hote.as_ref().ok_or(RefusMiyu::VisaDesactive)?;
         let (visa, passeport) = analyser_autorisation_visa(autorisation.unwrap_or(""))?;
         analyser_pop(pop.unwrap_or(""))?;
-        miyauth::verifier_visa(&visa, &passeport, AUDIENCE_MIYUCLOUD, &hote.politique(), maintenant)
-            .map_err(|e| RefusMiyu::Http(RefusHttp::Identite(e)))?;
+        miyauth::verifier_visa(
+            &visa,
+            &passeport,
+            AUDIENCE_MIYUCLOUD,
+            &hote.politique(),
+            maintenant,
+        )
+        .map_err(|e| RefusMiyu::Http(RefusHttp::Identite(e)))?;
         Ok(())
     }
 

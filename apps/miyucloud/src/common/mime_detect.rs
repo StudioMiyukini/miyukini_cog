@@ -161,7 +161,9 @@ pub fn validate_upload_mime(
     }
 
     // Check extension against blocklist via mime_guess
-    let ext_mime = mime_guess::from_path(filename).first().map(|m| m.to_string());
+    let ext_mime = mime_guess::from_path(filename)
+        .first()
+        .map(|m| m.to_string());
     if let Some(ref ext_type) = ext_mime {
         for blocked in blocked_types {
             if ext_type == blocked {
@@ -335,7 +337,10 @@ mod tests {
     fn blocks_executable_by_magic_bytes() {
         // ELF magic bytes
         let elf = b"\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-        let blocked = vec!["application/x-executable".into(), "application/x-elf".into()];
+        let blocked = vec![
+            "application/x-executable".into(),
+            "application/x-elf".into(),
+        ];
         let result = validate_upload_mime(elf, "safe.jpg", "image/jpeg", &blocked);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("blocked"));
@@ -343,9 +348,18 @@ mod tests {
 
     #[test]
     fn detects_executable_formats() {
-        assert_eq!(detect_executable(b"\x7fELF\x02\x01"), Some("application/x-executable"));
-        assert_eq!(detect_executable(b"MZ\x90\x00"), Some("application/x-msdownload"));
-        assert_eq!(detect_executable(&[0xCF, 0xFA, 0xED, 0xFE, 0, 0]), Some("application/x-mach-binary"));
+        assert_eq!(
+            detect_executable(b"\x7fELF\x02\x01"),
+            Some("application/x-executable")
+        );
+        assert_eq!(
+            detect_executable(b"MZ\x90\x00"),
+            Some("application/x-msdownload")
+        );
+        assert_eq!(
+            detect_executable(&[0xCF, 0xFA, 0xED, 0xFE, 0, 0]),
+            Some("application/x-mach-binary")
+        );
         assert_eq!(detect_executable(b"\x89PNG\r\n"), None);
         assert_eq!(detect_executable(b"M"), None);
     }
@@ -353,7 +367,8 @@ mod tests {
     #[test]
     fn blocks_claimed_type_in_blocklist() {
         let blocked = vec!["application/x-msdownload".into()];
-        let result = validate_upload_mime(b"data", "file.exe", "application/x-msdownload", &blocked);
+        let result =
+            validate_upload_mime(b"data", "file.exe", "application/x-msdownload", &blocked);
         assert!(result.is_err());
     }
 

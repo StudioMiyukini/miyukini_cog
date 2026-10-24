@@ -12,14 +12,14 @@
 //! The service processes files in 64KB streaming chunks to maintain the
 //! low-memory property of the upload pipeline.
 
+use crate::application::ports::encryption_ports::BlobEncryptionPort;
+use crate::common::config::EncryptionConfig;
+use crate::common::errors::DomainError;
 use aes_gcm::{
     Aes256Gcm, KeyInit, Nonce,
     aead::{Aead, OsRng},
 };
 use bytes::Bytes;
-use crate::application::ports::encryption_ports::BlobEncryptionPort;
-use crate::common::config::EncryptionConfig;
-use crate::common::errors::DomainError;
 use futures::Stream;
 use std::path::Path;
 use std::pin::Pin;
@@ -101,7 +101,8 @@ impl BlobEncryptionPort for BlobEncryptionService {
     async fn decrypt_stream(
         &self,
         path: &Path,
-    ) -> Result<Pin<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>>, DomainError> {
+    ) -> Result<Pin<Box<dyn Stream<Item = Result<Bytes, std::io::Error>> + Send>>, DomainError>
+    {
         if !self.enabled {
             // Return raw file stream when encryption is off
             let file = tokio::fs::File::open(path)

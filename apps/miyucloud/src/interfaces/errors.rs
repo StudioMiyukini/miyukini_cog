@@ -112,6 +112,28 @@ impl AppError {
         )
     }
 
+    /// Erreur d'un chemin d'écriture de fichier : un refus du CDR (EX-45,
+    /// `InvalidInput`) reste un 400 explicite ; toute autre erreur garde le
+    /// comportement historique (500 avec contexte).
+    pub fn ecriture_fichier(err: DomainError, contexte: &str) -> Self {
+        if err.kind == ErrorKind::InvalidInput {
+            Self::from(err)
+        } else {
+            Self::internal_error(format!("{contexte}: {err}"))
+        }
+    }
+
+    /// Refus de lecture WebDAV d'un fichier en quarantaine CDR (EX-45) : un
+    /// client DAV ne peut pas exprimer l'accord explicite exigé.
+    pub fn non_desarme_dav() -> Self {
+        Self::new(
+            StatusCode::FORBIDDEN,
+            "Fichier non désarmé (quarantaine CDR) : lecture WebDAV refusée. Télécharger \
+             depuis l'interface web après accord explicite (accepter_non_desarme=1).",
+            "NonDesarme",
+        )
+    }
+
     /// Create a 413 Payload Too Large error.
     pub fn payload_too_large(message: impl Into<String>) -> Self {
         Self::new(StatusCode::PAYLOAD_TOO_LARGE, message, "PayloadTooLarge")

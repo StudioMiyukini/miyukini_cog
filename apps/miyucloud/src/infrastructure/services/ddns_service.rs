@@ -79,13 +79,7 @@ impl DdnsService {
                         let old_ip = current_ip.read().await.clone();
                         if old_ip.as_deref() != Some(&new_ip) {
                             tracing::info!("Public IP changed: {:?} -> {}", old_ip, new_ip);
-                            match Self::update_dns_static(
-                                &http_client,
-                                &config,
-                                &new_ip,
-                            )
-                            .await
-                            {
+                            match Self::update_dns_static(&http_client, &config, &new_ip).await {
                                 Ok(()) => {
                                     *current_ip.write().await = Some(new_ip.clone());
                                     let url = format!("http://{}", config.hostname);
@@ -97,7 +91,11 @@ impl DdnsService {
                                         last_update: Some(Utc::now()),
                                         error: None,
                                     };
-                                    tracing::info!("DDNS updated: {} -> {}", config.hostname, new_ip);
+                                    tracing::info!(
+                                        "DDNS updated: {} -> {}",
+                                        config.hostname,
+                                        new_ip
+                                    );
                                 }
                                 Err(e) => {
                                     tracing::error!("DDNS update failed: {}", e);
@@ -149,15 +147,11 @@ impl DdnsService {
         Ok(ip)
     }
 
-    async fn detect_ip_static(
-        client: &reqwest::Client,
-        url: &str,
-    ) -> Result<String, DomainError> {
-        let resp = client
-            .get(url)
-            .send()
-            .await
-            .map_err(|e| DomainError::internal_error("DDNS", format!("IP detect failed: {}", e)))?;
+    async fn detect_ip_static(client: &reqwest::Client, url: &str) -> Result<String, DomainError> {
+        let resp =
+            client.get(url).send().await.map_err(|e| {
+                DomainError::internal_error("DDNS", format!("IP detect failed: {}", e))
+            })?;
         let ip = resp
             .text()
             .await

@@ -285,7 +285,8 @@ impl ChunkedUploadHandler {
         )
         .await;
 
-        // Upload from assembled file on disk — zero extra RAM copies, hash pre-computed
+        // Upload from assembled file on disk — passes through the CDR funnel
+        // (EX-45) inside `upload_file_from_path`.
         match upload_service
             .upload_file_from_path(
                 filename.clone(),
@@ -322,7 +323,13 @@ impl ChunkedUploadHandler {
             }
             Err(e) => {
                 tracing::error!("Failed to create file from assembled upload: {:?}", e);
-                AppError::internal_error(format!("Failed to create file: {}", e)).into_response()
+                if e.kind == crate::common::errors::ErrorKind::InvalidInput {
+                    // Refus du CDR : la session ne peut pas aboutir, on la libère.
+                    let _ = chunked_service
+                        .cancel_upload(&upload_id, auth_user.id)
+                        .await;
+                }
+                AppError::ecriture_fichier(e, "Failed to create file").into_response()
             }
         }
     }

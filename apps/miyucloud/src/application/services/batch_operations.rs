@@ -649,8 +649,20 @@ impl BatchOperationService {
         let buf_writer = BufWriter::with_capacity(256 * 1024, tokio_file);
         let mut zip = ZipFileWriter::with_tokio(buf_writer);
 
+        // EX-45 : les fichiers en quarantaine CDR ne sortent jamais dans une
+        // archive (l'accord explicite se donne fichier par fichier).
+        let en_quarantaine = self
+            .file_retrieval
+            .ids_en_quarantaine(&file_ids)
+            .await
+            .map_err(BatchOperationError::Domain)?;
+
         // ── Add individual files at the root of the ZIP ──────────────────
         for file_id in &file_ids {
+            if en_quarantaine.contains(file_id) {
+                info!("File {} excluded from ZIP (CDR quarantine)", file_id);
+                continue;
+            }
             match self.file_retrieval.get_file_owned(file_id, user_id).await {
                 Ok(file_dto) => {
                     if let Err(e) = self
@@ -778,6 +790,26 @@ impl BatchOperationService {
             let file = file.map_err(BatchOperationError::Domain)?;
             let fid = file.folder_id.clone().unwrap_or_default();
             files_by_folder.entry(fid).or_default().push(file);
+        }
+
+        // EX-45 : quarantaine CDR exclue de l'archive.
+        let ids: Vec<String> = files_by_folder
+            .values()
+            .flat_map(|v| v.iter().map(|f| f.id.clone()))
+            .collect();
+        let en_quarantaine = self
+            .file_retrieval
+            .ids_en_quarantaine(&ids)
+            .await
+            .map_err(BatchOperationError::Domain)?;
+        if !en_quarantaine.is_empty() {
+            info!(
+                "{} file(s) excluded from ZIP (CDR quarantine)",
+                en_quarantaine.len()
+            );
+            for files in files_by_folder.values_mut() {
+                files.retain(|f| !en_quarantaine.contains(&f.id));
+            }
         }
 
         // Build path mapping: folder_id → ZIP-relative path

@@ -64,13 +64,7 @@ impl CentralClientService {
 
         tracing::info!("Registering with Central at {}", url);
 
-        match self
-            .http_client
-            .post(&url)
-            .json(&body)
-            .send()
-            .await
-        {
+        match self.http_client.post(&url).json(&body).send().await {
             Ok(resp) if resp.status().is_success() => {
                 *self.state.write().await = ConnectionStatus {
                     mode: "central".into(),

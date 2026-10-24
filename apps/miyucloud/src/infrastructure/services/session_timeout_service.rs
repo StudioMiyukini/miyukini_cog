@@ -45,7 +45,7 @@ pub fn start_session_cleanup(pool: Arc<PgPool>, config: SessionTimeoutConfig) {
             let abs_result = sqlx::query(
                 "UPDATE auth.sessions SET revoked = true \
                  WHERE revoked = false \
-                   AND created_at < NOW() - make_interval(hours => $1::int)"
+                   AND created_at < NOW() - make_interval(hours => $1::int)",
             )
             .bind(config.absolute_timeout_hours as i32)
             .execute(pool.as_ref())
@@ -68,7 +68,7 @@ pub fn start_session_cleanup(pool: Arc<PgPool>, config: SessionTimeoutConfig) {
             let idle_result = sqlx::query(
                 "UPDATE auth.sessions SET revoked = true \
                  WHERE revoked = false \
-                   AND expires_at < NOW()"
+                   AND expires_at < NOW()",
             )
             .execute(pool.as_ref())
             .await;

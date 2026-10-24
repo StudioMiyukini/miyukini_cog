@@ -20,6 +20,7 @@ use uuid::Uuid;
 
 use crate::application::ports::storage_ports::{CopyFolderTreeResult, FileWritePort};
 use crate::common::errors::DomainError;
+use crate::domain::entities::etat_cdr::MarqueCdr;
 use crate::domain::entities::file::File;
 use crate::domain::services::path_service::StoragePath;
 
@@ -149,6 +150,8 @@ impl FileBlobWriteRepository {
         new_hash: &str,
         new_size: i64,
         modified_at: Option<i64>,
+        marque: &MarqueCdr,
+        mime_type: Option<&str>,
     ) -> Result<String, DomainError> {
         // Atomic CTE: capture old hash then update in one round-trip, no TOCTOU.
         let old_hash = match sqlx::query_scalar::<_, String>(
@@ -158,7 +161,9 @@ impl FileBlobWriteRepository {
             )
             UPDATE storage.files f
                SET blob_hash = $1, size = $2,
-                   updated_at = COALESCE(to_timestamp($4), NOW())
+                   updated_at = COALESCE(to_timestamp($4), NOW()),
+                   etat_cdr = $5, cdr_rapport = $6,
+                   mime_type = COALESCE($7, f.mime_type)
               FROM old
              WHERE f.id = old.id
             RETURNING old.blob_hash
@@ -168,6 +173,9 @@ impl FileBlobWriteRepository {
         .bind(new_size)
         .bind(file_id)
         .bind(modified_at.map(|t| t as f64))
+        .bind(marque.etat.as_str())
+        .bind(&marque.rapport)
+        .bind(mime_type)
         .fetch_optional(self.pool.as_ref())
         .await
         {
@@ -208,10 +216,11 @@ impl FileBlobWriteRepository {
 
         Ok(new_hash.to_string())
     }
-}
 
-impl FileWritePort for FileBlobWriteRepository {
-    async fn save_file_from_temp(
+    /// Range un fichier temporaire (déjà passé par l'entonnoir CDR) et crée sa
+    /// ligne `storage.files` avec son état CDR, en une seule insertion.
+    #[allow(clippy::too_many_arguments)]
+    pub async fn save_file_from_temp_cdr(
         &self,
         name: String,
         folder_id: Option<String>,
@@ -219,6 +228,7 @@ impl FileWritePort for FileBlobWriteRepository {
         temp_path: &std::path::Path,
         size: u64,
         pre_computed_hash: Option<String>,
+        marque: &MarqueCdr,
     ) -> Result<File, DomainError> {
         let user_id = self.resolve_user_id(folder_id.as_deref()).await?;
 
@@ -233,8 +243,9 @@ impl FileWritePort for FileBlobWriteRepository {
         // Insert file metadata — if this fails, compensate by removing the blob ref
         let row = match sqlx::query_as::<_, (String, i64, i64)>(
             r#"
-            INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type)
-            VALUES ($1, $2::uuid, $3, $4, $5, $6)
+            INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type,
+                                       etat_cdr, cdr_rapport)
+            VALUES ($1, $2::uuid, $3, $4, $5, $6, $7, $8)
             RETURNING id::text,
                       EXTRACT(EPOCH FROM created_at)::bigint,
                       EXTRACT(EPOCH FROM updated_at)::bigint
@@ -246,6 +257,8 @@ impl FileWritePort for FileBlobWriteRepository {
         .bind(&blob_hash)
         .bind(size as i64)
         .bind(&content_type)
+        .bind(marque.etat.as_str())
+        .bind(&marque.rapport)
         .fetch_one(self.pool.as_ref())
         .await
         {
@@ -293,6 +306,65 @@ impl FileWritePort for FileBlobWriteRepository {
             Some(user_id),
             blob_hash.clone(),
         )
+    }
+
+    /// Remplace le contenu du fichier `file_id` par un fichier temporaire
+    /// (déjà passé par l'entonnoir CDR) et met à jour son état CDR dans la
+    /// même instruction que l'échange de blob.
+    #[allow(clippy::too_many_arguments)]
+    pub async fn update_file_content_from_temp_cdr(
+        &self,
+        file_id: &str,
+        temp_path: &std::path::Path,
+        size: u64,
+        content_type: Option<String>,
+        pre_computed_hash: Option<String>,
+        modified_at: Option<i64>,
+        marque: &MarqueCdr,
+    ) -> Result<String, DomainError> {
+        // Streaming: pass pre-computed hash so dedup skips re-reading the file.
+        let dedup_result = self
+            .dedup
+            .store_from_file(temp_path, content_type.clone(), pre_computed_hash)
+            .await?;
+        let new_hash = dedup_result.hash().to_string();
+
+        // Le type MIME suit le contenu stocké (reconstruction GIF → PNG…).
+        self.swap_blob_hash(
+            file_id,
+            &new_hash,
+            size as i64,
+            modified_at,
+            marque,
+            content_type.as_deref(),
+        )
+        .await
+    }
+}
+
+impl FileWritePort for FileBlobWriteRepository {
+    /// Écriture hors entonnoir CDR : état `inconnu` (traité comme non désarmé).
+    /// Les chemins d'écriture de MiyuCloud passent par `FileUploadService`,
+    /// qui appelle [`FileBlobWriteRepository::save_file_from_temp_cdr`].
+    async fn save_file_from_temp(
+        &self,
+        name: String,
+        folder_id: Option<String>,
+        content_type: String,
+        temp_path: &std::path::Path,
+        size: u64,
+        pre_computed_hash: Option<String>,
+    ) -> Result<File, DomainError> {
+        self.save_file_from_temp_cdr(
+            name,
+            folder_id,
+            content_type,
+            temp_path,
+            size,
+            pre_computed_hash,
+            &MarqueCdr::inconnue(),
+        )
+        .await
     }
 
     async fn move_file(
@@ -357,18 +429,23 @@ impl FileWritePort for FileBlobWriteRepository {
         >(
             r#"
             WITH src AS (
-                SELECT name, folder_id, user_id, blob_hash, size, mime_type
+                SELECT name, folder_id, user_id, blob_hash, size, mime_type,
+                       etat_cdr, cdr_rapport
                   FROM storage.files
                  WHERE id = $1::uuid AND NOT is_trashed
             ),
             new_file AS (
-                INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type)
+                -- EX-45 : la copie (même blob) conserve l'état CDR de la source.
+                INSERT INTO storage.files (name, folder_id, user_id, blob_hash, size, mime_type,
+                                           etat_cdr, cdr_rapport)
                 SELECT name,
                        COALESCE($2::uuid, folder_id),
                        user_id,
                        blob_hash,
                        size,
-                       mime_type
+                       mime_type,
+                       etat_cdr,
+                       cdr_rapport
                   FROM src
                 RETURNING id::text, name, folder_id::text, size, mime_type,
                           EXTRACT(EPOCH FROM created_at)::bigint,
@@ -494,15 +571,17 @@ impl FileWritePort for FileBlobWriteRepository {
         pre_computed_hash: Option<String>,
         modified_at: Option<i64>,
     ) -> Result<String, DomainError> {
-        // Streaming: pass pre-computed hash so dedup skips re-reading the file.
-        let dedup_result = self
-            .dedup
-            .store_from_file(temp_path, content_type, pre_computed_hash)
-            .await?;
-        let new_hash = dedup_result.hash().to_string();
-
-        self.swap_blob_hash(file_id, &new_hash, size as i64, modified_at)
-            .await
+        // Hors entonnoir CDR : état `inconnu` (traité comme non désarmé).
+        self.update_file_content_from_temp_cdr(
+            file_id,
+            temp_path,
+            size,
+            content_type,
+            pre_computed_hash,
+            modified_at,
+            &MarqueCdr::inconnue(),
+        )
+        .await
     }
 
     async fn register_file_deferred(
