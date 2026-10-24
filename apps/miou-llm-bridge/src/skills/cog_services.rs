@@ -19,8 +19,6 @@ const COG_BASE_PORT: u16 = 11400;
 const KNOWN_SERVICES: &[(&str, &str, u16)] = &[
     ("jaykonta", "JayKonta — Comptabilité", 11441),
     ("jaykoa", "JayKoa — Calendrier", 11442),
-    ("jayxpose", "JayXpose — Vitrine", 11443),
-    ("jayfestival", "JayFestival — Événements", 11444),
     (
         "miyukiniwatch",
         "MiyukiniWatch — Habitudes & Mesures",

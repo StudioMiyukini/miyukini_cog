@@ -7,7 +7,7 @@
 //! @human  Composants calendrier reutilisables (jour, semaine, mois)
 //!
 //! Ce module fournit des composants calendrier generiques utilisables
-//! par tous les services (JayKoa, JayFestival, etc.).
+//! par tous les services (JayKoa, JayRDV, etc.).
 
 pub mod types;
 pub mod day_view;

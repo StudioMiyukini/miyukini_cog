@@ -45,7 +45,7 @@ impl CalendarViewMode {
 /// Trait pour les evenements de calendrier.
 ///
 /// Permet d'utiliser les composants calendrier avec n'importe quel type d'evenement
-/// (TemporalEntry de JayKoa, Animation de JayFestival, etc.)
+/// (TemporalEntry de JayKoa, rendez-vous de JayRDV, etc.)
 pub trait CalendarEvent: Clone + PartialEq {
     /// Identifiant unique de l'evenement.
     fn id(&self) -> Option<&str>;

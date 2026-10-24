@@ -102,7 +102,7 @@ pub enum SidebarFooter {
 /// Props pour le composant ServiceSidebar.
 #[derive(Props, Clone, PartialEq)]
 pub struct ServiceSidebarProps {
-    /// Titre du service (ex: "JayFestival", "JayKonta").
+    /// Titre du service (ex: "JayRDV", "JayKonta").
     pub title: &'static str,
     /// Sous-titre optionnel.
     #[props(default)]
