@@ -12,11 +12,25 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 type HmacSha256 = Hmac<Sha256>;
 
-/// Clé secrète CSRF (injectée depuis l'environnement ou défaut de dev).
-fn csrf_secret() -> Vec<u8> {
-    std::env::var("PORTAL_CSRF_SECRET")
-        .unwrap_or_else(|_| "dev-csrf-secret-changeme".to_string())
-        .into_bytes()
+/// Longueur minimale d'un secret CSRF fourni par l'environnement.
+const SECRET_MIN: usize = 32;
+
+/// Clé secrète CSRF : `PORTAL_CSRF_SECRET` (≥ 32 octets) sinon secret aléatoire
+/// propre au processus (jamais de clé codée en dur ; les jetons ne survivent
+/// alors pas à un redémarrage, ce qui est sans conséquence pour des formulaires).
+fn csrf_secret() -> &'static [u8] {
+    static SECRET: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
+    SECRET.get_or_init(|| match std::env::var("PORTAL_CSRF_SECRET") {
+        Ok(s) if s.len() >= SECRET_MIN => s.into_bytes(),
+        autre => {
+            if autre.is_ok() {
+                eprintln!("PORTAL_CSRF_SECRET trop court (< {SECRET_MIN} octets) : ignoré");
+            }
+            let mut octets = vec![0u8; 32];
+            getrandom::getrandom(&mut octets).expect("aléa système indisponible");
+            octets
+        }
+    })
 }
 
 /// Retourne le timestamp Unix en secondes.
@@ -59,7 +73,7 @@ pub fn validate_csrf_token(token: &str) -> bool {
 
 fn compute_mac(data: &str) -> String {
     let mut mac =
-        HmacSha256::new_from_slice(&csrf_secret()).expect("HMAC accepts any key length");
+        HmacSha256::new_from_slice(csrf_secret()).expect("HMAC accepts any key length");
     mac.update(data.as_bytes());
     hex::encode(mac.finalize().into_bytes())
 }

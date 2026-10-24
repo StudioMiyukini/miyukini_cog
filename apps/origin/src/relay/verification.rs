@@ -118,7 +118,14 @@ impl Verifier {
             // Calculer le hash de la clé fournie
             let provided_hash = Sha256::digest(provided_key);
 
-            if provided_hash.as_slice() == expected_hash {
+            // Comparaison en temps constant (pas de fuite par la durée).
+            let egal = provided_hash.len() == expected_hash.len()
+                && provided_hash
+                    .iter()
+                    .zip(expected_hash.iter())
+                    .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+                    == 0;
+            if egal {
                 info!("Phase A: Core key verified for version {}", core_version);
                 VerifyResult::Ok
             } else {

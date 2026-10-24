@@ -1693,6 +1693,7 @@ dependencies = [
  "axum 0.8.8",
  "chrono",
  "cog-portal-contract",
+ "getrandom 0.2.17",
  "hex",
  "hmac",
  "reqwest",

@@ -25,6 +25,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 thiserror = "2"
 cog-portal-contract = { path = "../../crates/cog-portal-contract" }
 hmac = "0.12"
+# Secret CSRF aléatoire par processus si PORTAL_CSRF_SECRET absent
+getrandom = "0.2"
 hex = "0.4"
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 
