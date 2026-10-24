@@ -867,8 +867,8 @@ mod tests {
         let paquet = signer(&build_zip(&[("service.manifest.json", m.as_bytes())]), "svc", None, &cle);
         let p = verifier_paquet_market(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false).unwrap();
         let i = p.action_market(OperationMarket::Installer, "svc", Some("1.0.0")).intention();
-        assert_eq!(i.data.content["provenance"], "signee_tierce");
-        assert_eq!(i.data.content["niveau_confiance"], "reconnu");
+        assert_eq!(i.data.content["provenance"], "signee_officielle");
+        assert_eq!(i.data.content["niveau_confiance"], "souverain");
         assert_eq!(i.data.content["version"], "1.0.0");
         assert_ne!(i.data.content["editeur"], "aucun");
     }
