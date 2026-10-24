@@ -47,6 +47,10 @@ pub struct AliciaRuntime {
     pub http: reqwest::Client,
     pub stt_url: String,
     pub tts_url: String,
+    /// Jeton bearer STT (mock : jeton du processus ; externe : `ALICIA_VOICE_TOKEN`).
+    pub stt_token: Option<String>,
+    /// Jeton bearer TTS (mock : jeton du processus ; externe : `ALICIA_VOICE_TOKEN`).
+    pub tts_token: Option<String>,
     pub face_url: Option<String>,
 }
 
@@ -56,7 +60,12 @@ impl AliciaRuntime {
     pub async fn build(args: ServiceArgs) -> anyhow::Result<Self> {
         let nlu = NluEngine::new(args.llm_url, args.llm_key, args.search_url, args.workspace);
 
-        let (stt_url, tts_url) = resolve_urls(args.stt_url, args.tts_url).await?;
+        let VoiceEndpoints {
+            stt_url,
+            tts_url,
+            stt_token,
+            tts_token,
+        } = resolve_urls(args.stt_url, args.tts_url).await?;
 
         let config = AliciaConfig {
             mqtt: None,
@@ -75,6 +84,8 @@ impl AliciaRuntime {
             http: reqwest::Client::new(),
             stt_url,
             tts_url,
+            stt_token,
+            tts_token,
             face_url: args.face_url,
         })
     }
@@ -94,6 +105,8 @@ impl AliciaRuntime {
             http: reqwest::Client::new(),
             stt_url: String::new(),
             tts_url: String::new(),
+            stt_token: None,
+            tts_token: None,
             face_url: None,
         }
     }
@@ -136,26 +149,66 @@ impl AliciaRuntime {
     }
 }
 
+/// URLs STT/TTS resolues et jetons bearer associes.
+struct VoiceEndpoints {
+    stt_url: String,
+    tts_url: String,
+    stt_token: Option<String>,
+    tts_token: Option<String>,
+}
+
+/// Jeton des serveurs externes, lu dans l'environnement (jamais en argument CLI).
+fn external_voice_token() -> Option<String> {
+    std::env::var(voice::VOICE_TOKEN_ENV)
+        .ok()
+        .filter(|t| !t.trim().is_empty())
+}
+
 /// Resout les URLs STT et TTS : demarre un unique serveur mock si les deux sont vides,
 /// ou demarre le mock uniquement pour celle qui est vide.
-async fn resolve_urls(stt_url: String, tts_url: String) -> anyhow::Result<(String, String)> {
+///
+/// Les mocks ecoutent en loopback et exigent un jeton aleatoire propre au processus.
+async fn resolve_urls(stt_url: String, tts_url: String) -> anyhow::Result<VoiceEndpoints> {
     match (stt_url.is_empty(), tts_url.is_empty()) {
-        (false, false) => Ok((stt_url, tts_url)),
+        (false, false) => {
+            let token = external_voice_token();
+            Ok(VoiceEndpoints {
+                stt_url,
+                tts_url,
+                stt_token: token.clone(),
+                tts_token: token,
+            })
+        }
         (true, true) => {
-            let (stt, tts) = voice::start_mock_servers().await?;
-            println!("  STT mock : {stt}");
-            println!("  TTS mock : {tts}");
-            Ok((stt, tts))
+            let mock = voice::start_mock_servers().await?;
+            println!("  STT mock : {}", mock.stt_url);
+            println!("  TTS mock : {}", mock.tts_url);
+            Ok(VoiceEndpoints {
+                stt_url: mock.stt_url,
+                tts_url: mock.tts_url,
+                stt_token: Some(mock.token.clone()),
+                tts_token: Some(mock.token),
+            })
         }
         (true, false) => {
-            let (stt, _) = voice::start_mock_servers().await?;
-            println!("  STT mock : {stt}");
-            Ok((stt, tts_url))
+            let mock = voice::start_mock_servers().await?;
+            println!("  STT mock : {}", mock.stt_url);
+            Ok(VoiceEndpoints {
+                stt_url: mock.stt_url,
+                tts_url,
+                stt_token: Some(mock.token),
+                tts_token: external_voice_token(),
+            })
         }
         (false, true) => {
-            let (_, tts) = voice::start_mock_servers().await?;
-            println!("  TTS mock : {tts}");
-            Ok((stt_url, tts))
+            let mock = voice::start_mock_servers().await?;
+            println!("  TTS mock : {}", mock.tts_url);
+            Ok(VoiceEndpoints {
+                stt_url,
+                tts_url: mock.tts_url,
+                stt_token: external_voice_token(),
+                tts_token: Some(mock.token),
+            })
         }
     }
 }

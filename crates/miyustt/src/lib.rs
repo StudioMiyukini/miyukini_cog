@@ -10,18 +10,44 @@
 //! - types API STT v1
 //! - selection de preset hardware
 //! - routeur HTTP local (`/api/health`, `/api/stt`, `/api/stt/stream`)
+//!
+//! Securite (R-010) : jeton bearer compare en temps constant, origine locale
+//! stricte, corps borne, et [`validate_bind`] qui refuse une ecoute hors loopback
+//! sans jeton. Le controle s'execute en middleware, avant la lecture du corps.
+
+mod securite;
+
+use std::net::SocketAddr;
 
 use axum::{
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
-        State,
+        DefaultBodyLimit, Request, State,
     },
-    http::{header, HeaderMap, StatusCode},
-    response::Response,
+    http::StatusCode,
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
+
+pub use securite::{is_local_origin, SecurityConfigError};
+
+/// Taille max du corps HTTP `/api/stt` (octets). Au-dela : 413.
+pub const MAX_STT_BODY_BYTES: usize = 16 * 1024 * 1024;
+/// Duree audio max acceptee par requete (secondes).
+pub const MAX_AUDIO_SECONDS: u32 = 60;
+/// Frequence d'echantillonnage minimale acceptee (Hz).
+pub const MIN_SAMPLE_RATE: u32 = 8_000;
+/// Frequence d'echantillonnage maximale acceptee (Hz).
+pub const MAX_SAMPLE_RATE: u32 = 48_000;
+/// Nombre max d'indices de langue.
+pub const MAX_LANGUAGE_HINTS: usize = 8;
+/// Longueur max d'un identifiant court (langue, modele).
+pub const MAX_IDENT_LEN: usize = 128;
+/// Taille max d'un message WebSocket entrant (octets).
+pub const MAX_WS_MESSAGE_BYTES: usize = 64 * 1024;
 
 /// Niveaux de preset STT.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -155,12 +181,45 @@ pub struct SttState {
 }
 
 /// Configuration securite de MiyuSTT.
-#[derive(Debug, Clone, Default)]
+///
+/// `bearer_token` : s'il est present, il est exige sur toute route sauf `/api/health`,
+/// y compris en loopback. Son absence n'est admise qu'en ecoute loopback
+/// (voir [`validate_bind`]). Un jeton vide refuse toute requete.
+#[derive(Clone, Default)]
 pub struct SttSecurity {
-    /// Token bearer attendu si auth active.
+    /// Token bearer attendu (obligatoire hors loopback).
     pub bearer_token: Option<String>,
     /// Restreint les requetes avec `Origin` non-local.
     pub enforce_local_origin: bool,
+}
+
+impl std::fmt::Debug for SttSecurity {
+    // Le jeton n'est jamais affiche (C-25).
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SttSecurity")
+            .field(
+                "bearer_token",
+                &self.bearer_token.as_ref().map(|_| "<masque>"),
+            )
+            .field("enforce_local_origin", &self.enforce_local_origin)
+            .finish()
+    }
+}
+
+/// Valide l'adresse d'ecoute au regard de la configuration de securite.
+///
+/// A appeler avant d'ouvrir le port. Refuse (fail-closed) :
+/// - une adresse non analysable comme `IP:port` ;
+/// - un jeton configure mais vide ;
+/// - une adresse non-loopback sans jeton.
+///
+/// # Errors
+/// [`SecurityConfigError`] decrivant la cause du refus.
+pub fn validate_bind(
+    bind_addr: &str,
+    security: &SttSecurity,
+) -> Result<SocketAddr, SecurityConfigError> {
+    securite::check_bind(bind_addr, security.bearer_token.as_deref())
 }
 
 impl Default for SttState {
@@ -182,12 +241,37 @@ pub fn router() -> Router {
 }
 
 /// Construit un routeur HTTP MiyuSTT v1 avec etat personnalise.
+///
+/// `/api/health` reste public ; les autres routes passent par le controle
+/// origine + jeton avant toute lecture du corps.
 pub fn router_with_state(state: SttState) -> Router {
-    Router::new()
-        .route("/api/health", get(health_handler))
+    let protected = Router::new()
         .route("/api/stt", post(stt_handler))
         .route("/api/stt/stream", get(stt_stream_handler))
-        .with_state(state)
+        .route_layer(middleware::from_fn_with_state(
+            state.security.clone(),
+            security_middleware,
+        ))
+        .layer(DefaultBodyLimit::max(MAX_STT_BODY_BYTES))
+        .with_state(state);
+    Router::new()
+        .route("/api/health", get(health_handler))
+        .merge(protected)
+}
+
+async fn security_middleware(
+    State(security): State<SttSecurity>,
+    req: Request,
+    next: Next,
+) -> Response {
+    match securite::check_request(
+        req.headers(),
+        security.bearer_token.as_deref(),
+        security.enforce_local_origin,
+    ) {
+        Ok(()) => next.run(req).await,
+        Err(status) => status.into_response(),
+    }
 }
 
 async fn health_handler() -> Json<serde_json::Value> {
@@ -198,18 +282,34 @@ async fn health_handler() -> Json<serde_json::Value> {
     }))
 }
 
-async fn stt_handler(
-    State(state): State<SttState>,
-    headers: HeaderMap,
-    Json(mut req): Json<SttRequest>,
-) -> Result<Json<SttResponse>, StatusCode> {
-    enforce_security(&headers, &state.security)?;
-
-    if req.samples.is_empty() || req.sample_rate < 8_000 {
+/// Validation bornee d'une requete STT (C-13).
+fn validate_request(req: &SttRequest) -> Result<(), StatusCode> {
+    if req.samples.is_empty() || !(MIN_SAMPLE_RATE..=MAX_SAMPLE_RATE).contains(&req.sample_rate) {
         return Err(StatusCode::BAD_REQUEST);
+    }
+    let max_samples = u64::from(req.sample_rate) * u64::from(MAX_AUDIO_SECONDS);
+    if req.samples.len() as u64 > max_samples {
+        return Err(StatusCode::PAYLOAD_TOO_LARGE);
     }
     if !matches!(req.language.as_str(), "auto" | "fr" | "en") {
         return Err(StatusCode::BAD_REQUEST);
+    }
+    if req.languages_hint.len() > MAX_LANGUAGE_HINTS
+        || req.languages_hint.iter().any(|h| h.len() > MAX_IDENT_LEN)
+        || req.model.as_ref().is_some_and(|m| m.len() > MAX_IDENT_LEN)
+    {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+    Ok(())
+}
+
+async fn stt_handler(
+    State(state): State<SttState>,
+    Json(mut req): Json<SttRequest>,
+) -> Result<Json<SttResponse>, StatusCode> {
+    if let Err(status) = validate_request(&req) {
+        req.samples.fill(0.0);
+        return Err(status);
     }
 
     let response = transcribe_with_fallback(&req, &state);
@@ -222,14 +322,10 @@ async fn stt_handler(
         .map_err(|_| StatusCode::SERVICE_UNAVAILABLE)
 }
 
-async fn stt_stream_handler(
-    ws: WebSocketUpgrade,
-    State(state): State<SttState>,
-    headers: HeaderMap,
-) -> Result<Response, StatusCode> {
-    enforce_security(&headers, &state.security)?;
-
-    Ok(ws.on_upgrade(move |socket| stream_session(socket, state)))
+async fn stt_stream_handler(ws: WebSocketUpgrade, State(state): State<SttState>) -> Response {
+    ws.max_message_size(MAX_WS_MESSAGE_BYTES)
+        .max_frame_size(MAX_WS_MESSAGE_BYTES)
+        .on_upgrade(move |socket| stream_session(socket, state))
 }
 
 async fn stream_session(mut socket: WebSocket, state: SttState) {
@@ -315,53 +411,6 @@ fn detect_language(req: &SttRequest) -> String {
     } else {
         "fr".to_string()
     }
-}
-
-fn enforce_security(headers: &HeaderMap, security: &SttSecurity) -> Result<(), StatusCode> {
-    enforce_origin_policy(headers, security)?;
-    enforce_bearer_auth(headers, security)?;
-    Ok(())
-}
-
-fn enforce_bearer_auth(headers: &HeaderMap, security: &SttSecurity) -> Result<(), StatusCode> {
-    let Some(expected_token) = &security.bearer_token else {
-        return Ok(());
-    };
-
-    let provided = headers
-        .get(header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.strip_prefix("Bearer "));
-
-    match provided {
-        Some(token) if token == expected_token => Ok(()),
-        _ => Err(StatusCode::UNAUTHORIZED),
-    }
-}
-
-fn enforce_origin_policy(headers: &HeaderMap, security: &SttSecurity) -> Result<(), StatusCode> {
-    if !security.enforce_local_origin {
-        return Ok(());
-    }
-
-    let Some(origin) = headers.get(header::ORIGIN) else {
-        return Ok(());
-    };
-    let origin = origin.to_str().map_err(|_| StatusCode::FORBIDDEN)?;
-    if is_local_origin(origin) {
-        Ok(())
-    } else {
-        Err(StatusCode::FORBIDDEN)
-    }
-}
-
-fn is_local_origin(origin: &str) -> bool {
-    origin.starts_with("http://localhost")
-        || origin.starts_with("https://localhost")
-        || origin.starts_with("http://127.0.0.1")
-        || origin.starts_with("https://127.0.0.1")
-        || origin.starts_with("http://[::1]")
-        || origin.starts_with("https://[::1]")
 }
 
 #[cfg(test)]
@@ -511,6 +560,186 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    fn secured_app(enforce_local_origin: bool) -> Router {
+        router_with_state(SttState {
+            security: SttSecurity {
+                bearer_token: Some("secret".to_string()),
+                enforce_local_origin,
+            },
+            ..SttState::default()
+        })
+    }
+
+    fn stt_body() -> String {
+        json!({
+            "samples": [0.1, -0.1],
+            "sample_rate": 16000,
+            "language": "fr",
+            "languages_hint": ["fr"]
+        })
+        .to_string()
+    }
+
+    async fn post_stt(app: Router, headers: &[(&str, &str)], body: String) -> StatusCode {
+        let mut builder = Request::builder()
+            .method("POST")
+            .uri("/api/stt")
+            .header("content-type", "application/json");
+        for (k, v) in headers {
+            builder = builder.header(*k, *v);
+        }
+        app.oneshot(builder.body(Body::from(body)).unwrap())
+            .await
+            .unwrap()
+            .status()
+    }
+
+    #[test]
+    fn startup_refuses_non_loopback_without_token() {
+        let err = validate_bind("0.0.0.0:3003", &SttSecurity::default()).unwrap_err();
+        assert!(matches!(err, SecurityConfigError::TokenRequired(_)));
+        let ok = validate_bind(
+            "0.0.0.0:3003",
+            &SttSecurity {
+                bearer_token: Some("secret".into()),
+                enforce_local_origin: true,
+            },
+        );
+        assert!(ok.is_ok());
+        assert!(validate_bind("127.0.0.1:3003", &SttSecurity::default()).is_ok());
+    }
+
+    #[tokio::test]
+    async fn bad_token_is_401() {
+        let status = post_stt(
+            secured_app(false),
+            &[("authorization", "Bearer secreu")],
+            stt_body(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        let status = post_stt(
+            secured_app(false),
+            &[("authorization", "Bearer secret-plus-long")],
+            stt_body(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn good_token_is_200() {
+        let status = post_stt(
+            secured_app(false),
+            &[("authorization", "Bearer secret")],
+            stt_body(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn lookalike_origin_is_refused() {
+        for origin in [
+            "http://localhost.evil.com",
+            "http://127.0.0.1.evil.com:8080",
+        ] {
+            let status = post_stt(
+                secured_app(true),
+                &[("origin", origin), ("authorization", "Bearer secret")],
+                stt_body(),
+            )
+            .await;
+            assert_eq!(status, StatusCode::FORBIDDEN, "{origin}");
+        }
+    }
+
+    #[tokio::test]
+    async fn local_origin_with_port_is_accepted() {
+        let status = post_stt(
+            secured_app(true),
+            &[
+                ("origin", "http://localhost:5173"),
+                ("authorization", "Bearer secret"),
+            ],
+            stt_body(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn oversize_body_is_413() {
+        let big = format!(
+            "{{\"samples\":[{}0],\"sample_rate\":16000,\"language\":\"fr\"}}",
+            "0,".repeat(MAX_STT_BODY_BYTES / 2 + 16)
+        );
+        let status = post_stt(
+            secured_app(false),
+            &[("authorization", "Bearer secret")],
+            big,
+        )
+        .await;
+        assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+    }
+
+    #[tokio::test]
+    async fn too_long_audio_is_413() {
+        let samples = vec![0.0_f32; (8_000 * MAX_AUDIO_SECONDS + 1) as usize];
+        let body = json!({ "samples": samples, "sample_rate": 8000, "language": "fr" }).to_string();
+        let status = post_stt(
+            secured_app(false),
+            &[("authorization", "Bearer secret")],
+            body,
+        )
+        .await;
+        assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+    }
+
+    #[tokio::test]
+    async fn stream_requires_token_when_configured() {
+        let response = secured_app(false)
+            .oneshot(
+                Request::builder()
+                    .uri("/api/stt/stream")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn health_stays_public() {
+        let response = secured_app(true)
+            .oneshot(
+                Request::builder()
+                    .uri("/api/health")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[test]
+    fn debug_masks_token() {
+        let sec = SttSecurity {
+            bearer_token: Some("super-secret".into()),
+            enforce_local_origin: true,
+        };
+        let shown = format!(
+            "{:?}",
+            SttState {
+                security: sec,
+                ..SttState::default()
+            }
+        );
+        assert!(!shown.contains("super-secret"));
     }
 
     #[tokio::test]

@@ -158,7 +158,7 @@ pub async fn run_listen_mode(
                         Err(e) => { println!("  [STT/Whisper] Erreur : {e:#}"); continue; }
                     }
                 } else {
-                    match voice::call_stt(&rt.http, &rt.stt_url, &samples).await {
+                    match voice::call_stt(&rt.http, &rt.stt_url, rt.stt_token.as_deref(), &samples).await {
                         Ok(t) => { println!("  [STT] \"{}\" ({:?})", t, start.elapsed()); t }
                         Err(e) => { println!("  [STT] Erreur : {e:#}"); continue; }
                     }
@@ -166,7 +166,7 @@ pub async fn run_listen_mode(
             }
             #[cfg(not(feature = "whisper-cuda"))]
             {
-                match voice::call_stt(&rt.http, &rt.stt_url, &samples).await {
+                match voice::call_stt(&rt.http, &rt.stt_url, rt.stt_token.as_deref(), &samples).await {
                     Ok(t) => { println!("  [STT] \"{}\" ({:?})", t, start.elapsed()); t }
                     Err(e) => { println!("  [STT] Erreur : {e:#}"); continue; }
                 }
@@ -182,7 +182,7 @@ pub async fn run_listen_mode(
         rt.dispatch(&intent, &transcript).await;
         let response = rt.nlu.generate_response(&intent, &transcript).await;
         println!("  [Alicia] \"{}\"", response);
-        match voice::call_tts(&rt.http, &rt.tts_url, &response).await {
+        match voice::call_tts(&rt.http, &rt.tts_url, rt.tts_token.as_deref(), &response).await {
             Ok(wav) => { println!("  [TTS] {} octets", wav.len()); voice::play_wav(&wav); }
             Err(e) => println!("  [TTS] Erreur : {e}"),
         }

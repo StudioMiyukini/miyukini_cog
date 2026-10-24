@@ -9,6 +9,7 @@
 //! Cette crate assemble les toolkits MiyuSTT/MiyuTTS et expose
 //! une configuration initiale de presets hardware.
 
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc;
 use std::time::Duration;
 
@@ -210,7 +211,77 @@ pub fn clean_text(raw: &str) -> String {
     cleaned
 }
 
+/// Nombre max de reecritures en vol (threads actifs, y compris ceux dont le
+/// delai a expire mais qui n'ont pas encore rendu la main).
+pub const MAX_INFLIGHT_REWRITES: usize = 2;
+
+/// Borne le nombre de threads de reecriture simultanes.
+///
+/// Un `rewrite_fn` synchrone ne peut pas etre interrompu de l'exterieur : a
+/// l'expiration du delai, son thread continue jusqu'a son terme. Pour que des
+/// reecritures expirees ne s'accumulent pas, chaque thread occupe une place
+/// jusqu'a sa fin reelle ; sans place libre, on bascule directement sur `Clean`
+/// sans lancer de thread. Les backends doivent en outre porter leur propre
+/// delai (client HTTP, etc.) pour liberer la place.
+#[derive(Debug)]
+pub struct RewriteLimiter {
+    inflight: AtomicUsize,
+    max: usize,
+}
+
+impl RewriteLimiter {
+    /// Cree un limiteur de `max` reecritures simultanees.
+    #[must_use]
+    pub const fn new(max: usize) -> Self {
+        Self {
+            inflight: AtomicUsize::new(0),
+            max,
+        }
+    }
+
+    /// Reecritures actuellement en vol.
+    #[must_use]
+    pub fn inflight(&self) -> usize {
+        self.inflight.load(Ordering::Acquire)
+    }
+
+    fn try_acquire(&'static self) -> Option<RewriteSlot> {
+        let mut current = self.inflight.load(Ordering::Acquire);
+        loop {
+            if current >= self.max {
+                return None;
+            }
+            match self.inflight.compare_exchange_weak(
+                current,
+                current + 1,
+                Ordering::AcqRel,
+                Ordering::Acquire,
+            ) {
+                Ok(_) => return Some(RewriteSlot { limiter: self }),
+                Err(actual) => current = actual,
+            }
+        }
+    }
+}
+
+/// Place occupee par un thread de reecriture ; rendue a sa destruction.
+struct RewriteSlot {
+    limiter: &'static RewriteLimiter,
+}
+
+impl Drop for RewriteSlot {
+    fn drop(&mut self) {
+        self.limiter.inflight.fetch_sub(1, Ordering::AcqRel);
+    }
+}
+
+static GLOBAL_REWRITE_LIMITER: RewriteLimiter = RewriteLimiter::new(MAX_INFLIGHT_REWRITES);
+
 /// Post-process d'un transcript selon le profil actif.
+///
+/// En mode `Rewrite`, la reecriture tourne dans un thread borne par
+/// [`MAX_INFLIGHT_REWRITES`] ; au-dela du delai ou sans place libre,
+/// repli sur `Clean`.
 #[must_use]
 pub fn post_process_text<F>(
     transcript: &str,
@@ -218,6 +289,29 @@ pub fn post_process_text<F>(
     local_llm_available: bool,
     host_bridge_available: bool,
     rewrite_fn: F,
+) -> PostProcessResult
+where
+    F: Fn(RewriteBackend, &str) -> Result<String, String> + Send + Sync + 'static + Clone,
+{
+    post_process_text_with_limiter(
+        transcript,
+        config,
+        local_llm_available,
+        host_bridge_available,
+        rewrite_fn,
+        &GLOBAL_REWRITE_LIMITER,
+    )
+}
+
+/// Variante de [`post_process_text`] avec un limiteur explicite.
+#[must_use]
+pub fn post_process_text_with_limiter<F>(
+    transcript: &str,
+    config: &WhisperConfig,
+    local_llm_available: bool,
+    host_bridge_available: bool,
+    rewrite_fn: F,
+    limiter: &'static RewriteLimiter,
 ) -> PostProcessResult
 where
     F: Fn(RewriteBackend, &str) -> Result<String, String> + Send + Sync + 'static + Clone,
@@ -244,13 +338,35 @@ where
                 };
             }
 
+            let fallback = || PostProcessResult {
+                text: clean_text(transcript),
+                rewrite_backend: backend,
+                fell_back_to_clean: true,
+            };
+
+            // Sans place libre : pas de nouveau thread, repli immediat.
+            let Some(slot) = limiter.try_acquire() else {
+                tracing::warn!(
+                    inflight = limiter.inflight(),
+                    "reecriture saturee, repli sur Clean"
+                );
+                return fallback();
+            };
+
             let (sender, receiver) = mpsc::channel();
             let source = transcript.to_string();
             let rewrite_fn_clone = rewrite_fn.clone();
-            std::thread::spawn(move || {
-                let result = rewrite_fn_clone(backend, &source);
-                let _ = sender.send(result);
-            });
+            let spawned = std::thread::Builder::new()
+                .name("whisper-rewrite".into())
+                .spawn(move || {
+                    // La place est rendue quand le thread se termine reellement.
+                    let _slot = slot;
+                    let result = rewrite_fn_clone(backend, &source);
+                    let _ = sender.send(result);
+                });
+            if spawned.is_err() {
+                return fallback();
+            }
 
             match receiver.recv_timeout(Duration::from_millis(config.rewrite_timeout_ms)) {
                 Ok(Ok(text)) => PostProcessResult {
@@ -258,11 +374,7 @@ where
                     rewrite_backend: backend,
                     fell_back_to_clean: false,
                 },
-                _ => PostProcessResult {
-                    text: clean_text(transcript),
-                    rewrite_backend: backend,
-                    fell_back_to_clean: true,
-                },
+                _ => fallback(),
             }
         }
     }
@@ -328,6 +440,63 @@ mod tests {
         });
         assert!(out.fell_back_to_clean);
         assert_eq!(out.text, "Salut.");
+    }
+
+    #[test]
+    fn timed_out_rewrites_cannot_pile_up() {
+        static LIMITER: RewriteLimiter = RewriteLimiter::new(1);
+        let cfg = WhisperConfig {
+            output_profile: OutputProfile::Rewrite,
+            fallback_mode: FallbackMode::HostBridge,
+            rewrite_timeout_ms: 10,
+            ..WhisperConfig::default()
+        };
+        let (release_tx, release_rx) = mpsc::channel::<()>();
+        let release_rx = std::sync::Arc::new(std::sync::Mutex::new(release_rx));
+        let blocking = {
+            let release_rx = release_rx.clone();
+            move |_b: RewriteBackend, _i: &str| {
+                if let Ok(rx) = release_rx.lock() {
+                    let _ = rx.recv_timeout(Duration::from_secs(5));
+                }
+                Ok("rewrite".to_string())
+            }
+        };
+
+        // 1re requete : expire, son thread garde la place.
+        let first =
+            post_process_text_with_limiter("salut", &cfg, false, true, blocking.clone(), &LIMITER);
+        assert!(first.fell_back_to_clean);
+        assert_eq!(LIMITER.inflight(), 1);
+
+        // 2e requete : aucune place, aucun nouveau thread.
+        let second = post_process_text_with_limiter("salut", &cfg, false, true, blocking, &LIMITER);
+        assert!(second.fell_back_to_clean);
+        assert_eq!(second.text, "Salut.");
+        assert_eq!(LIMITER.inflight(), 1);
+
+        // Liberation : la place est rendue a la fin reelle du thread.
+        let _ = release_tx.send(());
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while LIMITER.inflight() != 0 && std::time::Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert_eq!(LIMITER.inflight(), 0);
+
+        let cfg_ok = WhisperConfig {
+            rewrite_timeout_ms: 2_000,
+            ..cfg
+        };
+        let third = post_process_text_with_limiter(
+            "salut",
+            &cfg_ok,
+            false,
+            true,
+            |_b, _i| Ok("Bonjour.".to_string()),
+            &LIMITER,
+        );
+        assert!(!third.fell_back_to_clean);
+        assert_eq!(third.text, "Bonjour.");
     }
 
     #[test]

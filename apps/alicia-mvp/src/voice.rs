@@ -138,38 +138,93 @@ pub async fn capture_speech() -> anyhow::Result<Vec<f32>> {
 // Mock servers (embarques)
 // ---------------------------------------------------------------------------
 
-pub async fn start_mock_servers() -> anyhow::Result<(String, String)> {
+/// Adresse d'ecoute des serveurs mock embarques : loopback, port ephemere (C-21).
+pub const MOCK_BIND_ADDR: &str = "127.0.0.1:0";
+
+/// Variable d'environnement portant le jeton bearer des serveurs STT/TTS externes.
+/// (Pas d'argument CLI : un secret en argument serait visible dans la liste des processus.)
+pub const VOICE_TOKEN_ENV: &str = "ALICIA_VOICE_TOKEN";
+
+/// Serveurs mock STT/TTS demarres, avec le jeton bearer qui les protege.
+pub struct MockServers {
+    pub stt_url: String,
+    pub tts_url: String,
+    /// Jeton aleatoire propre au processus, exige par les deux serveurs.
+    pub token: String,
+}
+
+/// Jeton bearer aleatoire de 256 bits (OS RNG, C-24), encode en hexadecimal.
+fn generate_token() -> anyhow::Result<String> {
+    use rand_core::{OsRng, RngCore as _};
+    let mut bytes = [0_u8; 32];
+    OsRng
+        .try_fill_bytes(&mut bytes)
+        .map_err(|e| anyhow::anyhow!("generation du jeton impossible : {e}"))?;
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(64);
+    for b in bytes {
+        out.push(char::from(HEX[usize::from(b >> 4)]));
+        out.push(char::from(HEX[usize::from(b & 0x0f)]));
+    }
+    bytes.fill(0);
+    Ok(out)
+}
+
+/// Construit les routeurs STT/TTS proteges (jeton obligatoire, origine locale stricte).
+fn mock_routers(token: &str) -> (axum::Router, axum::Router, miyustt::SttSecurity, miyutts::TtsSecurity) {
     let stt_security = miyustt::SttSecurity {
-        bearer_token: None,
-        enforce_local_origin: false,
+        bearer_token: Some(token.to_string()),
+        enforce_local_origin: true,
     };
     let stt_router = miyustt::router_with_state(miyustt::SttState {
-        security: stt_security,
+        security: stt_security.clone(),
         ..Default::default()
     });
 
     let tts_security = miyutts::TtsSecurity {
-        bearer_token: None,
-        enforce_local_origin: false,
+        bearer_token: Some(token.to_string()),
+        enforce_local_origin: true,
     };
     let tts_router = miyutts::router_with_state(miyutts::TtsState {
-        security: tts_security,
+        security: tts_security.clone(),
         ..Default::default()
     });
+    (stt_router, tts_router, stt_security, tts_security)
+}
 
-    let stt_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
-    let stt_addr = format!("http://{}", stt_listener.local_addr()?);
+/// Demarre les serveurs mock STT/TTS sur `bind_addr`.
+///
+/// Fail-closed : l'adresse est validee par `validate_bind` (hors loopback sans
+/// jeton = refus) avant toute ouverture de port.
+pub async fn start_mock_servers_on(bind_addr: &str) -> anyhow::Result<MockServers> {
+    let token = generate_token()?;
+    let (stt_router, tts_router, stt_security, tts_security) = mock_routers(&token);
+
+    let stt_addr = miyustt::validate_bind(bind_addr, &stt_security)?;
+    let tts_addr = miyutts::validate_bind(bind_addr, &tts_security)?;
+
+    let stt_listener = tokio::net::TcpListener::bind(stt_addr).await?;
+    let stt_url = format!("http://{}", stt_listener.local_addr()?);
     tokio::spawn(async move {
         let _ = axum::serve(stt_listener, stt_router).await;
     });
 
-    let tts_listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
-    let tts_addr = format!("http://{}", tts_listener.local_addr()?);
+    let tts_listener = tokio::net::TcpListener::bind(tts_addr).await?;
+    let tts_url = format!("http://{}", tts_listener.local_addr()?);
     tokio::spawn(async move {
         let _ = axum::serve(tts_listener, tts_router).await;
     });
 
-    Ok((stt_addr, tts_addr))
+    Ok(MockServers {
+        stt_url,
+        tts_url,
+        token,
+    })
+}
+
+/// Demarre les serveurs mock STT/TTS en loopback (defaut).
+pub async fn start_mock_servers() -> anyhow::Result<MockServers> {
+    start_mock_servers_on(MOCK_BIND_ADDR).await
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +234,7 @@ pub async fn start_mock_servers() -> anyhow::Result<(String, String)> {
 pub async fn call_stt(
     client: &reqwest::Client,
     base_url: &str,
+    token: Option<&str>,
     samples: &[f32],
 ) -> anyhow::Result<String> {
     let url = format!("{base_url}/api/stt");
@@ -189,9 +245,11 @@ pub async fn call_stt(
         "language": "fr"
     });
 
-    let resp = match client
-        .post(&url)
-        .json(&body)
+    let mut request = client.post(&url).json(&body);
+    if let Some(token) = token {
+        request = request.bearer_auth(token);
+    }
+    let resp = match request
         .timeout(std::time::Duration::from_secs(30))
         .send()
         .await
@@ -223,6 +281,7 @@ pub async fn call_stt(
 pub async fn call_tts(
     client: &reqwest::Client,
     base_url: &str,
+    token: Option<&str>,
     text: &str,
 ) -> anyhow::Result<Vec<u8>> {
     let url = format!("{base_url}/api/tts/wav");
@@ -234,9 +293,11 @@ pub async fn call_tts(
         "sample_rate": 22050
     });
 
-    let resp = client
-        .post(&url)
-        .json(&body)
+    let mut request = client.post(&url).json(&body);
+    if let Some(token) = token {
+        request = request.bearer_auth(token);
+    }
+    let resp = request
         .timeout(std::time::Duration::from_secs(10))
         .send()
         .await?;
@@ -338,7 +399,7 @@ pub async fn run_voice_mode(
                         samples.len(),
                         samples.len() as f64 / 16_000.0
                     );
-                    match call_stt(&rt.http, &rt.stt_url, &samples).await {
+                    match call_stt(&rt.http, &rt.stt_url, rt.stt_token.as_deref(), &samples).await {
                         Ok(t) => { println!("  [STT] \"{t}\""); t }
                         Err(e) => { println!("  [STT] Erreur : {e:#}"); continue; }
                     }
@@ -362,7 +423,7 @@ pub async fn run_voice_mode(
         // Response + TTS
         let response_text = rt.nlu.generate_response(&intent, &transcript).await;
         println!("  [Alicia] \"{response_text}\"");
-        match call_tts(&rt.http, &rt.tts_url, &response_text).await {
+        match call_tts(&rt.http, &rt.tts_url, rt.tts_token.as_deref(), &response_text).await {
             Ok(wav) => { println!("  [TTS] {} octets", wav.len()); play_wav(&wav); }
             Err(e) => println!("  [TTS] Erreur : {e}"),
         }
@@ -372,3 +433,104 @@ pub async fn run_voice_mode(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn stt_body() -> serde_json::Value {
+        serde_json::json!({ "samples": [0.1, -0.1], "sample_rate": 16000, "language": "fr" })
+    }
+
+    #[tokio::test]
+    async fn mock_servers_require_token() {
+        let mock = start_mock_servers().await.unwrap();
+        let client = reqwest::Client::new();
+
+        // Sans jeton : 401.
+        let resp = client
+            .post(format!("{}/api/stt", mock.stt_url))
+            .json(&stt_body())
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), reqwest::StatusCode::UNAUTHORIZED);
+
+        // Mauvais jeton : 401.
+        let resp = client
+            .post(format!("{}/api/tts/wav", mock.tts_url))
+            .bearer_auth("mauvais")
+            .json(&serde_json::json!({
+                "text": "Bonjour", "voice": "", "format": "wav", "language": "fr"
+            }))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), reqwest::StatusCode::UNAUTHORIZED);
+
+        // Bon jeton : 200 via les clients de l'application.
+        let transcript = call_stt(&client, &mock.stt_url, Some(&mock.token), &[0.1, -0.1])
+            .await
+            .unwrap();
+        assert_ne!(transcript, "");
+        let wav = call_tts(&client, &mock.tts_url, Some(&mock.token), "Bonjour")
+            .await
+            .unwrap();
+        assert!(wav.len() > 44);
+        assert!(call_stt(&client, &mock.stt_url, None, &[0.1]).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn mock_servers_check_origin() {
+        let mock = start_mock_servers().await.unwrap();
+        let client = reqwest::Client::new();
+        let port = mock.stt_url.rsplit(':').next().unwrap().to_string();
+
+        let resp = client
+            .post(format!("{}/api/stt", mock.stt_url))
+            .bearer_auth(&mock.token)
+            .header("origin", "http://localhost.evil.com")
+            .json(&stt_body())
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), reqwest::StatusCode::FORBIDDEN);
+
+        let resp = client
+            .post(format!("{}/api/stt", mock.stt_url))
+            .bearer_auth(&mock.token)
+            .header("origin", format!("http://localhost:{port}"))
+            .json(&stt_body())
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), reqwest::StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn mock_servers_bound_body_size() {
+        let mock = start_mock_servers().await.unwrap();
+        let client = reqwest::Client::new();
+        let text = "a".repeat(miyutts::MAX_TTS_BODY_BYTES + 1);
+        let resp = client
+            .post(format!("{}/api/tts", mock.tts_url))
+            .bearer_auth(&mock.token)
+            .json(&serde_json::json!({
+                "text": text, "voice": "", "format": "wav", "language": "fr"
+            }))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), reqwest::StatusCode::PAYLOAD_TOO_LARGE);
+    }
+
+    #[tokio::test]
+    async fn mock_servers_listen_on_loopback_and_refuse_bad_bind() {
+        let mock = start_mock_servers().await.unwrap();
+        assert!(mock.stt_url.starts_with("http://127.0.0.1:"));
+        assert!(mock.tts_url.starts_with("http://127.0.0.1:"));
+        assert_eq!(mock.token.len(), 64);
+        assert!(start_mock_servers_on("localhost:0").await.is_err());
+    }
+}
+
