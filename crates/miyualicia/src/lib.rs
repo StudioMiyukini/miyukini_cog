@@ -13,13 +13,14 @@
 
 #![forbid(unsafe_code)]
 
-// @id: service.alicia.orchestrator
-// @role: central_orchestrator
-// @layer: 7
-// @human: Orchestrateur central Alicia ; devices, MQTT, HTTP, NLU, commandes, snapshot.
-// @do: orchestrate_alicia_home_assistant
+// @id service.alicia.orchestrator
+// @role central_orchestrator
+// @layer 7
+// @do orchestrate_alicia_home_assistant
+// @human Orchestrateur central Alicia ; devices, MQTT, HTTP, NLU, commandes, snapshot.
 
 pub mod admin_cell;
+pub mod capabilities_runtime;
 pub mod command;
 pub mod config;
 pub mod errors;
@@ -29,6 +30,7 @@ pub mod nlu_fallback;
 pub mod service;
 pub mod snapshot;
 
+pub use capabilities_runtime::{CapabilitiesRuntime, CapabilitiesRuntimeConfig};
 pub use config::AliciaConfig;
 pub use errors::AliciaError;
 pub use intent::Intent;

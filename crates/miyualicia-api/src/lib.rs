@@ -33,6 +33,7 @@ pub mod dto;
 pub mod errors;
 pub mod handlers;
 pub mod router;
+pub mod security;
 pub mod server;
 
 pub use config::ApiConfig;

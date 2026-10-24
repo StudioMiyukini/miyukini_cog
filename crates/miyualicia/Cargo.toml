@@ -12,9 +12,12 @@ categories.workspace = true
 description = "Orchestrateur central Alicia Home Assistante — connecte devices, MQTT, HTTP, NLU, wake word, commandes."
 
 [dependencies]
-miyualicia-devices  = { path = "../miyualicia-devices" }
-miyualicia-mqtt     = { path = "../miyualicia-mqtt" }
-miyualicia-http     = { path = "../miyualicia-http" }
+miyualicia-devices    = { path = "../miyualicia-devices" }
+miyualicia-mqtt       = { path = "../miyualicia-mqtt" }
+miyualicia-http       = { path = "../miyualicia-http" }
+miyualicia-skills     = { path = "../miyualicia-skills" }
+miyualicia-memory     = { path = "../miyualicia-memory" }
+miyualicia-dispatcher = { path = "../miyualicia-dispatcher" }
 
 tokio      = { version = "1", features = ["full"] }
 serde      = { version = "1", features = ["derive"] }
@@ -32,6 +35,9 @@ tokio = { version = "1", features = ["full", "test-util"] }
 axum = "0.8"
 miyustt = { path = "../miyustt" }
 miyutts = { path = "../miyutts" }
+miyualicia-cores-gate = { path = "../miyualicia-cores-gate" }
+borderguard = { path = "../borderguard" }
+tempfile = "3"
 
 [lints.rust]
 unsafe_code = "forbid"

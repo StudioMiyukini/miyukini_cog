@@ -3,11 +3,11 @@
 //! `AliciaService` relie le registre de dispositifs, les transports MQTT/HTTP,
 //! le pipeline NLU et le journal d'activite en une facade unique.
 
-// @id: service.alicia.service
-// @role: orchestration_facade
-// @layer: 7
-// @human: Service central Alicia ; registre, MQTT, HTTP, NLU, commandes, snapshot.
-// @do: orchestrate_all_alicia_subsystems
+// @id service.alicia.service
+// @role orchestration_facade
+// @layer 7
+// @do orchestrate_all_alicia_subsystems
+// @human Service central Alicia ; registre, MQTT, HTTP, NLU, commandes, snapshot.
 
 use std::time::Instant;
 
@@ -20,6 +20,7 @@ use miyualicia_devices::{
 use miyualicia_http::HttpDeviceClient;
 use miyualicia_mqtt::MqttClient;
 
+use crate::capabilities_runtime::CapabilitiesRuntime;
 use crate::command::CommandLogEntry;
 use crate::config::AliciaConfig;
 use crate::errors::AliciaError;
@@ -41,6 +42,7 @@ pub struct AliciaService {
     http_client: HttpDeviceClient,
     nlu_bridge: NluBridge,
     activity_log: RwLock<Vec<CommandLogEntry>>,
+    capabilities: RwLock<Option<std::sync::Arc<CapabilitiesRuntime>>>,
 }
 
 impl AliciaService {
@@ -74,7 +76,30 @@ impl AliciaService {
             http_client,
             nlu_bridge,
             activity_log: RwLock::new(Vec::new()),
+            capabilities: RwLock::new(None),
         }
+    }
+
+    /// Active le sous-système des capacités services (P1-P7).
+    ///
+    /// À appeler après `new()` quand on dispose d'un `CapabilitiesRuntime`
+    /// initialisé. Le sous-système est complètement opt-in : tant qu'il
+    /// n'est pas activé, `AliciaService` se comporte comme avant.
+    pub async fn enable_capabilities_runtime(
+        &self,
+        runtime: std::sync::Arc<CapabilitiesRuntime>,
+    ) {
+        *self.capabilities.write().await = Some(runtime);
+    }
+
+    /// `true` si le sous-système des capacités est activé.
+    pub async fn capabilities_enabled(&self) -> bool {
+        self.capabilities.read().await.is_some()
+    }
+
+    /// Référence au runtime des capacités, ou `None` si non activé.
+    pub async fn capabilities(&self) -> Option<std::sync::Arc<CapabilitiesRuntime>> {
+        self.capabilities.read().await.clone()
     }
 
     /// Produit un snapshot complet de l'etat de la maison.

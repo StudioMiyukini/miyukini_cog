@@ -40,7 +40,8 @@ impl AliciaApiServer {
     ///
     /// Retourne `ApiError::InternalError` si le port est deja pris.
     pub async fn start(self) -> Result<(), ApiError> {
-        let addr = self.listen_addr();
+        self.config.validate()?;
+        let addr = self.listen_addr()?;
         let router = build_router(self.alicia, self.config, self.secret);
 
         tracing::info!("API Alicia demarree sur http://{addr}");
@@ -49,7 +50,11 @@ impl AliciaApiServer {
             .await
             .map_err(|e| ApiError::InternalError(format!("impossible de bind {addr}: {e}")))?;
 
-        axum::serve(listener, router)
+        // ConnectInfo requis par le limiteur de debit par IP.
+        axum::serve(
+            listener,
+            router.into_make_service_with_connect_info::<SocketAddr>(),
+        )
             .with_graceful_shutdown(shutdown_signal())
             .await
             .map_err(|e| ApiError::InternalError(format!("erreur serveur : {e}")))?;
@@ -59,13 +64,13 @@ impl AliciaApiServer {
     }
 
     /// Retourne l'adresse d'ecoute effective.
-    pub fn listen_addr(&self) -> SocketAddr {
-        let host = self
-            .config
-            .host
-            .parse()
-            .unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED));
-        SocketAddr::new(host, self.config.port)
+    ///
+    /// Fail-closed : un hote invalide est une erreur (plus de repli sur 0.0.0.0).
+    pub fn listen_addr(&self) -> Result<SocketAddr, ApiError> {
+        let host: std::net::IpAddr = self.config.host.parse().map_err(|e| {
+            ApiError::InternalError(format!("host invalide '{}': {e}", self.config.host))
+        })?;
+        Ok(SocketAddr::new(host, self.config.port))
     }
 }
 
@@ -93,7 +98,7 @@ mod tests {
             ..Default::default()
         };
         let server = AliciaApiServer::new(alicia, api_config, b"secret".to_vec());
-        let addr = server.listen_addr();
+        let addr = server.listen_addr().unwrap();
         assert_eq!(addr.port(), 9999);
         assert_eq!(
             addr.ip(),
@@ -109,7 +114,23 @@ mod tests {
         };
         let alicia = Arc::new(AliciaService::new(config));
         let server = AliciaApiServer::new(alicia, ApiConfig::default(), b"secret".to_vec());
-        let addr = server.listen_addr();
+        let addr = server.listen_addr().unwrap();
         assert_eq!(addr.port(), 7890);
+        assert!(addr.ip().is_loopback(), "bind par defaut = loopback");
+    }
+
+    #[test]
+    fn test_server_invalid_host_is_error() {
+        let config = AliciaConfig {
+            mqtt: None,
+            ..Default::default()
+        };
+        let alicia = Arc::new(AliciaService::new(config));
+        let api_config = ApiConfig {
+            host: "nimporte quoi".to_string(),
+            ..Default::default()
+        };
+        let server = AliciaApiServer::new(alicia, api_config, b"secret".to_vec());
+        assert!(server.listen_addr().is_err());
     }
 }

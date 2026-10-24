@@ -1,0 +1,1115 @@
+//! Store SQLite + FTS5 pour la mémoire Alicia.
+//!
+//! Schéma P1 :
+//! - `facts(id, persona, subject, content, source, confidence, created_at, updated_at)`
+//! - `facts_fts(content)` — index FTS5 sur `facts.content`, lié par `rowid`
+//! - `preferences(scope, key, value_json, updated_at)` — `PRIMARY KEY(scope,key)`
+//! - `episodes(id, persona, service_id, intent, user_phrase, params_json, outcome, error, created_at)`
+//! - `episodes_fts(user_phrase)` — index FTS5
+//! - `personas(id, display_name, description, is_default, created_at)`
+//!
+//! Le store est volontairement **synchrone** (rusqlite). En P2 on l'enveloppera
+//! côté `miyualicia` dans une tâche dédiée si besoin.
+
+// @id service.alicia.memory.store
+// @role memory_store
+// @layer 7
+// @do persist_alicia_memory
+// @human Store SQLite local pour les faits, préférences, épisodes et personas d'Alicia.
+
+use std::path::Path;
+
+use chrono::{DateTime, Utc};
+use rusqlite::{params, Connection, OptionalExtension, Row};
+use serde_json::Value;
+use uuid::Uuid;
+
+use crate::errors::MemoryError;
+use crate::types::{
+    Episode, EpisodeOutcome, Fact, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
+    PendingStatus, Persona, Preference,
+};
+
+/// Store mémoire — wrapper rusqlite + helpers typés.
+///
+/// La connexion SQLite est encapsulée dans un `Mutex` interne pour garantir
+/// que `Arc<MemoryStore>` soit `Send + Sync` — indispensable pour partager le
+/// store entre handlers axum, tâches tokio, et le runtime Alicia.
+pub struct MemoryStore {
+    conn: std::sync::Mutex<Connection>,
+}
+
+impl MemoryStore {
+    fn lock_conn(&self) -> std::sync::MutexGuard<'_, Connection> {
+        // Le lock ne peut être empoisonné que si une autre tâche a paniqué en
+        // tenant le mutex. Dans ce cas, autant remonter le poison plutôt que
+        // de continuer avec un état incohérent.
+        self.conn.lock().expect("MemoryStore mutex empoisonné")
+    }
+
+    /// Ouvre (ou crée) un store dans le fichier `path`. Crée le dossier parent
+    /// si nécessaire.
+    pub fn open(path: &Path) -> Result<Self, MemoryError> {
+        if let Some(parent) = path.parent() {
+            if !parent.as_os_str().is_empty() && !parent.exists() {
+                std::fs::create_dir_all(parent).map_err(|e| MemoryError::Io {
+                    path: parent.to_path_buf(),
+                    source: e,
+                })?;
+            }
+        }
+        let conn = Connection::open(path)?;
+        let store = Self {
+            conn: std::sync::Mutex::new(conn),
+        };
+        store.init_schema()?;
+        Ok(store)
+    }
+
+    /// Ouvre un store en mémoire (tests).
+    pub fn open_in_memory() -> Result<Self, MemoryError> {
+        let conn = Connection::open_in_memory()?;
+        let store = Self {
+            conn: std::sync::Mutex::new(conn),
+        };
+        store.init_schema()?;
+        Ok(store)
+    }
+
+    fn init_schema(&self) -> Result<(), MemoryError> {
+        self.lock_conn().execute_batch(
+            r#"
+            CREATE TABLE IF NOT EXISTS facts (
+                id          TEXT PRIMARY KEY,
+                persona     TEXT NOT NULL,
+                subject     TEXT NOT NULL,
+                content     TEXT NOT NULL,
+                source      TEXT NOT NULL,
+                confidence  REAL NOT NULL,
+                created_at  TEXT NOT NULL,
+                updated_at  TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_facts_persona ON facts(persona);
+            CREATE INDEX IF NOT EXISTS idx_facts_subject ON facts(subject);
+
+            CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts
+                USING fts5(content, content='facts', content_rowid='rowid');
+
+            CREATE TABLE IF NOT EXISTS preferences (
+                scope       TEXT NOT NULL,
+                key         TEXT NOT NULL,
+                value_json  TEXT NOT NULL,
+                updated_at  TEXT NOT NULL,
+                PRIMARY KEY (scope, key)
+            );
+
+            CREATE TABLE IF NOT EXISTS episodes (
+                id           TEXT PRIMARY KEY,
+                persona      TEXT NOT NULL,
+                service_id   TEXT NOT NULL,
+                intent       TEXT NOT NULL,
+                user_phrase  TEXT NOT NULL,
+                params_json  TEXT NOT NULL,
+                outcome      TEXT NOT NULL,
+                error        TEXT,
+                created_at   TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_episodes_persona ON episodes(persona);
+            CREATE INDEX IF NOT EXISTS idx_episodes_service ON episodes(service_id);
+            CREATE INDEX IF NOT EXISTS idx_episodes_created ON episodes(created_at);
+
+            CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts
+                USING fts5(user_phrase, content='episodes', content_rowid='rowid');
+
+            CREATE TABLE IF NOT EXISTS personas (
+                id            TEXT PRIMARY KEY,
+                display_name  TEXT NOT NULL,
+                description   TEXT NOT NULL,
+                is_default    INTEGER NOT NULL,
+                created_at    TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS learned_skills (
+                id              TEXT PRIMARY KEY,
+                persona         TEXT NOT NULL,
+                trigger_phrase  TEXT NOT NULL,
+                qualified_id    TEXT NOT NULL,
+                params_template TEXT NOT NULL,
+                status          TEXT NOT NULL,
+                created_at      TEXT NOT NULL,
+                accepted_at     TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_learned_persona ON learned_skills(persona);
+            CREATE INDEX IF NOT EXISTS idx_learned_status  ON learned_skills(status);
+            CREATE INDEX IF NOT EXISTS idx_learned_qid     ON learned_skills(qualified_id);
+
+            CREATE TABLE IF NOT EXISTS pending_confirmations (
+                id            TEXT PRIMARY KEY,
+                qualified_id  TEXT NOT NULL,
+                params_json   TEXT NOT NULL,
+                persona       TEXT NOT NULL,
+                user_phrase   TEXT NOT NULL,
+                prompt        TEXT NOT NULL,
+                status        TEXT NOT NULL,
+                created_at    TEXT NOT NULL,
+                resolved_at   TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_pending_status   ON pending_confirmations(status);
+            CREATE INDEX IF NOT EXISTS idx_pending_persona  ON pending_confirmations(persona);
+            CREATE INDEX IF NOT EXISTS idx_pending_created  ON pending_confirmations(created_at);
+            "#,
+        )?;
+        Ok(())
+    }
+
+    // ------------------------------------------------------------------
+    // FACTS
+    // ------------------------------------------------------------------
+
+    /// Enregistre (ou met à jour) un fait. Identifiant stable par `id`.
+    pub fn remember(&self, fact: &Fact) -> Result<(), MemoryError> {
+        self.lock_conn().execute(
+            r#"
+            INSERT INTO facts(id, persona, subject, content, source, confidence, created_at, updated_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+            ON CONFLICT(id) DO UPDATE SET
+                persona     = excluded.persona,
+                subject     = excluded.subject,
+                content     = excluded.content,
+                source      = excluded.source,
+                confidence  = excluded.confidence,
+                updated_at  = excluded.updated_at
+            "#,
+            params![
+                fact.id.to_string(),
+                fact.persona,
+                fact.subject,
+                fact.content,
+                fact.source,
+                fact.confidence,
+                fact.created_at.to_rfc3339(),
+                fact.updated_at.to_rfc3339(),
+            ],
+        )?;
+        // Sync FTS index. We rely on facts.rowid (auto) ↔ facts_fts.rowid.
+        self.lock_conn().execute(
+            "INSERT INTO facts_fts(rowid, content) SELECT rowid, content FROM facts WHERE id = ?1",
+            params![fact.id.to_string()],
+        )?;
+        Ok(())
+    }
+
+    /// Supprime un fait par son `id`. Renvoie le nombre de lignes supprimées.
+    pub fn forget(&self, id: Uuid) -> Result<usize, MemoryError> {
+        let n = self
+            .lock_conn()
+            .execute("DELETE FROM facts WHERE id = ?1", params![id.to_string()])?;
+        // Le trigger sync FTS5 n'est pas posé en P1 — on nettoie à la main.
+        self.lock_conn().execute(
+            "DELETE FROM facts_fts WHERE rowid NOT IN (SELECT rowid FROM facts)",
+            [],
+        )?;
+        Ok(n)
+    }
+
+    /// Liste les faits d'un persona (triés par `updated_at` décroissant).
+    pub fn facts_for_persona(&self, persona: &str) -> Result<Vec<Fact>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, subject, content, source, confidence, created_at, updated_at
+             FROM facts WHERE persona = ?1 ORDER BY updated_at DESC",
+        )?;
+        let rows = stmt.query_map(params![persona], row_to_fact)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    /// Recherche plein texte sur les faits — retourne au plus `limit` résultats.
+    pub fn recall(&self, query: &str, limit: usize) -> Result<Vec<Fact>, MemoryError> {
+        if query.trim().is_empty() {
+            return Ok(Vec::new());
+        }
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            r#"
+            SELECT f.id, f.persona, f.subject, f.content, f.source, f.confidence,
+                   f.created_at, f.updated_at
+            FROM facts_fts ft
+            JOIN facts f ON f.rowid = ft.rowid
+            WHERE facts_fts MATCH ?1
+            ORDER BY rank
+            LIMIT ?2
+            "#,
+        )?;
+        let rows = stmt.query_map(params![query, limit as i64], row_to_fact)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+    }
+
+    // ------------------------------------------------------------------
+    // PREFERENCES
+    // ------------------------------------------------------------------
+
+    /// Définit (ou met à jour) une préférence.
+    pub fn prefer(&self, pref: &Preference) -> Result<(), MemoryError> {
+        let value_json = serde_json::to_string(&pref.value)?;
+        self.lock_conn().execute(
+            r#"
+            INSERT INTO preferences(scope, key, value_json, updated_at)
+            VALUES (?1, ?2, ?3, ?4)
+            ON CONFLICT(scope, key) DO UPDATE SET
+                value_json = excluded.value_json,
+                updated_at = excluded.updated_at
+            "#,
+            params![pref.scope, pref.key, value_json, pref.updated_at.to_rfc3339()],
+        )?;
+        Ok(())
+    }
+
+    /// Récupère une préférence (None si absente).
+    pub fn preference(&self, scope: &str, key: &str) -> Result<Option<Preference>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT scope, key, value_json, updated_at FROM preferences
+             WHERE scope = ?1 AND key = ?2",
+        )?;
+        let opt = stmt
+            .query_row(params![scope, key], |row| {
+                let scope: String = row.get(0)?;
+                let key: String = row.get(1)?;
+                let value_json: String = row.get(2)?;
+                let updated_at: String = row.get(3)?;
+                Ok((scope, key, value_json, updated_at))
+            })
+            .optional()?;
+        match opt {
+            None => Ok(None),
+            Some((scope, key, value_json, updated_at)) => {
+                let value: Value = serde_json::from_str(&value_json)?;
+                let updated_at = parse_rfc3339(&updated_at)?;
+                Ok(Some(Preference {
+                    scope,
+                    key,
+                    value,
+                    updated_at,
+                }))
+            }
+        }
+    }
+
+    /// Liste toutes les préférences d'un scope (persona ou `"global"`).
+    pub fn preferences_for_scope(&self, scope: &str) -> Result<Vec<Preference>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT scope, key, value_json, updated_at FROM preferences
+             WHERE scope = ?1 ORDER BY key",
+        )?;
+        let rows = stmt.query_map(params![scope], |row| {
+            let scope: String = row.get(0)?;
+            let key: String = row.get(1)?;
+            let value_json: String = row.get(2)?;
+            let updated_at: String = row.get(3)?;
+            Ok((scope, key, value_json, updated_at))
+        })?;
+        let mut out = Vec::new();
+        for row in rows {
+            let (scope, key, value_json, updated_at) = row?;
+            let value: Value = serde_json::from_str(&value_json)?;
+            let updated_at = parse_rfc3339(&updated_at)?;
+            out.push(Preference {
+                scope,
+                key,
+                value,
+                updated_at,
+            });
+        }
+        Ok(out)
+    }
+
+    /// Supprime une préférence. Renvoie le nombre de lignes supprimées.
+    pub fn unprefer(&self, scope: &str, key: &str) -> Result<usize, MemoryError> {
+        let n = self.lock_conn().execute(
+            "DELETE FROM preferences WHERE scope = ?1 AND key = ?2",
+            params![scope, key],
+        )?;
+        Ok(n)
+    }
+
+    // ------------------------------------------------------------------
+    // EPISODES
+    // ------------------------------------------------------------------
+
+    /// Enregistre un épisode (insertion uniquement — pas d'upsert).
+    pub fn record_episode(&self, ep: &Episode) -> Result<(), MemoryError> {
+        let params_json = serde_json::to_string(&ep.params)?;
+        let outcome = match ep.outcome {
+            EpisodeOutcome::Ok => "ok",
+            EpisodeOutcome::Cancelled => "cancelled",
+            EpisodeOutcome::Failed => "failed",
+        };
+        self.lock_conn().execute(
+            r#"
+            INSERT INTO episodes(id, persona, service_id, intent, user_phrase, params_json,
+                                 outcome, error, created_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+            "#,
+            params![
+                ep.id.to_string(),
+                ep.persona,
+                ep.service_id,
+                ep.intent,
+                ep.user_phrase,
+                params_json,
+                outcome,
+                ep.error,
+                ep.created_at.to_rfc3339(),
+            ],
+        )?;
+        self.lock_conn().execute(
+            "INSERT INTO episodes_fts(rowid, user_phrase) SELECT rowid, user_phrase FROM episodes WHERE id = ?1",
+            params![ep.id.to_string()],
+        )?;
+        Ok(())
+    }
+
+    /// Récupère les `limit` derniers épisodes (tous personas confondus).
+    pub fn recent_episodes(&self, limit: usize) -> Result<Vec<Episode>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, service_id, intent, user_phrase, params_json,
+                    outcome, error, created_at
+             FROM episodes ORDER BY created_at DESC LIMIT ?1",
+        )?;
+        let rows = stmt.query_map(params![limit as i64], row_to_episode)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// Liste les épisodes d'un service donné, plus récents d'abord.
+    pub fn episodes_for_service(
+        &self,
+        service_id: &str,
+        limit: usize,
+    ) -> Result<Vec<Episode>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, service_id, intent, user_phrase, params_json,
+                    outcome, error, created_at
+             FROM episodes WHERE service_id = ?1
+             ORDER BY created_at DESC LIMIT ?2",
+        )?;
+        let rows = stmt.query_map(params![service_id, limit as i64], row_to_episode)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// Recherche plein texte sur les phrases utilisateur des épisodes.
+    pub fn search_episodes(
+        &self,
+        query: &str,
+        limit: usize,
+    ) -> Result<Vec<Episode>, MemoryError> {
+        if query.trim().is_empty() {
+            return Ok(Vec::new());
+        }
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            r#"
+            SELECT e.id, e.persona, e.service_id, e.intent, e.user_phrase, e.params_json,
+                   e.outcome, e.error, e.created_at
+            FROM episodes_fts ft
+            JOIN episodes e ON e.rowid = ft.rowid
+            WHERE episodes_fts MATCH ?1
+            ORDER BY rank
+            LIMIT ?2
+            "#,
+        )?;
+        let rows = stmt.query_map(params![query, limit as i64], row_to_episode)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    // ------------------------------------------------------------------
+    // PERSONAS
+    // ------------------------------------------------------------------
+
+    /// Crée ou met à jour un persona.
+    pub fn upsert_persona(&self, persona: &Persona) -> Result<(), MemoryError> {
+        if persona.id.trim().is_empty() {
+            return Err(MemoryError::InvalidId(persona.id.clone()));
+        }
+        self.lock_conn().execute(
+            r#"
+            INSERT INTO personas(id, display_name, description, is_default, created_at)
+            VALUES (?1, ?2, ?3, ?4, ?5)
+            ON CONFLICT(id) DO UPDATE SET
+                display_name = excluded.display_name,
+                description  = excluded.description,
+                is_default   = excluded.is_default
+            "#,
+            params![
+                persona.id,
+                persona.display_name,
+                persona.description,
+                i32::from(persona.is_default),
+                persona.created_at.to_rfc3339(),
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// Récupère un persona par son `id`.
+    pub fn persona(&self, id: &str) -> Result<Option<Persona>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, display_name, description, is_default, created_at
+             FROM personas WHERE id = ?1",
+        )?;
+        stmt.query_row(params![id], row_to_persona)
+            .optional()
+            .map_err(MemoryError::from)
+    }
+
+    /// Liste tous les personas (triés par `id`).
+    pub fn personas(&self) -> Result<Vec<Persona>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, display_name, description, is_default, created_at
+             FROM personas ORDER BY id",
+        )?;
+        let rows = stmt.query_map([], row_to_persona)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// Persona marqué `is_default = 1` (s'il y en a un).
+    pub fn default_persona(&self) -> Result<Option<Persona>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, display_name, description, is_default, created_at
+             FROM personas WHERE is_default = 1 LIMIT 1",
+        )?;
+        stmt.query_row([], row_to_persona)
+            .optional()
+            .map_err(MemoryError::from)
+    }
+
+    // ------------------------------------------------------------------
+    // PERSONA ACTIVE (runtime)
+    // ------------------------------------------------------------------
+
+    /// Identifiant de la persona active.
+    ///
+    /// Résolution :
+    /// 1. `Preference` scope=`global`, key=`active_persona` (string)
+    /// 2. sinon le `default_persona()`
+    /// 3. sinon `None`
+    pub fn active_persona_id(&self) -> Result<Option<String>, MemoryError> {
+        if let Some(pref) = self.preference("global", "active_persona")? {
+            if let Value::String(s) = &pref.value {
+                if !s.trim().is_empty() {
+                    return Ok(Some(s.clone()));
+                }
+            }
+        }
+        Ok(self.default_persona()?.map(|p| p.id))
+    }
+
+    /// Pose la persona active. Vérifie qu'elle existe — sinon `UnknownPersona`.
+    pub fn set_active_persona(&self, persona_id: &str) -> Result<(), MemoryError> {
+        if persona_id.trim().is_empty() {
+            return Err(MemoryError::InvalidId(persona_id.into()));
+        }
+        if self.persona(persona_id)?.is_none() {
+            return Err(MemoryError::UnknownPersona(persona_id.into()));
+        }
+        self.prefer(&Preference::new(
+            "global".into(),
+            "active_persona".into(),
+            Value::String(persona_id.into()),
+        ))
+    }
+
+    // ------------------------------------------------------------------
+    // PRÉFÉRENCE DE CONFIRMATION (par capability)
+    // ------------------------------------------------------------------
+
+    /// Lit la préférence de confirmation pour une capability.
+    ///
+    /// Convention de stockage :
+    /// - clé : `confirm.<qualified_id>` (ex: `confirm.jaykoa.schedule_event`)
+    /// - valeur JSON : `true` (toujours demander) / `false` (ne jamais demander)
+    ///
+    /// Résolution avec fallback :
+    /// 1. scope = `persona`
+    /// 2. scope = `global`
+    /// 3. `None` (= aucune préférence posée → caller applique son défaut)
+    pub fn confirmation_preference(
+        &self,
+        persona: &str,
+        qualified_id: &str,
+    ) -> Result<Option<bool>, MemoryError> {
+        let key = format!("confirm.{qualified_id}");
+        for scope in [persona, "global"] {
+            if let Some(pref) = self.preference(scope, &key)? {
+                if let Value::Bool(b) = pref.value {
+                    return Ok(Some(b));
+                }
+                tracing::warn!(
+                    persona = %persona,
+                    qualified_id = %qualified_id,
+                    scope = %scope,
+                    "préférence confirmation non booléenne, ignorée"
+                );
+            }
+        }
+        Ok(None)
+    }
+
+    /// Pose la préférence de confirmation pour une capability sur un persona
+    /// donné (ou `"global"`).
+    pub fn set_confirmation_preference(
+        &self,
+        scope: &str,
+        qualified_id: &str,
+        ask: bool,
+    ) -> Result<(), MemoryError> {
+        if scope.trim().is_empty() || qualified_id.trim().is_empty() {
+            return Err(MemoryError::InvalidId(format!(
+                "scope='{scope}' qualified_id='{qualified_id}'"
+            )));
+        }
+        self.prefer(&Preference::new(
+            scope.into(),
+            format!("confirm.{qualified_id}"),
+            Value::Bool(ask),
+        ))
+    }
+
+    // ------------------------------------------------------------------
+    // SKILLS APPRISES (P5)
+    // ------------------------------------------------------------------
+
+    /// Insère ou met à jour une `LearnedSkill` (clé = `id`).
+    pub fn upsert_learned_skill(&self, skill: &LearnedSkill) -> Result<(), MemoryError> {
+        let params_json = serde_json::to_string(&skill.params_template)?;
+        self.lock_conn().execute(
+            r#"
+            INSERT INTO learned_skills(id, persona, trigger_phrase, qualified_id,
+                                       params_template, status, created_at, accepted_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+            ON CONFLICT(id) DO UPDATE SET
+                persona         = excluded.persona,
+                trigger_phrase  = excluded.trigger_phrase,
+                qualified_id    = excluded.qualified_id,
+                params_template = excluded.params_template,
+                status          = excluded.status,
+                accepted_at     = excluded.accepted_at
+            "#,
+            params![
+                skill.id.to_string(),
+                skill.persona,
+                skill.trigger_phrase,
+                skill.qualified_id,
+                params_json,
+                learned_status_as_str(skill.status),
+                skill.created_at.to_rfc3339(),
+                skill.accepted_at.map(|d| d.to_rfc3339()),
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// Propose une nouvelle skill apprise (raccourci pour les détecteurs).
+    pub fn propose_learned_skill(
+        &self,
+        persona: &str,
+        trigger_phrase: &str,
+        qualified_id: &str,
+        params_template: Value,
+    ) -> Result<LearnedSkill, MemoryError> {
+        if persona.trim().is_empty()
+            || trigger_phrase.trim().is_empty()
+            || qualified_id.trim().is_empty()
+        {
+            return Err(MemoryError::InvalidId(format!(
+                "persona='{persona}' qualified_id='{qualified_id}' trigger='{trigger_phrase}'"
+            )));
+        }
+        let skill = LearnedSkill::proposed(
+            persona.to_string(),
+            trigger_phrase.to_string(),
+            qualified_id.to_string(),
+            params_template,
+        );
+        self.upsert_learned_skill(&skill)?;
+        Ok(skill)
+    }
+
+    /// Marque une skill comme acceptée (statut `Accepted`, `accepted_at` posé).
+    pub fn accept_learned_skill(&self, id: Uuid) -> Result<(), MemoryError> {
+        let n = self.lock_conn().execute(
+            "UPDATE learned_skills SET status = ?1, accepted_at = ?2 WHERE id = ?3",
+            params![
+                learned_status_as_str(LearnedSkillStatus::Accepted),
+                Utc::now().to_rfc3339(),
+                id.to_string(),
+            ],
+        )?;
+        if n == 0 {
+            return Err(MemoryError::LearnedSkillNotFound(id));
+        }
+        Ok(())
+    }
+
+    /// Marque une skill comme refusée (statut `Rejected`).
+    pub fn reject_learned_skill(&self, id: Uuid) -> Result<(), MemoryError> {
+        let n = self.lock_conn().execute(
+            "UPDATE learned_skills SET status = ?1 WHERE id = ?2",
+            params![
+                learned_status_as_str(LearnedSkillStatus::Rejected),
+                id.to_string(),
+            ],
+        )?;
+        if n == 0 {
+            return Err(MemoryError::LearnedSkillNotFound(id));
+        }
+        Ok(())
+    }
+
+    /// Récupère une skill apprise par son id.
+    pub fn learned_skill(&self, id: Uuid) -> Result<Option<LearnedSkill>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, trigger_phrase, qualified_id, params_template,
+                    status, created_at, accepted_at
+             FROM learned_skills WHERE id = ?1",
+        )?;
+        stmt.query_row(params![id.to_string()], row_to_learned_skill)
+            .optional()
+            .map_err(MemoryError::from)
+    }
+
+    /// Liste les skills apprises **acceptées** pour une persona donnée
+    /// (utilisable au runtime pour matcher des phrases).
+    pub fn active_learned_skills(&self, persona: &str) -> Result<Vec<LearnedSkill>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, trigger_phrase, qualified_id, params_template,
+                    status, created_at, accepted_at
+             FROM learned_skills
+             WHERE persona = ?1 AND status = 'accepted'
+             ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map(params![persona], row_to_learned_skill)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// Liste les skills apprises **proposées** pour une persona — c'est ce
+    /// qu'on pousse dans le dialogue de promotion.
+    pub fn pending_learned_skills(
+        &self,
+        persona: &str,
+    ) -> Result<Vec<LearnedSkill>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, trigger_phrase, qualified_id, params_template,
+                    status, created_at, accepted_at
+             FROM learned_skills
+             WHERE persona = ?1 AND status = 'proposed'
+             ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map(params![persona], row_to_learned_skill)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// `true` si une skill apprise existe déjà (proposée OU rejetée OU
+    /// acceptée) pour ce `(persona, qualified_id)`. Sert au détecteur de
+    /// patterns pour ne pas re-proposer en boucle.
+    pub fn learned_skill_exists(
+        &self,
+        persona: &str,
+        qualified_id: &str,
+    ) -> Result<bool, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT 1 FROM learned_skills
+             WHERE persona = ?1 AND qualified_id = ?2 LIMIT 1",
+        )?;
+        let exists = stmt
+            .query_row(params![persona, qualified_id], |_| Ok(()))
+            .optional()?
+            .is_some();
+        Ok(exists)
+    }
+
+    /// Cherche, parmi les `LearnedSkill` **acceptées** pour la persona, une
+    /// dont le `trigger_phrase` matche la phrase utilisateur.
+    ///
+    /// Matching P5 (volontairement simple) :
+    /// 1. Normalisation : lowercase + suppression de la ponctuation +
+    ///    compactage des whitespaces
+    /// 2. Match si phrase normalisée == trigger normalisé **OU** phrase
+    ///    contient trigger (utile si l'utilisateur ajoute des mots autour)
+    /// 3. En cas d'ambiguïté (plusieurs matches) : la skill **la plus
+    ///    récemment créée** gagne — `active_learned_skills` renvoie déjà
+    ///    triées DESC par `created_at`.
+    ///
+    /// Renvoie `None` si la phrase est vide après normalisation, ou si rien
+    /// ne matche.
+    pub fn match_learned_skill(
+        &self,
+        persona: &str,
+        phrase: &str,
+    ) -> Result<Option<LearnedSkill>, MemoryError> {
+        let phrase_norm = normalize_phrase(phrase);
+        if phrase_norm.is_empty() {
+            return Ok(None);
+        }
+        for skill in self.active_learned_skills(persona)? {
+            let trigger_norm = normalize_phrase(&skill.trigger_phrase);
+            if trigger_norm.is_empty() {
+                continue;
+            }
+            if phrase_norm == trigger_norm || phrase_norm.contains(&trigger_norm) {
+                return Ok(Some(skill));
+            }
+        }
+        Ok(None)
+    }
+}
+
+/// Normalise une phrase pour le matching : lowercase, supprime la
+/// ponctuation (remplacée par espace), compacte les whitespaces.
+fn normalize_phrase(s: &str) -> String {
+    s.chars()
+        .map(|c| {
+            if c.is_alphanumeric() || c.is_whitespace() {
+                c.to_lowercase().next().unwrap_or(c)
+            } else {
+                ' '
+            }
+        })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+// ----------------------------------------------------------------------
+// PENDING CONFIRMATIONS (queue async)
+// ----------------------------------------------------------------------
+
+impl MemoryStore {
+    /// Pose une nouvelle confirmation en attente dans la queue. Retourne la
+    /// `PendingConfirmation` créée (statut `Pending`).
+    pub fn enqueue_pending_confirmation(
+        &self,
+        qualified_id: &str,
+        params: Value,
+        persona: &str,
+        user_phrase: &str,
+        prompt: &str,
+    ) -> Result<PendingConfirmation, MemoryError> {
+        if qualified_id.trim().is_empty() || persona.trim().is_empty() {
+            return Err(MemoryError::InvalidId(format!(
+                "qualified_id='{qualified_id}' persona='{persona}'"
+            )));
+        }
+        let pc = PendingConfirmation::new(
+            qualified_id.to_string(),
+            params,
+            persona.to_string(),
+            user_phrase.to_string(),
+            prompt.to_string(),
+        );
+        let params_json = serde_json::to_string(&pc.params)?;
+        self.lock_conn().execute(
+            r#"
+            INSERT INTO pending_confirmations(id, qualified_id, params_json, persona,
+                                              user_phrase, prompt, status, created_at, resolved_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+            "#,
+            params![
+                pc.id.to_string(),
+                pc.qualified_id,
+                params_json,
+                pc.persona,
+                pc.user_phrase,
+                pc.prompt,
+                pending_status_as_str(pc.status),
+                pc.created_at.to_rfc3339(),
+                pc.resolved_at.map(|d| d.to_rfc3339()),
+            ],
+        )?;
+        Ok(pc)
+    }
+
+    /// Liste toutes les confirmations actuellement `Pending` (toutes personas
+    /// confondues, plus récentes d'abord).
+    pub fn list_pending_confirmations(&self) -> Result<Vec<PendingConfirmation>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
+                    status, created_at, resolved_at
+             FROM pending_confirmations
+             WHERE status = 'pending'
+             ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map([], row_to_pending)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// Liste les confirmations `Pending` filtrées par persona.
+    pub fn pending_confirmations_for_persona(
+        &self,
+        persona: &str,
+    ) -> Result<Vec<PendingConfirmation>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
+                    status, created_at, resolved_at
+             FROM pending_confirmations
+             WHERE persona = ?1 AND status = 'pending'
+             ORDER BY created_at DESC",
+        )?;
+        let rows = stmt.query_map(params![persona], row_to_pending)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
+    /// Récupère une confirmation par id, quel que soit son statut.
+    pub fn pending_confirmation(
+        &self,
+        id: Uuid,
+    ) -> Result<Option<PendingConfirmation>, MemoryError> {
+        let conn = self.lock_conn();
+        let mut stmt = conn.prepare(
+            "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
+                    status, created_at, resolved_at
+             FROM pending_confirmations
+             WHERE id = ?1",
+        )?;
+        stmt.query_row(params![id.to_string()], row_to_pending)
+            .optional()
+            .map_err(MemoryError::from)
+    }
+
+    /// Marque une confirmation `Confirmed` (statut + resolved_at). Refuse si
+    /// la confirmation n'existe pas ou n'est plus `Pending`.
+    pub fn mark_pending_confirmed(&self, id: Uuid) -> Result<(), MemoryError> {
+        self.transition_pending(id, PendingStatus::Confirmed)
+    }
+
+    /// Marque une confirmation `Cancelled`. Mêmes garanties que `confirmed`.
+    pub fn mark_pending_cancelled(&self, id: Uuid) -> Result<(), MemoryError> {
+        self.transition_pending(id, PendingStatus::Cancelled)
+    }
+
+    fn transition_pending(
+        &self,
+        id: Uuid,
+        new_status: PendingStatus,
+    ) -> Result<(), MemoryError> {
+        let current = self
+            .pending_confirmation(id)?
+            .ok_or(MemoryError::PendingConfirmationNotFound(id))?;
+        if current.status != PendingStatus::Pending {
+            return Err(MemoryError::PendingConfirmationAlreadyResolved {
+                id,
+                status: pending_status_as_str(current.status).into(),
+            });
+        }
+        let n = self.lock_conn().execute(
+            "UPDATE pending_confirmations
+             SET status = ?1, resolved_at = ?2
+             WHERE id = ?3 AND status = 'pending'",
+            params![
+                pending_status_as_str(new_status),
+                Utc::now().to_rfc3339(),
+                id.to_string(),
+            ],
+        )?;
+        if n == 0 {
+            return Err(MemoryError::PendingConfirmationNotFound(id));
+        }
+        Ok(())
+    }
+}
+
+fn pending_status_as_str(s: PendingStatus) -> &'static str {
+    match s {
+        PendingStatus::Pending => "pending",
+        PendingStatus::Confirmed => "confirmed",
+        PendingStatus::Cancelled => "cancelled",
+    }
+}
+
+fn row_to_pending(row: &Row<'_>) -> rusqlite::Result<PendingConfirmation> {
+    let id_str: String = row.get(0)?;
+    let id = Uuid::parse_str(&id_str).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let params_json: String = row.get(2)?;
+    let params: Value = serde_json::from_str(&params_json).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(2, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let status_str: String = row.get(6)?;
+    let status = match status_str.as_str() {
+        "pending" => PendingStatus::Pending,
+        "confirmed" => PendingStatus::Confirmed,
+        "cancelled" => PendingStatus::Cancelled,
+        other => {
+            return Err(rusqlite::Error::FromSqlConversionFailure(
+                6,
+                rusqlite::types::Type::Text,
+                format!("statut PendingConfirmation inconnu : {other}").into(),
+            ));
+        }
+    };
+    let created_at: String = row.get(7)?;
+    let resolved_at: Option<String> = row.get(8)?;
+    let resolved_at = resolved_at.map(|s| rfc3339_or_err(&s, 8)).transpose()?;
+    Ok(PendingConfirmation {
+        id,
+        qualified_id: row.get(1)?,
+        params,
+        persona: row.get(3)?,
+        user_phrase: row.get(4)?,
+        prompt: row.get(5)?,
+        status,
+        created_at: rfc3339_or_err(&created_at, 7)?,
+        resolved_at,
+    })
+}
+
+fn learned_status_as_str(s: LearnedSkillStatus) -> &'static str {
+    match s {
+        LearnedSkillStatus::Proposed => "proposed",
+        LearnedSkillStatus::Accepted => "accepted",
+        LearnedSkillStatus::Rejected => "rejected",
+    }
+}
+
+fn row_to_learned_skill(row: &Row<'_>) -> rusqlite::Result<LearnedSkill> {
+    let id_str: String = row.get(0)?;
+    let id = Uuid::parse_str(&id_str).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let params_json: String = row.get(4)?;
+    let params_template: Value = serde_json::from_str(&params_json).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(4, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let status_str: String = row.get(5)?;
+    let status = match status_str.as_str() {
+        "proposed" => LearnedSkillStatus::Proposed,
+        "accepted" => LearnedSkillStatus::Accepted,
+        "rejected" => LearnedSkillStatus::Rejected,
+        other => {
+            return Err(rusqlite::Error::FromSqlConversionFailure(
+                5,
+                rusqlite::types::Type::Text,
+                format!("statut LearnedSkill inconnu : {other}").into(),
+            ));
+        }
+    };
+    let created_at: String = row.get(6)?;
+    let accepted_at: Option<String> = row.get(7)?;
+    let accepted_at = accepted_at.map(|s| rfc3339_or_err(&s, 7)).transpose()?;
+    Ok(LearnedSkill {
+        id,
+        persona: row.get(1)?,
+        trigger_phrase: row.get(2)?,
+        qualified_id: row.get(3)?,
+        params_template,
+        status,
+        created_at: rfc3339_or_err(&created_at, 6)?,
+        accepted_at,
+    })
+}
+
+// ----------------------------------------------------------------------
+// Row → struct helpers
+// ----------------------------------------------------------------------
+
+fn row_to_fact(row: &Row<'_>) -> rusqlite::Result<Fact> {
+    let id_str: String = row.get(0)?;
+    let id = Uuid::parse_str(&id_str).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let created_at: String = row.get(6)?;
+    let updated_at: String = row.get(7)?;
+    Ok(Fact {
+        id,
+        persona: row.get(1)?,
+        subject: row.get(2)?,
+        content: row.get(3)?,
+        source: row.get(4)?,
+        confidence: row.get(5)?,
+        created_at: rfc3339_or_err(&created_at, 6)?,
+        updated_at: rfc3339_or_err(&updated_at, 7)?,
+    })
+}
+
+fn row_to_episode(row: &Row<'_>) -> rusqlite::Result<Episode> {
+    let id_str: String = row.get(0)?;
+    let id = Uuid::parse_str(&id_str).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let params_json: String = row.get(5)?;
+    let params: Value = serde_json::from_str(&params_json).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(5, rusqlite::types::Type::Text, Box::new(e))
+    })?;
+    let outcome_str: String = row.get(6)?;
+    let outcome = match outcome_str.as_str() {
+        "ok" => EpisodeOutcome::Ok,
+        "cancelled" => EpisodeOutcome::Cancelled,
+        "failed" => EpisodeOutcome::Failed,
+        other => {
+            return Err(rusqlite::Error::FromSqlConversionFailure(
+                6,
+                rusqlite::types::Type::Text,
+                format!("outcome inconnu : {other}").into(),
+            ));
+        }
+    };
+    let created_at: String = row.get(8)?;
+    Ok(Episode {
+        id,
+        persona: row.get(1)?,
+        service_id: row.get(2)?,
+        intent: row.get(3)?,
+        user_phrase: row.get(4)?,
+        params,
+        outcome,
+        error: row.get(7)?,
+        created_at: rfc3339_or_err(&created_at, 8)?,
+    })
+}
+
+fn row_to_persona(row: &Row<'_>) -> rusqlite::Result<Persona> {
+    let created_at: String = row.get(4)?;
+    let is_default: i32 = row.get(3)?;
+    Ok(Persona {
+        id: row.get(0)?,
+        display_name: row.get(1)?,
+        description: row.get(2)?,
+        is_default: is_default != 0,
+        created_at: rfc3339_or_err(&created_at, 4)?,
+    })
+}
+
+fn parse_rfc3339(s: &str) -> Result<DateTime<Utc>, MemoryError> {
+    DateTime::parse_from_rfc3339(s)
+        .map(|dt| dt.with_timezone(&Utc))
+        .map_err(|e| MemoryError::InvalidId(format!("date RFC3339 invalide '{s}' : {e}")))
+}
+
+fn rfc3339_or_err(s: &str, idx: usize) -> rusqlite::Result<DateTime<Utc>> {
+    DateTime::parse_from_rfc3339(s)
+        .map(|dt| dt.with_timezone(&Utc))
+        .map_err(|e| {
+            rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Text, Box::new(e))
+        })
+}

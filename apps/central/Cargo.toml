@@ -61,6 +61,12 @@ miyumarket = { path = "../../crates/miyumarket" }
 miyualicia-capture = { path = "../../crates/miyuvoicecapture" }
 miyualicia-wakeword = { path = "../../crates/miyuwakeword" }
 
+# Alicia — clients de services (UI dashboard productivité : météo, agenda, compta, contacts)
+jaymeteo-client = { path = "../../crates/jaymeteo-client" }
+jaycontact-client = { path = "../../crates/jaycontact-client" }
+jaykoa-client = { path = "../../crates/jaykoa-client" }
+jaykonta-client = { path = "../../crates/jaykonta-client" }
+
 # File dialog natif (selecteur de fichiers pour MiyuCloud upload)
 rfd = "0.15"
 

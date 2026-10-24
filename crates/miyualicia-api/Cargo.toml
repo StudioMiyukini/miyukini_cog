@@ -12,8 +12,11 @@ categories.workspace = true
 description = "Serveur API REST JWT — Alicia Home Assistante. Routes, auth HS256, DTOs, handlers, rate limit."
 
 [dependencies]
-miyualicia         = { path = "../miyualicia" }
-miyualicia-devices = { path = "../miyualicia-devices" }
+miyualicia            = { path = "../miyualicia" }
+miyualicia-devices    = { path = "../miyualicia-devices" }
+miyualicia-skills     = { path = "../miyualicia-skills" }
+miyualicia-memory     = { path = "../miyualicia-memory" }
+miyualicia-dispatcher = { path = "../miyualicia-dispatcher" }
 
 axum               = "0.8"
 tower              = { version = "0.5", features = ["util"] }
@@ -26,9 +29,12 @@ chrono             = { version = "0.4", features = ["serde"] }
 uuid               = { version = "1", features = ["v4", "serde"] }
 thiserror          = "2"
 tracing            = "0.1"
+argon2             = "0.5"
 
 [dev-dependencies]
-tokio = { version = "1", features = ["full", "test-util"] }
+tokio          = { version = "1", features = ["full", "test-util"] }
+http-body-util = "0.1"
+tempfile       = "3"
 
 [lints.rust]
 unsafe_code = "forbid"
