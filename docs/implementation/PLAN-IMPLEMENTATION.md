@@ -115,10 +115,17 @@
 - **Fait** : incrément 1, `miyusceau` (format Sceau v1, 15 tests)
 - **Incrément 2** : signature à seuil (2 sur 2), fraîcheur de tête de registre, fuzzing du décodeur (EX-01, EX-03, EX-10)
   - **Fait** (amendement A-002) : format Sceau v1.1 — identifiant d'algorithme signé, bloc multi-signature, `verifier_seuil`, `cosigner`, vecteurs simple et 2 sur 2 (30 tests)
-  - **Reste** : politique 2 sur 2 branchée sur les mises à jour des Cores (Central), fraîcheur de tête, cibles de fuzzing
+  - **Fait** : tête de registre fraîche et monotone, preuves Merkle RFC 9162, fuzzing (4 cibles, job CI) (7ed62645, 6774aaa6)
+  - **Reste** : politique 2 sur 2 branchée sur les mises à jour des Cores (lot 4, canal officiel)
 - **Incrément 3** : racine SLIP-39 2 sur 3 sur USB, clés SLIP-10 par usage, cérémonie de rotation (EX-24, EX-25)
+  - **Fait** : crate `miyuracine` (vecteurs officiels SLIP-39 et SLIP-10), CLI hors ligne, passation scellée (7e6719ca)
+  - **Reste** : fichier chiffré Argon2id sur support amovible ; `mlock` et désactivation des core dumps (NC-ANSSI-25)
 - **Incrément 4** : passeport et visa émis et vérifiés par `miyauth`, révocation d'appareil (EX-14, EX-36)
+  - **Fait** : passeport par COG de destination, visa après preuve de possession, identifiant par COG, révocation fail-closed (4277203c, e34f1f08)
+  - **Reste** : chaîne racine → clé d'émission ; adaptateur révocation ← tête de registre ; une clé d'appareil par COG (non-corrélation complète)
 - **Sortie** : plus aucune authentification par secret partagé sur les points exposés
+  - **Statut** : non atteinte — 23 points recensés ([inventaire](INVENTAIRE-SECRETS-PARTAGES.md)), à remplacer par passeport, visa et preuve de possession
+  - **Choix non fixés par la doc gelée, à inscrire par amendement** : champs et durées de la tête de registre, 2 sur 2 du canal officiel, encodages Merkle et d'état ; table des chemins SLIP-10 et type de la passation ; champs `destination`, `sujet` et `cle_appareil` du passeport et du visa, fraîcheur de révocation de 15 min ; liste C-24 (`hmac`, `pbkdf2`, `hkdf`)
 
 ## 5. Lot 3 — Frontières
 
