@@ -916,3 +916,157 @@ fn finalize_sets_confirmed_or_failed_only_from_executing() {
     assert!(s.finalize_pending_confirmation(ko.id, true).is_err());
     assert!(s.claim_pending_confirmation(ko.id).is_err());
 }
+
+// ----------------------------------------------------------------------
+// Expiration des confirmations (Executing bloquée → Failed, Pending
+// ancienne → Cancelled), motif "expired"
+// ----------------------------------------------------------------------
+
+const TTL_EXEC: std::time::Duration = std::time::Duration::from_secs(15 * 60);
+const TTL_PENDING: std::time::Duration = std::time::Duration::from_secs(24 * 3600);
+
+#[test]
+fn executing_older_than_ttl_becomes_failed_and_is_never_reclaimable() {
+    let s = store();
+    let pc = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    s.claim_pending_confirmation(pc.id).unwrap();
+    // Balayage 16 min plus tard : la réclamation a dépassé le TTL de 15 min.
+    let plus_tard = chrono::Utc::now() + chrono::Duration::minutes(16);
+    let rapport = s
+        .expire_stale_pending_confirmations_at(plus_tard, TTL_EXEC, TTL_PENDING)
+        .unwrap();
+    assert_eq!(rapport.failed, vec![pc.id]);
+    assert_eq!(rapport.cancelled.len(), 0);
+    let got = s.pending_confirmation(pc.id).unwrap().unwrap();
+    assert_eq!(got.status, PendingStatus::Failed);
+    assert_eq!(got.reason.as_deref(), Some(miyualicia_memory::PENDING_REASON_EXPIRED));
+    assert!(got.resolved_at.is_some());
+    // Terminal : ni réclamation ni finalisation tardive.
+    assert!(s.claim_pending_confirmation(pc.id).is_err());
+    assert!(s.finalize_pending_confirmation(pc.id, true).is_err());
+}
+
+#[test]
+fn fresh_executing_record_is_untouched() {
+    let s = store();
+    let pc = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    s.claim_pending_confirmation(pc.id).unwrap();
+    let rapport = s
+        .expire_stale_pending_confirmations(TTL_EXEC, TTL_PENDING)
+        .unwrap();
+    assert!(rapport.is_empty());
+    let got = s.pending_confirmation(pc.id).unwrap().unwrap();
+    assert_eq!(got.status, PendingStatus::Executing);
+    assert!(got.reason.is_none());
+    // La finalisation normale reste possible.
+    s.finalize_pending_confirmation(pc.id, true).unwrap();
+}
+
+#[test]
+fn pending_older_than_ttl_becomes_cancelled_and_cannot_be_claimed() {
+    let s = store();
+    let vieux = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    // 25 h plus tard : la pending dépasse le TTL de 24 h.
+    let plus_tard = chrono::Utc::now() + chrono::Duration::hours(25);
+    let rapport = s
+        .expire_stale_pending_confirmations_at(plus_tard, TTL_EXEC, TTL_PENDING)
+        .unwrap();
+    assert_eq!(rapport.cancelled, vec![vieux.id]);
+    let got = s.pending_confirmation(vieux.id).unwrap().unwrap();
+    assert_eq!(got.status, PendingStatus::Cancelled);
+    assert_eq!(got.reason.as_deref(), Some("expired"));
+    assert!(matches!(
+        s.claim_pending_confirmation(vieux.id).unwrap_err(),
+        miyualicia_memory::MemoryError::PendingConfirmationAlreadyResolved { .. }
+    ));
+    assert_eq!(s.list_pending_confirmations().unwrap().len(), 0);
+}
+
+#[test]
+fn fresh_pending_is_untouched_and_terminal_records_are_ignored() {
+    let s = store();
+    let frais = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    let fini = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "y", "p")
+        .unwrap();
+    s.claim_pending_confirmation(fini.id).unwrap();
+    s.finalize_pending_confirmation(fini.id, true).unwrap();
+    // 1 h plus tard : pending encore valide ; Confirmed jamais touchée.
+    let plus_tard = chrono::Utc::now() + chrono::Duration::hours(1);
+    let rapport = s
+        .expire_stale_pending_confirmations_at(plus_tard, TTL_EXEC, TTL_PENDING)
+        .unwrap();
+    assert!(rapport.is_empty());
+    assert_eq!(
+        s.pending_confirmation(frais.id).unwrap().unwrap().status,
+        PendingStatus::Pending
+    );
+    let got = s.pending_confirmation(fini.id).unwrap().unwrap();
+    assert_eq!(got.status, PendingStatus::Confirmed);
+    assert!(got.reason.is_none());
+}
+
+#[test]
+fn migration_from_old_schema_adds_columns_and_expires_legacy_executing() {
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("ancienne.db");
+    let maintenant = chrono::Utc::now().to_rfc3339();
+    let (id_pending, id_exec) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
+    {
+        // Schéma antérieur exact (sans claimed_at ni reason).
+        let conn = rusqlite::Connection::open(&path).unwrap();
+        conn.execute_batch(
+            "CREATE TABLE pending_confirmations (
+                id            TEXT PRIMARY KEY,
+                qualified_id  TEXT NOT NULL,
+                params_json   TEXT NOT NULL,
+                persona       TEXT NOT NULL,
+                user_phrase   TEXT NOT NULL,
+                prompt        TEXT NOT NULL,
+                status        TEXT NOT NULL,
+                created_at    TEXT NOT NULL,
+                resolved_at   TEXT
+            );",
+        )
+        .unwrap();
+        for (id, statut) in [(id_pending, "pending"), (id_exec, "executing")] {
+            conn.execute(
+                "INSERT INTO pending_confirmations VALUES (?1, 'a.b', '{}', 'voice', 'x', 'p', ?2, ?3, NULL)",
+                rusqlite::params![id.to_string(), statut, maintenant],
+            )
+            .unwrap();
+        }
+    }
+    let s = MemoryStore::open(&path).expect("ouverture + migration");
+    // Lecture OK sur les lignes héritées (reason NULL).
+    let p = s.pending_confirmation(id_pending).unwrap().unwrap();
+    assert_eq!(p.status, PendingStatus::Pending);
+    assert!(p.reason.is_none());
+    // Ligne `executing` héritée : date de réclamation inconnue (0) → expirée.
+    let rapport = s
+        .expire_stale_pending_confirmations(TTL_EXEC, TTL_PENDING)
+        .unwrap();
+    assert_eq!(rapport.failed, vec![id_exec]);
+    assert_eq!(rapport.cancelled.len(), 0);
+    assert_eq!(
+        s.pending_confirmation(id_exec).unwrap().unwrap().status,
+        PendingStatus::Failed
+    );
+    // La pending héritée reste réclamable (claimed_at désormais posé).
+    s.claim_pending_confirmation(id_pending).unwrap();
+    drop(s);
+    // Réouverture : migration idempotente.
+    let s = MemoryStore::open(&path).expect("réouverture");
+    assert_eq!(
+        s.pending_confirmation(id_pending).unwrap().unwrap().status,
+        PendingStatus::Executing
+    );
+}

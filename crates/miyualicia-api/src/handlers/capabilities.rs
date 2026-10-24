@@ -37,22 +37,76 @@ async fn capabilities_or_503(
     })
 }
 
+/// Trace une action admin inter-personas (accès obtenu par `all_personas`
+/// sur une persona hors de la liste explicite du client).
+fn log_cross_persona(claims: &JwtClaims, persona: &str, action: &str) {
+    if claims.is_cross_persona(persona) {
+        tracing::info!(
+            client = %claims.sub,
+            persona,
+            action,
+            "action admin inter-personas (all_personas)"
+        );
+    }
+}
+
+/// Autorise une persona **nommée par la requête** (corps, chemin, filtre).
+///
+/// - persona de la liste explicite du client : autorisée ;
+/// - sinon, avec `all_personas` (+ scope `admin`) : autorisée seulement si
+///   elle **existe** en mémoire (404 sinon), et l'action est tracée ;
+/// - sinon : 403 `PersonaForbidden` (fail-closed).
+fn authorize_requested_persona(
+    claims: &JwtClaims,
+    runtime: &CapabilitiesRuntime,
+    persona: &str,
+    action: &str,
+) -> Result<(), ApiError> {
+    claims.require_persona(persona)?;
+    if claims.is_cross_persona(persona) {
+        let existe = runtime
+            .memory()
+            .persona(persona)
+            .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?
+            .is_some();
+        if !existe {
+            return Err(ApiError::NotFound(format!("persona '{persona}'")));
+        }
+        log_cross_persona(claims, persona, action);
+    }
+    Ok(())
+}
+
+/// Autorise la persona d'un enregistrement **stocké** (pending, skill
+/// apprise) : 403 si non autorisée, trace si accès admin inter-personas.
+fn authorize_stored_persona(
+    claims: &JwtClaims,
+    persona: &str,
+    action: &str,
+) -> Result<(), ApiError> {
+    claims.require_persona(persona)?;
+    log_cross_persona(claims, persona, action);
+    Ok(())
+}
+
 /// Résout la persona d'une requête à partir de l'identité authentifiée
 /// (R-002, C-20) — jamais d'un champ de requête seul.
 ///
-/// - `requested = Some(p)` : `p` doit figurer dans `claims.personas` (403 sinon) ;
+/// - `requested = Some(p)` : `p` doit être autorisée pour le client (liste
+///   explicite, ou `all_personas` + persona existante) — 403 / 404 sinon ;
 /// - `requested = None` : persona active côté serveur si elle est autorisée,
 ///   sinon l'unique persona autorisée du client, sinon 403.
 ///
-/// Fail-closed : un client sans persona configurée ne peut rien dispatcher,
-/// y compris avec le scope `admin`.
+/// Fail-closed : un client sans persona configurée ni `all_personas` ne peut
+/// rien dispatcher, y compris avec le scope `admin`.
 fn resolve_persona(
     claims: &JwtClaims,
     requested: Option<&str>,
     runtime: &CapabilitiesRuntime,
+    action: &str,
 ) -> Result<String, ApiError> {
     if let Some(p) = requested {
-        claims.require_persona(p)?;
+        authorize_requested_persona(claims, runtime, p, action)?;
         return Ok(p.to_string());
     }
     let active = runtime
@@ -61,6 +115,7 @@ fn resolve_persona(
         .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
     if let Some(a) = active {
         if claims.allows_persona(&a) {
+            log_cross_persona(claims, &a, action);
             return Ok(a);
         }
     }
@@ -78,12 +133,13 @@ async fn require_pending_owned(
     claims: &JwtClaims,
     runtime: &CapabilitiesRuntime,
     id: Uuid,
+    action: &str,
 ) -> Result<(), ApiError> {
     let pc = runtime
         .pending_confirmation(id)
         .await?
         .ok_or_else(|| ApiError::NotFound(format!("confirmation en attente {id}")))?;
-    claims.require_persona(&pc.persona)
+    authorize_stored_persona(claims, &pc.persona, action)
 }
 
 // ----------------------------------------------------------------------
@@ -175,7 +231,7 @@ pub async fn dispatch(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    let persona = resolve_persona(&claims, body.persona.as_deref(), &runtime)?;
+    let persona = resolve_persona(&claims, body.persona.as_deref(), &runtime, "dispatch")?;
     let outcome = runtime
         .dispatch_and_queue(&body.qualified_id, &body.params, &persona, &body.user_phrase)
         .await?;
@@ -200,7 +256,7 @@ pub async fn dispatch_confirm(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    require_pending_owned(&claims, &runtime, body.id).await?;
+    require_pending_owned(&claims, &runtime, body.id, "confirm").await?;
     let result = runtime.confirm_queued(body.id).await?;
     Ok(Json(executed_to_json(&result)))
 }
@@ -214,7 +270,7 @@ pub async fn dispatch_cancel(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    require_pending_owned(&claims, &runtime, body.id).await?;
+    require_pending_owned(&claims, &runtime, body.id, "cancel").await?;
     runtime.cancel_queued(body.id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
@@ -228,13 +284,14 @@ fn require_learned_skill_owned(
     claims: &JwtClaims,
     runtime: &CapabilitiesRuntime,
     id: Uuid,
+    action: &str,
 ) -> Result<(), ApiError> {
     let skill = runtime
         .memory()
         .learned_skill(id)
         .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?
         .ok_or_else(|| ApiError::NotFound(format!("skill apprise {id}")))?;
-    claims.require_persona(&skill.persona)
+    authorize_stored_persona(claims, &skill.persona, action)
 }
 
 /// GET `/capabilities/learnings/pending/{persona}` — skills proposées (persona autorisée).
@@ -247,6 +304,7 @@ pub async fn learnings_pending(
     claims.require_scope(&JwtScope::Read)?;
     claims.require_persona(&persona)?;
     let runtime = capabilities_or_503(&state).await?;
+    authorize_requested_persona(&claims, &runtime, &persona, "learnings_pending")?;
     let pending = runtime
         .memory()
         .pending_learned_skills(&persona)
@@ -264,6 +322,7 @@ pub async fn learnings_active(
     claims.require_scope(&JwtScope::Read)?;
     claims.require_persona(&persona)?;
     let runtime = capabilities_or_503(&state).await?;
+    authorize_requested_persona(&claims, &runtime, &persona, "learnings_active")?;
     let active = runtime
         .memory()
         .active_learned_skills(&persona)
@@ -280,7 +339,7 @@ pub async fn learnings_accept(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    require_learned_skill_owned(&claims, &runtime, id)?;
+    require_learned_skill_owned(&claims, &runtime, id, "learning_accept")?;
     runtime
         .memory()
         .accept_learned_skill(id)
@@ -297,7 +356,7 @@ pub async fn learnings_reject(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    require_learned_skill_owned(&claims, &runtime, id)?;
+    require_learned_skill_owned(&claims, &runtime, id, "learning_reject")?;
     runtime
         .memory()
         .reject_learned_skill(id)
@@ -315,6 +374,7 @@ pub async fn learnings_detect(
     claims.require_scope(&JwtScope::Write)?;
     claims.require_persona(&persona)?;
     let runtime = capabilities_or_503(&state).await?;
+    authorize_requested_persona(&claims, &runtime, &persona, "learnings_detect")?;
     let patterns = runtime.detect_patterns(&persona).await?;
     Ok(Json(serde_json::json!({ "patterns": patterns })))
 }
@@ -335,7 +395,8 @@ pub async fn persona_active(
         .memory()
         .active_persona_id()
         .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
-    // Persona active révélée seulement si le client y a droit (R-002).
+    // Persona active révélée seulement si le client y a droit (R-002 ;
+    // `all_personas` : toujours).
     let id = id.filter(|p| claims.allows_persona(p));
     Ok(Json(serde_json::json!({ "persona_id": id })))
 }
@@ -351,6 +412,7 @@ pub async fn persona_activate(
     // Un client ne peut activer qu'une persona qui lui est autorisée (R-002).
     claims.require_persona(&id)?;
     let runtime = capabilities_or_503(&state).await?;
+    authorize_requested_persona(&claims, &runtime, &id, "persona_activate")?;
     runtime
         .memory()
         .set_active_persona(&id)
@@ -407,11 +469,16 @@ pub async fn episodes_recent(
     claims.require_scope(&JwtScope::Read)?;
     let runtime = capabilities_or_503(&state).await?;
     let limit = query.limit.unwrap_or(20).min(200);
-    // Seuls les épisodes des personas autorisées pour ce client (R-002).
-    let episodes = runtime
-        .memory()
-        .recent_episodes_for_personas(&claims.personas, limit)
-        .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
+    // Seuls les épisodes des personas autorisées pour ce client (R-002) ;
+    // `all_personas` (admin) : requête non filtrée, tracée.
+    let memory = runtime.memory();
+    let episodes = if claims.has_all_personas() {
+        tracing::info!(client = %claims.sub, limit, "episodes_recent toutes personas (all_personas)");
+        memory.recent_episodes(limit)
+    } else {
+        memory.recent_episodes_for_personas(&claims.personas, limit)
+    }
+    .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
     Ok(Json(serde_json::json!({
         "episodes": episodes,
         "count":    episodes.len(),
@@ -434,7 +501,7 @@ pub async fn dispatch_and_queue(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    let persona = resolve_persona(&claims, body.persona.as_deref(), &runtime)?;
+    let persona = resolve_persona(&claims, body.persona.as_deref(), &runtime, "dispatch")?;
     let outcome = runtime
         .dispatch_and_queue(&body.qualified_id, &body.params, &persona, &body.user_phrase)
         .await?;
@@ -470,8 +537,12 @@ pub async fn pending_list(
     // Seules les pending des personas autorisées pour le client sont visibles.
     let pending = match q.persona.as_deref() {
         Some(p) => {
-            claims.require_persona(p)?;
+            authorize_requested_persona(&claims, &runtime, p, "pending_list")?;
             runtime.pending_confirmations_for(p).await?
+        }
+        None if claims.has_all_personas() => {
+            tracing::info!(client = %claims.sub, "pending_list toutes personas (all_personas)");
+            runtime.list_pending_confirmations().await?
         }
         None => runtime
             .list_pending_confirmations()
@@ -495,7 +566,7 @@ pub async fn pending_confirm(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    require_pending_owned(&claims, &runtime, id).await?;
+    require_pending_owned(&claims, &runtime, id, "confirm").await?;
     let result = runtime.confirm_queued(id).await?;
     Ok(Json(executed_to_json(&result)))
 }
@@ -509,7 +580,7 @@ pub async fn pending_cancel(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    require_pending_owned(&claims, &runtime, id).await?;
+    require_pending_owned(&claims, &runtime, id, "cancel").await?;
     runtime.cancel_queued(id).await?;
     Ok(StatusCode::NO_CONTENT)
 }

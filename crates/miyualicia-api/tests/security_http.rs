@@ -74,12 +74,21 @@ fn cfg_with_clients() -> ApiConfig {
                 secret_hash: hash("s3cret"),
                 scopes: vec![JwtScope::Admin],
                 personas: vec!["voice".into()],
+                all_personas: false,
             },
             ApiClientConfig {
                 client_id: "admin".into(),
                 secret_hash: hash("lecteur"),
                 scopes: vec![JwtScope::Read],
                 personas: vec![],
+                all_personas: false,
+            },
+            ApiClientConfig {
+                client_id: "root".into(),
+                secret_hash: hash("racine"),
+                scopes: vec![JwtScope::Admin],
+                personas: vec![],
+                all_personas: true,
             },
         ],
         ..Default::default()
@@ -120,6 +129,37 @@ async fn token_personas_come_from_config() {
 
     let (_, body, _) = call(router(cfg_with_clients()), token_req("admin", "lecteur")).await;
     assert_eq!(body["personas"], json!([]));
+    assert_eq!(body["all_personas"], json!(false));
+    let tok = body["access_token"].as_str().unwrap();
+    assert!(!miyualicia_api::auth::verify_token(tok, SECRET).unwrap().all_personas);
+}
+
+#[tokio::test]
+async fn token_all_personas_claim_comes_from_admin_config() {
+    // Décision propriétaire : drapeau explicite, porté en claim booléen signé.
+    let (st, body, _) = call(router(cfg_with_clients()), token_req("root", "racine")).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["all_personas"], json!(true));
+    assert_eq!(body["personas"], json!([]));
+    let tok = body["access_token"].as_str().unwrap();
+    let claims = miyualicia_api::auth::verify_token(tok, SECRET).unwrap();
+    assert!(claims.all_personas);
+    assert!(claims.has_all_personas());
+}
+
+#[test]
+fn all_personas_without_admin_scope_rejected_at_config_validation() {
+    let cfg = ApiConfig {
+        clients: vec![ApiClientConfig {
+            client_id: "ecrivain".into(),
+            secret_hash: hash("x"),
+            scopes: vec![JwtScope::Read, JwtScope::Write],
+            personas: vec![],
+            all_personas: true,
+        }],
+        ..Default::default()
+    };
+    assert!(cfg.validate().is_err());
 }
 
 #[tokio::test]

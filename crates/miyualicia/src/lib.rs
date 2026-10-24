@@ -30,7 +30,7 @@ pub mod nlu_fallback;
 pub mod service;
 pub mod snapshot;
 
-pub use capabilities_runtime::{CapabilitiesRuntime, CapabilitiesRuntimeConfig};
+pub use capabilities_runtime::{CapabilitiesRuntime, CapabilitiesRuntimeConfig, PendingExpiryConfig};
 pub use config::AliciaConfig;
 pub use errors::AliciaError;
 pub use intent::Intent;

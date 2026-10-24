@@ -61,9 +61,17 @@ pub struct JwtClaims {
     ///
     /// Issues EXCLUSIVEMENT de `api.clients[].personas` a l'emission du token
     /// (signe HS256) ; jamais d'un champ de requete. Absent / vide : aucune
-    /// persona autorisee (fail-closed, y compris pour un token `admin`).
+    /// persona autorisee (fail-closed, y compris pour un token `admin`), sauf
+    /// claim `all_personas` (voir ci-dessous).
     #[serde(default)]
     pub personas: Vec<String>,
+    /// Acces a toutes les personas existantes (decision proprietaire) :
+    /// claim booleen explicite, signe, issu EXCLUSIVEMENT de
+    /// `api.clients[].all_personas` (accepte seulement avec le scope `admin`).
+    /// N'a d'effet que si le token porte aussi le scope `admin` (defense en
+    /// profondeur). Absent : `false`.
+    #[serde(default)]
+    pub all_personas: bool,
 }
 
 impl JwtClaims {
@@ -79,6 +87,7 @@ impl JwtClaims {
             iat: now,
             scopes,
             personas: Vec::new(),
+            all_personas: false,
         }
     }
 
@@ -89,13 +98,38 @@ impl JwtClaims {
         self
     }
 
-    /// Retourne `true` si la persona fait partie des personas autorisees.
+    /// Accorde l'acces a toutes les personas (config `all_personas`).
+    #[must_use]
+    pub fn with_all_personas(mut self, all: bool) -> Self {
+        self.all_personas = all;
+        self
+    }
+
+    /// `true` si le token donne effectivement acces a toutes les personas :
+    /// claim `all_personas` ET scope `admin` (les deux sont exiges).
+    pub fn has_all_personas(&self) -> bool {
+        self.all_personas && self.is_admin()
+    }
+
+    /// `true` si la persona est accessible : listee dans `personas`, ou
+    /// n'importe quelle persona si [`JwtClaims::has_all_personas`].
+    ///
+    /// L'existence de la persona n'est pas connue des claims : les handlers
+    /// la verifient en memoire pour toute persona fournie par la requete
+    /// lorsque l'acces passe par `all_personas`.
     pub fn allows_persona(&self, persona: &str) -> bool {
-        self.personas.iter().any(|p| p == persona)
+        self.has_all_personas() || self.personas.iter().any(|p| p == persona)
+    }
+
+    /// `true` si l'acces a `persona` ne vient QUE du drapeau `all_personas`
+    /// (persona hors liste explicite) — action admin inter-personas a tracer.
+    pub fn is_cross_persona(&self, persona: &str) -> bool {
+        self.has_all_personas() && !self.personas.iter().any(|p| p == persona)
     }
 
     /// Verifie que la persona est autorisee pour ce client, `PersonaForbidden`
-    /// sinon (fail-closed, aucun passe-droit `admin`).
+    /// sinon (fail-closed : le scope `admin` seul ne suffit pas, il faut en
+    /// plus le claim explicite `all_personas`).
     pub fn require_persona(&self, persona: &str) -> Result<(), ApiError> {
         if self.allows_persona(persona) {
             Ok(())
@@ -311,6 +345,32 @@ mod tests {
     fn test_admin_without_personas_gets_none() {
         let claims = JwtClaims::new("admin", vec![JwtScope::Admin], 3600);
         assert!(claims.require_persona("voice").is_err());
+    }
+
+    #[test]
+    fn test_all_personas_claim_roundtrip_requires_admin() {
+        let claims = JwtClaims::new("ops", vec![JwtScope::Admin], 3600).with_all_personas(true);
+        let token = generate_token(&claims, TEST_SECRET).expect("generate token");
+        let verified = verify_token(&token, TEST_SECRET).expect("verify token");
+        assert!(verified.all_personas);
+        assert!(verified.has_all_personas());
+        assert!(verified.allows_persona("voice"));
+        assert!(verified.is_cross_persona("voice"));
+        assert!(verified.require_persona("work").is_ok());
+
+        // Claim sans scope admin : sans effet (fail-closed).
+        let forged = JwtClaims::new("c", vec![JwtScope::Write], 3600).with_all_personas(true);
+        assert!(!forged.has_all_personas());
+        assert!(forged.require_persona("voice").is_err());
+    }
+
+    #[test]
+    fn test_all_personas_absent_defaults_false() {
+        // Ancien token sans le claim : false.
+        let json = r#"{"sub":"c","exp":1,"iat":0,"scopes":["admin"],"personas":[]}"#;
+        let c: JwtClaims = serde_json::from_str(json).expect("deserialize");
+        assert!(!c.all_personas);
+        assert!(!c.allows_persona("voice"));
     }
 
     #[test]

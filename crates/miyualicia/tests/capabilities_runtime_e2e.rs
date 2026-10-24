@@ -9,7 +9,9 @@ use std::sync::Arc;
 use serde_json::{json, Value};
 
 use borderguard::TrustLevel;
-use miyualicia::{AliciaConfig, AliciaService, CapabilitiesRuntime, CapabilitiesRuntimeConfig};
+use miyualicia::{
+    AliciaConfig, AliciaService, CapabilitiesRuntime, CapabilitiesRuntimeConfig, PendingExpiryConfig,
+};
 use miyualicia_cores_gate::test_helpers::simple_gate;
 use miyualicia_dispatcher::{Decision, MockServiceClient, ServiceCallResult};
 use miyualicia_memory::Persona;
@@ -601,6 +603,16 @@ impl miyualicia_dispatcher::ServiceClient for SlowCountingClient {
 }
 
 async fn runtime_with_shout(tmp: &std::path::Path) -> Arc<CapabilitiesRuntime> {
+    runtime_with_shout_cfg(tmp, None, PendingExpiryConfig::default()).await
+}
+
+/// Variante paramétrable : base SQLite fichier (redémarrage simulé) et TTL
+/// d'expiration des confirmations.
+async fn runtime_with_shout_cfg(
+    tmp: &std::path::Path,
+    memory_db_path: Option<std::path::PathBuf>,
+    pending_expiry: PendingExpiryConfig,
+) -> Arc<CapabilitiesRuntime> {
     let demo = tmp.join("demo");
     std::fs::create_dir_all(&demo).unwrap();
     std::fs::write(
@@ -620,6 +632,8 @@ async fn runtime_with_shout(tmp: &std::path::Path) -> Arc<CapabilitiesRuntime> {
     Arc::new(
         CapabilitiesRuntime::new_with_bypass_gate(CapabilitiesRuntimeConfig {
             services_dir: Some(tmp.to_path_buf()),
+            memory_db_path,
+            pending_expiry,
             ..Default::default()
         })
         .await
@@ -738,4 +752,151 @@ fn queued_id(outcome: miyualicia::capabilities_runtime::QueuedDispatch) -> uuid:
         panic!("expected Queued");
     };
     id
+}
+
+// -------------------------------------------------------------------
+// Expiration des confirmations : Executing bloquée → Failed (jamais
+// ré-exécutée), Pending périmée → Cancelled (plus confirmable)
+// -------------------------------------------------------------------
+
+fn counting_client() -> Arc<SlowCountingClient> {
+    Arc::new(SlowCountingClient {
+        calls: std::sync::atomic::AtomicUsize::new(0),
+    })
+}
+
+/// Simule un arrêt brutal pendant l'exécution : la confirmation est
+/// réclamée (`Executing`) puis le runtime disparaît sans finaliser.
+async fn crash_mid_execution(tmp: &std::path::Path, db: &std::path::Path) -> uuid::Uuid {
+    let rt = runtime_with_shout_cfg(tmp, Some(db.to_path_buf()), PendingExpiryConfig::default()).await;
+    let id = queued_id(
+        rt.dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+            .await
+            .unwrap(),
+    );
+    rt.memory().claim_pending_confirmation(id).unwrap();
+    id
+}
+
+#[tokio::test]
+async fn stuck_executing_older_than_ttl_is_failed_at_startup_and_never_executed() {
+    let tmp = tempfile::tempdir().unwrap();
+    let db = tmp.path().join("memoire.db");
+    let id = crash_mid_execution(tmp.path(), &db).await;
+
+    // Redémarrage avec TTL Executing nul : la réclamation est « trop vieille ».
+    let rt = runtime_with_shout_cfg(
+        tmp.path(),
+        Some(db.clone()),
+        PendingExpiryConfig {
+            executing_ttl_secs: 0,
+            ..Default::default()
+        },
+    )
+    .await;
+    let client = counting_client();
+    rt.register_service_client("demo", client.clone()).await;
+
+    let pc = rt.memory().pending_confirmation(id).unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Failed);
+    assert_eq!(pc.reason.as_deref(), Some("expired"));
+    let err = rt.confirm_queued(id).await.unwrap_err();
+    assert!(matches!(
+        err,
+        miyualicia::AliciaError::PendingConfirmationAlreadyResolved { .. }
+    ));
+    assert_eq!(client.calls.load(std::sync::atomic::Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn fresh_executing_is_untouched_at_startup_and_not_reexecuted() {
+    let tmp = tempfile::tempdir().unwrap();
+    let db = tmp.path().join("memoire.db");
+    let id = crash_mid_execution(tmp.path(), &db).await;
+
+    // Redémarrage avec le TTL par défaut (15 min) : rien n'expire encore.
+    let rt = runtime_with_shout_cfg(tmp.path(), Some(db.clone()), PendingExpiryConfig::default()).await;
+    let client = counting_client();
+    rt.register_service_client("demo", client.clone()).await;
+    let report = rt.sweep_expired_confirmations().unwrap();
+    assert!(report.is_empty());
+    let pc = rt.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Executing);
+    assert!(pc.reason.is_none());
+    // Toujours non réclamable : aucune ré-exécution automatique ni manuelle.
+    assert!(rt.confirm_queued(id).await.is_err());
+    assert_eq!(client.calls.load(std::sync::atomic::Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn pending_older_than_ttl_is_cancelled_and_cannot_be_confirmed() {
+    let tmp = tempfile::tempdir().unwrap();
+    let rt = runtime_with_shout_cfg(
+        tmp.path(),
+        None,
+        PendingExpiryConfig {
+            pending_ttl_secs: 0,
+            ..Default::default()
+        },
+    )
+    .await;
+    let client = counting_client();
+    rt.register_service_client("demo", client.clone()).await;
+    let id = queued_id(
+        rt.dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+            .await
+            .unwrap(),
+    );
+    let err = rt.confirm_queued(id).await.unwrap_err();
+    assert!(matches!(
+        err,
+        miyualicia::AliciaError::PendingConfirmationAlreadyResolved { .. }
+    ));
+    assert_eq!(client.calls.load(std::sync::atomic::Ordering::SeqCst), 0);
+    let pc = rt.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Cancelled);
+    assert_eq!(pc.reason.as_deref(), Some("expired"));
+    assert_eq!(rt.list_pending_confirmations().await.unwrap().len(), 0);
+}
+
+#[tokio::test]
+async fn periodic_sweeper_expires_stuck_executing() {
+    let tmp = tempfile::tempdir().unwrap();
+    let rt = runtime_with_shout_cfg(
+        tmp.path(),
+        None,
+        PendingExpiryConfig {
+            executing_ttl_secs: 0,
+            ..Default::default()
+        },
+    )
+    .await;
+    let id = queued_id(
+        rt.dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+            .await
+            .unwrap(),
+    );
+    rt.memory().claim_pending_confirmation(id).unwrap();
+    let handle = rt.spawn_expiry_sweeper(std::time::Duration::from_secs(60));
+    // Le premier tick est immédiat.
+    let mut statut = miyualicia_memory::PendingStatus::Executing;
+    for _ in 0..50 {
+        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        statut = rt.memory().pending_confirmation(id).unwrap().unwrap().status;
+        if statut != miyualicia_memory::PendingStatus::Executing {
+            break;
+        }
+    }
+    handle.abort();
+    assert_eq!(statut, miyualicia_memory::PendingStatus::Failed);
+}
+
+#[test]
+fn pending_expiry_config_defaults_and_toml() {
+    let d = PendingExpiryConfig::default();
+    assert_eq!(d.executing_ttl_secs, 900);
+    assert_eq!(d.pending_ttl_secs, 86_400);
+    let partiel: PendingExpiryConfig = serde_json::from_value(json!({"pending_ttl_secs": 3600})).unwrap();
+    assert_eq!(partiel.executing_ttl_secs, 900);
+    assert_eq!(partiel.pending_ttl_secs, 3600);
 }

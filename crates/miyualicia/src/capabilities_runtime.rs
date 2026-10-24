@@ -38,7 +38,8 @@ use miyualicia_dispatcher::{
 };
 use miyualicia_memory::{
     build_persona_context, detect_repetitions, propose_from_pattern, ContextOptions,
-    DetectorOptions, LearnedSkill, MemoryStore, PendingConfirmation, RepetitionPattern,
+    DetectorOptions, LearnedSkill, MemoryStore, PendingConfirmation, PendingExpiryReport,
+    RepetitionPattern,
 };
 use miyualicia_skills::{
     build_tool_response, capabilities_to_tools, resolve_tool_call, AliciaPolicy, ManifestWatcher,
@@ -64,6 +65,59 @@ pub struct CapabilitiesRuntimeConfig {
     /// Options de construction du bloc de contexte mémoire injecté dans le
     /// system prompt LLM.
     pub context_options: ContextOptions,
+    /// Expiration des confirmations bloquées / périmées.
+    pub pending_expiry: PendingExpiryConfig,
+}
+
+/// Durées d'expiration des `PendingConfirmation` (désérialisable depuis
+/// `alicia.toml`, ex. section `[capabilities.pending_expiry]`).
+///
+/// - `executing_ttl_secs` (défaut 900 = 15 min) : une confirmation restée
+///   `Executing` (arrêt brutal pendant l'exécution) passe en `Failed`, motif
+///   `"expired"`. Elle n'est **jamais** ré-exécutée automatiquement.
+/// - `pending_ttl_secs` (défaut 86 400 = 24 h) : une confirmation restée
+///   `Pending` passe en `Cancelled`, motif `"expired"` ; elle ne peut plus
+///   être confirmée.
+///
+/// Le balayage a lieu au démarrage du runtime, avant chaque lecture /
+/// réclamation / annulation de confirmation, et périodiquement si
+/// [`CapabilitiesRuntime::spawn_expiry_sweeper`] est utilisé.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct PendingExpiryConfig {
+    /// TTL d'une confirmation `Executing`, en secondes (défaut 900).
+    #[serde(default = "PendingExpiryConfig::default_executing_ttl_secs")]
+    pub executing_ttl_secs: u64,
+    /// TTL d'une confirmation `Pending`, en secondes (défaut 86 400).
+    #[serde(default = "PendingExpiryConfig::default_pending_ttl_secs")]
+    pub pending_ttl_secs: u64,
+}
+
+impl PendingExpiryConfig {
+    fn default_executing_ttl_secs() -> u64 {
+        15 * 60
+    }
+    fn default_pending_ttl_secs() -> u64 {
+        24 * 3600
+    }
+    /// TTL `Executing` sous forme de `Duration`.
+    #[must_use]
+    pub fn executing_ttl(&self) -> std::time::Duration {
+        std::time::Duration::from_secs(self.executing_ttl_secs)
+    }
+    /// TTL `Pending` sous forme de `Duration`.
+    #[must_use]
+    pub fn pending_ttl(&self) -> std::time::Duration {
+        std::time::Duration::from_secs(self.pending_ttl_secs)
+    }
+}
+
+impl Default for PendingExpiryConfig {
+    fn default() -> Self {
+        Self {
+            executing_ttl_secs: Self::default_executing_ttl_secs(),
+            pending_ttl_secs: Self::default_pending_ttl_secs(),
+        }
+    }
 }
 
 /// Résultat d'une exécution `dispatch_and_queue` — soit l'action est passée
@@ -145,7 +199,7 @@ impl CapabilitiesRuntime {
                 tracing::warn!(?dir, "services_dir absent — registre vide");
             }
         }
-        Ok(Self {
+        let runtime = Self {
             config,
             registry: RwLock::new(registry),
             memory: Arc::new(memory),
@@ -153,6 +207,58 @@ impl CapabilitiesRuntime {
             core_gate,
             service_clients: RwLock::new(ServiceClientRouter::new()),
             watcher: RwLock::new(ManifestWatcher::new()),
+        };
+        // Balayage au démarrage : une confirmation laissée `Executing` par un
+        // arrêt brutal passe en `Failed` (jamais ré-exécutée).
+        runtime.sweep_expired_confirmations()?;
+        Ok(runtime)
+    }
+
+    /// Balaye les confirmations périmées selon `config.pending_expiry` :
+    /// `Executing` trop ancienne → `Failed`, `Pending` trop ancienne →
+    /// `Cancelled` (motif `"expired"`). Aucune ré-exécution.
+    pub fn sweep_expired_confirmations(&self) -> Result<PendingExpiryReport, AliciaError> {
+        let exp = self.config.pending_expiry;
+        let report = self
+            .memory
+            .expire_stale_pending_confirmations(exp.executing_ttl(), exp.pending_ttl())
+            .map_err(memory_err)?;
+        if !report.failed.is_empty() {
+            tracing::warn!(
+                ids = ?report.failed,
+                ttl_secs = exp.executing_ttl_secs,
+                "confirmations bloquées en exécution expirées → Failed (non ré-exécutées)"
+            );
+        }
+        if !report.cancelled.is_empty() {
+            tracing::info!(
+                ids = ?report.cancelled,
+                ttl_secs = exp.pending_ttl_secs,
+                "confirmations en attente expirées → Cancelled"
+            );
+        }
+        Ok(report)
+    }
+
+    /// Lance une tâche tokio qui balaye les confirmations périmées toutes les
+    /// `period` (en plus du balayage paresseux avant chaque accès). La tâche
+    /// s'arrête quand le runtime est libéré (référence faible).
+    pub fn spawn_expiry_sweeper(
+        self: &Arc<Self>,
+        period: std::time::Duration,
+    ) -> tokio::task::JoinHandle<()> {
+        let faible = Arc::downgrade(self);
+        let period = period.max(std::time::Duration::from_secs(1));
+        tokio::spawn(async move {
+            let mut ticker = tokio::time::interval(period);
+            ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+            loop {
+                ticker.tick().await;
+                let Some(rt) = faible.upgrade() else { break };
+                if let Err(e) = rt.sweep_expired_confirmations() {
+                    tracing::error!("balayage d'expiration des confirmations : {e}");
+                }
+            }
         })
     }
 
@@ -376,6 +482,7 @@ impl CapabilitiesRuntime {
     pub async fn list_pending_confirmations(
         &self,
     ) -> Result<Vec<PendingConfirmation>, AliciaError> {
+        self.sweep_expired_confirmations()?;
         self.memory.list_pending_confirmations().map_err(memory_err)
     }
 
@@ -384,6 +491,7 @@ impl CapabilitiesRuntime {
         &self,
         persona: &str,
     ) -> Result<Vec<PendingConfirmation>, AliciaError> {
+        self.sweep_expired_confirmations()?;
         self.memory
             .pending_confirmations_for_persona(persona)
             .map_err(memory_err)
@@ -394,6 +502,7 @@ impl CapabilitiesRuntime {
         &self,
         id: uuid::Uuid,
     ) -> Result<Option<PendingConfirmation>, AliciaError> {
+        self.sweep_expired_confirmations()?;
         self.memory.pending_confirmation(id).map_err(memory_err)
     }
 
@@ -405,10 +514,17 @@ impl CapabilitiesRuntime {
     /// 2. exécution des seuls `qualified_id` / `params` / `persona` /
     ///    `user_phrase` **stockés** (gates cores actives, audit posé) ;
     /// 3. finalisation `Executing → Confirmed` (succès) ou `→ Failed`.
+    ///
+    /// Un balayage d'expiration précède la réclamation : une pending plus
+    /// ancienne que `pending_expiry.pending_ttl_secs` est `Cancelled` et ne
+    /// peut plus être confirmée.
     pub async fn confirm_queued(
         &self,
         id: uuid::Uuid,
     ) -> Result<miyualicia_dispatcher::ExecutionResult, AliciaError> {
+        // Une pending périmée est annulée avant toute réclamation : la
+        // réclamation est alors refusée (`AlreadyResolved`).
+        self.sweep_expired_confirmations()?;
         let pc = self
             .memory
             .claim_pending_confirmation(id)
@@ -439,6 +555,7 @@ impl CapabilitiesRuntime {
     // API async conservée (symétrie avec `confirm_queued`, appelants existants).
     #[allow(clippy::unused_async)]
     pub async fn cancel_queued(&self, id: uuid::Uuid) -> Result<(), AliciaError> {
+        self.sweep_expired_confirmations()?;
         let pc = self
             .memory
             .pending_confirmation(id)

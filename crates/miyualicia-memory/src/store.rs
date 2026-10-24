@@ -27,7 +27,7 @@ use uuid::Uuid;
 use crate::errors::MemoryError;
 use crate::types::{
     Episode, EpisodeOutcome, Fact, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
-    PendingStatus, Persona, Preference,
+    PendingExpiryReport, PendingStatus, Persona, Preference, PENDING_REASON_EXPIRED,
 };
 
 /// Store mémoire — wrapper rusqlite + helpers typés.
@@ -152,13 +152,49 @@ impl MemoryStore {
                 prompt        TEXT NOT NULL,
                 status        TEXT NOT NULL,
                 created_at    TEXT NOT NULL,
-                resolved_at   TEXT
+                resolved_at   TEXT,
+                claimed_at    INTEGER NOT NULL DEFAULT 0,
+                reason        TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_pending_status   ON pending_confirmations(status);
             CREATE INDEX IF NOT EXISTS idx_pending_persona  ON pending_confirmations(persona);
             CREATE INDEX IF NOT EXISTS idx_pending_created  ON pending_confirmations(created_at);
             "#,
         )?;
+        self.migrate_schema()?;
+        Ok(())
+    }
+
+    /// Migrations additives des bases créées avec un schéma antérieur.
+    ///
+    /// `pending_confirmations` : ajout de `claimed_at` (horodatage de
+    /// réclamation, epoch ms, défaut `0`) et `reason` (motif de résolution
+    /// automatique, `NULL` par défaut). `ALTER TABLE ... ADD COLUMN` ne touche
+    /// pas les lignes existantes ; une ligne `executing` héritée garde
+    /// `claimed_at = 0` (date de réclamation inconnue) et sera donc expirée
+    /// en `Failed` au premier balayage — jamais ré-exécutée.
+    ///
+    /// Réversibilité (C-41) : colonnes purement additives, ignorées par
+    /// l'ancien code ; retour arrière = `ALTER TABLE ... DROP COLUMN`.
+    fn migrate_schema(&self) -> Result<(), MemoryError> {
+        let conn = self.lock_conn()?;
+        let colonnes: Vec<String> = {
+            let mut stmt = conn.prepare("PRAGMA table_info(pending_confirmations)")?;
+            let rows = stmt.query_map([], |r| r.get::<_, String>(1))?;
+            rows.collect::<Result<Vec<_>, _>>()?
+        };
+        let a = |nom: &str| colonnes.iter().any(|c| c == nom);
+        if !a("claimed_at") {
+            conn.execute_batch(
+                "ALTER TABLE pending_confirmations
+                 ADD COLUMN claimed_at INTEGER NOT NULL DEFAULT 0;",
+            )?;
+            tracing::info!("migration mémoire : colonne pending_confirmations.claimed_at ajoutée");
+        }
+        if !a("reason") {
+            conn.execute_batch("ALTER TABLE pending_confirmations ADD COLUMN reason TEXT;")?;
+            tracing::info!("migration mémoire : colonne pending_confirmations.reason ajoutée");
+        }
         Ok(())
     }
 
@@ -881,7 +917,7 @@ impl MemoryStore {
         let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                    status, created_at, resolved_at
+                    status, created_at, resolved_at, reason
              FROM pending_confirmations
              WHERE status = 'pending'
              ORDER BY created_at DESC",
@@ -899,7 +935,7 @@ impl MemoryStore {
         let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                    status, created_at, resolved_at
+                    status, created_at, resolved_at, reason
              FROM pending_confirmations
              WHERE persona = ?1 AND status = 'pending'
              ORDER BY created_at DESC",
@@ -951,12 +987,13 @@ impl MemoryStore {
         let conn = self.lock_conn()?;
         let n = conn.execute(
             "UPDATE pending_confirmations
-             SET status = ?1
+             SET status = ?1, claimed_at = ?4
              WHERE id = ?2 AND status = ?3",
             params![
                 pending_status_as_str(PendingStatus::Executing),
                 id.to_string(),
                 pending_status_as_str(PendingStatus::Pending),
+                Utc::now().timestamp_millis(),
             ],
         )?;
         let current = pending_by_id(&conn, id)?;
@@ -985,6 +1022,66 @@ impl MemoryStore {
             PendingStatus::Failed
         };
         self.transition_pending(id, PendingStatus::Executing, target)
+    }
+
+    /// Balaye les confirmations périmées (horloge courante). Voir
+    /// [`MemoryStore::expire_stale_pending_confirmations_at`].
+    pub fn expire_stale_pending_confirmations(
+        &self,
+        executing_ttl: std::time::Duration,
+        pending_ttl: std::time::Duration,
+    ) -> Result<PendingExpiryReport, MemoryError> {
+        self.expire_stale_pending_confirmations_at(Utc::now(), executing_ttl, pending_ttl)
+    }
+
+    /// Balaye les confirmations périmées par rapport à l'instant `now` :
+    ///
+    /// - `Executing` réclamée depuis au moins `executing_ttl` (arrêt brutal
+    ///   pendant l'exécution) → `Failed`, motif `"expired"`. Jamais
+    ///   ré-exécutée : l'issue réelle de l'exécution interrompue est
+    ///   inconnue, une reprise automatique risquerait un double effet ;
+    /// - `Pending` créée depuis au moins `pending_ttl` → `Cancelled`, motif
+    ///   `"expired"` : une confirmation ancienne ne peut plus être confirmée.
+    ///
+    /// Chaque transition est une requête conditionnelle unique
+    /// (`UPDATE ... WHERE status = ... AND <date> <= ?`) exécutée sous le
+    /// verrou de connexion dans une transaction : aucune course possible avec
+    /// une réclamation ou une finalisation concurrente (la condition sur le
+    /// statut est réévaluée par SQLite).
+    pub fn expire_stale_pending_confirmations_at(
+        &self,
+        now: DateTime<Utc>,
+        executing_ttl: std::time::Duration,
+        pending_ttl: std::time::Duration,
+    ) -> Result<PendingExpiryReport, MemoryError> {
+        let now_ms = now.timestamp_millis();
+        let ttl_ms = |d: std::time::Duration| i64::try_from(d.as_millis()).unwrap_or(i64::MAX);
+        let seuil_exec = now_ms.saturating_sub(ttl_ms(executing_ttl));
+        let seuil_pending = now_ms.saturating_sub(ttl_ms(pending_ttl));
+        let resolu = now.to_rfc3339();
+
+        let mut conn = self.lock_conn()?;
+        let tx = conn.transaction()?;
+        let failed = expire_where(
+            &tx,
+            PendingStatus::Executing,
+            PendingStatus::Failed,
+            "claimed_at <= ?1",
+            seuil_exec,
+            &resolu,
+        )?;
+        // `created_at` est en RFC 3339 : conversion en epoch ms côté SQLite
+        // (julianday gère fuseau et fraction de seconde).
+        let cancelled = expire_where(
+            &tx,
+            PendingStatus::Pending,
+            PendingStatus::Cancelled,
+            "CAST((julianday(created_at) - 2440587.5) * 86400000.0 AS INTEGER) <= ?1",
+            seuil_pending,
+            &resolu,
+        )?;
+        tx.commit()?;
+        Ok(PendingExpiryReport { failed, cancelled })
     }
 
     /// Transition atomique `from → to` (une seule requête conditionnelle,
@@ -1020,6 +1117,46 @@ impl MemoryStore {
     }
 }
 
+/// Fait expirer (`from → to`, motif `"expired"`) les lignes vérifiant
+/// `condition` (paramètre `?1` = seuil epoch ms). Retourne les ids touchés.
+///
+/// `UPDATE ... RETURNING` : sélection et transition dans la même requête
+/// conditionnelle (atomique).
+fn expire_where(
+    conn: &Connection,
+    from: PendingStatus,
+    to: PendingStatus,
+    condition: &str,
+    seuil_ms: i64,
+    resolu: &str,
+) -> Result<Vec<Uuid>, MemoryError> {
+    let sql = format!(
+        "UPDATE pending_confirmations
+         SET status = ?2, resolved_at = ?3, reason = ?4
+         WHERE status = ?5 AND {condition}
+         RETURNING id"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(
+        params![
+            seuil_ms,
+            pending_status_as_str(to),
+            resolu,
+            PENDING_REASON_EXPIRED,
+            pending_status_as_str(from),
+        ],
+        |r| r.get::<_, String>(0),
+    )?;
+    let mut ids = Vec::new();
+    for r in rows {
+        let brut = r?;
+        let id = Uuid::parse_str(&brut)
+            .map_err(|e| MemoryError::InvalidId(format!("uuid invalide '{brut}' : {e}")))?;
+        ids.push(id);
+    }
+    Ok(ids)
+}
+
 /// Lecture d'une confirmation par id sur une connexion déjà verrouillée.
 fn pending_by_id(
     conn: &Connection,
@@ -1027,7 +1164,7 @@ fn pending_by_id(
 ) -> Result<Option<PendingConfirmation>, MemoryError> {
     let mut stmt = conn.prepare(
         "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                status, created_at, resolved_at
+                status, created_at, resolved_at, reason
          FROM pending_confirmations
          WHERE id = ?1",
     )?;
@@ -1073,6 +1210,7 @@ fn row_to_pending(row: &Row<'_>) -> rusqlite::Result<PendingConfirmation> {
     let created_at: String = row.get(7)?;
     let resolved_at: Option<String> = row.get(8)?;
     let resolved_at = resolved_at.map(|s| rfc3339_or_err(&s, 8)).transpose()?;
+    let reason: Option<String> = row.get(9)?;
     Ok(PendingConfirmation {
         id,
         qualified_id: row.get(1)?,
@@ -1083,6 +1221,7 @@ fn row_to_pending(row: &Row<'_>) -> rusqlite::Result<PendingConfirmation> {
         status,
         created_at: rfc3339_or_err(&created_at, 7)?,
         resolved_at,
+        reason,
     })
 }
 

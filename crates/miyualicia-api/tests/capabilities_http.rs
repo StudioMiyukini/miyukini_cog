@@ -39,15 +39,21 @@ fn token_with(scopes: Vec<JwtScope>, personas: &[&str]) -> String {
 
 /// Construit un AppState minimal + un token JWT de test à scope admin.
 async fn setup_with_runtime(services_dir: Option<&Path>) -> (axum::Router, String, Arc<CapabilitiesRuntime>) {
+    setup_with_runtime_cfg(CapabilitiesRuntimeConfig {
+        services_dir: services_dir.map(|p| p.to_path_buf()),
+        ..Default::default()
+    })
+    .await
+}
+
+/// Variante avec configuration complète du runtime (ex. TTL d'expiration).
+async fn setup_with_runtime_cfg(
+    cfg: CapabilitiesRuntimeConfig,
+) -> (axum::Router, String, Arc<CapabilitiesRuntime>) {
     let alicia = Arc::new(AliciaService::new(AliciaConfig {
         mqtt: None,
         ..Default::default()
     }));
-
-    let cfg = CapabilitiesRuntimeConfig {
-        services_dir: services_dir.map(|p| p.to_path_buf()),
-        ..Default::default()
-    };
     let runtime = Arc::new(
         CapabilitiesRuntime::new_with_bypass_gate(cfg)
             .await
@@ -1049,4 +1055,219 @@ fn queued_id(outcome: miyualicia::capabilities_runtime::QueuedDispatch) -> uuid:
         panic!("expected Queued");
     };
     id
+}
+
+// -------------------------------------------------------------------
+// Décision propriétaire : client admin `all_personas`
+// -------------------------------------------------------------------
+
+/// Token admin avec le claim explicite `all_personas` (aucune persona listée).
+fn token_all_personas(scopes: Vec<JwtScope>) -> String {
+    let claims = JwtClaims::new("root", scopes, 3600).with_all_personas(true);
+    generate_token(&claims, TEST_SECRET).expect("token")
+}
+
+fn seed_personas(runtime: &CapabilitiesRuntime, ids: &[&str]) {
+    let mem = runtime.memory();
+    for (i, id) in ids.iter().enumerate() {
+        mem.upsert_persona(&Persona::new((*id).into(), (*id).into(), String::new(), i == 0))
+            .unwrap();
+    }
+}
+
+#[tokio::test]
+async fn admin_all_personas_sees_and_acts_on_every_persona() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    seed_personas(&runtime, &["voice", "work", "family"]);
+    let mock = Arc::new(MockServiceClient::new());
+    mock.expect("demo.shout", ServiceCallResult::ok(json!({"ok": true})));
+    mock.expect("demo.ping", ServiceCallResult::ok(json!({"pong": true})));
+    runtime.register_service_client("demo", mock.clone()).await;
+    let root = token_all_personas(vec![JwtScope::Admin]);
+
+    // Dispatch pour une persona absente de toute liste explicite.
+    let (st, body) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch",
+        &root,
+        json!({"qualified_id": "demo.ping", "params": {}, "persona": "family", "user_phrase": "p"}),
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK, "{body}");
+    assert_eq!(body["kind"], "executed");
+
+    // Pending de plusieurs personas : toutes visibles, filtre libre.
+    let id_work = queued_id(
+        runtime
+            .dispatch_and_queue("demo.shout", &Value::Null, "work", "w")
+            .await
+            .unwrap(),
+    );
+    runtime
+        .dispatch_and_queue("demo.shout", &Value::Null, "voice", "v")
+        .await
+        .unwrap();
+    let (st, body) = json_get(router.clone(), "/api/v1/alicia/capabilities/pending_confirmations", &root).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["count"], 2);
+    let (st, body) = json_get(
+        router.clone(),
+        "/api/v1/alicia/capabilities/pending_confirmations?persona=work",
+        &root,
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["count"], 1);
+
+    // Confirmation d'une pending d'une autre persona.
+    let (st, body) = json_post(
+        router.clone(),
+        &format!("/api/v1/alicia/capabilities/pending_confirmations/{id_work}/confirm"),
+        &root,
+        json!({}),
+    )
+    .await;
+    assert_eq!(st, StatusCode::OK, "{body}");
+    assert_eq!(body["kind"], "executed");
+
+    // Apprentissages, activation de persona, persona active.
+    let ls = runtime
+        .memory()
+        .propose_learned_skill("work", "x", "demo.x", json!({}))
+        .unwrap();
+    let (st, body) = json_get(router.clone(), "/api/v1/alicia/capabilities/learnings/pending/work", &root).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["pending"].as_array().unwrap().len(), 1);
+    let (st, _) = json_post(
+        router.clone(),
+        &format!("/api/v1/alicia/capabilities/learnings/{}/accept", ls.id),
+        &root,
+        json!({}),
+    )
+    .await;
+    assert_eq!(st, StatusCode::NO_CONTENT);
+    let (st, _) = json_post(router.clone(), "/api/v1/alicia/capabilities/persona/family/activate", &root, json!({})).await;
+    assert_eq!(st, StatusCode::NO_CONTENT);
+    let (st, body) = json_get(router.clone(), "/api/v1/alicia/capabilities/persona/active", &root).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["persona_id"], "family");
+
+    // Épisodes : requête non filtrée (family + work au moins).
+    let (st, body) = json_get(router.clone(), "/api/v1/alicia/capabilities/episodes/recent", &root).await;
+    assert_eq!(st, StatusCode::OK);
+    let personas: std::collections::BTreeSet<String> = body["episodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["persona"].as_str().unwrap().to_string())
+        .collect();
+    assert!(personas.contains("family") && personas.contains("work"), "{personas:?}");
+}
+
+#[tokio::test]
+async fn admin_all_personas_refuses_unknown_persona_and_executes_nothing() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    seed_personas(&runtime, &["voice"]);
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+    let root = token_all_personas(vec![JwtScope::Admin]);
+    let (st, _) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch",
+        &root,
+        json!({"qualified_id": "demo.ping", "params": {}, "persona": "fantome", "user_phrase": "p"}),
+    )
+    .await;
+    assert_eq!(st, StatusCode::NOT_FOUND);
+    let (st, _) = json_get(router, "/api/v1/alicia/capabilities/learnings/pending/fantome", &root).await;
+    assert_eq!(st, StatusCode::NOT_FOUND);
+    assert_eq!(mock.calls().len(), 0);
+}
+
+#[tokio::test]
+async fn all_personas_claim_without_admin_scope_is_inert() {
+    // Non-admin inchangé : même avec le claim (jamais émis par la config,
+    // ici forgé avec la clé), sans scope admin l'accès reste 403.
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    seed_personas(&runtime, &["voice", "work"]);
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+    let id = queued_id(
+        runtime
+            .dispatch_and_queue("demo.shout", &Value::Null, "work", "x")
+            .await
+            .unwrap(),
+    );
+    let ecrivain = token_all_personas(vec![JwtScope::Read, JwtScope::Write]);
+    let (st, _) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch",
+        &ecrivain,
+        json!({"qualified_id": "demo.ping", "params": {}, "persona": "work", "user_phrase": "p"}),
+    )
+    .await;
+    assert_eq!(st, StatusCode::FORBIDDEN);
+    let (st, _) = json_post(
+        router.clone(),
+        &format!("/api/v1/alicia/capabilities/pending_confirmations/{id}/confirm"),
+        &ecrivain,
+        json!({}),
+    )
+    .await;
+    assert_eq!(st, StatusCode::FORBIDDEN);
+    let (st, body) = json_get(router.clone(), "/api/v1/alicia/capabilities/pending_confirmations", &ecrivain).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["count"], 0);
+    let (st, body) = json_get(router, "/api/v1/alicia/capabilities/episodes/recent", &ecrivain).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["count"], 0);
+    assert_eq!(mock.calls().len(), 0);
+}
+
+// -------------------------------------------------------------------
+// Expiration : pending périmée → Cancelled, plus confirmable (409)
+// -------------------------------------------------------------------
+
+#[tokio::test]
+async fn expired_pending_cannot_be_confirmed_over_http() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, token, runtime) = setup_with_runtime_cfg(CapabilitiesRuntimeConfig {
+        services_dir: Some(tmp.path().to_path_buf()),
+        pending_expiry: miyualicia::PendingExpiryConfig {
+            pending_ttl_secs: 0,
+            ..Default::default()
+        },
+        ..Default::default()
+    })
+    .await;
+    let mock = Arc::new(MockServiceClient::new());
+    mock.expect("demo.shout", ServiceCallResult::ok(json!({"ok": true})));
+    runtime.register_service_client("demo", mock.clone()).await;
+    let id = queued_id(
+        runtime
+            .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+            .await
+            .unwrap(),
+    );
+    for (uri, body) in [
+        (format!("/api/v1/alicia/capabilities/pending_confirmations/{id}/confirm"), json!({})),
+        ("/api/v1/alicia/capabilities/dispatch/confirm".to_string(), json!({"id": id})),
+    ] {
+        let (st, _) = json_post(router.clone(), &uri, &token, body).await;
+        assert_eq!(st, StatusCode::CONFLICT, "{uri}");
+    }
+    assert_eq!(mock.calls().len(), 0);
+    let pc = runtime.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Cancelled);
+    assert_eq!(pc.reason.as_deref(), Some("expired"));
+    let (st, body) = json_get(router, "/api/v1/alicia/capabilities/pending_confirmations", &token).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["count"], 0);
 }

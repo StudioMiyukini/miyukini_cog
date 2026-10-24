@@ -239,8 +239,13 @@ async fn auth_token_handler(
     let ttl = state.config.token_ttl_secs;
     // Personas autorisees : config du client uniquement (R-002, C-20).
     let personas = grant.personas.clone();
+    let all_personas = grant.all_personas;
     let claims = crate::auth::JwtClaims::new(&req.client_id, grant.scopes, ttl)
-        .with_personas(grant.personas);
+        .with_personas(grant.personas)
+        .with_all_personas(all_personas);
+    if all_personas {
+        tracing::info!(client = %req.client_id, "token admin emis avec all_personas=true");
+    }
     let token = crate::auth::generate_token(&claims, &state.jwt_secret.0)?;
 
     Ok(axum::Json(crate::dto::TokenResponse {
@@ -249,6 +254,7 @@ async fn auth_token_handler(
         expires_in: ttl,
         scopes: scope_names,
         personas,
+        all_personas,
     }))
 }
 

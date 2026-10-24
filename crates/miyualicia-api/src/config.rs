@@ -30,6 +30,13 @@ pub struct ApiClientConfig {
     /// resolution de confirmation possible (fail-closed).
     #[serde(default)]
     pub personas: Vec<String>,
+    /// Le client peut agir pour **toutes** les personas existantes (decision
+    /// proprietaire). Drapeau explicite, accepte uniquement si le client a
+    /// aussi le scope `admin` (la validation refuse sinon) ; aucun joker dans
+    /// `personas`. Porte dans le JWT signe (claim `all_personas`). Defaut :
+    /// `false`.
+    #[serde(default)]
+    pub all_personas: bool,
 }
 
 /// Configuration du serveur API REST Alicia.
@@ -127,6 +134,12 @@ impl ApiConfig {
                     c.client_id
                 ))
             })?;
+            if c.all_personas && !c.scopes.contains(&JwtScope::Admin) {
+                return Err(ApiError::InternalError(format!(
+                    "config api: all_personas=true exige le scope admin pour '{}'",
+                    c.client_id
+                )));
+            }
             for p in &c.personas {
                 if p.trim().is_empty() || p.contains('*') {
                     return Err(ApiError::InternalError(format!(
@@ -200,6 +213,7 @@ mod tests {
                 secret_hash: "plaintext".into(),
                 scopes: vec![JwtScope::Read],
                 personas: vec![],
+                all_personas: false,
             }],
             ..Default::default()
         };
@@ -217,10 +231,46 @@ mod tests {
                     secret_hash: hash.into(),
                     scopes: vec![JwtScope::Write],
                     personas: vec![bad.into()],
+                    all_personas: false,
                 }],
                 ..Default::default()
             };
             assert!(cfg.validate().is_err(), "persona '{bad}' doit etre refusee");
         }
+    }
+
+    fn client(scopes: Vec<JwtScope>, all_personas: bool) -> ApiClientConfig {
+        ApiClientConfig {
+            client_id: "c".into(),
+            secret_hash: "$argon2id$v=19$m=19456,t=2,p=1$ZHVtbXlzYWx0ZHVtbXk$Kq3b3m3mQ4h7m1o0cYk3x5v0o4d8Qm0pJm3wq0ZkZ9o".into(),
+            scopes,
+            personas: vec![],
+            all_personas,
+        }
+    }
+
+    #[test]
+    fn test_validate_all_personas_requires_admin_scope() {
+        for scopes in [vec![], vec![JwtScope::Read, JwtScope::Write, JwtScope::History]] {
+            let cfg = ApiConfig {
+                clients: vec![client(scopes, true)],
+                ..Default::default()
+            };
+            assert!(cfg.validate().is_err(), "all_personas sans admin doit etre refuse");
+        }
+        let cfg = ApiConfig {
+            clients: vec![client(vec![JwtScope::Admin], true)],
+            ..Default::default()
+        };
+        assert!(cfg.validate().is_ok());
+    }
+
+    #[test]
+    fn test_all_personas_defaults_false_in_toml_shape() {
+        let c: ApiClientConfig = serde_json::from_value(serde_json::json!({
+            "client_id": "c", "secret_hash": "x", "scopes": ["admin"]
+        }))
+        .expect("deserialize");
+        assert!(!c.all_personas);
     }
 }

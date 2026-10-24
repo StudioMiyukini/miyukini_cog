@@ -302,6 +302,31 @@ pub struct PendingConfirmation {
     /// Date de résolution (confirmation ou annulation), `None` tant que
     /// `Pending`.
     pub resolved_at: Option<DateTime<Utc>>,
+    /// Motif de résolution automatique, ex. `"expired"` quand le balayage
+    /// d'expiration a fait passer l'enregistrement en `Failed` (exécution
+    /// bloquée) ou `Cancelled` (attente trop longue). `None` sinon.
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+/// Motif posé par le balayage d'expiration des confirmations.
+pub const PENDING_REASON_EXPIRED: &str = "expired";
+
+/// Bilan d'un balayage d'expiration des `PendingConfirmation`.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PendingExpiryReport {
+    /// Enregistrements `Executing` trop anciens passés en `Failed`
+    /// (jamais ré-exécutés).
+    pub failed: Vec<Uuid>,
+    /// Enregistrements `Pending` trop anciens passés en `Cancelled`.
+    pub cancelled: Vec<Uuid>,
+}
+
+impl PendingExpiryReport {
+    /// `true` si aucun enregistrement n'a expiré.
+    pub fn is_empty(&self) -> bool {
+        self.failed.is_empty() && self.cancelled.is_empty()
+    }
 }
 
 impl PendingConfirmation {
@@ -324,6 +349,7 @@ impl PendingConfirmation {
             status: PendingStatus::Pending,
             created_at: Utc::now(),
             resolved_at: None,
+            reason: None,
         }
     }
 }

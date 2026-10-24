@@ -33,5 +33,5 @@ pub use prompt::{build_persona_context, ContextOptions};
 pub use store::MemoryStore;
 pub use types::{
     Episode, EpisodeOutcome, Fact, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
-    PendingStatus, Persona, Preference,
+    PendingExpiryReport, PendingStatus, Persona, Preference, PENDING_REASON_EXPIRED,
 };

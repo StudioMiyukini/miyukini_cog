@@ -26,6 +26,9 @@ pub struct ClientGrant {
     pub scopes: Vec<JwtScope>,
     /// Personas autorisees (R-002).
     pub personas: Vec<String>,
+    /// Toutes personas (admin uniquement ; reverifie ici en defense en
+    /// profondeur, en plus de la validation de config).
+    pub all_personas: bool,
 }
 
 /// Verifie `client_id` + `secret` contre le registre configure.
@@ -52,6 +55,7 @@ pub fn authenticate_client(config: &ApiConfig, client_id: &str, secret: &str) ->
         Some(c) if ok => Some(ClientGrant {
             scopes: c.scopes.clone(),
             personas: c.personas.clone(),
+            all_personas: c.all_personas && c.scopes.contains(&JwtScope::Admin),
         }),
         _ => None,
     }
@@ -122,12 +126,14 @@ mod tests {
                     secret_hash: hash("bon-secret"),
                     scopes: vec![JwtScope::Admin],
                     personas: vec!["voice".into()],
+                    all_personas: true,
                 },
                 ApiClientConfig {
                     client_id: "admin".into(),
                     secret_hash: hash("autre"),
                     scopes: vec![JwtScope::Read],
                     personas: vec![],
+                    all_personas: true,
                 },
             ],
             ..Default::default()
@@ -139,6 +145,7 @@ mod tests {
         let g = authenticate_client(&cfg(), "ops", "bon-secret").expect("grant");
         assert_eq!(g.scopes, vec![JwtScope::Admin]);
         assert_eq!(g.personas, vec!["voice".to_string()]);
+        assert!(g.all_personas);
     }
 
     #[test]
@@ -147,6 +154,8 @@ mod tests {
         let g = authenticate_client(&cfg(), "admin", "autre").expect("grant");
         assert_eq!(g.scopes, vec![JwtScope::Read]);
         assert!(g.personas.is_empty());
+        // all_personas sans admin (config non validee) : jamais accorde.
+        assert!(!g.all_personas);
     }
 
     #[test]

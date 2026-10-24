@@ -68,6 +68,8 @@ pub struct TokenResponse {
     pub scopes: Vec<String>,
     /// Personas autorisees pour ce client (issues de la config).
     pub personas: Vec<String>,
+    /// `true` si le client (admin) peut agir pour toutes les personas.
+    pub all_personas: bool,
 }
 
 /// Etat complet de la maison.
@@ -247,6 +249,7 @@ mod tests {
             expires_in: 3600,
             scopes: vec!["read".to_string(), "write".to_string()],
             personas: vec!["voice".to_string()],
+            all_personas: false,
         };
         let json = serde_json::to_string(&resp).expect("serialize");
         assert!(json.contains("access_token"));
