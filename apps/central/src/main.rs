@@ -31,6 +31,38 @@ use std::sync::{Mutex, OnceLock};
 /// Utilise OnceLock + Mutex pour un accès thread-safe sans unsafe.
 static KINDMOTHER_PROCESS: OnceLock<Mutex<Option<Child>>> = OnceLock::new();
 
+/// CA-03 : ramène les fichiers secrets existants (anciennes versions en 0644) en
+/// 0600 et les dossiers applicatifs en 0700. Le répertoire courant n'est jamais
+/// modifié (seuls les dossiers nommés `Miyukini-COG` sont durcis).
+fn durcir_fichiers_au_demarrage() {
+    use miyukini_central::chemins::{dossier_config, dossier_donnees, DOSSIER_APP, NOM_BASE_AUTH};
+    use miyukini_central::fichiers_secrets::{creer_dossier_prive, durcir_fichier};
+
+    let est_dossier_app = |d: &std::path::Path| d.file_name().is_some_and(|n| n == DOSSIER_APP);
+    if let Ok(conf) = dossier_config() {
+        if est_dossier_app(&conf) && conf.is_dir() {
+            if let Err(e) = creer_dossier_prive(&conf) {
+                tracing::warn!("Permissions de {} non corrigées : {e}", conf.display());
+            }
+        }
+        for nom in ["mws-config.json", "miyucloud-config.json"] {
+            if let Err(e) = durcir_fichier(&conf.join(nom)) {
+                tracing::warn!("Permissions de {nom} non corrigées : {e}");
+            }
+        }
+    }
+    if let Ok(donnees) = dossier_donnees() {
+        if est_dossier_app(&donnees) && donnees.is_dir() {
+            if let Err(e) = creer_dossier_prive(&donnees) {
+                tracing::warn!("Permissions de {} non corrigées : {e}", donnees.display());
+            }
+        }
+        if let Err(e) = durcir_fichier(&donnees.join(NOM_BASE_AUTH)) {
+            tracing::warn!("Permissions de {NOM_BASE_AUTH} non corrigées : {e}");
+        }
+    }
+}
+
 fn main() {
     // Initialiser le logging
     tracing_subscriber::fmt()
@@ -38,6 +70,9 @@ fn main() {
         .init();
 
     tracing::info!("Démarrage de Miyukini Central...");
+
+    // CA-03 : secrets existants ramenés en 0600, dossiers applicatifs en 0700.
+    durcir_fichiers_au_demarrage();
 
     // Initialiser le holder du processus KindMother
     KINDMOTHER_PROCESS.get_or_init(|| Mutex::new(None));

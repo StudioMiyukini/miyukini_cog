@@ -20,7 +20,9 @@
 
 pub mod auth;
 pub mod catalog;
+pub mod chemins;
 pub mod config;
+pub mod fichiers_secrets;
 pub mod mws;
 pub mod services;
 

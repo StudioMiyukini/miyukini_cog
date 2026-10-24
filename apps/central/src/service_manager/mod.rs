@@ -11,6 +11,7 @@
 //! - Le lancement/arrêt des processus service
 //! - L'installation/désinstallation depuis le Market
 
+pub mod confiance;
 pub mod installer;
 pub mod launcher;
 pub mod registry;
@@ -93,15 +94,30 @@ impl ServiceManager {
         self.processes.stop_all();
     }
 
-    /// Installe un service depuis des bytes de package (.msp).
-    /// `expected_id` : service demandé ; le manifeste du package doit correspondre.
+    /// Installe un service depuis des bytes de package (.msp signé).
+    /// `expected_id` / `expected_version` : service et version demandés ; la
+    /// signature d'un éditeur épinglé est vérifiée AVANT toute écriture (CA-01).
     pub fn install_from_package(
         &self,
         expected_id: &str,
+        expected_version: &str,
         package_bytes: &[u8],
     ) -> Result<String, String> {
-        let mut reg = self.registry.lock().unwrap_or_else(|e| e.into_inner());
-        let service_id = installer::install_package(package_bytes, &mut reg, expected_id)?;
+        let ancres = confiance::ancres_market();
+        let mut reg = self
+            .registry
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let service_id = installer::verifier_puis_installer(
+            package_bytes,
+            expected_id,
+            Some(expected_version),
+            &ancres,
+            confiance::maintenant_secs(),
+            confiance::dev_non_signe_autorise(),
+            &mut reg,
+            &registry::services_root_dir(),
+        )?;
         registry::save_registry(&reg)?;
         Ok(service_id)
     }
@@ -133,14 +149,24 @@ impl ServiceManager {
     pub fn update_from_package(
         &self,
         service_id: &str,
+        version: &str,
         package_bytes: &[u8],
     ) -> Result<String, String> {
+        // Vérifier la signature avant d'arrêter quoi que ce soit.
+        installer::verifier_paquet_market(
+            package_bytes,
+            service_id,
+            Some(version),
+            &confiance::ancres_market(),
+            confiance::maintenant_secs(),
+            confiance::dev_non_signe_autorise(),
+        )?;
         // Arrêter le service s'il tourne
         if self.is_running(service_id) {
             self.stop_service(service_id)?;
         }
-        // Réinstaller (install_package écrase l'entrée existante)
-        self.install_from_package(service_id, package_bytes)
+        // Réinstaller (vérifie de nouveau, puis écrase l'entrée existante)
+        self.install_from_package(service_id, version, package_bytes)
     }
 
     /// Désinstalle un service (arrête le processus, supprime les fichiers).

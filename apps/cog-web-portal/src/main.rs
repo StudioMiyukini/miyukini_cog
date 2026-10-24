@@ -75,17 +75,38 @@ async fn main() {
         .layer(SecurityHeadersLayer)
         .layer(rate_limiter);
 
-    let addr = std::env::var("PORTAL_LISTEN")
-        .unwrap_or_else(|_| "0.0.0.0:8090".to_string());
+    let addr = adresse_ecoute(std::env::var("PORTAL_LISTEN").ok());
 
-    let listener = TcpListener::bind(&addr)
-        .await
-        .unwrap_or_else(|e| panic!("Cannot bind {addr}: {e}"));
+    let listener = match TcpListener::bind(&addr).await {
+        Ok(l) => l,
+        Err(e) => {
+            tracing::error!("Impossible d'écouter sur {addr} : {e}");
+            std::process::exit(1);
+        }
+    };
 
     info!("COG Web Portal listening on {addr}");
-    axum::serve(listener, app)
-        .await
-        .expect("server error");
+    if let Err(e) = axum::serve(listener, app).await {
+        tracing::error!("Serveur arrêté sur erreur : {e}");
+        std::process::exit(1);
+    }
+}
+
+/// Adresse d'écoute par défaut : boucle locale uniquement (EX-48, C-21).
+pub const ADRESSE_ECOUTE_DEFAUT: &str = "127.0.0.1:8090";
+
+/// Adresse d'écoute : `PORTAL_LISTEN` si renseignée (exposition explicite),
+/// sinon la boucle locale. Une exposition non locale est journalisée.
+pub fn adresse_ecoute(env: Option<String>) -> String {
+    match env.map(|v| v.trim().to_string()).filter(|v| !v.is_empty()) {
+        Some(v) => {
+            if !(v.starts_with("127.") || v.starts_with("[::1]") || v.starts_with("localhost:")) {
+                tracing::warn!("PORTAL_LISTEN={v} : le portail est exposé hors de la boucle locale");
+            }
+            v
+        }
+        None => ADRESSE_ECOUTE_DEFAUT.to_string(),
+    }
 }
 
 /// Construit l'AppState. Les services Portal sont enregistrés ici lorsqu'ils
@@ -109,6 +130,13 @@ pub fn build_app_state() -> AppState {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ecoute_par_defaut_en_boucle_locale() {
+        assert_eq!(adresse_ecoute(None), "127.0.0.1:8090");
+        assert_eq!(adresse_ecoute(Some("  ".into())), "127.0.0.1:8090");
+        assert_eq!(adresse_ecoute(Some("0.0.0.0:9000".into())), "0.0.0.0:9000");
+    }
 
     #[test]
     fn app_state_builds_empty() {

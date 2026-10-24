@@ -43,9 +43,10 @@ pub fn App() -> Element {
     let boot_error_writer = boot_error.clone();
 
     use_context_provider(move || {
-        let base_path = std::env::current_dir().unwrap_or_default();
-        let connections =
-            ServiceConnections::open(&base_path).expect("Impossible d'ouvrir la base auth");
+        // CA-04 : jamais le répertoire courant en release.
+        let connections = crate::data::dossier_donnees_central()
+            .and_then(|base_path| ServiceConnections::open(&base_path))
+            .expect("Impossible d'ouvrir la base auth");
         let connections = Arc::new(connections);
         let auth_db = &*connections.auth_db;
         let is_cog_virgin = match auth_db.is_cog_virgin() {

@@ -23,16 +23,17 @@
 //! - Souveraineté complète des données
 
 use miyuwebway_participant::{
-    CogIdentity, CogInfo, LobbyInfo, LobbySearchResult, MwsService, MwsServiceConfig,
+    CogIdentity, CogInfo, IdentiteCog, LobbyInfo, LobbySearchResult, MwsService,
+    MwsServiceConfig,
 };
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
-use tokio::io::AsyncWriteExt;
-use tokio::net::TcpListener;
 use tokio::sync::{oneshot, RwLock};
 use tokio::task::JoinHandle;
 use tokio::time::{sleep, Duration};
 use tracing::{error, info, warn};
+
+mod home;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -62,21 +63,34 @@ pub struct CentralMwsConfig {
     pub auto_reconnect: bool,
     /// Présenter le COG même sans services exposés.
     pub present_without_services: bool,
-    /// Adresse d'écoute du mini serveur Home (ex. "0.0.0.0:8080"). Si présent, une page Home est exposée lorsque le COG est annoncé sur le Tracker.
+    /// Adresse d'écoute du mini serveur Home (ex. "127.0.0.1:8090"). `None` (défaut) =
+    /// serveur désactivé. Le tunnel MWS n'a besoin que de la boucle locale (EX-48, C-21).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub home_http_bind: Option<String>,
     /// Slug de sous-domaine personnalisé (optionnel).
     /// Si fourni, le COG sera accessible via `<slug>.miyukini.com`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subdomain_slug: Option<String>,
+    /// Fichier de la clé d'identité MWS du COG (graine Ed25519, `0600`), créé au premier
+    /// usage. Le `cog_id` annoncé au réseau est l'empreinte de cette clé (O-01).
+    #[serde(default = "default_identity_key_path")]
+    pub identity_key_path: String,
+}
+
+/// Emplacement par défaut de la clé d'identité MWS, relatif au dossier de
+/// données de Central (voir [`resoudre_chemin_identite`]).
+fn default_identity_key_path() -> String {
+    "data/mws/identite_cog.key".to_string()
 }
 
 impl Default for CentralMwsConfig {
     fn default() -> Self {
         Self {
-            enabled: true,
+            // EX-48 / C-21 : exposition désactivée par défaut ; activation explicite
+            // depuis les réglages MWS de Central.
+            enabled: false,
             lone_mode: false,
-            auto_connect: true,
+            auto_connect: false,
             relay_address: "miyukini.com:7000".to_string(),
             tracker_address: "miyukini.com:21000".to_string(),
             core_conformity_key: None,
@@ -84,8 +98,9 @@ impl Default for CentralMwsConfig {
             auto_heartbeat: true,
             auto_reconnect: true,
             present_without_services: true, // Se présente toujours
-            home_http_bind: Some("0.0.0.0:8090".to_string()),
+            home_http_bind: None,
             subdomain_slug: None,
+            identity_key_path: default_identity_key_path(),
         }
     }
 }
@@ -412,13 +427,37 @@ impl CentralMwsManager {
             }
         });
 
+        // O-01 : identité cryptographique ; le cog_id MWS est l'empreinte de la clé.
+        let identite = match resoudre_chemin_identite(&self.config.identity_key_path)
+            .and_then(|chemin| IdentiteCog::charger_ou_creer(&chemin).map_err(|e| e.to_string()))
+        {
+            Ok(identite) => Arc::new(identite),
+            Err(e) => {
+                let message = format!("Clé d'identité MWS indisponible : {e}");
+                self.update_conformity(MwsConformityState::ConformityError(message.clone()))
+                    .await;
+                self.update_state(CentralMwsState::Error(message.clone()))
+                    .await;
+                return Err(message);
+            }
+        };
+        let cog_id_mws = identite.cog_id();
+        if cog_id_mws != self.cog_id {
+            info!(
+                "cog_id MWS dérivé de la clé d'identité : {} (identifiant local : {})",
+                cog_id_mws, self.cog_id
+            );
+        }
+        mws_config.relay.identite = Some(Arc::clone(&identite));
+        mws_config.tracker.identite = Some(identite);
+
         // Créer le service MWS
         let service = MwsService::new(mws_config);
 
         // Créer l'identité du COG
         let services = self.services.read().await.clone();
         let identity = CogIdentity {
-            cog_id: self.cog_id.clone(),
+            cog_id: cog_id_mws,
             core_version: self.core_version.clone(),
             public_address: self.config.public_address.clone(),
             services: services.clone(),
@@ -524,11 +563,13 @@ impl CentralMwsManager {
                     let bind_for_server = bind_addr.clone();
                     let bind_for_log = bind_addr.clone();
                     tokio::spawn(async move {
-                        match run_home_server(
+                        match home::run_home_server(
                             bind_for_server.clone(),
-                            cog_id,
-                            core_version,
-                            services,
+                            home::ContenuHome {
+                                cog_id,
+                                core_version,
+                                services,
+                            },
                             rx,
                         )
                         .await
@@ -991,94 +1032,24 @@ impl MwsStatusSummary {
     }
 }
 
+/// CA-04 : un chemin de clé relatif est résolu sous le dossier de données de
+/// Central (dossier utilisateur en release, jamais le répertoire courant ;
+/// répertoire courant en debug, comportement historique). Absolu = inchangé.
+pub fn resoudre_chemin_identite(chemin: &str) -> Result<std::path::PathBuf, String> {
+    let p = std::path::Path::new(chemin);
+    if p.is_absolute() {
+        return Ok(p.to_path_buf());
+    }
+    crate::chemins::dossier_donnees()
+        .map(|d| d.join(p))
+        .map_err(|e| format!("dossier de données : {e}"))
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERVEUR HOME COG (layout commun, exposition automatique quand annoncé)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Lance le mini serveur HTTP qui sert la page Home du COG (GET /).
-/// S'arrête quand `shutdown` reçoit un signal.
-async fn run_home_server(
-    bind_addr: String,
-    cog_id: String,
-    core_version: String,
-    services: Vec<String>,
-    mut shutdown: oneshot::Receiver<()>,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let listener = TcpListener::bind(&bind_addr).await?;
-    info!("Serveur Home COG en écoute sur http://{}", bind_addr);
-
-    loop {
-        tokio::select! {
-            _ = &mut shutdown => {
-                info!("Serveur Home arrêté (déconnexion MWS)");
-                break;
-            }
-            accept_result = listener.accept() => {
-                let (stream, addr) = match accept_result {
-                    Ok(x) => x,
-                    Err(e) => {
-                        warn!("Accept Home: {}", e);
-                        continue;
-                    }
-                };
-                info!("[Home Server] Connexion entrante depuis {}", addr);
-                let cog_id = cog_id.clone();
-                let core_version = core_version.clone();
-                let services = services.clone();
-                tokio::spawn(async move {
-                    if let Err(e) = handle_home_connection(stream, cog_id, core_version, services).await {
-                        warn!("Home connection: {}", e);
-                    }
-                });
-            }
-        }
-    }
-    Ok(())
-}
-
-async fn handle_home_connection(
-    mut stream: tokio::net::TcpStream,
-    cog_id: String,
-    core_version: String,
-    services: Vec<String>,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    use tokio::io::{AsyncBufReadExt, BufReader};
-
-    let (reader, mut writer) = stream.split();
-    let mut reader = BufReader::new(reader);
-    let mut first_line = String::new();
-    reader.read_line(&mut first_line).await?;
-
-    // Parser la requête: "GET /path HTTP/1.x"
-    let parts: Vec<&str> = first_line.trim().split_whitespace().collect();
-    let path = if parts.len() >= 2 && parts[0] == "GET" {
-        parts[1]
-    } else {
-        "/"
-    };
-
-    // Consommer le reste des en-têtes
-    loop {
-        let mut line = String::new();
-        reader.read_line(&mut line).await?;
-        if line.trim().is_empty() {
-            break;
-        }
-    }
-
-    // Routage
-    let (status, body) = route_request(path, &cog_id, &core_version, &services);
-
-    let response = format!(
-        "HTTP/1.1 {}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-        status,
-        body.len(),
-        body
-    );
-    writer.write_all(response.as_bytes()).await?;
-    writer.flush().await?;
-    Ok(())
-}
+// Serveur borné (taille, délais, connexions) : voir `home.rs` (CA-02).
 
 /// Route les requêtes vers les handlers appropriés.
 fn route_request(
@@ -1233,13 +1204,33 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = CentralMwsConfig::default();
-        assert!(config.enabled);
+        // EX-48 : exposition désactivée par défaut.
+        assert!(!config.enabled);
         assert!(!config.lone_mode);
-        assert!(config.auto_connect);
+        assert!(!config.auto_connect);
         assert!(config.auto_heartbeat);
         assert!(config.present_without_services);
         assert_eq!(config.public_address, "0.0.0.0:8090");
-        assert_eq!(config.home_http_bind.as_deref(), Some("0.0.0.0:8090"));
+        assert_eq!(config.home_http_bind, None);
+    }
+
+    #[test]
+    fn cle_identite_mws_par_defaut_et_cog_id_derive() {
+        // O-01 : une configuration ancienne (sans le champ) reçoit l'emplacement par défaut.
+        let mut json = serde_json::to_value(CentralMwsConfig::default()).expect("json");
+        json.as_object_mut()
+            .expect("objet")
+            .remove("identity_key_path");
+        let config: CentralMwsConfig = serde_json::from_value(json).expect("relecture");
+        assert_eq!(config.identity_key_path, "data/mws/identite_cog.key");
+        // Le cog_id MWS est l'empreinte de la clé chargée.
+        let dir = std::env::temp_dir().join(format!("central-mws-id-{}", std::process::id()));
+        let chemin = dir.join("cle");
+        let a = IdentiteCog::charger_ou_creer(&chemin).expect("clé");
+        let b = IdentiteCog::charger_ou_creer(&chemin).expect("clé");
+        assert_eq!(a.cog_id(), b.cog_id());
+        assert_eq!(a.cog_id().len(), 26);
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]
@@ -1253,7 +1244,9 @@ mod tests {
     #[test]
     fn test_should_connect() {
         let default_config = CentralMwsConfig::default();
-        assert!(default_config.should_connect());
+        assert!(!default_config.should_connect());
+        let active = CentralMwsConfig { enabled: true, ..CentralMwsConfig::default() };
+        assert!(active.should_connect());
 
         let lone_config = CentralMwsConfig::lone();
         assert!(!lone_config.should_connect());
@@ -1270,9 +1263,33 @@ mod tests {
     async fn test_manager_creation() {
         let manager = CentralMwsManager::with_defaults("test-cog".to_string(), "1.0.0".to_string());
 
-        assert_eq!(manager.get_state().await, CentralMwsState::Disconnected);
+        // EX-48 : MWS désactivé par défaut → état `Disabled`, aucune connexion.
+        assert_eq!(manager.get_state().await, CentralMwsState::Disabled);
         assert!(!manager.is_connected().await);
         assert!(!manager.is_lone().await);
+    }
+
+    #[tokio::test]
+    async fn exposition_desactivee_par_defaut() {
+        let config = CentralMwsConfig::default();
+        assert!(!config.enabled && !config.auto_connect && config.home_http_bind.is_none());
+        let manager = CentralMwsManager::with_defaults("cog".into(), "1.0.0".into());
+        // auto_connect désactivé : aucune tentative réseau, aucun serveur Home.
+        assert!(manager.auto_connect_if_enabled().await.is_ok());
+        assert_eq!(manager.get_state().await, CentralMwsState::Disabled);
+        assert!(!manager.is_connected().await);
+    }
+
+    #[test]
+    fn chemin_identite_relatif_sous_dossier_donnees() {
+        let abs = if cfg!(windows) { "C:\\k\\cle" } else { "/k/cle" };
+        assert_eq!(resoudre_chemin_identite(abs).unwrap(), std::path::PathBuf::from(abs));
+        let r = resoudre_chemin_identite("data/mws/identite_cog.key").unwrap();
+        assert!(r.is_absolute());
+        assert!(r.ends_with("data/mws/identite_cog.key"));
+        if crate::chemins::est_release() {
+            assert!(!r.starts_with(std::env::current_dir().unwrap()));
+        }
     }
 
     #[tokio::test]

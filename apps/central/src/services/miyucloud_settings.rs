@@ -5,13 +5,17 @@
 //! @human  central — module « services miyucloud settings ».
 
 //! Configuration persisted for MiyuCloud inside Central.
+//!
+//! CA-03 : le fichier contient le jeton COG et la phrase de chiffrement ; il est
+//! écrit en 0600 (dossier 0700), un fichier existant est ramené en 0600 au
+//! chargement, et `Debug` masque les secrets (jamais journalisés).
 
 use crate::service_manager::registry::service_install_dir;
+use miyukini_central::fichiers_secrets::{durcir_fichier, ecrire_secret};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
-const APP_DIR: &str = "Miyukini-COG";
 const CONFIG_FILE: &str = "miyucloud-config.json";
 const DEFAULT_API_PORT: u16 = 11440;
 const DEFAULT_WEB_PORT: u16 = 11442;
@@ -86,7 +90,7 @@ impl Default for MiyuCloudSshConfig {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct MiyuCloudServiceConfig {
     pub api_port: u16,
@@ -107,8 +111,29 @@ impl Default for MiyuCloudServiceConfig {
     }
 }
 
+/// `Debug` sans les secrets (jeton COG, phrase de chiffrement) — C-25.
+impl std::fmt::Debug for MiyuCloudServiceConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MiyuCloudServiceConfig")
+            .field("api_port", &self.api_port)
+            .field("web_port", &self.web_port)
+            .field("web_enabled", &self.web_enabled)
+            .field("storage_path", &self.storage_path)
+            .field("quota_bytes", &self.quota_bytes)
+            .field("cog_token", &"<masqué>")
+            .field("encryption_passphrase", &"<masqué>")
+            .field("first_launch_completed", &self.first_launch_completed)
+            .field("share_policy", &self.share_policy)
+            .field("ssh", &self.ssh)
+            .finish()
+    }
+}
+
 pub fn load_miyucloud_config() -> MiyuCloudServiceConfig {
     let path = miyucloud_config_path();
+    if let Err(err) = durcir_fichier(&path) {
+        tracing::warn!("Permissions de {} non corrigées : {err}", path.display());
+    }
     let raw = match std::fs::read_to_string(&path) {
         Ok(raw) => raw,
         Err(_) => return persist_default_config(&path),
@@ -173,14 +198,9 @@ fn persist_default_config(path: &Path) -> MiyuCloudServiceConfig {
 }
 
 fn persist_config_to_path(path: &Path, config: &MiyuCloudServiceConfig) -> Result<(), String> {
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)
-            .map_err(|err| format!("Create MiyuCloud config directory: {err}"))?;
-    }
-
     let json = serde_json::to_string_pretty(config)
         .map_err(|err| format!("Serialize MiyuCloud config: {err}"))?;
-    std::fs::write(path, json).map_err(|err| format!("Write MiyuCloud config: {err}"))?;
+    ecrire_secret(path, json.as_bytes()).map_err(|err| format!("Write MiyuCloud config: {err}"))?;
     Ok(())
 }
 
@@ -209,22 +229,14 @@ fn normalize_config(config: &mut MiyuCloudServiceConfig) {
 }
 
 fn miyucloud_config_path() -> PathBuf {
-    if let Ok(local) = std::env::var("LOCALAPPDATA") {
-        return PathBuf::from(local).join(APP_DIR).join(CONFIG_FILE);
+    match miyukini_central::chemins::dossier_config() {
+        Ok(dir) => dir.join(CONFIG_FILE),
+        Err(err) => {
+            // Jamais le répertoire courant en release (CA-04).
+            tracing::error!("Dossier de configuration introuvable : {err}");
+            PathBuf::from("/nonexistent/miyukini-cog").join(CONFIG_FILE)
+        }
     }
-
-    if let Ok(config_home) = std::env::var("XDG_CONFIG_HOME") {
-        return PathBuf::from(config_home).join(APP_DIR).join(CONFIG_FILE);
-    }
-
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home)
-            .join(".config")
-            .join(APP_DIR)
-            .join(CONFIG_FILE);
-    }
-
-    PathBuf::from(".").join(CONFIG_FILE)
 }
 
 fn default_storage_path() -> PathBuf {
@@ -277,7 +289,7 @@ mod tests {
 
         let first = load_miyucloud_config();
         let second = load_miyucloud_config();
-        let persisted_path = temp_root.join(APP_DIR).join(CONFIG_FILE);
+        let persisted_path = temp_root.join("Miyukini-COG").join(CONFIG_FILE);
         let persisted_raw = std::fs::read_to_string(&persisted_path).expect("persisted config");
         let persisted: MiyuCloudServiceConfig =
             serde_json::from_str(&persisted_raw).expect("persisted config json");
@@ -288,6 +300,15 @@ mod tests {
         assert!(!first.encryption_passphrase.is_empty());
         assert_eq!(first.share_policy.default_permission, SharePermissionPreset::Read);
         assert_eq!(first.ssh.port, DEFAULT_SSH_PORT);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(&persisted_path).unwrap().permissions().mode() & 0o777;
+            assert_eq!(mode, 0o600, "config MiyuCloud (jeton, phrase) en 0600");
+        }
+        let affichage = format!("{first:?}");
+        assert!(!affichage.contains(&first.cog_token));
+        assert!(!affichage.contains(&first.encryption_passphrase));
 
         if let Some(value) = previous_local {
             std::env::set_var("LOCALAPPDATA", value);

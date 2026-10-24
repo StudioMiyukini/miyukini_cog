@@ -13,8 +13,58 @@ use std::collections::HashMap;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 
+use super::confiance;
 use super::registry::InstalledService;
 use crate::services::miyucloud_settings::load_miyucloud_config;
+use miyumarket::signature::{hex_decoder, verifier_sceau_installe};
+use miyusceau::AncresDeConfiance;
+
+/// Service dont le sceau conservé a été re-vérifié contre les éditeurs épinglés.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Provenance {
+    /// Sceau valide d'un éditeur de confiance pour cet identifiant.
+    Signee,
+    /// Aucun sceau valide : lancement toléré par dérogation dev, sans secrets.
+    NonSigneeDev,
+}
+
+/// Contrôle de provenance avant lancement (CA-01, fail-closed).
+///
+/// Sceau absent ou invalide → refus, sauf dérogation dev (debug uniquement).
+pub fn controler_provenance(
+    service: &InstalledService,
+    ancres: &AncresDeConfiance,
+    maintenant_secs: u64,
+    dev_non_signe: bool,
+) -> Result<Provenance, String> {
+    let id = &service.manifest.id;
+    let verdict = match service.sceau_paquet.as_deref() {
+        None => Err("aucune signature d'éditeur".to_string()),
+        Some(hex) => match hex_decoder(hex) {
+            None => Err("sceau conservé illisible".to_string()),
+            Some(octets) => verifier_sceau_installe(&octets, id, ancres, maintenant_secs)
+                .map_err(|e| e.to_string())
+                .and_then(|v| {
+                    if v.titre().version == service.manifest.version {
+                        Ok(())
+                    } else {
+                        Err("version signée différente de la version installée".to_string())
+                    }
+                }),
+        },
+    };
+    match verdict {
+        Ok(()) => Ok(Provenance::Signee),
+        Err(motif) if dev_non_signe && cfg!(debug_assertions) => {
+            tracing::error!(
+                "⚠⚠ DÉROGATION DEV : lancement de '{id}' sans signature valide ({motif}) — \
+                 aucun secret ne lui est transmis. Interdit en production. ⚠⚠"
+            );
+            Ok(Provenance::NonSigneeDev)
+        }
+        Err(motif) => Err(format!("Lancement de '{id}' refusé : {motif}")),
+    }
+}
 
 /// Processus en cours d'exécution pour un service.
 struct RunningService {
@@ -46,10 +96,21 @@ impl ServiceProcesses {
             }
         }
 
-        // En dev, préférer le binaire dans le même dossier que Central (target/debug/)
-        // pour éviter de devoir copier manuellement après chaque build.
-        let binary_path = dev_binary_override(&service.binary_path)
-            .unwrap_or_else(|| service.binary_path.clone());
+        // CA-01 : provenance re-vérifiée avant toute exécution.
+        let provenance = controler_provenance(
+            service,
+            &confiance::ancres_market(),
+            confiance::maintenant_secs(),
+            confiance::dev_non_signe_autorise(),
+        )?;
+
+        // En dev (build debug + dérogation), préférer le binaire dans le même
+        // dossier que Central (target/debug/). Jamais en release.
+        let binary_path = if provenance == Provenance::NonSigneeDev {
+            dev_binary_override(&service.binary_path).unwrap_or_else(|| service.binary_path.clone())
+        } else {
+            service.binary_path.clone()
+        };
 
         if !binary_path.exists() {
             return Err(format!(
@@ -64,7 +125,7 @@ impl ServiceProcesses {
             tracing::warn!("Impossible de créer le répertoire de données: {e}");
         }
 
-        let service_env = build_service_env(service, profile_id, &data_dir)?;
+        let service_env = build_service_env(service, provenance, profile_id, &data_dir)?;
 
         tracing::info!(
             "Lancement du service '{}' depuis {:?}",
@@ -149,17 +210,35 @@ impl ServiceProcesses {
     }
 }
 
+/// Identifiant du service autorisé à recevoir les secrets MiyuCloud.
+const ID_MIYUCLOUD: &str = "miyucloud";
+
+/// Vrai si le service peut recevoir les secrets MiyuCloud : identifiant
+/// `miyucloud` ET sceau d'un éditeur épinglé déclarant cet identifiant.
+pub fn secrets_miyucloud_autorises(service: &InstalledService, provenance: Provenance) -> bool {
+    service.manifest.id == ID_MIYUCLOUD && provenance == Provenance::Signee
+}
+
 fn build_service_env(
     service: &InstalledService,
+    provenance: Provenance,
     profile_id: &str,
     data_dir: &std::path::Path,
 ) -> Result<HashMap<String, String>, String> {
     let mut env = HashMap::new();
 
-    if service.manifest.id == "miyucloud" {
+    if service.manifest.id == ID_MIYUCLOUD && !secrets_miyucloud_autorises(service, provenance) {
+        // Jeton COG et phrase de chiffrement : jamais à un paquet non signé (CA-01).
+        return Err(
+            "MiyuCloud non signé par un éditeur de confiance : jeton et phrase de chiffrement refusés"
+                .to_string(),
+        );
+    }
+
+    if secrets_miyucloud_autorises(service, provenance) {
         let config = load_miyucloud_config();
-        let current_dir =
-            std::env::current_dir().map_err(|e| format!("Lecture du répertoire courant: {e}"))?;
+        let central_db = miyukini_central::chemins::chemin_base_auth()
+            .map_err(|e| format!("Chemin de la base Central : {e}"))?;
         env.insert("MIYUCLOUD_PORT".to_string(), config.api_port.to_string());
         env.insert("MIYUCLOUD_WEB_PORT".to_string(), config.web_port.to_string());
         env.insert(
@@ -221,7 +300,7 @@ fn build_service_env(
         );
         env.insert(
             "MIYUCLOUD_CENTRAL_DB_PATH".to_string(),
-            current_dir.join("central.db").to_string_lossy().to_string(),
+            central_db.to_string_lossy().to_string(),
         );
     }
 
@@ -230,6 +309,7 @@ fn build_service_env(
 
 /// En développement, si le binaire du service existe à côté de l'exécutable Central
 /// (ex. `target/debug/`), on le préfère au binaire de l'install dir.
+/// Uniquement pour un service lancé par dérogation dev (jamais en release).
 fn dev_binary_override(registered_path: &std::path::Path) -> Option<std::path::PathBuf> {
     let bin_name = registered_path.file_name()?;
     let central_dir = std::env::current_exe().ok()?.parent()?.to_path_buf();
@@ -243,5 +323,72 @@ fn dev_binary_override(registered_path: &std::path::Path) -> Option<std::path::P
         Some(dev_path)
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use miyumarket::signature::{hex_encoder, signer_paquet, separer_enveloppe};
+    use miyusceau::{CleSignature, NiveauConfiance};
+
+    fn service(id: &str, sceau: Option<String>) -> InstalledService {
+        let manifest = serde_json::from_str(&format!(
+            r#"{{"id":"{id}","name":"x","version":"1.0.0","developer":"d","description":"","icon":"x","service_type":"interne_cog","source":"officiel","min_central_version":"0.1.0"}}"#
+        ))
+        .unwrap();
+        InstalledService {
+            manifest,
+            install_dir: std::path::PathBuf::from("/nonexistent"),
+            binary_path: std::path::PathBuf::from("/nonexistent/bin/x"),
+            installed_at: String::new(),
+            updated_at: None,
+            sceau_paquet: sceau,
+        }
+    }
+
+    fn sceau_pour(id: &str, cle: &CleSignature) -> String {
+        let paquet = signer_paquet(b"PK zip", id, "1.0.0", None, cle).unwrap();
+        let (sceau, _) = separer_enveloppe(&paquet).unwrap();
+        hex_encoder(sceau)
+    }
+
+    fn ancres(cle: &CleSignature) -> AncresDeConfiance {
+        let mut a = AncresDeConfiance::new();
+        a.ajouter(&cle.cle_publique(), NiveauConfiance::Reconnu).unwrap();
+        a
+    }
+
+    #[test]
+    fn non_signe_refuse_au_lancement() {
+        let cle = CleSignature::generer();
+        assert!(controler_provenance(&service("svc", None), &ancres(&cle), 0, false).is_err());
+    }
+
+    #[test]
+    fn signe_par_editeur_epingle_accepte() {
+        let cle = CleSignature::generer();
+        let s = service("svc", Some(sceau_pour("svc", &cle)));
+        assert_eq!(controler_provenance(&s, &ancres(&cle), 0, false), Ok(Provenance::Signee));
+    }
+
+    #[test]
+    fn secrets_miyucloud_exigent_un_sceau_miyucloud_epingle() {
+        let cle = CleSignature::generer();
+        let autre = CleSignature::generer();
+        // Sceau valide mais pour un autre id : refus.
+        let s = service("miyucloud", Some(sceau_pour("jaykoa", &cle)));
+        assert!(controler_provenance(&s, &ancres(&cle), 0, false).is_err());
+        // Sceau miyucloud d'un éditeur non épinglé : refus.
+        let s = service("miyucloud", Some(sceau_pour("miyucloud", &autre)));
+        assert!(controler_provenance(&s, &ancres(&cle), 0, false).is_err());
+        // Sceau miyucloud épinglé : secrets autorisés.
+        let s = service("miyucloud", Some(sceau_pour("miyucloud", &cle)));
+        let p = controler_provenance(&s, &ancres(&cle), 0, false).unwrap();
+        assert!(secrets_miyucloud_autorises(&s, p));
+        // Dérogation dev : jamais de secrets.
+        assert!(!secrets_miyucloud_autorises(&s, Provenance::NonSigneeDev));
+        let tmp = std::env::temp_dir();
+        assert!(build_service_env(&s, Provenance::NonSigneeDev, "p", &tmp).is_err());
     }
 }

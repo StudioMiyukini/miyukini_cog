@@ -18,6 +18,23 @@ use miyukini_connect::{
     AuthVerifyRequest, ConnectError, ConnectService, IdentitySetup, PermissionTier, RuntimeState,
 };
 
+/// Dossier des données de Central (CA-04) : dossier utilisateur absolu en
+/// release (créé en 0700), répertoire courant en debug. Jamais le cwd en release.
+pub fn dossier_donnees_central() -> Result<std::path::PathBuf, String> {
+    let dossier = miyukini_central::chemins::dossier_donnees()
+        .map_err(|e| format!("Dossier de données Central : {e}"))?;
+    if miyukini_central::chemins::est_release() {
+        miyukini_central::fichiers_secrets::creer_dossier_prive(&dossier)
+            .map_err(|e| format!("Création de {} : {e}", dossier.display()))?;
+    }
+    Ok(dossier)
+}
+
+/// Chemin de la base auth Central (`central.db`) — voir [`dossier_donnees_central`].
+pub fn chemin_base_auth_central() -> Result<std::path::PathBuf, String> {
+    Ok(dossier_donnees_central()?.join(miyukini_central::chemins::NOM_BASE_AUTH))
+}
+
 /// Connexions DB de Central (standalone — uniquement auth).
 pub struct ServiceConnections {
     /// Base auth Central (profils, COG vierge, session).

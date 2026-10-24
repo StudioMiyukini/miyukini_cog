@@ -164,6 +164,12 @@ impl CentralAuthDb {
     /// Ouvre ou crée la base SQLite à `path`.
     pub fn open(path: impl AsRef<Path>) -> Result<Self, AuthDbError> {
         let path = path.as_ref();
+        // CA-03 : base de profils (hachés) créée/ramenée en 0600 avant ouverture ;
+        // SQLite reprend ces permissions pour ses fichiers -wal / -journal.
+        if path.as_os_str() != ":memory:" {
+            crate::fichiers_secrets::preparer_fichier_prive(path)
+                .map_err(|e| AuthDbError(format!("permissions de {} : {e}", path.display())))?;
+        }
         let conn = Connection::open(path)?;
 
         #[cfg(feature = "db-encryption")]
@@ -880,6 +886,22 @@ mod tests_securite {
     }
 
     const PW: &str = "Str0ng!Passw0rd#2026";
+
+    /// CA-03 : la base de profils est créée en 0600 et une base existante 0644 est durcie.
+    #[cfg(unix)]
+    #[test]
+    fn base_creee_en_0600() {
+        use std::os::unix::fs::PermissionsExt;
+        let (db, dir) = temp_db("mode");
+        let f = dir.join("central.db");
+        let mode = |p: &std::path::Path| std::fs::metadata(p).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode(&f), 0o600);
+        drop(db);
+        std::fs::set_permissions(&f, std::fs::Permissions::from_mode(0o644)).unwrap();
+        let _db2 = CentralAuthDb::open(&f).expect("réouverture");
+        assert_eq!(mode(&f), 0o600);
+        let _ = std::fs::remove_dir_all(dir);
+    }
 
     #[test]
     fn premier_admin_unique() {

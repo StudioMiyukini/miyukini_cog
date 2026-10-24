@@ -231,7 +231,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                                     match client.download_package(&sid, &new_ver).await {
                                                         Ok(bytes) => {
                                                             st.write().install_status = Some((sid.clone(), InstallStatus::Installing));
-                                                            match mgr.update_from_package(&sid, &bytes) {
+                                                            match mgr.update_from_package(&sid, &new_ver, &bytes) {
                                                                 Ok(_) => {
                                                                     tracing::info!("Service mis \u{e0} jour: {sid} -> v{new_ver}");
                                                                     st.write().install_status = Some((sid.clone(), InstallStatus::Done));
@@ -337,7 +337,7 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
                                                 match client.download_package(&sid, &ver).await {
                                                     Ok(bytes) => {
                                                         st.write().install_status = Some((sid.clone(), InstallStatus::Installing));
-                                                        match mgr.install_from_package(&sid, &bytes) {
+                                                        match mgr.install_from_package(&sid, &ver, &bytes) {
                                                             Ok(installed_id) => {
                                                                 tracing::info!("Service installe: {installed_id}");
                                                                 st.write().install_status = Some((sid.clone(), InstallStatus::Done));

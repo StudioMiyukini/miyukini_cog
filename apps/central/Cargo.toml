@@ -56,6 +56,8 @@ miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 
 # Service Market (protocole + manifeste partagé Central/Origin)
 miyumarket = { path = "../../crates/miyumarket" }
+# Sceau v1 : ancres de confiance des éditeurs Market (CA-01)
+miyusceau = { path = "../../crates/miyusceau" }
 
 # Alicia Home Assistante — capture audio locale + détection de wake word
 miyualicia-capture = { path = "../../crates/miyuvoicecapture" }

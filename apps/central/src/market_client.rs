@@ -33,7 +33,7 @@ pub enum MarketError {
     InsecureUrl(String),
     /// Intégrité du package non vérifiable ou incorrecte (checksum).
     Integrity(String),
-    /// Package non signé (signature Ed25519 — lot 2).
+    /// Package sans enveloppe signée (Sceau v1 obligatoire, CA-01).
     NonSigne,
 }
 
@@ -45,7 +45,7 @@ impl std::fmt::Display for MarketError {
             Self::Server(e) => write!(f, "Erreur serveur : {e}"),
             Self::InsecureUrl(e) => write!(f, "URL Origin refusée (HTTPS requis) : {e}"),
             Self::Integrity(e) => write!(f, "Intégrité du package refusée : {e}"),
-            Self::NonSigne => write!(f, "Package non signé"),
+            Self::NonSigne => write!(f, "Package non signé : signature d'éditeur obligatoire"),
         }
     }
 }
@@ -113,18 +113,18 @@ pub fn verify_checksum(bytes: &[u8], expected: Option<&str>) -> Result<(), Marke
     }
 }
 
-/// POINT D'EXTENSION — vérification de la signature du package.
-///
-/// Lot 1 : renvoie toujours `Err(NonSigne)` ; l'appelant journalise un
-/// avertissement mais NE BLOQUE PAS encore l'installation.
-/// Lot 2 : implémentera la vérification Ed25519 (clé publique d'Origin épinglée
-/// dans Central) et la signature deviendra OBLIGATOIRE : l'appelant refusera
-/// alors l'installation sur toute erreur de cette fonction.
-pub fn verify_package_signature(
-    _package_bytes: &[u8],
-    _manifest: &ServiceManifest,
-) -> Result<(), MarketError> {
-    Err(MarketError::NonSigne)
+/// Contrôle précoce : refuse au téléchargement un package sans enveloppe signée
+/// (la vérification cryptographique complète, éditeur épinglé compris, est faite
+/// par `service_manager::installer::verifier_paquet_market` avant toute écriture).
+/// En build debug, `MIYUKINI_MARKET_DEV_NON_SIGNE=1` lève ce contrôle précoce.
+pub fn require_signed_envelope(package_bytes: &[u8]) -> Result<(), MarketError> {
+    if miyumarket::signature::est_paquet_signe(package_bytes)
+        || crate::service_manager::confiance::dev_non_signe_autorise()
+    {
+        Ok(())
+    } else {
+        Err(MarketError::NonSigne)
+    }
 }
 
 impl MarketClient {
@@ -133,14 +133,15 @@ impl MarketClient {
     pub fn new(origin_url: impl Into<String>) -> Result<Self, MarketError> {
         let origin_url = origin_url.into();
         validate_origin_url(&origin_url)?;
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            // Pas de redirection : évite un downgrade https -> http.
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .map_err(|e| MarketError::Network(format!("client HTTP Market : {e}")))?;
         Ok(Self {
             origin_url: origin_url.trim_end_matches('/').to_string(),
-            client: reqwest::Client::builder()
-                .timeout(std::time::Duration::from_secs(120))
-                // Pas de redirection : évite un downgrade https -> http.
-                .redirect(reqwest::redirect::Policy::none())
-                .build()
-                .expect("reqwest client for Market"),
+            client,
         })
     }
 
@@ -180,8 +181,8 @@ impl MarketClient {
     /// Télécharge le package d'un service.
     ///
     /// Vérifie avant de rendre les octets : cohérence id/version du catalogue
-    /// avec la demande, puis checksum SHA-256 du catalogue (obligatoire).
-    /// La signature (`verify_package_signature`) n'est pour l'instant que journalisée.
+    /// avec la demande, checksum SHA-256 du catalogue (obligatoire), présence de
+    /// l'enveloppe signée. La signature est vérifiée par l'installeur (CA-01).
     pub async fn download_package(
         &self,
         service_id: &str,
@@ -211,14 +212,7 @@ impl MarketClient {
         );
         let bytes = self.http_get_bytes(&url).await?;
         verify_checksum(&bytes, entry.manifest.checksum.as_deref())?;
-
-        // Lot 2 : la signature Ed25519 deviendra obligatoire (refus sur Err).
-        if let Err(e) = verify_package_signature(&bytes, &entry.manifest) {
-            tracing::warn!(
-                "Package '{service_id}' v{version} : {e} — installation autorisée au lot 1, \
-                 mais la signature sera obligatoire au lot 2"
-            );
-        }
+        require_signed_envelope(&bytes)?;
         Ok(bytes)
     }
 
@@ -333,14 +327,14 @@ mod tests {
     }
 
     #[test]
-    fn signature_non_signe_au_lot_1() {
-        let m = serde_json::from_str::<ServiceManifest>(
-            r#"{"id":"x","name":"x","version":"1.0.0","developer":"d","description":"","icon":"x","service_type":"interne_cog","source":"tiers","min_central_version":"0.1.0"}"#,
-        )
-        .unwrap();
+    fn package_sans_enveloppe_signee_refuse() {
+        if crate::service_manager::confiance::dev_non_signe_autorise() {
+            return; // dérogation dev active dans l'environnement de test
+        }
         assert!(matches!(
-            verify_package_signature(b"", &m),
+            require_signed_envelope(b"PK\x03\x04 zip nu"),
             Err(MarketError::NonSigne)
         ));
+        assert!(require_signed_envelope(b"MSPS\x01....").is_ok());
     }
 }

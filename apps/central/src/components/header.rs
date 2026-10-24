@@ -142,9 +142,9 @@ pub fn Header() -> Element {
                                     let config = RemoteServerConfig {
                                         listen_addr: std::env::var("CENTRAL_REMOTE_LISTEN")
                                             .unwrap_or_else(|_| "127.0.0.1:8091".into()),
-                                        auth_db_path: std::env::current_dir()
+                                        // CA-04 : base auth hors du répertoire courant en release.
+                                        auth_db_path: crate::data::chemin_base_auth_central()
                                             .unwrap_or_default()
-                                            .join("central.db")
                                             .to_string_lossy()
                                             .to_string(),
                                         // Liste d'origines CORS explicite (vide = aucun CORS).

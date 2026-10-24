@@ -6,15 +6,112 @@
 
 //! Installation et désinstallation de packages service (.msp).
 //!
-//! Un package .msp est une archive ZIP contenant :
+//! **Signature obligatoire (CA-01, EX-09, EX-26)** : un package n'est installé
+//! que sous forme de [`PaquetAccepte`], obtenu par [`verifier_paquet_market`]
+//! (enveloppe Sceau v1 signée par un éditeur épinglé, voir
+//! `miyumarket::signature`). Aucun octet n'est décompressé ni écrit avant cette
+//! vérification. Seule exception : build debug + `MIYUKINI_MARKET_DEV_NON_SIGNE=1`.
+//!
+//! L'archive ZIP signée contient :
 //! - `service.manifest.json` : manifeste du service
 //! - `bin/` : binaires du service
 //! - `assets/` : icônes, ressources statiques (optionnel)
 
 use std::io::Read;
 
-use super::registry::{service_install_dir, InstalledService, ServiceRegistryData};
+#[cfg(debug_assertions)]
+use super::registry::service_install_dir;
+use super::registry::{InstalledService, ServiceRegistryData};
 use miyumarket::manifest::ServiceManifest;
+use miyumarket::signature::{
+    hex_encoder, verifier_paquet, ErreurSignaturePaquet, ManifestePaquet, PaquetVerifie,
+};
+use miyusceau::AncresDeConfiance;
+
+/// Paquet autorisé à l'installation. Ne se construit que par
+/// [`verifier_paquet_market`].
+#[derive(Debug)]
+pub enum PaquetAccepte {
+    /// Paquet signé par un éditeur de confiance (cas normal, seul cas en release).
+    Signe(PaquetVerifie),
+    /// Archive non signée acceptée par dérogation de développement (debug uniquement).
+    #[cfg(debug_assertions)]
+    NonSigneDev(Vec<u8>),
+}
+
+impl PaquetAccepte {
+    /// Archive ZIP à extraire.
+    fn archive(&self) -> &[u8] {
+        match self {
+            Self::Signe(p) => p.archive(),
+            #[cfg(debug_assertions)]
+            Self::NonSigneDev(a) => a,
+        }
+    }
+
+    /// Titre signé (absent pour une dérogation dev).
+    fn titre(&self) -> Option<&ManifestePaquet> {
+        match self {
+            Self::Signe(p) => Some(p.manifeste()),
+            #[cfg(debug_assertions)]
+            Self::NonSigneDev(_) => None,
+        }
+    }
+
+    /// Sceau à conserver (hex) pour re-vérification au lancement.
+    fn sceau_hex(&self) -> Option<String> {
+        match self {
+            Self::Signe(p) => Some(hex_encoder(p.sceau())),
+            #[cfg(debug_assertions)]
+            Self::NonSigneDev(_) => None,
+        }
+    }
+}
+
+/// Vérifie un paquet téléchargé AVANT toute écriture (fail-closed).
+///
+/// `dev_non_signe` n'a d'effet qu'en build debug, et seulement pour une archive
+/// sans signature : un paquet signé mais altéré, d'un autre éditeur ou d'un
+/// autre service reste refusé.
+pub fn verifier_paquet_market(
+    octets: &[u8],
+    id_attendu: &str,
+    version_attendue: Option<&str>,
+    ancres: &AncresDeConfiance,
+    maintenant_secs: u64,
+    dev_non_signe: bool,
+) -> Result<PaquetAccepte, String> {
+    match verifier_paquet(octets, id_attendu, version_attendue, ancres, maintenant_secs) {
+        Ok(p) => {
+            tracing::info!(
+                "Paquet '{id_attendu}' v{} : signature vérifiée (éditeur {})",
+                p.manifeste().version,
+                hex_encoder(&p.editeur()[..8])
+            );
+            Ok(PaquetAccepte::Signe(p))
+        }
+        Err(ErreurSignaturePaquet::NonSigne | ErreurSignaturePaquet::AucuneAncre)
+            if dev_non_signe && cfg!(debug_assertions) && !miyumarket::signature::est_paquet_signe(octets) =>
+        {
+            #[cfg(debug_assertions)]
+            {
+                tracing::error!(
+                    "⚠⚠ DÉROGATION DEV : paquet '{id_attendu}' NON SIGNÉ accepté \
+                     (MIYUKINI_MARKET_DEV_NON_SIGNE=1, build debug). Interdit en production. ⚠⚠"
+                );
+                Ok(PaquetAccepte::NonSigneDev(octets.to_vec()))
+            }
+            #[cfg(not(debug_assertions))]
+            {
+                Err("paquet non signé : installation refusée".to_string())
+            }
+        }
+        Err(e) => {
+            tracing::warn!("Paquet '{id_attendu}' refusé : {e}");
+            Err(format!("Installation refusée : {e}"))
+        }
+    }
+}
 
 /// Valide le champ `binary_name` d'un manifeste : simple nom de fichier,
 /// sans séparateur, sans `..`, sans nom absolu/lecteur, non vide.
@@ -85,31 +182,54 @@ fn safe_entry_path(
     Ok(out)
 }
 
-/// Installe un service depuis les bytes d'un package .msp (archive ZIP).
+/// Installe un service depuis un paquet vérifié (voir [`verifier_paquet_market`]).
 /// `expected_id` : identifiant de service demandé ; le manifeste du package
 /// doit porter exactement cet id, sinon refus (audit C3).
 /// Retourne l'ID du service installé.
 pub fn install_package(
-    package_bytes: &[u8],
+    paquet: &PaquetAccepte,
     registry: &mut ServiceRegistryData,
     expected_id: &str,
 ) -> Result<String, String> {
     install_package_with_root(
-        package_bytes,
+        paquet,
         registry,
         expected_id,
         &super::registry::services_root_dir(),
     )
 }
 
+/// Vérifie puis installe : chemin unique du Market (signature avant écriture).
+#[allow(clippy::too_many_arguments)]
+pub fn verifier_puis_installer(
+    octets: &[u8],
+    id_attendu: &str,
+    version_attendue: Option<&str>,
+    ancres: &AncresDeConfiance,
+    maintenant_secs: u64,
+    dev_non_signe: bool,
+    registry: &mut ServiceRegistryData,
+    root: &std::path::Path,
+) -> Result<String, String> {
+    let paquet = verifier_paquet_market(
+        octets,
+        id_attendu,
+        version_attendue,
+        ancres,
+        maintenant_secs,
+        dev_non_signe,
+    )?;
+    install_package_with_root(&paquet, registry, id_attendu, root)
+}
+
 /// Variante avec racine d'installation explicite (utilisée par les tests).
 fn install_package_with_root(
-    package_bytes: &[u8],
+    paquet: &PaquetAccepte,
     registry: &mut ServiceRegistryData,
     expected_id: &str,
     root: &std::path::Path,
 ) -> Result<String, String> {
-    let cursor = std::io::Cursor::new(package_bytes);
+    let cursor = std::io::Cursor::new(paquet.archive());
     let mut archive = zip::ZipArchive::new(cursor)
         .map_err(|e| format!("Package .msp invalide (pas une archive ZIP) : {e}"))?;
 
@@ -135,6 +255,17 @@ fn install_package_with_root(
             "Identifiant du manifeste ('{}') différent du service demandé ('{expected_id}') : installation refusée",
             manifest.id
         ));
+    }
+    // Le manifeste embarqué doit correspondre au titre signé (id, version, binaire).
+    if let Some(titre) = paquet.titre() {
+        if manifest.id != titre.service_id
+            || manifest.version != titre.version
+            || manifest.binary_name != titre.nom_binaire
+        {
+            return Err(format!(
+                "Manifeste du package incohérent avec la signature (id/version/binary_name) pour '{expected_id}' : installation refusée"
+            ));
+        }
     }
     let binary_name = resolve_binary_name(&manifest)?;
 
@@ -205,6 +336,7 @@ fn install_package_with_root(
         binary_path,
         installed_at: chrono::Utc::now().to_rfc3339(),
         updated_at: None,
+        sceau_paquet: paquet.sceau_hex(),
     };
     registry.services.insert(service_id.clone(), installed);
 
@@ -213,7 +345,8 @@ fn install_package_with_root(
 }
 
 /// Installe un service directement depuis un binaire (sans package .msp).
-/// Utilisé pour le développement et les services construits localement.
+/// Développement uniquement : absent des builds release (pas de signature).
+#[cfg(debug_assertions)]
 pub fn install_from_binary(
     manifest: ServiceManifest,
     binary_source: &std::path::Path,
@@ -268,6 +401,7 @@ pub fn install_from_binary(
         binary_path: binary_path.clone(),
         installed_at: chrono::Utc::now().to_rfc3339(),
         updated_at: None,
+        sceau_paquet: None,
     };
     registry.services.insert(service_id.clone(), installed);
 
@@ -375,6 +509,9 @@ pub fn scan_installed_services(registry: &mut ServiceRegistryData) {
                     binary_path,
                     installed_at: String::new(),
                     updated_at: None,
+                    // Service copié à la main : aucun sceau, il ne se lance
+                    // qu'avec la dérogation dev (voir launcher).
+                    sceau_paquet: None,
                 },
             );
         }
@@ -415,12 +552,138 @@ mod tests {
         d
     }
 
+    fn cle_test() -> miyusceau::CleSignature {
+        miyusceau::CleSignature::depuis_graine(&[7u8; 32])
+    }
+
+    fn ancres(cle: &miyusceau::CleSignature) -> AncresDeConfiance {
+        let mut a = AncresDeConfiance::new();
+        a.ajouter(&cle.cle_publique(), miyusceau::NiveauConfiance::Reconnu).unwrap();
+        a
+    }
+
+    fn signer(zip: &[u8], id: &str, bin: Option<&str>, cle: &miyusceau::CleSignature) -> Vec<u8> {
+        miyumarket::signature::signer_paquet(zip, id, "1.0.0", bin, cle).unwrap()
+    }
+
+    /// Signe l'archive pour `expected` (clé de test épinglée) puis vérifie et installe.
     fn try_install(entries: &[(&str, &[u8])], expected: &str, tag: &str) -> (Result<String, String>, std::path::PathBuf) {
         let root = tmp_root(tag);
-        let bytes = build_zip(entries);
+        let cle = cle_test();
+        let bytes = signer(&build_zip(entries), expected, None, &cle);
         let mut reg = ServiceRegistryData::default();
-        let r = install_package_with_root(&bytes, &mut reg, expected, &root);
+        let r = verifier_puis_installer(&bytes, expected, Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root);
         (r, root)
+    }
+
+    fn racine_vide(root: &std::path::Path) -> bool {
+        std::fs::read_dir(root).map_or(true, |mut d| d.next().is_none())
+    }
+
+    #[test]
+    fn paquet_non_signe_refuse_sans_ecriture() {
+        let m = manifest_json("svc", None);
+        let zip = build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]);
+        let root = tmp_root("nonsigne");
+        let mut reg = ServiceRegistryData::default();
+        let r = verifier_puis_installer(&zip, "svc", Some("1.0.0"), &ancres(&cle_test()), 0, false, &mut reg, &root);
+        assert!(r.unwrap_err().contains("non signé"));
+        assert!(racine_vide(&root), "rien ne doit être écrit");
+        assert!(reg.services.is_empty());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn paquet_altere_refuse_sans_ecriture() {
+        let m = manifest_json("svc", None);
+        let cle = cle_test();
+        let mut paquet = signer(
+            &build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]),
+            "svc",
+            None,
+            &cle,
+        );
+        let n = paquet.len();
+        paquet[n - 30] ^= 0xff;
+        let root = tmp_root("altere");
+        let mut reg = ServiceRegistryData::default();
+        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root);
+        assert!(r.is_err());
+        assert!(racine_vide(&root));
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn mauvais_editeur_refuse_sans_ecriture() {
+        let m = manifest_json("svc", None);
+        let autre = miyusceau::CleSignature::depuis_graine(&[9u8; 32]);
+        let paquet = signer(
+            &build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]),
+            "svc",
+            None,
+            &autre,
+        );
+        let root = tmp_root("editeur");
+        let mut reg = ServiceRegistryData::default();
+        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle_test()), 0, false, &mut reg, &root);
+        assert!(r.is_err());
+        assert!(racine_vide(&root));
+        // Aucune ancre : refus aussi.
+        let r = verifier_puis_installer(&paquet, "svc", None, &AncresDeConfiance::new(), 0, false, &mut reg, &root);
+        assert!(r.is_err());
+        assert!(racine_vide(&root));
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn manifeste_incoherent_avec_signature_refuse() {
+        // Signature pour binary_name absent, manifeste embarqué déclarant un autre binaire.
+        let m = manifest_json("svc", Some("autre.bin"));
+        let cle = cle_test();
+        let paquet = signer(&build_zip(&[("service.manifest.json", m.as_bytes())]), "svc", None, &cle);
+        let root = tmp_root("incoherent");
+        let mut reg = ServiceRegistryData::default();
+        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root);
+        assert!(r.unwrap_err().contains("incohérent"));
+        assert!(racine_vide(&root));
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn paquet_signe_valide_conserve_le_sceau() {
+        let m = manifest_json("svc", None);
+        let cle = cle_test();
+        let paquet = signer(
+            &build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]),
+            "svc",
+            None,
+            &cle,
+        );
+        let root = tmp_root("sceau");
+        let mut reg = ServiceRegistryData::default();
+        verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root).unwrap();
+        let sceau = reg.services["svc"].sceau_paquet.clone().expect("sceau conservé");
+        let octets = miyumarket::signature::hex_decoder(&sceau).unwrap();
+        assert!(miyumarket::signature::verifier_sceau_installe(&octets, "svc", &ancres(&cle), 0).is_ok());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[cfg(debug_assertions)]
+    #[test]
+    fn derogation_dev_accepte_seulement_le_non_signe() {
+        let m = manifest_json("svc", None);
+        let zip = build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]);
+        let root = tmp_root("dev");
+        let mut reg = ServiceRegistryData::default();
+        let r = verifier_puis_installer(&zip, "svc", None, &AncresDeConfiance::new(), 0, true, &mut reg, &root);
+        assert_eq!(r.unwrap(), "svc");
+        assert!(reg.services["svc"].sceau_paquet.is_none());
+        // Un paquet signé par un éditeur inconnu reste refusé même avec la dérogation.
+        let autre = miyusceau::CleSignature::depuis_graine(&[9u8; 32]);
+        let paquet = signer(&zip, "svc", None, &autre);
+        let r = verifier_puis_installer(&paquet, "svc", None, &ancres(&cle_test()), 0, true, &mut reg, &root);
+        assert!(r.is_err());
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]
@@ -476,7 +739,9 @@ mod tests {
         }
         let root = tmp_root("symlink");
         let mut reg = ServiceRegistryData::default();
-        let r = install_package_with_root(&buf, &mut reg, "svc", &root);
+        let cle = cle_test();
+        let paquet = signer(&buf, "svc", None, &cle);
+        let r = verifier_puis_installer(&paquet, "svc", None, &ancres(&cle), 0, false, &mut reg, &root);
         assert!(r.is_err(), "{r:?}");
         let _ = std::fs::remove_dir_all(&root);
     }

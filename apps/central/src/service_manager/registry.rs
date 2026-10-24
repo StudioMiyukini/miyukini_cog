@@ -15,12 +15,23 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 /// Répertoire racine pour toutes les installations de services.
-/// Windows : `%LOCALAPPDATA%/Miyukini-COG/services/`
+/// Windows : `%LOCALAPPDATA%/Miyukini-COG/services/`.
+/// Ailleurs : debug → `./services` (historique) ; release → dossier de données
+/// utilisateur (jamais le répertoire courant, CA-04).
 pub fn services_root_dir() -> PathBuf {
-    if let Ok(local) = std::env::var("LOCALAPPDATA") {
-        PathBuf::from(local).join("Miyukini-COG").join("services")
+    if let Some(local) = std::env::var_os("LOCALAPPDATA").filter(|v| !v.is_empty()) {
+        return PathBuf::from(local).join("Miyukini-COG").join("services");
+    }
+    if miyukini_central::chemins::est_release() {
+        match miyukini_central::chemins::dossier_donnees() {
+            Ok(d) => d.join("services"),
+            Err(e) => {
+                // Fail-closed : chemin inexistant et non relatif plutôt que le cwd.
+                tracing::error!("Dossier des services introuvable : {e}");
+                PathBuf::from("/nonexistent/miyukini-cog/services")
+            }
+        }
     } else {
-        // Fallback : répertoire courant
         PathBuf::from("./services")
     }
 }
@@ -43,6 +54,10 @@ pub struct InstalledService {
     pub installed_at: String,
     /// Date de dernière mise à jour (RFC 3339).
     pub updated_at: Option<String>,
+    /// Sceau `ManifestePaquet` (hex) du paquet installé : re-vérifié au lancement
+    /// et avant toute remise de secrets (CA-01). `None` = service non signé.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sceau_paquet: Option<String>,
 }
 
 /// Registre complet persisté sur disque.

@@ -82,8 +82,14 @@ pub fn load_supabase_config() -> SupabaseConfig {
     }
 }
 
-/// Cherche `supabase-catakana.env` en remontant depuis le répertoire courant.
+/// Cherche `supabase-catakana.env` : en release, uniquement dans le dossier de
+/// configuration utilisateur (CA-04) ; en debug, en remontant depuis le
+/// répertoire courant.
 fn find_env_file() -> Option<std::path::PathBuf> {
+    if crate::chemins::est_release() {
+        let candidate = crate::chemins::dossier_config().ok()?.join(ENV_FILENAME);
+        return candidate.exists().then_some(candidate);
+    }
     let cwd = std::env::current_dir().ok()?;
     let mut dir = cwd.as_path();
 

@@ -5,18 +5,31 @@
 //! @human  central — module « services mws settings ».
 
 //! Configuration persistée du Webway dans Central.
+//!
+//! - Exposition désactivée par défaut (EX-48, C-21) : MWS inactif, pas de
+//!   connexion automatique, page Home éteinte.
+//! - Page Home activée depuis les réglages : boucle locale [`HOME_BIND_LOCAL`]
+//!   (le tunnel MWS suffit) sauf adresse saisie explicitement.
+//! - Fichier écrit en 0600 (contient la clé de conformité MWS, CA-03).
 
+use miyukini_central::fichiers_secrets::{durcir_fichier, ecrire_secret};
 use miyukini_central::CentralMwsConfig;
 use reqwest::Url;
 use std::path::PathBuf;
 
-const APP_DIR: &str = "Miyukini-COG";
 const CONFIG_FILE: &str = "mws-config.json";
-const DEFAULT_HOME_BIND: &str = "0.0.0.0:8090";
+/// Adresse de la page Home lorsqu'elle est activée sans adresse explicite.
+pub const HOME_BIND_LOCAL: &str = "127.0.0.1:8090";
+/// Ancien défaut implicite (exposition LAN) migré vers la boucle locale.
+const LEGACY_HOME_BIND: &str = "0.0.0.0:8090";
 const DEFAULT_PUBLIC_ADDRESS: &str = "0.0.0.0:8090";
 
 pub fn load_mws_config() -> CentralMwsConfig {
     let path = mws_config_path();
+    // CA-03 : un fichier existant (ancienne version, 0644) est ramené en 0600.
+    if let Err(err) = durcir_fichier(&path) {
+        tracing::warn!("Permissions de {} non corrigées : {err}", path.display());
+    }
     let raw = match std::fs::read_to_string(&path) {
         Ok(raw) => raw,
         Err(_) => return default_mws_config(),
@@ -36,14 +49,9 @@ pub fn load_mws_config() -> CentralMwsConfig {
 
 pub fn save_mws_config(config: &CentralMwsConfig) -> Result<(), String> {
     let path = mws_config_path();
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)
-            .map_err(|err| format!("Création dossier config MWS: {err}"))?;
-    }
-
     let json = serde_json::to_string_pretty(config)
         .map_err(|err| format!("Sérialisation config MWS: {err}"))?;
-    std::fs::write(&path, json).map_err(|err| format!("Écriture config MWS: {err}"))?;
+    ecrire_secret(&path, json.as_bytes()).map_err(|err| format!("Écriture config MWS: {err}"))?;
     Ok(())
 }
 
@@ -79,8 +87,12 @@ fn normalize_config(config: &mut CentralMwsConfig) {
         }
     }
 
-    if config.home_http_bind.is_none() {
-        config.home_http_bind = Some(DEFAULT_HOME_BIND.to_string());
+    // `None` = page Home désactivée (respecté). L'ancien défaut implicite
+    // `0.0.0.0:8090` (jamais choisi par l'utilisateur) passe en boucle locale.
+    match config.home_http_bind.as_deref().map(str::trim) {
+        Some("") => config.home_http_bind = None,
+        Some(LEGACY_HOME_BIND) => config.home_http_bind = Some(HOME_BIND_LOCAL.to_string()),
+        _ => {}
     }
 
     if config.public_address.trim().is_empty() || config.public_address == "0.0.0.0:0" {
@@ -89,22 +101,15 @@ fn normalize_config(config: &mut CentralMwsConfig) {
 }
 
 fn mws_config_path() -> PathBuf {
-    if let Ok(local) = std::env::var("LOCALAPPDATA") {
-        return PathBuf::from(local).join(APP_DIR).join(CONFIG_FILE);
+    match miyukini_central::chemins::dossier_config() {
+        Ok(dir) => dir.join(CONFIG_FILE),
+        Err(err) => {
+            // Release sans dossier utilisateur : chemin inexistant (lecture → défauts
+            // sûrs, écriture → erreur), jamais le répertoire courant (CA-04).
+            tracing::error!("Dossier de configuration introuvable : {err}");
+            PathBuf::from("/nonexistent/miyukini-cog").join(CONFIG_FILE)
+        }
     }
-
-    if let Ok(config_home) = std::env::var("XDG_CONFIG_HOME") {
-        return PathBuf::from(config_home).join(APP_DIR).join(CONFIG_FILE);
-    }
-
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home)
-            .join(".config")
-            .join(APP_DIR)
-            .join(CONFIG_FILE);
-    }
-
-    PathBuf::from(".").join(CONFIG_FILE)
 }
 
 fn origin_host(origin_url: &str) -> Option<String> {
@@ -125,10 +130,28 @@ mod tests {
     }
 
     #[test]
-    fn default_config_enables_central_home_defaults() {
+    fn default_config_exposition_desactivee() {
         let config = default_mws_config();
-        assert_eq!(config.home_http_bind.as_deref(), Some(DEFAULT_HOME_BIND));
+        assert!(!config.enabled, "MWS inactif par défaut (EX-48)");
+        assert!(!config.auto_connect, "pas de connexion automatique par défaut");
+        assert_eq!(config.home_http_bind, None, "page Home éteinte par défaut");
         assert_eq!(config.public_address, DEFAULT_PUBLIC_ADDRESS);
-        assert!(config.auto_connect);
+    }
+
+    #[test]
+    fn ancien_bind_lan_migre_en_boucle_locale() {
+        let mut config = CentralMwsConfig {
+            home_http_bind: Some(LEGACY_HOME_BIND.to_string()),
+            ..CentralMwsConfig::default()
+        };
+        normalize_config(&mut config);
+        assert_eq!(config.home_http_bind.as_deref(), Some(HOME_BIND_LOCAL));
+        // Une adresse explicite différente est respectée ; None reste None.
+        config.home_http_bind = Some("192.168.1.10:9000".into());
+        normalize_config(&mut config);
+        assert_eq!(config.home_http_bind.as_deref(), Some("192.168.1.10:9000"));
+        config.home_http_bind = None;
+        normalize_config(&mut config);
+        assert_eq!(config.home_http_bind, None);
     }
 }

@@ -446,6 +446,8 @@ fn MwsConfigCard(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> Elem
     let auto_connect = state.read().config.auto_connect;
     let auto_reconnect = state.read().config.auto_reconnect;
     let enabled = state.read().config.enabled;
+    let home_enabled = state.read().config.home_http_bind.is_some();
+    let home_bg = if home_enabled { "#f59e0b" } else { "#374151" };
     let enabled_bg = if enabled { "#10b981" } else { "#374151" };
     let auto_connect_bg = if auto_connect { "#8b5cf6" } else { "#374151" };
     let auto_reconnect_bg = if auto_reconnect { "#06b6d4" } else { "#374151" };
@@ -467,6 +469,28 @@ fn MwsConfigCard(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> Elem
             "Connexion automatique activée par défaut.".to_string()
         } else {
             "Connexion automatique désactivée.".to_string()
+        });
+        let n = *tick.read();
+        tick.set(n + 1);
+    };
+
+    // Interrupteur de la page Home (EX-48) : activée en boucle locale par défaut.
+    let toggle_home = move |_| {
+        let now_enabled = {
+            let mut s = state.write();
+            s.config.home_http_bind = if s.config.home_http_bind.is_some() {
+                None
+            } else {
+                Some(super::mws_settings::HOME_BIND_LOCAL.to_string())
+            };
+            s.config.home_http_bind.clone()
+        };
+        home_input.set(now_enabled.clone().unwrap_or_default());
+        persist_config(&state);
+        feedback_is_error.set(false);
+        feedback.set(match now_enabled {
+            Some(addr) => format!("Page Home activée sur {addr} (appliquée à la prochaine connexion MWS)."),
+            None => "Page Home désactivée (appliquée à la prochaine connexion MWS).".to_string(),
         });
         let n = *tick.read();
         tick.set(n + 1);
@@ -547,10 +571,11 @@ fn MwsConfigCard(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> Elem
                 value
             }
         };
+        // Champ vide = page Home désactivée (EX-48).
         let home_http_bind = {
             let value = home_input().trim().to_string();
             if value.is_empty() {
-                defaults.home_http_bind
+                None
             } else {
                 Some(value)
             }
@@ -661,6 +686,11 @@ fn MwsConfigCard(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> Elem
                     onclick: toggle_auto_reconnect,
                     if auto_reconnect { "Reconnexion auto: oui" } else { "Reconnexion auto: non" }
                 }
+                button {
+                    style: "padding: 8px 12px; border-radius: 999px; border: none; cursor: pointer; background: {home_bg}; color: #fff;",
+                    onclick: toggle_home,
+                    if home_enabled { "Page Home: exposée" } else { "Page Home: désactivée" }
+                }
             }
 
             div {
@@ -701,7 +731,7 @@ fn MwsConfigCard(mut state: Signal<MwsViewState>, mut tick: Signal<u64>) -> Elem
 
                 div {
                     style: "display: flex; flex-direction: column; gap: 6px;",
-                    label { style: "font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;", "Bind Home HTTP" }
+                    label { style: "font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;", "Bind Home HTTP (vide = désactivée)" }
                     input {
                         r#type: "text",
                         value: "{home_input()}",
