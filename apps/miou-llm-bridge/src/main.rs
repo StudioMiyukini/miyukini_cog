@@ -22,8 +22,10 @@
 mod agents;
 mod catalog;
 mod config;
+mod confirmations;
 mod context;
 mod fallback;
+mod garde_etranger;
 mod hardware;
 mod health;
 mod inference;
@@ -306,6 +308,7 @@ async fn main() {
         maia_mode,
         started_at,
         team_registered,
+        confirmations: std::sync::Arc::new(confirmations::RegistreConfirmations::new()),
     };
 
     let app = proxy_router(state);

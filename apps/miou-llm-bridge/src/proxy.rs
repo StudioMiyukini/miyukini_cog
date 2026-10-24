@@ -55,6 +55,8 @@ pub struct ProxyState {
     pub started_at: u64,
     /// Enregistré auprès du hub TEAM.
     pub team_registered: bool,
+    /// Actions d'outils suspendues en attente de confirmation (K-02).
+    pub confirmations: std::sync::Arc<crate::confirmations::RegistreConfirmations>,
 }
 
 /// Construit la couche CORS à partir d'une liste explicite d'origines.
@@ -113,6 +115,9 @@ pub fn proxy_router(state: ProxyState) -> Router {
         // ── Skills ───────────────────────────────────────────────
         .route("/v1/skills", get(list_skills))
         .route("/v1/skills/{id}/execute", post(execute_skill))
+        // ── Confirmations d'actions suspendues (K-02) ────────────
+        .route("/v1/confirmations", get(list_confirmations))
+        .route("/v1/confirmations/{id}", post(decide_confirmation))
         // ── Contextes CRUD ───────────────────────────────────────
         .route("/v1/contexts", get(list_contexts).post(create_context))
         .route(
@@ -428,6 +433,7 @@ async fn chat_with_agent(
             tools,
             &agent,
             &state.audit_log,
+            &state.confirmations,
         )
         .await
         {
@@ -442,6 +448,8 @@ async fn chat_with_agent(
                 "fallback": false,
                 "tool_calls": result.tool_calls_log,
                 "iterations": result.iterations,
+                "foreign_content": result.contenu_etranger,
+                "pending_confirmations": result.confirmations_en_attente,
             }))
             .into_response(),
 
@@ -505,7 +513,14 @@ async fn execute_skill(
             .into_response();
     }
 
-    let result = SkillRegistry::execute(&id, &req.params).await;
+    // Appel direct par l'utilisateur (hors boucle du modèle) : une écriture
+    // de service exige `confirm: true` explicite dans la requête.
+    let autorisation = if req.confirm {
+        crate::skills::Autorisation::EcritureConfirmee
+    } else {
+        crate::skills::Autorisation::Standard
+    };
+    let result = SkillRegistry::execute(&id, &req.params, autorisation).await;
 
     state.audit_log.log(crate::security::AuditEntry {
         timestamp: crate::security::epoch_now(),
@@ -523,6 +538,65 @@ async fn execute_skill(
     });
 
     Json(serde_json::json!({ "result": result })).into_response()
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Confirmations d'actions suspendues (K-02)
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Liste les actions suspendues, avec l'action exacte qui sera exécutée.
+async fn list_confirmations(State(state): State<ProxyState>) -> impl IntoResponse {
+    let actions = state.confirmations.lister();
+    Json(serde_json::json!({ "pending_confirmations": actions, "count": actions.len() }))
+}
+
+#[derive(serde::Deserialize)]
+struct ConfirmationDecision {
+    /// `true` : exécuter l'action affichée ; `false` : l'abandonner.
+    confirm: bool,
+}
+
+/// Confirme (exécute) ou rejette une action suspendue. Usage unique.
+async fn decide_confirmation(
+    State(state): State<ProxyState>,
+    Path(id): Path<String>,
+    Json(decision): Json<ConfirmationDecision>,
+) -> impl IntoResponse {
+    if !decision.confirm {
+        return match state.confirmations.prendre(&id) {
+            Ok(action) => Json(serde_json::json!({
+                "rejected": action.id,
+                "action": action.action,
+            }))
+            .into_response(),
+            Err(e) => (
+                StatusCode::NOT_FOUND,
+                Json(serde_json::json!({ "error": e.to_string() })),
+            )
+                .into_response(),
+        };
+    }
+    match crate::tools::executer_confirmation(
+        &id,
+        &state.confirmations,
+        &state.agent_registry,
+        &state.audit_log,
+        &crate::tools::ExecuteurRegistre,
+    )
+    .await
+    {
+        Ok((action, result)) => Json(serde_json::json!({
+            "confirmed": action.id,
+            "action": action.action,
+            "result": result,
+        }))
+        .into_response(),
+        Err(e) => (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({ "error": e })),
+        )
+            .into_response(),
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════

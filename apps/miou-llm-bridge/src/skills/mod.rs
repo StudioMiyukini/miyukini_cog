@@ -45,6 +45,20 @@ pub struct SkillInfo {
     pub min_security_level: &'static str,
 }
 
+/// Autorisation accordée à une exécution de skill.
+///
+/// `EcritureConfirmee` n'est jamais dérivée des paramètres fournis par le
+/// modèle : elle n'est accordée que par une confirmation humaine explicite
+/// (`POST /v1/confirmations/{id}`) ou par l'appel direct de l'API skills avec
+/// `confirm: true` (action initiée par l'utilisateur, hors boucle du modèle).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Autorisation {
+    /// Exécution courante : les écritures vers les services COG sont refusées.
+    Standard,
+    /// Action confirmée par l'utilisateur.
+    EcritureConfirmee,
+}
+
 /// Requête d'exécution d'un skill.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SkillExecRequest {
@@ -54,6 +68,9 @@ pub struct SkillExecRequest {
     /// ID de l'agent qui exécute (pour vérifier les permissions).
     #[serde(default)]
     pub agent_id: Option<String>,
+    /// Confirmation explicite de l'utilisateur pour une écriture de service.
+    #[serde(default)]
+    pub confirm: bool,
 }
 
 // ── Registre ─────────────────────────────────────────────────────────
@@ -76,6 +93,7 @@ impl SkillRegistry {
     pub async fn execute(
         skill_id: &str,
         params: &HashMap<String, serde_json::Value>,
+        autorisation: Autorisation,
     ) -> SkillResult {
         let start = std::time::Instant::now();
 
@@ -83,7 +101,7 @@ impl SkillRegistry {
             "file_ops" => file_ops::execute(params).await,
             "shell_exec" => shell_exec::execute(params).await,
             "web_fetch" => web_fetch::execute(params).await,
-            "cog_services" => cog_services::execute(params).await,
+            "cog_services" => cog_services::execute(params, autorisation).await,
             _ => SkillResult {
                 success: false,
                 output: serde_json::Value::Null,
