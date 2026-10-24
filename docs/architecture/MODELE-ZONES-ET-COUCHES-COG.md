@@ -107,6 +107,7 @@
 - **INV-Z4** Zone COG sans route par défaut
 - **INV-Z5** Franche sans secret ; DB secondaire = copies publiées seulement
 - **INV-Z6** International : rien n'entre hors liste blanche
+- **INV-Z7** Relais (Franche) ⇄ moteur (zone COG) : **uniquement par le Portail interne**, flux ouvert par la zone COG
 
 ## 7. Canal officiel
 
