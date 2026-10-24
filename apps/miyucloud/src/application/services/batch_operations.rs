@@ -659,11 +659,12 @@ impl BatchOperationService {
 
         // ── Add individual files at the root of the ZIP ──────────────────
         for file_id in &file_ids {
-            if en_quarantaine.contains(file_id) {
-                info!("File {} excluded from ZIP (CDR quarantine)", file_id);
-                continue;
-            }
+            // Propriété d'abord ; l'état CDR n'est consulté que pour un
+            // fichier de l'appelant (anti-IDOR).
             match self.file_retrieval.get_file_owned(file_id, user_id).await {
+                Ok(_) if en_quarantaine.contains(file_id) => {
+                    info!("File {} excluded from ZIP (CDR quarantine)", file_id);
+                }
                 Ok(file_dto) => {
                     if let Err(e) = self
                         .add_file_entry_streamed(&mut zip, file_id, &file_dto.name, user_id)

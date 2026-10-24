@@ -26,6 +26,7 @@ use crate::application::ports::file_ports::{
 use crate::application::ports::inbound::FolderUseCase;
 use crate::application::ports::trash_ports::TrashUseCase;
 use crate::common::di::AppState;
+use crate::common::errors::ErrorKind;
 use crate::common::mime_detect::{filename_from_path, refine_content_type};
 use crate::domain::services::home_folder::is_reserved_home_name;
 use crate::interfaces::errors::AppError;
@@ -310,11 +311,16 @@ async fn handle_get(
     };
 
     // EX-45 : un client DAV ne peut pas exprimer l'accord explicite exigé
-    // pour un fichier en quarantaine CDR → 403 (fermé par défaut).
+    // pour un fichier en quarantaine CDR → 403 (fermé par défaut). L'état
+    // n'est lu qu'après résolution sous la racine de l'appelant, et limité au
+    // propriétaire (anti-IDOR) : sinon même 404.
     let etat = file_service
-        .etat_cdr(&file.id)
+        .etat_cdr_owned(&file.id, user.id)
         .await
-        .map_err(|e| AppError::internal_error(format!("Failed to read file: {}", e)))?;
+        .map_err(|e| match e.kind {
+            ErrorKind::NotFound => AppError::not_found("File not found"),
+            _ => AppError::internal_error(format!("Failed to read file: {}", e)),
+        })?;
     if !etat.autorise_lecture_dav() {
         return Err(AppError::non_desarme_dav());
     }

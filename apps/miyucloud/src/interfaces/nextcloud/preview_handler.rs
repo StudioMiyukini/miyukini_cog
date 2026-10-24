@@ -105,11 +105,12 @@ pub async fn handle_preview(
     }
 
     // EX-45 : aucun aperçu pour un fichier non désarmé (quarantaine CDR ou
-    // antérieur au CDR) — le contenu n'est jamais ouvert.
+    // antérieur au CDR) — le contenu n'est jamais ouvert. Lu après la
+    // vérification de propriété et limité au propriétaire (anti-IDOR).
     match state
         .repositories
         .file_read_repository
-        .get_etat_cdr(&object_id)
+        .get_etat_cdr_owned(&object_id, user.id)
         .await
     {
         Ok(etat) if etat.autorise_traitement_contenu() => {}

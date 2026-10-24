@@ -33,6 +33,7 @@ use crate::application::ports::storage_ports::StorageUsagePort;
 use crate::application::services::file_retrieval_service::FileRetrievalService;
 use crate::application::services::folder_service::FolderService;
 use crate::common::di::AppState;
+use crate::common::errors::ErrorKind;
 use crate::domain::services::home_folder::is_reserved_home_name;
 use crate::infrastructure::services::path_resolver_service::ResolvedResource;
 use crate::interfaces::errors::AppError;
@@ -739,11 +740,15 @@ async fn handle_get(
     };
 
     // EX-45 : quarantaine CDR → 403 (un client DAV ne peut pas exprimer
-    // l'accord explicite exigé).
+    // l'accord explicite exigé). Propriété déjà confirmée ci-dessus, et l'état
+    // n'est lu que pour le propriétaire (anti-IDOR) : sinon même 404.
     let etat = file_retrieval_service
-        .etat_cdr(&file.id)
+        .etat_cdr_owned(&file.id, user.id)
         .await
-        .map_err(|e| AppError::internal_error(format!("Failed to stream file: {}", e)))?;
+        .map_err(|e| match e.kind {
+            ErrorKind::NotFound => AppError::not_found(format!("File not found: {}", path)),
+            _ => AppError::internal_error(format!("Failed to stream file: {}", e)),
+        })?;
     if !etat.autorise_lecture_dav() {
         return Err(AppError::non_desarme_dav());
     }

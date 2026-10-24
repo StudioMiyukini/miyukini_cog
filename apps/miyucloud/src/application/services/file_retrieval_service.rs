@@ -61,9 +61,10 @@ impl FileRetrievalService {
         }
     }
 
-    /// État CDR du fichier (EX-45, décision A-004).
-    pub async fn etat_cdr(&self, id: &str) -> Result<EtatCdr, DomainError> {
-        self.file_read.get_etat_cdr(id).await
+    /// État CDR du fichier (EX-45, décision A-004), limité au propriétaire :
+    /// un fichier d'autrui répond `NotFound`, exactement comme un id inexistant.
+    pub async fn etat_cdr_owned(&self, id: &str, owner_id: Uuid) -> Result<EtatCdr, DomainError> {
+        self.file_read.get_etat_cdr_owned(id, owner_id).await
     }
 
     /// Identifiants en quarantaine CDR parmi `ids` (exclus des archives ZIP).

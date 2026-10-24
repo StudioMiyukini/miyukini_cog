@@ -107,16 +107,21 @@ impl ShareService {
         }
     }
 
-    /// Verifies that the item to share exists
+    /// Vérifie que l'élément à partager existe **et appartient à `user_id`**.
+    ///
+    /// Sécurité (anti-IDOR) : élément inexistant ou d'autrui → même
+    /// `ItemNotFound` ; l'état CDR n'est lu qu'après confirmation de la
+    /// propriété (et limité au propriétaire), jamais pour un tiers.
     async fn verify_item_exists(
         &self,
         item_id: &str,
         item_type: &ShareItemType,
+        user_id: Uuid,
     ) -> Result<(), ShareServiceError> {
         match item_type {
             ShareItemType::File => {
                 self.file_repository
-                    .get_file(item_id) // Using the correct method from the FileStoragePort trait
+                    .get_file_for_owner(item_id, user_id)
                     .await
                     .map_err(|_| {
                         ShareServiceError::ItemNotFound(format!(
@@ -128,7 +133,7 @@ impl ShareService {
                 // (quarantaine ou antérieur au CDR) — fermé par défaut.
                 let etat = self
                     .file_repository
-                    .get_etat_cdr(item_id)
+                    .get_etat_cdr_owned(item_id, user_id)
                     .await
                     .map_err(|e| ShareServiceError::Repository(e.to_string()))?;
                 if !etat.autorise_lien_public() {
@@ -138,8 +143,9 @@ impl ShareService {
                 }
             }
             ShareItemType::Folder => {
-                self.folder_repository
-                    .get_folder(item_id) // Using the correct method from the FolderStoragePort trait
+                let folder = self
+                    .folder_repository
+                    .get_folder(item_id)
                     .await
                     .map_err(|_| {
                         ShareServiceError::ItemNotFound(format!(
@@ -147,6 +153,13 @@ impl ShareService {
                             item_id
                         ))
                     })?;
+                // Dossier d'autrui → même réponse qu'un dossier inexistant.
+                if folder.owner_id() != Some(user_id) {
+                    return Err(ShareServiceError::ItemNotFound(format!(
+                        "Folder with ID {} not found",
+                        item_id
+                    )));
+                }
             }
         }
         Ok(())
@@ -189,8 +202,9 @@ impl ShareUseCase for ShareService {
         let item_type = ShareItemType::try_from(dto.item_type.as_str())
             .map_err(|e| ShareServiceError::InvalidItemType(e.to_string()))?;
 
-        // Verify that the item exists
-        self.verify_item_exists(&dto.item_id, &item_type).await?;
+        // Vérifie l'existence ET la propriété de l'élément (anti-IDOR).
+        self.verify_item_exists(&dto.item_id, &item_type, user_id)
+            .await?;
 
         // Convert the permissions DTO if it exists
         let permissions = dto.permissions.map(|p| p.to_entity());
@@ -496,15 +510,19 @@ mod tests {
             &self,
             item_id: &str,
             item_type: &ShareItemType,
+            user_id: Uuid,
         ) -> Result<(), ShareServiceError> {
             match item_type {
                 ShareItemType::File => {
-                    self.file_repository.get_file(item_id).await.map_err(|_| {
-                        ShareServiceError::ItemNotFound(format!(
-                            "File with ID {} not found",
-                            item_id
-                        ))
-                    })?;
+                    self.file_repository
+                        .get_file_for_owner(item_id, user_id)
+                        .await
+                        .map_err(|_| {
+                            ShareServiceError::ItemNotFound(format!(
+                                "File with ID {} not found",
+                                item_id
+                            ))
+                        })?;
                 }
                 ShareItemType::Folder => {
                     self.folder_repository
@@ -543,7 +561,8 @@ mod tests {
         ) -> Result<ShareDto, DomainError> {
             let item_type = ShareItemType::try_from(dto.item_type.as_str())
                 .map_err(|e| ShareServiceError::InvalidItemType(e.to_string()))?;
-            self.verify_item_exists(&dto.item_id, &item_type).await?;
+            self.verify_item_exists(&dto.item_id, &item_type, user_id)
+                .await?;
             let permissions = dto.permissions.map(|p| p.to_entity());
             let password_hash = match dto.password {
                 Some(p) => Some(self.hash_password_async(&p).await?),

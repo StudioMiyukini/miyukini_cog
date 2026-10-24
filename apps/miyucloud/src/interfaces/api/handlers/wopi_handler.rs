@@ -88,8 +88,10 @@ async fn check_file_info(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
-    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
-    if let Err(status) = exiger_desarme(&state, &file_id).await {
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé. Le jeton
+    // (validé ci-dessus) confirme l'accès ; l'état est en outre lu limité au
+    // titulaire du jeton (anti-IDOR).
+    if let Err(status) = exiger_desarme_jeton(&state, &file_id, &claims.sub).await {
         return status.into_response();
     }
 
@@ -150,8 +152,10 @@ async fn get_file(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
-    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
-    if let Err(status) = exiger_desarme(&state, &file_id).await {
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé. Le jeton
+    // (validé ci-dessus) confirme l'accès ; l'état est en outre lu limité au
+    // titulaire du jeton (anti-IDOR).
+    if let Err(status) = exiger_desarme_jeton(&state, &file_id, &claims.sub).await {
         return status.into_response();
     }
 
@@ -198,8 +202,10 @@ async fn put_file(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
-    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
-    if let Err(status) = exiger_desarme(&state, &file_id).await {
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé. Le jeton
+    // (validé ci-dessus) confirme l'accès ; l'état est en outre lu limité au
+    // titulaire du jeton (anti-IDOR).
+    if let Err(status) = exiger_desarme_jeton(&state, &file_id, &claims.sub).await {
         return status.into_response();
     }
 
@@ -337,8 +343,10 @@ async fn file_operations(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
-    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
-    if let Err(status) = exiger_desarme(&state, &file_id).await {
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé. Le jeton
+    // (validé ci-dessus) confirme l'accès ; l'état est en outre lu limité au
+    // titulaire du jeton (anti-IDOR).
+    if let Err(status) = exiger_desarme_jeton(&state, &file_id, &claims.sub).await {
         return status.into_response();
     }
 
@@ -415,19 +423,36 @@ pub struct EditorUrlResponse {
 }
 
 /// EX-45 : seul un fichier désarmé peut être ouvert par un éditeur WOPI.
-/// Quarantaine ou état inconnu → 403 ; fichier introuvable → 404.
-async fn exiger_desarme(state: &WopiState, file_id: &str) -> Result<(), StatusCode> {
+/// Quarantaine ou état inconnu → 403 ; fichier introuvable **ou d'autrui**
+/// → 404 (l'état n'est lu que limité au propriétaire : anti-IDOR). À appeler
+/// uniquement après confirmation de l'accès.
+async fn exiger_desarme(
+    state: &WopiState,
+    file_id: &str,
+    appelant: uuid::Uuid,
+) -> Result<(), StatusCode> {
     match state
         .app_state
         .applications
         .file_retrieval_service
-        .etat_cdr(file_id)
+        .etat_cdr_owned(file_id, appelant)
         .await
     {
         Ok(etat) if etat.autorise_traitement_contenu() => Ok(()),
         Ok(_) => Err(StatusCode::FORBIDDEN),
         Err(_) => Err(StatusCode::NOT_FOUND),
     }
+}
+
+/// Variante des routes à jeton WOPI : l'appelant est le sujet du jeton.
+/// Sujet illisible → 401 (jeton invalide), sans jamais lire l'état CDR.
+async fn exiger_desarme_jeton(
+    state: &WopiState,
+    file_id: &str,
+    sujet: &str,
+) -> Result<(), StatusCode> {
+    let appelant = uuid::Uuid::parse_str(sujet).map_err(|_| StatusCode::UNAUTHORIZED)?;
+    exiger_desarme(state, file_id, appelant).await
 }
 
 /// Determines if `caller_id` can access `file_id` and with what permissions.
@@ -478,7 +503,7 @@ pub async fn get_editor_url(
 
     // EX-45 : édition WOPI refusée pour tout fichier non désarmé (quarantaine
     // ou antérieur au CDR) — fermé par défaut.
-    if let Err(status) = exiger_desarme(&state, &params.file_id).await {
+    if let Err(status) = exiger_desarme(&state, &params.file_id, user_id).await {
         return (
             status,
             "Édition refusée : fichier non désarmé (CDR), jamais ouvert par un éditeur",
@@ -554,11 +579,6 @@ async fn host_page(
         return StatusCode::UNAUTHORIZED.into_response();
     }
 
-    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé.
-    if let Err(status) = exiger_desarme(&state, &file_id).await {
-        return status.into_response();
-    }
-
     // Re-verify ownership even though the token was valid — defence in depth.
     let requested_action = if claims.can_write { "edit" } else { "view" };
     let caller_uuid = match uuid::Uuid::parse_str(&claims.sub) {
@@ -576,6 +596,12 @@ async fn host_page(
         Ok((f, _)) => f,
         Err(status) => return status.into_response(),
     };
+
+    // EX-45 : aucun éditeur WOPI n'ouvre un fichier non désarmé — vérifié
+    // après la propriété, jamais avant (anti-IDOR).
+    if let Err(status) = exiger_desarme(&state, &file_id, caller_uuid).await {
+        return status.into_response();
+    }
 
     let extension = file.name.rsplit('.').next().unwrap_or("").to_lowercase();
     let action = requested_action;

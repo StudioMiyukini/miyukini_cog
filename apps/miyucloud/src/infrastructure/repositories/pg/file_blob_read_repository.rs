@@ -172,13 +172,24 @@ impl FileBlobReadRepository {
         Ok(hash)
     }
 
-    /// État CDR d'un fichier (EX-45). Jamais mis en cache : l'état change
-    /// avec le contenu. Fichier absent → `NotFound`.
-    pub async fn get_etat_cdr(&self, file_id: &str) -> Result<EtatCdr, DomainError> {
+    /// État CDR d'un fichier **appartenant à `owner_id`** (EX-45). Jamais mis
+    /// en cache : l'état change avec le contenu.
+    ///
+    /// Sécurité (anti-IDOR) : la propriété est vérifiée dans la même requête
+    /// SQL. Fichier absent, à la corbeille ou appartenant à un autre
+    /// utilisateur → même `NotFound`, si bien que l'état CDR n'est jamais un
+    /// oracle d'existence pour un tiers.
+    pub async fn get_etat_cdr_owned(
+        &self,
+        file_id: &str,
+        owner_id: Uuid,
+    ) -> Result<EtatCdr, DomainError> {
         let etat = sqlx::query_scalar::<_, String>(
-            "SELECT etat_cdr FROM storage.files WHERE id = $1::uuid",
+            "SELECT etat_cdr FROM storage.files \
+              WHERE id = $1::uuid AND user_id = $2 AND NOT is_trashed",
         )
         .bind(file_id)
+        .bind(owner_id)
         .fetch_optional(self.pool.as_ref())
         .await
         .map_err(|e| DomainError::internal_error("FileBlobRead", format!("etat_cdr: {e}")))?

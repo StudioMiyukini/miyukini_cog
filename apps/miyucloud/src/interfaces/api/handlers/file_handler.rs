@@ -22,13 +22,16 @@ use crate::application::ports::file_ports::{
 };
 use crate::application::ports::storage_ports::{FileReadPort, StorageUsagePort};
 use crate::application::ports::thumbnail_ports::ThumbnailPort;
+use crate::application::services::file_retrieval_service::FileRetrievalService;
 use crate::common::di::AppState;
+use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::entities::etat_cdr::{
     ENTETE_ETAT_CDR, EtatCdr, MESSAGE_QUARANTAINE, PARAM_ACCORD_NON_DESARME, accord_explicite,
 };
 use crate::interfaces::errors::AppError;
 use crate::interfaces::middleware::auth::AuthUser;
 use std::sync::Arc;
+use uuid::Uuid;
 
 /**
  * Type aliases for dependency injection state.
@@ -404,23 +407,25 @@ impl FileHandler {
                 .into_response();
         }
 
-        // ── EX-45 : aucune vignette pour un fichier non désarmé ────────
-        // (quarantaine ou antérieur au CDR), y compris depuis le cache : le
-        // contenu a pu être remplacé depuis la génération de la vignette.
-        match state
-            .repositories
-            .file_read_repository
-            .get_etat_cdr(&id)
-            .await
+        // ── Propriété puis EX-45, avant tout accès au cache ──────────
+        // Anti-IDOR : l'état CDR n'est lu qu'à travers une requête limitée au
+        // propriétaire ; un fichier d'autrui répond le même 404 qu'un id
+        // inexistant, sans en-tête d'état. Puis aucune vignette pour un
+        // fichier non désarmé (quarantaine ou antérieur au CDR), y compris
+        // depuis le cache : le contenu a pu être remplacé depuis la génération.
+        if let Some(refus) = Self::porte_vignette(
+            &*state.applications.file_retrieval_service,
+            &id,
+            auth_user.id,
+        )
+        .await
         {
-            Ok(etat) if etat.autorise_traitement_contenu() => {}
-            Ok(etat) => return Self::sans_vignette(etat),
-            Err(err) => return AppError::from(err).into_response(),
+            return refus;
         }
 
         // ── Cache-first path (Solution A) ────────────────────────────
-        // Try moka (RAM) → disk before touching the database.
-        // If the thumbnail exists it was authorized at creation time.
+        // Propriété déjà confirmée ci-dessus : le cache (moka → disque) n'est
+        // servi qu'au propriétaire.
         if let Some(data) = thumbnail_service
             .get_cached_thumbnail(&id, thumb_size.into())
             .await
@@ -444,9 +449,7 @@ impl FileHandler {
             .await
         {
             Ok(f) => f,
-            Err(err) => {
-                return AppError::from(err).into_response();
-            }
+            Err(err) => return Self::reponse_erreur_acces(err),
         };
 
         // Non-image (video, etc.) with no cached thumbnail → 204
@@ -536,30 +539,24 @@ impl FileHandler {
                 .into_response();
         }
 
-        // Validate file ownership
-        let file_retrieval_service = &state.applications.file_retrieval_service;
-        if let Err(err) = file_retrieval_service
-            .get_file_owned(&id, auth_user.id)
-            .await
+        // Propriété (requête limitée au propriétaire) puis EX-45 : pas de
+        // vignette pour un fichier non désarmé. Fichier d'autrui ⇒ même 404
+        // qu'un id inexistant (anti-IDOR).
+        let etat = match Self::etat_cdr_apres_acces(
+            &*state.applications.file_retrieval_service,
+            &id,
+            auth_user.id,
+        )
+        .await
         {
-            return AppError::from(err).into_response();
-        }
-
-        // EX-45 : pas de vignette pour un fichier non désarmé.
-        match state
-            .repositories
-            .file_read_repository
-            .get_etat_cdr(&id)
-            .await
-        {
-            Ok(etat) if etat.autorise_traitement_contenu() => {}
-            Ok(etat) => {
-                return AppError::forbidden(format!(
-                    "Vignette refusée : fichier non désarmé (état CDR « {etat} »)"
-                ))
-                .into_response();
-            }
-            Err(err) => return AppError::from(err).into_response(),
+            Ok(etat) => etat,
+            Err(refus) => return *refus,
+        };
+        if !etat.autorise_traitement_contenu() {
+            return AppError::forbidden(format!(
+                "Vignette refusée : fichier non désarmé (état CDR « {etat} »)"
+            ))
+            .into_response();
         }
 
         // EX-45 : la vignette fournie par le client est un fichier entrant —
@@ -605,17 +602,17 @@ impl FileHandler {
         let retrieval = &state.applications.file_retrieval_service;
 
         // ── Get file metadata (ownership-scoped) ────────────────────────
+        // Fichier d'autrui ⇒ même 404 qu'un id inexistant (anti-IDOR).
         let file_dto = match retrieval.get_file_owned(&id, auth_user.id).await {
             Ok(f) => f,
-            Err(err) => {
-                return AppError::from(err).into_response();
-            }
+            Err(err) => return Self::reponse_erreur_acces(err),
         };
 
         // ── EX-45 : état CDR (jamais en cache, suit le contenu) ────────
-        let etat = match retrieval.etat_cdr(&id).await {
+        // Lu après la propriété, et lui-même limité au propriétaire.
+        let etat = match Self::etat_cdr_apres_acces(&**retrieval, &id, auth_user.id).await {
             Ok(etat) => etat,
-            Err(err) => return AppError::from(err).into_response(),
+            Err(refus) => return *refus,
         };
 
         // ── Metadata-only request ────────────────────────────────────
@@ -1096,6 +1093,49 @@ impl FileHandler {
         format!("{disposition}; filename=\"{ascii_safe}\"; filename*=UTF-8''{encoded}")
     }
 
+    /// Réponse uniforme « introuvable » : même statut, mêmes en-têtes et même
+    /// corps pour un fichier inexistant et pour un fichier d'autrui (anti-IDOR).
+    /// Aucun en-tête d'état CDR.
+    fn reponse_introuvable() -> Response<Body> {
+        AppError::not_found("File not found").into_response()
+    }
+
+    /// Erreur d'accès → réponse. Introuvable et accès refusé sont confondus
+    /// en un 404 uniforme pour ne jamais révéler l'existence d'un fichier.
+    fn reponse_erreur_acces(err: DomainError) -> Response<Body> {
+        match err.kind {
+            ErrorKind::NotFound | ErrorKind::AccessDenied => Self::reponse_introuvable(),
+            _ => AppError::from(err).into_response(),
+        }
+    }
+
+    /// État CDR lu **seulement** à travers la source limitée au propriétaire
+    /// (EX-45, anti-IDOR) : un tiers obtient le 404 uniforme, jamais l'état.
+    async fn etat_cdr_apres_acces<S: EtatCdrProprietaire>(
+        source: &S,
+        id: &str,
+        utilisateur: Uuid,
+    ) -> Result<EtatCdr, Box<Response<Body>>> {
+        source
+            .etat_cdr_proprietaire(id, utilisateur)
+            .await
+            .map_err(|err| Box::new(Self::reponse_erreur_acces(err)))
+    }
+
+    /// Porte de la vignette : `None` ⇒ poursuivre ; `Some(r)` ⇒ répondre `r`
+    /// (404 uniforme si non-propriétaire, 204 + état CDR si non désarmé).
+    async fn porte_vignette<S: EtatCdrProprietaire>(
+        source: &S,
+        id: &str,
+        utilisateur: Uuid,
+    ) -> Option<Response<Body>> {
+        match Self::etat_cdr_apres_acces(source, id, utilisateur).await {
+            Ok(etat) if etat.autorise_traitement_contenu() => None,
+            Ok(etat) => Some(Self::sans_vignette(etat)),
+            Err(refus) => Some(*refus),
+        }
+    }
+
     /// Réponse « pas de vignette » pour un fichier non désarmé (EX-45).
     fn sans_vignette(etat: EtatCdr) -> Response<Body> {
         Response::builder()
@@ -1171,6 +1211,27 @@ impl FileHandler {
     }
 }
 
+/// Source d'état CDR limitée au propriétaire (EX-45, anti-IDOR). Les
+/// gestionnaires ne lisent l'état CDR qu'à travers elle : la propriété est
+/// vérifiée avant (dans la même requête que) la lecture de l'état.
+pub(crate) trait EtatCdrProprietaire {
+    async fn etat_cdr_proprietaire(
+        &self,
+        id: &str,
+        proprietaire: Uuid,
+    ) -> Result<EtatCdr, DomainError>;
+}
+
+impl EtatCdrProprietaire for FileRetrievalService {
+    async fn etat_cdr_proprietaire(
+        &self,
+        id: &str,
+        proprietaire: Uuid,
+    ) -> Result<EtatCdr, DomainError> {
+        self.etat_cdr_owned(id, proprietaire).await
+    }
+}
+
 /// Payload for moving a file
 #[derive(Debug, Deserialize)]
 pub struct MoveFilePayload {
@@ -1181,6 +1242,117 @@ pub struct MoveFilePayload {
 #[cfg(test)]
 mod tests_cdr {
     use super::*;
+
+    /// Source factice reproduisant la sémantique SQL de
+    /// `get_etat_cdr_owned` : `WHERE id = $1 AND user_id = $2`.
+    struct SourceFactice {
+        fichiers: HashMap<String, (Uuid, EtatCdr)>,
+    }
+
+    impl EtatCdrProprietaire for SourceFactice {
+        async fn etat_cdr_proprietaire(
+            &self,
+            id: &str,
+            proprietaire: Uuid,
+        ) -> Result<EtatCdr, DomainError> {
+            match self.fichiers.get(id) {
+                Some((p, etat)) if *p == proprietaire => Ok(*etat),
+                _ => Err(DomainError::not_found("File", id)),
+            }
+        }
+    }
+
+    const ID_ALICE: &str = "11111111-1111-1111-1111-111111111111";
+    const ID_INEXISTANT: &str = "22222222-2222-2222-2222-222222222222";
+
+    fn source_alice(alice: Uuid, etat: EtatCdr) -> SourceFactice {
+        SourceFactice {
+            fichiers: HashMap::from([(ID_ALICE.to_string(), (alice, etat))]),
+        }
+    }
+
+    /// Statut, en-têtes et corps complets d'une réponse.
+    async fn decomposer(resp: Response<Body>) -> (StatusCode, header::HeaderMap, bytes::Bytes) {
+        let (parts, body) = resp.into_parts();
+        let corps = axum::body::to_bytes(body, usize::MAX).await.unwrap();
+        (parts.status, parts.headers, corps)
+    }
+
+    #[tokio::test]
+    async fn vignette_fichier_d_autrui_identique_a_inexistant() {
+        let (alice, bob) = (Uuid::new_v4(), Uuid::new_v4());
+        for etat in [EtatCdr::Quarantaine, EtatCdr::Inconnu, EtatCdr::Desarme] {
+            let source = source_alice(alice, etat);
+            let autrui = FileHandler::porte_vignette(&source, ID_ALICE, bob)
+                .await
+                .expect("refus attendu pour un tiers");
+            let inexistant = FileHandler::porte_vignette(&source, ID_INEXISTANT, bob)
+                .await
+                .expect("refus attendu pour un id inexistant");
+            let autrui = decomposer(autrui).await;
+            assert_eq!(autrui.0, StatusCode::NOT_FOUND);
+            assert!(autrui.1.get(ENTETE_ETAT_CDR).is_none());
+            assert_eq!(autrui, decomposer(inexistant).await);
+        }
+    }
+
+    #[tokio::test]
+    async fn vignette_proprietaire_recoit_l_etat() {
+        let alice = Uuid::new_v4();
+        let source = source_alice(alice, EtatCdr::Quarantaine);
+        let resp = FileHandler::porte_vignette(&source, ID_ALICE, alice)
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::NO_CONTENT);
+        assert_eq!(resp.headers().get(ENTETE_ETAT_CDR).unwrap(), "quarantaine");
+        let source = source_alice(alice, EtatCdr::Desarme);
+        assert!(
+            FileHandler::porte_vignette(&source, ID_ALICE, alice)
+                .await
+                .is_none()
+        );
+    }
+
+    #[tokio::test]
+    async fn telechargement_fichier_d_autrui_identique_a_inexistant() {
+        let (alice, bob) = (Uuid::new_v4(), Uuid::new_v4());
+        let source = source_alice(alice, EtatCdr::Quarantaine);
+        // Même enchaînement que `download_file` : erreur de propriété puis
+        // état CDR limité au propriétaire.
+        let autrui = FileHandler::etat_cdr_apres_acces(&source, ID_ALICE, bob)
+            .await
+            .unwrap_err();
+        let inexistant = FileHandler::etat_cdr_apres_acces(&source, ID_INEXISTANT, bob)
+            .await
+            .unwrap_err();
+        let autrui = decomposer(*autrui).await;
+        assert_eq!(autrui.0, StatusCode::NOT_FOUND);
+        assert!(autrui.1.get(ENTETE_ETAT_CDR).is_none());
+        assert_eq!(autrui, decomposer(*inexistant).await);
+
+        // L'erreur de `get_file_owned` (NotFound ou AccessDenied) donne la
+        // même réponse uniforme.
+        for err in [
+            DomainError::not_found("File", ID_ALICE),
+            DomainError::access_denied("File", "not owner"),
+        ] {
+            let r = decomposer(FileHandler::reponse_erreur_acces(err)).await;
+            assert_eq!(r, autrui);
+        }
+    }
+
+    #[tokio::test]
+    async fn telechargement_proprietaire_quarantaine_refusee_avec_etat() {
+        let alice = Uuid::new_v4();
+        let source = source_alice(alice, EtatCdr::Quarantaine);
+        let etat = FileHandler::etat_cdr_apres_acces(&source, ID_ALICE, alice)
+            .await
+            .unwrap();
+        assert!(!etat.autorise_telechargement(false));
+        let resp = FileHandler::refus_non_desarme(etat);
+        assert_eq!(resp.status(), StatusCode::FORBIDDEN);
+        assert_eq!(resp.headers().get(ENTETE_ETAT_CDR).unwrap(), "quarantaine");
+    }
 
     #[test]
     fn quarantaine_sans_accord_refusee_avec_explication() {
