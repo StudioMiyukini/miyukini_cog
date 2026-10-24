@@ -164,7 +164,7 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 - **Services retirés encore cités** : JayXpose, JayFestival (≈ 20 dossiers)
 - **Code mort** : modules non déclarés dans `apps/central/src/services/`, `apps/miyuclicker`
 - **Hors workspace** : `lifegame-*`, `crates/jayclub` (vide), `kindmother-db-adapter`, `apps/ui-builder`
-- **Sans doc** : Suite Jay Bureau, Whisper, maia-llm, TEAM, MIPOWER, `miyusceau` dans `tools/`, design system UI
+- **Sans doc** : Suite Jay Bureau, Whisper, maia-llm, TEAM, MIPOWER, design system UI (`miyusceau` ✅ [fiche](../tools/MiyuSceau/_index.md))
 - **Contradictions** : rôle de JayKoa (site web), statut JayRDV, MiyuCloud vs JayCloud, nombre de services et de Cores annoncés
 - **Stubs de sécurité** : `miyuantispam` (limitation toujours « autorisée »), `miyuwebway_tracker`, `miyuvalidate`
 - **Index** : ✅ `_index.md` racine aligné sur D6 ; [index des Cores](../cores/_index.md) créé

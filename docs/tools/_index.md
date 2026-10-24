@@ -23,6 +23,7 @@ Ce dossier documente les Kits d'Outils disponibles (ou en cours de documentation
 |-----|-------------|------|
 | **MiyuSQL** | Kit d'outils de manipulation de données DB (query, transaction, cache) ; ToolkitId `toolkit.data.miyusql` | [MiyuSQL — Index de navigation](./MiyuSQL/_index.md) |
 | **MiyuAuth** | Kit d'outils d'identité utilisateur (résolution rôle, attestation, vérification Passeport/Visa) ; ToolkitId `toolkit.identity.miyauth` | [MiyuAuth — Index de navigation](./MiyuAuth/_index.md) |
+| **MiyuSceau** | Titres signés « Sceau v1 » (passeports, visas, manifestes, registre, certificats) ; crate `miyusceau` | [MiyuSceau — Index](./MiyuSceau/_index.md) |
 | **MiyuWeb** | Kit d'outils d'affichage de contenu web (rendu HTML, layout, thème, scripts, assets, formulaires, événements) ; ToolkitId `toolkit.web.miyuweb` | [MiyuWeb — Index de navigation](./MiyuWeb/_index.md) |
 | **MiyuClock** | Kit d'outils horloge locale (trace only) ; ToolkitId `toolkit.kernel.miyuclock` | [MiyuClock — Index de navigation](./MiyuClock/_index.md) |
 | **MiyuCMS** | Kit d'outils de contenu éditorial (posts, pages, médias, révisions, commentaires) ; ToolkitId `toolkit.content.cms` | [MiyuCMS — Index de navigation](./MiyuCMS/_index.md) |
