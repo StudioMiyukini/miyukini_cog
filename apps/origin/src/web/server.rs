@@ -109,7 +109,16 @@ fn assainir_reponse_sous_domaine(reponse: &[u8]) -> Option<Vec<u8>> {
     {
         return None;
     }
-    let mut sortie = Vec::with_capacity(reponse.len() + CSP_SOUS_DOMAINE.len() + 64);
+    // Statut final uniquement : un 1xx permettrait de glisser une seconde
+    // réponse non assainie dans le corps (différence d'analyse).
+    let code: u16 = statut.get(9..12)?.parse().ok()?;
+    if !(200..=599).contains(&code) {
+        return None;
+    }
+    // Corps : après la ligne vide ; le cadrage annoncé par le COG n'est pas
+    // repris, la réponse est reconstruite avec une longueur exacte.
+    let mut corps = corps.get(4..)?;
+    let mut sortie = Vec::with_capacity(reponse.len() + CSP_SOUS_DOMAINE.len() + 96);
     sortie.extend_from_slice(statut.as_bytes());
     for ligne in lignes {
         if ligne.starts_with([' ', '\t']) || ligne.chars().any(char::is_control) {
@@ -119,6 +128,26 @@ fn assainir_reponse_sous_domaine(reponse: &[u8]) -> Option<Vec<u8>> {
             continue;
         };
         let nom = nom.trim();
+        if nom.eq_ignore_ascii_case("transfer-encoding") {
+            // Encodage de transfert non pris en charge : refus (fail-closed).
+            if !valeur.trim().eq_ignore_ascii_case("identity") {
+                return None;
+            }
+            continue;
+        }
+        if nom.eq_ignore_ascii_case("content-length") {
+            // Longueur annoncée : les octets au-delà sont ignorés ; une
+            // longueur supérieure au corps reçu est refusée.
+            let annonce: usize = valeur.trim().parse().ok()?;
+            if annonce > corps.len() {
+                return None;
+            }
+            corps = &corps[..annonce];
+            continue;
+        }
+        if nom.eq_ignore_ascii_case("connection") || nom.eq_ignore_ascii_case("keep-alive") {
+            continue;
+        }
         if nom.eq_ignore_ascii_case("set-cookie2") {
             continue;
         }
@@ -131,6 +160,7 @@ fn assainir_reponse_sous_domaine(reponse: &[u8]) -> Option<Vec<u8>> {
     sortie.extend_from_slice(b"\r\n");
     sortie.extend_from_slice(CSP_SOUS_DOMAINE.as_bytes());
     sortie.extend_from_slice(b"\r\nX-Content-Type-Options: nosniff");
+    sortie.extend_from_slice(format!("\r\nContent-Length: {}\r\nConnection: close\r\n\r\n", corps.len()).as_bytes());
     sortie.extend_from_slice(corps);
     Some(sortie)
 }
@@ -2245,7 +2275,7 @@ mod tests {
         assert!(r.contains("Content-Security-Policy: sandbox allow-scripts"));
         assert!(!r.contains("allow-same-origin"));
         assert!(r.contains("X-Content-Type-Options: nosniff"));
-        assert!(r.ends_with("\r\n\r\ncorps"));
+        assert!(r.ends_with("Content-Length: 5\r\nConnection: close\r\n\r\ncorps"));
     }
 
     #[test]
@@ -2253,6 +2283,26 @@ mod tests {
         assert!(super::assainir_reponse_sous_domaine(b"pas du http").is_none());
         assert!(super::assainir_reponse_sous_domaine(b"FOO 200\r\n\r\n").is_none());
         assert!(super::assainir_reponse_sous_domaine(b"HTTP/1.1 200 OK\r\nX: \xff\r\n\r\n").is_none());
+    }
+
+    #[test]
+    fn sous_domaine_pas_de_seconde_reponse_glissee() {
+        // 1xx suivi d'une seconde réponse dans le « corps » : refus.
+        let continu = b"HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nSet-Cookie: x=1; Domain=miyukini.com\r\n\r\npiege";
+        assert!(super::assainir_reponse_sous_domaine(continu).is_none());
+        // Encodage de transfert non identité : refus.
+        let chunk = b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n";
+        assert!(super::assainir_reponse_sous_domaine(chunk).is_none());
+        // Longueur annoncée plus grande que le corps : refus.
+        let long = b"HTTP/1.1 200 OK\r\nContent-Length: 99\r\n\r\ncourt";
+        assert!(super::assainir_reponse_sous_domaine(long).is_none());
+        // Octets au-delà de Content-Length (seconde réponse) : ignorés, cadrage exact.
+        let colle = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: keep-alive\r\n\r\nokHTTP/1.1 200 OK\r\nSet-Cookie: y=1; Domain=miyukini.com\r\n\r\nx";
+        let r = String::from_utf8(super::assainir_reponse_sous_domaine(colle).expect("réponse"))
+            .expect("utf8");
+        assert!(r.ends_with("Content-Length: 2\r\nConnection: close\r\n\r\nok"));
+        assert!(!r.contains("y=1"));
+        assert!(!r.contains("keep-alive"));
     }
 
     #[test]
