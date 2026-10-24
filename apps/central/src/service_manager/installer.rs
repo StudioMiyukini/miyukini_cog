@@ -82,6 +82,13 @@ pub fn verifier_paquet_market(
     dev_non_signe: bool,
 ) -> Result<PaquetAccepte, String> {
     match verifier_paquet(octets, id_attendu, version_attendue, ancres, maintenant_secs) {
+        Ok(p) if crate::service_manager::confiance::id_reserve_officiel(id_attendu)
+            && p.niveau() != miyusceau::NiveauConfiance::Souverain =>
+        {
+            Err(format!(
+                "Paquet '{id_attendu}' refusé : identifiant réservé aux éditeurs officiels"
+            ))
+        }
         Ok(p) => {
             tracing::info!(
                 "Paquet '{id_attendu}' v{} : signature vérifiée (éditeur {})",

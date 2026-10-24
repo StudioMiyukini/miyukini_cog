@@ -48,10 +48,22 @@ struct EntreeEditeur {
     cle_publique: String,
 }
 
+/// Identifiants de service réservés aux éditeurs officiels (bundle) : ils
+/// reçoivent des secrets du COG. Un éditeur ajouté localement ne peut ni les
+/// installer ni les lancer.
+pub const IDS_RESERVES_OFFICIELS: &[&str] = &["miyucloud"];
+
+/// Vrai si l'identifiant est réservé aux éditeurs officiels.
+pub fn id_reserve_officiel(id: &str) -> bool {
+    IDS_RESERVES_OFFICIELS.contains(&id)
+}
+
 /// Ajoute une clé hex aux ancres ; une clé invalide est ignorée et journalisée.
-fn epingler(ancres: &mut AncresDeConfiance, nom: &str, hex: &str) {
+/// Éditeurs officiels (bundle) : `Souverain` ; éditeurs ajoutés localement :
+/// `Reconnu`.
+fn epingler(ancres: &mut AncresDeConfiance, nom: &str, hex: &str, niveau: NiveauConfiance) {
     if let Some(cle) = cle_publique_depuis_hex(hex) {
-        if ancres.ajouter(&cle, NiveauConfiance::Reconnu).is_err() {
+        if ancres.ajouter(&cle, niveau).is_err() {
             tracing::warn!("Éditeur Market '{nom}' : clé publique refusée (faible ou invalide)");
         }
     } else {
@@ -63,14 +75,14 @@ fn epingler(ancres: &mut AncresDeConfiance, nom: &str, hex: &str) {
 pub fn charger_ancres_depuis(fichier: Option<&Path>) -> AncresDeConfiance {
     let mut ancres = AncresDeConfiance::new();
     for (nom, hex) in EDITEURS_OFFICIELS {
-        epingler(&mut ancres, nom, hex);
+        epingler(&mut ancres, nom, hex, NiveauConfiance::Souverain);
     }
     if let Some(chemin) = fichier {
         match std::fs::read_to_string(chemin) {
             Ok(texte) => match serde_json::from_str::<FichierEditeurs>(&texte) {
                 Ok(f) => {
                     for e in &f.editeurs {
-                        epingler(&mut ancres, &e.nom, &e.cle_publique);
+                        epingler(&mut ancres, &e.nom, &e.cle_publique, NiveauConfiance::Reconnu);
                     }
                 }
                 Err(e) => tracing::warn!("{} illisible : {e}", chemin.display()),

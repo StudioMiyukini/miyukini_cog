@@ -22,8 +22,11 @@ use miyusceau::AncresDeConfiance;
 /// Service dont le sceau conservé a été re-vérifié contre les éditeurs épinglés.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Provenance {
-    /// Sceau valide d'un éditeur de confiance pour cet identifiant.
-    Signee,
+    /// Sceau valide d'un éditeur officiel (bundle, niveau souverain).
+    SigneeOfficielle,
+    /// Sceau valide d'un éditeur ajouté localement (niveau reconnu) :
+    /// jamais de secrets, jamais d'identifiant réservé.
+    SigneeTierce,
     /// Aucun sceau valide : lancement toléré par dérogation dev, sans secrets.
     NonSigneeDev,
 }
@@ -45,16 +48,19 @@ pub fn controler_provenance(
             Some(octets) => verifier_sceau_installe(&octets, id, ancres, maintenant_secs)
                 .map_err(|e| e.to_string())
                 .and_then(|v| {
-                    if v.titre().version == service.manifest.version {
-                        Ok(())
-                    } else {
-                        Err("version signée différente de la version installée".to_string())
+                    if v.titre().version != service.manifest.version {
+                        return Err("version signée différente de la version installée".to_string());
                     }
+                    let officiel = v.niveau() == miyusceau::NiveauConfiance::Souverain;
+                    if crate::service_manager::confiance::id_reserve_officiel(id) && !officiel {
+                        return Err(format!("identifiant réservé '{id}' signé par un éditeur non officiel"));
+                    }
+                    Ok(if officiel { Provenance::SigneeOfficielle } else { Provenance::SigneeTierce })
                 }),
         },
     };
     match verdict {
-        Ok(()) => Ok(Provenance::Signee),
+        Ok(p) => Ok(p),
         Err(motif) if dev_non_signe && cfg!(debug_assertions) => {
             tracing::error!(
                 "⚠⚠ DÉROGATION DEV : lancement de '{id}' sans signature valide ({motif}) — \
@@ -214,9 +220,9 @@ impl ServiceProcesses {
 const ID_MIYUCLOUD: &str = "miyucloud";
 
 /// Vrai si le service peut recevoir les secrets MiyuCloud : identifiant
-/// `miyucloud` ET sceau d'un éditeur épinglé déclarant cet identifiant.
+/// `miyucloud` ET sceau d'un éditeur **officiel** déclarant cet identifiant.
 pub fn secrets_miyucloud_autorises(service: &InstalledService, provenance: Provenance) -> bool {
-    service.manifest.id == ID_MIYUCLOUD && provenance == Provenance::Signee
+    service.manifest.id == ID_MIYUCLOUD && provenance == Provenance::SigneeOfficielle
 }
 
 fn build_service_env(
@@ -353,10 +359,33 @@ mod tests {
         hex_encoder(sceau)
     }
 
+    /// Ancres d'un éditeur officiel (bundle).
     fn ancres(cle: &CleSignature) -> AncresDeConfiance {
+        let mut a = AncresDeConfiance::new();
+        a.ajouter(&cle.cle_publique(), NiveauConfiance::Souverain).unwrap();
+        a
+    }
+
+    /// Ancres d'un éditeur ajouté localement.
+    fn ancres_tierces(cle: &CleSignature) -> AncresDeConfiance {
         let mut a = AncresDeConfiance::new();
         a.ajouter(&cle.cle_publique(), NiveauConfiance::Reconnu).unwrap();
         a
+    }
+
+    #[test]
+    fn editeur_tiers_ne_peut_ni_lancer_un_id_reserve_ni_recevoir_de_secrets() {
+        let cle = CleSignature::generer();
+        // miyucloud signé par un éditeur tiers : lancement refusé.
+        let s = service("miyucloud", Some(sceau_pour("miyucloud", &cle)));
+        assert!(controler_provenance(&s, &ancres_tierces(&cle), 0, false).is_err());
+        // Service ordinaire signé par un tiers : accepté, sans secrets.
+        let s = service("svc", Some(sceau_pour("svc", &cle)));
+        assert_eq!(
+            controler_provenance(&s, &ancres_tierces(&cle), 0, false),
+            Ok(Provenance::SigneeTierce)
+        );
+        assert!(!secrets_miyucloud_autorises(&s, Provenance::SigneeTierce));
     }
 
     #[test]
@@ -369,7 +398,7 @@ mod tests {
     fn signe_par_editeur_epingle_accepte() {
         let cle = CleSignature::generer();
         let s = service("svc", Some(sceau_pour("svc", &cle)));
-        assert_eq!(controler_provenance(&s, &ancres(&cle), 0, false), Ok(Provenance::Signee));
+        assert_eq!(controler_provenance(&s, &ancres(&cle), 0, false), Ok(Provenance::SigneeOfficielle));
     }
 
     #[test]

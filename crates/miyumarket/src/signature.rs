@@ -166,6 +166,11 @@ impl PaquetVerifie {
         self.manifeste.signataire()
     }
 
+    /// Niveau de confiance de l'éditeur signataire (souverain = officiel).
+    pub fn niveau(&self) -> miyusceau::NiveauConfiance {
+        self.manifeste.niveau()
+    }
+
     /// Archive ZIP (octets couverts par l'empreinte signée).
     pub fn archive(&self) -> &[u8] {
         &self.archive
