@@ -6,7 +6,7 @@
 <!-- @human Règles obligatoires pour tout code COG : build, erreurs, sécurité, architecture, données, IA, tests, traçabilité -->
 <!-- @do constrain_implementation -->
 
-- **Statut** : v1.0, 2026-10-24 — s'applique à tout code nouveau ou modifié ; C-24 révisée le 2026-10-24 (A-003)
+- **Statut** : v1.0, 2026-10-24 — s'applique à tout code nouveau ou modifié ; C-24 révisée le 2026-10-24 (A-003) et le 2026-10-25 (A-004)
 - **Base** : [doc conceptuelle gelée](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) · [menaces EX-01..63](../securite/MODELE-MENACES-COG.md)
 - **Règle** : une contrainte non tenue bloque la fusion ; une dérogation est écrite, motivée et datée dans la PR
 - **Niveaux** : **[B]** bloquant · **[R]** requis avant la sortie du lot · **[V]** visé
@@ -46,10 +46,10 @@
 - **C-21 [B]** Exposition désactivée par défaut ; écoute sur `127.0.0.1` sauf contrat signé (EX-48)
 - **C-22 [B]** Authentification sur tout point d'accès non local ; comparaisons de secrets en temps constant
 - **C-23 [B]** Signature vérifiée **avant** tout décodage de contenu (EX-09)
-- **C-24 [B]** Cryptographie limitée à l'inventaire ci-dessous (révisée le 2026-10-24, amendement A-003, NC-ANSSI-09) ; toute primitive ou crate nouvelle = révision de C-24
+- **C-24 [B]** Cryptographie limitée à l'inventaire ci-dessous (révisée le 2026-10-24, amendement A-003, NC-ANSSI-09 ; complétée le 2026-10-25, A-004) ; toute primitive ou crate nouvelle = révision de C-24
   - **Règle** : **aucune primitive maison** ; le code de schéma (Shamir GF(256), RS1024 et Feistel de SLIP-39, SLIP-10, Merkle RFC 9162) n'est admis qu'avec les **vecteurs de test officiels** de sa spécification
   - **Inventaire** (algorithme → crate → usage → statut), relevé sur les `Cargo.toml` du workspace :
-    - **Ed25519** → `ed25519-dalek` 2, `verify_strict` → `miyusceau` (Sceau, seul format d'identité signée), `miyauth`, `miyuracine` (via `miyusceau`), `kindmother-client`, `kindmother-service`, `miyukini-cog-bridge`, `jaymessage`, `jay-collab`, `miyuwebway_participant` → autorisé ; hors listes ANSSI, justification à produire (NC-ANSSI-10)
+    - **Ed25519** → `ed25519-dalek` 2, `verify_strict` → `miyusceau` (Sceau, seul format d'identité signée), `miyauth`, `miyuracine` (via `miyusceau`), `kindmother-client`, `kindmother-service`, `miyukini-cog-bridge`, `jaymessage`, `jay-collab`, `miyuwebway_participant`, `miyuportail` (trames de voie, A-004) → autorisé ; hors listes ANSSI, justification à produire (NC-ANSSI-10)
     - **X25519** → `x25519-dalek` 2 → `miyukini-cog-bridge` (pont E2E), `jaymessage`, `crates/miyucloud` (`crypto/e2e.rs`, `sync/transport.rs`) → autorisé, à justifier (NC-ANSSI-10), non post-quantique
     - **XChaCha20-Poly1305** → `chacha20poly1305` 0.10 → `miyukini-cog-bridge` (`e2e.rs`), `jaymessage` (`session.rs`) → autorisé, à justifier
     - **ChaCha20-Poly1305** → `chacha20poly1305` 0.10 → `jaycloud` (`kits/crypto_kit.rs`), `crates/miyucloud` (`crypto/at_rest.rs`, `crypto/e2e.rs`) → autorisé
@@ -58,7 +58,7 @@
     - **HMAC-SHA256** → `hmac` 0.12 → `miyuracine` (SLIP-10, PBKDF2), `cog-web-portal`, `central-remote`, `origin`, `miou-llm-bridge` → autorisé
     - **PBKDF2-HMAC-SHA256** → `pbkdf2` 0.12 → `miyuracine` (Feistel SLIP-39) → autorisé, réservé à SLIP-39
     - **Argon2id** → `argon2` 0.5 → `kindmother-db-key` (64 Mio, 3 passes, 4 voies), `origin`, `miyukini-central`, `miyukini-connect`, `miyukini-admin`, `miyualicia-api`, `jaycloud`, `apps/miyucloud`, `crates/miyucloud` → autorisé pour les secrets de faible entropie ; paramètres à documenter (NC-ANSSI-17)
-    - **SHA-256** → `sha2` 0.10 → `miyusceau` (`kid`, identité des titres, Merkle), `miyauth`, `miyuracine`, `miyumarket` (`package_id`), autres crates → autorisé
+    - **SHA-256** → `sha2` 0.10 → `miyusceau` (`kid`, identité des titres, Merkle), `miyauth`, `miyuracine`, `miyumarket` (`package_id`), `miyuportail` (empreintes des passages, A-004), `borderguard` (arrêtés), autres crates → autorisé
     - **BLAKE3** → `blake3` 1 → `apps/miyucloud` (empreintes de contenu), `miyuvoicecapture` (identifiant de périphérique) → **usages non sécuritaires uniquement** (NC-ANSSI-16)
     - **MD5** → `md-5` 0.10 → `apps/miyucloud` (`chunked_upload_service.rs`, ETag) → usages non sécuritaires uniquement
     - **TLS (rustls)** → `rustls` 0.22 (`ring` : `origin`, `rumqttc`) et 0.23 (`ring` **et** `aws-lc-rs` compilés par unification des features : `axum-server`, `hyper-rustls`, `tokio-tungstenite`) ; `rcgen` (`apps/miyucloud`, via `ring`) → autorisé ; `ring` n'offre pas X25519MLKEM768 ; fournisseur unique, version unique et profil TLS à fixer (NC-ANSSI-20)
@@ -67,6 +67,7 @@
     - **Aléa** → `rand_core::OsRng` / `getrandom` (noyau) → partout ; `rand` 0.8 présent : seul `OsRng` admis pour un secret → autorisé
     - **Jetons hérités** → `jsonwebtoken` 9 / 10, HS256 (`miyualicia-api`, `apps/miyucloud`) ; `totp-rs` (`miyukini-connect`, `crates/miyucloud`) → tolérés jusqu'à leur remplacement par passeport et visa ([inventaire](INVENTAIRE-SECRETS-PARTAGES.md))
     - **Utilitaires** → `subtle` (temps constant, C-22), `zeroize` (C-25)
+    - **Confinement du sas** (non cryptographique, A-004) → `seccompiler` 0.5 (filtre seccomp-bpf, API sûre) et `rustix` 1 (`process` : rlimits, `no_new_privs`) → `miyuportail` (`bac_a_sable.rs`) → autorisé
   - **Écarts connus** à la règle : HMAC réimplémenté (`jaycloud` `kits/token_kit.rs`, O-21) ; MAC `SHA256(secret ‖ charge)` (`miyucloud-dav`, M-20) → à corriger
 - **C-25 [B]** Secrets : `zeroize`, jamais journalisés, jamais dans le dépôt
 - **C-26 [R]** Tout décodeur d'entrée externe a une cible de fuzzing (EX-10)

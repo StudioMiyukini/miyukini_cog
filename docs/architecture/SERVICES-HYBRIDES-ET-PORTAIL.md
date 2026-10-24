@@ -1,6 +1,6 @@
 # Services hybrides et durcissement du Portail interne
 
-> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-004** (v1.4 : Portail, CDR et quarantaine du lot 3, §1, §3.1). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.services-hybrides -->
 <!-- @role architecture-specification -->
@@ -27,6 +27,7 @@
   - H2 : voies quarantaine + publication, validation à chaque entrée
   - H3 : comme H2 + destinations sortantes en liste blanche + intention StrongFather pour chaque action
 - La classe est déclarée dans le **contrat** (manifeste signé) ; changer de classe = nouvelle installation
+- Sens de voie ouverts (A-004) : H0 aucun · H1 sortante · H2 / H3 entrante + sortante (liste blanche sortante et intention StrongFather de H3 : hors Portail)
 
 ## 2. Gabarit d'un service hybride
 
@@ -90,6 +91,56 @@
 **Réaction**
 - WorrySentinel (IDS) peut **couper une voie** sans toucher aux autres
 - Coupure = façade détruite et reconstruite, session close, incident au registre
+
+### 3.1 Portail implémenté — amendement A-004
+
+<!-- @id arch.hybride.portail-a004 -->
+<!-- @role boundary-implementation -->
+<!-- @do record_portal_implementation -->
+
+Implémenté par `crates/miyuportail` et `crates/miyucdr` (lot 3).
+
+**Voies**
+- Une voie par service ; files, quotas (≤ 4 096 trames), débit par sens (fenêtre 60 s), compteurs et **clé de publication** distincts
+- Voie déclarée **désactivée** par défaut ; ce qui n'est pas déclaré n'existe pas
+
+**Trame `MSCE` « déclaration de voie »**
+- Disposition **Sceau v1.1**, type **`0x08`**, même domaine signé (`miyukini/sceau/v1.1`) ; charge ≤ 65 536 o
+- Charge TLV, tags strictement croissants, tous obligatoires :
+
+| tag | champ | forme |
+|---|---|---|
+| 1 | `service` | `[a-z0-9._:-]`, 1..64 o |
+| 2 | `sens` | `0x01` entrante, `0x02` sortante |
+| 3 | `version du traité` | u64, **égale** à celle du traité |
+| 4 | `type` | u64, déclaré par le traité pour ce sens |
+| 5 | `séquence` | u64, **strictement croissante** par session (anti-rejeu) |
+| 6 | `émise le` | u64, secondes Unix |
+| 7 | `champs` | TLV imbriqué, schéma du traité (≤ 32 champs ; traité ≤ 64 types) |
+
+- Signatures : entrante = **exactement 2** (clé de session de la façade, émise par la zone COG, **et** un auteur épinglé parmi ≤ 32) ; sortante = **exactement 1** (clé de publication de la voie)
+- Rupture protocolaire : la trame est décodée puis **réencodée** dans le format interne `MPI1` ; aucun octet reçu ne traverse ; en sortie, trame neuve signée par la voie
+
+**Sas de décodage**
+- Processus `portail-sas` séparé, lancé **par lot** (≤ 64 trames), délai 5 s puis mise à mort ; toute fin anormale refuse le lot entier
+- Confinement **avant** toute lecture : rlimits (mémoire 256 Mio, CPU 5 s, 3 descripteurs, fichiers et processus interdits, pas de vidage mémoire), `no_new_privs`, seccomp en liste blanche (lecture fd 0, écriture fd 1–2, mémoire sans `PROT_EXEC`, fin) ; tout autre appel **tue** le processus
+- **Deuxième validation** en zone COG, implémentation indépendante ; sortie du sas ≠ revalidation = refus
+
+**CDR** (`miyucdr`, fermé par défaut)
+- Type réel détecté par signature, refus si différent du type déclaré ; décodage complet sous limites (32 Mio, côté 16 384 px, 40 Mpx, 512 Mio alloués, 10 s)
+- Reconstruits : PNG, JPEG, GIF (1re image), WebP, BMP → réencodés sans métadonnées ; texte, CSV (formules neutralisées), Markdown → UTF-8 NFC nettoyé ; JSON → resérialisé (profondeur ≤ 64)
+- **Refusés** : PDF, bureautique, archives, exécutables, tout type inconnu
+- Le Portail refuse tout document tant qu'aucun CDR n'est branché
+
+**Quarantaine des fichiers non désarmés — MiyuCloud** (décision du propriétaire, implémentation à venir)
+- Fichier non pris en charge par le CDR (PDF, vidéo, archives, bureautique…) ou trop volumineux → **quarantaine**
+- Stocké **à part**, marqué « **non désarmé** »
+- Téléchargeable seulement après une **action explicite** de l'utilisateur
+- **Jamais ouvert** par un composant du COG
+
+**Coupure et rétablissement**
+- Coupure (WorrySentinel, EX-49) : **voie entière, deux sens** ; session close, files purgées, génération incrémentée (lots en vol rejetés) ; les autres voies inchangées
+- Rétablissement : **explicite** seulement ; voie remise **désactivée** avec une **nouvelle clé de publication**
 
 ## 4. Cycle de vie d'un service hybride
 

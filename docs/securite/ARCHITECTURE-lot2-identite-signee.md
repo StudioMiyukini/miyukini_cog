@@ -1,6 +1,6 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) et **A-003** (v1.3 : choix d'implémentation du lot 2). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) **A-003** (v1.3 : choix d'implémentation du lot 2) et **A-004** (v1.4 : type `0x08`, natures de certificat, indice d'usage 4 des arrêtés). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
@@ -76,9 +76,10 @@ Implémenté par `crates/miyuracine` (7e6719ca).
 | `emission` | 1 | `m/1296256839'/1'/g'` | passeports **et** visas | 90 j |
 | `journal` | 2 | `m/1296256839'/2'/g'` | têtes du registre (§8) | 90 j |
 | `editeur` | 3 | `m/1296256839'/3'/g'` | certificats éditeur, paquets publiés par le COG | par génération |
+| `arretes` (A-004) | 4 | `m/1296256839'/4'/g'` | arrêtés de frontière (BorderGuard) | 90 j |
 
 - `g` = génération (< 2³¹), incrémentée à chaque rotation de la clé d'usage
-- Indices ≥ 4 **réservés** (usages futurs, ex. arrêtés) ; un indice n'est **jamais réattribué**
+- Indice 4 attribué aux **arrêtés** par A-004 (format : [zones §10](../architecture/MODELE-ZONES-ET-COUCHES-COG.md)) ; indices ≥ 5 **réservés** ; un indice n'est **jamais réattribué**
 - **Passation** (rotation de la racine) : `Sceau` de type `0x06` (certificat) dont le premier champ `nature` (tag 1) vaut `0x01` ; champs `ancienne_racine` (2), `nouvelle_racine` (3), `emise_le` (4) ; signée par l'**ancienne et la nouvelle** clé d'identité, chacune vérifiée
 - **Non implémenté, à décider ultérieurement** (A-003) : fichier racine chiffré Argon2id (tableau ci-dessus) ; certificat racine → clé d'émission / journal (chaîne vérifiable)
 
@@ -94,6 +95,7 @@ version     1 o   0x02 (Sceau v1.1 ; 0x01 = Sceau v1.0, abandonné, refusé)
 alg         1 o   algorithme de signature du sceau (table ci-dessous)
 type        1 o   0x01 passeport | 0x02 visa | 0x03 manifeste paquet | 0x04 entrée registre
                   0x05 tête registre | 0x06 certificat (émission, éditeur) | 0x07 reconnaissance
+                  0x08 déclaration de voie (A-004, Portail)
 len         4 o   longueur de la charge utile (≤ 65 536)
 payload   len o   champs TLV canoniques (4.2)
 nombre      1 o   nombre de signatures, 1 ≤ n ≤ 8
@@ -110,6 +112,17 @@ n × signature :
 | `0x02` | ML-DSA-65 (FIPS 204) | 3 309 | **réservé, refusé** à la vérification |
 | `0x03` | hybride Ed25519 ‖ ML-DSA-65 (les deux valides) | 3 373 | **réservé, refusé** à la vérification |
 | autre | — | — | refusé au décodage |
+
+Compléments A-004 :
+
+- **Type `0x08` « déclaration de voie »** : même disposition, même domaine signé ; décodé **uniquement** par `miyuportail` (le décodeur générique `miyusceau` le refuse, type inconnu) ; charge TLV et politique de signatures en [services hybrides §3.1](../architecture/SERVICES-HYBRIDES-ET-PORTAIL.md)
+- **Natures de certificat** (`0x06`, premier champ `nature`, tag 1) :
+
+| `nature` | Objet | Signé par |
+|---|---|---|
+| `0x01` | passation de racine (§3.1) | ancienne **et** nouvelle identité |
+| `0x41` (« A ») | arrêté de frontière | clé d'usage `arretes` (indice 4) |
+| autre | réservé | refusé par les décodeurs |
 
 Octets signés (identiques pour tous les signataires) :
 `"miyukini/sceau/v1.1" || 0x00 || version || alg || type || len || payload`.

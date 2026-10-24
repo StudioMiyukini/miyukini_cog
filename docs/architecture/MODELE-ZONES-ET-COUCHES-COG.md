@@ -1,6 +1,6 @@
 # Modèle de zones et de couches — Miyukini COG
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.zones-couches -->
 <!-- @role architecture-reference -->
@@ -103,6 +103,10 @@
   - seul passage Franche / dépôt officiel ⇄ zone COG
   - rupture protocolaire, liste blanche de protocole `MSCE` (Sceau v1)
   - la **vérification finale** (signature, dédouanement) est faite **côté zone COG**, jamais par une instance exposée
+- **Implémenté (A-004)** — trois frontières, une instance Douane chacune (`miyudouane`) :
+  - `externe` : extérieur ⇄ Franche, **routage** + IPS
+  - `portail-interne` : zone COG → Franche ; `portail-local` : zone COG → Franche locale
+  - portails en **rupture protocolaire** : aucun routage (`ip_forward=0`), toute connexion se termine dans le portail ; **seule la zone COG ouvre**
 
 ## 6. Invariants de flux
 
@@ -244,6 +248,13 @@
 - **Constitution réseau** (racine COG, hors ligne) : zones, invariants, plafonds globaux
 - **Arrêtés** (clé d'émission, générés par les Cores) : règles par service, **dans les plafonds** de la constitution
 - Arrêté hors constitution = refusé ; installation / désinstallation = nouvel arrêté inscrit au registre Merkle
+- **Arrêté implémenté (A-004)** (`borderguard`) :
+  - `Sceau` `0x06` (certificat), premier champ `nature = 0x41` ; TLV `0x01`–`0x0B` (`nature`, `format`, `frontiere`, `numero`, `emis_le`, `pas_avant`, `pas_apres`, `emetteur`, `motif`, `voies`, `flux`)
+  - une frontière par arrêté ; il n'exprime que des autorisations (refus par défaut)
+  - validité ≤ **90 j** ; `numero` strictement croissant par frontière (anti-rejeu, anti-retour arrière)
+  - signé par la clé d'usage **arrêtés** (indice 4, §15), vérifié contre les ancres `Souverain` du COG ; aucun arrêté d'un autre COG
+  - constitution contrôlée au scellement et à la vérification : couples de zones admis par frontière (INV-Z1, Z2, Z3, Z7), liste blanche pour International et Origin (INV-Z6), plafonds de débit et de flux
+  - sans arrêté valide, la Douane **ferme** sa frontière
 
 ## 11. Réseau intégré
 
@@ -255,6 +266,8 @@
 - 1 network namespace par zone et par pare-feu, reliés en veth
 - 1 seule carte physique, portée par BorderGuard
 - Adressage indicatif : zone COG `10.77.0.0/24` sans passerelle · Franche `10.77.1.0/24` · Fédération `10.78.0.0/16`
+  - Implémenté (A-004) : + Franche locale `10.77.2.0/24` ; **IPv6 désactivé** dans tous les espaces
+  - Espaces de noms : `mcog-z-<zone>` (pont filtré), `mcog-f-<frontière>`, `mcog-s-<zone>-<service>` (une sandbox par service, utilisateur et slice systemd dédiés)
 - nftables, drop par défaut, règles générées depuis la **constitution réseau** (racine COG) et les **arrêtés** des Cores (§10)
 - Dureté :
   1. namespaces + utilisateurs + nftables (prototype, sans toucher le réseau de l'hôte)
@@ -279,7 +292,14 @@
   - Portail interne : IPS en liste blanche `MSCE`
   - canal officiel : uniquement objets scellés Origin
   - applique les décisions de WorrySentinel (bannissement, gel, coupure)
+  - **Implémenté (A-004)** : nftables `policy drop` (entrée, transit, sortie) ; mêmes règles compilées pour le pare-feu et l'IPS
+  - bannissement automatique : **5 blocages en 60 s → 15 min**, sources **International** seulement
+  - table de connexions de l'IPS ≤ **65 536**
+  - canal vers les Vigies fermé ⇒ la Douane **bloque tout**
+  - **Journaux (convention canonique, A-004)** : préfixe `MDOU|<lieu>|<chaine>|<MOTIF>|` (`<chaine>` = `entree` / `transit` / `sortie`), groupes NFLOG 101 externe, 102 portail interne, 103 portail local, 110 zone COG, 111 Franche, 112 Franche locale ; les Vigies lisent cette convention
 - **CaringNanny** — santé et ressources (noyau), distinct de la sécurité
+  - relaie les signaux des Vigies **inchangés** à WorrySentinel, avec la santé de chaque capteur et de chaque voie
+  - capteur muet, périmé ou en échec → santé `Inconnu` (jamais saine par défaut)
 
 **Moteur**
 - Rust, **salle blanche** : aucun code Suricata / Snort (GPLv2 incompatible)
@@ -296,6 +316,16 @@
 **Détection prioritaire**
 - Franche, zone COG : mouvement latéral, tentative de sortie de la zone COG = incident critique
 - Tout flux hors contrat (§10)
+
+**Implémenté (A-004)**
+- Règles intégrées des Vigies : `R-EX12-SORTIE` (sortie de zone COG) et `R-INV-Z7-ENTREE` (entrée directe) **critiques, même si la Douane a bloqué** ; `R-INDETERMINE` (zone ou verdict inconnus) moyenne
+- Jeux de règles supplémentaires : format `vigies-regles 1`, analyse stricte (une ligne invalide rejette le jeu, les règles intégrées restent)
+- **Voies** sous WorrySentinel : `Ouverte` / `Surveillee` / `Coupee`
+  - signal critique attribué à une voie → **coupée** (elle seule) ; signal moyen ou élevé → surveillée
+  - **voie aveugle** (santé `Inconnu` / `Unhealthy`) → **coupée** (décision du propriétaire, fail-closed) ; inconvénients acceptés : voies coupées jusqu'au premier rapport des capteurs, journaux corrompus pouvant forcer une coupure
+  - réarmement sur **autorisation explicite** (humaine / TAMR), tracé
+- **État global** T0–T4 : un cran par évaluation ; T1 / T2 / T3 à 1 / 2 / 3 voies coupées pour incident (incident hors voie : T2, ou T3 avec une voie coupée) ; voies aveugles non comptées ; **jamais T4 automatique** ; aucune désescalade automatique
+- **Coupure** exécutée par le Portail : voie entière, deux sens, sans toucher aux autres ([services hybrides §3.1](SERVICES-HYBRIDES-ET-PORTAIL.md))
 
 ## 13. Cloisonnement noyau
 
@@ -340,7 +370,7 @@
 - Appareils de l'utilisateur = pairs Fédération → aucun port ouvert côté International
 - **Une clé par usage** (passeports, visas, arrêtés, journal), **dérivée de la racine en SLIP-10** (dérivation durcie)
   - Implémenté (A-003, [lot 2 §3.1](../securite/ARCHITECTURE-lot2-identite-signee.md)) : identité (0), émission (1, **passeports et visas**, comme le lot 2 §3), journal (2), éditeur (3)
-  - Arrêtés : indice d'usage futur (≥ 4, réservé, jamais réattribué), attribué avec leur format
+  - Arrêtés : indice **4** (`m/1296256839'/4'/g'`), attribué avec leur format (A-004) ; indices ≥ 5 réservés, jamais réattribués
 - Racine sauvegardée en **SLIP-39 2 sur 3** (parts en mots, sur USB et papier) ; cérémonie de rotation guidée
 - **Identifiant différent par COG visité** (pas de traçage entre COG)
 

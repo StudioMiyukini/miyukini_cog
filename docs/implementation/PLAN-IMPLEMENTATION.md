@@ -139,6 +139,27 @@
 - **Vigies** : capteurs IDS, signaux vers CaringNanny → WorrySentinel ; sortie de zone COG = incident critique (EX-12)
 - **Zones** : zone COG sans route sortante, Franche isolée, Franche locale (EX-20, EX-21, EX-29)
 - **Sortie** : test d'intrusion local — aucun flux non déclaré ne traverse ; coupure d'une voie sans impact sur les autres (EX-49)
+- **Statut (2026-10-25)** — choix inscrits par l'amendement [A-004](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) (doc v1.4)
+  - **Fait** :
+    - `miyuportail` : voies par service (H0–H3, désactivées par défaut), trame `0x08`, sas seccomp en processus séparé, deuxième validation, coupure et rétablissement
+    - `miyucdr` : CDR fermé par défaut (images, texte, CSV, Markdown, JSON)
+    - `borderguard` : arrêtés signés (`0x06` / `0x41`, indice d'usage 4), constitution
+    - `miyudouane` : instances par frontière, compilation, nftables, IPS, rendu des zones
+    - `miyuvigie` : capteurs, règles intégrées et jeux de règles
+    - CaringNanny module « vigies » ; WorrySentinel module « voies » (voie aveugle coupée)
+  - **Reste** :
+    - câblage Douane → Vigies (événements IPS) et WorrySentinel → Portail (`CoupureVoie`)
+    - lecteur nftables des Vigies aligné sur `MDOU|` + NFLOG (convention A-004) ; `miyuracine::Usage` indice 4 « arrêtés »
+    - adaptateur `miyucdr` → `Desarmement` du Portail
+    - MiyuCloud : CDR des envois + **quarantaine** des fichiers non désarmés (A-004)
+    - séparation des processus entrant / sortant ; Portail en micro-VM ou espace réseau dédié
+    - source de paquets NFQUEUE / NFLOG pour l'IPS et les Vigies
+    - mise en forme du débit (`tc`)
+    - cibles de fuzzing MSCE et sas (C-26, EX-10)
+    - registre Merkle réel (lot 4)
+    - profils Landlock / AppArmor
+    - application des scripts de déploiement (zones, nftables, systemd)
+    - **test d'intrusion** = critère de sortie du lot
 
 ## 6. Lot 4 — Canal officiel et registre
 
