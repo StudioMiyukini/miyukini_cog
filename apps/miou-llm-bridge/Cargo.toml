@@ -62,5 +62,8 @@ rand = "0.8"
 # Identifiant de nœud TEAM (hostname)
 hostname = "0.4"
 
+# Porte obligatoire StrongFather (K-11) : outils et administration des agents
+bondingbrother = { path = "../../crates/bondingbrother" }
+
 [lints]
 workspace = true

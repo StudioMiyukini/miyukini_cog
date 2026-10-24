@@ -34,7 +34,7 @@ regex      = "1"
 default = []
 # Expose `CapabilitiesRuntime::new_with_bypass_gate` (BypassCoreGate).
 # Tests / dev uniquement, jamais en production (K-16).
-dev-bypass = []
+dev-bypass = ["miyualicia-dispatcher/dev-bypass", "miyualicia-skills/dev-bypass"]
 
 [dev-dependencies]
 # Active `dev-bypass` pour les tests d'intégration (tests/*.rs).

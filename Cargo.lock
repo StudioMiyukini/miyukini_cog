@@ -5987,6 +5987,7 @@ dependencies = [
  "async-recursion",
  "axum 0.8.8",
  "base64",
+ "bondingbrother",
  "hex",
  "hmac",
  "hostname",
@@ -6466,7 +6467,9 @@ name = "miyualicia-dispatcher"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "bondingbrother",
  "chrono",
+ "miyualicia-dispatcher",
  "miyualicia-memory",
  "miyualicia-skills",
  "serde",

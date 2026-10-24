@@ -19,6 +19,8 @@ description = "Alicia Dispatcher — orchestrateur d'exécution des skills d'Ali
 [dependencies]
 miyualicia-skills = { path = "../miyualicia-skills" }
 miyualicia-memory = { path = "../miyualicia-memory" }
+# Porte obligatoire StrongFather (K-11, K-16) : la gate cores de production décide via SF.
+bondingbrother    = { path = "../bondingbrother" }
 
 serde       = { version = "1", features = ["derive"] }
 serde_json  = "1"
@@ -28,8 +30,15 @@ async-trait = "0.1"
 thiserror   = "2"
 tracing     = "0.1"
 
+[features]
+default = []
+# Expose `BypassCoreGate` (gate cores qui autorise tout). Tests / dev uniquement,
+# jamais en production (K-16).
+dev-bypass = ["miyualicia-skills/dev-bypass"]
+
 [dev-dependencies]
 # Tests uniquement : active le bypass de la gate cores (K-16).
+miyualicia-dispatcher = { path = ".", features = ["dev-bypass"] }
 miyualicia-skills = { path = "../miyualicia-skills", features = ["dev-bypass"] }
 tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
 tempfile    = "3"

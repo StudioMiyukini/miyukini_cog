@@ -17,6 +17,17 @@
 //! Sinon le franchissement est refusé avec un message lisible (qui sera
 //! repris dans l'`Episode` audité par le dispatcher).
 //!
+//! ## BorderGuard alimente, StrongFather décide (K-16)
+//!
+//! En production, la gate cores est `miyualicia_dispatcher::StrongFatherCoreGate`.
+//! `BorderGuardCoreGate` implémente [`EnrichisseurIntention`] : brancher par
+//! `StrongFatherCoreGate::avec_enrichisseur(Arc::new(gate_borderguard))` ajoute à
+//! l'intention `data.borderguard_confiance` (niveau de confiance de la persona) et
+//! `data.borderguard_franchissement` (`autorise` / `refuse` / `sans_regle`) ; la
+//! politique StrongFather `alicia-frontiere-borderguard-refusee` refuse alors tout
+//! franchissement non autorisé. Utilisé seul comme `CoreGate`, ce crate reste un
+//! contrôle consultatif (tests, outillage).
+//!
 //! ## Lois d'autonomie respectées
 //!
 //! - Le crate ne fait que **consulter** BorderGuard (`get_crossing_rules`),
@@ -38,7 +49,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 
 use borderguard::{BoundaryRegistry, TrustLevel, TrustLevelClassifier};
-use miyualicia_dispatcher::{CoreGate, CoreGateOutcome};
+use miyualicia_dispatcher::{CoreGate, CoreGateOutcome, EnrichisseurIntention};
 use miyualicia_skills::ServiceCapability;
 use serde_json::Value;
 
@@ -127,6 +138,34 @@ impl CoreGate for BorderGuardCoreGate {
                 "trust '{trust:?}' insuffisant pour franchir '{boundary_id}'"
             ))
         }
+    }
+}
+
+impl BorderGuardCoreGate {
+    /// Verdict BorderGuard brut (sans décision) : niveau de confiance de la
+    /// persona et état du franchissement (`autorise` / `refuse` / `sans_regle`).
+    #[must_use]
+    pub fn verdict(&self, capability: &ServiceCapability, persona: &str) -> (TrustLevel, &'static str) {
+        let trust = self.classifier.classify(persona);
+        let boundary_id = Self::boundary_id_for(&capability.service_id);
+        let etat = match self.registry.get_crossing_rules(&boundary_id) {
+            None => "sans_regle",
+            Some(rules) if rules.rules.iter().any(|r| trust >= r.min_trust_level && r.allowed) => {
+                "autorise"
+            }
+            Some(_) => "refuse",
+        };
+        (trust, etat)
+    }
+}
+
+impl EnrichisseurIntention for BorderGuardCoreGate {
+    fn donnees(&self, capability: &ServiceCapability, persona: &str) -> Vec<(String, String)> {
+        let (trust, etat) = self.verdict(capability, persona);
+        vec![
+            ("borderguard_confiance".to_string(), format!("{trust:?}").to_lowercase()),
+            ("borderguard_franchissement".to_string(), etat.to_string()),
+        ]
     }
 }
 
@@ -319,6 +358,20 @@ mod tests {
         // bob = Verified → matche Rule 2 (allowed=false), pas Rule 1
         let r2 = gate.validate(&cap, &Value::Null, "bob").await;
         assert!(matches!(r2, CoreGateOutcome::Denied(_)));
+    }
+
+    #[test]
+    fn enrichit_l_intention_sans_decider() {
+        let gate = test_helpers::simple_gate(
+            [("jaykoa", TrustLevel::Verified, true)],
+            [("voice", TrustLevel::Trusted), ("ghost", TrustLevel::Unknown)],
+        );
+        let cap = capability("jaykoa", "list_events", false);
+        let d: std::collections::HashMap<_, _> = gate.donnees(&cap, "voice").into_iter().collect();
+        assert_eq!(d["borderguard_franchissement"], "autorise");
+        assert_eq!(d["borderguard_confiance"], "trusted");
+        assert_eq!(gate.verdict(&cap, "ghost").1, "refuse");
+        assert_eq!(gate.verdict(&capability("jaykonta", "x", true), "voice").1, "sans_regle");
     }
 
     #[test]

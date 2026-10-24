@@ -28,6 +28,8 @@ thiserror   = "2"
 tracing     = "0.1"
 
 [dev-dependencies]
+# Tests uniquement : expose `BypassCoreGate` (K-16).
+miyualicia-dispatcher = { path = "../miyualicia-dispatcher", features = ["dev-bypass"] }
 miyualicia-memory = { path = "../miyualicia-memory" }
 tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
 tempfile    = "3"

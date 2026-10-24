@@ -41,6 +41,12 @@ pub struct BridgeConfig {
     /// Configuration de sécurité renforcée.
     #[serde(default)]
     pub security: SecurityConfig,
+
+    /// Répertoire des politiques StrongFather (fichier `maia.toml`). Absent :
+    /// `COG_POLITIQUES_DIR`, sinon `config/strongfather`. Politiques absentes
+    /// ou invalides ⇒ tout outil et toute écriture d'agent refusés (K-11).
+    #[serde(default)]
+    pub politiques_dir: Option<String>,
 }
 
 /// Configuration pour l'inférence GGUF native (llama-cpp-2).
@@ -188,6 +194,7 @@ impl Default for BridgeConfig {
             log_requests: true,
             native: NativeInferenceConfig::default(),
             security: SecurityConfig::default(),
+            politiques_dir: None,
         }
     }
 }

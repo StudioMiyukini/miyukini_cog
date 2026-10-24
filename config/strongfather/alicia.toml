@@ -1,0 +1,56 @@
+# @id     strongfather_politiques_alicia
+# @do     gouverner_capabilities_alicia
+# @role   config
+# @layer  core
+# @human  Politiques StrongFather de base d'Alicia : reproduit le comportement légitime actuel,
+# @human  tout le reste est refusé par défaut (K-11, K-16).
+#
+# Chargé au démarrage par `StrongFatherCoreGate::depuis_repertoire` (crate miyualicia-dispatcher).
+# Répertoire surchargeable par COG_POLITIQUES_DIR. Fichier absent ou invalide ⇒ toute
+# capability est refusée (fail-closed).
+#
+# Intention soumise (voir miyualicia_dispatcher::intention_alicia) :
+#   action  = read (capability sans écriture) | modification (writes = true)
+#   subject = alicia.skill.<service_id>.<intent>
+#   caller  = local          origin = alicia
+#   data.service, data.intent, data.skill, data.ecriture ('true'/'false'), data.persona,
+#   data.confirmation, data.categorie, + data.borderguard_* si BorderGuard alimente l'intention
+#
+# Rappels moteur : refus explicite > autorisation ; erreur d'évaluation ⇒ refus ;
+# aucune autorisation applicable ⇒ refus « défaut: refus ».
+#
+# La confirmation utilisateur des écritures reste tenue par le dispatcher (gate UX) :
+# StrongFather est appelé après le consentement, juste avant l'appel au service.
+
+version = 1
+
+# Lectures vers les services COG qui exposent des capabilities Alicia.
+[[policy]]
+id = "alicia-lecture-services-cog"
+type = "permission"
+effect = "authorize"
+rule = "data.service in ['jaykoa', 'jaykonta', 'jayrdv', 'jaycloud', 'jaysheets', 'jaydocs', 'jayslides', 'jaymail', 'jaymessage', 'jaycontact', 'jaymeteo']"
+[policy.target]
+actions = ["read"]
+origins = ["alicia"]
+
+# Écritures vers les mêmes services (après consentement utilisateur, gate UX du dispatcher).
+[[policy]]
+id = "alicia-ecriture-services-cog"
+type = "permission"
+effect = "authorize"
+rule = "data.ecriture == 'true' && data.service in ['jaykoa', 'jaykonta', 'jayrdv', 'jaycloud', 'jaysheets', 'jaydocs', 'jayslides', 'jaymail', 'jaymessage', 'jaycontact']"
+[policy.target]
+actions = ["modification"]
+origins = ["alicia"]
+
+# BorderGuard refuse le franchissement de la frontière du service ⇒ refus.
+[[policy]]
+id = "alicia-frontiere-borderguard-refusee"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "has(data.borderguard_franchissement)"
+rule = "data.borderguard_franchissement != 'autorise'"
+[policy.target]
+origins = ["alicia"]

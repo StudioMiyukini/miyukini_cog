@@ -17,9 +17,10 @@
 //! 4. l'exécution via le `ServiceClient`
 //! 5. l'enregistrement épisode dans `MemoryStore` (toujours, même bypass)
 //!
-//! Les implémentations réelles de `CoreGate` (vraie traversée BorderGuard /
-//! StrongFather) et `ServiceClient` (clients HTTP des services COG) seront
-//! branchées en **P3+**. P2 fournit des mocks et un `BypassCoreGate`.
+//! La gate cores de production est [`StrongFatherCoreGate`] : StrongFather
+//! décide (porte BondingBrother obligatoire, K-11 / K-16), BorderGuard peut
+//! seulement alimenter l'intention. `BypassCoreGate` n'existe que sous
+//! `cfg(test)` ou la feature `dev-bypass`.
 //!
 //! ## Lois d'autonomie
 //!
@@ -40,7 +41,12 @@ pub mod dispatcher;
 pub mod errors;
 pub mod service_client;
 
-pub use core_gate::{BypassCoreGate, CoreGate, CoreGateOutcome};
+#[cfg(any(test, feature = "dev-bypass"))]
+pub use core_gate::BypassCoreGate;
+pub use core_gate::{
+    chemin_politiques_alicia, intention_alicia, CoreGate, CoreGateOutcome,
+    EnrichisseurIntention, StrongFatherCoreGate,
+};
 pub use dispatcher::{Decision, Dispatcher, ExecutionResult, ResolvedLearnedCall};
 pub use errors::DispatchError;
 pub use service_client::{

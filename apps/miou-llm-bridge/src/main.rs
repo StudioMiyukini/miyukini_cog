@@ -26,6 +26,7 @@ mod confirmations;
 mod context;
 mod fallback;
 mod garde_etranger;
+mod gouvernance;
 mod hardware;
 mod health;
 mod inference;
@@ -290,6 +291,11 @@ async fn main() {
         }
     }
 
+    // Porte StrongFather (K-11) : chargée une fois ; absente / invalide ⇒ refus de tout outil.
+    let gouvernance = std::sync::Arc::new(gouvernance::GouvernanceMaia::depuis_fichier(
+        gouvernance::chemin_politiques_maia(cfg.politiques_dir.as_deref()),
+    ));
+
     let state = ProxyState {
         client: http_client,
         upstream_url: cfg.upstream_url,
@@ -309,6 +315,7 @@ async fn main() {
         started_at,
         team_registered,
         confirmations: std::sync::Arc::new(confirmations::RegistreConfirmations::new()),
+        gouvernance,
     };
 
     let app = proxy_router(state);

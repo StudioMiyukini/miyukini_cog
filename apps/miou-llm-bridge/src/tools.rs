@@ -18,6 +18,7 @@ use std::pin::Pin;
 use crate::agents::AgentDef;
 use crate::confirmations::{ActionEnAttente, RegistreConfirmations};
 use crate::garde_etranger::{self, Decision, EtatTour, Provenance};
+use crate::gouvernance::{self, DemandeOutil, GouvernanceMaia, ModeExecution};
 use crate::security::{self, AuditEntry, AuditLog};
 use crate::skills::{Autorisation, SkillInfo, SkillRegistry, SkillResult};
 
@@ -227,11 +228,38 @@ impl ExecuteurOutils for ExecuteurRegistre {
     }
 }
 
+/// Point d'exécution **unique** d'un outil MAIA (boucle du modèle, confirmation,
+/// appel direct de l'API) : l'intention est soumise à StrongFather via la porte
+/// obligatoire (`executer_si_autorise`) ; l'exécuteur n'est appelé que sur ALLOW.
+/// Rend le résultat et l'identifiant de la règle qui a autorisé, ou le motif du refus.
+pub async fn executer_outil_gouverne(
+    gouvernance: &GouvernanceMaia,
+    executeur: &dyn ExecuteurOutils,
+    demande: &DemandeOutil<'_>,
+) -> Result<(SkillResult, String), String> {
+    let intent = gouvernance::intention_outil(demande);
+    let (regle, execution) = gouvernance.executer(&intent, |jeton| {
+        tracing::info!(
+            "StrongFather autorise '{}' pour l'agent '{}' (règle {}, empreinte {})",
+            demande.skill_id,
+            demande.agent.id,
+            jeton.regle(),
+            jeton.empreinte()
+        );
+        (
+            jeton.regle().to_string(),
+            executeur.executer(demande.skill_id, demande.params, demande.autorisation),
+        )
+    })?;
+    Ok((execution.await, regle))
+}
+
 /// Garde d'un tour de conversation : provenance, blocage, actions suspendues.
 pub struct GardeTour<'a> {
     etat: EtatTour,
     registre: &'a RegistreConfirmations,
     executeur: &'a dyn ExecuteurOutils,
+    gouvernance: &'a GouvernanceMaia,
     suspendues: Vec<ActionEnAttente>,
 }
 
@@ -243,11 +271,16 @@ impl<'a> GardeTour<'a> {
     }
 
     /// Nouvelle garde pour un tour.
-    pub fn new(registre: &'a RegistreConfirmations, executeur: &'a dyn ExecuteurOutils) -> Self {
+    pub fn new(
+        registre: &'a RegistreConfirmations,
+        executeur: &'a dyn ExecuteurOutils,
+        gouvernance: &'a GouvernanceMaia,
+    ) -> Self {
         Self {
             etat: EtatTour::new(),
             registre,
             executeur,
+            gouvernance,
             suspendues: Vec::new(),
         }
     }
@@ -356,11 +389,36 @@ pub async fn execute_tool_call(
         return (message_refus(tool_call, contenu), log_entry);
     }
 
-    // Exécuter le skill (jamais d'écriture de service confirmée dans la boucle).
-    let result = garde
-        .executeur
-        .executer(skill_id, &params, Autorisation::Standard)
-        .await;
+    // Décision StrongFather obligatoire puis exécution (jamais d'écriture de
+    // service confirmée dans la boucle).
+    let demande = DemandeOutil {
+        agent,
+        skill_id,
+        params: &params,
+        autorisation: Autorisation::Standard,
+        contenu_etranger: garde.etat.contient_etranger(),
+        mode: ModeExecution::Boucle,
+        appelant: gouvernance::APPELANT_LOCAL,
+    };
+    let result = match executer_outil_gouverne(garde.gouvernance, garde.executeur, &demande).await {
+        Ok((result, _regle)) => result,
+        Err(motif) => {
+            audit_log.log(AuditEntry {
+                timestamp: security::epoch_now(),
+                agent_id: agent.id.clone(),
+                skill_id: skill_id.clone(),
+                action: "refus_strongfather".into(),
+                details: tool_call.function.arguments.clone(),
+                success: false,
+                client_id: "tool_calling".into(),
+            });
+            let msg = message_refus(
+                tool_call,
+                serde_json::json!({ "success": false, "error": motif }),
+            );
+            return (msg, log_entry);
+        }
+    };
 
     // Audit
     audit_log.log(AuditEntry {
@@ -444,6 +502,7 @@ pub async fn executer_confirmation(
     agents: &crate::agents::AgentRegistry,
     audit_log: &AuditLog,
     executeur: &dyn ExecuteurOutils,
+    gouvernance: &GouvernanceMaia,
 ) -> Result<(ActionEnAttente, SkillResult), String> {
     let action = registre.prendre(id).map_err(|e| e.to_string())?;
     let agent = agents
@@ -454,9 +513,30 @@ pub async fn executer_confirmation(
     {
         return Err(reason);
     }
-    let result = executeur
-        .executer(&action.skill_id, &action.params, Autorisation::EcritureConfirmee)
-        .await;
+    // L'action a pu être suspendue par la garde « contenu étranger » : on la
+    // déclare contaminée (prudence) ; la politique autorise le mode « confirmee ».
+    let demande = DemandeOutil {
+        agent: &agent,
+        skill_id: &action.skill_id,
+        params: &action.params,
+        autorisation: Autorisation::EcritureConfirmee,
+        contenu_etranger: true,
+        mode: ModeExecution::Confirmee,
+        appelant: gouvernance::APPELANT_LOCAL,
+    };
+    let (result, _regle) = executer_outil_gouverne(gouvernance, executeur, &demande)
+        .await
+        .inspect_err(|motif| {
+            audit_log.log(AuditEntry {
+                timestamp: security::epoch_now(),
+                agent_id: action.agent_id.clone(),
+                skill_id: action.skill_id.clone(),
+                action: "refus_strongfather".into(),
+                details: format!("{} — {motif}", action.action),
+                success: false,
+                client_id: "confirmation".into(),
+            });
+        })?;
     audit_log.log(AuditEntry {
         timestamp: security::epoch_now(),
         agent_id: action.agent_id.clone(),
@@ -473,6 +553,7 @@ pub async fn executer_confirmation(
 
 /// Boucle de tool calling : envoie la requête via InferenceRouter, si tool_calls → exécute → renvoie.
 /// Itère jusqu'à obtenir une réponse textuelle finale ou atteindre MAX_TOOL_ITERATIONS.
+#[allow(clippy::too_many_arguments)]
 pub async fn chat_with_tools(
     inference: &crate::inference::InferenceRouter,
     model: &str,
@@ -481,10 +562,11 @@ pub async fn chat_with_tools(
     agent: &AgentDef,
     audit_log: &AuditLog,
     registre: &RegistreConfirmations,
+    gouvernance: &GouvernanceMaia,
 ) -> Result<ToolChatResult, ToolChatError> {
     let mut tool_calls_log = Vec::new();
     let executeur = ExecuteurRegistre;
-    let mut garde = GardeTour::new(registre, &executeur);
+    let mut garde = GardeTour::new(registre, &executeur, gouvernance);
     // Le marquage étranger survit d'un tour à l'autre : l'historique reçu
     // (non fiable) contamine le tour s'il contient des résultats d'outils.
     garde.reprendre_historique(&messages);
@@ -643,7 +725,8 @@ mod tests {
         let audit = AuditLog::new(100);
         let registre = RegistreConfirmations::new();
         let exec = ExecuteurFactice::default();
-        let mut garde = GardeTour::new(&registre, &exec);
+        let gouv = crate::gouvernance::tests::gouvernance_de_base();
+        let mut garde = GardeTour::new(&registre, &exec, &gouv);
 
         // 1. web_fetch : exécuté, résultat marqué étranger et délimité.
         let (msg, log) = execute_tool_call(
@@ -717,7 +800,7 @@ mod tests {
 
         // 5. Confirmation explicite (étape séparée) : exécution de l'action exacte.
         let (action, resultat) =
-            executer_confirmation(&id_fichier, &registre, &agents, &audit, &exec)
+            executer_confirmation(&id_fichier, &registre, &agents, &audit, &exec, &gouv)
                 .await
                 .expect("confirmation acceptée");
         assert!(resultat.success);
@@ -729,12 +812,12 @@ mod tests {
 
         // Usage unique : rejouer la confirmation est refusé.
         assert!(
-            executer_confirmation(&id_fichier, &registre, &agents, &audit, &exec)
+            executer_confirmation(&id_fichier, &registre, &agents, &audit, &exec, &gouv)
                 .await
                 .is_err()
         );
         assert!(
-            executer_confirmation("inconnu", &registre, &agents, &audit, &exec)
+            executer_confirmation("inconnu", &registre, &agents, &audit, &exec, &gouv)
                 .await
                 .is_err()
         );
@@ -746,10 +829,11 @@ mod tests {
         let audit = AuditLog::new(100);
         let registre = RegistreConfirmations::new();
         let exec = ExecuteurFactice::default();
+        let gouv = crate::gouvernance::tests::gouvernance_de_base();
         // clara, victor, emma combinent web_fetch et cog_services.
         for id in ["clara", "victor", "emma"] {
             let agent = agents.get_agent(id).expect("agent built-in");
-            let mut garde = GardeTour::new(&registre, &exec);
+            let mut garde = GardeTour::new(&registre, &exec, &gouv);
             let (_, log) = execute_tool_call(
                 &appel(
                     "w",
@@ -776,7 +860,8 @@ mod tests {
         let audit = AuditLog::new(10);
         let registre = RegistreConfirmations::new();
         let exec = ExecuteurFactice::default();
-        let mut garde = GardeTour::new(&registre, &exec);
+        let gouv = crate::gouvernance::tests::gouvernance_de_base();
+        let mut garde = GardeTour::new(&registre, &exec, &gouv);
         let tc = ToolCall {
             id: "x".into(),
             function: FunctionCall {
@@ -787,6 +872,121 @@ mod tests {
         let (msg, _) = execute_tool_call(&tc, &victor, &audit, &mut garde).await;
         assert!(contenu(&msg).contains("arguments JSON invalides"));
         assert_eq!(exec.appels(), Vec::new());
+    }
+
+    #[tokio::test]
+    async fn outil_refuse_par_strongfather_jamais_execute() {
+        let agents = AgentRegistry::new();
+        let victor = agents.get_agent("victor").expect("victor built-in");
+        let audit = AuditLog::new(10);
+        let registre = RegistreConfirmations::new();
+        let exec = ExecuteurFactice::default();
+        // Politique qui n'autorise que file_ops : web_fetch est refusé par défaut,
+        // bien que l'agent ait le skill et le niveau requis.
+        let politiques = bondingbrother::strongfather::PolicySet::from_toml_str(
+            r#"
+version = 1
+[[policy]]
+id = "seulement-fichiers"
+type = "permission"
+effect = "authorize"
+rule = "data.outil == 'file_ops'"
+"#,
+        )
+        .expect("politiques");
+        let gouv = GouvernanceMaia::new(
+            bondingbrother::PorteStrongFather::depuis_politiques(politiques).expect("porte"),
+        );
+        let mut garde = GardeTour::new(&registre, &exec, &gouv);
+        let (msg, log) = execute_tool_call(
+            &appel("1", "web_fetch", serde_json::json!({ "url": "https://exemple.org/" })),
+            &victor,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        assert!(contenu(&msg).contains("refusé par StrongFather"), "{}", contenu(&msg));
+        assert!(!log.result_success);
+        assert!(exec.appels().is_empty(), "outil refusé ⇒ non exécuté");
+        assert!(!garde.contient_etranger());
+        assert_eq!(audit.recent(1)[0].action, "refus_strongfather");
+
+        // Le skill autorisé passe.
+        let (_, log) = execute_tool_call(
+            &appel("2", "file_ops", serde_json::json!({ "action": "read", "path": "a" })),
+            &victor,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        assert!(log.result_success);
+        assert_eq!(exec.appels().len(), 1);
+    }
+
+    #[tokio::test]
+    async fn politiques_indisponibles_aucun_outil_ni_confirmation() {
+        let agents = AgentRegistry::new();
+        let victor = agents.get_agent("victor").expect("victor built-in");
+        let audit = AuditLog::new(10);
+        let registre = RegistreConfirmations::new();
+        let exec = ExecuteurFactice::default();
+        let gouv = GouvernanceMaia::depuis_fichier("/chemin/inexistant/maia.toml");
+        let mut garde = GardeTour::new(&registre, &exec, &gouv);
+        let (msg, _) = execute_tool_call(
+            &appel("1", "file_ops", serde_json::json!({ "action": "read", "path": "a" })),
+            &victor,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        assert!(contenu(&msg).contains("indisponible"));
+        // Action suspendue (écriture service) puis confirmée : refusée aussi.
+        let (_, log) = execute_tool_call(
+            &appel(
+                "2",
+                "cog_services",
+                serde_json::json!({ "action": "call", "service": "jaykonta",
+                                    "endpoint": "/intents/add_movement", "method": "POST" }),
+            ),
+            &victor,
+            &audit,
+            &mut garde,
+        )
+        .await;
+        let id = log.confirmation_id.expect("suspendue");
+        assert!(executer_confirmation(&id, &registre, &agents, &audit, &exec, &gouv)
+            .await
+            .is_err());
+        assert!(exec.appels().is_empty(), "refus ⇒ aucune exécution");
+    }
+
+    #[tokio::test]
+    async fn tour_contamine_effet_refuse_par_strongfather_meme_sans_garde() {
+        // Défense en profondeur : même si la garde laissait passer, StrongFather
+        // refuse un outil à effet dans un tour contaminé.
+        let agents = AgentRegistry::new();
+        let victor = agents.get_agent("victor").expect("victor built-in");
+        let exec = ExecuteurFactice::default();
+        let gouv = crate::gouvernance::tests::gouvernance_de_base();
+        let params: HashMap<String, serde_json::Value> =
+            serde_json::from_value(serde_json::json!({ "action": "write", "path": "x", "content": "y" }))
+                .unwrap_or_default();
+        let demande = DemandeOutil {
+            agent: &victor,
+            skill_id: "file_ops",
+            params: &params,
+            autorisation: Autorisation::Standard,
+            contenu_etranger: true,
+            mode: ModeExecution::Boucle,
+            appelant: gouvernance::APPELANT_LOCAL,
+        };
+        let refus = executer_outil_gouverne(&gouv, &exec, &demande).await.unwrap_err();
+        assert!(refus.contains("maia-etranger-effet-en-boucle"), "{refus}");
+        assert!(exec.appels().is_empty(), "refus ⇒ aucune exécution");
+        let sain = DemandeOutil { contenu_etranger: false, ..demande };
+        let (r, regle) = executer_outil_gouverne(&gouv, &exec, &sain).await.expect("autorisé");
+        assert!(r.success);
+        assert_eq!(regle, "maia-outil-file-ops");
     }
 
     #[test]

@@ -16,10 +16,14 @@
 //! Le `CapabilitiesRuntime` est entièrement **opt-in** :
 //! - Si non activé, `AliciaService` se comporte comme avant.
 //! - Si activé sans répertoire de manifestes, le registre reste vide.
-//! - Un `CoreGate` doit toujours être injecté ; le runtime production
-//!   injecte un `BorderGuardCoreGate`. La variante
-//!   `new_with_bypass_gate` (`BypassCoreGate`) n'existe que sous
-//!   `cfg(test)` ou la feature `dev-bypass`, désactivée par défaut (K-16).
+//! - Un `CoreGate` doit toujours être injecté ; le runtime production est
+//!   construit par [`CapabilitiesRuntime::new_gouverne`], qui injecte un
+//!   `StrongFatherCoreGate` (politiques `config/strongfather/alicia.toml`,
+//!   répertoire surchargeable par `COG_POLITIQUES_DIR` ; absentes ou
+//!   invalides ⇒ toute capability refusée). BorderGuard peut seulement
+//!   alimenter l'intention (K-16). La variante `new_with_bypass_gate`
+//!   (`BypassCoreGate`) n'existe que sous `cfg(test)` ou la feature
+//!   `dev-bypass`, désactivée par défaut.
 
 // @id service.alicia.capabilities_runtime
 // @role alicia_capabilities_subsystem
@@ -36,8 +40,8 @@ use tokio::sync::RwLock;
 #[cfg(any(test, feature = "dev-bypass"))]
 use miyualicia_dispatcher::BypassCoreGate;
 use miyualicia_dispatcher::{
-    CoreGate, Decision, DispatchError, Dispatcher, ExecutionResult,
-    ResolvedLearnedCall, ServiceClient, ServiceClientRouter,
+    CoreGate, Decision, DispatchError, Dispatcher, EnrichisseurIntention, ExecutionResult,
+    ResolvedLearnedCall, ServiceClient, ServiceClientRouter, StrongFatherCoreGate,
 };
 use miyualicia_memory::{
     build_persona_context, detect_repetitions, propose_from_pattern, ContextOptions,
@@ -263,6 +267,24 @@ impl CapabilitiesRuntime {
                 }
             }
         })
+    }
+
+    /// Construction **production** : la gate cores est un `StrongFatherCoreGate`
+    /// chargé depuis `<repertoire_politiques>/alicia.toml` (défaut :
+    /// `COG_POLITIQUES_DIR`, sinon `config/strongfather`). Fichier absent ou
+    /// invalide : le runtime démarre mais **refuse toute capability**
+    /// (fail-closed, journalisé). `enrichisseurs` (ex. `BorderGuardCoreGate`)
+    /// alimentent l'intention sans décider.
+    pub async fn new_gouverne(
+        config: CapabilitiesRuntimeConfig,
+        repertoire_politiques: Option<&Path>,
+        enrichisseurs: Vec<Arc<dyn EnrichisseurIntention>>,
+    ) -> Result<Self, AliciaError> {
+        let gate = enrichisseurs.into_iter().fold(
+            StrongFatherCoreGate::depuis_repertoire(repertoire_politiques),
+            StrongFatherCoreGate::avec_enrichisseur,
+        );
+        Self::new(config, Arc::new(gate)).await
     }
 
     /// Variante dev/test : initialise avec un `BypassCoreGate`.

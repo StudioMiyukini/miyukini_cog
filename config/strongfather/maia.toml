@@ -1,0 +1,157 @@
+# @id     strongfather_politiques_maia
+# @do     gouverner_outils_et_agents_maia
+# @role   config
+# @layer  core
+# @human  Politiques StrongFather de base de MAIA : reproduit le comportement légitime actuel
+# @human  (liste de skills de l'agent, niveaux de sécurité, garde « contenu étranger » du lot 0 bis,
+# @human  confirmation des écritures de service) ; tout le reste est refusé par défaut (K-11, K-9).
+#
+# Chargé au démarrage de MAIA (apps/miou-llm-bridge, module `gouvernance`). Répertoire :
+# `politiques_dir` de bridge.toml, sinon COG_POLITIQUES_DIR, sinon config/strongfather.
+# Fichier absent ou invalide ⇒ tout outil et toute écriture d'agent sont refusés (fail-closed).
+#
+# Intention « outil » (tools::executer_outil_gouverne) :
+#   action  = read (effet lecture / sortant) | modification (effet écriture)
+#   subject = maia.agent.<agent_id>     caller = local     origin = maia
+#   data.operation = 'outil', data.outil, data.agent, data.niveau, data.niveau_rang (0..3),
+#   data.competence_autorisee, data.effet (lecture|sortant|ecriture), data.contenu_etranger,
+#   data.mode (boucle|confirmee|direct), data.autorisation (standard|ecriture_confirmee),
+#   data.action, data.service
+#
+# Intention « agent » (POST /v1/agents, PUT /v1/agents/{id}) :
+#   action  = creation | modification   subject = maia.agent.<agent_id>
+#   data.operation (agent.creer|agent.modifier), data.agent, data.existe, data.cible_builtin,
+#   data.niveau_rang, data.niveau_precedent_rang, data.elevation_niveau, data.competences,
+#   data.competences_ajoutees (entier), data.dispatch_ajoute, data.prompt_modifie,
+#   data.modification_cosmetique
+#
+# Rappels moteur : refus explicite > autorisation ; erreur d'évaluation ⇒ refus ;
+# aucune autorisation applicable ⇒ refus « défaut: refus ». Chaque condition commence par
+# `data.operation == ...` (court-circuit) pour ne lire que des attributs présents.
+
+version = 1
+
+# ── Outils : niveau minimum par skill (miroir de security::check_agent_skill_permission) ──
+
+[[policy]]
+id = "maia-outil-file-ops"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'outil' && data.outil == 'file_ops'"
+rule = "data.competence_autorisee == 'true' && data.niveau_rang >= 1"
+[policy.target]
+actions = ["read", "modification"]
+origins = ["maia"]
+
+[[policy]]
+id = "maia-outil-web-fetch"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'outil' && data.outil == 'web_fetch'"
+rule = "data.competence_autorisee == 'true' && data.niveau_rang >= 1"
+[policy.target]
+actions = ["read", "modification"]
+origins = ["maia"]
+
+[[policy]]
+id = "maia-outil-cog-services"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'outil' && data.outil == 'cog_services'"
+rule = "data.competence_autorisee == 'true' && data.niveau_rang >= 1"
+[policy.target]
+actions = ["read", "modification"]
+origins = ["maia"]
+
+[[policy]]
+id = "maia-outil-shell-exec"
+type = "permission"
+effect = "authorize"
+condition = "data.operation == 'outil' && data.outil == 'shell_exec'"
+rule = "data.competence_autorisee == 'true' && data.niveau_rang >= 2"
+[policy.target]
+actions = ["read", "modification"]
+origins = ["maia"]
+
+# ── Outils : refus explicites ──
+
+# Lot 0 bis (K-02) : après ingestion de contenu étranger, aucun outil à effet (écriture,
+# appel sortant) ne s'exécute dans la boucle du modèle ; seule une confirmation humaine
+# explicite (mode « confirmee ») le permet.
+[[policy]]
+id = "maia-etranger-effet-en-boucle"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'outil' && data.contenu_etranger == 'true'"
+rule = "data.effet != 'lecture' && data.mode != 'confirmee'"
+[policy.target]
+origins = ["maia"]
+
+# K-01 / K-02 : une écriture vers un service COG exige une confirmation explicite.
+[[policy]]
+id = "maia-ecriture-service-sans-confirmation"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'outil' && data.outil == 'cog_services'"
+rule = "data.effet == 'ecriture' && data.autorisation != 'ecriture_confirmee'"
+[policy.target]
+origins = ["maia"]
+
+# ── Agents (K-9) ──
+
+[[policy]]
+id = "maia-agent-gestion"
+type = "permission"
+effect = "authorize"
+condition = "data.operation in ['agent.creer', 'agent.modifier']"
+rule = "data.agent != ''"
+[policy.target]
+actions = ["creation", "modification"]
+origins = ["maia"]
+
+# Un agent built-in ne peut être ni écrasé (POST) ni modifié au-delà du cosmétique
+# (nom, icône, description, préférence de modèle).
+[[policy]]
+id = "maia-agent-builtin-protege"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation in ['agent.creer', 'agent.modifier']"
+rule = "data.cible_builtin == 'true' && data.modification_cosmetique != 'true'"
+[policy.target]
+origins = ["maia"]
+
+# POST n'écrase jamais un agent existant (passer par PUT, soumis au contrôle d'élévation).
+[[policy]]
+id = "maia-agent-creation-existant"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'agent.creer'"
+rule = "data.existe == 'true'"
+[policy.target]
+origins = ["maia"]
+
+# Un agent créé par l'API ne dépasse pas le niveau Sandboxed (défaut de création).
+[[policy]]
+id = "maia-agent-creation-niveau-max"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'agent.creer'"
+rule = "data.niveau_rang > 1"
+[policy.target]
+origins = ["maia"]
+
+# Pas d'élévation par modification : niveau, nouveaux skills, droit de dispatch.
+[[policy]]
+id = "maia-agent-elevation-refusee"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'agent.modifier'"
+rule = "data.elevation_niveau == 'true' || data.competences_ajoutees > 0 || data.dispatch_ajoute == 'true'"
+[policy.target]
+origins = ["maia"]

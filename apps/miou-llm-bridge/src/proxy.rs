@@ -57,6 +57,8 @@ pub struct ProxyState {
     pub team_registered: bool,
     /// Actions d'outils suspendues en attente de confirmation (K-02).
     pub confirmations: std::sync::Arc<crate::confirmations::RegistreConfirmations>,
+    /// Porte StrongFather obligatoire (outils, administration des agents — K-11, K-9).
+    pub gouvernance: std::sync::Arc<crate::gouvernance::GouvernanceMaia>,
 }
 
 /// Construit la couche CORS à partir d'une liste explicite d'origines.
@@ -233,17 +235,38 @@ async fn get_agent(State(state): State<ProxyState>, Path(id): Path<String>) -> i
     }
 }
 
+/// Réponse 403 d'un refus StrongFather.
+fn refus_gouvernance(motif: String) -> axum::response::Response {
+    (
+        StatusCode::FORBIDDEN,
+        Json(serde_json::json!({ "error": motif })),
+    )
+        .into_response()
+}
+
 async fn create_agent(
     State(state): State<ProxyState>,
     Json(req): Json<CreateAgentRequest>,
 ) -> impl IntoResponse {
     let agent = req.into_agent_def();
     let id = agent.id.clone();
-    state.agent_registry.upsert_agent(agent);
-    (
-        StatusCode::CREATED,
-        Json(serde_json::json!({ "created": id })),
-    )
+    // K-9 : création soumise à StrongFather (pas d'écrasement, pas d'agent au-delà de Sandboxed).
+    let existant = state.agent_registry.get_agent(&id);
+    let intent = crate::gouvernance::intention_agent(
+        crate::gouvernance::OperationAgent::Creer,
+        &agent,
+        existant.as_ref(),
+        crate::gouvernance::APPELANT_LOCAL,
+    );
+    let registre = &state.agent_registry;
+    match state.gouvernance.executer(&intent, |_| registre.upsert_agent(agent)) {
+        Ok(()) => (
+            StatusCode::CREATED,
+            Json(serde_json::json!({ "created": id })),
+        )
+            .into_response(),
+        Err(motif) => refus_gouvernance(motif),
+    }
 }
 
 async fn update_agent(
@@ -252,10 +275,21 @@ async fn update_agent(
     Json(req): Json<UpdateAgentRequest>,
 ) -> impl IntoResponse {
     match state.agent_registry.get_agent(&id) {
-        Some(mut agent) => {
+        Some(existant) => {
+            let mut agent = existant.clone();
             req.apply_to(&mut agent);
-            state.agent_registry.upsert_agent(agent);
-            Json(serde_json::json!({ "updated": id })).into_response()
+            // K-9 : built-in non réécrit, aucune élévation (niveau, skills, dispatch).
+            let intent = crate::gouvernance::intention_agent(
+                crate::gouvernance::OperationAgent::Modifier,
+                &agent,
+                Some(&existant),
+                crate::gouvernance::APPELANT_LOCAL,
+            );
+            let registre = &state.agent_registry;
+            match state.gouvernance.executer(&intent, |_| registre.upsert_agent(agent)) {
+                Ok(()) => Json(serde_json::json!({ "updated": id })).into_response(),
+                Err(motif) => refus_gouvernance(motif),
+            }
         }
         None => (
             StatusCode::NOT_FOUND,
@@ -434,6 +468,7 @@ async fn chat_with_agent(
             &agent,
             &state.audit_log,
             &state.confirmations,
+            &state.gouvernance,
         )
         .await
         {
@@ -520,7 +555,45 @@ async fn execute_skill(
     } else {
         crate::skills::Autorisation::Standard
     };
-    let result = SkillRegistry::execute(&id, &req.params, autorisation).await;
+    // Agent déjà validé par `authorize_skill_request` (fail-closed).
+    let Some(agent) = req
+        .agent_id
+        .as_deref()
+        .map(str::trim)
+        .and_then(|a| state.agent_registry.get_agent(a))
+    else {
+        return refus_gouvernance("agent inconnu — exécution refusée".into());
+    };
+    let demande = crate::gouvernance::DemandeOutil {
+        agent: &agent,
+        skill_id: &id,
+        params: &req.params,
+        autorisation,
+        contenu_etranger: false,
+        mode: crate::gouvernance::ModeExecution::Direct,
+        appelant: crate::gouvernance::APPELANT_LOCAL,
+    };
+    let result = match crate::tools::executer_outil_gouverne(
+        &state.gouvernance,
+        &crate::tools::ExecuteurRegistre,
+        &demande,
+    )
+    .await
+    {
+        Ok((result, _regle)) => result,
+        Err(motif) => {
+            state.audit_log.log(crate::security::AuditEntry {
+                timestamp: crate::security::epoch_now(),
+                agent_id: agent.id.clone(),
+                skill_id: id.clone(),
+                action: "refus_strongfather".into(),
+                details: serde_json::to_string(&req.params).unwrap_or_default(),
+                success: false,
+                client_id: String::new(),
+            });
+            return refus_gouvernance(motif);
+        }
+    };
 
     state.audit_log.log(crate::security::AuditEntry {
         timestamp: crate::security::epoch_now(),
@@ -582,6 +655,7 @@ async fn decide_confirmation(
         &state.agent_registry,
         &state.audit_log,
         &crate::tools::ExecuteurRegistre,
+        &state.gouvernance,
     )
     .await
     {
