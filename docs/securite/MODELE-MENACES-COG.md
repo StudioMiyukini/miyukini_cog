@@ -246,6 +246,7 @@
 - **EX-38** Preuve de calcul légère à la candidature fédérale
 - **EX-39** Évolutions du protocole fédéral activées par seuil de signalement des membres
 - **EX-40 à EX-49** Services hybrides et Portail : voir [services hybrides](../architecture/SERVICES-HYBRIDES-ET-PORTAIL.md) §6
+- **EX-50 à EX-56** Mémoire de MAIA : voir [mémoire MAIA](../architecture/MEMOIRE-MAIA.md) §12
 
 ## 10. Priorités
 
