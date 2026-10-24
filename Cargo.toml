@@ -32,6 +32,7 @@ members = [
     "crates/miyuexport",
     "crates/miyujobs",
     "crates/miyauth",
+    "crates/miyusceau",
     "crates/miyuweb",
     "crates/miyuclock",
     "crates/miyuforum",
