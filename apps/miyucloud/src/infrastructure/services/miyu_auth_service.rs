@@ -43,7 +43,8 @@ use std::sync::Arc;
 
 use miyauth::http::{
     DefiEmis, EntetesSignees, MagasinDefis, MagasinDefisMemoire, RefusHttp, RegistreNonces,
-    RequeteHttp, verifier_requete_signee, verifier_requete_visa,
+    RequeteHttp, analyser_autorisation_visa, analyser_pop, verifier_requete_signee,
+    verifier_requete_visa,
 };
 use miyauth::{
     AnnuaireEmetteurs, CibleRevocation, CogId, ErreurRevocation, PolitiqueIdentite,
@@ -397,6 +398,24 @@ impl<S: MiyuIdentityStore> MiyuAuthService<S> {
             return Err(RefusMiyu::VisaDesactive);
         }
         Ok(self.defis.emettre(AUDIENCE_MIYUCLOUD, maintenant)?)
+    }
+
+    /// Précontrôle **avant lecture du corps** : schéma actif, en-têtes bien
+    /// formés, visa et passeport scellés par une ancre épinglée, audience,
+    /// fenêtres et révocation. Ne consomme pas le défi (la preuve liée au corps
+    /// est vérifiée ensuite par [`Self::verifier_visa`]).
+    pub fn precontroler_visa(
+        &self,
+        autorisation: Option<&str>,
+        pop: Option<&str>,
+        maintenant: u64,
+    ) -> Result<(), RefusMiyu> {
+        let hote = self.hote.as_ref().ok_or(RefusMiyu::VisaDesactive)?;
+        let (visa, passeport) = analyser_autorisation_visa(autorisation.unwrap_or(""))?;
+        analyser_pop(pop.unwrap_or(""))?;
+        miyauth::verifier_visa(&visa, &passeport, AUDIENCE_MIYUCLOUD, &hote.politique(), maintenant)
+            .map_err(|e| RefusMiyu::Http(RefusHttp::Identite(e)))?;
+        Ok(())
     }
 
     /// Vérifie `MiyuVisa` + `X-Miyu-PoP` (défi consommé d'abord) et rend

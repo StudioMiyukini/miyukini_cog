@@ -84,10 +84,12 @@ impl CompteurEchecs {
         self.cache.get(ip).is_some_and(|n| n >= self.max)
     }
 
-    /// Enregistre un échec pour l'IP.
+    /// Enregistre un échec pour l'IP (incrément atomique : des échecs
+    /// concurrents ne se perdent pas).
     pub fn noter_echec(&self, ip: &str) {
-        let n = self.cache.get(ip).unwrap_or(0).saturating_add(1);
-        self.cache.insert(ip.to_string(), n);
+        self.cache
+            .entry(ip.to_string())
+            .and_upsert_with(|actuel| actuel.map_or(1, |e| e.into_value().saturating_add(1)));
     }
 }
 
@@ -180,5 +182,24 @@ mod tests {
         }
         assert!(c.bloque("1.2.3.4"));
         assert!(!c.bloque("1.2.3.5"));
+    }
+
+    #[test]
+    fn echecs_concurrents_tous_comptes() {
+        let c = std::sync::Arc::new(CompteurEchecs::new(1_000, 300, 100));
+        let fils: Vec<_> = (0..8)
+            .map(|_| {
+                let c = c.clone();
+                std::thread::spawn(move || {
+                    for _ in 0..50 {
+                        c.noter_echec("9.9.9.9");
+                    }
+                })
+            })
+            .collect();
+        for f in fils {
+            f.join().unwrap();
+        }
+        assert_eq!(c.cache.get("9.9.9.9"), Some(400));
     }
 }

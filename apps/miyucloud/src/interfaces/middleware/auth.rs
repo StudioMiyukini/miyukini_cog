@@ -317,6 +317,14 @@ pub async fn auth_middleware(
         let miyu = state.miyu_auth.as_ref().ok_or_else(|| {
             AuthError::InvalidToken("MiyuVisa is not enabled on this server".to_string())
         })?;
+        // Titres vérifiés (signatures, ancre, audience, révocation) avant de
+        // lire le moindre octet du corps : un anonyme ne fait pas lire 16 Mio.
+        miyu.precontroler_visa(
+            Some(valeur),
+            entete(&headers, miyauth::http::ENTETE_POP),
+            maintenant(),
+        )
+        .map_err(refus_miyu)?;
         let (chemin, chemin_et_requete) = chemins(&request);
         let methode = request.method().as_str().to_string();
         let (req, corps) = lire_corps_borne(request).await?;
