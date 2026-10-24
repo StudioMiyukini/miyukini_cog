@@ -3,7 +3,7 @@
 <!-- @id arch.ia.memoire-maia -->
 <!-- @role architecture-specification -->
 <!-- @layer 8 -->
-<!-- @human Mémoire hiérarchique de MAIA : légère, indexable, économe en tokens, utilisable par un petit modèle ou une chaîne de modèles par strates -->
+<!-- @human Mémoire hiérarchique de MAIA : légère, indexable, économe en tokens, utilisable par un petit modèle ou un grand modèle via le moteur Strata -->
 <!-- @do design_maia_memory -->
 
 - **Statut** : v1, 2026-10-24
@@ -19,7 +19,7 @@
 - **Indexable** : identifiants hiérarchiques, plein texte, vecteurs, graphe, temps
 - **Économe** : contexte assemblé **sous budget de tokens**, jamais de vidage brut
 - **Hiérarchique** : du résumé global au détail, chargée par **zoom progressif**
-- **Utilisable par un petit modèle** (contexte 4 k) comme par une **chaîne de modèles par strates**
+- **Utilisable par un petit modèle** (contexte 4 k) comme par un **grand modèle via Strata**
 - **Sûre** : zone COG, données `nationale`, provenance tracée, résistante à l'empoisonnement
 - **Souveraine** : appartient à l'utilisateur, consultable, corrigeable, oubliable
 
@@ -121,6 +121,7 @@ famille.lea.s1 …
   - petit modèle (contexte 4 k) : mémoire ≤ 600 tokens
   - moyen (8 k) : ≤ 1 500 tokens
   - grand (32 k et +) : ≤ 4 000 tokens
+  - Strata : ≤ 4 000 tokens, préfixe N0 + N1 stable pour le cache (§8)
 - Ordre de remplissage :
   1. N0 (toujours)
   2. N1 compressée
@@ -129,17 +130,37 @@ famille.lea.s1 …
 - Zoom à la demande : outil `memoire.ouvrir(id)` (lecture seule, sans effet de bord)
 - Comptage réel des tokens avec le tokenizer du modèle actif
 
-## 8. Chaîne de modèles par strates
+## 8. Moteurs d'inférence : petit modèle et Strata
 
 <!-- @id arch.ia.memoire.strata -->
 <!-- @role model-pipeline -->
-<!-- @do run_memory_through_model_strata -->
+<!-- @do run_memory_with_small_model_or_strata -->
 
-- **S0 · Déterministe** (sans LLM) : rappel par index, score, budget
-- **S1 · Petit modèle** (≈ 1–3 B) : reclasse, fusionne les doublons, compresse les notes trop longues pour tenir dans le budget
-- **S2 · Modèle principal** : répond à l'utilisateur à partir du paquet final
-- Un petit modèle seul peut tout faire : S0 + S2 réduit, budget petit modèle
-- Écriture : S1 **propose** des notes candidates à partir de la conversation ; elles ne deviennent mémoire qu'après validation (§9)
+**Strata** ([Niko1221/Strata](https://github.com/Niko1221/Strata), MIT ; chaque modèle a sa propre licence)
+- moteur d'inférence pour grands modèles MoE sur matériel grand public (Qwen3.8-Flash-Next, 125 B)
+- experts répartis GPU / RAM / SSD, quantification 2–4 bits, décodage spéculatif
+- API OpenAI / Anthropic sur `127.0.0.1:8080`
+- lecture du prompt ≈ 1 600–2 600 tokens/s (RTX 5070), premier message ≈ **1 min pour 30 000 tokens** → chaque token de contexte coûte du temps
+- prérequis : ≥ 32 Go RAM + VRAM (IQ2_XS dès 40 Go), GPU NVIDIA ≥ 12 Go, ~80 Go SSD
+
+**Profils MAIA**
+- **S0 · Déterministe** (sans LLM) : rappel par index, score, budget — toujours actif
+- **S1 · Petit modèle local** (≈ 1–4 B, `maia-llm` / llama.cpp) : reclasse, compresse, propose les notes candidates ; peut aussi répondre seul
+- **S2 · Grand modèle via Strata** : répond quand la tâche le demande
+- Le format mémoire est **indépendant du moteur** : même paquet, budgets différents
+
+**Optimisations liées à Strata**
+- **Préfixe stable** : N0 puis N1 toujours en tête et dans le même ordre → réutilisation du cache de prompt, seule la partie variable est relue
+- Parties variables (N2 / N3) en fin de contexte
+- Budget mémoire Strata ≤ 4 000 tokens malgré la grande fenêtre : le coût est le temps de lecture, pas la place
+
+**Intégration sûre dans le COG**
+- Strata = composant tiers : en **zone COG**, sandbox, **aucun réseau** hors socket local vers MAIA
+- Port `8080` non exposé ; appelé uniquement par MAIA
+- Binaire et modèles reçus par le **canal officiel** (signés, EX-26), jamais téléchargés par Strata lui-même
+- Service **H0** (interne pur)
+
+**Serveur actuel** (2026-10-24) : RTX 3060 Ti 8 Go + 30 Go RAM (dont ~15 Go déjà utilisés) → **sous les prérequis** de Strata ; profil S1 seul en attendant un GPU ≥ 12 Go ou plus de RAM
 
 ## 9. Écriture, consolidation, oubli
 
