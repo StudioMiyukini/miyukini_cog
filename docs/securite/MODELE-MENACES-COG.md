@@ -227,10 +227,10 @@
 - **EX-19** Une instance BorderGuard par frontière ; vérification finale côté zone COG
 - **EX-20** Canal officiel : dépôt officiel relevé via le Portail, aucune route vers la zone COG
 - **EX-21** Zone COG segmentée : sandbox par service, données via KindMother, clé de DB par service
-- **EX-22** Horloge monotone ancrée sur horodatages signés Origin
+- **EX-22** Horloge monotone, Median-Time-Past des têtes de registre, horodatages signés Origin
 - **EX-23** Contenu non fiable jamais rendu tel quel en zone COG (formats assainis, WebView sans réseau, CSP)
-- **EX-24** Racine en Shamir 2 sur 3, cérémonie de rotation guidée
-- **EX-25** Une clé par usage (passeports, visas, arrêtés, journal)
+- **EX-24** Racine en SLIP-39 2 sur 3, cérémonie de rotation guidée
+- **EX-25** Une clé par usage, dérivée de la racine en SLIP-10 (durcie)
 - **EX-26** Correctifs OS et modèles IA uniquement via le canal officiel, signés
 - **EX-27** Sauvegarde hors site chiffrée par clé hors ligne, vers un pair fédéré
 - **EX-28** Amorçage : image signée, empreinte publiée hors bande
@@ -242,6 +242,9 @@
 - **EX-34** Registre Merkle fédéral contresigné par Origin (anti-éclipse)
 - **EX-35** Fraîcheur maximale des révocations fédérées
 - **EX-36** Identifiant de passeport différent par COG visité
+- **EX-37** Note locale des pairs (ban score) et anti-éclipse (diversité des pairs)
+- **EX-38** Preuve de calcul légère à la candidature fédérale
+- **EX-39** Évolutions du protocole fédéral activées par seuil de signalement des membres
 
 ## 10. Priorités
 

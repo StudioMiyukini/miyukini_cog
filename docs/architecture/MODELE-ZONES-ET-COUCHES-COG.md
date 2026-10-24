@@ -335,8 +335,8 @@
 - **Certification fédérale** = reconnaissance croisée des racines entre COG
 - **Certification globale** = signature Origin (Market, canal officiel, Fédération)
 - Appareils de l'utilisateur = pairs Fédération → aucun port ouvert côté International
-- **Une clé par usage** (passeports, visas, arrêtés, journal), chacune certifiée par la racine
-- Racine sauvegardée en **Shamir 2 sur 3** (plusieurs USB + papier) ; cérémonie de rotation guidée
+- **Une clé par usage** (passeports, visas, arrêtés, journal), **dérivée de la racine en SLIP-10** (dérivation durcie)
+- Racine sauvegardée en **SLIP-39 2 sur 3** (parts en mots, sur USB et papier) ; cérémonie de rotation guidée
 - **Identifiant différent par COG visité** (pas de traçage entre COG)
 
 ## 16. Fédération : admission et sanctions
@@ -355,6 +355,7 @@
 
 **Confirmations**
 - Seuls les **membres** confirment ; **membres fondateurs** créés par Origin
+- Candidature accompagnée d'une **preuve de calcul** légère (hashcash) contre la création en masse
 - Confirmation signée (Sceau v1), datée, **renouvelée toutes les 24 h**
 - Compteur des 7 jours remis à zéro sous 4 confirmations ; membre durablement sous 2 → invité
 - Confirmateurs **indépendants** : racines distinctes, attestation TPM, nombre de confirmations limité par membre et par mois
@@ -373,6 +374,12 @@
 - Statuts, confirmations et blacklists dans un **registre Merkle fédéral**
 - Têtes échangées entre pairs, contresignées par Origin en témoin → éclipse et double discours détectables
 - Révocations fédérées avec **fraîcheur maximale** ; au-delà, accès fédéré refusé
+- Propagation par **commérage** (annonce puis récupération à la demande)
+
+**Défense locale**
+- **Note locale** de chaque pair (ban score), indépendante de la blacklist fédérale
+- **Anti-éclipse** : pairs choisis dans des réseaux différents, pairs anciens conservés
+- **Évolutions du protocole** activées seulement quand un seuil de membres les signale
 
 ## 17. Confiance et résilience
 
@@ -381,7 +388,7 @@
 <!-- @layer 3-8+kernel -->
 <!-- @do ensure_trust_and_resilience -->
 
-- **Temps de confiance** : horloge monotone qui ne recule jamais, ancrée sur des horodatages signés par Origin et la dernière tête de registre vue
+- **Temps de confiance** : horloge monotone qui ne recule jamais ; rejet de toute heure antérieure à la **médiane des 11 dernières têtes** de registre vues (Median-Time-Past) ; horodatages signés par Origin
 - **Sauvegarde hors site** : DB principale chiffrée par une clé hors ligne, publiée via la Franche vers un pair fédéré (flux déclaré)
 - **Amorçage** : image signée, empreinte publiée hors bande (site, papier, QR), clé Origin intégrée à l'image
 - **Gouvernance d'Origin** : à seuil (plusieurs détenteurs), plan de succession ; la Fédération fonctionne sans Origin
@@ -390,7 +397,39 @@
 - **TAMR sans fatigue** : peu de types sensibles, validations groupées, décisions mémorisées par règle
 - **Noyau partagé** : le niveau 1 (namespaces) ne sert qu'au prototype ; protection réelle à partir des micro-VM ou d'une machine dédiée
 
-## 18. Feuille de route
+## 18. Emprunts à Bitcoin
+
+<!-- @id arch.cog.emprunts-bitcoin -->
+<!-- @role design-rationale -->
+<!-- @layer 5-7 -->
+<!-- @human Briques éprouvées de Bitcoin reprises par COG, et ce qui est volontairement écarté -->
+<!-- @do reuse_bitcoin_mechanisms -->
+
+**Repris**
+- **Arbre de Merkle + preuves SPV** → registre Merkle, preuves d'inclusion
+- **« Don't trust, verify »** → chaque COG revalide signatures, statuts, blacklists
+- **SLIP-10** (BIP32 pour Ed25519, dérivation durcie) → une clé par usage dérivée de la racine
+- **SLIP-39** (Shamir normalisé en mots) → sauvegarde de la racine, 2 sur 3
+- **Median-Time-Past** → temps de confiance
+- **Ban score** → note locale des pairs, en plus de la blacklist fédérale
+- **Anti-éclipse** (addrman) → pairs diversifiés par réseau d'origine, pairs anciens conservés
+- **Graines de démarrage** → membres fondateurs et Origin intégrés à l'image
+- **Commérage `inv` / `getdata`** → propagation des confirmations, signalements, têtes de registre
+- **Soft fork à seuil** (BIP9) → évolutions du protocole fédéral activées par signalement des membres
+- **Compilations reproductibles Guix** → EX-04
+- **Multisig** → signature à seuil (canal officiel, gouvernance d'Origin)
+- **Hashcash** → coût de calcul léger à la candidature (anti-création en masse)
+
+**Écarté**
+- Blockchain globale et minage (énergie, latence, attaque à 51 % sur un petit réseau)
+- Monnaie et jetons
+- Registre public mondial (fuite de métadonnées)
+- Modèle sans permission : la Fédération reste un réseau de confiance par cooptation
+
+**Leçon retenue**
+- Bitcoin n'a aucun bannissement global → la blacklist fédérale exige **preuves + quorum**, et chaque COG garde sa note locale
+
+## 19. Feuille de route
 
 <!-- @id arch.cog.feuille-de-route -->
 <!-- @role roadmap -->
@@ -403,7 +442,7 @@
 - ⬜ **Lot 5** gouvernance IA (couche 8)
 - ⬜ **Lot 6** COG OS
 
-## 19. Points ouverts
+## 20. Points ouverts
 
 <!-- @id arch.cog.points-ouverts -->
 <!-- @role open-questions -->

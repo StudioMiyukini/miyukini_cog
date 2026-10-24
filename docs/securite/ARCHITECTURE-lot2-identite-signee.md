@@ -219,8 +219,8 @@ Le point d'extension `verify_package_signature` posé au lot 1 devient bloquant.
 ## 12. Décisions (validées le 2026-10-24)
 
 1. **Format** : maison « Sceau v1 » (section 4), sans dépendance de sérialisation.
-2. **Racine COG** : hors ligne sur support amovible (USB chiffrée Argon2id + phrase de
-   récupération) ; le serveur ne détient que des clés d'émission/journal à 90 j.
+2. **Racine COG** : hors ligne sur support amovible ; sauvegarde **SLIP-39 2 sur 3** ; clés
+   d'émission/journal **dérivées en SLIP-10** (durcie), 90 j, seules présentes sur le serveur.
 3. **Durées** : passeport 30 j, visa 15 min, clés d'émission 90 j.
 4. **Market** : paquets **officiels uniquement** dans ce lot — un seul éditeur (Studio Miyukini),
    certificat éditeur signé par la racine Origin. Les éditeurs tiers sont reportés.
