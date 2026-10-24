@@ -79,6 +79,12 @@ impl Vigie {
         }
     }
 
+    /// Attribue à `voie` les journaux du pont de zone passant par le port
+    /// `interface` (port de sandbox `sv<n>` du plan réseau de la Douane).
+    pub fn declarer_interface_voie(&mut self, interface: impl Into<String>, voie: VoieId) {
+        self.lecteur.declarer_interface_voie(interface, voie);
+    }
+
     /// Identifiant du capteur.
     pub fn capteur(&self) -> &CapteurId {
         &self.config.capteur
@@ -107,7 +113,7 @@ impl Vigie {
         self.clore(signaux, c, maintenant_ms)
     }
 
-    /// Analyse des lignes de journal nftables.
+    /// Analyse des lignes de journal NFLOG de la Douane (convention `MDOU|`).
     pub fn analyser_journal<'a>(
         &mut self,
         lignes: impl IntoIterator<Item = &'a str>,

@@ -190,3 +190,38 @@ fn source_interchangeable() {
     assert!(matches!(verdicts[0], Verdict::Autoriser { .. }));
     assert_eq!(verdicts[1], Verdict::Bloquer(NatureEvenement::SortieZoneCog));
 }
+
+/// Usurpation : des paquets hors connexion à source usurpée ne comptent pas
+/// pour le bannissement automatique (seules les tentatives de connexion nouvelle).
+#[test]
+fn bannissement_ignore_les_paquets_hors_connexion() {
+    let (mut m, rx) = moteur(&arrete_externe(1));
+    let t = T0 + 10;
+    for k in 0..20 {
+        let v = m.evaluer(&meta(t, "192.0.2.66", 40000 + k, "10.77.1.11", 443, false));
+        assert_eq!(v, Verdict::Bloquer(NatureEvenement::HorsEtat));
+    }
+    assert!(!rx.try_iter().any(|e| matches!(e.nature, NatureEvenement::Bannissement { .. })));
+    // La source n'est pas bannie : ses tentatives restent jugées sur l'arrêté.
+    assert_eq!(
+        m.evaluer(&meta(t, "192.0.2.66", 41000, "10.77.1.11", 443, true)),
+        Verdict::Bloquer(NatureEvenement::FluxNonDeclare)
+    );
+}
+
+/// Un pair de la liste blanche de l'arrêté n'est jamais banni automatiquement,
+/// même après de nombreux blocages (adresse usurpée vers un port non déclaré).
+#[test]
+fn pair_en_liste_blanche_jamais_banni_automatiquement() {
+    let (mut m, rx) = moteur(&arrete_externe(1));
+    let t = T0 + 10;
+    assert!(m.est_pair_autorise(ip("203.0.113.9")));
+    assert!(!m.est_pair_autorise(ip("192.0.2.66")));
+    for k in 0..20 {
+        let v = m.evaluer(&meta(t, "203.0.113.9", 40000 + k, "10.77.1.11", 22, true));
+        assert_eq!(v, Verdict::Bloquer(NatureEvenement::FluxNonDeclare));
+    }
+    assert!(!rx.try_iter().any(|e| matches!(e.nature, NatureEvenement::Bannissement { .. })));
+    // Sa voie déclarée reste ouverte.
+    assert!(matches!(m.evaluer(&meta(t, "203.0.113.9", 42000, "10.77.1.11", 443, true)), Verdict::Autoriser { .. }));
+}

@@ -56,7 +56,7 @@ UTILISATION
       porte garante de la nouvelle » signé par les deux identités (fichier neuf).
 
 USAGES
-  identite (génération 0 uniquement), emission, journal, editeur
+  identite (génération 0 uniquement), emission, journal, editeur, arretes
 
 PHRASE SECRÈTE
   Facultative (ASCII imprimable), lue dans un fichier ; vide par défaut. Sans

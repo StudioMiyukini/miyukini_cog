@@ -9,7 +9,7 @@
 //! [`RefusParDefaut`] **refuse tout** (fail-closed) tant qu'aucun CDR n'est
 //! branché : aucun document ne traverse sans désarmement.
 
-use crate::traite::{IdService, NatureDocument, Sens};
+use crate::traite::{IdService, NatureDocument, Sens, TypeMime};
 
 /// Document à désarmer (octets non fiables, jamais transmis tels quels).
 #[derive(Debug, Clone, Copy)]
@@ -24,6 +24,8 @@ pub struct ObjetADesarmer<'a> {
     pub tag: u8,
     /// Nature déclarée par le traité.
     pub nature: NatureDocument,
+    /// Type MIME déclaré par le traité (obligatoire pour [`NatureDocument::Document`]).
+    pub mime: Option<TypeMime>,
     /// Taille maximale admise après reconstruction.
     pub taille_max: usize,
     /// Octets reçus.

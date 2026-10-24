@@ -19,6 +19,8 @@ pub const MAX_TYPES: usize = 64;
 pub const MAX_CHAMPS: usize = 32;
 /// Longueur maximale d'un identifiant de service.
 pub const MAX_ID_SERVICE: usize = 64;
+/// Longueur maximale d'un type MIME déclaré par le traité.
+pub const MAX_TYPE_MIME: usize = 64;
 
 /// Identifiant de service : `[a-z0-9._:-]`, 1 à 64 octets, commence par une lettre.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -126,6 +128,68 @@ impl NatureDocument {
     }
 }
 
+/// Type MIME déclaré par le traité pour un champ `Document` (A-004 : le CDR
+/// exige le type déclaré, puis vérifie que le contenu réel lui correspond).
+///
+/// Forme stricte `type/sous-type`, minuscules ASCII `[a-z0-9.+-]`, sans
+/// paramètre, au plus [`MAX_TYPE_MIME`] octets. Valeur copiable (le traité
+/// reste `Copy` champ par champ).
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub struct TypeMime {
+    octets: [u8; MAX_TYPE_MIME],
+    longueur: u8,
+}
+
+impl TypeMime {
+    /// Valide et construit un type MIME.
+    pub fn new(mime: &str) -> Result<Self, ErreurPortail> {
+        Self::depuis_octets(mime.as_bytes()).ok_or(ErreurPortail::ContratInvalide("type MIME invalide"))
+    }
+
+    fn depuis_octets(o: &[u8]) -> Option<Self> {
+        let partie = |p: &[u8]| {
+            !p.is_empty()
+                && (p[0].is_ascii_lowercase() || p[0].is_ascii_digit())
+                && p.iter().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || matches!(b, b'.' | b'+' | b'-'))
+        };
+        if o.len() > MAX_TYPE_MIME {
+            return None;
+        }
+        let mut morceaux = o.split(|b| *b == b'/');
+        let (Some(t), Some(st), None) = (morceaux.next(), morceaux.next(), morceaux.next()) else {
+            return None;
+        };
+        if !partie(t) || !partie(st) {
+            return None;
+        }
+        let mut octets = [0u8; MAX_TYPE_MIME];
+        octets[..o.len()].copy_from_slice(o);
+        Some(Self { octets, longueur: o.len() as u8 })
+    }
+
+    /// Forme textuelle.
+    pub fn as_str(&self) -> &str {
+        // ASCII validé à la construction.
+        std::str::from_utf8(&self.octets[..usize::from(self.longueur)]).unwrap_or("")
+    }
+
+    fn octets(&self) -> &[u8] {
+        &self.octets[..usize::from(self.longueur)]
+    }
+}
+
+impl std::fmt::Debug for TypeMime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "TypeMime({:?})", self.as_str())
+    }
+}
+
+impl std::fmt::Display for TypeMime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
 /// Nature d'un champ du traité.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NatureChamp {
@@ -145,10 +209,14 @@ pub enum NatureChamp {
     },
     /// Fichier ou document : **désarmement (CDR) obligatoire** (EX-45).
     Document {
-        /// Taille maximale en octets.
+        /// Taille maximale en octets (entrée reçue **et** sortie reconstruite).
         max: u32,
         /// Nature attendue.
         nature: NatureDocument,
+        /// Type MIME déclaré : **obligatoire** pour [`NatureDocument::Document`]
+        /// (le CDR désarme selon le type déclaré), **absent** pour les images
+        /// (famille imposée, format détecté) et les archives (refusées).
+        mime: Option<TypeMime>,
     },
 }
 
@@ -175,6 +243,13 @@ impl NatureChamp {
         match self {
             Self::Document { nature, .. } => nature as u8,
             _ => 0,
+        }
+    }
+
+    fn mime(self) -> Option<TypeMime> {
+        match self {
+            Self::Document { mime, .. } => mime,
+            _ => None,
         }
     }
 }
@@ -250,6 +325,15 @@ impl Traite {
                 if max == 0 || max > TAILLE_MAX_CHARGE {
                     return Err(ErreurPortail::ContratInvalide("borne de champ invalide"));
                 }
+                match c.nature {
+                    NatureChamp::Document { nature: NatureDocument::Document, mime: None, .. } => {
+                        return Err(ErreurPortail::ContratInvalide("document sans type MIME déclaré"));
+                    }
+                    NatureChamp::Document { nature: NatureDocument::Image | NatureDocument::Archive, mime: Some(_), .. } => {
+                        return Err(ErreurPortail::ContratInvalide("type MIME réservé aux documents"));
+                    }
+                    _ => {}
+                }
             }
         }
         Ok(())
@@ -257,7 +341,10 @@ impl Traite {
 
     /// Encodage binaire canonique (transmission au sas).
     ///
-    /// `version u64 | n u8 | n × [code u64 | sens u8 | m u8 | m × [tag u8 | nature u8 | max u32 | doc u8 | oblig u8]]`
+    /// `version u64 | n u8 | n × [code u64 | sens u8 | m u8 | m × [tag u8 | nature u8 | max u32 | doc u8 | oblig u8 | lmime u8 | mime]]`
+    ///
+    /// (`lmime` = 0 sans type MIME.) Protocole interne parent ⇄ sas : ne fait
+    /// pas partie de la trame MSCE (vecteurs figés inchangés).
     pub fn encoder(&self) -> Vec<u8> {
         let mut s = Vec::new();
         s.extend_from_slice(&self.version.to_be_bytes());
@@ -272,6 +359,10 @@ impl Traite {
                 s.extend_from_slice(&c.nature.max().to_be_bytes());
                 s.push(c.nature.nature_document());
                 s.push(u8::from(c.obligatoire));
+                let mime = c.nature.mime();
+                let mime = mime.as_ref().map_or(&[][..], TypeMime::octets);
+                s.push(mime.len() as u8);
+                s.extend_from_slice(mime);
             }
         }
         s
@@ -304,14 +395,25 @@ impl Traite {
                     1 => true,
                     _ => return Err(RefusDecodage::Requete),
                 };
+                let lmime = usize::from(l.u8()?);
+                let mime = if lmime == 0 {
+                    None
+                } else {
+                    Some(TypeMime::depuis_octets(l.prendre(lmime)?).ok_or(RefusDecodage::Requete)?)
+                };
+                if mime.is_some() && code_nature != 0x05 {
+                    return Err(RefusDecodage::Requete);
+                }
                 let nature = match (code_nature, doc) {
                     (0x01, 0) if max == 8 => NatureChamp::Entier,
                     (0x02, 0) if max == 1 => NatureChamp::Booleen,
                     (0x03, 0) => NatureChamp::Texte { max },
                     (0x04, 0) => NatureChamp::Octets { max },
-                    (0x05, d) => {
-                        NatureChamp::Document { max, nature: NatureDocument::depuis_octet(d).ok_or(RefusDecodage::Requete)? }
-                    }
+                    (0x05, d) => NatureChamp::Document {
+                        max,
+                        nature: NatureDocument::depuis_octet(d).ok_or(RefusDecodage::Requete)?,
+                        mime,
+                    },
                     _ => return Err(RefusDecodage::Requete),
                 };
                 champs.push(ChampTraite { tag, nature, obligatoire });
@@ -392,7 +494,7 @@ mod tests {
                         ChampTraite { tag: 2, nature: NatureChamp::Entier, obligatoire: false },
                         ChampTraite {
                             tag: 5,
-                            nature: NatureChamp::Document { max: 4096, nature: NatureDocument::Image },
+                            nature: NatureChamp::Document { max: 4096, nature: NatureDocument::Image, mime: None },
                             obligatoire: false,
                         },
                     ],
@@ -426,6 +528,38 @@ mod tests {
         t.types[0].champs.swap(0, 1);
         assert!(t.valider().is_err());
         assert!(Traite::decoder(&t.encoder()).is_err());
+    }
+
+    #[test]
+    fn document_exige_un_type_mime_declare() {
+        let mut t = exemple();
+        t.types[0].champs.push(ChampTraite {
+            tag: 6,
+            nature: NatureChamp::Document { max: 1024, nature: NatureDocument::Document, mime: None },
+            obligatoire: false,
+        });
+        assert!(t.valider().is_err(), "document sans type MIME");
+        t.types[0].champs[3].nature = NatureChamp::Document {
+            max: 1024,
+            nature: NatureDocument::Document,
+            mime: Some(TypeMime::new("text/csv").unwrap()),
+        };
+        t.valider().unwrap();
+        assert_eq!(Traite::decoder(&t.encoder()).unwrap(), t);
+        // Type MIME sur une image : refusé.
+        t.types[0].champs[2].nature =
+            NatureChamp::Document { max: 4096, nature: NatureDocument::Image, mime: Some(TypeMime::new("image/png").unwrap()) };
+        assert!(t.valider().is_err());
+    }
+
+    #[test]
+    fn type_mime_strict() {
+        assert_eq!(TypeMime::new("text/plain").unwrap().as_str(), "text/plain");
+        assert!(TypeMime::new("application/vnd.oasis.opendocument.text").is_ok());
+        for faux in ["", "text", "Text/plain", "text/plain; charset=utf-8", "a/b/c", "/x", "x/", "text/pl ain"] {
+            assert!(TypeMime::new(faux).is_err(), "{faux}");
+        }
+        assert!(TypeMime::new(&format!("a/{}", "b".repeat(MAX_TYPE_MIME))).is_err());
     }
 
     #[test]

@@ -557,7 +557,7 @@ impl PortailInterne {
         let ty = traite.type_pour(d.sens, d.type_code).ok_or(RefusDecodage::TypeDeclaration)?;
         for champ in &mut d.champs {
             if let Valeur::Document(octets) = &champ.valeur {
-                let Some(NatureChamp::Document { max, nature }) = ty.champ(champ.tag).map(|c| c.nature) else {
+                let Some(NatureChamp::Document { max, nature, mime }) = ty.champ(champ.tag).map(|c| c.nature) else {
                     return Err(ErreurPortail::Desarmement);
                 };
                 let objet = ObjetADesarmer {
@@ -566,6 +566,7 @@ impl PortailInterne {
                     type_code: d.type_code,
                     tag: champ.tag,
                     nature,
+                    mime,
                     taille_max: max as usize,
                     octets,
                 };

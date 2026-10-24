@@ -16,7 +16,9 @@
 //! Snort, C-71). Entrées :
 //!
 //! - [`SourceEvenements`] → [`EvenementFlux`] : événements de la Douane (adaptateur) ;
-//! - [`LecteurNftables`] : journaux nftables au préfixe `MIYU:` (analyse stricte) ;
+//! - [`LecteurNftables`] : journaux NFLOG de la Douane, convention canonique
+//!   `MDOU|<lieu>|<chaine>|<MOTIF>|` + groupes 101–103 / 110–112 (A-004,
+//!   analyse stricte et recoupée avec les règles générées) ;
 //! - [`ControleSortie`] / [`analyser_proc_net_tcp`] : connexions de la zone COG
 //!   (toute destination hors boucle locale et hors Portail = critique, EX-12).
 //!
@@ -40,7 +42,7 @@ pub mod zone;
 
 pub use dedup::{Admission, Dedoublonneur};
 pub use evenement::{ErreurSource, EvenementFlux, Protocole, SourceEvenements, Verdict};
-pub use nftables::{LecteurNftables, ResultatLigne, MARQUEUR_PREFIXE};
+pub use nftables::{Chaine, LecteurNftables, Lieu, MotifJournal, PrefixeDouane, ResultatLigne, MARQUEUR_PREFIXE};
 pub use regles::{
     Condition, Declenchement, ErreurRegles, JeuRegles, Regle, VerificateurJeuRegles, REGLE_ENTREE,
     REGLE_INDETERMINE, REGLE_SORTIE,

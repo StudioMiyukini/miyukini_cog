@@ -20,7 +20,12 @@
 //!   `DebitDepasse`, gravité élevée) ;
 //! - arrêté hors de sa fenêtre de validité → tout bloqué (`ArreteHorsVigueur`) ;
 //! - bannissement automatique d'une source International après
-//!   [`SEUIL_BANNISSEMENT`] blocages en [`FENETRE_BANNISSEMENT_SECS`] ;
+//!   [`SEUIL_BANNISSEMENT`] blocages en [`FENETRE_BANNISSEMENT_SECS`] ; seuls
+//!   comptent les blocages de **tentatives de connexion nouvelle** (un paquet
+//!   hors connexion à adresse source usurpée ne compte pas) et un pair inscrit
+//!   en **liste blanche** de l'arrêté en vigueur (`pairs`) n'est jamais banni
+//!   automatiquement (une usurpation de son adresse ne peut pas le priver de
+//!   sa voie ; WorrySentinel reste seul à pouvoir le bannir) ;
 //! - décisions de WorrySentinel ([`DecisionSentinelle`]) : bannir, couper ou
 //!   rétablir une voie (sans toucher aux autres, EX-49), geler / dégeler.
 //!
@@ -36,7 +41,7 @@ use std::collections::{BTreeSet, HashMap};
 use std::net::IpAddr;
 use std::sync::mpsc::{channel, Receiver, Sender};
 
-use borderguard::{ArreteVerifie, Frontiere, Protocole, Zone};
+use borderguard::{ArreteVerifie, Frontiere, Protocole, Reseau, Zone};
 
 use crate::compilation::RegleCompilee;
 use crate::plan::PlanReseau;
@@ -229,6 +234,7 @@ pub struct MoteurIps {
     pas_avant: u64,
     pas_apres: u64,
     regles: Vec<RegleCompilee>,
+    pairs_autorises: Vec<Reseau>,
     plan: PlanReseau,
     evenements: Sender<EvenementDouane>,
     connexions: HashMap<CleConnexion, (usize, u64)>,
@@ -249,12 +255,19 @@ impl MoteurIps {
         evenements: Sender<EvenementDouane>,
     ) -> Self {
         let a = arrete.arrete();
+        let mut pairs_autorises: Vec<Reseau> = Vec::new();
+        for r in a.flux.iter().flat_map(|f| f.pairs.iter()) {
+            if !pairs_autorises.contains(r) {
+                pairs_autorises.push(*r);
+            }
+        }
         Self {
             frontiere: a.frontiere,
             numero_arrete: a.numero,
             pas_avant: a.pas_avant,
             pas_apres: a.pas_apres,
             regles,
+            pairs_autorises,
             plan,
             evenements,
             connexions: HashMap::new(),
@@ -270,6 +283,11 @@ impl MoteurIps {
     /// Vrai si le canal des Vigies est fermé (tout est alors bloqué).
     pub fn est_aveugle(&self) -> bool {
         self.aveugle
+    }
+
+    /// Vrai si `adresse` figure dans une liste blanche (`pairs`) de l'arrêté en vigueur.
+    pub fn est_pair_autorise(&self, adresse: IpAddr) -> bool {
+        self.pairs_autorises.iter().any(|r| r.contient(adresse))
     }
 
     /// Voies actuellement coupées.
@@ -451,12 +469,18 @@ impl MoteurIps {
         };
         self.emettre(ev);
         // Bannissement automatique : sources International seulement, hors
-        // blocages dus à un état (gel, expiration, bannissement déjà prononcé).
+        // blocages dus à un état (gel, expiration, bannissement déjà prononcé),
+        // tentatives de connexion nouvelle seulement (un paquet isolé à source
+        // usurpée ne compte pas), jamais un pair de la liste blanche.
         let automatique = !matches!(
             nature,
             NatureEvenement::SourceBannie | NatureEvenement::Gel | NatureEvenement::ArreteHorsVigueur
         );
-        if automatique && zones.0 == Zone::International {
+        if automatique
+            && m.nouvelle_connexion
+            && zones.0 == Zone::International
+            && !self.est_pair_autorise(m.source)
+        {
             let t = m.horodatage_secs;
             let e = self.blocages.entry(m.source).or_insert((t, 0));
             if t.saturating_sub(e.0) >= FENETRE_BANNISSEMENT_SECS {

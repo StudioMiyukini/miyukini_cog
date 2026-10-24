@@ -8,7 +8,7 @@
 //! la Douane (pare-feu + IPS) ou par un autre capteur.
 //!
 //! La Douane (crate séparé, lot 3) définit son propre type d'événement ; un
-//! adaptateur (câblage du coordinateur) implémente [`SourceEvenements`] en
+//! adaptateur (`miyufrontiere::SourceDouane`) implémente [`SourceEvenements`] en
 //! convertissant ses événements en [`EvenementFlux`]. Champs requis :
 //!
 //! | champ | rôle |

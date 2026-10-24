@@ -36,8 +36,26 @@
 //!
 //! Le trait [`Desarmement`] est la forme consommée par le Portail ; [`Cdr`] en
 //! est l'implémentation. Le décodage s'exécute dans un fil dédié borné par
-//! [`Limites::delai_max`] ; l'isolement fort (processus séparé, seccomp) relève
-//! du sas de décodage du Portail.
+//! [`Limites::delai_max`].
+//!
+//! ## Délai, saturation et isolement
+//!
+//! Un fil ne peut pas être tué : au-delà du délai, l'appelant reçoit
+//! [`Refus::DelaiDepasse`] mais le fil abandonné continue jusqu'à la fin de
+//! l'étape en cours. Deux protections bornent la consommation :
+//!
+//! - **plafond global** de [`MAX_DECODAGES_SIMULTANES`] désarmements en cours
+//!   dans le processus, fils abandonnés **compris** (le jeton n'est rendu qu'à
+//!   la fin réelle du fil) ; au-delà, l'appel attend une place au plus
+//!   [`Limites::delai_max`] puis est refusé ([`Refus::Sature`]) — des entrées
+//!   lentes répétées ne peuvent pas épuiser CPU et mémoire ;
+//! - **annulation coopérative** : à l'expiration du délai, un drapeau est levé ;
+//!   le fil le consulte entre les étapes (détection, décodage, reconstruction,
+//!   contrôle final) et s'arrête sans produire de sortie.
+//!
+//! L'isolement **fort** (processus séparé, rlimits, seccomp) reste celui du
+//! sas de décodage du Portail ; un appelant en processus (MiyuCloud) bénéficie
+//! du plafond et de l'annulation, pas d'un confinement.
 
 mod detection;
 mod images;
@@ -46,7 +64,8 @@ mod tableur;
 mod texte;
 
 use std::fmt;
-use std::sync::mpsc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{mpsc, Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
 pub use detection::{detecter, TypeDetecte};
@@ -304,14 +323,85 @@ pub enum Refus {
     /// Délai de désarmement dépassé.
     #[error("délai de désarmement dépassé")]
     DelaiDepasse,
+    /// Plafond de désarmements simultanés atteint (fils abandonnés compris) :
+    /// réessayer plus tard.
+    #[error("CDR saturé : {MAX_DECODAGES_SIMULTANES} désarmements déjà en cours")]
+    Sature,
     /// Défaillance interne (panique du décodeur…) : refus par prudence.
     #[error("défaillance interne du désarmement : {0}")]
     Interne(String),
 }
 
+/// Nombre maximal de désarmements simultanés dans le processus, fils
+/// abandonnés après dépassement du délai **compris**.
+pub const MAX_DECODAGES_SIMULTANES: usize = 4;
+
+/// Compteur global des fils de décodage vivants et sa condition d'attente.
+static DECODAGES: (Mutex<usize>, Condvar) = (Mutex::new(0), Condvar::new());
+
+fn compteur() -> MutexGuard<'static, usize> {
+    // Un empoisonnement ne peut venir que d'une panique pendant une simple
+    // incrémentation : la valeur reste cohérente, on la reprend.
+    DECODAGES.0.lock().unwrap_or_else(PoisonError::into_inner)
+}
+
+/// Désarmements en cours dans le processus (fils abandonnés compris).
+pub fn decodages_en_cours() -> usize {
+    *compteur()
+}
+
+/// Jeton de décodage : rendu à la fin **réelle** du fil (destruction).
+struct Jeton;
+
+impl Jeton {
+    /// Attend au plus `attente` qu'une place se libère.
+    fn acquerir(attente: Duration) -> Option<Self> {
+        let garde = compteur();
+        let (mut garde, _) = DECODAGES
+            .1
+            .wait_timeout_while(garde, attente, |n| *n >= MAX_DECODAGES_SIMULTANES)
+            .unwrap_or_else(PoisonError::into_inner);
+        if *garde >= MAX_DECODAGES_SIMULTANES {
+            return None;
+        }
+        *garde += 1;
+        Some(Jeton)
+    }
+}
+
+impl Drop for Jeton {
+    fn drop(&mut self) {
+        let mut n = compteur();
+        *n = n.saturating_sub(1);
+        drop(n);
+        DECODAGES.1.notify_one();
+    }
+}
+
+/// Drapeau d'annulation coopérative (levé à l'expiration du délai).
+#[derive(Debug, Clone, Default)]
+struct Annulation(Arc<AtomicBool>);
+
+impl Annulation {
+    fn lever(&self) {
+        self.0.store(true, Ordering::Release);
+    }
+
+    fn verifier(&self) -> Result<(), Refus> {
+        if self.0.load(Ordering::Acquire) {
+            Err(Refus::DelaiDepasse)
+        } else {
+            Ok(())
+        }
+    }
+}
+
 /// Désarme et reconstruit `octets` déclarés de type `type_declare` (MIME).
 ///
 /// Fermé par défaut : tout ce qui n'est pas explicitement reconstruit est refusé.
+/// Si [`MAX_DECODAGES_SIMULTANES`] désarmements sont déjà en cours, attend une
+/// place au plus [`Limites::delai_max`], sinon [`Refus::Sature`] (voir la
+/// documentation du crate).
 pub fn desarmer(
     type_declare: &str,
     octets: &[u8],
@@ -330,14 +420,21 @@ pub fn desarmer(
         });
     }
 
+    // Plafond global : le jeton suit le fil, même abandonné. Attente bornée
+    // par le délai (les appels légitimes concurrents patientent).
+    let jeton = Jeton::acquerir(limites.delai_max).ok_or(Refus::Sature)?;
+
     // Décodage dans un fil dédié : délai borné, panique confinée.
     let entree = octets.to_vec();
     let limites_fil = limites.clone();
+    let annulation = Annulation::default();
+    let annulation_fil = annulation.clone();
     let (envoi, reception) = mpsc::sync_channel(1);
     std::thread::Builder::new()
         .name("miyucdr".into())
         .spawn(move || {
-            let resultat = desarmer_type(type_contenu, &entree, &limites_fil);
+            let _jeton = jeton;
+            let resultat = desarmer_type(type_contenu, &entree, &limites_fil, &annulation_fil);
             // Le destinataire a pu abandonner (délai) : rien à faire.
             let _ = envoi.send(resultat);
         })
@@ -345,7 +442,10 @@ pub fn desarmer(
 
     match reception.recv_timeout(limites.delai_max) {
         Ok(resultat) => resultat,
-        Err(mpsc::RecvTimeoutError::Timeout) => Err(Refus::DelaiDepasse),
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            annulation.lever();
+            Err(Refus::DelaiDepasse)
+        }
         Err(mpsc::RecvTimeoutError::Disconnected) => {
             Err(Refus::Interne("le décodeur s'est interrompu".into()))
         }
@@ -357,7 +457,9 @@ fn desarmer_type(
     declare: TypeContenu,
     octets: &[u8],
     limites: &Limites,
+    annulation: &Annulation,
 ) -> Result<Reconstruit, Refus> {
+    annulation.verifier()?;
     let detecte = detecter(octets);
     let attendu = match declare {
         TypeContenu::Png => TypeDetecte::Png,
@@ -383,6 +485,7 @@ fn desarmer_type(
         anomalies: detection::anomalies(octets, detecte),
     };
 
+    annulation.verifier()?;
     let (sortie, type_reel) = match declare {
         TypeContenu::Png
         | TypeContenu::Jpeg
@@ -403,6 +506,7 @@ fn desarmer_type(
         ),
     };
 
+    annulation.verifier()?;
     if !type_reel.est_image() && sortie.len() > limites.texte_octets_max {
         return Err(Refus::TropVolumineux {
             octets: sortie.len(),

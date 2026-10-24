@@ -8,7 +8,8 @@
 //! classement d'une adresse IP dans une zone.
 //!
 //! Adressage indicatif du document : zone COG `10.77.0.0/24` (sans passerelle),
-//! Franche `10.77.1.0/24`, Fédération `10.78.0.0/16`. Le plan est une donnée :
+//! Franche `10.77.1.0/24`, Fédération `10.78.0.0/16` ; Franche locale
+//! `10.77.2.0/24` (plan de la Douane, A-004). Le plan est une donnée :
 //! il est fourni par l'appelant ([`PlanAdressage::new`]) ; [`PlanAdressage::indicatif`]
 //! reprend les valeurs du document.
 //!
@@ -28,6 +29,8 @@ pub enum Zone {
     Portail,
     /// Zone Franche : façades, relais, quarantaine.
     Franche,
+    /// Franche locale : seconde DMZ, LAN domestique (domotique), A-004.
+    FrancheLocale,
     /// Réseau de la Fédération.
     Federation,
     /// Frontière BorderGuard / Douane.
@@ -45,6 +48,7 @@ impl Zone {
             Zone::Cog => "cog",
             Zone::Portail => "portail",
             Zone::Franche => "franche",
+            Zone::FrancheLocale => "locale",
             Zone::Federation => "federation",
             Zone::BorderGuard => "borderguard",
             Zone::Exterieur => "ext",
@@ -69,6 +73,7 @@ impl FromStr for Zone {
             "cog" => Ok(Zone::Cog),
             "portail" => Ok(Zone::Portail),
             "franche" => Ok(Zone::Franche),
+            "locale" => Ok(Zone::FrancheLocale),
             "federation" => Ok(Zone::Federation),
             "borderguard" => Ok(Zone::BorderGuard),
             "ext" => Ok(Zone::Exterieur),
@@ -155,7 +160,7 @@ impl PlanAdressage {
     }
 
     /// Plan indicatif du modèle (§11) : COG `10.77.0.0/24`, Franche
-    /// `10.77.1.0/24`, Fédération `10.78.0.0/16`.
+    /// `10.77.1.0/24`, Franche locale `10.77.2.0/24`, Fédération `10.78.0.0/16`.
     ///
     /// Le Portail et BorderGuard n'ont pas d'adressage dans le document ; ils
     /// doivent être déclarés par l'appelant ([`PlanAdressage::declarer`]).
@@ -167,6 +172,9 @@ impl PlanAdressage {
         }
         if let Some(franche) = Prefixe::v4(10, 77, 1, 0, 24) {
             p.declarer(franche, Zone::Franche);
+        }
+        if let Some(locale) = Prefixe::v4(10, 77, 2, 0, 24) {
+            p.declarer(locale, Zone::FrancheLocale);
         }
         if let Some(fede) = Prefixe::v4(10, 78, 0, 0, 16) {
             p.declarer(fede, Zone::Federation);
@@ -212,6 +220,7 @@ mod tests {
         assert_eq!(p.zone_de("10.77.0.5".parse().unwrap()), Zone::Cog);
         assert_eq!(p.zone_de("10.77.1.9".parse().unwrap()), Zone::Franche);
         assert_eq!(p.zone_de("10.78.3.4".parse().unwrap()), Zone::Federation);
+        assert_eq!(p.zone_de("10.77.2.9".parse().unwrap()), Zone::FrancheLocale);
         assert_eq!(p.zone_de("8.8.8.8".parse().unwrap()), Zone::Exterieur);
         assert_eq!(p.zone_de("2001:db8::1".parse().unwrap()), Zone::Exterieur);
     }

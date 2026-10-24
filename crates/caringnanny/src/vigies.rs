@@ -10,6 +10,9 @@
 //! CaringNanny **observe** (INV-CN-1) : elle ne qualifie pas les signaux, ne
 //! décide rien, ne bloque rien (INV-CN-2, INV-CN-6). Elle :
 //! - ingère les [`LotVigie`] et écarte les signaux déjà vus (rejeu, doublon) ;
+//! - **refuse** (compte, ne transmet pas) les signaux d'un capteur non
+//!   enregistré et ceux qui se réclament d'un autre capteur que celui du lot
+//!   (fail-closed, C-12 : un capteur inconnu n'a aucune autorité) ;
 //! - tient la santé de chaque capteur et de chaque voie couverte ;
 //! - transmet à WorrySentinel un [`RapportObservation`] : les signaux nouveaux
 //!   **inchangés** (INV-CN-7) et la santé observée ;
@@ -60,7 +63,10 @@ pub struct RecuIngestion {
     pub nouveaux: usize,
     /// Signaux déjà vus, écartés.
     pub doublons: usize,
-    /// Vrai si le capteur n'est pas enregistré (pouls ignoré, signaux transmis).
+    /// Signaux refusés (capteur non enregistré, ou signal attribué à un autre
+    /// capteur que celui du lot) : comptés, jamais transmis.
+    pub refuses: usize,
+    /// Vrai si le capteur n'est pas enregistré (pouls ignoré, signaux refusés).
     pub capteur_inconnu: bool,
 }
 
@@ -86,6 +92,7 @@ pub struct ObservatoireVigies {
     capacite_vus: usize,
     en_attente: Vec<Signal>,
     lots_capteur_inconnu: u64,
+    signaux_refuses: u64,
     journal: DefaultObserver,
 }
 
@@ -105,6 +112,7 @@ impl ObservatoireVigies {
             capacite_vus: capacite_vus.max(1),
             en_attente: Vec::new(),
             lots_capteur_inconnu: 0,
+            signaux_refuses: 0,
             journal: DefaultObserver::new(),
         }
     }
@@ -144,6 +152,17 @@ impl ObservatoireVigies {
         } else {
             recu.capteur_inconnu = true;
             self.lots_capteur_inconnu += 1;
+            recu.refuses = lot.signaux.len();
+            self.signaux_refuses += lot.signaux.len() as u64;
+            self.journal.observe(SystemEvent {
+                event_type: EventType::Anomaly,
+                component: format!("vigie:{}", lot.capteur),
+                message: format!(
+                    "lot d'un capteur non enregistré refusé ({} signaux)",
+                    lot.signaux.len()
+                ),
+            });
+            return recu;
         }
         if lot.etat != EtatCapteur::Nominal {
             self.journal.observe(SystemEvent {
@@ -153,6 +172,16 @@ impl ObservatoireVigies {
             });
         }
         for s in lot.signaux {
+            if s.capteur != lot.capteur {
+                recu.refuses += 1;
+                self.signaux_refuses += 1;
+                self.journal.observe(SystemEvent {
+                    event_type: EventType::Anomaly,
+                    component: format!("vigie:{}", lot.capteur),
+                    message: format!("signal {} attribué à un autre capteur, refusé", s.id),
+                });
+                continue;
+            }
             if self.vus.contains(&s.id) {
                 recu.doublons += 1;
                 continue;
@@ -241,6 +270,11 @@ impl ObservatoireVigies {
     /// Lots reçus de capteurs non enregistrés.
     pub fn lots_capteur_inconnu(&self) -> u64 {
         self.lots_capteur_inconnu
+    }
+
+    /// Signaux refusés depuis la création (capteur non enregistré ou usurpé).
+    pub fn signaux_refuses(&self) -> u64 {
+        self.signaux_refuses
     }
 
     /// Trace des observations (INV-CN-5).
@@ -395,7 +429,7 @@ mod tests {
     }
 
     #[test]
-    fn capteur_non_enregistre() {
+    fn capteur_non_enregistre_refuse() {
         let mut o = observatoire();
         let r = o.ingerer(lot(
             "intrus",
@@ -405,9 +439,28 @@ mod tests {
         ));
         assert!(r.capteur_inconnu);
         assert_eq!(o.lots_capteur_inconnu(), 1);
+        // Fail-closed : signaux comptés, jamais transmis.
+        assert_eq!((r.nouveaux, r.refuses), (0, 1));
+        assert_eq!(o.signaux_refuses(), 1);
+        assert_eq!(o.transmettre(1).signaux, Vec::new());
         assert_eq!(
             o.sante_capteur(&capteur("intrus"), 1),
             HealthStatus::Inconnu
         );
+    }
+
+    #[test]
+    fn signal_d_un_autre_capteur_refuse() {
+        let mut o = observatoire();
+        let mut usurpe = signal("s2");
+        usurpe.capteur = capteur("autre");
+        let r = o.ingerer(lot(
+            "v1",
+            Some(1),
+            EtatCapteur::Nominal,
+            vec![usurpe, signal("s3")],
+        ));
+        assert_eq!((r.nouveaux, r.refuses), (1, 1));
+        assert_eq!(o.transmettre(1).signaux, vec![signal("s3")]);
     }
 }

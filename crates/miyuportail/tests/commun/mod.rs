@@ -43,7 +43,11 @@ pub fn traite() -> Traite {
                     ChampTraite { tag: 2, nature: NatureChamp::Entier, obligatoire: false },
                     ChampTraite {
                         tag: 3,
-                        nature: NatureChamp::Document { max: 1024, nature: NatureDocument::Document },
+                        nature: NatureChamp::Document {
+                            max: 1024,
+                            nature: NatureDocument::Document,
+                            mime: Some(TypeMime::new("text/plain").unwrap()),
+                        },
                         obligatoire: false,
                     },
                 ],
@@ -55,7 +59,7 @@ pub fn traite() -> Traite {
                     ChampTraite { tag: 1, nature: NatureChamp::Texte { max: 128 }, obligatoire: true },
                     ChampTraite {
                         tag: 2,
-                        nature: NatureChamp::Document { max: 1024, nature: NatureDocument::Image },
+                        nature: NatureChamp::Document { max: 1024, nature: NatureDocument::Image, mime: None },
                         obligatoire: false,
                     },
                 ],

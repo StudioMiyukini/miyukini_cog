@@ -18,9 +18,11 @@
 //! | `emission`  | signe passeports et visas                       | `m/1296256839'/1'/g'`       | 90 j (g = génération) |
 //! | `journal`   | signe les têtes du registre                     | `m/1296256839'/2'/g'`       | 90 j |
 //! | `editeur`   | certificats éditeur / paquets publiés par le COG | `m/1296256839'/3'/g'`       | par génération |
+//! | `arretes`   | arrêtés de frontière de BorderGuard (A-004)     | `m/1296256839'/4'/g'`       | par génération |
 //!
 //! `1296256839` = `0x4D434F47` = « MCOG » en ASCII (but, inférieur à 2³¹).
-//! Les indices 4 et suivants sont réservés ; un indice d'usage n'est jamais
+//! L'indice 4 « arrêtés » est fixé par l'amendement A-004 (doc v1.4) ; les
+//! indices 5 et suivants sont réservés ; un indice d'usage n'est jamais
 //! réattribué. `g` (génération) est un entier < 2³¹ incrémenté à chaque
 //! rotation de la clé d'usage.
 
@@ -47,11 +49,13 @@ pub enum Usage {
     Journal,
     /// Clé éditeur du COG : certificats éditeur et paquets publiés par le COG.
     Editeur,
+    /// Clé des arrêtés : arrêtés de frontière signés par BorderGuard (A-004, indice 4).
+    Arretes,
 }
 
 impl Usage {
     /// Tous les usages, dans l'ordre des indices.
-    pub const TOUS: [Self; 4] = [Self::Identite, Self::Emission, Self::Journal, Self::Editeur];
+    pub const TOUS: [Self; 5] = [Self::Identite, Self::Emission, Self::Journal, Self::Editeur, Self::Arretes];
 
     /// Indice d'usage dans le chemin (jamais réattribué).
     pub const fn indice(self) -> u32 {
@@ -60,6 +64,7 @@ impl Usage {
             Self::Emission => 1,
             Self::Journal => 2,
             Self::Editeur => 3,
+            Self::Arretes => 4,
         }
     }
 
@@ -70,6 +75,7 @@ impl Usage {
             Self::Emission => "emission",
             Self::Journal => "journal",
             Self::Editeur => "editeur",
+            Self::Arretes => "arretes",
         }
     }
 
@@ -155,8 +161,34 @@ mod tests {
             Usage::Emission.chemin(DURCI).unwrap_err(),
             ErreurRacine::IndiceHorsPlage
         );
+        assert_eq!(
+            Usage::Arretes.chemin_texte(2).unwrap(),
+            "m/1296256839'/4'/2'"
+        );
         let indices: Vec<u32> = Usage::TOUS.iter().map(|u| u.indice()).collect();
-        assert_eq!(indices, vec![0, 1, 2, 3]);
+        assert_eq!(indices, vec![0, 1, 2, 3, 4]);
+    }
+
+    /// A-004 : indice 4 = arrêtés ; les indices existants ne bougent pas.
+    #[test]
+    fn indice_arretes_a004_et_indices_stables() {
+        assert_eq!(Usage::Arretes.indice(), 4);
+        assert_eq!(Usage::Arretes.nom(), "arretes");
+        assert!(Usage::Arretes.a_generations());
+        assert_eq!(
+            Usage::Arretes.chemin(0).unwrap(),
+            vec![BUT_MIYUKINI_COG, 4, 0]
+        );
+        let attendus = [
+            (Usage::Identite, 0),
+            (Usage::Emission, 1),
+            (Usage::Journal, 2),
+            (Usage::Editeur, 3),
+            (Usage::Arretes, 4),
+        ];
+        for (u, i) in attendus {
+            assert_eq!(u.indice(), i, "{u}");
+        }
     }
 
     #[test]

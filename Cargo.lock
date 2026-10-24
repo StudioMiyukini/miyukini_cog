@@ -6878,6 +6878,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "miyufrontiere"
+version = "0.1.0"
+dependencies = [
+ "borderguard",
+ "caringnanny",
+ "ed25519-dalek",
+ "image",
+ "miyucdr",
+ "miyudouane",
+ "miyuportail",
+ "miyusceau",
+ "miyuvigie",
+ "worrysentinel",
+]
+
+[[package]]
 name = "miyuhr"
 version = "0.1.0"
 dependencies = [

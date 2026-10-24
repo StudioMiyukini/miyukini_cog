@@ -351,7 +351,8 @@ fn lignes_mal_formees_ignorees_et_comptees() {
         ..PolitiqueVoies::default()
     });
 
-    let saine = "1729760000.000000 hote kernel: MIYU:autorise:cog>portail:jaymail: IN=veth-cog OUT=veth-pt SRC=10.77.0.5 DST=10.77.0.250 LEN=60 PROTO=TCP SPT=40000 DPT=7001";
+    // Rejet ordinaire de la frontière externe (convention MDOU, A-004) : aucun signal.
+    let saine = "1729760000.000000 hote nflog-101: MDOU|externe|transit|NON-DECLARE| IN=ext0 OUT=ext-franche SRC=192.0.2.66 DST=10.77.1.10 LEN=60 PROTO=TCP SPT=40000 DPT=22";
     let lot = v.analyser_journal([saine], 1_000);
     assert_eq!(lot.signaux.len(), 0);
     assert!(lot.pouls.is_some());
@@ -362,9 +363,9 @@ fn lignes_mal_formees_ignorees_et_comptees() {
     );
 
     let lignes = [
-        "1729760001.000000 hote kernel: MIYU:autorise:cog>portail:jaymail: IN=veth-cog SRC=10.77.0.5",
-        "1729760001.000000 hote kernel: MIYU:autorise:cog>portail:jaymail: IN=veth-cog OUT=x SRC=10.77.0.5 DST=10.77.0.250 LEN=60 PROTO=TCP DPT=7001 DPT=7001",
-        "MIYU:garbage",
+        "1729760001.000000 hote nflog-101: MDOU|externe|transit|NON-DECLARE| IN=ext0 SRC=192.0.2.66",
+        "1729760001.000000 hote nflog-101: MDOU|externe|transit|NON-DECLARE| IN=ext0 OUT=x SRC=192.0.2.66 DST=10.77.1.10 LEN=60 PROTO=TCP DPT=22 DPT=22",
+        "MDOU|garbage",
         "1729760001.000000 hote kernel: carte réseau prête",
     ];
     let lot = v.analyser_journal(lignes, 2_000);

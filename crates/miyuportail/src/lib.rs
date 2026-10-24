@@ -43,4 +43,6 @@ pub use portail::{
 };
 pub use registre::{Evenement, Inscription, MotifCoupure, RegistreMemoire};
 pub use sas::{DecodeurIsole, RequeteSas, SasProcessus};
-pub use traite::{ChampTraite, ClasseExposition, IdService, NatureChamp, NatureDocument, Sens, Traite, TypeDeclaration};
+pub use traite::{
+    ChampTraite, ClasseExposition, IdService, NatureChamp, NatureDocument, Sens, Traite, TypeDeclaration, TypeMime,
+};
