@@ -77,9 +77,6 @@ const SESSION_ID_DOMAIN: &[u8] = b"miyukini/cog-bridge/e2e-session-id/v2";
 /// Domaine des données associées (AAD) des messages.
 const MESSAGE_AAD_DOMAIN: &[u8] = b"miyukini/cog-bridge/e2e-msg/v2";
 
-/// Domaine du code de confirmation d'appairage.
-const PAIRING_CODE_DOMAIN: &[u8] = b"miyukini/cog-bridge/pairing-code/v2";
-
 /// En-tête HTTP portant l'identifiant (public) de session E2E, en hex.
 pub const E2E_SESSION_HEADER: &str = "x-miyukini-e2e-session";
 
@@ -802,7 +799,7 @@ impl EncryptedMessage {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Appairage : clés d'identité et code de confirmation
+// Appairage : clés d'identité (code SAS : voir `crate::pairing`)
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Décode et valide une clé publique d'identité ed25519 (hex, 32 octets) :
@@ -814,19 +811,6 @@ pub fn parse_identity_key_hex(s: &str) -> Result<[u8; 32], E2eError> {
         return Err(E2eError::InvalidIdentityKey);
     }
     Ok(bytes)
-}
-
-/// Code de confirmation d'appairage à 6 chiffres, à comparer visuellement sur
-/// l'appareil et sur le COG (substitution de clé par un intermédiaire = codes
-/// différents). Calculé sur SHA-256(domaine || identité appareil || identité COG).
-pub fn pairing_confirmation_code(device_identity: &[u8; 32], cog_identity: &[u8; 32]) -> String {
-    let mut input = Vec::with_capacity(PAIRING_CODE_DOMAIN.len() + 64);
-    input.extend_from_slice(PAIRING_CODE_DOMAIN);
-    input.extend_from_slice(device_identity);
-    input.extend_from_slice(cog_identity);
-    let digest = sha256(&input);
-    let n = u32::from_be_bytes([digest[0], digest[1], digest[2], digest[3]]) % 1_000_000;
-    format!("{n:06}")
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1399,22 +1383,6 @@ mod tests {
         );
         assert!(parse_identity_key_hex("zz").is_err());
         assert!(parse_identity_key_hex(&"00".repeat(33)).is_err());
-    }
-
-    #[test]
-    fn confirmation_code_depends_on_both_keys() {
-        let d = E2eIdentity::generate().public_key_bytes();
-        let c = E2eIdentity::generate().public_key_bytes();
-        let m = E2eIdentity::generate().public_key_bytes();
-        let code = pairing_confirmation_code(&d, &c);
-        assert_eq!(code.len(), 6);
-        assert!(code.chars().all(|ch| ch.is_ascii_digit()));
-        assert_eq!(code, pairing_confirmation_code(&d, &c));
-        assert_ne!(code, pairing_confirmation_code(&d, &m));
-        assert_eq!(
-            pairing_confirmation_code(&[0x01; 32], &[0x02; 32]),
-            pairing_confirmation_code(&[0x01; 32], &[0x02; 32])
-        );
     }
 
     // ── Vecteur de référence figé (C-61) ─────────────────────────────────

@@ -17,15 +17,34 @@
 //! - `POST /auth` chiffré : en-tête `x-miyukini-e2e-session` + corps
 //!   `EncryptedMessage` v2 lié à `POST /auth` ; la réponse est chiffrée et liée
 //!   au même identifiant de requête.
-//! - `POST /auth` en clair : refusé hors loopback (politique par défaut
-//!   [`ClearAuthPolicy::LoopbackOnly`], portail web local), ou partout avec
-//!   [`ClearAuthPolicy::Refuse`].
+//! - `POST /auth` en clair (R-025) : **refusé partout par défaut** (E2E
+//!   obligatoire). Avec [`RemoteServerConfig::allow_plaintext_local_auth`]
+//!   (opt-in explicite, avertissement au démarrage), accepté depuis un pair
+//!   loopback uniquement — utile au portail web local, mais un proxy inverse
+//!   local ferait paraître « locale » toute requête : ne jamais l'activer
+//!   derrière un proxy.
+//!
+//! ## Appairage v2 : engagement puis révélation (R-026 à R-028)
+//!
+//! - `POST /api/bridge/pair` : engagement de l'appareil → clé + aléa du COG.
+//! - `POST /api/bridge/pair/reveal` : révélation de `Nd`, vérifiée.
+//! - `POST /api/bridge/pair/status` : suivi de la demande par l'appareil.
+//! - Administration (loopback + secret) : `/api/bridge/devices` expose code
+//!   SAS et empreinte de clé ; `/api/bridge/approve` exige le code affiché.
+//! - Liste blanche persistée à côté de l'identité E2E (R-024).
 
 use crate::bridge::RemoteBridge;
 use crate::e2e::{load_or_create_cog_identity, E2eSessionStore, DEFAULT_IDENTITY_FILE};
+use crate::paired_store::DEFAULT_PAIRED_DEVICES_FILE;
 use crate::pairing::{
-    mask_device_id, PairRequest, PairingError, PairingManager, WhitelistValidateRequest,
-    DEFAULT_API_TOKEN_TTL_SECS,
+    mask_device_id, PairingConfig, PairingError, PairingManager, WhitelistValidateRequest,
+    DEFAULT_API_TOKEN_TTL_SECS, DEFAULT_PENDING_TTL,
+};
+use crate::protocol::pairing::{
+    check_pairing_version, PairCommitRequest, PairCommitResponse, PairRevealRequest,
+    PairRevealResponse, PairStatusRequest, PairStatusResponse, PairingStatus,
+    PAIRING_PROTOCOL_VERSION, PAIR_ENDPOINT, PAIR_REVEAL_ENDPOINT, PAIR_STATUS_ENDPOINT,
+    STATUS_UNSUPPORTED_VERSION,
 };
 use crate::protocol::{RemoteAuthRequest, RemoteAuthResponse, RemoteCommand, RemoteEvent};
 use crate::session::SessionManager;
@@ -44,8 +63,9 @@ use futures_util::{SinkExt, StreamExt};
 use miyukini_central::auth::CentralAuthDb;
 use miyukini_cog_bridge::e2e::MAX_HANDSHAKE_JSON_LEN;
 use miyukini_cog_bridge::{
-    pairing_confirmation_code, parse_identity_key_hex, E2eHandshake, E2eIdentity, E2eRole,
-    EncryptedMessage, PendingHandshake, RequestBinding, E2E_SESSION_HEADER,
+    identity_fingerprint, identity_fingerprint_hex, parse_commitment_hex, parse_identity_key_hex,
+    E2eHandshake, E2eIdentity, E2eRole, EncryptedMessage, PairingNonce, PendingHandshake,
+    RequestBinding, E2E_SESSION_HEADER,
 };
 use miyukini_connect::{AuthVerifyRequest, ConnectService, IdentitySetup, PermissionTier};
 use rand::rngs::OsRng;
@@ -72,6 +92,9 @@ const AUTH_RATE_MAX: usize = 10;
 const BRIDGE_RATE_WINDOW: Duration = Duration::from_secs(60);
 /// Nombre maximal d'appels appairage + handshake par IP dans la fenêtre.
 const BRIDGE_RATE_MAX: usize = 30;
+/// Nombre maximal d'appels de suivi d'appairage par IP et par minute
+/// (l'appareil interroge toutes les 3 s pendant l'attente d'approbation).
+const PAIR_STATUS_RATE_MAX: usize = 60;
 /// Taille maximale du corps de /auth (clair ou enveloppe chiffrée, C-13).
 pub const AUTH_MAX_BODY: usize = 16 * 1024;
 /// Taille maximale du corps de /api/bridge/pair (C-13).
@@ -98,29 +121,21 @@ pub struct RemoteServerConfig {
     /// Fichier de l'identité E2E longue durée du COG (`0600`). Défaut :
     /// `central-remote-e2e-identity.key` dans le dossier de la base auth.
     pub e2e_identity_path: Option<String>,
-    /// Politique d'acceptation de `/auth` sans chiffrement E2E.
-    pub clear_auth_policy: ClearAuthPolicy,
+    /// Fichier de la liste blanche des appareils appairés (`0600`). Défaut :
+    /// `central-remote-paired-devices.json` dans le dossier de l'identité E2E.
+    pub paired_devices_path: Option<String>,
+    /// Durée de vie d'une demande d'appairage en attente (secondes ; 0 = 10 min).
+    pub pairing_pending_ttl_secs: u64,
+    /// `/auth` en clair accepté depuis un pair loopback (R-025). **Faux par
+    /// défaut** : E2E obligatoire partout. À n'activer que pour le portail web
+    /// local, jamais derrière un proxy inverse local (toute requête y paraît
+    /// locale). Un avertissement est journalisé au démarrage s'il est actif.
+    pub allow_plaintext_local_auth: bool,
 }
 
-/// Politique d'acceptation de `/auth` en clair (sans session E2E).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum ClearAuthPolicy {
-    /// Clair accepté uniquement depuis un pair loopback (portail web local,
-    /// tunnel SSH) ; tout pair réseau doit passer par une session E2E.
-    #[default]
-    LoopbackOnly,
-    /// Clair toujours refusé : E2E obligatoire pour tout client.
-    Refuse,
-}
-
-impl ClearAuthPolicy {
-    /// Vrai si un `/auth` en clair est accepté depuis `ip`.
-    pub fn allows(self, ip: IpAddr) -> bool {
-        match self {
-            Self::LoopbackOnly => ip.to_canonical().is_loopback(),
-            Self::Refuse => false,
-        }
-    }
+/// Vrai si un `/auth` en clair est accepté depuis `ip` (R-025).
+fn plaintext_auth_allowed(allow_plaintext_local_auth: bool, ip: IpAddr) -> bool {
+    allow_plaintext_local_auth && ip.to_canonical().is_loopback()
 }
 
 impl Default for RemoteServerConfig {
@@ -132,7 +147,9 @@ impl Default for RemoteServerConfig {
             cors_allowed_origins: Vec::new(),
             api_token_ttl_secs: DEFAULT_API_TOKEN_TTL_SECS,
             e2e_identity_path: None,
-            clear_auth_policy: ClearAuthPolicy::LoopbackOnly,
+            paired_devices_path: None,
+            pairing_pending_ttl_secs: DEFAULT_PENDING_TTL.as_secs(),
+            allow_plaintext_local_auth: false,
         }
     }
 }
@@ -194,12 +211,14 @@ struct ServerState {
     auth_limiter: Arc<RateLimiter>,
     /// Limiteur des routes d'appairage et de handshake E2E.
     bridge_limiter: Arc<RateLimiter>,
+    /// Limiteur du suivi d'appairage (`/api/bridge/pair/status`).
+    status_limiter: Arc<RateLimiter>,
     /// Identité E2E longue durée du COG (secret effacé à la destruction).
     cog_identity: Arc<E2eIdentity>,
     /// Sessions E2E établies avec les appareils appairés.
     e2e_sessions: Arc<E2eSessionStore>,
-    /// Politique d'acceptation de /auth en clair.
-    clear_auth_policy: ClearAuthPolicy,
+    /// `/auth` en clair accepté depuis loopback (R-025, faux par défaut).
+    allow_plaintext_local_auth: bool,
     /// Signal d'arrêt pour fermer les WebSocket ouverts.
     shutdown: tokio::sync::watch::Receiver<bool>,
 }
@@ -275,8 +294,16 @@ fn build_router(state: ServerState, cors: Option<CorsLayer>) -> Router {
         .route("/api/bridge/validate", post(handle_bridge_validate))
         .route("/api/bridge/validate-token", get(handle_bridge_validate_token))
         .route(
-            "/api/bridge/pair",
+            PAIR_ENDPOINT,
             post(handle_bridge_pair).layer(DefaultBodyLimit::max(PAIR_MAX_BODY)),
+        )
+        .route(
+            PAIR_REVEAL_ENDPOINT,
+            post(handle_bridge_pair_reveal).layer(DefaultBodyLimit::max(PAIR_MAX_BODY)),
+        )
+        .route(
+            PAIR_STATUS_ENDPOINT,
+            post(handle_bridge_pair_status).layer(DefaultBodyLimit::max(PAIR_MAX_BODY)),
         )
         .route(
             "/api/bridge/e2e-handshake",
@@ -306,7 +333,6 @@ pub async fn start_remote_server(
 
     let connect = ConnectService::new("2026.03.05");
     let sessions = SessionManager::with_random_secret();
-    let pairing = Arc::new(PairingManager::with_token_ttl(config.api_token_ttl_secs));
 
     // Identité E2E longue durée du COG : chargée ou créée (0600), sinon refus
     // de démarrer (fail-closed).
@@ -323,6 +349,40 @@ pub async fn start_remote_server(
         load_or_create_cog_identity(&identity_path).map_err(|e| format!("CentralRemote: {e}"))?,
     );
     let cog_identity_key_hex = hex::encode(cog_identity.public_key_bytes());
+    let cog_identity_fingerprint = identity_fingerprint(&cog_identity.public_key_bytes());
+
+    // Liste blanche persistée à côté de l'identité ; fichier corrompu = refus
+    // de démarrer (fail-closed, R-024).
+    let paired_path = config.paired_devices_path.as_ref().map_or_else(
+        || {
+            identity_path
+                .parent()
+                .unwrap_or_else(|| Path::new(""))
+                .join(DEFAULT_PAIRED_DEVICES_FILE)
+        },
+        PathBuf::from,
+    );
+    let pairing_config = PairingConfig {
+        pending_ttl: Duration::from_secs(config.pairing_pending_ttl_secs),
+        ..PairingConfig::default()
+    };
+    let pairing = Arc::new(
+        PairingManager::open(config.api_token_ttl_secs, pairing_config, paired_path.clone())
+            .map_err(|e| {
+                format!(
+                    "CentralRemote: {e} ({}) — démarrage refusé ; corriger ou supprimer \
+                     ce fichier (suppression = ré-appairage de tous les appareils)",
+                    paired_path.display()
+                )
+            })?,
+    );
+
+    if config.allow_plaintext_local_auth {
+        warn!(
+            "CentralRemote: /auth en clair accepté depuis loopback \
+             (allow_plaintext_local_auth) — ne jamais exposer derrière un proxy inverse local"
+        );
+    }
 
     let listener = TcpListener::bind(&config.listen_addr)
         .await
@@ -362,9 +422,10 @@ pub async fn start_remote_server(
         admin_secret: admin_secret.clone(),
         auth_limiter: Arc::new(RateLimiter::new(AUTH_RATE_WINDOW, AUTH_RATE_MAX)),
         bridge_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, BRIDGE_RATE_MAX)),
+        status_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, PAIR_STATUS_RATE_MAX)),
         cog_identity,
         e2e_sessions: Arc::new(E2eSessionStore::default()),
-        clear_auth_policy: config.clear_auth_policy,
+        allow_plaintext_local_auth: config.allow_plaintext_local_auth,
         shutdown: ws_shutdown_rx,
     };
 
@@ -394,6 +455,7 @@ pub async fn start_remote_server(
         pairing: pairing_for_handle,
         admin_secret,
         cog_identity_key_hex,
+        cog_identity_fingerprint,
         discovery: discovery_handle,
     })
 }
@@ -410,6 +472,8 @@ pub struct RemoteServerHandle {
     admin_secret: Arc<String>,
     /// Clé publique d'identité E2E du COG (hex), publique.
     cog_identity_key_hex: String,
+    /// Empreinte lisible de la clé d'identité du COG.
+    cog_identity_fingerprint: String,
     /// Handle du listener UDP (gardé pour qu'il reste actif).
     discovery: Option<crate::discovery::DiscoveryHandle>,
 }
@@ -443,6 +507,12 @@ impl RemoteServerHandle {
     pub fn e2e_identity_public_key_hex(&self) -> &str {
         &self.cog_identity_key_hex
     }
+
+    /// Empreinte lisible de la clé d'identité du COG (8 groupes de 4 hex),
+    /// à afficher sur Central pour comparaison avec le téléphone.
+    pub fn e2e_identity_fingerprint(&self) -> &str {
+        &self.cog_identity_fingerprint
+    }
 }
 
 impl Drop for RemoteServerHandle {
@@ -463,7 +533,7 @@ fn auth_failure(msg: &str) -> Json<RemoteAuthResponse> {
 ///
 /// Avec l'en-tête [`E2E_SESSION_HEADER`] : corps `EncryptedMessage` v2 lié à
 /// `POST /auth`, réponse chiffrée liée à la même requête. Sans : clair, accepté
-/// seulement si la [`ClearAuthPolicy`] l'autorise pour ce pair.
+/// seulement si `allow_plaintext_local_auth` est actif et le pair loopback.
 async fn handle_auth(
     State(state): State<ServerState>,
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
@@ -486,9 +556,9 @@ async fn handle_auth(
     }
 }
 
-/// /auth en clair : uniquement si la politique l'autorise pour ce pair.
+/// /auth en clair : uniquement si l'option l'autorise et le pair est loopback.
 fn handle_auth_clear(state: &ServerState, peer: SocketAddr, body: &[u8]) -> Response {
-    if !state.clear_auth_policy.allows(peer.ip()) {
+    if !plaintext_auth_allowed(state.allow_plaintext_local_auth, peer.ip()) {
         warn!("CentralRemote /auth en clair refusé (E2E requis) pour {}", peer.ip());
         return (
             StatusCode::FORBIDDEN,
@@ -812,52 +882,171 @@ async fn handle_bridge_validate_token(
     }
 }
 
-/// POST /api/bridge/pair — demande d'appairage depuis un device mobile.
+/// Réponse JSON `{"status": <statut>}` avec un code HTTP.
+fn status_reply(code: StatusCode, status: &str) -> Response {
+    (code, Json(serde_json::json!({ "status": status }))).into_response()
+}
+
+/// Traduit une erreur d'appairage en réponse HTTP (une cause = un statut).
+fn pairing_error_reply(e: &PairingError) -> Response {
+    match e {
+        PairingError::InvalidDeviceId => status_reply(StatusCode::BAD_REQUEST, "invalid_device_id"),
+        PairingError::InvalidIdentityKey => {
+            status_reply(StatusCode::BAD_REQUEST, "invalid_e2e_identity_key")
+        }
+        PairingError::TooManyPending => {
+            status_reply(StatusCode::SERVICE_UNAVAILABLE, "too_many_pending")
+        }
+        PairingError::TooManyPendingForSource => {
+            status_reply(StatusCode::TOO_MANY_REQUESTS, "too_many_pending_for_source")
+        }
+        PairingError::PendingConflict => status_reply(StatusCode::CONFLICT, "pending_conflict"),
+        PairingError::KeyInUse => status_reply(StatusCode::CONFLICT, "key_in_use"),
+        PairingError::AlreadyPaired => status_reply(StatusCode::CONFLICT, "already_paired"),
+        PairingError::NoPending => status_reply(StatusCode::NOT_FOUND, "no_pending"),
+        PairingError::AlreadyRevealed => status_reply(StatusCode::CONFLICT, "already_revealed"),
+        PairingError::CommitmentMismatch => {
+            status_reply(StatusCode::FORBIDDEN, "commitment_mismatch")
+        }
+        PairingError::NotRevealed => status_reply(StatusCode::CONFLICT, "not_revealed"),
+        PairingError::CodeMismatch => status_reply(StatusCode::CONFLICT, "code_mismatch"),
+        PairingError::Persistence(_) | PairingError::Unavailable => {
+            status_reply(StatusCode::SERVICE_UNAVAILABLE, "unavailable")
+        }
+    }
+}
+
+/// Refus explicite d'une requête d'appairage d'une autre version (v1 comprise).
+fn unsupported_version_reply(version: u8) -> Response {
+    warn!("CentralRemote appairage refusé: version {version} (attendue {PAIRING_PROTOCOL_VERSION})");
+    (
+        StatusCode::BAD_REQUEST,
+        Json(serde_json::json!({
+            "status": STATUS_UNSUPPORTED_VERSION,
+            "expected_pairing_version": PAIRING_PROTOCOL_VERSION,
+        })),
+    )
+        .into_response()
+}
+
+/// POST /api/bridge/pair — étape 1 de l'appairage v2 (engagement).
 ///
-/// L'appareil fournit sa clé publique d'identité E2E (obligatoire, validée) ;
-/// la réponse porte la clé publique d'identité du COG (à épingler) et le code
-/// de confirmation à comparer avec celui affiché côté desktop. L'approbation
-/// sur le desktop reste requise (inchangé).
+/// L'appareil envoie sa clé d'identité E2E et l'engagement `C` sur son aléa
+/// `Nd` ; le COG enregistre la demande et répond avec sa clé d'identité et son
+/// aléa `Nc`. Aucun code n'est transmis : chaque côté le calcule après la
+/// révélation. L'approbation sur le desktop reste requise.
 async fn handle_bridge_pair(
     State(state): State<ServerState>,
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
-    Json(req): Json<PairRequest>,
+    body: Bytes,
 ) -> Response {
-    if !state.bridge_limiter.check(peer.ip().to_canonical()) {
+    let source = peer.ip().to_canonical();
+    if !state.bridge_limiter.check(source) {
         return StatusCode::TOO_MANY_REQUESTS.into_response();
     }
+    if let Err(v) = check_pairing_version(&body) {
+        return unsupported_version_reply(v);
+    }
+    let Ok(req) = serde_json::from_slice::<PairCommitRequest>(&body) else {
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_request");
+    };
     let Ok(device_key) = parse_identity_key_hex(&req.e2e_identity_key) else {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({"status": "invalid_e2e_identity_key"})),
-        )
-            .into_response();
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_e2e_identity_key");
+    };
+    let Ok(commitment) = parse_commitment_hex(&req.commitment) else {
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_commitment");
     };
     let cog_key = state.cog_identity.public_key_bytes();
-    let code = pairing_confirmation_code(&device_key, &cog_key);
     match state.pairing.request_pairing(
         &req.device_id,
         &req.device_name,
         &hex::encode(device_key),
-        &code,
+        commitment,
+        source,
     ) {
-        Ok(resp) => Json(serde_json::json!({
-            "status": resp.status,
-            "token": resp.token,
-            "message": resp.message,
-            "cog_identity_key": hex::encode(cog_key),
-            "confirmation_code": code,
-        }))
-        .into_response(),
-        Err(PairingError::InvalidDeviceId) => (
-            StatusCode::BAD_REQUEST,
-            Json(serde_json::json!({"status": "invalid_device_id"})),
-        )
-            .into_response(),
-        Err(PairingError::TooManyPending | PairingError::Unavailable) => {
-            StatusCode::SERVICE_UNAVAILABLE.into_response()
+        Ok(cog_nonce) => {
+            info!(
+                "CentralRemote: demande d'appairage v2 ({})",
+                mask_device_id(&req.device_id)
+            );
+            Json(PairCommitResponse {
+                pairing_version: PAIRING_PROTOCOL_VERSION,
+                status: PairingStatus::Committed,
+                cog_identity_key: hex::encode(cog_key),
+                cog_nonce: cog_nonce.to_hex().to_string(),
+                message: "Révélez votre aléa, puis comparez le code avec Central Desktop".into(),
+            })
+            .into_response()
+        }
+        Err(e) => {
+            warn!(
+                "CentralRemote appairage refusé ({}): {e}",
+                mask_device_id(&req.device_id)
+            );
+            pairing_error_reply(&e)
         }
     }
+}
+
+/// POST /api/bridge/pair/reveal — étape 3 (révélation de `Nd`).
+///
+/// Refus : version (400), aucune demande — donc aucun `Nc` émis (404), déjà
+/// révélé (409), engagement incohérent (403, demande abandonnée).
+async fn handle_bridge_pair_reveal(
+    State(state): State<ServerState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    body: Bytes,
+) -> Response {
+    if !state.bridge_limiter.check(peer.ip().to_canonical()) {
+        return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+    if let Err(v) = check_pairing_version(&body) {
+        return unsupported_version_reply(v);
+    }
+    let Ok(req) = serde_json::from_slice::<PairRevealRequest>(&body) else {
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_request");
+    };
+    let Ok(device_nonce) = PairingNonce::from_hex(&req.device_nonce) else {
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_device_nonce");
+    };
+    let cog_key = state.cog_identity.public_key_bytes();
+    match state
+        .pairing
+        .reveal_pairing(&req.device_id, &device_nonce, &cog_key)
+    {
+        Ok(_code) => Json(PairRevealResponse {
+            status: PairingStatus::Revealed,
+        })
+        .into_response(),
+        Err(e) => {
+            warn!(
+                "CentralRemote révélation refusée ({}): {e}",
+                mask_device_id(&req.device_id)
+            );
+            pairing_error_reply(&e)
+        }
+    }
+}
+
+/// POST /api/bridge/pair/status — suivi d'une demande par l'appareil.
+async fn handle_bridge_pair_status(
+    State(state): State<ServerState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    body: Bytes,
+) -> Response {
+    if !state.status_limiter.check(peer.ip().to_canonical()) {
+        return StatusCode::TOO_MANY_REQUESTS.into_response();
+    }
+    let Ok(req) = serde_json::from_slice::<PairStatusRequest>(&body) else {
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_request");
+    };
+    let Ok(device_key) = parse_identity_key_hex(&req.e2e_identity_key) else {
+        return status_reply(StatusCode::BAD_REQUEST, "invalid_e2e_identity_key");
+    };
+    let status = state
+        .pairing
+        .pairing_status(&req.device_id, &hex::encode(device_key));
+    Json(PairStatusResponse { status }).into_response()
 }
 
 /// POST /api/bridge/e2e-handshake — handshake E2E v2 avec un appareil appairé.
@@ -950,7 +1139,9 @@ async fn handle_bridge_discovery(
 }
 
 /// GET /api/bridge/devices — liste les devices appairés et en attente
-/// (admin local ; les `device_id` sont masqués).
+/// (admin local ; les `device_id` sont masqués). Chaque demande révélée porte
+/// son code SAS et l'empreinte de la clé de l'appareil ; la réponse porte
+/// aussi l'empreinte de la clé du COG.
 async fn handle_bridge_devices(
     State(state): State<ServerState>,
 ) -> Json<serde_json::Value> {
@@ -965,6 +1156,7 @@ async fn handle_bridge_devices(
                 "paired_at": d.paired_at,
                 "last_seen": d.last_seen,
                 "mode": d.mode,
+                "key_fingerprint": identity_fingerprint_hex(&d.e2e_identity_key),
             })
         })
         .collect();
@@ -977,26 +1169,52 @@ async fn handle_bridge_devices(
                 "device_id": mask_device_id(&d.device_id),
                 "name": d.name,
                 "requested_at": d.requested_at,
+                "status": d.status,
                 "confirmation_code": d.confirmation_code,
+                "key_fingerprint": d.key_fingerprint,
+                "expires_in_secs": d.expires_in_secs,
             })
         })
         .collect();
-    Json(serde_json::json!({ "paired": paired, "pending": pending }))
+    Json(serde_json::json!({
+        "cog_key_fingerprint": identity_fingerprint(&state.cog_identity.public_key_bytes()),
+        "paired": paired,
+        "pending": pending,
+    }))
 }
 
-/// Requête d'approbation/rejet.
+/// Requête de rejet.
 #[derive(Deserialize)]
 struct DeviceAction {
     device_id: String,
 }
 
-/// POST /api/bridge/approve — approuve un device en attente (depuis le desktop).
+/// Requête d'approbation : le code SAS que l'administrateur a vu (R-027).
+#[derive(Deserialize)]
+struct ApproveAction {
+    device_id: String,
+    confirmation_code: String,
+}
+
+/// POST /api/bridge/approve — approuve une demande révélée (depuis le desktop)
+/// si le code fourni est celui de la demande (temps constant).
 async fn handle_bridge_approve(
     State(state): State<ServerState>,
-    Json(req): Json<DeviceAction>,
-) -> Json<serde_json::Value> {
-    let ok = state.pairing.approve_device(&req.device_id);
-    Json(serde_json::json!({"approved": ok}))
+    Json(req): Json<ApproveAction>,
+) -> Response {
+    match state
+        .pairing
+        .approve_device(&req.device_id, &req.confirmation_code)
+    {
+        Ok(()) => Json(serde_json::json!({"approved": true})).into_response(),
+        Err(e) => {
+            warn!(
+                "CentralRemote approbation refusée ({}): {e}",
+                mask_device_id(&req.device_id)
+            );
+            pairing_error_reply(&e)
+        }
+    }
 }
 
 /// POST /api/bridge/reject — refuse un device en attente (depuis le desktop).
@@ -1043,12 +1261,40 @@ mod tests {
             admin_secret: Arc::new(generate_admin_secret()),
             auth_limiter: Arc::new(RateLimiter::new(AUTH_RATE_WINDOW, AUTH_RATE_MAX)),
             bridge_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, BRIDGE_RATE_MAX)),
+            status_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, PAIR_STATUS_RATE_MAX)),
             cog_identity: Arc::new(E2eIdentity::generate()),
             e2e_sessions: Arc::new(E2eSessionStore::default()),
-            clear_auth_policy: ClearAuthPolicy::LoopbackOnly,
+            allow_plaintext_local_auth: false,
             shutdown: rx,
         };
         (state, tx, profile.id)
+    }
+
+    /// État de test avec `/auth` en clair accepté depuis loopback (tests de la
+    /// logique d'authentification elle-même).
+    fn test_state_plain() -> (ServerState, tokio::sync::watch::Sender<bool>, String) {
+        let (mut state, tx, id) = test_state();
+        state.allow_plaintext_local_auth = true;
+        (state, tx, id)
+    }
+
+    /// Demande d'appairage honnête jusqu'à la révélation, directement sur le
+    /// gestionnaire ; retourne l'identité de l'appareil et le code SAS.
+    fn commit_reveal(state: &ServerState, device_id: &str) -> (E2eIdentity, String) {
+        let device = E2eIdentity::generate();
+        let key = device.public_key_bytes();
+        let pairing = DevicePairing::start(key);
+        let c = parse_commitment_hex(&pairing.commitment_hex()).unwrap();
+        let nc = state
+            .pairing
+            .request_pairing(device_id, "Pixel", &hex::encode(key), c, "192.168.1.30".parse().unwrap())
+            .unwrap();
+        let cog_key = state.cog_identity.public_key_bytes();
+        let revealed = pairing.receive_cog_nonce(cog_key, nc).unwrap();
+        let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
+        let code = state.pairing.reveal_pairing(device_id, &nd, &cog_key).unwrap();
+        assert_eq!(code, revealed.code());
+        (device, code)
     }
 
     fn app_for(state: ServerState, peer: &str) -> Router {
@@ -1162,10 +1408,7 @@ mod tests {
     async fn admin_routes_ok_with_secret_and_ids_masked() {
         let (state, _tx, _) = test_state();
         let full_id = "device-abcdef-1234567890";
-        state
-            .pairing
-            .request_pairing(full_id, "Pixel", &"aa".repeat(32), "123456")
-            .unwrap();
+        let (device, code) = commit_reveal(&state, full_id);
         let secret = state.admin_secret.as_str().to_string();
         let (st, body) = call(
             app_for(state.clone(), "127.0.0.1:5000"),
@@ -1175,7 +1418,17 @@ mod tests {
         assert_eq!(st, StatusCode::OK);
         assert!(!body.contains(full_id), "device_id complet fuité: {body}");
         assert!(body.contains(&mask_device_id(full_id)));
-        assert!(body.contains("\"confirmation_code\":\"123456\""));
+        let v: serde_json::Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(v["pending"][0]["confirmation_code"], code.as_str());
+        assert_eq!(v["pending"][0]["status"], "revealed");
+        assert_eq!(
+            v["pending"][0]["key_fingerprint"],
+            identity_fingerprint(&device.public_key_bytes()).as_str()
+        );
+        assert_eq!(
+            v["cog_key_fingerprint"],
+            identity_fingerprint(&state.cog_identity.public_key_bytes()).as_str()
+        );
     }
 
     #[tokio::test]
@@ -1197,7 +1450,7 @@ mod tests {
 
     #[tokio::test]
     async fn lockout_cannot_be_bypassed() {
-        let (state, _tx, _) = test_state();
+        let (state, _tx, _) = test_state_plain();
         // 5 échecs => verrouillage Connect (limite /auth : 10 par minute).
         for _ in 0..5 {
             let (_, body) = call(
@@ -1218,7 +1471,7 @@ mod tests {
 
     #[tokio::test]
     async fn valid_login_works_and_legacy_only_account_refused() {
-        let (state, _tx, _) = test_state();
+        let (state, _tx, _) = test_state_plain();
         let (_, body) = call(
             app_for(state.clone(), "127.0.0.1:6001"),
             auth_req("alice@example.org", PASSWORD),
@@ -1263,7 +1516,7 @@ mod tests {
 
     // ── E2E mobile ↔ COG (R-023) ─────────────────────────────────────────
 
-    use miyukini_cog_bridge::E2eSession;
+    use miyukini_cog_bridge::{DevicePairing, E2eSession};
 
     const PEER_LAN: &str = "192.168.1.20:7100";
 
@@ -1278,13 +1531,8 @@ mod tests {
 
     /// Appaire un appareil (demande + approbation desktop) et retourne son identité.
     fn paired_device(state: &ServerState, device_id: &str) -> E2eIdentity {
-        let device = E2eIdentity::generate();
-        let key = hex::encode(device.public_key_bytes());
-        state
-            .pairing
-            .request_pairing(device_id, "Pixel", &key, "000000")
-            .unwrap();
-        assert!(state.pairing.approve_device(device_id));
+        let (device, code) = commit_reveal(state, device_id);
+        state.pairing.approve_device(device_id, &code).unwrap();
         device
     }
 
@@ -1358,17 +1606,8 @@ mod tests {
         )
         .await;
         assert_eq!(st, StatusCode::FORBIDDEN);
-        // Appareil seulement en attente (non approuvé) : refus également.
-        let pending_dev = E2eIdentity::generate();
-        state
-            .pairing
-            .request_pairing(
-                "device-pending-01",
-                "x",
-                &hex::encode(pending_dev.public_key_bytes()),
-                "1",
-            )
-            .unwrap();
+        // Appareil seulement en attente (révélé, non approuvé) : refus également.
+        let (pending_dev, _code) = commit_reveal(&state, "device-pending-01");
         let (_p, offer) = PendingHandshake::initiate(
             E2eRole::Device,
             &pending_dev,
@@ -1456,51 +1695,245 @@ mod tests {
         assert!(state.e2e_sessions.is_empty());
     }
 
-    #[tokio::test]
-    async fn pair_exchanges_and_pins_keys() {
-        let (state, _tx, _) = test_state();
-        let device = E2eIdentity::generate();
-        let device_key = hex::encode(device.public_key_bytes());
+    fn commit_body(device_id: &str, key_hex: &str, commitment_hex: &str) -> String {
+        serde_json::json!({
+            "pairing_version": PAIRING_PROTOCOL_VERSION,
+            "device_id": device_id,
+            "device_name": "Pixel",
+            "mode": "whitelist",
+            "e2e_identity_key": key_hex,
+            "commitment": commitment_hex,
+        })
+        .to_string()
+    }
+
+    fn reveal_body(device_id: &str, nonce_hex: &str) -> String {
+        serde_json::json!({
+            "pairing_version": PAIRING_PROTOCOL_VERSION,
+            "device_id": device_id,
+            "device_nonce": nonce_hex,
+        })
+        .to_string()
+    }
+
+    async fn pair_status(state: &ServerState, device_id: &str, key_hex: &str) -> String {
         let (st, body) = call(
             app_for(state.clone(), PEER_LAN),
             post_json(
-                "/api/bridge/pair",
-                serde_json::json!({
-                    "device_id": "device-0004-abcdef",
-                    "device_name": "Pixel",
-                    "mode": "whitelist",
-                    "e2e_identity_key": device_key,
-                })
-                .to_string(),
+                PAIR_STATUS_ENDPOINT,
+                serde_json::json!({"device_id": device_id, "e2e_identity_key": key_hex}).to_string(),
             ),
         )
         .await;
         assert_eq!(st, StatusCode::OK, "{body}");
         let v: serde_json::Value = serde_json::from_str(&body).unwrap();
-        assert_eq!(v["status"], "pending");
-        let cog_key = state.cog_identity.public_key_bytes();
-        assert_eq!(v["cog_identity_key"], hex::encode(cog_key));
-        let code = pairing_confirmation_code(&device.public_key_bytes(), &cog_key);
-        assert_eq!(v["confirmation_code"], code.as_str());
-        let pending = state.pairing.pending_devices();
-        assert_eq!(pending[0].e2e_identity_key, device_key);
-        assert_eq!(pending[0].confirmation_code, code);
-        // Approbation desktop : la clé est épinglée dans la whitelist.
-        assert!(state.pairing.approve_device("device-0004-abcdef"));
-        let paired = state.pairing.device_for_identity_key(&device_key).unwrap();
-        assert_eq!(paired.device_id, "device-0004-abcdef");
+        v["status"].as_str().unwrap().to_string()
+    }
+
+    fn admin_post(uri: &str, secret: &str, body: serde_json::Value) -> axum::http::Request<Body> {
+        axum::http::Request::builder()
+            .method("POST")
+            .uri(uri)
+            .header("content-type", "application/json")
+            .header(ADMIN_SECRET_HEADER, secret)
+            .body(Body::from(body.to_string()))
+            .unwrap()
     }
 
     #[tokio::test]
-    async fn pair_without_valid_key_refused() {
+    async fn http_pairing_v2_end_to_end() {
+        let (state, _tx, _) = test_state();
+        let id = "device-0004-abcdef";
+        let device = E2eIdentity::generate();
+        let key = device.public_key_bytes();
+        let key_hex = hex::encode(key);
+        let pairing = DevicePairing::start(key);
+
+        // 1. Engagement : la réponse porte la clé et l'aléa du COG, aucun code.
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_ENDPOINT, commit_body(id, &key_hex, &pairing.commitment_hex())),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let resp: PairCommitResponse = serde_json::from_str(&body).unwrap();
+        assert_eq!(resp.status, PairingStatus::Committed);
+        assert_eq!(resp.pairing_version, PAIRING_PROTOCOL_VERSION);
+        assert!(!body.contains("confirmation_code"));
+        let cog_key = parse_identity_key_hex(&resp.cog_identity_key).unwrap();
+        assert_eq!(cog_key, state.cog_identity.public_key_bytes());
+        assert_eq!(pair_status(&state, id, &key_hex).await, "committed");
+
+        // 3. Révélation.
+        let nc = PairingNonce::from_hex(&resp.cog_nonce).unwrap();
+        let revealed = pairing.receive_cog_nonce(cog_key, nc).unwrap();
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex())),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        assert_eq!(pair_status(&state, id, &key_hex).await, "revealed");
+        // Seconde révélation refusée.
+        let (st, _) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex())),
+        )
+        .await;
+        assert_eq!(st, StatusCode::CONFLICT);
+
+        // 4. Central affiche le même code que le téléphone.
+        let pending = state.pairing.pending_devices();
+        assert_eq!(pending[0].confirmation_code.as_deref(), Some(revealed.code()));
+        assert!(!state.pairing.is_whitelisted(id), "jamais d'approbation implicite");
+
+        // Approbation : mauvais code refusé, bon code accepté.
+        let secret = state.admin_secret.as_str().to_string();
+        let wrong = if revealed.code() == "00000000" { "11111111" } else { "00000000" };
+        let (st, _) = call(
+            app_for(state.clone(), "127.0.0.1:5000"),
+            admin_post(
+                "/api/bridge/approve",
+                &secret,
+                serde_json::json!({"device_id": id, "confirmation_code": wrong}),
+            ),
+        )
+        .await;
+        assert_eq!(st, StatusCode::CONFLICT);
+        // Sans code : rejet par le désérialiseur.
+        let (st, _) = call(
+            app_for(state.clone(), "127.0.0.1:5000"),
+            admin_post("/api/bridge/approve", &secret, serde_json::json!({"device_id": id})),
+        )
+        .await;
+        assert!(st.is_client_error());
+        assert!(!state.pairing.is_whitelisted(id));
+        let (st, _) = call(
+            app_for(state.clone(), "127.0.0.1:5000"),
+            admin_post(
+                "/api/bridge/approve",
+                &secret,
+                serde_json::json!({"device_id": id, "confirmation_code": revealed.code()}),
+            ),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK);
+        assert_eq!(pair_status(&state, id, &key_hex).await, "approved");
+        let paired = state.pairing.device_for_identity_key(&key_hex).unwrap();
+        assert_eq!(paired.device_id, id);
+        // La clé épinglée permet le handshake E2E.
+        let _session = handshake(&state, &device).await;
+    }
+
+    #[tokio::test]
+    async fn http_old_pairing_protocol_refused() {
+        let (state, _tx, _) = test_state();
+        let key_hex = hex::encode(E2eIdentity::generate().public_key_bytes());
+        // Requête v1 (sans version ni engagement).
+        let v1 = serde_json::json!({
+            "device_id": "d-000000001", "device_name": "x",
+            "mode": "whitelist", "e2e_identity_key": key_hex,
+        });
+        let (st, body) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, v1.to_string())).await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        assert!(body.contains(STATUS_UNSUPPORTED_VERSION), "{body}");
+        // Version future.
+        let mut v3: serde_json::Value =
+            serde_json::from_str(&commit_body("d-000000001", &key_hex, &"00".repeat(32))).unwrap();
+        v3["pairing_version"] = 3.into();
+        let (st, body) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, v3.to_string())).await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        assert!(body.contains(STATUS_UNSUPPORTED_VERSION));
+        // Révélation v1 refusée aussi.
+        let (st, _) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(
+                PAIR_REVEAL_ENDPOINT,
+                serde_json::json!({"device_id": "d-000000001", "device_nonce": "00".repeat(32)}).to_string(),
+            ),
+        )
+        .await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        assert_eq!(state.pairing.pending_devices().len(), 0);
+    }
+
+    #[tokio::test]
+    async fn http_reveal_wrong_nonce_or_without_commit_refused() {
+        let (state, _tx, _) = test_state();
+        // Révélation sans engagement préalable (aucun Nc émis).
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body("device-0010-abcdef", &"11".repeat(32))),
+        )
+        .await;
+        assert_eq!(st, StatusCode::NOT_FOUND, "{body}");
+        // Mauvais Nd : appairage abandonné.
+        let key = E2eIdentity::generate().public_key_bytes();
+        let key_hex = hex::encode(key);
+        let pairing = DevicePairing::start(key);
+        let (st, _) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_ENDPOINT, commit_body("device-0011-abcdef", &key_hex, &pairing.commitment_hex())),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK);
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body("device-0011-abcdef", &"22".repeat(32))),
+        )
+        .await;
+        assert_eq!(st, StatusCode::FORBIDDEN, "{body}");
+        assert!(body.contains("commitment_mismatch"));
+        assert_eq!(state.pairing.pending_devices().len(), 0);
+        assert_eq!(pair_status(&state, "device-0011-abcdef", &key_hex).await, "rejected");
+    }
+
+    #[tokio::test]
+    async fn http_pending_overwrite_and_per_ip_cap_refused() {
+        let (state, _tx, _) = test_state();
+        let commit = |id: &str| {
+            let key = E2eIdentity::generate().public_key_bytes();
+            commit_body(id, &hex::encode(key), &DevicePairing::start(key).commitment_hex())
+        };
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, commit("device-0020-abcdef"))).await;
+        assert_eq!(st, StatusCode::OK);
+        // Autre clé pour le même appareil, depuis une autre IP : conflit.
+        let (st, body) = call(
+            app_for(state.clone(), "192.168.1.99:7000"),
+            post_json(PAIR_ENDPOINT, commit("device-0020-abcdef")),
+        )
+        .await;
+        assert_eq!(st, StatusCode::CONFLICT);
+        assert!(body.contains("pending_conflict"));
+        // Plafond par IP (3) : la 4e demande depuis la même IP est refusée.
+        for i in 1..3 {
+            let (st, _) = call(
+                app_for(state.clone(), PEER_LAN),
+                post_json(PAIR_ENDPOINT, commit(&format!("device-002{i}-abcdef"))),
+            )
+            .await;
+            assert_eq!(st, StatusCode::OK);
+        }
+        let (st, body) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, commit("device-0029-abcdef"))).await;
+        assert_eq!(st, StatusCode::TOO_MANY_REQUESTS);
+        assert!(body.contains("too_many_pending_for_source"));
+        assert_eq!(state.pairing.pending_devices().len(), 3);
+    }
+
+    #[tokio::test]
+    async fn pair_without_valid_key_or_commitment_refused() {
         let (state, _tx, _) = test_state();
         // Sans clé : rejet par le désérialiseur.
         let (st, _) = call(
             app_for(state.clone(), PEER_LAN),
             post_json(
-                "/api/bridge/pair",
-                serde_json::json!({"device_id": "d-000000001", "device_name": "x", "mode": "whitelist"})
-                    .to_string(),
+                PAIR_ENDPOINT,
+                serde_json::json!({
+                    "pairing_version": PAIRING_PROTOCOL_VERSION,
+                    "device_id": "d-000000001", "device_name": "x", "mode": "whitelist",
+                    "commitment": "00".repeat(32),
+                })
+                .to_string(),
             ),
         )
         .await;
@@ -1511,19 +1944,22 @@ mod tests {
         for key in [hex::encode(weak), "zz".into(), "00".repeat(31)] {
             let (st, _) = call(
                 app_for(state.clone(), PEER_LAN),
-                post_json(
-                    "/api/bridge/pair",
-                    serde_json::json!({
-                        "device_id": "d-000000001", "device_name": "x",
-                        "mode": "whitelist", "e2e_identity_key": key,
-                    })
-                    .to_string(),
-                ),
+                post_json(PAIR_ENDPOINT, commit_body("d-000000001", &key, &"00".repeat(32))),
             )
             .await;
             assert_eq!(st, StatusCode::BAD_REQUEST);
         }
-        assert!(state.pairing.pending_devices().is_empty());
+        // Engagement mal formé.
+        let key_hex = hex::encode(E2eIdentity::generate().public_key_bytes());
+        for c in ["", "zz", &"00".repeat(31)] {
+            let (st, _) = call(
+                app_for(state.clone(), PEER_LAN),
+                post_json(PAIR_ENDPOINT, commit_body("d-000000001", &key_hex, c)),
+            )
+            .await;
+            assert_eq!(st, StatusCode::BAD_REQUEST);
+        }
+        assert_eq!(state.pairing.pending_devices().len(), 0);
     }
 
     #[tokio::test]
@@ -1591,7 +2027,7 @@ mod tests {
         let (state, _tx, _) = test_state();
         let device = paired_device(&state, "device-0007-abcdef");
         let session = handshake(&state, &device).await;
-        assert!(state.pairing.revoke_device("device-0007-abcdef"));
+        assert_eq!(state.pairing.revoke_device("device-0007-abcdef"), Ok(true));
         let binding = RequestBinding::new("POST", AUTH_ENDPOINT).unwrap();
         let (req, _) = e2e_auth_req(&session, &binding, "alice@example.org", PASSWORD);
         let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
@@ -1613,25 +2049,39 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn clear_auth_refused_everywhere_with_refuse_policy() {
-        let (mut state, _tx, _) = test_state();
-        state.clear_auth_policy = ClearAuthPolicy::Refuse;
-        let (st, _) = call(
+    async fn clear_auth_refused_by_default_even_from_loopback() {
+        let (state, _tx, _) = test_state();
+        assert!(!RemoteServerConfig::default().allow_plaintext_local_auth);
+        let (st, body) = call(
             app_for(state.clone(), "127.0.0.1:6100"),
             auth_req("alice@example.org", PASSWORD),
         )
         .await;
         assert_eq!(st, StatusCode::FORBIDDEN);
+        assert!(!body.contains("token\":\""));
+    }
+
+    #[tokio::test]
+    async fn clear_auth_loopback_only_when_flag_set() {
+        let (state, _tx, _) = test_state_plain();
+        let (st, body) = call(
+            app_for(state.clone(), "127.0.0.1:6101"),
+            auth_req("alice@example.org", PASSWORD),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK);
+        assert!(body.contains("\"success\":true"), "{body}");
+        // Pair réseau : toujours refusé, même avec l'option.
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), auth_req("alice@example.org", PASSWORD)).await;
+        assert_eq!(st, StatusCode::FORBIDDEN);
     }
 
     #[test]
-    fn clear_auth_policy_default_is_loopback_only() {
-        let p = RemoteServerConfig::default().clear_auth_policy;
-        assert_eq!(p, ClearAuthPolicy::LoopbackOnly);
-        assert!(p.allows("127.0.0.1".parse().unwrap()));
-        assert!(p.allows("::ffff:127.0.0.1".parse().unwrap()));
-        assert!(!p.allows("192.168.1.2".parse().unwrap()));
-        assert!(!ClearAuthPolicy::Refuse.allows("127.0.0.1".parse().unwrap()));
+    fn plaintext_auth_policy() {
+        assert!(!plaintext_auth_allowed(false, "127.0.0.1".parse().unwrap()));
+        assert!(plaintext_auth_allowed(true, "127.0.0.1".parse().unwrap()));
+        assert!(plaintext_auth_allowed(true, "::ffff:127.0.0.1".parse().unwrap()));
+        assert!(!plaintext_auth_allowed(true, "192.168.1.2".parse().unwrap()));
     }
 
     #[tokio::test]
@@ -1660,5 +2110,50 @@ mod tests {
         assert!(dir.join(DEFAULT_IDENTITY_FILE).exists());
         let h2 = start_remote_server(config, RemoteBridge::new()).await.unwrap();
         assert_eq!(h2.e2e_identity_public_key_hex(), k1);
+        assert_eq!(h2.e2e_identity_fingerprint().split(' ').count(), 8);
+    }
+
+    #[tokio::test]
+    async fn server_whitelist_persists_and_corruption_blocks_start() {
+        let dir = std::env::temp_dir().join(format!("central-remote-wl-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let config = RemoteServerConfig {
+            listen_addr: "127.0.0.1:0".into(),
+            auth_db_path: dir.join("central.db").to_string_lossy().to_string(),
+            ..RemoteServerConfig::default()
+        };
+        let h1 = start_remote_server(config.clone(), RemoteBridge::new()).await.unwrap();
+        let device = E2eIdentity::generate();
+        let key = device.public_key_bytes();
+        let pairing = DevicePairing::start(key);
+        let c = parse_commitment_hex(&pairing.commitment_hex()).unwrap();
+        let nc = h1
+            .pairing
+            .request_pairing("device-persist-01", "Pixel", &hex::encode(key), c, "10.0.0.5".parse().unwrap())
+            .unwrap();
+        let cog_key = parse_identity_key_hex(h1.e2e_identity_public_key_hex()).unwrap();
+        let revealed = pairing.receive_cog_nonce(cog_key, nc).unwrap();
+        let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
+        let code = h1.pairing.reveal_pairing("device-persist-01", &nd, &cog_key).unwrap();
+        h1.pairing.approve_device("device-persist-01", &code).unwrap();
+        drop(h1);
+
+        let file = dir.join(DEFAULT_PAIRED_DEVICES_FILE);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(&file).unwrap().permissions().mode();
+            assert_eq!(mode & 0o777, 0o600);
+        }
+        let h2 = start_remote_server(config.clone(), RemoteBridge::new()).await.unwrap();
+        assert!(h2.pairing.is_paired_with_key("device-persist-01", &hex::encode(key)));
+        drop(h2);
+
+        // Fichier corrompu : refus de démarrer (fail-closed), message explicite.
+        std::fs::write(&file, b"{corrompu").unwrap();
+        let Err(err) = start_remote_server(config, RemoteBridge::new()).await else {
+            panic!("démarrage accepté avec une liste blanche corrompue");
+        };
+        assert!(err.contains("liste blanche"), "{err}");
     }
 }

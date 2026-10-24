@@ -156,6 +156,13 @@ pub fn Header() -> Element {
                                                     .collect()
                                             })
                                             .unwrap_or_default(),
+                                        // R-025 : /auth en clair refusé par défaut (E2E
+                                        // obligatoire). Opt-in explicite pour le portail web
+                                        // local uniquement (jamais derrière un proxy inverse).
+                                        allow_plaintext_local_auth: std::env::var(
+                                            "CENTRAL_REMOTE_ALLOW_PLAINTEXT_LOCAL_AUTH",
+                                        )
+                                        .is_ok_and(|v| v == "1"),
                                         ..RemoteServerConfig::default()
                                     };
 

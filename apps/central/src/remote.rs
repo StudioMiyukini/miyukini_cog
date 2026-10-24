@@ -46,6 +46,10 @@ static REMOTE_BRIDGE: std::sync::OnceLock<RemoteBridge> = std::sync::OnceLock::n
 /// PairingManager partagé (accessible globalement pour l'UI d'approbation).
 static PAIRING_MANAGER: Mutex<Option<Arc<PairingManager>>> = Mutex::new(None);
 
+/// Empreinte de la clé d'identité E2E du COG (affichée dans le panneau des
+/// devices mobiles pour comparaison avec le téléphone).
+static COG_FINGERPRINT: Mutex<Option<String>> = Mutex::new(None);
+
 /// Retourne le bridge remote global.
 pub fn remote_bridge() -> &'static RemoteBridge {
     REMOTE_BRIDGE.get_or_init(RemoteBridge::new)
@@ -54,6 +58,11 @@ pub fn remote_bridge() -> &'static RemoteBridge {
 /// Retourne le PairingManager global (si le serveur remote est actif).
 pub fn pairing_manager() -> Option<Arc<PairingManager>> {
     PAIRING_MANAGER.lock().ok().and_then(|g| g.clone())
+}
+
+/// Empreinte de la clé d'identité du COG (si le serveur remote est actif).
+pub fn cog_identity_fingerprint() -> Option<String> {
+    COG_FINGERPRINT.lock().ok().and_then(|g| g.clone())
 }
 
 /// Démarre le serveur CentralRemote en background.
@@ -65,6 +74,9 @@ pub async fn start_remote(config: RemoteServerConfig) -> Result<RemoteServerHand
     // Stocker le PairingManager pour l'UI
     if let Ok(mut g) = PAIRING_MANAGER.lock() {
         *g = Some(handle.pairing.clone());
+    }
+    if let Ok(mut g) = COG_FINGERPRINT.lock() {
+        *g = Some(handle.e2e_identity_fingerprint().to_string());
     }
 
     Ok(handle)

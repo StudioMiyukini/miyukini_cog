@@ -14,6 +14,8 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod pairing;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Commandes envoyées par le client (navigateur ou mobile) vers Central
 // ═══════════════════════════════════════════════════════════════════════════
