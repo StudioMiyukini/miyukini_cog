@@ -1,6 +1,6 @@
 # Modèle de zones et de couches — Miyukini COG
 
-> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.zones-couches -->
 <!-- @role architecture-reference -->
@@ -339,6 +339,8 @@
 - **Certification globale** = signature Origin (Market, canal officiel, Fédération)
 - Appareils de l'utilisateur = pairs Fédération → aucun port ouvert côté International
 - **Une clé par usage** (passeports, visas, arrêtés, journal), **dérivée de la racine en SLIP-10** (dérivation durcie)
+  - Implémenté (A-003, [lot 2 §3.1](../securite/ARCHITECTURE-lot2-identite-signee.md)) : identité (0), émission (1, **passeports et visas**, comme le lot 2 §3), journal (2), éditeur (3)
+  - Arrêtés : indice d'usage futur (≥ 4, réservé, jamais réattribué), attribué avec leur format
 - Racine sauvegardée en **SLIP-39 2 sur 3** (parts en mots, sur USB et papier) ; cérémonie de rotation guidée
 - **Identifiant différent par COG visité** (pas de traçage entre COG)
 

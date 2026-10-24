@@ -1,6 +1,6 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1) et **A-003** (v1.3 : choix d'implémentation du lot 2). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
@@ -56,6 +56,31 @@ Racine Origin                      ── certifie les éditeurs du Market offic
 | Émission / journal | Signées par la racine, validité 90 j | Disque chiffré, `0600`, utilisateur dédié ; TPM quand disponible (lot 4) | Liste de révocation dans le registre |
 | Appareil | Sur l'appareil, à l'appairage | Android Keystore / trousseau OS ; à défaut fichier chiffré Argon2id (`miyucloud::crypto::keys`) | Entrée de révocation du passeport |
 | Éditeur | Poste du développeur | Hors dépôt, idéalement clé matérielle | Révocation du certificat éditeur |
+
+### 3.1 Racine, dérivation et passation — amendement A-003
+
+<!-- @id securite.lot2.racine-derivation -->
+<!-- @role key-derivation -->
+<!-- @do derive_keys_per_usage -->
+
+Implémenté par `crates/miyuracine` (7e6719ca).
+
+- **Secret maître** : 256 bits (`OsRng`), jamais écrit en clair
+- **Sauvegarde SLIP-39** : un groupe, **2 parts sur 3**, exposant d'itération 5 ; une part seule, corrompue ou d'un autre partage = refus
+- **`cog_id`** : `base32(SHA-256(clé publique d'identité))`, alphabet RFC 4648 **minuscule**, tronqué à **26 caractères** (130 bits)
+- **Chemins SLIP-10** (Ed25519, dérivation durcie), but `1296256839'` (`0x4D434F47`, « MCOG ») :
+
+| Usage | Indice `u` | Chemin | Signe | Rotation |
+|---|---|---|---|---|
+| `identite` | 0 | `m/1296256839'/0'` | `cog_id`, passation, reconnaissances, certificats | nouvelle racine (passation) |
+| `emission` | 1 | `m/1296256839'/1'/g'` | passeports **et** visas | 90 j |
+| `journal` | 2 | `m/1296256839'/2'/g'` | têtes du registre (§8) | 90 j |
+| `editeur` | 3 | `m/1296256839'/3'/g'` | certificats éditeur, paquets publiés par le COG | par génération |
+
+- `g` = génération (< 2³¹), incrémentée à chaque rotation de la clé d'usage
+- Indices ≥ 4 **réservés** (usages futurs, ex. arrêtés) ; un indice n'est **jamais réattribué**
+- **Passation** (rotation de la racine) : `Sceau` de type `0x06` (certificat) dont le premier champ `nature` (tag 1) vaut `0x01` ; champs `ancienne_racine` (2), `nouvelle_racine` (3), `emise_le` (4) ; signée par l'**ancienne et la nouvelle** clé d'identité, chacune vérifiée
+- **Non implémenté, à décider ultérieurement** (A-003) : fichier racine chiffré Argon2id (tableau ci-dessus) ; certificat racine → clé d'émission / journal (chaîne vérifiable)
 
 ## 4. Enveloppe commune : le « Sceau »
 
@@ -160,6 +185,25 @@ son niveau BorderGuard (`Trusted` / `Verified`).
 
 Un passeport sans preuve de possession ne vaut rien : voler le fichier ne suffit pas.
 
+**Implémentation (A-003)** — `crates/miyauth` (4277203c, e34f1f08), `Sceau` type `0x01`, TLV :
+
+| Tag | Champ | Valeur |
+|---|---|---|
+| 1 | `serie` | 16 o aléatoires |
+| 2 | `emetteur_cog` | `cog_id` du COG d'origine |
+| 3 | `emetteur_kid` | `kid` de la clé d'émission |
+| 4 | `sujet` | identifiant par paire pour `destination` (32 o) |
+| 5 | `destination` | `cog_id` du COG visité (le COG d'origine pour un usage local) |
+| 6 | `cle_appareil` | clé publique Ed25519 de l'appareil (`device_pk`) |
+| 7 | `role` | `1` = `Citizen` (seule valeur acceptée) |
+| 8 | `portees` | ≤ 32 portées, triées, sans doublon, ≤ 128 caractères |
+| 9 / 10 | `pas_avant` / `pas_apres` | durée ≤ **30 j** |
+
+- **Un passeport par COG visité** : `destination` = COG local, sinon refus (EX-36)
+- **Identifiant par paire** : `HKDF-SHA256(sel = "miyukini/miyauth/pairwise/v1", ikm = secret du titulaire (32 o, détenu par le COG d'origine), info = "cog:" || cog_id visité)`, 32 o
+- **Signataire** : exactement un signataire compté, égal à `emetteur_kid`, épinglé sous le `cog_id` émetteur ; niveau `Souverain` ⇔ COG local
+- **À décider ultérieurement** : une clé d'appareil par COG visité — aujourd'hui `cle_appareil` est commune à tous les passeports d'un appareil, ce qui permet de relier deux COG visités
+
 ## 6. Visa (droit d'entrée ciblé)
 
 Émis par le COG **hôte** (le sien ou un COG étranger reconnu), sur présentation d'un passeport.
@@ -175,6 +219,13 @@ Un passeport sans preuve de possession ne vaut rien : voler le fichier ne suffit
 
 Remplace à terme les JWT HS256 et jetons au porteur de CentralRemote, Alicia API, MiyuCloud.
 
+**Implémentation (A-003)** — `Sceau` type `0x02`, TLV : `serie` (1), `passeport` (2, SHA-256 des octets signés du passeport), `emetteur_cog` (3, COG hôte), `sujet` (4) et `cle_appareil` (5) **recopiés du passeport**, `audience` (6, `[a-z0-9._-]{1,64}`), `role` (7, `1` Citizen / `2` Visitor), `portees` (8), `pas_avant` / `pas_apres` (9 / 10).
+
+- Durée ≤ **15 min**, contenue dans la fenêtre du passeport
+- Émis après preuve de possession (§7), signé par une ancre **souveraine du COG hôte** ; exactement un signataire compté
+- Liens contrôlés séparément : empreinte du passeport, `sujet`, `cle_appareil`, rôle, audience attendue
+- **Portées du visa ⊆ portées du passeport**, à l'émission et à la vérification ; comparaison exacte, **aucun joker**
+
 ## 7. Preuve de possession
 
 À chaque ouverture de session, le service envoie un défi ; l'appareil signe avec `device_pk` :
@@ -185,6 +236,13 @@ signature = Ed25519(device_sk, "miyukini/pop/v1" || defi(32 o) || audience || li
 
 `liaison_canal` = exporteur TLS ou hash de transcription Noise (lot 3) : la signature ne peut pas
 être relayée vers un autre canal (anti-MITM, anti-rejeu).
+
+**Implémentation (A-003)**
+
+- `defi` et `liaison_canal` de **32 o** chacun (longueurs fixes : l'audience, au milieu, est non ambiguë) ; audience au format du visa
+- Un rôle n'est accordé que sur `AccesProuve` = visa vérifié **et** possession prouvée pour la session : un visa intercepté seul n'accorde rien (`identity_resolve`)
+- Identifiant opaque exposé aux services : `pw:<cog d'origine>:<hex(sujet)>` (deux COG ne produisent jamais le même) ; référence de session client jamais reprise telle quelle : `sess:` + SHA-256
+- `attest` reste **refusé** : aucun format d'attestation défini (à décider ultérieurement)
 
 ## 8. Registre public chaîné (révocations + publications)
 
@@ -199,6 +257,45 @@ Un journal **append-only** par COG, et un pour le Market Origin, au format **arb
   sans que ce soit détecté.
 
 Remplace la chaîne d'audit actuelle de `miyukini-connect` (SHA-256 sans clé, en mémoire).
+
+### 8.1 Tête, fraîcheur et monotonie — amendement A-003
+
+<!-- @id securite.lot2.registre-tete -->
+<!-- @role registry-head -->
+<!-- @do verify_registry_head -->
+
+Implémenté par `crates/miyusceau` (`registre.rs`, `merkle.rs` ; 7ed62645, 6774aaa6).
+
+**Tête** = `Sceau` type `0x05`, TLV (tous obligatoires) :
+
+| Tag | Champ | Valeur |
+|---|---|---|
+| 1 | `registre` | identifiant du registre (32 o) |
+| 2 | `taille` | nombre de feuilles (`u64`) |
+| 3 | `racine` | racine Merkle ; `SHA-256("")` si `taille = 0` |
+| 4 | `sequence` | numéro de séquence (`u64`), croissant |
+| 5 | `emise_a` | horodatage d'émission (secondes Unix) |
+| 6 | `validite_max_secs` | validité annoncée, 1 s à 7 j |
+
+- **Fraîcheur** (EX-03) : âge accepté = `min(validite_max_secs, âge max de la politique)` ; défaut **24 h** (`AGE_MAX_TETE_DEFAUT_SECS`), plafond **7 j** ; tolérance d'horloge **120 s** ; tête trop ancienne = « registre gelé », refus
+- **Politiques** : `journal_cog` = 1 signataire (clé de journal) ; `canal_officiel` (Market Origin, mises à jour) = **2 sur 2** ; politique explicite : seuil 1 à 8
+- **Registre attendu** : toute tête est vérifiée contre l'identifiant de registre attendu (`RegistreInattendu` sinon)
+- **Monotonie** (dernière tête acceptée) :
+  - séquence en recul ou horodatage en recul ⇒ retour en arrière, refus
+  - même séquence et contenu différent, taille en recul, ou même taille et racine différente ⇒ **équivoque** ; preuve conservée = les deux sceaux signés
+  - taille en hausse depuis un état non vide ⇒ **preuve de cohérence exigée**, liée aux tailles des deux têtes
+  - preuve d'inclusion vérifiée seulement contre une tête **fraîche**, de même taille
+- **Encodage des preuves** (big-endian, taille exacte, chemin ≤ 64 empreintes) :
+  - inclusion : `index (8) | taille (8) | nombre (1) | nombre × empreinte (32)`
+  - cohérence : `taille1 (8) | taille2 (8) | nombre (1) | nombre × empreinte (32)`
+- **État persistant** : `"MSRG" | version 0x01 | longueur (4) | sceau de la dernière tête` ; au chargement, signatures revérifiées et **registre attendu exigé** (un état d'un autre registre est refusé)
+- **Fuzzing** (EX-10) : `crates/miyusceau/fuzz`, 4 cibles (sceau, titres, preuves Merkle, vérification à seuil)
+
+### 8.2 Révocation — amendement A-003
+
+- Cibles : série d'un titre, ou clé (appareil, émission) ; vérification passeport et visa contre série, appareil et clé d'émission
+- Fail-closed : liste absente, **plus ancienne que 15 min** (défaut, durée d'un visa) ou datée dans le futur au-delà de la tolérance d'horloge ⇒ refus
+- Interface indépendante du stockage (`SourceRevocation`) ; adaptateur ← tête de registre vérifiée : reste à faire (plan, lot 2)
 
 ## 9. Paquets identifiables (Market)
 
@@ -251,6 +348,7 @@ Le point d'extension `verify_package_signature` posé au lot 1 devient bloquant.
 | Composant | Changement |
 |---|---|
 | `crates/miyusceau` (nouvelle) | Format Sceau v1.1, ancres, `Verifie<T>`, Merkle log, preuves |
+| `crates/miyuracine` (nouvelle, A-003) | Racine hors ligne, SLIP-39, SLIP-10 par usage, passation, CLI de cérémonie (§3.1) |
 | `crates/miyauth` | `verify`/`resolve`/`attest` s'appuient sur `miyusceau` (fin du stub fail-closed du lot 1) |
 | `crates/miyukini-admin` | Création de la racine COG, émission des clés d'émission/journal |
 | `crates/borderguard` | Niveaux de confiance dérivés des ancres |
@@ -266,7 +364,8 @@ Le point d'extension `verify_package_signature` posé au lot 1 devient bloquant.
 1. **Format** : maison « Sceau v1 » (section 4), sans dépendance de sérialisation ; **v1.1**
    (algorithme + multi-signature) depuis l'amendement A-002.
 2. **Racine COG** : hors ligne sur support amovible ; sauvegarde **SLIP-39 2 sur 3** ; clés
-   d'émission/journal **dérivées en SLIP-10** (durcie), 90 j, seules présentes sur le serveur.
+   d'émission/journal **dérivées en SLIP-10** (durcie), 90 j, seules présentes sur le serveur ;
+   chemins et passation en §3.1 (A-003).
 3. **Durées** : passeport 30 j, visa 15 min, clés d'émission 90 j.
 4. **Market** : paquets **officiels uniquement** dans ce lot — un seul éditeur (Studio Miyukini),
    certificat éditeur signé par la racine Origin. Les éditeurs tiers sont reportés.
