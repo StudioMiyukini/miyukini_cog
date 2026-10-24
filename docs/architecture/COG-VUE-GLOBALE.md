@@ -19,11 +19,14 @@
 Un schéma global en **6 vues** superposables (une page chacune, même légende) :
 
 - **Fichiers** : [V1 territoire](schema-global/V1-territoire.mmd) · [V2 gouvernance](schema-global/V2-gouvernance.mmd) · [V3 services](schema-global/V3-services.mmd) · [V4 confiance](schema-global/V4-confiance.mmd) · [V5 flux](schema-global/V5-flux.mmd) · [V6 cycle de vie](schema-global/V6-cycle-de-vie.mmd)
-
+- **FigJam** : [COG — schéma global](https://www.figma.com/board/Nx7DXwWUy2jwetLGkxB0Jn) (6 vues, vérifiées le 2026-10-24)
+  - source de vérité : les `.mmd` ; le FigJam est un rendu (sans emojis, libellés raccourcis)
+  - V5 FigJam : scénarios enchaînés sans séparateur, étapes internes fusionnées dans les messages
 
 - **V1 · Territoire** — zones et frontières
-  - nœuds : International, Fédération, Origin (2 faces), BorderGuard, Franche, Dépôt officiel, Portail interne, zone COG, Franche locale
+  - nœuds : International, Fédération, Origin, Douane externe, Franche (façades, DB secondaire, quarantaine, publication), Dépôt officiel, Portail interne, zone COG, Franche locale
   - liens : certification fédérale / globale / zero trust, voies du Portail, « la zone COG tire »
+  - lecture : extérieur → Douane → Franche → Portail → zone COG ; la façade lit la publication écrite par le Portail
 - **V2 · Gouvernance** — strates et Cores
   - nœuds : Kernel (5 modules), 10 Cores, MiyukiniAdmin, Toolkits, Services
   - liens : intention → décision → persistance, contraintes de sécurité, signaux d'observation
@@ -34,12 +37,13 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
   - nœuds : racine USB, clés dérivées, passeport, visa, registres Merkle, statuts fédéraux
   - liens : signe, dérive, émet, confirme, révoque
 - **V5 · Flux** — parcours de bout en bout
-  - accès distant, session collaborative relayée, installation Market, mise à jour Cores, requête IA fédérée, incident IDS/IPS
+  - dessinés : accès distant / session relayée, mise à jour officielle, incident IDS/IPS
+  - à dessiner : installation Market, requête IA fédérée
 - **V6 · Cycle de vie** — démarrage EIP, installation par contrat, consolidation mémoire, sanction fédérale
 - **Légende commune**
-  - couleurs : zone COG vert · Franche orange · Fédération bleu · International gris · pare-feu rouge · Cores violet
-  - traits : plein = flux de données · pointillé = gouvernance · double = signature
-  - formes : rectangle = composant · cylindre = stockage · losange = frontière · cercle = acteur externe
+  - couleurs : zone COG vert · Franche orange · Fédération bleu · International gris · pare-feu rouge · Cores violet · clés et humain jaune
+  - traits : plein = flux de données · pointillé = gouvernance · épais = signature
+  - formes : rectangle = composant · cylindre = stockage · hexagone = frontière · cercle = acteur externe · losange = décision
 
 ## 2. Strates (numérotation unifiée proposée)
 

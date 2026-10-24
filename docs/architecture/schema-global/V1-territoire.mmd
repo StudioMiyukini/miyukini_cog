@@ -29,13 +29,13 @@ flowchart TB
     DOUANE <--> FAC
     DOUANE -- "contenu Origin" --> DEPOT
     FAC --> Q
-    P --> FAC
+    FAC -- "lit" --> P
     FAC <--> DBS
     Q --> PORTAIL
     PORTAIL --> P
     DEPOT -- "voie réservée" --> PORTAIL
     FL --> PORTAIL
-    CORE -. "la zone COG tire" .-> PORTAIL
+    PORTAIL -. "relevé par la zone COG (elle tire)" .-> CORE
     class INTL ext
     class FED,ORIG fed
     class DOUANE,PORTAIL fw
