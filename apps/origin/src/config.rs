@@ -388,6 +388,10 @@ pub struct ForumConfig {
     /// personnes sans COG. **Désactivée par défaut** ; à activer explicitement.
     #[serde(default)]
     pub password_login: bool,
+    /// `cog_id` propriétaire des profils hérités de l'ancien canal HMAC (`cog_id` vide).
+    /// Absent : ces profils restent en lecture seule (aucune adoption automatique).
+    #[serde(default)]
+    pub cog_heritage: Option<String>,
 }
 
 /// Market (inventaire #14, sortie du lot 2).

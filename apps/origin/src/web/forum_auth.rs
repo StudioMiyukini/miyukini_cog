@@ -131,6 +131,8 @@ pub struct ParametresForum {
     pub sync_cles: Vec<[u8; 32]>,
     /// Connexion par mot de passe autorisée.
     pub password_login: bool,
+    /// Propriétaire désigné des profils hérités (`cog_id` vide) ; None = lecture seule.
+    pub cog_heritage: Option<String>,
 }
 
 fn cle_hex(texte: &str, champ: &str) -> Result<[u8; 32], String> {
@@ -155,7 +157,16 @@ impl ParametresForum {
         }
         let sync_cles =
             config.sync_cles.iter().map(|c| cle_hex(c, "forum.sync_cles")).collect::<Result<Vec<_>, _>>()?;
-        Ok(Self { cle_hote, cogs_reconnus, sync_cles, password_login: config.password_login })
+        let cog_heritage = match config.cog_heritage.as_deref().map(str::trim) {
+            Some(c) => Some(
+                CogId::new(c)
+                    .ok_or_else(|| format!("forum.cog_heritage : cog_id invalide « {c} »"))?
+                    .as_str()
+                    .to_string(),
+            ),
+            None => None,
+        };
+        Ok(Self { cle_hote, cogs_reconnus, sync_cles, password_login: config.password_login, cog_heritage })
     }
 }
 
@@ -271,6 +282,8 @@ pub struct ForumAuthStore {
     sync_nonces: RegistreNonces,
     /// Connexion par mot de passe autorisée.
     password_login: bool,
+    /// Propriétaire désigné des profils hérités (`cog_id` vide) ; None = lecture seule.
+    cog_heritage: Option<String>,
 }
 
 impl ForumAuthStore {
@@ -293,6 +306,7 @@ impl ForumAuthStore {
             sync_cles,
             sync_nonces: RegistreNonces::default(),
             password_login: parametres.password_login,
+            cog_heritage: parametres.cog_heritage,
         };
         if let Some(h) = &store.hote {
             info!("Forum : connexion par passeport activée (Origin cog_id {})", h.cog);
@@ -454,8 +468,9 @@ impl ForumAuthStore {
     /// Met à jour ou insère un profil pour le COG `cog_id` (après requête signée vérifiée).
     ///
     /// Un COG ne peut pas écraser le profil (ni le courriel) d'un autre COG. Les profils
-    /// hérités de l'ancien canal HMAC (`cog_id` vide) sont adoptés par le premier COG
-    /// épinglé qui les synchronise.
+    /// hérités de l'ancien canal HMAC (`cog_id` vide) n'appartiennent qu'au COG désigné
+    /// par `[forum] cog_heritage` ; sans désignation, ils restent en lecture seule
+    /// (jamais d'adoption par le premier COG venu).
     fn sync_profile(
         &self,
         cog_id: &str,
@@ -479,13 +494,18 @@ impl ForumAuthStore {
                 Err(e) => Err(e.to_string()),
             }
         };
+        // Propriétaire effectif : le COG inscrit, ou pour un profil hérité le COG désigné.
+        let heritage = self.cog_heritage.as_deref();
+        let detenu_par = |cog: &str| -> bool {
+            if cog.is_empty() { heritage == Some(cog_id) } else { cog == cog_id }
+        };
         if let Some((_, cog)) = proprietaire("SELECT central_id, cog_id FROM forum_profiles WHERE central_id = ?1", central_id)? {
-            if !cog.is_empty() && cog != cog_id {
-                return Err("profil détenu par un autre COG".to_string());
+            if !detenu_par(&cog) {
+                return Err("profil détenu par un autre COG (ou hérité non attribué)".to_string());
             }
         }
         if let Some((autre_id, cog)) = proprietaire("SELECT central_id, cog_id FROM forum_profiles WHERE email = ?1", &email)? {
-            if autre_id != central_id || (!cog.is_empty() && cog != cog_id) {
+            if autre_id != central_id || !detenu_par(&cog) {
                 return Err("courriel déjà utilisé par un autre profil".to_string());
             }
         }
@@ -821,6 +841,7 @@ mod tests {
             cogs_reconnus: vec![(cog_h.clone(), cle_h.cle_publique())],
             sync_cles: vec![cle_sync.cle_publique()],
             password_login,
+            cog_heritage: None,
         };
         let path = std::env::temp_dir().join(format!("forum_auth_test_{}.db", uuid::Uuid::new_v4()));
         let store = ForumAuthStore::open(path, parametres).expect("store");
@@ -1074,6 +1095,45 @@ mod tests {
         let pirate = sync_body("c2", "a@b.c", &hash("pirate"));
         assert!(status_of(&handle_api(ROUTE_SYNC, pirate.as_bytes(), &signed(&autre, &pirate, epoch_secs()), &m.store)).starts_with("400"));
         assert!(m.store.validate("a@b.c", "pw").unwrap().is_some());
+    }
+
+    #[test]
+    fn profil_herite_non_adopte_sans_designation() {
+        let m = monde_avec(true);
+        {
+            let conn = m.store.conn.lock().unwrap();
+            conn.execute(
+                "INSERT INTO forum_profiles (central_id, email, password_hash, pseudonyme, updated_at, cog_id)
+                 VALUES ('h1', 'h@b.c', ?1, NULL, 0, '')",
+                rusqlite::params![hash("ancien")],
+            )
+            .unwrap();
+        }
+        // Sans `cog_heritage`, aucun COG ne peut réécrire le profil hérité ni prendre son courriel.
+        let body = sync_body("h1", "h@b.c", &hash("pirate"));
+        assert!(status_of(&handle_api(ROUTE_SYNC, body.as_bytes(), &signed(&m.cle_sync, &body, epoch_secs()), &m.store)).starts_with("400"));
+        let body = sync_body("h2", "h@b.c", &hash("pirate"));
+        assert!(status_of(&handle_api(ROUTE_SYNC, body.as_bytes(), &signed(&m.cle_sync, &body, epoch_secs()), &m.store)).starts_with("400"));
+
+        // COG désigné : peut reprendre le profil hérité.
+        let path = std::env::temp_dir().join(format!("forum_auth_test_{}.db", uuid::Uuid::new_v4()));
+        let designe = cog_id_depuis_cle(&m.cle_sync.cle_publique());
+        let store = ForumAuthStore::open(
+            path,
+            ParametresForum { sync_cles: vec![m.cle_sync.cle_publique()], cog_heritage: Some(designe), ..Default::default() },
+        )
+        .unwrap();
+        {
+            let conn = store.conn.lock().unwrap();
+            conn.execute(
+                "INSERT INTO forum_profiles (central_id, email, password_hash, pseudonyme, updated_at, cog_id)
+                 VALUES ('h1', 'h@b.c', ?1, NULL, 0, '')",
+                rusqlite::params![hash("ancien")],
+            )
+            .unwrap();
+        }
+        let body = sync_body("h1", "h@b.c", &hash("nouveau"));
+        assert!(status_of(&handle_api(ROUTE_SYNC, body.as_bytes(), &signed(&m.cle_sync, &body, epoch_secs()), &store)).starts_with("200"));
     }
 
     #[test]
