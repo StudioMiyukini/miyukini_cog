@@ -145,7 +145,7 @@ famille.lea.s1 …
 
 **Profils MAIA**
 - **S0 · Déterministe** (sans LLM) : rappel par index, score, budget — toujours actif
-- **S1 · Petit modèle local** (≈ 1–4 B, `maia-llm` / llama.cpp) : reclasse, compresse, propose les notes candidates ; peut aussi répondre seul
+- **S1 · Petit modèle local** (≈ 1–4 B, `maia-llm` / llama.cpp) : reclasse, compresse, propose les notes candidates ; peut aussi répondre seul — choix des modèles : [petites configurations](MODELES-IA-PETITES-CONFIGS.md)
 - **S2 · Grand modèle via Strata** : répond quand la tâche le demande
 - Le format mémoire est **indépendant du moteur** : même paquet, budgets différents
 

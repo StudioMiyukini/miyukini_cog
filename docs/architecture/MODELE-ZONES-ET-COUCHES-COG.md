@@ -7,7 +7,7 @@
 <!-- @do define_cog_zones_and_layers -->
 
 - **Statut** : référence, 2026-10-24 (schéma de l'auteur, v2)
-- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd) · [menaces](../securite/MODELE-MENACES-COG.md) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md) · [mémoire MAIA](MEMOIRE-MAIA.md) · [IA fédérée](IA-FEDEREE.md)
+- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd) · [menaces](../securite/MODELE-MENACES-COG.md) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md) · [mémoire MAIA](MEMOIRE-MAIA.md) · [IA fédérée](IA-FEDEREE.md) · [modèles locaux](MODELES-IA-PETITES-CONFIGS.md)
 
 ## 1. Principes
 
