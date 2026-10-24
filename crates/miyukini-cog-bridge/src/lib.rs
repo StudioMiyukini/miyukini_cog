@@ -34,9 +34,11 @@ pub use e2e::{
 };
 pub use pairing::{
     format_sas_code, identity_fingerprint, identity_fingerprint_hex, normalize_sas_code,
-    pairing_commitment, pairing_sas_code, parse_commitment_hex, sas_codes_equal,
-    verify_pairing_commitment, DevicePairing, PairingNonce, RevealedDevicePairing,
-    PAIRING_NONCE_SIZE, PAIRING_PROTOCOL_VERSION, SAS_DIGITS,
+    pairing_commitment, pairing_sas_code, parse_commitment_hex, parse_pairing_signature_hex,
+    sas_codes_equal, sign_pairing_commit, sign_pairing_reveal, verify_pairing_commit_signature,
+    verify_pairing_commitment, verify_pairing_reveal_signature, DevicePairing, PairingNonce,
+    RevealedDevicePairing, PAIRING_NONCE_SIZE, PAIRING_PROTOCOL_VERSION, PAIRING_SIGNATURE_SIZE,
+    SAS_DIGITS,
 };
 
 /// Résultat standard du bridge.

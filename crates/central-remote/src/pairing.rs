@@ -15,19 +15,35 @@
 //! Machine à états d'une demande (une entrée par `device_id`) :
 //!
 //! ```text
-//! Committed ──reveal(Nd) valide──▶ Revealed ──approve(code affiché)──▶ Approved (liste blanche)
-//!     │                               │
-//!     ├──reveal(Nd) invalide──▶ Rejected (entrée supprimée)
-//!     ├──reject (desktop)──────────▶ Rejected
-//!     └──délai dépassé─────────────▶ Expired (purge à chaque opération)
+//! Committed ──reveal(Nd) signé, valide──▶ Revealed ──approve(code affiché)──▶ Approved (liste blanche)
+//!     │                                       │
+//!     ├──reveal(Nd) signé, Nd faux──▶ Rejected (entrée supprimée)
+//!     ├──reject (desktop)──────────────────▶ Rejected
+//!     └──délai dépassé─────────────────────▶ Expired (purge à chaque opération)
 //! ```
 //!
+//! - **Preuve de possession** : engagement et révélation sont signés par la
+//!   clé d'identité de l'appareil `Kd` et vérifiés (`verify_strict`) avant
+//!   toute autre opération. Signature absente ou invalide = refus **sans
+//!   toucher** à la demande en attente : connaître `device_id` ne suffit
+//!   plus pour l'abandonner. Seule une révélation valablement signée avec un
+//!   mauvais `Nd` (donc émise par le détenteur de `Kd`) supprime l'entrée.
+//! - **Liaison à la source** : la révélation (et la relance) doit venir de
+//!   l'adresse IP de l'engagement ([`PairingConfig::require_same_source`],
+//!   actif par défaut) ; sinon refus sans toucher à l'entrée. Derrière un NAT
+//!   ou un proxy, tous les appareils partagent une même adresse : la liaison
+//!   y est sans effet mais reste sûre (les signatures suffisent) ; un
+//!   téléphone qui change de réseau entre engagement et révélation doit
+//!   recommencer. Désactiver l'option seulement si l'adresse source n'est
+//!   pas stable entre deux requêtes.
 //! - Le COG n'accepte la révélation que pour une entrée existante, donc
 //!   **après** avoir émis `Nc` ; une seule révélation par entrée.
 //! - Une entrée en attente n'est **jamais** remplacée par une autre clé (R-027) :
 //!   l'appareil attend l'expiration ou le refus explicite. Le même appareil
 //!   avec la **même** clé peut relancer sa demande (nouveaux aléas, ancien
-//!   code invalidé).
+//!   code invalidé) seulement si la relance est signée par `Kd`, vient de la
+//!   même source, porte un nouvel engagement, et que la demande est encore
+//!   `Committed` (jamais après la révélation : `PendingConflict`).
 //! - L'approbation exige le code vu par l'administrateur, comparé en temps
 //!   constant au code de l'entrée (R-027).
 //! - Durée de vie des demandes (10 min par défaut), plafond global et
@@ -38,7 +54,8 @@ use crate::paired_store::{load_paired_devices, save_paired_devices, PairedStoreE
 use central_remote_protocol::pairing::PairingStatus;
 use miyukini_cog_bridge::{
     identity_fingerprint_hex, pairing_sas_code, parse_identity_key_hex, sas_codes_equal,
-    verify_pairing_commitment, PairingNonce,
+    verify_pairing_commit_signature, verify_pairing_commitment, verify_pairing_reveal_signature,
+    PairingNonce, PAIRING_SIGNATURE_SIZE,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -81,6 +98,9 @@ pub struct PairingConfig {
     pub max_pending: usize,
     /// Plafond de demandes en attente par adresse source.
     pub max_pending_per_source: usize,
+    /// La révélation et la relance doivent venir de l'adresse source de
+    /// l'engagement (défaut : vrai ; voir la note NAT du module).
+    pub require_same_source: bool,
 }
 
 impl Default for PairingConfig {
@@ -89,6 +109,7 @@ impl Default for PairingConfig {
             pending_ttl: DEFAULT_PENDING_TTL,
             max_pending: MAX_PENDING_DEVICES,
             max_pending_per_source: DEFAULT_MAX_PENDING_PER_SOURCE,
+            require_same_source: true,
         }
     }
 }
@@ -169,6 +190,10 @@ pub enum PairingError {
     NotRevealed,
     #[error("code de confirmation différent de celui de la demande")]
     CodeMismatch,
+    #[error("signature d'appairage invalide (preuve de possession de la clé)")]
+    InvalidSignature,
+    #[error("requête d'une autre source que l'engagement")]
+    SourceMismatch,
     #[error("persistance de la liste blanche impossible: {0}")]
     Persistence(String),
     #[error("état d'appairage indisponible")]
@@ -381,15 +406,21 @@ impl PairingManager {
     /// `e2e_identity_key_hex`, hex canonique déjà validé) venu de `source`, et
     /// retourne l'aléa `Nc` du COG à lui renvoyer.
     ///
-    /// Refus : `device_id` invalide, appareil déjà appairé avec cette clé,
-    /// clé utilisée par un autre appareil, demande en attente avec une autre
-    /// clé (jamais écrasée), plafond global ou par source atteint.
+    /// `commit_signature` est la signature par `Kd` de l'engagement ; elle est
+    /// vérifiée avant toute autre opération (aucun état touché si invalide).
+    ///
+    /// Refus : `device_id` invalide, signature invalide, appareil déjà appairé
+    /// avec cette clé, clé utilisée par un autre appareil, demande en attente
+    /// avec une autre clé (jamais écrasée), relance après révélation ou avec
+    /// le même engagement, relance d'une autre source, plafond global ou par
+    /// source atteint.
     pub fn request_pairing(
         &self,
         device_id: &str,
         device_name: &str,
         e2e_identity_key_hex: &str,
         commitment: [u8; 32],
+        commit_signature: &[u8; PAIRING_SIGNATURE_SIZE],
         source: IpAddr,
     ) -> Result<PairingNonce, PairingError> {
         if device_id.is_empty()
@@ -405,6 +436,9 @@ impl PairingManager {
         if hex::encode(device_key) != e2e_identity_key_hex {
             return Err(PairingError::InvalidIdentityKey);
         }
+        // Preuve de possession de Kd, avant toute lecture de l'état (C-23).
+        verify_pairing_commit_signature(&device_key, device_id, &commitment, commit_signature)
+            .map_err(|_| PairingError::InvalidSignature)?;
         let name: String = device_name
             .chars()
             .filter(|c| !c.is_control())
@@ -432,6 +466,19 @@ impl PairingManager {
             // R-027 : jamais d'écrasement par une autre clé.
             Some(existing) if existing.key_hex != e2e_identity_key_hex => {
                 return Err(PairingError::PendingConflict);
+            }
+            // Relance de la même clé : seulement avant la révélation (le code
+            // affiché ne change jamais sous les yeux de l'administrateur), et
+            // jamais avec l'engagement déjà enregistré (rejeu d'une requête
+            // signée capturée).
+            Some(existing)
+                if matches!(existing.state, PendingState::Revealed { .. })
+                    || existing.commitment == commitment =>
+            {
+                return Err(PairingError::PendingConflict);
+            }
+            Some(existing) if self.config.require_same_source && existing.source != source => {
+                return Err(PairingError::SourceMismatch);
             }
             Some(_) => true,
             None => false,
@@ -474,18 +521,38 @@ impl PairingManager {
         Ok(cog_nonce)
     }
 
-    /// Étape 3 : l'appareil révèle `Nd`. Vérifie l'engagement en temps
-    /// constant ; incohérence ⇒ demande supprimée (`Rejected`). Une seule
-    /// révélation par demande. Retourne le code SAS calculé avec `cog_key`.
+    /// Étape 3 : l'appareil révèle `Nd`, venu de `source`, avec la signature
+    /// `reveal_signature` par `Kd` de `(device_id, Kd, Nd, Nc)`.
+    ///
+    /// Ordre des contrôles : signature (`verify_strict` avec la clé de
+    /// l'entrée), puis source, puis état ; un refus à ces étapes laisse la
+    /// demande **intacte**. Ensuite l'engagement est vérifié en temps
+    /// constant : un `Nd` incohérent, valablement signé, supprime la demande
+    /// (`Rejected`). Une seule révélation par demande. Retourne le code SAS
+    /// calculé avec `cog_key`.
     pub fn reveal_pairing(
         &self,
         device_id: &str,
         device_nonce: &PairingNonce,
+        reveal_signature: &[u8; PAIRING_SIGNATURE_SIZE],
+        source: IpAddr,
         cog_key: &[u8; 32],
     ) -> Result<String, PairingError> {
+        let source = source.to_canonical();
         let mut book = self.pending.lock().map_err(|_| PairingError::Unavailable)?;
         book.purge(self.config.pending_ttl);
         let entry = book.entries.get_mut(device_id).ok_or(PairingError::NoPending)?;
+        verify_pairing_reveal_signature(
+            &entry.device_key,
+            device_id,
+            device_nonce,
+            &entry.cog_nonce,
+            reveal_signature,
+        )
+        .map_err(|_| PairingError::InvalidSignature)?;
+        if self.config.require_same_source && entry.source != source {
+            return Err(PairingError::SourceMismatch);
+        }
         if matches!(entry.state, PendingState::Revealed { .. }) {
             return Err(PairingError::AlreadyRevealed);
         }
@@ -707,6 +774,7 @@ fn sanitize_config(c: PairingConfig) -> PairingConfig {
         pending_ttl: if c.pending_ttl.is_zero() { DEFAULT_PENDING_TTL } else { c.pending_ttl },
         max_pending: c.max_pending.clamp(1, MAX_PENDING_DEVICES),
         max_pending_per_source: c.max_pending_per_source.max(1),
+        require_same_source: c.require_same_source,
     }
 }
 
@@ -754,41 +822,72 @@ mod tests {
 
     /// Appareil de test : identité + appairage démarré.
     struct TestDevice {
-        key: [u8; 32],
+        identity: E2eIdentity,
         key_hex: String,
         pairing: DevicePairing,
     }
 
+    impl TestDevice {
+        /// Nouvel appairage (nouvel aléa Nd) pour la même identité.
+        fn restart(&mut self) {
+            self.pairing = DevicePairing::start(self.identity.public_key_bytes());
+        }
+    }
+
     fn new_device() -> TestDevice {
-        let key = E2eIdentity::generate().public_key_bytes();
+        let identity = E2eIdentity::generate();
+        let key = identity.public_key_bytes();
         TestDevice {
-            key,
+            identity,
             key_hex: hex::encode(key),
             pairing: DevicePairing::start(key),
         }
     }
 
+    fn sig(hex_sig: &str) -> [u8; PAIRING_SIGNATURE_SIZE] {
+        miyukini_cog_bridge::parse_pairing_signature_hex(hex_sig).unwrap()
+    }
+
     fn commit(mgr: &PairingManager, id: &str, d: &TestDevice, src: &str) -> Result<PairingNonce, PairingError> {
         let c = parse_commitment_hex(&d.pairing.commitment_hex()).unwrap();
-        mgr.request_pairing(id, "Pixel", &d.key_hex, c, ip(src))
+        let s = sig(&d.pairing.commit_signature_hex(&d.identity, id).unwrap());
+        mgr.request_pairing(id, "Pixel", &d.key_hex, c, &s, ip(src))
+    }
+
+    /// Révélation signée de `d` (consomme l'appairage en cours).
+    fn reveal(
+        mgr: &PairingManager,
+        id: &str,
+        d: &mut TestDevice,
+        nc: PairingNonce,
+        src: &str,
+    ) -> (Result<String, PairingError>, String) {
+        let pairing = std::mem::replace(&mut d.pairing, DevicePairing::start(d.identity.public_key_bytes()));
+        let revealed = pairing.receive_cog_nonce(cog_key(), nc).unwrap();
+        let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
+        let s = sig(&revealed.reveal_signature_hex(&d.identity, id).unwrap());
+        (mgr.reveal_pairing(id, &nd, &s, ip(src), &cog_key()), revealed.code().to_string())
     }
 
     /// Appairage honnête complet jusqu'à `Revealed` ; retourne (code appareil, code COG).
     fn commit_and_reveal(mgr: &PairingManager, id: &str, src: &str) -> (TestDevice, String, String) {
-        let d = new_device();
+        let mut d = new_device();
         let nc = commit(mgr, id, &d, src).unwrap();
-        let key_hex = d.key_hex.clone();
-        let key = d.key;
-        let revealed = d.pairing.receive_cog_nonce(cog_key(), nc).unwrap();
-        let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
-        let cog_code = mgr.reveal_pairing(id, &nd, &cog_key()).unwrap();
-        let device_code = revealed.code().to_string();
-        let d = TestDevice {
-            key,
-            key_hex,
-            pairing: DevicePairing::start(key),
-        };
-        (d, device_code, cog_code)
+        let (cog_code, device_code) = reveal(mgr, id, &mut d, nc, src);
+        (d, device_code, cog_code.unwrap())
+    }
+
+    /// Révélation valablement signée par `d` d'un aléa `nd` arbitraire.
+    fn signed_reveal_of(
+        mgr: &PairingManager,
+        id: &str,
+        d: &TestDevice,
+        nd: &PairingNonce,
+        nc: &PairingNonce,
+        src: &str,
+    ) -> Result<String, PairingError> {
+        let s = miyukini_cog_bridge::sign_pairing_reveal(&d.identity, id, nd, nc).unwrap();
+        mgr.reveal_pairing(id, nd, &s, ip(src), &cog_key())
     }
 
     fn tmp_store() -> PathBuf {
@@ -818,29 +917,127 @@ mod tests {
     }
 
     #[test]
-    fn reveal_with_wrong_nonce_aborts() {
+    fn validly_signed_wrong_nonce_aborts() {
         let mgr = PairingManager::new();
-        let d = new_device();
-        commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        let mut d = new_device();
+        let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        // Mauvais Nd, mais signé par Kd : seul le détenteur de la clé peut
+        // abandonner sa propre demande.
         assert_eq!(
-            mgr.reveal_pairing("dev-1", &PairingNonce::generate(), &cog_key()).unwrap_err(),
+            signed_reveal_of(&mgr, "dev-1", &d, &PairingNonce::generate(), &nc, IP_A).unwrap_err(),
             PairingError::CommitmentMismatch
         );
         assert_eq!(mgr.pending_devices().len(), 0);
         assert_eq!(mgr.pairing_status("dev-1", &d.key_hex), PairingStatus::Rejected);
         // La bonne révélation arrive trop tard : plus d'entrée.
+        assert_eq!(reveal(&mgr, "dev-1", &mut d, nc, IP_A).0.unwrap_err(), PairingError::NoPending);
+    }
+
+    #[test]
+    fn reveal_with_invalid_signature_leaves_entry_intact() {
+        let mgr = PairingManager::new();
+        let mut d = new_device();
+        let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        let attacker = new_device();
+        let wrong_nd = PairingNonce::generate();
+        // 1. Signature d'une autre clé (l'attaquant connaît device_id).
+        let s = miyukini_cog_bridge::sign_pairing_reveal(&attacker.identity, "dev-1", &wrong_nd, &nc).unwrap();
         assert_eq!(
-            mgr.reveal_pairing("dev-1", &PairingNonce::generate(), &cog_key()).unwrap_err(),
-            PairingError::NoPending
+            mgr.reveal_pairing("dev-1", &wrong_nd, &s, ip(IP_A), &cog_key()).unwrap_err(),
+            PairingError::InvalidSignature
         );
+        // 2. Signature nulle / altérée.
+        assert_eq!(
+            mgr.reveal_pairing("dev-1", &wrong_nd, &[0u8; 64], ip(IP_A), &cog_key()).unwrap_err(),
+            PairingError::InvalidSignature
+        );
+        // 3. Signature valide de Kd sur un autre Nc (rejeu d'une ancienne révélation).
+        let old_nc = PairingNonce::generate();
+        assert_eq!(
+            signed_reveal_of(&mgr, "dev-1", &d, &wrong_nd, &old_nc, IP_A).unwrap_err(),
+            PairingError::InvalidSignature
+        );
+        // La demande est intacte : la révélation honnête aboutit.
+        assert_eq!(mgr.pairing_status("dev-1", &d.key_hex), PairingStatus::Committed);
+        let (code, device_code) = reveal(&mgr, "dev-1", &mut d, nc, IP_A);
+        assert_eq!(code.unwrap(), device_code);
+    }
+
+    #[test]
+    fn reveal_from_other_source_leaves_entry_intact() {
+        let mgr = PairingManager::new();
+        let mut d = new_device();
+        let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        // Même révélation signée (capturée) rejouée depuis une autre IP,
+        // y compris avec un mauvais Nd valablement signé : refus sans effet.
+        assert_eq!(
+            signed_reveal_of(&mgr, "dev-1", &d, &PairingNonce::generate(), &nc, IP_B).unwrap_err(),
+            PairingError::SourceMismatch
+        );
+        assert_eq!(mgr.pairing_status("dev-1", &d.key_hex), PairingStatus::Committed);
+        assert!(reveal(&mgr, "dev-1", &mut d, nc, IP_A).0.is_ok());
+    }
+
+    #[test]
+    fn source_binding_can_be_disabled() {
+        let mgr = PairingManager::with_config(
+            0,
+            PairingConfig {
+                require_same_source: false,
+                ..PairingConfig::default()
+            },
+        );
+        let mut d = new_device();
+        let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        assert!(reveal(&mgr, "dev-1", &mut d, nc, IP_B).0.is_ok());
+    }
+
+    #[test]
+    fn unsigned_or_wrongly_signed_commit_refused() {
+        let mgr = PairingManager::new();
+        let d = new_device();
+        let c = parse_commitment_hex(&d.pairing.commitment_hex()).unwrap();
+        // Signature nulle.
+        assert_eq!(
+            mgr.request_pairing("dev-1", "Pixel", &d.key_hex, c, &[0u8; 64], ip(IP_A)).unwrap_err(),
+            PairingError::InvalidSignature
+        );
+        // Signature par une autre clé que celle présentée.
+        let other = new_device();
+        let s = miyukini_cog_bridge::sign_pairing_commit(&other.identity, "dev-1", &c).unwrap();
+        assert_eq!(
+            mgr.request_pairing("dev-1", "Pixel", &d.key_hex, c, &s, ip(IP_A)).unwrap_err(),
+            PairingError::InvalidSignature
+        );
+        // Signature valide pour un autre device_id.
+        let s = sig(&d.pairing.commit_signature_hex(&d.identity, "dev-2").unwrap());
+        assert_eq!(
+            mgr.request_pairing("dev-1", "Pixel", &d.key_hex, c, &s, ip(IP_A)).unwrap_err(),
+            PairingError::InvalidSignature
+        );
+        assert_eq!(mgr.pending_devices().len(), 0);
+    }
+
+    #[test]
+    fn unsigned_commit_never_touches_pending_entry() {
+        let mgr = PairingManager::new();
+        let (legit, _, code) = commit_and_reveal(&mgr, "dev-1", IP_A);
+        let c = [0x77; 32];
+        assert_eq!(
+            mgr.request_pairing("dev-1", "Pixel", &legit.key_hex, c, &[0u8; 64], ip(IP_A)).unwrap_err(),
+            PairingError::InvalidSignature
+        );
+        assert_eq!(mgr.pending_devices()[0].confirmation_code.as_deref(), Some(code.as_str()));
     }
 
     #[test]
     fn reveal_before_cog_nonce_refused() {
         // Aucune entrée (donc aucun Nc émis) : révélation refusée.
         let mgr = PairingManager::new();
+        let d = new_device();
+        let nd = PairingNonce::generate();
         assert_eq!(
-            mgr.reveal_pairing("dev-1", &PairingNonce::generate(), &cog_key()).unwrap_err(),
+            signed_reveal_of(&mgr, "dev-1", &d, &nd, &PairingNonce::generate(), IP_A).unwrap_err(),
             PairingError::NoPending
         );
         assert_eq!(mgr.pairing_status("dev-1", &"aa".repeat(32)), PairingStatus::Unknown);
@@ -853,9 +1050,10 @@ mod tests {
         let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
         let revealed = d.pairing.receive_cog_nonce(cog_key(), nc).unwrap();
         let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
-        let code = mgr.reveal_pairing("dev-1", &nd, &cog_key()).unwrap();
+        let s = sig(&revealed.reveal_signature_hex(&d.identity, "dev-1").unwrap());
+        let code = mgr.reveal_pairing("dev-1", &nd, &s, ip(IP_A), &cog_key()).unwrap();
         assert_eq!(
-            mgr.reveal_pairing("dev-1", &nd, &cog_key()).unwrap_err(),
+            mgr.reveal_pairing("dev-1", &nd, &s, ip(IP_A), &cog_key()).unwrap_err(),
             PairingError::AlreadyRevealed
         );
         // L'entrée révélée reste approuvable avec son code.
@@ -899,13 +1097,47 @@ mod tests {
     }
 
     #[test]
-    fn same_key_restart_invalidates_old_code() {
+    fn same_key_restart_before_reveal_allowed() {
         let mgr = PairingManager::new();
-        let (d, _, old_code) = commit_and_reveal(&mgr, "dev-1", IP_A);
-        // L'appareil relance (nouveaux aléas) : l'ancien code n'est plus approuvable.
-        commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        let mut d = new_device();
+        let old_nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        // Rejeu de la même requête signée (même engagement) : refusé.
+        assert_eq!(commit(&mgr, "dev-1", &d, IP_A).unwrap_err(), PairingError::PendingConflict);
+        // Relance honnête (nouvel Nd), signée, même source, avant révélation.
+        d.restart();
+        let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
         assert_eq!(mgr.pending_devices().len(), 1);
-        assert_eq!(mgr.approve_device("dev-1", &old_code).unwrap_err(), PairingError::NotRevealed);
+        // L'ancien Nc n'est plus valable ; le nouveau oui.
+        let stale = signed_reveal_of(&mgr, "dev-1", &d, &PairingNonce::generate(), &old_nc, IP_A);
+        assert_eq!(stale.unwrap_err(), PairingError::InvalidSignature);
+        assert!(reveal(&mgr, "dev-1", &mut d, nc, IP_A).0.is_ok());
+    }
+
+    #[test]
+    fn same_key_restart_after_reveal_refused() {
+        let mgr = PairingManager::new();
+        let (mut d, _, code) = commit_and_reveal(&mgr, "dev-1", IP_A);
+        d.restart();
+        assert_eq!(commit(&mgr, "dev-1", &d, IP_A).unwrap_err(), PairingError::PendingConflict);
+        // Le code affiché sur Central reste celui de la demande révélée.
+        assert_eq!(mgr.pending_devices()[0].confirmation_code.as_deref(), Some(code.as_str()));
+        mgr.approve_device("dev-1", &code).unwrap();
+    }
+
+    #[test]
+    fn same_key_restart_from_other_source_refused() {
+        let mgr = PairingManager::new();
+        let mut d = new_device();
+        let nc = commit(&mgr, "dev-1", &d, IP_A).unwrap();
+        // Relance (nouvel Nd, signée par Kd) depuis une autre adresse.
+        let retry = TestDevice {
+            identity: E2eIdentity::from_secret_bytes(&d.identity.secret_bytes()),
+            key_hex: d.key_hex.clone(),
+            pairing: DevicePairing::start(d.identity.public_key_bytes()),
+        };
+        assert_eq!(commit(&mgr, "dev-1", &retry, IP_B).unwrap_err(), PairingError::SourceMismatch);
+        // L'entrée d'origine (et son Nc) est intacte : la révélation initiale aboutit.
+        assert!(reveal(&mgr, "dev-1", &mut d, nc, IP_A).0.is_ok());
     }
 
     #[test]
@@ -974,7 +1206,8 @@ mod tests {
             PairingError::InvalidDeviceId
         );
         let c = parse_commitment_hex(&d.pairing.commitment_hex()).unwrap();
-        mgr.request_pairing("dev-0", &"n".repeat(500), &d.key_hex, c, ip(IP_A)).unwrap();
+        let s = sig(&d.pairing.commit_signature_hex(&d.identity, "dev-0").unwrap());
+        mgr.request_pairing("dev-0", &"n".repeat(500), &d.key_hex, c, &s, ip(IP_A)).unwrap();
         assert_eq!(mgr.pending_devices()[0].name.chars().count(), MAX_DEVICE_NAME_CHARS);
         assert!(mgr.device_for_identity_key("").is_none());
         // Configuration nulle : bornes minimales appliquées.
@@ -982,6 +1215,7 @@ mod tests {
             pending_ttl: Duration::ZERO,
             max_pending: 0,
             max_pending_per_source: 0,
+            require_same_source: true,
         });
         assert_eq!(c.pending_ttl, DEFAULT_PENDING_TTL);
         assert_eq!((c.max_pending, c.max_pending_per_source), (1, 1));

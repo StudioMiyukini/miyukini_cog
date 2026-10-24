@@ -17,6 +17,14 @@
 //! (statut `unsupported_pairing_version`), sans repli.
 //!
 //! Le code SAS n'est **jamais** transporté : chaque côté le calcule.
+//!
+//! L'engagement et la révélation portent une signature ed25519 de la clé
+//! d'identité de l'appareil (preuve de possession, voir
+//! `miyukini_cog_bridge::pairing`). Une requête v2 sans signature (format
+//! antérieur au durcissement du 2026-10-24) est refusée explicitement
+//! (statut [`STATUS_MISSING_SIGNATURE`]), sans repli. La version reste 2 :
+//! le format v2 n'a été publié dans aucune version distribuée avant ce
+//! durcissement (introduit le même jour).
 
 use serde::{Deserialize, Serialize};
 
@@ -33,6 +41,12 @@ pub const PAIR_STATUS_ENDPOINT: &str = "/api/bridge/pair/status";
 
 /// Statut d'erreur renvoyé à une requête d'appairage de version inconnue.
 pub const STATUS_UNSUPPORTED_VERSION: &str = "unsupported_pairing_version";
+/// Statut d'erreur : signature d'appairage absente (requête v2 non signée).
+pub const STATUS_MISSING_SIGNATURE: &str = "missing_pairing_signature";
+/// Statut d'erreur : signature d'appairage mal formée ou invalide.
+pub const STATUS_INVALID_SIGNATURE: &str = "invalid_pairing_signature";
+/// Statut d'erreur : révélation ou relance depuis une autre source que l'engagement.
+pub const STATUS_SOURCE_MISMATCH: &str = "source_mismatch";
 
 /// Étape 1 — l'appareil s'engage sur `Nd` sans le révéler.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -46,6 +60,11 @@ pub struct PairCommitRequest {
     pub e2e_identity_key: String,
     /// Engagement `SHA-256(COMMIT_DOMAIN || Kd || Nd)` (hex 32 octets).
     pub commitment: String,
+    /// Signature ed25519 par `Kd` de
+    /// `COMMIT_SIG_DOMAIN || version || len16(device_id) || device_id || Kd || C`
+    /// (hex 64 octets). Absente (vide) = refus explicite.
+    #[serde(default)]
+    pub commit_signature: String,
 }
 
 /// Réponse à l'étape 1 — clé d'identité et aléa `Nc` du COG.
@@ -68,6 +87,11 @@ pub struct PairRevealRequest {
     pub device_id: String,
     /// Aléa de l'appareil `Nd` (hex 32 octets).
     pub device_nonce: String,
+    /// Signature ed25519 par `Kd` de
+    /// `REVEAL_SIG_DOMAIN || version || len16(device_id) || device_id || Kd || Nd || Nc`
+    /// (hex 64 octets). Absente (vide) = refus explicite.
+    #[serde(default)]
+    pub reveal_signature: String,
 }
 
 /// Réponse à l'étape 3.
@@ -146,6 +170,19 @@ mod tests {
         assert_eq!(check_pairing_version(br#"{"pairing_version":3}"#), Err(3));
         assert_eq!(check_pairing_version(b"not json"), Err(0));
         assert_eq!(check_pairing_version(br#"{"pairing_version":2}"#), Ok(()));
+    }
+
+    #[test]
+    fn unsigned_v2_requests_parse_with_empty_signature() {
+        // Le serveur refuse explicitement une signature vide (aucun repli).
+        let c: PairCommitRequest = serde_json::from_str(
+            r#"{"pairing_version":2,"device_id":"d","device_name":"x","mode":"whitelist","e2e_identity_key":"aa","commitment":"bb"}"#,
+        )
+        .unwrap();
+        assert_eq!(c.commit_signature, "");
+        let r: PairRevealRequest =
+            serde_json::from_str(r#"{"pairing_version":2,"device_id":"d","device_nonce":"cc"}"#).unwrap();
+        assert_eq!(r.reveal_signature, "");
     }
 
     #[test]

@@ -28,6 +28,8 @@
 //!
 //! - `POST /api/bridge/pair` : engagement de l'appareil → clé + aléa du COG.
 //! - `POST /api/bridge/pair/reveal` : révélation de `Nd`, vérifiée.
+//!   Engagement et révélation sont signés par la clé de l'appareil (preuve de
+//!   possession) ; requête non signée = refus explicite, sans repli.
 //! - `POST /api/bridge/pair/status` : suivi de la demande par l'appareil.
 //! - Administration (loopback + secret) : `/api/bridge/devices` expose code
 //!   SAS et empreinte de clé ; `/api/bridge/approve` exige le code affiché.
@@ -44,6 +46,7 @@ use crate::protocol::pairing::{
     check_pairing_version, PairCommitRequest, PairCommitResponse, PairRevealRequest,
     PairRevealResponse, PairStatusRequest, PairStatusResponse, PairingStatus,
     PAIRING_PROTOCOL_VERSION, PAIR_ENDPOINT, PAIR_REVEAL_ENDPOINT, PAIR_STATUS_ENDPOINT,
+    STATUS_INVALID_SIGNATURE, STATUS_MISSING_SIGNATURE, STATUS_SOURCE_MISMATCH,
     STATUS_UNSUPPORTED_VERSION,
 };
 use crate::protocol::{RemoteAuthRequest, RemoteAuthResponse, RemoteCommand, RemoteEvent};
@@ -64,8 +67,8 @@ use miyukini_central::auth::CentralAuthDb;
 use miyukini_cog_bridge::e2e::MAX_HANDSHAKE_JSON_LEN;
 use miyukini_cog_bridge::{
     identity_fingerprint, identity_fingerprint_hex, parse_commitment_hex, parse_identity_key_hex,
-    E2eHandshake, E2eIdentity, E2eRole, EncryptedMessage, PairingNonce, PendingHandshake,
-    RequestBinding, E2E_SESSION_HEADER,
+    parse_pairing_signature_hex, E2eHandshake, E2eIdentity, E2eRole, EncryptedMessage,
+    PairingNonce, PendingHandshake, RequestBinding, E2E_SESSION_HEADER, PAIRING_SIGNATURE_SIZE,
 };
 use miyukini_connect::{AuthVerifyRequest, ConnectService, IdentitySetup, PermissionTier};
 use rand::rngs::OsRng;
@@ -126,6 +129,12 @@ pub struct RemoteServerConfig {
     pub paired_devices_path: Option<String>,
     /// Durée de vie d'une demande d'appairage en attente (secondes ; 0 = 10 min).
     pub pairing_pending_ttl_secs: u64,
+    /// Révélation et relance d'appairage acceptées seulement depuis l'adresse
+    /// source de l'engagement (**vrai par défaut**). Derrière un NAT les
+    /// appareils partagent une adresse (liaison sans effet, signatures
+    /// suffisantes) ; ne désactiver que si l'adresse source change entre deux
+    /// requêtes d'un même appareil.
+    pub pairing_require_same_source: bool,
     /// `/auth` en clair accepté depuis un pair loopback (R-025). **Faux par
     /// défaut** : E2E obligatoire partout. À n'activer que pour le portail web
     /// local, jamais derrière un proxy inverse local (toute requête y paraît
@@ -149,6 +158,7 @@ impl Default for RemoteServerConfig {
             e2e_identity_path: None,
             paired_devices_path: None,
             pairing_pending_ttl_secs: DEFAULT_PENDING_TTL.as_secs(),
+            pairing_require_same_source: true,
             allow_plaintext_local_auth: false,
         }
     }
@@ -364,6 +374,7 @@ pub async fn start_remote_server(
     );
     let pairing_config = PairingConfig {
         pending_ttl: Duration::from_secs(config.pairing_pending_ttl_secs),
+        require_same_source: config.pairing_require_same_source,
         ..PairingConfig::default()
     };
     let pairing = Arc::new(
@@ -910,10 +921,26 @@ fn pairing_error_reply(e: &PairingError) -> Response {
         }
         PairingError::NotRevealed => status_reply(StatusCode::CONFLICT, "not_revealed"),
         PairingError::CodeMismatch => status_reply(StatusCode::CONFLICT, "code_mismatch"),
+        PairingError::InvalidSignature => {
+            status_reply(StatusCode::UNAUTHORIZED, STATUS_INVALID_SIGNATURE)
+        }
+        PairingError::SourceMismatch => status_reply(StatusCode::FORBIDDEN, STATUS_SOURCE_MISMATCH),
         PairingError::Persistence(_) | PairingError::Unavailable => {
             status_reply(StatusCode::SERVICE_UNAVAILABLE, "unavailable")
         }
     }
+}
+
+/// Décode la signature d'appairage d'une requête. Absente (requête v2 non
+/// signée, format antérieur) : refus explicite `missing_pairing_signature`,
+/// sans repli ; mal formée : `invalid_pairing_signature`.
+/// L'erreur porte le statut à renvoyer (HTTP 400).
+fn pairing_signature_field(s: &str) -> Result<[u8; PAIRING_SIGNATURE_SIZE], &'static str> {
+    if s.is_empty() {
+        warn!("CentralRemote appairage refusé: requête non signée");
+        return Err(STATUS_MISSING_SIGNATURE);
+    }
+    parse_pairing_signature_hex(s).map_err(|_| STATUS_INVALID_SIGNATURE)
 }
 
 /// Refus explicite d'une requête d'appairage d'une autre version (v1 comprise).
@@ -956,12 +983,18 @@ async fn handle_bridge_pair(
     let Ok(commitment) = parse_commitment_hex(&req.commitment) else {
         return status_reply(StatusCode::BAD_REQUEST, "invalid_commitment");
     };
+    let signature = match pairing_signature_field(&req.commit_signature) {
+        Ok(sig) => sig,
+        Err(status) => return status_reply(StatusCode::BAD_REQUEST, status),
+    };
     let cog_key = state.cog_identity.public_key_bytes();
+    // La signature est vérifiée par le gestionnaire avant toute lecture d'état.
     match state.pairing.request_pairing(
         &req.device_id,
         &req.device_name,
         &hex::encode(device_key),
         commitment,
+        &signature,
         source,
     ) {
         Ok(cog_nonce) => {
@@ -990,14 +1023,17 @@ async fn handle_bridge_pair(
 
 /// POST /api/bridge/pair/reveal — étape 3 (révélation de `Nd`).
 ///
-/// Refus : version (400), aucune demande — donc aucun `Nc` émis (404), déjà
-/// révélé (409), engagement incohérent (403, demande abandonnée).
+/// Refus : version ou signature absente (400), aucune demande — donc aucun
+/// `Nc` émis (404), signature invalide (401) ou autre source (403) — demande
+/// intacte —, déjà révélé (409), engagement incohérent valablement signé
+/// (403, demande abandonnée).
 async fn handle_bridge_pair_reveal(
     State(state): State<ServerState>,
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
     body: Bytes,
 ) -> Response {
-    if !state.bridge_limiter.check(peer.ip().to_canonical()) {
+    let source = peer.ip().to_canonical();
+    if !state.bridge_limiter.check(source) {
         return StatusCode::TOO_MANY_REQUESTS.into_response();
     }
     if let Err(v) = check_pairing_version(&body) {
@@ -1009,10 +1045,14 @@ async fn handle_bridge_pair_reveal(
     let Ok(device_nonce) = PairingNonce::from_hex(&req.device_nonce) else {
         return status_reply(StatusCode::BAD_REQUEST, "invalid_device_nonce");
     };
+    let signature = match pairing_signature_field(&req.reveal_signature) {
+        Ok(sig) => sig,
+        Err(status) => return status_reply(StatusCode::BAD_REQUEST, status),
+    };
     let cog_key = state.cog_identity.public_key_bytes();
     match state
         .pairing
-        .reveal_pairing(&req.device_id, &device_nonce, &cog_key)
+        .reveal_pairing(&req.device_id, &device_nonce, &signature, source, &cog_key)
     {
         Ok(_code) => Json(PairRevealResponse {
             status: PairingStatus::Revealed,
@@ -1282,19 +1322,35 @@ mod tests {
     /// gestionnaire ; retourne l'identité de l'appareil et le code SAS.
     fn commit_reveal(state: &ServerState, device_id: &str) -> (E2eIdentity, String) {
         let device = E2eIdentity::generate();
+        let cog_key = state.cog_identity.public_key_bytes();
+        let code = direct_pair(&state.pairing, cog_key, &device, device_id, "192.168.1.30");
+        (device, code)
+    }
+
+    /// Engagement + révélation signés, directement sur le gestionnaire ;
+    /// retourne le code SAS (identique des deux côtés).
+    fn direct_pair(
+        mgr: &PairingManager,
+        cog_key: [u8; 32],
+        device: &E2eIdentity,
+        device_id: &str,
+        src: &str,
+    ) -> String {
         let key = device.public_key_bytes();
         let pairing = DevicePairing::start(key);
         let c = parse_commitment_hex(&pairing.commitment_hex()).unwrap();
-        let nc = state
-            .pairing
-            .request_pairing(device_id, "Pixel", &hex::encode(key), c, "192.168.1.30".parse().unwrap())
+        let sig = parse_pairing_signature_hex(&pairing.commit_signature_hex(device, device_id).unwrap()).unwrap();
+        let src: IpAddr = src.parse().unwrap();
+        let nc = mgr
+            .request_pairing(device_id, "Pixel", &hex::encode(key), c, &sig, src)
             .unwrap();
-        let cog_key = state.cog_identity.public_key_bytes();
         let revealed = pairing.receive_cog_nonce(cog_key, nc).unwrap();
         let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
-        let code = state.pairing.reveal_pairing(device_id, &nd, &cog_key).unwrap();
+        let rsig =
+            parse_pairing_signature_hex(&revealed.reveal_signature_hex(device, device_id).unwrap()).unwrap();
+        let code = mgr.reveal_pairing(device_id, &nd, &rsig, src, &cog_key).unwrap();
         assert_eq!(code, revealed.code());
-        (device, code)
+        code
     }
 
     fn app_for(state: ServerState, peer: &str) -> Router {
@@ -1695,7 +1751,7 @@ mod tests {
         assert!(state.e2e_sessions.is_empty());
     }
 
-    fn commit_body(device_id: &str, key_hex: &str, commitment_hex: &str) -> String {
+    fn commit_body(device_id: &str, key_hex: &str, commitment_hex: &str, sig_hex: &str) -> String {
         serde_json::json!({
             "pairing_version": PAIRING_PROTOCOL_VERSION,
             "device_id": device_id,
@@ -1703,17 +1759,47 @@ mod tests {
             "mode": "whitelist",
             "e2e_identity_key": key_hex,
             "commitment": commitment_hex,
+            "commit_signature": sig_hex,
         })
         .to_string()
     }
 
-    fn reveal_body(device_id: &str, nonce_hex: &str) -> String {
+    fn reveal_body(device_id: &str, nonce_hex: &str, sig_hex: &str) -> String {
         serde_json::json!({
             "pairing_version": PAIRING_PROTOCOL_VERSION,
             "device_id": device_id,
             "device_nonce": nonce_hex,
+            "reveal_signature": sig_hex,
         })
         .to_string()
+    }
+
+    /// Corps d'engagement signé honnête pour `device`.
+    fn signed_commit_body(device_id: &str, device: &E2eIdentity, pairing: &DevicePairing) -> String {
+        commit_body(
+            device_id,
+            &hex::encode(device.public_key_bytes()),
+            &pairing.commitment_hex(),
+            &pairing.commit_signature_hex(device, device_id).unwrap(),
+        )
+    }
+
+    /// Engagement HTTP signé ; retourne l'aléa du COG.
+    async fn http_commit(
+        state: &ServerState,
+        peer: &str,
+        device_id: &str,
+        device: &E2eIdentity,
+        pairing: &DevicePairing,
+    ) -> PairingNonce {
+        let (st, body) = call(
+            app_for(state.clone(), peer),
+            post_json(PAIR_ENDPOINT, signed_commit_body(device_id, device, pairing)),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let resp: PairCommitResponse = serde_json::from_str(&body).unwrap();
+        PairingNonce::from_hex(&resp.cog_nonce).unwrap()
     }
 
     async fn pair_status(state: &ServerState, device_id: &str, key_hex: &str) -> String {
@@ -1752,7 +1838,7 @@ mod tests {
         // 1. Engagement : la réponse porte la clé et l'aléa du COG, aucun code.
         let (st, body) = call(
             app_for(state.clone(), PEER_LAN),
-            post_json(PAIR_ENDPOINT, commit_body(id, &key_hex, &pairing.commitment_hex())),
+            post_json(PAIR_ENDPOINT, signed_commit_body(id, &device, &pairing)),
         )
         .await;
         assert_eq!(st, StatusCode::OK, "{body}");
@@ -1767,9 +1853,10 @@ mod tests {
         // 3. Révélation.
         let nc = PairingNonce::from_hex(&resp.cog_nonce).unwrap();
         let revealed = pairing.receive_cog_nonce(cog_key, nc).unwrap();
+        let rsig = revealed.reveal_signature_hex(&device, id).unwrap();
         let (st, body) = call(
             app_for(state.clone(), PEER_LAN),
-            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex())),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex(), &rsig)),
         )
         .await;
         assert_eq!(st, StatusCode::OK, "{body}");
@@ -1777,7 +1864,7 @@ mod tests {
         // Seconde révélation refusée.
         let (st, _) = call(
             app_for(state.clone(), PEER_LAN),
-            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex())),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex(), &rsig)),
         )
         .await;
         assert_eq!(st, StatusCode::CONFLICT);
@@ -1839,7 +1926,7 @@ mod tests {
         assert!(body.contains(STATUS_UNSUPPORTED_VERSION), "{body}");
         // Version future.
         let mut v3: serde_json::Value =
-            serde_json::from_str(&commit_body("d-000000001", &key_hex, &"00".repeat(32))).unwrap();
+            serde_json::from_str(&commit_body("d-000000001", &key_hex, &"00".repeat(32), &"00".repeat(64))).unwrap();
         v3["pairing_version"] = 3.into();
         let (st, body) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, v3.to_string())).await;
         assert_eq!(st, StatusCode::BAD_REQUEST);
@@ -1863,23 +1950,24 @@ mod tests {
         // Révélation sans engagement préalable (aucun Nc émis).
         let (st, body) = call(
             app_for(state.clone(), PEER_LAN),
-            post_json(PAIR_REVEAL_ENDPOINT, reveal_body("device-0010-abcdef", &"11".repeat(32))),
+            post_json(
+                PAIR_REVEAL_ENDPOINT,
+                reveal_body("device-0010-abcdef", &"11".repeat(32), &"00".repeat(64)),
+            ),
         )
         .await;
         assert_eq!(st, StatusCode::NOT_FOUND, "{body}");
-        // Mauvais Nd : appairage abandonné.
-        let key = E2eIdentity::generate().public_key_bytes();
-        let key_hex = hex::encode(key);
-        let pairing = DevicePairing::start(key);
-        let (st, _) = call(
-            app_for(state.clone(), PEER_LAN),
-            post_json(PAIR_ENDPOINT, commit_body("device-0011-abcdef", &key_hex, &pairing.commitment_hex())),
-        )
-        .await;
-        assert_eq!(st, StatusCode::OK);
+        // Mauvais Nd valablement signé par Kd : appairage abandonné.
+        let device = E2eIdentity::generate();
+        let key_hex = hex::encode(device.public_key_bytes());
+        let pairing = DevicePairing::start(device.public_key_bytes());
+        let id = "device-0011-abcdef";
+        let nc = http_commit(&state, PEER_LAN, id, &device, &pairing).await;
+        let wrong_nd = PairingNonce::from_bytes([0x22; 32]);
+        let sig = miyukini_cog_bridge::sign_pairing_reveal(&device, id, &wrong_nd, &nc).unwrap();
         let (st, body) = call(
             app_for(state.clone(), PEER_LAN),
-            post_json(PAIR_REVEAL_ENDPOINT, reveal_body("device-0011-abcdef", &"22".repeat(32))),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &"22".repeat(32), &hex::encode(sig))),
         )
         .await;
         assert_eq!(st, StatusCode::FORBIDDEN, "{body}");
@@ -1892,8 +1980,8 @@ mod tests {
     async fn http_pending_overwrite_and_per_ip_cap_refused() {
         let (state, _tx, _) = test_state();
         let commit = |id: &str| {
-            let key = E2eIdentity::generate().public_key_bytes();
-            commit_body(id, &hex::encode(key), &DevicePairing::start(key).commitment_hex())
+            let device = E2eIdentity::generate();
+            signed_commit_body(id, &device, &DevicePairing::start(device.public_key_bytes()))
         };
         let (st, _) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, commit("device-0020-abcdef"))).await;
         assert_eq!(st, StatusCode::OK);
@@ -1921,6 +2009,130 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn http_unsigned_or_wrongly_signed_commit_refused() {
+        let (state, _tx, _) = test_state();
+        let device = E2eIdentity::generate();
+        let key_hex = hex::encode(device.public_key_bytes());
+        let pairing = DevicePairing::start(device.public_key_bytes());
+        let id = "device-0030-abcdef";
+        // Requête v2 non signée (format antérieur) : refus explicite, sans repli.
+        let unsigned = serde_json::json!({
+            "pairing_version": PAIRING_PROTOCOL_VERSION, "device_id": id, "device_name": "Pixel",
+            "mode": "whitelist", "e2e_identity_key": key_hex, "commitment": pairing.commitment_hex(),
+        });
+        let (st, body) = call(app_for(state.clone(), PEER_LAN), post_json(PAIR_ENDPOINT, unsigned.to_string())).await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        assert!(body.contains(STATUS_MISSING_SIGNATURE), "{body}");
+        // Signature mal formée.
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_ENDPOINT, commit_body(id, &key_hex, &pairing.commitment_hex(), "zz")),
+        )
+        .await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        assert!(body.contains(STATUS_INVALID_SIGNATURE), "{body}");
+        // Signature d'une autre clé.
+        let other = E2eIdentity::generate();
+        let c = parse_commitment_hex(&pairing.commitment_hex()).unwrap();
+        let sig = miyukini_cog_bridge::sign_pairing_commit(&other, id, &c).unwrap();
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_ENDPOINT, commit_body(id, &key_hex, &pairing.commitment_hex(), &hex::encode(sig))),
+        )
+        .await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        assert!(body.contains(STATUS_INVALID_SIGNATURE), "{body}");
+        assert_eq!(state.pairing.pending_devices().len(), 0);
+    }
+
+    #[tokio::test]
+    async fn http_bad_reveal_leaves_pending_entry_intact() {
+        let (state, _tx, _) = test_state();
+        let device = E2eIdentity::generate();
+        let key_hex = hex::encode(device.public_key_bytes());
+        let pairing = DevicePairing::start(device.public_key_bytes());
+        let id = "device-0031-abcdef";
+        let nc = http_commit(&state, PEER_LAN, id, &device, &pairing).await;
+        let wrong = "33".repeat(32);
+        // 1. Révélation non signée (v2 antérieure) : refus explicite.
+        let unsigned = serde_json::json!({
+            "pairing_version": PAIRING_PROTOCOL_VERSION, "device_id": id, "device_nonce": wrong,
+        });
+        let (st, body) =
+            call(app_for(state.clone(), PEER_LAN), post_json(PAIR_REVEAL_ENDPOINT, unsigned.to_string())).await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        assert!(body.contains(STATUS_MISSING_SIGNATURE), "{body}");
+        // 2. Signée par un tiers qui connaît device_id.
+        let attacker = E2eIdentity::generate();
+        let wrong_nd = PairingNonce::from_hex(&wrong).unwrap();
+        let sig = miyukini_cog_bridge::sign_pairing_reveal(&attacker, id, &wrong_nd, &nc).unwrap();
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &wrong, &hex::encode(sig))),
+        )
+        .await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        assert!(body.contains(STATUS_INVALID_SIGNATURE), "{body}");
+        // 3. Révélation honnête rejouée depuis une autre adresse.
+        let revealed = pairing.receive_cog_nonce(state.cog_identity.public_key_bytes(), nc).unwrap();
+        let rsig = revealed.reveal_signature_hex(&device, id).unwrap();
+        let (st, body) = call(
+            app_for(state.clone(), "192.168.1.99:7000"),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex(), &rsig)),
+        )
+        .await;
+        assert_eq!(st, StatusCode::FORBIDDEN);
+        assert!(body.contains(STATUS_SOURCE_MISMATCH), "{body}");
+        // L'entrée est intacte : la révélation légitime aboutit.
+        assert_eq!(pair_status(&state, id, &key_hex).await, "committed");
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex(), &rsig)),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        assert_eq!(pair_status(&state, id, &key_hex).await, "revealed");
+    }
+
+    #[tokio::test]
+    async fn http_same_key_recommit_after_reveal_or_other_source_refused() {
+        let (state, _tx, _) = test_state();
+        let device = E2eIdentity::generate();
+        let id = "device-0032-abcdef";
+        let pairing = DevicePairing::start(device.public_key_bytes());
+        let nc = http_commit(&state, PEER_LAN, id, &device, &pairing).await;
+        // Relance (nouvel Nd) depuis une autre source : refusée.
+        let retry = DevicePairing::start(device.public_key_bytes());
+        let (st, body) = call(
+            app_for(state.clone(), "192.168.1.99:7000"),
+            post_json(PAIR_ENDPOINT, signed_commit_body(id, &device, &retry)),
+        )
+        .await;
+        assert_eq!(st, StatusCode::FORBIDDEN);
+        assert!(body.contains(STATUS_SOURCE_MISMATCH), "{body}");
+        // Révélation, puis relance depuis la même source : refusée (PendingConflict).
+        let revealed = pairing.receive_cog_nonce(state.cog_identity.public_key_bytes(), nc).unwrap();
+        let rsig = revealed.reveal_signature_hex(&device, id).unwrap();
+        let (st, _) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_REVEAL_ENDPOINT, reveal_body(id, &revealed.device_nonce_hex(), &rsig)),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK);
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(PAIR_ENDPOINT, signed_commit_body(id, &device, &retry)),
+        )
+        .await;
+        assert_eq!(st, StatusCode::CONFLICT);
+        assert!(body.contains("pending_conflict"), "{body}");
+        assert_eq!(
+            state.pairing.pending_devices()[0].confirmation_code.as_deref(),
+            Some(revealed.code())
+        );
+    }
+
+    #[tokio::test]
     async fn pair_without_valid_key_or_commitment_refused() {
         let (state, _tx, _) = test_state();
         // Sans clé : rejet par le désérialiseur.
@@ -1944,7 +2156,7 @@ mod tests {
         for key in [hex::encode(weak), "zz".into(), "00".repeat(31)] {
             let (st, _) = call(
                 app_for(state.clone(), PEER_LAN),
-                post_json(PAIR_ENDPOINT, commit_body("d-000000001", &key, &"00".repeat(32))),
+                post_json(PAIR_ENDPOINT, commit_body("d-000000001", &key, &"00".repeat(32), &"00".repeat(64))),
             )
             .await;
             assert_eq!(st, StatusCode::BAD_REQUEST);
@@ -1954,7 +2166,7 @@ mod tests {
         for c in ["", "zz", &"00".repeat(31)] {
             let (st, _) = call(
                 app_for(state.clone(), PEER_LAN),
-                post_json(PAIR_ENDPOINT, commit_body("d-000000001", &key_hex, c)),
+                post_json(PAIR_ENDPOINT, commit_body("d-000000001", &key_hex, c, &"00".repeat(64))),
             )
             .await;
             assert_eq!(st, StatusCode::BAD_REQUEST);
@@ -2125,16 +2337,8 @@ mod tests {
         let h1 = start_remote_server(config.clone(), RemoteBridge::new()).await.unwrap();
         let device = E2eIdentity::generate();
         let key = device.public_key_bytes();
-        let pairing = DevicePairing::start(key);
-        let c = parse_commitment_hex(&pairing.commitment_hex()).unwrap();
-        let nc = h1
-            .pairing
-            .request_pairing("device-persist-01", "Pixel", &hex::encode(key), c, "10.0.0.5".parse().unwrap())
-            .unwrap();
         let cog_key = parse_identity_key_hex(h1.e2e_identity_public_key_hex()).unwrap();
-        let revealed = pairing.receive_cog_nonce(cog_key, nc).unwrap();
-        let nd = PairingNonce::from_hex(&revealed.device_nonce_hex()).unwrap();
-        let code = h1.pairing.reveal_pairing("device-persist-01", &nd, &cog_key).unwrap();
+        let code = direct_pair(&h1.pairing, cog_key, &device, "device-persist-01", "10.0.0.5");
         h1.pairing.approve_device("device-persist-01", &code).unwrap();
         drop(h1);
 

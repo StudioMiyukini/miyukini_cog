@@ -238,7 +238,7 @@ impl E2eIdentity {
         self.signing.verifying_key().to_bytes()
     }
 
-    fn sign(&self, message: &[u8]) -> [u8; 64] {
+    pub(crate) fn sign(&self, message: &[u8]) -> [u8; 64] {
         self.signing.sign(message).to_bytes()
     }
 }

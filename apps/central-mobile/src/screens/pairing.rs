@@ -9,17 +9,28 @@
 //! Flow :
 //!   Idle → [user clicks "WiFi"] → Searching (UDP broadcast 5s)
 //!     → Found(host) → [user confirms] → Pairing :
-//!       1. POST /api/bridge/pair (clé E2E + engagement sur Nd) → clé + aléa Nc du COG
-//!       2. POST /api/bridge/pair/reveal (Nd, seulement après réception de Nc)
-//!       3. affichage du code SAS à 8 chiffres et de l'empreinte du COG
-//!       4. poll /api/bridge/pair/status jusqu'à `approved` (ou refus / expiration)
-//!         → persiste SavedConnection (clé du COG épinglée) → Connexion
+//!       1. POST /api/bridge/pair (clé E2E + engagement sur Nd, signé par Kd)
+//!          → clé + aléa Nc du COG
+//!       2. POST /api/bridge/pair/reveal (Nd signé, seulement après réception de Nc)
+//!       3. affichage du code SAS à 8 chiffres et de l'empreinte du COG, avec la
+//!          question « Le code affiché sur Central est identique ? » (Oui / Non)
+//!       4. poll /api/bridge/pair/status ; « Non » = abandon immédiat
+//!       5. épinglage seulement si « Oui » **et** `approved` ; handshake E2E v2
+//!          avec la clé épinglée ; persiste SavedConnection seulement si le
+//!          handshake réussit → Connexion
 //!
 //! Appairage v2 (R-026) : engagement puis révélation (voir
 //! `miyukini_cog_bridge::pairing`). Le code est calculé localement à partir
 //! des deux clés et des deux aléas ; il n'est jamais lu dans une réponse du
-//! réseau. L'utilisateur vérifie qu'il est identique sur Central Desktop avant
-//! que l'administrateur n'approuve.
+//! réseau.
+//!
+//! Le statut `approved` n'est **pas** authentifié : un intermédiaire peut le
+//! simuler. Il ne suffit donc jamais à épingler la clé du COG : la
+//! confirmation locale de l'utilisateur (comparaison des codes, seule garantie
+//! contre une substitution de clé) est exigée en plus, puis un handshake E2E
+//! réussi avec la clé épinglée. Une signature du COG sur le statut
+//! n'apporterait rien : sous substitution, elle serait faite par la clé de
+//! l'intermédiaire, celle que le téléphone croit être celle du COG.
 
 use central_remote_protocol::pairing::{
     PairCommitRequest, PairCommitResponse, PairRevealRequest, PairStatusRequest,
@@ -28,9 +39,10 @@ use central_remote_protocol::pairing::{
 };
 use dioxus::prelude::*;
 use miyukini_cog_bridge::{
-    discovery, format_sas_code, identity_fingerprint, parse_identity_key_hex, DevicePairing,
-    E2eIdentity, PairingNonce,
+    discovery, format_sas_code, identity_fingerprint, parse_identity_key_hex, CogBridge,
+    ConnectionMode, DevicePairing, E2eIdentity, PairingNonce,
 };
+use std::future::Future;
 use serde::Deserialize;
 use std::net::SocketAddr;
 use std::time::Duration;
@@ -40,6 +52,10 @@ const MAX_PAIR_REPLY_LEN: usize = 4096;
 
 /// Intervalle d'interrogation du suivi d'appairage.
 const STATUS_POLL_INTERVAL: Duration = Duration::from_secs(3);
+
+/// Intervalle de lecture de la réponse de l'utilisateur (Oui / Non) entre
+/// deux interrogations du suivi.
+const CONFIRMATION_TICK: Duration = Duration::from_millis(500);
 
 /// Nombre maximal d'interrogations (≈ 10 min 30 : au-delà, la demande a expiré
 /// côté COG).
@@ -103,6 +119,12 @@ fn refusal_message(http: u16, body: &[u8]) -> String {
             "Trop de demandes d'appairage en attente. Réessayez plus tard.".into()
         }
         "commitment_mismatch" => "Vérification de l'appairage échouée : recommencez.".into(),
+        "missing_pairing_signature" | "invalid_pairing_signature" => {
+            "Signature d'appairage refusée : mettez à jour Central Mobile.".into()
+        }
+        "source_mismatch" => {
+            "Le réseau a changé pendant l'appairage : recommencez depuis le même WiFi.".into()
+        }
         _ => format!("Appairage refusé par le COG Host (HTTP {http})"),
     }
 }
@@ -135,6 +157,68 @@ struct DisplayedCode {
 
 use crate::platform;
 use crate::state::{AppScreen, AppState, SavedConnection};
+
+/// Réponse de l'utilisateur, sur le téléphone, à la question « Le code
+/// affiché sur Central est identique ? ».
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CodeConfirmation {
+    /// Pas encore de réponse.
+    Pending,
+    /// « Oui » : codes identiques.
+    Confirmed,
+    /// « Non » : codes différents (substitution de clé possible).
+    Denied,
+}
+
+/// Action suivante du flow d'appairage.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum PairingDecision {
+    /// Continuer d'attendre (réponse locale ou approbation desktop).
+    Wait,
+    /// Les deux conditions sont réunies : vérifier par handshake E2E puis épingler.
+    VerifyAndPin,
+    /// Abandon (clés reçues et aléas oubliés, rien n'est épinglé).
+    Abort(String),
+}
+
+/// Décide de la suite à partir de la réponse locale et du dernier statut lu.
+/// L'épinglage exige **à la fois** la confirmation sur le téléphone et le
+/// statut `approved` ; `approved` seul ne suffit jamais (statut non
+/// authentifié, voir la doc du module).
+fn decide(confirmation: CodeConfirmation, status: Option<PairingStatus>) -> PairingDecision {
+    if confirmation == CodeConfirmation::Denied {
+        return PairingDecision::Abort(
+            "Codes différents : appairage annulé, aucune clé enregistrée.\nRefusez la demande sur Central Desktop (ou révoquez l'appareil s'il a été approuvé)."
+                .into(),
+        );
+    }
+    match status {
+        Some(PairingStatus::Rejected) => {
+            PairingDecision::Abort("Appairage refusé sur Central Desktop.".into())
+        }
+        Some(PairingStatus::Expired | PairingStatus::Unknown) => {
+            PairingDecision::Abort("Demande d'appairage expirée. Recommencez.".into())
+        }
+        Some(PairingStatus::Approved) if confirmation == CodeConfirmation::Confirmed => {
+            PairingDecision::VerifyAndPin
+        }
+        _ => PairingDecision::Wait,
+    }
+}
+
+/// Épingle la connexion candidate seulement si le handshake E2E v2 avec la
+/// clé du COG candidate réussit ; sinon rien n'est retourné (donc rien
+/// n'est enregistré).
+async fn verify_then_pin<F, Fut>(candidate: SavedConnection, handshake: F) -> Result<SavedConnection, String>
+where
+    F: FnOnce() -> Fut,
+    Fut: Future<Output = Result<(), String>>,
+{
+    handshake().await.map_err(|e| {
+        format!("Vérification du COG Host échouée ({e}) : appairage non enregistré. Recommencez.")
+    })?;
+    Ok(candidate)
+}
 
 /// Étape du flow d'appairage.
 #[derive(Debug, Clone, PartialEq)]
@@ -348,18 +432,19 @@ fn FoundView(
     }
 }
 
-/// Déroule l'appairage v2 (engagement, révélation, attente d'approbation).
-/// Retourne la connexion à persister une fois l'appareil approuvé.
+/// Déroule l'appairage v2 (engagement, révélation, double confirmation,
+/// vérification par handshake E2E). Retourne la connexion à persister.
 async fn run_pairing(
     host: &str,
     port: u16,
     mut displayed: Signal<Option<DisplayedCode>>,
+    confirmation: Signal<CodeConfirmation>,
 ) -> Result<SavedConnection, String> {
-    // Identité E2E de l'appareil (générée une fois, stockée 0600).
+    // Identité E2E de l'appareil (générée une fois, stockée 0600) : signe
+    // l'engagement et la révélation, puis sert au handshake de vérification.
     let identity: E2eIdentity = platform::load_or_create_e2e_identity()
         .map_err(|e| format!("Identité E2E indisponible : {e}"))?;
     let device_key = identity.public_key_bytes();
-    drop(identity);
     let device_key_hex = hex::encode(device_key);
 
     let device_id = platform::get_device_id();
@@ -368,8 +453,11 @@ async fn run_pairing(
     let base = format!("http://{host}:{port}");
     let client = reqwest::Client::new();
 
-    // 1. Engagement : Nd reste secret.
+    // 1. Engagement signé : Nd reste secret.
     let pairing = DevicePairing::start(device_key);
+    let commit_signature = pairing
+        .commit_signature_hex(&identity, &device_id)
+        .map_err(|e| format!("Signature d'appairage impossible : {e}"))?;
     let req = PairCommitRequest {
         pairing_version: PAIRING_PROTOCOL_VERSION,
         device_id: device_id.clone(),
@@ -377,6 +465,7 @@ async fn run_pairing(
         mode: "whitelist".into(),
         e2e_identity_key: device_key_hex.clone(),
         commitment: pairing.commitment_hex(),
+        commit_signature,
     };
     let resp = client
         .post(format!("{base}{PAIR_ENDPOINT}"))
@@ -391,7 +480,7 @@ async fn run_pairing(
     }
     let challenge = parse_commit_reply(&body, &device_key)?;
 
-    // 2. Aléa du COG reçu : calcul du code, puis révélation de Nd.
+    // 2. Aléa du COG reçu : calcul du code, puis révélation signée de Nd.
     let revealed = pairing
         .receive_cog_nonce(challenge.cog_key, challenge.cog_nonce)
         .map_err(|_| "Clé du COG Host invalide".to_string())?;
@@ -399,6 +488,9 @@ async fn run_pairing(
         pairing_version: PAIRING_PROTOCOL_VERSION,
         device_id: device_id.clone(),
         device_nonce: revealed.device_nonce_hex().to_string(),
+        reveal_signature: revealed
+            .reveal_signature_hex(&identity, &device_id)
+            .map_err(|e| format!("Signature d'appairage impossible : {e}"))?,
     };
     let resp = client
         .post(format!("{base}{PAIR_REVEAL_ENDPOINT}"))
@@ -412,54 +504,93 @@ async fn run_pairing(
         return Err(refusal_message(http, &body));
     }
 
-    // 3. Affichage du code et de l'empreinte du COG.
+    // 3. Affichage du code et de l'empreinte du COG ; question Oui / Non.
     displayed.set(Some(DisplayedCode {
         code: format_sas_code(revealed.code()),
         cog_fingerprint: identity_fingerprint(&revealed.cog_identity()),
     }));
 
-    // 4. Attente de l'approbation de CETTE clé sur le desktop.
+    // 4. Attente : confirmation locale ET approbation de CETTE clé.
     let status_req = PairStatusRequest {
         device_id: device_id.clone(),
         e2e_identity_key: device_key_hex,
     };
+    await_confirmation_and_approval(&client, &base, &status_req, confirmation).await?;
+
+    // 5. Handshake E2E v2 avec la clé du COG candidate, avant tout enregistrement.
+    let cog_key = revealed.cog_identity();
+    let candidate = SavedConnection {
+        mode: "whitelist".to_string(),
+        host: host.to_string(),
+        port,
+        credential: device_id.clone(),
+        cog_identity_key: Some(hex::encode(cog_key)),
+    };
+    let bridge = CogBridge::new(ConnectionMode::Whitelist {
+        host: host.to_string(),
+        port,
+        device_id,
+    })
+    .with_e2e_identities(identity, cog_key);
+    verify_then_pin(candidate, || async move {
+        bridge.negotiate_e2e().await.map_err(|e| e.to_string())
+    })
+    .await
+}
+
+/// Attend la réponse locale (Oui / Non) et le statut `approved`. `Ok` seulement
+/// quand les deux sont réunis ; « Non », refus ou expiration = `Err`.
+async fn await_confirmation_and_approval(
+    client: &reqwest::Client,
+    base: &str,
+    status_req: &PairStatusRequest,
+    confirmation: Signal<CodeConfirmation>,
+) -> Result<(), String> {
+    let ticks_per_poll = (STATUS_POLL_INTERVAL.as_millis() / CONFIRMATION_TICK.as_millis()).max(1);
+    let mut last_status: Option<PairingStatus> = None;
     for _ in 0..STATUS_POLL_MAX {
-        tokio::time::sleep(STATUS_POLL_INTERVAL).await;
-        let Ok(resp) = client
-            .post(format!("{base}{PAIR_STATUS_ENDPOINT}"))
-            .json(&status_req)
-            .timeout(Duration::from_secs(5))
-            .send()
-            .await
-        else {
-            continue;
-        };
-        let Ok((200, body)) = read_bounded(resp).await else {
-            continue;
-        };
-        let Ok(status) = serde_json::from_slice::<PairStatusResponse>(&body) else {
-            continue;
-        };
-        match status.status {
-            PairingStatus::Approved => {
-                return Ok(SavedConnection {
-                    mode: "whitelist".to_string(),
-                    host: host.to_string(),
-                    port,
-                    credential: device_id,
-                    cog_identity_key: Some(hex::encode(revealed.cog_identity())),
-                });
-            }
-            PairingStatus::Committed | PairingStatus::Revealed => {}
-            PairingStatus::Rejected => {
-                return Err("Appairage refusé sur Central Desktop.".into());
-            }
-            PairingStatus::Expired | PairingStatus::Unknown => {
-                return Err("Demande d'appairage expirée. Recommencez.".into());
+        // Réponse « Non » prise en compte sans attendre le prochain suivi.
+        for _ in 0..ticks_per_poll {
+            tokio::time::sleep(CONFIRMATION_TICK).await;
+            if let PairingDecision::Abort(msg) = decide(*confirmation.read(), None) {
+                return Err(msg);
             }
         }
+        // `approved` est définitif : inutile de réinterroger, seule la
+        // réponse locale manque encore.
+        if last_status != Some(PairingStatus::Approved) {
+            if let Some(status) = poll_status(client, base, status_req).await {
+                last_status = Some(status);
+            }
+        }
+        match decide(*confirmation.read(), last_status) {
+            PairingDecision::Wait => {}
+            PairingDecision::Abort(msg) => return Err(msg),
+            PairingDecision::VerifyAndPin => return Ok(()),
+        }
     }
-    Err("Délai dépassé. Approuvez le device sur Central Desktop.".to_string())
+    Err("Délai dépassé. Comparez les codes et approuvez le device sur Central Desktop.".to_string())
+}
+
+/// Interroge le suivi d'appairage ; `None` si la réponse est absente ou illisible.
+async fn poll_status(
+    client: &reqwest::Client,
+    base: &str,
+    req: &PairStatusRequest,
+) -> Option<PairingStatus> {
+    let resp = client
+        .post(format!("{base}{PAIR_STATUS_ENDPOINT}"))
+        .json(req)
+        .timeout(Duration::from_secs(5))
+        .send()
+        .await
+        .ok()?;
+    let Ok((200, body)) = read_bounded(resp).await else {
+        return None;
+    };
+    serde_json::from_slice::<PairStatusResponse>(&body)
+        .ok()
+        .map(|r| r.status)
 }
 
 /// Vue en attente d'approbation sur le COG Host.
@@ -475,11 +606,13 @@ fn PairingView(
 
     // Code SAS et empreinte du COG affichés pendant l'attente d'approbation.
     let displayed = use_signal(|| None::<DisplayedCode>);
+    // Réponse de l'utilisateur à la comparaison des codes.
+    let mut confirmation = use_signal(|| CodeConfirmation::Pending);
 
     use_effect(move || {
         let host_clone = host.clone();
         spawn(async move {
-            match run_pairing(&host_clone, port, displayed).await {
+            match run_pairing(&host_clone, port, displayed, confirmation).await {
                 Ok(saved) => {
                     tracing::info!("Device approuvé sur le COG Host");
                     if let Err(e) = platform::save_connection(&saved) {
@@ -514,7 +647,7 @@ fn PairingView(
             if let Some(d) = displayed.read().clone() {
                 p {
                     style: "color: #e0e0e0; font-size: 14px; text-align: center; margin: 0;",
-                    "Code de confirmation — n'approuvez que s'il est identique sur Central Desktop :"
+                    "Code de confirmation :"
                 }
                 p {
                     style: "color: #22c55e; font-size: 28px; font-weight: bold; font-family: monospace; letter-spacing: 4px; margin: 0;",
@@ -523,6 +656,39 @@ fn PairingView(
                 p {
                     style: "color: #888; font-size: 11px; text-align: center; font-family: monospace; margin: 0;",
                     "Empreinte du COG : {d.cog_fingerprint}"
+                }
+                match *confirmation.read() {
+                    CodeConfirmation::Pending => rsx! {
+                        p {
+                            style: "color: #e0e0e0; font-size: 15px; font-weight: bold; text-align: center; margin: 8px 0 0 0;",
+                            "Le code affiché sur Central est identique ?"
+                        }
+                        div {
+                            style: "display: flex; gap: 12px; width: 100%;",
+                            button {
+                                style: "flex: 1; padding: 12px; background: #22c55e; border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: bold; cursor: pointer;",
+                                onclick: move |_| confirmation.set(CodeConfirmation::Confirmed),
+                                "Oui"
+                            }
+                            button {
+                                style: "flex: 1; padding: 12px; background: #ef4444; border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: bold; cursor: pointer;",
+                                onclick: move |_| confirmation.set(CodeConfirmation::Denied),
+                                "Non"
+                            }
+                        }
+                    },
+                    CodeConfirmation::Confirmed => rsx! {
+                        p {
+                            style: "color: #22c55e; font-size: 13px; text-align: center; margin: 0;",
+                            "Code confirmé. Approuvez maintenant ce device sur Central Desktop."
+                        }
+                    },
+                    CodeConfirmation::Denied => rsx! {
+                        p {
+                            style: "color: #ef4444; font-size: 13px; text-align: center; margin: 0;",
+                            "Appairage annulé."
+                        }
+                    },
                 }
             }
 
@@ -635,8 +801,84 @@ mod tests {
         assert!(parse_commit_reply(&vec![b' '; MAX_PAIR_REPLY_LEN + 1], &device).is_err());
     }
 
+    fn candidate() -> SavedConnection {
+        SavedConnection {
+            mode: "whitelist".into(),
+            host: "192.168.1.5".into(),
+            port: 8091,
+            credential: "dev-1".into(),
+            cog_identity_key: Some("aa".repeat(32)),
+        }
+    }
+
+    #[test]
+    fn approved_without_local_confirmation_never_pins() {
+        // Un intermédiaire peut simuler `approved` : sans « Oui », on attend.
+        assert_eq!(
+            decide(CodeConfirmation::Pending, Some(PairingStatus::Approved)),
+            PairingDecision::Wait
+        );
+        // « Oui » sans approbation desktop : on attend aussi.
+        for s in [None, Some(PairingStatus::Committed), Some(PairingStatus::Revealed)] {
+            assert_eq!(decide(CodeConfirmation::Confirmed, s), PairingDecision::Wait);
+            assert_eq!(decide(CodeConfirmation::Pending, s), PairingDecision::Wait);
+        }
+        // Les deux réunis : vérification puis épinglage.
+        assert_eq!(
+            decide(CodeConfirmation::Confirmed, Some(PairingStatus::Approved)),
+            PairingDecision::VerifyAndPin
+        );
+    }
+
+    #[test]
+    fn denied_code_aborts_whatever_the_status() {
+        for s in [
+            None,
+            Some(PairingStatus::Revealed),
+            Some(PairingStatus::Approved),
+            Some(PairingStatus::Rejected),
+        ] {
+            assert!(matches!(
+                decide(CodeConfirmation::Denied, s),
+                PairingDecision::Abort(m) if m.contains("Codes différents")
+            ));
+        }
+        // Refus / expiration côté COG : abandon aussi.
+        assert!(matches!(
+            decide(CodeConfirmation::Confirmed, Some(PairingStatus::Rejected)),
+            PairingDecision::Abort(_)
+        ));
+        assert!(matches!(
+            decide(CodeConfirmation::Pending, Some(PairingStatus::Expired)),
+            PairingDecision::Abort(_)
+        ));
+    }
+
+    #[tokio::test]
+    async fn pin_only_after_successful_e2e_handshake() {
+        let failed = verify_then_pin(candidate(), || async { Err("signature invalide".to_string()) }).await;
+        assert!(failed.unwrap_err().contains("non enregistré"));
+        let ok = verify_then_pin(candidate(), || async { Ok(()) }).await.unwrap();
+        assert_eq!(ok.cog_identity_key, candidate().cog_identity_key);
+    }
+
+    #[test]
+    fn signed_requests_carry_valid_signatures() {
+        let identity = E2eIdentity::generate();
+        let key = identity.public_key_bytes();
+        let pairing = DevicePairing::start(key);
+        let c = parse_commitment_hex(&pairing.commitment_hex()).unwrap();
+        let sig = miyukini_cog_bridge::parse_pairing_signature_hex(
+            &pairing.commit_signature_hex(&identity, "dev-1").unwrap(),
+        )
+        .unwrap();
+        assert!(miyukini_cog_bridge::verify_pairing_commit_signature(&key, "dev-1", &c, &sig).is_ok());
+    }
+
     #[test]
     fn refusal_messages_explain_cause() {
+        assert!(refusal_message(400, br#"{"status":"missing_pairing_signature"}"#).contains("mettez à jour"));
+        assert!(refusal_message(403, br#"{"status":"source_mismatch"}"#).contains("réseau"));
         assert!(refusal_message(409, br#"{"status":"already_paired"}"#).contains("Révoquez"));
         assert!(refusal_message(409, br#"{"status":"pending_conflict"}"#).contains("en attente"));
         assert!(refusal_message(400, br#"{"status":"unsupported_pairing_version"}"#).contains("incompatible"));
