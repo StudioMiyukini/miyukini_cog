@@ -1,5 +1,7 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
+> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
 <!-- @layer 5-6 -->

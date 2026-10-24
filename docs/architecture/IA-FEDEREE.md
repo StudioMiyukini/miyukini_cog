@@ -1,5 +1,7 @@
 # IA fédérée — le web pour IA entre COG
 
+> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+
 <!-- @id arch.ia.federee -->
 <!-- @role architecture-specification -->
 <!-- @layer 8 -->

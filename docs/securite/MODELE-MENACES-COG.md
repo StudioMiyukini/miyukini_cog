@@ -1,5 +1,7 @@
 # Modèle de menaces — Miyukini COG
 
+> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+
 <!-- @id securite.menaces.cog -->
 <!-- @role threat-model -->
 <!-- @layer 3-8+kernel -->

@@ -1,5 +1,7 @@
 # Services hybrides et durcissement du Portail interne
 
+> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+
 <!-- @id arch.cog.services-hybrides -->
 <!-- @role architecture-specification -->
 <!-- @layer 3-8 -->

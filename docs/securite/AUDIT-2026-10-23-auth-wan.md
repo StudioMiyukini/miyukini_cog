@@ -1,5 +1,7 @@
 # Audit sécurité — Authentification, WAN, fédération, secrets (2026-10-23)
 
+> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+
 <!-- @id securite.audit.2026-10-23 -->
 <!-- @role security-audit -->
 <!-- @layer 3-8 -->

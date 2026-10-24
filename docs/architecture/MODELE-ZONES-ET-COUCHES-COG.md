@@ -1,5 +1,7 @@
 # Modèle de zones et de couches — Miyukini COG
 
+> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+
 <!-- @id arch.cog.zones-couches -->
 <!-- @role architecture-reference -->
 <!-- @layer 3-8+kernel -->
