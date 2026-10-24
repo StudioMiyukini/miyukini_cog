@@ -63,14 +63,16 @@ impl std::error::Error for NodeUrlError {}
 
 /// Vérifie si une URL de destination est autorisée selon la politique.
 ///
-/// - `Airgap` : tout est refusé.
+/// - `Airgap` : seule la machine locale, par **adresse IP** loopback
+///   (`127.0.0.0/8`, `::1`) ; aucun nom d'hôte, aucune autre adresse.
 /// - `InternalOnly` : uniquement les **adresses IP** loopback / privées
 ///   (RFC 1918, ULA `fc00::/7`) et `localhost`. Un nom d'hôte quelconque est
 ///   refusé (sa résolution DNS n'est pas maîtrisée).
 /// - `Unrestricted` : toute URL parsable.
 pub fn is_allowed_destination(url: &str, policy: IsolationPolicy) -> bool {
     match policy {
-        IsolationPolicy::Airgap => false,
+        IsolationPolicy::Airgap => Url::parse(url)
+            .is_ok_and(|u| host_ip(&u).is_some_and(|ip| ip.to_canonical().is_loopback())),
         IsolationPolicy::Unrestricted => Url::parse(url).is_ok(),
         IsolationPolicy::InternalOnly => Url::parse(url).is_ok_and(|u| is_internal_url(&u)),
     }
@@ -162,10 +164,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_airgap_blocks_all() {
+    fn test_airgap_ip_loopback_seulement() {
+        // Décision 2026-10-24 : airgap autorise la machine locale, par IP uniquement.
+        assert!(is_allowed_destination("http://127.0.0.1:11434", IsolationPolicy::Airgap));
+        assert!(is_allowed_destination("http://[::1]:11434", IsolationPolicy::Airgap));
+        assert!(!is_allowed_destination("http://localhost:11434", IsolationPolicy::Airgap));
         assert!(!is_allowed_destination("http://192.168.1.1:7800", IsolationPolicy::Airgap));
         assert!(!is_allowed_destination("https://example.com", IsolationPolicy::Airgap));
-        assert!(!is_allowed_destination("http://localhost:11434", IsolationPolicy::Airgap));
+        assert!(!is_allowed_destination("http://127.0.0.1.evil.com", IsolationPolicy::Airgap));
     }
 
     #[test]
@@ -277,9 +283,15 @@ mod tests {
     }
 
     #[test]
-    fn node_url_airgap_refuses_everything() {
+    fn node_url_airgap_loopback_seulement() {
         assert_eq!(
             validate_node_url("http://127.0.0.1:11434", IsolationPolicy::Airgap, &[]),
+            Ok(())
+        );
+        // Même listé, un hôte non loopback reste refusé en airgap.
+        let allow = vec!["192.168.1.10".to_string()];
+        assert_eq!(
+            validate_node_url("http://192.168.1.10:11434", IsolationPolicy::Airgap, &allow),
             Err(NodeUrlError::BlockedByPolicy)
         );
     }

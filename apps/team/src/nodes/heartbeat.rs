@@ -173,12 +173,12 @@ mod tests {
     }
 
     /// Lance un poll et indique si le nœud local a reçu une connexion.
-    async fn poll_hits_listener(policy: IsolationPolicy) -> bool {
+    async fn poll_hits_listener(policy: IsolationPolicy, hote: &str) -> bool {
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         let registry = NodeRegistry::new();
         // Insertion directe : simule une URL devenue non conforme après enregistrement
-        registry.register(node(&format!("http://{addr}")));
+        registry.register(node(&format!("http://{hote}:{}", addr.port())));
         let cfg = TeamConfig {
             isolation_policy: policy,
             ..TeamConfig::default()
@@ -195,9 +195,11 @@ mod tests {
 
     #[tokio::test]
     async fn revalidation_avant_chaque_requete() {
-        // Politique airgap : URL refusée → aucune requête sortante
-        assert!(!poll_hits_listener(IsolationPolicy::Airgap).await);
+        // Airgap : nom d'hôte refusé (IP loopback seulement) → aucune requête sortante
+        assert!(!poll_hits_listener(IsolationPolicy::Airgap, "localhost").await);
+        // Airgap : IP loopback autorisée (décision 2026-10-24)
+        assert!(poll_hits_listener(IsolationPolicy::Airgap, "127.0.0.1").await);
         // Contrôle positif : loopback autorisé en internal_only
-        assert!(poll_hits_listener(IsolationPolicy::InternalOnly).await);
+        assert!(poll_hits_listener(IsolationPolicy::InternalOnly, "127.0.0.1").await);
     }
 }
