@@ -114,6 +114,8 @@
 
 - **Fait** : incrément 1, `miyusceau` (format Sceau v1, 15 tests)
 - **Incrément 2** : signature à seuil (2 sur 2), fraîcheur de tête de registre, fuzzing du décodeur (EX-01, EX-03, EX-10)
+  - **Fait** (amendement A-002) : format Sceau v1.1 — identifiant d'algorithme signé, bloc multi-signature, `verifier_seuil`, `cosigner`, vecteurs simple et 2 sur 2 (30 tests)
+  - **Reste** : politique 2 sur 2 branchée sur les mises à jour des Cores (Central), fraîcheur de tête, cibles de fuzzing
 - **Incrément 3** : racine SLIP-39 2 sur 3 sur USB, clés SLIP-10 par usage, cérémonie de rotation (EX-24, EX-25)
 - **Incrément 4** : passeport et visa émis et vérifiés par `miyauth`, révocation d'appareil (EX-14, EX-36)
 - **Sortie** : plus aucune authentification par secret partagé sur les points exposés

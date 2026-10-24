@@ -1,11 +1,11 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
-> **Gelé v1.0 — 2026-10-24.** Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-002** (v1.2 : Sceau v1.1). Toute modification passe par un amendement : [règles du gel](../architecture/GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id securite.lot2.identite-signee -->
 <!-- @role architecture-specification -->
 <!-- @layer 5-6 -->
-<!-- @human Sceau v1, racine COG, passeports, visas, paquets identifiables, registre Merkle, fédération -->
+<!-- @human Sceau v1.1, racine COG, passeports, visas, paquets identifiables, registre Merkle, fédération -->
 <!-- @do specify_signed_identity -->
 
 > Statut : **validé** le 2026-10-24 (décisions en section 12). Fait suite à
@@ -28,8 +28,8 @@ Non-objectifs de ce lot : chiffrement des canaux (lot 3, Noise), cloisonnement O
    longueurs préfixées, une seule représentation valide par titre (spécification en section 4).
    Aucune dépendance de sérialisation ; tout écart au format est un refus.
 3. **Séparation de domaine** : chaque type de titre a un code `type` distinct, inclus dans les
-   octets signés avec l'étiquette `miyukini/sceau/v1`. Une signature de paquet ne peut jamais être
-   rejouée comme passeport.
+   octets signés avec l'étiquette `miyukini/sceau/v1.1`, la version et l'algorithme. Une signature
+   de paquet ne peut jamais être rejouée comme passeport, ni relue sous un autre algorithme.
 4. **Vérification stricte** : `ed25519_dalek::VerifyingKey::verify_strict`, horloge avec tolérance
    bornée, tout champ inconnu critique → refus.
 5. **Fail-closed partout** : absence de signature, de clé de confiance ou d'horloge = refus.
@@ -61,22 +61,62 @@ Racine Origin                      ── certifie les éditeurs du Market offic
 
 Nouvelle crate **`crates/miyusceau`** (strate toolkit, aucune dépendance réseau) :
 
-### 4.1 Format binaire « Sceau v1 » (big-endian)
+### 4.1 Format binaire « Sceau v1.1 » (big-endian) — amendement A-002
 
 ```
-magic      4 o   "MSCE"
-version    1 o   0x01
-type       1 o   0x01 passeport | 0x02 visa | 0x03 manifeste paquet | 0x04 entrée registre
-                 0x05 tête registre | 0x06 certificat (émission, éditeur) | 0x07 reconnaissance
-kid       32 o   SHA-256(clé publique Ed25519 du signataire)
-len        4 o   longueur de la charge utile (≤ 65 536)
-payload  len o   champs TLV canoniques (4.2)
-signature 64 o   Ed25519
+magic       4 o   "MSCE"
+version     1 o   0x02 (Sceau v1.1 ; 0x01 = Sceau v1.0, abandonné, refusé)
+alg         1 o   algorithme de signature du sceau (table ci-dessous)
+type        1 o   0x01 passeport | 0x02 visa | 0x03 manifeste paquet | 0x04 entrée registre
+                  0x05 tête registre | 0x06 certificat (émission, éditeur) | 0x07 reconnaissance
+len         4 o   longueur de la charge utile (≤ 65 536)
+payload   len o   champs TLV canoniques (4.2)
+nombre      1 o   nombre de signatures, 1 ≤ n ≤ 8
+n × signature :
+  kid      32 o   SHA-256(clé publique du signataire)
+  alg       1 o   égal à l'`alg` de l'entête
+  sig_len   2 o   longueur exacte imposée par l'algorithme
+  sig  sig_len o  signature
 ```
 
-Octets signés :
-`"miyukini/sceau/v1" || 0x00 || version || type || kid || len || payload`.
-Aucun octet après la signature ; taille totale exacte ; sinon refus.
+| `alg` | Algorithme | `sig_len` | Statut |
+|---|---|---|---|
+| `0x01` | Ed25519, `verify_strict` | 64 | implémenté |
+| `0x02` | ML-DSA-65 (FIPS 204) | 3 309 | **réservé, refusé** à la vérification |
+| `0x03` | hybride Ed25519 ‖ ML-DSA-65 (les deux valides) | 3 373 | **réservé, refusé** à la vérification |
+| autre | — | — | refusé au décodage |
+
+Octets signés (identiques pour tous les signataires) :
+`"miyukini/sceau/v1.1" || 0x00 || version || alg || type || len || payload`.
+
+- Séparation de domaine : version et algorithme sont signés → une signature ne peut pas être
+  réinterprétée sous une autre version ni un autre algorithme
+- Le `kid` n'est pas dans les octets signés : Ed25519 (et ML-DSA) lient déjà la clé publique au
+  défi ; une signature déplacée sous un autre `kid` ne vérifie pas
+- Identité d'un titre = SHA-256 des octets signés (le bloc de signatures peut varier : ajout
+  d'un cosignataire)
+
+Décodage strict (tout écart = refus) :
+
+- Taille totale exacte, aucun octet après la dernière signature
+- Taille maximale : 92 812 o (charge maximale + 8 signatures de l'algorithme le plus long)
+- `alg` connu ; `nombre` entre 1 et 8 ; `alg` de chaque entrée = `alg` de l'entête ;
+  `sig_len` = longueur imposée
+- `kid` strictement croissants : ni désordre ni doublon (un signataire compte une seule fois)
+
+Vérification à seuil (politique = seuil `m ≥ 1` + jeu d'ancres) :
+
+1. Format strict, type attendu
+2. Algorithme implémenté (sinon refus, même si une autre entrée serait valable)
+3. Chaque entrée dont le `kid` est épinglé : `verify_strict` ; **une seule signature invalide
+   d'un signataire épinglé = refus du sceau entier** (pas d'entrée ignorée)
+4. Entrées non épinglées : bien formées, non comptées
+5. Valide si au moins `m` signataires épinglés distincts ont signé ; aucun épinglé → « signataire
+   inconnu » ; sinon « seuil non atteint »
+6. Niveau de confiance = **le plus faible** des signataires comptés (`Reconnu` < `Souverain`)
+7. Puis décodage canonique de la charge et fenêtre de validité
+
+Signature simple = seuil 1. EX-01 (mise à jour des Cores) = seuil 2 sur le jeu {Origin, éditeur}.
 
 ### 4.2 Charge utile TLV canonique
 
@@ -93,8 +133,11 @@ Suite de champs `tag (1 o) || longueur (4 o) || valeur`.
 
 API :
 
-- `sceller<T: Titre>(titre, &CleSignature) -> Sceau`
-- `verifier<T: Titre>(&Sceau, &AncresDeConfiance, maintenant) -> Result<Verifie<T>, RefusSceau>`
+- `sceller<T: Titre>(titre, &CleSignature) -> Sceau` (un signataire)
+- `sceller_multi<T: Titre>(titre, &[&CleSignature]) -> Sceau` (plusieurs signataires)
+- `cosigner<T: Titre>(&Sceau, &CleSignature) -> Sceau` (ajoute une signature sur les mêmes octets signés)
+- `verifier<T: Titre>(&Sceau, &AncresDeConfiance, maintenant) -> Result<Verifie<T>, RefusSceau>` (seuil 1)
+- `verifier_seuil<T: Titre>(&Sceau, &AncresDeConfiance, m, maintenant)` (seuil `m`)
 - `Verifie<T>` : seul moyen d'obtenir un titre exploitable (constructeur privé, déjà introduit
   dans `miyauth` au lot 1).
 
@@ -207,7 +250,7 @@ Le point d'extension `verify_package_signature` posé au lot 1 devient bloquant.
 
 | Composant | Changement |
 |---|---|
-| `crates/miyusceau` (nouvelle) | Format Sceau v1, ancres, `Verifie<T>`, Merkle log, preuves |
+| `crates/miyusceau` (nouvelle) | Format Sceau v1.1, ancres, `Verifie<T>`, Merkle log, preuves |
 | `crates/miyauth` | `verify`/`resolve`/`attest` s'appuient sur `miyusceau` (fin du stub fail-closed du lot 1) |
 | `crates/miyukini-admin` | Création de la racine COG, émission des clés d'émission/journal |
 | `crates/borderguard` | Niveaux de confiance dérivés des ancres |
@@ -220,7 +263,8 @@ Le point d'extension `verify_package_signature` posé au lot 1 devient bloquant.
 
 ## 12. Décisions (validées le 2026-10-24)
 
-1. **Format** : maison « Sceau v1 » (section 4), sans dépendance de sérialisation.
+1. **Format** : maison « Sceau v1 » (section 4), sans dépendance de sérialisation ; **v1.1**
+   (algorithme + multi-signature) depuis l'amendement A-002.
 2. **Racine COG** : hors ligne sur support amovible ; sauvegarde **SLIP-39 2 sur 3** ; clés
    d'émission/journal **dérivées en SLIP-10** (durcie), 90 j, seules présentes sur le serveur.
 3. **Durées** : passeport 30 j, visa 15 min, clés d'émission 90 j.
