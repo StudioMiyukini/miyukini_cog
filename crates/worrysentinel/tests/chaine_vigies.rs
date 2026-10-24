@@ -87,6 +87,7 @@ fn flux(
         ip_dst: None,
         port_dst: Some(443),
         protocole: Some(Protocole::Tcp),
+        motif: None,
     }
 }
 

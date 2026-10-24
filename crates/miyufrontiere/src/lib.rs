@@ -32,4 +32,4 @@ pub mod douane_vigies;
 
 pub use cdr::{CdrPortail, MotifRefusCdr};
 pub use coupure::{CoupureFrontiere, Horloge, IpsPartage};
-pub use douane_vigies::{zone_vigie, AttributionVoies, SourceDouane};
+pub use douane_vigies::{motif_douane, zone_vigie, AttributionVoies, SourceDouane};

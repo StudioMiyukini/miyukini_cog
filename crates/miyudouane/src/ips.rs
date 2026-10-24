@@ -76,6 +76,11 @@ pub struct MetaFlux {
     pub taille: u32,
     /// Vrai pour le premier paquet d'une connexion (SYN, premier datagramme).
     pub nouvelle_connexion: bool,
+    /// Interface d'entrée observée dans l'espace de la frontière (NFQUEUE
+    /// `indev`), `None` si la source ne la fournit pas. Non utilisée par la
+    /// décision ; sert aux Vigies à n'attribuer une voie que depuis le côté
+    /// d'entrée (anti-usurpation, A-005).
+    pub interface_entree: Option<String>,
 }
 
 /// Source interchangeable de métadonnées (NFQUEUE, NFLOG, conntrack, rejeu).

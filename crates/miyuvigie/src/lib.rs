@@ -44,8 +44,9 @@ pub use dedup::{Admission, Dedoublonneur};
 pub use evenement::{ErreurSource, EvenementFlux, Protocole, SourceEvenements, Verdict};
 pub use nftables::{Chaine, LecteurNftables, Lieu, MotifJournal, PrefixeDouane, ResultatLigne, MARQUEUR_PREFIXE};
 pub use regles::{
-    Condition, Declenchement, ErreurRegles, JeuRegles, Regle, VerificateurJeuRegles, REGLE_ENTREE,
-    REGLE_INDETERMINE, REGLE_SORTIE,
+    Condition, Declenchement, ErreurRegles, JeuRegles, Regle, VerificateurJeuRegles,
+    REGLES_INTEGREES, REGLE_A005_LATERAL, REGLE_A005_NON_DECLARE, REGLE_ENTREE, REGLE_INDETERMINE,
+    REGLE_SORTIE,
 };
 pub use signal::{
     CapteurId, Categorie, Compteurs, EtatCapteur, EvenementId, LotVigie, Pouls, RegleId, Severite,

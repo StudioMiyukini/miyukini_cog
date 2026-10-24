@@ -32,6 +32,7 @@ fn meta(t: u64, src: &str, sport: u16, dst: &str, dport: u16, nouvelle: bool) ->
         port_destination: dport,
         taille: 100,
         nouvelle_connexion: nouvelle,
+        interface_entree: None,
     }
 }
 

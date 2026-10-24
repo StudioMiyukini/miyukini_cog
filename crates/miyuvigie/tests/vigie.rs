@@ -89,6 +89,7 @@ fn regle_chargee_produit_un_signal() {
         ip_dst: None,
         port_dst: None,
         protocole: None,
+        motif: None,
     };
     let lot = v.analyser_flux(vec![e], 1);
     assert_eq!(lot.signaux.len(), 1);

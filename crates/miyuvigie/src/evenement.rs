@@ -20,10 +20,16 @@
 //! | `verdict` | décision de la Douane : autorisé / bloqué / inconnu |
 //! | `octets` | volume du flux (0 si inconnu) |
 //! | `ip_src`, `ip_dst`, `port_dst`, `protocole` | facultatifs, pour l'explication |
+//! | `motif` | motif de rejet de la Douane (`MDOU|…|<MOTIF>|`, nature de l'IPS), lu par les règles intégrées A-005 |
+//!
+//! `voie` n'est renseignée que depuis le **côté d'entrée** (la sandbox qui a
+//! émis le trafic) : jamais depuis l'interface de sortie ni depuis une adresse
+//! que rien ne recoupe (anti-usurpation, A-005).
 
 use std::fmt;
 use std::net::IpAddr;
 
+use crate::nftables::MotifJournal;
 use crate::signal::{CapteurId, EvenementId, VoieId};
 use crate::zone::Zone;
 
@@ -96,6 +102,8 @@ pub struct EvenementFlux {
     pub port_dst: Option<u16>,
     /// Protocole (facultatif).
     pub protocole: Option<Protocole>,
+    /// Motif de rejet de la Douane, si connu (A-005).
+    pub motif: Option<MotifJournal>,
 }
 
 /// Échec de relève d'une source.

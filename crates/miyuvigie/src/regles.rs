@@ -15,6 +15,18 @@
 //! | `R-EX12-SORTIE` | `zone_src = cog` et `zone_dst ∉ {cog, portail}` (quel que soit le verdict) | critique | `sortie_zone_cog` |
 //! | `R-INV-Z7-ENTREE` | `zone_dst = cog` et `zone_src ∉ {cog, portail}` | critique | `mouvement_lateral` |
 //! | `R-INDETERMINE` | zone `inconnue` ou verdict `inconnu` | moyenne | `donnee_indeterminee` |
+//! | `R-A005-LATERAL` | motif Douane `LATERAL` (sandbox ⇄ sandbox dans une zone) | critique | `mouvement_lateral` |
+//! | `R-A005-NON-DECLARE` | motif `NON-DECLARE` de source intérieure (y compris intra-zone), ou `SORTIE-COG` vers la zone COG / le Portail (port non déclaré) | critique | `flux_hors_contrat` |
+//!
+//! Règles A-005 (motif de la Douane, `MDOU|<lieu>|<chaine>|<MOTIF>|`) : la voie
+//! du signal est celle de l'événement, attribuée par le seul côté d'entrée ;
+//! sans voie, WorrySentinel lève un incident critique hors voie. Source
+//! intérieure = zone COG, Portail, Franche, Franche locale : un `NON-DECLARE`
+//! de source extérieure est un rejet ordinaire de frontière (aucun signal).
+//! Zone COG → adresse du Portail sur un port non déclaré : la Douane le
+//! journalise `SORTIE-COG` (règle `ip saddr <cog>` avant le rejet final) ;
+//! la destination étant en zone COG, `R-EX12-SORTIE` ne le couvre pas et
+//! `R-A005-NON-DECLARE` le prend (les deux sont disjointes).
 //!
 //! # Format d'un jeu de règles
 //!
@@ -37,6 +49,7 @@ use std::collections::HashSet;
 use std::fmt;
 
 use crate::evenement::{EvenementFlux, Verdict};
+use crate::nftables::MotifJournal;
 use crate::signal::{Categorie, RegleId, Severite, VoieId};
 use crate::zone::Zone;
 
@@ -49,6 +62,27 @@ pub const REGLE_SORTIE: &str = "R-EX12-SORTIE";
 pub const REGLE_ENTREE: &str = "R-INV-Z7-ENTREE";
 /// Identifiant de la règle intégrée « donnée indéterminée ».
 pub const REGLE_INDETERMINE: &str = "R-INDETERMINE";
+/// Identifiant de la règle intégrée A-005 « mouvement latéral » (motif `LATERAL`).
+pub const REGLE_A005_LATERAL: &str = "R-A005-LATERAL";
+/// Identifiant de la règle intégrée A-005 « flux non déclaré » (motif `NON-DECLARE`).
+pub const REGLE_A005_NON_DECLARE: &str = "R-A005-NON-DECLARE";
+
+/// Identifiants réservés aux règles intégrées (refusés dans un jeu chargé).
+pub const REGLES_INTEGREES: [&str; 5] = [
+    REGLE_SORTIE,
+    REGLE_ENTREE,
+    REGLE_INDETERMINE,
+    REGLE_A005_LATERAL,
+    REGLE_A005_NON_DECLARE,
+];
+
+/// Vrai pour une zone intérieure du COG (source d'un flux « émis de l'intérieur »).
+fn zone_interieure(z: Zone) -> bool {
+    matches!(
+        z,
+        Zone::Cog | Zone::Portail | Zone::Franche | Zone::FrancheLocale
+    )
+}
 
 /// Condition élémentaire.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -188,7 +222,7 @@ impl JeuRegles {
             }
             let regle = analyser_regle(l).map_err(|motif| ErreurRegles { ligne: n, motif })?;
             let id = regle.id.as_str();
-            if [REGLE_SORTIE, REGLE_ENTREE, REGLE_INDETERMINE].contains(&id) {
+            if REGLES_INTEGREES.contains(&id) {
                 return Err(ErreurRegles {
                     ligne: n,
                     motif: "identifiant réservé aux règles intégrées",
@@ -235,6 +269,40 @@ impl JeuRegles {
                     "flux direct « {} » → zone COG hors Portail (verdict Douane : {}) — INV-Z7",
                     e.zone_src,
                     e.verdict.nom()
+                ),
+            ));
+        }
+        if e.motif == Some(MotifJournal::Lateral) {
+            d.push(integree(
+                REGLE_A005_LATERAL,
+                Severite::Critique,
+                Categorie::MouvementLateral,
+                format!(
+                    "mouvement latéral sandbox → sandbox « {} » → « {} » (motif Douane LATERAL) — A-005, INV-Z8",
+                    e.zone_src, e.zone_dst
+                ),
+            ));
+        }
+        let non_declare = match e.motif {
+            Some(MotifJournal::NonDeclare) => zone_interieure(e.zone_src),
+            Some(MotifJournal::SortieCog) => {
+                e.zone_src == Zone::Cog && matches!(e.zone_dst, Zone::Cog | Zone::Portail)
+            }
+            _ => false,
+        };
+        if non_declare {
+            let port = e
+                .port_dst
+                .map_or_else(|| "?".to_string(), |p| p.to_string());
+            d.push(integree(
+                REGLE_A005_NON_DECLARE,
+                Severite::Critique,
+                Categorie::FluxHorsContrat,
+                format!(
+                    "flux non déclaré « {} » → « {} » port {port} (motif Douane {}) — A-005",
+                    e.zone_src,
+                    e.zone_dst,
+                    e.motif.map_or("?", MotifJournal::nom)
                 ),
             ));
         }
@@ -367,6 +435,79 @@ mod tests {
             ip_dst: None,
             port_dst: Some(443),
             protocole: None,
+            motif: None,
+        }
+    }
+
+    fn avec_motif(mut e: EvenementFlux, m: MotifJournal) -> EvenementFlux {
+        e.motif = Some(m);
+        e
+    }
+
+    #[test]
+    fn regles_a005_lateral_et_non_declare_critiques() {
+        let j = JeuRegles::vide();
+        // Latéral dans la zone COG : critique, mouvement latéral.
+        let d = j.evaluer(&avec_motif(
+            evt(Zone::Cog, Zone::Cog, Verdict::Bloque, 0),
+            MotifJournal::Lateral,
+        ));
+        assert_eq!(d.len(), 1);
+        assert_eq!(d[0].regle.as_str(), REGLE_A005_LATERAL);
+        assert_eq!(
+            (d[0].severite, d[0].categorie),
+            (Severite::Critique, Categorie::MouvementLateral)
+        );
+        // Non déclaré intra-zone Franche : critique, hors contrat.
+        let d = j.evaluer(&avec_motif(
+            evt(Zone::Franche, Zone::Franche, Verdict::Bloque, 0),
+            MotifJournal::NonDeclare,
+        ));
+        assert_eq!(d.len(), 1);
+        assert_eq!(d[0].regle.as_str(), REGLE_A005_NON_DECLARE);
+        assert_eq!(
+            (d[0].severite, d[0].categorie),
+            (Severite::Critique, Categorie::FluxHorsContrat)
+        );
+        // Zone COG → adresse du Portail (zone COG) sur un port non déclaré : SORTIE-COG.
+        for dst in [Zone::Cog, Zone::Portail] {
+            let d = j.evaluer(&avec_motif(
+                evt(Zone::Cog, dst, Verdict::Bloque, 0),
+                MotifJournal::SortieCog,
+            ));
+            assert_eq!(d.len(), 1, "{dst}");
+            assert_eq!(d[0].regle.as_str(), REGLE_A005_NON_DECLARE);
+        }
+        // SORTIE-COG vers l'extérieur : EX-12 seule (règles disjointes).
+        let d = j.evaluer(&avec_motif(
+            evt(Zone::Cog, Zone::Exterieur, Verdict::Bloque, 0),
+            MotifJournal::SortieCog,
+        ));
+        assert_eq!(d.len(), 1);
+        assert_eq!(d[0].regle.as_str(), REGLE_SORTIE);
+        // NON-DECLARE de source extérieure : rejet ordinaire de frontière.
+        for src in [Zone::Exterieur, Zone::Federation] {
+            let e = avec_motif(
+                evt(src, Zone::Franche, Verdict::Bloque, 0),
+                MotifJournal::NonDeclare,
+            );
+            assert_eq!(j.evaluer(&e), Vec::new(), "{src}");
+        }
+        // Autres motifs : pas de règle A-005.
+        let e = avec_motif(
+            evt(Zone::Franche, Zone::Franche, Verdict::Bloque, 0),
+            MotifJournal::Taille,
+        );
+        assert_eq!(j.evaluer(&e), Vec::new());
+    }
+
+    #[test]
+    fn regles_a005_non_desactivables() {
+        for id in [REGLE_A005_LATERAL, REGLE_A005_NON_DECLARE] {
+            let t = format!(
+                "vigies-regles 1\nregle {id} si zone_src=cog alors info flux_hors_contrat\n"
+            );
+            assert!(JeuRegles::charger(&t).is_err(), "{id} réservé");
         }
     }
 

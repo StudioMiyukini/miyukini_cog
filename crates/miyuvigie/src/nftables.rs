@@ -58,10 +58,16 @@
 //!   est accepté avant toute journalisation).
 //!
 //! Zones : déduites des adresses par le [`PlanAdressage`]. Voie : attribuée
-//! seulement si l'interface d'entrée (à défaut, de sortie) d'un **pont de
-//! zone** est le port de la sandbox d'un service déclaré au lecteur
-//! ([`LecteurNftables::declarer_interface_voie`]) ; une frontière est partagée
-//! par toutes les voies, ses lignes restent sans voie.
+//! seulement si l'interface d'**entrée** (`IN=`) d'un **pont de zone** est le
+//! port de la sandbox d'un service déclaré au lecteur
+//! ([`LecteurNftables::declarer_interface_voie`]) : la voie est celle de la
+//! sandbox qui a **émis** le trafic. L'interface de sortie (`OUT=`) n'attribue
+//! jamais de voie : un flux reçu par une sandbox (adresse source usurpée ou
+//! non) ne doit pas faire couper sa voie (anti-usurpation, A-005). Une
+//! frontière est partagée par toutes les voies, ses lignes restent sans voie.
+//!
+//! Le motif du préfixe est porté par l'événement ([`EvenementFlux::motif`]) :
+//! les règles intégrées A-005 (`LATERAL`, `NON-DECLARE`) le lisent.
 //!
 //! Une ligne mal formée ou incohérente est ignorée et **comptée** ; elle n'est
 //! jamais une preuve bénigne et ne vaut pas preuve de vie du capteur.
@@ -366,11 +372,9 @@ impl LecteurNftables {
         let (zone_src, zone_dst) = self.recouper(prefixe, groupe, (iif, oif), (ip_src, ip_dst))?;
         let lieu = prefixe.lieu;
 
+        // Côté d'entrée seulement (A-005) : jamais `OUT=`.
         let voie = if lieu.est_zone() {
-            self.interfaces_voies
-                .get(iif)
-                .or_else(|| self.interfaces_voies.get(oif))
-                .cloned()
+            self.interfaces_voies.get(iif).cloned()
         } else {
             None
         };
@@ -389,6 +393,7 @@ impl LecteurNftables {
             ip_dst: Some(ip_dst),
             port_dst,
             protocole: Some(protocole),
+            motif: Some(prefixe.motif),
         })
     }
 
@@ -645,6 +650,41 @@ mod tests {
                 l.analyser(&c)
             );
         }
+    }
+
+    #[test]
+    fn motif_porte_par_l_evenement() {
+        let ResultatLigne::Evenement(e) = lecteur().analyser(LIGNE) else {
+            panic!("ligne valide refusée");
+        };
+        assert_eq!(e.motif, Some(MotifJournal::SortieCog));
+    }
+
+    /// Anti-usurpation (A-005) : une ligne qui n'atteint la sandbox d'une voie
+    /// que par `OUT=` n'attribue aucune voie (la victime n'est pas coupée).
+    #[test]
+    fn voie_jamais_attribuee_par_l_interface_de_sortie() {
+        let mut l = lecteur();
+        l.declarer_interface_voie("sv1", VoieId::new("jaymail").unwrap());
+        // Trafic entrant vers la sandbox de « jaymail » depuis le port du Portail.
+        let entrant = "1729760000.123456 hote nflog-111: MDOU|zone-franche|transit|NON-DECLARE| IN=z-pi OUT=sv1 SRC=10.77.1.253 DST=10.77.1.11 LEN=60 PROTO=TCP SPT=40000 DPT=22";
+        let ResultatLigne::Evenement(e) = l.analyser(entrant) else {
+            panic!("refusée : {:?}", l.analyser(entrant));
+        };
+        assert_eq!(e.voie, None, "OUT= n'attribue pas de voie");
+        // Latéral sv0 → sv1 : la voie est celle de l'émetteur (sv0), jamais sv1.
+        let lateral = "1729760000.123456 hote nflog-110: MDOU|zone-cog|transit|LATERAL| IN=sv0 OUT=sv1 SRC=10.77.0.10 DST=10.77.0.11 LEN=60 PROTO=TCP SPT=40000 DPT=22";
+        let ResultatLigne::Evenement(e) = l.analyser(lateral) else {
+            panic!("refusée : {:?}", l.analyser(lateral));
+        };
+        assert_eq!(e.voie.as_ref().map(VoieId::as_str), Some("jayoffice"));
+        assert_eq!(e.motif, Some(MotifJournal::Lateral));
+        // Émetteur non déclaré : aucune voie, même si la cible l'est.
+        let inconnu = lateral.replace("IN=sv0 OUT=sv1", "IN=sv7 OUT=sv1");
+        let ResultatLigne::Evenement(e) = l.analyser(&inconnu) else {
+            panic!("refusée");
+        };
+        assert_eq!(e.voie, None);
     }
 
     #[test]

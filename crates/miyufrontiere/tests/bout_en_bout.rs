@@ -2,7 +2,7 @@
 //! @do     verifier_critere_sortie_lot3
 //! @role   test
 //! @layer  operateur
-//! @human  Lot 3 bout en bout (niveau bibliothèque) : arrêté signé → Douane + IPS → Vigies → CaringNanny → WorrySentinel → coupure d'une voie au Portail et à la Douane, l'autre voie intacte (EX-12, EX-49) ; capteur périmé ⇒ voie aveugle coupée.
+//! @human  Lot 3 bout en bout (niveau bibliothèque) : arrêté signé → Douane + IPS → Vigies → CaringNanny → WorrySentinel → coupure d'une voie au Portail et à la Douane, l'autre voie intacte (EX-12, EX-49) ; latéral et COG → Portail non déclaré coupent la voie fautive (A-005) ; adresse usurpée ⇒ aucune voie coupée ; capteur périmé ⇒ voie aveugle coupée.
 
 #![allow(clippy::assert_is_empty, clippy::struct_field_names)]
 
@@ -85,7 +85,13 @@ fn ip(s: &str) -> IpAddr {
     s.parse().unwrap()
 }
 
+/// Métadonnée d'une connexion nouvelle entrée par le lien zone COG du portail interne.
 fn meta(t: u64, src: IpAddr, dst: IpAddr, dport: u16) -> MetaFlux {
+    meta_par(t, src, dst, dport, "pi-cog")
+}
+
+/// Métadonnée d'une connexion nouvelle entrée par l'interface `entree` de la frontière.
+fn meta_par(t: u64, src: IpAddr, dst: IpAddr, dport: u16, entree: &str) -> MetaFlux {
     MetaFlux {
         horodatage_secs: t,
         source: src,
@@ -95,6 +101,7 @@ fn meta(t: u64, src: IpAddr, dst: IpAddr, dport: u16) -> MetaFlux {
         port_destination: dport,
         taille: 120,
         nouvelle_connexion: true,
+        interface_entree: Some(entree.into()),
     }
 }
 
@@ -445,6 +452,7 @@ fn voie_inconnue_coupure_non_confirmee() {
         ip_dst: None,
         port_dst: Some(443),
         protocole: None,
+        motif: None,
     };
     nanny.ingerer(vigie.analyser_flux(vec![evt], 1_000));
     let decisions = sentinelle.evaluer(&nanny.transmettre(1_000));
@@ -473,4 +481,199 @@ fn attribution_par_sandbox_source() {
     assert_eq!(attribution.voie(cog_a), Some(&voie(A)));
     assert_eq!(attribution.voie(franche_b), Some(&voie(B)));
     assert_eq!(attribution.voie(ip("10.77.0.253")), None);
+}
+
+// ------------------------------------------------------------------ A-005
+
+/// Banc commun : Douane du portail interne + IPS, Portail à deux voies,
+/// WorrySentinel et son exécutant de coupure.
+struct Banc {
+    plan: PlanReseau,
+    douane: InstanceDouane,
+    ips: Arc<Mutex<MoteurIps>>,
+    source: SourceDouane,
+    portail: Portail,
+    sentinelle: SentinelleVoies,
+    coupure: CoupureFrontiere<miyuportail::PoigneeCoupure>,
+    t: u64,
+}
+
+const CAPTEUR_DOUANE: &str = "douane-portail-interne";
+
+impl Banc {
+    fn nouveau() -> Self {
+        let t = T0 + 100;
+        let plan = plan();
+        let mut douane = InstanceDouane::nouvelle(Frontiere::PortailInterne, plan.clone(), 0).unwrap();
+        douane.charger(arrete_verifie(), T0 + 1).unwrap();
+        let (tx, rx) = canal_evenements();
+        let ips = Arc::new(Mutex::new(douane.moteur_ips(tx).unwrap()));
+        let source = SourceDouane::new(CapteurId::new(CAPTEUR_DOUANE).unwrap(), rx)
+            .avec_attribution(AttributionVoies::nouvelle(&plan, douane.regles()));
+        let portail = Portail::deux_voies();
+        let coupure = executant(&portail, &ips, t);
+        Self { plan, douane, ips, source, portail, sentinelle: SentinelleVoies::default(), coupure, t }
+    }
+
+    fn sandbox(&self, zone: borderguard::Zone, service: &str) -> &miyudouane::Sandbox {
+        self.plan.sandbox(zone, service).unwrap()
+    }
+
+    /// Évalue les décisions de WorrySentinel, applique les coupures, rend les voies coupées.
+    fn decider(&mut self, rapport: &caringnanny::RapportObservation) -> (Vec<(VoieId, Motif)>, Vec<Action>) {
+        let decisions = self.sentinelle.evaluer(rapport);
+        let resultats = self.sentinelle.appliquer_coupures(&decisions, &mut self.coupure);
+        assert!(resultats.iter().all(|(_, r)| r.is_ok()), "{resultats:?}");
+        let coupees = decisions
+            .iter()
+            .filter_map(|d| match &d.action {
+                Action::CouperVoie(v) => Some((v.clone(), d.motif)),
+                _ => None,
+            })
+            .collect();
+        (coupees, decisions.into_iter().map(|d| d.action).collect())
+    }
+
+    /// La voie `coupee` est fermée au Portail et à la Douane ; l'autre continue.
+    fn seule_coupee(&self, coupee: &str, intacte: &str, port_intacte: u16) {
+        assert_eq!(self.sentinelle.etat_voie(&voie(coupee)), Some(EtatSentinelle::Coupee));
+        assert_ne!(self.sentinelle.etat_voie(&voie(intacte)), Some(EtatSentinelle::Coupee));
+        let sc = service(coupee);
+        assert!(matches!(self.portail.portail.etat(&sc).unwrap(), EtatVoie::Coupee(_)));
+        assert_eq!(self.portail.portail.etat(&service(intacte)).unwrap(), EtatVoie::Active);
+        self.portail.depot_admis(intacte, 2);
+        let cog_i = self.sandbox(borderguard::Zone::Cog, intacte).adresse;
+        let mut m = self.ips.lock().unwrap();
+        assert!(matches!(
+            m.evaluer(&meta(self.t, cog_i, ip("10.77.0.253"), port_intacte)),
+            Verdict::Autoriser { .. }
+        ));
+        let ruleset = self.douane.ruleset(self.t, m.voies_coupees());
+        assert_eq!(voies_acceptees(&ruleset), BTreeSet::from([intacte.to_string()]));
+    }
+
+    /// Aucune voie coupée, au Portail comme à la Douane.
+    fn aucune_coupee(&self) {
+        for v in [A, B] {
+            assert_ne!(self.sentinelle.etat_voie(&voie(v)), Some(EtatSentinelle::Coupee), "{v}");
+            assert_eq!(self.portail.portail.etat(&service(v)).unwrap(), EtatVoie::Active, "{v}");
+        }
+        assert!(self.ips.lock().unwrap().voies_coupees().is_empty());
+    }
+}
+
+/// A-005 : zone COG → adresse du Portail sur un port **non déclaré** (même
+/// zone, donc hors EX-12) ⇒ IPS bloque ⇒ `R-A005-NON-DECLARE` critique sur la
+/// voie émettrice A ⇒ A coupée, B continue.
+#[test]
+fn cog_vers_portail_port_non_declare_coupe_la_voie_fautive() {
+    let mut b = Banc::nouveau();
+    let ms = b.t * 1000;
+    let mut vigie = vigie(CAPTEUR_DOUANE, &[A, B]);
+    let mut nanny = ObservatoireVigies::default();
+    nanny.enregistrer_capteur(attendu(CAPTEUR_DOUANE, &[A, B]));
+
+    let cog_a = b.sandbox(borderguard::Zone::Cog, A).adresse;
+    let v = b.ips.lock().unwrap().evaluer(&meta(b.t, cog_a, ip("10.77.0.253"), 9999));
+    assert!(matches!(v, Verdict::Bloquer(_)), "port non déclaré bloqué : {v:?}");
+
+    let lot = vigie.relever(&mut b.source, ms);
+    assert_eq!(lot.signaux.len(), 1, "{:?}", lot.signaux);
+    let s = &lot.signaux[0];
+    assert_eq!(s.regle.as_str(), miyuvigie::REGLE_A005_NON_DECLARE);
+    assert_eq!((s.severite, s.categorie), (Severite::Critique, Categorie::FluxHorsContrat));
+    assert_eq!((s.zone_src, s.zone_dst), (Zone::Cog, Zone::Cog));
+    assert_eq!(s.voie, Some(voie(A)));
+    nanny.ingerer(lot);
+
+    let (coupees, _) = b.decider(&nanny.transmettre(ms));
+    assert_eq!(coupees, vec![(voie(A), Motif::IncidentCritique)]);
+    b.seule_coupee(A, B, 7444);
+}
+
+/// A-005 : mouvement latéral sandbox A → sandbox B dans le pont de la zone COG
+/// (journal NFLOG `LATERAL`) ⇒ critique, voie de l'**émetteur** (port d'entrée
+/// `IN=`) ⇒ A coupée, B (la cible) continue. Une ligne qui n'atteint B que par
+/// `OUT=` ne coupe pas B.
+#[test]
+fn lateral_dans_la_zone_coupe_la_voie_emettrice() {
+    let mut b = Banc::nouveau();
+    let ms = b.t * 1000;
+    let capteur = "nflog-zone-cog";
+    let mut vigie = vigie(capteur, &[A, B]);
+    for nom in [A, B] {
+        let s = b.sandbox(borderguard::Zone::Cog, nom);
+        vigie.declarer_interface_voie(s.interface_zone.clone(), voie(nom));
+    }
+    let mut nanny = ObservatoireVigies::default();
+    nanny.enregistrer_capteur(attendu(capteur, &[A, B]));
+    let (sa, sb) = (b.sandbox(borderguard::Zone::Cog, A).clone(), b.sandbox(borderguard::Zone::Cog, B).clone());
+    let lateral = format!(
+        "{T0}.100000 hote nflog-110: MDOU|zone-cog|transit|LATERAL| IN={} OUT={} SRC={} DST={} LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=22 SYN",
+        sa.interface_zone, sb.interface_zone, sa.adresse, sb.adresse
+    );
+    let lot = vigie.analyser_journal([lateral.as_str()], ms);
+    assert!(lot.pouls.is_some(), "{:?}", lot.compteurs);
+    assert_eq!(lot.signaux.len(), 1, "{:?}", lot.signaux);
+    let s = &lot.signaux[0];
+    assert_eq!(s.regle.as_str(), miyuvigie::REGLE_A005_LATERAL);
+    assert_eq!((s.severite, s.categorie), (Severite::Critique, Categorie::MouvementLateral));
+    assert_eq!(s.voie, Some(voie(A)), "voie de l'émetteur, jamais celle de la cible");
+    nanny.ingerer(lot);
+    let (coupees, _) = b.decider(&nanny.transmettre(ms));
+    assert_eq!(coupees, vec![(voie(A), Motif::IncidentCritique)]);
+    b.seule_coupee(A, B, 7444);
+
+    // Ligne n'atteignant la sandbox B que par OUT= (entrée par le port du
+    // Portail) : incident critique hors voie, B n'est pas coupée.
+    let vers_b = format!(
+        "{T0}.200000 hote nflog-110: MDOU|zone-cog|transit|SORTIE-COG| IN=z-pi OUT={} SRC=10.77.0.253 DST={} LEN=60 TTL=64 PROTO=TCP SPT=40000 DPT=22 SYN",
+        sb.interface_zone, sb.adresse
+    );
+    let lot = vigie.analyser_journal([vers_b.as_str()], ms + 1);
+    assert_eq!(lot.signaux.len(), 1, "{:?}", lot.signaux);
+    assert_eq!(lot.signaux[0].severite, Severite::Critique);
+    assert_eq!(lot.signaux[0].voie, None);
+    nanny.ingerer(lot);
+    let (coupees, actions) = b.decider(&nanny.transmettre(ms + 1));
+    assert!(coupees.is_empty(), "{coupees:?}");
+    assert!(actions.contains(&Action::IncidentHorsVoie), "{actions:?}");
+    assert_eq!(b.portail.portail.etat(&service(B)).unwrap(), EtatVoie::Active);
+}
+
+/// Anti-usurpation : un paquet portant l'adresse de la sandbox COG de A mais
+/// entré par le lien **Franche** (mauvaise interface) ⇒ IPS bloque, incident
+/// critique **hors voie** ; ni A (la victime) ni B ne sont coupées. Un paquet
+/// hors connexion (`HorsEtat`) n'attribue pas non plus de voie.
+#[test]
+fn adresse_usurpee_ne_coupe_pas_la_voie_de_la_victime() {
+    let mut b = Banc::nouveau();
+    let ms = b.t * 1000;
+    let mut vigie = vigie(CAPTEUR_DOUANE, &[A, B]);
+    let mut nanny = ObservatoireVigies::default();
+    nanny.enregistrer_capteur(attendu(CAPTEUR_DOUANE, &[A, B]));
+
+    let cog_a = b.sandbox(borderguard::Zone::Cog, A).adresse;
+    let franche_b = b.sandbox(borderguard::Zone::Franche, B).adresse;
+    {
+        let mut m = b.ips.lock().unwrap();
+        // Usurpation de l'adresse de A depuis le côté Franche.
+        let v = m.evaluer(&meta_par(b.t, cog_a, ip("93.184.216.34"), 443, "pi-franche"));
+        assert_eq!(v, Verdict::Bloquer(NatureEvenement::SortieZoneCog));
+        // Paquet isolé (hors connexion) à l'adresse de A, bonne interface.
+        let mut hors = meta(b.t, cog_a, franche_b, 22);
+        hors.nouvelle_connexion = false;
+        assert_eq!(m.evaluer(&hors), Verdict::Bloquer(NatureEvenement::HorsEtat));
+    }
+    let lot = vigie.relever(&mut b.source, ms);
+    assert!(!lot.signaux.is_empty());
+    assert!(lot.signaux.iter().any(|s| s.severite == Severite::Critique));
+    assert!(lot.signaux.iter().all(|s| s.voie.is_none()), "{:?}", lot.signaux);
+    nanny.ingerer(lot);
+    let (coupees, actions) = b.decider(&nanny.transmettre(ms));
+    assert!(coupees.is_empty(), "{coupees:?}");
+    assert!(actions.contains(&Action::IncidentHorsVoie), "détection conservée : {actions:?}");
+    b.aucune_coupee();
+    b.portail.depot_admis(A, 2);
+    b.portail.depot_admis(B, 2);
 }
