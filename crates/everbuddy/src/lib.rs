@@ -15,5 +15,5 @@ pub mod migration;
 pub mod version;
 
 pub use compatibility::{Compatibility, CompatibilityChecker};
-pub use migration::{DefaultMigrationExecutor, Migration, MigrationExecutor};
+pub use migration::{DefaultMigrationExecutor, Migration, MigrationError, MigrationExecutor};
 pub use version::{DefaultVersionManager, Version, VersionManager};

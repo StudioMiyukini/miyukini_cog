@@ -28,6 +28,14 @@ pub enum HealthStatus {
     //@human / @human Composant non fonctionnel.
     /// @depends caringnanny_health_status
     Unhealthy,
+    /// @id caringnanny_health_status_inconnu
+    /// @role data
+    /// @layer core
+    /// @do represent_unknown_status
+    //@human / @human Aucune observation pour ce composant : état inconnu. Ne doit jamais
+    //@human être traité comme « sain » (C-12, fail-closed).
+    /// @depends caringnanny_health_status
+    Inconnu,
 }
 
 /// @id caringnanny_health_checker_trait
@@ -52,7 +60,8 @@ pub struct DefaultHealthChecker {
 }
 
 impl DefaultHealthChecker {
-    /// Crée un vérificateur vide (tous les composants considérés Healthy).
+    /// Crée un vérificateur vide (tous les composants sont `Inconnu` tant
+    /// qu'aucun statut n'a été enregistré).
     #[must_use]
     pub fn new() -> Self {
         Self::default()
@@ -69,7 +78,7 @@ impl HealthChecker for DefaultHealthChecker {
         self.status_by_component
             .get(component)
             .copied()
-            .unwrap_or(HealthStatus::Healthy)
+            .unwrap_or(HealthStatus::Inconnu)
     }
 }
 
@@ -89,10 +98,17 @@ mod tests {
         assert_ne!(HealthStatus::Healthy, HealthStatus::Unhealthy);
     }
 
+    /// @id caringnanny_health_test_composant_inconnu
+    /// @role test
+    /// @layer core
+    /// @do verify_unknown_component_not_healthy
+    //@human / @human Un composant jamais observé est `Inconnu`, pas `Healthy`.
+    /// @depends caringnanny_health_status_inconnu
     #[test]
     fn test_default_health_checker() {
         let mut checker = DefaultHealthChecker::new();
-        assert_eq!(checker.check("unknown"), HealthStatus::Healthy);
+        assert_eq!(checker.check("unknown"), HealthStatus::Inconnu);
+        assert_ne!(checker.check("unknown"), HealthStatus::Healthy);
         checker.set_status("db", HealthStatus::Degraded);
         assert_eq!(checker.check("db"), HealthStatus::Degraded);
     }

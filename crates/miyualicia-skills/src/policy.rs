@@ -19,6 +19,15 @@
 //! **Bypass cores ≠ bypass confirmations.** Un opérateur peut vouloir
 //! conserver l'audit cores mais sauter les confirmations (ex. CI), ou
 //! l'inverse (ex. dev local sans cores mais garder les double-checks).
+//!
+//! ## Bypass cores : tests et dev uniquement (K-16, C-12)
+//!
+//! Le champ `bypass_cores_validation` et [`AliciaPolicy::permissive`] n'existent
+//! que sous `cfg(test)` ou avec la feature `dev-bypass` (désactivée par défaut).
+//! Dans un binaire de production, la gate cores est donc toujours active :
+//! [`AliciaPolicy::requires_cores_check`] renvoie `true`, et un
+//! `"bypass_cores_validation": true` présent dans une politique persistée est
+//! ignoré à la désérialisation (fail-closed).
 
 // @id service.alicia.skills.policy
 // @role alicia_execution_policy
@@ -47,6 +56,9 @@ pub struct AliciaPolicy {
     ///
     /// L'audit (épisodes en mémoire) reste actif côté Alicia, mais les
     /// politiques d'arbitrage cross-services ne sont plus appliquées.
+    ///
+    /// N'existe que sous `cfg(test)` ou la feature `dev-bypass` (K-16).
+    #[cfg(any(test, feature = "dev-bypass"))]
     #[serde(default)]
     pub bypass_cores_validation: bool,
 
@@ -59,7 +71,7 @@ pub struct AliciaPolicy {
     /// - tests automatisés
     ///
     /// L'audit (épisodes en mémoire) reste actif. Les gates cores restent
-    /// actives, sauf si `bypass_cores_validation` est aussi `true`.
+    /// actives (sauf bypass cores, possible uniquement en test / `dev-bypass`).
     #[serde(default)]
     pub bypass_user_confirmations: bool,
 }
@@ -73,7 +85,9 @@ impl AliciaPolicy {
 
     /// Politique permissive : les deux gates sont bypassées.
     ///
-    /// **À n'utiliser qu'en dev / test / sandbox.**
+    /// **À n'utiliser qu'en dev / test / sandbox.** N'existe que sous
+    /// `cfg(test)` ou la feature `dev-bypass` (K-16).
+    #[cfg(any(test, feature = "dev-bypass"))]
     #[must_use]
     pub fn permissive() -> Self {
         Self {
@@ -83,9 +97,18 @@ impl AliciaPolicy {
     }
 
     /// `true` si l'exécution doit traverser les cores avant action.
+    ///
+    /// Hors `cfg(test)` / feature `dev-bypass` : toujours `true` (fail-closed).
     #[must_use]
     pub fn requires_cores_check(&self) -> bool {
-        !self.bypass_cores_validation
+        #[cfg(any(test, feature = "dev-bypass"))]
+        {
+            !self.bypass_cores_validation
+        }
+        #[cfg(not(any(test, feature = "dev-bypass")))]
+        {
+            true
+        }
     }
 
     /// `true` si la capability donnée doit demander confirmation à

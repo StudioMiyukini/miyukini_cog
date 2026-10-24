@@ -16,9 +16,10 @@
 //! Le `CapabilitiesRuntime` est entièrement **opt-in** :
 //! - Si non activé, `AliciaService` se comporte comme avant.
 //! - Si activé sans répertoire de manifestes, le registre reste vide.
-//! - Si activé sans `CoreGate`, un `BypassCoreGate` est utilisé (avec
-//!   warning) — le runtime production doit injecter un
-//!   `BorderGuardCoreGate`.
+//! - Un `CoreGate` doit toujours être injecté ; le runtime production
+//!   injecte un `BorderGuardCoreGate`. La variante
+//!   `new_with_bypass_gate` (`BypassCoreGate`) n'existe que sous
+//!   `cfg(test)` ou la feature `dev-bypass`, désactivée par défaut (K-16).
 
 // @id service.alicia.capabilities_runtime
 // @role alicia_capabilities_subsystem
@@ -32,8 +33,10 @@ use std::sync::Arc;
 use serde_json::Value;
 use tokio::sync::RwLock;
 
+#[cfg(any(test, feature = "dev-bypass"))]
+use miyualicia_dispatcher::BypassCoreGate;
 use miyualicia_dispatcher::{
-    BypassCoreGate, CoreGate, Decision, DispatchError, Dispatcher, ExecutionResult,
+    CoreGate, Decision, DispatchError, Dispatcher, ExecutionResult,
     ResolvedLearnedCall, ServiceClient, ServiceClientRouter,
 };
 use miyualicia_memory::{
@@ -264,7 +267,9 @@ impl CapabilitiesRuntime {
 
     /// Variante dev/test : initialise avec un `BypassCoreGate`.
     /// **Ne pas utiliser en production** — la gouvernance cores n'est pas
-    /// appliquée.
+    /// appliquée. N'existe que sous `cfg(test)` ou la feature `dev-bypass`
+    /// (désactivée par défaut, K-16).
+    #[cfg(any(test, feature = "dev-bypass"))]
     pub async fn new_with_bypass_gate(
         config: CapabilitiesRuntimeConfig,
     ) -> Result<Self, AliciaError> {

@@ -56,6 +56,23 @@ pub enum MiyuSQLError {
     //@human / @human Erreur d'exécution technique (sans contenu métier).
     /// @depends miyusql_error_enum
     Execution(String),
+
+    /// @id miyusql_error_mandat_non_signe
+    /// @role data
+    /// @layer toolkit
+    /// @do signal_unsigned_mandate
+    //@human / @human Exécution refusée : mandat non signé par StrongFather (K-19, fail-closed).
+    /// @depends miyusql_error_enum
+    MandatNonSigne,
+
+    /// @id miyusql_error_non_implemente
+    /// @role data
+    /// @layer toolkit
+    /// @do signal_not_implemented
+    //@human / @human Instruction, clause ou option non gérée : refus explicite (C-14)
+    //@human au lieu d'un succès silencieux.
+    /// @depends miyusql_error_enum
+    NonImplemente(String),
 }
 
 impl std::fmt::Display for MiyuSQLError {
@@ -66,6 +83,10 @@ impl std::fmt::Display for MiyuSQLError {
             MiyuSQLError::Connection(msg) => write!(f, "Connection error: {msg}"),
             MiyuSQLError::Syntax(msg) => write!(f, "Syntax error: {msg}"),
             MiyuSQLError::Execution(msg) => write!(f, "Execution error: {msg}"),
+            MiyuSQLError::MandatNonSigne => {
+                write!(f, "Execution refused: mandate not signed by StrongFather")
+            }
+            MiyuSQLError::NonImplemente(msg) => write!(f, "Not implemented: {msg}"),
         }
     }
 }

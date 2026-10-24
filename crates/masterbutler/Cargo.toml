@@ -13,8 +13,7 @@ description = "MasterButler - Orchestrateur de workflows du Miyukini Core System
 
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
-strongfather = { path = "../strongfather" }
-kindmother = { path = "../kindmother" }
+# strongfather / kindmother retirés : jamais utilisés (K-18).
 
 [dev-dependencies]
 

@@ -15,7 +15,14 @@ description = "Kit d'outils MiyuSQL - manipulation de données en base sous auto
 miyukini-kernel = { path = "../miyukini-kernel" }
 serde = { version = "1.0", features = ["derive"] }
 
+[features]
+default = []
+# Expose `MemoryExecutor` et `SignatureMandat::pour_tests` (tests uniquement, jamais en prod).
+test-support = []
+
 [dev-dependencies]
+# Active `test-support` pour les tests d'intégration (tests/*.rs).
+miyusql = { path = ".", features = ["test-support"] }
 
 [lints.rust]
 unsafe_code = "forbid"

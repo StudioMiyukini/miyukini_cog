@@ -6361,6 +6361,7 @@ dependencies = [
  "axum 0.8.8",
  "borderguard",
  "chrono",
+ "miyualicia",
  "miyualicia-cores-gate",
  "miyualicia-devices",
  "miyualicia-dispatcher",
@@ -7292,6 +7293,7 @@ name = "miyusql"
 version = "0.1.0"
 dependencies = [
  "miyukini-kernel",
+ "miyusql",
  "serde",
 ]
 

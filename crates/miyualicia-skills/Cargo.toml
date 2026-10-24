@@ -23,6 +23,12 @@ chrono      = { version = "0.4", features = ["serde"] }
 thiserror   = "2"
 tracing     = "0.1"
 
+[features]
+default = []
+# Expose le bypass de la gate cores (`AliciaPolicy::bypass_cores_validation`,
+# `AliciaPolicy::permissive`). Tests / dev uniquement, jamais en production (K-16).
+dev-bypass = []
+
 [dev-dependencies]
 tempfile    = "3"
 

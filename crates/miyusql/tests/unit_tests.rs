@@ -9,10 +9,16 @@
 use miyusql::{
     cache_get, cache_invalidate, cache_set, query_execute, query_prepare, schema_read,
     schema_read_table, tx_begin, tx_commit, tx_rollback, GovernedContext, MemoryExecutor,
-    MiyuSQLError, MIYUKINI_SQLTEST_TABLE,
+    MiyuSQLError, SignatureMandat, MIYUKINI_SQLTEST_TABLE,
 };
 
 fn governed_ctx() -> GovernedContext {
+    GovernedContext::new("mandate-test-001".to_string(), 2)
+        .avec_signature(SignatureMandat::pour_tests())
+}
+
+/// Mandat non vide mais sans signature StrongFather (K-19).
+fn unsigned_ctx() -> GovernedContext {
     GovernedContext::new("mandate-test-001".to_string(), 2)
 }
 
@@ -33,7 +39,7 @@ fn msql_q_001_execute_select_valid() {
     let _ = query_execute(&ctx, sql, &[], &exec).unwrap();
     let sql2 = "SELECT * FROM t1";
     let res = query_execute(&ctx, sql2, &[], &exec).unwrap();
-    assert!(res.rows.is_empty());
+    assert_eq!(res.rows, [] as [std::collections::HashMap<std::string::String, std::string::String>; 0]);
     assert_eq!(res.count, 0);
 }
 
@@ -46,8 +52,28 @@ fn msql_q_001_execute_select_valid() {
 fn msql_q_002_prepare_valid() {
     let ctx = governed_ctx();
     let exec = MemoryExecutor::new();
-    let r = query_prepare(&ctx, "SELECT 1 FROM t", &[], &exec);
+    let r = query_prepare(&ctx, "SELECT * FROM t", &[], &exec);
     assert!(r.is_ok());
+}
+
+/// @id MSQL_Q_002B
+/// @role test
+/// @layer tool
+/// @do msql_q_002b_prepare_unhandled_clause
+//@human / @human Prepare d'une clause non gérée (projection, WHERE, UPDATE) — refus explicite
+//@human au lieu d'une validation de façade.
+#[test]
+fn msql_q_002b_prepare_unhandled_clause() {
+    let ctx = governed_ctx();
+    let exec = MemoryExecutor::new();
+    for sql in [
+        "SELECT 1 FROM t",
+        "SELECT * FROM t WHERE id = 1",
+        "UPDATE t SET a = 1",
+    ] {
+        let r = query_prepare(&ctx, sql, &[], &exec);
+        assert!(matches!(r, Err(MiyuSQLError::NonImplemente(_))), "{sql}");
+    }
 }
 
 /// @id MSQL_Q_003
@@ -74,6 +100,43 @@ fn msql_q_004_no_mandate() {
     let exec = MemoryExecutor::new();
     let r = query_execute(&ctx, "SELECT 1", &[], &exec);
     assert!(matches!(r, Err(MiyuSQLError::NoMandate)));
+}
+
+/// @id MSQL_Q_005
+/// @role test
+/// @layer tool
+/// @do msql_q_005_unsigned_mandate
+//@human / @human Mandat non signé par StrongFather — refus (fail-closed, K-19).
+#[test]
+fn msql_q_005_unsigned_mandate() {
+    let ctx = unsigned_ctx();
+    let exec = MemoryExecutor::new();
+    let r = query_execute(&ctx, "CREATE TABLE t (id text)", &[], &exec);
+    assert!(matches!(r, Err(MiyuSQLError::MandatNonSigne)));
+    let r = tx_begin(&ctx, &exec);
+    assert!(matches!(r, Err(MiyuSQLError::MandatNonSigne)));
+    let r = cache_get(&ctx, "k", &exec);
+    assert!(matches!(r, Err(MiyuSQLError::MandatNonSigne)));
+    let r = schema_read(&ctx, &exec);
+    assert!(matches!(r, Err(MiyuSQLError::MandatNonSigne)));
+}
+
+/// @id MSQL_Q_006
+/// @role test
+/// @layer tool
+/// @do msql_q_006_delete_where_refused
+//@human / @human DELETE … WHERE refusé : la table n'est pas vidée (K-19).
+#[test]
+fn msql_q_006_delete_where_refused() {
+    let ctx = governed_ctx();
+    let exec = MemoryExecutor::new();
+    query_execute(&ctx, "CREATE TABLE t (id text)", &[], &exec).unwrap();
+    query_execute(&ctx, "INSERT INTO t (id) VALUES ('1')", &[], &exec).unwrap();
+    query_execute(&ctx, "INSERT INTO t (id) VALUES ('2')", &[], &exec).unwrap();
+    let r = query_execute(&ctx, "DELETE FROM t WHERE id = ?", &["1".into()], &exec);
+    assert!(matches!(r, Err(MiyuSQLError::NonImplemente(_))));
+    let res = query_execute(&ctx, "SELECT * FROM t", &[], &exec).unwrap();
+    assert_eq!(res.count, 2);
 }
 
 /// @id MSQL_T_001
@@ -169,7 +232,7 @@ fn msql_s_001_read_schema_tables() {
     let exec = MemoryExecutor::new();
     let _ = query_execute(
         &ctx,
-        &format!("CREATE TABLE {}", MIYUKINI_SQLTEST_TABLE),
+        &format!("CREATE TABLE {MIYUKINI_SQLTEST_TABLE}"),
         &[],
         &exec,
     )
@@ -190,7 +253,7 @@ fn msql_s_002_read_schema_columns() {
     let exec = MemoryExecutor::new();
     let _ = query_execute(
         &ctx,
-        &format!("CREATE TABLE {}", MIYUKINI_SQLTEST_TABLE),
+        &format!("CREATE TABLE {MIYUKINI_SQLTEST_TABLE}"),
         &[],
         &exec,
     )
@@ -198,8 +261,7 @@ fn msql_s_002_read_schema_columns() {
     let _ = query_execute(
         &ctx,
         &format!(
-            "ALTER TABLE {} ADD COLUMN test_value text",
-            MIYUKINI_SQLTEST_TABLE
+            "ALTER TABLE {MIYUKINI_SQLTEST_TABLE} ADD COLUMN test_value text"
         ),
         &[],
         &exec,
@@ -214,12 +276,11 @@ fn msql_s_002_read_schema_columns() {
 /// @role test
 /// @layer tool
 /// @do msql_s_003_table_nonexistent
-//@human / @human Table inexistante — vérifie le comportement pour une table inexistante (retourne colonnes vides).
+//@human / @human Table inexistante — erreur explicite (et non une table vide fictive).
 #[test]
 fn msql_s_003_table_nonexistent() {
     let ctx = governed_ctx();
     let exec = MemoryExecutor::new();
-    let meta = schema_read_table(&ctx, "NonexistentTable", &exec).unwrap();
-    assert_eq!(meta.name, "NonexistentTable");
-    assert!(meta.columns.is_empty());
+    let r = schema_read_table(&ctx, "NonexistentTable", &exec);
+    assert!(matches!(r, Err(MiyuSQLError::Execution(_))));
 }

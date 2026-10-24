@@ -1,4 +1,15 @@
-//! Module d'orchestration d'exécution de MasterButler
+//! @id     masterbutler_orchestrator
+//! @do     definir_contrat_orchestration
+//! @role   orchestration
+//! @layer  core
+//! @human  masterbutler — contrat d'orchestration ; aucune exécution réelle dans le Core.
+//!
+//! Module d'orchestration de MasterButler.
+//!
+//! Selon D1 / C-31, les Cores décident et n'exécutent pas : l'exécution des étapes
+//! revient aux opérateurs (Douane, Vigies) et au Kernel. Tant que cette délégation
+//! n'est pas câblée, [`DefaultOrchestrator`] refuse explicitement (C-14, C-12) au lieu
+//! de renvoyer un faux succès (constat K-15).
 
 use crate::{Step, StepResult, Workflow};
 
@@ -14,10 +25,47 @@ pub trait Orchestrator {
     /// @do execute_workflow
     //@human / @human Exécute un workflow avec ses étapes.
     /// @depends masterbutler_orchestrator_trait
-    fn execute(&mut self, workflow: &Workflow, steps: &[Step]) -> Vec<StepResult>;
+    fn execute(
+        &mut self,
+        workflow: &Workflow,
+        steps: &[Step],
+    ) -> Result<Vec<StepResult>, OrchestrationError>;
 }
 
-/// Orchestrateur par défaut : exécute les étapes dans l'ordre, une par une (sans délégation réelle).
+/// @id masterbutler_orchestration_error
+/// @role error
+/// @layer core
+/// @do represent_orchestration_error
+//@human / @human Erreur d'orchestration (refus explicite, fail-closed).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum OrchestrationError {
+    /// @id masterbutler_orchestration_error_non_implemente
+    /// @role error
+    /// @layer core
+    /// @do represent_not_implemented
+    //@human / @human Exécution non implémentée : la délégation aux opérateurs / Kernel
+    //@human n'existe pas encore (D1). Aucune étape n'a été exécutée.
+    /// @depends masterbutler_orchestration_error
+    NonImplemente(String),
+}
+
+impl std::fmt::Display for OrchestrationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OrchestrationError::NonImplemente(msg) => {
+                write!(f, "orchestration non implémentée : {msg}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for OrchestrationError {}
+
+/// Orchestrateur par défaut : refuse toute exécution (K-15, C-14).
+///
+/// L'exécution réelle sera déléguée aux opérateurs et au Kernel (D1, lot C du plan).
+/// En attendant, `execute` renvoie toujours [`OrchestrationError::NonImplemente`]
+/// et n'exécute aucune étape.
 #[derive(Debug, Default)]
 pub struct DefaultOrchestrator;
 
@@ -30,8 +78,16 @@ impl DefaultOrchestrator {
 }
 
 impl Orchestrator for DefaultOrchestrator {
-    fn execute(&mut self, _workflow: &Workflow, steps: &[Step]) -> Vec<StepResult> {
-        steps.iter().map(|_step| StepResult::Success).collect()
+    fn execute(
+        &mut self,
+        workflow: &Workflow,
+        steps: &[Step],
+    ) -> Result<Vec<StepResult>, OrchestrationError> {
+        Err(OrchestrationError::NonImplemente(format!(
+            "workflow « {} » ({} étape(s)) : l'exécution est réservée aux opérateurs et au Kernel (D1)",
+            workflow.id,
+            steps.len()
+        )))
     }
 }
 
@@ -48,7 +104,7 @@ mod tests {
     #[test]
     fn test_workflow_execution_structure() {
         let workflow = Workflow::new("wf-1".to_string(), "Test".to_string());
-        let steps = vec![Step {
+        let steps = [Step {
             id: "step-1".to_string(),
             name: "Step 1".to_string(),
         }];
@@ -56,12 +112,17 @@ mod tests {
         assert_eq!(steps.len(), 1);
     }
 
+    /// @id masterbutler_orchestrator_test_refus_explicite
+    /// @role test
+    /// @layer core
+    /// @do verify_default_orchestrator_refuses
+    //@human / @human L'orchestrateur par défaut refuse au lieu d'annoncer un faux succès (K-15).
+    /// @depends masterbutler_orchestrator_execute
     #[test]
-    fn test_default_orchestrator() {
-        use super::{DefaultOrchestrator, Orchestrator, StepResult};
+    fn test_default_orchestrator_refuse_explicitement() {
         let mut orch = DefaultOrchestrator::new();
         let workflow = Workflow::new("wf-1".to_string(), "Test".to_string());
-        let steps = vec![
+        let steps = [
             Step {
                 id: "s1".to_string(),
                 name: "Step 1".to_string(),
@@ -71,9 +132,21 @@ mod tests {
                 name: "Step 2".to_string(),
             },
         ];
-        let results = orch.execute(&workflow, &steps);
-        assert_eq!(results.len(), 2);
-        assert!(matches!(results[0], StepResult::Success));
-        assert!(matches!(results[1], StepResult::Success));
+        let result = orch.execute(&workflow, &steps);
+        assert!(matches!(result, Err(OrchestrationError::NonImplemente(_))));
+    }
+
+    /// @id masterbutler_orchestrator_test_refus_workflow_vide
+    /// @role test
+    /// @layer core
+    /// @do verify_refusal_on_empty_workflow
+    //@human / @human Même un workflow sans étape est refusé (pas de succès vide).
+    /// @depends masterbutler_orchestrator_execute
+    #[test]
+    fn test_default_orchestrator_refuse_workflow_vide() {
+        let mut orch = DefaultOrchestrator::new();
+        let workflow = Workflow::new("wf-vide".to_string(), "Vide".to_string());
+        let err = orch.execute(&workflow, &[]).unwrap_err();
+        assert!(err.to_string().contains("non implémentée"));
     }
 }

@@ -8,7 +8,20 @@
 //!
 //! Détecteur de menaces et dégradation du Miyukini Core System.
 //!
-//! WorrySentinel détecte les menaces, évalue les niveaux de sécurité, et gère la dégradation progressive.
+//! WorrySentinel a pour rôle de détecter les menaces, d'évaluer les niveaux de
+//! sécurité et de gérer la dégradation progressive.
+//!
+//! ## État réel (K-17)
+//!
+//! Ce crate est un **modèle** : types (niveaux de sécurité, menaces, états de
+//! dégradation) et gestionnaires en mémoire qui renvoient des valeurs fixées par
+//! l'appelant. Ce n'est **pas** une gate active : aucune détection réelle n'a lieu
+//! (`DefaultThreatDetector` ne fait que restituer les signaux qu'on lui fournit)
+//! et le niveau courant ne pilote aucune frontière.
+//!
+//! Prévu, non implémenté : signaux des Vigies via CaringNanny (lot 3), lien
+//! niveau WorrySentinel → contraintes StrongFather / BorderGuard, et mécanismes
+//! d'ESCALATION / OVERRIDE (constat K-17, à mettre au plan).
 
 pub mod degradation;
 pub mod security_level;

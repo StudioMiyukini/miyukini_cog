@@ -1,4 +1,15 @@
-//! Module de migration de versions d'EverBuddy
+//! @id     everbuddy_migration
+//! @do     definir_contrat_migration
+//! @role   orchestration
+//! @layer  core
+//! @human  everbuddy — contrat de migration ; aucune application réelle dans le Core.
+//!
+//! Module de migration de versions d'EverBuddy.
+//!
+//! Selon D1 / C-31, EverBuddy décide des migrations mais ne les applique pas :
+//! l'application revient au Kernel et aux opérateurs. [`DefaultMigrationExecutor`]
+//! refuse donc explicitement (C-14, C-12) au lieu de noter une migration comme
+//! appliquée sans l'avoir faite (constat K-15).
 
 /// @id everbuddy_migration
 /// @role data
@@ -52,19 +63,34 @@ pub enum MigrationError {
     //@human / @human Échec de migration.
     /// @depends everbuddy_migration_error
     Failed(String),
+    /// @id everbuddy_migration_error_non_implemente
+    /// @role error
+    /// @layer core
+    /// @do represent_not_implemented
+    //@human / @human Application de migration non implémentée dans le Core (D1) :
+    //@human rien n'a été appliqué ni enregistré.
+    /// @depends everbuddy_migration_error
+    NonImplemente(String),
 }
 
 impl std::fmt::Display for MigrationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MigrationError::Failed(msg) => write!(f, "Migration failed: {msg}"),
+            MigrationError::NonImplemente(msg) => {
+                write!(f, "migration non implémentée : {msg}")
+            }
         }
     }
 }
 
 impl std::error::Error for MigrationError {}
 
-/// Exécuteur par défaut : enregistre les migrations exécutées, exécution no-op (délégation à KindMother côté produit).
+/// Exécuteur par défaut : refuse toute migration (K-15, C-14).
+///
+/// L'application réelle sera déléguée au Kernel / aux opérateurs (D1, lot C du plan).
+/// `execute` renvoie toujours [`MigrationError::NonImplemente`] et n'enregistre rien
+/// dans [`DefaultMigrationExecutor::executed`].
 #[derive(Debug, Default)]
 pub struct DefaultMigrationExecutor {
     executed: Vec<Migration>,
@@ -77,7 +103,8 @@ impl DefaultMigrationExecutor {
         Self::default()
     }
 
-    /// Retourne la liste des migrations déjà exécutées.
+    /// Retourne la liste des migrations réellement appliquées (toujours vide tant que
+    /// l'application n'est pas implémentée).
     #[must_use]
     pub fn executed(&self) -> &[Migration] {
         &self.executed
@@ -86,8 +113,10 @@ impl DefaultMigrationExecutor {
 
 impl MigrationExecutor for DefaultMigrationExecutor {
     fn execute(&mut self, migration: &Migration) -> Result<(), MigrationError> {
-        self.executed.push(migration.clone());
-        Ok(())
+        Err(MigrationError::NonImplemente(format!(
+            "{} -> {} : l'application des migrations est réservée au Kernel et aux opérateurs (D1)",
+            migration.from_version, migration.to_version
+        )))
     }
 }
 
@@ -110,15 +139,22 @@ mod tests {
         assert_eq!(migration.from_version, "1.0");
     }
 
+    /// @id everbuddy_migration_test_refus_explicite
+    /// @role test
+    /// @layer core
+    /// @do verify_default_executor_refuses
+    //@human / @human L'exécuteur par défaut refuse et n'enregistre rien (K-15).
+    /// @depends everbuddy_migration_executor_execute
     #[test]
-    fn test_default_migration_executor() {
+    fn test_default_migration_executor_refuse_explicitement() {
         let mut ex = DefaultMigrationExecutor::new();
         let m = Migration {
             from_version: "1.0".to_string(),
             to_version: "2.0".to_string(),
         };
-        assert!(ex.execute(&m).is_ok());
-        assert_eq!(ex.executed().len(), 1);
-        assert_eq!(ex.executed()[0].to_version, "2.0");
+        let err = ex.execute(&m).unwrap_err();
+        assert!(matches!(err, MigrationError::NonImplemente(_)));
+        assert!(err.to_string().contains("non implémentée"));
+        assert!(ex.executed().is_empty());
     }
 }

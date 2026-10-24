@@ -69,9 +69,7 @@ pub fn read(
     ctx: &GovernedContext,
     executor: &dyn SchemaExecutor,
 ) -> Result<SchemaResult, MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.read_tables(ctx)
 }
 
@@ -85,9 +83,7 @@ pub fn read_table(
     table_name: &str,
     executor: &dyn SchemaExecutor,
 ) -> Result<TableMeta, MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.read_table(ctx, table_name)
 }
 

@@ -30,7 +30,15 @@ chrono     = { version = "0.4", features = ["serde"] }
 uuid       = { version = "1", features = ["v4", "serde"] }
 regex      = "1"
 
+[features]
+default = []
+# Expose `CapabilitiesRuntime::new_with_bypass_gate` (BypassCoreGate).
+# Tests / dev uniquement, jamais en production (K-16).
+dev-bypass = []
+
 [dev-dependencies]
+# Active `dev-bypass` pour les tests d'intégration (tests/*.rs).
+miyualicia = { path = ".", features = ["dev-bypass"] }
 tokio = { version = "1", features = ["full", "test-util"] }
 axum = "0.8"
 miyustt = { path = "../miyustt" }

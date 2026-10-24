@@ -16,9 +16,7 @@ pub fn get(
     key: &str,
     executor: &dyn CacheExecutor,
 ) -> Result<Option<Vec<u8>>, MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.get(ctx, key)
 }
 
@@ -35,9 +33,7 @@ pub fn set(
     ttl_secs: Option<u64>,
     executor: &dyn CacheExecutor,
 ) -> Result<(), MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.set(ctx, key, value, ttl_secs)
 }
 
@@ -52,9 +48,7 @@ pub fn invalidate(
     key_or_pattern: &str,
     executor: &dyn CacheExecutor,
 ) -> Result<u64, MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.invalidate(ctx, key_or_pattern)
 }
 

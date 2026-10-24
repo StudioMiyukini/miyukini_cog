@@ -29,6 +29,8 @@ thiserror   = "2"
 tracing     = "0.1"
 
 [dev-dependencies]
+# Tests uniquement : active le bypass de la gate cores (K-16).
+miyualicia-skills = { path = "../miyualicia-skills", features = ["dev-bypass"] }
 tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
 tempfile    = "3"
 

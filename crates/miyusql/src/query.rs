@@ -39,9 +39,7 @@ pub fn execute(
     params: &[String],
     executor: &dyn QueryExecutor,
 ) -> Result<QueryResult, MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.execute(ctx, sql, params)
 }
 
@@ -57,9 +55,7 @@ pub fn prepare(
     params: &[String],
     executor: &dyn QueryExecutor,
 ) -> Result<(), MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.prepare(ctx, sql, params)
 }
 
@@ -85,17 +81,20 @@ pub trait QueryExecutor: Send + Sync {
     /// @role accessor
     /// @layer tool
     /// @do validate_query
-    //@human / @human Valide la requête sans exécution.
+    //@human / @human Valide la requête sans exécution. Par défaut : refus explicite
+    //@human (C-14) — un exécuteur doit fournir sa propre validation, sinon aucune
+    //@human requête n'est déclarée valide sans avoir été analysée.
     fn prepare(
         &self,
         _ctx: &GovernedContext,
         sql: &str,
-        params: &[String],
+        _params: &[String],
     ) -> Result<(), MiyuSQLError> {
         if sql.trim().is_empty() {
             return Err(MiyuSQLError::Syntax("empty query".into()));
         }
-        let _ = params;
-        Ok(())
+        Err(MiyuSQLError::NonImplemente(
+            "validation de requête non fournie par cet exécuteur".into(),
+        ))
     }
 }

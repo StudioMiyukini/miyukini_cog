@@ -15,9 +15,7 @@ pub fn begin(
     ctx: &GovernedContext,
     executor: &dyn TransactionExecutor,
 ) -> Result<String, MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.begin(ctx)
 }
 
@@ -32,9 +30,7 @@ pub fn commit(
     tx_id: &str,
     executor: &dyn TransactionExecutor,
 ) -> Result<(), MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.commit(ctx, tx_id)
 }
 
@@ -49,9 +45,7 @@ pub fn rollback(
     tx_id: &str,
     executor: &dyn TransactionExecutor,
 ) -> Result<(), MiyuSQLError> {
-    if !ctx.has_mandate() {
-        return Err(MiyuSQLError::NoMandate);
-    }
+    ctx.verifier_mandat()?;
     executor.rollback(ctx, tx_id)
 }
 
