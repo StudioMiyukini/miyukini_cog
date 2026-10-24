@@ -18,6 +18,14 @@
 //! | GET     | /api/market/package/{id}/{version}   | Téléchargement du package          |
 //! | POST    | /api/market/publish                  | Publication d'un package           |
 //! | DELETE  | /api/market/package/{id}/{version}   | Retrait d'un package               |
+//!
+//! # Sécurité (fail-closed)
+//!
+//! - publish / unpublish exigent le jeton développeur/admin défini par la
+//!   variable d'environnement `MIYUKINI_MARKET_DEV_TOKEN` (>= 32 caractères),
+//!   comparé en temps constant. Variable absente → routes désactivées (503).
+//! - `id` (`[a-z0-9_-]{1,64}`) et `version` (semver strict) sont validés avant
+//!   toute construction de chemin disque (anti-traversée).
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -26,6 +34,7 @@ use chrono::Utc;
 use rusqlite::Connection;
 use tokio::sync::Mutex;
 
+use super::forum_auth::secrets_equal;
 use miyumarket::manifest::{ServiceManifest, ServiceSource, ServiceType};
 use miyumarket::package;
 use miyumarket::protocol::{
@@ -43,6 +52,55 @@ pub struct MarketStore {
     db: Arc<Mutex<Connection>>,
     /// Répertoire racine pour le stockage des packages.
     packages_dir: PathBuf,
+    /// Jeton développeur/admin (None = publication/retrait désactivés).
+    developer_token: Option<String>,
+}
+
+/// Variable d'environnement portant le jeton développeur/admin du Market.
+pub const DEV_TOKEN_ENV: &str = "MIYUKINI_MARKET_DEV_TOKEN";
+/// Longueur minimale du jeton développeur.
+const DEV_TOKEN_MIN_LEN: usize = 32;
+
+/// Valide l'identifiant d'un package : `[a-z0-9_-]{1,64}`.
+#[must_use]
+pub fn is_valid_service_id(id: &str) -> bool {
+    !id.is_empty()
+        && id.len() <= 64
+        && id
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'-')
+}
+
+/// Valide une version semver stricte : `X.Y.Z[-prerelease]` (sans métadonnée de build).
+/// Pré-release : identifiants `[0-9A-Za-z-]+` séparés par des points.
+#[must_use]
+pub fn is_valid_version(v: &str) -> bool {
+    if v.is_empty() || v.len() > 64 {
+        return false;
+    }
+    let (core, pre) = match v.split_once('-') {
+        Some((c, p)) => (c, Some(p)),
+        None => (v, None),
+    };
+    let nums: Vec<&str> = core.split('.').collect();
+    if nums.len() != 3 {
+        return false;
+    }
+    let num_ok = |n: &str| {
+        !n.is_empty()
+            && n.len() <= 9
+            && n.bytes().all(|b| b.is_ascii_digit())
+            && (n == "0" || !n.starts_with('0'))
+    };
+    if !nums.iter().all(|n| num_ok(n)) {
+        return false;
+    }
+    match pre {
+        None => true,
+        Some(p) => p.split('.').all(|id| {
+            !id.is_empty() && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+        }),
+    }
 }
 
 impl MarketStore {
@@ -56,11 +114,36 @@ impl MarketStore {
         let store = Self {
             db: Arc::new(Mutex::new(conn)),
             packages_dir: packages_dir.as_ref().to_path_buf(),
+            developer_token: load_dev_token_from_env(),
         };
+        if store.developer_token.is_none() {
+            tracing::warn!(
+                "{} absent ou trop court (< {} caractères) : publication/retrait Market désactivés",
+                DEV_TOKEN_ENV,
+                DEV_TOKEN_MIN_LEN
+            );
+        }
         store.init_schema_sync()?;
         store.seed_official_catalog_sync()?;
         store.sync_package_metadata_sync()?;
         Ok(store)
+    }
+
+    /// Définit le jeton développeur (config/tests). Trop court ou vide → désactivé.
+    #[must_use]
+    pub fn with_developer_token(mut self, token: &str) -> Self {
+        self.developer_token = if token.len() >= DEV_TOKEN_MIN_LEN {
+            Some(token.to_string())
+        } else {
+            None
+        };
+        self
+    }
+
+    /// Publication/retrait activés (jeton configuré) ?
+    #[must_use]
+    pub fn publish_enabled(&self) -> bool {
+        self.developer_token.is_some()
     }
 
     /// Initialise le schéma de la base.
@@ -151,8 +234,10 @@ impl MarketStore {
         drop(stmt);
 
         for (service_id, version) in entries {
-            let package_path = self.package_path(&service_id, &version);
-            if let Ok(bytes) = std::fs::read(&package_path) {
+            let package_bytes = self
+                .package_path(&service_id, &version)
+                .and_then(|p| std::fs::read(p).ok());
+            if let Some(bytes) = package_bytes {
                 let checksum = package::sha256_hex(&bytes);
                 conn.execute(
                     "UPDATE market_services
@@ -175,11 +260,17 @@ impl MarketStore {
         Ok(())
     }
 
-    fn package_path(&self, service_id: &str, version: &str) -> PathBuf {
-        self.packages_dir
-            .join(service_id)
-            .join(version)
-            .join(package::package_filename(service_id, version))
+    /// Chemin disque d'un package ; `None` si `id`/`version` sont invalides (anti-traversée).
+    fn package_path(&self, service_id: &str, version: &str) -> Option<PathBuf> {
+        if !is_valid_service_id(service_id) || !is_valid_version(version) {
+            return None;
+        }
+        Some(
+            self.packages_dir
+                .join(service_id)
+                .join(version)
+                .join(package::package_filename(service_id, version)),
+        )
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -284,16 +375,17 @@ impl MarketStore {
             .validate()
             .map_err(|e| format!("Manifeste invalide : {e}"))?;
 
-        // 2. Vérifier le token développeur
-        self.verify_developer_token(developer_token, &manifest.developer)
-            .await?;
+        // 2. Vérifier le token développeur (fail-closed)
+        self.verify_developer_token(developer_token, &manifest.developer)?;
 
         // 3. Calculer le checksum et valider le package
         let info = package::validate_package(package_data, manifest)
             .map_err(|e| format!("Package invalide : {e}"))?;
 
         // 4. Stocker le fichier package
-        let full_path = self.package_path(&manifest.id, &manifest.version);
+        let full_path = self
+            .package_path(&manifest.id, &manifest.version)
+            .ok_or_else(|| "Identifiant ou version de package invalide".to_string())?;
         if let Some(parent) = full_path.parent() {
             std::fs::create_dir_all(parent)
                 .map_err(|e| format!("Création répertoire package : {e}"))?;
@@ -351,16 +443,16 @@ impl MarketStore {
         version: &str,
         developer_token: &str,
     ) -> Result<UnpublishResponse, String> {
-        // Vérifier que le service existe et que le token est valide
-        let entry = self
-            .get_service(service_id)
+        // Le token est vérifié en premier (fail-closed), puis les paramètres de chemin.
+        self.verify_developer_token(developer_token, "")?;
+        let full_path = self
+            .package_path(service_id, version)
+            .ok_or_else(|| "Identifiant ou version de package invalide".to_string())?;
+        self.get_service(service_id)
             .await
             .ok_or_else(|| format!("Service '{service_id}' introuvable"))?;
-        self.verify_developer_token(developer_token, &entry.manifest.developer)
-            .await?;
 
         // Supprimer le fichier package
-        let full_path = self.package_path(service_id, version);
         if full_path.exists() {
             let _ = std::fs::remove_file(&full_path);
         }
@@ -381,7 +473,7 @@ impl MarketStore {
 
     /// Lit le contenu binaire d'un package pour le téléchargement.
     pub async fn get_package_bytes(&self, service_id: &str, version: &str) -> Option<Vec<u8>> {
-        let full_path = self.package_path(service_id, version);
+        let full_path = self.package_path(service_id, version)?;
         let bytes = std::fs::read(&full_path).ok()?;
 
         let conn = self.db.lock().await;
@@ -393,22 +485,29 @@ impl MarketStore {
         Some(bytes)
     }
 
-    /// Vérifie un token développeur.
-    async fn verify_developer_token(
+    /// Vérifie un token développeur/admin contre la configuration (temps constant).
+    /// Configuration absente → refus systématique (fail-closed).
+    fn verify_developer_token(
         &self,
         token: &str,
-        expected_developer: &str,
+        _expected_developer: &str,
     ) -> Result<(), String> {
-        // Phase 1 : vérification simple par token prédéfini
-        // Phase 2 : intégration avec le système d'authentification Central/Origin
-        if token.is_empty() {
-            return Err("Token développeur requis".into());
+        let Some(expected) = self.developer_token.as_deref() else {
+            return Err("Publication désactivée (jeton non configuré)".into());
+        };
+        if token.is_empty() || !secrets_equal(token, expected) {
+            tracing::warn!("Market : jeton développeur invalide");
+            return Err("Token développeur invalide".into());
         }
-        // Pour les services officiels Miyukini, le token est vérifié contre la config Origin
-        // Pour les tiers, le token est vérifié contre le registre développeurs
-        let _ = expected_developer; // sera utilisé en Phase 2
         Ok(())
     }
+}
+
+/// Charge le jeton développeur depuis l'environnement.
+fn load_dev_token_from_env() -> Option<String> {
+    let v = std::env::var(DEV_TOKEN_ENV).ok()?;
+    let v = v.trim();
+    (v.len() >= DEV_TOKEN_MIN_LEN).then(|| v.to_string())
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -561,32 +660,6 @@ fn official_catalog_seed() -> Vec<ServiceManifest> {
             execution_mode: ExecutionMode::Background,
             binary_name: Some("miyucloud-server.exe".into()),
             platforms: PlatformBinaries { windows_x64: Some("miyucloud-server.exe".into()), ..Default::default() },
-        },
-        ServiceManifest {
-            id: "miyuclicker".into(), name: "Lord of the Click".into(),
-            description: "Premier jeu officiel Miyukini (Idle/Clicker + Carte stratégique)".into(),
-            icon: "\u{1F3AE}".into(), version: "0.1.0".into(),
-            service_type: ServiceType::InterCog, source: ServiceSource::Officiel,
-            developer: "Miyukini".into(), min_central_version: "0.2.0".into(),
-            dependencies: vec![], permissions: vec![ServicePermission::Storage],
-            tags: vec!["jeu".into(), "idle".into(), "clicker".into(), "strategie".into()],
-            homepage: None, checksum: None, package_size: None,
-            execution_mode: ExecutionMode::Standalone,
-            binary_name: Some("miyuclicker.exe".into()),
-            platforms: PlatformBinaries { windows_x64: Some("miyuclicker.exe".into()), ..Default::default() },
-        },
-        ServiceManifest {
-            id: "lord_of_the_castle".into(), name: "Miyukini Survivor".into(),
-            description: "Jeu Survivor/Tower Defense officiel Miyukini".into(),
-            icon: "\u{1F3F0}".into(), version: "0.1.0".into(),
-            service_type: ServiceType::InterCog, source: ServiceSource::Officiel,
-            developer: "Miyukini".into(), min_central_version: "0.2.0".into(),
-            dependencies: vec![], permissions: vec![ServicePermission::Storage],
-            tags: vec!["jeu".into(), "survivor".into(), "tower-defense".into()],
-            homepage: None, checksum: None, package_size: None,
-            execution_mode: ExecutionMode::Standalone,
-            binary_name: Some("lord_of_the_castle.exe".into()),
-            platforms: PlatformBinaries { windows_x64: Some("lord_of_the_castle.exe".into()), ..Default::default() },
         },
     ]
 }
@@ -753,6 +826,71 @@ mod tests {
             .expect("package bytes");
         assert_eq!(bytes, b"dummy package");
 
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    const TEST_TOKEN: &str = "market-dev-token-0123456789abcdefghij";
+
+    #[test]
+    fn version_et_id_valides_et_invalides() {
+        assert!(is_valid_version("1.2.3"));
+        assert!(is_valid_version("0.1.0-beta.1"));
+        for bad in ["../x", "1.2", "1.2.3/..", "01.2.3", "1.2.3+b", "", "1.2.3-", "a.b.c", "1.2.3-a/b"] {
+            assert!(!is_valid_version(bad), "{bad}");
+        }
+        assert!(is_valid_service_id("miyu_cloud-2"));
+        for bad in ["", "../etc", "A", "a/b", "a.b", &"a".repeat(65)] {
+            assert!(!is_valid_service_id(bad), "{bad}");
+        }
+    }
+
+    #[test]
+    fn package_path_refuse_la_traversee() {
+        let (root, db_path, packages_dir) = temp_market_paths("traversal");
+        let store = MarketStore::open(&db_path, &packages_dir).expect("market store");
+        assert!(store.package_path("jaykoa", "../x").is_none());
+        assert!(store.package_path("../jaykoa", "1.0.0").is_none());
+        assert!(store.package_path("jaykoa", "1.0.0").is_some());
+        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+        assert!(runtime
+            .block_on(store.get_package_bytes("jaykoa", "../x"))
+            .is_none());
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn token_developpeur_invalide_ou_absent_refuse() {
+        let (root, db_path, packages_dir) = temp_market_paths("token");
+        let store = MarketStore::open(&db_path, &packages_dir)
+            .expect("market store")
+            .with_developer_token(TEST_TOKEN);
+        assert!(store.publish_enabled());
+        assert!(store.verify_developer_token("", "dev").is_err());
+        assert!(store.verify_developer_token("mauvais", "dev").is_err());
+        assert!(store.verify_developer_token(TEST_TOKEN, "dev").is_ok());
+
+        // Config absente : tout est refusé, même un jeton « plausible ».
+        let store = store.with_developer_token("");
+        assert!(!store.publish_enabled());
+        assert!(store.verify_developer_token(TEST_TOKEN, "dev").is_err());
+        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+        assert!(runtime
+            .block_on(store.unpublish("jaykoa", "0.1.0", TEST_TOKEN))
+            .is_err());
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn unpublish_refuse_version_traversante_meme_avec_bon_token() {
+        let (root, db_path, packages_dir) = temp_market_paths("unpub");
+        let store = MarketStore::open(&db_path, &packages_dir)
+            .expect("market store")
+            .with_developer_token(TEST_TOKEN);
+        let runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+        let err = runtime
+            .block_on(store.unpublish("jaykoa", "../x", TEST_TOKEN))
+            .expect_err("doit être refusé");
+        assert!(err.contains("invalide"));
         let _ = std::fs::remove_dir_all(root);
     }
 }

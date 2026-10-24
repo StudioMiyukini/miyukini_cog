@@ -114,13 +114,18 @@ impl WebServer {
         loop {
             match listener.accept().await {
                 Ok((stream, addr)) => {
-                    match self.rate_limiter.check_connection(addr.ip()).await {
-                        RateLimitResult::Allowed => {}
-                        _ => {
-                            warn!("HTTP rate limit exceeded for {}", addr.ip());
-                            continue;
+                    // Derrière nginx (peer loopback), l'IP réelle n'est connue qu'après
+                    // lecture des en-têtes : le contrôle est alors fait dans handle_connection.
+                    if !is_trusted_proxy(addr.ip()) {
+                        match self.rate_limiter.check_connection(addr.ip()).await {
+                            RateLimitResult::Allowed => {}
+                            _ => {
+                                warn!("HTTP rate limit exceeded for {}", addr.ip());
+                                continue;
+                            }
                         }
                     }
+                    let rate_limiter = Arc::clone(&self.rate_limiter);
 
                     let config = Arc::clone(&self.config);
                     let pool_mgr = Arc::clone(&self.pool_manager);
@@ -142,6 +147,8 @@ impl WebServer {
                             relay_ref,
                             forum_auth_store,
                             market_store,
+                            addr.ip(),
+                            rate_limiter,
                         )
                         .await
                         {
@@ -157,14 +164,80 @@ impl WebServer {
     }
 }
 
-/// Extrait Content-Length des headers (optionnel).
-fn content_length_from_headers(headers: &[String]) -> Option<usize> {
-    const MAX_BODY: usize = 65_536;
+/// Plafond du corps pour les uploads de packages Market (64 Mio).
+const MAX_PACKAGE_BODY: usize = 64 * 1024 * 1024;
+/// Plafond du corps pour toutes les autres routes (1 Mio).
+const MAX_DEFAULT_BODY: usize = 1024 * 1024;
+
+/// Erreur de lecture du corps d'une requête.
+#[derive(Debug, PartialEq, Eq)]
+enum BodyError {
+    /// Content-Length mal formé.
+    Malformed,
+    /// Content-Length supérieur au plafond (413).
+    TooLarge,
+}
+
+/// Extrait Content-Length des headers et le compare au plafond, AVANT toute allocation.
+/// Absent → 0.
+fn content_length_checked(headers: &[String], max: usize) -> Result<usize, BodyError> {
     for line in headers {
         let lower = line.to_lowercase();
         if let Some(v) = lower.strip_prefix("content-length:") {
-            let n: usize = v.trim().parse().ok()?;
-            return Some(n.min(MAX_BODY));
+            let n: usize = v.trim().parse().map_err(|_| BodyError::Malformed)?;
+            if n > max {
+                return Err(BodyError::TooLarge);
+            }
+            return Ok(n);
+        }
+    }
+    Ok(0)
+}
+
+/// Réponse d'erreur pour un corps rejeté.
+fn body_error_response(e: &BodyError) -> RouteResponse {
+    let (status, msg) = match e {
+        BodyError::TooLarge => ("413 Payload Too Large", "payload too large"),
+        BodyError::Malformed => ("400 Bad Request", "invalid content-length"),
+    };
+    RouteResponse::Normal {
+        status: status.to_string(),
+        content_type: "application/json".to_string(),
+        body: format!(r#"{{"ok":false,"success":false,"error":"{msg}"}}"#),
+    }
+}
+
+/// Lit exactement `len` octets sans pré-allocation (la mémoire croît avec les données reçues).
+async fn read_body(
+    reader: &mut (impl AsyncReadExt + Unpin),
+    len: usize,
+) -> std::io::Result<Vec<u8>> {
+    let mut body = Vec::new();
+    let read = reader.take(len as u64).read_to_end(&mut body).await?;
+    if read != len {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::UnexpectedEof,
+            "corps incomplet",
+        ));
+    }
+    Ok(body)
+}
+
+/// Le pair est-il un proxy de confiance (nginx local) ? Seul le loopback l'est.
+fn is_trusted_proxy(ip: std::net::IpAddr) -> bool {
+    ip.to_canonical().is_loopback()
+}
+
+/// IP cliente réelle : `X-Real-IP` UNIQUEMENT si le pair est un proxy de confiance.
+fn effective_client_ip(peer: std::net::IpAddr, headers: &[String]) -> Option<std::net::IpAddr> {
+    if !is_trusted_proxy(peer) {
+        return Some(peer);
+    }
+    for line in headers {
+        if let Some((k, v)) = line.split_once(':') {
+            if k.trim().eq_ignore_ascii_case("x-real-ip") {
+                return v.trim().parse::<std::net::IpAddr>().ok().map(|ip| ip.to_canonical());
+            }
         }
     }
     None
@@ -181,6 +254,8 @@ async fn handle_connection(
     relay_ref: Option<Arc<RelayServer>>,
     forum_auth_store: Option<Arc<forum_auth::ForumAuthStore>>,
     market_store: Option<Arc<market::MarketStore>>,
+    peer_ip: std::net::IpAddr,
+    rate_limiter: Arc<RateLimiter>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (reader, mut writer) = stream.split();
     let mut buf_reader = BufReader::new(reader);
@@ -216,15 +291,37 @@ async fn handle_connection(
 
     debug!("{} {} (Host: {:?})", method, path, host_header);
 
+    // Rate limit par IP réelle quand le pair est le proxy local de confiance.
+    if is_trusted_proxy(peer_ip) {
+        if let Some(real_ip) = effective_client_ip(peer_ip, &headers) {
+            if !matches!(
+                rate_limiter.check_connection(real_ip).await,
+                RateLimitResult::Allowed
+            ) {
+                warn!("HTTP rate limit exceeded for {} (via proxy)", real_ip);
+                let resp = RouteResponse::Normal {
+                    status: "429 Too Many Requests".to_string(),
+                    content_type: "application/json".to_string(),
+                    body: r#"{"ok":false,"success":false,"error":"rate_limited"}"#.to_string(),
+                };
+                write_response(&mut writer, resp).await?;
+                return Ok(());
+            }
+        }
+    }
+
     // Auth Central unifiée : POST /api/auth/* (forum, profile, session, security)
     if method == "POST" && path.starts_with("/api/auth/") {
         if let Some(store) = &forum_auth_store {
-            let len = content_length_from_headers(&headers).unwrap_or(0);
-            let mut body = vec![0u8; len];
-            if !body.is_empty() {
-                buf_reader.read_exact(&mut body).await?;
-            }
-            let route_response = forum_auth::handle_api(path, &body, store.as_ref());
+            let len = match content_length_checked(&headers, MAX_DEFAULT_BODY) {
+                Ok(n) => n,
+                Err(e) => {
+                    write_response(&mut writer, body_error_response(&e)).await?;
+                    return Ok(());
+                }
+            };
+            let body = read_body(&mut buf_reader, len).await?;
+            let route_response = forum_auth::handle_api(path, &body, &headers, store.as_ref());
             write_response(&mut writer, route_response).await?;
             return Ok(());
         }
@@ -307,37 +404,55 @@ async fn handle_connection(
                 }
                 // POST /api/market/publish
                 ("POST", "/api/market/publish") => {
-                    let len = content_length_from_headers(&headers).unwrap_or(0);
-                    let mut body_bytes = vec![0u8; len];
-                    if !body_bytes.is_empty() {
-                        buf_reader.read_exact(&mut body_bytes).await?;
-                    }
-                    let body_str = String::from_utf8_lossy(&body_bytes);
-                    let body = market::api_market_publish(store, &body_str).await;
-                    RouteResponse::Normal {
-                        status: "200 OK".to_string(),
-                        content_type: "application/json".to_string(),
-                        body,
+                    if !store.publish_enabled() {
+                        RouteResponse::Normal {
+                            status: "503 Service Unavailable".to_string(),
+                            content_type: "application/json".to_string(),
+                            body: r#"{"success":false,"error":"Publication désactivée"}"#
+                                .to_string(),
+                        }
+                    } else {
+                        match content_length_checked(&headers, MAX_PACKAGE_BODY) {
+                            Err(e) => body_error_response(&e),
+                            Ok(len) => {
+                                let body_bytes = read_body(&mut buf_reader, len).await?;
+                                let body_str = String::from_utf8_lossy(&body_bytes);
+                                let body = market::api_market_publish(store, &body_str).await;
+                                RouteResponse::Normal {
+                                    status: "200 OK".to_string(),
+                                    content_type: "application/json".to_string(),
+                                    body,
+                                }
+                            }
+                        }
                     }
                 }
                 // DELETE /api/market/package/{id}/{version}
                 ("DELETE", _) if path_clean.starts_with("/api/market/package/") => {
                     let remainder = &path_clean[20..];
                     let parts: Vec<&str> = remainder.splitn(2, '/').collect();
-                    if parts.len() == 2 {
-                        let len = content_length_from_headers(&headers).unwrap_or(0);
-                        let mut body_bytes = vec![0u8; len];
-                        if !body_bytes.is_empty() {
-                            buf_reader.read_exact(&mut body_bytes).await?;
-                        }
-                        let body_str = String::from_utf8_lossy(&body_bytes);
-                        let body =
-                            market::api_market_unpublish(store, parts[0], parts[1], &body_str)
-                                .await;
+                    if parts.len() == 2 && !store.publish_enabled() {
                         RouteResponse::Normal {
-                            status: "200 OK".to_string(),
+                            status: "503 Service Unavailable".to_string(),
                             content_type: "application/json".to_string(),
-                            body,
+                            body: r#"{"success":false,"error":"Retrait désactivé"}"#.to_string(),
+                        }
+                    } else if parts.len() == 2 {
+                        match content_length_checked(&headers, MAX_DEFAULT_BODY) {
+                            Err(e) => body_error_response(&e),
+                            Ok(len) => {
+                                let body_bytes = read_body(&mut buf_reader, len).await?;
+                                let body_str = String::from_utf8_lossy(&body_bytes);
+                                let body = market::api_market_unpublish(
+                                    store, parts[0], parts[1], &body_str,
+                                )
+                                .await;
+                                RouteResponse::Normal {
+                                    status: "200 OK".to_string(),
+                                    content_type: "application/json".to_string(),
+                                    body,
+                                }
+                            }
                         }
                     } else {
                         RouteResponse::Normal {
@@ -1876,5 +1991,30 @@ mod tests {
             rewrite_visit_location("https://miyukini.com", "Miyukini"),
             "https://miyukini.com"
         );
+    }
+
+    #[test]
+    fn content_length_plafonne_avant_allocation() {
+        let h = vec!["Content-Length: 2000000\r\n".to_string()];
+        assert_eq!(super::content_length_checked(&h, 1024 * 1024), Err(super::BodyError::TooLarge));
+        assert_eq!(super::content_length_checked(&h, 64 * 1024 * 1024), Ok(2_000_000));
+        let bad = vec!["Content-Length: abc\r\n".to_string()];
+        assert_eq!(super::content_length_checked(&bad, 10), Err(super::BodyError::Malformed));
+        assert_eq!(super::content_length_checked(&[], 10), Ok(0));
+    }
+
+    #[test]
+    fn x_real_ip_lu_uniquement_depuis_loopback() {
+        let h = vec!["X-Real-IP: 203.0.113.7\r\n".to_string()];
+        let lo: std::net::IpAddr = "127.0.0.1".parse().unwrap();
+        let remote: std::net::IpAddr = "198.51.100.9".parse().unwrap();
+        assert_eq!(
+            super::effective_client_ip(lo, &h),
+            Some("203.0.113.7".parse().unwrap())
+        );
+        // Pair non fiable : l'en-tête usurpé est ignoré.
+        assert_eq!(super::effective_client_ip(remote, &h), Some(remote));
+        // Loopback sans en-tête valide : pas d'IP exploitable.
+        assert_eq!(super::effective_client_ip(lo, &[]), None);
     }
 }

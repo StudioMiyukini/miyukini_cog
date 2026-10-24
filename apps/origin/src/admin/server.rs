@@ -188,13 +188,8 @@ impl AdminServer {
                 break;
             }
             if in_headers && line.to_lowercase().starts_with("cookie:") {
-                let rest = line[7..].trim();
-                for part in rest.split(';') {
-                    let part = part.trim();
-                    if part.starts_with("admin_session=") {
-                        cookie_session = Some(part[13..].trim().to_string());
-                        break;
-                    }
+                if let Some(v) = Self::cookie_value(&line[7..], "admin_session") {
+                    cookie_session = Some(v);
                 }
             }
         }
@@ -202,30 +197,84 @@ impl AdminServer {
         (method, path, cookie_session, body)
     }
 
+    /// Extrait la valeur d'un cookie nommé dans le contenu d'un en-tête `Cookie:`.
+    fn cookie_value(header_rest: &str, name: &str) -> Option<String> {
+        let prefix = format!("{name}=");
+        for part in header_rest.trim().split(';') {
+            if let Some(v) = part.trim().strip_prefix(prefix.as_str()) {
+                return Some(v.trim().to_string());
+            }
+        }
+        None
+    }
+
+    /// L'adresse du pair est-elle un proxy de confiance (nginx local) ?
+    fn is_trusted_proxy(ip: std::net::IpAddr) -> bool {
+        ip.to_canonical().is_loopback()
+    }
+
+    /// IP cliente pour le rate-limit : `X-Real-IP` lu UNIQUEMENT si le pair est
+    /// loopback (proxy de confiance) ; sinon l'IP du pair (en-tête ignoré).
+    fn client_ip(request: &str, peer: std::net::IpAddr) -> std::net::IpAddr {
+        if !Self::is_trusted_proxy(peer) {
+            return peer;
+        }
+        for line in request.lines().skip(1) {
+            if line.is_empty() {
+                break;
+            }
+            if let Some((k, v)) = line.split_once(':') {
+                if k.trim().eq_ignore_ascii_case("x-real-ip") {
+                    if let Ok(ip) = v.trim().parse::<std::net::IpAddr>() {
+                        return ip.to_canonical();
+                    }
+                    break;
+                }
+            }
+        }
+        peer
+    }
+
+    /// Une entrée de rate-limit bloque-t-elle encore à l'instant `now` ?
+    /// Après expiration du blocage (ou de la fenêtre d'inactivité), l'IP est libérée.
+    fn entry_blocks(entry: &(u32, Instant, Option<Instant>), now: Instant) -> bool {
+        let (count, last, blocked_until) = entry;
+        if let Some(until) = blocked_until {
+            return now < *until;
+        }
+        *count >= MAX_LOGIN_ATTEMPTS
+            && now.saturating_duration_since(*last) < Duration::from_secs(LOGIN_BLOCK_DURATION_SECS)
+    }
+
     /// Vérifie si une IP est bloquée pour tentatives de login excessives.
     async fn check_login_rate_limit(auth_state: &AdminAuthState, ip: std::net::IpAddr) -> bool {
         let attempts = auth_state.login_attempts.lock().await;
-        if let Some((count, _, blocked_until)) = attempts.get(&ip) {
-            if let Some(until) = blocked_until {
-                if Instant::now() < *until {
-                    return false;
-                }
-            }
-            if *count >= MAX_LOGIN_ATTEMPTS {
-                return false;
-            }
+        match attempts.get(&ip) {
+            Some(entry) => !Self::entry_blocks(entry, Instant::now()),
+            None => true,
         }
-        true
     }
 
     /// Enregistre une tentative de login échouée.
     async fn record_failed_login(auth_state: &AdminAuthState, ip: std::net::IpAddr) {
         let mut attempts = auth_state.login_attempts.lock().await;
-        let entry = attempts.entry(ip).or_insert((0, Instant::now(), None));
+        let now = Instant::now();
+        let entry = attempts.entry(ip).or_insert((0, now, None));
+        // Entrée dont le blocage/la fenêtre a expiré : on repart de zéro.
+        let expired = match entry.2 {
+            Some(until) => now >= until,
+            None => {
+                now.saturating_duration_since(entry.1)
+                    >= Duration::from_secs(LOGIN_BLOCK_DURATION_SECS)
+            }
+        };
+        if expired {
+            *entry = (0, now, None);
+        }
         entry.0 += 1;
-        entry.1 = Instant::now();
-        if entry.0 >= MAX_LOGIN_ATTEMPTS {
-            entry.2 = Some(Instant::now() + Duration::from_secs(LOGIN_BLOCK_DURATION_SECS));
+        entry.1 = now;
+        if entry.0 >= MAX_LOGIN_ATTEMPTS && entry.2.is_none() {
+            entry.2 = Some(now + Duration::from_secs(LOGIN_BLOCK_DURATION_SECS));
             warn!(
                 "Admin login blocked for IP {} ({} failed attempts)",
                 ip, entry.0
@@ -263,14 +312,14 @@ impl AdminServer {
     /// Réponse redirect vers /admin avec Set-Cookie session (SameSite=Strict + Secure).
     fn redirect_with_session(token: &str, ttl_secs: u64) -> String {
         format!(
-            "HTTP/1.1 302 Found\r\nLocation: /admin/\r\nSet-Cookie: admin_session={}; HttpOnly; SameSite=Strict; Path=/admin; Max-Age={}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+            "HTTP/1.1 302 Found\r\nLocation: /admin/\r\nSet-Cookie: admin_session={}; HttpOnly; Secure; SameSite=Strict; Path=/admin; Max-Age={}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
             token, ttl_secs
         )
     }
 
     /// Réponse redirect vers /admin/login avec cookie supprimé (logout).
     fn redirect_logout() -> String {
-        "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nSet-Cookie: admin_session=; HttpOnly; SameSite=Strict; Path=/admin; Max-Age=0\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
+        "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nSet-Cookie: admin_session=; HttpOnly; Secure; SameSite=Strict; Path=/admin; Max-Age=0\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
     }
 
     /// Gère une requête.
@@ -283,6 +332,7 @@ impl AdminServer {
         peer_addr: SocketAddr,
     ) -> String {
         let (method, path, cookie_session, body) = Self::parse_request(request);
+        let client_ip = Self::client_ip(request, peer_addr.ip());
 
         let path_normalized = if path.starts_with("/admin") {
             path.strip_prefix("/admin").unwrap_or("/").to_string()
@@ -297,14 +347,14 @@ impl AdminServer {
                 return Self::login_form_html(auth_state).await;
             }
             if method == "POST" {
-                if !Self::check_login_rate_limit(auth_state, peer_addr.ip()).await {
+                if !Self::check_login_rate_limit(auth_state, client_ip).await {
                     return Self::http_response(
                         429,
                         "Too Many Requests",
                         "Too many login attempts. Try again later.",
                     );
                 }
-                return Self::login_post(config, body, auth_state, peer_addr.ip()).await;
+                return Self::login_post(config, body, auth_state, client_ip).await;
             }
         }
 
@@ -447,10 +497,12 @@ impl AdminServer {
             }
         };
 
-        if argon2::Argon2::default()
+        // Le mot de passe est toujours vérifié (pas d'oracle sur l'email), puis l'email.
+        let password_ok = argon2::Argon2::default()
             .verify_password(password.as_bytes(), &parsed_hash)
-            .is_err()
-        {
+            .is_ok();
+        let email_ok = Self::emails_match(&email, &auth_config.email);
+        if !(password_ok && email_ok) {
             Self::record_failed_login(auth_state, client_ip).await;
             return Self::redirect_to_login();
         }
@@ -467,6 +519,16 @@ impl AdminServer {
             sessions.insert(token.clone(), Instant::now() + ttl);
         }
         Self::redirect_with_session(&token, auth_config.session_ttl_seconds)
+    }
+
+    /// Compare deux emails (insensible à la casse/espaces) en temps constant.
+    fn emails_match(provided: &str, expected: &str) -> bool {
+        let a = provided.trim().to_lowercase();
+        let b = expected.trim().to_lowercase();
+        if a.len() != b.len() {
+            return false;
+        }
+        a.bytes().zip(b.bytes()).fold(0u8, |d, (x, y)| d | (x ^ y)) == 0
     }
 
     /// Extrait une valeur d'un body application/x-www-form-urlencoded.
@@ -811,5 +873,75 @@ impl AdminServer {
             "HTTP/1.1 {} {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nConnection: close\r\n\r\n{}",
             status, status_text, body.len(), body
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn state() -> AdminAuthState {
+        AdminAuthState {
+            config: None,
+            sessions: Mutex::new(HashMap::new()),
+            login_attempts: Mutex::new(HashMap::new()),
+        }
+    }
+
+    #[test]
+    fn cookie_parse_utilise_le_bon_prefixe() {
+        let req = "GET / HTTP/1.1\r\nCookie: a=1; admin_session=abc123; b=2\r\n\r\n";
+        let (_, _, c, _) = AdminServer::parse_request(req);
+        assert_eq!(c.as_deref(), Some("abc123"));
+        // Ancien bug : offset 13 aurait donné « abc123 » tronqué d'un caractère en moins.
+        let req = "GET / HTTP/1.1\r\nCookie: admin_session=x\r\n\r\n";
+        assert_eq!(AdminServer::parse_request(req).2.as_deref(), Some("x"));
+        let req = "GET / HTTP/1.1\r\nCookie: other_admin_session=zz\r\n\r\n";
+        assert_eq!(AdminServer::parse_request(req).2, None);
+    }
+
+    #[test]
+    fn cookie_session_est_secure() {
+        assert!(AdminServer::redirect_with_session("t", 60).contains("; Secure;"));
+        assert!(AdminServer::redirect_logout().contains("; Secure;"));
+    }
+
+    #[test]
+    fn email_compare_insensible_a_la_casse() {
+        assert!(AdminServer::emails_match(" Admin@X.org ", "admin@x.org"));
+        assert!(!AdminServer::emails_match("autre@x.org", "admin@x.org"));
+    }
+
+    #[test]
+    fn x_real_ip_ignore_hors_loopback() {
+        let req = "POST /login HTTP/1.1\r\nX-Real-IP: 203.0.113.5\r\n\r\n";
+        let lo: std::net::IpAddr = "127.0.0.1".parse().unwrap();
+        let ext: std::net::IpAddr = "198.51.100.1".parse().unwrap();
+        assert_eq!(AdminServer::client_ip(req, lo), "203.0.113.5".parse::<std::net::IpAddr>().unwrap());
+        assert_eq!(AdminServer::client_ip(req, ext), ext);
+        assert_eq!(AdminServer::client_ip("GET / HTTP/1.1\r\n\r\n", lo), lo);
+    }
+
+    #[tokio::test]
+    async fn rate_limit_bloque_puis_se_libere() {
+        let st = state();
+        let ip: std::net::IpAddr = "203.0.113.5".parse().unwrap();
+        let other: std::net::IpAddr = "203.0.113.6".parse().unwrap();
+        for _ in 0..MAX_LOGIN_ATTEMPTS {
+            AdminServer::record_failed_login(&st, ip).await;
+        }
+        assert!(!AdminServer::check_login_rate_limit(&st, ip).await);
+        // Une autre IP (autre client derrière le même proxy) n'est pas affectée.
+        assert!(AdminServer::check_login_rate_limit(&st, other).await);
+        // Expiration du blocage : l'IP est libérée malgré count >= MAX.
+        {
+            let mut m = st.login_attempts.lock().await;
+            let e = m.get_mut(&ip).unwrap();
+            e.2 = Some(Instant::now() - Duration::from_secs(1));
+        }
+        assert!(AdminServer::check_login_rate_limit(&st, ip).await);
+        // Un nouvel échec repart de zéro (pas de re-blocage immédiat).
+        AdminServer::record_failed_login(&st, ip).await;
+        assert!(AdminServer::check_login_rate_limit(&st, ip).await);
     }
 }
