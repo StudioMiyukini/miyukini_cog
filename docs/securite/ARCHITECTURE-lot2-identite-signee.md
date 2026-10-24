@@ -1,5 +1,11 @@
 # Lot 2 — Identité signée : Passeports, Visas et paquets identifiables
 
+<!-- @id securite.lot2.identite-signee -->
+<!-- @role architecture-specification -->
+<!-- @layer 5-6 -->
+<!-- @human Sceau v1, racine COG, passeports, visas, paquets identifiables, registre Merkle, fédération -->
+<!-- @do specify_signed_identity -->
+
 > Statut : **validé** le 2026-10-24 (décisions en section 12). Fait suite à
 > [AUDIT-2026-10-23-auth-wan.md](AUDIT-2026-10-23-auth-wan.md) (constats C3, C8, H7).
 

@@ -1,5 +1,11 @@
 # Audit sécurité — Authentification, WAN, fédération, secrets (2026-10-23)
 
+<!-- @id securite.audit.2026-10-23 -->
+<!-- @role security-audit -->
+<!-- @layer 3-8 -->
+<!-- @human Audit 4 axes (auth, réseau, fédération/crypto, secrets) et plan de remédiation par lots -->
+<!-- @do audit_cog_security_posture -->
+
 Audit en lecture seule de `miyukini-cog` (branche `mscm/reformat-rust`, commit 5f84ffdc), sur 4 axes :
 identité/auth, surface réseau, fédération/crypto, secrets/déploiement. Aucune valeur secrète n'est
 reproduite. **[V]** = vérifié dans le code, **[S]** = supposé (dépend du déploiement).

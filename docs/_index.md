@@ -26,6 +26,7 @@ Index global de la documentation du projet Miyukini COG.
 | [ux_ui/](ux_ui/) | Ressources UX/UI et composants |
 | [legal/](legal/) | Documentation juridique |
 | [securite/](securite/) | Audits de securite transverses (auth, WAN, federation, secrets) |
+| [architecture/](architecture/) | Modele de reference : zones (Nationale, Franche, Federation, International) et couches 3-8 + Kernel |
 
 ## Migration documentaire recente
 
