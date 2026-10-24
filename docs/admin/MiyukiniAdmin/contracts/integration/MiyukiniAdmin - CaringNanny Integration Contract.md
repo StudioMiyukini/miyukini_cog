@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” CaringNanny Integration Contract
+﻿# MiyukiniAdmin — CaringNanny Integration Contract
 
 ## 1. Contexte
 
@@ -143,49 +143,49 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin           BondingBrother              CaringNanny
-     â”‚                        â”‚                          â”‚
-     â”‚â”€â”€MetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (type: realtime)       â”‚                          â”‚
-     â”‚  (interval: 1s)         â”‚                          â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â”€â”€ObserveMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â—€â”€MetricsStreamâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                        â”‚  (continuous)             â”‚
-     â”‚â—€â”€MetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚  (stream)               â”‚                          â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚  [... updates every 1s ...]                       â”‚
+     │                        │                          │
+     │──MetricsRequest────────▶│                          │
+     │  (type: realtime)       │                          │
+     │  (interval: 1s)         │                          │
+     │                        │                          │
+     │                        │──ObserveMetrics──────────▶│
+     │                        │                          │
+     │                        │◀─MetricsStream───────────│
+     │                        │  (continuous)             │
+     │◀─MetricsResponse───────│                          │
+     │  (stream)               │                          │
+     │                        │                          │
+     │  [... updates every 1s ...]                       │
 ```
 
 ### 6.2 Flux Sante Globale
 
 ```
 MiyukiniAdmin           BondingBrother              CaringNanny
-     â”‚                        â”‚                          â”‚
-     â”‚â”€â”€HealthRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â”€â”€GetSystemHealthâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â—€â”€HealthReportâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚â—€â”€HealthResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚  (score, level, alerts) â”‚                          â”‚
+     │                        │                          │
+     │──HealthRequest─────────▶│                          │
+     │                        │                          │
+     │                        │──GetSystemHealth─────────▶│
+     │                        │                          │
+     │                        │◀─HealthReport────────────│
+     │                        │                          │
+     │◀─HealthResponse────────│                          │
+     │  (score, level, alerts) │                          │
 ```
 
 ### 6.3 Flux Etat Operateurs
 
 ```
 MiyukiniAdmin           BondingBrother              CaringNanny
-     â”‚                        â”‚                          â”‚
-     â”‚â”€â”€OperatorsRequestâ”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â”€â”€GetOperatorsStateâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â—€â”€OperatorsStateâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚â—€â”€OperatorsResponseâ”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚  (list with states)     â”‚                          â”‚
+     │                        │                          │
+     │──OperatorsRequest──────▶│                          │
+     │                        │                          │
+     │                        │──GetOperatorsState───────▶│
+     │                        │                          │
+     │                        │◀─OperatorsState──────────│
+     │                        │                          │
+     │◀─OperatorsResponse─────│                          │
+     │  (list with states)     │                          │
 ```
 
 ---
@@ -262,14 +262,14 @@ MiyukiniAdmin           BondingBrother              CaringNanny
 
 ```
 CaringNanny                  BondingBrother           MiyukiniAdmin
-     â”‚                             â”‚                        â”‚
-     â”‚  [Anomalie detectee]        â”‚                        â”‚
-     â”‚                             â”‚                        â”‚
-     â”‚â”€â”€AlertNotificationâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                        â”‚
-     â”‚                             â”‚                        â”‚
-     â”‚                             â”‚â”€â”€ForwardAlertâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚                        â”‚
-     â”‚                             â”‚                        â”‚  [Afficher alerte]
+     │                             │                        │
+     │  [Anomalie detectee]        │                        │
+     │                             │                        │
+     │──AlertNotification─────────▶│                        │
+     │                             │                        │
+     │                             │──ForwardAlert──────────▶│
+     │                             │                        │
+     │                             │                        │  [Afficher alerte]
 ```
 
 ---

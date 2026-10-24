@@ -65,7 +65,7 @@ Ce document est **contractuel et normatif** pour les aspects concernant les inva
 
 ### 3.3. Volume et charge
 
-**Principe :** Le volume d'interventions (nombre d'approbations, overrides, escalades, supervisions) et la charge associee (emission et persistance des traces) relevent des produits et des cores. TAMR exige que chaque intervention soit tracÃ©e et conforme aux types et limites ; il n'impose pas de plafond ni de strategie de lot (batching) pour les traces. Les implementations peuvent optimiser sous reserve de respecter INV-TAMR-1 (tracabilite absolue) et les delais contractuels (ex. RT-SEC-5 si applicable).
+**Principe :** Le volume d'interventions (nombre d'approbations, overrides, escalades, supervisions) et la charge associee (emission et persistance des traces) relevent des produits et des cores. TAMR exige que chaque intervention soit tracée et conforme aux types et limites ; il n'impose pas de plafond ni de strategie de lot (batching) pour les traces. Les implementations peuvent optimiser sous reserve de respecter INV-TAMR-1 (tracabilite absolue) et les delais contractuels (ex. RT-SEC-5 si applicable).
 
 ---
 

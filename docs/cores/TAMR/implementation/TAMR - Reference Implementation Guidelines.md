@@ -109,7 +109,7 @@ Les points d'intervention doivent etre declares selon les categories definies da
 
 1. Un humain active une supervision (perimetre et duree definis).
 2. Le produit enregistre le debut de supervision et la trace (type SUPERVISION, supervisor_id, scope, started_at, duration_planned).
-3. Si le superviseur declenche une intervention, celle-ci est typÃ©e (APPROVAL, OVERRIDE, ESCALATION) et tracee separement.
+3. Si le superviseur declenche une intervention, celle-ci est typée (APPROVAL, OVERRIDE, ESCALATION) et tracee separement.
 4. A la fin (explicite ou timeout), la trace est completee (ended_at, end_reason).
 
 ---

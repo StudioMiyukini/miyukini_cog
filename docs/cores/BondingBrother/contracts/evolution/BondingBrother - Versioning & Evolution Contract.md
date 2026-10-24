@@ -2,130 +2,130 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit les rÃ¨gles de versionnement et d'Ã©volution de Bonding Brother. Il Ã©tablit comment Bonding Brother Ã©volue dans le temps tout en prÃ©servant la stabilitÃ© de l'interface pour les produits et en respectant les invariants fondamentaux.
+Ce document définit les règles de versionnement et d'évolution de Bonding Brother. Il établit comment Bonding Brother évolue dans le temps tout en préservant la stabilité de l'interface pour les produits et en respectant les invariants fondamentaux.
 
-Ce document complÃ¨te la Section 7 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Product Interface Contract](../product/BondingBrother%20-%20Product%20Interface%20Contract.md) et l'[Extension & Specialization Contract](../product/BondingBrother%20-%20Extension%20&%20Specialization%20Contract.md) pour dÃ©finir les rÃ¨gles d'Ã©volution de l'interface.
+Ce document complète la Section 7 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Product Interface Contract](../product/BondingBrother%20-%20Product%20Interface%20Contract.md) et l'[Extension & Specialization Contract](../product/BondingBrother%20-%20Extension%20&%20Specialization%20Contract.md) pour définir les règles d'évolution de l'interface.
 
-L'Ã©volution respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : les nouvelles versions doivent maintenir l'autonomie locale (**LOI-1**, **LOI-2**, **LOI-3**).
+L'évolution respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : les nouvelles versions doivent maintenir l'autonomie locale (**LOI-1**, **LOI-2**, **LOI-3**).
 
 **Navigation :** [Index BondingBrother](../../_index.md)
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- Le schÃ©ma de versionnement (sÃ©mantique)
-- Les rÃ¨gles d'Ã©volution de l'interface
-- Les rÃ¨gles d'Ã©volution des contrats internes
-- Les rÃ¨gles de dÃ©prÃ©ciation
-- Les rÃ¨gles de compatibilitÃ©
-- Le processus d'Ã©volution
+- Le schéma de versionnement (sémantique)
+- Les règles d'évolution de l'interface
+- Les règles d'évolution des contrats internes
+- Les règles de dépréciation
+- Les règles de compatibilité
+- Le processus d'évolution
 - La gestion des breaking changes
 
 Ce document **ne couvre pas** :
-- Les rÃ¨gles de migration (voir [Migration & Compatibility Contract](./BondingBrother%20-%20Migration%20&%20Compatibility%20Contract.md))
-- Les dÃ©tails d'implÃ©mentation du versionnement
-- Le versionnement des autoritÃ©s (Kind Mother, Strong Father)
+- Les règles de migration (voir [Migration & Compatibility Contract](./BondingBrother%20-%20Migration%20&%20Compatibility%20Contract.md))
+- Les détails d'implémentation du versionnement
+- Le versionnement des autorités (Kind Mother, Strong Father)
 
 ---
 
 ## 3. Principes fondamentaux
 
-### 3.1 StabilitÃ© avant tout
+### 3.1 Stabilité avant tout
 
 **Principe EVOL-01 : Interface stable**
 
-L'interface de Bonding Brother vers les produits est stable. Les changements rÃ©tro-incompatibles sont exceptionnels et suivent un processus formel.
+L'interface de Bonding Brother vers les produits est stable. Les changements rétro-incompatibles sont exceptionnels et suivent un processus formel.
 
 **Implications :**
 - Les produits existants continuent de fonctionner
-- Les nouvelles fonctionnalitÃ©s sont additives
-- Les breaking changes nÃ©cessitent une version majeure
-- PÃ©riode de dÃ©prÃ©ciation avant suppression
+- Les nouvelles fonctionnalités sont additives
+- Les breaking changes nécessitent une version majeure
+- Période de dépréciation avant suppression
 
-### 3.2 Ã‰volution par extension
+### 3.2 Évolution par extension
 
 **Principe EVOL-02 : Extension, pas modification**
 
-Bonding Brother Ã©volue par extension (ajout de fonctionnalitÃ©s) plutÃ´t que par modification (changement de fonctionnalitÃ©s existantes).
+Bonding Brother évolue par extension (ajout de fonctionnalités) plutôt que par modification (changement de fonctionnalités existantes).
 
 **Implications :**
-- Nouvelles interfaces spÃ©cialisÃ©es
-- Nouvelles capacitÃ©s optionnelles
-- PrÃ©servation des interfaces existantes
+- Nouvelles interfaces spécialisées
+- Nouvelles capacités optionnelles
+- Préservation des interfaces existantes
 - Coexistence de plusieurs versions d'interfaces
 
 ### 3.3 Invariants immuables
 
-**Principe EVOL-03 : Invariants non nÃ©gociables**
+**Principe EVOL-03 : Invariants non négociables**
 
-Les invariants de Bonding Brother ne changent jamais. Toute Ã©volution doit les prÃ©server.
+Les invariants de Bonding Brother ne changent jamais. Toute évolution doit les préserver.
 
 **Implications :**
 - Pas de modification des invariants
-- Pas de compromis sur les invariants pour de nouvelles fonctionnalitÃ©s
-- Toute Ã©volution est vÃ©rifiÃ©e contre les invariants
+- Pas de compromis sur les invariants pour de nouvelles fonctionnalités
+- Toute évolution est vérifiée contre les invariants
 
 ---
 
-## 4. SchÃ©ma de versionnement
+## 4. Schéma de versionnement
 
-### 4.1 Version sÃ©mantique
+### 4.1 Version sémantique
 
-Bonding Brother utilise le versionnement sÃ©mantique (Semantic Versioning) : `MAJOR.MINOR.PATCH`
+Bonding Brother utilise le versionnement sémantique (Semantic Versioning) : `MAJOR.MINOR.PATCH`
 
 **Format :** `v<MAJOR>.<MINOR>.<PATCH>[-<PRE-RELEASE>][+<BUILD>]`
 
 **Exemples :**
 - `v1.0.0` : Version majeure initiale
-- `v1.1.0` : Nouvelle fonctionnalitÃ© (compatible)
+- `v1.1.0` : Nouvelle fonctionnalité (compatible)
 - `v1.1.1` : Correction de bug (compatible)
 - `v2.0.0` : Breaking change
-- `v2.0.0-alpha.1` : PrÃ©-version (alpha)
-- `v2.0.0-beta.1` : PrÃ©-version (beta)
-- `v2.0.0+20260126` : Build avec mÃ©tadonnÃ©es
+- `v2.0.0-alpha.1` : Pré-version (alpha)
+- `v2.0.0-beta.1` : Pré-version (beta)
+- `v2.0.0+20260126` : Build avec métadonnées
 
-### 4.2 RÃ¨gles d'incrÃ©mentation
+### 4.2 Règles d'incrémentation
 
 #### 4.2.1 Version MAJOR (X.0.0)
 
-**IncrÃ©mentation quand :**
+**Incrémentation quand :**
 - Breaking change de l'interface produit
 - Modification d'un invariant (interdit, voir EVOL-03)
 - Changement de comportement contractuel majeur
 - Suppression d'une interface publique
 
-**RÃ¨gle MAJOR-01 : Breaking change formel**
+**Règle MAJOR-01 : Breaking change formel**
 
-Tout breaking change nÃ©cessite :
-1. Justification documentÃ©e
-2. PÃ©riode de dÃ©prÃ©ciation (minimum 6 mois)
+Tout breaking change nécessite :
+1. Justification documentée
+2. Période de dépréciation (minimum 6 mois)
 3. Plan de migration
 4. Communication aux produits
 
 #### 4.2.2 Version MINOR (x.Y.0)
 
-**IncrÃ©mentation quand :**
-- Nouvelle fonctionnalitÃ© (additive, compatible)
-- Nouvelle interface spÃ©cialisÃ©e
-- Nouvelle capacitÃ© optionnelle
+**Incrémentation quand :**
+- Nouvelle fonctionnalité (additive, compatible)
+- Nouvelle interface spécialisée
+- Nouvelle capacité optionnelle
 - Extension d'une interface existante (champs optionnels)
 
-**RÃ¨gle MINOR-01 : CompatibilitÃ© ascendante**
+**Règle MINOR-01 : Compatibilité ascendante**
 
-Les versions mineures sont rÃ©tro-compatibles :
-- Les produits utilisant une version mineure antÃ©rieure continuent de fonctionner
-- Les nouvelles fonctionnalitÃ©s sont optionnelles
-- Les champs existants ne sont pas modifiÃ©s
+Les versions mineures sont rétro-compatibles :
+- Les produits utilisant une version mineure antérieure continuent de fonctionner
+- Les nouvelles fonctionnalités sont optionnelles
+- Les champs existants ne sont pas modifiés
 
 #### 4.2.3 Version PATCH (x.y.Z)
 
-**IncrÃ©mentation quand :**
+**Incrémentation quand :**
 - Correction de bug
-- Correction de sÃ©curitÃ©
-- AmÃ©lioration de performance (sans changement d'interface)
+- Correction de sécurité
+- Amélioration de performance (sans changement d'interface)
 - Correction de documentation
 
-**RÃ¨gle PATCH-01 : Pas de changement d'interface**
+**Règle PATCH-01 : Pas de changement d'interface**
 
 Les versions patch ne modifient jamais l'interface publique.
 
@@ -137,8 +137,8 @@ Les versions patch ne modifient jamais l'interface publique.
 
 **Composant :** `ProductGateway`, `IIntentSubmission`, `IResultConsumption`, `INotificationSubscription`
 
-**RÃ¨gles :**
-- VersionnÃ©e indÃ©pendamment : `v<MAJOR>.<MINOR>.<PATCH>`
+**Règles :**
+- Versionnée indépendamment : `v<MAJOR>.<MINOR>.<PATCH>`
 - Breaking change = nouvelle version MAJOR
 - Extension = nouvelle version MINOR
 - Correction = nouvelle version PATCH
@@ -146,182 +146,182 @@ Les versions patch ne modifient jamais l'interface publique.
 **Exemple :**
 - `IIntentSubmission v1.0.0` : Interface initiale
 - `IIntentSubmission v1.1.0` : Nouveau champ optionnel
-- `IIntentSubmission v2.0.0` : Champ obligatoire modifiÃ© (breaking)
+- `IIntentSubmission v2.0.0` : Champ obligatoire modifié (breaking)
 
 ### 5.2 Contrats internes
 
 **Composants :** `ITranslation`, `IFiltering`, `IJournaling`, `IAuthorityRouting`
 
-**RÃ¨gles :**
-- VersionnÃ©s indÃ©pendamment
+**Règles :**
+- Versionnés indépendamment
 - Changements internes n'affectent pas la version de l'interface produit
 - Breaking change interne = nouvelle version MAJOR du contrat interne
 
 **Exemple :**
 - `ITranslation v1.0.0` : Contrat initial
-- `ITranslation v2.0.0` : Nouvelle mÃ©thode obligatoire (breaking interne)
+- `ITranslation v2.0.0` : Nouvelle méthode obligatoire (breaking interne)
 - Interface produit reste `v1.x.x` si compatible
 
 ### 5.3 Configuration
 
-**Composant :** `ConfigurationStore`, rÃ¨gles de configuration
+**Composant :** `ConfigurationStore`, règles de configuration
 
-**RÃ¨gles :**
-- VersionnÃ©e avec Bonding Brother
+**Règles :**
+- Versionnée avec Bonding Brother
 - Changements de format de configuration = version MAJOR
 - Nouvelles options = version MINOR
 - Corrections = version PATCH
 
 ---
 
-## 6. RÃ¨gles d'Ã©volution de l'interface
+## 6. Règles d'évolution de l'interface
 
-### 6.1 Ajout de fonctionnalitÃ©s
+### 6.1 Ajout de fonctionnalités
 
-**RÃ¨gle EVOL-IFACE-01 : Additif uniquement**
+**Règle EVOL-IFACE-01 : Additif uniquement**
 
-Les nouvelles fonctionnalitÃ©s sont ajoutÃ©es sans modifier les fonctionnalitÃ©s existantes.
+Les nouvelles fonctionnalités sont ajoutées sans modifier les fonctionnalités existantes.
 
-**AutorisÃ© :**
-- Nouvelle mÃ©thode dans une interface
+**Autorisé :**
+- Nouvelle méthode dans une interface
 - Nouveau champ optionnel dans une structure
 - Nouveau type d'intention
-- Nouvelle capacitÃ© optionnelle
+- Nouvelle capacité optionnelle
 
 **Interdit :**
-- Modification d'une mÃ©thode existante
-- Suppression d'une mÃ©thode existante
+- Modification d'une méthode existante
+- Suppression d'une méthode existante
 - Modification d'un champ existant (sauf version MAJOR)
 - Changement de signature
 
-### 6.2 Modification de fonctionnalitÃ©s
+### 6.2 Modification de fonctionnalités
 
-**RÃ¨gle EVOL-IFACE-02 : DÃ©prÃ©ciation puis modification**
+**Règle EVOL-IFACE-02 : Dépréciation puis modification**
 
-Avant de modifier une fonctionnalitÃ© existante :
-1. DÃ©prÃ©ciation (marquage comme `@deprecated`)
-2. PÃ©riode de dÃ©prÃ©ciation (minimum 6 mois)
+Avant de modifier une fonctionnalité existante :
+1. Dépréciation (marquage comme `@deprecated`)
+2. Période de dépréciation (minimum 6 mois)
 3. Communication aux produits
 4. Modification dans version MAJOR suivante
 
 **Processus :**
 ```
-v1.0.0 : MÃ©thode `createContent()` disponible
-v1.1.0 : MÃ©thode `createContent()` marquÃ©e @deprecated, nouvelle mÃ©thode `createContentV2()` ajoutÃ©e
-v1.x.x : PÃ©riode de dÃ©prÃ©ciation (6+ mois)
-v2.0.0 : MÃ©thode `createContent()` supprimÃ©e, `createContentV2()` devient `createContent()`
+v1.0.0 : Méthode `createContent()` disponible
+v1.1.0 : Méthode `createContent()` marquée @deprecated, nouvelle méthode `createContentV2()` ajoutée
+v1.x.x : Période de dépréciation (6+ mois)
+v2.0.0 : Méthode `createContent()` supprimée, `createContentV2()` devient `createContent()`
 ```
 
-### 6.3 Suppression de fonctionnalitÃ©s
+### 6.3 Suppression de fonctionnalités
 
-**RÃ¨gle EVOL-IFACE-03 : DÃ©prÃ©ciation obligatoire**
+**Règle EVOL-IFACE-03 : Dépréciation obligatoire**
 
-Aucune fonctionnalitÃ© publique n'est supprimÃ©e sans dÃ©prÃ©ciation prÃ©alable.
+Aucune fonctionnalité publique n'est supprimée sans dépréciation préalable.
 
 **Processus :**
 1. Marquage `@deprecated` avec message d'avertissement
 2. Documentation de la migration
-3. PÃ©riode de dÃ©prÃ©ciation (minimum 6 mois, recommandÃ© 12 mois)
+3. Période de dépréciation (minimum 6 mois, recommandé 12 mois)
 4. Suppression dans version MAJOR suivante
 
-### 6.4 Extension par spÃ©cialisation
+### 6.4 Extension par spécialisation
 
-**RÃ¨gle EVOL-IFACE-04 : SpÃ©cialisation autorisÃ©e**
+**Règle EVOL-IFACE-04 : Spécialisation autorisée**
 
-De nouvelles interfaces spÃ©cialisÃ©es peuvent Ãªtre crÃ©Ã©es pour Ã©tendre les capacitÃ©s sans modifier les interfaces existantes.
+De nouvelles interfaces spécialisées peuvent être créées pour étendre les capacités sans modifier les interfaces existantes.
 
 **Exemple :**
 - `IIntentSubmission v1.0.0` : Interface de base
-- `IAdvancedIntentSubmission v1.0.0` : Interface spÃ©cialisÃ©e (hÃ©rite de `IIntentSubmission`)
+- `IAdvancedIntentSubmission v1.0.0` : Interface spécialisée (hérite de `IIntentSubmission`)
 - Les deux coexistent, les produits peuvent choisir
 
 ---
 
-## 7. RÃ¨gles de compatibilitÃ©
+## 7. Règles de compatibilité
 
-### 7.1 CompatibilitÃ© ascendante
+### 7.1 Compatibilité ascendante
 
-**RÃ¨gle COMPAT-01 : RÃ©trocompatibilitÃ©**
+**Règle COMPAT-01 : Rétrocompatibilité**
 
-Les versions mineures et patch sont rÃ©tro-compatibles :
+Les versions mineures et patch sont rétro-compatibles :
 - Un produit utilisant `v1.0.0` fonctionne avec Bonding Brother `v1.5.0`
-- Un produit utilisant `v1.5.0` fonctionne avec Bonding Brother `v1.0.0` (sauf nouvelles fonctionnalitÃ©s)
+- Un produit utilisant `v1.5.0` fonctionne avec Bonding Brother `v1.0.0` (sauf nouvelles fonctionnalités)
 
 **Garanties :**
-- Les interfaces existantes ne sont pas modifiÃ©es
-- Les comportements existants sont prÃ©servÃ©s
-- Les nouvelles fonctionnalitÃ©s sont optionnelles
+- Les interfaces existantes ne sont pas modifiées
+- Les comportements existants sont préservés
+- Les nouvelles fonctionnalités sont optionnelles
 
-### 7.2 CompatibilitÃ© descendante
+### 7.2 Compatibilité descendante
 
-**RÃ¨gle COMPAT-02 : Pas de garantie descendante**
+**Règle COMPAT-02 : Pas de garantie descendante**
 
-Bonding Brother ne garantit pas la compatibilitÃ© descendante :
+Bonding Brother ne garantit pas la compatibilité descendante :
 - Un produit utilisant `v2.0.0` peut ne pas fonctionner avec Bonding Brother `v1.5.0`
 - Les produits doivent utiliser une version compatible de Bonding Brother
 
 **Implications :**
-- Les produits doivent spÃ©cifier la version minimale requise
-- Les breaking changes sont documentÃ©s
-- Les migrations sont guidÃ©es
+- Les produits doivent spécifier la version minimale requise
+- Les breaking changes sont documentés
+- Les migrations sont guidées
 
 ### 7.3 Coexistence de versions
 
-**RÃ¨gle COMPAT-03 : Multi-version supportÃ©e**
+**Règle COMPAT-03 : Multi-version supportée**
 
-Bonding Brother peut supporter plusieurs versions d'interfaces simultanÃ©ment :
-- `IIntentSubmission v1.0.0` : SupportÃ©e
-- `IIntentSubmission v2.0.0` : SupportÃ©e
-- Les deux coexistent, routage selon la version utilisÃ©e par le produit
+Bonding Brother peut supporter plusieurs versions d'interfaces simultanément :
+- `IIntentSubmission v1.0.0` : Supportée
+- `IIntentSubmission v2.0.0` : Supportée
+- Les deux coexistent, routage selon la version utilisée par le produit
 
-**DurÃ©e de support :**
-- Version N : SupportÃ©e
-- Version N-1 : SupportÃ©e (minimum 12 mois aprÃ¨s version N)
-- Version N-2 : DÃ©prÃ©ciÃ©e (support limitÃ©)
-- Version N-3 : Non supportÃ©e
+**Durée de support :**
+- Version N : Supportée
+- Version N-1 : Supportée (minimum 12 mois après version N)
+- Version N-2 : Dépréciée (support limité)
+- Version N-3 : Non supportée
 
 ---
 
-## 8. Processus d'Ã©volution
+## 8. Processus d'évolution
 
-### 8.1 Proposition d'Ã©volution
+### 8.1 Proposition d'évolution
 
-**Ã‰tape 1 : Proposition**
-- Description de l'Ã©volution
-- Justification (besoin, bÃ©nÃ©fice)
-- Impact (produits, autoritÃ©s, invariants)
+**Étape 1 : Proposition**
+- Description de l'évolution
+- Justification (besoin, bénéfice)
+- Impact (produits, autorités, invariants)
 - Plan de migration (si breaking change)
 
-**Ã‰tape 2 : Revue**
-- VÃ©rification contre les invariants
-- VÃ©rification de compatibilitÃ©
+**Étape 2 : Revue**
+- Vérification contre les invariants
+- Vérification de compatibilité
 - Validation architecturale
 - Approbation
 
-### 8.2 ImplÃ©mentation
+### 8.2 Implémentation
 
-**Ã‰tape 3 : ImplÃ©mentation**
-- DÃ©veloppement selon les rÃ¨gles d'Ã©volution
-- Tests de compatibilitÃ©
-- Tests de rÃ©gression
+**Étape 3 : Implémentation**
+- Développement selon les règles d'évolution
+- Tests de compatibilité
+- Tests de régression
 - Documentation
 
-**Ã‰tape 4 : DÃ©prÃ©ciation (si nÃ©cessaire)**
+**Étape 4 : Dépréciation (si nécessaire)**
 - Marquage `@deprecated`
 - Communication aux produits
-- PÃ©riode de dÃ©prÃ©ciation
+- Période de dépréciation
 
 ### 8.3 Publication
 
-**Ã‰tape 5 : Release**
-- Versionnement selon les rÃ¨gles
+**Étape 5 : Release**
+- Versionnement selon les règles
 - Notes de version
 - Documentation de migration
 - Communication
 
-**Ã‰tape 6 : Support**
+**Étape 6 : Support**
 - Support de la nouvelle version
-- Support des versions prÃ©cÃ©dentes (selon politique)
+- Support des versions précédentes (selon politique)
 - Monitoring des migrations
 
 ---
@@ -331,8 +331,8 @@ Bonding Brother peut supporter plusieurs versions d'interfaces simultanÃ©ment 
 ### 9.1 Types de breaking changes
 
 **Breaking change d'interface :**
-- Modification de signature de mÃ©thode
-- Suppression de mÃ©thode
+- Modification de signature de méthode
+- Suppression de méthode
 - Modification de champ obligatoire
 - Changement de comportement contractuel
 
@@ -344,75 +344,75 @@ Bonding Brother peut supporter plusieurs versions d'interfaces simultanÃ©ment 
 **Breaking change de configuration :**
 - Modification de format de configuration
 - Suppression d'option de configuration
-- Changement de valeur par dÃ©faut (si impactant)
+- Changement de valeur par défaut (si impactant)
 
 ### 9.2 Processus de breaking change
 
-**RÃ¨gle BREAK-01 : Processus formel**
+**Règle BREAK-01 : Processus formel**
 
 Tout breaking change suit un processus formel :
 
-1. **Justification :** Pourquoi ce breaking change est nÃ©cessaire
-2. **Impact analysis :** Quels produits sont affectÃ©s
+1. **Justification :** Pourquoi ce breaking change est nécessaire
+2. **Impact analysis :** Quels produits sont affectés
 3. **Plan de migration :** Comment migrer
-4. **PÃ©riode de dÃ©prÃ©ciation :** Minimum 6 mois
+4. **Période de dépréciation :** Minimum 6 mois
 5. **Communication :** Annonce, documentation, support
-6. **Version MAJOR :** IncrÃ©mentation obligatoire
+6. **Version MAJOR :** Incrémentation obligatoire
 
 ### 9.3 Exceptions
 
-**Exception BREAK-EXCEPT-01 : SÃ©curitÃ© critique**
+**Exception BREAK-EXCEPT-01 : Sécurité critique**
 
-En cas de vulnÃ©rabilitÃ© de sÃ©curitÃ© critique, un breaking change peut Ãªtre appliquÃ© immÃ©diatement avec version MAJOR, mais avec communication urgente et support de migration.
+En cas de vulnérabilité de sécurité critique, un breaking change peut être appliqué immédiatement avec version MAJOR, mais avec communication urgente et support de migration.
 
-**Exception BREAK-EXCEPT-02 : Correction d'invariant violÃ©**
+**Exception BREAK-EXCEPT-02 : Correction d'invariant violé**
 
-Si un invariant est violÃ© par erreur dans une version prÃ©cÃ©dente, la correction (qui peut Ãªtre un breaking change) est appliquÃ©e avec version MAJOR et communication.
+Si un invariant est violé par erreur dans une version précédente, la correction (qui peut être un breaking change) est appliquée avec version MAJOR et communication.
 
 ---
 
-## 10. DÃ©prÃ©ciation
+## 10. Dépréciation
 
-### 10.1 Marquage de dÃ©prÃ©ciation
+### 10.1 Marquage de dépréciation
 
-**RÃ¨gle DEPREC-01 : Marquage explicite**
+**Règle DEPREC-01 : Marquage explicite**
 
-Toute fonctionnalitÃ© dÃ©prÃ©ciÃ©e est marquÃ©e explicitement :
+Toute fonctionnalité dépréciée est marquée explicitement :
 - Annotation `@deprecated` dans le code
-- Documentation de dÃ©prÃ©ciation
+- Documentation de dépréciation
 - Message d'avertissement dans les logs
-- Date de suppression prÃ©vue
+- Date de suppression prévue
 
 **Format de message :**
 ```
 @deprecated Since v1.5.0, will be removed in v2.0.0. Use createContentV2() instead.
 ```
 
-### 10.2 PÃ©riode de dÃ©prÃ©ciation
+### 10.2 Période de dépréciation
 
-**RÃ¨gle DEPREC-02 : Minimum 6 mois**
+**Règle DEPREC-02 : Minimum 6 mois**
 
-La pÃ©riode de dÃ©prÃ©ciation est d'au minimum 6 mois, recommandÃ© 12 mois.
+La période de dépréciation est d'au minimum 6 mois, recommandé 12 mois.
 
 **Calcul :**
-- Date de dÃ©prÃ©ciation : Date de publication de la version avec `@deprecated`
+- Date de dépréciation : Date de publication de la version avec `@deprecated`
 - Date de suppression : Date de publication de la version MAJOR suivante
-- PÃ©riode : Minimum 6 mois entre les deux
+- Période : Minimum 6 mois entre les deux
 
-### 10.3 Communication de dÃ©prÃ©ciation
+### 10.3 Communication de dépréciation
 
-**RÃ¨gle DEPREC-03 : Communication proactive**
+**Règle DEPREC-03 : Communication proactive**
 
-La dÃ©prÃ©ciation est communiquÃ©e :
+La dépréciation est communiquée :
 - Dans les notes de version
 - Dans la documentation
-- Via des alertes (si configurÃ©)
+- Via des alertes (si configuré)
 - Via le support (si contact)
 
 **Contenu :**
-- Ce qui est dÃ©prÃ©ciÃ©
-- Pourquoi c'est dÃ©prÃ©ciÃ©
-- Quand ce sera supprimÃ©
+- Ce qui est déprécié
+- Pourquoi c'est déprécié
+- Quand ce sera supprimé
 - Comment migrer
 
 ---
@@ -421,48 +421,48 @@ La dÃ©prÃ©ciation est communiquÃ©e :
 
 ### 11.1 Documents contractuels
 
-**RÃ¨gle DOC-VER-01 : Versionnement alignÃ©**
+**Règle DOC-VER-01 : Versionnement aligné**
 
-Les documents contractuels sont versionnÃ©s et alignÃ©s avec les versions de Bonding Brother :
-- Document `v1.0.0` correspond Ã  Bonding Brother `v1.0.0`
-- Document `v2.0.0` correspond Ã  Bonding Brother `v2.0.0`
+Les documents contractuels sont versionnés et alignés avec les versions de Bonding Brother :
+- Document `v1.0.0` correspond à Bonding Brother `v1.0.0`
+- Document `v2.0.0` correspond à Bonding Brother `v2.0.0`
 
 **Format :**
-- En-tÃªte du document : `Version : 1.0`
+- En-tête du document : `Version : 1.0`
 - Historique des versions dans le document
-- Liens vers versions prÃ©cÃ©dentes
+- Liens vers versions précédentes
 
-### 11.2 Ã‰volution des documents
+### 11.2 Évolution des documents
 
-**RÃ¨gle DOC-VER-02 : PrÃ©servation de l'historique**
+**Règle DOC-VER-02 : Préservation de l'historique**
 
-Les documents Ã©voluent en prÃ©servant l'historique :
+Les documents évoluent en préservant l'historique :
 - Nouvelle version = nouveau document ou section
 - Anciennes versions restent accessibles
-- Changelog documentÃ©
+- Changelog documenté
 
 ---
 
 ## 12. Exemples
 
-### 12.1 Ã‰volution mineure (v1.0.0 â†’ v1.1.0)
+### 12.1 Évolution mineure (v1.0.0 → v1.1.0)
 
 **Changement :** Ajout d'un nouveau type d'intention `SYNC_CONTENT`
 
 **Impact :** Aucun (additif)
 
-**CompatibilitÃ© :** RÃ©tro-compatible
+**Compatibilité :** Rétro-compatible
 
-**Migration :** Aucune nÃ©cessaire
+**Migration :** Aucune nécessaire
 
-### 12.2 Ã‰volution majeure (v1.5.0 â†’ v2.0.0)
+### 12.2 Évolution majeure (v1.5.0 → v2.0.0)
 
-**Changement :** Suppression de la mÃ©thode `createContent()`, remplacement par `createContentV2()`
+**Changement :** Suppression de la méthode `createContent()`, remplacement par `createContentV2()`
 
 **Processus :**
-1. v1.5.0 : `createContent()` marquÃ©e `@deprecated`
-2. v1.6.0 - v1.9.0 : PÃ©riode de dÃ©prÃ©ciation (12 mois)
-3. v2.0.0 : `createContent()` supprimÃ©e, `createContentV2()` devient `createContent()`
+1. v1.5.0 : `createContent()` marquée `@deprecated`
+2. v1.6.0 - v1.9.0 : Période de dépréciation (12 mois)
+3. v2.0.0 : `createContent()` supprimée, `createContentV2()` devient `createContent()`
 
 **Impact :** Produits utilisant `createContent()` doivent migrer
 
@@ -472,16 +472,16 @@ Les documents Ã©voluent en prÃ©servant l'historique :
 
 ## 13. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles de versionnement et d'Ã©volution de Bonding Brother qui doivent Ãªtre respectÃ©es pour garantir la stabilitÃ© et l'Ã©volutivitÃ©.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles de versionnement et d'évolution de Bonding Brother qui doivent être respectées pour garantir la stabilité et l'évolutivité.
 
-Toute Ã©volution de Bonding Brother doit respecter ces rÃ¨gles. Toute violation doit Ãªtre corrigÃ©e ou justifiÃ©e par une exception documentÃ©e.
+Toute évolution de Bonding Brother doit respecter ces règles. Toute violation doit être corrigée ou justifiée par une exception documentée.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice v1.0](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) (Section 7)
 - [Product Interface Contract v1.0](../product/BondingBrother%20-%20Product%20Interface%20Contract.md)
 - [Extension & Specialization Contract v1.0](../product/BondingBrother%20-%20Extension%20&%20Specialization%20Contract.md)

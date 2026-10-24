@@ -35,17 +35,17 @@ Publication d'un article : le systeme atteint un point d'approbation ; un editeu
 | `approver_id` | editor-alice |
 | `requested_at` | 2026-01-28T10:00:00Z (local) |
 | `resolved_at` | 2026-01-28T10:05:00Z (local) |
-| `result` | APPROUVÃ‰ |
+| `result` | APPROUVÉ |
 | `subject` | Publication article article-12345 |
 | `context` | process_id=CONTENT-LIFECYCLE, point_id=IP-CONTENT-PUBLISH-001 |
 
 ### Cas refus
 
-Si `editor-alice` refuse : `result` = REFUSÃ‰ ; le processus n'execute pas la publication.
+Si `editor-alice` refuse : `result` = REFUSÉ ; le processus n'execute pas la publication.
 
 ### Cas expiration
 
-Si aucun retour avant timeout (ex. 24h) : `result` = EXPIRÃ‰ ; le comportement par defaut (ex. refus par defaut) est applique et trace.
+Si aucun retour avant timeout (ex. 24h) : `result` = EXPIRÉ ; le comportement par defaut (ex. refus par defaut) est applique et trace.
 
 ---
 
@@ -155,7 +155,7 @@ L'intervention OVERRIDE declenchee pendant la supervision a sa propre trace (int
 
 | Type | Moment | Acteur typique | Resultat trace |
 |------|--------|----------------|----------------|
-| APPROVAL | Avant action | Approbateur designe | APPROUVÃ‰ / REFUSÃ‰ / EXPIRÃ‰ |
+| APPROVAL | Avant action | Approbateur designe | APPROUVÉ / REFUSÉ / EXPIRÉ |
 | OVERRIDE | Apres decision auto | Humain autorise | FORCE / BLOCK + justification |
 | ESCALATION | En cours | Initiateur + niveau superieur | resolution + timeout_behavior |
 | SUPERVISION | Continu | Superviseur | started_at, ended_at, interventions_triggered |

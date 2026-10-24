@@ -2,395 +2,395 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le flux contractuel dÃ©taillÃ© des intentions depuis les produits vers l'Ã©cosystÃ¨me via Bonding Brother. Il spÃ©cifie les Ã©tapes prÃ©cises, les transformations, les validations, et les garanties associÃ©es au flux Produit â†’ Ã‰cosystÃ¨me.
+Ce document définit le flux contractuel détaillé des intentions depuis les produits vers l'écosystème via Bonding Brother. Il spécifie les étapes précises, les transformations, les validations, et les garanties associées au flux Produit → Écosystème.
 
-Ce document complÃ¨te la Section 5 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Bilateral Flow Contract](./BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour la vue d'ensemble, l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) pour la structure des intentions, et le [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) pour les rÃ¨gles de traduction.
+Ce document complète la Section 5 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Bilateral Flow Contract](./BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour la vue d'ensemble, l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) pour la structure des intentions, et le [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) pour les règles de traduction.
 
-Ce flux respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : il fonctionne mÃªme en mode offline (**LOI-2**), et les intentions sont prÃ©servÃ©es localement mÃªme sans connexion aux autoritÃ©s (**LOI-3**).
+Ce flux respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : il fonctionne même en mode offline (**LOI-2**), et les intentions sont préservées localement même sans connexion aux autorités (**LOI-3**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- Le flux complet Produit â†’ Ã‰cosystÃ¨me (Ã©tape par Ã©tape)
-- Les transformations appliquÃ©es Ã  chaque Ã©tape
-- Les validations et vÃ©rifications effectuÃ©es
-- Les rÃ¨gles de routage vers les autoritÃ©s
+- Le flux complet Produit → Écosystème (étape par étape)
+- Les transformations appliquées à chaque étape
+- Les validations et vérifications effectuées
+- Les règles de routage vers les autorités
 - Les garanties de traitement
 - Les cas d'erreur et leur gestion
 
 Ce document **ne couvre pas** :
-- Le flux inverse Ã‰cosystÃ¨me â†’ Produit (voir [Ecosystem-to-Product Flow](./BondingBrother%20-%20Ecosystem-to-Product%20Flow.md))
-- Les dÃ©tails de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
+- Le flux inverse Écosystème → Produit (voir [Ecosystem-to-Product Flow](./BondingBrother%20-%20Ecosystem-to-Product%20Flow.md))
+- Les détails de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
 - La gestion des erreurs (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20%26%20Rejection%20Model.md))
-- Les protocoles d'intÃ©gration avec les autoritÃ©s (voir les contrats d'intÃ©gration)
+- Les protocoles d'intégration avec les autorités (voir les contrats d'intégration)
 
 ---
 
 ## 3. Principe fondamental
 
-**Le flux Produit â†’ Ã‰cosystÃ¨me est unidirectionnel, asymÃ©trique, et toujours adaptatif.**
+**Le flux Produit → Écosystème est unidirectionnel, asymétrique, et toujours adaptatif.**
 
-Les produits expriment des intentions dans leur vocabulaire. Bonding Brother adapte ces intentions au vocabulaire et aux contraintes des autoritÃ©s, sans jamais demander aux autoritÃ©s de s'adapter aux produits.
+Les produits expriment des intentions dans leur vocabulaire. Bonding Brother adapte ces intentions au vocabulaire et aux contraintes des autorités, sans jamais demander aux autorités de s'adapter aux produits.
 
 ---
 
 ## 4. Vue d'ensemble du flux
 
-Le flux Produit â†’ Ã‰cosystÃ¨me traverse les Ã©tapes suivantes dans l'ordre strict :
+Le flux Produit → Écosystème traverse les étapes suivantes dans l'ordre strict :
 
 ```
 PRODUIT
-  â”‚
-  â–¼
-[1] RÃ©ception de l'intention
-  â”‚
-  â–¼
+  │
+  ▼
+[1] Réception de l'intention
+  │
+  ▼
 [2] Validation structurelle
-  â”‚
-  â–¼
-[3] Traduction intention â†’ demande
-  â”‚
-  â–¼
-[4] Filtrage d'entrÃ©e
-  â”‚
-  â–¼
+  │
+  ▼
+[3] Traduction intention → demande
+  │
+  ▼
+[4] Filtrage d'entrée
+  │
+  ▼
 [5] Journalisation
-  â”‚
-  â–¼
-[6] Routage vers autoritÃ©
-  â”‚
-  â–¼
-[7] Transmission Ã  l'autoritÃ©
-  â”‚
-  â–¼
-[8] Attente de rÃ©ponse
-  â”‚
-  â–¼
-[9] RÃ©ception de la rÃ©ponse
-  â”‚
-  â–¼
-[10] Traduction rÃ©ponse â†’ rÃ©sultat
-  â”‚
-  â–¼
+  │
+  ▼
+[6] Routage vers autorité
+  │
+  ▼
+[7] Transmission à l'autorité
+  │
+  ▼
+[8] Attente de réponse
+  │
+  ▼
+[9] Réception de la réponse
+  │
+  ▼
+[10] Traduction réponse → résultat
+  │
+  ▼
 [11] Filtrage de sortie
-  â”‚
-  â–¼
-[12] Transmission du rÃ©sultat au produit
-  â”‚
-  â–¼
+  │
+  ▼
+[12] Transmission du résultat au produit
+  │
+  ▼
 PRODUIT
 ```
 
 ---
 
-## 5. Ã‰tapes dÃ©taillÃ©es
+## 5. Étapes détaillées
 
-### 5.1 Ã‰tape 1 : RÃ©ception de l'intention
+### 5.1 Étape 1 : Réception de l'intention
 
-**DÃ©clencheur :** Le produit soumet une intention Ã  Bonding Brother via l'interface `IIntentSubmission`.
+**Déclencheur :** Le produit soumet une intention à Bonding Brother via l'interface `IIntentSubmission`.
 
-**Action :** Bonding Brother reÃ§oit l'intention dans le format et le vocabulaire du produit.
+**Action :** Bonding Brother reçoit l'intention dans le format et le vocabulaire du produit.
 
-**Validation :** Aucune validation Ã  ce stade, uniquement rÃ©ception.
+**Validation :** Aucune validation à ce stade, uniquement réception.
 
-**RÃ©sultat :** Intention reÃ§ue, Ã©tat `CRÃ‰Ã‰E`.
+**Résultat :** Intention reçue, état `CRÉÉE`.
 
-**RÃ¨gle REC-01 : RÃ©ception immÃ©diate**
+**Règle REC-01 : Réception immédiate**
 
-Bonding Brother accepte immÃ©diatement toute intention structurellement valide (JSON valide), mÃªme si la validation sÃ©mantique Ã©choue plus tard.
+Bonding Brother accepte immédiatement toute intention structurellement valide (JSON valide), même si la validation sémantique échoue plus tard.
 
-**RÃ¨gle REC-02 : Pas de rejet prÃ©coce**
+**Règle REC-02 : Pas de rejet précoce**
 
-Aucun rejet n'est effectuÃ© Ã  cette Ã©tape, sauf si l'intention n'est pas un JSON valide.
+Aucun rejet n'est effectué à cette étape, sauf si l'intention n'est pas un JSON valide.
 
 ---
 
-### 5.2 Ã‰tape 2 : Validation structurelle
+### 5.2 Étape 2 : Validation structurelle
 
-**DÃ©clencheur :** Intention reÃ§ue et parsÃ©e.
+**Déclencheur :** Intention reçue et parsée.
 
-**Action :** Bonding Brother valide la structure de l'intention selon le schÃ©ma dÃ©fini dans l'Intent Model Contract.
+**Action :** Bonding Brother valide la structure de l'intention selon le schéma défini dans l'Intent Model Contract.
 
-**Validations effectuÃ©es :**
+**Validations effectuées :**
 - Format JSON valide
-- PrÃ©sence des champs obligatoires (`id`, `produit_id`, `type`, `payload`, `contexte`, `timestamp`, `version`)
-- Types de donnÃ©es conformes
-- Version du schÃ©ma supportÃ©e
+- Présence des champs obligatoires (`id`, `produit_id`, `type`, `payload`, `contexte`, `timestamp`, `version`)
+- Types de données conformes
+- Version du schéma supportée
 - Type d'intention reconnu
 
-**RÃ©sultat :**
-- Si validation rÃ©ussie : Ã‰tat `VALIDÃ‰E`, passage Ã  l'Ã©tape suivante
-- Si validation Ã©choue : Ã‰tat `REJETÃ‰E`, transmission d'un rÃ©sultat d'erreur au produit
+**Résultat :**
+- Si validation réussie : État `VALIDÉE`, passage à l'étape suivante
+- Si validation échoue : État `REJETÉE`, transmission d'un résultat d'erreur au produit
 
-**RÃ¨gle VAL-01 : Validation stricte**
+**Règle VAL-01 : Validation stricte**
 
-Toute intention non conforme est rejetÃ©e immÃ©diatement, sans tentative de correction ou d'infÃ©rence.
+Toute intention non conforme est rejetée immédiatement, sans tentative de correction ou d'inférence.
 
-**RÃ¨gle VAL-02 : Pas de validation mÃ©tier**
+**Règle VAL-02 : Pas de validation métier**
 
-Bonding Brother ne valide pas le contenu mÃ©tier du payload. Cette validation appartient aux autoritÃ©s.
+Bonding Brother ne valide pas le contenu métier du payload. Cette validation appartient aux autorités.
 
 ---
 
-### 5.3 Ã‰tape 3 : Traduction intention â†’ demande
+### 5.3 Étape 3 : Traduction intention → demande
 
-**DÃ©clencheur :** Intention validÃ©e structurellement.
+**Déclencheur :** Intention validée structurellement.
 
-**Action :** Bonding Brother traduit l'intention (vocabulaire produit) en demande (vocabulaire autoritÃ©) selon les rÃ¨gles du Translation Contract.
+**Action :** Bonding Brother traduit l'intention (vocabulaire produit) en demande (vocabulaire autorité) selon les règles du Translation Contract.
 
-**Transformations appliquÃ©es :**
+**Transformations appliquées :**
 - Mapping du type d'intention vers le type de demande
 - Traduction champ par champ du payload
-- PrÃ©servation intÃ©grale du contexte
-- Ajout de mÃ©tadonnÃ©es techniques (intention_id, timestamp_demande)
+- Préservation intégrale du contexte
+- Ajout de métadonnées techniques (intention_id, timestamp_demande)
 
-**RÃ©sultat :**
-- Si traduction rÃ©ussie : Demande crÃ©Ã©e, Ã©tat `TRADUITE`
-- Si traduction Ã©choue : Ã‰tat `REJETÃ‰E`, transmission d'un rÃ©sultat d'erreur au produit
+**Résultat :**
+- Si traduction réussie : Demande créée, état `TRADUITE`
+- Si traduction échoue : État `REJETÉE`, transmission d'un résultat d'erreur au produit
 
-**RÃ¨gle TRAD-01 : FidÃ©litÃ© sÃ©mantique**
+**Règle TRAD-01 : Fidélité sémantique**
 
-La traduction prÃ©serve intÃ©gralement la sÃ©mantique de l'intention. Aucune interprÃ©tation ni enrichissement mÃ©tier n'est autorisÃ©.
+La traduction préserve intégralement la sémantique de l'intention. Aucune interprétation ni enrichissement métier n'est autorisé.
 
-**RÃ¨gle TRAD-02 : DÃ©terminisme**
+**Règle TRAD-02 : Déterminisme**
 
-Pour une mÃªme intention, la traduction produit toujours la mÃªme demande.
+Pour une même intention, la traduction produit toujours la même demande.
 
-**RÃ¨gle TRAD-03 : Identification de l'autoritÃ©**
+**Règle TRAD-03 : Identification de l'autorité**
 
-La traduction identifie l'autoritÃ© cible (Kind Mother ou Strong Father) en fonction du type d'intention.
+La traduction identifie l'autorité cible (Kind Mother ou Strong Father) en fonction du type d'intention.
 
 ---
 
-### 5.4 Ã‰tape 4 : Filtrage d'entrÃ©e
+### 5.4 Étape 4 : Filtrage d'entrée
 
-**DÃ©clencheur :** Demande traduite et prÃªte.
+**Déclencheur :** Demande traduite et prête.
 
-**Action :** Bonding Brother applique les rÃ¨gles de filtrage d'entrÃ©e dÃ©finies dans le Filtering & Projection Contract.
+**Action :** Bonding Brother applique les règles de filtrage d'entrée définies dans le Filtering & Projection Contract.
 
-**Filtrages appliquÃ©s :**
+**Filtrages appliqués :**
 - Rejet des demandes manifestement invalides
-- VÃ©rification des contraintes prÃ©-transmission
-- Application des rÃ¨gles de sÃ©curitÃ© d'entrÃ©e
+- Vérification des contraintes pré-transmission
+- Application des règles de sécurité d'entrée
 
-**RÃ©sultat :**
-- Si filtrage accepte : Ã‰tat `FILTRÃ‰E`, passage Ã  l'Ã©tape suivante
-- Si filtrage rejette : Ã‰tat `REJETÃ‰E`, transmission d'un rÃ©sultat d'erreur au produit
+**Résultat :**
+- Si filtrage accepte : État `FILTRÉE`, passage à l'étape suivante
+- Si filtrage rejette : État `REJETÉE`, transmission d'un résultat d'erreur au produit
 
-**RÃ¨gle FILT-01 : Filtrage prÃ©ventif**
+**Règle FILT-01 : Filtrage préventif**
 
-Le filtrage d'entrÃ©e protÃ¨ge les autoritÃ©s en rejetant les demandes invalides avant transmission.
+Le filtrage d'entrée protège les autorités en rejetant les demandes invalides avant transmission.
 
-**RÃ¨gle FILT-02 : Pas de dÃ©cision mÃ©tier**
+**Règle FILT-02 : Pas de décision métier**
 
-Le filtrage ne prend pas de dÃ©cision mÃ©tier. Il applique uniquement des rÃ¨gles techniques et de sÃ©curitÃ©.
+Le filtrage ne prend pas de décision métier. Il applique uniquement des règles techniques et de sécurité.
 
 ---
 
-### 5.5 Ã‰tape 5 : Journalisation
+### 5.5 Étape 5 : Journalisation
 
-**DÃ©clencheur :** Demande filtrÃ©e et prÃªte pour transmission.
+**Déclencheur :** Demande filtrée et prête pour transmission.
 
-**Action :** Bonding Brother journalise l'intention complÃ¨te dans le journal d'audit.
+**Action :** Bonding Brother journalise l'intention complète dans le journal d'audit.
 
-**Informations journalisÃ©es :**
-- Intention complÃ¨te (structure + payload)
+**Informations journalisées :**
+- Intention complète (structure + payload)
 - Contexte complet
-- Timestamp de rÃ©ception
-- IdentitÃ© du produit
-- Ã‰tat actuel (`JOURNALISÃ‰E`)
+- Timestamp de réception
+- Identité du produit
+- État actuel (`JOURNALISÉE`)
 
-**RÃ©sultat :** Intention journalisÃ©e, Ã©tat `JOURNALISÃ‰E`, passage Ã  l'Ã©tape suivante.
+**Résultat :** Intention journalisée, état `JOURNALISÉE`, passage à l'étape suivante.
 
-**RÃ¨gle JOUR-01 : Journalisation systÃ©matique**
+**Règle JOUR-01 : Journalisation systématique**
 
-Toute intention qui atteint cette Ã©tape est journalisÃ©e, sans exception.
+Toute intention qui atteint cette étape est journalisée, sans exception.
 
-**RÃ¨gle JOUR-02 : ImmuabilitÃ©**
+**Règle JOUR-02 : Immuabilité**
 
-Une fois journalisÃ©e, l'intention ne peut Ãªtre modifiÃ©e. Les corrections se font par nouvelle intention.
+Une fois journalisée, l'intention ne peut être modifiée. Les corrections se font par nouvelle intention.
 
-**RÃ¨gle JOUR-03 : TraÃ§abilitÃ© complÃ¨te**
+**Règle JOUR-03 : Traçabilité complète**
 
-Le journal permet de tracer l'intention complÃ¨te depuis sa rÃ©ception jusqu'Ã  sa rÃ©solution.
-
----
-
-### 5.6 Ã‰tape 6 : Routage vers autoritÃ©
-
-**DÃ©clencheur :** Intention journalisÃ©e et prÃªte pour transmission.
-
-**Action :** Bonding Brother dÃ©termine l'autoritÃ© cible et route la demande vers l'adaptateur appropriÃ©.
-
-**RÃ¨gles de routage :**
-- Intentions de type donnÃ©es (CREATE_CONTENT, UPDATE_CONTENT, etc.) â†’ Kind Mother
-- Intentions de type hiÃ©rarchie (CREATE_NODE, MOVE_NODE, etc.) â†’ Kind Mother
-- Intentions de type identitÃ© (AUTHENTICATE, AUTHORIZE, etc.) â†’ Strong Father
-- Intentions de type session (CREATE_SESSION, REVOKE_SESSION) â†’ Strong Father
-
-**RÃ©sultat :** AutoritÃ© identifiÃ©e, adaptateur sÃ©lectionnÃ©, passage Ã  l'Ã©tape suivante.
-
-**RÃ¨gle ROUT-01 : Routage dÃ©terministe**
-
-Le routage est dÃ©terministe : un type d'intention mappe toujours vers la mÃªme autoritÃ©.
-
-**RÃ¨gle ROUT-02 : Pas d'intentions multi-autoritÃ©s**
-
-Une intention ne peut cibler qu'une seule autoritÃ©. Les intentions multi-autoritÃ©s sont interdites.
+Le journal permet de tracer l'intention complète depuis sa réception jusqu'à sa résolution.
 
 ---
 
-### 5.7 Ã‰tape 7 : Transmission Ã  l'autoritÃ©
+### 5.6 Étape 6 : Routage vers autorité
 
-**DÃ©clencheur :** AutoritÃ© identifiÃ©e et adaptateur sÃ©lectionnÃ©.
+**Déclencheur :** Intention journalisée et prête pour transmission.
 
-**Action :** Bonding Brother transmet la demande Ã  l'autoritÃ© via l'adaptateur appropriÃ© (KindMotherAdapter ou StrongFatherAdapter).
+**Action :** Bonding Brother détermine l'autorité cible et route la demande vers l'adaptateur approprié.
+
+**Règles de routage :**
+- Intentions de type données (CREATE_CONTENT, UPDATE_CONTENT, etc.) → Kind Mother
+- Intentions de type hiérarchie (CREATE_NODE, MOVE_NODE, etc.) → Kind Mother
+- Intentions de type identité (AUTHENTICATE, AUTHORIZE, etc.) → Strong Father
+- Intentions de type session (CREATE_SESSION, REVOKE_SESSION) → Strong Father
+
+**Résultat :** Autorité identifiée, adaptateur sélectionné, passage à l'étape suivante.
+
+**Règle ROUT-01 : Routage déterministe**
+
+Le routage est déterministe : un type d'intention mappe toujours vers la même autorité.
+
+**Règle ROUT-02 : Pas d'intentions multi-autorités**
+
+Une intention ne peut cibler qu'une seule autorité. Les intentions multi-autorités sont interdites.
+
+---
+
+### 5.7 Étape 7 : Transmission à l'autorité
+
+**Déclencheur :** Autorité identifiée et adaptateur sélectionné.
+
+**Action :** Bonding Brother transmet la demande à l'autorité via l'adaptateur approprié (KindMotherAdapter ou StrongFatherAdapter).
 
 **Transmission :**
-- Format : Demande traduite dans le vocabulaire de l'autoritÃ©
-- Contexte : Contexte complet prÃ©servÃ©
-- MÃ©tadonnÃ©es : MÃ©tadonnÃ©es techniques ajoutÃ©es
+- Format : Demande traduite dans le vocabulaire de l'autorité
+- Contexte : Contexte complet préservé
+- Métadonnées : Métadonnées techniques ajoutées
 
-**RÃ©sultat :**
-- Si transmission rÃ©ussie : Ã‰tat `TRANSMISE`, passage Ã  l'Ã©tape suivante
-- Si transmission Ã©choue (offline) : Ã‰tat `EN_ERREUR`, mise en buffer pour retry ultÃ©rieur
+**Résultat :**
+- Si transmission réussie : État `TRANSMISE`, passage à l'étape suivante
+- Si transmission échoue (offline) : État `EN_ERREUR`, mise en buffer pour retry ultérieur
 
-**RÃ¨gle TRANS-01 : Transmission fidÃ¨le**
+**Règle TRANS-01 : Transmission fidèle**
 
-La demande est transmise intÃ©gralement, sans modification ni interprÃ©tation.
+La demande est transmise intégralement, sans modification ni interprétation.
 
-**RÃ¨gle TRANS-02 : Gestion offline**
+**Règle TRANS-02 : Gestion offline**
 
-En cas d'indisponibilitÃ© de l'autoritÃ©, l'intention est mise en buffer et retentÃ©e lors de la reconnexion.
+En cas d'indisponibilité de l'autorité, l'intention est mise en buffer et retentée lors de la reconnexion.
 
-**RÃ¨gle TRANS-03 : Pas de modification**
+**Règle TRANS-03 : Pas de modification**
 
-Bonding Brother ne modifie jamais la demande avant transmission. Toute adaptation a Ã©tÃ© faite lors de la traduction.
+Bonding Brother ne modifie jamais la demande avant transmission. Toute adaptation a été faite lors de la traduction.
 
 ---
 
-### 5.8 Ã‰tape 8 : Attente de rÃ©ponse
+### 5.8 Étape 8 : Attente de réponse
 
-**DÃ©clencheur :** Demande transmise avec succÃ¨s Ã  l'autoritÃ©.
+**Déclencheur :** Demande transmise avec succès à l'autorité.
 
-**Action :** Bonding Brother attend la rÃ©ponse de l'autoritÃ©.
+**Action :** Bonding Brother attend la réponse de l'autorité.
 
-**CaractÃ©ristiques :**
-- Ã‰tat : `EN_ATTENTE`
-- Timeout : Configurable par intention ou par dÃ©faut
+**Caractéristiques :**
+- État : `EN_ATTENTE`
+- Timeout : Configurable par intention ou par défaut
 - Mode asynchrone : Bonding Brother peut traiter d'autres intentions pendant l'attente
 
-**RÃ©sultat :**
-- Si rÃ©ponse reÃ§ue : Passage Ã  l'Ã©tape suivante
-- Si timeout : Ã‰tat `ABANDONNÃ‰E`, transmission d'un rÃ©sultat d'erreur au produit
+**Résultat :**
+- Si réponse reçue : Passage à l'étape suivante
+- Si timeout : État `ABANDONNÉE`, transmission d'un résultat d'erreur au produit
 
-**RÃ¨gle ATT-01 : Pas d'interruption**
+**Règle ATT-01 : Pas d'interruption**
 
-Bonding Brother n'interrompt jamais l'autoritÃ©. Il attend patiemment la rÃ©ponse.
+Bonding Brother n'interrompt jamais l'autorité. Il attend patiemment la réponse.
 
-**RÃ¨gle ATT-02 : Timeout configurable**
+**Règle ATT-02 : Timeout configurable**
 
-Chaque intention peut spÃ©cifier un timeout. Si non spÃ©cifiÃ©, le timeout par dÃ©faut s'applique.
+Chaque intention peut spécifier un timeout. Si non spécifié, le timeout par défaut s'applique.
 
-**RÃ¨gle ATT-03 : Mode asynchrone**
+**Règle ATT-03 : Mode asynchrone**
 
 L'attente est asynchrone. Bonding Brother continue de traiter d'autres intentions pendant l'attente.
 
 ---
 
-### 5.9 Ã‰tape 9 : RÃ©ception de la rÃ©ponse
+### 5.9 Étape 9 : Réception de la réponse
 
-**DÃ©clencheur :** AutoritÃ© a fourni une rÃ©ponse (acceptÃ©e, refusÃ©e, ou erreur).
+**Déclencheur :** Autorité a fourni une réponse (acceptée, refusée, ou erreur).
 
-**Action :** Bonding Brother reÃ§oit la rÃ©ponse de l'autoritÃ© dans son vocabulaire natif.
+**Action :** Bonding Brother reçoit la réponse de l'autorité dans son vocabulaire natif.
 
-**Contenu de la rÃ©ponse :**
-- Statut : AcceptÃ©e, refusÃ©e, ou erreur
-- DonnÃ©es : DonnÃ©es retournÃ©es (si applicable)
+**Contenu de la réponse :**
+- Statut : Acceptée, refusée, ou erreur
+- Données : Données retournées (si applicable)
 - Erreurs : Messages d'erreur (si applicable)
-- MÃ©tadonnÃ©es : MÃ©tadonnÃ©es de l'autoritÃ©
+- Métadonnées : Métadonnées de l'autorité
 
-**RÃ©sultat :** RÃ©ponse reÃ§ue, Ã©tat `Ã‰VALUÃ‰E`, passage Ã  l'Ã©tape suivante.
+**Résultat :** Réponse reçue, état `ÉVALUÉE`, passage à l'étape suivante.
 
-**RÃ¨gle RECP-01 : PrÃ©servation intÃ©grale**
+**Règle RECP-01 : Préservation intégrale**
 
-La rÃ©ponse de l'autoritÃ© est prÃ©servÃ©e intÃ©gralement, sans modification ni interprÃ©tation.
+La réponse de l'autorité est préservée intégralement, sans modification ni interprétation.
 
-**RÃ¨gle RECP-02 : Pas de validation**
+**Règle RECP-02 : Pas de validation**
 
-Bonding Brother ne valide pas la rÃ©ponse de l'autoritÃ©. Il la transmet telle quelle (aprÃ¨s traduction).
+Bonding Brother ne valide pas la réponse de l'autorité. Il la transmet telle quelle (après traduction).
 
 ---
 
-### 5.10 Ã‰tape 10 : Traduction rÃ©ponse â†’ rÃ©sultat
+### 5.10 Étape 10 : Traduction réponse → résultat
 
-**DÃ©clencheur :** RÃ©ponse reÃ§ue de l'autoritÃ©.
+**Déclencheur :** Réponse reçue de l'autorité.
 
-**Action :** Bonding Brother traduit la rÃ©ponse (vocabulaire autoritÃ©) en rÃ©sultat (vocabulaire produit) selon les rÃ¨gles du Translation Contract.
+**Action :** Bonding Brother traduit la réponse (vocabulaire autorité) en résultat (vocabulaire produit) selon les règles du Translation Contract.
 
-**Transformations appliquÃ©es :**
+**Transformations appliquées :**
 - Mapping du statut vers le vocabulaire produit
-- Traduction champ par champ des donnÃ©es
+- Traduction champ par champ des données
 - Traduction des erreurs dans le vocabulaire produit
-- PrÃ©servation de la dÃ©cision de l'autoritÃ©
+- Préservation de la décision de l'autorité
 
-**RÃ©sultat :** RÃ©sultat traduit, prÃªt pour filtrage.
+**Résultat :** Résultat traduit, prêt pour filtrage.
 
-**RÃ¨gle TRAD-R-01 : PrÃ©servation de la dÃ©cision**
+**Règle TRAD-R-01 : Préservation de la décision**
 
-La dÃ©cision de l'autoritÃ© (acceptÃ©e, refusÃ©e, erreur) est prÃ©servÃ©e intÃ©gralement. Aucune modification n'est autorisÃ©e.
+La décision de l'autorité (acceptée, refusée, erreur) est préservée intégralement. Aucune modification n'est autorisée.
 
-**RÃ¨gle TRAD-R-02 : FidÃ©litÃ© sÃ©mantique**
+**Règle TRAD-R-02 : Fidélité sémantique**
 
-La traduction prÃ©serve la sÃ©mantique de la rÃ©ponse. Les donnÃ©es sont traduites, pas interprÃ©tÃ©es.
-
----
-
-### 5.11 Ã‰tape 11 : Filtrage de sortie
-
-**DÃ©clencheur :** RÃ©sultat traduit et prÃªt.
-
-**Action :** Bonding Brother applique les rÃ¨gles de filtrage de sortie dÃ©finies dans le Filtering & Projection Contract.
-
-**Filtrages appliquÃ©s :**
-- Suppression des informations sensibles non autorisÃ©es
-- Adaptation des donnÃ©es selon les permissions du produit
-- Projection des champs nÃ©cessaires uniquement
-
-**RÃ©sultat :** RÃ©sultat filtrÃ©, prÃªt pour transmission au produit.
-
-**RÃ¨gle FILT-S-01 : Filtrage protecteur**
-
-Le filtrage de sortie protÃ¨ge les autoritÃ©s en ne transmettant que les informations autorisÃ©es.
-
-**RÃ¨gle FILT-S-02 : Respect des permissions**
-
-Le filtrage respecte les permissions du produit. Les informations non autorisÃ©es sont omises.
+La traduction préserve la sémantique de la réponse. Les données sont traduites, pas interprétées.
 
 ---
 
-### 5.12 Ã‰tape 12 : Transmission du rÃ©sultat au produit
+### 5.11 Étape 11 : Filtrage de sortie
 
-**DÃ©clencheur :** RÃ©sultat filtrÃ© et prÃªt.
+**Déclencheur :** Résultat traduit et prêt.
 
-**Action :** Bonding Brother transmet le rÃ©sultat au produit via l'interface `IResultConsumption`.
+**Action :** Bonding Brother applique les règles de filtrage de sortie définies dans le Filtering & Projection Contract.
+
+**Filtrages appliqués :**
+- Suppression des informations sensibles non autorisées
+- Adaptation des données selon les permissions du produit
+- Projection des champs nécessaires uniquement
+
+**Résultat :** Résultat filtré, prêt pour transmission au produit.
+
+**Règle FILT-S-01 : Filtrage protecteur**
+
+Le filtrage de sortie protège les autorités en ne transmettant que les informations autorisées.
+
+**Règle FILT-S-02 : Respect des permissions**
+
+Le filtrage respecte les permissions du produit. Les informations non autorisées sont omises.
+
+---
+
+### 5.12 Étape 12 : Transmission du résultat au produit
+
+**Déclencheur :** Résultat filtré et prêt.
+
+**Action :** Bonding Brother transmet le résultat au produit via l'interface `IResultConsumption`.
 
 **Contenu transmis :**
-- Statut : SUCCÃˆS, REFUSÃ‰, ou ERREUR
-- DonnÃ©es : DonnÃ©es filtrÃ©es (si applicable)
+- Statut : SUCCÈS, REFUSÉ, ou ERREUR
+- Données : Données filtrées (si applicable)
 - Erreurs : Messages d'erreur traduits (si applicable)
-- MÃ©tadonnÃ©es : MÃ©tadonnÃ©es de traÃ§abilitÃ©
+- Métadonnées : Métadonnées de traçabilité
 
-**RÃ©sultat :** RÃ©sultat transmis, Ã©tat `RÃ‰SOLUE`, cycle complet terminÃ©.
+**Résultat :** Résultat transmis, état `RÉSOLUE`, cycle complet terminé.
 
-**RÃ¨gle TRANS-R-01 : Transmission complÃ¨te**
+**Règle TRANS-R-01 : Transmission complète**
 
-Le rÃ©sultat est transmis intÃ©gralement au produit, sans modification supplÃ©mentaire.
+Le résultat est transmis intégralement au produit, sans modification supplémentaire.
 
-**RÃ¨gle TRANS-R-02 : Journalisation finale**
+**Règle TRANS-R-02 : Journalisation finale**
 
-La transmission du rÃ©sultat est journalisÃ©e pour complÃ©ter la traÃ§abilitÃ©.
+La transmission du résultat est journalisée pour compléter la traçabilité.
 
 ---
 
@@ -398,53 +398,53 @@ La transmission du rÃ©sultat est journalisÃ©e pour complÃ©ter la traÃ§ab
 
 ### 6.1 Garantie d'ordre
 
-**Engagement :** Les Ã©tapes du flux sont exÃ©cutÃ©es dans l'ordre strict dÃ©fini. Aucune Ã©tape ne peut Ãªtre sautÃ©e ou rÃ©ordonnÃ©e.
+**Engagement :** Les étapes du flux sont exécutées dans l'ordre strict défini. Aucune étape ne peut être sautée ou réordonnée.
 
-**Exception :** En cas d'erreur, le flux peut Ãªtre interrompu et un rÃ©sultat d'erreur peut Ãªtre transmis au produit.
+**Exception :** En cas d'erreur, le flux peut être interrompu et un résultat d'erreur peut être transmis au produit.
 
-### 6.2 Garantie de traÃ§abilitÃ©
+### 6.2 Garantie de traçabilité
 
-**Engagement :** Toute intention qui traverse le flux est traÃ§able de bout en bout. Le journal contient toutes les informations nÃ©cessaires pour reconstruire le flux complet.
+**Engagement :** Toute intention qui traverse le flux est traçable de bout en bout. Le journal contient toutes les informations nécessaires pour reconstruire le flux complet.
 
-### 6.3 Garantie de fidÃ©litÃ©
+### 6.3 Garantie de fidélité
 
-**Engagement :** La sÃ©mantique de l'intention est prÃ©servÃ©e lors de la traduction et de la transmission. La dÃ©cision de l'autoritÃ© est transmise fidÃ¨lement au produit.
+**Engagement :** La sémantique de l'intention est préservée lors de la traduction et de la transmission. La décision de l'autorité est transmise fidèlement au produit.
 
 ### 6.4 Garantie de non-modification
 
-**Engagement :** Bonding Brother ne modifie jamais la dÃ©cision de l'autoritÃ©. Il transmet fidÃ¨lement ce que l'autoritÃ© a dÃ©cidÃ©.
+**Engagement :** Bonding Brother ne modifie jamais la décision de l'autorité. Il transmet fidèlement ce que l'autorité a décidé.
 
 ---
 
 ## 7. Gestion des erreurs
 
-### 7.1 Points d'Ã©chec
+### 7.1 Points d'échec
 
-Le flux peut Ã©chouer aux Ã©tapes suivantes :
-- **Ã‰tape 2** : Validation structurelle Ã©chouÃ©e â†’ Rejet immÃ©diat
-- **Ã‰tape 3** : Traduction Ã©chouÃ©e â†’ Rejet immÃ©diat
-- **Ã‰tape 4** : Filtrage d'entrÃ©e rejetÃ© â†’ Rejet immÃ©diat
-- **Ã‰tape 7** : Transmission Ã©chouÃ©e â†’ Mise en buffer (mode offline)
-- **Ã‰tape 8** : Timeout â†’ Abandon
-- **Ã‰tape 9** : RÃ©ponse d'erreur de l'autoritÃ© â†’ Transmission de l'erreur au produit
+Le flux peut échouer aux étapes suivantes :
+- **Étape 2** : Validation structurelle échouée → Rejet immédiat
+- **Étape 3** : Traduction échouée → Rejet immédiat
+- **Étape 4** : Filtrage d'entrée rejeté → Rejet immédiat
+- **Étape 7** : Transmission échouée → Mise en buffer (mode offline)
+- **Étape 8** : Timeout → Abandon
+- **Étape 9** : Réponse d'erreur de l'autorité → Transmission de l'erreur au produit
 
 ### 7.2 Traitement des erreurs
 
-**RÃ¨gle ERR-01 : Notification immÃ©diate**
+**Règle ERR-01 : Notification immédiate**
 
-Toute erreur dÃ©tectÃ©e est notifiÃ©e immÃ©diatement au produit via un rÃ©sultat d'erreur.
+Toute erreur détectée est notifiée immédiatement au produit via un résultat d'erreur.
 
-**RÃ¨gle ERR-02 : Journalisation des erreurs**
+**Règle ERR-02 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisÃ©es pour audit et analyse.
+Toutes les erreurs sont journalisées pour audit et analyse.
 
-**RÃ¨gle ERR-03 : Pas de retry automatique**
+**Règle ERR-03 : Pas de retry automatique**
 
-Les erreurs de validation, traduction, ou filtrage ne sont pas retentÃ©es automatiquement (ce ne sont pas des erreurs transitoires).
+Les erreurs de validation, traduction, ou filtrage ne sont pas retentées automatiquement (ce ne sont pas des erreurs transitoires).
 
-**RÃ¨gle ERR-04 : Retry pour erreurs de transmission**
+**Règle ERR-04 : Retry pour erreurs de transmission**
 
-Les erreurs de transmission sont retentÃ©es lors de la reconnexion (mode offline).
+Les erreurs de transmission sont retentées lors de la reconnexion (mode offline).
 
 ---
 
@@ -452,100 +452,100 @@ Les erreurs de transmission sont retentÃ©es lors de la reconnexion (mode offli
 
 ### 8.1 Comportement en mode offline
 
-En mode offline, les Ã©tapes 7 Ã  9 peuvent Ãªtre diffÃ©rÃ©es :
+En mode offline, les étapes 7 à 9 peuvent être différées :
 
-- **Ã‰tape 7** : La transmission est mise en buffer
-- **Ã‰tape 8** : L'attente est diffÃ©rÃ©e jusqu'Ã  la reconnexion
-- **Ã‰tape 9** : La rÃ©ception est diffÃ©rÃ©e jusqu'Ã  la reconnexion
+- **Étape 7** : La transmission est mise en buffer
+- **Étape 8** : L'attente est différée jusqu'à la reconnexion
+- **Étape 9** : La réception est différée jusqu'à la reconnexion
 
-Les Ã©tapes 1 Ã  6 et 10 Ã  12 continuent de fonctionner normalement.
+Les étapes 1 à 6 et 10 à 12 continuent de fonctionner normalement.
 
-### 8.2 Synchronisation Ã  la reconnexion
+### 8.2 Synchronisation à la reconnexion
 
 Lors de la reconnexion, Bonding Brother :
 1. Transmet toutes les intentions en buffer
-2. Attend les rÃ©ponses
-3. Transmet les rÃ©sultats aux produits
+2. Attend les réponses
+3. Transmet les résultats aux produits
 
-Voir [Sync & Reconnection Contract](../offline/BondingBrother%20-%20Sync%20%26%20Reconnection%20Contract.md) pour les dÃ©tails.
+Voir [Sync & Reconnection Contract](../offline/BondingBrother%20-%20Sync%20%26%20Reconnection%20Contract.md) pour les détails.
 
 ---
 
 ## 9. Performance et limites
 
-### 9.1 DÃ©lais
+### 9.1 Délais
 
-**DÃ©lai de traitement :** Le dÃ©lai total dÃ©pend de :
-- Temps de validation (instantanÃ©)
-- Temps de traduction (instantanÃ©)
-- Temps de filtrage (instantanÃ©)
-- Temps de transmission Ã  l'autoritÃ© (variable)
-- Temps d'Ã©valuation par l'autoritÃ© (variable)
-- Temps de traduction de la rÃ©ponse (instantanÃ©)
-- Temps de filtrage de sortie (instantanÃ©)
+**Délai de traitement :** Le délai total dépend de :
+- Temps de validation (instantané)
+- Temps de traduction (instantané)
+- Temps de filtrage (instantané)
+- Temps de transmission à l'autorité (variable)
+- Temps d'évaluation par l'autorité (variable)
+- Temps de traduction de la réponse (instantané)
+- Temps de filtrage de sortie (instantané)
 
-**Timeout par dÃ©faut :** 30 secondes (configurable)
+**Timeout par défaut :** 30 secondes (configurable)
 
 ### 9.2 Limites
 
 **Taille maximale d'intention :** 1 MB (configurable)
 **Taille maximale de contexte :** 100 KB (configurable)
-**Nombre d'intentions en attente :** IllimitÃ© (sous rÃ©serve de ressources)
+**Nombre d'intentions en attente :** Illimité (sous réserve de ressources)
 
 ---
 
 ## 10. Exemples
 
-### 10.1 Flux complet : CrÃ©ation de contenu
+### 10.1 Flux complet : Création de contenu
 
 ```
 1. Produit soumet intention CREATE_CONTENT
-2. Validation structurelle : âœ…
-3. Traduction : CREATE_CONTENT â†’ create_content (Kind Mother)
-4. Filtrage d'entrÃ©e : âœ…
-5. Journalisation : âœ…
-6. Routage : â†’ Kind Mother
-7. Transmission : âœ…
+2. Validation structurelle : ✅
+3. Traduction : CREATE_CONTENT → create_content (Kind Mother)
+4. Filtrage d'entrée : ✅
+5. Journalisation : ✅
+6. Routage : → Kind Mother
+7. Transmission : ✅
 8. Attente : 2 secondes
-9. RÃ©ception : AcceptÃ©e, content_id = "content-123"
-10. Traduction : AcceptÃ©e â†’ SUCCÃˆS, id = "content-123"
-11. Filtrage de sortie : âœ…
-12. Transmission au produit : âœ…
+9. Réception : Acceptée, content_id = "content-123"
+10. Traduction : Acceptée → SUCCÈS, id = "content-123"
+11. Filtrage de sortie : ✅
+12. Transmission au produit : ✅
 ```
 
-### 10.2 Flux avec erreur : Validation Ã©chouÃ©e
+### 10.2 Flux avec erreur : Validation échouée
 
 ```
 1. Produit soumet intention CREATE_CONTENT (champ obligatoire manquant)
-2. Validation structurelle : âŒ (champ "payload.titre" manquant)
-â†’ Rejet immÃ©diat, rÃ©sultat d'erreur transmis au produit
+2. Validation structurelle : ❌ (champ "payload.titre" manquant)
+→ Rejet immédiat, résultat d'erreur transmis au produit
 ```
 
-### 10.3 Flux avec erreur : AutoritÃ© refuse
+### 10.3 Flux avec erreur : Autorité refuse
 
 ```
-1-7. (identique Ã  l'exemple 10.1)
+1-7. (identique à l'exemple 10.1)
 8. Attente : 1 seconde
-9. RÃ©ception : RefusÃ©e (permission insuffisante)
-10. Traduction : RefusÃ©e â†’ REFUSÃ‰
-11. Filtrage de sortie : âœ…
-12. Transmission au produit : REFUSÃ‰ avec message d'erreur
+9. Réception : Refusée (permission insuffisante)
+10. Traduction : Refusée → REFUSÉ
+11. Filtrage de sortie : ✅
+12. Transmission au produit : REFUSÉ avec message d'erreur
 ```
 
 ---
 
 ## 11. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit le flux dÃ©taillÃ© que Bonding Brother doit respecter pour traiter les intentions des produits vers l'Ã©cosystÃ¨me.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit le flux détaillé que Bonding Brother doit respecter pour traiter les intentions des produits vers l'écosystème.
 
-Toute implÃ©mentation du flux Produit â†’ Ã‰cosystÃ¨me doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
+Toute implémentation du flux Produit → Écosystème doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0 (Section 5)
 - [Bilateral Flow Contract](./BondingBrother%20-%20Bilateral%20Flow%20Contract.md) v2.0
 - [Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) v2.0

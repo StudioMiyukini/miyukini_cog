@@ -1,4 +1,4 @@
-﻿# Kernel â€” Index de Navigation
+﻿# Kernel — Index de Navigation
 
 ## Contexte
 
@@ -6,7 +6,7 @@ Le Kernel est la **fondation technique minimale et reutilisable** du Miyukini Co
 
 Le Kernel represente les **briques transversales essentielles** : identifiants, temps, configuration, logs, lifecycle. Toutes les surfaces (web, mobile, jeu) en dependent pour ces besoins fondamentaux.
 
-**Dans le cadre de Miyukini Core System, le terme Â« kernel Â» designe le noyau technique minimal de la fondation, et non un kernel systeme au sens OS.**
+**Dans le cadre de Miyukini Core System, le terme « kernel » designe le noyau technique minimal de la fondation, et non un kernel systeme au sens OS.**
 
 **Strate :** 0 (Fondation)  
 **Role :** Infrastructure technique minimale et transverse  
@@ -58,7 +58,7 @@ Contrats normatifs et non negociables.
 | Document | Description |
 |----------|-------------|
 | [Invariants & Guarantees](./contracts/Kernel%20-%20Invariants%20&%20Guarantees.md) | Catalogue consolide des invariants INV-K-1 a INV-K-10 |
-| [Security Boundaries Contract](./contracts/Kernel%20-%20Security%20Boundaries%20Contract.md) | Frontieres de securite â€” Ce que le Kernel ne fournit pas |
+| [Security Boundaries Contract](./contracts/Kernel%20-%20Security%20Boundaries%20Contract.md) | Frontieres de securite — Ce que le Kernel ne fournit pas |
 
 ---
 
@@ -87,16 +87,16 @@ Documentation de reference.
 
 | Invariant | Description |
 |-----------|-------------|
-| **INV-K-1** | Aucune logique metier â€” Le Kernel ne contient aucune regle business, auth, facturation, gameplay |
-| **INV-K-2** | Aucune dependance externe critique â€” Fonctionnement complet sans appel reseau obligatoire |
-| **INV-K-3** | Primitives locales sures uniquement â€” Pas de runtime async, pas de serveur HTTP, pas de client externe |
-| **INV-K-4** | Pas de protocole applicatif â€” Aucun HTTP, WebSocket, gRPC, ou format de serialisation impose |
-| **INV-K-5** | Non-mutation â€” Le Kernel ne modifie jamais le code, configurations ou donnees pour "reparer" |
-| **INV-K-6** | Determinisme â€” Toute observation ou attestation produit le meme resultat pour le meme etat d'entree |
-| **INV-K-7** | Explicabilite â€” Toute information fournie est comprehensible sans connaissance du code source |
-| **INV-K-8** | Souverainete locale â€” Les controles fonctionnent sans dependance externe (reseau, SaaS, agent) |
-| **INV-K-9** | Cout proportionnel au hardware â€” Le Kernel tourne sur hardware simple, consommation maitrisee et previsible |
-| **INV-K-10** | Gouvernance preservee â€” Aucune capacite du Kernel ne contourne la chaine de gouvernance (StrongFather, EverBuddy) |
+| **INV-K-1** | Aucune logique metier — Le Kernel ne contient aucune regle business, auth, facturation, gameplay |
+| **INV-K-2** | Aucune dependance externe critique — Fonctionnement complet sans appel reseau obligatoire |
+| **INV-K-3** | Primitives locales sures uniquement — Pas de runtime async, pas de serveur HTTP, pas de client externe |
+| **INV-K-4** | Pas de protocole applicatif — Aucun HTTP, WebSocket, gRPC, ou format de serialisation impose |
+| **INV-K-5** | Non-mutation — Le Kernel ne modifie jamais le code, configurations ou donnees pour "reparer" |
+| **INV-K-6** | Determinisme — Toute observation ou attestation produit le meme resultat pour le meme etat d'entree |
+| **INV-K-7** | Explicabilite — Toute information fournie est comprehensible sans connaissance du code source |
+| **INV-K-8** | Souverainete locale — Les controles fonctionnent sans dependance externe (reseau, SaaS, agent) |
+| **INV-K-9** | Cout proportionnel au hardware — Le Kernel tourne sur hardware simple, consommation maitrisee et previsible |
+| **INV-K-10** | Gouvernance preservee — Aucune capacite du Kernel ne contourne la chaine de gouvernance (StrongFather, EverBuddy) |
 
 ---
 
@@ -143,35 +143,35 @@ Documentation de reference.
 
 | Core | Relation |
 |------|----------|
-| **StrongFather** | Consommateur â€” Utilise les briques Kernel (config, log, id, time, lifecycle) |
-| **KindMother** | Consommateur â€” Utilise les briques Kernel pour persistance et observabilite |
-| **Bonding Brother** | Consommateur â€” Utilise les briques Kernel comme fondation technique |
-| **Caring Nanny** | Consommateur â€” Utilise le logging et time pour l'observation |
-| **Border Guard** | Consommateur â€” Utilise les briques Kernel pour classification |
-| **Master Butler** | Consommateur â€” Utilise les briques Kernel pour orchestration technique |
-| **Ever Buddy** | Consommateur â€” Utilise les briques Kernel pour validation |
-| **LogisticsSteward** | Fournisseur â€” Fournit l'etat systeme abstrait (lecture seule) pour les decisions d'arbitrage des ressources |
+| **StrongFather** | Consommateur — Utilise les briques Kernel (config, log, id, time, lifecycle) |
+| **KindMother** | Consommateur — Utilise les briques Kernel pour persistance et observabilite |
+| **Bonding Brother** | Consommateur — Utilise les briques Kernel comme fondation technique |
+| **Caring Nanny** | Consommateur — Utilise le logging et time pour l'observation |
+| **Border Guard** | Consommateur — Utilise les briques Kernel pour classification |
+| **Master Butler** | Consommateur — Utilise les briques Kernel pour orchestration technique |
+| **Ever Buddy** | Consommateur — Utilise les briques Kernel pour validation |
+| **LogisticsSteward** | Fournisseur — Fournit l'etat systeme abstrait (lecture seule) pour les decisions d'arbitrage des ressources |
 
 ### Diagramme de dependances
 
 ```
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚           Produits                  â”‚
-                    â”‚  (SaaS, Web, Mobile, Jeu)           â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚             Cores                   â”‚
-                    â”‚  StrongFather, KindMother, etc.     â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚            KERNEL                   â”‚
-                    â”‚  config | id | time | log | lifecycleâ”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                    ┌─────────────────────────────────────┐
+                    │           Produits                  │
+                    │  (SaaS, Web, Mobile, Jeu)           │
+                    └───────────────┬─────────────────────┘
+                                    │
+                    ┌───────────────▼─────────────────────┐
+                    │             Cores                   │
+                    │  StrongFather, KindMother, etc.     │
+                    └───────────────┬─────────────────────┘
+                                    │
+                    ┌───────────────▼─────────────────────┐
+                    │            KERNEL                   │
+                    │  config | id | time | log | lifecycle│
+                    └─────────────────────────────────────┘
 
     Dependance strictement unidirectionnelle :
-    Produits â†’ Cores â†’ Kernel
+    Produits → Cores → Kernel
     Jamais l'inverse.
 ```
 
@@ -183,12 +183,12 @@ Le Kernel est **fondamental pour l'autonomie** selon les [Lois d'Autonomie Syste
 
 | Loi | Conformite | Note |
 |-----|------------|------|
-| **LOI-1** | âœ… Role critique | Aucune dependance externe â€” primitives locales uniquement |
-| **LOI-2** | âœ… | Kernel fonctionne en isolation totale |
-| **LOI-3** | âœ… | Configuration et logs locaux souverains |
-| **LOI-4** | âœ… | Time abstrait, pas de dependance a une horloge reseau |
-| **LOI-5** | âœ… Role critique | Minimal, leger, prevu pour hardware simple |
-| **LOI-6** | âœ… | Kernel neutre, n'empeche pas la federation |
+| **LOI-1** | ✅ Role critique | Aucune dependance externe — primitives locales uniquement |
+| **LOI-2** | ✅ | Kernel fonctionne en isolation totale |
+| **LOI-3** | ✅ | Configuration et logs locaux souverains |
+| **LOI-4** | ✅ | Time abstrait, pas de dependance a une horloge reseau |
+| **LOI-5** | ✅ Role critique | Minimal, leger, prevu pour hardware simple |
+| **LOI-6** | ✅ | Kernel neutre, n'empeche pas la federation |
 
 ---
 
@@ -250,10 +250,10 @@ Pour les details, voir [Kernel - Security Boundaries Contract](./contracts/Kerne
 
 ## Documents de reference
 
-- [Miyukini Conceptual References - Glossaire](..//miyukini-webway-system//reference//_index.md) â€” Terminologie officielle
-- [Miyukini Conceptual References - Pyramide Architecture Complete](..//miyukini-webway-system//reference//_index.md) â€” Position du Kernel
-- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](..//miyukini-webway-system//reference//_index.md) â€” Capacites bas niveau
-- [Miyukini Conceptual References - Lois Autonomie Systeme](..//miyukini-webway-system//reference//_index.md) â€” Conformite aux lois
+- [Miyukini Conceptual References - Glossaire](..//miyukini-webway-system//reference//_index.md) — Terminologie officielle
+- [Miyukini Conceptual References - Pyramide Architecture Complete](..//miyukini-webway-system//reference//_index.md) — Position du Kernel
+- [Miyukini Conceptual References - Kernel Maintenance Observability Contract](..//miyukini-webway-system//reference//_index.md) — Capacites bas niveau
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//miyukini-webway-system//reference//_index.md) — Conformite aux lois
 
 ---
 
@@ -268,5 +268,5 @@ Pour les details, voir [Kernel - Security Boundaries Contract](./contracts/Kerne
 
 **Date de creation :** 2026-01-28  
 **Version :** 0.1.0  
-**Statut :** GELE â€” Documentation de reference v0.1.0
+**Statut :** GELE — Documentation de reference v0.1.0
 

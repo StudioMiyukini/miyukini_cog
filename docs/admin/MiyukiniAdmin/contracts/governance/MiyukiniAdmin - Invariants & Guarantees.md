@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Invariants & Guarantees
+﻿# MiyukiniAdmin — Invariants & Guarantees
 
 ## 1. Contexte
 

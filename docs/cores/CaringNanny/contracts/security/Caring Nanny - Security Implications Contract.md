@@ -1,4 +1,4 @@
-﻿# Caring Nanny â€” Security Implications Contract
+﻿# Caring Nanny — Security Implications Contract
 
 ## 1. Contexte
 
@@ -17,7 +17,7 @@ Caring Nanny est definie comme **Gardienne de la Sante** du systeme. Cette respo
 
 ### 2.1 Role Principal
 
-**Caring Nanny â€” Gardienne de la Sante**
+**Caring Nanny — Gardienne de la Sante**
 
 Caring Nanny est **exclusivement responsable** de la detection d'anomalies et de la consolidation de l'etat systeme. Cette responsabilite est critique pour la securite car elle permet :
 - La detection precoce des attaques et compromissions
@@ -63,9 +63,9 @@ Caring Nanny est impliquee dans les protocoles suivants definis dans [Security P
 
 | Protocole | Role de Caring Nanny | Responsabilite |
 |-----------|---------------------|----------------|
-| **RT-SEC-2** | Authentification en couches | **R** â€” Verifie la coherence de l'authentification |
-| **RT-SEC-3** | Validation systematique | **R** â€” Verifie la coherence des validations |
-| **RT-SEC-4** | Detection active d'anomalie | **R** â€” Detection principale et correlation |
+| **RT-SEC-2** | Authentification en couches | **R** — Verifie la coherence de l'authentification |
+| **RT-SEC-3** | Validation systematique | **R** — Verifie la coherence des validations |
+| **RT-SEC-4** | Detection active d'anomalie | **R** — Detection principale et correlation |
 
 **Detail RT-SEC-4 (Detection active) :**
 - Caring Nanny est le **responsable principal** de la detection d'anomalies
@@ -76,7 +76,7 @@ Caring Nanny est impliquee dans les protocoles suivants definis dans [Security P
 
 | Protocole | Role de Caring Nanny | Responsabilite |
 |-----------|---------------------|----------------|
-| **AS-SEC-5** | Degradation graduee | **R** â€” Evaluation et signalement du niveau de degradation |
+| **AS-SEC-5** | Degradation graduee | **R** — Evaluation et signalement du niveau de degradation |
 
 **Detail AS-SEC-5 (Degradation graduee) :**
 - Caring Nanny evalue l'impact des operations differees
@@ -87,8 +87,8 @@ Caring Nanny est impliquee dans les protocoles suivants definis dans [Security P
 
 | Protocole | Role de Caring Nanny | Responsabilite |
 |-----------|---------------------|----------------|
-| **NET-SEC-1** | Handshake de conformite | **R** â€” Verification de la coherence post-reconnexion |
-| **NET-SEC-3** | Renforcement ou affaiblissement local | **R** â€” Evaluation de l'etat pour ajustement |
+| **NET-SEC-1** | Handshake de conformite | **R** — Verification de la coherence post-reconnexion |
+| **NET-SEC-3** | Renforcement ou affaiblissement local | **R** — Evaluation de l'etat pour ajustement |
 
 **Detail NET-SEC-1 (Handshake conformite) :**
 - Verification de la coherence de l'etat apres reconnexion
@@ -108,42 +108,42 @@ Le comportement de Caring Nanny s'adapte selon le niveau de confiance du systeme
 
 | Niveau | Etat | Comportement Caring Nanny |
 |--------|------|--------------------------|
-| **T0** | Normal | Monitoring standard â€” Observation passive, detection reactive |
-| **T1** | Instable | Log renforce â€” Traces detaillees, correlation accrue |
-| **T2** | Degrade | Monitoring actif â€” Sondes supplementaires, frequence elevee |
-| **T3** | Restreint | Sondes intensives â€” Surveillance maximale, correlation temps reel |
-| **T4** | Bloque | Diagnostics seuls â€” Focus exclusif sur le diagnostic de la cause |
+| **T0** | Normal | Monitoring standard — Observation passive, detection reactive |
+| **T1** | Instable | Log renforce — Traces detaillees, correlation accrue |
+| **T2** | Degrade | Monitoring actif — Sondes supplementaires, frequence elevee |
+| **T3** | Restreint | Sondes intensives — Surveillance maximale, correlation temps reel |
+| **T4** | Bloque | Diagnostics seuls — Focus exclusif sur le diagnostic de la cause |
 
 ### 4.1 Detail des Adaptations
 
-**T0 â€” Normal :**
+**T0 — Normal :**
 - Frequence de verification : Standard (intervalle configurable)
 - Profondeur des sondes : Normale
 - Correlation : Periodique
 - Historique : Retention standard
 
-**T1 â€” Instable :**
+**T1 — Instable :**
 - Frequence de verification : +50%
 - Profondeur des sondes : Etendue
 - Correlation : Continue
 - Historique : Retention etendue
 - **Action :** Log renforce pour diagnostic futur
 
-**T2 â€” Degrade :**
+**T2 — Degrade :**
 - Frequence de verification : x2
 - Profondeur des sondes : Complete
 - Correlation : Temps reel
 - Historique : Conservation complete
 - **Action :** Monitoring visible pour les composants concernes
 
-**T3 â€” Restreint :**
+**T3 — Restreint :**
 - Frequence de verification : Maximale
 - Profondeur des sondes : Exhaustive
 - Correlation : Temps reel avec alertes immediates
 - Historique : Conservation absolue
 - **Action :** Sondes intensives, preparation diagnostic humain
 
-**T4 â€” Bloque :**
+**T4 — Bloque :**
 - Frequence de verification : Continue
 - Profondeur des sondes : Diagnostique uniquement
 - Correlation : Focus sur la cause racine
@@ -158,39 +158,39 @@ Le comportement de Caring Nanny s'adapte egalement selon le niveau de securite d
 
 | Niveau | Profil | Comportement Caring Nanny |
 |--------|--------|--------------------------|
-| **0** | Public/Demo | Minimal â€” Observation basique, seuils larges |
-| **1** | Standard | Normal â€” Observation standard, seuils par defaut |
-| **2** | Renforce | Actif â€” Observation accrue, seuils resseres |
-| **3** | Critique | Intensif â€” Observation intensive, seuils stricts |
-| **4** | Maximal | Continu â€” Observation continue, seuils minimaux |
+| **0** | Public/Demo | Minimal — Observation basique, seuils larges |
+| **1** | Standard | Normal — Observation standard, seuils par defaut |
+| **2** | Renforce | Actif — Observation accrue, seuils resseres |
+| **3** | Critique | Intensif — Observation intensive, seuils stricts |
+| **4** | Maximal | Continu — Observation continue, seuils minimaux |
 
 ### 5.1 Detail des Adaptations
 
-**Niveau 0 â€” Minimal :**
+**Niveau 0 — Minimal :**
 - Seuils de detection : Larges (tolerance elevee)
 - Frequence d'observation : Faible
 - Profondeur : Basique
 - Usage : Demos, tests, environnements non critiques
 
-**Niveau 1 â€” Normal :**
+**Niveau 1 — Normal :**
 - Seuils de detection : Standards
 - Frequence d'observation : Normale
 - Profondeur : Standard
 - Usage : Applications standard
 
-**Niveau 2 â€” Actif :**
+**Niveau 2 — Actif :**
 - Seuils de detection : Resseres
 - Frequence d'observation : Elevee
 - Profondeur : Etendue
 - Usage : Applications avec donnees sensibles
 
-**Niveau 3 â€” Intensif :**
+**Niveau 3 — Intensif :**
 - Seuils de detection : Stricts
 - Frequence d'observation : Tres elevee
 - Profondeur : Complete
 - Usage : Applications critiques
 
-**Niveau 4 â€” Continu :**
+**Niveau 4 — Continu :**
 - Seuils de detection : Minimaux (haute sensibilite)
 - Frequence d'observation : Continue
 - Profondeur : Exhaustive
@@ -205,32 +205,32 @@ Le comportement de Caring Nanny s'adapte egalement selon le niveau de securite d
 Caring Nanny intervient a plusieurs points dans le flux de securite :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                         REQUETE ENTRANTE                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [1] BORDER GUARD â€” Classification source                        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [2] MASTER BUTLER â€” Verification capacites                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [3] CARING NANNY â€” Verification etat systeme                    â”‚â—„â”€â”€ Point de controle
-â”‚      â€¢ Verification etat systeme                                 â”‚
-â”‚      â€¢ Consolidation des signaux                                 â”‚
-â”‚      â€¢ Evaluation niveau de confiance (T0-T4)                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [4] STRONGFATHER â€” Decision finale                              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────┐
+│                         REQUETE ENTRANTE                         │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [1] BORDER GUARD — Classification source                        │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [2] MASTER BUTLER — Verification capacites                      │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [3] CARING NANNY — Verification etat systeme                    │◄── Point de controle
+│      • Verification etat systeme                                 │
+│      • Consolidation des signaux                                 │
+│      • Evaluation niveau de confiance (T0-T4)                    │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [4] STRONGFATHER — Decision finale                              │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 6.2 Point de Controle Transversal
@@ -238,13 +238,13 @@ Caring Nanny intervient a plusieurs points dans le flux de securite :
 Caring Nanny possede un **point de controle transversal** qui lui permet d'observer toutes les strates :
 
 ```
-SERVICES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                         â”‚
-CORES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â–º CARING NANNY (observation)
-                         â”‚
-SECURITY ENGINES â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                         â”‚
-KERNEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+SERVICES ────────────────┐
+                         │
+CORES ───────────────────┼────► CARING NANNY (observation)
+                         │
+SECURITY ENGINES ────────┤
+                         │
+KERNEL ──────────────────┘
 ```
 
 **Caracteristiques du point de controle :**
@@ -262,43 +262,43 @@ KERNEL â”€â”€â”€â”€â”€â”€â”€â”€â”€�
 Caring Nanny est l'**initiateur principal** du flux de degradation :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                       ANOMALIE DETECTEE                          â”‚
-â”‚           (Caring Nanny â€” Sondes d'integrite)                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [1] CARING NANNY â€” Consolidation                                â”‚
-â”‚      â€¢ Collecte des signaux                                      â”‚
-â”‚      â€¢ Correlation inter-cores                                   â”‚
-â”‚      â€¢ Attribution de cause (Root Cause Approximation)           â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [2] STRONGFATHER â€” Evaluation                                   â”‚
-â”‚      â€¢ Analyse probabilite dominante                             â”‚
-â”‚      â€¢ Decision de transition de niveau                          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [3] TRANSITION DE NIVEAU (T0 â†’ T1 â†’ T2 â†’ T3 â†’ T4)               â”‚
-â”‚      â€¢ Caring Nanny : adapte son monitoring                      â”‚
-â”‚      â€¢ Notification via BondingBrother                           â”‚
-â”‚      â€¢ Information TAMR si necessaire                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────┐
+│                       ANOMALIE DETECTEE                          │
+│           (Caring Nanny — Sondes d'integrite)                    │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [1] CARING NANNY — Consolidation                                │
+│      • Collecte des signaux                                      │
+│      • Correlation inter-cores                                   │
+│      • Attribution de cause (Root Cause Approximation)           │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [2] STRONGFATHER — Evaluation                                   │
+│      • Analyse probabilite dominante                             │
+│      • Decision de transition de niveau                          │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [3] TRANSITION DE NIVEAU (T0 → T1 → T2 → T3 → T4)               │
+│      • Caring Nanny : adapte son monitoring                      │
+│      • Notification via BondingBrother                           │
+│      • Information TAMR si necessaire                            │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 7.2 Responsabilite dans les Transitions
 
 | Transition | Role Caring Nanny | RACI |
 |------------|-------------------|------|
-| Detection T1 | **R** â€” Detection et signalement | Responsable |
-| Decision T1â†’T2 | C â€” Fourniture des donnees | Consulte |
-| Decision T2â†’T3 | C â€” Fourniture des donnees | Consulte |
-| Decision T3â†’T4 | C â€” Fourniture des donnees | Consulte |
+| Detection T1 | **R** — Detection et signalement | Responsable |
+| Decision T1→T2 | C — Fourniture des donnees | Consulte |
+| Decision T2→T3 | C — Fourniture des donnees | Consulte |
+| Decision T3→T4 | C — Fourniture des donnees | Consulte |
 
 ---
 
@@ -338,19 +338,19 @@ Les invariants de securite sont coherents avec les invariants fondamentaux de Ca
 Caring Nanny surveille la coherence de la chaine de confiance :
 
 ```
-CODE â†’ MSCM â†’ MIP â†’ GRAPH â†’ STA â†’ OSV
-          â–²                   â–²
-          â”‚                   â”‚
-          â””â”€â”€â”€ Caring Nanny surveille â”€â”€â”€â”˜
+CODE → MSCM → MIP → GRAPH → STA → OSV
+          ▲                   ▲
+          │                   │
+          └─── Caring Nanny surveille ───┘
 ```
 
 | Maillon | Surveillance Caring Nanny |
 |---------|--------------------------|
-| CODE â†’ MSCM | Non (validation par Validation Engine) |
-| MSCM â†’ MIP | **Oui** â€” Coherence des transitions |
-| MIP â†’ GRAPH | **Oui** â€” Integrite du graph |
-| GRAPH â†’ STA | Non (validation par StrongFather) |
-| STA â†’ OSV | Non (certification par Ever Buddy) |
+| CODE → MSCM | Non (validation par Validation Engine) |
+| MSCM → MIP | **Oui** — Coherence des transitions |
+| MIP → GRAPH | **Oui** — Integrite du graph |
+| GRAPH → STA | Non (validation par StrongFather) |
+| STA → OSV | Non (certification par Ever Buddy) |
 
 ### 9.2 Detection de Rupture
 
@@ -420,11 +420,11 @@ Caring Nanny collabore avec les Security Engines sans les remplacer :
 
 Ce contrat etablit les implications securitaires de Caring Nanny au sein de l'ecosysteme Miyukini. En tant que **Gardienne de la Sante**, Caring Nanny joue un role critique dans :
 
-- âœ… **Detection d'anomalies** : Identification proactive des deviations
-- âœ… **Consolidation des signaux** : Vision globale de l'etat de securite
-- âœ… **Calcul du niveau de confiance** : T0-T4 toujours determinable
-- âœ… **Flux de degradation** : Initiateur principal des transitions
-- âœ… **Protocoles de securite** : Participation active a RT-SEC, AS-SEC, NET-SEC
+- ✅ **Detection d'anomalies** : Identification proactive des deviations
+- ✅ **Consolidation des signaux** : Vision globale de l'etat de securite
+- ✅ **Calcul du niveau de confiance** : T0-T4 toujours determinable
+- ✅ **Flux de degradation** : Initiateur principal des transitions
+- ✅ **Protocoles de securite** : Participation active a RT-SEC, AS-SEC, NET-SEC
 
 **Principe fondateur :**
 
@@ -450,11 +450,11 @@ Ce contrat etablit les implications securitaires de Caring Nanny au sein de l'ec
 
 ### Verification de coherence
 
-- âœ… Coherence avec la Doctrine Securite Fondamentale
-- âœ… Coherence avec Security - Core Integration Map
-- âœ… Coherence avec Caring Nanny - Documentation Fondatrice
-- âœ… Coherence avec les invariants INV-CN-1 a INV-CN-7
-- âœ… References correctes vers tous les documents
+- ✅ Coherence avec la Doctrine Securite Fondamentale
+- ✅ Coherence avec Security - Core Integration Map
+- ✅ Coherence avec Caring Nanny - Documentation Fondatrice
+- ✅ Coherence avec les invariants INV-CN-1 a INV-CN-7
+- ✅ References correctes vers tous les documents
 
 **Aucune contradiction detectee.**
 

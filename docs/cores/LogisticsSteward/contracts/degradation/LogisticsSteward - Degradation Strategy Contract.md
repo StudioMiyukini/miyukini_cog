@@ -1,10 +1,10 @@
-﻿# LogisticsSteward â€” Degradation Strategy Contract
+﻿# LogisticsSteward — Degradation Strategy Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document definit le **LogisticsSteward â€” Degradation Strategy Contract** : un contrat normatif, non negociable, et de statut FONDATION qui formalise les strategies de degradation controlee dans le systeme Miyukini.
+Ce document definit le **LogisticsSteward — Degradation Strategy Contract** : un contrat normatif, non negociable, et de statut FONDATION qui formalise les strategies de degradation controlee dans le systeme Miyukini.
 
 Ce contrat etablit :
 - La definition formelle des niveaux de degradation
@@ -32,12 +32,12 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 ### Relation avec les autres contrats
 
 Ce contrat s'articule avec :
-- **LogisticsSteward â€” Documentation Fondatrice** : Definition conceptuelle et invariants fondamentaux (Section 7)
-- **LogisticsSteward â€” Quota Definition Contract** : Adaptation des quotas selon le niveau de degradation
-- **LogisticsSteward â€” Priority Management Contract** : Impact sur les priorites actives
-- **LogisticsSteward â€” Resource Arbitration Contract** : Arbitrage en conditions degradees
-- **WorrySentinel â€” Core Supervision Contract** : Detection des conditions de degradation
-- **StrongFather â€” Core Decision Contract** : Validation des transitions de degradation
+- **LogisticsSteward — Documentation Fondatrice** : Definition conceptuelle et invariants fondamentaux (Section 7)
+- **LogisticsSteward — Quota Definition Contract** : Adaptation des quotas selon le niveau de degradation
+- **LogisticsSteward — Priority Management Contract** : Impact sur les priorites actives
+- **LogisticsSteward — Resource Arbitration Contract** : Arbitrage en conditions degradees
+- **WorrySentinel — Core Supervision Contract** : Detection des conditions de degradation
+- **StrongFather — Core Decision Contract** : Validation des transitions de degradation
 
 ---
 
@@ -88,7 +88,7 @@ LogisticsSteward definit une echelle de degradation a 5 niveaux :
 
 ### 3.2. Semantique des niveaux
 
-**D0 â€” NORMAL**
+**D0 — NORMAL**
 
 Etat nominal du systeme. Toutes les capacites sont disponibles.
 
@@ -100,7 +100,7 @@ Etat nominal du systeme. Toutes les capacites sont disponibles.
 | **Operations** | Aucune restriction |
 | **Preemption** | Regles normales de preemption |
 
-**D1 â€” PRUDENT**
+**D1 — PRUDENT**
 
 Etat de vigilance. Le systeme detecte une charge elevee et prend des mesures preventives.
 
@@ -112,7 +112,7 @@ Etat de vigilance. Le systeme detecte une charge elevee et prend des mesures pre
 | **Operations** | Operations de fond reportees |
 | **Preemption** | Preemption facilitee des P5 et P6 |
 
-**D2 â€” RESTREINT**
+**D2 — RESTREINT**
 
 Etat de restriction active. Les ressources sont insuffisantes pour le fonctionnement nominal.
 
@@ -124,7 +124,7 @@ Etat de restriction active. Les ressources sont insuffisantes pour le fonctionne
 | **Operations** | Seules operations necessaires autorisees |
 | **Preemption** | Preemption active des P4 a P6 |
 
-**D3 â€” CRITIQUE**
+**D3 — CRITIQUE**
 
 Etat critique. Risque imminent de saturation. Seuls les services essentiels sont maintenus.
 
@@ -136,7 +136,7 @@ Etat critique. Risque imminent de saturation. Seuls les services essentiels sont
 | **Operations** | Operations critiques uniquement |
 | **Preemption** | Preemption maximale des priorites basses |
 
-**D4 â€” SURVIE**
+**D4 — SURVIE**
 
 Etat d'urgence absolue. Le systeme preserve uniquement son coeur fonctionnel.
 
@@ -185,7 +185,7 @@ Le Kernel fournit l'etat systeme abstrait incluant les indicateurs suivants :
 
 ### 4.3. Conditions de transition ascendante (vers D4)
 
-**Transition D0 â†’ D1 (NORMAL â†’ PRUDENT)**
+**Transition D0 → D1 (NORMAL → PRUDENT)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -193,7 +193,7 @@ Le Kernel fournit l'etat systeme abstrait incluant les indicateurs suivants :
 | **COND-D1-2** | Disponibilite ressources < 70% |
 | **COND-D1-3** | Alerte WorrySentinel niveau "Attention" |
 
-**Transition D1 â†’ D2 (PRUDENT â†’ RESTREINT)**
+**Transition D1 → D2 (PRUDENT → RESTREINT)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -202,7 +202,7 @@ Le Kernel fournit l'etat systeme abstrait incluant les indicateurs suivants :
 | **COND-D2-3** | Alerte WorrySentinel niveau "Avertissement" |
 | **COND-D2-4** | Saturation imminente = "Probable" |
 
-**Transition D2 â†’ D3 (RESTREINT â†’ CRITIQUE)**
+**Transition D2 → D3 (RESTREINT → CRITIQUE)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -211,7 +211,7 @@ Le Kernel fournit l'etat systeme abstrait incluant les indicateurs suivants :
 | **COND-D3-3** | Alerte WorrySentinel niveau "Critique" |
 | **COND-D3-4** | Saturation imminente = "Imminent" |
 
-**Transition D3 â†’ D4 (CRITIQUE â†’ SURVIE)**
+**Transition D3 → D4 (CRITIQUE → SURVIE)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -263,35 +263,35 @@ Apres une transition ascendante, un delai minimum de stabilisation s'applique av
 L'ordre de reduction suit la priorite inverse des services :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ DERNIER REDUIT â€” Services vitaux (P0-P1)                    â”‚
-â”‚ Fonctions systeme critiques, preservation des donnees       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Administration (P2)                                         â”‚
-â”‚ MiyukiniAdmin, maintenance critique                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Services prioritaires (P3)                                  â”‚
-â”‚ Operations metier critiques, SLA strict                     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Services normaux (P4)                                       â”‚
-â”‚ Operations metier standard                                  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Services secondaires (P5)                                   â”‚
-â”‚ Operations de fond, synchronisation non critique            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ PREMIER REDUIT â€” Services d'arriere-plan (P6)               â”‚
-â”‚ Taches non urgentes, cache warming, pre-calculs             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ DERNIER REDUIT — Services vitaux (P0-P1)                    │
+│ Fonctions systeme critiques, preservation des donnees       │
+└─────────────────────────────────────────────────────────────┘
+          ▲
+┌─────────────────────────────────────────────────────────────┐
+│ Administration (P2)                                         │
+│ MiyukiniAdmin, maintenance critique                         │
+└─────────────────────────────────────────────────────────────┘
+          ▲
+┌─────────────────────────────────────────────────────────────┐
+│ Services prioritaires (P3)                                  │
+│ Operations metier critiques, SLA strict                     │
+└─────────────────────────────────────────────────────────────┘
+          ▲
+┌─────────────────────────────────────────────────────────────┐
+│ Services normaux (P4)                                       │
+│ Operations metier standard                                  │
+└─────────────────────────────────────────────────────────────┘
+          ▲
+┌─────────────────────────────────────────────────────────────┐
+│ Services secondaires (P5)                                   │
+│ Operations de fond, synchronisation non critique            │
+└─────────────────────────────────────────────────────────────┘
+          ▲
+┌─────────────────────────────────────────────────────────────┐
+│ PREMIER REDUIT — Services d'arriere-plan (P6)               │
+│ Taches non urgentes, cache warming, pre-calculs             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### 5.3. Strategies par type de ressource
@@ -350,7 +350,7 @@ Certains services sont **toujours proteges** et ne peuvent etre degrades qu'en D
 
 ### 6.2. Conditions de transition descendante (vers D0)
 
-**Transition D4 â†’ D3 (SURVIE â†’ CRITIQUE)**
+**Transition D4 → D3 (SURVIE → CRITIQUE)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -358,7 +358,7 @@ Certains services sont **toujours proteges** et ne peuvent etre degrades qu'en D
 | **RECOV-D3-2** | Disponibilite ressources > 20% |
 | **RECOV-D3-3** | Stabilite maintenue pendant seuil configurable |
 
-**Transition D3 â†’ D2 (CRITIQUE â†’ RESTREINT)**
+**Transition D3 → D2 (CRITIQUE → RESTREINT)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -367,7 +367,7 @@ Certains services sont **toujours proteges** et ne peuvent etre degrades qu'en D
 | **RECOV-D2-3** | Saturation imminente = "Non" |
 | **RECOV-D2-4** | Stabilite maintenue |
 
-**Transition D2 â†’ D1 (RESTREINT â†’ PRUDENT)**
+**Transition D2 → D1 (RESTREINT → PRUDENT)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -375,7 +375,7 @@ Certains services sont **toujours proteges** et ne peuvent etre degrades qu'en D
 | **RECOV-D1-2** | Disponibilite ressources > 60% |
 | **RECOV-D1-3** | Pas d'alerte WorrySentinel active |
 
-**Transition D1 â†’ D0 (PRUDENT â†’ NORMAL)**
+**Transition D1 → D0 (PRUDENT → NORMAL)**
 
 | Condition | Description |
 |-----------|-------------|
@@ -399,35 +399,35 @@ Pour eviter les oscillations, les seuils de recuperation sont plus exigeants que
 
 | Transition | Delai minimum | Raison |
 |------------|---------------|--------|
-| D4 â†’ D3 | Configurable (ex: 5 min) | Verification stabilite urgence |
-| D3 â†’ D2 | Configurable (ex: 10 min) | Confirmation sortie de crise |
-| D2 â†’ D1 | Configurable (ex: 15 min) | Stabilisation progressive |
-| D1 â†’ D0 | Configurable (ex: 20 min) | Confirmation retour normal |
+| D4 → D3 | Configurable (ex: 5 min) | Verification stabilite urgence |
+| D3 → D2 | Configurable (ex: 10 min) | Confirmation sortie de crise |
+| D2 → D1 | Configurable (ex: 15 min) | Stabilisation progressive |
+| D1 → D0 | Configurable (ex: 20 min) | Confirmation retour normal |
 
 ### 6.5. Restauration des capacites
 
 L'ordre de restauration est l'inverse de l'ordre de reduction :
 
 ```
-[Recuperation D(n) â†’ D(n-1)]
-         â”‚
-         â–¼
+[Recuperation D(n) → D(n-1)]
+         │
+         ▼
 [Verification conditions de recuperation]
-         â”‚
-         â–¼
+         │
+         ▼
 [Attente delai de stabilisation]
-         â”‚
-         â–¼
+         │
+         ▼
 [Transition de niveau]
-         â”‚
-         â–¼
+         │
+         ▼
 [Restauration progressive des capacites]
-  â”œâ”€â”€ 1. Quotas du niveau restaure
-  â”œâ”€â”€ 2. Priorites reactivees
-  â”œâ”€â”€ 3. Services reactivees
-  â””â”€â”€ 4. Operations autorisees
-         â”‚
-         â–¼
+  ├── 1. Quotas du niveau restaure
+  ├── 2. Priorites reactivees
+  ├── 3. Services reactivees
+  └── 4. Operations autorisees
+         │
+         ▼
 [Journalisation et notification]
 ```
 
@@ -690,19 +690,19 @@ Ce contrat respecte les **Lois d'Autonomie Systeme** definies dans [Miyukini Con
 
 ### LOI-1 : Aucune dependance externe critique a l'execution
 
-**Conformite :** âœ… La degradation opere sur l'etat systeme local fourni par le Kernel, sans dependance externe.
+**Conformite :** ✅ La degradation opere sur l'etat systeme local fourni par le Kernel, sans dependance externe.
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** âœ… La degradation est un mecanisme local. L'isolement peut declencher une degradation, jamais la bloquer.
+**Conformite :** ✅ La degradation est un mecanisme local. L'isolement peut declencher une degradation, jamais la bloquer.
 
 ### LOI-3 : L'etat local est souverain
 
-**Conformite :** âœ… Le niveau de degradation local est la verite. Reconciliation explicite a la reconnexion.
+**Conformite :** ✅ Le niveau de degradation local est la verite. Reconciliation explicite a la reconnexion.
 
 ### LOI-5 : Le cout doit etre proportionnel au hardware
 
-**Conformite :** âœ… La gestion de la degradation est legere (machine a etats simple).
+**Conformite :** ✅ La gestion de la degradation est legere (machine a etats simple).
 
 ---
 
@@ -740,6 +740,6 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** FONDATION â€” Contrat normatif valide  
+**Statut :** FONDATION — Contrat normatif valide  
 **Reference :** Miyukini Core System v2.4, LogisticsSteward Documentation Fondatrice (Section 7)
 

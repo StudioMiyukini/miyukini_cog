@@ -1,107 +1,107 @@
-﻿# BondingBrother â€” Translation Contract
+﻿# BondingBrother — Translation Contract
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif
+**Statut :** CONTRAT — Normatif
 
 ---
 
 ## 1. Contexte
 
-Ce document dÃ©finit les rÃ¨gles contractuelles de traduction dans Bonding Brother. Il spÃ©cifie comment les intentions (exprimÃ©es dans le vocabulaire des produits) sont transformÃ©es en demandes (exprimÃ©es dans le vocabulaire des autoritÃ©s), et comment les rÃ©ponses sont transformÃ©es en rÃ©sultats.
+Ce document définit les règles contractuelles de traduction dans Bonding Brother. Il spécifie comment les intentions (exprimées dans le vocabulaire des produits) sont transformées en demandes (exprimées dans le vocabulaire des autorités), et comment les réponses sont transformées en résultats.
 
-**DÃ©pendances :**
-- [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) â€” Section 5 (Nature du lien)
+**Dépendances :**
+- [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) — Section 5 (Nature du lien)
 - [Intent Model Contract](./BondingBrother%20-%20Intent%20Model%20Contract.md)
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
-La traduction fonctionne localement sans dÃ©pendance externe, conformÃ©ment Ã  **LOI-1** (aucune dÃ©pendance externe critique).
+La traduction fonctionne localement sans dépendance externe, conformément à **LOI-1** (aucune dépendance externe critique).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - Les principes fondamentaux de la traduction
-- Les rÃ¨gles de traduction intention â†’ demande
-- Les rÃ¨gles de traduction rÃ©ponse â†’ rÃ©sultat
+- Les règles de traduction intention → demande
+- Les règles de traduction réponse → résultat
 - Les mappings de vocabulaire
-- Les garanties de fidÃ©litÃ© sÃ©mantique
-- Les cas d'Ã©chec de traduction
+- Les garanties de fidélité sémantique
+- Les cas d'échec de traduction
 
 Ce document **ne couvre pas** :
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](./BondingBrother%20-%20Filtering%20&%20Projection%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](./BondingBrother%20-%20Filtering%20&%20Projection%20Contract.md))
 - La gestion des erreurs de traduction (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md))
 
 ---
 
 ## 3. Principe fondamental
 
-> **La traduction prÃ©serve la sÃ©mantique tout en adaptant le format.**
+> **La traduction préserve la sémantique tout en adaptant le format.**
 
-La traduction est une transformation pure : elle ne prend aucune dÃ©cision, ne modifie pas le sens, et n'a aucun effet de bord. Elle est bidirectionnelle et rÃ©versible (en thÃ©orie).
+La traduction est une transformation pure : elle ne prend aucune décision, ne modifie pas le sens, et n'a aucun effet de bord. Elle est bidirectionnelle et réversible (en théorie).
 
 ---
 
 ## 4. Directions de traduction
 
-### 4.1 Traduction ascendante (Intention â†’ Demande)
+### 4.1 Traduction ascendante (Intention → Demande)
 
 | Aspect | Description |
 |--------|-------------|
-| **Direction** | Produit â†’ AutoritÃ© |
-| **EntrÃ©e** | Intention (vocabulaire produit) |
-| **Sortie** | Demande (vocabulaire autoritÃ©) |
-| **Objectif** | Adapter l'intention au format de l'autoritÃ© |
+| **Direction** | Produit → Autorité |
+| **Entrée** | Intention (vocabulaire produit) |
+| **Sortie** | Demande (vocabulaire autorité) |
+| **Objectif** | Adapter l'intention au format de l'autorité |
 
-### 4.2 Traduction descendante (RÃ©ponse â†’ RÃ©sultat)
+### 4.2 Traduction descendante (Réponse → Résultat)
 
 | Aspect | Description |
 |--------|-------------|
-| **Direction** | AutoritÃ© â†’ Produit |
-| **EntrÃ©e** | RÃ©ponse (vocabulaire autoritÃ©) |
-| **Sortie** | RÃ©sultat (vocabulaire produit) |
-| **Objectif** | Adapter la rÃ©ponse au format du produit |
+| **Direction** | Autorité → Produit |
+| **Entrée** | Réponse (vocabulaire autorité) |
+| **Sortie** | Résultat (vocabulaire produit) |
+| **Objectif** | Adapter la réponse au format du produit |
 
 ---
 
-## 5. PropriÃ©tÃ©s de la traduction
+## 5. Propriétés de la traduction
 
-### 5.1 FidÃ©litÃ© sÃ©mantique
+### 5.1 Fidélité sémantique
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **FID-01** | PrÃ©servation du sens | Le sens original est prÃ©servÃ© |
-| **FID-02** | Pas d'interprÃ©tation | Format transformÃ©, sens intact |
-| **FID-03** | Pas d'enrichissement mÃ©tier | Pas d'ajout d'information mÃ©tier |
+| **FID-01** | Préservation du sens | Le sens original est préservé |
+| **FID-02** | Pas d'interprétation | Format transformé, sens intact |
+| **FID-03** | Pas d'enrichissement métier | Pas d'ajout d'information métier |
 
-**Exceptions autorisÃ©es :**
-- Enrichissement technique (mÃ©tadonnÃ©es de traÃ§abilitÃ©)
+**Exceptions autorisées :**
+- Enrichissement technique (métadonnées de traçabilité)
 - Normalisation de format (dates, nombres)
-- ComplÃ©tion de champs techniques obligatoires
+- Complétion de champs techniques obligatoires
 
-### 5.2 ComplÃ©tude
+### 5.2 Complétude
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **COMP-01** | Pas de perte essentielle | Information essentielle prÃ©servÃ©e |
-| **COMP-02** | Omission non essentielle | Informations non supportÃ©es omissibles |
+| **COMP-01** | Pas de perte essentielle | Information essentielle préservée |
+| **COMP-02** | Omission non essentielle | Informations non supportées omissibles |
 
 **Information essentielle :**
 - Type d'intention
 - Identifiants (produit, utilisateur, ressources)
-- DonnÃ©es du payload nÃ©cessaires Ã  l'Ã©valuation
+- Données du payload nécessaires à l'évaluation
 - Contexte minimal requis
 
-### 5.3 PuretÃ©
+### 5.3 Pureté
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **PUR-01** | Pas d'effet de bord | Pas de modification d'Ã©tat, pas d'appel, pas de dÃ©cision |
-| **PUR-02** | Fonction pure | MÃªme entrÃ©e â†’ mÃªme sortie |
-| **PUR-03** | DÃ©terminisme | Pas de hasard, pas de dÃ©pendance Ã  l'Ã©tat global |
+| **PUR-01** | Pas d'effet de bord | Pas de modification d'état, pas d'appel, pas de décision |
+| **PUR-02** | Fonction pure | Même entrée → même sortie |
+| **PUR-03** | Déterminisme | Pas de hasard, pas de dépendance à l'état global |
 
 ---
 
-## 6. Traduction ascendante (Intention â†’ Demande)
+## 6. Traduction ascendante (Intention → Demande)
 
 ### 6.1 Structure de la demande
 
@@ -109,35 +109,35 @@ La traduction est une transformation pure : elle ne prend aucune dÃ©cision, ne
 interface Demande {
     // Identifiants
     demande_id: DemandeId;
-    intention_id: IntentionId;           // TraÃ§abilitÃ©
+    intention_id: IntentionId;           // Traçabilité
     
     // Type et contenu
-    type: TypeDemande;                   // Vocabulaire autoritÃ©
-    donnees: DonneesSpecifiques;         // DonnÃ©es traduites
+    type: TypeDemande;                   // Vocabulaire autorité
+    donnees: DonneesSpecifiques;         // Données traduites
     
     // Contexte
-    contexte: Contexte;                  // Transmis intÃ©gralement
+    contexte: Contexte;                  // Transmis intégralement
     
-    // MÃ©tadonnÃ©es
+    // Métadonnées
     timestamp: Timestamp;
     autorite_cible: AutoriteId;
 }
 ```
 
-### 6.2 RÃ¨gles de traduction ascendante
+### 6.2 Règles de traduction ascendante
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **ASC-01** | Mapping de type | Type intention â†’ type demande |
+| **ASC-01** | Mapping de type | Type intention → type demande |
 | **ASC-02** | Traduction payload | Champ par champ selon mapping |
-| **ASC-03** | PrÃ©servation contexte | Contexte intÃ©gral sans modification |
-| **ASC-04** | Ajout mÃ©tadonnÃ©es techniques | `intention_id`, `timestamp_demande` |
-| **ASC-05** | Champs optionnels | Omissibles si non supportÃ©s |
-| **ASC-06** | Validation format | Demande valide selon schÃ©ma autoritÃ© |
+| **ASC-03** | Préservation contexte | Contexte intégral sans modification |
+| **ASC-04** | Ajout métadonnées techniques | `intention_id`, `timestamp_demande` |
+| **ASC-05** | Champs optionnels | Omissibles si non supportés |
+| **ASC-06** | Validation format | Demande valide selon schéma autorité |
 
 ### 6.3 Exemples de mapping de type
 
-| Type Intention (Produit) | Type Demande (AutoritÃ©) |
+| Type Intention (Produit) | Type Demande (Autorité) |
 |--------------------------|-------------------------|
 | `CREATE_CONTENT` | `create_content` |
 | `AUTHORIZE` | `check_permission` |
@@ -181,9 +181,9 @@ interface Demande {
 
 ---
 
-## 7. Traduction descendante (RÃ©ponse â†’ RÃ©sultat)
+## 7. Traduction descendante (Réponse → Résultat)
 
-### 7.1 Structure du rÃ©sultat
+### 7.1 Structure du résultat
 
 ```typescript
 interface Resultat {
@@ -193,35 +193,35 @@ interface Resultat {
     demande_id: DemandeId;
     
     // Statut
-    statut: StatutResultat;              // SUCCÃˆS, REFUSÃ‰, ERREUR
+    statut: StatutResultat;              // SUCCÈS, REFUSÉ, ERREUR
     decision: DecisionAutorite;
     
-    // DonnÃ©es (si applicable)
+    // Données (si applicable)
     donnees?: DonneesTraduites;
     
     // Erreurs (si applicable)
     erreurs?: ErreurTraduite[];
     
-    // MÃ©tadonnÃ©es
+    // Métadonnées
     timestamp: Timestamp;
     autorite: AutoriteId;
 }
 ```
 
-### 7.2 RÃ¨gles de traduction descendante
+### 7.2 Règles de traduction descendante
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **DESC-01** | PrÃ©servation dÃ©cision | DÃ©cision de l'autoritÃ© intacte |
-| **DESC-02** | Traduction statut | `accepted` â†’ `SUCCÃˆS`, `denied` â†’ `REFUSÃ‰` |
-| **DESC-03** | Traduction donnÃ©es | Champ par champ selon mapping |
-| **DESC-04** | Traduction erreurs | Code technique prÃ©servÃ© si nÃ©cessaire |
-| **DESC-05** | Filtrage avant traduction | Filtrage appliquÃ© AVANT traduction |
-| **DESC-06** | Champs absents | Omis (pas de valeur par dÃ©faut) |
+| **DESC-01** | Préservation décision | Décision de l'autorité intacte |
+| **DESC-02** | Traduction statut | `accepted` → `SUCCÈS`, `denied` → `REFUSÉ` |
+| **DESC-03** | Traduction données | Champ par champ selon mapping |
+| **DESC-04** | Traduction erreurs | Code technique préservé si nécessaire |
+| **DESC-05** | Filtrage avant traduction | Filtrage appliqué AVANT traduction |
+| **DESC-06** | Champs absents | Omis (pas de valeur par défaut) |
 
 ### 7.3 Exemple de traduction descendante
 
-**RÃ©ponse (KindMother) :**
+**Réponse (KindMother) :**
 ```json
 {
   "response_id": "resp-456",
@@ -235,14 +235,14 @@ interface Resultat {
 }
 ```
 
-**RÃ©sultat traduit (produit) :**
+**Résultat traduit (produit) :**
 ```json
 {
   "resultat_id": "res-111",
   "intention_id": "int-123",
   "demande_id": "dem-789",
-  "statut": "SUCCÃˆS",
-  "decision": "ACCEPTÃ‰E",
+  "statut": "SUCCÈS",
+  "decision": "ACCEPTÉE",
   "donnees": {
     "id": "content-999",
     "titre": "Mon article",
@@ -276,19 +276,19 @@ interface MappingVocabulaire {
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Directe** | Champ â†’ Champ | `titre` â†’ `title` |
-| **De type** | Conversion de type | String â†’ Enum |
-| **De structure** | Aplatissement/imbrication | Objet â†’ Structure plate |
-| **De valeur** | Valeur â†’ Valeur | `"crÃ©er"` â†’ `"create"` |
+| **Directe** | Champ → Champ | `titre` → `title` |
+| **De type** | Conversion de type | String → Enum |
+| **De structure** | Aplatissement/imbrication | Objet → Structure plate |
+| **De valeur** | Valeur → Valeur | `"créer"` → `"create"` |
 
-### 8.3 RÃ¨gles de mapping
+### 8.3 Règles de mapping
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **MAP-01** | UnicitÃ© | Un champ â†’ un mapping max |
-| **MAP-02** | ComplÃ©tude | Champs obligatoires mappÃ©s |
-| **MAP-03** | RÃ©versibilitÃ© thÃ©orique | Mapping inverse possible |
-| **MAP-04** | Versioning | Mappings versionnÃ©s |
+| **MAP-01** | Unicité | Un champ → un mapping max |
+| **MAP-02** | Complétude | Champs obligatoires mappés |
+| **MAP-03** | Réversibilité théorique | Mapping inverse possible |
+| **MAP-04** | Versioning | Mappings versionnés |
 
 ---
 
@@ -296,56 +296,56 @@ interface MappingVocabulaire {
 
 | Garantie | Engagement | Mesure |
 |----------|------------|--------|
-| **FidÃ©litÃ©** | SÃ©mantique prÃ©servÃ©e | Tests round-trip |
-| **ComplÃ©tude** | Information essentielle prÃ©servÃ©e | VÃ©rification automatisÃ©e |
-| **DÃ©terminisme** | MÃªme entrÃ©e â†’ mÃªme sortie | Tests de rÃ©gression |
-| **Performance** | Temps constant | MÃ©triques temps |
+| **Fidélité** | Sémantique préservée | Tests round-trip |
+| **Complétude** | Information essentielle préservée | Vérification automatisée |
+| **Déterminisme** | Même entrée → même sortie | Tests de régression |
+| **Performance** | Temps constant | Métriques temps |
 
 ---
 
-## 10. Cas d'Ã©chec de traduction
+## 10. Cas d'échec de traduction
 
-### 10.1 Types d'Ã©chec
+### 10.1 Types d'échec
 
 | Type | Cause | Exemple |
 |------|-------|---------|
-| **Ã‰chec mapping** | Type/champ non mappÃ© | Type inconnu |
-| **Ã‰chec validation** | Demande invalide | Champ obligatoire manquant |
-| **Ã‰chec format** | Format incompatible | Type de donnÃ©es non supportÃ© |
+| **Échec mapping** | Type/champ non mappé | Type inconnu |
+| **Échec validation** | Demande invalide | Champ obligatoire manquant |
+| **Échec format** | Format incompatible | Type de données non supporté |
 
-### 10.2 Traitement des Ã©checs
+### 10.2 Traitement des échecs
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **ECHEC-01** | Rejet immÃ©diat | Pas de transmission Ã  l'autoritÃ© |
-| **ECHEC-02** | Journalisation | Intention + type Ã©chec + raison |
+| **ECHEC-01** | Rejet immédiat | Pas de transmission à l'autorité |
+| **ECHEC-02** | Journalisation | Intention + type échec + raison |
 | **ECHEC-03** | Notification produit | `ERREUR_TRADUCTION` + message |
-| **ECHEC-04** | Pas de retry | Ã‰chec non transitoire |
+| **ECHEC-04** | Pas de retry | Échec non transitoire |
 
 ---
 
-## 11. ExtensibilitÃ©
+## 11. Extensibilité
 
 ### 11.1 Ajout de nouveaux mappings
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **EXT-01** | DÃ©claration explicite | Registre de mappings |
+| **EXT-01** | Déclaration explicite | Registre de mappings |
 | **EXT-02** | Tests obligatoires | Tests round-trip |
-| **EXT-03** | Versioning | Avec les schÃ©mas |
+| **EXT-03** | Versioning | Avec les schémas |
 
 ### 11.2 Modification de mappings existants
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **EXT-04** | RÃ©trocompatibilitÃ© | Ou processus de dÃ©prÃ©ciation |
-| **EXT-05** | Migration | Intentions en cours migrÃ©es |
+| **EXT-04** | Rétrocompatibilité | Ou processus de dépréciation |
+| **EXT-05** | Migration | Intentions en cours migrées |
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles de traduction que Bonding Brother doit respecter pour garantir la fidÃ©litÃ© et la complÃ©tude des transformations entre produits et autoritÃ©s.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles de traduction que Bonding Brother doit respecter pour garantir la fidélité et la complétude des transformations entre produits et autorités.
 
 ---
 
@@ -359,6 +359,6 @@ Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** Documentation Fondatrice v2.0, Intent Model Contract v2.0
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** Documentation Fondatrice v2.0, Intent Model Contract v2.0
 

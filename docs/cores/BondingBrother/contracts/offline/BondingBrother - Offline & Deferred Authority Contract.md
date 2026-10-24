@@ -2,33 +2,33 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le contrat de gestion du mode hors ligne et de l'autoritÃ© diffÃ©rÃ©e dans Bonding Brother. Il spÃ©cifie comment Bonding Brother gÃ¨re les intentions lorsque la connexion aux autoritÃ©s n'est pas disponible, et comment l'Ã©valuation par les autoritÃ©s peut Ãªtre reportÃ©e sans compromettre l'intÃ©gritÃ© du systÃ¨me.
+Ce document définit le contrat de gestion du mode hors ligne et de l'autorité différée dans Bonding Brother. Il spécifie comment Bonding Brother gère les intentions lorsque la connexion aux autorités n'est pas disponible, et comment l'évaluation par les autorités peut être reportée sans compromettre l'intégrité du système.
 
-Ce document complÃ¨te la Section 8 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Architecture & Flows](../../architecture/BondingBrother%20-%20Architecture%20&%20Flows.md) et l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md).
+Ce document complète la Section 8 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Architecture & Flows](../../architecture/BondingBrother%20-%20Architecture%20&%20Flows.md) et l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md).
 
-Ce contrat est une implÃ©mentation directe de **LOI-2** (le systÃ¨me accepte l'isolement comme Ã©tat normal) dÃ©finie dans les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md). L'isolement n'est pas une erreur, mais un Ã©tat valide du systÃ¨me.
+Ce contrat est une implémentation directe de **LOI-2** (le système accepte l'isolement comme état normal) définie dans les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md). L'isolement n'est pas une erreur, mais un état valide du système.
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - Le fonctionnement en mode hors ligne
-- Le mÃ©canisme d'autoritÃ© diffÃ©rÃ©e
+- Le mécanisme d'autorité différée
 - La gestion du buffer offline
-- Les rÃ¨gles de journalisation en mode offline
-- La synchronisation Ã  la reconnexion
+- Les règles de journalisation en mode offline
+- La synchronisation à la reconnexion
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails de journalisation (voir [Journaling Contract](./BondingBrother%20-%20Journaling%20Contract.md))
-- Les dÃ©tails de synchronisation (voir [Sync & Reconnection Contract](./BondingBrother%20-%20Sync%20&%20Reconnection%20Contract.md))
-- Les rÃ¨gles de dÃ©lÃ©gation (voir [Authority Delegation Contract](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md))
+- Les détails de journalisation (voir [Journaling Contract](./BondingBrother%20-%20Journaling%20Contract.md))
+- Les détails de synchronisation (voir [Sync & Reconnection Contract](./BondingBrother%20-%20Sync%20&%20Reconnection%20Contract.md))
+- Les règles de délégation (voir [Authority Delegation Contract](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md))
 
 ---
 
 ## 3. Principe fondamental
 
-**Bonding Brother continue de fonctionner en mode hors ligne, mais l'autoritÃ© est diffÃ©rÃ©e jusqu'Ã  la reconnexion.**
+**Bonding Brother continue de fonctionner en mode hors ligne, mais l'autorité est différée jusqu'à la reconnexion.**
 
-En mode hors ligne, Bonding Brother reÃ§oit, traduit et journalise les intentions normalement, mais leur transmission aux autoritÃ©s est diffÃ©rÃ©e. L'Ã©valuation par les autoritÃ©s se fait lors de la reconnexion, et les rÃ©sultats sont transmis aux produits de maniÃ¨re diffÃ©rÃ©e.
+En mode hors ligne, Bonding Brother reçoit, traduit et journalise les intentions normalement, mais leur transmission aux autorités est différée. L'évaluation par les autorités se fait lors de la reconnexion, et les résultats sont transmis aux produits de manière différée.
 
 ---
 
@@ -36,124 +36,124 @@ En mode hors ligne, Bonding Brother reÃ§oit, traduit et journalise les intenti
 
 ### 4.1 Mode hors ligne
 
-**DÃ©finition :** Ã‰tat oÃ¹ Bonding Brother ne peut pas communiquer avec une ou plusieurs autoritÃ©s (Kind Mother ou Strong Father).
+**Définition :** État où Bonding Brother ne peut pas communiquer avec une ou plusieurs autorités (Kind Mother ou Strong Father).
 
 **Causes possibles :**
-- Perte de connectivitÃ© rÃ©seau
-- AutoritÃ© temporairement indisponible
-- Maintenance planifiÃ©e d'une autoritÃ©
-- DÃ©gradation de service
+- Perte de connectivité réseau
+- Autorité temporairement indisponible
+- Maintenance planifiée d'une autorité
+- Dégradation de service
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 - Bonding Brother continue de recevoir des intentions
 - Les intentions sont traduites normalement
-- Les intentions sont journalisÃ©es normalement
-- Les intentions sont mises en buffer pour transmission diffÃ©rÃ©e
-- Aucune Ã©valuation par l'autoritÃ© n'est possible
+- Les intentions sont journalisées normalement
+- Les intentions sont mises en buffer pour transmission différée
+- Aucune évaluation par l'autorité n'est possible
 
-### 4.2 AutoritÃ© diffÃ©rÃ©e
+### 4.2 Autorité différée
 
-**DÃ©finition :** MÃ©canisme par lequel l'Ã©valuation d'une intention par une autoritÃ© est reportÃ©e Ã  un moment ultÃ©rieur (reconnexion).
+**Définition :** Mécanisme par lequel l'évaluation d'une intention par une autorité est reportée à un moment ultérieur (reconnexion).
 
-**CaractÃ©ristiques :**
-- L'intention est complÃ¨te et valide
-- L'intention est prÃªte pour Ã©valuation
-- L'Ã©valuation est simplement reportÃ©e dans le temps
-- Aucune modification de l'intention n'est nÃ©cessaire
-- L'ordre chronologique est prÃ©servÃ©
+**Caractéristiques :**
+- L'intention est complète et valide
+- L'intention est prête pour évaluation
+- L'évaluation est simplement reportée dans le temps
+- Aucune modification de l'intention n'est nécessaire
+- L'ordre chronologique est préservé
 
 ### 4.3 Buffer offline
 
-**DÃ©finition :** Stockage temporaire des intentions en attente de transmission aux autoritÃ©s.
+**Définition :** Stockage temporaire des intentions en attente de transmission aux autorités.
 
-**CaractÃ©ristiques :**
-- Stockage persistant (survit aux redÃ©marrages)
-- Ordre prÃ©servÃ© (FIFO)
-- TraÃ§abilitÃ© complÃ¨te
-- Limite de capacitÃ© configurable
+**Caractéristiques :**
+- Stockage persistant (survit aux redémarrages)
+- Ordre préservé (FIFO)
+- Traçabilité complète
+- Limite de capacité configurable
 - Gestion des erreurs de stockage
 
 ---
 
 ## 5. Fonctionnement en mode hors ligne
 
-### 5.1 DÃ©tection du mode hors ligne
+### 5.1 Détection du mode hors ligne
 
-**RÃ¨gle OFFLINE-01 : DÃ©tection automatique**
+**Règle OFFLINE-01 : Détection automatique**
 
-Bonding Brother dÃ©tecte automatiquement la perte de connexion avec une autoritÃ© :
+Bonding Brother détecte automatiquement la perte de connexion avec une autorité :
 - Par timeout de connexion
 - Par erreur de communication
-- Par signal explicite d'indisponibilitÃ©
+- Par signal explicite d'indisponibilité
 
-**RÃ¨gle OFFLINE-02 : DÃ©tection par autoritÃ©**
+**Règle OFFLINE-02 : Détection par autorité**
 
-La dÃ©tection est indÃ©pendante pour chaque autoritÃ© :
+La détection est indépendante pour chaque autorité :
 - Perte de connexion avec Kind Mother n'affecte pas Strong Father
 - Perte de connexion avec Strong Father n'affecte pas Kind Mother
-- Les intentions pour une autoritÃ© disponible continuent d'Ãªtre traitÃ©es normalement
+- Les intentions pour une autorité disponible continuent d'être traitées normalement
 
-**RÃ¨gle OFFLINE-03 : Notification aux produits**
+**Règle OFFLINE-03 : Notification aux produits**
 
 Bonding Brother notifie les produits du passage en mode offline :
-- Notification immÃ©diate du changement d'Ã©tat
-- Statut de chaque autoritÃ© communiquÃ©
-- Estimation du dÃ©lai de reconnexion (si disponible)
+- Notification immédiate du changement d'état
+- Statut de chaque autorité communiqué
+- Estimation du délai de reconnexion (si disponible)
 
 ### 5.2 Traitement des intentions en mode offline
 
 **Flux normal (en ligne) :**
 ```
-Intention â†’ Traduction â†’ Filtrage â†’ Journalisation â†’ Transmission â†’ AutoritÃ©
+Intention → Traduction → Filtrage → Journalisation → Transmission → Autorité
 ```
 
 **Flux offline :**
 ```
-Intention â†’ Traduction â†’ Filtrage â†’ Journalisation â†’ Buffer Offline â†’ (attente)
+Intention → Traduction → Filtrage → Journalisation → Buffer Offline → (attente)
 ```
 
-**RÃ¨gle OFFLINE-04 : Traitement identique jusqu'au buffer**
+**Règle OFFLINE-04 : Traitement identique jusqu'au buffer**
 
-En mode offline, le traitement d'une intention est identique au mode en ligne jusqu'Ã  l'Ã©tape de transmission :
+En mode offline, le traitement d'une intention est identique au mode en ligne jusqu'à l'étape de transmission :
 - Validation structurelle : identique
 - Traduction : identique
 - Filtrage : identique
 - Journalisation : identique
-- Transmission : diffÃ©rÃ©e (mise en buffer)
+- Transmission : différée (mise en buffer)
 
-**RÃ¨gle OFFLINE-05 : Pas de rejet pour cause offline**
+**Règle OFFLINE-05 : Pas de rejet pour cause offline**
 
-Une intention valide n'est jamais rejetÃ©e uniquement parce que l'autoritÃ© est hors ligne. Elle est mise en buffer pour transmission ultÃ©rieure. Cette rÃ¨gle garantit le respect de **LOI-2** : le systÃ¨me ne bloque jamais une opÃ©ration valide au motif d'une ressource externe indisponible.
+Une intention valide n'est jamais rejetée uniquement parce que l'autorité est hors ligne. Elle est mise en buffer pour transmission ultérieure. Cette règle garantit le respect de **LOI-2** : le système ne bloque jamais une opération valide au motif d'une ressource externe indisponible.
 
 ### 5.3 Gestion du buffer offline
 
-**RÃ¨gle BUFFER-01 : Stockage persistant**
+**Règle BUFFER-01 : Stockage persistant**
 
-Le buffer offline est stockÃ© de maniÃ¨re persistante :
-- Survit aux redÃ©marrages de Bonding Brother
-- Survit aux pannes systÃ¨me
+Le buffer offline est stocké de manière persistante :
+- Survit aux redémarrages de Bonding Brother
+- Survit aux pannes système
 - Garantit la non-perte d'intentions
 
-**RÃ¨gle BUFFER-02 : Ordre prÃ©servÃ©**
+**Règle BUFFER-02 : Ordre préservé**
 
-Les intentions sont stockÃ©es et transmises dans l'ordre chronologique (FIFO) :
-- Ordre basÃ© sur le timestamp de l'intention
-- Aucune rÃ©organisation n'est permise
-- Ordre strictement respectÃ© lors de la synchronisation
+Les intentions sont stockées et transmises dans l'ordre chronologique (FIFO) :
+- Ordre basé sur le timestamp de l'intention
+- Aucune réorganisation n'est permise
+- Ordre strictement respecté lors de la synchronisation
 
-**RÃ¨gle BUFFER-03 : Limite de capacitÃ©**
+**Règle BUFFER-03 : Limite de capacité**
 
-Le buffer a une limite de capacitÃ© configurable :
-- Par dÃ©faut : 10 000 intentions
+Le buffer a une limite de capacité configurable :
+- Par défaut : 10 000 intentions
 - Configurable par environnement
-- Gestion du dÃ©passement (voir Section 6.3)
+- Gestion du dépassement (voir Section 6.3)
 
-**RÃ¨gle BUFFER-04 : MÃ©tadonnÃ©es de buffer**
+**Règle BUFFER-04 : Métadonnées de buffer**
 
 Chaque intention en buffer contient :
-- L'intention complÃ¨te (structure + payload)
+- L'intention complète (structure + payload)
 - Le timestamp de mise en buffer
-- L'autoritÃ© cible
+- L'autorité cible
 - Le nombre de tentatives de transmission
 - Le statut (en attente, en transmission, erreur)
 
@@ -161,261 +161,261 @@ Chaque intention en buffer contient :
 
 ## 6. Gestion des contraintes offline
 
-### 6.1 Contrainte CAP-01 : CapacitÃ© du buffer
+### 6.1 Contrainte CAP-01 : Capacité du buffer
 
-**ProblÃ¨me :** Le buffer offline atteint sa capacitÃ© maximale.
+**Problème :** Le buffer offline atteint sa capacité maximale.
 
 **Gestion :**
-1. Bonding Brother refuse les nouvelles intentions avec un code d'erreur spÃ©cifique
-2. Les produits sont notifiÃ©s de la saturation du buffer
-3. Les produits peuvent retenter aprÃ¨s libÃ©ration d'espace
-4. Les intentions en buffer sont priorisÃ©es pour transmission
+1. Bonding Brother refuse les nouvelles intentions avec un code d'erreur spécifique
+2. Les produits sont notifiés de la saturation du buffer
+3. Les produits peuvent retenter après libération d'espace
+4. Les intentions en buffer sont priorisées pour transmission
 
 **Code d'erreur :** `BUFFER_FULL`
 
-**Message :** "Le buffer offline est saturÃ©. Veuillez rÃ©essayer plus tard."
+**Message :** "Le buffer offline est saturé. Veuillez réessayer plus tard."
 
 ### 6.2 Contrainte CAP-02 : Expiration des intentions
 
-**ProblÃ¨me :** Une intention reste trop longtemps en buffer sans Ãªtre transmise.
+**Problème :** Une intention reste trop longtemps en buffer sans être transmise.
 
 **Gestion :**
-1. Chaque intention a une durÃ©e de vie maximale (par dÃ©faut : 7 jours)
-2. AprÃ¨s expiration, l'intention est marquÃ©e comme expirÃ©e
-3. L'intention expirÃ©e n'est plus transmise
-4. Le produit est notifiÃ© de l'expiration
+1. Chaque intention a une durée de vie maximale (par défaut : 7 jours)
+2. Après expiration, l'intention est marquée comme expirée
+3. L'intention expirée n'est plus transmise
+4. Le produit est notifié de l'expiration
 
 **Code d'erreur :** `INTENTION_EXPIRED`
 
-**Message :** "L'intention a expirÃ© avant d'Ãªtre transmise Ã  l'autoritÃ©."
+**Message :** "L'intention a expiré avant d'être transmise à l'autorité."
 
 ### 6.3 Contrainte CAP-03 : Taille des intentions
 
-**ProblÃ¨me :** Une intention est trop volumineuse pour le buffer.
+**Problème :** Une intention est trop volumineuse pour le buffer.
 
 **Gestion :**
 1. Validation de la taille avant mise en buffer
-2. Rejet immÃ©diat si taille excessive
-3. Code d'erreur spÃ©cifique
-4. Suggestion de dÃ©coupage si possible
+2. Rejet immédiat si taille excessive
+3. Code d'erreur spécifique
+4. Suggestion de découpage si possible
 
 **Code d'erreur :** `INTENTION_TOO_LARGE`
 
-**Message :** "L'intention dÃ©passe la taille maximale autorisÃ©e pour le buffer offline."
+**Message :** "L'intention dépasse la taille maximale autorisée pour le buffer offline."
 
 ---
 
 ## 7. Reconnexion et synchronisation
 
-### 7.1 DÃ©tection de la reconnexion
+### 7.1 Détection de la reconnexion
 
-**RÃ¨gle RECONN-01 : DÃ©tection automatique**
+**Règle RECONN-01 : Détection automatique**
 
-Bonding Brother dÃ©tecte automatiquement la reconnexion avec une autoritÃ© :
-- Par succÃ¨s de connexion
+Bonding Brother détecte automatiquement la reconnexion avec une autorité :
+- Par succès de connexion
 - Par restauration du heartbeat
-- Par signal explicite de disponibilitÃ©
+- Par signal explicite de disponibilité
 
-**RÃ¨gle RECONN-02 : DÃ©tection par autoritÃ©**
+**Règle RECONN-02 : Détection par autorité**
 
-La dÃ©tection est indÃ©pendante pour chaque autoritÃ© :
-- Reconnexion avec Kind Mother dÃ©clenche la synchronisation des intentions Kind Mother
-- Reconnexion avec Strong Father dÃ©clenche la synchronisation des intentions Strong Father
-- Les synchronisations sont indÃ©pendantes
+La détection est indépendante pour chaque autorité :
+- Reconnexion avec Kind Mother déclenche la synchronisation des intentions Kind Mother
+- Reconnexion avec Strong Father déclenche la synchronisation des intentions Strong Father
+- Les synchronisations sont indépendantes
 
 ### 7.2 Processus de synchronisation
 
-**Ã‰tape 1 : PrÃ©paration**
-- RÃ©cupÃ©ration des intentions en buffer pour l'autoritÃ© concernÃ©e
-- Tri par ordre chronologique (vÃ©rification)
-- PrÃ©paration des mÃ©tadonnÃ©es de transmission
+**Étape 1 : Préparation**
+- Récupération des intentions en buffer pour l'autorité concernée
+- Tri par ordre chronologique (vérification)
+- Préparation des métadonnées de transmission
 
-**Ã‰tape 2 : Transmission sÃ©quentielle**
+**Étape 2 : Transmission séquentielle**
 - Transmission des intentions une par une dans l'ordre
-- Attente de la rÃ©ponse pour chaque intention
+- Attente de la réponse pour chaque intention
 - Gestion des erreurs de transmission
 
-**Ã‰tape 3 : RÃ©ception des rÃ©ponses**
-- RÃ©ception des rÃ©ponses de l'autoritÃ©
-- Association rÃ©ponse â†’ intention
-- Traduction des rÃ©ponses en rÃ©sultats
+**Étape 3 : Réception des réponses**
+- Réception des réponses de l'autorité
+- Association réponse → intention
+- Traduction des réponses en résultats
 
-**Ã‰tape 4 : Transmission aux produits**
-- Transmission des rÃ©sultats aux produits concernÃ©s
+**Étape 4 : Transmission aux produits**
+- Transmission des résultats aux produits concernés
 - Gestion des produits non disponibles
-- Journalisation des rÃ©sultats
+- Journalisation des résultats
 
-**Ã‰tape 5 : Nettoyage**
-- Suppression des intentions transmises avec succÃ¨s du buffer
+**Étape 5 : Nettoyage**
+- Suppression des intentions transmises avec succès du buffer
 - Conservation des intentions en erreur pour analyse
-- Mise Ã  jour des mÃ©tadonnÃ©es
+- Mise à jour des métadonnées
 
-### 7.3 RÃ¨gles de synchronisation
+### 7.3 Règles de synchronisation
 
-**RÃ¨gle SYNC-01 : Ordre strict**
+**Règle SYNC-01 : Ordre strict**
 
-Les intentions sont transmises dans l'ordre chronologique strict, sans parallÃ©lisation :
-- Une intention Ã  la fois
-- Attente de la rÃ©ponse avant la suivante
-- Aucun rÃ©ordonnancement
+Les intentions sont transmises dans l'ordre chronologique strict, sans parallélisation :
+- Une intention à la fois
+- Attente de la réponse avant la suivante
+- Aucun réordonnancement
 
-**RÃ¨gle SYNC-02 : Gestion des erreurs**
+**Règle SYNC-02 : Gestion des erreurs**
 
 En cas d'erreur lors de la synchronisation :
-- L'intention en erreur est marquÃ©e
-- Les intentions suivantes continuent d'Ãªtre transmises
-- Les intentions en erreur sont retentÃ©es selon une stratÃ©gie de retry
+- L'intention en erreur est marquée
+- Les intentions suivantes continuent d'être transmises
+- Les intentions en erreur sont retentées selon une stratégie de retry
 
-**RÃ¨gle SYNC-03 : Notification aux produits**
+**Règle SYNC-03 : Notification aux produits**
 
-Les produits sont notifiÃ©s de la reconnexion et de la synchronisation :
+Les produits sont notifiés de la reconnexion et de la synchronisation :
 - Notification de reconnexion
 - Progression de la synchronisation (optionnelle)
-- Notification de rÃ©ception des rÃ©sultats diffÃ©rÃ©s
+- Notification de réception des résultats différés
 
 ---
 
-## 8. Ã‰tats et transitions
+## 8. États et transitions
 
-### 8.1 Ã‰tats du systÃ¨me
+### 8.1 États du système
 
 ```
-EN_LIGNE â†’ DÃ‰TECTION_OFFLINE â†’ HORS_LIGNE â†’ DÃ‰TECTION_RECONNEXION â†’ SYNCHRONISATION â†’ EN_LIGNE
+EN_LIGNE → DÉTECTION_OFFLINE → HORS_LIGNE → DÉTECTION_RECONNEXION → SYNCHRONISATION → EN_LIGNE
 ```
 
 **EN_LIGNE :**
-- Toutes les autoritÃ©s sont disponibles
-- Les intentions sont transmises immÃ©diatement
+- Toutes les autorités sont disponibles
+- Les intentions sont transmises immédiatement
 - Aucune intention en buffer
 
-**DÃ‰TECTION_OFFLINE :**
-- Perte de connexion dÃ©tectÃ©e
+**DÉTECTION_OFFLINE :**
+- Perte de connexion détectée
 - Passage en mode offline imminent
 - Notification aux produits
 
 **HORS_LIGNE :**
-- Une ou plusieurs autoritÃ©s sont indisponibles
+- Une ou plusieurs autorités sont indisponibles
 - Les intentions sont mises en buffer
-- Les produits sont notifiÃ©s
+- Les produits sont notifiés
 
-**DÃ‰TECTION_RECONNEXION :**
-- Reconnexion dÃ©tectÃ©e
-- PrÃ©paration de la synchronisation
+**DÉTECTION_RECONNEXION :**
+- Reconnexion détectée
+- Préparation de la synchronisation
 - Notification aux produits
 
 **SYNCHRONISATION :**
-- Transmission des intentions buffÃ©es
-- RÃ©ception des rÃ©ponses
-- Transmission des rÃ©sultats aux produits
+- Transmission des intentions buffées
+- Réception des réponses
+- Transmission des résultats aux produits
 
-### 8.2 Ã‰tats d'une intention en buffer
+### 8.2 États d'une intention en buffer
 
 ```
-EN_ATTENTE â†’ EN_TRANSMISSION â†’ TRANSMISE â†’ RÃ‰SULTAT_REÃ‡U â†’ RÃ‰SULTAT_TRANSMIS
-               â”‚
-               â””â”€â”€â†’ ERREUR â†’ RETRY â†’ (retour EN_ATTENTE ou ABANDONNÃ‰E)
+EN_ATTENTE → EN_TRANSMISSION → TRANSMISE → RÉSULTAT_REÇU → RÉSULTAT_TRANSMIS
+               │
+               └──→ ERREUR → RETRY → (retour EN_ATTENTE ou ABANDONNÉE)
 ```
 
 **EN_ATTENTE :**
 - Intention en buffer, pas encore transmise
-- PrÃªte pour transmission
+- Prête pour transmission
 
 **EN_TRANSMISSION :**
-- Intention en cours de transmission Ã  l'autoritÃ©
-- Attente de rÃ©ponse
+- Intention en cours de transmission à l'autorité
+- Attente de réponse
 
 **TRANSMISE :**
-- Intention transmise avec succÃ¨s
-- RÃ©ponse attendue
+- Intention transmise avec succès
+- Réponse attendue
 
-**RÃ‰SULTAT_REÃ‡U :**
-- RÃ©ponse reÃ§ue de l'autoritÃ©
-- PrÃªte pour traduction et transmission au produit
+**RÉSULTAT_REÇU :**
+- Réponse reçue de l'autorité
+- Prête pour traduction et transmission au produit
 
-**RÃ‰SULTAT_TRANSMIS :**
-- RÃ©sultat transmis au produit
-- Intention peut Ãªtre supprimÃ©e du buffer
+**RÉSULTAT_TRANSMIS :**
+- Résultat transmis au produit
+- Intention peut être supprimée du buffer
 
 **ERREUR :**
 - Erreur lors de la transmission
-- PrÃªte pour retry
+- Prête pour retry
 
-**ABANDONNÃ‰E :**
+**ABANDONNÉE :**
 - Trop d'erreurs ou expiration
 - Ne sera plus transmise
 
 ---
 
-## 9. Garanties et propriÃ©tÃ©s
+## 9. Garanties et propriétés
 
 ### 9.1 Garantie GAR-01 : Non-perte d'intentions
 
-**Ã‰noncÃ© :** Aucune intention valide n'est perdue en mode offline.
+**Énoncé :** Aucune intention valide n'est perdue en mode offline.
 
-**MÃ©canismes :**
+**Mécanismes :**
 - Stockage persistant du buffer
-- Journalisation systÃ©matique
+- Journalisation systématique
 - Retry en cas d'erreur
-- VÃ©rification d'intÃ©gritÃ©
+- Vérification d'intégrité
 
-### 9.2 Garantie GAR-02 : Ordre prÃ©servÃ©
+### 9.2 Garantie GAR-02 : Ordre préservé
 
-**Ã‰noncÃ© :** L'ordre chronologique des intentions est prÃ©servÃ© lors de la synchronisation.
+**Énoncé :** L'ordre chronologique des intentions est préservé lors de la synchronisation.
 
-**MÃ©canismes :**
+**Mécanismes :**
 - Tri par timestamp
-- Transmission sÃ©quentielle
-- Aucun rÃ©ordonnancement
+- Transmission séquentielle
+- Aucun réordonnancement
 
-### 9.3 Garantie GAR-03 : TraÃ§abilitÃ© complÃ¨te
+### 9.3 Garantie GAR-03 : Traçabilité complète
 
-**Ã‰noncÃ© :** Toute intention en mode offline est traÃ§able de maniÃ¨re complÃ¨te.
+**Énoncé :** Toute intention en mode offline est traçable de manière complète.
 
-**MÃ©canismes :**
+**Mécanismes :**
 - Journalisation avec marqueur offline
-- MÃ©tadonnÃ©es de buffer
+- Métadonnées de buffer
 - Historique de transmission
 - Logs d'audit
 
 ### 9.4 Garantie GAR-04 : Transparence pour les produits
 
-**Ã‰noncÃ© :** Les produits sont informÃ©s de l'Ã©tat du systÃ¨me et des rÃ©sultats diffÃ©rÃ©s.
+**Énoncé :** Les produits sont informés de l'état du système et des résultats différés.
 
-**MÃ©canismes :**
-- Notifications d'Ã©tat
-- Transmission des rÃ©sultats diffÃ©rÃ©s
+**Mécanismes :**
+- Notifications d'état
+- Transmission des résultats différés
 - Codes d'erreur explicites
-- Estimation de dÃ©lai (si disponible)
+- Estimation de délai (si disponible)
 
 ---
 
 ## 10. Configuration
 
-### 10.1 ParamÃ¨tres configurables
+### 10.1 Paramètres configurables
 
-| ParamÃ¨tre | Description | Valeur par dÃ©faut | UnitÃ© |
+| Paramètre | Description | Valeur par défaut | Unité |
 |-----------|-------------|-------------------|-------|
-| `buffer.max_capacity` | CapacitÃ© maximale du buffer | 10 000 | intentions |
-| `buffer.intention_ttl` | DurÃ©e de vie maximale d'une intention | 7 | jours |
+| `buffer.max_capacity` | Capacité maximale du buffer | 10 000 | intentions |
+| `buffer.intention_ttl` | Durée de vie maximale d'une intention | 7 | jours |
 | `buffer.max_intention_size` | Taille maximale d'une intention | 1 | MB |
 | `sync.retry_max_attempts` | Nombre maximum de tentatives | 3 | tentatives |
-| `sync.retry_delay` | DÃ©lai entre tentatives | 60 | secondes |
+| `sync.retry_delay` | Délai entre tentatives | 60 | secondes |
 | `detection.connection_timeout` | Timeout de connexion | 30 | secondes |
 | `detection.heartbeat_interval` | Intervalle de heartbeat | 10 | secondes |
 
-### 10.2 RÃ¨gles de configuration
+### 10.2 Règles de configuration
 
-**RÃ¨gle CONFIG-01 : Configuration immuable**
+**Règle CONFIG-01 : Configuration immuable**
 
-La configuration est immuable aprÃ¨s le dÃ©marrage de Bonding Brother. Aucune modification dynamique n'est permise.
+La configuration est immuable après le démarrage de Bonding Brother. Aucune modification dynamique n'est permise.
 
-**RÃ¨gle CONFIG-02 : Validation au dÃ©marrage**
+**Règle CONFIG-02 : Validation au démarrage**
 
-Tous les paramÃ¨tres sont validÃ©s au dÃ©marrage. Une configuration invalide empÃªche le dÃ©marrage.
+Tous les paramètres sont validés au démarrage. Une configuration invalide empêche le démarrage.
 
-**RÃ¨gle CONFIG-03 : Documentation**
+**Règle CONFIG-03 : Documentation**
 
-Tous les paramÃ¨tres sont documentÃ©s avec leur impact et leurs valeurs recommandÃ©es.
+Tous les paramètres sont documentés avec leur impact et leurs valeurs recommandées.
 
 ---
 
@@ -424,43 +424,43 @@ Tous les paramÃ¨tres sont documentÃ©s avec leur impact et leurs valeurs reco
 ### 11.1 Exemple : Passage en mode offline
 
 ```
-1. Bonding Brother dÃ©tecte la perte de connexion avec Kind Mother
+1. Bonding Brother détecte la perte de connexion avec Kind Mother
 2. Bonding Brother passe en mode offline pour Kind Mother
 3. Bonding Brother notifie les produits : "Kind Mother est hors ligne"
 4. Les nouvelles intentions pour Kind Mother sont mises en buffer
 5. Les intentions pour Strong Father continuent normalement
 ```
 
-### 11.2 Exemple : Synchronisation Ã  la reconnexion
+### 11.2 Exemple : Synchronisation à la reconnexion
 
 ```
-1. Bonding Brother dÃ©tecte la reconnexion avec Kind Mother
+1. Bonding Brother détecte la reconnexion avec Kind Mother
 2. Bonding Brother notifie les produits : "Kind Mother est de nouveau en ligne"
-3. Bonding Brother rÃ©cupÃ¨re 150 intentions en buffer pour Kind Mother
+3. Bonding Brother récupère 150 intentions en buffer pour Kind Mother
 4. Bonding Brother transmet les intentions une par une dans l'ordre chronologique
 5. Pour chaque intention :
-   a. Transmission Ã  Kind Mother
-   b. RÃ©ception de la rÃ©ponse
-   c. Traduction en rÃ©sultat
-   d. Transmission du rÃ©sultat au produit concernÃ©
+   a. Transmission à Kind Mother
+   b. Réception de la réponse
+   c. Traduction en résultat
+   d. Transmission du résultat au produit concerné
 6. Bonding Brother supprime les intentions transmises du buffer
-7. Bonding Brother notifie les produits : "Synchronisation terminÃ©e"
+7. Bonding Brother notifie les produits : "Synchronisation terminée"
 ```
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles de gestion du mode hors ligne et de l'autoritÃ© diffÃ©rÃ©e que Bonding Brother doit respecter.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles de gestion du mode hors ligne et de l'autorité différée que Bonding Brother doit respecter.
 
-Toute implÃ©mentation du mode offline doit respecter ces rÃ¨gles. Toute violation compromet l'intÃ©gritÃ© et la traÃ§abilitÃ© du systÃ¨me.
+Toute implémentation du mode offline doit respecter ces règles. Toute violation compromet l'intégrité et la traçabilité du système.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0 (Section 8)
 - [Architecture & Flows](../../architecture/BondingBrother%20-%20Architecture%20&%20Flows.md) v2.0
 - [Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) v2.0

@@ -1,10 +1,10 @@
-﻿# MiyukiniTerminal â€” Alignement Central Dioxus
+﻿# MiyukiniTerminal — Alignement Central Dioxus
 
 ## Contexte
 
-Ce document dÃ©crit le **mapping des patterns Miyukini Central** vers MiyukiniTerminal : AppContext, hooks, thÃ¨me, navigation, composants, et les **diffÃ©rences imposÃ©es par le mobile** (Ã©cran tactile, taille, gestures).
+Ce document décrit le **mapping des patterns Miyukini Central** vers MiyukiniTerminal : AppContext, hooks, thème, navigation, composants, et les **différences imposées par le mobile** (écran tactile, taille, gestures).
 
-**RÃ©fÃ©rences :**
+**Références :**
 
 - [Architecture Technique](./MiyukiniTerminal%20-%20Architecture%20Technique.md)
 - [Skill miyukini-dioxus-ui](_index.md)
@@ -12,19 +12,19 @@ Ce document dÃ©crit le **mapping des patterns Miyukini Central** vers Miyukini
 
 ---
 
-## PortÃ©e / Scope
+## Portée / Scope
 
 - Patterns Central : AppContext, use_app_state, theme
 - Navigation : MainTab vs mobile (bottom nav)
 - Composants : Props, Signal, RSX
-- DiffÃ©rences mobile : touch, taille, gestures
-- RÃ©utilisation thÃ¨me Gaming
+- Différences mobile : touch, taille, gestures
+- Réutilisation thème Gaming
 
 ---
 
-## 1. Gestion d'Ã©tat : AppContext
+## 1. Gestion d'état : AppContext
 
-### 1.1 Central (rÃ©fÃ©rence)
+### 1.1 Central (référence)
 
 ```rust
 pub struct AppContext {
@@ -43,10 +43,10 @@ pub fn use_app_state() -> Signal<AppState> {
 
 ### 1.2 Terminal (adaptation)
 
-| Ã‰lÃ©ment | Central | Terminal |
+| Élément | Central | Terminal |
 |---------|---------|----------|
-| **ServiceConnections** | Oui (bases locales) | AdaptÃ© : connexions rÃ©duites (cache, queue, MWS) |
-| **AppState** | current_user, main_tab, theme, etc. | current_user (identique), main_tab (adaptÃ©), theme, connection_state |
+| **ServiceConnections** | Oui (bases locales) | Adapté : connexions réduites (cache, queue, MWS) |
+| **AppState** | current_user, main_tab, theme, etc. | current_user (identique), main_tab (adapté), theme, connection_state |
 | **Provider** | use_context_provider | Idem |
 | **Hooks** | use_app_state, use_service_connections | Idem ; ajouter use_connection_state |
 
@@ -54,10 +54,10 @@ pub fn use_app_state() -> Signal<AppState> {
 
 ```rust
 pub struct AppState {
-    // HÃ©ritÃ©s de Central
+    // Hérités de Central
     pub current_user: Option<User>,
     pub current_theme: Theme,
-    // SpÃ©cifiques Terminal
+    // Spécifiques Terminal
     pub parent_cog_id: Option<String>,
     pub cog_id: Option<String>,
     pub connection_state: ConnectionState, // Online, Offline, Degrading
@@ -67,11 +67,11 @@ pub struct AppState {
 
 ---
 
-## 2. ThÃ¨me : ThemePalette
+## 2. Thème : ThemePalette
 
-### 2.1 RÃ©utilisation
+### 2.1 Réutilisation
 
-Le thÃ¨me **Gaming** (palette type Steam) est **rÃ©utilisÃ© tel quel** pour la cohÃ©rence visuelle entre Central et Terminal.
+Le thème **Gaming** (palette type Steam) est **réutilisé tel quel** pour la cohérence visuelle entre Central et Terminal.
 
 ```rust
 // Copier ou partager depuis apps/central/src/theme.rs
@@ -89,14 +89,14 @@ pub struct ThemePalette {
 
 | Aspect | Central (desktop) | Terminal (mobile) |
 |--------|-------------------|-------------------|
-| **UnitÃ©** | px | dp (density-independent) ou px |
-| **Touch** | Clic souris | Zone tactile min 44Ã—44 pt |
-| **Contraste** | Idem | Renforcer si usage extÃ©rieur |
+| **Unité** | px | dp (density-independent) ou px |
+| **Touch** | Clic souris | Zone tactile min 44×44 pt |
+| **Contraste** | Idem | Renforcer si usage extérieur |
 | **Espacement** | Standard | Augmenter pour touch |
 
 ### 2.3 Styles
 
-Les fonctions `styles::xxx(theme)` de Central peuvent Ãªtre rÃ©utilisÃ©es ; ajouter des variantes mobile :
+Les fonctions `styles::xxx(theme)` de Central peuvent être réutilisées ; ajouter des variantes mobile :
 
 ```rust
 pub mod styles {
@@ -134,7 +134,7 @@ pub enum MainTabTerminal {
 }
 ```
 
-**Pas de :** BibliothÃ¨que (services complets) ; CommunautÃ© (simplifiÃ© ou futur).
+**Pas de :** Bibliothèque (services complets) ; Communauté (simplifié ou futur).
 
 ### 3.3 Bottom Navigation
 
@@ -143,7 +143,7 @@ Sur mobile : **barre de navigation en bas** (standard Android/iOS).
 ```rust
 // Structure
 rsx! {
-    main { /* contenu Ã©cran actif */ }
+    main { /* contenu écran actif */ }
     nav { style: "position: fixed; bottom: 0; ...",
         TabButton { tab: MainTabTerminal::Salon, ... }
         TabButton { tab: MainTabTerminal::Parametres, ... }
@@ -203,71 +203,71 @@ onclick: move |_| {
 
 ---
 
-## 5. DiffÃ©rences mobile
+## 5. Différences mobile
 
-### 5.1 Ã‰cran tactile
+### 5.1 Écran tactile
 
-| RÃ¨gle | Description |
+| Règle | Description |
 |-------|-------------|
-| **Taille cible** | Min 44Ã—44 pt (ou dp) pour boutons/liens |
-| **Espacement** | Padding accru entre Ã©lÃ©ments cliquables |
-| **Pas de hover** | Remplacer par : focus, Ã©tat actif |
+| **Taille cible** | Min 44×44 pt (ou dp) pour boutons/liens |
+| **Espacement** | Padding accru entre éléments cliquables |
+| **Pas de hover** | Remplacer par : focus, état actif |
 | **Long press** | Possible pour actions contextuelles |
 
 ### 5.2 Gestures
 
 | Gesture | Usage possible |
 |---------|----------------|
-| **Tap** | SÃ©lection, navigation |
-| **Swipe** | Refresh, navigation latÃ©rale |
+| **Tap** | Sélection, navigation |
+| **Swipe** | Refresh, navigation latérale |
 | **Pinch** | Zoom (si applicable) |
 | **Pull-to-refresh** | Synchronisation |
 
-### 5.3 Taille Ã©cran
+### 5.3 Taille écran
 
-- **Width** : 360â€“480 dp typique (phone)
+- **Width** : 360–480 dp typique (phone)
 - **Orientation** : Portrait prioritaire ; paysage optionnel
-- **Safe area** : Notch, barre systÃ¨me ; prÃ©voir margins
+- **Safe area** : Notch, barre système ; prévoir margins
 
 ### 5.4 Performance
 
-- **WebView** : Limiter re-renders ; Ã©viter listes trÃ¨s longues sans virtualisation
+- **WebView** : Limiter re-renders ; éviter listes très longues sans virtualisation
 - **Batterie** : Sync par batch ; pas de polling continu
 
 ---
 
-## 6. Mapping Ã©crans Central â†’ Terminal
+## 6. Mapping écrans Central → Terminal
 
 | Central | Terminal | Correspondance |
 |---------|----------|----------------|
-| RiteEntree | â€” | Non (Terminal = enfant existant) |
+| RiteEntree | — | Non (Terminal = enfant existant) |
 | Connexion | Liaison | Token / QR au lieu de login |
-| Salon | Salon | Liste services (rÃ©duite) |
-| BibliothÃ¨que | â€” | Non (ou simplifiÃ©) |
-| CommunautÃ© | â€” | Futur : dÃ©couverte COGs |
-| Miyukini (paramÃ¨tres) | ParamÃ¨tres | AdaptÃ© |
-| ProfileWindow | Profil | AdaptÃ© |
+| Salon | Salon | Liste services (réduite) |
+| Bibliothèque | — | Non (ou simplifié) |
+| Communauté | — | Futur : découverte COGs |
+| Miyukini (paramètres) | Paramètres | Adapté |
+| ProfileWindow | Profil | Adapté |
 
 ---
 
-## 7. RÃ©utilisation concrÃ¨te
+## 7. Réutilisation concrète
 
-### 7.1 Fichiers Ã  rÃ©utiliser / adapter
+### 7.1 Fichiers à réutiliser / adapter
 
 | Fichier Central | Action Terminal |
 |-----------------|----------------|
 | `theme.rs` | Copier ; ajouter variantes mobile |
 | `state.rs` (partie) | Adapter AppState ; garder structure |
-| Composants (cards, buttons) | RÃ©utiliser ; augmenter zone touch |
-| `styles` | RÃ©utiliser ; ajouter `_mobile` si besoin |
+| Composants (cards, buttons) | Réutiliser ; augmenter zone touch |
+| `styles` | Réutiliser ; ajouter `_mobile` si besoin |
 
-### 7.2 Pas de dÃ©pendance directe
+### 7.2 Pas de dépendance directe
 
-Terminal et Central sont des **applications sÃ©parÃ©es**. Pas de `path = "../../apps/central"` dans Cargo.toml. La rÃ©utilisation se fait par **copie** ou extraction en crate partagÃ© (ex. `miyukini-ui-common`) si pertinent.
+Terminal et Central sont des **applications séparées**. Pas de `path = "../../apps/central"` dans Cargo.toml. La réutilisation se fait par **copie** ou extraction en crate partagé (ex. `miyukini-ui-common`) si pertinent.
 
 ---
 
-## 8. RÃ©fÃ©rences
+## 8. Références
 
 - [Skill miyukini-dioxus-ui](_index.md)
 - [Spec Design System Mobile](./MiyukiniTerminal%20-%20Spec%20Design%20System%20Mobile.md)

@@ -42,17 +42,17 @@ Ce document **ne couvre pas** :
 > **Un point d'intervention est un moment explicitement defini dans un processus ou l'intervention humaine est possible ou requise, selon des conditions predeterminees et des regles non ambigues.**
 
 Un point d'intervention n'est pas :
-- âŒ Un bug ou une erreur
-- âŒ Un blocage imprevu
-- âŒ Une opportunite implicite
-- âŒ Un contournement
+- ❌ Un bug ou une erreur
+- ❌ Un blocage imprevu
+- ❌ Une opportunite implicite
+- ❌ Un contournement
 
 Un point d'intervention est :
-- âœ… Declare explicitement par le processus
-- âœ… Categorise selon les regles de TAMR
-- âœ… Conditionne par des criteres definis
-- âœ… Associe a un ou plusieurs types d'intervention
-- âœ… TraÃ§able et auditable
+- ✅ Declare explicitement par le processus
+- ✅ Categorise selon les regles de TAMR
+- ✅ Conditionne par des criteres definis
+- ✅ Associe a un ou plusieurs types d'intervention
+- ✅ Traçable et auditable
 
 ### 3.2 Caracteristiques Fondamentales
 
@@ -86,7 +86,7 @@ Un point d'intervention possede les attributs suivants :
 
 TAMR definit **cinq categories fondamentales** de points d'intervention. Tout point d'intervention declare par un processus doit appartenir a l'une de ces categories.
 
-### 4.1 DECISION_GATE â€” Porte de Decision
+### 4.1 DECISION_GATE — Porte de Decision
 
 **Definition :** Point ou une decision importante doit etre prise, necessitant potentiellement une validation humaine.
 
@@ -104,7 +104,7 @@ TAMR definit **cinq categories fondamentales** de points d'intervention. Tout po
 
 **Types d'intervention autorises :** Approval, Override
 
-### 4.2 CRITICAL_OPERATION â€” Operation Critique
+### 4.2 CRITICAL_OPERATION — Operation Critique
 
 **Definition :** Point ou une operation a fort impact est sur le point d'etre executee, necessitant une confirmation humaine.
 
@@ -122,7 +122,7 @@ TAMR definit **cinq categories fondamentales** de points d'intervention. Tout po
 
 **Types d'intervention autorises :** Approval, Override, Escalation
 
-### 4.3 CONFLICT_RESOLUTION â€” Resolution de Conflit
+### 4.3 CONFLICT_RESOLUTION — Resolution de Conflit
 
 **Definition :** Point ou le systeme detecte une incoherence ou un conflit qu'il ne peut pas resoudre automatiquement.
 
@@ -140,7 +140,7 @@ TAMR definit **cinq categories fondamentales** de points d'intervention. Tout po
 
 **Types d'intervention autorises :** Override, Escalation
 
-### 4.4 ANOMALY_RESPONSE â€” Reponse a Anomalie
+### 4.4 ANOMALY_RESPONSE — Reponse a Anomalie
 
 **Definition :** Point active lorsqu'une anomalie est detectee et que le systeme attend une intervention humaine pour continuer.
 
@@ -158,7 +158,7 @@ TAMR definit **cinq categories fondamentales** de points d'intervention. Tout po
 
 **Types d'intervention autorises :** Override, Escalation, Supervision
 
-### 4.5 SUPERVISION_CHECKPOINT â€” Point de Supervision
+### 4.5 SUPERVISION_CHECKPOINT — Point de Supervision
 
 **Definition :** Point ou l'humain peut observer l'etat du processus sans necessairement intervenir.
 
@@ -201,7 +201,7 @@ Conditions evaluees a l'execution, basees sur le contexte.
 
 | Condition | Description | Exemple |
 |-----------|-------------|---------|
-| `THRESHOLD_EXCEEDED` | Seuil depasse | Montant > 1000â‚¬ |
+| `THRESHOLD_EXCEEDED` | Seuil depasse | Montant > 1000€ |
 | `RULE_VIOLATION` | Regle metier violee | Contrainte non respectee |
 | `AMBIGUOUS_DECISION` | Decision StrongFather AMBIGUOUS | Plusieurs politiques en conflit |
 | `ANOMALY_DETECTED` | Anomalie detectee par Caring Nanny | Signal d'alerte |
@@ -223,12 +223,12 @@ Les conditions peuvent etre combinees avec des operateurs logiques.
 
 Les conditions sont evaluees dans l'ordre de priorite suivant :
 
-1. **Conditions de securite** (niveau de confiance T3-T4) â€” Haute priorite
-2. **Conditions de niveau de securite** (niveau 3-4) â€” Haute priorite
-3. **Conditions d'anomalie** â€” Moyenne priorite
-4. **Conditions metier** â€” Priorite normale
-5. **Conditions de seuil** â€” Priorite normale
-6. **Conditions statiques** â€” Base
+1. **Conditions de securite** (niveau de confiance T3-T4) — Haute priorite
+2. **Conditions de niveau de securite** (niveau 3-4) — Haute priorite
+3. **Conditions d'anomalie** — Moyenne priorite
+4. **Conditions metier** — Priorite normale
+5. **Conditions de seuil** — Priorite normale
+6. **Conditions statiques** — Base
 
 ### 5.3 Invariant de Condition
 
@@ -340,18 +340,18 @@ StrongFather valide les declarations de points d'intervention :
 
 ```
 Declaration du processus
-        â”‚
-        â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  STRONGFATHER â€” Validation            â”‚
-â”‚  â€¢ La categorie est-elle valide ?     â”‚
-â”‚  â€¢ Les conditions sont-elles valides ?â”‚
-â”‚  â€¢ Les types sont-ils compatibles ?   â”‚
-â”‚  â€¢ Le niveau de securite est-il       â”‚
-â”‚    respecte ?                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-        â”‚
-        â–¼
+        │
+        ▼
+┌───────────────────────────────────────┐
+│  STRONGFATHER — Validation            │
+│  • La categorie est-elle valide ?     │
+│  • Les conditions sont-elles valides ?│
+│  • Les types sont-ils compatibles ?   │
+│  • Le niveau de securite est-il       │
+│    respecte ?                         │
+└───────────────────────────────────────┘
+        │
+        ▼
   Declaration acceptee ou refusee
 ```
 
@@ -373,32 +373,32 @@ Le comportement des points d'intervention s'adapte au niveau de confiance du sys
 
 ### 8.2 Detail par Niveau
 
-#### T0 â€” Normal
+#### T0 — Normal
 
 - Points d'intervention fonctionnent selon leur configuration
 - Points optionnels restent optionnels
 - Pas de modification automatique du comportement
 
-#### T1 â€” Instable
+#### T1 — Instable
 
 - Points SUPERVISION_CHECKPOINT recommandes
 - Logging renforce sur tous les points actives
 - Notification optionnelle aux superviseurs
 
-#### T2 â€” Degrade
+#### T2 — Degrade
 
 - Points ANOMALY_RESPONSE actives automatiquement
 - Points SUPERVISION_CHECKPOINT deviennent obligatoires
-- Points CRITICAL_OPERATION reÃ§oivent un avertissement supplementaire
+- Points CRITICAL_OPERATION reçoivent un avertissement supplementaire
 
-#### T3 â€” Restreint
+#### T3 — Restreint
 
 - Tous les points CRITICAL_OPERATION deviennent obligatoires
 - Points DECISION_GATE necessitent confirmation
 - Override necessite passage par TAMR
 - Escalade facilitee
 
-#### T4 â€” Bloque
+#### T4 — Bloque
 
 - Seuls les points permettant le diagnostic sont actifs
 - Intervention humaine obligatoire pour toute action
@@ -408,7 +408,7 @@ Le comportement des points d'intervention s'adapte au niveau de confiance du sys
 
 **INV-IP-3 : Non-Regression de Securite**
 
-> **Un niveau de confiance plus eleve (T1 â†’ T2 â†’ T3 â†’ T4) ne peut jamais reduire le nombre de points d'intervention obligatoires.**
+> **Un niveau de confiance plus eleve (T1 → T2 → T3 → T4) ne peut jamais reduire le nombre de points d'intervention obligatoires.**
 
 Cet invariant garantit que la degradation du systeme renforce toujours l'intervention humaine, jamais l'inverse.
 
@@ -432,13 +432,13 @@ Les points d'intervention s'adaptent egalement au niveau de securite declare par
 
 | Categorie | Niveau 0 | Niveau 1 | Niveau 2 | Niveau 3 | Niveau 4 |
 |-----------|----------|----------|----------|----------|----------|
-| DECISION_GATE | âŒ | âšª | âšª | âœ… | âœ…âœ… |
-| CRITICAL_OPERATION | âŒ | âŒ | âšª | âœ… | âœ…âœ… |
-| CONFLICT_RESOLUTION | âŒ | âšª | âšª | âœ… | âœ…âœ… |
-| ANOMALY_RESPONSE | âŒ | âŒ | âšª | âœ… | âœ…âœ… |
-| SUPERVISION_CHECKPOINT | âŒ | âšª | âšª | âœ… | âœ… |
+| DECISION_GATE | ❌ | ⚪ | ⚪ | ✅ | ✅✅ |
+| CRITICAL_OPERATION | ❌ | ❌ | ⚪ | ✅ | ✅✅ |
+| CONFLICT_RESOLUTION | ❌ | ⚪ | ⚪ | ✅ | ✅✅ |
+| ANOMALY_RESPONSE | ❌ | ❌ | ⚪ | ✅ | ✅✅ |
+| SUPERVISION_CHECKPOINT | ❌ | ⚪ | ⚪ | ✅ | ✅ |
 
-**Legende :** âŒ Desactive | âšª Optionnel | âœ… Active | âœ…âœ… Obligatoire
+**Legende :** ❌ Desactive | ⚪ Optionnel | ✅ Active | ✅✅ Obligatoire
 
 ---
 
@@ -511,7 +511,7 @@ Les points d'intervention s'adaptent egalement au niveau de securite declare par
 
 **Interactions :**
 - Detecte les anomalies declenchant des points
-- Signale le niveau de confiance influenÃ§ant les points
+- Signale le niveau de confiance influençant les points
 - Consolide les signaux pour activation
 
 ---
@@ -522,7 +522,7 @@ Les points d'intervention respectent les [Lois d'Autonomie Systeme](..//..//..//
 
 ### LOI-1 : Aucune dependance externe critique a l'execution
 
-**Conformite :** âœ… **Conforme**
+**Conformite :** ✅ **Conforme**
 
 - Les points d'intervention sont declares localement
 - L'evaluation des conditions est locale
@@ -530,7 +530,7 @@ Les points d'intervention respectent les [Lois d'Autonomie Systeme](..//..//..//
 
 ### LOI-2 : Le systeme accepte l'isolement comme etat normal
 
-**Conformite :** âœ… **Conforme**
+**Conformite :** ✅ **Conforme**
 
 - Les points fonctionnent en mode isole
 - L'intervention humaine reste possible offline
@@ -538,7 +538,7 @@ Les points d'intervention respectent les [Lois d'Autonomie Systeme](..//..//..//
 
 ### LOI-3 : L'etat local est souverain
 
-**Conformite :** âœ… **Conforme**
+**Conformite :** ✅ **Conforme**
 
 - Les interventions effectuees localement sont valides
 - Le registre local des points fait autorite
@@ -572,11 +572,11 @@ Les points d'intervention respectent les [Lois d'Autonomie Systeme](..//..//..//
 
 Les Points d'Intervention TAMR garantissent que :
 
-- âœ… **Les interventions humaines sont explicites** : Pas de point implicite ou cache
-- âœ… **Les conditions sont deterministes** : Comportement previsible et auditable
-- âœ… **L'adaptation est automatique** : Selon niveau de confiance et niveau de securite
-- âœ… **La tracabilite est complete** : Declencheur, contexte, moment traces
-- âœ… **La conformite est verifiee** : Validation StrongFather obligatoire
+- ✅ **Les interventions humaines sont explicites** : Pas de point implicite ou cache
+- ✅ **Les conditions sont deterministes** : Comportement previsible et auditable
+- ✅ **L'adaptation est automatique** : Selon niveau de confiance et niveau de securite
+- ✅ **La tracabilite est complete** : Declencheur, contexte, moment traces
+- ✅ **La conformite est verifiee** : Validation StrongFather obligatoire
 
 **Principe fondateur :**
 
@@ -611,11 +611,11 @@ Les Points d'Intervention TAMR garantissent que :
 ### Verification de coherence
 
 **Verification effectuee :**
-- âœ… Coherence avec la Documentation Fondatrice TAMR : Confirmee (types d'intervention compatibles)
-- âœ… Coherence avec le Security Contract : Confirmee (niveaux T0-T4 et 0-4 alignes)
-- âœ… Conformite aux Lois d'Autonomie : Confirmee (LOI-1, LOI-2, LOI-3)
-- âœ… Structure imposee respectee : Confirmee
-- âœ… Ton contractuel : Confirmee (formulations absolues)
+- ✅ Coherence avec la Documentation Fondatrice TAMR : Confirmee (types d'intervention compatibles)
+- ✅ Coherence avec le Security Contract : Confirmee (niveaux T0-T4 et 0-4 alignes)
+- ✅ Conformite aux Lois d'Autonomie : Confirmee (LOI-1, LOI-2, LOI-3)
+- ✅ Structure imposee respectee : Confirmee
+- ✅ Ton contractuel : Confirmee (formulations absolues)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et non ambigu.
 
@@ -623,6 +623,6 @@ Les Points d'Intervention TAMR garantissent que :
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** CONTRAT â€” Document contractuel normatif  
+**Statut :** CONTRAT — Document contractuel normatif  
 **Reference :** Miyukini Core System v2.4, TAMR v1.4
 

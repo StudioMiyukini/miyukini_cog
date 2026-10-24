@@ -1,76 +1,76 @@
-﻿# MWS â€” Quarantaine et Blacklist
+﻿# MWS — Quarantaine et Blacklist
 
 ## Contexte
 
-La **quarantaine** et la **blacklist** sont les mÃ©canismes de sÃ©curitÃ© du MWS qui permettent d'isoler les COGs non-conformes et de protÃ©ger le rÃ©seau contre les COGs malveillants ou corrompus. Ce systÃ¨me d'escalade progressive garantit une rÃ©ponse proportionnÃ©e aux non-conformitÃ©s.
+La **quarantaine** et la **blacklist** sont les mécanismes de sécurité du MWS qui permettent d'isoler les COGs non-conformes et de protéger le réseau contre les COGs malveillants ou corrompus. Ce système d'escalade progressive garantit une réponse proportionnée aux non-conformités.
 
-**RÃ©fÃ©rence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
+**Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
-## PortÃ©e / Scope
+## Portée / Scope
 
-- Quarantaine : dÃ©finition, dÃ©clencheurs, durÃ©es, escalade
-- Blacklist : conditions, consÃ©quences, auto-destruction
-- LevÃ©e de quarantaine et reconstruction
-- Alerte rÃ©seau et confinement
+- Quarantaine : définition, déclencheurs, durées, escalade
+- Blacklist : conditions, conséquences, auto-destruction
+- Levée de quarantaine et reconstruction
+- Alerte réseau et confinement
 - Synchronisation des listes entre acteurs MWS
 
 ---
 
 ## 1. Quarantaine
 
-### 1.1 DÃ©finition
+### 1.1 Définition
 
-La **quarantaine** est un Ã©tat d'**isolement temporaire** d'un COG qui n'a pas passÃ© la vÃ©rification de conformitÃ©. Un COG en quarantaine :
+La **quarantaine** est un état d'**isolement temporaire** d'un COG qui n'a pas passé la vérification de conformité. Un COG en quarantaine :
 
 - Ne peut pas obtenir de Permis de circulation
 - Ne peut pas se connecter aux trackers
 - Ne peut pas participer au maillage MWS
-- Peut retenter la vÃ©rification aprÃ¨s le dÃ©lai de quarantaine
+- Peut retenter la vérification après le délai de quarantaine
 
-### 1.2 DÃ©clencheurs de quarantaine
+### 1.2 Déclencheurs de quarantaine
 
-| DÃ©clencheur | Phase | Description |
+| Déclencheur | Phase | Description |
 |-------------|-------|-------------|
-| **Ã‰chec Phase A** | ClÃ© Cores | ClÃ© de conformitÃ© incorrecte |
-| **Ã‰chec Phase B** | Blocs Services | Un ou plusieurs Services suspects |
-| **Ã‰chec Phase C** | SantÃ© | Environnement dÃ©gradÃ© ou corrompu |
-| **Permis expirÃ©/invalide** | Tracker | Tentative de connexion avec Permis invalide (contrÃ´le tracker) |
-| **Service non rÃ©pertoriÃ©** | Registre | Service absent du Registre Origin |
+| **Échec Phase A** | Clé Cores | Clé de conformité incorrecte |
+| **Échec Phase B** | Blocs Services | Un ou plusieurs Services suspects |
+| **Échec Phase C** | Santé | Environnement dégradé ou corrompu |
+| **Permis expiré/invalide** | Tracker | Tentative de connexion avec Permis invalide (contrôle tracker) |
+| **Service non répertorié** | Registre | Service absent du Registre Origin |
 
-### 1.3 Escalade des durÃ©es
+### 1.3 Escalade des durées
 
 ```mermaid
 stateDiagram-v2
-    [*] --> NonConformitÃ©1: 1Ã¨re non-conformitÃ©
-    NonConformitÃ©1 --> Quarantaine1h: DÃ©lai 1 heure
-    Quarantaine1h --> Retentative: AprÃ¨s 1h
-    Retentative --> Conforme: VÃ©rification OK
-    Retentative --> NonConformitÃ©2: 2Ã¨me Ã©chec
-    NonConformitÃ©2 --> Quarantaine2h: DÃ©lai 2 heures (x2)
-    Quarantaine2h --> Retentative2: AprÃ¨s 2h
-    Retentative2 --> Conforme: VÃ©rification OK
-    Retentative2 --> NonConformitÃ©3: 3Ã¨me Ã©chec
-    NonConformitÃ©3 --> Blacklist: Blacklistage
+    [*] --> NonConformité1: 1ère non-conformité
+    NonConformité1 --> Quarantaine1h: Délai 1 heure
+    Quarantaine1h --> Retentative: Après 1h
+    Retentative --> Conforme: Vérification OK
+    Retentative --> NonConformité2: 2ème échec
+    NonConformité2 --> Quarantaine2h: Délai 2 heures (x2)
+    Quarantaine2h --> Retentative2: Après 2h
+    Retentative2 --> Conforme: Vérification OK
+    Retentative2 --> NonConformité3: 3ème échec
+    NonConformité3 --> Blacklist: Blacklistage
     Conforme --> [*]
     Blacklist --> AutoDestruction
 ```
 
-| Tentative | DurÃ©e | Action |
+| Tentative | Durée | Action |
 |-----------|-------|--------|
-| **1Ã¨re non-conformitÃ©** | 1 heure | Isolation, journalisation, notification utilisateur |
-| **2Ã¨me non-conformitÃ©** | 2 heures (x2) | Isolation, alerte rÃ©seau, surveillance renforcÃ©e |
-| **3Ã¨me non-conformitÃ©** | **Blacklist** | COG et IP blacklistÃ©s pour tout le rÃ©seau |
+| **1ère non-conformité** | 1 heure | Isolation, journalisation, notification utilisateur |
+| **2ème non-conformité** | 2 heures (x2) | Isolation, alerte réseau, surveillance renforcée |
+| **3ème non-conformité** | **Blacklist** | COG et IP blacklistés pour tout le réseau |
 
-### 1.4 Informations stockÃ©es
+### 1.4 Informations stockées
 
 | Champ | Description |
 |-------|-------------|
 | `cog_id` | Identifiant du COG en quarantaine |
-| `reason` | Raison de la quarantaine (phase Ã©chouÃ©e, dÃ©clencheur) |
-| `started_at` | Date et heure de dÃ©but |
-| `duration` | DurÃ©e de la quarantaine |
-| `attempt` | NumÃ©ro de tentative (1, 2, 3) |
-| `relay_id` | Relay ayant appliquÃ© la quarantaine |
+| `reason` | Raison de la quarantaine (phase échouée, déclencheur) |
+| `started_at` | Date et heure de début |
+| `duration` | Durée de la quarantaine |
+| `attempt` | Numéro de tentative (1, 2, 3) |
+| `relay_id` | Relay ayant appliqué la quarantaine |
 
 ### 1.5 Notification utilisateur
 
@@ -78,46 +78,46 @@ Quand un COG est mis en quarantaine :
 
 | Contenu | Description |
 |---------|-------------|
-| **Raison** | Quelle phase a Ã©chouÃ© et pourquoi |
-| **DurÃ©e** | Combien de temps dure la quarantaine |
-| **Actions recommandÃ©es** | Comment corriger la non-conformitÃ© |
-| **Historique** | Nombre de tentatives prÃ©cÃ©dentes |
+| **Raison** | Quelle phase a échoué et pourquoi |
+| **Durée** | Combien de temps dure la quarantaine |
+| **Actions recommandées** | Comment corriger la non-conformité |
+| **Historique** | Nombre de tentatives précédentes |
 
 ---
 
 ## 2. Blacklist
 
-### 2.1 DÃ©finition
+### 2.1 Définition
 
-La **blacklist** est la liste des COGs (et adresses IP associÃ©es) **dÃ©finitivement exclus** du rÃ©seau MWS. Un COG blacklistÃ© :
+La **blacklist** est la liste des COGs (et adresses IP associées) **définitivement exclus** du réseau MWS. Un COG blacklisté :
 
-- Est identifiÃ© comme **corrompu**
-- Doit s'**auto-dÃ©truire**
-- Ne peut plus participer au MWS sous cette identitÃ©
-- Peut potentiellement Ãªtre restaurÃ© aprÃ¨s reconstruction complÃ¨te
+- Est identifié comme **corrompu**
+- Doit s'**auto-détruire**
+- Ne peut plus participer au MWS sous cette identité
+- Peut potentiellement être restauré après reconstruction complète
 
 ### 2.2 Conditions de blacklistage
 
 | Condition | Description |
 |-----------|-------------|
-| **3 non-conformitÃ©s** | AprÃ¨s 3 Ã©checs de vÃ©rification consÃ©cutifs |
-| **Comportement malveillant** | DÃ©tection d'attaque, usurpation, injection |
-| **DÃ©cision Origin** | DÃ©cision explicite d'Origin pour des raisons de sÃ©curitÃ© |
+| **3 non-conformités** | Après 3 échecs de vérification consécutifs |
+| **Comportement malveillant** | Détection d'attaque, usurpation, injection |
+| **Décision Origin** | Décision explicite d'Origin pour des raisons de sécurité |
 
 ### 2.3 Contenu de la blacklist
 
 | Champ | Description |
 |-------|-------------|
-| `cog_id` | Identifiant du COG blacklistÃ© |
-| `ip_addresses` | Adresses IP associÃ©es |
+| `cog_id` | Identifiant du COG blacklisté |
+| `ip_addresses` | Adresses IP associées |
 | `reason` | Raison du blacklistage |
 | `blacklisted_at` | Date et heure du blacklistage |
-| `source` | Origin, relay, ou tracker ayant initiÃ© |
+| `source` | Origin, relay, ou tracker ayant initié |
 | `status` | `ACTIVE`, `PENDING_REVIEW`, `REMOVED` |
 
 ### 2.4 Auto-destruction
 
-Un COG dont l'ID est blacklistÃ©e **doit** suivre le protocole d'auto-destruction :
+Un COG dont l'ID est blacklistée **doit** suivre le protocole d'auto-destruction :
 
 ```mermaid
 sequenceDiagram
@@ -125,34 +125,34 @@ sequenceDiagram
     participant Cores as Cores (WorrySentinel)
     participant O as Origin
 
-    Note over COG: ID blacklistÃ©e dÃ©tectÃ©e
+    Note over COG: ID blacklistée détectée
     COG->>COG: Identification comme corrompu
-    COG->>COG: Suppression de toutes les strates (9 â†’ 0)
+    COG->>COG: Suppression de toutes les strates (9 → 0)
     COG->>COG: Conservation des Cores uniquement
     Note over Cores: En attente de connexion Internet
-    Cores->>O: Ping (cog_id, Ã©tat actuel)
-    O->>Cores: Instructions de remise en conformitÃ©
+    Cores->>O: Ping (cog_id, état actuel)
+    O->>Cores: Instructions de remise en conformité
     Cores->>COG: Reconstruction depuis la version Origin
-    Note over COG: Si conformitÃ© restaurÃ©e
+    Note over COG: Si conformité restaurée
     O->>O: Retrait de la blacklist
 ```
 
-### 2.5 Ã‰tapes de l'auto-destruction
+### 2.5 Étapes de l'auto-destruction
 
-| Ã‰tape | Action |
+| Étape | Action |
 |-------|--------|
 | 1 | Le COG s'identifie comme **corrompu** |
 | 2 | Suppression de **toutes les strates** (du haut vers le bas) |
-| 3 | Le contenu est **vidÃ©** (donnÃ©es utilisateur, Services) |
+| 3 | Le contenu est **vidé** (données utilisateur, Services) |
 | 4 | Seuls les **Cores** restent (Border Guard, WorrySentinel, etc.) |
-| 5 | Le Core de sÃ©curitÃ© **ping Origin** dÃ¨s qu'une connexion Internet est disponible |
+| 5 | Le Core de sécurité **ping Origin** dès qu'une connexion Internet est disponible |
 | 6 | Origin fournit les **instructions de reconstruction** |
 | 7 | Le COG est **reconstruit** dans sa version d'origine |
-| 8 | Si la conformitÃ© est **restaurÃ©e**, le COG est **retirÃ© de la blacklist** |
+| 8 | Si la conformité est **restaurée**, le COG est **retiré de la blacklist** |
 
 ---
 
-## 3. LevÃ©e de quarantaine
+## 3. Levée de quarantaine
 
 ### 3.1 Conditions
 
@@ -160,9 +160,9 @@ Un COG peut sortir de quarantaine si :
 
 | Condition | Description |
 |-----------|-------------|
-| **DÃ©lai Ã©coulÃ©** | La durÃ©e de quarantaine est terminÃ©e |
-| **Re-vÃ©rification rÃ©ussie** | Les 3 phases de vÃ©rification passent |
-| **Correction effectuÃ©e** | La cause de non-conformitÃ© a Ã©tÃ© corrigÃ©e |
+| **Délai écoulé** | La durée de quarantaine est terminée |
+| **Re-vérification réussie** | Les 3 phases de vérification passent |
+| **Correction effectuée** | La cause de non-conformité a été corrigée |
 
 ### 3.2 Processus
 
@@ -171,122 +171,122 @@ sequenceDiagram
     participant COG as COG
     participant R as Relay
 
-    Note over COG: En quarantaine, dÃ©lai Ã©coulÃ©
-    COG->>R: Nouvelle requÃªte de vÃ©rification
-    R->>R: VÃ©rification Phase A, B, C
+    Note over COG: En quarantaine, délai écoulé
+    COG->>R: Nouvelle requête de vérification
+    R->>R: Vérification Phase A, B, C
     alt Conforme
-        R->>R: RÃ©initialiser compteur de tentatives
-        R->>COG: Permis de circulation dÃ©livrÃ©
+        R->>R: Réinitialiser compteur de tentatives
+        R->>COG: Permis de circulation délivré
         Note over COG: Sortie de quarantaine
     else Non-conforme
-        R->>R: IncrÃ©menter compteur de tentatives
-        R->>COG: Quarantaine (durÃ©e x2)
+        R->>R: Incrémenter compteur de tentatives
+        R->>COG: Quarantaine (durée x2)
     end
 ```
 
 ---
 
-## 4. Alerte rÃ©seau
+## 4. Alerte réseau
 
-### 4.1 DÃ©clenchement
+### 4.1 Déclenchement
 
-Une **alerte rÃ©seau** est dÃ©clenchÃ©e si **plusieurs COGs sont rejetÃ©s** dans un **trÃ¨s court laps de temps** :
+Une **alerte réseau** est déclenchée si **plusieurs COGs sont rejetés** dans un **très court laps de temps** :
 
 | Seuil | Action |
 |-------|--------|
-| > N rejets en < T secondes | Alerte envoyÃ©e Ã  tout le rÃ©seau |
+| > N rejets en < T secondes | Alerte envoyée à tout le réseau |
 
 Les seuils N et T sont configurables par Origin.
 
-### 4.2 ConsÃ©quences de l'alerte
+### 4.2 Conséquences de l'alerte
 
 ```mermaid
 flowchart TB
-    A[Alerte rÃ©seau] --> B[Relays : contrÃ´le renforcÃ©]
+    A[Alerte réseau] --> B[Relays : contrôle renforcé]
     A --> C[Trackers : surveillance]
-    B --> D{Attaque confirmÃ©e ?}
-    D -->|Oui| E[Confinement rÃ©seau]
-    D -->|Non| F[Retour Ã  la normale]
+    B --> D{Attaque confirmée ?}
+    D -->|Oui| E[Confinement réseau]
+    D -->|Non| F[Retour à la normale]
     E --> G[Fermeture connexions inter-COG]
     E --> H[Origin/Relays en lecture seule]
     E --> I[Reconstruction progressive]
 ```
 
-### 4.3 Actions immÃ©diates
+### 4.3 Actions immédiates
 
 | Acteur | Action |
 |--------|--------|
-| **Relays** | Renforcement immÃ©diat des contrÃ´les |
-| **Trackers** | Surveillance renforcÃ©e, fermeture possible des connexions |
-| **COGs** | Peuvent Ãªtre soumis Ã  re-vÃ©rification obligatoire |
+| **Relays** | Renforcement immédiat des contrôles |
+| **Trackers** | Surveillance renforcée, fermeture possible des connexions |
+| **COGs** | Peuvent être soumis à re-vérification obligatoire |
 
 ---
 
-## 5. Confinement rÃ©seau
+## 5. Confinement réseau
 
-### 5.1 DÃ©finition
+### 5.1 Définition
 
-Le **confinement rÃ©seau** est l'Ã©tat d'urgence du MWS oÃ¹ les connexions inter-COG sont **fermÃ©es** pour circonscrire une attaque ou une corruption massive.
+Le **confinement réseau** est l'état d'urgence du MWS où les connexions inter-COG sont **fermées** pour circonscrire une attaque ou une corruption massive.
 
 ### 5.2 Phases du confinement
 
-| Phase | Ã‰tat | Description |
+| Phase | État | Description |
 |-------|------|-------------|
-| **Alerte** | DÃ©tection | Multiples rejets dÃ©tectÃ©s, alerte envoyÃ©e |
-| **Confinement** | ExÃ©cution | Les trackers ferment tout ou partie des connexions |
-| **Lecture seule** | Maintenance | Origin et relays accessibles en lecture seule, vÃ©rification uniquement |
-| **Reconstruction** | RÃ©cupÃ©ration | Les COGs valides reconstruisent le rÃ©seau progressivement |
+| **Alerte** | Détection | Multiples rejets détectés, alerte envoyée |
+| **Confinement** | Exécution | Les trackers ferment tout ou partie des connexions |
+| **Lecture seule** | Maintenance | Origin et relays accessibles en lecture seule, vérification uniquement |
+| **Reconstruction** | Récupération | Les COGs valides reconstruisent le réseau progressivement |
 
 ### 5.3 Comportement des acteurs
 
 | Acteur | Pendant le confinement |
 |--------|------------------------|
-| **Origin** | Accessible en lecture seule, fonctions de vÃ©rification actives |
-| **Relays** | Accessibles en lecture seule, peuvent vÃ©rifier les COGs |
-| **Trackers** | Ferment les connexions, n'acceptent que les COGs re-vÃ©rifiÃ©s |
-| **COGs** | Ne peuvent plus Ã©changer de donnÃ©es, peuvent se re-vÃ©rifier |
+| **Origin** | Accessible en lecture seule, fonctions de vérification actives |
+| **Relays** | Accessibles en lecture seule, peuvent vérifier les COGs |
+| **Trackers** | Ferment les connexions, n'acceptent que les COGs re-vérifiés |
+| **COGs** | Ne peuvent plus échanger de données, peuvent se re-vérifier |
 
 ### 5.4 Reconstruction progressive
 
-1. Les COGs se re-prÃ©sentent aux relays
-2. Re-vÃ©rification complÃ¨te (Phase A, B, C)
-3. Si conforme â†’ nouveau Permis de circulation
+1. Les COGs se re-présentent aux relays
+2. Re-vérification complète (Phase A, B, C)
+3. Si conforme → nouveau Permis de circulation
 4. Connexion aux trackers avec le nouveau Permis
 5. Reconstruction progressive du maillage
 
 ---
 
-## 5.5 RÃ©vocation de Permis en temps rÃ©el (contremesure R-009)
+## 5.5 Révocation de Permis en temps réel (contremesure R-009)
 
-Pour rÃ©agir rapidement Ã  un COG malveillant sans attendre l'expiration de son Permis, le MWS prÃ©voit une **rÃ©vocation de Permis en temps rÃ©el**.
+Pour réagir rapidement à un COG malveillant sans attendre l'expiration de son Permis, le MWS prévoit une **révocation de Permis en temps réel**.
 
-### DÃ©clenchement
+### Déclenchement
 
-| DÃ©clencheur | Description |
+| Déclencheur | Description |
 |-------------|-------------|
-| **Alerte sÃ©curitÃ©** | Comportement suspect dÃ©tectÃ© par un tracker ou un relay |
-| **DÃ©cision administrative** | Origin ou relay dÃ©cide de rÃ©voquer un Permis |
-| **Blacklistage** | Le COG est blacklistÃ© â†’ tous ses Permis sont rÃ©voquÃ©s |
+| **Alerte sécurité** | Comportement suspect détecté par un tracker ou un relay |
+| **Décision administrative** | Origin ou relay décide de révoquer un Permis |
+| **Blacklistage** | Le COG est blacklisté → tous ses Permis sont révoqués |
 
 ### Propagation
 
-| Ã‰tape | Description |
+| Étape | Description |
 |-------|-------------|
-| 1 | Le relay (ou Origin) Ã©met un message **PERMIT_REVOKE** (permis_id, raison, signature) |
-| 2 | Origin diffuse la rÃ©vocation Ã  tous les trackers en **moins de 1 minute** |
-| 3 | Chaque tracker met Ã  jour son **cache de rÃ©vocation** et ferme les connexions concernÃ©es |
-| 4 | Le COG rÃ©voquÃ© reÃ§oit **CLOSE** avec la raison `permit_revoked` |
+| 1 | Le relay (ou Origin) émet un message **PERMIT_REVOKE** (permis_id, raison, signature) |
+| 2 | Origin diffuse la révocation à tous les trackers en **moins de 1 minute** |
+| 3 | Chaque tracker met à jour son **cache de révocation** et ferme les connexions concernées |
+| 4 | Le COG révoqué reçoit **CLOSE** avec la raison `permit_revoked` |
 
-### Cache de rÃ©vocation
+### Cache de révocation
 
-Les trackers maintiennent un cache des Permis rÃ©voquÃ©s (TTL au moins Ã©gal Ã  la durÃ©e max d'un Permis, ex. 8 jours). Toute connexion prÃ©sentant un Permis rÃ©voquÃ© est refusÃ©e.
+Les trackers maintiennent un cache des Permis révoqués (TTL au moins égal à la durée max d'un Permis, ex. 8 jours). Toute connexion présentant un Permis révoqué est refusée.
 
 ### Journalisation
 
-| Ã‰vÃ©nement | DonnÃ©es |
+| Événement | Données |
 |-----------|---------|
-| RÃ©vocation Ã©mise | `permis_id`, `cog_id`, `reason`, `revoked_by`, `revoked_at` |
-| RÃ©vocation appliquÃ©e | `tracker_id`, `permis_id`, `connections_closed` |
+| Révocation émise | `permis_id`, `cog_id`, `reason`, `revoked_by`, `revoked_at` |
+| Révocation appliquée | `tracker_id`, `permis_id`, `connections_closed` |
 
 ---
 
@@ -297,9 +297,9 @@ Les trackers maintiennent un cache des Permis rÃ©voquÃ©s (TTL au moins Ã©g
 ```mermaid
 flowchart TB
     subgraph Origin["Origin"]
-        OW[Whitelist maÃ®tre]
-        OB[Blacklist maÃ®tre]
-        OQ[Quarantaines maÃ®tre]
+        OW[Whitelist maître]
+        OB[Blacklist maître]
+        OQ[Quarantaines maître]
     end
 
     subgraph Relays["Relays"]
@@ -323,92 +323,92 @@ flowchart TB
     RQ1 -->|Push| TQ1
 ```
 
-### 6.2 MÃ©canismes
+### 6.2 Mécanismes
 
-| MÃ©canisme | Description |
+| Mécanisme | Description |
 |-----------|-------------|
-| **Push depuis Origin** | Origin pousse les mises Ã  jour vers tous les relays |
+| **Push depuis Origin** | Origin pousse les mises à jour vers tous les relays |
 | **Push depuis Relays** | Les relays propagent vers les trackers |
-| **Pull pÃ©riodique** | Les acteurs peuvent interroger pour synchronisation |
-| **Invalidation** | Notification immÃ©diate en cas de modification critique |
+| **Pull périodique** | Les acteurs peuvent interroger pour synchronisation |
+| **Invalidation** | Notification immédiate en cas de modification critique |
 
-### 6.3 CohÃ©rence
+### 6.3 Cohérence
 
 | Principe | Description |
 |----------|-------------|
-| **Origin fait autoritÃ©** | La liste d'Origin est la vÃ©ritÃ© |
-| **CohÃ©rence Ã©ventuelle** | Un lÃ©ger retard est acceptable (< 1 minute) |
-| **Pas de divergence** | Un acteur ne peut pas avoir une liste diffÃ©rente d'Origin |
+| **Origin fait autorité** | La liste d'Origin est la vérité |
+| **Cohérence éventuelle** | Un léger retard est acceptable (< 1 minute) |
+| **Pas de divergence** | Un acteur ne peut pas avoir une liste différente d'Origin |
 
 ---
 
 ## 7. Cas particuliers
 
-### 7.1 Passeport spÃ©cial
+### 7.1 Passeport spécial
 
 | Aspect | Comportement |
 |--------|--------------|
-| **Quarantaine** | MÃªme processus, mais notification prioritaire |
-| **Blacklist** | MÃªme processus, mais audit approfondi avant auto-destruction |
-| **Alerte** | Un Passeport spÃ©cial blacklistÃ© dÃ©clenche une alerte rÃ©seau |
+| **Quarantaine** | Même processus, mais notification prioritaire |
+| **Blacklist** | Même processus, mais audit approfondi avant auto-destruction |
+| **Alerte** | Un Passeport spécial blacklisté déclenche une alerte réseau |
 
-### 7.2 COG avec parentÃ©
+### 7.2 COG avec parenté
 
 | Aspect | Comportement |
 |--------|--------------|
-| **Quarantaine** | Le COG parent est notifiÃ© |
-| **Blacklist** | Le COG parent n'est pas automatiquement blacklistÃ© (mais surveillÃ©) |
-| **Confiance hÃ©ritÃ©e** | La confiance du parent peut accÃ©lÃ©rer la sortie de quarantaine |
+| **Quarantaine** | Le COG parent est notifié |
+| **Blacklist** | Le COG parent n'est pas automatiquement blacklisté (mais surveillé) |
+| **Confiance héritée** | La confiance du parent peut accélérer la sortie de quarantaine |
 
 ### 7.3 Faux positif
 
-Si un COG lÃ©gitime est mis en quarantaine par erreur :
+Si un COG légitime est mis en quarantaine par erreur :
 
 1. L'utilisateur peut contacter Origin
 2. Audit manuel de la situation
-3. Si erreur confirmÃ©e : levÃ©e de quarantaine + whitelist temporaire
+3. Si erreur confirmée : levée de quarantaine + whitelist temporaire
 4. Investigation de la cause du faux positif
 
 ---
 
 ## 8. Journalisation
 
-### 8.1 Ã‰vÃ©nements journalisÃ©s
+### 8.1 Événements journalisés
 
-| Ã‰vÃ©nement | DonnÃ©es |
+| Événement | Données |
 |-----------|---------|
 | Mise en quarantaine | `cog_id`, `reason`, `attempt`, `duration`, `relay_id` |
 | Sortie de quarantaine | `cog_id`, `after_verification` (bool) |
 | Blacklistage | `cog_id`, `ip_addresses`, `reason`, `source` |
 | Auto-destruction | `cog_id`, `stages_cleared`, `timestamp` |
 | Retrait de blacklist | `cog_id`, `reason`, `verified_by` |
-| Alerte rÃ©seau | `trigger_count`, `time_window`, `initiator` |
+| Alerte réseau | `trigger_count`, `time_window`, `initiator` |
 | Confinement | `phase`, `connections_closed`, `timestamp` |
-| RÃ©vocation Permis | `permis_id`, `cog_id`, `reason`, `revoked_by` |
+| Révocation Permis | `permis_id`, `cog_id`, `reason`, `revoked_by` |
 
-### 8.2 RÃ©tention
+### 8.2 Rétention
 
-| Type | DurÃ©e recommandÃ©e |
+| Type | Durée recommandée |
 |------|-------------------|
 | Quarantaines | 90 jours |
-| Blacklists | IndÃ©fini (historique) |
-| Alertes rÃ©seau | 1 an |
-| Confinements | IndÃ©fini (incidents critiques) |
+| Blacklists | Indéfini (historique) |
+| Alertes réseau | 1 an |
+| Confinements | Indéfini (incidents critiques) |
 
 ---
 
-## RÃ©fÃ©rences
+## Références
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
-- [MWS - Flux de VÃ©rification](../verification/MWS%20-%20Flux%20de%20Verification.md)
+- [MWS - Flux de Vérification](../verification/MWS%20-%20Flux%20de%20Verification.md)
 - [MWS - Relays](../acteurs/MWS%20-%20Relays.md)
 - [MWS - Trackers](../acteurs/MWS%20-%20Trackers.md)
-- [MWS - Contre-Mesures de SÃ©curitÃ©](./MWS%20-%20Contre-Mesures%20de%20Securite.md) â€” R-009
-- [Miyukini Webway Relay](..//reference//_index.md) â€” sections 2.8, 2.9, 3.4
+- [MWS - Contre-Mesures de Sécurité](./MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-009
+- [Miyukini Webway Relay](..//reference//_index.md) — sections 2.8, 2.9, 3.4
 
 ---
 
 **Version :** 2.0  
-**Mise Ã  jour :** RÃ©vocation Permis temps rÃ©el (R-009)  
-**Classification :** Documentation MWS â€” SÃ©curitÃ©
+**Mise à jour :** Révocation Permis temps réel (R-009)  
+**Classification :** Documentation MWS — Sécurité
 

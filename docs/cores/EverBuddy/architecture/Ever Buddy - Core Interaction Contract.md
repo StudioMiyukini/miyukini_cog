@@ -2,49 +2,49 @@
 
 ## Contexte
 
-Ce document formalise les **interactions d'Ever Buddy avec les autres Cores** du Miyukini Core System. Il dÃ©finit les contrats d'interface, les flux d'Ã©change, et les responsabilitÃ©s de chaque partie dans les interactions.
+Ce document formalise les **interactions d'Ever Buddy avec les autres Cores** du Miyukini Core System. Il définit les contrats d'interface, les flux d'échange, et les responsabilités de chaque partie dans les interactions.
 
-Ever Buddy, en tant que **core de cycle de vie et d'Ã©volution** (Strate 4), interagit avec tous les autres cores pour fournir le contexte temporel nÃ©cessaire aux dÃ©cisions et aux opÃ©rations du systÃ¨me.
+Ever Buddy, en tant que **core de cycle de vie et d'évolution** (Strate 4), interagit avec tous les autres cores pour fournir le contexte temporel nécessaire aux décisions et aux opérations du système.
 
-**Document de rÃ©fÃ©rence :** [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
+**Document de référence :** [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
-## PortÃ©e / Scope
+## Portée / Scope
 
-- **Applicable Ã  :** Toute interaction entre Ever Buddy et les autres cores
-- **Audience :** Architectes, dÃ©veloppeurs, intÃ©grateurs
-- **Statut :** Document contractuel normatif â€” CONTRAT D'INTERACTION
+- **Applicable à :** Toute interaction entre Ever Buddy et les autres cores
+- **Audience :** Architectes, développeurs, intégrateurs
+- **Statut :** Document contractuel normatif — CONTRAT D'INTERACTION
 
 ---
 
-## 1. Principes gÃ©nÃ©raux d'interaction
+## 1. Principes généraux d'interaction
 
 ### 1.1 Nature des relations
 
-Ever Buddy entretient des relations avec les autres cores qui suivent des patterns spÃ©cifiques :
+Ever Buddy entretient des relations avec les autres cores qui suivent des patterns spécifiques :
 
-| Pattern | Description | Cores concernÃ©s |
+| Pattern | Description | Cores concernés |
 |---------|-------------|-----------------|
 | **Consultative** | Le core demande un contexte de cycle de vie | StrongFather |
-| **ComplÃ©mentaire** | Les responsabilitÃ©s se complÃ¨tent sans chevauchement | KindMother |
+| **Complémentaire** | Les responsabilités se complètent sans chevauchement | KindMother |
 | **Guidance** | Ever Buddy guide sans imposer | BondingBrother |
 | **Alimentation** | Ever Buddy fournit des indicateurs | Caring Nanny |
-| **Normative** | Ever Buddy dÃ©finit les rÃ¨gles appliquÃ©es | Border Guard |
-| **Descriptive** | Ever Buddy informe sur l'Ã©tat de vie | Master Butler |
+| **Normative** | Ever Buddy définit les règles appliquées | Border Guard |
+| **Descriptive** | Ever Buddy informe sur l'état de vie | Master Butler |
 | **Escalade** | Ever Buddy signale le besoin d'intervention humaine | TAMR |
 
 ### 1.2 Invariants d'interaction
 
-**INV-INT-1 : Jamais d'autoritÃ© mutuelle**
+**INV-INT-1 : Jamais d'autorité mutuelle**
 
-Les cores conservent leur autonomie. Ever Buddy influence par l'information, jamais par la contrainte. Aucun core ne peut forcer Ever Buddy Ã  modifier ses rÃ¨gles d'Ã©volution.
+Les cores conservent leur autonomie. Ever Buddy influence par l'information, jamais par la contrainte. Aucun core ne peut forcer Ever Buddy à modifier ses règles d'évolution.
 
 **INV-INT-2 : Flux unidirectionnels ou bidirectionnels explicites**
 
-Chaque interaction a une direction explicite. Les flux bidirectionnels sont documentÃ©s comme deux flux unidirectionnels distincts.
+Chaque interaction a une direction explicite. Les flux bidirectionnels sont documentés comme deux flux unidirectionnels distincts.
 
-**INV-INT-3 : Aucune modification de donnÃ©es**
+**INV-INT-3 : Aucune modification de données**
 
-Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il observe, enregistre, recommande, mais l'exÃ©cution reste sous l'autoritÃ© du core concernÃ©.
+Ever Buddy ne modifie jamais les données ou états des autres cores. Il observe, enregistre, recommande, mais l'exécution reste sous l'autorité du core concerné.
 
 ---
 
@@ -52,53 +52,53 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 ### 2.1 Relation avec KindMother
 
-**Type de relation :** ComplÃ©mentaire
+**Type de relation :** Complémentaire
 
 **Principe fondamental :**
 
-> Ever Buddy gouverne comment les structures de donnÃ©es Ã©voluent de T Ã  T+1. KindMother gÃ¨re les donnÃ©es Ã  un instant T.
+> Ever Buddy gouverne comment les structures de données évoluent de T à T+1. KindMother gère les données à un instant T.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | KindMother | Ever Buddy |
 |--------|------------|------------|
-| DonnÃ©es Ã  instant T | âœ… AutoritÃ© | âŒ Lecture seule |
-| SchÃ©mas de donnÃ©es | âœ… DÃ©finition | âœ… RÃ¨gles d'Ã©volution |
-| Migrations de donnÃ©es | âœ… ExÃ©cution | âœ… DÃ©finition des rÃ¨gles |
-| Versionnement des schÃ©mas | âŒ Non concernÃ© | âœ… Gouvernance |
+| Données à instant T | ✅ Autorité | ❌ Lecture seule |
+| Schémas de données | ✅ Définition | ✅ Règles d'évolution |
+| Migrations de données | ✅ Exécution | ✅ Définition des règles |
+| Versionnement des schémas | ❌ Non concerné | ✅ Gouvernance |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Ever Buddy  â”‚                      â”‚ KindMother  â”‚
-â”‚             â”‚  RÃ¨gles d'Ã©volution  â”‚             â”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚             â”‚  Ã‰tat des migrations â”‚             â”‚
-â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌─────────────┐
+│ Ever Buddy  │                      │ KindMother  │
+│             │  Règles d'évolution  │             │
+│             │ ──────────────────► │             │
+│             │                      │             │
+│             │  État des migrations │             │
+│             │ ◄────────────────── │             │
+└─────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| EB â†’ KM | RÃ¨gles de compatibilitÃ© des schÃ©mas | `CompatibilityRules` |
-| EB â†’ KM | Chemins de migration recommandÃ©s | `MigrationPath` |
-| KM â†’ EB | Ã‰tat d'avancement des migrations | `MigrationStatus` |
-| KM â†’ EB | DÃ©claration de nouveaux schÃ©mas | `SchemaDeclaration` |
+| EB → KM | Règles de compatibilité des schémas | `CompatibilityRules` |
+| EB → KM | Chemins de migration recommandés | `MigrationPath` |
+| KM → EB | État d'avancement des migrations | `MigrationStatus` |
+| KM → EB | Déclaration de nouveaux schémas | `SchemaDeclaration` |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
-| **COL-KM-1** | Ever Buddy ne modifie jamais les donnÃ©es gÃ©rÃ©es par KindMother |
-| **COL-KM-2** | KindMother notifie Ever Buddy de tout nouveau schÃ©ma |
-| **COL-KM-3** | Les migrations sont dÃ©finies par Ever Buddy, exÃ©cutÃ©es par KindMother |
+| **COL-KM-1** | Ever Buddy ne modifie jamais les données gérées par KindMother |
+| **COL-KM-2** | KindMother notifie Ever Buddy de tout nouveau schéma |
+| **COL-KM-3** | Les migrations sont définies par Ever Buddy, exécutées par KindMother |
 | **COL-KM-4** | KindMother peut refuser une migration si elle viole ses propres invariants |
 
-**RÃ©fÃ©rence Glossaire :** [KindMother](..//..//..//miyukini-webway-system//reference//_index.md#kindmother)
+**Référence Glossaire :** [KindMother](..//..//..//miyukini-webway-system//reference//_index.md#kindmother)
 
 ---
 
@@ -108,58 +108,58 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> StrongFather dÃ©cide si une action est autorisÃ©e. Ever Buddy fournit le contexte de cycle de vie nÃ©cessaire Ã  la dÃ©cision.
+> StrongFather décide si une action est autorisée. Ever Buddy fournit le contexte de cycle de vie nécessaire à la décision.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | StrongFather | Ever Buddy |
 |--------|--------------|------------|
-| DÃ©cision d'autorisation | âœ… AutoritÃ© | âŒ Aucune |
-| Contexte de cycle de vie | âŒ Consommateur | âœ… Fournisseur |
-| Ã‰valuation de l'impact | âœ… DÃ©cision finale | âœ… Information sur l'Ã©volution |
+| Décision d'autorisation | ✅ Autorité | ❌ Aucune |
+| Contexte de cycle de vie | ❌ Consommateur | ✅ Fournisseur |
+| Évaluation de l'impact | ✅ Décision finale | ✅ Information sur l'évolution |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚StrongFather â”‚  Demande de contexte â”‚ Ever Buddy  â”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚             â”‚  Contexte cycle vie  â”‚             â”‚
-â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚  DÃ‰CISION   â”‚                      â”‚  (aucune)   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌─────────────┐
+│StrongFather │  Demande de contexte │ Ever Buddy  │
+│             │ ──────────────────► │             │
+│             │                      │             │
+│             │  Contexte cycle vie  │             │
+│             │ ◄────────────────── │             │
+│             │                      │             │
+│  DÉCISION   │                      │  (aucune)   │
+└─────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| SF â†’ EB | Demande de contexte pour un Ã©lÃ©ment | `LifecycleContextRequest` |
-| EB â†’ SF | Ã‰tat de cycle de vie actuel | `LifecycleState` |
-| EB â†’ SF | Historique de transitions | `TransitionHistory` |
-| EB â†’ SF | Recommandations associÃ©es | `EvolutionRecommendations` |
+| SF → EB | Demande de contexte pour un élément | `LifecycleContextRequest` |
+| EB → SF | État de cycle de vie actuel | `LifecycleState` |
+| EB → SF | Historique de transitions | `TransitionHistory` |
+| EB → SF | Recommandations associées | `EvolutionRecommendations` |
 
-**Informations fournies par Ever Buddy Ã  StrongFather :**
+**Informations fournies par Ever Buddy à StrongFather :**
 
 | Information | Description | Usage par StrongFather |
 |-------------|-------------|------------------------|
-| `current_state` | DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED | Ã‰valuer si l'action est permise |
-| `deprecation_date` | Date de dÃ©prÃ©ciation (si applicable) | Ã‰valuer l'urgence de migration |
+| `current_state` | DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED | Évaluer si l'action est permise |
+| `deprecation_date` | Date de dépréciation (si applicable) | Évaluer l'urgence de migration |
 | `successor_id` | Identifiant du successeur (si existe) | Rediriger vers le successeur |
-| `compatibility_level` | Niveau de compatibilitÃ© | Ã‰valuer les risques de l'action |
+| `compatibility_level` | Niveau de compatibilité | Évaluer les risques de l'action |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
-| **COL-SF-1** | StrongFather peut consulter Ever Buddy mais la dÃ©cision finale lui appartient |
-| **COL-SF-2** | Ever Buddy ne prend jamais de dÃ©cision Ã  la place de StrongFather |
-| **COL-SF-3** | StrongFather peut ignorer les recommandations d'Ever Buddy (mais c'est tracÃ©) |
-| **COL-SF-4** | Ever Buddy fournit le contexte dans un dÃ©lai garanti (non-bloquant) |
+| **COL-SF-1** | StrongFather peut consulter Ever Buddy mais la décision finale lui appartient |
+| **COL-SF-2** | Ever Buddy ne prend jamais de décision à la place de StrongFather |
+| **COL-SF-3** | StrongFather peut ignorer les recommandations d'Ever Buddy (mais c'est tracé) |
+| **COL-SF-4** | Ever Buddy fournit le contexte dans un délai garanti (non-bloquant) |
 
-**RÃ©fÃ©rence Glossaire :** [StrongFather](..//..//..//miyukini-webway-system//reference//_index.md#strongfather)
+**Référence Glossaire :** [StrongFather](..//..//..//miyukini-webway-system//reference//_index.md#strongfather)
 
 ---
 
@@ -169,50 +169,50 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> BondingBrother traduit les intentions entre produits et autoritÃ©s. Ever Buddy guide les traductions selon les rÃ¨gles de compatibilitÃ© et d'Ã©volution.
+> BondingBrother traduit les intentions entre produits et autorités. Ever Buddy guide les traductions selon les règles de compatibilité et d'évolution.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | BondingBrother | Ever Buddy |
 |--------|----------------|------------|
-| Traduction des intentions | âœ… ExÃ©cution | âŒ Aucune |
-| RÃ¨gles de compatibilitÃ© | âŒ Consommateur | âœ… Fournisseur |
-| Adaptation entre versions | âœ… Application | âœ… DÃ©finition |
-| MÃ©diation produits â†” cores | âœ… AutoritÃ© | âŒ Aucune |
+| Traduction des intentions | ✅ Exécution | ❌ Aucune |
+| Règles de compatibilité | ❌ Consommateur | ✅ Fournisseur |
+| Adaptation entre versions | ✅ Application | ✅ Définition |
+| Médiation produits ↔ cores | ✅ Autorité | ❌ Aucune |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ BondingBrother  â”‚  Demande compat.     â”‚ Ever Buddy  â”‚
-â”‚                 â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚                 â”‚                      â”‚             â”‚
-â”‚                 â”‚  RÃ¨gles adaptation   â”‚             â”‚
-â”‚                 â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
-â”‚                 â”‚                      â”‚             â”‚
-â”‚  TRADUCTION     â”‚                      â”‚  (aucune)   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────┐                      ┌─────────────┐
+│ BondingBrother  │  Demande compat.     │ Ever Buddy  │
+│                 │ ──────────────────► │             │
+│                 │                      │             │
+│                 │  Règles adaptation   │             │
+│                 │ ◄────────────────── │             │
+│                 │                      │             │
+│  TRADUCTION     │                      │  (aucune)   │
+└─────────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| BB â†’ EB | Demande de rÃ¨gles de compatibilitÃ© | `CompatibilityRequest` |
-| BB â†’ EB | Transmission d'alertes aux produits | `AlertForwarding` |
-| EB â†’ BB | RÃ¨gles d'adaptation entre versions | `AdaptationRules` |
-| EB â†’ BB | Alertes de dÃ©prÃ©ciation | `DeprecationAlert` |
+| BB → EB | Demande de règles de compatibilité | `CompatibilityRequest` |
+| BB → EB | Transmission d'alertes aux produits | `AlertForwarding` |
+| EB → BB | Règles d'adaptation entre versions | `AdaptationRules` |
+| EB → BB | Alertes de dépréciation | `DeprecationAlert` |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
 | **COL-BB-1** | BondingBrother peut adapter ses traductions selon les conseils d'Ever Buddy |
-| **COL-BB-2** | Ever Buddy ne traduit jamais lui-mÃªme |
+| **COL-BB-2** | Ever Buddy ne traduit jamais lui-même |
 | **COL-BB-3** | Les alertes d'Ever Buddy sont transmises aux produits via BondingBrother |
-| **COL-BB-4** | Les produits ne parlent jamais directement Ã  Ever Buddy |
+| **COL-BB-4** | Les produits ne parlent jamais directement à Ever Buddy |
 
-**RÃ©fÃ©rence Glossaire :** [BondingBrother](..//..//..//miyukini-webway-system//reference//_index.md#bondingbrother)
+**Référence Glossaire :** [BondingBrother](..//..//..//miyukini-webway-system//reference//_index.md#bondingbrother)
 
 ---
 
@@ -222,56 +222,56 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> Caring Nanny observe l'Ã©tat de santÃ© du systÃ¨me. Ever Buddy fournit les indicateurs d'Ã©volution qui affectent cette santÃ©.
+> Caring Nanny observe l'état de santé du système. Ever Buddy fournit les indicateurs d'évolution qui affectent cette santé.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | Caring Nanny | Ever Buddy |
 |--------|--------------|------------|
-| Observation d'Ã©tat global | âœ… AutoritÃ© | âŒ Aucune |
-| Indicateurs d'Ã©volution | âŒ Consommateur | âœ… Fournisseur |
-| Rapport de santÃ© | âœ… Production | âŒ Contribution |
-| DÃ©tection d'anomalies | âœ… AutoritÃ© | âŒ Source de donnÃ©es |
+| Observation d'état global | ✅ Autorité | ❌ Aucune |
+| Indicateurs d'évolution | ❌ Consommateur | ✅ Fournisseur |
+| Rapport de santé | ✅ Production | ❌ Contribution |
+| Détection d'anomalies | ✅ Autorité | ❌ Source de données |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Ever Buddy  â”‚  Indicateurs Ã©vol.   â”‚Caring Nanny â”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚  (aucun)    â”‚                      â”‚  RAPPORT    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌─────────────┐
+│ Ever Buddy  │  Indicateurs évol.   │Caring Nanny │
+│             │ ──────────────────► │             │
+│             │                      │             │
+│  (aucun)    │                      │  RAPPORT    │
+└─────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| EB â†’ CN | Transitions en cours | `ActiveTransitions` |
-| EB â†’ CN | DÃ©prÃ©ciations imminentes | `PendingDeprecations` |
-| EB â†’ CN | Debt ratio actuel | `DebtMetrics` |
-| EB â†’ CN | Alertes d'Ã©volution | `EvolutionAlerts` |
+| EB → CN | Transitions en cours | `ActiveTransitions` |
+| EB → CN | Dépréciations imminentes | `PendingDeprecations` |
+| EB → CN | Debt ratio actuel | `DebtMetrics` |
+| EB → CN | Alertes d'évolution | `EvolutionAlerts` |
 
 **Indicateurs fournis par Ever Buddy :**
 
-| Indicateur | Description | Impact sur la santÃ© |
+| Indicateur | Description | Impact sur la santé |
 |------------|-------------|---------------------|
-| `active_transitions` | Nombre de transitions en cours | Charge d'Ã©volution |
-| `pending_deprecations` | Ã‰lÃ©ments bientÃ´t retirÃ©s | Risque de rupture |
+| `active_transitions` | Nombre de transitions en cours | Charge d'évolution |
+| `pending_deprecations` | Éléments bientôt retirés | Risque de rupture |
 | `debt_ratio` | (DEPRECATED + RETIRED) / ACTIVE | Dette structurelle |
-| `blocked_transitions` | Transitions au-delÃ  de la pÃ©riode prÃ©vue | ProblÃ¨me d'adoption |
+| `blocked_transitions` | Transitions au-delà de la période prévue | Problème d'adoption |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
 | **COL-CN-1** | Ever Buddy publie proactivement ses indicateurs vers Caring Nanny |
-| **COL-CN-2** | Caring Nanny intÃ¨gre ces indicateurs dans son rapport de santÃ© |
-| **COL-CN-3** | La frÃ©quence de publication est dÃ©finie par Ever Buddy |
-| **COL-CN-4** | Caring Nanny ne demande jamais de modifier un Ã©tat de cycle de vie |
+| **COL-CN-2** | Caring Nanny intègre ces indicateurs dans son rapport de santé |
+| **COL-CN-3** | La fréquence de publication est définie par Ever Buddy |
+| **COL-CN-4** | Caring Nanny ne demande jamais de modifier un état de cycle de vie |
 
-**RÃ©fÃ©rence Glossaire :** [Caring Nanny](..//..//..//miyukini-webway-system//reference//_index.md#caring-nanny)
+**Référence Glossaire :** [Caring Nanny](..//..//..//miyukini-webway-system//reference//_index.md#caring-nanny)
 
 ---
 
@@ -281,47 +281,47 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> Border Guard applique les rÃ¨gles aux frontiÃ¨res. Ever Buddy dÃ©finit les rÃ¨gles de compatibilitÃ© qui s'appliquent.
+> Border Guard applique les règles aux frontières. Ever Buddy définit les règles de compatibilité qui s'appliquent.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | Border Guard | Ever Buddy |
 |--------|--------------|------------|
-| Application aux frontiÃ¨res | âœ… AutoritÃ© | âŒ Aucune |
-| DÃ©finition des rÃ¨gles de compatibilitÃ© | âŒ Consommateur | âœ… Fournisseur |
-| Versions supportÃ©es | âŒ Application | âœ… DÃ©finition |
-| VÃ©rification d'intÃ©gration | âœ… ExÃ©cution | âœ… CritÃ¨res |
+| Application aux frontières | ✅ Autorité | ❌ Aucune |
+| Définition des règles de compatibilité | ❌ Consommateur | ✅ Fournisseur |
+| Versions supportées | ❌ Application | ✅ Définition |
+| Vérification d'intégration | ✅ Exécution | ✅ Critères |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Ever Buddy  â”‚  RÃ¨gles compatibilitÃ©â”‚Border Guard â”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚  (dÃ©finit)  â”‚                      â”‚ (applique)  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌─────────────┐
+│ Ever Buddy  │  Règles compatibilité│Border Guard │
+│             │ ──────────────────► │             │
+│             │                      │             │
+│  (définit)  │                      │ (applique)  │
+└─────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| EB â†’ BG | Versions supportÃ©es par interface | `SupportedVersions` |
-| EB â†’ BG | RÃ¨gles de compatibilitÃ© en vigueur | `CompatibilityRules` |
-| EB â†’ BG | FenÃªtres de compatibilitÃ© | `CompatibilityWindows` |
-| BG â†’ EB | IntÃ©grations refusÃ©es pour incompatibilitÃ© | `RejectionReport` |
+| EB → BG | Versions supportées par interface | `SupportedVersions` |
+| EB → BG | Règles de compatibilité en vigueur | `CompatibilityRules` |
+| EB → BG | Fenêtres de compatibilité | `CompatibilityWindows` |
+| BG → EB | Intégrations refusées pour incompatibilité | `RejectionReport` |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
-| **COL-BG-1** | Ever Buddy dÃ©finit les versions acceptables aux frontiÃ¨res |
-| **COL-BG-2** | Border Guard applique ces rÃ¨gles sans les modifier |
-| **COL-BG-3** | Border Guard notifie Ever Buddy des rejets pour incompatibilitÃ© |
-| **COL-BG-4** | Les fenÃªtres de compatibilitÃ© sont non nÃ©gociables |
+| **COL-BG-1** | Ever Buddy définit les versions acceptables aux frontières |
+| **COL-BG-2** | Border Guard applique ces règles sans les modifier |
+| **COL-BG-3** | Border Guard notifie Ever Buddy des rejets pour incompatibilité |
+| **COL-BG-4** | Les fenêtres de compatibilité sont non négociables |
 
-**RÃ©fÃ©rence Glossaire :** [Border Guard](..//..//..//miyukini-webway-system//reference//_index.md#border-guard)
+**Référence Glossaire :** [Border Guard](..//..//..//miyukini-webway-system//reference//_index.md#border-guard)
 
 ---
 
@@ -331,60 +331,60 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> Master Butler expose les capacitÃ©s disponibles. Ever Buddy indique l'Ã©tat de vie de chaque capacitÃ©.
+> Master Butler expose les capacités disponibles. Ever Buddy indique l'état de vie de chaque capacité.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | Master Butler | Ever Buddy |
 |--------|---------------|------------|
-| Catalogue des capacitÃ©s | âœ… AutoritÃ© | âŒ Aucune |
-| Ã‰tat de vie des capacitÃ©s | âŒ Consommateur | âœ… Fournisseur |
-| Exposition des capacitÃ©s | âœ… ExÃ©cution | âŒ Aucune |
-| Versionnement des capacitÃ©s | âŒ Application | âœ… Gouvernance |
+| Catalogue des capacités | ✅ Autorité | ❌ Aucune |
+| État de vie des capacités | ❌ Consommateur | ✅ Fournisseur |
+| Exposition des capacités | ✅ Exécution | ❌ Aucune |
+| Versionnement des capacités | ❌ Application | ✅ Gouvernance |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Ever Buddy  â”‚  Ã‰tat vie capacitÃ©s  â”‚Master Butlerâ”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚             â”‚  Nouvelles capacitÃ©s â”‚             â”‚
-â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚  (gouverne) â”‚                      â”‚  (expose)   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌─────────────┐
+│ Ever Buddy  │  État vie capacités  │Master Butler│
+│             │ ──────────────────► │             │
+│             │                      │             │
+│             │  Nouvelles capacités │             │
+│             │ ◄────────────────── │             │
+│             │                      │             │
+│  (gouverne) │                      │  (expose)   │
+└─────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| MB â†’ EB | DÃ©claration de nouvelle capacitÃ© | `CapabilityDeclaration` |
-| EB â†’ MB | Ã‰tat de vie de chaque capacitÃ© | `CapabilityLifecycle` |
-| EB â†’ MB | CapacitÃ©s dÃ©prÃ©ciÃ©es | `DeprecatedCapabilities` |
-| EB â†’ MB | CapacitÃ©s retirÃ©es | `RetiredCapabilities` |
+| MB → EB | Déclaration de nouvelle capacité | `CapabilityDeclaration` |
+| EB → MB | État de vie de chaque capacité | `CapabilityLifecycle` |
+| EB → MB | Capacités dépréciées | `DeprecatedCapabilities` |
+| EB → MB | Capacités retirées | `RetiredCapabilities` |
 
-**Impact sur l'exposition des capacitÃ©s :**
+**Impact sur l'exposition des capacités :**
 
-| Ã‰tat EB | Comportement Master Butler |
+| État EB | Comportement Master Butler |
 |---------|---------------------------|
-| DRAFT | CapacitÃ© non exposÃ©e |
-| ACTIVE | CapacitÃ© pleinement exposÃ©e |
-| DEPRECATED | CapacitÃ© exposÃ©e avec avertissement |
-| RETIRED | CapacitÃ© non exposÃ©e (erreur si appelÃ©e) |
-| ARCHIVED | CapacitÃ© inexistante |
+| DRAFT | Capacité non exposée |
+| ACTIVE | Capacité pleinement exposée |
+| DEPRECATED | Capacité exposée avec avertissement |
+| RETIRED | Capacité non exposée (erreur si appelée) |
+| ARCHIVED | Capacité inexistante |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
-| **COL-MB-1** | Master Butler notifie Ever Buddy de toute nouvelle capacitÃ© |
-| **COL-MB-2** | Ever Buddy assigne un Ã©tat de vie initial (DRAFT ou ACTIVE) |
-| **COL-MB-3** | Master Butler adapte son exposition selon l'Ã©tat fourni par Ever Buddy |
-| **COL-MB-4** | Les capacitÃ©s RETIRED ne sont plus exposÃ©es par Master Butler |
+| **COL-MB-1** | Master Butler notifie Ever Buddy de toute nouvelle capacité |
+| **COL-MB-2** | Ever Buddy assigne un état de vie initial (DRAFT ou ACTIVE) |
+| **COL-MB-3** | Master Butler adapte son exposition selon l'état fourni par Ever Buddy |
+| **COL-MB-4** | Les capacités RETIRED ne sont plus exposées par Master Butler |
 
-**RÃ©fÃ©rence Glossaire :** [Master Butler](..//..//..//miyukini-webway-system//reference//_index.md#master-butler)
+**Référence Glossaire :** [Master Butler](..//..//..//miyukini-webway-system//reference//_index.md#master-butler)
 
 ---
 
@@ -394,60 +394,60 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> TAMR dÃ©finit quand l'humain intervient. Ever Buddy signale les transitions qui nÃ©cessitent une intervention humaine.
+> TAMR définit quand l'humain intervient. Ever Buddy signale les transitions qui nécessitent une intervention humaine.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | TAMR | Ever Buddy |
 |--------|------|------------|
-| Points d'intervention humaine | âœ… AutoritÃ© | âŒ Aucune |
-| Signalement de besoin d'intervention | âŒ Destinataire | âœ… Ã‰metteur |
-| Validation humaine des transitions | âœ… ExÃ©cution | âŒ Aucune |
-| DÃ©cision de transition majeure | âœ… Validation finale | âœ… Proposition |
+| Points d'intervention humaine | ✅ Autorité | ❌ Aucune |
+| Signalement de besoin d'intervention | ❌ Destinataire | ✅ Émetteur |
+| Validation humaine des transitions | ✅ Exécution | ❌ Aucune |
+| Décision de transition majeure | ✅ Validation finale | ✅ Proposition |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Ever Buddy  â”‚  Besoin intervention â”‚    TAMR     â”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚             â”‚  Validation humaine  â”‚             â”‚
-â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
-â”‚             â”‚                      â”‚             â”‚
-â”‚ (enregistre)â”‚                      â”‚ (valide)    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌─────────────┐
+│ Ever Buddy  │  Besoin intervention │    TAMR     │
+│             │ ──────────────────► │             │
+│             │                      │             │
+│             │  Validation humaine  │             │
+│             │ ◄────────────────── │             │
+│             │                      │             │
+│ (enregistre)│                      │ (valide)    │
+└─────────────┘                      └─────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| EB â†’ TAMR | Demande de validation de transition majeure | `TransitionValidationRequest` |
-| EB â†’ TAMR | Signalement de rupture de compatibilitÃ© | `BreakingChangeAlert` |
-| TAMR â†’ EB | Validation de la transition | `HumanValidation` |
-| TAMR â†’ EB | Refus avec justification | `HumanRejection` |
+| EB → TAMR | Demande de validation de transition majeure | `TransitionValidationRequest` |
+| EB → TAMR | Signalement de rupture de compatibilité | `BreakingChangeAlert` |
+| TAMR → EB | Validation de la transition | `HumanValidation` |
+| TAMR → EB | Refus avec justification | `HumanRejection` |
 
-**Cas nÃ©cessitant une escalade vers TAMR :**
+**Cas nécessitant une escalade vers TAMR :**
 
-| Cas | Description | SÃ©vÃ©ritÃ© |
+| Cas | Description | Sévérité |
 |-----|-------------|----------|
-| Migration majeure | Changement de version majeure | Ã‰levÃ©e |
-| Rupture de compatibilitÃ© | Breaking change dÃ©clarÃ© | Ã‰levÃ©e |
-| AccÃ©lÃ©ration de dÃ©prÃ©ciation | RÃ©duction de la pÃ©riode de dÃ©prÃ©ciation | Moyenne |
-| Archivage d'Ã©lÃ©ments critiques | Ã‰lÃ©ments marquÃ©s FONDATION | Critique |
-| RÃ©activation aprÃ¨s DEPRECATED | Retour DEPRECATED â†’ ACTIVE | Moyenne |
+| Migration majeure | Changement de version majeure | Élevée |
+| Rupture de compatibilité | Breaking change déclaré | Élevée |
+| Accélération de dépréciation | Réduction de la période de dépréciation | Moyenne |
+| Archivage d'éléments critiques | Éléments marqués FONDATION | Critique |
+| Réactivation après DEPRECATED | Retour DEPRECATED → ACTIVE | Moyenne |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
-| **COL-TAMR-1** | Ever Buddy signale automatiquement les transitions critiques Ã  TAMR |
+| **COL-TAMR-1** | Ever Buddy signale automatiquement les transitions critiques à TAMR |
 | **COL-TAMR-2** | TAMR peut bloquer une transition en attente de validation humaine |
-| **COL-TAMR-3** | Une transition bloquÃ©e par TAMR ne peut Ãªtre forcÃ©e par Ever Buddy |
-| **COL-TAMR-4** | La validation TAMR est enregistrÃ©e dans l'historique immuable |
+| **COL-TAMR-3** | Une transition bloquée par TAMR ne peut être forcée par Ever Buddy |
+| **COL-TAMR-4** | La validation TAMR est enregistrée dans l'historique immuable |
 
-**RÃ©fÃ©rence Glossaire :** [TAMR](..//..//..//miyukini-webway-system//reference//_index.md#tamr-trust--authority-mediation-resolver)
+**Référence Glossaire :** [TAMR](..//..//..//miyukini-webway-system//reference//_index.md#tamr-trust--authority-mediation-resolver)
 
 ---
 
@@ -457,50 +457,50 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 **Principe fondamental :**
 
-> WorrySentinel gouverne la sÃ©curitÃ©. Ever Buddy informe des Ã©volutions qui peuvent affecter la sÃ©curitÃ© et reÃ§oit les alertes de sÃ©curitÃ© qui peuvent bloquer des transitions.
+> WorrySentinel gouverne la sécurité. Ever Buddy informe des évolutions qui peuvent affecter la sécurité et reçoit les alertes de sécurité qui peuvent bloquer des transitions.
 
-**ResponsabilitÃ©s respectives :**
+**Responsabilités respectives :**
 
 | Aspect | WorrySentinel | Ever Buddy |
 |--------|---------------|------------|
-| Ã‰tats de confiance (T0-T4) | âœ… AutoritÃ© | âŒ Consommateur |
-| Impact sÃ©curitÃ© des Ã©volutions | âŒ Destinataire | âœ… Signalement |
-| Blocage de transitions pour sÃ©curitÃ© | âœ… AutoritÃ© | âŒ Soumis |
-| Audit des transitions | âŒ Consommateur | âœ… Fournisseur |
+| États de confiance (T0-T4) | ✅ Autorité | ❌ Consommateur |
+| Impact sécurité des évolutions | ❌ Destinataire | ✅ Signalement |
+| Blocage de transitions pour sécurité | ✅ Autorité | ❌ Soumis |
+| Audit des transitions | ❌ Consommateur | ✅ Fournisseur |
 
 **Flux d'interaction :**
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Ever Buddy  â”‚  Ã‰volutions Ã  risque â”‚WorrySentinel  â”‚
-â”‚             â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚               â”‚
-â”‚             â”‚                      â”‚               â”‚
-â”‚             â”‚  Ã‰tat de confiance   â”‚               â”‚
-â”‚             â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚               â”‚
-â”‚             â”‚                      â”‚               â”‚
-â”‚ (adapte)    â”‚                      â”‚ (gouverne)    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                      ┌───────────────┐
+│ Ever Buddy  │  Évolutions à risque │WorrySentinel  │
+│             │ ──────────────────► │               │
+│             │                      │               │
+│             │  État de confiance   │               │
+│             │ ◄────────────────── │               │
+│             │                      │               │
+│ (adapte)    │                      │ (gouverne)    │
+└─────────────┘                      └───────────────┘
 ```
 
 **Contrat d'interface :**
 
-| Direction | DonnÃ©es Ã©changÃ©es | Format |
+| Direction | Données échangées | Format |
 |-----------|-------------------|--------|
-| EB â†’ WS | Transitions avec impact sÃ©curitÃ© potentiel | `SecurityImpactAlert` |
-| EB â†’ WS | Historique des transitions pour audit | `TransitionAuditLog` |
-| WS â†’ EB | Ã‰tat de confiance actuel | `TrustState` |
-| WS â†’ EB | Blocage de transition pour raison de sÃ©curitÃ© | `SecurityBlock` |
+| EB → WS | Transitions avec impact sécurité potentiel | `SecurityImpactAlert` |
+| EB → WS | Historique des transitions pour audit | `TransitionAuditLog` |
+| WS → EB | État de confiance actuel | `TrustState` |
+| WS → EB | Blocage de transition pour raison de sécurité | `SecurityBlock` |
 
-**RÃ¨gles de collaboration :**
+**Règles de collaboration :**
 
-| ID | RÃ¨gle |
+| ID | Règle |
 |----|-------|
-| **COL-WS-1** | En Ã©tat T3 ou T4, les transitions non critiques sont suspendues |
-| **COL-WS-2** | WorrySentinel peut bloquer une transition pour raison de sÃ©curitÃ© |
-| **COL-WS-3** | Ever Buddy fournit l'historique complet pour les audits de sÃ©curitÃ© |
-| **COL-WS-4** | Les transitions bloquÃ©es par sÃ©curitÃ© sont tracÃ©es sÃ©parÃ©ment |
+| **COL-WS-1** | En état T3 ou T4, les transitions non critiques sont suspendues |
+| **COL-WS-2** | WorrySentinel peut bloquer une transition pour raison de sécurité |
+| **COL-WS-3** | Ever Buddy fournit l'historique complet pour les audits de sécurité |
+| **COL-WS-4** | Les transitions bloquées par sécurité sont tracées séparément |
 
-**RÃ©fÃ©rence Glossaire :** [WorrySentinel](..//..//..//miyukini-webway-system//reference//_index.md#worrysentinel)
+**Référence Glossaire :** [WorrySentinel](..//..//..//miyukini-webway-system//reference//_index.md#worrysentinel)
 
 ---
 
@@ -508,142 +508,142 @@ Ever Buddy ne modifie jamais les donnÃ©es ou Ã©tats des autres cores. Il obs
 
 ### 3.1 Flux d'observation
 
-Ever Buddy observe continuellement l'Ã©tat du systÃ¨me pour maintenir sa connaissance des cycles de vie.
+Ever Buddy observe continuellement l'état du système pour maintenir sa connaissance des cycles de vie.
 
-**SÃ©quence :**
+**Séquence :**
 
 ```
-1. RÃ©ception des dÃ©clarations
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    dÃ©claration    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚ Cores/      â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚ Ever Buddy  â”‚
-   â”‚ Produits    â”‚                   â”‚             â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+1. Réception des déclarations
+   ┌─────────────┐    déclaration    ┌─────────────┐
+   │ Cores/      │ ───────────────► │ Ever Buddy  │
+   │ Produits    │                   │             │
+   └─────────────┘                   └─────────────┘
 
-2. Enregistrement de l'Ã©tat
-   Ever Buddy enregistre l'Ã©tat de cycle de vie de chaque Ã©lÃ©ment
+2. Enregistrement de l'état
+   Ever Buddy enregistre l'état de cycle de vie de chaque élément
 
 3. Surveillance des transitions
-   Ever Buddy dÃ©tecte les demandes de transition d'Ã©tat
+   Ever Buddy détecte les demandes de transition d'état
 
 4. Validation des transitions
-   Ever Buddy vÃ©rifie que la transition respecte les rÃ¨gles
+   Ever Buddy vérifie que la transition respecte les règles
 
 5. Enregistrement de la transition
-   Si valide, la transition est enregistrÃ©e dans l'historique immuable
+   Si valide, la transition est enregistrée dans l'historique immuable
 ```
 
 **Sources d'observation :**
 
-| Source | Type de dÃ©claration |
+| Source | Type de déclaration |
 |--------|---------------------|
-| KindMother | Nouveaux schÃ©mas de donnÃ©es |
-| Master Butler | Nouvelles capacitÃ©s |
+| KindMother | Nouveaux schémas de données |
+| Master Butler | Nouvelles capacités |
 | BondingBrother | Nouvelles interfaces de traduction |
-| Produits (via BB) | Nouveaux Ã©lÃ©ments mÃ©tier |
+| Produits (via BB) | Nouveaux éléments métier |
 
 ### 3.2 Flux de consultation
 
 Les autres cores consultent Ever Buddy pour obtenir des informations de cycle de vie.
 
-**SÃ©quence :**
+**Séquence :**
 
 ```
 1. Demande de contexte
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    demande contexte   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚ Core        â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚ Ever Buddy  â”‚
-   â”‚ demandeur   â”‚                        â”‚             â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+   ┌─────────────┐    demande contexte   ┌─────────────┐
+   │ Core        │ ─────────────────────► │ Ever Buddy  │
+   │ demandeur   │                        │             │
+   └─────────────┘                        └─────────────┘
 
-2. Recherche de l'Ã©tat
-   Ever Buddy recherche l'Ã©tat actuel et l'historique de l'Ã©lÃ©ment
+2. Recherche de l'état
+   Ever Buddy recherche l'état actuel et l'historique de l'élément
 
 3. Fourniture du contexte
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚ Core        â”‚    contexte complet    â”‚ Ever Buddy  â”‚
-   â”‚ demandeur   â”‚ â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚             â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+   ┌─────────────┐                        ┌─────────────┐
+   │ Core        │    contexte complet    │ Ever Buddy  │
+   │ demandeur   │ ◄───────────────────── │             │
+   └─────────────┘                        └─────────────┘
 
 4. Utilisation par le demandeur
-   Le core demandeur utilise ce contexte pour sa propre dÃ©cision
+   Le core demandeur utilise ce contexte pour sa propre décision
 ```
 
-**Temps de rÃ©ponse garanti :**
+**Temps de réponse garanti :**
 
-| Type de demande | Temps de rÃ©ponse maximum |
+| Type de demande | Temps de réponse maximum |
 |-----------------|-------------------------|
-| Ã‰tat actuel simple | < 10ms |
+| État actuel simple | < 10ms |
 | Historique complet | < 100ms |
 | Recommandations | < 50ms |
 | Contexte complet | < 200ms |
 
 ### 3.3 Flux de planification
 
-Ever Buddy communique les planifications d'Ã©volution aux consommateurs.
+Ever Buddy communique les planifications d'évolution aux consommateurs.
 
-**SÃ©quence :**
+**Séquence :**
 
 ```
-1. DÃ©finition du plan
-   Ever Buddy dÃ©finit un plan de transition
-   (dÃ©prÃ©ciation, retirement, archivage)
+1. Définition du plan
+   Ever Buddy définit un plan de transition
+   (dépréciation, retirement, archivage)
 
 2. Communication
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    plan transition    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚ Ever Buddy  â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚ BondingBrother  â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                       â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                                  â”‚
-                                                  â–¼
-                                         â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                         â”‚   Produits      â”‚
-                                         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+   ┌─────────────┐    plan transition    ┌─────────────────┐
+   │ Ever Buddy  │ ────────────────────► │ BondingBrother  │
+   └─────────────┘                       └────────┬────────┘
+                                                  │
+                                                  ▼
+                                         ┌─────────────────┐
+                                         │   Produits      │
+                                         └─────────────────┘
 
-3. PÃ©riode de transition
+3. Période de transition
    L'ancien et le nouveau coexistent
 
 4. Suivi de l'adoption
    Ever Buddy observe l'adoption du nouveau par les consommateurs
 
-5. ComplÃ©tion
-   Ã€ la fin de la pÃ©riode, la transition est complÃ©tÃ©e
+5. Complétion
+   À la fin de la période, la transition est complétée
 ```
 
 **Canaux de communication :**
 
-| Destinataire | Canal | FrÃ©quence |
+| Destinataire | Canal | Fréquence |
 |--------------|-------|-----------|
-| Cores | Direct | ImmÃ©diat |
-| Produits | Via BondingBrother | ImmÃ©diat |
-| Caring Nanny | Publication mÃ©triques | PÃ©riodique |
+| Cores | Direct | Immédiat |
+| Produits | Via BondingBrother | Immédiat |
+| Caring Nanny | Publication métriques | Périodique |
 
 ### 3.4 Flux d'alerte
 
-Ever Buddy alerte quand des conditions anormales sont dÃ©tectÃ©es.
+Ever Buddy alerte quand des conditions anormales sont détectées.
 
-**SÃ©quence :**
+**Séquence :**
 
 ```
-1. DÃ©tection
-   Ever Buddy dÃ©tecte une condition anormale
+1. Détection
+   Ever Buddy détecte une condition anormale
 
-2. Ã‰valuation
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚ Ã‰valuation de la gravitÃ© et urgence   â”‚
-   â”‚ - Dette excessive                     â”‚
-   â”‚ - Transition bloquÃ©e                  â”‚
-   â”‚ - IncompatibilitÃ© dÃ©tectÃ©e            â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+2. Évaluation
+   ┌───────────────────────────────────────┐
+   │ Évaluation de la gravité et urgence   │
+   │ - Dette excessive                     │
+   │ - Transition bloquée                  │
+   │ - Incompatibilité détectée            │
+   └───────────────────────────────────────┘
 
 3. Alerte
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    alerte    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚ Ever Buddy  â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚ Destinataires   â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜              â”‚ (selon gravitÃ©) â”‚
-                                â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+   ┌─────────────┐    alerte    ┌─────────────────┐
+   │ Ever Buddy  │ ───────────► │ Destinataires   │
+   └─────────────┘              │ (selon gravité) │
+                                └─────────────────┘
 
 4. Recommandation
-   Ever Buddy fournit des recommandations pour rÃ©soudre
+   Ever Buddy fournit des recommandations pour résoudre
 
 5. Suivi
-   Ever Buddy suit la rÃ©solution et clÃ´ture l'alerte
+   Ever Buddy suit la résolution et clôture l'alerte
 ```
 
 **Niveaux d'alerte :**
@@ -651,7 +651,7 @@ Ever Buddy alerte quand des conditions anormales sont dÃ©tectÃ©es.
 | Niveau | Description | Destinataires |
 |--------|-------------|---------------|
 | INFO | Information non critique | Caring Nanny |
-| WARNING | Situation Ã  surveiller | Caring Nanny, StrongFather |
+| WARNING | Situation à surveiller | Caring Nanny, StrongFather |
 | CRITICAL | Action requise | Tous les cores, TAMR |
 | EMERGENCY | Blocage imminent | Tous les cores, TAMR, WorrySentinel |
 
@@ -661,139 +661,139 @@ Ever Buddy alerte quand des conditions anormales sont dÃ©tectÃ©es.
 
 ### 4.1 Principe fondamental
 
-**Les produits ne parlent jamais directement Ã  Ever Buddy.**
+**Les produits ne parlent jamais directement à Ever Buddy.**
 
-Toute interaction passe par BondingBrother qui traduit et filtre les Ã©changes.
+Toute interaction passe par BondingBrother qui traduit et filtre les échanges.
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Produits   â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚ Ever Buddy  â”‚
-â”‚             â”‚              âŒ INTERDIT            â”‚             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────┐                                    ┌─────────────┐
+│  Produits   │ ──────────────────────────────────► │ Ever Buddy  │
+│             │              ❌ INTERDIT            │             │
+└─────────────┘                                    └─────────────┘
 
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    via     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Produits   â”‚ â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º â”‚BondingBrother â”‚ â”€â”€â”€â”€â–º â”‚ Ever Buddy  â”‚
-â”‚             â”‚            â”‚               â”‚       â”‚             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-               âœ… AUTORISÃ‰
+┌─────────────┐    via     ┌───────────────┐       ┌─────────────┐
+│  Produits   │ ─────────► │BondingBrother │ ────► │ Ever Buddy  │
+│             │            │               │       │             │
+└─────────────┘            └───────────────┘       └─────────────┘
+               ✅ AUTORISÉ
 ```
 
 ### 4.2 Ce que les produits peuvent demander (via BondingBrother)
 
-| Demande | RÃ©ponse d'Ever Buddy |
+| Demande | Réponse d'Ever Buddy |
 |---------|---------------------|
-| "Est-ce que X est encore supportÃ© ?" | Ã‰tat de cycle de vie de X |
-| "Quelle est la version recommandÃ©e de Y ?" | Successeur de Y (si existe) |
-| "Quand Z sera-t-il retirÃ© ?" | Date de retirement prÃ©vue |
-| "Suis-je compatible avec W ?" | Niveau de compatibilitÃ© |
+| "Est-ce que X est encore supporté ?" | État de cycle de vie de X |
+| "Quelle est la version recommandée de Y ?" | Successeur de Y (si existe) |
+| "Quand Z sera-t-il retiré ?" | Date de retirement prévue |
+| "Suis-je compatible avec W ?" | Niveau de compatibilité |
 
-### 4.3 Ce que les produits reÃ§oivent (via BondingBrother)
+### 4.3 Ce que les produits reçoivent (via BondingBrother)
 
 | Type | Description |
 |------|-------------|
-| Alertes de dÃ©prÃ©ciation | Ã‰lÃ©ments utilisÃ©s bientÃ´t retirÃ©s |
+| Alertes de dépréciation | Éléments utilisés bientôt retirés |
 | Recommandations de migration | Chemins vers les successeurs |
-| FenÃªtres de compatibilitÃ© | Versions avec lesquelles ils sont compatibles |
-| Notifications de transition | Changements d'Ã©tat des Ã©lÃ©ments utilisÃ©s |
+| Fenêtres de compatibilité | Versions avec lesquelles ils sont compatibles |
+| Notifications de transition | Changements d'état des éléments utilisés |
 
 ---
 
 ## 5. Diagramme d'interaction globale
 
 ```
-                              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                              â”‚                 EVER BUDDY                   â”‚
-                              â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-                              â”‚  â”‚ Registre  â”‚  â”‚  RÃ¨gles   â”‚  â”‚ Historiqueâ”‚ â”‚
-                              â”‚  â”‚ des Ã©tats â”‚  â”‚ Ã©volution â”‚  â”‚  immuable â”‚ â”‚
-                              â”‚  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜ â”‚
-                              â”‚        â”‚              â”‚              â”‚       â”‚
-                              â”‚        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â”‚
-                              â”‚                       â”‚                      â”‚
-                              â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                                      â”‚
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚                                             â”‚                                             â”‚
-        â–¼                                             â–¼                                             â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  KindMother   â”‚                            â”‚ StrongFather  â”‚                            â”‚BondingBrother â”‚
-â”‚ (complÃ©men.)  â”‚                            â”‚ (consultatif) â”‚                            â”‚  (guidance)   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                            â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜
-                                                                                                  â”‚
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”         â”‚
-        â”‚                                             â”‚                                 â”‚         â”‚
-        â–¼                                             â–¼                                 â–¼         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Caring Nanny  â”‚                            â”‚ Border Guard  â”‚                  â”‚      PRODUITS         â”‚
-â”‚ (alimentation)â”‚                            â”‚  (normatif)   â”‚                  â”‚ (via BondingBrother)  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                              ┌─────────────────────────────────────────────┐
+                              │                 EVER BUDDY                   │
+                              │  ┌───────────┐  ┌───────────┐  ┌───────────┐ │
+                              │  │ Registre  │  │  Règles   │  │ Historique│ │
+                              │  │ des états │  │ évolution │  │  immuable │ │
+                              │  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘ │
+                              │        │              │              │       │
+                              │        └──────────────┼──────────────┘       │
+                              │                       │                      │
+                              └───────────────────────┼──────────────────────┘
+                                                      │
+        ┌─────────────────────────────────────────────┼─────────────────────────────────────────────┐
+        │                                             │                                             │
+        ▼                                             ▼                                             ▼
+┌───────────────┐                            ┌───────────────┐                            ┌───────────────┐
+│  KindMother   │                            │ StrongFather  │                            │BondingBrother │
+│ (complémen.)  │                            │ (consultatif) │                            │  (guidance)   │
+└───────────────┘                            └───────────────┘                            └───────┬───────┘
+                                                                                                  │
+        ┌─────────────────────────────────────────────┬─────────────────────────────────┐         │
+        │                                             │                                 │         │
+        ▼                                             ▼                                 ▼         ▼
+┌───────────────┐                            ┌───────────────┐                  ┌───────────────────────┐
+│ Caring Nanny  │                            │ Border Guard  │                  │      PRODUITS         │
+│ (alimentation)│                            │  (normatif)   │                  │ (via BondingBrother)  │
+└───────────────┘                            └───────────────┘                  └───────────────────────┘
 
-        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-        â”‚                                             â”‚                                 â”‚
-        â–¼                                             â–¼                                 â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Master Butler â”‚                            â”‚     TAMR      â”‚                  â”‚WorrySentinel  â”‚
-â”‚ (descriptif)  â”‚                            â”‚  (escalade)   â”‚                  â”‚(informatif bi)â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        ┌─────────────────────────────────────────────┬─────────────────────────────────┐
+        │                                             │                                 │
+        ▼                                             ▼                                 ▼
+┌───────────────┐                            ┌───────────────┐                  ┌───────────────┐
+│ Master Butler │                            │     TAMR      │                  │WorrySentinel  │
+│ (descriptif)  │                            │  (escalade)   │                  │(informatif bi)│
+└───────────────┘                            └───────────────┘                  └───────────────┘
 ```
 
 ---
 
-## 6. SynthÃ¨se des contrats d'interface
+## 6. Synthèse des contrats d'interface
 
 ### 6.1 Matrice des interactions
 
-| Core | Direction | Nature | DonnÃ©es Ã©changÃ©es |
+| Core | Direction | Nature | Données échangées |
 |------|-----------|--------|-------------------|
-| **KindMother** | EB â†” KM | ComplÃ©mentaire | RÃ¨gles Ã©volution â†” Ã‰tat migrations |
-| **StrongFather** | SF â†’ EB | Consultative | Demande contexte â†’ Ã‰tat cycle vie |
-| **BondingBrother** | EB â†” BB | Guidance | RÃ¨gles compat â†” Alertes transmises |
-| **Caring Nanny** | EB â†’ CN | Alimentation | Indicateurs Ã©volution (unidirectionnel) |
-| **Border Guard** | EB â†’ BG | Normative | RÃ¨gles compatibilitÃ© (unidirectionnel) |
-| **Master Butler** | EB â†” MB | Descriptive | Ã‰tat capacitÃ©s â†” Nouvelles capacitÃ©s |
-| **TAMR** | EB â†” TAMR | Escalade | Besoin validation â†” Validation humaine |
-| **WorrySentinel** | EB â†” WS | Bidirectionnelle | Impact sÃ©curitÃ© â†” Ã‰tat confiance |
+| **KindMother** | EB ↔ KM | Complémentaire | Règles évolution ↔ État migrations |
+| **StrongFather** | SF → EB | Consultative | Demande contexte → État cycle vie |
+| **BondingBrother** | EB ↔ BB | Guidance | Règles compat ↔ Alertes transmises |
+| **Caring Nanny** | EB → CN | Alimentation | Indicateurs évolution (unidirectionnel) |
+| **Border Guard** | EB → BG | Normative | Règles compatibilité (unidirectionnel) |
+| **Master Butler** | EB ↔ MB | Descriptive | État capacités ↔ Nouvelles capacités |
+| **TAMR** | EB ↔ TAMR | Escalade | Besoin validation ↔ Validation humaine |
+| **WorrySentinel** | EB ↔ WS | Bidirectionnelle | Impact sécurité ↔ État confiance |
 
 ### 6.2 Garanties de service
 
 | Garantie | Valeur | Condition |
 |----------|--------|-----------|
-| Temps de rÃ©ponse consultation | < 200ms | Ã‰tat systÃ¨me normal |
-| DisponibilitÃ© du registre | 99.9% | Hors maintenance |
-| ImmuabilitÃ© de l'historique | 100% | Invariant structural |
-| DÃ©lai de propagation des alertes | < 1s | Ã‰tat systÃ¨me normal |
+| Temps de réponse consultation | < 200ms | État système normal |
+| Disponibilité du registre | 99.9% | Hors maintenance |
+| Immuabilité de l'historique | 100% | Invariant structural |
+| Délai de propagation des alertes | < 1s | État système normal |
 
 ---
 
-## 7. ConformitÃ© aux Lois d'Autonomie
+## 7. Conformité aux Lois d'Autonomie
 
-### 7.1 LOI-1 : Aucune dÃ©pendance externe critique
+### 7.1 LOI-1 : Aucune dépendance externe critique
 
 Toutes les interactions sont locales. Ever Buddy n'a pas besoin de service externe pour interagir avec les autres cores.
 
-### 7.2 LOI-2 : Le systÃ¨me accepte l'isolement
+### 7.2 LOI-2 : Le système accepte l'isolement
 
-En mode isolÃ©, Ever Buddy continue d'interagir avec les cores locaux. Les interactions avec les produits distants sont suspendues mais pas perdues.
+En mode isolé, Ever Buddy continue d'interagir avec les cores locaux. Les interactions avec les produits distants sont suspendues mais pas perdues.
 
-### 7.3 LOI-6 : L'autonomie n'empÃªche pas la fÃ©dÃ©ration
+### 7.3 LOI-6 : L'autonomie n'empêche pas la fédération
 
-Les informations de cycle de vie peuvent Ãªtre partagÃ©es entre COG via BondingBrother, sans crÃ©er de dÃ©pendance obligatoire.
+Les informations de cycle de vie peuvent être partagées entre COG via BondingBrother, sans créer de dépendance obligatoire.
 
 ---
 
-## 8. RÃ©fÃ©rences
+## 8. Références
 
 ### Documents fondateurs
 
 - [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
-### Contrats associÃ©s
+### Contrats associés
 
 - [Ever Buddy - Lifecycle States Contract](../contracts/lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md)
 - [Ever Buddy - Transition Rules Contract](../contracts/lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md)
 - [Ever Buddy - Compatibility Rules Contract](../contracts/compatibility/Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md)
 
-### RÃ©fÃ©rences Glossaire
+### Références Glossaire
 
 - [Glossaire - Ever Buddy](..//..//..//miyukini-webway-system//reference//_index.md#ever-buddy)
 - [Glossaire - Cores](..//..//..//miyukini-webway-system//reference//_index.md#cores)
@@ -806,6 +806,6 @@ Les informations de cycle de vie peuvent Ãªtre partagÃ©es entre COG via Bond
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Contrat normatif â€” ARCHITECTURE  
-**RÃ©fÃ©rence :** Ever Buddy - Documentation Fondatrice v1.3, Sections 3 et 8
+**Statut :** Contrat normatif — ARCHITECTURE  
+**Référence :** Ever Buddy - Documentation Fondatrice v1.3, Sections 3 et 8
 

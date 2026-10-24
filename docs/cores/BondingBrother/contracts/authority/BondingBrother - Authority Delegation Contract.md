@@ -2,372 +2,372 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le contrat de dÃ©lÃ©gation aux autoritÃ©s dans Bonding Brother. Il spÃ©cifie comment Bonding Brother dÃ©lÃ¨gue les dÃ©cisions aux autoritÃ©s (Kind Mother et Strong Father), comment il transmet les demandes, et comment il gÃ¨re les rÃ©ponses.
+Ce document définit le contrat de délégation aux autorités dans Bonding Brother. Il spécifie comment Bonding Brother délègue les décisions aux autorités (Kind Mother et Strong Father), comment il transmet les demandes, et comment il gère les réponses.
 
-Ce document complÃ¨te la Section 6 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) et le [Bilateral Flow Contract](../flows/BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour dÃ©finir les rÃ¨gles prÃ©cises de dÃ©lÃ©gation.
+Ce document complète la Section 6 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) et le [Bilateral Flow Contract](../flows/BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour définir les règles précises de délégation.
 
-La dÃ©lÃ©gation respecte **LOI-2** (isolement comme Ã©tat normal) : en mode offline, la dÃ©lÃ©gation est diffÃ©rÃ©e mais les intentions sont prÃ©servÃ©es localement. Voir les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md).
+La délégation respecte **LOI-2** (isolement comme état normal) : en mode offline, la délégation est différée mais les intentions sont préservées localement. Voir les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- Les principes fondamentaux de la dÃ©lÃ©gation
-- Les rÃ¨gles de dÃ©lÃ©gation Ã  Kind Mother
-- Les rÃ¨gles de dÃ©lÃ©gation Ã  Strong Father
-- Le routage vers l'autoritÃ© appropriÃ©e
-- La transmission fidÃ¨le des demandes et rÃ©ponses
-- La gestion de l'autoritÃ© diffÃ©rÃ©e (mode offline)
-- Les garanties de non-dÃ©cision
+- Les principes fondamentaux de la délégation
+- Les règles de délégation à Kind Mother
+- Les règles de délégation à Strong Father
+- Le routage vers l'autorité appropriée
+- La transmission fidèle des demandes et réponses
+- La gestion de l'autorité différée (mode offline)
+- Les garanties de non-décision
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails d'intÃ©gration avec Kind Mother (voir [KindMother Integration Contract](../integration/BondingBrother%20-%20KindMother%20Integration%20Contract.md))
-- Les dÃ©tails d'intÃ©gration avec Strong Father (voir [StrongFather Integration Contract](../integration/BondingBrother%20-%20StrongFather%20Integration%20Contract.md))
-- Les rÃ¨gles de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
-- Le mode offline dÃ©taillÃ© (voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md))
+- Les détails d'intégration avec Kind Mother (voir [KindMother Integration Contract](../integration/BondingBrother%20-%20KindMother%20Integration%20Contract.md))
+- Les détails d'intégration avec Strong Father (voir [StrongFather Integration Contract](../integration/BondingBrother%20-%20StrongFather%20Integration%20Contract.md))
+- Les règles de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
+- Le mode offline détaillé (voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md))
 
 ---
 
 ## 3. Principe fondamental
 
-**Bonding Brother dÃ©lÃ¨gue toute dÃ©cision aux autoritÃ©s. Il ne dÃ©cide jamais, ne crÃ©e aucune rÃ¨gle, ne dÃ©tient aucune vÃ©ritÃ©. Il transmet fidÃ¨lement les demandes et les rÃ©ponses, sans interprÃ©tation ni modification.**
+**Bonding Brother délègue toute décision aux autorités. Il ne décide jamais, ne crée aucune règle, ne détient aucune vérité. Il transmet fidèlement les demandes et les réponses, sans interprétation ni modification.**
 
-La dÃ©lÃ©gation est totale, systÃ©matique, et non nÃ©gociable. Toute dÃ©cision appartient exclusivement Ã  une autoritÃ©.
-
----
-
-## 4. Nature de la dÃ©lÃ©gation
-
-### 4.1 DÃ©lÃ©gation totale
-
-**RÃ¨gle DELEG-01 : Absence de dÃ©cision**
-
-Bonding Brother ne prend jamais de dÃ©cision stratÃ©gique, politique, ou opÃ©rationnelle. Toute dÃ©cision est dÃ©lÃ©guÃ©e Ã  une autoritÃ©.
-
-**RÃ¨gle DELEG-02 : Absence de rÃ¨gle**
-
-Bonding Brother ne crÃ©e aucune rÃ¨gle. Toutes les rÃ¨gles viennent des autoritÃ©s ou de l'Ã©cosystÃ¨me. Bonding Brother applique ces rÃ¨gles, mais ne les dÃ©finit jamais.
-
-**RÃ¨gle DELEG-03 : Absence de vÃ©ritÃ©**
-
-Bonding Brother ne dÃ©tient aucune vÃ©ritÃ© sur les donnÃ©es, les identitÃ©s, les permissions, les dÃ©cisions. Toute vÃ©ritÃ© vient d'une autoritÃ©.
-
-### 4.2 Transmission fidÃ¨le
-
-**RÃ¨gle DELEG-04 : Transmission sans modification**
-
-Bonding Brother transmet les demandes aux autoritÃ©s sans modification, sans interprÃ©tation, sans enrichissement mÃ©tier.
-
-**RÃ¨gle DELEG-05 : RÃ©ception sans modification**
-
-Bonding Brother reÃ§oit les rÃ©ponses des autoritÃ©s sans modification, sans interprÃ©tation, sans remplacement.
-
-**RÃ¨gle DELEG-06 : PrÃ©servation du contexte**
-
-Le contexte est transmis intÃ©gralement aux autoritÃ©s, sans filtrage ni modification.
-
-### 4.3 RÃ´le de mÃ©diateur
-
-**RÃ¨gle DELEG-07 : Canal, pas source**
-
-Bonding Brother est un canal de communication, pas une source de dÃ©cision. Il transmet, il ne dÃ©cide pas.
-
-**RÃ¨gle DELEG-08 : Traducteur, pas dÃ©cideur**
-
-Bonding Brother traduit les formats et les vocabulaires, mais ne modifie jamais le sens ni la dÃ©cision.
-
-**RÃ¨gle DELEG-09 : Filtre, pas crÃ©ateur**
-
-Bonding Brother filtre les informations selon les rÃ¨gles dÃ©finies par les autoritÃ©s, mais ne crÃ©e pas ces rÃ¨gles.
+La délégation est totale, systématique, et non négociable. Toute décision appartient exclusivement à une autorité.
 
 ---
 
-## 5. Routage vers les autoritÃ©s
+## 4. Nature de la délégation
 
-### 5.1 Identification de l'autoritÃ© cible
+### 4.1 Délégation totale
 
-**RÃ¨gle ROUTE-01 : Un type = une autoritÃ©**
+**Règle DELEG-01 : Absence de décision**
 
-Chaque type d'intention cible une et une seule autoritÃ© :
-- Intentions de donnÃ©es â†’ Kind Mother
-- Intentions d'identitÃ©/permissions â†’ Strong Father
+Bonding Brother ne prend jamais de décision stratégique, politique, ou opérationnelle. Toute décision est déléguée à une autorité.
 
-**RÃ¨gle ROUTE-02 : Routage par type**
+**Règle DELEG-02 : Absence de règle**
 
-Le routage est dÃ©terminÃ© par le type d'intention, pas par le contenu ou le contexte.
+Bonding Brother ne crée aucune règle. Toutes les règles viennent des autorités ou de l'écosystème. Bonding Brother applique ces règles, mais ne les définit jamais.
 
-**RÃ¨gle ROUTE-03 : Pas de routage conditionnel**
+**Règle DELEG-03 : Absence de vérité**
 
-Le routage n'est jamais conditionnel. Il est dÃ©terministe basÃ© sur le type d'intention.
+Bonding Brother ne détient aucune vérité sur les données, les identités, les permissions, les décisions. Toute vérité vient d'une autorité.
 
-### 5.2 Types d'intentions par autoritÃ©
+### 4.2 Transmission fidèle
 
-**Kind Mother (autoritÃ© des donnÃ©es) :**
+**Règle DELEG-04 : Transmission sans modification**
+
+Bonding Brother transmet les demandes aux autorités sans modification, sans interprétation, sans enrichissement métier.
+
+**Règle DELEG-05 : Réception sans modification**
+
+Bonding Brother reçoit les réponses des autorités sans modification, sans interprétation, sans remplacement.
+
+**Règle DELEG-06 : Préservation du contexte**
+
+Le contexte est transmis intégralement aux autorités, sans filtrage ni modification.
+
+### 4.3 Rôle de médiateur
+
+**Règle DELEG-07 : Canal, pas source**
+
+Bonding Brother est un canal de communication, pas une source de décision. Il transmet, il ne décide pas.
+
+**Règle DELEG-08 : Traducteur, pas décideur**
+
+Bonding Brother traduit les formats et les vocabulaires, mais ne modifie jamais le sens ni la décision.
+
+**Règle DELEG-09 : Filtre, pas créateur**
+
+Bonding Brother filtre les informations selon les règles définies par les autorités, mais ne crée pas ces règles.
+
+---
+
+## 5. Routage vers les autorités
+
+### 5.1 Identification de l'autorité cible
+
+**Règle ROUTE-01 : Un type = une autorité**
+
+Chaque type d'intention cible une et une seule autorité :
+- Intentions de données → Kind Mother
+- Intentions d'identité/permissions → Strong Father
+
+**Règle ROUTE-02 : Routage par type**
+
+Le routage est déterminé par le type d'intention, pas par le contenu ou le contexte.
+
+**Règle ROUTE-03 : Pas de routage conditionnel**
+
+Le routage n'est jamais conditionnel. Il est déterministe basé sur le type d'intention.
+
+### 5.2 Types d'intentions par autorité
+
+**Kind Mother (autorité des données) :**
 - `CREATE_CONTENT`
 - `UPDATE_CONTENT`
 - `DELETE_CONTENT`
 - `READ_CONTENT`
 - `QUERY_CONTENT`
-- `CREATE_NODE` (hiÃ©rarchie)
-- `MOVE_NODE` (hiÃ©rarchie)
-- `DELETE_NODE` (hiÃ©rarchie)
-- Toute intention liÃ©e Ã  la persistance ou Ã  la cohÃ©rence des donnÃ©es
+- `CREATE_NODE` (hiérarchie)
+- `MOVE_NODE` (hiérarchie)
+- `DELETE_NODE` (hiérarchie)
+- Toute intention liée à la persistance ou à la cohérence des données
 
-**StrongFather (autoritÃ© des dÃ©cisions stratÃ©giques et politiques) :**
+**StrongFather (autorité des décisions stratégiques et politiques) :**
 - `AUTHENTICATE`
 - `AUTHORIZE`
 - `CREATE_SESSION`
 - `REVOKE_SESSION`
 - `CHECK_PERMISSION`
-- Toute intention liÃ©e aux identitÃ©s, permissions, ou dÃ©cisions politiques
+- Toute intention liée aux identités, permissions, ou décisions politiques
 
-**RÃ¨gle ROUTE-04 : Pas d'intention multi-autoritÃ©**
+**Règle ROUTE-04 : Pas d'intention multi-autorité**
 
-Une intention ne peut jamais cibler plusieurs autoritÃ©s simultanÃ©ment. Si une opÃ©ration nÃ©cessite plusieurs autoritÃ©s, elle doit Ãªtre dÃ©composÃ©e en plusieurs intentions.
+Une intention ne peut jamais cibler plusieurs autorités simultanément. Si une opération nécessite plusieurs autorités, elle doit être décomposée en plusieurs intentions.
 
 ### 5.3 Gestion des erreurs de routage
 
-**RÃ¨gle ROUTE-05 : Type inconnu**
+**Règle ROUTE-05 : Type inconnu**
 
-Si le type d'intention n'est pas reconnu ou ne mappe vers aucune autoritÃ©, l'intention est rejetÃ©e immÃ©diatement.
+Si le type d'intention n'est pas reconnu ou ne mappe vers aucune autorité, l'intention est rejetée immédiatement.
 
-**RÃ¨gle ROUTE-06 : AutoritÃ© indisponible**
+**Règle ROUTE-06 : Autorité indisponible**
 
-Si l'autoritÃ© cible est indisponible, l'intention est mise en buffer offline (voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md)).
+Si l'autorité cible est indisponible, l'intention est mise en buffer offline (voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md)).
 
 ---
 
-## 6. DÃ©lÃ©gation Ã  Kind Mother
+## 6. Délégation à Kind Mother
 
-### 6.1 Domaine de dÃ©lÃ©gation
+### 6.1 Domaine de délégation
 
-**Kind Mother est l'autoritÃ© des donnÃ©es :**
-- Persistance des donnÃ©es
-- CohÃ©rence des donnÃ©es
-- IntÃ©gritÃ© des donnÃ©es
-- Gestion des hiÃ©rarchies
+**Kind Mother est l'autorité des données :**
+- Persistance des données
+- Cohérence des données
+- Intégrité des données
+- Gestion des hiérarchies
 - Gestion des relations
 
-**RÃ¨gle KM-01 : DÃ©cisions de persistance**
+**Règle KM-01 : Décisions de persistance**
 
-Toute dÃ©cision concernant la persistance, la modification, ou la suppression de donnÃ©es est dÃ©lÃ©guÃ©e Ã  Kind Mother.
+Toute décision concernant la persistance, la modification, ou la suppression de données est déléguée à Kind Mother.
 
-**RÃ¨gle KM-02 : DÃ©cisions de cohÃ©rence**
+**Règle KM-02 : Décisions de cohérence**
 
-Toute dÃ©cision concernant la cohÃ©rence, l'intÃ©gritÃ©, ou les contraintes de donnÃ©es est dÃ©lÃ©guÃ©e Ã  Kind Mother.
+Toute décision concernant la cohérence, l'intégrité, ou les contraintes de données est déléguée à Kind Mother.
 
-**RÃ¨gle KM-03 : DÃ©cisions de structure**
+**Règle KM-03 : Décisions de structure**
 
-Toute dÃ©cision concernant la structure, la hiÃ©rarchie, ou l'organisation des donnÃ©es est dÃ©lÃ©guÃ©e Ã  Kind Mother.
+Toute décision concernant la structure, la hiérarchie, ou l'organisation des données est déléguée à Kind Mother.
 
-### 6.2 Transmission Ã  Kind Mother
+### 6.2 Transmission à Kind Mother
 
-**RÃ¨gle KM-04 : Format adaptÃ©**
+**Règle KM-04 : Format adapté**
 
 La demande est traduite dans le format et le vocabulaire que Kind Mother comprend.
 
-**RÃ¨gle KM-05 : Contexte complet**
+**Règle KM-05 : Contexte complet**
 
-Le contexte est transmis intÃ©gralement Ã  Kind Mother, sans modification.
+Le contexte est transmis intégralement à Kind Mother, sans modification.
 
-**RÃ¨gle KM-06 : Pas d'interprÃ©tation**
+**Règle KM-06 : Pas d'interprétation**
 
 Bonding Brother ne modifie jamais la demande avant transmission. Il traduit le format, pas le sens.
 
-### 6.3 RÃ©ception de Kind Mother
+### 6.3 Réception de Kind Mother
 
-**RÃ¨gle KM-07 : RÃ©ception fidÃ¨le**
+**Règle KM-07 : Réception fidèle**
 
-La rÃ©ponse de Kind Mother est reÃ§ue intÃ©gralement, sans modification ni interprÃ©tation.
+La réponse de Kind Mother est reçue intégralement, sans modification ni interprétation.
 
-**RÃ¨gle KM-08 : PrÃ©servation de la dÃ©cision**
+**Règle KM-08 : Préservation de la décision**
 
-La dÃ©cision de Kind Mother (acceptÃ©e, refusÃ©e, erreur) est prÃ©servÃ©e intÃ©gralement.
+La décision de Kind Mother (acceptée, refusée, erreur) est préservée intégralement.
 
-**RÃ¨gle KM-09 : Transmission au produit**
+**Règle KM-09 : Transmission au produit**
 
-La rÃ©ponse est traduite et filtrÃ©e avant transmission au produit, mais la dÃ©cision reste inchangÃ©e.
+La réponse est traduite et filtrée avant transmission au produit, mais la décision reste inchangée.
 
 ---
 
-## 7. DÃ©lÃ©gation Ã  Strong Father
+## 7. Délégation à Strong Father
 
-### 7.1 Domaine de dÃ©lÃ©gation
+### 7.1 Domaine de délégation
 
-**Strong Father est l'autoritÃ© des identitÃ©s et permissions :**
+**Strong Father est l'autorité des identités et permissions :**
 - Authentification
 - Autorisation
 - Gestion des sessions
-- DÃ©cisions politiques
-- RÃ¨gles de sÃ©curitÃ©
+- Décisions politiques
+- Règles de sécurité
 
-**RÃ¨gle SF-01 : DÃ©cisions d'authentification**
+**Règle SF-01 : Décisions d'authentification**
 
-Toute dÃ©cision concernant l'authentification d'un utilisateur est dÃ©lÃ©guÃ©e Ã  Strong Father.
+Toute décision concernant l'authentification d'un utilisateur est déléguée à Strong Father.
 
-**RÃ¨gle SF-02 : DÃ©cisions d'autorisation**
+**Règle SF-02 : Décisions d'autorisation**
 
-Toute dÃ©cision concernant l'autorisation d'une action est dÃ©lÃ©guÃ©e Ã  Strong Father.
+Toute décision concernant l'autorisation d'une action est déléguée à Strong Father.
 
-**RÃ¨gle SF-03 : DÃ©cisions politiques**
+**Règle SF-03 : Décisions politiques**
 
-Toute dÃ©cision stratÃ©gique ou politique est dÃ©lÃ©guÃ©e Ã  Strong Father.
+Toute décision stratégique ou politique est déléguée à Strong Father.
 
-**RÃ¨gle SF-04 : DÃ©cisions de session**
+**Règle SF-04 : Décisions de session**
 
-Toute dÃ©cision concernant la crÃ©ation, la validation, ou la rÃ©vocation de sessions est dÃ©lÃ©guÃ©e Ã  Strong Father.
+Toute décision concernant la création, la validation, ou la révocation de sessions est déléguée à Strong Father.
 
-### 7.2 Transmission Ã  Strong Father
+### 7.2 Transmission à Strong Father
 
-**RÃ¨gle SF-05 : Format adaptÃ©**
+**Règle SF-05 : Format adapté**
 
 La demande est traduite dans le format et le vocabulaire que Strong Father comprend.
 
-**RÃ¨gle SF-06 : Contexte complet**
+**Règle SF-06 : Contexte complet**
 
-Le contexte est transmis intÃ©gralement Ã  Strong Father, sans modification.
+Le contexte est transmis intégralement à Strong Father, sans modification.
 
-**RÃ¨gle SF-07 : Pas d'interprÃ©tation**
+**Règle SF-07 : Pas d'interprétation**
 
 Bonding Brother ne modifie jamais la demande avant transmission. Il traduit le format, pas le sens.
 
-### 7.3 RÃ©ception de Strong Father
+### 7.3 Réception de Strong Father
 
-**RÃ¨gle SF-08 : RÃ©ception fidÃ¨le**
+**Règle SF-08 : Réception fidèle**
 
-La rÃ©ponse de Strong Father est reÃ§ue intÃ©gralement, sans modification ni interprÃ©tation.
+La réponse de Strong Father est reçue intégralement, sans modification ni interprétation.
 
-**RÃ¨gle SF-09 : PrÃ©servation de la dÃ©cision**
+**Règle SF-09 : Préservation de la décision**
 
-La dÃ©cision de Strong Father (autorisÃ©, refusÃ©, erreur) est prÃ©servÃ©e intÃ©gralement.
+La décision de Strong Father (autorisé, refusé, erreur) est préservée intégralement.
 
-**RÃ¨gle SF-10 : Transmission au produit**
+**Règle SF-10 : Transmission au produit**
 
-La rÃ©ponse est traduite et filtrÃ©e avant transmission au produit, mais la dÃ©cision reste inchangÃ©e.
+La réponse est traduite et filtrée avant transmission au produit, mais la décision reste inchangée.
 
 ---
 
-## 8. AutoritÃ© diffÃ©rÃ©e (mode offline)
+## 8. Autorité différée (mode offline)
 
 ### 8.1 Principe
 
-**RÃ¨gle OFFLINE-01 : DÃ©lÃ©gation diffÃ©rÃ©e**
+**Règle OFFLINE-01 : Délégation différée**
 
-Quand une autoritÃ© n'est pas accessible, la dÃ©lÃ©gation est diffÃ©rÃ©e. L'intention est journalisÃ©e et transmise lorsque la connexion est rÃ©tablie.
+Quand une autorité n'est pas accessible, la délégation est différée. L'intention est journalisée et transmise lorsque la connexion est rétablie.
 
-**RÃ¨gle OFFLINE-02 : Pas de dÃ©cision locale**
+**Règle OFFLINE-02 : Pas de décision locale**
 
-Bonding Brother ne prend jamais de dÃ©cision Ã  la place de l'autoritÃ©, mÃªme en mode offline.
+Bonding Brother ne prend jamais de décision à la place de l'autorité, même en mode offline.
 
-**RÃ¨gle OFFLINE-03 : Journalisation systÃ©matique**
+**Règle OFFLINE-03 : Journalisation systématique**
 
-Toute intention en attente de dÃ©lÃ©gation est journalisÃ©e avec un marqueur "offline".
+Toute intention en attente de délégation est journalisée avec un marqueur "offline".
 
 ### 8.2 Gestion du buffer offline
 
-**RÃ¨gle OFFLINE-04 : Stockage temporaire**
+**Règle OFFLINE-04 : Stockage temporaire**
 
-Les intentions en attente sont stockÃ©es dans un buffer temporaire, ordonnÃ© chronologiquement.
+Les intentions en attente sont stockées dans un buffer temporaire, ordonné chronologiquement.
 
-**RÃ¨gle OFFLINE-05 : Transmission Ã  la reconnexion**
+**Règle OFFLINE-05 : Transmission à la reconnexion**
 
-Lors de la reconnexion, les intentions sont transmises dans l'ordre (FIFO) Ã  l'autoritÃ©.
+Lors de la reconnexion, les intentions sont transmises dans l'ordre (FIFO) à l'autorité.
 
-**RÃ¨gle OFFLINE-06 : RÃ©ception diffÃ©rÃ©e**
+**Règle OFFLINE-06 : Réception différée**
 
-Les rÃ©ponses diffÃ©rÃ©es sont reÃ§ues et transmises aux produits lorsque disponibles.
+Les réponses différées sont reçues et transmises aux produits lorsque disponibles.
 
 ### 8.3 Garanties en mode offline
 
-**RÃ¨gle OFFLINE-07 : Aucune perte**
+**Règle OFFLINE-07 : Aucune perte**
 
-Aucune intention n'est perdue en mode offline. Toutes sont transmises Ã  la reconnexion.
+Aucune intention n'est perdue en mode offline. Toutes sont transmises à la reconnexion.
 
-**RÃ¨gle OFFLINE-08 : Ordre prÃ©servÃ©**
+**Règle OFFLINE-08 : Ordre préservé**
 
-L'ordre des intentions est prÃ©servÃ© lors de la transmission diffÃ©rÃ©e.
+L'ordre des intentions est préservé lors de la transmission différée.
 
-**RÃ¨gle OFFLINE-09 : TraÃ§abilitÃ©**
+**Règle OFFLINE-09 : Traçabilité**
 
-Toutes les intentions en mode offline sont traÃ§ables, avec horodatage de crÃ©ation et de transmission.
+Toutes les intentions en mode offline sont traçables, avec horodatage de création et de transmission.
 
 ---
 
-## 9. Transmission fidÃ¨le
+## 9. Transmission fidèle
 
-### 9.1 Principe de fidÃ©litÃ©
+### 9.1 Principe de fidélité
 
-**RÃ¨gle FID-01 : Pas de modification**
+**Règle FID-01 : Pas de modification**
 
-Bonding Brother ne modifie jamais le contenu d'une demande ou d'une rÃ©ponse. Il traduit le format, mais prÃ©serve le sens.
+Bonding Brother ne modifie jamais le contenu d'une demande ou d'une réponse. Il traduit le format, mais préserve le sens.
 
-**RÃ¨gle FID-02 : Pas d'interprÃ©tation**
+**Règle FID-02 : Pas d'interprétation**
 
-Bonding Brother ne interprÃ¨te jamais une demande ou une rÃ©ponse. Il transmet fidÃ¨lement ce qu'il reÃ§oit.
+Bonding Brother ne interprète jamais une demande ou une réponse. Il transmet fidèlement ce qu'il reçoit.
 
-**RÃ¨gle FID-03 : Pas d'enrichissement mÃ©tier**
+**Règle FID-03 : Pas d'enrichissement métier**
 
-Bonding Brother n'ajoute jamais d'information mÃ©tier Ã  une demande ou une rÃ©ponse. Seuls les enrichissements techniques sont autorisÃ©s (mÃ©tadonnÃ©es de traÃ§abilitÃ©).
+Bonding Brother n'ajoute jamais d'information métier à une demande ou une réponse. Seuls les enrichissements techniques sont autorisés (métadonnées de traçabilité).
 
-### 9.2 Enrichissements techniques autorisÃ©s
+### 9.2 Enrichissements techniques autorisés
 
-**MÃ©tadonnÃ©es de traÃ§abilitÃ© :**
-- `intention_id` (pour corrÃ©lation)
-- `demande_id` (pour traÃ§abilitÃ©)
+**Métadonnées de traçabilité :**
+- `intention_id` (pour corrélation)
+- `demande_id` (pour traçabilité)
 - `timestamp_demande` (pour ordre chronologique)
-- `autoritÃ©_cible` (pour routage)
+- `autorité_cible` (pour routage)
 
-**RÃ¨gle FID-04 : Enrichissements non mÃ©tier**
+**Règle FID-04 : Enrichissements non métier**
 
-Les enrichissements techniques ne modifient jamais le sens de la demande ou de la rÃ©ponse.
+Les enrichissements techniques ne modifient jamais le sens de la demande ou de la réponse.
 
-### 9.3 PrÃ©servation du contexte
+### 9.3 Préservation du contexte
 
-**RÃ¨gle FID-05 : Contexte intÃ©gral**
+**Règle FID-05 : Contexte intégral**
 
-Le contexte est transmis intÃ©gralement aux autoritÃ©s, sans filtrage ni modification.
+Le contexte est transmis intégralement aux autorités, sans filtrage ni modification.
 
-**RÃ¨gle FID-06 : Pas de masquage**
+**Règle FID-06 : Pas de masquage**
 
-Bonding Brother ne masque jamais d'information du contexte aux autoritÃ©s.
+Bonding Brother ne masque jamais d'information du contexte aux autorités.
 
-**RÃ¨gle FID-07 : TraÃ§abilitÃ© complÃ¨te**
+**Règle FID-07 : Traçabilité complète**
 
-Le contexte complet est journalisÃ© pour traÃ§abilitÃ©, mÃªme s'il n'est pas utilisÃ© par l'autoritÃ©.
+Le contexte complet est journalisé pour traçabilité, même s'il n'est pas utilisé par l'autorité.
 
 ---
 
-## 10. Garanties de dÃ©lÃ©gation
+## 10. Garanties de délégation
 
-### 10.1 Garantie de non-dÃ©cision
+### 10.1 Garantie de non-décision
 
-**Engagement :** Bonding Brother ne prend jamais de dÃ©cision Ã  la place d'une autoritÃ©. Toute dÃ©cision vient exclusivement d'une autoritÃ©.
+**Engagement :** Bonding Brother ne prend jamais de décision à la place d'une autorité. Toute décision vient exclusivement d'une autorité.
 
-**Mesure :** VÃ©rification structurelle que Bonding Brother n'a pas de logique de dÃ©cision mÃ©tier.
+**Mesure :** Vérification structurelle que Bonding Brother n'a pas de logique de décision métier.
 
-### 10.2 Garantie de fidÃ©litÃ©
+### 10.2 Garantie de fidélité
 
-**Engagement :** Les demandes sont transmises fidÃ¨lement aux autoritÃ©s, et les rÃ©ponses sont transmises fidÃ¨lement aux produits (aprÃ¨s traduction et filtrage).
+**Engagement :** Les demandes sont transmises fidèlement aux autorités, et les réponses sont transmises fidèlement aux produits (après traduction et filtrage).
 
-**Mesure :** Tests de round-trip avec vÃ©rification que les dÃ©cisions sont prÃ©servÃ©es.
+**Mesure :** Tests de round-trip avec vérification que les décisions sont préservées.
 
-### 10.3 Garantie de complÃ©tude
+### 10.3 Garantie de complétude
 
-**Engagement :** Toute demande est transmise Ã  l'autoritÃ© appropriÃ©e, et toute rÃ©ponse est transmise au produit (mÃªme en mode offline).
+**Engagement :** Toute demande est transmise à l'autorité appropriée, et toute réponse est transmise au produit (même en mode offline).
 
-**Mesure :** TraÃ§abilitÃ© complÃ¨te avec vÃ©rification que chaque demande a une rÃ©ponse.
+**Mesure :** Traçabilité complète avec vérification que chaque demande a une réponse.
 
 ### 10.4 Garantie de routage correct
 
-**Engagement :** Chaque intention est routÃ©e vers la bonne autoritÃ©, sans erreur de routage.
+**Engagement :** Chaque intention est routée vers la bonne autorité, sans erreur de routage.
 
-**Mesure :** Tests avec tous les types d'intentions vÃ©rifiant le routage correct.
+**Mesure :** Tests avec tous les types d'intentions vérifiant le routage correct.
 
-### 10.5 Garantie de disponibilitÃ©
+### 10.5 Garantie de disponibilité
 
-**Engagement :** La dÃ©lÃ©gation fonctionne mÃªme en mode offline, avec transmission diffÃ©rÃ©e Ã  la reconnexion.
+**Engagement :** La délégation fonctionne même en mode offline, avec transmission différée à la reconnexion.
 
-**Mesure :** Tests de fonctionnement offline avec vÃ©rification de la transmission diffÃ©rÃ©e.
+**Mesure :** Tests de fonctionnement offline avec vérification de la transmission différée.
 
 ---
 
@@ -375,51 +375,51 @@ Le contexte complet est journalisÃ© pour traÃ§abilitÃ©, mÃªme s'il n'est
 
 ### 11.1 Violations interdites
 
-**Violation VIO-01 : DÃ©cision par Bonding Brother**
+**Violation VIO-01 : Décision par Bonding Brother**
 
-Bonding Brother ne doit jamais prendre de dÃ©cision mÃ©tier. Toute logique de dÃ©cision est une violation.
+Bonding Brother ne doit jamais prendre de décision métier. Toute logique de décision est une violation.
 
-**Violation VIO-02 : Modification de dÃ©cision**
+**Violation VIO-02 : Modification de décision**
 
-Bonding Brother ne doit jamais modifier une dÃ©cision d'autoritÃ©. Toute modification est une violation.
+Bonding Brother ne doit jamais modifier une décision d'autorité. Toute modification est une violation.
 
-**Violation VIO-03 : InterprÃ©tation de dÃ©cision**
+**Violation VIO-03 : Interprétation de décision**
 
-Bonding Brother ne doit jamais interprÃ©ter une dÃ©cision d'autoritÃ©. Toute interprÃ©tation est une violation.
+Bonding Brother ne doit jamais interpréter une décision d'autorité. Toute interprétation est une violation.
 
 **Violation VIO-04 : Routage incorrect**
 
-Bonding Brother ne doit jamais router une intention vers la mauvaise autoritÃ©. Tout routage incorrect est une violation.
+Bonding Brother ne doit jamais router une intention vers la mauvaise autorité. Tout routage incorrect est une violation.
 
 **Violation VIO-05 : Masquage de contexte**
 
-Bonding Brother ne doit jamais masquer d'information du contexte aux autoritÃ©s. Tout masquage est une violation.
+Bonding Brother ne doit jamais masquer d'information du contexte aux autorités. Tout masquage est une violation.
 
 ### 11.2 Anti-patterns
 
-**Anti-pattern AP-01 : Cache de dÃ©cisions**
+**Anti-pattern AP-01 : Cache de décisions**
 
-Bonding Brother ne doit jamais mettre en cache des dÃ©cisions d'autoritÃ© pour Ã©viter de les redemander.
+Bonding Brother ne doit jamais mettre en cache des décisions d'autorité pour éviter de les redemander.
 
-**Anti-pattern AP-02 : DÃ©cision par dÃ©faut**
+**Anti-pattern AP-02 : Décision par défaut**
 
-Bonding Brother ne doit jamais prendre une dÃ©cision par dÃ©faut en cas d'indisponibilitÃ© d'autoritÃ©.
+Bonding Brother ne doit jamais prendre une décision par défaut en cas d'indisponibilité d'autorité.
 
-**Anti-pattern AP-03 : AgrÃ©gation de dÃ©cisions**
+**Anti-pattern AP-03 : Agrégation de décisions**
 
-Bonding Brother ne doit jamais agrÃ©ger ou combiner des dÃ©cisions de plusieurs autoritÃ©s.
+Bonding Brother ne doit jamais agréger ou combiner des décisions de plusieurs autorités.
 
 **Anti-pattern AP-04 : Validation locale**
 
-Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© par une autoritÃ©.
+Bonding Brother ne doit jamais valider localement ce qui doit être validé par une autorité.
 
 ---
 
 ## 12. Exemples
 
-### 12.1 DÃ©lÃ©gation Ã  Kind Mother
+### 12.1 Délégation à Kind Mother
 
-**Intention reÃ§ue :**
+**Intention reçue :**
 ```json
 {
   "type": "CREATE_CONTENT",
@@ -427,18 +427,18 @@ Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© 
 }
 ```
 
-**Routage :** `CREATE_CONTENT` â†’ Kind Mother
+**Routage :** `CREATE_CONTENT` → Kind Mother
 
-**Demande transmise Ã  Kind Mother :**
+**Demande transmise à Kind Mother :**
 ```json
 {
   "type": "create_content",
-  "donnÃ©es": { "title": "Mon article", "body": "..." },
+  "données": { "title": "Mon article", "body": "..." },
   "contexte": { ... }
 }
 ```
 
-**RÃ©ponse de Kind Mother :**
+**Réponse de Kind Mother :**
 ```json
 {
   "status": "accepted",
@@ -446,11 +446,11 @@ Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© 
 }
 ```
 
-**DÃ©cision prÃ©servÃ©e :** `accepted` â†’ `SUCCÃˆS` (traduit, mais dÃ©cision inchangÃ©e)
+**Décision préservée :** `accepted` → `SUCCÈS` (traduit, mais décision inchangée)
 
-### 12.2 DÃ©lÃ©gation Ã  Strong Father
+### 12.2 Délégation à Strong Father
 
-**Intention reÃ§ue :**
+**Intention reçue :**
 ```json
 {
   "type": "AUTHORIZE",
@@ -462,9 +462,9 @@ Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© 
 }
 ```
 
-**Routage :** `AUTHORIZE` â†’ Strong Father
+**Routage :** `AUTHORIZE` → Strong Father
 
-**Demande transmise Ã  Strong Father :**
+**Demande transmise à Strong Father :**
 ```json
 {
   "type": "check_permission",
@@ -475,7 +475,7 @@ Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© 
 }
 ```
 
-**RÃ©ponse de Strong Father :**
+**Réponse de Strong Father :**
 ```json
 {
   "decision": "authorized",
@@ -483,11 +483,11 @@ Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© 
 }
 ```
 
-**DÃ©cision prÃ©servÃ©e :** `authorized` â†’ `AUTORISÃ‰` (traduit, mais dÃ©cision inchangÃ©e)
+**Décision préservée :** `authorized` → `AUTORISÉ` (traduit, mais décision inchangée)
 
 ### 12.3 Mode offline
 
-**Intention reÃ§ue en mode offline :**
+**Intention reçue en mode offline :**
 ```json
 {
   "type": "CREATE_CONTENT",
@@ -497,26 +497,26 @@ Bonding Brother ne doit jamais valider localement ce qui doit Ãªtre validÃ© 
 
 **Action :** Journalisation avec marqueur `offline: true`
 
-**Buffer offline :** Intention stockÃ©e dans l'ordre chronologique
+**Buffer offline :** Intention stockée dans l'ordre chronologique
 
-**Ã€ la reconnexion :** Transmission Ã  Kind Mother dans l'ordre (FIFO)
+**À la reconnexion :** Transmission à Kind Mother dans l'ordre (FIFO)
 
-**RÃ©ponse diffÃ©rÃ©e :** ReÃ§ue et transmise au produit
+**Réponse différée :** Reçue et transmise au produit
 
 ---
 
 ## 13. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles de dÃ©lÃ©gation aux autoritÃ©s que Bonding Brother doit respecter pour garantir l'absence de dÃ©cision et la transmission fidÃ¨le.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles de délégation aux autorités que Bonding Brother doit respecter pour garantir l'absence de décision et la transmission fidèle.
 
-Toute dÃ©lÃ©gation effectuÃ©e par Bonding Brother doit respecter ce contrat. Toute violation entraÃ®ne une erreur critique.
+Toute délégation effectuée par Bonding Brother doit respecter ce contrat. Toute violation entraîne une erreur critique.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice v2.0](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) (Section 6)
 - [Intent Model Contract v2.0](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md)
 - [Bilateral Flow Contract v2.0](../flows/BondingBrother%20-%20Bilateral%20Flow%20Contract.md)

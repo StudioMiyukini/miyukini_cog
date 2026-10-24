@@ -1,10 +1,10 @@
-﻿# LogisticsSteward â€” Priority Management Contract
+﻿# LogisticsSteward — Priority Management Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document definit le **LogisticsSteward â€” Priority Management Contract** : un contrat normatif, non negociable, et de statut FONDATION qui formalise la gestion des priorites dans le systeme Miyukini.
+Ce document definit le **LogisticsSteward — Priority Management Contract** : un contrat normatif, non negociable, et de statut FONDATION qui formalise la gestion des priorites dans le systeme Miyukini.
 
 Ce contrat etablit :
 - La definition formelle des niveaux de priorite
@@ -30,11 +30,11 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 ### Relation avec les autres contrats
 
 Ce contrat s'articule avec :
-- **LogisticsSteward â€” Documentation Fondatrice** : Definition conceptuelle et invariants fondamentaux
-- **LogisticsSteward â€” Quota Definition Contract** : Interaction priorites/quotas
-- **LogisticsSteward â€” Resource Arbitration Contract** : Application des priorites dans l'arbitrage
-- **LogisticsSteward â€” Degradation Strategy Contract** : Impact des niveaux de degradation sur les priorites
-- **StrongFather â€” Core Decision Contract** : Validation des decisions de priorite
+- **LogisticsSteward — Documentation Fondatrice** : Definition conceptuelle et invariants fondamentaux
+- **LogisticsSteward — Quota Definition Contract** : Interaction priorites/quotas
+- **LogisticsSteward — Resource Arbitration Contract** : Application des priorites dans l'arbitrage
+- **LogisticsSteward — Degradation Strategy Contract** : Impact des niveaux de degradation sur les priorites
+- **StrongFather — Core Decision Contract** : Validation des decisions de priorite
 
 ---
 
@@ -95,49 +95,49 @@ LogisticsSteward definit une echelle de priorite a 7 niveaux :
 
 ### 3.2. Semantique des niveaux
 
-**P0 â€” CRITICAL**
+**P0 — CRITICAL**
 
 Reserve exclusivement aux fonctions vitales du systeme :
 - Maintien de la coherence systeme
 - Protection contre la corruption de donnees
 - Preservation des invariants fondamentaux
 
-**P1 â€” EMERGENCY**
+**P1 — EMERGENCY**
 
 Reserve aux situations d'urgence :
 - Operations de recovery systeme
 - Reponse aux alertes critiques
 - Retablissement apres incident
 
-**P2 â€” HIGH**
+**P2 — HIGH**
 
 Reserve aux operations administratives et de maintenance :
 - MiyukiniAdmin (priorite par defaut)
 - Operations de maintenance planifiee
 - Mises a jour critiques
 
-**P3 â€” ELEVATED**
+**P3 — ELEVATED**
 
 Reserve aux operations metier prioritaires :
 - Transactions utilisateur sensibles
 - Operations avec SLA strict
 - Workflows critiques
 
-**P4 â€” NORMAL**
+**P4 — NORMAL**
 
 Niveau par defaut pour les operations metier standard :
 - Transactions utilisateur courantes
 - Operations CRUD standard
 - Requetes API normales
 
-**P5 â€” LOW**
+**P5 — LOW**
 
 Reserve aux operations non urgentes :
 - Taches de fond
 - Synchronisation non critique
 - Rapports et analytics
 
-**P6 â€” BACKGROUND**
+**P6 — BACKGROUND**
 
 Reserve aux taches d'arriere-plan :
 - Nettoyage et maintenance legere
@@ -553,6 +553,6 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** FONDATION â€” Contrat normatif valide  
+**Statut :** FONDATION — Contrat normatif valide  
 **Reference :** Miyukini Core System v2.4, LogisticsSteward Documentation Fondatrice
 

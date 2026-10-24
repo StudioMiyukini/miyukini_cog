@@ -1,60 +1,60 @@
-﻿# MiyuInvoice â€” Documentation Fondatrice
+﻿# MiyuInvoice — Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuInvoice** est le **kit d'outils (Toolkit)** de facturation mÃ©tier indÃ©pendants (devis, factures ponctuelles, acomptes, relances, facturation Ã©lectronique B2B 2026) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de crÃ©ation et mise Ã  jour de devis, de conversion devis â†’ facture, de crÃ©ation et envoi de factures, de relances, de gÃ©nÃ©ration de lien de paiement et de soumission Ã  la facturation Ã©lectronique, alignÃ©s sur [Ã‰quivalents ComptabilitÃ© IndÃ©pendants](..//..//miyukini-webway-system//reference//_index.md).
+**MiyuInvoice** est le **kit d'outils (Toolkit)** de facturation métier indépendants (devis, factures ponctuelles, acomptes, relances, facturation électronique B2B 2026) de l'écosystème Miyukini. Il intègre les outils de création et mise à jour de devis, de conversion devis → facture, de création et envoi de factures, de relances, de génération de lien de paiement et de soumission à la facturation électronique, alignés sur [Équivalents Comptabilité Indépendants](..//..//miyukini-webway-system//reference//_index.md).
 
-L'autoritÃ© sur les donnÃ©es (devis, factures, clients facturation) appartient Ã  **KindMother** (Core de donnÃ©es, Strate 4). MiyuInvoice expose des capacitÃ©s d'exÃ©cution gouvernÃ©e ; les dÃ©cisions (envoi relance, conversion devis â†’ facture) relÃ¨vent de **StrongFather**. Les OpÃ©rateurs (ex. Facturation indÃ©pendants) passent par la gouvernance pour utiliser ces outils.
+L'autorité sur les données (devis, factures, clients facturation) appartient à **KindMother** (Core de données, Strate 4). MiyuInvoice expose des capacités d'exécution gouvernée ; les décisions (envoi relance, conversion devis → facture) relèvent de **StrongFather**. Les Opérateurs (ex. Facturation indépendants) passent par la gouvernance pour utiliser ces outils.
 
 **Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
-**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuInvoice, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother, l'alignement MIP.
+**Ce document définit :** l'identité et la définition canonique de MiyuInvoice, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother, l'alignement MIP.
 
-**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (gÃ©nÃ©ration PDF, plateformes agrÃ©Ã©es facturation Ã©lectronique) ; la facturation SaaS rÃ©currente (voir MiyuBilling).
+**Hors scope :** l'implémentation détaillée (génération PDF, plateformes agréées facturation électronique) ; la facturation SaaS récurrente (voir MiyuBilling).
 
 ---
 
-## 3. DÃ©finition canonique
+## 3. Définition canonique
 
-> **MiyuInvoice est une composition officielle d'outils de facturation mÃ©tier indÃ©pendants (devis, factures, relances, facturation Ã©lectronique B2B), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+> **MiyuInvoice est une composition officielle d'outils de facturation métier indépendants (devis, factures, relances, facturation électronique B2B), déclarée et gouvernée par l'environnement.**
 
-- MiyuInvoice **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
-- MiyuInvoice **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques ; les dÃ©cisions (relance, conversion devis â†’ facture) = StrongFather.
+- MiyuInvoice **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
+- MiyuInvoice **n'ajoute aucune logique métier** : il orchestre des capacités atomiques ; les décisions (relance, conversion devis → facture) = StrongFather.
 
-**RÃ¨gle fondamentale :** Toute Ã©criture (devis, facture) = WriteIntent vers KindMother.
+**Règle fondamentale :** Toute écriture (devis, facture) = WriteIntent vers KindMother.
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.invoice.standalone` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `invoice` |
-| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuInvoice - Reference Outils](./MiyuInvoice%20-%20Reference%20Outils.md).
+Le détail de chaque outil est décrit dans [MiyuInvoice - Reference Outils](./MiyuInvoice%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.invoice.quote.create` | CrÃ©e un devis Ã  partir de donnÃ©es fournies |
-| `tool.invoice.quote.update` | Met Ã  jour un devis existant |
-| `tool.invoice.quote.to_invoice` | Convertit un devis en facture (exÃ©cution ; dÃ©cision = StrongFather) |
-| `tool.invoice.create` | CrÃ©e une facture (mÃ©tier indÃ©pendant) Ã  partir de donnÃ©es fournies |
+| `tool.invoice.quote.create` | Crée un devis à partir de données fournies |
+| `tool.invoice.quote.update` | Met à jour un devis existant |
+| `tool.invoice.quote.to_invoice` | Convertit un devis en facture (exécution ; décision = StrongFather) |
+| `tool.invoice.create` | Crée une facture (métier indépendant) à partir de données fournies |
 | `tool.invoice.send` | Envoie une facture par canal fourni (email, etc.) |
-| `tool.invoice.electronic.submit` | Soumet Ã  la facturation Ã©lectronique (plateforme agrÃ©Ã©e 2026) |
-| `tool.invoice.reminder.send` | Envoie une relance (exÃ©cution ; rÃ¨gles = StrongFather) |
-| `tool.invoice.payment.link.generate` | GÃ©nÃ¨re un lien de paiement pour une facture |
-| `tool.invoice.customer.resolve` | RÃ©sout un client (facturation) par identifiant |
+| `tool.invoice.electronic.submit` | Soumet à la facturation électronique (plateforme agréée 2026) |
+| `tool.invoice.reminder.send` | Envoie une relance (exécution ; règles = StrongFather) |
+| `tool.invoice.payment.link.generate` | Génère un lien de paiement pour une facture |
+| `tool.invoice.customer.resolve` | Résout un client (facturation) par identifiant |
 | `tool.invoice.customer.list` | Liste les clients (filtres fournis) pour facturation |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuInvoice en contient dix.
@@ -63,46 +63,46 @@ Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuInvoice - Reference Outils]
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : permissions (qui peut Ã©mettre/modifier factures) = Master Butler + StrongFather ; toute Ã©criture = WriteIntent KindMother.
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). Spécificité : permissions (qui peut émettre/modifier factures) = Master Butler + StrongFather ; toute écriture = WriteIntent KindMother.
 
 ---
 
-## 7. Niveau de sÃ©curitÃ© et Ã©tats
+## 7. Niveau de sécurité et états
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |---------|--------|
-| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  2** (dÃ©tail par outil dans Reference Outils) |
-| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` |
-| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
+| **Niveau de sécurité du kit** | **1 à 2** (détail par outil dans Reference Outils) |
+| **États autorisés** | `HEALTHY`, `DEGRADED` |
+| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autoritÃ© sur les donnÃ©es : devis, factures, clients facturation. Toute Ã©criture (quote.create, quote.update, invoice.create) passe par **WriteIntent** sous autoritÃ© KindMother. MiyuInvoice exÃ©cute des capacitÃ©s atomiques ; les dÃ©cisions (relance, conversion devis â†’ facture) = StrongFather.
+**KindMother** est l'autorité sur les données : devis, factures, clients facturation. Toute écriture (quote.create, quote.update, invoice.create) passe par **WriteIntent** sous autorité KindMother. MiyuInvoice exécute des capacités atomiques ; les décisions (relance, conversion devis → facture) = StrongFather.
 
-Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuInvoice - Tool Governance Compliance Contract](./contracts/governance/MiyuInvoice%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformité détaillées sont dans [MiyuInvoice - Tool Governance Compliance Contract](./contracts/governance/MiyuInvoice%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implÃ©mentation de MiyuInvoice sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). Ã€ l'implÃ©mentation, le code fournissant les Tools MiyuInvoice devra Ãªtre balisÃ© MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit gÃ©nÃ©rÃ© selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+La documentation et la future implémentation de MiyuInvoice sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). À l'implémentation, le code fournissant les Tools MiyuInvoice devra être balisé MSCM afin que l'index MIP (blocks.json, domains.json, layers.json) soit généré selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 10. RÃ©fÃ©rences croisÃ©es
+## 10. Références croisées
 
 | Document | Lien |
 |----------|------|
 | Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
-| Ã‰quivalents ComptabilitÃ© IndÃ©pendants | [Miyukini Conceptual References - Equivalents Comptabilite Independants](..//..//miyukini-webway-system//reference//_index.md) |
+| Équivalents Comptabilité Indépendants | [Miyukini Conceptual References - Equivalents Comptabilite Independants](..//..//miyukini-webway-system//reference//_index.md) |
 | Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 
 ---
 
-**Date de crÃ©ation :** 2026-01-30  
+**Date de création :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de rÃ©fÃ©rence fondateur
+**Statut :** Document de référence fondateur
 
 

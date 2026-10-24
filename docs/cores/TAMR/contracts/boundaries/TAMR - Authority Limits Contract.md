@@ -63,7 +63,7 @@ Les limites d'autorite sont :
 - **Explicites** : Definies clairement, jamais implicites.
 - **Contextuelles** : Leur application depend du contexte (type d'intervention, niveau de securite, niveau de confiance, role, point d'intervention).
 - **Evaluables** : StrongFather peut evaluer si une intervention respecte ou non ces limites.
-- **Protectrices** : Elles protegent le systeme et l'humain contre les interventions inappropriÃ©es.
+- **Protectrices** : Elles protegent le systeme et l'humain contre les interventions inappropriées.
 - **Non absolues (pour ce contrat)** : Elles peuvent etre assouplies ou renforcees par le contexte ; seules les limites infranchissables sont absolues.
 
 ### 2.2 Distinction : limites d'autorite vs limites infranchissables
@@ -143,7 +143,7 @@ Le niveau de securite est defini par l'Operateur (voir [Security Levels](..//../
 | **1** | STANDARD / CMS | Limites de base ; approbations optionnelles selon configuration |
 | **2** | SENSITIVE DATA | Limites renforcees ; override et approbation soumis a validation renforcee pour donnees sensibles |
 | **3** | CRITICAL SYSTEM | Limites strictes ; approbation obligatoire pour operations critiques, override soumis a justification renforcee |
-| **4** | HARDENED / ISOLATED | Limites maximales ; toute intervention tracÃ©e et restreinte aux roles et points declares |
+| **4** | HARDENED / ISOLATED | Limites maximales ; toute intervention tracée et restreinte aux roles et points declares |
 
 **INV-AL-2 : Monotonie par niveau de securite**
 
@@ -180,12 +180,12 @@ Aucune limite d'autorite ne peut etre evaluee pour une intervention qui ne s'ins
 
 ### 5.1 Responsable de l'evaluation
 
-**StrongFather** est exclusivement responsable d'evaluer si une intervention respecte les limites d'autorite. TAMR definit les limites (conceptuelles) ; StrongFather applique les politiques et rend la decision (autorisÃ©e / refusÃ©e).
+**StrongFather** est exclusivement responsable d'evaluer si une intervention respecte les limites d'autorite. TAMR definit les limites (conceptuelles) ; StrongFather applique les politiques et rend la decision (autorisée / refusée).
 
 - TAMR dit : "En niveau 3, l'override necessite une justification renforcee."
 - StrongFather dit : "Cette intervention respecte-t-elle la politique de justification niveau 3 ?"
 
-### 5.2 CritÃ¨res d'evaluation
+### 5.2 Critères d'evaluation
 
 L'evaluation prend en compte :
 
@@ -200,7 +200,7 @@ L'evaluation prend en compte :
 2. Verifier qu'aucune limite infranchissable n'est franchise (contrat Inviolable Limits).
 3. Appliquer les limites d'autorite selon le type d'intervention (section 3).
 4. Appliquer les restrictions contextuelles (niveau securite, niveau confiance) (section 4).
-5. Rendre la decision (autorisÃ©e / refusÃ©e) selon les politiques StrongFather.
+5. Rendre la decision (autorisée / refusée) selon les politiques StrongFather.
 
 **INV-AL-5 : Non-decision par TAMR**
 
@@ -220,7 +220,7 @@ TAMR ne prend jamais de decision. Il definit les limites ; StrongFather evalue e
 | **INV-AL-4** | Aucune limite d'autorite ne peut etre evaluee pour une intervention hors point declare ou sans role reconnu. |
 | **INV-AL-5** | TAMR definit les limites ; StrongFather evalue et decide. TAMR ne prend jamais de decision. |
 
-### 6.2 TraÃ§abilitÃ©
+### 6.2 Traçabilité
 
 Toute evaluation des limites d'autorite (effectuee par StrongFather) doit pouvoir etre auditee : contexte utilise, limites appliquees, decision. La structure des traces est definie par TAMR (voir contrats Audit) et persistee par KindMother.
 
@@ -280,6 +280,6 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 
 **Document cree le :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif  
+**Statut :** FONDATION — Contrat normatif  
 **Reference :** Miyukini Core System v2.4, TAMR Documentation Fondatrice v1.4, [TAMR - Inviolable Limits Contract](./TAMR%20-%20Inviolable%20Limits%20Contract.md)
 

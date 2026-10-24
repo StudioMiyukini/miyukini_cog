@@ -1,8 +1,8 @@
-﻿# StrongFather â€” Examples Intentions
+﻿# StrongFather — Examples Intentions
 
 ## Contexte
 
-Ce document illustre StrongFather par des **exemples d'intentions** soumises au moteur de dÃ©cision. Il fait partie de la sÃ©rie de documents d'exemples.
+Ce document illustre StrongFather par des **exemples d'intentions** soumises au moteur de décision. Il fait partie de la série de documents d'exemples.
 
 **Documents connexes :**
 - [StrongFather - Examples Policies](./StrongFather%20-%20Examples%20Policies.md)
@@ -14,53 +14,53 @@ Ce document illustre StrongFather par des **exemples d'intentions** soumises au 
 
 ## 1. Structure d'une intention
 
-Une intention est une demande d'action soumise Ã  StrongFather pour Ã©valuation. Elle contient :
+Une intention est une demande d'action soumise à StrongFather pour évaluation. Elle contient :
 
 **Composants obligatoires :**
 - Identifiant unique
-- Action (CRÃ‰ER, MODIFIER, SUPPRIMER, LECTURE, Ã‰VALUATION)
-- Type d'entitÃ©
+- Action (CRÉER, MODIFIER, SUPPRIMER, LECTURE, ÉVALUATION)
+- Type d'entité
 - Contexte (utilisateur, produit, instance)
 
 **Composants optionnels :**
-- DonnÃ©es associÃ©es
-- PrioritÃ© demandÃ©e
+- Données associées
+- Priorité demandée
 - Contraintes explicites
-- MÃ©tadonnÃ©es
+- Métadonnées
 
 ---
 
 ## 2. Exemples d'intentions
 
-### 2.1. Intention de crÃ©ation de contenu
+### 2.1. Intention de création de contenu
 
 **Contexte :**
-Un adaptateur produit soumet une intention de crÃ©ation d'un article de blog.
+Un adaptateur produit soumet une intention de création d'un article de blog.
 
 **Intention :**
 ```
 Identifiant : intent-2026-01-26-001
-Action : CRÃ‰ER
-Type d'entitÃ© : ARTICLE
-DonnÃ©es :
-  - Titre : "Introduction Ã  StrongFather"
+Action : CRÉER
+Type d'entité : ARTICLE
+Données :
+  - Titre : "Introduction à StrongFather"
   - Auteur : user-alice
-  - Statut demandÃ© : PUBLIÃ‰
-  - CatÃ©gorie : TECHNIQUE
+  - Statut demandé : PUBLIÉ
+  - Catégorie : TECHNIQUE
 Contexte :
   - Utilisateur : user-alice
   - Produit : miyukini-cms
   - Instance : prod-001
-MÃ©tadonnÃ©es :
-  - PrioritÃ© demandÃ©e : NORMALE
+Métadonnées :
+  - Priorité demandée : NORMALE
   - Contraintes : aucune
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 - Intention structurellement valide
-- Tous les champs obligatoires prÃ©sents
+- Tous les champs obligatoires présents
 - Contexte complet fourni
-- Action et type d'entitÃ© explicites
+- Action et type d'entité explicites
 
 ---
 
@@ -73,23 +73,23 @@ Un adaptateur produit soumet une intention de modification d'un article existant
 ```
 Identifiant : intent-2026-01-26-002
 Action : MODIFIER
-Type d'entitÃ© : ARTICLE
-Identifiant d'entitÃ© : article-12345
-DonnÃ©es :
-  - Titre : "Introduction Ã  StrongFather â€” Version mise Ã  jour"
-  - Statut demandÃ© : PUBLIÃ‰
+Type d'entité : ARTICLE
+Identifiant d'entité : article-12345
+Données :
+  - Titre : "Introduction à StrongFather — Version mise à jour"
+  - Statut demandé : PUBLIÉ
 Contexte :
   - Utilisateur : user-bob
   - Produit : miyukini-cms
   - Instance : prod-001
-MÃ©tadonnÃ©es :
-  - PrioritÃ© demandÃ©e : HAUTE
+Métadonnées :
+  - Priorité demandée : HAUTE
   - Contraintes : aucune
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 - Intention structurellement valide
-- RÃ©fÃ©rence Ã  une entitÃ© existante
+- Référence à une entité existante
 - Modification partielle (seulement titre et statut)
 
 ---
@@ -103,52 +103,52 @@ Un adaptateur produit soumet une intention de suppression d'un article.
 ```
 Identifiant : intent-2026-01-26-003
 Action : SUPPRIMER
-Type d'entitÃ© : ARTICLE
-Identifiant d'entitÃ© : article-12345
+Type d'entité : ARTICLE
+Identifiant d'entité : article-12345
 Contexte :
   - Utilisateur : user-charlie
   - Produit : miyukini-cms
   - Instance : prod-001
-MÃ©tadonnÃ©es :
-  - PrioritÃ© demandÃ©e : NORMALE
+Métadonnées :
+  - Priorité demandée : NORMALE
   - Contraintes : aucune
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 - Intention structurellement valide
 - Action de suppression
-- Pas de donnÃ©es de modification (non applicable)
+- Pas de données de modification (non applicable)
 
 ---
 
-### 2.4. Intention avec prioritÃ© Ã©levÃ©e
+### 2.4. Intention avec priorité élevée
 
 **Contexte :**
-Un adaptateur produit soumet une intention avec prioritÃ© Ã©levÃ©e pour une publication urgente.
+Un adaptateur produit soumet une intention avec priorité élevée pour une publication urgente.
 
 **Intention :**
 ```
 Identifiant : intent-2026-01-26-004
-Action : CRÃ‰ER
-Type d'entitÃ© : ARTICLE
-DonnÃ©es :
-  - Titre : "Alerte sÃ©curitÃ© â€” Mise Ã  jour critique"
+Action : CRÉER
+Type d'entité : ARTICLE
+Données :
+  - Titre : "Alerte sécurité — Mise à jour critique"
   - Auteur : user-admin
-  - Statut demandÃ© : PUBLIÃ‰
-  - CatÃ©gorie : SÃ‰CURITÃ‰
+  - Statut demandé : PUBLIÉ
+  - Catégorie : SÉCURITÉ
 Contexte :
   - Utilisateur : user-admin
   - Produit : miyukini-cms
   - Instance : prod-001
-MÃ©tadonnÃ©es :
-  - PrioritÃ© demandÃ©e : URGENTE
+Métadonnées :
+  - Priorité demandée : URGENTE
   - Contraintes : aucune
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 - Intention structurellement valide
-- PrioritÃ© URGENTE demandÃ©e
-- CatÃ©gorie SÃ‰CURITÃ‰
+- Priorité URGENTE demandée
+- Catégorie SÉCURITÉ
 
 ---
 
@@ -159,8 +159,8 @@ MÃ©tadonnÃ©es :
 ```
 Identifiant : intent-2026-01-26-010
 Action : (manquant)
-Type d'entitÃ© : ARTICLE
-DonnÃ©es :
+Type d'entité : ARTICLE
+Données :
   - Titre : "Article incomplet"
 Contexte :
   - Utilisateur : user-alice
@@ -168,16 +168,16 @@ Contexte :
   - Instance : prod-001
 ```
 
-**RÃ©sultat attendu :** Rejet structurel â€” Action obligatoire manquante
+**Résultat attendu :** Rejet structurel — Action obligatoire manquante
 
 ---
 
 ### 3.2. Intention sans identifiant
 
 ```
-Action : CRÃ‰ER
-Type d'entitÃ© : ARTICLE
-DonnÃ©es :
+Action : CRÉER
+Type d'entité : ARTICLE
+Données :
   - Titre : "Article sans identifiant"
   - Auteur : user-alice
 Contexte :
@@ -186,7 +186,7 @@ Contexte :
   - Instance : prod-001
 ```
 
-**RÃ©sultat attendu :** Rejet structurel â€” Identifiant obligatoire manquant (INV-INT-1)
+**Résultat attendu :** Rejet structurel — Identifiant obligatoire manquant (INV-INT-1)
 
 ---
 
@@ -195,46 +195,46 @@ Contexte :
 ```
 Identifiant : intent-2026-01-26-006
 Action : MODIFIER
-Type d'entitÃ© : ARTICLE
-Identifiant d'entitÃ© : article-12345
-DonnÃ©es :
-  - Titre : "Titre modifiÃ©"
+Type d'entité : ARTICLE
+Identifiant d'entité : article-12345
+Données :
+  - Titre : "Titre modifié"
 Contexte :
-  - Utilisateur : (non spÃ©cifiÃ©)
+  - Utilisateur : (non spécifié)
   - Produit : miyukini-cms
   - Instance : prod-001
 ```
 
-**RÃ©sultat attendu :** DÃ©cision AMBIGUÃ‹ â€” Utilisateur manquant dans le contexte
+**Résultat attendu :** Décision AMBIGUË — Utilisateur manquant dans le contexte
 
 ---
 
-## 4. Points clÃ©s sur les intentions
+## 4. Points clés sur les intentions
 
-### 4.1. RÃ¨gles de formation
+### 4.1. Règles de formation
 
-- **Identifiant unique :** Toute intention DOIT possÃ©der un identifiant unique (INV-INT-1)
-- **ImmutabilitÃ© :** Une intention ne peut pas Ãªtre modifiÃ©e aprÃ¨s soumission
+- **Identifiant unique :** Toute intention DOIT posséder un identifiant unique (INV-INT-1)
+- **Immutabilité :** Une intention ne peut pas être modifiée après soumission
 - **Contexte complet :** Le contexte (utilisateur, produit, instance) est obligatoire
-- **Action explicite :** L'action demandÃ©e doit Ãªtre explicitement spÃ©cifiÃ©e
+- **Action explicite :** L'action demandée doit être explicitement spécifiée
 
 ### 4.2. Cycle de vie
 
-1. **SOUMISE** : Intention reÃ§ue par StrongFather
-2. **EN_Ã‰VALUATION** : Ã‰valuation en cours selon les politiques
-3. **DÃ‰CIDÃ‰E** : DÃ©cision produite (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
+1. **SOUMISE** : Intention reçue par StrongFather
+2. **EN_ÉVALUATION** : Évaluation en cours selon les politiques
+3. **DÉCIDÉE** : Décision produite (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE)
 
 ### 4.3. Ce qu'une intention N'EST PAS
 
-- **Pas une commande d'exÃ©cution** : L'intention est Ã©valuÃ©e, jamais exÃ©cutÃ©e par StrongFather
-- **Pas une requÃªte de donnÃ©es** : L'intention ne lit pas de donnÃ©es directement
-- **Pas un ordre** : L'intention est une demande d'Ã©valuation, pas un ordre d'exÃ©cution
+- **Pas une commande d'exécution** : L'intention est évaluée, jamais exécutée par StrongFather
+- **Pas une requête de données** : L'intention ne lit pas de données directement
+- **Pas un ordre** : L'intention est une demande d'évaluation, pas un ordre d'exécution
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-27  
-**Version :** 1.1 (rÃ©organisation)  
-**Statut :** Illustratif et pÃ©dagogique  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Intent Model Contract  
+**Document créé le :** 2026-01-27  
+**Version :** 1.1 (réorganisation)  
+**Statut :** Illustratif et pédagogique  
+**Référence :** Miyukini Core System v2.4, StrongFather Intent Model Contract  
 **Type :** Exemples et cas d'usage
 

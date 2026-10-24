@@ -2,97 +2,97 @@
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Normatif â€” Guide d'installation et de bootstrap  
-**PortÃ©e :** Installation initiale, bootstrap, rÃ©solution des dÃ©pendances circulaires
+**Statut :** Normatif — Guide d'installation et de bootstrap  
+**Portée :** Installation initiale, bootstrap, résolution des dépendances circulaires
 
 ---
 
 ## 1. Contexte
 
-Ce document dÃ©finit le **processus d'installation et de bootstrap** de MiyukiniAdmin, l'OpÃ©rateur Souverain (Strate 9) de l'Ã©cosystÃ¨me Miyukini Core System.
+Ce document définit le **processus d'installation et de bootstrap** de MiyukiniAdmin, l'Opérateur Souverain (Strate 9) de l'écosystème Miyukini Core System.
 
-**ProblÃ©matique identifiÃ©e :** MiyukiniAdmin nÃ©cessite BondingBrother pour fonctionner, mais BondingBrother nÃ©cessite MiyukiniAdmin pour son installation initiale. Ce document rÃ©sout cette **dÃ©pendance circulaire** en dÃ©finissant un processus de bootstrap explicite.
+**Problématique identifiée :** MiyukiniAdmin nécessite BondingBrother pour fonctionner, mais BondingBrother nécessite MiyukiniAdmin pour son installation initiale. Ce document résout cette **dépendance circulaire** en définissant un processus de bootstrap explicite.
 
-**RÃ©fÃ©rences :**
+**Références :**
 - [MiyukiniAdmin - Documentation Fondatrice](./MiyukiniAdmin%20-%20Documentation%20Fondatrice.md)
-- [MiyukiniAdmin - Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md) â€” dÃ©tection environnement vierge, verrou StrongFather, Futur Admin, compte admin
-- [MiyukiniAdmin - Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md) â€” identitÃ© environnement chiffrÃ©e (EIP)
+- [MiyukiniAdmin - Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md) — détection environnement vierge, verrou StrongFather, Futur Admin, compte admin
+- [MiyukiniAdmin - Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md) — identité environnement chiffrée (EIP)
 - [BondingBrother - Documentation Fondatrice](..//..//..//cores//BondingBrother//foundation//BondingBrother%20-%20Documentation%20Fondatrice.md)
 - [Kernel - Definition](..//..//..//kernel//Miyukini%20Core%20System%20-%20Definition%20Kernel.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- PrÃ©requis matÃ©riels et logiciels
-- **Premier dÃ©marrage** : dÃ©tection environnement vierge vs initialisÃ©, verrou StrongFather, parcours Futur Admin et crÃ©ation du compte admin (dÃ©tail dans [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md))
-- **IdentitÃ© environnement** : production des donnÃ©es d'identitÃ© du COG de faÃ§on chiffrÃ©e par les Cores (protocole [EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md))
-- Processus d'installation Ã©tape par Ã©tape
-- Bootstrap initial (rÃ©solution dÃ©pendance circulaire)
-- VÃ©rification post-installation
-- Cas d'erreur et rÃ©cupÃ©ration
+- Prérequis matériels et logiciels
+- **Premier démarrage** : détection environnement vierge vs initialisé, verrou StrongFather, parcours Futur Admin et création du compte admin (détail dans [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md))
+- **Identité environnement** : production des données d'identité du COG de façon chiffrée par les Cores (protocole [EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md))
+- Processus d'installation étape par étape
+- Bootstrap initial (résolution dépendance circulaire)
+- Vérification post-installation
+- Cas d'erreur et récupération
 
 Ce document **ne couvre pas** :
-- Mise Ã  jour de MiyukiniAdmin (voir Versioning & Evolution Contract)
+- Mise à jour de MiyukiniAdmin (voir Versioning & Evolution Contract)
 - Migration entre environnements (voir Migration & Compatibility Contract)
-- Configuration avancÃ©e (voir Configuration Contract)
+- Configuration avancée (voir Configuration Contract)
 
 ---
 
-## 3. PrÃ©requis
+## 3. Prérequis
 
-### 3.1 MatÃ©riel
+### 3.1 Matériel
 
-| Composant | Minimum | RecommandÃ© |
+| Composant | Minimum | Recommandé |
 |-----------|---------|------------|
 | **CPU** | 2 cores | 4+ cores |
 | **RAM** | 4 Go | 8+ Go |
-| **Disque** | 20 Go libres | 50+ Go libres (SSD recommandÃ©) |
-| **RÃ©seau** | Optionnel (offline-first) | Connexion pour synchronisation |
+| **Disque** | 20 Go libres | 50+ Go libres (SSD recommandé) |
+| **Réseau** | Optionnel (offline-first) | Connexion pour synchronisation |
 
 ### 3.2 Logiciel
 
 | Composant | Version | Notes |
 |-----------|---------|-------|
-| **OS** | Linux (Ubuntu 22.04+, Debian 11+), macOS 12+, Windows 11+ | â€” |
-| **Rust** | 1.75+ | InstallÃ© via rustup |
+| **OS** | Linux (Ubuntu 22.04+, Debian 11+), macOS 12+, Windows 11+ | — |
+| **Rust** | 1.75+ | Installé via rustup |
 | **SQLite** | 3.35+ | Inclus dans KindMother |
-| **Permissions** | AccÃ¨s lecture/Ã©criture au rÃ©pertoire d'installation | â€” |
+| **Permissions** | Accès lecture/écriture au répertoire d'installation | — |
 
 ### 3.3 Environnement
 
 - Variables d'environnement : aucune requise pour le bootstrap minimal
-- Ports rÃ©seau : aucun port requis pour le bootstrap (offline-first)
+- Ports réseau : aucun port requis pour le bootstrap (offline-first)
 - Services externes : aucun service externe requis (conforme LOI-1)
 
 ---
 
 ## 4. Processus d'installation
 
-### 4.1 Phase 0 : PrÃ©paration
+### 4.1 Phase 0 : Préparation
 
-#### Ã‰tape 0.1 : VÃ©rification du systÃ¨me
+#### Étape 0.1 : Vérification du système
 
 ```bash
-# VÃ©rifier Rust
-rustc --version  # Doit Ãªtre >= 1.75
+# Vérifier Rust
+rustc --version  # Doit être >= 1.75
 
-# VÃ©rifier l'espace disque
-df -h  # VÃ©rifier au moins 20 Go libres
+# Vérifier l'espace disque
+df -h  # Vérifier au moins 20 Go libres
 
-# VÃ©rifier les permissions
+# Vérifier les permissions
 mkdir -p /tmp/miyukini_test && rmdir /tmp/miyukini_test
 ```
 
-#### Ã‰tape 0.2 : TÃ©lÃ©chargement
+#### Étape 0.2 : Téléchargement
 
 ```bash
-# Cloner le repository (ou tÃ©lÃ©charger l'archive)
+# Cloner le repository (ou télécharger l'archive)
 git clone https://github.com/miyukini/miyukini-kernel.git
 cd miyukini-kernel
 
-# Ou tÃ©lÃ©charger l'archive release
+# Ou télécharger l'archive release
 # wget https://github.com/miyukini/miyukini-kernel/releases/v1.0.0/miyukini-admin.tar.gz
 # tar -xzf miyukini-admin.tar.gz
 ```
@@ -103,44 +103,44 @@ cd miyukini-kernel
 
 **Objectif :** Installer le Kernel (Strate 0) qui est la fondation technique minimale.
 
-#### Ã‰tape 1.1 : Compilation du Kernel
+#### Étape 1.1 : Compilation du Kernel
 
 ```bash
 cd crates/miyukini-kernel
 cargo build --release
 ```
 
-#### Ã‰tape 1.2 : VÃ©rification du Kernel
+#### Étape 1.2 : Vérification du Kernel
 
 ```bash
-# ExÃ©cuter les tests unitaires
+# Exécuter les tests unitaires
 cargo test
 
-# VÃ©rifier les invariants
+# Vérifier les invariants
 cargo test --test invariants_tests
 ```
 
-**CritÃ¨res de succÃ¨s :**
-- âœ… Compilation sans erreur
-- âœ… Tous les tests passent
-- âœ… Aucune dÃ©pendance externe requise (vÃ©rification offline)
+**Critères de succès :**
+- ✅ Compilation sans erreur
+- ✅ Tous les tests passent
+- ✅ Aucune dépendance externe requise (vérification offline)
 
 ---
 
-### 4.3 Phase 2 : Bootstrap initial (RÃ©solution dÃ©pendance circulaire)
+### 4.3 Phase 2 : Bootstrap initial (Résolution dépendance circulaire)
 
-**ProblÃ¨me :** MiyukiniAdmin nÃ©cessite BondingBrother, mais BondingBrother nÃ©cessite MiyukiniAdmin pour son installation.
+**Problème :** MiyukiniAdmin nécessite BondingBrother, mais BondingBrother nécessite MiyukiniAdmin pour son installation.
 
 **Solution :** Bootstrap en **mode minimal** sans BondingBrother, puis activation progressive.
 
-**Ã‰tat de l'environnement au dÃ©marrage :** Au lancement, MiyukiniAdmin dÃ©termine si l'environnement est **vierge** (donnÃ©es critiques absentes ou invalides) ou **dÃ©jÃ  initialisÃ©**. En environnement vierge, StrongFather applique un **verrou bootstrap** : seuls MiyukiniAdmin et les Cores peuvent agir ; l'utilisateur est traitÃ© comme **Futur Admin** et dirigÃ© vers le **parcours d'installation** (crÃ©ation compte admin, gÃ©nÃ©ration identitÃ© environnement EIP, config minimale). DÃ©tail complet : [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md). IdentitÃ© environnement chiffrÃ©e : [Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md).
+**État de l'environnement au démarrage :** Au lancement, MiyukiniAdmin détermine si l'environnement est **vierge** (données critiques absentes ou invalides) ou **déjà initialisé**. En environnement vierge, StrongFather applique un **verrou bootstrap** : seuls MiyukiniAdmin et les Cores peuvent agir ; l'utilisateur est traité comme **Futur Admin** et dirigé vers le **parcours d'installation** (création compte admin, génération identité environnement EIP, config minimale). Détail complet : [Auth and First-Boot Contract](../contracts/security/MiyukiniAdmin%20-%20Auth%20and%20First-Boot%20Contract.md). Identité environnement chiffrée : [Environment Identity Protocol EIP](..//..//..//contrats//MiyukiniAdmin%20-%20Environment%20Identity%20Protocol%20EIP.md).
 
-#### Ã‰tape 2.1 : Installation de MiyukiniAdmin en mode bootstrap
+#### Étape 2.1 : Installation de MiyukiniAdmin en mode bootstrap
 
 ```bash
 cd crates/miyukini-admin
 
-# Compilation en mode bootstrap (sans dÃ©pendance BondingBrother)
+# Compilation en mode bootstrap (sans dépendance BondingBrother)
 cargo build --release --features bootstrap
 
 # Ou via script d'installation
@@ -148,50 +148,50 @@ cargo build --release --features bootstrap
 ```
 
 **Mode bootstrap :**
-- âœ… Kernel initialisÃ©
-- âœ… Base de donnÃ©es locale crÃ©Ã©e (SQLite)
-- âœ… IdentitÃ©s systÃ¨me gÃ©nÃ©rÃ©es
-- âœ… Configuration minimale chargÃ©e
-- âš ï¸ BondingBrother **non activÃ©** (mode dÃ©gradÃ©)
+- ✅ Kernel initialisé
+- ✅ Base de données locale créée (SQLite)
+- ✅ Identités système générées
+- ✅ Configuration minimale chargée
+- ⚠️ BondingBrother **non activé** (mode dégradé)
 
-#### Ã‰tape 2.2 : Initialisation de la base de donnÃ©es
+#### Étape 2.2 : Initialisation de la base de données
 
 ```bash
-# ExÃ©cuter les migrations SQL initiales
+# Exécuter les migrations SQL initiales
 ./miyukini-admin migrate init
 
-# VÃ©rifier la crÃ©ation des tables
+# Vérifier la création des tables
 sqlite3 data/miyukini.db ".tables"
 ```
 
-**Tables crÃ©Ã©es :**
-- `kernel_config` : Configuration systÃ¨me
-- `system_identities` : IdentitÃ©s systÃ¨me gÃ©nÃ©rÃ©es
+**Tables créées :**
+- `kernel_config` : Configuration système
+- `system_identities` : Identités système générées
 - `bootstrap_log` : Journal du bootstrap
 - `core_registry` : Registre des cores (vide initialement)
 
-#### Ã‰tape 2.3 : GÃ©nÃ©ration des identitÃ©s systÃ¨me
+#### Étape 2.3 : Génération des identités système
 
 ```bash
-# GÃ©nÃ©rer les identitÃ©s systÃ¨me (via Kernel)
+# Générer les identités système (via Kernel)
 ./miyukini-admin generate-identities
 
-# VÃ©rifier les identitÃ©s
+# Vérifier les identités
 ./miyukini-admin list-identities
 ```
 
-**IdentitÃ©s gÃ©nÃ©rÃ©es :**
-- `system_admin_id` : IdentitÃ© de l'administrateur systÃ¨me
-- `environment_id` : IdentitÃ© de l'environnement
+**Identités générées :**
+- `system_admin_id` : Identité de l'administrateur système
+- `environment_id` : Identité de l'environnement
 - `bootstrap_token` : Token temporaire pour activation BondingBrother
 
 ---
 
 ### 4.4 Phase 3 : Installation des Cores (sans BondingBrother)
 
-**Objectif :** Installer les cores fondamentaux nÃ©cessaires avant BondingBrother.
+**Objectif :** Installer les cores fondamentaux nécessaires avant BondingBrother.
 
-#### Ã‰tape 3.1 : Installation de StrongFather
+#### Étape 3.1 : Installation de StrongFather
 
 ```bash
 cd crates/miyukini-strongfather
@@ -202,7 +202,7 @@ cargo test
 ../miyukini-admin/bin/miyukini-admin register-core StrongFather
 ```
 
-#### Ã‰tape 3.2 : Installation de KindMother
+#### Étape 3.2 : Installation de KindMother
 
 ```bash
 cd crates/kindmother
@@ -213,7 +213,7 @@ cargo test
 ../miyukini-admin/bin/miyukini-admin register-core KindMother
 ```
 
-#### Ã‰tape 3.3 : Installation des autres cores nÃ©cessaires
+#### Étape 3.3 : Installation des autres cores nécessaires
 
 ```bash
 # CaringNanny
@@ -233,16 +233,16 @@ cd crates/border-guard && cargo build --release
 1. StrongFather (gouvernance)
 2. KindMother (persistance)
 3. CaringNanny (observation)
-4. WorrySentinel (sÃ©curitÃ©)
-5. BorderGuard (frontiÃ¨res)
+4. WorrySentinel (sécurité)
+5. BorderGuard (frontières)
 
 ---
 
 ### 4.5 Phase 4 : Activation de BondingBrother
 
-**Objectif :** Activer BondingBrother maintenant que les dÃ©pendances sont en place.
+**Objectif :** Activer BondingBrother maintenant que les dépendances sont en place.
 
-#### Ã‰tape 4.1 : Installation de BondingBrother
+#### Étape 4.1 : Installation de BondingBrother
 
 ```bash
 cd crates/bonding-brother
@@ -253,51 +253,51 @@ cargo test
 ../miyukini-admin/bin/miyukini-admin register-core BondingBrother
 ```
 
-#### Ã‰tape 4.2 : Activation du mode normal
+#### Étape 4.2 : Activation du mode normal
 
 ```bash
 # Passer du mode bootstrap au mode normal
 ./miyukini-admin activate-normal-mode
 
-# VÃ©rifier l'Ã©tat
+# Vérifier l'état
 ./miyukini-admin status
 ```
 
-**Transition bootstrap â†’ normal :**
-- âœ… BondingBrother activÃ©
-- âœ… Synchronisation disponible (si rÃ©seau)
-- âœ… Tous les cores opÃ©rationnels
-- âœ… Mode bootstrap dÃ©sactivÃ©
+**Transition bootstrap → normal :**
+- ✅ BondingBrother activé
+- ✅ Synchronisation disponible (si réseau)
+- ✅ Tous les cores opérationnels
+- ✅ Mode bootstrap désactivé
 
 ---
 
-### 4.6 Phase 5 : VÃ©rification post-installation
+### 4.6 Phase 5 : Vérification post-installation
 
-#### Ã‰tape 5.1 : VÃ©rification de conformitÃ©
+#### Étape 5.1 : Vérification de conformité
 
 ```bash
-# VÃ©rifier l'Ã©tat de tous les cores
+# Vérifier l'état de tous les cores
 ./miyukini-admin verify-installation
 
-# VÃ©rifier les invariants
+# Vérifier les invariants
 ./miyukini-admin verify-invariants
 ```
 
-**Checklist de vÃ©rification :**
+**Checklist de vérification :**
 
-| VÃ©rification | Commande | RÃ©sultat attendu |
+| Vérification | Commande | Résultat attendu |
 |-------------|----------|------------------|
-| Kernel opÃ©rationnel | `./miyukini-admin kernel-status` | âœ… OpÃ©rationnel |
-| Cores enregistrÃ©s | `./miyukini-admin list-cores` | 6+ cores listÃ©s |
-| Base de donnÃ©es | `sqlite3 data/miyukini.db "SELECT COUNT(*) FROM core_registry"` | > 0 |
-| IdentitÃ©s gÃ©nÃ©rÃ©es | `./miyukini-admin list-identities` | 3+ identitÃ©s |
+| Kernel opérationnel | `./miyukini-admin kernel-status` | ✅ Opérationnel |
+| Cores enregistrés | `./miyukini-admin list-cores` | 6+ cores listés |
+| Base de données | `sqlite3 data/miyukini.db "SELECT COUNT(*) FROM core_registry"` | > 0 |
+| Identités générées | `./miyukini-admin list-identities` | 3+ identités |
 | Mode bootstrap | `./miyukini-admin status` | Mode normal |
-| Invariants | `./miyukini-admin verify-invariants` | Tous respectÃ©s |
+| Invariants | `./miyukini-admin verify-invariants` | Tous respectés |
 
-#### Ã‰tape 5.2 : Tests de fonctionnement
+#### Étape 5.2 : Tests de fonctionnement
 
 ```bash
-# Test de dÃ©cision StrongFather
+# Test de décision StrongFather
 ./miyukini-admin test-strongfather
 
 # Test de persistance KindMother
@@ -306,19 +306,19 @@ cargo test
 # Test d'observation CaringNanny
 ./miyukini-admin test-caringnanny
 
-# Test de sÃ©curitÃ© WorrySentinel
+# Test de sécurité WorrySentinel
 ./miyukini-admin test-worrysentinel
 ```
 
 ---
 
-## 5. RÃ©solution de la dÃ©pendance circulaire
+## 5. Résolution de la dépendance circulaire
 
-### 5.1 ProblÃ¨me
+### 5.1 Problème
 
-**DÃ©pendance circulaire identifiÃ©e :**
-- MiyukiniAdmin nÃ©cessite BondingBrother pour la synchronisation
-- BondingBrother nÃ©cessite MiyukiniAdmin pour son installation initiale
+**Dépendance circulaire identifiée :**
+- MiyukiniAdmin nécessite BondingBrother pour la synchronisation
+- BondingBrother nécessite MiyukiniAdmin pour son installation initiale
 
 ### 5.2 Solution : Mode Bootstrap
 
@@ -326,102 +326,102 @@ cargo test
 
 #### Phase Bootstrap (sans BondingBrother)
 
-| Composant | Ã‰tat | Raison |
+| Composant | État | Raison |
 |-----------|------|--------|
-| Kernel | âœ… OpÃ©rationnel | Fondation technique |
-| StrongFather | âœ… OpÃ©rationnel | NÃ©cessaire pour gouvernance |
-| KindMother | âœ… OpÃ©rationnel | NÃ©cessaire pour persistance |
-| CaringNanny | âœ… OpÃ©rationnel | NÃ©cessaire pour observation |
-| WorrySentinel | âœ… OpÃ©rationnel | NÃ©cessaire pour sÃ©curitÃ© |
-| BorderGuard | âœ… OpÃ©rationnel | NÃ©cessaire pour frontiÃ¨res |
-| BondingBrother | âš ï¸ Non activÃ© | DÃ©pendance circulaire rÃ©solue |
+| Kernel | ✅ Opérationnel | Fondation technique |
+| StrongFather | ✅ Opérationnel | Nécessaire pour gouvernance |
+| KindMother | ✅ Opérationnel | Nécessaire pour persistance |
+| CaringNanny | ✅ Opérationnel | Nécessaire pour observation |
+| WorrySentinel | ✅ Opérationnel | Nécessaire pour sécurité |
+| BorderGuard | ✅ Opérationnel | Nécessaire pour frontières |
+| BondingBrother | ⚠️ Non activé | Dépendance circulaire résolue |
 
 #### Phase Normale (avec BondingBrother)
 
-| Composant | Ã‰tat | Raison |
+| Composant | État | Raison |
 |-----------|------|--------|
-| Tous les cores | âœ… OpÃ©rationnels | Installation complÃ¨te |
-| BondingBrother | âœ… ActivÃ© | DÃ©pendance rÃ©solue |
+| Tous les cores | ✅ Opérationnels | Installation complète |
+| BondingBrother | ✅ Activé | Dépendance résolue |
 
 ### 5.3 Garanties du mode Bootstrap
 
-**FonctionnalitÃ©s disponibles :**
-- âœ… Installation et configuration des cores
-- âœ… GÃ©nÃ©ration des identitÃ©s systÃ¨me
-- âœ… CrÃ©ation de la base de donnÃ©es
-- âœ… VÃ©rification de conformitÃ©
-- âœ… Tests techniques
+**Fonctionnalités disponibles :**
+- ✅ Installation et configuration des cores
+- ✅ Génération des identités système
+- ✅ Création de la base de données
+- ✅ Vérification de conformité
+- ✅ Tests techniques
 
-**FonctionnalitÃ©s limitÃ©es :**
-- âš ï¸ Pas de synchronisation inter-instances
-- âš ï¸ Pas de fÃ©dÃ©ration
-- âš ï¸ Mode dÃ©gradÃ© (offline uniquement)
+**Fonctionnalités limitées :**
+- ⚠️ Pas de synchronisation inter-instances
+- ⚠️ Pas de fédération
+- ⚠️ Mode dégradé (offline uniquement)
 
 **Transition vers mode normal :**
-- Une fois BondingBrother installÃ©, activation automatique
-- VÃ©rification de toutes les dÃ©pendances
-- Passage en mode normal sans perte de donnÃ©es
+- Une fois BondingBrother installé, activation automatique
+- Vérification de toutes les dépendances
+- Passage en mode normal sans perte de données
 
 ---
 
-## 6. Cas d'erreur et rÃ©cupÃ©ration
+## 6. Cas d'erreur et récupération
 
 ### 6.1 Erreur de compilation
 
-**SymptÃ´me :** `cargo build` Ã©choue
+**Symptôme :** `cargo build` échoue
 
 **Solutions :**
 ```bash
-# VÃ©rifier la version de Rust
+# Vérifier la version de Rust
 rustc --version
 
 # Nettoyer et reconstruire
 cargo clean
 cargo build --release
 
-# VÃ©rifier les dÃ©pendances
+# Vérifier les dépendances
 cargo tree
 ```
 
-### 6.2 Erreur de base de donnÃ©es
+### 6.2 Erreur de base de données
 
-**SymptÃ´me :** Erreur SQLite lors de l'initialisation
+**Symptôme :** Erreur SQLite lors de l'initialisation
 
 **Solutions :**
 ```bash
 # Supprimer la base corrompue
 rm -f data/miyukini.db
 
-# RÃ©initialiser
+# Réinitialiser
 ./miyukini-admin migrate init
 ```
 
-### 6.3 Erreur de dÃ©pendance circulaire
+### 6.3 Erreur de dépendance circulaire
 
-**SymptÃ´me :** Impossible d'activer BondingBrother
+**Symptôme :** Impossible d'activer BondingBrother
 
 **Solutions :**
 ```bash
-# VÃ©rifier l'ordre d'installation
+# Vérifier l'ordre d'installation
 ./miyukini-admin list-cores
 
-# RÃ©installer dans le bon ordre
+# Réinstaller dans le bon ordre
 ./miyukini-admin reinstall-cores --order StrongFather,KindMother,CaringNanny,WorrySentinel,BorderGuard,BondingBrother
 ```
 
-### 6.4 Mode bootstrap bloquÃ©
+### 6.4 Mode bootstrap bloqué
 
-**SymptÃ´me :** Impossible de passer en mode normal
+**Symptôme :** Impossible de passer en mode normal
 
 **Solutions :**
 ```bash
-# VÃ©rifier les logs
+# Vérifier les logs
 ./miyukini-admin logs bootstrap
 
-# Forcer l'activation (si sÃ»r)
+# Forcer l'activation (si sûr)
 ./miyukini-admin activate-normal-mode --force
 
-# RÃ©initialiser complÃ¨tement (dernier recours)
+# Réinitialiser complètement (dernier recours)
 ./miyukini-admin reset --confirm
 ```
 
@@ -464,11 +464,11 @@ cd ../miyukini-admin
 ./miyukini-admin register-core BondingBrother
 ./miyukini-admin activate-normal-mode
 
-# Phase 5 : VÃ©rification
-echo "Phase 5 : VÃ©rification"
+# Phase 5 : Vérification
+echo "Phase 5 : Vérification"
 ./miyukini-admin verify-installation
 
-echo "=== Bootstrap terminÃ© avec succÃ¨s ==="
+echo "=== Bootstrap terminé avec succès ==="
 ```
 
 ### 7.2 Utilisation
@@ -480,44 +480,44 @@ chmod +x scripts/bootstrap.sh
 
 ---
 
-## 8. SÃ©curitÃ© du bootstrap
+## 8. Sécurité du bootstrap
 
 ### 8.1 Token de bootstrap
 
-**GÃ©nÃ©ration :** Token temporaire gÃ©nÃ©rÃ© lors du bootstrap
+**Génération :** Token temporaire généré lors du bootstrap
 
 **Utilisation :** Authentification pour l'activation de BondingBrother
 
-**Expiration :** Token valide 24 heures aprÃ¨s gÃ©nÃ©ration
+**Expiration :** Token valide 24 heures après génération
 
-**SÃ©curitÃ© :**
-- Token stockÃ© de maniÃ¨re sÃ©curisÃ©e (chiffrÃ©)
-- Token invalidÃ© aprÃ¨s activation du mode normal
-- Token non rÃ©utilisable
+**Sécurité :**
+- Token stocké de manière sécurisée (chiffré)
+- Token invalidé après activation du mode normal
+- Token non réutilisable
 
-### 8.2 VÃ©rifications de sÃ©curitÃ©
+### 8.2 Vérifications de sécurité
 
 **Avant activation du mode normal :**
-- âœ… VÃ©rification de l'intÃ©gritÃ© des cores
-- âœ… VÃ©rification des identitÃ©s systÃ¨me
-- âœ… VÃ©rification des permissions
-- âœ… VÃ©rification de la base de donnÃ©es
+- ✅ Vérification de l'intégrité des cores
+- ✅ Vérification des identités système
+- ✅ Vérification des permissions
+- ✅ Vérification de la base de données
 
 ---
 
-## 9. RÃ©fÃ©rences
+## 9. Références
 
 - [MiyukiniAdmin - Documentation Fondatrice](./MiyukiniAdmin%20-%20Documentation%20Fondatrice.md)
 - [BondingBrother - Documentation Fondatrice](..//..//..//cores//BondingBrother//foundation//BondingBrother%20-%20Documentation%20Fondatrice.md)
 - [Kernel - Definition](..//..//..//kernel//Miyukini%20Core%20System%20-%20Definition%20Kernel.md)
-- [Lois d'Autonomie SystÃ¨me](..//..//..//miyukini-webway-system//reference//_index.md)
+- [Lois d'Autonomie Système](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Normatif â€” Guide d'installation et de bootstrap  
-**Action requise :** ImplÃ©menter le processus de bootstrap selon ce guide lors de l'implÃ©mentation de MiyukiniAdmin
+**Statut :** Normatif — Guide d'installation et de bootstrap  
+**Action requise :** Implémenter le processus de bootstrap selon ce guide lors de l'implémentation de MiyukiniAdmin
 
 
 

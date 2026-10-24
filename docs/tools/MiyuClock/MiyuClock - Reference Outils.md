@@ -1,64 +1,64 @@
-﻿# MiyuClock â€” RÃ©fÃ©rence des outils
+﻿# MiyuClock — Référence des outils
 
 ## 1. Contexte
 
-Ce document dÃ©crit **chaque outil (Tool)** composant le kit MiyuClock. Il constitue la rÃ©fÃ©rence technique des capacitÃ©s atomiques de mesure du temps (instant prÃ©sent, delta entre instants) sans dÃ©cision mÃ©tier ni persistance. Les Tools sont gouvernÃ©s par les Cores (Master Butler, WorrySentinel, Caring Nanny, StrongFather) ; la mesure du temps s'appuie sur le trait Clock du Kernel (conformitÃ© **LOI-4** â€” pas de temps global).
+Ce document décrit **chaque outil (Tool)** composant le kit MiyuClock. Il constitue la référence technique des capacités atomiques de mesure du temps (instant présent, delta entre instants) sans décision métier ni persistance. Les Tools sont gouvernés par les Cores (Master Butler, WorrySentinel, Caring Nanny, StrongFather) ; la mesure du temps s'appuie sur le trait Clock du Kernel (conformité **LOI-4** — pas de temps global).
 
-**RÃ©fÃ©rence du kit :** [MiyuClock - Documentation Fondatrice](./MiyuClock%20-%20Documentation%20Fondatrice.md)
+**Référence du kit :** [MiyuClock - Documentation Fondatrice](./MiyuClock%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 **Ce document fournit :**
 
 - La liste exhaustive des Tools du kit MiyuClock
-- Pour chaque Tool : **ToolId**, **nom lisible**, **action** (phrase courte Â« fait quoi Â»), **niveau de sÃ©curitÃ©** typique, **capability_id** si applicable
+- Pour chaque Tool : **ToolId**, **nom lisible**, **action** (phrase courte « fait quoi »), **niveau de sécurité** typique, **capability_id** si applicable
 
 **Hors scope :**
 
-- L'implÃ©mentation (source d'horloge, prÃ©cision)
-- La persistance des timestamps (OpÃ©rateur + KindMother/MiyuSQL)
+- L'implémentation (source d'horloge, précision)
+- La persistance des timestamps (Opérateur + KindMother/MiyuSQL)
 
 ---
 
 ## 3. Tableau des outils
 
-| ToolId | Nom lisible | Action | Niveau sÃ©curitÃ© | capability_id (ex.) |
+| ToolId | Nom lisible | Action | Niveau sécurité | capability_id (ex.) |
 |--------|-------------|--------|------------------|----------------------|
-| `tool.time.now` | Instant prÃ©sent | Retourne l'instant prÃ©sent (rÃ©fÃ©rence locale ; pas de timezone imposÃ©e). | 0 ou 1 | `time.now` |
-| `tool.time.delta` | Delta entre instants | Retourne la durÃ©e Ã©coulÃ©e entre deux instants fournis dans le flux (t_prev, t_now) ; ne dÃ©cide pas. | 0 ou 1 | `time.delta` |
+| `tool.time.now` | Instant présent | Retourne l'instant présent (référence locale ; pas de timezone imposée). | 0 ou 1 | `time.now` |
+| `tool.time.delta` | Delta entre instants | Retourne la durée écoulée entre deux instants fournis dans le flux (t_prev, t_now) ; ne décide pas. | 0 ou 1 | `time.delta` |
 
-**Format ToolId :** `tool.<domain>.<action>` â€” conforme au [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md).
+**Format ToolId :** `tool.<domain>.<action>` — conforme au [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md).
 
 ---
 
-## 4. DÃ©tail par outil (rÃ©sumÃ©)
+## 4. Détail par outil (résumé)
 
-### 4.1 Instant prÃ©sent
+### 4.1 Instant présent
 
-- **tool.time.now** â€” Retourne l'instant prÃ©sent selon l'horloge locale fournie par le Kernel (Clock). Type de sortie : valeur d'instant (trace / horodatage). Aucune timezone imposÃ©e ; aucune dÃ©pendance Ã  un temps global (LOI-4). Ne persiste pas ; la valeur est fournie dans le flux pour usage par l'OpÃ©rateur (ex. passage Ã  KindMother/MiyuSQL pour persistance si besoin).
+- **tool.time.now** — Retourne l'instant présent selon l'horloge locale fournie par le Kernel (Clock). Type de sortie : valeur d'instant (trace / horodatage). Aucune timezone imposée ; aucune dépendance à un temps global (LOI-4). Ne persiste pas ; la valeur est fournie dans le flux pour usage par l'Opérateur (ex. passage à KindMother/MiyuSQL pour persistance si besoin).
 
 ### 4.2 Delta entre instants
 
-- **tool.time.delta** â€” Retourne la durÃ©e Ã©coulÃ©e entre deux instants fournis en entrÃ©e dans le flux (t_prev, t_now ou rÃ©fÃ©rences Ã©quivalentes). EntrÃ©es : deux instants (types compatibles avec la sortie de `tool.time.now` ou rÃ©fÃ©rences). Sortie : durÃ©e (delta). Ne dÃ©cide pas ; ne persiste pas. Aucune dÃ©pendance Ã  un temps global.
+- **tool.time.delta** — Retourne la durée écoulée entre deux instants fournis en entrée dans le flux (t_prev, t_now ou références équivalentes). Entrées : deux instants (types compatibles avec la sortie de `tool.time.now` ou références). Sortie : durée (delta). Ne décide pas ; ne persiste pas. Aucune dépendance à un temps global.
 
 ---
 
 ## 5. Alignement MIP
 
-Chaque outil listÃ© ci-dessus est conÃ§u pour Ãªtre une **unitÃ© logique** pouvant devenir un **bloc MSCM** Ã  l'implÃ©mentation :
+Chaque outil listé ci-dessus est conçu pour être une **unité logique** pouvant devenir un **bloc MSCM** à l'implémentation :
 
-- **id** : identifiant du bloc (ex. dÃ©rivÃ© du ToolId)
-- **do** : description fonctionnelle courte (ex. Â« retourne l'instant prÃ©sent local Â», Â« retourne la durÃ©e entre deux instants Â»)
-- **role** : rÃ´le sÃ©mantique (ex. `time`)
-- **layer** : couche (Strate 6 â€” outil / toolkit)
+- **id** : identifiant du bloc (ex. dérivé du ToolId)
+- **do** : description fonctionnelle courte (ex. « retourne l'instant présent local », « retourne la durée entre deux instants »)
+- **role** : rôle sémantique (ex. `time`)
+- **layer** : couche (Strate 6 — outil / toolkit)
 
-Ã€ l'implÃ©mentation, le code fournissant ces Tools devra Ãªtre balisÃ© MSCM afin d'alimenter **blocks.json**, **domains.json**, **layers.json** selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+À l'implémentation, le code fournissant ces Tools devra être balisé MSCM afin d'alimenter **blocks.json**, **domains.json**, **layers.json** selon le [Protocole MIP v1](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
 ---
 
-## 6. RÃ©fÃ©rences croisÃ©es
+## 6. Références croisées
 
 | Document | Lien |
 |----------|------|
@@ -69,8 +69,8 @@ Chaque outil listÃ© ci-dessus est conÃ§u pour Ãªtre une **unitÃ© logique
 
 ---
 
-**Date de crÃ©ation :** 2026-01-30  
+**Date de création :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de rÃ©fÃ©rence
+**Statut :** Document de référence
 
 

@@ -1,4 +1,4 @@
-﻿# TAMR â€” Index de Navigation
+﻿# TAMR — Index de Navigation
 
 ## Contexte
 
@@ -136,14 +136,14 @@ Contrats normatifs et non negociables.
 
 | Invariant | Description |
 |-----------|-------------|
-| **INV-TAMR-1** | Tracabilite absolue â€” Toute intervention humaine est tracee, sans exception |
-| **INV-TAMR-2** | Responsabilite explicite â€” L'humain qui intervient assume explicitement la responsabilite |
-| **INV-TAMR-3** | Limites infranchissables â€” Certaines limites sont absolues et ne peuvent etre depassees |
-| **INV-TAMR-4** | Separation conceptuel/technique â€” TAMR reste purement conceptuel |
-| **INV-TAMR-5** | Non-decision â€” TAMR ne prend jamais de decision, ne valide jamais d'intervention |
-| **INV-TAMR-6** | Automatisation par defaut â€” L'intervention humaine est l'exception controlee |
-| **INV-TAMR-7** | Justification obligatoire pour override â€” Tout override necessite une justification explicite |
-| **INV-TAMR-8** | Escalade non bloquante â€” Une escalade ne bloque pas indefiniment le systeme |
+| **INV-TAMR-1** | Tracabilite absolue — Toute intervention humaine est tracee, sans exception |
+| **INV-TAMR-2** | Responsabilite explicite — L'humain qui intervient assume explicitement la responsabilite |
+| **INV-TAMR-3** | Limites infranchissables — Certaines limites sont absolues et ne peuvent etre depassees |
+| **INV-TAMR-4** | Separation conceptuel/technique — TAMR reste purement conceptuel |
+| **INV-TAMR-5** | Non-decision — TAMR ne prend jamais de decision, ne valide jamais d'intervention |
+| **INV-TAMR-6** | Automatisation par defaut — L'intervention humaine est l'exception controlee |
+| **INV-TAMR-7** | Justification obligatoire pour override — Tout override necessite une justification explicite |
+| **INV-TAMR-8** | Escalade non bloquante — Une escalade ne bloque pas indefiniment le systeme |
 
 ---
 
@@ -176,13 +176,13 @@ Contrats normatifs et non negociables.
 
 | Core | Relation |
 |------|----------|
-| **StrongFather** | Complementarite â€” TAMR definit les regles d'intervention, StrongFather decide si l'intervention est autorisee |
-| **KindMother** | Service â€” KindMother persiste les traces d'intervention definies par TAMR |
-| **BondingBrother** | Mediation â€” Toute intention d'intervention transite par BondingBrother |
-| **CaringNanny** | Observation â€” CaringNanny observe l'etat du systeme pendant l'intervention |
-| **BorderGuard** | Confiance â€” BorderGuard definit si l'intervenant est de confiance |
-| **MasterButler** | Capacites â€” MasterButler expose les capacites d'intervention disponibles |
-| **EverBuddy** | Evolution â€” EverBuddy gere l'evolution des regles d'intervention |
+| **StrongFather** | Complementarite — TAMR definit les regles d'intervention, StrongFather decide si l'intervention est autorisee |
+| **KindMother** | Service — KindMother persiste les traces d'intervention definies par TAMR |
+| **BondingBrother** | Mediation — Toute intention d'intervention transite par BondingBrother |
+| **CaringNanny** | Observation — CaringNanny observe l'etat du systeme pendant l'intervention |
+| **BorderGuard** | Confiance — BorderGuard definit si l'intervenant est de confiance |
+| **MasterButler** | Capacites — MasterButler expose les capacites d'intervention disponibles |
+| **EverBuddy** | Evolution — EverBuddy gere l'evolution des regles d'intervention |
 
 ### Diagramme de relations
 
@@ -236,11 +236,11 @@ graph TB
 
 | Niveau | Etat | Comportement TAMR |
 |--------|------|-------------------|
-| **T0** | Normal | Non requis â€” Interventions optionnelles |
-| **T1** | Instable | Optionnel â€” Surveillance humaine recommandee |
-| **T2** | Degrade | Possible â€” Intervention humaine disponible |
-| **T3** | Restreint | **Requis pour override** â€” Seul TAMR peut autoriser un deblocage |
-| **T4** | Bloque | **Intervention humaine obligatoire** â€” Canal unique d'intervention |
+| **T0** | Normal | Non requis — Interventions optionnelles |
+| **T1** | Instable | Optionnel — Surveillance humaine recommandee |
+| **T2** | Degrade | Possible — Intervention humaine disponible |
+| **T3** | Restreint | **Requis pour override** — Seul TAMR peut autoriser un deblocage |
+| **T4** | Bloque | **Intervention humaine obligatoire** — Canal unique d'intervention |
 
 ---
 
@@ -262,12 +262,12 @@ TAMR est **intrinsequement compatible** avec les [Lois d'Autonomie Systeme](..//
 
 | Loi | Conformite | Note |
 |-----|------------|------|
-| **LOI-1** | âœ… Conforme | Cadre conceptuel pur, aucune dependance externe |
-| **LOI-2** | âœ… Conforme | Intervention humaine possible en mode isole |
-| **LOI-3** | âœ… Conforme | Interventions locales valides localement |
-| **LOI-4** | âœ… Conforme | Aucune logique temporelle technique |
-| **LOI-5** | âœ… Conforme | Cadre conceptuel sans ressource consommee |
-| **LOI-6** | âœ… Conforme | Regles d'intervention restent locales par noeud |
+| **LOI-1** | ✅ Conforme | Cadre conceptuel pur, aucune dependance externe |
+| **LOI-2** | ✅ Conforme | Intervention humaine possible en mode isole |
+| **LOI-3** | ✅ Conforme | Interventions locales valides localement |
+| **LOI-4** | ✅ Conforme | Aucune logique temporelle technique |
+| **LOI-5** | ✅ Conforme | Cadre conceptuel sans ressource consommee |
+| **LOI-6** | ✅ Conforme | Regles d'intervention restent locales par noeud |
 
 ---
 

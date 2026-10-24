@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Security Level Management Contract
+﻿# MiyukiniAdmin — Security Level Management Contract
 
 ## 1. Contexte
 
@@ -117,25 +117,25 @@ Voir [Miyukini Conceptual References - Security Levels](..//..//..//..//miyukini
 
 ```
 Operateur                MiyukiniAdmin         BondingBrother        StrongFather    WorrySentinel
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚â”€â”€ChangeSecurityLevelâ”€â”€â”€â”€â–¶â”‚                     â”‚                    â”‚               â”‚
-    â”‚  (new_level: 3,          â”‚                     â”‚                    â”‚               â”‚
-    â”‚   justification: "...")   â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚â”€â”€ValidateChangeâ”€â”€â”€â”€â”€â–¶â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚â”€â”€RequestApprovalâ”€â”€â”€â–¶â”‚               â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚â—€â”€APPROVEDâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚               â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚â”€â”€ApplyChangeâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚â—€â”€ChangeAppliedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚                          â”‚â—€â”€ChangeConfirmedâ”€â”€â”€â”‚                    â”‚               â”‚
-    â”‚                          â”‚                     â”‚                    â”‚               â”‚
-    â”‚â—€â”€ChangeResultâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚                    â”‚               â”‚
-    â”‚  (success, new_level)     â”‚                    â”‚                    â”‚               â”‚
+    │                          │                     │                    │               │
+    │──ChangeSecurityLevel────▶│                     │                    │               │
+    │  (new_level: 3,          │                     │                    │               │
+    │   justification: "...")   │                     │                    │               │
+    │                          │                     │                    │               │
+    │                          │──ValidateChange─────▶│                    │               │
+    │                          │                     │                    │               │
+    │                          │                     │──RequestApproval───▶│               │
+    │                          │                     │                    │               │
+    │                          │                     │◀─APPROVED──────────│               │
+    │                          │                     │                    │               │
+    │                          │                     │──ApplyChange────────────────────────▶│
+    │                          │                     │                    │               │
+    │                          │                     │◀─ChangeApplied─────────────────────│
+    │                          │                     │                    │               │
+    │                          │◀─ChangeConfirmed───│                    │               │
+    │                          │                     │                    │               │
+    │◀─ChangeResult───────────│                     │                    │               │
+    │  (success, new_level)     │                    │                    │               │
 ```
 
 ### 6.3 Format Requete
@@ -265,12 +265,12 @@ MiyukiniAdmin peut isoler un Operateur specifique.
 ### 9.1 Flux d'Information
 
 ```
-MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ WorrySentinel
-                                          â”‚
-                                          â”œâ”€â”€ Lecture niveau actuel
-                                          â”œâ”€â”€ Lecture modes degradation
-                                          â”œâ”€â”€ Changement niveau
-                                          â””â”€â”€ Activation degradation
+MiyukiniAdmin ──▶ BondingBrother ──▶ WorrySentinel
+                                          │
+                                          ├── Lecture niveau actuel
+                                          ├── Lecture modes degradation
+                                          ├── Changement niveau
+                                          └── Activation degradation
 ```
 
 ### 9.2 Notifications Recues
@@ -308,32 +308,32 @@ MiyukiniAdmin recoit de WorrySentinel :
 ### 10.3 Dialogue Changement
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Changement de Niveau de Securite                            â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                                                             â”‚
-â”‚ Niveau actuel: [2 - SENSITIVE]                             â”‚
-â”‚                                                             â”‚
-â”‚ Nouveau niveau: [Dropdown 0-4]                              â”‚
-â”‚                                                             â”‚
-â”‚ Justification (obligatoire):                                â”‚
-â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚ â”‚                                                         â”‚ â”‚
-â”‚ â”‚ (minimum 50 caracteres)                                 â”‚ â”‚
-â”‚ â”‚                                                         â”‚ â”‚
-â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚                                                             â”‚
-â”‚ Reference incident (optionnel): [_______________]           â”‚
-â”‚                                                             â”‚
-â”‚ [ ] Notifier les Operateurs                                 â”‚
-â”‚                                                             â”‚
-â”‚ Impact:                                                     â”‚
-â”‚ - Performance: [Graphique impact]                           â”‚
-â”‚ - Fonctionnalites: [Liste restrictions]                     â”‚
-â”‚                                                             â”‚
-â”‚        [Annuler]                    [Confirmer]             â”‚
-â”‚                                                             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ Changement de Niveau de Securite                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ Niveau actuel: [2 - SENSITIVE]                             │
+│                                                             │
+│ Nouveau niveau: [Dropdown 0-4]                              │
+│                                                             │
+│ Justification (obligatoire):                                │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │                                                         │ │
+│ │ (minimum 50 caracteres)                                 │ │
+│ │                                                         │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ Reference incident (optionnel): [_______________]           │
+│                                                             │
+│ [ ] Notifier les Operateurs                                 │
+│                                                             │
+│ Impact:                                                     │
+│ - Performance: [Graphique impact]                           │
+│ - Fonctionnalites: [Liste restrictions]                     │
+│                                                             │
+│        [Annuler]                    [Confirmer]             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---

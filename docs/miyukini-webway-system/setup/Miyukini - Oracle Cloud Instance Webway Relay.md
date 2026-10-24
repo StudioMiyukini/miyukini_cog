@@ -1,83 +1,83 @@
-﻿# Miyukini â€” Instance Oracle Cloud pour Origin Webway
+﻿# Miyukini — Instance Oracle Cloud pour Origin Webway
 
-> **DÃ©prÃ©ciÃ© â€” Migration fÃ©vrier 2026 :** L'hÃ©bergement Origin a migrÃ© vers **Hostinger VPS (Debian 13)**. Utiliser [Miyukini - Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) et [MWS - ImplÃ©mentation Origin Hostinger](..//deploiement//MWS%20-%20Implementation%20Origin%20Hostinger.md). Ce document est conservÃ© pour archive (ancienne instance OCI).
+> **Déprécié — Migration février 2026 :** L'hébergement Origin a migré vers **Hostinger VPS (Debian 13)**. Utiliser [Miyukini - Hostinger VPS Origin Webway](Miyukini%20-%20Hostinger%20VPS%20Origin%20Webway.md) et [MWS - Implémentation Origin Hostinger](..//deploiement//MWS%20-%20Implementation%20Origin%20Hostinger.md). Ce document est conservé pour archive (ancienne instance OCI).
 
 ## Contexte
 
-Ce guide documentait l'**instance Oracle Cloud Always Free** qui hÃ©bergeait **Origin** (relay + tracker + source de vÃ©ritÃ© MWS). L'instance est **crÃ©Ã©e et opÃ©rationnelle** depuis le 12 fÃ©vrier 2026.
+Ce guide documentait l'**instance Oracle Cloud Always Free** qui hébergeait **Origin** (relay + tracker + source de vérité MWS). L'instance est **créée et opérationnelle** depuis le 12 février 2026.
 
-**RÃ©gion :** France South (Marseille) â€” `eu-marseille-1`
+**Région :** France South (Marseille) — `eu-marseille-1`
 
-Pour le guide complet d'implÃ©mentation logicielle (compilation, configuration, dÃ©marrage), voir :  
-**[MWS - ImplÃ©mentation Origin Oracle Cloud](..//deploiement//MWS%20-%20Implementation%20Origin%20Oracle%20Cloud.md)**
+Pour le guide complet d'implémentation logicielle (compilation, configuration, démarrage), voir :  
+**[MWS - Implémentation Origin Oracle Cloud](..//deploiement//MWS%20-%20Implementation%20Origin%20Oracle%20Cloud.md)**
 
 ---
 
-## 1. Instance Origin (crÃ©Ã©e)
+## 1. Instance Origin (créée)
 
-### 1.1 Informations gÃ©nÃ©rales
+### 1.1 Informations générales
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
 | **Nom** | (instance Origin MWS) |
 | **Compartiment** | `studiomiyukini` (racine) |
-| **Domaine de disponibilitÃ©** | AD-1 |
+| **Domaine de disponibilité** | AD-1 |
 | **Domaine de pannes** | FD-2 |
-| **RÃ©gion** | `eu-marseille-1` (France South, Marseille) |
-| **LancÃ©e** | 12 fÃ©vrier 2026, 21:06:20 UTC |
-| **Type de capacitÃ©** | Ã€ la demande |
+| **Région** | `eu-marseille-1` (France South, Marseille) |
+| **Lancée** | 12 février 2026, 21:06:20 UTC |
+| **Type de capacité** | À la demande |
 
 ### 1.2 Image et forme
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
-| **SystÃ¨me d'exploitation** | **Oracle Linux** |
+| **Système d'exploitation** | **Oracle Linux** |
 | **Version** | **9** |
 | **Image** | `Oracle-Linux-9.7-2026.01.29-0` |
 | **Forme** | `VM.Standard.E2.1.Micro` (Always Free) |
 | **OCPU** | 1 |
 | **Bande passante** | 0.5 Gbits/s |
-| **MÃ©moire** | 1 Go |
+| **Mémoire** | 1 Go |
 | **Disque local** | Stockage de blocs uniquement |
 | **Microprogramme** | UEFI_64 |
 
 ### 1.3 Options de lancement
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
-| **Type d'attachement rÃ©seau** | PARAVIRTUALIZED |
-| **Volume de donnÃ©es distantes** | PARAVIRTUALIZED |
-| **Cryptage en transit** | ActivÃ© |
-| **Initialisation sÃ©curisÃ©e** | DÃ©sactivÃ© |
-| **Initialisation mesurÃ©e** | DÃ©sactivÃ© |
-| **Module de plate-forme sÃ©curisÃ©e** | DÃ©sactivÃ© |
+| **Type d'attachement réseau** | PARAVIRTUALIZED |
+| **Volume de données distantes** | PARAVIRTUALIZED |
+| **Cryptage en transit** | Activé |
+| **Initialisation sécurisée** | Désactivé |
+| **Initialisation mesurée** | Désactivé |
+| **Module de plate-forme sécurisée** | Désactivé |
 | **Type de volume d'initialisation** | PARAVIRTUALIZED |
 | **Mode de lancement** | PARAVIRTUALIZED |
-| **Service de mÃ©tadonnÃ©es** | Versions 1 et 2 |
-| **Migration en direct** | Valeur par dÃ©faut recommandÃ©e |
-| **Full Stack Disaster Recovery** | Non activÃ© |
+| **Service de métadonnées** | Versions 1 et 2 |
+| **Migration en direct** | Valeur par défaut recommandée |
+| **Full Stack Disaster Recovery** | Non activé |
 
 ---
 
-## 2. RÃ©seau
+## 2. Réseau
 
-### 2.1 Carte d'interface rÃ©seau (VNIC) principale
+### 2.1 Carte d'interface réseau (VNIC) principale
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
 | **Adresse IPv4 publique** | `84.235.227.152` |
-| **Adresse IPv4 privÃ©e** | `10.0.0.110` |
-| **RÃ©seau cloud virtuel (VCN)** | `origin-miyukini-webway` |
-| **Sous-rÃ©seau** | `webway-0.1` |
+| **Adresse IPv4 privée** | `10.0.0.110` |
+| **Réseau cloud virtuel (VCN)** | `origin-miyukini-webway` |
+| **Sous-réseau** | `webway-0.1` |
 | **Table de routage** | `Default Route Table for origin-miyukini-webway` |
-| **Groupes de sÃ©curitÃ© rÃ©seau** | `ig-quick-action-NSG` |
-| **Enregistrement DNS privÃ©** | Activer |
-| **Nom d'hÃ´te** | `origin-miyukini-webway-interface` |
+| **Groupes de sécurité réseau** | `ig-quick-action-NSG` |
+| **Enregistrement DNS privé** | Activer |
+| **Nom d'hôte** | `origin-miyukini-webway-interface` |
 | **FQDN interne** | `origin-miyukini-webway-interface.subnet02122206.vcn02122206.oraclevcn.com` |
 
-### 2.2 RÃ¨gles de sÃ©curitÃ© (ports ouverts)
+### 2.2 Règles de sécurité (ports ouverts)
 
-Les ports MWS sont ouverts dans le groupe de sÃ©curitÃ© `ig-quick-action-NSG` :
+Les ports MWS sont ouverts dans le groupe de sécurité `ig-quick-action-NSG` :
 
 | Source | Protocole | Port | Description |
 |--------|-----------|------|-------------|
@@ -87,29 +87,29 @@ Les ports MWS sont ouverts dans le groupe de sÃ©curitÃ© `ig-quick-action-NSG
 | `0.0.0.0/0` | TCP | 7000 | Origin Relay |
 | `0.0.0.0/0` | TCP | 21000 | Origin Tracker |
 
-Pour ajouter ou modifier des rÃ¨gles :  
-**Console OCI â†’ RÃ©seau â†’ RÃ©seaux de cloud virtuels â†’ `origin-miyukini-webway` â†’ Groupes de sÃ©curitÃ© rÃ©seau â†’ `ig-quick-action-NSG`**
+Pour ajouter ou modifier des règles :  
+**Console OCI → Réseau → Réseaux de cloud virtuels → `origin-miyukini-webway` → Groupes de sécurité réseau → `ig-quick-action-NSG`**
 
 ---
 
-## 3. AccÃ¨s SSH
+## 3. Accès SSH
 
-### 3.1 ClÃ© SSH
+### 3.1 Clé SSH
 
 | Fichier | Chemin dans le workspace | Usage |
 |---------|--------------------------|-------|
-| **ClÃ© privÃ©e** | `ssh-key-2026-02-12.key` | Connexion SSH |
-| **ClÃ© publique** | `ssh-key-2026-02-12.key.pub` | EnregistrÃ©e sur l'instance OCI |
+| **Clé privée** | `ssh-key-2026-02-12.key` | Connexion SSH |
+| **Clé publique** | `ssh-key-2026-02-12.key.pub` | Enregistrée sur l'instance OCI |
 
-**ClÃ© publique de rÃ©fÃ©rence (miyukini@gmail.com) â€” Ã  conserver pour tout hÃ©bergeur :**
+**Clé publique de référence (miyukini@gmail.com) — à conserver pour tout hébergeur :**
 
 ```
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIVTDqC5yyNd6Ir9/NLjzUTT1IhugyRyRCo6+O5LZC4Z miyukini@gmail.com
 ```
 
-Ã€ ajouter dans `~/.ssh/authorized_keys` sur chaque serveur (Oracle Cloud, nouvel hÃ©bergeur Debian/Ubuntu, etc.).
+À ajouter dans `~/.ssh/authorized_keys` sur chaque serveur (Oracle Cloud, nouvel hébergeur Debian/Ubuntu, etc.).
 
-**Utilisateur par dÃ©faut :** `opc` (Oracle Linux) ; sur Debian/Ubuntu : selon compte crÃ©Ã© (ex. `miyukini` ou `opc`).
+**Utilisateur par défaut :** `opc` (Oracle Linux) ; sur Debian/Ubuntu : selon compte créé (ex. `miyukini` ou `opc`).
 
 ### 3.2 Connexion depuis Windows (PowerShell)
 
@@ -130,37 +130,37 @@ chmod 600 ssh-key-2026-02-12.key
 ssh -i ssh-key-2026-02-12.key opc@84.235.227.152
 ```
 
-### 3.4 VÃ©rification aprÃ¨s connexion
+### 3.4 Vérification après connexion
 
 ```bash
-cat /etc/oracle-release     # â†’ Oracle Linux Server release 9.7
-hostname                     # â†’ origin-miyukini-webway-interface
-ip addr show | grep 84.235  # â†’ IP publique
+cat /etc/oracle-release     # → Oracle Linux Server release 9.7
+hostname                     # → origin-miyukini-webway-interface
+ip addr show | grep 84.235  # → IP publique
 ```
 
 ---
 
-## 4. SpÃ©cificitÃ©s Oracle Linux 9.7
+## 4. Spécificités Oracle Linux 9.7
 
 | Aspect | Commande / outil |
 |--------|-----------------|
 | **Package manager** | `dnf` (pas `apt`) |
 | **Installer un paquet** | `sudo dnf install -y <paquet>` |
-| **Mettre Ã  jour** | `sudo dnf update -y` |
+| **Mettre à jour** | `sudo dnf update -y` |
 | **Firewall** | `firewalld` (pas `ufw`, pas `iptables` directement) |
 | **Ouvrir un port** | `sudo firewall-cmd --permanent --add-port=<port>/tcp && sudo firewall-cmd --reload` |
 | **NTP** | `chronyd` (pas `systemd-timesyncd`) |
-| **SELinux** | ActivÃ© (Enforcing) â€” `getenforce` |
+| **SELinux** | Activé (Enforcing) — `getenforce` |
 | **Utilisateur SSH** | `opc` (pas `ubuntu`) |
 | **Services** | `systemctl enable/start/stop/status <service>` |
-| **DÃ©pendances build** | `gcc gcc-c++ make pkg-config openssl-devel` |
+| **Dépendances build** | `gcc gcc-c++ make pkg-config openssl-devel` |
 | **EPEL** | `sudo dnf install -y oracle-epel-release-el9` |
 
 ---
 
-## 5. Domaine DNS (Ã  configurer)
+## 5. Domaine DNS (à configurer)
 
-| EntrÃ©e | Type | Valeur | RÃ´le |
+| Entrée | Type | Valeur | Rôle |
 |--------|------|--------|------|
 | `origin.miyukini.com` | A | `84.235.227.152` | Adresse canonique d'Origin |
 | `webway.miyukini.com` | CNAME | `origin.miyukini.com` | Alias |
@@ -169,21 +169,21 @@ ip addr show | grep 84.235  # â†’ IP publique
 
 ---
 
-## 6. RÃ©sumÃ© des ports
+## 6. Résumé des ports
 
-| Port | RÃ´le | RÃ©fÃ©rence MWS |
+| Port | Rôle | Référence MWS |
 |------|------|---------------|
-| 22 | SSH (administration) | â€” |
-| 80 | HTTP (redirect â†’ HTTPS) | Catalogue web MWS |
+| 22 | SSH (administration) | — |
+| 80 | HTTP (redirect → HTTPS) | Catalogue web MWS |
 | 443 | HTTPS (catalogue + MiyukiniAdmin) | Portail Origin |
 | 7000 | Origin Relay (transport) | Protocole relay MWS |
-| 21000 | Origin Tracker (dÃ©couverte) | Port officiel MWS |
+| 21000 | Origin Tracker (découverte) | Port officiel MWS |
 
 ---
 
-## RÃ©fÃ©rences
+## Références
 
-- [MWS - ImplÃ©mentation Origin Oracle Cloud](..//deploiement//MWS%20-%20Implementation%20Origin%20Oracle%20Cloud.md) â€” **guide complet d'implÃ©mentation**
+- [MWS - Implémentation Origin Oracle Cloud](..//deploiement//MWS%20-%20Implementation%20Origin%20Oracle%20Cloud.md) — **guide complet d'implémentation**
 - [MWS - Origin](..//README.md)
 - [Miyukini Webway System](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System.md)
 - [MWS Normes et Standards](../reference/Miyukini%20Conceptual%20References%20-%20Miyukini%20Webway%20System%20Normes%20et%20Standards.md)
@@ -193,7 +193,7 @@ ip addr show | grep 84.235  # â†’ IP publique
 ---
 
 **Version :** 2.0  
-**Mise Ã  jour :** Oracle Linux 9.7 (infos rÃ©elles vÃ©rifiÃ©es), clÃ© SSH, rÃ©seau dÃ©taillÃ©, consolidation avec le guide d'implÃ©mentation  
-**Classification :** Documentation MWS â€” Setup
+**Mise à jour :** Oracle Linux 9.7 (infos réelles vérifiées), clé SSH, réseau détaillé, consolidation avec le guide d'implémentation  
+**Classification :** Documentation MWS — Setup
 
 

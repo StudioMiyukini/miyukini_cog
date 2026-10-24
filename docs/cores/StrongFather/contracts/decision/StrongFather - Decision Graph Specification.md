@@ -1,82 +1,82 @@
-﻿# StrongFather â€” Decision Graph Specification
+﻿# StrongFather — Decision Graph Specification
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **StrongFather â€” Decision Graph Specification** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit la spÃ©cification conceptuelle du graphe de dÃ©cision de StrongFather, dÃ©finissant comment les Ã©valuations sont structurÃ©es, comment les politiques sont composÃ©es, et comment les dÃ©cisions sont dÃ©rivÃ©es dans le systÃ¨me Miyukini Core System v2.4.
+Ce document définit le **StrongFather — Decision Graph Specification** : un contrat normatif, non négociable, et de statut FONDATION qui établit la spécification conceptuelle du graphe de décision de StrongFather, définissant comment les évaluations sont structurées, comment les politiques sont composées, et comment les décisions sont dérivées dans le système Miyukini Core System v2.4.
 
-Ce contrat prÃ©cise la nature conceptuelle du graphe de dÃ©cision, ses nÅ“uds, ses arÃªtes, ses propriÃ©tÃ©s, et les rÃ¨gles de parcours.
+Ce contrat précise la nature conceptuelle du graphe de décision, ses nœuds, ses arêtes, ses propriétés, et les règles de parcours.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toutes les Ã©valuations de StrongFather** et dÃ©finit de maniÃ¨re absolue :
-- la dÃ©finition formelle du graphe de dÃ©cision,
-- les types de nÅ“uds du graphe,
-- les types d'arÃªtes du graphe,
-- les rÃ¨gles de composition,
-- les propriÃ©tÃ©s du graphe,
+Ce contrat s'applique à **toutes les évaluations de StrongFather** et définit de manière absolue :
+- la définition formelle du graphe de décision,
+- les types de nœuds du graphe,
+- les types d'arêtes du graphe,
+- les règles de composition,
+- les propriétés du graphe,
 - les invariants du graphe.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complÃ¨te et respecte les documents contractuels existants :
-- **StrongFather â€” Policy Engine Contract** : DÃ©finit comment les politiques sont appliquÃ©es
-- **StrongFather â€” Core Decision Contract** : DÃ©finit les types de dÃ©cisions produites
-- **StrongFather â€” Intent Model Contract** : DÃ©finit les intentions Ã©valuÃ©es
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie, notamment **LOI-1** (aucune dÃ©pendance externe critique) : le graphe de dÃ©cision fonctionne entiÃ¨rement localement
+Ce contrat complète et respecte les documents contractuels existants :
+- **StrongFather — Policy Engine Contract** : Définit comment les politiques sont appliquées
+- **StrongFather — Core Decision Contract** : Définit les types de décisions produites
+- **StrongFather — Intent Model Contract** : Définit les intentions évaluées
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Conformité aux lois d'autonomie, notamment **LOI-1** (aucune dépendance externe critique) : le graphe de décision fonctionne entièrement localement
 
-Il n'introduit aucune contradiction, et constitue la spÃ©cification formelle du graphe de dÃ©cision.
+Il n'introduit aucune contradiction, et constitue la spécification formelle du graphe de décision.
 
 ---
 
-## 2. DÃ©finition du graphe de dÃ©cision
+## 2. Définition du graphe de décision
 
 ### 2.1. Nature du graphe
 
-Le **graphe de dÃ©cision** est une structure conceptuelle qui reprÃ©sente le processus d'Ã©valuation d'une intention dans StrongFather. Il modÃ©lise le chemin de l'intention vers la dÃ©cision Ã  travers l'application des politiques.
+Le **graphe de décision** est une structure conceptuelle qui représente le processus d'évaluation d'une intention dans StrongFather. Il modélise le chemin de l'intention vers la décision à travers l'application des politiques.
 
-**CaractÃ©ristiques du graphe :**
+**Caractéristiques du graphe :**
 
-- **DirigÃ©** : Le graphe a une direction (de l'intention vers la dÃ©cision)
+- **Dirigé** : Le graphe a une direction (de l'intention vers la décision)
 - **Acyclique** : Le graphe ne contient pas de cycles
-- **Fini** : Le graphe a un nombre fini de nÅ“uds et d'arÃªtes
-- **Terminant** : Tout parcours du graphe termine par une dÃ©cision
+- **Fini** : Le graphe a un nombre fini de nœuds et d'arêtes
+- **Terminant** : Tout parcours du graphe termine par une décision
 
 ### 2.2. Objectif du graphe
 
-Le graphe de dÃ©cision permet :
+Le graphe de décision permet :
 
-1. **Visualisation** : Comprendre le processus d'Ã©valuation
-2. **Validation** : VÃ©rifier la cohÃ©rence des politiques
-3. **TraÃ§abilitÃ©** : Suivre le chemin d'une Ã©valuation
+1. **Visualisation** : Comprendre le processus d'évaluation
+2. **Validation** : Vérifier la cohérence des politiques
+3. **Traçabilité** : Suivre le chemin d'une évaluation
 4. **Optimisation** : Identifier les chemins critiques
 5. **Audit** : Reconstruire le raisonnement
 
 ### 2.3. Abstraction conceptuelle
 
-Le graphe de dÃ©cision est une **abstraction conceptuelle**. Il ne prÃ©suppose aucune implÃ©mentation technique particuliÃ¨re. Il peut Ãªtre implÃ©mentÃ© de diffÃ©rentes maniÃ¨res tout en respectant cette spÃ©cification.
+Le graphe de décision est une **abstraction conceptuelle**. Il ne présuppose aucune implémentation technique particulière. Il peut être implémenté de différentes manières tout en respectant cette spécification.
 
 ---
 
-## 3. Types de nÅ“uds
+## 3. Types de nœuds
 
-### 3.1. NÅ“ud d'entrÃ©e (ENTRY)
+### 3.1. Nœud d'entrée (ENTRY)
 
-**DÃ©finition :**
+**Définition :**
 
-Le **nÅ“ud d'entrÃ©e** est le point d'entrÃ©e unique du graphe. Il reprÃ©sente la rÃ©ception d'une intention pour Ã©valuation.
+Le **nœud d'entrée** est le point d'entrée unique du graphe. Il représente la réception d'une intention pour évaluation.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Un seul nÅ“ud d'entrÃ©e par graphe
-- Contient l'intention complÃ¨te
-- Contient le contexte d'Ã©valuation
-- Pas d'arÃªte entrante
+- Un seul nœud d'entrée par graphe
+- Contient l'intention complète
+- Contient le contexte d'évaluation
+- Pas d'arête entrante
 
 **Contenu :**
 
@@ -84,157 +84,157 @@ Le **nÅ“ud d'entrÃ©e** est le point d'entrÃ©e unique du graphe. Il reprÃ
 - Type d'action
 - Sujet
 - Contexte d'appel
-- DonnÃ©es de l'intention
+- Données de l'intention
 
-### 3.2. NÅ“ud de validation structurelle (VALIDATION)
+### 3.2. Nœud de validation structurelle (VALIDATION)
 
-**DÃ©finition :**
+**Définition :**
 
-Le **nÅ“ud de validation** vÃ©rifie la validitÃ© structurelle de l'intention avant l'Ã©valuation des politiques.
+Le **nœud de validation** vérifie la validité structurelle de l'intention avant l'évaluation des politiques.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Suit immÃ©diatement le nÅ“ud d'entrÃ©e
-- VÃ©rifie les composants obligatoires
-- VÃ©rifie la cohÃ©rence structurelle
-- Peut conduire Ã  un rejet structurel
+- Suit immédiatement le nœud d'entrée
+- Vérifie les composants obligatoires
+- Vérifie la cohérence structurelle
+- Peut conduire à un rejet structurel
 
 **Sorties possibles :**
 
 - VALIDE : L'intention est structurellement valide
-- INVALIDE : L'intention est structurellement invalide (â†’ rejet structurel)
+- INVALIDE : L'intention est structurellement invalide (→ rejet structurel)
 
-### 3.3. NÅ“ud de politique (POLICY)
+### 3.3. Nœud de politique (POLICY)
 
-**DÃ©finition :**
+**Définition :**
 
-Un **nÅ“ud de politique** reprÃ©sente l'Ã©valuation d'une politique spÃ©cifique.
+Un **nœud de politique** représente l'évaluation d'une politique spécifique.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Un nÅ“ud par politique Ã©valuÃ©e
-- Ã‰value la politique selon le contexte
-- Produit un rÃ©sultat d'Ã©valuation
+- Un nœud par politique évaluée
+- Évalue la politique selon le contexte
+- Produit un résultat d'évaluation
 
 **Contenu :**
 
 - Identifiant de la politique
 - Type de politique
 - Condition de la politique
-- Contexte d'Ã©valuation
+- Contexte d'évaluation
 
 **Sorties possibles :**
 
 - SATISFAITE : La politique est satisfaite
 - NON_SATISFAITE : La politique n'est pas satisfaite
-- INDÃ‰TERMINÃ‰E : La politique ne peut pas Ãªtre Ã©valuÃ©e
+- INDÉTERMINÉE : La politique ne peut pas être évaluée
 
-### 3.4. NÅ“ud de composition (COMPOSITION)
+### 3.4. Nœud de composition (COMPOSITION)
 
-**DÃ©finition :**
+**Définition :**
 
-Un **nÅ“ud de composition** agrÃ¨ge les rÃ©sultats de plusieurs Ã©valuations de politiques selon les rÃ¨gles de composition.
+Un **nœud de composition** agrège les résultats de plusieurs évaluations de politiques selon les règles de composition.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- ReÃ§oit les rÃ©sultats de plusieurs nÅ“uds de politique
-- Applique les rÃ¨gles de composition (Policy Engine Contract)
-- Produit un rÃ©sultat agrÃ©gÃ©
+- Reçoit les résultats de plusieurs nœuds de politique
+- Applique les règles de composition (Policy Engine Contract)
+- Produit un résultat agrégé
 
-**RÃ¨gles de composition appliquÃ©es :**
+**Règles de composition appliquées :**
 
-- UnanimitÃ© pour l'acceptation
+- Unanimité pour l'acceptation
 - Refus prioritaire
-- AmbiguÃ¯tÃ© si indÃ©termination
+- Ambiguïté si indétermination
 
 **Sorties possibles :**
 
 - TOUTES_SATISFAITES : Toutes les politiques sont satisfaites
 - AU_MOINS_UNE_NON_SATISFAITE : Au moins une politique n'est pas satisfaite
-- AU_MOINS_UNE_INDÃ‰TERMINÃ‰E : Au moins une politique est indÃ©terminÃ©e
+- AU_MOINS_UNE_INDÉTERMINÉE : Au moins une politique est indéterminée
 
-### 3.5. NÅ“ud de prioritÃ© (PRIORITY)
+### 3.5. Nœud de priorité (PRIORITY)
 
-**DÃ©finition :**
+**Définition :**
 
-Un **nÅ“ud de prioritÃ©** calcule la prioritÃ© relative de l'intention si les politiques sont satisfaites.
+Un **nœud de priorité** calcule la priorité relative de l'intention si les politiques sont satisfaites.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- ActivÃ© uniquement si la composition est TOUTES_SATISFAITES
-- Applique les politiques de prioritÃ©
-- Produit une valeur de prioritÃ©
+- Activé uniquement si la composition est TOUTES_SATISFAITES
+- Applique les politiques de priorité
+- Produit une valeur de priorité
 
 **Contenu :**
 
-- Politiques de prioritÃ© appliquÃ©es
-- CritÃ¨res de prioritÃ©
-- PrioritÃ© calculÃ©e
+- Politiques de priorité appliquées
+- Critères de priorité
+- Priorité calculée
 
-### 3.6. NÅ“ud de dÃ©cision (DECISION)
+### 3.6. Nœud de décision (DECISION)
 
-**DÃ©finition :**
+**Définition :**
 
-Un **nÅ“ud de dÃ©cision** reprÃ©sente la production d'une dÃ©cision finale.
+Un **nœud de décision** représente la production d'une décision finale.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
 - Point de sortie du graphe
-- Produit une dÃ©cision complÃ¨te
+- Produit une décision complète
 - Inclut la justification
 
-**Types de nÅ“uds de dÃ©cision :**
+**Types de nœuds de décision :**
 
-- DECISION_ACCEPTÃ‰E : L'intention est acceptÃ©e
-- DECISION_REFUSÃ‰E : L'intention est refusÃ©e
-- DECISION_AMBIGUÃ‹ : L'intention nÃ©cessite des clarifications
-- DECISION_DIFFÃ‰RÃ‰E : L'intention dÃ©pend d'un contexte futur
+- DECISION_ACCEPTÉE : L'intention est acceptée
+- DECISION_REFUSÉE : L'intention est refusée
+- DECISION_AMBIGUË : L'intention nécessite des clarifications
+- DECISION_DIFFÉRÉE : L'intention dépend d'un contexte futur
 
 ---
 
-## 4. Types d'arÃªtes
+## 4. Types d'arêtes
 
-### 4.1. ArÃªte de sÃ©quence (SEQUENCE)
+### 4.1. Arête de séquence (SEQUENCE)
 
-**DÃ©finition :**
+**Définition :**
 
-Une **arÃªte de sÃ©quence** reprÃ©sente une succession obligatoire entre deux nÅ“uds.
+Une **arête de séquence** représente une succession obligatoire entre deux nœuds.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Le nÅ“ud cible est toujours atteint aprÃ¨s le nÅ“ud source
+- Le nœud cible est toujours atteint après le nœud source
 - Pas de condition
-- ReprÃ©sente un flux obligatoire
+- Représente un flux obligatoire
 
-**Notation :** â†’
+**Notation :** →
 
-### 4.2. ArÃªte conditionnelle (CONDITIONAL)
+### 4.2. Arête conditionnelle (CONDITIONAL)
 
-**DÃ©finition :**
+**Définition :**
 
-Une **arÃªte conditionnelle** reprÃ©sente une succession conditionnelle basÃ©e sur un rÃ©sultat.
+Une **arête conditionnelle** représente une succession conditionnelle basée sur un résultat.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Le nÅ“ud cible est atteint uniquement si la condition est vraie
-- La condition est basÃ©e sur le rÃ©sultat du nÅ“ud source
-- ReprÃ©sente un branchement
+- Le nœud cible est atteint uniquement si la condition est vraie
+- La condition est basée sur le résultat du nœud source
+- Représente un branchement
 
-**Notation :** â†’[condition]
+**Notation :** →[condition]
 
-### 4.3. ArÃªte de composition (AGGREGATION)
+### 4.3. Arête de composition (AGGREGATION)
 
-**DÃ©finition :**
+**Définition :**
 
-Une **arÃªte de composition** relie plusieurs nÅ“uds sources Ã  un nÅ“ud de composition.
+Une **arête de composition** relie plusieurs nœuds sources à un nœud de composition.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
 - Plusieurs sources vers une cible
-- ReprÃ©sente l'agrÃ©gation de rÃ©sultats
-- Le nÅ“ud de composition attend tous les rÃ©sultats
+- Représente l'agrégation de résultats
+- Le nœud de composition attend tous les résultats
 
-**Notation :** â‡’
+**Notation :** ⇒
 
 ---
 
@@ -243,155 +243,155 @@ Une **arÃªte de composition** relie plusieurs nÅ“uds sources Ã  un nÅ“
 ### 5.1. Structure standard
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                                                             â”‚
-â”‚   [ENTRY] â”€â”€â†’ [VALIDATION]                                 â”‚
-â”‚                    â”‚                                        â”‚
-â”‚                    â”œâ”€â”€â†’[INVALIDE]â”€â”€â†’ [DECISION_REFUSÃ‰E]    â”‚
-â”‚                    â”‚                                        â”‚
-â”‚                    â””â”€â”€â†’[VALIDE]                             â”‚
-â”‚                           â”‚                                 â”‚
-â”‚                           â–¼                                 â”‚
-â”‚              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                    â”‚
-â”‚              â”‚   Ã‰valuation des       â”‚                    â”‚
-â”‚              â”‚   politiques           â”‚                    â”‚
-â”‚              â”‚                        â”‚                    â”‚
-â”‚              â”‚  [POLICY_1]            â”‚                    â”‚
-â”‚              â”‚  [POLICY_2]            â”‚                    â”‚
-â”‚              â”‚  [POLICY_N]            â”‚                    â”‚
-â”‚              â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                    â”‚
-â”‚                       â‡“                                     â”‚
-â”‚                 [COMPOSITION]                               â”‚
-â”‚                       â”‚                                     â”‚
-â”‚    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                 â”‚
-â”‚    â”‚                  â”‚                  â”‚                 â”‚
-â”‚    â–¼                  â–¼                  â–¼                 â”‚
-â”‚ [TOUTES_SAT]    [NON_SAT]          [INDÃ‰T]                â”‚
-â”‚    â”‚                  â”‚                  â”‚                 â”‚
-â”‚    â–¼                  â–¼                  â–¼                 â”‚
-â”‚ [PRIORITY]    [DECISION_REF]    [DECISION_AMB/DIFF]       â”‚
-â”‚    â”‚                                                       â”‚
-â”‚    â–¼                                                       â”‚
-â”‚ [DECISION_ACC]                                             â”‚
-â”‚                                                             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   [ENTRY] ──→ [VALIDATION]                                 │
+│                    │                                        │
+│                    ├──→[INVALIDE]──→ [DECISION_REFUSÉE]    │
+│                    │                                        │
+│                    └──→[VALIDE]                             │
+│                           │                                 │
+│                           ▼                                 │
+│              ┌────────────────────────┐                    │
+│              │   Évaluation des       │                    │
+│              │   politiques           │                    │
+│              │                        │                    │
+│              │  [POLICY_1]            │                    │
+│              │  [POLICY_2]            │                    │
+│              │  [POLICY_N]            │                    │
+│              └────────┬───────────────┘                    │
+│                       ⇓                                     │
+│                 [COMPOSITION]                               │
+│                       │                                     │
+│    ┌──────────────────┼──────────────────┐                 │
+│    │                  │                  │                 │
+│    ▼                  ▼                  ▼                 │
+│ [TOUTES_SAT]    [NON_SAT]          [INDÉT]                │
+│    │                  │                  │                 │
+│    ▼                  ▼                  ▼                 │
+│ [PRIORITY]    [DECISION_REF]    [DECISION_AMB/DIFF]       │
+│    │                                                       │
+│    ▼                                                       │
+│ [DECISION_ACC]                                             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### 5.2. Phases du graphe
 
 **Phase 1 : Validation structurelle**
 
-NÅ“uds : ENTRY â†’ VALIDATION
+Nœuds : ENTRY → VALIDATION
 
-Objectif : VÃ©rifier la validitÃ© structurelle de l'intention.
+Objectif : Vérifier la validité structurelle de l'intention.
 
-**Phase 2 : Ã‰valuation des politiques**
+**Phase 2 : Évaluation des politiques**
 
-NÅ“uds : POLICY_1, POLICY_2, ..., POLICY_N
+Nœuds : POLICY_1, POLICY_2, ..., POLICY_N
 
-Objectif : Ã‰valuer chaque politique applicable.
+Objectif : Évaluer chaque politique applicable.
 
 **Phase 3 : Composition**
 
-NÅ“uds : COMPOSITION
+Nœuds : COMPOSITION
 
-Objectif : AgrÃ©ger les rÃ©sultats selon les rÃ¨gles de composition.
+Objectif : Agréger les résultats selon les règles de composition.
 
-**Phase 4 : PrioritÃ© (conditionnelle)**
+**Phase 4 : Priorité (conditionnelle)**
 
-NÅ“uds : PRIORITY
+Nœuds : PRIORITY
 
-Objectif : Calculer la prioritÃ© si toutes les politiques sont satisfaites.
+Objectif : Calculer la priorité si toutes les politiques sont satisfaites.
 
-**Phase 5 : DÃ©cision**
+**Phase 5 : Décision**
 
-NÅ“uds : DECISION_*
+Nœuds : DECISION_*
 
-Objectif : Produire la dÃ©cision finale.
+Objectif : Produire la décision finale.
 
 ---
 
-## 6. PropriÃ©tÃ©s du graphe
+## 6. Propriétés du graphe
 
-### 6.1. PropriÃ©tÃ©s structurelles
+### 6.1. Propriétés structurelles
 
-**PROP-1 : UnicitÃ© de l'entrÃ©e**
+**PROP-1 : Unicité de l'entrée**
 
-Le graphe possÃ¨de exactement un nÅ“ud d'entrÃ©e.
+Le graphe possède exactement un nœud d'entrée.
 
-**PROP-2 : UnicitÃ© de la sortie logique**
+**PROP-2 : Unicité de la sortie logique**
 
-Tout parcours du graphe termine par exactement un nÅ“ud de dÃ©cision.
+Tout parcours du graphe termine par exactement un nœud de décision.
 
-**PROP-3 : AcyclicitÃ©**
+**PROP-3 : Acyclicité**
 
-Le graphe ne contient aucun cycle. Tout chemin de l'entrÃ©e vers une sortie est fini.
+Le graphe ne contient aucun cycle. Tout chemin de l'entrée vers une sortie est fini.
 
-**PROP-4 : ConnexitÃ©**
+**PROP-4 : Connexité**
 
-Tous les nÅ“uds sont atteignables depuis le nÅ“ud d'entrÃ©e.
+Tous les nœuds sont atteignables depuis le nœud d'entrée.
 
-### 6.2. PropriÃ©tÃ©s de parcours
+### 6.2. Propriétés de parcours
 
-**PROP-5 : DÃ©terminisme**
+**PROP-5 : Déterminisme**
 
-Pour une intention et un ensemble de politiques donnÃ©s, le parcours du graphe est dÃ©terministe.
+Pour une intention et un ensemble de politiques donnés, le parcours du graphe est déterministe.
 
 **PROP-6 : Terminaison**
 
 Tout parcours du graphe termine en un temps fini.
 
-**PROP-7 : ComplÃ©tude**
+**PROP-7 : Complétude**
 
-Toutes les politiques applicables sont Ã©valuÃ©es avant la composition.
+Toutes les politiques applicables sont évaluées avant la composition.
 
-### 6.3. PropriÃ©tÃ©s de rÃ©sultat
+### 6.3. Propriétés de résultat
 
-**PROP-8 : UnicitÃ© du rÃ©sultat**
+**PROP-8 : Unicité du résultat**
 
-Un parcours produit exactement une dÃ©cision.
+Un parcours produit exactement une décision.
 
-**PROP-9 : Justification complÃ¨te**
+**PROP-9 : Justification complète**
 
-Le chemin parcouru constitue la justification de la dÃ©cision.
+Le chemin parcouru constitue la justification de la décision.
 
 ---
 
-## 7. RÃ¨gles de parcours
+## 7. Règles de parcours
 
-### 7.1. RÃ¨gles d'entrÃ©e
+### 7.1. Règles d'entrée
 
-**R-PARC-1 : EntrÃ©e unique**
+**R-PARC-1 : Entrée unique**
 
-Le parcours commence toujours par le nÅ“ud d'entrÃ©e.
+Le parcours commence toujours par le nœud d'entrée.
 
 **R-PARC-2 : Validation obligatoire**
 
-Le nÅ“ud de validation est toujours traversÃ© aprÃ¨s l'entrÃ©e.
+Le nœud de validation est toujours traversé après l'entrée.
 
-### 7.2. RÃ¨gles d'Ã©valuation
+### 7.2. Règles d'évaluation
 
-**R-PARC-3 : Ã‰valuation parallÃ¨le conceptuelle**
+**R-PARC-3 : Évaluation parallèle conceptuelle**
 
-Les nÅ“uds de politique peuvent Ãªtre conceptuellement Ã©valuÃ©s en parallÃ¨le.
+Les nœuds de politique peuvent être conceptuellement évalués en parallèle.
 
-**R-PARC-4 : IndÃ©pendance des Ã©valuations**
+**R-PARC-4 : Indépendance des évaluations**
 
-L'Ã©valuation d'une politique n'influence pas l'Ã©valuation d'une autre.
+L'évaluation d'une politique n'influence pas l'évaluation d'une autre.
 
 **R-PARC-5 : Attente de composition**
 
-La composition attend tous les rÃ©sultats des politiques avant de s'exÃ©cuter.
+La composition attend tous les résultats des politiques avant de s'exécuter.
 
-### 7.3. RÃ¨gles de sortie
+### 7.3. Règles de sortie
 
 **R-PARC-6 : Sortie unique**
 
-Un seul nÅ“ud de dÃ©cision est atteint par parcours.
+Un seul nœud de décision est atteint par parcours.
 
 **R-PARC-7 : Sortie obligatoire**
 
-Tout parcours doit atteindre un nÅ“ud de dÃ©cision.
+Tout parcours doit atteindre un nœud de décision.
 
 ---
 
@@ -399,27 +399,27 @@ Tout parcours doit atteindre un nÅ“ud de dÃ©cision.
 
 ### 8.1. Invariants structurels
 
-**INV-GRAPH-1 : AcyclicitÃ©**
+**INV-GRAPH-1 : Acyclicité**
 
 Le graphe ne contient jamais de cycle.
 
-**INV-GRAPH-2 : EntrÃ©e unique**
+**INV-GRAPH-2 : Entrée unique**
 
-Le graphe possÃ¨de toujours exactement un nÅ“ud d'entrÃ©e.
+Le graphe possède toujours exactement un nœud d'entrée.
 
-**INV-GRAPH-3 : ConnexitÃ©**
+**INV-GRAPH-3 : Connexité**
 
-Tous les nÅ“uds sont toujours atteignables depuis l'entrÃ©e.
+Tous les nœuds sont toujours atteignables depuis l'entrée.
 
 ### 8.2. Invariants de parcours
 
 **INV-GRAPH-4 : Terminaison garantie**
 
-Tout parcours termine toujours par un nÅ“ud de dÃ©cision.
+Tout parcours termine toujours par un nœud de décision.
 
-**INV-GRAPH-5 : DÃ©terminisme garanti**
+**INV-GRAPH-5 : Déterminisme garanti**
 
-Un mÃªme parcours avec les mÃªmes entrÃ©es produit toujours le mÃªme rÃ©sultat.
+Un même parcours avec les mêmes entrées produit toujours le même résultat.
 
 **INV-GRAPH-6 : Pas d'effet de bord**
 
@@ -427,35 +427,35 @@ Le parcours du graphe ne produit jamais d'effet de bord.
 
 ---
 
-## 9. RÃ¨gles de fermeture du contrat
+## 9. Règles de fermeture du contrat
 
-### 9.1. Contrat fermÃ©
+### 9.1. Contrat fermé
 
-Ce contrat est **fermÃ©**. Seuls les types de nÅ“uds, les types d'arÃªtes, et les propriÃ©tÃ©s explicitement dÃ©finies sont valides.
+Ce contrat est **fermé**. Seuls les types de nœuds, les types d'arêtes, et les propriétés explicitement définies sont valides.
 
 ### 9.2. Interdiction d'extension implicite
 
-Aucune extension implicite n'est autorisÃ©e :
+Aucune extension implicite n'est autorisée :
 
-- **INTERD-GRAPH-1** : Aucun type de nÅ“ud non dÃ©fini n'est reconnu
-- **INTERD-GRAPH-2** : Aucun type d'arÃªte non dÃ©fini n'est reconnu
-- **INTERD-GRAPH-3** : Aucune propriÃ©tÃ© non dÃ©finie n'est garantie
+- **INTERD-GRAPH-1** : Aucun type de nœud non défini n'est reconnu
+- **INTERD-GRAPH-2** : Aucun type d'arête non défini n'est reconnu
+- **INTERD-GRAPH-3** : Aucune propriété non définie n'est garantie
 
 ---
 
 ## 10. Conclusion contractuelle
 
-Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable la spÃ©cification du graphe de dÃ©cision de StrongFather.
+Ce contrat établit de manière définitive et non négociable la spécification du graphe de décision de StrongFather.
 
 Il garantit que :
-- la structure du graphe est formellement dÃ©finie,
-- les types de nÅ“uds et d'arÃªtes sont exhaustifs,
-- les propriÃ©tÃ©s du graphe sont garanties,
-- les rÃ¨gles de parcours sont explicites,
+- la structure du graphe est formellement définie,
+- les types de nœuds et d'arêtes sont exhaustifs,
+- les propriétés du graphe sont garanties,
+- les règles de parcours sont explicites,
 - les invariants sont maintenus,
-- le contrat est fermÃ© et non extensible implicitement.
+- le contrat est fermé et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
@@ -463,63 +463,63 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ### 11.1. Cas conformes
 
-Les cas suivants sont **conformes** Ã  ce contrat :
+Les cas suivants sont **conformes** à ce contrat :
 
-1. **Parcours complet** : EntrÃ©e â†’ Validation (valide) â†’ Politiques â†’ Composition (toutes satisfaites) â†’ PrioritÃ© â†’ DÃ©cision acceptÃ©e.
+1. **Parcours complet** : Entrée → Validation (valide) → Politiques → Composition (toutes satisfaites) → Priorité → Décision acceptée.
 
-2. **Rejet structurel** : EntrÃ©e â†’ Validation (invalide) â†’ DÃ©cision refusÃ©e (type structurel).
+2. **Rejet structurel** : Entrée → Validation (invalide) → Décision refusée (type structurel).
 
-3. **Rejet de politique** : EntrÃ©e â†’ Validation (valide) â†’ Politiques â†’ Composition (non satisfaite) â†’ DÃ©cision refusÃ©e.
+3. **Rejet de politique** : Entrée → Validation (valide) → Politiques → Composition (non satisfaite) → Décision refusée.
 
 ### 11.2. Cas de violation
 
 Les cas suivants **violent** ce contrat :
 
-1. **Cycle dans le graphe** : Un parcours revient Ã  un nÅ“ud dÃ©jÃ  visitÃ©. Viole INV-GRAPH-1.
+1. **Cycle dans le graphe** : Un parcours revient à un nœud déjà visité. Viole INV-GRAPH-1.
 
-2. **Parcours sans dÃ©cision** : Un parcours se termine sans nÅ“ud de dÃ©cision. Viole INV-GRAPH-4.
+2. **Parcours sans décision** : Un parcours se termine sans nœud de décision. Viole INV-GRAPH-4.
 
-3. **EntrÃ©es multiples** : Le graphe a plusieurs nÅ“uds d'entrÃ©e. Viole INV-GRAPH-2.
+3. **Entrées multiples** : Le graphe a plusieurs nœuds d'entrée. Viole INV-GRAPH-2.
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-25  
+**Document créé le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif validÃ©  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** SpÃ©cification de graphe de dÃ©cision non nÃ©gociable
+**Statut :** FONDATION — Contrat normatif validé  
+**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Spécification de graphe de décision non négociable
 
 ---
 
-## 12. Mini log de gÃ©nÃ©ration
+## 12. Mini log de génération
 
 ### Warning W1 : Abstraction conceptuelle
 
-**Warning rencontrÃ© :** Risque de spÃ©cification trop technique.
+**Warning rencontré :** Risque de spécification trop technique.
 
-**DÃ©cision prise :** PrÃ©cision que le graphe est une abstraction conceptuelle qui ne prÃ©suppose aucune implÃ©mentation technique.
+**Décision prise :** Précision que le graphe est une abstraction conceptuelle qui ne présuppose aucune implémentation technique.
 
-**Correction effectuÃ©e :** Section 2.3 ajoutÃ©e pour clarifier l'abstraction.
+**Correction effectuée :** Section 2.3 ajoutée pour clarifier l'abstraction.
 
-### Warning W2 : ParallÃ©lisme des Ã©valuations
+### Warning W2 : Parallélisme des évaluations
 
-**Warning rencontrÃ© :** Les Ã©valuations de politiques peuvent-elles Ãªtre parallÃ¨les ?
+**Warning rencontré :** Les évaluations de politiques peuvent-elles être parallèles ?
 
-**DÃ©cision prise :** DÃ©finition d'un parallÃ©lisme conceptuel (R-PARC-3) avec indÃ©pendance des Ã©valuations (R-PARC-4).
+**Décision prise :** Définition d'un parallélisme conceptuel (R-PARC-3) avec indépendance des évaluations (R-PARC-4).
 
-**Correction effectuÃ©e :** Section 7.2 prÃ©cise le parallÃ©lisme conceptuel.
+**Correction effectuée :** Section 7.2 précise le parallélisme conceptuel.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec Policy Engine Contract : ConfirmÃ©e (rÃ¨gles de composition)
-- âœ… CohÃ©rence avec Core Decision Contract : ConfirmÃ©e (types de dÃ©cisions)
-- âœ… CohÃ©rence avec Intent Model Contract : ConfirmÃ©e (nÅ“ud d'entrÃ©e)
-- âœ… AcyclicitÃ© et terminaison : ConfirmÃ©es (propriÃ©tÃ©s et invariants)
+**Vérification effectuée :**
+- ✅ Cohérence avec Policy Engine Contract : Confirmée (règles de composition)
+- ✅ Cohérence avec Core Decision Contract : Confirmée (types de décisions)
+- ✅ Cohérence avec Intent Model Contract : Confirmée (nœud d'entrée)
+- ✅ Acyclicité et terminaison : Confirmées (propriétés et invariants)
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e.
+**Conclusion :** Aucune contradiction détectée.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

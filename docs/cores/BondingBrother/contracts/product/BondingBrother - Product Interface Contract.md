@@ -2,48 +2,48 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le contrat d'interface stable que Bonding Brother expose aux produits de l'Ã©cosystÃ¨me. Il spÃ©cifie les interfaces, les formats, les protocoles, et les garanties que les produits peuvent s'attendre Ã  recevoir de Bonding Brother.
+Ce document définit le contrat d'interface stable que Bonding Brother expose aux produits de l'écosystème. Il spécifie les interfaces, les formats, les protocoles, et les garanties que les produits peuvent s'attendre à recevoir de Bonding Brother.
 
-Ce document complÃ¨te la Section 7 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Bilateral Flow Contract](../flows/BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour dÃ©finir l'interface complÃ¨te.
+Ce document complète la Section 7 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Bilateral Flow Contract](../flows/BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour définir l'interface complète.
 
-L'interface respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : elle fonctionne mÃªme en mode offline (**LOI-2**), et les intentions sont acceptÃ©es et traitÃ©es localement mÃªme sans connexion aux autoritÃ©s.
+L'interface respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : elle fonctionne même en mode offline (**LOI-2**), et les intentions sont acceptées et traitées localement même sans connexion aux autorités.
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - L'interface de soumission d'intentions
-- L'interface de consommation de rÃ©sultats
+- L'interface de consommation de résultats
 - L'interface d'abonnement aux notifications
-- Les formats de donnÃ©es standardisÃ©s
+- Les formats de données standardisés
 - Les protocoles de communication
-- Les garanties de stabilitÃ© et de compatibilitÃ©
-- Les rÃ¨gles de versionnement
+- Les garanties de stabilité et de compatibilité
+- Les règles de versionnement
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails du flux Produit â†’ Ã‰cosystÃ¨me (voir [Product-to-Ecosystem Flow](../flows/BondingBrother%20-%20Product-to-Ecosystem%20Flow.md))
-- Les dÃ©tails du flux Ã‰cosystÃ¨me â†’ Produit (voir [Ecosystem-to-Product Flow](../flows/BondingBrother%20-%20Ecosystem-to-Product%20Flow.md))
-- Les rÃ¨gles d'adaptation des produits (voir [Product Adaptation Rules](./BondingBrother%20-%20Product%20Adaptation%20Rules.md))
-- Les mÃ©canismes d'extension (voir [Extension & Specialization Contract](./BondingBrother%20-%20Extension%20&%20Specialization%20Contract.md))
+- Les détails du flux Produit → Écosystème (voir [Product-to-Ecosystem Flow](../flows/BondingBrother%20-%20Product-to-Ecosystem%20Flow.md))
+- Les détails du flux Écosystème → Produit (voir [Ecosystem-to-Product Flow](../flows/BondingBrother%20-%20Ecosystem-to-Product%20Flow.md))
+- Les règles d'adaptation des produits (voir [Product Adaptation Rules](./BondingBrother%20-%20Product%20Adaptation%20Rules.md))
+- Les mécanismes d'extension (voir [Extension & Specialization Contract](./BondingBrother%20-%20Extension%20&%20Specialization%20Contract.md))
 
 ---
 
 ## 3. Principe fondamental
 
-**Bonding Brother offre une interface stable aux produits. Cette stabilitÃ© est fondamentale : les produits s'adaptent Ã  Bonding Brother, jamais l'inverse.**
+**Bonding Brother offre une interface stable aux produits. Cette stabilité est fondamentale : les produits s'adaptent à Bonding Brother, jamais l'inverse.**
 
-L'interface est versionnÃ©e, documentÃ©e, et Ã©volue selon des rÃ¨gles strictes de compatibilitÃ©. Les produits peuvent s'appuyer sur cette interface sans crainte de rupture.
+L'interface est versionnée, documentée, et évolue selon des règles strictes de compatibilité. Les produits peuvent s'appuyer sur cette interface sans crainte de rupture.
 
 ---
 
 ## 4. Interface de soumission d'intentions
 
-### 4.1 Point d'entrÃ©e
+### 4.1 Point d'entrée
 
 **Interface :** `IIntentSubmission`
 
 **Endpoint :** `/api/v1/intentions`
 
-**MÃ©thode :** `POST`
+**Méthode :** `POST`
 
 **Format :** JSON
 
@@ -52,64 +52,64 @@ L'interface est versionnÃ©e, documentÃ©e, et Ã©volue selon des rÃ¨gles s
 ```typescript
 interface IntentionSubmission {
     // Identifiants
-    id?: IntentionId;                    // Optionnel (gÃ©nÃ©rÃ© si absent)
+    id?: IntentionId;                    // Optionnel (généré si absent)
     produit_id: ProduitId;               // Obligatoire
     
     // Type et contenu
     type: TypeIntention;                  // Obligatoire (type canonique)
-    payload: PayloadSpÃ©cifique;         // Obligatoire (structure dÃ©pend du type)
+    payload: PayloadSpécifique;         // Obligatoire (structure dépend du type)
     
     // Contexte
     contexte: Contexte;                   // Obligatoire (voir Section 5)
     
-    // MÃ©tadonnÃ©es
-    timestamp?: Timestamp;                // Optionnel (gÃ©nÃ©rÃ© si absent)
-    version?: VersionIntention;          // Optionnel (dÃ©faut: derniÃ¨re version)
-    corrÃ©lation_id?: CorrÃ©lationId;      // Optionnel (pour traÃ§abilitÃ© distribuÃ©e)
+    // Métadonnées
+    timestamp?: Timestamp;                // Optionnel (généré si absent)
+    version?: VersionIntention;          // Optionnel (défaut: dernière version)
+    corrélation_id?: CorrélationId;      // Optionnel (pour traçabilité distribuée)
 }
 ```
 
-### 4.3 RÃ¨gles de soumission
+### 4.3 Règles de soumission
 
-**RÃ¨gle SUB-01 : Format JSON valide**
+**Règle SUB-01 : Format JSON valide**
 
-L'intention doit Ãªtre un JSON valide, parsable sans erreur.
+L'intention doit être un JSON valide, parsable sans erreur.
 
-**RÃ¨gle SUB-02 : Champs obligatoires**
+**Règle SUB-02 : Champs obligatoires**
 
-Tous les champs marquÃ©s comme obligatoires doivent Ãªtre prÃ©sents :
+Tous les champs marqués comme obligatoires doivent être présents :
 - `produit_id`
 - `type`
 - `payload`
 - `contexte`
 
-**RÃ¨gle SUB-03 : Types de donnÃ©es**
+**Règle SUB-03 : Types de données**
 
-Chaque champ doit respecter son type dÃ©clarÃ©.
+Chaque champ doit respecter son type déclaré.
 
-**RÃ¨gle SUB-04 : Version supportÃ©e**
+**Règle SUB-04 : Version supportée**
 
-La version du schÃ©ma doit Ãªtre supportÃ©e par Bonding Brother. Les versions obsolÃ¨tes sont rejetÃ©es.
+La version du schéma doit être supportée par Bonding Brother. Les versions obsolètes sont rejetées.
 
-**RÃ¨gle SUB-05 : Type reconnu**
+**Règle SUB-05 : Type reconnu**
 
-Le type d'intention doit Ãªtre un type canonique reconnu par Bonding Brother.
+Le type d'intention doit être un type canonique reconnu par Bonding Brother.
 
-### 4.4 RÃ©ponse Ã  la soumission
+### 4.4 Réponse à la soumission
 
-**Format de rÃ©ponse :**
+**Format de réponse :**
 
 ```typescript
 interface SubmissionResponse {
     // Identifiants
-    intention_id: IntentionId;           // ID de l'intention (confirmÃ© ou gÃ©nÃ©rÃ©)
+    intention_id: IntentionId;           // ID de l'intention (confirmé ou généré)
     
     // Statut
-    statut: StatutSoumission;            // ACCEPTÃ‰E, REJETÃ‰E, EN_ERREUR
+    statut: StatutSoumission;            // ACCEPTÉE, REJETÉE, EN_ERREUR
     
-    // MÃ©tadonnÃ©es
-    timestamp: Timestamp;                 // Timestamp de rÃ©ception
-    version: VersionIntention;            // Version utilisÃ©e
+    // Métadonnées
+    timestamp: Timestamp;                 // Timestamp de réception
+    version: VersionIntention;            // Version utilisée
     
     // Erreurs (si applicable)
     erreurs?: ErreurSoumission[];        // Erreurs de validation
@@ -117,101 +117,101 @@ interface SubmissionResponse {
 ```
 
 **Statuts possibles :**
-- `ACCEPTÃ‰E` : Intention acceptÃ©e et en cours de traitement
-- `REJETÃ‰E` : Intention rejetÃ©e (validation Ã©chouÃ©e)
-- `EN_ERREUR` : Erreur technique lors de la rÃ©ception
+- `ACCEPTÉE` : Intention acceptée et en cours de traitement
+- `REJETÉE` : Intention rejetée (validation échouée)
+- `EN_ERREUR` : Erreur technique lors de la réception
 
-**RÃ¨gle SUB-06 : RÃ©ponse immÃ©diate**
+**Règle SUB-06 : Réponse immédiate**
 
-La rÃ©ponse Ã  la soumission est immÃ©diate (synchronisÃ©e). Elle indique uniquement l'acceptation ou le rejet de la structure, pas le rÃ©sultat de l'intention.
+La réponse à la soumission est immédiate (synchronisée). Elle indique uniquement l'acceptation ou le rejet de la structure, pas le résultat de l'intention.
 
-**RÃ¨gle SUB-07 : Pas de rÃ©sultat dans la rÃ©ponse**
+**Règle SUB-07 : Pas de résultat dans la réponse**
 
-La rÃ©ponse de soumission ne contient pas le rÃ©sultat de l'intention. Le rÃ©sultat arrive via l'interface de consommation (asynchrone).
+La réponse de soumission ne contient pas le résultat de l'intention. Le résultat arrive via l'interface de consommation (asynchrone).
 
 ---
 
-## 5. Interface de consommation de rÃ©sultats
+## 5. Interface de consommation de résultats
 
-### 5.1 Point de rÃ©ception
+### 5.1 Point de réception
 
 **Interface :** `IResultConsumption`
 
-**MÃ©canisme :** Callback ou polling (selon configuration)
+**Mécanisme :** Callback ou polling (selon configuration)
 
 **Format :** JSON
 
-### 5.2 Structure du rÃ©sultat
+### 5.2 Structure du résultat
 
 ```typescript
-interface RÃ©sultat {
+interface Résultat {
     // Identifiants
-    rÃ©sultat_id: RÃ©sultatId;             // ID unique du rÃ©sultat
+    résultat_id: RésultatId;             // ID unique du résultat
     intention_id: IntentionId;           // ID de l'intention source
-    demande_id?: DemandeId;              // ID de la demande (traÃ§abilitÃ©)
+    demande_id?: DemandeId;              // ID de la demande (traçabilité)
     
     // Statut
-    statut: StatutRÃ©sultat;              // SUCCÃˆS, REFUSÃ‰, ERREUR
-    dÃ©cision: DÃ©cisionAutoritÃ©;          // DÃ©cision de l'autoritÃ© (traduite)
+    statut: StatutRésultat;              // SUCCÈS, REFUSÉ, ERREUR
+    décision: DécisionAutorité;          // Décision de l'autorité (traduite)
     
-    // DonnÃ©es (si applicable)
-    donnÃ©es?: DonnÃ©esTraduites;          // DonnÃ©es traduites pour le produit
+    // Données (si applicable)
+    données?: DonnéesTraduites;          // Données traduites pour le produit
     
     // Erreurs (si applicable)
     erreurs?: ErreurTraduite[];          // Erreurs dans le vocabulaire produit
     
-    // MÃ©tadonnÃ©es
-    timestamp: Timestamp;                 // Timestamp de la rÃ©ponse
-    autoritÃ©: AutoritÃ©Id;                // AutoritÃ© qui a rÃ©pondu (Kind Mother ou Strong Father)
-    durÃ©e_traitement?: DurÃ©e;             // DurÃ©e de traitement (si disponible)
+    // Métadonnées
+    timestamp: Timestamp;                 // Timestamp de la réponse
+    autorité: AutoritéId;                // Autorité qui a répondu (Kind Mother ou Strong Father)
+    durée_traitement?: Durée;             // Durée de traitement (si disponible)
 }
 ```
 
-### 5.3 Statuts de rÃ©sultat
+### 5.3 Statuts de résultat
 
 **Statuts possibles :**
 
-| Statut | Signification | DonnÃ©es prÃ©sentes |
+| Statut | Signification | Données présentes |
 |--------|---------------|-------------------|
-| `SUCCÃˆS` | Intention acceptÃ©e et exÃ©cutÃ©e | Oui (donnÃ©es de rÃ©sultat) |
-| `REFUSÃ‰` | Intention refusÃ©e par l'autoritÃ© | Non (raison du refus) |
-| `ERREUR` | Erreur technique ou mÃ©tier | Non (dÃ©tails de l'erreur) |
-| `TIMEOUT` | DÃ©lai d'attente dÃ©passÃ© | Non |
-| `ABANDONNÃ‰E` | Intention abandonnÃ©e | Non (raison) |
+| `SUCCÈS` | Intention acceptée et exécutée | Oui (données de résultat) |
+| `REFUSÉ` | Intention refusée par l'autorité | Non (raison du refus) |
+| `ERREUR` | Erreur technique ou métier | Non (détails de l'erreur) |
+| `TIMEOUT` | Délai d'attente dépassé | Non |
+| `ABANDONNÉE` | Intention abandonnée | Non (raison) |
 
-**RÃ¨gle RES-01 : Un rÃ©sultat par intention**
+**Règle RES-01 : Un résultat par intention**
 
-Chaque intention acceptÃ©e reÃ§oit exactement un rÃ©sultat (succÃ¨s, refus, ou erreur).
+Chaque intention acceptée reçoit exactement un résultat (succès, refus, ou erreur).
 
-**RÃ¨gle RES-02 : RÃ©sultat asynchrone**
+**Règle RES-02 : Résultat asynchrone**
 
-Le rÃ©sultat arrive de maniÃ¨re asynchrone, aprÃ¨s l'Ã©valuation par l'autoritÃ©.
+Le résultat arrive de manière asynchrone, après l'évaluation par l'autorité.
 
-**RÃ¨gle RES-03 : Ordre prÃ©servÃ©**
+**Règle RES-03 : Ordre préservé**
 
-Pour une mÃªme intention, l'ordre des rÃ©sultats est prÃ©servÃ© (FIFO).
+Pour une même intention, l'ordre des résultats est préservé (FIFO).
 
-**RÃ¨gle RES-04 : RÃ©sultat complet**
+**Règle RES-04 : Résultat complet**
 
-Le rÃ©sultat contient toutes les informations nÃ©cessaires et autorisÃ©es pour le produit.
+Le résultat contient toutes les informations nécessaires et autorisées pour le produit.
 
-### 5.4 MÃ©canismes de rÃ©ception
+### 5.4 Mécanismes de réception
 
-**Option 1 : Callback (recommandÃ©)**
+**Option 1 : Callback (recommandé)**
 
-Le produit fournit une URL de callback lors de la soumission. Bonding Brother appelle cette URL avec le rÃ©sultat.
+Le produit fournit une URL de callback lors de la soumission. Bonding Brother appelle cette URL avec le résultat.
 
 **Option 2 : Polling**
 
-Le produit interroge rÃ©guliÃ¨rement Bonding Brother pour rÃ©cupÃ©rer les rÃ©sultats.
+Le produit interroge régulièrement Bonding Brother pour récupérer les résultats.
 
 **Option 3 : Webhook**
 
-Le produit s'abonne Ã  un webhook pour recevoir les rÃ©sultats.
+Le produit s'abonne à un webhook pour recevoir les résultats.
 
-**RÃ¨gle RES-05 : MÃ©canisme configurable**
+**Règle RES-05 : Mécanisme configurable**
 
-Le mÃ©canisme de rÃ©ception est configurable par produit, avec callback comme option par dÃ©faut.
+Le mécanisme de réception est configurable par produit, avec callback comme option par défaut.
 
 ---
 
@@ -223,7 +223,7 @@ Le mÃ©canisme de rÃ©ception est configurable par produit, avec callback comm
 
 **Endpoint :** `/api/v1/notifications/subscribe`
 
-**MÃ©thode :** `POST`
+**Méthode :** `POST`
 
 **Format :** JSON
 
@@ -233,18 +233,18 @@ Le mÃ©canisme de rÃ©ception est configurable par produit, avec callback comm
 interface AbonnementNotification {
     // Identifiants
     produit_id: ProduitId;               // Obligatoire
-    abonnement_id?: AbonnementId;         // Optionnel (gÃ©nÃ©rÃ© si absent)
+    abonnement_id?: AbonnementId;         // Optionnel (généré si absent)
     
     // Types de notifications
-    types: TypeNotification[];           // Obligatoire (types souhaitÃ©s)
+    types: TypeNotification[];           // Obligatoire (types souhaités)
     
     // Filtres
-    filtres?: FiltresNotification;        // Optionnel (filtres spÃ©cifiques)
+    filtres?: FiltresNotification;        // Optionnel (filtres spécifiques)
     
     // Destination
-    callback_url: URL;                   // Obligatoire (URL de rÃ©ception)
+    callback_url: URL;                   // Obligatoire (URL de réception)
     
-    // MÃ©tadonnÃ©es
+    // Métadonnées
     timestamp?: Timestamp;                // Optionnel
 }
 ```
@@ -253,23 +253,23 @@ interface AbonnementNotification {
 
 **Types disponibles :**
 
-| Type | Description | DÃ©clencheur |
+| Type | Description | Déclencheur |
 |------|-------------|-------------|
-| `CONTENT_CREATED` | Contenu crÃ©Ã© | Kind Mother crÃ©e un contenu |
-| `CONTENT_UPDATED` | Contenu modifiÃ© | Kind Mother modifie un contenu |
-| `CONTENT_DELETED` | Contenu supprimÃ© | Kind Mother supprime un contenu |
-| `HIERARCHY_CHANGED` | HiÃ©rarchie modifiÃ©e | Kind Mother modifie la hiÃ©rarchie |
-| `PERMISSION_CHANGED` | Permission modifiÃ©e | Strong Father modifie une permission |
-| `SESSION_REVOKED` | Session rÃ©voquÃ©e | Strong Father rÃ©voque une session |
-| `SYSTEM_EVENT` | Ã‰vÃ©nement systÃ¨me | Ã‰vÃ©nement systÃ¨me |
+| `CONTENT_CREATED` | Contenu créé | Kind Mother crée un contenu |
+| `CONTENT_UPDATED` | Contenu modifié | Kind Mother modifie un contenu |
+| `CONTENT_DELETED` | Contenu supprimé | Kind Mother supprime un contenu |
+| `HIERARCHY_CHANGED` | Hiérarchie modifiée | Kind Mother modifie la hiérarchie |
+| `PERMISSION_CHANGED` | Permission modifiée | Strong Father modifie une permission |
+| `SESSION_REVOKED` | Session révoquée | Strong Father révoque une session |
+| `SYSTEM_EVENT` | Événement système | Événement système |
 
-**RÃ¨gle NOTIF-01 : Types canoniques**
+**Règle NOTIF-01 : Types canoniques**
 
-Les types de notifications sont dÃ©finis de maniÃ¨re canonique. Un nouveau type nÃ©cessite une version majeure.
+Les types de notifications sont définis de manière canonique. Un nouveau type nécessite une version majeure.
 
-**RÃ¨gle NOTIF-02 : Filtres optionnels**
+**Règle NOTIF-02 : Filtres optionnels**
 
-Les filtres permettent de restreindre les notifications reÃ§ues (ex: uniquement pour certaines ressources).
+Les filtres permettent de restreindre les notifications reçues (ex: uniquement pour certaines ressources).
 
 ### 6.4 Structure de la notification
 
@@ -281,68 +281,68 @@ interface Notification {
     
     // Type et contenu
     type: TypeNotification;               // Type de notification
-    donnÃ©es: DonnÃ©esNotification;         // DonnÃ©es de la notification
+    données: DonnéesNotification;         // Données de la notification
     
-    // MÃ©tadonnÃ©es
-    timestamp: Timestamp;                 // Timestamp de l'Ã©vÃ©nement
-    autoritÃ©: AutoritÃ©Id;                 // AutoritÃ© source (Kind Mother ou Strong Father)
-    corrÃ©lation_id?: CorrÃ©lationId;       // ID de corrÃ©lation (si applicable)
+    // Métadonnées
+    timestamp: Timestamp;                 // Timestamp de l'événement
+    autorité: AutoritéId;                 // Autorité source (Kind Mother ou Strong Father)
+    corrélation_id?: CorrélationId;       // ID de corrélation (si applicable)
 }
 ```
 
-**RÃ¨gle NOTIF-03 : Notification asynchrone**
+**Règle NOTIF-03 : Notification asynchrone**
 
-Les notifications sont envoyÃ©es de maniÃ¨re asynchrone, sans garantie d'ordre (sauf pour les notifications corrÃ©lÃ©es).
+Les notifications sont envoyées de manière asynchrone, sans garantie d'ordre (sauf pour les notifications corrélées).
 
-**RÃ¨gle NOTIF-04 : Notification unique**
+**Règle NOTIF-04 : Notification unique**
 
-Chaque Ã©vÃ©nement gÃ©nÃ¨re une notification unique, envoyÃ©e Ã  tous les produits abonnÃ©s concernÃ©s.
+Chaque événement génère une notification unique, envoyée à tous les produits abonnés concernés.
 
-**RÃ¨gle NOTIF-05 : Retry en cas d'Ã©chec**
+**Règle NOTIF-05 : Retry en cas d'échec**
 
-En cas d'Ã©chec de livraison, Bonding Brother retente selon une politique dÃ©finie.
+En cas d'échec de livraison, Bonding Brother retente selon une politique définie.
 
 ---
 
-## 7. Formats de donnÃ©es standardisÃ©s
+## 7. Formats de données standardisés
 
 ### 7.1 Format JSON
 
-**RÃ¨gle FORMAT-01 : JSON strict**
+**Règle FORMAT-01 : JSON strict**
 
-Tous les Ã©changes utilisent JSON strict, avec validation de schÃ©ma.
+Tous les échanges utilisent JSON strict, avec validation de schéma.
 
-**RÃ¨gle FORMAT-02 : Encodage UTF-8**
+**Règle FORMAT-02 : Encodage UTF-8**
 
-Tous les textes sont encodÃ©s en UTF-8.
+Tous les textes sont encodés en UTF-8.
 
-**RÃ¨gle FORMAT-03 : Dates ISO 8601**
+**Règle FORMAT-03 : Dates ISO 8601**
 
 Toutes les dates sont au format ISO 8601 : `YYYY-MM-DDTHH:mm:ssZ`
 
-### 7.2 Types de donnÃ©es
+### 7.2 Types de données
 
-**Types primitifs supportÃ©s :**
-- `string` : ChaÃ®ne de caractÃ¨res UTF-8
-- `number` : Nombre (entier ou dÃ©cimal)
-- `boolean` : BoolÃ©en
+**Types primitifs supportés :**
+- `string` : Chaîne de caractères UTF-8
+- `number` : Nombre (entier ou décimal)
+- `boolean` : Booléen
 - `null` : Valeur nulle
 
-**Types complexes supportÃ©s :**
+**Types complexes supportés :**
 - `object` : Objet JSON
 - `array` : Tableau JSON
 
-**RÃ¨gle FORMAT-04 : Types stricts**
+**Règle FORMAT-04 : Types stricts**
 
-Les types de donnÃ©es sont stricts. Pas de conversion implicite.
+Les types de données sont stricts. Pas de conversion implicite.
 
 ### 7.3 Vocabulaire canonique
 
-**RÃ¨gle FORMAT-05 : Vocabulaire standard**
+**Règle FORMAT-05 : Vocabulaire standard**
 
-Tous les termes utilisÃ©s dans l'interface suivent le vocabulaire canonique dÃ©fini dans le [Vocabulary & Glossary](../../reference/BondingBrother%20-%20Vocabulary%20&%20Glossary.md).
+Tous les termes utilisés dans l'interface suivent le vocabulaire canonique défini dans le [Vocabulary & Glossary](../../reference/BondingBrother%20-%20Vocabulary%20&%20Glossary.md).
 
-**RÃ¨gle FORMAT-06 : Pas de synonymes**
+**Règle FORMAT-06 : Pas de synonymes**
 
 Les synonymes sont interdits. Un seul terme par concept.
 
@@ -352,30 +352,30 @@ Les synonymes sont interdits. Un seul terme par concept.
 
 ### 8.1 Protocole HTTP/HTTPS
 
-**RÃ¨gle PROTO-01 : HTTPS obligatoire**
+**Règle PROTO-01 : HTTPS obligatoire**
 
-Toutes les communications utilisent HTTPS en production. HTTP est autorisÃ© uniquement en dÃ©veloppement.
+Toutes les communications utilisent HTTPS en production. HTTP est autorisé uniquement en développement.
 
-**RÃ¨gle PROTO-02 : Version HTTP**
+**Règle PROTO-02 : Version HTTP**
 
-HTTP/1.1 ou HTTP/2 sont supportÃ©s. HTTP/3 est supportÃ© si disponible.
+HTTP/1.1 ou HTTP/2 sont supportés. HTTP/3 est supporté si disponible.
 
-**RÃ¨gle PROTO-03 : MÃ©thodes REST**
+**Règle PROTO-03 : Méthodes REST**
 
-Les mÃ©thodes REST standard sont utilisÃ©es :
-- `POST` : CrÃ©ation (soumission d'intention, abonnement)
-- `GET` : Lecture (polling de rÃ©sultats)
-- `DELETE` : Suppression (dÃ©sabonnement)
+Les méthodes REST standard sont utilisées :
+- `POST` : Création (soumission d'intention, abonnement)
+- `GET` : Lecture (polling de résultats)
+- `DELETE` : Suppression (désabonnement)
 
 ### 8.2 Authentification
 
-**RÃ¨gle PROTO-04 : Authentification requise**
+**Règle PROTO-04 : Authentification requise**
 
-Toutes les requÃªtes doivent Ãªtre authentifiÃ©es. Le mÃ©canisme d'authentification est dÃ©fini par Strong Father.
+Toutes les requêtes doivent être authentifiées. Le mécanisme d'authentification est défini par Strong Father.
 
-**RÃ¨gle PROTO-05 : Tokens**
+**Règle PROTO-05 : Tokens**
 
-Les tokens d'authentification sont fournis via les en-tÃªtes HTTP standard (`Authorization: Bearer <token>`).
+Les tokens d'authentification sont fournis via les en-têtes HTTP standard (`Authorization: Bearer <token>`).
 
 ### 8.3 Gestion des erreurs HTTP
 
@@ -383,104 +383,104 @@ Les tokens d'authentification sont fournis via les en-tÃªtes HTTP standard (`A
 
 | Code | Signification | Usage |
 |------|--------------|-------|
-| `200 OK` | SuccÃ¨s | RÃ©ponse normale |
-| `201 Created` | CrÃ©Ã© | Intention acceptÃ©e |
-| `400 Bad Request` | RequÃªte invalide | Validation Ã©chouÃ©e |
-| `401 Unauthorized` | Non autorisÃ© | Authentification Ã©chouÃ©e |
+| `200 OK` | Succès | Réponse normale |
+| `201 Created` | Créé | Intention acceptée |
+| `400 Bad Request` | Requête invalide | Validation échouée |
+| `401 Unauthorized` | Non autorisé | Authentification échouée |
 | `403 Forbidden` | Interdit | Permission insuffisante |
-| `404 Not Found` | Non trouvÃ© | Ressource inexistante |
-| `429 Too Many Requests` | Trop de requÃªtes | Rate limiting |
+| `404 Not Found` | Non trouvé | Ressource inexistante |
+| `429 Too Many Requests` | Trop de requêtes | Rate limiting |
 | `500 Internal Server Error` | Erreur serveur | Erreur technique |
 | `503 Service Unavailable` | Service indisponible | Service temporairement indisponible |
 
-**RÃ¨gle PROTO-06 : Corps d'erreur**
+**Règle PROTO-06 : Corps d'erreur**
 
 Toutes les erreurs HTTP incluent un corps JSON avec :
 - `code` : Code d'erreur canonique
 - `message` : Message d'erreur lisible
-- `dÃ©tails` : DÃ©tails optionnels
+- `détails` : Détails optionnels
 
 ---
 
-## 9. Garanties de stabilitÃ©
+## 9. Garanties de stabilité
 
-### 9.1 StabilitÃ© de l'interface
+### 9.1 Stabilité de l'interface
 
-**RÃ¨gle STAB-01 : Interface versionnÃ©e**
+**Règle STAB-01 : Interface versionnée**
 
-L'interface est versionnÃ©e. Les versions majeures introduisent des changements incompatibles. Les versions mineures ajoutent des fonctionnalitÃ©s compatibles.
+L'interface est versionnée. Les versions majeures introduisent des changements incompatibles. Les versions mineures ajoutent des fonctionnalités compatibles.
 
-**RÃ¨gle STAB-02 : RÃ©trocompatibilitÃ©**
+**Règle STAB-02 : Rétrocompatibilité**
 
-Les versions mineures sont rÃ©trocompatibles. Un produit utilisant la version N fonctionne avec la version N+1 (mineure).
+Les versions mineures sont rétrocompatibles. Un produit utilisant la version N fonctionne avec la version N+1 (mineure).
 
-**RÃ¨gle STAB-03 : DÃ©prÃ©ciation**
+**Règle STAB-03 : Dépréciation**
 
-Les fonctionnalitÃ©s dÃ©prÃ©ciÃ©es sont annoncÃ©es Ã  l'avance et maintenues pendant au moins une version majeure.
+Les fonctionnalités dépréciées sont annoncées à l'avance et maintenues pendant au moins une version majeure.
 
-**RÃ¨gle STAB-04 : Pas de changement imprÃ©visible**
+**Règle STAB-04 : Pas de changement imprévisible**
 
-L'interface ne change jamais de maniÃ¨re imprÃ©visible ou rÃ©tro-incompatible sans processus formel de versionnement.
+L'interface ne change jamais de manière imprévisible ou rétro-incompatible sans processus formel de versionnement.
 
-### 9.2 Garantie de disponibilitÃ©
+### 9.2 Garantie de disponibilité
 
-**RÃ¨gle STAB-05 : DisponibilitÃ©**
+**Règle STAB-05 : Disponibilité**
 
-Bonding Brother garantit une disponibilitÃ© Ã©levÃ©e (SLA dÃ©fini sÃ©parÃ©ment).
+Bonding Brother garantit une disponibilité élevée (SLA défini séparément).
 
-**RÃ¨gle STAB-06 : Mode offline**
+**Règle STAB-06 : Mode offline**
 
-Bonding Brother fonctionne en mode offline, avec synchronisation Ã  la reconnexion.
+Bonding Brother fonctionne en mode offline, avec synchronisation à la reconnexion.
 
 ### 9.3 Garantie de performance
 
-**RÃ¨gle STAB-07 : Temps de rÃ©ponse**
+**Règle STAB-07 : Temps de réponse**
 
-Les temps de rÃ©ponse sont documentÃ©s et respectÃ©s (mÃ©triques dÃ©finies sÃ©parÃ©ment).
+Les temps de réponse sont documentés et respectés (métriques définies séparément).
 
-**RÃ¨gle STAB-08 : Throughput**
+**Règle STAB-08 : Throughput**
 
-Le throughput est documentÃ© et respectÃ© (limites dÃ©finies sÃ©parÃ©ment).
+Le throughput est documenté et respecté (limites définies séparément).
 
 ---
 
 ## 10. Versionnement
 
-### 10.1 SchÃ©ma de versionnement
+### 10.1 Schéma de versionnement
 
 **Format :** `v<MAJEURE>.<MINEURE>.<PATCH>`
 
 **Exemple :** `v1.2.3`
 
-**RÃ¨gle VERS-01 : Version majeure**
+**Règle VERS-01 : Version majeure**
 
 Les versions majeures introduisent des changements incompatibles. Migration requise.
 
-**RÃ¨gle VERS-02 : Version mineure**
+**Règle VERS-02 : Version mineure**
 
-Les versions mineures ajoutent des fonctionnalitÃ©s compatibles. Pas de migration requise.
+Les versions mineures ajoutent des fonctionnalités compatibles. Pas de migration requise.
 
-**RÃ¨gle VERS-03 : Version patch**
+**Règle VERS-03 : Version patch**
 
 Les versions patch corrigent des bugs. Pas de changement d'interface.
 
 ### 10.2 Gestion des versions
 
-**RÃ¨gle VERS-04 : Version dans l'URL**
+**Règle VERS-04 : Version dans l'URL**
 
-La version est spÃ©cifiÃ©e dans l'URL : `/api/v1/...`
+La version est spécifiée dans l'URL : `/api/v1/...`
 
-**RÃ¨gle VERS-05 : Version dans les donnÃ©es**
+**Règle VERS-05 : Version dans les données**
 
-La version du schÃ©ma peut Ãªtre spÃ©cifiÃ©e dans les donnÃ©es (optionnel).
+La version du schéma peut être spécifiée dans les données (optionnel).
 
-**RÃ¨gle VERS-06 : Support multi-versions**
+**Règle VERS-06 : Support multi-versions**
 
-Bonding Brother peut supporter plusieurs versions simultanÃ©ment, avec dÃ©prÃ©ciation progressive.
+Bonding Brother peut supporter plusieurs versions simultanément, avec dépréciation progressive.
 
-**RÃ¨gle VERS-07 : Migration**
+**Règle VERS-07 : Migration**
 
-Les migrations entre versions majeures sont documentÃ©es et supportÃ©es.
+Les migrations entre versions majeures sont documentées et supportées.
 
 ---
 
@@ -488,7 +488,7 @@ Les migrations entre versions majeures sont documentÃ©es et supportÃ©es.
 
 ### 11.1 Soumission d'intention
 
-**RequÃªte :**
+**Requête :**
 ```http
 POST /api/v1/intentions HTTP/1.1
 Host: bonding-brother.example.com
@@ -510,44 +510,44 @@ Content-Type: application/json
 }
 ```
 
-**RÃ©ponse :**
+**Réponse :**
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
 
 {
   "intention_id": "int-123",
-  "statut": "ACCEPTÃ‰E",
+  "statut": "ACCEPTÉE",
   "timestamp": "2026-01-28T10:00:00Z",
   "version": "1.0.0"
 }
 ```
 
-### 11.2 RÃ©ception de rÃ©sultat (callback)
+### 11.2 Réception de résultat (callback)
 
-**RequÃªte de Bonding Brother vers le produit :**
+**Requête de Bonding Brother vers le produit :**
 ```http
 POST https://produit.example.com/callback HTTP/1.1
 Host: produit.example.com
 Content-Type: application/json
 
 {
-  "rÃ©sultat_id": "res-111",
+  "résultat_id": "res-111",
   "intention_id": "int-123",
-  "statut": "SUCCÃˆS",
-  "dÃ©cision": "ACCEPTÃ‰E",
-  "donnÃ©es": {
+  "statut": "SUCCÈS",
+  "décision": "ACCEPTÉE",
+  "données": {
     "id": "content-999",
     "titre": "Mon article"
   },
   "timestamp": "2026-01-28T10:05:00Z",
-  "autoritÃ©": "kind_mother"
+  "autorité": "kind_mother"
 }
 ```
 
 ### 11.3 Abonnement aux notifications
 
-**RequÃªte :**
+**Requête :**
 ```http
 POST /api/v1/notifications/subscribe HTTP/1.1
 Host: bonding-brother.example.com
@@ -561,7 +561,7 @@ Content-Type: application/json
 }
 ```
 
-**RÃ©ponse :**
+**Réponse :**
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
@@ -573,9 +573,9 @@ Content-Type: application/json
 }
 ```
 
-### 11.4 Notification reÃ§ue
+### 11.4 Notification reçue
 
-**RequÃªte de Bonding Brother vers le produit :**
+**Requête de Bonding Brother vers le produit :**
 ```http
 POST https://produit.example.com/notifications HTTP/1.1
 Host: produit.example.com
@@ -585,12 +585,12 @@ Content-Type: application/json
   "notification_id": "notif-789",
   "abonnement_id": "sub-456",
   "type": "CONTENT_CREATED",
-  "donnÃ©es": {
+  "données": {
     "content_id": "content-999",
     "titre": "Mon article"
   },
   "timestamp": "2026-01-28T10:10:00Z",
-  "autoritÃ©": "kind_mother"
+  "autorité": "kind_mother"
 }
 ```
 
@@ -598,16 +598,16 @@ Content-Type: application/json
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface stable que Bonding Brother expose aux produits et que tous les produits doivent respecter pour interagir avec l'Ã©cosystÃ¨me.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface stable que Bonding Brother expose aux produits et que tous les produits doivent respecter pour interagir avec l'écosystème.
 
-Toute implÃ©mentation de l'interface produit de Bonding Brother doit respecter ce contrat. Toute Ã©volution doit suivre les rÃ¨gles de versionnement dÃ©finies.
+Toute implémentation de l'interface produit de Bonding Brother doit respecter ce contrat. Toute évolution doit suivre les règles de versionnement définies.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0 (Section 7)
 - [Bilateral Flow Contract](../flows/BondingBrother%20-%20Bilateral%20Flow%20Contract.md) v2.0
 - [Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) v2.0

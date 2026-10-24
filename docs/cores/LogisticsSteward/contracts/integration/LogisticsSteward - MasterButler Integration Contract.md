@@ -2,169 +2,169 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le **contrat d'intÃ©gration entre LogisticsSteward et MasterButler**. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration avec MasterButler en tant que registre des capacitÃ©s et permissions.
+Ce document définit le **contrat d'intégration entre LogisticsSteward et MasterButler**. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration avec MasterButler en tant que registre des capacités et permissions.
 
-Ce document complÃ¨te la Section 8.3 de la [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+Ce document complète la Section 8.3 de la [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
 - [LogisticsSteward - Architecture & Flows](../../architecture/LogisticsSteward%20-%20Architecture%20&%20Flows.md) pour les flux d'arbitrage
-- [LogisticsSteward - Quota Definition Contract](../resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md) pour la dÃ©finition des quotas
+- [LogisticsSteward - Quota Definition Contract](../resources/LogisticsSteward%20-%20Quota%20Definition%20Contract.md) pour la définition des quotas
 - [Master Butler - Documentation Fondatrice](../../../MasterButler/foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) pour la nature de MasterButler
-- [Master Butler - Capability API Contract](../../../MasterButler/contracts/api/Master%20Butler%20-%20Capability%20API%20Contract.md) pour l'API des capacitÃ©s
+- [Master Butler - Capability API Contract](../../../MasterButler/contracts/api/Master%20Butler%20-%20Capability%20API%20Contract.md) pour l'API des capacités
 
-L'intÃ©gration respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interactions sont locales et ne requiÃ¨rent aucune dÃ©pendance externe (**LOI-1**).
+L'intégration respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interactions sont locales et ne requièrent aucune dépendance externe (**LOI-1**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre LogisticsSteward et MasterButler
 - Le protocole de communication (interrogations et limitations)
-- Les types d'interactions LogisticsSteward â†’ MasterButler
-- Les rÃ¨gles d'intÃ©gration spÃ©cifiques
-- La gestion des erreurs et des rÃ©ponses
-- Les garanties de l'intÃ©gration
+- Les types d'interactions LogisticsSteward → MasterButler
+- Les règles d'intégration spécifiques
+- La gestion des erreurs et des réponses
+- Les garanties de l'intégration
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails internes de MasterButler (voir documentation MasterButler)
-- Les dÃ©tails des registres de capacitÃ©s (voir Capability Registry Contract)
-- Les stratÃ©gies de dÃ©gradation (voir Degradation Strategy Contract)
-- L'intÃ©gration avec StrongFather (voir StrongFather Integration Contract)
+- Les détails internes de MasterButler (voir documentation MasterButler)
+- Les détails des registres de capacités (voir Capability Registry Contract)
+- Les stratégies de dégradation (voir Degradation Strategy Contract)
+- L'intégration avec StrongFather (voir StrongFather Integration Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**MasterButler expose les capacitÃ©s existantes. LogisticsSteward limite leur usage sans jamais modifier leur existence. MasterButler dit ce qui est possible, LogisticsSteward dit ce qui est autorisÃ© en termes de ressources.**
+**MasterButler expose les capacités existantes. LogisticsSteward limite leur usage sans jamais modifier leur existence. MasterButler dit ce qui est possible, LogisticsSteward dit ce qui est autorisé en termes de ressources.**
 
 La relation est de **consultation et de limitation** :
-- LogisticsSteward interroge MasterButler pour connaÃ®tre les capacitÃ©s disponibles
-- LogisticsSteward applique des limitations d'usage sur ces capacitÃ©s
-- MasterButler reflÃ¨te ces limitations sans les interprÃ©ter
+- LogisticsSteward interroge MasterButler pour connaître les capacités disponibles
+- LogisticsSteward applique des limitations d'usage sur ces capacités
+- MasterButler reflète ces limitations sans les interpréter
 
-La sÃ©paration est absolue : **l'existence d'une capacitÃ© est du ressort de MasterButler, la limitation de son usage est du ressort de LogisticsSteward**.
+La séparation est absolue : **l'existence d'une capacité est du ressort de MasterButler, la limitation de son usage est du ressort de LogisticsSteward**.
 
 ---
 
-## 4. Nature de la relation LogisticsSteward â€” MasterButler
+## 4. Nature de la relation LogisticsSteward — MasterButler
 
 ### 4.1 Relation de consultation et limitation
 
 **LogisticsSteward consulte MasterButler pour :**
-- ConnaÃ®tre les capacitÃ©s existantes pour appliquer des quotas
-- Identifier les entitÃ©s consommatrices de ressources
-- Obtenir les mÃ©tadonnÃ©es des capacitÃ©s pour le calcul d'arbitrage
-- DÃ©couvrir les Tools et Toolkits pour la limitation d'usage
+- Connaître les capacités existantes pour appliquer des quotas
+- Identifier les entités consommatrices de ressources
+- Obtenir les métadonnées des capacités pour le calcul d'arbitrage
+- Découvrir les Tools et Toolkits pour la limitation d'usage
 
-**LogisticsSteward limite les capacitÃ©s exposÃ©es par MasterButler :**
+**LogisticsSteward limite les capacités exposées par MasterButler :**
 - Applique des quotas d'utilisation
-- DÃ©finit des prioritÃ©s d'accÃ¨s aux capacitÃ©s
+- Définit des priorités d'accès aux capacités
 - Impose des plafonds de consommation
 - Active des restrictions temporaires
 
-**RÃ¨gle LS-MB-01 : Limitation sans modification d'existence**
+**Règle LS-MB-01 : Limitation sans modification d'existence**
 
-LogisticsSteward ne peut jamais modifier l'existence d'une capacitÃ© dans MasterButler. Il peut uniquement limiter son usage. Une capacitÃ© dÃ©clarÃ©e dans MasterButler reste dÃ©clarÃ©e, mÃªme si son usage est entiÃ¨rement restreint.
+LogisticsSteward ne peut jamais modifier l'existence d'une capacité dans MasterButler. Il peut uniquement limiter son usage. Une capacité déclarée dans MasterButler reste déclarée, même si son usage est entièrement restreint.
 
-**RÃ¨gle LS-MB-02 : ExhaustivitÃ© de la connaissance**
+**Règle LS-MB-02 : Exhaustivité de la connaissance**
 
-LogisticsSteward a accÃ¨s Ã  l'intÃ©gralitÃ© des capacitÃ©s dÃ©clarÃ©es dans MasterButler. Aucune capacitÃ© n'est masquÃ©e ou filtrÃ©e lors des interrogations.
+LogisticsSteward a accès à l'intégralité des capacités déclarées dans MasterButler. Aucune capacité n'est masquée ou filtrée lors des interrogations.
 
-**RÃ¨gle LS-MB-03 : IndÃ©pendance des registres**
+**Règle LS-MB-03 : Indépendance des registres**
 
-Le registre des capacitÃ©s (MasterButler) et le registre des limitations (LogisticsSteward) sont strictement sÃ©parÃ©s. Aucun chevauchement n'est autorisÃ©.
+Le registre des capacités (MasterButler) et le registre des limitations (LogisticsSteward) sont strictement séparés. Aucun chevauchement n'est autorisé.
 
-### 4.2 SÃ©paration des responsabilitÃ©s
+### 4.2 Séparation des responsabilités
 
-| ResponsabilitÃ© | LogisticsSteward | MasterButler |
+| Responsabilité | LogisticsSteward | MasterButler |
 |----------------|------------------|--------------|
-| **DÃ©clarer les capacitÃ©s** | âŒ Jamais | âœ… Exclusif |
-| **ConnaÃ®tre les capacitÃ©s** | âŒ Interroge | âœ… Exclusif |
-| **Limiter l'usage** | âœ… Exclusif | âŒ Jamais |
-| **DÃ©finir les quotas** | âœ… Exclusif | âŒ Jamais |
-| **Attribuer les prioritÃ©s** | âœ… Exclusif | âŒ Jamais |
-| **Appliquer les restrictions** | âœ… Exclusif | âŒ Jamais |
-| **Supprimer des capacitÃ©s** | âŒ Jamais | âœ… Exclusif |
-| **Exposer les permissions** | âŒ Jamais | âœ… Exclusif |
+| **Déclarer les capacités** | ❌ Jamais | ✅ Exclusif |
+| **Connaître les capacités** | ❌ Interroge | ✅ Exclusif |
+| **Limiter l'usage** | ✅ Exclusif | ❌ Jamais |
+| **Définir les quotas** | ✅ Exclusif | ❌ Jamais |
+| **Attribuer les priorités** | ✅ Exclusif | ❌ Jamais |
+| **Appliquer les restrictions** | ✅ Exclusif | ❌ Jamais |
+| **Supprimer des capacités** | ❌ Jamais | ✅ Exclusif |
+| **Exposer les permissions** | ❌ Jamais | ✅ Exclusif |
 
-**RÃ¨gle LS-MB-04 : Aucun chevauchement**
+**Règle LS-MB-04 : Aucun chevauchement**
 
-Aucun chevauchement de responsabilitÃ©s n'est autorisÃ©. LogisticsSteward ne dÃ©clare jamais de capacitÃ©s, MasterButler ne limite jamais l'usage.
+Aucun chevauchement de responsabilités n'est autorisé. LogisticsSteward ne déclare jamais de capacités, MasterButler ne limite jamais l'usage.
 
 ---
 
 ## 5. Types d'interactions
 
-### 5.1 Interrogation des capacitÃ©s existantes
+### 5.1 Interrogation des capacités existantes
 
 **CAPABILITY_CATALOG**
-- **Objectif :** Obtenir la liste des capacitÃ©s pour appliquer des limitations
+- **Objectif :** Obtenir la liste des capacités pour appliquer des limitations
 - **Payload :** Filtres optionnels (module, type, niveau)
-- **RÃ©ponse :** Liste des capacitÃ©s avec leurs mÃ©tadonnÃ©es
+- **Réponse :** Liste des capacités avec leurs métadonnées
 
-**RÃ¨gle LS-MB-QUERY-01 : Catalogue complet**
+**Règle LS-MB-QUERY-01 : Catalogue complet**
 
-LogisticsSteward peut interroger le catalogue complet des capacitÃ©s pour Ã©tablir ses rÃ¨gles de gouvernance.
+LogisticsSteward peut interroger le catalogue complet des capacités pour établir ses règles de gouvernance.
 
-### 5.2 Interrogation des entitÃ©s consommatrices
+### 5.2 Interrogation des entités consommatrices
 
 **CONSUMER_ENTITIES**
-- **Objectif :** Identifier les entitÃ©s qui utilisent une capacitÃ©
-- **Payload :** Identifiant de la capacitÃ©
-- **RÃ©ponse :** Liste des entitÃ©s consommatrices (OpÃ©rateurs, Ã‰quipes, Services)
+- **Objectif :** Identifier les entités qui utilisent une capacité
+- **Payload :** Identifiant de la capacité
+- **Réponse :** Liste des entités consommatrices (Opérateurs, Équipes, Services)
 
-**RÃ¨gle LS-MB-QUERY-02 : TraÃ§abilitÃ© des consommateurs**
+**Règle LS-MB-QUERY-02 : Traçabilité des consommateurs**
 
-La liste des consommateurs permet Ã  LogisticsSteward de calculer les quotas et prioritÃ©s par entitÃ©.
+La liste des consommateurs permet à LogisticsSteward de calculer les quotas et priorités par entité.
 
 ### 5.3 Interrogation des Tools et Toolkits
 
 **TOOL_METADATA**
-- **Objectif :** Obtenir les mÃ©tadonnÃ©es d'un Tool pour le calcul de quota
+- **Objectif :** Obtenir les métadonnées d'un Tool pour le calcul de quota
 - **Payload :** Identifiant du Tool
-- **RÃ©ponse :** MÃ©tadonnÃ©es incluant coÃ»t estimÃ©, frÃ©quence d'appel, ressources requises
+- **Réponse :** Métadonnées incluant coût estimé, fréquence d'appel, ressources requises
 
 **TOOLKIT_COMPOSITION**
 - **Objectif :** Obtenir la composition d'un Toolkit
 - **Payload :** Identifiant du Toolkit
-- **RÃ©ponse :** Liste des Tools avec leurs caractÃ©ristiques de consommation
+- **Réponse :** Liste des Tools avec leurs caractéristiques de consommation
 
-**RÃ¨gle LS-MB-QUERY-03 : MÃ©tadonnÃ©es de consommation**
+**Règle LS-MB-QUERY-03 : Métadonnées de consommation**
 
-MasterButler expose les mÃ©tadonnÃ©es de consommation des Tools (coÃ»t, frÃ©quence, ressources) pour permettre Ã  LogisticsSteward de calculer les limitations.
+MasterButler expose les métadonnées de consommation des Tools (coût, fréquence, ressources) pour permettre à LogisticsSteward de calculer les limitations.
 
 ### 5.4 Notification des limitations
 
 **USAGE_LIMITATION**
 - **Objectif :** Informer MasterButler d'une limitation d'usage
-- **Payload :** CapacitÃ© concernÃ©e, type de limitation, paramÃ¨tres
-- **RÃ©ponse :** Acquittement
+- **Payload :** Capacité concernée, type de limitation, paramètres
+- **Réponse :** Acquittement
 
-**RÃ¨gle LS-MB-NOTIF-01 : Notification informative**
+**Règle LS-MB-NOTIF-01 : Notification informative**
 
-Les notifications de limitation sont informatives. MasterButler les enregistre mais ne les applique pas lui-mÃªme. L'application est du ressort du Kernel via les dÃ©cisions de LogisticsSteward.
+Les notifications de limitation sont informatives. MasterButler les enregistre mais ne les applique pas lui-même. L'application est du ressort du Kernel via les décisions de LogisticsSteward.
 
 ### 5.5 Notification de restauration
 
 **USAGE_RESTORATION**
-- **Objectif :** Informer MasterButler de la levÃ©e d'une limitation
-- **Payload :** CapacitÃ© concernÃ©e, limitation levÃ©e
-- **RÃ©ponse :** Acquittement
+- **Objectif :** Informer MasterButler de la levée d'une limitation
+- **Payload :** Capacité concernée, limitation levée
+- **Réponse :** Acquittement
 
-**RÃ¨gle LS-MB-NOTIF-02 : Restauration explicite**
+**Règle LS-MB-NOTIF-02 : Restauration explicite**
 
-Toute levÃ©e de limitation fait l'objet d'une notification explicite pour maintenir la cohÃ©rence des Ã©tats.
+Toute levée de limitation fait l'objet d'une notification explicite pour maintenir la cohérence des états.
 
-### 5.6 RÃ¨gles gÃ©nÃ©rales d'interaction
+### 5.6 Règles générales d'interaction
 
-**RÃ¨gle LS-MB-QUERY-04 : Interrogation sans effet de bord**
+**Règle LS-MB-QUERY-04 : Interrogation sans effet de bord**
 
-Les interrogations de LogisticsSteward ne modifient jamais l'Ã©tat de MasterButler. Ce sont des lectures pures.
+Les interrogations de LogisticsSteward ne modifient jamais l'état de MasterButler. Ce sont des lectures pures.
 
-**RÃ¨gle LS-MB-QUERY-05 : Notification avec acquittement**
+**Règle LS-MB-QUERY-05 : Notification avec acquittement**
 
 Les notifications de limitation ou restauration attendent un acquittement de MasterButler pour garantir la prise en compte.
 
-**RÃ¨gle LS-MB-QUERY-06 : RÃ©ponse immÃ©diate**
+**Règle LS-MB-QUERY-06 : Réponse immédiate**
 
-Les rÃ©ponses sont fournies immÃ©diatement. Aucune interrogation n'est mise en attente ou diffÃ©rÃ©e.
+Les réponses sont fournies immédiatement. Aucune interrogation n'est mise en attente ou différée.
 
 ---
 
@@ -172,78 +172,78 @@ Les rÃ©ponses sont fournies immÃ©diatement. Aucune interrogation n'est mise 
 
 ### 6.1 Format des interrogations
 
-Les interrogations de LogisticsSteward suivent un format standardisÃ©.
+Les interrogations de LogisticsSteward suivent un format standardisé.
 
 **Structure de base :**
 
-| Ã‰lÃ©ment | Description | Obligatoire |
+| Élément | Description | Obligatoire |
 |---------|-------------|-------------|
-| `interrogation_id` | Identifiant unique de l'interrogation | âœ… Oui |
-| `arbitrage_id` | RÃ©fÃ©rence Ã  l'arbitrage en cours | âœ… Oui |
-| `type` | Type d'interrogation | âœ… Oui |
-| `payload` | DonnÃ©es spÃ©cifiques Ã  l'interrogation | âœ… Oui |
-| `contexte_appelant` | Contexte de LogisticsSteward | âœ… Oui |
-| `timestamp` | Horodatage de l'interrogation | âœ… Oui |
+| `interrogation_id` | Identifiant unique de l'interrogation | ✅ Oui |
+| `arbitrage_id` | Référence à l'arbitrage en cours | ✅ Oui |
+| `type` | Type d'interrogation | ✅ Oui |
+| `payload` | Données spécifiques à l'interrogation | ✅ Oui |
+| `contexte_appelant` | Contexte de LogisticsSteward | ✅ Oui |
+| `timestamp` | Horodatage de l'interrogation | ✅ Oui |
 
-**RÃ¨gle LS-MB-PROT-01 : Format standardisÃ©**
+**Règle LS-MB-PROT-01 : Format standardisé**
 
-Toutes les interrogations respectent le format standardisÃ©. Aucune interrogation ad-hoc n'est acceptÃ©e.
+Toutes les interrogations respectent le format standardisé. Aucune interrogation ad-hoc n'est acceptée.
 
-**RÃ¨gle LS-MB-PROT-02 : TraÃ§abilitÃ© par arbitrage**
+**Règle LS-MB-PROT-02 : Traçabilité par arbitrage**
 
-Chaque interrogation rÃ©fÃ©rence l'arbitrage en cours pour assurer la traÃ§abilitÃ© bout-en-bout.
+Chaque interrogation référence l'arbitrage en cours pour assurer la traçabilité bout-en-bout.
 
 ### 6.2 Format des notifications
 
-Les notifications de LogisticsSteward suivent un format standardisÃ©.
+Les notifications de LogisticsSteward suivent un format standardisé.
 
 **Structure de base :**
 
-| Ã‰lÃ©ment | Description | Obligatoire |
+| Élément | Description | Obligatoire |
 |---------|-------------|-------------|
-| `notification_id` | Identifiant unique de la notification | âœ… Oui |
-| `decision_id` | RÃ©fÃ©rence Ã  la dÃ©cision d'arbitrage | âœ… Oui |
-| `type` | Type de notification (LIMITATION, RESTORATION) | âœ… Oui |
-| `payload` | DonnÃ©es spÃ©cifiques Ã  la notification | âœ… Oui |
-| `contexte_appelant` | Contexte de LogisticsSteward | âœ… Oui |
-| `timestamp` | Horodatage de la notification | âœ… Oui |
+| `notification_id` | Identifiant unique de la notification | ✅ Oui |
+| `decision_id` | Référence à la décision d'arbitrage | ✅ Oui |
+| `type` | Type de notification (LIMITATION, RESTORATION) | ✅ Oui |
+| `payload` | Données spécifiques à la notification | ✅ Oui |
+| `contexte_appelant` | Contexte de LogisticsSteward | ✅ Oui |
+| `timestamp` | Horodatage de la notification | ✅ Oui |
 
-**RÃ¨gle LS-MB-PROT-03 : Notification structurÃ©e**
+**Règle LS-MB-PROT-03 : Notification structurée**
 
-Toutes les notifications respectent le format structurÃ©. MasterButler peut les enregistrer pour audit.
+Toutes les notifications respectent le format structuré. MasterButler peut les enregistrer pour audit.
 
-### 6.3 Format des rÃ©ponses
+### 6.3 Format des réponses
 
-Les rÃ©ponses de MasterButler suivent un format standardisÃ©.
+Les réponses de MasterButler suivent un format standardisé.
 
 **Structure de base :**
 
-| Ã‰lÃ©ment | Description | Obligatoire |
+| Élément | Description | Obligatoire |
 |---------|-------------|-------------|
-| `reponse_id` | Identifiant unique de la rÃ©ponse | âœ… Oui |
-| `interrogation_id` | RÃ©fÃ©rence Ã  l'interrogation | âœ… Oui |
-| `statut` | Statut de la rÃ©ponse (SUCCESS, NOT_FOUND, ERROR) | âœ… Oui |
-| `donnees` | DonnÃ©es de la rÃ©ponse | Si SUCCESS |
-| `erreur` | DÃ©tails de l'erreur | Si ERROR |
-| `timestamp` | Horodatage de la rÃ©ponse | âœ… Oui |
+| `reponse_id` | Identifiant unique de la réponse | ✅ Oui |
+| `interrogation_id` | Référence à l'interrogation | ✅ Oui |
+| `statut` | Statut de la réponse (SUCCESS, NOT_FOUND, ERROR) | ✅ Oui |
+| `donnees` | Données de la réponse | Si SUCCESS |
+| `erreur` | Détails de l'erreur | Si ERROR |
+| `timestamp` | Horodatage de la réponse | ✅ Oui |
 
-**RÃ¨gle LS-MB-PROT-04 : RÃ©ponse toujours structurÃ©e**
+**Règle LS-MB-PROT-04 : Réponse toujours structurée**
 
-MasterButler retourne toujours une rÃ©ponse structurÃ©e, mÃªme en cas d'erreur ou de non-existence.
+MasterButler retourne toujours une réponse structurée, même en cas d'erreur ou de non-existence.
 
-### 6.4 Statuts de rÃ©ponse
+### 6.4 Statuts de réponse
 
 | Statut | Signification |
 |--------|---------------|
 | `SUCCESS` | L'interrogation/notification a abouti |
-| `NOT_FOUND` | L'Ã©lÃ©ment recherchÃ© n'existe pas dans le registre |
-| `INVALID_QUERY` | L'interrogation est mal formÃ©e ou incomplÃ¨te |
-| `ACKNOWLEDGED` | La notification a Ã©tÃ© prise en compte |
+| `NOT_FOUND` | L'élément recherché n'existe pas dans le registre |
+| `INVALID_QUERY` | L'interrogation est mal formée ou incomplète |
+| `ACKNOWLEDGED` | La notification a été prise en compte |
 | `ERROR` | Une erreur interne s'est produite |
 
-**RÃ¨gle LS-MB-PROT-05 : NOT_FOUND est informatif**
+**Règle LS-MB-PROT-05 : NOT_FOUND est informatif**
 
-Le statut `NOT_FOUND` indique qu'une capacitÃ© n'existe pas. LogisticsSteward ne peut pas limiter une capacitÃ© inexistante.
+Le statut `NOT_FOUND` indique qu'une capacité n'existe pas. LogisticsSteward ne peut pas limiter une capacité inexistante.
 
 ---
 
@@ -253,129 +253,129 @@ Le statut `NOT_FOUND` indique qu'une capacitÃ© n'existe pas. LogisticsSteward 
 
 **Acteurs :** LogisticsSteward, MasterButler, Kernel
 
-**SÃ©quence :**
+**Séquence :**
 
-1. LogisticsSteward reÃ§oit une demande de ressource (via Kernel)
-2. LogisticsSteward interroge MasterButler : `CAPABILITY_CATALOG` (si nÃ©cessaire)
-3. MasterButler rÃ©pond avec les capacitÃ©s concernÃ©es
+1. LogisticsSteward reçoit une demande de ressource (via Kernel)
+2. LogisticsSteward interroge MasterButler : `CAPABILITY_CATALOG` (si nécessaire)
+3. MasterButler répond avec les capacités concernées
 4. LogisticsSteward interroge MasterButler : `TOOL_METADATA`
-5. MasterButler rÃ©pond avec les mÃ©tadonnÃ©es de consommation
+5. MasterButler répond avec les métadonnées de consommation
 6. LogisticsSteward calcule les quotas applicables
-7. LogisticsSteward soumet la dÃ©cision Ã  StrongFather
-8. Si validÃ©e, LogisticsSteward notifie MasterButler : `USAGE_LIMITATION` (si limitation)
+7. LogisticsSteward soumet la décision à StrongFather
+8. Si validée, LogisticsSteward notifie MasterButler : `USAGE_LIMITATION` (si limitation)
 9. MasterButler acquitte la notification
 
-**RÃ¨gle LS-MB-FLOW-01 : Interrogation avant limitation**
+**Règle LS-MB-FLOW-01 : Interrogation avant limitation**
 
-LogisticsSteward interroge toujours MasterButler avant d'appliquer une limitation pour s'assurer que la capacitÃ© existe.
+LogisticsSteward interroge toujours MasterButler avant d'appliquer une limitation pour s'assurer que la capacité existe.
 
-### 7.2 Flux de dÃ©gradation
+### 7.2 Flux de dégradation
 
 **Acteurs :** LogisticsSteward, MasterButler, WorrySentinel
 
-**SÃ©quence :**
+**Séquence :**
 
-1. WorrySentinel signale une situation de stress (charge Ã©levÃ©e)
-2. LogisticsSteward Ã©value le niveau de dÃ©gradation requis
-3. LogisticsSteward interroge MasterButler : `CAPABILITY_CATALOG` (capacitÃ©s non critiques)
-4. MasterButler rÃ©pond avec les capacitÃ©s et leurs niveaux de criticitÃ©
-5. LogisticsSteward calcule les limitations de dÃ©gradation
-6. LogisticsSteward notifie MasterButler : `USAGE_LIMITATION` (par capacitÃ©)
+1. WorrySentinel signale une situation de stress (charge élevée)
+2. LogisticsSteward évalue le niveau de dégradation requis
+3. LogisticsSteward interroge MasterButler : `CAPABILITY_CATALOG` (capacités non critiques)
+4. MasterButler répond avec les capacités et leurs niveaux de criticité
+5. LogisticsSteward calcule les limitations de dégradation
+6. LogisticsSteward notifie MasterButler : `USAGE_LIMITATION` (par capacité)
 7. MasterButler acquitte les notifications
 
-**RÃ¨gle LS-MB-FLOW-02 : DÃ©gradation par criticitÃ©**
+**Règle LS-MB-FLOW-02 : Dégradation par criticité**
 
-Les capacitÃ©s sont limitÃ©es par ordre de criticitÃ© inverse : les moins critiques d'abord.
+Les capacités sont limitées par ordre de criticité inverse : les moins critiques d'abord.
 
 ### 7.3 Flux de restauration
 
 **Acteurs :** LogisticsSteward, MasterButler, Kernel
 
-**SÃ©quence :**
+**Séquence :**
 
-1. Kernel signale un retour Ã  la normale (charge rÃ©duite)
-2. LogisticsSteward Ã©value les limitations Ã  lever
-3. LogisticsSteward notifie MasterButler : `USAGE_RESTORATION` (par capacitÃ©)
+1. Kernel signale un retour à la normale (charge réduite)
+2. LogisticsSteward évalue les limitations à lever
+3. LogisticsSteward notifie MasterButler : `USAGE_RESTORATION` (par capacité)
 4. MasterButler acquitte les notifications
-5. Les capacitÃ©s reprennent leur usage normal
+5. Les capacités reprennent leur usage normal
 
-**RÃ¨gle LS-MB-FLOW-03 : Restauration progressive**
+**Règle LS-MB-FLOW-03 : Restauration progressive**
 
-La restauration est progressive, par paliers, en fonction de l'Ã©tat systÃ¨me.
+La restauration est progressive, par paliers, en fonction de l'état système.
 
-### 7.4 Diagramme de sÃ©quence
+### 7.4 Diagramme de séquence
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚     Kernel      â”‚    â”‚ LogisticsStewardâ”‚    â”‚  Master Butler  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚                      â”‚                      â”‚
-         â”œâ”€â”€ Demande ressource â–ºâ”‚                      â”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ CAPABILITY_CATALOGâ–ºâ”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”‚â—„â”€â”€ CapacitÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ TOOL_METADATA â”€â”€â”€â”€â–ºâ”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”‚â—„â”€â”€ MÃ©tadonnÃ©es â”€â”€â”€â”€â”€â”€â”¤
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ Calcul quota â”€â”€â”€â”€â”€â”€â”¤
-         â”‚                      â”‚   (interne)          â”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ USAGE_LIMITATION â”€â–ºâ”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”‚â—„â”€â”€ ACKNOWLEDGED â”€â”€â”€â”€â”€â”¤
-         â”‚                      â”‚                      â”‚
-         â”‚â—„â”€â”€ DÃ©cision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                      â”‚
-         â”‚                      â”‚                      â”‚
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│     Kernel      │    │ LogisticsSteward│    │  Master Butler  │
+└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
+         │                      │                      │
+         ├── Demande ressource ►│                      │
+         │                      │                      │
+         │                      ├── CAPABILITY_CATALOG►│
+         │                      │                      │
+         │                      │◄── Capacités ────────┤
+         │                      │                      │
+         │                      ├── TOOL_METADATA ────►│
+         │                      │                      │
+         │                      │◄── Métadonnées ──────┤
+         │                      │                      │
+         │                      ├── Calcul quota ──────┤
+         │                      │   (interne)          │
+         │                      │                      │
+         │                      ├── USAGE_LIMITATION ─►│
+         │                      │                      │
+         │                      │◄── ACKNOWLEDGED ─────┤
+         │                      │                      │
+         │◄── Décision ─────────┤                      │
+         │                      │                      │
 ```
 
 ---
 
-## 8. RÃ¨gles d'intÃ©gration
+## 8. Règles d'intégration
 
-### 8.1 RÃ¨gles de communication
+### 8.1 Règles de communication
 
-**RÃ¨gle LS-MB-INT-01 : LogisticsSteward initie**
+**Règle LS-MB-INT-01 : LogisticsSteward initie**
 
-LogisticsSteward initie les interrogations et notifications. MasterButler ne sollicite jamais LogisticsSteward spontanÃ©ment pour des questions de limitation.
+LogisticsSteward initie les interrogations et notifications. MasterButler ne sollicite jamais LogisticsSteward spontanément pour des questions de limitation.
 
-**RÃ¨gle LS-MB-INT-02 : Notification aprÃ¨s validation**
+**Règle LS-MB-INT-02 : Notification après validation**
 
-Les notifications de limitation sont Ã©mises uniquement aprÃ¨s validation par StrongFather. Aucune limitation n'est notifiÃ©e avant validation.
+Les notifications de limitation sont émises uniquement après validation par StrongFather. Aucune limitation n'est notifiée avant validation.
 
-**RÃ¨gle LS-MB-INT-03 : Synchronisme des interrogations**
+**Règle LS-MB-INT-03 : Synchronisme des interrogations**
 
-Les interrogations sont synchrones. LogisticsSteward attend la rÃ©ponse avant de poursuivre l'arbitrage.
+Les interrogations sont synchrones. LogisticsSteward attend la réponse avant de poursuivre l'arbitrage.
 
-### 8.2 RÃ¨gles de donnÃ©es
+### 8.2 Règles de données
 
-**RÃ¨gle LS-MB-INT-04 : DonnÃ©es fraÃ®ches**
+**Règle LS-MB-INT-04 : Données fraîches**
 
-Les donnÃ©es retournÃ©es par MasterButler reflÃ¨tent l'Ã©tat actuel du registre au moment de l'interrogation.
+Les données retournées par MasterButler reflètent l'état actuel du registre au moment de l'interrogation.
 
-**RÃ¨gle LS-MB-INT-05 : Cache autorisÃ© pour mÃ©tadonnÃ©es statiques**
+**Règle LS-MB-INT-05 : Cache autorisé pour métadonnées statiques**
 
-LogisticsSteward peut mettre en cache les mÃ©tadonnÃ©es statiques des capacitÃ©s (coÃ»t, description) mais pas les donnÃ©es dynamiques (consommateurs actuels).
+LogisticsSteward peut mettre en cache les métadonnées statiques des capacités (coût, description) mais pas les données dynamiques (consommateurs actuels).
 
-**RÃ¨gle LS-MB-INT-06 : CohÃ©rence des limitations**
+**Règle LS-MB-INT-06 : Cohérence des limitations**
 
-Les limitations notifiÃ©es par LogisticsSteward sont cohÃ©rentes avec les capacitÃ©s dÃ©clarÃ©es dans MasterButler.
+Les limitations notifiées par LogisticsSteward sont cohérentes avec les capacités déclarées dans MasterButler.
 
-### 8.3 RÃ¨gles de traÃ§abilitÃ©
+### 8.3 Règles de traçabilité
 
-**RÃ¨gle LS-MB-INT-07 : TraÃ§abilitÃ© des interrogations**
+**Règle LS-MB-INT-07 : Traçabilité des interrogations**
 
-Toutes les interrogations de LogisticsSteward sont tracÃ©es par les deux parties.
+Toutes les interrogations de LogisticsSteward sont tracées par les deux parties.
 
-**RÃ¨gle LS-MB-INT-08 : CorrÃ©lation arbitrage-interrogation**
+**Règle LS-MB-INT-08 : Corrélation arbitrage-interrogation**
 
-Chaque interrogation est corrÃ©lÃ©e Ã  l'arbitrage en cours pour permettre l'audit bout-en-bout.
+Chaque interrogation est corrélée à l'arbitrage en cours pour permettre l'audit bout-en-bout.
 
-**RÃ¨gle LS-MB-INT-09 : Historique des limitations**
+**Règle LS-MB-INT-09 : Historique des limitations**
 
-MasterButler maintient un historique des notifications de limitation reÃ§ues pour audit.
+MasterButler maintient un historique des notifications de limitation reçues pour audit.
 
 ---
 
@@ -384,14 +384,14 @@ MasterButler maintient un historique des notifications de limitation reÃ§ues p
 ### 9.1 Types d'erreurs
 
 **Erreurs de format :**
-- Interrogation mal formÃ©e
+- Interrogation mal formée
 - Champ obligatoire manquant
 - Type d'interrogation inconnu
 
-**Erreurs de donnÃ©es :**
-- CapacitÃ© inexistante (NOT_FOUND)
+**Erreurs de données :**
+- Capacité inexistante (NOT_FOUND)
 - Tool inexistant (NOT_FOUND)
-- Limitation sur capacitÃ© inexistante
+- Limitation sur capacité inexistante
 
 **Erreurs internes :**
 - Erreur de registre MasterButler
@@ -399,107 +399,107 @@ MasterButler maintient un historique des notifications de limitation reÃ§ues p
 
 ### 9.2 Traitement des erreurs
 
-**RÃ¨gle LS-MB-ERR-01 : RÃ©ponse structurÃ©e toujours**
+**Règle LS-MB-ERR-01 : Réponse structurée toujours**
 
-MasterButler retourne toujours une rÃ©ponse structurÃ©e, mÃªme en cas d'erreur. LogisticsSteward peut toujours interprÃ©ter la rÃ©ponse.
+MasterButler retourne toujours une réponse structurée, même en cas d'erreur. LogisticsSteward peut toujours interpréter la réponse.
 
-**RÃ¨gle LS-MB-ERR-02 : NOT_FOUND bloque la limitation**
+**Règle LS-MB-ERR-02 : NOT_FOUND bloque la limitation**
 
-Si une capacitÃ© n'existe pas (NOT_FOUND), LogisticsSteward ne peut pas la limiter. L'arbitrage Ã©choue pour cette capacitÃ©.
+Si une capacité n'existe pas (NOT_FOUND), LogisticsSteward ne peut pas la limiter. L'arbitrage échoue pour cette capacité.
 
-**RÃ¨gle LS-MB-ERR-03 : Journalisation des erreurs**
+**Règle LS-MB-ERR-03 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisÃ©es par les deux parties pour audit et diagnostic.
+Toutes les erreurs sont journalisées par les deux parties pour audit et diagnostic.
 
-**RÃ¨gle LS-MB-ERR-04 : Pas de retry automatique**
+**Règle LS-MB-ERR-04 : Pas de retry automatique**
 
-En cas d'erreur, LogisticsSteward dÃ©cide de la stratÃ©gie (retry, Ã©chec de l'arbitrage). Aucun retry automatique.
+En cas d'erreur, LogisticsSteward décide de la stratégie (retry, échec de l'arbitrage). Aucun retry automatique.
 
-### 9.3 Cas de capacitÃ© supprimÃ©e
+### 9.3 Cas de capacité supprimée
 
-**RÃ¨gle LS-MB-ERR-05 : Limitation orpheline**
+**Règle LS-MB-ERR-05 : Limitation orpheline**
 
-Si une capacitÃ© est supprimÃ©e de MasterButler alors qu'une limitation existe, LogisticsSteward doit Ãªtre notifiÃ© pour nettoyer sa limitation orpheline.
+Si une capacité est supprimée de MasterButler alors qu'une limitation existe, LogisticsSteward doit être notifié pour nettoyer sa limitation orpheline.
 
-**RÃ¨gle LS-MB-ERR-06 : Notification de suppression**
+**Règle LS-MB-ERR-06 : Notification de suppression**
 
-MasterButler notifie LogisticsSteward lors de la suppression d'une capacitÃ© pour permettre le nettoyage des limitations associÃ©es.
+MasterButler notifie LogisticsSteward lors de la suppression d'une capacité pour permettre le nettoyage des limitations associées.
 
 ---
 
-## 10. Garanties de l'intÃ©gration
+## 10. Garanties de l'intégration
 
-### 10.1 Garantie de visibilitÃ©
+### 10.1 Garantie de visibilité
 
-**Engagement :** LogisticsSteward a une visibilitÃ© complÃ¨te sur les capacitÃ©s dÃ©clarÃ©es dans MasterButler. Aucune capacitÃ© n'est masquÃ©e.
+**Engagement :** LogisticsSteward a une visibilité complète sur les capacités déclarées dans MasterButler. Aucune capacité n'est masquée.
 
-### 10.2 Garantie de non-interfÃ©rence
+### 10.2 Garantie de non-interférence
 
-**Engagement :** LogisticsSteward n'interfÃ¨re jamais avec l'existence des capacitÃ©s. Les limitations concernent uniquement l'usage.
+**Engagement :** LogisticsSteward n'interfère jamais avec l'existence des capacités. Les limitations concernent uniquement l'usage.
 
-### 10.3 Garantie de cohÃ©rence
+### 10.3 Garantie de cohérence
 
-**Engagement :** Les limitations notifiÃ©es sont cohÃ©rentes avec les capacitÃ©s existantes. Aucune limitation orpheline n'est crÃ©Ã©e intentionnellement.
+**Engagement :** Les limitations notifiées sont cohérentes avec les capacités existantes. Aucune limitation orpheline n'est créée intentionnellement.
 
-### 10.4 Garantie de traÃ§abilitÃ©
+### 10.4 Garantie de traçabilité
 
-**Engagement :** Toute interaction entre LogisticsSteward et MasterButler est traÃ§able de bout en bout. L'audit complet est possible.
+**Engagement :** Toute interaction entre LogisticsSteward et MasterButler est traçable de bout en bout. L'audit complet est possible.
 
-### 10.5 Garantie de disponibilitÃ©
+### 10.5 Garantie de disponibilité
 
-**Engagement :** MasterButler est disponible pour rÃ©pondre aux interrogations de LogisticsSteward sans dÃ©pendance externe (conformitÃ© LOI-1).
+**Engagement :** MasterButler est disponible pour répondre aux interrogations de LogisticsSteward sans dépendance externe (conformité LOI-1).
 
 ### 10.6 Garantie de restauration
 
-**Engagement :** Toute limitation peut Ãªtre levÃ©e. Le systÃ¨me peut toujours revenir Ã  un Ã©tat sans limitation.
+**Engagement :** Toute limitation peut être levée. Le système peut toujours revenir à un état sans limitation.
 
 ---
 
-## 11. Invariants de l'intÃ©gration
+## 11. Invariants de l'intégration
 
 ### 11.1 Invariants de relation
 
-**INV-LS-MB-1 : SÃ©paration existence/usage**
+**INV-LS-MB-1 : Séparation existence/usage**
 
-L'existence des capacitÃ©s (MasterButler) et la limitation de leur usage (LogisticsSteward) sont strictement sÃ©parÃ©es.
+L'existence des capacités (MasterButler) et la limitation de leur usage (LogisticsSteward) sont strictement séparées.
 
-**INV-LS-MB-2 : Limitation sur capacitÃ© existante**
+**INV-LS-MB-2 : Limitation sur capacité existante**
 
-LogisticsSteward ne peut limiter que des capacitÃ©s existantes dans MasterButler.
+LogisticsSteward ne peut limiter que des capacités existantes dans MasterButler.
 
 **INV-LS-MB-3 : Non-modification d'existence**
 
-LogisticsSteward ne peut jamais crÃ©er, modifier, ou supprimer une capacitÃ© dans MasterButler.
+LogisticsSteward ne peut jamais créer, modifier, ou supprimer une capacité dans MasterButler.
 
-### 11.2 Invariants de donnÃ©es
+### 11.2 Invariants de données
 
 **INV-LS-MB-4 : Lecture pure**
 
-Les interrogations sont des lectures pures. Aucune modification du registre n'est causÃ©e par une interrogation.
+Les interrogations sont des lectures pures. Aucune modification du registre n'est causée par une interrogation.
 
 **INV-LS-MB-5 : Notification avec acquittement**
 
-Toute notification de limitation ou restauration attend un acquittement avant d'Ãªtre considÃ©rÃ©e comme appliquÃ©e.
+Toute notification de limitation ou restauration attend un acquittement avant d'être considérée comme appliquée.
 
 ### 11.3 Invariants de protocole
 
-**INV-LS-MB-6 : Format respectÃ©**
+**INV-LS-MB-6 : Format respecté**
 
-Toutes les interrogations, notifications, et rÃ©ponses respectent le format standardisÃ©.
+Toutes les interrogations, notifications, et réponses respectent le format standardisé.
 
-**INV-LS-MB-7 : TraÃ§abilitÃ© complÃ¨te**
+**INV-LS-MB-7 : Traçabilité complète**
 
-Toute interaction est traÃ§able avec son contexte complet.
+Toute interaction est traçable avec son contexte complet.
 
-**INV-LS-MB-8 : Validation prÃ©alable**
+**INV-LS-MB-8 : Validation préalable**
 
-Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongFather.
+Toute limitation notifiée a été préalablement validée par StrongFather.
 
 ---
 
 ## 12. Exemples
 
-### 12.1 Interrogation du catalogue de capacitÃ©s
+### 12.1 Interrogation du catalogue de capacités
 
 **Interrogation LogisticsSteward :**
 ```
@@ -519,7 +519,7 @@ Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongF
 }
 ```
 
-**RÃ©ponse MasterButler :**
+**Réponse MasterButler :**
 ```
 {
   "reponse_id": "resp-mb-001",
@@ -574,7 +574,7 @@ Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongF
 }
 ```
 
-**RÃ©ponse MasterButler :**
+**Réponse MasterButler :**
 ```
 {
   "reponse_id": "resp-mb-002",
@@ -610,7 +610,7 @@ Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongF
 }
 ```
 
-**RÃ©ponse MasterButler :**
+**Réponse MasterButler :**
 ```
 {
   "reponse_id": "resp-mb-003",
@@ -625,7 +625,7 @@ Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongF
 }
 ```
 
-### 12.4 CapacitÃ© inexistante
+### 12.4 Capacité inexistante
 
 **Interrogation LogisticsSteward :**
 ```
@@ -644,7 +644,7 @@ Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongF
 }
 ```
 
-**RÃ©ponse MasterButler :**
+**Réponse MasterButler :**
 ```
 {
   "reponse_id": "resp-mb-004",
@@ -658,22 +658,22 @@ Toute limitation notifiÃ©e a Ã©tÃ© prÃ©alablement validÃ©e par StrongF
 }
 ```
 
-**Note :** LogisticsSteward ne peut pas crÃ©er de limitation sur ce Tool inexistant.
+**Note :** LogisticsSteward ne peut pas créer de limitation sur ce Tool inexistant.
 
 ---
 
 ## 13. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que LogisticsSteward doit respecter pour s'intÃ©grer avec MasterButler.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que LogisticsSteward doit respecter pour s'intégrer avec MasterButler.
 
-Toute implÃ©mentation de l'intÃ©gration avec MasterButler doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
+Toute implémentation de l'intégration avec MasterButler doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :**
+**Statut :** CONTRAT — Normatif  
+**Dépendances :**
 - LogisticsSteward - Documentation Fondatrice v1.0.0 (Section 8.3)
 - LogisticsSteward - Quota Definition Contract
 - Master Butler - Documentation Fondatrice
@@ -681,47 +681,47 @@ Toute implÃ©mentation de l'intÃ©gration avec MasterButler doit respecter ce 
 
 ---
 
-## 14. Mini log de gÃ©nÃ©ration
+## 14. Mini log de génération
 
-### DÃ©cision Ã©ditoriale E1 : Direction de la relation
+### Décision éditoriale E1 : Direction de la relation
 
-**DÃ©cision prise :** La relation est bidirectionnelle asymÃ©trique : LogisticsSteward interroge et notifie, MasterButler rÃ©pond et acquitte. LogisticsSteward est l'initiateur, MasterButler est le rÃ©pondant.
+**Décision prise :** La relation est bidirectionnelle asymétrique : LogisticsSteward interroge et notifie, MasterButler répond et acquitte. LogisticsSteward est l'initiateur, MasterButler est le répondant.
 
-**Application :** Le document est structurÃ© autour de cette direction d'interaction.
+**Application :** Le document est structuré autour de cette direction d'interaction.
 
-### DÃ©cision Ã©ditoriale E2 : Types d'interactions
+### Décision éditoriale E2 : Types d'interactions
 
-**DÃ©cision prise :** Les interactions sont divisÃ©es en interrogations (lecture) et notifications (Ã©criture informative). Les interrogations portent sur les capacitÃ©s, les notifications portent sur les limitations.
+**Décision prise :** Les interactions sont divisées en interrogations (lecture) et notifications (écriture informative). Les interrogations portent sur les capacités, les notifications portent sur les limitations.
 
-**Application :** Section 5 dÃ©finit chaque type avec objectif, payload, et rÃ©ponse.
+**Application :** Section 5 définit chaque type avec objectif, payload, et réponse.
 
-### Warning W1 : Limitation sur capacitÃ© inexistante
+### Warning W1 : Limitation sur capacité inexistante
 
-**Warning rencontrÃ© :** Risque de crÃ©er des limitations orphelines sur des capacitÃ©s qui n'existent pas ou plus.
+**Warning rencontré :** Risque de créer des limitations orphelines sur des capacités qui n'existent pas ou plus.
 
-**DÃ©cision prise :** LogisticsSteward doit interroger l'existence avant de limiter. Les limitations orphelines sont nettoyÃ©es via notification de suppression.
+**Décision prise :** LogisticsSteward doit interroger l'existence avant de limiter. Les limitations orphelines sont nettoyées via notification de suppression.
 
-**Correction effectuÃ©e :** RÃ¨gles LS-MB-ERR-02, LS-MB-ERR-05, LS-MB-ERR-06 ajoutÃ©es.
+**Correction effectuée :** Règles LS-MB-ERR-02, LS-MB-ERR-05, LS-MB-ERR-06 ajoutées.
 
-### Warning W2 : SÃ©paration existence/usage
+### Warning W2 : Séparation existence/usage
 
-**Warning rencontrÃ© :** Risque de confusion entre "capacitÃ© inexistante" et "capacitÃ© limitÃ©e Ã  zÃ©ro".
+**Warning rencontré :** Risque de confusion entre "capacité inexistante" et "capacité limitée à zéro".
 
-**DÃ©cision prise :** La distinction est explicite : une capacitÃ© peut Ãªtre totalement limitÃ©e mais existe toujours. LogisticsSteward ne peut pas supprimer une capacitÃ©.
+**Décision prise :** La distinction est explicite : une capacité peut être totalement limitée mais existe toujours. LogisticsSteward ne peut pas supprimer une capacité.
 
-**Correction effectuÃ©e :** INV-LS-MB-1 et INV-LS-MB-3 clarifient cette sÃ©paration.
+**Correction effectuée :** INV-LS-MB-1 et INV-LS-MB-3 clarifient cette séparation.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec LogisticsSteward - Documentation Fondatrice : ConfirmÃ©e (Section 8.3 respectÃ©e)
-- âœ… CohÃ©rence avec Master Butler - Documentation Fondatrice : ConfirmÃ©e (registre des capacitÃ©s respectÃ©)
-- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe pour les interactions)
-- âœ… ConformitÃ© INV-LS-7 : ConfirmÃ©e (sÃ©paration avec le Kernel maintenue)
+**Vérification effectuée :**
+- ✅ Cohérence avec LogisticsSteward - Documentation Fondatrice : Confirmée (Section 8.3 respectée)
+- ✅ Cohérence avec Master Butler - Documentation Fondatrice : Confirmée (registre des capacités respecté)
+- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe pour les interactions)
+- ✅ Conformité INV-LS-7 : Confirmée (séparation avec le Kernel maintenue)
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
+**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

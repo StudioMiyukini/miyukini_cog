@@ -180,43 +180,43 @@ Chaque arbitrage produit une trace complete pour audit.
 
 ```
 [Demande de ressource]
-       â”‚
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 1. Reception        â”‚ â† Validation structurelle
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 2. Contextualisationâ”‚ â† Lecture etat systeme
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 3. Identification   â”‚ â† Regles applicables
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 4. Evaluation       â”‚ â† Calcul priorite/quota
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 5. Decision         â”‚ â† Verdict et conditions
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 6. Validation       â”‚ â† StrongFather
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ 7. Emission         â”‚ â† Decision finale
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
+       │
+       ▼
+┌─────────────────────┐
+│ 1. Reception        │ ← Validation structurelle
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 2. Contextualisation│ ← Lecture etat systeme
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 3. Identification   │ ← Regles applicables
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 4. Evaluation       │ ← Calcul priorite/quota
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 5. Decision         │ ← Verdict et conditions
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 6. Validation       │ ← StrongFather
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 7. Emission         │ ← Decision finale
+└──────────┬──────────┘
+           │
+           ▼
 [Decision d'arbitrage]
 ```
 
@@ -439,31 +439,31 @@ La preemption permet a une demande de haute priorite d'interrompre une allocatio
 
 ```
 [Demande haute priorite]
-       â”‚
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Evaluation normale  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-       â”‚ ressources insuffisantes
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Recherche cibles    â”‚ â† Allocations preemptibles
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-       â”‚ cibles trouvees
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Validation preemptionâ”‚ â† StrongFather
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-       â”‚ approuvee
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Notification cibles â”‚ â† Avertissement
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-       â”‚
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Reallocation        â”‚ â† Execution Kernel
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       │
+       ▼
+┌─────────────────────┐
+│ Evaluation normale  │
+└──────────┬──────────┘
+       │ ressources insuffisantes
+       ▼
+┌─────────────────────┐
+│ Recherche cibles    │ ← Allocations preemptibles
+└──────────┬──────────┘
+       │ cibles trouvees
+       ▼
+┌─────────────────────┐
+│ Validation preemption│ ← StrongFather
+└──────────┬──────────┘
+       │ approuvee
+       ▼
+┌─────────────────────┐
+│ Notification cibles │ ← Avertissement
+└──────────┬──────────┘
+       │
+       ▼
+┌─────────────────────┐
+│ Reallocation        │ ← Execution Kernel
+└──────────┬──────────┘
 ```
 
 ### 7.3 Regles de preemption
@@ -494,7 +494,7 @@ La preemption permet a une demande de haute priorite d'interrompre une allocatio
 
 **Verification :**
 - Trace complete pour chaque arbitrage
-- Lien demande â†’ decision verifiable
+- Lien demande → decision verifiable
 - Audit possible a posteriori
 
 ### 8.3 Garantie de non-execution (GAR-ARB-03)
@@ -707,7 +707,7 @@ Tout arbitrage effectue par LogisticsSteward doit respecter ce contrat. Toute vi
 
 **Version :** 1.0.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
+**Statut :** CONTRAT — Normatif  
 **Dependencies :**
 - [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) v1.0.0 (Section 6.4)
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)

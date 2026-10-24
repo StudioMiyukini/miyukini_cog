@@ -1,4 +1,4 @@
-﻿# Kernel â€” Security Boundaries Contract
+﻿# Kernel — Security Boundaries Contract
 
 ## 1. Contexte
 
@@ -54,9 +54,9 @@ Le Kernel **ne gere pas** l'authentification :
 
 | Autorise | Interdit |
 |----------|----------|
-| âœ… Generer un identifiant unique (UUID/ULID) | âŒ Verifier l'identite d'un utilisateur |
-| âœ… Fournir des traits abstraits pour l'ID | âŒ Implementer OAuth, JWT, sessions |
-| âœ… Garantir l'unicite locale des IDs | âŒ Valider des tokens ou credentials |
+| ✅ Generer un identifiant unique (UUID/ULID) | ❌ Verifier l'identite d'un utilisateur |
+| ✅ Fournir des traits abstraits pour l'ID | ❌ Implementer OAuth, JWT, sessions |
+| ✅ Garantir l'unicite locale des IDs | ❌ Valider des tokens ou credentials |
 
 **Raison :** L'authentification est une logique metier qui varie selon le produit. Le Kernel doit rester reutilisable par tous les produits.
 
@@ -66,9 +66,9 @@ Le Kernel **ne fournit pas** de primitives cryptographiques :
 
 | Autorise | Interdit |
 |----------|----------|
-| âœ… Exposer des hooks pour integration crypto | âŒ Implementer des algorithmes de chiffrement |
-| âœ… Fournir des interfaces abstraites | âŒ Gerer des cles, certificats, HSM |
-| âœ… Transporter des donnees opaques (bytes) | âŒ Signer, verifier, chiffrer, dechiffrer |
+| ✅ Exposer des hooks pour integration crypto | ❌ Implementer des algorithmes de chiffrement |
+| ✅ Fournir des interfaces abstraites | ❌ Gerer des cles, certificats, HSM |
+| ✅ Transporter des donnees opaques (bytes) | ❌ Signer, verifier, chiffrer, dechiffrer |
 
 **Raison :** Les choix cryptographiques varient selon les exigences reglementaires (GDPR, HIPAA, etc.) et les produits. Le Kernel ne peut pas presupposer ces choix.
 
@@ -78,9 +78,9 @@ Le Kernel **ne gere pas** le controle d'acces :
 
 | Autorise | Interdit |
 |----------|----------|
-| âœ… Fournir des configurations chargeables | âŒ Definir des politiques d'acces |
-| âœ… Logger les evenements de lifecycle | âŒ Evaluer les permissions |
-| âœ… Executer les ordres de StrongFather | âŒ Decider qui peut faire quoi |
+| ✅ Fournir des configurations chargeables | ❌ Definir des politiques d'acces |
+| ✅ Logger les evenements de lifecycle | ❌ Evaluer les permissions |
+| ✅ Executer les ordres de StrongFather | ❌ Decider qui peut faire quoi |
 
 **Raison :** Le controle d'acces est de la responsabilite de Master Butler et StrongFather, qui appliquent la gouvernance.
 
@@ -90,9 +90,9 @@ Le Kernel **ne valide pas** les donnees metier :
 
 | Autorise | Interdit |
 |----------|----------|
-| âœ… Valider la syntaxe de configuration | âŒ Valider des donnees utilisateur |
-| âœ… Verifier la coherence interne | âŒ Filtrer les injections (SQL, XSS) |
-| âœ… Garantir les invariants techniques | âŒ Appliquer des regles metier |
+| ✅ Valider la syntaxe de configuration | ❌ Valider des donnees utilisateur |
+| ✅ Verifier la coherence interne | ❌ Filtrer les injections (SQL, XSS) |
+| ✅ Garantir les invariants techniques | ❌ Appliquer des regles metier |
 
 **Raison :** La validation des entrees est assuree par le Validation Engine et les Cores.
 
@@ -105,36 +105,36 @@ Le Kernel **ne valide pas** les donnees metier :
 Le Kernel est la strate la plus basse, sous les Security Engines :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                              SERVICES                               â”‚
-â”‚                    Apps, outils, plateformes, IA                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-                                    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                               CORES                                 â”‚
-â”‚         StrongFather, KindMother, Border Guard, Caring Nanny       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-                                    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                      SECURITY ENGINES                               â”‚
-â”‚  Integrity | Validation | Policy | Consensus | Audit | Sandbox     â”‚
-â”‚                    Cognitive Guard | Recovery                       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-                                    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                              KERNEL                                 â”‚
-â”‚              config | id | time | log | lifecycle                   â”‚
-â”‚      (Primitives techniques minimales â€” Aucune securite active)    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-                                    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                              SUBSTRAT                               â”‚
-â”‚                      OS, drivers, hardware, runtime                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌────────────────────────────────────────────────────────────────────┐
+│                              SERVICES                               │
+│                    Apps, outils, plateformes, IA                    │
+└────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                               CORES                                 │
+│         StrongFather, KindMother, Border Guard, Caring Nanny       │
+└────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                      SECURITY ENGINES                               │
+│  Integrity | Validation | Policy | Consensus | Audit | Sandbox     │
+│                    Cognitive Guard | Recovery                       │
+└────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                              KERNEL                                 │
+│              config | id | time | log | lifecycle                   │
+│      (Primitives techniques minimales — Aucune securite active)    │
+└────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                              SUBSTRAT                               │
+│                      OS, drivers, hardware, runtime                 │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 4.2 Ce que le Kernel fournit aux Security Engines
@@ -154,34 +154,34 @@ Le Kernel fournit des **primitives techniques** utilisees par les mecanismes de 
 Le Kernel participe aux flux de securite de maniere **passive** :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                       EVENEMENT SECURITE                         â”‚
-â”‚          (Detection anomalie, violation, alerte)                 â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [1] SECURITY ENGINE â€” Traitement                                â”‚
-â”‚      â€¢ Integrity Engine detecte une violation                    â”‚
-â”‚      â€¢ Audit Engine journalise l'evenement                       â”‚
-â”‚      â€¢ Recovery Engine prepare le rollback                       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [2] KERNEL â€” Support technique                                  â”‚
-â”‚      â€¢ time.now() : Horodatage precis                            â”‚
-â”‚      â€¢ id.generate() : Identifiant unique de l'evenement         â”‚
-â”‚      â€¢ log.log() : Emission du log structure                     â”‚
-â”‚      â€¢ config.get() : Lecture de la politique applicable         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                â”‚
-                                â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  [3] DECISION â€” Par les Cores                                    â”‚
-â”‚      â€¢ StrongFather evalue et decide                             â”‚
-â”‚      â€¢ TAMR escalade si necessaire                               â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────┐
+│                       EVENEMENT SECURITE                         │
+│          (Detection anomalie, violation, alerte)                 │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [1] SECURITY ENGINE — Traitement                                │
+│      • Integrity Engine detecte une violation                    │
+│      • Audit Engine journalise l'evenement                       │
+│      • Recovery Engine prepare le rollback                       │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [2] KERNEL — Support technique                                  │
+│      • time.now() : Horodatage precis                            │
+│      • id.generate() : Identifiant unique de l'evenement         │
+│      • log.log() : Emission du log structure                     │
+│      • config.get() : Lecture de la politique applicable         │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  [3] DECISION — Par les Cores                                    │
+│      • StrongFather evalue et decide                             │
+│      • TAMR escalade si necessaire                               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -205,7 +205,7 @@ Chaque invariant du Kernel a des **implications directes** sur la securite de l'
 | **INV-K-9** | Cout proportionnel | Pas de resource exhaustion |
 | **INV-K-10** | Gouvernance preservee | Chaine de confiance intacte |
 
-### 5.2 INV-K-1 â€” Aucune logique metier
+### 5.2 INV-K-1 — Aucune logique metier
 
 **Implication securite :**
 
@@ -213,13 +213,13 @@ Le Kernel ne contient aucune regle metier, donc aucune vulnerabilite liee a la l
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Surface d'attaque | âœ… Minimale â€” Pas de code metier a attaquer |
-| Vulnerabilites logiques | âœ… Impossibles â€” Pas de logique a exploiter |
-| Audit | âœ… Simplifie â€” Code technique previsible |
+| Surface d'attaque | ✅ Minimale — Pas de code metier a attaquer |
+| Vulnerabilites logiques | ✅ Impossibles — Pas de logique a exploiter |
+| Audit | ✅ Simplifie — Code technique previsible |
 
 **Relation avec la Doctrine :** Applique le principe de **separation des responsabilites**.
 
-### 5.3 INV-K-2 â€” Aucune dependance externe critique
+### 5.3 INV-K-2 — Aucune dependance externe critique
 
 **Implication securite :**
 
@@ -227,13 +227,13 @@ Le Kernel ne peut pas etre compromis via un service externe.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Supply chain attack | âœ… Reduit â€” Pas de SaaS externe |
-| Single point of failure | âœ… Elimine â€” Fonctionnement local |
-| Compromission transitive | âœ… Impossible â€” Pas de dependance critique |
+| Supply chain attack | ✅ Reduit — Pas de SaaS externe |
+| Single point of failure | ✅ Elimine — Fonctionnement local |
+| Compromission transitive | ✅ Impossible — Pas de dependance critique |
 
 **Relation avec la Doctrine :** Applique **LOI-1** (Aucune dependance externe critique).
 
-### 5.4 INV-K-3 â€” Primitives locales sures uniquement
+### 5.4 INV-K-3 — Primitives locales sures uniquement
 
 **Implication securite :**
 
@@ -241,13 +241,13 @@ Le comportement du Kernel est previsible, sans effets de bord caches.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Side-channel attacks | âœ… Reduits â€” Comportement deterministe |
-| Race conditions | âœ… Eliminees â€” Pas d'etat global mutable |
-| Comportement imprevisible | âœ… Impossible â€” Operations deterministes |
+| Side-channel attacks | ✅ Reduits — Comportement deterministe |
+| Race conditions | ✅ Eliminees — Pas d'etat global mutable |
+| Comportement imprevisible | ✅ Impossible — Operations deterministes |
 
 **Relation avec la Doctrine :** Prerequis pour l'**auditabilite**.
 
-### 5.5 INV-K-4 â€” Pas de protocole applicatif
+### 5.5 INV-K-4 — Pas de protocole applicatif
 
 **Implication securite :**
 
@@ -255,27 +255,27 @@ Le Kernel ne contient aucune implementation HTTP, WebSocket, gRPC, etc.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Vulnerabilites protocolaires | âœ… Impossibles â€” Pas de code reseau |
-| Injection, XSS, CSRF | âœ… Impossibles â€” Pas de web handler |
-| Buffer overflow reseau | âœ… Impossibles â€” Pas de parsing protocolaire |
+| Vulnerabilites protocolaires | ✅ Impossibles — Pas de code reseau |
+| Injection, XSS, CSRF | ✅ Impossibles — Pas de web handler |
+| Buffer overflow reseau | ✅ Impossibles — Pas de parsing protocolaire |
 
 **Relation avec la Doctrine :** Les vulnerabilites protocolaires sont gerees par les **couches superieures**.
 
-### 5.6 INV-K-5 â€” Non-mutation
+### 5.6 INV-K-5 — Non-mutation
 
 **Implication securite :**
 
-Le Kernel ne modifie jamais les donnees, configurations ou code â€” il observe uniquement.
+Le Kernel ne modifie jamais les donnees, configurations ou code — il observe uniquement.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Corruption automatique | âœ… Impossible â€” Pas de modification |
-| Perte de donnees | âœ… Impossible â€” Lecture seule |
-| Rollback non desire | âœ… Impossible â€” Decision par les Cores |
+| Corruption automatique | ✅ Impossible — Pas de modification |
+| Perte de donnees | ✅ Impossible — Lecture seule |
+| Rollback non desire | ✅ Impossible — Decision par les Cores |
 
-**Relation avec la Doctrine :** Preserve l'**integrite des donnees** â€” seuls les Cores modifient.
+**Relation avec la Doctrine :** Preserve l'**integrite des donnees** — seuls les Cores modifient.
 
-### 5.7 INV-K-6 â€” Determinisme
+### 5.7 INV-K-6 — Determinisme
 
 **Implication securite :**
 
@@ -283,13 +283,13 @@ Toute operation produit le meme resultat pour la meme entree.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Reproductibilite | âœ… Totale â€” Audit possible |
-| Detection d'alterations | âœ… Facilitee â€” Comparaison deterministe |
-| Forensic | âœ… Fiable â€” Rejouabilite garantie |
+| Reproductibilite | ✅ Totale — Audit possible |
+| Detection d'alterations | ✅ Facilitee — Comparaison deterministe |
+| Forensic | ✅ Fiable — Rejouabilite garantie |
 
-**Relation avec la Doctrine :** Prerequis pour la **chaine de confiance** CODE â†’ MSCM â†’ MIP â†’ GRAPH â†’ STA â†’ OSV.
+**Relation avec la Doctrine :** Prerequis pour la **chaine de confiance** CODE → MSCM → MIP → GRAPH → STA → OSV.
 
-### 5.8 INV-K-7 â€” Explicabilite
+### 5.8 INV-K-7 — Explicabilite
 
 **Implication securite :**
 
@@ -297,13 +297,13 @@ Tout evenement du Kernel est comprehensible sans expertise technique profonde.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Audit humain | âœ… Facilite â€” Pas de jargon cryptique |
-| Detection de compromission | âœ… Acceleree â€” Anomalies visibles |
-| Governance | âœ… Effective â€” Humain peut comprendre |
+| Audit humain | ✅ Facilite — Pas de jargon cryptique |
+| Detection de compromission | ✅ Acceleree — Anomalies visibles |
+| Governance | ✅ Effective — Humain peut comprendre |
 
 **Relation avec la Doctrine :** Applique le principe de **transparence pour la gouvernance humaine**.
 
-### 5.9 INV-K-8 â€” Souverainete locale
+### 5.9 INV-K-8 — Souverainete locale
 
 **Implication securite :**
 
@@ -311,13 +311,13 @@ Le Kernel fonctionne sans aucune dependance externe (reseau, SaaS, agent).
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Air-gapped environments | âœ… Supportes â€” Fonctionnement offline |
-| Attaque reseau | âœ… Impossibles â€” Pas de surface reseau |
-| Resilience | âœ… Maximale â€” Autonomie totale |
+| Air-gapped environments | ✅ Supportes — Fonctionnement offline |
+| Attaque reseau | ✅ Impossibles — Pas de surface reseau |
+| Resilience | ✅ Maximale — Autonomie totale |
 
 **Relation avec la Doctrine :** Applique **LOI-3** (L'etat local est souverain).
 
-### 5.10 INV-K-9 â€” Cout proportionnel au hardware
+### 5.10 INV-K-9 — Cout proportionnel au hardware
 
 **Implication securite :**
 
@@ -325,13 +325,13 @@ Le Kernel ne peut pas etre utilise pour une attaque par epuisement de ressources
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Denial of Service (DoS) | âœ… Limite â€” Ressources bornees |
-| Resource exhaustion | âœ… Impossible â€” Consommation previsible |
-| Timing attacks | âœ… Reduits â€” Performance predictible |
+| Denial of Service (DoS) | ✅ Limite — Ressources bornees |
+| Resource exhaustion | ✅ Impossible — Consommation previsible |
+| Timing attacks | ✅ Reduits — Performance predictible |
 
 **Relation avec la Doctrine :** Applique **LOI-5** (Cout proportionnel au hardware).
 
-### 5.11 INV-K-10 â€” Gouvernance preservee
+### 5.11 INV-K-10 — Gouvernance preservee
 
 **Implication securite :**
 
@@ -339,9 +339,9 @@ Le Kernel ne contourne jamais la chaine de gouvernance.
 
 | Aspect | Impact securite |
 |--------|-----------------|
-| Bypass de securite | âœ… Impossible â€” Gouvernance obligatoire |
-| Decisions non tracees | âœ… Impossibles â€” StrongFather valide |
-| Elevation de privileges | âœ… Impossible â€” Pas de decision autonome |
+| Bypass de securite | ✅ Impossible — Gouvernance obligatoire |
+| Decisions non tracees | ✅ Impossibles — StrongFather valide |
+| Elevation de privileges | ✅ Impossible — Pas de decision autonome |
 
 **Relation avec la Doctrine :** Applique la **chaine de confiance** via les Cores.
 
@@ -391,16 +391,16 @@ Le Kernel garantit un fonctionnement **souverain** :
 Selon le [Security - Core Integration Map](..//..//cores//WorrySentinel//_index.md), le Kernel intervient a ces points :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                              KERNEL                                 â”‚
-â”‚              Abstraction OS, hardware, runtime                      â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚
-â”‚  â”‚  POINTS DE CONTROLE :                                       â”‚    â”‚
-â”‚  â”‚  â€¢ KindMother : Persistance securisee                       â”‚    â”‚
-â”‚  â”‚  â€¢ Sondes environnementales                                 â”‚    â”‚
-â”‚  â”‚  â€¢ System Trust Chain                                       â”‚    â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌────────────────────────────────────────────────────────────────────┐
+│                              KERNEL                                 │
+│              Abstraction OS, hardware, runtime                      │
+│  ┌────────────────────────────────────────────────────────────┐    │
+│  │  POINTS DE CONTROLE :                                       │    │
+│  │  • KindMother : Persistance securisee                       │    │
+│  │  • Sondes environnementales                                 │    │
+│  │  • System Trust Chain                                       │    │
+│  └────────────────────────────────────────────────────────────┘    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 7.2 Sondes environnementales
@@ -414,7 +414,7 @@ Le Kernel supporte les **sondes environnementales** pour la detection d'anomalie
 | Lifecycle | Detection d'arret/demarrage anormal |
 | Ressources | Detection de consommation anormale |
 
-**Note :** Le Kernel **observe** via ces sondes mais **n'agit pas** â€” les decisions sont prises par Caring Nanny et StrongFather.
+**Note :** Le Kernel **observe** via ces sondes mais **n'agit pas** — les decisions sont prises par Caring Nanny et StrongFather.
 
 ### 7.3 Adaptation par niveau de confiance (T0-T4)
 
@@ -422,8 +422,8 @@ Le Kernel adapte son comportement selon le niveau de confiance :
 
 | Niveau | Comportement Kernel |
 |--------|---------------------|
-| **T0** | Normal â€” Sondes standard |
-| **T1** | Inchange â€” Sondes standard |
+| **T0** | Normal — Sondes standard |
+| **T1** | Inchange — Sondes standard |
 | **T2** | Sondes plus frequentes |
 | **T3** | Sondes intensives |
 | **T4** | Lecture seule, diagnostics uniquement |
@@ -450,10 +450,10 @@ Le Kernel est concerne par certains protocoles de securite :
 
 | Protocole | Role du Kernel | Description |
 |-----------|----------------|-------------|
-| **RT-SEC-5** | Support technique | Tracabilite immediate â€” Le Kernel fournit time, id, log |
-| **AS-SEC-4** | Support technique | Anti-Replay & Anti-Ordre â€” Le Kernel fournit time, id |
+| **RT-SEC-5** | Support technique | Tracabilite immediate — Le Kernel fournit time, id, log |
+| **AS-SEC-4** | Support technique | Anti-Replay & Anti-Ordre — Le Kernel fournit time, id |
 
-### 8.2 RT-SEC-5 â€” Tracabilite immediate
+### 8.2 RT-SEC-5 — Tracabilite immediate
 
 Le Kernel fournit les primitives pour la tracabilite :
 
@@ -463,7 +463,7 @@ Le Kernel fournit les primitives pour la tracabilite :
 | `id.generate()` | Identifiant unique de l'evenement |
 | `log.log()` | Emission du log structure |
 
-### 8.3 AS-SEC-4 â€” Anti-Replay & Anti-Ordre
+### 8.3 AS-SEC-4 — Anti-Replay & Anti-Ordre
 
 Le Kernel fournit les primitives pour la detection de replay :
 
@@ -506,20 +506,20 @@ Le Kernel fournit les primitives pour la detection de replay :
 
 ### Ce que le Kernel ne fait PAS en securite
 
-1. **Pas d'authentification** â€” Fournie par les Security Engines
-2. **Pas de cryptographie** â€” Fournie par les Security Engines
-3. **Pas de controle d'acces** â€” Fourni par Master Butler et StrongFather
-4. **Pas de validation metier** â€” Fournie par le Validation Engine
-5. **Pas de detection d'anomalies** â€” Fournie par Caring Nanny et Integrity Engine
-6. **Pas de decisions securitaires** â€” Prises par les Cores
+1. **Pas d'authentification** — Fournie par les Security Engines
+2. **Pas de cryptographie** — Fournie par les Security Engines
+3. **Pas de controle d'acces** — Fourni par Master Butler et StrongFather
+4. **Pas de validation metier** — Fournie par le Validation Engine
+5. **Pas de detection d'anomalies** — Fournie par Caring Nanny et Integrity Engine
+6. **Pas de decisions securitaires** — Prises par les Cores
 
 ### Comment le Kernel contribue a la securite
 
-1. **Par la simplicite** â€” Surface d'attaque minimale
-2. **Par le determinisme** â€” Comportement auditable et reproductible
-3. **Par l'autonomie** â€” Resilience aux attaques externes
-4. **Par la transparence** â€” Explicabilite pour audit humain
-5. **Par la gouvernance** â€” Subordination aux Cores
+1. **Par la simplicite** — Surface d'attaque minimale
+2. **Par le determinisme** — Comportement auditable et reproductible
+3. **Par l'autonomie** — Resilience aux attaques externes
+4. **Par la transparence** — Explicabilite pour audit humain
+5. **Par la gouvernance** — Subordination aux Cores
 
 ### Phrase de synthese
 
@@ -545,19 +545,19 @@ Le Kernel fournit les primitives pour la detection de replay :
 
 ### Avertissements traites
 
-**W1 : Distinction Kernel/Security** â€” La frontiere est claire : le Kernel fournit les primitives, les Security Engines et Cores gerent la securite.
+**W1 : Distinction Kernel/Security** — La frontiere est claire : le Kernel fournit les primitives, les Security Engines et Cores gerent la securite.
 
-**W2 : Coherence avec les invariants** â€” Les implications de securite derivent directement des invariants documentes dans `Kernel - Invariants & Guarantees.md`.
+**W2 : Coherence avec les invariants** — Les implications de securite derivent directement des invariants documentes dans `Kernel - Invariants & Guarantees.md`.
 
-**W3 : Integration avec la documentation securite** â€” Les references vers `docs/security` et `docs/reference` sont explicites.
+**W3 : Integration avec la documentation securite** — Les references vers `docs/security` et `docs/reference` sont explicites.
 
 ### Verification de coherence
 
-- âœ… Coherence avec la Doctrine Securite Fondamentale
-- âœ… Coherence avec Security - Core Integration Map
-- âœ… Coherence avec Kernel - Invariants & Guarantees
-- âœ… References correctes vers tous les documents
-- âœ… Structure conforme au plan de documentation
+- ✅ Coherence avec la Doctrine Securite Fondamentale
+- ✅ Coherence avec Security - Core Integration Map
+- ✅ Coherence avec Kernel - Invariants & Guarantees
+- ✅ References correctes vers tous les documents
+- ✅ Structure conforme au plan de documentation
 
 **Aucune contradiction detectee.**
 

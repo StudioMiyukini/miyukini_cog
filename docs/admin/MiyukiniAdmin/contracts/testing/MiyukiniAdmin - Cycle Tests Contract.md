@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Cycle Tests Contract
+﻿# MiyukiniAdmin — Cycle Tests Contract
 
 ## 1. Contexte
 
@@ -65,7 +65,7 @@ Ce document **ne couvre pas** :
 
 | Test | Description | Parametres |
 |------|-------------|------------|
-| **LOAD-001** | Charge progressive | 10 â†’ 100 â†’ 500 req/s |
+| **LOAD-001** | Charge progressive | 10 → 100 → 500 req/s |
 | **LOAD-002** | Pic de charge | Burst 1000 req/s |
 | **LOAD-003** | Charge soutenue | 200 req/s pendant 5 min |
 | **LOAD-004** | Stress test | Jusqu'a saturation |
@@ -94,70 +94,70 @@ Avant tout test de cycle :
 ### 5.2 Phases d'Execution
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Phase 1: Preparation                                         â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ - Verification pre-conditions                               â”‚
-â”‚ - Baseline metriques                                        â”‚
-â”‚ - Configuration parametres                                   â”‚
-â”‚ - Creation sandbox si necessaire                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Phase 2: Execution                                           â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ - Lancement test                                            â”‚
-â”‚ - Collecte metriques temps reel                             â”‚
-â”‚ - Monitoring seuils critiques                               â”‚
-â”‚ - Arret si seuils depasses                                  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Phase 3: Analyse                                             â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ - Agregation resultats                                      â”‚
-â”‚ - Calcul statistiques                                       â”‚
-â”‚ - Comparaison baseline                                      â”‚
-â”‚ - Detection anomalies                                       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                              â”‚
-                              â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ Phase 4: Rapport                                             â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ - Generation rapport                                        â”‚
-â”‚ - Stockage pour audit                                       â”‚
-â”‚ - Notification resultats                                    â”‚
-â”‚ - Nettoyage sandbox                                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 1: Preparation                                         │
+├─────────────────────────────────────────────────────────────┤
+│ - Verification pre-conditions                               │
+│ - Baseline metriques                                        │
+│ - Configuration parametres                                   │
+│ - Creation sandbox si necessaire                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 2: Execution                                           │
+├─────────────────────────────────────────────────────────────┤
+│ - Lancement test                                            │
+│ - Collecte metriques temps reel                             │
+│ - Monitoring seuils critiques                               │
+│ - Arret si seuils depasses                                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 3: Analyse                                             │
+├─────────────────────────────────────────────────────────────┤
+│ - Agregation resultats                                      │
+│ - Calcul statistiques                                       │
+│ - Comparaison baseline                                      │
+│ - Detection anomalies                                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Phase 4: Rapport                                             │
+├─────────────────────────────────────────────────────────────┤
+│ - Generation rapport                                        │
+│ - Stockage pour audit                                       │
+│ - Notification resultats                                    │
+│ - Nettoyage sandbox                                         │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### 5.3 Flux d'Execution
 
 ```
 MiyukiniAdmin            BondingBrother         StrongFather      CaringNanny
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚â”€â”€TestRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚                â”‚
-     â”‚  (type: LOAD-001)        â”‚                     â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚                         â”‚â”€â”€ValidateTestâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚                         â”‚â—€â”€Approvedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚                         â”‚â”€â”€NotifyTestStartâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚â—€â”€TestStartedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚  â•â•â• EXECUTION TEST â•â•â•â•â”‚                     â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚â—€â”€TestProgressâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚                â”‚
-     â”‚  (metriques temps reel) â”‚                     â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
-     â”‚â—€â”€TestCompletedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚                â”‚
-     â”‚  (rapport final)        â”‚                     â”‚                â”‚
-     â”‚                         â”‚                     â”‚                â”‚
+     │                         │                     │                │
+     │──TestRequest────────────▶│                     │                │
+     │  (type: LOAD-001)        │                     │                │
+     │                         │                     │                │
+     │                         │──ValidateTest───────▶│                │
+     │                         │                     │                │
+     │                         │◀─Approved───────────│                │
+     │                         │                     │                │
+     │                         │──NotifyTestStart────────────────────▶│
+     │                         │                     │                │
+     │◀─TestStarted────────────│                     │                │
+     │                         │                     │                │
+     │  ═══ EXECUTION TEST ════│                     │                │
+     │                         │                     │                │
+     │◀─TestProgress───────────│                     │                │
+     │  (metriques temps reel) │                     │                │
+     │                         │                     │                │
+     │◀─TestCompleted──────────│                     │                │
+     │  (rapport final)        │                     │                │
+     │                         │                     │                │
 ```
 
 ---
@@ -342,7 +342,7 @@ MiyukiniAdmin            BondingBrother         StrongFather      CaringNanny
 
 ---
 
-## 11. Implications Securite â€” DoS et Stress Testing
+## 11. Implications Securite — DoS et Stress Testing
 
 ### 11.1 Risques de Securite des Tests de Charge
 
@@ -377,7 +377,7 @@ Les tests de cycle (LOAD, STRESS) peuvent involontairement creer des conditions 
 | **Quota de charge** | Maximum 50% de la capacite totale |
 | **Notification** | Tous les operateurs informes avant LOAD test |
 
-### 11.4 Stress Test (LOAD-004) â€” Controles Speciaux
+### 11.4 Stress Test (LOAD-004) — Controles Speciaux
 
 Le Stress Test (jusqu'a saturation) presente des risques majeurs :
 
@@ -460,11 +460,11 @@ MiyukiniAdmin peut executer un **test de cycle dedie a MiyuSQL** qui verifie le 
 
 La specification complete du scenario (etapes, criteres de succes, verdicts, table dediee) est definie dans le contrat MiyuSQL :
 
-- **[MiyuSQL - Cycle Tests Contract](..//..//..//..//tools//MiyuSQL//contracts//testing//MiyuSQL%20-%20Cycle%20Tests%20Contract.md)** â€” section Â« Test chemin complet MiyuSQL â€” MiyukiniSQLtest Â».
+- **[MiyuSQL - Cycle Tests Contract](..//..//..//..//tools//MiyuSQL//contracts//testing//MiyuSQL%20-%20Cycle%20Tests%20Contract.md)** — section « Test chemin complet MiyuSQL — MiyukiniSQLtest ».
 
 ### 12.3 Role de MiyukiniAdmin
 
-MiyukiniAdmin est l'**executant** du test : il emet les WriteIntent, declenche le flux gouvernÃ©, et verifie les resultats (lecture, affichage). L'environnement de diagnostic et la table `MiyukiniSQLtest` sont isoles ; aucun impact sur les donnees metier.
+MiyukiniAdmin est l'**executant** du test : il emet les WriteIntent, declenche le flux gouverné, et verifie les resultats (lecture, affichage). L'environnement de diagnostic et la table `MiyukiniSQLtest` sont isoles ; aucun impact sur les donnees metier.
 
 ### 12.4 Reference Croisee
 

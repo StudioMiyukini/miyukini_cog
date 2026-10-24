@@ -1,126 +1,126 @@
-﻿# Miyukini Web Portal â€” Document Fondateur
+﻿# Miyukini Web Portal — Document Fondateur
 
 ## Contexte
 
-**Miyukini Web Portal** (le **Portail**) est le **Service Fondamental** qui constitue le point d'entrÃ©e web pour les utilisateurs externes. Il est l'Ã©quivalent de Miyukini Central pour le monde extÃ©rieur : lÃ  oÃ¹ Central sert l'utilisateur du COG, le Portail sert les utilisateurs externes qui accÃ¨dent via un navigateur web.
+**Miyukini Web Portal** (le **Portail**) est le **Service Fondamental** qui constitue le point d'entrée web pour les utilisateurs externes. Il est l'équivalent de Miyukini Central pour le monde extérieur : là où Central sert l'utilisateur du COG, le Portail sert les utilisateurs externes qui accèdent via un navigateur web.
 
-Le Portail expose les **FaÃ§ades Publiques GouvernÃ©es** des Services de Type 2 (Ã  surface web externe) sous contrÃ´le strict de la gouvernance COG (BorderGuard, StrongFather, WorrySentinel).
+Le Portail expose les **Façades Publiques Gouvernées** des Services de Type 2 (à surface web externe) sous contrôle strict de la gouvernance COG (BorderGuard, StrongFather, WorrySentinel).
 
-**RÃ¨gle canonique :**
+**Règle canonique :**
 
 > **Central = COG, Portail = Web.**
 
-## PortÃ©e / Scope
+## Portée / Scope
 
-- **Applicable Ã  :** Conception, dÃ©veloppement et exploitation du Portail Miyukini Web Portal
-- **Audience :** Architectes, dÃ©veloppeurs, designers UX/UI, responsables sÃ©curitÃ©
-- **Statut :** Document de rÃ©fÃ©rence fondateur â€” Service Fondamental
+- **Applicable à :** Conception, développement et exploitation du Portail Miyukini Web Portal
+- **Audience :** Architectes, développeurs, designers UX/UI, responsables sécurité
+- **Statut :** Document de référence fondateur — Service Fondamental
 
 ### Couvert par ce document
 
-- Positionnement et rÃ´le du Portail
+- Positionnement et rôle du Portail
 - Relation avec Central et les Services
 - Architecture et gouvernance
-- Flux et sÃ©curitÃ©
+- Flux et sécurité
 - Identification et fichage des connexions
 
 ### Hors scope
 
-- ImplÃ©mentation technique dÃ©taillÃ©e (voir guide d'implÃ©mentation)
-- UX/UI dÃ©taillÃ© des surfaces des Services (voir chaque Service)
+- Implémentation technique détaillée (voir guide d'implémentation)
+- UX/UI détaillé des surfaces des Services (voir chaque Service)
 
 ---
 
-## 1. DÃ©finition et Position dans la Pyramide
+## 1. Définition et Position dans la Pyramide
 
 ### 1.1 Nature du Miyukini Web Portal
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Type** | Service Fondamental â€” OpÃ©rateur d'Interface (Strate 7) |
-| **RÃ´le** | Expose les FaÃ§ades Publiques des Services (Type 2) aux utilisateurs externes via le web |
-| **Question fondamentale** | *Â« Comment les utilisateurs externes accÃ¨dent-ils aux surfaces web du COG ? Â»* |
-| **Cible** | Utilisateurs externes (clients, visiteurs, prospects) â€” sans COG, via navigateur |
-| **AutoritÃ©** | Aucune autoritÃ© propre â€” applique les dÃ©cisions des Cores (BorderGuard, StrongFather) |
+| **Type** | Service Fondamental — Opérateur d'Interface (Strate 7) |
+| **Rôle** | Expose les Façades Publiques des Services (Type 2) aux utilisateurs externes via le web |
+| **Question fondamentale** | *« Comment les utilisateurs externes accèdent-ils aux surfaces web du COG ? »* |
+| **Cible** | Utilisateurs externes (clients, visiteurs, prospects) — sans COG, via navigateur |
+| **Autorité** | Aucune autorité propre — applique les décisions des Cores (BorderGuard, StrongFather) |
 
 **Phrase fondatrice :**
 
-> **Le Portail est la porte d'entrÃ©e web du COG. L'utilisateur externe y accÃ¨de ; le COG sort vers lui, jamais l'inverse.**
+> **Le Portail est la porte d'entrée web du COG. L'utilisateur externe y accède ; le COG sort vers lui, jamais l'inverse.**
 
 ### 1.2 Ce que le Portail N'EST PAS
 
-| âŒ N'est pas | Pourquoi |
+| ❌ N'est pas | Pourquoi |
 |--------------|----------|
 | Un serveur central unique | Chaque COG expose **son** Portail ; pas de "super-serveur" qui affiche tous les COGs |
-| Un remplacement de Central | Central reste le point d'entrÃ©e pour l'utilisateur du COG |
-| Une porte ouverte | Tout accÃ¨s passe par BorderGuard, identification et Mandat Public d'AccÃ¨s |
-| Une source de vÃ©ritÃ© | La vÃ©ritÃ© est dans les Cores ; le Portail relaie et affiche |
+| Un remplacement de Central | Central reste le point d'entrée pour l'utilisateur du COG |
+| Une porte ouverte | Tout accès passe par BorderGuard, identification et Mandat Public d'Accès |
+| Une source de vérité | La vérité est dans les Cores ; le Portail relaie et affiche |
 
 ### 1.3 Position dans la Pyramide Miyukini
 
 ```
-STRATE 7 â€” OpÃ©rateurs
-â”œâ”€â”€ Miyukini Central (Service Fondamental) â† Point d'entrÃ©e COG
-â”œâ”€â”€ Miyukini Web Portal (Service Fondamental) â† Point d'entrÃ©e Web
-â”œâ”€â”€ JayXpose, JayFestival, JayRDV, JayKonta, ... (Services Type 1/2/3)
-â””â”€â”€ â€¦
+STRATE 7 — Opérateurs
+├── Miyukini Central (Service Fondamental) ← Point d'entrée COG
+├── Miyukini Web Portal (Service Fondamental) ← Point d'entrée Web
+├── JayXpose, JayFestival, JayRDV, JayKonta, ... (Services Type 1/2/3)
+└── …
 
-STRATE 9 â€” MiyukiniAdmin (exception, administration systÃ¨me)
+STRATE 9 — MiyukiniAdmin (exception, administration système)
 ```
 
 ---
 
 ## 2. Relation Central / Portail
 
-### 2.1 DualitÃ© fondamentale
+### 2.1 Dualité fondamentale
 
 | Aspect | Miyukini Central | Miyukini Web Portal |
 |--------|------------------|---------------------|
 | **Cible** | Utilisateur du COG | Utilisateurs externes (web) |
-| **AccÃ¨s** | Application desktop/web locale | Navigateur web distant |
-| **Authentification** | IdentitÃ© COG souveraine | Sans identitÃ© COG (FaÃ§ade Publique) |
-| **Gouvernance** | Mandat de Permission | Mandat Public d'AccÃ¨s |
-| **RÃ´le** | Gestion, administration, crÃ©ation | Consultation, rÃ©servation, achat |
+| **Accès** | Application desktop/web locale | Navigateur web distant |
+| **Authentification** | Identité COG souveraine | Sans identité COG (Façade Publique) |
+| **Gouvernance** | Mandat de Permission | Mandat Public d'Accès |
+| **Rôle** | Gestion, administration, création | Consultation, réservation, achat |
 
-### 2.2 SchÃ©ma de relation
+### 2.2 Schéma de relation
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    Utilisateur du COG                                â”‚
-â”‚  (propriÃ©taire, administrateur, gestionnaire)                       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    Miyukini Central                                  â”‚
-â”‚  Â· Gestion, administration, crÃ©ation                                â”‚
-â”‚  Â· AccÃ¨s complet aux Services (Type 1, 2, 3)                        â”‚
-â”‚  Â· PrÃ©pare les contenus exposÃ©s au Portail                          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â”‚ Les Services de Type 2 exposent
-                            â”‚ leurs capacitÃ©s au Portail
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    Miyukini Web Portal                               â”‚
-â”‚  Â· FaÃ§ades Publiques GouvernÃ©es                                     â”‚
-â”‚  Â· Surfaces web des Services (vitrine, rÃ©servation, catalogue...)  â”‚
-â”‚  Â· Identification et fichage des connexions entrantes               â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    Utilisateurs externes                             â”‚
-â”‚  (clients, visiteurs, prospects â€” sans COG)                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Utilisateur du COG                                │
+│  (propriétaire, administrateur, gestionnaire)                       │
+└───────────────────────────┬─────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Miyukini Central                                  │
+│  · Gestion, administration, création                                │
+│  · Accès complet aux Services (Type 1, 2, 3)                        │
+│  · Prépare les contenus exposés au Portail                          │
+└─────────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Les Services de Type 2 exposent
+                            │ leurs capacités au Portail
+                            ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Miyukini Web Portal                               │
+│  · Façades Publiques Gouvernées                                     │
+│  · Surfaces web des Services (vitrine, réservation, catalogue...)  │
+│  · Identification et fichage des connexions entrantes               │
+└───────────────────────────┬─────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Utilisateurs externes                             │
+│  (clients, visiteurs, prospects — sans COG)                         │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 RÃ¨gle de cohabitation
+### 2.3 Règle de cohabitation
 
-> **Central et Portail sont tous deux des Services Fondamentaux. Leur prÃ©sence fait partie de l'environnement versionnÃ© du COG.**
+> **Central et Portail sont tous deux des Services Fondamentaux. Leur présence fait partie de l'environnement versionné du COG.**
 
-Un COG sans Central ne peut pas Ãªtre administrÃ©.  
-Un COG sans Portail ne peut pas exposer de surfaces web (Services Type 2 limitÃ©s Ã  leur facette interne).
+Un COG sans Central ne peut pas être administré.  
+Un COG sans Portail ne peut pas exposer de surfaces web (Services Type 2 limités à leur facette interne).
 
 ---
 
@@ -129,143 +129,143 @@ Un COG sans Portail ne peut pas exposer de surfaces web (Services Type 2 limitÃ
 ### 3.1 Architecture logique
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚            Utilisateur externe (navigateur web)                      â”‚
-â”‚  https://vitrine.mon-commerce.cog                                   â”‚
-â”‚  https://rdv.kine-paris.cog                                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚ HTTPS
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              Miyukini Web Portal (Portail)                           â”‚
-â”‚  Â· MiyuWeb (rendu HTML, layout, formulaires)                        â”‚
-â”‚  Â· Routage vers les surfaces des Services                           â”‚
-â”‚  Â· Identification et fichage (session, IP, scope)                   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚ BondingBrother
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    BorderGuard (Strate 4)                            â”‚
-â”‚  Â· DÃ©finition des frontiÃ¨res et niveaux de confiance                â”‚
-â”‚  Â· Mandat Public d'AccÃ¨s                                            â”‚
-â”‚  Â· RÃ¨gles de franchissement                                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-              â–¼             â–¼             â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ StrongFather     â”‚ â”‚ KindMother       â”‚ â”‚ WorrySentinel    â”‚
-â”‚ DÃ©cision ALLOW/  â”‚ â”‚ DonnÃ©es          â”‚ â”‚ SÃ©curitÃ©         â”‚
-â”‚ DENY             â”‚ â”‚ (lecture seule)  â”‚ â”‚ (Ã©tat, niveau)   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Services (JayXpose, JayFestival, JayRDV, JayKonta)                  â”‚
-â”‚  Â· Exposent leurs capacitÃ©s (lecture, formulaires, actions bornÃ©es) â”‚
-â”‚  Â· Jamais d'accÃ¨s direct aux Cores depuis l'extÃ©rieur               â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────┐
+│            Utilisateur externe (navigateur web)                      │
+│  https://vitrine.mon-commerce.cog                                   │
+│  https://rdv.kine-paris.cog                                         │
+└───────────────────────────┬─────────────────────────────────────────┘
+                            │ HTTPS
+                            ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│              Miyukini Web Portal (Portail)                           │
+│  · MiyuWeb (rendu HTML, layout, formulaires)                        │
+│  · Routage vers les surfaces des Services                           │
+│  · Identification et fichage (session, IP, scope)                   │
+└───────────────────────────┬─────────────────────────────────────────┘
+                            │ BondingBrother
+                            ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    BorderGuard (Strate 4)                            │
+│  · Définition des frontières et niveaux de confiance                │
+│  · Mandat Public d'Accès                                            │
+│  · Règles de franchissement                                         │
+└───────────────────────────┬─────────────────────────────────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│ StrongFather     │ │ KindMother       │ │ WorrySentinel    │
+│ Décision ALLOW/  │ │ Données          │ │ Sécurité         │
+│ DENY             │ │ (lecture seule)  │ │ (état, niveau)   │
+└──────────────────┘ └──────────────────┘ └──────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Services (JayXpose, JayFestival, JayRDV, JayKonta)                  │
+│  · Exposent leurs capacités (lecture, formulaires, actions bornées) │
+│  · Jamais d'accès direct aux Cores depuis l'extérieur               │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 3.2 Flux typiques
 
 | Flux | Description |
 |------|-------------|
-| **Consultation vitrine** | Utilisateur externe â†’ Portail â†’ BorderGuard â†’ JayXpose (lecture catalogue, pages) â†’ rendu HTML |
-| **RÃ©servation RDV** | Utilisateur externe â†’ Portail â†’ BorderGuard â†’ JayRDV (crÃ©neaux, formulaire, crÃ©ation RDV) |
-| **Achat e-shop** | Utilisateur externe â†’ Portail â†’ BorderGuard â†’ JayXpose (panier, commande) â†’ KindMother (persist) |
-| **Consultation facture** | Client (lien email) â†’ Portail â†’ BorderGuard (token) â†’ JayKonta (lecture facture) |
+| **Consultation vitrine** | Utilisateur externe → Portail → BorderGuard → JayXpose (lecture catalogue, pages) → rendu HTML |
+| **Réservation RDV** | Utilisateur externe → Portail → BorderGuard → JayRDV (créneaux, formulaire, création RDV) |
+| **Achat e-shop** | Utilisateur externe → Portail → BorderGuard → JayXpose (panier, commande) → KindMother (persist) |
+| **Consultation facture** | Client (lien email) → Portail → BorderGuard (token) → JayKonta (lecture facture) |
 
 ---
 
-## 4. Gouvernance et SÃ©curitÃ©
+## 4. Gouvernance et Sécurité
 
 ### 4.1 Principes fondamentaux
 
-| Principe | RÃ¨gle |
+| Principe | Règle |
 |----------|-------|
-| **FaÃ§ade Publique GouvernÃ©e** | Le Portail expose une zone tampon ; l'utilisateur externe n'entre jamais dans le COG |
-| **Mandat Public d'AccÃ¨s** | Toute surface exposÃ©e est sous Mandat (quotas, rate limits, mÃ©thodes autorisÃ©es) |
-| **Identification obligatoire** | Chaque connexion entrante est identifiÃ©e et fichÃ©e (session, IP, timestamp, scope) |
-| **Pas d'accÃ¨s aux Cores** | L'utilisateur externe n'accÃ¨de jamais directement aux Cores ; uniquement via capacitÃ©s exposÃ©es |
+| **Façade Publique Gouvernée** | Le Portail expose une zone tampon ; l'utilisateur externe n'entre jamais dans le COG |
+| **Mandat Public d'Accès** | Toute surface exposée est sous Mandat (quotas, rate limits, méthodes autorisées) |
+| **Identification obligatoire** | Chaque connexion entrante est identifiée et fichée (session, IP, timestamp, scope) |
+| **Pas d'accès aux Cores** | L'utilisateur externe n'accède jamais directement aux Cores ; uniquement via capacités exposées |
 
 ### 4.2 Identification et fichage des connexions
 
-**RÃ¨gle :**
+**Règle :**
 
-> **Par sÃ©curitÃ©, chaque connexion entrante est identifiÃ©e et fichÃ©e.**
+> **Par sécurité, chaque connexion entrante est identifiée et fichée.**
 
-| DonnÃ©e collectÃ©e | Usage |
+| Donnée collectée | Usage |
 |------------------|-------|
 | **Session ID** | Identification de la session (token opaque) |
-| **IP / origine** | TraÃ§abilitÃ©, rate limiting, dÃ©tection d'abus |
+| **IP / origine** | Traçabilité, rate limiting, détection d'abus |
 | **Timestamp** | Horodatage de la connexion |
-| **Scope / Visa** | Niveau d'accÃ¨s accordÃ© (S1/S2 selon Mandat Public) |
-| **Actions effectuÃ©es** | Audit (pages consultÃ©es, formulaires soumis) |
+| **Scope / Visa** | Niveau d'accès accordé (S1/S2 selon Mandat Public) |
+| **Actions effectuées** | Audit (pages consultées, formulaires soumis) |
 
-**Stockage :** KindMother (logs de sÃ©curitÃ©), non exposÃ© Ã  l'utilisateur externe.
+**Stockage :** KindMother (logs de sécurité), non exposé à l'utilisateur externe.
 
-### 4.3 Niveaux de sÃ©curitÃ© (WorrySentinel)
+### 4.3 Niveaux de sécurité (WorrySentinel)
 
 | Niveau | Usage typique sur le Portail |
 |--------|------------------------------|
-| **0 â€” Public** | Lecture catalogue, pages vitrine |
-| **1 â€” Standard** | Formulaire de contact, rÃ©servation simple |
-| **2 â€” Sensitive** | Paiement, donnÃ©es personnelles |
+| **0 — Public** | Lecture catalogue, pages vitrine |
+| **1 — Standard** | Formulaire de contact, réservation simple |
+| **2 — Sensitive** | Paiement, données personnelles |
 
-Les niveaux 3+ (Critical, Highest) ne sont pas exposÃ©s via le Portail (rÃ©servÃ©s Ã  Central / Admin).
+Les niveaux 3+ (Critical, Highest) ne sont pas exposés via le Portail (réservés à Central / Admin).
 
-### 4.4 DÃ©gradation et protection
+### 4.4 Dégradation et protection
 
-| Action | DÃ©clencheur | Effet |
+| Action | Déclencheur | Effet |
 |--------|-------------|-------|
-| **Throttle** | RequÃªtes trop frÃ©quentes | Ralentissement |
-| **Downgrade** | Comportement suspect | FonctionnalitÃ©s rÃ©duites |
-| **Freeze** | Anomalie dÃ©tectÃ©e | Lecture seule |
-| **Block** | Abus confirmÃ© | IP / session bloquÃ©e |
-| **Blackhole** | Attaque | RÃ©ponse neutre, pas d'erreur exploitable |
+| **Throttle** | Requêtes trop fréquentes | Ralentissement |
+| **Downgrade** | Comportement suspect | Fonctionnalités réduites |
+| **Freeze** | Anomalie détectée | Lecture seule |
+| **Block** | Abus confirmé | IP / session bloquée |
+| **Blackhole** | Attaque | Réponse neutre, pas d'erreur exploitable |
 
 ---
 
 ## 5. Relation avec le Maillage Webway
 
-### 5.1 RÃ´le du COG Tracker
+### 5.1 Rôle du COG Tracker
 
 Le **COG Tracker** (Maillage Webway) peut cataloguer les Portails des COGs participants :
 
-- **DÃ©claration** : un COG dÃ©clare son Portail (adresse, services exposÃ©s)
-- **DÃ©couverte** : d'autres COGs ou utilisateurs peuvent dÃ©couvrir les Portails disponibles
-- **Pas de gouvernance** : le Tracker ne gouverne pas ; il rÃ©fÃ©rence et facilite la dÃ©couverte
+- **Déclaration** : un COG déclare son Portail (adresse, services exposés)
+- **Découverte** : d'autres COGs ou utilisateurs peuvent découvrir les Portails disponibles
+- **Pas de gouvernance** : le Tracker ne gouverne pas ; il référence et facilite la découverte
 
 ### 5.2 Portail et Inter-COG
 
 Le Portail sert les **utilisateurs externes sans COG**.
 
-Pour les **utilisateurs d'autres COGs** (Visite gouvernÃ©e inter-COG), c'est le mÃ©canisme de Passeport / Visa qui s'applique, pas le Portail. Le Portail est rÃ©servÃ© aux utilisateurs non-COG.
+Pour les **utilisateurs d'autres COGs** (Visite gouvernée inter-COG), c'est le mécanisme de Passeport / Visa qui s'applique, pas le Portail. Le Portail est réservé aux utilisateurs non-COG.
 
 ---
 
-## 6. Services exposÃ©s via le Portail
+## 6. Services exposés via le Portail
 
-### 6.1 Services de Type 2 (Ã  surface web externe)
+### 6.1 Services de Type 2 (à surface web externe)
 
 Seuls les Services de **Type 2** exposent une surface via le Portail.
 
 | Service | Surface Portail | Parcours typiques |
 |---------|-----------------|-------------------|
 | **JayXpose** | Vitrine, e-shop, annuaire, blog | Consultation catalogue, achat, contact |
-| **JayFestival** | Catalogue Ã©vÃ©nements, billets, espace visiteur | DÃ©couverte, inscription, rÃ©servation |
-| **JayRDV** | Page rÃ©servation, parcours guest | Choix crÃ©neau, formulaire, confirmation |
+| **JayFestival** | Catalogue événements, billets, espace visiteur | Découverte, inscription, réservation |
+| **JayRDV** | Page réservation, parcours guest | Choix créneau, formulaire, confirmation |
 | **JayKonta** | Portail client | Consultation factures, paiement en ligne |
 
-### 6.2 Ce qui n'est PAS exposÃ©
+### 6.2 Ce qui n'est PAS exposé
 
 | Service / Fonction | Exposition Portail |
 |--------------------|--------------------|
-| **JayKoa** (agenda personnel) | âŒ Interne uniquement |
-| **Administration comptable** (JayKonta) | âŒ Central uniquement |
-| **Gestion exposant** (JayXpose) | âŒ Central uniquement |
-| **MiyukiniAdmin** | âŒ Jamais exposÃ© |
+| **JayKoa** (agenda personnel) | ❌ Interne uniquement |
+| **Administration comptable** (JayKonta) | ❌ Central uniquement |
+| **Gestion exposant** (JayXpose) | ❌ Central uniquement |
+| **MiyukiniAdmin** | ❌ Jamais exposé |
 
 ---
 
@@ -274,10 +274,10 @@ Seuls les Services de **Type 2** exposent une surface via le Portail.
 | Aspect | Valeur |
 |--------|--------|
 | **Type** | Service Fondamental |
-| **Description** | Point d'entrÃ©e web pour les utilisateurs externes |
-| **Espace Central** | âœ… Administration du Portail (paramÃ¨tres, logs, monitoring) |
-| **Espace Portail** | âœ… Le Portail lui-mÃªme (point d'entrÃ©e web) |
-| **Espace Inter-COG** | âŒ Non concernÃ© (les visites inter-COG passent par Passeport/Visa, pas par le Portail) |
+| **Description** | Point d'entrée web pour les utilisateurs externes |
+| **Espace Central** | ✅ Administration du Portail (paramètres, logs, monitoring) |
+| **Espace Portail** | ✅ Le Portail lui-même (point d'entrée web) |
+| **Espace Inter-COG** | ❌ Non concerné (les visites inter-COG passent par Passeport/Visa, pas par le Portail) |
 
 ---
 
@@ -287,42 +287,42 @@ Le Portail utilise les Outils suivants (Strate 6) :
 
 | Outil / Kit | Usage |
 |-------------|-------|
-| **MiyuWeb** | Rendu HTML, layout, formulaires, Ã©vÃ©nements |
-| **MiyuValidate** | Validation des entrÃ©es utilisateur |
+| **MiyuWeb** | Rendu HTML, layout, formulaires, événements |
+| **MiyuValidate** | Validation des entrées utilisateur |
 | **MiyuAntiSpam** | Rate limiting, captcha, flood protection |
-| **BorderGuard (capacitÃ©s)** | RÃ¨gles de franchissement, niveaux de confiance |
+| **BorderGuard (capacités)** | Règles de franchissement, niveaux de confiance |
 
 ---
 
-## 9. SynthÃ¨se
+## 9. Synthèse
 
 | Dimension | Miyukini Web Portal |
 |-----------|---------------------|
-| **Type** | Service Fondamental â€” OpÃ©rateur d'Interface (Strate 7) |
-| **RÃ´le** | Point d'entrÃ©e web pour les utilisateurs externes |
-| **Cible** | Clients, visiteurs, prospects â€” sans COG |
-| **Gouvernance** | BorderGuard + Mandat Public d'AccÃ¨s + Identification/Fichage |
-| **Services exposÃ©s** | Type 2 (JayXpose, JayFestival, JayRDV, JayKonta portail client) |
+| **Type** | Service Fondamental — Opérateur d'Interface (Strate 7) |
+| **Rôle** | Point d'entrée web pour les utilisateurs externes |
+| **Cible** | Clients, visiteurs, prospects — sans COG |
+| **Gouvernance** | BorderGuard + Mandat Public d'Accès + Identification/Fichage |
+| **Services exposés** | Type 2 (JayXpose, JayFestival, JayRDV, JayKonta portail client) |
 | **Outils** | MiyuWeb, MiyuValidate, MiyuAntiSpam |
 | **Relation Central** | Central = COG, Portail = Web |
 
 ---
 
-## 10. RÃ©fÃ©rences
+## 10. Références
 
 | Document | Lien |
 |----------|------|
 | **Miyukini Central** | [Miyukini Central Hub Services](..//..//miyukini-webway-system//reference//_index.md) |
 | **Types de Services** | [Types de Services et Espaces](..//..//miyukini-webway-system//reference//_index.md) |
 | **Glossaire** | [Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
-| **FaÃ§ade Publique** | [Glossaire Â§ FaÃ§ade Publique GouvernÃ©e](..//..//miyukini-webway-system//reference//_index.md) |
+| **Façade Publique** | [Glossaire § Façade Publique Gouvernée](..//..//miyukini-webway-system//reference//_index.md) |
 | **BorderGuard** | [docs/core/BorderGuard](..//..//cores//BorderGuard//) |
-| **SouverainetÃ©** | [SouverainetÃ© Environnement](..//..//miyukini-webway-system//reference//_index.md) |
+| **Souveraineté** | [Souveraineté Environnement](..//..//miyukini-webway-system//reference//_index.md) |
 
 ---
 
-**Date de crÃ©ation :** 2026-02-08  
+**Date de création :** 2026-02-08  
 **Version :** 1.0  
-**Statut :** Document de rÃ©fÃ©rence fondateur â€” Service Fondamental Miyukini Web Portal
+**Statut :** Document de référence fondateur — Service Fondamental Miyukini Web Portal
 
 

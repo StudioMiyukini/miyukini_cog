@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Consumption Metrics Contract
+﻿# MiyukiniAdmin — Consumption Metrics Contract
 
 ## 1. Contexte
 
@@ -316,11 +316,11 @@ Le mode est selectionne en fonction de :
 
 | Metrique | Min | Max | Avg | Sum |
 |----------|-----|-----|-----|-----|
-| CPU usage | âœ… | âœ… | âœ… | âŒ |
-| RAM usage | âœ… | âœ… | âœ… | âŒ |
-| Disk usage | âœ… | âœ… | âœ… | âŒ |
-| Disk I/O | âœ… | âœ… | âœ… | âœ… |
-| Network I/O | âœ… | âœ… | âœ… | âœ… |
+| CPU usage | ✅ | ✅ | ✅ | ❌ |
+| RAM usage | ✅ | ✅ | ✅ | ❌ |
+| Disk usage | ✅ | ✅ | ✅ | ❌ |
+| Disk I/O | ✅ | ✅ | ✅ | ✅ |
+| Network I/O | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -351,20 +351,20 @@ Le mode est selectionne en fonction de :
 
 ```
 MiyukiniAdmin                 BondingBrother              CaringNanny
-     â”‚                              â”‚                          â”‚
-     â”‚â”€â”€MetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (type: consumption)          â”‚                          â”‚
-     â”‚  (interval: 5s)               â”‚                          â”‚
-     â”‚                              â”‚                          â”‚
-     â”‚                              â”‚â”€â”€ReadMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                              â”‚                          â”‚
-     â”‚                              â”‚â—€â”€MetricsDataâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                              â”‚  (cpu, ram, disk, net)    â”‚
-     â”‚                              â”‚                          â”‚
-     â”‚â—€â”€MetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚                              â”‚                          â”‚
-     â”‚  (Update Dashboard)          â”‚                          â”‚
-     â”‚                              â”‚                          â”‚
+     │                              │                          │
+     │──MetricsRequest──────────────▶│                          │
+     │  (type: consumption)          │                          │
+     │  (interval: 5s)               │                          │
+     │                              │                          │
+     │                              │──ReadMetrics─────────────▶│
+     │                              │                          │
+     │                              │◀─MetricsData─────────────│
+     │                              │  (cpu, ram, disk, net)    │
+     │                              │                          │
+     │◀─MetricsResponse─────────────│                          │
+     │                              │                          │
+     │  (Update Dashboard)          │                          │
+     │                              │                          │
 ```
 
 ---

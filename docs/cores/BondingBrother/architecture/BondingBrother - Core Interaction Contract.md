@@ -1,41 +1,41 @@
-﻿# BondingBrother â€” Core Interaction Contract
+﻿# BondingBrother — Core Interaction Contract
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif
+**Statut :** CONTRAT — Normatif
 
 ---
 
 ## 1. Contexte
 
-Ce document dÃ©finit le **modÃ¨le d'interaction** entre Bonding Brother et les autres cores de l'Ã©cosystÃ¨me Miyukini. Il spÃ©cifie comment Bonding Brother communique avec chaque core, les protocoles utilisÃ©s, et les garanties contractuelles de ces interactions.
+Ce document définit le **modèle d'interaction** entre Bonding Brother et les autres cores de l'écosystème Miyukini. Il spécifie comment Bonding Brother communique avec chaque core, les protocoles utilisés, et les garanties contractuelles de ces interactions.
 
-**DÃ©pendances :**
+**Dépendances :**
 - [Documentation Fondatrice](../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md)
 - [Architecture & Flows](./BondingBrother%20-%20Architecture%20&%20Flows.md)
 - [Miyukini Conceptual References - Connexion Inter-COG](..//..//..//miyukini-webway-system//reference//_index.md)
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- Le modÃ¨le d'interaction avec chaque core
+- Le modèle d'interaction avec chaque core
 - Les protocoles de communication
 - Les garanties contractuelles
 - Les flux d'information entre cores
-- Les rÃ¨gles de prioritÃ© et de routage
+- Les règles de priorité et de routage
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails d'implÃ©mentation des adaptateurs (voir Architecture & Flows)
-- Les contrats d'intÃ©gration spÃ©cifiques (voir `contracts/integration/`)
-- Les rÃ¨gles mÃ©tier des cores individuels
+- Les détails d'implémentation des adaptateurs (voir Architecture & Flows)
+- Les contrats d'intégration spécifiques (voir `contracts/integration/`)
+- Les règles métier des cores individuels
 
 ---
 
 ## 3. Principe fondamental
 
-> **Bonding Brother est le seul point de passage autorisÃ© entre les produits et les cores.**
+> **Bonding Brother est le seul point de passage autorisé entre les produits et les cores.**
 
-Aucun produit, aucun opÃ©rateur, aucune interface ne peut accÃ©der directement aux cores. Toute interaction passe obligatoirement par Bonding Brother, qui traduit, filtre, journalise et transmet.
+Aucun produit, aucun opérateur, aucune interface ne peut accéder directement aux cores. Toute interaction passe obligatoirement par Bonding Brother, qui traduit, filtre, journalise et transmet.
 
 ---
 
@@ -88,46 +88,46 @@ graph TB
 
 ### 4.2 Matrice des interactions
 
-| Core | Direction | Type d'Ã©change | FrÃ©quence |
+| Core | Direction | Type d'échange | Fréquence |
 |------|-----------|----------------|-----------|
-| **StrongFather** | BB â†’ SF | Demandes de dÃ©cision | Haute |
-| **StrongFather** | SF â†’ BB | DÃ©cisions, mandats | Haute |
-| **KindMother** | BB â†’ KM | Demandes donnÃ©es | Haute |
-| **KindMother** | KM â†’ BB | DonnÃ©es, confirmations | Haute |
-| **CaringNanny** | BB â†’ CN | MÃ©triques, Ã©tats | Moyenne |
-| **CaringNanny** | CN â†’ BB | Alertes d'Ã©tat | Basse |
-| **MasterButler** | BB â†’ MB | DÃ©couverte capacitÃ©s | Basse |
-| **MasterButler** | MB â†’ BB | Catalogue capacitÃ©s | Basse |
-| **BorderGuard** | BB â†’ BG | Contexte frontiÃ¨re | Moyenne |
-| **BorderGuard** | BG â†’ BB | RÃ¨gles franchissement | Moyenne |
-| **WorrySentinel** | BB â†’ WS | Signalements sÃ©curitÃ© | Basse |
-| **WorrySentinel** | WS â†’ BB | Alertes, niveaux | Moyenne |
-| **EverBuddy** | BB â†’ EB | VÃ©rification version | Basse |
-| **EverBuddy** | EB â†’ BB | CompatibilitÃ©, migrations | Basse |
-| **TAMR** | BB â†’ TAMR | Escalade humain | Rare |
-| **TAMR** | TAMR â†’ BB | DÃ©cisions humaines | Rare |
+| **StrongFather** | BB → SF | Demandes de décision | Haute |
+| **StrongFather** | SF → BB | Décisions, mandats | Haute |
+| **KindMother** | BB → KM | Demandes données | Haute |
+| **KindMother** | KM → BB | Données, confirmations | Haute |
+| **CaringNanny** | BB → CN | Métriques, états | Moyenne |
+| **CaringNanny** | CN → BB | Alertes d'état | Basse |
+| **MasterButler** | BB → MB | Découverte capacités | Basse |
+| **MasterButler** | MB → BB | Catalogue capacités | Basse |
+| **BorderGuard** | BB → BG | Contexte frontière | Moyenne |
+| **BorderGuard** | BG → BB | Règles franchissement | Moyenne |
+| **WorrySentinel** | BB → WS | Signalements sécurité | Basse |
+| **WorrySentinel** | WS → BB | Alertes, niveaux | Moyenne |
+| **EverBuddy** | BB → EB | Vérification version | Basse |
+| **EverBuddy** | EB → BB | Compatibilité, migrations | Basse |
+| **TAMR** | BB → TAMR | Escalade humain | Rare |
+| **TAMR** | TAMR → BB | Décisions humaines | Rare |
 
 ---
 
 ## 5. Interaction avec StrongFather
 
-### 5.1 RÃ´le de l'interaction
+### 5.1 Rôle de l'interaction
 
-StrongFather est l'**autoritÃ© de dÃ©cision stratÃ©gique**. Bonding Brother lui transmet les demandes nÃ©cessitant une dÃ©cision d'autorisation, de validation, ou de politique.
+StrongFather est l'**autorité de décision stratégique**. Bonding Brother lui transmet les demandes nécessitant une décision d'autorisation, de validation, ou de politique.
 
 ### 5.2 Types de demandes
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Demande d'autorisation** | VÃ©rifier si une action est permise | "L'opÃ©rateur X peut-il accÃ©der Ã  Y ?" |
-| **Demande de mandat** | Obtenir un mandat de permission | "Mandat pour Ã©quipe d'opÃ©rateurs" |
-| **Demande de validation** | Valider une intention complexe | "Cette intention respecte-t-elle les rÃ¨gles ?" |
-| **Notification de contexte** | Informer d'un contexte de dÃ©cision | "Contexte de sÃ©curitÃ© pour dÃ©cision" |
+| **Demande d'autorisation** | Vérifier si une action est permise | "L'opérateur X peut-il accéder à Y ?" |
+| **Demande de mandat** | Obtenir un mandat de permission | "Mandat pour équipe d'opérateurs" |
+| **Demande de validation** | Valider une intention complexe | "Cette intention respecte-t-elle les règles ?" |
+| **Notification de contexte** | Informer d'un contexte de décision | "Contexte de sécurité pour décision" |
 
 ### 5.3 Protocole
 
 ```
-BB â†’ SF : IntentionDÃ©cision {
+BB → SF : IntentionDécision {
     intention_id: string,
     operateur_source: string,
     type_decision: enum,
@@ -135,12 +135,12 @@ BB â†’ SF : IntentionDÃ©cision {
     timestamp: LogicalClock
 }
 
-SF â†’ BB : DÃ©cisionRÃ©sultat {
+SF → BB : DécisionRésultat {
     intention_id: string,
-    decision: enum (AUTORISÃ‰ | REFUSÃ‰ | CONDITIONNEL),
+    decision: enum (AUTORISÉ | REFUSÉ | CONDITIONNEL),
     mandat?: Mandat,
     justification: string,
-    validitÃ©: Duration
+    validité: Duration
 }
 ```
 
@@ -148,45 +148,45 @@ SF â†’ BB : DÃ©cisionRÃ©sultat {
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-SF-1** | Toute dÃ©cision SF est transmise fidÃ¨lement sans modification |
-| **INTER-SF-2** | Le contexte transmis est complet et non altÃ©rÃ© |
-| **INTER-SF-3** | Les mandats sont stockÃ©s temporairement mais jamais interprÃ©tÃ©s |
-| **INTER-SF-4** | Les refus sont journalisÃ©s avec justification |
+| **INTER-SF-1** | Toute décision SF est transmise fidèlement sans modification |
+| **INTER-SF-2** | Le contexte transmis est complet et non altéré |
+| **INTER-SF-3** | Les mandats sont stockés temporairement mais jamais interprétés |
+| **INTER-SF-4** | Les refus sont journalisés avec justification |
 
 ---
 
 ## 6. Interaction avec KindMother
 
-### 6.1 RÃ´le de l'interaction
+### 6.1 Rôle de l'interaction
 
-KindMother est l'**autoritÃ© des donnÃ©es**. Bonding Brother lui transmet les demandes de lecture, d'Ã©criture, et de synchronisation de donnÃ©es.
+KindMother est l'**autorité des données**. Bonding Brother lui transmet les demandes de lecture, d'écriture, et de synchronisation de données.
 
 ### 6.2 Types de demandes
 
 | Type | Description | Exemple |
 |------|-------------|---------|
-| **Lecture** | RÃ©cupÃ©rer des donnÃ©es | "Lire le contenu X" |
-| **Ã‰criture** | Persister des donnÃ©es | "CrÃ©er le contenu Y" |
-| **Synchronisation** | Synchroniser des Ã©tats | "Sync aprÃ¨s reconnexion" |
-| **Validation** | VÃ©rifier cohÃ©rence donnÃ©es | "Ces donnÃ©es sont-elles valides ?" |
+| **Lecture** | Récupérer des données | "Lire le contenu X" |
+| **Écriture** | Persister des données | "Créer le contenu Y" |
+| **Synchronisation** | Synchroniser des états | "Sync après reconnexion" |
+| **Validation** | Vérifier cohérence données | "Ces données sont-elles valides ?" |
 
 ### 6.3 Protocole
 
 ```
-BB â†’ KM : IntentionDonnÃ©es {
+BB → KM : IntentionDonnées {
     intention_id: string,
     type_operation: enum (READ | WRITE | SYNC),
     cible: ResourceIdentifier,
-    donnÃ©es?: Payload,
+    données?: Payload,
     contexte: ContexteComplet
 }
 
-KM â†’ BB : RÃ©sultatDonnÃ©es {
+KM → BB : RésultatDonnées {
     intention_id: string,
     statut: enum (SUCCESS | FAILURE | PARTIAL),
-    donnÃ©es?: Payload,
+    données?: Payload,
     erreur?: Erreur,
-    metadata: MetadataRÃ©sultat
+    metadata: MetadataRésultat
 }
 ```
 
@@ -194,82 +194,82 @@ KM â†’ BB : RÃ©sultatDonnÃ©es {
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-KM-1** | Les donnÃ©es retournÃ©es sont filtrÃ©es selon les permissions |
-| **INTER-KM-2** | Les Ã©critures sont validÃ©es par SF avant transmission |
+| **INTER-KM-1** | Les données retournées sont filtrées selon les permissions |
+| **INTER-KM-2** | Les écritures sont validées par SF avant transmission |
 | **INTER-KM-3** | Les erreurs KM sont traduites en erreurs produit |
-| **INTER-KM-4** | Les mÃ©tadonnÃ©es internes KM ne sont jamais exposÃ©es |
+| **INTER-KM-4** | Les métadonnées internes KM ne sont jamais exposées |
 
 ---
 
 ## 7. Interaction avec CaringNanny
 
-### 7.1 RÃ´le de l'interaction
+### 7.1 Rôle de l'interaction
 
-CaringNanny est l'**observateur d'Ã©tat**. Bonding Brother lui expose ses mÃ©triques et reÃ§oit les alertes d'Ã©tat systÃ¨me.
+CaringNanny est l'**observateur d'état**. Bonding Brother lui expose ses métriques et reçoit les alertes d'état système.
 
-### 7.2 Types d'Ã©changes
+### 7.2 Types d'échanges
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **MÃ©triques BB** | BB â†’ CN | Statistiques de fonctionnement |
-| **Ã‰tat de santÃ©** | BB â†’ CN | SantÃ© des connexions aux autoritÃ©s |
-| **Alertes systÃ¨me** | CN â†’ BB | Changements d'Ã©tat global |
-| **DÃ©gradation** | CN â†’ BB | Notification de mode dÃ©gradÃ© |
+| **Métriques BB** | BB → CN | Statistiques de fonctionnement |
+| **État de santé** | BB → CN | Santé des connexions aux autorités |
+| **Alertes système** | CN → BB | Changements d'état global |
+| **Dégradation** | CN → BB | Notification de mode dégradé |
 
 ### 7.3 Garanties
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-CN-1** | Les mÃ©triques sont exposÃ©es en lecture seule |
-| **INTER-CN-2** | Les alertes CN sont propagÃ©es aux produits concernÃ©s |
-| **INTER-CN-3** | BB adapte son comportement selon l'Ã©tat CN |
+| **INTER-CN-1** | Les métriques sont exposées en lecture seule |
+| **INTER-CN-2** | Les alertes CN sont propagées aux produits concernés |
+| **INTER-CN-3** | BB adapte son comportement selon l'état CN |
 
 ---
 
 ## 8. Interaction avec BorderGuard
 
-### 8.1 RÃ´le de l'interaction
+### 8.1 Rôle de l'interaction
 
-BorderGuard **dÃ©finit les frontiÃ¨res et les rÃ¨gles de franchissement**. Bonding Brother l'interroge pour connaÃ®tre le contexte de frontiÃ¨re et les rÃ¨gles applicables.
+BorderGuard **définit les frontières et les règles de franchissement**. Bonding Brother l'interroge pour connaître le contexte de frontière et les règles applicables.
 
-### 8.2 Types d'Ã©changes
+### 8.2 Types d'échanges
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **Contexte frontiÃ¨re** | BB â†’ BG | "Quelle est la frontiÃ¨re pour cette source ?" |
-| **RÃ¨gles franchissement** | BG â†’ BB | RÃ¨gles Ã  appliquer pour le franchissement |
-| **Classification confiance** | BG â†’ BB | Niveau de confiance de la source |
+| **Contexte frontière** | BB → BG | "Quelle est la frontière pour cette source ?" |
+| **Règles franchissement** | BG → BB | Règles à appliquer pour le franchissement |
+| **Classification confiance** | BG → BB | Niveau de confiance de la source |
 
 ### 8.3 Garanties
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-BG-1** | BB applique les rÃ¨gles BG sans les modifier |
-| **INTER-BG-2** | BG ne filtre pas â€” il dÃ©finit les rÃ¨gles, BB les applique |
-| **INTER-BG-3** | Le contexte de frontiÃ¨re accompagne toute demande aux autoritÃ©s |
+| **INTER-BG-1** | BB applique les règles BG sans les modifier |
+| **INTER-BG-2** | BG ne filtre pas — il définit les règles, BB les applique |
+| **INTER-BG-3** | Le contexte de frontière accompagne toute demande aux autorités |
 
 ---
 
 ## 9. Interaction avec WorrySentinel
 
-### 9.1 RÃ´le de l'interaction
+### 9.1 Rôle de l'interaction
 
-WorrySentinel **gouverne la sÃ©curitÃ©**. Bonding Brother lui signale les anomalies et reÃ§oit les alertes de sÃ©curitÃ©.
+WorrySentinel **gouverne la sécurité**. Bonding Brother lui signale les anomalies et reçoit les alertes de sécurité.
 
-### 9.2 Types d'Ã©changes
+### 9.2 Types d'échanges
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **Signalement** | BB â†’ WS | Anomalie dÃ©tectÃ©e (pattern suspect, etc.) |
-| **Niveau sÃ©curitÃ©** | WS â†’ BB | Niveau de sÃ©curitÃ© actuel |
-| **Alerte** | WS â†’ BB | Alerte de sÃ©curitÃ© active |
-| **Mode dÃ©gradÃ©** | WS â†’ BB | Activation/dÃ©sactivation mode dÃ©gradÃ© |
+| **Signalement** | BB → WS | Anomalie détectée (pattern suspect, etc.) |
+| **Niveau sécurité** | WS → BB | Niveau de sécurité actuel |
+| **Alerte** | WS → BB | Alerte de sécurité active |
+| **Mode dégradé** | WS → BB | Activation/désactivation mode dégradé |
 
 ### 9.3 Garanties
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-WS-1** | BB signale tout pattern suspect Ã  WS |
+| **INTER-WS-1** | BB signale tout pattern suspect à WS |
 | **INTER-WS-2** | BB adapte son filtrage selon le niveau WS |
 | **INTER-WS-3** | Les alertes WS sont prioritaires |
 
@@ -277,105 +277,105 @@ WorrySentinel **gouverne la sÃ©curitÃ©**. Bonding Brother lui signale les an
 
 ## 10. Interaction avec MasterButler
 
-### 10.1 RÃ´le de l'interaction
+### 10.1 Rôle de l'interaction
 
-MasterButler est le **registre des capacitÃ©s**. Bonding Brother l'interroge pour dÃ©couvrir les capacitÃ©s disponibles.
+MasterButler est le **registre des capacités**. Bonding Brother l'interroge pour découvrir les capacités disponibles.
 
-### 10.2 Types d'Ã©changes
+### 10.2 Types d'échanges
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **DÃ©couverte** | BB â†’ MB | "Quelles capacitÃ©s existent ?" |
-| **Catalogue** | MB â†’ BB | Liste des capacitÃ©s et permissions |
-| **RÃ©solution** | BB â†’ MB | "Cette capacitÃ© est-elle disponible ?" |
+| **Découverte** | BB → MB | "Quelles capacités existent ?" |
+| **Catalogue** | MB → BB | Liste des capacités et permissions |
+| **Résolution** | BB → MB | "Cette capacité est-elle disponible ?" |
 
 ### 10.3 Garanties
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-MB-1** | BB ne cache pas les capacitÃ©s MB |
-| **INTER-MB-2** | La dÃ©couverte est toujours Ã  jour |
+| **INTER-MB-1** | BB ne cache pas les capacités MB |
+| **INTER-MB-2** | La découverte est toujours à jour |
 
 ---
 
 ## 11. Interaction avec EverBuddy
 
-### 11.1 RÃ´le de l'interaction
+### 11.1 Rôle de l'interaction
 
-EverBuddy **gouverne le cycle de vie et l'Ã©volution**. Bonding Brother l'interroge pour vÃ©rifier la compatibilitÃ© des versions.
+EverBuddy **gouverne le cycle de vie et l'évolution**. Bonding Brother l'interroge pour vérifier la compatibilité des versions.
 
-### 11.2 Types d'Ã©changes
+### 11.2 Types d'échanges
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **VÃ©rification version** | BB â†’ EB | "Cette version est-elle compatible ?" |
-| **Migration** | EB â†’ BB | Instructions de migration |
-| **DÃ©prÃ©ciation** | EB â†’ BB | Notification de dÃ©prÃ©ciation |
+| **Vérification version** | BB → EB | "Cette version est-elle compatible ?" |
+| **Migration** | EB → BB | Instructions de migration |
+| **Dépréciation** | EB → BB | Notification de dépréciation |
 
 ### 11.3 Garanties
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-EB-1** | BB respecte les rÃ¨gles de compatibilitÃ© EB |
-| **INTER-EB-2** | Les migrations sont propagÃ©es aux produits |
+| **INTER-EB-1** | BB respecte les règles de compatibilité EB |
+| **INTER-EB-2** | Les migrations sont propagées aux produits |
 
 ---
 
 ## 12. Interaction avec TAMR
 
-### 12.1 RÃ´le de l'interaction
+### 12.1 Rôle de l'interaction
 
-TAMR **dÃ©finit les points d'intervention humaine**. Bonding Brother l'utilise pour escalader vers un humain quand nÃ©cessaire.
+TAMR **définit les points d'intervention humaine**. Bonding Brother l'utilise pour escalader vers un humain quand nécessaire.
 
-### 12.2 Types d'Ã©changes
+### 12.2 Types d'échanges
 
 | Type | Direction | Description |
 |------|-----------|-------------|
-| **Escalade** | BB â†’ TAMR | "Intervention humaine requise" |
-| **DÃ©cision humaine** | TAMR â†’ BB | DÃ©cision aprÃ¨s intervention |
-| **Timeout** | TAMR â†’ BB | Timeout d'intervention |
+| **Escalade** | BB → TAMR | "Intervention humaine requise" |
+| **Décision humaine** | TAMR → BB | Décision après intervention |
+| **Timeout** | TAMR → BB | Timeout d'intervention |
 
 ### 12.3 Garanties
 
 | Garantie | Description |
 |----------|-------------|
-| **INTER-TAMR-1** | Les escalades sont traÃ§ables et justifiÃ©es |
-| **INTER-TAMR-2** | Les dÃ©cisions humaines sont journalisÃ©es |
-| **INTER-TAMR-3** | Un timeout dÃ©clenche un comportement par dÃ©faut |
+| **INTER-TAMR-1** | Les escalades sont traçables et justifiées |
+| **INTER-TAMR-2** | Les décisions humaines sont journalisées |
+| **INTER-TAMR-3** | Un timeout déclenche un comportement par défaut |
 
 ---
 
-## 13. RÃ¨gles de routage
+## 13. Règles de routage
 
 ### 13.1 Ordre de consultation
 
 Pour une intention typique, l'ordre de consultation des cores est :
 
-1. **BorderGuard** â€” Contexte de frontiÃ¨re
-2. **WorrySentinel** â€” Niveau de sÃ©curitÃ©
-3. **StrongFather** â€” DÃ©cision d'autorisation
-4. **KindMother** â€” AccÃ¨s aux donnÃ©es
-5. **CaringNanny** â€” Notification de l'Ã©tat
+1. **BorderGuard** — Contexte de frontière
+2. **WorrySentinel** — Niveau de sécurité
+3. **StrongFather** — Décision d'autorisation
+4. **KindMother** — Accès aux données
+5. **CaringNanny** — Notification de l'état
 
-### 13.2 RÃ¨gles de prioritÃ©
+### 13.2 Règles de priorité
 
-| PrioritÃ© | Core | Raison |
+| Priorité | Core | Raison |
 |----------|------|--------|
-| 1 | WorrySentinel | SÃ©curitÃ© prime sur tout |
-| 2 | StrongFather | DÃ©cision avant action |
-| 3 | BorderGuard | FrontiÃ¨res avant donnÃ©es |
-| 4 | KindMother | DonnÃ©es aprÃ¨s autorisation |
+| 1 | WorrySentinel | Sécurité prime sur tout |
+| 2 | StrongFather | Décision avant action |
+| 3 | BorderGuard | Frontières avant données |
+| 4 | KindMother | Données après autorisation |
 | 5 | CaringNanny | Observation passive |
-| 6 | MasterButler | DÃ©couverte Ã  la demande |
-| 7 | EverBuddy | VÃ©rification rare |
+| 6 | MasterButler | Découverte à la demande |
+| 7 | EverBuddy | Vérification rare |
 | 8 | TAMR | Escalade exceptionnelle |
 
 ### 13.3 Court-circuits
 
 | Condition | Court-circuit |
 |-----------|---------------|
-| WorrySentinel en alerte critique | Rejet immÃ©diat, pas de consultation SF/KM |
-| BorderGuard refuse le franchissement | Rejet immÃ©diat, pas de consultation SF |
+| WorrySentinel en alerte critique | Rejet immédiat, pas de consultation SF/KM |
+| BorderGuard refuse le franchissement | Rejet immédiat, pas de consultation SF |
 | StrongFather refuse | Rejet, pas de consultation KM |
 | Mode offline | Buffer local, pas de consultation distante |
 
@@ -387,14 +387,14 @@ Pour une intention typique, l'ordre de consultation des cores est :
 
 | Type | Description | Action |
 |------|-------------|--------|
-| **Timeout** | Core ne rÃ©pond pas | Retry puis dÃ©gradation |
+| **Timeout** | Core ne répond pas | Retry puis dégradation |
 | **Rejet** | Core refuse la demande | Propagation au produit |
-| **IncohÃ©rence** | RÃ©ponse incohÃ©rente | Journalisation + escalade |
-| **IndisponibilitÃ©** | Core indisponible | Mode offline ou dÃ©gradÃ© |
+| **Incohérence** | Réponse incohérente | Journalisation + escalade |
+| **Indisponibilité** | Core indisponible | Mode offline ou dégradé |
 
-### 14.2 StratÃ©gie de retry
+### 14.2 Stratégie de retry
 
-| Core | Retry max | DÃ©lai entre retry |
+| Core | Retry max | Délai entre retry |
 |------|-----------|-------------------|
 | StrongFather | 3 | 100ms, 500ms, 2s |
 | KindMother | 3 | 100ms, 500ms, 2s |
@@ -404,7 +404,7 @@ Pour une intention typique, l'ordre de consultation des cores est :
 
 ## 15. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles d'interaction entre Bonding Brother et les autres cores qui doivent Ãªtre respectÃ©es par toute implÃ©mentation.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles d'interaction entre Bonding Brother et les autres cores qui doivent être respectées par toute implémentation.
 
 ---
 
@@ -420,6 +420,6 @@ Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** Documentation Fondatrice v2.0, Architecture & Flows v2.0
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** Documentation Fondatrice v2.0, Architecture & Flows v2.0
 

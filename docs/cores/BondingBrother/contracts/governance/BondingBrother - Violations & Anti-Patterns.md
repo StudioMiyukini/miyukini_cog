@@ -2,301 +2,301 @@
 
 ## 1. Contexte
 
-Ce document liste exhaustivement les violations et anti-patterns que Bonding Brother ne doit **JAMAIS** commettre. Il complÃ¨te la Section 10 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et les [Invariants & Guarantees](./BondingBrother%20-%20Invariants%20&%20Guarantees.md) en dÃ©taillant ce qui est explicitement interdit.
+Ce document liste exhaustivement les violations et anti-patterns que Bonding Brother ne doit **JAMAIS** commettre. Il complète la Section 10 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et les [Invariants & Guarantees](./BondingBrother%20-%20Invariants%20&%20Guarantees.md) en détaillant ce qui est explicitement interdit.
 
-Ce document sert de rÃ©fÃ©rence pour :
-- Les dÃ©veloppeurs implÃ©mentant Bonding Brother
+Ce document sert de référence pour :
+- Les développeurs implémentant Bonding Brother
 - Les audits de code et d'architecture
 - Les revues de design
-- Les tests de non-rÃ©gression
+- Les tests de non-régression
 
-Les violations incluent Ã©galement celles des [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : dÃ©pendances externes critiques (**LOI-1**), blocage en attente de ressources externes (**LOI-2**), remise en question de l'Ã©tat local (**LOI-3**), dÃ©pendance au temps global (**LOI-4**), consommation excessive de ressources (**LOI-5**).
+Les violations incluent également celles des [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : dépendances externes critiques (**LOI-1**), blocage en attente de ressources externes (**LOI-2**), remise en question de l'état local (**LOI-3**), dépendance au temps global (**LOI-4**), consommation excessive de ressources (**LOI-5**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - Les violations d'invariants (ce que BB ne doit jamais faire)
 - Les anti-patterns architecturaux (structures interdites)
 - Les anti-patterns comportementaux (comportements interdits)
-- Les anti-patterns d'intÃ©gration (interactions interdites)
-- Les mÃ©canismes de dÃ©tection
+- Les anti-patterns d'intégration (interactions interdites)
+- Les mécanismes de détection
 
 Ce document **ne couvre pas** :
 - Les erreurs de traduction (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md))
-- Les cas d'erreur lÃ©gitimes (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md))
-- Les dÃ©tails d'implÃ©mentation des vÃ©rifications
+- Les cas d'erreur légitimes (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md))
+- Les détails d'implémentation des vérifications
 
 ---
 
 ## 3. Principe fondamental
 
-**Toute violation listÃ©e ici est une faute critique qui remet en question la nature mÃªme de Bonding Brother.**
+**Toute violation listée ici est une faute critique qui remet en question la nature même de Bonding Brother.**
 
-Ces violations ne sont pas des erreurs Ã  gÃ©rer, mais des impossibilitÃ©s structurelles. Si une violation est dÃ©tectÃ©e, c'est un dÃ©faut de conception ou d'implÃ©mentation qui doit Ãªtre corrigÃ© immÃ©diatement.
-
----
-
-## 4. Violations de nature (ce que Bonding Brother ne peut pas Ãªtre)
-
-### 4.1 VIOL-NAT-01 : Devenir une autoritÃ©
-
-**Violation :** Bonding Brother dÃ©tient une vÃ©ritÃ©, prend une dÃ©cision finale, ou dÃ©finit une rÃ¨gle.
-
-**Exemples de violation :**
-- Un composant stocke l'Ã©tat des permissions et dÃ©cide de l'autorisation
-- Un composant crÃ©e une rÃ¨gle mÃ©tier dynamiquement
-- Un composant dÃ©tient une copie de donnÃ©es mÃ©tier comme source de vÃ©ritÃ©
-
-**DÃ©tection :**
-- Recherche de mÃ©thodes `decide()`, `rule()`, `store_truth()` dans le code
-- Audit des structures de donnÃ©es : aucune ne doit reprÃ©senter un "Ã©tat courant" mÃ©tier
-- VÃ©rification qu'aucun composant ne prend de dÃ©cision basÃ©e sur des critÃ¨res mÃ©tier
-
-**Correction :**
-- DÃ©lÃ©guer toute dÃ©cision Ã  Strong Father ou Kind Mother
-- Supprimer tout stockage de vÃ©ritÃ© mÃ©tier
-- Transmettre les rÃ¨gles depuis les autoritÃ©s, ne jamais les crÃ©er
+Ces violations ne sont pas des erreurs à gérer, mais des impossibilités structurelles. Si une violation est détectée, c'est un défaut de conception ou d'implémentation qui doit être corrigé immédiatement.
 
 ---
 
-### 4.2 VIOL-NAT-02 : ExÃ©cuter des actions mÃ©tier
+## 4. Violations de nature (ce que Bonding Brother ne peut pas être)
 
-**Violation :** Bonding Brother modifie, crÃ©e, ou supprime des entitÃ©s mÃ©tier directement.
+### 4.1 VIOL-NAT-01 : Devenir une autorité
+
+**Violation :** Bonding Brother détient une vérité, prend une décision finale, ou définit une règle.
 
 **Exemples de violation :**
-- Un composant Ã©crit directement dans une base de donnÃ©es mÃ©tier
-- Un composant crÃ©e un contenu sans passer par Kind Mother
-- Un composant supprime une ressource sans dÃ©lÃ©gation
+- Un composant stocke l'état des permissions et décide de l'autorisation
+- Un composant crée une règle métier dynamiquement
+- Un composant détient une copie de données métier comme source de vérité
 
-**DÃ©tection :**
-- Recherche d'appels directs Ã  des bases de donnÃ©es mÃ©tier
-- VÃ©rification que tous les accÃ¨s aux donnÃ©es passent par les adaptateurs d'autoritÃ©
-- Audit des opÃ©rations CRUD : toutes doivent Ãªtre dÃ©lÃ©guÃ©es
+**Détection :**
+- Recherche de méthodes `decide()`, `rule()`, `store_truth()` dans le code
+- Audit des structures de données : aucune ne doit représenter un "état courant" métier
+- Vérification qu'aucun composant ne prend de décision basée sur des critères métier
 
 **Correction :**
-- Toute action mÃ©tier doit Ãªtre traduite en intention et dÃ©lÃ©guÃ©e Ã  une autoritÃ©
-- Supprimer tout accÃ¨s direct aux donnÃ©es mÃ©tier
+- Déléguer toute décision à Strong Father ou Kind Mother
+- Supprimer tout stockage de vérité métier
+- Transmettre les règles depuis les autorités, ne jamais les créer
 
 ---
 
-### 4.3 VIOL-NAT-03 : ÃŠtre source d'information
+### 4.2 VIOL-NAT-02 : Exécuter des actions métier
 
-**Violation :** Bonding Brother gÃ©nÃ¨re ou fabrique des donnÃ©es sans source autoritaire.
+**Violation :** Bonding Brother modifie, crée, ou supprime des entités métier directement.
 
 **Exemples de violation :**
-- Un composant gÃ©nÃ¨re des identifiants de ressources mÃ©tier
-- Un composant fabrique une rÃ©ponse sans avoir reÃ§u de rÃ©ponse d'autoritÃ©
-- Un composant crÃ©e des donnÃ©es de synthÃ¨se non demandÃ©es par une autoritÃ©
+- Un composant écrit directement dans une base de données métier
+- Un composant crée un contenu sans passer par Kind Mother
+- Un composant supprime une ressource sans délégation
 
-**DÃ©tection :**
-- TraÃ§abilitÃ© complÃ¨te : toute donnÃ©e sortante doit avoir une source (autoritÃ©) identifiÃ©e
-- VÃ©rification qu'aucun composant ne gÃ©nÃ¨re de donnÃ©es mÃ©tier
-- Audit des rÃ©ponses : toutes doivent provenir d'une autoritÃ©
+**Détection :**
+- Recherche d'appels directs à des bases de données métier
+- Vérification que tous les accès aux données passent par les adaptateurs d'autorité
+- Audit des opérations CRUD : toutes doivent être déléguées
 
 **Correction :**
-- Toute donnÃ©e doit provenir d'une autoritÃ© ou Ãªtre une mÃ©tadonnÃ©e technique
-- Supprimer toute gÃ©nÃ©ration de donnÃ©es mÃ©tier
+- Toute action métier doit être traduite en intention et déléguée à une autorité
+- Supprimer tout accès direct aux données métier
+
+---
+
+### 4.3 VIOL-NAT-03 : Être source d'information
+
+**Violation :** Bonding Brother génère ou fabrique des données sans source autoritaire.
+
+**Exemples de violation :**
+- Un composant génère des identifiants de ressources métier
+- Un composant fabrique une réponse sans avoir reçu de réponse d'autorité
+- Un composant crée des données de synthèse non demandées par une autorité
+
+**Détection :**
+- Traçabilité complète : toute donnée sortante doit avoir une source (autorité) identifiée
+- Vérification qu'aucun composant ne génère de données métier
+- Audit des réponses : toutes doivent provenir d'une autorité
+
+**Correction :**
+- Toute donnée doit provenir d'une autorité ou être une métadonnée technique
+- Supprimer toute génération de données métier
 
 ---
 
 ## 5. Violations de non-action (ce que Bonding Brother ne doit jamais faire)
 
-### 5.1 VIOL-NEG-01 : Prendre une dÃ©cision mÃ©tier
+### 5.1 VIOL-NEG-01 : Prendre une décision métier
 
-**Violation :** Bonding Brother prend une dÃ©cision stratÃ©gique, politique, ou opÃ©rationnelle.
+**Violation :** Bonding Brother prend une décision stratégique, politique, ou opérationnelle.
 
 **Exemples de violation :**
-- Un composant autorise ou refuse un accÃ¨s sans consulter Strong Father
-- Un composant valide une donnÃ©e mÃ©tier sans consulter Kind Mother
-- Un composant choisit entre plusieurs options mÃ©tier
-- Un composant dÃ©finit une prioritÃ© mÃ©tier
+- Un composant autorise ou refuse un accès sans consulter Strong Father
+- Un composant valide une donnée métier sans consulter Kind Mother
+- Un composant choisit entre plusieurs options métier
+- Un composant définit une priorité métier
 
-**DÃ©tection :**
-- Analyse de code : aucune logique conditionnelle basÃ©e sur des critÃ¨res mÃ©tier
-- VÃ©rification que toutes les dÃ©cisions sont dÃ©lÃ©guÃ©es
-- Audit des branches conditionnelles : seules les dÃ©cisions techniques sont autorisÃ©es
+**Détection :**
+- Analyse de code : aucune logique conditionnelle basée sur des critères métier
+- Vérification que toutes les décisions sont déléguées
+- Audit des branches conditionnelles : seules les décisions techniques sont autorisées
 
 **Correction :**
-- DÃ©lÃ©guer toute dÃ©cision mÃ©tier Ã  l'autoritÃ© appropriÃ©e
-- Transformer les conditions mÃ©tier en dÃ©lÃ©gations
+- Déléguer toute décision métier à l'autorité appropriée
+- Transformer les conditions métier en délégations
 
 ---
 
-### 5.2 VIOL-NEG-02 : Stocker la vÃ©ritÃ©
+### 5.2 VIOL-NEG-02 : Stocker la vérité
 
-**Violation :** Bonding Brother stocke l'Ã©tat des donnÃ©es, des identitÃ©s, ou des permissions.
+**Violation :** Bonding Brother stocke l'état des données, des identités, ou des permissions.
 
 **Exemples de violation :**
-- Un composant maintient un cache de donnÃ©es mÃ©tier
+- Un composant maintient un cache de données métier
 - Un composant stocke les permissions des utilisateurs
-- Un composant rÃ©plique l'Ã©tat d'une autoritÃ©
-- Un composant garde une copie de donnÃ©es "pour performance"
+- Un composant réplique l'état d'une autorité
+- Un composant garde une copie de données "pour performance"
 
-**DÃ©tection :**
-- Audit des structures de donnÃ©es : aucune ne doit reprÃ©senter un Ã©tat mÃ©tier
-- Recherche de caches de donnÃ©es mÃ©tier
-- VÃ©rification que seuls le journal et le buffer offline sont utilisÃ©s pour stockage
+**Détection :**
+- Audit des structures de données : aucune ne doit représenter un état métier
+- Recherche de caches de données métier
+- Vérification que seuls le journal et le buffer offline sont utilisés pour stockage
 
 **Correction :**
-- Supprimer tout cache de donnÃ©es mÃ©tier
+- Supprimer tout cache de données métier
 - Utiliser uniquement le journal (immuable) et le buffer offline (temporaire)
-- Toujours interroger l'autoritÃ© pour obtenir la vÃ©ritÃ©
+- Toujours interroger l'autorité pour obtenir la vérité
 
 ---
 
-### 5.3 VIOL-NEG-03 : CrÃ©er une rÃ¨gle
+### 5.3 VIOL-NEG-03 : Créer une règle
 
-**Violation :** Bonding Brother crÃ©e, modifie, ou supprime une rÃ¨gle.
+**Violation :** Bonding Brother crée, modifie, ou supprime une règle.
 
 **Exemples de violation :**
-- Un composant dÃ©finit dynamiquement qui peut accÃ©der Ã  quoi
-- Un composant crÃ©e une rÃ¨gle de validation
-- Un composant modifie une rÃ¨gle de filtrage sans source externe
+- Un composant définit dynamiquement qui peut accéder à quoi
+- Un composant crée une règle de validation
+- Un composant modifie une règle de filtrage sans source externe
 
-**DÃ©tection :**
-- VÃ©rification que toutes les rÃ¨gles sont chargÃ©es depuis une source externe
-- Audit des rÃ¨gles : aucune ne doit Ãªtre gÃ©nÃ©rÃ©e par le code
-- Recherche de mÃ©thodes `create_rule()`, `modify_rule()`
+**Détection :**
+- Vérification que toutes les règles sont chargées depuis une source externe
+- Audit des règles : aucune ne doit être générée par le code
+- Recherche de méthodes `create_rule()`, `modify_rule()`
 
 **Correction :**
-- Charger toutes les rÃ¨gles depuis les autoritÃ©s ou la configuration
-- Supprimer toute gÃ©nÃ©ration de rÃ¨gles
+- Charger toutes les règles depuis les autorités ou la configuration
+- Supprimer toute génération de règles
 
 ---
 
-### 5.4 VIOL-NEG-04 : Permettre le contournement d'autoritÃ©
+### 5.4 VIOL-NEG-04 : Permettre le contournement d'autorité
 
-**Violation :** Bonding Brother permet Ã  un produit d'accÃ©der directement aux autoritÃ©s.
+**Violation :** Bonding Brother permet à un produit d'accéder directement aux autorités.
 
 **Exemples de violation :**
 - Exposition d'une API directe vers Kind Mother ou Strong Father
 - Mode "bypass" qui contourne Bonding Brother
-- Endpoint qui permet d'appeler une autoritÃ© sans passer par BB
+- Endpoint qui permet d'appeler une autorité sans passer par BB
 
-**DÃ©tection :**
-- Analyse rÃ©seau : les autoritÃ©s ne doivent Ãªtre accessibles que via BB
-- Audit des API exposÃ©es : aucune ne doit pointer vers une autoritÃ©
-- VÃ©rification qu'aucun produit ne peut contourner BB
+**Détection :**
+- Analyse réseau : les autorités ne doivent être accessibles que via BB
+- Audit des API exposées : aucune ne doit pointer vers une autorité
+- Vérification qu'aucun produit ne peut contourner BB
 
 **Correction :**
-- Supprimer toute API directe vers les autoritÃ©s
-- Forcer tous les accÃ¨s Ã  passer par Bonding Brother
+- Supprimer toute API directe vers les autorités
+- Forcer tous les accès à passer par Bonding Brother
 
 ---
 
-### 5.5 VIOL-NEG-05 : Modifier une dÃ©cision d'autoritÃ©
+### 5.5 VIOL-NEG-05 : Modifier une décision d'autorité
 
-**Violation :** Bonding Brother modifie, interprÃ¨te, ou remplace une dÃ©cision d'autoritÃ©.
+**Violation :** Bonding Brother modifie, interprète, ou remplace une décision d'autorité.
 
 **Exemples de violation :**
-- Transformer un "refusÃ©" en "acceptÃ©"
-- Ajouter des permissions non accordÃ©es par Strong Father
-- Supprimer des restrictions imposÃ©es par Kind Mother
-- InterprÃ©ter une dÃ©cision de maniÃ¨re diffÃ©rente
+- Transformer un "refusé" en "accepté"
+- Ajouter des permissions non accordées par Strong Father
+- Supprimer des restrictions imposées par Kind Mother
+- Interpréter une décision de manière différente
 
-**DÃ©tection :**
-- Comparaison automatisÃ©e entre dÃ©cision reÃ§ue et dÃ©cision transmise
-- VÃ©rification que la traduction ne modifie pas le sens de la dÃ©cision
-- Audit des filtrages : ils ne doivent pas modifier la dÃ©cision
+**Détection :**
+- Comparaison automatisée entre décision reçue et décision transmise
+- Vérification que la traduction ne modifie pas le sens de la décision
+- Audit des filtrages : ils ne doivent pas modifier la décision
 
 **Correction :**
-- Transmettre fidÃ¨lement toute dÃ©cision sans modification
-- SÃ©parer clairement traduction (format) et dÃ©cision (sens)
+- Transmettre fidèlement toute décision sans modification
+- Séparer clairement traduction (format) et décision (sens)
 
 ---
 
 ### 5.6 VIOL-NEG-06 : Cacher l'origine d'une intention
 
-**Violation :** Bonding Brother masque, modifie, ou omet l'origine d'une intention aux autoritÃ©s.
+**Violation :** Bonding Brother masque, modifie, ou omet l'origine d'une intention aux autorités.
 
 **Exemples de violation :**
-- Ne pas transmettre l'identitÃ© du produit
-- Modifier l'identitÃ© de l'utilisateur
-- Oublier des Ã©lÃ©ments du contexte
+- Ne pas transmettre l'identité du produit
+- Modifier l'identité de l'utilisateur
+- Oublier des éléments du contexte
 - Anonymiser les intentions
 
-**DÃ©tection :**
+**Détection :**
 - Audit des demandes transmises : toutes doivent contenir le contexte complet
-- VÃ©rification que l'origine est toujours prÃ©sente
-- Tests de traÃ§abilitÃ© : l'origine doit Ãªtre traÃ§able
+- Vérification que l'origine est toujours présente
+- Tests de traçabilité : l'origine doit être traçable
 
 **Correction :**
-- Transmettre intÃ©gralement le contexte Ã  chaque demande
+- Transmettre intégralement le contexte à chaque demande
 - Ne jamais filtrer ou modifier l'origine
 
 ---
 
 ## 6. Anti-patterns architecturaux
 
-### 6.1 ANTI-ARCH-01 : Couche qui saute une Ã©tape
+### 6.1 ANTI-ARCH-01 : Couche qui saute une étape
 
-**Anti-pattern :** Une couche accÃ¨de directement Ã  une couche non adjacente.
+**Anti-pattern :** Une couche accède directement à une couche non adjacente.
 
 **Exemple :**
-- La Couche Produit accÃ¨de directement Ã  la Couche AutoritÃ©
-- La Couche Traduction accÃ¨de directement au journal
+- La Couche Produit accède directement à la Couche Autorité
+- La Couche Traduction accède directement au journal
 
-**DÃ©tection :**
-- Analyse des dÃ©pendances entre composants
-- VÃ©rification que chaque couche n'accÃ¨de qu'aux couches adjacentes
+**Détection :**
+- Analyse des dépendances entre composants
+- Vérification que chaque couche n'accède qu'aux couches adjacentes
 
 **Correction :**
-- RÃ©organiser les appels pour respecter l'ordre des couches
+- Réorganiser les appels pour respecter l'ordre des couches
 - Utiliser les interfaces des couches adjacentes
 
 ---
 
-### 6.2 ANTI-ARCH-02 : Partage d'Ã©tat entre couches
+### 6.2 ANTI-ARCH-02 : Partage d'état entre couches
 
-**Anti-pattern :** Deux couches partagent un Ã©tat mutable.
+**Anti-pattern :** Deux couches partagent un état mutable.
 
 **Exemple :**
-- La Couche Produit et la Couche MÃ©diation partagent un cache
-- La Couche Traduction modifie un Ã©tat global
+- La Couche Produit et la Couche Médiation partagent un cache
+- La Couche Traduction modifie un état global
 
-**DÃ©tection :**
-- Audit des structures de donnÃ©es partagÃ©es
-- VÃ©rification que chaque couche a son propre Ã©tat isolÃ©
+**Détection :**
+- Audit des structures de données partagées
+- Vérification que chaque couche a son propre état isolé
 
 **Correction :**
-- Isoler l'Ã©tat de chaque couche
+- Isoler l'état de chaque couche
 - Utiliser des interfaces immutables pour la communication
 
 ---
 
-### 6.3 ANTI-ARCH-03 : DÃ©pendance circulaire
+### 6.3 ANTI-ARCH-03 : Dépendance circulaire
 
-**Anti-pattern :** Deux composants dÃ©pendent l'un de l'autre.
+**Anti-pattern :** Deux composants dépendent l'un de l'autre.
 
 **Exemple :**
-- ProductGateway dÃ©pend de FilterEngine, qui dÃ©pend de ProductGateway
-- IntentTranslator dÃ©pend de ResponseTranslator, qui dÃ©pend de IntentTranslator
+- ProductGateway dépend de FilterEngine, qui dépend de ProductGateway
+- IntentTranslator dépend de ResponseTranslator, qui dépend de IntentTranslator
 
-**DÃ©tection :**
-- Analyse des dÃ©pendances : dÃ©tection de cycles
-- VÃ©rification de la structure acyclique
+**Détection :**
+- Analyse des dépendances : détection de cycles
+- Vérification de la structure acyclique
 
 **Correction :**
-- RÃ©organiser les dÃ©pendances pour Ã©liminer les cycles
-- Introduire une abstraction commune si nÃ©cessaire
+- Réorganiser les dépendances pour éliminer les cycles
+- Introduire une abstraction commune si nécessaire
 
 ---
 
-### 6.4 ANTI-ARCH-04 : Composant avec responsabilitÃ©s multiples
+### 6.4 ANTI-ARCH-04 : Composant avec responsabilités multiples
 
-**Anti-pattern :** Un composant assume plusieurs responsabilitÃ©s non liÃ©es.
+**Anti-pattern :** Un composant assume plusieurs responsabilités non liées.
 
 **Exemple :**
 - Un composant traduit ET filtre ET journalise
-- Un composant reÃ§oit les intentions ET prend des dÃ©cisions
+- Un composant reçoit les intentions ET prend des décisions
 
-**DÃ©tection :**
-- Analyse de la responsabilitÃ© unique de chaque composant
-- VÃ©rification qu'aucun composant ne fait trop de choses
+**Détection :**
+- Analyse de la responsabilité unique de chaque composant
+- Vérification qu'aucun composant ne fait trop de choses
 
 **Correction :**
-- SÃ©parer les responsabilitÃ©s en composants distincts
-- Respecter le principe de responsabilitÃ© unique
+- Séparer les responsabilités en composants distincts
+- Respecter le principe de responsabilité unique
 
 ---
 
@@ -304,231 +304,231 @@ Ces violations ne sont pas des erreurs Ã  gÃ©rer, mais des impossibilitÃ©s
 
 ### 7.1 ANTI-COMP-01 : Traduction avec effet de bord
 
-**Anti-pattern :** La traduction modifie un Ã©tat ou appelle une autoritÃ©.
+**Anti-pattern :** La traduction modifie un état ou appelle une autorité.
 
 **Exemple :**
-- La traduction met Ã  jour un cache
-- La traduction interroge Strong Father pour enrichir les donnÃ©es
+- La traduction met à jour un cache
+- La traduction interroge Strong Father pour enrichir les données
 
-**DÃ©tection :**
-- VÃ©rification que les fonctions de traduction sont pures
-- Tests unitaires : mÃªme entrÃ©e = mÃªme sortie
+**Détection :**
+- Vérification que les fonctions de traduction sont pures
+- Tests unitaires : même entrée = même sortie
 
 **Correction :**
 - Rendre la traduction pure (sans effet de bord)
-- DÃ©placer les effets de bord vers d'autres composants
+- Déplacer les effets de bord vers d'autres composants
 
 ---
 
-### 7.2 ANTI-COMP-02 : Filtrage qui dÃ©cide
+### 7.2 ANTI-COMP-02 : Filtrage qui décide
 
-**Anti-pattern :** Le filtrage prend une dÃ©cision mÃ©tier au lieu d'appliquer une rÃ¨gle.
+**Anti-pattern :** Le filtrage prend une décision métier au lieu d'appliquer une règle.
 
 **Exemple :**
-- Le filtrage autorise ou refuse sans consulter une autoritÃ©
-- Le filtrage valide des donnÃ©es mÃ©tier
+- Le filtrage autorise ou refuse sans consulter une autorité
+- Le filtrage valide des données métier
 
-**DÃ©tection :**
-- VÃ©rification que le filtrage applique uniquement des rÃ¨gles dÃ©finies
-- Audit des rÃ¨gles de filtrage : aucune ne doit Ãªtre une dÃ©cision
+**Détection :**
+- Vérification que le filtrage applique uniquement des règles définies
+- Audit des règles de filtrage : aucune ne doit être une décision
 
 **Correction :**
-- Le filtrage applique des rÃ¨gles, ne prend pas de dÃ©cision
-- DÃ©lÃ©guer les dÃ©cisions aux autoritÃ©s
+- Le filtrage applique des règles, ne prend pas de décision
+- Déléguer les décisions aux autorités
 
 ---
 
-### 7.3 ANTI-COMP-03 : Journalisation sÃ©lective
+### 7.3 ANTI-COMP-03 : Journalisation sélective
 
-**Anti-pattern :** Certaines interactions ne sont pas journalisÃ©es.
+**Anti-pattern :** Certaines interactions ne sont pas journalisées.
 
 **Exemple :**
-- Les erreurs ne sont pas journalisÃ©es
+- Les erreurs ne sont pas journalisées
 - Certains types d'intentions sont omis du journal
 
-**DÃ©tection :**
-- VÃ©rification que toutes les interactions sont journalisÃ©es
-- Tests de couverture : 100% des interactions doivent Ãªtre tracÃ©es
+**Détection :**
+- Vérification que toutes les interactions sont journalisées
+- Tests de couverture : 100% des interactions doivent être tracées
 
 **Correction :**
-- Journaliser systÃ©matiquement toutes les interactions
-- Aucune exception Ã  la journalisation
+- Journaliser systématiquement toutes les interactions
+- Aucune exception à la journalisation
 
 ---
 
 ### 7.4 ANTI-COMP-04 : Retry avec modification
 
-**Anti-pattern :** Un retry modifie l'intention au lieu de rÃ©essayer l'identique.
+**Anti-pattern :** Un retry modifie l'intention au lieu de réessayer l'identique.
 
 **Exemple :**
 - Un retry change le contexte
 - Un retry modifie le payload
 
-**DÃ©tection :**
-- VÃ©rification que les retries sont identiques Ã  l'intention originale
-- Tests de retry : l'intention doit Ãªtre prÃ©servÃ©e
+**Détection :**
+- Vérification que les retries sont identiques à l'intention originale
+- Tests de retry : l'intention doit être préservée
 
 **Correction :**
-- Les retries doivent Ãªtre identiques Ã  l'intention originale
+- Les retries doivent être identiques à l'intention originale
 - Ne jamais modifier une intention lors d'un retry
 
 ---
 
-## 8. Anti-patterns d'intÃ©gration
+## 8. Anti-patterns d'intégration
 
 ### 8.1 ANTI-INT-01 : Adaptation bidirectionnelle
 
 **Anti-pattern :** Bonding Brother s'adapte aux produits au lieu de l'inverse.
 
 **Exemple :**
-- BB modifie son interface pour un produit spÃ©cifique
-- BB supporte un format propriÃ©taire d'un produit
+- BB modifie son interface pour un produit spécifique
+- BB supporte un format propriétaire d'un produit
 
-**DÃ©tection :**
-- VÃ©rification que l'interface de BB est stable
-- Audit des adaptations : aucune ne doit Ãªtre spÃ©cifique Ã  un produit
+**Détection :**
+- Vérification que l'interface de BB est stable
+- Audit des adaptations : aucune ne doit être spécifique à un produit
 
 **Correction :**
-- Les produits s'adaptent Ã  BB, jamais l'inverse
+- Les produits s'adaptent à BB, jamais l'inverse
 - L'interface de BB reste stable
 
 ---
 
-### 8.2 ANTI-INT-02 : Cache d'autoritÃ©
+### 8.2 ANTI-INT-02 : Cache d'autorité
 
-**Anti-pattern :** Bonding Brother maintient un cache des rÃ©ponses d'autoritÃ©.
+**Anti-pattern :** Bonding Brother maintient un cache des réponses d'autorité.
 
 **Exemple :**
 - Cache des permissions pour "performance"
-- Cache des donnÃ©es pour Ã©viter les appels rÃ©pÃ©tÃ©s
+- Cache des données pour éviter les appels répétés
 
-**DÃ©tection :**
-- Recherche de caches d'autoritÃ©
-- VÃ©rification qu'aucun cache ne stocke de vÃ©ritÃ©
+**Détection :**
+- Recherche de caches d'autorité
+- Vérification qu'aucun cache ne stocke de vérité
 
 **Correction :**
-- Supprimer tout cache d'autoritÃ©
-- Toujours interroger l'autoritÃ© pour la vÃ©ritÃ©
+- Supprimer tout cache d'autorité
+- Toujours interroger l'autorité pour la vérité
 
 ---
 
-### 8.3 ANTI-INT-03 : Aggregation de rÃ©ponses
+### 8.3 ANTI-INT-03 : Aggregation de réponses
 
-**Anti-pattern :** Bonding Brother agrÃ¨ge des rÃ©ponses de plusieurs autoritÃ©s pour crÃ©er une rÃ©ponse composite.
+**Anti-pattern :** Bonding Brother agrège des réponses de plusieurs autorités pour créer une réponse composite.
 
 **Exemple :**
-- BB combine une rÃ©ponse de Kind Mother et Strong Father
-- BB synthÃ©tise des donnÃ©es de plusieurs sources
+- BB combine une réponse de Kind Mother et Strong Father
+- BB synthétise des données de plusieurs sources
 
-**DÃ©tection :**
-- VÃ©rification qu'aucune rÃ©ponse n'est agrÃ©gÃ©e
-- Audit des rÃ©ponses : chaque rÃ©ponse doit Ãªtre transmise individuellement
+**Détection :**
+- Vérification qu'aucune réponse n'est agrégée
+- Audit des réponses : chaque réponse doit être transmise individuellement
 
 **Correction :**
-- Transmettre chaque rÃ©ponse individuellement
-- Ne jamais agrÃ©ger les rÃ©ponses d'autoritÃ©s
+- Transmettre chaque réponse individuellement
+- Ne jamais agréger les réponses d'autorités
 
 ---
 
-## 9. MÃ©canismes de dÃ©tection
+## 9. Mécanismes de détection
 
-### 9.1 DÃ©tection statique (au build)
-
-**Outils :**
-- Analyse statique de code (dÃ©tection de patterns interdits)
-- VÃ©rification des dÃ©pendances (dÃ©tection de cycles)
-- Audit des structures de donnÃ©es (dÃ©tection de stockage de vÃ©ritÃ©)
-
-**FrÃ©quence :** Ã€ chaque build / CI
-
-### 9.2 DÃ©tection dynamique (au runtime)
+### 9.1 Détection statique (au build)
 
 **Outils :**
-- Comparaison dÃ©cision reÃ§ue / transmise
-- VÃ©rification de traÃ§abilitÃ© (origine toujours prÃ©sente)
-- Monitoring des violations (alertes en temps rÃ©el)
+- Analyse statique de code (détection de patterns interdits)
+- Vérification des dépendances (détection de cycles)
+- Audit des structures de données (détection de stockage de vérité)
 
-**FrÃ©quence :** Temps rÃ©el
+**Fréquence :** À chaque build / CI
 
-### 9.3 DÃ©tection par audit
+### 9.2 Détection dynamique (au runtime)
 
 **Outils :**
-- Revue architecturale pÃ©riodique
-- Audit de sÃ©curitÃ©
-- Tests de non-rÃ©gression
+- Comparaison décision reçue / transmise
+- Vérification de traçabilité (origine toujours présente)
+- Monitoring des violations (alertes en temps réel)
 
-**FrÃ©quence :** Mensuel / Ã  chaque release
+**Fréquence :** Temps réel
+
+### 9.3 Détection par audit
+
+**Outils :**
+- Revue architecturale périodique
+- Audit de sécurité
+- Tests de non-régression
+
+**Fréquence :** Mensuel / à chaque release
 
 ---
 
 ## 10. Processus de correction
 
-### 10.1 DÃ©tection d'une violation
+### 10.1 Détection d'une violation
 
-**Action immÃ©diate :**
-1. ArrÃªter le traitement si la violation est critique
-2. Journaliser la violation avec tous les dÃ©tails
+**Action immédiate :**
+1. Arrêter le traitement si la violation est critique
+2. Journaliser la violation avec tous les détails
 3. Notifier les administrateurs
 
 ### 10.2 Analyse de la violation
 
-**Ã‰tapes :**
+**Étapes :**
 1. Identifier la cause racine
-2. Ã‰valuer l'impact (donnÃ©es affectÃ©es, produits impactÃ©s)
-3. DÃ©terminer la correction nÃ©cessaire
+2. Évaluer l'impact (données affectées, produits impactés)
+3. Déterminer la correction nécessaire
 
 ### 10.3 Correction
 
 **Processus :**
 1. Corriger le code / l'architecture
-2. Ajouter des tests pour prÃ©venir la rÃ©currence
-3. VÃ©rifier que la correction n'introduit pas d'autres violations
-4. DÃ©ployer la correction
+2. Ajouter des tests pour prévenir la récurrence
+3. Vérifier que la correction n'introduit pas d'autres violations
+4. Déployer la correction
 
-### 10.4 PrÃ©vention
+### 10.4 Prévention
 
 **Actions :**
-1. Mettre Ã  jour ce document si une nouvelle violation est dÃ©couverte
-2. Ajouter des tests de dÃ©tection
-3. Documenter la leÃ§on apprise
+1. Mettre à jour ce document si une nouvelle violation est découverte
+2. Ajouter des tests de détection
+3. Documenter la leçon apprise
 
 ---
 
-## 11. Liste de vÃ©rification
+## 11. Liste de vérification
 
-Cette liste peut Ãªtre utilisÃ©e lors des revues de code et d'architecture :
+Cette liste peut être utilisée lors des revues de code et d'architecture :
 
-- [ ] Aucun composant ne dÃ©tient de vÃ©ritÃ© mÃ©tier
-- [ ] Aucun composant ne prend de dÃ©cision mÃ©tier
-- [ ] Aucun composant ne crÃ©e de rÃ¨gle
-- [ ] Aucun cache de donnÃ©es mÃ©tier n'existe
-- [ ] Toutes les dÃ©cisions sont dÃ©lÃ©guÃ©es aux autoritÃ©s
-- [ ] Toutes les interactions sont journalisÃ©es
-- [ ] Aucune couche n'accÃ¨de Ã  une couche non adjacente
-- [ ] Aucune dÃ©pendance circulaire n'existe
+- [ ] Aucun composant ne détient de vérité métier
+- [ ] Aucun composant ne prend de décision métier
+- [ ] Aucun composant ne crée de règle
+- [ ] Aucun cache de données métier n'existe
+- [ ] Toutes les décisions sont déléguées aux autorités
+- [ ] Toutes les interactions sont journalisées
+- [ ] Aucune couche n'accède à une couche non adjacente
+- [ ] Aucune dépendance circulaire n'existe
 - [ ] La traduction est pure (sans effet de bord)
-- [ ] Le filtrage applique des rÃ¨gles, ne dÃ©cide pas
-- [ ] Aucune API directe vers les autoritÃ©s n'est exposÃ©e
-- [ ] Les dÃ©cisions d'autoritÃ© sont transmises fidÃ¨lement
+- [ ] Le filtrage applique des règles, ne décide pas
+- [ ] Aucune API directe vers les autorités n'est exposée
+- [ ] Les décisions d'autorité sont transmises fidèlement
 - [ ] L'origine des intentions est toujours transmise
-- [ ] Aucune agrÃ©gation de rÃ©ponses d'autoritÃ©s
+- [ ] Aucune agrégation de réponses d'autorités
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut INTERDICTION**. Il Ã©tablit les violations et anti-patterns que Bonding Brother ne doit jamais commettre, sous peine de remettre en question sa nature mÃªme.
+Ce document est **contractuel, normatif, et de statut INTERDICTION**. Il établit les violations et anti-patterns que Bonding Brother ne doit jamais commettre, sous peine de remettre en question sa nature même.
 
-Toute violation dÃ©tectÃ©e est un dÃ©faut critique qui doit Ãªtre corrigÃ© immÃ©diatement. Toute implÃ©mentation de Bonding Brother doit Ãªtre vÃ©rifiÃ©e contre cette liste.
+Toute violation détectée est un défaut critique qui doit être corrigé immédiatement. Toute implémentation de Bonding Brother doit être vérifiée contre cette liste.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** INTERDICTION â€” Non nÃ©gociable  
-**DÃ©pendances :** 
+**Statut :** INTERDICTION — Non négociable  
+**Dépendances :** 
 - [Documentation Fondatrice v1.0](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) (Section 10)
 - [Invariants & Guarantees v1.0](./BondingBrother%20-%20Invariants%20&%20Guarantees.md)
 - [Error & Rejection Model v1.0](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md)
-- [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)
+- [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md)
 

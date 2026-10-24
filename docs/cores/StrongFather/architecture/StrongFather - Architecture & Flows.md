@@ -1,36 +1,36 @@
-﻿# StrongFather â€” Architecture & Flows
+﻿# StrongFather — Architecture & Flows
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **StrongFather â€” Architecture & Flows** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit l'architecture conceptuelle de StrongFather et les flux d'Ã©valuation, dÃ©finissant comment les composants internes de StrongFather sont organisÃ©s et comment les Ã©valuations transitent Ã  travers le systÃ¨me dans le Miyukini Core System v2.4.
+Ce document définit le **StrongFather — Architecture & Flows** : un contrat normatif, non négociable, et de statut FONDATION qui établit l'architecture conceptuelle de StrongFather et les flux d'évaluation, définissant comment les composants internes de StrongFather sont organisés et comment les évaluations transitent à travers le système dans le Miyukini Core System v2.4.
 
-Ce contrat prÃ©cise l'architecture conceptuelle, les composants internes, les flux d'Ã©valuation, et les interactions entre composants.
+Ce contrat précise l'architecture conceptuelle, les composants internes, les flux d'évaluation, et les interactions entre composants.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toute l'architecture de StrongFather** et dÃ©finit de maniÃ¨re absolue :
+Ce contrat s'applique à **toute l'architecture de StrongFather** et définit de manière absolue :
 - l'architecture conceptuelle de StrongFather,
-- les composants internes et leurs responsabilitÃ©s,
-- les flux d'Ã©valuation,
+- les composants internes et leurs responsabilités,
+- les flux d'évaluation,
 - les interactions entre composants,
 - les invariants architecturaux.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat **synthÃ©tise et illustre** l'architecture dÃ©finie dans :
-- **StrongFather â€” Documentation Fondatrice** : Positionnement architectural
-- **StrongFather â€” Boundary & Isolation Contract** : FrontiÃ¨res
-- **StrongFather â€” Decision Graph Specification** : Structure des Ã©valuations
-- **StrongFather â€” Intent Model Contract** : EntrÃ©es du systÃ¨me
-- **StrongFather â€” Core Decision Contract** : Sorties du systÃ¨me
+Ce contrat **synthétise et illustre** l'architecture définie dans :
+- **StrongFather — Documentation Fondatrice** : Positionnement architectural
+- **StrongFather — Boundary & Isolation Contract** : Frontières
+- **StrongFather — Decision Graph Specification** : Structure des évaluations
+- **StrongFather — Intent Model Contract** : Entrées du système
+- **StrongFather — Core Decision Contract** : Sorties du système
 
-Ce contrat ne contredit aucun autre contrat et constitue une vue architecturale consolidÃ©e.
+Ce contrat ne contredit aucun autre contrat et constitue une vue architecturale consolidée.
 
 ---
 
@@ -39,336 +39,336 @@ Ce contrat ne contredit aucun autre contrat et constitue une vue architecturale 
 ### 2.1. Vue d'ensemble
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                              Ã‰COSYSTÃˆME MIYUKINI                         â”‚
-â”‚                                                                         â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚                          PRODUIT                                   â”‚  â”‚
-â”‚  â”‚                                                                   â”‚  â”‚
-â”‚  â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚  â”‚
-â”‚  â”‚   â”‚              ADAPTATEUR PRODUIT                          â”‚    â”‚  â”‚
-â”‚  â”‚   â”‚                                                         â”‚    â”‚  â”‚
-â”‚  â”‚   â”‚   [Intention] â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ [StrongFather] â”€â”€â”€â”€â”€â”€â–¶ [DÃ©cision]  â”‚  â”‚
-â”‚  â”‚   â”‚                                â”‚                        â”‚    â”‚  â”‚
-â”‚  â”‚   â”‚                                â”‚                        â”‚    â”‚  â”‚
-â”‚  â”‚   â”‚                                â–¼                        â”‚    â”‚  â”‚
-â”‚  â”‚   â”‚                          [KindMother]                   â”‚    â”‚  â”‚
-â”‚  â”‚   â”‚                        (via adaptateur)                 â”‚    â”‚  â”‚
-â”‚  â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚  â”‚
-â”‚  â”‚                                                                   â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                         â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚                       MODULES SPM CMS                             â”‚  â”‚
-â”‚  â”‚                  (traits fonctionnels, isolÃ©s)                    â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                         â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚                           KERNEL                                   â”‚  â”‚
-â”‚  â”‚                     (Id, Clock, Logger)                           â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              ÉCOSYSTÈME MIYUKINI                         │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                          PRODUIT                                   │  │
+│  │                                                                   │  │
+│  │   ┌─────────────────────────────────────────────────────────┐    │  │
+│  │   │              ADAPTATEUR PRODUIT                          │    │  │
+│  │   │                                                         │    │  │
+│  │   │   [Intention] ──────────▶ [StrongFather] ──────▶ [Décision]  │  │
+│  │   │                                │                        │    │  │
+│  │   │                                │                        │    │  │
+│  │   │                                ▼                        │    │  │
+│  │   │                          [KindMother]                   │    │  │
+│  │   │                        (via adaptateur)                 │    │  │
+│  │   └─────────────────────────────────────────────────────────┘    │  │
+│  │                                                                   │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                       MODULES SPM CMS                             │  │
+│  │                  (traits fonctionnels, isolés)                    │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                           KERNEL                                   │  │
+│  │                     (Id, Clock, Logger)                           │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 2.2. Positionnement de StrongFather
 
 **StrongFather est un moteur interne** :
 
-- Il n'est pas exposÃ© comme API publique directe
+- Il n'est pas exposé comme API publique directe
 - Il n'est pas un module SPM CMS
 - Il n'est pas dans le kernel
-- Il est utilisÃ© par les adaptateurs produits pour Ã©valuer des intentions
+- Il est utilisé par les adaptateurs produits pour évaluer des intentions
 
-**DÃ©pendances :**
+**Dépendances :**
 
-- StrongFather ne dÃ©pend d'aucun composant externe pour ses Ã©valuations (conformitÃ© Ã  **LOI-1** : aucune dÃ©pendance externe critique)
-- StrongFather reÃ§oit son contexte des adaptateurs
-- StrongFather reÃ§oit ses politiques d'une source configurÃ©e
+- StrongFather ne dépend d'aucun composant externe pour ses évaluations (conformité à **LOI-1** : aucune dépendance externe critique)
+- StrongFather reçoit son contexte des adaptateurs
+- StrongFather reçoit ses politiques d'une source configurée
 
-Cette architecture respecte les lois d'autonomie systÃ¨me dÃ©finies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-1** (aucune dÃ©pendance externe critique) : StrongFather peut dÃ©marrer, dÃ©cider, fonctionner, et Ãªtre auditÃ© sans aucun appel externe obligatoire.
+Cette architecture respecte les lois d'autonomie système définies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-1** (aucune dépendance externe critique) : StrongFather peut démarrer, décider, fonctionner, et être audité sans aucun appel externe obligatoire.
 
 ---
 
 ## 3. Composants internes de StrongFather
 
-### 3.1. Surface d'Ã©valuation
+### 3.1. Surface d'évaluation
 
-**DÃ©finition :**
+**Définition :**
 
-La **surface d'Ã©valuation** est le point d'entrÃ©e unique de StrongFather. Elle reÃ§oit les intentions et retourne les dÃ©cisions.
+La **surface d'évaluation** est le point d'entrée unique de StrongFather. Elle reçoit les intentions et retourne les décisions.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
 - Recevoir les intentions des adaptateurs
 - Valider la structure des intentions
-- DÃ©lÃ©guer l'Ã©valuation au moteur de politiques
-- Retourner les dÃ©cisions aux adaptateurs
+- Déléguer l'évaluation au moteur de politiques
+- Retourner les décisions aux adaptateurs
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Point d'entrÃ©e unique (pas d'entrÃ©es multiples)
-- Interface conceptuelle standardisÃ©e
-- Pas de logique mÃ©tier
+- Point d'entrée unique (pas d'entrées multiples)
+- Interface conceptuelle standardisée
+- Pas de logique métier
 
 ### 3.2. Validateur d'intention
 
-**DÃ©finition :**
+**Définition :**
 
-Le **validateur d'intention** vÃ©rifie la validitÃ© structurelle des intentions avant l'Ã©valuation des politiques.
+Le **validateur d'intention** vérifie la validité structurelle des intentions avant l'évaluation des politiques.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
-- VÃ©rifier la prÃ©sence des composants obligatoires
-- VÃ©rifier la cohÃ©rence structurelle
+- Vérifier la présence des composants obligatoires
+- Vérifier la cohérence structurelle
 - Rejeter les intentions structurellement invalides
 
-**RÃ¨gles appliquÃ©es :**
+**Règles appliquées :**
 
-- Intent Model Contract, section 6 (rÃ¨gles de formation)
+- Intent Model Contract, section 6 (règles de formation)
 - Intent Model Contract, section 8 (intentions invalides)
 
 ### 3.3. Moteur de politiques
 
-**DÃ©finition :**
+**Définition :**
 
-Le **moteur de politiques** applique les politiques sur les intentions et produit les rÃ©sultats d'Ã©valuation.
+Le **moteur de politiques** applique les politiques sur les intentions et produit les résultats d'évaluation.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
-- SÃ©lectionner les politiques applicables
-- Ã‰valuer chaque politique
-- Produire les rÃ©sultats d'Ã©valuation
+- Sélectionner les politiques applicables
+- Évaluer chaque politique
+- Produire les résultats d'évaluation
 
-**RÃ¨gles appliquÃ©es :**
+**Règles appliquées :**
 
 - Policy Engine Contract, section 5 (application des politiques)
 
-### 3.4. Compositeur de rÃ©sultats
+### 3.4. Compositeur de résultats
 
-**DÃ©finition :**
+**Définition :**
 
-Le **compositeur de rÃ©sultats** agrÃ¨ge les rÃ©sultats des Ã©valuations de politiques selon les rÃ¨gles de composition.
+Le **compositeur de résultats** agrège les résultats des évaluations de politiques selon les règles de composition.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
-- AgrÃ©ger les rÃ©sultats des politiques
-- Appliquer les rÃ¨gles de composition
-- DÃ©terminer le rÃ©sultat global
+- Agréger les résultats des politiques
+- Appliquer les règles de composition
+- Déterminer le résultat global
 
-**RÃ¨gles appliquÃ©es :**
+**Règles appliquées :**
 
 - Policy Engine Contract, section 6 (composition des politiques)
 
-### 3.5. Calculateur de prioritÃ©
+### 3.5. Calculateur de priorité
 
-**DÃ©finition :**
+**Définition :**
 
-Le **calculateur de prioritÃ©** Ã©tablit la prioritÃ© relative d'une intention si les politiques sont satisfaites.
+Le **calculateur de priorité** établit la priorité relative d'une intention si les politiques sont satisfaites.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
-- Appliquer les politiques de prioritÃ©
-- Calculer la prioritÃ© relative
-- Fournir la prioritÃ© Ã  la dÃ©cision
+- Appliquer les politiques de priorité
+- Calculer la priorité relative
+- Fournir la priorité à la décision
 
 **Activation :**
 
-- ActivÃ© uniquement si toutes les politiques sont satisfaites
+- Activé uniquement si toutes les politiques sont satisfaites
 
-### 3.6. Producteur de dÃ©cision
+### 3.6. Producteur de décision
 
-**DÃ©finition :**
+**Définition :**
 
-Le **producteur de dÃ©cision** gÃ©nÃ¨re la dÃ©cision finale Ã  partir des rÃ©sultats d'Ã©valuation.
+Le **producteur de décision** génère la décision finale à partir des résultats d'évaluation.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
-- Produire la dÃ©cision (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
+- Produire la décision (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE)
 - Assembler la justification
-- RÃ©fÃ©rencer les politiques appliquÃ©es
+- Référencer les politiques appliquées
 
-**RÃ¨gles appliquÃ©es :**
+**Règles appliquées :**
 
-- Core Decision Contract, section 3 (types de dÃ©cisions)
+- Core Decision Contract, section 3 (types de décisions)
 - Core Decision Contract, section 5 (sorties garanties)
 
 ### 3.7. Traceur
 
-**DÃ©finition :**
+**Définition :**
 
-Le **traceur** enregistre les traces d'Ã©valuation pour audit et diagnostic.
+Le **traceur** enregistre les traces d'évaluation pour audit et diagnostic.
 
-**ResponsabilitÃ©s :**
+**Responsabilités :**
 
-- Tracer les intentions reÃ§ues
-- Tracer les Ã©valuations de politiques
-- Tracer les dÃ©cisions produites
+- Tracer les intentions reçues
+- Tracer les évaluations de politiques
+- Tracer les décisions produites
 - Tracer les erreurs
 
-**RÃ¨gles appliquÃ©es :**
+**Règles appliquées :**
 
-- Audit & Trace Contract, section 3 (Ã©lÃ©ments obligatoirement tracÃ©s)
+- Audit & Trace Contract, section 3 (éléments obligatoirement tracés)
 
 ---
 
-## 4. Flux d'Ã©valuation
+## 4. Flux d'évaluation
 
 ### 4.1. Flux principal
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                         FLUX D'Ã‰VALUATION PRINCIPAL                      â”‚
-â”‚                                                                         â”‚
-â”‚   [Adaptateur]                                                          â”‚
-â”‚        â”‚                                                                â”‚
-â”‚        â”‚ Intention                                                      â”‚
-â”‚        â–¼                                                                â”‚
-â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚   â”‚  1. SURFACE D'Ã‰VALUATION                                         â”‚  â”‚
-â”‚   â”‚     - RÃ©ception de l'intention                                   â”‚  â”‚
-â”‚   â”‚     - DÃ©lÃ©gation au validateur                                   â”‚  â”‚
-â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                              â”‚                                          â”‚
-â”‚                              â–¼                                          â”‚
-â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚   â”‚  2. VALIDATEUR D'INTENTION                                       â”‚  â”‚
-â”‚   â”‚     - VÃ©rification structurelle                                  â”‚  â”‚
-â”‚   â”‚     - Si invalide â†’ DÃ©cision REFUSÃ‰E (structurel)               â”‚  â”‚
-â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                              â”‚ (si valide)                              â”‚
-â”‚                              â–¼                                          â”‚
-â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚   â”‚  3. MOTEUR DE POLITIQUES                                         â”‚  â”‚
-â”‚   â”‚     - SÃ©lection des politiques                                   â”‚  â”‚
-â”‚   â”‚     - Ã‰valuation de chaque politique                            â”‚  â”‚
-â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                              â”‚                                          â”‚
-â”‚                              â–¼                                          â”‚
-â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚   â”‚  4. COMPOSITEUR DE RÃ‰SULTATS                                     â”‚  â”‚
-â”‚   â”‚     - AgrÃ©gation des rÃ©sultats                                   â”‚  â”‚
-â”‚   â”‚     - DÃ©termination du rÃ©sultat global                          â”‚  â”‚
-â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                              â”‚                                          â”‚
-â”‚               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                          â”‚
-â”‚               â”‚              â”‚              â”‚                          â”‚
-â”‚               â–¼              â–¼              â–¼                          â”‚
-â”‚        [TOUTES_SAT]    [NON_SAT]     [INDÃ‰TERMINÃ‰]                    â”‚
-â”‚               â”‚              â”‚              â”‚                          â”‚
-â”‚               â–¼              â”‚              â”‚                          â”‚
-â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”‚              â”‚                          â”‚
-â”‚   â”‚ 5. CALCULATEUR    â”‚     â”‚              â”‚                          â”‚
-â”‚   â”‚    DE PRIORITÃ‰    â”‚     â”‚              â”‚                          â”‚
-â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚              â”‚                          â”‚
-â”‚             â”‚               â”‚              â”‚                          â”‚
-â”‚             â–¼               â–¼              â–¼                          â”‚
-â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚   â”‚  6. PRODUCTEUR DE DÃ‰CISION                                       â”‚  â”‚
-â”‚   â”‚     - Production de la dÃ©cision                                  â”‚  â”‚
-â”‚   â”‚     - Assemblage de la justification                            â”‚  â”‚
-â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                              â”‚                                          â”‚
-â”‚                              â–¼                                          â”‚
-â”‚   [Adaptateur] â—€â”€â”€â”€â”€â”€â”€â”€â”€ DÃ©cision                                      â”‚
-â”‚                                                                         â”‚
-â”‚   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•   â”‚
-â”‚   â”‚ TRACEUR (en parallÃ¨le)                                           â”‚  â”‚
-â”‚   â”‚   - Trace d'intention                                            â”‚  â”‚
-â”‚   â”‚   - Traces d'Ã©valuation                                          â”‚  â”‚
-â”‚   â”‚   - Trace de dÃ©cision                                            â”‚  â”‚
-â”‚   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•   â”‚
-â”‚                                                                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         FLUX D'ÉVALUATION PRINCIPAL                      │
+│                                                                         │
+│   [Adaptateur]                                                          │
+│        │                                                                │
+│        │ Intention                                                      │
+│        ▼                                                                │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │  1. SURFACE D'ÉVALUATION                                         │  │
+│   │     - Réception de l'intention                                   │  │
+│   │     - Délégation au validateur                                   │  │
+│   └──────────────────────────┬──────────────────────────────────────┘  │
+│                              │                                          │
+│                              ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │  2. VALIDATEUR D'INTENTION                                       │  │
+│   │     - Vérification structurelle                                  │  │
+│   │     - Si invalide → Décision REFUSÉE (structurel)               │  │
+│   └──────────────────────────┬──────────────────────────────────────┘  │
+│                              │ (si valide)                              │
+│                              ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │  3. MOTEUR DE POLITIQUES                                         │  │
+│   │     - Sélection des politiques                                   │  │
+│   │     - Évaluation de chaque politique                            │  │
+│   └──────────────────────────┬──────────────────────────────────────┘  │
+│                              │                                          │
+│                              ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │  4. COMPOSITEUR DE RÉSULTATS                                     │  │
+│   │     - Agrégation des résultats                                   │  │
+│   │     - Détermination du résultat global                          │  │
+│   └──────────────────────────┬──────────────────────────────────────┘  │
+│                              │                                          │
+│               ┌──────────────┼──────────────┐                          │
+│               │              │              │                          │
+│               ▼              ▼              ▼                          │
+│        [TOUTES_SAT]    [NON_SAT]     [INDÉTERMINÉ]                    │
+│               │              │              │                          │
+│               ▼              │              │                          │
+│   ┌───────────────────┐     │              │                          │
+│   │ 5. CALCULATEUR    │     │              │                          │
+│   │    DE PRIORITÉ    │     │              │                          │
+│   └─────────┬─────────┘     │              │                          │
+│             │               │              │                          │
+│             ▼               ▼              ▼                          │
+│   ┌─────────────────────────────────────────────────────────────────┐  │
+│   │  6. PRODUCTEUR DE DÉCISION                                       │  │
+│   │     - Production de la décision                                  │  │
+│   │     - Assemblage de la justification                            │  │
+│   └──────────────────────────┬──────────────────────────────────────┘  │
+│                              │                                          │
+│                              ▼                                          │
+│   [Adaptateur] ◀──────── Décision                                      │
+│                                                                         │
+│   ══════════════════════════════════════════════════════════════════   │
+│   │ TRACEUR (en parallèle)                                           │  │
+│   │   - Trace d'intention                                            │  │
+│   │   - Traces d'évaluation                                          │  │
+│   │   - Trace de décision                                            │  │
+│   ══════════════════════════════════════════════════════════════════   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 4.2. Flux de rejet structurel
 
 ```
-[Intention invalide] â†’ [Validateur] â†’ [Rejet structurel] â†’ [DÃ©cision REFUSÃ‰E]
+[Intention invalide] → [Validateur] → [Rejet structurel] → [Décision REFUSÉE]
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Pas d'Ã©valuation de politiques
-- Rejet immÃ©diat
-- Justification : violation des rÃ¨gles de formation
+- Pas d'évaluation de politiques
+- Rejet immédiat
+- Justification : violation des règles de formation
 
 ### 4.3. Flux de rejet de politique
 
 ```
-[Intention valide] â†’ [Politiques] â†’ [Au moins une NON_SATISFAITE] â†’ [DÃ©cision REFUSÃ‰E]
+[Intention valide] → [Politiques] → [Au moins une NON_SATISFAITE] → [Décision REFUSÉE]
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Ã‰valuation de toutes les politiques
+- Évaluation de toutes les politiques
 - Rejet si au moins une politique n'est pas satisfaite
-- Justification : politiques violÃ©es identifiÃ©es
+- Justification : politiques violées identifiées
 
-### 4.4. Flux d'ambiguÃ¯tÃ©
+### 4.4. Flux d'ambiguïté
 
 ```
-[Intention valide] â†’ [Politiques] â†’ [Au moins une INDÃ‰TERMINÃ‰E] â†’ [DÃ©cision AMBIGUÃ‹]
+[Intention valide] → [Politiques] → [Au moins une INDÉTERMINÉE] → [Décision AMBIGUË]
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Ã‰valuation de toutes les politiques
-- AmbiguÃ¯tÃ© si au moins une politique est indÃ©terminÃ©e
-- Clarifications requises identifiÃ©es
+- Évaluation de toutes les politiques
+- Ambiguïté si au moins une politique est indéterminée
+- Clarifications requises identifiées
 
 ### 4.5. Flux d'acceptation
 
 ```
-[Intention valide] â†’ [Politiques] â†’ [TOUTES_SATISFAITES] â†’ [PrioritÃ©] â†’ [DÃ©cision ACCEPTÃ‰E]
+[Intention valide] → [Politiques] → [TOUTES_SATISFAITES] → [Priorité] → [Décision ACCEPTÉE]
 ```
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- Ã‰valuation de toutes les politiques
+- Évaluation de toutes les politiques
 - Toutes les politiques satisfaites
-- PrioritÃ© calculÃ©e
+- Priorité calculée
 - Justification : politiques satisfaites
 
 ---
 
 ## 5. Interactions entre composants
 
-### 5.1. RÃ¨gles d'interaction
+### 5.1. Règles d'interaction
 
 **R-INTER-1 : Flux unidirectionnel**
 
-Le flux d'Ã©valuation est unidirectionnel : de l'entrÃ©e vers la sortie.
+Le flux d'évaluation est unidirectionnel : de l'entrée vers la sortie.
 
 **R-INTER-2 : Pas de callback**
 
-Aucun composant ne rappelle un composant prÃ©cÃ©dent dans le flux.
+Aucun composant ne rappelle un composant précédent dans le flux.
 
-**R-INTER-3 : IndÃ©pendance du traceur**
+**R-INTER-3 : Indépendance du traceur**
 
-Le traceur fonctionne en parallÃ¨le sans affecter le flux principal.
+Le traceur fonctionne en parallèle sans affecter le flux principal.
 
 **R-INTER-4 : Composition explicite**
 
-Les interactions entre composants sont explicites et documentÃ©es.
+Les interactions entre composants sont explicites et documentées.
 
-### 5.2. DÃ©pendances entre composants
+### 5.2. Dépendances entre composants
 
 ```
-Surface d'Ã©valuation
-        â”‚
-        â””â”€â”€â–¶ Validateur d'intention
-                    â”‚
-                    â””â”€â”€â–¶ Moteur de politiques
-                                â”‚
-                                â””â”€â”€â–¶ Compositeur de rÃ©sultats
-                                            â”‚
-                                            â”œâ”€â”€â–¶ Calculateur de prioritÃ© (conditionnel)
-                                            â”‚
-                                            â””â”€â”€â–¶ Producteur de dÃ©cision
+Surface d'évaluation
+        │
+        └──▶ Validateur d'intention
+                    │
+                    └──▶ Moteur de politiques
+                                │
+                                └──▶ Compositeur de résultats
+                                            │
+                                            ├──▶ Calculateur de priorité (conditionnel)
+                                            │
+                                            └──▶ Producteur de décision
 
-Traceur â”€â”€â–¶ (observe tous les composants)
+Traceur ──▶ (observe tous les composants)
 ```
 
 ---
@@ -377,59 +377,59 @@ Traceur â”€â”€â–¶ (observe tous les composants)
 
 ### 6.1. Invariants de structure
 
-**INV-ARCH-1 : Point d'entrÃ©e unique**
+**INV-ARCH-1 : Point d'entrée unique**
 
-La surface d'Ã©valuation est le seul point d'entrÃ©e de StrongFather.
+La surface d'évaluation est le seul point d'entrée de StrongFather.
 
 **INV-ARCH-2 : Point de sortie unique**
 
-Le producteur de dÃ©cision est le seul point de sortie de StrongFather.
+Le producteur de décision est le seul point de sortie de StrongFather.
 
 **INV-ARCH-3 : Flux acyclique**
 
-Le flux d'Ã©valuation est acyclique. Aucun composant ne rappelle un composant prÃ©cÃ©dent.
+Le flux d'évaluation est acyclique. Aucun composant ne rappelle un composant précédent.
 
 ### 6.2. Invariants de comportement
 
-**INV-ARCH-4 : Composants sans Ã©tat persistant**
+**INV-ARCH-4 : Composants sans état persistant**
 
-Aucun composant ne maintient d'Ã©tat persistant entre Ã©valuations.
+Aucun composant ne maintient d'état persistant entre évaluations.
 
 **INV-ARCH-5 : Composants purs**
 
 Tous les composants se comportent comme des fonctions pures.
 
-**INV-ARCH-6 : Traceur isolÃ©**
+**INV-ARCH-6 : Traceur isolé**
 
 Le traceur n'affecte jamais le comportement des autres composants.
 
 ---
 
-## 7. RÃ¨gles de fermeture du contrat
+## 7. Règles de fermeture du contrat
 
-### 7.1. Contrat fermÃ©
+### 7.1. Contrat fermé
 
-Ce contrat est **fermÃ©**. Seuls les composants, les flux, et les interactions explicitement dÃ©finis sont valides.
+Ce contrat est **fermé**. Seuls les composants, les flux, et les interactions explicitement définis sont valides.
 
 ### 7.2. Interdiction d'extension implicite
 
-Aucun composant, flux, ou interaction non dÃ©fini n'est autorisÃ©.
+Aucun composant, flux, ou interaction non défini n'est autorisé.
 
 ---
 
 ## 8. Conclusion contractuelle
 
-Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable l'architecture et les flux de StrongFather.
+Ce contrat établit de manière définitive et non négociable l'architecture et les flux de StrongFather.
 
 Il garantit que :
-- l'architecture est explicitement dÃ©finie,
-- les composants internes sont identifiÃ©s et documentÃ©s,
-- les flux d'Ã©valuation sont formalisÃ©s,
+- l'architecture est explicitement définie,
+- les composants internes sont identifiés et documentés,
+- les flux d'évaluation sont formalisés,
 - les interactions sont explicites,
 - les invariants architecturaux sont maintenus,
-- le contrat est fermÃ© et non extensible implicitement.
+- le contrat est fermé et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
@@ -437,58 +437,58 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ### 9.1. Cas conformes
 
-Les cas suivants sont **conformes** Ã  ce contrat :
+Les cas suivants sont **conformes** à ce contrat :
 
-1. **Flux standard** : Une intention traverse tous les composants dans l'ordre dÃ©fini et produit une dÃ©cision.
+1. **Flux standard** : Une intention traverse tous les composants dans l'ordre défini et produit une décision.
 
-2. **Rejet prÃ©coce** : Une intention structurellement invalide est rejetÃ©e par le validateur sans atteindre le moteur de politiques.
+2. **Rejet précoce** : Une intention structurellement invalide est rejetée par le validateur sans atteindre le moteur de politiques.
 
 ### 9.2. Cas de violation
 
 Les cas suivants **violent** ce contrat :
 
-1. **EntrÃ©e multiple** : Une intention entre directement dans le moteur de politiques sans passer par la surface d'Ã©valuation. Viole INV-ARCH-1.
+1. **Entrée multiple** : Une intention entre directement dans le moteur de politiques sans passer par la surface d'évaluation. Viole INV-ARCH-1.
 
-2. **Callback** : Le producteur de dÃ©cision rappelle le validateur pour une re-validation. Viole INV-ARCH-3.
+2. **Callback** : Le producteur de décision rappelle le validateur pour une re-validation. Viole INV-ARCH-3.
 
-3. **Ã‰tat persistant** : Le moteur de politiques mÃ©morise des rÃ©sultats entre Ã©valuations. Viole INV-ARCH-4.
+3. **État persistant** : Le moteur de politiques mémorise des résultats entre évaluations. Viole INV-ARCH-4.
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-25  
+**Document créé le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif validÃ©  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Architecture et flux non nÃ©gociables
+**Statut :** FONDATION — Contrat normatif validé  
+**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Architecture et flux non négociables
 
 ---
 
-## 10. Mini log de gÃ©nÃ©ration
+## 10. Mini log de génération
 
-### DÃ©cision Ã©ditoriale E1 : Composants internes
+### Décision éditoriale E1 : Composants internes
 
-**DÃ©cision prise :** DÃ©finition de 7 composants internes (surface, validateur, moteur, compositeur, calculateur, producteur, traceur).
+**Décision prise :** Définition de 7 composants internes (surface, validateur, moteur, compositeur, calculateur, producteur, traceur).
 
-**Application :** Section 3 dÃ©finit chaque composant avec ses responsabilitÃ©s.
+**Application :** Section 3 définit chaque composant avec ses responsabilités.
 
-### DÃ©cision Ã©ditoriale E2 : Diagrammes ASCII
+### Décision éditoriale E2 : Diagrammes ASCII
 
-**DÃ©cision prise :** Utilisation de diagrammes ASCII pour illustrer l'architecture et les flux.
+**Décision prise :** Utilisation de diagrammes ASCII pour illustrer l'architecture et les flux.
 
 **Application :** Sections 2, 4, et 5 contiennent des diagrammes ASCII.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec Documentation Fondatrice : ConfirmÃ©e (positionnement)
-- âœ… CohÃ©rence avec Decision Graph Specification : ConfirmÃ©e (flux d'Ã©valuation)
-- âœ… CohÃ©rence avec Intent Model Contract : ConfirmÃ©e (entrÃ©es)
-- âœ… CohÃ©rence avec Core Decision Contract : ConfirmÃ©e (sorties)
-- âœ… CohÃ©rence avec Policy Engine Contract : ConfirmÃ©e (moteur de politiques)
+**Vérification effectuée :**
+- ✅ Cohérence avec Documentation Fondatrice : Confirmée (positionnement)
+- ✅ Cohérence avec Decision Graph Specification : Confirmée (flux d'évaluation)
+- ✅ Cohérence avec Intent Model Contract : Confirmée (entrées)
+- ✅ Cohérence avec Core Decision Contract : Confirmée (sorties)
+- ✅ Cohérence avec Policy Engine Contract : Confirmée (moteur de politiques)
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e.
+**Conclusion :** Aucune contradiction détectée.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

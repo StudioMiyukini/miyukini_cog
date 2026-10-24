@@ -1,481 +1,481 @@
-﻿# WorrySentinel â€” Documentation Fondatrice
+﻿# WorrySentinel — Documentation Fondatrice
 
-## 1. Introduction â€” Objet et statut
+## 1. Introduction — Objet et statut
 
 ### Objet du document
 
-Ce document dÃ©finit le **WorrySentinel â€” Documentation Fondatrice** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit ce que signifie gouverner la sÃ©curitÃ© dans WorrySentinel, les caractÃ©ristiques conceptuelles de la gouvernance de sÃ©curitÃ©, et les garanties associÃ©es Ã  la protection de l'Ã©cosystÃ¨me Miyukini Core System v2.4.
+Ce document définit le **WorrySentinel — Documentation Fondatrice** : un contrat normatif, non négociable, et de statut FONDATION qui établit ce que signifie gouverner la sécurité dans WorrySentinel, les caractéristiques conceptuelles de la gouvernance de sécurité, et les garanties associées à la protection de l'écosystème Miyukini Core System v2.4.
 
-Ce contrat prÃ©cise la nature conceptuelle de la gouvernance de sÃ©curitÃ©, les niveaux de sÃ©curitÃ©, les Ã©tats de confiance du systÃ¨me, la logique de dÃ©gradation progressive, sans jamais introduire de dÃ©tail d'implÃ©mentation technique, de mÃ©canisme cryptographique concret, ou de contrÃ´le technique.
+Ce contrat précise la nature conceptuelle de la gouvernance de sécurité, les niveaux de sécurité, les états de confiance du système, la logique de dégradation progressive, sans jamais introduire de détail d'implémentation technique, de mécanisme cryptographique concret, ou de contrôle technique.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toutes les opÃ©rations de gouvernance de sÃ©curitÃ©** dans WorrySentinel et dÃ©finit de maniÃ¨re absolue :
-- la dÃ©finition formelle de la gouvernance de sÃ©curitÃ©,
-- la notion de niveau de sÃ©curitÃ©,
-- les Ã©tats de confiance du systÃ¨me,
-- la dÃ©gradation progressive,
-- les invariants de gouvernance de sÃ©curitÃ©,
-- les distinctions entre gouvernance de sÃ©curitÃ© et implÃ©mentation de sÃ©curitÃ©.
+Ce contrat s'applique à **toutes les opérations de gouvernance de sécurité** dans WorrySentinel et définit de manière absolue :
+- la définition formelle de la gouvernance de sécurité,
+- la notion de niveau de sécurité,
+- les états de confiance du système,
+- la dégradation progressive,
+- les invariants de gouvernance de sécurité,
+- les distinctions entre gouvernance de sécurité et implémentation de sécurité.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complÃ¨te et respecte les documents contractuels existants :
-- **StrongFather â€” Documentation Fondatrice** : WorrySentinel gouverne les niveaux de sÃ©curitÃ©, StrongFather applique les politiques selon ces niveaux
-- **StrongFather â€” Security & Threat Model Contract** : WorrySentinel dÃ©finit les niveaux de sÃ©curitÃ©, StrongFather Ã©value les menaces selon ces niveaux
-- **StrongFather â€” Performance & Scalability Contract** : WorrySentinel gouverne la dÃ©gradation de sÃ©curitÃ©, les performances sont prÃ©servÃ©es
-- **StrongFather â€” Invariants & Guarantees** : WorrySentinel respecte tous les invariants de StrongFather
-- **StrongFather â€” Boundary & Isolation Contract** : WorrySentinel gouverne les frontiÃ¨res de sÃ©curitÃ©
-- **TAMR â€” Documentation Fondatrice** : WorrySentinel dÃ©finit les niveaux de sÃ©curitÃ©, TAMR dÃ©finit les interventions humaines selon ces niveaux
-- **[Miyukini Framework - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md)** : WorrySentinel gouverne les niveaux de confiance (T0-T4) et la dÃ©gradation progressive
-- **[Miyukini Framework - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)** : WorrySentinel gouverne les niveaux de sÃ©curitÃ© (0-4) et leur interaction avec les niveaux de confiance
-- **[Miyukini Framework - Pyramide Architecture Complete](..//..//..//miyukini-webway-system//reference//_index.md)** : WorrySentinel est positionnÃ© dans la STRATE 4 â€” Gouvernance de sÃ©curitÃ©
-- **LogisticsSteward â€” Documentation Fondatrice** : WorrySentinel supervise LogisticsSteward pour dÃ©tecter les dÃ©rives d'allocation et peut imposer un durcissement des rÃ¨gles d'arbitrage
+Ce contrat complète et respecte les documents contractuels existants :
+- **StrongFather — Documentation Fondatrice** : WorrySentinel gouverne les niveaux de sécurité, StrongFather applique les politiques selon ces niveaux
+- **StrongFather — Security & Threat Model Contract** : WorrySentinel définit les niveaux de sécurité, StrongFather évalue les menaces selon ces niveaux
+- **StrongFather — Performance & Scalability Contract** : WorrySentinel gouverne la dégradation de sécurité, les performances sont préservées
+- **StrongFather — Invariants & Guarantees** : WorrySentinel respecte tous les invariants de StrongFather
+- **StrongFather — Boundary & Isolation Contract** : WorrySentinel gouverne les frontières de sécurité
+- **TAMR — Documentation Fondatrice** : WorrySentinel définit les niveaux de sécurité, TAMR définit les interventions humaines selon ces niveaux
+- **[Miyukini Framework - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md)** : WorrySentinel gouverne les niveaux de confiance (T0-T4) et la dégradation progressive
+- **[Miyukini Framework - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md)** : WorrySentinel gouverne les niveaux de sécurité (0-4) et leur interaction avec les niveaux de confiance
+- **[Miyukini Framework - Pyramide Architecture Complete](..//..//..//miyukini-webway-system//reference//_index.md)** : WorrySentinel est positionné dans la STRATE 4 — Gouvernance de sécurité
+- **LogisticsSteward — Documentation Fondatrice** : WorrySentinel supervise LogisticsSteward pour détecter les dérives d'allocation et peut imposer un durcissement des règles d'arbitrage
 
-Il n'introduit aucune contradiction et constitue la dÃ©finition formelle de ce que signifie gouverner la sÃ©curitÃ© dans WorrySentinel.
+Il n'introduit aucune contradiction et constitue la définition formelle de ce que signifie gouverner la sécurité dans WorrySentinel.
 
 ---
 
-## 2. DÃ©finition de WorrySentinel
+## 2. Définition de WorrySentinel
 
 ### Position exacte de WorrySentinel
 
 **WorrySentinel n'est PAS un core fonctionnel.**  
 **WorrySentinel est un core de gouvernance transversale.**
 
-WorrySentinel agit comme une **pression verticale**, pas comme une brique horizontale. Il gouverne sans exÃ©cuter, contraint sans remplacer.
+WorrySentinel agit comme une **pression verticale**, pas comme une brique horizontale. Il gouverne sans exécuter, contraint sans remplacer.
 
-**Ce que WorrySentinel ne dÃ©cide pas :**
-- âŒ Des actions
-- âŒ Des permissions
-- âŒ Des intÃ©grations
-- âŒ Des donnÃ©es
+**Ce que WorrySentinel ne décide pas :**
+- ❌ Des actions
+- ❌ Des permissions
+- ❌ Des intégrations
+- ❌ Des données
 
-**Ce que WorrySentinel dÃ©cide :**
-- âœ… Du niveau de confiance global
-- âœ… Du niveau de sÃ©curitÃ© actif
-- âœ… Du mode de fonctionnement autorisÃ©
-- âœ… Du niveau de dÃ©gradation requis
+**Ce que WorrySentinel décide :**
+- ✅ Du niveau de confiance global
+- ✅ Du niveau de sécurité actif
+- ✅ Du mode de fonctionnement autorisé
+- ✅ Du niveau de dégradation requis
 
 ### Position dans la Pyramide Miyukini
 
-WorrySentinel est positionnÃ© dans la **STRATE 4 â€” Gouvernance de sÃ©curitÃ©** de la Pyramide Miyukini, entre le Kernel (Strate 3) et les Cores fonctionnels (Strate 5).
+WorrySentinel est positionné dans la **STRATE 4 — Gouvernance de sécurité** de la Pyramide Miyukini, entre le Kernel (Strate 3) et les Cores fonctionnels (Strate 5).
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 5 â€” Cores fonctionnels             â”‚
-â”‚ StrongFather Â· KindMother Â· MasterButlerâ”‚
-â”‚ CaringNanny Â· EverBuddy Â· BorderGuard    â”‚
-â”‚ TAMR                                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 4 â€” ðŸ›¡ï¸ WorrySentinel               â”‚
-â”‚ Gouvernance de sÃ©curitÃ©                   â”‚
-â”‚ Niveaux, Ã©tats, dÃ©gradation               â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 3 â€” Kernel Miyukini               â”‚
-â”‚ IdentitÃ©, Horloge, Logger, Sondes         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌──────────────────────────────────────────┐
+│ STRATE 5 — Cores fonctionnels             │
+│ StrongFather · KindMother · MasterButler│
+│ CaringNanny · EverBuddy · BorderGuard    │
+│ TAMR                                      │
+└──────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│ STRATE 4 — 🛡️ WorrySentinel               │
+│ Gouvernance de sécurité                   │
+│ Niveaux, états, dégradation               │
+└──────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│ STRATE 3 — Kernel Miyukini               │
+│ Identité, Horloge, Logger, Sondes         │
+└──────────────────────────────────────────┘
 ```
 
-**RÃ¨gle architecturale :** WorrySentinel gouverne les cores fonctionnels de la Strate 5, mais ne les remplace jamais. Il contraint leur comportement selon les niveaux de sÃ©curitÃ© et les Ã©tats de confiance.
+**Règle architecturale :** WorrySentinel gouverne les cores fonctionnels de la Strate 5, mais ne les remplace jamais. Il contraint leur comportement selon les niveaux de sécurité et les états de confiance.
 
-### DÃ©finition philosophique
+### Définition philosophique
 
-WorrySentinel est le **gouvernant de la sÃ©curitÃ©** du Miyukini Core System. Il incarne la capacitÃ© conceptuelle du systÃ¨me Ã  dÃ©finir, maintenir, et faire Ã©voluer les niveaux de sÃ©curitÃ©, les Ã©tats de confiance, et les mÃ©canismes de dÃ©gradation progressive, sans jamais possÃ©der d'autoritÃ© sur l'implÃ©mentation technique, l'exÃ©cution des contrÃ´les, ou la persistance des donnÃ©es.
+WorrySentinel est le **gouvernant de la sécurité** du Miyukini Core System. Il incarne la capacité conceptuelle du système à définir, maintenir, et faire évoluer les niveaux de sécurité, les états de confiance, et les mécanismes de dégradation progressive, sans jamais posséder d'autorité sur l'implémentation technique, l'exécution des contrôles, ou la persistance des données.
 
-WorrySentinel reprÃ©sente la **volontÃ© sÃ©curitaire** du systÃ¨me : il dÃ©termine quels niveaux de sÃ©curitÃ© sont applicables, quels Ã©tats de confiance sont acceptables, comment la dÃ©gradation doit progresser, mais ne dÃ©termine jamais comment ces niveaux sont implÃ©mentÃ©s ni quand les contrÃ´les sont exÃ©cutÃ©s.
+WorrySentinel représente la **volonté sécuritaire** du système : il détermine quels niveaux de sécurité sont applicables, quels états de confiance sont acceptables, comment la dégradation doit progresser, mais ne détermine jamais comment ces niveaux sont implémentés ni quand les contrôles sont exécutés.
 
-### DÃ©finition fonctionnelle
+### Définition fonctionnelle
 
 WorrySentinel est un **gouvernant conceptuel** qui :
 
-1. **DÃ©finit les niveaux de sÃ©curitÃ©** : Ã‰tablit les niveaux de sÃ©curitÃ© (0-4) applicables aux produits et aux composants
-2. **Gouverne les Ã©tats de confiance** : DÃ©finit les Ã©tats de confiance du systÃ¨me (T0-T4) et leurs transitions
-3. **Orchestre la dÃ©gradation progressive** : DÃ©termine comment le systÃ¨me dÃ©grade ses capacitÃ©s de maniÃ¨re contrÃ´lÃ©e
-4. **Ã‰tablit les rÃ¨gles de gouvernance** : DÃ©finit les rÃ¨gles selon lesquelles les autres cores et produits doivent adapter leur comportement selon les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-5. **Assure la cohÃ©rence sÃ©curitaire** : Garantit que les dÃ©cisions de sÃ©curitÃ© sont cohÃ©rentes Ã  travers l'Ã©cosystÃ¨me
+1. **Définit les niveaux de sécurité** : Établit les niveaux de sécurité (0-4) applicables aux produits et aux composants
+2. **Gouverne les états de confiance** : Définit les états de confiance du système (T0-T4) et leurs transitions
+3. **Orchestre la dégradation progressive** : Détermine comment le système dégrade ses capacités de manière contrôlée
+4. **Établit les règles de gouvernance** : Définit les règles selon lesquelles les autres cores et produits doivent adapter leur comportement selon les niveaux de sécurité et les états de confiance
+5. **Assure la cohérence sécuritaire** : Garantit que les décisions de sécurité sont cohérentes à travers l'écosystème
 
-WorrySentinel **ne possÃ¨de aucune autoritÃ©** sur :
-- L'implÃ©mentation des contrÃ´les de sÃ©curitÃ©
-- L'exÃ©cution des vÃ©rifications de sÃ©curitÃ©
-- La persistance des donnÃ©es de sÃ©curitÃ©
-- Les mÃ©canismes cryptographiques
-- Les dÃ©cisions spÃ©cifiques de StrongFather
+WorrySentinel **ne possède aucune autorité** sur :
+- L'implémentation des contrôles de sécurité
+- L'exécution des vérifications de sécurité
+- La persistance des données de sécurité
+- Les mécanismes cryptographiques
+- Les décisions spécifiques de StrongFather
 
 ---
 
 ## 3. Pourquoi WorrySentinel existe
 
-### ProblÃ¨me que WorrySentinel rÃ©sout
+### Problème que WorrySentinel résout
 
-Dans l'architecture actuelle de MCS, la gouvernance de sÃ©curitÃ© est dispersÃ©e dans les produits, les adaptateurs, et les modules. Cette dispersion prÃ©sente plusieurs limitations :
+Dans l'architecture actuelle de MCS, la gouvernance de sécurité est dispersée dans les produits, les adaptateurs, et les modules. Cette dispersion présente plusieurs limitations :
 
-1. **Absence de cohÃ©rence sÃ©curitaire** : Chaque composant dÃ©finit ses propres niveaux de sÃ©curitÃ© sans garantie de cohÃ©rence globale
-2. **Duplication de logique de gouvernance** : Les rÃ¨gles de gouvernance sont rÃ©pliquÃ©es dans plusieurs endroits, conduisant Ã  des incohÃ©rences
-3. **Pas de centralisation de la gouvernance** : Aucun point central pour dÃ©finir et maintenir les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-4. **Gestion de dÃ©gradation dispersÃ©e** : La dÃ©gradation progressive est gÃ©rÃ©e localement sans vision globale
-5. **IncohÃ©rence entre niveaux de sÃ©curitÃ© et Ã©tats de confiance** : Les interactions entre niveaux de sÃ©curitÃ© (0-4) et Ã©tats de confiance (T0-T4) ne sont pas gouvernÃ©es de maniÃ¨re cohÃ©rente
+1. **Absence de cohérence sécuritaire** : Chaque composant définit ses propres niveaux de sécurité sans garantie de cohérence globale
+2. **Duplication de logique de gouvernance** : Les règles de gouvernance sont répliquées dans plusieurs endroits, conduisant à des incohérences
+3. **Pas de centralisation de la gouvernance** : Aucun point central pour définir et maintenir les niveaux de sécurité et les états de confiance
+4. **Gestion de dégradation dispersée** : La dégradation progressive est gérée localement sans vision globale
+5. **Incohérence entre niveaux de sécurité et états de confiance** : Les interactions entre niveaux de sécurité (0-4) et états de confiance (T0-T4) ne sont pas gouvernées de manière cohérente
 
-WorrySentinel rÃ©sout ces problÃ¨mes en fournissant un gouvernant unifiÃ© qui :
-- Centralise la dÃ©finition des niveaux de sÃ©curitÃ© et des Ã©tats de confiance
-- Ã‰tablit des rÃ¨gles de gouvernance cohÃ©rentes et centralisÃ©es
-- Orchestre la dÃ©gradation progressive de maniÃ¨re globale et cohÃ©rente
-- Assure la cohÃ©rence entre les diffÃ©rents niveaux et Ã©tats
-- Maintient une sÃ©paration stricte entre gouvernance et implÃ©mentation
+WorrySentinel résout ces problèmes en fournissant un gouvernant unifié qui :
+- Centralise la définition des niveaux de sécurité et des états de confiance
+- Établit des règles de gouvernance cohérentes et centralisées
+- Orchestre la dégradation progressive de manière globale et cohérente
+- Assure la cohérence entre les différents niveaux et états
+- Maintient une séparation stricte entre gouvernance et implémentation
 
 ### Positionnement architectural
 
 WorrySentinel est un **gouvernant interne** :
-- Il n'est pas exposÃ© comme API publique directe
+- Il n'est pas exposé comme API publique directe
 - Il n'est pas un module SPM CMS
 - Il n'est pas dans le kernel
-- Il est utilisÃ© par les adaptateurs produits, les produits, et les autres cores pour comprendre les niveaux de sÃ©curitÃ© et les Ã©tats de confiance applicables
+- Il est utilisé par les adaptateurs produits, les produits, et les autres cores pour comprendre les niveaux de sécurité et les états de confiance applicables
 
-WorrySentinel est conÃ§u avec une **discipline de produit** :
-- Architecture claire et documentÃ©e
-- Contrats stables et Ã©volutifs
-- PrÃªt pour une implÃ©mentation future en Rust
-- Mais reste strictement interne au systÃ¨me
+WorrySentinel est conçu avec une **discipline de produit** :
+- Architecture claire et documentée
+- Contrats stables et évolutifs
+- Prêt pour une implémentation future en Rust
+- Mais reste strictement interne au système
 
 ---
 
-## 4. PÃ©rimÃ¨tre absolu
+## 4. Périmètre absolu
 
-### ResponsabilitÃ©s exclusives de WorrySentinel
+### Responsabilités exclusives de WorrySentinel
 
 WorrySentinel est **exclusivement responsable** de :
 
-1. **DÃ©finition des niveaux de sÃ©curitÃ©** : DÃ©finir les niveaux de sÃ©curitÃ© (0-4) et leurs caractÃ©ristiques conceptuelles
-2. **Gouvernance des Ã©tats de confiance** : DÃ©finir les Ã©tats de confiance (T0-T4) et leurs rÃ¨gles de transition
-3. **Orchestration de la dÃ©gradation progressive** : DÃ©terminer comment le systÃ¨me dÃ©grade ses capacitÃ©s selon les Ã©tats de confiance
-4. **Ã‰tablissement des rÃ¨gles de gouvernance** : DÃ©finir les rÃ¨gles selon lesquelles les composants doivent adapter leur comportement
-5. **Assurance de cohÃ©rence sÃ©curitaire** : Garantir que les dÃ©cisions de sÃ©curitÃ© sont cohÃ©rentes Ã  travers l'Ã©cosystÃ¨me
-6. **TraÃ§abilitÃ© de la gouvernance** : Enregistrer toutes les dÃ©cisions de gouvernance avec leur contexte et justification
+1. **Définition des niveaux de sécurité** : Définir les niveaux de sécurité (0-4) et leurs caractéristiques conceptuelles
+2. **Gouvernance des états de confiance** : Définir les états de confiance (T0-T4) et leurs règles de transition
+3. **Orchestration de la dégradation progressive** : Déterminer comment le système dégrade ses capacités selon les états de confiance
+4. **Établissement des règles de gouvernance** : Définir les règles selon lesquelles les composants doivent adapter leur comportement
+5. **Assurance de cohérence sécuritaire** : Garantir que les décisions de sécurité sont cohérentes à travers l'écosystème
+6. **Traçabilité de la gouvernance** : Enregistrer toutes les décisions de gouvernance avec leur contexte et justification
 
-### AutoritÃ© exclusive
+### Autorité exclusive
 
-WorrySentinel possÃ¨de une **autoritÃ© exclusive** sur :
-- La dÃ©finition des niveaux de sÃ©curitÃ©
-- La dÃ©finition des Ã©tats de confiance
-- Les rÃ¨gles de transition entre Ã©tats
-- Les rÃ¨gles de dÃ©gradation progressive
-- Les rÃ¨gles d'adaptation comportementale selon les niveaux et Ã©tats
+WorrySentinel possède une **autorité exclusive** sur :
+- La définition des niveaux de sécurité
+- La définition des états de confiance
+- Les règles de transition entre états
+- Les règles de dégradation progressive
+- Les règles d'adaptation comportementale selon les niveaux et états
 
 ### Invariants absolus
 
-**INV-WS-1 : Aucune autoritÃ© sur l'implÃ©mentation**
+**INV-WS-1 : Aucune autorité sur l'implémentation**
 
-WorrySentinel ne possÃ¨de jamais d'autoritÃ© sur l'implÃ©mentation des contrÃ´les de sÃ©curitÃ©. Une rÃ¨gle de gouvernance produite par WorrySentinel n'entraÃ®ne jamais d'implÃ©mentation automatique.
+WorrySentinel ne possède jamais d'autorité sur l'implémentation des contrôles de sécurité. Une règle de gouvernance produite par WorrySentinel n'entraîne jamais d'implémentation automatique.
 
-**INV-WS-2 : Aucune autoritÃ© sur l'exÃ©cution**
+**INV-WS-2 : Aucune autorité sur l'exécution**
 
-WorrySentinel ne possÃ¨de jamais d'autoritÃ© sur l'exÃ©cution des vÃ©rifications de sÃ©curitÃ©. WorrySentinel gouverne, mais n'exÃ©cute jamais.
+WorrySentinel ne possède jamais d'autorité sur l'exécution des vérifications de sécurité. WorrySentinel gouverne, mais n'exécute jamais.
 
-**INV-WS-3 : Aucune autoritÃ© sur la persistance**
+**INV-WS-3 : Aucune autorité sur la persistance**
 
-WorrySentinel ne possÃ¨de jamais d'autoritÃ© sur la persistance. WorrySentinel ne peut jamais modifier, lire, ou accÃ©der Ã  des donnÃ©es persistÃ©es.
+WorrySentinel ne possède jamais d'autorité sur la persistance. WorrySentinel ne peut jamais modifier, lire, ou accéder à des données persistées.
 
-**INV-WS-4 : Aucune modification d'Ã©tat**
+**INV-WS-4 : Aucune modification d'état**
 
-WorrySentinel ne modifie jamais un Ã©tat ou un fait. WorrySentinel gouverne et dÃ©finit, mais ne change jamais l'Ã©tat du systÃ¨me.
+WorrySentinel ne modifie jamais un état ou un fait. WorrySentinel gouverne et définit, mais ne change jamais l'état du système.
 
 **INV-WS-5 : Aucune logique temporelle technique**
 
-WorrySentinel ne possÃ¨de jamais de logique temporelle technique. WorrySentinel ne gÃ¨re jamais le temps, les horodatages, ou l'ordonnancement technique.
+WorrySentinel ne possède jamais de logique temporelle technique. WorrySentinel ne gère jamais le temps, les horodatages, ou l'ordonnancement technique.
 
 **INV-WS-6 : Zero-trust**
 
-WorrySentinel ne fait confiance Ã  aucun appelant. Toute demande de gouvernance est Ã©valuÃ©e selon les rÃ¨gles, sans prÃ©supposer la validitÃ©, l'authenticitÃ©, ou la lÃ©gitimitÃ© de l'appelant.
+WorrySentinel ne fait confiance à aucun appelant. Toute demande de gouvernance est évaluée selon les règles, sans présupposer la validité, l'authenticité, ou la légitimité de l'appelant.
 
 **INV-WS-7 : Gouvernance explicite**
 
-Toutes les rÃ¨gles de gouvernance appliquÃ©es par WorrySentinel sont explicites et dÃ©claratives. Aucune rÃ¨gle implicite n'est autorisÃ©e.
+Toutes les règles de gouvernance appliquées par WorrySentinel sont explicites et déclaratives. Aucune règle implicite n'est autorisée.
 
-**INV-WS-8 : TraÃ§abilitÃ© complÃ¨te**
+**INV-WS-8 : Traçabilité complète**
 
-Toute dÃ©cision de gouvernance produite par WorrySentinel est traÃ§able avec son contexte, ses rÃ¨gles appliquÃ©es, et sa justification.
+Toute décision de gouvernance produite par WorrySentinel est traçable avec son contexte, ses règles appliquées, et sa justification.
 
 ---
 
 ## 5. Hors-scope explicite
 
-### ImplÃ©mentation
+### Implémentation
 
-L'implÃ©mentation est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- N'implÃ©mente jamais un contrÃ´le de sÃ©curitÃ©
-- Ne dÃ©finit jamais de mÃ©canisme cryptographique concret
-- Ne code jamais de vÃ©rification technique
-- Ne spÃ©cifie jamais d'algorithme de sÃ©curitÃ©
+L'implémentation est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
+- N'implémente jamais un contrôle de sécurité
+- Ne définit jamais de mécanisme cryptographique concret
+- Ne code jamais de vérification technique
+- Ne spécifie jamais d'algorithme de sécurité
 
-### ExÃ©cution
+### Exécution
 
-L'exÃ©cution est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- N'exÃ©cute jamais une vÃ©rification de sÃ©curitÃ©
-- N'ordonnance jamais l'exÃ©cution de contrÃ´les
-- Ne contrÃ´le jamais le moment de l'exÃ©cution
-- Ne surveille jamais l'exÃ©cution
+L'exécution est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
+- N'exécute jamais une vérification de sécurité
+- N'ordonnance jamais l'exécution de contrôles
+- Ne contrôle jamais le moment de l'exécution
+- Ne surveille jamais l'exécution
 
 ### Persistance
 
 La persistance est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- Ne lit jamais de donnÃ©es persistÃ©es
-- Ne modifie jamais de donnÃ©es persistÃ©es
-- N'accÃ¨de jamais Ã  KindMother directement
-- Ne connaÃ®t jamais l'Ã©tat des donnÃ©es persistÃ©es
+- Ne lit jamais de données persistées
+- Ne modifie jamais de données persistées
+- N'accède jamais à KindMother directement
+- Ne connaît jamais l'état des données persistées
 
-### Modification d'Ã©tat
+### Modification d'état
 
-La modification d'Ã©tat est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- Ne modifie jamais un Ã©tat du systÃ¨me
-- Ne crÃ©e jamais de fait
+La modification d'état est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
+- Ne modifie jamais un état du système
+- Ne crée jamais de fait
 - Ne supprime jamais de fait
-- Ne met jamais Ã  jour un Ã©tat
+- Ne met jamais à jour un état
 
 ### Logique temporelle technique
 
 La logique temporelle technique est **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- Ne gÃ¨re jamais le temps technique
-- Ne gÃ©nÃ¨re jamais d'horodatages
+- Ne gère jamais le temps technique
+- Ne génère jamais d'horodatages
 - N'ordonnance jamais selon le temps
 - Ne synchronise jamais selon le temps
 
-### DÃ©cisions spÃ©cifiques
+### Décisions spécifiques
 
-Les dÃ©cisions spÃ©cifiques de sÃ©curitÃ© sont **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- Ne prend jamais de dÃ©cision d'autorisation ou de refus
-- N'Ã©value jamais une intention spÃ©cifique
-- N'applique jamais une politique Ã  un cas concret
-- Ne connaÃ®t jamais les dÃ©tails d'une dÃ©cision
+Les décisions spécifiques de sécurité sont **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
+- Ne prend jamais de décision d'autorisation ou de refus
+- N'évalue jamais une intention spécifique
+- N'applique jamais une politique à un cas concret
+- Ne connaît jamais les détails d'une décision
 
-### MÃ©canismes cryptographiques
+### Mécanismes cryptographiques
 
-Les mÃ©canismes cryptographiques sont **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
-- Ne dÃ©finit jamais d'algorithme cryptographique
-- Ne spÃ©cifie jamais de protocole de chiffrement
-- Ne gÃ¨re jamais de clÃ©s cryptographiques
-- Ne connaÃ®t jamais les dÃ©tails cryptographiques
+Les mécanismes cryptographiques sont **explicitement hors-scope** de WorrySentinel. WorrySentinel ne :
+- Ne définit jamais d'algorithme cryptographique
+- Ne spécifie jamais de protocole de chiffrement
+- Ne gère jamais de clés cryptographiques
+- Ne connaît jamais les détails cryptographiques
 
 ---
 
-## 6. Gouvernance des niveaux de sÃ©curitÃ©
+## 6. Gouvernance des niveaux de sécurité
 
-### DÃ©finition des niveaux de sÃ©curitÃ©
+### Définition des niveaux de sécurité
 
-WorrySentinel dÃ©finit cinq niveaux de sÃ©curitÃ© (0-4) qui caractÃ©risent le profil de risque d'un produit ou d'un composant :
+WorrySentinel définit cinq niveaux de sécurité (0-4) qui caractérisent le profil de risque d'un produit ou d'un composant :
 
-**Niveau 0 â€” Public**
+**Niveau 0 — Public**
 
-**CaractÃ©ristiques :**
-- DonnÃ©es publiques, aucune sensibilitÃ©
-- Aucune contrainte de sÃ©curitÃ© stricte
+**Caractéristiques :**
+- Données publiques, aucune sensibilité
+- Aucune contrainte de sécurité stricte
 - Fonctionnement normal sans restrictions
 
-**Niveau 1 â€” Standard**
+**Niveau 1 — Standard**
 
-**CaractÃ©ristiques :**
-- DonnÃ©es standard, sensibilitÃ© faible
-- Contraintes de sÃ©curitÃ© de base
-- Fonctionnement normal avec vÃ©rifications de base
+**Caractéristiques :**
+- Données standard, sensibilité faible
+- Contraintes de sécurité de base
+- Fonctionnement normal avec vérifications de base
 
-**Niveau 2 â€” Sensitive Data**
+**Niveau 2 — Sensitive Data**
 
-**CaractÃ©ristiques :**
-- DonnÃ©es sensibles, protection requise
-- Contraintes de sÃ©curitÃ© renforcÃ©es
-- Fonctionnement avec restrictions modÃ©rÃ©es
+**Caractéristiques :**
+- Données sensibles, protection requise
+- Contraintes de sécurité renforcées
+- Fonctionnement avec restrictions modérées
 
-**Niveau 3 â€” Critical Data**
+**Niveau 3 — Critical Data**
 
-**CaractÃ©ristiques :**
-- DonnÃ©es critiques, protection maximale
-- Contraintes de sÃ©curitÃ© strictes
+**Caractéristiques :**
+- Données critiques, protection maximale
+- Contraintes de sécurité strictes
 - Fonctionnement avec restrictions importantes
 
-**Niveau 4 â€” Highest Security**
+**Niveau 4 — Highest Security**
 
-**CaractÃ©ristiques :**
-- DonnÃ©es de sÃ©curitÃ© maximale, protection absolue
-- Contraintes de sÃ©curitÃ© maximales
+**Caractéristiques :**
+- Données de sécurité maximale, protection absolue
+- Contraintes de sécurité maximales
 - Fonctionnement avec restrictions maximales
 
-### RÃ¨gles de gouvernance des niveaux
+### Règles de gouvernance des niveaux
 
-**RÃˆGLE-SEC-1 : Attribution de niveau**
+**RÈGLE-SEC-1 : Attribution de niveau**
 
-WorrySentinel gouverne l'attribution des niveaux de sÃ©curitÃ© aux produits et composants. Cette attribution est :
-- **Explicite** : Chaque produit et composant possÃ¨de un niveau de sÃ©curitÃ© dÃ©fini
-- **Immuable pendant l'exÃ©cution** : Le niveau de sÃ©curitÃ© ne change pas pendant l'exÃ©cution d'une opÃ©ration
-- **TraÃ§able** : Toute attribution de niveau est tracÃ©e avec justification
+WorrySentinel gouverne l'attribution des niveaux de sécurité aux produits et composants. Cette attribution est :
+- **Explicite** : Chaque produit et composant possède un niveau de sécurité défini
+- **Immuable pendant l'exécution** : Le niveau de sécurité ne change pas pendant l'exécution d'une opération
+- **Traçable** : Toute attribution de niveau est tracée avec justification
 
-**RÃˆGLE-SEC-2 : Adaptation comportementale**
+**RÈGLE-SEC-2 : Adaptation comportementale**
 
-WorrySentinel gouverne les rÃ¨gles selon lesquelles les composants doivent adapter leur comportement selon le niveau de sÃ©curitÃ© :
+WorrySentinel gouverne les règles selon lesquelles les composants doivent adapter leur comportement selon le niveau de sécurité :
 - **Niveau 0-1** : Comportement normal, restrictions minimales
-- **Niveau 2** : Restrictions modÃ©rÃ©es, vÃ©rifications renforcÃ©es
-- **Niveau 3-4** : Restrictions importantes, vÃ©rifications maximales
+- **Niveau 2** : Restrictions modérées, vérifications renforcées
+- **Niveau 3-4** : Restrictions importantes, vérifications maximales
 
-**RÃˆGLE-SEC-3 : CohÃ©rence inter-composants**
+**RÈGLE-SEC-3 : Cohérence inter-composants**
 
-WorrySentinel garantit la cohÃ©rence des niveaux de sÃ©curitÃ© entre composants qui interagissent :
-- Un composant de niveau N ne peut pas accÃ©der directement Ã  un composant de niveau > N sans mÃ©diation
-- Les interactions entre niveaux diffÃ©rents sont gouvernÃ©es par des rÃ¨gles explicites
+WorrySentinel garantit la cohérence des niveaux de sécurité entre composants qui interagissent :
+- Un composant de niveau N ne peut pas accéder directement à un composant de niveau > N sans médiation
+- Les interactions entre niveaux différents sont gouvernées par des règles explicites
 
-### Gouvernance de sÃ©curitÃ© des Tools et Toolkits
+### Gouvernance de sécurité des Tools et Toolkits
 
-WorrySentinel gouverne la sÃ©curitÃ© des Tools et Toolkits en dÃ©finissant :
+WorrySentinel gouverne la sécurité des Tools et Toolkits en définissant :
 
-| ResponsabilitÃ© | Description |
+| Responsabilité | Description |
 |----------------|-------------|
-| **Niveau de sÃ©curitÃ© par Tool** | Chaque Tool a un niveau de sÃ©curitÃ© requis (0-4) |
-| **DÃ©gradation** | GÃ¨re la dÃ©gradation sÃ©curitaire des Tools |
-| **Blocage** | Bloque les Tools en cas de menace (Ã©tat T2+) |
+| **Niveau de sécurité par Tool** | Chaque Tool a un niveau de sécurité requis (0-4) |
+| **Dégradation** | Gère la dégradation sécuritaire des Tools |
+| **Blocage** | Bloque les Tools en cas de menace (état T2+) |
 | **Audit** | Trace les appels aux Tools pour audit |
-| **Autorisation conditionnelle** | Autorise les Tools sous conditions de sÃ©curitÃ© |
+| **Autorisation conditionnelle** | Autorise les Tools sous conditions de sécurité |
 
-**Question Ã  laquelle WorrySentinel rÃ©pond pour les Tools :**
+**Question à laquelle WorrySentinel répond pour les Tools :**
 
-> *"Le niveau de sÃ©curitÃ© actuel permet-il cet appel de Tool ?"*
+> *"Le niveau de sécurité actuel permet-il cet appel de Tool ?"*
 
 **Exemple de blocage :**
 
 ```
-UI Toolkit indisponible car environnement en Ã©tat SECURITY_LOCKDOWN (T3)
+UI Toolkit indisponible car environnement en état SECURITY_LOCKDOWN (T3)
 ```
 
-**RÃ¨gles de gouvernance Tools :**
+**Règles de gouvernance Tools :**
 
-| RÃ¨gle | Description |
+| Règle | Description |
 |-------|-------------|
-| **RÃˆGLE-TOOL-SEC-1** | Chaque Tool a un niveau de sÃ©curitÃ© dÃ©fini |
-| **RÃˆGLE-TOOL-SEC-2** | Un Tool de niveau N ne peut Ãªtre appelÃ© que si le niveau de sÃ©curitÃ© le permet |
-| **RÃˆGLE-TOOL-SEC-3** | En Ã©tat de confiance T2+, certains Tools peuvent Ãªtre bloquÃ©s |
-| **RÃˆGLE-TOOL-SEC-4** | Tout appel de Tool est auditable |
+| **RÈGLE-TOOL-SEC-1** | Chaque Tool a un niveau de sécurité défini |
+| **RÈGLE-TOOL-SEC-2** | Un Tool de niveau N ne peut être appelé que si le niveau de sécurité le permet |
+| **RÈGLE-TOOL-SEC-3** | En état de confiance T2+, certains Tools peuvent être bloqués |
+| **RÈGLE-TOOL-SEC-4** | Tout appel de Tool est auditable |
 
-**Documentation complÃ¨te :** [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md)
+**Documentation complète :** [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 7. Ã‰tats de confiance du systÃ¨me
+## 7. États de confiance du système
 
-### Ã‰tats globaux de l'Ã©cosystÃ¨me
+### États globaux de l'écosystème
 
-WorrySentinel gouverne les **Ã©tats globaux de l'Ã©cosystÃ¨me** qui s'appliquent Ã  tout le systÃ¨me, pas Ã  un produit isolÃ©. Ces Ã©tats sont pilotÃ©s par WorrySentinel et ne peuvent pas Ãªtre ignorÃ©s par les produits.
+WorrySentinel gouverne les **états globaux de l'écosystème** qui s'appliquent à tout le système, pas à un produit isolé. Ces états sont pilotés par WorrySentinel et ne peuvent pas être ignorés par les produits.
 
-| Ã‰tat | Effet | Correspondance T0-T4 |
+| État | Effet | Correspondance T0-T4 |
 |------|-------|---------------------|
-| ðŸŸ¢ **Nominal** | Fonctionnement normal | T0 |
-| ðŸŸ¡ **Doute** | + contrÃ´les, + traces | T1 |
-| ðŸŸ  **Suspect** | Fonctions sensibles bridÃ©es | T2 |
-| ðŸ”´ **Critique** | Lecture seule / blocage partiel | T3 |
-| â›” **Compromis** | Blocage total | T4 |
+| 🟢 **Nominal** | Fonctionnement normal | T0 |
+| 🟡 **Doute** | + contrôles, + traces | T1 |
+| 🟠 **Suspect** | Fonctions sensibles bridées | T2 |
+| 🔴 **Critique** | Lecture seule / blocage partiel | T3 |
+| ⛔ **Compromis** | Blocage total | T4 |
 
-**RÃ¨gle absolue :** Les produits ne peuvent pas ignorer ces Ã©tats. Tout produit doit adapter son comportement selon l'Ã©tat global gouvernÃ© par WorrySentinel.
+**Règle absolue :** Les produits ne peuvent pas ignorer ces états. Tout produit doit adapter son comportement selon l'état global gouverné par WorrySentinel.
 
-### DÃ©finition des Ã©tats de confiance
+### Définition des états de confiance
 
-WorrySentinel dÃ©finit cinq Ã©tats de confiance (T0-T4) qui caractÃ©risent l'intÃ©gritÃ© du systÃ¨me :
+WorrySentinel définit cinq états de confiance (T0-T4) qui caractérisent l'intégrité du système :
 
-**T0 â€” Normal**
+**T0 — Normal**
 
-**CaractÃ©ristiques :**
-- SystÃ¨me sain, aucune anomalie dÃ©tectÃ©e
-- Toutes les capacitÃ©s disponibles
-- DÃ©cisions normales
+**Caractéristiques :**
+- Système sain, aucune anomalie détectée
+- Toutes les capacités disponibles
+- Décisions normales
 - Monitoring standard
 
-**T1 â€” Instable**
+**T1 — Instable**
 
-**CaractÃ©ristiques :**
-- Anomalie dÃ©tectÃ©e, mais pas encore confirmÃ©e
-- Log renforcÃ©, traÃ§abilitÃ© Ã©tendue
+**Caractéristiques :**
+- Anomalie détectée, mais pas encore confirmée
+- Log renforcé, traçabilité étendue
 - Aucun blocage
 - Surveillance accrue
 
-**T2 â€” DÃ©gradÃ©**
+**T2 — Dégradé**
 
-**CaractÃ©ristiques :**
-- IncohÃ©rence persistante, suspicion modÃ©rÃ©e
-- Certaines capacitÃ©s dÃ©sactivÃ©es
-- DÃ©cisions plus strictes
+**Caractéristiques :**
+- Incohérence persistante, suspicion modérée
+- Certaines capacités désactivées
+- Décisions plus strictes
 - Monitoring visible
 
-**T3 â€” Restreint**
+**T3 — Restreint**
 
-**CaractÃ©ristiques :**
-- Suspicion forte, intÃ©gritÃ© potentiellement compromise
+**Caractéristiques :**
+- Suspicion forte, intégrité potentiellement compromise
 - Gel des produits non essentiels
-- DÃ©cisions critiques â†’ AMBIGUÃ‹ / DIFFÃ‰RÃ‰E
+- Décisions critiques → AMBIGUË / DIFFÉRÉE
 - TAMR requis pour override
 
-**T4 â€” BloquÃ©**
+**T4 — Bloqué**
 
-**CaractÃ©ristiques :**
-- IntÃ©gritÃ© rompue, systÃ¨me compromis
-- Plus aucune dÃ©cision opÃ©rationnelle
+**Caractéristiques :**
+- Intégrité rompue, système compromis
+- Plus aucune décision opérationnelle
 - Uniquement diagnostics
-- Ã‰tat lisible, sortie propre possible
+- État lisible, sortie propre possible
 
-### RÃ¨gles de transition entre Ã©tats
+### Règles de transition entre états
 
-**RÃˆGLE-TRANS-1 : Transitions autorisÃ©es**
+**RÈGLE-TRANS-1 : Transitions autorisées**
 
-WorrySentinel gouverne les transitions autorisÃ©es entre Ã©tats de confiance :
-- **T0 â†’ T1** : DÃ©tection d'anomalie
-- **T1 â†’ T0** : RÃ©solution d'anomalie
-- **T1 â†’ T2** : Persistance d'anomalie
-- **T2 â†’ T1** : AmÃ©lioration de l'Ã©tat
-- **T2 â†’ T3** : Aggravation de l'Ã©tat
-- **T3 â†’ T2** : Confirmation de sÃ©curitÃ©
-- **T3 â†’ T4** : Confirmation de compromission
-- **T4** : Ã‰tat terminal, aucune transition sortante
+WorrySentinel gouverne les transitions autorisées entre états de confiance :
+- **T0 → T1** : Détection d'anomalie
+- **T1 → T0** : Résolution d'anomalie
+- **T1 → T2** : Persistance d'anomalie
+- **T2 → T1** : Amélioration de l'état
+- **T2 → T3** : Aggravation de l'état
+- **T3 → T2** : Confirmation de sécurité
+- **T3 → T4** : Confirmation de compromission
+- **T4** : État terminal, aucune transition sortante
 
-**RÃˆGLE-TRANS-2 : Progression uniquement**
+**RÈGLE-TRANS-2 : Progression uniquement**
 
-Les transitions vers un Ã©tat de confiance plus dÃ©gradÃ© sont **irrÃ©versibles sans intervention explicite**. Une fois en T2, le systÃ¨me ne peut pas revenir directement en T0 sans passer par T1.
+Les transitions vers un état de confiance plus dégradé sont **irréversibles sans intervention explicite**. Une fois en T2, le système ne peut pas revenir directement en T0 sans passer par T1.
 
-**RÃˆGLE-TRANS-3 : DÃ©gradation progressive**
+**RÈGLE-TRANS-3 : Dégradation progressive**
 
-Les transitions vers un Ã©tat plus dÃ©gradÃ© sont **progressives**. Le systÃ¨me ne passe jamais brutalement de T0 Ã  T4. Chaque transition est justifiÃ©e et tracÃ©e.
+Les transitions vers un état plus dégradé sont **progressives**. Le système ne passe jamais brutalement de T0 à T4. Chaque transition est justifiée et tracée.
 
 ---
 
-## 8. DÃ©gradation progressive (principes)
+## 8. Dégradation progressive (principes)
 
 ### Principe fondamental
 
-**"Un systÃ¨me autonome ne bloque jamais brutalement. Il observe, interprÃ¨te, dÃ©grade, puis bloque seulement quand il est sÃ»r."**
+**"Un système autonome ne bloque jamais brutalement. Il observe, interprète, dégrade, puis bloque seulement quand il est sûr."**
 
-WorrySentinel gouverne la dÃ©gradation progressive selon ce principe fondamental.
+WorrySentinel gouverne la dégradation progressive selon ce principe fondamental.
 
-### RÃ¨gles de dÃ©gradation
+### Règles de dégradation
 
-**RÃˆGLE-DEGRAD-1 : DÃ©gradation par niveau**
+**RÈGLE-DEGRAD-1 : Dégradation par niveau**
 
-WorrySentinel gouverne la dÃ©gradation progressive selon les Ã©tats de confiance :
-- **T0 â†’ T1** : Aucune dÃ©gradation de capacitÃ©, uniquement surveillance renforcÃ©e
-- **T1 â†’ T2** : DÃ©gradation lÃ©gÃ¨re, certaines capacitÃ©s non essentielles dÃ©sactivÃ©es
-- **T2 â†’ T3** : DÃ©gradation modÃ©rÃ©e, gel des produits non essentiels
-- **T3 â†’ T4** : DÃ©gradation totale, arrÃªt opÃ©rationnel
+WorrySentinel gouverne la dégradation progressive selon les états de confiance :
+- **T0 → T1** : Aucune dégradation de capacité, uniquement surveillance renforcée
+- **T1 → T2** : Dégradation légère, certaines capacités non essentielles désactivées
+- **T2 → T3** : Dégradation modérée, gel des produits non essentiels
+- **T3 → T4** : Dégradation totale, arrêt opérationnel
 
-**RÃˆGLE-DEGRAD-2 : PrÃ©servation des invariants**
+**RÈGLE-DEGRAD-2 : Préservation des invariants**
 
-La dÃ©gradation progressive ne peut jamais compromettre les invariants FONDATION. MÃªme en T4, les invariants sont prÃ©servÃ©s.
+La dégradation progressive ne peut jamais compromettre les invariants FONDATION. Même en T4, les invariants sont préservés.
 
-**RÃˆGLE-DEGRAD-3 : ExplicabilitÃ©**
+**RÈGLE-DEGRAD-3 : Explicabilité**
 
-Toute dÃ©gradation est explicable. WorrySentinel gouverne les rÃ¨gles selon lesquelles chaque dÃ©gradation doit Ãªtre justifiÃ©e et tracÃ©e.
+Toute dégradation est explicable. WorrySentinel gouverne les règles selon lesquelles chaque dégradation doit être justifiée et tracée.
 
-**RÃˆGLE-DEGRAD-4 : Interaction avec niveaux de sÃ©curitÃ©**
+**RÈGLE-DEGRAD-4 : Interaction avec niveaux de sécurité**
 
-WorrySentinel gouverne l'interaction entre les niveaux de sÃ©curitÃ© (0-4) et les Ã©tats de confiance (T0-T4) :
-- Un produit de niveau de sÃ©curitÃ© N en Ã©tat de confiance T doit adapter son comportement selon les deux dimensions
-- Les restrictions sont cumulatives : niveau de sÃ©curitÃ© Ã©levÃ© + Ã©tat de confiance dÃ©gradÃ© = restrictions maximales
+WorrySentinel gouverne l'interaction entre les niveaux de sécurité (0-4) et les états de confiance (T0-T4) :
+- Un produit de niveau de sécurité N en état de confiance T doit adapter son comportement selon les deux dimensions
+- Les restrictions sont cumulatives : niveau de sécurité élevé + état de confiance dégradé = restrictions maximales
 
 ---
 
@@ -483,175 +483,175 @@ WorrySentinel gouverne l'interaction entre les niveaux de sÃ©curitÃ© (0-4) e
 
 ### Relation avec le Kernel
 
-WorrySentinel **n'utilise pas** le kernel directement. WorrySentinel est un gouvernant conceptuel qui n'a pas besoin des capacitÃ©s techniques du kernel (Id, Clock, Logger).
+WorrySentinel **n'utilise pas** le kernel directement. WorrySentinel est un gouvernant conceptuel qui n'a pas besoin des capacités techniques du kernel (Id, Clock, Logger).
 
-Si une implÃ©mentation future nÃ©cessite des capacitÃ©s du kernel, ces capacitÃ©s seront utilisÃ©es uniquement pour la traÃ§abilitÃ© et l'audit, jamais pour la logique de gouvernance.
+Si une implémentation future nécessite des capacités du kernel, ces capacités seront utilisées uniquement pour la traçabilité et l'audit, jamais pour la logique de gouvernance.
 
 ### Relation avec StrongFather
 
-WorrySentinel et StrongFather sont **complÃ©mentaires et indÃ©pendants** :
+WorrySentinel et StrongFather sont **complémentaires et indépendants** :
 
-- **WorrySentinel** : Gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-- **StrongFather** : Applique les politiques selon les niveaux et Ã©tats gouvernÃ©s par WorrySentinel
+- **WorrySentinel** : Gouverne les niveaux de sécurité et les états de confiance
+- **StrongFather** : Applique les politiques selon les niveaux et états gouvernés par WorrySentinel
 
-WorrySentinel ne connaÃ®t pas StrongFather directement. WorrySentinel dÃ©finit les rÃ¨gles de gouvernance, StrongFather les applique dans ses dÃ©cisions.
+WorrySentinel ne connaît pas StrongFather directement. WorrySentinel définit les règles de gouvernance, StrongFather les applique dans ses décisions.
 
 L'interaction entre WorrySentinel et StrongFather se fait via les adaptateurs produits :
-1. WorrySentinel gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-2. Les adaptateurs consultent WorrySentinel pour connaÃ®tre les niveaux et Ã©tats applicables
-3. Les adaptateurs soumettent des intentions Ã  StrongFather avec le contexte de sÃ©curitÃ©
-4. StrongFather applique les politiques selon le contexte de sÃ©curitÃ©
+1. WorrySentinel gouverne les niveaux de sécurité et les états de confiance
+2. Les adaptateurs consultent WorrySentinel pour connaître les niveaux et états applicables
+3. Les adaptateurs soumettent des intentions à StrongFather avec le contexte de sécurité
+4. StrongFather applique les politiques selon le contexte de sécurité
 
 ### Relation avec KindMother
 
-WorrySentinel et KindMother sont **complÃ©mentaires et indÃ©pendants** :
+WorrySentinel et KindMother sont **complémentaires et indépendants** :
 
-- **WorrySentinel** : Gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-- **KindMother** : Persiste les donnÃ©es selon les rÃ¨gles de gouvernance dÃ©finies par WorrySentinel
+- **WorrySentinel** : Gouverne les niveaux de sécurité et les états de confiance
+- **KindMother** : Persiste les données selon les règles de gouvernance définies par WorrySentinel
 
-WorrySentinel ne connaÃ®t pas KindMother. WorrySentinel ne peut pas appeler KindMother. WorrySentinel ne peut pas accÃ©der aux donnÃ©es gÃ©rÃ©es par KindMother.
+WorrySentinel ne connaît pas KindMother. WorrySentinel ne peut pas appeler KindMother. WorrySentinel ne peut pas accéder aux données gérées par KindMother.
 
 ### Relation avec TAMR
 
-WorrySentinel et TAMR sont **complÃ©mentaires** :
+WorrySentinel et TAMR sont **complémentaires** :
 
-- **WorrySentinel** : Gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-- **TAMR** : DÃ©finit les interventions humaines selon les niveaux et Ã©tats gouvernÃ©s par WorrySentinel
+- **WorrySentinel** : Gouverne les niveaux de sécurité et les états de confiance
+- **TAMR** : Définit les interventions humaines selon les niveaux et états gouvernés par WorrySentinel
 
-WorrySentinel gouverne les rÃ¨gles selon lesquelles TAMR doit adapter les interventions humaines selon les niveaux de sÃ©curitÃ© et les Ã©tats de confiance.
+WorrySentinel gouverne les règles selon lesquelles TAMR doit adapter les interventions humaines selon les niveaux de sécurité et les états de confiance.
 
 ### Relation avec CaringNanny
 
-WorrySentinel et CaringNanny sont **complÃ©mentaires** :
+WorrySentinel et CaringNanny sont **complémentaires** :
 
-- **WorrySentinel** : Gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-- **CaringNanny** : Consolide les signaux d'intÃ©gritÃ© qui influencent les Ã©tats de confiance
+- **WorrySentinel** : Gouverne les niveaux de sécurité et les états de confiance
+- **CaringNanny** : Consolide les signaux d'intégrité qui influencent les états de confiance
 
-WorrySentinel gouverne les rÃ¨gles selon lesquelles CaringNanny doit consolider les signaux et proposer des transitions d'Ã©tat.
+WorrySentinel gouverne les règles selon lesquelles CaringNanny doit consolider les signaux et proposer des transitions d'état.
 
 ### Relation avec BorderGuard
 
-WorrySentinel et BorderGuard sont **complÃ©mentaires** :
+WorrySentinel et BorderGuard sont **complémentaires** :
 
-- **WorrySentinel** : Gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance
-- **BorderGuard** : DÃ©finit les frontiÃ¨res d'intÃ©gration selon les niveaux de sÃ©curitÃ© gouvernÃ©s par WorrySentinel
+- **WorrySentinel** : Gouverne les niveaux de sécurité et les états de confiance
+- **BorderGuard** : Définit les frontières d'intégration selon les niveaux de sécurité gouvernés par WorrySentinel
 
-WorrySentinel gouverne les rÃ¨gles selon lesquelles BorderGuard doit adapter les frontiÃ¨res selon les niveaux de sÃ©curitÃ©.
+WorrySentinel gouverne les règles selon lesquelles BorderGuard doit adapter les frontières selon les niveaux de sécurité.
 
 ### Relation avec LogisticsSteward
 
-WorrySentinel et LogisticsSteward sont **complÃ©mentaires** :
+WorrySentinel et LogisticsSteward sont **complémentaires** :
 
-- **WorrySentinel** : Gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance, supervise la cohÃ©rence globale du systÃ¨me
+- **WorrySentinel** : Gouverne les niveaux de sécurité et les états de confiance, supervise la cohérence globale du système
 - **LogisticsSteward** : Gouverne l'allocation, la priorisation et la limitation des ressources
 
 **Nature de la relation :**
 
 WorrySentinel exerce une **pression de supervision** sur LogisticsSteward :
 
-1. **Invalidation d'Ã©tat incohÃ©rent** : WorrySentinel peut invalider un Ã©tat systÃ¨me jugÃ© incohÃ©rent par LogisticsSteward si cet Ã©tat compromet l'intÃ©gritÃ© sÃ©curitaire
-2. **Durcissement des rÃ¨gles** : En cas de dÃ©gradation de l'Ã©tat de confiance (T1+), WorrySentinel peut dÃ©clencher un durcissement des rÃ¨gles d'arbitrage de LogisticsSteward
-3. **Supervision des dÃ©rives** : WorrySentinel supervise les dÃ©rives potentielles dans l'allocation des ressources qui pourraient compromettre la sÃ©curitÃ©
+1. **Invalidation d'état incohérent** : WorrySentinel peut invalider un état système jugé incohérent par LogisticsSteward si cet état compromet l'intégrité sécuritaire
+2. **Durcissement des règles** : En cas de dégradation de l'état de confiance (T1+), WorrySentinel peut déclencher un durcissement des règles d'arbitrage de LogisticsSteward
+3. **Supervision des dérives** : WorrySentinel supervise les dérives potentielles dans l'allocation des ressources qui pourraient compromettre la sécurité
 
-**RÃ¨gles d'interaction :**
+**Règles d'interaction :**
 
-| RÃ¨gle | Description |
+| Règle | Description |
 |-------|-------------|
-| **RÃˆGLE-WS-LS-1** | WorrySentinel peut imposer des contraintes sÃ©curitaires sur les dÃ©cisions d'arbitrage de LogisticsSteward |
-| **RÃˆGLE-WS-LS-2** | En Ã©tat T2+, LogisticsSteward doit appliquer des quotas plus restrictifs selon les directives de WorrySentinel |
-| **RÃˆGLE-WS-LS-3** | WorrySentinel observe les patterns d'allocation de ressources pour dÃ©tecter des anomalies sÃ©curitaires |
-| **RÃˆGLE-WS-LS-4** | Toute dÃ©rive d'allocation signalÃ©e par WorrySentinel doit Ãªtre traitÃ©e par LogisticsSteward |
+| **RÈGLE-WS-LS-1** | WorrySentinel peut imposer des contraintes sécuritaires sur les décisions d'arbitrage de LogisticsSteward |
+| **RÈGLE-WS-LS-2** | En état T2+, LogisticsSteward doit appliquer des quotas plus restrictifs selon les directives de WorrySentinel |
+| **RÈGLE-WS-LS-3** | WorrySentinel observe les patterns d'allocation de ressources pour détecter des anomalies sécuritaires |
+| **RÈGLE-WS-LS-4** | Toute dérive d'allocation signalée par WorrySentinel doit être traitée par LogisticsSteward |
 
 **Flux d'interaction :**
 
 ```
 WorrySentinel                          LogisticsSteward
-     â”‚                                       â”‚
-     â”‚ â†â”€â”€ signaux allocation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ â”‚
-     â”‚                                       â”‚
-     â”‚ â”€â”€â”€ contraintes sÃ©curitaires â”€â”€â”€â”€â”€â”€â†’ â”‚
-     â”‚                                       â”‚
-     â”‚ â”€â”€â”€ durcissement (si T1+) â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ â”‚
-     â”‚                                       â”‚
-     â”‚ â†â”€â”€ confirmation application â”€â”€â”€â”€â”€â”€â”€ â”‚
+     │                                       │
+     │ ←── signaux allocation ───────────── │
+     │                                       │
+     │ ─── contraintes sécuritaires ──────→ │
+     │                                       │
+     │ ─── durcissement (si T1+) ─────────→ │
+     │                                       │
+     │ ←── confirmation application ─────── │
 ```
 
-**Principe :** WorrySentinel supervise LogisticsSteward sans se substituer Ã  lui. LogisticsSteward reste souverain sur l'arbitrage des ressources, mais doit adapter ses dÃ©cisions selon les contraintes sÃ©curitaires imposÃ©es par WorrySentinel.
+**Principe :** WorrySentinel supervise LogisticsSteward sans se substituer à lui. LogisticsSteward reste souverain sur l'arbitrage des ressources, mais doit adapter ses décisions selon les contraintes sécuritaires imposées par WorrySentinel.
 
 ### Flux de gouvernance
 
-WorrySentinel gouverne selon deux flux complÃ©mentaires :
+WorrySentinel gouverne selon deux flux complémentaires :
 
-#### ðŸ”½ Flux descendant (gouvernance)
+#### 🔽 Flux descendant (gouvernance)
 
 WorrySentinel impose des contraintes verticales sur tous les cores fonctionnels :
 
 ```
 WorrySentinel
-   â†“ impose contraintes
-StrongFather â†’ sÃ©vÃ©ritÃ© des dÃ©cisions
-MasterButler â†’ permissions actives
-BorderGuard â†’ durcissement I/O
-LogisticsSteward â†’ durcissement quotas et prioritÃ©s
-TAMR â†’ droits humains
-Kernel â†’ frÃ©quence sondes
+   ↓ impose contraintes
+StrongFather → sévérité des décisions
+MasterButler → permissions actives
+BorderGuard → durcissement I/O
+LogisticsSteward → durcissement quotas et priorités
+TAMR → droits humains
+Kernel → fréquence sondes
 ```
 
 **Principe :** WorrySentinel ne remplace rien. Il contraint tout.
 
-#### ðŸ”¼ Flux montant (observation)
+#### 🔼 Flux montant (observation)
 
-WorrySentinel observe et corrÃ¨le les signaux remontant des cores :
-
-```
-Kernel â†’ signaux (clock, id, trace)
-BorderGuard â†’ anomalies I/O
-StrongFather â†’ dÃ©cisions refusÃ©es
-KindMother â†’ incohÃ©rences dÃ©tectÃ©es
-BondingBrother â†’ comportements produits
-LogisticsSteward â†’ dÃ©rives allocation ressources
-   â†“
-WorrySentinel observe, corrÃ¨le, dÃ©clare un Ã©tat
-```
-
-**Principe :** WorrySentinel observe, corrÃ¨le, et dÃ©clare un Ã©tat global basÃ© sur les signaux consolidÃ©s.
-
-### Architecture de dÃ©pendances
+WorrySentinel observe et corrèle les signaux remontant des cores :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚           PRODUIT                        â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  Adaptateurs SPM                    â”‚  â”‚
-â”‚  â”‚  (implÃ©mentent les traits)         â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚           â”‚                               â”‚
-â”‚           â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚           â”‚                               â”‚
-â”‚           â–¼                               â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  WorrySentinel                      â”‚  â”‚
-â”‚  â”‚  (gouvernance de sÃ©curitÃ©)          â”‚  â”‚
-â”‚  â”‚  ðŸ›¡ï¸ Strate 4 â€” Pression verticale    â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚           â”‚                               â”‚
-â”‚           â–¼                               â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  StrongFather                      â”‚  â”‚
-â”‚  â”‚  (dÃ©cisions selon gouvernance)    â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚           â”‚                               â”‚
-â”‚           â–¼                               â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  KindMother                        â”‚  â”‚
-â”‚  â”‚  (persistance)                     â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+Kernel → signaux (clock, id, trace)
+BorderGuard → anomalies I/O
+StrongFather → décisions refusées
+KindMother → incohérences détectées
+BondingBrother → comportements produits
+LogisticsSteward → dérives allocation ressources
+   ↓
+WorrySentinel observe, corrèle, déclare un état
 ```
 
-**Flux de gouvernance :** Produit â†’ Adaptateur â†’ WorrySentinel (gouvernance) â†’ Adaptateur â†’ StrongFather (dÃ©cision) â†’ Adaptateur â†’ KindMother (persistance)
+**Principe :** WorrySentinel observe, corrèle, et déclare un état global basé sur les signaux consolidés.
 
-**RÃ¨gle :** Les dÃ©pendances sont strictement unidirectionnelles. WorrySentinel ne dÃ©pend pas des modules SPM, et les modules SPM ne dÃ©pendent pas de WorrySentinel. WorrySentinel agit comme une pression verticale, pas comme une brique horizontale.
+### Architecture de dépendances
+
+```
+┌─────────────────────────────────────────┐
+│           PRODUIT                        │
+│  ┌───────────────────────────────────┐  │
+│  │  Adaptateurs SPM                    │  │
+│  │  (implémentent les traits)         │  │
+│  └───────────────────────────────────┘  │
+│           │                               │
+│           ├───────────────────────────────┤
+│           │                               │
+│           ▼                               │
+│  ┌───────────────────────────────────┐  │
+│  │  WorrySentinel                      │  │
+│  │  (gouvernance de sécurité)          │  │
+│  │  🛡️ Strate 4 — Pression verticale    │  │
+│  └───────────────────────────────────┘  │
+│           │                               │
+│           ▼                               │
+│  ┌───────────────────────────────────┐  │
+│  │  StrongFather                      │  │
+│  │  (décisions selon gouvernance)    │  │
+│  └───────────────────────────────────┘  │
+│           │                               │
+│           ▼                               │
+│  ┌───────────────────────────────────┐  │
+│  │  KindMother                        │  │
+│  │  (persistance)                     │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+**Flux de gouvernance :** Produit → Adaptateur → WorrySentinel (gouvernance) → Adaptateur → StrongFather (décision) → Adaptateur → KindMother (persistance)
+
+**Règle :** Les dépendances sont strictement unidirectionnelles. WorrySentinel ne dépend pas des modules SPM, et les modules SPM ne dépendent pas de WorrySentinel. WorrySentinel agit comme une pression verticale, pas comme une brique horizontale.
 
 ---
 
@@ -659,130 +659,130 @@ WorrySentinel observe, corrÃ¨le, dÃ©clare un Ã©tat
 
 ### Ce que WorrySentinel permet
 
-WorrySentinel est la clÃ© pour :
+WorrySentinel est la clé pour :
 
-**âœ” Autonomie mÃªme isolÃ©e**
+**✔ Autonomie même isolée**
 
-WorrySentinel gouverne la sÃ©curitÃ© sans dÃ©pendre d'un cloud obligatoire. Le systÃ¨me peut fonctionner de maniÃ¨re autonome, mÃªme en mode isolÃ©, avec une gouvernance de sÃ©curitÃ© locale.
+WorrySentinel gouverne la sécurité sans dépendre d'un cloud obligatoire. Le système peut fonctionner de manière autonome, même en mode isolé, avec une gouvernance de sécurité locale.
 
-**âœ” DÃ©tection hardware dÃ©faillant vs intrusion**
+**✔ Détection hardware défaillant vs intrusion**
 
-WorrySentinel gouverne les rÃ¨gles selon lesquelles le systÃ¨me distingue une panne matÃ©rielle d'une intrusion. Les Ã©tats de confiance (T0-T4) permettent de diffÃ©rencier les anomalies hardware des compromissions.
+WorrySentinel gouverne les règles selon lesquelles le système distingue une panne matérielle d'une intrusion. Les états de confiance (T0-T4) permettent de différencier les anomalies hardware des compromissions.
 
-**âœ” DÃ©gradation intelligente (pas tout casser)**
+**✔ Dégradation intelligente (pas tout casser)**
 
-WorrySentinel gouverne la dÃ©gradation progressive. Le systÃ¨me ne bloque jamais brutalement, mais dÃ©grade progressivement ses capacitÃ©s selon les Ã©tats de confiance.
+WorrySentinel gouverne la dégradation progressive. Le système ne bloque jamais brutalement, mais dégrade progressivement ses capacités selon les états de confiance.
 
-**âœ” SÃ©curitÃ© proportionnelle au produit**
+**✔ Sécurité proportionnelle au produit**
 
-WorrySentinel gouverne les niveaux de sÃ©curitÃ© (0-4) qui s'adaptent au profil de risque de chaque produit. Un produit de niveau 0 n'a pas les mÃªmes contraintes qu'un produit de niveau 4.
+WorrySentinel gouverne les niveaux de sécurité (0-4) qui s'adaptent au profil de risque de chaque produit. Un produit de niveau 0 n'a pas les mêmes contraintes qu'un produit de niveau 4.
 
-**âœ” Pilotage central via MiyukiniAdmin**
+**✔ Pilotage central via MiyukiniAdmin**
 
-WorrySentinel rend la gouvernance de sÃ©curitÃ© lisible, pilotable, et auditable via MiyukiniAdmin. Les administrateurs peuvent consulter et configurer les niveaux de sÃ©curitÃ© et les Ã©tats de confiance.
+WorrySentinel rend la gouvernance de sécurité lisible, pilotable, et auditable via MiyukiniAdmin. Les administrateurs peuvent consulter et configurer les niveaux de sécurité et les états de confiance.
 
-**âœ” Ã‰cosystÃ¨me verrouillÃ© sans cloud obligatoire**
+**✔ Écosystème verrouillé sans cloud obligatoire**
 
-WorrySentinel gouverne la sÃ©curitÃ© de maniÃ¨re locale, sans nÃ©cessiter une connexion Internet permanente. La gouvernance est autonome et fonctionne en mode offline.
+WorrySentinel gouverne la sécurité de manière locale, sans nécessiter une connexion Internet permanente. La gouvernance est autonome et fonctionne en mode offline.
 
 ### Ce que WorrySentinel ne change pas
 
-**âŒ Aucun impact sur l'API produit**
+**❌ Aucun impact sur l'API produit**
 
-WorrySentinel gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance, mais ne modifie jamais les APIs des produits. Les produits continuent d'exposer leurs APIs normalement, mais adaptent leur comportement selon la gouvernance.
+WorrySentinel gouverne les niveaux de sécurité et les états de confiance, mais ne modifie jamais les APIs des produits. Les produits continuent d'exposer leurs APIs normalement, mais adaptent leur comportement selon la gouvernance.
 
-**âŒ Aucun code mÃ©tier dÃ©placÃ©**
+**❌ Aucun code métier déplacé**
 
-WorrySentinel ne contient aucune logique mÃ©tier. Il gouverne uniquement la sÃ©curitÃ©, sans jamais dÃ©placer ou modifier la logique mÃ©tier des produits.
+WorrySentinel ne contient aucune logique métier. Il gouverne uniquement la sécurité, sans jamais déplacer ou modifier la logique métier des produits.
 
-**âŒ Aucun ralentissement en nominal**
+**❌ Aucun ralentissement en nominal**
 
-En Ã©tat nominal (T0), WorrySentinel n'introduit aucun ralentissement. La gouvernance est lÃ©gÃ¨re et n'affecte pas les performances en fonctionnement normal.
+En état nominal (T0), WorrySentinel n'introduit aucun ralentissement. La gouvernance est légère et n'affecte pas les performances en fonctionnement normal.
 
-**âŒ Aucun couplage fort**
+**❌ Aucun couplage fort**
 
-WorrySentinel gouverne via des rÃ¨gles explicites, mais ne crÃ©e pas de couplage fort avec les produits. Les produits peuvent fonctionner indÃ©pendamment, mais doivent respecter la gouvernance.
+WorrySentinel gouverne via des règles explicites, mais ne crée pas de couplage fort avec les produits. Les produits peuvent fonctionner indépendamment, mais doivent respecter la gouvernance.
 
-**âŒ Aucun besoin internet permanent**
+**❌ Aucun besoin internet permanent**
 
-WorrySentinel fonctionne de maniÃ¨re autonome, sans nÃ©cessiter une connexion Internet permanente. La gouvernance est locale et fonctionne en mode offline.
+WorrySentinel fonctionne de manière autonome, sans nécessiter une connexion Internet permanente. La gouvernance est locale et fonctionne en mode offline.
 
 ---
 
 ## 11. Interaction avec MiyukiniAdmin
 
-### RÃ´le de MiyukiniAdmin
+### Rôle de MiyukiniAdmin
 
-MiyukiniAdmin est l'interface d'administration qui permet aux administrateurs de consulter et de configurer la gouvernance de sÃ©curitÃ©.
+MiyukiniAdmin est l'interface d'administration qui permet aux administrateurs de consulter et de configurer la gouvernance de sécurité.
 
-### Interactions autorisÃ©es
+### Interactions autorisées
 
-**INTERACTION-ADMIN-1 : Consultation des niveaux de sÃ©curitÃ©**
+**INTERACTION-ADMIN-1 : Consultation des niveaux de sécurité**
 
-MiyukiniAdmin peut consulter les niveaux de sÃ©curitÃ© gouvernÃ©s par WorrySentinel :
-- Niveaux de sÃ©curitÃ© des produits et composants
-- RÃ¨gles de gouvernance applicables
+MiyukiniAdmin peut consulter les niveaux de sécurité gouvernés par WorrySentinel :
+- Niveaux de sécurité des produits et composants
+- Règles de gouvernance applicables
 - Historique des changements de niveaux
 
-**INTERACTION-ADMIN-2 : Consultation des Ã©tats de confiance**
+**INTERACTION-ADMIN-2 : Consultation des états de confiance**
 
-MiyukiniAdmin peut consulter les Ã©tats de confiance gouvernÃ©s par WorrySentinel :
-- Ã‰tat de confiance courant du systÃ¨me
-- Historique des transitions d'Ã©tat
+MiyukiniAdmin peut consulter les états de confiance gouvernés par WorrySentinel :
+- État de confiance courant du système
+- Historique des transitions d'état
 - Justifications des transitions
 
 **INTERACTION-ADMIN-3 : Configuration de la gouvernance**
 
-MiyukiniAdmin peut configurer certaines rÃ¨gles de gouvernance (sous rÃ©serve de validation par StrongFather) :
-- Attribution de niveaux de sÃ©curitÃ© aux produits
-- RÃ¨gles de transition entre Ã©tats de confiance
-- RÃ¨gles de dÃ©gradation progressive
+MiyukiniAdmin peut configurer certaines règles de gouvernance (sous réserve de validation par StrongFather) :
+- Attribution de niveaux de sécurité aux produits
+- Règles de transition entre états de confiance
+- Règles de dégradation progressive
 
-**RÃˆGLE-ADMIN-1 : Validation par StrongFather**
+**RÈGLE-ADMIN-1 : Validation par StrongFather**
 
-Toute configuration de gouvernance par MiyukiniAdmin doit Ãªtre validÃ©e par StrongFather selon les politiques applicables.
+Toute configuration de gouvernance par MiyukiniAdmin doit être validée par StrongFather selon les politiques applicables.
 
-**RÃˆGLE-ADMIN-2 : TraÃ§abilitÃ© obligatoire**
+**RÈGLE-ADMIN-2 : Traçabilité obligatoire**
 
-Toute interaction avec MiyukiniAdmin concernant la gouvernance de sÃ©curitÃ© est tracÃ©e avec identitÃ©, moment, et justification.
+Toute interaction avec MiyukiniAdmin concernant la gouvernance de sécurité est tracée avec identité, moment, et justification.
 
 ---
 
-## 12. Invariants de gouvernance de sÃ©curitÃ©
+## 12. Invariants de gouvernance de sécurité
 
 ### Invariants de gouvernance
 
-**INV-GOV-1 : Niveaux de sÃ©curitÃ© explicites**
+**INV-GOV-1 : Niveaux de sécurité explicites**
 
-Tous les produits et composants possÃ¨dent un niveau de sÃ©curitÃ© explicite dÃ©fini par WorrySentinel. Aucun produit ou composant ne peut fonctionner sans niveau de sÃ©curitÃ© dÃ©fini.
+Tous les produits et composants possèdent un niveau de sécurité explicite défini par WorrySentinel. Aucun produit ou composant ne peut fonctionner sans niveau de sécurité défini.
 
-**INV-GOV-2 : Ã‰tats de confiance uniques**
+**INV-GOV-2 : États de confiance uniques**
 
-Le systÃ¨me possÃ¨de un Ã©tat de confiance unique Ã  tout moment. L'Ã©tat de confiance est global au systÃ¨me, pas local Ã  un composant.
+Le système possède un état de confiance unique à tout moment. L'état de confiance est global au système, pas local à un composant.
 
-**INV-GOV-3 : Transitions justifiÃ©es**
+**INV-GOV-3 : Transitions justifiées**
 
-Toute transition entre Ã©tats de confiance est justifiÃ©e et tracÃ©e. Aucune transition ne peut se produire sans justification.
+Toute transition entre états de confiance est justifiée et tracée. Aucune transition ne peut se produire sans justification.
 
-**INV-GOV-4 : DÃ©gradation progressive uniquement**
+**INV-GOV-4 : Dégradation progressive uniquement**
 
-Les transitions vers un Ã©tat plus dÃ©gradÃ© sont progressives. Le systÃ¨me ne passe jamais brutalement d'un Ã©tat Ã  un autre sans passer par les Ã©tats intermÃ©diaires.
+Les transitions vers un état plus dégradé sont progressives. Le système ne passe jamais brutalement d'un état à un autre sans passer par les états intermédiaires.
 
-**INV-GOV-5 : PrÃ©servation des invariants**
+**INV-GOV-5 : Préservation des invariants**
 
-La gouvernance de sÃ©curitÃ© ne peut jamais compromettre les invariants FONDATION. MÃªme en Ã©tat de confiance T4, les invariants sont prÃ©servÃ©s.
+La gouvernance de sécurité ne peut jamais compromettre les invariants FONDATION. Même en état de confiance T4, les invariants sont préservés.
 
-**INV-GOV-6 : CohÃ©rence inter-composants**
+**INV-GOV-6 : Cohérence inter-composants**
 
-Les niveaux de sÃ©curitÃ© sont cohÃ©rents entre composants qui interagissent. Un composant de niveau N ne peut pas accÃ©der directement Ã  un composant de niveau > N sans mÃ©diation.
+Les niveaux de sécurité sont cohérents entre composants qui interagissent. Un composant de niveau N ne peut pas accéder directement à un composant de niveau > N sans médiation.
 
-**INV-GOV-7 : SÃ©paration gouvernance/implÃ©mentation**
+**INV-GOV-7 : Séparation gouvernance/implémentation**
 
-La gouvernance de sÃ©curitÃ© est strictement sÃ©parÃ©e de l'implÃ©mentation. WorrySentinel gouverne, mais n'implÃ©mente jamais.
+La gouvernance de sécurité est strictement séparée de l'implémentation. WorrySentinel gouverne, mais n'implémente jamais.
 
-**INV-GOV-8 : TraÃ§abilitÃ© complÃ¨te**
+**INV-GOV-8 : Traçabilité complète**
 
-Toute dÃ©cision de gouvernance est traÃ§able avec son contexte, ses rÃ¨gles appliquÃ©es, et sa justification.
+Toute décision de gouvernance est traçable avec son contexte, ses règles appliquées, et sa justification.
 
 ---
 
@@ -790,39 +790,39 @@ Toute dÃ©cision de gouvernance est traÃ§able avec son contexte, ses rÃ¨gle
 
 ### Violations de gouvernance
 
-**VIOL-GOV-1 : Modification directe d'Ã©tat de confiance**
+**VIOL-GOV-1 : Modification directe d'état de confiance**
 
-Un composant modifie directement l'Ã©tat de confiance sans passer par WorrySentinel.
+Un composant modifie directement l'état de confiance sans passer par WorrySentinel.
 
 *Violation :* INV-GOV-2, INV-GOV-3
 
 **VIOL-GOV-2 : Transition brutale**
 
-Le systÃ¨me passe brutalement d'un Ã©tat de confiance Ã  un autre sans passer par les Ã©tats intermÃ©diaires.
+Le système passe brutalement d'un état de confiance à un autre sans passer par les états intermédiaires.
 
 *Violation :* INV-GOV-4
 
-**VIOL-GOV-3 : Niveau de sÃ©curitÃ© implicite**
+**VIOL-GOV-3 : Niveau de sécurité implicite**
 
-Un produit ou composant fonctionne sans niveau de sÃ©curitÃ© explicite dÃ©fini.
+Un produit ou composant fonctionne sans niveau de sécurité explicite défini.
 
 *Violation :* INV-GOV-1
 
-**VIOL-GOV-4 : IncohÃ©rence inter-composants**
+**VIOL-GOV-4 : Incohérence inter-composants**
 
-Un composant de niveau N accÃ¨de directement Ã  un composant de niveau > N sans mÃ©diation.
+Un composant de niveau N accède directement à un composant de niveau > N sans médiation.
 
 *Violation :* INV-GOV-6
 
-**VIOL-GOV-5 : ImplÃ©mentation par WorrySentinel**
+**VIOL-GOV-5 : Implémentation par WorrySentinel**
 
-WorrySentinel implÃ©mente directement un contrÃ´le de sÃ©curitÃ©.
+WorrySentinel implémente directement un contrôle de sécurité.
 
 *Violation :* INV-WS-1, INV-GOV-7
 
-**VIOL-GOV-6 : ExÃ©cution par WorrySentinel**
+**VIOL-GOV-6 : Exécution par WorrySentinel**
 
-WorrySentinel exÃ©cute directement une vÃ©rification de sÃ©curitÃ©.
+WorrySentinel exécute directement une vérification de sécurité.
 
 *Violation :* INV-WS-2, INV-GOV-7
 
@@ -830,119 +830,119 @@ WorrySentinel exÃ©cute directement une vÃ©rification de sÃ©curitÃ©.
 
 **INTERD-GOV-1 : Contournement de gouvernance**
 
-Aucun composant ne peut contourner la gouvernance de WorrySentinel pour dÃ©finir ses propres niveaux de sÃ©curitÃ© ou Ã©tats de confiance.
+Aucun composant ne peut contourner la gouvernance de WorrySentinel pour définir ses propres niveaux de sécurité ou états de confiance.
 
-**INTERD-GOV-2 : Modification non tracÃ©e**
+**INTERD-GOV-2 : Modification non tracée**
 
-Aucune modification de gouvernance ne peut se produire sans traÃ§abilitÃ© complÃ¨te.
+Aucune modification de gouvernance ne peut se produire sans traçabilité complète.
 
-**INTERD-GOV-3 : Transition non justifiÃ©e**
+**INTERD-GOV-3 : Transition non justifiée**
 
-Aucune transition entre Ã©tats de confiance ne peut se produire sans justification explicite.
+Aucune transition entre états de confiance ne peut se produire sans justification explicite.
 
-**INTERD-GOV-4 : DÃ©gradation non progressive**
+**INTERD-GOV-4 : Dégradation non progressive**
 
-Aucune dÃ©gradation ne peut Ãªtre brutale. Toute dÃ©gradation doit Ãªtre progressive.
+Aucune dégradation ne peut être brutale. Toute dégradation doit être progressive.
 
 ---
 
-## 14. RÃ¨gles de fermeture du contrat
+## 14. Règles de fermeture du contrat
 
-### Contrat fermÃ©
+### Contrat fermé
 
-Ce contrat est **fermÃ©**. Seules les responsabilitÃ©s, rÃ¨gles, invariants, et interdictions explicitement dÃ©finis dans ce contrat sont autorisÃ©s. Toute responsabilitÃ©, rÃ¨gle, invariant, ou interdiction non explicitement dÃ©finie est **interdite** si elle viole un invariant FONDATION.
+Ce contrat est **fermé**. Seules les responsabilités, règles, invariants, et interdictions explicitement définis dans ce contrat sont autorisés. Toute responsabilité, règle, invariant, ou interdiction non explicitement définie est **interdite** si elle viole un invariant FONDATION.
 
 ### Interdiction d'extension implicite
 
-Aucune extension implicite de ce contrat n'est autorisÃ©e. Les rÃ¨gles suivantes s'appliquent :
+Aucune extension implicite de ce contrat n'est autorisée. Les règles suivantes s'appliquent :
 
-- **INTERD-EXT-1** : Aucune responsabilitÃ© non dÃ©finie dans ce contrat n'est autorisÃ©e si elle viole un invariant
-- **INTERD-EXT-2** : Aucune rÃ¨gle non dÃ©finie dans ce contrat n'est imposÃ©e
-- **INTERD-EXT-3** : Aucune garantie non dÃ©finie dans ce contrat n'est offerte
+- **INTERD-EXT-1** : Aucune responsabilité non définie dans ce contrat n'est autorisée si elle viole un invariant
+- **INTERD-EXT-2** : Aucune règle non définie dans ce contrat n'est imposée
+- **INTERD-EXT-3** : Aucune garantie non définie dans ce contrat n'est offerte
 
-### PrimautÃ© des invariants
+### Primauté des invariants
 
-**RÃ¨gle absolue :**
+**Règle absolue :**
 
-Les invariants FONDATION priment toujours sur les considÃ©rations de gouvernance. Aucune rÃ¨gle de gouvernance ne peut violer un invariant, mÃªme si elle amÃ©liore la sÃ©curitÃ©.
+Les invariants FONDATION priment toujours sur les considérations de gouvernance. Aucune règle de gouvernance ne peut violer un invariant, même si elle améliore la sécurité.
 
 ---
 
 ## 15. Conclusion fondatrice
 
-Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable ce que signifie gouverner la sÃ©curitÃ© dans WorrySentinel.
+Ce contrat établit de manière définitive et non négociable ce que signifie gouverner la sécurité dans WorrySentinel.
 
 Il garantit que :
-- WorrySentinel est le gouvernant de la sÃ©curitÃ©,
-- les niveaux de sÃ©curitÃ© sont dÃ©finis de maniÃ¨re cohÃ©rente,
-- les Ã©tats de confiance sont gouvernÃ©s de maniÃ¨re progressive,
-- la dÃ©gradation est contrÃ´lÃ©e et explicable,
-- la sÃ©paration entre gouvernance et implÃ©mentation est stricte,
-- WorrySentinel ne possÃ¨de aucune autoritÃ© sur l'implÃ©mentation, l'exÃ©cution, ou la persistance.
+- WorrySentinel est le gouvernant de la sécurité,
+- les niveaux de sécurité sont définis de manière cohérente,
+- les états de confiance sont gouvernés de manière progressive,
+- la dégradation est contrôlée et explicable,
+- la séparation entre gouvernance et implémentation est stricte,
+- WorrySentinel ne possède aucune autorité sur l'implémentation, l'exécution, ou la persistance.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-26  
+**Document créé le :** 2026-01-26  
 **Version :** 1.2  
-**Statut :** FONDATION â€” Contrat normatif validÃ©  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice, [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Framework - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Framework - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Framework - Pyramide Architecture Complete](..//..//..//miyukini-webway-system//reference//_index.md)  
-**Type :** Documentation fondatrice non nÃ©gociable
+**Statut :** FONDATION — Contrat normatif validé  
+**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice, [Miyukini Conceptual References - Tools et Toolkits](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Framework - Integrity Degradation System](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Framework - Security Levels](..//..//..//miyukini-webway-system//reference//_index.md), [Miyukini Framework - Pyramide Architecture Complete](..//..//..//miyukini-webway-system//reference//_index.md)  
+**Type :** Documentation fondatrice non négociable
 
 ---
 
 ## 16. Justification de l'absence de tests
 
-Ce document est **purement conceptuel et contractuel**. Il dÃ©finit la gouvernance de sÃ©curitÃ© sans jamais introduire d'implÃ©mentation technique.
+Ce document est **purement conceptuel et contractuel**. Il définit la gouvernance de sécurité sans jamais introduire d'implémentation technique.
 
 **Aucun test unitaire n'est applicable** car :
-- WorrySentinel ne contient aucune logique d'implÃ©mentation
-- WorrySentinel ne dÃ©finit aucun mÃ©canisme technique
-- WorrySentinel ne spÃ©cifie aucun algorithme
+- WorrySentinel ne contient aucune logique d'implémentation
+- WorrySentinel ne définit aucun mécanisme technique
+- WorrySentinel ne spécifie aucun algorithme
 
-Les tests applicables Ã  WorrySentinel sont :
-- **Tests de conformitÃ© contractuelle** : VÃ©rifier que toute implÃ©mentation respecte les invariants et rÃ¨gles dÃ©finis dans ce contrat
-- **Tests de cohÃ©rence** : VÃ©rifier que les niveaux de sÃ©curitÃ© et les Ã©tats de confiance sont cohÃ©rents entre composants
-- **Tests d'intÃ©gration** : VÃ©rifier que les interactions entre WorrySentinel et les autres cores respectent les rÃ¨gles dÃ©finies
+Les tests applicables à WorrySentinel sont :
+- **Tests de conformité contractuelle** : Vérifier que toute implémentation respecte les invariants et règles définis dans ce contrat
+- **Tests de cohérence** : Vérifier que les niveaux de sécurité et les états de confiance sont cohérents entre composants
+- **Tests d'intégration** : Vérifier que les interactions entre WorrySentinel et les autres cores respectent les règles définies
 
-Ces tests sont de la responsabilitÃ© des implÃ©mentations, pas de WorrySentinel lui-mÃªme.
+Ces tests sont de la responsabilité des implémentations, pas de WorrySentinel lui-même.
 
 ---
 
-## 17. Mini log de gÃ©nÃ©ration
+## 17. Mini log de génération
 
-### AmbiguÃ¯tÃ© A1 : Gouvernance vs implÃ©mentation
+### Ambiguïté A1 : Gouvernance vs implémentation
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confusion entre la gouvernance de sÃ©curitÃ© (WorrySentinel) et l'implÃ©mentation des contrÃ´les de sÃ©curitÃ©.
+**Ambiguïté rencontrée :** Risque de confusion entre la gouvernance de sécurité (WorrySentinel) et l'implémentation des contrôles de sécurité.
 
-**DÃ©cision prise :** Clarification explicite que WorrySentinel gouverne mais n'implÃ©mente jamais. L'invariant INV-WS-1 Ã©tablit l'absence d'autoritÃ© sur l'implÃ©mentation. La section 5 "Hors-scope explicite" liste explicitement l'implÃ©mentation comme hors-scope.
+**Décision prise :** Clarification explicite que WorrySentinel gouverne mais n'implémente jamais. L'invariant INV-WS-1 établit l'absence d'autorité sur l'implémentation. La section 5 "Hors-scope explicite" liste explicitement l'implémentation comme hors-scope.
 
-**Correction effectuÃ©e :** Sections 2, 4, 5, et 11 rÃ©digÃ©es avec cette distinction explicite. L'invariant INV-WS-1 ajoutÃ© pour garantir l'absence d'autoritÃ© sur l'implÃ©mentation.
+**Correction effectuée :** Sections 2, 4, 5, et 11 rédigées avec cette distinction explicite. L'invariant INV-WS-1 ajouté pour garantir l'absence d'autorité sur l'implémentation.
 
-### AmbiguÃ¯tÃ© A2 : Gouvernance vs exÃ©cution
+### Ambiguïté A2 : Gouvernance vs exécution
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confusion entre la gouvernance de sÃ©curitÃ© et l'exÃ©cution des vÃ©rifications de sÃ©curitÃ©.
+**Ambiguïté rencontrée :** Risque de confusion entre la gouvernance de sécurité et l'exécution des vérifications de sécurité.
 
-**DÃ©cision prise :** Clarification explicite que WorrySentinel gouverne mais n'exÃ©cute jamais. L'invariant INV-WS-2 Ã©tablit l'absence d'autoritÃ© sur l'exÃ©cution. La section 5 "Hors-scope explicite" liste explicitement l'exÃ©cution comme hors-scope.
+**Décision prise :** Clarification explicite que WorrySentinel gouverne mais n'exécute jamais. L'invariant INV-WS-2 établit l'absence d'autorité sur l'exécution. La section 5 "Hors-scope explicite" liste explicitement l'exécution comme hors-scope.
 
-**Correction effectuÃ©e :** Sections 2, 4, 5, et 11 rÃ©digÃ©es avec cette distinction explicite. L'invariant INV-WS-2 ajoutÃ© pour garantir l'absence d'autoritÃ© sur l'exÃ©cution.
+**Correction effectuée :** Sections 2, 4, 5, et 11 rédigées avec cette distinction explicite. L'invariant INV-WS-2 ajouté pour garantir l'absence d'autorité sur l'exécution.
 
-### AmbiguÃ¯tÃ© A3 : Niveaux de sÃ©curitÃ© vs Ã©tats de confiance
+### Ambiguïté A3 : Niveaux de sécurité vs états de confiance
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confusion entre les niveaux de sÃ©curitÃ© (0-4) et les Ã©tats de confiance (T0-T4).
+**Ambiguïté rencontrée :** Risque de confusion entre les niveaux de sécurité (0-4) et les états de confiance (T0-T4).
 
-**DÃ©cision prise :** Clarification explicite que les niveaux de sÃ©curitÃ© caractÃ©risent le profil de risque d'un produit, tandis que les Ã©tats de confiance caractÃ©risent l'intÃ©gritÃ© du systÃ¨me. Les deux dimensions sont indÃ©pendantes mais interagissent. La section 8.4 "Interaction avec niveaux de sÃ©curitÃ©" prÃ©cise cette interaction.
+**Décision prise :** Clarification explicite que les niveaux de sécurité caractérisent le profil de risque d'un produit, tandis que les états de confiance caractérisent l'intégrité du système. Les deux dimensions sont indépendantes mais interagissent. La section 8.4 "Interaction avec niveaux de sécurité" précise cette interaction.
 
-**Correction effectuÃ©e :** Sections 6, 7, et 8 rÃ©digÃ©es avec cette distinction explicite. RÃ©fÃ©rence aux documents de rÃ©fÃ©rence pour les dÃ©tails de chaque dimension.
+**Correction effectuée :** Sections 6, 7, et 8 rédigées avec cette distinction explicite. Référence aux documents de référence pour les détails de chaque dimension.
 
-### AmbiguÃ¯tÃ© A4 : Relation avec StrongFather
+### Ambiguïté A4 : Relation avec StrongFather
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** Comment dÃ©crire la relation entre WorrySentinel et StrongFather sans crÃ©er de dÃ©pendance ou d'autoritÃ© croisÃ©e ?
+**Ambiguïté rencontrée :** Comment décrire la relation entre WorrySentinel et StrongFather sans créer de dépendance ou d'autorité croisée ?
 
-**DÃ©cision prise :** WorrySentinel et StrongFather sont complÃ©mentaires et indÃ©pendants. WorrySentinel gouverne les niveaux de sÃ©curitÃ© et les Ã©tats de confiance, StrongFather applique les politiques selon ces niveaux et Ã©tats. L'interaction se fait via les adaptateurs produits.
+**Décision prise :** WorrySentinel et StrongFather sont complémentaires et indépendants. WorrySentinel gouverne les niveaux de sécurité et les états de confiance, StrongFather applique les politiques selon ces niveaux et états. L'interaction se fait via les adaptateurs produits.
 
-**Correction effectuÃ©e :** Section 9 "Relations avec les autres cores" rÃ©digÃ©e avec cette relation d'indÃ©pendance et de complÃ©mentaritÃ©. Le diagramme d'architecture montre l'indÃ©pendance via les adaptateurs.
+**Correction effectuée :** Section 9 "Relations avec les autres cores" rédigée avec cette relation d'indépendance et de complémentarité. Le diagramme d'architecture montre l'indépendance via les adaptateurs.
 
 ### Modification v1.1 : Position exacte et flux de gouvernance
 
@@ -950,100 +950,100 @@ Ces tests sont de la responsabilitÃ© des implÃ©mentations, pas de WorrySenti
 
 **Origine :** Clarification de la position architecturale de WorrySentinel
 
-**Modifications apportÃ©es :**
+**Modifications apportées :**
 
 1. **Section 2 : Position exacte de WorrySentinel**
    - Clarification que WorrySentinel n'est PAS un core fonctionnel, mais un core de gouvernance transversale
    - Ajout de la position dans la Pyramide Miyukini (STRATE 4)
-   - Distinction entre ce que WorrySentinel dÃ©cide et ne dÃ©cide pas
+   - Distinction entre ce que WorrySentinel décide et ne décide pas
 
-2. **Section 7 : Ã‰tats globaux de l'Ã©cosystÃ¨me**
-   - Ajout des Ã©tats globaux (Nominal, Doute, Suspect, Critique, Compromis)
-   - Correspondance avec les Ã©tats de confiance T0-T4
-   - RÃ¨gle absolue : les produits ne peuvent pas ignorer ces Ã©tats
+2. **Section 7 : États globaux de l'écosystème**
+   - Ajout des états globaux (Nominal, Doute, Suspect, Critique, Compromis)
+   - Correspondance avec les états de confiance T0-T4
+   - Règle absolue : les produits ne peuvent pas ignorer ces états
 
 3. **Section 9 : Flux de gouvernance**
    - Ajout du flux descendant (gouvernance) : WorrySentinel contraint les cores
-   - Ajout du flux montant (observation) : WorrySentinel observe et corrÃ¨le les signaux
+   - Ajout du flux montant (observation) : WorrySentinel observe et corrèle les signaux
    - Principe : WorrySentinel ne remplace rien, il contraint tout
 
 4. **Section 10 : Ce que WorrySentinel permet et ne change pas**
-   - Ajout de la liste des capacitÃ©s permises par WorrySentinel
+   - Ajout de la liste des capacités permises par WorrySentinel
    - Ajout de la liste des choses que WorrySentinel ne change pas
    - Clarification de l'impact (ou absence d'impact) sur les produits
 
-**Objectif :** Clarifier que WorrySentinel agit comme une pression verticale, pas comme une brique horizontale. Il gouverne sans exÃ©cuter, contraint sans remplacer.
+**Objectif :** Clarifier que WorrySentinel agit comme une pression verticale, pas comme une brique horizontale. Il gouverne sans exécuter, contraint sans remplacer.
 
-**CohÃ©rence vÃ©rifiÃ©e :**
-- âœ… Compatible avec Pyramide Architecture Complete (STRATE 4)
-- âœ… Compatible avec Integrity Degradation System (Ã©tats T0-T4)
-- âœ… Compatible avec Security Levels (niveaux 0-4)
-- âœ… Position transversale clarifiÃ©e
+**Cohérence vérifiée :**
+- ✅ Compatible avec Pyramide Architecture Complete (STRATE 4)
+- ✅ Compatible avec Integrity Degradation System (états T0-T4)
+- ✅ Compatible avec Security Levels (niveaux 0-4)
+- ✅ Position transversale clarifiée
 
-### DÃ©cision Ã©ditoriale E1 : Structure du document
+### Décision éditoriale E1 : Structure du document
 
-**DÃ©cision prise :** Respect strict de la structure imposÃ©e par l'utilisateur. Aucune modification de l'ordre des sections. Chaque section est explicitement rÃ©digÃ©e sans remplissage vague.
+**Décision prise :** Respect strict de la structure imposée par l'utilisateur. Aucune modification de l'ordre des sections. Chaque section est explicitement rédigée sans remplissage vague.
 
-**Application :** Structure respectÃ©e exactement comme demandÃ©. Chaque section contient du contenu substantiel et non ambigu.
+**Application :** Structure respectée exactement comme demandé. Chaque section contient du contenu substantiel et non ambigu.
 
-### DÃ©cision Ã©ditoriale E2 : Ton contractuel
+### Décision éditoriale E2 : Ton contractuel
 
-**DÃ©cision prise :** Utilisation d'un ton contractuel, prÃ©cis, non ambigu, comparable au niveau de rigueur de StrongFather. Utilisation de formulations absolues ("ne possÃ¨de jamais", "est exclusivement responsable", "est explicitement hors-scope").
+**Décision prise :** Utilisation d'un ton contractuel, précis, non ambigu, comparable au niveau de rigueur de StrongFather. Utilisation de formulations absolues ("ne possède jamais", "est exclusivement responsable", "est explicitement hors-scope").
 
-**Application :** Tout le document utilise un ton contractuel avec des formulations absolues. Les invariants sont Ã©noncÃ©s de maniÃ¨re non nÃ©gociable.
+**Application :** Tout le document utilise un ton contractuel avec des formulations absolues. Les invariants sont énoncés de manière non négociable.
 
-### DÃ©cision Ã©ditoriale E3 : Absence de code et d'implÃ©mentation
+### Décision éditoriale E3 : Absence de code et d'implémentation
 
-**DÃ©cision prise :** Aucun code, pseudo-code, algorithme, ou dÃ©tail d'implÃ©mentation technique n'est inclus. Le document reste purement conceptuel et contractuel.
+**Décision prise :** Aucun code, pseudo-code, algorithme, ou détail d'implémentation technique n'est inclus. Le document reste purement conceptuel et contractuel.
 
-**Application :** Aucun code ou pseudo-code n'a Ã©tÃ© inclus. Les descriptions sont purement conceptuelles.
+**Application :** Aucun code ou pseudo-code n'a été inclus. Les descriptions sont purement conceptuelles.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec StrongFather : ConfirmÃ©e (complÃ©mentaritÃ©, pas de remplacement)
-- âœ… CohÃ©rence avec Integrity Degradation System : ConfirmÃ©e (gouvernance des Ã©tats T0-T4)
-- âœ… CohÃ©rence avec Security Levels : ConfirmÃ©e (gouvernance des niveaux 0-4)
-- âœ… Aucune autoritÃ© sur l'implÃ©mentation : ConfirmÃ©e (INV-WS-1, section 5)
-- âœ… Aucune autoritÃ© sur l'exÃ©cution : ConfirmÃ©e (INV-WS-2, section 5)
-- âœ… Aucune autoritÃ© sur la persistance : ConfirmÃ©e (INV-WS-3, section 5)
-- âœ… Aucune modification d'Ã©tat : ConfirmÃ©e (INV-WS-4, section 5)
-- âœ… Aucune logique temporelle technique : ConfirmÃ©e (INV-WS-5, section 5)
-- âœ… Zero-trust respectÃ© : ConfirmÃ©e (INV-WS-6)
-- âœ… Gouvernance explicite : ConfirmÃ©e (INV-WS-7)
-- âœ… TraÃ§abilitÃ© complÃ¨te : ConfirmÃ©e (INV-WS-8)
-- âœ… Structure imposÃ©e respectÃ©e : ConfirmÃ©e
+**Vérification effectuée :**
+- ✅ Cohérence avec StrongFather : Confirmée (complémentarité, pas de remplacement)
+- ✅ Cohérence avec Integrity Degradation System : Confirmée (gouvernance des états T0-T4)
+- ✅ Cohérence avec Security Levels : Confirmée (gouvernance des niveaux 0-4)
+- ✅ Aucune autorité sur l'implémentation : Confirmée (INV-WS-1, section 5)
+- ✅ Aucune autorité sur l'exécution : Confirmée (INV-WS-2, section 5)
+- ✅ Aucune autorité sur la persistance : Confirmée (INV-WS-3, section 5)
+- ✅ Aucune modification d'état : Confirmée (INV-WS-4, section 5)
+- ✅ Aucune logique temporelle technique : Confirmée (INV-WS-5, section 5)
+- ✅ Zero-trust respecté : Confirmée (INV-WS-6)
+- ✅ Gouvernance explicite : Confirmée (INV-WS-7)
+- ✅ Traçabilité complète : Confirmée (INV-WS-8)
+- ✅ Structure imposée respectée : Confirmée
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
+**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
 
 ### Modification v1.2 : Ajout relation LogisticsSteward
 
 **Date :** 2026-01-28
 
-**Origine :** IntÃ©gration du nouveau core LogisticsSteward dans l'Ã©cosystÃ¨me
+**Origine :** Intégration du nouveau core LogisticsSteward dans l'écosystème
 
-**Modifications apportÃ©es :**
+**Modifications apportées :**
 
 1. **Section 1 : Relation avec les autres contrats**
-   - Ajout de la rÃ©fÃ©rence Ã  LogisticsSteward â€” Documentation Fondatrice
+   - Ajout de la référence à LogisticsSteward — Documentation Fondatrice
 
 2. **Section 9 : Relation avec LogisticsSteward**
-   - Nouvelle sous-section dÃ©crivant la relation de supervision
-   - WorrySentinel supervise LogisticsSteward pour dÃ©tecter les dÃ©rives d'allocation
-   - WorrySentinel peut imposer un durcissement des rÃ¨gles d'arbitrage en Ã©tat T1+
-   - RÃ¨gles d'interaction RÃˆGLE-WS-LS-1 Ã  RÃˆGLE-WS-LS-4
+   - Nouvelle sous-section décrivant la relation de supervision
+   - WorrySentinel supervise LogisticsSteward pour détecter les dérives d'allocation
+   - WorrySentinel peut imposer un durcissement des règles d'arbitrage en état T1+
+   - Règles d'interaction RÈGLE-WS-LS-1 à RÈGLE-WS-LS-4
 
 3. **Section 9 : Flux de gouvernance**
-   - Flux descendant : ajout de LogisticsSteward â†’ durcissement quotas et prioritÃ©s
-   - Flux montant : ajout de LogisticsSteward â†’ dÃ©rives allocation ressources
+   - Flux descendant : ajout de LogisticsSteward → durcissement quotas et priorités
+   - Flux montant : ajout de LogisticsSteward → dérives allocation ressources
 
-**CohÃ©rence vÃ©rifiÃ©e :**
-- âœ… Compatible avec LogisticsSteward â€” Documentation Fondatrice
-- âœ… SÃ©paration des responsabilitÃ©s prÃ©servÃ©e (supervision vs arbitrage)
-- âœ… Flux bidirectionnel documentÃ©
-- âœ… RÃ¨gles d'interaction explicites
+**Cohérence vérifiée :**
+- ✅ Compatible avec LogisticsSteward — Documentation Fondatrice
+- ✅ Séparation des responsabilités préservée (supervision vs arbitrage)
+- ✅ Flux bidirectionnel documenté
+- ✅ Règles d'interaction explicites
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

@@ -1,63 +1,63 @@
-﻿# Caring Nanny â€” Testing & Validation Contract
+﻿# Caring Nanny — Testing & Validation Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **Caring Nanny â€” Testing & Validation Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit les rÃ¨gles de test et de validation pour Caring Nanny, dÃ©finissant les types de tests requis, les critÃ¨res de validation, et les mÃ©thodes de vÃ©rification de conformitÃ© dans le systÃ¨me Miyukini Core System.
+Ce document définit le **Caring Nanny — Testing & Validation Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit les règles de test et de validation pour Caring Nanny, définissant les types de tests requis, les critères de validation, et les méthodes de vérification de conformité dans le système Miyukini Core System.
 
-Ce contrat prÃ©cise la nature conceptuelle des tests, les types de validation requis, les critÃ¨res de rÃ©ussite, et les liens avec les invariants et garanties de Caring Nanny, sans imposer de framework ou d'outil spÃ©cifique.
+Ce contrat précise la nature conceptuelle des tests, les types de validation requis, les critères de réussite, et les liens avec les invariants et garanties de Caring Nanny, sans imposer de framework ou d'outil spécifique.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toutes les implÃ©mentations de Caring Nanny** et dÃ©finit de maniÃ¨re absolue :
-- la dÃ©finition formelle des tests de validation,
+Ce contrat s'applique à **toutes les implémentations de Caring Nanny** et définit de manière absolue :
+- la définition formelle des tests de validation,
 - les types de tests requis,
-- les critÃ¨res de validation des invariants d'observateur passif,
-- les tests de non-rÃ©gression,
-- les tests de nature (passivitÃ©, non-intrusion),
+- les critères de validation des invariants d'observateur passif,
+- les tests de non-régression,
+- les tests de nature (passivité, non-intrusion),
 - les tests de performance conceptuels,
-- les rÃ¨gles de validation de conformitÃ©.
+- les règles de validation de conformité.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complÃ¨te et respecte les documents contractuels existants :
-- **Caring Nanny â€” Documentation Fondatrice** : DÃ©finition philosophique et fonctionnelle de Caring Nanny (v1.6)
-- **Caring Nanny â€” Invariants et Garanties** : DÃ©finit les invariants et garanties Ã  valider (INV-CN-1 Ã  INV-CN-7)
-- **Caring Nanny â€” Violations & Anti-Patterns** : DÃ©finit les violations Ã  dÃ©tecter
-- **Caring Nanny â€” Performance & Scalability Contract** : DÃ©finit les contraintes de performance conceptuelles
-- **Caring Nanny â€” State Model Contract** : DÃ©finit le modÃ¨le d'Ã©tats Ã  valider
-- **Caring Nanny â€” Observation Flow Contract** : DÃ©finit les flux d'observation Ã  valider
-- **Caring Nanny â€” Propagation Flow Contract** : DÃ©finit les flux de propagation Ã  valider
-- **[Miyukini Conceptual References - Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Tests de conformitÃ© aux lois d'autonomie systÃ¨me
+Ce contrat complète et respecte les documents contractuels existants :
+- **Caring Nanny — Documentation Fondatrice** : Définition philosophique et fonctionnelle de Caring Nanny (v1.6)
+- **Caring Nanny — Invariants et Garanties** : Définit les invariants et garanties à valider (INV-CN-1 à INV-CN-7)
+- **Caring Nanny — Violations & Anti-Patterns** : Définit les violations à détecter
+- **Caring Nanny — Performance & Scalability Contract** : Définit les contraintes de performance conceptuelles
+- **Caring Nanny — State Model Contract** : Définit le modèle d'états à valider
+- **Caring Nanny — Observation Flow Contract** : Définit les flux d'observation à valider
+- **Caring Nanny — Propagation Flow Contract** : Définit les flux de propagation à valider
+- **[Miyukini Conceptual References - Lois Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Tests de conformité aux lois d'autonomie système
 
-Il n'introduit aucune contradiction, et constitue la dÃ©finition formelle des tests et validations requis pour Caring Nanny.
+Il n'introduit aucune contradiction, et constitue la définition formelle des tests et validations requis pour Caring Nanny.
 
 ### Principes de test
 
 **T-1 : Tests conceptuels**
 
-Les tests dÃ©finis dans ce contrat sont **conceptuels** : ils dÃ©finissent ce qui doit Ãªtre testÃ©, pas comment le tester. Aucun framework, outil, ou mÃ©thode d'implÃ©mentation n'est imposÃ©.
+Les tests définis dans ce contrat sont **conceptuels** : ils définissent ce qui doit être testé, pas comment le tester. Aucun framework, outil, ou méthode d'implémentation n'est imposé.
 
 **T-2 : Validation contractuelle**
 
-Les tests valident le respect des contrats Caring Nanny, pas des dÃ©tails d'implÃ©mentation.
+Les tests valident le respect des contrats Caring Nanny, pas des détails d'implémentation.
 
-**T-3 : ComplÃ©tude**
+**T-3 : Complétude**
 
-Tous les invariants, garanties, et interdictions doivent Ãªtre validÃ©s par au moins un test.
+Tous les invariants, garanties, et interdictions doivent être validés par au moins un test.
 
-**T-4 : ReproductibilitÃ©**
+**T-4 : Reproductibilité**
 
-Tous les tests doivent Ãªtre reproductibles : pour une entrÃ©e donnÃ©e, le rÃ©sultat attendu est toujours le mÃªme.
+Tous les tests doivent être reproductibles : pour une entrée donnée, le résultat attendu est toujours le même.
 
-**T-5 : PassivitÃ© des tests**
+**T-5 : Passivité des tests**
 
-Les tests eux-mÃªmes doivent respecter la nature d'observateur passif de Caring Nanny : ils observent et vÃ©rifient, ils ne modifient pas l'Ã©tat du systÃ¨me testÃ©.
+Les tests eux-mêmes doivent respecter la nature d'observateur passif de Caring Nanny : ils observent et vérifient, ils ne modifient pas l'état du système testé.
 
 ---
 
@@ -65,200 +65,200 @@ Les tests eux-mÃªmes doivent respecter la nature d'observateur passif de Carin
 
 ### 2.1. Tests d'invariants de nature
 
-**DÃ©finition :**
+**Définition :**
 
-Les tests d'invariants de nature valident que Caring Nanny respecte sa nature fondamentale d'observateur passif telle que dÃ©finie dans la Documentation Fondatrice et le contrat Invariants et Garanties.
+Les tests d'invariants de nature valident que Caring Nanny respecte sa nature fondamentale d'observateur passif telle que définie dans la Documentation Fondatrice et le contrat Invariants et Garanties.
 
-**PortÃ©e :**
+**Portée :**
 
-Tous les invariants de nature doivent Ãªtre testÃ©s :
+Tous les invariants de nature doivent être testés :
 - INV-CN-1 : Observateur pur
 - INV-CN-3 : Non-autoritaire
-- INV-CN-4 : Ã‰tat cohÃ©rent
-- INV-CN-7 : Propagation fidÃ¨le
+- INV-CN-4 : État cohérent
+- INV-CN-7 : Propagation fidèle
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
-- **TV-NAT-1** : Chaque invariant de nature est vÃ©rifiÃ© par au moins un test
-- **TV-NAT-2** : Les tests vÃ©rifient l'absence de violation de la nature d'observateur
-- **TV-NAT-3** : Les tests sont non intrusifs (ils n'altÃ¨rent pas le comportement testÃ©)
+- **TV-NAT-1** : Chaque invariant de nature est vérifié par au moins un test
+- **TV-NAT-2** : Les tests vérifient l'absence de violation de la nature d'observateur
+- **TV-NAT-3** : Les tests sont non intrusifs (ils n'altèrent pas le comportement testé)
 
 **Exemples conceptuels :**
 
-- Test de non-modification : VÃ©rifier qu'aucune donnÃ©e du systÃ¨me observÃ© n'est modifiÃ©e aprÃ¨s observation
-- Test de non-autoritÃ© : VÃ©rifier qu'aucune mÃ©thode de validation, approbation, ou rejet n'existe
-- Test de cohÃ©rence d'Ã©tat : VÃ©rifier qu'aucun Ã©tat contradictoire n'est rapportÃ©
-- Test de fidÃ©litÃ© : VÃ©rifier que l'information propagÃ©e est identique Ã  celle observÃ©e
+- Test de non-modification : Vérifier qu'aucune donnée du système observé n'est modifiée après observation
+- Test de non-autorité : Vérifier qu'aucune méthode de validation, approbation, ou rejet n'existe
+- Test de cohérence d'état : Vérifier qu'aucun état contradictoire n'est rapporté
+- Test de fidélité : Vérifier que l'information propagée est identique à celle observée
 
 ### 2.2. Tests d'invariants de non-action
 
-**DÃ©finition :**
+**Définition :**
 
 Les tests d'invariants de non-action valident que Caring Nanny respecte ses interdictions absolues (ce qu'elle ne fait JAMAIS).
 
-**PortÃ©e :**
+**Portée :**
 
-Tous les invariants de non-action cataloguÃ©s dans le contrat Invariants et Garanties doivent Ãªtre testÃ©s :
-- INV-CN-2 : Aucune capacitÃ© d'exÃ©cution
-- INV-NEG-CN-01 : Jamais de modification de donnÃ©es
-- INV-NEG-CN-02 : Jamais de dÃ©cision
+Tous les invariants de non-action catalogués dans le contrat Invariants et Garanties doivent être testés :
+- INV-CN-2 : Aucune capacité d'exécution
+- INV-NEG-CN-01 : Jamais de modification de données
+- INV-NEG-CN-02 : Jamais de décision
 - INV-NEG-CN-03 : Jamais d'action corrective
-- INV-NEG-CN-04 : Jamais de mÃ©diation d'intentions
-- INV-NEG-CN-05 : Jamais de dÃ©finition de rÃ¨gles
+- INV-NEG-CN-04 : Jamais de médiation d'intentions
+- INV-NEG-CN-05 : Jamais de définition de règles
 - INV-NEG-CN-06 : Jamais de gestion de persistance
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
-- **TV-NEG-1** : Chaque invariant de non-action est vÃ©rifiÃ© par au moins un test
-- **TV-NEG-2** : Les tests vÃ©rifient l'absence de mÃ©thodes ou comportements interdits
-- **TV-NEG-3** : Les tests couvrent les scÃ©narios oÃ¹ une violation serait tentante
+- **TV-NEG-1** : Chaque invariant de non-action est vérifié par au moins un test
+- **TV-NEG-2** : Les tests vérifient l'absence de méthodes ou comportements interdits
+- **TV-NEG-3** : Les tests couvrent les scénarios où une violation serait tentante
 
 **Exemples conceptuels :**
 
-- Test de non-exÃ©cution : VÃ©rifier qu'aucune action n'est dÃ©clenchÃ©e lors d'une dÃ©tection d'anomalie
-- Test de non-modification : VÃ©rifier qu'aucune Ã©criture vers KindMother n'est effectuÃ©e
-- Test de non-dÃ©cision : VÃ©rifier qu'aucune logique conditionnelle ne prend de dÃ©cision mÃ©tier
-- Test de non-mÃ©diation : VÃ©rifier qu'aucune interface d'intention n'est exposÃ©e
+- Test de non-exécution : Vérifier qu'aucune action n'est déclenchée lors d'une détection d'anomalie
+- Test de non-modification : Vérifier qu'aucune écriture vers KindMother n'est effectuée
+- Test de non-décision : Vérifier qu'aucune logique conditionnelle ne prend de décision métier
+- Test de non-médiation : Vérifier qu'aucune interface d'intention n'est exposée
 
 ### 2.3. Tests d'invariants de flux
 
-**DÃ©finition :**
+**Définition :**
 
-Les tests d'invariants de flux valident que les sÃ©quences d'observation, de classification, et de propagation respectent les contrats dÃ©finis.
+Les tests d'invariants de flux valident que les séquences d'observation, de classification, et de propagation respectent les contrats définis.
 
-**PortÃ©e :**
+**Portée :**
 
-Tous les invariants de flux cataloguÃ©s dans le contrat Invariants et Garanties doivent Ãªtre testÃ©s :
-- INV-CN-5 : TraÃ§abilitÃ© complÃ¨te
+Tous les invariants de flux catalogués dans le contrat Invariants et Garanties doivent être testés :
+- INV-CN-5 : Traçabilité complète
 - INV-CN-6 : Non-bloquant
-- INV-FLUX-CN-01 : SÃ©quence d'observation cohÃ©rente
-- INV-FLUX-CN-02 : SÃ©quence de propagation cohÃ©rente
+- INV-FLUX-CN-01 : Séquence d'observation cohérente
+- INV-FLUX-CN-02 : Séquence de propagation cohérente
 - INV-FLUX-CN-03 : Pas de perte d'observation
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
-- **TV-FLUX-1** : Chaque invariant de flux est vÃ©rifiÃ© par au moins un test
-- **TV-FLUX-2** : Les tests vÃ©rifient l'intÃ©gritÃ© des sÃ©quences de traitement
-- **TV-FLUX-3** : Les tests vÃ©rifient l'absence de perte d'information
+- **TV-FLUX-1** : Chaque invariant de flux est vérifié par au moins un test
+- **TV-FLUX-2** : Les tests vérifient l'intégrité des séquences de traitement
+- **TV-FLUX-3** : Les tests vérifient l'absence de perte d'information
 
 **Exemples conceptuels :**
 
-- Test de sÃ©quence d'observation : VÃ©rifier que chaque observation suit les Ã©tapes (dÃ©tection â†’ Ã©valuation â†’ agrÃ©gation â†’ transition)
-- Test de sÃ©quence de propagation : VÃ©rifier que chaque propagation suit les Ã©tapes (identification â†’ formulation â†’ dÃ©lÃ©gation â†’ enregistrement)
-- Test de traÃ§abilitÃ© : VÃ©rifier que chaque observation, transition, et propagation est enregistrÃ©e avec son contexte
-- Test de non-blocage : VÃ©rifier qu'aucune opÃ©ration d'observation ne bloque le systÃ¨me observÃ©
+- Test de séquence d'observation : Vérifier que chaque observation suit les étapes (détection → évaluation → agrégation → transition)
+- Test de séquence de propagation : Vérifier que chaque propagation suit les étapes (identification → formulation → délégation → enregistrement)
+- Test de traçabilité : Vérifier que chaque observation, transition, et propagation est enregistrée avec son contexte
+- Test de non-blocage : Vérifier qu'aucune opération d'observation ne bloque le système observé
 
 ### 2.4. Tests de garanties envers les consommateurs
 
-**DÃ©finition :**
+**Définition :**
 
-Les tests de garanties envers les consommateurs valident que Caring Nanny respecte ses engagements envers les composants qui consultent l'Ã©tat.
+Les tests de garanties envers les consommateurs valident que Caring Nanny respecte ses engagements envers les composants qui consultent l'état.
 
-**PortÃ©e :**
+**Portée :**
 
-Toutes les garanties envers les consommateurs cataloguÃ©es dans le contrat Invariants et Garanties doivent Ãªtre testÃ©es :
-- GAR-CONS-01 : Ã‰tat toujours disponible
-- GAR-CONS-02 : CohÃ©rence garantie
+Toutes les garanties envers les consommateurs cataloguées dans le contrat Invariants et Garanties doivent être testées :
+- GAR-CONS-01 : État toujours disponible
+- GAR-CONS-02 : Cohérence garantie
 - GAR-CONS-03 : Historique accessible
 - GAR-CONS-04 : Notifications fiables
 - GAR-CONS-05 : Contexte complet
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
-- **TV-GAR-CONS-1** : Chaque garantie est vÃ©rifiÃ©e par au moins un test
-- **TV-GAR-CONS-2** : Les tests vÃ©rifient l'observabilitÃ© des garanties
-- **TV-GAR-CONS-3** : Les tests vÃ©rifient les conditions d'application
+- **TV-GAR-CONS-1** : Chaque garantie est vérifiée par au moins un test
+- **TV-GAR-CONS-2** : Les tests vérifient l'observabilité des garanties
+- **TV-GAR-CONS-3** : Les tests vérifient les conditions d'application
 
 **Exemples conceptuels :**
 
-- Test de disponibilitÃ© : VÃ©rifier qu'une rÃ©ponse est toujours retournÃ©e, mÃªme en cas d'incertitude
-- Test de cohÃ©rence : VÃ©rifier qu'aucune contradiction n'existe dans les rÃ©ponses d'Ã©tat
-- Test d'historique : VÃ©rifier que l'historique est accessible et complet sur la pÃ©riode configurÃ©e
-- Test de notification : VÃ©rifier que chaque transition gÃ©nÃ¨re une notification ordonnÃ©e et non dupliquÃ©e
-- Test de contexte : VÃ©rifier que chaque rÃ©ponse inclut timestamp, Ã©tat, durÃ©e, et cause
+- Test de disponibilité : Vérifier qu'une réponse est toujours retournée, même en cas d'incertitude
+- Test de cohérence : Vérifier qu'aucune contradiction n'existe dans les réponses d'état
+- Test d'historique : Vérifier que l'historique est accessible et complet sur la période configurée
+- Test de notification : Vérifier que chaque transition génère une notification ordonnée et non dupliquée
+- Test de contexte : Vérifier que chaque réponse inclut timestamp, état, durée, et cause
 
-### 2.5. Tests de garanties envers les autoritÃ©s
+### 2.5. Tests de garanties envers les autorités
 
-**DÃ©finition :**
+**Définition :**
 
-Les tests de garanties envers les autoritÃ©s valident que Caring Nanny respecte ses engagements envers KindMother, StrongFather, et BondingBrother.
+Les tests de garanties envers les autorités valident que Caring Nanny respecte ses engagements envers KindMother, StrongFather, et BondingBrother.
 
-**PortÃ©e :**
+**Portée :**
 
-Toutes les garanties envers les autoritÃ©s cataloguÃ©es dans le contrat Invariants et Garanties doivent Ãªtre testÃ©es :
+Toutes les garanties envers les autorités cataloguées dans le contrat Invariants et Garanties doivent être testées :
 - GAR-AUTH-01 : Observation non intrusive
-- GAR-AUTH-02 : Respect de la confidentialitÃ©
-- GAR-AUTH-03 : FidÃ©litÃ© de l'observation
-- GAR-AUTH-04 : Propagation via canaux appropriÃ©s
+- GAR-AUTH-02 : Respect de la confidentialité
+- GAR-AUTH-03 : Fidélité de l'observation
+- GAR-AUTH-04 : Propagation via canaux appropriés
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
-- **TV-GAR-AUTH-1** : Chaque garantie est vÃ©rifiÃ©e par au moins un test
-- **TV-GAR-AUTH-2** : Les tests vÃ©rifient le respect des autoritÃ©s
-- **TV-GAR-AUTH-3** : Les tests vÃ©rifient l'absence d'intrusion ou de modification
+- **TV-GAR-AUTH-1** : Chaque garantie est vérifiée par au moins un test
+- **TV-GAR-AUTH-2** : Les tests vérifient le respect des autorités
+- **TV-GAR-AUTH-3** : Les tests vérifient l'absence d'intrusion ou de modification
 
 **Exemples conceptuels :**
 
-- Test de non-intrusion : VÃ©rifier que l'observation n'ajoute pas de charge significative aux autoritÃ©s
-- Test de confidentialitÃ© : VÃ©rifier qu'aucune information sensible n'est divulguÃ©e Ã  des consommateurs non autorisÃ©s
-- Test de fidÃ©litÃ© : VÃ©rifier que l'Ã©tat rapportÃ© reflÃ¨te exactement l'Ã©tat rÃ©el des autoritÃ©s
-- Test de canal : VÃ©rifier que toutes les propagations passent exclusivement par BondingBrother
+- Test de non-intrusion : Vérifier que l'observation n'ajoute pas de charge significative aux autorités
+- Test de confidentialité : Vérifier qu'aucune information sensible n'est divulguée à des consommateurs non autorisés
+- Test de fidélité : Vérifier que l'état rapporté reflète exactement l'état réel des autorités
+- Test de canal : Vérifier que toutes les propagations passent exclusivement par BondingBrother
 
-### 2.6. Tests de non-rÃ©gression
+### 2.6. Tests de non-régression
 
-**DÃ©finition :**
+**Définition :**
 
-Les tests de non-rÃ©gression valident que les modifications n'introduisent pas de rÃ©gression dans le comportement conforme.
+Les tests de non-régression valident que les modifications n'introduisent pas de régression dans le comportement conforme.
 
-**PortÃ©e :**
+**Portée :**
 
-Les tests de non-rÃ©gression couvrent :
-- Les cas de test historiques validÃ©s
-- Les scÃ©narios d'usage documentÃ©s
-- Les cas limites identifiÃ©s
-- Les corrections de bugs prÃ©cÃ©dents
+Les tests de non-régression couvrent :
+- Les cas de test historiques validés
+- Les scénarios d'usage documentés
+- Les cas limites identifiés
+- Les corrections de bugs précédents
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
 - **TV-REGR-1** : Tous les cas de test historiques sont maintenus
-- **TV-REGR-2** : Les scÃ©narios d'usage documentÃ©s restent valides
-- **TV-REGR-3** : Les corrections de bugs prÃ©cÃ©dents ne rÃ©gressent pas
+- **TV-REGR-2** : Les scénarios d'usage documentés restent valides
+- **TV-REGR-3** : Les corrections de bugs précédents ne régressent pas
 
 **Exemples conceptuels :**
 
-- Test de scÃ©nario standard : VÃ©rifier qu'un scÃ©nario d'observation documentÃ© produit toujours le rÃ©sultat attendu
-- Test de cas limite : VÃ©rifier qu'un cas limite identifiÃ© (ex: Ã©tat "offline" transitoire) est toujours gÃ©rÃ© correctement
-- Test de correction : VÃ©rifier qu'un bug corrigÃ© (ex: contradiction d'Ã©tat rÃ©solue) ne rÃ©apparaÃ®t pas
+- Test de scénario standard : Vérifier qu'un scénario d'observation documenté produit toujours le résultat attendu
+- Test de cas limite : Vérifier qu'un cas limite identifié (ex: état "offline" transitoire) est toujours géré correctement
+- Test de correction : Vérifier qu'un bug corrigé (ex: contradiction d'état résolue) ne réapparaît pas
 
 ### 2.7. Tests de performance conceptuels
 
-**DÃ©finition :**
+**Définition :**
 
-Les tests de performance conceptuels valident que les propriÃ©tÃ©s conceptuelles de performance dÃ©finies dans le Performance & Scalability Contract sont respectÃ©es.
+Les tests de performance conceptuels valident que les propriétés conceptuelles de performance définies dans le Performance & Scalability Contract sont respectées.
 
-**PortÃ©e :**
+**Portée :**
 
 Les tests de performance conceptuels couvrent :
-- Les propriÃ©tÃ©s de terminaison et non-blocage
-- Les propriÃ©tÃ©s de scalabilitÃ© conceptuelles
-- Les contraintes de dÃ©gradation contrÃ´lÃ©e
+- Les propriétés de terminaison et non-blocage
+- Les propriétés de scalabilité conceptuelles
+- Les contraintes de dégradation contrôlée
 
-**CritÃ¨res de validation :**
+**Critères de validation :**
 
-- **TV-PERF-1** : Les tests vÃ©rifient la terminaison de toute observation
-- **TV-PERF-2** : Les tests vÃ©rifient l'absence de boucles infinies
-- **TV-PERF-3** : Les tests vÃ©rifient le caractÃ¨re non-bloquant
+- **TV-PERF-1** : Les tests vérifient la terminaison de toute observation
+- **TV-PERF-2** : Les tests vérifient l'absence de boucles infinies
+- **TV-PERF-3** : Les tests vérifient le caractère non-bloquant
 
 **Exemples conceptuels :**
 
-- Test de terminaison : VÃ©rifier que toute observation termine en temps fini
-- Test de non-blocage : VÃ©rifier qu'aucune observation ne bloque le systÃ¨me observÃ©
-- Test de scalabilitÃ© : VÃ©rifier que le comportement reste cohÃ©rent avec un grand nombre de composants observÃ©s
-- Test de dÃ©gradation : VÃ©rifier que la dÃ©gradation sous charge est prÃ©visible et contrÃ´lÃ©e
+- Test de terminaison : Vérifier que toute observation termine en temps fini
+- Test de non-blocage : Vérifier qu'aucune observation ne bloque le système observé
+- Test de scalabilité : Vérifier que le comportement reste cohérent avec un grand nombre de composants observés
+- Test de dégradation : Vérifier que la dégradation sous charge est prévisible et contrôlée
 
 **Note importante :**
 
-Les tests de performance sont **conceptuels** : ils valident des propriÃ©tÃ©s (terminaison, non-blocage, cohÃ©rence sous charge), pas des mÃ©triques absolues (temps d'exÃ©cution, dÃ©bit). Aucune mÃ©trique de performance absolue n'est garantie par Caring Nanny.
+Les tests de performance sont **conceptuels** : ils valident des propriétés (terminaison, non-blocage, cohérence sous charge), pas des métriques absolues (temps d'exécution, débit). Aucune métrique de performance absolue n'est garantie par Caring Nanny.
 
 ---
 
@@ -268,168 +268,168 @@ Les tests de performance sont **conceptuels** : ils valident des propriÃ©tÃ©
 
 **V-INV-1 : Identification des invariants**
 
-Tous les invariants des contrats Caring Nanny doivent Ãªtre identifiÃ©s et listÃ©s.
+Tous les invariants des contrats Caring Nanny doivent être identifiés et listés.
 
-**V-INV-2 : CrÃ©ation de tests**
+**V-INV-2 : Création de tests**
 
-Pour chaque invariant, au moins un test doit Ãªtre crÃ©Ã© pour valider son respect.
+Pour chaque invariant, au moins un test doit être créé pour valider son respect.
 
-**V-INV-3 : ExÃ©cution des tests**
+**V-INV-3 : Exécution des tests**
 
-Tous les tests d'invariants doivent Ãªtre exÃ©cutÃ©s et rÃ©ussir pour valider la conformitÃ©.
+Tous les tests d'invariants doivent être exécutés et réussir pour valider la conformité.
 
-**V-INV-4 : Documentation des rÃ©sultats**
+**V-INV-4 : Documentation des résultats**
 
-Les rÃ©sultats des tests d'invariants doivent Ãªtre documentÃ©s et traÃ§ables.
+Les résultats des tests d'invariants doivent être documentés et traçables.
 
-### 3.2. CatÃ©gories d'invariants Ã  valider
+### 3.2. Catégories d'invariants à valider
 
 **Invariants de nature (ce que Caring Nanny EST) :**
 
 | Invariant | Description | Test requis |
 |-----------|-------------|-------------|
-| INV-CN-1 | Observateur pur | VÃ©rifier l'absence d'effet de bord |
-| INV-CN-3 | Non-autoritaire | VÃ©rifier l'absence de dÃ©cision ou blocage |
-| INV-CN-4 | Ã‰tat cohÃ©rent | VÃ©rifier l'absence de contradiction |
-| INV-CN-7 | Propagation fidÃ¨le | VÃ©rifier l'identitÃ© information observÃ©e/propagÃ©e |
+| INV-CN-1 | Observateur pur | Vérifier l'absence d'effet de bord |
+| INV-CN-3 | Non-autoritaire | Vérifier l'absence de décision ou blocage |
+| INV-CN-4 | État cohérent | Vérifier l'absence de contradiction |
+| INV-CN-7 | Propagation fidèle | Vérifier l'identité information observée/propagée |
 
 **Invariants de non-action (ce que Caring Nanny NE FAIT JAMAIS) :**
 
 | Invariant | Description | Test requis |
 |-----------|-------------|-------------|
-| INV-CN-2 | Aucune capacitÃ© d'exÃ©cution | VÃ©rifier l'absence de dÃ©clenchement d'action |
-| INV-NEG-CN-01 | Jamais de modification de donnÃ©es | VÃ©rifier l'absence d'Ã©criture vers KindMother |
-| INV-NEG-CN-02 | Jamais de dÃ©cision | VÃ©rifier l'absence de logique dÃ©cisionnelle |
-| INV-NEG-CN-03 | Jamais d'action corrective | VÃ©rifier l'absence de remÃ©diation automatique |
-| INV-NEG-CN-04 | Jamais de mÃ©diation d'intentions | VÃ©rifier l'absence d'interface d'intention |
-| INV-NEG-CN-05 | Jamais de dÃ©finition de rÃ¨gles | VÃ©rifier que les rÃ¨gles sont chargÃ©es depuis une source externe |
-| INV-NEG-CN-06 | Jamais de gestion de persistance | VÃ©rifier l'absence de connexion directe Ã  un systÃ¨me de persistance |
+| INV-CN-2 | Aucune capacité d'exécution | Vérifier l'absence de déclenchement d'action |
+| INV-NEG-CN-01 | Jamais de modification de données | Vérifier l'absence d'écriture vers KindMother |
+| INV-NEG-CN-02 | Jamais de décision | Vérifier l'absence de logique décisionnelle |
+| INV-NEG-CN-03 | Jamais d'action corrective | Vérifier l'absence de remédiation automatique |
+| INV-NEG-CN-04 | Jamais de médiation d'intentions | Vérifier l'absence d'interface d'intention |
+| INV-NEG-CN-05 | Jamais de définition de règles | Vérifier que les règles sont chargées depuis une source externe |
+| INV-NEG-CN-06 | Jamais de gestion de persistance | Vérifier l'absence de connexion directe à un système de persistance |
 
 **Invariants de flux (comment l'information transite) :**
 
 | Invariant | Description | Test requis |
 |-----------|-------------|-------------|
-| INV-CN-5 | TraÃ§abilitÃ© complÃ¨te | VÃ©rifier l'enregistrement de chaque Ã©tape |
-| INV-CN-6 | Non-bloquant | VÃ©rifier l'absence de blocage du systÃ¨me observÃ© |
-| INV-FLUX-CN-01 | SÃ©quence d'observation cohÃ©rente | VÃ©rifier le respect de la sÃ©quence d'observation |
-| INV-FLUX-CN-02 | SÃ©quence de propagation cohÃ©rente | VÃ©rifier le respect de la sÃ©quence de propagation |
-| INV-FLUX-CN-03 | Pas de perte d'observation | VÃ©rifier l'absence de perte silencieuse |
+| INV-CN-5 | Traçabilité complète | Vérifier l'enregistrement de chaque étape |
+| INV-CN-6 | Non-bloquant | Vérifier l'absence de blocage du système observé |
+| INV-FLUX-CN-01 | Séquence d'observation cohérente | Vérifier le respect de la séquence d'observation |
+| INV-FLUX-CN-02 | Séquence de propagation cohérente | Vérifier le respect de la séquence de propagation |
+| INV-FLUX-CN-03 | Pas de perte d'observation | Vérifier l'absence de perte silencieuse |
 
-### 3.3. MÃ©thodes de validation conceptuelles
+### 3.3. Méthodes de validation conceptuelles
 
-**MÃ©thode 1 : VÃ©rification par analyse statique**
+**Méthode 1 : Vérification par analyse statique**
 
-Pour les invariants structurels (non-exÃ©cution, non-modification, non-mÃ©diation), l'analyse statique peut Ãªtre utilisÃ©e pour vÃ©rifier l'absence de code violant l'invariant.
+Pour les invariants structurels (non-exécution, non-modification, non-médiation), l'analyse statique peut être utilisée pour vérifier l'absence de code violant l'invariant.
 
-**ApplicabilitÃ© :**
-- INV-CN-1 : VÃ©rifier l'absence de mÃ©thodes `write()`, `update()`, `delete()`
-- INV-CN-2 : VÃ©rifier l'absence de mÃ©thodes `execute()`, `trigger()`, `action()`
-- INV-CN-3 : VÃ©rifier l'absence de mÃ©thodes `validate()`, `approve()`, `reject()`, `authorize()`
-- INV-NEG-CN-04 : VÃ©rifier l'absence d'interfaces d'intention
+**Applicabilité :**
+- INV-CN-1 : Vérifier l'absence de méthodes `write()`, `update()`, `delete()`
+- INV-CN-2 : Vérifier l'absence de méthodes `execute()`, `trigger()`, `action()`
+- INV-CN-3 : Vérifier l'absence de méthodes `validate()`, `approve()`, `reject()`, `authorize()`
+- INV-NEG-CN-04 : Vérifier l'absence d'interfaces d'intention
 
-**MÃ©thode 2 : VÃ©rification par test d'exÃ©cution**
+**Méthode 2 : Vérification par test d'exécution**
 
-Pour les invariants comportementaux (cohÃ©rence, traÃ§abilitÃ©, non-blocage), des tests d'exÃ©cution peuvent Ãªtre utilisÃ©s pour vÃ©rifier le comportement.
+Pour les invariants comportementaux (cohérence, traçabilité, non-blocage), des tests d'exécution peuvent être utilisés pour vérifier le comportement.
 
-**ApplicabilitÃ© :**
-- INV-CN-4 : ExÃ©cuter des observations et vÃ©rifier l'absence de contradiction dans les rÃ©ponses
-- INV-CN-5 : ExÃ©cuter des observations et vÃ©rifier l'existence des traces
-- INV-CN-6 : ExÃ©cuter des observations et mesurer l'impact sur le systÃ¨me observÃ©
-- INV-CN-7 : Comparer l'information observÃ©e et l'information propagÃ©e
+**Applicabilité :**
+- INV-CN-4 : Exécuter des observations et vérifier l'absence de contradiction dans les réponses
+- INV-CN-5 : Exécuter des observations et vérifier l'existence des traces
+- INV-CN-6 : Exécuter des observations et mesurer l'impact sur le système observé
+- INV-CN-7 : Comparer l'information observée et l'information propagée
 
-**MÃ©thode 3 : VÃ©rification par inspection**
+**Méthode 3 : Vérification par inspection**
 
-Pour les invariants conceptuels (sÃ©quences de flux), l'inspection peut Ãªtre utilisÃ©e pour vÃ©rifier la conformitÃ© architecturale.
+Pour les invariants conceptuels (séquences de flux), l'inspection peut être utilisée pour vérifier la conformité architecturale.
 
-**ApplicabilitÃ© :**
-- INV-FLUX-CN-01 : Inspecter les traces pour vÃ©rifier le respect de la sÃ©quence d'observation
-- INV-FLUX-CN-02 : Inspecter les traces pour vÃ©rifier le respect de la sÃ©quence de propagation
-- INV-FLUX-CN-03 : RÃ©concilier les conditions dÃ©tectÃ©es et les observations enregistrÃ©es
+**Applicabilité :**
+- INV-FLUX-CN-01 : Inspecter les traces pour vérifier le respect de la séquence d'observation
+- INV-FLUX-CN-02 : Inspecter les traces pour vérifier le respect de la séquence de propagation
+- INV-FLUX-CN-03 : Réconcilier les conditions détectées et les observations enregistrées
 
-**MÃ©thode 4 : VÃ©rification par preuve conceptuelle**
+**Méthode 4 : Vérification par preuve conceptuelle**
 
-Pour les invariants fondamentaux (nature d'observateur pur), une preuve conceptuelle peut Ãªtre utilisÃ©e pour dÃ©montrer le respect.
+Pour les invariants fondamentaux (nature d'observateur pur), une preuve conceptuelle peut être utilisée pour démontrer le respect.
 
-**ApplicabilitÃ© :**
-- INV-CN-1 : Prouver que toutes les mÃ©thodes sont en lecture seule
-- INV-NEG-CN-05 : Prouver que les rÃ¨gles proviennent d'une source externe configurÃ©e
+**Applicabilité :**
+- INV-CN-1 : Prouver que toutes les méthodes sont en lecture seule
+- INV-NEG-CN-05 : Prouver que les règles proviennent d'une source externe configurée
 
 ---
 
-## 4. Tests de non-rÃ©gression
+## 4. Tests de non-régression
 
-### 4.1. DÃ©finition de la non-rÃ©gression
+### 4.1. Définition de la non-régression
 
-**DÃ©finition :**
+**Définition :**
 
-La non-rÃ©gression est la propriÃ©tÃ© selon laquelle les modifications n'introduisent pas de rÃ©gression dans le comportement conforme de Caring Nanny.
+La non-régression est la propriété selon laquelle les modifications n'introduisent pas de régression dans le comportement conforme de Caring Nanny.
 
-**CritÃ¨res de non-rÃ©gression :**
+**Critères de non-régression :**
 
-- **NR-1** : Les cas de test historiques continuent de rÃ©ussir
-- **NR-2** : Les scÃ©narios d'usage documentÃ©s restent valides
-- **NR-3** : Les corrections de bugs prÃ©cÃ©dents ne rÃ©gressent pas
-- **NR-4** : Les invariants et garanties restent respectÃ©s
+- **NR-1** : Les cas de test historiques continuent de réussir
+- **NR-2** : Les scénarios d'usage documentés restent valides
+- **NR-3** : Les corrections de bugs précédents ne régressent pas
+- **NR-4** : Les invariants et garanties restent respectés
 
-### 4.2. Catalogue de tests de non-rÃ©gression
+### 4.2. Catalogue de tests de non-régression
 
-**CatÃ©gorie 1 : Tests historiques**
+**Catégorie 1 : Tests historiques**
 
-Tous les cas de test qui ont Ã©tÃ© validÃ©s dans le passÃ© doivent Ãªtre maintenus et continuer de rÃ©ussir.
+Tous les cas de test qui ont été validés dans le passé doivent être maintenus et continuer de réussir.
 
-**CatÃ©gorie 2 : ScÃ©narios d'observation**
+**Catégorie 2 : Scénarios d'observation**
 
-Tous les scÃ©narios d'observation documentÃ©s doivent Ãªtre testÃ©s et continuer de produire les rÃ©sultats attendus :
-- Observation d'un composant en Ã©tat healthy
-- Observation d'un composant en Ã©tat degraded
-- Observation d'un composant en Ã©tat offline
-- Observation d'un composant en Ã©tat syncing
-- Observation d'un composant en Ã©tat error
-- DÃ©tection de transition entre Ã©tats
-- AgrÃ©gation d'Ã©tats partiels en Ã©tat global
+Tous les scénarios d'observation documentés doivent être testés et continuer de produire les résultats attendus :
+- Observation d'un composant en état healthy
+- Observation d'un composant en état degraded
+- Observation d'un composant en état offline
+- Observation d'un composant en état syncing
+- Observation d'un composant en état error
+- Détection de transition entre états
+- Agrégation d'états partiels en état global
 
-**CatÃ©gorie 3 : ScÃ©narios de propagation**
+**Catégorie 3 : Scénarios de propagation**
 
-Tous les scÃ©narios de propagation documentÃ©s doivent Ãªtre testÃ©s :
-- Propagation d'un changement d'Ã©tat vers les consommateurs
+Tous les scénarios de propagation documentés doivent être testés :
+- Propagation d'un changement d'état vers les consommateurs
 - Propagation via BondingBrother
 - Propagation avec contexte complet
 
-**CatÃ©gorie 4 : Cas limites**
+**Catégorie 4 : Cas limites**
 
-Tous les cas limites identifiÃ©s doivent Ãªtre testÃ©s :
-- Ã‰tat incertain ou inconnu
-- Transition rapide entre Ã©tats
+Tous les cas limites identifiés doivent être testés :
+- État incertain ou inconnu
+- Transition rapide entre états
 - Composant temporairement inaccessible
-- Conditions contradictoires rÃ©solues
+- Conditions contradictoires résolues
 
-**CatÃ©gorie 5 : Corrections de bugs**
+**Catégorie 5 : Corrections de bugs**
 
-Tous les bugs corrigÃ©s doivent Ãªtre testÃ©s pour Ã©viter la rÃ©gression.
+Tous les bugs corrigés doivent être testés pour éviter la régression.
 
 ### 4.3. Processus de maintenance
 
 **M-NR-1 : Ajout de tests**
 
-Lorsqu'un nouveau cas de test est validÃ©, il doit Ãªtre ajoutÃ© au catalogue de tests de non-rÃ©gression.
+Lorsqu'un nouveau cas de test est validé, il doit être ajouté au catalogue de tests de non-régression.
 
-**M-NR-2 : ExÃ©cution avant modification**
+**M-NR-2 : Exécution avant modification**
 
-Avant toute modification, les tests de non-rÃ©gression doivent Ãªtre exÃ©cutÃ©s pour Ã©tablir un Ã©tat de rÃ©fÃ©rence.
+Avant toute modification, les tests de non-régression doivent être exécutés pour établir un état de référence.
 
-**M-NR-3 : ExÃ©cution aprÃ¨s modification**
+**M-NR-3 : Exécution après modification**
 
-AprÃ¨s toute modification, les tests de non-rÃ©gression doivent Ãªtre exÃ©cutÃ©s pour vÃ©rifier l'absence de rÃ©gression.
+Après toute modification, les tests de non-régression doivent être exécutés pour vérifier l'absence de régression.
 
-**M-NR-4 : Documentation des rÃ©gressions**
+**M-NR-4 : Documentation des régressions**
 
-Toute rÃ©gression dÃ©tectÃ©e doit Ãªtre documentÃ©e et corrigÃ©e avant validation.
+Toute régression détectée doit être documentée et corrigée avant validation.
 
 ---
 
-## 5. Tests de nature (passivitÃ© et non-intrusion)
+## 5. Tests de nature (passivité et non-intrusion)
 
-### 5.1. PortÃ©e des tests de nature
+### 5.1. Portée des tests de nature
 
 **Objectif :**
 
@@ -438,97 +438,97 @@ Les tests de nature valident que Caring Nanny respecte sa nature fondamentale d'
 **Tests requis :**
 
 Les tests de nature couvrent :
-- La passivitÃ© de l'observation (aucune modification)
-- La non-intrusion (aucun impact sur les composants observÃ©s)
-- L'absence d'effet de bord (aucune consÃ©quence indirecte)
-- La fidÃ©litÃ© (aucune altÃ©ration de l'information)
+- La passivité de l'observation (aucune modification)
+- La non-intrusion (aucun impact sur les composants observés)
+- L'absence d'effet de bord (aucune conséquence indirecte)
+- La fidélité (aucune altération de l'information)
 
-### 5.2. Tests de passivitÃ©
+### 5.2. Tests de passivité
 
-**Test de passivitÃ© d'observation (T-NAT-01) :**
+**Test de passivité d'observation (T-NAT-01) :**
 
-VÃ©rifier que l'observation d'un composant ne modifie pas l'Ã©tat de ce composant.
+Vérifier que l'observation d'un composant ne modifie pas l'état de ce composant.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… L'Ã©tat du composant avant observation est identique Ã  l'Ã©tat aprÃ¨s observation
-- âœ… Aucune Ã©criture n'est effectuÃ©e vers le composant
-- âœ… Aucun effet de bord mesurable
+**Critères de réussite :**
+- ✅ L'état du composant avant observation est identique à l'état après observation
+- ✅ Aucune écriture n'est effectuée vers le composant
+- ✅ Aucun effet de bord mesurable
 
-**Test de passivitÃ© de classification (T-NAT-02) :**
+**Test de passivité de classification (T-NAT-02) :**
 
-VÃ©rifier que la classification d'un Ã©tat ne modifie pas les conditions observÃ©es.
+Vérifier que la classification d'un état ne modifie pas les conditions observées.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Les conditions observÃ©es sont identiques avant et aprÃ¨s classification
-- âœ… La classification n'a aucun effet de bord
+**Critères de réussite :**
+- ✅ Les conditions observées sont identiques avant et après classification
+- ✅ La classification n'a aucun effet de bord
 
-**Test de passivitÃ© de propagation (T-NAT-03) :**
+**Test de passivité de propagation (T-NAT-03) :**
 
-VÃ©rifier que la propagation d'un changement d'Ã©tat ne modifie pas l'Ã©tat propagÃ©.
+Vérifier que la propagation d'un changement d'état ne modifie pas l'état propagé.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… L'Ã©tat propagÃ© est identique Ã  l'Ã©tat observÃ©
-- âœ… La propagation n'altÃ¨re pas le message
-- âœ… La propagation ne dÃ©clenche aucune action
+**Critères de réussite :**
+- ✅ L'état propagé est identique à l'état observé
+- ✅ La propagation n'altère pas le message
+- ✅ La propagation ne déclenche aucune action
 
 ### 5.3. Tests de non-intrusion
 
 **Test de non-intrusion sur KindMother (T-NAT-04) :**
 
-VÃ©rifier que l'observation de KindMother n'interfÃ¨re pas avec son fonctionnement.
+Vérifier que l'observation de KindMother n'interfère pas avec son fonctionnement.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Les performances de KindMother ne sont pas impactÃ©es
-- âœ… Aucune modification des donnÃ©es de KindMother
-- âœ… Aucun verrouillage de ressources KindMother
+**Critères de réussite :**
+- ✅ Les performances de KindMother ne sont pas impactées
+- ✅ Aucune modification des données de KindMother
+- ✅ Aucun verrouillage de ressources KindMother
 
 **Test de non-intrusion sur StrongFather (T-NAT-05) :**
 
-VÃ©rifier que l'observation de StrongFather n'interfÃ¨re pas avec son fonctionnement.
+Vérifier que l'observation de StrongFather n'interfère pas avec son fonctionnement.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Les performances de StrongFather ne sont pas impactÃ©es
-- âœ… Aucune influence sur les dÃ©cisions de StrongFather
-- âœ… Aucune modification des politiques
+**Critères de réussite :**
+- ✅ Les performances de StrongFather ne sont pas impactées
+- ✅ Aucune influence sur les décisions de StrongFather
+- ✅ Aucune modification des politiques
 
 **Test de non-intrusion sur BondingBrother (T-NAT-06) :**
 
-VÃ©rifier que la propagation via BondingBrother n'interfÃ¨re pas avec la mÃ©diation normale.
+Vérifier que la propagation via BondingBrother n'interfère pas avec la médiation normale.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Les performances de BondingBrother ne sont pas impactÃ©es
-- âœ… La propagation utilise le canal appropriÃ©
-- âœ… Aucune mÃ©diation d'intention par Caring Nanny
+**Critères de réussite :**
+- ✅ Les performances de BondingBrother ne sont pas impactées
+- ✅ La propagation utilise le canal approprié
+- ✅ Aucune médiation d'intention par Caring Nanny
 
 ### 5.4. Tests d'absence d'effet de bord
 
-**Test d'absence d'effet de bord sur l'Ã©cosystÃ¨me (T-NAT-07) :**
+**Test d'absence d'effet de bord sur l'écosystème (T-NAT-07) :**
 
-VÃ©rifier que les opÃ©rations de Caring Nanny n'ont aucun effet de bord sur l'Ã©cosystÃ¨me.
+Vérifier que les opérations de Caring Nanny n'ont aucun effet de bord sur l'écosystème.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Aucune modification de donnÃ©es mÃ©tier
-- âœ… Aucune modification de configuration
-- âœ… Aucun dÃ©clenchement d'action
-- âœ… Aucune crÃ©ation, modification, ou suppression d'entitÃ©
+**Critères de réussite :**
+- ✅ Aucune modification de données métier
+- ✅ Aucune modification de configuration
+- ✅ Aucun déclenchement d'action
+- ✅ Aucune création, modification, ou suppression d'entité
 
-### 5.5. CritÃ¨res de validation de nature
+### 5.5. Critères de validation de nature
 
 **V-NAT-1 : Absence de modification**
 
-Aucune opÃ©ration de Caring Nanny ne doit modifier l'Ã©tat d'un composant observÃ©.
+Aucune opération de Caring Nanny ne doit modifier l'état d'un composant observé.
 
 **V-NAT-2 : Absence d'intrusion**
 
-Aucune opÃ©ration de Caring Nanny ne doit interfÃ©rer avec le fonctionnement des composants observÃ©s.
+Aucune opération de Caring Nanny ne doit interférer avec le fonctionnement des composants observés.
 
 **V-NAT-3 : Absence d'effet de bord**
 
-Aucune opÃ©ration de Caring Nanny ne doit avoir de consÃ©quence indirecte sur l'Ã©cosystÃ¨me.
+Aucune opération de Caring Nanny ne doit avoir de conséquence indirecte sur l'écosystème.
 
-**V-NAT-4 : FidÃ©litÃ© prÃ©servÃ©e**
+**V-NAT-4 : Fidélité préservée**
 
-L'information observÃ©e et l'information propagÃ©e doivent Ãªtre identiques.
+L'information observée et l'information propagée doivent être identiques.
 
 ---
 
@@ -536,229 +536,229 @@ L'information observÃ©e et l'information propagÃ©e doivent Ãªtre identique
 
 ### 6.1. Nature des tests de performance
 
-**Conceptuel, pas mÃ©trique :**
+**Conceptuel, pas métrique :**
 
-Les tests de performance sont **conceptuels** : ils valident des propriÃ©tÃ©s (terminaison, non-blocage, absence de boucles infinies), pas des mÃ©triques absolues (temps d'exÃ©cution, dÃ©bit).
+Les tests de performance sont **conceptuels** : ils valident des propriétés (terminaison, non-blocage, absence de boucles infinies), pas des métriques absolues (temps d'exécution, débit).
 
 **Aucune garantie de performance absolue :**
 
-Caring Nanny ne garantit aucune mÃ©trique de performance absolue. Les tests de performance valident uniquement des propriÃ©tÃ©s conceptuelles.
+Caring Nanny ne garantit aucune métrique de performance absolue. Les tests de performance valident uniquement des propriétés conceptuelles.
 
-### 6.2. PropriÃ©tÃ©s Ã  valider
+### 6.2. Propriétés à valider
 
-**PropriÃ©tÃ© 1 : Terminaison (INV-FLUX-CN-01, INV-FLUX-CN-02)**
+**Propriété 1 : Terminaison (INV-FLUX-CN-01, INV-FLUX-CN-02)**
 
 Toute observation et toute propagation doivent terminer en temps fini.
 
-**PropriÃ©tÃ© 2 : Non-blocage (INV-CN-6)**
+**Propriété 2 : Non-blocage (INV-CN-6)**
 
-Aucune observation ne doit bloquer le systÃ¨me observÃ©.
+Aucune observation ne doit bloquer le système observé.
 
-**PropriÃ©tÃ© 3 : ScalabilitÃ© conceptuelle**
+**Propriété 3 : Scalabilité conceptuelle**
 
-Le comportement doit rester cohÃ©rent mÃªme avec un grand nombre de composants observÃ©s.
+Le comportement doit rester cohérent même avec un grand nombre de composants observés.
 
-**PropriÃ©tÃ© 4 : CohÃ©rence sous charge (INV-CN-4)**
+**Propriété 4 : Cohérence sous charge (INV-CN-4)**
 
-L'Ã©tat rapportÃ© doit rester cohÃ©rent mÃªme sous forte charge.
+L'état rapporté doit rester cohérent même sous forte charge.
 
-**PropriÃ©tÃ© 5 : DÃ©gradation contrÃ´lÃ©e**
+**Propriété 5 : Dégradation contrôlée**
 
-La dÃ©gradation sous charge doit Ãªtre prÃ©visible et ne jamais violer les invariants.
+La dégradation sous charge doit être prévisible et ne jamais violer les invariants.
 
 ### 6.3. Tests conceptuels de performance
 
 **Test de terminaison d'observation (T-PERF-01) :**
 
-VÃ©rifier que toute observation termine, mÃªme avec des conditions complexes.
+Vérifier que toute observation termine, même avec des conditions complexes.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… L'observation termine en temps fini
-- âœ… Aucune boucle infinie dÃ©tectÃ©e
-- âœ… Le rÃ©sultat est cohÃ©rent
+**Critères de réussite :**
+- ✅ L'observation termine en temps fini
+- ✅ Aucune boucle infinie détectée
+- ✅ Le résultat est cohérent
 
 **Test de terminaison de propagation (T-PERF-02) :**
 
-VÃ©rifier que toute propagation termine, mÃªme avec de nombreux destinataires.
+Vérifier que toute propagation termine, même avec de nombreux destinataires.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… La propagation termine en temps fini
-- âœ… Tous les destinataires sont notifiÃ©s
-- âœ… La propagation est tracÃ©e
+**Critères de réussite :**
+- ✅ La propagation termine en temps fini
+- ✅ Tous les destinataires sont notifiés
+- ✅ La propagation est tracée
 
 **Test de non-blocage (T-PERF-03) :**
 
-VÃ©rifier qu'aucune observation ne bloque le systÃ¨me observÃ©.
+Vérifier qu'aucune observation ne bloque le système observé.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Le systÃ¨me observÃ© continue de fonctionner pendant l'observation
-- âœ… Aucun lock n'est acquis sur les composants observÃ©s
-- âœ… Aucune attente bloquante
+**Critères de réussite :**
+- ✅ Le système observé continue de fonctionner pendant l'observation
+- ✅ Aucun lock n'est acquis sur les composants observés
+- ✅ Aucune attente bloquante
 
-**Test de scalabilitÃ© conceptuelle (T-PERF-04) :**
+**Test de scalabilité conceptuelle (T-PERF-04) :**
 
-VÃ©rifier que le comportement reste cohÃ©rent avec un nombre croissant de composants.
+Vérifier que le comportement reste cohérent avec un nombre croissant de composants.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Le comportement est identique pour 1 et N composants
-- âœ… La cohÃ©rence d'Ã©tat est prÃ©servÃ©e
-- âœ… La traÃ§abilitÃ© est maintenue
+**Critères de réussite :**
+- ✅ Le comportement est identique pour 1 et N composants
+- ✅ La cohérence d'état est préservée
+- ✅ La traçabilité est maintenue
 
-**Test de cohÃ©rence sous charge (T-PERF-05) :**
+**Test de cohérence sous charge (T-PERF-05) :**
 
-VÃ©rifier que l'Ã©tat rapportÃ© reste cohÃ©rent mÃªme sous forte charge.
+Vérifier que l'état rapporté reste cohérent même sous forte charge.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Aucune contradiction dans l'Ã©tat rapportÃ©
-- âœ… L'agrÃ©gation reste cohÃ©rente
-- âœ… La fidÃ©litÃ© de propagation est prÃ©servÃ©e
+**Critères de réussite :**
+- ✅ Aucune contradiction dans l'état rapporté
+- ✅ L'agrégation reste cohérente
+- ✅ La fidélité de propagation est préservée
 
-**Test de dÃ©gradation contrÃ´lÃ©e (T-PERF-06) :**
+**Test de dégradation contrôlée (T-PERF-06) :**
 
-VÃ©rifier que la dÃ©gradation sous charge est prÃ©visible et ne viole pas les invariants.
+Vérifier que la dégradation sous charge est prévisible et ne viole pas les invariants.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… La dÃ©gradation ne viole aucun invariant (INV-CN-1 Ã  INV-CN-7)
-- âœ… Les pertes Ã©ventuelles sont tracÃ©es (jamais silencieuses)
-- âœ… Le comportement reste prÃ©visible
+**Critères de réussite :**
+- ✅ La dégradation ne viole aucun invariant (INV-CN-1 à INV-CN-7)
+- ✅ Les pertes éventuelles sont tracées (jamais silencieuses)
+- ✅ Le comportement reste prévisible
 
-### 6.4. CritÃ¨res de validation de performance
+### 6.4. Critères de validation de performance
 
 **V-PERF-1 : Terminaison garantie**
 
-Tous les tests de terminaison doivent rÃ©ussir.
+Tous les tests de terminaison doivent réussir.
 
 **V-PERF-2 : Non-blocage garanti**
 
-Tous les tests de non-blocage doivent rÃ©ussir.
+Tous les tests de non-blocage doivent réussir.
 
-**V-PERF-3 : ScalabilitÃ© conceptuelle**
+**V-PERF-3 : Scalabilité conceptuelle**
 
-Les tests de scalabilitÃ© conceptuelle doivent rÃ©ussir.
+Les tests de scalabilité conceptuelle doivent réussir.
 
-**V-PERF-4 : CohÃ©rence prÃ©servÃ©e**
+**V-PERF-4 : Cohérence préservée**
 
-La cohÃ©rence doit Ãªtre prÃ©servÃ©e indÃ©pendamment de la charge.
+La cohérence doit être préservée indépendamment de la charge.
 
-**V-PERF-5 : DÃ©gradation contrÃ´lÃ©e**
+**V-PERF-5 : Dégradation contrôlée**
 
-La dÃ©gradation ne doit jamais violer un invariant.
+La dégradation ne doit jamais violer un invariant.
 
 ---
 
-## 7. Tests de conformitÃ© aux Lois d'Autonomie SystÃ¨me
+## 7. Tests de conformité aux Lois d'Autonomie Système
 
-### 7.1. PortÃ©e des tests de conformitÃ©
+### 7.1. Portée des tests de conformité
 
 **Objectif :**
 
-Les tests de conformitÃ© valident que Caring Nanny respecte les Lois d'Autonomie SystÃ¨me dÃ©finies dans [Miyukini Conceptual References - Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md).
+Les tests de conformité valident que Caring Nanny respecte les Lois d'Autonomie Système définies dans [Miyukini Conceptual References - Lois Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
 ### 7.2. Tests par loi
 
-**Test de conformitÃ© LOI-1 (T-LOI-01) : Aucune dÃ©pendance externe critique**
+**Test de conformité LOI-1 (T-LOI-01) : Aucune dépendance externe critique**
 
-VÃ©rifier que l'observation fonctionne sans dÃ©pendance externe critique Ã  l'exÃ©cution.
+Vérifier que l'observation fonctionne sans dépendance externe critique à l'exécution.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… L'observation fonctionne localement
-- âœ… L'historique est enregistrÃ© localement
-- âœ… L'absence de connexion ne bloque pas l'observation
+**Critères de réussite :**
+- ✅ L'observation fonctionne localement
+- ✅ L'historique est enregistré localement
+- ✅ L'absence de connexion ne bloque pas l'observation
 
-**Test de conformitÃ© LOI-2 (T-LOI-02) : Isolement acceptÃ© comme Ã©tat normal**
+**Test de conformité LOI-2 (T-LOI-02) : Isolement accepté comme état normal**
 
-VÃ©rifier que l'Ã©tat "offline" est reconnu comme un Ã©tat normal, distinct de "error".
+Vérifier que l'état "offline" est reconnu comme un état normal, distinct de "error".
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… L'Ã©tat "offline" est classifiÃ© correctement
-- âœ… L'Ã©tat "offline" n'est pas traitÃ© comme une erreur
-- âœ… La distinction "isolÃ©" vs "erreur" est explicite
+**Critères de réussite :**
+- ✅ L'état "offline" est classifié correctement
+- ✅ L'état "offline" n'est pas traité comme une erreur
+- ✅ La distinction "isolé" vs "erreur" est explicite
 
-**Test de conformitÃ© LOI-3 (T-LOI-03) : Ã‰tat local souverain**
+**Test de conformité LOI-3 (T-LOI-03) : État local souverain**
 
-VÃ©rifier que l'historique local est la source de vÃ©ritÃ© pour l'observation.
+Vérifier que l'historique local est la source de vérité pour l'observation.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… L'historique local est complet
-- âœ… Les transitions sont enregistrÃ©es localement
-- âœ… L'audit est possible Ã  partir de l'historique local
+**Critères de réussite :**
+- ✅ L'historique local est complet
+- ✅ Les transitions sont enregistrées localement
+- ✅ L'audit est possible à partir de l'historique local
 
-**Test de conformitÃ© LOI-4 (T-LOI-04) : Pas de temps global requis**
+**Test de conformité LOI-4 (T-LOI-04) : Pas de temps global requis**
 
-VÃ©rifier que les observations sont horodatÃ©es localement sans dÃ©pendance Ã  un temps global.
+Vérifier que les observations sont horodatées localement sans dépendance à un temps global.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Les timestamps sont locaux
-- âœ… Aucune comparaison automatique de timestamps inter-nÅ“uds
-- âœ… Le temps est contextuel
+**Critères de réussite :**
+- ✅ Les timestamps sont locaux
+- ✅ Aucune comparaison automatique de timestamps inter-nœuds
+- ✅ Le temps est contextuel
 
-**Test de conformitÃ© LOI-5 (T-LOI-05) : CoÃ»t proportionnel au hardware**
+**Test de conformité LOI-5 (T-LOI-05) : Coût proportionnel au hardware**
 
-VÃ©rifier que la consommation de ressources est prÃ©visible et maÃ®trisÃ©e.
+Vérifier que la consommation de ressources est prévisible et maîtrisée.
 
-**CritÃ¨res de rÃ©ussite :**
-- âœ… Consommation CPU prÃ©visible
-- âœ… Allocation mÃ©moire bornÃ©e
-- âœ… Pas de workers permanents coÃ»teux
-- âœ… Historique gÃ©rÃ© avec rÃ©tention configurable
+**Critères de réussite :**
+- ✅ Consommation CPU prévisible
+- ✅ Allocation mémoire bornée
+- ✅ Pas de workers permanents coûteux
+- ✅ Historique géré avec rétention configurable
 
 ---
 
-## 8. RÃ¨gles de validation
+## 8. Règles de validation
 
-### 8.1. RÃ¨gles gÃ©nÃ©rales
+### 8.1. Règles générales
 
-**R-VAL-1 : ComplÃ©tude**
+**R-VAL-1 : Complétude**
 
-Tous les invariants, garanties, et interdictions doivent Ãªtre validÃ©s par au moins un test.
+Tous les invariants, garanties, et interdictions doivent être validés par au moins un test.
 
-**R-VAL-2 : ReproductibilitÃ©**
+**R-VAL-2 : Reproductibilité**
 
-Tous les tests doivent Ãªtre reproductibles : pour une entrÃ©e donnÃ©e, le rÃ©sultat attendu est toujours le mÃªme.
+Tous les tests doivent être reproductibles : pour une entrée donnée, le résultat attendu est toujours le même.
 
 **R-VAL-3 : Documentation**
 
-Tous les tests doivent Ãªtre documentÃ©s avec leur objectif, leurs critÃ¨res de rÃ©ussite, et leurs rÃ©sultats.
+Tous les tests doivent être documentés avec leur objectif, leurs critères de réussite, et leurs résultats.
 
-**R-VAL-4 : TraÃ§abilitÃ©**
+**R-VAL-4 : Traçabilité**
 
-Tous les rÃ©sultats de tests doivent Ãªtre traÃ§ables et associÃ©s aux critÃ¨res de conformitÃ©.
+Tous les résultats de tests doivent être traçables et associés aux critères de conformité.
 
-**R-VAL-5 : PassivitÃ© des tests**
+**R-VAL-5 : Passivité des tests**
 
-Les tests eux-mÃªmes doivent respecter la nature d'observateur passif : ils vÃ©rifient sans modifier.
+Les tests eux-mêmes doivent respecter la nature d'observateur passif : ils vérifient sans modifier.
 
-### 8.2. RÃ¨gles d'exÃ©cution
+### 8.2. Règles d'exécution
 
-**R-EXEC-1 : ExÃ©cution avant validation**
+**R-EXEC-1 : Exécution avant validation**
 
-Tous les tests doivent Ãªtre exÃ©cutÃ©s avant de valider une implÃ©mentation.
+Tous les tests doivent être exécutés avant de valider une implémentation.
 
-**R-EXEC-2 : Tous les tests doivent rÃ©ussir**
+**R-EXEC-2 : Tous les tests doivent réussir**
 
-Tous les tests doivent rÃ©ussir pour valider la conformitÃ©. Un seul test en Ã©chec invalide la conformitÃ©.
+Tous les tests doivent réussir pour valider la conformité. Un seul test en échec invalide la conformité.
 
-**R-EXEC-3 : ExÃ©cution aprÃ¨s modification**
+**R-EXEC-3 : Exécution après modification**
 
-AprÃ¨s toute modification, tous les tests pertinents doivent Ãªtre rÃ©exÃ©cutÃ©s.
+Après toute modification, tous les tests pertinents doivent être réexécutés.
 
-**R-EXEC-4 : ExÃ©cution pÃ©riodique**
+**R-EXEC-4 : Exécution périodique**
 
-Les tests doivent Ãªtre exÃ©cutÃ©s pÃ©riodiquement pour maintenir la conformitÃ©.
+Les tests doivent être exécutés périodiquement pour maintenir la conformité.
 
-### 8.3. RÃ¨gles de maintenance
+### 8.3. Règles de maintenance
 
 **R-MAINT-1 : Ajout de tests**
 
-Lorsqu'un nouvel invariant, garantie, ou interdiction est ajoutÃ©, un test correspondant doit Ãªtre crÃ©Ã©.
+Lorsqu'un nouvel invariant, garantie, ou interdiction est ajouté, un test correspondant doit être créé.
 
-**R-MAINT-2 : Mise Ã  jour des tests**
+**R-MAINT-2 : Mise à jour des tests**
 
-Lorsqu'un contrat est modifiÃ©, les tests correspondants doivent Ãªtre mis Ã  jour.
+Lorsqu'un contrat est modifié, les tests correspondants doivent être mis à jour.
 
 **R-MAINT-3 : Suppression de tests**
 
-Un test ne doit Ãªtre supprimÃ© que si l'invariant, garantie, ou interdiction correspondant est supprimÃ©.
+Un test ne doit être supprimé que si l'invariant, garantie, ou interdiction correspondant est supprimé.
 
 ---
 
@@ -768,45 +768,45 @@ Cette matrice montre la couverture des tests par rapport aux invariants et garan
 
 ### 9.1. Couverture des invariants de nature
 
-| Invariant | Tests associÃ©s | Section |
+| Invariant | Tests associés | Section |
 |-----------|---------------|---------|
 | INV-CN-1 : Observateur pur | T-NAT-01, T-NAT-02, T-NAT-03, T-NAT-07 | 5.2, 5.4 |
 | INV-CN-3 : Non-autoritaire | Tests d'invariants de non-action | 2.2 |
-| INV-CN-4 : Ã‰tat cohÃ©rent | T-PERF-05, Tests de garanties consommateurs | 6.3, 2.4 |
-| INV-CN-7 : Propagation fidÃ¨le | T-NAT-03, Tests de garanties consommateurs | 5.2, 2.4 |
+| INV-CN-4 : État cohérent | T-PERF-05, Tests de garanties consommateurs | 6.3, 2.4 |
+| INV-CN-7 : Propagation fidèle | T-NAT-03, Tests de garanties consommateurs | 5.2, 2.4 |
 
 ### 9.2. Couverture des invariants de non-action
 
-| Invariant | Tests associÃ©s | Section |
+| Invariant | Tests associés | Section |
 |-----------|---------------|---------|
-| INV-CN-2 | Tests d'absence de mÃ©thodes d'exÃ©cution | 2.2, 3.3 |
-| INV-NEG-CN-01 | Tests d'absence d'Ã©criture | 2.2 |
-| INV-NEG-CN-02 | Tests d'absence de logique dÃ©cisionnelle | 2.2 |
-| INV-NEG-CN-03 | Tests d'absence de remÃ©diation | 2.2 |
+| INV-CN-2 | Tests d'absence de méthodes d'exécution | 2.2, 3.3 |
+| INV-NEG-CN-01 | Tests d'absence d'écriture | 2.2 |
+| INV-NEG-CN-02 | Tests d'absence de logique décisionnelle | 2.2 |
+| INV-NEG-CN-03 | Tests d'absence de remédiation | 2.2 |
 | INV-NEG-CN-04 | Tests d'absence d'interface d'intention | 2.2 |
-| INV-NEG-CN-05 | Tests de source externe des rÃ¨gles | 2.2 |
+| INV-NEG-CN-05 | Tests de source externe des règles | 2.2 |
 | INV-NEG-CN-06 | Tests d'absence de connexion persistance | 2.2 |
 
 ### 9.3. Couverture des invariants de flux
 
-| Invariant | Tests associÃ©s | Section |
+| Invariant | Tests associés | Section |
 |-----------|---------------|---------|
-| INV-CN-5 : TraÃ§abilitÃ© complÃ¨te | Tests de flux, T-PERF-02 | 2.3, 6.3 |
+| INV-CN-5 : Traçabilité complète | Tests de flux, T-PERF-02 | 2.3, 6.3 |
 | INV-CN-6 : Non-bloquant | T-NAT-04, T-NAT-05, T-NAT-06, T-PERF-03 | 5.3, 6.3 |
-| INV-FLUX-CN-01 | Tests de sÃ©quence d'observation | 2.3 |
-| INV-FLUX-CN-02 | Tests de sÃ©quence de propagation | 2.3 |
-| INV-FLUX-CN-03 | Tests de rÃ©conciliation | 2.3 |
+| INV-FLUX-CN-01 | Tests de séquence d'observation | 2.3 |
+| INV-FLUX-CN-02 | Tests de séquence de propagation | 2.3 |
+| INV-FLUX-CN-03 | Tests de réconciliation | 2.3 |
 
 ### 9.4. Couverture des garanties
 
-| Garantie | Tests associÃ©s | Section |
+| Garantie | Tests associés | Section |
 |----------|---------------|---------|
-| GAR-CONS-01 Ã  GAR-CONS-05 | Tests de garanties consommateurs | 2.4 |
-| GAR-AUTH-01 Ã  GAR-AUTH-04 | Tests de garanties autoritÃ©s, T-NAT-04 Ã  T-NAT-06 | 2.5, 5.3 |
+| GAR-CONS-01 à GAR-CONS-05 | Tests de garanties consommateurs | 2.4 |
+| GAR-AUTH-01 à GAR-AUTH-04 | Tests de garanties autorités, T-NAT-04 à T-NAT-06 | 2.5, 5.3 |
 
 ### 9.5. Couverture des Lois d'Autonomie
 
-| Loi | Tests associÃ©s | Section |
+| Loi | Tests associés | Section |
 |-----|---------------|---------|
 | LOI-1 | T-LOI-01 | 7.2 |
 | LOI-2 | T-LOI-02 | 7.2 |
@@ -816,40 +816,40 @@ Cette matrice montre la couverture des tests par rapport aux invariants et garan
 
 ---
 
-## 10. RÃ¨gles de fermeture du contrat
+## 10. Règles de fermeture du contrat
 
-### 10.1. Contrat fermÃ©
+### 10.1. Contrat fermé
 
-Ce contrat est **fermÃ©**. Seuls les types de tests, critÃ¨res de validation, et mÃ©thodes explicitement dÃ©finis sont valides.
+Ce contrat est **fermé**. Seuls les types de tests, critères de validation, et méthodes explicitement définis sont valides.
 
 ### 10.2. Interdiction d'extension implicite
 
-Aucune extension implicite des types de tests ou des critÃ¨res de validation n'est autorisÃ©e.
+Aucune extension implicite des types de tests ou des critères de validation n'est autorisée.
 
-### 10.3. Aucun framework imposÃ©
+### 10.3. Aucun framework imposé
 
-Ce contrat n'impose aucun framework, outil, ou mÃ©thode d'implÃ©mentation. Seuls les objectifs et critÃ¨res de validation sont dÃ©finis.
+Ce contrat n'impose aucun framework, outil, ou méthode d'implémentation. Seuls les objectifs et critères de validation sont définis.
 
 ### 10.4. Respect de la nature d'observateur
 
-Les tests eux-mÃªmes doivent respecter la nature d'observateur passif de Caring Nanny : ils vÃ©rifient et observent, ils ne modifient pas.
+Les tests eux-mêmes doivent respecter la nature d'observateur passif de Caring Nanny : ils vérifient et observent, ils ne modifient pas.
 
 ---
 
 ## 11. Conclusion contractuelle
 
-Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable les rÃ¨gles de test et de validation de Caring Nanny.
+Ce contrat établit de manière définitive et non négociable les règles de test et de validation de Caring Nanny.
 
 Il garantit que :
-- les types de tests requis sont dÃ©finis (nature, non-action, flux, garanties, non-rÃ©gression, performance),
-- les critÃ¨res de validation sont explicites,
-- les mÃ©thodes de validation sont conceptuelles,
-- la couverture des invariants et garanties est complÃ¨te,
-- les tests de conformitÃ© aux Lois d'Autonomie sont dÃ©finis,
-- le contrat est fermÃ© et non extensible implicitement,
-- les tests respectent eux-mÃªmes la nature d'observateur passif.
+- les types de tests requis sont définis (nature, non-action, flux, garanties, non-régression, performance),
+- les critères de validation sont explicites,
+- les méthodes de validation sont conceptuelles,
+- la couverture des invariants et garanties est complète,
+- les tests de conformité aux Lois d'Autonomie sont définis,
+- le contrat est fermé et non extensible implicitement,
+- les tests respectent eux-mêmes la nature d'observateur passif.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
@@ -857,78 +857,78 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ### 12.1. Cas conformes
 
-Les cas suivants sont **conformes** Ã  ce contrat :
+Les cas suivants sont **conformes** à ce contrat :
 
-1. **Validation complÃ¨te** : Tous les tests dÃ©finis sont exÃ©cutÃ©s et rÃ©ussissent, validant la conformitÃ©.
+1. **Validation complète** : Tous les tests définis sont exécutés et réussissent, validant la conformité.
 
-2. **Tests de non-rÃ©gression** : Les modifications sont validÃ©es par les tests de non-rÃ©gression avant validation.
+2. **Tests de non-régression** : Les modifications sont validées par les tests de non-régression avant validation.
 
-3. **Tests de nature** : Toutes les propriÃ©tÃ©s de passivitÃ© et non-intrusion sont validÃ©es.
+3. **Tests de nature** : Toutes les propriétés de passivité et non-intrusion sont validées.
 
-4. **Tests de performance conceptuels** : Les propriÃ©tÃ©s de terminaison et non-blocage sont validÃ©es sans mÃ©triques absolues.
+4. **Tests de performance conceptuels** : Les propriétés de terminaison et non-blocage sont validées sans métriques absolues.
 
 ### 12.2. Cas de violation
 
 Les cas suivants **violent** ce contrat :
 
-1. **Tests manquants** : Un invariant, garantie, ou interdiction n'est pas testÃ©. Viole R-VAL-1.
+1. **Tests manquants** : Un invariant, garantie, ou interdiction n'est pas testé. Viole R-VAL-1.
 
-2. **Tests en Ã©chec** : Un test Ã©choue mais l'implÃ©mentation est validÃ©e. Viole R-EXEC-2.
+2. **Tests en échec** : Un test échoue mais l'implémentation est validée. Viole R-EXEC-2.
 
 3. **Tests non reproductibles** : Un test n'est pas reproductible. Viole R-VAL-2.
 
-4. **Tests intrusifs** : Un test modifie l'Ã©tat du systÃ¨me testÃ©. Viole R-VAL-5.
+4. **Tests intrusifs** : Un test modifie l'état du système testé. Viole R-VAL-5.
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-27  
+**Document créé le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif validÃ©  
-**RÃ©fÃ©rence :** Miyukini Core System, Caring Nanny Documentation Fondatrice v1.6  
-**Type :** RÃ¨gles de test et validation non nÃ©gociables
+**Statut :** FONDATION — Contrat normatif validé  
+**Référence :** Miyukini Core System, Caring Nanny Documentation Fondatrice v1.6  
+**Type :** Règles de test et validation non négociables
 
 ---
 
-## 13. Mini log de gÃ©nÃ©ration
+## 13. Mini log de génération
 
-### DÃ©cision Ã©ditoriale E1 : Nature conceptuelle des tests
+### Décision éditoriale E1 : Nature conceptuelle des tests
 
-**DÃ©cision prise :** Les tests sont dÃ©finis de maniÃ¨re conceptuelle, sans imposer de framework ou d'outil.
+**Décision prise :** Les tests sont définis de manière conceptuelle, sans imposer de framework ou d'outil.
 
-**Application :** Section 1.4 (Principes de test) et section 10.3 (Aucun framework imposÃ©) Ã©tablissent que seuls les objectifs et critÃ¨res sont dÃ©finis.
+**Application :** Section 1.4 (Principes de test) et section 10.3 (Aucun framework imposé) établissent que seuls les objectifs et critères sont définis.
 
-### DÃ©cision Ã©ditoriale E2 : Tests de nature spÃ©cifiques Ã  Caring Nanny
+### Décision éditoriale E2 : Tests de nature spécifiques à Caring Nanny
 
-**DÃ©cision prise :** Une section dÃ©diÃ©e aux "Tests de nature" (passivitÃ©, non-intrusion) est crÃ©Ã©e pour reflÃ©ter la nature unique d'observateur passif de Caring Nanny.
+**Décision prise :** Une section dédiée aux "Tests de nature" (passivité, non-intrusion) est créée pour refléter la nature unique d'observateur passif de Caring Nanny.
 
-**Application :** Section 5 "Tests de nature" couvre spÃ©cifiquement les tests de passivitÃ© et non-intrusion.
+**Application :** Section 5 "Tests de nature" couvre spécifiquement les tests de passivité et non-intrusion.
 
-### DÃ©cision Ã©ditoriale E3 : Tests de performance conceptuels
+### Décision éditoriale E3 : Tests de performance conceptuels
 
-**DÃ©cision prise :** Les tests de performance sont conceptuels et valident des propriÃ©tÃ©s (terminaison, non-blocage), pas des mÃ©triques absolues.
+**Décision prise :** Les tests de performance sont conceptuels et valident des propriétés (terminaison, non-blocage), pas des métriques absolues.
 
-**Application :** Section 6 dÃ©finit les tests de performance comme conceptuels, sans mÃ©triques absolues.
+**Application :** Section 6 définit les tests de performance comme conceptuels, sans métriques absolues.
 
-### DÃ©cision Ã©ditoriale E4 : PassivitÃ© des tests eux-mÃªmes
+### Décision éditoriale E4 : Passivité des tests eux-mêmes
 
-**DÃ©cision prise :** Les tests doivent respecter la nature d'observateur passif de Caring Nanny : ils vÃ©rifient sans modifier.
+**Décision prise :** Les tests doivent respecter la nature d'observateur passif de Caring Nanny : ils vérifient sans modifier.
 
-**Application :** Section 1.4 (T-5), section 8.1 (R-VAL-5), et section 10.4 Ã©tablissent cette rÃ¨gle.
+**Application :** Section 1.4 (T-5), section 8.1 (R-VAL-5), et section 10.4 établissent cette règle.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec Documentation Fondatrice v1.6 : ConfirmÃ©e (nature d'observateur respectÃ©e)
-- âœ… CohÃ©rence avec Invariants et Garanties : ConfirmÃ©e (tous les invariants couverts)
-- âœ… CohÃ©rence avec Performance & Scalability Contract : ConfirmÃ©e (tests conceptuels)
-- âœ… CohÃ©rence avec State Model Contract : ConfirmÃ©e (Ã©tats testÃ©s)
-- âœ… CohÃ©rence avec Observation Flow Contract : ConfirmÃ©e (sÃ©quences testÃ©es)
-- âœ… CohÃ©rence avec Propagation Flow Contract : ConfirmÃ©e (propagation testÃ©e)
-- âœ… ConformitÃ© aux Lois d'Autonomie : ConfirmÃ©e (tests de conformitÃ© dÃ©finis)
+**Vérification effectuée :**
+- ✅ Cohérence avec Documentation Fondatrice v1.6 : Confirmée (nature d'observateur respectée)
+- ✅ Cohérence avec Invariants et Garanties : Confirmée (tous les invariants couverts)
+- ✅ Cohérence avec Performance & Scalability Contract : Confirmée (tests conceptuels)
+- ✅ Cohérence avec State Model Contract : Confirmée (états testés)
+- ✅ Cohérence avec Observation Flow Contract : Confirmée (séquences testées)
+- ✅ Cohérence avec Propagation Flow Contract : Confirmée (propagation testée)
+- ✅ Conformité aux Lois d'Autonomie : Confirmée (tests de conformité définis)
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e.
+**Conclusion :** Aucune contradiction détectée.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

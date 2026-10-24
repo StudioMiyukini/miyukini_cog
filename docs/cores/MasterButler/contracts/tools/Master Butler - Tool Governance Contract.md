@@ -1,4 +1,4 @@
-﻿# Master Butler â€” Tool Governance Contract
+﻿# Master Butler — Tool Governance Contract
 
 ## 1. Introduction
 
@@ -215,7 +215,7 @@ Le **Catalogue des Tools** est la structure centrale de Master Butler pour la go
 ToolCatalog {
   tools: Map<ToolId, Tool>,                 // Index principal des Tools
   toolkits: Map<ToolkitId, Toolkit>,        // Index principal des Toolkits
-  by_capability: Map<CapabilityId, ToolId>, // Index Capability â†’ Tool
+  by_capability: Map<CapabilityId, ToolId>, // Index Capability → Tool
   by_domain: Map<Domain, Set<ToolId>>,      // Index par domaine
   by_security_level: Map<SecurityLevel, Set<ToolId>>, // Index par niveau securite
   history: ToolCatalogHistory,              // Historique des modifications
@@ -225,7 +225,7 @@ ToolCatalog {
 
 **Caracteristiques :**
 - **Exhaustif :** Contient tous les Tools et Toolkits de l'environnement
-- **Coherent :** Aucune duplication, aucune incohÃ©rence
+- **Coherent :** Aucune duplication, aucune incohérence
 - **Tracable :** Historique complet de toutes les modifications
 - **Indexe :** Recherche efficace par identifiant, capability, domaine
 - **Gouverne :** Aucun Tool ou Toolkit non declare
@@ -329,7 +329,7 @@ DeclareTool(
   source: SourceIdentity,
   security_level: SecurityLevel,
   metadata: ToolMetadata?
-) â†’ Result<Tool, DeclarationError>
+) → Result<Tool, DeclarationError>
 ```
 
 **Preconditions :**
@@ -379,7 +379,7 @@ DeclareToolkit(
   allowed_states: Set<SystemState>?,
   disallowed_states: Set<SystemState>?,
   metadata: ToolkitMetadata?
-) â†’ Result<Toolkit, DeclarationError>
+) → Result<Toolkit, DeclarationError>
 ```
 
 **Preconditions :**
@@ -428,7 +428,7 @@ L'operation **QueryTools** permet d'interroger le catalogue pour decouvrir les T
 ```
 QueryTools(
   filter: ToolFilter
-) â†’ Result<List<Tool>, QueryError>
+) → Result<List<Tool>, QueryError>
 
 ToolFilter {
   id: ToolId?,
@@ -464,7 +464,7 @@ L'operation **CheckToolAccess** permet de verifier si un contexte (Operateur, ro
 CheckToolAccess(
   tool_or_toolkit_id: ToolId | ToolkitId,
   context: AccessContext
-) â†’ Result<AccessInfo, AccessError>
+) → Result<AccessInfo, AccessError>
 
 AccessContext {
   operator_id: OperatorId,
@@ -535,55 +535,55 @@ Tout appel a un Tool ou Toolkit passe par un flux de gouvernance strict.
 
 ```
 Operateur (Strate 7)
-    â”‚
-    â”‚ 1. Demande d'utilisation d'un Tool
-    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  BondingBrother (mediation)           â”‚
-â”‚  - Traduit l'intention                â”‚
-â”‚  - Prepare le contexte                â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-    â”‚
-    â”‚ 2. Interrogation du catalogue
-    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Master Butler                         â”‚
-â”‚  - "Ce Tool existe-t-il ?"            â”‚
-â”‚  - "Quelles permissions requises ?"   â”‚
-â”‚  - "Quel niveau de securite ?"        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-    â”‚
-    â”‚ 3. Verification securite
-    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  WorrySentinel                         â”‚
-â”‚  - "Le niveau de securite permet-il   â”‚
-â”‚     cet appel ?"                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-    â”‚
-    â”‚ 4. Verification etat systeme
-    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Caring Nanny                          â”‚
-â”‚  - "L'etat systeme permet-il cet      â”‚
-â”‚     appel ?"                          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-    â”‚
-    â”‚ 5. Decision finale
-    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  StrongFather                          â”‚
-â”‚  - Evalue l'intention complete        â”‚
-â”‚  - Produit la decision ALLOW/DENY     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-    â”‚
-    â”‚ 6. Execution (si ALLOW)
-    â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Tool / Toolkit (execution)            â”‚
-â”‚  - Execute l'action                   â”‚
-â”‚  - Retourne le resultat               â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+    │
+    │ 1. Demande d'utilisation d'un Tool
+    ▼
+┌───────────────────────────────────────┐
+│  BondingBrother (mediation)           │
+│  - Traduit l'intention                │
+│  - Prepare le contexte                │
+└───────────────────────────────────────┘
+    │
+    │ 2. Interrogation du catalogue
+    ▼
+┌───────────────────────────────────────┐
+│  Master Butler                         │
+│  - "Ce Tool existe-t-il ?"            │
+│  - "Quelles permissions requises ?"   │
+│  - "Quel niveau de securite ?"        │
+└───────────────────────────────────────┘
+    │
+    │ 3. Verification securite
+    ▼
+┌───────────────────────────────────────┐
+│  WorrySentinel                         │
+│  - "Le niveau de securite permet-il   │
+│     cet appel ?"                      │
+└───────────────────────────────────────┘
+    │
+    │ 4. Verification etat systeme
+    ▼
+┌───────────────────────────────────────┐
+│  Caring Nanny                          │
+│  - "L'etat systeme permet-il cet      │
+│     appel ?"                          │
+└───────────────────────────────────────┘
+    │
+    │ 5. Decision finale
+    ▼
+┌───────────────────────────────────────┐
+│  StrongFather                          │
+│  - Evalue l'intention complete        │
+│  - Produit la decision ALLOW/DENY     │
+└───────────────────────────────────────┘
+    │
+    │ 6. Execution (si ALLOW)
+    ▼
+┌───────────────────────────────────────┐
+│  Tool / Toolkit (execution)            │
+│  - Execute l'action                   │
+│  - Retourne le resultat               │
+└───────────────────────────────────────┘
 ```
 
 **Invariants :**
@@ -601,7 +601,7 @@ Operateur (Strate 7)
 | Action | Description |
 |--------|-------------|
 | **Declare l'existence** | Maintient le catalogue exhaustif des Tools |
-| **Lie Capability â†’ Tool** | Etablit la correspondance Capacite-Outil |
+| **Lie Capability → Tool** | Etablit la correspondance Capacite-Outil |
 | **Definit les permissions** | Declare les permissions d'acces aux Tools |
 | **Catalogue les Toolkits** | Maintient l'inventaire des compositions |
 | **Informe sur les acces** | Repond aux questions sur les permissions requises |
@@ -650,15 +650,15 @@ Tout Tool possede un statut qui reflete son etat dans le cycle de vie.
 
 | Statut | Description | Transitions possibles |
 |--------|-------------|----------------------|
-| **Active** | Tool disponible et utilisable | â†’ Deprecated, â†’ Removed |
-| **Deprecated** | Tool obsolete, utilisation deconseillee | â†’ Removed |
+| **Active** | Tool disponible et utilisable | → Deprecated, → Removed |
+| **Deprecated** | Tool obsolete, utilisation deconseillee | → Removed |
 | **Removed** | Tool supprime, non utilisable | (terminal) |
 
 **Regles de transition :**
 - R-ST-1 : Un Tool nouvellement cree est toujours Active
-- R-ST-2 : Un Tool Active peut etre deprecie (â†’ Deprecated)
-- R-ST-3 : Un Tool Deprecated peut etre supprime (â†’ Removed)
-- R-ST-4 : Un Tool Active peut etre supprime directement (â†’ Removed)
+- R-ST-2 : Un Tool Active peut etre deprecie (→ Deprecated)
+- R-ST-3 : Un Tool Deprecated peut etre supprime (→ Removed)
+- R-ST-4 : Un Tool Active peut etre supprime directement (→ Removed)
 - R-ST-5 : Un Tool Removed ne peut pas etre reactive
 - R-ST-6 : Une transition de statut est irreversible
 
@@ -671,7 +671,7 @@ DeprecateTool(
   id: ToolId,
   reason: String,
   successor: ToolId?
-) â†’ Result<Tool, DeprecationError>
+) → Result<Tool, DeprecationError>
 ```
 
 **Preconditions :**
@@ -770,144 +770,144 @@ Lorsqu'un Tool est deprecie ou supprime, les Toolkits qui le contiennent sont im
 ### 9.1. Structure du Catalogue
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                          TOOL CATALOG                                        â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                                                                              â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  INDEX DES TOOLS (Map<ToolId, Tool>)                                  â”‚  â”‚
-â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
-â”‚  â”‚  tool.layout.render    â†’ Tool { cap: "ui.render", sec: 1, ... }      â”‚  â”‚
-â”‚  â”‚  tool.input.capture    â†’ Tool { cap: "ui.capture", sec: 1, ... }     â”‚  â”‚
-â”‚  â”‚  tool.form.validate    â†’ Tool { cap: "form.validate", sec: 2, ... }  â”‚  â”‚
-â”‚  â”‚  tool.query.execute    â†’ Tool { cap: "data.query", sec: 2, ... }     â”‚  â”‚
-â”‚  â”‚  tool.file.read        â†’ Tool { cap: "io.read", sec: 3, ... }        â”‚  â”‚
-â”‚  â”‚  tool.cache.get        â†’ Tool { cap: "cache.read", sec: 1, ... }     â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                              â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  INDEX DES TOOLKITS (Map<ToolkitId, Toolkit>)                         â”‚  â”‚
-â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
-â”‚  â”‚  toolkit.ui.standard â†’ Toolkit {                                      â”‚  â”‚
-â”‚  â”‚                          tools: [tool.layout.render,                  â”‚  â”‚
-â”‚  â”‚                                  tool.input.capture,                  â”‚  â”‚
-â”‚  â”‚                                  tool.form.validate],                 â”‚  â”‚
-â”‚  â”‚                          sec: 2                                       â”‚  â”‚
-â”‚  â”‚                        }                                              â”‚  â”‚
-â”‚  â”‚                                                                        â”‚  â”‚
-â”‚  â”‚  toolkit.data.crud   â†’ Toolkit {                                      â”‚  â”‚
-â”‚  â”‚                          tools: [tool.query.execute,                  â”‚  â”‚
-â”‚  â”‚                                  tool.cache.get],                     â”‚  â”‚
-â”‚  â”‚                          sec: 2                                       â”‚  â”‚
-â”‚  â”‚                        }                                              â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                              â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚  INDEX PAR CAPABILITY      â”‚    â”‚  INDEX PAR DOMAINE                  â”‚  â”‚
-â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤    â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤  â”‚
-â”‚  â”‚  ui.render â†’ tool.layout.  â”‚    â”‚  ui:                                â”‚  â”‚
-â”‚  â”‚              render        â”‚    â”‚    - tool.layout.render             â”‚  â”‚
-â”‚  â”‚  ui.capture â†’ tool.input.  â”‚    â”‚    - tool.input.capture             â”‚  â”‚
-â”‚  â”‚               capture      â”‚    â”‚                                      â”‚  â”‚
-â”‚  â”‚  form.validate â†’ tool.form â”‚    â”‚  data:                               â”‚  â”‚
-â”‚  â”‚                 .validate  â”‚    â”‚    - tool.query.execute              â”‚  â”‚
-â”‚  â”‚  ...                       â”‚    â”‚    - tool.cache.get                  â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          TOOL CATALOG                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │  INDEX DES TOOLS (Map<ToolId, Tool>)                                  │  │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │  tool.layout.render    → Tool { cap: "ui.render", sec: 1, ... }      │  │
+│  │  tool.input.capture    → Tool { cap: "ui.capture", sec: 1, ... }     │  │
+│  │  tool.form.validate    → Tool { cap: "form.validate", sec: 2, ... }  │  │
+│  │  tool.query.execute    → Tool { cap: "data.query", sec: 2, ... }     │  │
+│  │  tool.file.read        → Tool { cap: "io.read", sec: 3, ... }        │  │
+│  │  tool.cache.get        → Tool { cap: "cache.read", sec: 1, ... }     │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │  INDEX DES TOOLKITS (Map<ToolkitId, Toolkit>)                         │  │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │  toolkit.ui.standard → Toolkit {                                      │  │
+│  │                          tools: [tool.layout.render,                  │  │
+│  │                                  tool.input.capture,                  │  │
+│  │                                  tool.form.validate],                 │  │
+│  │                          sec: 2                                       │  │
+│  │                        }                                              │  │
+│  │                                                                        │  │
+│  │  toolkit.data.crud   → Toolkit {                                      │  │
+│  │                          tools: [tool.query.execute,                  │  │
+│  │                                  tool.cache.get],                     │  │
+│  │                          sec: 2                                       │  │
+│  │                        }                                              │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌────────────────────────────┐    ┌────────────────────────────────────┐  │
+│  │  INDEX PAR CAPABILITY      │    │  INDEX PAR DOMAINE                  │  │
+│  ├────────────────────────────┤    ├────────────────────────────────────┤  │
+│  │  ui.render → tool.layout.  │    │  ui:                                │  │
+│  │              render        │    │    - tool.layout.render             │  │
+│  │  ui.capture → tool.input.  │    │    - tool.input.capture             │  │
+│  │               capture      │    │                                      │  │
+│  │  form.validate → tool.form │    │  data:                               │  │
+│  │                 .validate  │    │    - tool.query.execute              │  │
+│  │  ...                       │    │    - tool.cache.get                  │  │
+│  └────────────────────────────┘    └────────────────────────────────────┘  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 9.2. Flux de Declaration d'Outil
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                     FLUX DE DECLARATION D'OUTIL                              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     FLUX DE DECLARATION D'OUTIL                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 
    COMPOSANT                    MASTER BUTLER                    CATALOGUE
-       â”‚                              â”‚                              â”‚
-       â”‚  DeclareTool(                â”‚                              â”‚
-       â”‚    id: "tool.layout.render", â”‚                              â”‚
-       â”‚    capability: "ui.render",  â”‚                              â”‚
-       â”‚    security_level: 1         â”‚                              â”‚
-       â”‚  )                           â”‚                              â”‚
-       â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                              â”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚  1. Valider format id        â”‚
-       â”‚                              â”‚  2. Verifier unicite         â”‚
-       â”‚                              â”‚  3. Verifier Capability      â”‚
-       â”‚                              â”‚     existe                   â”‚
-       â”‚                              â”‚  4. Verifier Capability      â”‚
-       â”‚                              â”‚     non liee                 â”‚
-       â”‚                              â”‚  5. Valider security level   â”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚  [Validations OK]            â”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚  6. Creer Tool               â”‚
-       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚  7. Creer liaison            â”‚
-       â”‚                              â”‚     Capability-Tool          â”‚
-       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚  8. Mettre a jour index      â”‚
-       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚  9. Historiser evenement     â”‚
-       â”‚                              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
-       â”‚                              â”‚                              â”‚
-       â”‚                              â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-       â”‚                              â”‚      [Tool cree]             â”‚
-       â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                              â”‚
-       â”‚    Result::Ok(Tool)          â”‚                              â”‚
-       â”‚                              â”‚                              â”‚
-       â–¼                              â–¼                              â–¼
+       │                              │                              │
+       │  DeclareTool(                │                              │
+       │    id: "tool.layout.render", │                              │
+       │    capability: "ui.render",  │                              │
+       │    security_level: 1         │                              │
+       │  )                           │                              │
+       ├─────────────────────────────►│                              │
+       │                              │                              │
+       │                              │  1. Valider format id        │
+       │                              │  2. Verifier unicite         │
+       │                              │  3. Verifier Capability      │
+       │                              │     existe                   │
+       │                              │  4. Verifier Capability      │
+       │                              │     non liee                 │
+       │                              │  5. Valider security level   │
+       │                              │                              │
+       │                              │  [Validations OK]            │
+       │                              │                              │
+       │                              │  6. Creer Tool               │
+       │                              ├─────────────────────────────►│
+       │                              │                              │
+       │                              │  7. Creer liaison            │
+       │                              │     Capability-Tool          │
+       │                              ├─────────────────────────────►│
+       │                              │                              │
+       │                              │  8. Mettre a jour index      │
+       │                              ├─────────────────────────────►│
+       │                              │                              │
+       │                              │  9. Historiser evenement     │
+       │                              ├─────────────────────────────►│
+       │                              │                              │
+       │                              │◄─────────────────────────────┤
+       │                              │      [Tool cree]             │
+       │◄─────────────────────────────┤                              │
+       │    Result::Ok(Tool)          │                              │
+       │                              │                              │
+       ▼                              ▼                              ▼
 ```
 
 ### 9.3. Separation des Responsabilites
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                 SEPARATION DES RESPONSABILITES - TOOLS                       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                 SEPARATION DES RESPONSABILITES - TOOLS                       │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-                     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                     â”‚      MASTER BUTLER          â”‚
-                     â”‚   Capability & Permission   â”‚
-                     â”‚           Core              â”‚
-                     â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                     â”‚  âœ“ Declarer les Tools       â”‚
-                     â”‚  âœ“ Lier Capability â†’ Tool   â”‚
-                     â”‚  âœ“ Definir permissions      â”‚
-                     â”‚  âœ“ Cataloguer Toolkits      â”‚
-                     â”‚  âœ— NE DECIDE PAS            â”‚
-                     â”‚  âœ— N'EXECUTE PAS            â”‚
-                     â”‚  âœ— N'IMPLEMENTE PAS         â”‚
-                     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                   â”‚
-           â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-           â”‚                       â”‚                       â”‚
-           â–¼                       â–¼                       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   STRONGFATHER      â”‚ â”‚    EVER BUDDY       â”‚ â”‚   WORRYSENSTINEL    â”‚
-â”‚  Decision Core      â”‚ â”‚  Lifecycle Core     â”‚ â”‚   Security Core     â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ âœ“ Decide ALLOW/DENY â”‚ â”‚ âœ“ Gere versions     â”‚ â”‚ âœ“ Valide securite   â”‚
-â”‚ âœ“ Evalue intentions â”‚ â”‚ âœ“ Deprecie Tools    â”‚ â”‚ âœ“ Verifie niveau    â”‚
-â”‚ âœ— Ne catalogue pas  â”‚ â”‚ âœ“ Migre Tools       â”‚ â”‚ âœ— Ne catalogue pas  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                   â”‚
-                                   â–¼
-                     â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                     â”‚         TOOLS               â”‚
-                     â”‚   Capacites Executables     â”‚
-                     â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-                     â”‚  âœ“ Executent les actions    â”‚
-                     â”‚  âœ“ Retournent resultats     â”‚
-                     â”‚  âœ— NE DECIDENT JAMAIS       â”‚
-                     â”‚  âœ— NE CONNAISSENT PAS       â”‚
-                     â”‚    L'OPERATEUR              â”‚
-                     â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                     ┌─────────────────────────────┐
+                     │      MASTER BUTLER          │
+                     │   Capability & Permission   │
+                     │           Core              │
+                     ├─────────────────────────────┤
+                     │  ✓ Declarer les Tools       │
+                     │  ✓ Lier Capability → Tool   │
+                     │  ✓ Definir permissions      │
+                     │  ✓ Cataloguer Toolkits      │
+                     │  ✗ NE DECIDE PAS            │
+                     │  ✗ N'EXECUTE PAS            │
+                     │  ✗ N'IMPLEMENTE PAS         │
+                     └─────────────────────────────┘
+                                   │
+           ┌───────────────────────┼───────────────────────┐
+           │                       │                       │
+           ▼                       ▼                       ▼
+┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│   STRONGFATHER      │ │    EVER BUDDY       │ │   WORRYSENSTINEL    │
+│  Decision Core      │ │  Lifecycle Core     │ │   Security Core     │
+├─────────────────────┤ ├─────────────────────┤ ├─────────────────────┤
+│ ✓ Decide ALLOW/DENY │ │ ✓ Gere versions     │ │ ✓ Valide securite   │
+│ ✓ Evalue intentions │ │ ✓ Deprecie Tools    │ │ ✓ Verifie niveau    │
+│ ✗ Ne catalogue pas  │ │ ✓ Migre Tools       │ │ ✗ Ne catalogue pas  │
+└─────────────────────┘ └─────────────────────┘ └─────────────────────┘
+                                   │
+                                   ▼
+                     ┌─────────────────────────────┐
+                     │         TOOLS               │
+                     │   Capacites Executables     │
+                     ├─────────────────────────────┤
+                     │  ✓ Executent les actions    │
+                     │  ✓ Retournent resultats     │
+                     │  ✗ NE DECIDENT JAMAIS       │
+                     │  ✗ NE CONNAISSENT PAS       │
+                     │    L'OPERATEUR              │
+                     └─────────────────────────────┘
 ```
 
 ---
@@ -1029,7 +1029,7 @@ StrongFather interroge Master Butler lors de l'evaluation d'une intention.
 ```
 // Question : Ce Tool existe-t-il ?
 QueryTools(filter: { id: "tool.layout.render" })
-â†’ Result::Ok([
+→ Result::Ok([
     Tool {
       id: "tool.layout.render",
       capability_id: "ui.render",
@@ -1044,7 +1044,7 @@ CheckToolAccess(
   tool_id: "tool.form.validate",
   context: AccessContext { ... }
 )
-â†’ Result::Ok(AccessInfo {
+→ Result::Ok(AccessInfo {
     can_access: true,  // Information, pas decision
     required_permissions: ["form.validate.execute"],
     required_security_level: 2,
@@ -1088,13 +1088,13 @@ Ce contrat complete la Documentation Fondatrice de Master Butler (section 10) en
 
 **Document cree le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif valide  
+**Statut :** FONDATION — Contrat normatif valide  
 **Reference :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice, Miyukini Conceptual References - Tools et Toolkits  
 **Type :** Contrat de gouvernance non negociable
 
 ---
 
-## 12. Mini log â€” erreurs / warnings / ambiguites rencontrees et corrigees
+## 12. Mini log — erreurs / warnings / ambiguites rencontrees et corrigees
 
 ### Ambiguite A1 : Format de l'identifiant de Tool
 

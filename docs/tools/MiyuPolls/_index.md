@@ -1,8 +1,8 @@
-﻿# MiyuPolls â€” Index de navigation
+﻿# MiyuPolls — Index de navigation
 
 ## Contexte
 
-**MiyuPolls** est le **kit d'outils (Toolkit)** de sondages (crÃ©ation, vote, rÃ©sultats). AlignÃ© sur [Ã‰quivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md).
+**MiyuPolls** est le **kit d'outils (Toolkit)** de sondages (création, vote, résultats). Aligné sur [Équivalents Moteur Forum](..//..//miyukini-webway-system//reference//_index.md).
 
 **Strate :** 6 (Tools & Toolkits)  
 **ToolkitId :** `toolkit.content.polls`
@@ -13,11 +13,11 @@
 
 | Document | Description |
 |----------|-------------|
-| [Documentation Fondatrice](./MiyuPolls%20-%20Documentation%20Fondatrice.md) | IdentitÃ©, dÃ©finition canonique, ToolkitId, liste des outils composants, gouvernance |
-| [Reference Outils](./MiyuPolls%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sÃ©curitÃ© |
-| [Tool Governance Compliance Contract](./contracts/governance/MiyuPolls%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformitÃ© |
+| [Documentation Fondatrice](./MiyuPolls%20-%20Documentation%20Fondatrice.md) | Identité, définition canonique, ToolkitId, liste des outils composants, gouvernance |
+| [Reference Outils](./MiyuPolls%20-%20Reference%20Outils.md) | Liste exhaustive des Tools : ToolId, action, niveau de sécurité |
+| [Tool Governance Compliance Contract](./contracts/governance/MiyuPolls%20-%20Tool%20Governance%20Compliance%20Contract.md) | Obligations de conformité |
 
 ---
 
-**RÃ©fÃ©rence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)
+**Référence conceptuelle :** [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)
 

@@ -1,10 +1,10 @@
-﻿# LogisticsSteward â€” Invariants & Guarantees
+﻿# LogisticsSteward — Invariants & Guarantees
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document definit le **LogisticsSteward â€” Invariants & Guarantees** : un contrat normatif, non negociable, et de statut FONDATION qui formalise l'ensemble des invariants et garanties du core LogisticsSteward.
+Ce document definit le **LogisticsSteward — Invariants & Guarantees** : un contrat normatif, non negociable, et de statut FONDATION qui formalise l'ensemble des invariants et garanties du core LogisticsSteward.
 
 Ce contrat etablit :
 - Les invariants fondamentaux et leurs specifications formelles
@@ -28,10 +28,10 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 ### Relation avec les autres contrats
 
 Ce contrat s'articule avec :
-- **LogisticsSteward â€” Documentation Fondatrice** : Source des invariants fondamentaux
-- **LogisticsSteward â€” Violations & Anti-Patterns** : Catalogue des violations
-- **StrongFather â€” Core Decision Contract** : Validation des invariants
-- **WorrySentinel â€” Monitoring Contract** : Surveillance des invariants
+- **LogisticsSteward — Documentation Fondatrice** : Source des invariants fondamentaux
+- **LogisticsSteward — Violations & Anti-Patterns** : Catalogue des violations
+- **StrongFather — Core Decision Contract** : Validation des invariants
+- **WorrySentinel — Monitoring Contract** : Surveillance des invariants
 
 ---
 
@@ -750,7 +750,7 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisee.
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** FONDATION â€” Contrat normatif valide  
+**Statut :** FONDATION — Contrat normatif valide  
 **Reference :** Miyukini Core System v2.4, LogisticsSteward Documentation Fondatrice
 
 

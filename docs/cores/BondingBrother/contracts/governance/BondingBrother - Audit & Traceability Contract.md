@@ -2,98 +2,98 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le contrat d'audit et de traÃ§abilitÃ© de Bonding Brother. Il spÃ©cifie comment toutes les interactions sont tracÃ©es, comment l'audit est garanti, et comment les informations de traÃ§abilitÃ© sont structurÃ©es et accessibles.
+Ce document définit le contrat d'audit et de traçabilité de Bonding Brother. Il spécifie comment toutes les interactions sont tracées, comment l'audit est garanti, et comment les informations de traçabilité sont structurées et accessibles.
 
-Ce document complÃ¨te la Section 9 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) sur la traÃ§abilitÃ© et la responsabilitÃ©, et s'appuie sur le [Journaling Contract](../offline/BondingBrother%20-%20Journaling%20Contract.md) pour dÃ©finir les rÃ¨gles d'audit complÃ¨tes.
+Ce document complète la Section 9 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) sur la traçabilité et la responsabilité, et s'appuie sur le [Journaling Contract](../offline/BondingBrother%20-%20Journaling%20Contract.md) pour définir les règles d'audit complètes.
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- La dÃ©finition formelle de l'audit et de la traÃ§abilitÃ©
-- Les Ã©vÃ©nements auditÃ©s
+- La définition formelle de l'audit et de la traçabilité
+- Les événements audités
 - La structure des traces d'audit
 - Les garanties d'audit
-- L'accessibilitÃ© des traces
-- La rÃ©tention et l'archivage
-- La corrÃ©lation des traces
+- L'accessibilité des traces
+- La rétention et l'archivage
+- La corrélation des traces
 
 Ce document **ne couvre pas** :
 - La journalisation technique (voir [Journaling Contract](../offline/BondingBrother%20-%20Journaling%20Contract.md))
-- Les dÃ©tails d'implÃ©mentation du stockage
+- Les détails d'implémentation du stockage
 - Les formats de logs techniques
-- Les mÃ©canismes de recherche dans les traces
+- Les mécanismes de recherche dans les traces
 
 ---
 
 ## 3. Principe fondamental
 
-**Toute interaction via Bonding Brother est auditable. On peut tracer qui a exprimÃ© quelle intention, quand, comment elle a Ã©tÃ© traitÃ©e, quelle rÃ©ponse a Ã©tÃ© reÃ§ue, et quel rÃ©sultat a Ã©tÃ© transmis.**
+**Toute interaction via Bonding Brother est auditable. On peut tracer qui a exprimé quelle intention, quand, comment elle a été traitée, quelle réponse a été reçue, et quel résultat a été transmis.**
 
-L'audit est complet, immuable, et accessible aux acteurs autorisÃ©s. Il permet de comprendre, aprÃ¨s coup, exactement ce qui s'est passÃ©, pourquoi, et qui en est responsable.
+L'audit est complet, immuable, et accessible aux acteurs autorisés. Il permet de comprendre, après coup, exactement ce qui s'est passé, pourquoi, et qui en est responsable.
 
 ---
 
-## 4. DÃ©finitions
+## 4. Définitions
 
 ### 4.1 Audit
 
-L'**audit** est la capacitÃ© de consulter et d'analyser l'historique complet des interactions via Bonding Brother pour comprendre ce qui s'est passÃ©, quand, et pourquoi.
+L'**audit** est la capacité de consulter et d'analyser l'historique complet des interactions via Bonding Brother pour comprendre ce qui s'est passé, quand, et pourquoi.
 
-### 4.2 TraÃ§abilitÃ©
+### 4.2 Traçabilité
 
-La **traÃ§abilitÃ©** est la capacitÃ© de suivre une intention depuis son expression par un produit jusqu'Ã  sa rÃ©solution, en passant par toutes les Ã©tapes de traitement.
+La **traçabilité** est la capacité de suivre une intention depuis son expression par un produit jusqu'à sa résolution, en passant par toutes les étapes de traitement.
 
 ### 4.3 Trace d'audit
 
-Une **trace d'audit** est un enregistrement immuable d'un Ã©vÃ©nement significatif dans le cycle de vie d'une intention ou d'une interaction.
+Une **trace d'audit** est un enregistrement immuable d'un événement significatif dans le cycle de vie d'une intention ou d'une interaction.
 
 ---
 
-## 5. Ã‰vÃ©nements auditÃ©s
+## 5. Événements audités
 
-### 5.1 CatÃ©gories d'Ã©vÃ©nements
+### 5.1 Catégories d'événements
 
-Tous les Ã©vÃ©nements suivants sont auditÃ©s :
+Tous les événements suivants sont audités :
 
-| CatÃ©gorie | Ã‰vÃ©nements | Moment |
+| Catégorie | Événements | Moment |
 |-----------|------------|--------|
-| **RÃ©ception** | Intention reÃ§ue | DÃ¨s rÃ©ception par ProductGateway |
-| **Validation** | Intention validÃ©e / rejetÃ©e | AprÃ¨s validation structurelle |
-| **Traduction** | Intention traduite / erreur de traduction | AprÃ¨s traduction |
-| **Filtrage** | Intention filtrÃ©e / rejetÃ©e par filtrage | AprÃ¨s filtrage |
-| **Journalisation** | Intention journalisÃ©e | AprÃ¨s journalisation |
-| **Transmission** | Demande transmise Ã  autoritÃ© | DÃ¨s transmission |
-| **RÃ©ception autoritÃ©** | RÃ©ponse reÃ§ue de l'autoritÃ© | DÃ¨s rÃ©ception |
-| **Traduction rÃ©ponse** | RÃ©ponse traduite en rÃ©sultat | AprÃ¨s traduction |
-| **Filtrage rÃ©sultat** | RÃ©sultat filtrÃ© | AprÃ¨s filtrage |
-| **Ã‰mission** | RÃ©sultat Ã©mis au produit | DÃ¨s Ã©mission |
-| **Erreur** | Erreur survenue | DÃ¨s dÃ©tection |
-| **Synchronisation** | Synchronisation dÃ©marrÃ©e / complÃ©tÃ©e | DÃ©but et fin de sync |
+| **Réception** | Intention reçue | Dès réception par ProductGateway |
+| **Validation** | Intention validée / rejetée | Après validation structurelle |
+| **Traduction** | Intention traduite / erreur de traduction | Après traduction |
+| **Filtrage** | Intention filtrée / rejetée par filtrage | Après filtrage |
+| **Journalisation** | Intention journalisée | Après journalisation |
+| **Transmission** | Demande transmise à autorité | Dès transmission |
+| **Réception autorité** | Réponse reçue de l'autorité | Dès réception |
+| **Traduction réponse** | Réponse traduite en résultat | Après traduction |
+| **Filtrage résultat** | Résultat filtré | Après filtrage |
+| **Émission** | Résultat émis au produit | Dès émission |
+| **Erreur** | Erreur survenue | Dès détection |
+| **Synchronisation** | Synchronisation démarrée / complétée | Début et fin de sync |
 
-### 5.2 RÃ¨gle d'audit complÃ¨te
+### 5.2 Règle d'audit complète
 
-**RÃ¨gle AUDIT-01 : Audit systÃ©matique**
+**Règle AUDIT-01 : Audit systématique**
 
-Tout Ã©vÃ©nement significatif est auditÃ©, sans exception :
-- Pas d'Ã©vÃ©nement silencieux
-- Pas d'Ã©vÃ©nement non tracÃ©
-- Pas d'Ã©vÃ©nement ignorÃ©
+Tout événement significatif est audité, sans exception :
+- Pas d'événement silencieux
+- Pas d'événement non tracé
+- Pas d'événement ignoré
 
-**RÃ¨gle AUDIT-02 : GranularitÃ©**
+**Règle AUDIT-02 : Granularité**
 
-L'audit capture tous les dÃ©tails nÃ©cessaires :
+L'audit capture tous les détails nécessaires :
 - Qui (produit, utilisateur, session)
-- Quoi (intention, demande, rÃ©ponse, rÃ©sultat)
-- Quand (timestamp prÃ©cis)
-- Comment (Ã©tapes de traitement)
-- Pourquoi (contexte, dÃ©cisions)
+- Quoi (intention, demande, réponse, résultat)
+- Quand (timestamp précis)
+- Comment (étapes de traitement)
+- Pourquoi (contexte, décisions)
 
-**RÃ¨gle AUDIT-03 : ImmuabilitÃ©**
+**Règle AUDIT-03 : Immuabilité**
 
 Les traces d'audit sont immuables :
-- Aucune modification aprÃ¨s crÃ©ation
+- Aucune modification après création
 - Aucune suppression (sauf archivage)
-- Aucune altÃ©ration
+- Aucune altération
 
 ---
 
@@ -107,250 +107,250 @@ interface TraceAudit {
     trace_id: TraceId;                    // ID unique de la trace
     intention_id?: IntentionId;           // ID de l'intention (si applicable)
     demande_id?: DemandeId;               // ID de la demande (si applicable)
-    rÃ©sultat_id?: RÃ©sultatId;             // ID du rÃ©sultat (si applicable)
+    résultat_id?: RésultatId;             // ID du résultat (si applicable)
     
-    // Ã‰vÃ©nement
-    type_Ã©vÃ©nement: TypeÃ‰vÃ©nement;        // Type d'Ã©vÃ©nement auditÃ©
-    catÃ©gorie: CatÃ©gorieÃ‰vÃ©nement;        // CatÃ©gorie (rÃ©ception, validation, etc.)
+    // Événement
+    type_événement: TypeÉvénement;        // Type d'événement audité
+    catégorie: CatégorieÉvénement;        // Catégorie (réception, validation, etc.)
     
     // Qui
-    produit_id: ProduitId;                // Produit Ã©metteur
+    produit_id: ProduitId;                // Produit émetteur
     utilisateur_id?: UtilisateurId;       // Utilisateur (si applicable)
     session_id?: SessionId;                // Session (si applicable)
     
     // Quoi
-    donnÃ©es_Ã©vÃ©nement: DonnÃ©esÃ‰vÃ©nement;  // DonnÃ©es spÃ©cifiques Ã  l'Ã©vÃ©nement
+    données_événement: DonnéesÉvénement;  // Données spécifiques à l'événement
     
     // Quand
-    timestamp: Timestamp;                  // Moment prÃ©cis de l'Ã©vÃ©nement
+    timestamp: Timestamp;                  // Moment précis de l'événement
     
     // Comment
-    Ã©tapes_traitement?: Ã‰tapeTraitement[]; // Ã‰tapes de traitement (si applicable)
+    étapes_traitement?: ÉtapeTraitement[]; // Étapes de traitement (si applicable)
     
     // Pourquoi
     contexte: Contexte;                    // Contexte complet
     
-    // TraÃ§abilitÃ©
-    corrÃ©lation_id?: CorrÃ©lationId;       // ID pour corrÃ©lation distribuÃ©e
+    // Traçabilité
+    corrélation_id?: CorrélationId;       // ID pour corrélation distribuée
     parent_trace_id?: TraceId;            // ID de la trace parente (si applicable)
 }
 ```
 
-### 6.2 Types d'Ã©vÃ©nements
+### 6.2 Types d'événements
 
-| Type | Description | DonnÃ©es spÃ©cifiques |
+| Type | Description | Données spécifiques |
 |------|-------------|---------------------|
-| `INTENTION_RECUE` | Intention reÃ§ue | Intention complÃ¨te |
-| `INTENTION_VALIDÃ‰E` | Intention validÃ©e | Intention validÃ©e |
-| `INTENTION_REJETÃ‰E` | Intention rejetÃ©e | Code erreur, raison |
+| `INTENTION_RECUE` | Intention reçue | Intention complète |
+| `INTENTION_VALIDÉE` | Intention validée | Intention validée |
+| `INTENTION_REJETÉE` | Intention rejetée | Code erreur, raison |
 | `INTENTION_TRADUITE` | Intention traduite | Demande traduite |
-| `DEMANDE_TRANSMISE` | Demande transmise | Demande, autoritÃ© cible |
-| `RÃ‰PONSE_REÃ‡UE` | RÃ©ponse reÃ§ue | RÃ©ponse de l'autoritÃ© |
-| `RÃ‰SULTAT_Ã‰MIS` | RÃ©sultat Ã©mis | RÃ©sultat filtrÃ© |
-| `ERREUR_SURVENUE` | Erreur survenue | Erreur complÃ¨te |
-| `SYNC_DÃ‰MARRÃ‰E` | Synchronisation dÃ©marrÃ©e | Nombre d'intentions |
-| `SYNC_COMPLÃ‰TÃ‰E` | Synchronisation complÃ©tÃ©e | Statistiques |
+| `DEMANDE_TRANSMISE` | Demande transmise | Demande, autorité cible |
+| `RÉPONSE_REÇUE` | Réponse reçue | Réponse de l'autorité |
+| `RÉSULTAT_ÉMIS` | Résultat émis | Résultat filtré |
+| `ERREUR_SURVENUE` | Erreur survenue | Erreur complète |
+| `SYNC_DÉMARRÉE` | Synchronisation démarrée | Nombre d'intentions |
+| `SYNC_COMPLÉTÉE` | Synchronisation complétée | Statistiques |
 
-### 6.3 DonnÃ©es d'Ã©vÃ©nement
+### 6.3 Données d'événement
 
-Les donnÃ©es spÃ©cifiques Ã  chaque Ã©vÃ©nement contiennent :
-- Pour les intentions : L'intention complÃ¨te (structure + payload)
+Les données spécifiques à chaque événement contiennent :
+- Pour les intentions : L'intention complète (structure + payload)
 - Pour les demandes : La demande traduite
-- Pour les rÃ©ponses : La rÃ©ponse de l'autoritÃ©
-- Pour les rÃ©sultats : Le rÃ©sultat filtrÃ©
-- Pour les erreurs : L'erreur complÃ¨te (code, message, contexte)
+- Pour les réponses : La réponse de l'autorité
+- Pour les résultats : Le résultat filtré
+- Pour les erreurs : L'erreur complète (code, message, contexte)
 
 ---
 
 ## 7. Garanties d'audit
 
-### 7.1 ComplÃ©tude
+### 7.1 Complétude
 
 **GAR-AUDIT-01 : Aucune perte**
 
 Aucune interaction n'est perdue :
-- Toutes les intentions sont tracÃ©es
-- Toutes les rÃ©ponses sont tracÃ©es
-- Toutes les erreurs sont tracÃ©es
+- Toutes les intentions sont tracées
+- Toutes les réponses sont tracées
+- Toutes les erreurs sont tracées
 
-**GAR-AUDIT-02 : SÃ©quence complÃ¨te**
+**GAR-AUDIT-02 : Séquence complète**
 
-Pour chaque intention, la sÃ©quence complÃ¨te est tracÃ©e :
-- RÃ©ception â†’ Validation â†’ Traduction â†’ Transmission â†’ RÃ©ponse â†’ RÃ©sultat
-- Aucune Ã©tape manquante
+Pour chaque intention, la séquence complète est tracée :
+- Réception → Validation → Traduction → Transmission → Réponse → Résultat
+- Aucune étape manquante
 
 **GAR-AUDIT-03 : Contexte complet**
 
-Le contexte complet est prÃ©servÃ© dans chaque trace :
+Le contexte complet est préservé dans chaque trace :
 - Contexte de l'intention
 - Contexte de traitement
 - Contexte d'erreur (si applicable)
 
-### 7.2 IntÃ©gritÃ©
+### 7.2 Intégrité
 
-**GAR-AUDIT-04 : ImmuabilitÃ©**
+**GAR-AUDIT-04 : Immuabilité**
 
-Les traces ne peuvent pas Ãªtre modifiÃ©es :
-- Aucune altÃ©ration aprÃ¨s crÃ©ation
+Les traces ne peuvent pas être modifiées :
+- Aucune altération après création
 - Aucune falsification possible
-- VÃ©rification d'intÃ©gritÃ© possible
+- Vérification d'intégrité possible
 
-**GAR-AUDIT-05 : Ordre prÃ©servÃ©**
+**GAR-AUDIT-05 : Ordre préservé**
 
-L'ordre chronologique est prÃ©servÃ© :
-- Les traces sont ordonnÃ©es par timestamp
-- L'ordre de traitement est tracÃ©
-- Pas de rÃ©ordonnancement
+L'ordre chronologique est préservé :
+- Les traces sont ordonnées par timestamp
+- L'ordre de traitement est tracé
+- Pas de réordonnancement
 
-**GAR-AUDIT-06 : CorrÃ©lation fiable**
+**GAR-AUDIT-06 : Corrélation fiable**
 
-Les traces peuvent Ãªtre corrÃ©lÃ©es de maniÃ¨re fiable :
-- ID d'intention pour corrÃ©ler toutes les traces d'une intention
-- ID de corrÃ©lation pour traÃ§abilitÃ© distribuÃ©e
-- Liens parent-enfant pour sÃ©quences
+Les traces peuvent être corrélées de manière fiable :
+- ID d'intention pour corréler toutes les traces d'une intention
+- ID de corrélation pour traçabilité distribuée
+- Liens parent-enfant pour séquences
 
-**ConformitÃ© autonomie :** Cette garantie respecte **LOI-3** : les traces locales sont complÃ¨tes et souveraines. Elles ne dÃ©pendent pas d'une synchronisation externe pour Ãªtre consultables, garantissant l'auditabilitÃ© mÃªme en mode offline. Voir les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md).
+**Conformité autonomie :** Cette garantie respecte **LOI-3** : les traces locales sont complètes et souveraines. Elles ne dépendent pas d'une synchronisation externe pour être consultables, garantissant l'auditabilité même en mode offline. Voir les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-### 7.3 AccessibilitÃ©
+### 7.3 Accessibilité
 
 **GAR-AUDIT-07 : Accessible aux produits**
 
 Un produit peut consulter ses propres traces :
 - API de consultation des traces
 - Filtrage par produit
-- Pas d'accÃ¨s aux traces d'autres produits
+- Pas d'accès aux traces d'autres produits
 
 **GAR-AUDIT-08 : Accessible aux administrateurs**
 
 Les administrateurs peuvent consulter toutes les traces :
-- AccÃ¨s complet Ã  l'audit
-- Recherche et filtrage avancÃ©s
+- Accès complet à l'audit
+- Recherche et filtrage avancés
 - Export pour analyse
 
 **GAR-AUDIT-09 : Performance**
 
-L'accÃ¨s aux traces est performant :
+L'accès aux traces est performant :
 - Recherche rapide par ID
 - Filtrage efficace
-- Pagination pour grandes quantitÃ©s
+- Pagination pour grandes quantités
 
 ---
 
-## 8. CorrÃ©lation des traces
+## 8. Corrélation des traces
 
-### 8.1 CorrÃ©lation par intention
+### 8.1 Corrélation par intention
 
-**RÃ¨gle CORR-01 : ID d'intention**
+**Règle CORR-01 : ID d'intention**
 
-Toutes les traces liÃ©es Ã  une intention partagent le mÃªme `intention_id` :
-- Trace de rÃ©ception
+Toutes les traces liées à une intention partagent le même `intention_id` :
+- Trace de réception
 - Trace de validation
 - Trace de traduction
 - Trace de transmission
-- Trace de rÃ©ponse
-- Trace de rÃ©sultat
+- Trace de réponse
+- Trace de résultat
 
-**RÃ¨gle CORR-02 : SÃ©quence complÃ¨te**
+**Règle CORR-02 : Séquence complète**
 
-On peut reconstruire la sÃ©quence complÃ¨te d'une intention en corrÃ©lant ses traces :
+On peut reconstruire la séquence complète d'une intention en corrélant ses traces :
 - Ordre chronologique
-- Toutes les Ã©tapes
-- Tous les dÃ©tails
+- Toutes les étapes
+- Tous les détails
 
-### 8.2 CorrÃ©lation distribuÃ©e
+### 8.2 Corrélation distribuée
 
-**RÃ¨gle CORR-03 : ID de corrÃ©lation**
+**Règle CORR-03 : ID de corrélation**
 
-Pour la traÃ§abilitÃ© distribuÃ©e, un `corrÃ©lation_id` est utilisÃ© :
-- Partage entre systÃ¨mes
-- TraÃ§abilitÃ© cross-systÃ¨me
+Pour la traçabilité distribuée, un `corrélation_id` est utilisé :
+- Partage entre systèmes
+- Traçabilité cross-système
 - Reconstruction de flux complets
 
-**RÃ¨gle CORR-04 : Liens parent-enfant**
+**Règle CORR-04 : Liens parent-enfant**
 
-Les traces peuvent Ãªtre liÃ©es en parent-enfant :
+Les traces peuvent être liées en parent-enfant :
 - Trace parente (intention globale)
-- Traces enfants (Ã©tapes de traitement)
+- Traces enfants (étapes de traitement)
 - Reconstruction de l'arbre de traitement
 
 ---
 
-## 9. RÃ©tention et archivage
+## 9. Rétention et archivage
 
-### 9.1 RÃ©tention
+### 9.1 Rétention
 
-**RÃ¨gle RET-01 : DurÃ©e de rÃ©tention**
+**Règle RET-01 : Durée de rétention**
 
-Les traces sont conservÃ©es pour une durÃ©e configurable :
-- DurÃ©e par dÃ©faut : 1 an
-- DurÃ©e configurable par type d'Ã©vÃ©nement
-- DurÃ©e minimale : 90 jours (rÃ©glementaire)
+Les traces sont conservées pour une durée configurable :
+- Durée par défaut : 1 an
+- Durée configurable par type d'événement
+- Durée minimale : 90 jours (réglementaire)
 
-**RÃ¨gle RET-02 : RÃ©tention diffÃ©rentielle**
+**Règle RET-02 : Rétention différentielle**
 
-Certains types d'Ã©vÃ©nements peuvent avoir des durÃ©es diffÃ©rentes :
+Certains types d'événements peuvent avoir des durées différentes :
 - Erreurs critiques : 2 ans
 - Intentions normales : 1 an
-- MÃ©triques : 90 jours
+- Métriques : 90 jours
 
 ### 9.2 Archivage
 
-**RÃ¨gle ARCH-01 : Archivage automatique**
+**Règle ARCH-01 : Archivage automatique**
 
-Les traces anciennes sont archivÃ©es automatiquement :
-- Archivage aprÃ¨s durÃ©e de rÃ©tention active
-- Format d'archivage prÃ©servant l'intÃ©gritÃ©
-- AccessibilitÃ© maintenue (lecture seule)
+Les traces anciennes sont archivées automatiquement :
+- Archivage après durée de rétention active
+- Format d'archivage préservant l'intégrité
+- Accessibilité maintenue (lecture seule)
 
-**RÃ¨gle ARCH-02 : Suppression**
+**Règle ARCH-02 : Suppression**
 
-Les traces archivÃ©es peuvent Ãªtre supprimÃ©es aprÃ¨s archivage long terme :
-- DurÃ©e d'archivage : 7 ans (rÃ©glementaire)
-- Suppression dÃ©finitive aprÃ¨s archivage
+Les traces archivées peuvent être supprimées après archivage long terme :
+- Durée d'archivage : 7 ans (réglementaire)
+- Suppression définitive après archivage
 - Notification avant suppression
 
 ---
 
-## 10. ConfidentialitÃ© et sÃ©curitÃ©
+## 10. Confidentialité et sécurité
 
-### 10.1 DonnÃ©es sensibles
+### 10.1 Données sensibles
 
-**RÃ¨gle CONF-01 : Masquage des secrets**
+**Règle CONF-01 : Masquage des secrets**
 
-Les secrets ne sont jamais tracÃ©s :
-- Mots de passe : jamais tracÃ©s
-- Tokens : masquÃ©s (seulement prÃ©fixe)
-- ClÃ©s : jamais tracÃ©es
+Les secrets ne sont jamais tracés :
+- Mots de passe : jamais tracés
+- Tokens : masqués (seulement préfixe)
+- Clés : jamais tracées
 
-**RÃ¨gle CONF-02 : DonnÃ©es personnelles**
+**Règle CONF-02 : Données personnelles**
 
-Les donnÃ©es personnelles sensibles peuvent Ãªtre masquÃ©es :
+Les données personnelles sensibles peuvent être masquées :
 - Configuration selon RGPD
 - Masquage optionnel
 - Consentement requis
 
-**RÃ¨gle CONF-03 : Filtrage par produit**
+**Règle CONF-03 : Filtrage par produit**
 
 Un produit ne voit que ses propres traces :
-- Isolation complÃ¨te
-- Pas d'accÃ¨s croisÃ©
+- Isolation complète
+- Pas d'accès croisé
 - Filtrage automatique
 
-### 10.2 SÃ©curitÃ© des traces
+### 10.2 Sécurité des traces
 
-**RÃ¨gle SEC-01 : AccÃ¨s contrÃ´lÃ©**
+**Règle SEC-01 : Accès contrôlé**
 
-L'accÃ¨s aux traces est contrÃ´lÃ© :
+L'accès aux traces est contrôlé :
 - Authentification requise
-- Autorisation par rÃ´le
-- Audit des accÃ¨s aux traces
+- Autorisation par rôle
+- Audit des accès aux traces
 
-**RÃ¨gle SEC-02 : IntÃ©gritÃ© vÃ©rifiable**
+**Règle SEC-02 : Intégrité vérifiable**
 
-L'intÃ©gritÃ© des traces est vÃ©rifiable :
+L'intégrité des traces est vérifiable :
 - Hash de chaque trace
 - Signature optionnelle
-- DÃ©tection d'altÃ©ration
+- Détection d'altération
 
 ---
 
@@ -360,18 +360,18 @@ L'intÃ©gritÃ© des traces est vÃ©rifiable :
 
 **Endpoint :** `GET /audit/traces`
 
-**ParamÃ¨tres :**
+**Paramètres :**
 - `intention_id` : Filtrer par intention
 - `produit_id` : Filtrer par produit
-- `type_Ã©vÃ©nement` : Filtrer par type
-- `date_dÃ©but` : Date de dÃ©but
+- `type_événement` : Filtrer par type
+- `date_début` : Date de début
 - `date_fin` : Date de fin
-- `limite` : Nombre de rÃ©sultats
+- `limite` : Nombre de résultats
 - `offset` : Pagination
 
-**RÃ©ponse :**
+**Réponse :**
 ```typescript
-interface RÃ©ponseTraces {
+interface RéponseTraces {
     traces: TraceAudit[];
     total: number;
     limite: number;
@@ -383,34 +383,34 @@ interface RÃ©ponseTraces {
 
 **Endpoint :** `GET /audit/intentions/{intention_id}/traces`
 
-**RÃ©ponse :** SÃ©quence complÃ¨te de traces pour une intention
+**Réponse :** Séquence complète de traces pour une intention
 
 ### 11.3 Export d'audit
 
 **Endpoint :** `POST /audit/export`
 
-**ParamÃ¨tres :**
-- CritÃ¨res de filtrage
+**Paramètres :**
+- Critères de filtrage
 - Format d'export (JSON, CSV)
 
-**RÃ©ponse :** Fichier d'export
+**Réponse :** Fichier d'export
 
 ---
 
 ## 12. Exemples
 
-### 12.1 Trace d'intention rÃ©ussie
+### 12.1 Trace d'intention réussie
 
 ```json
 {
   "trace_id": "trace-001",
   "intention_id": "int-123",
-  "type_Ã©vÃ©nement": "INTENTION_RECUE",
-  "catÃ©gorie": "RÃ‰CEPTION",
+  "type_événement": "INTENTION_RECUE",
+  "catégorie": "RÉCEPTION",
   "produit_id": "miyukini-cms",
   "utilisateur_id": "user-456",
   "timestamp": "2026-01-26T10:00:00Z",
-  "donnÃ©es_Ã©vÃ©nement": {
+  "données_événement": {
     "intention": {
       "id": "int-123",
       "type": "CREATE_CONTENT",
@@ -421,33 +421,33 @@ interface RÃ©ponseTraces {
 }
 ```
 
-### 12.2 SÃ©quence complÃ¨te d'une intention
+### 12.2 Séquence complète d'une intention
 
 ```
 1. INTENTION_RECUE (trace-001)
-2. INTENTION_VALIDÃ‰E (trace-002)
+2. INTENTION_VALIDÉE (trace-002)
 3. INTENTION_TRADUITE (trace-003)
 4. DEMANDE_TRANSMISE (trace-004)
-5. RÃ‰PONSE_REÃ‡UE (trace-005)
-6. RÃ‰SULTAT_Ã‰MIS (trace-006)
+5. RÉPONSE_REÇUE (trace-005)
+6. RÉSULTAT_ÉMIS (trace-006)
 ```
 
 ---
 
 ## 13. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles d'audit et de traÃ§abilitÃ© que Bonding Brother doit respecter pour garantir la transparence et la responsabilitÃ©.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles d'audit et de traçabilité que Bonding Brother doit respecter pour garantir la transparence et la responsabilité.
 
-Toute interaction doit Ãªtre auditable selon ce contrat. Toute dÃ©viation est considÃ©rÃ©e comme une violation.
+Toute interaction doit être auditable selon ce contrat. Toute déviation est considérée comme une violation.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice v1.0](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) (Section 9)
-- [Journaling Contract](../offline/BondingBrother%20-%20Journaling%20Contract.md) (rÃ©fÃ©rence conceptuelle)
+- [Journaling Contract](../offline/BondingBrother%20-%20Journaling%20Contract.md) (référence conceptuelle)
 - [Intent Model Contract v1.0](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md)
 - [Invariants & Guarantees v1.0](./BondingBrother%20-%20Invariants%20&%20Guarantees.md)
 

@@ -1,175 +1,175 @@
-﻿# Master Butler â€” Violations & Anti-Patterns
+﻿# Master Butler — Violations & Anti-Patterns
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **Master Butler â€” Violations & Anti-Patterns** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit le catalogue des violations contractuelles et des anti-patterns Ã  Ã©viter lors de l'implÃ©mentation ou de l'utilisation de Master Butler dans le systÃ¨me Miyukini Core System v2.4.
+Ce document définit le **Master Butler — Violations & Anti-Patterns** : un contrat normatif, non négociable, et de statut FONDATION qui établit le catalogue des violations contractuelles et des anti-patterns à éviter lors de l'implémentation ou de l'utilisation de Master Butler dans le système Miyukini Core System v2.4.
 
-Ce contrat prÃ©cise ce qui constitue une violation, les catÃ©gories de violations, les anti-patterns identifiÃ©s, et les consÃ©quences associÃ©es.
+Ce contrat précise ce qui constitue une violation, les catégories de violations, les anti-patterns identifiés, et les conséquences associées.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toutes les implÃ©mentations et utilisations de Master Butler** et dÃ©finit de maniÃ¨re absolue :
-- la dÃ©finition formelle d'une violation,
-- les catÃ©gories de violations,
+Ce contrat s'applique à **toutes les implémentations et utilisations de Master Butler** et définit de manière absolue :
+- la définition formelle d'une violation,
+- les catégories de violations,
 - le catalogue des violations explicites,
-- les anti-patterns Ã  Ã©viter,
-- les consÃ©quences des violations.
+- les anti-patterns à éviter,
+- les conséquences des violations.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat **rÃ©fÃ©rence et consolide** les violations dÃ©finies dans :
-- **Master Butler â€” Documentation Fondatrice**
-- **Master Butler â€” Capability Registry Contract**
-- **Master Butler â€” Permission Registry Contract**
-- **Master Butler â€” Capability API Contract**
-- **Master Butler â€” Permission API Contract**
-- **Master Butler â€” Boundary & Scope Contract**
-- **Master Butler â€” Tool Governance Contract**
-- **Master Butler â€” Audit & Traceability Contract**
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Violations des lois d'autonomie systÃ¨me
+Ce contrat **référence et consolide** les violations définies dans :
+- **Master Butler — Documentation Fondatrice**
+- **Master Butler — Capability Registry Contract**
+- **Master Butler — Permission Registry Contract**
+- **Master Butler — Capability API Contract**
+- **Master Butler — Permission API Contract**
+- **Master Butler — Boundary & Scope Contract**
+- **Master Butler — Tool Governance Contract**
+- **Master Butler — Audit & Traceability Contract**
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Violations des lois d'autonomie système
 
-Ce contrat est le **catalogue de rÃ©fÃ©rence** pour toutes les violations Master Butler.
+Ce contrat est le **catalogue de référence** pour toutes les violations Master Butler.
 
 ---
 
-## 2. DÃ©finition d'une violation
+## 2. Définition d'une violation
 
 ### 2.1. Nature d'une violation
 
-Une **violation** est un non-respect d'une rÃ¨gle, d'un invariant, ou d'une garantie dÃ©finie dans les contrats Master Butler.
+Une **violation** est un non-respect d'une règle, d'un invariant, ou d'une garantie définie dans les contrats Master Butler.
 
-**CaractÃ©ristiques d'une violation :**
+**Caractéristiques d'une violation :**
 
-- **Contractuelle** : Une violation concerne toujours un contrat spÃ©cifique
-- **Identifiable** : Une violation peut Ãªtre identifiÃ©e et rÃ©fÃ©rencÃ©e
-- **ConsÃ©quentielle** : Une violation a des consÃ©quences dÃ©finies
-- **Non-tolÃ©rable** : Une violation ne peut pas Ãªtre ignorÃ©e ou tolÃ©rÃ©e
+- **Contractuelle** : Une violation concerne toujours un contrat spécifique
+- **Identifiable** : Une violation peut être identifiée et référencée
+- **Conséquentielle** : Une violation a des conséquences définies
+- **Non-tolérable** : Une violation ne peut pas être ignorée ou tolérée
 
-### 2.2. GravitÃ© des violations
+### 2.2. Gravité des violations
 
-Les violations sont classÃ©es selon leur gravitÃ© :
+Les violations sont classées selon leur gravité :
 
 **CRITIQUE :**
 
-Violation d'un invariant fondamental ou d'une interdiction absolue. La violation compromet l'intÃ©gritÃ© de Master Butler.
+Violation d'un invariant fondamental ou d'une interdiction absolue. La violation compromet l'intégrité de Master Butler.
 
 **MAJEURE :**
 
-Violation d'une rÃ¨gle importante qui affecte le comportement de Master Butler mais ne compromet pas ses propriÃ©tÃ©s fondamentales.
+Violation d'une règle importante qui affecte le comportement de Master Butler mais ne compromet pas ses propriétés fondamentales.
 
 **MINEURE :**
 
-Violation d'une rÃ¨gle secondaire qui n'affecte pas le comportement principal de Master Butler.
+Violation d'une règle secondaire qui n'affecte pas le comportement principal de Master Butler.
 
 ---
 
-## 3. CatÃ©gories de violations
+## 3. Catégories de violations
 
-### 3.1. Violations de dÃ©cision
+### 3.1. Violations de décision
 
-**CatÃ©gorie :** CRITIQUE
+**Catégorie :** CRITIQUE
 
 **Source :** Documentation Fondatrice, INV-MB-2
 
 **Violations :**
 
-**VIOL-DEC-1 : Production de dÃ©cision d'autorisation**
+**VIOL-DEC-1 : Production de décision d'autorisation**
 
-Master Butler produit une dÃ©cision "autorisÃ©" ou "refusÃ©" pour une action.
+Master Butler produit une décision "autorisé" ou "refusé" pour une action.
 
-*Invariant violÃ© : INV-MB-2 (Non-dÃ©cision)*
+*Invariant violé : INV-MB-2 (Non-décision)*
 
-**VIOL-DEC-2 : VÃ©rification de permissions en temps rÃ©el**
+**VIOL-DEC-2 : Vérification de permissions en temps réel**
 
-Master Butler vÃ©rifie si un contexte possÃ¨de effectivement une permission au moment d'une action, au lieu de simplement fournir les informations.
+Master Butler vérifie si un contexte possède effectivement une permission au moment d'une action, au lieu de simplement fournir les informations.
 
-*Invariant violÃ© : INV-MB-2 (Non-dÃ©cision)*
+*Invariant violé : INV-MB-2 (Non-décision)*
 
-**VIOL-DEC-3 : Retour d'un boolÃ©en d'autorisation**
+**VIOL-DEC-3 : Retour d'un booléen d'autorisation**
 
-Une mÃ©thode de Master Butler retourne un boolÃ©en d'autorisation (isAuthorized, canAccess, etc.).
+Une méthode de Master Butler retourne un booléen d'autorisation (isAuthorized, canAccess, etc.).
 
-*Invariant violÃ© : INV-MB-2 (Non-dÃ©cision)*
+*Invariant violé : INV-MB-2 (Non-décision)*
 
-**VIOL-DEC-4 : Suggestion de dÃ©cision**
+**VIOL-DEC-4 : Suggestion de décision**
 
-Master Butler suggÃ¨re ou recommande une dÃ©cision Ã  StrongFather.
+Master Butler suggère ou recommande une décision à StrongFather.
 
-*Invariant violÃ© : INV-MB-2 (Non-dÃ©cision)*
+*Invariant violé : INV-MB-2 (Non-décision)*
 
-### 3.2. Violations d'exÃ©cution
+### 3.2. Violations d'exécution
 
-**CatÃ©gorie :** CRITIQUE
+**Catégorie :** CRITIQUE
 
 **Source :** Documentation Fondatrice, Section 6
 
 **Violations :**
 
-**VIOL-EXEC-1 : ExÃ©cution d'action fonctionnelle**
+**VIOL-EXEC-1 : Exécution d'action fonctionnelle**
 
-Master Butler exÃ©cute une action fonctionnelle (crÃ©ation de contenu, modification de hiÃ©rarchie, etc.).
+Master Butler exécute une action fonctionnelle (création de contenu, modification de hiérarchie, etc.).
 
-*RÃ¨gle violÃ©e : "Master Butler n'exÃ©cute jamais"*
+*Règle violée : "Master Butler n'exécute jamais"*
 
-**VIOL-EXEC-2 : Stockage de donnÃ©es mÃ©tier**
+**VIOL-EXEC-2 : Stockage de données métier**
 
-Master Butler stocke des donnÃ©es mÃ©tier au lieu de mÃ©tadonnÃ©es sur les capacitÃ©s et permissions.
+Master Butler stocke des données métier au lieu de métadonnées sur les capacités et permissions.
 
-*RÃ¨gle violÃ©e : "Master Butler ne stocke jamais de donnÃ©es mÃ©tier"*
+*Règle violée : "Master Butler ne stocke jamais de données métier"*
 
-**VIOL-EXEC-3 : Application de contraintes mÃ©tier**
+**VIOL-EXEC-3 : Application de contraintes métier**
 
-Master Butler applique des contraintes mÃ©tier (limites, rÃ¨gles de gestion, quotas).
+Master Butler applique des contraintes métier (limites, règles de gestion, quotas).
 
-*RÃ¨gle violÃ©e : "Master Butler n'applique jamais de contraintes mÃ©tier"*
+*Règle violée : "Master Butler n'applique jamais de contraintes métier"*
 
-**VIOL-EXEC-4 : DÃ©finition de politiques**
+**VIOL-EXEC-4 : Définition de politiques**
 
-Master Butler dÃ©finit des politiques de dÃ©cision au lieu de fournir les informations aux dÃ©cideurs.
+Master Butler définit des politiques de décision au lieu de fournir les informations aux décideurs.
 
-*RÃ¨gle violÃ©e : "Master Butler ne dÃ©finit jamais de politiques"*
+*Règle violée : "Master Butler ne définit jamais de politiques"*
 
 ### 3.3. Violations de registre
 
-**CatÃ©gorie :** CRITIQUE Ã  MAJEURE
+**Catégorie :** CRITIQUE à MAJEURE
 
 **Source :** Capability Registry Contract, Permission Registry Contract, INV-MB-1
 
 **Violations :**
 
-**VIOL-REG-1 : CapacitÃ© non recensÃ©e** (CRITIQUE)
+**VIOL-REG-1 : Capacité non recensée** (CRITIQUE)
 
-Une capacitÃ© est exposÃ©e par un module sans Ãªtre dÃ©clarÃ©e dans Master Butler.
+Une capacité est exposée par un module sans être déclarée dans Master Butler.
 
-*Invariant violÃ© : INV-MB-1 (ExhaustivitÃ© du registre)*
+*Invariant violé : INV-MB-1 (Exhaustivité du registre)*
 
-**VIOL-REG-2 : Permission sans capacitÃ© associÃ©e** (MAJEURE)
+**VIOL-REG-2 : Permission sans capacité associée** (MAJEURE)
 
-Une permission est dÃ©finie sans rÃ©fÃ©rencer au moins une capacitÃ© existante.
+Une permission est définie sans référencer au moins une capacité existante.
 
-*RÃ¨gle violÃ©e : Permission Registry Contract*
+*Règle violée : Permission Registry Contract*
 
-**VIOL-REG-3 : CapacitÃ© fantÃ´me**
+**VIOL-REG-3 : Capacité fantôme**
 
-Une capacitÃ© rÃ©fÃ©rencÃ©e dans une permission n'existe pas dans le registre.
+Une capacité référencée dans une permission n'existe pas dans le registre.
 
-*Invariant violÃ© : INV-MB-6 (SÃ©paration capacitÃ©/permission)*
+*Invariant violé : INV-MB-6 (Séparation capacité/permission)*
 
 **VIOL-REG-4 : Registre partiel**
 
-Le registre ne contient qu'un sous-ensemble des capacitÃ©s du systÃ¨me.
+Le registre ne contient qu'un sous-ensemble des capacités du système.
 
-*Invariant violÃ© : INV-MB-1 (ExhaustivitÃ© du registre)*
+*Invariant violé : INV-MB-1 (Exhaustivité du registre)*
 
 ### 3.4. Violations d'identifiant
 
-**CatÃ©gorie :** CRITIQUE
+**Catégorie :** CRITIQUE
 
 **Source :** Documentation Fondatrice, INV-MB-4
 
@@ -177,418 +177,418 @@ Le registre ne contient qu'un sous-ensemble des capacitÃ©s du systÃ¨me.
 
 **VIOL-ID-1 : Mutation d'identifiant**
 
-Un identifiant de capacitÃ© est modifiÃ© aprÃ¨s sa dÃ©claration initiale.
+Un identifiant de capacité est modifié après sa déclaration initiale.
 
-*Invariant violÃ© : INV-MB-4 (ImmutabilitÃ© des identifiants)*
+*Invariant violé : INV-MB-4 (Immutabilité des identifiants)*
 
-**VIOL-ID-2 : RÃ©utilisation d'identifiant**
+**VIOL-ID-2 : Réutilisation d'identifiant**
 
-Un identifiant de capacitÃ© supprimÃ©e est rÃ©utilisÃ© pour une nouvelle capacitÃ©.
+Un identifiant de capacité supprimée est réutilisé pour une nouvelle capacité.
 
-*Invariant violÃ© : INV-MB-4 (ImmutabilitÃ© des identifiants)*
+*Invariant violé : INV-MB-4 (Immutabilité des identifiants)*
 
 **VIOL-ID-3 : Identifiant ambigu**
 
-Un identifiant ne permet pas d'identifier de maniÃ¨re unique une capacitÃ©.
+Un identifiant ne permet pas d'identifier de manière unique une capacité.
 
-*Invariant violÃ© : INV-MB-4 (ImmutabilitÃ© des identifiants)*
+*Invariant violé : INV-MB-4 (Immutabilité des identifiants)*
 
-### 3.5. Violations de traÃ§abilitÃ©
+### 3.5. Violations de traçabilité
 
-**CatÃ©gorie :** MAJEURE
+**Catégorie :** MAJEURE
 
 **Source :** Audit & Traceability Contract, INV-MB-5
 
 **Violations :**
 
-**VIOL-TRACE-1 : DÃ©claration sans trace**
+**VIOL-TRACE-1 : Déclaration sans trace**
 
-Une dÃ©claration de capacitÃ© n'est pas tracÃ©e.
+Une déclaration de capacité n'est pas tracée.
 
-*Invariant violÃ© : INV-MB-5 (TraÃ§abilitÃ© complÃ¨te)*
+*Invariant violé : INV-MB-5 (Traçabilité complète)*
 
-**VIOL-TRACE-2 : DÃ©finition sans trace**
+**VIOL-TRACE-2 : Définition sans trace**
 
-Une dÃ©finition de permission n'est pas tracÃ©e.
+Une définition de permission n'est pas tracée.
 
-*Invariant violÃ© : INV-MB-5 (TraÃ§abilitÃ© complÃ¨te)*
+*Invariant violé : INV-MB-5 (Traçabilité complète)*
 
 **VIOL-TRACE-3 : Modification silencieuse**
 
-Une modification du registre est effectuÃ©e sans trace.
+Une modification du registre est effectuée sans trace.
 
-*Invariant violÃ© : INV-MB-5 (TraÃ§abilitÃ© complÃ¨te)*
+*Invariant violé : INV-MB-5 (Traçabilité complète)*
 
 **VIOL-TRACE-4 : Suppression sans historique**
 
-Une capacitÃ© ou permission est supprimÃ©e sans conservation de l'historique.
+Une capacité ou permission est supprimée sans conservation de l'historique.
 
-*Invariant violÃ© : INV-MB-5 (TraÃ§abilitÃ© complÃ¨te)*
+*Invariant violé : INV-MB-5 (Traçabilité complète)*
 
-### 3.6. Violations de frontiÃ¨re
+### 3.6. Violations de frontière
 
-**CatÃ©gorie :** MAJEURE
+**Catégorie :** MAJEURE
 
 **Source :** Boundary & Scope Contract, INV-MB-7
 
 **Violations :**
 
-**VIOL-BOUND-1 : Logique mÃ©tier intÃ©grÃ©e**
+**VIOL-BOUND-1 : Logique métier intégrée**
 
-Master Butler contient de la logique mÃ©tier (rÃ¨gles de domaine, validations mÃ©tier).
+Master Butler contient de la logique métier (règles de domaine, validations métier).
 
-*Invariant violÃ© : INV-MB-7 (Pas de logique mÃ©tier)*
+*Invariant violé : INV-MB-7 (Pas de logique métier)*
 
-**VIOL-BOUND-2 : Gestion d'identitÃ©**
+**VIOL-BOUND-2 : Gestion d'identité**
 
-Master Butler gÃ¨re les identitÃ©s des utilisateurs ou des systÃ¨mes.
+Master Butler gère les identités des utilisateurs ou des systèmes.
 
-*RÃ¨gle violÃ©e : "Master Butler ne gÃ¨re jamais les identitÃ©s"*
+*Règle violée : "Master Butler ne gère jamais les identités"*
 
 **VIOL-BOUND-3 : Persistance directe**
 
-Master Butler manipule directement une base de donnÃ©es ou un systÃ¨me de fichiers.
+Master Butler manipule directement une base de données ou un système de fichiers.
 
-*RÃ¨gle violÃ©e : "Master Butler ne persiste jamais directement"*
+*Règle violée : "Master Butler ne persiste jamais directement"*
 
-**VIOL-BOUND-4 : Validation mÃ©tier**
+**VIOL-BOUND-4 : Validation métier**
 
-Master Butler valide des actions selon des critÃ¨res mÃ©tier.
+Master Butler valide des actions selon des critères métier.
 
-*Invariant violÃ© : INV-MB-7 (Pas de logique mÃ©tier)*
+*Invariant violé : INV-MB-7 (Pas de logique métier)*
 
-### 3.7. Violations d'accessibilitÃ©
+### 3.7. Violations d'accessibilité
 
-**CatÃ©gorie :** MAJEURE
+**Catégorie :** MAJEURE
 
 **Source :** Documentation Fondatrice, INV-MB-8
 
 **Violations :**
 
-**VIOL-ACCESS-1 : Composant bloquÃ©**
+**VIOL-ACCESS-1 : Composant bloqué**
 
-Un composant autorisÃ© est empÃªchÃ© d'interroger Master Butler.
+Un composant autorisé est empêché d'interroger Master Butler.
 
-*Invariant violÃ© : INV-MB-8 (AccessibilitÃ© universelle)*
+*Invariant violé : INV-MB-8 (Accessibilité universelle)*
 
-**VIOL-ACCESS-2 : AccÃ¨s sÃ©lectif injustifiÃ©**
+**VIOL-ACCESS-2 : Accès sélectif injustifié**
 
-L'accÃ¨s Ã  Master Butler est restreint sans justification de sÃ©curitÃ©.
+L'accès à Master Butler est restreint sans justification de sécurité.
 
-*Invariant violÃ© : INV-MB-8 (AccessibilitÃ© universelle)*
+*Invariant violé : INV-MB-8 (Accessibilité universelle)*
 
 ### 3.8. Violations de Tools et Toolkits
 
-**CatÃ©gorie :** CRITIQUE
+**Catégorie :** CRITIQUE
 
 **Source :** Tool Governance Contract, Toolkit Composition Contract
 
 **Violations :**
 
-**VIOL-TOOL-1 : Tool non dÃ©clarÃ©**
+**VIOL-TOOL-1 : Tool non déclaré**
 
-Un Tool est utilisÃ© dans le systÃ¨me sans Ãªtre dÃ©clarÃ© dans Master Butler.
+Un Tool est utilisé dans le système sans être déclaré dans Master Butler.
 
-*RÃ¨gle violÃ©e : "Pas d'injection sauvage"*
+*Règle violée : "Pas d'injection sauvage"*
 
-**VIOL-TOOL-2 : Tool local non gouvernÃ©**
+**VIOL-TOOL-2 : Tool local non gouverné**
 
-Un Tool "local" existe sans dÃ©claration dans l'environnement.
+Un Tool "local" existe sans déclaration dans l'environnement.
 
-*RÃ¨gle violÃ©e : "Pas de Tool local"*
+*Règle violée : "Pas de Tool local"*
 
-**VIOL-TOOL-3 : DÃ©pendance externe cachÃ©e**
+**VIOL-TOOL-3 : Dépendance externe cachée**
 
-Une librairie externe non gouvernÃ©e est utilisÃ©e.
+Une librairie externe non gouvernée est utilisée.
 
-*RÃ¨gle violÃ©e : "Pas de dÃ©pendance externe cachÃ©e"*
+*Règle violée : "Pas de dépendance externe cachée"*
 
-**VIOL-TOOL-4 : Toolkit avec capacitÃ© nouvelle**
+**VIOL-TOOL-4 : Toolkit avec capacité nouvelle**
 
-Un Toolkit crÃ©e une capacitÃ© nouvelle au lieu d'orchestrer des Tools existants.
+Un Toolkit crée une capacité nouvelle au lieu d'orchestrer des Tools existants.
 
-*RÃ¨gle violÃ©e : "Un Toolkit orchestre, mais n'ajoute pas de capacitÃ©"*
+*Règle violée : "Un Toolkit orchestre, mais n'ajoute pas de capacité"*
 
 ---
 
 ## 4. Anti-patterns
 
-### 4.1. Anti-pattern : Master Butler comme dÃ©cideur
+### 4.1. Anti-pattern : Master Butler comme décideur
 
 **Description :**
 
-Utiliser Master Butler pour prendre des dÃ©cisions d'autorisation au lieu de simplement fournir les informations sur les capacitÃ©s et permissions.
+Utiliser Master Butler pour prendre des décisions d'autorisation au lieu de simplement fournir les informations sur les capacités et permissions.
 
 **Pourquoi c'est un anti-pattern :**
 
-Master Butler est un registre d'information, pas un moteur de dÃ©cision. Les dÃ©cisions d'autorisation appartiennent exclusivement Ã  StrongFather.
+Master Butler est un registre d'information, pas un moteur de décision. Les décisions d'autorisation appartiennent exclusivement à StrongFather.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
-- Master Butler retourne "autorisÃ©" ou "refusÃ©"
-- Master Butler Ã©value si une action peut Ãªtre effectuÃ©e
-- Master Butler bloque des opÃ©rations
-- Master Butler filtre selon des critÃ¨res de dÃ©cision
+- Master Butler retourne "autorisé" ou "refusé"
+- Master Butler évalue si une action peut être effectuée
+- Master Butler bloque des opérations
+- Master Butler filtre selon des critères de décision
 
 **Solution :**
 
-Master Butler fournit les informations (capacitÃ©s existantes, permissions dÃ©finies, associations). StrongFather prend les dÃ©cisions.
+Master Butler fournit les informations (capacités existantes, permissions définies, associations). StrongFather prend les décisions.
 
-### 4.2. Anti-pattern : Master Butler comme contrÃ´leur d'accÃ¨s
+### 4.2. Anti-pattern : Master Butler comme contrôleur d'accès
 
 **Description :**
 
-Utiliser Master Butler pour contrÃ´ler l'accÃ¨s en temps rÃ©el, vÃ©rifiant si un utilisateur peut effectuer une action.
+Utiliser Master Butler pour contrôler l'accès en temps réel, vérifiant si un utilisateur peut effectuer une action.
 
 **Pourquoi c'est un anti-pattern :**
 
-Le contrÃ´le d'accÃ¨s en temps rÃ©el est une dÃ©cision. Master Butler fournit les dÃ©finitions de permissions, pas les vÃ©rifications.
+Le contrôle d'accès en temps réel est une décision. Master Butler fournit les définitions de permissions, pas les vérifications.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
-- Master Butler vÃ©rifie des permissions Ã  chaque requÃªte
-- Master Butler maintient un Ã©tat de session
-- Master Butler rejette des requÃªtes non autorisÃ©es
+- Master Butler vérifie des permissions à chaque requête
+- Master Butler maintient un état de session
+- Master Butler rejette des requêtes non autorisées
 
 **Solution :**
 
-Master Butler fournit les dÃ©finitions de permissions. StrongFather effectue les vÃ©rifications lors de l'Ã©valuation des intentions.
+Master Butler fournit les définitions de permissions. StrongFather effectue les vérifications lors de l'évaluation des intentions.
 
-### 4.3. Anti-pattern : Registre dispersÃ©
+### 4.3. Anti-pattern : Registre dispersé
 
 **Description :**
 
-Maintenir plusieurs registres de capacitÃ©s dans diffÃ©rents composants au lieu d'utiliser Master Butler comme source unique.
+Maintenir plusieurs registres de capacités dans différents composants au lieu d'utiliser Master Butler comme source unique.
 
 **Pourquoi c'est un anti-pattern :**
 
-La dispersion des registres viole l'exhaustivitÃ© et crÃ©e des incohÃ©rences. Master Butler est le registre central et unique.
+La dispersion des registres viole l'exhaustivité et crée des incohérences. Master Butler est le registre central et unique.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
-- Chaque module maintient sa propre liste de capacitÃ©s
-- Les permissions sont dÃ©finies localement dans les produits
-- Il existe des capacitÃ©s non connues de Master Butler
+- Chaque module maintient sa propre liste de capacités
+- Les permissions sont définies localement dans les produits
+- Il existe des capacités non connues de Master Butler
 
 **Solution :**
 
-Tous les modules dÃ©clarent leurs capacitÃ©s Ã  Master Butler. Aucun registre local de capacitÃ©s n'est maintenu.
+Tous les modules déclarent leurs capacités à Master Butler. Aucun registre local de capacités n'est maintenu.
 
-### 4.4. Anti-pattern : CapacitÃ©s implicites
+### 4.4. Anti-pattern : Capacités implicites
 
 **Description :**
 
-Exposer des capacitÃ©s fonctionnelles sans les dÃ©clarer explicitement dans Master Butler.
+Exposer des capacités fonctionnelles sans les déclarer explicitement dans Master Butler.
 
 **Pourquoi c'est un anti-pattern :**
 
-Les capacitÃ©s implicites violent l'exhaustivitÃ© du registre et crÃ©ent des zones d'ombre dans le systÃ¨me.
+Les capacités implicites violent l'exhaustivité du registre et créent des zones d'ombre dans le système.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
-- Un module expose des actions non documentÃ©es
-- Des fonctionnalitÃ©s existent sans permission associÃ©e
-- La dÃ©couverte ne rÃ©vÃ¨le pas toutes les possibilitÃ©s
+- Un module expose des actions non documentées
+- Des fonctionnalités existent sans permission associée
+- La découverte ne révèle pas toutes les possibilités
 
 **Solution :**
 
-Toute capacitÃ© exposÃ©e est dÃ©clarÃ©e dans Master Butler. Pas de capacitÃ© implicite ou cachÃ©e.
+Toute capacité exposée est déclarée dans Master Butler. Pas de capacité implicite ou cachée.
 
-### 4.5. Anti-pattern : Master Butler comme gestionnaire d'identitÃ©
+### 4.5. Anti-pattern : Master Butler comme gestionnaire d'identité
 
 **Description :**
 
-Utiliser Master Butler pour gÃ©rer les identitÃ©s des utilisateurs (crÃ©ation, authentification, sessions).
+Utiliser Master Butler pour gérer les identités des utilisateurs (création, authentification, sessions).
 
 **Pourquoi c'est un anti-pattern :**
 
-Master Butler gÃ¨re les capacitÃ©s et permissions, pas les identitÃ©s. L'identitÃ© appartient au systÃ¨me d'authentification.
+Master Butler gère les capacités et permissions, pas les identités. L'identité appartient au système d'authentification.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
 - Master Butler stocke des utilisateurs
-- Master Butler vÃ©rifie des credentials
+- Master Butler vérifie des credentials
 - Master Butler maintient des sessions
 
 **Solution :**
 
-Master Butler connaÃ®t les associations rÃ´les-permissions. L'identitÃ© et l'attribution des rÃ´les appartiennent au systÃ¨me d'authentification.
+Master Butler connaît les associations rôles-permissions. L'identité et l'attribution des rôles appartiennent au système d'authentification.
 
-### 4.6. Anti-pattern : Permissions dynamiques calculÃ©es
+### 4.6. Anti-pattern : Permissions dynamiques calculées
 
 **Description :**
 
-Faire calculer dynamiquement les permissions par Master Butler selon des rÃ¨gles mÃ©tier au lieu de les dÃ©finir explicitement.
+Faire calculer dynamiquement les permissions par Master Butler selon des règles métier au lieu de les définir explicitement.
 
 **Pourquoi c'est un anti-pattern :**
 
-Master Butler dÃ©finit les permissions, il ne les calcule pas. Le calcul dynamique introduit de la logique mÃ©tier.
+Master Butler définit les permissions, il ne les calcule pas. Le calcul dynamique introduit de la logique métier.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
-- Les permissions changent selon le contexte mÃ©tier
-- Master Butler applique des rÃ¨gles de calcul
-- Les permissions sont gÃ©nÃ©rÃ©es Ã  la volÃ©e
+- Les permissions changent selon le contexte métier
+- Master Butler applique des règles de calcul
+- Les permissions sont générées à la volée
 
 **Solution :**
 
-Les permissions sont dÃ©finies explicitement. Le contexte de capacitÃ© peut filtrer, mais ne calcule pas de nouvelles permissions.
+Les permissions sont définies explicitement. Le contexte de capacité peut filtrer, mais ne calcule pas de nouvelles permissions.
 
 ### 4.7. Anti-pattern : Couplage Tool-Permission direct
 
 **Description :**
 
-Associer directement les Tools aux permissions sans passer par les capacitÃ©s.
+Associer directement les Tools aux permissions sans passer par les capacités.
 
 **Pourquoi c'est un anti-pattern :**
 
-La structure est Capability â†’ Tool et Permission â†’ Capability. Un Tool n'est pas directement liÃ© Ã  une permission.
+La structure est Capability → Tool et Permission → Capability. Un Tool n'est pas directement lié à une permission.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
-- Les permissions rÃ©fÃ©rencent directement des Tools
-- Les Tools vÃ©rifient des permissions
-- La sÃ©paration capacitÃ©/permission est ignorÃ©e
+- Les permissions référencent directement des Tools
+- Les Tools vérifient des permissions
+- La séparation capacité/permission est ignorée
 
 **Solution :**
 
-Les capacitÃ©s sont liÃ©es aux Tools. Les permissions rÃ©fÃ©rencent des capacitÃ©s. La chaÃ®ne est : Permission â†’ Capability â†’ Tool.
+Les capacités sont liées aux Tools. Les permissions référencent des capacités. La chaîne est : Permission → Capability → Tool.
 
 ### 4.8. Anti-pattern : Master Butler comme orchestrateur de Tools
 
 **Description :**
 
-Utiliser Master Butler pour orchestrer l'exÃ©cution des Tools au lieu de simplement les cataloguer.
+Utiliser Master Butler pour orchestrer l'exécution des Tools au lieu de simplement les cataloguer.
 
 **Pourquoi c'est un anti-pattern :**
 
-Master Butler catalogue les Tools, il ne les exÃ©cute pas. L'exÃ©cution appartient aux Tools eux-mÃªmes.
+Master Butler catalogue les Tools, il ne les exécute pas. L'exécution appartient aux Tools eux-mêmes.
 
-**SymptÃ´mes :**
+**Symptômes :**
 
 - Master Butler appelle des Tools
-- Master Butler sÃ©quence des opÃ©rations
-- Master Butler gÃ¨re le cycle de vie des Tools
+- Master Butler séquence des opérations
+- Master Butler gère le cycle de vie des Tools
 
 **Solution :**
 
-Master Butler rÃ©pond "quels Tools existent". L'orchestration appartient aux composants appelants.
+Master Butler répond "quels Tools existent". L'orchestration appartient aux composants appelants.
 
 ---
 
-## 5. ConsÃ©quences des violations
+## 5. Conséquences des violations
 
 ### 5.1. Violations critiques
 
-**ConsÃ©quences :**
+**Conséquences :**
 
-1. **Non-conformitÃ© immÃ©diate** : L'implÃ©mentation est considÃ©rÃ©e non conforme
-2. **ArrÃªt requis** : L'opÃ©ration en cours doit Ãªtre arrÃªtÃ©e
-3. **Audit obligatoire** : Un audit doit Ãªtre effectuÃ©
-4. **Correction impÃ©rative** : La correction est obligatoire avant toute utilisation
+1. **Non-conformité immédiate** : L'implémentation est considérée non conforme
+2. **Arrêt requis** : L'opération en cours doit être arrêtée
+3. **Audit obligatoire** : Un audit doit être effectué
+4. **Correction impérative** : La correction est obligatoire avant toute utilisation
 
 ### 5.2. Violations majeures
 
-**ConsÃ©quences :**
+**Conséquences :**
 
-1. **Warning de non-conformitÃ©** : L'implÃ©mentation est signalÃ©e comme non conforme
-2. **RÃ©sultat invalide** : Le rÃ©sultat associÃ© est invalide
-3. **Correction requise** : La correction doit Ãªtre planifiÃ©e
+1. **Warning de non-conformité** : L'implémentation est signalée comme non conforme
+2. **Résultat invalide** : Le résultat associé est invalide
+3. **Correction requise** : La correction doit être planifiée
 
 ### 5.3. Violations mineures
 
-**ConsÃ©quences :**
+**Conséquences :**
 
-1. **Signalement** : La violation est signalÃ©e
-2. **Correction recommandÃ©e** : La correction est recommandÃ©e
-3. **TraÃ§abilitÃ©** : La violation est tracÃ©e pour suivi
+1. **Signalement** : La violation est signalée
+2. **Correction recommandée** : La correction est recommandée
+3. **Traçabilité** : La violation est tracée pour suivi
 
 ---
 
-## 6. RÃ¨gles de fermeture du contrat
+## 6. Règles de fermeture du contrat
 
-### 6.1. Contrat fermÃ©
+### 6.1. Contrat fermé
 
-Ce contrat est **fermÃ©**. Seules les violations et les anti-patterns explicitement dÃ©finis sont reconnus.
+Ce contrat est **fermé**. Seules les violations et les anti-patterns explicitement définis sont reconnus.
 
-### 6.2. Catalogue de rÃ©fÃ©rence
+### 6.2. Catalogue de référence
 
-Ce contrat est le **catalogue de rÃ©fÃ©rence** pour toutes les violations Master Butler. Toute nouvelle violation doit Ãªtre ajoutÃ©e Ã  ce catalogue.
+Ce contrat est le **catalogue de référence** pour toutes les violations Master Butler. Toute nouvelle violation doit être ajoutée à ce catalogue.
 
 ---
 
 ## 7. Conclusion contractuelle
 
-Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable le catalogue des violations et anti-patterns de Master Butler.
+Ce contrat établit de manière définitive et non négociable le catalogue des violations et anti-patterns de Master Butler.
 
 Il garantit que :
-- les violations sont exhaustivement cataloguÃ©es,
-- les anti-patterns sont identifiÃ©s et documentÃ©s,
-- les consÃ©quences sont explicites,
-- le contrat est fermÃ© et constitue la rÃ©fÃ©rence unique.
+- les violations sont exhaustivement cataloguées,
+- les anti-patterns sont identifiés et documentés,
+- les conséquences sont explicites,
+- le contrat est fermé et constitue la référence unique.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
 ## 8. Validation conceptuelle
 
-### 8.1. VÃ©rification de complÃ©tude
+### 8.1. Vérification de complétude
 
 Ce document catalogue les violations de :
-- âœ… Documentation Fondatrice : INV-MB-1 Ã  INV-MB-8
-- âœ… Capability Registry Contract : VIOL-REG-*
-- âœ… Permission Registry Contract : VIOL-REG-*
-- âœ… Tool Governance Contract : VIOL-TOOL-*
-- âœ… Boundary & Scope Contract : VIOL-BOUND-*
-- âœ… Audit & Traceability Contract : VIOL-TRACE-*
+- ✅ Documentation Fondatrice : INV-MB-1 à INV-MB-8
+- ✅ Capability Registry Contract : VIOL-REG-*
+- ✅ Permission Registry Contract : VIOL-REG-*
+- ✅ Tool Governance Contract : VIOL-TOOL-*
+- ✅ Boundary & Scope Contract : VIOL-BOUND-*
+- ✅ Audit & Traceability Contract : VIOL-TRACE-*
 
-### 8.2. VÃ©rification de cohÃ©rence
+### 8.2. Vérification de cohérence
 
-- âœ… Toutes les violations rÃ©fÃ©rencent un contrat source
-- âœ… Toutes les violations rÃ©fÃ©rencent un invariant ou une rÃ¨gle
-- âœ… Les gravitÃ©s sont cohÃ©rentes avec l'importance des rÃ¨gles
+- ✅ Toutes les violations référencent un contrat source
+- ✅ Toutes les violations référencent un invariant ou une règle
+- ✅ Les gravités sont cohérentes avec l'importance des règles
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-27  
+**Document créé le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif validÃ©  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice  
-**Type :** Catalogue des violations et anti-patterns non nÃ©gociable
+**Statut :** FONDATION — Contrat normatif validé  
+**Référence :** Miyukini Core System v2.4, Master Butler Documentation Fondatrice  
+**Type :** Catalogue des violations et anti-patterns non négociable
 
 ---
 
-## 9. Mini log de gÃ©nÃ©ration
+## 9. Mini log de génération
 
-### DÃ©cision Ã©ditoriale E1 : Consolidation des violations
+### Décision éditoriale E1 : Consolidation des violations
 
-**DÃ©cision prise :** Consolidation de toutes les violations dispersÃ©es dans les contrats en un catalogue unique.
+**Décision prise :** Consolidation de toutes les violations dispersées dans les contrats en un catalogue unique.
 
-**Application :** Chaque violation rÃ©fÃ©rence son contrat et invariant source (INV-MB-*).
+**Application :** Chaque violation référence son contrat et invariant source (INV-MB-*).
 
-### DÃ©cision Ã©ditoriale E2 : Anti-patterns spÃ©cifiques
+### Décision éditoriale E2 : Anti-patterns spécifiques
 
-**DÃ©cision prise :** Inclusion d'anti-patterns spÃ©cifiques au rÃ´le de registre de Master Butler.
+**Décision prise :** Inclusion d'anti-patterns spécifiques au rôle de registre de Master Butler.
 
-**Application :** 8 anti-patterns identifiÃ©s et documentÃ©s, centrÃ©s sur la distinction registre/dÃ©cideur.
+**Application :** 8 anti-patterns identifiés et documentés, centrés sur la distinction registre/décideur.
 
-### DÃ©cision Ã©ditoriale E3 : Violations Tools et Toolkits
+### Décision éditoriale E3 : Violations Tools et Toolkits
 
-**DÃ©cision prise :** Inclusion des violations liÃ©es Ã  la gouvernance des Tools et Toolkits.
+**Décision prise :** Inclusion des violations liées à la gouvernance des Tools et Toolkits.
 
-**Application :** Section VIOL-TOOL-* couvrant les rÃ¨gles de souverainetÃ© applicative.
+**Application :** Section VIOL-TOOL-* couvrant les règles de souveraineté applicative.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… Toutes les violations des contrats sont incluses
-- âœ… Les rÃ©fÃ©rences aux invariants sont correctes
-- âœ… Les gravitÃ©s sont cohÃ©rentes
+**Vérification effectuée :**
+- ✅ Toutes les violations des contrats sont incluses
+- ✅ Les références aux invariants sont correctes
+- ✅ Les gravités sont cohérentes
 
-**Conclusion :** Catalogue complet et cohÃ©rent.
+**Conclusion :** Catalogue complet et cohérent.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

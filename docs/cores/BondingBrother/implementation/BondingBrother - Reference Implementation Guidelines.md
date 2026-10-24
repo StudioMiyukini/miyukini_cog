@@ -2,51 +2,51 @@
 
 ## 1. Contexte
 
-Ce document fournit des guidelines pour l'implÃ©mentation de rÃ©fÃ©rence de Bonding Brother. Il guide les dÃ©veloppeurs dans la crÃ©ation d'une implÃ©mentation conforme aux contrats et invariants de Bonding Brother, en fournissant des recommandations pratiques, des patterns, et des bonnes pratiques.
+Ce document fournit des guidelines pour l'implémentation de référence de Bonding Brother. Il guide les développeurs dans la création d'une implémentation conforme aux contrats et invariants de Bonding Brother, en fournissant des recommandations pratiques, des patterns, et des bonnes pratiques.
 
-Ce document complÃ¨te l'[Architecture & Flows](../architecture/BondingBrother%20-%20Architecture%20%26%20Flows.md) et les [Invariants & Guarantees](../contracts/governance/BondingBrother%20-%20Invariants%20%26%20Guarantees.md) en fournissant des directives concrÃ¨tes d'implÃ©mentation.
+Ce document complète l'[Architecture & Flows](../architecture/BondingBrother%20-%20Architecture%20%26%20Flows.md) et les [Invariants & Guarantees](../contracts/governance/BondingBrother%20-%20Invariants%20%26%20Guarantees.md) en fournissant des directives concrètes d'implémentation.
 
-L'implÃ©mentation doit respecter les [Lois d'Autonomie SystÃ¨me](..//..//..//miyukini-webway-system//reference//_index.md) : aucune dÃ©pendance externe critique (**LOI-1**), fonctionnement en mode offline (**LOI-2**), Ã©tat local souverain (**LOI-3**), et coÃ»t proportionnel au hardware (**LOI-5**).
+L'implémentation doit respecter les [Lois d'Autonomie Système](..//..//..//miyukini-webway-system//reference//_index.md) : aucune dépendance externe critique (**LOI-1**), fonctionnement en mode offline (**LOI-2**), état local souverain (**LOI-3**), et coût proportionnel au hardware (**LOI-5**).
 
 **Navigation :** [Index BondingBrother](../_index.md)
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- Les principes d'implÃ©mentation
-- Les patterns recommandÃ©s
-- Les structures de code recommandÃ©es
+- Les principes d'implémentation
+- Les patterns recommandés
+- Les structures de code recommandées
 - Les bonnes pratiques
-- Les piÃ¨ges Ã  Ã©viter
+- Les pièges à éviter
 - Les exemples de code
 - Les guidelines de test
 
 Ce document **ne couvre pas** :
-- Les spÃ©cifications contractuelles (voir les contrats spÃ©cifiques)
-- Les dÃ©tails d'implÃ©mentation spÃ©cifiques Ã  une technologie
-- Les optimisations spÃ©cifiques Ã  un environnement
+- Les spécifications contractuelles (voir les contrats spécifiques)
+- Les détails d'implémentation spécifiques à une technologie
+- Les optimisations spécifiques à un environnement
 
 ---
 
-## 3. Principes d'implÃ©mentation
+## 3. Principes d'implémentation
 
-### 3.1 ConformitÃ© aux contrats
+### 3.1 Conformité aux contrats
 
 **Principe IMPL-01 : Contrats d'abord**
 
-L'implÃ©mentation doit respecter strictement tous les contrats de Bonding Brother. Aucun compromis n'est autorisÃ©.
+L'implémentation doit respecter strictement tous les contrats de Bonding Brother. Aucun compromis n'est autorisé.
 
 **Implications :**
-- Tous les contrats sont implÃ©mentÃ©s intÃ©gralement
+- Tous les contrats sont implémentés intégralement
 - Aucune violation d'invariant
 - Tous les tests de contrat passent
-- Documentation Ã  jour
+- Documentation à jour
 
-### 3.2 SimplicitÃ© et clartÃ©
+### 3.2 Simplicité et clarté
 
 **Principe IMPL-02 : Code simple**
 
-Le code doit Ãªtre simple, clair, et facile Ã  comprendre. La complexitÃ© n'est justifiÃ©e que si nÃ©cessaire pour respecter les contrats.
+Le code doit être simple, clair, et facile à comprendre. La complexité n'est justifiée que si nécessaire pour respecter les contrats.
 
 **Implications :**
 - Code lisible
@@ -54,79 +54,79 @@ Le code doit Ãªtre simple, clair, et facile Ã  comprendre. La complexitÃ© 
 - Structure claire
 - Documentation inline
 
-### 3.3 TestabilitÃ©
+### 3.3 Testabilité
 
 **Principe IMPL-03 : Testable par design**
 
-L'implÃ©mentation doit Ãªtre testable. Chaque composant doit pouvoir Ãªtre testÃ© isolÃ©ment.
+L'implémentation doit être testable. Chaque composant doit pouvoir être testé isolément.
 
 **Implications :**
-- Injection de dÃ©pendances
+- Injection de dépendances
 - Interfaces claires
 - Pas de couplage fort
 - Mocks possibles
 
-### 3.4 ObservabilitÃ©
+### 3.4 Observabilité
 
 **Principe IMPL-04 : Observable**
 
-L'implÃ©mentation doit Ãªtre observable : logs, mÃ©triques, traces.
+L'implémentation doit être observable : logs, métriques, traces.
 
 **Implications :**
-- Logging structurÃ©
-- MÃ©triques exposÃ©es
-- Traces distribuÃ©es
+- Logging structuré
+- Métriques exposées
+- Traces distribuées
 - Health checks
 
 ---
 
-## 4. Structure de code recommandÃ©e
+## 4. Structure de code recommandée
 
 ### 4.1 Organisation par couches
 
-**Structure recommandÃ©e :**
+**Structure recommandée :**
 ```
 bonding-brother/
-â”œâ”€â”€ product-layer/          # Couche Produit
-â”‚   â”œâ”€â”€ gateway/
-â”‚   â”œâ”€â”€ receiver/
-â”‚   â”œâ”€â”€ emitter/
-â”‚   â””â”€â”€ dispatcher/
-â”œâ”€â”€ translation-layer/      # Couche Traduction
-â”‚   â”œâ”€â”€ intent-translator/
-â”‚   â”œâ”€â”€ response-translator/
-â”‚   â”œâ”€â”€ vocabulary-mapper/
-â”‚   â””â”€â”€ context-enricher/
-â”œâ”€â”€ mediation-layer/        # Couche MÃ©diation
-â”‚   â”œâ”€â”€ orchestrator/
-â”‚   â”œâ”€â”€ router/
-â”‚   â”œâ”€â”€ filter-engine/
-â”‚   â”œâ”€â”€ journal-writer/
-â”‚   â””â”€â”€ offline-buffer/
-â”œâ”€â”€ authority-layer/        # Couche AutoritÃ©
-â”‚   â”œâ”€â”€ kind-mother-adapter/
-â”‚   â”œâ”€â”€ strong-father-adapter/
-â”‚   â”œâ”€â”€ response-handler/
-â”‚   â””â”€â”€ deferred-manager/
-â”œâ”€â”€ common/                 # Composants transversaux
-â”‚   â”œâ”€â”€ config/
-â”‚   â”œâ”€â”€ metrics/
-â”‚   â”œâ”€â”€ health/
-â”‚   â””â”€â”€ errors/
-â””â”€â”€ contracts/              # DÃ©finitions de contrats
-    â”œâ”€â”€ interfaces/
-    â””â”€â”€ types/
+├── product-layer/          # Couche Produit
+│   ├── gateway/
+│   ├── receiver/
+│   ├── emitter/
+│   └── dispatcher/
+├── translation-layer/      # Couche Traduction
+│   ├── intent-translator/
+│   ├── response-translator/
+│   ├── vocabulary-mapper/
+│   └── context-enricher/
+├── mediation-layer/        # Couche Médiation
+│   ├── orchestrator/
+│   ├── router/
+│   ├── filter-engine/
+│   ├── journal-writer/
+│   └── offline-buffer/
+├── authority-layer/        # Couche Autorité
+│   ├── kind-mother-adapter/
+│   ├── strong-father-adapter/
+│   ├── response-handler/
+│   └── deferred-manager/
+├── common/                 # Composants transversaux
+│   ├── config/
+│   ├── metrics/
+│   ├── health/
+│   └── errors/
+└── contracts/              # Définitions de contrats
+    ├── interfaces/
+    └── types/
 ```
 
 ### 4.2 Isolation des couches
 
-**RÃ¨gle IMPL-STRUCT-01 : Isolation stricte**
+**Règle IMPL-STRUCT-01 : Isolation stricte**
 
-Chaque couche est isolÃ©e et ne dÃ©pend que de ses interfaces, pas de l'implÃ©mentation.
+Chaque couche est isolée et ne dépend que de ses interfaces, pas de l'implémentation.
 
 **Exemple :**
 ```typescript
-// âœ… BON : Couche Traduction dÃ©pend de l'interface, pas de l'implÃ©mentation
+// ✅ BON : Couche Traduction dépend de l'interface, pas de l'implémentation
 interface IIntentReceiver {
   receive(intent: Intent): Promise<Intent>;
 }
@@ -136,7 +136,7 @@ class IntentTranslator {
   // ...
 }
 
-// âŒ MAUVAIS : Couplage direct Ã  l'implÃ©mentation
+// ❌ MAUVAIS : Couplage direct à l'implémentation
 class IntentTranslator {
   constructor(private receiver: IntentReceiverImpl) {}
   // ...
@@ -145,24 +145,24 @@ class IntentTranslator {
 
 ### 4.3 Interfaces explicites
 
-**RÃ¨gle IMPL-STRUCT-02 : Interfaces explicites**
+**Règle IMPL-STRUCT-02 : Interfaces explicites**
 
-Toutes les interfaces entre composants sont explicites et documentÃ©es.
+Toutes les interfaces entre composants sont explicites et documentées.
 
 **Exemple :**
 ```typescript
 /**
- * Interface pour la rÃ©ception d'intentions depuis les produits.
+ * Interface pour la réception d'intentions depuis les produits.
  * 
  * @contract IIntentSubmission
  * @version 1.0
  */
 interface IIntentReceiver {
   /**
-   * ReÃ§oit une intention d'un produit.
+   * Reçoit une intention d'un produit.
    * 
-   * @param intent - L'intention Ã  recevoir
-   * @returns L'intention reÃ§ue (validÃ©e structurellement)
+   * @param intent - L'intention à recevoir
+   * @returns L'intention reçue (validée structurellement)
    * @throws ValidationError si l'intention est invalide
    */
   receive(intent: Intent): Promise<ValidatedIntent>;
@@ -171,11 +171,11 @@ interface IIntentReceiver {
 
 ---
 
-## 5. Patterns recommandÃ©s
+## 5. Patterns recommandés
 
 ### 5.1 Pattern : Traduction pure
 
-**Contexte :** La traduction doit Ãªtre pure (sans effet de bord).
+**Contexte :** La traduction doit être pure (sans effet de bord).
 
 **Pattern :**
 ```typescript
@@ -184,24 +184,24 @@ interface IIntentReceiver {
  */
 class IntentTranslator {
   /**
-   * Traduit une intention en demande pour l'autoritÃ©.
+   * Traduit une intention en demande pour l'autorité.
    * 
-   * @param intent - L'intention Ã  traduire
+   * @param intent - L'intention à traduire
    * @param context - Le contexte de traduction
    * @returns La demande traduite
    * 
-   * @invariant INV-NAT-02 : Traducteur, pas exÃ©cuteur
+   * @invariant INV-NAT-02 : Traducteur, pas exécuteur
    * @invariant Pure function : pas d'effet de bord
    */
   translate(intent: ValidatedIntent, context: TranslationContext): Demand {
-    // Traduction pure : pas de modification d'Ã©tat
-    // Pas d'appel Ã  des services externes
+    // Traduction pure : pas de modification d'état
+    // Pas d'appel à des services externes
     // Pas de journalisation (fait ailleurs)
     return this.doTranslate(intent, context);
   }
   
   private doTranslate(intent: ValidatedIntent, context: TranslationContext): Demand {
-    // ImplÃ©mentation de la traduction
+    // Implémentation de la traduction
   }
 }
 ```
@@ -211,14 +211,14 @@ class IntentTranslator {
 - Pas d'effet de bord
 - Respecte INV-NAT-02
 
-### 5.2 Pattern : DÃ©lÃ©gation aux autoritÃ©s
+### 5.2 Pattern : Délégation aux autorités
 
-**Contexte :** Toute dÃ©cision est dÃ©lÃ©guÃ©e aux autoritÃ©s.
+**Contexte :** Toute décision est déléguée aux autorités.
 
 **Pattern :**
 ```typescript
 /**
- * Routeur vers les autoritÃ©s. Ne dÃ©cide jamais, dÃ©lÃ¨gue toujours.
+ * Routeur vers les autorités. Ne décide jamais, délègue toujours.
  */
 class AuthorityRouter {
   constructor(
@@ -227,19 +227,19 @@ class AuthorityRouter {
   ) {}
   
   /**
-   * Route une demande vers l'autoritÃ© appropriÃ©e.
+   * Route une demande vers l'autorité appropriée.
    * 
-   * @param demand - La demande Ã  router
-   * @returns La rÃ©ponse de l'autoritÃ©
+   * @param demand - La demande à router
+   * @returns La réponse de l'autorité
    * 
-   * @invariant INV-NEG-01 : Jamais de dÃ©cision
+   * @invariant INV-NEG-01 : Jamais de décision
    * @invariant INV-NEG-04 : Jamais de contournement
    */
   async route(demand: Demand): Promise<AuthorityResponse> {
-    // DÃ©cision technique uniquement : quelle autoritÃ© ?
+    // Décision technique uniquement : quelle autorité ?
     const authority = this.selectAuthority(demand);
     
-    // DÃ©lÃ©gation : pas de dÃ©cision mÃ©tier
+    // Délégation : pas de décision métier
     if (authority === 'KIND_MOTHER') {
       return await this.kindMotherAdapter.send(demand);
     } else {
@@ -248,10 +248,10 @@ class AuthorityRouter {
   }
   
   /**
-   * SÃ©lection technique de l'autoritÃ© (pas de dÃ©cision mÃ©tier).
+   * Sélection technique de l'autorité (pas de décision métier).
    */
   private selectAuthority(demand: Demand): 'KIND_MOTHER' | 'STRONG_FATHER' {
-    // SÃ©lection basÃ©e sur le type de demande, pas sur le contenu mÃ©tier
+    // Sélection basée sur le type de demande, pas sur le contenu métier
     return demand.type.startsWith('DATA_') ? 'KIND_MOTHER' : 'STRONG_FATHER';
   }
 }
@@ -259,25 +259,25 @@ class AuthorityRouter {
 
 **Avantages :**
 - Respecte INV-NEG-01
-- DÃ©lÃ©gation claire
+- Délégation claire
 - Testable
 
-### 5.3 Pattern : Journalisation systÃ©matique
+### 5.3 Pattern : Journalisation systématique
 
-**Contexte :** Toute interaction doit Ãªtre journalisÃ©e.
+**Contexte :** Toute interaction doit être journalisée.
 
 **Pattern :**
 ```typescript
 /**
- * Journaliseur. Journalise systÃ©matiquement toutes les interactions.
+ * Journaliseur. Journalise systématiquement toutes les interactions.
  */
 class JournalWriter {
   /**
    * Journalise une interaction.
    * 
-   * @param entry - L'entrÃ©e Ã  journaliser
+   * @param entry - L'entrée à journaliser
    * 
-   * @invariant INV-FLUX-02 : Journalisation systÃ©matique
+   * @invariant INV-FLUX-02 : Journalisation systématique
    */
   async journalize(entry: JournalEntry): Promise<void> {
     // Journalisation asynchrone (ne bloque pas le flux)
@@ -295,33 +295,33 @@ class JournalWriter {
 
 **Avantages :**
 - Respecte INV-FLUX-02
-- TraÃ§abilitÃ© complÃ¨te
-- ImmutabilitÃ©
+- Traçabilité complète
+- Immutabilité
 
-### 5.4 Pattern : Filtrage par rÃ¨gles
+### 5.4 Pattern : Filtrage par règles
 
-**Contexte :** Le filtrage applique des rÃ¨gles, ne dÃ©cide pas.
+**Contexte :** Le filtrage applique des règles, ne décide pas.
 
 **Pattern :**
 ```typescript
 /**
- * Moteur de filtrage. Applique des rÃ¨gles, ne dÃ©cide pas.
+ * Moteur de filtrage. Applique des règles, ne décide pas.
  */
 class FilterEngine {
   constructor(private rules: IFilterRules) {}
   
   /**
-   * Filtre une demande selon les rÃ¨gles.
+   * Filtre une demande selon les règles.
    * 
-   * @param demand - La demande Ã  filtrer
-   * @returns La demande filtrÃ©e (ou rejetÃ©e)
+   * @param demand - La demande à filtrer
+   * @returns La demande filtrée (ou rejetée)
    * 
-   * @invariant INV-NEG-03 : Jamais de crÃ©ation de rÃ¨gle
-   * @invariant Applique des rÃ¨gles, ne dÃ©cide pas
+   * @invariant INV-NEG-03 : Jamais de création de règle
+   * @invariant Applique des règles, ne décide pas
    */
   async filter(demand: Demand): Promise<FilteredDemand | Rejection> {
-    // Application des rÃ¨gles (dÃ©finies par une autoritÃ©)
-    // Pas de dÃ©cision arbitraire
+    // Application des règles (définies par une autorité)
+    // Pas de décision arbitraire
     for (const rule of this.rules.getApplicableRules(demand)) {
       const result = await rule.evaluate(demand);
       if (result === 'REJECT') {
@@ -336,7 +336,7 @@ class FilterEngine {
 
 **Avantages :**
 - Respecte INV-NEG-03
-- RÃ¨gles externes
+- Règles externes
 - Testable
 
 ---
@@ -345,13 +345,13 @@ class FilterEngine {
 
 ### 6.1 Gestion des erreurs
 
-**Pratique ERR-01 : Erreurs typÃ©es**
+**Pratique ERR-01 : Erreurs typées**
 
 Utiliser des types d'erreur explicites et conformes au [Error & Rejection Model](../contracts/error/BondingBrother%20-%20Error%20%26%20Rejection%20Model.md).
 
 **Exemple :**
 ```typescript
-// âœ… BON : Erreur typÃ©e
+// ✅ BON : Erreur typée
 class ValidationError extends Error {
   constructor(
     public code: 'VALIDATION_ERROR',
@@ -362,26 +362,26 @@ class ValidationError extends Error {
   }
 }
 
-// âŒ MAUVAIS : Erreur gÃ©nÃ©rique
+// ❌ MAUVAIS : Erreur générique
 throw new Error('Something went wrong');
 ```
 
-**Pratique ERR-02 : Propagation fidÃ¨le**
+**Pratique ERR-02 : Propagation fidèle**
 
-Les erreurs des autoritÃ©s sont propagÃ©es fidÃ¨lement, sans modification.
+Les erreurs des autorités sont propagées fidèlement, sans modification.
 
 **Exemple :**
 ```typescript
-// âœ… BON : Propagation fidÃ¨le
+// ✅ BON : Propagation fidèle
 try {
   const response = await this.authorityAdapter.send(demand);
   return response;
 } catch (error) {
-  // Propagation fidÃ¨le de l'erreur de l'autoritÃ©
+  // Propagation fidèle de l'erreur de l'autorité
   throw new AuthorityError(error.code, error.message, error.context);
 }
 
-// âŒ MAUVAIS : Modification de l'erreur
+// ❌ MAUVAIS : Modification de l'erreur
 catch (error) {
   throw new Error('Internal error'); // Perte d'information
 }
@@ -389,13 +389,13 @@ catch (error) {
 
 ### 6.2 Validation
 
-**Pratique VAL-01 : Validation prÃ©coce**
+**Pratique VAL-01 : Validation précoce**
 
 Valider structurellement avant tout traitement.
 
 **Exemple :**
 ```typescript
-// âœ… BON : Validation prÃ©coce
+// ✅ BON : Validation précoce
 class IntentReceiver {
   async receive(intent: Intent): Promise<ValidatedIntent> {
     // Validation structurelle d'abord
@@ -408,33 +408,33 @@ class IntentReceiver {
   }
 }
 
-// âŒ MAUVAIS : Validation tardive
+// ❌ MAUVAIS : Validation tardive
 async receive(intent: Intent) {
   // Traitement d'abord...
   const processed = this.process(intent);
-  // Validation aprÃ¨s (trop tard)
+  // Validation après (trop tard)
   this.validate(processed);
 }
 ```
 
 ### 6.3 Logging
 
-**Pratique LOG-01 : Logging structurÃ©**
+**Pratique LOG-01 : Logging structuré**
 
-Utiliser un logging structurÃ© avec contexte.
+Utiliser un logging structuré avec contexte.
 
 **Exemple :**
 ```typescript
-// âœ… BON : Logging structurÃ©
-logger.info('Intention reÃ§ue', {
+// ✅ BON : Logging structuré
+logger.info('Intention reçue', {
   intention_id: intent.id,
   produit_id: intent.produit_id,
   type: intent.type,
   timestamp: Date.now()
 });
 
-// âŒ MAUVAIS : Logging non structurÃ©
-console.log('Intention reÃ§ue: ' + intent.id);
+// ❌ MAUVAIS : Logging non structuré
+console.log('Intention reçue: ' + intent.id);
 ```
 
 **Pratique LOG-02 : Pas de secrets**
@@ -443,14 +443,14 @@ Ne jamais logger de secrets (mots de passe, tokens).
 
 **Exemple :**
 ```typescript
-// âœ… BON : Pas de secrets
-logger.info('Contexte reÃ§u', {
+// ✅ BON : Pas de secrets
+logger.info('Contexte reçu', {
   produit_id: context.produit_id,
   user_id: context.user_id,
-  // token: context.token // âŒ JAMAIS
+  // token: context.token // ❌ JAMAIS
 });
 
-// âŒ MAUVAIS : Secret loggÃ©
+// ❌ MAUVAIS : Secret loggé
 logger.info('Contexte', context); // Peut contenir des secrets
 ```
 
@@ -458,7 +458,7 @@ logger.info('Contexte', context); // Peut contenir des secrets
 
 **Pratique TEST-01 : Tests d'invariants**
 
-Tester systÃ©matiquement les invariants.
+Tester systématiquement les invariants.
 
 **Exemple :**
 ```typescript
@@ -470,11 +470,11 @@ describe('IntentTranslator', () => {
     // Premier appel
     const result1 = await translator.translate(intent, context);
     
-    // DeuxiÃ¨me appel (mÃªme entrÃ©e = mÃªme sortie)
+    // Deuxième appel (même entrée = même sortie)
     const result2 = await translator.translate(intent, context);
     
     expect(result1).toEqual(result2);
-    // VÃ©rification : pas d'effet de bord
+    // Vérification : pas d'effet de bord
   });
   
   it('should not make decisions', async () => {
@@ -483,7 +483,7 @@ describe('IntentTranslator', () => {
     
     const demand = await translator.translate(intent, context);
     
-    // VÃ©rification : pas de dÃ©cision mÃ©tier dans la demande
+    // Vérification : pas de décision métier dans la demande
     expect(demand.decision).toBeUndefined();
   });
 });
@@ -491,7 +491,7 @@ describe('IntentTranslator', () => {
 
 **Pratique TEST-02 : Tests de contrats**
 
-Tester la conformitÃ© aux contrats.
+Tester la conformité aux contrats.
 
 **Exemple :**
 ```typescript
@@ -503,7 +503,7 @@ describe('ProductGateway', () => {
     const intent = createValidIntent();
     const result = await gateway.submitIntent(intent);
     
-    // VÃ©rification de la conformitÃ© au contrat
+    // Vérification de la conformité au contrat
     expect(result).toMatchContract(IIntentSubmission);
   });
 });
@@ -511,95 +511,95 @@ describe('ProductGateway', () => {
 
 ---
 
-## 7. PiÃ¨ges Ã  Ã©viter
+## 7. Pièges à éviter
 
-### 7.1 PiÃ¨ge : Cache de donnÃ©es mÃ©tier
+### 7.1 Piège : Cache de données métier
 
-**ProblÃ¨me :** Mettre en cache des donnÃ©es mÃ©tier pour amÃ©liorer les performances.
+**Problème :** Mettre en cache des données métier pour améliorer les performances.
 
-**Pourquoi c'est mal :** Violerait INV-NEG-02 (jamais de stockage de vÃ©ritÃ©).
+**Pourquoi c'est mal :** Violerait INV-NEG-02 (jamais de stockage de vérité).
 
-**Solution :** Cache uniquement de configuration, pas de donnÃ©es mÃ©tier.
+**Solution :** Cache uniquement de configuration, pas de données métier.
 
 ```typescript
-// âŒ MAUVAIS : Cache de donnÃ©es mÃ©tier
+// ❌ MAUVAIS : Cache de données métier
 class ContentCache {
   private cache = new Map<string, Content>();
   
   async getContent(id: string): Promise<Content> {
     if (this.cache.has(id)) {
-      return this.cache.get(id); // âŒ Violation INV-NEG-02
+      return this.cache.get(id); // ❌ Violation INV-NEG-02
     }
     // ...
   }
 }
 
-// âœ… BON : Pas de cache de donnÃ©es mÃ©tier
+// ✅ BON : Pas de cache de données métier
 class ContentTranslator {
-  // Pas de cache, toujours aller chercher chez l'autoritÃ©
+  // Pas de cache, toujours aller chercher chez l'autorité
   async translate(intent: Intent): Promise<Demand> {
     // Traduction pure, pas de cache
   }
 }
 ```
 
-### 7.2 PiÃ¨ge : DÃ©cision basÃ©e sur la performance
+### 7.2 Piège : Décision basée sur la performance
 
-**ProblÃ¨me :** Prendre des dÃ©cisions mÃ©tier basÃ©es sur la performance.
+**Problème :** Prendre des décisions métier basées sur la performance.
 
-**Pourquoi c'est mal :** Violerait INV-NEG-01 (jamais de dÃ©cision).
+**Pourquoi c'est mal :** Violerait INV-NEG-01 (jamais de décision).
 
-**Solution :** DÃ©cisions techniques uniquement, pas de dÃ©cisions mÃ©tier.
+**Solution :** Décisions techniques uniquement, pas de décisions métier.
 
 ```typescript
-// âŒ MAUVAIS : DÃ©cision basÃ©e sur la performance
+// ❌ MAUVAIS : Décision basée sur la performance
 class AuthorityRouter {
   async route(demand: Demand): Promise<Response> {
-    // DÃ©cision mÃ©tier basÃ©e sur la performance âŒ
+    // Décision métier basée sur la performance ❌
     if (this.kindMother.isSlow()) {
-      return this.strongFather.send(demand); // âŒ Violation INV-NEG-01
+      return this.strongFather.send(demand); // ❌ Violation INV-NEG-01
     }
     // ...
   }
 }
 
-// âœ… BON : Routage technique uniquement
+// ✅ BON : Routage technique uniquement
 class AuthorityRouter {
   async route(demand: Demand): Promise<Response> {
-    // DÃ©cision technique uniquement
+    // Décision technique uniquement
     const authority = this.selectAuthorityByType(demand.type);
     return await this.getAdapter(authority).send(demand);
   }
 }
 ```
 
-### 7.3 PiÃ¨ge : Saut d'Ã©tape pour performance
+### 7.3 Piège : Saut d'étape pour performance
 
-**ProblÃ¨me :** Sauter des Ã©tapes du flux pour amÃ©liorer les performances.
+**Problème :** Sauter des étapes du flux pour améliorer les performances.
 
-**Pourquoi c'est mal :** Violerait INV-FLUX-01 (sÃ©quence complÃ¨te).
+**Pourquoi c'est mal :** Violerait INV-FLUX-01 (séquence complète).
 
-**Solution :** Optimiser chaque Ã©tape, mais ne jamais en sauter.
+**Solution :** Optimiser chaque étape, mais ne jamais en sauter.
 
 ```typescript
-// âŒ MAUVAIS : Saut d'Ã©tape
+// ❌ MAUVAIS : Saut d'étape
 class MediationOrchestrator {
   async process(intent: Intent): Promise<Result> {
-    // Saut de la journalisation pour performance âŒ
-    // this.journalize(intent); // âŒ Violation INV-FLUX-02
+    // Saut de la journalisation pour performance ❌
+    // this.journalize(intent); // ❌ Violation INV-FLUX-02
     
     const demand = await this.translate(intent);
     return await this.route(demand);
   }
 }
 
-// âœ… BON : Toutes les Ã©tapes, optimisÃ©es
+// ✅ BON : Toutes les étapes, optimisées
 class MediationOrchestrator {
   async process(intent: Intent): Promise<Result> {
-    // Toutes les Ã©tapes, mais optimisÃ©es
+    // Toutes les étapes, mais optimisées
     const validated = await this.validate(intent);
     const demand = await this.translate(validated);
-    await this.journalize(validated); // Asynchrone mais prÃ©sent
+    await this.journalize(validated); // Asynchrone mais présent
     const response = await this.route(demand);
     await this.journalize(response);
     return await this.emit(response);
@@ -607,32 +607,32 @@ class MediationOrchestrator {
 }
 ```
 
-### 7.4 PiÃ¨ge : Modification de dÃ©cision d'autoritÃ©
+### 7.4 Piège : Modification de décision d'autorité
 
-**ProblÃ¨me :** Modifier une dÃ©cision d'autoritÃ© pour "corriger" ou "amÃ©liorer".
+**Problème :** Modifier une décision d'autorité pour "corriger" ou "améliorer".
 
-**Pourquoi c'est mal :** Violerait INV-NEG-05 (jamais de modification de dÃ©cision).
+**Pourquoi c'est mal :** Violerait INV-NEG-05 (jamais de modification de décision).
 
-**Solution :** Transmettre fidÃ¨lement, sans modification.
+**Solution :** Transmettre fidèlement, sans modification.
 
 ```typescript
-// âŒ MAUVAIS : Modification de dÃ©cision
+// ❌ MAUVAIS : Modification de décision
 class ResponseTranslator {
   translate(response: AuthorityResponse): Result {
-    // Modification de la dÃ©cision âŒ
+    // Modification de la décision ❌
     if (response.status === 'REJECTED') {
-      return { status: 'ACCEPTED' }; // âŒ Violation INV-NEG-05
+      return { status: 'ACCEPTED' }; // ❌ Violation INV-NEG-05
     }
     // ...
   }
 }
 
-// âœ… BON : Transmission fidÃ¨le
+// ✅ BON : Transmission fidèle
 class ResponseTranslator {
   translate(response: AuthorityResponse): Result {
-    // Transmission fidÃ¨le de la dÃ©cision
+    // Transmission fidèle de la décision
     return {
-      status: response.status, // FidÃ¨le
+      status: response.status, // Fidèle
       data: this.filterData(response.data), // Filtrage OK
     };
   }
@@ -645,34 +645,34 @@ class ResponseTranslator {
 
 ### 8.1 Structure des tests
 
-**Organisation recommandÃ©e :**
+**Organisation recommandée :**
 ```
 tests/
-â”œâ”€â”€ unit/                   # Tests unitaires
-â”‚   â”œâ”€â”€ product-layer/
-â”‚   â”œâ”€â”€ translation-layer/
-â”‚   â”œâ”€â”€ mediation-layer/
-â”‚   â””â”€â”€ authority-layer/
-â”œâ”€â”€ integration/           # Tests d'intÃ©gration
-â”‚   â”œâ”€â”€ flows/
-â”‚   â””â”€â”€ contracts/
-â”œâ”€â”€ contract/               # Tests de contrats
-â”‚   â”œâ”€â”€ invariants/
-â”‚   â””â”€â”€ guarantees/
-â””â”€â”€ e2e/                    # Tests end-to-end
-    â””â”€â”€ scenarios/
+├── unit/                   # Tests unitaires
+│   ├── product-layer/
+│   ├── translation-layer/
+│   ├── mediation-layer/
+│   └── authority-layer/
+├── integration/           # Tests d'intégration
+│   ├── flows/
+│   └── contracts/
+├── contract/               # Tests de contrats
+│   ├── invariants/
+│   └── guarantees/
+└── e2e/                    # Tests end-to-end
+    └── scenarios/
 ```
 
 ### 8.2 Tests d'invariants
 
-**RÃ¨gle TEST-INV-01 : Tests systÃ©matiques**
+**Règle TEST-INV-01 : Tests systématiques**
 
-Tous les invariants doivent Ãªtre testÃ©s systÃ©matiquement.
+Tous les invariants doivent être testés systématiquement.
 
 **Exemple :**
 ```typescript
 describe('Invariants', () => {
-  describe('INV-NAT-01: MÃ©diateur, pas autoritÃ©', () => {
+  describe('INV-NAT-01: Médiateur, pas autorité', () => {
     it('should not have decision methods', () => {
       const components = getAllComponents();
       components.forEach(component => {
@@ -683,7 +683,7 @@ describe('Invariants', () => {
     });
   });
   
-  describe('INV-FLUX-02: Journalisation systÃ©matique', () => {
+  describe('INV-FLUX-02: Journalisation systématique', () => {
     it('should journalize all interactions', async () => {
       const journal = new InMemoryJournal();
       const orchestrator = new MediationOrchestrator(journal);
@@ -691,8 +691,8 @@ describe('Invariants', () => {
       const intent = createTestIntent();
       await orchestrator.process(intent);
       
-      // VÃ©rification : toutes les Ã©tapes sont journalisÃ©es
-      expect(journal.entries).toHaveLength(2); // Intention + RÃ©sultat
+      // Vérification : toutes les étapes sont journalisées
+      expect(journal.entries).toHaveLength(2); // Intention + Résultat
     });
   });
 });
@@ -700,9 +700,9 @@ describe('Invariants', () => {
 
 ### 8.3 Tests de contrats
 
-**RÃ¨gle TEST-CONTRACT-01 : Tests de conformitÃ©**
+**Règle TEST-CONTRACT-01 : Tests de conformité**
 
-Tous les contrats doivent Ãªtre testÃ©s pour conformitÃ©.
+Tous les contrats doivent être testés pour conformité.
 
 **Exemple :**
 ```typescript
@@ -712,11 +712,11 @@ describe('Contract Compliance', () => {
       const gateway = new ProductGateway();
       const contract = IIntentSubmissionContract;
       
-      // Test de conformitÃ©
+      // Test de conformité
       const intent = createValidIntent();
       const result = await gateway.submitIntent(intent);
       
-      // VÃ©rification
+      // Vérification
       expect(contract.validate(result)).toBe(true);
     });
   });
@@ -725,13 +725,13 @@ describe('Contract Compliance', () => {
 
 ---
 
-## 9. Exemples d'implÃ©mentation
+## 9. Exemples d'implémentation
 
 ### 9.1 Exemple : ProductGateway complet
 
 ```typescript
 /**
- * Gateway produit. Point d'entrÃ©e pour les intentions des produits.
+ * Gateway produit. Point d'entrée pour les intentions des produits.
  * 
  * @contract IIntentSubmission v1.0
  * @layer Product
@@ -747,26 +747,26 @@ class ProductGateway implements IIntentSubmission {
   /**
    * Soumet une intention d'un produit.
    * 
-   * @param intent - L'intention Ã  soumettre
-   * @returns Le rÃ©sultat de l'intention
+   * @param intent - L'intention à soumettre
+   * @returns Le résultat de l'intention
    * 
-   * @invariant INV-FLUX-01 : SÃ©quence complÃ¨te
-   * @invariant INV-FLUX-02 : Journalisation systÃ©matique
+   * @invariant INV-FLUX-01 : Séquence complète
+   * @invariant INV-FLUX-02 : Journalisation systématique
    */
   async submitIntent(intent: Intent): Promise<Result> {
-    this.logger.info('Intention reÃ§ue', { intention_id: intent.id });
+    this.logger.info('Intention reçue', { intention_id: intent.id });
     
     try {
-      // 1. RÃ©ception et validation
+      // 1. Réception et validation
       const validated = await this.receiver.receive(intent);
       
-      // 2. Orchestration complÃ¨te
+      // 2. Orchestration complète
       const result = await this.orchestrator.process(validated);
       
-      // 3. Ã‰mission du rÃ©sultat
+      // 3. Émission du résultat
       await this.emitter.emit(result);
       
-      this.logger.info('Intention traitÃ©e', { 
+      this.logger.info('Intention traitée', { 
         intention_id: intent.id, 
         status: result.status 
       });
@@ -787,12 +787,12 @@ class ProductGateway implements IIntentSubmission {
 
 ```typescript
 /**
- * Traducteur d'intention. Traduit intention â†’ demande.
+ * Traducteur d'intention. Traduit intention → demande.
  * 
  * @contract ITranslation v1.0
  * @layer Translation
  * 
- * @invariant INV-NAT-02 : Traducteur, pas exÃ©cuteur
+ * @invariant INV-NAT-02 : Traducteur, pas exécuteur
  * @invariant Pure function : pas d'effet de bord
  */
 class IntentTranslator implements ITranslation {
@@ -804,14 +804,14 @@ class IntentTranslator implements ITranslation {
   /**
    * Traduit une intention en demande.
    * 
-   * @param intent - L'intention Ã  traduire
+   * @param intent - L'intention à traduire
    * @param context - Le contexte de traduction
    * @returns La demande traduite
    */
   translate(intent: ValidatedIntent, context: TranslationContext): Demand {
     // Traduction pure : pas d'effet de bord
-    // Pas de modification d'Ã©tat
-    // Pas d'appel Ã  des services externes
+    // Pas de modification d'état
+    // Pas d'appel à des services externes
     
     // 1. Mapping du vocabulaire
     const mappedType = this.vocabularyMapper.mapType(intent.type);
@@ -835,39 +835,39 @@ class IntentTranslator implements ITranslation {
 
 ---
 
-## 10. Checklist d'implÃ©mentation
+## 10. Checklist d'implémentation
 
-### 10.1 Checklist de conformitÃ©
+### 10.1 Checklist de conformité
 
-Avant de considÃ©rer une implÃ©mentation comme complÃ¨te, vÃ©rifier :
+Avant de considérer une implémentation comme complète, vérifier :
 
 **Contrats :**
-- [ ] Tous les contrats sont implÃ©mentÃ©s
+- [ ] Tous les contrats sont implémentés
 - [ ] Tous les tests de contrat passent
-- [ ] Documentation des contrats Ã  jour
+- [ ] Documentation des contrats à jour
 
 **Invariants :**
-- [ ] Tous les invariants sont respectÃ©s
+- [ ] Tous les invariants sont respectés
 - [ ] Tests d'invariants passent
-- [ ] Aucune violation dÃ©tectÃ©e
+- [ ] Aucune violation détectée
 
 **Architecture :**
-- [ ] Structure en 4 couches respectÃ©e
-- [ ] Isolation des couches respectÃ©e
-- [ ] Interfaces explicites dÃ©finies
+- [ ] Structure en 4 couches respectée
+- [ ] Isolation des couches respectée
+- [ ] Interfaces explicites définies
 
 **Tests :**
 - [ ] Couverture de code > 80%
 - [ ] Tests unitaires pour tous les composants
-- [ ] Tests d'intÃ©gration pour tous les flux
+- [ ] Tests d'intégration pour tous les flux
 - [ ] Tests de contrats passent
 
 **Documentation :**
-- [ ] Code documentÃ©
-- [ ] Interfaces documentÃ©es
+- [ ] Code documenté
+- [ ] Interfaces documentées
 - [ ] Exemples fournis
 
-### 10.2 Checklist de qualitÃ©
+### 10.2 Checklist de qualité
 
 **Code :**
 - [ ] Code lisible et maintenable
@@ -876,60 +876,60 @@ Avant de considÃ©rer une implÃ©mentation comme complÃ¨te, vÃ©rifier :
 - [ ] Pas de duplication
 
 **Performance :**
-- [ ] MÃ©triques de performance respectÃ©es
-- [ ] Pas d'optimisation prÃ©maturÃ©e
-- [ ] Profiling effectuÃ©
+- [ ] Métriques de performance respectées
+- [ ] Pas d'optimisation prématurée
+- [ ] Profiling effectué
 
-**SÃ©curitÃ© :**
+**Sécurité :**
 - [ ] Pas de secrets dans le code
-- [ ] Validation des entrÃ©es
-- [ ] Gestion sÃ©curisÃ©e des erreurs
+- [ ] Validation des entrées
+- [ ] Gestion sécurisée des erreurs
 
 ---
 
-## 11. ConformitÃ© MSCM/MIP
+## 11. Conformité MSCM/MIP
 
 ### 11.1 Obligation de balisage MSCM
 
-Tout code implÃ©mentÃ© pour Bonding Brother DOIT Ãªtre balisÃ© selon le protocole MSCM v1.
+Tout code implémenté pour Bonding Brother DOIT être balisé selon le protocole MSCM v1.
 
-**RÃ©fÃ©rence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
+**Référence :** [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md)
 
 **Obligations minimales :**
 - Chaque bloc fonctionnel DOIT avoir un identifiant unique (`@id`)
-- Le rÃ´le sÃ©mantique DOIT Ãªtre explicite (`@role`)
-- La couche architecturale DOIT Ãªtre dÃ©clarÃ©e (`@layer`)
+- Le rôle sémantique DOIT être explicite (`@role`)
+- La couche architecturale DOIT être déclarée (`@layer`)
 - Une description humaine DOIT accompagner chaque bloc (`@human`)
 
-### 11.2 IntÃ©gration MIP
+### 11.2 Intégration MIP
 
-AprÃ¨s implÃ©mentation, l'index MIP DOIT Ãªtre rÃ©gÃ©nÃ©rÃ© pour :
-- Valider l'intÃ©gritÃ© des blocs MSCM
-- Mettre Ã  jour le graphe de dÃ©pendances
-- VÃ©rifier la cohÃ©rence hiÃ©rarchique
+Après implémentation, l'index MIP DOIT être régénéré pour :
+- Valider l'intégrité des blocs MSCM
+- Mettre à jour le graphe de dépendances
+- Vérifier la cohérence hiérarchique
 
 ### 11.3 Check-list MSCM
 
-Avant toute livraison, vÃ©rifier :
-- [ ] Tous les blocs critiques sont balisÃ©s MSCM
+Avant toute livraison, vérifier :
+- [ ] Tous les blocs critiques sont balisés MSCM
 - [ ] Les identifiants sont uniques globalement
-- [ ] Les couches (layer) sont cohÃ©rentes avec l'architecture
-- [ ] L'index MIP peut Ãªtre rÃ©gÃ©nÃ©rÃ© sans erreur
+- [ ] Les couches (layer) sont cohérentes avec l'architecture
+- [ ] L'index MIP peut être régénéré sans erreur
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **informatif, non contractuel, et de statut GUIDELINES**. Il fournit des recommandations pour l'implÃ©mentation de rÃ©fÃ©rence de Bonding Brother, mais n'Ã©tablit pas de contraintes contractuelles.
+Ce document est **informatif, non contractuel, et de statut GUIDELINES**. Il fournit des recommandations pour l'implémentation de référence de Bonding Brother, mais n'établit pas de contraintes contractuelles.
 
-Les contrats et invariants restent la source de vÃ©ritÃ©. Ces guidelines sont des recommandations pour faciliter une implÃ©mentation conforme.
+Les contrats et invariants restent la source de vérité. Ces guidelines sont des recommandations pour faciliter une implémentation conforme.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** GUIDELINES â€” Informatif  
-**DÃ©pendances :** 
+**Statut :** GUIDELINES — Informatif  
+**Dépendances :** 
 - Architecture & Flows v2.0
 - Invariants & Guarantees v2.0
 - Documentation Fondatrice v2.0

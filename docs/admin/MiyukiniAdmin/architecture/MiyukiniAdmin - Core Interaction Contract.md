@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Core Interaction Contract
+﻿# MiyukiniAdmin — Core Interaction Contract
 
 ## 1. Contexte
 
@@ -28,9 +28,9 @@ Ce document **ne couvre pas** :
 > **Toute interaction entre MiyukiniAdmin et les cores passe par BondingBrother.**
 
 ```
-MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ Core
-     â”‚                  â”‚
-     â”‚â—€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚â—€â”€â”€â”€ Reponse
+MiyukiniAdmin ──▶ BondingBrother ──▶ Core
+     │                  │
+     │◀─────────────────│◀─── Reponse
 ```
 
 **Aucun acces direct aux cores n'est autorise.**
@@ -62,32 +62,32 @@ MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ Cor
 ### 4.2 Protocole de Requete
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AdminRequest                                                 â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ request_id: UUID           # Identifiant unique              â”‚
-â”‚ timestamp: DateTime        # Horodatage                      â”‚
-â”‚ operator_id: UUID          # Identite operateur              â”‚
-â”‚ capability: String         # Capacite invoquee               â”‚
-â”‚ parameters: Map            # Parametres de la requete        â”‚
-â”‚ justification: String?     # Justification (si requise)      â”‚
-â”‚ session_context: Context   # Contexte de session             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ AdminRequest                                                 │
+├─────────────────────────────────────────────────────────────┤
+│ request_id: UUID           # Identifiant unique              │
+│ timestamp: DateTime        # Horodatage                      │
+│ operator_id: UUID          # Identite operateur              │
+│ capability: String         # Capacite invoquee               │
+│ parameters: Map            # Parametres de la requete        │
+│ justification: String?     # Justification (si requise)      │
+│ session_context: Context   # Contexte de session             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### 4.3 Protocole de Reponse
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AdminResponse                                                â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ request_id: UUID           # Reference a la requete          â”‚
-â”‚ timestamp: DateTime        # Horodatage reponse              â”‚
-â”‚ status: ResponseStatus     # SUCCESS | ERROR | DENIED        â”‚
-â”‚ data: Any?                 # Donnees de reponse              â”‚
-â”‚ error: Error?              # Erreur si applicable            â”‚
-â”‚ audit_ref: UUID            # Reference audit log             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ AdminResponse                                                │
+├─────────────────────────────────────────────────────────────┤
+│ request_id: UUID           # Reference a la requete          │
+│ timestamp: DateTime        # Horodatage reponse              │
+│ status: ResponseStatus     # SUCCESS | ERROR | DENIED        │
+│ data: Any?                 # Donnees de reponse              │
+│ error: Error?              # Erreur si applicable            │
+│ audit_ref: UUID            # Reference audit log             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -117,30 +117,30 @@ MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ Cor
 
 ```
 MiyukiniAdmin                BondingBrother              StrongFather
-     â”‚                             â”‚                          â”‚
-     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (capability: security.write)â”‚                          â”‚
-     â”‚                             â”‚â”€â”€DecisionRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚                          â”‚
-     â”‚                             â”‚â—€â”€DecisionResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                             â”‚  (APPROVED/DENIED)        â”‚
-     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚                             â”‚                          â”‚
+     │                             │                          │
+     │──AdminRequest───────────────▶│                          │
+     │  (capability: security.write)│                          │
+     │                             │──DecisionRequest─────────▶│
+     │                             │                          │
+     │                             │◀─DecisionResponse────────│
+     │                             │  (APPROVED/DENIED)        │
+     │◀─AdminResponse──────────────│                          │
+     │                             │                          │
 ```
 
 ### 5.4 Donnees de Validation
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ StrongFather Validation Context                              â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ action_type: String        # Type d'action admin             â”‚
-â”‚ current_security_level: 0-4 # Niveau actuel                  â”‚
-â”‚ requested_change: Any      # Changement demande              â”‚
-â”‚ justification: String      # Justification obligatoire       â”‚
-â”‚ operator_role: Role        # Role de l'operateur             â”‚
-â”‚ system_state: State        # Etat actuel du systeme          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ StrongFather Validation Context                              │
+├─────────────────────────────────────────────────────────────┤
+│ action_type: String        # Type d'action admin             │
+│ current_security_level: 0-4 # Niveau actuel                  │
+│ requested_change: Any      # Changement demande              │
+│ justification: String      # Justification obligatoire       │
+│ operator_role: Role        # Role de l'operateur             │
+│ system_state: State        # Etat actuel du systeme          │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -171,15 +171,15 @@ MiyukiniAdmin                BondingBrother              StrongFather
 
 ```
 MiyukiniAdmin                BondingBrother              KindMother
-     â”‚                             â”‚                          â”‚
-     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (capability: db.read)       â”‚                          â”‚
-     â”‚                             â”‚â”€â”€DataRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚                          â”‚
-     â”‚                             â”‚â—€â”€DataResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                             â”‚  (data)                   â”‚
-     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚                             â”‚                          â”‚
+     │                             │                          │
+     │──AdminRequest───────────────▶│                          │
+     │  (capability: db.read)       │                          │
+     │                             │──DataRequest─────────────▶│
+     │                             │                          │
+     │                             │◀─DataResponse────────────│
+     │                             │  (data)                   │
+     │◀─AdminResponse──────────────│                          │
+     │                             │                          │
 ```
 
 ### 6.4 Flux Mode Recovery (Cas Extreme)
@@ -188,24 +188,24 @@ MiyukiniAdmin                BondingBrother              KindMother
 
 ```
 MiyukiniAdmin                BondingBrother         StrongFather    KindMother
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚â”€â”€RecoveryRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚              â”‚
-     â”‚  (conditions cumulatives)    â”‚                     â”‚              â”‚
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚                             â”‚â”€â”€VerifyConditionsâ”€â”€â”€â–¶â”‚              â”‚
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚                             â”‚â—€â”€ConditionsValidâ”€â”€â”€â”€â”‚              â”‚
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚                             â”‚â”€â”€NotifyRecoveryâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚  (blocage Operateurs)                â”‚
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚â—€â”€RecoveryGrantedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚              â”‚
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚â•â•â•â•â•â•â•â• ACCES DIRECT DB (temporaire) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â”‚
-     â”‚                             â”‚                     â”‚              â”‚
-     â”‚â”€â”€EndRecoveryâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚              â”‚
-     â”‚                             â”‚â”€â”€Revalidationâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚                     â”‚              â”‚
+     │                             │                     │              │
+     │──RecoveryRequest────────────▶│                     │              │
+     │  (conditions cumulatives)    │                     │              │
+     │                             │                     │              │
+     │                             │──VerifyConditions───▶│              │
+     │                             │                     │              │
+     │                             │◀─ConditionsValid────│              │
+     │                             │                     │              │
+     │                             │──NotifyRecovery─────────────────────▶│
+     │                             │  (blocage Operateurs)                │
+     │                             │                     │              │
+     │◀─RecoveryGranted────────────│                     │              │
+     │                             │                     │              │
+     │════════ ACCES DIRECT DB (temporaire) ════════════════════════════│
+     │                             │                     │              │
+     │──EndRecovery────────────────▶│                     │              │
+     │                             │──Revalidation────────────────────────▶│
+     │                             │                     │              │
 ```
 
 ---
@@ -236,32 +236,32 @@ MiyukiniAdmin                BondingBrother         StrongFather    KindMother
 
 ```
 MiyukiniAdmin                BondingBrother              CaringNanny
-     â”‚                             â”‚                          â”‚
-     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (capability: metrics.system)â”‚                          â”‚
-     â”‚                             â”‚â”€â”€MetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚                          â”‚
-     â”‚                             â”‚â—€â”€MetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                             â”‚  (cpu, ram, disk, net)    â”‚
-     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
-     â”‚                             â”‚                          â”‚
+     │                             │                          │
+     │──AdminRequest───────────────▶│                          │
+     │  (capability: metrics.system)│                          │
+     │                             │──MetricsRequest──────────▶│
+     │                             │                          │
+     │                             │◀─MetricsResponse─────────│
+     │                             │  (cpu, ram, disk, net)    │
+     │◀─AdminResponse──────────────│                          │
+     │                             │                          │
 ```
 
 ### 7.4 Structure des Metriques
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ SystemMetrics                                                â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚ timestamp: DateTime                                          â”‚
-â”‚ cpu_usage: Percentage                                        â”‚
-â”‚ ram_usage: Percentage                                        â”‚
-â”‚ disk_usage: Percentage                                       â”‚
-â”‚ network_io: NetworkStats                                     â”‚
-â”‚ active_connections: Integer                                  â”‚
-â”‚ trust_level: T0-T4                                           â”‚
-â”‚ security_level: 0-4                                          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│ SystemMetrics                                                │
+├─────────────────────────────────────────────────────────────┤
+│ timestamp: DateTime                                          │
+│ cpu_usage: Percentage                                        │
+│ ram_usage: Percentage                                        │
+│ disk_usage: Percentage                                       │
+│ network_io: NetworkStats                                     │
+│ active_connections: Integer                                  │
+│ trust_level: T0-T4                                           │
+│ security_level: 0-4                                          │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -291,20 +291,20 @@ MiyukiniAdmin                BondingBrother              CaringNanny
 
 ```
 MiyukiniAdmin            BondingBrother        StrongFather      WorrySentinel
-     â”‚                         â”‚                    â”‚                  â”‚
-     â”‚â”€â”€ChangeSecurityLevelâ”€â”€â”€â”€â–¶â”‚                    â”‚                  â”‚
-     â”‚  (new_level, justif)     â”‚                    â”‚                  â”‚
-     â”‚                         â”‚                    â”‚                  â”‚
-     â”‚                         â”‚â”€â”€ValidateChangeâ”€â”€â”€â”€â–¶â”‚                  â”‚
-     â”‚                         â”‚                    â”‚                  â”‚
-     â”‚                         â”‚â—€â”€Approvedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                  â”‚
-     â”‚                         â”‚                    â”‚                  â”‚
-     â”‚                         â”‚â”€â”€ApplyChangeâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                         â”‚                    â”‚                  â”‚
-     â”‚                         â”‚â—€â”€ChangeAppliedâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                         â”‚                    â”‚                  â”‚
-     â”‚â—€â”€Successâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                    â”‚                  â”‚
-     â”‚                         â”‚                    â”‚                  â”‚
+     │                         │                    │                  │
+     │──ChangeSecurityLevel────▶│                    │                  │
+     │  (new_level, justif)     │                    │                  │
+     │                         │                    │                  │
+     │                         │──ValidateChange────▶│                  │
+     │                         │                    │                  │
+     │                         │◀─Approved──────────│                  │
+     │                         │                    │                  │
+     │                         │──ApplyChange───────────────────────────▶│
+     │                         │                    │                  │
+     │                         │◀─ChangeApplied────────────────────────│
+     │                         │                    │                  │
+     │◀─Success────────────────│                    │                  │
+     │                         │                    │                  │
 ```
 
 ---
@@ -405,17 +405,17 @@ MiyukiniAdmin            BondingBrother        StrongFather      WorrySentinel
 
 ```
 MiyukiniAdmin                BondingBrother              Core
-     â”‚                             â”‚                      â”‚
-     â”‚â”€â”€AdminRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                      â”‚
-     â”‚                             â”‚â”€â”€Requestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                             â”‚                      â”‚
-     â”‚                             â”‚â—€â”€Errorâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                             â”‚                      â”‚
-     â”‚                             â”‚  (Log erreur)         â”‚
-     â”‚                             â”‚                      â”‚
-     â”‚â—€â”€AdminResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                      â”‚
-     â”‚   (status: ERROR)           â”‚                      â”‚
-     â”‚   (error: details)          â”‚                      â”‚
+     │                             │                      │
+     │──AdminRequest───────────────▶│                      │
+     │                             │──Request─────────────▶│
+     │                             │                      │
+     │                             │◀─Error───────────────│
+     │                             │                      │
+     │                             │  (Log erreur)         │
+     │                             │                      │
+     │◀─AdminResponse──────────────│                      │
+     │   (status: ERROR)           │                      │
+     │   (error: details)          │                      │
 ```
 
 ---

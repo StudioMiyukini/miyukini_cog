@@ -1,59 +1,59 @@
-﻿# MiyuClock â€” Tool Governance Compliance Contract
+﻿# MiyuClock — Tool Governance Compliance Contract
 
 ## 1. Contexte
 
-ConformitÃ© aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
+Conformité aux obligations communes : [Master Butler - Tool Governance Compliance Template](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Compliance%20Template.md).
 
-Ce document dÃ©finit la **conformitÃ© de MiyuClock** aux contrats de gouvernance des Outils et Kits d'Outils de Master Butler. MiyuClock est un **Kit d'Outils (Toolkit)** dÃ©clarÃ© et gouvernÃ© par l'environnement ; ce contrat Ã©tablit la dÃ©claration formelle du ToolkitId, des ToolIds composants, et des capabilities associÃ©es.
+Ce document définit la **conformité de MiyuClock** aux contrats de gouvernance des Outils et Kits d'Outils de Master Butler. MiyuClock est un **Kit d'Outils (Toolkit)** déclaré et gouverné par l'environnement ; ce contrat établit la déclaration formelle du ToolkitId, des ToolIds composants, et des capabilities associées.
 
 **Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
-Ce document dÃ©finit :
-- La conformitÃ© au [Master Butler - Tool Governance Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md)
-- La conformitÃ© au [Master Butler - Toolkit Composition Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)
-- La dÃ©claration formelle du ToolkitId et des ToolIds MiyuClock
-- Le catalogue des capabilities exposÃ©es
+Ce document définit :
+- La conformité au [Master Butler - Tool Governance Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md)
+- La conformité au [Master Butler - Toolkit Composition Contract](..//..//..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)
+- La déclaration formelle du ToolkitId et des ToolIds MiyuClock
+- Le catalogue des capabilities exposées
 
 Ce document **ne couvre pas** :
-- L'implÃ©mentation technique des Tools
-- Les contrats MiyuClock hors gouvernance (sÃ©curitÃ©, bornage, intÃ©gration KindMother)
+- L'implémentation technique des Tools
+- Les contrats MiyuClock hors gouvernance (sécurité, bornage, intégration KindMother)
 
 ---
 
-## 3. ConformitÃ© au Tool Governance Contract
+## 3. Conformité au Tool Governance Contract
 
-### 3.1 Principes respectÃ©s
+### 3.1 Principes respectés
 
 | Principe Master Butler | Application MiyuClock |
 |------------------------|---------------------|
-| Tout Tool possÃ¨de un ToolId unique et immuable | Chaque outil MiyuClock a un ToolId au format `tool.<domain>.<action>` |
-| Tout Tool est liÃ© Ã  exactement une Capability | Chaque ToolId est associÃ© Ã  un capability_id (voir section 5) |
-| Un Tool ne prend jamais de dÃ©cision mÃ©tier | Les Tools MiyuClock exÃ©cutent uniquement ; pas de dÃ©cision, pas de persistance |
-| Un Tool ne connaÃ®t jamais l'OpÃ©rateur appelant | MiyuClock reÃ§oit un contexte gouvernÃ© ; pas d'identitÃ© OpÃ©rateur dans la logique Tool |
+| Tout Tool possède un ToolId unique et immuable | Chaque outil MiyuClock a un ToolId au format `tool.<domain>.<action>` |
+| Tout Tool est lié à exactement une Capability | Chaque ToolId est associé à un capability_id (voir section 5) |
+| Un Tool ne prend jamais de décision métier | Les Tools MiyuClock exécutent uniquement ; pas de décision, pas de persistance |
+| Un Tool ne connaît jamais l'Opérateur appelant | MiyuClock reçoit un contexte gouverné ; pas d'identité Opérateur dans la logique Tool |
 
 ### 3.2 Format ToolId
 
 Format canonique : `tool.<domain>.<action>`
 
-- **PrÃ©fixe :** `tool.`
+- **Préfixe :** `tool.`
 - **Domaine MiyuClock :** `time`
-- **Segments :** minuscules, sans accents, sÃ©parÃ©s par des points
+- **Segments :** minuscules, sans accents, séparés par des points
 
 ---
 
-## 4. ConformitÃ© au Toolkit Composition Contract
+## 4. Conformité au Toolkit Composition Contract
 
-### 4.1 Principes respectÃ©s
+### 4.1 Principes respectés
 
 | Principe Toolkit | Application MiyuClock |
 |------------------|---------------------|
-| Un Toolkit agrÃ¨ge des Tools existants | MiyuClock regroupe deux Tools dÃ©clarÃ©s individuellement dans le catalogue |
-| Un Toolkit n'ajoute aucune capacitÃ© nouvelle | MiyuClock n'expose que les capacitÃ©s de ses Tools composants |
-| Un Toolkit est dÃ©clarÃ© et validÃ© par l'environnement | MiyuClock est dÃ©clarÃ© dans Master Butler avec ToolkitId `toolkit.time.miyuclock` |
+| Un Toolkit agrège des Tools existants | MiyuClock regroupe deux Tools déclarés individuellement dans le catalogue |
+| Un Toolkit n'ajoute aucune capacité nouvelle | MiyuClock n'expose que les capacités de ses Tools composants |
+| Un Toolkit est déclaré et validé par l'environnement | MiyuClock est déclaré dans Master Butler avec ToolkitId `toolkit.time.miyuclock` |
 | Tout Toolkit contient au moins deux Tools | MiyuClock contient deux Tools |
 
 ### 4.2 Structure formelle du Toolkit MiyuClock
@@ -72,31 +72,31 @@ Format canonique : `tool.<domain>.<action>`
 
 ---
 
-## 5. DÃ©claration ToolkitId et ToolIds
+## 5. Déclaration ToolkitId et ToolIds
 
 ### 5.1 ToolkitId
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |---------|--------|
 | **ToolkitId** | `toolkit.time.miyuclock` |
 | **Nom lisible** | MiyuClock |
-| **Description** | Kit d'outils de mesure du temps (instant prÃ©sent, delta entre instants) ; horloge locale, pas de temps global (LOI-4) |
+| **Description** | Kit d'outils de mesure du temps (instant présent, delta entre instants) ; horloge locale, pas de temps global (LOI-4) |
 
 ### 5.2 Liste des ToolIds composants
 
 | ToolId | capability_id (ex.) | Description courte |
 |--------|---------------------|---------------------|
-| `tool.time.now` | `time.now` | Retourne l'instant prÃ©sent (rÃ©fÃ©rence locale ; pas de timezone imposÃ©e) |
-| `tool.time.delta` | `time.delta` | Retourne la durÃ©e Ã©coulÃ©e entre deux instants fournis dans le flux (t_prev, t_now) |
+| `tool.time.now` | `time.now` | Retourne l'instant présent (référence locale ; pas de timezone imposée) |
+| `tool.time.delta` | `time.delta` | Retourne la durée écoulée entre deux instants fournis dans le flux (t_prev, t_now) |
 
-### 5.3 Invariants de dÃ©claration
+### 5.3 Invariants de déclaration
 
 | Code | Invariant |
 |------|-----------|
 | **INV-DECL-1** | Le ToolkitId `toolkit.time.miyuclock` est unique dans le catalogue Master Butler |
-| **INV-DECL-2** | Chaque ToolId listÃ© est dÃ©clarÃ© individuellement dans le catalogue avant d'Ãªtre associÃ© au Toolkit |
-| **INV-DECL-3** | Le niveau de sÃ©curitÃ© du Toolkit est au moins Ã©gal au maximum des niveaux de ses Tools (0 ou 1 selon politique) |
-| **INV-DECL-4** | Aucun Tool hors domaine time n'est ajoutÃ© au Toolkit MiyuClock sans rÃ©vision contractuelle |
+| **INV-DECL-2** | Chaque ToolId listé est déclaré individuellement dans le catalogue avant d'être associé au Toolkit |
+| **INV-DECL-3** | Le niveau de sécurité du Toolkit est au moins égal au maximum des niveaux de ses Tools (0 ou 1 selon politique) |
+| **INV-DECL-4** | Aucun Tool hors domaine time n'est ajouté au Toolkit MiyuClock sans révision contractuelle |
 
 ---
 
@@ -104,18 +104,18 @@ Format canonique : `tool.<domain>.<action>`
 
 ### 6.1 Enregistrement
 
-- Master Butler dÃ©clare le Toolkit MiyuClock et la liste des ToolIds composants.
+- Master Butler déclare le Toolkit MiyuClock et la liste des ToolIds composants.
 - Toute utilisation du Toolkit ou d'un de ses Tools passe par le catalogue et la gouvernance (BondingBrother, Master Butler, WorrySentinel, Caring Nanny, StrongFather).
 
-### 6.2 RÃ©solution
+### 6.2 Résolution
 
-- Un OpÃ©rateur (ou adaptateur) demande l'utilisation d'un Tool ou du Toolkit via BondingBrother.
-- Master Butler vÃ©rifie l'existence du Tool/Toolkit, les permissions requises, et le niveau de sÃ©curitÃ©.
-- En cas d'autorisation (StrongFather ALLOW), l'exÃ©cution est dÃ©lÃ©guÃ©e ; la mesure du temps s'appuie sur le Kernel (Clock) ; MiyuClock ne persiste pas.
+- Un Opérateur (ou adaptateur) demande l'utilisation d'un Tool ou du Toolkit via BondingBrother.
+- Master Butler vérifie l'existence du Tool/Toolkit, les permissions requises, et le niveau de sécurité.
+- En cas d'autorisation (StrongFather ALLOW), l'exécution est déléguée ; la mesure du temps s'appuie sur le Kernel (Clock) ; MiyuClock ne persiste pas.
 
 ---
 
-## 7. RÃ©fÃ©rences croisÃ©es
+## 7. Références croisées
 
 | Document | Lien |
 |----------|------|
@@ -127,9 +127,9 @@ Format canonique : `tool.<domain>.<action>`
 
 ---
 
-**Date de crÃ©ation :** 2026-01-30  
+**Date de création :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Contrat de rÃ©fÃ©rence
+**Statut :** Contrat de référence
 
 
 

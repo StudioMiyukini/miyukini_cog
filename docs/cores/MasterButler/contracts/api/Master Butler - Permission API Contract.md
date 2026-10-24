@@ -1,537 +1,537 @@
-﻿# Master Butler â€” Permission API Contract
+﻿# Master Butler — Permission API Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **Master Butler Permission API Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit la surface d'appel conceptuelle pour la dÃ©finition, l'interrogation, l'association et la gestion des permissions dans le systÃ¨me Miyukini Core System v2.4.
+Ce document définit le **Master Butler Permission API Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit la surface d'appel conceptuelle pour la définition, l'interrogation, l'association et la gestion des permissions dans le système Miyukini Core System v2.4.
 
-Ce contrat prÃ©cise les opÃ©rations autorisÃ©es sur les permissions, les rÃ¨gles d'appel, les contextes requis, les garanties offertes, et les interdictions absolues liÃ©es Ã  la gestion des permissions.
+Ce contrat précise les opérations autorisées sur les permissions, les règles d'appel, les contextes requis, les garanties offertes, et les interdictions absolues liées à la gestion des permissions.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **tous les composants** interagissant avec le registre des permissions de Master Butler et dÃ©finit de maniÃ¨re absolue :
+Ce contrat s'applique à **tous les composants** interagissant avec le registre des permissions de Master Butler et définit de manière absolue :
 
-- La dÃ©finition formelle de la Permission API et son rÃ´le systÃ©mique
-- La typologie conceptuelle des opÃ©rations autorisÃ©es
-- Les rÃ¨gles d'appel et prÃ©conditions obligatoires
+- La définition formelle de la Permission API et son rôle systémique
+- La typologie conceptuelle des opérations autorisées
+- Les règles d'appel et préconditions obligatoires
 - Ce que la Permission API PEUT et NE PEUT JAMAIS faire
 - Les garanties offertes aux appelants conformes
-- Les rÃ¨gles de rejet et comportements en cas d'erreur
-- Les invariants systÃ©miques associÃ©s
+- Les règles de rejet et comportements en cas d'erreur
+- Les invariants systémiques associés
 
-Ce contrat se concentre exclusivement sur la **surface d'appel** pour la gestion des permissions, sans entrer dans les dÃ©tails d'implÃ©mentation technique.
+Ce contrat se concentre exclusivement sur la **surface d'appel** pour la gestion des permissions, sans entrer dans les détails d'implémentation technique.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complÃ¨te et respecte les documents contractuels existants :
+Ce contrat complète et respecte les documents contractuels existants :
 
-- **Master Butler â€” Documentation Fondatrice** : DÃ©finit la raison d'Ãªtre et les responsabilitÃ©s de Master Butler
-- **Master Butler â€” Permission Registry Contract** : DÃ©finit le modÃ¨le de donnÃ©es du registre des permissions (complÃ©mentaire)
-- **Master Butler â€” Capability API Contract** : DÃ©finit la surface d'appel pour les capacitÃ©s (parallÃ¨le)
-- **Master Butler â€” Association Model Contract** : DÃ©finit les associations entre permissions, rÃ´les et capacitÃ©s
-- **[Miyukini Conceptual References â€” Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)** : DÃ©finitions canoniques des termes
-- **[Miyukini Conceptual References â€” Lois Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique) en garantissant que toutes les opÃ©rations fonctionnent sans appel externe obligatoire
+- **Master Butler — Documentation Fondatrice** : Définit la raison d'être et les responsabilités de Master Butler
+- **Master Butler — Permission Registry Contract** : Définit le modèle de données du registre des permissions (complémentaire)
+- **Master Butler — Capability API Contract** : Définit la surface d'appel pour les capacités (parallèle)
+- **Master Butler — Association Model Contract** : Définit les associations entre permissions, rôles et capacités
+- **[Miyukini Conceptual References — Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Définitions canoniques des termes
+- **[Miyukini Conceptual References — Lois Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique) en garantissant que toutes les opérations fonctionnent sans appel externe obligatoire
 
-**ComplÃ©mentaritÃ© :**
+**Complémentarité :**
 
-- Permission Registry Contract = le **modÃ¨le de donnÃ©es** des permissions
+- Permission Registry Contract = le **modèle de données** des permissions
 - Permission API Contract = la **surface d'appel** pour interagir avec les permissions
 
 ---
 
-## 2. RÃ´le et nature de la Permission API
+## 2. Rôle et nature de la Permission API
 
-### DÃ©finition formelle
+### Définition formelle
 
-La **Permission API** est la surface d'appel conceptuelle qui constitue l'interface formelle pour toutes les opÃ©rations liÃ©es aux permissions dans Master Butler. Elle reprÃ©sente l'ensemble des opÃ©rations conceptuelles exposÃ©es pour dÃ©finir, interroger, modifier et gÃ©rer les permissions du systÃ¨me.
+La **Permission API** est la surface d'appel conceptuelle qui constitue l'interface formelle pour toutes les opérations liées aux permissions dans Master Butler. Elle représente l'ensemble des opérations conceptuelles exposées pour définir, interroger, modifier et gérer les permissions du système.
 
-### CaractÃ©ristiques formelles fondamentales
+### Caractéristiques formelles fondamentales
 
-**Surface d'appel dÃ©diÃ©e :** La Permission API est la surface d'appel unique pour toutes les opÃ©rations sur les permissions. Aucune autre mÃ©thode d'interaction avec les permissions n'est autorisÃ©e.
+**Surface d'appel dédiée :** La Permission API est la surface d'appel unique pour toutes les opérations sur les permissions. Aucune autre méthode d'interaction avec les permissions n'est autorisée.
 
-**Interface conceptuelle :** La Permission API est une interface conceptuelle, pas une implÃ©mentation technique. Elle dÃ©finit les opÃ©rations autorisÃ©es de maniÃ¨re abstraite, sans prÃ©supposer aucune technologie, aucun protocole, ou aucun format de donnÃ©es.
+**Interface conceptuelle :** La Permission API est une interface conceptuelle, pas une implémentation technique. Elle définit les opérations autorisées de manière abstraite, sans présupposer aucune technologie, aucun protocole, ou aucun format de données.
 
-**MÃ©diation obligatoire :** Toute opÃ©ration sur les permissions DOIT passer par la Permission API. Aucun accÃ¨s direct au registre des permissions n'est autorisÃ©.
+**Médiation obligatoire :** Toute opération sur les permissions DOIT passer par la Permission API. Aucun accès direct au registre des permissions n'est autorisé.
 
-**Abstraction de l'implÃ©mentation :** La Permission API abstrait complÃ¨tement l'implÃ©mentation interne du registre. Les appelants interagissent avec des concepts, pas avec des mÃ©canismes techniques.
+**Abstraction de l'implémentation :** La Permission API abstrait complètement l'implémentation interne du registre. Les appelants interagissent avec des concepts, pas avec des mécanismes techniques.
 
-### Nature systÃ©mique
+### Nature systémique
 
-La Permission API est un **concept systÃ©mique**, pas une interface technique. Elle reprÃ©sente la frontiÃ¨re conceptuelle entre les appelants (OpÃ©rateurs, StrongFather, BondingBrother) et le registre des permissions de Master Butler.
+La Permission API est un **concept systémique**, pas une interface technique. Elle représente la frontière conceptuelle entre les appelants (Opérateurs, StrongFather, BondingBrother) et le registre des permissions de Master Butler.
 
-**Important :** Cette dÃ©finition est purement conceptuelle et systÃ©mique. Elle ne prÃ©suppose aucune technologie, aucun langage de programmation, aucun protocole de communication, ou aucun format d'Ã©change.
+**Important :** Cette définition est purement conceptuelle et systémique. Elle ne présuppose aucune technologie, aucun langage de programmation, aucun protocole de communication, ou aucun format d'échange.
 
 ---
 
 ## 3. Principes fondamentaux
 
-### Principe d'unicitÃ©
+### Principe d'unicité
 
-La Permission API constitue l'**unique surface d'appel** pour les opÃ©rations sur les permissions.
+La Permission API constitue l'**unique surface d'appel** pour les opérations sur les permissions.
 
-| CaractÃ©ristique | Description |
+| Caractéristique | Description |
 |-----------------|-------------|
-| **UnicitÃ©** | Il n'existe qu'une seule Permission API |
-| **ExclusivitÃ©** | Toute opÃ©ration sur les permissions DOIT passer par cette API |
-| **Non-contournabilitÃ©** | La Permission API ne peut pas Ãªtre contournÃ©e |
-| **Centralisation** | Tout contrÃ´le et validation sont centralisÃ©s |
+| **Unicité** | Il n'existe qu'une seule Permission API |
+| **Exclusivité** | Toute opération sur les permissions DOIT passer par cette API |
+| **Non-contournabilité** | La Permission API ne peut pas être contournée |
+| **Centralisation** | Tout contrôle et validation sont centralisés |
 
-### Principe de sÃ©paration
+### Principe de séparation
 
-La Permission API respecte la sÃ©paration fondamentale entre :
+La Permission API respecte la séparation fondamentale entre :
 
-| ResponsabilitÃ© | PropriÃ©taire | Ce que fait la Permission API |
+| Responsabilité | Propriétaire | Ce que fait la Permission API |
 |----------------|--------------|-------------------------------|
-| **DÃ©finition des permissions** | Master Butler | âœ… Permet de dÃ©finir |
-| **Attribution des permissions** | MÃ©canismes d'attribution | âŒ Ne gÃ¨re pas |
-| **VÃ©rification des permissions** | StrongFather | âŒ Ne vÃ©rifie jamais |
+| **Définition des permissions** | Master Butler | ✅ Permet de définir |
+| **Attribution des permissions** | Mécanismes d'attribution | ❌ Ne gère pas |
+| **Vérification des permissions** | StrongFather | ❌ Ne vérifie jamais |
 
-**RÃ¨gle absolue :**
+**Règle absolue :**
 
-> **La Permission API dÃ©finit ce qui existe comme droits possibles, jamais ce qui est effectivement autorisÃ©.**
+> **La Permission API définit ce qui existe comme droits possibles, jamais ce qui est effectivement autorisé.**
 
-### Principe de non-dÃ©cision
+### Principe de non-décision
 
-La Permission API **ne prend jamais de dÃ©cision d'autorisation**. Elle fournit les informations sur les permissions dÃ©finies, mais ne rÃ©pond jamais "autorisÃ©" ou "refusÃ©" pour une action.
+La Permission API **ne prend jamais de décision d'autorisation**. Elle fournit les informations sur les permissions définies, mais ne répond jamais "autorisé" ou "refusé" pour une action.
 
 ---
 
-## 4. DÃ©finition conceptuelle d'une opÃ©ration Permission API
+## 4. Définition conceptuelle d'une opération Permission API
 
-### DÃ©finition formelle
+### Définition formelle
 
-Une **opÃ©ration Permission API** est une demande d'action conceptuelle formulÃ©e par un appelant Ã  destination du registre des permissions de Master Butler, accompagnÃ©e d'un contexte, et soumise Ã  validation avant exÃ©cution.
+Une **opération Permission API** est une demande d'action conceptuelle formulée par un appelant à destination du registre des permissions de Master Butler, accompagnée d'un contexte, et soumise à validation avant exécution.
 
-### CaractÃ©ristiques formelles d'une opÃ©ration
+### Caractéristiques formelles d'une opération
 
-**Demande d'action :** Une opÃ©ration Permission API est une demande d'action sur les permissions (dÃ©finition, interrogation, modification, dÃ©prÃ©ciation).
+**Demande d'action :** Une opération Permission API est une demande d'action sur les permissions (définition, interrogation, modification, dépréciation).
 
-**Contexte requis :** Chaque opÃ©ration Permission API est accompagnÃ©e d'un contexte qui inclut :
-- L'identitÃ© de l'appelant
-- Le niveau d'autoritÃ© de l'appelant
-- Le type d'opÃ©ration demandÃ©e
-- Les paramÃ¨tres de l'opÃ©ration
+**Contexte requis :** Chaque opération Permission API est accompagnée d'un contexte qui inclut :
+- L'identité de l'appelant
+- Le niveau d'autorité de l'appelant
+- Le type d'opération demandée
+- Les paramètres de l'opération
 
-**Soumission Ã  validation :** Chaque opÃ©ration Permission API est soumise Ã  validation avant exÃ©cution.
+**Soumission à validation :** Chaque opération Permission API est soumise à validation avant exécution.
 
-**AtomicitÃ© conceptuelle :** Une opÃ©ration Permission API est atomique conceptuellement. Elle est exÃ©cutÃ©e complÃ¨tement ou pas du tout.
+**Atomicité conceptuelle :** Une opération Permission API est atomique conceptuellement. Elle est exécutée complètement ou pas du tout.
 
-**TraÃ§abilitÃ© obligatoire :** Chaque opÃ©ration Permission API est tracÃ©e de maniÃ¨re complÃ¨te.
+**Traçabilité obligatoire :** Chaque opération Permission API est tracée de manière complète.
 
-### Structure conceptuelle d'une opÃ©ration
+### Structure conceptuelle d'une opération
 
-Conceptuellement, une opÃ©ration Permission API comprend :
-- **Type d'opÃ©ration :** la catÃ©gorie de l'opÃ©ration
-- **ParamÃ¨tres :** les donnÃ©es nÃ©cessaires Ã  l'exÃ©cution
+Conceptuellement, une opération Permission API comprend :
+- **Type d'opération :** la catégorie de l'opération
+- **Paramètres :** les données nécessaires à l'exécution
 - **Contexte :** les informations contextuelles requises
-- **RÃ©sultat attendu :** le type de rÃ©sultat retournÃ©
+- **Résultat attendu :** le type de résultat retourné
 
 ---
 
-## 5. Typologie des opÃ©rations autorisÃ©es
+## 5. Typologie des opérations autorisées
 
-### 5.1. OpÃ©rations de dÃ©finition
+### 5.1. Opérations de définition
 
-#### CrÃ©er une permission
+#### Créer une permission
 
-**OpÃ©ration :** `definePermission`
+**Opération :** `definePermission`
 
-**Description :** CrÃ©e une nouvelle permission dans le registre.
+**Description :** Crée une nouvelle permission dans le registre.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `id` | String | Identifiant unique de la permission | âœ… |
-| `name` | String | Nom lisible de la permission | âœ… |
-| `description` | String | Description dÃ©taillÃ©e | âœ… |
-| `domain` | String | Domaine fonctionnel | âœ… |
-| `level` | Enum | Niveau de criticitÃ© | âœ… |
-| `scope_type` | Enum | Type de portÃ©e | âœ… |
-| `capabilities` | Array[String] | CapacitÃ©s couvertes | âœ… |
-| `implied_permissions` | Array[String] | Permissions impliquÃ©es | âŒ |
-| `required_permissions` | Array[String] | Permissions prÃ©requises | âŒ |
+| `id` | String | Identifiant unique de la permission | ✅ |
+| `name` | String | Nom lisible de la permission | ✅ |
+| `description` | String | Description détaillée | ✅ |
+| `domain` | String | Domaine fonctionnel | ✅ |
+| `level` | Enum | Niveau de criticité | ✅ |
+| `scope_type` | Enum | Type de portée | ✅ |
+| `capabilities` | Array[String] | Capacités couvertes | ✅ |
+| `implied_permissions` | Array[String] | Permissions impliquées | ❌ |
+| `required_permissions` | Array[String] | Permissions prérequises | ❌ |
 
-**PrÃ©conditions :**
-- L'appelant doit avoir l'autoritÃ© de dÃ©finir des permissions
-- L'identifiant ne doit pas dÃ©jÃ  exister
-- Toutes les capacitÃ©s rÃ©fÃ©rencÃ©es doivent exister
-- Toutes les permissions impliquÃ©es/requises doivent exister
-- Le niveau de criticitÃ© doit Ãªtre autorisÃ© pour l'appelant
+**Préconditions :**
+- L'appelant doit avoir l'autorité de définir des permissions
+- L'identifiant ne doit pas déjà exister
+- Toutes les capacités référencées doivent exister
+- Toutes les permissions impliquées/requises doivent exister
+- Le niveau de criticité doit être autorisé pour l'appelant
 
-**RÃ©sultat :**
-- SuccÃ¨s : Permission crÃ©Ã©e en Ã©tat DRAFT, identifiant confirmÃ©
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Permission créée en état DRAFT, identifiant confirmé
+- Échec : Erreur explicite avec raison
 
 #### Activer une permission
 
-**OpÃ©ration :** `activatePermission`
+**Opération :** `activatePermission`
 
-**Description :** Active une permission en Ã©tat DRAFT.
+**Description :** Active une permission en état DRAFT.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
+| `permission_id` | String | Identifiant de la permission | ✅ |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - La permission doit exister
-- La permission doit Ãªtre en Ã©tat DRAFT
-- L'appelant doit avoir l'autoritÃ© d'activer
-- Toutes les capacitÃ©s rÃ©fÃ©rencÃ©es doivent Ãªtre ACTIVE
-- Toutes les permissions impliquÃ©es doivent Ãªtre ACTIVE
+- La permission doit être en état DRAFT
+- L'appelant doit avoir l'autorité d'activer
+- Toutes les capacités référencées doivent être ACTIVE
+- Toutes les permissions impliquées doivent être ACTIVE
 
-**RÃ©sultat :**
-- SuccÃ¨s : Permission passÃ©e en Ã©tat ACTIVE
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Permission passée en état ACTIVE
+- Échec : Erreur explicite avec raison
 
 #### Modifier une permission
 
-**OpÃ©ration :** `updatePermission`
+**Opération :** `updatePermission`
 
 **Description :** Modifie une permission existante.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
-| `updates` | Object | Champs Ã  modifier | âœ… |
+| `permission_id` | String | Identifiant de la permission | ✅ |
+| `updates` | Object | Champs à modifier | ✅ |
 
-**RÃ¨gles de modification :**
+**Règles de modification :**
 
 | Champ | Modifiable en DRAFT | Modifiable en ACTIVE |
 |-------|---------------------|----------------------|
-| `id` | âŒ Non | âŒ Non |
-| `name` | âœ… Oui | âš ï¸ Avec version |
-| `description` | âœ… Oui | âš ï¸ Avec version |
-| `capabilities` | âœ… Oui | âš ï¸ Avec version |
-| `implied_permissions` | âœ… Oui | âš ï¸ Avec version |
-| `level` | âœ… Oui | âŒ Non |
-| `scope_type` | âœ… Oui | âŒ Non |
+| `id` | ❌ Non | ❌ Non |
+| `name` | ✅ Oui | ⚠️ Avec version |
+| `description` | ✅ Oui | ⚠️ Avec version |
+| `capabilities` | ✅ Oui | ⚠️ Avec version |
+| `implied_permissions` | ✅ Oui | ⚠️ Avec version |
+| `level` | ✅ Oui | ❌ Non |
+| `scope_type` | ✅ Oui | ❌ Non |
 
-**RÃ©sultat :**
-- SuccÃ¨s : Permission mise Ã  jour, nouvelle version si applicable
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Permission mise à jour, nouvelle version si applicable
+- Échec : Erreur explicite avec raison
 
-#### DÃ©prÃ©cier une permission
+#### Déprécier une permission
 
-**OpÃ©ration :** `deprecatePermission`
+**Opération :** `deprecatePermission`
 
-**Description :** Marque une permission comme dÃ©prÃ©ciÃ©e.
+**Description :** Marque une permission comme dépréciée.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
-| `reason` | String | Raison de la dÃ©prÃ©ciation | âœ… |
-| `successor_id` | String | Permission de remplacement | RecommandÃ© |
-| `migration_guide` | String | Guide de migration | RecommandÃ© |
+| `permission_id` | String | Identifiant de la permission | ✅ |
+| `reason` | String | Raison de la dépréciation | ✅ |
+| `successor_id` | String | Permission de remplacement | Recommandé |
+| `migration_guide` | String | Guide de migration | Recommandé |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - La permission doit exister
-- La permission doit Ãªtre en Ã©tat ACTIVE
-- L'appelant doit avoir l'autoritÃ© de dÃ©prÃ©cier
+- La permission doit être en état ACTIVE
+- L'appelant doit avoir l'autorité de déprécier
 
-**RÃ©sultat :**
-- SuccÃ¨s : Permission passÃ©e en Ã©tat DEPRECATED
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Permission passée en état DEPRECATED
+- Échec : Erreur explicite avec raison
 
 #### Retirer une permission
 
-**OpÃ©ration :** `retirePermission`
+**Opération :** `retirePermission`
 
-**Description :** Retire dÃ©finitivement une permission du systÃ¨me.
+**Description :** Retire définitivement une permission du système.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
+| `permission_id` | String | Identifiant de la permission | ✅ |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - La permission doit exister
-- La permission doit Ãªtre en Ã©tat DEPRECATED
-- La pÃ©riode de dÃ©prÃ©ciation minimale doit Ãªtre Ã©coulÃ©e
-- L'appelant doit avoir l'autoritÃ© de retirer
+- La permission doit être en état DEPRECATED
+- La période de dépréciation minimale doit être écoulée
+- L'appelant doit avoir l'autorité de retirer
 
-**RÃ©sultat :**
-- SuccÃ¨s : Permission passÃ©e en Ã©tat RETIRED, archivÃ©e
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Permission passée en état RETIRED, archivée
+- Échec : Erreur explicite avec raison
 
 ---
 
-### 5.2. OpÃ©rations d'interrogation
+### 5.2. Opérations d'interrogation
 
 #### Obtenir une permission
 
-**OpÃ©ration :** `getPermission`
+**Opération :** `getPermission`
 
-**Description :** RÃ©cupÃ¨re la dÃ©finition complÃ¨te d'une permission.
+**Description :** Récupère la définition complète d'une permission.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
+| `permission_id` | String | Identifiant de la permission | ✅ |
 
-**RÃ©sultat :**
-- SuccÃ¨s : DÃ©finition complÃ¨te de la permission
-- Ã‰chec : Erreur si permission inexistante
+**Résultat :**
+- Succès : Définition complète de la permission
+- Échec : Erreur si permission inexistante
 
 #### Lister les permissions
 
-**OpÃ©ration :** `listPermissions`
+**Opération :** `listPermissions`
 
-**Description :** Liste les permissions selon des critÃ¨res de filtrage.
+**Description :** Liste les permissions selon des critères de filtrage.
 
-**ParamÃ¨tres optionnels :**
+**Paramètres optionnels :**
 
-| ParamÃ¨tre | Type | Description |
+| Paramètre | Type | Description |
 |-----------|------|-------------|
 | `domain` | String | Filtrer par domaine |
 | `level` | Enum[] | Filtrer par niveaux |
-| `status` | Enum[] | Filtrer par Ã©tats |
-| `scope_type` | Enum[] | Filtrer par types de portÃ©e |
-| `capability_id` | String | Filtrer par capacitÃ© couverte |
-| `offset` | Integer | DÃ©calage pour pagination |
-| `limit` | Integer | Nombre maximum de rÃ©sultats |
+| `status` | Enum[] | Filtrer par états |
+| `scope_type` | Enum[] | Filtrer par types de portée |
+| `capability_id` | String | Filtrer par capacité couverte |
+| `offset` | Integer | Décalage pour pagination |
+| `limit` | Integer | Nombre maximum de résultats |
 
-**RÃ©sultat :**
-- Liste des permissions correspondant aux critÃ¨res
-- MÃ©tadonnÃ©es de pagination
+**Résultat :**
+- Liste des permissions correspondant aux critères
+- Métadonnées de pagination
 
 #### Rechercher des permissions
 
-**OpÃ©ration :** `searchPermissions`
+**Opération :** `searchPermissions`
 
 **Description :** Recherche des permissions par texte libre.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `query` | String | Texte de recherche | âœ… |
-| `filters` | Object | Filtres additionnels | âŒ |
+| `query` | String | Texte de recherche | ✅ |
+| `filters` | Object | Filtres additionnels | ❌ |
 
-**RÃ©sultat :**
-- Liste des permissions correspondant Ã  la recherche
-- Score de pertinence pour chaque rÃ©sultat
+**Résultat :**
+- Liste des permissions correspondant à la recherche
+- Score de pertinence pour chaque résultat
 
-#### Obtenir les capacitÃ©s d'une permission
+#### Obtenir les capacités d'une permission
 
-**OpÃ©ration :** `getPermissionCapabilities`
+**Opération :** `getPermissionCapabilities`
 
-**Description :** RÃ©cupÃ¨re les capacitÃ©s couvertes par une permission.
+**Description :** Récupère les capacités couvertes par une permission.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
-| `include_implied` | Boolean | Inclure les capacitÃ©s des permissions impliquÃ©es | âŒ (dÃ©faut: false) |
+| `permission_id` | String | Identifiant de la permission | ✅ |
+| `include_implied` | Boolean | Inclure les capacités des permissions impliquées | ❌ (défaut: false) |
 
-**RÃ©sultat :**
-- Liste des capacitÃ©s directement associÃ©es
-- Si `include_implied` : union de toutes les capacitÃ©s effectives
+**Résultat :**
+- Liste des capacités directement associées
+- Si `include_implied` : union de toutes les capacités effectives
 
-#### Obtenir la hiÃ©rarchie d'une permission
+#### Obtenir la hiérarchie d'une permission
 
-**OpÃ©ration :** `getPermissionHierarchy`
+**Opération :** `getPermissionHierarchy`
 
-**Description :** RÃ©cupÃ¨re l'arbre des implications d'une permission.
+**Description :** Récupère l'arbre des implications d'une permission.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
-| `direction` | Enum | `UP` (qui implique cette permission) ou `DOWN` (permissions impliquÃ©es) | âŒ (dÃ©faut: DOWN) |
+| `permission_id` | String | Identifiant de la permission | ✅ |
+| `direction` | Enum | `UP` (qui implique cette permission) ou `DOWN` (permissions impliquées) | ❌ (défaut: DOWN) |
 
-**RÃ©sultat :**
-- Arbre des implications dans la direction demandÃ©e
+**Résultat :**
+- Arbre des implications dans la direction demandée
 - Profondeur de chaque niveau
 
 ---
 
-### 5.3. OpÃ©rations d'association
+### 5.3. Opérations d'association
 
-#### Associer une capacitÃ©
+#### Associer une capacité
 
-**OpÃ©ration :** `associateCapability`
+**Opération :** `associateCapability`
 
-**Description :** Ajoute une capacitÃ© Ã  une permission.
+**Description :** Ajoute une capacité à une permission.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
-| `capability_id` | String | Identifiant de la capacitÃ© | âœ… |
+| `permission_id` | String | Identifiant de la permission | ✅ |
+| `capability_id` | String | Identifiant de la capacité | ✅ |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - La permission doit exister
-- La capacitÃ© doit exister
-- La permission doit Ãªtre en Ã©tat DRAFT ou ACTIVE
-- L'appelant doit avoir l'autoritÃ© de modifier
+- La capacité doit exister
+- La permission doit être en état DRAFT ou ACTIVE
+- L'appelant doit avoir l'autorité de modifier
 
-**RÃ©sultat :**
-- SuccÃ¨s : Association crÃ©Ã©e
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Association créée
+- Échec : Erreur explicite avec raison
 
-#### Dissocier une capacitÃ©
+#### Dissocier une capacité
 
-**OpÃ©ration :** `dissociateCapability`
+**Opération :** `dissociateCapability`
 
-**Description :** Retire une capacitÃ© d'une permission.
+**Description :** Retire une capacité d'une permission.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Identifiant de la permission | âœ… |
-| `capability_id` | String | Identifiant de la capacitÃ© | âœ… |
+| `permission_id` | String | Identifiant de la permission | ✅ |
+| `capability_id` | String | Identifiant de la capacité | ✅ |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - La permission doit exister
 - L'association doit exister
-- La permission doit conserver au moins une capacitÃ©
-- La permission doit Ãªtre en Ã©tat DRAFT ou ACTIVE
+- La permission doit conserver au moins une capacité
+- La permission doit être en état DRAFT ou ACTIVE
 
-**RÃ©sultat :**
-- SuccÃ¨s : Association retirÃ©e
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Association retirée
+- Échec : Erreur explicite avec raison
 
 #### Ajouter une implication
 
-**OpÃ©ration :** `addImplication`
+**Opération :** `addImplication`
 
-**Description :** Ajoute une permission impliquÃ©e.
+**Description :** Ajoute une permission impliquée.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Permission parente | âœ… |
-| `implied_permission_id` | String | Permission impliquÃ©e | âœ… |
+| `permission_id` | String | Permission parente | ✅ |
+| `implied_permission_id` | String | Permission impliquée | ✅ |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - Les deux permissions doivent exister
-- L'ajout ne doit pas crÃ©er de cycle
-- La permission parente doit Ãªtre en Ã©tat DRAFT ou ACTIVE
+- L'ajout ne doit pas créer de cycle
+- La permission parente doit être en état DRAFT ou ACTIVE
 
-**RÃ©sultat :**
-- SuccÃ¨s : Implication ajoutÃ©e
-- Ã‰chec : Erreur explicite (notamment si cycle dÃ©tectÃ©)
+**Résultat :**
+- Succès : Implication ajoutée
+- Échec : Erreur explicite (notamment si cycle détecté)
 
 #### Retirer une implication
 
-**OpÃ©ration :** `removeImplication`
+**Opération :** `removeImplication`
 
-**Description :** Retire une permission impliquÃ©e.
+**Description :** Retire une permission impliquée.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Permission parente | âœ… |
-| `implied_permission_id` | String | Permission impliquÃ©e Ã  retirer | âœ… |
+| `permission_id` | String | Permission parente | ✅ |
+| `implied_permission_id` | String | Permission impliquée à retirer | ✅ |
 
-**PrÃ©conditions :**
+**Préconditions :**
 - Les deux permissions doivent exister
 - L'implication doit exister
-- La permission parente doit Ãªtre en Ã©tat DRAFT ou ACTIVE
+- La permission parente doit être en état DRAFT ou ACTIVE
 
-**RÃ©sultat :**
-- SuccÃ¨s : Implication retirÃ©e
-- Ã‰chec : Erreur explicite avec raison
+**Résultat :**
+- Succès : Implication retirée
+- Échec : Erreur explicite avec raison
 
 ---
 
-### 5.4. OpÃ©rations de validation
+### 5.4. Opérations de validation
 
-#### Valider une dÃ©finition
+#### Valider une définition
 
-**OpÃ©ration :** `validatePermissionDefinition`
+**Opération :** `validatePermissionDefinition`
 
-**Description :** Valide une dÃ©finition de permission sans l'enregistrer.
+**Description :** Valide une définition de permission sans l'enregistrer.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `definition` | Object | DÃ©finition Ã  valider | âœ… |
+| `definition` | Object | Définition à valider | ✅ |
 
-**RÃ©sultat :**
-- SuccÃ¨s : DÃ©finition valide
-- Ã‰chec : Liste des erreurs de validation
+**Résultat :**
+- Succès : Définition valide
+- Échec : Liste des erreurs de validation
 
-#### VÃ©rifier les cycles
+#### Vérifier les cycles
 
-**OpÃ©ration :** `checkCycles`
+**Opération :** `checkCycles`
 
-**Description :** VÃ©rifie si l'ajout d'une implication crÃ©erait un cycle.
+**Description :** Vérifie si l'ajout d'une implication créerait un cycle.
 
-**ParamÃ¨tres requis :**
+**Paramètres requis :**
 
-| ParamÃ¨tre | Type | Description | Obligatoire |
+| Paramètre | Type | Description | Obligatoire |
 |-----------|------|-------------|-------------|
-| `permission_id` | String | Permission parente | âœ… |
-| `implied_permission_id` | String | Permission Ã  impliquer | âœ… |
+| `permission_id` | String | Permission parente | ✅ |
+| `implied_permission_id` | String | Permission à impliquer | ✅ |
 
-**RÃ©sultat :**
-- SuccÃ¨s : Pas de cycle dÃ©tectÃ©
-- Ã‰chec : Cycle dÃ©tectÃ© avec chemin explicite
+**Résultat :**
+- Succès : Pas de cycle détecté
+- Échec : Cycle détecté avec chemin explicite
 
 ---
 
 ## 6. Ce que la Permission API PEUT faire
 
-### 6.1. OpÃ©rations autorisÃ©es
+### 6.1. Opérations autorisées
 
-**PEUT-PERM-1 : DÃ©finir des permissions**
+**PEUT-PERM-1 : Définir des permissions**
 
-La Permission API PEUT crÃ©er de nouvelles permissions dans le registre, sous rÃ©serve que le contexte soit valide et que l'appelant ait l'autoritÃ© requise.
+La Permission API PEUT créer de nouvelles permissions dans le registre, sous réserve que le contexte soit valide et que l'appelant ait l'autorité requise.
 
 **PEUT-PERM-2 : Interroger les permissions**
 
-La Permission API PEUT retourner les dÃ©finitions des permissions, les lister, les rechercher, et fournir leurs mÃ©tadonnÃ©es.
+La Permission API PEUT retourner les définitions des permissions, les lister, les rechercher, et fournir leurs métadonnées.
 
 **PEUT-PERM-3 : Modifier les permissions**
 
-La Permission API PEUT modifier les permissions selon les rÃ¨gles de modification dÃ©finies dans le Permission Registry Contract.
+La Permission API PEUT modifier les permissions selon les règles de modification définies dans le Permission Registry Contract.
 
-**PEUT-PERM-4 : GÃ©rer le cycle de vie**
+**PEUT-PERM-4 : Gérer le cycle de vie**
 
-La Permission API PEUT faire transiter les permissions entre les Ã©tats du cycle de vie (DRAFT â†’ ACTIVE â†’ DEPRECATED â†’ RETIRED).
+La Permission API PEUT faire transiter les permissions entre les états du cycle de vie (DRAFT → ACTIVE → DEPRECATED → RETIRED).
 
-**PEUT-PERM-5 : GÃ©rer les associations**
+**PEUT-PERM-5 : Gérer les associations**
 
-La Permission API PEUT crÃ©er et supprimer les associations entre permissions et capacitÃ©s, et entre permissions (implications).
+La Permission API PEUT créer et supprimer les associations entre permissions et capacités, et entre permissions (implications).
 
-**PEUT-PERM-6 : Valider les dÃ©finitions**
+**PEUT-PERM-6 : Valider les définitions**
 
-La Permission API PEUT valider les dÃ©finitions de permissions avant enregistrement et dÃ©tecter les cycles d'implication.
+La Permission API PEUT valider les définitions de permissions avant enregistrement et détecter les cycles d'implication.
 
 **PEUT-PERM-7 : Retourner des erreurs explicites**
 
-La Permission API PEUT retourner des erreurs explicites et actionnables lorsqu'une opÃ©ration ne peut pas Ãªtre exÃ©cutÃ©e.
+La Permission API PEUT retourner des erreurs explicites et actionnables lorsqu'une opération ne peut pas être exécutée.
 
-### 6.2. Garanties associÃ©es
+### 6.2. Garanties associées
 
-Chaque opÃ©ration autorisÃ©e est accompagnÃ©e des garanties suivantes :
-- Validation complÃ¨te avant exÃ©cution
-- AtomicitÃ© de l'opÃ©ration
-- TraÃ§abilitÃ© complÃ¨te
+Chaque opération autorisée est accompagnée des garanties suivantes :
+- Validation complète avant exécution
+- Atomicité de l'opération
+- Traçabilité complète
 - Erreur explicite en cas de rejet
-- IntÃ©gritÃ© du registre prÃ©servÃ©e
+- Intégrité du registre préservée
 
 ---
 
@@ -539,177 +539,177 @@ Chaque opÃ©ration autorisÃ©e est accompagnÃ©e des garanties suivantes :
 
 ### 7.1. Interdictions absolues
 
-**INTERDIT-PERM-1 : DÃ©cider d'une autorisation**
+**INTERDIT-PERM-1 : Décider d'une autorisation**
 
-La Permission API NE PEUT JAMAIS dÃ©cider si une permission est accordÃ©e ou refusÃ©e Ã  un contexte donnÃ©. Elle dÃ©finit les permissions, elle ne vÃ©rifie pas leur attribution.
+La Permission API NE PEUT JAMAIS décider si une permission est accordée ou refusée à un contexte donné. Elle définit les permissions, elle ne vérifie pas leur attribution.
 
-**INTERDIT-PERM-2 : VÃ©rifier les permissions en temps rÃ©el**
+**INTERDIT-PERM-2 : Vérifier les permissions en temps réel**
 
-La Permission API NE PEUT JAMAIS vÃ©rifier si un utilisateur ou un contexte possÃ¨de effectivement une permission au moment d'une action. Cette vÃ©rification appartient Ã  StrongFather.
+La Permission API NE PEUT JAMAIS vérifier si un utilisateur ou un contexte possède effectivement une permission au moment d'une action. Cette vérification appartient à StrongFather.
 
 **INTERDIT-PERM-3 : Retourner un verdict d'autorisation**
 
-La Permission API NE PEUT JAMAIS retourner "autorisÃ©" ou "refusÃ©" comme rÃ©sultat d'une opÃ©ration. Elle retourne des dÃ©finitions, pas des dÃ©cisions.
+La Permission API NE PEUT JAMAIS retourner "autorisé" ou "refusé" comme résultat d'une opération. Elle retourne des définitions, pas des décisions.
 
-**INTERDIT-PERM-4 : CrÃ©er une permission sans capacitÃ©**
+**INTERDIT-PERM-4 : Créer une permission sans capacité**
 
-La Permission API NE PEUT JAMAIS crÃ©er ou activer une permission qui ne rÃ©fÃ©rence aucune capacitÃ© existante.
+La Permission API NE PEUT JAMAIS créer ou activer une permission qui ne référence aucune capacité existante.
 
-**INTERDIT-PERM-5 : CrÃ©er des cycles d'implication**
+**INTERDIT-PERM-5 : Créer des cycles d'implication**
 
-La Permission API NE PEUT JAMAIS crÃ©er une implication qui formerait un cycle (direct ou indirect).
+La Permission API NE PEUT JAMAIS créer une implication qui formerait un cycle (direct ou indirect).
 
-**INTERDIT-PERM-6 : Contourner les Ã©tats du cycle de vie**
+**INTERDIT-PERM-6 : Contourner les états du cycle de vie**
 
-La Permission API NE PEUT JAMAIS permettre une transition d'Ã©tat non autorisÃ©e (ex: ACTIVE â†’ DRAFT, RETIRED â†’ ACTIVE).
+La Permission API NE PEUT JAMAIS permettre une transition d'état non autorisée (ex: ACTIVE → DRAFT, RETIRED → ACTIVE).
 
 **INTERDIT-PERM-7 : Modifier l'identifiant**
 
-La Permission API NE PEUT JAMAIS modifier l'identifiant d'une permission aprÃ¨s sa crÃ©ation.
+La Permission API NE PEUT JAMAIS modifier l'identifiant d'une permission après sa création.
 
-**INTERDIT-PERM-8 : Supprimer sans dÃ©prÃ©ciation**
+**INTERDIT-PERM-8 : Supprimer sans dépréciation**
 
-La Permission API NE PEUT JAMAIS retirer une permission ACTIVE sans passer par l'Ã©tat DEPRECATED (sauf pour les permissions DRAFT).
+La Permission API NE PEUT JAMAIS retirer une permission ACTIVE sans passer par l'état DEPRECATED (sauf pour les permissions DRAFT).
 
 **INTERDIT-PERM-9 : Exposer les attributions**
 
-La Permission API NE PEUT JAMAIS exposer qui possÃ¨de quelle permission. Ces informations appartiennent aux mÃ©canismes d'attribution et Ã  StrongFather.
+La Permission API NE PEUT JAMAIS exposer qui possède quelle permission. Ces informations appartiennent aux mécanismes d'attribution et à StrongFather.
 
-**INTERDIT-PERM-10 : Appliquer des rÃ¨gles mÃ©tier**
+**INTERDIT-PERM-10 : Appliquer des règles métier**
 
-La Permission API NE PEUT JAMAIS appliquer des rÃ¨gles mÃ©tier sur l'usage des permissions. Elle dÃ©finit les droits, pas leur contexte d'application.
+La Permission API NE PEUT JAMAIS appliquer des règles métier sur l'usage des permissions. Elle définit les droits, pas leur contexte d'application.
 
 ### 7.2. Justifications
 
-Ces interdictions sont justifiÃ©es par :
-- La prÃ©servation de la sÃ©paration entre dÃ©finition et dÃ©cision
-- Le respect de l'autoritÃ© de StrongFather pour les dÃ©cisions
-- La garantie de l'intÃ©gritÃ© du registre
-- L'absence de logique mÃ©tier dans Master Butler
-- Le principe de non-vÃ©rification de Master Butler
+Ces interdictions sont justifiées par :
+- La préservation de la séparation entre définition et décision
+- Le respect de l'autorité de StrongFather pour les décisions
+- La garantie de l'intégrité du registre
+- L'absence de logique métier dans Master Butler
+- Le principe de non-vérification de Master Butler
 
 ---
 
-## 8. RÃ¨gles absolues d'appel (prÃ©conditions)
+## 8. Règles absolues d'appel (préconditions)
 
-### 8.1. PrÃ©conditions obligatoires
+### 8.1. Préconditions obligatoires
 
-Chaque appel Permission API DOIT respecter les prÃ©conditions suivantes. Si une prÃ©condition n'est pas satisfaite, l'appel est rejetÃ© immÃ©diatement.
+Chaque appel Permission API DOIT respecter les préconditions suivantes. Si une précondition n'est pas satisfaite, l'appel est rejeté immédiatement.
 
-**PRECOND-PERM-1 : IdentitÃ© de l'appelant**
+**PRECOND-PERM-1 : Identité de l'appelant**
 
-Chaque appel DOIT Ãªtre accompagnÃ© de l'identitÃ© de l'appelant, permettant de vÃ©rifier son autoritÃ©.
+Chaque appel DOIT être accompagné de l'identité de l'appelant, permettant de vérifier son autorité.
 
-**PRECOND-PERM-2 : AutoritÃ© suffisante**
+**PRECOND-PERM-2 : Autorité suffisante**
 
-L'appelant DOIT avoir l'autoritÃ© nÃ©cessaire pour l'opÃ©ration demandÃ©e :
-- DÃ©finition de permission STANDARD : OpÃ©rateurs autorisÃ©s
-- DÃ©finition de permission ELEVATED : OpÃ©rateurs avec autoritÃ© Ã©levÃ©e
-- DÃ©finition de permission CRITICAL : StrongFather avec validation
-- DÃ©finition de permission SYSTEM : MiyukiniAdmin uniquement
+L'appelant DOIT avoir l'autorité nécessaire pour l'opération demandée :
+- Définition de permission STANDARD : Opérateurs autorisés
+- Définition de permission ELEVATED : Opérateurs avec autorité élevée
+- Définition de permission CRITICAL : StrongFather avec validation
+- Définition de permission SYSTEM : MiyukiniAdmin uniquement
 
-**PRECOND-PERM-3 : ParamÃ¨tres valides**
+**PRECOND-PERM-3 : Paramètres valides**
 
-Tous les paramÃ¨tres obligatoires DOIVENT Ãªtre fournis et valides.
+Tous les paramètres obligatoires DOIVENT être fournis et valides.
 
-**PRECOND-PERM-4 : RÃ©fÃ©rences existantes**
+**PRECOND-PERM-4 : Références existantes**
 
-Toutes les rÃ©fÃ©rences (capacitÃ©s, permissions impliquÃ©es) DOIVENT exister dans les registres respectifs.
+Toutes les références (capacités, permissions impliquées) DOIVENT exister dans les registres respectifs.
 
-**PRECOND-PERM-5 : CohÃ©rence des Ã©tats**
+**PRECOND-PERM-5 : Cohérence des états**
 
-Les opÃ©rations DOIVENT Ãªtre cohÃ©rentes avec l'Ã©tat actuel des permissions concernÃ©es.
+Les opérations DOIVENT être cohérentes avec l'état actuel des permissions concernées.
 
-### 8.2. RÃ¨gles de validation
+### 8.2. Règles de validation
 
-- Les prÃ©conditions sont validÃ©es dans l'ordre
-- Si une prÃ©condition Ã©choue, l'appel est rejetÃ© immÃ©diatement
-- L'erreur de rejet indique la prÃ©condition non satisfaite
-- Aucune exÃ©cution partielle n'est autorisÃ©e aprÃ¨s un Ã©chec
+- Les préconditions sont validées dans l'ordre
+- Si une précondition échoue, l'appel est rejeté immédiatement
+- L'erreur de rejet indique la précondition non satisfaite
+- Aucune exécution partielle n'est autorisée après un échec
 
 ---
 
-## 9. RÃ¨gles absolues de rejet
+## 9. Règles absolues de rejet
 
 ### 9.1. Conditions de rejet
 
-Un appel Permission API est rejetÃ© si l'une des conditions suivantes est dÃ©tectÃ©e :
+Un appel Permission API est rejeté si l'une des conditions suivantes est détectée :
 
-**REJET-PERM-1 : Appelant non identifiÃ©**
+**REJET-PERM-1 : Appelant non identifié**
 
-L'appel est rejetÃ© si l'identitÃ© de l'appelant n'est pas fournie ou invalide.
+L'appel est rejeté si l'identité de l'appelant n'est pas fournie ou invalide.
 - Erreur : `UNKNOWN_CALLER`
 - Action : Aucune modification
 
-**REJET-PERM-2 : AutoritÃ© insuffisante**
+**REJET-PERM-2 : Autorité insuffisante**
 
-L'appel est rejetÃ© si l'appelant n'a pas l'autoritÃ© pour l'opÃ©ration.
+L'appel est rejeté si l'appelant n'a pas l'autorité pour l'opération.
 - Erreur : `INSUFFICIENT_AUTHORITY`
-- Action : Aucune modification, tentative tracÃ©e
+- Action : Aucune modification, tentative tracée
 
 **REJET-PERM-3 : Permission inexistante**
 
-L'appel est rejetÃ© si la permission rÃ©fÃ©rencÃ©e n'existe pas.
+L'appel est rejeté si la permission référencée n'existe pas.
 - Erreur : `PERMISSION_NOT_FOUND`
 - Action : Aucune modification
 
-**REJET-PERM-4 : Identifiant dupliquÃ©**
+**REJET-PERM-4 : Identifiant dupliqué**
 
-L'appel est rejetÃ© si l'identifiant existe dÃ©jÃ  lors d'une crÃ©ation.
+L'appel est rejeté si l'identifiant existe déjà lors d'une création.
 - Erreur : `DUPLICATE_PERMISSION_ID`
 - Action : Aucune modification
 
-**REJET-PERM-5 : CapacitÃ© inexistante**
+**REJET-PERM-5 : Capacité inexistante**
 
-L'appel est rejetÃ© si une capacitÃ© rÃ©fÃ©rencÃ©e n'existe pas.
+L'appel est rejeté si une capacité référencée n'existe pas.
 - Erreur : `CAPABILITY_NOT_FOUND`
 - Action : Aucune modification
 
-**REJET-PERM-6 : Cycle dÃ©tectÃ©**
+**REJET-PERM-6 : Cycle détecté**
 
-L'appel est rejetÃ© si l'opÃ©ration crÃ©erait un cycle d'implication.
+L'appel est rejeté si l'opération créerait un cycle d'implication.
 - Erreur : `CYCLIC_IMPLICATION_DETECTED`
-- Action : Aucune modification, chemin du cycle retournÃ©
+- Action : Aucune modification, chemin du cycle retourné
 
-**REJET-PERM-7 : Transition d'Ã©tat invalide**
+**REJET-PERM-7 : Transition d'état invalide**
 
-L'appel est rejetÃ© si la transition d'Ã©tat demandÃ©e n'est pas autorisÃ©e.
+L'appel est rejeté si la transition d'état demandée n'est pas autorisée.
 - Erreur : `INVALID_STATE_TRANSITION`
 - Action : Aucune modification
 
 **REJET-PERM-8 : Modification interdite**
 
-L'appel est rejetÃ© si la modification demandÃ©e n'est pas autorisÃ©e pour l'Ã©tat actuel.
+L'appel est rejeté si la modification demandée n'est pas autorisée pour l'état actuel.
 - Erreur : `MODIFICATION_NOT_ALLOWED`
 - Action : Aucune modification
 
-**REJET-PERM-9 : DerniÃ¨re capacitÃ©**
+**REJET-PERM-9 : Dernière capacité**
 
-L'appel est rejetÃ© si la dissociation laisserait la permission sans capacitÃ©.
+L'appel est rejeté si la dissociation laisserait la permission sans capacité.
 - Erreur : `LAST_CAPABILITY_REMOVAL`
 - Action : Aucune modification
 
-**REJET-PERM-10 : PÃ©riode de dÃ©prÃ©ciation**
+**REJET-PERM-10 : Période de dépréciation**
 
-L'appel est rejetÃ© si le retrait est demandÃ© avant la fin de la pÃ©riode de dÃ©prÃ©ciation.
+L'appel est rejeté si le retrait est demandé avant la fin de la période de dépréciation.
 - Erreur : `DEPRECATION_PERIOD_NOT_ELAPSED`
 - Action : Aucune modification
 
-### 9.2. Garanties aprÃ¨s rejet
+### 9.2. Garanties après rejet
 
-AprÃ¨s tout rejet, les garanties suivantes s'appliquent :
-- L'Ã©tat du registre reste inchangÃ©
-- Aucune modification partielle n'est appliquÃ©e
+Après tout rejet, les garanties suivantes s'appliquent :
+- L'état du registre reste inchangé
+- Aucune modification partielle n'est appliquée
 - L'erreur est explicite et actionnable
-- La tentative est tracÃ©e pour audit
-- Aucun effet de bord n'est crÃ©Ã©
+- La tentative est tracée pour audit
+- Aucun effet de bord n'est créé
 
-### 9.3. RÃ¨gles absolues
+### 9.3. Règles absolues
 
-- **R-REJ-PERM-1 :** Tout rejet laisse le registre inchangÃ©
+- **R-REJ-PERM-1 :** Tout rejet laisse le registre inchangé
 - **R-REJ-PERM-2 :** Tout rejet retourne une erreur explicite
-- **R-REJ-PERM-3 :** Tout rejet est tracÃ©
-- **R-REJ-PERM-4 :** Aucune exception au rejet n'est autorisÃ©e
+- **R-REJ-PERM-3 :** Tout rejet est tracé
+- **R-REJ-PERM-4 :** Aucune exception au rejet n'est autorisée
 
 ---
 
@@ -717,96 +717,96 @@ AprÃ¨s tout rejet, les garanties suivantes s'appliquent :
 
 ### 10.1. Garanties de traitement
 
-**G-PERM-API-1 : Traitement prÃ©visible**
+**G-PERM-API-1 : Traitement prévisible**
 
-Si un appelant autorisÃ© fournit des paramÃ¨tres valides et respecte les prÃ©conditions, Master Butler traite l'opÃ©ration de maniÃ¨re prÃ©visible et conforme au contrat.
+Si un appelant autorisé fournit des paramètres valides et respecte les préconditions, Master Butler traite l'opération de manière prévisible et conforme au contrat.
 
 **G-PERM-API-2 : Messages d'erreur explicites**
 
-Si une opÃ©ration est rejetÃ©e, Master Butler retourne toujours un message d'erreur explicite et actionnable.
+Si une opération est rejetée, Master Butler retourne toujours un message d'erreur explicite et actionnable.
 
 **G-PERM-API-3 : Pas de rejet arbitraire**
 
-Master Butler ne rejette jamais une opÃ©ration de maniÃ¨re arbitraire. Tout rejet est justifiÃ© par une violation documentÃ©e.
+Master Butler ne rejette jamais une opération de manière arbitraire. Tout rejet est justifié par une violation documentée.
 
-**G-PERM-API-4 : AtomicitÃ©**
+**G-PERM-API-4 : Atomicité**
 
-Toute opÃ©ration Permission API est atomique. Elle est exÃ©cutÃ©e complÃ¨tement ou pas du tout.
+Toute opération Permission API est atomique. Elle est exécutée complètement ou pas du tout.
 
-### 10.2. Garanties de cohÃ©rence
+### 10.2. Garanties de cohérence
 
-**G-PERM-API-5 : IntÃ©gritÃ© rÃ©fÃ©rentielle**
+**G-PERM-API-5 : Intégrité référentielle**
 
-AprÃ¨s toute opÃ©ration rÃ©ussie, l'intÃ©gritÃ© rÃ©fÃ©rentielle du registre est garantie.
+Après toute opération réussie, l'intégrité référentielle du registre est garantie.
 
-**G-PERM-API-6 : Ã‰tat inchangÃ© aprÃ¨s rejet**
+**G-PERM-API-6 : État inchangé après rejet**
 
-AprÃ¨s tout rejet, l'Ã©tat du registre reste inchangÃ©.
+Après tout rejet, l'état du registre reste inchangé.
 
 **G-PERM-API-7 : Absence de cycle**
 
-AprÃ¨s toute opÃ©ration rÃ©ussie, le registre ne contient aucun cycle d'implication.
+Après toute opération réussie, le registre ne contient aucun cycle d'implication.
 
-### 10.3. Garanties de traÃ§abilitÃ©
+### 10.3. Garanties de traçabilité
 
-**G-PERM-API-8 : TraÃ§abilitÃ© complÃ¨te**
+**G-PERM-API-8 : Traçabilité complète**
 
-Toutes les opÃ©rations sont tracÃ©es de maniÃ¨re complÃ¨te (qui, quand, quoi, rÃ©sultat).
+Toutes les opérations sont tracées de manière complète (qui, quand, quoi, résultat).
 
-**G-PERM-API-9 : Historique prÃ©servÃ©**
+**G-PERM-API-9 : Historique préservé**
 
-L'historique des modifications est prÃ©servÃ©, y compris pour les permissions retirÃ©es.
+L'historique des modifications est préservé, y compris pour les permissions retirées.
 
-### 10.4. Non-nÃ©gociabilitÃ©
+### 10.4. Non-négociabilité
 
-Ces garanties sont absolues et non nÃ©gociables. Elles s'appliquent Ã  tous les appelants conformes, sans exception.
+Ces garanties sont absolues et non négociables. Elles s'appliquent à tous les appelants conformes, sans exception.
 
 ---
 
-## 11. Contexte requis pour les opÃ©rations
+## 11. Contexte requis pour les opérations
 
 ### 11.1. Structure du contexte
 
-Chaque opÃ©ration Permission API est accompagnÃ©e d'un contexte structurÃ© :
+Chaque opération Permission API est accompagnée d'un contexte structuré :
 
 ```yaml
 context:
   caller:
     id: <identifiant de l'appelant>
     type: <OPERATOR | CORE | SYSTEM>
-    authority_level: <niveau d'autoritÃ©>
+    authority_level: <niveau d'autorité>
   operation:
-    type: <type d'opÃ©ration>
+    type: <type d'opération>
     timestamp: <timestamp de l'appel>
-    request_id: <identifiant unique de requÃªte>
+    request_id: <identifiant unique de requête>
   trace:
-    correlation_id: <identifiant de corrÃ©lation>
+    correlation_id: <identifiant de corrélation>
     source: <composant source>
 ```
 
 ### 11.2. Contexte par type d'appelant
 
-#### OpÃ©rateur
+#### Opérateur
 
 | Champ | Description | Requis |
 |-------|-------------|--------|
-| `operator_id` | Identifiant de l'OpÃ©rateur | âœ… |
-| `authority_level` | Niveau d'autoritÃ© | âœ… |
-| `session_id` | Identifiant de session | RecommandÃ© |
+| `operator_id` | Identifiant de l'Opérateur | ✅ |
+| `authority_level` | Niveau d'autorité | ✅ |
+| `session_id` | Identifiant de session | Recommandé |
 
 #### Core (StrongFather, BondingBrother)
 
 | Champ | Description | Requis |
 |-------|-------------|--------|
-| `core_id` | Identifiant du Core | âœ… |
-| `operation_context` | Contexte de l'opÃ©ration parente | âœ… |
+| `core_id` | Identifiant du Core | ✅ |
+| `operation_context` | Contexte de l'opération parente | ✅ |
 
 #### System (MiyukiniAdmin)
 
 | Champ | Description | Requis |
 |-------|-------------|--------|
-| `admin_id` | Identifiant administrateur | âœ… |
-| `authorization_proof` | Preuve d'autorisation | âœ… |
+| `admin_id` | Identifiant administrateur | ✅ |
+| `authorization_proof` | Preuve d'autorisation | ✅ |
 
 ---
 
@@ -817,23 +817,23 @@ context:
 **Flux typique d'interrogation :**
 
 ```
-StrongFather Ã©value une intention
-    â”‚
-    â”œâ”€â”€ Interroge Permission API : "Quelles permissions couvrent cette capacitÃ© ?"
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Permission API retourne : Liste des permissions
-    â”‚
-    â”œâ”€â”€ Interroge Permission API : "Quelle est la dÃ©finition de cette permission ?"
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Permission API retourne : DÃ©finition complÃ¨te
-    â”‚
-    â””â”€â”€ StrongFather dÃ©cide selon les politiques
+StrongFather évalue une intention
+    │
+    ├── Interroge Permission API : "Quelles permissions couvrent cette capacité ?"
+    │       │
+    │       └── Permission API retourne : Liste des permissions
+    │
+    ├── Interroge Permission API : "Quelle est la définition de cette permission ?"
+    │       │
+    │       └── Permission API retourne : Définition complète
+    │
+    └── StrongFather décide selon les politiques
 ```
 
-**RÃ¨gles d'interaction :**
-- StrongFather est toujours autorisÃ© Ã  interroger
-- La Permission API ne suggÃ¨re jamais de dÃ©cision
-- Les rÃ©ponses sont exhaustives et exactes
+**Règles d'interaction :**
+- StrongFather est toujours autorisé à interroger
+- La Permission API ne suggère jamais de décision
+- Les réponses sont exhaustives et exactes
 
 ### 12.2. Interaction avec BondingBrother
 
@@ -841,79 +841,79 @@ StrongFather Ã©value une intention
 
 ```
 BondingBrother traduit une intention
-    â”‚
-    â”œâ”€â”€ Interroge Permission API : "Quelles permissions sont requises pour cette action ?"
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Permission API retourne : Permissions requises
-    â”‚
-    â””â”€â”€ BondingBrother enrichit le contexte de l'intention
+    │
+    ├── Interroge Permission API : "Quelles permissions sont requises pour cette action ?"
+    │       │
+    │       └── Permission API retourne : Permissions requises
+    │
+    └── BondingBrother enrichit le contexte de l'intention
 ```
 
-**RÃ¨gles d'interaction :**
-- BondingBrother interroge pour la traduction, pas pour la dÃ©cision
-- Les rÃ©ponses aident Ã  construire le contexte
+**Règles d'interaction :**
+- BondingBrother interroge pour la traduction, pas pour la décision
+- Les réponses aident à construire le contexte
 
-### 12.3. Interaction avec les OpÃ©rateurs
+### 12.3. Interaction avec les Opérateurs
 
-**Flux de dÃ©finition :**
-
-```
-OpÃ©rateur dÃ©finit une nouvelle permission
-    â”‚
-    â”œâ”€â”€ Soumet via BondingBrother
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Permission API valide et enregistre
-    â”‚
-    â””â”€â”€ Confirmation de l'enregistrement
-```
-
-**Flux de dÃ©couverte :**
+**Flux de définition :**
 
 ```
-OpÃ©rateur dÃ©couvre les permissions
-    â”‚
-    â”œâ”€â”€ Interroge Permission API
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Permission API retourne les permissions (selon autoritÃ©)
-    â”‚
-    â””â”€â”€ OpÃ©rateur utilise ces informations
+Opérateur définit une nouvelle permission
+    │
+    ├── Soumet via BondingBrother
+    │       │
+    │       └── Permission API valide et enregistre
+    │
+    └── Confirmation de l'enregistrement
+```
+
+**Flux de découverte :**
+
+```
+Opérateur découvre les permissions
+    │
+    ├── Interroge Permission API
+    │       │
+    │       └── Permission API retourne les permissions (selon autorité)
+    │
+    └── Opérateur utilise ces informations
 ```
 
 ### 12.4. Interaction avec le Capability Registry
 
-**DÃ©pendance :**
+**Dépendance :**
 
 ```
 Permission API
-    â”‚
-    â””â”€â”€ VÃ©rifie les capacitÃ©s rÃ©fÃ©rencÃ©es dans Capability Registry
-            â”‚
-            â””â”€â”€ Capability Registry confirme l'existence
+    │
+    └── Vérifie les capacités référencées dans Capability Registry
+            │
+            └── Capability Registry confirme l'existence
 ```
 
-**RÃ¨gles :**
-- Toute capacitÃ© rÃ©fÃ©rencÃ©e DOIT exister
-- La suppression d'une capacitÃ© invalide les permissions associÃ©es
+**Règles :**
+- Toute capacité référencée DOIT exister
+- La suppression d'une capacité invalide les permissions associées
 
 ---
 
-## 13. Invariants systÃ©miques
+## 13. Invariants systémiques
 
-### INV-PERM-API-1 : Non-dÃ©cision
+### INV-PERM-API-1 : Non-décision
 
-La Permission API **ne prend jamais de dÃ©cision d'autorisation**. Aucune mÃ©thode ne retourne "autorisÃ©" ou "refusÃ©".
+La Permission API **ne prend jamais de décision d'autorisation**. Aucune méthode ne retourne "autorisé" ou "refusé".
 
-### INV-PERM-API-2 : AtomicitÃ©
+### INV-PERM-API-2 : Atomicité
 
-Toute opÃ©ration Permission API est **atomique**. Elle est exÃ©cutÃ©e complÃ¨tement ou pas du tout.
+Toute opération Permission API est **atomique**. Elle est exécutée complètement ou pas du tout.
 
-### INV-PERM-API-3 : TraÃ§abilitÃ©
+### INV-PERM-API-3 : Traçabilité
 
-Toute opÃ©ration Permission API est **tracÃ©e** avec contexte complet.
+Toute opération Permission API est **tracée** avec contexte complet.
 
-### INV-PERM-API-4 : IntÃ©gritÃ© rÃ©fÃ©rentielle
+### INV-PERM-API-4 : Intégrité référentielle
 
-La Permission API **prÃ©serve l'intÃ©gritÃ© rÃ©fÃ©rentielle** du registre. Aucune rÃ©fÃ©rence invalide n'est crÃ©Ã©e.
+La Permission API **préserve l'intégrité référentielle** du registre. Aucune référence invalide n'est créée.
 
 ### INV-PERM-API-5 : Absence de cycle
 
@@ -921,213 +921,213 @@ La Permission API **garantit l'absence de cycle** dans les implications.
 
 ### INV-PERM-API-6 : Association obligatoire
 
-La Permission API **garantit qu'une permission active a au moins une capacitÃ©**.
+La Permission API **garantit qu'une permission active a au moins une capacité**.
 
-### INV-PERM-API-7 : ImmutabilitÃ© des identifiants
+### INV-PERM-API-7 : Immutabilité des identifiants
 
-La Permission API **ne modifie jamais** un identifiant de permission aprÃ¨s crÃ©ation.
+La Permission API **ne modifie jamais** un identifiant de permission après création.
 
-### INV-PERM-API-8 : Transitions d'Ã©tat valides
+### INV-PERM-API-8 : Transitions d'état valides
 
-La Permission API **n'autorise que les transitions d'Ã©tat valides** du cycle de vie.
+La Permission API **n'autorise que les transitions d'état valides** du cycle de vie.
 
 ---
 
-## 14. SchÃ©mas ASCII
+## 14. Schémas ASCII
 
 ### 14.1. Position de la Permission API dans l'architecture
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    APPELANTS                                      â”‚
-â”‚                                                                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚   OpÃ©rateurs  â”‚  â”‚  StrongFather â”‚  â”‚  BondingBrother   â”‚   â”‚
-â”‚  â”‚               â”‚  â”‚   (dÃ©cision)  â”‚  â”‚    (mÃ©diation)    â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â”‚ Appels Permission API
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    PERMISSION API                                 â”‚
-â”‚                                                                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚  OPÃ‰RATIONS AUTORISÃ‰ES :                                  â”‚ â”‚
-â”‚  â”‚                                                            â”‚ â”‚
-â”‚  â”‚  DÃ‰FINITION        INTERROGATION      ASSOCIATION         â”‚ â”‚
-â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€      â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€         â”‚ â”‚
-â”‚  â”‚  â€¢ definePermission   â€¢ getPermission   â€¢ associateCapability  â”‚
-â”‚  â”‚  â€¢ activatePermission â€¢ listPermissions â€¢ dissociateCapability â”‚
-â”‚  â”‚  â€¢ updatePermission   â€¢ searchPermissions â€¢ addImplication     â”‚
-â”‚  â”‚  â€¢ deprecatePermissionâ€¢ getCapabilities  â€¢ removeImplication   â”‚
-â”‚  â”‚  â€¢ retirePermission   â€¢ getHierarchy                          â”‚
-â”‚  â”‚                                                            â”‚ â”‚
-â”‚  â”‚  VALIDATION                                                â”‚ â”‚
-â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€                                                â”‚ â”‚
-â”‚  â”‚  â€¢ validateDefinition â€¢ checkCycles                       â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚                                                                   â”‚
-â”‚  PRINCIPES :                                                      â”‚
-â”‚  âœ“ Surface d'appel unique pour les permissions                  â”‚
-â”‚  âœ“ Contexte obligatoire                                         â”‚
-â”‚  âœ“ Validation avant exÃ©cution                                   â”‚
-â”‚  âœ“ AtomicitÃ© des opÃ©rations                                     â”‚
-â”‚  âœ“ TraÃ§abilitÃ© complÃ¨te                                         â”‚
-â”‚  âœ“ JAMAIS de dÃ©cision d'autorisation                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â”‚ AccÃ¨de au
-                            â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              PERMISSION REGISTRY (Registre)                       â”‚
-â”‚                                                                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚  â€¢ Stockage des permissions                               â”‚ â”‚
-â”‚  â”‚  â€¢ Associations permission â†” capacitÃ©                    â”‚ â”‚
-â”‚  â”‚  â€¢ HiÃ©rarchie d'implications                              â”‚ â”‚
-â”‚  â”‚  â€¢ Historique des modifications                           â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────┐
+│                    APPELANTS                                      │
+│                                                                   │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────────┐   │
+│  │   Opérateurs  │  │  StrongFather │  │  BondingBrother   │   │
+│  │               │  │   (décision)  │  │    (médiation)    │   │
+│  └───────────────┘  └───────────────┘  └───────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Appels Permission API
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    PERMISSION API                                 │
+│                                                                   │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  OPÉRATIONS AUTORISÉES :                                  │ │
+│  │                                                            │ │
+│  │  DÉFINITION        INTERROGATION      ASSOCIATION         │ │
+│  │  ───────────       ─────────────      ───────────         │ │
+│  │  • definePermission   • getPermission   • associateCapability  │
+│  │  • activatePermission • listPermissions • dissociateCapability │
+│  │  • updatePermission   • searchPermissions • addImplication     │
+│  │  • deprecatePermission• getCapabilities  • removeImplication   │
+│  │  • retirePermission   • getHierarchy                          │
+│  │                                                            │ │
+│  │  VALIDATION                                                │ │
+│  │  ──────────                                                │ │
+│  │  • validateDefinition • checkCycles                       │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  PRINCIPES :                                                      │
+│  ✓ Surface d'appel unique pour les permissions                  │
+│  ✓ Contexte obligatoire                                         │
+│  ✓ Validation avant exécution                                   │
+│  ✓ Atomicité des opérations                                     │
+│  ✓ Traçabilité complète                                         │
+│  ✓ JAMAIS de décision d'autorisation                            │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            │ Accède au
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              PERMISSION REGISTRY (Registre)                       │
+│                                                                   │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  • Stockage des permissions                               │ │
+│  │  • Associations permission ↔ capacité                    │ │
+│  │  • Hiérarchie d'implications                              │ │
+│  │  • Historique des modifications                           │ │
+│  └───────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 14.2. Flux de dÃ©finition d'une permission
+### 14.2. Flux de définition d'une permission
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              FLUX DE DÃ‰FINITION D'UNE PERMISSION                  â”‚
-â”‚                                                                   â”‚
-â”‚  APPELANT (OpÃ©rateur)                                            â”‚
-â”‚      â”‚                                                            â”‚
-â”‚      â”‚ 1. Soumet dÃ©finition de permission                        â”‚
-â”‚      â”‚    â€¢ id, name, description                                â”‚
-â”‚      â”‚    â€¢ domain, level, scope_type                            â”‚
-â”‚      â”‚    â€¢ capabilities[]                                       â”‚
-â”‚      â–¼                                                            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚              PERMISSION API                               â”‚ â”‚
-â”‚  â”‚                                                            â”‚ â”‚
-â”‚  â”‚  2. Validation des prÃ©conditions                          â”‚ â”‚
-â”‚  â”‚     â”œâ”€â”€ Appelant identifiÃ© ?         â”€â”€â†’ Rejet si non    â”‚ â”‚
-â”‚  â”‚     â”œâ”€â”€ AutoritÃ© suffisante ?        â”€â”€â†’ Rejet si non    â”‚ â”‚
-â”‚  â”‚     â””â”€â”€ ParamÃ¨tres valides ?         â”€â”€â†’ Rejet si non    â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚      â”‚                                                            â”‚
-â”‚      â”‚ 3. Validation de la dÃ©finition                            â”‚
-â”‚      â–¼                                                            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚  Identifiant unique ?                â”€â”€â†’ Rejet si non     â”‚ â”‚
-â”‚  â”‚  CapacitÃ©s existent toutes ?         â”€â”€â†’ Rejet si non     â”‚ â”‚
-â”‚  â”‚  Permissions impliquÃ©es existent ?   â”€â”€â†’ Rejet si non     â”‚ â”‚
-â”‚  â”‚  Pas de cycle d'implication ?        â”€â”€â†’ Rejet si cycle   â”‚ â”‚
-â”‚  â”‚  Niveau autorisÃ© pour l'appelant ?   â”€â”€â†’ Rejet si non     â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚      â”‚                                                            â”‚
-â”‚      â”‚ 4. Toutes validations passÃ©es                             â”‚
-â”‚      â–¼                                                            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚              ENREGISTREMENT                               â”‚ â”‚
-â”‚  â”‚                                                            â”‚ â”‚
-â”‚  â”‚  â€¢ Permission crÃ©Ã©e en Ã©tat DRAFT                         â”‚ â”‚
-â”‚  â”‚  â€¢ Associations crÃ©Ã©es                                    â”‚ â”‚
-â”‚  â”‚  â€¢ TraÃ§abilitÃ© enregistrÃ©e                               â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚      â”‚                                                            â”‚
-â”‚      â”‚ 5. Retour du rÃ©sultat                                     â”‚
-â”‚      â–¼                                                            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚  SUCCÃˆS                              Ã‰CHEC                 â”‚ â”‚
-â”‚  â”‚  â”€â”€â”€â”€â”€â”€â”€                             â”€â”€â”€â”€â”€                 â”‚ â”‚
-â”‚  â”‚  â€¢ permission_id confirmÃ©            â€¢ Erreur explicite    â”‚ â”‚
-â”‚  â”‚  â€¢ Ã©tat: DRAFT                       â€¢ Raison dÃ©taillÃ©e    â”‚ â”‚
-â”‚  â”‚  â€¢ version: 1.0.0                    â€¢ Registre inchangÃ©   â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚      â”‚                                                            â”‚
-â”‚      â–¼                                                            â”‚
-â”‚  APPELANT (reÃ§oit le rÃ©sultat)                                   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────┐
+│              FLUX DE DÉFINITION D'UNE PERMISSION                  │
+│                                                                   │
+│  APPELANT (Opérateur)                                            │
+│      │                                                            │
+│      │ 1. Soumet définition de permission                        │
+│      │    • id, name, description                                │
+│      │    • domain, level, scope_type                            │
+│      │    • capabilities[]                                       │
+│      ▼                                                            │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │              PERMISSION API                               │ │
+│  │                                                            │ │
+│  │  2. Validation des préconditions                          │ │
+│  │     ├── Appelant identifié ?         ──→ Rejet si non    │ │
+│  │     ├── Autorité suffisante ?        ──→ Rejet si non    │ │
+│  │     └── Paramètres valides ?         ──→ Rejet si non    │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│      │                                                            │
+│      │ 3. Validation de la définition                            │
+│      ▼                                                            │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  Identifiant unique ?                ──→ Rejet si non     │ │
+│  │  Capacités existent toutes ?         ──→ Rejet si non     │ │
+│  │  Permissions impliquées existent ?   ──→ Rejet si non     │ │
+│  │  Pas de cycle d'implication ?        ──→ Rejet si cycle   │ │
+│  │  Niveau autorisé pour l'appelant ?   ──→ Rejet si non     │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│      │                                                            │
+│      │ 4. Toutes validations passées                             │
+│      ▼                                                            │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │              ENREGISTREMENT                               │ │
+│  │                                                            │ │
+│  │  • Permission créée en état DRAFT                         │ │
+│  │  • Associations créées                                    │ │
+│  │  • Traçabilité enregistrée                               │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│      │                                                            │
+│      │ 5. Retour du résultat                                     │
+│      ▼                                                            │
+│  ┌───────────────────────────────────────────────────────────┐ │
+│  │  SUCCÈS                              ÉCHEC                 │ │
+│  │  ───────                             ─────                 │ │
+│  │  • permission_id confirmé            • Erreur explicite    │ │
+│  │  • état: DRAFT                       • Raison détaillée    │ │
+│  │  • version: 1.0.0                    • Registre inchangé   │ │
+│  └───────────────────────────────────────────────────────────┘ │
+│      │                                                            │
+│      ▼                                                            │
+│  APPELANT (reçoit le résultat)                                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 14.3. Ce que la Permission API fait vs ne fait pas
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚     PERMISSION API : CE QU'ELLE FAIT VS NE FAIT PAS              â”‚
-â”‚                                                                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚  CE QUE LA PERMISSION API FAIT                           â”‚   â”‚
-â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                         â”‚   â”‚
-â”‚  â”‚                                                           â”‚   â”‚
-â”‚  â”‚  âœ“ DÃ©finit des permissions                               â”‚   â”‚
-â”‚  â”‚  âœ“ Interroge le registre                                 â”‚   â”‚
-â”‚  â”‚  âœ“ GÃ¨re les associations permission â†” capacitÃ©          â”‚   â”‚
-â”‚  â”‚  âœ“ GÃ¨re les hiÃ©rarchies d'implication                   â”‚   â”‚
-â”‚  â”‚  âœ“ Valide les dÃ©finitions                                â”‚   â”‚
-â”‚  â”‚  âœ“ DÃ©tecte les cycles                                    â”‚   â”‚
-â”‚  â”‚  âœ“ Trace toutes les opÃ©rations                           â”‚   â”‚
-â”‚  â”‚  âœ“ Retourne des erreurs explicites                       â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”‚                                                                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚  CE QUE LA PERMISSION API NE FAIT JAMAIS                 â”‚   â”‚
-â”‚  â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                 â”‚   â”‚
-â”‚  â”‚                                                           â”‚   â”‚
-â”‚  â”‚  âœ— DÃ©cider si une permission est accordÃ©e                â”‚   â”‚
-â”‚  â”‚  âœ— VÃ©rifier les permissions en temps rÃ©el                â”‚   â”‚
-â”‚  â”‚  âœ— Retourner "autorisÃ©" ou "refusÃ©"                      â”‚   â”‚
-â”‚  â”‚  âœ— ConnaÃ®tre qui possÃ¨de quelle permission               â”‚   â”‚
-â”‚  â”‚  âœ— Appliquer des rÃ¨gles mÃ©tier                           â”‚   â”‚
-â”‚  â”‚  âœ— ExÃ©cuter des actions fonctionnelles                   â”‚   â”‚
-â”‚  â”‚  âœ— Stocker des donnÃ©es mÃ©tier                            â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”‚                                                                   â”‚
-â”‚  PHRASE FONDAMENTALE :                                            â”‚
-â”‚  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•                                            â”‚
-â”‚                                                                   â”‚
-â”‚  "La Permission API dÃ©finit ce qui existe comme droits           â”‚
-â”‚   possibles, jamais ce qui est effectivement autorisÃ©."          â”‚
-â”‚                                                                   â”‚
-â”‚  La DÃ‰FINITION appartient Ã  Master Butler.                        â”‚
-â”‚  La DÃ‰CISION appartient Ã  StrongFather.                           â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────┐
+│     PERMISSION API : CE QU'ELLE FAIT VS NE FAIT PAS              │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  CE QUE LA PERMISSION API FAIT                           │   │
+│  │  ═══════════════════════════════                         │   │
+│  │                                                           │   │
+│  │  ✓ Définit des permissions                               │   │
+│  │  ✓ Interroge le registre                                 │   │
+│  │  ✓ Gère les associations permission ↔ capacité          │   │
+│  │  ✓ Gère les hiérarchies d'implication                   │   │
+│  │  ✓ Valide les définitions                                │   │
+│  │  ✓ Détecte les cycles                                    │   │
+│  │  ✓ Trace toutes les opérations                           │   │
+│  │  ✓ Retourne des erreurs explicites                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  CE QUE LA PERMISSION API NE FAIT JAMAIS                 │   │
+│  │  ═══════════════════════════════════════                 │   │
+│  │                                                           │   │
+│  │  ✗ Décider si une permission est accordée                │   │
+│  │  ✗ Vérifier les permissions en temps réel                │   │
+│  │  ✗ Retourner "autorisé" ou "refusé"                      │   │
+│  │  ✗ Connaître qui possède quelle permission               │   │
+│  │  ✗ Appliquer des règles métier                           │   │
+│  │  ✗ Exécuter des actions fonctionnelles                   │   │
+│  │  ✗ Stocker des données métier                            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                   │
+│  PHRASE FONDAMENTALE :                                            │
+│  ═════════════════════                                            │
+│                                                                   │
+│  "La Permission API définit ce qui existe comme droits           │
+│   possibles, jamais ce qui est effectivement autorisé."          │
+│                                                                   │
+│  La DÉFINITION appartient à Master Butler.                        │
+│  La DÉCISION appartient à StrongFather.                           │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 15. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
+## 15. Conformité aux Lois d'Autonomie Système
 
-Ce contrat respecte les Lois d'Autonomie SystÃ¨me dÃ©finies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md).
+Ce contrat respecte les Lois d'Autonomie Système définies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-### LOI-1 : Aucune dÃ©pendance externe critique Ã  l'exÃ©cution
+### LOI-1 : Aucune dépendance externe critique à l'exécution
 
-**ConformitÃ© :** Conforme
+**Conformité :** Conforme
 
-La Permission API opÃ¨re entiÃ¨rement en local :
+La Permission API opère entièrement en local :
 
-- **OpÃ©rations locales** : Toutes les opÃ©rations s'exÃ©cutent localement
+- **Opérations locales** : Toutes les opérations s'exécutent localement
 - **Registre local** : Le registre des permissions est local
 - **Aucune API externe** : Aucun service distant n'est requis
 
-**VÃ©rification LOI-1** : *"La Permission API fonctionne-t-elle si le rÃ©seau est indisponible ?"* â†’ **Oui.**
+**Vérification LOI-1** : *"La Permission API fonctionne-t-elle si le réseau est indisponible ?"* → **Oui.**
 
-### LOI-5 : Le coÃ»t doit Ãªtre proportionnel au hardware
+### LOI-5 : Le coût doit être proportionnel au hardware
 
-**ConformitÃ© :** Conforme
+**Conformité :** Conforme
 
 La Permission API a une empreinte minimale :
 
-- **OpÃ©rations lÃ©gÃ¨res** : Lecture et Ã©criture de mÃ©tadonnÃ©es
-- **Pas de workers** : Aucun processus en arriÃ¨re-plan
-- **MÃ©moire prÃ©visible** : Proportionnelle au nombre de permissions
+- **Opérations légères** : Lecture et écriture de métadonnées
+- **Pas de workers** : Aucun processus en arrière-plan
+- **Mémoire prévisible** : Proportionnelle au nombre de permissions
 
-**VÃ©rification LOI-5** : *"La Permission API fonctionne-t-elle sur un Raspberry Pi 4 ?"* â†’ **Oui.**
+**Vérification LOI-5** : *"La Permission API fonctionne-t-elle sur un Raspberry Pi 4 ?"* → **Oui.**
 
-### SynthÃ¨se de conformitÃ©
+### Synthèse de conformité
 
 | Loi | Statut | Raison |
 |-----|--------|--------|
-| LOI-1 | âœ… Conforme | OpÃ©rations locales, aucune dÃ©pendance externe |
-| LOI-5 | âœ… Conforme | MÃ©tadonnÃ©es lÃ©gÃ¨res, consommation minimale |
+| LOI-1 | ✅ Conforme | Opérations locales, aucune dépendance externe |
+| LOI-5 | ✅ Conforme | Métadonnées légères, consommation minimale |
 
 ---
 
@@ -1135,68 +1135,68 @@ La Permission API a une empreinte minimale :
 
 ### Essence de la Permission API
 
-La Permission API de Master Butler est la **surface d'appel unique** pour toutes les opÃ©rations liÃ©es aux permissions dans le systÃ¨me Miyukini. Elle permet de dÃ©finir, interroger, associer et gÃ©rer les permissions, sans jamais participer Ã  la dÃ©cision d'autorisation.
+La Permission API de Master Butler est la **surface d'appel unique** pour toutes les opérations liées aux permissions dans le système Miyukini. Elle permet de définir, interroger, associer et gérer les permissions, sans jamais participer à la décision d'autorisation.
 
 ### Phrase fondatrice
 
-> **La Permission API dÃ©finit la surface d'appel pour gÃ©rer les droits possibles du systÃ¨me Miyukini, en garantissant l'intÃ©gritÃ© du registre, sans jamais dÃ©cider de ce qui est effectivement autorisÃ©.**
+> **La Permission API définit la surface d'appel pour gérer les droits possibles du système Miyukini, en garantissant l'intégrité du registre, sans jamais décider de ce qui est effectivement autorisé.**
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
-Toute implÃ©mentation de la Permission API doit respecter intÃ©gralement ce document. Toute Ã©volution doit prÃ©server les invariants dÃ©finis ici.
+Toute implémentation de la Permission API doit respecter intégralement ce document. Toute évolution doit préserver les invariants définis ici.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** FONDATION â€” Non nÃ©gociable  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4
+**Statut :** FONDATION — Non négociable  
+**Référence :** Miyukini Core System v2.4
 
-**RÃ©fÃ©rences croisÃ©es :**
+**Références croisées :**
 
-- [Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) : DÃ©finition et responsabilitÃ©s de Master Butler
-- [Master Butler - Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md) : ModÃ¨le de donnÃ©es du registre
-- [Master Butler - Capability API Contract](./Master%20Butler%20-%20Capability%20API%20Contract.md) : Surface d'appel pour les capacitÃ©s
-- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) : DÃ©finitions canoniques
+- [Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) : Définition et responsabilités de Master Butler
+- [Master Butler - Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md) : Modèle de données du registre
+- [Master Butler - Capability API Contract](./Master%20Butler%20-%20Capability%20API%20Contract.md) : Surface d'appel pour les capacités
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) : Définitions canoniques
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : Lois d'autonomie
 
 ---
 
-## 17. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
+## 17. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
 
-### AmbiguÃ¯tÃ© A1 : Confusion entre Permission API et Permission Registry
+### Ambiguïté A1 : Confusion entre Permission API et Permission Registry
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** Risque de confusion entre la Permission API (surface d'appel) et le Permission Registry Contract (modÃ¨le de donnÃ©es).
+**Ambiguïté rencontrée :** Risque de confusion entre la Permission API (surface d'appel) et le Permission Registry Contract (modèle de données).
 
-**DÃ©cision prise :** DÃ©finition explicite de la complÃ©mentaritÃ© : le Registry Contract dÃ©finit le modÃ¨le de donnÃ©es, l'API Contract dÃ©finit la surface d'appel pour interagir avec ce modÃ¨le.
+**Décision prise :** Définition explicite de la complémentarité : le Registry Contract définit le modèle de données, l'API Contract définit la surface d'appel pour interagir avec ce modèle.
 
-**Correction effectuÃ©e :** Section 1 et section 2 rÃ©digÃ©es avec clarification explicite de cette distinction.
+**Correction effectuée :** Section 1 et section 2 rédigées avec clarification explicite de cette distinction.
 
-### AmbiguÃ¯tÃ© A2 : ResponsabilitÃ© de vÃ©rification des permissions
+### Ambiguïté A2 : Responsabilité de vérification des permissions
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** NÃ©cessitÃ© de clarifier que la Permission API ne vÃ©rifie jamais si une permission est accordÃ©e Ã  un contexte.
+**Ambiguïté rencontrée :** Nécessité de clarifier que la Permission API ne vérifie jamais si une permission est accordée à un contexte.
 
-**DÃ©cision prise :** Interdiction explicite (INTERDIT-PERM-1, INTERDIT-PERM-2, INTERDIT-PERM-3) et rappel constant que la dÃ©cision appartient Ã  StrongFather.
+**Décision prise :** Interdiction explicite (INTERDIT-PERM-1, INTERDIT-PERM-2, INTERDIT-PERM-3) et rappel constant que la décision appartient à StrongFather.
 
-**Correction effectuÃ©e :** Sections 3, 7, et schÃ©ma 14.3 rÃ©digÃ©s avec emphase sur cette sÃ©paration.
+**Correction effectuée :** Sections 3, 7, et schéma 14.3 rédigés avec emphase sur cette séparation.
 
-### AmbiguÃ¯tÃ© A3 : Gestion des cycles d'implication
+### Ambiguïté A3 : Gestion des cycles d'implication
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** NÃ©cessitÃ© de dÃ©finir clairement le comportement en cas de tentative de crÃ©ation de cycle.
+**Ambiguïté rencontrée :** Nécessité de définir clairement le comportement en cas de tentative de création de cycle.
 
-**DÃ©cision prise :** Ajout d'une opÃ©ration de validation `checkCycles` et interdiction explicite (INTERDIT-PERM-5) avec rejet REJET-PERM-6.
+**Décision prise :** Ajout d'une opération de validation `checkCycles` et interdiction explicite (INTERDIT-PERM-5) avec rejet REJET-PERM-6.
 
-**Correction effectuÃ©e :** Sections 5.4, 7, et 9 rÃ©digÃ©es avec gestion explicite des cycles.
+**Correction effectuée :** Sections 5.4, 7, et 9 rédigées avec gestion explicite des cycles.
 
-### VÃ©rification de compatibilitÃ©
+### Vérification de compatibilité
 
-**VÃ©rification effectuÃ©e :** VÃ©rification systÃ©matique de la compatibilitÃ© avec le Permission Registry Contract et la Documentation Fondatrice. Aucune contradiction dÃ©tectÃ©e.
+**Vérification effectuée :** Vérification systématique de la compatibilité avec le Permission Registry Contract et la Documentation Fondatrice. Aucune contradiction détectée.
 
-**Conclusion :** Le contrat est strictement compatible avec le systÃ¨me contractuel existant.
+**Conclusion :** Le contrat est strictement compatible avec le système contractuel existant.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

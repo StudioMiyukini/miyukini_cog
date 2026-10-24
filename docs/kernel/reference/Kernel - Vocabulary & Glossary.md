@@ -1,4 +1,4 @@
-﻿# Kernel â€” Vocabulary & Glossary
+﻿# Kernel — Vocabulary & Glossary
 
 ## Contexte
 
@@ -10,7 +10,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 - **Applicable a :** Documentation Kernel, implementation, tests
 - **Audience :** Developpeurs, architectes, mainteneurs
-- **Statut :** Document de reference normatif â€” GLOSSAIRE KERNEL
+- **Statut :** Document de reference normatif — GLOSSAIRE KERNEL
 - **Relation :** Complete le [Glossaire General Miyukini](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
@@ -33,9 +33,9 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 
 **Ce que le boot N'EST PAS :**
 
-- âŒ Orchestration de workflows metier
-- âŒ Initialisation de jobs applicatifs
-- âŒ Hooks applicatifs
+- ❌ Orchestration de workflows metier
+- ❌ Initialisation de jobs applicatifs
+- ❌ Hooks applicatifs
 
 **Voir aussi :** Lifecycle, Shutdown
 
@@ -54,7 +54,7 @@ Ce document constitue le **dictionnaire officiel** de la terminologie specifique
 | **Zones a fort couplage** | Composants tres interconnectes |
 | **Zones a faible stabilite** | Composants frequemment modifies ou fragiles |
 
-**Utilite :** Anticiper la dette technique, planifier les refactorings â€” **sans jamais toucher au code.**
+**Utilite :** Anticiper la dette technique, planifier les refactorings — **sans jamais toucher au code.**
 
 **Voir aussi :** Kernel Maintenance Observability
 
@@ -98,13 +98,13 @@ trait Config {
 
 - Le kernel fournit le mecanisme d'acces, pas la politique
 - Le produit choisit les cles et les valeurs
-- Pas de typage (int, bool) â€” le produit parse
+- Pas de typage (int, bool) — le produit parse
 
 **Ce que Config NE fait PAS :**
 
-- âŒ Definir les noms de variables
-- âŒ Imposer une structure metier
-- âŒ Fournir des methodes `get_i64`, `get_bool`
+- ❌ Definir les noms de variables
+- ❌ Imposer une structure metier
+- ❌ Fournir des methodes `get_i64`, `get_bool`
 
 **Voir aussi :** EnvConfig, Configuration
 
@@ -133,7 +133,7 @@ trait Config {
 
 **Implementation par defaut** du trait `Clock`. Utilise `std::time::SystemTime::now()`.
 
-**Statut :** Implementation, hors contrat du trait â€” peut evoluer.
+**Statut :** Implementation, hors contrat du trait — peut evoluer.
 
 **Voir aussi :** Clock
 
@@ -148,7 +148,7 @@ trait Config {
 - Un second appel a `shutdown()` est no-op (implementation-dependant)
 - Les panics dans les hooks se propagent
 
-**Statut :** Implementation, hors contrat du trait â€” peut evoluer.
+**Statut :** Implementation, hors contrat du trait — peut evoluer.
 
 **Voir aussi :** Lifecycle
 
@@ -164,7 +164,7 @@ trait Config {
 - N'impose pas de format
 - Le produit peut implementer un Logger custom
 
-**Statut :** Implementation, hors contrat du trait â€” peut evoluer.
+**Statut :** Implementation, hors contrat du trait — peut evoluer.
 
 **Voir aussi :** Logger
 
@@ -247,7 +247,7 @@ trait Config {
 EnvConfig::from_env() -> Self
 ```
 
-**Statut :** Implementation, hors contrat du trait â€” peut evoluer.
+**Statut :** Implementation, hors contrat du trait — peut evoluer.
 
 **Voir aussi :** Config, Configuration
 
@@ -353,10 +353,10 @@ trait IdGenerator {
 
 **Types publics :**
 
-- `Id` â€” Type opaque
-- `IdParseError` â€” Erreur de parsing
-- `IdGenerator` â€” Trait
-- `UuidIdGenerator` â€” Implementation
+- `Id` — Type opaque
+- `IdParseError` — Erreur de parsing
+- `IdGenerator` — Trait
+- `UuidIdGenerator` — Implementation
 
 **Voir aussi :** Id, IdGenerator
 
@@ -422,10 +422,10 @@ trait IdGenerator {
 
 **Ce que le kernel N'EST PAS :**
 
-- âŒ Un framework applicatif (Axum, Actix, Rocket)
-- âŒ Un ORM ou une couche d'acces donnees
-- âŒ Le lieu du metier (auth, facturation, gameplay)
-- âŒ Une suite d'outils d'ops (APM, tracing distribue)
+- ❌ Un framework applicatif (Axum, Actix, Rocket)
+- ❌ Un ORM ou une couche d'acces donnees
+- ❌ Le lieu du metier (auth, facturation, gameplay)
+- ❌ Une suite d'outils d'ops (APM, tracing distribue)
 
 **Voir aussi :** miyukini-kernel
 
@@ -452,7 +452,7 @@ trait IdGenerator {
 
 **Ce que le Kernel ne peut JAMAIS faire :**
 
-- âŒ Corriger, muter, auto-reparer
+- ❌ Corriger, muter, auto-reparer
 
 > **Miyukini ne maintient pas le code a la place de l'humain. Il rend le code maintenable sans ambiguite.**
 
@@ -507,9 +507,9 @@ trait Lifecycle {
 
 **Ce que Lifecycle NE fait PAS :**
 
-- âŒ Orchestration de workflows metier
-- âŒ Jobs metier
-- âŒ Hooks applicatifs
+- ❌ Orchestration de workflows metier
+- ❌ Jobs metier
+- ❌ Hooks applicatifs
 
 **Voir aussi :** DefaultLifecycle, Boot, Shutdown
 
@@ -535,9 +535,9 @@ trait Logger {
 
 **Ce que Logger NE fournit PAS :**
 
-- âŒ `log_with_fields` ou type `Fields`
-- âŒ Methodes par niveau (`info`, `warn`, etc.)
-- âŒ Backend ou format impose
+- ❌ `log_with_fields` ou type `Fields`
+- ❌ Methodes par niveau (`info`, `warn`, etc.)
+- ❌ Backend ou format impose
 
 **Voir aussi :** Level, DefaultLogger, Logging structure
 
@@ -549,9 +549,9 @@ trait Logger {
 
 **Types publics :**
 
-- `Level` â€” Niveaux de log
-- `Logger` â€” Trait
-- `DefaultLogger` â€” Implementation
+- `Level` — Niveaux de log
+- `Logger` — Trait
+- `DefaultLogger` — Implementation
 
 **Caracteristiques :**
 
@@ -668,7 +668,7 @@ trait Logger {
 
 **Implementation par defaut** du trait `IdGenerator` utilisant UUID v4.
 
-**Statut :** Implementation, hors contrat du trait â€” peut evoluer.
+**Statut :** Implementation, hors contrat du trait — peut evoluer.
 
 **Voir aussi :** IdGenerator, Id
 
@@ -692,11 +692,11 @@ trait Logger {
 
 **A ne pas faire en v0.1 :**
 
-- âŒ Ajouter `Config::load`, `Config::get_i64`
-- âŒ Ajouter `IdGenerator::generate_with_seed`
-- âŒ Ajouter `Logger::info`, `Logger::log_with_fields`
-- âŒ Ajouter `Lifecycle::register_init_hook`
-- âŒ Reexporter `uuid::Uuid`, `log::Level`
+- ❌ Ajouter `Config::load`, `Config::get_i64`
+- ❌ Ajouter `IdGenerator::generate_with_seed`
+- ❌ Ajouter `Logger::info`, `Logger::log_with_fields`
+- ❌ Ajouter `Lifecycle::register_init_hook`
+- ❌ Reexporter `uuid::Uuid`, `log::Level`
 
 **Voir aussi :** Stable vs Experimental
 
@@ -711,8 +711,8 @@ trait Logger {
 | Logger Interface | **Trait `Logger`** |
 | ID Type | **Type `Id`** |
 | Time Module | **Module `time`** ou **Abstraction temps** |
-| Boot Hook | âŒ N'existe pas (shutdown uniquement) |
-| Auto-correction | âŒ Interdit (INV-MOC-1) |
+| Boot Hook | ❌ N'existe pas (shutdown uniquement) |
+| Auto-correction | ❌ Interdit (INV-MOC-1) |
 
 ---
 
@@ -738,7 +738,7 @@ trait Logger {
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0  
-**Statut :** Document de reference normatif â€” GLOSSAIRE KERNEL
+**Statut :** Document de reference normatif — GLOSSAIRE KERNEL
 
 **References croisees :**
 

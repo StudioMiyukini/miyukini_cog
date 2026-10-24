@@ -2,36 +2,36 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le contrat des flux bilatÃ©raux dans Bonding Brother. Il spÃ©cifie comment les communications bidirectionnelles entre les produits et l'Ã©cosystÃ¨me sont orchestrÃ©es, avec des rÃ¨gles distinctes pour chaque direction.
+Ce document définit le contrat des flux bilatéraux dans Bonding Brother. Il spécifie comment les communications bidirectionnelles entre les produits et l'écosystème sont orchestrées, avec des règles distinctes pour chaque direction.
 
-Ce document complÃ¨te la Section 5 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) et le [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) pour dÃ©finir les flux complets.
+Ce document complète la Section 5 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) et le [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) pour définir les flux complets.
 
-Ces flux respectent les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-2** (isolement comme Ã©tat normal) et **LOI-3** (Ã©tat local souverain) : les flux fonctionnent mÃªme en mode offline, et l'Ã©tat local est prÃ©servÃ©.
+Ces flux respectent les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md), notamment **LOI-2** (isolement comme état normal) et **LOI-3** (état local souverain) : les flux fonctionnent même en mode offline, et l'état local est préservé.
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- La vue d'ensemble des flux bilatÃ©raux
-- Le flux Produit â†’ Ã‰cosystÃ¨me (dÃ©taillÃ©)
-- Le flux Ã‰cosystÃ¨me â†’ Produit (dÃ©taillÃ©)
-- Les rÃ¨gles d'asymÃ©trie et d'adaptation
+- La vue d'ensemble des flux bilatéraux
+- Le flux Produit → Écosystème (détaillé)
+- Le flux Écosystème → Produit (détaillé)
+- Les règles d'asymétrie et d'adaptation
 - La coordination entre les deux flux
-- Les garanties de cohÃ©rence
+- Les garanties de cohérence
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails du flux Produit â†’ Ã‰cosystÃ¨me (voir [Product-to-Ecosystem Flow](./BondingBrother%20-%20Product-to-Ecosystem%20Flow.md))
-- Les dÃ©tails du flux Ã‰cosystÃ¨me â†’ Produit (voir [Ecosystem-to-Product Flow](./BondingBrother%20-%20Ecosystem-to-Product%20Flow.md))
-- Les rÃ¨gles de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
-- La dÃ©lÃ©gation aux autoritÃ©s (voir [Authority Delegation Contract](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md))
+- Les détails du flux Produit → Écosystème (voir [Product-to-Ecosystem Flow](./BondingBrother%20-%20Product-to-Ecosystem%20Flow.md))
+- Les détails du flux Écosystème → Produit (voir [Ecosystem-to-Product Flow](./BondingBrother%20-%20Ecosystem-to-Product%20Flow.md))
+- Les règles de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
+- La délégation aux autorités (voir [Authority Delegation Contract](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md))
 
 ---
 
 ## 3. Principe fondamental
 
-**Bonding Brother gÃ¨re deux flux de communication dans deux sens opposÃ©s, avec des rÃ¨gles diffÃ©rentes pour chaque sens, garantissant l'asymÃ©trie et l'adaptation.**
+**Bonding Brother gère deux flux de communication dans deux sens opposés, avec des règles différentes pour chaque sens, garantissant l'asymétrie et l'adaptation.**
 
-L'asymÃ©trie est fondamentale : les produits s'adaptent Ã  Bonding Brother, Bonding Brother s'adapte aux autoritÃ©s. Les produits ne connaissent pas les dÃ©tails des autoritÃ©s, les autoritÃ©s ne connaissent pas les dÃ©tails des produits.
+L'asymétrie est fondamentale : les produits s'adaptent à Bonding Brother, Bonding Brother s'adapte aux autorités. Les produits ne connaissent pas les détails des autorités, les autorités ne connaissent pas les détails des produits.
 
 ---
 
@@ -40,431 +40,431 @@ L'asymÃ©trie est fondamentale : les produits s'adaptent Ã  Bonding Brother, 
 ### 4.1 Les deux flux principaux
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Produit   â”‚                    â”‚ Ã‰cosystÃ¨me  â”‚
-â”‚             â”‚                    â”‚  (AutoritÃ©s)â”‚
-â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜                    â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜
-       â”‚                                   â”‚
-       â”‚  FLUX ASCENDANT                   â”‚
-       â”‚  (Intention)                      â”‚
-       â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€>â”‚
-       â”‚                                   â”‚
-       â”‚  FLUX DESCENDANT                 â”‚
-       â”‚  (RÃ©sultat/Notification)          â”‚
-       â”‚<â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-       â”‚                                   â”‚
+┌─────────────┐                    ┌─────────────┐
+│   Produit   │                    │ Écosystème  │
+│             │                    │  (Autorités)│
+└──────┬──────┘                    └──────┬─────┘
+       │                                   │
+       │  FLUX ASCENDANT                   │
+       │  (Intention)                      │
+       │──────────────────────────────────>│
+       │                                   │
+       │  FLUX DESCENDANT                 │
+       │  (Résultat/Notification)          │
+       │<──────────────────────────────────│
+       │                                   │
 ```
 
-**Flux ascendant (Produit â†’ Ã‰cosystÃ¨me) :**
-- DÃ©clenchÃ© par : Expression d'une intention par un produit
-- Contenu : Intention structurÃ©e
-- Destination : AutoritÃ© (Kind Mother ou Strong Father)
-- RÃ©sultat attendu : RÃ©sultat de l'Ã©valuation
+**Flux ascendant (Produit → Écosystème) :**
+- Déclenché par : Expression d'une intention par un produit
+- Contenu : Intention structurée
+- Destination : Autorité (Kind Mother ou Strong Father)
+- Résultat attendu : Résultat de l'évaluation
 
-**Flux descendant (Ã‰cosystÃ¨me â†’ Produit) :**
-- DÃ©clenchÃ© par : Notification ou Ã©vÃ©nement de l'Ã©cosystÃ¨me
-- Contenu : Information ou rÃ©sultat
-- Destination : Produit(s) concernÃ©(s)
-- RÃ©sultat attendu : Notification reÃ§ue
+**Flux descendant (Écosystème → Produit) :**
+- Déclenché par : Notification ou événement de l'écosystème
+- Contenu : Information ou résultat
+- Destination : Produit(s) concerné(s)
+- Résultat attendu : Notification reçue
 
-### 4.2 CaractÃ©ristiques communes
+### 4.2 Caractéristiques communes
 
-**AsymÃ©trie :**
-- Les produits s'adaptent Ã  Bonding Brother
-- Bonding Brother s'adapte aux autoritÃ©s
+**Asymétrie :**
+- Les produits s'adaptent à Bonding Brother
+- Bonding Brother s'adapte aux autorités
 - Pas d'adaptation inverse
 
-**TraÃ§abilitÃ© :**
-- Tous les flux sont journalisÃ©s
-- Chaque Ã©tape est traÃ§able
-- Aucune perte d'information de traÃ§abilitÃ©
+**Traçabilité :**
+- Tous les flux sont journalisés
+- Chaque étape est traçable
+- Aucune perte d'information de traçabilité
 
-**SÃ©curitÃ© :**
-- Validation Ã  chaque Ã©tape
-- Filtrage systÃ©matique
+**Sécurité :**
+- Validation à chaque étape
+- Filtrage systématique
 - Isolation des produits
 
 ---
 
-## 5. Flux Produit â†’ Ã‰cosystÃ¨me
+## 5. Flux Produit → Écosystème
 
 ### 5.1 Vue d'ensemble
 
-Le flux ascendant transporte une intention d'un produit vers une autoritÃ©, en passant par les Ã©tapes de validation, traduction, filtrage, et transmission.
+Le flux ascendant transporte une intention d'un produit vers une autorité, en passant par les étapes de validation, traduction, filtrage, et transmission.
 
-### 5.2 Ã‰tapes du flux
+### 5.2 Étapes du flux
 
 ```
 Produit
-   â”‚
-   â”‚ 1. Expression d'intention
-   â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ProductGateway      â”‚ â† RÃ©ception
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 2. Validation structurelle
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ IntentReceiver       â”‚ â† Validation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 3. Traduction ascendante
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ IntentTranslator    â”‚ â† Intention â†’ Demande
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 4. Filtrage d'entrÃ©e
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ FilterEngine        â”‚ â† Filtrage
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 5. Journalisation
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ JournalWriter       â”‚ â† Journalisation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 6. Routage vers autoritÃ©
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AuthorityRouter      â”‚ â† Routage
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-      â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”
-      â–¼         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚KindMotherâ”‚ â”‚Strong   â”‚ â† Transmission
-â”‚          â”‚ â”‚Father   â”‚
-â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-     â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 7. RÃ©ception rÃ©ponse
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AuthorityResponse   â”‚ â† RÃ©ception
-â”‚ Handler             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 8. Filtrage de sortie
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ FilterEngine        â”‚ â† Filtrage
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 9. Traduction descendante
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ResponseTranslator   â”‚ â† RÃ©ponse â†’ RÃ©sultat
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 10. Journalisation rÃ©sultat
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ JournalWriter       â”‚ â† Journalisation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 11. Ã‰mission vers produit
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ResultEmitter       â”‚ â† Ã‰mission
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â–¼
+   │
+   │ 1. Expression d'intention
+   ▼
+┌─────────────────────┐
+│ ProductGateway      │ ← Réception
+└──────────┬──────────┘
+           │
+           │ 2. Validation structurelle
+           ▼
+┌─────────────────────┐
+│ IntentReceiver       │ ← Validation
+└──────────┬──────────┘
+           │
+           │ 3. Traduction ascendante
+           ▼
+┌─────────────────────┐
+│ IntentTranslator    │ ← Intention → Demande
+└──────────┬──────────┘
+           │
+           │ 4. Filtrage d'entrée
+           ▼
+┌─────────────────────┐
+│ FilterEngine        │ ← Filtrage
+└──────────┬──────────┘
+           │
+           │ 5. Journalisation
+           ▼
+┌─────────────────────┐
+│ JournalWriter       │ ← Journalisation
+└──────────┬──────────┘
+           │
+           │ 6. Routage vers autorité
+           ▼
+┌─────────────────────┐
+│ AuthorityRouter      │ ← Routage
+└──────────┬──────────┘
+           │
+      ┌────┴────┐
+      ▼         ▼
+┌─────────┐ ┌─────────┐
+│KindMother│ │Strong   │ ← Transmission
+│          │ │Father   │
+└────┬─────┘ └────┬────┘
+     └─────┬──────┘
+           │
+           │ 7. Réception réponse
+           ▼
+┌─────────────────────┐
+│ AuthorityResponse   │ ← Réception
+│ Handler             │
+└──────────┬──────────┘
+           │
+           │ 8. Filtrage de sortie
+           ▼
+┌─────────────────────┐
+│ FilterEngine        │ ← Filtrage
+└──────────┬──────────┘
+           │
+           │ 9. Traduction descendante
+           ▼
+┌─────────────────────┐
+│ ResponseTranslator   │ ← Réponse → Résultat
+└──────────┬──────────┘
+           │
+           │ 10. Journalisation résultat
+           ▼
+┌─────────────────────┐
+│ JournalWriter       │ ← Journalisation
+└──────────┬──────────┘
+           │
+           │ 11. Émission vers produit
+           ▼
+┌─────────────────────┐
+│ ResultEmitter       │ ← Émission
+└──────────┬──────────┘
+           │
+           ▼
         Produit
 ```
 
-### 5.3 RÃ¨gles du flux ascendant
+### 5.3 Règles du flux ascendant
 
-**RÃ¨gle FLUX-ASC-01 : Ordre strict**
+**Règle FLUX-ASC-01 : Ordre strict**
 
-Les Ã©tapes doivent Ãªtre exÃ©cutÃ©es dans l'ordre strict dÃ©fini. Aucune Ã©tape ne peut Ãªtre sautÃ©e.
+Les étapes doivent être exécutées dans l'ordre strict défini. Aucune étape ne peut être sautée.
 
-**RÃ¨gle FLUX-ASC-02 : Validation prÃ©coce**
+**Règle FLUX-ASC-02 : Validation précoce**
 
-La validation structurelle est effectuÃ©e avant toute traduction ou traitement mÃ©tier.
+La validation structurelle est effectuée avant toute traduction ou traitement métier.
 
-**RÃ¨gle FLUX-ASC-03 : Traduction avant filtrage**
+**Règle FLUX-ASC-03 : Traduction avant filtrage**
 
-La traduction ascendante est effectuÃ©e avant le filtrage d'entrÃ©e. Le filtrage valide la demande traduite.
+La traduction ascendante est effectuée avant le filtrage d'entrée. Le filtrage valide la demande traduite.
 
-**RÃ¨gle FLUX-ASC-04 : Journalisation systÃ©matique**
+**Règle FLUX-ASC-04 : Journalisation systématique**
 
-Chaque Ã©tape critique est journalisÃ©e :
-- RÃ©ception de l'intention
-- Validation rÃ©ussie/Ã©chouÃ©e
-- Traduction rÃ©ussie/Ã©chouÃ©e
-- Filtrage rÃ©ussi/Ã©chouÃ©
-- Transmission Ã  l'autoritÃ©
-- RÃ©ception de la rÃ©ponse
-- Ã‰mission du rÃ©sultat
+Chaque étape critique est journalisée :
+- Réception de l'intention
+- Validation réussie/échouée
+- Traduction réussie/échouée
+- Filtrage réussi/échoué
+- Transmission à l'autorité
+- Réception de la réponse
+- Émission du résultat
 
-**RÃ¨gle FLUX-ASC-05 : Routage vers autoritÃ© unique**
+**Règle FLUX-ASC-05 : Routage vers autorité unique**
 
-Chaque intention est routÃ©e vers une et une seule autoritÃ© (Kind Mother ou Strong Father).
+Chaque intention est routée vers une et une seule autorité (Kind Mother ou Strong Father).
 
-**RÃ¨gle FLUX-ASC-06 : Transmission fidÃ¨le**
+**Règle FLUX-ASC-06 : Transmission fidèle**
 
-La demande transmise Ã  l'autoritÃ© est fidÃ¨le Ã  l'intention traduite, sans modification ni interprÃ©tation.
+La demande transmise à l'autorité est fidèle à l'intention traduite, sans modification ni interprétation.
 
-**RÃ¨gle FLUX-ASC-07 : RÃ©ception complÃ¨te**
+**Règle FLUX-ASC-07 : Réception complète**
 
-La rÃ©ponse de l'autoritÃ© est reÃ§ue intÃ©gralement, sans perte ni modification.
+La réponse de l'autorité est reçue intégralement, sans perte ni modification.
 
-**RÃ¨gle FLUX-ASC-08 : Filtrage avant traduction (sortie)**
+**Règle FLUX-ASC-08 : Filtrage avant traduction (sortie)**
 
-Le filtrage de sortie est appliquÃ© avant la traduction descendante.
+Le filtrage de sortie est appliqué avant la traduction descendante.
 
-**RÃ¨gle FLUX-ASC-09 : RÃ©sultat complet**
+**Règle FLUX-ASC-09 : Résultat complet**
 
-Le rÃ©sultat transmis au produit contient toutes les informations nÃ©cessaires et autorisÃ©es.
+Le résultat transmis au produit contient toutes les informations nécessaires et autorisées.
 
 ### 5.4 Gestion des erreurs dans le flux ascendant
 
 **Erreur de validation :**
-- ArrÃªt du flux
-- Rejet immÃ©diat
+- Arrêt du flux
+- Rejet immédiat
 - Notification au produit avec code d'erreur
 
 **Erreur de traduction :**
-- ArrÃªt du flux
-- Rejet immÃ©diat
+- Arrêt du flux
+- Rejet immédiat
 - Notification au produit avec code d'erreur
 
 **Erreur de filtrage :**
-- ArrÃªt du flux
-- Rejet immÃ©diat
+- Arrêt du flux
+- Rejet immédiat
 - Notification au produit avec code d'erreur
 
 **Erreur de transmission :**
 - Retry selon politique (si erreur transitoire)
-- Mise en buffer offline (si mode dÃ©connectÃ©)
-- Notification au produit avec statut appropriÃ©
+- Mise en buffer offline (si mode déconnecté)
+- Notification au produit avec statut approprié
 
-**Erreur de l'autoritÃ© :**
-- RÃ©ception de l'erreur
+**Erreur de l'autorité :**
+- Réception de l'erreur
 - Traduction de l'erreur
 - Transmission au produit
 
 ---
 
-## 6. Flux Ã‰cosystÃ¨me â†’ Produit
+## 6. Flux Écosystème → Produit
 
 ### 6.1 Vue d'ensemble
 
-Le flux descendant transporte une notification ou un Ã©vÃ©nement de l'Ã©cosystÃ¨me vers un ou plusieurs produits, en passant par les Ã©tapes de rÃ©ception, filtrage, traduction, et distribution.
+Le flux descendant transporte une notification ou un événement de l'écosystème vers un ou plusieurs produits, en passant par les étapes de réception, filtrage, traduction, et distribution.
 
-### 6.2 Ã‰tapes du flux
+### 6.2 Étapes du flux
 
 ```
-AutoritÃ© (KM ou SF)
-   â”‚
-   â”‚ 1. Ã‰mission notification/Ã©vÃ©nement
-   â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AuthorityResponse   â”‚ â† RÃ©ception
-â”‚ Handler             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 2. Normalisation
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ EventNormalizer     â”‚ â† Normalisation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 3. Filtrage de sortie
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ FilterEngine        â”‚ â† Filtrage
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 4. Traduction descendante
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ResponseTranslator  â”‚ â† RÃ©ponse â†’ Message
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 5. Identification produits cibles
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ProductSelector     â”‚ â† SÃ©lection produits
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 6. Journalisation
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ JournalWriter       â”‚ â† Journalisation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ 7. Distribution
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ NotificationDispatcherâ”‚ â† Distribution
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-      â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”
-      â–¼         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚Produit Aâ”‚ â”‚Produit Bâ”‚ â† RÃ©ception
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+Autorité (KM ou SF)
+   │
+   │ 1. Émission notification/événement
+   ▼
+┌─────────────────────┐
+│ AuthorityResponse   │ ← Réception
+│ Handler             │
+└──────────┬──────────┘
+           │
+           │ 2. Normalisation
+           ▼
+┌─────────────────────┐
+│ EventNormalizer     │ ← Normalisation
+└──────────┬──────────┘
+           │
+           │ 3. Filtrage de sortie
+           ▼
+┌─────────────────────┐
+│ FilterEngine        │ ← Filtrage
+└──────────┬──────────┘
+           │
+           │ 4. Traduction descendante
+           ▼
+┌─────────────────────┐
+│ ResponseTranslator  │ ← Réponse → Message
+└──────────┬──────────┘
+           │
+           │ 5. Identification produits cibles
+           ▼
+┌─────────────────────┐
+│ ProductSelector     │ ← Sélection produits
+└──────────┬──────────┘
+           │
+           │ 6. Journalisation
+           ▼
+┌─────────────────────┐
+│ JournalWriter       │ ← Journalisation
+└──────────┬──────────┘
+           │
+           │ 7. Distribution
+           ▼
+┌─────────────────────┐
+│ NotificationDispatcher│ ← Distribution
+└──────────┬──────────┘
+           │
+      ┌────┴────┐
+      ▼         ▼
+┌─────────┐ ┌─────────┐
+│Produit A│ │Produit B│ ← Réception
+└─────────┘ └─────────┘
 ```
 
-### 6.3 RÃ¨gles du flux descendant
+### 6.3 Règles du flux descendant
 
-**RÃ¨gle FLUX-DESC-01 : Ordre strict**
+**Règle FLUX-DESC-01 : Ordre strict**
 
-Les Ã©tapes doivent Ãªtre exÃ©cutÃ©es dans l'ordre strict dÃ©fini. Aucune Ã©tape ne peut Ãªtre sautÃ©e.
+Les étapes doivent être exécutées dans l'ordre strict défini. Aucune étape ne peut être sautée.
 
-**RÃ¨gle FLUX-DESC-02 : RÃ©ception complÃ¨te**
+**Règle FLUX-DESC-02 : Réception complète**
 
-La notification ou l'Ã©vÃ©nement est reÃ§u intÃ©gralement de l'autoritÃ©, sans perte ni modification.
+La notification ou l'événement est reçu intégralement de l'autorité, sans perte ni modification.
 
-**RÃ¨gle FLUX-DESC-03 : Normalisation**
+**Règle FLUX-DESC-03 : Normalisation**
 
-La notification est normalisÃ©e dans un format standard avant traitement.
+La notification est normalisée dans un format standard avant traitement.
 
-**RÃ¨gle FLUX-DESC-04 : Filtrage avant traduction**
+**Règle FLUX-DESC-04 : Filtrage avant traduction**
 
-Le filtrage de sortie est appliquÃ© avant la traduction descendante.
+Le filtrage de sortie est appliqué avant la traduction descendante.
 
-**RÃ¨gle FLUX-DESC-05 : Traduction adaptÃ©e**
+**Règle FLUX-DESC-05 : Traduction adaptée**
 
 La traduction adapte le message au vocabulaire et au format de chaque produit cible.
 
-**RÃ¨gle FLUX-DESC-06 : SÃ©lection des produits**
+**Règle FLUX-DESC-06 : Sélection des produits**
 
-Seuls les produits concernÃ©s et autorisÃ©s reÃ§oivent la notification.
+Seuls les produits concernés et autorisés reçoivent la notification.
 
-**RÃ¨gle FLUX-DESC-07 : Journalisation systÃ©matique**
+**Règle FLUX-DESC-07 : Journalisation systématique**
 
-Chaque Ã©tape critique est journalisÃ©e :
-- RÃ©ception de la notification
+Chaque étape critique est journalisée :
+- Réception de la notification
 - Normalisation
 - Filtrage
 - Traduction
-- SÃ©lection des produits
+- Sélection des produits
 - Distribution
 
-**RÃ¨gle FLUX-DESC-08 : Distribution fiable**
+**Règle FLUX-DESC-08 : Distribution fiable**
 
-La notification est distribuÃ©e de maniÃ¨re fiable Ã  tous les produits cibles (avec retry si nÃ©cessaire).
+La notification est distribuée de manière fiable à tous les produits cibles (avec retry si nécessaire).
 
-**RÃ¨gle FLUX-DESC-09 : Isolation**
+**Règle FLUX-DESC-09 : Isolation**
 
-Chaque produit reÃ§oit uniquement les informations qui lui sont destinÃ©es, sans fuite vers d'autres produits.
+Chaque produit reçoit uniquement les informations qui lui sont destinées, sans fuite vers d'autres produits.
 
 ### 6.4 Types de notifications
 
-**Notification de rÃ©sultat :**
-- RÃ©sultat d'une intention prÃ©cÃ©dente
-- Statut d'une opÃ©ration
+**Notification de résultat :**
+- Résultat d'une intention précédente
+- Statut d'une opération
 - Confirmation d'une action
 
-**Notification d'Ã©vÃ©nement :**
-- Ã‰vÃ©nement systÃ¨me
-- Changement d'Ã©tat
+**Notification d'événement :**
+- Événement système
+- Changement d'état
 - Synchronisation
 
 **Notification d'erreur :**
-- Erreur survenue dans l'Ã©cosystÃ¨me
-- Ã‰chec d'une opÃ©ration
+- Erreur survenue dans l'écosystème
+- Échec d'une opération
 - Avertissement
 
 ### 6.5 Gestion des erreurs dans le flux descendant
 
-**Erreur de rÃ©ception :**
+**Erreur de réception :**
 - Retry selon politique
 - Journalisation de l'erreur
 - Pas de notification au produit (pas de demande)
 
 **Erreur de filtrage :**
-- Suppression de la notification (si non autorisÃ©e)
+- Suppression de la notification (si non autorisée)
 - Journalisation
 - Pas de notification au produit
 
 **Erreur de traduction :**
-- Notification gÃ©nÃ©rique au produit
+- Notification générique au produit
 - Journalisation de l'erreur
-- PrÃ©servation de l'information essentielle
+- Préservation de l'information essentielle
 
 **Erreur de distribution :**
 - Retry selon politique
-- Mise en file d'attente si nÃ©cessaire
+- Mise en file d'attente si nécessaire
 - Journalisation
 
 ---
 
 ## 7. Coordination entre les flux
 
-### 7.1 Flux indÃ©pendants
+### 7.1 Flux indépendants
 
-**RÃ¨gle COORD-01 : IndÃ©pendance**
+**Règle COORD-01 : Indépendance**
 
-Les flux ascendant et descendant sont indÃ©pendants. Un flux peut se produire sans l'autre.
+Les flux ascendant et descendant sont indépendants. Un flux peut se produire sans l'autre.
 
-**RÃ¨gle COORD-02 : Pas de blocage mutuel**
+**Règle COORD-02 : Pas de blocage mutuel**
 
-Un flux ne bloque jamais l'autre. Les deux flux peuvent Ãªtre actifs simultanÃ©ment.
+Un flux ne bloque jamais l'autre. Les deux flux peuvent être actifs simultanément.
 
-**RÃ¨gle COORD-03 : Pas de dÃ©pendance temporelle**
+**Règle COORD-03 : Pas de dépendance temporelle**
 
-Le flux descendant n'est pas nÃ©cessairement une rÃ©ponse au flux ascendant. Il peut Ãªtre dÃ©clenchÃ© indÃ©pendamment.
+Le flux descendant n'est pas nécessairement une réponse au flux ascendant. Il peut être déclenché indépendamment.
 
-### 7.2 CorrÃ©lation des flux
+### 7.2 Corrélation des flux
 
-**RÃ¨gle COORD-04 : CorrÃ©lation par intention_id**
+**Règle COORD-04 : Corrélation par intention_id**
 
-Quand le flux descendant est une rÃ©ponse au flux ascendant, la corrÃ©lation se fait via `intention_id`.
+Quand le flux descendant est une réponse au flux ascendant, la corrélation se fait via `intention_id`.
 
-**RÃ¨gle COORD-05 : TraÃ§abilitÃ© croisÃ©e**
+**Règle COORD-05 : Traçabilité croisée**
 
-Les deux flux sont traÃ§ables indÃ©pendamment, mais peuvent Ãªtre corrÃ©lÃ©s via les identifiants.
+Les deux flux sont traçables indépendamment, mais peuvent être corrélés via les identifiants.
 
-**RÃ¨gle COORD-06 : Ordre prÃ©servÃ©**
+**Règle COORD-06 : Ordre préservé**
 
-Pour une mÃªme intention, l'ordre des rÃ©ponses est prÃ©servÃ© (FIFO).
+Pour une même intention, l'ordre des réponses est préservé (FIFO).
 
 ### 7.3 Synchronisation
 
-**RÃ¨gle COORD-07 : Pas de synchronisation bloquante**
+**Règle COORD-07 : Pas de synchronisation bloquante**
 
-Bonding Brother ne bloque jamais en attendant une rÃ©ponse. Les notifications sont asynchrones.
+Bonding Brother ne bloque jamais en attendant une réponse. Les notifications sont asynchrones.
 
-**RÃ¨gle COORD-08 : Gestion des timeouts**
+**Règle COORD-08 : Gestion des timeouts**
 
-Si une rÃ©ponse n'arrive pas dans le dÃ©lai attendu, le produit est notifiÃ© avec un statut appropriÃ©.
+Si une réponse n'arrive pas dans le délai attendu, le produit est notifié avec un statut approprié.
 
 ---
 
-## 8. AsymÃ©trie et adaptation
+## 8. Asymétrie et adaptation
 
-### 8.1 Principe d'asymÃ©trie
+### 8.1 Principe d'asymétrie
 
-**RÃ¨gle ASYM-01 : Adaptation unidirectionnelle**
+**Règle ASYM-01 : Adaptation unidirectionnelle**
 
-Les produits s'adaptent Ã  Bonding Brother. Bonding Brother s'adapte aux autoritÃ©s. Jamais l'inverse.
+Les produits s'adaptent à Bonding Brother. Bonding Brother s'adapte aux autorités. Jamais l'inverse.
 
-**RÃ¨gle ASYM-02 : Interface stable**
+**Règle ASYM-02 : Interface stable**
 
 L'interface de Bonding Brother vers les produits est stable. Les produits doivent s'adapter aux changements (selon versionnement).
 
-**RÃ¨gle ASYM-03 : Adaptation aux autoritÃ©s**
+**Règle ASYM-03 : Adaptation aux autorités**
 
-Bonding Brother s'adapte aux changements des autoritÃ©s, masquant cette adaptation aux produits.
+Bonding Brother s'adapte aux changements des autorités, masquant cette adaptation aux produits.
 
 ### 8.2 Adaptation dans le flux ascendant
 
 **Adaptation du produit :**
 - Format d'intention standard
 - Vocabulaire canonique
-- Structure imposÃ©e
+- Structure imposée
 
 **Adaptation de Bonding Brother :**
-- Traduction vers le vocabulaire de l'autoritÃ©
-- Adaptation du format aux contraintes de l'autoritÃ©
-- Enrichissement technique (mÃ©tadonnÃ©es)
+- Traduction vers le vocabulaire de l'autorité
+- Adaptation du format aux contraintes de l'autorité
+- Enrichissement technique (métadonnées)
 
 ### 8.3 Adaptation dans le flux descendant
 
@@ -474,45 +474,45 @@ Bonding Brother s'adapte aux changements des autoritÃ©s, masquant cette adapta
 - Filtrage et projection
 
 **Adaptation du produit :**
-- RÃ©ception du format standard
+- Réception du format standard
 - Consommation du vocabulaire canonique
 - Gestion des notifications asynchrones
 
 ---
 
-## 9. Garanties des flux bilatÃ©raux
+## 9. Garanties des flux bilatéraux
 
-### 9.1 Garantie de complÃ©tude
+### 9.1 Garantie de complétude
 
-**Engagement :** Toute intention exprimÃ©e par un produit reÃ§oit une rÃ©ponse (succÃ¨s, refus, ou erreur). Toute notification de l'Ã©cosystÃ¨me est distribuÃ©e aux produits concernÃ©s.
+**Engagement :** Toute intention exprimée par un produit reçoit une réponse (succès, refus, ou erreur). Toute notification de l'écosystème est distribuée aux produits concernés.
 
-**Mesure :** TraÃ§abilitÃ© complÃ¨te avec vÃ©rification que chaque intention a un rÃ©sultat.
+**Mesure :** Traçabilité complète avec vérification que chaque intention a un résultat.
 
-### 9.2 Garantie de fidÃ©litÃ©
+### 9.2 Garantie de fidélité
 
-**Engagement :** Les intentions sont transmises fidÃ¨lement aux autoritÃ©s, et les rÃ©ponses sont transmises fidÃ¨lement aux produits (aprÃ¨s filtrage et traduction).
+**Engagement :** Les intentions sont transmises fidèlement aux autorités, et les réponses sont transmises fidèlement aux produits (après filtrage et traduction).
 
-**Mesure :** Tests de round-trip avec vÃ©rification de prÃ©servation du sens.
+**Mesure :** Tests de round-trip avec vérification de préservation du sens.
 
 ### 9.3 Garantie d'isolation
 
-**Engagement :** Les produits sont isolÃ©s les uns des autres. Aucune fuite d'information entre produits.
+**Engagement :** Les produits sont isolés les uns des autres. Aucune fuite d'information entre produits.
 
-**Mesure :** Tests avec plusieurs produits vÃ©rifiant l'absence de fuite.
+**Mesure :** Tests avec plusieurs produits vérifiant l'absence de fuite.
 
 ### 9.4 Garantie de performance
 
-**Engagement :** Les flux sont traitÃ©s dans des dÃ©lais raisonnables, avec des mÃ©triques de performance dÃ©finies.
+**Engagement :** Les flux sont traités dans des délais raisonnables, avec des métriques de performance définies.
 
-**Mesure :** MÃ©triques de temps de traitement par Ã©tape.
+**Mesure :** Métriques de temps de traitement par étape.
 
-### 9.5 Garantie de disponibilitÃ©
+### 9.5 Garantie de disponibilité
 
-**Engagement :** Les flux fonctionnent mÃªme en mode offline (avec autoritÃ© diffÃ©rÃ©e).
+**Engagement :** Les flux fonctionnent même en mode offline (avec autorité différée).
 
-**Mesure :** Tests de fonctionnement offline avec synchronisation Ã  la reconnexion.
+**Mesure :** Tests de fonctionnement offline avec synchronisation à la reconnexion.
 
-**ConformitÃ© autonomie :** Cette garantie implÃ©mente directement **LOI-2** (isolement comme Ã©tat normal) et **LOI-3** (Ã©tat local souverain) : les flux continuent de fonctionner en isolation, et l'Ã©tat local est prÃ©servÃ© jusqu'Ã  la synchronisation.
+**Conformité autonomie :** Cette garantie implémente directement **LOI-2** (isolement comme état normal) et **LOI-3** (état local souverain) : les flux continuent de fonctionner en isolation, et l'état local est préservé jusqu'à la synchronisation.
 
 ---
 
@@ -531,19 +531,19 @@ Bonding Brother s'adapte aux changements des autoritÃ©s, masquant cette adapta
 }
 ```
 
-**2. AprÃ¨s validation, traduction, filtrage :**
+**2. Après validation, traduction, filtrage :**
 ```json
 {
   "demande_id": "dem-789",
   "intention_id": "int-123",
   "type": "create_content",
-  "donnÃ©es": { ... },
+  "données": { ... },
   "contexte": { ... }
 }
 ```
-â†’ Transmis Ã  Kind Mother
+→ Transmis à Kind Mother
 
-**3. RÃ©ponse de Kind Mother :**
+**3. Réponse de Kind Mother :**
 ```json
 {
   "status": "accepted",
@@ -551,20 +551,20 @@ Bonding Brother s'adapte aux changements des autoritÃ©s, masquant cette adapta
 }
 ```
 
-**4. AprÃ¨s filtrage, traduction :**
+**4. Après filtrage, traduction :**
 ```json
 {
-  "rÃ©sultat_id": "res-111",
+  "résultat_id": "res-111",
   "intention_id": "int-123",
-  "statut": "SUCCÃˆS",
-  "donnÃ©es": { "id": "content-999" }
+  "statut": "SUCCÈS",
+  "données": { "id": "content-999" }
 }
 ```
-â†’ Transmis au produit
+→ Transmis au produit
 
 ### 10.2 Flux descendant
 
-**1. Kind Mother Ã©met un Ã©vÃ©nement :**
+**1. Kind Mother émet un événement :**
 ```json
 {
   "event_type": "content_updated",
@@ -573,7 +573,7 @@ Bonding Brother s'adapte aux changements des autoritÃ©s, masquant cette adapta
 }
 ```
 
-**2. AprÃ¨s normalisation, filtrage, traduction :**
+**2. Après normalisation, filtrage, traduction :**
 ```json
 {
   "type": "CONTENT_UPDATED",
@@ -582,24 +582,24 @@ Bonding Brother s'adapte aux changements des autoritÃ©s, masquant cette adapta
 }
 ```
 
-**3. Distribution aux produits concernÃ©s :**
-â†’ Produit A (abonnÃ© aux mises Ã  jour)
-â†’ Produit B (propriÃ©taire du contenu)
+**3. Distribution aux produits concernés :**
+→ Produit A (abonné aux mises à jour)
+→ Produit B (propriétaire du contenu)
 
 ---
 
 ## 11. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles des flux bilatÃ©raux que Bonding Brother doit respecter pour garantir la communication fiable et sÃ©curisÃ©e entre les produits et l'Ã©cosystÃ¨me.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles des flux bilatéraux que Bonding Brother doit respecter pour garantir la communication fiable et sécurisée entre les produits et l'écosystème.
 
-Tout flux gÃ©rÃ© par Bonding Brother doit respecter ce contrat. Toute violation entraÃ®ne un rejet ou une erreur avec code appropriÃ©.
+Tout flux géré par Bonding Brother doit respecter ce contrat. Toute violation entraîne un rejet ou une erreur avec code approprié.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0 (Section 5)
 - [Intent Model Contract](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md) v2.0
 - [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) v2.0

@@ -1,10 +1,10 @@
-﻿# Caring Nanny â€” Performance & Scalability Contract
+﻿# Caring Nanny — Performance & Scalability Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document definit le **Caring Nanny â€” Performance & Scalability Contract** : un contrat normatif, non negociable, et de statut FONDATION qui etablit les contraintes de performance, les limites de capacite, le comportement sous charge, et les regles d'optimisation autorisees et interdites pour Caring Nanny dans le systeme Miyukini Core System.
+Ce document definit le **Caring Nanny — Performance & Scalability Contract** : un contrat normatif, non negociable, et de statut FONDATION qui etablit les contraintes de performance, les limites de capacite, le comportement sous charge, et les regles d'optimisation autorisees et interdites pour Caring Nanny dans le systeme Miyukini Core System.
 
 Ce contrat precise ce que signifie la performance dans le contexte de Caring Nanny, les contraintes absolues qui preservent les invariants, les limites de capacite, le comportement degrade sous charge, et les optimisations strictement interdites qui violeraient la nature d'observateur passif ou les autres contrats FONDATION.
 
@@ -26,11 +26,11 @@ Ce document est **contractuel, normatif, non discutable, et de statut FONDATION*
 ### Relation avec les autres contrats
 
 Ce contrat complete et respecte les documents contractuels existants :
-- **Caring Nanny â€” Documentation Fondatrice** : Definition philosophique et fonctionnelle de Caring Nanny (v1.6)
-- **Caring Nanny â€” Invariants et Garanties** : Invariants d'observateur pur (INV-CN-1 a INV-CN-7)
-- **Caring Nanny â€” State Model Contract** : Modele formel des etats (healthy, degraded, offline, syncing, error)
-- **Caring Nanny â€” Observation Flow Contract** : Flux d'observation et detection de conditions
-- **Caring Nanny â€” Propagation Flow Contract** : Flux de propagation des changements d'etat
+- **Caring Nanny — Documentation Fondatrice** : Definition philosophique et fonctionnelle de Caring Nanny (v1.6)
+- **Caring Nanny — Invariants et Garanties** : Invariants d'observateur pur (INV-CN-1 a INV-CN-7)
+- **Caring Nanny — State Model Contract** : Modele formel des etats (healthy, degraded, offline, syncing, error)
+- **Caring Nanny — Observation Flow Contract** : Flux d'observation et detection de conditions
+- **Caring Nanny — Propagation Flow Contract** : Flux de propagation des changements d'etat
 - **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Conformite aux lois d'autonomie, notamment **LOI-5** (le cout doit etre proportionnel au hardware)
 
 Il n'introduit aucune contradiction et etablit les contraintes de performance qui preservent tous les invariants FONDATION.
@@ -928,7 +928,7 @@ Les cas suivants **violent** explicitement ce contrat :
 
 **Document cree le :** 2026-01-27  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif valide  
+**Statut :** FONDATION — Contrat normatif valide  
 **Reference :** Miyukini Core System, Caring Nanny Documentation Fondatrice v1.6  
 **Type :** Contrat de performance et scalabilite non negociable
 

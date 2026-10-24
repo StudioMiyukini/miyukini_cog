@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Documentation Fondatrice
+﻿# MiyukiniAdmin — Documentation Fondatrice
 
 ## 1. Contexte
 
@@ -203,14 +203,14 @@ Comparable a un mode recovery.
 ### 6.7 Tests des modules et cycle de vie
 
 **Fonctions :**
-- **Tests des modules** : Tests des Kits d'outils, Operateurs, Equipes d'operateurs et Services via le manifeste de test embarquÃ© dans chaque module. Seul MiyukiniAdmin peut executer et interpreter ces tests (voir [Module Testing and Lifecycle Contract](../contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)).
+- **Tests des modules** : Tests des Kits d'outils, Operateurs, Equipes d'operateurs et Services via le manifeste de test embarqué dans chaque module. Seul MiyukiniAdmin peut executer et interpreter ces tests (voir [Module Testing and Lifecycle Contract](../contracts/testing/MiyukiniAdmin%20-%20Module%20Testing%20and%20Lifecycle%20Contract.md)).
 - **Cellule Admin** : Chaque module expose une cellule destinee uniquement a MiyukiniAdmin (identification, manifeste de test, metadonnees d'integrite). Seul MiyukiniAdmin peut la lire et l'utiliser.
 - **Identification des modules** : Liste des modules presents obtenue via Master Butler (via BondingBrother), avec reference vers la cellule Admin de chaque module.
 - **Verification d'integrite** : Collaboration avec les cores, notamment **TAMR** (champ d'action integrite et interventions humaines), pour verifier l'integrite des modules.
-- **Cycle de vie des modules** : Ajout, verrouillage/deverrouillage et suppression d'un module â€” exclusivement via MiyukiniAdmin, sous validation StrongFather et enregistrement Master Butler / Ever Buddy selon le cas.
+- **Cycle de vie des modules** : Ajout, verrouillage/deverrouillage et suppression d'un module — exclusivement via MiyukiniAdmin, sous validation StrongFather et enregistrement Master Butler / Ever Buddy selon le cas.
 
 **Caracteristiques :**
-- Exclusivite MiyukiniAdmin pour la cellule Admin et l'execution des tests embarquÃ©s
+- Exclusivite MiyukiniAdmin pour la cellule Admin et l'execution des tests embarqués
 - Toute action lifecycle passe par BondingBrother ; aucun bypass des cores
 - Tracabilite complete des tests et des actions de cycle de vie
 
@@ -282,11 +282,11 @@ Meme s'il ressemble a PHPMyAdmin :
 
 ```
 [MiyukiniAdmin]
- â”œâ”€â”€ UI propre
- â”œâ”€â”€ Logique metier admin
- â”œâ”€â”€ Securite maximale
- â””â”€â”€ BondingBrother
-        â†“
+ ├── UI propre
+ ├── Logique metier admin
+ ├── Securite maximale
+ └── BondingBrother
+        ↓
      Miyukini Core
 ```
 
@@ -368,31 +368,31 @@ MiyukiniAdmin sollicite TAMR via BondingBrother pour la verification d'integrite
 ### 9.1 Positionnement
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 9 â€” MiyukiniAdmin (EXCEPTION)     â”‚
-â”‚ Operateur Souverain d'administration     â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-          â”‚ (hors pyramide)
-          â”‚
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 7 â€” Operateurs                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 6 â€” Outils & Kits d'Outils        â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 5 â€” Interfaces & Adaptation       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â–²
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 4 â€” Cores Systeme                 â”‚
-â”‚         (incluant BondingBrother*)       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌──────────────────────────────────────────┐
+│ STRATE 9 — MiyukiniAdmin (EXCEPTION)     │
+│ Operateur Souverain d'administration     │
+└──────────────────────────────────────────┘
+          ▲
+          │ (hors pyramide)
+          │
+┌──────────────────────────────────────────┐
+│ STRATE 7 — Operateurs                    │
+└──────────────────────────────────────────┘
+          ▲
+┌──────────────────────────────────────────┐
+│ STRATE 6 — Outils & Kits d'Outils        │
+└──────────────────────────────────────────┘
+          ▲
+┌──────────────────────────────────────────┐
+│ STRATE 5 — Interfaces & Adaptation       │
+└──────────────────────────────────────────┘
+          ▲
+┌──────────────────────────────────────────┐
+│ STRATE 4 — Cores Systeme                 │
+│         (incluant BondingBrother*)       │
+└──────────────────────────────────────────┘
 
-> **Note :** *BondingBrother est classÃ© avec les Cores (strate 4) en raison de son importance critique, mais conserve sa fonction de passerelle (strate 5). Tous les Cores dÃ©pendent de lui.
+> **Note :** *BondingBrother est classé avec les Cores (strate 4) en raison de son importance critique, mais conserve sa fonction de passerelle (strate 5). Tous les Cores dépendent de lui.
 
 **MiyukiniAdmin est au-dessus de la pyramide, pas dedans.**
 
@@ -411,7 +411,7 @@ Il observe, installe, arbitre, mais ne vit pas dans le flux normal.
 
 **MiyukiniAdmin est au Miyukini Core ce que le BIOS/UEFI est a un OS moderne :**
 
-**Autonome, puissant, dangereux s'il est mal utilise â€” et absolument necessaire.**
+**Autonome, puissant, dangereux s'il est mal utilise — et absolument necessaire.**
 
 ---
 

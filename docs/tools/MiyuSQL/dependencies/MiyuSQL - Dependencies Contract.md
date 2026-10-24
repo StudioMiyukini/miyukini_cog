@@ -1,4 +1,4 @@
-﻿# MiyuSQL â€” Dependencies Contract
+﻿# MiyuSQL — Dependencies Contract
 
 ## 1. Contexte
 
@@ -17,7 +17,7 @@ Ce document definit :
 - Les invariants de dependance
 
 Ce document **ne couvre pas** :
-- Les dependances d'implementation (driver SQL, librairies techniques) â€” hors scope documentaire fondateur
+- Les dependances d'implementation (driver SQL, librairies techniques) — hors scope documentaire fondateur
 - Les dependances des Cores eux-memes
 
 ---
@@ -32,7 +32,7 @@ Ce document **ne couvre pas** :
 
 | Code | Invariant |
 |------|-----------|
-| **INV-DEP-1** | MiyuSQL ne connait pas les Operateurs ; il reÃ§oit un contexte gouverne (BondingBrother) |
+| **INV-DEP-1** | MiyuSQL ne connait pas les Operateurs ; il reçoit un contexte gouverne (BondingBrother) |
 | **INV-DEP-2** | MiyuSQL ne depend d'aucun produit ni regle metier applicative |
 | **INV-DEP-3** | Toute invocation de MiyuSQL passe par la mediation BondingBrother et la gouvernance (Master Butler, WorrySentinel, Caring Nanny, StrongFather) |
 | **INV-DEP-4** | Les operations de donnees sont executees sous autorite KindMother uniquement |
@@ -43,7 +43,7 @@ Ce document **ne couvre pas** :
 
 ### 4.1 Cores (Strate 4)
 
-| DÃ©pendance | RÃ´le pour MiyuSQL | Contrainte |
+| Dépendance | Rôle pour MiyuSQL | Contrainte |
 |------------|-------------------|------------|
 | **KindMother** | Autorite sur les donnees ; validation WriteIntent ; application des ecritures ; execution mandatee des requetes/transactions | MiyuSQL n'accede a la base que via KindMother ; aucune ecriture sans WriteIntent acceptee |
 | **Master Butler** | Catalogue des Tools et Toolkits ; permissions ; declaration de MiyuSQL et des ToolIds | MiyuSQL est invoque apres verification Master Butler |
@@ -53,15 +53,15 @@ Ce document **ne couvre pas** :
 
 ### 4.2 Interface & Mediation (Strate 5)
 
-| DÃ©pendance | RÃ´le pour MiyuSQL | Contrainte |
+| Dépendance | Rôle pour MiyuSQL | Contrainte |
 |------------|-------------------|------------|
-| **BondingBrother** | Mediation ; traduction de l'intention ; preparation du contexte ; passage des requetes vers les Cores | MiyuSQL reÃ§oit les demandes via BondingBrother (ou via le flux gouvernÃ© initie par BondingBrother) |
+| **BondingBrother** | Mediation ; traduction de l'intention ; preparation du contexte ; passage des requetes vers les Cores | MiyuSQL reçoit les demandes via BondingBrother (ou via le flux gouverné initie par BondingBrother) |
 
 ### 4.3 Kernel (Strate K)
 
-| DÃ©pendance | RÃ´le pour MiyuSQL | Contrainte |
+| Dépendance | Rôle pour MiyuSQL | Contrainte |
 |------------|-------------------|------------|
-| **Kernel** | Id (identifiants), Logger (traÃ§abilite), Clock (horodatage), Config (configuration locale), Lifecycle | Usage minimal et neutre ; pas de logique metier ; conformite aux invariants Kernel |
+| **Kernel** | Id (identifiants), Logger (traçabilite), Clock (horodatage), Config (configuration locale), Lifecycle | Usage minimal et neutre ; pas de logique metier ; conformite aux invariants Kernel |
 
 ---
 
@@ -72,14 +72,14 @@ Ce document **ne couvre pas** :
 L'ordre d'implication des dependances lors d'un appel a un Tool MiyuSQL est :
 
 1. **Operateur** (hors dependance MiyuSQL) emet une intention.
-2. **BondingBrother** â€” mediation, traduction, contexte.
-3. **Master Butler** â€” verification Tool/Toolkit, permissions.
-4. **WorrySentinel** â€” niveau de securite.
-5. **Caring Nanny** â€” etat systeme.
-6. **StrongFather** â€” decision ALLOW/DENY.
-7. Si ALLOW : **KindMother** â€” validation WriteIntent (si ecriture), mandat d'execution.
-8. **MiyuSQL** â€” execution du Tool mandate.
-9. **KindMother** â€” application effective (persistance) si ecriture.
+2. **BondingBrother** — mediation, traduction, contexte.
+3. **Master Butler** — verification Tool/Toolkit, permissions.
+4. **WorrySentinel** — niveau de securite.
+5. **Caring Nanny** — etat systeme.
+6. **StrongFather** — decision ALLOW/DENY.
+7. Si ALLOW : **KindMother** — validation WriteIntent (si ecriture), mandat d'execution.
+8. **MiyuSQL** — execution du Tool mandate.
+9. **KindMother** — application effective (persistance) si ecriture.
 
 ### 5.2 Contraintes
 
@@ -91,7 +91,7 @@ L'ordre d'implication des dependances lors d'un appel a un Tool MiyuSQL est :
 
 ---
 
-## 6. Absence de DÃ©pendance Metier
+## 6. Absence de Dépendance Metier
 
 ### 6.1 Ce dont MiyuSQL ne depend pas
 
@@ -102,7 +102,7 @@ L'ordre d'implication des dependances lors d'un appel a un Tool MiyuSQL est :
 | **Autres Toolkits** | Kits d'outils metier | MiyuSQL est independant des autres Toolkits ; pas de couplage fonctionnel |
 | **Services externes** | APIs externes, reseau metier | Conformite LOI-1 ; pas de dependance externe critique |
 
-### 6.2 DÃ©pendances Techniques (Hors Scope Contractuel)
+### 6.2 Dépendances Techniques (Hors Scope Contractuel)
 
 Les dependances techniques (driver SQL, pool de connexions, librairies) sont hors scope de ce contrat fondateur. Elles seront definies dans le guide d'implementation (MiyuSQL - Reference Implementation Guidelines) et doivent rester neutres (pas de logique metier).
 

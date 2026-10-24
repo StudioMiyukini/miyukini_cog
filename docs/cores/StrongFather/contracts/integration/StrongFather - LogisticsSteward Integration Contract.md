@@ -44,7 +44,7 @@ Cette relation garantit que :
 
 ---
 
-## 4. Nature de la relation StrongFather â€” LogisticsSteward
+## 4. Nature de la relation StrongFather — LogisticsSteward
 
 ### 4.1 Relation de validation-subordination
 
@@ -71,13 +71,13 @@ StrongFather motive toujours ses decisions (validation, invalidation, modificati
 
 | Responsabilite | StrongFather | LogisticsSteward |
 |----------------|--------------|------------------|
-| **Evaluer les besoins en ressources** | âŒ Jamais | âœ… Exclusif |
-| **Proposer des arbitrages** | âŒ Jamais | âœ… Exclusif |
-| **Valider les arbitrages** | âœ… Exclusif | âŒ Jamais |
-| **Appliquer des politiques globales** | âœ… Exclusif | âŒ Jamais |
-| **Trancher les conflits de regles** | âœ… Exclusif | âŒ Jamais |
-| **Definir les regles de gouvernance** | âœ… Valide | âœ… Propose |
-| **Executer les decisions** | âŒ Jamais (Kernel) | âŒ Jamais |
+| **Evaluer les besoins en ressources** | ❌ Jamais | ✅ Exclusif |
+| **Proposer des arbitrages** | ❌ Jamais | ✅ Exclusif |
+| **Valider les arbitrages** | ✅ Exclusif | ❌ Jamais |
+| **Appliquer des politiques globales** | ✅ Exclusif | ❌ Jamais |
+| **Trancher les conflits de regles** | ✅ Exclusif | ❌ Jamais |
+| **Definir les regles de gouvernance** | ✅ Valide | ✅ Propose |
+| **Executer les decisions** | ❌ Jamais (Kernel) | ❌ Jamais |
 
 **Regle SF-LS-04 : Aucun chevauchement decisif**
 
@@ -86,24 +86,24 @@ StrongFather ne propose jamais d'arbitrage de ressources. LogisticsSteward ne va
 ### 4.3 Hierarchie des autorites
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 4 â€” Autorite                     â”‚
-â”‚ StrongFather (validation)               â”‚
-â”‚    â”‚                                    â”‚
-â”‚    â”‚ valide/invalide                    â”‚
-â”‚    â–¼                                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 3 â€” Gouvernance Ressources       â”‚
-â”‚ LogisticsSteward (proposition)          â”‚
-â”‚    â”‚                                    â”‚
-â”‚    â”‚ soumet                             â”‚
-â”‚    â–¼                                    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ STRATE 1 â€” Execution                    â”‚
-â”‚ Kernel (execution)                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────┐
+│ STRATE 4 — Autorite                     │
+│ StrongFather (validation)               │
+│    │                                    │
+│    │ valide/invalide                    │
+│    ▼                                    │
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ STRATE 3 — Gouvernance Ressources       │
+│ LogisticsSteward (proposition)          │
+│    │                                    │
+│    │ soumet                             │
+│    ▼                                    │
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ STRATE 1 — Execution                    │
+│ Kernel (execution)                      │
+└─────────────────────────────────────────┘
 ```
 
 StrongFather est superieur a LogisticsSteward dans la chaine de decision. Cette hierarchie est non negociable.
@@ -158,7 +158,7 @@ StrongFather valide les restrictions proportionnees a la situation. Une restrict
 
 **Politique SF-DEGR-01 : Degradation graduee**
 
-StrongFather impose une degradation graduee. Un saut de plus d'un niveau (ex: D0 â†’ D2) est refuse sauf justification exceptionnelle. La transition doit passer par les niveaux intermediaires.
+StrongFather impose une degradation graduee. Un saut de plus d'un niveau (ex: D0 → D2) est refuse sauf justification exceptionnelle. La transition doit passer par les niveaux intermediaires.
 
 **Politique SF-DEGR-02 : Preservation des services critiques**
 
@@ -206,14 +206,14 @@ StrongFather recoit les demandes de validation de LogisticsSteward selon le form
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `demande_id` | Identifiant unique de la demande | âœ… Oui |
-| `type` | Type de decision (QUOTA_ALLOCATION, PRIORITY_MODIFICATION, etc.) | âœ… Oui |
-| `entite_concernee` | Identifiant de l'entite concernee par la decision | âœ… Oui |
-| `decision_proposee` | Details de la decision proposee | âœ… Oui |
-| `justification` | Justification basee sur l'etat systeme | âœ… Oui |
-| `etat_systeme_reference` | Reference a l'etat systeme utilise | âœ… Oui |
-| `regles_appliquees` | Regles de gouvernance appliquees | âœ… Oui |
-| `timestamp` | Horodatage de la demande | âœ… Oui |
+| `demande_id` | Identifiant unique de la demande | ✅ Oui |
+| `type` | Type de decision (QUOTA_ALLOCATION, PRIORITY_MODIFICATION, etc.) | ✅ Oui |
+| `entite_concernee` | Identifiant de l'entite concernee par la decision | ✅ Oui |
+| `decision_proposee` | Details de la decision proposee | ✅ Oui |
+| `justification` | Justification basee sur l'etat systeme | ✅ Oui |
+| `etat_systeme_reference` | Reference a l'etat systeme utilise | ✅ Oui |
+| `regles_appliquees` | Regles de gouvernance appliquees | ✅ Oui |
+| `timestamp` | Horodatage de la demande | ✅ Oui |
 
 **Regle SF-LS-PROT-01 : Validation du format**
 
@@ -244,13 +244,13 @@ Toute decision est basee sur des politiques explicites et declarees. Aucune deci
 
 | Element | Description | Obligatoire |
 |---------|-------------|-------------|
-| `reponse_id` | Identifiant unique de la reponse | âœ… Oui |
-| `demande_id` | Reference a la demande | âœ… Oui |
-| `statut` | Statut de la decision (VALIDATED, INVALIDATED, DEFERRED, MODIFIED) | âœ… Oui |
+| `reponse_id` | Identifiant unique de la reponse | ✅ Oui |
+| `demande_id` | Reference a la demande | ✅ Oui |
+| `statut` | Statut de la decision (VALIDATED, INVALIDATED, DEFERRED, MODIFIED) | ✅ Oui |
 | `decision_finale` | Decision validee (peut differer de la proposition) | Si VALIDATED ou MODIFIED |
-| `motif` | Motif de la decision de StrongFather | âœ… Oui |
-| `politiques_appliquees` | Politiques utilisees pour la decision | âœ… Oui |
-| `timestamp` | Horodatage de la reponse | âœ… Oui |
+| `motif` | Motif de la decision de StrongFather | ✅ Oui |
+| `politiques_appliquees` | Politiques utilisees pour la decision | ✅ Oui |
+| `timestamp` | Horodatage de la reponse | ✅ Oui |
 
 ### 6.4 Statuts de reponse
 
@@ -321,7 +321,7 @@ Decision : Option 1 selectionnee
 Motif : La continuite operationnelle des Operateurs actifs est prioritaire
         sur les mesures de degradation generales.
 Politique appliquee : POL-CONTINUITY-001 (priorite 2 > priorite 3)
-Precedent : Oui â€” Cette resolution peut etre appliquee aux cas similaires
+Precedent : Oui — Cette resolution peut etre appliquee aux cas similaires
 ```
 
 ---
@@ -532,7 +532,7 @@ En cas d'invalidation ou d'erreur, LogisticsSteward peut reformuler sa demande a
 
 **Evaluation StrongFather :**
 - Politique applicable : POL-DEGR-GRADUAL-001
-- Saut D0 â†’ D2 non autorise (violation degradation graduee)
+- Saut D0 → D2 non autorise (violation degradation graduee)
 - Modification : passage a D1 au lieu de D2
 
 **Reponse StrongFather :**
@@ -564,7 +564,7 @@ Toute implementation de l'integration avec LogisticsSteward doit respecter ce co
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
+**Statut :** CONTRAT — Normatif  
 **Dependances :**
 - StrongFather - Documentation Fondatrice v1.5
 - StrongFather - Core Decision Contract v1.0
@@ -592,11 +592,11 @@ Toute implementation de l'integration avec LogisticsSteward doit respecter ce co
 ### Verification de coherence
 
 **Verification effectuee :**
-- âœ… Coherence avec StrongFather - Documentation Fondatrice : Confirmee (role de validation)
-- âœ… Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (INV-LS-8, Section 8.2)
-- âœ… Coherence avec LogisticsSteward - StrongFather Integration Contract : Confirmee (formats, protocoles)
-- âœ… Conformite LOI-1 : Confirmee (aucune dependance externe)
-- âœ… Hierarchie des strates respectee : Confirmee (Strate 4 > Strate 3)
+- ✅ Coherence avec StrongFather - Documentation Fondatrice : Confirmee (role de validation)
+- ✅ Coherence avec LogisticsSteward - Documentation Fondatrice : Confirmee (INV-LS-8, Section 8.2)
+- ✅ Coherence avec LogisticsSteward - StrongFather Integration Contract : Confirmee (formats, protocoles)
+- ✅ Conformite LOI-1 : Confirmee (aucune dependance externe)
+- ✅ Hierarchie des strates respectee : Confirmee (Strate 4 > Strate 3)
 
 **Conclusion :** Aucune contradiction detectee. Le document est coherent et symetrique.
 

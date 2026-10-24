@@ -1,84 +1,84 @@
-﻿# Jay1Tribu â€” Guide d'implÃ©mentation
+﻿# Jay1Tribu — Guide d'implémentation
 
 ## Contexte
 
-Ce document constitue le **guide d'implÃ©mentation** du Service Jay1Tribu. Il dÃ©crit la structure attendue du crate, les modules, les dÃ©pendances (KindMother, MWS), les phases de dÃ©veloppement et les points de conformitÃ© aux contraintes et invariants.
+Ce document constitue le **guide d'implémentation** du Service Jay1Tribu. Il décrit la structure attendue du crate, les modules, les dépendances (KindMother, MWS), les phases de développement et les points de conformité aux contraintes et invariants.
 
-## PortÃ©e / Scope
+## Portée / Scope
 
-- **Applicable Ã  :** DÃ©veloppement du crate Jay1Tribu, intÃ©gration Central, contrat Miou/MWS.
-- **Audience :** DÃ©veloppeurs, architectes.
-- **Statut :** Guide normatif â€” rÃ©fÃ©rence d'implÃ©mentation.
+- **Applicable à :** Développement du crate Jay1Tribu, intégration Central, contrat Miou/MWS.
+- **Audience :** Développeurs, architectes.
+- **Statut :** Guide normatif — référence d'implémentation.
 
-**Note :** Le crate `jay1tribu` n'existe pas encore dans le dÃ©pÃ´t ; ce guide est anticipatoire et sera mis Ã  jour au fur et Ã  mesure de l'implÃ©mentation.
+**Note :** Le crate `jay1tribu` n'existe pas encore dans le dépôt ; ce guide est anticipatoire et sera mis à jour au fur et à mesure de l'implémentation.
 
 ---
 
-## 1. Vue d'ensemble de l'implÃ©mentation
+## 1. Vue d'ensemble de l'implémentation
 
-### 1.1 Composants Ã  crÃ©er
+### 1.1 Composants à créer
 
-| Composant | Type | Emplacement | RÃ´le |
+| Composant | Type | Emplacement | Rôle |
 |-----------|------|-------------|------|
-| **jay1tribu** | Crate Service (Strate 7) | `crates/jay1tribu/` | Logique mÃ©tier : tribus, salons, amis, messages, persistance locale, transport MWS |
-| **OpÃ©rateurs Jay1Tribu** | OpÃ©rateurs | Dans `jay1tribu` | Messagerie, tribus, amis (voir Architecture et Positionnement) |
-| **Vue Jay1Tribu** | Service Central | `apps/central/src/services/jay1tribu/` (ou Ã©quivalent) | Interface utilisateur : liste tribus/salons/amis, conversations |
-| **Connexion DB / MWS** | Data & transport | Central + jay1tribu | ServiceDb (KindMother), client MWS pour transport et prÃ©sence |
+| **jay1tribu** | Crate Service (Strate 7) | `crates/jay1tribu/` | Logique métier : tribus, salons, amis, messages, persistance locale, transport MWS |
+| **Opérateurs Jay1Tribu** | Opérateurs | Dans `jay1tribu` | Messagerie, tribus, amis (voir Architecture et Positionnement) |
+| **Vue Jay1Tribu** | Service Central | `apps/central/src/services/jay1tribu/` (ou équivalent) | Interface utilisateur : liste tribus/salons/amis, conversations |
+| **Connexion DB / MWS** | Data & transport | Central + jay1tribu | ServiceDb (KindMother), client MWS pour transport et présence |
 
-### 1.2 Ordre de dÃ©pendances
+### 1.2 Ordre de dépendances
 
 ```
 KindMother (existant)
-MWS (prÃ©sence, transport)
-       â”‚
-       â–¼
-jay1tribu (crate) â€” persistance, messagerie, tribus, amis
-       â”‚
-       â”œâ”€â”€ Miyukini Central (service view, ouverture service)
-       â”‚
-       â””â”€â”€ Miou (get_online_friends, get_friends_list)
+MWS (présence, transport)
+       │
+       ▼
+jay1tribu (crate) — persistance, messagerie, tribus, amis
+       │
+       ├── Miyukini Central (service view, ouverture service)
+       │
+       └── Miou (get_online_friends, get_friends_list)
 ```
 
-### 1.3 Principes d'implÃ©mentation impÃ©ratifs
+### 1.3 Principes d'implémentation impératifs
 
-| # | Principe | VÃ©rification |
+| # | Principe | Vérification |
 |---|----------|---------------|
 | P1 | **Pas d'archives centrales** | Aucun envoi du contenu des messages vers un serveur central ; archivage local uniquement. |
-| P2 | **Transit cryptÃ©** | Toute donnÃ©e Ã©changÃ©e entre COGs est cryptÃ©e (TLS et/ou E2E selon spec sÃ©curitÃ©). |
-| P3 | **Persistance via KindMother** | Toutes les Ã©critures locales passent par KindMother (WriteIntent). |
-| P4 | **PrÃ©sence via MWS** | La prÃ©sence (en ligne / hors ligne) est lue depuis le MWS ; pas de duplication de logique. |
-| P5 | **Gouvernance par les Cores** | Toute action soumise Ã  StrongFather, KindMother, Master Butler, WorrySentinel, Border Guard via BondingBrother. |
+| P2 | **Transit crypté** | Toute donnée échangée entre COGs est cryptée (TLS et/ou E2E selon spec sécurité). |
+| P3 | **Persistance via KindMother** | Toutes les écritures locales passent par KindMother (WriteIntent). |
+| P4 | **Présence via MWS** | La présence (en ligne / hors ligne) est lue depuis le MWS ; pas de duplication de logique. |
+| P5 | **Gouvernance par les Cores** | Toute action soumise à StrongFather, KindMother, Master Butler, WorrySentinel, Border Guard via BondingBrother. |
 
 ---
 
 ## 2. Structure standard du crate (pattern Services)
 
-ConformÃ©ment au pattern [miyukini-services](_index.md) :
+Conformément au pattern [miyukini-services](_index.md) :
 
 ```
 crates/jay1tribu/
-â”œâ”€â”€ Cargo.toml
-â””â”€â”€ src/
-    â”œâ”€â”€ lib.rs
-    â”œâ”€â”€ errors.rs
-    â”œâ”€â”€ data/
-    â”‚   â”œâ”€â”€ mod.rs
-    â”‚   â”œâ”€â”€ types.rs          # Tribe, Salon, Message, Friend, Role, etc.
-    â”‚   â”œâ”€â”€ kindmother_db.rs  # (legacy-sqlite)
-    â”‚   â””â”€â”€ kindmother_client_db.rs  # (kindmother-only)
-    â”œâ”€â”€ auth/                 # Optionnel â€” permissions, RLS
-    â”‚   â”œâ”€â”€ mod.rs
-    â”‚   â””â”€â”€ permissions.rs
-    â”œâ”€â”€ services/             # Adaptateurs inter-services (lecture rÃ©flÃ©chie si besoin)
-    â”‚   â””â”€â”€ mod.rs
-    â”œâ”€â”€ domain/               # Logique mÃ©tier : crÃ©ation tribu, envoi, livraison diffÃ©rÃ©e
-    â”‚   â””â”€â”€ mod.rs
-    â””â”€â”€ transport/            # Ou mws/ â€” abstraction transport MWS, chiffrement
-        â”œâ”€â”€ mod.rs
-        â””â”€â”€ ...
+├── Cargo.toml
+└── src/
+    ├── lib.rs
+    ├── errors.rs
+    ├── data/
+    │   ├── mod.rs
+    │   ├── types.rs          # Tribe, Salon, Message, Friend, Role, etc.
+    │   ├── kindmother_db.rs  # (legacy-sqlite)
+    │   └── kindmother_client_db.rs  # (kindmother-only)
+    ├── auth/                 # Optionnel — permissions, RLS
+    │   ├── mod.rs
+    │   └── permissions.rs
+    ├── services/             # Adaptateurs inter-services (lecture réfléchie si besoin)
+    │   └── mod.rs
+    ├── domain/               # Logique métier : création tribu, envoi, livraison différée
+    │   └── mod.rs
+    └── transport/            # Ou mws/ — abstraction transport MWS, chiffrement
+        ├── mod.rs
+        └── ...
 ```
 
-### 2.1 Feature flags recommandÃ©s
+### 2.1 Feature flags recommandés
 
 ```toml
 [features]
@@ -88,7 +88,7 @@ kindmother-only = ["kindmother-client", "kindmother-db-key"]
 db-encryption = ["kindmother-db-key"]
 ```
 
-### 2.2 DÃ©pendances Cargo.toml (vision)
+### 2.2 Dépendances Cargo.toml (vision)
 
 ```toml
 [dependencies]
@@ -97,8 +97,8 @@ kindmother = { path = "../kindmother" }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 # kindmother-client pour kindmother-only
 
-# MWS / transport (Ã  adapter selon API MWS rÃ©elle)
-# miyu-webway-participant ou Ã©quivalent pour prÃ©sence et transport
+# MWS / transport (à adapter selon API MWS réelle)
+# miyu-webway-participant ou équivalent pour présence et transport
 
 # Utilitaires
 uuid = { version = "1", features = ["v4"] }
@@ -106,7 +106,7 @@ chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 thiserror = "2"
 
-# Chiffrement (WorrySentinel, spec technique Ã  valider)
+# Chiffrement (WorrySentinel, spec technique à valider)
 # ring ou aes-gcm, etc.
 ```
 
@@ -121,7 +121,7 @@ Au minimum (conceptuel) :
 - **Tribe** : id, name, creator_cog_id, created_at, settings, etc.
 - **Salon** : id, tribe_id (optionnel), type (direct | collective), participants, created_at.
 - **Message** : id, salon_id, sender_cog_id, content_encrypted ou ref, created_at.
-- **Friend** : id, profile_id, friend_cog_id, pseudo (rÃ©solu), added_at.
+- **Friend** : id, profile_id, friend_cog_id, pseudo (résolu), added_at.
 - **Role** : id, tribe_id, name, permissions (bitmask ou liste).
 
 Identifiants : UUID v4 ; timestamps ISO 8601. Convention CRUD : `tribe_list`, `tribe_by_id`, `tribe_create`, `tribe_update`, `tribe_delete`, etc.
@@ -129,82 +129,82 @@ Identifiants : UUID v4 ; timestamps ISO 8601. Convention CRUD : `tribe_list`, `t
 ### 3.2 Persistance (kindmother_db / kindmother_client_db)
 
 - **InstanceType** : `Daughter` pour les DB locales du service.
-- Toute Ã©criture passe par KindMother (WriteIntent) ; pas de connexion SQL directe en contournement.
-- SchÃ©mas : tables `tribes`, `salons`, `salon_members`, `messages`, `friends`, `roles`, `tribe_member_roles`, etc. (dÃ©tail Ã  dÃ©finir en phase de conception schÃ©ma).
+- Toute écriture passe par KindMother (WriteIntent) ; pas de connexion SQL directe en contournement.
+- Schémas : tables `tribes`, `salons`, `salon_members`, `messages`, `friends`, `roles`, `tribe_member_roles`, etc. (détail à définir en phase de conception schéma).
 
 ---
 
 ## 4. Transport et MWS
 
-- **PrÃ©sence** : consommation des APIs ou Ã©vÃ©nements MWS pour Â« en ligne / hors ligne Â». Pas de rÃ©implÃ©mentation.
-- **Transport des messages** : envoi/rÃ©ception via le MWS (canal sÃ©curisÃ©). Chiffrement du payload applicatif selon [Jay1Tribu - Securite et Conformite](./Jay1Tribu%20-%20Securite%20et%20Conformite.md).
-- **Livraison diffÃ©rÃ©e (tribu)** : lorsque un membre se reconnecte, le systÃ¨me vÃ©rifie si l'Ã©metteur est connectÃ© et envoie les messages/fichiers non encore livrÃ©s ; implÃ©mentation Ã  dÃ©tailler (file dâ€™attente locale, reprise Ã  la connexion).
+- **Présence** : consommation des APIs ou événements MWS pour « en ligne / hors ligne ». Pas de réimplémentation.
+- **Transport des messages** : envoi/réception via le MWS (canal sécurisé). Chiffrement du payload applicatif selon [Jay1Tribu - Securite et Conformite](./Jay1Tribu%20-%20Securite%20et%20Conformite.md).
+- **Livraison différée (tribu)** : lorsque un membre se reconnecte, le système vérifie si l'émetteur est connecté et envoie les messages/fichiers non encore livrés ; implémentation à détailler (file d’attente locale, reprise à la connexion).
 
 ---
 
-## 5. IntÃ©gration Miyukini Central
+## 5. Intégration Miyukini Central
 
-- Enregistrement du service dans la liste des services (Salon / BibliothÃ¨que).
-- Ouverture de lâ€™Ã©cran/onglet Jay1Tribu depuis Central (navigation, pas de lecture du contenu par Central).
-- Connexion Ã  la base Jay1Tribu (ServiceDb) depuis `apps/central` si nÃ©cessaire (ex. via `ServiceConnections` ou Ã©quivalent).
-- Exposer les capacitÃ©s pour Miou : `get_online_friends`, `get_friends_list` (voir [Jay1Tribu - Integration Central et Miou](./Jay1Tribu%20-%20Integration%20Central%20et%20Miou.md)).
-
----
-
-## 6. IntÃ©gration Miou
-
-- ImplÃ©menter le contrat dÃ©crit dans [Jay1Tribu - Integration Central et Miou](./Jay1Tribu%20-%20Integration%20Central%20et%20Miou.md) : retour de listes dâ€™amis et amis en ligne sans contenu de messages.
-- DÃ©gradation gracieuse : si Jay1Tribu est indisponible, retourner liste vide ou erreur gÃ©rÃ©e ; pas de crash Central/Miou.
+- Enregistrement du service dans la liste des services (Salon / Bibliothèque).
+- Ouverture de l’écran/onglet Jay1Tribu depuis Central (navigation, pas de lecture du contenu par Central).
+- Connexion à la base Jay1Tribu (ServiceDb) depuis `apps/central` si nécessaire (ex. via `ServiceConnections` ou équivalent).
+- Exposer les capacités pour Miou : `get_online_friends`, `get_friends_list` (voir [Jay1Tribu - Integration Central et Miou](./Jay1Tribu%20-%20Integration%20Central%20et%20Miou.md)).
 
 ---
 
-## 7. Phases suggÃ©rÃ©es
+## 6. Intégration Miou
+
+- Implémenter le contrat décrit dans [Jay1Tribu - Integration Central et Miou](./Jay1Tribu%20-%20Integration%20Central%20et%20Miou.md) : retour de listes d’amis et amis en ligne sans contenu de messages.
+- Dégradation gracieuse : si Jay1Tribu est indisponible, retourner liste vide ou erreur gérée ; pas de crash Central/Miou.
+
+---
+
+## 7. Phases suggérées
 
 | Phase | Objectif | Livrables |
 |-------|----------|-----------|
-| **1** | Infrastructure | Crate `jay1tribu`, structure data/, types, KindMother (Ã©criture/lecture locale de base). |
-| **2** | Salons et messages | CrÃ©ation salon direct/collectif, envoi/rÃ©ception messages (transport MWS + chiffrement), archivage local. |
-| **3** | Tribus et rÃ´les | CrÃ©ation tribu, invitations, rÃ´les (Chef de tribu, admin, membre), salons de tribu. |
-| **4** | Amis et prÃ©sence | Liste dâ€™amis, consommation prÃ©sence MWS, get_online_friends / get_friends_list pour Miou. |
-| **5** | Livraison diffÃ©rÃ©e | Synchronisation Ã  la reconnexion pour les tribus (si Ã©metteur connectÃ©). |
-| **6** | Fichiers et images | Envoi/rÃ©ception fichiers et images (chiffrÃ©s), stockage local. |
-| **7** | UI Central et Miou | Ã‰crans Central, connexion Miou, dÃ©gradation gracieuse. |
-| **8** | SÃ©curitÃ© et audit | Revue chiffrement, conformitÃ© C-1 Ã  C-8, invariants, audit. |
+| **1** | Infrastructure | Crate `jay1tribu`, structure data/, types, KindMother (écriture/lecture locale de base). |
+| **2** | Salons et messages | Création salon direct/collectif, envoi/réception messages (transport MWS + chiffrement), archivage local. |
+| **3** | Tribus et rôles | Création tribu, invitations, rôles (Chef de tribu, admin, membre), salons de tribu. |
+| **4** | Amis et présence | Liste d’amis, consommation présence MWS, get_online_friends / get_friends_list pour Miou. |
+| **5** | Livraison différée | Synchronisation à la reconnexion pour les tribus (si émetteur connecté). |
+| **6** | Fichiers et images | Envoi/réception fichiers et images (chiffrés), stockage local. |
+| **7** | UI Central et Miou | Écrans Central, connexion Miou, dégradation gracieuse. |
+| **8** | Sécurité et audit | Revue chiffrement, conformité C-1 à C-8, invariants, audit. |
 
 ---
 
-## 8. Matrice de vÃ©rification (rÃ©sumÃ©)
+## 8. Matrice de vérification (résumé)
 
-Avant toute livraison, vÃ©rifier :
+Avant toute livraison, vérifier :
 
-| Contrainte | VÃ©rification |
+| Contrainte | Vérification |
 |------------|--------------|
-| C-1 | Aucune archive centralisÃ©e ; tout local. |
-| C-2 | Transit cryptÃ© (tests, revue code). |
-| C-3 | HÃ©bergement utilisateur uniquement. |
-| C-4 | Toutes les Ã©critures via KindMother. |
-| C-5 | Type 3 dÃ©clarÃ© ; espaces Central + Inter-COG. |
-| C-6 | Livraison diffÃ©rÃ©e conditionnÃ©e (Ã©metteur connectÃ©, paramÃ©trage). |
-| C-7 | RÃ´les attribuÃ©s par Chef de tribu, gouvernÃ©s par Cores. |
-| C-8 | PrÃ©sence lue depuis MWS uniquement. |
+| C-1 | Aucune archive centralisée ; tout local. |
+| C-2 | Transit crypté (tests, revue code). |
+| C-3 | Hébergement utilisateur uniquement. |
+| C-4 | Toutes les écritures via KindMother. |
+| C-5 | Type 3 déclaré ; espaces Central + Inter-COG. |
+| C-6 | Livraison différée conditionnée (émetteur connecté, paramétrage). |
+| C-7 | Rôles attribués par Chef de tribu, gouvernés par Cores. |
+| C-8 | Présence lue depuis MWS uniquement. |
 
 ---
 
-## 9. RÃ©fÃ©rences
+## 9. Références
 
-| Document | RÃ´le |
+| Document | Rôle |
 |----------|------|
-| [Jay1Tribu - Document Conceptuel](./Jay1Tribu%20-%20Document%20Conceptuel.md) | Concepts, modÃ¨le mÃ©tier. |
-| [Jay1Tribu - Architecture et Positionnement](./Jay1Tribu%20-%20Architecture%20et%20Positionnement.md) | Pyramide, OpÃ©rateurs, MWS, Cores. |
+| [Jay1Tribu - Document Conceptuel](./Jay1Tribu%20-%20Document%20Conceptuel.md) | Concepts, modèle métier. |
+| [Jay1Tribu - Architecture et Positionnement](./Jay1Tribu%20-%20Architecture%20et%20Positionnement.md) | Pyramide, Opérateurs, MWS, Cores. |
 | [Jay1Tribu - Contraintes et Invariants](./Jay1Tribu%20-%20Contraintes%20et%20Invariants.md) | Contraintes et invariants. |
-| [Jay1Tribu - Securite et Conformite](./Jay1Tribu%20-%20Securite%20et%20Conformite.md) | Chiffrement, contrÃ´les d'accÃ¨s. |
+| [Jay1Tribu - Securite et Conformite](./Jay1Tribu%20-%20Securite%20et%20Conformite.md) | Chiffrement, contrôles d'accès. |
 | [Jay1Tribu - Integration Central et Miou](./Jay1Tribu%20-%20Integration%20Central%20et%20Miou.md) | Contrat Central / Miou. |
 | Skill miyukini-services | Pattern data/, auth/, services/, feature flags. |
 | Skill miyukini-kindmother-db | KindMother, InstanceType, kindmother-db-key. |
 
 ---
 
-**Document** : Jay1Tribu â€” Guide d'implÃ©mentation  
+**Document** : Jay1Tribu — Guide d'implémentation  
 **Version** : 1.0  
 **Date** : 2026-02-15  
 **Statut** : Guide normatif

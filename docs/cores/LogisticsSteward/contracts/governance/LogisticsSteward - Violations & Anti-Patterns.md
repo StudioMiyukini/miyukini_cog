@@ -1,4 +1,4 @@
-﻿# LogisticsSteward â€” Violations & Anti-Patterns
+﻿# LogisticsSteward — Violations & Anti-Patterns
 
 ## 1. Contexte
 
@@ -982,7 +982,7 @@ Toute violation detectee est un defaut critique qui doit etre corrige immediatem
 
 **Date de creation :** 2026-01-28  
 **Version :** 1.0.0  
-**Statut :** INTERDICTION â€” Non negociable  
+**Statut :** INTERDICTION — Non negociable  
 **Dependencies :**
 - [Documentation Fondatrice v1.0](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) (Sections 4, 5)
 - [Lois d'Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)

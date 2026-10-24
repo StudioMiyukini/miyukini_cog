@@ -47,7 +47,7 @@ L'objectif est de :
 
 ### 2.3. Contraintes
 
-- **ContinuitÃ©** : Les interventions existantes doivent pouvoir etre mappees vers les types TAMR sans rupture.
+- **Continuité** : Les interventions existantes doivent pouvoir etre mappees vers les types TAMR sans rupture.
 - **Compatibilite** : Les traces historiques (si elles existent) doivent rester lisibles ou migrables.
 - **Progression graduelle** : L'adoption peut etre progressive (par processus ou par type d'intervention).
 
@@ -69,7 +69,7 @@ L'objectif est de :
 
 ### 3.3. Phase 3 - Conformite
 
-1. Verifier les invariants INV-TAMR-* (traÃ§abilite, responsabilite, limites infranchissables, justification override, escalade non bloquante).
+1. Verifier les invariants INV-TAMR-* (traçabilite, responsabilite, limites infranchissables, justification override, escalade non bloquante).
 2. Valider l'adaptation aux niveaux de confiance (T0-T4) et niveaux de securite (0-4) selon [TAMR - Security Contract](../contracts/security/TAMR%20-%20Security%20Contract.md).
 
 ---

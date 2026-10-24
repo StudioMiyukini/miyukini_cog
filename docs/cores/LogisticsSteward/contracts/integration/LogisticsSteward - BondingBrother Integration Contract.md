@@ -257,30 +257,30 @@ Si l'acquittement n'est pas recu dans le delai imparti (configurable, defaut 30s
 
 ```
 [LogisticsSteward]
-       â”‚
-       â”‚ Message avec decision
-       â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ BondingBrother      â”‚
-â”‚ - Reception         â”‚
-â”‚ - Validation format â”‚
-â”‚ - Ack RECU          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ Traduction si necessaire
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ BondingBrother      â”‚
-â”‚ - Transmission      â”‚
-â”‚ - Ack TRANSMIS      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-           â”‚
-           â”‚ Confirmation destinataire
-           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ BondingBrother      â”‚
-â”‚ - Ack DELIVRE       â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+       │
+       │ Message avec decision
+       ▼
+┌─────────────────────┐
+│ BondingBrother      │
+│ - Reception         │
+│ - Validation format │
+│ - Ack RECU          │
+└──────────┬──────────┘
+           │
+           │ Traduction si necessaire
+           ▼
+┌─────────────────────┐
+│ BondingBrother      │
+│ - Transmission      │
+│ - Ack TRANSMIS      │
+└──────────┬──────────┘
+           │
+           │ Confirmation destinataire
+           ▼
+┌─────────────────────┐
+│ BondingBrother      │
+│ - Ack DELIVRE       │
+└─────────────────────┘
 ```
 
 ---
@@ -574,8 +574,8 @@ La reconciliation est un processus explicite, pas une correction silencieuse.
 
 **Etape 1 : Decision emise, BondingBrother indisponible**
 ```
-[LogisticsSteward] â†’ Decision emise
-[Buffer local] â† Decision stockee (BB indisponible)
+[LogisticsSteward] → Decision emise
+[Buffer local] ← Decision stockee (BB indisponible)
 [Log] : "Decision dec-2026-005679 buffee, BB offline"
 ```
 
@@ -613,7 +613,7 @@ Toute implementation de l'integration avec BondingBrother doit respecter ce cont
 
 **Version :** 1.0.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
+**Statut :** CONTRAT — Normatif  
 **Dependencies :**
 - [Documentation Fondatrice](../../foundation/LogisticsSteward%20-%20Documentation%20Fondatrice.md) v1.0.0 (Section 8.5)
 - [BondingBrother - Documentation Fondatrice](../../../BondingBrother/foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0

@@ -2,37 +2,37 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le flux contractuel dÃ©taillÃ© des informations depuis l'Ã©cosystÃ¨me vers les produits via Bonding Brother. Il spÃ©cifie les Ã©tapes prÃ©cises, les transformations, les validations, et les garanties associÃ©es au flux Ã‰cosystÃ¨me â†’ Produit.
+Ce document définit le flux contractuel détaillé des informations depuis l'écosystème vers les produits via Bonding Brother. Il spécifie les étapes précises, les transformations, les validations, et les garanties associées au flux Écosystème → Produit.
 
-Ce document complÃ¨te la Section 5 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Bilateral Flow Contract](./BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour la vue d'ensemble, le [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) pour les rÃ¨gles de traduction, et le [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md) pour les rÃ¨gles de filtrage.
+Ce document complète la Section 5 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur le [Bilateral Flow Contract](./BondingBrother%20-%20Bilateral%20Flow%20Contract.md) pour la vue d'ensemble, le [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) pour les règles de traduction, et le [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md) pour les règles de filtrage.
 
-Ce flux respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : les rÃ©sultats diffÃ©rÃ©s sont transmis mÃªme aprÃ¨s une pÃ©riode d'isolement (**LOI-2**, **LOI-3**).
+Ce flux respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : les résultats différés sont transmis même après une période d'isolement (**LOI-2**, **LOI-3**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- Le flux complet Ã‰cosystÃ¨me â†’ Produit (Ã©tape par Ã©tape)
-- Les types d'informations transmises (notifications, Ã©vÃ©nements, synchronisations)
-- Les transformations appliquÃ©es Ã  chaque Ã©tape
-- Les validations et vÃ©rifications effectuÃ©es
-- Les rÃ¨gles de distribution aux produits
+- Le flux complet Écosystème → Produit (étape par étape)
+- Les types d'informations transmises (notifications, événements, synchronisations)
+- Les transformations appliquées à chaque étape
+- Les validations et vérifications effectuées
+- Les règles de distribution aux produits
 - Les garanties de traitement
 - Les cas d'erreur et leur gestion
 
 Ce document **ne couvre pas** :
-- Le flux inverse Produit â†’ Ã‰cosystÃ¨me (voir [Product-to-Ecosystem Flow](./BondingBrother%20-%20Product-to-Ecosystem%20Flow.md))
-- Les dÃ©tails de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
+- Le flux inverse Produit → Écosystème (voir [Product-to-Ecosystem Flow](./BondingBrother%20-%20Product-to-Ecosystem%20Flow.md))
+- Les détails de traduction (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
 - La gestion des erreurs (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20%26%20Rejection%20Model.md))
-- Les protocoles d'intÃ©gration avec les autoritÃ©s (voir les contrats d'intÃ©gration)
+- Les protocoles d'intégration avec les autorités (voir les contrats d'intégration)
 
 ---
 
 ## 3. Principe fondamental
 
-**Le flux Ã‰cosystÃ¨me â†’ Produit est unidirectionnel, asymÃ©trique, et toujours adaptatif.**
+**Le flux Écosystème → Produit est unidirectionnel, asymétrique, et toujours adaptatif.**
 
-L'Ã©cosystÃ¨me (via les autoritÃ©s) Ã©met des informations dans son vocabulaire. Bonding Brother adapte ces informations au vocabulaire et aux attentes des produits, sans jamais demander aux produits de s'adapter Ã  l'Ã©cosystÃ¨me.
+L'écosystème (via les autorités) émet des informations dans son vocabulaire. Bonding Brother adapte ces informations au vocabulaire et aux attentes des produits, sans jamais demander aux produits de s'adapter à l'écosystème.
 
 ---
 
@@ -40,357 +40,357 @@ L'Ã©cosystÃ¨me (via les autoritÃ©s) Ã©met des informations dans son voca
 
 ### 4.1 Notifications
 
-**DÃ©finition :** Informations proactives envoyÃ©es par l'Ã©cosystÃ¨me pour informer un produit d'un Ã©vÃ©nement ou d'un changement.
+**Définition :** Informations proactives envoyées par l'écosystème pour informer un produit d'un événement ou d'un changement.
 
 **Exemples :**
-- Notification de crÃ©ation de contenu
-- Notification de modification de hiÃ©rarchie
+- Notification de création de contenu
+- Notification de modification de hiérarchie
 - Notification de changement de permission
 - Notification de synchronisation disponible
 
-**CaractÃ©ristiques :**
-- Proactives (initiÃ©es par l'Ã©cosystÃ¨me)
-- CiblÃ©es (destinÃ©es Ã  un produit spÃ©cifique)
-- Asynchrones (pas de rÃ©ponse attendue)
+**Caractéristiques :**
+- Proactives (initiées par l'écosystème)
+- Ciblées (destinées à un produit spécifique)
+- Asynchrones (pas de réponse attendue)
 
-### 4.2 Ã‰vÃ©nements
+### 4.2 Événements
 
-**DÃ©finition :** Informations sur des Ã©vÃ©nements survenus dans l'Ã©cosystÃ¨me qui peuvent intÃ©resser un produit.
+**Définition :** Informations sur des événements survenus dans l'écosystème qui peuvent intéresser un produit.
 
 **Exemples :**
-- Ã‰vÃ©nement de publication
-- Ã‰vÃ©nement de suppression
-- Ã‰vÃ©nement de migration
-- Ã‰vÃ©nement de synchronisation
+- Événement de publication
+- Événement de suppression
+- Événement de migration
+- Événement de synchronisation
 
-**CaractÃ©ristiques :**
-- Ã‰mis par les autoritÃ©s
+**Caractéristiques :**
+- Émis par les autorités
 - Potentiellement multi-destinataires
 - Asynchrones
 
 ### 4.3 Synchronisations
 
-**DÃ©finition :** Informations de synchronisation envoyÃ©es pour mettre Ã  jour un produit avec l'Ã©tat actuel de l'Ã©cosystÃ¨me.
+**Définition :** Informations de synchronisation envoyées pour mettre à jour un produit avec l'état actuel de l'écosystème.
 
 **Exemples :**
 - Synchronisation de contenu
-- Synchronisation de hiÃ©rarchie
+- Synchronisation de hiérarchie
 - Synchronisation de permissions
-- Synchronisation d'Ã©tat
+- Synchronisation d'état
 
-**CaractÃ©ristiques :**
-- Initiatives de l'Ã©cosystÃ¨me
-- Peuvent Ãªtre diffÃ©rÃ©es (mode offline)
-- Peuvent Ãªtre incrÃ©mentielles ou complÃ¨tes
+**Caractéristiques :**
+- Initiatives de l'écosystème
+- Peuvent être différées (mode offline)
+- Peuvent être incrémentielles ou complètes
 
-### 4.4 RÃ©sultats diffÃ©rÃ©s
+### 4.4 Résultats différés
 
-**DÃ©finition :** RÃ©sultats d'intentions prÃ©cÃ©demment soumises, disponibles aprÃ¨s une pÃ©riode d'attente ou une reconnexion.
+**Définition :** Résultats d'intentions précédemment soumises, disponibles après une période d'attente ou une reconnexion.
 
 **Exemples :**
-- RÃ©sultat d'une intention soumise en mode offline
-- RÃ©sultat d'une intention Ã  traitement long
-- RÃ©sultat d'une intention diffÃ©rÃ©e
+- Résultat d'une intention soumise en mode offline
+- Résultat d'une intention à traitement long
+- Résultat d'une intention différée
 
-**CaractÃ©ristiques :**
-- LiÃ©es Ã  une intention prÃ©cÃ©dente
-- Peuvent Ãªtre diffÃ©rÃ©es
+**Caractéristiques :**
+- Liées à une intention précédente
+- Peuvent être différées
 - Asynchrones
 
 ---
 
 ## 5. Vue d'ensemble du flux
 
-Le flux Ã‰cosystÃ¨me â†’ Produit traverse les Ã©tapes suivantes dans l'ordre strict :
+Le flux Écosystème → Produit traverse les étapes suivantes dans l'ordre strict :
 
 ```
-AUTORITÃ‰ (Kind Mother ou Strong Father)
-  â”‚
-  â–¼
-[1] RÃ©ception de l'information
-  â”‚
-  â–¼
+AUTORITÉ (Kind Mother ou Strong Father)
+  │
+  ▼
+[1] Réception de l'information
+  │
+  ▼
 [2] Validation structurelle
-  â”‚
-  â–¼
+  │
+  ▼
 [3] Identification des produits cibles
-  â”‚
-  â–¼
-[4] Filtrage d'entrÃ©e
-  â”‚
-  â–¼
+  │
+  ▼
+[4] Filtrage d'entrée
+  │
+  ▼
 [5] Journalisation
-  â”‚
-  â–¼
-[6] Traduction information â†’ message
-  â”‚
-  â–¼
+  │
+  ▼
+[6] Traduction information → message
+  │
+  ▼
 [7] Filtrage de sortie
-  â”‚
-  â–¼
+  │
+  ▼
 [8] Distribution aux produits
-  â”‚
-  â–¼
+  │
+  ▼
 [9] Transmission aux produits
-  â”‚
-  â–¼
+  │
+  ▼
 PRODUITS
 ```
 
 ---
 
-## 6. Ã‰tapes dÃ©taillÃ©es
+## 6. Étapes détaillées
 
-### 6.1 Ã‰tape 1 : RÃ©ception de l'information
+### 6.1 Étape 1 : Réception de l'information
 
-**DÃ©clencheur :** Une autoritÃ© (Kind Mother ou Strong Father) Ã©met une information via son adaptateur.
+**Déclencheur :** Une autorité (Kind Mother ou Strong Father) émet une information via son adaptateur.
 
-**Action :** Bonding Brother reÃ§oit l'information dans le vocabulaire et le format de l'autoritÃ©.
+**Action :** Bonding Brother reçoit l'information dans le vocabulaire et le format de l'autorité.
 
-**Types d'informations reÃ§ues :**
+**Types d'informations reçues :**
 - Notifications
-- Ã‰vÃ©nements
+- Événements
 - Synchronisations
-- RÃ©sultats diffÃ©rÃ©s
+- Résultats différés
 
-**Validation :** Aucune validation Ã  ce stade, uniquement rÃ©ception.
+**Validation :** Aucune validation à ce stade, uniquement réception.
 
-**RÃ©sultat :** Information reÃ§ue, Ã©tat `REÃ‡UE`.
+**Résultat :** Information reçue, état `REÇUE`.
 
-**RÃ¨gle REC-01 : RÃ©ception immÃ©diate**
+**Règle REC-01 : Réception immédiate**
 
-Bonding Brother accepte immÃ©diatement toute information structurellement valide, mÃªme si la validation sÃ©mantique Ã©choue plus tard.
+Bonding Brother accepte immédiatement toute information structurellement valide, même si la validation sémantique échoue plus tard.
 
-**RÃ¨gle REC-02 : Pas de rejet prÃ©coce**
+**Règle REC-02 : Pas de rejet précoce**
 
-Aucun rejet n'est effectuÃ© Ã  cette Ã©tape, sauf si l'information n'est pas un format valide.
+Aucun rejet n'est effectué à cette étape, sauf si l'information n'est pas un format valide.
 
 ---
 
-### 6.2 Ã‰tape 2 : Validation structurelle
+### 6.2 Étape 2 : Validation structurelle
 
-**DÃ©clencheur :** Information reÃ§ue et parsÃ©e.
+**Déclencheur :** Information reçue et parsée.
 
-**Action :** Bonding Brother valide la structure de l'information selon le schÃ©ma dÃ©fini par l'autoritÃ© Ã©mettrice.
+**Action :** Bonding Brother valide la structure de l'information selon le schéma défini par l'autorité émettrice.
 
-**Validations effectuÃ©es :**
+**Validations effectuées :**
 - Format valide (JSON, protobuf, etc.)
-- PrÃ©sence des champs obligatoires
-- Types de donnÃ©es conformes
-- CohÃ©rence des mÃ©tadonnÃ©es
+- Présence des champs obligatoires
+- Types de données conformes
+- Cohérence des métadonnées
 
-**RÃ©sultat :**
-- Si validation rÃ©ussie : Ã‰tat `VALIDÃ‰E`, passage Ã  l'Ã©tape suivante
-- Si validation Ã©choue : Ã‰tat `REJETÃ‰E`, information ignorÃ©e (journalisÃ©e pour audit)
+**Résultat :**
+- Si validation réussie : État `VALIDÉE`, passage à l'étape suivante
+- Si validation échoue : État `REJETÉE`, information ignorée (journalisée pour audit)
 
-**RÃ¨gle VAL-01 : Validation stricte**
+**Règle VAL-01 : Validation stricte**
 
-Toute information non conforme est rejetÃ©e immÃ©diatement, sans tentative de correction.
+Toute information non conforme est rejetée immédiatement, sans tentative de correction.
 
-**RÃ¨gle VAL-02 : Pas de validation mÃ©tier**
+**Règle VAL-02 : Pas de validation métier**
 
-Bonding Brother ne valide pas le contenu mÃ©tier de l'information. Il valide uniquement la structure.
+Bonding Brother ne valide pas le contenu métier de l'information. Il valide uniquement la structure.
 
 ---
 
-### 6.3 Ã‰tape 3 : Identification des produits cibles
+### 6.3 Étape 3 : Identification des produits cibles
 
-**DÃ©clencheur :** Information validÃ©e structurellement.
+**Déclencheur :** Information validée structurellement.
 
 **Action :** Bonding Brother identifie les produits qui doivent recevoir cette information.
 
-**MÃ©thodes d'identification :**
-- **Explicite :** L'autoritÃ© spÃ©cifie explicitement les produits cibles
-- **Implicite :** Bonding Brother dÃ©termine les produits cibles selon des rÃ¨gles :
-  - Produits abonnÃ©s Ã  un type d'Ã©vÃ©nement
-  - Produits concernÃ©s par une ressource
-  - Produits ayant soumis une intention liÃ©e
-  - Produits dans un contexte spÃ©cifique
+**Méthodes d'identification :**
+- **Explicite :** L'autorité spécifie explicitement les produits cibles
+- **Implicite :** Bonding Brother détermine les produits cibles selon des règles :
+  - Produits abonnés à un type d'événement
+  - Produits concernés par une ressource
+  - Produits ayant soumis une intention liée
+  - Produits dans un contexte spécifique
 
-**RÃ©sultat :** Liste de produits cibles identifiÃ©e, passage Ã  l'Ã©tape suivante.
+**Résultat :** Liste de produits cibles identifiée, passage à l'étape suivante.
 
-**RÃ¨gle IDENT-01 : Identification dÃ©terministe**
+**Règle IDENT-01 : Identification déterministe**
 
-L'identification des produits cibles est dÃ©terministe : pour une mÃªme information, les mÃªmes produits sont identifiÃ©s.
+L'identification des produits cibles est déterministe : pour une même information, les mêmes produits sont identifiés.
 
-**RÃ¨gle IDENT-02 : Pas de produits inconnus**
+**Règle IDENT-02 : Pas de produits inconnus**
 
-Seuls les produits enregistrÃ©s et actifs peuvent Ãªtre cibles. Les produits inconnus sont ignorÃ©s.
+Seuls les produits enregistrés et actifs peuvent être cibles. Les produits inconnus sont ignorés.
 
-**RÃ¨gle IDENT-03 : Liste vide autorisÃ©e**
+**Règle IDENT-03 : Liste vide autorisée**
 
-Si aucun produit n'est identifiÃ©, l'information est journalisÃ©e mais non distribuÃ©e.
-
----
-
-### 6.4 Ã‰tape 4 : Filtrage d'entrÃ©e
-
-**DÃ©clencheur :** Produits cibles identifiÃ©s.
-
-**Action :** Bonding Brother applique les rÃ¨gles de filtrage d'entrÃ©e pour dÃ©terminer si l'information doit Ãªtre distribuÃ©e.
-
-**Filtrages appliquÃ©s :**
-- VÃ©rification de la pertinence pour chaque produit
-- Application des rÃ¨gles de sÃ©curitÃ©
-- VÃ©rification des permissions de rÃ©ception
-- Filtrage des informations obsolÃ¨tes ou redondantes
-
-**RÃ©sultat :**
-- Si filtrage accepte : Ã‰tat `FILTRÃ‰E`, passage Ã  l'Ã©tape suivante
-- Si filtrage rejette pour tous les produits : Ã‰tat `REJETÃ‰E`, information non distribuÃ©e
-
-**RÃ¨gle FILT-01 : Filtrage par produit**
-
-Le filtrage est effectuÃ© pour chaque produit cible individuellement. Un produit peut recevoir l'information mÃªme si d'autres la rejettent.
-
-**RÃ¨gle FILT-02 : Pas de dÃ©cision mÃ©tier**
-
-Le filtrage ne prend pas de dÃ©cision mÃ©tier. Il applique uniquement des rÃ¨gles techniques et de sÃ©curitÃ©.
+Si aucun produit n'est identifié, l'information est journalisée mais non distribuée.
 
 ---
 
-### 6.5 Ã‰tape 5 : Journalisation
+### 6.4 Étape 4 : Filtrage d'entrée
 
-**DÃ©clencheur :** Information filtrÃ©e et prÃªte pour distribution.
+**Déclencheur :** Produits cibles identifiés.
 
-**Action :** Bonding Brother journalise l'information complÃ¨te dans le journal d'audit.
+**Action :** Bonding Brother applique les règles de filtrage d'entrée pour déterminer si l'information doit être distribuée.
 
-**Informations journalisÃ©es :**
-- Information complÃ¨te (structure + donnÃ©es)
-- AutoritÃ© Ã©mettrice
-- Produits cibles identifiÃ©s
-- Timestamp de rÃ©ception
-- Ã‰tat actuel (`JOURNALISÃ‰E`)
+**Filtrages appliqués :**
+- Vérification de la pertinence pour chaque produit
+- Application des règles de sécurité
+- Vérification des permissions de réception
+- Filtrage des informations obsolètes ou redondantes
 
-**RÃ©sultat :** Information journalisÃ©e, Ã©tat `JOURNALISÃ‰E`, passage Ã  l'Ã©tape suivante.
+**Résultat :**
+- Si filtrage accepte : État `FILTRÉE`, passage à l'étape suivante
+- Si filtrage rejette pour tous les produits : État `REJETÉE`, information non distribuée
 
-**RÃ¨gle JOUR-01 : Journalisation systÃ©matique**
+**Règle FILT-01 : Filtrage par produit**
 
-Toute information qui atteint cette Ã©tape est journalisÃ©e, sans exception.
+Le filtrage est effectué pour chaque produit cible individuellement. Un produit peut recevoir l'information même si d'autres la rejettent.
 
-**RÃ¨gle JOUR-02 : ImmuabilitÃ©**
+**Règle FILT-02 : Pas de décision métier**
 
-Une fois journalisÃ©e, l'information ne peut Ãªtre modifiÃ©e.
-
-**RÃ¨gle JOUR-03 : TraÃ§abilitÃ© complÃ¨te**
-
-Le journal permet de tracer l'information complÃ¨te depuis sa rÃ©ception jusqu'Ã  sa distribution.
+Le filtrage ne prend pas de décision métier. Il applique uniquement des règles techniques et de sécurité.
 
 ---
 
-### 6.6 Ã‰tape 6 : Traduction information â†’ message
+### 6.5 Étape 5 : Journalisation
 
-**DÃ©clencheur :** Information journalisÃ©e et prÃªte pour traduction.
+**Déclencheur :** Information filtrée et prête pour distribution.
 
-**Action :** Bonding Brother traduit l'information (vocabulaire autoritÃ©) en message (vocabulaire produit) selon les rÃ¨gles du Translation Contract.
+**Action :** Bonding Brother journalise l'information complète dans le journal d'audit.
 
-**Transformations appliquÃ©es :**
+**Informations journalisées :**
+- Information complète (structure + données)
+- Autorité émettrice
+- Produits cibles identifiés
+- Timestamp de réception
+- État actuel (`JOURNALISÉE`)
+
+**Résultat :** Information journalisée, état `JOURNALISÉE`, passage à l'étape suivante.
+
+**Règle JOUR-01 : Journalisation systématique**
+
+Toute information qui atteint cette étape est journalisée, sans exception.
+
+**Règle JOUR-02 : Immuabilité**
+
+Une fois journalisée, l'information ne peut être modifiée.
+
+**Règle JOUR-03 : Traçabilité complète**
+
+Le journal permet de tracer l'information complète depuis sa réception jusqu'à sa distribution.
+
+---
+
+### 6.6 Étape 6 : Traduction information → message
+
+**Déclencheur :** Information journalisée et prête pour traduction.
+
+**Action :** Bonding Brother traduit l'information (vocabulaire autorité) en message (vocabulaire produit) selon les règles du Translation Contract.
+
+**Transformations appliquées :**
 - Mapping des types d'information vers les types de message
-- Traduction champ par champ des donnÃ©es
+- Traduction champ par champ des données
 - Adaptation du format au vocabulaire du produit
-- PrÃ©servation de la sÃ©mantique
+- Préservation de la sémantique
 
-**RÃ©sultat :** Message traduit pour chaque produit cible, prÃªt pour filtrage.
+**Résultat :** Message traduit pour chaque produit cible, prêt pour filtrage.
 
-**RÃ¨gle TRAD-01 : Traduction par produit**
+**Règle TRAD-01 : Traduction par produit**
 
-Chaque produit peut recevoir une traduction adaptÃ©e Ã  son vocabulaire spÃ©cifique.
+Chaque produit peut recevoir une traduction adaptée à son vocabulaire spécifique.
 
-**RÃ¨gle TRAD-02 : FidÃ©litÃ© sÃ©mantique**
+**Règle TRAD-02 : Fidélité sémantique**
 
-La traduction prÃ©serve intÃ©gralement la sÃ©mantique de l'information. Aucune interprÃ©tation ni enrichissement mÃ©tier n'est autorisÃ©.
+La traduction préserve intégralement la sémantique de l'information. Aucune interprétation ni enrichissement métier n'est autorisé.
 
-**RÃ¨gle TRAD-03 : DÃ©terminisme**
+**Règle TRAD-03 : Déterminisme**
 
-Pour une mÃªme information et un mÃªme produit, la traduction produit toujours le mÃªme message.
-
----
-
-### 6.7 Ã‰tape 7 : Filtrage de sortie
-
-**DÃ©clencheur :** Message traduit et prÃªt.
-
-**Action :** Bonding Brother applique les rÃ¨gles de filtrage de sortie pour chaque produit cible.
-
-**Filtrages appliquÃ©s :**
-- Suppression des informations sensibles non autorisÃ©es pour le produit
-- Adaptation des donnÃ©es selon les permissions du produit
-- Projection des champs nÃ©cessaires uniquement
-- Masquage des dÃ©tails internes de l'autoritÃ©
-
-**RÃ©sultat :** Message filtrÃ© pour chaque produit, prÃªt pour transmission.
-
-**RÃ¨gle FILT-S-01 : Filtrage protecteur**
-
-Le filtrage de sortie protÃ¨ge les autoritÃ©s en ne transmettant que les informations autorisÃ©es.
-
-**RÃ¨gle FILT-S-02 : Respect des permissions**
-
-Le filtrage respecte les permissions de chaque produit. Les informations non autorisÃ©es sont omises.
-
-**RÃ¨gle FILT-S-03 : Filtrage par produit**
-
-Chaque produit peut recevoir une version filtrÃ©e diffÃ©rente selon ses permissions.
+Pour une même information et un même produit, la traduction produit toujours le même message.
 
 ---
 
-### 6.8 Ã‰tape 8 : Distribution aux produits
+### 6.7 Étape 7 : Filtrage de sortie
 
-**DÃ©clencheur :** Messages filtrÃ©s et prÃªts.
+**Déclencheur :** Message traduit et prêt.
+
+**Action :** Bonding Brother applique les règles de filtrage de sortie pour chaque produit cible.
+
+**Filtrages appliqués :**
+- Suppression des informations sensibles non autorisées pour le produit
+- Adaptation des données selon les permissions du produit
+- Projection des champs nécessaires uniquement
+- Masquage des détails internes de l'autorité
+
+**Résultat :** Message filtré pour chaque produit, prêt pour transmission.
+
+**Règle FILT-S-01 : Filtrage protecteur**
+
+Le filtrage de sortie protège les autorités en ne transmettant que les informations autorisées.
+
+**Règle FILT-S-02 : Respect des permissions**
+
+Le filtrage respecte les permissions de chaque produit. Les informations non autorisées sont omises.
+
+**Règle FILT-S-03 : Filtrage par produit**
+
+Chaque produit peut recevoir une version filtrée différente selon ses permissions.
+
+---
+
+### 6.8 Étape 8 : Distribution aux produits
+
+**Déclencheur :** Messages filtrés et prêts.
 
 **Action :** Bonding Brother distribue les messages aux produits cibles via l'interface `INotificationSubscription` ou `IResultConsumption`.
 
 **Modes de distribution :**
-- **Push :** Transmission immÃ©diate au produit (si connectÃ©)
-- **Queue :** Mise en file d'attente pour transmission ultÃ©rieure (si dÃ©connectÃ©)
-- **Broadcast :** Distribution Ã  tous les produits cibles simultanÃ©ment
+- **Push :** Transmission immédiate au produit (si connecté)
+- **Queue :** Mise en file d'attente pour transmission ultérieure (si déconnecté)
+- **Broadcast :** Distribution à tous les produits cibles simultanément
 
-**RÃ©sultat :** Messages distribuÃ©s aux produits, passage Ã  l'Ã©tape suivante.
+**Résultat :** Messages distribués aux produits, passage à l'étape suivante.
 
-**RÃ¨gle DIST-01 : Distribution asynchrone**
+**Règle DIST-01 : Distribution asynchrone**
 
-La distribution est asynchrone. Bonding Brother ne bloque pas en attendant la rÃ©ception par les produits.
+La distribution est asynchrone. Bonding Brother ne bloque pas en attendant la réception par les produits.
 
-**RÃ¨gle DIST-02 : Gestion des dÃ©connexions**
+**Règle DIST-02 : Gestion des déconnexions**
 
-Si un produit est dÃ©connectÃ©, le message est mis en queue et transmis lors de la reconnexion.
+Si un produit est déconnecté, le message est mis en queue et transmis lors de la reconnexion.
 
-**RÃ¨gle DIST-03 : Pas de garantie de rÃ©ception**
+**Règle DIST-03 : Pas de garantie de réception**
 
-Bonding Brother garantit la transmission, pas la rÃ©ception. Les produits peuvent Ãªtre dÃ©connectÃ©s ou indisponibles.
+Bonding Brother garantit la transmission, pas la réception. Les produits peuvent être déconnectés ou indisponibles.
 
 ---
 
-### 6.9 Ã‰tape 9 : Transmission aux produits
+### 6.9 Étape 9 : Transmission aux produits
 
-**DÃ©clencheur :** Messages distribuÃ©s et produits identifiÃ©s.
+**Déclencheur :** Messages distribués et produits identifiés.
 
-**Action :** Bonding Brother transmet le message Ã  chaque produit cible via l'interface appropriÃ©e.
+**Action :** Bonding Brother transmet le message à chaque produit cible via l'interface appropriée.
 
-**Interfaces utilisÃ©es :**
-- `INotificationSubscription` : Pour les notifications et Ã©vÃ©nements
-- `IResultConsumption` : Pour les rÃ©sultats diffÃ©rÃ©s
+**Interfaces utilisées :**
+- `INotificationSubscription` : Pour les notifications et événements
+- `IResultConsumption` : Pour les résultats différés
 - `ISyncSubscription` : Pour les synchronisations
 
 **Contenu transmis :**
 - Type de message
-- DonnÃ©es traduites et filtrÃ©es
-- MÃ©tadonnÃ©es de traÃ§abilitÃ©
+- Données traduites et filtrées
+- Métadonnées de traçabilité
 - Timestamp
 
-**RÃ©sultat :** Messages transmis aux produits, Ã©tat `TRANSMISE`, cycle complet terminÃ©.
+**Résultat :** Messages transmis aux produits, état `TRANSMISE`, cycle complet terminé.
 
-**RÃ¨gle TRANS-01 : Transmission fidÃ¨le**
+**Règle TRANS-01 : Transmission fidèle**
 
-Le message est transmis intÃ©gralement au produit, sans modification supplÃ©mentaire.
+Le message est transmis intégralement au produit, sans modification supplémentaire.
 
-**RÃ¨gle TRANS-02 : Journalisation finale**
+**Règle TRANS-02 : Journalisation finale**
 
-La transmission du message est journalisÃ©e pour complÃ©ter la traÃ§abilitÃ©.
+La transmission du message est journalisée pour compléter la traçabilité.
 
-**RÃ¨gle TRANS-03 : Gestion des erreurs de transmission**
+**Règle TRANS-03 : Gestion des erreurs de transmission**
 
-Si la transmission Ã©choue pour un produit, le message est mis en queue pour retry ultÃ©rieur.
+Si la transmission échoue pour un produit, le message est mis en queue pour retry ultérieur.
 
 ---
 
@@ -398,50 +398,50 @@ Si la transmission Ã©choue pour un produit, le message est mis en queue pour r
 
 ### 7.1 Garantie d'ordre
 
-**Engagement :** Les Ã©tapes du flux sont exÃ©cutÃ©es dans l'ordre strict dÃ©fini. Aucune Ã©tape ne peut Ãªtre sautÃ©e ou rÃ©ordonnÃ©e.
+**Engagement :** Les étapes du flux sont exécutées dans l'ordre strict défini. Aucune étape ne peut être sautée ou réordonnée.
 
-**Exception :** En cas d'erreur, le flux peut Ãªtre interrompu et l'information peut Ãªtre ignorÃ©e ou mise en queue.
+**Exception :** En cas d'erreur, le flux peut être interrompu et l'information peut être ignorée ou mise en queue.
 
-### 7.2 Garantie de traÃ§abilitÃ©
+### 7.2 Garantie de traçabilité
 
-**Engagement :** Toute information qui traverse le flux est traÃ§able de bout en bout. Le journal contient toutes les informations nÃ©cessaires pour reconstruire le flux complet.
+**Engagement :** Toute information qui traverse le flux est traçable de bout en bout. Le journal contient toutes les informations nécessaires pour reconstruire le flux complet.
 
-### 7.3 Garantie de fidÃ©litÃ©
+### 7.3 Garantie de fidélité
 
-**Engagement :** La sÃ©mantique de l'information est prÃ©servÃ©e lors de la traduction et de la transmission. Les donnÃ©es sont adaptÃ©es au format, pas au contenu.
+**Engagement :** La sémantique de l'information est préservée lors de la traduction et de la transmission. Les données sont adaptées au format, pas au contenu.
 
 ### 7.4 Garantie de distribution
 
-**Engagement :** Bonding Brother garantit la transmission de l'information aux produits cibles identifiÃ©s, sous rÃ©serve de leur disponibilitÃ©.
+**Engagement :** Bonding Brother garantit la transmission de l'information aux produits cibles identifiés, sous réserve de leur disponibilité.
 
 ---
 
 ## 8. Gestion des erreurs
 
-### 8.1 Points d'Ã©chec
+### 8.1 Points d'échec
 
-Le flux peut Ã©chouer aux Ã©tapes suivantes :
-- **Ã‰tape 2** : Validation structurelle Ã©chouÃ©e â†’ Information ignorÃ©e
-- **Ã‰tape 3** : Aucun produit cible identifiÃ© â†’ Information journalisÃ©e mais non distribuÃ©e
-- **Ã‰tape 4** : Filtrage rejette pour tous les produits â†’ Information non distribuÃ©e
-- **Ã‰tape 6** : Traduction Ã©chouÃ©e â†’ Information ignorÃ©e pour le produit concernÃ©
-- **Ã‰tape 9** : Transmission Ã©chouÃ©e â†’ Message mis en queue pour retry
+Le flux peut échouer aux étapes suivantes :
+- **Étape 2** : Validation structurelle échouée → Information ignorée
+- **Étape 3** : Aucun produit cible identifié → Information journalisée mais non distribuée
+- **Étape 4** : Filtrage rejette pour tous les produits → Information non distribuée
+- **Étape 6** : Traduction échouée → Information ignorée pour le produit concerné
+- **Étape 9** : Transmission échouée → Message mis en queue pour retry
 
 ### 8.2 Traitement des erreurs
 
-**RÃ¨gle ERR-01 : Journalisation des erreurs**
+**Règle ERR-01 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisÃ©es pour audit et analyse.
+Toutes les erreurs sont journalisées pour audit et analyse.
 
-**RÃ¨gle ERR-02 : Pas de retry automatique pour erreurs structurelles**
+**Règle ERR-02 : Pas de retry automatique pour erreurs structurelles**
 
-Les erreurs de validation ou de traduction ne sont pas retentÃ©es automatiquement (ce ne sont pas des erreurs transitoires).
+Les erreurs de validation ou de traduction ne sont pas retentées automatiquement (ce ne sont pas des erreurs transitoires).
 
-**RÃ¨gle ERR-03 : Retry pour erreurs de transmission**
+**Règle ERR-03 : Retry pour erreurs de transmission**
 
-Les erreurs de transmission sont retentÃ©es lors de la reconnexion du produit.
+Les erreurs de transmission sont retentées lors de la reconnexion du produit.
 
-**RÃ¨gle ERR-04 : Isolation des erreurs**
+**Règle ERR-04 : Isolation des erreurs**
 
 Une erreur pour un produit n'affecte pas la distribution aux autres produits.
 
@@ -451,107 +451,107 @@ Une erreur pour un produit n'affecte pas la distribution aux autres produits.
 
 ### 9.1 Comportement en mode offline
 
-En mode offline, les Ã©tapes 8 et 9 peuvent Ãªtre diffÃ©rÃ©es :
+En mode offline, les étapes 8 et 9 peuvent être différées :
 
-- **Ã‰tape 8** : La distribution est mise en queue
-- **Ã‰tape 9** : La transmission est diffÃ©rÃ©e jusqu'Ã  la reconnexion
+- **Étape 8** : La distribution est mise en queue
+- **Étape 9** : La transmission est différée jusqu'à la reconnexion
 
-Les Ã©tapes 1 Ã  7 continuent de fonctionner normalement.
+Les étapes 1 à 7 continuent de fonctionner normalement.
 
-### 9.2 Synchronisation Ã  la reconnexion
+### 9.2 Synchronisation à la reconnexion
 
 Lors de la reconnexion d'un produit, Bonding Brother :
 1. Transmet tous les messages en queue pour ce produit
 2. Respecte l'ordre chronologique
-3. GÃ¨re les doublons et les messages obsolÃ¨tes
+3. Gère les doublons et les messages obsolètes
 
-Voir [Sync & Reconnection Contract](../offline/BondingBrother%20-%20Sync%20%26%20Reconnection%20Contract.md) pour les dÃ©tails.
+Voir [Sync & Reconnection Contract](../offline/BondingBrother%20-%20Sync%20%26%20Reconnection%20Contract.md) pour les détails.
 
 ---
 
 ## 10. Performance et limites
 
-### 10.1 DÃ©lais
+### 10.1 Délais
 
-**DÃ©lai de traitement :** Le dÃ©lai total dÃ©pend de :
-- Temps de validation (instantanÃ©)
-- Temps d'identification des produits (instantanÃ©)
-- Temps de filtrage (instantanÃ©)
-- Temps de traduction (instantanÃ©)
-- Temps de filtrage de sortie (instantanÃ©)
+**Délai de traitement :** Le délai total dépend de :
+- Temps de validation (instantané)
+- Temps d'identification des produits (instantané)
+- Temps de filtrage (instantané)
+- Temps de traduction (instantané)
+- Temps de filtrage de sortie (instantané)
 - Temps de transmission aux produits (variable)
 
-**DÃ©lai de distribution :** Asynchrone, non bloquant
+**Délai de distribution :** Asynchrone, non bloquant
 
 ### 10.2 Limites
 
 **Taille maximale d'information :** 1 MB (configurable)
-**Nombre de produits cibles :** IllimitÃ© (sous rÃ©serve de ressources)
+**Nombre de produits cibles :** Illimité (sous réserve de ressources)
 **Taille de la queue :** Configurable par produit
 
 ---
 
 ## 11. Exemples
 
-### 11.1 Flux complet : Notification de crÃ©ation de contenu
+### 11.1 Flux complet : Notification de création de contenu
 
 ```
-1. Kind Mother Ã©met notification : content crÃ©Ã© (content_id = "content-123")
-2. Validation structurelle : âœ…
+1. Kind Mother émet notification : content créé (content_id = "content-123")
+2. Validation structurelle : ✅
 3. Identification produits : ["miyukini-cms", "miyukini-publisher"]
-4. Filtrage d'entrÃ©e : âœ… pour les deux produits
-5. Journalisation : âœ…
-6. Traduction : content crÃ©Ã© â†’ notification_content_created (vocabulaire produit)
-7. Filtrage de sortie : âœ… (donnÃ©es adaptÃ©es selon permissions)
+4. Filtrage d'entrée : ✅ pour les deux produits
+5. Journalisation : ✅
+6. Traduction : content créé → notification_content_created (vocabulaire produit)
+7. Filtrage de sortie : ✅ (données adaptées selon permissions)
 8. Distribution : Push aux deux produits
-9. Transmission : âœ… aux deux produits
+9. Transmission : ✅ aux deux produits
 ```
 
 ### 11.2 Flux avec filtrage : Information non pertinente
 
 ```
-1. Strong Father Ã©met Ã©vÃ©nement : permission modifiÃ©e (user_id = "user-456")
-2. Validation structurelle : âœ…
+1. Strong Father émet événement : permission modifiée (user_id = "user-456")
+2. Validation structurelle : ✅
 3. Identification produits : ["miyukini-cms", "miyukini-auth"]
-4. Filtrage d'entrÃ©e : 
-   - "miyukini-cms" : âœ… (intÃ©ressÃ© par les permissions)
-   - "miyukini-auth" : âŒ (non concernÃ© par cette modification)
-5. Journalisation : âœ…
+4. Filtrage d'entrée : 
+   - "miyukini-cms" : ✅ (intéressé par les permissions)
+   - "miyukini-auth" : ❌ (non concerné par cette modification)
+5. Journalisation : ✅
 6. Traduction : Pour "miyukini-cms" uniquement
-7. Filtrage de sortie : âœ…
-8. Distribution : Push Ã  "miyukini-cms" uniquement
-9. Transmission : âœ… Ã  "miyukini-cms"
+7. Filtrage de sortie : ✅
+8. Distribution : Push à "miyukini-cms" uniquement
+9. Transmission : ✅ à "miyukini-cms"
 ```
 
-### 11.3 Flux avec queue : Produit dÃ©connectÃ©
+### 11.3 Flux avec queue : Produit déconnecté
 
 ```
-1-7. (identique Ã  l'exemple 11.1)
+1-7. (identique à l'exemple 11.1)
 8. Distribution : 
-   - "miyukini-cms" : Push immÃ©diat (connectÃ©) âœ…
-   - "miyukini-publisher" : Queue (dÃ©connectÃ©) â³
+   - "miyukini-cms" : Push immédiat (connecté) ✅
+   - "miyukini-publisher" : Queue (déconnecté) ⏳
 9. Transmission : 
-   - "miyukini-cms" : âœ…
+   - "miyukini-cms" : ✅
    - "miyukini-publisher" : Mise en queue
    
 [Reconnexion de "miyukini-publisher"]
-â†’ Transmission du message en queue âœ…
+→ Transmission du message en queue ✅
 ```
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit le flux dÃ©taillÃ© que Bonding Brother doit respecter pour traiter les informations de l'Ã©cosystÃ¨me vers les produits.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit le flux détaillé que Bonding Brother doit respecter pour traiter les informations de l'écosystème vers les produits.
 
-Toute implÃ©mentation du flux Ã‰cosystÃ¨me â†’ Produit doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
+Toute implémentation du flux Écosystème → Produit doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) v2.0 (Section 5)
 - [Bilateral Flow Contract](./BondingBrother%20-%20Bilateral%20Flow%20Contract.md) v2.0
 - [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md) v2.0

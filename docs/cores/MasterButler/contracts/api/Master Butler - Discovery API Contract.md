@@ -1,105 +1,105 @@
-﻿# Master Butler â€” Discovery API Contract
+﻿# Master Butler — Discovery API Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **Master Butler Discovery API Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit l'API de dÃ©couverte des capacitÃ©s et permissions dans le systÃ¨me Miyukini Core System v2.4.
+Ce document définit le **Master Butler Discovery API Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit l'API de découverte des capacités et permissions dans le système Miyukini Core System v2.4.
 
-Ce contrat dÃ©finit :
+Ce contrat définit :
 
-- Les opÃ©rations de dÃ©couverte disponibles
-- Les modes de dÃ©couverte (par module, par type, par contexte)
-- Les rÃ¨gles de filtrage et de visibilitÃ©
-- Les rÃ©ponses standardisÃ©es
-- Les invariants de l'API de dÃ©couverte
+- Les opérations de découverte disponibles
+- Les modes de découverte (par module, par type, par contexte)
+- Les règles de filtrage et de visibilité
+- Les réponses standardisées
+- Les invariants de l'API de découverte
 - Les interactions avec les autres composants
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toute opÃ©ration de dÃ©couverte** via Master Butler et dÃ©finit de maniÃ¨re absolue :
+Ce contrat s'applique à **toute opération de découverte** via Master Butler et définit de manière absolue :
 
-- La dÃ©couverte des capacitÃ©s par module
-- La dÃ©couverte des capacitÃ©s par type d'action
-- La dÃ©couverte des permissions par capacitÃ©
-- La dÃ©couverte du contexte de capacitÃ©
+- La découverte des capacités par module
+- La découverte des capacités par type d'action
+- La découverte des permissions par capacité
+- La découverte du contexte de capacité
 - Le filtrage selon le contexte demandeur
-- Les rÃ¨gles de visibilitÃ© et d'accÃ¨s
+- Les règles de visibilité et d'accès
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues que Master Butler applique sans exception. Ces rÃ¨gles ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues que Master Butler applique sans exception. Ces règles ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complÃ¨te les documents contractuels existants :
+Ce contrat complète les documents contractuels existants :
 
-- **[Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : DÃ©finit la nature, le rÃ´le, et les responsabilitÃ©s de Master Butler
-- **[Master Butler - Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md)** : DÃ©finit le registre des capacitÃ©s (source des donnÃ©es dÃ©couvertes)
-- **[Master Butler - Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md)** : DÃ©finit le registre des permissions (source des donnÃ©es dÃ©couvertes)
-- **[Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)** : DÃ©finitions canoniques des termes
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dÃ©pendance externe critique) et **LOI-5** (coÃ»t proportionnel au hardware)
+- **[Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md)** : Définit la nature, le rôle, et les responsabilités de Master Butler
+- **[Master Butler - Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md)** : Définit le registre des capacités (source des données découvertes)
+- **[Master Butler - Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md)** : Définit le registre des permissions (source des données découvertes)
+- **[Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Définitions canoniques des termes
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Ce contrat respecte **LOI-1** (aucune dépendance externe critique) et **LOI-5** (coût proportionnel au hardware)
 
-**ComplÃ©mentaritÃ© :**
+**Complémentarité :**
 
-- Capability Registry Contract = structure et gestion des capacitÃ©s
+- Capability Registry Contract = structure et gestion des capacités
 - Permission Registry Contract = structure et gestion des permissions
-- Discovery API Contract = mÃ©canismes de dÃ©couverte et d'exploration
+- Discovery API Contract = mécanismes de découverte et d'exploration
 
-Ces contrats forment ensemble le systÃ¨me complet de gestion et d'exploration des capacitÃ©s et permissions.
+Ces contrats forment ensemble le système complet de gestion et d'exploration des capacités et permissions.
 
 ---
 
-## 2. DÃ©finition de la DÃ©couverte
+## 2. Définition de la Découverte
 
-### DÃ©finition canonique
+### Définition canonique
 
-La **dÃ©couverte** est le processus par lequel un composant interroge Master Butler pour connaÃ®tre les capacitÃ©s et permissions existantes dans le systÃ¨me. La dÃ©couverte permet l'exploration dynamique des possibilitÃ©s du systÃ¨me.
+La **découverte** est le processus par lequel un composant interroge Master Butler pour connaître les capacités et permissions existantes dans le système. La découverte permet l'exploration dynamique des possibilités du système.
 
 **Phrase fondatrice :**
 
-> **La dÃ©couverte expose ce qui est possible, sans jamais suggÃ©rer ce qui est autorisÃ©.**
+> **La découverte expose ce qui est possible, sans jamais suggérer ce qui est autorisé.**
 
-### CaractÃ©ristiques de la dÃ©couverte
+### Caractéristiques de la découverte
 
-| CaractÃ©ristique | Description |
+| Caractéristique | Description |
 |-----------------|-------------|
-| **Non-intrusive** | La dÃ©couverte ne modifie pas les registres |
-| **Contextuelle** | Les rÃ©sultats peuvent Ãªtre filtrÃ©s selon le contexte |
-| **Exhaustive** | Retourne toutes les informations pertinentes selon les critÃ¨res |
-| **TraÃ§able** | Les requÃªtes de dÃ©couverte sont journalisÃ©es |
-| **Accessible** | Disponible pour tous les composants autorisÃ©s |
+| **Non-intrusive** | La découverte ne modifie pas les registres |
+| **Contextuelle** | Les résultats peuvent être filtrés selon le contexte |
+| **Exhaustive** | Retourne toutes les informations pertinentes selon les critères |
+| **Traçable** | Les requêtes de découverte sont journalisées |
+| **Accessible** | Disponible pour tous les composants autorisés |
 
-### Nature de la dÃ©couverte
+### Nature de la découverte
 
-La dÃ©couverte est une opÃ©ration de **lecture seule** qui permet aux composants de :
+La découverte est une opération de **lecture seule** qui permet aux composants de :
 
-1. Explorer les capacitÃ©s disponibles dans le systÃ¨me
-2. Identifier les permissions associÃ©es Ã  des capacitÃ©s
-3. Calculer les capacitÃ©s accessibles dans un contexte donnÃ©
-4. Comprendre la structure des modules et leurs capacitÃ©s
+1. Explorer les capacités disponibles dans le système
+2. Identifier les permissions associées à des capacités
+3. Calculer les capacités accessibles dans un contexte donné
+4. Comprendre la structure des modules et leurs capacités
 
-**Important :** La dÃ©couverte fournit des informations, mais ne constitue jamais une autorisation. La dÃ©cision d'autorisation appartient exclusivement Ã  StrongFather.
+**Important :** La découverte fournit des informations, mais ne constitue jamais une autorisation. La décision d'autorisation appartient exclusivement à StrongFather.
 
-### Distinction dÃ©couverte vs autorisation
+### Distinction découverte vs autorisation
 
-| Aspect | DÃ©couverte | Autorisation |
+| Aspect | Découverte | Autorisation |
 |--------|------------|--------------|
-| **DÃ©finition** | Exploration de ce qui existe | DÃ©cision d'accorder un accÃ¨s |
+| **Définition** | Exploration de ce qui existe | Décision d'accorder un accès |
 | **Responsable** | Master Butler | StrongFather |
-| **Nature** | Lecture seule, informative | DÃ©cisionnelle |
+| **Nature** | Lecture seule, informative | Décisionnelle |
 | **Question** | "Qu'existe-t-il ?" | "Est-ce permis ?" |
-| **Modification** | Aucune | Peut modifier l'Ã©tat d'autorisation |
+| **Modification** | Aucune | Peut modifier l'état d'autorisation |
 
 ---
 
-## 3. Modes de DÃ©couverte
+## 3. Modes de Découverte
 
-### 3.1. DÃ©couverte par Module (DiscoverByModule)
+### 3.1. Découverte par Module (DiscoverByModule)
 
-**Ã‰noncÃ© :**
+**Énoncé :**
 
-L'opÃ©ration **DiscoverByModule** permet de dÃ©couvrir toutes les capacitÃ©s dÃ©clarÃ©es par un module spÃ©cifique.
+L'opération **DiscoverByModule** permet de découvrir toutes les capacités déclarées par un module spécifique.
 
 **Signature conceptuelle :**
 
@@ -107,17 +107,17 @@ L'opÃ©ration **DiscoverByModule** permet de dÃ©couvrir toutes les capacitÃ�
 DiscoverByModule(
   module_id: ModuleIdentifier,
   filter: DiscoveryFilter?
-) â†’ Result<DiscoveryResult, DiscoveryError>
+) → Result<DiscoveryResult, DiscoveryError>
 ```
 
-**ParamÃ¨tres :**
+**Paramètres :**
 
-| ParamÃ¨tre | Type | Obligatoire | Description |
+| Paramètre | Type | Obligatoire | Description |
 |-----------|------|-------------|-------------|
-| `module_id` | ModuleIdentifier | âœ… Oui | Identifiant du module source |
-| `filter` | DiscoveryFilter | âŒ Non | Filtres optionnels (statut, catÃ©gorie) |
+| `module_id` | ModuleIdentifier | ✅ Oui | Identifiant du module source |
+| `filter` | DiscoveryFilter | ❌ Non | Filtres optionnels (statut, catégorie) |
 
-**RÃ©sultat :**
+**Résultat :**
 
 ```
 DiscoveryResult {
@@ -140,7 +140,7 @@ CapabilitySummary {
 **Exemples d'utilisation :**
 
 ```yaml
-# DÃ©couvrir toutes les capacitÃ©s du module CMS Content
+# Découvrir toutes les capacités du module CMS Content
 request:
   operation: DiscoverByModule
   module_id: "spm.cms.content"
@@ -151,7 +151,7 @@ response:
   data:
     capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
+        name: "Créer du contenu"
         category: "Data"
         status: "Active"
         associated_permissions: ["content.create.any", "content.create.own"]
@@ -164,17 +164,17 @@ response:
     filtered_count: 8
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
 - R-DBM-1 : Le module doit exister dans le registre
-- R-DBM-2 : Seules les capacitÃ©s avec statut correspondant au filtre sont retournÃ©es
-- R-DBM-3 : Les capacitÃ©s confidentielles sont filtrÃ©es selon le contexte demandeur
+- R-DBM-2 : Seules les capacités avec statut correspondant au filtre sont retournées
+- R-DBM-3 : Les capacités confidentielles sont filtrées selon le contexte demandeur
 
-### 3.2. DÃ©couverte par Type d'Action (DiscoverByAction)
+### 3.2. Découverte par Type d'Action (DiscoverByAction)
 
-**Ã‰noncÃ© :**
+**Énoncé :**
 
-L'opÃ©ration **DiscoverByAction** permet de dÃ©couvrir toutes les capacitÃ©s correspondant Ã  un type d'action donnÃ©.
+L'opération **DiscoverByAction** permet de découvrir toutes les capacités correspondant à un type d'action donné.
 
 **Signature conceptuelle :**
 
@@ -183,22 +183,22 @@ DiscoverByAction(
   action_type: ActionType,
   domain: DomainIdentifier?,
   filter: DiscoveryFilter?
-) â†’ Result<DiscoveryResult, DiscoveryError>
+) → Result<DiscoveryResult, DiscoveryError>
 ```
 
-**ParamÃ¨tres :**
+**Paramètres :**
 
-| ParamÃ¨tre | Type | Obligatoire | Description |
+| Paramètre | Type | Obligatoire | Description |
 |-----------|------|-------------|-------------|
-| `action_type` | ActionType | âœ… Oui | Type d'action (create, read, update, delete, etc.) |
-| `domain` | DomainIdentifier | âŒ Non | Domaine de filtrage optionnel |
-| `filter` | DiscoveryFilter | âŒ Non | Filtres additionnels |
+| `action_type` | ActionType | ✅ Oui | Type d'action (create, read, update, delete, etc.) |
+| `domain` | DomainIdentifier | ❌ Non | Domaine de filtrage optionnel |
+| `filter` | DiscoveryFilter | ❌ Non | Filtres additionnels |
 
 **Types d'actions standards :**
 
-| ActionType | Description | Exemples de capacitÃ©s |
+| ActionType | Description | Exemples de capacités |
 |------------|-------------|----------------------|
-| `create` | Actions de crÃ©ation | `content.create`, `media.upload` |
+| `create` | Actions de création | `content.create`, `media.upload` |
 | `read` | Actions de lecture | `content.read`, `user.profile.view` |
 | `update` | Actions de modification | `content.edit`, `hierarchy.reorder` |
 | `delete` | Actions de suppression | `content.delete`, `media.remove` |
@@ -210,7 +210,7 @@ DiscoverByAction(
 **Exemples d'utilisation :**
 
 ```yaml
-# DÃ©couvrir toutes les capacitÃ©s de type "create" dans le domaine "content"
+# Découvrir toutes les capacités de type "create" dans le domaine "content"
 request:
   operation: DiscoverByAction
   action_type: "create"
@@ -221,25 +221,25 @@ response:
   data:
     capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
+        name: "Créer du contenu"
         source: "spm.cms.content"
       - id: "content.draft.create"
-        name: "CrÃ©er un brouillon"
+        name: "Créer un brouillon"
         source: "spm.cms.content"
     total_count: 2
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
 - R-DBA-1 : Le type d'action est obligatoire
 - R-DBA-2 : Le domaine est optionnel et sert de filtre
-- R-DBA-3 : La correspondance est basÃ©e sur le segment d'action dans l'identifiant
+- R-DBA-3 : La correspondance est basée sur le segment d'action dans l'identifiant
 
-### 3.3. DÃ©couverte par CatÃ©gorie (DiscoverByCategory)
+### 3.3. Découverte par Catégorie (DiscoverByCategory)
 
-**Ã‰noncÃ© :**
+**Énoncé :**
 
-L'opÃ©ration **DiscoverByCategory** permet de dÃ©couvrir toutes les capacitÃ©s d'une catÃ©gorie fonctionnelle donnÃ©e.
+L'opération **DiscoverByCategory** permet de découvrir toutes les capacités d'une catégorie fonctionnelle donnée.
 
 **Signature conceptuelle :**
 
@@ -247,27 +247,27 @@ L'opÃ©ration **DiscoverByCategory** permet de dÃ©couvrir toutes les capacit�
 DiscoverByCategory(
   category: CapabilityCategory,
   filter: DiscoveryFilter?
-) â†’ Result<DiscoveryResult, DiscoveryError>
+) → Result<DiscoveryResult, DiscoveryError>
 ```
 
-**CatÃ©gories supportÃ©es :**
+**Catégories supportées :**
 
-| CatÃ©gorie | Description |
+| Catégorie | Description |
 |-----------|-------------|
-| `Data` | CapacitÃ©s liÃ©es aux donnÃ©es |
-| `Hierarchy` | CapacitÃ©s liÃ©es aux hiÃ©rarchies |
-| `Media` | CapacitÃ©s liÃ©es aux mÃ©dias |
-| `Search` | CapacitÃ©s liÃ©es Ã  la recherche |
-| `Auth` | CapacitÃ©s liÃ©es Ã  l'authentification |
-| `Admin` | CapacitÃ©s d'administration |
-| `UI` | CapacitÃ©s d'interface utilisateur |
-| `IO` | CapacitÃ©s d'entrÃ©e/sortie |
-| `System` | CapacitÃ©s systÃ¨me |
+| `Data` | Capacités liées aux données |
+| `Hierarchy` | Capacités liées aux hiérarchies |
+| `Media` | Capacités liées aux médias |
+| `Search` | Capacités liées à la recherche |
+| `Auth` | Capacités liées à l'authentification |
+| `Admin` | Capacités d'administration |
+| `UI` | Capacités d'interface utilisateur |
+| `IO` | Capacités d'entrée/sortie |
+| `System` | Capacités système |
 
 **Exemples d'utilisation :**
 
 ```yaml
-# DÃ©couvrir toutes les capacitÃ©s de la catÃ©gorie "Media"
+# Découvrir toutes les capacités de la catégorie "Media"
 request:
   operation: DiscoverByCategory
   category: "Media"
@@ -277,22 +277,22 @@ response:
   data:
     capabilities:
       - id: "media.upload"
-        name: "TÃ©lÃ©verser un mÃ©dia"
+        name: "Téléverser un média"
         source: "spm.cms.media"
       - id: "media.delete"
-        name: "Supprimer un mÃ©dia"
+        name: "Supprimer un média"
         source: "spm.cms.media"
       - id: "media.transform"
-        name: "Transformer un mÃ©dia"
+        name: "Transformer un média"
         source: "spm.cms.media"
     total_count: 6
 ```
 
-### 3.4. DÃ©couverte des Permissions par CapacitÃ© (DiscoverPermissionsForCapability)
+### 3.4. Découverte des Permissions par Capacité (DiscoverPermissionsForCapability)
 
-**Ã‰noncÃ© :**
+**Énoncé :**
 
-L'opÃ©ration **DiscoverPermissionsForCapability** permet de dÃ©couvrir toutes les permissions qui couvrent une capacitÃ© donnÃ©e.
+L'opération **DiscoverPermissionsForCapability** permet de découvrir toutes les permissions qui couvrent une capacité donnée.
 
 **Signature conceptuelle :**
 
@@ -300,17 +300,17 @@ L'opÃ©ration **DiscoverPermissionsForCapability** permet de dÃ©couvrir toute
 DiscoverPermissionsForCapability(
   capability_id: CapabilityId,
   include_implied: Boolean?
-) â†’ Result<PermissionDiscoveryResult, DiscoveryError>
+) → Result<PermissionDiscoveryResult, DiscoveryError>
 ```
 
-**ParamÃ¨tres :**
+**Paramètres :**
 
-| ParamÃ¨tre | Type | Obligatoire | Description |
+| Paramètre | Type | Obligatoire | Description |
 |-----------|------|-------------|-------------|
-| `capability_id` | CapabilityId | âœ… Oui | Identifiant de la capacitÃ© |
-| `include_implied` | Boolean | âŒ Non | Inclure les permissions impliquant d'autres permissions (dÃ©faut: true) |
+| `capability_id` | CapabilityId | ✅ Oui | Identifiant de la capacité |
+| `include_implied` | Boolean | ❌ Non | Inclure les permissions impliquant d'autres permissions (défaut: true) |
 
-**RÃ©sultat :**
+**Résultat :**
 
 ```
 PermissionDiscoveryResult {
@@ -333,7 +333,7 @@ PermissionSummary {
 **Exemples d'utilisation :**
 
 ```yaml
-# DÃ©couvrir les permissions pour la capacitÃ© "content.create"
+# Découvrir les permissions pour la capacité "content.create"
 request:
   operation: DiscoverPermissionsForCapability
   capability_id: "content.create"
@@ -344,34 +344,34 @@ response:
   data:
     capability:
       id: "content.create"
-      name: "CrÃ©er du contenu"
+      name: "Créer du contenu"
     direct_permissions:
       - id: "content.create.any"
-        name: "CrÃ©er n'importe quel contenu"
+        name: "Créer n'importe quel contenu"
         level: "ELEVATED"
         scope_type: "GLOBAL"
       - id: "content.create.own"
-        name: "CrÃ©er son propre contenu"
+        name: "Créer son propre contenu"
         level: "STANDARD"
         scope_type: "OWNED"
     implied_permissions:
       - id: "content.manage.all"
-        name: "Gestion complÃ¨te du contenu"
+        name: "Gestion complète du contenu"
         level: "CRITICAL"
         # Implique content.create.any
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
-- R-DPC-1 : La capacitÃ© doit exister dans le registre
-- R-DPC-2 : Les permissions RETIRED ne sont pas incluses par dÃ©faut
-- R-DPC-3 : Les permissions impliquÃ©es sont rÃ©solues rÃ©cursivement si include_implied=true
+- R-DPC-1 : La capacité doit exister dans le registre
+- R-DPC-2 : Les permissions RETIRED ne sont pas incluses par défaut
+- R-DPC-3 : Les permissions impliquées sont résolues récursivement si include_implied=true
 
-### 3.5. DÃ©couverte des CapacitÃ©s par Permission (DiscoverCapabilitiesForPermission)
+### 3.5. Découverte des Capacités par Permission (DiscoverCapabilitiesForPermission)
 
-**Ã‰noncÃ© :**
+**Énoncé :**
 
-L'opÃ©ration **DiscoverCapabilitiesForPermission** permet de dÃ©couvrir toutes les capacitÃ©s couvertes par une permission donnÃ©e.
+L'opération **DiscoverCapabilitiesForPermission** permet de découvrir toutes les capacités couvertes par une permission donnée.
 
 **Signature conceptuelle :**
 
@@ -379,17 +379,17 @@ L'opÃ©ration **DiscoverCapabilitiesForPermission** permet de dÃ©couvrir tout
 DiscoverCapabilitiesForPermission(
   permission_id: PermissionId,
   resolve_implied: Boolean?
-) â†’ Result<CapabilityDiscoveryResult, DiscoveryError>
+) → Result<CapabilityDiscoveryResult, DiscoveryError>
 ```
 
-**ParamÃ¨tres :**
+**Paramètres :**
 
-| ParamÃ¨tre | Type | Obligatoire | Description |
+| Paramètre | Type | Obligatoire | Description |
 |-----------|------|-------------|-------------|
-| `permission_id` | PermissionId | âœ… Oui | Identifiant de la permission |
-| `resolve_implied` | Boolean | âŒ Non | RÃ©soudre les permissions impliquÃ©es (dÃ©faut: true) |
+| `permission_id` | PermissionId | ✅ Oui | Identifiant de la permission |
+| `resolve_implied` | Boolean | ❌ Non | Résoudre les permissions impliquées (défaut: true) |
 
-**RÃ©sultat :**
+**Résultat :**
 
 ```
 CapabilityDiscoveryResult {
@@ -403,7 +403,7 @@ CapabilityDiscoveryResult {
 **Exemples d'utilisation :**
 
 ```yaml
-# DÃ©couvrir les capacitÃ©s couvertes par "content.manage.all"
+# Découvrir les capacités couvertes par "content.manage.all"
 request:
   operation: DiscoverCapabilitiesForPermission
   permission_id: "content.manage.all"
@@ -414,11 +414,11 @@ response:
   data:
     permission:
       id: "content.manage.all"
-      name: "Gestion complÃ¨te du contenu"
+      name: "Gestion complète du contenu"
     direct_capabilities: []
     implied_capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
+        name: "Créer du contenu"
       - id: "content.edit"
         name: "Modifier du contenu"
       - id: "content.delete"
@@ -427,34 +427,34 @@ response:
 
 ---
 
-## 4. Contexte de CapacitÃ©
+## 4. Contexte de Capacité
 
-### 4.1. DÃ©finition
+### 4.1. Définition
 
-Le **contexte de capacitÃ©** est l'ensemble des informations qui dÃ©finissent les capacitÃ©s et permissions disponibles dans une situation donnÃ©e.
+Le **contexte de capacité** est l'ensemble des informations qui définissent les capacités et permissions disponibles dans une situation donnée.
 
 **Composition du contexte :**
 
-| Ã‰lÃ©ment | Description |
+| Élément | Description |
 |---------|-------------|
-| `requester_identity` | IdentitÃ© du demandeur (utilisateur, systÃ¨me, produit) |
-| `requester_roles` | RÃ´les du demandeur |
-| `target_module` | Module ou composant ciblÃ© |
-| `security_level` | Niveau de sÃ©curitÃ© courant |
-| `environment` | Environnement d'exÃ©cution |
+| `requester_identity` | Identité du demandeur (utilisateur, système, produit) |
+| `requester_roles` | Rôles du demandeur |
+| `target_module` | Module ou composant ciblé |
+| `security_level` | Niveau de sécurité courant |
+| `environment` | Environnement d'exécution |
 
-### 4.2. Calcul du Contexte de CapacitÃ© (ComputeCapabilityContext)
+### 4.2. Calcul du Contexte de Capacité (ComputeCapabilityContext)
 
-**Ã‰noncÃ© :**
+**Énoncé :**
 
-L'opÃ©ration **ComputeCapabilityContext** permet de calculer les capacitÃ©s et permissions accessibles dans un contexte donnÃ©.
+L'opération **ComputeCapabilityContext** permet de calculer les capacités et permissions accessibles dans un contexte donné.
 
 **Signature conceptuelle :**
 
 ```
 ComputeCapabilityContext(
   context: ContextSpecification
-) â†’ Result<CapabilityContext, DiscoveryError>
+) → Result<CapabilityContext, DiscoveryError>
 ```
 
 **Structure du contexte :**
@@ -484,7 +484,7 @@ SecurityConstraints {
 }
 ```
 
-**RÃ©sultat :**
+**Résultat :**
 
 ```
 CapabilityContext {
@@ -507,7 +507,7 @@ Restriction {
 **Exemples d'utilisation :**
 
 ```yaml
-# Calculer le contexte pour un utilisateur avec le rÃ´le "editor"
+# Calculer le contexte pour un utilisateur avec le rôle "editor"
 request:
   operation: ComputeCapabilityContext
   context:
@@ -528,7 +528,7 @@ response:
       id: "user_123"
     accessible_capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
+        name: "Créer du contenu"
       - id: "content.edit"
         name: "Modifier du contenu"
       - id: "content.read"
@@ -547,26 +547,26 @@ response:
     computed_at: "2026-01-27T10:30:00Z"
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
-- R-CCC-1 : Le calcul de contexte est une projection, jamais une dÃ©cision
-- R-CCC-2 : Le contexte est calculÃ© Ã  la demande, jamais mis en cache dÃ©cisionnel
-- R-CCC-3 : Les restrictions de sÃ©curitÃ© sont toujours appliquÃ©es
-- R-CCC-4 : Le rÃ©sultat ne modifie pas les registres
+- R-CCC-1 : Le calcul de contexte est une projection, jamais une décision
+- R-CCC-2 : Le contexte est calculé à la demande, jamais mis en cache décisionnel
+- R-CCC-3 : Les restrictions de sécurité sont toujours appliquées
+- R-CCC-4 : Le résultat ne modifie pas les registres
 
-### 4.3. RÃ¨gles de Calcul du Contexte
+### 4.3. Règles de Calcul du Contexte
 
-| RÃ¨gle | Description | Impact |
+| Règle | Description | Impact |
 |-------|-------------|--------|
-| **R-CTX-1** | Les capacitÃ©s DEPRECATED sont incluses avec avertissement | VisibilitÃ© avec notice |
-| **R-CTX-2** | Les capacitÃ©s REMOVED sont exclues | Non visibles |
+| **R-CTX-1** | Les capacités DEPRECATED sont incluses avec avertissement | Visibilité avec notice |
+| **R-CTX-2** | Les capacités REMOVED sont exclues | Non visibles |
 | **R-CTX-3** | Les permissions DRAFT sont exclues | Non utilisables |
-| **R-CTX-4** | Le niveau de sÃ©curitÃ© filtre les capacitÃ©s | Exclusion si niveau insuffisant |
-| **R-CTX-5** | Les rÃ´les dÃ©terminent les permissions accessibles | Filtrage par association |
+| **R-CTX-4** | Le niveau de sécurité filtre les capacités | Exclusion si niveau insuffisant |
+| **R-CTX-5** | Les rôles déterminent les permissions accessibles | Filtrage par association |
 
 ---
 
-## 5. Filtres de DÃ©couverte
+## 5. Filtres de Découverte
 
 ### 5.1. Structure du Filtre
 
@@ -577,8 +577,8 @@ DiscoveryFilter {
   level: List<Level>?,          // STANDARD, ELEVATED, CRITICAL, SYSTEM
   scope_type: List<ScopeType>?, // GLOBAL, SCOPED, OWNED, CONTEXTUAL
   tags: List<String>?,          // Tags de recherche
-  created_after: Timestamp?,    // Date de crÃ©ation minimum
-  created_before: Timestamp?,   // Date de crÃ©ation maximum
+  created_after: Timestamp?,    // Date de création minimum
+  created_before: Timestamp?,   // Date de création maximum
   source_type: List<SourceType>?, // Module, Core, Operator, Tool
   search_query: String?         // Recherche textuelle
 }
@@ -586,27 +586,27 @@ DiscoveryFilter {
 
 ### 5.2. Application des Filtres
 
-Les filtres sont combinÃ©s avec une logique **AND** :
+Les filtres sont combinés avec une logique **AND** :
 
 ```yaml
-# Exemple : CapacitÃ©s Active OU Deprecated, de catÃ©gorie Data, de niveau STANDARD
+# Exemple : Capacités Active OU Deprecated, de catégorie Data, de niveau STANDARD
 filter:
   status: ["Active", "Deprecated"]  # Active OR Deprecated
   category: ["Data"]                 # AND category = Data
   level: ["STANDARD"]                # AND level = STANDARD
-# RÃ©sultat : (status IN [Active, Deprecated]) AND (category = Data) AND (level = STANDARD)
+# Résultat : (status IN [Active, Deprecated]) AND (category = Data) AND (level = STANDARD)
 ```
 
 ### 5.3. Pagination
 
-Les rÃ©sultats de dÃ©couverte supportent la pagination :
+Les résultats de découverte supportent la pagination :
 
 ```
 PaginationParams {
-  offset: Integer,    // DÃ©calage (dÃ©faut: 0)
-  limit: Integer,     // Nombre max de rÃ©sultats (dÃ©faut: 50, max: 500)
-  sort_by: String,    // Champ de tri (dÃ©faut: "id")
-  sort_order: SortOrder  // ASC ou DESC (dÃ©faut: ASC)
+  offset: Integer,    // Décalage (défaut: 0)
+  limit: Integer,     // Nombre max de résultats (défaut: 50, max: 500)
+  sort_by: String,    // Champ de tri (défaut: "id")
+  sort_order: SortOrder  // ASC ou DESC (défaut: ASC)
 }
 
 PaginatedResult {
@@ -620,11 +620,11 @@ PaginatedResult {
 
 ---
 
-## 6. RÃ©ponses StandardisÃ©es
+## 6. Réponses Standardisées
 
-### 6.1. Structure de RÃ©ponse
+### 6.1. Structure de Réponse
 
-Toutes les opÃ©rations de dÃ©couverte retournent une rÃ©ponse avec la structure suivante :
+Toutes les opérations de découverte retournent une réponse avec la structure suivante :
 
 ```
 DiscoveryResponse<T> {
@@ -647,19 +647,19 @@ ResponseMetadata {
 
 | Code | Nom | Description |
 |------|-----|-------------|
-| `DISC-001` | `INVALID_FILTER` | Filtre invalide ou mal formÃ© |
-| `DISC-002` | `UNKNOWN_MODULE` | Module non trouvÃ© dans le registre |
-| `DISC-003` | `UNKNOWN_CAPABILITY` | CapacitÃ© non trouvÃ©e dans le registre |
-| `DISC-004` | `UNKNOWN_PERMISSION` | Permission non trouvÃ©e dans le registre |
-| `DISC-005` | `INVALID_CONTEXT` | Contexte de dÃ©couverte invalide |
-| `DISC-006` | `ACCESS_DENIED` | AccÃ¨s refusÃ© au composant demandeur |
-| `DISC-007` | `PAGINATION_ERROR` | ParamÃ¨tres de pagination invalides |
-| `DISC-008` | `TIMEOUT` | Timeout de la requÃªte de dÃ©couverte |
+| `DISC-001` | `INVALID_FILTER` | Filtre invalide ou mal formé |
+| `DISC-002` | `UNKNOWN_MODULE` | Module non trouvé dans le registre |
+| `DISC-003` | `UNKNOWN_CAPABILITY` | Capacité non trouvée dans le registre |
+| `DISC-004` | `UNKNOWN_PERMISSION` | Permission non trouvée dans le registre |
+| `DISC-005` | `INVALID_CONTEXT` | Contexte de découverte invalide |
+| `DISC-006` | `ACCESS_DENIED` | Accès refusé au composant demandeur |
+| `DISC-007` | `PAGINATION_ERROR` | Paramètres de pagination invalides |
+| `DISC-008` | `TIMEOUT` | Timeout de la requête de découverte |
 | `DISC-009` | `INTERNAL_ERROR` | Erreur interne du registre |
 
-### 6.3. Exemples de RÃ©ponses
+### 6.3. Exemples de Réponses
 
-**RÃ©ponse succÃ¨s :**
+**Réponse succès :**
 
 ```yaml
 response:
@@ -667,7 +667,7 @@ response:
   data:
     capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
+        name: "Créer du contenu"
     total_count: 1
   metadata:
     request_id: "req_abc123"
@@ -678,7 +678,7 @@ response:
   errors: null
 ```
 
-**RÃ©ponse erreur :**
+**Réponse erreur :**
 
 ```yaml
 response:
@@ -699,44 +699,44 @@ response:
 
 ---
 
-## 7. RÃ¨gles de VisibilitÃ©
+## 7. Règles de Visibilité
 
-### 7.1. VisibilitÃ© par DÃ©faut
+### 7.1. Visibilité par Défaut
 
-| Ã‰lÃ©ment | VisibilitÃ© par dÃ©faut |
+| Élément | Visibilité par défaut |
 |---------|----------------------|
-| CapacitÃ©s ACTIVE | âœ… Visibles |
-| CapacitÃ©s DEPRECATED | âœ… Visibles (avec warning) |
-| CapacitÃ©s REMOVED | âŒ Non visibles |
-| Permissions ACTIVE | âœ… Visibles |
-| Permissions DEPRECATED | âœ… Visibles (avec warning) |
-| Permissions DRAFT | âŒ Non visibles (sauf crÃ©ateur) |
-| Permissions RETIRED | âŒ Non visibles |
+| Capacités ACTIVE | ✅ Visibles |
+| Capacités DEPRECATED | ✅ Visibles (avec warning) |
+| Capacités REMOVED | ❌ Non visibles |
+| Permissions ACTIVE | ✅ Visibles |
+| Permissions DEPRECATED | ✅ Visibles (avec warning) |
+| Permissions DRAFT | ❌ Non visibles (sauf créateur) |
+| Permissions RETIRED | ❌ Non visibles |
 
-### 7.2. VisibilitÃ© Contextuelle
+### 7.2. Visibilité Contextuelle
 
-Certaines capacitÃ©s et permissions peuvent avoir une visibilitÃ© restreinte selon le contexte :
+Certaines capacités et permissions peuvent avoir une visibilité restreinte selon le contexte :
 
-| Niveau | Description | RÃ¨gle |
+| Niveau | Description | Règle |
 |--------|-------------|-------|
 | **Public** | Visible par tous | Aucune restriction |
-| **Internal** | Visible par les composants internes | Requiert identitÃ© systÃ¨me |
-| **Restricted** | Visible par les composants autorisÃ©s | Requiert permission spÃ©cifique |
-| **Confidential** | Visible uniquement par le propriÃ©taire | Requiert identitÃ© propriÃ©taire |
+| **Internal** | Visible par les composants internes | Requiert identité système |
+| **Restricted** | Visible par les composants autorisés | Requiert permission spécifique |
+| **Confidential** | Visible uniquement par le propriétaire | Requiert identité propriétaire |
 
-### 7.3. Filtrage de SÃ©curitÃ©
+### 7.3. Filtrage de Sécurité
 
-Les capacitÃ©s et permissions de niveau `SYSTEM` sont soumises Ã  des rÃ¨gles de visibilitÃ© renforcÃ©es :
+Les capacités et permissions de niveau `SYSTEM` sont soumises à des règles de visibilité renforcées :
 
-| Demandeur | VisibilitÃ© SYSTEM |
+| Demandeur | Visibilité SYSTEM |
 |-----------|-------------------|
-| OpÃ©rateur standard | âŒ Non visible |
-| Core systÃ¨me | âœ… Visible |
-| MiyukiniAdmin | âœ… Visible |
+| Opérateur standard | ❌ Non visible |
+| Core système | ✅ Visible |
+| MiyukiniAdmin | ✅ Visible |
 
-**RÃ¨gle :**
+**Règle :**
 
-> **Les capacitÃ©s et permissions SYSTEM ne sont jamais exposÃ©es aux OpÃ©rateurs standards, mÃªme par dÃ©couverte.**
+> **Les capacités et permissions SYSTEM ne sont jamais exposées aux Opérateurs standards, même par découverte.**
 
 ---
 
@@ -748,349 +748,349 @@ Les capacitÃ©s et permissions de niveau `SYSTEM` sont soumises Ã  des rÃ¨g
 
 ```
 BondingBrother traduit une intention
-    â”‚
-    â”œâ”€â”€ Interroge Master Butler : DiscoverPermissionsForCapability("content.create")
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Master Butler retourne les permissions associÃ©es
-    â”‚
-    â””â”€â”€ BondingBrother enrichit l'intention avec les permissions requises
+    │
+    ├── Interroge Master Butler : DiscoverPermissionsForCapability("content.create")
+    │       │
+    │       └── Master Butler retourne les permissions associées
+    │
+    └── BondingBrother enrichit l'intention avec les permissions requises
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
-- BondingBrother utilise la dÃ©couverte pour la traduction des intentions
-- Les rÃ©sultats de dÃ©couverte alimentent le contexte de l'intention
-- BondingBrother ne prend jamais de dÃ©cision basÃ©e sur la dÃ©couverte
+- BondingBrother utilise la découverte pour la traduction des intentions
+- Les résultats de découverte alimentent le contexte de l'intention
+- BondingBrother ne prend jamais de décision basée sur la découverte
 
 ### 8.2. Interaction avec StrongFather
 
 **Flux typique :**
 
 ```
-StrongFather Ã©value une intention
-    â”‚
-    â”œâ”€â”€ Interroge Master Butler : DiscoverCapabilitiesForPermission(permission_id)
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Master Butler retourne les capacitÃ©s couvertes
-    â”‚
-    â””â”€â”€ StrongFather utilise ces informations pour l'Ã©valuation
+StrongFather évalue une intention
+    │
+    ├── Interroge Master Butler : DiscoverCapabilitiesForPermission(permission_id)
+    │       │
+    │       └── Master Butler retourne les capacités couvertes
+    │
+    └── StrongFather utilise ces informations pour l'évaluation
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
-- StrongFather a un accÃ¨s complet Ã  la dÃ©couverte (incluant SYSTEM)
-- La dÃ©couverte informe l'Ã©valuation mais ne la dÃ©termine pas
-- StrongFather peut interroger sans restriction de visibilitÃ©
+- StrongFather a un accès complet à la découverte (incluant SYSTEM)
+- La découverte informe l'évaluation mais ne la détermine pas
+- StrongFather peut interroger sans restriction de visibilité
 
-### 8.3. Interaction avec les OpÃ©rateurs
+### 8.3. Interaction avec les Opérateurs
 
 **Flux typique :**
 
 ```
-OpÃ©rateur explore les capacitÃ©s disponibles
-    â”‚
-    â”œâ”€â”€ Interroge Master Butler : DiscoverByModule("spm.cms.content")
-    â”‚       â”‚
-    â”‚       â””â”€â”€ Master Butler retourne les capacitÃ©s (filtrÃ©es par contexte)
-    â”‚
-    â””â”€â”€ OpÃ©rateur utilise ces informations pour adapter son comportement
+Opérateur explore les capacités disponibles
+    │
+    ├── Interroge Master Butler : DiscoverByModule("spm.cms.content")
+    │       │
+    │       └── Master Butler retourne les capacités (filtrées par contexte)
+    │
+    └── Opérateur utilise ces informations pour adapter son comportement
 ```
 
-**RÃ¨gles :**
+**Règles :**
 
-- Les OpÃ©rateurs voient uniquement les capacitÃ©s/permissions selon leur contexte
-- La visibilitÃ© SYSTEM est masquÃ©e pour les OpÃ©rateurs standards
-- Les OpÃ©rateurs peuvent dÃ©couvrir pour adapter leur comportement, jamais pour contourner
+- Les Opérateurs voient uniquement les capacités/permissions selon leur contexte
+- La visibilité SYSTEM est masquée pour les Opérateurs standards
+- Les Opérateurs peuvent découvrir pour adapter leur comportement, jamais pour contourner
 
 ---
 
-## 9. SchÃ©mas ASCII
+## 9. Schémas ASCII
 
-### 9.1. Architecture de l'API de DÃ©couverte
-
-```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                        DISCOVERY API ARCHITECTURE                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-
-                              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                              â”‚    DEMANDEURS   â”‚
-                              â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-          â”‚                           â”‚                           â”‚
-          â–¼                           â–¼                           â–¼
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚BondingBrotherâ”‚           â”‚ StrongFather â”‚           â”‚  OpÃ©rateurs â”‚
-   â”‚ (Traduction)â”‚            â”‚  (DÃ©cision)  â”‚           â”‚ (Adaptation)â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â”‚                           â”‚                           â”‚
-          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                      â”‚
-                                      â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                         MASTER BUTLER - DISCOVERY API                        â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                                                                              â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚                        OPÃ‰RATIONS DE DÃ‰COUVERTE                        â”‚ â”‚
-â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
-â”‚  â”‚                                                                          â”‚ â”‚
-â”‚  â”‚  DiscoverByModule      DiscoverByAction      DiscoverByCategory         â”‚ â”‚
-â”‚  â”‚         â”‚                     â”‚                     â”‚                   â”‚ â”‚
-â”‚  â”‚         â–¼                     â–¼                     â–¼                   â”‚ â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
-â”‚  â”‚  â”‚                      MOTEUR DE FILTRAGE                           â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ Filtres de statut, catÃ©gorie, niveau                          â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ Filtrage de visibilitÃ© (contextuel)                           â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ Pagination                                                     â”‚  â”‚ â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
-â”‚  â”‚                               â”‚                                         â”‚ â”‚
-â”‚  â”‚  DiscoverPermissionsForCapability    DiscoverCapabilitiesForPermission â”‚ â”‚
-â”‚  â”‚         â”‚                                     â”‚                         â”‚ â”‚
-â”‚  â”‚         â–¼                                     â–¼                         â”‚ â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
-â”‚  â”‚  â”‚                   RÃ‰SOLUTION DES ASSOCIATIONS                     â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ RÃ©solution directe                                             â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ RÃ©solution des implications                                    â”‚  â”‚ â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
-â”‚  â”‚                               â”‚                                         â”‚ â”‚
-â”‚  â”‚  ComputeCapabilityContext    â”‚                                         â”‚ â”‚
-â”‚  â”‚         â”‚                    â”‚                                         â”‚ â”‚
-â”‚  â”‚         â–¼                    â–¼                                         â”‚ â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚ â”‚
-â”‚  â”‚  â”‚                    CALCUL DU CONTEXTE                             â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ Intersection rÃ´les-permissions                                 â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ Application des contraintes de sÃ©curitÃ©                        â”‚  â”‚ â”‚
-â”‚  â”‚  â”‚  â€¢ GÃ©nÃ©ration des restrictions                                    â”‚  â”‚ â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚ â”‚
-â”‚  â”‚                                                                          â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚                                      â”‚                                       â”‚
-â”‚                                      â–¼                                       â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
-â”‚  â”‚                           SOURCES DE DONNÃ‰ES                           â”‚ â”‚
-â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤ â”‚
-â”‚  â”‚                                                                          â”‚ â”‚
-â”‚  â”‚   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”           â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”            â”‚ â”‚
-â”‚  â”‚   â”‚  CAPABILITY REGISTRY â”‚           â”‚ PERMISSION REGISTRY â”‚            â”‚ â”‚
-â”‚  â”‚   â”‚                       â”‚           â”‚                     â”‚            â”‚ â”‚
-â”‚  â”‚   â”‚  â€¢ CapacitÃ©s         â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚  â€¢ Permissions      â”‚            â”‚ â”‚
-â”‚  â”‚   â”‚  â€¢ Index par module  â”‚           â”‚  â€¢ Associations     â”‚            â”‚ â”‚
-â”‚  â”‚   â”‚  â€¢ Index par catÃ©gorieâ”‚          â”‚  â€¢ HiÃ©rarchies      â”‚            â”‚ â”‚
-â”‚  â”‚   â”‚  â€¢ Relations         â”‚           â”‚                     â”‚            â”‚ â”‚
-â”‚  â”‚   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜           â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜            â”‚ â”‚
-â”‚  â”‚                                                                          â”‚ â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
-â”‚                                                                              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-```
-
-### 9.2. Flux de DÃ©couverte Typique
+### 9.1. Architecture de l'API de Découverte
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                        FLUX DE DÃ‰COUVERTE TYPIQUE                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DISCOVERY API ARCHITECTURE                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌─────────────────┐
+                              │    DEMANDEURS   │
+                              └─────────────────┘
+                                      │
+          ┌───────────────────────────┼───────────────────────────┐
+          │                           │                           │
+          ▼                           ▼                           ▼
+   ┌─────────────┐            ┌─────────────┐            ┌─────────────┐
+   │BondingBrother│           │ StrongFather │           │  Opérateurs │
+   │ (Traduction)│            │  (Décision)  │           │ (Adaptation)│
+   └─────────────┘            └─────────────┘            └─────────────┘
+          │                           │                           │
+          └───────────────────────────┼───────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MASTER BUTLER - DISCOVERY API                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                        OPÉRATIONS DE DÉCOUVERTE                        │ │
+│  ├────────────────────────────────────────────────────────────────────────┤ │
+│  │                                                                          │ │
+│  │  DiscoverByModule      DiscoverByAction      DiscoverByCategory         │ │
+│  │         │                     │                     │                   │ │
+│  │         ▼                     ▼                     ▼                   │ │
+│  │  ┌──────────────────────────────────────────────────────────────────┐  │ │
+│  │  │                      MOTEUR DE FILTRAGE                           │  │ │
+│  │  │  • Filtres de statut, catégorie, niveau                          │  │ │
+│  │  │  • Filtrage de visibilité (contextuel)                           │  │ │
+│  │  │  • Pagination                                                     │  │ │
+│  │  └──────────────────────────────────────────────────────────────────┘  │ │
+│  │                               │                                         │ │
+│  │  DiscoverPermissionsForCapability    DiscoverCapabilitiesForPermission │ │
+│  │         │                                     │                         │ │
+│  │         ▼                                     ▼                         │ │
+│  │  ┌──────────────────────────────────────────────────────────────────┐  │ │
+│  │  │                   RÉSOLUTION DES ASSOCIATIONS                     │  │ │
+│  │  │  • Résolution directe                                             │  │ │
+│  │  │  • Résolution des implications                                    │  │ │
+│  │  └──────────────────────────────────────────────────────────────────┘  │ │
+│  │                               │                                         │ │
+│  │  ComputeCapabilityContext    │                                         │ │
+│  │         │                    │                                         │ │
+│  │         ▼                    ▼                                         │ │
+│  │  ┌──────────────────────────────────────────────────────────────────┐  │ │
+│  │  │                    CALCUL DU CONTEXTE                             │  │ │
+│  │  │  • Intersection rôles-permissions                                 │  │ │
+│  │  │  • Application des contraintes de sécurité                        │  │ │
+│  │  │  • Génération des restrictions                                    │  │ │
+│  │  └──────────────────────────────────────────────────────────────────┘  │ │
+│  │                                                                          │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                       │
+│                                      ▼                                       │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                           SOURCES DE DONNÉES                           │ │
+│  ├────────────────────────────────────────────────────────────────────────┤ │
+│  │                                                                          │ │
+│  │   ┌─────────────────────┐           ┌─────────────────────┐            │ │
+│  │   │  CAPABILITY REGISTRY │           │ PERMISSION REGISTRY │            │ │
+│  │   │                       │           │                     │            │ │
+│  │   │  • Capacités         │◄─────────►│  • Permissions      │            │ │
+│  │   │  • Index par module  │           │  • Associations     │            │ │
+│  │   │  • Index par catégorie│          │  • Hiérarchies      │            │ │
+│  │   │  • Relations         │           │                     │            │ │
+│  │   └─────────────────────┘           └─────────────────────┘            │ │
+│  │                                                                          │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 9.2. Flux de Découverte Typique
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        FLUX DE DÉCOUVERTE TYPIQUE                            │
+└─────────────────────────────────────────────────────────────────────────────┘
 
    DEMANDEUR                   DISCOVERY API                   REGISTRES
-       â”‚                            â”‚                              â”‚
-       â”‚  DiscoverByModule(         â”‚                              â”‚
-       â”‚    module_id: "spm.cms",   â”‚                              â”‚
-       â”‚    filter: {status: Active}â”‚                              â”‚
-       â”‚  )                         â”‚                              â”‚
-       â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                              â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  1. Valider la requÃªte       â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  2. VÃ©rifier visibilitÃ©      â”‚
-       â”‚                            â”‚     demandeur                â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  3. Interroger registre      â”‚
-       â”‚                            â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  4. Appliquer filtres        â”‚
-       â”‚                            â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-       â”‚                            â”‚     [CapacitÃ©s brutes]       â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  5. Filtrer par visibilitÃ©   â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  6. Enrichir rÃ©sumÃ©s         â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚                            â”‚  7. Paginer rÃ©sultats        â”‚
-       â”‚                            â”‚                              â”‚
-       â”‚  DiscoveryResponse {       â”‚                              â”‚
-       â”‚    success: true,          â”‚                              â”‚
-       â”‚    data: {                 â”‚                              â”‚
-       â”‚      capabilities: [...],  â”‚                              â”‚
-       â”‚      total_count: 8        â”‚                              â”‚
-       â”‚    }                       â”‚                              â”‚
-       â”‚  }                         â”‚                              â”‚
-       â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                              â”‚
-       â”‚                            â”‚                              â”‚
-       â–¼                            â–¼                              â–¼
+       │                            │                              │
+       │  DiscoverByModule(         │                              │
+       │    module_id: "spm.cms",   │                              │
+       │    filter: {status: Active}│                              │
+       │  )                         │                              │
+       ├───────────────────────────►│                              │
+       │                            │                              │
+       │                            │  1. Valider la requête       │
+       │                            │                              │
+       │                            │  2. Vérifier visibilité      │
+       │                            │     demandeur                │
+       │                            │                              │
+       │                            │  3. Interroger registre      │
+       │                            ├─────────────────────────────►│
+       │                            │                              │
+       │                            │  4. Appliquer filtres        │
+       │                            │◄─────────────────────────────┤
+       │                            │     [Capacités brutes]       │
+       │                            │                              │
+       │                            │  5. Filtrer par visibilité   │
+       │                            │                              │
+       │                            │  6. Enrichir résumés         │
+       │                            │                              │
+       │                            │  7. Paginer résultats        │
+       │                            │                              │
+       │  DiscoveryResponse {       │                              │
+       │    success: true,          │                              │
+       │    data: {                 │                              │
+       │      capabilities: [...],  │                              │
+       │      total_count: 8        │                              │
+       │    }                       │                              │
+       │  }                         │                              │
+       │◄───────────────────────────┤                              │
+       │                            │                              │
+       ▼                            ▼                              ▼
 ```
 
-### 9.3. Calcul du Contexte de CapacitÃ©
+### 9.3. Calcul du Contexte de Capacité
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                   CALCUL DU CONTEXTE DE CAPACITÃ‰                             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   CALCUL DU CONTEXTE DE CAPACITÉ                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 
                     ContextSpecification
-                           â”‚
-                           â”‚
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚                      â”‚                      â”‚
-    â–¼                      â–¼                      â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚Requesterâ”‚          â”‚  Roles  â”‚          â”‚   Target    â”‚
-â”‚ Identityâ”‚          â”‚  List   â”‚          â”‚Specificationâ”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜          â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-    â”‚                      â”‚                      â”‚
-    â”‚                      â”‚                      â”‚
-    â–¼                      â–¼                      â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                        MOTEUR DE CALCUL DE CONTEXTE                          â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                                                                              â”‚
-â”‚   1. RÃ©cupÃ©rer toutes les capacitÃ©s du target (si spÃ©cifiÃ©)                 â”‚
-â”‚                            â”‚                                                 â”‚
-â”‚                            â–¼                                                 â”‚
-â”‚   2. RÃ©cupÃ©rer les permissions des rÃ´les                                    â”‚
-â”‚                            â”‚                                                 â”‚
-â”‚                            â–¼                                                 â”‚
-â”‚   3. RÃ©soudre les capacitÃ©s couvertes par ces permissions                   â”‚
-â”‚                            â”‚                                                 â”‚
-â”‚                            â–¼                                                 â”‚
-â”‚   4. Intersection avec capacitÃ©s du target                                  â”‚
-â”‚                            â”‚                                                 â”‚
-â”‚                            â–¼                                                 â”‚
-â”‚   5. Appliquer contraintes de sÃ©curitÃ©                                      â”‚
-â”‚       â€¢ Exclure capacitÃ©s au-dessus du niveau autorisÃ©                      â”‚
-â”‚       â€¢ Marquer les restrictions                                            â”‚
-â”‚                            â”‚                                                 â”‚
-â”‚                            â–¼                                                 â”‚
-â”‚   6. GÃ©nÃ©rer le CapabilityContext                                           â”‚
-â”‚                                                                              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                            â”‚
-                            â–¼
-              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-              â”‚    CapabilityContext    â”‚
-              â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-              â”‚ accessible_capabilities â”‚
-              â”‚ accessible_permissions  â”‚
-              â”‚ restrictions            â”‚
-              â”‚ computed_at             â”‚
-              â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                           │
+                           │
+    ┌──────────────────────┼──────────────────────┐
+    │                      │                      │
+    ▼                      ▼                      ▼
+┌─────────┐          ┌─────────┐          ┌─────────────┐
+│Requester│          │  Roles  │          │   Target    │
+│ Identity│          │  List   │          │Specification│
+└─────────┘          └─────────┘          └─────────────┘
+    │                      │                      │
+    │                      │                      │
+    ▼                      ▼                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MOTEUR DE CALCUL DE CONTEXTE                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   1. Récupérer toutes les capacités du target (si spécifié)                 │
+│                            │                                                 │
+│                            ▼                                                 │
+│   2. Récupérer les permissions des rôles                                    │
+│                            │                                                 │
+│                            ▼                                                 │
+│   3. Résoudre les capacités couvertes par ces permissions                   │
+│                            │                                                 │
+│                            ▼                                                 │
+│   4. Intersection avec capacités du target                                  │
+│                            │                                                 │
+│                            ▼                                                 │
+│   5. Appliquer contraintes de sécurité                                      │
+│       • Exclure capacités au-dessus du niveau autorisé                      │
+│       • Marquer les restrictions                                            │
+│                            │                                                 │
+│                            ▼                                                 │
+│   6. Générer le CapabilityContext                                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+              ┌─────────────────────────┐
+              │    CapabilityContext    │
+              ├─────────────────────────┤
+              │ accessible_capabilities │
+              │ accessible_permissions  │
+              │ restrictions            │
+              │ computed_at             │
+              └─────────────────────────┘
 ```
 
 ---
 
-## 10. Invariants Non NÃ©gociables
+## 10. Invariants Non Négociables
 
 ### INV-DISC-1 : Lecture Seule
 
-> **La dÃ©couverte ne modifie jamais les registres.**
+> **La découverte ne modifie jamais les registres.**
 
 **Implications :**
-- Aucune opÃ©ration de dÃ©couverte ne crÃ©e, modifie ou supprime de donnÃ©es
-- Les registres sont inchangÃ©s aprÃ¨s une dÃ©couverte
-- La dÃ©couverte est idempotente (mÃªmes paramÃ¨tres = mÃªmes rÃ©sultats)
+- Aucune opération de découverte ne crée, modifie ou supprime de données
+- Les registres sont inchangés après une découverte
+- La découverte est idempotente (mêmes paramètres = mêmes résultats)
 
-### INV-DISC-2 : Non-DÃ©cision
+### INV-DISC-2 : Non-Décision
 
-> **La dÃ©couverte informe mais ne dÃ©cide jamais.**
-
-**Implications :**
-- Aucune rÃ©ponse de dÃ©couverte ne contient "autorisÃ©" ou "refusÃ©"
-- Le contexte calculÃ© est une projection, pas une autorisation
-- La dÃ©cision appartient exclusivement Ã  StrongFather
-
-### INV-DISC-3 : ExhaustivitÃ© selon VisibilitÃ©
-
-> **La dÃ©couverte retourne tous les Ã©lÃ©ments visibles selon le contexte demandeur.**
+> **La découverte informe mais ne décide jamais.**
 
 **Implications :**
-- Aucune capacitÃ© ou permission visible n'est omise
-- Les filtres rÃ©duisent mais ne cachent pas arbitrairement
-- La visibilitÃ© est dÃ©terminÃ©e par des rÃ¨gles explicites
+- Aucune réponse de découverte ne contient "autorisé" ou "refusé"
+- Le contexte calculé est une projection, pas une autorisation
+- La décision appartient exclusivement à StrongFather
 
-### INV-DISC-4 : CohÃ©rence Temporelle
+### INV-DISC-3 : Exhaustivité selon Visibilité
 
-> **Les rÃ©sultats de dÃ©couverte sont cohÃ©rents Ã  l'instant de la requÃªte.**
-
-**Implications :**
-- Snapshot cohÃ©rent des registres au moment de la requÃªte
-- Pas d'Ã©tat intermÃ©diaire visible
-- Les modifications pendant la requÃªte n'affectent pas le rÃ©sultat
-
-### INV-DISC-5 : TraÃ§abilitÃ© des RequÃªtes
-
-> **Toutes les requÃªtes de dÃ©couverte sont journalisÃ©es.**
+> **La découverte retourne tous les éléments visibles selon le contexte demandeur.**
 
 **Implications :**
-- Chaque requÃªte a un identifiant unique (request_id)
-- L'identitÃ© du demandeur est enregistrÃ©e
-- L'audit des dÃ©couvertes est possible
+- Aucune capacité ou permission visible n'est omise
+- Les filtres réduisent mais ne cachent pas arbitrairement
+- La visibilité est déterminée par des règles explicites
 
-### INV-DISC-6 : Respect des Contraintes de SÃ©curitÃ©
+### INV-DISC-4 : Cohérence Temporelle
 
-> **Les contraintes de sÃ©curitÃ© sont toujours appliquÃ©es, sans exception.**
+> **Les résultats de découverte sont cohérents à l'instant de la requête.**
 
 **Implications :**
-- Les capacitÃ©s SYSTEM ne sont jamais exposÃ©es aux non-autorisÃ©s
-- Le niveau de sÃ©curitÃ© du demandeur est toujours vÃ©rifiÃ©
-- Aucun contournement possible par la dÃ©couverte
+- Snapshot cohérent des registres au moment de la requête
+- Pas d'état intermédiaire visible
+- Les modifications pendant la requête n'affectent pas le résultat
+
+### INV-DISC-5 : Traçabilité des Requêtes
+
+> **Toutes les requêtes de découverte sont journalisées.**
+
+**Implications :**
+- Chaque requête a un identifiant unique (request_id)
+- L'identité du demandeur est enregistrée
+- L'audit des découvertes est possible
+
+### INV-DISC-6 : Respect des Contraintes de Sécurité
+
+> **Les contraintes de sécurité sont toujours appliquées, sans exception.**
+
+**Implications :**
+- Les capacités SYSTEM ne sont jamais exposées aux non-autorisés
+- Le niveau de sécurité du demandeur est toujours vérifié
+- Aucun contournement possible par la découverte
 
 ---
 
-## 11. ConformitÃ© aux Lois d'Autonomie SystÃ¨me
+## 11. Conformité aux Lois d'Autonomie Système
 
-Ce contrat respecte les Lois d'Autonomie SystÃ¨me dÃ©finies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md).
+Ce contrat respecte les Lois d'Autonomie Système définies dans [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-### LOI-1 : Aucune dÃ©pendance externe critique Ã  l'exÃ©cution
+### LOI-1 : Aucune dépendance externe critique à l'exécution
 
-**ConformitÃ© :** Conforme
+**Conformité :** Conforme
 
-La Discovery API opÃ¨re entiÃ¨rement sur des donnÃ©es locales :
+La Discovery API opère entièrement sur des données locales :
 
-- **Registres locaux** : Les capacitÃ©s et permissions sont stockÃ©es localement
+- **Registres locaux** : Les capacités et permissions sont stockées localement
 - **Calculs locaux** : Le calcul de contexte n'utilise aucune ressource externe
-- **Aucune API externe** : La dÃ©couverte ne dÃ©pend d'aucun service distant
+- **Aucune API externe** : La découverte ne dépend d'aucun service distant
 
-**VÃ©rification LOI-1** : *"La Discovery API fonctionne-t-elle si le rÃ©seau est indisponible ?"* â†’ **Oui.** Toutes les opÃ©rations sont locales.
+**Vérification LOI-1** : *"La Discovery API fonctionne-t-elle si le réseau est indisponible ?"* → **Oui.** Toutes les opérations sont locales.
 
-### LOI-5 : Le coÃ»t doit Ãªtre proportionnel au hardware
+### LOI-5 : Le coût doit être proportionnel au hardware
 
-**ConformitÃ© :** Conforme
+**Conformité :** Conforme
 
 La Discovery API a une empreinte minimale :
 
-- **OpÃ©rations de lecture** : Pas de computation intensive
+- **Opérations de lecture** : Pas de computation intensive
 - **Index existants** : Utilise les index des registres existants
-- **Pagination** : RÃ©sultats limitÃ©s pour contrÃ´ler la mÃ©moire
-- **Pas de cache permanent** : Les contextes sont calculÃ©s Ã  la demande
+- **Pagination** : Résultats limités pour contrôler la mémoire
+- **Pas de cache permanent** : Les contextes sont calculés à la demande
 
-**VÃ©rification LOI-5** : *"La Discovery API fonctionne-t-elle sur un Raspberry Pi 4 ?"* â†’ **Oui.** Les opÃ©rations de dÃ©couverte sont des lectures simples avec filtrage.
+**Vérification LOI-5** : *"La Discovery API fonctionne-t-elle sur un Raspberry Pi 4 ?"* → **Oui.** Les opérations de découverte sont des lectures simples avec filtrage.
 
-### SynthÃ¨se de conformitÃ©
+### Synthèse de conformité
 
 | Loi | Statut | Raison |
 |-----|--------|--------|
-| LOI-1 | âœ… Conforme | OpÃ©rations locales, aucune dÃ©pendance externe |
-| LOI-5 | âœ… Conforme | Lectures simples, pagination, pas de cache lourd |
+| LOI-1 | ✅ Conforme | Opérations locales, aucune dépendance externe |
+| LOI-5 | ✅ Conforme | Lectures simples, pagination, pas de cache lourd |
 
 ---
 
 ## 12. Exemples Complets
 
-### 12.1. Exemple : DÃ©couverte des capacitÃ©s d'un module CMS
+### 12.1. Exemple : Découverte des capacités d'un module CMS
 
 ```yaml
-# RequÃªte
+# Requête
 request:
   operation: DiscoverByModule
   module_id: "spm.cms.content"
@@ -1103,14 +1103,14 @@ request:
     sort_by: "id"
     sort_order: "ASC"
 
-# RÃ©ponse
+# Réponse
 response:
   success: true
   data:
     capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
-        description: "CapacitÃ© de crÃ©er un nouveau contenu"
+        name: "Créer du contenu"
+        description: "Capacité de créer un nouveau contenu"
         category: "Data"
         status: "Active"
         source: "spm.cms.content"
@@ -1119,7 +1119,7 @@ response:
           - "content.create.own"
       - id: "content.read"
         name: "Lire du contenu"
-        description: "CapacitÃ© de lire le contenu existant"
+        description: "Capacité de lire le contenu existant"
         category: "Data"
         status: "Active"
         source: "spm.cms.content"
@@ -1128,7 +1128,7 @@ response:
           - "content.read.own"
       - id: "content.edit"
         name: "Modifier du contenu"
-        description: "CapacitÃ© de modifier un contenu existant"
+        description: "Capacité de modifier un contenu existant"
         category: "Data"
         status: "Active"
         source: "spm.cms.content"
@@ -1146,10 +1146,10 @@ response:
     processing_time_ms: 15
 ```
 
-### 12.2. Exemple : Calcul de contexte pour un Ã©diteur de contenu
+### 12.2. Exemple : Calcul de contexte pour un éditeur de contenu
 
 ```yaml
-# RequÃªte
+# Requête
 request:
   operation: ComputeCapabilityContext
   context:
@@ -1164,7 +1164,7 @@ request:
     security_constraints:
       max_level: "ELEVATED"
 
-# RÃ©ponse
+# Réponse
 response:
   success: true
   data:
@@ -1173,7 +1173,7 @@ response:
       id: "user_editor_001"
     accessible_capabilities:
       - id: "content.create"
-        name: "CrÃ©er du contenu"
+        name: "Créer du contenu"
         category: "Data"
       - id: "content.edit"
         name: "Modifier du contenu"
@@ -1186,7 +1186,7 @@ response:
         category: "Data"
     accessible_permissions:
       - id: "content.create.own"
-        name: "CrÃ©er son propre contenu"
+        name: "Créer son propre contenu"
         level: "STANDARD"
         scope_type: "OWNED"
       - id: "content.edit.own"
@@ -1194,7 +1194,7 @@ response:
         level: "STANDARD"
         scope_type: "OWNED"
       - id: "content.edit.team"
-        name: "Modifier le contenu de l'Ã©quipe"
+        name: "Modifier le contenu de l'équipe"
         level: "ELEVATED"
         scope_type: "SCOPED"
       - id: "content.publish.own"
@@ -1220,44 +1220,44 @@ response:
     processing_time_ms: 28
 ```
 
-### 12.3. Exemple : DÃ©couverte des permissions pour une capacitÃ©
+### 12.3. Exemple : Découverte des permissions pour une capacité
 
 ```yaml
-# RequÃªte
+# Requête
 request:
   operation: DiscoverPermissionsForCapability
   capability_id: "media.upload"
   include_implied: true
 
-# RÃ©ponse
+# Réponse
 response:
   success: true
   data:
     capability:
       id: "media.upload"
-      name: "TÃ©lÃ©verser un mÃ©dia"
-      description: "CapacitÃ© de tÃ©lÃ©verser des fichiers mÃ©dias"
+      name: "Téléverser un média"
+      description: "Capacité de téléverser des fichiers médias"
       category: "Media"
       status: "Active"
     direct_permissions:
       - id: "media.upload.any"
-        name: "TÃ©lÃ©verser n'importe quel mÃ©dia"
+        name: "Téléverser n'importe quel média"
         level: "ELEVATED"
         scope_type: "GLOBAL"
         status: "Active"
       - id: "media.upload.own"
-        name: "TÃ©lÃ©verser ses propres mÃ©dias"
+        name: "Téléverser ses propres médias"
         level: "STANDARD"
         scope_type: "OWNED"
         status: "Active"
       - id: "media.upload.team"
-        name: "TÃ©lÃ©verser pour l'Ã©quipe"
+        name: "Téléverser pour l'équipe"
         level: "STANDARD"
         scope_type: "SCOPED"
         status: "Active"
     implied_permissions:
       - id: "media.manage.all"
-        name: "Gestion complÃ¨te des mÃ©dias"
+        name: "Gestion complète des médias"
         level: "CRITICAL"
         scope_type: "GLOBAL"
         status: "Active"
@@ -1276,96 +1276,96 @@ response:
 
 ### Essence de la Discovery API
 
-La Discovery API de Master Butler est le mÃ©canisme par lequel les composants du systÃ¨me Miyukini peuvent explorer les capacitÃ©s et permissions disponibles. Elle permet une adaptation dynamique des comportements sans jamais participer aux dÃ©cisions d'autorisation.
+La Discovery API de Master Butler est le mécanisme par lequel les composants du système Miyukini peuvent explorer les capacités et permissions disponibles. Elle permet une adaptation dynamique des comportements sans jamais participer aux décisions d'autorisation.
 
-Cette API incarne le principe fondateur de Master Butler : **exposer ce qui est possible, sans jamais dÃ©cider ce qui est autorisÃ©**.
+Cette API incarne le principe fondateur de Master Butler : **exposer ce qui est possible, sans jamais décider ce qui est autorisé**.
 
 ### Phrase fondatrice
 
-> **La Discovery API permet aux composants de dÃ©couvrir les possibilitÃ©s du systÃ¨me Miyukini de maniÃ¨re exhaustive, filtrÃ©e par contexte, sans jamais constituer une autorisation.**
+> **La Discovery API permet aux composants de découvrir les possibilités du système Miyukini de manière exhaustive, filtrée par contexte, sans jamais constituer une autorisation.**
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
-Toute implÃ©mentation de la Discovery API doit respecter intÃ©gralement ce document. Toute Ã©volution doit prÃ©server les invariants dÃ©finis ici.
+Toute implémentation de la Discovery API doit respecter intégralement ce document. Toute évolution doit préserver les invariants définis ici.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** FONDATION â€” Non nÃ©gociable  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4
+**Statut :** FONDATION — Non négociable  
+**Référence :** Miyukini Core System v2.4
 
-**RÃ©fÃ©rences croisÃ©es :**
+**Références croisées :**
 
-- [Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) : DÃ©finition et responsabilitÃ©s de Master Butler
-- [Master Butler - Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md) : Registre des capacitÃ©s
+- [Master Butler - Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) : Définition et responsabilités de Master Butler
+- [Master Butler - Capability Registry Contract](../registry/Master%20Butler%20-%20Capability%20Registry%20Contract.md) : Registre des capacités
 - [Master Butler - Permission Registry Contract](../registry/Master%20Butler%20-%20Permission%20Registry%20Contract.md) : Registre des permissions
-- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) : DÃ©finitions canoniques
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) : Définitions canoniques
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) : Lois d'autonomie
 
 ---
 
-## 14. Mini log â€” erreurs / warnings / ambiguÃ¯tÃ©s rencontrÃ©es et corrigÃ©es
+## 14. Mini log — erreurs / warnings / ambiguïtés rencontrées et corrigées
 
-### AmbiguÃ¯tÃ© A1 : Scope de la dÃ©couverte
+### Ambiguïté A1 : Scope de la découverte
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :**
-La documentation fondatrice mentionne "API de dÃ©couverte des capacitÃ©s par module" et "API de dÃ©couverte des capacitÃ©s par type d'action" sans dÃ©finir clairement si ce sont des opÃ©rations distinctes ou des filtres d'une mÃªme opÃ©ration.
+**Ambiguïté rencontrée :**
+La documentation fondatrice mentionne "API de découverte des capacités par module" et "API de découverte des capacités par type d'action" sans définir clairement si ce sont des opérations distinctes ou des filtres d'une même opération.
 
-**DÃ©cision prise :**
-OpÃ©rations distinctes dÃ©finies : DiscoverByModule, DiscoverByAction, DiscoverByCategory, avec des signatures et comportements spÃ©cifiques pour chaque mode de dÃ©couverte.
-
-**Justification :**
-Des opÃ©rations distinctes permettent une API plus claire et typÃ©e, avec des paramÃ¨tres et validations spÃ©cifiques Ã  chaque mode.
-
-**Correction effectuÃ©e :**
-Section 3 "Modes de DÃ©couverte" avec opÃ©rations sÃ©parÃ©es et signatures conceptuelles.
-
-### AmbiguÃ¯tÃ© A2 : VisibilitÃ© contextuelle
-
-**AmbiguÃ¯tÃ© rencontrÃ©e :**
-La documentation fondatrice mentionne "filtrage des capacitÃ©s selon le contexte" sans dÃ©finir les niveaux de visibilitÃ© ni les rÃ¨gles de filtrage.
-
-**DÃ©cision prise :**
-Quatre niveaux de visibilitÃ© dÃ©finis (Public, Internal, Restricted, Confidential) avec des rÃ¨gles explicites de filtrage basÃ©es sur l'identitÃ© et le niveau de sÃ©curitÃ© du demandeur.
+**Décision prise :**
+Opérations distinctes définies : DiscoverByModule, DiscoverByAction, DiscoverByCategory, avec des signatures et comportements spécifiques pour chaque mode de découverte.
 
 **Justification :**
-Des niveaux de visibilitÃ© explicites garantissent une sÃ©curitÃ© cohÃ©rente et prÃ©visible.
+Des opérations distinctes permettent une API plus claire et typée, avec des paramètres et validations spécifiques à chaque mode.
 
-**Correction effectuÃ©e :**
-Section 7 "RÃ¨gles de VisibilitÃ©" avec niveaux et rÃ¨gles de filtrage.
+**Correction effectuée :**
+Section 3 "Modes de Découverte" avec opérations séparées et signatures conceptuelles.
 
-### AmbiguÃ¯tÃ© A3 : Contexte de capacitÃ©
+### Ambiguïté A2 : Visibilité contextuelle
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :**
-Le "contexte de capacitÃ©" est mentionnÃ© dans la documentation fondatrice avec une liste d'Ã©lÃ©ments inclus, mais sans dÃ©finition formelle de la structure ni du mÃ©canisme de calcul.
+**Ambiguïté rencontrée :**
+La documentation fondatrice mentionne "filtrage des capacités selon le contexte" sans définir les niveaux de visibilité ni les règles de filtrage.
 
-**DÃ©cision prise :**
-Structure formelle dÃ©finie (ContextSpecification, CapabilityContext) avec un algorithme de calcul en 6 Ã©tapes clairement documentÃ©.
-
-**Justification :**
-Une structure et un algorithme formels garantissent un comportement prÃ©visible et vÃ©rifiable.
-
-**Correction effectuÃ©e :**
-Section 4 "Contexte de CapacitÃ©" avec structures de donnÃ©es et rÃ¨gles de calcul.
-
-### AmbiguÃ¯tÃ© A4 : RÃ©ponses d'erreur
-
-**AmbiguÃ¯tÃ© rencontrÃ©e :**
-Aucune documentation existante ne dÃ©finit les codes d'erreur spÃ©cifiques Ã  la Discovery API.
-
-**DÃ©cision prise :**
-Catalogue de 9 codes d'erreur dÃ©finis (DISC-001 Ã  DISC-009) couvrant les cas d'erreur typiques.
+**Décision prise :**
+Quatre niveaux de visibilité définis (Public, Internal, Restricted, Confidential) avec des règles explicites de filtrage basées sur l'identité et le niveau de sécurité du demandeur.
 
 **Justification :**
-Des codes d'erreur standardisÃ©s facilitent le diagnostic et le traitement des erreurs.
+Des niveaux de visibilité explicites garantissent une sécurité cohérente et prévisible.
 
-**Correction effectuÃ©e :**
+**Correction effectuée :**
+Section 7 "Règles de Visibilité" avec niveaux et règles de filtrage.
+
+### Ambiguïté A3 : Contexte de capacité
+
+**Ambiguïté rencontrée :**
+Le "contexte de capacité" est mentionné dans la documentation fondatrice avec une liste d'éléments inclus, mais sans définition formelle de la structure ni du mécanisme de calcul.
+
+**Décision prise :**
+Structure formelle définie (ContextSpecification, CapabilityContext) avec un algorithme de calcul en 6 étapes clairement documenté.
+
+**Justification :**
+Une structure et un algorithme formels garantissent un comportement prévisible et vérifiable.
+
+**Correction effectuée :**
+Section 4 "Contexte de Capacité" avec structures de données et règles de calcul.
+
+### Ambiguïté A4 : Réponses d'erreur
+
+**Ambiguïté rencontrée :**
+Aucune documentation existante ne définit les codes d'erreur spécifiques à la Discovery API.
+
+**Décision prise :**
+Catalogue de 9 codes d'erreur définis (DISC-001 à DISC-009) couvrant les cas d'erreur typiques.
+
+**Justification :**
+Des codes d'erreur standardisés facilitent le diagnostic et le traitement des erreurs.
+
+**Correction effectuée :**
 Section 6.2 "Codes d'Erreur" avec codes et descriptions.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

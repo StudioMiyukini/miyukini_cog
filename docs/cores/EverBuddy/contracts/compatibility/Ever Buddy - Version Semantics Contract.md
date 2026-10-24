@@ -2,34 +2,34 @@
 
 ## Contexte
 
-Ce document dÃ©finit le **contrat de sÃ©mantique de versionnement** gouvernÃ© par Ever Buddy. Le versionnement conceptuel est la maniÃ¨re dont Ever Buddy identifie et distingue les diffÃ©rentes versions d'un Ã©lÃ©ment du systÃ¨me Miyukini.
+Ce document définit le **contrat de sémantique de versionnement** gouverné par Ever Buddy. Le versionnement conceptuel est la manière dont Ever Buddy identifie et distingue les différentes versions d'un élément du système Miyukini.
 
-Le versionnement sÃ©mantique est au cÅ“ur de la capacitÃ© du systÃ¨me Ã  Ã©voluer sans rupture. Il permet aux consommateurs d'anticiper l'impact d'une mise Ã  jour et de planifier leurs propres Ã©volutions en consÃ©quence.
+Le versionnement sémantique est au cœur de la capacité du système à évoluer sans rupture. Il permet aux consommateurs d'anticiper l'impact d'une mise à jour et de planifier leurs propres évolutions en conséquence.
 
 **Document source :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## PortÃ©e / Scope
+## Portée / Scope
 
-- **Applicable Ã  :** Tous les Ã©lÃ©ments versionnÃ©s du systÃ¨me Miyukini (contrats, interfaces, structures, capacitÃ©s)
-- **Audience :** Architectes, dÃ©veloppeurs, cores consommateurs, produits
-- **Statut :** Document contractuel normatif â€” VERSION SEMANTICS CONTRACT
-- **AutoritÃ© :** Ever Buddy (Strate 4) â€” Core de cycle de vie et d'Ã©volution
+- **Applicable à :** Tous les éléments versionnés du système Miyukini (contrats, interfaces, structures, capacités)
+- **Audience :** Architectes, développeurs, cores consommateurs, produits
+- **Statut :** Document contractuel normatif — VERSION SEMANTICS CONTRACT
+- **Autorité :** Ever Buddy (Strate 4) — Core de cycle de vie et d'évolution
 
 ---
 
 ## 1. Principes fondamentaux du versionnement
 
-### 1.1 Versionnement sÃ©mantique et significatif
+### 1.1 Versionnement sémantique et significatif
 
-Le versionnement conceptuel d'Ever Buddy est **sÃ©mantique et significatif**. Chaque composant du numÃ©ro de version communique une information claire sur la nature du changement :
+Le versionnement conceptuel d'Ever Buddy est **sémantique et significatif**. Chaque composant du numéro de version communique une information claire sur la nature du changement :
 
 | Composant | Signification | Impact pour les consommateurs |
 |-----------|---------------|-------------------------------|
 | **Majeur** | Changement incompatible, rupture de contrat | Migration obligatoire |
-| **Mineur** | Ajout de fonctionnalitÃ©, rÃ©trocompatible | Adoption optionnelle |
-| **Correctif** | Correction de bug, aucun changement fonctionnel | Adoption recommandÃ©e |
+| **Mineur** | Ajout de fonctionnalité, rétrocompatible | Adoption optionnelle |
+| **Correctif** | Correction de bug, aucun changement fonctionnel | Adoption recommandée |
 
 ### 1.2 Format de version
 
@@ -40,14 +40,14 @@ MAJEUR.MINEUR.CORRECTIF
 ```
 
 **Exemples :**
-- `1.0.0` â€” PremiÃ¨re version stable
-- `1.2.0` â€” Ajout de fonctionnalitÃ©s depuis la v1.0.0
-- `1.2.3` â€” Trois corrections de bugs depuis la v1.2.0
-- `2.0.0` â€” Rupture de compatibilitÃ© par rapport Ã  la v1.x
+- `1.0.0` — Première version stable
+- `1.2.0` — Ajout de fonctionnalités depuis la v1.0.0
+- `1.2.3` — Trois corrections de bugs depuis la v1.2.0
+- `2.0.0` — Rupture de compatibilité par rapport à la v1.x
 
-### 1.3 RÃ¨gle de non-rÃ©gression numÃ©rique
+### 1.3 Règle de non-régression numérique
 
-Les numÃ©ros de version ne peuvent que croÃ®tre. Une fois qu'une version est publiÃ©e, elle ne peut Ãªtre ni retirÃ©e, ni renumÃ©rotÃ©e. Cette rÃ¨gle garantit la traÃ§abilitÃ© et la confiance des consommateurs.
+Les numéros de version ne peuvent que croître. Une fois qu'une version est publiée, elle ne peut être ni retirée, ni renumérotée. Cette règle garantit la traçabilité et la confiance des consommateurs.
 
 ---
 
@@ -55,40 +55,40 @@ Les numÃ©ros de version ne peuvent que croÃ®tre. Une fois qu'une version est
 
 ### 2.1 Changement majeur (MAJEUR)
 
-Un **changement majeur** est toute modification qui rompt la compatibilitÃ© avec les versions prÃ©cÃ©dentes.
+Un **changement majeur** est toute modification qui rompt la compatibilité avec les versions précédentes.
 
 **Exemples de changements majeurs :**
-- Suppression d'une capacitÃ© existante
+- Suppression d'une capacité existante
 - Modification d'une signature de contrat
-- Changement de comportement d'une fonctionnalitÃ© existante
-- Restructuration incompatible des donnÃ©es
-- Suppression d'un Ã©tat de cycle de vie
-- Modification des rÃ¨gles de transition
+- Changement de comportement d'une fonctionnalité existante
+- Restructuration incompatible des données
+- Suppression d'un état de cycle de vie
+- Modification des règles de transition
 
-**ConsÃ©quences :**
-- IncrÃ©mentation du numÃ©ro majeur
-- Remise Ã  zÃ©ro des numÃ©ros mineur et correctif
-- PÃ©riode de dÃ©prÃ©ciation obligatoire de l'ancienne version (INV-EB-4)
+**Conséquences :**
+- Incrémentation du numéro majeur
+- Remise à zéro des numéros mineur et correctif
+- Période de dépréciation obligatoire de l'ancienne version (INV-EB-4)
 - Documentation obligatoire du chemin de migration (INV-EB-7)
 
-**RÃ©fÃ©rence Glossaire :** [Breaking change](..//..//..//..//miyukini-webway-system//reference//_index.md#breaking-change-changement-de-rupture)
+**Référence Glossaire :** [Breaking change](..//..//..//..//miyukini-webway-system//reference//_index.md#breaking-change-changement-de-rupture)
 
 ### 2.2 Changement mineur (MINEUR)
 
-Un **changement mineur** est un ajout de fonctionnalitÃ© qui prÃ©serve la rÃ©trocompatibilitÃ©.
+Un **changement mineur** est un ajout de fonctionnalité qui préserve la rétrocompatibilité.
 
 **Exemples de changements mineurs :**
-- Ajout d'une nouvelle capacitÃ©
+- Ajout d'une nouvelle capacité
 - Ajout d'un nouveau champ optionnel
-- Extension d'une interface sans modification des mÃ©thodes existantes
-- Ajout d'un nouvel Ã©tat de vie (avec transitions dÃ©finies)
-- Nouvelles rÃ¨gles d'Ã©volution qui n'affectent pas l'existant
+- Extension d'une interface sans modification des méthodes existantes
+- Ajout d'un nouvel état de vie (avec transitions définies)
+- Nouvelles règles d'évolution qui n'affectent pas l'existant
 
-**ConsÃ©quences :**
-- IncrÃ©mentation du numÃ©ro mineur
-- Remise Ã  zÃ©ro du numÃ©ro correctif
+**Conséquences :**
+- Incrémentation du numéro mineur
+- Remise à zéro du numéro correctif
 - Les consommateurs existants continuent de fonctionner sans modification
-- Adoption optionnelle des nouvelles fonctionnalitÃ©s
+- Adoption optionnelle des nouvelles fonctionnalités
 
 ### 2.3 Changement correctif (CORRECTIF)
 
@@ -96,231 +96,231 @@ Un **changement correctif** est une correction de bug qui ne modifie pas le comp
 
 **Exemples de changements correctifs :**
 - Correction d'une erreur de calcul
-- Correction d'une fuite de mÃ©moire
+- Correction d'une fuite de mémoire
 - Correction d'une condition de concurrence
-- AmÃ©lioration de performance sans changement fonctionnel
-- Correction de documentation erronÃ©e
+- Amélioration de performance sans changement fonctionnel
+- Correction de documentation erronée
 
-**ConsÃ©quences :**
-- IncrÃ©mentation du numÃ©ro correctif uniquement
+**Conséquences :**
+- Incrémentation du numéro correctif uniquement
 - Aucun impact sur les consommateurs
-- Adoption recommandÃ©e pour bÃ©nÃ©ficier des corrections
+- Adoption recommandée pour bénéficier des corrections
 
 ---
 
-## 3. Versionnement par catÃ©gorie d'Ã©lÃ©ment
+## 3. Versionnement par catégorie d'élément
 
 ### 3.1 Contrats fondateurs (FONDATION)
 
-Les contrats de statut **FONDATION** ont des rÃ¨gles de versionnement particuliÃ¨rement strictes :
+Les contrats de statut **FONDATION** ont des règles de versionnement particulièrement strictes :
 
-| Aspect | RÃ¨gle |
+| Aspect | Règle |
 |--------|-------|
-| **Changements majeurs** | ExtrÃªmement rares, nÃ©cessitent approbation multi-niveaux |
-| **PÃ©riode de dÃ©prÃ©ciation** | Minimale : 3 gÃ©nÃ©rations de versions |
+| **Changements majeurs** | Extrêmement rares, nécessitent approbation multi-niveaux |
+| **Période de dépréciation** | Minimale : 3 générations de versions |
 | **Ruptures** | Quasiment interdites, uniquement en dernier recours |
-| **FrÃ©quence de changement** | Ã‰volution trÃ¨s lente (annÃ©es) |
+| **Fréquence de changement** | Évolution très lente (années) |
 
 **Invariant applicable :** INV-EB-6 (Vision long terme obligatoire)
 
-### 3.2 Contrats opÃ©rationnels
+### 3.2 Contrats opérationnels
 
-Les contrats opÃ©rationnels suivent des rÃ¨gles de versionnement standards :
+Les contrats opérationnels suivent des règles de versionnement standards :
 
-| Aspect | RÃ¨gle |
+| Aspect | Règle |
 |--------|-------|
 | **Changements majeurs** | Possibles avec justification |
-| **PÃ©riode de dÃ©prÃ©ciation** | Minimale : 1 gÃ©nÃ©ration de versions |
-| **Ruptures** | AutorisÃ©es avec plan de migration |
-| **FrÃ©quence de changement** | Ã‰volution modÃ©rÃ©e (mois Ã  annÃ©es) |
+| **Période de dépréciation** | Minimale : 1 génération de versions |
+| **Ruptures** | Autorisées avec plan de migration |
+| **Fréquence de changement** | Évolution modérée (mois à années) |
 
 ### 3.3 Interfaces techniques
 
-Les interfaces techniques ont des rÃ¨gles de versionnement plus souples :
+Les interfaces techniques ont des règles de versionnement plus souples :
 
-| Aspect | RÃ¨gle |
+| Aspect | Règle |
 |--------|-------|
 | **Changements majeurs** | Relativement courants |
-| **PÃ©riode de dÃ©prÃ©ciation** | Minimale : 2 cycles de release |
+| **Période de dépréciation** | Minimale : 2 cycles de release |
 | **Ruptures** | Possibles avec documentation |
-| **FrÃ©quence de changement** | Ã‰volution plus rapide (semaines Ã  mois) |
+| **Fréquence de changement** | Évolution plus rapide (semaines à mois) |
 
-### 3.4 Ã‰lÃ©ments internes
+### 3.4 Éléments internes
 
-Les Ã©lÃ©ments internes n'ont pas de garantie de stabilitÃ© externe :
+Les éléments internes n'ont pas de garantie de stabilité externe :
 
-| Aspect | RÃ¨gle |
+| Aspect | Règle |
 |--------|-------|
 | **Changements majeurs** | Libres sans contrainte externe |
-| **PÃ©riode de dÃ©prÃ©ciation** | Aucune obligation |
-| **Ruptures** | AutorisÃ©es sans prÃ©avis |
-| **FrÃ©quence de changement** | Ã‰volution libre |
+| **Période de dépréciation** | Aucune obligation |
+| **Ruptures** | Autorisées sans préavis |
+| **Fréquence de changement** | Évolution libre |
 
-**ATTENTION :** Les Ã©lÃ©ments internes ne doivent jamais Ãªtre exposÃ©s aux consommateurs externes. Tout Ã©lÃ©ment exposÃ© devient un contrat de facto.
+**ATTENTION :** Les éléments internes ne doivent jamais être exposés aux consommateurs externes. Tout élément exposé devient un contrat de facto.
 
 ---
 
-## 4. RÃ¨gles de compatibilitÃ© par type de version
+## 4. Règles de compatibilité par type de version
 
-### 4.1 RÃ©trocompatibilitÃ© (comportement par dÃ©faut)
+### 4.1 Rétrocompatibilité (comportement par défaut)
 
-ConformÃ©ment Ã  l'invariant **INV-EB-5**, toute Ã©volution est **prÃ©sumÃ©e rÃ©trocompatible** sauf dÃ©claration explicite contraire.
+Conformément à l'invariant **INV-EB-5**, toute évolution est **présumée rétrocompatible** sauf déclaration explicite contraire.
 
-| Type de version | RÃ©trocompatibilitÃ© garantie |
+| Type de version | Rétrocompatibilité garantie |
 |-----------------|----------------------------|
-| Majeur (n.0.0) | âŒ Non |
-| Mineur (x.n.0) | âœ… Oui |
-| Correctif (x.y.n) | âœ… Oui |
+| Majeur (n.0.0) | ❌ Non |
+| Mineur (x.n.0) | ✅ Oui |
+| Correctif (x.y.n) | ✅ Oui |
 
-**RÃ©fÃ©rence Glossaire :** [RÃ©trocompatible](..//..//..//..//miyukini-webway-system//reference//_index.md#retrocompatible)
+**Référence Glossaire :** [Rétrocompatible](..//..//..//..//miyukini-webway-system//reference//_index.md#retrocompatible)
 
-### 4.2 CompatibilitÃ© en amont
+### 4.2 Compatibilité en amont
 
-La compatibilitÃ© en amont (anciennes versions fonctionnant avec les nouvelles) est :
+La compatibilité en amont (anciennes versions fonctionnant avec les nouvelles) est :
 
-| Type de version | CompatibilitÃ© amont |
+| Type de version | Compatibilité amont |
 |-----------------|---------------------|
-| Majeur | âŒ Non garantie |
-| Mineur | âš ï¸ Partielle possible |
-| Correctif | âœ… GÃ©nÃ©ralement oui |
+| Majeur | ❌ Non garantie |
+| Mineur | ⚠️ Partielle possible |
+| Correctif | ✅ Généralement oui |
 
-**Note :** La compatibilitÃ© en amont est rarement garantie et souvent techniquement impossible. Elle ne doit pas Ãªtre une attente par dÃ©faut.
+**Note :** La compatibilité en amont est rarement garantie et souvent techniquement impossible. Elle ne doit pas être une attente par défaut.
 
-### 4.3 FenÃªtre de compatibilitÃ©
+### 4.3 Fenêtre de compatibilité
 
-Chaque Ã©lÃ©ment dÃ©finit une **fenÃªtre de compatibilitÃ©** qui spÃ©cifie les versions avec lesquelles il garantit l'interopÃ©rabilitÃ©.
+Chaque élément définit une **fenêtre de compatibilité** qui spécifie les versions avec lesquelles il garantit l'interopérabilité.
 
 **Format :**
 ```
-Compatible avec : vX.Y Ã  vX.Z
+Compatible avec : vX.Y à vX.Z
 ```
 
 **Exemples :**
-- `Compatible avec : v1.0 Ã  v1.9` â€” Supporte toutes les versions 1.x
-- `Compatible avec : v2.3 Ã  v2.5` â€” FenÃªtre restreinte
+- `Compatible avec : v1.0 à v1.9` — Supporte toutes les versions 1.x
+- `Compatible avec : v2.3 à v2.5` — Fenêtre restreinte
 
-**RÃ©fÃ©rence Glossaire :** [Compatibility window](..//..//..//..//miyukini-webway-system//reference//_index.md#compatibility-window)
+**Référence Glossaire :** [Compatibility window](..//..//..//..//miyukini-webway-system//reference//_index.md#compatibility-window)
 
 ---
 
 ## 5. Cycle de vie des versions
 
-### 5.1 Ã‰tats de version
+### 5.1 États de version
 
-Chaque version possÃ¨de un Ã©tat de cycle de vie gouvernÃ© par Ever Buddy :
+Chaque version possède un état de cycle de vie gouverné par Ever Buddy :
 
-| Ã‰tat | Description | Versionnement |
+| État | Description | Versionnement |
 |------|-------------|---------------|
-| **DRAFT** | Version en dÃ©veloppement | Version provisoire (0.x.x ou suffixe -draft) |
+| **DRAFT** | Version en développement | Version provisoire (0.x.x ou suffixe -draft) |
 | **ACTIVE** | Version en usage normal | Version stable (x.y.z) |
-| **DEPRECATED** | Version dÃ©couragÃ©e | Conserve son numÃ©ro + marqueur dÃ©prÃ©ciation |
-| **RETIRED** | Version retirÃ©e | NumÃ©ro figÃ©, plus de correctifs |
-| **ARCHIVED** | Version archivÃ©e | NumÃ©ro conservÃ© pour rÃ©fÃ©rence |
+| **DEPRECATED** | Version découragée | Conserve son numéro + marqueur dépréciation |
+| **RETIRED** | Version retirée | Numéro figé, plus de correctifs |
+| **ARCHIVED** | Version archivée | Numéro conservé pour référence |
 
 ### 5.2 Versions DRAFT (0.x.x)
 
-Les versions dont le numÃ©ro majeur est **0** (zÃ©ro) sont considÃ©rÃ©es comme instables :
+Les versions dont le numéro majeur est **0** (zéro) sont considérées comme instables :
 
-| RÃ¨gle | Description |
+| Règle | Description |
 |-------|-------------|
-| **StabilitÃ©** | Aucune garantie de stabilitÃ© |
-| **Changements** | Tout changement possible sans incrÃ©mentation majeure |
+| **Stabilité** | Aucune garantie de stabilité |
+| **Changements** | Tout changement possible sans incrémentation majeure |
 | **Consommateurs** | Usage en connaissance de cause uniquement |
-| **Transition** | Passage Ã  1.0.0 = premiÃ¨re version stable |
+| **Transition** | Passage à 1.0.0 = première version stable |
 
 **Exemple de progression :**
 ```
-0.1.0 â†’ 0.2.0 â†’ 0.9.0 â†’ 1.0.0 (premiÃ¨re version stable)
+0.1.0 → 0.2.0 → 0.9.0 → 1.0.0 (première version stable)
 ```
 
 ### 5.3 Succession de versions
 
-La **chaÃ®ne d'Ã©volution** trace toutes les versions d'un Ã©lÃ©ment :
+La **chaîne d'évolution** trace toutes les versions d'un élément :
 
 ```
-v1.0.0 â†’ v1.1.0 â†’ v1.2.0 â†’ v2.0.0 â†’ v2.1.0 â†’ ...
-         â””â†’ v1.1.1 (correctif)
+v1.0.0 → v1.1.0 → v1.2.0 → v2.0.0 → v2.1.0 → ...
+         └→ v1.1.1 (correctif)
 ```
 
-**RÃ¨gles :**
+**Règles :**
 - Une version peut avoir plusieurs successeurs (branches)
-- Une version a un seul prÃ©dÃ©cesseur direct
+- Une version a un seul prédécesseur direct
 - Les correctifs se branchent depuis leur version mineure parente
 
-**RÃ©fÃ©rence Glossaire :** [Evolution chain](..//..//..//..//miyukini-webway-system//reference//_index.md#evolution-chain)
+**Référence Glossaire :** [Evolution chain](..//..//..//..//miyukini-webway-system//reference//_index.md#evolution-chain)
 
 ---
 
-## 6. DÃ©claration des changements
+## 6. Déclaration des changements
 
 ### 6.1 Changelog obligatoire
 
-Toute nouvelle version doit Ãªtre accompagnÃ©e d'un **changelog** documentant :
+Toute nouvelle version doit être accompagnée d'un **changelog** documentant :
 
 | Section | Contenu |
 |---------|---------|
-| **Added** | Nouvelles fonctionnalitÃ©s |
+| **Added** | Nouvelles fonctionnalités |
 | **Changed** | Modifications de comportement |
-| **Deprecated** | Ã‰lÃ©ments dÃ©prÃ©ciÃ©s |
-| **Removed** | Ã‰lÃ©ments supprimÃ©s |
+| **Deprecated** | Éléments dépréciés |
+| **Removed** | Éléments supprimés |
 | **Fixed** | Corrections de bugs |
-| **Security** | Corrections de sÃ©curitÃ© |
+| **Security** | Corrections de sécurité |
 
 ### 6.2 Classification de l'impact
 
-Chaque changement doit Ãªtre classifiÃ© selon son impact :
+Chaque changement doit être classifié selon son impact :
 
 | Impact | Description | Type de version |
 |--------|-------------|-----------------|
-| **Breaking** | Rompt la compatibilitÃ© | Majeur |
-| **Feature** | Ajoute une fonctionnalitÃ© | Mineur |
+| **Breaking** | Rompt la compatibilité | Majeur |
+| **Feature** | Ajoute une fonctionnalité | Mineur |
 | **Fix** | Corrige un bug | Correctif |
 | **None** | Aucun impact fonctionnel | Correctif ou aucun |
 
-### 6.3 DÃ©claration des ruptures
+### 6.3 Déclaration des ruptures
 
-ConformÃ©ment Ã  l'invariant **INV-EB-5**, si une Ã©volution est incompatible, elle doit Ãªtre **explicitement dÃ©clarÃ©e** :
+Conformément à l'invariant **INV-EB-5**, si une évolution est incompatible, elle doit être **explicitement déclarée** :
 
 ```markdown
 ## Version 2.0.0
 
-### âš ï¸ BREAKING CHANGES
+### ⚠️ BREAKING CHANGES
 
-- **[BREAKING]** Suppression de la mÃ©thode `legacyMethod()`
-  - Migration : Utiliser `newMethod()` Ã  la place
-  - Raison : Obsolescence et maintenance coÃ»teuse
+- **[BREAKING]** Suppression de la méthode `legacyMethod()`
+  - Migration : Utiliser `newMethod()` à la place
+  - Raison : Obsolescence et maintenance coûteuse
 
 - **[BREAKING]** Modification du format de `DataStructure`
   - Migration : Voir guide de migration section 3.2
-  - Raison : Performance et cohÃ©rence
+  - Raison : Performance et cohérence
 ```
 
 ---
 
-## 7. Versionnement et transitions d'Ã©tat
+## 7. Versionnement et transitions d'état
 
 ### 7.1 Impact des transitions sur le versionnement
 
 | Transition | Impact sur la version |
 |------------|----------------------|
-| DRAFT â†’ ACTIVE | Passage Ã  version stable (1.0.0 si premiÃ¨re) |
-| ACTIVE â†’ DEPRECATED | Aucun changement de numÃ©ro |
-| DEPRECATED â†’ RETIRED | Aucun changement de numÃ©ro |
-| RETIRED â†’ ARCHIVED | Aucun changement de numÃ©ro |
-| DEPRECATED â†’ ACTIVE (rÃ©activation) | Aucun changement de numÃ©ro |
+| DRAFT → ACTIVE | Passage à version stable (1.0.0 si première) |
+| ACTIVE → DEPRECATED | Aucun changement de numéro |
+| DEPRECATED → RETIRED | Aucun changement de numéro |
+| RETIRED → ARCHIVED | Aucun changement de numéro |
+| DEPRECATED → ACTIVE (réactivation) | Aucun changement de numéro |
 
-### 7.2 Correctifs sur versions dÃ©prÃ©ciÃ©es
+### 7.2 Correctifs sur versions dépréciées
 
-Les versions **DEPRECATED** peuvent recevoir des correctifs de sÃ©curitÃ© critiques :
+Les versions **DEPRECATED** peuvent recevoir des correctifs de sécurité critiques :
 
-| Type de correctif | AutorisÃ© sur DEPRECATED |
+| Type de correctif | Autorisé sur DEPRECATED |
 |-------------------|------------------------|
-| Correction de sÃ©curitÃ© | âœ… Oui |
-| Correction de bug critique | âœ… Oui |
-| Correction de bug mineur | âŒ Non |
-| Nouvelle fonctionnalitÃ© | âŒ Non |
+| Correction de sécurité | ✅ Oui |
+| Correction de bug critique | ✅ Oui |
+| Correction de bug mineur | ❌ Non |
+| Nouvelle fonctionnalité | ❌ Non |
 
-Les versions **RETIRED** ne reÃ§oivent aucun correctif.
+Les versions **RETIRED** ne reçoivent aucun correctif.
 
 ---
 
@@ -332,40 +332,40 @@ Les invariants suivants d'Ever Buddy s'appliquent au versionnement :
 
 | Invariant | Application au versionnement |
 |-----------|------------------------------|
-| **INV-EB-4** | Pas de passage direct ACTIVE â†’ RETIRED sans version DEPRECATED |
-| **INV-EB-5** | RÃ©trocompatibilitÃ© prÃ©sumÃ©e sauf dÃ©claration majeure explicite |
-| **INV-EB-6** | Impact sur au moins deux gÃ©nÃ©rations de versions considÃ©rÃ© |
-| **INV-EB-7** | Chaque version documentÃ©e avec raison et chemin de migration |
-| **INV-EB-9** | RÃ¨gles de versionnement publiques et stables |
-| **INV-EB-11** | Changements de rÃ¨gles non rÃ©troactifs |
+| **INV-EB-4** | Pas de passage direct ACTIVE → RETIRED sans version DEPRECATED |
+| **INV-EB-5** | Rétrocompatibilité présumée sauf déclaration majeure explicite |
+| **INV-EB-6** | Impact sur au moins deux générations de versions considéré |
+| **INV-EB-7** | Chaque version documentée avec raison et chemin de migration |
+| **INV-EB-9** | Règles de versionnement publiques et stables |
+| **INV-EB-11** | Changements de règles non rétroactifs |
 
 ### 8.2 Violations de versionnement
 
 Les actions suivantes sont des **violations** du contrat de versionnement :
 
-| Violation | GravitÃ© |
+| Violation | Gravité |
 |-----------|---------|
-| Changement majeur sans incrÃ©ment majeur | ðŸ”´ Critique |
-| Rupture de compatibilitÃ© non documentÃ©e | ðŸ”´ Critique |
-| RenumÃ©rotation d'une version publiÃ©e | ðŸ”´ Critique |
-| Correctif incluant une nouvelle fonctionnalitÃ© | ðŸŸ¡ ModÃ©rÃ©e |
-| Version mineure sans rÃ©trocompatibilitÃ© | ðŸ”´ Critique |
-| Absence de changelog | ðŸŸ¡ ModÃ©rÃ©e |
+| Changement majeur sans incrément majeur | 🔴 Critique |
+| Rupture de compatibilité non documentée | 🔴 Critique |
+| Renumérotation d'une version publiée | 🔴 Critique |
+| Correctif incluant une nouvelle fonctionnalité | 🟡 Modérée |
+| Version mineure sans rétrocompatibilité | 🔴 Critique |
+| Absence de changelog | 🟡 Modérée |
 
 ---
 
 ## 9. Comparaison et ordering des versions
 
-### 9.1 RÃ¨gles de comparaison
+### 9.1 Règles de comparaison
 
-Les versions sont comparÃ©es composant par composant, de gauche Ã  droite :
+Les versions sont comparées composant par composant, de gauche à droite :
 
 ```
 1.9.0 < 1.10.0 < 2.0.0
 1.0.0 < 1.0.1 < 1.1.0
 ```
 
-### 9.2 PrÃ©cÃ©dence
+### 9.2 Précédence
 
 ```
 MAJEUR > MINEUR > CORRECTIF
@@ -373,12 +373,12 @@ MAJEUR > MINEUR > CORRECTIF
 
 **Exemple de tri :**
 ```
-1.0.0 â†’ 1.0.1 â†’ 1.1.0 â†’ 1.1.1 â†’ 1.2.0 â†’ 2.0.0
+1.0.0 → 1.0.1 → 1.1.0 → 1.1.1 → 1.2.0 → 2.0.0
 ```
 
-### 9.3 Versions prÃ©-release (DRAFT)
+### 9.3 Versions pré-release (DRAFT)
 
-Les versions DRAFT (0.x.x) sont toujours infÃ©rieures Ã  leur premiÃ¨re version stable :
+Les versions DRAFT (0.x.x) sont toujours inférieures à leur première version stable :
 
 ```
 0.9.9 < 1.0.0
@@ -390,75 +390,75 @@ Les versions DRAFT (0.x.x) sont toujours infÃ©rieures Ã  leur premiÃ¨re ve
 
 ### 10.1 Consultation par StrongFather
 
-StrongFather peut consulter Ever Buddy pour connaÃ®tre :
-- La version actuelle d'un Ã©lÃ©ment
-- La compatibilitÃ© entre deux versions
-- Les rÃ¨gles de migration applicables
+StrongFather peut consulter Ever Buddy pour connaître :
+- La version actuelle d'un élément
+- La compatibilité entre deux versions
+- Les règles de migration applicables
 
 ### 10.2 Guidance pour BondingBrother
 
 BondingBrother utilise les informations de versionnement pour :
-- Adapter les traductions entre versions diffÃ©rentes
-- Communiquer les avertissements de compatibilitÃ©
+- Adapter les traductions entre versions différentes
+- Communiquer les avertissements de compatibilité
 - Guider les produits dans leurs migrations
 
 ### 10.3 Information vers Master Butler
 
-Master Butler est informÃ© par Ever Buddy de :
-- L'Ã©tat de vie de chaque capacitÃ© versionnÃ©e
-- Les versions supportÃ©es de chaque Tool
-- Les compatibilitÃ©s Tool â†” Environnement
+Master Butler est informé par Ever Buddy de :
+- L'état de vie de chaque capacité versionnée
+- Les versions supportées de chaque Tool
+- Les compatibilités Tool ↔ Environnement
 
 ---
 
-## 11. ConformitÃ© aux Lois d'Autonomie
+## 11. Conformité aux Lois d'Autonomie
 
 ### LOI-4 : Pas de temps global requis
 
-Le versionnement sÃ©mantique respecte LOI-4 :
-- Les versions sont des **numÃ©ros discrets**, pas des timestamps
-- Les comparaisons de versions entre nÅ“uds utilisent des **numÃ©ros**, pas des dates
-- Les pÃ©riodes de dÃ©prÃ©ciation sont dÃ©finies en **cycles de release**, pas en temps absolu
+Le versionnement sémantique respecte LOI-4 :
+- Les versions sont des **numéros discrets**, pas des timestamps
+- Les comparaisons de versions entre nœuds utilisent des **numéros**, pas des dates
+- Les périodes de dépréciation sont définies en **cycles de release**, pas en temps absolu
 
-### LOI-3 : L'Ã©tat local est souverain
+### LOI-3 : L'état local est souverain
 
-Chaque nÅ“ud maintient son propre registre de versions :
-- La version locale est la vÃ©ritÃ© locale
-- Ã€ la reconnexion, rÃ©conciliation explicite des versions
+Chaque nœud maintient son propre registre de versions :
+- La version locale est la vérité locale
+- À la reconnexion, réconciliation explicite des versions
 
 ---
 
-## 12. RÃ©sumÃ© des rÃ¨gles de versionnement
+## 12. Résumé des règles de versionnement
 
-| RÃ¨gle | Description |
+| Règle | Description |
 |-------|-------------|
 | **R-VS-1** | Format : MAJEUR.MINEUR.CORRECTIF |
-| **R-VS-2** | Majeur = rupture de compatibilitÃ© |
-| **R-VS-3** | Mineur = ajout rÃ©trocompatible |
+| **R-VS-2** | Majeur = rupture de compatibilité |
+| **R-VS-3** | Mineur = ajout rétrocompatible |
 | **R-VS-4** | Correctif = bug fix uniquement |
-| **R-VS-5** | NumÃ©ros croissants uniquement |
+| **R-VS-5** | Numéros croissants uniquement |
 | **R-VS-6** | Version 0.x.x = instable |
 | **R-VS-7** | Changelog obligatoire |
-| **R-VS-8** | Ruptures explicitement dÃ©clarÃ©es |
-| **R-VS-9** | CatÃ©gorie dÃ©termine les pÃ©riodes de dÃ©prÃ©ciation |
-| **R-VS-10** | RÃ©trocompatibilitÃ© prÃ©sumÃ©e par dÃ©faut |
+| **R-VS-8** | Ruptures explicitement déclarées |
+| **R-VS-9** | Catégorie détermine les périodes de dépréciation |
+| **R-VS-10** | Rétrocompatibilité présumée par défaut |
 
 ---
 
-## 13. RÃ©fÃ©rences croisÃ©es
+## 13. Références croisées
 
-- [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) â€” Document source de ce contrat
-- [Ever Buddy - Compatibility Rules Contract](./Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md) â€” RÃ¨gles de compatibilitÃ© dÃ©taillÃ©es
-- [Ever Buddy - Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md) â€” Ã‰tats de cycle de vie
-- [Ever Buddy - Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md) â€” RÃ¨gles de transition
-- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) â€” DÃ©finitions canoniques
-- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) â€” ConformitÃ© LOI-1 Ã  LOI-6
+- [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) — Document source de ce contrat
+- [Ever Buddy - Compatibility Rules Contract](./Ever%20Buddy%20-%20Compatibility%20Rules%20Contract.md) — Règles de compatibilité détaillées
+- [Ever Buddy - Lifecycle States Contract](../lifecycle/Ever%20Buddy%20-%20Lifecycle%20States%20Contract.md) — États de cycle de vie
+- [Ever Buddy - Transition Rules Contract](../lifecycle/Ever%20Buddy%20-%20Transition%20Rules%20Contract.md) — Règles de transition
+- [Miyukini Conceptual References - Glossaire](..//..//..//..//miyukini-webway-system//reference//_index.md) — Définitions canoniques
+- [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md) — Conformité LOI-1 à LOI-6
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Contractuel normatif â€” VERSION SEMANTICS CONTRACT  
-**AutoritÃ© :** Ever Buddy (Strate 4)  
-**Source :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md), Section 4 â€” Concepts fondamentaux
+**Statut :** Contractuel normatif — VERSION SEMANTICS CONTRACT  
+**Autorité :** Ever Buddy (Strate 4)  
+**Source :** [Ever Buddy - Documentation Fondatrice](../../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md), Section 4 — Concepts fondamentaux
 

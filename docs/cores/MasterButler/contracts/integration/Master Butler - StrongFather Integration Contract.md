@@ -2,164 +2,164 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le **contrat d'intÃ©gration entre Master Butler et StrongFather**. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration avec StrongFather en tant qu'autoritÃ© des dÃ©cisions stratÃ©giques et politiques.
+Ce document définit le **contrat d'intégration entre Master Butler et StrongFather**. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration avec StrongFather en tant qu'autorité des décisions stratégiques et politiques.
 
-Ce document complÃ¨te la Section 3 de la [Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
-- [Master Butler - Capability API Contract](../api/Master%20Butler%20-%20Capability%20API%20Contract.md) pour l'API des capacitÃ©s
+Ce document complète la Section 3 de la [Documentation Fondatrice](../../foundation/Master%20Butler%20-%20Documentation%20Fondatrice.md) et s'appuie sur :
+- [Master Butler - Capability API Contract](../api/Master%20Butler%20-%20Capability%20API%20Contract.md) pour l'API des capacités
 - [Master Butler - Permission API Contract](../api/Master%20Butler%20-%20Permission%20API%20Contract.md) pour l'API des permissions
 - [StrongFather - Documentation Fondatrice](../../../StrongFather/foundation/StrongFather%20-%20Documentation%20Fondatrice.md) pour la nature de StrongFather
-- [StrongFather - Integration Readiness Contract](../../../StrongFather/architecture/StrongFather%20-%20Integration%20Readiness%20Contract.md) pour les rÃ¨gles d'intÃ©gration
+- [StrongFather - Integration Readiness Contract](../../../StrongFather/architecture/StrongFather%20-%20Integration%20Readiness%20Contract.md) pour les règles d'intégration
 
-L'intÃ©gration respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interrogations sont locales et ne requiÃ¨rent aucune dÃ©pendance externe (**LOI-1**).
+L'intégration respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : toutes les interrogations sont locales et ne requièrent aucune dépendance externe (**LOI-1**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre Master Butler et StrongFather
-- Le protocole de communication (interrogations et rÃ©ponses)
-- Les types d'interrogations acceptÃ©es par Master Butler
-- Les rÃ¨gles d'intÃ©gration spÃ©cifiques Ã  StrongFather
-- La gestion des erreurs et des rÃ©ponses
-- Les garanties de l'intÃ©gration
+- Le protocole de communication (interrogations et réponses)
+- Les types d'interrogations acceptées par Master Butler
+- Les règles d'intégration spécifiques à StrongFather
+- La gestion des erreurs et des réponses
+- Les garanties de l'intégration
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails internes de StrongFather (voir documentation StrongFather)
-- Les dÃ©tails internes des registres (voir Capability Registry Contract, Permission Registry Contract)
-- Les API de dÃ©claration (voir Discovery API Contract)
-- L'intÃ©gration avec BondingBrother (voir BondingBrother Integration Contract)
+- Les détails internes de StrongFather (voir documentation StrongFather)
+- Les détails internes des registres (voir Capability Registry Contract, Permission Registry Contract)
+- Les API de déclaration (voir Discovery API Contract)
+- L'intégration avec BondingBrother (voir BondingBrother Integration Contract)
 
 ---
 
 ## 3. Principe fondamental
 
-**StrongFather interroge Master Butler pour obtenir les informations nÃ©cessaires Ã  ses dÃ©cisions. Master Butler fournit ces informations de maniÃ¨re exhaustive, exacte, et non interprÃ©tÃ©e, sans jamais participer Ã  la dÃ©cision elle-mÃªme.**
+**StrongFather interroge Master Butler pour obtenir les informations nécessaires à ses décisions. Master Butler fournit ces informations de manière exhaustive, exacte, et non interprétée, sans jamais participer à la décision elle-même.**
 
-La relation est de consultation : StrongFather interroge Master Butler sur les capacitÃ©s et permissions, Master Butler rÃ©pond avec les informations demandÃ©es. Cette relation est unidirectionnelle en termes de flux informationnel : Master Butler informe, StrongFather dÃ©cide.
+La relation est de consultation : StrongFather interroge Master Butler sur les capacités et permissions, Master Butler répond avec les informations demandées. Cette relation est unidirectionnelle en termes de flux informationnel : Master Butler informe, StrongFather décide.
 
 ---
 
-## 4. Nature de la relation Master Butler â€” StrongFather
+## 4. Nature de la relation Master Butler — StrongFather
 
 ### 4.1 Relation de consultation
 
-**Master Butler est consultÃ© par StrongFather :**
-- Pour connaÃ®tre l'existence des capacitÃ©s
-- Pour obtenir les permissions associÃ©es aux capacitÃ©s
-- Pour calculer le contexte de capacitÃ© d'un demandeur
-- Pour dÃ©couvrir les mÃ©tadonnÃ©es des capacitÃ©s et permissions
+**Master Butler est consulté par StrongFather :**
+- Pour connaître l'existence des capacités
+- Pour obtenir les permissions associées aux capacités
+- Pour calculer le contexte de capacité d'un demandeur
+- Pour découvrir les métadonnées des capacités et permissions
 
-**RÃ¨gle MB-SF-01 : Consultation sans dÃ©cision**
+**Règle MB-SF-01 : Consultation sans décision**
 
-Master Butler ne participe jamais aux dÃ©cisions de StrongFather. Il fournit des informations factuelles sur les capacitÃ©s et permissions, sans recommandation, sans interprÃ©tation, sans jugement.
+Master Butler ne participe jamais aux décisions de StrongFather. Il fournit des informations factuelles sur les capacités et permissions, sans recommandation, sans interprétation, sans jugement.
 
-**RÃ¨gle MB-SF-02 : ExhaustivitÃ© des rÃ©ponses**
+**Règle MB-SF-02 : Exhaustivité des réponses**
 
-Les rÃ©ponses de Master Butler Ã  StrongFather sont exhaustives. Aucune information pertinente n'est omise ou filtrÃ©e.
+Les réponses de Master Butler à StrongFather sont exhaustives. Aucune information pertinente n'est omise ou filtrée.
 
-**RÃ¨gle MB-SF-03 : AccÃ¨s privilÃ©giÃ©**
+**Règle MB-SF-03 : Accès privilégié**
 
-StrongFather dispose d'un accÃ¨s privilÃ©giÃ© Ã  Master Butler. Aucune restriction d'accÃ¨s ne s'applique aux interrogations de StrongFather.
+StrongFather dispose d'un accès privilégié à Master Butler. Aucune restriction d'accès ne s'applique aux interrogations de StrongFather.
 
-### 4.2 SÃ©paration des responsabilitÃ©s
+### 4.2 Séparation des responsabilités
 
-| ResponsabilitÃ© | Master Butler | StrongFather |
+| Responsabilité | Master Butler | StrongFather |
 |----------------|---------------|--------------|
-| **ConnaÃ®tre les capacitÃ©s** | âœ… Exclusif | âŒ Interroge |
-| **ConnaÃ®tre les permissions** | âœ… Exclusif | âŒ Interroge |
-| **DÃ©cider si autorisÃ©** | âŒ Jamais | âœ… Exclusif |
-| **Appliquer des politiques** | âŒ Jamais | âœ… Exclusif |
-| **Ã‰valuer des intentions** | âŒ Jamais | âœ… Exclusif |
-| **Fournir des informations** | âœ… Exclusif | âŒ Consomme |
+| **Connaître les capacités** | ✅ Exclusif | ❌ Interroge |
+| **Connaître les permissions** | ✅ Exclusif | ❌ Interroge |
+| **Décider si autorisé** | ❌ Jamais | ✅ Exclusif |
+| **Appliquer des politiques** | ❌ Jamais | ✅ Exclusif |
+| **Évaluer des intentions** | ❌ Jamais | ✅ Exclusif |
+| **Fournir des informations** | ✅ Exclusif | ❌ Consomme |
 
-**RÃ¨gle MB-SF-04 : Aucun chevauchement**
+**Règle MB-SF-04 : Aucun chevauchement**
 
-Aucun chevauchement de responsabilitÃ©s n'est autorisÃ©. Master Butler ne prend jamais de dÃ©cision, StrongFather ne maintient jamais de registre de capacitÃ©s ou permissions.
+Aucun chevauchement de responsabilités n'est autorisé. Master Butler ne prend jamais de décision, StrongFather ne maintient jamais de registre de capacités ou permissions.
 
 ---
 
 ## 5. Types d'interrogations
 
-### 5.1 Interrogation d'existence de capacitÃ©
+### 5.1 Interrogation d'existence de capacité
 
 **CAPABILITY_EXISTS**
-- **Objectif :** VÃ©rifier si une capacitÃ© existe dans le registre
-- **Payload :** Identifiant de la capacitÃ©
-- **RÃ©ponse :** Existence (boolÃ©en) + mÃ©tadonnÃ©es si existante
+- **Objectif :** Vérifier si une capacité existe dans le registre
+- **Payload :** Identifiant de la capacité
+- **Réponse :** Existence (booléen) + métadonnées si existante
 
-**RÃ¨gle MB-SF-QUERY-01 : RÃ©ponse binaire enrichie**
+**Règle MB-SF-QUERY-01 : Réponse binaire enrichie**
 
-L'existence est une rÃ©ponse binaire (existe/n'existe pas), mais si la capacitÃ© existe, les mÃ©tadonnÃ©es sont fournies.
+L'existence est une réponse binaire (existe/n'existe pas), mais si la capacité existe, les métadonnées sont fournies.
 
 ### 5.2 Interrogation des permissions requises
 
 **REQUIRED_PERMISSIONS**
-- **Objectif :** Obtenir les permissions requises pour accÃ©der Ã  une capacitÃ©
-- **Payload :** Identifiant de la capacitÃ©
-- **RÃ©ponse :** Liste des permissions associÃ©es avec leurs mÃ©tadonnÃ©es
+- **Objectif :** Obtenir les permissions requises pour accéder à une capacité
+- **Payload :** Identifiant de la capacité
+- **Réponse :** Liste des permissions associées avec leurs métadonnées
 
-**RÃ¨gle MB-SF-QUERY-02 : Liste exhaustive**
+**Règle MB-SF-QUERY-02 : Liste exhaustive**
 
-La liste des permissions est exhaustive. Toutes les permissions associÃ©es Ã  la capacitÃ© sont retournÃ©es.
+La liste des permissions est exhaustive. Toutes les permissions associées à la capacité sont retournées.
 
-### 5.3 Interrogation du contexte de capacitÃ©
+### 5.3 Interrogation du contexte de capacité
 
 **CAPABILITY_CONTEXT**
-- **Objectif :** Calculer le contexte de capacitÃ© pour un demandeur donnÃ©
-- **Payload :** IdentitÃ© du demandeur, rÃ´les, module cible
-- **RÃ©ponse :** CapacitÃ©s accessibles, permissions dÃ©tenues, associations
+- **Objectif :** Calculer le contexte de capacité pour un demandeur donné
+- **Payload :** Identité du demandeur, rôles, module cible
+- **Réponse :** Capacités accessibles, permissions détenues, associations
 
-**RÃ¨gle MB-SF-QUERY-03 : Calcul de projection**
+**Règle MB-SF-QUERY-03 : Calcul de projection**
 
-Le contexte de capacitÃ© est une projection des capacitÃ©s et permissions disponibles pour le demandeur dans le contexte donnÃ©. Ce calcul ne modifie pas le registre.
+Le contexte de capacité est une projection des capacités et permissions disponibles pour le demandeur dans le contexte donné. Ce calcul ne modifie pas le registre.
 
 ### 5.4 Interrogation de permission
 
 **PERMISSION_EXISTS**
-- **Objectif :** VÃ©rifier si une permission existe dans le registre
+- **Objectif :** Vérifier si une permission existe dans le registre
 - **Payload :** Identifiant de la permission
-- **RÃ©ponse :** Existence (boolÃ©en) + mÃ©tadonnÃ©es si existante
+- **Réponse :** Existence (booléen) + métadonnées si existante
 
 **PERMISSION_DETAILS**
-- **Objectif :** Obtenir les dÃ©tails d'une permission
+- **Objectif :** Obtenir les détails d'une permission
 - **Payload :** Identifiant de la permission
-- **RÃ©ponse :** MÃ©tadonnÃ©es complÃ¨tes, capacitÃ©s associÃ©es, niveaux
+- **Réponse :** Métadonnées complètes, capacités associées, niveaux
 
-### 5.5 Interrogation d'association rÃ´le-permission
+### 5.5 Interrogation d'association rôle-permission
 
 **ROLE_PERMISSIONS**
-- **Objectif :** Obtenir les permissions associÃ©es Ã  un rÃ´le
-- **Payload :** Identifiant du rÃ´le
-- **RÃ©ponse :** Liste des permissions avec leurs mÃ©tadonnÃ©es
+- **Objectif :** Obtenir les permissions associées à un rôle
+- **Payload :** Identifiant du rôle
+- **Réponse :** Liste des permissions avec leurs métadonnées
 
-**RÃ¨gle MB-SF-QUERY-04 : RÃ´les connus uniquement**
+**Règle MB-SF-QUERY-04 : Rôles connus uniquement**
 
-Master Butler connaÃ®t les associations rÃ´les-permissions, mais ne gÃ¨re pas les attributions de rÃ´les aux utilisateurs (hors-scope).
+Master Butler connaît les associations rôles-permissions, mais ne gère pas les attributions de rôles aux utilisateurs (hors-scope).
 
 ### 5.6 Interrogation de Tool/Toolkit
 
 **TOOL_EXISTS**
-- **Objectif :** VÃ©rifier si un Tool existe dans le catalogue
+- **Objectif :** Vérifier si un Tool existe dans le catalogue
 - **Payload :** Identifiant du Tool
-- **RÃ©ponse :** Existence + mÃ©tadonnÃ©es si existant
+- **Réponse :** Existence + métadonnées si existant
 
 **TOOLKIT_COMPOSITION**
 - **Objectif :** Obtenir la composition d'un Toolkit
 - **Payload :** Identifiant du Toolkit
-- **RÃ©ponse :** Liste des Tools composant le Toolkit avec leurs mÃ©tadonnÃ©es
+- **Réponse :** Liste des Tools composant le Toolkit avec leurs métadonnées
 
-### 5.7 RÃ¨gles gÃ©nÃ©rales d'interrogation
+### 5.7 Règles générales d'interrogation
 
-**RÃ¨gle MB-SF-QUERY-05 : Toute interrogation est sans Ã©tat**
+**Règle MB-SF-QUERY-05 : Toute interrogation est sans état**
 
-Les interrogations de StrongFather ne modifient jamais l'Ã©tat de Master Butler. Ce sont des lectures pures.
+Les interrogations de StrongFather ne modifient jamais l'état de Master Butler. Ce sont des lectures pures.
 
-**RÃ¨gle MB-SF-QUERY-06 : Pas d'effet de bord**
+**Règle MB-SF-QUERY-06 : Pas d'effet de bord**
 
-Aucune interrogation ne produit d'effet de bord sur le registre, les associations, ou les mÃ©tadonnÃ©es.
+Aucune interrogation ne produit d'effet de bord sur le registre, les associations, ou les métadonnées.
 
-**RÃ¨gle MB-SF-QUERY-07 : RÃ©ponse immÃ©diate**
+**Règle MB-SF-QUERY-07 : Réponse immédiate**
 
-Les rÃ©ponses sont fournies immÃ©diatement. Aucune interrogation n'est mise en attente ou diffÃ©rÃ©e.
+Les réponses sont fournies immédiatement. Aucune interrogation n'est mise en attente ou différée.
 
 ---
 
@@ -167,171 +167,171 @@ Les rÃ©ponses sont fournies immÃ©diatement. Aucune interrogation n'est mise 
 
 ### 6.1 Format des interrogations
 
-Les interrogations de StrongFather suivent un format standardisÃ©.
+Les interrogations de StrongFather suivent un format standardisé.
 
 **Structure de base :**
 
-| Ã‰lÃ©ment | Description | Obligatoire |
+| Élément | Description | Obligatoire |
 |---------|-------------|-------------|
-| `interrogation_id` | Identifiant unique de l'interrogation | âœ… Oui |
-| `intention_id` | RÃ©fÃ©rence Ã  l'intention en cours d'Ã©valuation | âœ… Oui |
-| `type` | Type d'interrogation | âœ… Oui |
-| `payload` | DonnÃ©es spÃ©cifiques Ã  l'interrogation | âœ… Oui |
-| `contexte_appelant` | Contexte de StrongFather | âœ… Oui |
-| `timestamp` | Horodatage de l'interrogation | âœ… Oui |
+| `interrogation_id` | Identifiant unique de l'interrogation | ✅ Oui |
+| `intention_id` | Référence à l'intention en cours d'évaluation | ✅ Oui |
+| `type` | Type d'interrogation | ✅ Oui |
+| `payload` | Données spécifiques à l'interrogation | ✅ Oui |
+| `contexte_appelant` | Contexte de StrongFather | ✅ Oui |
+| `timestamp` | Horodatage de l'interrogation | ✅ Oui |
 
-**RÃ¨gle MB-SF-PROT-01 : Format standardisÃ©**
+**Règle MB-SF-PROT-01 : Format standardisé**
 
-Toutes les interrogations respectent le format standardisÃ©. Aucune interrogation ad-hoc n'est acceptÃ©e.
+Toutes les interrogations respectent le format standardisé. Aucune interrogation ad-hoc n'est acceptée.
 
-**RÃ¨gle MB-SF-PROT-02 : TraÃ§abilitÃ© par intention**
+**Règle MB-SF-PROT-02 : Traçabilité par intention**
 
-Chaque interrogation rÃ©fÃ©rence l'intention en cours d'Ã©valuation pour assurer la traÃ§abilitÃ© bout-en-bout.
+Chaque interrogation référence l'intention en cours d'évaluation pour assurer la traçabilité bout-en-bout.
 
-### 6.2 Format des rÃ©ponses
+### 6.2 Format des réponses
 
-Les rÃ©ponses de Master Butler suivent un format standardisÃ©.
+Les réponses de Master Butler suivent un format standardisé.
 
 **Structure de base :**
 
-| Ã‰lÃ©ment | Description | Obligatoire |
+| Élément | Description | Obligatoire |
 |---------|-------------|-------------|
-| `reponse_id` | Identifiant unique de la rÃ©ponse | âœ… Oui |
-| `interrogation_id` | RÃ©fÃ©rence Ã  l'interrogation | âœ… Oui |
-| `statut` | Statut de la rÃ©ponse (SUCCESS, NOT_FOUND, ERROR) | âœ… Oui |
-| `donnees` | DonnÃ©es de la rÃ©ponse | Si SUCCESS |
-| `erreur` | DÃ©tails de l'erreur | Si ERROR |
-| `timestamp` | Horodatage de la rÃ©ponse | âœ… Oui |
+| `reponse_id` | Identifiant unique de la réponse | ✅ Oui |
+| `interrogation_id` | Référence à l'interrogation | ✅ Oui |
+| `statut` | Statut de la réponse (SUCCESS, NOT_FOUND, ERROR) | ✅ Oui |
+| `donnees` | Données de la réponse | Si SUCCESS |
+| `erreur` | Détails de l'erreur | Si ERROR |
+| `timestamp` | Horodatage de la réponse | ✅ Oui |
 
-**RÃ¨gle MB-SF-PROT-03 : RÃ©ponse toujours structurÃ©e**
+**Règle MB-SF-PROT-03 : Réponse toujours structurée**
 
-Master Butler retourne toujours une rÃ©ponse structurÃ©e, mÃªme en cas d'erreur ou de non-existence.
+Master Butler retourne toujours une réponse structurée, même en cas d'erreur ou de non-existence.
 
-**RÃ¨gle MB-SF-PROT-04 : Pas d'interprÃ©tation**
+**Règle MB-SF-PROT-04 : Pas d'interprétation**
 
-Les rÃ©ponses sont des informations brutes. Master Butler n'interprÃ¨te pas les donnÃ©es pour StrongFather.
+Les réponses sont des informations brutes. Master Butler n'interprète pas les données pour StrongFather.
 
-### 6.3 Statuts de rÃ©ponse
+### 6.3 Statuts de réponse
 
 | Statut | Signification |
 |--------|---------------|
-| `SUCCESS` | L'interrogation a abouti, les donnÃ©es sont fournies |
-| `NOT_FOUND` | L'Ã©lÃ©ment recherchÃ© n'existe pas dans le registre |
-| `INVALID_QUERY` | L'interrogation est mal formÃ©e ou incomplÃ¨te |
+| `SUCCESS` | L'interrogation a abouti, les données sont fournies |
+| `NOT_FOUND` | L'élément recherché n'existe pas dans le registre |
+| `INVALID_QUERY` | L'interrogation est mal formée ou incomplète |
 | `ERROR` | Une erreur interne s'est produite |
 
-**RÃ¨gle MB-SF-PROT-05 : NOT_FOUND n'est pas une erreur**
+**Règle MB-SF-PROT-05 : NOT_FOUND n'est pas une erreur**
 
-Le statut `NOT_FOUND` est une rÃ©ponse valide, pas une erreur. Il indique que l'Ã©lÃ©ment recherchÃ© n'existe pas dans le registre.
+Le statut `NOT_FOUND` est une réponse valide, pas une erreur. Il indique que l'élément recherché n'existe pas dans le registre.
 
 ---
 
 ## 7. Flux d'interrogation typique
 
-### 7.1 Flux complet d'Ã©valuation d'intention
+### 7.1 Flux complet d'évaluation d'intention
 
 **Acteurs :** BondingBrother, StrongFather, Master Butler
 
-**SÃ©quence :**
+**Séquence :**
 
-1. BondingBrother soumet une intention Ã  StrongFather pour Ã©valuation
-2. StrongFather identifie les capacitÃ©s impliquÃ©es dans l'intention
+1. BondingBrother soumet une intention à StrongFather pour évaluation
+2. StrongFather identifie les capacités impliquées dans l'intention
 3. StrongFather interroge Master Butler : `CAPABILITY_EXISTS`
-4. Master Butler rÃ©pond avec l'existence et les mÃ©tadonnÃ©es
+4. Master Butler répond avec l'existence et les métadonnées
 5. StrongFather interroge Master Butler : `REQUIRED_PERMISSIONS`
-6. Master Butler rÃ©pond avec les permissions requises
+6. Master Butler répond avec les permissions requises
 7. StrongFather interroge Master Butler : `ROLE_PERMISSIONS` (pour le demandeur)
-8. Master Butler rÃ©pond avec les permissions du demandeur
-9. StrongFather Ã©value l'intention selon les politiques avec les informations obtenues
-10. StrongFather produit une dÃ©cision (acceptÃ©e, refusÃ©e, ambiguÃ«, diffÃ©rÃ©e)
+8. Master Butler répond avec les permissions du demandeur
+9. StrongFather évalue l'intention selon les politiques avec les informations obtenues
+10. StrongFather produit une décision (acceptée, refusée, ambiguë, différée)
 
-**RÃ¨gle MB-SF-FLOW-01 : Interrogations multiples possibles**
+**Règle MB-SF-FLOW-01 : Interrogations multiples possibles**
 
-StrongFather peut effectuer plusieurs interrogations pour une mÃªme Ã©valuation d'intention. Master Butler rÃ©pond Ã  chacune indÃ©pendamment.
+StrongFather peut effectuer plusieurs interrogations pour une même évaluation d'intention. Master Butler répond à chacune indépendamment.
 
-### 7.2 Flux de calcul de contexte de capacitÃ©
+### 7.2 Flux de calcul de contexte de capacité
 
 **Acteurs :** BondingBrother, StrongFather, Master Butler
 
-**SÃ©quence :**
+**Séquence :**
 
-1. BondingBrother demande le contexte de capacitÃ© pour traduire une intention
+1. BondingBrother demande le contexte de capacité pour traduire une intention
 2. BondingBrother interroge Master Butler : `CAPABILITY_CONTEXT`
-3. Master Butler calcule le contexte de capacitÃ©
-4. Master Butler retourne les capacitÃ©s accessibles et permissions
+3. Master Butler calcule le contexte de capacité
+4. Master Butler retourne les capacités accessibles et permissions
 5. BondingBrother utilise le contexte pour la traduction
 
-**Note :** Ce flux peut aussi Ãªtre initiÃ© par StrongFather selon l'architecture choisie.
+**Note :** Ce flux peut aussi être initié par StrongFather selon l'architecture choisie.
 
-### 7.3 Diagramme de sÃ©quence
+### 7.3 Diagramme de séquence
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  BondingBrother â”‚    â”‚   StrongFather  â”‚    â”‚  Master Butler  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚                      â”‚                      â”‚
-         â”œâ”€â”€ Intention â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚                      â”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ CAPABILITY_EXISTS â–ºâ”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”‚â—„â”€â”€ Existence + Meta â”€â”¤
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ REQUIRED_PERMS â”€â”€â”€â–ºâ”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”‚â—„â”€â”€ Permissions â”€â”€â”€â”€â”€â”€â”¤
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ ROLE_PERMISSIONS â”€â–ºâ”‚
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”‚â—„â”€â”€ Permissions rÃ´le â”€â”¤
-         â”‚                      â”‚                      â”‚
-         â”‚                      â”œâ”€â”€ Ã‰valuation â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-         â”‚                      â”‚   (interne)          â”‚
-         â”‚                      â”‚                      â”‚
-         â”‚â—„â”€â”€ DÃ©cision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤                      â”‚
-         â”‚                      â”‚                      â”‚
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  BondingBrother │    │   StrongFather  │    │  Master Butler  │
+└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
+         │                      │                      │
+         ├── Intention ────────►│                      │
+         │                      │                      │
+         │                      ├── CAPABILITY_EXISTS ►│
+         │                      │                      │
+         │                      │◄── Existence + Meta ─┤
+         │                      │                      │
+         │                      ├── REQUIRED_PERMS ───►│
+         │                      │                      │
+         │                      │◄── Permissions ──────┤
+         │                      │                      │
+         │                      ├── ROLE_PERMISSIONS ─►│
+         │                      │                      │
+         │                      │◄── Permissions rôle ─┤
+         │                      │                      │
+         │                      ├── Évaluation ────────┤
+         │                      │   (interne)          │
+         │                      │                      │
+         │◄── Décision ─────────┤                      │
+         │                      │                      │
 ```
 
 ---
 
-## 8. RÃ¨gles d'intÃ©gration
+## 8. Règles d'intégration
 
-### 8.1 RÃ¨gles de communication
+### 8.1 Règles de communication
 
-**RÃ¨gle MB-SF-INT-01 : StrongFather initie toujours**
+**Règle MB-SF-INT-01 : StrongFather initie toujours**
 
-StrongFather initie toujours les interrogations. Master Butler ne contacte jamais StrongFather spontanÃ©ment.
+StrongFather initie toujours les interrogations. Master Butler ne contacte jamais StrongFather spontanément.
 
-**RÃ¨gle MB-SF-INT-02 : Pas de notification proactive**
+**Règle MB-SF-INT-02 : Pas de notification proactive**
 
-Master Butler ne notifie jamais StrongFather de changements dans les registres. Si StrongFather a besoin d'informations Ã  jour, il interroge Ã  nouveau.
+Master Butler ne notifie jamais StrongFather de changements dans les registres. Si StrongFather a besoin d'informations à jour, il interroge à nouveau.
 
-**RÃ¨gle MB-SF-INT-03 : Synchronisme des rÃ©ponses**
+**Règle MB-SF-INT-03 : Synchronisme des réponses**
 
-Les rÃ©ponses de Master Butler sont synchrones. StrongFather attend la rÃ©ponse avant de poursuivre l'Ã©valuation.
+Les réponses de Master Butler sont synchrones. StrongFather attend la réponse avant de poursuivre l'évaluation.
 
-### 8.2 RÃ¨gles de donnÃ©es
+### 8.2 Règles de données
 
-**RÃ¨gle MB-SF-INT-04 : DonnÃ©es fraÃ®ches**
+**Règle MB-SF-INT-04 : Données fraîches**
 
-Les donnÃ©es retournÃ©es par Master Butler reflÃ¨tent l'Ã©tat actuel du registre au moment de l'interrogation.
+Les données retournées par Master Butler reflètent l'état actuel du registre au moment de l'interrogation.
 
-**RÃ¨gle MB-SF-INT-05 : Pas de cache cÃ´tÃ© StrongFather**
+**Règle MB-SF-INT-05 : Pas de cache côté StrongFather**
 
-StrongFather ne met jamais en cache les rÃ©ponses de Master Butler. Chaque Ã©valuation nÃ©cessite de nouvelles interrogations.
+StrongFather ne met jamais en cache les réponses de Master Butler. Chaque évaluation nécessite de nouvelles interrogations.
 
-**RÃ¨gle MB-SF-INT-06 : CohÃ©rence garantie**
+**Règle MB-SF-INT-06 : Cohérence garantie**
 
-Master Butler garantit la cohÃ©rence des donnÃ©es retournÃ©es. Les informations sur une capacitÃ© et ses permissions sont cohÃ©rentes entre elles.
+Master Butler garantit la cohérence des données retournées. Les informations sur une capacité et ses permissions sont cohérentes entre elles.
 
-### 8.3 RÃ¨gles de traÃ§abilitÃ©
+### 8.3 Règles de traçabilité
 
-**RÃ¨gle MB-SF-INT-07 : TraÃ§abilitÃ© des interrogations**
+**Règle MB-SF-INT-07 : Traçabilité des interrogations**
 
-Toutes les interrogations de StrongFather sont tracÃ©es par Master Butler avec le contexte complet.
+Toutes les interrogations de StrongFather sont tracées par Master Butler avec le contexte complet.
 
-**RÃ¨gle MB-SF-INT-08 : CorrÃ©lation intention-interrogation**
+**Règle MB-SF-INT-08 : Corrélation intention-interrogation**
 
-Chaque interrogation est corrÃ©lÃ©e Ã  l'intention en cours d'Ã©valuation pour permettre l'audit bout-en-bout.
+Chaque interrogation est corrélée à l'intention en cours d'évaluation pour permettre l'audit bout-en-bout.
 
 ---
 
@@ -340,14 +340,14 @@ Chaque interrogation est corrÃ©lÃ©e Ã  l'intention en cours d'Ã©valuatio
 ### 9.1 Types d'erreurs
 
 **Erreurs de format :**
-- Interrogation mal formÃ©e
+- Interrogation mal formée
 - Champ obligatoire manquant
 - Type d'interrogation inconnu
 
-**Erreurs de donnÃ©es :**
-- CapacitÃ© inexistante (NOT_FOUND, pas une erreur)
+**Erreurs de données :**
+- Capacité inexistante (NOT_FOUND, pas une erreur)
 - Permission inexistante (NOT_FOUND, pas une erreur)
-- RÃ´le inconnu
+- Rôle inconnu
 
 **Erreurs internes :**
 - Erreur de registre
@@ -355,53 +355,53 @@ Chaque interrogation est corrÃ©lÃ©e Ã  l'intention en cours d'Ã©valuatio
 
 ### 9.2 Traitement des erreurs
 
-**RÃ¨gle MB-SF-ERR-01 : RÃ©ponse structurÃ©e toujours**
+**Règle MB-SF-ERR-01 : Réponse structurée toujours**
 
-Master Butler retourne toujours une rÃ©ponse structurÃ©e, mÃªme en cas d'erreur. StrongFather peut toujours interprÃ©ter la rÃ©ponse.
+Master Butler retourne toujours une réponse structurée, même en cas d'erreur. StrongFather peut toujours interpréter la réponse.
 
-**RÃ¨gle MB-SF-ERR-02 : NOT_FOUND est informatif**
+**Règle MB-SF-ERR-02 : NOT_FOUND est informatif**
 
-Le statut `NOT_FOUND` est une information, pas une erreur. StrongFather peut utiliser cette information dans son Ã©valuation (capacitÃ© inexistante = intention invalide).
+Le statut `NOT_FOUND` est une information, pas une erreur. StrongFather peut utiliser cette information dans son évaluation (capacité inexistante = intention invalide).
 
-**RÃ¨gle MB-SF-ERR-03 : Journalisation des erreurs**
+**Règle MB-SF-ERR-03 : Journalisation des erreurs**
 
-Toutes les erreurs sont journalisÃ©es par Master Butler pour audit et diagnostic.
+Toutes les erreurs sont journalisées par Master Butler pour audit et diagnostic.
 
-**RÃ¨gle MB-SF-ERR-04 : Pas de retry automatique**
+**Règle MB-SF-ERR-04 : Pas de retry automatique**
 
-En cas d'erreur, StrongFather dÃ©cide de la stratÃ©gie (retry, Ã©chec de l'Ã©valuation). Master Butler ne retry jamais automatiquement.
+En cas d'erreur, StrongFather décide de la stratégie (retry, échec de l'évaluation). Master Butler ne retry jamais automatiquement.
 
 ---
 
-## 10. Garanties de l'intÃ©gration
+## 10. Garanties de l'intégration
 
-### 10.1 Garantie d'exhaustivitÃ©
+### 10.1 Garantie d'exhaustivité
 
-**Engagement :** Les rÃ©ponses de Master Butler sont exhaustives. Toutes les informations pertinentes sont fournies sans omission.
+**Engagement :** Les réponses de Master Butler sont exhaustives. Toutes les informations pertinentes sont fournies sans omission.
 
 ### 10.2 Garantie d'exactitude
 
-**Engagement :** Les informations fournies par Master Butler sont exactes et reflÃ¨tent l'Ã©tat actuel du registre.
+**Engagement :** Les informations fournies par Master Butler sont exactes et reflètent l'état actuel du registre.
 
-### 10.3 Garantie de neutralitÃ©
+### 10.3 Garantie de neutralité
 
-**Engagement :** Master Butler fournit des informations sans interprÃ©tation, sans recommandation, sans jugement. La dÃ©cision appartient exclusivement Ã  StrongFather.
+**Engagement :** Master Butler fournit des informations sans interprétation, sans recommandation, sans jugement. La décision appartient exclusivement à StrongFather.
 
-### 10.4 Garantie de traÃ§abilitÃ©
+### 10.4 Garantie de traçabilité
 
-**Engagement :** Toute interaction entre StrongFather et Master Butler est traÃ§able de bout en bout. L'audit complet des interrogations et rÃ©ponses est possible.
+**Engagement :** Toute interaction entre StrongFather et Master Butler est traçable de bout en bout. L'audit complet des interrogations et réponses est possible.
 
-### 10.5 Garantie de disponibilitÃ©
+### 10.5 Garantie de disponibilité
 
-**Engagement :** Master Butler est disponible pour rÃ©pondre aux interrogations de StrongFather sans dÃ©pendance externe (conformitÃ© LOI-1).
+**Engagement :** Master Butler est disponible pour répondre aux interrogations de StrongFather sans dépendance externe (conformité LOI-1).
 
-### 10.6 Garantie de cohÃ©rence
+### 10.6 Garantie de cohérence
 
-**Engagement :** Les informations retournÃ©es sont cohÃ©rentes entre elles. Si une capacitÃ© et ses permissions sont interrogÃ©es, les donnÃ©es sont mutuellement cohÃ©rentes.
+**Engagement :** Les informations retournées sont cohérentes entre elles. Si une capacité et ses permissions sont interrogées, les données sont mutuellement cohérentes.
 
 ---
 
-## 11. Invariants de l'intÃ©gration
+## 11. Invariants de l'intégration
 
 ### 11.1 Invariants de relation
 
@@ -409,39 +409,39 @@ En cas d'erreur, StrongFather dÃ©cide de la stratÃ©gie (retry, Ã©chec de l
 
 StrongFather interroge Master Butler. Master Butler ne sollicite jamais StrongFather.
 
-**INV-MB-SF-2 : Information sans dÃ©cision**
+**INV-MB-SF-2 : Information sans décision**
 
-Master Butler fournit des informations. Il ne participe jamais aux dÃ©cisions de StrongFather.
+Master Butler fournit des informations. Il ne participe jamais aux décisions de StrongFather.
 
-**INV-MB-SF-3 : AccÃ¨s sans restriction**
+**INV-MB-SF-3 : Accès sans restriction**
 
-StrongFather a un accÃ¨s sans restriction aux informations de Master Butler.
+StrongFather a un accès sans restriction aux informations de Master Butler.
 
-### 11.2 Invariants de donnÃ©es
+### 11.2 Invariants de données
 
 **INV-MB-SF-4 : Lecture pure**
 
-Les interrogations sont des lectures pures. Aucune modification du registre n'est causÃ©e par une interrogation.
+Les interrogations sont des lectures pures. Aucune modification du registre n'est causée par une interrogation.
 
-**INV-MB-SF-5 : DonnÃ©es factuelles**
+**INV-MB-SF-5 : Données factuelles**
 
-Les donnÃ©es retournÃ©es sont factuelles (existe/n'existe pas, liste de permissions, mÃ©tadonnÃ©es). Aucune donnÃ©e interprÃ©tÃ©e n'est retournÃ©e.
+Les données retournées sont factuelles (existe/n'existe pas, liste de permissions, métadonnées). Aucune donnée interprétée n'est retournée.
 
 ### 11.3 Invariants de protocole
 
-**INV-MB-SF-6 : Format respectÃ©**
+**INV-MB-SF-6 : Format respecté**
 
-Toutes les interrogations et rÃ©ponses respectent le format standardisÃ©.
+Toutes les interrogations et réponses respectent le format standardisé.
 
-**INV-MB-SF-7 : TraÃ§abilitÃ© complÃ¨te**
+**INV-MB-SF-7 : Traçabilité complète**
 
-Toute interaction est traÃ§able avec son contexte complet.
+Toute interaction est traçable avec son contexte complet.
 
 ---
 
 ## 12. Exemples
 
-### 12.1 Interrogation d'existence de capacitÃ©
+### 12.1 Interrogation d'existence de capacité
 
 **Interrogation StrongFather :**
 ```
@@ -460,7 +460,7 @@ Toute interaction est traÃ§able avec son contexte complet.
 }
 ```
 
-**RÃ©ponse Master Butler :**
+**Réponse Master Butler :**
 ```
 {
   "reponse_id": "resp-mb-001",
@@ -499,7 +499,7 @@ Toute interaction est traÃ§able avec son contexte complet.
 }
 ```
 
-**RÃ©ponse Master Butler :**
+**Réponse Master Butler :**
 ```
 {
   "reponse_id": "resp-mb-002",
@@ -524,7 +524,7 @@ Toute interaction est traÃ§able avec son contexte complet.
 }
 ```
 
-### 12.3 CapacitÃ© inexistante
+### 12.3 Capacité inexistante
 
 **Interrogation StrongFather :**
 ```
@@ -543,7 +543,7 @@ Toute interaction est traÃ§able avec son contexte complet.
 }
 ```
 
-**RÃ©ponse Master Butler :**
+**Réponse Master Butler :**
 ```
 {
   "reponse_id": "resp-mb-003",
@@ -557,9 +557,9 @@ Toute interaction est traÃ§able avec son contexte complet.
 }
 ```
 
-**Note :** StrongFather peut utiliser cette information pour refuser l'intention (capacitÃ© inexistante = intention invalide).
+**Note :** StrongFather peut utiliser cette information pour refuser l'intention (capacité inexistante = intention invalide).
 
-### 12.4 Interrogation du contexte de capacitÃ©
+### 12.4 Interrogation du contexte de capacité
 
 **Interrogation StrongFather :**
 ```
@@ -580,7 +580,7 @@ Toute interaction est traÃ§able avec son contexte complet.
 }
 ```
 
-**RÃ©ponse Master Butler :**
+**Réponse Master Butler :**
 ```
 {
   "reponse_id": "resp-mb-004",
@@ -612,16 +612,16 @@ Toute interaction est traÃ§able avec son contexte complet.
 
 ## 13. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que Master Butler doit respecter pour s'intÃ©grer avec StrongFather.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que Master Butler doit respecter pour s'intégrer avec StrongFather.
 
-Toute implÃ©mentation de l'intÃ©gration avec StrongFather doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
+Toute implémentation de l'intégration avec StrongFather doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :**
+**Statut :** CONTRAT — Normatif  
+**Dépendances :**
 - Master Butler - Documentation Fondatrice v1.4 (Section 3)
 - Master Butler - Capability API Contract v1.0
 - Master Butler - Permission API Contract v1.0
@@ -630,47 +630,47 @@ Toute implÃ©mentation de l'intÃ©gration avec StrongFather doit respecter ce 
 
 ---
 
-## 14. Mini log de gÃ©nÃ©ration
+## 14. Mini log de génération
 
-### DÃ©cision Ã©ditoriale E1 : Direction de la relation
+### Décision éditoriale E1 : Direction de la relation
 
-**DÃ©cision prise :** La relation est de consultation : StrongFather interroge, Master Butler rÃ©pond. Cette direction est l'inverse de la relation BondingBrother â†’ StrongFather.
+**Décision prise :** La relation est de consultation : StrongFather interroge, Master Butler répond. Cette direction est l'inverse de la relation BondingBrother → StrongFather.
 
-**Application :** Tout le document est structurÃ© autour de cette direction unidirectionnelle.
+**Application :** Tout le document est structuré autour de cette direction unidirectionnelle.
 
-### DÃ©cision Ã©ditoriale E2 : Types d'interrogations
+### Décision éditoriale E2 : Types d'interrogations
 
-**DÃ©cision prise :** Les types d'interrogations sont dÃ©finis exhaustivement : existence de capacitÃ©, permissions requises, contexte de capacitÃ©, dÃ©tails de permission, permissions de rÃ´le, Tools et Toolkits.
+**Décision prise :** Les types d'interrogations sont définis exhaustivement : existence de capacité, permissions requises, contexte de capacité, détails de permission, permissions de rôle, Tools et Toolkits.
 
-**Application :** Section 5 dÃ©finit chaque type avec objectif, payload, et rÃ©ponse.
+**Application :** Section 5 définit chaque type avec objectif, payload, et réponse.
 
 ### Warning W1 : NOT_FOUND vs ERROR
 
-**Warning rencontrÃ© :** Risque de confusion entre "Ã©lÃ©ment non trouvÃ©" (information valide) et "erreur".
+**Warning rencontré :** Risque de confusion entre "élément non trouvé" (information valide) et "erreur".
 
-**DÃ©cision prise :** Le statut `NOT_FOUND` est explicitement dÃ©fini comme une rÃ©ponse valide, pas une erreur. StrongFather peut utiliser cette information dans son Ã©valuation.
+**Décision prise :** Le statut `NOT_FOUND` est explicitement défini comme une réponse valide, pas une erreur. StrongFather peut utiliser cette information dans son évaluation.
 
-**Correction effectuÃ©e :** Section 6.3 et rÃ¨gle MB-SF-ERR-02 clarifient cette distinction.
+**Correction effectuée :** Section 6.3 et règle MB-SF-ERR-02 clarifient cette distinction.
 
-### Warning W2 : Cache cÃ´tÃ© StrongFather
+### Warning W2 : Cache côté StrongFather
 
-**Warning rencontrÃ© :** Risque que StrongFather mette en cache les rÃ©ponses, conduisant Ã  des dÃ©cisions basÃ©es sur des donnÃ©es obsolÃ¨tes.
+**Warning rencontré :** Risque que StrongFather mette en cache les réponses, conduisant à des décisions basées sur des données obsolètes.
 
-**DÃ©cision prise :** RÃ¨gle MB-SF-INT-05 interdit explicitement le cache cÃ´tÃ© StrongFather.
+**Décision prise :** Règle MB-SF-INT-05 interdit explicitement le cache côté StrongFather.
 
-**Correction effectuÃ©e :** RÃ¨gle explicite ajoutÃ©e dans la section 8.2.
+**Correction effectuée :** Règle explicite ajoutée dans la section 8.2.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec Master Butler - Documentation Fondatrice : ConfirmÃ©e (flux d'interrogation, sÃ©paration des responsabilitÃ©s)
-- âœ… CohÃ©rence avec StrongFather - Documentation Fondatrice : ConfirmÃ©e (StrongFather interroge, ne maintient pas de registre)
-- âœ… CohÃ©rence avec StrongFather - Integration Readiness Contract : ConfirmÃ©e (interfaces conformes)
-- âœ… ConformitÃ© LOI-1 : ConfirmÃ©e (aucune dÃ©pendance externe pour les interrogations)
+**Vérification effectuée :**
+- ✅ Cohérence avec Master Butler - Documentation Fondatrice : Confirmée (flux d'interrogation, séparation des responsabilités)
+- ✅ Cohérence avec StrongFather - Documentation Fondatrice : Confirmée (StrongFather interroge, ne maintient pas de registre)
+- ✅ Cohérence avec StrongFather - Integration Readiness Contract : Confirmée (interfaces conformes)
+- ✅ Conformité LOI-1 : Confirmée (aucune dépendance externe pour les interrogations)
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et non ambigu.
+**Conclusion :** Aucune contradiction détectée. Le document est cohérent et non ambigu.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

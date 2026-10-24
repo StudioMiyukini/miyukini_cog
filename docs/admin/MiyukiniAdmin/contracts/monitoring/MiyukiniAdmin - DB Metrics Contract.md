@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” DB Metrics Contract
+﻿# MiyukiniAdmin — DB Metrics Contract
 
 ## 1. Contexte
 
@@ -384,22 +384,22 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin                 BondingBrother         CaringNanny    KindMother
-     â”‚                              â”‚                     â”‚             â”‚
-     â”‚â”€â”€DBMetricsRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                     â”‚             â”‚
-     â”‚  (type: db_metrics)           â”‚                     â”‚             â”‚
-     â”‚                              â”‚                     â”‚             â”‚
-     â”‚                              â”‚â”€â”€ReadSystemMetricsâ”€â”€â–¶â”‚             â”‚
-     â”‚                              â”‚                     â”‚             â”‚
-     â”‚                              â”‚â—€â”€SystemDataâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚             â”‚
-     â”‚                              â”‚                     â”‚             â”‚
-     â”‚                              â”‚â”€â”€ReadDBMetricsâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                              â”‚                     â”‚             â”‚
-     â”‚                              â”‚â—€â”€DBDataâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                              â”‚                     â”‚             â”‚
-     â”‚â—€â”€DBMetricsResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                     â”‚             â”‚
-     â”‚  (queries, latency, pool,    â”‚                     â”‚             â”‚
-     â”‚   health, size)              â”‚                     â”‚             â”‚
-     â”‚                              â”‚                     â”‚             â”‚
+     │                              │                     │             │
+     │──DBMetricsRequest────────────▶│                     │             │
+     │  (type: db_metrics)           │                     │             │
+     │                              │                     │             │
+     │                              │──ReadSystemMetrics──▶│             │
+     │                              │                     │             │
+     │                              │◀─SystemData─────────│             │
+     │                              │                     │             │
+     │                              │──ReadDBMetrics───────────────────▶│
+     │                              │                     │             │
+     │                              │◀─DBData─────────────────────────│
+     │                              │                     │             │
+     │◀─DBMetricsResponse───────────│                     │             │
+     │  (queries, latency, pool,    │                     │             │
+     │   health, size)              │                     │             │
+     │                              │                     │             │
 ```
 
 ---
@@ -453,7 +453,7 @@ OBLIGATOIRE :
 | **Segregation** | KindMother valide l'acces aux tables |
 | **Audit** | Toute consultation tracee avec query hash |
 
-### 13.5 Top Queries â€” Securite
+### 13.5 Top Queries — Securite
 
 Les "Top Queries" (section 9) presentent des risques specifiques :
 

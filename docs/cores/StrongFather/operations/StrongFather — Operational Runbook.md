@@ -1,642 +1,642 @@
-﻿# StrongFather â€” Operational Runbook
+﻿# StrongFather — Operational Runbook
 
 ## 1. Introduction
 
 ### Objet du document
 
-Ce document dÃ©finit le **StrongFather â€” Operational Runbook** : un guide opÃ©rationnel pour l'exploitation de StrongFather en production, couvrant le dÃ©ploiement, la configuration, le monitoring, les alertes, et le troubleshooting dans le systÃ¨me Miyukini Core System v2.4.
+Ce document définit le **StrongFather — Operational Runbook** : un guide opérationnel pour l'exploitation de StrongFather en production, couvrant le déploiement, la configuration, le monitoring, les alertes, et le troubleshooting dans le système Miyukini Core System v2.4.
 
-Ce document est orientÃ© **SRE / Ops Architect** et fournit les directives opÃ©rationnelles nÃ©cessaires pour exploiter StrongFather de maniÃ¨re fiable et efficace.
+Ce document est orienté **SRE / Ops Architect** et fournit les directives opérationnelles nécessaires pour exploiter StrongFather de manière fiable et efficace.
 
-### PortÃ©e
+### Portée
 
-Ce document s'applique Ã  **toute l'exploitation opÃ©rationnelle de StrongFather** et couvre :
-- les procÃ©dures de dÃ©ploiement,
-- les paramÃ¨tres de configuration,
-- les stratÃ©gies de monitoring conceptuel,
-- les rÃ¨gles d'alertes,
-- les procÃ©dures de troubleshooting.
+Ce document s'applique à **toute l'exploitation opérationnelle de StrongFather** et couvre :
+- les procédures de déploiement,
+- les paramètres de configuration,
+- les stratégies de monitoring conceptuel,
+- les règles d'alertes,
+- les procédures de troubleshooting.
 
 ### Statut
 
-Ce document est **opÃ©rationnel et pratique**. Il complÃ¨te les contrats FONDATION en fournissant les directives d'exploitation sans imposer d'outils ou d'infrastructure spÃ©cifiques.
+Ce document est **opérationnel et pratique**. Il complète les contrats FONDATION en fournissant les directives d'exploitation sans imposer d'outils ou d'infrastructure spécifiques.
 
 ### Relation avec les autres documents
 
 Ce document s'appuie sur :
-- **StrongFather â€” Documentation Fondatrice** : ComprÃ©hension du rÃ´le et des responsabilitÃ©s
-- **StrongFather â€” Architecture & Flows** : Architecture conceptuelle et flux d'Ã©valuation
-- **StrongFather â€” Performance & Scalability Contract** : Contraintes de performance
-- **StrongFather â€” Audit & Trace Contract** : TraÃ§abilitÃ© et audit
-- **StrongFather â€” Invariants & Guarantees** : PropriÃ©tÃ©s Ã  prÃ©server
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© opÃ©rationnelle aux lois d'autonomie, notamment **LOI-1** (aucune dÃ©pendance externe critique) et **LOI-5** (coÃ»t proportionnel au hardware)
+- **StrongFather — Documentation Fondatrice** : Compréhension du rôle et des responsabilités
+- **StrongFather — Architecture & Flows** : Architecture conceptuelle et flux d'évaluation
+- **StrongFather — Performance & Scalability Contract** : Contraintes de performance
+- **StrongFather — Audit & Trace Contract** : Traçabilité et audit
+- **StrongFather — Invariants & Guarantees** : Propriétés à préserver
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)** : Conformité opérationnelle aux lois d'autonomie, notamment **LOI-1** (aucune dépendance externe critique) et **LOI-5** (coût proportionnel au hardware)
 
 ---
 
-## 2. Contexte opÃ©rationnel
+## 2. Contexte opérationnel
 
 ### 2.1. Nature de StrongFather
 
-StrongFather est un **moteur de dÃ©cision stratÃ©gique et politique** qui :
-- Ã‰value des intentions selon des politiques
-- Produit des dÃ©cisions (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
-- Ne possÃ¨de aucune autoritÃ© sur l'exÃ©cution ou la persistance
-- Est un moteur interne utilisÃ© par les adaptateurs produits
-- Doit prÃ©server la puretÃ© fonctionnelle, le dÃ©terminisme, et l'isolation
+StrongFather est un **moteur de décision stratégique et politique** qui :
+- Évalue des intentions selon des politiques
+- Produit des décisions (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE)
+- Ne possède aucune autorité sur l'exécution ou la persistance
+- Est un moteur interne utilisé par les adaptateurs produits
+- Doit préserver la pureté fonctionnelle, le déterminisme, et l'isolation
 
-### 2.2. CaractÃ©ristiques opÃ©rationnelles critiques
+### 2.2. Caractéristiques opérationnelles critiques
 
-**CaractÃ©ristiques Ã  prÃ©server absolument :**
+**Caractéristiques à préserver absolument :**
 
-1. **PuretÃ© fonctionnelle** : Aucun effet de bord, aucune mutation d'Ã©tat entre Ã©valuations
-2. **DÃ©terminisme** : MÃªme intention + mÃªme contexte + mÃªmes politiques = mÃªme dÃ©cision
-3. **Isolation** : Aucune persistance opÃ©rationnelle, aucune communication externe (sauf traÃ§abilitÃ©)
-4. **Zero-trust** : Validation systÃ©matique de toutes les intentions
-5. **TraÃ§abilitÃ© complÃ¨te** : Toutes les Ã©valuations doivent Ãªtre tracÃ©es
+1. **Pureté fonctionnelle** : Aucun effet de bord, aucune mutation d'état entre évaluations
+2. **Déterminisme** : Même intention + même contexte + mêmes politiques = même décision
+3. **Isolation** : Aucune persistance opérationnelle, aucune communication externe (sauf traçabilité)
+4. **Zero-trust** : Validation systématique de toutes les intentions
+5. **Traçabilité complète** : Toutes les évaluations doivent être tracées
 
-**ConsÃ©quences opÃ©rationnelles :**
+**Conséquences opérationnelles :**
 
-- StrongFather ne nÃ©cessite pas de base de donnÃ©es opÃ©rationnelle
-- StrongFather ne nÃ©cessite pas de cache dÃ©cisionnel
-- StrongFather ne nÃ©cessite pas de synchronisation entre instances
-- StrongFather peut Ãªtre dÃ©ployÃ© en multiples instances sans coordination
-- StrongFather doit Ãªtre tracÃ© pour audit
+- StrongFather ne nécessite pas de base de données opérationnelle
+- StrongFather ne nécessite pas de cache décisionnel
+- StrongFather ne nécessite pas de synchronisation entre instances
+- StrongFather peut être déployé en multiples instances sans coordination
+- StrongFather doit être tracé pour audit
 
-### 2.3. DÃ©pendances opÃ©rationnelles
+### 2.3. Dépendances opérationnelles
 
-**DÃ©pendances minimales :**
+**Dépendances minimales :**
 
-- **Source de politiques** : Chargement des politiques applicables (peut Ãªtre fichier, API, configuration)
-- **Traceur** : SystÃ¨me de traÃ§abilitÃ© (peut Ãªtre logger, systÃ¨me d'audit, etc.)
-- **Kernel (optionnel)** : Logger pour traÃ§abilitÃ© (exception autorisÃ©e par Boundary Contract)
+- **Source de politiques** : Chargement des politiques applicables (peut être fichier, API, configuration)
+- **Traceur** : Système de traçabilité (peut être logger, système d'audit, etc.)
+- **Kernel (optionnel)** : Logger pour traçabilité (exception autorisée par Boundary Contract)
 
-**Pas de dÃ©pendances sur :**
+**Pas de dépendances sur :**
 
-- KindMother (pas d'accÃ¨s direct)
+- KindMother (pas d'accès direct)
 - Modules SPM CMS (pas d'interaction directe)
-- Base de donnÃ©es opÃ©rationnelle
-- SystÃ¨me de cache
-- SystÃ¨me de synchronisation
+- Base de données opérationnelle
+- Système de cache
+- Système de synchronisation
 
 ---
 
-## 3. DÃ©ploiement
+## 3. Déploiement
 
-### 3.1. PrÃ©requis de dÃ©ploiement
+### 3.1. Prérequis de déploiement
 
-**PrÃ©requis conceptuels :**
+**Prérequis conceptuels :**
 
-1. **Source de politiques configurÃ©e** : Les politiques doivent Ãªtre disponibles et chargÃ©es
-2. **SystÃ¨me de traÃ§abilitÃ© opÃ©rationnel** : Le traceur doit Ãªtre configurÃ© et fonctionnel
-3. **Interface d'Ã©valuation accessible** : Les adaptateurs produits doivent pouvoir appeler StrongFather
+1. **Source de politiques configurée** : Les politiques doivent être disponibles et chargées
+2. **Système de traçabilité opérationnel** : Le traceur doit être configuré et fonctionnel
+3. **Interface d'évaluation accessible** : Les adaptateurs produits doivent pouvoir appeler StrongFather
 
-**PrÃ©requis techniques (exemples, non imposÃ©s) :**
+**Prérequis techniques (exemples, non imposés) :**
 
-- Environnement d'exÃ©cution (JVM, runtime Rust, etc.)
-- AccÃ¨s rÃ©seau (si dÃ©ployÃ© en service)
-- Configuration de sÃ©curitÃ© (si exposÃ© en rÃ©seau)
+- Environnement d'exécution (JVM, runtime Rust, etc.)
+- Accès réseau (si déployé en service)
+- Configuration de sécurité (si exposé en réseau)
 
-### 3.2. StratÃ©gies de dÃ©ploiement
+### 3.2. Stratégies de déploiement
 
-**DÃ©ploiement en bibliothÃ¨que :**
+**Déploiement en bibliothèque :**
 
-- StrongFather est intÃ©grÃ© dans l'application produit
-- Pas de service sÃ©parÃ©
-- Avantages : Latence minimale, pas de dÃ©pendance rÃ©seau
-- InconvÃ©nients : Pas de centralisation, pas de monitoring centralisÃ©
+- StrongFather est intégré dans l'application produit
+- Pas de service séparé
+- Avantages : Latence minimale, pas de dépendance réseau
+- Inconvénients : Pas de centralisation, pas de monitoring centralisé
 
-**DÃ©ploiement en service :**
+**Déploiement en service :**
 
-- StrongFather est dÃ©ployÃ© comme service indÃ©pendant
+- StrongFather est déployé comme service indépendant
 - Accessible via API (REST, gRPC, etc.)
-- Avantages : Centralisation, monitoring centralisÃ©, mise Ã  jour indÃ©pendante
-- InconvÃ©nients : Latence rÃ©seau, dÃ©pendance rÃ©seau
+- Avantages : Centralisation, monitoring centralisé, mise à jour indépendante
+- Inconvénients : Latence réseau, dépendance réseau
 
-**DÃ©ploiement hybride :**
+**Déploiement hybride :**
 
-- StrongFather est dÃ©ployÃ© en service mais peut Ãªtre intÃ©grÃ© localement
-- Avantages : FlexibilitÃ©, optimisation selon le contexte
-- InconvÃ©nients : ComplexitÃ© opÃ©rationnelle
+- StrongFather est déployé en service mais peut être intégré localement
+- Avantages : Flexibilité, optimisation selon le contexte
+- Inconvénients : Complexité opérationnelle
 
-### 3.3. ProcÃ©dures de dÃ©ploiement
+### 3.3. Procédures de déploiement
 
-**DÃ©ploiement initial :**
+**Déploiement initial :**
 
-1. **VÃ©rification des prÃ©requis**
+1. **Vérification des prérequis**
    - Source de politiques accessible
-   - SystÃ¨me de traÃ§abilitÃ© opÃ©rationnel
-   - Configuration validÃ©e
+   - Système de traçabilité opérationnel
+   - Configuration validée
 
-2. **DÃ©ploiement du composant**
-   - Installation/compilation selon l'implÃ©mentation
-   - Configuration des paramÃ¨tres opÃ©rationnels
-   - VÃ©rification de l'accessibilitÃ©
+2. **Déploiement du composant**
+   - Installation/compilation selon l'implémentation
+   - Configuration des paramètres opérationnels
+   - Vérification de l'accessibilité
 
-3. **Validation opÃ©rationnelle**
-   - Test d'Ã©valuation d'intention de test
-   - VÃ©rification de la production de traces
-   - VÃ©rification de la conformitÃ© aux invariants
+3. **Validation opérationnelle**
+   - Test d'évaluation d'intention de test
+   - Vérification de la production de traces
+   - Vérification de la conformité aux invariants
 
 4. **Mise en production**
    - Activation progressive (si possible)
-   - Monitoring de la santÃ© opÃ©rationnelle
-   - VÃ©rification des mÃ©triques
+   - Monitoring de la santé opérationnelle
+   - Vérification des métriques
 
-**Mise Ã  jour :**
+**Mise à jour :**
 
-1. **PrÃ©paration**
+1. **Préparation**
    - Sauvegarde de la configuration actuelle
-   - Validation de la compatibilitÃ© des politiques
+   - Validation de la compatibilité des politiques
    - Plan de rollback
 
-2. **DÃ©ploiement**
+2. **Déploiement**
    - Remplacement du composant
-   - VÃ©rification de la compatibilitÃ©
-   - Validation opÃ©rationnelle
+   - Vérification de la compatibilité
+   - Validation opérationnelle
 
-3. **VÃ©rification post-dÃ©ploiement**
-   - Monitoring des mÃ©triques
-   - VÃ©rification des traces
-   - Validation de la conformitÃ©
+3. **Vérification post-déploiement**
+   - Monitoring des métriques
+   - Vérification des traces
+   - Validation de la conformité
 
 **Rollback :**
 
-1. **DÃ©tection de problÃ¨me**
-   - MÃ©triques anormales
-   - Erreurs dÃ©tectÃ©es
-   - Non-conformitÃ© aux invariants
+1. **Détection de problème**
+   - Métriques anormales
+   - Erreurs détectées
+   - Non-conformité aux invariants
 
 2. **Restauration**
-   - Remplacement par version prÃ©cÃ©dente
-   - VÃ©rification de la restauration
-   - Validation opÃ©rationnelle
+   - Remplacement par version précédente
+   - Vérification de la restauration
+   - Validation opérationnelle
 
-### 3.4. DÃ©ploiement multi-instances
+### 3.4. Déploiement multi-instances
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- StrongFather peut Ãªtre dÃ©ployÃ© en multiples instances sans coordination
-- Chaque instance est indÃ©pendante (pas d'Ã©tat partagÃ©)
-- Les instances peuvent traiter des intentions en parallÃ¨le
+- StrongFather peut être déployé en multiples instances sans coordination
+- Chaque instance est indépendante (pas d'état partagé)
+- Les instances peuvent traiter des intentions en parallèle
 
-**ConsidÃ©rations opÃ©rationnelles :**
+**Considérations opérationnelles :**
 
-- **Load balancing** : RÃ©partition des intentions entre instances
+- **Load balancing** : Répartition des intentions entre instances
 - **Monitoring** : Monitoring de chaque instance
-- **TraÃ§abilitÃ©** : Traces doivent Ãªtre corrÃ©lÃ©es (identifiant d'instance)
-- **Configuration** : Configuration cohÃ©rente entre instances
+- **Traçabilité** : Traces doivent être corrélées (identifiant d'instance)
+- **Configuration** : Configuration cohérente entre instances
 
 **Avantages :**
 
-- ScalabilitÃ© horizontale
-- RÃ©silience (une instance peut tomber sans impact global)
-- Performance (parallÃ©lisation)
+- Scalabilité horizontale
+- Résilience (une instance peut tomber sans impact global)
+- Performance (parallélisation)
 
-**InconvÃ©nients :**
+**Inconvénients :**
 
-- ComplexitÃ© de monitoring
-- NÃ©cessitÃ© de corrÃ©lation des traces
+- Complexité de monitoring
+- Nécessité de corrélation des traces
 
 ---
 
 ## 4. Configuration
 
-### 4.1. ParamÃ¨tres de configuration
+### 4.1. Paramètres de configuration
 
 **Configuration de la source de politiques :**
 
-- **Type de source** : Fichier, API, base de donnÃ©es, etc.
+- **Type de source** : Fichier, API, base de données, etc.
 - **Emplacement** : Chemin, URL, connexion
 - **Format** : Format des politiques (JSON, YAML, etc.)
-- **Rechargement** : StratÃ©gie de rechargement (au dÃ©marrage, pÃ©riodique, Ã  la demande)
+- **Rechargement** : Stratégie de rechargement (au démarrage, périodique, à la demande)
 
 **Configuration du traceur :**
 
-- **Type de traceur** : Logger, systÃ¨me d'audit, etc.
+- **Type de traceur** : Logger, système d'audit, etc.
 - **Niveau de trace** : MANDATORY, DETAILED, DEBUG
-- **Destination** : Fichier, systÃ¨me d'audit, etc.
-- **Format** : Format des traces (JSON, texte structurÃ©, etc.)
+- **Destination** : Fichier, système d'audit, etc.
+- **Format** : Format des traces (JSON, texte structuré, etc.)
 
 **Configuration de performance (si applicable) :**
 
-- **Limites de capacitÃ©** : Nombre maximum de politiques, taille maximale d'intention
-- **StratÃ©gies de dÃ©gradation** : Comportement sous charge
-- **Optimisations** : Optimisations autorisÃ©es (selon Performance Contract)
+- **Limites de capacité** : Nombre maximum de politiques, taille maximale d'intention
+- **Stratégies de dégradation** : Comportement sous charge
+- **Optimisations** : Optimisations autorisées (selon Performance Contract)
 
-**Configuration de sÃ©curitÃ© (si applicable) :**
+**Configuration de sécurité (si applicable) :**
 
-- **Authentification** : Si exposÃ© en service
-- **Autorisation** : ContrÃ´le d'accÃ¨s
+- **Authentification** : Si exposé en service
+- **Autorisation** : Contrôle d'accès
 - **Chiffrement** : Chiffrement des communications
 
 ### 4.2. Validation de configuration
 
-**RÃ¨gles de validation :**
+**Règles de validation :**
 
 1. **Source de politiques valide**
-   - Politiques chargÃ©es et parsÃ©es correctement
+   - Politiques chargées et parsées correctement
    - Politiques conformes au Policy Engine Contract
    - Aucune politique invalide
 
-2. **Traceur opÃ©rationnel**
+2. **Traceur opérationnel**
    - Traceur accessible et fonctionnel
-   - Niveau de trace configurÃ© correctement
+   - Niveau de trace configuré correctement
    - Destination des traces accessible
 
-3. **ParamÃ¨tres de performance cohÃ©rents**
-   - Limites de capacitÃ© raisonnables
-   - StratÃ©gies de dÃ©gradation dÃ©finies
+3. **Paramètres de performance cohérents**
+   - Limites de capacité raisonnables
+   - Stratégies de dégradation définies
    - Optimisations conformes aux contrats
 
-4. **SÃ©curitÃ© configurÃ©e (si applicable)**
-   - Authentification opÃ©rationnelle
-   - Autorisation configurÃ©e
-   - Chiffrement activÃ© si nÃ©cessaire
+4. **Sécurité configurée (si applicable)**
+   - Authentification opérationnelle
+   - Autorisation configurée
+   - Chiffrement activé si nécessaire
 
 ### 4.3. Gestion de configuration
 
 **Changement de configuration :**
 
-1. **Validation prÃ©alable**
+1. **Validation préalable**
    - Validation de la nouvelle configuration
-   - VÃ©rification de compatibilitÃ©
+   - Vérification de compatibilité
    - Test en environnement de test
 
 2. **Application**
    - Application de la nouvelle configuration
-   - Rechargement des politiques si nÃ©cessaire
-   - VÃ©rification opÃ©rationnelle
+   - Rechargement des politiques si nécessaire
+   - Vérification opérationnelle
 
-3. **VÃ©rification post-changement**
-   - Monitoring des mÃ©triques
-   - VÃ©rification des traces
-   - Validation de la conformitÃ©
+3. **Vérification post-changement**
+   - Monitoring des métriques
+   - Vérification des traces
+   - Validation de la conformité
 
 **Rechargement de politiques :**
 
-- **StratÃ©gies possibles** : Au dÃ©marrage, pÃ©riodique, Ã  la demande
-- **Validation** : VÃ©rification de la validitÃ© des nouvelles politiques
-- **Impact** : Aucun impact sur les Ã©valuations en cours (pas d'Ã©tat partagÃ©)
-- **TraÃ§abilitÃ©** : Traces de rechargement de politiques
+- **Stratégies possibles** : Au démarrage, périodique, à la demande
+- **Validation** : Vérification de la validité des nouvelles politiques
+- **Impact** : Aucun impact sur les évaluations en cours (pas d'état partagé)
+- **Traçabilité** : Traces de rechargement de politiques
 
 ---
 
 ## 5. Monitoring conceptuel
 
-### 5.1. MÃ©triques Ã  surveiller
+### 5.1. Métriques à surveiller
 
-**MÃ©triques de santÃ© :**
+**Métriques de santé :**
 
-- **DisponibilitÃ©** : StrongFather est-il accessible et opÃ©rationnel ?
-- **Temps de rÃ©ponse** : Latence d'Ã©valuation des intentions
-- **DÃ©bit** : Nombre d'intentions Ã©valuÃ©es par unitÃ© de temps
-- **Taux d'erreur** : Pourcentage d'erreurs dans les Ã©valuations
+- **Disponibilité** : StrongFather est-il accessible et opérationnel ?
+- **Temps de réponse** : Latence d'évaluation des intentions
+- **Débit** : Nombre d'intentions évaluées par unité de temps
+- **Taux d'erreur** : Pourcentage d'erreurs dans les évaluations
 
-**MÃ©triques de performance :**
+**Métriques de performance :**
 
-- **Latence d'Ã©valuation** : Temps entre rÃ©ception d'intention et production de dÃ©cision
-- **DÃ©bit d'Ã©valuation** : Intentions Ã©valuÃ©es par seconde
-- **Utilisation des ressources** : CPU, mÃ©moire (si observable)
-- **DÃ©gradation sous charge** : Comportement lorsque la charge augmente
+- **Latence d'évaluation** : Temps entre réception d'intention et production de décision
+- **Débit d'évaluation** : Intentions évaluées par seconde
+- **Utilisation des ressources** : CPU, mémoire (si observable)
+- **Dégradation sous charge** : Comportement lorsque la charge augmente
 
-**MÃ©triques de qualitÃ© :**
+**Métriques de qualité :**
 
-- **Taux d'acceptation** : Pourcentage de dÃ©cisions ACCEPTÃ‰ES
-- **Taux de refus** : Pourcentage de dÃ©cisions REFUSÃ‰ES
-- **Taux d'ambiguÃ¯tÃ©** : Pourcentage de dÃ©cisions AMBIGUÃ‹S
-- **Taux de diffÃ©ration** : Pourcentage de dÃ©cisions DIFFÃ‰RÃ‰ES
+- **Taux d'acceptation** : Pourcentage de décisions ACCEPTÉES
+- **Taux de refus** : Pourcentage de décisions REFUSÉES
+- **Taux d'ambiguïté** : Pourcentage de décisions AMBIGUËS
+- **Taux de différation** : Pourcentage de décisions DIFFÉRÉES
 
-**MÃ©triques de traÃ§abilitÃ© :**
+**Métriques de traçabilité :**
 
-- **Couverture de traÃ§abilitÃ©** : Pourcentage d'Ã©valuations tracÃ©es
-- **IntÃ©gritÃ© des traces** : Traces complÃ¨tes et valides
-- **DisponibilitÃ© du traceur** : Traceur opÃ©rationnel
+- **Couverture de traçabilité** : Pourcentage d'évaluations tracées
+- **Intégrité des traces** : Traces complètes et valides
+- **Disponibilité du traceur** : Traceur opérationnel
 
-### 5.2. Sources de mÃ©triques
+### 5.2. Sources de métriques
 
-**MÃ©triques internes (si disponibles) :**
+**Métriques internes (si disponibles) :**
 
-- Compteurs d'Ã©valuations
+- Compteurs d'évaluations
 - Mesures de latence
-- Statistiques de dÃ©cisions
+- Statistiques de décisions
 
-**MÃ©triques externes :**
+**Métriques externes :**
 
 - Monitoring applicatif (APM)
 - Monitoring infrastructure
 - Logs et traces
 
-**MÃ©triques dÃ©rivÃ©es :**
+**Métriques dérivées :**
 
-- CalculÃ©es Ã  partir des traces
-- AgrÃ©gees depuis plusieurs instances
-- CorrÃ©lÃ©es avec d'autres systÃ¨mes
+- Calculées à partir des traces
+- Agrégees depuis plusieurs instances
+- Corrélées avec d'autres systèmes
 
 ### 5.3. Dashboard conceptuel
 
 **Vue d'ensemble :**
 
-- Ã‰tat de santÃ© global
-- MÃ©triques clÃ©s (disponibilitÃ©, latence, dÃ©bit)
+- État de santé global
+- Métriques clés (disponibilité, latence, débit)
 - Alertes actives
 
 **Vue performance :**
 
-- Latence d'Ã©valuation (moyenne, mÃ©diane, p95, p99)
-- DÃ©bit d'Ã©valuation
+- Latence d'évaluation (moyenne, médiane, p95, p99)
+- Débit d'évaluation
 - Utilisation des ressources
-- DÃ©gradation sous charge
+- Dégradation sous charge
 
-**Vue qualitÃ© :**
+**Vue qualité :**
 
-- RÃ©partition des dÃ©cisions (ACCEPTÃ‰E, REFUSÃ‰E, AMBIGUÃ‹, DIFFÃ‰RÃ‰E)
+- Répartition des décisions (ACCEPTÉE, REFUSÉE, AMBIGUË, DIFFÉRÉE)
 - Taux d'erreur
 - Tendances temporelles
 
-**Vue traÃ§abilitÃ© :**
+**Vue traçabilité :**
 
-- Couverture de traÃ§abilitÃ©
-- IntÃ©gritÃ© des traces
-- DisponibilitÃ© du traceur
+- Couverture de traçabilité
+- Intégrité des traces
+- Disponibilité du traceur
 
 ### 5.4. Surveillance continue
 
-**Surveillance en temps rÃ©el :**
+**Surveillance en temps réel :**
 
-- Monitoring continu des mÃ©triques clÃ©s
-- DÃ©tection d'anomalies
+- Monitoring continu des métriques clés
+- Détection d'anomalies
 - Alertes automatiques
 
-**Surveillance pÃ©riodique :**
+**Surveillance périodique :**
 
-- Revue quotidienne des mÃ©triques
+- Revue quotidienne des métriques
 - Analyse des tendances
-- VÃ©rification de la conformitÃ©
+- Vérification de la conformité
 
 **Surveillance proactive :**
 
-- DÃ©tection de dÃ©gradation progressive
-- Anticipation des problÃ¨mes
-- Optimisation prÃ©ventive
+- Détection de dégradation progressive
+- Anticipation des problèmes
+- Optimisation préventive
 
 ---
 
 ## 6. Alertes
 
-### 6.1. CritÃ¨res d'alerte
+### 6.1. Critères d'alerte
 
 **Alertes critiques (P0) :**
 
-- **IndisponibilitÃ©** : StrongFather n'est plus accessible
-- **Violation d'invariant** : DÃ©tection de violation d'un invariant FONDATION
-- **Traceur indisponible** : Le traceur n'est plus opÃ©rationnel
+- **Indisponibilité** : StrongFather n'est plus accessible
+- **Violation d'invariant** : Détection de violation d'un invariant FONDATION
+- **Traceur indisponible** : Le traceur n'est plus opérationnel
 - **Source de politiques indisponible** : Impossible de charger les politiques
 
 **Alertes majeures (P1) :**
 
-- **Latence excessive** : Latence d'Ã©valuation au-delÃ  du seuil acceptable
-- **Taux d'erreur Ã©levÃ©** : Taux d'erreur supÃ©rieur au seuil
-- **DÃ©gradation de performance** : Performance dÃ©gradÃ©e de maniÃ¨re significative
-- **Traces incomplÃ¨tes** : Traces manquantes ou incomplÃ¨tes
+- **Latence excessive** : Latence d'évaluation au-delà du seuil acceptable
+- **Taux d'erreur élevé** : Taux d'erreur supérieur au seuil
+- **Dégradation de performance** : Performance dégradée de manière significative
+- **Traces incomplètes** : Traces manquantes ou incomplètes
 
 **Alertes mineures (P2) :**
 
-- **DÃ©gradation progressive** : DÃ©gradation lente mais continue
-- **Anomalies de dÃ©cision** : Comportement de dÃ©cision anormal
+- **Dégradation progressive** : Dégradation lente mais continue
+- **Anomalies de décision** : Comportement de décision anormal
 - **Configuration suspecte** : Configuration potentiellement incorrecte
 
 **Alertes informatives (P3) :**
 
 - **Changements de configuration** : Modifications de configuration
 - **Rechargement de politiques** : Rechargement de politiques
-- **Ã‰vÃ©nements opÃ©rationnels** : Ã‰vÃ©nements normaux mais Ã  noter
+- **Événements opérationnels** : Événements normaux mais à noter
 
 ### 6.2. Seuils d'alerte
 
 **Seuils de latence :**
 
-- **Seuil critique** : Latence > X ms (Ã  dÃ©finir selon contexte)
-- **Seuil majeur** : Latence > Y ms (Ã  dÃ©finir selon contexte)
-- **Seuil mineur** : Latence > Z ms (Ã  dÃ©finir selon contexte)
+- **Seuil critique** : Latence > X ms (à définir selon contexte)
+- **Seuil majeur** : Latence > Y ms (à définir selon contexte)
+- **Seuil mineur** : Latence > Z ms (à définir selon contexte)
 
-**Seuils de dÃ©bit :**
+**Seuils de débit :**
 
-- **Seuil critique** : DÃ©bit < X intentions/s (Ã  dÃ©finir selon contexte)
-- **Seuil majeur** : DÃ©bit < Y intentions/s (Ã  dÃ©finir selon contexte)
-- **Seuil mineur** : DÃ©bit < Z intentions/s (Ã  dÃ©finir selon contexte)
+- **Seuil critique** : Débit < X intentions/s (à définir selon contexte)
+- **Seuil majeur** : Débit < Y intentions/s (à définir selon contexte)
+- **Seuil mineur** : Débit < Z intentions/s (à définir selon contexte)
 
 **Seuils de taux d'erreur :**
 
-- **Seuil critique** : Taux d'erreur > X% (Ã  dÃ©finir selon contexte)
-- **Seuil majeur** : Taux d'erreur > Y% (Ã  dÃ©finir selon contexte)
-- **Seuil mineur** : Taux d'erreur > Z% (Ã  dÃ©finir selon contexte)
+- **Seuil critique** : Taux d'erreur > X% (à définir selon contexte)
+- **Seuil majeur** : Taux d'erreur > Y% (à définir selon contexte)
+- **Seuil mineur** : Taux d'erreur > Z% (à définir selon contexte)
 
-**Note :** Les seuils doivent Ãªtre dÃ©finis selon le contexte opÃ©rationnel et les contraintes de performance. Aucun seuil n'est imposÃ© par les contrats FONDATION.
+**Note :** Les seuils doivent être définis selon le contexte opérationnel et les contraintes de performance. Aucun seuil n'est imposé par les contrats FONDATION.
 
-### 6.3. ProcÃ©dures d'alerte
+### 6.3. Procédures d'alerte
 
-**RÃ©ception d'alerte :**
+**Réception d'alerte :**
 
-1. **Classification** : DÃ©terminer la prioritÃ© (P0, P1, P2, P3)
-2. **VÃ©rification** : VÃ©rifier la validitÃ© de l'alerte
-3. **Escalade** : Escalader selon la prioritÃ©
+1. **Classification** : Déterminer la priorité (P0, P1, P2, P3)
+2. **Vérification** : Vérifier la validité de l'alerte
+3. **Escalade** : Escalader selon la priorité
 4. **Documentation** : Documenter l'alerte et les actions
 
-**RÃ©ponse Ã  une alerte :**
+**Réponse à une alerte :**
 
 1. **Diagnostic** : Identifier la cause de l'alerte
-2. **Impact** : Ã‰valuer l'impact opÃ©rationnel
+2. **Impact** : Évaluer l'impact opérationnel
 3. **Action** : Prendre les actions correctives
-4. **VÃ©rification** : VÃ©rifier la rÃ©solution
-5. **Documentation** : Documenter la rÃ©solution
+4. **Vérification** : Vérifier la résolution
+5. **Documentation** : Documenter la résolution
 
 **Escalade :**
 
-- **P0** : Escalade immÃ©diate, intervention urgente
+- **P0** : Escalade immédiate, intervention urgente
 - **P1** : Escalade rapide, intervention dans l'heure
-- **P2** : Escalade normale, intervention dans la journÃ©e
+- **P2** : Escalade normale, intervention dans la journée
 - **P3** : Pas d'escalade, suivi informatif
 
 ---
 
 ## 7. Troubleshooting
 
-### 7.1. Diagnostic de problÃ¨mes
+### 7.1. Diagnostic de problèmes
 
-**ProblÃ¨mes de disponibilitÃ© :**
+**Problèmes de disponibilité :**
 
-**SymptÃ´mes :**
+**Symptômes :**
 - StrongFather n'est plus accessible
 - Timeout sur les appels
 - Erreurs de connexion
 
 **Diagnostic :**
-1. VÃ©rifier l'Ã©tat du service/composant
-2. VÃ©rifier les logs d'erreur
-3. VÃ©rifier la configuration rÃ©seau (si service)
-4. VÃ©rifier les dÃ©pendances (source de politiques, traceur)
+1. Vérifier l'état du service/composant
+2. Vérifier les logs d'erreur
+3. Vérifier la configuration réseau (si service)
+4. Vérifier les dépendances (source de politiques, traceur)
 
 **Actions correctives :**
-- RedÃ©marrer le service/composant
-- VÃ©rifier et corriger la configuration
-- VÃ©rifier et restaurer les dÃ©pendances
-- Escalader si nÃ©cessaire
+- Redémarrer le service/composant
+- Vérifier et corriger la configuration
+- Vérifier et restaurer les dépendances
+- Escalader si nécessaire
 
-**ProblÃ¨mes de performance :**
+**Problèmes de performance :**
 
-**SymptÃ´mes :**
+**Symptômes :**
 - Latence excessive
-- DÃ©bit rÃ©duit
-- DÃ©gradation sous charge
+- Débit réduit
+- Dégradation sous charge
 
 **Diagnostic :**
-1. Analyser les mÃ©triques de performance
-2. Identifier les goulots d'Ã©tranglement
-3. VÃ©rifier la charge (nombre d'intentions)
-4. VÃ©rifier la complexitÃ© des politiques
-5. VÃ©rifier l'utilisation des ressources
+1. Analyser les métriques de performance
+2. Identifier les goulots d'étranglement
+3. Vérifier la charge (nombre d'intentions)
+4. Vérifier la complexité des politiques
+5. Vérifier l'utilisation des ressources
 
 **Actions correctives :**
 - Optimiser les politiques (si possible)
-- Ajuster les limites de capacitÃ©
+- Ajuster les limites de capacité
 - Augmenter les ressources (si applicable)
-- DÃ©ployer des instances supplÃ©mentaires
-- VÃ©rifier les optimisations (conformes aux contrats)
+- Déployer des instances supplémentaires
+- Vérifier les optimisations (conformes aux contrats)
 
-**ProblÃ¨mes de qualitÃ© :**
+**Problèmes de qualité :**
 
-**SymptÃ´mes :**
-- Taux d'erreur Ã©levÃ©
-- DÃ©cisions inattendues
+**Symptômes :**
+- Taux d'erreur élevé
+- Décisions inattendues
 - Comportement anormal
 
 **Diagnostic :**
-1. Analyser les traces d'Ã©valuation
-2. Identifier les intentions problÃ©matiques
-3. VÃ©rifier les politiques appliquÃ©es
-4. VÃ©rifier la conformitÃ© aux contrats
-5. VÃ©rifier la configuration
+1. Analyser les traces d'évaluation
+2. Identifier les intentions problématiques
+3. Vérifier les politiques appliquées
+4. Vérifier la conformité aux contrats
+5. Vérifier la configuration
 
 **Actions correctives :**
 - Corriger les politiques (si invalides)
 - Corriger la configuration
-- VÃ©rifier la conformitÃ© aux contrats
+- Vérifier la conformité aux contrats
 - Documenter les cas limites
 
-**ProblÃ¨mes de traÃ§abilitÃ© :**
+**Problèmes de traçabilité :**
 
-**SymptÃ´mes :**
+**Symptômes :**
 - Traces manquantes
-- Traces incomplÃ¨tes
+- Traces incomplètes
 - Traceur indisponible
 
 **Diagnostic :**
-1. VÃ©rifier l'Ã©tat du traceur
-2. VÃ©rifier la configuration du traceur
-3. VÃ©rifier les logs du traceur
-4. VÃ©rifier la couverture de traÃ§abilitÃ©
+1. Vérifier l'état du traceur
+2. Vérifier la configuration du traceur
+3. Vérifier les logs du traceur
+4. Vérifier la couverture de traçabilité
 
 **Actions correctives :**
-- RedÃ©marrer le traceur
+- Redémarrer le traceur
 - Corriger la configuration du traceur
-- VÃ©rifier et restaurer la destination des traces
-- VÃ©rifier la conformitÃ© au Audit & Trace Contract
+- Vérifier et restaurer la destination des traces
+- Vérifier la conformité au Audit & Trace Contract
 
-**ProblÃ¨mes de conformitÃ© :**
+**Problèmes de conformité :**
 
-**SymptÃ´mes :**
-- Violation d'invariant dÃ©tectÃ©e
+**Symptômes :**
+- Violation d'invariant détectée
 - Comportement non conforme aux contrats
-- DÃ©cisions non dÃ©terministes
+- Décisions non déterministes
 
 **Diagnostic :**
-1. Analyser les traces d'Ã©valuation
+1. Analyser les traces d'évaluation
 2. Identifier les violations d'invariant
-3. VÃ©rifier la configuration
-4. VÃ©rifier l'implÃ©mentation (si accessible)
+3. Vérifier la configuration
+4. Vérifier l'implémentation (si accessible)
 
 **Actions correctives :**
 - Corriger la configuration
-- Corriger l'implÃ©mentation (si nÃ©cessaire)
-- VÃ©rifier la conformitÃ© aux contrats
-- Documenter et escalader si nÃ©cessaire
+- Corriger l'implémentation (si nécessaire)
+- Vérifier la conformité aux contrats
+- Documenter et escalader si nécessaire
 
-### 7.2. ProcÃ©dures de rÃ©solution
+### 7.2. Procédures de résolution
 
-**RÃ©solution standard :**
+**Résolution standard :**
 
-1. **Identification** : Identifier le problÃ¨me via diagnostic
-2. **Isolation** : Isoler le problÃ¨me (instance, configuration, etc.)
+1. **Identification** : Identifier le problème via diagnostic
+2. **Isolation** : Isoler le problème (instance, configuration, etc.)
 3. **Correction** : Appliquer la correction
-4. **VÃ©rification** : VÃ©rifier la rÃ©solution
-5. **Documentation** : Documenter le problÃ¨me et la rÃ©solution
+4. **Vérification** : Vérifier la résolution
+5. **Documentation** : Documenter le problème et la résolution
 
-**RÃ©solution d'urgence :**
+**Résolution d'urgence :**
 
-1. **Mitigation** : Mitiger l'impact immÃ©diatement
+1. **Mitigation** : Mitiger l'impact immédiatement
 2. **Diagnostic** : Diagnostiquer la cause
 3. **Correction** : Appliquer la correction permanente
-4. **VÃ©rification** : VÃ©rifier la rÃ©solution
+4. **Vérification** : Vérifier la résolution
 5. **Post-mortem** : Analyser et documenter
 
 **Rollback :**
 
-1. **DÃ©tection** : DÃ©tecter le problÃ¨me post-dÃ©ploiement
-2. **DÃ©cision** : DÃ©cider du rollback
-3. **Restauration** : Restaurer la version prÃ©cÃ©dente
-4. **VÃ©rification** : VÃ©rifier la restauration
-5. **Analyse** : Analyser la cause du problÃ¨me
+1. **Détection** : Détecter le problème post-déploiement
+2. **Décision** : Décider du rollback
+3. **Restauration** : Restaurer la version précédente
+4. **Vérification** : Vérifier la restauration
+5. **Analyse** : Analyser la cause du problème
 
 ### 7.3. Outils de diagnostic
 
-**Outils conceptuels (non imposÃ©s) :**
+**Outils conceptuels (non imposés) :**
 
-- **Logs** : Analyse des logs d'Ã©valuation et d'erreur
+- **Logs** : Analyse des logs d'évaluation et d'erreur
 - **Traces** : Analyse des traces d'audit
-- **MÃ©triques** : Analyse des mÃ©triques de performance
-- **Tests** : Tests d'Ã©valuation pour reproduction
+- **Métriques** : Analyse des métriques de performance
+- **Tests** : Tests d'évaluation pour reproduction
 
 **Outils pratiques (exemples) :**
 
-- SystÃ¨me de logging centralisÃ©
-- SystÃ¨me d'audit et de traÃ§abilitÃ©
+- Système de logging centralisé
+- Système d'audit et de traçabilité
 - Dashboard de monitoring
 - Outils d'analyse de traces
 
 ### 7.4. Base de connaissances
 
-**Documentation des problÃ¨mes rÃ©currents :**
+**Documentation des problèmes récurrents :**
 
-- ProblÃ¨mes identifiÃ©s et rÃ©solus
-- Solutions documentÃ©es
-- ProcÃ©dures de rÃ©solution
+- Problèmes identifiés et résolus
+- Solutions documentées
+- Procédures de résolution
 - Cas limites et exceptions
 
-**Mise Ã  jour continue :**
+**Mise à jour continue :**
 
-- Ajout de nouveaux problÃ¨mes
-- Mise Ã  jour des solutions
-- AmÃ©lioration des procÃ©dures
+- Ajout de nouveaux problèmes
+- Mise à jour des solutions
+- Amélioration des procédures
 - Partage des connaissances
 
 ---
 
-## 8. Maintenance opÃ©rationnelle
+## 8. Maintenance opérationnelle
 
-### 8.1. Maintenance prÃ©ventive
+### 8.1. Maintenance préventive
 
-**VÃ©rifications pÃ©riodiques :**
+**Vérifications périodiques :**
 
-- **Quotidienne** : VÃ©rification de la santÃ© opÃ©rationnelle
-- **Hebdomadaire** : Analyse des mÃ©triques et tendances
+- **Quotidienne** : Vérification de la santé opérationnelle
+- **Hebdomadaire** : Analyse des métriques et tendances
 - **Mensuelle** : Revue de la configuration et des politiques
-- **Trimestrielle** : Audit de conformitÃ© aux contrats
+- **Trimestrielle** : Audit de conformité aux contrats
 
-**Actions prÃ©ventives :**
+**Actions préventives :**
 
-- Mise Ã  jour des politiques
+- Mise à jour des politiques
 - Optimisation de la configuration
-- VÃ©rification de la traÃ§abilitÃ©
+- Vérification de la traçabilité
 - Nettoyage des ressources (si applicable)
 
 ### 8.2. Maintenance corrective
@@ -644,169 +644,169 @@ StrongFather est un **moteur de dÃ©cision stratÃ©gique et politique** qui :
 **Correction de bugs :**
 
 - Identification du bug
-- Correction de l'implÃ©mentation
+- Correction de l'implémentation
 - Validation de la correction
-- DÃ©ploiement de la correction
+- Déploiement de la correction
 
-**AmÃ©lioration de performance :**
+**Amélioration de performance :**
 
-- Identification des goulots d'Ã©tranglement
+- Identification des goulots d'étranglement
 - Optimisation (conforme aux contrats)
-- Validation de l'amÃ©lioration
-- DÃ©ploiement de l'amÃ©lioration
+- Validation de l'amélioration
+- Déploiement de l'amélioration
 
-### 8.3. Ã‰volution opÃ©rationnelle
+### 8.3. Évolution opérationnelle
 
-**Ã‰volution des politiques :**
+**Évolution des politiques :**
 
 - Ajout de nouvelles politiques
 - Modification de politiques existantes
-- Suppression de politiques obsolÃ¨tes
-- Validation de la conformitÃ©
+- Suppression de politiques obsolètes
+- Validation de la conformité
 
-**Ã‰volution de la configuration :**
+**Évolution de la configuration :**
 
-- Ajout de nouveaux paramÃ¨tres
-- Modification de paramÃ¨tres existants
+- Ajout de nouveaux paramètres
+- Modification de paramètres existants
 - Optimisation de la configuration
 - Validation de la configuration
 
 ---
 
-## 9. SÃ©curitÃ© opÃ©rationnelle
+## 9. Sécurité opérationnelle
 
-### 9.1. SÃ©curitÃ© de dÃ©ploiement
+### 9.1. Sécurité de déploiement
 
-**SÃ©curitÃ© du composant :**
+**Sécurité du composant :**
 
-- DÃ©ploiement dans un environnement sÃ©curisÃ©
-- ContrÃ´le d'accÃ¨s au composant
-- Chiffrement des communications (si exposÃ© en rÃ©seau)
-- Authentification et autorisation (si exposÃ© en service)
+- Déploiement dans un environnement sécurisé
+- Contrôle d'accès au composant
+- Chiffrement des communications (si exposé en réseau)
+- Authentification et autorisation (si exposé en service)
 
-**SÃ©curitÃ© de la configuration :**
+**Sécurité de la configuration :**
 
-- Protection des secrets (mots de passe, clÃ©s)
+- Protection des secrets (mots de passe, clés)
 - Chiffrement de la configuration sensible
-- ContrÃ´le d'accÃ¨s Ã  la configuration
+- Contrôle d'accès à la configuration
 - Audit des changements de configuration
 
-### 9.2. SÃ©curitÃ© des traces
+### 9.2. Sécurité des traces
 
 **Protection des traces :**
 
 - Chiffrement des traces sensibles
-- ContrÃ´le d'accÃ¨s aux traces
-- IntÃ©gritÃ© des traces
-- RÃ©tention et archivage sÃ©curisÃ©
+- Contrôle d'accès aux traces
+- Intégrité des traces
+- Rétention et archivage sécurisé
 
-**ConformitÃ© :**
+**Conformité :**
 
-- ConformitÃ© aux rÃ©glementations (RGPD, etc.)
-- Gestion des donnÃ©es personnelles
-- Audit de sÃ©curitÃ©
-- Documentation de conformitÃ©
+- Conformité aux réglementations (RGPD, etc.)
+- Gestion des données personnelles
+- Audit de sécurité
+- Documentation de conformité
 
-### 9.3. RÃ©ponse aux incidents de sÃ©curitÃ©
+### 9.3. Réponse aux incidents de sécurité
 
-**DÃ©tection :**
+**Détection :**
 
-- Monitoring des accÃ¨s
-- DÃ©tection d'anomalies
-- Alertes de sÃ©curitÃ©
+- Monitoring des accès
+- Détection d'anomalies
+- Alertes de sécurité
 - Investigation des incidents
 
-**RÃ©ponse :**
+**Réponse :**
 
 - Isolation de l'incident
-- Correction de la vulnÃ©rabilitÃ©
-- VÃ©rification de l'intÃ©gritÃ©
+- Correction de la vulnérabilité
+- Vérification de l'intégrité
 - Documentation de l'incident
 
 ---
 
-## 10. Conclusion opÃ©rationnelle
+## 10. Conclusion opérationnelle
 
-Ce runbook fournit les directives opÃ©rationnelles pour l'exploitation de StrongFather en production.
+Ce runbook fournit les directives opérationnelles pour l'exploitation de StrongFather en production.
 
 Il garantit que :
-- les procÃ©dures de dÃ©ploiement sont dÃ©finies,
-- la configuration est gÃ©rÃ©e de maniÃ¨re cohÃ©rente,
+- les procédures de déploiement sont définies,
+- la configuration est gérée de manière cohérente,
 - le monitoring permet la surveillance continue,
-- les alertes permettent la dÃ©tection proactive,
-- le troubleshooting permet la rÃ©solution efficace,
-- la maintenance assure la pÃ©rennitÃ©,
-- la sÃ©curitÃ© est prÃ©servÃ©e.
+- les alertes permettent la détection proactive,
+- le troubleshooting permet la résolution efficace,
+- la maintenance assure la pérennité,
+- la sécurité est préservée.
 
-Ce document est **opÃ©rationnel et pratique**. Il doit Ãªtre adaptÃ© selon le contexte d'implÃ©mentation et les outils choisis.
+Ce document est **opérationnel et pratique**. Il doit être adapté selon le contexte d'implémentation et les outils choisis.
 
 ---
 
-## 11. Mini log de gÃ©nÃ©ration
+## 11. Mini log de génération
 
-### DÃ©cision Ã©ditoriale E1 : Orientation SRE/Ops
+### Décision éditoriale E1 : Orientation SRE/Ops
 
-**DÃ©cision prise :** Document orientÃ© SRE/Ops Architect avec focus sur l'exploitation opÃ©rationnelle, sans imposer d'outils ou d'infrastructure spÃ©cifiques.
+**Décision prise :** Document orienté SRE/Ops Architect avec focus sur l'exploitation opérationnelle, sans imposer d'outils ou d'infrastructure spécifiques.
 
-**Application :** Toutes les sections sont orientÃ©es opÃ©rationnelles avec exemples conceptuels, pas d'outils imposÃ©s.
+**Application :** Toutes les sections sont orientées opérationnelles avec exemples conceptuels, pas d'outils imposés.
 
-### DÃ©cision Ã©ditoriale E2 : Structure opÃ©rationnelle
+### Décision éditoriale E2 : Structure opérationnelle
 
-**DÃ©cision prise :** Structure classique de runbook : DÃ©ploiement â†’ Configuration â†’ Monitoring â†’ Alertes â†’ Troubleshooting â†’ Maintenance â†’ SÃ©curitÃ©.
+**Décision prise :** Structure classique de runbook : Déploiement → Configuration → Monitoring → Alertes → Troubleshooting → Maintenance → Sécurité.
 
-**Application :** Sections organisÃ©es selon le cycle de vie opÃ©rationnel.
+**Application :** Sections organisées selon le cycle de vie opérationnel.
 
-### DÃ©cision Ã©ditoriale E3 : Conceptuel mais pratique
+### Décision éditoriale E3 : Conceptuel mais pratique
 
-**DÃ©cision prise :** Document conceptuel (pas d'outils imposÃ©s) mais pratique (directives opÃ©rationnelles claires).
+**Décision prise :** Document conceptuel (pas d'outils imposés) mais pratique (directives opérationnelles claires).
 
-**Application :** Directives opÃ©rationnelles avec exemples, mais pas d'outils spÃ©cifiques imposÃ©s.
+**Application :** Directives opérationnelles avec exemples, mais pas d'outils spécifiques imposés.
 
-### Warning W1 : Monitoring vs mÃ©triques
+### Warning W1 : Monitoring vs métriques
 
-**Warning rencontrÃ© :** Comment dÃ©finir le monitoring sans imposer d'outils ?
+**Warning rencontré :** Comment définir le monitoring sans imposer d'outils ?
 
-**DÃ©cision prise :** DÃ©finition conceptuelle des mÃ©triques Ã  surveiller et des sources possibles, sans imposer d'outils.
+**Décision prise :** Définition conceptuelle des métriques à surveiller et des sources possibles, sans imposer d'outils.
 
-**Correction effectuÃ©e :** Section 5 dÃ©finit les mÃ©triques conceptuelles et les sources possibles, sans imposer d'outils.
+**Correction effectuée :** Section 5 définit les métriques conceptuelles et les sources possibles, sans imposer d'outils.
 
 ### Warning W2 : Alertes vs seuils
 
-**Warning rencontrÃ© :** Comment dÃ©finir les alertes sans imposer de seuils ?
+**Warning rencontré :** Comment définir les alertes sans imposer de seuils ?
 
-**DÃ©cision prise :** DÃ©finition des critÃ¨res d'alerte et des seuils conceptuels (Ã  dÃ©finir selon contexte), sans imposer de valeurs.
+**Décision prise :** Définition des critères d'alerte et des seuils conceptuels (à définir selon contexte), sans imposer de valeurs.
 
-**Correction effectuÃ©e :** Section 6 dÃ©finit les critÃ¨res d'alerte et les seuils conceptuels, avec note que les seuils doivent Ãªtre dÃ©finis selon le contexte.
+**Correction effectuée :** Section 6 définit les critères d'alerte et les seuils conceptuels, avec note que les seuils doivent être définis selon le contexte.
 
-### AmbiguÃ¯tÃ© A1 : DÃ©ploiement vs architecture
+### Ambiguïté A1 : Déploiement vs architecture
 
-**AmbiguÃ¯tÃ© rencontrÃ©e :** Comment dÃ©crire le dÃ©ploiement sans connaÃ®tre l'architecture d'implÃ©mentation ?
+**Ambiguïté rencontrée :** Comment décrire le déploiement sans connaître l'architecture d'implémentation ?
 
-**DÃ©cision prise :** Description conceptuelle des stratÃ©gies de dÃ©ploiement possibles (bibliothÃ¨que, service, hybride) avec avantages/inconvÃ©nients.
+**Décision prise :** Description conceptuelle des stratégies de déploiement possibles (bibliothèque, service, hybride) avec avantages/inconvénients.
 
-**Correction effectuÃ©e :** Section 3.2 dÃ©crit les stratÃ©gies de dÃ©ploiement conceptuelles.
+**Correction effectuée :** Section 3.2 décrit les stratégies de déploiement conceptuelles.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec Documentation Fondatrice : ConfirmÃ©e (nature de StrongFather)
-- âœ… CohÃ©rence avec Architecture & Flows : ConfirmÃ©e (architecture conceptuelle)
-- âœ… CohÃ©rence avec Performance Contract : ConfirmÃ©e (contraintes de performance)
-- âœ… CohÃ©rence avec Audit & Trace Contract : ConfirmÃ©e (traÃ§abilitÃ©)
-- âœ… CohÃ©rence avec Invariants & Guarantees : ConfirmÃ©e (propriÃ©tÃ©s Ã  prÃ©server)
-- âœ… Aucune contradiction : ConfirmÃ©e
+**Vérification effectuée :**
+- ✅ Cohérence avec Documentation Fondatrice : Confirmée (nature de StrongFather)
+- ✅ Cohérence avec Architecture & Flows : Confirmée (architecture conceptuelle)
+- ✅ Cohérence avec Performance Contract : Confirmée (contraintes de performance)
+- ✅ Cohérence avec Audit & Trace Contract : Confirmée (traçabilité)
+- ✅ Cohérence avec Invariants & Guarantees : Confirmée (propriétés à préserver)
+- ✅ Aucune contradiction : Confirmée
 
-**Conclusion :** Aucune contradiction dÃ©tectÃ©e. Le document est cohÃ©rent et fournit des directives opÃ©rationnelles pratiques sans imposer d'outils.
+**Conclusion :** Aucune contradiction détectée. Le document est cohérent et fournit des directives opérationnelles pratiques sans imposer d'outils.
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-26  
+**Document créé le :** 2026-01-26  
 **Version :** 1.0  
-**Statut :** OpÃ©rationnel â€” Guide pratique  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Runbook opÃ©rationnel
+**Statut :** Opérationnel — Guide pratique  
+**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Runbook opérationnel
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

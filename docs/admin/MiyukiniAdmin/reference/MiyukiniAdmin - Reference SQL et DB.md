@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Reference SQL et DB
+﻿# MiyukiniAdmin — Reference SQL et DB
 
 ## 1. Contexte
 
@@ -60,7 +60,7 @@ Ce document **ne remplace pas** les contrats ; il les complete et sert de refere
 | **timestamp** | Date/heure sans fuseau | Horodatage local |
 | **bool** | Booleen | Vrai/faux |
 
-*Reference style Supabase : "About data types" â€” documenter ces types dans l'UI Table Editor (creation de colonnes).*
+*Reference style Supabase : "About data types" — documenter ces types dans l'UI Table Editor (creation de colonnes).*
 
 ### 4.2 Proprietes des colonnes
 
@@ -100,7 +100,7 @@ Ce document **ne remplace pas** les contrats ; il les complete et sert de refere
 
 ### 6.3 Onglet Chart
 
-- **Visualisation :** representation graphique des resultats (courbes, barres) pour metriques ou donnees agregÃ©es. Optionnel.
+- **Visualisation :** representation graphique des resultats (courbes, barres) pour metriques ou donnees agregées. Optionnel.
 - **Implementation :** soit tableau + export (Rust seul), soit serveur genere SVG, soit librairie JS legere cote client ; voir [Affichage Dynamique et Metriques](../ui/MiyukiniAdmin%20-%20Affichage%20Dynamique%20et%20Metriques.md).
 
 ---

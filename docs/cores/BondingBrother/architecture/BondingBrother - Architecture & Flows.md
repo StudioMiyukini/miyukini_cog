@@ -1,185 +1,185 @@
-﻿# BondingBrother â€” Architecture & Flows
+﻿# BondingBrother — Architecture & Flows
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** ARCHITECTURE â€” Normatif
+**Statut :** ARCHITECTURE — Normatif
 
 ---
 
 ## 1. Contexte
 
-Ce document dÃ©crit l'architecture technique interne de Bonding Brother, ses composants structurels, et sa vision de haut niveau en tant que **strate de liaison gouvernÃ©e** de l'Ã©cosystÃ¨me Miyukini.
+Ce document décrit l'architecture technique interne de Bonding Brother, ses composants structurels, et sa vision de haut niveau en tant que **strate de liaison gouvernée** de l'écosystème Miyukini.
 
-Ce document fusionne et remplace les anciens documents "Architecture et Composants" et "Strate de Liaison GouvernÃ©e" pour une vision unifiÃ©e.
+Ce document fusionne et remplace les anciens documents "Architecture et Composants" et "Strate de Liaison Gouvernée" pour une vision unifiée.
 
-**DÃ©pendances :**
-- [Documentation Fondatrice](../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) â€” Principes fondamentaux
+**Dépendances :**
+- [Documentation Fondatrice](../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) — Principes fondamentaux
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- La dÃ©finition et le rÃ´le fondamental de Bonding Brother
+- La définition et le rôle fondamental de Bonding Brother
 - Son positionnement dans la pyramide Miyukini
-- Les rÃ´les internes de la strate (Adapter, Bridge, Gateway, Translator, Contract Enforcer)
+- Les rôles internes de la strate (Adapter, Bridge, Gateway, Translator, Contract Enforcer)
 - La structure en couches de Bonding Brother
-- Les composants internes et leurs responsabilitÃ©s
-- Les flux de donnÃ©es internes
+- Les composants internes et leurs responsabilités
+- Les flux de données internes
 - Les invariants architecturaux
 
 Ce document **ne couvre pas** :
-- Les rÃ¨gles mÃ©tier (voir les contrats spÃ©cifiques dans `contracts/`)
-- Les protocoles d'intÃ©gration avec les autoritÃ©s (voir `contracts/integration/`)
-- Les guidelines d'implÃ©mentation (voir `implementation/`)
+- Les règles métier (voir les contrats spécifiques dans `contracts/`)
+- Les protocoles d'intégration avec les autorités (voir `contracts/integration/`)
+- Les guidelines d'implémentation (voir `implementation/`)
 
 ---
 
-## 3. DÃ©finition
+## 3. Définition
 
-**Bonding Brother est la strate de liaison gouvernÃ©e de Miyukini.**
+**Bonding Brother est la strate de liaison gouvernée de Miyukini.**
 
-Il permet aux entitÃ©s hÃ©tÃ©rogÃ¨nes (cores, outils, opÃ©rateurs, COGs, interfaces) de se parler **sans jamais se comprendre implicitement**.
+Il permet aux entités hétérogènes (cores, outils, opérateurs, COGs, interfaces) de se parler **sans jamais se comprendre implicitement**.
 
 ### 3.1 Ce qu'il n'apporte PAS
 
 | Exclusion | Description |
 |-----------|-------------|
-| âŒ Aucune logique mÃ©tier | BB ne connaÃ®t pas le domaine |
-| âŒ Aucune dÃ©cision | BB ne tranche jamais |
-| âŒ Aucune autoritÃ© | BB n'a pas de pouvoir |
-| âŒ Aucune persistance | BB ne stocke pas d'Ã©tat mÃ©tier |
+| ❌ Aucune logique métier | BB ne connaît pas le domaine |
+| ❌ Aucune décision | BB ne tranche jamais |
+| ❌ Aucune autorité | BB n'a pas de pouvoir |
+| ❌ Aucune persistance | BB ne stocke pas d'état métier |
 
 ### 3.2 Ce qu'il apporte
 
-| CapacitÃ© | Description |
+| Capacité | Description |
 |----------|-------------|
-| âœ… Traduction | Conversion entre vocabulaires |
-| âœ… Normalisation | Format uniforme pour l'Ã©cosystÃ¨me |
-| âœ… Encapsulation | Isolation des implÃ©mentations |
-| âœ… Isolation | FrontiÃ¨re stricte entre entitÃ©s |
-| âœ… TraÃ§abilitÃ© | Tout Ã©change est journalisÃ© |
+| ✅ Traduction | Conversion entre vocabulaires |
+| ✅ Normalisation | Format uniforme pour l'écosystème |
+| ✅ Encapsulation | Isolation des implémentations |
+| ✅ Isolation | Frontière stricte entre entités |
+| ✅ Traçabilité | Tout échange est journalisé |
 
 ---
 
 ## 4. Positionnement dans la pyramide Miyukini
 
-Bonding Brother **n'est pas un core de gouvernance**, mais il est au mÃªme niveau structurel qu'eux.
+Bonding Brother **n'est pas un core de gouvernance**, mais il est au même niveau structurel qu'eux.
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚     Interfaces / RÃ©seau / Terminaux         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                      â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚           BONDING BROTHER (Strate 5)        â”‚ â† STRATE DE LIAISON
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                      â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚   Cores (StrongFather, KindMother, etc.)    â”‚ â† STRATE 4
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                      â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                  Kernel                      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────┐
+│     Interfaces / Réseau / Terminaux         │
+└─────────────────────┬───────────────────────┘
+                      ▼
+┌─────────────────────────────────────────────┐
+│           BONDING BROTHER (Strate 5)        │ ← STRATE DE LIAISON
+└─────────────────────┬───────────────────────┘
+                      ▼
+┌─────────────────────────────────────────────┐
+│   Cores (StrongFather, KindMother, etc.)    │ ← STRATE 4
+└─────────────────────┬───────────────────────┘
+                      ▼
+┌─────────────────────────────────────────────┐
+│                  Kernel                      │
+└─────────────────────────────────────────────┘
 ```
 
-**RÃ¨gles fondamentales :**
-- Tout Ã©change passe par lui
-- Aucun Ã©change ne le traverse sans Ãªtre transformÃ©
+**Règles fondamentales :**
+- Tout échange passe par lui
+- Aucun échange ne le traverse sans être transformé
 
 ### Question fondamentale
 
-> **"Comment deux entitÃ©s qui n'ont pas le droit de se connaÃ®tre peuvent-elles Ã©changer ?"**
+> **"Comment deux entités qui n'ont pas le droit de se connaître peuvent-elles échanger ?"**
 
 ---
 
-## 5. RÃ´les internes de la strate
+## 5. Rôles internes de la strate
 
-**Bonding Brother n'est PAS un seul composant.** C'est une strate composÃ©e avec plusieurs rÃ´les internes.
+**Bonding Brother n'est PAS un seul composant.** C'est une strate composée avec plusieurs rôles internes.
 
 ### 5.1 Adapter (Interne)
 
-**RÃ´le :** Adapter une entitÃ© au langage Miyukini.
+**Rôle :** Adapter une entité au langage Miyukini.
 
 | Source | Cible |
 |--------|-------|
 | UI | Intent Miyukini |
 | Tool | Capability Call |
-| Produit | Demande gouvernÃ©e |
-| API externe | RequÃªte normalisÃ©e |
+| Produit | Demande gouvernée |
+| API externe | Requête normalisée |
 
-**PropriÃ©tÃ©s :**
+**Propriétés :**
 - Sens unique ou bidirectionnel
 - Stateless
-- Strictement typÃ©
-- VersionnÃ©
+- Strictement typé
+- Versionné
 
-> Un adapter ne dÃ©cide jamais si c'est valide. Il rend simplement la chose auditable.
+> Un adapter ne décide jamais si c'est valide. Il rend simplement la chose auditable.
 
 ### 5.2 Bridge (Inter-COG / Inter-Environment)
 
-**RÃ´le :** Relier deux environnements souverains sans fusion.
+**Rôle :** Relier deux environnements souverains sans fusion.
 
 | Liaison | Description |
 |---------|-------------|
-| COG â†” COG | Visite, migration |
-| Environnement isolÃ© â†” Environnement connectÃ© | Passage de frontiÃ¨re |
-| Offline â†” Online | Synchronisation diffÃ©rÃ©e |
+| COG ↔ COG | Visite, migration |
+| Environnement isolé ↔ Environnement connecté | Passage de frontière |
+| Offline ↔ Online | Synchronisation différée |
 
-**PropriÃ©tÃ©s :**
+**Propriétés :**
 - Canal diplomatique
-- Aucun Ã©tat mÃ©tier
-- Transport chiffrÃ©
-- VÃ©rification d'intÃ©gritÃ©
+- Aucun état métier
+- Transport chiffré
+- Vérification d'intégrité
 
-> Le Bridge ne connaÃ®t pas le sens de ce qu'il transporte.
+> Le Bridge ne connaît pas le sens de ce qu'il transporte.
 
-### 5.3 Gateway (Exposition contrÃ´lÃ©e)
+### 5.3 Gateway (Exposition contrôlée)
 
-**RÃ´le :** Exposer une surface vers l'extÃ©rieur.
+**Rôle :** Exposer une surface vers l'extérieur.
 
 | Surface | Description |
 |---------|-------------|
-| Site web public | AccÃ¨s non authentifiÃ© |
-| API REST / GraphQL | IntÃ©gration technique |
-| WebSocket temps rÃ©el | Communication bidirectionnelle |
+| Site web public | Accès non authentifié |
+| API REST / GraphQL | Intégration technique |
+| WebSocket temps réel | Communication bidirectionnelle |
 | App mobile | Interface native |
 
-**PropriÃ©tÃ©s :**
-- FrontiÃ¨re stricte
-- Pas de logique mÃ©tier
-- CouplÃ©e Ã  BorderGuard
-- ObservÃ©e par WorrySentinel
+**Propriétés :**
+- Frontière stricte
+- Pas de logique métier
+- Couplée à BorderGuard
+- Observée par WorrySentinel
 
 > Une gateway n'est jamais une API "libre".
 
-### 5.4 Translator (SÃ©mantique)
+### 5.4 Translator (Sémantique)
 
-**RÃ´le :** Traduire sans enrichir.
+**Rôle :** Traduire sans enrichir.
 
-| EntrÃ©e | Sortie |
+| Entrée | Sortie |
 |--------|--------|
 | JSON | Intent Structure |
-| HTTP | Demande gouvernÃ©e |
+| HTTP | Demande gouvernée |
 | UI Event | Action abstraite |
 
-**PropriÃ©tÃ©s :**
-- Perte contrÃ´lÃ©e
-- Aucune infÃ©rence
+**Propriétés :**
+- Perte contrôlée
+- Aucune inférence
 - Pas de raccourci
 
-> Toute information non comprise est rejetÃ©e ou neutralisÃ©e.
+> Toute information non comprise est rejetée ou neutralisée.
 
 ### 5.5 Contract Enforcer (Structurel)
 
-**RÃ´le :** VÃ©rifier que l'Ã©change respecte un contrat connu.
+**Rôle :** Vérifier que l'échange respecte un contrat connu.
 
-| VÃ©rification | Description |
+| Vérification | Description |
 |--------------|-------------|
-| Version de protocole | CompatibilitÃ© garantie |
-| SchÃ©ma attendu | Structure valide |
-| Champs interdits | SÃ©curitÃ© respectÃ©e |
-| Sens de circulation | Direction autorisÃ©e |
+| Version de protocole | Compatibilité garantie |
+| Schéma attendu | Structure valide |
+| Champs interdits | Sécurité respectée |
+| Sens de circulation | Direction autorisée |
 
 > Il ne valide pas le fond, seulement la forme.
 
@@ -187,255 +187,255 @@ Bonding Brother **n'est pas un core de gouvernance**, mais il est au mÃªme niv
 
 ## 6. Architecture en couches
 
-Bonding Brother est organisÃ© en **quatre couches distinctes**, chacune avec une responsabilitÃ© unique et des interfaces claires.
+Bonding Brother est organisé en **quatre couches distinctes**, chacune avec une responsabilité unique et des interfaces claires.
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    COUCHE PRODUIT                           â”‚
-â”‚         (Interface stable vers les produits)                â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                    COUCHE TRADUCTION                        â”‚
-â”‚    (Transformation intention â†” demande, rÃ©ponse â†” rÃ©sultat) â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                    COUCHE MÃ‰DIATION                         â”‚
-â”‚   (Orchestration, dÃ©lÃ©gation, filtrage, journalisation)     â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                    COUCHE AUTORITÃ‰                          â”‚
-â”‚         (Interface vers KindMother et StrongFather)         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────┐
+│                    COUCHE PRODUIT                           │
+│         (Interface stable vers les produits)                │
+├─────────────────────────────────────────────────────────────┤
+│                    COUCHE TRADUCTION                        │
+│    (Transformation intention ↔ demande, réponse ↔ résultat) │
+├─────────────────────────────────────────────────────────────┤
+│                    COUCHE MÉDIATION                         │
+│   (Orchestration, délégation, filtrage, journalisation)     │
+├─────────────────────────────────────────────────────────────┤
+│                    COUCHE AUTORITÉ                          │
+│         (Interface vers KindMother et StrongFather)         │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### 6.1 Couche Produit
 
-**ResponsabilitÃ© :** Exposer une interface stable, prÃ©visible et documentÃ©e aux produits de l'Ã©cosystÃ¨me.
+**Responsabilité :** Exposer une interface stable, prévisible et documentée aux produits de l'écosystème.
 
 **Composants :**
-- **ProductGateway** : Point d'entrÃ©e unique pour toutes les intentions des produits
-- **IntentReceiver** : RÃ©ception et validation structurelle des intentions
-- **ResultEmitter** : Ã‰mission des rÃ©sultats filtrÃ©s vers les produits
-- **NotificationDispatcher** : Distribution des notifications de l'Ã©cosystÃ¨me vers les produits
+- **ProductGateway** : Point d'entrée unique pour toutes les intentions des produits
+- **IntentReceiver** : Réception et validation structurelle des intentions
+- **ResultEmitter** : Émission des résultats filtrés vers les produits
+- **NotificationDispatcher** : Distribution des notifications de l'écosystème vers les produits
 
-**Interfaces exposÃ©es :**
+**Interfaces exposées :**
 - `IIntentSubmission` : Soumission d'intentions
-- `IResultConsumption` : Consommation de rÃ©sultats
+- `IResultConsumption` : Consommation de résultats
 - `INotificationSubscription` : Abonnement aux notifications
 
-**RÃ¨gle architecturale :** Cette couche est la seule que les produits peuvent voir. Toute autre couche est invisible et inaccessible aux produits.
+**Règle architecturale :** Cette couche est la seule que les produits peuvent voir. Toute autre couche est invisible et inaccessible aux produits.
 
 ### 6.2 Couche Traduction
 
-**ResponsabilitÃ© :** Transformer les intentions en demandes et les rÃ©ponses en rÃ©sultats, en prÃ©servant la sÃ©mantique tout en adaptant le format.
+**Responsabilité :** Transformer les intentions en demandes et les réponses en résultats, en préservant la sémantique tout en adaptant le format.
 
 **Composants :**
-- **IntentTranslator** : Transformation intention â†’ demande
-- **ResponseTranslator** : Transformation rÃ©ponse â†’ rÃ©sultat
-- **VocabularyMapper** : Correspondance entre vocabulaires (produit â†” autoritÃ©)
-- **ContextEnricher** : Enrichissement du contexte pour les autoritÃ©s
+- **IntentTranslator** : Transformation intention → demande
+- **ResponseTranslator** : Transformation réponse → résultat
+- **VocabularyMapper** : Correspondance entre vocabulaires (produit ↔ autorité)
+- **ContextEnricher** : Enrichissement du contexte pour les autorités
 
 **Interfaces internes :**
 - `ITranslation` : Contrat de traduction bidirectionnelle
-- `IVocabularyMapping` : RÃ¨gles de correspondance de vocabulaire
-- `IContextEnrichment` : RÃ¨gles d'enrichissement contextuel
+- `IVocabularyMapping` : Règles de correspondance de vocabulaire
+- `IContextEnrichment` : Règles d'enrichissement contextuel
 
-**RÃ¨gle architecturale :** La traduction est pure et sans effet de bord. Elle ne modifie aucun Ã©tat, ne prend aucune dÃ©cision, ne stocke aucune donnÃ©e.
+**Règle architecturale :** La traduction est pure et sans effet de bord. Elle ne modifie aucun état, ne prend aucune décision, ne stocke aucune donnée.
 
-### 6.3 Couche MÃ©diation
+### 6.3 Couche Médiation
 
-**ResponsabilitÃ© :** Orchestrer le flux complet entre les produits et les autoritÃ©s, en appliquant les rÃ¨gles de filtrage et de journalisation.
+**Responsabilité :** Orchestrer le flux complet entre les produits et les autorités, en appliquant les règles de filtrage et de journalisation.
 
 **Composants :**
 - **MediationOrchestrator** : Coordination du flux complet d'une intention
-- **AuthorityRouter** : Routage vers l'autoritÃ© appropriÃ©e (KindMother ou StrongFather)
-- **FilterEngine** : Application des rÃ¨gles de filtrage (entrÃ©e et sortie)
-- **JournalWriter** : Journalisation systÃ©matique de toutes les interactions
-- **OfflineBuffer** : Gestion des intentions en mode dÃ©connectÃ© (conforme Ã  **LOI-2**)
+- **AuthorityRouter** : Routage vers l'autorité appropriée (KindMother ou StrongFather)
+- **FilterEngine** : Application des règles de filtrage (entrée et sortie)
+- **JournalWriter** : Journalisation systématique de toutes les interactions
+- **OfflineBuffer** : Gestion des intentions en mode déconnecté (conforme à **LOI-2**)
 
-Cette couche garantit que le systÃ¨me fonctionne mÃªme en mode offline, respectant **LOI-2** en acceptant l'isolement comme Ã©tat normal plutÃ´t qu'une erreur.
+Cette couche garantit que le système fonctionne même en mode offline, respectant **LOI-2** en acceptant l'isolement comme état normal plutôt qu'une erreur.
 
 **Interfaces internes :**
 - `IMediation` : Contrat d'orchestration
-- `IAuthorityRouting` : RÃ¨gles de routage vers les autoritÃ©s
-- `IFiltering` : RÃ¨gles de filtrage
+- `IAuthorityRouting` : Règles de routage vers les autorités
+- `IFiltering` : Règles de filtrage
 - `IJournaling` : Contrat de journalisation
 
-**RÃ¨gle architecturale :** La mÃ©diation ne dÃ©cide jamais. Elle applique des rÃ¨gles dÃ©finies ailleurs, dÃ©lÃ¨gue les dÃ©cisions aux autoritÃ©s, et journalise tout.
+**Règle architecturale :** La médiation ne décide jamais. Elle applique des règles définies ailleurs, délègue les décisions aux autorités, et journalise tout.
 
-### 6.4 Couche AutoritÃ©
+### 6.4 Couche Autorité
 
-**ResponsabilitÃ© :** Interfacer avec KindMother et StrongFather de maniÃ¨re standardisÃ©e et traÃ§able.
+**Responsabilité :** Interfacer avec KindMother et StrongFather de manière standardisée et traçable.
 
 **Composants :**
 - **KindMotherAdapter** : Adaptateur pour les interactions avec KindMother
 - **StrongFatherAdapter** : Adaptateur pour les interactions avec StrongFather
-- **AuthorityResponseHandler** : RÃ©ception et normalisation des rÃ©ponses des autoritÃ©s
-- **DeferredAuthorityManager** : Gestion de l'autoritÃ© diffÃ©rÃ©e (mode offline)
+- **AuthorityResponseHandler** : Réception et normalisation des réponses des autorités
+- **DeferredAuthorityManager** : Gestion de l'autorité différée (mode offline)
 
-**Interfaces vers les autoritÃ©s :**
+**Interfaces vers les autorités :**
 - `IKindMotherInterface` : Contrat d'interface avec KindMother
 - `IStrongFatherInterface` : Contrat d'interface avec StrongFather
 
-**RÃ¨gle architecturale :** Cette couche adapte les formats, mais ne modifie jamais le sens. Elle transmet fidÃ¨lement dans les deux sens.
+**Règle architecturale :** Cette couche adapte les formats, mais ne modifie jamais le sens. Elle transmet fidèlement dans les deux sens.
 
 ---
 
 ## 7. Composants transversaux
 
-Ces composants servent plusieurs couches et assurent des fonctions critiques non spÃ©cifiques Ã  une couche.
+Ces composants servent plusieurs couches et assurent des fonctions critiques non spécifiques à une couche.
 
 ### 7.1 ConfigurationStore
 
-**ResponsabilitÃ© :** Stocker et fournir la configuration de Bonding Brother.
+**Responsabilité :** Stocker et fournir la configuration de Bonding Brother.
 
-**CaractÃ©ristiques :**
-- Configuration immuable aprÃ¨s initialisation
+**Caractéristiques :**
+- Configuration immuable après initialisation
 - Pas de configuration dynamique en production
-- TraÃ§abilitÃ© complÃ¨te des valeurs de configuration
+- Traçabilité complète des valeurs de configuration
 
 ### 7.2 MetricsCollector
 
-**ResponsabilitÃ© :** Collecter les mÃ©triques de fonctionnement sans impacter le flux principal.
+**Responsabilité :** Collecter les métriques de fonctionnement sans impacter le flux principal.
 
-**MÃ©triques collectÃ©es :**
-- Nombre d'intentions reÃ§ues/traduites/transmises
-- Temps de traitement par Ã©tape
-- Taux de succÃ¨s/Ã©chec par autoritÃ©
-- Volume de donnÃ©es journalisÃ©es
+**Métriques collectées :**
+- Nombre d'intentions reçues/traduites/transmises
+- Temps de traitement par étape
+- Taux de succès/échec par autorité
+- Volume de données journalisées
 
 ### 7.3 HealthChecker
 
-**ResponsabilitÃ© :** VÃ©rifier l'Ã©tat de santÃ© de Bonding Brother et de ses connexions aux autoritÃ©s.
+**Responsabilité :** Vérifier l'état de santé de Bonding Brother et de ses connexions aux autorités.
 
-**VÃ©rifications :**
-- ConnectivitÃ© vers KindMother
-- ConnectivitÃ© vers StrongFather
-- Ã‰tat des composants internes
-- CapacitÃ© du buffer offline
+**Vérifications :**
+- Connectivité vers KindMother
+- Connectivité vers StrongFather
+- État des composants internes
+- Capacité du buffer offline
 
 ---
 
-## 8. Flux de donnÃ©es internes
+## 8. Flux de données internes
 
-### 8.1 Flux Produit â†’ Ã‰cosystÃ¨me
+### 8.1 Flux Produit → Écosystème
 
 ```
 Produit
-   â”‚
-   â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ProductGateway  â”‚ â† Validation structurelle
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Intention validÃ©e
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ IntentTranslatorâ”‚ â† Traduction intention â†’ demande
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Demande traduite
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ FilterEngine    â”‚ â† Filtrage d'entrÃ©e
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Demande filtrÃ©e
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ JournalWriter   â”‚ â† Journalisation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Demande journalisÃ©e
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AuthorityRouter â”‚ â† Routage vers autoritÃ©
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-    â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”
-    â–¼         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”
-â”‚  KM   â”‚ â”‚  SF   â”‚ â† Transmission Ã  l'autoritÃ©
-â””â”€â”€â”€â”¬â”€â”€â”€â”˜ â””â”€â”€â”€â”¬â”€â”€â”€â”˜
-    â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-         â”‚ RÃ©ponse autoritÃ©
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ResponseTranslatorâ”‚ â† Traduction rÃ©ponse â†’ rÃ©sultat
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ RÃ©sultat traduit
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ FilterEngine    â”‚ â† Filtrage de sortie
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ RÃ©sultat filtrÃ©
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ ResultEmitter   â”‚ â† Ã‰mission vers produit
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
+   │
+   ▼
+┌─────────────────┐
+│ ProductGateway  │ ← Validation structurelle
+└────────┬────────┘
+         │ Intention validée
+         ▼
+┌─────────────────┐
+│ IntentTranslator│ ← Traduction intention → demande
+└────────┬────────┘
+         │ Demande traduite
+         ▼
+┌─────────────────┐
+│ FilterEngine    │ ← Filtrage d'entrée
+└────────┬────────┘
+         │ Demande filtrée
+         ▼
+┌─────────────────┐
+│ JournalWriter   │ ← Journalisation
+└────────┬────────┘
+         │ Demande journalisée
+         ▼
+┌─────────────────┐
+│ AuthorityRouter │ ← Routage vers autorité
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+┌───────┐ ┌───────┐
+│  KM   │ │  SF   │ ← Transmission à l'autorité
+└───┬───┘ └───┬───┘
+    └────┬────┘
+         │ Réponse autorité
+         ▼
+┌──────────────────┐
+│ResponseTranslator│ ← Traduction réponse → résultat
+└────────┬─────────┘
+         │ Résultat traduit
+         ▼
+┌─────────────────┐
+│ FilterEngine    │ ← Filtrage de sortie
+└────────┬────────┘
+         │ Résultat filtré
+         ▼
+┌─────────────────┐
+│ ResultEmitter   │ ← Émission vers produit
+└────────┬────────┘
+         │
+         ▼
       Produit
 ```
 
-### 8.2 Flux Ã‰cosystÃ¨me â†’ Produit
+### 8.2 Flux Écosystème → Produit
 
 ```
-AutoritÃ© (KM ou SF)
-         â”‚
-         â”‚ Notification/Ã‰vÃ©nement
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ AuthorityResponse   â”‚ â† RÃ©ception
-â”‚ Handler             â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Ã‰vÃ©nement normalisÃ©
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ResponseTranslatorâ”‚ â† Traduction
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Message traduit
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ FilterEngine    â”‚ â† Filtrage
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚ Message filtrÃ©
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ JournalWriter   â”‚ â† Journalisation
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚ NotificationDispatcherâ”‚ â† Distribution
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-         â”‚
-         â–¼
-      Produits concernÃ©s
+Autorité (KM ou SF)
+         │
+         │ Notification/Événement
+         ▼
+┌─────────────────────┐
+│ AuthorityResponse   │ ← Réception
+│ Handler             │
+└────────┬────────────┘
+         │ Événement normalisé
+         ▼
+┌──────────────────┐
+│ResponseTranslator│ ← Traduction
+└────────┬─────────┘
+         │ Message traduit
+         ▼
+┌─────────────────┐
+│ FilterEngine    │ ← Filtrage
+└────────┬────────┘
+         │ Message filtré
+         ▼
+┌─────────────────┐
+│ JournalWriter   │ ← Journalisation
+└────────┬────────┘
+         │
+         ▼
+┌───────────────────────┐
+│ NotificationDispatcher│ ← Distribution
+└────────┬──────────────┘
+         │
+         ▼
+      Produits concernés
 ```
 
 ---
 
-## 9. Cycle d'un Ã©change typique
+## 9. Cycle d'un échange typique
 
-**Exemple :** Utilisateur web â†’ Service
+**Exemple :** Utilisateur web → Service
 
 ```
-1. UI produit un Ã©vÃ©nement
-         â†“
-2. Adapter UI â†’ Intent neutre
-         â†“
-3. Translator â†’ format Miyukini
-         â†“
-4. Contract Enforcer â†’ vÃ©rifie structure
-         â†“
-5. BorderGuard â†’ filtre
-         â†“
-6. StrongFather â†’ dÃ©cide
-         â†“
-7. KindMother â†’ lit
-         â†“
-8. RÃ©ponse repasse par Bonding Brother
-         â†“
-9. Adapter â†’ UI Response
+1. UI produit un événement
+         ↓
+2. Adapter UI → Intent neutre
+         ↓
+3. Translator → format Miyukini
+         ↓
+4. Contract Enforcer → vérifie structure
+         ↓
+5. BorderGuard → filtre
+         ↓
+6. StrongFather → décide
+         ↓
+7. KindMother → lit
+         ↓
+8. Réponse repasse par Bonding Brother
+         ↓
+9. Adapter → UI Response
 ```
 
-**Ã€ aucun moment :**
-- âŒ l'UI "appelle" un core
-- âŒ un core "comprend" l'UI
+**À aucun moment :**
+- ❌ l'UI "appelle" un core
+- ❌ un core "comprend" l'UI
 
 ---
 
@@ -443,94 +443,94 @@ AutoritÃ© (KM ou SF)
 
 ### 10.1 Principe d'isolation
 
-Chaque couche est **strictement isolÃ©e** des autres. Une couche ne peut accÃ©der qu'Ã  :
+Chaque couche est **strictement isolée** des autres. Une couche ne peut accéder qu'à :
 - Ses propres composants internes
-- Les interfaces exposÃ©es par la couche adjacente
+- Les interfaces exposées par la couche adjacente
 
 **Interdit :**
-- AccÃ¨s direct d'une couche Ã  une couche non adjacente
-- Partage d'Ã©tat entre couches
-- DÃ©pendances circulaires entre composants
+- Accès direct d'une couche à une couche non adjacente
+- Partage d'état entre couches
+- Dépendances circulaires entre composants
 
 ### 10.2 Principe d'encapsulation
 
-Chaque composant **encapsule** son implÃ©mentation :
-- L'interface est stable et documentÃ©e
-- L'implÃ©mentation peut Ã©voluer sans impacter les consommateurs
-- Aucun dÃ©tail interne n'est exposÃ©
+Chaque composant **encapsule** son implémentation :
+- L'interface est stable et documentée
+- L'implémentation peut évoluer sans impacter les consommateurs
+- Aucun détail interne n'est exposé
 
-### 10.3 FrontiÃ¨res de responsabilitÃ©
+### 10.3 Frontières de responsabilité
 
 | Composant | Responsable de | Non responsable de |
 |-----------|----------------|-------------------|
-| ProductGateway | Recevoir les intentions | DÃ©cider de leur validitÃ© mÃ©tier |
+| ProductGateway | Recevoir les intentions | Décider de leur validité métier |
 | IntentTranslator | Transformer le format | Valider la permission |
-| FilterEngine | Appliquer les rÃ¨gles | DÃ©finir les rÃ¨gles |
-| AuthorityRouter | Choisir l'autoritÃ© | DÃ©cider Ã  la place de l'autoritÃ© |
-| JournalWriter | Enregistrer | InterprÃ©ter les enregistrements |
+| FilterEngine | Appliquer les règles | Définir les règles |
+| AuthorityRouter | Choisir l'autorité | Décider à la place de l'autorité |
+| JournalWriter | Enregistrer | Interpréter les enregistrements |
 
 ---
 
-## 11. ExtensibilitÃ©
+## 11. Extensibilité
 
 ### 11.1 Points d'extension
 
-Bonding Brother peut Ãªtre Ã©tendu **uniquement** aux points suivants :
+Bonding Brother peut être étendu **uniquement** aux points suivants :
 
 | Point d'extension | Type | Contrainte |
 |-------------------|------|------------|
 | Nouveaux types d'intention | Addition | Doivent suivre le contrat IIntentSubmission |
 | Nouveaux vocabulaires produit | Addition | Doivent avoir un mapping complet |
-| Nouvelles rÃ¨gles de filtrage | Addition | Doivent Ãªtre dÃ©finies par une autoritÃ© |
+| Nouvelles règles de filtrage | Addition | Doivent être définies par une autorité |
 | Nouveaux types de notification | Addition | Doivent suivre le contrat INotificationSubscription |
 
 ### 11.2 Points non extensibles
 
-Ces Ã©lÃ©ments sont **figÃ©s** et non extensibles :
+Ces éléments sont **figés** et non extensibles :
 - Structure en 4 couches
-- Flux de donnÃ©es (direction et ordre des Ã©tapes)
-- RÃ´le de chaque composant
+- Flux de données (direction et ordre des étapes)
+- Rôle de chaque composant
 - Interfaces entre couches
-- Principe de dÃ©lÃ©gation aux autoritÃ©s
+- Principe de délégation aux autorités
 
 ---
 
-## 12. DÃ©pendances
+## 12. Dépendances
 
-### 12.1 DÃ©pendances externes (vers l'Ã©cosystÃ¨me)
+### 12.1 Dépendances externes (vers l'écosystème)
 
-| DÃ©pendance | Type | CriticitÃ© |
+| Dépendance | Type | Criticité |
 |------------|------|-----------|
-| KindMother | AutoritÃ© donnÃ©es | Critique |
-| StrongFather | AutoritÃ© dÃ©cisions | Critique |
+| KindMother | Autorité données | Critique |
+| StrongFather | Autorité décisions | Critique |
 | Storage Journal | Persistance journal | Haute |
-| Configuration | ParamÃ©trage | DÃ©marrage |
+| Configuration | Paramétrage | Démarrage |
 
-**Note sur l'autonomie :** Conforme Ã  **LOI-1** (aucune dÃ©pendance externe critique), Bonding Brother peut fonctionner en mode offline avec buffer, mÃªme si les autoritÃ©s sont temporairement indisponibles.
+**Note sur l'autonomie :** Conforme à **LOI-1** (aucune dépendance externe critique), Bonding Brother peut fonctionner en mode offline avec buffer, même si les autorités sont temporairement indisponibles.
 
-### 12.2 Absence de dÃ©pendances
+### 12.2 Absence de dépendances
 
-Bonding Brother **ne dÃ©pend pas** :
-- D'aucun produit spÃ©cifique
-- D'aucune base de donnÃ©es mÃ©tier
-- D'aucun service externe autre que les autoritÃ©s
-- D'aucune logique mÃ©tier spÃ©cifique
-- D'aucune connexion rÃ©seau permanente (conforme Ã  **LOI-1** et **LOI-2**)
+Bonding Brother **ne dépend pas** :
+- D'aucun produit spécifique
+- D'aucune base de données métier
+- D'aucun service externe autre que les autorités
+- D'aucune logique métier spécifique
+- D'aucune connexion réseau permanente (conforme à **LOI-1** et **LOI-2**)
 
 ---
 
 ## 13. Invariants architecturaux
 
-Ces invariants sont **gravÃ©s dans le marbre** â€” non nÃ©gociables, non contournables.
+Ces invariants sont **gravés dans le marbre** — non négociables, non contournables.
 
 | Code | Invariant |
 |------|-----------|
-| **BB-ARCH-1** | Bonding Brother ne dÃ©cide jamais |
-| **BB-ARCH-2** | Bonding Brother ne persiste jamais d'Ã©tat mÃ©tier |
-| **BB-ARCH-3** | Bonding Brother ne dÃ©duit jamais |
-| **BB-ARCH-4** | Tout ce qu'il transmet est traÃ§able |
-| **BB-ARCH-5** | Toute ambiguÃ¯tÃ© est rejetÃ©e |
-| **BB-ARCH-6** | Il ne fait confiance Ã  personne |
+| **BB-ARCH-1** | Bonding Brother ne décide jamais |
+| **BB-ARCH-2** | Bonding Brother ne persiste jamais d'état métier |
+| **BB-ARCH-3** | Bonding Brother ne déduit jamais |
+| **BB-ARCH-4** | Tout ce qu'il transmet est traçable |
+| **BB-ARCH-5** | Toute ambiguïté est rejetée |
+| **BB-ARCH-6** | Il ne fait confiance à personne |
 | **BB-ARCH-7** | Il ne parle jamais sans contrat |
 
 ---
@@ -539,13 +539,13 @@ Ces invariants sont **gravÃ©s dans le marbre** â€” non nÃ©gociables, no
 
 | Core | Relation avec Bonding Brother |
 |------|------------------------------|
-| **StrongFather** | ReÃ§oit des intents normalisÃ©s |
-| **KindMother** | ReÃ§oit des requÃªtes de lecture traduites |
-| **MasterButler** | Expose des capacitÃ©s via BB |
+| **StrongFather** | Reçoit des intents normalisés |
+| **KindMother** | Reçoit des requêtes de lecture traduites |
+| **MasterButler** | Expose des capacités via BB |
 | **BorderGuard** | Filtre AVANT BB ou AVEC BB |
 | **WorrySentinel** | Observe les flux BB |
 | **TAMR** | Passe par BB pour l'humain |
-| **MiyukiniAdmin** | BB interne renforcÃ© |
+| **MiyukiniAdmin** | BB interne renforcé |
 
 ---
 
@@ -553,48 +553,48 @@ Ces invariants sont **gravÃ©s dans le marbre** â€” non nÃ©gociables, no
 
 ### 15.1 Sans lui
 
-| ProblÃ¨me | ConsÃ©quence |
+| Problème | Conséquence |
 |----------|-------------|
-| Les cores seraient couplÃ©s | FragilitÃ© architecturale |
-| Les produits imposeraient leur logique | Perte de cohÃ©rence |
-| Les interfaces dicteraient le modÃ¨le | Inversion de contrÃ´le |
-| La sÃ©curitÃ© serait fragmentÃ©e | Failles multiples |
+| Les cores seraient couplés | Fragilité architecturale |
+| Les produits imposeraient leur logique | Perte de cohérence |
+| Les interfaces dicteraient le modèle | Inversion de contrôle |
+| La sécurité serait fragmentée | Failles multiples |
 | La migration serait impossible | Dette technique |
 
 ### 15.2 Avec lui
 
-| BÃ©nÃ©fice | Description |
+| Bénéfice | Description |
 |----------|-------------|
-| Tout est remplaÃ§able | ModularitÃ© totale |
-| Tout est versionnable | Ã‰volution contrÃ´lÃ©e |
+| Tout est remplaçable | Modularité totale |
+| Tout est versionnable | Évolution contrôlée |
 | Tout est observable | Debug et audit |
-| Tout est gouvernable | ContrÃ´le centralisÃ© |
+| Tout est gouvernable | Contrôle centralisé |
 
 ---
 
 ## 16. Analogie
 
-> **Bonding Brother = MinistÃ¨re des Affaires Ã©trangÃ¨res + Douanes + Traducteurs**
+> **Bonding Brother = Ministère des Affaires étrangères + Douanes + Traducteurs**
 
 | Aspect | Description |
 |--------|-------------|
-| Il ne gouverne pas | Pas de pouvoir exÃ©cutif |
-| Il ne lÃ©gifÃ¨re pas | Pas de pouvoir lÃ©gislatif |
-| Il applique des protocoles | ExÃ©cution stricte des rÃ¨gles Ã©tablies |
+| Il ne gouverne pas | Pas de pouvoir exécutif |
+| Il ne légifère pas | Pas de pouvoir législatif |
+| Il applique des protocoles | Exécution stricte des règles établies |
 
 ---
 
 ## 17. Phrase fondatrice architecturale
 
-> **Bonding Brother est ce qui permet Ã  Miyukini d'Ãªtre ouvert sans jamais Ãªtre permissif.**
+> **Bonding Brother est ce qui permet à Miyukini d'être ouvert sans jamais être permissif.**
 
 ---
 
 ## 18. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut ARCHITECTURE**. Il Ã©tablit la structure interne de Bonding Brother qui ne peut Ãªtre modifiÃ©e sans processus formel de versionnement.
+Ce document est **contractuel, normatif, et de statut ARCHITECTURE**. Il établit la structure interne de Bonding Brother qui ne peut être modifiée sans processus formel de versionnement.
 
-Toute implÃ©mentation de Bonding Brother doit respecter cette architecture. Toute extension doit utiliser les points d'extension dÃ©finis. Toute modification structurelle nÃ©cessite une nouvelle version de ce document.
+Toute implémentation de Bonding Brother doit respecter cette architecture. Toute extension doit utiliser les points d'extension définis. Toute modification structurelle nécessite une nouvelle version de ce document.
 
 ---
 
@@ -608,6 +608,6 @@ Toute implÃ©mentation de Bonding Brother doit respecter cette architecture. To
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** ARCHITECTURE â€” Normatif  
-**DÃ©pendance :** Documentation Fondatrice v2.0
+**Statut :** ARCHITECTURE — Normatif  
+**Dépendance :** Documentation Fondatrice v2.0
 

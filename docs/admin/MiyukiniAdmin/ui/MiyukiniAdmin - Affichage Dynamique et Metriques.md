@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” Affichage Dynamique et Metriques
+﻿# MiyukiniAdmin — Affichage Dynamique et Metriques
 
 ## 1. Contexte
 
@@ -85,7 +85,7 @@ Ce document **ne remplace pas** les contrats de metriques ; il complete la strat
 | Metriques / Observability | Metriques DB, systeme | SSE ou polling (Rust) |
 | Logs | Flux logs audit / operationnels | SSE pour flux continu (Rust) |
 | Table Editor | Liste tables, recent items | Polling ou bouton "Refresh" |
-| Table Editor â€” Donnees table | Lignes, pagination | Polling ou refresh a la demande |
+| Table Editor — Donnees table | Lignes, pagination | Polling ou refresh a la demande |
 | SQL Editor | Resultats, Explain | Un appel API par execution ; pas de push |
 
 ---

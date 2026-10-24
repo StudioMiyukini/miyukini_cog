@@ -1,211 +1,211 @@
-﻿# BondingBrother â€” Filtering & Projection Contract
+﻿# BondingBrother — Filtering & Projection Contract
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif
+**Statut :** CONTRAT — Normatif
 
 ---
 
 ## 1. Contexte
 
-Ce document dÃ©finit les rÃ¨gles contractuelles de filtrage et de projection dans Bonding Brother. Il spÃ©cifie comment les intentions et les demandes sont filtrÃ©es avant transmission aux autoritÃ©s, et comment les rÃ©ponses sont filtrÃ©es et projetÃ©es avant transmission aux produits.
+Ce document définit les règles contractuelles de filtrage et de projection dans Bonding Brother. Il spécifie comment les intentions et les demandes sont filtrées avant transmission aux autorités, et comment les réponses sont filtrées et projetées avant transmission aux produits.
 
-**DÃ©pendances :**
-- [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) â€” Section 5 (Filtrage)
+**Dépendances :**
+- [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) — Section 5 (Filtrage)
 - [Architecture & Flows](../../architecture/BondingBrother%20-%20Architecture%20&%20Flows.md)
 - [Translation Contract](./BondingBrother%20-%20Translation%20Contract.md)
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
-Le filtrage fonctionne localement sans dÃ©pendance externe, conformÃ©ment Ã  **LOI-1** (aucune dÃ©pendance externe critique).
+Le filtrage fonctionne localement sans dépendance externe, conformément à **LOI-1** (aucune dépendance externe critique).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - Les principes fondamentaux du filtrage
-- Les rÃ¨gles de filtrage d'entrÃ©e (intention â†’ demande)
-- Les rÃ¨gles de filtrage de sortie (rÃ©ponse â†’ rÃ©sultat)
-- Les rÃ¨gles de projection (sÃ©lection de champs)
-- Les garanties de sÃ©curitÃ© et de protection
-- Les cas d'Ã©chec de filtrage
+- Les règles de filtrage d'entrée (intention → demande)
+- Les règles de filtrage de sortie (réponse → résultat)
+- Les règles de projection (sélection de champs)
+- Les garanties de sécurité et de protection
+- Les cas d'échec de filtrage
 
 Ce document **ne couvre pas** :
-- Les rÃ¨gles de traduction (voir [Translation Contract](./BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de traduction (voir [Translation Contract](./BondingBrother%20-%20Translation%20Contract.md))
 - La gestion des erreurs de filtrage (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md))
 
 ---
 
 ## 3. Principe fondamental
 
-> **Le filtrage protÃ¨ge les autoritÃ©s et les produits en supprimant ou masquant les informations non autorisÃ©es ou non nÃ©cessaires.**
+> **Le filtrage protège les autorités et les produits en supprimant ou masquant les informations non autorisées ou non nécessaires.**
 
-Le filtrage est systÃ©matique, non optionnel, et non contournable. Il s'applique Ã  toutes les interactions, sans exception.
+Le filtrage est systématique, non optionnel, et non contournable. Il s'applique à toutes les interactions, sans exception.
 
 ---
 
 ## 4. Types de filtrage
 
-### 4.1 Filtrage d'entrÃ©e
+### 4.1 Filtrage d'entrée
 
 | Aspect | Description |
 |--------|-------------|
-| **Direction** | Produit â†’ AutoritÃ© |
-| **Moment** | AprÃ¨s traduction, avant transmission |
-| **Objectif** | ProtÃ©ger l'autoritÃ© des demandes invalides |
+| **Direction** | Produit → Autorité |
+| **Moment** | Après traduction, avant transmission |
+| **Objectif** | Protéger l'autorité des demandes invalides |
 
-**Ce qui est filtrÃ© :**
+**Ce qui est filtré :**
 - Demandes structurellement invalides
 - Demandes contenant des champs interdits
-- Demandes dÃ©passant les limites autorisÃ©es
-- Demandes violant les rÃ¨gles de sÃ©curitÃ©
+- Demandes dépassant les limites autorisées
+- Demandes violant les règles de sécurité
 
 ### 4.2 Filtrage de sortie
 
 | Aspect | Description |
 |--------|-------------|
-| **Direction** | AutoritÃ© â†’ Produit |
-| **Moment** | AprÃ¨s rÃ©ception rÃ©ponse, avant traduction |
-| **Objectif** | ProtÃ©ger le produit des informations non autorisÃ©es |
+| **Direction** | Autorité → Produit |
+| **Moment** | Après réception réponse, avant traduction |
+| **Objectif** | Protéger le produit des informations non autorisées |
 
-**Ce qui est filtrÃ© :**
+**Ce qui est filtré :**
 - Informations d'autres produits
-- DÃ©tails internes de l'autoritÃ©
-- DonnÃ©es sensibles non autorisÃ©es
-- MÃ©tadonnÃ©es techniques non nÃ©cessaires
+- Détails internes de l'autorité
+- Données sensibles non autorisées
+- Métadonnées techniques non nécessaires
 
 ### 4.3 Projection
 
 | Aspect | Description |
 |--------|-------------|
-| **Direction** | AutoritÃ© â†’ Produit |
+| **Direction** | Autorité → Produit |
 | **Moment** | Pendant le filtrage de sortie |
-| **Objectif** | SÃ©lectionner uniquement les champs nÃ©cessaires |
+| **Objectif** | Sélectionner uniquement les champs nécessaires |
 
 ---
 
-## 5. RÃ¨gles de filtrage d'entrÃ©e
+## 5. Règles de filtrage d'entrée
 
 ### 5.1 Validation structurelle
 
-| Code | RÃ¨gle | Action si Ã©chec |
+| Code | Règle | Action si échec |
 |------|-------|-----------------|
-| **FILT-IN-01** | Format valide | Rejet immÃ©diat |
-| **FILT-IN-02** | Champs obligatoires | Rejet immÃ©diat |
-| **FILT-IN-03** | Types de donnÃ©es | Rejet immÃ©diat |
+| **FILT-IN-01** | Format valide | Rejet immédiat |
+| **FILT-IN-02** | Champs obligatoires | Rejet immédiat |
+| **FILT-IN-03** | Types de données | Rejet immédiat |
 
-### 5.2 Validation de sÃ©curitÃ©
+### 5.2 Validation de sécurité
 
-| Code | RÃ¨gle | Action si Ã©chec |
+| Code | Règle | Action si échec |
 |------|-------|-----------------|
 | **FILT-IN-04** | Champs interdits | Suppression ou rejet |
-| **FILT-IN-05** | Limites de taille | Rejet immÃ©diat |
-| **FILT-IN-06** | Validation contexte | Rejet immÃ©diat |
+| **FILT-IN-05** | Limites de taille | Rejet immédiat |
+| **FILT-IN-06** | Validation contexte | Rejet immédiat |
 
-### 5.3 Protection des autoritÃ©s
+### 5.3 Protection des autorités
 
-| Code | RÃ¨gle | Action si Ã©chec |
+| Code | Règle | Action si échec |
 |------|-------|-----------------|
-| **FILT-IN-07** | Demandes malveillantes | Rejet + journal sÃ©curitÃ© |
+| **FILT-IN-07** | Demandes malveillantes | Rejet + journal sécurité |
 | **FILT-IN-08** | Rate limiting | Rejet ou file d'attente |
 
 ---
 
-## 6. RÃ¨gles de filtrage de sortie
+## 6. Règles de filtrage de sortie
 
 ### 6.1 Filtrage par autorisation
 
-| Code | RÃ¨gle | Action |
+| Code | Règle | Action |
 |------|-------|--------|
-| **FILT-OUT-01** | PÃ©rimÃ¨tre produit | Suppression hors pÃ©rimÃ¨tre |
+| **FILT-OUT-01** | Périmètre produit | Suppression hors périmètre |
 | **FILT-OUT-02** | Permissions requises | Masquage ou suppression |
-| **FILT-OUT-03** | Isolation produits | Suppression systÃ©matique |
+| **FILT-OUT-03** | Isolation produits | Suppression systématique |
 
-### 6.2 Filtrage de confidentialitÃ©
+### 6.2 Filtrage de confidentialité
 
-| Code | RÃ¨gle | Action |
+| Code | Règle | Action |
 |------|-------|--------|
-| **FILT-OUT-04** | DonnÃ©es sensibles | Suppression ou masquage (`***`) |
-| **FILT-OUT-05** | MÃ©tadonnÃ©es internes | Suppression |
-| **FILT-OUT-06** | DÃ©tails implÃ©mentation | Suppression |
+| **FILT-OUT-04** | Données sensibles | Suppression ou masquage (`***`) |
+| **FILT-OUT-05** | Métadonnées internes | Suppression |
+| **FILT-OUT-06** | Détails implémentation | Suppression |
 
 ### 6.3 Projection de champs
 
-| Code | RÃ¨gle | Action |
+| Code | Règle | Action |
 |------|-------|--------|
-| **FILT-OUT-07** | Champs demandÃ©s | SÃ©lection uniquement |
-| **FILT-OUT-08** | Champs nÃ©cessaires | Inclusion automatique |
+| **FILT-OUT-07** | Champs demandés | Sélection uniquement |
+| **FILT-OUT-08** | Champs nécessaires | Inclusion automatique |
 | **FILT-OUT-09** | Champs optionnels | Inclusion conditionnelle |
 
 ---
 
-## 7. RÃ¨gles de projection
+## 7. Règles de projection
 
-### 7.1 Projection basÃ©e sur l'intention
+### 7.1 Projection basée sur l'intention
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **PROJ-01** | Champs explicites | Si spÃ©cifiÃ©s, seuls ceux-lÃ  |
-| **PROJ-02** | Champs par dÃ©faut | Si non spÃ©cifiÃ©s, dÃ©faut autoritÃ© |
-| **PROJ-03** | Champs calculÃ©s | Si demandÃ©s et autorisÃ©s |
+| **PROJ-01** | Champs explicites | Si spécifiés, seuls ceux-là |
+| **PROJ-02** | Champs par défaut | Si non spécifiés, défaut autorité |
+| **PROJ-03** | Champs calculés | Si demandés et autorisés |
 
-### 7.2 Projection basÃ©e sur les permissions
+### 7.2 Projection basée sur les permissions
 
-| Niveau | AccÃ¨s |
+| Niveau | Accès |
 |--------|-------|
 | **Lecture basique** | Champs publics uniquement |
-| **Lecture Ã©tendue** | Publics + Ã©tendus autorisÃ©s |
-| **Lecture complÃ¨te** | Tous les champs autorisÃ©s |
+| **Lecture étendue** | Publics + étendus autorisés |
+| **Lecture complète** | Tous les champs autorisés |
 
-**Masquage partiel :** Si champ partiellement autorisÃ©, seule la partie autorisÃ©e est projetÃ©e (ex: `user@***.com`).
+**Masquage partiel :** Si champ partiellement autorisé, seule la partie autorisée est projetée (ex: `user@***.com`).
 
 ---
 
 ## 8. Ordre d'application
 
-### 8.1 Flux de filtrage d'entrÃ©e
+### 8.1 Flux de filtrage d'entrée
 
 ```
 Intention
-   â”‚
-   â–¼
-Traduction (Intention â†’ Demande)
-   â”‚
-   â–¼
-Filtrage d'entrÃ©e
-   â”œâ”€ Validation structurelle
-   â”œâ”€ Validation de sÃ©curitÃ©
-   â””â”€ Protection des autoritÃ©s
-   â”‚
-   â–¼
-Demande filtrÃ©e â†’ AutoritÃ©
+   │
+   ▼
+Traduction (Intention → Demande)
+   │
+   ▼
+Filtrage d'entrée
+   ├─ Validation structurelle
+   ├─ Validation de sécurité
+   └─ Protection des autorités
+   │
+   ▼
+Demande filtrée → Autorité
 ```
 
 ### 8.2 Flux de filtrage de sortie
 
 ```
-RÃ©ponse autoritÃ©
-   â”‚
-   â–¼
+Réponse autorité
+   │
+   ▼
 Filtrage de sortie
-   â”œâ”€ Filtrage par autorisation
-   â”œâ”€ Filtrage de confidentialitÃ©
-   â””â”€ Projection de champs
-   â”‚
-   â–¼
-RÃ©ponse filtrÃ©e
-   â”‚
-   â–¼
-Traduction (RÃ©ponse â†’ RÃ©sultat)
-   â”‚
-   â–¼
-RÃ©sultat â†’ Produit
+   ├─ Filtrage par autorisation
+   ├─ Filtrage de confidentialité
+   └─ Projection de champs
+   │
+   ▼
+Réponse filtrée
+   │
+   ▼
+Traduction (Réponse → Résultat)
+   │
+   ▼
+Résultat → Produit
 ```
 
-### 8.3 RÃ¨gles d'ordre
+### 8.3 Règles d'ordre
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **ORDRE-01** | Filtrage avant traduction (sortie) | Traduction du filtrÃ©, pas du brut |
-| **ORDRE-02** | Traduction avant filtrage (entrÃ©e) | Filtrage de la demande traduite |
+| **ORDRE-01** | Filtrage avant traduction (sortie) | Traduction du filtré, pas du brut |
+| **ORDRE-02** | Traduction avant filtrage (entrée) | Filtrage de la demande traduite |
 
 ---
 
@@ -213,59 +213,59 @@ RÃ©sultat â†’ Produit
 
 | Garantie | Engagement | Mesure |
 |----------|------------|--------|
-| **SÃ©curitÃ©** | Aucune info non autorisÃ©e transmise | Tests avec donnÃ©es sensibles |
-| **ComplÃ©tude minimale** | Info minimale toujours prÃ©sente | VÃ©rification champs obligatoires |
-| **Non-rÃ©gression** | DonnÃ©es autorisÃ©es prÃ©servÃ©es | Tests de rÃ©gression |
-| **Performance** | Temps linÃ©aire | MÃ©triques temps |
+| **Sécurité** | Aucune info non autorisée transmise | Tests avec données sensibles |
+| **Complétude minimale** | Info minimale toujours présente | Vérification champs obligatoires |
+| **Non-régression** | Données autorisées préservées | Tests de régression |
+| **Performance** | Temps linéaire | Métriques temps |
 
 ---
 
-## 10. Cas d'Ã©chec de filtrage
+## 10. Cas d'échec de filtrage
 
-### 10.1 Types d'Ã©chec
+### 10.1 Types d'échec
 
 | Type | Cause |
 |------|-------|
-| **Validation (entrÃ©e)** | Demande invalide, champs manquants |
-| **SÃ©curitÃ© (entrÃ©e)** | Demande malveillante, limites dÃ©passÃ©es |
-| **Projection (sortie)** | Aucun champ autorisÃ© disponible |
+| **Validation (entrée)** | Demande invalide, champs manquants |
+| **Sécurité (entrée)** | Demande malveillante, limites dépassées |
+| **Projection (sortie)** | Aucun champ autorisé disponible |
 
-### 10.2 Traitement des Ã©checs
+### 10.2 Traitement des échecs
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **ECHEC-FILT-01** | Rejet immÃ©diat (entrÃ©e) | Pas de transmission |
-| **ECHEC-FILT-02** | Journalisation | Source + type + raison + rÃ¨gles |
+| **ECHEC-FILT-01** | Rejet immédiat (entrée) | Pas de transmission |
+| **ECHEC-FILT-02** | Journalisation | Source + type + raison + règles |
 | **ECHEC-FILT-03** | Notification produit | `ERREUR_FILTRAGE` + message |
-| **ECHEC-FILT-04** | RÃ©sultat partiel (sortie) | Champs autorisÃ©s + avertissement |
-| **ECHEC-FILT-05** | Pas de retry | Ã‰chec non transitoire |
+| **ECHEC-FILT-04** | Résultat partiel (sortie) | Champs autorisés + avertissement |
+| **ECHEC-FILT-05** | Pas de retry | Échec non transitoire |
 
 ---
 
-## 11. Configuration et rÃ¨gles
+## 11. Configuration et règles
 
-### 11.1 Source des rÃ¨gles
+### 11.1 Source des règles
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **CONFIG-01** | DÃ©finition par autoritÃ© | Les autoritÃ©s dÃ©finissent les rÃ¨gles |
+| **CONFIG-01** | Définition par autorité | Les autorités définissent les règles |
 | **CONFIG-02** | Application par BB | BB applique, ne modifie jamais |
-| **CONFIG-03** | Mise Ã  jour des rÃ¨gles | RÃ¨gles en vigueur au moment du filtrage |
+| **CONFIG-03** | Mise à jour des règles | Règles en vigueur au moment du filtrage |
 
-### 11.2 RÃ¨gles par dÃ©faut
+### 11.2 Règles par défaut
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **CONFIG-04** | RÃ¨gles minimales | Validation structurelle + anti-injection + isolation |
-| **CONFIG-05** | RÃ¨gles spÃ©cifiques | ComplÃ¨tent ou remplacent par dÃ©faut |
+| **CONFIG-04** | Règles minimales | Validation structurelle + anti-injection + isolation |
+| **CONFIG-05** | Règles spécifiques | Complètent ou remplacent par défaut |
 
 ---
 
 ## 12. Exemples
 
-### 12.1 Filtrage d'entrÃ©e (XSS dÃ©tectÃ©)
+### 12.1 Filtrage d'entrée (XSS détecté)
 
-**Intention reÃ§ue :**
+**Intention reçue :**
 ```json
 {
   "type": "CREATE_CONTENT",
@@ -276,11 +276,11 @@ RÃ©sultat â†’ Produit
 }
 ```
 
-**RÃ©sultat :** Rejet immÃ©diat, pattern XSS dÃ©tectÃ©, pas de transmission Ã  KindMother.
+**Résultat :** Rejet immédiat, pattern XSS détecté, pas de transmission à KindMother.
 
 ### 12.2 Filtrage de sortie
 
-**RÃ©ponse KindMother :**
+**Réponse KindMother :**
 ```json
 {
   "data": {
@@ -292,7 +292,7 @@ RÃ©sultat â†’ Produit
 }
 ```
 
-**AprÃ¨s filtrage :**
+**Après filtrage :**
 ```json
 {
   "data": {
@@ -302,7 +302,7 @@ RÃ©sultat â†’ Produit
 }
 ```
 
-SupprimÃ© : `internal_metadata` (dÃ©tails internes), `other_product_data` (autre produit).
+Supprimé : `internal_metadata` (détails internes), `other_product_data` (autre produit).
 
 ### 12.3 Projection
 
@@ -317,13 +317,13 @@ SupprimÃ© : `internal_metadata` (dÃ©tails internes), `other_product_data` (a
 }
 ```
 
-**RÃ©sultat :** Seuls `titre` et `auteur` retournÃ©s, `contenu` omis car non demandÃ©.
+**Résultat :** Seuls `titre` et `auteur` retournés, `contenu` omis car non demandé.
 
 ---
 
 ## 13. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit les rÃ¨gles de filtrage et de projection que Bonding Brother doit respecter pour garantir la sÃ©curitÃ© et la protection des autoritÃ©s et des produits.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit les règles de filtrage et de projection que Bonding Brother doit respecter pour garantir la sécurité et la protection des autorités et des produits.
 
 ---
 
@@ -337,6 +337,6 @@ Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** Documentation Fondatrice v2.0, Translation Contract v2.0
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** Documentation Fondatrice v2.0, Translation Contract v2.0
 

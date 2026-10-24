@@ -2,46 +2,46 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit les **flux d'Ã©volution** gouvernÃ©s par Ever Buddy. Ces flux dÃ©crivent comment l'information de cycle de vie circule dans l'Ã©cosystÃ¨me Miyukini, depuis l'observation des Ã©lÃ©ments jusqu'Ã  l'alerte en cas de conditions anormales.
+Ce document définit les **flux d'évolution** gouvernés par Ever Buddy. Ces flux décrivent comment l'information de cycle de vie circule dans l'écosystème Miyukini, depuis l'observation des éléments jusqu'à l'alerte en cas de conditions anormales.
 
 Ever Buddy orchestre quatre flux principaux :
 
-1. **Flux d'observation** â€” Surveillance continue de l'Ã©tat du systÃ¨me
-2. **Flux de consultation** â€” Fourniture du contexte de cycle de vie aux autres cores
-3. **Flux de planification** â€” Communication et coordination des transitions planifiÃ©es
-4. **Flux d'alerte** â€” DÃ©tection et signalement des conditions anormales
+1. **Flux d'observation** — Surveillance continue de l'état du système
+2. **Flux de consultation** — Fourniture du contexte de cycle de vie aux autres cores
+3. **Flux de planification** — Communication et coordination des transitions planifiées
+4. **Flux d'alerte** — Détection et signalement des conditions anormales
 
-Ce document est **dÃ©rivÃ© de la Documentation Fondatrice d'Ever Buddy** (Section 8 - Interactions avec l'Ã©cosystÃ¨me) et constitue la rÃ©fÃ©rence architecturale pour les flux d'Ã©volution.
+Ce document est **dérivé de la Documentation Fondatrice d'Ever Buddy** (Section 8 - Interactions avec l'écosystème) et constitue la référence architecturale pour les flux d'évolution.
 
 **Document source :** [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
-- **Applicable Ã  :** Tous les Ã©changes d'information de cycle de vie dans l'Ã©cosystÃ¨me Miyukini
-- **Audience :** Architectes, dÃ©veloppeurs, intÃ©grateurs, cores systÃ¨me
-- **Statut :** Documentation architecturale â€” Normative
-- **DÃ©pendances :** Documentation Fondatrice Ever Buddy, Core Interaction Contract, Glossaire Miyukini
+- **Applicable à :** Tous les échanges d'information de cycle de vie dans l'écosystème Miyukini
+- **Audience :** Architectes, développeurs, intégrateurs, cores système
+- **Statut :** Documentation architecturale — Normative
+- **Dépendances :** Documentation Fondatrice Ever Buddy, Core Interaction Contract, Glossaire Miyukini
 
 ---
 
 ## 3. Vue d'ensemble des flux
 
-### 3.1 Diagramme synthÃ©tique
+### 3.1 Diagramme synthétique
 
 ```mermaid
 graph TB
     subgraph EverBuddy[Ever Buddy]
-        REG[Registre<br/>des Ã©tats]
-        RUL[RÃ¨gles<br/>d'Ã©volution]
+        REG[Registre<br/>des états]
+        RUL[Règles<br/>d'évolution]
         HIS[Historique<br/>immuable]
         ALE[Alertes<br/>et plans]
     end
 
     subgraph FluxObs[Flux d'Observation]
-        O1[RÃ©ception dÃ©clarations]
-        O2[Enregistrement Ã©tat]
+        O1[Réception déclarations]
+        O2[Enregistrement état]
         O3[Surveillance transitions]
         O4[Validation transitions]
         O5[Enregistrement transition]
@@ -49,25 +49,25 @@ graph TB
 
     subgraph FluxCons[Flux de Consultation]
         C1[Demande de contexte]
-        C2[Recherche Ã©tat]
+        C2[Recherche état]
         C3[Fourniture contexte]
         C4[Utilisation demandeur]
     end
 
     subgraph FluxPlan[Flux de Planification]
-        P1[DÃ©finition plan]
+        P1[Définition plan]
         P2[Communication]
-        P3[PÃ©riode transition]
+        P3[Période transition]
         P4[Suivi adoption]
-        P5[ComplÃ©tion]
+        P5[Complétion]
     end
 
     subgraph FluxAle[Flux d'Alerte]
-        A1[DÃ©tection]
-        A2[Ã‰valuation gravitÃ©]
-        A3[Ã‰mission alerte]
+        A1[Détection]
+        A2[Évaluation gravité]
+        A3[Émission alerte]
         A4[Recommandation]
-        A5[Suivi rÃ©solution]
+        A5[Suivi résolution]
     end
 
     O1 --> O2 --> O3 --> O4 --> O5
@@ -87,15 +87,15 @@ graph TB
     ALE --> A3
 ```
 
-### 3.2 CaractÃ©ristiques communes des flux
+### 3.2 Caractéristiques communes des flux
 
-| CaractÃ©ristique | Valeur |
+| Caractéristique | Valeur |
 |-----------------|--------|
-| **SynchronicitÃ©** | Tous les flux sont asynchrones et non bloquants |
-| **TraÃ§abilitÃ©** | Chaque opÃ©ration est enregistrÃ©e (INV-EB-2) |
-| **Idempotence** | Les opÃ©rations peuvent Ãªtre rejouÃ©es sans effet secondaire |
-| **Isolation** | Chaque flux fonctionne indÃ©pendamment des autres |
-| **PrioritÃ©** | Alerte > Observation > Consultation > Planification |
+| **Synchronicité** | Tous les flux sont asynchrones et non bloquants |
+| **Traçabilité** | Chaque opération est enregistrée (INV-EB-2) |
+| **Idempotence** | Les opérations peuvent être rejouées sans effet secondaire |
+| **Isolation** | Chaque flux fonctionne indépendamment des autres |
+| **Priorité** | Alerte > Observation > Consultation > Planification |
 
 ---
 
@@ -103,26 +103,26 @@ graph TB
 
 ### 4.1 Description
 
-Le flux d'observation est le flux principal par lequel Ever Buddy maintient sa connaissance de l'Ã©tat du systÃ¨me. Ce flux est **passif** : Ever Buddy reÃ§oit les dÃ©clarations, il ne les sollicite pas activement.
+Le flux d'observation est le flux principal par lequel Ever Buddy maintient sa connaissance de l'état du système. Ce flux est **passif** : Ever Buddy reçoit les déclarations, il ne les sollicite pas activement.
 
-### 4.2 Ã‰tapes du flux
+### 4.2 Étapes du flux
 
 ```mermaid
 sequenceDiagram
     participant Source as Core/Produit
     participant EB as Ever Buddy
-    participant Reg as Registre Ã‰tats
+    participant Reg as Registre États
     participant His as Historique
 
-    Source->>EB: 1. DÃ©clare Ã©lÃ©ment/transition
-    EB->>Reg: 2. Enregistre Ã©tat initial
+    Source->>EB: 1. Déclare élément/transition
+    EB->>Reg: 2. Enregistre état initial
     
     loop Surveillance continue
         EB->>Reg: 3. Surveille demandes de transition
-        Reg-->>EB: Transition demandÃ©e
-        EB->>EB: 4. Valide selon rÃ¨gles
+        Reg-->>EB: Transition demandée
+        EB->>EB: 4. Valide selon règles
         alt Transition valide
-            EB->>Reg: Met Ã  jour Ã©tat
+            EB->>Reg: Met à jour état
             EB->>His: 5. Enregistre transition
         else Transition invalide
             EB-->>Source: Rejette avec raison
@@ -130,90 +130,90 @@ sequenceDiagram
     end
 ```
 
-#### Ã‰tape 1 : RÃ©ception des dÃ©clarations
+#### Étape 1 : Réception des déclarations
 
-Les cores et produits **dÃ©clarent** leurs Ã©lÃ©ments et leurs versions Ã  Ever Buddy.
+Les cores et produits **déclarent** leurs éléments et leurs versions à Ever Buddy.
 
-| Ã‰lÃ©ment dÃ©clarÃ© | Information fournie |
+| Élément déclaré | Information fournie |
 |-----------------|---------------------|
-| **Nouvel Ã©lÃ©ment** | ID, type, catÃ©gorie, version initiale, Ã©tat demandÃ© |
-| **Demande de transition** | ID Ã©lÃ©ment, Ã©tat actuel, Ã©tat cible, justification |
-| **Mise Ã  jour de version** | ID Ã©lÃ©ment, version prÃ©cÃ©dente, nouvelle version, type de changement |
+| **Nouvel élément** | ID, type, catégorie, version initiale, état demandé |
+| **Demande de transition** | ID élément, état actuel, état cible, justification |
+| **Mise à jour de version** | ID élément, version précédente, nouvelle version, type de changement |
 
 **Contraintes :**
 
-- La dÃ©claration est **obligatoire** pour tout nouvel Ã©lÃ©ment
-- Un Ã©lÃ©ment non dÃ©clarÃ© est considÃ©rÃ© comme **inexistant** par Ever Buddy
-- Les dÃ©clarations sont **horodatÃ©es localement** (LOI-4 : pas de temps global requis)
+- La déclaration est **obligatoire** pour tout nouvel élément
+- Un élément non déclaré est considéré comme **inexistant** par Ever Buddy
+- Les déclarations sont **horodatées localement** (LOI-4 : pas de temps global requis)
 
-#### Ã‰tape 2 : Enregistrement de l'Ã©tat
+#### Étape 2 : Enregistrement de l'état
 
-Ever Buddy **enregistre** l'Ã©tat de cycle de vie de chaque Ã©lÃ©ment dÃ©clarÃ©.
+Ever Buddy **enregistre** l'état de cycle de vie de chaque élément déclaré.
 
-| DonnÃ©e enregistrÃ©e | Description |
+| Donnée enregistrée | Description |
 |--------------------|-------------|
-| **ID unique** | Identifiant de l'Ã©lÃ©ment |
-| **Ã‰tat actuel** | DRAFT, ACTIVE, DEPRECATED, RETIRED, ou ARCHIVED |
-| **Version** | Version sÃ©mantique (majeur.mineur.correctif) |
-| **CatÃ©gorie** | FONDATION, OpÃ©rationnel, Technique, Interne |
+| **ID unique** | Identifiant de l'élément |
+| **État actuel** | DRAFT, ACTIVE, DEPRECATED, RETIRED, ou ARCHIVED |
+| **Version** | Version sémantique (majeur.mineur.correctif) |
+| **Catégorie** | FONDATION, Opérationnel, Technique, Interne |
 | **Horodatage local** | Moment de l'enregistrement |
-| **Source** | Core ou produit ayant effectuÃ© la dÃ©claration |
+| **Source** | Core ou produit ayant effectué la déclaration |
 
-**Invariant applicable :** INV-EB-3 (Aucun Ã©tat ambigu â€” un seul Ã©tat par Ã©lÃ©ment)
+**Invariant applicable :** INV-EB-3 (Aucun état ambigu — un seul état par élément)
 
-#### Ã‰tape 3 : Surveillance des transitions
+#### Étape 3 : Surveillance des transitions
 
-Ever Buddy **surveille** les demandes de transition d'Ã©tat qui arrivent dans le systÃ¨me.
+Ever Buddy **surveille** les demandes de transition d'état qui arrivent dans le système.
 
-| Type de surveillance | MÃ©canisme |
+| Type de surveillance | Mécanisme |
 |----------------------|-----------|
 | **Polling passif** | Ever Buddy attend les demandes (pas de scan actif) |
-| **Queue de transitions** | Les demandes sont traitÃ©es dans l'ordre d'arrivÃ©e |
-| **Priorisation** | Les transitions critiques (sÃ©curitÃ©) sont prioritaires |
+| **Queue de transitions** | Les demandes sont traitées dans l'ordre d'arrivée |
+| **Priorisation** | Les transitions critiques (sécurité) sont prioritaires |
 
-#### Ã‰tape 4 : Validation des transitions
+#### Étape 4 : Validation des transitions
 
-Ever Buddy **vÃ©rifie** que chaque transition demandÃ©e respecte les rÃ¨gles.
+Ever Buddy **vérifie** que chaque transition demandée respecte les règles.
 
-| VÃ©rification | RÃ¨gle appliquÃ©e |
+| Vérification | Règle appliquée |
 |--------------|-----------------|
-| **Matrice de transition** | La transition est-elle autorisÃ©e ? (ACTIVE â†’ DEPRECATED âœ“, ACTIVE â†’ RETIRED âœ—) |
-| **PÃ©riode minimale** | La pÃ©riode minimale dans l'Ã©tat actuel est-elle respectÃ©e ? |
-| **Documentation** | La transition est-elle correctement documentÃ©e ? (INV-EB-7) |
-| **Successeur identifiÃ©** | Pour DEPRECATED, un successeur est-il dÃ©clarÃ© ? (INV-EB-10) |
+| **Matrice de transition** | La transition est-elle autorisée ? (ACTIVE → DEPRECATED ✓, ACTIVE → RETIRED ✗) |
+| **Période minimale** | La période minimale dans l'état actuel est-elle respectée ? |
+| **Documentation** | La transition est-elle correctement documentée ? (INV-EB-7) |
+| **Successeur identifié** | Pour DEPRECATED, un successeur est-il déclaré ? (INV-EB-10) |
 
-**RÃ©sultats possibles :**
+**Résultats possibles :**
 
-| RÃ©sultat | Action |
+| Résultat | Action |
 |----------|--------|
-| **ValidÃ©e** | La transition est acceptÃ©e et enregistrÃ©e |
-| **RejetÃ©e** | La transition est refusÃ©e avec raison explicite |
-| **DiffÃ©rÃ©e** | La transition est mise en attente (condition non remplie) |
+| **Validée** | La transition est acceptée et enregistrée |
+| **Rejetée** | La transition est refusée avec raison explicite |
+| **Différée** | La transition est mise en attente (condition non remplie) |
 
-#### Ã‰tape 5 : Enregistrement de la transition
+#### Étape 5 : Enregistrement de la transition
 
-Si la transition est validÃ©e, Ever Buddy l'**enregistre** dans l'historique immuable.
+Si la transition est validée, Ever Buddy l'**enregistre** dans l'historique immuable.
 
-| DonnÃ©e enregistrÃ©e | Description |
+| Donnée enregistrée | Description |
 |--------------------|-------------|
-| **ID Ã©lÃ©ment** | Ã‰lÃ©ment concernÃ© |
-| **Ã‰tat prÃ©cÃ©dent** | Ã‰tat avant transition |
-| **Ã‰tat nouveau** | Ã‰tat aprÃ¨s transition |
+| **ID élément** | Élément concerné |
+| **État précédent** | État avant transition |
+| **État nouveau** | État après transition |
 | **Horodatage** | Moment de la transition |
 | **Raison** | Justification de la transition |
 | **Source** | Demandeur de la transition |
-| **Documentation** | RÃ©fÃ©rence vers la documentation |
+| **Documentation** | Référence vers la documentation |
 
-**Invariant applicable :** INV-EB-2 (TraÃ§abilitÃ© complÃ¨te et immuable)
+**Invariant applicable :** INV-EB-2 (Traçabilité complète et immuable)
 
 ### 4.3 Garanties du flux d'observation
 
 | Garantie | Description |
 |----------|-------------|
-| **ExhaustivitÃ©** | Toute dÃ©claration est traitÃ©e |
-| **AtomicitÃ©** | Une transition est totale ou nulle (pas d'Ã©tat intermÃ©diaire) |
-| **ImmuabilitÃ©** | L'historique enregistrÃ© ne peut Ãªtre modifiÃ© |
-| **TraÃ§abilitÃ©** | Chaque opÃ©ration est attribuable Ã  une source |
+| **Exhaustivité** | Toute déclaration est traitée |
+| **Atomicité** | Une transition est totale ou nulle (pas d'état intermédiaire) |
+| **Immuabilité** | L'historique enregistré ne peut être modifié |
+| **Traçabilité** | Chaque opération est attribuable à une source |
 
 ---
 
@@ -221,98 +221,98 @@ Si la transition est validÃ©e, Ever Buddy l'**enregistre** dans l'historique i
 
 ### 5.1 Description
 
-Le flux de consultation permet aux autres cores d'**obtenir** des informations de cycle de vie auprÃ¨s d'Ever Buddy. Ce flux est **synchrone** du point de vue du demandeur : il envoie une requÃªte et attend une rÃ©ponse.
+Le flux de consultation permet aux autres cores d'**obtenir** des informations de cycle de vie auprès d'Ever Buddy. Ce flux est **synchrone** du point de vue du demandeur : il envoie une requête et attend une réponse.
 
-### 5.2 Ã‰tapes du flux
+### 5.2 Étapes du flux
 
 ```mermaid
 sequenceDiagram
     participant Core as Core demandeur
     participant EB as Ever Buddy
-    participant Reg as Registre Ã‰tats
+    participant Reg as Registre États
     participant His as Historique
 
-    Core->>EB: 1. Demande contexte (ID Ã©lÃ©ment)
-    EB->>Reg: 2. Recherche Ã©tat actuel
-    Reg-->>EB: Ã‰tat trouvÃ©
+    Core->>EB: 1. Demande contexte (ID élément)
+    EB->>Reg: 2. Recherche état actuel
+    Reg-->>EB: État trouvé
     EB->>His: Recherche historique (optionnel)
     His-->>EB: Historique
     EB-->>Core: 3. Fournit contexte complet
-    Core->>Core: 4. Utilise contexte pour dÃ©cision
+    Core->>Core: 4. Utilise contexte pour décision
 ```
 
-#### Ã‰tape 1 : Demande de contexte
+#### Étape 1 : Demande de contexte
 
-Un core (StrongFather, BondingBrother, etc.) **demande** le contexte de cycle de vie d'un Ã©lÃ©ment.
+Un core (StrongFather, BondingBrother, etc.) **demande** le contexte de cycle de vie d'un élément.
 
-| ParamÃ¨tre de demande | Description |
+| Paramètre de demande | Description |
 |----------------------|-------------|
-| **ID Ã©lÃ©ment** | Identifiant de l'Ã©lÃ©ment concernÃ© |
-| **Profondeur** | Ã‰tat seul, avec historique, avec recommandations |
+| **ID élément** | Identifiant de l'élément concerné |
+| **Profondeur** | État seul, avec historique, avec recommandations |
 | **Contexte** | Raison de la demande (optionnel, pour audit) |
 
 **Demandeurs typiques :**
 
 | Core | Raison de consultation |
 |------|------------------------|
-| **StrongFather** | DÃ©cider si une action sur un Ã©lÃ©ment dÃ©prÃ©ciÃ© est autorisÃ©e |
-| **BondingBrother** | Adapter une traduction selon la version de l'Ã©lÃ©ment |
-| **Border Guard** | VÃ©rifier si une version externe est compatible |
-| **Master Butler** | Filtrer les capacitÃ©s exposÃ©es selon leur Ã©tat |
-| **Caring Nanny** | Ã‰valuer l'impact d'un Ã©tat sur la santÃ© systÃ¨me |
+| **StrongFather** | Décider si une action sur un élément déprécié est autorisée |
+| **BondingBrother** | Adapter une traduction selon la version de l'élément |
+| **Border Guard** | Vérifier si une version externe est compatible |
+| **Master Butler** | Filtrer les capacités exposées selon leur état |
+| **Caring Nanny** | Évaluer l'impact d'un état sur la santé système |
 
-#### Ã‰tape 2 : Recherche de l'Ã©tat
+#### Étape 2 : Recherche de l'état
 
-Ever Buddy **recherche** l'Ã©tat actuel et l'historique de l'Ã©lÃ©ment demandÃ©.
+Ever Buddy **recherche** l'état actuel et l'historique de l'élément demandé.
 
-| Source de donnÃ©es | Information extraite |
+| Source de données | Information extraite |
 |-------------------|----------------------|
-| **Registre des Ã©tats** | Ã‰tat actuel, version, catÃ©gorie |
-| **Historique** | ChaÃ®ne d'Ã©volution, transitions passÃ©es |
-| **RÃ¨gles** | Recommandations applicables |
+| **Registre des états** | État actuel, version, catégorie |
+| **Historique** | Chaîne d'évolution, transitions passées |
+| **Règles** | Recommandations applicables |
 
 **Cas particuliers :**
 
-| Situation | RÃ©ponse |
+| Situation | Réponse |
 |-----------|---------|
-| **Ã‰lÃ©ment inconnu** | Erreur : Ã©lÃ©ment non dÃ©clarÃ© |
-| **Ã‰lÃ©ment archivÃ©** | Contexte minimal (tombstone) |
-| **Ã‰lÃ©ment en transition** | Ã‰tat actuel (pas d'Ã©tat transitoire â€” INV-EB-3) |
+| **Élément inconnu** | Erreur : élément non déclaré |
+| **Élément archivé** | Contexte minimal (tombstone) |
+| **Élément en transition** | État actuel (pas d'état transitoire — INV-EB-3) |
 
-#### Ã‰tape 3 : Fourniture du contexte
+#### Étape 3 : Fourniture du contexte
 
 Ever Buddy **retourne** le contexte complet au demandeur.
 
-| Ã‰lÃ©ment de rÃ©ponse | Description |
+| Élément de réponse | Description |
 |--------------------|-------------|
-| **Ã‰tat actuel** | DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED |
-| **Version** | Version sÃ©mantique actuelle |
-| **CatÃ©gorie** | CatÃ©gorie de l'Ã©lÃ©ment |
-| **Successeur** | Si DEPRECATED/RETIRED, rÃ©fÃ©rence au successeur |
-| **Date de transition prÃ©vue** | Si planifiÃ©e |
-| **Historique** | Si demandÃ©, chaÃ®ne d'Ã©volution |
-| **Recommandations** | Actions suggÃ©rÃ©es selon le contexte |
+| **État actuel** | DRAFT, ACTIVE, DEPRECATED, RETIRED, ARCHIVED |
+| **Version** | Version sémantique actuelle |
+| **Catégorie** | Catégorie de l'élément |
+| **Successeur** | Si DEPRECATED/RETIRED, référence au successeur |
+| **Date de transition prévue** | Si planifiée |
+| **Historique** | Si demandé, chaîne d'évolution |
+| **Recommandations** | Actions suggérées selon le contexte |
 
-#### Ã‰tape 4 : Utilisation par le demandeur
+#### Étape 4 : Utilisation par le demandeur
 
-Le core demandeur **utilise** le contexte fourni pour sa propre dÃ©cision.
+Le core demandeur **utilise** le contexte fourni pour sa propre décision.
 
 | Core | Utilisation du contexte |
 |------|-------------------------|
-| **StrongFather** | Peut refuser une action sur un Ã©lÃ©ment RETIRED |
-| **BondingBrother** | Peut adapter la traduction pour compatibilitÃ© |
-| **Border Guard** | Peut refuser une intÃ©gration incompatible |
-| **Master Butler** | Peut masquer une capacitÃ© DEPRECATED |
-| **Caring Nanny** | Peut inclure l'Ã©tat dans le rapport de santÃ© |
+| **StrongFather** | Peut refuser une action sur un élément RETIRED |
+| **BondingBrother** | Peut adapter la traduction pour compatibilité |
+| **Border Guard** | Peut refuser une intégration incompatible |
+| **Master Butler** | Peut masquer une capacité DEPRECATED |
+| **Caring Nanny** | Peut inclure l'état dans le rapport de santé |
 
 ### 5.3 Garanties du flux de consultation
 
 | Garantie | Description |
 |----------|-------------|
-| **CohÃ©rence** | La rÃ©ponse reflÃ¨te l'Ã©tat au moment de la demande |
-| **DisponibilitÃ©** | Le flux fonctionne mÃªme en mode isolÃ© (LOI-2) |
-| **Non-autoritÃ©** | Ever Buddy fournit le contexte mais ne dÃ©cide pas |
-| **TraÃ§abilitÃ©** | Les consultations peuvent Ãªtre auditÃ©es |
+| **Cohérence** | La réponse reflète l'état au moment de la demande |
+| **Disponibilité** | Le flux fonctionne même en mode isolé (LOI-2) |
+| **Non-autorité** | Ever Buddy fournit le contexte mais ne décide pas |
+| **Traçabilité** | Les consultations peuvent être auditées |
 
 ---
 
@@ -320,23 +320,23 @@ Le core demandeur **utilise** le contexte fourni pour sa propre dÃ©cision.
 
 ### 6.1 Description
 
-Le flux de planification permet Ã  Ever Buddy de **communiquer** les plans de transition aux consommateurs concernÃ©s. Ce flux est **proactif** : Ever Buddy initie la communication.
+Le flux de planification permet à Ever Buddy de **communiquer** les plans de transition aux consommateurs concernés. Ce flux est **proactif** : Ever Buddy initie la communication.
 
-### 6.2 Ã‰tapes du flux
+### 6.2 Étapes du flux
 
 ```mermaid
 sequenceDiagram
     participant EB as Ever Buddy
     participant Cons as Consommateurs
-    participant Reg as Registre Ã‰tats
+    participant Reg as Registre États
 
-    EB->>EB: 1. DÃ©finit plan de transition
+    EB->>EB: 1. Définit plan de transition
     EB->>Cons: 2. Communique le plan
     
     rect rgb(240, 240, 240)
-        Note over EB,Cons: 3. PÃ©riode de transition (coexistence)
+        Note over EB,Cons: 3. Période de transition (coexistence)
         loop Surveillance continue
-            EB->>Cons: Rappels pÃ©riodiques
+            EB->>Cons: Rappels périodiques
             Cons-->>EB: Statut de migration
         end
     end
@@ -344,7 +344,7 @@ sequenceDiagram
     EB->>Reg: 4. Surveille adoption
     
     alt Adoption suffisante
-        EB->>Reg: 5. ComplÃ¨te la transition
+        EB->>Reg: 5. Complète la transition
         EB->>Cons: Notifie fin de transition
     else Adoption insuffisante
         EB->>Cons: Alerte retardataires
@@ -352,116 +352,116 @@ sequenceDiagram
     end
 ```
 
-#### Ã‰tape 1 : DÃ©finition du plan
+#### Étape 1 : Définition du plan
 
-Ever Buddy **dÃ©finit** un plan de transition pour un Ã©lÃ©ment.
+Ever Buddy **définit** un plan de transition pour un élément.
 
-| Ã‰lÃ©ment du plan | Description |
+| Élément du plan | Description |
 |-----------------|-------------|
-| **Ã‰lÃ©ment concernÃ©** | ID, version actuelle, Ã©tat actuel |
-| **Transition planifiÃ©e** | Ã‰tat cible (DEPRECATED, RETIRED, ARCHIVED) |
-| **Successeur** | Ã‰lÃ©ment de remplacement (si applicable) |
-| **Date de dÃ©but** | Quand la transition commence |
-| **Date de fin prÃ©vue** | Quand la transition devrait Ãªtre complÃ©tÃ©e |
-| **CritÃ¨res de complÃ©tion** | Conditions pour considÃ©rer la transition terminÃ©e |
-| **Guide de migration** | RÃ©fÃ©rence vers la documentation de migration |
+| **Élément concerné** | ID, version actuelle, état actuel |
+| **Transition planifiée** | État cible (DEPRECATED, RETIRED, ARCHIVED) |
+| **Successeur** | Élément de remplacement (si applicable) |
+| **Date de début** | Quand la transition commence |
+| **Date de fin prévue** | Quand la transition devrait être complétée |
+| **Critères de complétion** | Conditions pour considérer la transition terminée |
+| **Guide de migration** | Référence vers la documentation de migration |
 
 **Types de plans :**
 
 | Type | Description |
 |------|-------------|
-| **DÃ©prÃ©ciation** | ACTIVE â†’ DEPRECATED |
-| **Retirement** | DEPRECATED â†’ RETIRED |
-| **Archivage** | RETIRED â†’ ARCHIVED |
-| **Ã‰volution majeure** | Nouvelle version avec rupture de compatibilitÃ© |
+| **Dépréciation** | ACTIVE → DEPRECATED |
+| **Retirement** | DEPRECATED → RETIRED |
+| **Archivage** | RETIRED → ARCHIVED |
+| **Évolution majeure** | Nouvelle version avec rupture de compatibilité |
 
-#### Ã‰tape 2 : Communication
+#### Étape 2 : Communication
 
-Ever Buddy **communique** le plan Ã  tous les consommateurs concernÃ©s.
+Ever Buddy **communique** le plan à tous les consommateurs concernés.
 
 | Canal de communication | Destinataire |
 |------------------------|--------------|
-| **Cores systÃ¨me** | Notification directe aux cores concernÃ©s |
-| **Produits** | Via BondingBrother (les produits ne parlent jamais directement Ã  Ever Buddy) |
+| **Cores système** | Notification directe aux cores concernés |
+| **Produits** | Via BondingBrother (les produits ne parlent jamais directement à Ever Buddy) |
 | **Adaptateurs** | Via BondingBrother |
 
 **Contenu de la communication :**
 
 | Information | Obligatoire | Description |
 |-------------|-------------|-------------|
-| **RÃ©sumÃ© du changement** | âœ… | Ce qui change et pourquoi |
-| **Impact sur les consommateurs** | âœ… | Ce que les consommateurs doivent faire |
-| **Calendrier** | âœ… | Dates clÃ©s de la transition |
-| **Guide de migration** | âœ… | Comment migrer vers le successeur |
-| **Contact support** | âš ï¸ | Si applicable |
+| **Résumé du changement** | ✅ | Ce qui change et pourquoi |
+| **Impact sur les consommateurs** | ✅ | Ce que les consommateurs doivent faire |
+| **Calendrier** | ✅ | Dates clés de la transition |
+| **Guide de migration** | ✅ | Comment migrer vers le successeur |
+| **Contact support** | ⚠️ | Si applicable |
 
-#### Ã‰tape 3 : PÃ©riode de transition
+#### Étape 3 : Période de transition
 
-La **pÃ©riode de transition** commence : l'ancien et le nouveau coexistent.
+La **période de transition** commence : l'ancien et le nouveau coexistent.
 
-| CaractÃ©ristique | Description |
+| Caractéristique | Description |
 |-----------------|-------------|
-| **Coexistence** | L'ancien Ã©lÃ©ment reste fonctionnel |
-| **Support rÃ©duit** | L'ancien Ã©lÃ©ment ne reÃ§oit que des corrections critiques |
-| **Rappels** | Les consommateurs non migrÃ©s reÃ§oivent des rappels |
-| **MÃ©triques** | Ever Buddy surveille le taux d'adoption |
+| **Coexistence** | L'ancien élément reste fonctionnel |
+| **Support réduit** | L'ancien élément ne reçoit que des corrections critiques |
+| **Rappels** | Les consommateurs non migrés reçoivent des rappels |
+| **Métriques** | Ever Buddy surveille le taux d'adoption |
 
-**PÃ©riode minimale selon la catÃ©gorie :**
+**Période minimale selon la catégorie :**
 
-| CatÃ©gorie | PÃ©riode minimale de dÃ©prÃ©ciation |
+| Catégorie | Période minimale de dépréciation |
 |-----------|----------------------------------|
-| **FONDATION** | Plusieurs gÃ©nÃ©rations |
-| **OpÃ©rationnel** | Standard (plusieurs cycles de release) |
+| **FONDATION** | Plusieurs générations |
+| **Opérationnel** | Standard (plusieurs cycles de release) |
 | **Technique** | Court (quelques cycles de release) |
 | **Interne** | Optionnel |
 
-#### Ã‰tape 4 : Suivi de l'adoption
+#### Étape 4 : Suivi de l'adoption
 
 Ever Buddy **surveille** l'adoption du successeur par les consommateurs.
 
-| MÃ©trique suivie | Description |
+| Métrique suivie | Description |
 |-----------------|-------------|
-| **Taux d'adoption** | % de consommateurs ayant migrÃ© |
-| **Consommateurs restants** | Liste des consommateurs non migrÃ©s |
-| **Blocages identifiÃ©s** | ProblÃ¨mes empÃªchant la migration |
-| **Tendance** | Ã‰volution du taux d'adoption |
+| **Taux d'adoption** | % de consommateurs ayant migré |
+| **Consommateurs restants** | Liste des consommateurs non migrés |
+| **Blocages identifiés** | Problèmes empêchant la migration |
+| **Tendance** | Évolution du taux d'adoption |
 
 **Seuils d'adoption :**
 
 | Seuil | Action |
 |-------|--------|
-| **< 50%** | Rappels intensifiÃ©s |
+| **< 50%** | Rappels intensifiés |
 | **50-80%** | Suivi normal |
-| **> 80%** | PrÃ©paration de la complÃ©tion |
-| **100%** | ComplÃ©tion possible |
+| **> 80%** | Préparation de la complétion |
+| **100%** | Complétion possible |
 
-#### Ã‰tape 5 : ComplÃ©tion
+#### Étape 5 : Complétion
 
-Ã€ la fin de la pÃ©riode, Ever Buddy **complÃ¨te** la transition.
+À la fin de la période, Ever Buddy **complète** la transition.
 
-| Condition de complÃ©tion | Description |
+| Condition de complétion | Description |
 |-------------------------|-------------|
-| **PÃ©riode minimale Ã©coulÃ©e** | La pÃ©riode de dÃ©prÃ©ciation minimale est atteinte |
+| **Période minimale écoulée** | La période de dépréciation minimale est atteinte |
 | **Adoption suffisante** | Le taux d'adoption est acceptable |
-| **Aucun blocage critique** | Pas de problÃ¨me technique bloquant |
+| **Aucun blocage critique** | Pas de problème technique bloquant |
 
-**Actions de complÃ©tion :**
+**Actions de complétion :**
 
 | Action | Description |
 |--------|-------------|
-| **Transition d'Ã©tat** | L'Ã©lÃ©ment passe Ã  l'Ã©tat suivant |
-| **Notification finale** | Les consommateurs sont informÃ©s |
-| **ClÃ´ture du plan** | Le plan est marquÃ© comme complÃ©tÃ© |
-| **Archivage documentation** | La documentation de migration est archivÃ©e |
+| **Transition d'état** | L'élément passe à l'état suivant |
+| **Notification finale** | Les consommateurs sont informés |
+| **Clôture du plan** | Le plan est marqué comme complété |
+| **Archivage documentation** | La documentation de migration est archivée |
 
 ### 6.3 Garanties du flux de planification
 
 | Garantie | Description |
 |----------|-------------|
-| **PrÃ©visibilitÃ©** | Les plans sont communiquÃ©s Ã  l'avance (INV-EB-9) |
-| **Transparence** | Les critÃ¨res de complÃ©tion sont publics |
-| **Accompagnement** | Les consommateurs reÃ§oivent un guide de migration |
-| **FlexibilitÃ©** | Les pÃ©riodes peuvent Ãªtre Ã©tendues si nÃ©cessaire |
+| **Prévisibilité** | Les plans sont communiqués à l'avance (INV-EB-9) |
+| **Transparence** | Les critères de complétion sont publics |
+| **Accompagnement** | Les consommateurs reçoivent un guide de migration |
+| **Flexibilité** | Les périodes peuvent être étendues si nécessaire |
 
 ---
 
@@ -469,9 +469,9 @@ Ever Buddy **surveille** l'adoption du successeur par les consommateurs.
 
 ### 7.1 Description
 
-Le flux d'alerte permet Ã  Ever Buddy de **signaler** les conditions anormales dÃ©tectÃ©es dans l'Ã©cosystÃ¨me. Ce flux est **rÃ©actif** : il se dÃ©clenche quand une anomalie est dÃ©tectÃ©e.
+Le flux d'alerte permet à Ever Buddy de **signaler** les conditions anormales détectées dans l'écosystème. Ce flux est **réactif** : il se déclenche quand une anomalie est détectée.
 
-### 7.2 Ã‰tapes du flux
+### 7.2 Étapes du flux
 
 ```mermaid
 sequenceDiagram
@@ -479,181 +479,181 @@ sequenceDiagram
     participant EB as Ever Buddy
     participant Dest as Destinataires
     
-    Mon->>EB: 1. DÃ©tecte condition anormale
-    EB->>EB: 2. Ã‰value gravitÃ© et urgence
+    Mon->>EB: 1. Détecte condition anormale
+    EB->>EB: 2. Évalue gravité et urgence
     
-    alt Alerte justifiÃ©e
-        EB->>Dest: 3. Ã‰met alerte
+    alt Alerte justifiée
+        EB->>Dest: 3. Émet alerte
         EB->>Dest: 4. Fournit recommandations
         loop Suivi
             Dest-->>EB: Actions entreprises
-            EB->>EB: 5. Ã‰value rÃ©solution
+            EB->>EB: 5. Évalue résolution
         end
-        EB->>Dest: ClÃ´ture alerte
+        EB->>Dest: Clôture alerte
     else Condition normale
         Note over EB: Pas d'alerte
     end
 ```
 
-#### Ã‰tape 1 : DÃ©tection
+#### Étape 1 : Détection
 
-Ever Buddy **dÃ©tecte** une condition anormale.
+Ever Buddy **détecte** une condition anormale.
 
 | Type de condition | Description |
 |-------------------|-------------|
-| **Dette excessive** | Le debt ratio dÃ©passe le seuil dÃ©fini |
-| **Transition bloquÃ©e** | Une transition dÃ©passe sa durÃ©e prÃ©vue |
-| **IncompatibilitÃ©** | DÃ©tection d'une incompatibilitÃ© non gÃ©rÃ©e |
-| **Violation de rÃ¨gle** | Une rÃ¨gle d'Ã©volution est violÃ©e |
-| **Consommateur en retard** | Un consommateur n'a pas migrÃ© Ã  l'approche du retirement |
+| **Dette excessive** | Le debt ratio dépasse le seuil défini |
+| **Transition bloquée** | Une transition dépasse sa durée prévue |
+| **Incompatibilité** | Détection d'une incompatibilité non gérée |
+| **Violation de règle** | Une règle d'évolution est violée |
+| **Consommateur en retard** | Un consommateur n'a pas migré à l'approche du retirement |
 
-**MÃ©canismes de dÃ©tection :**
+**Mécanismes de détection :**
 
-| MÃ©canisme | Description |
+| Mécanisme | Description |
 |-----------|-------------|
-| **Surveillance pÃ©riodique** | VÃ©rification rÃ©guliÃ¨re des seuils |
-| **Ã‰vÃ©nement dÃ©clencheur** | Alerte immÃ©diate sur certains Ã©vÃ©nements |
-| **AgrÃ©gation** | DÃ©tection de patterns sur plusieurs mÃ©triques |
+| **Surveillance périodique** | Vérification régulière des seuils |
+| **Événement déclencheur** | Alerte immédiate sur certains événements |
+| **Agrégation** | Détection de patterns sur plusieurs métriques |
 
-#### Ã‰tape 2 : Ã‰valuation
+#### Étape 2 : Évaluation
 
-Ever Buddy **Ã©value** la gravitÃ© et l'urgence de la condition.
+Ever Buddy **évalue** la gravité et l'urgence de la condition.
 
-| Niveau de gravitÃ© | CritÃ¨res |
+| Niveau de gravité | Critères |
 |-------------------|----------|
-| **CRITIQUE** | Impact immÃ©diat sur la production, action immÃ©diate requise |
+| **CRITIQUE** | Impact immédiat sur la production, action immédiate requise |
 | **MAJEUR** | Impact significatif, action rapide requise |
-| **MINEUR** | Impact limitÃ©, action planifiable |
-| **INFO** | Information Ã  suivre, pas d'action immÃ©diate |
+| **MINEUR** | Impact limité, action planifiable |
+| **INFO** | Information à suivre, pas d'action immédiate |
 
-| Niveau d'urgence | CritÃ¨res |
+| Niveau d'urgence | Critères |
 |------------------|----------|
-| **IMMÃ‰DIATE** | Action requise dans l'heure |
-| **HAUTE** | Action requise dans la journÃ©e |
+| **IMMÉDIATE** | Action requise dans l'heure |
+| **HAUTE** | Action requise dans la journée |
 | **NORMALE** | Action requise dans la semaine |
 | **BASSE** | Action planifiable librement |
 
-**Matrice gravitÃ© Ã— urgence :**
+**Matrice gravité × urgence :**
 
-| GravitÃ© \ Urgence | IMMÃ‰DIATE | HAUTE | NORMALE | BASSE |
+| Gravité \ Urgence | IMMÉDIATE | HAUTE | NORMALE | BASSE |
 |-------------------|-----------|-------|---------|-------|
-| **CRITIQUE** | ðŸ”´ P0 | ðŸ”´ P0 | ðŸŸ  P1 | ðŸŸ  P1 |
-| **MAJEUR** | ðŸŸ  P1 | ðŸŸ  P1 | ðŸŸ¡ P2 | ðŸŸ¡ P2 |
-| **MINEUR** | ðŸŸ¡ P2 | ðŸŸ¢ P3 | ðŸŸ¢ P3 | ðŸŸ¢ P4 |
-| **INFO** | ðŸŸ¢ P3 | ðŸŸ¢ P4 | ðŸŸ¢ P4 | âšª P5 |
+| **CRITIQUE** | 🔴 P0 | 🔴 P0 | 🟠 P1 | 🟠 P1 |
+| **MAJEUR** | 🟠 P1 | 🟠 P1 | 🟡 P2 | 🟡 P2 |
+| **MINEUR** | 🟡 P2 | 🟢 P3 | 🟢 P3 | 🟢 P4 |
+| **INFO** | 🟢 P3 | 🟢 P4 | 🟢 P4 | ⚪ P5 |
 
-#### Ã‰tape 3 : Ã‰mission de l'alerte
+#### Étape 3 : Émission de l'alerte
 
-Ever Buddy **Ã©met** l'alerte vers les destinataires concernÃ©s.
+Ever Buddy **émet** l'alerte vers les destinataires concernés.
 
-| Destinataire | Type d'alerte reÃ§u |
+| Destinataire | Type d'alerte reçu |
 |--------------|-------------------|
-| **Cores systÃ¨me** | Toutes les alertes les concernant |
-| **Produits** | Via BondingBrother, alertes de dÃ©prÃ©ciation et incompatibilitÃ© |
-| **Caring Nanny** | Alertes impactant la santÃ© systÃ¨me |
-| **TAMR** | Alertes nÃ©cessitant une intervention humaine (INV-EB-6 : vision long terme) |
+| **Cores système** | Toutes les alertes les concernant |
+| **Produits** | Via BondingBrother, alertes de dépréciation et incompatibilité |
+| **Caring Nanny** | Alertes impactant la santé système |
+| **TAMR** | Alertes nécessitant une intervention humaine (INV-EB-6 : vision long terme) |
 
 **Contenu de l'alerte :**
 
-| Ã‰lÃ©ment | Obligatoire | Description |
+| Élément | Obligatoire | Description |
 |---------|-------------|-------------|
-| **ID alerte** | âœ… | Identifiant unique |
-| **Type** | âœ… | CatÃ©gorie de l'alerte |
-| **GravitÃ©** | âœ… | Niveau de gravitÃ© |
-| **Urgence** | âœ… | Niveau d'urgence |
-| **Description** | âœ… | Ce qui se passe |
-| **Ã‰lÃ©ments concernÃ©s** | âœ… | IDs des Ã©lÃ©ments impactÃ©s |
-| **Recommandations** | âœ… | Actions suggÃ©rÃ©es |
-| **Horodatage** | âœ… | Moment de l'alerte |
+| **ID alerte** | ✅ | Identifiant unique |
+| **Type** | ✅ | Catégorie de l'alerte |
+| **Gravité** | ✅ | Niveau de gravité |
+| **Urgence** | ✅ | Niveau d'urgence |
+| **Description** | ✅ | Ce qui se passe |
+| **Éléments concernés** | ✅ | IDs des éléments impactés |
+| **Recommandations** | ✅ | Actions suggérées |
+| **Horodatage** | ✅ | Moment de l'alerte |
 
-#### Ã‰tape 4 : Recommandation
+#### Étape 4 : Recommandation
 
-Ever Buddy **fournit** des recommandations pour rÃ©soudre la situation.
+Ever Buddy **fournit** des recommandations pour résoudre la situation.
 
 | Type de recommandation | Exemple |
 |------------------------|---------|
 | **Migration** | "Migrer vers le successeur X avant la date Y" |
-| **Nettoyage** | "Archiver les Ã©lÃ©ments RETIRED suivants..." |
-| **Extension** | "Ã‰tendre la pÃ©riode de dÃ©prÃ©ciation de Z semaines" |
-| **RÃ©vision** | "RÃ©viser le plan de transition pour l'Ã©lÃ©ment W" |
-| **Escalade** | "Escalader vers TAMR pour dÃ©cision humaine" |
+| **Nettoyage** | "Archiver les éléments RETIRED suivants..." |
+| **Extension** | "Étendre la période de dépréciation de Z semaines" |
+| **Révision** | "Réviser le plan de transition pour l'élément W" |
+| **Escalade** | "Escalader vers TAMR pour décision humaine" |
 
-#### Ã‰tape 5 : Suivi de la rÃ©solution
+#### Étape 5 : Suivi de la résolution
 
-Ever Buddy **suit** la rÃ©solution de l'alerte.
+Ever Buddy **suit** la résolution de l'alerte.
 
-| Ã‰tat de l'alerte | Description |
+| État de l'alerte | Description |
 |------------------|-------------|
-| **OUVERTE** | Alerte Ã©mise, en attente d'action |
-| **ACQUITTÃ‰E** | Action en cours |
-| **RÃ‰SOLUE** | Condition normale rÃ©tablie |
-| **ESCALADÃ‰E** | Transmise Ã  TAMR |
-| **CLOSE** | Alerte terminÃ©e |
+| **OUVERTE** | Alerte émise, en attente d'action |
+| **ACQUITTÉE** | Action en cours |
+| **RÉSOLUE** | Condition normale rétablie |
+| **ESCALADÉE** | Transmise à TAMR |
+| **CLOSE** | Alerte terminée |
 
-**CritÃ¨res de clÃ´ture :**
+**Critères de clôture :**
 
-| Condition | ClÃ´ture automatique |
+| Condition | Clôture automatique |
 |-----------|---------------------|
-| **Seuil revenu sous limite** | âœ… |
-| **Transition complÃ©tÃ©e** | âœ… |
-| **Migration effectuÃ©e** | âœ… |
-| **Acquittement manuel** | âš ï¸ Avec justification |
+| **Seuil revenu sous limite** | ✅ |
+| **Transition complétée** | ✅ |
+| **Migration effectuée** | ✅ |
+| **Acquittement manuel** | ⚠️ Avec justification |
 
 ### 7.3 Types d'alertes
 
 #### 7.3.1 Alerte de dette structurelle
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
-| **DÃ©clencheur** | debt_ratio > seuil_max |
-| **GravitÃ©** | MAJEUR |
+| **Déclencheur** | debt_ratio > seuil_max |
+| **Gravité** | MAJEUR |
 | **Urgence** | NORMALE |
-| **Recommandation** | Plan de nettoyage des Ã©lÃ©ments RETIRED |
+| **Recommandation** | Plan de nettoyage des éléments RETIRED |
 
 **Seuils de dette :**
 
 | Seuil | Niveau | Action |
 |-------|--------|--------|
-| **< 20%** | âœ… Sain | Aucune |
-| **20-40%** | âš ï¸ Attention | Surveillance |
-| **40-60%** | ðŸŸ¡ Ã‰levÃ© | Plan de rÃ©duction |
-| **> 60%** | ðŸ”´ Critique | Alerte immÃ©diate |
+| **< 20%** | ✅ Sain | Aucune |
+| **20-40%** | ⚠️ Attention | Surveillance |
+| **40-60%** | 🟡 Élevé | Plan de réduction |
+| **> 60%** | 🔴 Critique | Alerte immédiate |
 
-#### 7.3.2 Alerte de transition bloquÃ©e
+#### 7.3.2 Alerte de transition bloquée
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
-| **DÃ©clencheur** | DurÃ©e transition > durÃ©e_prÃ©vue Ã— 1.5 |
-| **GravitÃ©** | MINEUR Ã  MAJEUR (selon impact) |
+| **Déclencheur** | Durée transition > durée_prévue × 1.5 |
+| **Gravité** | MINEUR à MAJEUR (selon impact) |
 | **Urgence** | HAUTE |
-| **Recommandation** | Investiguer les blocages, Ã©tendre ou forcer |
+| **Recommandation** | Investiguer les blocages, étendre ou forcer |
 
 #### 7.3.3 Alerte de consommateur en retard
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
-| **DÃ©clencheur** | Consommateur non migrÃ© Ã  80% de la pÃ©riode |
-| **GravitÃ©** | MINEUR |
+| **Déclencheur** | Consommateur non migré à 80% de la période |
+| **Gravité** | MINEUR |
 | **Urgence** | NORMALE |
 | **Recommandation** | Contacter le consommateur, proposer assistance |
 
-#### 7.3.4 Alerte de violation de rÃ¨gle
+#### 7.3.4 Alerte de violation de règle
 
-| ParamÃ¨tre | Valeur |
+| Paramètre | Valeur |
 |-----------|--------|
-| **DÃ©clencheur** | Tentative de transition invalide |
-| **GravitÃ©** | MAJEUR |
-| **Urgence** | IMMÃ‰DIATE |
+| **Déclencheur** | Tentative de transition invalide |
+| **Gravité** | MAJEUR |
+| **Urgence** | IMMÉDIATE |
 | **Recommandation** | Rejeter la transition, notifier l'auteur |
 
 ### 7.4 Garanties du flux d'alerte
 
 | Garantie | Description |
 |----------|-------------|
-| **RÃ©activitÃ©** | Les alertes critiques sont Ã©mises immÃ©diatement |
-| **Non-blocage** | Les alertes informent mais ne bloquent pas le systÃ¨me |
-| **TraÃ§abilitÃ©** | L'historique des alertes est conservÃ© |
-| **ActionnabilitÃ©** | Chaque alerte inclut des recommandations |
+| **Réactivité** | Les alertes critiques sont émises immédiatement |
+| **Non-blocage** | Les alertes informent mais ne bloquent pas le système |
+| **Traçabilité** | L'historique des alertes est conservé |
+| **Actionnabilité** | Chaque alerte inclut des recommandations |
 
 ---
 
@@ -661,14 +661,14 @@ Ever Buddy **suit** la rÃ©solution de l'alerte.
 
 ### 8.1 Principe fondamental
 
-> **Les produits ne parlent JAMAIS directement Ã  Ever Buddy.**
+> **Les produits ne parlent JAMAIS directement à Ever Buddy.**
 
 Toute interaction entre les produits et Ever Buddy passe par **BondingBrother** qui :
 
 - Traduit les demandes de contexte de cycle de vie
 - Filtre les informations selon les droits du produit
 - Adapte les alertes au contexte du produit
-- Transforme les recommandations en actions concrÃ¨tes
+- Transforme les recommandations en actions concrètes
 
 ### 8.2 Diagramme des flux produits
 
@@ -695,211 +695,211 @@ graph LR
     BB -->|Consultation| EB
     EB -->|Contexte| BB
 
-    BB -->|Contexte filtrÃ©| P1
-    BB -->|Contexte filtrÃ©| P2
-    BB -->|Contexte filtrÃ©| P3
+    BB -->|Contexte filtré| P1
+    BB -->|Contexte filtré| P2
+    BB -->|Contexte filtré| P3
 
     EB -->|Alertes| BB
-    BB -->|Alertes adaptÃ©es| P1
-    BB -->|Alertes adaptÃ©es| P2
-    BB -->|Alertes adaptÃ©es| P3
+    BB -->|Alertes adaptées| P1
+    BB -->|Alertes adaptées| P2
+    BB -->|Alertes adaptées| P3
 ```
 
 ### 8.3 Traduction des flux par BondingBrother
 
 | Flux Ever Buddy | Traduction BondingBrother |
 |-----------------|---------------------------|
-| **Ã‰tat de cycle de vie** | Information de version et support |
-| **Alerte de dÃ©prÃ©ciation** | Notification de mise Ã  jour nÃ©cessaire |
-| **Guide de migration** | Instructions concrÃ¨tes adaptÃ©es au produit |
-| **Recommandation d'action** | TÃ¢che Ã  planifier dans le backlog produit |
+| **État de cycle de vie** | Information de version et support |
+| **Alerte de dépréciation** | Notification de mise à jour nécessaire |
+| **Guide de migration** | Instructions concrètes adaptées au produit |
+| **Recommandation d'action** | Tâche à planifier dans le backlog produit |
 
-### 8.4 Ce que les produits reÃ§oivent
+### 8.4 Ce que les produits reçoivent
 
 | Information | Format produit |
 |-------------|----------------|
-| **Ã‰tat d'une fonctionnalitÃ©** | "Cette fonctionnalitÃ© est supportÃ©e / dÃ©prÃ©ciÃ©e / retirÃ©e" |
-| **CompatibilitÃ© de version** | "Votre version X.Y est compatible jusqu'Ã  la date Z" |
-| **Alerte de migration** | "Une mise Ã  jour vers X est recommandÃ©e avant Z" |
-| **Impact d'Ã©volution** | "Les changements suivants vous affectent..." |
+| **État d'une fonctionnalité** | "Cette fonctionnalité est supportée / dépréciée / retirée" |
+| **Compatibilité de version** | "Votre version X.Y est compatible jusqu'à la date Z" |
+| **Alerte de migration** | "Une mise à jour vers X est recommandée avant Z" |
+| **Impact d'évolution** | "Les changements suivants vous affectent..." |
 
 ---
 
 ## 9. Diagramme d'architecture des flux
 
-### 9.1 Vue d'ensemble complÃ¨te
+### 9.1 Vue d'ensemble complète
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                              EVER BUDDY                                       â”‚
-â”‚                                                                               â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”           â”‚
-â”‚  â”‚    REGISTRE      â”‚  â”‚     RÃˆGLES       â”‚  â”‚   HISTORIQUE     â”‚           â”‚
-â”‚  â”‚    DES Ã‰TATS     â”‚  â”‚   D'Ã‰VOLUTION    â”‚  â”‚    IMMUABLE      â”‚           â”‚
-â”‚  â”‚                  â”‚  â”‚                  â”‚  â”‚                  â”‚           â”‚
-â”‚  â”‚ â€¢ Ã‰tat actuel    â”‚  â”‚ â€¢ Matrice trans. â”‚  â”‚ â€¢ Transitions    â”‚           â”‚
-â”‚  â”‚ â€¢ Version        â”‚  â”‚ â€¢ PÃ©riodes min.  â”‚  â”‚ â€¢ Raisons        â”‚           â”‚
-â”‚  â”‚ â€¢ CatÃ©gorie      â”‚  â”‚ â€¢ CompatibilitÃ©  â”‚  â”‚ â€¢ Sources        â”‚           â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜           â”‚
-â”‚           â”‚                     â”‚                     â”‚                      â”‚
-â”‚           â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                      â”‚
-â”‚                                 â”‚                                            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”        â”‚
-â”‚  â”‚                              â”‚                                   â”‚        â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚        â”‚
-â”‚  â”‚  â”‚   FLUX     â”‚  â”‚        FLUX          â”‚  â”‚      FLUX      â”‚  â”‚        â”‚
-â”‚  â”‚  â”‚OBSERVATION â”‚  â”‚    CONSULTATION      â”‚  â”‚  PLANIFICATION â”‚  â”‚        â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚        â”‚
-â”‚  â”‚         â”‚                   â”‚                      â”‚           â”‚        â”‚
-â”‚  â”‚         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜           â”‚        â”‚
-â”‚  â”‚                             â”‚                                   â”‚        â”‚
-â”‚  â”‚                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”                         â”‚        â”‚
-â”‚  â”‚                    â”‚   FLUX ALERTE   â”‚                         â”‚        â”‚
-â”‚  â”‚                    â”‚                 â”‚                         â”‚        â”‚
-â”‚  â”‚                    â”‚ â€¢ DÃ©tection     â”‚                         â”‚        â”‚
-â”‚  â”‚                    â”‚ â€¢ Ã‰valuation    â”‚                         â”‚        â”‚
-â”‚  â”‚                    â”‚ â€¢ Ã‰mission      â”‚                         â”‚        â”‚
-â”‚  â”‚                    â”‚ â€¢ Suivi         â”‚                         â”‚        â”‚
-â”‚  â”‚                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜                         â”‚        â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜        â”‚
-â”‚                                â”‚                                            â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-              â”‚                  â”‚                  â”‚
-              â–¼                  â–¼                  â–¼
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚  StrongFather   â”‚ â”‚  BondingBrother â”‚ â”‚  Caring Nanny   â”‚
-    â”‚  (dÃ©cisions)    â”‚ â”‚  (mÃ©diation)    â”‚ â”‚  (monitoring)   â”‚
-    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                 â”‚
-                                 â–¼
-                      â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                      â”‚      PRODUITS       â”‚
-                      â”‚ (via BondingBrother)â”‚
-                      â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              EVER BUDDY                                       │
+│                                                                               │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐           │
+│  │    REGISTRE      │  │     RÈGLES       │  │   HISTORIQUE     │           │
+│  │    DES ÉTATS     │  │   D'ÉVOLUTION    │  │    IMMUABLE      │           │
+│  │                  │  │                  │  │                  │           │
+│  │ • État actuel    │  │ • Matrice trans. │  │ • Transitions    │           │
+│  │ • Version        │  │ • Périodes min.  │  │ • Raisons        │           │
+│  │ • Catégorie      │  │ • Compatibilité  │  │ • Sources        │           │
+│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘           │
+│           │                     │                     │                      │
+│           └─────────────────────┼─────────────────────┘                      │
+│                                 │                                            │
+│  ┌──────────────────────────────┼──────────────────────────────────┐        │
+│  │                              │                                   │        │
+│  │  ┌────────────┐  ┌───────────▼──────────┐  ┌────────────────┐  │        │
+│  │  │   FLUX     │  │        FLUX          │  │      FLUX      │  │        │
+│  │  │OBSERVATION │  │    CONSULTATION      │  │  PLANIFICATION │  │        │
+│  │  └──────┬─────┘  └──────────┬───────────┘  └───────┬────────┘  │        │
+│  │         │                   │                      │           │        │
+│  │         └───────────────────┼──────────────────────┘           │        │
+│  │                             │                                   │        │
+│  │                    ┌────────▼────────┐                         │        │
+│  │                    │   FLUX ALERTE   │                         │        │
+│  │                    │                 │                         │        │
+│  │                    │ • Détection     │                         │        │
+│  │                    │ • Évaluation    │                         │        │
+│  │                    │ • Émission      │                         │        │
+│  │                    │ • Suivi         │                         │        │
+│  │                    └────────┬────────┘                         │        │
+│  └─────────────────────────────┼──────────────────────────────────┘        │
+│                                │                                            │
+└────────────────────────────────┼────────────────────────────────────────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+    │  StrongFather   │ │  BondingBrother │ │  Caring Nanny   │
+    │  (décisions)    │ │  (médiation)    │ │  (monitoring)   │
+    └─────────────────┘ └────────┬────────┘ └─────────────────┘
+                                 │
+                                 ▼
+                      ┌─────────────────────┐
+                      │      PRODUITS       │
+                      │ (via BondingBrother)│
+                      └─────────────────────┘
 ```
 
-### 9.2 Flux temporel d'une Ã©volution complÃ¨te
+### 9.2 Flux temporel d'une évolution complète
 
 ```
-Temps â†’
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º
+Temps →
+────────────────────────────────────────────────────────────────────────────────►
 
 PHASE 1: CONCEPTION
-â”œâ”€â”€ Ã‰lÃ©ment crÃ©Ã© en DRAFT
-â”œâ”€â”€ [Flux Observation] DÃ©claration reÃ§ue, Ã©tat DRAFT enregistrÃ©
-â””â”€â”€ DÃ©veloppement interne
+├── Élément créé en DRAFT
+├── [Flux Observation] Déclaration reçue, état DRAFT enregistré
+└── Développement interne
 
 PHASE 2: ACTIVATION
-â”œâ”€â”€ Ã‰lÃ©ment prÃªt pour production
-â”œâ”€â”€ [Flux Observation] Transition DRAFT â†’ ACTIVE validÃ©e et enregistrÃ©e
-â”œâ”€â”€ [Flux Consultation] Autres cores consultent l'Ã©tat
-â””â”€â”€ Ã‰lÃ©ment utilisÃ© normalement
+├── Élément prêt pour production
+├── [Flux Observation] Transition DRAFT → ACTIVE validée et enregistrée
+├── [Flux Consultation] Autres cores consultent l'état
+└── Élément utilisé normalement
 
-PHASE 3: DÃ‰PRÃ‰CIATION
-â”œâ”€â”€ DÃ©cision de dÃ©prÃ©cier (successeur disponible)
-â”œâ”€â”€ [Flux Planification] Plan de dÃ©prÃ©ciation dÃ©fini et communiquÃ©
-â”œâ”€â”€ [Flux Observation] Transition ACTIVE â†’ DEPRECATED enregistrÃ©e
-â”œâ”€â”€ [Flux Alerte] Consommateurs alertÃ©s via BondingBrother
-â””â”€â”€ PÃ©riode de coexistence ancien/nouveau
+PHASE 3: DÉPRÉCIATION
+├── Décision de déprécier (successeur disponible)
+├── [Flux Planification] Plan de dépréciation défini et communiqué
+├── [Flux Observation] Transition ACTIVE → DEPRECATED enregistrée
+├── [Flux Alerte] Consommateurs alertés via BondingBrother
+└── Période de coexistence ancien/nouveau
 
 PHASE 4: RETIREMENT
-â”œâ”€â”€ PÃ©riode de dÃ©prÃ©ciation terminÃ©e
-â”œâ”€â”€ [Flux Planification] Suivi de l'adoption complÃ©tÃ©
-â”œâ”€â”€ [Flux Observation] Transition DEPRECATED â†’ RETIRED enregistrÃ©e
-â”œâ”€â”€ [Flux Alerte] Derniers consommateurs alertÃ©s
-â””â”€â”€ Support minimal (sÃ©curitÃ© uniquement)
+├── Période de dépréciation terminée
+├── [Flux Planification] Suivi de l'adoption complété
+├── [Flux Observation] Transition DEPRECATED → RETIRED enregistrée
+├── [Flux Alerte] Derniers consommateurs alertés
+└── Support minimal (sécurité uniquement)
 
 PHASE 5: ARCHIVAGE
-â”œâ”€â”€ PÃ©riode de grÃ¢ce terminÃ©e
-â”œâ”€â”€ [Flux Observation] Transition RETIRED â†’ ARCHIVED enregistrÃ©e
-â”œâ”€â”€ [Flux Consultation] Tombstone disponible pour rÃ©fÃ©rence
-â””â”€â”€ Ã‰lÃ©ment non fonctionnel, conservÃ© pour traÃ§abilitÃ©
+├── Période de grâce terminée
+├── [Flux Observation] Transition RETIRED → ARCHIVED enregistrée
+├── [Flux Consultation] Tombstone disponible pour référence
+└── Élément non fonctionnel, conservé pour traçabilité
 ```
 
 ---
 
-## 10. MÃ©triques surveillÃ©es
+## 10. Métriques surveillées
 
-Ever Buddy surveille en permanence plusieurs mÃ©triques pour piloter les flux d'Ã©volution.
+Ever Buddy surveille en permanence plusieurs métriques pour piloter les flux d'évolution.
 
-### 10.1 MÃ©triques d'Ã©tat
+### 10.1 Métriques d'état
 
-| MÃ©trique | Description | Seuil d'alerte |
+| Métrique | Description | Seuil d'alerte |
 |----------|-------------|----------------|
-| **count_by_state** | Nombre d'Ã©lÃ©ments par Ã©tat | â€” |
+| **count_by_state** | Nombre d'éléments par état | — |
 | **debt_ratio** | (DEPRECATED + RETIRED) / ACTIVE | > 40% |
-| **avg_age_by_state** | Ã‚ge moyen des Ã©lÃ©ments par Ã©tat | Variable |
-| **draft_stale_count** | DRAFT sans activitÃ© > 90 jours | > 0 |
+| **avg_age_by_state** | Âge moyen des éléments par état | Variable |
+| **draft_stale_count** | DRAFT sans activité > 90 jours | > 0 |
 
-### 10.2 MÃ©triques de transition
+### 10.2 Métriques de transition
 
-| MÃ©trique | Description | Seuil d'alerte |
+| Métrique | Description | Seuil d'alerte |
 |----------|-------------|----------------|
-| **transitions_in_progress** | Nombre de transitions en cours | > seuil_capacitÃ© |
-| **avg_deprecation_duration** | DurÃ©e moyenne de dÃ©prÃ©ciation | Variable |
-| **adoption_rate** | Taux d'adoption des successeurs | < 50% Ã  mi-pÃ©riode |
-| **reactivation_count** | Nombre de rÃ©activations | > 0 (Ã  investiguer) |
-| **blocked_transitions** | Transitions bloquÃ©es | > 0 |
+| **transitions_in_progress** | Nombre de transitions en cours | > seuil_capacité |
+| **avg_deprecation_duration** | Durée moyenne de dépréciation | Variable |
+| **adoption_rate** | Taux d'adoption des successeurs | < 50% à mi-période |
+| **reactivation_count** | Nombre de réactivations | > 0 (à investiguer) |
+| **blocked_transitions** | Transitions bloquées | > 0 |
 
-### 10.3 MÃ©triques d'alerte
+### 10.3 Métriques d'alerte
 
-| MÃ©trique | Description | Seuil d'alerte |
+| Métrique | Description | Seuil d'alerte |
 |----------|-------------|----------------|
-| **open_alerts** | Alertes ouvertes | > seuil_capacitÃ© |
-| **alert_resolution_time** | Temps moyen de rÃ©solution | > SLA |
+| **open_alerts** | Alertes ouvertes | > seuil_capacité |
+| **alert_resolution_time** | Temps moyen de résolution | > SLA |
 | **escalation_rate** | Taux d'escalade vers TAMR | > 10% |
-| **recurring_alerts** | Alertes rÃ©currentes | > 0 (Ã  investiguer) |
+| **recurring_alerts** | Alertes récurrentes | > 0 (à investiguer) |
 
-### 10.4 AgrÃ©gation et reporting
+### 10.4 Agrégation et reporting
 
-| Rapport | FrÃ©quence | Destinataires |
+| Rapport | Fréquence | Destinataires |
 |---------|-----------|---------------|
-| **Snapshot d'Ã©tat** | Continue | Caring Nanny |
+| **Snapshot d'état** | Continue | Caring Nanny |
 | **Rapport de dette** | Hebdomadaire | Architectes |
 | **Bilan des transitions** | Mensuel | Parties prenantes |
-| **Alertes ouvertes** | Quotidien | Ã‰quipes concernÃ©es |
+| **Alertes ouvertes** | Quotidien | Équipes concernées |
 
 ---
 
-## 11. ConformitÃ© aux Lois d'Autonomie
+## 11. Conformité aux Lois d'Autonomie
 
-Les flux d'Ã©volution respectent les Lois d'Autonomie SystÃ¨me :
+Les flux d'évolution respectent les Lois d'Autonomie Système :
 
-| Loi | ConformitÃ© | MÃ©canisme dans les flux |
+| Loi | Conformité | Mécanisme dans les flux |
 |-----|------------|-------------------------|
-| **LOI-1** | âœ… | Tous les flux fonctionnent localement |
-| **LOI-2** | âœ… | Les flux continuent en mode isolÃ© |
-| **LOI-3** | âœ… | L'Ã©tat local des flux est souverain |
-| **LOI-4** | âœ… | Pas de dÃ©pendance au temps global |
-| **LOI-5** | âœ… | Flux lÃ©gers, pas de workers permanents |
-| **LOI-6** | âœ… | FÃ©dÃ©ration des flux via BondingBrother |
+| **LOI-1** | ✅ | Tous les flux fonctionnent localement |
+| **LOI-2** | ✅ | Les flux continuent en mode isolé |
+| **LOI-3** | ✅ | L'état local des flux est souverain |
+| **LOI-4** | ✅ | Pas de dépendance au temps global |
+| **LOI-5** | ✅ | Flux légers, pas de workers permanents |
+| **LOI-6** | ✅ | Fédération des flux via BondingBrother |
 
-**RÃ©fÃ©rence :** [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
+**Référence :** [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
 ## 12. Invariants applicables
 
-Ce document est gouvernÃ© par les invariants suivants de la Documentation Fondatrice :
+Ce document est gouverné par les invariants suivants de la Documentation Fondatrice :
 
-| Invariant | Ã‰noncÃ© | Application aux flux |
+| Invariant | Énoncé | Application aux flux |
 |-----------|--------|----------------------|
-| **INV-EB-1** | Aucune exÃ©cution de migration | Les flux observent et guident, ils n'exÃ©cutent pas |
-| **INV-EB-2** | TraÃ§abilitÃ© complÃ¨te et immuable | Toute opÃ©ration de flux est enregistrÃ©e |
-| **INV-EB-3** | Aucun Ã©tat ambigu | Les flux maintiennent un Ã©tat unique par Ã©lÃ©ment |
-| **INV-EB-7** | Documentation obligatoire | Chaque transition dans les flux est documentÃ©e |
-| **INV-EB-9** | PrÃ©dictibilitÃ© des transitions | Les flux de planification sont prÃ©visibles |
-| **INV-EB-12** | ResponsabilitÃ© de l'annonce | Ever Buddy annonce, les consommateurs rÃ©agissent |
+| **INV-EB-1** | Aucune exécution de migration | Les flux observent et guident, ils n'exécutent pas |
+| **INV-EB-2** | Traçabilité complète et immuable | Toute opération de flux est enregistrée |
+| **INV-EB-3** | Aucun état ambigu | Les flux maintiennent un état unique par élément |
+| **INV-EB-7** | Documentation obligatoire | Chaque transition dans les flux est documentée |
+| **INV-EB-9** | Prédictibilité des transitions | Les flux de planification sont prévisibles |
+| **INV-EB-12** | Responsabilité de l'annonce | Ever Buddy annonce, les consommateurs réagissent |
 
 ---
 
-## 13. RÃ©fÃ©rences croisÃ©es
+## 13. Références croisées
 
 - **Document source :** [Ever Buddy - Documentation Fondatrice](../foundation/Ever%20Buddy%20-%20Documentation%20Fondatrice.md) (Section 8)
-- **Contrat complÃ©mentaire :** [Ever Buddy - Core Interaction Contract](./Ever%20Buddy%20-%20Core%20Interaction%20Contract.md)
-- **MÃ©triques dÃ©taillÃ©es :** [Ever Buddy - Metrics & Alerting Contract](../contracts/observability/Ever%20Buddy%20-%20Metrics%20&%20Alerting%20Contract.md)
+- **Contrat complémentaire :** [Ever Buddy - Core Interaction Contract](./Ever%20Buddy%20-%20Core%20Interaction%20Contract.md)
+- **Métriques détaillées :** [Ever Buddy - Metrics & Alerting Contract](../contracts/observability/Ever%20Buddy%20-%20Metrics%20&%20Alerting%20Contract.md)
 - **Dette structurelle :** [Ever Buddy - Debt Tracking Contract](../contracts/observability/Ever%20Buddy%20-%20Debt%20Tracking%20Contract.md)
 - **Glossaire :** [Miyukini Conceptual References - Glossaire](..//..//..//miyukini-webway-system//reference//_index.md)
 - **Lois d'Autonomie :** [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//miyukini-webway-system//reference//_index.md)
@@ -908,7 +908,7 @@ Ce document est gouvernÃ© par les invariants suivants de la Documentation Fond
 
 **Version :** 1.0  
 **Date :** 2026-01-27  
-**Statut :** Documentation architecturale â€” Normative  
-**DÃ©rivÃ© de :** Ever Buddy - Documentation Fondatrice v1.3, Section 8  
-**Type :** Architecture des flux d'Ã©volution
+**Statut :** Documentation architecturale — Normative  
+**Dérivé de :** Ever Buddy - Documentation Fondatrice v1.3, Section 8  
+**Type :** Architecture des flux d'évolution
 

@@ -2,131 +2,131 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le contrat d'intÃ©gration entre Bonding Brother et Kind Mother. Il spÃ©cifie l'interface, le protocole, les rÃ¨gles de communication, et les garanties associÃ©es Ã  l'intÃ©gration avec Kind Mother en tant qu'autoritÃ© des donnÃ©es.
+Ce document définit le contrat d'intégration entre Bonding Brother et Kind Mother. Il spécifie l'interface, le protocole, les règles de communication, et les garanties associées à l'intégration avec Kind Mother en tant qu'autorité des données.
 
-Ce document complÃ¨te la Section 2 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Authority Delegation Contract](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md) pour les principes de dÃ©lÃ©gation, le [Product-to-Ecosystem Flow](../flows/BondingBrother%20-%20Product-to-Ecosystem%20Flow.md) pour le flux dÃ©taillÃ©, et la documentation de Kind Mother pour les spÃ©cifications de l'autoritÃ©.
+Ce document complète la Section 2 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) et s'appuie sur l'[Authority Delegation Contract](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md) pour les principes de délégation, le [Product-to-Ecosystem Flow](../flows/BondingBrother%20-%20Product-to-Ecosystem%20Flow.md) pour le flux détaillé, et la documentation de Kind Mother pour les spécifications de l'autorité.
 
-L'intÃ©gration respecte les [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md) : en mode offline, les intentions sont buffÃ©es et synchronisÃ©es Ã  la reconnexion (**LOI-2**, **LOI-3**).
+L'intégration respecte les [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md) : en mode offline, les intentions sont buffées et synchronisées à la reconnexion (**LOI-2**, **LOI-3**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - L'interface contractuelle entre Bonding Brother et Kind Mother
-- Le protocole de communication (demandes et rÃ©ponses)
-- Les types d'intentions dÃ©lÃ©guÃ©es Ã  Kind Mother
-- Les rÃ¨gles de traduction spÃ©cifiques Ã  Kind Mother
-- La gestion des erreurs et des rÃ©ponses
-- Les garanties de l'intÃ©gration
+- Le protocole de communication (demandes et réponses)
+- Les types d'intentions déléguées à Kind Mother
+- Les règles de traduction spécifiques à Kind Mother
+- La gestion des erreurs et des réponses
+- Les garanties de l'intégration
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails internes de Kind Mother (voir documentation Kind Mother)
-- Les rÃ¨gles de traduction gÃ©nÃ©rales (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
-- Le mode offline dÃ©taillÃ© (voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md))
+- Les détails internes de Kind Mother (voir documentation Kind Mother)
+- Les règles de traduction générales (voir [Translation Contract](../intent/BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](../intent/BondingBrother%20-%20Filtering%20%26%20Projection%20Contract.md))
+- Le mode offline détaillé (voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md))
 
 ---
 
 ## 3. Principe fondamental
 
-**Bonding Brother reconnaÃ®t Kind Mother comme l'autoritÃ© absolue des donnÃ©es. Il s'adapte Ã  Kind Mother, jamais l'inverse. Toute dÃ©cision concernant la persistance, la cohÃ©rence, ou l'intÃ©gritÃ© des donnÃ©es appartient exclusivement Ã  Kind Mother.**
+**Bonding Brother reconnaît Kind Mother comme l'autorité absolue des données. Il s'adapte à Kind Mother, jamais l'inverse. Toute décision concernant la persistance, la cohérence, ou l'intégrité des données appartient exclusivement à Kind Mother.**
 
-La relation est asymÃ©trique : Bonding Brother traduit les intentions des produits en demandes que Kind Mother comprend, et traduit les rÃ©ponses de Kind Mother en rÃ©sultats que les produits peuvent consommer.
+La relation est asymétrique : Bonding Brother traduit les intentions des produits en demandes que Kind Mother comprend, et traduit les réponses de Kind Mother en résultats que les produits peuvent consommer.
 
 ---
 
 ## 4. Positionnement de Kind Mother
 
-### 4.1 AutoritÃ© des donnÃ©es
+### 4.1 Autorité des données
 
-**Kind Mother est l'autoritÃ© absolue pour :**
-- La persistance des donnÃ©es
-- La cohÃ©rence des donnÃ©es
-- L'intÃ©gritÃ© des donnÃ©es
-- La gestion des hiÃ©rarchies
-- La gestion des relations entre entitÃ©s
+**Kind Mother est l'autorité absolue pour :**
+- La persistance des données
+- La cohérence des données
+- L'intégrité des données
+- La gestion des hiérarchies
+- La gestion des relations entre entités
 - La synchronisation entre instances
 
-**RÃ¨gle KM-POS-01 : AutoritÃ© exclusive**
+**Règle KM-POS-01 : Autorité exclusive**
 
-Toute dÃ©cision concernant les donnÃ©es est dÃ©lÃ©guÃ©e Ã  Kind Mother. Bonding Brother ne prend jamais de dÃ©cision sur les donnÃ©es.
+Toute décision concernant les données est déléguée à Kind Mother. Bonding Brother ne prend jamais de décision sur les données.
 
-**RÃ¨gle KM-POS-02 : Pas de contournement**
+**Règle KM-POS-02 : Pas de contournement**
 
-Bonding Brother ne permet jamais aux produits de contourner Kind Mother pour accÃ©der directement aux donnÃ©es.
+Bonding Brother ne permet jamais aux produits de contourner Kind Mother pour accéder directement aux données.
 
-**RÃ¨gle KM-POS-03 : Adaptation unidirectionnelle**
+**Règle KM-POS-03 : Adaptation unidirectionnelle**
 
-Bonding Brother s'adapte Ã  Kind Mother, jamais l'inverse. Les formats, vocabulaires, et protocoles sont dÃ©finis par Kind Mother.
+Bonding Brother s'adapte à Kind Mother, jamais l'inverse. Les formats, vocabulaires, et protocoles sont définis par Kind Mother.
 
 ---
 
-## 5. Types d'intentions dÃ©lÃ©guÃ©es
+## 5. Types d'intentions déléguées
 
 ### 5.1 Intentions de contenu
 
 **CREATE_CONTENT**
-- **DÃ©lÃ©gation :** CrÃ©ation d'un nouveau contenu
-- **Traduction :** `CREATE_CONTENT` â†’ `create_content` (Kind Mother)
-- **Payload :** DonnÃ©es du contenu Ã  crÃ©er (titre, corps, mÃ©tadonnÃ©es, etc.)
-- **RÃ©ponse :** Contenu crÃ©Ã© avec identifiant unique
+- **Délégation :** Création d'un nouveau contenu
+- **Traduction :** `CREATE_CONTENT` → `create_content` (Kind Mother)
+- **Payload :** Données du contenu à créer (titre, corps, métadonnées, etc.)
+- **Réponse :** Contenu créé avec identifiant unique
 
 **UPDATE_CONTENT**
-- **DÃ©lÃ©gation :** Modification d'un contenu existant
-- **Traduction :** `UPDATE_CONTENT` â†’ `update_content` (Kind Mother)
+- **Délégation :** Modification d'un contenu existant
+- **Traduction :** `UPDATE_CONTENT` → `update_content` (Kind Mother)
 - **Payload :** Identifiant du contenu + modifications
-- **RÃ©ponse :** Contenu modifiÃ© ou erreur si non trouvÃ©/non autorisÃ©
+- **Réponse :** Contenu modifié ou erreur si non trouvé/non autorisé
 
 **DELETE_CONTENT**
-- **DÃ©lÃ©gation :** Suppression d'un contenu
-- **Traduction :** `DELETE_CONTENT` â†’ `delete_content` (Kind Mother)
-- **Payload :** Identifiant du contenu Ã  supprimer
-- **RÃ©ponse :** Confirmation de suppression ou erreur
+- **Délégation :** Suppression d'un contenu
+- **Traduction :** `DELETE_CONTENT` → `delete_content` (Kind Mother)
+- **Payload :** Identifiant du contenu à supprimer
+- **Réponse :** Confirmation de suppression ou erreur
 
 **READ_CONTENT**
-- **DÃ©lÃ©gation :** Lecture d'un contenu par identifiant
-- **Traduction :** `READ_CONTENT` â†’ `read_content` (Kind Mother)
-- **Payload :** Identifiant du contenu Ã  lire
-- **RÃ©ponse :** DonnÃ©es du contenu ou erreur si non trouvÃ©/non autorisÃ©
+- **Délégation :** Lecture d'un contenu par identifiant
+- **Traduction :** `READ_CONTENT` → `read_content` (Kind Mother)
+- **Payload :** Identifiant du contenu à lire
+- **Réponse :** Données du contenu ou erreur si non trouvé/non autorisé
 
 **QUERY_CONTENT**
-- **DÃ©lÃ©gation :** Recherche de contenus selon des critÃ¨res
-- **Traduction :** `QUERY_CONTENT` â†’ `query_content` (Kind Mother)
-- **Payload :** CritÃ¨res de recherche (filtres, tri, pagination)
-- **RÃ©ponse :** Liste de contenus correspondants
+- **Délégation :** Recherche de contenus selon des critères
+- **Traduction :** `QUERY_CONTENT` → `query_content` (Kind Mother)
+- **Payload :** Critères de recherche (filtres, tri, pagination)
+- **Réponse :** Liste de contenus correspondants
 
-### 5.2 Intentions de hiÃ©rarchie
+### 5.2 Intentions de hiérarchie
 
 **CREATE_NODE**
-- **DÃ©lÃ©gation :** CrÃ©ation d'un nÅ“ud dans la hiÃ©rarchie
-- **Traduction :** `CREATE_NODE` â†’ `create_node` (Kind Mother)
-- **Payload :** DonnÃ©es du nÅ“ud + position dans la hiÃ©rarchie
-- **RÃ©ponse :** NÅ“ud crÃ©Ã© avec identifiant unique
+- **Délégation :** Création d'un nœud dans la hiérarchie
+- **Traduction :** `CREATE_NODE` → `create_node` (Kind Mother)
+- **Payload :** Données du nœud + position dans la hiérarchie
+- **Réponse :** Nœud créé avec identifiant unique
 
 **MOVE_NODE**
-- **DÃ©lÃ©gation :** DÃ©placement d'un nÅ“ud dans la hiÃ©rarchie
-- **Traduction :** `MOVE_NODE` â†’ `move_node` (Kind Mother)
-- **Payload :** Identifiant du nÅ“ud + nouvelle position
-- **RÃ©ponse :** Confirmation de dÃ©placement ou erreur
+- **Délégation :** Déplacement d'un nœud dans la hiérarchie
+- **Traduction :** `MOVE_NODE` → `move_node` (Kind Mother)
+- **Payload :** Identifiant du nœud + nouvelle position
+- **Réponse :** Confirmation de déplacement ou erreur
 
 **DELETE_NODE**
-- **DÃ©lÃ©gation :** Suppression d'un nÅ“ud de la hiÃ©rarchie
-- **Traduction :** `DELETE_NODE` â†’ `delete_node` (Kind Mother)
-- **Payload :** Identifiant du nÅ“ud Ã  supprimer
-- **RÃ©ponse :** Confirmation de suppression ou erreur
+- **Délégation :** Suppression d'un nœud de la hiérarchie
+- **Traduction :** `DELETE_NODE` → `delete_node` (Kind Mother)
+- **Payload :** Identifiant du nœud à supprimer
+- **Réponse :** Confirmation de suppression ou erreur
 
-### 5.3 RÃ¨gles de dÃ©lÃ©gation
+### 5.3 Règles de délégation
 
-**RÃ¨gle KM-DELEG-01 : Toutes les intentions de donnÃ©es**
+**Règle KM-DELEG-01 : Toutes les intentions de données**
 
-Toute intention liÃ©e Ã  la persistance, la modification, ou la consultation de donnÃ©es est dÃ©lÃ©guÃ©e Ã  Kind Mother.
+Toute intention liée à la persistance, la modification, ou la consultation de données est déléguée à Kind Mother.
 
-**RÃ¨gle KM-DELEG-02 : Pas d'intentions mixtes**
+**Règle KM-DELEG-02 : Pas d'intentions mixtes**
 
-Une intention ne peut pas mÃ©langer des opÃ©rations sur donnÃ©es et des opÃ©rations sur identitÃ©s/permissions. Ces derniÃ¨res sont dÃ©lÃ©guÃ©es Ã  Strong Father.
+Une intention ne peut pas mélanger des opérations sur données et des opérations sur identités/permissions. Ces dernières sont déléguées à Strong Father.
 
-**RÃ¨gle KM-DELEG-03 : Routage dÃ©terministe**
+**Règle KM-DELEG-03 : Routage déterministe**
 
-Le routage vers Kind Mother est dÃ©terministe basÃ© sur le type d'intention, pas sur le contenu.
+Le routage vers Kind Mother est déterministe basé sur le type d'intention, pas sur le contenu.
 
 ---
 
@@ -134,7 +134,7 @@ Le routage vers Kind Mother est dÃ©terministe basÃ© sur le type d'intention,
 
 ### 6.1 Format des demandes
 
-Les demandes transmises Ã  Kind Mother suivent le format dÃ©fini par Kind Mother dans son interface contractuelle.
+Les demandes transmises à Kind Mother suivent le format défini par Kind Mother dans son interface contractuelle.
 
 **Structure de base :**
 ```typescript
@@ -142,108 +142,108 @@ interface DemandeKindMother {
     demande_id: DemandeId;
     intention_id: IntentionId;
     type: TypeDemandeKM;              // create_content, update_content, etc.
-    donnÃ©es: DonnÃ©esSpÃ©cifiques;      // DonnÃ©es traduites
-    contexte: ContexteComplet;        // Contexte prÃ©servÃ© intÃ©gralement
+    données: DonnéesSpécifiques;      // Données traduites
+    contexte: ContexteComplet;        // Contexte préservé intégralement
     timestamp: Timestamp;
 }
 ```
 
-**RÃ¨gle KM-PROT-01 : Format Kind Mother**
+**Règle KM-PROT-01 : Format Kind Mother**
 
 La demande est dans le format et le vocabulaire que Kind Mother comprend, pas dans le format du produit.
 
-**RÃ¨gle KM-PROT-02 : Contexte complet**
+**Règle KM-PROT-02 : Contexte complet**
 
-Le contexte est transmis intÃ©gralement Ã  Kind Mother, sans modification ni filtrage.
+Le contexte est transmis intégralement à Kind Mother, sans modification ni filtrage.
 
-**RÃ¨gle KM-PROT-03 : Pas d'enrichissement mÃ©tier**
+**Règle KM-PROT-03 : Pas d'enrichissement métier**
 
-Bonding Brother n'ajoute aucune information mÃ©tier non prÃ©sente dans l'intention originale.
+Bonding Brother n'ajoute aucune information métier non présente dans l'intention originale.
 
 ---
 
-### 6.2 Format des rÃ©ponses
+### 6.2 Format des réponses
 
-Les rÃ©ponses reÃ§ues de Kind Mother suivent le format dÃ©fini par Kind Mother.
+Les réponses reçues de Kind Mother suivent le format défini par Kind Mother.
 
 **Structure de base :**
 ```typescript
-interface RÃ©ponseKindMother {
-    rÃ©ponse_id: RÃ©ponseId;
+interface RéponseKindMother {
+    réponse_id: RéponseId;
     demande_id: DemandeId;
     statut: StatutKM;                  // accepted, denied, error
-    donnÃ©es?: DonnÃ©esRetournÃ©es;        // DonnÃ©es si applicable
+    données?: DonnéesRetournées;        // Données si applicable
     erreurs?: ErreurKM[];               // Erreurs si applicable
     timestamp: Timestamp;
 }
 ```
 
-**RÃ¨gle KM-PROT-04 : RÃ©ception fidÃ¨le**
+**Règle KM-PROT-04 : Réception fidèle**
 
-La rÃ©ponse de Kind Mother est reÃ§ue intÃ©gralement, sans modification ni interprÃ©tation.
+La réponse de Kind Mother est reçue intégralement, sans modification ni interprétation.
 
-**RÃ¨gle KM-PROT-05 : PrÃ©servation de la dÃ©cision**
+**Règle KM-PROT-05 : Préservation de la décision**
 
-La dÃ©cision de Kind Mother (acceptÃ©e, refusÃ©e, erreur) est prÃ©servÃ©e intÃ©gralement.
+La décision de Kind Mother (acceptée, refusée, erreur) est préservée intégralement.
 
-**RÃ¨gle KM-PROT-06 : Pas de validation**
+**Règle KM-PROT-06 : Pas de validation**
 
-Bonding Brother ne valide pas la rÃ©ponse de Kind Mother. Il la transmet telle quelle (aprÃ¨s traduction).
+Bonding Brother ne valide pas la réponse de Kind Mother. Il la transmet telle quelle (après traduction).
 
 ---
 
-## 7. Traduction spÃ©cifique Ã  Kind Mother
+## 7. Traduction spécifique à Kind Mother
 
-### 7.1 Traduction intention â†’ demande
+### 7.1 Traduction intention → demande
 
-**RÃ¨gle KM-TRAD-01 : Mapping de type**
+**Règle KM-TRAD-01 : Mapping de type**
 
-Le type d'intention est mappÃ© vers le type de demande Kind Mother selon le registre de mappings.
+Le type d'intention est mappé vers le type de demande Kind Mother selon le registre de mappings.
 
 **Exemples de mapping :**
-- `CREATE_CONTENT` â†’ `create_content`
-- `UPDATE_CONTENT` â†’ `update_content`
-- `DELETE_CONTENT` â†’ `delete_content`
-- `READ_CONTENT` â†’ `read_content`
-- `QUERY_CONTENT` â†’ `query_content`
-- `CREATE_NODE` â†’ `create_node`
-- `MOVE_NODE` â†’ `move_node`
-- `DELETE_NODE` â†’ `delete_node`
+- `CREATE_CONTENT` → `create_content`
+- `UPDATE_CONTENT` → `update_content`
+- `DELETE_CONTENT` → `delete_content`
+- `READ_CONTENT` → `read_content`
+- `QUERY_CONTENT` → `query_content`
+- `CREATE_NODE` → `create_node`
+- `MOVE_NODE` → `move_node`
+- `DELETE_NODE` → `delete_node`
 
-**RÃ¨gle KM-TRAD-02 : Traduction du payload**
+**Règle KM-TRAD-02 : Traduction du payload**
 
-Le payload de l'intention est traduit champ par champ selon les rÃ¨gles de mapping dÃ©finies pour Kind Mother.
+Le payload de l'intention est traduit champ par champ selon les règles de mapping définies pour Kind Mother.
 
-**RÃ¨gle KM-TRAD-03 : PrÃ©servation du contexte**
+**Règle KM-TRAD-03 : Préservation du contexte**
 
-Le contexte est transmis intÃ©gralement, sans modification.
+Le contexte est transmis intégralement, sans modification.
 
-**RÃ¨gle KM-TRAD-04 : Ajout de mÃ©tadonnÃ©es techniques**
+**Règle KM-TRAD-04 : Ajout de métadonnées techniques**
 
-Des mÃ©tadonnÃ©es techniques peuvent Ãªtre ajoutÃ©es (intention_id, timestamp_demande), mais pas de mÃ©tadonnÃ©es mÃ©tier.
+Des métadonnées techniques peuvent être ajoutées (intention_id, timestamp_demande), mais pas de métadonnées métier.
 
 ---
 
-### 7.2 Traduction rÃ©ponse â†’ rÃ©sultat
+### 7.2 Traduction réponse → résultat
 
-**RÃ¨gle KM-TRAD-05 : PrÃ©servation de la dÃ©cision**
+**Règle KM-TRAD-05 : Préservation de la décision**
 
-La dÃ©cision de Kind Mother (acceptÃ©e, refusÃ©e, erreur) est prÃ©servÃ©e intÃ©gralement.
+La décision de Kind Mother (acceptée, refusée, erreur) est préservée intégralement.
 
-**RÃ¨gle KM-TRAD-06 : Traduction du statut**
+**Règle KM-TRAD-06 : Traduction du statut**
 
-Le statut de la rÃ©ponse est traduit dans le vocabulaire du produit :
-- `accepted` â†’ `SUCCÃˆS`
-- `denied` â†’ `REFUSÃ‰`
-- `error` â†’ `ERREUR`
+Le statut de la réponse est traduit dans le vocabulaire du produit :
+- `accepted` → `SUCCÈS`
+- `denied` → `REFUSÉ`
+- `error` → `ERREUR`
 
-**RÃ¨gle KM-TRAD-07 : Traduction des donnÃ©es**
+**Règle KM-TRAD-07 : Traduction des données**
 
-Les donnÃ©es de la rÃ©ponse sont traduites champ par champ selon les rÃ¨gles de mapping dÃ©finies.
+Les données de la réponse sont traduites champ par champ selon les règles de mapping définies.
 
-**RÃ¨gle KM-TRAD-08 : Traduction des erreurs**
+**Règle KM-TRAD-08 : Traduction des erreurs**
 
-Les erreurs de Kind Mother sont traduites dans le vocabulaire du produit, avec prÃ©servation du code d'erreur technique.
+Les erreurs de Kind Mother sont traduites dans le vocabulaire du produit, avec préservation du code d'erreur technique.
 
 ---
 
@@ -252,77 +252,77 @@ Les erreurs de Kind Mother sont traduites dans le vocabulaire du produit, avec p
 ### 8.1 Types d'erreurs
 
 **Erreurs de transmission :**
-- AutoritÃ© indisponible (offline)
+- Autorité indisponible (offline)
 - Timeout de connexion
-- Erreur rÃ©seau
+- Erreur réseau
 
 **Erreurs de Kind Mother :**
 - Demande invalide
 - Permission insuffisante
-- Contrainte violÃ©e
-- Ressource non trouvÃ©e
+- Contrainte violée
+- Ressource non trouvée
 - Erreur interne
 
 ### 8.2 Traitement des erreurs
 
-**RÃ¨gle KM-ERR-01 : Erreurs de transmission**
+**Règle KM-ERR-01 : Erreurs de transmission**
 
-Les erreurs de transmission sont gÃ©rÃ©es en mode offline : l'intention est mise en buffer et retentÃ©e lors de la reconnexion.
+Les erreurs de transmission sont gérées en mode offline : l'intention est mise en buffer et retentée lors de la reconnexion.
 
-**RÃ¨gle KM-ERR-02 : Erreurs de Kind Mother**
+**Règle KM-ERR-02 : Erreurs de Kind Mother**
 
-Les erreurs de Kind Mother sont traduites et transmises fidÃ¨lement au produit, sans modification ni interprÃ©tation.
+Les erreurs de Kind Mother sont traduites et transmises fidèlement au produit, sans modification ni interprétation.
 
-**RÃ¨gle KM-ERR-03 : Journalisation**
+**Règle KM-ERR-03 : Journalisation**
 
-Toutes les erreurs sont journalisÃ©es pour audit et analyse.
+Toutes les erreurs sont journalisées pour audit et analyse.
 
-**RÃ¨gle KM-ERR-04 : Pas de retry automatique**
+**Règle KM-ERR-04 : Pas de retry automatique**
 
-Les erreurs de Kind Mother (refus, contrainte violÃ©e) ne sont pas retentÃ©es automatiquement. Seules les erreurs de transmission sont retentÃ©es.
+Les erreurs de Kind Mother (refus, contrainte violée) ne sont pas retentées automatiquement. Seules les erreurs de transmission sont retentées.
 
 ---
 
-## 9. Notifications et Ã©vÃ©nements
+## 9. Notifications et événements
 
-### 9.1 RÃ©ception depuis Kind Mother
+### 9.1 Réception depuis Kind Mother
 
-Kind Mother peut Ã©mettre des notifications et Ã©vÃ©nements vers Bonding Brother pour informer les produits de changements dans les donnÃ©es.
+Kind Mother peut émettre des notifications et événements vers Bonding Brother pour informer les produits de changements dans les données.
 
 **Types de notifications :**
-- Notification de crÃ©ation de contenu
+- Notification de création de contenu
 - Notification de modification de contenu
 - Notification de suppression de contenu
-- Notification de changement de hiÃ©rarchie
+- Notification de changement de hiérarchie
 - Notification de synchronisation disponible
 
-**RÃ¨gle KM-NOTIF-01 : RÃ©ception fidÃ¨le**
+**Règle KM-NOTIF-01 : Réception fidèle**
 
-Les notifications de Kind Mother sont reÃ§ues intÃ©gralement, sans modification.
+Les notifications de Kind Mother sont reçues intégralement, sans modification.
 
-**RÃ¨gle KM-NOTIF-02 : Traduction et distribution**
+**Règle KM-NOTIF-02 : Traduction et distribution**
 
-Les notifications sont traduites et distribuÃ©es aux produits concernÃ©s selon les rÃ¨gles du flux Ã‰cosystÃ¨me â†’ Produit.
+Les notifications sont traduites et distribuées aux produits concernés selon les règles du flux Écosystème → Produit.
 
 ---
 
-## 10. Garanties de l'intÃ©gration
+## 10. Garanties de l'intégration
 
-### 10.1 Garantie de dÃ©lÃ©gation
+### 10.1 Garantie de délégation
 
-**Engagement :** Toute dÃ©cision concernant les donnÃ©es est dÃ©lÃ©guÃ©e Ã  Kind Mother. Bonding Brother ne prend jamais de dÃ©cision sur les donnÃ©es.
+**Engagement :** Toute décision concernant les données est déléguée à Kind Mother. Bonding Brother ne prend jamais de décision sur les données.
 
-### 10.2 Garantie de fidÃ©litÃ©
+### 10.2 Garantie de fidélité
 
-**Engagement :** La sÃ©mantique de l'intention est prÃ©servÃ©e lors de la traduction vers Kind Mother, et la dÃ©cision de Kind Mother est transmise fidÃ¨lement au produit.
+**Engagement :** La sémantique de l'intention est préservée lors de la traduction vers Kind Mother, et la décision de Kind Mother est transmise fidèlement au produit.
 
 ### 10.3 Garantie de non-modification
 
-**Engagement :** Bonding Brother ne modifie jamais la demande avant transmission ni la rÃ©ponse aprÃ¨s rÃ©ception. Il traduit le format, pas le sens.
+**Engagement :** Bonding Brother ne modifie jamais la demande avant transmission ni la réponse après réception. Il traduit le format, pas le sens.
 
-### 10.4 Garantie de traÃ§abilitÃ©
+### 10.4 Garantie de traçabilité
 
-**Engagement :** Toute interaction avec Kind Mother est traÃ§able de bout en bout. Le journal contient toutes les informations nÃ©cessaires pour reconstruire l'interaction complÃ¨te.
+**Engagement :** Toute interaction avec Kind Mother est traçable de bout en bout. Le journal contient toutes les informations nécessaires pour reconstruire l'interaction complète.
 
 ---
 
@@ -330,46 +330,46 @@ Les notifications sont traduites et distribuÃ©es aux produits concernÃ©s sel
 
 ### 11.1 Comportement en mode offline
 
-En mode offline, Kind Mother peut Ãªtre indisponible. Bonding Brother :
+En mode offline, Kind Mother peut être indisponible. Bonding Brother :
 1. Met les intentions en buffer
 2. Retente la transmission lors de la reconnexion
-3. Transmet les rÃ©sultats diffÃ©rÃ©s aux produits
+3. Transmet les résultats différés aux produits
 
-**RÃ¨gle KM-OFFLINE-01 : Buffer systÃ©matique**
+**Règle KM-OFFLINE-01 : Buffer systématique**
 
-Toute intention destinÃ©e Ã  Kind Mother est mise en buffer si l'autoritÃ© est indisponible.
+Toute intention destinée à Kind Mother est mise en buffer si l'autorité est indisponible.
 
-**RÃ¨gle KM-OFFLINE-02 : Retry Ã  la reconnexion**
+**Règle KM-OFFLINE-02 : Retry à la reconnexion**
 
-Lors de la reconnexion, toutes les intentions en buffer sont retentÃ©es dans l'ordre chronologique.
+Lors de la reconnexion, toutes les intentions en buffer sont retentées dans l'ordre chronologique.
 
-**RÃ¨gle KM-OFFLINE-03 : Transmission diffÃ©rÃ©e**
+**Règle KM-OFFLINE-03 : Transmission différée**
 
-Les rÃ©sultats diffÃ©rÃ©s sont transmis aux produits lors de la rÃ©ception.
+Les résultats différés sont transmis aux produits lors de la réception.
 
-Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md) pour les dÃ©tails.
+Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20%26%20Deferred%20Authority%20Contract.md) pour les détails.
 
 ---
 
 ## 12. Performance et limites
 
-### 12.1 DÃ©lais
+### 12.1 Délais
 
-**DÃ©lai de transmission :** Variable selon la disponibilitÃ© de Kind Mother
-**DÃ©lai d'Ã©valuation :** Variable selon la complexitÃ© de l'opÃ©ration
-**Timeout par dÃ©faut :** 30 secondes (configurable)
+**Délai de transmission :** Variable selon la disponibilité de Kind Mother
+**Délai d'évaluation :** Variable selon la complexité de l'opération
+**Timeout par défaut :** 30 secondes (configurable)
 
 ### 12.2 Limites
 
-**Taille maximale de demande :** DÃ©finie par Kind Mother (gÃ©nÃ©ralement 1 MB)
-**Taille maximale de rÃ©ponse :** DÃ©finie par Kind Mother (gÃ©nÃ©ralement 10 MB)
-**Nombre de demandes simultanÃ©es :** IllimitÃ© (sous rÃ©serve de ressources)
+**Taille maximale de demande :** Définie par Kind Mother (généralement 1 MB)
+**Taille maximale de réponse :** Définie par Kind Mother (généralement 10 MB)
+**Nombre de demandes simultanées :** Illimité (sous réserve de ressources)
 
 ---
 
 ## 13. Exemples
 
-### 13.1 CrÃ©ation de contenu
+### 13.1 Création de contenu
 
 **Intention produit :**
 ```json
@@ -394,7 +394,7 @@ Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Off
   "demande_id": "dem-789",
   "intention_id": "int-123",
   "type": "create_content",
-  "donnÃ©es": {
+  "données": {
     "title": "Mon article",
     "body": "Contenu de l'article...",
     "author_id": "user-456"
@@ -404,13 +404,13 @@ Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Off
 }
 ```
 
-**RÃ©ponse (Kind Mother) :**
+**Réponse (Kind Mother) :**
 ```json
 {
-  "rÃ©ponse_id": "resp-456",
+  "réponse_id": "resp-456",
   "demande_id": "dem-789",
   "statut": "accepted",
-  "donnÃ©es": {
+  "données": {
     "content_id": "content-999",
     "title": "Mon article",
     "created_at": "2026-01-26T10:05:00Z"
@@ -419,58 +419,58 @@ Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Off
 }
 ```
 
-**RÃ©sultat traduit (produit) :**
+**Résultat traduit (produit) :**
 ```json
 {
-  "rÃ©sultat_id": "res-111",
+  "résultat_id": "res-111",
   "intention_id": "int-123",
   "demande_id": "dem-789",
-  "statut": "SUCCÃˆS",
-  "dÃ©cision": "ACCEPTÃ‰E",
-  "donnÃ©es": {
+  "statut": "SUCCÈS",
+  "décision": "ACCEPTÉE",
+  "données": {
     "id": "content-999",
     "titre": "Mon article",
-    "crÃ©Ã©_le": "2026-01-26T10:05:00Z"
+    "créé_le": "2026-01-26T10:05:00Z"
   },
   "timestamp": "2026-01-26T10:05:00Z",
-  "autoritÃ©": "kind_mother"
+  "autorité": "kind_mother"
 }
 ```
 
 ### 13.2 Refus par Kind Mother
 
-**RÃ©ponse (Kind Mother) :**
+**Réponse (Kind Mother) :**
 ```json
 {
-  "rÃ©ponse_id": "resp-457",
+  "réponse_id": "resp-457",
   "demande_id": "dem-790",
   "statut": "denied",
   "erreurs": [
     {
       "code": "PERMISSION_INSUFFISANTE",
-      "message": "L'utilisateur n'a pas la permission d'Ã©crire ce contenu"
+      "message": "L'utilisateur n'a pas la permission d'écrire ce contenu"
     }
   ],
   "timestamp": "2026-01-26T10:06:00Z"
 }
 ```
 
-**RÃ©sultat traduit (produit) :**
+**Résultat traduit (produit) :**
 ```json
 {
-  "rÃ©sultat_id": "res-112",
+  "résultat_id": "res-112",
   "intention_id": "int-124",
   "demande_id": "dem-790",
-  "statut": "REFUSÃ‰",
-  "dÃ©cision": "REFUSÃ‰E",
+  "statut": "REFUSÉ",
+  "décision": "REFUSÉE",
   "erreurs": [
     {
       "code": "PERMISSION_INSUFFISANTE",
-      "message": "L'utilisateur n'a pas la permission d'Ã©crire ce contenu"
+      "message": "L'utilisateur n'a pas la permission d'écrire ce contenu"
     }
   ],
   "timestamp": "2026-01-26T10:06:00Z",
-  "autoritÃ©": "kind_mother"
+  "autorité": "kind_mother"
 }
 ```
 
@@ -478,16 +478,16 @@ Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Off
 
 ## 14. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit l'interface et le protocole que Bonding Brother doit respecter pour s'intÃ©grer avec Kind Mother.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit l'interface et le protocole que Bonding Brother doit respecter pour s'intégrer avec Kind Mother.
 
-Toute implÃ©mentation de l'intÃ©gration avec Kind Mother doit respecter ce contrat. Toute violation entraÃ®ne un comportement non conforme.
+Toute implémentation de l'intégration avec Kind Mother doit respecter ce contrat. Toute violation entraîne un comportement non conforme.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice v2.0](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) (Section 2)
 - [Authority Delegation Contract v2.0](../authority/BondingBrother%20-%20Authority%20Delegation%20Contract.md)
 - [Product-to-Ecosystem Flow v2.0](../flows/BondingBrother%20-%20Product-to-Ecosystem%20Flow.md)

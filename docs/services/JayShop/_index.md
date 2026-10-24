@@ -37,8 +37,8 @@ JayShop est le service Miyukini dedie au **commerce et a la vente** :
 
 ## Liaisons ecosysteme
 
-- [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) â€” Suivi comptable
-- [Miyukini Sales - Document Fondateur](../MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) â€” Socle Operateurs partages
+- [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) — Suivi comptable
+- [Miyukini Sales - Document Fondateur](../MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) — Socle Operateurs partages
 - [Services retires](../DEPRECATED.md)
 - [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md)
 

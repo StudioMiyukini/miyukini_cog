@@ -2,225 +2,225 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le **modÃ¨le de menaces** gouvernÃ© par Border Guard dans l'Ã©cosystÃ¨me Miyukini. Il spÃ©cifie formellement les catÃ©gories de menaces, les vecteurs d'attaque, les rÃ©ponses conceptuelles, et les rÃ¨gles de dÃ©tection que Border Guard applique pour protÃ©ger les frontiÃ¨res du systÃ¨me.
+Ce document définit le **modèle de menaces** gouverné par Border Guard dans l'écosystème Miyukini. Il spécifie formellement les catégories de menaces, les vecteurs d'attaque, les réponses conceptuelles, et les règles de détection que Border Guard applique pour protéger les frontières du système.
 
 **Document fondateur :** [Border Guard - Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md)
 
-**RÃ©fÃ©rences principales :**
+**Références principales :**
 - [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md)
 - [Miyukini Conceptual References - External Signal Trust Reinforcement Contract](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
-**Statut contractuel :** Ce document est **contractuel, normatif, et non nÃ©gociable**. Il dÃ©rive directement de la Documentation Fondatrice et des protocoles de sÃ©curitÃ©.
+**Statut contractuel :** Ce document est **contractuel, normatif, et non négociable**. Il dérive directement de la Documentation Fondatrice et des protocoles de sécurité.
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
-- **Applicable Ã  :** Toutes les frontiÃ¨res dÃ©finies par Border Guard
-- **Responsable :** Border Guard (dÃ©finition des menaces et rÃ©ponses conceptuelles)
-- **Consommateurs :** BondingBrother (application), StrongFather (dÃ©cision), Caring Nanny (observation)
-- **Ne couvre pas :** L'implÃ©mentation technique des mÃ©canismes de protection
+- **Applicable à :** Toutes les frontières définies par Border Guard
+- **Responsable :** Border Guard (définition des menaces et réponses conceptuelles)
+- **Consommateurs :** BondingBrother (application), StrongFather (décision), Caring Nanny (observation)
+- **Ne couvre pas :** L'implémentation technique des mécanismes de protection
 
 ---
 
-## 3. Philosophie de sÃ©curitÃ©
+## 3. Philosophie de sécurité
 
 ### 3.1 Principe fondamental
 
-**"La sÃ©curitÃ© n'est pas un mur. C'est un systÃ¨me nerveux. Il ressent, Ã©value, s'adapte, se dÃ©grade, se protÃ¨ge."**
+**"La sécurité n'est pas un mur. C'est un système nerveux. Il ressent, évalue, s'adapte, se dégrade, se protège."**
 
 ### 3.2 Posture de Border Guard
 
-Border Guard adopte une posture de **dÃ©fense en profondeur conceptuelle** :
+Border Guard adopte une posture de **défense en profondeur conceptuelle** :
 
-1. **DÃ©finition** â€” Border Guard dÃ©finit ce qui est une menace
-2. **Classification** â€” Border Guard classifie les sources selon leur niveau de confiance
-3. **Conseil** â€” Border Guard informe les autres cores sur les menaces
-4. **Jamais d'exÃ©cution** â€” Border Guard ne bloque pas lui-mÃªme
+1. **Définition** — Border Guard définit ce qui est une menace
+2. **Classification** — Border Guard classifie les sources selon leur niveau de confiance
+3. **Conseil** — Border Guard informe les autres cores sur les menaces
+4. **Jamais d'exécution** — Border Guard ne bloque pas lui-même
 
 ### 3.3 Internet comme source de signaux
 
 **Principe fondamental :**
 
-> **"Internet n'a jamais raison. Il peut seulement confirmer ou infirmer ce que le systÃ¨me croit dÃ©jÃ ."**
+> **"Internet n'a jamais raison. Il peut seulement confirmer ou infirmer ce que le système croit déjà."**
 
 - Internet est un **capteur, pas un cerveau**
-- Les signaux externes sont des **informations, pas des autoritÃ©s**
-- L'Ã©tat local **prime toujours** sur les signaux externes
+- Les signaux externes sont des **informations, pas des autorités**
+- L'état local **prime toujours** sur les signaux externes
 
 ---
 
-## 4. CatÃ©gories de menaces
+## 4. Catégories de menaces
 
-### 4.1 Menaces aux frontiÃ¨res externes
+### 4.1 Menaces aux frontières externes
 
-Les menaces ciblant la frontiÃ¨re entre l'Ã©cosystÃ¨me Miyukini et le monde extÃ©rieur.
+Les menaces ciblant la frontière entre l'écosystème Miyukini et le monde extérieur.
 
-#### THREAT-EXT-1 : Injection de donnÃ©es malveillantes
+#### THREAT-EXT-1 : Injection de données malveillantes
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Tentative d'injecter des donnÃ©es non valides ou malveillantes via les frontiÃ¨res externes |
+| **Description** | Tentative d'injecter des données non valides ou malveillantes via les frontières externes |
 | **Vecteurs** | API publiques, webhooks, formulaires, imports |
-| **Indicateurs** | DonnÃ©es hors format, patterns d'injection connus, sÃ©quences suspectes |
-| **Impact potentiel** | Corruption de donnÃ©es, compromission systÃ¨me |
-| **RÃ©ponse Border Guard** | Classification UNKNOWN â†’ HOSTILE si pattern confirmÃ© |
+| **Indicateurs** | Données hors format, patterns d'injection connus, séquences suspectes |
+| **Impact potentiel** | Corruption de données, compromission système |
+| **Réponse Border Guard** | Classification UNKNOWN → HOSTILE si pattern confirmé |
 
-#### THREAT-EXT-2 : Usurpation d'identitÃ©
+#### THREAT-EXT-2 : Usurpation d'identité
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Tentative de se faire passer pour une source lÃ©gitime |
-| **Vecteurs** | Tokens volÃ©s, sessions hijackÃ©es, replay d'authentification |
-| **Indicateurs** | Contexte incohÃ©rent, device inconnu, localisation suspecte |
-| **Impact potentiel** | AccÃ¨s non autorisÃ©, actions frauduleuses |
-| **RÃ©ponse Border Guard** | DÃ©gradation confiance VERIFIED â†’ UNKNOWN, notification StrongFather |
+| **Description** | Tentative de se faire passer pour une source légitime |
+| **Vecteurs** | Tokens volés, sessions hijackées, replay d'authentification |
+| **Indicateurs** | Contexte incohérent, device inconnu, localisation suspecte |
+| **Impact potentiel** | Accès non autorisé, actions frauduleuses |
+| **Réponse Border Guard** | Dégradation confiance VERIFIED → UNKNOWN, notification StrongFather |
 
-#### THREAT-EXT-3 : Attaque par dÃ©ni de service
+#### THREAT-EXT-3 : Attaque par déni de service
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Tentative de saturer les frontiÃ¨res pour bloquer le systÃ¨me |
-| **Vecteurs** | RequÃªtes massives, patterns rÃ©pÃ©titifs, amplification |
-| **Indicateurs** | Volume anormal, rythme anormal, sources multiples coordonnÃ©es |
-| **Impact potentiel** | IndisponibilitÃ© du systÃ¨me |
-| **RÃ©ponse Border Guard** | Classification HOSTILE, isolation de la frontiÃ¨re ciblÃ©e |
+| **Description** | Tentative de saturer les frontières pour bloquer le système |
+| **Vecteurs** | Requêtes massives, patterns répétitifs, amplification |
+| **Indicateurs** | Volume anormal, rythme anormal, sources multiples coordonnées |
+| **Impact potentiel** | Indisponibilité du système |
+| **Réponse Border Guard** | Classification HOSTILE, isolation de la frontière ciblée |
 
-#### THREAT-EXT-4 : Exfiltration de donnÃ©es
+#### THREAT-EXT-4 : Exfiltration de données
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Tentative d'extraire des donnÃ©es au-delÃ  des frontiÃ¨res autorisÃ©es |
-| **Vecteurs** | RequÃªtes massives, scraping, tunneling |
+| **Description** | Tentative d'extraire des données au-delà des frontières autorisées |
+| **Vecteurs** | Requêtes massives, scraping, tunneling |
 | **Indicateurs** | Volume de sortie anormal, patterns d'extraction |
-| **Impact potentiel** | Fuite de donnÃ©es sensibles |
-| **RÃ©ponse Border Guard** | Resserrement des rÃ¨gles de sortie, notification Caring Nanny |
+| **Impact potentiel** | Fuite de données sensibles |
+| **Réponse Border Guard** | Resserrement des règles de sortie, notification Caring Nanny |
 
-### 4.2 Menaces aux frontiÃ¨res internes
+### 4.2 Menaces aux frontières internes
 
-Les menaces ciblant les frontiÃ¨res entre zones de confiance internes.
+Les menaces ciblant les frontières entre zones de confiance internes.
 
-#### THREAT-INT-1 : Escalade de privilÃ¨ges
+#### THREAT-INT-1 : Escalade de privilèges
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Tentative d'accÃ©der Ã  une zone de confiance supÃ©rieure sans autorisation |
-| **Vecteurs** | Exploitation de failles, contournement de rÃ¨gles |
-| **Indicateurs** | Tentatives de franchissement non autorisÃ©es, patterns d'exploration |
-| **Impact potentiel** | AccÃ¨s Ã  des zones sensibles |
-| **RÃ©ponse Border Guard** | Renforcement de la frontiÃ¨re, classification HOSTILE si rÃ©pÃ©tÃ© |
+| **Description** | Tentative d'accéder à une zone de confiance supérieure sans autorisation |
+| **Vecteurs** | Exploitation de failles, contournement de règles |
+| **Indicateurs** | Tentatives de franchissement non autorisées, patterns d'exploration |
+| **Impact potentiel** | Accès à des zones sensibles |
+| **Réponse Border Guard** | Renforcement de la frontière, classification HOSTILE si répété |
 
-#### THREAT-INT-2 : Mouvement latÃ©ral
+#### THREAT-INT-2 : Mouvement latéral
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
 | **Description** | Tentative de se propager entre zones internes |
 | **Vecteurs** | Exploitation de relations de confiance, rebond |
-| **Indicateurs** | AccÃ¨s inhabituels entre zones, patterns de propagation |
-| **Impact potentiel** | Compromission Ã©tendue |
-| **RÃ©ponse Border Guard** | Isolation des zones, resserrement des franchissements |
+| **Indicateurs** | Accès inhabituels entre zones, patterns de propagation |
+| **Impact potentiel** | Compromission étendue |
+| **Réponse Border Guard** | Isolation des zones, resserrement des franchissements |
 
-#### THREAT-INT-3 : Corruption de donnÃ©es internes
+#### THREAT-INT-3 : Corruption de données internes
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Modification non autorisÃ©e de donnÃ©es dans une zone de confiance |
-| **Vecteurs** | Injection interne, race conditions, manipulation d'Ã©tat |
-| **Indicateurs** | IncohÃ©rences de donnÃ©es, signatures invalides |
-| **Impact potentiel** | Perte d'intÃ©gritÃ© |
-| **RÃ©ponse Border Guard** | Notification Caring Nanny, gel de la zone concernÃ©e |
+| **Description** | Modification non autorisée de données dans une zone de confiance |
+| **Vecteurs** | Injection interne, race conditions, manipulation d'état |
+| **Indicateurs** | Incohérences de données, signatures invalides |
+| **Impact potentiel** | Perte d'intégrité |
+| **Réponse Border Guard** | Notification Caring Nanny, gel de la zone concernée |
 
-### 4.3 Menaces aux frontiÃ¨res d'intÃ©gration
+### 4.3 Menaces aux frontières d'intégration
 
-Les menaces ciblant les relations avec les systÃ¨mes externes.
+Les menaces ciblant les relations avec les systèmes externes.
 
-#### THREAT-INTEG-1 : Compromission d'intÃ©gration
+#### THREAT-INTEG-1 : Compromission d'intégration
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Un systÃ¨me externe intÃ©grÃ© devient malveillant ou compromis |
-| **Vecteurs** | IntÃ©gration lÃ©gitime devenue hostile, piratage du partenaire |
-| **Indicateurs** | Comportement anormal de l'intÃ©gration, signaux externes de compromission |
+| **Description** | Un système externe intégré devient malveillant ou compromis |
+| **Vecteurs** | Intégration légitime devenue hostile, piratage du partenaire |
+| **Indicateurs** | Comportement anormal de l'intégration, signaux externes de compromission |
 | **Impact potentiel** | Canal de confiance devenu canal d'attaque |
-| **RÃ©ponse Border Guard** | Suspension de l'intÃ©gration, classification HOSTILE |
+| **Réponse Border Guard** | Suspension de l'intégration, classification HOSTILE |
 
-#### THREAT-INTEG-2 : Abus d'intÃ©gration
+#### THREAT-INTEG-2 : Abus d'intégration
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Un systÃ¨me intÃ©grÃ© dÃ©passe les limites de son contrat |
-| **Vecteurs** | RequÃªtes hors scope, accÃ¨s non autorisÃ©s, volume excessif |
-| **Indicateurs** | Ã‰carts par rapport au contrat d'intÃ©gration |
-| **Impact potentiel** | Surcharge, accÃ¨s non autorisÃ© |
-| **RÃ©ponse Border Guard** | DÃ©gradation confiance, restriction des accÃ¨s |
+| **Description** | Un système intégré dépasse les limites de son contrat |
+| **Vecteurs** | Requêtes hors scope, accès non autorisés, volume excessif |
+| **Indicateurs** | Écarts par rapport au contrat d'intégration |
+| **Impact potentiel** | Surcharge, accès non autorisé |
+| **Réponse Border Guard** | Dégradation confiance, restriction des accès |
 
-#### THREAT-INTEG-3 : Injection via intÃ©gration
+#### THREAT-INTEG-3 : Injection via intégration
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Utilisation d'une intÃ©gration lÃ©gitime pour injecter des donnÃ©es malveillantes |
-| **Vecteurs** | Webhooks manipulÃ©s, rÃ©ponses API altÃ©rÃ©es |
-| **Indicateurs** | DonnÃ©es incohÃ©rentes, signatures invalides |
+| **Description** | Utilisation d'une intégration légitime pour injecter des données malveillantes |
+| **Vecteurs** | Webhooks manipulés, réponses API altérées |
+| **Indicateurs** | Données incohérentes, signatures invalides |
 | **Impact potentiel** | Corruption via canal de confiance |
-| **RÃ©ponse Border Guard** | Validation renforcÃ©e, suspension si rÃ©pÃ©tÃ© |
+| **Réponse Border Guard** | Validation renforcée, suspension si répété |
 
-### 4.4 Menaces rÃ©seau et signaux externes
+### 4.4 Menaces réseau et signaux externes
 
-Les menaces liÃ©es aux communications rÃ©seau et aux signaux Internet.
+Les menaces liées aux communications réseau et aux signaux Internet.
 
 #### THREAT-NET-1 : Signal externe malveillant
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Signal Internet tentant d'imposer un Ã©tat ou une action |
-| **Vecteurs** | Update signals falsifiÃ©s, compliance signals manipulÃ©s |
-| **Indicateurs** | Signal non vÃ©rifiable, contradiction avec Ã©tat local |
-| **Impact potentiel** | Manipulation de l'Ã©tat local |
-| **RÃ©ponse Border Guard** | Rejet du signal, marquage AMBIGU |
+| **Description** | Signal Internet tentant d'imposer un état ou une action |
+| **Vecteurs** | Update signals falsifiés, compliance signals manipulés |
+| **Indicateurs** | Signal non vérifiable, contradiction avec état local |
+| **Impact potentiel** | Manipulation de l'état local |
+| **Réponse Border Guard** | Rejet du signal, marquage AMBIGU |
 
-#### THREAT-NET-2 : RÃ©seau compromis
+#### THREAT-NET-2 : Réseau compromis
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Le rÃ©seau lui-mÃªme est devenu hostile (MITM, DNS poisoning) |
+| **Description** | Le réseau lui-même est devenu hostile (MITM, DNS poisoning) |
 | **Vecteurs** | Interception, modification en transit, redirection |
-| **Indicateurs** | Certificats invalides, rÃ©ponses incohÃ©rentes |
+| **Indicateurs** | Certificats invalides, réponses incohérentes |
 | **Impact potentiel** | Toute communication compromise |
-| **RÃ©ponse Border Guard** | Isolation automatique, fonctionnement local |
+| **Réponse Border Guard** | Isolation automatique, fonctionnement local |
 
-#### THREAT-NET-3 : DÃ©pendance externe exploitÃ©e
+#### THREAT-NET-3 : Dépendance externe exploitée
 
-| Aspect | DÃ©finition |
+| Aspect | Définition |
 |--------|------------|
-| **Description** | Exploitation d'une dÃ©pendance Ã  un service externe |
-| **Vecteurs** | Service tiers compromis, indisponibilitÃ© forcÃ©e |
+| **Description** | Exploitation d'une dépendance à un service externe |
+| **Vecteurs** | Service tiers compromis, indisponibilité forcée |
 | **Indicateurs** | Comportement anormal du service externe |
 | **Impact potentiel** | Perte d'autonomie |
-| **RÃ©ponse Border Guard** | Activation du mode dÃ©gradÃ©, aucune dÃ©pendance critique |
+| **Réponse Border Guard** | Activation du mode dégradé, aucune dépendance critique |
 
 ---
 
-## 5. Vecteurs d'attaque et rÃ©ponses
+## 5. Vecteurs d'attaque et réponses
 
-### 5.1 Matrice vecteur / rÃ©ponse
+### 5.1 Matrice vecteur / réponse
 
-| Vecteur | Classification rÃ©sultante | Action Border Guard | Core notifiÃ© |
+| Vecteur | Classification résultante | Action Border Guard | Core notifié |
 |---------|---------------------------|---------------------|--------------|
-| Pattern d'injection | UNKNOWN â†’ HOSTILE | Blocage dÃ©finition | StrongFather |
-| Contexte incohÃ©rent | VERIFIED â†’ UNKNOWN | RÃ©Ã©valuation | StrongFather |
-| Volume anormal | UNKNOWN / HOSTILE | Isolation frontiÃ¨re | Caring Nanny |
-| Signature invalide | HOSTILE | Blocage dÃ©finition | StrongFather, TAMR |
+| Pattern d'injection | UNKNOWN → HOSTILE | Blocage définition | StrongFather |
+| Contexte incohérent | VERIFIED → UNKNOWN | Réévaluation | StrongFather |
+| Volume anormal | UNKNOWN / HOSTILE | Isolation frontière | Caring Nanny |
+| Signature invalide | HOSTILE | Blocage définition | StrongFather, TAMR |
 | Signal externe contradictoire | AMBIGU | Marquage, pas d'action | Caring Nanny |
-| Certificat invalide | HOSTILE (rÃ©seau) | Isolation rÃ©seau | Caring Nanny |
+| Certificat invalide | HOSTILE (réseau) | Isolation réseau | Caring Nanny |
 
-### 5.2 RÃ©ponses graduÃ©es
+### 5.2 Réponses graduées
 
-| Niveau de menace | RÃ©ponse Border Guard |
+| Niveau de menace | Réponse Border Guard |
 |------------------|---------------------|
 | **Suspicion** | Surveillance accrue, pas de changement de classification |
-| **Anomalie confirmÃ©e** | DÃ©gradation de confiance (ex: VERIFIED â†’ UNKNOWN) |
+| **Anomalie confirmée** | Dégradation de confiance (ex: VERIFIED → UNKNOWN) |
 | **Pattern hostile** | Classification HOSTILE, notification cores |
-| **Compromission** | Isolation frontiÃ¨re, gel zone, notification TAMR |
+| **Compromission** | Isolation frontière, gel zone, notification TAMR |
 
 ---
 
@@ -232,143 +232,143 @@ Border Guard traite les signaux Internet selon le contrat External Signal Trust 
 
 | Type de signal | Traitement Border Guard |
 |----------------|------------------------|
-| **Update signal** | Validation format, passage Ã  Ever Buddy |
-| **Compliance signal** | Comparaison Ã©tat local, passage Ã  Caring Nanny |
-| **Alert signal** | Ã‰valuation gravitÃ©, notification StrongFather |
+| **Update signal** | Validation format, passage à Ever Buddy |
+| **Compliance signal** | Comparaison état local, passage à Caring Nanny |
+| **Alert signal** | Évaluation gravité, notification StrongFather |
 | **Metadata signal** | Validation structure, stockage si conforme |
 
-### 6.2 RÃ¨gles de traitement ECS
+### 6.2 Règles de traitement ECS
 
-1. **Isolation** â€” Tout signal est isolÃ© avant traitement
-2. **Validation format** â€” Rejet si format invalide
-3. **Comparaison locale** â€” Comparaison avec l'Ã©tat connu
-4. **Classification** â€” Attribution d'un niveau de confiance au signal
-5. **Transmission** â€” Passage aux cores concernÃ©s avec classification
+1. **Isolation** — Tout signal est isolé avant traitement
+2. **Validation format** — Rejet si format invalide
+3. **Comparaison locale** — Comparaison avec l'état connu
+4. **Classification** — Attribution d'un niveau de confiance au signal
+5. **Transmission** — Passage aux cores concernés avec classification
 
-### 6.3 Matrice signal / Ã©tat local
+### 6.3 Matrice signal / état local
 
-| Signal externe | Ã‰tat local | Effet Border Guard |
+| Signal externe | État local | Effet Border Guard |
 |----------------|------------|-------------------|
 | Conforme | Sain | Aucun changement |
-| Conforme | DÃ©gradÃ© | Peut aider Ã  remonter (via Caring Nanny) |
-| Non conforme | Sain | Suspicion lÃ©gÃ¨re, surveillance |
-| Non conforme | DÃ©gradÃ© | Renforce dÃ©gradation |
-| Contradictoire | Tout Ã©tat | MarquÃ© AMBIGU, pas d'action automatique |
+| Conforme | Dégradé | Peut aider à remonter (via Caring Nanny) |
+| Non conforme | Sain | Suspicion légère, surveillance |
+| Non conforme | Dégradé | Renforce dégradation |
+| Contradictoire | Tout état | Marqué AMBIGU, pas d'action automatique |
 
 ---
 
-## 7. Bootstrap sÃ©curisÃ© (premier contact rÃ©seau)
+## 7. Bootstrap sécurisé (premier contact réseau)
 
-### 7.1 RÃ¨gles absolues
+### 7.1 Règles absolues
 
-Le premier contact avec Internet aprÃ¨s dÃ©marrage suit des rÃ¨gles strictes :
+Le premier contact avec Internet après démarrage suit des règles strictes :
 
-| RÃ¨gle | Exigence |
+| Règle | Exigence |
 |-------|----------|
-| âŒ Aucune clÃ© privÃ©e transmise | Les secrets restent locaux |
-| âŒ Aucun Ã©tat interne exposÃ© | Pas de fuite d'information |
-| âŒ Aucun module activÃ© | Pas d'activation Ã  distance |
-| âŒ Aucune dÃ©cision modifiÃ©e | Le rÃ©seau n'impose rien |
+| ❌ Aucune clé privée transmise | Les secrets restent locaux |
+| ❌ Aucun état interne exposé | Pas de fuite d'information |
+| ❌ Aucun module activé | Pas d'activation à distance |
+| ❌ Aucune décision modifiée | Le réseau n'impose rien |
 
-### 7.2 Informations autorisÃ©es
+### 7.2 Informations autorisées
 
-| Information | AutorisÃ©e | Raison |
+| Information | Autorisée | Raison |
 |-------------|-----------|--------|
-| Hash public du systÃ¨me | âœ… | VÃ©rification d'intÃ©gritÃ© |
-| Version dÃ©clarative | âœ… | CompatibilitÃ© |
-| CapacitÃ©s exposÃ©es | âœ… | Via Master Butler |
-| Ã‰tat de confiance (T0-T4) | âœ… | AnonymisÃ© |
-| ClÃ©s privÃ©es | âŒ | Secret absolu |
-| Ã‰tat interne dÃ©taillÃ© | âŒ | Information sensible |
-| Logs complets | âŒ | Information sensible |
+| Hash public du système | ✅ | Vérification d'intégrité |
+| Version déclarative | ✅ | Compatibilité |
+| Capacités exposées | ✅ | Via Master Butler |
+| État de confiance (T0-T4) | ✅ | Anonymisé |
+| Clés privées | ❌ | Secret absolu |
+| État interne détaillé | ❌ | Information sensible |
+| Logs complets | ❌ | Information sensible |
 
 ---
 
-## 8. Handshake de conformitÃ©
+## 8. Handshake de conformité
 
 ### 8.1 Processus de reconnexion
 
-Lors du retour Internet aprÃ¨s une pÃ©riode hors ligne :
+Lors du retour Internet après une période hors ligne :
 
 ```
-1. Border Guard : isolation du canal rÃ©seau
-2. Ã‰change de conformitÃ© :
+1. Border Guard : isolation du canal réseau
+2. Échange de conformité :
    - Version du noyau
    - Version des cores
-   - IntÃ©gritÃ© locale
-   - Ã‰tat de confiance
-3. Border Guard : validation de conformitÃ©
-4. Si conforme : levÃ©e progressive de l'isolation
+   - Intégrité locale
+   - État de confiance
+3. Border Guard : validation de conformité
+4. Si conforme : levée progressive de l'isolation
 5. Si non conforme : maintien de l'isolation
 ```
 
-### 8.2 RÃ©sultats possibles
+### 8.2 Résultats possibles
 
-| RÃ©sultat | Action Border Guard |
+| Résultat | Action Border Guard |
 |----------|---------------------|
-| **Conforme** | FrontiÃ¨res normales selon niveau sÃ©curitÃ© |
-| **Partiellement conforme** | FrontiÃ¨res restreintes, surveillance |
+| **Conforme** | Frontières normales selon niveau sécurité |
+| **Partiellement conforme** | Frontières restreintes, surveillance |
 | **Non conforme** | Isolation maintenue, notification TAMR |
-| **Signal suspect** | Isolation renforcÃ©e, enquÃªte |
+| **Signal suspect** | Isolation renforcée, enquête |
 
 ---
 
-## 9. Comportements en dÃ©gradation rÃ©seau
+## 9. Comportements en dégradation réseau
 
-### 9.1 Situations et rÃ©ponses
+### 9.1 Situations et réponses
 
 | Situation | Comportement Border Guard |
 |-----------|---------------------------|
-| **Pas d'Internet** | Fonctionnement normal, frontiÃ¨res locales actives |
-| **RÃ©seau instable** | Aucune panique, file d'attente des signaux |
-| **RÃ©seau compromis** | Isolation automatique, frontiÃ¨res fermÃ©es vers rÃ©seau |
-| **Signaux incohÃ©rents** | MarquÃ©s AMBIGU, pas d'action automatique |
-| **Tentative d'injection** | Classification HOSTILE, isolation immÃ©diate |
+| **Pas d'Internet** | Fonctionnement normal, frontières locales actives |
+| **Réseau instable** | Aucune panique, file d'attente des signaux |
+| **Réseau compromis** | Isolation automatique, frontières fermées vers réseau |
+| **Signaux incohérents** | Marqués AMBIGU, pas d'action automatique |
+| **Tentative d'injection** | Classification HOSTILE, isolation immédiate |
 
 ### 9.2 Principe d'autonomie
 
-**MÃªme sans Internet, le systÃ¨me :**
-- âœ”ï¸ Fonctionne (frontiÃ¨res locales actives)
-- âœ”ï¸ DÃ©cide (StrongFather opÃ©rationnel)
-- âœ”ï¸ Se protÃ¨ge (Border Guard dÃ©finit les menaces locales)
-- âœ”ï¸ Se dÃ©grade (graduellement si nÃ©cessaire)
+**Même sans Internet, le système :**
+- ✔️ Fonctionne (frontières locales actives)
+- ✔️ Décide (StrongFather opérationnel)
+- ✔️ Se protège (Border Guard définit les menaces locales)
+- ✔️ Se dégrade (graduellement si nécessaire)
 
-**Internet amÃ©liore la confiance, jamais la capacitÃ©.**
+**Internet améliore la confiance, jamais la capacité.**
 
 ---
 
-## 10. DÃ©tection et indicateurs
+## 10. Détection et indicateurs
 
-### 10.1 Indicateurs de menace par catÃ©gorie
+### 10.1 Indicateurs de menace par catégorie
 
-| CatÃ©gorie | Indicateurs surveillÃ©s |
+| Catégorie | Indicateurs surveillés |
 |-----------|----------------------|
-| **Injection** | Patterns connus, donnÃ©es hors format, sÃ©quences suspectes |
-| **Usurpation** | Contexte incohÃ©rent, device inconnu, replay dÃ©tectÃ© |
-| **DoS** | Volume anormal, rythme anormal, patterns rÃ©pÃ©titifs |
-| **Escalade** | Tentatives non autorisÃ©es, exploration de frontiÃ¨res |
+| **Injection** | Patterns connus, données hors format, séquences suspectes |
+| **Usurpation** | Contexte incohérent, device inconnu, replay détecté |
+| **DoS** | Volume anormal, rythme anormal, patterns répétitifs |
+| **Escalade** | Tentatives non autorisées, exploration de frontières |
 | **Compromission** | Comportement anormal, signaux externes de compromission |
 
-### 10.2 Niveaux de dÃ©tection
+### 10.2 Niveaux de détection
 
-| Niveau | Description | Seuil par dÃ©faut |
+| Niveau | Description | Seuil par défaut |
 |--------|-------------|------------------|
-| **INFO** | Ã‰vÃ©nement normal Ã  tracer | Toujours |
-| **WARNING** | Ã‰vÃ©nement inhabituel | Configuration dÃ©pendante |
+| **INFO** | Événement normal à tracer | Toujours |
+| **WARNING** | Événement inhabituel | Configuration dépendante |
 | **ALERT** | Menace potentielle | Notification StrongFather |
-| **CRITICAL** | Menace confirmÃ©e | Notification StrongFather + TAMR |
-| **EMERGENCY** | Compromission active | Action immÃ©diate + notification tous cores |
+| **CRITICAL** | Menace confirmée | Notification StrongFather + TAMR |
+| **EMERGENCY** | Compromission active | Action immédiate + notification tous cores |
 
-### 10.3 Adaptation des seuils selon niveau de sÃ©curitÃ©
+### 10.3 Adaptation des seuils selon niveau de sécurité
 
-Les seuils de dÃ©tection s'adaptent au niveau de sÃ©curitÃ© dÃ©clarÃ© :
+Les seuils de détection s'adaptent au niveau de sécurité déclaré :
 
-| Niveau de sÃ©curitÃ© | SensibilitÃ© | Comportement |
+| Niveau de sécurité | Sensibilité | Comportement |
 |--------------------|-------------|--------------|
-| **0 - PUBLIC** | Basse | WARNING rarement, ALERT sur patterns Ã©vidents |
-| **1 - STANDARD** | Standard | Seuils par dÃ©faut |
-| **2 - SENSITIVE** | Haute | WARNING frÃ©quent, ALERT sur anomalies |
-| **3 - CRITICAL** | TrÃ¨s haute | ALERT sur suspicions, CRITICAL rapidement |
+| **0 - PUBLIC** | Basse | WARNING rarement, ALERT sur patterns évidents |
+| **1 - STANDARD** | Standard | Seuils par défaut |
+| **2 - SENSITIVE** | Haute | WARNING fréquent, ALERT sur anomalies |
+| **3 - CRITICAL** | Très haute | ALERT sur suspicions, CRITICAL rapidement |
 | **4 - HARDENED** | Maximale | Toute anomalie = CRITICAL minimum |
 
 ---
@@ -377,27 +377,27 @@ Les seuils de dÃ©tection s'adaptent au niveau de sÃ©curitÃ© dÃ©clarÃ© 
 
 ### INV-TMC-1 : Border Guard ne bloque jamais
 
-Border Guard **dÃ©finit** les menaces et les rÃ©ponses conceptuelles. Il ne **bloque jamais** lui-mÃªme. L'application est dÃ©lÃ©guÃ©e Ã  BondingBrother.
+Border Guard **définit** les menaces et les réponses conceptuelles. Il ne **bloque jamais** lui-même. L'application est déléguée à BondingBrother.
 
-### INV-TMC-2 : Internet n'est pas une autoritÃ©
+### INV-TMC-2 : Internet n'est pas une autorité
 
-Aucun signal Internet ne peut **imposer** une action au systÃ¨me. Les signaux sont des **informations** traitÃ©es selon l'Ã©tat local.
+Aucun signal Internet ne peut **imposer** une action au système. Les signaux sont des **informations** traitées selon l'état local.
 
 ### INV-TMC-3 : Classification exhaustive des menaces
 
-Toute menace dÃ©tectÃ©e **doit** conduire Ã  une classification de la source (UNKNOWN, HOSTILE, ou maintien avec surveillance).
+Toute menace détectée **doit** conduire à une classification de la source (UNKNOWN, HOSTILE, ou maintien avec surveillance).
 
-### INV-TMC-4 : DÃ©gradation graduÃ©e
+### INV-TMC-4 : Dégradation graduée
 
-La rÃ©ponse Ã  une menace suit toujours une **gradation** (suspicion â†’ anomalie â†’ menace â†’ compromission), sauf compromission flagrante en niveau de sÃ©curitÃ© 4.
+La réponse à une menace suit toujours une **gradation** (suspicion → anomalie → menace → compromission), sauf compromission flagrante en niveau de sécurité 4.
 
-### INV-TMC-5 : Autonomie prÃ©servÃ©e
+### INV-TMC-5 : Autonomie préservée
 
-Le systÃ¨me **reste fonctionnel** mÃªme sans Internet. Les frontiÃ¨res locales restent actives et Border Guard continue de dÃ©finir les menaces.
+Le système **reste fonctionnel** même sans Internet. Les frontières locales restent actives et Border Guard continue de définir les menaces.
 
-### INV-TMC-6 : TraÃ§abilitÃ© des dÃ©tections
+### INV-TMC-6 : Traçabilité des détections
 
-Toute dÃ©tection de menace est **traÃ§able** avec l'indicateur, le niveau de dÃ©tection, et la rÃ©ponse appliquÃ©e.
+Toute détection de menace est **traçable** avec l'indicateur, le niveau de détection, et la réponse appliquée.
 
 ---
 
@@ -405,93 +405,93 @@ Toute dÃ©tection de menace est **traÃ§able** avec l'indicateur, le niveau de
 
 ### 12.1 Flux vers StrongFather
 
-| Ã‰vÃ©nement | Information transmise |
+| Événement | Information transmise |
 |-----------|----------------------|
-| Menace dÃ©tectÃ©e | Type, indicateurs, classification source |
-| Signal externe | Classification, comparaison Ã©tat local |
-| Anomalie de franchissement | FrontiÃ¨re concernÃ©e, source, indicateurs |
+| Menace détectée | Type, indicateurs, classification source |
+| Signal externe | Classification, comparaison état local |
+| Anomalie de franchissement | Frontière concernée, source, indicateurs |
 
-**StrongFather dÃ©cide.** Border Guard informe.
+**StrongFather décide.** Border Guard informe.
 
 ### 12.2 Flux vers BondingBrother
 
-| Ã‰vÃ©nement | Information transmise |
+| Événement | Information transmise |
 |-----------|----------------------|
-| Classification HOSTILE | Source, raison, rÃ¨gles de blocage Ã  appliquer |
-| RÃ¨gles de franchissement modifiÃ©es | Nouvelles rÃ¨gles pour la frontiÃ¨re |
-| Isolation de frontiÃ¨re | FrontiÃ¨re concernÃ©e, niveau d'isolation |
+| Classification HOSTILE | Source, raison, règles de blocage à appliquer |
+| Règles de franchissement modifiées | Nouvelles règles pour la frontière |
+| Isolation de frontière | Frontière concernée, niveau d'isolation |
 
-**BondingBrother applique.** Border Guard dÃ©finit.
+**BondingBrother applique.** Border Guard définit.
 
 ### 12.3 Flux vers Caring Nanny
 
-| Ã‰vÃ©nement | Information transmise |
+| Événement | Information transmise |
 |-----------|----------------------|
-| Ã‰tat des frontiÃ¨res | Saines, sous pression, compromises |
-| Signaux de conformitÃ© | RÃ©sultat de comparaison avec Ã©tat local |
-| Anomalies rÃ©seau | Type, gravitÃ©, impact potentiel |
+| État des frontières | Saines, sous pression, compromises |
+| Signaux de conformité | Résultat de comparaison avec état local |
+| Anomalies réseau | Type, gravité, impact potentiel |
 
 **Caring Nanny observe.** Border Guard signale.
 
 ### 12.4 Flux vers TAMR
 
-| Ã‰vÃ©nement | Information transmise |
+| Événement | Information transmise |
 |-----------|----------------------|
-| Menace CRITICAL ou EMERGENCY | DÃ©tails complets pour l'humain |
-| RÃ©habilitation requise | Source HOSTILE Ã  rÃ©habiliter |
-| DÃ©cision humaine requise | Cas ambigu nÃ©cessitant intervention |
+| Menace CRITICAL ou EMERGENCY | Détails complets pour l'humain |
+| Réhabilitation requise | Source HOSTILE à réhabiliter |
+| Décision humaine requise | Cas ambigu nécessitant intervention |
 
 **TAMR implique l'humain.** Border Guard fournit le contexte.
 
 ---
 
-## 13. RÃ©fÃ©rences croisÃ©es
+## 13. Références croisées
 
-### Invariants associÃ©s (Documentation Fondatrice - Section 7)
+### Invariants associés (Documentation Fondatrice - Section 7)
 
-| Invariant | Ã‰noncÃ© | Relation |
+| Invariant | Énoncé | Relation |
 |-----------|--------|----------|
-| INV-BG-1 | Aucune capacitÃ© d'exÃ©cution | Border Guard dÃ©finit, ne bloque pas |
-| INV-BG-3 | Aucune dÃ©cision autonome | Border Guard informe, StrongFather dÃ©cide |
-| INV-BG-4 | Classification exhaustive | Toute source dÃ©tectÃ©e est classifiÃ©e |
-| INV-BG-8 | TraÃ§abilitÃ© complÃ¨te | Toute dÃ©tection est traÃ§able |
+| INV-BG-1 | Aucune capacité d'exécution | Border Guard définit, ne bloque pas |
+| INV-BG-3 | Aucune décision autonome | Border Guard informe, StrongFather décide |
+| INV-BG-4 | Classification exhaustive | Toute source détectée est classifiée |
+| INV-BG-8 | Traçabilité complète | Toute détection est traçable |
 
-### Documents associÃ©s
+### Documents associés
 
 | Document | Relation |
 |----------|----------|
 | [Border Guard - Documentation Fondatrice](../../foundation/Border%20Guard%20-%20Documentation%20Fondatrice.md) | Document source |
-| [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md) | Protocoles temps rÃ©el et asynchrones |
+| [Miyukini Conceptual References - Security Protocols](..//..//..//..//miyukini-webway-system//reference//_index.md) | Protocoles temps réel et asynchrones |
 | [Miyukini Conceptual References - External Signal Trust](..//..//..//..//miyukini-webway-system//reference//_index.md) | Traitement des signaux Internet |
 | [Border Guard - Security Levels Adaptation Contract](./Border%20Guard%20-%20Security%20Levels%20Adaptation%20Contract.md) | Adaptation des seuils |
 | [Border Guard - Trust Level Classification Contract](../boundaries/Border%20Guard%20-%20Trust%20Level%20Classification%20Contract.md) | Classification des sources |
-| [Border Guard - StrongFather Integration Contract](../integration/Border%20Guard%20-%20StrongFather%20Integration%20Contract.md) | Flux de dÃ©cision |
+| [Border Guard - StrongFather Integration Contract](../integration/Border%20Guard%20-%20StrongFather%20Integration%20Contract.md) | Flux de décision |
 | [Border Guard - CaringNanny Integration Contract](../integration/Border%20Guard%20-%20CaringNanny%20Integration%20Contract.md) | Flux d'observation |
 
 ---
 
-## 14. SynthÃ¨se contractuelle
+## 14. Synthèse contractuelle
 
 ### Garanties de ce contrat
 
 Ce contrat garantit que :
 
-1. **Menaces catÃ©gorisÃ©es** â€” 13 types de menaces formellement dÃ©finies
-2. **RÃ©ponses graduÃ©es** â€” De la suspicion Ã  la compromission
-3. **Internet non autoritaire** â€” Signaux traitÃ©s comme informations
-4. **Autonomie prÃ©servÃ©e** â€” Fonctionnement sans Internet
-5. **DÃ©tection adaptative** â€” Seuils selon niveau de sÃ©curitÃ©
-6. **TraÃ§abilitÃ© complÃ¨te** â€” Toute dÃ©tection documentÃ©e
+1. **Menaces catégorisées** — 13 types de menaces formellement définies
+2. **Réponses graduées** — De la suspicion à la compromission
+3. **Internet non autoritaire** — Signaux traités comme informations
+4. **Autonomie préservée** — Fonctionnement sans Internet
+5. **Détection adaptative** — Seuils selon niveau de sécurité
+6. **Traçabilité complète** — Toute détection documentée
 
-### Phrase de synthÃ¨se
+### Phrase de synthèse
 
-> **Border Guard dÃ©finit le modÃ¨le de menaces en catÃ©gorisant les attaques aux frontiÃ¨res externes, internes, d'intÃ©gration et rÃ©seau, en Ã©tablissant des rÃ©ponses graduÃ©es de la suspicion Ã  la compromission, tout en garantissant que les signaux Internet restent des informations et jamais des autoritÃ©s, prÃ©servant l'autonomie du systÃ¨me.**
+> **Border Guard définit le modèle de menaces en catégorisant les attaques aux frontières externes, internes, d'intégration et réseau, en établissant des réponses graduées de la suspicion à la compromission, tout en garantissant que les signaux Internet restent des informations et jamais des autorités, préservant l'autonomie du système.**
 
 ---
 
 **Version :** 1.0  
 **Date :** 2026-01-28  
-**Statut :** Contrat â€” Normatif  
-**RÃ©fÃ©rence :** Border Guard v1.5, Security Protocols v1.0, External Signal Trust v1.0  
-**Type :** Contrat de modÃ¨le de menaces
+**Statut :** Contrat — Normatif  
+**Référence :** Border Guard v1.5, Security Protocols v1.0, External Signal Trust v1.0  
+**Type :** Contrat de modèle de menaces
 

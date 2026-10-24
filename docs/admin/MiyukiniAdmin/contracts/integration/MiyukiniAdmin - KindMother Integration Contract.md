@@ -1,4 +1,4 @@
-﻿# MiyukiniAdmin â€” KindMother Integration Contract
+﻿# MiyukiniAdmin — KindMother Integration Contract
 
 ## 1. Contexte
 
@@ -121,50 +121,50 @@ Ce document **ne couvre pas** :
 
 ```
 MiyukiniAdmin           BondingBrother              KindMother
-     â”‚                        â”‚                          â”‚
-     â”‚â”€â”€ReadRequestâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (table: users)         â”‚                          â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â”€â”€DataQueryâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â—€â”€DataResultâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚â—€â”€ReadResponseâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     │                        │                          │
+     │──ReadRequest───────────▶│                          │
+     │  (table: users)         │                          │
+     │                        │                          │
+     │                        │──DataQuery───────────────▶│
+     │                        │                          │
+     │                        │◀─DataResult──────────────│
+     │                        │                          │
+     │◀─ReadResponse──────────│                          │
 ```
 
 ### 6.2 Flux Maintenance (avec validation SF)
 
 ```
 MiyukiniAdmin           BondingBrother         StrongFather      KindMother
-     â”‚                        â”‚                     â”‚                â”‚
-     â”‚â”€â”€MaintenanceRequestâ”€â”€â”€â”€â–¶â”‚                     â”‚                â”‚
-     â”‚  (op: MIGRATE)          â”‚                     â”‚                â”‚
-     â”‚                        â”‚                     â”‚                â”‚
-     â”‚                        â”‚â”€â”€ValidateOpâ”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚                â”‚
-     â”‚                        â”‚                     â”‚                â”‚
-     â”‚                        â”‚â—€â”€APPROVEDâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚                â”‚
-     â”‚                        â”‚                     â”‚                â”‚
-     â”‚                        â”‚â”€â”€ExecuteMigrationâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                        â”‚                     â”‚                â”‚
-     â”‚                        â”‚â—€â”€MigrationResultâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                        â”‚                     â”‚                â”‚
-     â”‚â—€â”€MaintenanceResponseâ”€â”€â”€â”‚                     â”‚                â”‚
+     │                        │                     │                │
+     │──MaintenanceRequest────▶│                     │                │
+     │  (op: MIGRATE)          │                     │                │
+     │                        │                     │                │
+     │                        │──ValidateOp─────────▶│                │
+     │                        │                     │                │
+     │                        │◀─APPROVED───────────│                │
+     │                        │                     │                │
+     │                        │──ExecuteMigration────────────────────▶│
+     │                        │                     │                │
+     │                        │◀─MigrationResult─────────────────────│
+     │                        │                     │                │
+     │◀─MaintenanceResponse───│                     │                │
 ```
 
 ### 6.3 Flux Validation Coherence
 
 ```
 MiyukiniAdmin           BondingBrother              KindMother
-     â”‚                        â”‚                          â”‚
-     â”‚â”€â”€ValidateRequestâ”€â”€â”€â”€â”€â”€â”€â–¶â”‚                          â”‚
-     â”‚  (type: referential)    â”‚                          â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â”€â”€RunValidationâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚                        â”‚â—€â”€ValidationResultâ”€â”€â”€â”€â”€â”€â”€â”€â”‚
-     â”‚                        â”‚  (violations: [...])      â”‚
-     â”‚                        â”‚                          â”‚
-     â”‚â—€â”€ValidateResponseâ”€â”€â”€â”€â”€â”€â”‚                          â”‚
+     │                        │                          │
+     │──ValidateRequest───────▶│                          │
+     │  (type: referential)    │                          │
+     │                        │                          │
+     │                        │──RunValidation───────────▶│
+     │                        │                          │
+     │                        │◀─ValidationResult────────│
+     │                        │  (violations: [...])      │
+     │                        │                          │
+     │◀─ValidateResponse──────│                          │
 ```
 
 ---
@@ -251,7 +251,7 @@ MiyukiniAdmin           BondingBrother              KindMother
 2. Verification pre-conditions
 3. Application migration
 4. Tests post-migration
-5. Si echec â†’ rollback automatique
+5. Si echec → rollback automatique
 
 ### 9.2 Reparation
 
@@ -272,7 +272,7 @@ MiyukiniAdmin           BondingBrother              KindMother
 ### 10.1 Mode Normal
 
 ```
-MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ KindMother â”€â”€â–¶ Database
+MiyukiniAdmin ──▶ BondingBrother ──▶ KindMother ──▶ Database
 ```
 
 **Caracteristiques :**
@@ -284,8 +284,8 @@ MiyukiniAdmin â”€â”€â–¶ BondingBrother â”€â”€â–¶ Kin
 ### 10.2 Mode Recovery (Exception)
 
 ```
-MiyukiniAdmin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¶ Database
-                                                      â”‚
+MiyukiniAdmin ────────────────────────────────────▶ Database
+                                                      │
                                               [Acces direct]
 ```
 

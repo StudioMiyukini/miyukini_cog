@@ -1,54 +1,54 @@
-﻿# MiyuExport â€” Documentation Fondatrice
+﻿# MiyuExport — Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuExport** est le **kit d'outils (Toolkit)** d'export et de gÃ©nÃ©ration de documents de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils de gÃ©nÃ©ration CSV, Excel (XLSX) et PDF Ã  partir de donnÃ©es et templates fournis, sans logique mÃ©tier â€” les donnÃ©es Ã  exporter et les options (dÃ©limiteurs, locale, template) sont fournies dans le flux gouvernÃ© ; la dÃ©cision d'exporter ou de publier relÃ¨ve de **StrongFather**.
+**MiyuExport** est le **kit d'outils (Toolkit)** d'export et de génération de documents de l'écosystème Miyukini. Il intègre les outils de génération CSV, Excel (XLSX) et PDF à partir de données et templates fournis, sans logique métier — les données à exporter et les options (délimiteurs, locale, template) sont fournies dans le flux gouverné ; la décision d'exporter ou de publier relève de **StrongFather**.
 
-L'autoritÃ© sur les donnÃ©es mÃ©tier appartient Ã  **KindMother**. MiyuExport expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (gÃ©nÃ©rer CSV, XLSX, PDF) ; les dÃ©cisions sur ce qui doit Ãªtre exportÃ© ou rendu relÃ¨vent de **StrongFather** et des OpÃ©rateurs.
+L'autorité sur les données métier appartient à **KindMother**. MiyuExport expose des capacités d'exécution gouvernée (générer CSV, XLSX, PDF) ; les décisions sur ce qui doit être exporté ou rendu relèvent de **StrongFather** et des Opérateurs.
 
 **Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
-**Ce document dÃ©finit :** l'identitÃ© et la dÃ©finition canonique de MiyuExport, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sÃ©curitÃ©, la relation avec KindMother.
+**Ce document définit :** l'identité et la définition canonique de MiyuExport, le ToolkitId, la liste des outils composants, la gouvernance, le niveau de sécurité, la relation avec KindMother.
 
-**Hors scope :** l'implÃ©mentation dÃ©taillÃ©e (moteur PDF, bibliothÃ¨ques Excel) ; les rÃ¨gles mÃ©tier d'export (qui exporte quoi, quand) = StrongFather / OpÃ©rateurs.
+**Hors scope :** l'implémentation détaillée (moteur PDF, bibliothèques Excel) ; les règles métier d'export (qui exporte quoi, quand) = StrongFather / Opérateurs.
 
 ---
 
-## 3. DÃ©finition canonique
+## 3. Définition canonique
 
-> **MiyuExport est une composition officielle d'outils d'export et de gÃ©nÃ©ration de documents (CSV, XLSX, PDF), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+> **MiyuExport est une composition officielle d'outils d'export et de génération de documents (CSV, XLSX, PDF), déclarée et gouvernée par l'environnement.**
 
-- MiyuExport **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
-- MiyuExport **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (gÃ©nÃ©rer CSV, XLSX, PDF Ã  partir de donnÃ©es et options fournis) ; pas de dÃ©cision sur le pÃ©rimÃ¨tre ni le contenu Ã  exporter.
+- MiyuExport **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
+- MiyuExport **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (générer CSV, XLSX, PDF à partir de données et options fournis) ; pas de décision sur le périmètre ni le contenu à exporter.
 
-**RÃ¨gle fondamentale :** Un Tool MiyuExport exÃ©cute sur des **donnÃ©es et options fournies** ; il ne lit pas la base directement â€” les donnÃ©es sont fournies dans le flux (aprÃ¨s lecture via MiyuSQL sous autoritÃ© KindMother).
+**Règle fondamentale :** Un Tool MiyuExport exécute sur des **données et options fournies** ; il ne lit pas la base directement — les données sont fournies dans le flux (après lecture via MiyuSQL sous autorité KindMother).
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.export.miyuexport` |
 | **Format** | `toolkit.<domain>.<name>` (conforme Master Butler) |
 | **Domaine** | `export` |
-| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants. |
+| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants. |
 
 ---
 
 ## 5. Liste des outils composants
 
-Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuExport - Reference Outils](./MiyuExport%20-%20Reference%20Outils.md).
+Le détail de chaque outil est décrit dans [MiyuExport - Reference Outils](./MiyuExport%20-%20Reference%20Outils.md).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.export.csv.generate` | GÃ©nÃ¨re un fichier CSV Ã  partir de donnÃ©es et options fournis (dÃ©limiteur, encodage, locale) |
-| `tool.export.xlsx.generate` | GÃ©nÃ¨re un fichier Excel (XLSX) Ã  partir de donnÃ©es et options fournis (feuilles, format) |
-| `tool.export.pdf.render` | Rend un PDF Ã  partir d'un template et de donnÃ©es fournis ; ne dÃ©cide pas du contenu |
+| `tool.export.csv.generate` | Génère un fichier CSV à partir de données et options fournis (délimiteur, encodage, locale) |
+| `tool.export.xlsx.generate` | Génère un fichier Excel (XLSX) à partir de données et options fournis (feuilles, format) |
+| `tool.export.pdf.render` | Rend un PDF à partir d'un template et de données fournis ; ne décide pas du contenu |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuExport en contient trois.
 
@@ -56,35 +56,35 @@ Le dÃ©tail de chaque outil est dÃ©crit dans [MiyuExport - Reference Outils](
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : donnÃ©es et options fournies dans le flux ; dÃ©cision d'export = StrongFather ; MiyuExport n'Ã©crit pas la base mÃ©tier (produit un flux binaire ou fichier).
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). Spécificité : données et options fournies dans le flux ; décision d'export = StrongFather ; MiyuExport n'écrit pas la base métier (produit un flux binaire ou fichier).
 
 ---
 
-## 7. Niveau de sÃ©curitÃ© et Ã©tats
+## 7. Niveau de sécurité et états
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |---------|--------|
-| **Niveau de sÃ©curitÃ© du kit** | **1 Ã  3** (donnÃ©es exportÃ©es peuvent Ãªtre sensibles) |
-| **Ã‰tats autorisÃ©s** | Tous sauf restriction WorrySentinel |
-| **Ã‰tats interdits** | Selon politique (ex. blocage export en SECURITY_LOCKDOWN) |
+| **Niveau de sécurité du kit** | **1 à 3** (données exportées peuvent être sensibles) |
+| **États autorisés** | Tous sauf restriction WorrySentinel |
+| **États interdits** | Selon politique (ex. blocage export en SECURITY_LOCKDOWN) |
 
 ---
 
 ## 8. Relation avec KindMother
 
-**KindMother** est l'autoritÃ© sur les donnÃ©es. MiyuExport **ne lit pas** la base directement : les donnÃ©es Ã  exporter sont **fournies dans le flux** (aprÃ¨s lecture via MiyuSQL sous autoritÃ© KindMother). MiyuExport produit un flux binaire (CSV, XLSX, PDF) ; pas d'Ã©criture en base mÃ©tier par MiyuExport.
+**KindMother** est l'autorité sur les données. MiyuExport **ne lit pas** la base directement : les données à exporter sont **fournies dans le flux** (après lecture via MiyuSQL sous autorité KindMother). MiyuExport produit un flux binaire (CSV, XLSX, PDF) ; pas d'écriture en base métier par MiyuExport.
 
-Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuExport - Tool Governance Compliance Contract](./contracts/governance/MiyuExport%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformité détaillées sont dans [MiyuExport - Tool Governance Compliance Contract](./contracts/governance/MiyuExport%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ---
 
 ## 9. Alignement MIP
 
-Ã€ l'implÃ©mentation : chaque Tool MiyuExport est une unitÃ© logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+À l'implémentation : chaque Tool MiyuExport est une unité logique pouvant devenir un **bloc MSCM** : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. RÃ©fÃ©rences croisÃ©es
+## 10. Références croisées
 
 | Document | Lien |
 |----------|------|
@@ -94,8 +94,8 @@ Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuExport - Tool G
 
 ---
 
-**Date de crÃ©ation :** 2026-01-30  
+**Date de création :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de rÃ©fÃ©rence fondateur
+**Statut :** Document de référence fondateur
 
 

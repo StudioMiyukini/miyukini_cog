@@ -2,132 +2,132 @@
 
 ## 1. Contexte
 
-Ce document dÃ©finit le modÃ¨le de responsabilitÃ© de Bonding Brother. Il spÃ©cifie qui est responsable de quoi dans le cycle de vie d'une intention, comment les responsabilitÃ©s sont attribuÃ©es, et comment les erreurs et les dÃ©cisions sont imputÃ©es aux bons acteurs.
+Ce document définit le modèle de responsabilité de Bonding Brother. Il spécifie qui est responsable de quoi dans le cycle de vie d'une intention, comment les responsabilités sont attribuées, et comment les erreurs et les décisions sont imputées aux bons acteurs.
 
-Ce document complÃ¨te la Section 9 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) sur la traÃ§abilitÃ© et la responsabilitÃ©, et s'appuie sur le [Audit & Traceability Contract](./BondingBrother%20-%20Audit%20&%20Traceability%20Contract.md) pour dÃ©finir l'attribution formelle des responsabilitÃ©s.
+Ce document complète la Section 9 de la [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) sur la traçabilité et la responsabilité, et s'appuie sur le [Audit & Traceability Contract](./BondingBrother%20-%20Audit%20&%20Traceability%20Contract.md) pour définir l'attribution formelle des responsabilités.
 
-Le modÃ¨le de responsabilitÃ© garantit **LOI-3** (Ã©tat local souverain) : les responsabilitÃ©s sont traÃ§ables localement mÃªme en mode offline, conformÃ©ment aux [Lois d'Autonomie SystÃ¨me](..//..//..//..//miyukini-webway-system//reference//_index.md).
+Le modèle de responsabilité garantit **LOI-3** (état local souverain) : les responsabilités sont traçables localement même en mode offline, conformément aux [Lois d'Autonomie Système](..//..//..//..//miyukini-webway-system//reference//_index.md).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
-- La dÃ©finition formelle de la responsabilitÃ©
-- L'attribution des responsabilitÃ©s par acteur
-- Les responsabilitÃ©s de Bonding Brother
-- Les responsabilitÃ©s des produits
-- Les responsabilitÃ©s des autoritÃ©s
+- La définition formelle de la responsabilité
+- L'attribution des responsabilités par acteur
+- Les responsabilités de Bonding Brother
+- Les responsabilités des produits
+- Les responsabilités des autorités
 - L'imputation des erreurs
-- Les limites de responsabilitÃ©
+- Les limites de responsabilité
 
 Ce document **ne couvre pas** :
-- Les dÃ©tails d'implÃ©mentation de l'attribution
-- Les mÃ©canismes lÃ©gaux de responsabilitÃ©
+- Les détails d'implémentation de l'attribution
+- Les mécanismes légaux de responsabilité
 - Les garanties contractuelles commerciales
 
 ---
 
 ## 3. Principe fondamental
 
-**Chaque acteur est responsable de ses propres actions et dÃ©cisions. Bonding Brother est responsable de la mÃ©diation, pas des dÃ©cisions des autoritÃ©s ni des intentions des produits.**
+**Chaque acteur est responsable de ses propres actions et décisions. Bonding Brother est responsable de la médiation, pas des décisions des autorités ni des intentions des produits.**
 
-La responsabilitÃ© est claire, attribuable, et traÃ§able. Chaque erreur, chaque dÃ©cision, chaque rÃ©sultat peut Ãªtre imputÃ© Ã  l'acteur responsable.
+La responsabilité est claire, attribuable, et traçable. Chaque erreur, chaque décision, chaque résultat peut être imputé à l'acteur responsable.
 
 ---
 
-## 4. DÃ©finitions
+## 4. Définitions
 
-### 4.1 ResponsabilitÃ©
+### 4.1 Responsabilité
 
-La **responsabilitÃ©** est l'obligation d'un acteur de rÃ©pondre de ses actions, dÃ©cisions, et rÃ©sultats dans le cadre de ses attributions.
+La **responsabilité** est l'obligation d'un acteur de répondre de ses actions, décisions, et résultats dans le cadre de ses attributions.
 
 ### 4.2 Imputation
 
-L'**imputation** est l'attribution formelle d'une responsabilitÃ© Ã  un acteur spÃ©cifique pour un Ã©vÃ©nement ou un rÃ©sultat donnÃ©.
+L'**imputation** est l'attribution formelle d'une responsabilité à un acteur spécifique pour un événement ou un résultat donné.
 
-### 4.3 Domaine de responsabilitÃ©
+### 4.3 Domaine de responsabilité
 
-Un **domaine de responsabilitÃ©** est un pÃ©rimÃ¨tre d'actions et de dÃ©cisions pour lequel un acteur est responsable.
+Un **domaine de responsabilité** est un périmètre d'actions et de décisions pour lequel un acteur est responsable.
 
 ---
 
-## 5. Acteurs et leurs responsabilitÃ©s
+## 5. Acteurs et leurs responsabilités
 
 ### 5.1 Produit
 
-**Domaine de responsabilitÃ© :**
+**Domaine de responsabilité :**
 - Expression des intentions
 - Format et structure des intentions
 - Contexte fourni avec les intentions
-- Gestion des rÃ©sultats reÃ§us
+- Gestion des résultats reçus
 
-**ResponsabilitÃ©s spÃ©cifiques :**
+**Responsabilités spécifiques :**
 
-| ResponsabilitÃ© | Description | Imputation |
+| Responsabilité | Description | Imputation |
 |----------------|------------|------------|
 | **RES-PROD-01** | Expression d'intentions valides structurellement | Produit responsable si intention invalide |
-| **RES-PROD-02** | Fourniture d'un contexte complet et vÃ©ridique | Produit responsable si contexte falsifiÃ© |
+| **RES-PROD-02** | Fourniture d'un contexte complet et véridique | Produit responsable si contexte falsifié |
 | **RES-PROD-03** | Respect du vocabulaire et des formats | Produit responsable si format incorrect |
-| **RES-PROD-04** | Gestion des rÃ©sultats reÃ§us | Produit responsable de l'utilisation des rÃ©sultats |
+| **RES-PROD-04** | Gestion des résultats reçus | Produit responsable de l'utilisation des résultats |
 
 **Ce que le produit n'est PAS responsable :**
-- DÃ©cisions des autoritÃ©s
+- Décisions des autorités
 - Traduction des intentions
-- Filtrage des rÃ©sultats
+- Filtrage des résultats
 - Erreurs de transmission
 
 ### 5.2 Bonding Brother
 
-**Domaine de responsabilitÃ© :**
+**Domaine de responsabilité :**
 - Validation structurelle des intentions
 - Traduction des intentions en demandes
-- Traduction des rÃ©ponses en rÃ©sultats
-- Filtrage des demandes et rÃ©sultats
-- Transmission aux autoritÃ©s
+- Traduction des réponses en résultats
+- Filtrage des demandes et résultats
+- Transmission aux autorités
 - Journalisation
 - Synchronisation
 
-**ResponsabilitÃ©s spÃ©cifiques :**
+**Responsabilités spécifiques :**
 
-| ResponsabilitÃ© | Description | Imputation |
+| Responsabilité | Description | Imputation |
 |----------------|------------|------------|
 | **RES-BB-01** | Validation structurelle correcte | BB responsable si validation incorrecte |
-| **RES-BB-02** | Traduction fidÃ¨le (sÃ©mantique prÃ©servÃ©e) | BB responsable si traduction incorrecte |
-| **RES-BB-03** | Filtrage selon rÃ¨gles dÃ©finies | BB responsable si filtrage incorrect |
-| **RES-BB-04** | Transmission fidÃ¨le aux autoritÃ©s | BB responsable si transmission incorrecte |
-| **RES-BB-05** | Journalisation complÃ¨te | BB responsable si journalisation incomplÃ¨te |
+| **RES-BB-02** | Traduction fidèle (sémantique préservée) | BB responsable si traduction incorrecte |
+| **RES-BB-03** | Filtrage selon règles définies | BB responsable si filtrage incorrect |
+| **RES-BB-04** | Transmission fidèle aux autorités | BB responsable si transmission incorrecte |
+| **RES-BB-05** | Journalisation complète | BB responsable si journalisation incomplète |
 | **RES-BB-06** | Synchronisation sans perte | BB responsable si intention perdue en sync |
-| **RES-BB-07** | PrÃ©servation de l'ordre | BB responsable si ordre non prÃ©servÃ© |
+| **RES-BB-07** | Préservation de l'ordre | BB responsable si ordre non préservé |
 
 **Ce que Bonding Brother n'est PAS responsable :**
-- DÃ©cisions des autoritÃ©s (refus, acceptation)
-- ValiditÃ© mÃ©tier des intentions
-- Permissions rÃ©elles des utilisateurs
-- CohÃ©rence des donnÃ©es
-- Erreurs des autoritÃ©s
+- Décisions des autorités (refus, acceptation)
+- Validité métier des intentions
+- Permissions réelles des utilisateurs
+- Cohérence des données
+- Erreurs des autorités
 
-### 5.3 AutoritÃ© (Kind Mother / Strong Father)
+### 5.3 Autorité (Kind Mother / Strong Father)
 
-**Domaine de responsabilitÃ© :**
-- Ã‰valuation des demandes
-- DÃ©cisions d'acceptation ou de refus
-- Validation mÃ©tier
-- CohÃ©rence et intÃ©gritÃ©
+**Domaine de responsabilité :**
+- Évaluation des demandes
+- Décisions d'acceptation ou de refus
+- Validation métier
+- Cohérence et intégrité
 - Gestion des erreurs internes
 
-**ResponsabilitÃ©s spÃ©cifiques :**
+**Responsabilités spécifiques :**
 
-| ResponsabilitÃ© | Description | Imputation |
+| Responsabilité | Description | Imputation |
 |----------------|------------|------------|
-| **RES-AUTH-01** | DÃ©cision correcte selon rÃ¨gles | AutoritÃ© responsable si dÃ©cision incorrecte |
-| **RES-AUTH-02** | Validation mÃ©tier appropriÃ©e | AutoritÃ© responsable si validation incorrecte |
-| **RES-AUTH-03** | CohÃ©rence et intÃ©gritÃ© | AutoritÃ© responsable si incohÃ©rence |
-| **RES-AUTH-04** | RÃ©ponse dans dÃ©lai raisonnable | AutoritÃ© responsable si timeout |
-| **RES-AUTH-05** | Gestion des erreurs internes | AutoritÃ© responsable si erreur interne |
+| **RES-AUTH-01** | Décision correcte selon règles | Autorité responsable si décision incorrecte |
+| **RES-AUTH-02** | Validation métier appropriée | Autorité responsable si validation incorrecte |
+| **RES-AUTH-03** | Cohérence et intégrité | Autorité responsable si incohérence |
+| **RES-AUTH-04** | Réponse dans délai raisonnable | Autorité responsable si timeout |
+| **RES-AUTH-05** | Gestion des erreurs internes | Autorité responsable si erreur interne |
 
-**Ce que l'autoritÃ© n'est PAS responsable :**
-- Format des intentions (responsabilitÃ© du produit)
-- Traduction des intentions (responsabilitÃ© de BB)
-- Filtrage des rÃ©sultats (responsabilitÃ© de BB)
+**Ce que l'autorité n'est PAS responsable :**
+- Format des intentions (responsabilité du produit)
+- Traduction des intentions (responsabilité de BB)
+- Filtrage des résultats (responsabilité de BB)
 
 ---
 
@@ -135,47 +135,47 @@ Un **domaine de responsabilitÃ©** est un pÃ©rimÃ¨tre d'actions et de dÃ©
 
 ### 6.1 Erreurs de validation
 
-**Erreur :** Intention rejetÃ©e pour format invalide
+**Erreur :** Intention rejetée pour format invalide
 
 **Imputation :** Bonding Brother (RES-BB-01)
 
-**Justification :** BB est responsable de la validation structurelle. Si une intention valide est rejetÃ©e, c'est la responsabilitÃ© de BB.
+**Justification :** BB est responsable de la validation structurelle. Si une intention valide est rejetée, c'est la responsabilité de BB.
 
-**Exception :** Si l'intention est effectivement invalide selon le schÃ©ma, le produit est responsable (RES-PROD-01).
+**Exception :** Si l'intention est effectivement invalide selon le schéma, le produit est responsable (RES-PROD-01).
 
 ### 6.2 Erreurs de traduction
 
-**Erreur :** Traduction incorrecte (sÃ©mantique perdue ou altÃ©rÃ©e)
+**Erreur :** Traduction incorrecte (sémantique perdue ou altérée)
 
 **Imputation :** Bonding Brother (RES-BB-02)
 
-**Justification :** BB est responsable de la traduction fidÃ¨le. Toute perte ou altÃ©ration de sÃ©mantique est la responsabilitÃ© de BB.
+**Justification :** BB est responsable de la traduction fidèle. Toute perte ou altération de sémantique est la responsabilité de BB.
 
 ### 6.3 Erreurs de filtrage
 
-**Erreur :** Filtrage incorrect (information filtrÃ©e Ã  tort ou non filtrÃ©e)
+**Erreur :** Filtrage incorrect (information filtrée à tort ou non filtrée)
 
 **Imputation :** Bonding Brother (RES-BB-03)
 
-**Justification :** BB est responsable de l'application correcte des rÃ¨gles de filtrage.
+**Justification :** BB est responsable de l'application correcte des règles de filtrage.
 
-### 6.4 Erreurs d'autoritÃ©
+### 6.4 Erreurs d'autorité
 
-**Erreur :** DÃ©cision incorrecte de l'autoritÃ©
+**Erreur :** Décision incorrecte de l'autorité
 
-**Imputation :** AutoritÃ© (RES-AUTH-01)
+**Imputation :** Autorité (RES-AUTH-01)
 
-**Justification :** L'autoritÃ© est responsable de ses dÃ©cisions. BB transmet fidÃ¨lement, mais ne dÃ©cide pas.
+**Justification :** L'autorité est responsable de ses décisions. BB transmet fidèlement, mais ne décide pas.
 
 ### 6.5 Erreurs de transmission
 
-**Erreur :** Transmission Ã©chouÃ©e ou incorrecte
+**Erreur :** Transmission échouée ou incorrecte
 
 **Imputation :** Bonding Brother (RES-BB-04)
 
-**Justification :** BB est responsable de la transmission fidÃ¨le aux autoritÃ©s.
+**Justification :** BB est responsable de la transmission fidèle aux autorités.
 
-**Exception :** Si l'erreur est due Ã  une indisponibilitÃ© de l'autoritÃ©, l'autoritÃ© est responsable (RES-AUTH-04).
+**Exception :** Si l'erreur est due à une indisponibilité de l'autorité, l'autorité est responsable (RES-AUTH-04).
 
 ### 6.6 Erreurs de synchronisation
 
@@ -187,135 +187,135 @@ Un **domaine de responsabilitÃ©** est un pÃ©rimÃ¨tre d'actions et de dÃ©
 
 ### 6.7 Erreurs de journalisation
 
-**Erreur :** Journalisation incomplÃ¨te ou incorrecte
+**Erreur :** Journalisation incomplète ou incorrecte
 
 **Imputation :** Bonding Brother (RES-BB-05)
 
-**Justification :** BB est responsable de la journalisation complÃ¨te.
+**Justification :** BB est responsable de la journalisation complète.
 
 ---
 
-## 7. Limites de responsabilitÃ©
+## 7. Limites de responsabilité
 
-### 7.1 ResponsabilitÃ© limitÃ©e Ã  la mÃ©diation
+### 7.1 Responsabilité limitée à la médiation
 
-**RÃ¨gle LIM-01 : Pas de responsabilitÃ© sur les dÃ©cisions**
+**Règle LIM-01 : Pas de responsabilité sur les décisions**
 
-Bonding Brother n'est pas responsable des dÃ©cisions des autoritÃ©s :
-- Refus d'une intention : ResponsabilitÃ© de l'autoritÃ©
-- Acceptation d'une intention : ResponsabilitÃ© de l'autoritÃ©
-- Validation mÃ©tier : ResponsabilitÃ© de l'autoritÃ©
+Bonding Brother n'est pas responsable des décisions des autorités :
+- Refus d'une intention : Responsabilité de l'autorité
+- Acceptation d'une intention : Responsabilité de l'autorité
+- Validation métier : Responsabilité de l'autorité
 
-**RÃ¨gle LIM-02 : Pas de responsabilitÃ© sur les intentions**
+**Règle LIM-02 : Pas de responsabilité sur les intentions**
 
 Bonding Brother n'est pas responsable du contenu des intentions :
-- ValiditÃ© mÃ©tier : ResponsabilitÃ© du produit
-- ConformitÃ© aux rÃ¨gles : ResponsabilitÃ© du produit
-- CohÃ©rence sÃ©mantique : ResponsabilitÃ© du produit
+- Validité métier : Responsabilité du produit
+- Conformité aux règles : Responsabilité du produit
+- Cohérence sémantique : Responsabilité du produit
 
-**RÃ¨gle LIM-03 : Pas de responsabilitÃ© sur les rÃ©sultats**
+**Règle LIM-03 : Pas de responsabilité sur les résultats**
 
-Bonding Brother n'est pas responsable de l'utilisation des rÃ©sultats par les produits :
-- InterprÃ©tation des rÃ©sultats : ResponsabilitÃ© du produit
-- Actions basÃ©es sur les rÃ©sultats : ResponsabilitÃ© du produit
+Bonding Brother n'est pas responsable de l'utilisation des résultats par les produits :
+- Interprétation des résultats : Responsabilité du produit
+- Actions basées sur les résultats : Responsabilité du produit
 
-### 7.2 ResponsabilitÃ© limitÃ©e aux rÃ¨gles dÃ©finies
+### 7.2 Responsabilité limitée aux règles définies
 
-**RÃ¨gle LIM-04 : Application des rÃ¨gles, pas leur dÃ©finition**
+**Règle LIM-04 : Application des règles, pas leur définition**
 
-Bonding Brother applique les rÃ¨gles dÃ©finies par les autoritÃ©s, mais n'est pas responsable de leur dÃ©finition :
-- RÃ¨gles de filtrage : DÃ©finies par autoritÃ©, appliquÃ©es par BB
-- RÃ¨gles de traduction : DÃ©finies par architecture, appliquÃ©es par BB
+Bonding Brother applique les règles définies par les autorités, mais n'est pas responsable de leur définition :
+- Règles de filtrage : Définies par autorité, appliquées par BB
+- Règles de traduction : Définies par architecture, appliquées par BB
 
-**RÃ¨gle LIM-05 : Pas de responsabilitÃ© sur les rÃ¨gles incorrectes**
+**Règle LIM-05 : Pas de responsabilité sur les règles incorrectes**
 
-Si une rÃ¨gle est incorrecte, la responsabilitÃ© est de l'autoritÃ© qui l'a dÃ©finie, pas de BB qui l'applique.
+Si une règle est incorrecte, la responsabilité est de l'autorité qui l'a définie, pas de BB qui l'applique.
 
-### 7.3 ResponsabilitÃ© limitÃ©e aux capacitÃ©s
+### 7.3 Responsabilité limitée aux capacités
 
-**RÃ¨gle LIM-06 : ResponsabilitÃ© dans les limites des capacitÃ©s**
+**Règle LIM-06 : Responsabilité dans les limites des capacités**
 
-Bonding Brother est responsable uniquement dans les limites de ses capacitÃ©s :
-- Transmission : Responsable si erreur de transmission, pas si autoritÃ© indisponible
+Bonding Brother est responsable uniquement dans les limites de ses capacités :
+- Transmission : Responsable si erreur de transmission, pas si autorité indisponible
 - Traduction : Responsable si erreur de traduction, pas si mapping manquant (configuration)
-- Filtrage : Responsable si erreur d'application, pas si rÃ¨gle manquante (configuration)
+- Filtrage : Responsable si erreur d'application, pas si règle manquante (configuration)
 
 ---
 
-## 8. TraÃ§abilitÃ© de la responsabilitÃ©
+## 8. Traçabilité de la responsabilité
 
 ### 8.1 Attribution dans les traces
 
-**RÃ¨gle TRACE-01 : Acteur responsable tracÃ©**
+**Règle TRACE-01 : Acteur responsable tracé**
 
 Chaque trace d'audit inclut l'acteur responsable :
-- `acteur_responsable` : Acteur (PRODUIT, BONDING_BROTHER, AUTORITÃ‰)
-- `responsabilitÃ©_code` : Code de responsabilitÃ© (ex: RES-BB-01)
+- `acteur_responsable` : Acteur (PRODUIT, BONDING_BROTHER, AUTORITÉ)
+- `responsabilité_code` : Code de responsabilité (ex: RES-BB-01)
 
-**RÃ¨gle TRACE-02 : Imputation tracÃ©e**
+**Règle TRACE-02 : Imputation tracée**
 
-L'imputation d'une erreur est tracÃ©e :
+L'imputation d'une erreur est tracée :
 - `erreur_id` : ID de l'erreur
-- `acteur_imputÃ©` : Acteur responsable
+- `acteur_imputé` : Acteur responsable
 - `justification` : Justification de l'imputation
 
-### 8.2 Consultation de la responsabilitÃ©
+### 8.2 Consultation de la responsabilité
 
-**RÃ¨gle CONSULT-01 : API de consultation**
+**Règle CONSULT-01 : API de consultation**
 
-Un produit peut consulter la responsabilitÃ© de ses propres interactions :
-- `GET /responsibility/intentions/{intention_id}` : ResponsabilitÃ©s pour une intention
+Un produit peut consulter la responsabilité de ses propres interactions :
+- `GET /responsibility/intentions/{intention_id}` : Responsabilités pour une intention
 - `GET /responsibility/erreurs/{erreur_id}` : Imputation d'une erreur
 
-**RÃ¨gle CONSULT-02 : Rapport de responsabilitÃ©**
+**Règle CONSULT-02 : Rapport de responsabilité**
 
-Les administrateurs peuvent gÃ©nÃ©rer des rapports de responsabilitÃ© :
+Les administrateurs peuvent générer des rapports de responsabilité :
 - Par acteur
 - Par type d'erreur
-- Par pÃ©riode
+- Par période
 
 ---
 
 ## 9. Exemples
 
-### 9.1 Intention rejetÃ©e par validation
+### 9.1 Intention rejetée par validation
 
-**ScÃ©nario :** Intention avec format invalide rejetÃ©e par BB.
+**Scénario :** Intention avec format invalide rejetée par BB.
 
 **Imputation :**
 - Si intention effectivement invalide : **PRODUIT** (RES-PROD-01)
-- Si intention valide mais rejetÃ©e Ã  tort : **BONDING_BROTHER** (RES-BB-01)
+- Si intention valide mais rejetée à tort : **BONDING_BROTHER** (RES-BB-01)
 
 **Trace :**
 ```json
 {
   "trace_id": "trace-001",
-  "type_Ã©vÃ©nement": "INTENTION_REJETÃ‰E",
+  "type_événement": "INTENTION_REJETÉE",
   "acteur_responsable": "PRODUIT",
-  "responsabilitÃ©_code": "RES-PROD-01",
+  "responsabilité_code": "RES-PROD-01",
   "justification": "Intention invalide : champ 'payload' manquant"
 }
 ```
 
-### 9.2 Intention refusÃ©e par autoritÃ©
+### 9.2 Intention refusée par autorité
 
-**ScÃ©nario :** Intention valide et traduite, mais refusÃ©e par Strong Father pour permissions insuffisantes.
+**Scénario :** Intention valide et traduite, mais refusée par Strong Father pour permissions insuffisantes.
 
 **Imputation :**
 - Validation : **BONDING_BROTHER** (correcte)
 - Traduction : **BONDING_BROTHER** (correcte)
-- DÃ©cision de refus : **STRONG_FATHER** (RES-AUTH-01)
+- Décision de refus : **STRONG_FATHER** (RES-AUTH-01)
 
 **Trace :**
 ```json
 {
   "trace_id": "trace-005",
-  "type_Ã©vÃ©nement": "RÃ‰PONSE_REÃ‡UE",
+  "type_événement": "RÉPONSE_REÇUE",
   "acteur_responsable": "STRONG_FATHER",
-  "responsabilitÃ©_code": "RES-AUTH-01",
-  "donnÃ©es_Ã©vÃ©nement": {
-    "rÃ©ponse": {
-      "statut": "REFUSÃ‰",
+  "responsabilité_code": "RES-AUTH-01",
+  "données_événement": {
+    "réponse": {
+      "statut": "REFUSÉ",
       "raison": "Permissions insuffisantes"
     }
   }
@@ -324,7 +324,7 @@ Les administrateurs peuvent gÃ©nÃ©rer des rapports de responsabilitÃ© :
 
 ### 9.3 Erreur de traduction
 
-**ScÃ©nario :** Intention valide mais traduction incorrecte (sÃ©mantique perdue).
+**Scénario :** Intention valide mais traduction incorrecte (sémantique perdue).
 
 **Imputation :** **BONDING_BROTHER** (RES-BB-02)
 
@@ -332,10 +332,10 @@ Les administrateurs peuvent gÃ©nÃ©rer des rapports de responsabilitÃ© :
 ```json
 {
   "trace_id": "trace-003",
-  "type_Ã©vÃ©nement": "ERREUR_SURVENUE",
+  "type_événement": "ERREUR_SURVENUE",
   "acteur_responsable": "BONDING_BROTHER",
-  "responsabilitÃ©_code": "RES-BB-02",
-  "donnÃ©es_Ã©vÃ©nement": {
+  "responsabilité_code": "RES-BB-02",
+  "données_événement": {
     "erreur": {
       "code": "TRAD-002",
       "message": "Champ non mappable lors de la traduction"
@@ -346,7 +346,7 @@ Les administrateurs peuvent gÃ©nÃ©rer des rapports de responsabilitÃ© :
 
 ### 9.4 Intention perdue en synchronisation
 
-**ScÃ©nario :** Intention buffÃ©e en offline, mais perdue lors de la synchronisation.
+**Scénario :** Intention buffée en offline, mais perdue lors de la synchronisation.
 
 **Imputation :** **BONDING_BROTHER** (RES-BB-06)
 
@@ -354,10 +354,10 @@ Les administrateurs peuvent gÃ©nÃ©rer des rapports de responsabilitÃ© :
 ```json
 {
   "trace_id": "trace-sync-001",
-  "type_Ã©vÃ©nement": "ERREUR_SURVENUE",
+  "type_événement": "ERREUR_SURVENUE",
   "acteur_responsable": "BONDING_BROTHER",
-  "responsabilitÃ©_code": "RES-BB-06",
-  "donnÃ©es_Ã©vÃ©nement": {
+  "responsabilité_code": "RES-BB-06",
+  "données_événement": {
     "erreur": {
       "code": "SYNC-005",
       "message": "Intention perdue lors de la synchronisation"
@@ -368,40 +368,40 @@ Les administrateurs peuvent gÃ©nÃ©rer des rapports de responsabilitÃ© :
 
 ---
 
-## 10. Matrice de responsabilitÃ©
+## 10. Matrice de responsabilité
 
-Cette matrice rÃ©sume les responsabilitÃ©s par type d'Ã©vÃ©nement :
+Cette matrice résume les responsabilités par type d'événement :
 
-| Ã‰vÃ©nement | Acteur responsable | Code |
+| Événement | Acteur responsable | Code |
 |-----------|-------------------|------|
 | Intention invalide | Produit | RES-PROD-01 |
 | Validation incorrecte | Bonding Brother | RES-BB-01 |
 | Traduction incorrecte | Bonding Brother | RES-BB-02 |
 | Filtrage incorrect | Bonding Brother | RES-BB-03 |
 | Transmission incorrecte | Bonding Brother | RES-BB-04 |
-| Journalisation incomplÃ¨te | Bonding Brother | RES-BB-05 |
+| Journalisation incomplète | Bonding Brother | RES-BB-05 |
 | Perte en synchronisation | Bonding Brother | RES-BB-06 |
-| Ordre non prÃ©servÃ© | Bonding Brother | RES-BB-07 |
-| DÃ©cision incorrecte | AutoritÃ© | RES-AUTH-01 |
-| Validation mÃ©tier incorrecte | AutoritÃ© | RES-AUTH-02 |
-| IncohÃ©rence | AutoritÃ© | RES-AUTH-03 |
-| Timeout autoritÃ© | AutoritÃ© | RES-AUTH-04 |
-| Erreur interne autoritÃ© | AutoritÃ© | RES-AUTH-05 |
+| Ordre non préservé | Bonding Brother | RES-BB-07 |
+| Décision incorrecte | Autorité | RES-AUTH-01 |
+| Validation métier incorrecte | Autorité | RES-AUTH-02 |
+| Incohérence | Autorité | RES-AUTH-03 |
+| Timeout autorité | Autorité | RES-AUTH-04 |
+| Erreur interne autorité | Autorité | RES-AUTH-05 |
 
 ---
 
 ## 11. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit le modÃ¨le de responsabilitÃ© que Bonding Brother doit respecter pour garantir l'attribution claire des responsabilitÃ©s.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit le modèle de responsabilité que Bonding Brother doit respecter pour garantir l'attribution claire des responsabilités.
 
-Toute erreur, toute dÃ©cision, tout rÃ©sultat doit pouvoir Ãªtre imputÃ© selon ce modÃ¨le. Toute dÃ©viation est considÃ©rÃ©e comme une violation.
+Toute erreur, toute décision, tout résultat doit pouvoir être imputé selon ce modèle. Toute déviation est considérée comme une violation.
 
 ---
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** 
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** 
 - [Documentation Fondatrice v1.0](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) (Section 9)
 - [Audit & Traceability Contract v1.0](./BondingBrother%20-%20Audit%20&%20Traceability%20Contract.md)
 - [Intent Model Contract v1.0](../intent/BondingBrother%20-%20Intent%20Model%20Contract.md)

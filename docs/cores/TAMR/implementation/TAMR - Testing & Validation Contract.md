@@ -30,13 +30,13 @@ Ce document est **contractuel et normatif** pour les exigences de test ; il rest
 
 ## 2. Principes de test
 
-**T-TAMR-1 : Tests conceptuels** â€” Les tests definis sont conceptuels : ils specifient ce qui doit etre valide, pas l'outil ou la methode.
+**T-TAMR-1 : Tests conceptuels** — Les tests definis sont conceptuels : ils specifient ce qui doit etre valide, pas l'outil ou la methode.
 
-**T-TAMR-2 : Validation contractuelle** â€” Les tests valident le respect des contrats TAMR (invariants, trace, limites), pas les details d'implementation.
+**T-TAMR-2 : Validation contractuelle** — Les tests valident le respect des contrats TAMR (invariants, trace, limites), pas les details d'implementation.
 
-**T-TAMR-3 : Completeness** â€” Chaque invariant INV-TAMR-* et chaque regle critique (justification override, escalade non bloquante) doit etre couvert par au moins un test.
+**T-TAMR-3 : Completeness** — Chaque invariant INV-TAMR-* et chaque regle critique (justification override, escalade non bloquante) doit etre couvert par au moins un test.
 
-**T-TAMR-4 : Reproductibilite** â€” Les tests doivent etre reproductibles : meme scenario, meme resultat attendu.
+**T-TAMR-4 : Reproductibilite** — Les tests doivent etre reproductibles : meme scenario, meme resultat attendu.
 
 ---
 

@@ -1,18 +1,18 @@
-﻿# MWS â€” Registre de Services et Isolation
+﻿# MWS — Registre de Services et Isolation
 
 ## Contexte
 
-Le **Registre de Services** est la liste officielle de tous les Services autorisÃ©s sur le rÃ©seau MWS. Maintenu par **Origin**, il garantit que seuls des Services **vÃ©rifiÃ©s et rÃ©pertoriÃ©s** peuvent Ãªtre installÃ©s dans les COGs connectÃ©s. L'**isolation** est le mÃ©canisme appliquÃ© aux COGs possÃ©dant des Services non rÃ©pertoriÃ©s.
+Le **Registre de Services** est la liste officielle de tous les Services autorisés sur le réseau MWS. Maintenu par **Origin**, il garantit que seuls des Services **vérifiés et répertoriés** peuvent être installés dans les COGs connectés. L'**isolation** est le mécanisme appliqué aux COGs possédant des Services non répertoriés.
 
-**RÃ©fÃ©rence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
+**Référence fondatrice :** [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 
-## PortÃ©e / Scope
+## Portée / Scope
 
 - Registre de Services : structure, services officiels, services tiers
-- VÃ©rification des Services lors de l'enregistrement
-- DÃ©tection des Services non rÃ©pertoriÃ©s
-- Protocole d'isolation et de levÃ©e d'isolation
-- Suivi des mises Ã  jour
+- Vérification des Services lors de l'enregistrement
+- Détection des Services non répertoriés
+- Protocole d'isolation et de levée d'isolation
+- Suivi des mises à jour
 
 ---
 
@@ -20,20 +20,20 @@ Le **Registre de Services** est la liste officielle de tous les Services autoris
 
 ### 1.1 Principe fondamental
 
-> **Un Service ne peut pas Ãªtre installÃ© dans un COG connectÃ© au Webway sans Ãªtre prÃ©sent dans le Registre de Services du Relay Origin.**
+> **Un Service ne peut pas être installé dans un COG connecté au Webway sans être présent dans le Registre de Services du Relay Origin.**
 
 Le Registre garantit :
 
 | Garantie | Description |
 |----------|-------------|
-| **AuthenticitÃ©** | Seuls les Services vÃ©rifiÃ©s sont acceptÃ©s |
-| **IntÃ©gritÃ©** | Les checksums permettent de vÃ©rifier l'intÃ©gritÃ© |
-| **TraÃ§abilitÃ©** | L'origine de chaque Service est connue |
-| **CompatibilitÃ©** | Les versions compatibles avec les Cores sont documentÃ©es |
+| **Authenticité** | Seuls les Services vérifiés sont acceptés |
+| **Intégrité** | Les checksums permettent de vérifier l'intégrité |
+| **Traçabilité** | L'origine de chaque Service est connue |
+| **Compatibilité** | Les versions compatibles avec les Cores sont documentées |
 
 ### 1.2 Structure du Registre
 
-Le Registre est maintenu par **Origin** et contient deux catÃ©gories :
+Le Registre est maintenu par **Origin** et contient deux catégories :
 
 #### Services officiels Miyukini
 
@@ -41,39 +41,39 @@ Le Registre est maintenu par **Origin** et contient deux catÃ©gories :
 |-------|-------------|
 | `service_id` | Identifiant unique (ex. `webway.tracker`, `bridge`) |
 | `current_version` | Version courante officielle (`MAJOR.MINOR.PATCH`) |
-| `min_version` | Version minimale acceptÃ©e sur le rÃ©seau |
+| `min_version` | Version minimale acceptée sur le réseau |
 | `checksum` | Hash SHA-256 du binaire/package |
-| `signature` | **Signature Ed25519 ou GPG** du binaire (contremesure R-005 â€” supply chain). Obligatoire pour toute installation. |
-| `signing_key_id` | RÃ©fÃ©rence Ã  la clÃ© publique de signature (Registre des clÃ©s). |
-| `build_reproducible` | Optionnel : boolÃ©en + hash de build pour reproducible builds. |
-| `download_url` | URL de tÃ©lÃ©chargement officielle Miyukini |
+| `signature` | **Signature Ed25519 ou GPG** du binaire (contremesure R-005 — supply chain). Obligatoire pour toute installation. |
+| `signing_key_id` | Référence à la clé publique de signature (Registre des clés). |
+| `build_reproducible` | Optionnel : booléen + hash de build pour reproducible builds. |
+| `download_url` | URL de téléchargement officielle Miyukini |
 | `changelog_url` | URL du journal des modifications |
 | `core_compatibility` | Liste des `core_version.MAJOR` compatibles |
 | `status` | `ACTIVE`, `DEPRECATED`, `RETIRED` |
 
-#### Services tiers rÃ©pertoriÃ©s
+#### Services tiers répertoriés
 
 | Champ | Description |
 |-------|-------------|
-| `service_id` | Identifiant unique (prÃ©fixe `third.` ou namespace Ã©diteur) |
-| `publisher` | Nom de l'Ã©diteur du service tiers |
-| `official_source_url` | URL de la source officielle de l'Ã©diteur |
-| `current_version` | DerniÃ¨re version connue dans le Registre |
-| `checksum` | Hash SHA-256 de la version rÃ©pertoriÃ©e |
-| `signature` | **Signature** du binaire par l'Ã©diteur (contremesure R-005). VÃ©rification obligatoire avant installation. |
-| `signing_key` | ClÃ© publique de l'Ã©diteur (enregistrÃ©e et vÃ©rifiÃ©e par Origin). |
+| `service_id` | Identifiant unique (préfixe `third.` ou namespace éditeur) |
+| `publisher` | Nom de l'éditeur du service tiers |
+| `official_source_url` | URL de la source officielle de l'éditeur |
+| `current_version` | Dernière version connue dans le Registre |
+| `checksum` | Hash SHA-256 de la version répertoriée |
+| `signature` | **Signature** du binaire par l'éditeur (contremesure R-005). Vérification obligatoire avant installation. |
+| `signing_key` | Clé publique de l'éditeur (enregistrée et vérifiée par Origin). |
 | `core_compatibility` | Liste des `core_version.MAJOR` compatibles |
 | `review_status` | `APPROVED`, `PENDING_REVIEW`, `SUSPENDED` |
 | `registration_date` | Date d'enregistrement dans le Registre |
 
-**RÃ¨gle R-005 :** Avant d'installer un Service, le COG doit vÃ©rifier la signature du binaire avec la clÃ© publique enregistrÃ©e. En cas d'Ã©chec de vÃ©rification, l'installation est refusÃ©e.
+**Règle R-005 :** Avant d'installer un Service, le COG doit vérifier la signature du binaire avec la clé publique enregistrée. En cas d'échec de vérification, l'installation est refusée.
 
 ### 1.3 Synchronisation
 
 ```mermaid
 flowchart TB
     subgraph Origin["Origin"]
-        REG[Registre maÃ®tre]
+        REG[Registre maître]
     end
 
     subgraph Relays["Relays"]
@@ -90,19 +90,19 @@ flowchart TB
     R1 -->|Propagation| T1
 ```
 
-| MÃ©canisme | Description |
+| Mécanisme | Description |
 |-----------|-------------|
-| **Push depuis Origin** | Origin pousse les mises Ã  jour vers les relays |
-| **Pull pÃ©riodique** | Les relays interrogent Origin pÃ©riodiquement |
+| **Push depuis Origin** | Origin pousse les mises à jour vers les relays |
+| **Pull périodique** | Les relays interrogent Origin périodiquement |
 | **Cache local** | Chaque relay/tracker maintient un cache du Registre |
 
 ---
 
-## 2. VÃ©rification lors de l'enregistrement
+## 2. Vérification lors de l'enregistrement
 
 ### 2.1 Processus
 
-Quand un COG se prÃ©sente avec son `service_manifest` :
+Quand un COG se présente avec son `service_manifest` :
 
 ```mermaid
 sequenceDiagram
@@ -113,76 +113,76 @@ sequenceDiagram
     COG->>R: REGISTER (service_manifest)
     loop Pour chaque service_id
         R->>R: Consulter cache local
-        alt Cache manquant ou pÃ©rimÃ©
+        alt Cache manquant ou périmé
             R->>REG: REGISTRY_QUERY (service_id)
             REG->>R: REGISTRY_RESPONSE (status)
         end
         alt Service FOUND
             R->>R: Marquer OK
         else Service NOT_FOUND
-            R->>R: Marquer non rÃ©pertoriÃ©
+            R->>R: Marquer non répertorié
         else Service SUSPENDED
             R->>R: Marquer suspendu
         end
     end
     alt Tous les services OK
         R->>COG: REGISTER_OK
-    else Un ou plusieurs non rÃ©pertoriÃ©s
+    else Un ou plusieurs non répertoriés
         R->>COG: Isolation (raison)
     end
 ```
 
-### 2.2 RÃ©sultats possibles
+### 2.2 Résultats possibles
 
 | Statut Registre | Action |
 |-----------------|--------|
-| `FOUND` + `ACTIVE` | Service acceptÃ© |
-| `FOUND` + `DEPRECATED` | AcceptÃ© avec avertissement |
-| `FOUND` + `SUSPENDED` | Service temporairement retirÃ© â†’ isolation |
-| `NOT_FOUND` | Service non rÃ©pertoriÃ© â†’ isolation |
+| `FOUND` + `ACTIVE` | Service accepté |
+| `FOUND` + `DEPRECATED` | Accepté avec avertissement |
+| `FOUND` + `SUSPENDED` | Service temporairement retiré → isolation |
+| `NOT_FOUND` | Service non répertorié → isolation |
 
 ---
 
-## 3. DÃ©tection des Services non rÃ©pertoriÃ©s
+## 3. Détection des Services non répertoriés
 
-### 3.1 ScÃ©narios de dÃ©tection
+### 3.1 Scénarios de détection
 
-| ScÃ©nario | Moment de dÃ©tection |
+| Scénario | Moment de détection |
 |----------|---------------------|
-| **Installation hors ligne** | Le COG installe un Service sans connexion rÃ©seau, puis se prÃ©sente au relay |
-| **Service retirÃ©** | Un Service prÃ©cÃ©demment rÃ©pertoriÃ© est retirÃ© du Registre |
-| **ContrefaÃ§on** | Un service_id falsifiÃ© est dÃ©tectÃ© |
-| **Erreur de configuration** | Un service_id mal orthographiÃ© ou invalide |
+| **Installation hors ligne** | Le COG installe un Service sans connexion réseau, puis se présente au relay |
+| **Service retiré** | Un Service précédemment répertorié est retiré du Registre |
+| **Contrefaçon** | Un service_id falsifié est détecté |
+| **Erreur de configuration** | Un service_id mal orthographié ou invalide |
 
-### 3.2 Informations journalisÃ©es
+### 3.2 Informations journalisées
 
 | Champ | Description |
 |-------|-------------|
-| `cog_id` | COG concernÃ© |
-| `service_id` | Service non rÃ©pertoriÃ© |
-| `detected_at` | Date de dÃ©tection |
+| `cog_id` | COG concerné |
+| `service_id` | Service non répertorié |
+| `detected_at` | Date de détection |
 | `source_ip` | Adresse IP du COG |
-| `relay_id` | Relay ayant dÃ©tectÃ© |
+| `relay_id` | Relay ayant détecté |
 | `reason` | `NOT_FOUND` ou `SUSPENDED` |
 
 ---
 
 ## 4. Protocole d'isolation
 
-### 4.1 DÃ©finition
+### 4.1 Définition
 
-L'**isolation** est un Ã©tat oÃ¹ le COG est **exclu du maillage MWS actif** mais maintenu en **surveillance**. Il ne s'agit pas d'une quarantaine classique (non-conformitÃ©) mais d'une attente de mise en conformitÃ© du `service_manifest`.
+L'**isolation** est un état où le COG est **exclu du maillage MWS actif** mais maintenu en **surveillance**. Il ne s'agit pas d'une quarantaine classique (non-conformité) mais d'une attente de mise en conformité du `service_manifest`.
 
-### 4.2 Comportement du COG isolÃ©
+### 4.2 Comportement du COG isolé
 
-| AutorisÃ© | Interdit |
+| Autorisé | Interdit |
 |----------|----------|
-| Recevoir des notifications | Participer aux annonces de prÃ©sence |
-| Consulter le Registre | ApparaÃ®tre dans les rÃ©ponses de dÃ©couverte |
+| Recevoir des notifications | Participer aux annonces de présence |
+| Consulter le Registre | Apparaître dans les réponses de découverte |
 | Maintenir le tunnel (HEARTBEAT) | Recevoir des connexions inter-COG |
-| Se re-enregistrer | Router des donnÃ©es vers d'autres COGs |
+| Se re-enregistrer | Router des données vers d'autres COGs |
 
-### 4.3 Ã‰tapes de l'isolation
+### 4.3 Étapes de l'isolation
 
 ```mermaid
 sequenceDiagram
@@ -191,10 +191,10 @@ sequenceDiagram
     participant T as Tracker
     participant User as Utilisateur
 
-    R->>R: DÃ©tecter service non rÃ©pertoriÃ©
+    R->>R: Détecter service non répertorié
     R->>COG: REGISTER_OK (status = ISOLATED, reason)
     R->>T: ALERT (cog_id, unregistered_service)
-    T->>T: Exclure des rÃ©ponses de dÃ©couverte
+    T->>T: Exclure des réponses de découverte
     R->>COG: Notification utilisateur
     COG->>User: Afficher notification
     Note over COG: Mode surveillance
@@ -206,31 +206,31 @@ sequenceDiagram
 
 ### 4.4 Notification utilisateur
 
-La notification envoyÃ©e Ã  l'utilisateur contient :
+La notification envoyée à l'utilisateur contient :
 
 | Champ | Description |
 |-------|-------------|
-| **service_id** | Service non rÃ©pertoriÃ© |
+| **service_id** | Service non répertorié |
 | **Raison** | Absent du Registre de Services |
-| **Actions recommandÃ©es** | |
+| **Actions recommandées** | |
 | | 1. Soumettre le service au Registre (processus d'enregistrement tiers) |
-| | 2. DÃ©sinstaller le service non rÃ©pertoriÃ© |
+| | 2. Désinstaller le service non répertorié |
 | | 3. Se re-enregistrer avec un manifest conforme |
 
 ---
 
-## 5. LevÃ©e d'isolation
+## 5. Levée d'isolation
 
 ### 5.1 Conditions
 
-L'isolation est levÃ©e **automatiquement** quand :
+L'isolation est levée **automatiquement** quand :
 
 | Condition | Description |
 |-----------|-------------|
-| **Manifest corrigÃ©** | Le COG se re-enregistre avec un `service_manifest` entiÃ¨rement conforme |
-| **Service ajoutÃ© au Registre** | Le service non rÃ©pertoriÃ© est ajoutÃ© au Registre (processus d'enregistrement tiers approuvÃ©) |
+| **Manifest corrigé** | Le COG se re-enregistre avec un `service_manifest` entièrement conforme |
+| **Service ajouté au Registre** | Le service non répertorié est ajouté au Registre (processus d'enregistrement tiers approuvé) |
 
-### 5.2 Processus de levÃ©e
+### 5.2 Processus de levée
 
 ```mermaid
 sequenceDiagram
@@ -238,12 +238,12 @@ sequenceDiagram
     participant R as Relay
     participant T as Tracker
 
-    COG->>R: REGISTER (manifest corrigÃ©)
-    R->>R: VÃ©rifier tous les services dans le Registre
+    COG->>R: REGISTER (manifest corrigé)
+    R->>R: Vérifier tous les services dans le Registre
     alt Tous conformes
         R->>COG: REGISTER_OK (status = ACTIVE)
         R->>T: UPDATE (cog_id, status = ACTIVE)
-        T->>T: RÃ©intÃ©grer dans les rÃ©ponses de dÃ©couverte
+        T->>T: Réintégrer dans les réponses de découverte
     else Encore non conforme
         R->>COG: REGISTER_OK (status = ISOLATED)
     end
@@ -251,41 +251,41 @@ sequenceDiagram
 
 ---
 
-## 6. Suivi des mises Ã  jour
+## 6. Suivi des mises à jour
 
-### 6.1 MÃ©canismes
+### 6.1 Mécanismes
 
-Le COG dispose de capacitÃ©s de **suivi des mises Ã  jour** :
+Le COG dispose de capacités de **suivi des mises à jour** :
 
-| MÃ©canisme | Description |
+| Mécanisme | Description |
 |-----------|-------------|
-| **VÃ©rification pÃ©riodique** | Le COG interroge le Registre pour comparer son manifest |
+| **Vérification périodique** | Le COG interroge le Registre pour comparer son manifest |
 | **Notification push** | Le relay envoie `UPDATE_AVAILABLE` via le tunnel actif |
-| **Registre local** | Le COG maintient un registre local des versions installÃ©es |
+| **Registre local** | Le COG maintient un registre local des versions installées |
 
 ### 6.2 Contenu de UPDATE_AVAILABLE
 
 | Champ | Description |
 |-------|-------------|
-| `service_id` | Service concernÃ© |
-| `current_version` | Version installÃ©e sur le COG |
+| `service_id` | Service concerné |
+| `current_version` | Version installée sur le COG |
 | `available_version` | Version disponible |
 | `severity` | `critical`, `recommended`, `optional` |
-| `download_url` | URL de tÃ©lÃ©chargement |
+| `download_url` | URL de téléchargement |
 | `checksum` | Hash SHA-256 |
 | `changelog_url` | Journal des modifications |
 
-### 6.3 Mises Ã  jour critiques
+### 6.3 Mises à jour critiques
 
-Si une mise Ã  jour est marquÃ©e `critical` (faille de sÃ©curitÃ©) :
+Si une mise à jour est marquée `critical` (faille de sécurité) :
 
-| DÃ©lai | Action |
+| Délai | Action |
 |-------|--------|
-| ImmÃ©diat | Signalement vers WorrySentinel |
-| AprÃ¨s 24h | Throttling du COG |
-| AprÃ¨s 72h | Isolation du COG (si configurable) |
+| Immédiat | Signalement vers WorrySentinel |
+| Après 24h | Throttling du COG |
+| Après 72h | Isolation du COG (si configurable) |
 
-> La dÃ©cision de mise Ã  jour reste **souveraine au COG**. Le relay/Tracker ne force pas la mise Ã  jour, mais applique des mesures progressives.
+> La décision de mise à jour reste **souveraine au COG**. Le relay/Tracker ne force pas la mise à jour, mais applique des mesures progressives.
 
 ---
 
@@ -293,28 +293,28 @@ Si une mise Ã  jour est marquÃ©e `critical` (faille de sÃ©curitÃ©) :
 
 ### 7.1 Processus
 
-Pour qu'un service tiers soit ajoutÃ© au Registre :
+Pour qu'un service tiers soit ajouté au Registre :
 
-1. **Soumission** : L'Ã©diteur soumet le service Ã  Origin avec documentation
-2. **Audit** : Origin audite le service (sÃ©curitÃ©, conformitÃ©, compatibilitÃ©)
+1. **Soumission** : L'éditeur soumet le service à Origin avec documentation
+2. **Audit** : Origin audite le service (sécurité, conformité, compatibilité)
 3. **Review** : Statut `PENDING_REVIEW` pendant l'audit
-4. **Approbation** : Si approuvÃ© â†’ statut `APPROVED`
-5. **Publication** : Le service est ajoutÃ© au Registre et synchronisÃ©
+4. **Approbation** : Si approuvé → statut `APPROVED`
+5. **Publication** : Le service est ajouté au Registre et synchronisé
 
-### 7.2 ResponsabilitÃ©s
+### 7.2 Responsabilités
 
-| Acteur | ResponsabilitÃ© |
+| Acteur | Responsabilité |
 |--------|----------------|
-| **Ã‰diteur** | Maintenir le service, fournir les mises Ã  jour |
+| **Éditeur** | Maintenir le service, fournir les mises à jour |
 | **Origin** | Auditer, approuver, maintenir le Registre |
-| **Relay** | VÃ©rifier, rediriger vers la source officielle |
-| **COG** | TÃ©lÃ©charger depuis la source officielle |
+| **Relay** | Vérifier, rediriger vers la source officielle |
+| **COG** | Télécharger depuis la source officielle |
 
-> **Important :** Le relay **ne distribue pas** les binaires tiers ; il redirige vers la source officielle de l'Ã©diteur.
+> **Important :** Le relay **ne distribue pas** les binaires tiers ; il redirige vers la source officielle de l'éditeur.
 
 ---
 
-## 8. SchÃ©ma rÃ©capitulatif
+## 8. Schéma récapitulatif
 
 ```
 +--------------------------------+
@@ -322,7 +322,7 @@ Pour qu'un service tiers soit ajoutÃ© au Registre :
 |         (maintenu par Origin)  |
 |--------------------------------|
 | Services officiels Miyukini    |
-| Services tiers rÃ©pertoriÃ©s     |
+| Services tiers répertoriés     |
 +--------------------------------+
               |
               | Synchronisation
@@ -331,20 +331,20 @@ Pour qu'un service tiers soit ajoutÃ© au Registre :
 |        RELAY / TRACKER         |
 |--------------------------------|
 | Cache local du Registre        |
-| VÃ©rification lors de REGISTER  |
+| Vérification lors de REGISTER  |
 +--------------------------------+
               |
-              | VÃ©rification
+              | Vérification
               v
 +--------------------------------+
 |             COG                |
 |--------------------------------|
 | service_manifest               |
-| Tous les services doivent Ãªtre |
-| prÃ©sents dans le Registre      |
+| Tous les services doivent être |
+| présents dans le Registre      |
 +--------------------------------+
               |
-              | Si non rÃ©pertoriÃ©
+              | Si non répertorié
               v
 +--------------------------------+
 |          ISOLATION             |
@@ -352,23 +352,23 @@ Pour qu'un service tiers soit ajoutÃ© au Registre :
 | Tunnel maintenu (surveillance) |
 | Exclu du maillage actif        |
 | Notification utilisateur       |
-| LevÃ©e aprÃ¨s correction         |
+| Levée après correction         |
 +--------------------------------+
 ```
 
 ---
 
-## RÃ©fÃ©rences
+## Références
 
 - [MWS - Document Fondateur](../MWS%20-%20Document%20Fondateur.md)
 - [MWS - Origin](../acteurs/MWS%20-%20Origin.md)
-- [MWS - Flux de VÃ©rification](../verification/MWS%20-%20Flux%20de%20Verification.md)
-- [MWS - Contre-Mesures de SÃ©curitÃ©](./MWS%20-%20Contre-Mesures%20de%20Securite.md) â€” R-005
-- [Miyukini Webway Relay](..//reference//_index.md) â€” section 6
+- [MWS - Flux de Vérification](../verification/MWS%20-%20Flux%20de%20Verification.md)
+- [MWS - Contre-Mesures de Sécurité](./MWS%20-%20Contre-Mesures%20de%20Securite.md) — R-005
+- [Miyukini Webway Relay](..//reference//_index.md) — section 6
 
 ---
 
 **Version :** 2.0  
-**Mise Ã  jour :** Signature des binaires (R-005)  
-**Classification :** Documentation MWS â€” SÃ©curitÃ©
+**Mise à jour :** Signature des binaires (R-005)  
+**Classification :** Documentation MWS — Sécurité
 

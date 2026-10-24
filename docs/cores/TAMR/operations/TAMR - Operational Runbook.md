@@ -100,7 +100,7 @@ Les traces d'intervention sont persistees par KindMother selon la structure defi
 1. Identifier le flux et le point d'intervention concerne.
 2. Verifier que le produit emet bien une trace conforme au Trace Contract.
 3. Verifier que KindMother persiste la trace (configuration, erreurs).
-4. Corriger l'implementation ou la configuration ; rejouer si possible l'intervention pour generer la trace a posteriori (si autorise par la politique de rÃ©tention).
+4. Corriger l'implementation ou la configuration ; rejouer si possible l'intervention pour generer la trace a posteriori (si autorise par la politique de rétention).
 
 ### 5.2. Alerte : Override sans justification
 

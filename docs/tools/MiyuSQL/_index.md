@@ -1,4 +1,4 @@
-﻿# MiyuSQL â€” Index de navigation
+﻿# MiyuSQL — Index de navigation
 
 ## Contexte
 

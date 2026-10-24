@@ -1,66 +1,66 @@
-﻿# MiyuMedia â€” Documentation Fondatrice
+﻿# MiyuMedia — Documentation Fondatrice
 
 ## 1. Contexte
 
-**MiyuMedia** est le **kit d'outils (Toolkit)** de gestion des mÃ©dias (upload, service, transformation) de l'Ã©cosystÃ¨me Miyukini. Il intÃ¨gre les outils d'enregistrement, de service et de transformation des mÃ©dias (miniatures, recadrage), alignÃ©s sur KindMother pour la persistance des donnÃ©es.
+**MiyuMedia** est le **kit d'outils (Toolkit)** de gestion des médias (upload, service, transformation) de l'écosystème Miyukini. Il intègre les outils d'enregistrement, de service et de transformation des médias (miniatures, recadrage), alignés sur KindMother pour la persistance des données.
 
-L'autoritÃ© sur les donnÃ©es mÃ©dias appartient Ã  **KindMother** (Core de donnÃ©es, Strate 4). MiyuMedia expose des capacitÃ©s d'exÃ©cution gouvernÃ©e (upload, serve, transform) sans remplacer KindMother ni StrongFather ; les OpÃ©rateurs passent par la gouvernance (BondingBrother, Master Butler, StrongFather, WorrySentinel, Caring Nanny) pour utiliser ces outils.
+L'autorité sur les données médias appartient à **KindMother** (Core de données, Strate 4). MiyuMedia expose des capacités d'exécution gouvernée (upload, serve, transform) sans remplacer KindMother ni StrongFather ; les Opérateurs passent par la gouvernance (BondingBrother, Master Butler, StrongFather, WorrySentinel, Caring Nanny) pour utiliser ces outils.
 
 **Terminologie officielle :** [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md)
 
 ---
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
-**Ce document dÃ©finit :**
+**Ce document définit :**
 
-- L'identitÃ© et la dÃ©finition canonique de MiyuMedia
+- L'identité et la définition canonique de MiyuMedia
 - Le **ToolkitId** et le catalogue (Master Butler)
 - La liste des **outils composants** (ToolIds)
-- La gouvernance (flux d'appel, Cores impliquÃ©s)
-- Le niveau de sÃ©curitÃ© et les Ã©tats systÃ¨me autorisÃ©s ou interdits
-- La relation avec KindMother (persistance mÃ©dias)
-- L'alignement avec le protocole MIP v1 pour une future implÃ©mentation indexable
+- La gouvernance (flux d'appel, Cores impliqués)
+- Le niveau de sécurité et les états système autorisés ou interdits
+- La relation avec KindMother (persistance médias)
+- L'alignement avec le protocole MIP v1 pour une future implémentation indexable
 
 **Hors scope :**
 
-- L'implÃ©mentation dÃ©taillÃ©e (stockage binaire, gÃ©nÃ©ration de miniatures)
-- Toute dÃ©cision de politique de stockage ou de quota â€” celle-ci reste du ressort de StrongFather et des Cores
-- La gestion Ã©ditoriale des contenus (MiyuCMS)
+- L'implémentation détaillée (stockage binaire, génération de miniatures)
+- Toute décision de politique de stockage ou de quota — celle-ci reste du ressort de StrongFather et des Cores
+- La gestion éditoriale des contenus (MiyuCMS)
 
 ---
 
-## 3. DÃ©finition canonique
+## 3. Définition canonique
 
-> **MiyuMedia est une composition officielle d'outils de gestion des mÃ©dias (upload, service, transformation), dÃ©clarÃ©e et gouvernÃ©e par l'environnement.**
+> **MiyuMedia est une composition officielle d'outils de gestion des médias (upload, service, transformation), déclarée et gouvernée par l'environnement.**
 
-- MiyuMedia **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrÃ¨ge des Tools existants.
-- MiyuMedia **n'ajoute aucune logique mÃ©tier** : il orchestre des capacitÃ©s atomiques (enregistrer un mÃ©dia, servir un mÃ©dia, produire une variante) sans dÃ©cider de la politique de stockage ni des quotas.
+- MiyuMedia **n'est pas** un nouveau Tool : c'est un **Kit d'Outils (Toolkit)** qui agrège des Tools existants.
+- MiyuMedia **n'ajoute aucune logique métier** : il orchestre des capacités atomiques (enregistrer un média, servir un média, produire une variante) sans décider de la politique de stockage ni des quotas.
 
-**RÃ¨gle fondamentale :** Un Kit d'Outils orchestre, mais n'ajoute pas de capacitÃ©. Les capacitÃ©s viennent exclusivement des Tools composants. Toute persistance des mÃ©dias est sous autoritÃ© KindMother (WriteIntent).
+**Règle fondamentale :** Un Kit d'Outils orchestre, mais n'ajoute pas de capacité. Les capacités viennent exclusivement des Tools composants. Toute persistance des médias est sous autorité KindMother (WriteIntent).
 
 ---
 
 ## 4. Identifiant et catalogue
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |--------|--------|
 | **ToolkitId** | `toolkit.content.media` |
 | **Format** | `toolkit.<domain>.<name>` (conforme au [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md)) |
 | **Domaine** | `content` |
-| **Catalogue** | Master Butler dÃ©clare le Toolkit et la liste des Tools composants ; toute utilisation passe par le catalogue et la gouvernance. |
+| **Catalogue** | Master Butler déclare le Toolkit et la liste des Tools composants ; toute utilisation passe par le catalogue et la gouvernance. |
 
 ---
 
 ## 5. Liste des outils composants
 
-MiyuMedia est composÃ© des Tools suivants (format canonique `tool.<domain>.<action>`). Le dÃ©tail de chaque outil (action, niveau de sÃ©curitÃ©, capability_id) sera dÃ©crit dans MiyuMedia - Reference Outils (phase ultÃ©rieure).
+MiyuMedia est composé des Tools suivants (format canonique `tool.<domain>.<action>`). Le détail de chaque outil (action, niveau de sécurité, capability_id) sera décrit dans MiyuMedia - Reference Outils (phase ultérieure).
 
 | ToolId | Description courte |
 |--------|---------------------|
-| `tool.media.upload` | Enregistre un mÃ©dia Ã  partir du flux ; persistance = KindMother |
-| `tool.media.serve` | Sert un mÃ©dia (stream ou mÃ©tadonnÃ©es) Ã  partir de donnÃ©es fournies |
-| `tool.media.transform` | Produit une variante (miniature, recadrage) Ã  partir de donnÃ©es fournies |
+| `tool.media.upload` | Enregistre un média à partir du flux ; persistance = KindMother |
+| `tool.media.serve` | Sert un média (stream ou métadonnées) à partir de données fournies |
+| `tool.media.transform` | Produit une variante (miniature, recadrage) à partir de données fournies |
 
 **Invariant (Toolkit Composition Contract) :** Un Toolkit contient au moins deux Tools. MiyuMedia en contient trois.
 
@@ -68,56 +68,56 @@ MiyuMedia est composÃ© des Tools suivants (format canonique `tool.<domain>.<ac
 
 ## 6. Gouvernance
 
-Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). SpÃ©cificitÃ© : toute Ã©criture (upload, mÃ©tadonnÃ©es) = WriteIntent KindMother. Le Toolkit est dÃ©clarÃ© dans Master Butler et compatibilisÃ© par Ever Buddy ([Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)).
+Flux de gouvernance standard (voir [Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md)). Spécificité : toute écriture (upload, métadonnées) = WriteIntent KindMother. Le Toolkit est déclaré dans Master Butler et compatibilisé par Ever Buddy ([Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md)).
 
 ---
 
-## 7. Niveau de sÃ©curitÃ© et Ã©tats
+## 7. Niveau de sécurité et états
 
-| Ã‰lÃ©ment | Valeur |
+| Élément | Valeur |
 |---------|--------|
-| **Niveau de sÃ©curitÃ© du kit** | **0 Ã  2** selon politique d'exposition (mÃ©dias publics Ã  sensibles) ; cohÃ©rent avec WorrySentinel. Le niveau du Toolkit est au moins Ã©gal au maximum des niveaux de ses Tools composants. |
-| **Ã‰tats autorisÃ©s** | `HEALTHY`, `DEGRADED` (selon politique Caring Nanny) |
-| **Ã‰tats interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` (et autres selon Toolkit Composition Contract) |
+| **Niveau de sécurité du kit** | **0 à 2** selon politique d'exposition (médias publics à sensibles) ; cohérent avec WorrySentinel. Le niveau du Toolkit est au moins égal au maximum des niveaux de ses Tools composants. |
+| **États autorisés** | `HEALTHY`, `DEGRADED` (selon politique Caring Nanny) |
+| **États interdits** | `SECURITY_LOCKDOWN`, `MAINTENANCE` (et autres selon Toolkit Composition Contract) |
 
 ---
 
 ## 8. Relation avec KindMother et MiyuCMS
 
-Les obligations de conformitÃ© dÃ©taillÃ©es sont dans [MiyuMedia - Tool Governance Compliance Contract](./contracts/governance/MiyuMedia%20-%20Tool%20Governance%20Compliance%20Contract.md).
+Les obligations de conformité détaillées sont dans [MiyuMedia - Tool Governance Compliance Contract](./contracts/governance/MiyuMedia%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
-- **KindMother** est l'autoritÃ© sur toutes les donnÃ©es mÃ©dias. Toute crÃ©ation (upload) passe par **WriteIntent** vers KindMother ; MiyuMedia exÃ©cute des capacitÃ©s (upload, serve, transform) **sans dÃ©cider** de la politique de stockage.
-- **MiyuCMS** agrÃ¨ge MiyuMedia (tool.media.*) dans son pÃ©rimÃ¨tre pour le Service CMS complet ; MiyuMedia peut Ãªtre utilisÃ© seul pour des contextes oÃ¹ seule la gestion des mÃ©dias est requise.
+- **KindMother** est l'autorité sur toutes les données médias. Toute création (upload) passe par **WriteIntent** vers KindMother ; MiyuMedia exécute des capacités (upload, serve, transform) **sans décider** de la politique de stockage.
+- **MiyuCMS** agrège MiyuMedia (tool.media.*) dans son périmètre pour le Service CMS complet ; MiyuMedia peut être utilisé seul pour des contextes où seule la gestion des médias est requise.
 
-**RÃ©fÃ©rence :** [Miyukini Conceptual References - Equivalents Boutique CMS Reservation SaaS](..//..//miyukini-webway-system//reference//_index.md).
+**Référence :** [Miyukini Conceptual References - Equivalents Boutique CMS Reservation SaaS](..//..//miyukini-webway-system//reference//_index.md).
 
 ---
 
 ## 9. Alignement MIP
 
-La documentation et la future implÃ©mentation de MiyuMedia sont conÃ§ues pour Ãªtre **compatibles MIP v1** (Miyukini Index Protocol). RÃ©fÃ©rence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
+La documentation et la future implémentation de MiyuMedia sont conçues pour être **compatibles MIP v1** (Miyukini Index Protocol). Référence : [Miyukini Prompt Protocol - MIP v1 MSCM Index Protocol](..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md).
 
-- **Domaine** : `content` â€” cohÃ©rent avec la projection domains.json (blocs du domaine Â« content Â»).
-- **Layer** : outil / toolkit (Strate 6) â€” Ã  reflÃ©ter dans layers.json lorsque le code existera.
-- **Blocs** : chaque Tool MiyuMedia est une unitÃ© logique pouvant devenir un **bloc MSCM** Ã  l'implÃ©mentation : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
+- **Domaine** : `content` — cohérent avec la projection domains.json (blocs du domaine « content »).
+- **Layer** : outil / toolkit (Strate 6) — à refléter dans layers.json lorsque le code existera.
+- **Blocs** : chaque Tool MiyuMedia est une unité logique pouvant devenir un **bloc MSCM** à l'implémentation : `id`, `do`, `role`, `layer` pour alimenter blocks.json.
 
 ---
 
-## 10. RÃ©fÃ©rences croisÃ©es
+## 10. Références croisées
 
 | Document | Lien |
 |----------|------|
 | Glossaire | [Miyukini Conceptual References - Glossaire](..//..//miyukini-webway-system//reference//_index.md) |
 | Tools et Toolkits | [Miyukini Conceptual References - Tools et Toolkits](..//..//miyukini-webway-system//reference//_index.md) |
-| Ã‰quivalents Boutique CMS Reservation SaaS | [Miyukini Conceptual References - Equivalents Boutique CMS Reservation SaaS](..//..//miyukini-webway-system//reference//_index.md) |
+| Équivalents Boutique CMS Reservation SaaS | [Miyukini Conceptual References - Equivalents Boutique CMS Reservation SaaS](..//..//miyukini-webway-system//reference//_index.md) |
 | Tool Governance Contract | [Master Butler - Tool Governance Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Tool%20Governance%20Contract.md) |
 | Toolkit Composition Contract | [Master Butler - Toolkit Composition Contract](..//..//cores//MasterButler//contracts//tools//Master%20Butler%20-%20Toolkit%20Composition%20Contract.md) |
 | MiyuCMS - Documentation Fondatrice | [MiyuCMS - Documentation Fondatrice](../MiyuCMS/MiyuCMS%20-%20Documentation%20Fondatrice.md) |
 
 ---
 
-**Date de crÃ©ation :** 2026-01-30  
+**Date de création :** 2026-01-30  
 **Version :** 1.0  
-**Statut :** Document de rÃ©fÃ©rence fondateur
+**Statut :** Document de référence fondateur
 
 

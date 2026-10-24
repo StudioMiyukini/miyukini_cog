@@ -1,49 +1,49 @@
-﻿# BondingBrother â€” Intent Model Contract
+﻿# BondingBrother — Intent Model Contract
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif
+**Statut :** CONTRAT — Normatif
 
 ---
 
 ## 1. Contexte
 
-Ce document dÃ©finit le modÃ¨le contractuel des intentions dans Bonding Brother. Il spÃ©cifie comment les produits expriment leurs intentions, comment ces intentions sont structurÃ©es, et comment elles transitent dans le systÃ¨me jusqu'Ã  leur Ã©valuation par une autoritÃ©.
+Ce document définit le modèle contractuel des intentions dans Bonding Brother. Il spécifie comment les produits expriment leurs intentions, comment ces intentions sont structurées, et comment elles transitent dans le système jusqu'à leur évaluation par une autorité.
 
-**DÃ©pendances :**
-- [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) â€” Section 6 (Principe d'intention)
+**Dépendances :**
+- [Documentation Fondatrice](../../foundation/BondingBrother%20-%20Documentation%20Fondatrice.md) — Section 6 (Principe d'intention)
 - [Architecture & Flows](../../architecture/BondingBrother%20-%20Architecture%20&%20Flows.md)
 - [Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)
 
-Le modÃ¨le d'intention respecte les Lois d'Autonomie SystÃ¨me : les intentions sont acceptÃ©es et traitÃ©es localement mÃªme en mode offline (**LOI-2**), et leur Ã©tat local est souverain (**LOI-3**).
+Le modèle d'intention respecte les Lois d'Autonomie Système : les intentions sont acceptées et traitées localement même en mode offline (**LOI-2**), et leur état local est souverain (**LOI-3**).
 
-## 2. PortÃ©e / Scope
+## 2. Portée / Scope
 
 Ce document couvre :
 - La structure canonique d'une intention
-- Les types d'intentions supportÃ©s
-- Le cycle de vie d'une intention (crÃ©ation, transit, Ã©valuation, rÃ©solution)
-- Les rÃ¨gles de validation structurelle
-- Les mÃ©tadonnÃ©es et le contexte associÃ©s
+- Les types d'intentions supportés
+- Le cycle de vie d'une intention (création, transit, évaluation, résolution)
+- Les règles de validation structurelle
+- Les métadonnées et le contexte associés
 
 Ce document **ne couvre pas** :
-- Les rÃ¨gles de traduction (voir [Translation Contract](./BondingBrother%20-%20Translation%20Contract.md))
-- Les rÃ¨gles de filtrage (voir [Filtering & Projection Contract](./BondingBrother%20-%20Filtering%20&%20Projection%20Contract.md))
+- Les règles de traduction (voir [Translation Contract](./BondingBrother%20-%20Translation%20Contract.md))
+- Les règles de filtrage (voir [Filtering & Projection Contract](./BondingBrother%20-%20Filtering%20&%20Projection%20Contract.md))
 - La gestion des erreurs (voir [Error & Rejection Model](../error/BondingBrother%20-%20Error%20&%20Rejection%20Model.md))
 
 ---
 
 ## 3. Principe fondamental
 
-> **Une intention est une dÃ©claration de volontÃ©, pas une instruction d'exÃ©cution.**
+> **Une intention est une déclaration de volonté, pas une instruction d'exécution.**
 
-Les produits expriment ce qu'ils souhaitent faire, pas ce qu'ils ordonnent. L'Ã©valuation et la dÃ©cision appartiennent exclusivement aux autoritÃ©s.
+Les produits expriment ce qu'ils souhaitent faire, pas ce qu'ils ordonnent. L'évaluation et la décision appartiennent exclusivement aux autorités.
 
 ---
 
 ## 4. Structure canonique d'une intention
 
-### 4.1 SchÃ©ma de base
+### 4.1 Schéma de base
 
 Toute intention suit cette structure minimale :
 
@@ -51,18 +51,18 @@ Toute intention suit cette structure minimale :
 interface Intention {
     // Identifiants
     id: IntentionId;                    // Identifiant unique de l'intention
-    produit_id: ProduitId;              // IdentitÃ© du produit Ã©metteur
+    produit_id: ProduitId;              // Identité du produit émetteur
     
     // Type et contenu
     type: TypeIntention;                 // Type canonique de l'intention
-    payload: PayloadSpecifique;          // DonnÃ©es spÃ©cifiques au type
+    payload: PayloadSpecifique;          // Données spécifiques au type
     
     // Contexte
     contexte: Contexte;                  // Contexte complet (voir Section 5)
     
-    // MÃ©tadonnÃ©es
-    timestamp: Timestamp;                // Moment de crÃ©ation
-    version: VersionIntention;           // Version du schÃ©ma d'intention
+    // Métadonnées
+    timestamp: Timestamp;                // Moment de création
+    version: VersionIntention;           // Version du schéma d'intention
 }
 ```
 
@@ -70,26 +70,26 @@ interface Intention {
 
 #### IntentionId
 
-**Type :** UUID v4 ou identifiant unique dÃ©terministe
+**Type :** UUID v4 ou identifiant unique déterministe
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 - Unique globalement
-- Immuable aprÃ¨s crÃ©ation
-- TraÃ§able dans tous les logs
-- Non rÃ©utilisable (mÃªme aprÃ¨s rÃ©solution)
+- Immuable après création
+- Traçable dans tous les logs
+- Non réutilisable (même après résolution)
 
-**GÃ©nÃ©ration :**
-- Par le produit Ã©metteur
+**Génération :**
+- Par le produit émetteur
 - Ou par Bonding Brother si le produit ne fournit pas d'ID
 
 #### ProduitId
 
 **Type :** Identifiant canonique du produit
 
-**CaractÃ©ristiques :**
-- Identifie de maniÃ¨re unique le produit dans l'Ã©cosystÃ¨me
-- VÃ©rifiÃ© par StrongFather
-- Transmis intÃ©gralement aux autoritÃ©s
+**Caractéristiques :**
+- Identifie de manière unique le produit dans l'écosystème
+- Vérifié par StrongFather
+- Transmis intégralement aux autorités
 
 ---
 
@@ -97,35 +97,35 @@ interface Intention {
 
 ### 5.1 Structure du contexte
 
-Le contexte est l'ensemble des informations nÃ©cessaires Ã  l'Ã©valuation par une autoritÃ©.
+Le contexte est l'ensemble des informations nécessaires à l'évaluation par une autorité.
 
 ```typescript
 interface Contexte {
-    // IdentitÃ©s
-    produit_id: ProduitId;              // Redondant mais requis pour traÃ§abilitÃ©
-    utilisateur_id?: UtilisateurId;      // IdentitÃ© de l'utilisateur (si applicable)
+    // Identités
+    produit_id: ProduitId;              // Redondant mais requis pour traçabilité
+    utilisateur_id?: UtilisateurId;      // Identité de l'utilisateur (si applicable)
     session_id?: SessionId;              // Identifiant de session
     
-    // Permissions dÃ©clarÃ©es
-    permissions_declarees?: Permission[]; // Permissions revendiquÃ©es (non validÃ©es)
+    // Permissions déclarées
+    permissions_declarees?: Permission[]; // Permissions revendiquées (non validées)
     
     // Environnement
     environnement: Environnement;       // dev, staging, prod
-    region?: Region;                     // Zone gÃ©ographique
+    region?: Region;                     // Zone géographique
     
-    // MÃ©tadonnÃ©es
-    metadata?: Map<string, any>;         // Informations complÃ©mentaires
-    correlation_id?: CorrelationId;      // ID pour traÃ§abilitÃ© distribuÃ©e
+    // Métadonnées
+    metadata?: Map<string, any>;         // Informations complémentaires
+    correlation_id?: CorrelationId;      // ID pour traçabilité distribuée
 }
 ```
 
-### 5.2 RÃ¨gles du contexte
+### 5.2 Règles du contexte
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **CONT-01** | ComplÃ©tude minimale | `produit_id`, `environnement`, `timestamp` obligatoires |
-| **CONT-02** | Transmission intÃ©grale | Contexte transmis sans filtrage aux autoritÃ©s |
-| **CONT-03** | Non-validation | BB ne valide pas le contenu, les autoritÃ©s valident |
+| **CONT-01** | Complétude minimale | `produit_id`, `environnement`, `timestamp` obligatoires |
+| **CONT-02** | Transmission intégrale | Contexte transmis sans filtrage aux autorités |
+| **CONT-03** | Non-validation | BB ne valide pas le contenu, les autorités valident |
 
 ---
 
@@ -133,134 +133,134 @@ interface Contexte {
 
 ### 6.1 Taxonomie des types
 
-Les types d'intentions sont organisÃ©s par domaine d'autoritÃ© :
+Les types d'intentions sont organisés par domaine d'autorité :
 
-| Domaine | Type d'intention | AutoritÃ© cible | Exemple |
+| Domaine | Type d'intention | Autorité cible | Exemple |
 |---------|------------------|---------------|---------|
-| DonnÃ©es | `CREATE_CONTENT` | KindMother | CrÃ©er un contenu |
-| DonnÃ©es | `UPDATE_CONTENT` | KindMother | Modifier un contenu |
-| DonnÃ©es | `DELETE_CONTENT` | KindMother | Supprimer un contenu |
-| DonnÃ©es | `READ_CONTENT` | KindMother | Lire un contenu |
-| DonnÃ©es | `QUERY_CONTENT` | KindMother | Rechercher des contenus |
-| HiÃ©rarchie | `CREATE_NODE` | KindMother | CrÃ©er un nÅ“ud hiÃ©rarchique |
-| HiÃ©rarchie | `MOVE_NODE` | KindMother | DÃ©placer un nÅ“ud |
-| HiÃ©rarchie | `DELETE_NODE` | KindMother | Supprimer un nÅ“ud |
-| IdentitÃ© | `AUTHENTICATE` | StrongFather | Authentifier un utilisateur |
-| IdentitÃ© | `AUTHORIZE` | StrongFather | VÃ©rifier une permission |
-| IdentitÃ© | `CREATE_SESSION` | StrongFather | CrÃ©er une session |
-| IdentitÃ© | `REVOKE_SESSION` | StrongFather | RÃ©voquer une session |
+| Données | `CREATE_CONTENT` | KindMother | Créer un contenu |
+| Données | `UPDATE_CONTENT` | KindMother | Modifier un contenu |
+| Données | `DELETE_CONTENT` | KindMother | Supprimer un contenu |
+| Données | `READ_CONTENT` | KindMother | Lire un contenu |
+| Données | `QUERY_CONTENT` | KindMother | Rechercher des contenus |
+| Hiérarchie | `CREATE_NODE` | KindMother | Créer un nœud hiérarchique |
+| Hiérarchie | `MOVE_NODE` | KindMother | Déplacer un nœud |
+| Hiérarchie | `DELETE_NODE` | KindMother | Supprimer un nœud |
+| Identité | `AUTHENTICATE` | StrongFather | Authentifier un utilisateur |
+| Identité | `AUTHORIZE` | StrongFather | Vérifier une permission |
+| Identité | `CREATE_SESSION` | StrongFather | Créer une session |
+| Identité | `REVOKE_SESSION` | StrongFather | Révoquer une session |
 
-### 6.2 RÃ¨gles des types
+### 6.2 Règles des types
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **TYPE-01** | Types canoniques | Nouveau type = justification + autoritÃ© + schÃ©ma + version |
-| **TYPE-02** | Pas de types gÃ©nÃ©riques | `DO_ACTION` interdit â€” types spÃ©cifiques obligatoires |
-| **TYPE-03** | Un type = une autoritÃ© | Intentions multi-autoritÃ©s interdites |
+| **TYPE-01** | Types canoniques | Nouveau type = justification + autorité + schéma + version |
+| **TYPE-02** | Pas de types génériques | `DO_ACTION` interdit — types spécifiques obligatoires |
+| **TYPE-03** | Un type = une autorité | Intentions multi-autorités interdites |
 
 ---
 
 ## 7. Cycle de vie d'une intention
 
-### 7.1 Ã‰tats d'une intention
+### 7.1 États d'une intention
 
-Une intention traverse les Ã©tats suivants dans l'ordre strict :
+Une intention traverse les états suivants dans l'ordre strict :
 
 ```
-CRÃ‰Ã‰E â†’ VALIDÃ‰E â†’ TRADUITE â†’ FILTRÃ‰E â†’ JOURNALISÃ‰E â†’ TRANSMISE â†’ EN_ATTENTE â†’ Ã‰VALUÃ‰E â†’ RÃ‰SOLUE
+CRÉÉE → VALIDÉE → TRADUITE → FILTRÉE → JOURNALISÉE → TRANSMISE → EN_ATTENTE → ÉVALUÉE → RÉSOLUE
 ```
 
-| Ã‰tat | DÃ©clencheur | CaractÃ©ristiques |
+| État | Déclencheur | Caractéristiques |
 |------|-------------|------------------|
-| **CRÃ‰Ã‰E** | Produit soumet une intention | Structure brute, pas encore validÃ©e |
-| **VALIDÃ‰E** | Validation structurelle rÃ©ussie | Structure conforme, ID confirmÃ© |
-| **TRADUITE** | Traduction rÃ©ussie | Format adaptÃ© Ã  l'autoritÃ© |
-| **FILTRÃ‰E** | Filtrage d'entrÃ©e appliquÃ© | Demandes invalides rejetÃ©es |
-| **JOURNALISÃ‰E** | EnregistrÃ©e dans le journal | TraÃ§able, horodatÃ©e, immuable |
-| **TRANSMISE** | Transmise Ã  l'autoritÃ© | ReÃ§ue par l'autoritÃ© |
-| **EN_ATTENTE** | AutoritÃ© Ã©value | Ã‰valuation en cours |
-| **Ã‰VALUÃ‰E** | RÃ©ponse de l'autoritÃ© | DÃ©cision disponible |
-| **RÃ‰SOLUE** | RÃ©sultat transmis au produit | Cycle terminÃ© |
+| **CRÉÉE** | Produit soumet une intention | Structure brute, pas encore validée |
+| **VALIDÉE** | Validation structurelle réussie | Structure conforme, ID confirmé |
+| **TRADUITE** | Traduction réussie | Format adapté à l'autorité |
+| **FILTRÉE** | Filtrage d'entrée appliqué | Demandes invalides rejetées |
+| **JOURNALISÉE** | Enregistrée dans le journal | Traçable, horodatée, immuable |
+| **TRANSMISE** | Transmise à l'autorité | Reçue par l'autorité |
+| **EN_ATTENTE** | Autorité évalue | Évaluation en cours |
+| **ÉVALUÉE** | Réponse de l'autorité | Décision disponible |
+| **RÉSOLUE** | Résultat transmis au produit | Cycle terminé |
 
-### 7.2 Ã‰tats d'erreur
+### 7.2 États d'erreur
 
-| Ã‰tat | Cause | Action |
+| État | Cause | Action |
 |------|-------|--------|
-| **REJETÃ‰E** | Validation/traduction/filtrage Ã©chouÃ© | Notification au produit |
-| **EN_ERREUR** | Transmission Ã©chouÃ©e | Mode offline possible |
-| **ABANDONNÃ‰E** | Timeout/erreur irrÃ©cupÃ©rable | Journalisation + notification |
+| **REJETÉE** | Validation/traduction/filtrage échoué | Notification au produit |
+| **EN_ERREUR** | Transmission échouée | Mode offline possible |
+| **ABANDONNÉE** | Timeout/erreur irrécupérable | Journalisation + notification |
 
 ### 7.3 Mode offline
 
-En mode offline, les intentions restent en Ã©tat TRANSMISE ou EN_ATTENTE jusqu'Ã  la reconnexion. Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20&%20Deferred%20Authority%20Contract.md).
+En mode offline, les intentions restent en état TRANSMISE ou EN_ATTENTE jusqu'à la reconnexion. Voir [Offline & Deferred Authority Contract](../offline/BondingBrother%20-%20Offline%20&%20Deferred%20Authority%20Contract.md).
 
 ---
 
 ## 8. Validation structurelle
 
-### 8.1 RÃ¨gles de validation
+### 8.1 Règles de validation
 
-| Code | RÃ¨gle | Action si Ã©chec |
+| Code | Règle | Action si échec |
 |------|-------|-----------------|
-| **VAL-01** | Format JSON valide | Rejet immÃ©diat |
-| **VAL-02** | Champs obligatoires prÃ©sents | Rejet immÃ©diat |
-| **VAL-03** | Types de donnÃ©es corrects | Rejet immÃ©diat |
-| **VAL-04** | Version supportÃ©e | Rejet immÃ©diat |
-| **VAL-05** | Type reconnu | Rejet immÃ©diat |
+| **VAL-01** | Format JSON valide | Rejet immédiat |
+| **VAL-02** | Champs obligatoires présents | Rejet immédiat |
+| **VAL-03** | Types de données corrects | Rejet immédiat |
+| **VAL-04** | Version supportée | Rejet immédiat |
+| **VAL-05** | Type reconnu | Rejet immédiat |
 
 ### 8.2 Champs obligatoires
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `id` | string (UUID) | GÃ©nÃ©rÃ© par BB si absent |
-| `produit_id` | string | IdentitÃ© du produit |
+| `id` | string (UUID) | Généré par BB si absent |
+| `produit_id` | string | Identité du produit |
 | `type` | string | Type canonique |
-| `payload` | object | DonnÃ©es du type |
+| `payload` | object | Données du type |
 | `contexte` | object | Contexte complet |
 | `timestamp` | string/number | ISO 8601 ou Unix |
 | `version` | string | Semver |
 
-### 8.3 Validation NON effectuÃ©e par BB
+### 8.3 Validation NON effectuée par BB
 
-- Contenu sÃ©mantique du payload (validation mÃ©tier)
-- Permissions rÃ©elles de l'utilisateur (validation par StrongFather)
-- CohÃ©rence des donnÃ©es (validation par KindMother)
-- VÃ©racitÃ© du contexte (validation par les autoritÃ©s)
+- Contenu sémantique du payload (validation métier)
+- Permissions réelles de l'utilisateur (validation par StrongFather)
+- Cohérence des données (validation par KindMother)
+- Véracité du contexte (validation par les autorités)
 
 ---
 
-## 9. MÃ©tadonnÃ©es et traÃ§abilitÃ©
+## 9. Métadonnées et traçabilité
 
-### 9.1 MÃ©tadonnÃ©es obligatoires
+### 9.1 Métadonnées obligatoires
 
-| MÃ©tadonnÃ©e | Type | Source | Usage |
+| Métadonnée | Type | Source | Usage |
 |------------|------|--------|-------|
-| `id` | IntentionId | Produit ou BB | TraÃ§abilitÃ© unique |
+| `id` | IntentionId | Produit ou BB | Traçabilité unique |
 | `timestamp` | Timestamp | Produit | Ordre chronologique |
-| `version` | VersionIntention | Produit | CompatibilitÃ© schÃ©ma |
+| `version` | VersionIntention | Produit | Compatibilité schéma |
 | `produit_id` | ProduitId | Produit | Attribution |
 
-### 9.2 MÃ©tadonnÃ©es optionnelles
+### 9.2 Métadonnées optionnelles
 
-| MÃ©tadonnÃ©e | Type | Usage |
+| Métadonnée | Type | Usage |
 |------------|------|-------|
-| `correlation_id` | CorrelationId | TraÃ§abilitÃ© distribuÃ©e |
+| `correlation_id` | CorrelationId | Traçabilité distribuée |
 | `priorite` | Priorite | Ordre de traitement |
-| `timeout` | Duree | DÃ©lai maximum |
+| `timeout` | Duree | Délai maximum |
 
-### 9.3 RÃ¨gles de traÃ§abilitÃ©
+### 9.3 Règles de traçabilité
 
-| Code | RÃ¨gle | Description |
+| Code | Règle | Description |
 |------|-------|-------------|
-| **TRACE-01** | Journalisation systÃ©matique | Intention + contexte + timestamp + produit |
-| **TRACE-02** | ImmuabilitÃ© | Pas de modification aprÃ¨s journalisation |
-| **TRACE-03** | AccessibilitÃ© | Produit peut consulter son historique |
+| **TRACE-01** | Journalisation systématique | Intention + contexte + timestamp + produit |
+| **TRACE-02** | Immuabilité | Pas de modification après journalisation |
+| **TRACE-03** | Accessibilité | Produit peut consulter son historique |
 
 ---
 
 ## 10. Exemples
 
-### 10.1 Intention de crÃ©ation de contenu
+### 10.1 Intention de création de contenu
 
 ```json
 {
@@ -314,25 +314,25 @@ En mode offline, les intentions restent en Ã©tat TRANSMISE ou EN_ATTENTE jusqu
 
 ### 11.1 Taille maximale
 
-| Ã‰lÃ©ment | Limite par dÃ©faut |
+| Élément | Limite par défaut |
 |---------|-------------------|
 | Payload | 1 MB |
 | Contexte | 100 KB |
 
-### 11.2 DÃ©lais
+### 11.2 Délais
 
-| Ã‰lÃ©ment | Valeur par dÃ©faut |
+| Élément | Valeur par défaut |
 |---------|-------------------|
-| Timeout rÃ©solution | Configurable |
-| Expiration non rÃ©solue | 24 heures |
+| Timeout résolution | Configurable |
+| Expiration non résolue | 24 heures |
 
 ---
 
 ## 12. Statut contractuel
 
-Ce document est **contractuel, normatif, et de statut CONTRAT**. Il Ã©tablit le modÃ¨le d'intention que tous les produits doivent respecter pour interagir avec Bonding Brother.
+Ce document est **contractuel, normatif, et de statut CONTRAT**. Il établit le modèle d'intention que tous les produits doivent respecter pour interagir avec Bonding Brother.
 
-Toute intention soumise Ã  Bonding Brother doit respecter ce contrat. Toute violation entraÃ®ne un rejet avec code d'erreur appropriÃ©.
+Toute intention soumise à Bonding Brother doit respecter ce contrat. Toute violation entraîne un rejet avec code d'erreur approprié.
 
 ---
 
@@ -346,6 +346,6 @@ Toute intention soumise Ã  Bonding Brother doit respecter ce contrat. Toute vi
 
 **Version :** 2.0  
 **Date :** 2026-01-28  
-**Statut :** CONTRAT â€” Normatif  
-**DÃ©pendances :** Documentation Fondatrice v2.0, Architecture & Flows v2.0
+**Statut :** CONTRAT — Normatif  
+**Dépendances :** Documentation Fondatrice v2.0, Architecture & Flows v2.0
 

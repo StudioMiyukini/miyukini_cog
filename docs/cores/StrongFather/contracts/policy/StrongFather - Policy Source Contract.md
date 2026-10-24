@@ -1,325 +1,325 @@
-﻿# StrongFather â€” Policy Source Contract
+﻿# StrongFather — Policy Source Contract
 
 ## 1. Introduction
 
 ### Objet du contrat
 
-Ce document dÃ©finit le **StrongFather â€” Policy Source Contract** : un contrat normatif, non nÃ©gociable, et de statut FONDATION qui Ã©tablit l'unique origine valide des politiques de StrongFather, leur cycle de vie prÃ©-application, et les rÃ¨gles absolues d'alimentation du moteur de politiques dans le systÃ¨me Miyukini Core System v2.4.
+Ce document définit le **StrongFather — Policy Source Contract** : un contrat normatif, non négociable, et de statut FONDATION qui établit l'unique origine valide des politiques de StrongFather, leur cycle de vie pré-application, et les règles absolues d'alimentation du moteur de politiques dans le système Miyukini Core System v2.4.
 
-Ce contrat ferme la lacune contractuelle identifiÃ©e concernant l'origine et la gestion des politiques avant leur application par le Policy Engine.
+Ce contrat ferme la lacune contractuelle identifiée concernant l'origine et la gestion des politiques avant leur application par le Policy Engine.
 
-### PortÃ©e
+### Portée
 
-Ce contrat s'applique Ã  **toutes les politiques utilisÃ©es par StrongFather** et dÃ©finit de maniÃ¨re absolue :
-- la dÃ©finition formelle d'une source de politiques,
-- les types de sources autorisÃ©es,
-- le cycle de vie des politiques prÃ©-application,
-- les rÃ¨gles de chargement et validation,
+Ce contrat s'applique à **toutes les politiques utilisées par StrongFather** et définit de manière absolue :
+- la définition formelle d'une source de politiques,
+- les types de sources autorisées,
+- le cycle de vie des politiques pré-application,
+- les règles de chargement et validation,
 - les interdictions d'injection dynamique,
 - les invariants de source.
 
 ### Statut contractuel
 
-Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il Ã©tablit des rÃ¨gles absolues qui ne peuvent Ãªtre contournÃ©es, nÃ©gociÃ©es, ou modifiÃ©es. Le contrat prime sur toute considÃ©ration pratique.
+Ce document est **contractuel, normatif, non discutable, et de statut FONDATION**. Il établit des règles absolues qui ne peuvent être contournées, négociées, ou modifiées. Le contrat prime sur toute considération pratique.
 
 ### Relation avec les autres contrats
 
-Ce contrat complÃ¨te et respecte les documents contractuels existants :
-- **StrongFather â€” Policy Engine Contract** : DÃ©finit la structure et l'application des politiques (document maÃ®tre pour la structure des politiques)
-- **StrongFather â€” Boundary & Isolation Contract** : Autorise la lecture depuis une source de politiques configurÃ©e
-- **StrongFather â€” Invariants & Guarantees** : INV-POL-SOURCE est dÃ©fini dans ce contrat
-- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : ConformitÃ© aux lois d'autonomie, notamment **LOI-1** (aucune dÃ©pendance externe critique) : la source de politiques est locale et configurÃ©e, jamais dÃ©couverte dynamiquement
+Ce contrat complète et respecte les documents contractuels existants :
+- **StrongFather — Policy Engine Contract** : Définit la structure et l'application des politiques (document maître pour la structure des politiques)
+- **StrongFather — Boundary & Isolation Contract** : Autorise la lecture depuis une source de politiques configurée
+- **StrongFather — Invariants & Guarantees** : INV-POL-SOURCE est défini dans ce contrat
+- **[Miyukini Conceptual References - Lois Autonomie Systeme](..//..//..//..//miyukini-webway-system//reference//_index.md)** : Conformité aux lois d'autonomie, notamment **LOI-1** (aucune dépendance externe critique) : la source de politiques est locale et configurée, jamais découverte dynamiquement
 
-Il n'introduit aucune contradiction, et constitue la dÃ©finition formelle de l'origine et du cycle de vie des politiques.
+Il n'introduit aucune contradiction, et constitue la définition formelle de l'origine et du cycle de vie des politiques.
 
 ---
 
-## 2. DÃ©finition d'une source de politiques
+## 2. Définition d'une source de politiques
 
 ### 2.1. Nature d'une source
 
-Une **source de politiques** est l'unique origine autorisÃ©e d'oÃ¹ StrongFather peut obtenir les politiques qu'il applique. Une source est un concept systÃ©mique qui reprÃ©sente un rÃ©servoir de politiques validÃ©es, sans prÃ©supposer de technologie particuliÃ¨re.
+Une **source de politiques** est l'unique origine autorisée d'où StrongFather peut obtenir les politiques qu'il applique. Une source est un concept systémique qui représente un réservoir de politiques validées, sans présupposer de technologie particulière.
 
-**CaractÃ©ristiques d'une source :**
+**Caractéristiques d'une source :**
 
 - **Unique** : Il existe une et une seule source de politiques par instance de StrongFather
-- **ConfigurÃ©e** : La source est explicitement configurÃ©e, jamais dÃ©couverte dynamiquement
-- **ValidÃ©e** : Les politiques de la source sont validÃ©es avant utilisation
-- **Immuable pendant Ã©valuation** : La source ne change pas pendant une Ã©valuation
+- **Configurée** : La source est explicitement configurée, jamais découverte dynamiquement
+- **Validée** : Les politiques de la source sont validées avant utilisation
+- **Immuable pendant évaluation** : La source ne change pas pendant une évaluation
 
-### 2.2. Ce qu'une source reprÃ©sente
+### 2.2. Ce qu'une source représente
 
-Une source de politiques reprÃ©sente :
+Une source de politiques représente :
 
-1. **Un rÃ©servoir de politiques** : L'ensemble des politiques disponibles pour Ã©valuation
-2. **Un point de configuration** : Le point unique oÃ¹ les politiques sont dÃ©finies
-3. **Une garantie de cohÃ©rence** : L'assurance que les politiques sont cohÃ©rentes entre elles
-4. **Un pÃ©rimÃ¨tre fermÃ©** : L'ensemble exhaustif des politiques applicables
+1. **Un réservoir de politiques** : L'ensemble des politiques disponibles pour évaluation
+2. **Un point de configuration** : Le point unique où les politiques sont définies
+3. **Une garantie de cohérence** : L'assurance que les politiques sont cohérentes entre elles
+4. **Un périmètre fermé** : L'ensemble exhaustif des politiques applicables
 
-### 2.3. Ce qu'une source ne reprÃ©sente jamais
+### 2.3. Ce qu'une source ne représente jamais
 
-Une source de politiques ne reprÃ©sente **jamais** :
+Une source de politiques ne représente **jamais** :
 
-1. **Un gÃ©nÃ©rateur de politiques** : Une source ne gÃ©nÃ¨re pas de politiques dynamiquement
-2. **Un point d'injection** : Une source n'accepte pas de politiques injectÃ©es Ã  l'exÃ©cution
+1. **Un générateur de politiques** : Une source ne génère pas de politiques dynamiquement
+2. **Un point d'injection** : Une source n'accepte pas de politiques injectées à l'exécution
 3. **Un canal de communication** : Une source n'est pas un canal de communication externe
-4. **Un systÃ¨me externe actif** : Une source n'initie jamais de communication vers StrongFather
+4. **Un système externe actif** : Une source n'initie jamais de communication vers StrongFather
 
 ---
 
-## 3. Types de sources autorisÃ©es
+## 3. Types de sources autorisées
 
-### 3.1. Source dÃ©clarative statique
+### 3.1. Source déclarative statique
 
-**DÃ©finition :**
+**Définition :**
 
-Une **source dÃ©clarative statique** est une source dont les politiques sont dÃ©finies de maniÃ¨re dÃ©clarative et ne changent pas pendant l'exÃ©cution du systÃ¨me.
+Une **source déclarative statique** est une source dont les politiques sont définies de manière déclarative et ne changent pas pendant l'exécution du système.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- **DÃ©clarative** : Les politiques sont dÃ©clarÃ©es, pas gÃ©nÃ©rÃ©es
+- **Déclarative** : Les politiques sont déclarées, pas générées
 - **Statique** : Les politiques ne changent pas sans rechargement explicite
-- **Versionnable** : Les politiques peuvent Ãªtre versionnÃ©es
-- **AuditÃ©e** : Les politiques sont auditÃ©es avant dÃ©ploiement
+- **Versionnable** : Les politiques peuvent être versionnées
+- **Auditée** : Les politiques sont auditées avant déploiement
 
 **Exemples conceptuels :**
 
-- Configuration dÃ©clarative chargÃ©e au dÃ©marrage
-- Ensemble de rÃ¨gles dÃ©finies par l'Ã©quipe produit
-- Politiques versionnÃ©es et dÃ©ployÃ©es avec l'application
+- Configuration déclarative chargée au démarrage
+- Ensemble de règles définies par l'équipe produit
+- Politiques versionnées et déployées avec l'application
 
-### 3.2. Source dÃ©clarative rechargeable
+### 3.2. Source déclarative rechargeable
 
-**DÃ©finition :**
+**Définition :**
 
-Une **source dÃ©clarative rechargeable** est une source dÃ©clarative qui peut Ãªtre rechargÃ©e explicitement, permettant une mise Ã  jour des politiques sans redÃ©marrage.
+Une **source déclarative rechargeable** est une source déclarative qui peut être rechargée explicitement, permettant une mise à jour des politiques sans redémarrage.
 
-**CaractÃ©ristiques :**
+**Caractéristiques :**
 
-- MÃªmes caractÃ©ristiques que la source statique
-- **Rechargeable** : Peut Ãªtre rechargÃ©e sur demande explicite
+- Mêmes caractéristiques que la source statique
+- **Rechargeable** : Peut être rechargée sur demande explicite
 - **Atomique** : Le rechargement est atomique (tout ou rien)
-- **Non-disruptif** : Les Ã©valuations en cours ne sont pas affectÃ©es
+- **Non-disruptif** : Les évaluations en cours ne sont pas affectées
 
-**RÃ¨gles de rechargement :**
+**Règles de rechargement :**
 
-- **R-RELOAD-1** : Le rechargement est dÃ©clenchÃ© explicitement, jamais automatiquement
-- **R-RELOAD-2** : Le rechargement est atomique : la nouvelle version remplace entiÃ¨rement l'ancienne
-- **R-RELOAD-3** : Les Ã©valuations en cours utilisent les politiques chargÃ©es au dÃ©but de l'Ã©valuation
-- **R-RELOAD-4** : Un Ã©chec de rechargement n'affecte pas les politiques en cours d'utilisation
+- **R-RELOAD-1** : Le rechargement est déclenché explicitement, jamais automatiquement
+- **R-RELOAD-2** : Le rechargement est atomique : la nouvelle version remplace entièrement l'ancienne
+- **R-RELOAD-3** : Les évaluations en cours utilisent les politiques chargées au début de l'évaluation
+- **R-RELOAD-4** : Un échec de rechargement n'affecte pas les politiques en cours d'utilisation
 
 ### 3.3. Sources explicitement interdites
 
 Les types de sources suivants sont **explicitement interdits** :
 
-**INTERD-SRC-1 : Source gÃ©nÃ©rative**
+**INTERD-SRC-1 : Source générative**
 
-Aucune source ne peut gÃ©nÃ©rer des politiques dynamiquement ou algorithmiquement.
+Aucune source ne peut générer des politiques dynamiquement ou algorithmiquement.
 
 **INTERD-SRC-2 : Source externe distante**
 
-Aucune source ne peut Ãªtre un service externe distant nÃ©cessitant une communication rÃ©seau Ã  chaque Ã©valuation.
+Aucune source ne peut être un service externe distant nécessitant une communication réseau à chaque évaluation.
 
 **INTERD-SRC-3 : Source par injection**
 
-Aucune politique ne peut Ãªtre injectÃ©e dans StrongFather par un appelant ou un adaptateur.
+Aucune politique ne peut être injectée dans StrongFather par un appelant ou un adaptateur.
 
-**INTERD-SRC-4 : Source par dÃ©rivation**
+**INTERD-SRC-4 : Source par dérivation**
 
-Aucune politique ne peut Ãªtre dÃ©rivÃ©e ou calculÃ©e Ã  partir des donnÃ©es d'une intention.
+Aucune politique ne peut être dérivée ou calculée à partir des données d'une intention.
 
 **INTERD-SRC-5 : Source par apprentissage**
 
-Aucune politique ne peut Ãªtre gÃ©nÃ©rÃ©e ou modifiÃ©e par un systÃ¨me d'apprentissage automatique.
+Aucune politique ne peut être générée ou modifiée par un système d'apprentissage automatique.
 
 ---
 
-## 4. Cycle de vie des politiques prÃ©-application
+## 4. Cycle de vie des politiques pré-application
 
 ### 4.1. Phases du cycle de vie
 
 Le cycle de vie d'une politique avant son application comprend les phases suivantes :
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                    CYCLE DE VIE PRÃ‰-APPLICATION                          â”‚
-â”‚                                                                         â”‚
-â”‚   [DÃ‰FINITION] â†’ [VALIDATION] â†’ [CHARGEMENT] â†’ [ACTIVATION]            â”‚
-â”‚                                                                         â”‚
-â”‚   Hors StrongFather        â”‚        Dans StrongFather                   â”‚
-â”‚   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€        â”‚
-â”‚   DÃ©finition, Validation   â”‚   Chargement, Activation                   â”‚
-â”‚                                                                         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    CYCLE DE VIE PRÉ-APPLICATION                          │
+│                                                                         │
+│   [DÉFINITION] → [VALIDATION] → [CHARGEMENT] → [ACTIVATION]            │
+│                                                                         │
+│   Hors StrongFather        │        Dans StrongFather                   │
+│   ─────────────────────────┼────────────────────────────────────        │
+│   Définition, Validation   │   Chargement, Activation                   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2. Phase de dÃ©finition
+### 4.2. Phase de définition
 
-**Objectif :** CrÃ©er les politiques de maniÃ¨re dÃ©clarative.
+**Objectif :** Créer les politiques de manière déclarative.
 
-**Responsable :** Ã‰quipe produit ou configuration (hors StrongFather)
+**Responsable :** Équipe produit ou configuration (hors StrongFather)
 
-**RÃ¨gles :**
+**Règles :**
 
-- **R-DEF-1** : Les politiques sont dÃ©finies de maniÃ¨re dÃ©clarative
-- **R-DEF-2** : Les politiques respectent la structure dÃ©finie dans Policy Engine Contract
-- **R-DEF-3** : Les politiques sont documentÃ©es avec leur justification
+- **R-DEF-1** : Les politiques sont définies de manière déclarative
+- **R-DEF-2** : Les politiques respectent la structure définie dans Policy Engine Contract
+- **R-DEF-3** : Les politiques sont documentées avec leur justification
 
-**Sortie :** Ensemble de politiques dÃ©finies
+**Sortie :** Ensemble de politiques définies
 
 ### 4.3. Phase de validation
 
-**Objectif :** VÃ©rifier la validitÃ© des politiques avant chargement.
+**Objectif :** Vérifier la validité des politiques avant chargement.
 
 **Responsable :** Processus de validation (hors StrongFather)
 
 **Validations obligatoires :**
 
-1. **Validation structurelle** : Chaque politique possÃ¨de les composants obligatoires (identifiant, type, condition, rÃ¨gle, effet)
-2. **Validation de cohÃ©rence** : Les politiques ne contiennent pas de contradictions internes
-3. **Validation de complÃ©tude** : L'ensemble des politiques couvre les cas prÃ©vus
-4. **Validation de fermeture** : Les politiques ne rÃ©fÃ©rencent pas d'Ã©lÃ©ments non dÃ©finis
+1. **Validation structurelle** : Chaque politique possède les composants obligatoires (identifiant, type, condition, règle, effet)
+2. **Validation de cohérence** : Les politiques ne contiennent pas de contradictions internes
+3. **Validation de complétude** : L'ensemble des politiques couvre les cas prévus
+4. **Validation de fermeture** : Les politiques ne référencent pas d'éléments non définis
 
-**RÃ¨gles :**
+**Règles :**
 
-- **R-VAL-1** : Aucune politique invalide ne peut Ãªtre chargÃ©e
-- **R-VAL-2** : La validation est effectuÃ©e avant le chargement, pas pendant
-- **R-VAL-3** : Un Ã©chec de validation bloque le chargement
+- **R-VAL-1** : Aucune politique invalide ne peut être chargée
+- **R-VAL-2** : La validation est effectuée avant le chargement, pas pendant
+- **R-VAL-3** : Un échec de validation bloque le chargement
 
-**Sortie :** Ensemble de politiques validÃ©es
+**Sortie :** Ensemble de politiques validées
 
 ### 4.4. Phase de chargement
 
-**Objectif :** Charger les politiques validÃ©es dans StrongFather.
+**Objectif :** Charger les politiques validées dans StrongFather.
 
 **Responsable :** StrongFather
 
-**RÃ¨gles :**
+**Règles :**
 
-- **R-LOAD-1** : Seules les politiques validÃ©es peuvent Ãªtre chargÃ©es
+- **R-LOAD-1** : Seules les politiques validées peuvent être chargées
 - **R-LOAD-2** : Le chargement est atomique (tout ou rien)
-- **R-LOAD-3** : Un Ã©chec de chargement prÃ©serve les politiques prÃ©cÃ©dentes
-- **R-LOAD-4** : Le chargement est tracÃ© pour audit
+- **R-LOAD-3** : Un échec de chargement préserve les politiques précédentes
+- **R-LOAD-4** : Le chargement est tracé pour audit
 
-**Sortie :** Politiques chargÃ©es dans StrongFather
+**Sortie :** Politiques chargées dans StrongFather
 
 ### 4.5. Phase d'activation
 
-**Objectif :** Rendre les politiques disponibles pour Ã©valuation.
+**Objectif :** Rendre les politiques disponibles pour évaluation.
 
 **Responsable :** StrongFather
 
-**RÃ¨gles :**
+**Règles :**
 
-- **R-ACT-1** : L'activation rend les politiques disponibles pour les nouvelles Ã©valuations
-- **R-ACT-2** : Les Ã©valuations en cours ne sont pas affectÃ©es par l'activation
-- **R-ACT-3** : L'activation est instantanÃ©e une fois le chargement terminÃ©
+- **R-ACT-1** : L'activation rend les politiques disponibles pour les nouvelles évaluations
+- **R-ACT-2** : Les évaluations en cours ne sont pas affectées par l'activation
+- **R-ACT-3** : L'activation est instantanée une fois le chargement terminé
 
 **Sortie :** Politiques actives et utilisables
 
 ---
 
-## 5. RÃ¨gles de chargement
+## 5. Règles de chargement
 
 ### 5.1. Chargement initial
 
 **R-INIT-1 : Chargement obligatoire**
 
-StrongFather DOIT charger ses politiques depuis la source configurÃ©e avant toute Ã©valuation.
+StrongFather DOIT charger ses politiques depuis la source configurée avant toute évaluation.
 
-**R-INIT-2 : Ã‰chec bloquant**
+**R-INIT-2 : Échec bloquant**
 
-Si le chargement initial Ã©choue, StrongFather NE PEUT PAS effectuer d'Ã©valuations.
+Si le chargement initial échoue, StrongFather NE PEUT PAS effectuer d'évaluations.
 
 **R-INIT-3 : Source unique**
 
-Le chargement initial provient de l'unique source configurÃ©e.
+Le chargement initial provient de l'unique source configurée.
 
 ### 5.2. Rechargement
 
 **R-RECHG-1 : Rechargement explicite**
 
-Le rechargement est toujours explicitement dÃ©clenchÃ©, jamais automatique.
+Le rechargement est toujours explicitement déclenché, jamais automatique.
 
-**R-RECHG-2 : AtomicitÃ©**
+**R-RECHG-2 : Atomicité**
 
-Le rechargement est atomique : succÃ¨s total ou Ã©chec total.
+Le rechargement est atomique : succès total ou échec total.
 
-**R-RECHG-3 : Isolation des Ã©valuations**
+**R-RECHG-3 : Isolation des évaluations**
 
-Les Ã©valuations en cours ne sont jamais affectÃ©es par un rechargement.
+Les évaluations en cours ne sont jamais affectées par un rechargement.
 
 **R-RECHG-4 : Rollback automatique**
 
-En cas d'Ã©chec de rechargement, les politiques prÃ©cÃ©dentes restent actives.
+En cas d'échec de rechargement, les politiques précédentes restent actives.
 
-### 5.3. TraÃ§abilitÃ© du chargement
+### 5.3. Traçabilité du chargement
 
 **R-TRACE-LOAD-1 : Trace obligatoire**
 
-Tout chargement ou rechargement est tracÃ© avec :
+Tout chargement ou rechargement est tracé avec :
 - Horodatage du chargement
 - Identifiant de version des politiques
-- Nombre de politiques chargÃ©es
-- RÃ©sultat (succÃ¨s/Ã©chec)
+- Nombre de politiques chargées
+- Résultat (succès/échec)
 
 **R-TRACE-LOAD-2 : Trace d'activation**
 
-Toute activation est tracÃ©e avec :
+Toute activation est tracée avec :
 - Horodatage d'activation
 - Politiques actives (identifiants)
 
 ---
 
-## 6. RÃ¨gles de validation
+## 6. Règles de validation
 
 ### 6.1. Validation structurelle
 
-Chaque politique DOIT Ãªtre validÃ©e structurellement :
+Chaque politique DOIT être validée structurellement :
 
 **VALID-STRUCT-1 : Identifiant unique**
 
-Chaque politique possÃ¨de un identifiant unique dans l'ensemble des politiques.
+Chaque politique possède un identifiant unique dans l'ensemble des politiques.
 
 **VALID-STRUCT-2 : Type valide**
 
-Le type de chaque politique est l'un des types autorisÃ©s (permission, contrainte, prioritÃ©, validation, composite).
+Le type de chaque politique est l'un des types autorisés (permission, contrainte, priorité, validation, composite).
 
 **VALID-STRUCT-3 : Composants obligatoires**
 
-Chaque politique possÃ¨de tous les composants obligatoires dÃ©finis dans Policy Engine Contract.
+Chaque politique possède tous les composants obligatoires définis dans Policy Engine Contract.
 
 **VALID-STRUCT-4 : Effet explicite**
 
-Chaque politique possÃ¨de un effet explicitement dÃ©fini.
+Chaque politique possède un effet explicitement défini.
 
-### 6.2. Validation de cohÃ©rence
+### 6.2. Validation de cohérence
 
-L'ensemble des politiques DOIT Ãªtre validÃ© pour la cohÃ©rence :
+L'ensemble des politiques DOIT être validé pour la cohérence :
 
 **VALID-COHER-1 : Pas de contradiction directe**
 
-Deux politiques ne peuvent pas Ãªtre en contradiction directe non rÃ©soluble.
+Deux politiques ne peuvent pas être en contradiction directe non résoluble.
 
-**VALID-COHER-2 : RÃ©fÃ©rences valides**
+**VALID-COHER-2 : Références valides**
 
-Toute rÃ©fÃ©rence Ã  une autre politique pointe vers une politique existante.
+Toute référence à une autre politique pointe vers une politique existante.
 
 **VALID-COHER-3 : Pas de cycle dans les composites**
 
-Les politiques composites ne forment pas de cycles de rÃ©fÃ©rence.
+Les politiques composites ne forment pas de cycles de référence.
 
 ### 6.3. Validation de contenu
 
-Le contenu de chaque politique DOIT Ãªtre validÃ© :
+Le contenu de chaque politique DOIT être validé :
 
-**VALID-CONT-1 : Pas de logique d'exÃ©cution**
+**VALID-CONT-1 : Pas de logique d'exécution**
 
-Aucune politique ne contient de logique d'exÃ©cution.
+Aucune politique ne contient de logique d'exécution.
 
-**VALID-CONT-2 : Pas de logique mÃ©tier spÃ©cifique**
+**VALID-CONT-2 : Pas de logique métier spécifique**
 
-Aucune politique ne contient de logique mÃ©tier spÃ©cifique Ã  un domaine produit.
+Aucune politique ne contient de logique métier spécifique à un domaine produit.
 
 **VALID-CONT-3 : Pas de logique temporelle technique**
 
@@ -331,7 +331,7 @@ Aucune politique ne contient de logique temporelle technique (horodatages, times
 
 ### 7.1. Principe d'interdiction
 
-**Aucune politique ne peut Ãªtre injectÃ©e dans StrongFather en dehors du cycle de vie dÃ©fini.**
+**Aucune politique ne peut être injectée dans StrongFather en dehors du cycle de vie défini.**
 
 Ce principe est absolu et sans exception.
 
@@ -339,37 +339,37 @@ Ce principe est absolu et sans exception.
 
 **INTERD-INJ-1 : Injection par intention**
 
-Aucune intention ne peut contenir ou rÃ©fÃ©rencer une politique Ã  appliquer.
+Aucune intention ne peut contenir ou référencer une politique à appliquer.
 
 **INTERD-INJ-2 : Injection par adaptateur**
 
-Aucun adaptateur ne peut fournir des politiques Ã  appliquer lors d'une soumission.
+Aucun adaptateur ne peut fournir des politiques à appliquer lors d'une soumission.
 
 **INTERD-INJ-3 : Injection par contexte**
 
-Aucun contexte d'appel ne peut contenir des politiques supplÃ©mentaires.
+Aucun contexte d'appel ne peut contenir des politiques supplémentaires.
 
-**INTERD-INJ-4 : Injection par mÃ©tadonnÃ©es**
+**INTERD-INJ-4 : Injection par métadonnées**
 
-Aucune mÃ©tadonnÃ©e ne peut Ãªtre interprÃ©tÃ©e comme une politique.
+Aucune métadonnée ne peut être interprétée comme une politique.
 
 **INTERD-INJ-5 : Injection par modification**
 
-Aucune modification des politiques chargÃ©es n'est possible pendant l'exÃ©cution.
+Aucune modification des politiques chargées n'est possible pendant l'exécution.
 
-### 7.3. ConsÃ©quences de tentative d'injection
+### 7.3. Conséquences de tentative d'injection
 
 **CONSEQ-INJ-1 : Rejet de l'intention**
 
-Toute tentative d'injection dÃ©tectÃ©e entraÃ®ne le rejet de l'intention associÃ©e.
+Toute tentative d'injection détectée entraîne le rejet de l'intention associée.
 
 **CONSEQ-INJ-2 : Violation contractuelle**
 
 Toute tentative d'injection constitue une violation critique de ce contrat.
 
-**CONSEQ-INJ-3 : TraÃ§abilitÃ©**
+**CONSEQ-INJ-3 : Traçabilité**
 
-Toute tentative d'injection est tracÃ©e comme incident de sÃ©curitÃ©.
+Toute tentative d'injection est tracée comme incident de sécurité.
 
 ---
 
@@ -377,114 +377,114 @@ Toute tentative d'injection est tracÃ©e comme incident de sÃ©curitÃ©.
 
 ### 8.1. Invariants fondamentaux
 
-**INV-POL-SOURCE : Source unique et configurÃ©e**
+**INV-POL-SOURCE : Source unique et configurée**
 
-Les politiques de StrongFather proviennent exclusivement d'une source unique, explicitement configurÃ©e, et validÃ©e. Aucune politique ne peut Ãªtre injectÃ©e, gÃ©nÃ©rÃ©e, ou dÃ©rivÃ©e dynamiquement.
+Les politiques de StrongFather proviennent exclusivement d'une source unique, explicitement configurée, et validée. Aucune politique ne peut être injectée, générée, ou dérivée dynamiquement.
 
-*Cet invariant est rÃ©fÃ©rencÃ© dans le document Invariants & Guarantees.*
+*Cet invariant est référencé dans le document Invariants & Guarantees.*
 
-**INV-SRC-1 : UnicitÃ© de la source**
+**INV-SRC-1 : Unicité de la source**
 
 Il existe exactement une source de politiques par instance de StrongFather.
 
 **INV-SRC-2 : Configuration explicite**
 
-La source est toujours explicitement configurÃ©e, jamais dÃ©couverte ou dÃ©duite.
+La source est toujours explicitement configurée, jamais découverte ou déduite.
 
-**INV-SRC-3 : Validation prÃ©alable**
+**INV-SRC-3 : Validation préalable**
 
-Aucune politique n'est utilisÃ©e sans validation prÃ©alable.
+Aucune politique n'est utilisée sans validation préalable.
 
-**INV-SRC-4 : ImmuabilitÃ© pendant Ã©valuation**
+**INV-SRC-4 : Immuabilité pendant évaluation**
 
-Les politiques ne changent jamais pendant une Ã©valuation en cours.
+Les politiques ne changent jamais pendant une évaluation en cours.
 
 ### 8.2. Invariants de chargement
 
 **INV-SRC-5 : Chargement atomique**
 
-Le chargement est toujours atomique : succÃ¨s total ou Ã©chec total.
+Le chargement est toujours atomique : succès total ou échec total.
 
-**INV-SRC-6 : Isolation des Ã©valuations**
+**INV-SRC-6 : Isolation des évaluations**
 
-Une Ã©valuation utilise toujours l'ensemble de politiques actif au dÃ©but de l'Ã©valuation.
+Une évaluation utilise toujours l'ensemble de politiques actif au début de l'évaluation.
 
 ### 8.3. Invariants d'interdiction
 
 **INV-SRC-7 : Pas d'injection**
 
-Aucune politique n'est jamais injectÃ©e en dehors du cycle de vie dÃ©fini.
+Aucune politique n'est jamais injectée en dehors du cycle de vie défini.
 
-**INV-SRC-8 : Pas de gÃ©nÃ©ration**
+**INV-SRC-8 : Pas de génération**
 
-Aucune politique n'est jamais gÃ©nÃ©rÃ©e dynamiquement ou algorithmiquement.
+Aucune politique n'est jamais générée dynamiquement ou algorithmiquement.
 
 ---
 
 ## 9. Garanties offertes
 
-### 9.1. Garanties de stabilitÃ©
+### 9.1. Garanties de stabilité
 
-**G-SRC-1 : StabilitÃ© des politiques**
+**G-SRC-1 : Stabilité des politiques**
 
 Les politiques actives sont stables entre les rechargements explicites.
 
-**G-SRC-2 : PrÃ©visibilitÃ©**
+**G-SRC-2 : Prévisibilité**
 
-L'ensemble des politiques applicables est toujours prÃ©visible et auditable.
+L'ensemble des politiques applicables est toujours prévisible et auditable.
 
-### 9.2. Garanties de sÃ©curitÃ©
+### 9.2. Garanties de sécurité
 
-**G-SRC-3 : Pas de politique malveillante injectÃ©e**
+**G-SRC-3 : Pas de politique malveillante injectée**
 
-Aucune politique malveillante ne peut Ãªtre injectÃ©e via les intentions ou le contexte.
+Aucune politique malveillante ne peut être injectée via les intentions ou le contexte.
 
-**G-SRC-4 : TraÃ§abilitÃ© complÃ¨te**
+**G-SRC-4 : Traçabilité complète**
 
-L'origine et le cycle de vie de chaque politique sont traÃ§ables.
+L'origine et le cycle de vie de chaque politique sont traçables.
 
-### 9.3. Garanties de cohÃ©rence
+### 9.3. Garanties de cohérence
 
-**G-SRC-5 : CohÃ©rence garantie**
+**G-SRC-5 : Cohérence garantie**
 
-Les politiques actives sont toujours cohÃ©rentes entre elles (validÃ©es avant activation).
+Les politiques actives sont toujours cohérentes entre elles (validées avant activation).
 
-**G-SRC-6 : ComplÃ©tude garantie**
+**G-SRC-6 : Complétude garantie**
 
-L'ensemble des politiques actives est complet et fermÃ©.
+L'ensemble des politiques actives est complet et fermé.
 
 ---
 
-## 10. RÃ¨gles de fermeture du contrat
+## 10. Règles de fermeture du contrat
 
-### 10.1. Contrat fermÃ©
+### 10.1. Contrat fermé
 
-Ce contrat est **fermÃ©**. Seuls les types de sources, les phases du cycle de vie, les rÃ¨gles, et les invariants explicitement dÃ©finis dans ce contrat sont autorisÃ©s.
+Ce contrat est **fermé**. Seuls les types de sources, les phases du cycle de vie, les règles, et les invariants explicitement définis dans ce contrat sont autorisés.
 
 ### 10.2. Interdiction d'extension implicite
 
-Aucune extension implicite n'est autorisÃ©e :
+Aucune extension implicite n'est autorisée :
 
-- **INTERD-EXT-SRC-1** : Aucun type de source non dÃ©fini n'est reconnu
-- **INTERD-EXT-SRC-2** : Aucune phase de cycle de vie non dÃ©finie n'est autorisÃ©e
-- **INTERD-EXT-SRC-3** : Aucune rÃ¨gle de chargement non dÃ©finie n'est applicable
-- **INTERD-EXT-SRC-4** : Aucun mÃ©canisme d'injection n'est autorisÃ©
+- **INTERD-EXT-SRC-1** : Aucun type de source non défini n'est reconnu
+- **INTERD-EXT-SRC-2** : Aucune phase de cycle de vie non définie n'est autorisée
+- **INTERD-EXT-SRC-3** : Aucune règle de chargement non définie n'est applicable
+- **INTERD-EXT-SRC-4** : Aucun mécanisme d'injection n'est autorisé
 
 ---
 
 ## 11. Conclusion contractuelle
 
-Ce contrat Ã©tablit de maniÃ¨re dÃ©finitive et non nÃ©gociable l'origine et le cycle de vie des politiques de StrongFather.
+Ce contrat établit de manière définitive et non négociable l'origine et le cycle de vie des politiques de StrongFather.
 
 Il garantit que :
-- les politiques proviennent d'une source unique et configurÃ©e,
-- les politiques suivent un cycle de vie dÃ©fini,
-- les politiques sont validÃ©es avant utilisation,
+- les politiques proviennent d'une source unique et configurée,
+- les politiques suivent un cycle de vie défini,
+- les politiques sont validées avant utilisation,
 - aucune injection de politique n'est possible,
-- les invariants de source sont respectÃ©s,
-- le contrat est fermÃ© et non extensible implicitement.
+- les invariants de source sont respectés,
+- le contrat est fermé et non extensible implicitement.
 
-Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
+Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisée.
 
 ---
 
@@ -492,83 +492,83 @@ Ce contrat est de statut **FONDATION**. Aucune exception n'est autorisÃ©e.
 
 ### 12.1. Cas conformes
 
-Les cas suivants sont **conformes** Ã  ce contrat :
+Les cas suivants sont **conformes** à ce contrat :
 
-1. **Chargement initial** : StrongFather charge ses politiques depuis une source configurÃ©e au dÃ©marrage.
+1. **Chargement initial** : StrongFather charge ses politiques depuis une source configurée au démarrage.
 
-2. **Rechargement explicite** : Un administrateur dÃ©clenche un rechargement des politiques, les nouvelles politiques sont validÃ©es puis activÃ©es.
+2. **Rechargement explicite** : Un administrateur déclenche un rechargement des politiques, les nouvelles politiques sont validées puis activées.
 
-3. **Ã‰valuation isolÃ©e** : Une Ã©valuation en cours utilise les politiques actives au dÃ©but, non affectÃ©e par un rechargement concurrent.
+3. **Évaluation isolée** : Une évaluation en cours utilise les politiques actives au début, non affectée par un rechargement concurrent.
 
 ### 12.2. Cas de violation
 
 Les cas suivants **violent** ce contrat :
 
-1. **Injection par intention** : Une intention contient une politique Ã  appliquer. Viole INTERD-INJ-1.
+1. **Injection par intention** : Une intention contient une politique à appliquer. Viole INTERD-INJ-1.
 
 2. **Source multiple** : StrongFather utilise des politiques provenant de plusieurs sources. Viole INV-SRC-1.
 
-3. **Politique gÃ©nÃ©rÃ©e** : Une politique est gÃ©nÃ©rÃ©e algorithmiquement Ã  partir du contexte. Viole INV-SRC-8 et INTERD-SRC-4.
+3. **Politique générée** : Une politique est générée algorithmiquement à partir du contexte. Viole INV-SRC-8 et INTERD-SRC-4.
 
-4. **Politique non validÃ©e** : Une politique est utilisÃ©e sans validation prÃ©alable. Viole INV-SRC-3.
+4. **Politique non validée** : Une politique est utilisée sans validation préalable. Viole INV-SRC-3.
 
-5. **Chargement depuis service externe** : Les politiques sont rÃ©cupÃ©rÃ©es depuis une API externe Ã  chaque Ã©valuation. Viole INTERD-SRC-2.
+5. **Chargement depuis service externe** : Les politiques sont récupérées depuis une API externe à chaque évaluation. Viole INTERD-SRC-2.
 
 ---
 
-**Document crÃ©Ã© le :** 2026-01-25  
+**Document créé le :** 2026-01-25  
 **Version :** 1.0  
-**Statut :** FONDATION â€” Contrat normatif validÃ©  
-**RÃ©fÃ©rence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
-**Type :** Contrat de source de politiques non nÃ©gociable
+**Statut :** FONDATION — Contrat normatif validé  
+**Référence :** Miyukini Core System v2.4, StrongFather Documentation Fondatrice  
+**Type :** Contrat de source de politiques non négociable
 
 ---
 
-## 13. Mini log de gÃ©nÃ©ration
+## 13. Mini log de génération
 
-### Contexte de crÃ©ation
+### Contexte de création
 
-**Origine :** Ce contrat a Ã©tÃ© crÃ©Ã© suite Ã  l'audit global de StrongFather qui a identifiÃ© une lacune contractuelle (C.5) concernant l'absence de dÃ©finition de la source des politiques.
+**Origine :** Ce contrat a été créé suite à l'audit global de StrongFather qui a identifié une lacune contractuelle (C.5) concernant l'absence de définition de la source des politiques.
 
-**Objectif :** Fermer la lacune C.5 et rÃ©duire les risques D.1, D.4, D.5 identifiÃ©s dans l'audit.
+**Objectif :** Fermer la lacune C.5 et réduire les risques D.1, D.4, D.5 identifiés dans l'audit.
 
-### DÃ©cisions prises
+### Décisions prises
 
 **E1 : Types de sources**
 
-DÃ©cision prise : Deux types de sources autorisÃ©es (statique et rechargeable), liste fermÃ©e de sources interdites.
+Décision prise : Deux types de sources autorisées (statique et rechargeable), liste fermée de sources interdites.
 
-Application : Sections 3.1, 3.2 dÃ©finissent les sources autorisÃ©es, section 3.3 liste les interdictions.
+Application : Sections 3.1, 3.2 définissent les sources autorisées, section 3.3 liste les interdictions.
 
 **E2 : Cycle de vie en 4 phases**
 
-DÃ©cision prise : Cycle de vie en 4 phases (DÃ©finition, Validation, Chargement, Activation) avec responsabilitÃ©s claires.
+Décision prise : Cycle de vie en 4 phases (Définition, Validation, Chargement, Activation) avec responsabilités claires.
 
-Application : Section 4 dÃ©finit le cycle de vie complet.
+Application : Section 4 définit le cycle de vie complet.
 
 **E3 : Interdictions d'injection exhaustives**
 
-DÃ©cision prise : Liste exhaustive des cas d'injection interdits avec consÃ©quences.
+Décision prise : Liste exhaustive des cas d'injection interdits avec conséquences.
 
-Application : Section 7 dÃ©finit les interdictions et leurs consÃ©quences.
+Application : Section 7 définit les interdictions et leurs conséquences.
 
 **E4 : Invariant INV-POL-SOURCE**
 
-DÃ©cision prise : DÃ©finition de l'invariant INV-POL-SOURCE demandÃ© par l'audit.
+Décision prise : Définition de l'invariant INV-POL-SOURCE demandé par l'audit.
 
-Application : Section 8.1 dÃ©finit l'invariant qui sera rÃ©fÃ©rencÃ© dans Invariants & Guarantees.
+Application : Section 8.1 définit l'invariant qui sera référencé dans Invariants & Guarantees.
 
-### VÃ©rification de cohÃ©rence
+### Vérification de cohérence
 
-**VÃ©rification effectuÃ©e :**
-- âœ… CohÃ©rence avec Policy Engine Contract : ConfirmÃ©e (structure des politiques rÃ©fÃ©rencÃ©e)
-- âœ… CohÃ©rence avec Boundary & Isolation Contract : ConfirmÃ©e (source de politiques autorisÃ©e)
-- âœ… CohÃ©rence avec Execution Prohibition Contract : ConfirmÃ©e (pas de logique d'exÃ©cution dans les politiques)
-- âœ… Aucune contradiction avec les contrats existants
+**Vérification effectuée :**
+- ✅ Cohérence avec Policy Engine Contract : Confirmée (structure des politiques référencée)
+- ✅ Cohérence avec Boundary & Isolation Contract : Confirmée (source de politiques autorisée)
+- ✅ Cohérence avec Execution Prohibition Contract : Confirmée (pas de logique d'exécution dans les politiques)
+- ✅ Aucune contradiction avec les contrats existants
 
-**Conclusion :** Document crÃ©Ã© conformÃ©ment aux dÃ©cisions de l'audit, aucune contradiction dÃ©tectÃ©e.
+**Conclusion :** Document créé conformément aux décisions de l'audit, aucune contradiction détectée.
 
 ---
 
-*Aucune autre erreur, warning, ou ambiguÃ¯tÃ© rencontrÃ©e lors de la rÃ©daction de ce document.*
+*Aucune autre erreur, warning, ou ambiguïté rencontrée lors de la rédaction de ce document.*
 

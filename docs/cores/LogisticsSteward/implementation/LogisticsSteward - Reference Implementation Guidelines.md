@@ -55,7 +55,7 @@ LogisticsSteward decide, il n'execute jamais. Cette separation est fondamentale 
 - Toutes les decisions sont des recommandations pour le Kernel
 
 ```typescript
-// âœ… BON : Decision pure, pas d'execution
+// ✅ BON : Decision pure, pas d'execution
 class ArbitrationEngine {
   arbitrate(request: ResourceRequest, context: ArbitrationContext): ArbitrationDecision {
     // Evaluation des regles (pur)
@@ -67,7 +67,7 @@ class ArbitrationEngine {
   }
 }
 
-// âŒ MAUVAIS : Execution directe
+// ❌ MAUVAIS : Execution directe
 class ArbitrationEngine {
   arbitrate(request: ResourceRequest, context: ArbitrationContext): void {
     // Violation INV-LS-1 : execution directe
@@ -90,7 +90,7 @@ L'arbitrage doit etre completement deterministe. Aucune source d'aleatoire, aucu
 - Tests deterministes
 
 ```typescript
-// âœ… BON : Decision deterministe
+// ✅ BON : Decision deterministe
 class PriorityCalculator {
   calculate(entity: Entity, context: ArbitrationContext): Priority {
     // Calcul base uniquement sur les entrees
@@ -103,7 +103,7 @@ class PriorityCalculator {
   }
 }
 
-// âŒ MAUVAIS : Decision non deterministe
+// ❌ MAUVAIS : Decision non deterministe
 class PriorityCalculator {
   calculate(entity: Entity, context: ArbitrationContext): Priority {
     // Violation INV-LS-4 : composante aleatoire
@@ -126,7 +126,7 @@ Chaque demande, evaluation et decision doit etre journalisee avec son contexte c
 - Contexte complet pour reconstitution
 
 ```typescript
-// âœ… BON : Journalisation complete
+// ✅ BON : Journalisation complete
 class DecisionGenerator {
   generate(
     request: ResourceRequest,
@@ -164,7 +164,7 @@ Toute decision doit etre soumise a StrongFather pour validation. Aucune decision
 - Gestion du cas StrongFather indisponible
 
 ```typescript
-// âœ… BON : Soumission a validation
+// ✅ BON : Soumission a validation
 class ValidationPreparer {
   async prepareAndSubmit(decision: ArbitrationDecision): Promise<ValidationResult> {
     // Formatage pour StrongFather
@@ -183,7 +183,7 @@ class ValidationPreparer {
   }
 }
 
-// âŒ MAUVAIS : Decision auto-appliquee
+// ❌ MAUVAIS : Decision auto-appliquee
 class ValidationPreparer {
   async prepareAndSubmit(decision: ArbitrationDecision): Promise<ValidationResult> {
     // Violation INV-LS-8 : execution sans validation
@@ -203,36 +203,36 @@ class ValidationPreparer {
 
 ```
 logistics-steward/
-â”œâ”€â”€ reception-layer/           # Couche Reception
-â”‚   â”œâ”€â”€ request-receiver/
-â”‚   â”œâ”€â”€ structural-validator/
-â”‚   â”œâ”€â”€ entity-identifier/
-â”‚   â””â”€â”€ request-logger/
-â”œâ”€â”€ context-layer/             # Couche Contexte
-â”‚   â”œâ”€â”€ system-state-reader/
-â”‚   â”œâ”€â”€ entity-context-resolver/
-â”‚   â”œâ”€â”€ degradation-level-reader/
-â”‚   â””â”€â”€ context-assembler/
-â”œâ”€â”€ evaluation-layer/          # Couche Evaluation
-â”‚   â”œâ”€â”€ rule-engine/
-â”‚   â”œâ”€â”€ quota-evaluator/
-â”‚   â”œâ”€â”€ priority-calculator/
-â”‚   â”œâ”€â”€ conflict-resolver/
-â”‚   â””â”€â”€ degradation-applier/
-â”œâ”€â”€ decision-layer/            # Couche Decision
-â”‚   â”œâ”€â”€ decision-generator/
-â”‚   â”œâ”€â”€ decision-formatter/
-â”‚   â”œâ”€â”€ validation-preparer/
-â”‚   â””â”€â”€ decision-logger/
-â”œâ”€â”€ common/                    # Composants transversaux
-â”‚   â”œâ”€â”€ rule-repository/
-â”‚   â”œâ”€â”€ audit-journal/
-â”‚   â”œâ”€â”€ metrics-collector/
-â”‚   â”œâ”€â”€ health-monitor/
-â”‚   â””â”€â”€ errors/
-â””â”€â”€ contracts/                 # Definitions de contrats
-    â”œâ”€â”€ interfaces/
-    â””â”€â”€ types/
+├── reception-layer/           # Couche Reception
+│   ├── request-receiver/
+│   ├── structural-validator/
+│   ├── entity-identifier/
+│   └── request-logger/
+├── context-layer/             # Couche Contexte
+│   ├── system-state-reader/
+│   ├── entity-context-resolver/
+│   ├── degradation-level-reader/
+│   └── context-assembler/
+├── evaluation-layer/          # Couche Evaluation
+│   ├── rule-engine/
+│   ├── quota-evaluator/
+│   ├── priority-calculator/
+│   ├── conflict-resolver/
+│   └── degradation-applier/
+├── decision-layer/            # Couche Decision
+│   ├── decision-generator/
+│   ├── decision-formatter/
+│   ├── validation-preparer/
+│   └── decision-logger/
+├── common/                    # Composants transversaux
+│   ├── rule-repository/
+│   ├── audit-journal/
+│   ├── metrics-collector/
+│   ├── health-monitor/
+│   └── errors/
+└── contracts/                 # Definitions de contrats
+    ├── interfaces/
+    └── types/
 ```
 
 ### 4.2 Isolation des couches
@@ -242,7 +242,7 @@ logistics-steward/
 Chaque couche est isolee et ne depend que de ses interfaces, pas de l'implementation.
 
 ```typescript
-// âœ… BON : Couche Evaluation depend de l'interface, pas de l'implementation
+// ✅ BON : Couche Evaluation depend de l'interface, pas de l'implementation
 interface IContextProvider {
   getContext(entityId: string): Promise<ArbitrationContext>;
 }
@@ -256,7 +256,7 @@ class RuleEngine {
   }
 }
 
-// âŒ MAUVAIS : Couplage direct a l'implementation
+// ❌ MAUVAIS : Couplage direct a l'implementation
 class RuleEngine {
   constructor(private contextAssembler: ContextAssembler) {}
   // Depend de l'implementation concrete
@@ -676,7 +676,7 @@ class ValidationPreparer {
 Utiliser des types d'erreur explicites et semantiques.
 
 ```typescript
-// âœ… BON : Erreurs typees et semantiques
+// ✅ BON : Erreurs typees et semantiques
 class QuotaExceededError extends Error {
   constructor(
     public entityId: string,
@@ -699,7 +699,7 @@ class InvalidRuleError extends Error {
   }
 }
 
-// âŒ MAUVAIS : Erreur generique
+// ❌ MAUVAIS : Erreur generique
 throw new Error('Something went wrong');
 ```
 
@@ -708,7 +708,7 @@ throw new Error('Something went wrong');
 Toute erreur doit etre explicite et journalisee.
 
 ```typescript
-// âœ… BON : Erreur explicite et journalisee
+// ✅ BON : Erreur explicite et journalisee
 async arbitrate(request: ResourceRequest): Promise<ArbitrationDecision> {
   try {
     const context = await this.contextProvider.getContext(request.entityId);
@@ -726,12 +726,12 @@ async arbitrate(request: ResourceRequest): Promise<ArbitrationDecision> {
   }
 }
 
-// âŒ MAUVAIS : Erreur ignoree
+// ❌ MAUVAIS : Erreur ignoree
 async arbitrate(request: ResourceRequest): Promise<ArbitrationDecision | null> {
   try {
     return this.evaluate(request, context);
   } catch (error) {
-    return null; // âŒ Erreur masquee
+    return null; // ❌ Erreur masquee
   }
 }
 ```
@@ -743,7 +743,7 @@ async arbitrate(request: ResourceRequest): Promise<ArbitrationDecision | null> {
 Valider structurellement avant tout traitement.
 
 ```typescript
-// âœ… BON : Validation precoce
+// ✅ BON : Validation precoce
 class RequestReceiver {
   receive(request: ResourceRequest): ValidatedRequest {
     // Validation structurelle d'abord
@@ -769,7 +769,7 @@ class RequestReceiver {
   }
 }
 
-// âŒ MAUVAIS : Validation tardive
+// ❌ MAUVAIS : Validation tardive
 receive(request: ResourceRequest) {
   const processed = this.process(request); // Traitement d'abord
   this.validate(processed); // Validation apres (trop tard)
@@ -783,7 +783,7 @@ receive(request: ResourceRequest) {
 Utiliser un logging structure avec contexte complet.
 
 ```typescript
-// âœ… BON : Logging structure
+// ✅ BON : Logging structure
 this.logger.info('Decision d\'arbitrage generee', {
   decision_id: decision.id,
   entity_id: request.entityId,
@@ -795,7 +795,7 @@ this.logger.info('Decision d\'arbitrage generee', {
   timestamp: Date.now()
 });
 
-// âŒ MAUVAIS : Logging non structure
+// ❌ MAUVAIS : Logging non structure
 console.log('Decision: ' + decision.id);
 ```
 
@@ -804,7 +804,7 @@ console.log('Decision: ' + decision.id);
 Ne jamais logger de donnees sensibles.
 
 ```typescript
-// âœ… BON : Pas de donnees sensibles
+// ✅ BON : Pas de donnees sensibles
 this.logger.info('Contexte assemble', {
   entity_id: context.entityId,
   degradation_level: context.degradationLevel,
@@ -812,7 +812,7 @@ this.logger.info('Contexte assemble', {
   // Pas de tokens, credentials, etc.
 });
 
-// âŒ MAUVAIS : Donnees sensibles loggees
+// ❌ MAUVAIS : Donnees sensibles loggees
 this.logger.info('Contexte', context); // Peut contenir des secrets
 ```
 
@@ -920,18 +920,18 @@ describe('Invariants', () => {
 **Solution :** Utiliser l'etat systeme abstrait fourni par le Kernel.
 
 ```typescript
-// âŒ MAUVAIS : Mesure directe
+// ❌ MAUVAIS : Mesure directe
 class ResourceMonitor {
   getCurrentLoad(): number {
-    return os.loadavg()[0]; // âŒ Violation INV-LS-2 et INV-LS-7
+    return os.loadavg()[0]; // ❌ Violation INV-LS-2 et INV-LS-7
   }
   
   getMemoryUsage(): number {
-    return process.memoryUsage().heapUsed; // âŒ Violation
+    return process.memoryUsage().heapUsed; // ❌ Violation
   }
 }
 
-// âœ… BON : Etat abstrait du Kernel
+// ✅ BON : Etat abstrait du Kernel
 class SystemStateReader {
   async getLoadLevel(): Promise<LoadLevel> {
     const state = await this.kernelAdapter.getSystemState();
@@ -949,15 +949,15 @@ class SystemStateReader {
 **Solution :** Toujours soumettre a StrongFather, meme en mode degrade.
 
 ```typescript
-// âŒ MAUVAIS : Decision auto-appliquee
+// ❌ MAUVAIS : Decision auto-appliquee
 class ArbitrationService {
   async process(request: ResourceRequest): Promise<void> {
     const decision = await this.evaluate(request);
-    this.applyDecision(decision); // âŒ Violation INV-LS-8
+    this.applyDecision(decision); // ❌ Violation INV-LS-8
   }
 }
 
-// âœ… BON : Soumission obligatoire
+// ✅ BON : Soumission obligatoire
 class ArbitrationService {
   async process(request: ResourceRequest): Promise<ValidationResult> {
     const decision = await this.evaluate(request);
@@ -975,20 +975,20 @@ class ArbitrationService {
 **Solution :** Toute regle doit etre explicitement declaree.
 
 ```typescript
-// âŒ MAUVAIS : Regle implicite
+// ❌ MAUVAIS : Regle implicite
 class QuotaEvaluator {
   evaluate(request: ResourceRequest, quotas: Quota[]): boolean {
     const quota = quotas.find(q => q.resourceType === request.resourceType);
     
     if (!quota) {
-      return true; // âŒ Regle implicite : "pas de quota = autorise"
+      return true; // ❌ Regle implicite : "pas de quota = autorise"
     }
     
     return quota.remaining >= request.amount;
   }
 }
 
-// âœ… BON : Regle explicite
+// ✅ BON : Regle explicite
 class QuotaEvaluator {
   evaluate(request: ResourceRequest, quotas: Quota[]): QuotaResult {
     const quota = quotas.find(q => q.resourceType === request.resourceType);
@@ -1028,16 +1028,16 @@ class QuotaEvaluator {
 **Solution :** Calculs purs et deterministes uniquement.
 
 ```typescript
-// âŒ MAUVAIS : Composante aleatoire
+// ❌ MAUVAIS : Composante aleatoire
 class ConflictResolver {
   resolve(conflicts: RuleConflict[]): ArbitrationDecision {
-    // âŒ Violation INV-LS-4 : aleatoire
+    // ❌ Violation INV-LS-4 : aleatoire
     const randomIndex = Math.floor(Math.random() * conflicts.length);
     return conflicts[randomIndex].resolution;
   }
 }
 
-// âœ… BON : Resolution deterministe
+// ✅ BON : Resolution deterministe
 class ConflictResolver {
   resolve(conflicts: RuleConflict[]): ArbitrationDecision {
     // Resolution par priorite (deterministe)
@@ -1056,17 +1056,17 @@ class ConflictResolver {
 **Solution :** Generer des decisions, le Kernel execute.
 
 ```typescript
-// âŒ MAUVAIS : Execution technique
+// ❌ MAUVAIS : Execution technique
 class ResourceAllocator {
   allocate(decision: ArbitrationDecision): void {
-    // âŒ Violations multiples
+    // ❌ Violations multiples
     process.setMaxMemory(decision.memoryLimit);
     os.setPriority(decision.processPriority);
     this.threadPool.resize(decision.threadCount);
   }
 }
 
-// âœ… BON : Decision pour le Kernel
+// ✅ BON : Decision pour le Kernel
 class DecisionGenerator {
   generate(evaluation: RuleEvaluation): ArbitrationDecision {
     return {
@@ -1092,22 +1092,22 @@ class DecisionGenerator {
 
 ```
 tests/
-â”œâ”€â”€ unit/                      # Tests unitaires
-â”‚   â”œâ”€â”€ reception-layer/
-â”‚   â”œâ”€â”€ context-layer/
-â”‚   â”œâ”€â”€ evaluation-layer/
-â”‚   â””â”€â”€ decision-layer/
-â”œâ”€â”€ integration/               # Tests d'integration
-â”‚   â”œâ”€â”€ flows/
-â”‚   â””â”€â”€ contracts/
-â”œâ”€â”€ contract/                  # Tests de contrats
-â”‚   â”œâ”€â”€ invariants/
-â”‚   â””â”€â”€ guarantees/
-â”œâ”€â”€ determinism/               # Tests de determinisme
-â”‚   â””â”€â”€ reproducibility/
-â””â”€â”€ degradation/               # Tests de modes degrades
-    â”œâ”€â”€ offline/
-    â””â”€â”€ recovery/
+├── unit/                      # Tests unitaires
+│   ├── reception-layer/
+│   ├── context-layer/
+│   ├── evaluation-layer/
+│   └── decision-layer/
+├── integration/               # Tests d'integration
+│   ├── flows/
+│   └── contracts/
+├── contract/                  # Tests de contrats
+│   ├── invariants/
+│   └── guarantees/
+├── determinism/               # Tests de determinisme
+│   └── reproducibility/
+└── degradation/               # Tests de modes degrades
+    ├── offline/
+    └── recovery/
 ```
 
 ### 8.2 Tests d'invariants
@@ -1522,7 +1522,7 @@ Les contrats et invariants restent la source de verite. Ces guidelines sont des 
 
 **Version :** 1.0.0  
 **Date :** 2026-01-28  
-**Statut :** GUIDELINES â€” Informatif  
+**Statut :** GUIDELINES — Informatif  
 **Dependances :** 
 - Documentation Fondatrice v1.0.0
 - Architecture & Flows v1.0.0
