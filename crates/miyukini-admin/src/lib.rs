@@ -144,3 +144,10 @@ pub mod models;
 /// @do expose_services
 //@human / @human Services (environment_state, auth, permission, recovery).
 pub mod services;
+
+/// @id miyukiniadmin_module_gouvernance
+/// @role infrastructure
+/// @layer operator
+/// @do expose_gouvernance
+//@human / @human Porte StrongFather obligatoire des actions modifiantes (K-11).
+pub mod gouvernance;

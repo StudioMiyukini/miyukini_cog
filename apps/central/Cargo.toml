@@ -58,6 +58,8 @@ miyuwebway_participant = { path = "../../crates/miyuwebway_participant" }
 miyumarket = { path = "../../crates/miyumarket" }
 # Sceau v1 : ancres de confiance des éditeurs Market (CA-01)
 miyusceau = { path = "../../crates/miyusceau" }
+# Porte StrongFather obligatoire (K-11) : Market, lancement, secrets (ré-exporte strongfather)
+bondingbrother = { path = "../../crates/bondingbrother" }
 
 # Alicia Home Assistante — capture audio locale + détection de wake word
 miyualicia-capture = { path = "../../crates/miyuvoicecapture" }

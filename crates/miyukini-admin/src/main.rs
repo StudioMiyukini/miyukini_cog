@@ -17,6 +17,7 @@ use miyukini_admin::admin_cell::{AdminCell, ModuleInfo, ModuleType};
 use miyukini_admin::backup_service::{BackupService, BackupServiceImpl};
 use miyukini_admin::config::BackendConfig;
 use miyukini_admin::crud_state::CrudState;
+use miyukini_admin::gouvernance::{classer_requete, GouvernanceAdmin, PrincipalAdmin, RefusAdmin};
 use miyukini_admin::migration_service::{MigrationService, MigrationServiceImpl};
 use miyukini_admin::models::{AdminRole, EnvironmentState};
 use miyukini_admin::module_lifecycle_service::{AddModuleParams, ModuleLifecycleService};
@@ -88,6 +89,8 @@ struct AppState {
     setup_guard: Arc<SetupGuard>,
     /// Sérialise les appels à create-admin (pas de course entre deux créations).
     setup_lock: Arc<tokio::sync::Mutex<()>>,
+    /// Porte StrongFather des actions modifiantes (K-11) ; absente ⇒ tout refuser.
+    gouvernance: GouvernanceAdmin,
 }
 
 /// Nom du cookie de session (HttpOnly, Path=/).
@@ -143,6 +146,73 @@ async fn require_session_layer(
     } else {
         Redirect::to("/login").into_response()
     }
+}
+
+/// Taille maximale d'un corps lu par la gouvernance pour en extraire la cible (1 Mio).
+const MAX_CORPS_GOUVERNANCE: usize = 1024 * 1024;
+
+/// Middleware de gouvernance (K-11) : toute requête modifiante est classée puis soumise
+/// à StrongFather via `GouvernanceAdmin::executer_action_admin` ; le handler n'est
+/// exécuté qu'après une décision ALLOW. Refus ou politiques absentes ⇒ 403.
+/// @id miyukiniadmin_backend_gouverner_requete_layer
+/// @do gouverner_requete_layer
+async fn gouverner_requete_layer(
+    State(state): State<Arc<AppState>>,
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> Response {
+    let Some(mut action) = classer_requete(req.method().as_str(), req.uri().path()) else {
+        return next.run(req).await;
+    };
+    // Principal : session revalidée (défense en profondeur), sinon jeton de setup / anonyme.
+    let etat = state.environment_state;
+    let session = match session_id_from_headers(req.headers()) {
+        Some(id) => state.auth_svc.validate_session(&id).await,
+        None => None,
+    };
+    let principal = match (&session, action.operation) {
+        (Some(s), _) => PrincipalAdmin::depuis_session(s, etat),
+        (None, "setup.creer_premier_admin") => PrincipalAdmin::setup(etat),
+        (None, _) => PrincipalAdmin::anonyme(etat),
+    };
+    // Cible portée par le corps JSON (sauvegarde restaurée, module ajouté).
+    let req = if let Some(champ) = action.champ_cible_corps() {
+        let (parts, body) = req.into_parts();
+        let Ok(octets) = axum::body::to_bytes(body, MAX_CORPS_GOUVERNANCE).await else {
+            return refus_gouvernance(&RefusAdmin::PorteAbsente(
+                "corps de requête illisible ou trop volumineux".to_string(),
+            ));
+        };
+        if let Some(cible) = serde_json::from_slice::<serde_json::Value>(&octets)
+            .ok()
+            .and_then(|v| v.get(champ).and_then(|c| c.as_str()).map(str::to_string))
+        {
+            action.cible = cible;
+        }
+        axum::extract::Request::from_parts(parts, axum::body::Body::from(octets))
+    } else {
+        req
+    };
+    match state
+        .gouvernance
+        .executer_action_admin(&action, &principal, |_jeton| next.run(req))
+    {
+        Ok(execution) => execution.await,
+        Err(refus) => refus_gouvernance(&refus),
+    }
+}
+
+/// Réponse 403 d'un refus de gouvernance.
+fn refus_gouvernance(refus: &RefusAdmin) -> Response {
+    (
+        StatusCode::FORBIDDEN,
+        Json(serde_json::json!({
+            "success": false,
+            "error": "Refusé par StrongFather",
+            "message": refus.to_string()
+        })),
+    )
+        .into_response()
 }
 
 /// @id miyukiniadmin_backend_main
@@ -232,6 +302,7 @@ async fn main() {
         admin_cell_reader,
         setup_guard,
         setup_lock: Arc::new(tokio::sync::Mutex::new(())),
+        gouvernance: GouvernanceAdmin::charger(),
     };
 
     // Pas de CORS : l'UI est servie par ce même serveur (même origine) et l'écoute est
@@ -242,11 +313,20 @@ async fn main() {
     let env_state = shared_state.environment_state;
     let state_for_router = Arc::clone(&shared_state);
 
+    // Gouvernance StrongFather (K-11) : couche intérieure, après la session (couche extérieure).
     let app = match env_state {
-        EnvironmentState::Vierge => router_setup_only(state_for_router, ui_path),
-        EnvironmentState::Initialise => router_full(state_for_router.clone(), ui_path).layer(
-            middleware::from_fn_with_state(state_for_router, require_session_layer),
+        EnvironmentState::Vierge => router_setup_only(state_for_router.clone(), ui_path).layer(
+            middleware::from_fn_with_state(state_for_router, gouverner_requete_layer),
         ),
+        EnvironmentState::Initialise => router_full(state_for_router.clone(), ui_path)
+            .layer(middleware::from_fn_with_state(
+                state_for_router.clone(),
+                gouverner_requete_layer,
+            ))
+            .layer(middleware::from_fn_with_state(
+                state_for_router,
+                require_session_layer,
+            )),
         EnvironmentState::Compromis => router_compromised_only(state_for_router, ui_path),
     };
 

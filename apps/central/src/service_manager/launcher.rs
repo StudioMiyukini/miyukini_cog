@@ -14,6 +14,7 @@ use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 
 use super::confiance;
+use super::gouvernance::{ActionMarket, GouvernanceMarket, OperationMarket};
 use super::registry::InstalledService;
 use crate::services::miyucloud_settings::load_miyucloud_config;
 use miyumarket::signature::{hex_decoder, verifier_sceau_installe};
@@ -40,6 +41,27 @@ pub fn controler_provenance(
     maintenant_secs: u64,
     dev_non_signe: bool,
 ) -> Result<Provenance, String> {
+    controler_provenance_signee(service, ancres, maintenant_secs, dev_non_signe).map(|c| c.provenance)
+}
+
+/// Provenance contrôlée et signataire (pour l'intention StrongFather).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ProvenanceControlee {
+    /// Provenance retenue.
+    pub provenance: Provenance,
+    /// Niveau de l'ancre du signataire (`None` : dérogation dev, sans sceau valide).
+    pub niveau: Option<miyusceau::NiveauConfiance>,
+    /// `kid` du signataire (`None` : dérogation dev).
+    pub signataire: Option<miyusceau::Kid>,
+}
+
+/// Comme [`controler_provenance`], en conservant le signataire vérifié.
+pub fn controler_provenance_signee(
+    service: &InstalledService,
+    ancres: &AncresDeConfiance,
+    maintenant_secs: u64,
+    dev_non_signe: bool,
+) -> Result<ProvenanceControlee, String> {
     let id = &service.manifest.id;
     let verdict = match service.sceau_paquet.as_deref() {
         None => Err("aucune signature d'éditeur".to_string()),
@@ -55,7 +77,11 @@ pub fn controler_provenance(
                     if crate::service_manager::confiance::id_reserve_officiel(id) && !officiel {
                         return Err(format!("identifiant réservé '{id}' signé par un éditeur non officiel"));
                     }
-                    Ok(if officiel { Provenance::SigneeOfficielle } else { Provenance::SigneeTierce })
+                    Ok(ProvenanceControlee {
+                        provenance: if officiel { Provenance::SigneeOfficielle } else { Provenance::SigneeTierce },
+                        niveau: Some(v.niveau()),
+                        signataire: Some(*v.signataire()),
+                    })
                 }),
         },
     };
@@ -66,7 +92,7 @@ pub fn controler_provenance(
                 "⚠⚠ DÉROGATION DEV : lancement de '{id}' sans signature valide ({motif}) — \
                  aucun secret ne lui est transmis. Interdit en production. ⚠⚠"
             );
-            Ok(Provenance::NonSigneeDev)
+            Ok(ProvenanceControlee { provenance: Provenance::NonSigneeDev, niveau: None, signataire: None })
         }
         Err(motif) => Err(format!("Lancement de '{id}' refusé : {motif}")),
     }
@@ -91,24 +117,50 @@ impl ServiceProcesses {
     }
 
     /// Lance un service installé.
-    pub fn launch(&self, service: &InstalledService, profile_id: &str) -> Result<(), String> {
+    ///
+    /// Ordre : provenance re-vérifiée (CA-01) → décision StrongFather `lancer` (K-11) →
+    /// préparation de l'environnement (secrets soumis à leur propre décision) → exécution.
+    pub fn launch(
+        &self,
+        service: &InstalledService,
+        profile_id: &str,
+        gouvernance: &GouvernanceMarket,
+    ) -> Result<(), String> {
         let service_id = &service.manifest.id;
 
         // Vérifier si déjà en cours d'exécution
         {
-            let procs = self.processes.lock().unwrap_or_else(|e| e.into_inner());
+            let procs = self.processes.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
             if procs.contains_key(service_id) {
                 return Err(format!("Service '{service_id}' déjà en cours d'exécution"));
             }
         }
 
         // CA-01 : provenance re-vérifiée avant toute exécution.
-        let provenance = controler_provenance(
+        let controle = controler_provenance_signee(
             service,
             &confiance::ancres_market(),
             confiance::maintenant_secs(),
             confiance::dev_non_signe_autorise(),
         )?;
+        let action = action_pour(OperationMarket::Lancer, service, &controle).par(profile_id);
+
+        // K-11 : StrongFather décide avant tout lancement.
+        gouvernance.executer_action_market(&action, |_jeton| {
+            self.lancer_autorise(service, profile_id, &controle, gouvernance)
+        })?
+    }
+
+    /// Lancement effectif, appelé uniquement après une décision ALLOW.
+    fn lancer_autorise(
+        &self,
+        service: &InstalledService,
+        profile_id: &str,
+        controle: &ProvenanceControlee,
+        gouvernance: &GouvernanceMarket,
+    ) -> Result<(), String> {
+        let service_id = &service.manifest.id;
+        let provenance = controle.provenance;
 
         // En dev (build debug + dérogation), préférer le binaire dans le même
         // dossier que Central (target/debug/). Jamais en release.
@@ -131,7 +183,7 @@ impl ServiceProcesses {
             tracing::warn!("Impossible de créer le répertoire de données: {e}");
         }
 
-        let service_env = build_service_env(service, provenance, profile_id, &data_dir)?;
+        let service_env = build_service_env(service, controle, profile_id, &data_dir, gouvernance)?;
 
         tracing::info!(
             "Lancement du service '{}' depuis {:?}",
@@ -160,9 +212,9 @@ impl ServiceProcesses {
         let pid = child.id();
         tracing::info!("Service '{}' lancé (PID: {})", service_id, pid);
 
-        let mut procs = self.processes.lock().unwrap_or_else(|e| e.into_inner());
+        let mut procs = self.processes.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
         procs.insert(
-            service_id.to_string(),
+            service_id.clone(),
             RunningService {
                 child,
                 started_at: std::time::Instant::now(),
@@ -225,12 +277,27 @@ pub fn secrets_miyucloud_autorises(service: &InstalledService, provenance: Prove
     service.manifest.id == ID_MIYUCLOUD && provenance == Provenance::SigneeOfficielle
 }
 
+/// Action StrongFather décrivant `service` et sa provenance contrôlée.
+pub fn action_pour(
+    operation: OperationMarket,
+    service: &InstalledService,
+    controle: &ProvenanceControlee,
+) -> ActionMarket {
+    ActionMarket::nouvelle(operation, &service.manifest.id, &service.manifest.version).avec_provenance(
+        controle.provenance,
+        controle.niveau,
+        controle.signataire.as_ref().map(<[u8; 32]>::as_slice),
+    )
+}
+
 fn build_service_env(
     service: &InstalledService,
-    provenance: Provenance,
+    controle: &ProvenanceControlee,
     profile_id: &str,
     data_dir: &std::path::Path,
+    gouvernance: &GouvernanceMarket,
 ) -> Result<HashMap<String, String>, String> {
+    let provenance = controle.provenance;
     let mut env = HashMap::new();
 
     if service.manifest.id == ID_MIYUCLOUD && !secrets_miyucloud_autorises(service, provenance) {
@@ -242,75 +309,91 @@ fn build_service_env(
     }
 
     if secrets_miyucloud_autorises(service, provenance) {
-        let config = load_miyucloud_config();
-        let central_db = miyukini_central::chemins::chemin_base_auth()
-            .map_err(|e| format!("Chemin de la base Central : {e}"))?;
-        env.insert("MIYUCLOUD_PORT".to_string(), config.api_port.to_string());
-        env.insert("MIYUCLOUD_WEB_PORT".to_string(), config.web_port.to_string());
-        env.insert(
-            "MIYUCLOUD_WEB_ENABLED".to_string(),
-            if config.web_enabled { "1" } else { "0" }.to_string(),
-        );
-        env.insert("MIYUCLOUD_STORAGE_PATH".to_string(), config.storage_path);
-        env.insert(
-            "MIYUCLOUD_DB_PATH".to_string(),
-            data_dir.join("miyucloud.db").to_string_lossy().to_string(),
-        );
-        env.insert("MIYUCLOUD_COG_TOKEN".to_string(), config.cog_token);
-        env.insert(
-            "MIYUCLOUD_PASSPHRASE".to_string(),
-            config.encryption_passphrase,
-        );
-        env.insert("MIYUCLOUD_OWNER_ID".to_string(), profile_id.to_string());
-        env.insert(
-            "MIYUCLOUD_DEFAULT_QUOTA_BYTES".to_string(),
-            config.quota_bytes.to_string(),
-        );
-        env.insert(
-            "MIYUCLOUD_PUBLIC_SHARES_ENABLED".to_string(),
-            if config.share_policy.public_links_enabled {
-                "1"
-            } else {
-                "0"
-            }
-            .to_string(),
-        );
-        env.insert(
-            "MIYUCLOUD_INTERNAL_SHARING_ENABLED".to_string(),
-            if config.share_policy.internal_sharing_enabled {
-                "1"
-            } else {
-                "0"
-            }
-            .to_string(),
-        );
-        env.insert(
-            "MIYUCLOUD_DEFAULT_SHARE_PERMISSION".to_string(),
-            config.share_policy.default_permission.as_str().to_string(),
-        );
-        env.insert(
-            "MIYUCLOUD_SSH_ENABLED".to_string(),
-            if config.ssh.enabled { "1" } else { "0" }.to_string(),
-        );
-        env.insert("MIYUCLOUD_SSH_HOST".to_string(), config.ssh.host);
-        env.insert("MIYUCLOUD_SSH_PORT".to_string(), config.ssh.port.to_string());
-        env.insert("MIYUCLOUD_SSH_USERNAME".to_string(), config.ssh.username);
-        env.insert("MIYUCLOUD_SSH_ROOT_PATH".to_string(), config.ssh.root_path);
-        env.insert(
-            "MIYUCLOUD_SSH_PRIVATE_KEY_PATH".to_string(),
-            config.ssh.private_key_path,
-        );
-        env.insert(
-            "MIYUCLOUD_SSH_KEEPALIVE".to_string(),
-            if config.ssh.keepalive { "1" } else { "0" }.to_string(),
-        );
-        env.insert(
-            "MIYUCLOUD_CENTRAL_DB_PATH".to_string(),
-            central_db.to_string_lossy().to_string(),
-        );
+        // K-11 : remise de secrets soumise à sa propre décision StrongFather ;
+        // les secrets ne sont lus que dans la fermeture autorisée.
+        let action = action_pour(OperationMarket::InjecterSecrets, service, controle).par(profile_id);
+        gouvernance.executer_action_market(&action, |_jeton| {
+            inserer_secrets_miyucloud(&mut env, profile_id, data_dir)
+        })??;
     }
 
     Ok(env)
+}
+
+/// Secrets MiyuCloud (jeton COG, phrase de chiffrement, accès SSH) : appelée
+/// uniquement après une décision ALLOW `injecter_secrets`.
+fn inserer_secrets_miyucloud(
+    env: &mut HashMap<String, String>,
+    profile_id: &str,
+    data_dir: &std::path::Path,
+) -> Result<(), String> {
+    let config = load_miyucloud_config();
+    let central_db = miyukini_central::chemins::chemin_base_auth()
+        .map_err(|e| format!("Chemin de la base Central : {e}"))?;
+    env.insert("MIYUCLOUD_PORT".to_string(), config.api_port.to_string());
+    env.insert("MIYUCLOUD_WEB_PORT".to_string(), config.web_port.to_string());
+    env.insert(
+        "MIYUCLOUD_WEB_ENABLED".to_string(),
+        if config.web_enabled { "1" } else { "0" }.to_string(),
+    );
+    env.insert("MIYUCLOUD_STORAGE_PATH".to_string(), config.storage_path);
+    env.insert(
+        "MIYUCLOUD_DB_PATH".to_string(),
+        data_dir.join("miyucloud.db").to_string_lossy().to_string(),
+    );
+    env.insert("MIYUCLOUD_COG_TOKEN".to_string(), config.cog_token);
+    env.insert(
+        "MIYUCLOUD_PASSPHRASE".to_string(),
+        config.encryption_passphrase,
+    );
+    env.insert("MIYUCLOUD_OWNER_ID".to_string(), profile_id.to_string());
+    env.insert(
+        "MIYUCLOUD_DEFAULT_QUOTA_BYTES".to_string(),
+        config.quota_bytes.to_string(),
+    );
+    env.insert(
+        "MIYUCLOUD_PUBLIC_SHARES_ENABLED".to_string(),
+        if config.share_policy.public_links_enabled {
+            "1"
+        } else {
+            "0"
+        }
+        .to_string(),
+    );
+    env.insert(
+        "MIYUCLOUD_INTERNAL_SHARING_ENABLED".to_string(),
+        if config.share_policy.internal_sharing_enabled {
+            "1"
+        } else {
+            "0"
+        }
+        .to_string(),
+    );
+    env.insert(
+        "MIYUCLOUD_DEFAULT_SHARE_PERMISSION".to_string(),
+        config.share_policy.default_permission.as_str().to_string(),
+    );
+    env.insert(
+        "MIYUCLOUD_SSH_ENABLED".to_string(),
+        if config.ssh.enabled { "1" } else { "0" }.to_string(),
+    );
+    env.insert("MIYUCLOUD_SSH_HOST".to_string(), config.ssh.host);
+    env.insert("MIYUCLOUD_SSH_PORT".to_string(), config.ssh.port.to_string());
+    env.insert("MIYUCLOUD_SSH_USERNAME".to_string(), config.ssh.username);
+    env.insert("MIYUCLOUD_SSH_ROOT_PATH".to_string(), config.ssh.root_path);
+    env.insert(
+        "MIYUCLOUD_SSH_PRIVATE_KEY_PATH".to_string(),
+        config.ssh.private_key_path,
+    );
+    env.insert(
+        "MIYUCLOUD_SSH_KEEPALIVE".to_string(),
+        if config.ssh.keepalive { "1" } else { "0" }.to_string(),
+    );
+    env.insert(
+        "MIYUCLOUD_CENTRAL_DB_PATH".to_string(),
+        central_db.to_string_lossy().to_string(),
+    );
+    Ok(())
 }
 
 /// En développement, si le binaire du service existe à côté de l'exécutable Central
@@ -418,6 +501,36 @@ mod tests {
         // Dérogation dev : jamais de secrets.
         assert!(!secrets_miyucloud_autorises(&s, Provenance::NonSigneeDev));
         let tmp = std::env::temp_dir();
-        assert!(build_service_env(&s, Provenance::NonSigneeDev, "p", &tmp).is_err());
+        let dev = ProvenanceControlee { provenance: Provenance::NonSigneeDev, niveau: None, signataire: None };
+        assert!(build_service_env(&s, &dev, "p", &tmp, &gouvernance_base()).is_err());
+    }
+
+    fn gouvernance_base() -> GouvernanceMarket {
+        GouvernanceMarket::depuis_fichier(
+            &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../config/strongfather/market.toml"),
+        )
+    }
+
+    /// Même si les contrôles CA-01 étaient contournés (provenance officielle annoncée),
+    /// sans décision ALLOW aucun secret n'est lu ni transmis.
+    #[test]
+    fn secrets_refuses_sans_decision_strongfather() {
+        let s = service("miyucloud", None);
+        let officiel = ProvenanceControlee {
+            provenance: Provenance::SigneeOfficielle,
+            niveau: Some(NiveauConfiance::Souverain),
+            signataire: Some([3u8; 32]),
+        };
+        let tmp = std::env::temp_dir();
+        let absente = GouvernanceMarket::depuis_fichier(std::path::Path::new("/inexistant/market.toml"));
+        let r = build_service_env(&s, &officiel, "p", &tmp, &absente);
+        assert!(r.unwrap_err().contains("refusée"));
+        // Niveau incohérent (provenance officielle, ancre « reconnue ») : refus par la base.
+        let incoherent = ProvenanceControlee { niveau: Some(NiveauConfiance::Reconnu), ..officiel };
+        assert!(build_service_env(&s, &incoherent, "p", &tmp, &gouvernance_base()).is_err());
+        // Service ordinaire : aucune décision de secrets requise, aucun secret.
+        let svc = service("svc", None);
+        let env = build_service_env(&svc, &officiel, "p", &tmp, &absente).unwrap();
+        assert!(env.is_empty());
     }
 }

@@ -21,6 +21,8 @@ use std::io::Read;
 
 #[cfg(debug_assertions)]
 use super::registry::service_install_dir;
+use super::gouvernance::{ActionMarket, GouvernanceMarket, OperationMarket};
+use super::launcher::Provenance;
 use super::registry::{InstalledService, ServiceRegistryData};
 use miyumarket::manifest::ServiceManifest;
 use miyumarket::signature::{
@@ -55,6 +57,32 @@ impl PaquetAccepte {
             Self::Signe(p) => Some(p.manifeste()),
             #[cfg(debug_assertions)]
             Self::NonSigneDev(_) => None,
+        }
+    }
+
+    /// Action StrongFather décrivant ce paquet vérifié (provenance, niveau, signataire).
+    pub fn action_market(
+        &self,
+        operation: OperationMarket,
+        id: &str,
+        version: Option<&str>,
+    ) -> ActionMarket {
+        match self {
+            Self::Signe(p) => {
+                let provenance = if p.niveau() == miyusceau::NiveauConfiance::Souverain {
+                    Provenance::SigneeOfficielle
+                } else {
+                    Provenance::SigneeTierce
+                };
+                ActionMarket::nouvelle(operation, id, &p.manifeste().version).avec_provenance(
+                    provenance,
+                    Some(p.niveau()),
+                    Some(p.editeur().as_slice()),
+                )
+            }
+            #[cfg(debug_assertions)]
+            Self::NonSigneDev(_) => ActionMarket::nouvelle(operation, id, version.unwrap_or(""))
+                .avec_provenance(Provenance::NonSigneeDev, None, None),
         }
     }
 
@@ -189,32 +217,29 @@ fn safe_entry_path(
     Ok(out)
 }
 
-/// Installe un service depuis un paquet vérifié (voir [`verifier_paquet_market`]).
-/// `expected_id` : identifiant de service demandé ; le manifeste du package
-/// doit porter exactement cet id, sinon refus (audit C3).
-/// Retourne l'ID du service installé.
-pub fn install_package(
-    paquet: &PaquetAccepte,
-    registry: &mut ServiceRegistryData,
-    expected_id: &str,
-) -> Result<String, String> {
-    install_package_with_root(
-        paquet,
-        registry,
-        expected_id,
-        &super::registry::services_root_dir(),
-    )
+/// Contexte de vérification d'un paquet Market (ancres, horloge, dérogation dev).
+#[derive(Debug, Clone, Copy)]
+pub struct ContexteVerification<'a> {
+    /// Éditeurs épinglés.
+    pub ancres: &'a AncresDeConfiance,
+    /// Horloge Unix (secondes).
+    pub maintenant_secs: u64,
+    /// Dérogation « non signé » (debug uniquement).
+    pub dev_non_signe: bool,
 }
 
-/// Vérifie puis installe : chemin unique du Market (signature avant écriture).
+/// Vérifie puis installe : chemin unique du Market.
+///
+/// Ordre : signature Sceau (CA-01) → décision StrongFather `operation` (K-11) →
+/// écriture. Refus à l'une ou l'autre étape ⇒ aucun octet écrit.
 #[allow(clippy::too_many_arguments)]
 pub fn verifier_puis_installer(
     octets: &[u8],
     id_attendu: &str,
     version_attendue: Option<&str>,
-    ancres: &AncresDeConfiance,
-    maintenant_secs: u64,
-    dev_non_signe: bool,
+    contexte: ContexteVerification<'_>,
+    gouvernance: &GouvernanceMarket,
+    operation: OperationMarket,
     registry: &mut ServiceRegistryData,
     root: &std::path::Path,
 ) -> Result<String, String> {
@@ -222,14 +247,19 @@ pub fn verifier_puis_installer(
         octets,
         id_attendu,
         version_attendue,
-        ancres,
-        maintenant_secs,
-        dev_non_signe,
+        contexte.ancres,
+        contexte.maintenant_secs,
+        contexte.dev_non_signe,
     )?;
-    install_package_with_root(&paquet, registry, id_attendu, root)
+    let action = paquet.action_market(operation, id_attendu, version_attendue);
+    gouvernance.executer_action_market(&action, |_jeton| {
+        install_package_with_root(&paquet, registry, id_attendu, root)
+    })?
 }
 
-/// Variante avec racine d'installation explicite (utilisée par les tests).
+/// Écriture d'un paquet vérifié. N'est appelée que dans la fermeture autorisée de
+/// [`verifier_puis_installer`] (aucun autre chemin d'installation : K-11).
+/// `expected_id` : le manifeste du package doit porter exactement cet id (audit C3).
 fn install_package_with_root(
     paquet: &PaquetAccepte,
     registry: &mut ServiceRegistryData,
@@ -579,8 +609,29 @@ mod tests {
         let cle = cle_test();
         let bytes = signer(&build_zip(entries), expected, None, &cle);
         let mut reg = ServiceRegistryData::default();
-        let r = verifier_puis_installer(&bytes, expected, Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root);
+        let r = vpi(&bytes, expected, Some("1.0.0"), &ancres(&cle), false, &mut reg, &root);
         (r, root)
+    }
+
+    /// Politiques StrongFather de base du dépôt.
+    fn gouvernance_base() -> GouvernanceMarket {
+        GouvernanceMarket::depuis_fichier(
+            &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../config/strongfather/market.toml"),
+        )
+    }
+
+    /// Vérifie puis installe avec la politique de base (opération `installer`).
+    fn vpi(
+        octets: &[u8],
+        id: &str,
+        version: Option<&str>,
+        ancres: &AncresDeConfiance,
+        dev_non_signe: bool,
+        reg: &mut ServiceRegistryData,
+        root: &std::path::Path,
+    ) -> Result<String, String> {
+        let contexte = ContexteVerification { ancres, maintenant_secs: 0, dev_non_signe };
+        verifier_puis_installer(octets, id, version, contexte, &gouvernance_base(), OperationMarket::Installer, reg, root)
     }
 
     fn racine_vide(root: &std::path::Path) -> bool {
@@ -593,7 +644,7 @@ mod tests {
         let zip = build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]);
         let root = tmp_root("nonsigne");
         let mut reg = ServiceRegistryData::default();
-        let r = verifier_puis_installer(&zip, "svc", Some("1.0.0"), &ancres(&cle_test()), 0, false, &mut reg, &root);
+        let r = vpi(&zip, "svc", Some("1.0.0"), &ancres(&cle_test()), false, &mut reg, &root);
         assert!(r.unwrap_err().contains("non signé"));
         assert!(racine_vide(&root), "rien ne doit être écrit");
         assert!(reg.services.is_empty());
@@ -614,7 +665,7 @@ mod tests {
         paquet[n - 30] ^= 0xff;
         let root = tmp_root("altere");
         let mut reg = ServiceRegistryData::default();
-        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root);
+        let r = vpi(&paquet, "svc", Some("1.0.0"), &ancres(&cle), false, &mut reg, &root);
         assert!(r.is_err());
         assert!(racine_vide(&root));
         let _ = std::fs::remove_dir_all(&root);
@@ -632,11 +683,11 @@ mod tests {
         );
         let root = tmp_root("editeur");
         let mut reg = ServiceRegistryData::default();
-        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle_test()), 0, false, &mut reg, &root);
+        let r = vpi(&paquet, "svc", Some("1.0.0"), &ancres(&cle_test()), false, &mut reg, &root);
         assert!(r.is_err());
         assert!(racine_vide(&root));
         // Aucune ancre : refus aussi.
-        let r = verifier_puis_installer(&paquet, "svc", None, &AncresDeConfiance::new(), 0, false, &mut reg, &root);
+        let r = vpi(&paquet, "svc", None, &AncresDeConfiance::new(), false, &mut reg, &root);
         assert!(r.is_err());
         assert!(racine_vide(&root));
         let _ = std::fs::remove_dir_all(&root);
@@ -650,7 +701,7 @@ mod tests {
         let paquet = signer(&build_zip(&[("service.manifest.json", m.as_bytes())]), "svc", None, &cle);
         let root = tmp_root("incoherent");
         let mut reg = ServiceRegistryData::default();
-        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root);
+        let r = vpi(&paquet, "svc", Some("1.0.0"), &ancres(&cle), false, &mut reg, &root);
         assert!(r.unwrap_err().contains("incohérent"));
         assert!(racine_vide(&root));
         let _ = std::fs::remove_dir_all(&root);
@@ -668,7 +719,7 @@ mod tests {
         );
         let root = tmp_root("sceau");
         let mut reg = ServiceRegistryData::default();
-        verifier_puis_installer(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false, &mut reg, &root).unwrap();
+        vpi(&paquet, "svc", Some("1.0.0"), &ancres(&cle), false, &mut reg, &root).unwrap();
         let sceau = reg.services["svc"].sceau_paquet.clone().expect("sceau conservé");
         let octets = miyumarket::signature::hex_decoder(&sceau).unwrap();
         assert!(miyumarket::signature::verifier_sceau_installe(&octets, "svc", &ancres(&cle), 0).is_ok());
@@ -682,13 +733,13 @@ mod tests {
         let zip = build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]);
         let root = tmp_root("dev");
         let mut reg = ServiceRegistryData::default();
-        let r = verifier_puis_installer(&zip, "svc", None, &AncresDeConfiance::new(), 0, true, &mut reg, &root);
+        let r = vpi(&zip, "svc", None, &AncresDeConfiance::new(), true, &mut reg, &root);
         assert_eq!(r.unwrap(), "svc");
         assert!(reg.services["svc"].sceau_paquet.is_none());
         // Un paquet signé par un éditeur inconnu reste refusé même avec la dérogation.
         let autre = miyusceau::CleSignature::depuis_graine(&[9u8; 32]);
         let paquet = signer(&zip, "svc", None, &autre);
-        let r = verifier_puis_installer(&paquet, "svc", None, &ancres(&cle_test()), 0, true, &mut reg, &root);
+        let r = vpi(&paquet, "svc", None, &ancres(&cle_test()), true, &mut reg, &root);
         assert!(r.is_err());
         let _ = std::fs::remove_dir_all(&root);
     }
@@ -748,7 +799,7 @@ mod tests {
         let mut reg = ServiceRegistryData::default();
         let cle = cle_test();
         let paquet = signer(&buf, "svc", None, &cle);
-        let r = verifier_puis_installer(&paquet, "svc", None, &ancres(&cle), 0, false, &mut reg, &root);
+        let r = vpi(&paquet, "svc", None, &ancres(&cle), false, &mut reg, &root);
         assert!(r.is_err(), "{r:?}");
         let _ = std::fs::remove_dir_all(&root);
     }
@@ -771,5 +822,53 @@ mod tests {
         let (r, root) = try_install(&[("service.manifest.json", m.as_bytes())], "svc", "id");
         assert!(r.unwrap_err().contains("différent"));
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// Paquet valide et signé, mais StrongFather refuse : rien n'est écrit.
+    #[test]
+    fn refus_strongfather_aucune_ecriture() {
+        let m = manifest_json("svc", None);
+        let cle = cle_test();
+        let paquet = signer(
+            &build_zip(&[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")]),
+            "svc",
+            None,
+            &cle,
+        );
+        let a = ancres(&cle);
+        let contexte = ContexteVerification { ancres: &a, maintenant_secs: 0, dev_non_signe: false };
+        // Porte absente (fichier manquant) : refus fail-closed.
+        let absente = GouvernanceMarket::depuis_fichier(std::path::Path::new("/inexistant/market.toml"));
+        let root = tmp_root("sf-absente");
+        let mut reg = ServiceRegistryData::default();
+        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), contexte, &absente, OperationMarket::Installer, &mut reg, &root);
+        assert!(r.unwrap_err().contains("refusée"));
+        assert!(racine_vide(&root) && reg.services.is_empty());
+        // Politique qui n'autorise que la désinstallation : l'installation reste refusée.
+        let restrictive = bondingbrother::strongfather::PolicySet::from_toml_str(
+            "version = 1\n[[policy]]\nid = \"seulement-desinstaller\"\ntype = \"permission\"\neffect = \"authorize\"\nrule = \"data.operation == 'desinstaller'\"\n",
+        )
+        .unwrap();
+        let g = GouvernanceMarket::depuis_porte(bondingbrother::PorteStrongFather::depuis_politiques(restrictive).unwrap());
+        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), contexte, &g, OperationMarket::Installer, &mut reg, &root);
+        assert!(r.unwrap_err().contains("StrongFather"));
+        assert!(racine_vide(&root) && reg.services.is_empty());
+        // Politique de base : installation autorisée (éditeur épinglé localement).
+        let r = verifier_puis_installer(&paquet, "svc", Some("1.0.0"), contexte, &gouvernance_base(), OperationMarket::MettreAJour, &mut reg, &root);
+        assert_eq!(r.unwrap(), "svc");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn action_market_reflete_le_paquet_verifie() {
+        let m = manifest_json("svc", None);
+        let cle = cle_test();
+        let paquet = signer(&build_zip(&[("service.manifest.json", m.as_bytes())]), "svc", None, &cle);
+        let p = verifier_paquet_market(&paquet, "svc", Some("1.0.0"), &ancres(&cle), 0, false).unwrap();
+        let i = p.action_market(OperationMarket::Installer, "svc", Some("1.0.0")).intention();
+        assert_eq!(i.data.content["provenance"], "signee_tierce");
+        assert_eq!(i.data.content["niveau_confiance"], "reconnu");
+        assert_eq!(i.data.content["version"], "1.0.0");
+        assert_ne!(i.data.content["editeur"], "aucun");
     }
 }

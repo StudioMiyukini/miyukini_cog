@@ -6928,6 +6928,7 @@ dependencies = [
 name = "miyukini-central-native"
 version = "0.2.0"
 dependencies = [
+ "bondingbrother",
  "central-remote",
  "chrono",
  "dioxus",

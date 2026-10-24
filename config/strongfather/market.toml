@@ -1,0 +1,124 @@
+# @id     config_strongfather_market
+# @do     declarer_politiques_market
+# @role   securite
+# @layer  config
+# @human  Politiques StrongFather du Market et du cycle de vie des services de Central (K-11).
+#
+# Chargé au démarrage de Central par `PorteStrongFather::depuis_fichier`
+# (dossier : variable `COG_POLITIQUES_DIR`, défaut `config/strongfather`).
+# Fichier absent ou invalide ⇒ installation, mise à jour, désinstallation, lancement et
+# remise de secrets REFUSÉS (fail-closed), jamais « tout autoriser ».
+#
+# Intention soumise (voir apps/central/src/service_manager/gouvernance.rs) :
+# - subject  : `central.market` (installer, mettre_a_jour, desinstaller)
+#              `central.services` (lancer, injecter_secrets)
+# - action   : installer = creation, mettre_a_jour = modification, desinstaller = deletion,
+#              lancer = creation, injecter_secrets = read
+# - caller   : profil connecté si connu, sinon `local` ; origin = `central`
+# - data     : operation, paquet, version, provenance (signee_officielle | signee_tierce |
+#              non_signee_dev | non_signee), niveau_confiance (souverain | reconnu | aucun),
+#              editeur (kid hex abrégé ou `aucun`), id_reserve (`true` | `false`)
+# - meta     : build (`debug` | `release`)
+#
+# Tout ce qui n'est pas autorisé ci-dessous est refusé par défaut.
+
+version = 1
+
+# ── Refus explicites (l'emportent toujours sur une autorisation) ─────────────────────
+
+[[policy]]
+id = "market-refus-id-reserve-non-officiel"
+type = "permission"
+effect = "deny"
+priority = "critical"
+rule = "data.id_reserve == 'true' && data.provenance != 'signee_officielle'"
+[policy.target]
+actions = ["creation", "modification", "read"]
+subjects = ["central.market", "central.services"]
+
+[[policy]]
+id = "services-refus-secrets-hors-officiel"
+type = "permission"
+effect = "deny"
+priority = "critical"
+rule = "data.operation == 'injecter_secrets' && data.provenance != 'signee_officielle'"
+[policy.target]
+actions = ["read"]
+subjects = ["central.services"]
+
+# ── Installation / mise à jour ──────────────────────────────────────────────────────
+
+[[policy]]
+id = "market-installer-editeur-officiel"
+type = "permission"
+effect = "authorize"
+rule = "data.operation in ['installer', 'mettre_a_jour'] && data.provenance == 'signee_officielle' && data.niveau_confiance == 'souverain'"
+[policy.target]
+actions = ["creation", "modification"]
+subjects = ["central.market"]
+
+# Éditeurs épinglés localement (market-editeurs.json, niveau « reconnu ») : comportement
+# actuel conservé tant que la clé officielle d'Origin n'est pas compilée dans Central.
+# Supprimer cette politique pour n'accepter que les éditeurs officiels.
+[[policy]]
+id = "market-installer-editeur-epingle-local"
+type = "permission"
+effect = "authorize"
+rule = "data.operation in ['installer', 'mettre_a_jour'] && data.provenance == 'signee_tierce' && data.niveau_confiance == 'reconnu' && data.id_reserve == 'false'"
+[policy.target]
+actions = ["creation", "modification"]
+subjects = ["central.market"]
+
+# Dérogation de développement : seulement en build debug (meta.build fixé par le code
+# compilé, jamais `debug` en release) et seulement si MIYUKINI_MARKET_DEV_NON_SIGNE=1
+# a déjà été accepté par les contrôles existants.
+[[policy]]
+id = "market-installer-derogation-dev"
+type = "permission"
+effect = "authorize"
+rule = "data.operation in ['installer', 'mettre_a_jour'] && data.provenance == 'non_signee_dev' && meta.build == 'debug'"
+[policy.target]
+actions = ["creation", "modification"]
+subjects = ["central.market"]
+
+# ── Désinstallation (toujours possible localement : nettoyage) ──────────────────────
+
+[[policy]]
+id = "market-desinstaller"
+type = "permission"
+effect = "authorize"
+rule = "data.operation == 'desinstaller'"
+[policy.target]
+actions = ["deletion"]
+subjects = ["central.market"]
+
+# ── Lancement ───────────────────────────────────────────────────────────────────────
+
+[[policy]]
+id = "services-lancer-signe"
+type = "permission"
+effect = "authorize"
+rule = "data.operation == 'lancer' && data.provenance in ['signee_officielle', 'signee_tierce']"
+[policy.target]
+actions = ["creation"]
+subjects = ["central.services"]
+
+[[policy]]
+id = "services-lancer-derogation-dev"
+type = "permission"
+effect = "authorize"
+rule = "data.operation == 'lancer' && data.provenance == 'non_signee_dev' && meta.build == 'debug'"
+[policy.target]
+actions = ["creation"]
+subjects = ["central.services"]
+
+# ── Secrets (jeton COG, phrase de chiffrement MiyuCloud) ────────────────────────────
+
+[[policy]]
+id = "services-secrets-officiel"
+type = "permission"
+effect = "authorize"
+rule = "data.operation == 'injecter_secrets' && data.provenance == 'signee_officielle' && data.niveau_confiance == 'souverain'"
+[policy.target]
+actions = ["read"]
+subjects = ["central.services"]

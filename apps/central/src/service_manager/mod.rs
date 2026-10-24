@@ -12,10 +12,12 @@
 //! - L'installation/désinstallation depuis le Market
 
 pub mod confiance;
+pub mod gouvernance;
 pub mod installer;
 pub mod launcher;
 pub mod registry;
 
+use gouvernance::{ActionMarket, GouvernanceMarket, OperationMarket};
 use launcher::ServiceProcesses;
 use registry::{InstalledService, ServiceRegistryData};
 use std::sync::{Arc, Mutex};
@@ -27,6 +29,8 @@ pub struct ServiceManager {
     pub registry: Arc<Mutex<ServiceRegistryData>>,
     /// Processus en cours d'exécution.
     pub processes: Arc<ServiceProcesses>,
+    /// Porte StrongFather du domaine Market (K-11) : absente ⇒ tout refuser.
+    pub gouvernance: GouvernanceMarket,
 }
 
 impl ServiceManager {
@@ -54,6 +58,7 @@ impl ServiceManager {
         Self {
             registry: Arc::new(Mutex::new(registry_data)),
             processes: Arc::new(ServiceProcesses::new()),
+            gouvernance: GouvernanceMarket::charger(),
         }
     }
 
@@ -81,7 +86,7 @@ impl ServiceManager {
             .services
             .get(service_id)
             .ok_or_else(|| format!("Service '{service_id}' non installé"))?;
-        self.processes.launch(service, profile_id)
+        self.processes.launch(service, profile_id, &self.gouvernance)
     }
 
     /// Arrête un service en cours d'exécution.
@@ -96,14 +101,36 @@ impl ServiceManager {
 
     /// Installe un service depuis des bytes de package (.msp signé).
     /// `expected_id` / `expected_version` : service et version demandés ; la
-    /// signature d'un éditeur épinglé est vérifiée AVANT toute écriture (CA-01).
+    /// signature d'un éditeur épinglé est vérifiée AVANT toute écriture (CA-01),
+    /// puis StrongFather décide (K-11).
     pub fn install_from_package(
         &self,
         expected_id: &str,
         expected_version: &str,
         package_bytes: &[u8],
     ) -> Result<String, String> {
+        self.installer_gouverne(
+            expected_id,
+            expected_version,
+            package_bytes,
+            OperationMarket::Installer,
+        )
+    }
+
+    /// Installation (ou réinstallation de mise à jour) soumise à la décision `operation`.
+    fn installer_gouverne(
+        &self,
+        expected_id: &str,
+        expected_version: &str,
+        package_bytes: &[u8],
+        operation: OperationMarket,
+    ) -> Result<String, String> {
         let ancres = confiance::ancres_market();
+        let contexte = installer::ContexteVerification {
+            ancres: &ancres,
+            maintenant_secs: confiance::maintenant_secs(),
+            dev_non_signe: confiance::dev_non_signe_autorise(),
+        };
         let mut reg = self
             .registry
             .lock()
@@ -112,9 +139,9 @@ impl ServiceManager {
             package_bytes,
             expected_id,
             Some(expected_version),
-            &ancres,
-            confiance::maintenant_secs(),
-            confiance::dev_non_signe_autorise(),
+            contexte,
+            &self.gouvernance,
+            operation,
             &mut reg,
             &registry::services_root_dir(),
         )?;
@@ -146,14 +173,16 @@ impl ServiceManager {
     }
 
     /// Met à jour un service (même flow que l'installation : stop + réinstall).
+    ///
+    /// Signature vérifiée puis décision StrongFather `mettre_a_jour` AVANT d'arrêter
+    /// quoi que ce soit ; la réinstallation repasse par la vérification et la porte.
     pub fn update_from_package(
         &self,
         service_id: &str,
         version: &str,
         package_bytes: &[u8],
     ) -> Result<String, String> {
-        // Vérifier la signature avant d'arrêter quoi que ce soit.
-        installer::verifier_paquet_market(
+        let paquet = installer::verifier_paquet_market(
             package_bytes,
             service_id,
             Some(version),
@@ -161,24 +190,50 @@ impl ServiceManager {
             confiance::maintenant_secs(),
             confiance::dev_non_signe_autorise(),
         )?;
-        // Arrêter le service s'il tourne
-        if self.is_running(service_id) {
-            self.stop_service(service_id)?;
-        }
-        // Réinstaller (vérifie de nouveau, puis écrase l'entrée existante)
-        self.install_from_package(service_id, version, package_bytes)
+        let action = paquet.action_market(OperationMarket::MettreAJour, service_id, Some(version));
+        self.gouvernance.executer_action_market(&action, |_jeton| {
+            // Arrêter le service s'il tourne
+            if self.is_running(service_id) {
+                self.stop_service(service_id)?;
+            }
+            Ok::<(), String>(())
+        })??;
+        // Réinstaller (vérifie de nouveau, redemande la décision, écrase l'entrée)
+        self.installer_gouverne(service_id, version, package_bytes, OperationMarket::MettreAJour)
     }
 
     /// Désinstalle un service (arrête le processus, supprime les fichiers).
+    /// Décision StrongFather `desinstaller` avant tout arrêt ou suppression.
     pub fn uninstall_service(&self, service_id: &str) -> Result<(), String> {
-        // Arrêter si en cours d'exécution
-        if self.is_running(service_id) {
-            self.stop_service(service_id)?;
+        let action = self.action_service_installe(OperationMarket::Desinstaller, service_id);
+        self.gouvernance.executer_action_market(&action, |_jeton| {
+            // Arrêter si en cours d'exécution
+            if self.is_running(service_id) {
+                self.stop_service(service_id)?;
+            }
+            let mut reg = self.registry.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+            installer::uninstall_service(service_id, &mut reg)?;
+            registry::save_registry(&reg)?;
+            Ok(())
+        })?
+    }
+
+    /// Action décrivant un service installé ; provenance re-vérifiée sans dérogation
+    /// (sceau absent ou invalide ⇒ `non_signee`).
+    fn action_service_installe(&self, operation: OperationMarket, service_id: &str) -> ActionMarket {
+        let reg = self.registry.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        match reg.services.get(service_id) {
+            Some(service) => match launcher::controler_provenance_signee(
+                service,
+                &confiance::ancres_market(),
+                confiance::maintenant_secs(),
+                false,
+            ) {
+                Ok(controle) => launcher::action_pour(operation, service, &controle),
+                Err(_) => ActionMarket::nouvelle(operation, service_id, &service.manifest.version),
+            },
+            None => ActionMarket::nouvelle(operation, service_id, ""),
         }
-        let mut reg = self.registry.lock().unwrap_or_else(|e| e.into_inner());
-        installer::uninstall_service(service_id, &mut reg)?;
-        registry::save_registry(&reg)?;
-        Ok(())
     }
 }
 

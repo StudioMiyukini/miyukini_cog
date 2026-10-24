@@ -1,0 +1,71 @@
+# @id     config_strongfather_admin
+# @do     declarer_politiques_admin
+# @role   securite
+# @layer  config
+# @human  Politiques StrongFather des actions modifiantes de MiyukiniAdmin (K-11).
+#
+# Chargé au démarrage de MiyukiniAdmin par `PorteStrongFather::depuis_fichier`
+# (dossier : variable `COG_POLITIQUES_DIR`, défaut `config/strongfather`).
+# Fichier absent ou invalide ⇒ toute requête modifiante est refusée (403, fail-closed) ;
+# les lectures (GET) restent servies.
+#
+# Intention soumise (voir crates/miyukini-admin/src/gouvernance.rs) :
+# - subject  : `admin` ; origin : `admin.http` ; instance : `cog`
+# - caller   : identifiant du compte admin de la session, sinon `local`
+# - action   : creation | modification | deletion | evaluation selon l'opération
+# - data     : operation, cible, role (admin | recovery | audit | aucun), methode, chemin
+# - meta     : authentification (session | jeton_setup | aucune),
+#              etat_environnement (vierge | initialise | compromis)
+#
+# Contrainte permanente : AUCUNE destruction / réinitialisation / effacement d'un COG
+# par une requête d'administration (refus explicite, priorité critique). La destruction
+# vers VIERGE reste un mécanisme local d'auto-récupération, hors de ce chemin.
+#
+# Tout ce qui n'est pas autorisé ci-dessous est refusé par défaut.
+
+version = 1
+
+# ── Refus explicites ────────────────────────────────────────────────────────────────
+
+[[policy]]
+id = "admin-refus-destruction-cog"
+type = "permission"
+effect = "deny"
+priority = "critical"
+rule = "data.operation in ['environnement.detruire', 'environnement.reinitialiser', 'cog.effacer', 'cog.detruire']"
+[policy.target]
+subjects = ["admin"]
+
+[[policy]]
+id = "admin-refus-operation-inconnue"
+type = "permission"
+effect = "deny"
+priority = "critical"
+rule = "data.operation == 'inconnue'"
+[policy.target]
+subjects = ["admin"]
+
+# ── Premier compte (état VIERGE, jeton de setup vérifié ensuite par le serveur) ─────
+
+[[policy]]
+id = "admin-setup-premier-compte"
+type = "permission"
+effect = "authorize"
+rule = "data.operation == 'setup.creer_premier_admin' && meta.authentification == 'jeton_setup' && meta.etat_environnement == 'vierge'"
+[policy.target]
+actions = ["creation"]
+subjects = ["admin"]
+origins = ["admin.http"]
+
+# ── Actions des administrateurs authentifiés (comportement actuel) ──────────────────
+# Rôle `audit` : lecture seule (Permission Contract §5.3) ⇒ aucune action modifiante.
+
+[[policy]]
+id = "admin-actions-session-admin"
+type = "permission"
+effect = "authorize"
+rule = "meta.authentification == 'session' && meta.etat_environnement == 'initialise' && caller != 'local' && data.role in ['admin', 'recovery'] && data.operation in ['table.ligne.creer', 'table.ligne.modifier', 'table.ligne.supprimer', 'migrations.appliquer', 'sauvegarde.creer', 'sauvegarde.restaurer', 'module.ajouter', 'module.tests.executer', 'module.verrouiller', 'module.deverrouiller', 'module.supprimer']"
+[policy.target]
+actions = ["creation", "modification", "deletion", "evaluation"]
+subjects = ["admin"]
+origins = ["admin.http"]
