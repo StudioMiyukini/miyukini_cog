@@ -6020,6 +6020,7 @@ dependencies = [
  "miyusceau",
  "rand 0.8.5",
  "reqwest",
+ "rustix",
  "serde",
  "serde_json",
  "sha2",

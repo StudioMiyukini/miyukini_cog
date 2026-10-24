@@ -62,6 +62,8 @@ rand = "0.8"
 [target.'cfg(unix)'.dependencies]
 # O_NOFOLLOW à l'ouverture du modèle vérifié (EX-26, TOCTOU)
 libc = "0.2"
+# UID/GID effectifs sans `unsafe` (propriétaire et droits du modèle)
+rustix = { version = "1", default-features = false, features = ["std", "process"] }
 
 [lints]
 workspace = true

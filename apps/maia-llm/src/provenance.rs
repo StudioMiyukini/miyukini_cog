@@ -337,13 +337,9 @@ impl ModeleOuvert {
             // Personne d'autre que le service (ou root) ne doit pouvoir réécrire
             // le modèle pendant son usage.
             use std::os::unix::fs::MetadataExt;
-            // UID et GID effectifs du service : propriétaire de /proc/self (Linux).
-            #[cfg(target_os = "linux")]
-            let (euid, egid) = std::fs::metadata("/proc/self")
-                .map(|m| (m.uid(), m.gid()))
-                .map_err(lecture)?;
-            #[cfg(not(target_os = "linux"))]
-            let (euid, egid) = (meta.uid(), u32::MAX);
+            // UID et GID effectifs du service (toutes cibles Unix).
+            let euid = rustix::process::geteuid().as_raw();
+            let egid = rustix::process::getegid().as_raw();
             if meta.mode() & 0o002 != 0 {
                 return Err(ErreurProvenance::LectureModele(
                     "modèle modifiable par tous (chmod o-w requis)".into(),
