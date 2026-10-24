@@ -42,7 +42,7 @@ use crate::domain::purse::{
 use chrono::Local;
 use kindmother::{InstanceIdentity, InstanceType};
 use kindmother_client::{
-    ClientError, KindMotherClient, OperatorCredential, SchemaMigration, TypedSelect,
+    ClientError, KindMotherClient, OperatorCredential, TypedSelect,
     TypedWriteIntent,
 };
 use serde_json::Value;
@@ -110,25 +110,7 @@ const ENV_KINDMOTHER_ADDR: &str = "KINDMOTHER_ADDR";
 /// Identité de l'opérateur (et nom de la base) côté KindMother.
 const OPERATOR_ID: &str = "jaykonta";
 
-/// DDL de référence : le même fichier que le chemin hérité.
-const SCHEMA_SQL: &str = include_str!("schema.sql");
-
-/// Migrations versionnées de la base `jaykonta` côté KindMother.
-///
-/// v1 = `schema.sql` complet (tables, index, déclencheurs, vues), en un seul script
-/// multi-instructions contrôlé par le service (politique non destructive).
-///
-/// **Évolutions** : ajouter `SchemaMigration::new(2, …)`, puis 3… en fin de liste.
-/// Ne jamais modifier une version publiée, ne jamais supprimer de table de données
-/// (le service refuse une suite non contiguë et toute disparition de table/colonne).
-#[must_use]
-pub fn schema_migrations() -> Vec<SchemaMigration> {
-    vec![SchemaMigration::new(
-        1,
-        "JayKonta v1 : schéma complet Purse + Account (schema.sql)",
-        &[SCHEMA_SQL],
-    )]
-}
+use super::schema_kindmother::schema_migrations;
 
 /// Client global partagé (utilisé par [`JayKontaDb::open`]).
 static CLIENT: OnceCell<Arc<KindMotherClient>> = OnceCell::const_new();

@@ -17,6 +17,8 @@ name = "miyukini-central-stub"
 path = "src/main.rs"
 
 [dependencies]
+# Import de la base SQLite héritée (K-13, transitoire) : lecture seule, feature `import-heritage`.
+kindmother-heritage = { path = "../kindmother-heritage", optional = true }
 kindmother = { path = "../kindmother" }
 kindmother-client = { path = "../kindmother-client" }
 miyuwebway_participant = { path = "../miyuwebway_participant" }
@@ -42,6 +44,10 @@ tracing = "0.1"
 # K-13 : KindMother seul écrivain de la base `central` (intentions typées, EX-07).
 default = ["kindmother-only"]
 kindmother-only = []
+# Import unique de la base SQLite héritée dans KindMother (outil `kindmother-import`).
+# N'active pas `legacy-sqlite` (qui prendrait le pas sur le chemin KindMother) ;
+# la lecture seule du fichier hérité est faite par `kindmother-heritage`.
+import-heritage = ["kindmother-only", "dep:kindmother-heritage"]
 # HÉRITÉ (transitoire, K-13) : accès SQLite direct ; apps/central et crates/central-remote l'activent encore explicitement
 # (s'il est actif en même temps que kindmother-only, le legacy l'emporte : voir src/auth/mod.rs).
 legacy-sqlite = ["rusqlite"]
@@ -49,6 +55,8 @@ legacy-sqlite = ["rusqlite"]
 db-encryption = ["kindmother-db-key"]
 
 [dev-dependencies]
+# Fabrique de bases héritées (tests d'import).
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
 kindmother-service = { path = "../kindmother-service" }
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript

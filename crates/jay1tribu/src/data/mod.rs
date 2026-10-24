@@ -24,6 +24,12 @@ mod kindmother_db;
 #[cfg(all(feature = "kindmother-only", not(feature = "legacy-sqlite")))]
 mod kindmother_client_db;
 
+#[cfg(any(all(feature = "kindmother-only", not(feature = "legacy-sqlite")), feature = "import-heritage"))]
+mod schema_kindmother;
+
+#[cfg(feature = "import-heritage")]
+pub mod import_heritage;
+
 pub use types::{
     Friend, FriendWithPresence, Message, Salon, SalonMember, SalonType, Tribe, TribeMember,
     TribeRole,

@@ -10,6 +10,11 @@
 pub mod types;
 
 mod kindmother_client_db;
+mod schema_kindmother;
+
+/// Import de la base SQLite héritée (K-13), feature `import-heritage`.
+#[cfg(feature = "import-heritage")]
+pub mod import_heritage;
 
 pub use types::{
     Agenda, CalendarType, EntryType, EventSource, TemporalConflict, TemporalEntry, TemporalStatus,

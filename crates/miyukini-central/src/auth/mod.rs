@@ -39,6 +39,12 @@ mod db;
 #[cfg(all(feature = "kindmother-only", not(feature = "legacy-sqlite")))]
 mod db_client;
 
+#[cfg(any(all(feature = "kindmother-only", not(feature = "legacy-sqlite")), feature = "import-heritage"))]
+mod schema_kindmother;
+
+#[cfg(feature = "import-heritage")]
+pub mod import_heritage;
+
 #[cfg(feature = "legacy-sqlite")]
 pub use db::{AuthDbError, CentralAuthDb};
 

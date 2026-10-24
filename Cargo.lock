@@ -4961,6 +4961,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-heritage",
  "kindmother-service",
  "rusqlite",
  "serde",
@@ -5135,6 +5136,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-heritage",
  "kindmother-service",
  "serde",
  "serde_json",
@@ -5187,6 +5189,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-heritage",
  "kindmother-service",
  "rusqlite",
  "serde",
@@ -5563,6 +5566,39 @@ dependencies = [
  "getrandom 0.2.17",
  "winreg",
  "zeroize",
+]
+
+[[package]]
+name = "kindmother-heritage"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "kindmother",
+ "kindmother-client",
+ "kindmother-db-key",
+ "kindmother-heritage",
+ "kindmother-service",
+ "rusqlite",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
+name = "kindmother-import"
+version = "0.1.0"
+dependencies = [
+ "jay1tribu",
+ "jaykoa",
+ "jaykonta",
+ "kindmother-client",
+ "kindmother-heritage",
+ "kindmother-service",
+ "miyukini-central",
+ "miyukiniwatch",
+ "tokio",
 ]
 
 [[package]]
@@ -6906,6 +6942,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-heritage",
  "kindmother-service",
  "miyuwebway_participant",
  "rand 0.8.5",
@@ -7111,6 +7148,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-heritage",
  "kindmother-service",
  "rusqlite",
  "serde",

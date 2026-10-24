@@ -1,0 +1,51 @@
+# @id: kindmother_import_crate_config
+# @do: declare_kindmother_import_cli
+# @layer: outillage
+# CLI kindmother-import — import unique des bases SQLite héritées des services COG dans
+# KindMother (K-13). TRANSITOIRE : retiré avec kindmother-heritage.
+#
+# Crate séparé : kindmother-client et kindmother-heritage ne peuvent pas dépendre des
+# services (dépendance inverse) ; un seul binaire pour tous les services, chacun
+# fournissant son plan via sa feature `import-heritage`.
+
+[package]
+name = "kindmother-import"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+categories.workspace = true
+description = "Import unique des bases SQLite héritées des services COG dans KindMother"
+
+[[bin]]
+name = "kindmother-import"
+path = "src/main.rs"
+
+[dependencies]
+kindmother-client = { path = "../kindmother-client" }
+kindmother-heritage = { path = "../kindmother-heritage" }
+jaykonta = { path = "../jaykonta", features = ["import-heritage"] }
+jay1tribu = { path = "../jay1tribu", features = ["import-heritage"] }
+jaykoa = { path = "../jaykoa", features = ["import-heritage"] }
+miyukiniwatch = { path = "../miyukiniwatch", features = ["import-heritage"] }
+miyukini-central = { path = "../miyukini-central", features = ["import-heritage"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[features]
+# Bases héritées chiffrées (SQLCipher, ancien chemin `db-encryption`) lisibles par défaut.
+default = ["sqlcipher"]
+sqlcipher = ["kindmother-heritage/sqlcipher"]
+
+[dev-dependencies]
+kindmother-service = { path = "../kindmother-service" }
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

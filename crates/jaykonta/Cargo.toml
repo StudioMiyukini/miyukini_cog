@@ -12,6 +12,8 @@ categories.workspace = true
 description = "JayKonta - comptabilite COG unifiee Purse + Account"
 
 [dependencies]
+# Import de la base SQLite héritée (K-13, transitoire) : lecture seule, feature `import-heritage`.
+kindmother-heritage = { path = "../kindmother-heritage", optional = true }
 kindmother = { path = "../kindmother" }
 kindmother-client = { path = "../kindmother-client" }
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
@@ -25,6 +27,8 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "2"
 
 [dev-dependencies]
+# Fabrique de bases héritées (tests d'import).
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
 # Tests du chemin KindMother : serveur KindMother éphémère en processus.
 kindmother-service = { path = "../kindmother-service" }
 kindmother-client = { path = "../kindmother-client" }
@@ -34,6 +38,10 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 # K-13 : KindMother est le seul écrivain ; chemin par défaut (n'active pas rusqlite).
 default = ["kindmother-only"]
 kindmother-only = []
+# Import unique de la base SQLite héritée dans KindMother (outil `kindmother-import`).
+# N'active pas `legacy-sqlite` (qui prendrait le pas sur le chemin KindMother) ;
+# la lecture seule du fichier hérité est faite par `kindmother-heritage`.
+import-heritage = ["kindmother-only", "dep:kindmother-heritage"]
 # HÉRITÉ (transitoire, K-13) : accès SQLite direct, retiré au lot C+ ; non défaut.
 # Activé explicitement, il prend le pas sur kindmother-only (voir src/data/mod.rs).
 legacy-sqlite = ["rusqlite"]

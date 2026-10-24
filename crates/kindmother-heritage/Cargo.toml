@@ -1,0 +1,59 @@
+# @id: kindmother_heritage_crate_config
+# @do: declare_kindmother_heritage_crate
+# @layer: toolkit
+# Crate KindMother Héritage — reprise des bases SQLite héritées dans KindMother (K-13).
+#
+# TRANSITOIRE (lot C suite) : seul crate d'outillage qui lit encore une base SQLite
+# directement (lecture seule, fichier hérité jamais modifié). Retiré quand plus aucune
+# base héritée n'est à importer (voir scripts/verifier-regle-rusqlite.sh).
+
+[package]
+name = "kindmother-heritage"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["kindmother", "import", "sqlite", "migration"]
+categories.workspace = true
+description = "KindMother Héritage — import non destructif des bases SQLite héritées vers KindMother"
+
+[dependencies]
+kindmother = { path = "../kindmother" }
+kindmother-client = { path = "../kindmother-client" }
+# Lecture seule des bases héritées (OpenFlags::SQLITE_OPEN_READ_ONLY).
+rusqlite = { version = "0.32", features = ["bundled"] }
+# Clé SQLCipher héritée (même dérivation que les chemins `legacy-sqlite` + `db-encryption`).
+kindmother-db-key = { path = "../kindmother-db-key", optional = true }
+serde_json = "1"
+sha2 = "0.10"
+chrono = "0.4"
+thiserror = "2"
+
+[dev-dependencies]
+# Les tests d'intégration utilisent la fabrique de bases héritées.
+kindmother-heritage = { path = ".", features = ["fabrique-test"] }
+kindmother-service = { path = "../kindmother-service" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tempfile = "3"
+
+[features]
+default = []
+# Bases héritées chiffrées (SQLCipher) : requiert libcrypto à la compilation.
+sqlcipher = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
+# Fabrique de bases héritées pour les tests des services (écriture, jamais en production).
+fabrique-test = []
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = "allow"
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"

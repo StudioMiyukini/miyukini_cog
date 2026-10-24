@@ -11,6 +11,8 @@ repository.workspace = true
 description = "Jay1Tribu — Messagerie P2P, tribus, salons et amis (Service Inter-COG Type 3)"
 
 [dependencies]
+# Import de la base SQLite héritée (K-13, transitoire) : lecture seule, feature `import-heritage`.
+kindmother-heritage = { path = "../kindmother-heritage", optional = true }
 kindmother = { path = "../kindmother" }
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 kindmother-client = { path = "../kindmother-client", optional = true }
@@ -23,6 +25,8 @@ thiserror = "2"
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 
 [dev-dependencies]
+# Fabrique de bases héritées (tests d'import).
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
 # Serveur KindMother en processus pour les tests du chemin kindmother-only.
 kindmother-service = { path = "../kindmother-service" }
 tempfile = "3"
@@ -32,6 +36,10 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 # K-13 : KindMother est le seul écrivain ; la persistance passe par kindmother-client.
 default = ["kindmother-only"]
 kindmother-only = ["dep:kindmother-client", "dep:tokio"]
+# Import unique de la base SQLite héritée dans KindMother (outil `kindmother-import`).
+# N'active pas `legacy-sqlite` (qui prendrait le pas sur le chemin KindMother) ;
+# la lecture seule du fichier hérité est faite par `kindmother-heritage`.
+import-heritage = ["kindmother-only", "dep:kindmother-heritage"]
 # HÉRITÉ (transitoire, K-13) : accès SQLite direct, non défaut, retiré quand les données sont importées dans KindMother
 # Prioritaire si activée explicitement (ex. jayclub) : voir src/data/mod.rs.
 legacy-sqlite = ["rusqlite"]

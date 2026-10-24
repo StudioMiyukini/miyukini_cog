@@ -24,6 +24,12 @@ pub mod migrations;
 #[cfg(all(feature = "kindmother-only", not(feature = "legacy-sqlite")))]
 mod kindmother_client_db;
 
+#[cfg(any(all(feature = "kindmother-only", not(feature = "legacy-sqlite")), feature = "import-heritage"))]
+mod schema_kindmother;
+
+#[cfg(feature = "import-heritage")]
+pub mod import_heritage;
+
 pub use types::{
     AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,
 };
@@ -32,4 +38,7 @@ pub use types::{
 pub use kindmother_db::{AccountStats, DbError, JayKontaDb, PurseStats};
 
 #[cfg(all(feature = "kindmother-only", not(feature = "legacy-sqlite")))]
-pub use kindmother_client_db::{schema_migrations, AccountStats, DbError, JayKontaDb, PurseStats};
+pub use kindmother_client_db::{AccountStats, DbError, JayKontaDb, PurseStats};
+
+#[cfg(any(all(feature = "kindmother-only", not(feature = "legacy-sqlite")), feature = "import-heritage"))]
+pub use schema_kindmother::schema_migrations;

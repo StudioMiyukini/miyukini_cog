@@ -16,6 +16,8 @@ categories.workspace = true
 description = "MiyukiniWatch — Service silencieux de mesure des habitudes au service de Miou"
 
 [dependencies]
+# Import de la base SQLite héritée (K-13, transitoire) : lecture seule, feature `import-heritage`.
+kindmother-heritage = { path = "../kindmother-heritage", optional = true }
 kindmother = { path = "../kindmother" }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 # HÉRITÉ (transitoire, K-13) : accès SQLite direct, uniquement avec la feature `legacy-sqlite`.
@@ -30,6 +32,8 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
 
 [dev-dependencies]
+# Fabrique de bases héritées (tests d'import).
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
 # Serveur KindMother éphémère en processus (tests du chemin KindMother).
 kindmother-service = { path = "../kindmother-service" }
 tempfile = "3"
@@ -38,6 +42,10 @@ tempfile = "3"
 # Défaut : persistance via le service KindMother (seul écrivain).
 default = ["kindmother-only"]
 kindmother-only = ["dep:kindmother-client", "dep:tokio"]
+# Import unique de la base SQLite héritée dans KindMother (outil `kindmother-import`).
+# N'active pas `legacy-sqlite` (qui prendrait le pas sur le chemin KindMother) ;
+# la lecture seule du fichier hérité est faite par `kindmother-heritage`.
+import-heritage = ["kindmother-only", "dep:kindmother-heritage"]
 # HÉRITÉ (transitoire, K-13) : SQLite local direct ; prioritaire s'il est activé explicitement.
 legacy-sqlite = ["dep:rusqlite"]
 # Chiffrement SQLCipher : n'a de sens qu'avec le chemin hérité.

@@ -40,8 +40,10 @@ pub fn refuser_si_base_heritee(base_heritee: &Path) -> Result<(), String> {
     }
     Err(format!(
         "base héritée {} présente et non importée dans KindMother (K-13) : \
-         démarrage refusé pour ne pas présenter une base vide. Importer les données, \
-         ou créer {} pour confirmer l'abandon volontaire (le fichier hérité n'est jamais touché).",
+         démarrage refusé pour ne pas présenter une base vide. Importer les données \
+         (`kindmother-import <service> {}`), ou créer {} pour confirmer l'abandon \
+         volontaire (le fichier hérité n'est jamais touché).",
+        base_heritee.display(),
         base_heritee.display(),
         chemin_marqueur_import(base_heritee).display()
     ))

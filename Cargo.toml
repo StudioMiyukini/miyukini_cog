@@ -8,6 +8,8 @@ members = [
     "crates/kindmother",
     "crates/kindmother-db-key",   # Dérivation clé pour SQLCipher
     "crates/kindmother-service",  # Serveur libSQL isolé
+    "crates/kindmother-heritage", # Import des bases SQLite héritées (transitoire, K-13)
+    "crates/kindmother-import",   # CLI d'import des bases héritées (transitoire, K-13)
     "crates/kindmother-client",   # Client délégation IPC
     "crates/borderguard",
     "crates/caringnanny",

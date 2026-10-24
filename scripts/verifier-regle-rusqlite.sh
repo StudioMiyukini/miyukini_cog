@@ -31,10 +31,13 @@ AUTORISE="crates/kindmother-service"
 TRANSITOIRE=(
   # Services COG passés à KindMother par défaut ; accès SQLite direct gardé derrière la
   # feature non défaut `legacy-sqlite` le temps d'importer les données existantes.
-  "crates/jaykonta|K-13|lot C (suite)|feature legacy-sqlite non défaut, import des données à faire"
+  "crates/jaykonta|K-13|lot C (suite)|feature legacy-sqlite non défaut ; import : kindmother-import jaykonta"
   "crates/jay1tribu|K-13|lot C (suite)|feature legacy-sqlite non défaut ; jayclub l'active encore"
-  "crates/miyukiniwatch|K-13|lot C (suite)|feature legacy-sqlite non défaut, import des données à faire"
+  "crates/miyukiniwatch|K-13|lot C (suite)|feature legacy-sqlite non défaut ; import : kindmother-import miyukiniwatch"
   "crates/miyukini-central|K-13|lot C (suite)|feature legacy-sqlite ; apps/central et central-remote l'activent encore"
+  # Outil d'import des bases héritées : lecture seule (SQLITE_OPEN_READ_ONLY), fichier jamais
+  # modifié ; les services l'emploient par leur feature non défaut `import-heritage`.
+  "crates/kindmother-heritage|K-13|lot C (suite)|import des bases héritées (kindmother-import) ; retiré une fois les bases importées"
   # Services sans chemin KindMother complet (SQLite direct par défaut).
   "crates/jaymanga|K-13|lot C (suite)|chemin kindmother-only à écrire (client = placeholder)"
   "crates/jaybureau-suite/jayclub|K-13|lot C (suite)|refonte de Jay1Tribu, persistance directe"

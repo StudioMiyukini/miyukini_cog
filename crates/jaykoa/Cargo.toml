@@ -19,6 +19,8 @@ categories.workspace = true
 description = "JayKoa — Calendrier universel du COG, récepteur temporel transversal"
 
 [dependencies]
+# Import de la base SQLite héritée (K-13, transitoire) : lecture seule, feature `import-heritage`.
+kindmother-heritage = { path = "../kindmother-heritage", optional = true }
 jayrdv = { path = "../jayrdv" }
 kindmother = { path = "../kindmother" }
 kindmother-client = { path = "../kindmother-client" }
@@ -31,6 +33,8 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "2"
 
 [dev-dependencies]
+# Fabrique de bases héritées (tests d'import).
+kindmother-heritage = { path = "../kindmother-heritage", features = ["fabrique-test"] }
 # Serveur KindMother en processus pour les tests de persistance (opérateur jaykoa).
 kindmother-service = { path = "../kindmother-service" }
 tempfile = "3"
@@ -40,6 +44,10 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 default = ["kindmother-only"]
 # Full KM : accès exclusif via KindMother (kindmother-client)
 kindmother-only = []
+# Import unique de la base SQLite héritée dans KindMother (outil `kindmother-import`).
+# N'active pas `legacy-sqlite` (qui prendrait le pas sur le chemin KindMother) ;
+# la lecture seule du fichier hérité est faite par `kindmother-heritage`.
+import-heritage = ["kindmother-only", "dep:kindmother-heritage"]
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript
 # Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md
