@@ -11,8 +11,6 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(missing_docs)]
 pub enum ServiceId {
-    MiyuClicker,
-    LordOfTheCastle,
     JayKoa,
     JayKonta,
 }

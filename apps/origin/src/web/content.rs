@@ -1922,49 +1922,6 @@ JayKoa s'intègre avec JayKonta pour les échéances financières."#.to_string()
             banner_url: None,
         });
 
-        // Jeux
-        services.push(ServiceInfo {
-            id: "miyuclicker".to_string(),
-            name: "MiyuClicker".to_string(),
-            short_description: "Jeu idle/clicker avec progression infinie".to_string(),
-            full_description: r#"# MiyuClicker
-
-**MiyuClicker** est un jeu idle/clicker addictif avec une progression infinie.
-
-## Gameplay
-
-### Clics et automatisation
-- Gagnez des ressources en cliquant
-- Débloquez des améliorations automatiques
-- Progression exponentielle
-
-### Améliorations
-- Upgrades de clic
-- Générateurs automatiques
-- Multiplicateurs de bonus
-
-### Achievements
-- Objectifs à débloquer
-- Récompenses spéciales
-- Classements
-
-## Mode hors ligne
-
-Le jeu continue à progresser même quand vous ne jouez pas, grâce à la simulation de temps écoulé."#
-                .to_string(),
-            category: ServiceCategory::Jeux,
-            editor: "Miyukini".to_string(),
-            cog_version: "0.1.0".to_string(),
-            service_type: ServiceType::Officiel,
-            license: "Propriétaire Miyukini".to_string(),
-            price: 0.0,
-            release_date: Utc::now() - chrono::Duration::days(45),
-            website_url: Some("https://miyukini.com/games/miyuclicker".to_string()),
-            download_url: Some("/downloads".to_string()),
-            screenshots: vec![],
-            banner_url: None,
-        });
-
         // Suite Jay Bureau — bureautique collaborative
 
         services.push(ServiceInfo {

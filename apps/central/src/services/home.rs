@@ -78,7 +78,6 @@ fn build_suggestions(services: &[ServiceInfo], hour: u32) -> Vec<ServiceSuggesti
         6..=9 => Some(("jaykoa", "Consulte ton agenda du matin")),
         13..=14 => Some(("jaymanga", "Pause lecture manga")),
         15..=18 => Some(("jaykonta", "Vérifie tes comptes")),
-        19..=22 => Some(("miyuclicker", "Détends-toi avec un jeu")),
         23..=23 | 0..=5 => Some(("miyukiniwatch", "Bilan de ta journée")),
         _ => None,
     };
@@ -265,10 +264,6 @@ fn miou_greeting(pseudo: &str, hour: u32, services: &[ServiceInfo]) -> String {
             .iter()
             .find(|s| s.id == "jaykonta" && s.is_installed)
             .map(|_| "JayKonta t'attend pour un point sur tes comptes."),
-        19..=22 => services
-            .iter()
-            .find(|s| s.id == "miyuclicker" && s.is_installed)
-            .map(|_| "Un petit Lord of the Click pour se détendre ?"),
         _ => None,
     };
 

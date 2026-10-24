@@ -137,28 +137,6 @@ impl ArbitrationEngine {
             rate_limit: 0,
         })
         .await;
-
-        // === Services de jeux ===
-
-        // Lord of the Castle - jeu survivor
-        self.register_operator(OperatorConfig {
-            id: "lord-of-the-castle".to_string(),
-            databases: [("lord_of_the_castle".to_string(), Permission::Admin)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0,
-        })
-        .await;
-
-        // MiyuClicker - jeu idle clicker
-        self.register_operator(OperatorConfig {
-            id: "miyuclicker".to_string(),
-            databases: [("miyuclicker".to_string(), Permission::Admin)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0,
-        })
-        .await;
     }
 
     /// Vérifie qu'un opérateur peut effectuer une requête.

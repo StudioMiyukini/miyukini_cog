@@ -56,7 +56,7 @@ pub struct CentralProfileSave {
     pub id: String,
     /// Identifiant du profil Central.
     pub profile_id: String,
-    /// Clé du service (ex. `lord_of_the_castle`).
+    /// Clé du service (ex. `jaykoa`).
     pub service_key: String,
     /// Numéro de slot (0, 1, 2…).
     pub slot: i64,

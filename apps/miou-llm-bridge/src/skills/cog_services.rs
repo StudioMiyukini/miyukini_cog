@@ -28,7 +28,6 @@ const KNOWN_SERVICES: &[(&str, &str, u16)] = &[
     ),
     ("jay1tribu", "Jay1Tribu — Social & Chat", 11446),
     ("jaymanga", "JayManga — Manga", 11447),
-    ("miyuclicker", "Lord of the Click — Jeu", 11448),
 ];
 
 /// Métadonnées du skill.
