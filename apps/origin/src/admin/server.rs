@@ -8,6 +8,15 @@
 //!
 //! Expose les endpoints d'administration sur le port 8081.
 //! Toutes les routes (sauf /login) nécessitent une authentification par session.
+//!
+//! O-04 (cookie tossing, confiance « même site ») :
+//! - cookie de session `__Host-admin_session` (`Secure`, `Path=/`, sans `Domain`, `HttpOnly`,
+//!   `SameSite=Strict`) : un cookie posé par un sous-domaine COG sur le domaine parent ne
+//!   peut ni le remplacer ni le masquer (le navigateur refuse un `__Host-` avec Domain) ;
+//! - toute requête modifiante (méthode autre que GET/HEAD) exige un `Origin` (ou à défaut
+//!   un `Referer`) égal à l'origine exacte de l'admin **et** un jeton CSRF : jeton lié à la
+//!   session (champ `csrf` ou en-tête `X-CSRF-Token`), ou double soumission via le cookie
+//!   `__Host-admin_csrf` pour le formulaire de connexion. Tout échec = 403 (fail-closed).
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -26,6 +35,14 @@ use crate::tracker::pool::PoolManager;
 const MAX_LOGIN_ATTEMPTS: u32 = 5;
 /// Durée du blocage après trop de tentatives (secondes).
 const LOGIN_BLOCK_DURATION_SECS: u64 = 300;
+/// Nom du cookie de session admin (préfixe `__Host-` : hôte seul, Secure, Path=/).
+const COOKIE_SESSION: &str = "__Host-admin_session";
+/// Nom du cookie CSRF du formulaire de connexion (double soumission).
+const COOKIE_CSRF_LOGIN: &str = "__Host-admin_csrf";
+/// Durée de validité du jeton CSRF de connexion (secondes).
+const CSRF_LOGIN_TTL_SECS: u64 = 600;
+/// Réponse de refus CSRF (corps distinct, testable).
+const CORPS_REFUS_CSRF: &str = "Forbidden: CSRF check failed";
 
 /// Configuration d'authentification admin (chargée depuis admin.toml).
 #[derive(Debug, Clone)]
@@ -38,11 +55,31 @@ pub struct AdminAuthConfig {
     pub session_ttl_seconds: u64,
 }
 
+/// Session admin : expiration et jeton CSRF lié à la session.
+struct SessionAdmin {
+    expiration: Instant,
+    csrf: String,
+}
+
+/// Requête admin analysée.
+#[derive(Debug, Default)]
+struct RequeteAdmin {
+    method: String,
+    path: String,
+    cookie_session: Option<String>,
+    cookie_csrf: Option<String>,
+    origin: Option<String>,
+    referer: Option<String>,
+    host: Option<String>,
+    csrf_entete: Option<String>,
+    body: String,
+}
+
 /// État d'authentification admin : config + sessions actives + rate limiting login.
 struct AdminAuthState {
     config: Option<AdminAuthConfig>,
-    /// token -> expiration
-    sessions: Mutex<HashMap<String, Instant>>,
+    /// token -> session (expiration, jeton CSRF)
+    sessions: Mutex<HashMap<String, SessionAdmin>>,
     /// IP -> (tentatives, dernière tentative, bloqué_jusqu'à)
     login_attempts: Mutex<HashMap<std::net::IpAddr, (u32, Instant, Option<Instant>)>>,
 }
@@ -164,37 +201,116 @@ impl AdminServer {
         }
     }
 
-    /// Parse requête HTTP : méthode, chemin, cookie admin_session, body, peer IP.
-    fn parse_request(request: &str) -> (String, String, Option<String>, String) {
-        let mut method = "GET".to_string();
-        let mut path = "/".to_string();
-        let mut cookie_session: Option<String> = None;
-        let mut body = String::new();
+    /// Parse requête HTTP : méthode, chemin, cookies admin, en-têtes CSRF, body.
+    fn parse_request(request: &str) -> RequeteAdmin {
+        let mut r = RequeteAdmin {
+            method: "GET".to_string(),
+            path: "/".to_string(),
+            ..RequeteAdmin::default()
+        };
 
         if let Some(first) = request.lines().next() {
             let parts: Vec<&str> = first.split_whitespace().collect();
             if parts.len() >= 2 {
-                method = parts[0].to_string();
-                path = parts[1].to_string();
+                r.method = parts[0].to_string();
+                r.path = parts[1].to_string();
             }
         }
 
-        let in_headers = true;
         for line in request.lines().skip(1) {
             if line.is_empty() {
                 if let Some(pos) = request.find("\r\n\r\n") {
-                    body = request[pos + 4..].to_string();
+                    r.body = request[pos + 4..].to_string();
                 }
                 break;
             }
-            if in_headers && line.to_lowercase().starts_with("cookie:") {
-                if let Some(v) = Self::cookie_value(&line[7..], "admin_session") {
-                    cookie_session = Some(v);
+            let Some((nom, valeur)) = line.split_once(':') else {
+                continue;
+            };
+            let nom = nom.trim().to_ascii_lowercase();
+            let valeur = valeur.trim();
+            match nom.as_str() {
+                "cookie" => {
+                    if let Some(v) = Self::cookie_value(valeur, COOKIE_SESSION) {
+                        r.cookie_session = Some(v);
+                    }
+                    if let Some(v) = Self::cookie_value(valeur, COOKIE_CSRF_LOGIN) {
+                        r.cookie_csrf = Some(v);
+                    }
                 }
+                "origin" => r.origin = Some(valeur.to_string()),
+                "referer" => r.referer = Some(valeur.to_string()),
+                "host" => r.host = Some(valeur.to_string()),
+                "x-csrf-token" => r.csrf_entete = Some(valeur.to_string()),
+                _ => {}
             }
         }
 
-        (method, path, cookie_session, body)
+        r
+    }
+
+    /// Jeton aléatoire de 256 bits (hexadécimal), tiré de `OsRng` (C-24).
+    fn jeton_aleatoire() -> String {
+        let mut octets = [0u8; 32];
+        rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut octets);
+        hex::encode(octets)
+    }
+
+    /// Comparaison de secrets en temps constant (C-22).
+    fn egal_temps_constant(a: &str, b: &str) -> bool {
+        if a.is_empty() || a.len() != b.len() {
+            return false;
+        }
+        a.bytes().zip(b.bytes()).fold(0u8, |d, (x, y)| d | (x ^ y)) == 0
+    }
+
+    /// Origine exacte attendue pour l'admin : `admin.public_origin`, sinon `https://<Host>`.
+    fn origine_attendue(config: &OriginConfig, host: Option<&str>) -> Option<String> {
+        if let Some(o) = config.admin.public_origin.as_deref() {
+            let o = o.trim().trim_end_matches('/');
+            return (!o.is_empty()).then(|| o.to_ascii_lowercase());
+        }
+        let host = host?.trim();
+        if host.is_empty() || host.contains(['/', ' ', '@']) {
+            return None;
+        }
+        Some(format!("https://{}", host.to_ascii_lowercase()))
+    }
+
+    /// Origine (`schéma://autorité`) d'une URL de `Referer`.
+    fn origine_de_referer(referer: &str) -> Option<String> {
+        let (schema, reste) = referer.split_once("://")?;
+        let autorite = reste.split(['/', '?', '#']).next()?;
+        if schema.is_empty() || autorite.is_empty() || autorite.contains('@') {
+            return None;
+        }
+        Some(format!("{schema}://{autorite}").to_ascii_lowercase())
+    }
+
+    /// `Origin` (ou à défaut `Referer`) égal à l'origine admin exacte ? Absent = refus.
+    fn origine_valide(req: &RequeteAdmin, attendue: &str) -> bool {
+        if let Some(origin) = req.origin.as_deref() {
+            return origin.trim().trim_end_matches('/').eq_ignore_ascii_case(attendue);
+        }
+        req.referer
+            .as_deref()
+            .and_then(Self::origine_de_referer)
+            .is_some_and(|o| o == attendue)
+    }
+
+    /// Jeton CSRF présenté : champ de formulaire `csrf`, sinon en-tête `X-CSRF-Token`.
+    fn csrf_presente(req: &RequeteAdmin) -> String {
+        let champ = Self::form_value(&req.body, "csrf");
+        if champ.is_empty() {
+            req.csrf_entete.clone().unwrap_or_default()
+        } else {
+            champ
+        }
+    }
+
+    /// Réponse 403 pour un échec de contrôle CSRF.
+    fn refus_csrf() -> String {
+        Self::http_response(403, "Forbidden", CORPS_REFUS_CSRF)
     }
 
     /// Extrait la valeur d'un cookie nommé dans le contenu d'un en-tête `Cookie:`.
@@ -288,20 +404,20 @@ impl AdminServer {
         attempts.remove(&ip);
     }
 
-    /// Vérifie que le token de session est valide (présent et non expiré).
-    async fn is_session_valid(auth_state: &AdminAuthState, token: Option<&str>) -> bool {
+    /// Jeton CSRF de la session si le token de session est valide (présent, non expiré).
+    async fn session_csrf(auth_state: &AdminAuthState, token: Option<&str>) -> Option<String> {
         let token = match token {
             Some(t) if !t.is_empty() => t,
-            _ => return false,
+            _ => return None,
         };
         let mut sessions = auth_state.sessions.lock().await;
-        if let Some(expiry) = sessions.get(token) {
-            if *expiry > Instant::now() {
-                return true;
+        if let Some(session) = sessions.get(token) {
+            if session.expiration > Instant::now() {
+                return Some(session.csrf.clone());
             }
             sessions.remove(token);
         }
-        false
+        None
     }
 
     /// Réponse redirect vers /admin/login.
@@ -309,17 +425,27 @@ impl AdminServer {
         "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
     }
 
-    /// Réponse redirect vers /admin avec Set-Cookie session (SameSite=Strict + Secure).
+    /// En-tête `Set-Cookie` d'un cookie `__Host-` (Secure, Path=/, sans Domain).
+    fn cookie_host(nom: &str, valeur: &str, max_age: u64) -> String {
+        format!("Set-Cookie: {nom}={valeur}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age={max_age}\r\n")
+    }
+
+    /// Réponse redirect vers /admin avec Set-Cookie session ; le cookie CSRF de connexion
+    /// est effacé.
     fn redirect_with_session(token: &str, ttl_secs: u64) -> String {
         format!(
-            "HTTP/1.1 302 Found\r\nLocation: /admin/\r\nSet-Cookie: admin_session={}; HttpOnly; Secure; SameSite=Strict; Path=/admin; Max-Age={}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
-            token, ttl_secs
+            "HTTP/1.1 302 Found\r\nLocation: /admin/\r\n{}{}Content-Length: 0\r\nConnection: close\r\n\r\n",
+            Self::cookie_host(COOKIE_SESSION, token, ttl_secs),
+            Self::cookie_host(COOKIE_CSRF_LOGIN, "", 0),
         )
     }
 
     /// Réponse redirect vers /admin/login avec cookie supprimé (logout).
     fn redirect_logout() -> String {
-        "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\nSet-Cookie: admin_session=; HttpOnly; Secure; SameSite=Strict; Path=/admin; Max-Age=0\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_string()
+        format!(
+            "HTTP/1.1 302 Found\r\nLocation: /admin/login\r\n{}Content-Length: 0\r\nConnection: close\r\n\r\n",
+            Self::cookie_host(COOKIE_SESSION, "", 0),
+        )
     }
 
     /// Gère une requête.
@@ -331,15 +457,26 @@ impl AdminServer {
         auth_state: &Arc<AdminAuthState>,
         peer_addr: SocketAddr,
     ) -> String {
-        let (method, path, cookie_session, body) = Self::parse_request(request);
+        let req = Self::parse_request(request);
         let client_ip = Self::client_ip(request, peer_addr.ip());
+        let method = req.method.as_str();
 
-        let path_normalized = if path.starts_with("/admin") {
-            path.strip_prefix("/admin").unwrap_or("/").to_string()
+        let path_normalized = if req.path.starts_with("/admin") {
+            req.path.strip_prefix("/admin").unwrap_or("/").to_string()
         } else {
-            path.clone()
+            req.path.clone()
         };
         let path_norm = path_normalized.as_str();
+
+        // Anti-CSRF (O-04) : toute requête modifiante exige l'origine admin exacte.
+        let modifiante = !matches!(method, "GET" | "HEAD");
+        if modifiante {
+            let attendue = Self::origine_attendue(config, req.host.as_deref());
+            if !attendue.is_some_and(|a| Self::origine_valide(&req, &a)) {
+                warn!("Admin {} {} refused: missing or foreign Origin/Referer", method, path_norm);
+                return Self::refus_csrf();
+            }
+        }
 
         // Routes publiques : login (GET = formulaire, POST = traitement)
         if path_norm == "/login" || path_norm == "login" {
@@ -347,6 +484,12 @@ impl AdminServer {
                 return Self::login_form_html(auth_state).await;
             }
             if method == "POST" {
+                // Double soumission : champ `csrf` == cookie `__Host-admin_csrf`.
+                let cookie = req.cookie_csrf.as_deref().unwrap_or("");
+                if !Self::egal_temps_constant(&Self::csrf_presente(&req), cookie) {
+                    warn!("Admin login refused: CSRF token mismatch");
+                    return Self::refus_csrf();
+                }
                 if !Self::check_login_rate_limit(auth_state, client_ip).await {
                     return Self::http_response(
                         429,
@@ -354,26 +497,31 @@ impl AdminServer {
                         "Too many login attempts. Try again later.",
                     );
                 }
-                return Self::login_post(config, body, auth_state, client_ip).await;
+                return Self::login_post(config, req.body, auth_state, client_ip).await;
             }
-        }
-
-        // Logout
-        if (path_norm == "/logout" || path_norm == "logout") && method == "POST" {
-            if let Some(ref t) = cookie_session {
-                let mut sessions_map = auth_state.sessions.lock().await;
-                sessions_map.remove(t.as_str());
-            }
-            return Self::redirect_logout();
         }
 
         // Toutes les autres routes : authentification requise
-        if !Self::is_session_valid(auth_state, cookie_session.as_deref()).await {
+        let Some(csrf_session) =
+            Self::session_csrf(auth_state, req.cookie_session.as_deref()).await
+        else {
             return Self::redirect_to_login();
+        };
+
+        // Jeton CSRF lié à la session pour toute requête modifiante.
+        if modifiante && !Self::egal_temps_constant(&Self::csrf_presente(&req), &csrf_session) {
+            warn!("Admin {} {} refused: CSRF token mismatch", method, path_norm);
+            return Self::refus_csrf();
         }
 
-        match (method.as_str(), path_norm) {
-            ("GET", "/" | "") => Self::dashboard_html(config, sessions, pools).await,
+        match (method, path_norm) {
+            ("POST", "/logout" | "logout") => {
+                if let Some(t) = req.cookie_session.as_deref() {
+                    auth_state.sessions.lock().await.remove(t);
+                }
+                Self::redirect_logout()
+            }
+            ("GET", "/" | "") => Self::dashboard_html(config, sessions, pools, &csrf_session).await,
             ("GET", "/api/status") => Self::api_status(config, sessions, pools).await,
             ("GET", "/api/sessions") => Self::api_sessions(sessions).await,
             ("GET", "/api/pools") => Self::api_pools(pools).await,
@@ -383,7 +531,11 @@ impl AdminServer {
     }
 
     /// Page de login (formulaire).
+    ///
+    /// Pose le cookie `__Host-admin_csrf` et place le même jeton dans un champ caché
+    /// (double soumission, vérifiée au POST).
     async fn login_form_html(auth_state: &AdminAuthState) -> String {
+        let csrf = Self::jeton_aleatoire();
         let email_placeholder = auth_state
             .config
             .as_ref()
@@ -448,6 +600,7 @@ impl AdminServer {
     <div class="login-box">
         <h1>MiyukiniAdmin Origin</h1>
         <form method="post" action="/admin/login">
+            <input type="hidden" name="csrf" value="{}">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="{}" required autocomplete="email">
             <label for="password">Mot de passe</label>
@@ -457,9 +610,17 @@ impl AdminServer {
     </div>
 </body>
 </html>"#,
-            email_placeholder_escaped
+            csrf, email_placeholder_escaped
         );
-        Self::http_response_html(200, "OK", &html)
+        let reponse = Self::http_response_html(200, "OK", &html);
+        // Insère le cookie CSRF après la ligne de statut.
+        match reponse.split_once("\r\n") {
+            Some((statut, reste)) => format!(
+                "{statut}\r\n{}Cache-Control: no-store\r\n{reste}",
+                Self::cookie_host(COOKIE_CSRF_LOGIN, &csrf, CSRF_LOGIN_TTL_SECS)
+            ),
+            None => reponse,
+        }
     }
 
     /// Traitement POST /login : vérification mot de passe, création session, rate limiting.
@@ -509,14 +670,17 @@ impl AdminServer {
 
         Self::reset_login_attempts(auth_state, client_ip).await;
 
-        let token: String = (0..32)
-            .map(|_| rand::random::<u8>())
-            .map(|b| format!("{:02x}", b))
-            .collect();
+        let token = Self::jeton_aleatoire();
         let ttl = Duration::from_secs(auth_config.session_ttl_seconds);
         {
             let mut sessions = auth_state.sessions.lock().await;
-            sessions.insert(token.clone(), Instant::now() + ttl);
+            sessions.insert(
+                token.clone(),
+                SessionAdmin {
+                    expiration: Instant::now() + ttl,
+                    csrf: Self::jeton_aleatoire(),
+                },
+            );
         }
         Self::redirect_with_session(&token, auth_config.session_ttl_seconds)
     }
@@ -551,6 +715,7 @@ impl AdminServer {
         config: &OriginConfig,
         sessions: Option<&Arc<SessionManager>>,
         pools: Option<&Arc<PoolManager>>,
+        csrf: &str,
     ) -> String {
         let session_count = if let Some(s) = sessions {
             s.count().await
@@ -571,6 +736,7 @@ impl AdminServer {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MiyukiniAdmin Origin</title>
+    <meta name="csrf-token" content="{}">
     <style>
         :root {{
             --primary: #8b5cf6;
@@ -679,6 +845,7 @@ impl AdminServer {
         <span>
             <span class="status-badge">● En ligne</span>
             <form method="post" action="/admin/logout" style="display:inline;margin-left:1rem">
+                <input type="hidden" name="csrf" value="{}">
                 <button type="submit" class="logout-btn">Déconnexion</button>
             </form>
         </span>
@@ -732,6 +899,8 @@ impl AdminServer {
     </div>
 </body>
 </html>"#,
+            csrf,
+            csrf,
             session_count,
             pool_count,
             config.relay.port,
@@ -889,40 +1058,217 @@ mod tests {
     }
 
     #[test]
-    fn cookie_admin_hote_seul_strict_et_limite_a_admin() {
-        // O-04 : cookie non envoyé aux sous-domaines (pas d'attribut Domain), ni hors /admin.
+    fn cookie_admin_prefixe_host_strict() {
+        // O-04 : `__Host-` (Secure, Path=/, sans Domain) : un cookie posé par un sous-domaine
+        // COG sur le domaine parent ne peut pas le masquer.
         for r in [
             AdminServer::redirect_with_session("jeton", 60),
             AdminServer::redirect_logout(),
         ] {
             let ligne = r
                 .lines()
-                .find(|l| l.starts_with("Set-Cookie:"))
+                .find(|l| l.starts_with("Set-Cookie: __Host-admin_session="))
                 .expect("Set-Cookie");
-            assert!(ligne.contains("HttpOnly"));
-            assert!(ligne.contains("Secure"));
-            assert!(ligne.contains("SameSite=Strict"));
-            assert!(ligne.contains("Path=/admin"));
+            assert!(ligne.contains("; HttpOnly"));
+            assert!(ligne.contains("; Secure"));
+            assert!(ligne.contains("; SameSite=Strict"));
+            assert!(ligne.contains("; Path=/;"));
             assert!(!ligne.to_ascii_lowercase().contains("domain="));
+            // Plus aucun cookie sans préfixe.
+            assert!(!r.contains("Set-Cookie: admin_session"));
         }
+        assert!(AdminServer::redirect_with_session("jeton", 60)
+            .contains("Set-Cookie: __Host-admin_session=jeton;"));
     }
 
     #[test]
-    fn cookie_parse_utilise_le_bon_prefixe() {
-        let req = "GET / HTTP/1.1\r\nCookie: a=1; admin_session=abc123; b=2\r\n\r\n";
-        let (_, _, c, _) = AdminServer::parse_request(req);
-        assert_eq!(c.as_deref(), Some("abc123"));
-        // Ancien bug : offset 13 aurait donné « abc123 » tronqué d'un caractère en moins.
-        let req = "GET / HTTP/1.1\r\nCookie: admin_session=x\r\n\r\n";
-        assert_eq!(AdminServer::parse_request(req).2.as_deref(), Some("x"));
-        let req = "GET / HTTP/1.1\r\nCookie: other_admin_session=zz\r\n\r\n";
-        assert_eq!(AdminServer::parse_request(req).2, None);
+    fn cookie_parse_utilise_le_bon_nom() {
+        let req = "GET / HTTP/1.1\r\nCookie: a=1; __Host-admin_session=abc123; b=2\r\n\r\n";
+        assert_eq!(AdminServer::parse_request(req).cookie_session.as_deref(), Some("abc123"));
+        let req = "GET / HTTP/1.1\r\nCookie: __Host-admin_session=x\r\n\r\n";
+        assert_eq!(AdminServer::parse_request(req).cookie_session.as_deref(), Some("x"));
+        // Ancien nom sans préfixe (posable par un sous-domaine via Domain=) : ignoré.
+        let req = "GET / HTTP/1.1\r\nCookie: admin_session=zz\r\n\r\n";
+        assert_eq!(AdminServer::parse_request(req).cookie_session, None);
+        let req = "GET / HTTP/1.1\r\nCookie: other__Host-admin_session=zz\r\n\r\n";
+        assert_eq!(AdminServer::parse_request(req).cookie_session, None);
     }
 
     #[test]
     fn cookie_session_est_secure() {
         assert!(AdminServer::redirect_with_session("t", 60).contains("; Secure;"));
         assert!(AdminServer::redirect_logout().contains("; Secure;"));
+    }
+
+    fn config_admin() -> OriginConfig {
+        let mut c = OriginConfig::default();
+        c.admin.public_origin = Some("https://admin.miyukini.com".to_string());
+        c
+    }
+
+    fn pair() -> SocketAddr {
+        "198.51.100.9:5555".parse().unwrap()
+    }
+
+    async fn etat_avec_session() -> (Arc<AdminAuthState>, String, String) {
+        let st = Arc::new(state());
+        let jeton = "s".repeat(64);
+        let csrf = "c".repeat(64);
+        st.sessions.lock().await.insert(
+            jeton.clone(),
+            SessionAdmin {
+                expiration: Instant::now() + Duration::from_secs(60),
+                csrf: csrf.clone(),
+            },
+        );
+        (st, jeton, csrf)
+    }
+
+    async fn requete(st: &Arc<AdminAuthState>, brute: &str) -> String {
+        AdminServer::handle_request(brute, &config_admin(), None, None, st, pair()).await
+    }
+
+    #[tokio::test]
+    async fn post_admin_sans_origin_ou_sans_jeton_refuse_avec_les_deux_accepte() {
+        let (st, jeton, csrf) = etat_avec_session().await;
+        let cookie = format!("Cookie: __Host-admin_session={jeton}");
+
+        // Sans Origin ni Referer : refusé, session intacte.
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\n{cookie}\r\n\r\ncsrf={csrf}"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 403"), "{r}");
+        assert!(r.ends_with(CORPS_REFUS_CSRF));
+        assert!(st.sessions.lock().await.contains_key(&jeton));
+
+        // Origin d'un sous-domaine COG (même site, autre origine) : refusé.
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\nOrigin: https://boutique.miyukini.com\r\n{cookie}\r\n\r\ncsrf={csrf}"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 403"));
+        // Origin « null » (document en bac à sable) : refusé.
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\nOrigin: null\r\n{cookie}\r\n\r\ncsrf={csrf}"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 403"));
+
+        // Bonne Origin mais sans jeton : refusé.
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\n{cookie}\r\n\r\n"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 403"));
+        // Bonne Origin, mauvais jeton : refusé.
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\n{cookie}\r\n\r\ncsrf={}", "d".repeat(64)),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 403"));
+        assert!(st.sessions.lock().await.contains_key(&jeton));
+
+        // Referer (sans Origin) + jeton en en-tête : accepté.
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\nReferer: https://admin.miyukini.com/admin/\r\nX-CSRF-Token: {csrf}\r\n{cookie}\r\n\r\n"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 302"), "{r}");
+        assert!(!st.sessions.lock().await.contains_key(&jeton));
+
+        // Origin + jeton de formulaire : accepté.
+        let (st, jeton, csrf) = etat_avec_session().await;
+        let r = requete(
+            &st,
+            &format!("POST /admin/logout HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\nCookie: __Host-admin_session={jeton}\r\n\r\ncsrf={csrf}"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 302"));
+        assert!(r.contains("Set-Cookie: __Host-admin_session=;"));
+        assert!(!st.sessions.lock().await.contains_key(&jeton));
+    }
+
+    #[tokio::test]
+    async fn login_post_exige_origin_et_double_soumission() {
+        let st = Arc::new(state());
+        // Le formulaire pose le cookie CSRF et le même jeton en champ caché.
+        let page = requete(&st, "GET /admin/login HTTP/1.1\r\n\r\n").await;
+        let ligne = page
+            .lines()
+            .find(|l| l.starts_with("Set-Cookie: __Host-admin_csrf="))
+            .expect("cookie csrf");
+        assert!(ligne.contains("; Secure") && ligne.contains("; Path=/;"));
+        let jeton = ligne
+            .trim_start_matches("Set-Cookie: __Host-admin_csrf=")
+            .split(';')
+            .next()
+            .unwrap()
+            .to_string();
+        assert_eq!(jeton.len(), 64);
+        assert!(page.contains(&format!("name=\"csrf\" value=\"{jeton}\"")));
+
+        let corps = format!("csrf={jeton}&email=a%40b.c&password=x");
+        let origin = "Origin: https://admin.miyukini.com";
+        let cookie = format!("Cookie: __Host-admin_csrf={jeton}");
+        // Sans Origin : refusé.
+        let r = requete(&st, &format!("POST /admin/login HTTP/1.1\r\n{cookie}\r\n\r\n{corps}")).await;
+        assert!(r.ends_with(CORPS_REFUS_CSRF));
+        // Sans cookie CSRF : refusé.
+        let r = requete(&st, &format!("POST /admin/login HTTP/1.1\r\n{origin}\r\n\r\n{corps}")).await;
+        assert!(r.ends_with(CORPS_REFUS_CSRF));
+        // Sans champ CSRF : refusé.
+        let r = requete(
+            &st,
+            &format!("POST /admin/login HTTP/1.1\r\n{origin}\r\n{cookie}\r\n\r\nemail=a%40b.c&password=x"),
+        )
+        .await;
+        assert!(r.ends_with(CORPS_REFUS_CSRF));
+        // Les deux : le contrôle CSRF passe (puis refus métier : auth non configurée).
+        let r = requete(&st, &format!("POST /admin/login HTTP/1.1\r\n{origin}\r\n{cookie}\r\n\r\n{corps}")).await;
+        assert!(!r.ends_with(CORPS_REFUS_CSRF), "{r}");
+        assert!(r.contains("Admin auth not configured"));
+    }
+
+    #[tokio::test]
+    async fn get_admin_sans_origin_reste_accessible() {
+        let (st, jeton, csrf) = etat_avec_session().await;
+        let r = requete(
+            &st,
+            &format!("GET /admin/ HTTP/1.1\r\nCookie: __Host-admin_session={jeton}\r\n\r\n"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 200"));
+        // Le jeton CSRF de session est fourni au formulaire et au JS (meta).
+        assert!(r.contains(&format!("name=\"csrf\" value=\"{csrf}\"")));
+        assert!(r.contains(&format!("<meta name=\"csrf-token\" content=\"{csrf}\">")));
+    }
+
+    #[test]
+    fn origine_attendue_et_referer() {
+        let mut c = OriginConfig::default();
+        assert_eq!(
+            AdminServer::origine_attendue(&c, Some("Admin.Miyukini.com")),
+            Some("https://admin.miyukini.com".to_string())
+        );
+        assert_eq!(AdminServer::origine_attendue(&c, None), None);
+        c.admin.public_origin = Some("https://admin.miyukini.com/".to_string());
+        assert_eq!(
+            AdminServer::origine_attendue(&c, Some("evil.example")),
+            Some("https://admin.miyukini.com".to_string())
+        );
+        assert_eq!(
+            AdminServer::origine_de_referer("https://admin.miyukini.com/admin/?x=1"),
+            Some("https://admin.miyukini.com".to_string())
+        );
+        assert_eq!(AdminServer::origine_de_referer("https://u@evil.example/"), None);
+        assert_eq!(AdminServer::origine_de_referer("pas-une-url"), None);
     }
 
     #[test]

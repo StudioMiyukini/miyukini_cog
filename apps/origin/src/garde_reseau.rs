@@ -116,7 +116,10 @@ fn ipv6_publique(ip: Ipv6Addr) -> bool {
         || (s[0] & 0xffc0) == 0xfe80            // fe80::/10 lien local
         || (s[0] & 0xffc0) == 0xfec0            // fec0::/10 site local (déprécié)
         || (s[0] & 0xff00) == 0xff00            // ff00::/8 multicast
-        || (s[0] == 0x64 && s[1] == 0xff9b)     // 64:ff9b::/96 NAT64
+        || (s[0..5] == [0, 0, 0, 0, 0xffff] && s[5] == 0) // ::ffff:0:0/96 IPv4 traduite (SIIT) : refus net
+        // 64:ff9b::/32 : couvre 64:ff9b::/96 (NAT64 bien connu) et 64:ff9b:1::/48 (NAT64
+        // usage local, RFC 8215). Préfixes de traduction : refus net, jamais une cible directe.
+        || (s[0] == 0x64 && s[1] == 0xff9b)
         || (s[0] == 0x0100 && s[1..4] == [0, 0, 0]) // 100::/64 discard
         || (s[0] == 0x2001 && s[1] == 0x0db8)   // 2001:db8::/32 documentation
         || (s[0] == 0x2001 && s[1] == 0)        // 2001::/32 Teredo
@@ -317,6 +320,14 @@ mod tests {
             "[::ffff:10.0.0.1]:80",
             "[::127.0.0.1]:80",
             "[64:ff9b::7f00:1]:80",
+            "[64:ff9b::808:808]:80",
+            "[64:ff9b:1::7f00:1]:80",
+            "[64:ff9b:1:ffff::a00:1]:80",
+            "[64:ff9b:1::808:808]:80",
+            "[::ffff:0:7f00:1]:80",
+            "[::ffff:0:127.0.0.1]:80",
+            "[::ffff:0:a00:1]:80",
+            "[::ffff:0:808:808]:80",
             "[2002:7f00:1::]:80",
             "169.254.169.254:80",
             "http://169.254.169.254/",

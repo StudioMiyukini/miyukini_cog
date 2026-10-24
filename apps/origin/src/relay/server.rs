@@ -36,7 +36,7 @@ use miyuwebway_participant::protocol::{
     MAGIC_REPONSE_INJECTEE, MAGIC_REQUETE_INJECTEE, TAILLE_ID_REQUETE,
 };
 
-use super::identites::RegistreIdentites;
+use super::identites::{RefusEpinglage, RegistreIdentites};
 use super::metrics::RelayMetrics;
 use super::permis_registry::PermisRegistry;
 use super::rate_limiter::{RateLimitResult, RateLimiter, RateLimiterConfig};
@@ -52,6 +52,10 @@ use crate::protocol::{
 
 /// Nombre maximal de requêtes injectées en attente (toutes sessions, C-13).
 const MAX_INJECTIONS_EN_ATTENTE: usize = 10_000;
+
+/// Nombre maximal de requêtes injectées en attente pour une même session (C-13) : un COG
+/// lent ou muet ne peut pas épuiser le plafond global au détriment des autres.
+const MAX_INJECTIONS_PAR_SESSION: usize = 64;
 
 /// Issue de la remise d'une trame DATA à l'injecteur.
 #[derive(Debug, PartialEq, Eq)]
@@ -71,9 +75,45 @@ enum RemiseInjection {
 /// cet id et liées à la session émettrice : une réponse d'id inconnu, ou venant d'une autre
 /// session, est jetée. Deux visiteurs concurrents ne peuvent donc jamais recevoir la
 /// réponse destinée à l'autre.
-/// Attentes : id de requête → (session émettrice, canal de réponse).
-type AttentesInjection =
-    HashMap<[u8; TAILLE_ID_REQUETE], ([u8; SESSION_ID_SIZE], oneshot::Sender<Bytes>)>;
+/// Attentes : id de requête → (session émettrice, canal de réponse), plus le nombre
+/// d'attentes par session (plafond par session, purge à la fermeture).
+#[derive(Default)]
+struct AttentesInjection {
+    par_id: HashMap<[u8; TAILLE_ID_REQUETE], ([u8; SESSION_ID_SIZE], oneshot::Sender<Bytes>)>,
+    par_session: HashMap<[u8; SESSION_ID_SIZE], usize>,
+}
+
+impl AttentesInjection {
+    fn is_empty(&self) -> bool {
+        self.par_id.is_empty()
+    }
+
+    /// Retire une attente et décrémente le compteur de sa session.
+    fn retirer(
+        &mut self,
+        id: &[u8; TAILLE_ID_REQUETE],
+    ) -> Option<([u8; SESSION_ID_SIZE], oneshot::Sender<Bytes>)> {
+        let entree = self.par_id.remove(id)?;
+        if let Some(n) = self.par_session.get_mut(&entree.0) {
+            *n = n.saturating_sub(1);
+            if *n == 0 {
+                self.par_session.remove(&entree.0);
+            }
+        }
+        Some(entree)
+    }
+}
+
+/// Refus d'enregistrement d'une requête injectée (C-11).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+enum RefusInjection {
+    /// Plafond global atteint.
+    #[error("too many pending tunnel requests")]
+    PlafondGlobal,
+    /// Plafond de la session atteint.
+    #[error("too many pending tunnel requests for this COG")]
+    PlafondSession,
+}
 
 struct HttpInjector {
     pending: Arc<RwLock<AttentesInjection>>,
@@ -82,7 +122,7 @@ struct HttpInjector {
 impl HttpInjector {
     fn new() -> Self {
         Self {
-            pending: Arc::new(RwLock::new(HashMap::new())),
+            pending: Arc::new(RwLock::new(AttentesInjection::default())),
         }
     }
 
@@ -90,26 +130,42 @@ impl HttpInjector {
     async fn register(
         &self,
         session_id: [u8; SESSION_ID_SIZE],
-    ) -> Result<([u8; TAILLE_ID_REQUETE], oneshot::Receiver<Bytes>), &'static str> {
+    ) -> Result<([u8; TAILLE_ID_REQUETE], oneshot::Receiver<Bytes>), RefusInjection> {
         let (tx, rx) = oneshot::channel();
         let mut pending = self.pending.write().await;
-        if pending.len() >= MAX_INJECTIONS_EN_ATTENTE {
-            return Err("too many pending tunnel requests");
+        if pending.par_id.len() >= MAX_INJECTIONS_EN_ATTENTE {
+            return Err(RefusInjection::PlafondGlobal);
+        }
+        if pending.par_session.get(&session_id).copied().unwrap_or(0)
+            >= MAX_INJECTIONS_PAR_SESSION
+        {
+            return Err(RefusInjection::PlafondSession);
         }
         let mut id = [0u8; TAILLE_ID_REQUETE];
         loop {
             rand::RngCore::fill_bytes(&mut rand::rngs::OsRng, &mut id);
-            if !pending.contains_key(&id) {
+            if !pending.par_id.contains_key(&id) {
                 break;
             }
         }
-        pending.insert(id, (session_id, tx));
+        pending.par_id.insert(id, (session_id, tx));
+        *pending.par_session.entry(session_id).or_insert(0) += 1;
         Ok((id, rx))
     }
 
     /// Retire une attente (délai dépassé, échec d'envoi).
     async fn abandon(&self, id: &[u8; TAILLE_ID_REQUETE]) {
-        self.pending.write().await.remove(id);
+        self.pending.write().await.retirer(id);
+    }
+
+    /// Purge toutes les attentes d'une session fermée ; les demandeurs reçoivent une
+    /// erreur immédiate (canal fermé) au lieu d'attendre le délai.
+    async fn purger_session(&self, session_id: &[u8; SESSION_ID_SIZE]) -> usize {
+        let mut pending = self.pending.write().await;
+        let avant = pending.par_id.len();
+        pending.par_id.retain(|_, (s, _)| s != session_id);
+        pending.par_session.remove(session_id);
+        avant - pending.par_id.len()
     }
 
     /// Livre une réponse encadrée à l'attente correspondante (id **et** session).
@@ -124,9 +180,9 @@ impl HttpInjector {
         id.copy_from_slice(&reste[..TAILLE_ID_REQUETE]);
         let tx = {
             let mut pending = self.pending.write().await;
-            match pending.get(&id) {
+            match pending.par_id.get(&id) {
                 Some((session_attendue, _)) if *session_attendue == session_id => {
-                    pending.remove(&id).map(|(_, tx)| tx)
+                    pending.retirer(&id).map(|(_, tx)| tx)
                 }
                 Some(_) => {
                     warn!("Tunnel response with request id from another session dropped");
@@ -302,7 +358,11 @@ impl RelayServer {
             s.id
         };
 
-        let (id_requete, rx) = ctx.http_injector.register(session_id).await?;
+        let (id_requete, rx) = ctx
+            .http_injector
+            .register(session_id)
+            .await
+            .map_err(|e| e.to_string())?;
 
         if let Err(e) = ctx
             .tunnel_manager
@@ -590,6 +650,7 @@ impl RelayServer {
         // Tracker. Le permis est lié au cog_id prouvé et purgé à expiration (O-15 partiel).
         ctx.tunnel_manager.unregister_outbound(&session_id).await;
         ctx.tunnel_manager.close_session_tunnels(&session_id).await;
+        ctx.http_injector.purger_session(&session_id).await;
         ctx.sessions.remove(&session_id).await;
         ctx.rate_limiter.remove_session(&session_id).await;
         ctx.metrics.record_session_closed();
@@ -658,8 +719,9 @@ impl RelayServer {
     /// Traite un message REGISTER.
     ///
     /// O-01 : le REGISTER doit porter la clé publique d'identité et la signature du défi
-    /// de la session ; le `cog_id` doit être l'empreinte de cette clé ; la clé est épinglée
-    /// au premier usage (TOFU) et une autre clé pour le même `cog_id` est refusée.
+    /// de la session ; le `cog_id` doit être l'empreinte de cette clé ; une clé différente
+    /// de celle déjà épinglée pour ce `cog_id` est refusée. L'épinglage (TOFU) n'a lieu qu'à
+    /// la délivrance du permis, après les phases du mode strict.
     /// Le défi n'est utilisable qu'une fois par session.
     #[allow(clippy::too_many_lines)] // séquence de contrôles fail-closed, lue d'un bloc
     async fn handle_register(
@@ -733,8 +795,9 @@ impl RelayServer {
             return Self::refus(RegisterErrorCode::AuthFailed, b"Invalid identity proof");
         }
 
-        // TOFU : épingler la clé au premier usage, refuser une autre clé ensuite.
-        if let Err(e) = ctx.identites.epingler(&cog_id, &cle).await {
+        // TOFU : refuser une clé différente d'une clé déjà épinglée. L'épinglage lui-même
+        // n'a lieu qu'à la délivrance du permis (identité entièrement vérifiée).
+        if let Err(e) = ctx.identites.verifier_compatible(&cog_id, &cle).await {
             warn!("REGISTER refused for {}: {}", cog_id, e);
             metrics.record_registration(false);
             rate_limiter.record_failed_registration(client_ip).await;
@@ -812,16 +875,37 @@ impl RelayServer {
     }
 
     /// Délivre un permis lié au `cog_id` prouvé et construit `REGISTER_OK`.
+    ///
+    /// O-01 : c'est ici, et seulement ici, que la clé d'identité est épinglée — après la
+    /// preuve REGISTER et les phases du mode strict. Un refus d'épinglage (clé concurrente,
+    /// registre plein, persistance impossible) refuse l'enregistrement (fail-closed).
     async fn delivrer_permis(
         session: &Arc<RwLock<Session>>,
         ctx: &ContexteRelay,
         cog_id: &str,
         client_ip: std::net::IpAddr,
     ) -> Frame {
-        let (session_id, permis_id) = {
+        let (session_id, permis_id, cle) = {
             let s = session.read().await;
-            (s.id, s.generate_permis_id())
+            (s.id, s.generate_permis_id(), s.cle_identite)
         };
+        let epinglage = match cle {
+            Some(cle) if session.read().await.identite_verifiee => {
+                ctx.identites.epingler(cog_id, &cle).await
+            }
+            _ => Err(RefusEpinglage::CleDifferente),
+        };
+        if let Err(e) = epinglage {
+            warn!("Permit refused for {}: {}", cog_id, e);
+            ctx.metrics.record_registration(false);
+            ctx.rate_limiter.record_failed_registration(client_ip).await;
+            session.write().await.close();
+            let err = RegisterErrPayload::new(
+                RegisterErrorCode::AuthFailed,
+                Bytes::from_static(b"Identity pinning refused"),
+            );
+            return Frame::new(MessageType::RegisterErr, err.to_bytes());
+        }
         let permis_expires = chrono::Utc::now() + chrono::Duration::hours(24);
 
         let mut session_key = [0u8; 32];
@@ -1250,7 +1334,8 @@ mod tests {
         // REGISTER signé → VERIFY_RESULT (Phase A demandée).
         let (session, r) = enregistrer(&serveur, &identite).await;
         assert_eq!(r.expect("réponse").header.message_type, MessageType::VerifyResult);
-        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_some());
+        // Pas encore épinglé : les phases du mode strict ne sont pas passées.
+        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_none());
 
         // CORE_KEY → REGISTER_OK, permis lié au cog_id prouvé.
         let id = session.read().await.id;
@@ -1265,6 +1350,115 @@ mod tests {
         let permis_id = session.read().await.permis.clone().expect("permis").permis_id;
         assert!(permis.is_valid_for(&permis_id, &identite.cog_id()).await);
         assert!(!permis.is_valid_for(&permis_id, &IdentiteCog::generer().cog_id()).await);
+        // Épinglé seulement après la délivrance du permis.
+        assert_eq!(
+            identites.cle_epinglee(&identite.cog_id()).await,
+            Some(identite.cle_publique())
+        );
+    }
+
+    #[tokio::test]
+    async fn register_echoue_n_epingle_rien() {
+        let (serveur, _, identites) = serveur(true);
+        serveur
+            .ctx
+            .verifier
+            .add_core_key("1.0.0".to_string(), Sha256::digest(b"cle-cores").to_vec())
+            .await;
+
+        // Preuve invalide (mauvais défi) : aucun épinglage.
+        let identite = IdentiteCog::generer();
+        let session = serveur.ctx.sessions.create(adresse()).await;
+        let payload = register_client(&identite.cog_id()).to_origin_bytes_signe(
+            &identite,
+            &[0xAA; 32],
+            &serveur.ctx.identite_relay,
+        );
+        let r = RelayServer::handle_register(&payload, &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_none());
+
+        // Preuve valide mais Phase A échouée (mauvaise clé Cores) : aucun épinglage.
+        let identite = IdentiteCog::generer();
+        let (session, r) = enregistrer(&serveur, &identite).await;
+        assert_eq!(r.expect("réponse").header.message_type, MessageType::VerifyResult);
+        let id = session.read().await.id;
+        let mut ck = BytesMut::new();
+        ck.extend_from_slice(&id);
+        ck.extend_from_slice(&(9u16).to_be_bytes());
+        ck.extend_from_slice(b"mauvaise!");
+        let r = RelayServer::handle_core_key(&ck.freeze(), &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(r.header.message_type, MessageType::VerifyResult);
+        assert!(identites.cle_epinglee(&identite.cog_id()).await.is_none());
+
+        // Aucune place du registre consommée.
+        assert_eq!(identites.nombre().await, 0);
+    }
+
+    #[tokio::test]
+    async fn permis_refuse_si_cle_epinglee_entre_temps() {
+        // Course : une autre clé est épinglée entre REGISTER et la délivrance du permis.
+        let (serveur, permis, identites) = serveur(true);
+        serveur
+            .ctx
+            .verifier
+            .add_core_key("1.0.0".to_string(), Sha256::digest(b"cle-cores").to_vec())
+            .await;
+        let identite = IdentiteCog::generer();
+        let (session, _) = enregistrer(&serveur, &identite).await;
+        identites
+            .epingler(&identite.cog_id(), &[0x22; 32])
+            .await
+            .expect("épinglage");
+        let id = session.read().await.id;
+        let mut ck = BytesMut::new();
+        ck.extend_from_slice(&id);
+        ck.extend_from_slice(&(9u16).to_be_bytes());
+        ck.extend_from_slice(b"cle-cores");
+        let r = RelayServer::handle_core_key(&ck.freeze(), &session, &serveur.ctx, adresse().ip())
+            .await
+            .expect("réponse");
+        assert_eq!(code_refus(&r), Some(RegisterErrorCode::AuthFailed));
+        assert_eq!(session.read().await.state, SessionState::Closed);
+        assert!(session.read().await.permis.is_none());
+        let _ = permis;
+    }
+
+    #[tokio::test]
+    async fn plafond_injections_par_session_et_purge_a_la_fermeture() {
+        let inj = HttpInjector::new();
+        let session = [1u8; SESSION_ID_SIZE];
+        let autre = [2u8; SESSION_ID_SIZE];
+        let mut receveurs = Vec::new();
+        for _ in 0..MAX_INJECTIONS_PAR_SESSION {
+            receveurs.push(inj.register(session).await.expect("sous le plafond"));
+        }
+        assert_eq!(
+            inj.register(session).await.err(),
+            Some(RefusInjection::PlafondSession)
+        );
+        // Une autre session n'est pas affectée.
+        let (_, _rx_autre) = inj.register(autre).await.expect("autre session");
+
+        // Un abandon libère une place.
+        let (id0, _) = receveurs.remove(0);
+        inj.abandon(&id0).await;
+        receveurs.push(inj.register(session).await.expect("place libérée"));
+
+        // Fermeture de la session : toutes ses attentes sont purgées, les demandeurs
+        // voient le canal fermé immédiatement.
+        assert_eq!(inj.purger_session(&session).await, MAX_INJECTIONS_PAR_SESSION);
+        for (_, rx) in receveurs {
+            assert!(rx.await.is_err());
+        }
+        assert_eq!(inj.pending.read().await.par_id.len(), 1);
+        assert!(!inj.pending.read().await.par_session.contains_key(&session));
+        // Après purge, le plafond est de nouveau disponible.
+        assert!(inj.register(session).await.is_ok());
     }
 
     #[tokio::test]

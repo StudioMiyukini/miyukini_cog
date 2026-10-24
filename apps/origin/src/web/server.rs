@@ -69,27 +69,70 @@ fn entete_sur(valeur: &str, defaut: &str) -> String {
     }
 }
 
-/// Retire de la réponse d'un sous-domaine COG les `Set-Cookie` portant un attribut `Domain`
-/// (un COG ne doit pas poser de cookie sur le domaine principal ni sur les autres COG).
-fn assainir_reponse_sous_domaine(reponse: &[u8]) -> Vec<u8> {
-    let Some(fin) = reponse.windows(4).position(|w| w == b"\r\n\r\n") else {
-        return reponse.to_vec();
-    };
+/// Politique de bac à sable appliquée au contenu d'un sous-domaine COG (O-04) : même
+/// traitement que `/visit` sur hôte dédié — scripts permis mais origine opaque (jamais
+/// `allow-same-origin`). Un document en origine opaque n'est pas « même site » que le
+/// domaine principal : ses requêtes ne portent pas les cookies `SameSite` de l'admin.
+const CSP_SOUS_DOMAINE: &str = "Content-Security-Policy: sandbox allow-scripts allow-forms \
+allow-popups allow-popups-to-escape-sandbox; frame-ancestors 'none'";
+
+/// Un `Set-Cookie` est-il hôte seul (aucun attribut `Domain`) ? Seul ce cas est conservé :
+/// le cookie reste alors confiné au sous-domaine exact du COG.
+fn cookie_hote_seul(valeur: &str) -> bool {
+    valeur
+        .split(';')
+        .skip(1)
+        .all(|attribut| {
+            let nom = attribut.split('=').next().unwrap_or("").trim();
+            !nom.eq_ignore_ascii_case("domain")
+        })
+}
+
+/// Assainit la réponse brute d'un sous-domaine COG (Phase 2, tunnel) avant de la servir.
+///
+/// O-04 (cookie tossing, confiance « même site ») :
+/// - tout `Set-Cookie` portant un attribut `Domain` est retiré (un COG ne peut poser de
+///   cookie ni sur le domaine principal ni sur les autres COG) ; seuls les cookies hôte
+///   seul sont conservés ;
+/// - les lignes repliées (obs-fold), `Set-Cookie2` et les en-têtes sans `:` sont retirés ;
+/// - la réponse est servie en bac à sable CSP sans `allow-same-origin`, avec `nosniff`.
+///
+/// Retourne `None` (réponse refusée, fail-closed) si la réponse n'est pas du HTTP/1.x bien formé.
+fn assainir_reponse_sous_domaine(reponse: &[u8]) -> Option<Vec<u8>> {
+    let fin = reponse.windows(4).position(|w| w == b"\r\n\r\n")?;
     let (entetes, corps) = reponse.split_at(fin);
-    let entetes = String::from_utf8_lossy(entetes);
-    let mut sortie = Vec::with_capacity(reponse.len());
-    for (i, ligne) in entetes.split("\r\n").enumerate() {
-        let minuscule = ligne.to_ascii_lowercase();
-        if minuscule.starts_with("set-cookie:") && minuscule.contains("domain=") {
+    let entetes = std::str::from_utf8(entetes).ok()?;
+    let mut lignes = entetes.split("\r\n");
+    let statut = lignes.next()?;
+    if !(statut.starts_with("HTTP/1.1 ") || statut.starts_with("HTTP/1.0 "))
+        || statut.chars().any(char::is_control)
+    {
+        return None;
+    }
+    let mut sortie = Vec::with_capacity(reponse.len() + CSP_SOUS_DOMAINE.len() + 64);
+    sortie.extend_from_slice(statut.as_bytes());
+    for ligne in lignes {
+        if ligne.starts_with([' ', '\t']) || ligne.chars().any(char::is_control) {
+            continue; // obs-fold ou caractère de contrôle : retiré
+        }
+        let Some((nom, valeur)) = ligne.split_once(':') else {
+            continue;
+        };
+        let nom = nom.trim();
+        if nom.eq_ignore_ascii_case("set-cookie2") {
             continue;
         }
-        if i > 0 {
-            sortie.extend_from_slice(b"\r\n");
+        if nom.eq_ignore_ascii_case("set-cookie") && !cookie_hote_seul(valeur) {
+            continue;
         }
+        sortie.extend_from_slice(b"\r\n");
         sortie.extend_from_slice(ligne.as_bytes());
     }
+    sortie.extend_from_slice(b"\r\n");
+    sortie.extend_from_slice(CSP_SOUS_DOMAINE.as_bytes());
+    sortie.extend_from_slice(b"\r\nX-Content-Type-Options: nosniff");
     sortie.extend_from_slice(corps);
-    sortie
+    Some(sortie)
 }
 
 /// Serveur web public.
@@ -776,9 +819,10 @@ async fn handle_cog_subdomain_request(
                     config.identity.domain.as_deref().unwrap_or("miyukini.com"),
                     cog_id
                 );
-                return raw_http_response_to_route(&assainir_reponse_sous_domaine(
-                    &response_bytes,
-                ));
+                return match assainir_reponse_sous_domaine(&response_bytes) {
+                    Some(assainie) => raw_http_response_to_route(&assainie),
+                    None => bad_gateway(),
+                };
             }
             Err(e) => {
                 debug!(
@@ -810,10 +854,12 @@ async fn handle_cog_subdomain_request(
             );
 
             match proxy_http_request(&adresse, path).await {
-                Ok(reponse) => RouteResponse::Normal {
+                // Contenu du COG : non fiable, en bac à sable sans `allow-same-origin` (O-04).
+                Ok(reponse) => RouteResponse::NonFiable {
                     status: reponse.status,
                     content_type: reponse.content_type,
-                    body: String::from_utf8_lossy(&reponse.body).into_owned(),
+                    body: reponse.body,
+                    scripts: true,
                 },
                 Err(e) => {
                     warn!(
@@ -2182,12 +2228,31 @@ mod tests {
     }
 
     #[test]
-    fn sous_domaine_cookie_avec_domain_retire() {
-        let brute = b"HTTP/1.1 200 OK\r\nSet-Cookie: a=1; Path=/\r\nset-cookie: b=2; Domain=.miyukini.com\r\n\r\ncorps";
-        let r = String::from_utf8(super::assainir_reponse_sous_domaine(brute)).expect("utf8");
+    fn sous_domaine_ne_peut_pas_poser_de_cookie_parent() {
+        let brute = b"HTTP/1.1 200 OK\r\nSet-Cookie: a=1; Path=/; Secure\r\nset-cookie: b=2; Domain=.miyukini.com\r\nSet-Cookie: c=3; path=/; DOMAIN = miyukini.com\r\nSet-Cookie: __Host-admin_session=x; Path=/; domain=miyukini.com\r\nSet-Cookie2: d=4\r\nX-Pli: ok\r\n Set-Cookie: e=5; Domain=miyukini.com\r\n\r\ncorps";
+        let r = String::from_utf8(super::assainir_reponse_sous_domaine(brute).expect("réponse"))
+            .expect("utf8");
+        // Cookie hôte seul : conservé (confiné au sous-domaine du COG).
         assert!(r.contains("Set-Cookie: a=1"));
+        // Tout cookie avec Domain (quelle que soit la casse ou les espaces) : retiré.
         assert!(!r.contains("b=2"));
+        assert!(!r.contains("c=3"));
+        assert!(!r.contains("__Host-admin_session"));
+        assert!(!r.contains("d=4"));
+        // Ligne repliée (obs-fold) : retirée.
+        assert!(!r.contains("e=5"));
+        // Bac à sable CSP sans allow-same-origin.
+        assert!(r.contains("Content-Security-Policy: sandbox allow-scripts"));
+        assert!(!r.contains("allow-same-origin"));
+        assert!(r.contains("X-Content-Type-Options: nosniff"));
         assert!(r.ends_with("\r\n\r\ncorps"));
+    }
+
+    #[test]
+    fn sous_domaine_reponse_mal_formee_refusee() {
+        assert!(super::assainir_reponse_sous_domaine(b"pas du http").is_none());
+        assert!(super::assainir_reponse_sous_domaine(b"FOO 200\r\n\r\n").is_none());
+        assert!(super::assainir_reponse_sous_domaine(b"HTTP/1.1 200 OK\r\nX: \xff\r\n\r\n").is_none());
     }
 
     #[test]

@@ -463,6 +463,11 @@ pub struct AdminConfig {
     /// Chemin du fichier de configuration admin.
     #[serde(default)]
     pub config_file: Option<String>,
+    /// Origine publique exacte du panneau admin (ex. `https://admin.miyukini.com`), exigée
+    /// dans `Origin`/`Referer` de toute requête modifiante (anti-CSRF). Défaut :
+    /// `https://<identity.domain>`, sinon `https://<Host>` de la requête.
+    #[serde(default)]
+    pub public_origin: Option<String>,
 }
 
 impl Default for AdminConfig {
@@ -471,6 +476,7 @@ impl Default for AdminConfig {
             host: default_admin_host(),
             port: default_admin_port(),
             config_file: None,
+            public_origin: None,
         }
     }
 }
