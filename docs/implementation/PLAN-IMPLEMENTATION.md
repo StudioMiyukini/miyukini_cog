@@ -124,7 +124,8 @@
   - **Fait** : passeport par COG de destination, visa après preuve de possession, identifiant par COG, révocation fail-closed (4277203c, e34f1f08)
   - **Reste** : chaîne racine → clé d'émission ; adaptateur révocation ← tête de registre ; une clé d'appareil par COG (non-corrélation complète)
 - **Sortie** : plus aucune authentification par secret partagé sur les points exposés
-  - **Statut** : non atteinte — 23 points recensés ([inventaire](INVENTAIRE-SECRETS-PARTAGES.md)), à remplacer par passeport, visa et preuve de possession
+  - **Statut (2026-10-24)** : **atteinte** — les 23 points de l'[inventaire](INVENTAIRE-SECRETS-PARTAGES.md) sont remplacés (passeport, visa et preuve de possession ; requêtes machine signées ; sessions serveur) ou classés exceptions justifiées (DAV Basic en TLS, WOPI ≤ 15 min, salon Tracker, admin local de miyukini-admin) (053c3c38, 2a8378e5, 2cf67520, 283e11e1, 9203b811, b820fadb)
+  - **Reste (lot 2 suite)** : clients de connexion admin Origin et forum (Central émetteur de passeports vers Origin, extension phpBB) ; flux de révocation entre COG (Origin et MiyuCloud se reposent sur la durée ≤ 15 min) ; interface MiyuCloud de liaison d'identité et de clé d'appareil ; régénération d'identité dans l'application mobile ; défis et nonces en mémoire (une instance) ; PoP liée à la requête, pas au canal TLS (lot 3) ; clé LM Studio présente dans l'historique git (à révoquer)
   - **Choix non fixés par la doc gelée** : **inscrits par l'amendement [A-003](../architecture/GEL-DOC-CONCEPTUELLE-v1.md)** (doc v1.3) — champs et durées de la tête de registre, 2 sur 2 du canal officiel, encodages Merkle et d'état ; table des chemins SLIP-10 et type de la passation ; champs `destination`, `sujet` et `cle_appareil` du passeport et du visa, fraîcheur de révocation de 15 min ; **C-24 révisée** (inventaire crypto complet, dont `hmac`, `pbkdf2`, `hkdf`)
 
 ## 5. Lot 3 — Frontières
