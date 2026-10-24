@@ -39,15 +39,23 @@ const ALLOWED_COMMANDS: &[&str] = &[
     "ls", "cat", "head", "tail", "wc", "sort", "uniq", "grep", "rg", "echo", "printf",
 ];
 
-/// Options refusées même pour une commande de la whitelist, car elles
-/// exécutent un programme externe ou lisent une liste de fichiers arbitraire.
-const BLOCKED_OPTIONS: &[&str] = &[
-    "--pre",              // rg : préprocesseur = commande arbitraire
-    "--pre-glob",
-    "--compress-program", // sort : programme de compression arbitraire
-    "--files0-from",      // wc/sort : liste de fichiers hors sandbox
-    "--search-zip",       // rg -z : lance des décompresseurs externes
-    "-z",
+/// Options courtes autorisées par commande (whitelist, lettres sans valeur).
+///
+/// Les options longues sont TOUTES refusées : GNU accepte les abréviations
+/// (`--compress-prog`) et les valeurs collées, une blocklist est contournable.
+/// Exclues volontairement : `sort -o/-T` (écriture), `rg -z/--pre`
+/// (programmes externes), `grep -f` / `wc --files0-from` (lecture hors sandbox).
+/// `echo` et `printf` n'accèdent à aucun fichier : arguments libres.
+const ALLOWED_SHORT_FLAGS: &[(&str, &str)] = &[
+    ("ls", "lahR1rtS"),
+    ("cat", "n"),
+    ("head", "n"),
+    ("tail", "n"),
+    ("wc", "lwcm"),
+    ("sort", "rnufb"),
+    ("uniq", "cdui"),
+    ("grep", "inrvclwEFo"),
+    ("rg", "invclwF"),
 ];
 
 /// Commandes interdites (blocklist — même si elles passent la whitelist via shell).
@@ -116,10 +124,13 @@ fn check_command_allowed(command: &str) -> Result<(), String> {
     ))
 }
 
-/// Valide les arguments : pas de chemin absolu ni de `..` (tout reste relatif
-/// au sandbox), pas d'option qui exécute un programme, et blocklist appliquée
-/// à la ligne complète (commande + arguments).
-fn check_args_allowed(args: &[String]) -> Result<(), String> {
+/// Valide les arguments de `command` (fail-closed) :
+/// - options : seulement des groupes courts (`-n`, `-la`) dont chaque lettre est
+///   dans la whitelist de la commande ; toute option longue est refusée ;
+///   après `--`, tout est positionnel ;
+/// - positionnels : chemins relatifs au sandbox (pas d'absolu, `~`, `..`) ;
+/// - blocklist appliquée à la ligne complète.
+fn check_args_allowed(command: &str, args: &[String]) -> Result<(), String> {
     use std::path::{Component, Path};
     let joined = args.join(" ").to_lowercase();
     for blocked in BLOCKED_PATTERNS {
@@ -127,21 +138,39 @@ fn check_args_allowed(args: &[String]) -> Result<(), String> {
             return Err("Arguments bloqués par la politique de sécurité".into());
         }
     }
+    let command = command.to_ascii_lowercase();
+    if command == "echo" || command == "printf" {
+        return Ok(());
+    }
+    let letters = ALLOWED_SHORT_FLAGS
+        .iter()
+        .find(|(c, _)| *c == command)
+        .map(|(_, l)| *l)
+        .ok_or_else(|| format!("Aucune option définie pour '{command}'"))?;
+
+    let mut options_done = false;
     for arg in args {
-        let opt = arg.split('=').next().unwrap_or(arg);
-        if BLOCKED_OPTIONS.iter().any(|b| opt.eq_ignore_ascii_case(b)) {
-            return Err(format!("Option refusée : {opt}"));
+        if !options_done && arg == "--" {
+            options_done = true;
+            continue;
         }
-        // Une valeur d'option (`--file=/etc/x`) est aussi un chemin potentiel.
-        let value = arg.split_once('=').map(|(_, v)| v).unwrap_or(arg);
-        for candidate in [arg.as_str(), value] {
-            let path = Path::new(candidate);
-            if path.is_absolute()
-                || candidate.starts_with('~')
-                || path.components().any(|c| matches!(c, Component::ParentDir | Component::Prefix(_) | Component::RootDir))
-            {
-                return Err(format!("Argument hors sandbox refusé : {arg}"));
+        if !options_done && arg.starts_with('-') && arg.len() > 1 {
+            if arg.starts_with("--") {
+                return Err(format!("Option longue refusée : {arg}"));
             }
+            if let Some(bad) = arg[1..].chars().find(|c| !letters.contains(*c)) {
+                return Err(format!("Option -{bad} non autorisée pour {command}"));
+            }
+            continue;
+        }
+        let path = Path::new(arg);
+        if path.is_absolute()
+            || arg.starts_with('~')
+            || path
+                .components()
+                .any(|c| matches!(c, Component::ParentDir | Component::Prefix(_) | Component::RootDir))
+        {
+            return Err(format!("Argument hors sandbox refusé : {arg}"));
         }
     }
     Ok(())
@@ -207,7 +236,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         })
         .unwrap_or_default();
 
-    if let Err(msg) = check_args_allowed(&args) {
+    if let Err(msg) = check_args_allowed(command, &args) {
         return refuse(msg);
     }
 
@@ -329,22 +358,42 @@ mod tests {
     #[test]
     fn arguments_hors_sandbox_refuses() {
         let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
-        assert!(check_args_allowed(&a(&["notes.txt"])).is_ok());
-        assert!(check_args_allowed(&a(&["-n", "motif", "src"])).is_ok());
-        assert!(check_args_allowed(&a(&["/etc/passwd"])).is_err());
-        assert!(check_args_allowed(&a(&["../secret"])).is_err());
-        assert!(check_args_allowed(&a(&["a/../../b"])).is_err());
-        assert!(check_args_allowed(&a(&["~/.ssh/id_ed25519"])).is_err());
-        assert!(check_args_allowed(&a(&["--file=/etc/shadow"])).is_err());
+        assert!(check_args_allowed("cat", &a(&["notes.txt"])).is_ok());
+        assert!(check_args_allowed("grep", &a(&["-n", "motif", "src"])).is_ok());
+        assert!(check_args_allowed("ls", &a(&["-la", "docs"])).is_ok());
+        assert!(check_args_allowed("cat", &a(&["/etc/passwd"])).is_err());
+        assert!(check_args_allowed("cat", &a(&["../secret"])).is_err());
+        assert!(check_args_allowed("cat", &a(&["a/../../b"])).is_err());
+        assert!(check_args_allowed("cat", &a(&["~/.ssh/id_ed25519"])).is_err());
+        assert!(check_args_allowed("cat", &a(&["--", "/etc/passwd"])).is_err());
+        assert!(check_args_allowed("grep", &a(&["--file=/etc/shadow", "x"])).is_err());
+    }
+
+    #[test]
+    fn contournements_revue_securite_refuses() {
+        let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        // Valeur collée à une option courte (écriture hors sandbox).
+        assert!(check_args_allowed("sort", &a(&["-o/etc/cron.d/x", "f"])).is_err());
+        assert!(check_args_allowed("sort", &a(&["-T/tmp", "f"])).is_err());
+        // Abréviations GNU d'options longues.
+        assert!(check_args_allowed("sort", &a(&["--compress-prog=sh", "f"])).is_err());
+        assert!(check_args_allowed("rg", &a(&["--pr=sh", "x"])).is_err());
+        // Groupes d'options courtes contenant une lettre interdite.
+        assert!(check_args_allowed("rg", &a(&["-nz", "x"])).is_err());
+        assert!(check_args_allowed("grep", &a(&["-nf", "motifs"])).is_err());
+        // Commande hors whitelist d'options.
+        assert!(check_args_allowed("python", &a(&["x"])).is_err());
+        // echo/printf : aucun accès fichier, arguments libres.
+        assert!(check_args_allowed("echo", &a(&["-e", "/etc/passwd"])).is_ok());
     }
 
     #[test]
     fn options_executantes_refusees() {
         let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
-        assert!(check_args_allowed(&a(&["--pre=sh", "x"])).is_err());
-        assert!(check_args_allowed(&a(&["--pre", "sh", "x"])).is_err());
-        assert!(check_args_allowed(&a(&["--compress-program=sh"])).is_err());
-        assert!(check_args_allowed(&a(&["-z", "x"])).is_err());
+        assert!(check_args_allowed("rg", &a(&["--pre=sh", "x"])).is_err());
+        assert!(check_args_allowed("rg", &a(&["--pre", "sh", "x"])).is_err());
+        assert!(check_args_allowed("sort", &a(&["--compress-program=sh"])).is_err());
+        assert!(check_args_allowed("rg", &a(&["-z", "x"])).is_err());
     }
 
     #[tokio::test]
