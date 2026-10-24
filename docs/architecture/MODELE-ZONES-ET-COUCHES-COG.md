@@ -7,7 +7,7 @@
 <!-- @do define_cog_zones_and_layers -->
 
 - **Statut** : référence, 2026-10-24 (schéma de l'auteur, v2)
-- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd) · [menaces](../securite/MODELE-MENACES-COG.md)
+- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd) · [menaces](../securite/MODELE-MENACES-COG.md) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md)
 
 ## 1. Principes
 
@@ -165,7 +165,7 @@
 <!-- @human Un service se coupe en moteur (zone COG) et relais (Franche) reliés par une DB secondaire temps réel ; exemple JayOffice -->
 <!-- @do relay_service_between_cogs -->
 
-**Principe**
+**Principe** (détail : [services hybrides et Portail](SERVICES-HYBRIDES-ET-PORTAIL.md))
 - Le **moteur** du service et ses prérequis restent en zone COG, isolés
 - Un **agent relais** en Franche porte la partie collaborative externe
 - Une **DB secondaire** temps réel en Franche sert de tampon

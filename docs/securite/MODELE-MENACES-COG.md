@@ -245,6 +245,7 @@
 - **EX-37** Note locale des pairs (ban score) et anti-éclipse (diversité des pairs)
 - **EX-38** Preuve de calcul légère à la candidature fédérale
 - **EX-39** Évolutions du protocole fédéral activées par seuil de signalement des membres
+- **EX-40 à EX-49** Services hybrides et Portail : voir [services hybrides](../architecture/SERVICES-HYBRIDES-ET-PORTAIL.md) §6
 
 ## 10. Priorités
 
