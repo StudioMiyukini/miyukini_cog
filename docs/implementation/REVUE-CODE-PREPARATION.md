@@ -117,10 +117,11 @@
 | R-016 | haute | ✅ lot 0 (ae59e034) — Alicia API : `/dispatch/confirm` sans état exécute directement une capacité soumise à confirmation (contournement du garde-fou) — n'exécuter que l'enregistrement en attente | C-12 |
 | R-017 | moyenne | ✅ lot 0 (ae59e034) — Alicia : confirmation en attente non réclamée atomiquement → double exécution possible (`capabilities_runtime.rs`) | C-12 |
 | R-018 | moyenne | ✅ lot 0 (cee31a09, a71adb22) — `jaymail-client` : `send_mail` piloté par l'IA accepte `bcc` → exfiltration par injection ; afficher tous les destinataires à la confirmation, refuser `bcc` depuis l'IA, signaler les destinataires hors contacts | C-50, C-51 |
-| R-019 | haute | `miyukini-cog-bridge/src/e2e.rs` (pont Android) : `sha256()` n'est pas SHA-256 (XOR + DefaultHasher), handshake non signé, compteurs de nonce partagés entre les deux sens → réutilisation de nonce | C-24 |
-| R-020 | moyenne | jay-collab : `set_acl` retire le membre mais ne coupe pas son flux d'événements (révocation incomplète) — jeton d'annulation par connexion | C-12 |
-| R-021 | moyenne | jay-collab : plafond anti-rejeu global → saturation par un seul utilisateur ; ACL avant enregistrement du nonce, plafond par identité | C-13 |
-| R-022 | moyenne | jay-collab : jeton de jonction sans audience (serveur) → relais possible vers un autre serveur pendant 120 s ; ajouter l'identité du serveur ou un défi-réponse | C-23 |
+| R-019 | haute | ✅ (9f6f6794, bibliothèque ; chaîne produit → R-023) — `miyukini-cog-bridge/src/e2e.rs` (pont Android) : `sha256()` n'est pas SHA-256 (XOR + DefaultHasher), handshake non signé, compteurs de nonce partagés entre les deux sens → réutilisation de nonce | C-24 |
+| R-020 | moyenne | ✅ (cde0cb2c) — jay-collab : `set_acl` retire le membre mais ne coupe pas son flux d'événements (révocation incomplète) — jeton d'annulation par connexion | C-12 |
+| R-021 | moyenne | ✅ (cde0cb2c) — jay-collab : plafond anti-rejeu global → saturation par un seul utilisateur ; ACL avant enregistrement du nonce, plafond par identité | C-13 |
+| R-022 | moyenne | ✅ (cde0cb2c) — jay-collab : jeton de jonction sans audience (serveur) → relais possible vers un autre serveur pendant 120 s ; ajouter l'identité du serveur ou un défi-réponse | C-23 |
+| R-023 | haute | Mobile : si le handshake E2E échoue, la connexion continue en clair et envoie email + mot de passe ; route COG `/api/bridge/e2e-handshake` absente, identités non provisionnées au pairing | C-12, C-23 |
 
 ## 7. Livrables
 
