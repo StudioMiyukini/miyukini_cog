@@ -1,0 +1,33 @@
+%% @id arch.cog.schema-global.v6
+%% @role architecture-diagram
+%% @human Schéma global COG — V6 · Cycle de vie
+%% @do visualize_cog_v6
+%% Référence : docs/architecture/COG-VUE-GLOBALE.md §1
+flowchart LR
+    subgraph BOOT["Démarrage"]
+        B1["Kernel"] --> B2["MiyukiniAdmin détecte"] --> B3["EIP"] --> B4{"Vierge ?<br/>Initialisé ?<br/>Compromis ?"}
+        B4 -- "Vierge" --> B5["jeton de setup console<br/>premier admin"]
+        B4 -- "Compromis" --> B6["recovery gouverné"]
+    end
+    subgraph INST["Installation d'un service"]
+        I1["paquet msp:sha256 signé"] --> I2["contrat + traité + classe H"] --> I3["StrongFather valide"] --> I4["arrêté : Franche, voies, Douane"] --> I5["exposition désactivée par défaut"]
+    end
+    subgraph MEM["Mémoire MAIA"]
+        M1["notes candidates (S1)"] --> M2["validation utilisateur"] --> M3["versionnage"] --> M4["sommeil : consolidation"] --> M5["oubli à la demande"]
+    end
+    subgraph FEDE["Vie fédérale"]
+        F1["candidat + hashcash"] --> F2["invité ≥2"] --> F3["membre ≥4 · 7 j"]
+        F3 -- "preuves + quorum 6" --> F4["blacklisté : identité révoquée"]
+        F4 -- "nouvelle racine" --> F1
+    end
+    class B1,B2,B3,B5,B6,I1,I2,I3,I4,I5,M1,M2,M3,M4,M5 nat
+    class B4 key
+    class F1,F2,F3,F4 fed
+
+    classDef ext fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef fed fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef fw fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    classDef franche fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef nat fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef core fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef key fill:#fef9c3,stroke:#ca8a04,color:#713f12

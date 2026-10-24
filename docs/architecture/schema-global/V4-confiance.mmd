@@ -1,0 +1,44 @@
+%% @id arch.cog.schema-global.v4
+%% @role architecture-diagram
+%% @human Schéma global COG — V4 · Confiance
+%% @do visualize_cog_v4
+%% Référence : docs/architecture/COG-VUE-GLOBALE.md §1
+flowchart TB
+    ROOT[["🔑 Racine COG<br/>USB hors ligne · SLIP-39 2 sur 3<br/>cog_id = empreinte"]]
+    subgraph CLES["Clés dérivées SLIP-10 (90 j)"]
+        KE["émission passeports"]
+        KV["visas"]
+        KA["arrêtés réseau"]
+        KJ["journal"]
+    end
+    CONST["📜 Constitution réseau"]
+    ARR["Arrêtés des Cores"]
+    PASS["🪪 Passeport 30 j<br/>clé d'appareil"]
+    VISA["🎫 Visa 15 min<br/>par service / session"]
+    REG[("Registre Merkle local")]
+    FREG[("Registre Merkle fédéral")]
+    ORIG["🏛️ Origin<br/>certification globale · seuil 2 sur 2"]
+    PEER["🏛️ COG membres"]
+    ROOT -- "dérive" --> CLES
+    ROOT == "scelle" ==> CONST
+    KA == "scelle" ==> ARR
+    CONST -. "borne" .-> ARR
+    KE == "émet" ==> PASS
+    KV == "émet" ==> VISA
+    PASS -- "preuve de possession" --> VISA
+    KJ == "signe les têtes" ==> REG
+    PEER -- "confirmations 24 h<br/>invité ≥2 · membre ≥4 pendant 7 j" --> FREG
+    PEER -- "blacklist : preuves + quorum 6" --> FREG
+    ORIG -. "témoin des têtes" .-> FREG
+    ROOT -. "reconnaissance croisée" .-> PEER
+    class ROOT,KE,KV,KA,KJ key
+    class CONST,ARR,PASS,VISA,REG nat
+    class FREG,ORIG,PEER fed
+
+    classDef ext fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef fed fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef fw fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    classDef franche fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef nat fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef core fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef key fill:#fef9c3,stroke:#ca8a04,color:#713f12

@@ -1,0 +1,29 @@
+%% @id arch.cog.schema-global.v5
+%% @role architecture-diagram
+%% @human Schéma global COG — V5 · Flux
+%% @do visualize_cog_v5
+%% Référence : docs/architecture/COG-VUE-GLOBALE.md §1
+sequenceDiagram
+    autonumber
+    participant APP as 📱 Appareil (Fédération)
+    participant DOU as 🛂 Douane externe
+    participant FAC as 🏪 Façade Franche
+    participant POR as 🚪 Portail interne
+    participant COG as 🏛️ Zone COG (moteur + Cores)
+    participant ORI as 🏛️ Origin
+    Note over APP,COG: Accès distant / session relayée
+    APP->>DOU: passeport + preuve de possession
+    DOU->>FAC: connexion après visa (session)
+    FAC->>FAC: écriture à chaud, DB secondaire
+    COG->>POR: relève (la zone COG tire)
+    POR->>COG: déclarations MSCE dédouanées (CDR)
+    COG->>COG: StrongFather décide · KindMother persiste
+    COG->>POR: publication (étiquette session / publiable)
+    POR->>FAC: réponse
+    Note over ORI,COG: Mise à jour officielle
+    ORI->>DOU: paquet signé 2 sur 2 + preuve Merkle
+    DOU->>POR: dépôt officiel (voie réservée)
+    COG->>POR: relève après 48 h, vérifie chez elle
+    Note over FAC,COG: Incident
+    FAC-->>COG: Vigie : anomalie
+    COG->>DOU: WorrySentinel élève le niveau → coupure de voie

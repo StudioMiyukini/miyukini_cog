@@ -229,8 +229,8 @@
 - **LogisticsSteward** : calcule et attribue les ressources (taille de la Franche, quotas par service et par session)
 - **CaringNanny** : lit les informations du noyau (ressources disponibles, consommation, pression) et ajuste **sous** les maxima déclarés
 - **StrongFather** : valide le contrat à l'installation
-- **BorderGuard** (IPS) : applique — paquets autorisés, débit, taille, par service
-- **WorrySentinel** (IDS) : tout dépassement de contrat = anomalie → incident
+- **BorderGuard** définit, la **Douane** (IPS) applique — paquets autorisés, débit, taille, par service
+- **WorrySentinel** (signaux des Vigies) : tout dépassement de contrat = anomalie → incident
 
 **Ce que les Cores produisent**
 - Franche : un slice systemd par service (cgroups CPU / RAM / IO), espace disque borné
@@ -264,15 +264,15 @@
 <!-- @id arch.cog.ids-ips -->
 <!-- @role intrusion-detection -->
 <!-- @layer 3-7 -->
-<!-- @human WorrySentinel = IDS (détecte, ne modifie pas) ; BorderGuard = IPS (bloque aux frontières) -->
+<!-- @human Les Cores gouvernent, des opérateurs exécutent : Vigies (IDS) sous WorrySentinel, Douane (pare-feu + IPS) sous BorderGuard -->
 <!-- @do detect_and_block_intrusions -->
 
 **Répartition des rôles**
-- **WorrySentinel = IDS** — détecte et qualifie, **ne modifie rien** (INV-WS-4)
+- **WorrySentinel** gouverne la détection, **ne lance aucune vérification** (INV-WS-2) ; les **Vigies** (opérateurs IDS) détectent
   - capteurs dans chaque zone : Franche, zone COG, BorderGuard, Portail interne
   - compare le trafic au **contrat** de chaque service (§10)
   - fixe le niveau de sécurité du COG
-- **BorderGuard = IPS** — bloque, aux frontières uniquement
+- **BorderGuard** définit frontières et règles (INV-BG-1) ; la **Douane** (opérateur pare-feu + IPS) les applique via BondingBrother, aux frontières uniquement
   - pare-feu externe : IPS bloquant (règles, anti-scan, anti-exploitation)
   - Portail interne : IPS en liste blanche `MSCE`
   - canal officiel : uniquement objets scellés Origin

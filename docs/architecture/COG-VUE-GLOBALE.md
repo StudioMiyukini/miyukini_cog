@@ -18,6 +18,9 @@
 
 Un schéma global en **6 vues** superposables (une page chacune, même légende) :
 
+- **Fichiers** : [V1 territoire](schema-global/V1-territoire.mmd) · [V2 gouvernance](schema-global/V2-gouvernance.mmd) · [V3 services](schema-global/V3-services.mmd) · [V4 confiance](schema-global/V4-confiance.mmd) · [V5 flux](schema-global/V5-flux.mmd) · [V6 cycle de vie](schema-global/V6-cycle-de-vie.mmd)
+
+
 - **V1 · Territoire** — zones et frontières
   - nœuds : International, Fédération, Origin (2 faces), BorderGuard, Franche, Dépôt officiel, Portail interne, zone COG, Franche locale
   - liens : certification fédérale / globale / zero trust, voies du Portail, « la zone COG tire »
@@ -127,14 +130,14 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 - **Niveaux 0–4** = niveau de sécurité appliqué (pilote la sévérité des frontières)
 - **États d'environnement** (Vierge, Initialisé, Compromis, Vierge avec mémoire de corruption) = cycle de vie de l'installation
 
-## 8. Décisions à trancher
+## 8. Décisions (validées le 2026-10-24 : recommandations retenues)
 
 <!-- @id arch.vue.decisions -->
 <!-- @role open-decisions -->
 <!-- @do list_contradictions_to_resolve -->
 
 - **D1 · Cores et exécution** (contradiction avec INV-BG-1, INV-WS-2)
-  - *recommandé* : les Cores gouvernent, des **opérateurs exécutent** sous leur autorité
+  - **retenu** : les Cores gouvernent, des **opérateurs exécutent** sous leur autorité
     - **Douane** (pare-feu + IPS) : règles définies par BorderGuard, appliquées via BondingBrother
     - **Vigies** (capteurs IDS) : détectent ; signaux propagés par CaringNanny ; WorrySentinel fixe le niveau
 - **D2 · « Validation TAMR »** → intervention **APPROVAL** encadrée par TAMR, tranchée par StrongFather (INV-TAMR-5)

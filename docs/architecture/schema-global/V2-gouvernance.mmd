@@ -1,0 +1,57 @@
+%% @id arch.cog.schema-global.v2
+%% @role architecture-diagram
+%% @human Schéma global COG — V2 · Gouvernance
+%% @do visualize_cog_v2
+%% Référence : docs/architecture/COG-VUE-GLOBALE.md §1
+flowchart TB
+    subgraph S["S · Services / Opérateurs"]
+        SVC["Services (Central, Jay, MiyuCloud, MAIA…)"]
+        DOU["Douane (pare-feu + IPS)"]
+        VIG["Vigies (capteurs IDS)"]
+    end
+    ADMIN["A · MiyukiniAdmin<br/>opérateur souverain"]
+    TAMR["H · TAMR<br/>intervention humaine"]
+    subgraph C["C · Cores — gouvernent, n'exécutent pas"]
+        BB["BondingBrother<br/>passerelle"]
+        SF["StrongFather<br/>décide"]
+        KM["KindMother<br/>persiste"]
+        BG["BorderGuard<br/>définit frontières"]
+        WS["WorrySentinel<br/>niveaux 0-4 · T0-T4"]
+        CN["CaringNanny<br/>observe"]
+        MB["MasterButler<br/>capacités"]
+        LS["LogisticsSteward<br/>quotas"]
+        EB["EverBuddy<br/>évolution"]
+    end
+    TK["T · Toolkits (57 crates)"]
+    K["K · Kernel<br/>config · id · time · log · lifecycle"]
+    SVC -- "intention" --> BB
+    ADMIN -- "intention" --> BB
+    BB -- "demande de décision" --> SF
+    SF -- "décision" --> BB
+    BB -- "WriteIntent" --> KM
+    BG -. "règles" .-> BB
+    BB -. "applique via" .-> DOU
+    VIG -- "signaux" --> CN
+    CN -- "signaux" --> WS
+    WS -. "contraintes" .-> SF
+    WS -. "contraintes" .-> BG
+    WS -. "contraintes" .-> LS
+    MB -. "capacités" .-> SF
+    LS -. "arbitrage" .-> SF
+    EB -. "schémas" .-> KM
+    TAMR -. "APPROVAL / ESCALATION" .-> SF
+    S --> TK
+    C --> TK
+    TK --> K
+    LS -. "le Kernel exécute" .-> K
+    class SVC,DOU,VIG nat
+    class BB,SF,KM,BG,WS,CN,MB,LS,EB core
+    class ADMIN,TAMR key
+
+    classDef ext fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef fed fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef fw fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    classDef franche fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef nat fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef core fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef key fill:#fef9c3,stroke:#ca8a04,color:#713f12

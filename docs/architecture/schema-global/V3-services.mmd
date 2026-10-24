@@ -1,0 +1,44 @@
+%% @id arch.cog.schema-global.v3
+%% @role architecture-diagram
+%% @human Schéma global COG — V3 · Services
+%% @do visualize_cog_v3
+%% Référence : docs/architecture/COG-VUE-GLOBALE.md §1
+flowchart LR
+    subgraph NAT["🏛️ Zone COG — moteurs"]
+        H0["H0 interne pur<br/>Central · Miou · JayKoa · JayKonta<br/>Watch · Admin · MAIA · Whisper · MIPOWER"]
+        M2["Moteurs H2<br/>Jay Bureau · Jay1Tribu · JayManga<br/>JayRDV · JayFaim · JayShop · Cloud · BB"]
+        M3["Moteurs H3<br/>Jay Mail · Sales · Alicia · explorateur"]
+        M1["Moteurs H1<br/>site · partage lecture"]
+    end
+    PORTAIL{{"🚪 Portail interne<br/>traité par service · CDR"}}
+    subgraph FR["🏪 Franche — façades jetables"]
+        F1["Façades H1<br/>publication seule"]
+        F2["Façades H2<br/>relais de session + DB secondaire"]
+        F3["Façades H3<br/>sorties en liste blanche"]
+    end
+    FL["🏠 Franche locale<br/>Alicia · MQTT"]
+    EXT(("Fédération / International"))
+    USER(["👤 Utilisateur local"])
+    USER -- "hors ligne" --> H0
+    M1 --> PORTAIL
+    M2 <--> PORTAIL
+    M3 <--> PORTAIL
+    PORTAIL --> F1
+    PORTAIL <--> F2
+    PORTAIL <--> F3
+    FL <--> PORTAIL
+    F1 --> EXT
+    F2 <--> EXT
+    F3 --> EXT
+    class H0,M1,M2,M3,USER nat
+    class PORTAIL fw
+    class F1,F2,F3,FL franche
+    class EXT fed
+
+    classDef ext fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef fed fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef fw fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    classDef franche fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef nat fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef core fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef key fill:#fef9c3,stroke:#ca8a04,color:#713f12

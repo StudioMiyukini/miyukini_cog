@@ -1,0 +1,51 @@
+%% @id arch.cog.schema-global.v1
+%% @role architecture-diagram
+%% @human Schéma global COG — V1 · Territoire
+%% @do visualize_cog_v1
+%% Référence : docs/architecture/COG-VUE-GLOBALE.md §1
+flowchart TB
+    INTL(("🌐 International<br/>Internet · UNKNOWN"))
+    FED(("🤝 Fédération<br/>COG reconnus · VERIFIED"))
+    ORIG(("🏛️ Origin<br/>face fédérale + face publique"))
+    FED <-- "certification globale" --> ORIG
+    subgraph COG["COG"]
+        DOUANE{{"🛂 Douane externe<br/>pare-feu + IPS · règles BorderGuard"}}
+        subgraph FR["🏪 Zone Franche (DMZ)"]
+            FAC["Façades / relais<br/>un espace par service"]
+            DBS[("DB secondaire<br/>session")]
+            Q[("📥 Quarantaine")]
+            P[("📤 Publication")]
+        end
+        DEPOT[("📦 Dépôt officiel")]
+        PORTAIL{{"🚪 Portail interne<br/>rupture protocolaire · MSCE<br/>voies par service"}}
+        subgraph NAT["🏛️ Zone COG nationale · TRUSTED · aucune route"]
+            CORE["Kernel · Cores · Services · MAIA<br/>DB principale (KindMother Mère)"]
+        end
+        FL["🏠 Franche locale<br/>domotique · LAN seul"]
+    end
+    INTL -- "zero trust · liste blanche" --> DOUANE
+    FED -- "certification fédérale" --> DOUANE
+    ORIG -- "certification globale" --> DOUANE
+    DOUANE <--> FAC
+    DOUANE -- "contenu Origin" --> DEPOT
+    FAC --> Q
+    P --> FAC
+    FAC <--> DBS
+    Q --> PORTAIL
+    PORTAIL --> P
+    DEPOT -- "voie réservée" --> PORTAIL
+    FL --> PORTAIL
+    CORE -. "la zone COG tire" .-> PORTAIL
+    class INTL ext
+    class FED,ORIG fed
+    class DOUANE,PORTAIL fw
+    class FAC,DBS,Q,P,DEPOT,FL franche
+    class CORE nat
+
+    classDef ext fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef fed fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef fw fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+    classDef franche fill:#ffedd5,stroke:#ea580c,color:#7c2d12
+    classDef nat fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef core fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef key fill:#fef9c3,stroke:#ca8a04,color:#713f12
