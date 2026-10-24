@@ -49,7 +49,7 @@
   - `[lints] workspace = true` sur les 149 paquets, corrections clippy bloquantes (R-004)
   - CI : build, tests, clippy, `cargo audit`, `cargo deny` sur le workspace (R-005)
 - **Sortie** : 0 constat critique ou haut connu ; CI verte
-- **État 2026-10-24 (fin)** : R-001 à R-005, R-008 à R-011, R-015 à R-023 fermés ; décisions appliquées (admin toutes personas, expiration des confirmations, airgap loopback) ; restent R-024, R-025 (moyennes), CI à valider au premier push, `rust-toolchain.toml` (C-05)
+- **État 2026-10-24 (fin)** : tous les constats critiques et hauts fermés (R-001 à R-005, R-008 à R-011, R-015 à R-028) ; décisions appliquées (admin toutes personas, expiration des confirmations, airgap loopback) ; restent R-006, R-007, R-012 à R-014, R-029, R-030 (moyens et bas), CI à valider au premier push, `rust-toolchain.toml` (C-05)
 
 ## 3. Lot R — Revue de code
 
