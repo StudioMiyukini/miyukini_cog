@@ -4,9 +4,15 @@
 //! @do     define_client_protocol
 //@human ! @layer  toolkit
 //!
-//! Séquence (K-04) : le serveur envoie `Challenge`, le client répond `Authenticate`,
-//! le serveur confirme `Authenticated` ou refuse et ferme. Les champs `operator_id`
-//! des requêtes suivantes doivent égaler l'identité authentifiée (sinon refus).
+//! Séquence (K-04, protocole `kindmother-auth-v2`, authentification mutuelle) :
+//! 1. le client envoie `ClientHello { protocol, client_nonce }` ;
+//! 2. le serveur répond `Challenge { protocol, server_nonce, server_pub, server_sig }` ;
+//!    le client vérifie `server_pub` contre la clé épinglée et `server_sig` ;
+//! 3. le client envoie `Authenticate { operator_id, signature }` ;
+//! 4. le serveur confirme `Authenticated` ou refuse et ferme.
+//!
+//! Toute autre version de protocole (dont `kindmother-auth-v1`) est refusée. Les champs
+//! `operator_id` des requêtes suivantes doivent égaler l'identité authentifiée.
 
 use serde::{Deserialize, Serialize};
 
@@ -15,10 +21,18 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "type")]
 #[allow(missing_docs)]
 pub enum Request {
-    /// Réponse au défi d'authentification (première trame envoyée par le client).
+    /// Ouverture de la poignée de main (première trame envoyée par le client).
     ///
-    /// `signature` : signature Ed25519 (hex, 64 octets) de
-    /// `"kindmother-auth-v1\0" || operator_id || "\0" || nonce`.
+    /// `client_nonce` : 32 octets aléatoires (hex).
+    ClientHello {
+        protocol: String,
+        client_nonce: String,
+    },
+
+    /// Réponse au défi (seconde trame envoyée par le client).
+    ///
+    /// `signature` : signature Ed25519 (hex, 64 octets) de la transcription client
+    /// `"kindmother-auth-v2\0" || "client\0" || client_nonce || server_nonce || server_pub || operator_id`.
     Authenticate {
         operator_id: String,
         signature: String,
@@ -72,8 +86,16 @@ pub struct Operation {
 #[serde(tag = "type")]
 #[allow(missing_docs)]
 pub enum Response {
-    /// Défi d'authentification (première trame envoyée par le serveur).
-    Challenge { protocol: String, nonce: String },
+    /// Défi d'authentification signé par le serveur (réponse au `ClientHello`).
+    ///
+    /// `server_sig` : signature Ed25519 (hex) de la transcription serveur
+    /// `"kindmother-auth-v2\0" || "server\0" || client_nonce || server_nonce || server_pub`.
+    Challenge {
+        protocol: String,
+        server_nonce: String,
+        server_pub: String,
+        server_sig: String,
+    },
 
     /// Authentification réussie : l'identité est liée à la connexion.
     Authenticated { operator_id: String },

@@ -31,13 +31,16 @@
 //! ## Sécurité
 //!
 //! - Processus isolé - aucun accès direct possible aux fichiers DB
-//! - Authentification de chaque opérateur par défi signé Ed25519 (K-04) ; l'identité
-//!   est liée à la connexion, jamais lue dans la requête (C-20)
+//! - Authentification mutuelle Ed25519 (K-04, `kindmother-auth-v2`) : le serveur prouve
+//!   son identité épinglée (`server.pub`), l'opérateur signe une transcription liée aux
+//!   deux nonces et à la clé du serveur ; l'identité est liée à la connexion, jamais lue
+//!   dans la requête (C-20)
 //! - Contrôle d'accès par opérateur (arbitrage) et politique SQL appliquée par
 //!   l'autorisateur SQLite (K-05)
 //! - Audit des écritures
 //! - Écoute uniquement sur la boucle locale (sauf configuration explicite), trames
-//!   bornées, nombre de connexions borné
+//!   bornées, poignées de main non authentifiées bornées à part (éviction des plus
+//!   anciennes), emplacement principal pris après authentification, délai d'inactivité
 
 mod arbitration;
 mod credentials;
@@ -48,7 +51,10 @@ mod server;
 mod sql_guard;
 
 pub use arbitration::{AccessMode, ArbitrationEngine, OperatorConfig, Permission};
-pub use credentials::{auth_message, CredentialStore, AUTH_PROTOCOL, NONCE_LEN};
+pub use credentials::{
+    client_transcript, server_transcript, CredentialStore, ServerIdentity, AUTH_PROTOCOL,
+    NONCE_LEN, PUBLIC_KEY_LEN, SERVER_KEY_NAME,
+};
 pub use sql_guard::SqlPolicy;
 pub use database::EncryptedDatabase;
 pub use errors::ServiceError;

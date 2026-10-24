@@ -5534,6 +5534,7 @@ dependencies = [
  "ed25519-dalek",
  "kindmother",
  "miyukini-kernel",
+ "rand_core 0.6.4",
  "serde",
  "serde_json",
  "thiserror 2.0.18",

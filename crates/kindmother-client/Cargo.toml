@@ -37,8 +37,11 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
 tracing = "0.1"
 
-# Authentification de l'opérateur (K-04) : signature Ed25519 du défi serveur (C-24, C-25).
+# Authentification de l'opérateur (K-04) : signature Ed25519 de la transcription (C-24, C-25).
+# Authentification mutuelle (kindmother-auth-v2) : nonce client tiré via rand_core::OsRng (C-24),
+# déjà présent dans l'arbre via kindmother-service / ed25519-dalek.
 ed25519-dalek = { version = "2", features = ["zeroize"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
 zeroize = "1"
 
 # Pas de build dependencies nécessaires sans gRPC

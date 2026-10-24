@@ -37,6 +37,7 @@
 //! use kindmother_client::{KindMotherClient, OperatorCredential};
 //!
 //! // Justificatif approvisionné par le service (`<data_dir>/credentials/jaykoa.key`, 0600)
+//! // et pin de la clé du serveur (`<data_dir>/credentials/server.pub`) ; sans pin : refus.
 //! let credential = OperatorCredential::load("jaykoa")?;
 //! let client = KindMotherClient::connect("127.0.0.1:50051", &credential, "jaykoa").await?;
 //!
@@ -57,6 +58,9 @@ mod errors;
 mod protocol;
 
 pub use client::KindMotherClient;
-pub use credential::{OperatorCredential, ENV_CREDENTIALS_DIR, ENV_DATA_DIR};
+pub use credential::{
+    client_transcript, server_transcript, OperatorCredential, AUTH_PROTOCOL, ENV_CREDENTIALS_DIR,
+    ENV_DATA_DIR, NONCE_LEN, PUBLIC_KEY_LEN, SERVER_PIN_FILE,
+};
 pub use errors::ClientError;
 pub use protocol::{Operation, Request, Response};

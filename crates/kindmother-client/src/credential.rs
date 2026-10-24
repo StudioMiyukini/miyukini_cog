@@ -1,31 +1,53 @@
-//! Justificatif d'opérateur côté client (K-04).
+//! Justificatif d'opérateur et pin du serveur côté client (K-04).
 //!
 //! @id     kindmother_client_credential
 //! @do     charger_justificatif_operateur_et_signer_defi
 //! @role   securite
 //! @layer  toolkit
-//! @human  kindmother-client — clé Ed25519 de l'opérateur et réponse au défi du service.
+//! @human  kindmother-client — clé Ed25519 de l'opérateur, pin de la clé du serveur et authentification mutuelle.
 //!
-//! Le service KindMother approvisionne une clé Ed25519 par opérateur dans
-//! `<KINDMOTHER_DATA_DIR>/credentials/<operator>.key` (droits `0600`). L'opérateur la
-//! charge avec [`OperatorCredential::load`] et la présente à la connexion en signant
-//! le défi du serveur. La clé privée ne transite jamais sur la connexion.
+//! Le service KindMother approvisionne dans `<KINDMOTHER_DATA_DIR>/credentials/` :
+//! - `<operator>.key` : graine Ed25519 de l'opérateur (droits `0600`) ;
+//! - `server.pub` : clé publique du serveur, que le client **épingle**.
+//!
+//! [`OperatorCredential::load`] charge les deux ; sans pin, la connexion est refusée.
+//! Pendant la poignée de main (`kindmother-auth-v2`), le client vérifie que le serveur
+//! présente la clé épinglée et signe la transcription serveur (`verify_strict`), puis
+//! signe la transcription client, liée aux deux nonces et à la clé du serveur : une
+//! signature relayée par un faux serveur est inutilisable auprès du vrai. La clé privée
+//! ne transite jamais sur la connexion.
+//!
+//! Transcriptions (format figé, identique au service) :
+//! - serveur : `"kindmother-auth-v2\0" || "server\0" || client_nonce || server_nonce || server_pub`
+//! - client : `"kindmother-auth-v2\0" || "client\0" || client_nonce || server_nonce || server_pub || operator_id`
 
 use std::path::{Path, PathBuf};
 
-use ed25519_dalek::{Signer, SigningKey};
+use ed25519_dalek::{Signature, Signer, SigningKey, VerifyingKey};
 use zeroize::Zeroizing;
 
 use crate::errors::ClientError;
 
-/// Identifiant du protocole d'authentification attendu dans le défi.
-pub const AUTH_PROTOCOL: &str = "kindmother-auth-v1";
+/// Identifiant du protocole d'authentification (seule version acceptée).
+pub const AUTH_PROTOCOL: &str = "kindmother-auth-v2";
 
-/// Préfixe de séparation de domaine du message signé (identique au service).
-const AUTH_DOMAIN: &[u8] = b"kindmother-auth-v1\0";
+/// Préfixe de séparation de domaine (protocole et version, identique au service).
+const AUTH_DOMAIN: &[u8] = b"kindmother-auth-v2\0";
 
-/// Taille du nonce de défi.
+/// Étiquette de rôle de la transcription signée par le serveur.
+const ROLE_SERVER: &[u8] = b"server\0";
+
+/// Étiquette de rôle de la transcription signée par le client.
+const ROLE_CLIENT: &[u8] = b"client\0";
+
+/// Taille des nonces.
 pub const NONCE_LEN: usize = 32;
+
+/// Taille d'une clé publique Ed25519.
+pub const PUBLIC_KEY_LEN: usize = 32;
+
+/// Nom du fichier de pin de la clé du serveur dans le répertoire des justificatifs.
+pub const SERVER_PIN_FILE: &str = "server.pub";
 
 /// Variable d'environnement : répertoire des justificatifs.
 pub const ENV_CREDENTIALS_DIR: &str = "KINDMOTHER_CREDENTIALS_DIR";
@@ -36,22 +58,48 @@ pub const ENV_DATA_DIR: &str = "KINDMOTHER_DATA_DIR";
 /// Répertoire de données par défaut du service (relatif au répertoire courant).
 const DEFAULT_DATA_DIR: &str = "./data/kindmother";
 
-/// Construit le message signé : `domaine || operator_id || 0 || nonce` (format figé).
-pub fn auth_message(operator_id: &str, nonce: &[u8; NONCE_LEN]) -> Vec<u8> {
-    let mut message = Vec::with_capacity(AUTH_DOMAIN.len() + operator_id.len() + 1 + NONCE_LEN);
-    message.extend_from_slice(AUTH_DOMAIN);
-    message.extend_from_slice(operator_id.as_bytes());
-    message.push(0);
-    message.extend_from_slice(nonce);
-    message
+/// Transcription signée par le serveur (format figé).
+pub fn server_transcript(
+    client_nonce: &[u8; NONCE_LEN],
+    server_nonce: &[u8; NONCE_LEN],
+    server_pub: &[u8; PUBLIC_KEY_LEN],
+) -> Vec<u8> {
+    let mut t =
+        Vec::with_capacity(AUTH_DOMAIN.len() + ROLE_SERVER.len() + 2 * NONCE_LEN + PUBLIC_KEY_LEN);
+    t.extend_from_slice(AUTH_DOMAIN);
+    t.extend_from_slice(ROLE_SERVER);
+    t.extend_from_slice(client_nonce);
+    t.extend_from_slice(server_nonce);
+    t.extend_from_slice(server_pub);
+    t
 }
 
-/// Justificatif d'un opérateur : identifiant et clé de signature Ed25519.
+/// Transcription signée par l'opérateur (format figé).
+pub fn client_transcript(
+    client_nonce: &[u8; NONCE_LEN],
+    server_nonce: &[u8; NONCE_LEN],
+    server_pub: &[u8; PUBLIC_KEY_LEN],
+    operator_id: &str,
+) -> Vec<u8> {
+    let mut t = Vec::with_capacity(
+        AUTH_DOMAIN.len() + ROLE_CLIENT.len() + 2 * NONCE_LEN + PUBLIC_KEY_LEN + operator_id.len(),
+    );
+    t.extend_from_slice(AUTH_DOMAIN);
+    t.extend_from_slice(ROLE_CLIENT);
+    t.extend_from_slice(client_nonce);
+    t.extend_from_slice(server_nonce);
+    t.extend_from_slice(server_pub);
+    t.extend_from_slice(operator_id.as_bytes());
+    t
+}
+
+/// Justificatif d'un opérateur : identifiant, clé de signature Ed25519 et pin du serveur.
 ///
 /// La clé est effacée de la mémoire à la destruction (`ZeroizeOnDrop`).
 pub struct OperatorCredential {
     operator_id: String,
     signing_key: SigningKey,
+    server_pin: Option<VerifyingKey>,
 }
 
 impl std::fmt::Debug for OperatorCredential {
@@ -59,12 +107,16 @@ impl std::fmt::Debug for OperatorCredential {
         f.debug_struct("OperatorCredential")
             .field("operator_id", &self.operator_id)
             .field("signing_key", &"<redacted>")
+            .field(
+                "server_pin",
+                &self.server_pin.map(|k| encode_hex(k.as_bytes())),
+            )
             .finish()
     }
 }
 
 impl OperatorCredential {
-    /// Construit un justificatif depuis une graine de 32 octets.
+    /// Construit un justificatif depuis une graine de 32 octets (sans pin du serveur).
     pub fn from_seed(operator_id: &str, seed: &[u8; 32]) -> Result<Self, ClientError> {
         if !is_valid_operator_id(operator_id) {
             return Err(ClientError::InvalidRequest(format!(
@@ -74,10 +126,11 @@ impl OperatorCredential {
         Ok(Self {
             operator_id: operator_id.to_string(),
             signing_key: SigningKey::from_bytes(seed),
+            server_pin: None,
         })
     }
 
-    /// Charge un justificatif depuis un fichier `.key` (graine hex).
+    /// Charge un justificatif depuis un fichier `.key` (graine hex), sans pin du serveur.
     ///
     /// Sous Unix, refuse un fichier lisible par le groupe ou les autres.
     pub fn from_file(operator_id: &str, path: impl AsRef<Path>) -> Result<Self, ClientError> {
@@ -106,18 +159,65 @@ impl OperatorCredential {
         Self::from_seed(operator_id, &seed)
     }
 
-    /// Charge le justificatif d'un opérateur depuis le répertoire par défaut.
+    /// Épingle la clé publique du serveur (32 octets).
+    pub fn with_server_pin(
+        mut self,
+        server_pub: &[u8; PUBLIC_KEY_LEN],
+    ) -> Result<Self, ClientError> {
+        let key = VerifyingKey::from_bytes(server_pub).map_err(|_| {
+            ClientError::Authentication("Invalid server public key pin".to_string())
+        })?;
+        self.server_pin = Some(key);
+        Ok(self)
+    }
+
+    /// Épingle la clé du serveur depuis un fichier `server.pub` (hex).
+    ///
+    /// Sous Unix, refuse un fichier modifiable par le groupe ou les autres.
+    pub fn with_server_pin_file(self, path: impl AsRef<Path>) -> Result<Self, ClientError> {
+        let path = path.as_ref();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(path)
+                .map_err(|e| {
+                    ClientError::Authentication(format!("Cannot read server pin {path:?}: {e}"))
+                })?
+                .permissions()
+                .mode();
+            if mode & 0o022 != 0 {
+                return Err(ClientError::Authentication(format!(
+                    "Server pin {path:?} is writable by group/others"
+                )));
+            }
+        }
+        let text = std::fs::read_to_string(path).map_err(|e| {
+            ClientError::Authentication(format!("Cannot read server pin {path:?}: {e}"))
+        })?;
+        let bytes = decode_hex_fixed::<PUBLIC_KEY_LEN>(text.trim())
+            .ok_or_else(|| ClientError::Authentication(format!("Malformed server pin {path:?}")))?;
+        self.with_server_pin(&bytes)
+    }
+
+    /// Charge le justificatif d'un opérateur et le pin du serveur depuis le répertoire
+    /// par défaut ; refuse si l'un des deux manque.
     ///
     /// Répertoire : `$KINDMOTHER_CREDENTIALS_DIR`, sinon `$KINDMOTHER_DATA_DIR/credentials`,
     /// sinon `./data/kindmother/credentials` (défaut du service lancé par Central).
     pub fn load(operator_id: &str) -> Result<Self, ClientError> {
+        Self::load_from_dir(operator_id, Self::default_dir())
+    }
+
+    /// Charge `<dir>/<operator>.key` et le pin `<dir>/server.pub` ; refuse si l'un manque.
+    pub fn load_from_dir(operator_id: &str, dir: impl AsRef<Path>) -> Result<Self, ClientError> {
         if !is_valid_operator_id(operator_id) {
             return Err(ClientError::InvalidRequest(format!(
                 "Invalid operator id: {operator_id}"
             )));
         }
-        let path = Self::default_dir().join(format!("{operator_id}.key"));
-        Self::from_file(operator_id, path)
+        let dir = dir.as_ref();
+        Self::from_file(operator_id, dir.join(format!("{operator_id}.key")))?
+            .with_server_pin_file(dir.join(SERVER_PIN_FILE))
     }
 
     /// Répertoire des justificatifs selon l'environnement.
@@ -134,11 +234,50 @@ impl OperatorCredential {
         &self.operator_id
     }
 
-    /// Signe le défi du serveur ; retourne la signature en hexadécimal.
-    pub(crate) fn sign_challenge(&self, nonce: &[u8; NONCE_LEN]) -> String {
-        let signature = self
-            .signing_key
-            .sign(&auth_message(&self.operator_id, nonce));
+    /// Clé du serveur épinglée, si présente.
+    pub fn server_pin(&self) -> Option<[u8; PUBLIC_KEY_LEN]> {
+        self.server_pin.map(|k| k.to_bytes())
+    }
+
+    /// Vérifie la preuve d'identité du serveur : `server_pub` doit égaler la clé
+    /// épinglée et `server_sig` signer la transcription serveur (`verify_strict`).
+    pub(crate) fn verify_server(
+        &self,
+        client_nonce: &[u8; NONCE_LEN],
+        server_nonce: &[u8; NONCE_LEN],
+        server_pub: &[u8; PUBLIC_KEY_LEN],
+        server_sig_hex: &str,
+    ) -> Result<(), ClientError> {
+        let pin = self.server_pin.ok_or_else(|| {
+            ClientError::Authentication("No pinned server key (server.pub missing)".to_string())
+        })?;
+        if pin.as_bytes() != server_pub {
+            return Err(ClientError::Authentication(
+                "Server key does not match the pinned key".to_string(),
+            ));
+        }
+        let sig_bytes = decode_hex_fixed::<64>(server_sig_hex)
+            .ok_or_else(|| ClientError::Authentication("Malformed server signature".to_string()))?;
+        pin.verify_strict(
+            &server_transcript(client_nonce, server_nonce, server_pub),
+            &Signature::from_bytes(&sig_bytes),
+        )
+        .map_err(|_| ClientError::Authentication("Invalid server signature".to_string()))
+    }
+
+    /// Signe la transcription client ; retourne la signature en hexadécimal.
+    pub(crate) fn sign_transcript(
+        &self,
+        client_nonce: &[u8; NONCE_LEN],
+        server_nonce: &[u8; NONCE_LEN],
+        server_pub: &[u8; PUBLIC_KEY_LEN],
+    ) -> String {
+        let signature = self.signing_key.sign(&client_transcript(
+            client_nonce,
+            server_nonce,
+            server_pub,
+            &self.operator_id,
+        ));
         encode_hex(&signature.to_bytes())
     }
 }
@@ -191,29 +330,91 @@ fn hex_value(c: u8) -> Option<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ed25519_dalek::{Signature, Verifier};
+    use ed25519_dalek::Verifier;
 
-    /// Vecteur figé du message signé, identique à celui du service (C-61).
+    const CN: [u8; NONCE_LEN] = [0x11; NONCE_LEN];
+    const SN: [u8; NONCE_LEN] = [0x22; NONCE_LEN];
+    const SP: [u8; PUBLIC_KEY_LEN] = [0x33; PUBLIC_KEY_LEN];
+
+    /// Vecteur figé de la transcription serveur, identique au service (C-61).
     #[test]
-    fn auth_message_vecteur_fige() {
-        let msg = auth_message("jaykoa", &[0xab; NONCE_LEN]);
+    fn transcription_serveur_vecteur_fige() {
         assert_eq!(
-            encode_hex(&msg),
-            "6b696e646d6f746865722d617574682d763100\
-             6a61796b6f6100\
-             abababababababababababababababababababababababababababababababab"
+            encode_hex(&server_transcript(&CN, &SN, &SP)),
+            "6b696e646d6f746865722d617574682d763200\
+             73657276657200\
+             1111111111111111111111111111111111111111111111111111111111111111\
+             2222222222222222222222222222222222222222222222222222222222222222\
+             3333333333333333333333333333333333333333333333333333333333333333"
         );
     }
 
+    /// Vecteur figé de la transcription client, identique au service (C-61).
     #[test]
-    fn signature_du_defi_verifiable() {
+    fn transcription_client_vecteur_fige() {
+        assert_eq!(
+            encode_hex(&client_transcript(&CN, &SN, &SP, "jaykoa")),
+            "6b696e646d6f746865722d617574682d763200\
+             636c69656e7400\
+             1111111111111111111111111111111111111111111111111111111111111111\
+             2222222222222222222222222222222222222222222222222222222222222222\
+             3333333333333333333333333333333333333333333333333333333333333333\
+             6a61796b6f61"
+        );
+    }
+
+    /// Vecteur figé de signature (graine [7; 32]), identique au service (C-61).
+    #[test]
+    fn signature_client_vecteur_fige() {
         let cred = OperatorCredential::from_seed("jaykoa", &[7u8; 32]).expect("cred");
-        let nonce = [1u8; NONCE_LEN];
-        let sig_hex = cred.sign_challenge(&nonce);
+        assert_eq!(cred.sign_transcript(&CN, &SN, &SP), FROZEN_CLIENT_SIG);
+    }
+
+    /// Signature figée de la transcription client (graine [7; 32]).
+    const FROZEN_CLIENT_SIG: &str = "d0d90d31ce6964ba62e34addaa8172b15c7e96edd10395e239474eecd398cb54\
+                                     59a829acf874ddbcdaaa0114294980a191dfebed708c90cfe7ab68d967d01007";
+
+    #[test]
+    fn signature_transcription_verifiable() {
+        let cred = OperatorCredential::from_seed("jaykoa", &[7u8; 32]).expect("cred");
+        let sig_hex = cred.sign_transcript(&CN, &SN, &SP);
         let sig = Signature::from_bytes(&decode_hex_fixed::<64>(&sig_hex).expect("hex"));
         let vk = SigningKey::from_bytes(&[7u8; 32]).verifying_key();
-        assert!(vk.verify(&auth_message("jaykoa", &nonce), &sig).is_ok());
-        assert!(vk.verify(&auth_message("jaykonta", &nonce), &sig).is_err());
+        assert!(vk
+            .verify(&client_transcript(&CN, &SN, &SP, "jaykoa"), &sig)
+            .is_ok());
+        assert!(vk
+            .verify(&client_transcript(&CN, &SN, &SP, "jaykonta"), &sig)
+            .is_err());
+        assert!(vk
+            .verify(&client_transcript(&SN, &SN, &SP, "jaykoa"), &sig)
+            .is_err());
+    }
+
+    #[test]
+    fn verification_du_serveur() {
+        let server = SigningKey::from_bytes(&[5u8; 32]);
+        let spub = server.verifying_key().to_bytes();
+        let sig = encode_hex(&server.sign(&server_transcript(&CN, &SN, &spub)).to_bytes());
+
+        // Sans pin : refus
+        let sans_pin = OperatorCredential::from_seed("jaykoa", &[7u8; 32]).expect("cred");
+        assert!(sans_pin.verify_server(&CN, &SN, &spub, &sig).is_err());
+
+        let cred = OperatorCredential::from_seed("jaykoa", &[7u8; 32])
+            .expect("cred")
+            .with_server_pin(&spub)
+            .expect("pin");
+        assert!(cred.verify_server(&CN, &SN, &spub, &sig).is_ok());
+        // Autre nonce client (relais) : refus
+        assert!(cred.verify_server(&SN, &SN, &spub, &sig).is_err());
+        // Autre clé de serveur présentée : refus
+        let autre = SigningKey::from_bytes(&[6u8; 32]);
+        let apub = autre.verifying_key().to_bytes();
+        let asig = encode_hex(&autre.sign(&server_transcript(&CN, &SN, &apub)).to_bytes());
+        assert!(cred.verify_server(&CN, &SN, &apub, &asig).is_err());
+        // Signature mal formée
+        assert!(cred.verify_server(&CN, &SN, &spub, "zz").is_err());
     }
 
     #[test]
@@ -241,5 +442,30 @@ mod tests {
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).expect("perm");
         assert!(OperatorCredential::from_file("jaykoa", &path).is_ok());
         let _ = std::fs::remove_file(&path);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn chargement_sans_pin_refuse() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = std::env::temp_dir().join(format!("kmc-dir-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).expect("dir");
+        let key = dir.join("jaykoa.key");
+        std::fs::write(&key, format!("{}\n", encode_hex(&[3u8; 32]))).expect("write");
+        std::fs::set_permissions(&key, std::fs::Permissions::from_mode(0o600)).expect("perm");
+        // Pin absent : refus
+        assert!(OperatorCredential::load_from_dir("jaykoa", &dir).is_err());
+        // Pin présent mais modifiable par d'autres : refus
+        let pin = dir.join(SERVER_PIN_FILE);
+        let spub = SigningKey::from_bytes(&[5u8; 32])
+            .verifying_key()
+            .to_bytes();
+        std::fs::write(&pin, format!("{}\n", encode_hex(&spub))).expect("write");
+        std::fs::set_permissions(&pin, std::fs::Permissions::from_mode(0o666)).expect("perm");
+        assert!(OperatorCredential::load_from_dir("jaykoa", &dir).is_err());
+        std::fs::set_permissions(&pin, std::fs::Permissions::from_mode(0o600)).expect("perm");
+        let cred = OperatorCredential::load_from_dir("jaykoa", &dir).expect("load");
+        assert_eq!(cred.server_pin(), Some(spub));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

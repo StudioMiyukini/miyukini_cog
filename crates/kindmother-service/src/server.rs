@@ -6,24 +6,39 @@
 //!
 //! Sécurité (K-04) :
 //! - écoute sur la boucle locale uniquement, sauf `allow_non_loopback` explicite (C-21) ;
-//! - chaque connexion commence par un défi signé ; tant que l'opérateur n'est pas
-//!   authentifié, aucune requête n'est traitée ;
+//! - chaque connexion commence par une authentification **mutuelle** (`kindmother-auth-v2`,
+//!   voir `credentials`) ; tant que l'opérateur n'est pas authentifié, aucune requête
+//!   n'est traitée ; toute autre version de protocole est refusée ;
 //! - l'identité authentifiée est liée à la connexion ; le champ `operator_id` des
 //!   requêtes doit lui être égal, sinon refus (C-20) ;
-//! - trames bornées, délais de lecture, nombre de connexions borné (C-13).
+//! - trames bornées, délais de lecture (C-13).
+//!
+//! Résistance à l'épuisement (DoS) :
+//! - les connexions non authentifiées occupent une table **séparée et petite**
+//!   (`max_preauth`, `max_preauth_per_peer`) ; quand elle est pleine, la poignée de main
+//!   en attente la plus ancienne (du même pair d'abord) est évincée : une inondation de
+//!   connexions muettes ne bloque pas un client légitime, dont la poignée de main est
+//!   brève ;
+//! - un emplacement principal (`max_connections`) n'est pris **qu'après** une
+//!   authentification réussie ;
+//! - la poignée de main est bornée par `auth_timeout` ; une connexion authentifiée
+//!   inactive est fermée après `idle_timeout`.
 
-use std::net::SocketAddr;
+use std::collections::BTreeMap;
+use std::net::{IpAddr, SocketAddr};
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::Semaphore;
+use tokio::sync::{oneshot, OwnedSemaphorePermit, Semaphore};
 use tracing::{debug, error, info, instrument, warn};
 
 use crate::arbitration::{AccessMode, ArbitrationEngine};
-use crate::credentials::{encode_hex, new_nonce, CredentialStore, AUTH_PROTOCOL};
+use crate::credentials::{
+    decode_hex_fixed, encode_hex, new_nonce, CredentialStore, AUTH_PROTOCOL, NONCE_LEN,
+};
 use crate::database::EncryptedDatabase;
 use crate::errors::ServiceError;
 use crate::protocol::{Operation, Request, Response};
@@ -32,14 +47,20 @@ use crate::sql_guard::SqlPolicy;
 /// Bornes du serveur (C-13).
 #[derive(Debug, Clone, Copy)]
 pub struct ServerLimits {
-    /// Connexions simultanées maximales
+    /// Connexions **authentifiées** simultanées maximales
     pub max_connections: usize,
+    /// Poignées de main (connexions non authentifiées) simultanées maximales
+    pub max_preauth: usize,
+    /// Poignées de main simultanées maximales par adresse IP de pair
+    pub max_preauth_per_peer: usize,
     /// Taille maximale d'une trame de requête (octets)
     pub max_request_frame: usize,
     /// Taille maximale d'une trame d'authentification (octets)
     pub max_auth_frame: usize,
     /// Délai pour terminer l'authentification
     pub auth_timeout: Duration,
+    /// Délai d'inactivité d'une connexion authentifiée avant fermeture
+    pub idle_timeout: Duration,
     /// Délai pour recevoir le corps d'une trame une fois l'en-tête lu
     pub frame_body_timeout: Duration,
 }
@@ -48,12 +69,97 @@ impl Default for ServerLimits {
     fn default() -> Self {
         Self {
             max_connections: 64,
+            max_preauth: 16,
+            max_preauth_per_peer: 8,
             max_request_frame: 4 * 1024 * 1024,
             max_auth_frame: 4 * 1024,
             auth_timeout: Duration::from_secs(10),
+            idle_timeout: Duration::from_secs(5 * 60),
             frame_body_timeout: Duration::from_secs(30),
         }
     }
+}
+
+/// Poignée de main en attente : l'abandon de `_cancel` l'interrompt (éviction).
+struct PendingHandshake {
+    peer: IpAddr,
+    _cancel: oneshot::Sender<()>,
+}
+
+/// Table des poignées de main en cours, bornée globalement et par pair.
+///
+/// Les identifiants sont croissants : l'ordre de la table est l'ordre d'arrivée.
+#[derive(Default)]
+struct PreAuthTable {
+    next_id: u64,
+    pending: BTreeMap<u64, PendingHandshake>,
+}
+
+impl PreAuthTable {
+    /// Admet une nouvelle poignée de main, en évinçant au besoin les plus anciennes
+    /// (celles du même pair d'abord). Retourne l'identifiant et le signal d'éviction.
+    fn admit(
+        &mut self,
+        peer: IpAddr,
+        max_total: usize,
+        max_per_peer: usize,
+    ) -> (u64, oneshot::Receiver<()>) {
+        let max_total = max_total.max(1);
+        let max_per_peer = max_per_peer.max(1);
+
+        loop {
+            let same_peer: Vec<u64> = self
+                .pending
+                .iter()
+                .filter(|(_, p)| p.peer == peer)
+                .map(|(id, _)| *id)
+                .collect();
+            let victim = if same_peer.len() >= max_per_peer {
+                same_peer.first().copied()
+            } else if self.pending.len() >= max_total {
+                self.pending.keys().next().copied()
+            } else {
+                None
+            };
+            match victim {
+                Some(id) => {
+                    debug!("Pre-auth table full, evicting pending handshake #{id}");
+                    self.pending.remove(&id);
+                }
+                None => break,
+            }
+        }
+
+        let id = self.next_id;
+        self.next_id = self.next_id.wrapping_add(1);
+        let (tx, rx) = oneshot::channel();
+        self.pending
+            .insert(id, PendingHandshake { peer, _cancel: tx });
+        (id, rx)
+    }
+
+    fn release(&mut self, id: u64) {
+        self.pending.remove(&id);
+    }
+}
+
+/// Libère l'entrée de la table à la fin de la poignée de main (quelle qu'en soit l'issue).
+struct PreAuthGuard {
+    table: Arc<Mutex<PreAuthTable>>,
+    id: u64,
+}
+
+impl Drop for PreAuthGuard {
+    fn drop(&mut self) {
+        lock_table(&self.table).release(self.id);
+    }
+}
+
+/// Verrouille la table ; un verrou empoisonné reste utilisable (état toujours cohérent).
+fn lock_table(table: &Mutex<PreAuthTable>) -> std::sync::MutexGuard<'_, PreAuthTable> {
+    table
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 
 /// Serveur KindMother - point d'entrée unique pour la persistance.
@@ -62,7 +168,7 @@ pub struct KindMotherServer {
     database: Arc<EncryptedDatabase>,
     /// Moteur d'arbitrage
     arbitration: Arc<ArbitrationEngine>,
-    /// Clés publiques des opérateurs
+    /// Clés publiques des opérateurs et identité du serveur
     credentials: Arc<CredentialStore>,
     /// Bornes
     limits: ServerLimits,
@@ -73,7 +179,8 @@ pub struct KindMotherServer {
 impl KindMotherServer {
     /// Crée un nouveau serveur KindMother.
     ///
-    /// Les justificatifs des opérateurs par défaut sont approvisionnés dans
+    /// L'identité du serveur (`server.key`, `server.pub` à épingler par les clients) et
+    /// les justificatifs des opérateurs par défaut sont approvisionnés dans
     /// `<data_dir>/credentials` (voir `credentials`).
     ///
     /// # Arguments
@@ -93,9 +200,10 @@ impl KindMotherServer {
         )?);
 
         info!(
-            "KindMother server initialized ({} operators, credentials in {:?})",
+            "KindMother server initialized ({} operators, credentials in {:?}, server key {})",
             operator_ids.len(),
-            credentials.dir()
+            credentials.dir(),
+            encode_hex(credentials.server().public_key())
         );
 
         Ok(Self {
@@ -119,9 +227,14 @@ impl KindMotherServer {
         self
     }
 
-    /// Répertoire des justificatifs des opérateurs.
+    /// Répertoire des justificatifs des opérateurs (et du pin `server.pub`).
     pub fn credentials_dir(&self) -> &Path {
         self.credentials.dir()
+    }
+
+    /// Clé publique du serveur, à épingler par les clients.
+    pub fn server_public_key(&self) -> [u8; 32] {
+        *self.credentials.server().public_key()
     }
 
     /// Démarre le serveur sur l'adresse spécifiée.
@@ -145,23 +258,29 @@ impl KindMotherServer {
         info!("KindMother server listening on {}", local);
 
         let slots = Arc::new(Semaphore::new(self.limits.max_connections));
+        let preauth = Arc::new(Mutex::new(PreAuthTable::default()));
         let server = Arc::new(self);
 
         loop {
             match listener.accept().await {
                 Ok((stream, peer)) => {
-                    let Ok(permit) = slots.clone().try_acquire_owned() else {
-                        warn!("Connection limit reached, refusing {}", peer);
-                        drop(stream);
-                        continue;
-                    };
                     debug!("New connection from {}", peer);
+                    let (id, cancel) = lock_table(&preauth).admit(
+                        peer.ip(),
+                        server.limits.max_preauth,
+                        server.limits.max_preauth_per_peer,
+                    );
+                    let guard = PreAuthGuard {
+                        table: preauth.clone(),
+                        id,
+                    };
                     let server = server.clone();
+                    let slots = slots.clone();
                     tokio::spawn(async move {
-                        if let Err(e) = server.handle_connection(stream).await {
-                            warn!("Connection error: {}", e);
+                        if let Err(e) = server.handle_connection(stream, guard, cancel, slots).await
+                        {
+                            warn!("Connection from {} closed: {}", peer, e);
                         }
-                        drop(permit);
                     });
                 }
                 Err(e) => {
@@ -171,27 +290,33 @@ impl KindMotherServer {
         }
     }
 
-    /// Gère une connexion client : authentification puis boucle de requêtes.
-    async fn handle_connection(&self, mut stream: TcpStream) -> Result<(), ServiceError> {
-        let operator_id = match tokio::time::timeout(
-            self.limits.auth_timeout,
-            self.authenticate(&mut stream),
-        )
-        .await
-        {
-            Ok(Ok(id)) => id,
-            Ok(Err(e)) => {
-                let _ = write_response(
-                    &mut stream,
-                    &Response::error("AUTH_FAILED", "authentication failed"),
+    /// Gère une connexion client : authentification mutuelle puis boucle de requêtes.
+    async fn handle_connection(
+        &self,
+        mut stream: TcpStream,
+        guard: PreAuthGuard,
+        cancel: oneshot::Receiver<()>,
+        slots: Arc<Semaphore>,
+    ) -> Result<(), ServiceError> {
+        let outcome = tokio::select! {
+            biased;
+            _ = cancel => Err(ServiceError::Authentication("handshake evicted".to_string())),
+            r = tokio::time::timeout(self.limits.auth_timeout, self.authenticate(&mut stream, &slots)) => {
+                r.unwrap_or_else(|_| Err(ServiceError::Authentication("authentication timeout".to_string())))
+            }
+        };
+        // Fin de la poignée de main : libère l'entrée de pré-authentification.
+        drop(guard);
+
+        let (operator_id, _permit) = match outcome {
+            Ok(v) => v,
+            Err(e) => {
+                let _ = tokio::time::timeout(
+                    Duration::from_secs(1),
+                    write_response(&mut stream, &handshake_error(&e)),
                 )
                 .await;
                 return Err(e);
-            }
-            Err(_) => {
-                return Err(ServiceError::Authentication(
-                    "authentication timeout".to_string(),
-                ))
             }
         };
 
@@ -201,7 +326,7 @@ impl KindMotherServer {
             let Some(payload) = read_frame(
                 &mut stream,
                 self.limits.max_request_frame,
-                None,
+                Some(self.limits.idle_timeout),
                 self.limits.frame_body_timeout,
             )
             .await?
@@ -219,30 +344,49 @@ impl KindMotherServer {
         }
     }
 
-    /// Envoie le défi, vérifie la réponse et retourne l'identité authentifiée.
-    async fn authenticate(&self, stream: &mut TcpStream) -> Result<String, ServiceError> {
-        let nonce = new_nonce();
+    /// Poignée de main `kindmother-auth-v2` ; retourne l'identité authentifiée et
+    /// l'emplacement principal pris après authentification.
+    async fn authenticate(
+        &self,
+        stream: &mut TcpStream,
+        slots: &Arc<Semaphore>,
+    ) -> Result<(String, OwnedSemaphorePermit), ServiceError> {
+        // 1. ClientHello
+        let request = read_auth_request(stream, &self.limits).await?;
+        let Request::ClientHello {
+            protocol,
+            client_nonce,
+        } = request
+        else {
+            return Err(ServiceError::Authentication(
+                "authentication required".to_string(),
+            ));
+        };
+        if protocol != AUTH_PROTOCOL {
+            return Err(ServiceError::Validation(format!(
+                "unsupported authentication protocol (expected {AUTH_PROTOCOL})"
+            )));
+        }
+        let client_nonce = decode_hex_fixed::<NONCE_LEN>(&client_nonce)
+            .ok_or_else(|| ServiceError::Authentication("malformed client nonce".to_string()))?;
+
+        // 2. Challenge signé par le serveur
+        let server = self.credentials.server();
+        let server_nonce = new_nonce();
+        let server_sig = server.sign_challenge(&client_nonce, &server_nonce);
         write_response(
             stream,
             &Response::Challenge {
                 protocol: AUTH_PROTOCOL.to_string(),
-                nonce: encode_hex(&nonce),
+                server_nonce: encode_hex(&server_nonce),
+                server_pub: encode_hex(server.public_key()),
+                server_sig: encode_hex(&server_sig.to_bytes()),
             },
         )
         .await?;
 
-        let payload = read_frame(
-            stream,
-            self.limits.max_auth_frame,
-            Some(self.limits.auth_timeout),
-            self.limits.auth_timeout,
-        )
-        .await?
-        .ok_or_else(|| ServiceError::Authentication("connection closed".to_string()))?;
-
-        let request: Request = serde_json::from_slice(&payload)
-            .map_err(|_| ServiceError::Authentication("malformed authentication".to_string()))?;
-
+        // 3. Authenticate
+        let request = read_auth_request(stream, &self.limits).await?;
         let Request::Authenticate {
             operator_id,
             signature,
@@ -252,8 +396,14 @@ impl KindMotherServer {
                 "authentication required".to_string(),
             ));
         };
+        self.credentials
+            .verify(&operator_id, &client_nonce, &server_nonce, &signature)?;
 
-        self.credentials.verify(&operator_id, &nonce, &signature)?;
+        // 4. Emplacement principal pris seulement après authentification.
+        let permit = slots
+            .clone()
+            .try_acquire_owned()
+            .map_err(|_| ServiceError::QuotaExceeded("connection limit reached".to_string()))?;
 
         write_response(
             stream,
@@ -263,14 +413,14 @@ impl KindMotherServer {
         )
         .await?;
 
-        Ok(operator_id)
+        Ok((operator_id, permit))
     }
 
     /// Traite une requête d'un opérateur authentifié.
     #[instrument(skip(self, request))]
     async fn handle_request(&self, authenticated: &str, request: Request) -> Response {
         match request {
-            Request::Authenticate { .. } => {
+            Request::ClientHello { .. } | Request::Authenticate { .. } => {
                 Response::error("INVALID_REQUEST", "Connection already authenticated")
             }
 
@@ -281,7 +431,10 @@ impl KindMotherServer {
                 params,
             } => match check_identity(authenticated, &operator_id) {
                 Err(r) => r,
-                Ok(()) => self.handle_query(authenticated, &database, &sql, params).await,
+                Ok(()) => {
+                    self.handle_query(authenticated, &database, &sql, params)
+                        .await
+                }
             },
 
             Request::Execute {
@@ -566,12 +719,36 @@ fn check_identity(authenticated: &str, declared: &str) -> Result<(), Response> {
     }
 }
 
+/// Lit et décode une trame de la poignée de main (taille et délai bornés).
+async fn read_auth_request(
+    stream: &mut TcpStream,
+    limits: &ServerLimits,
+) -> Result<Request, ServiceError> {
+    let payload = read_frame(
+        stream,
+        limits.max_auth_frame,
+        Some(limits.auth_timeout),
+        limits.auth_timeout,
+    )
+    .await?
+    .ok_or_else(|| ServiceError::Authentication("connection closed".to_string()))?;
+    serde_json::from_slice(&payload)
+        .map_err(|_| ServiceError::Authentication("malformed authentication".to_string()))
+}
+
+/// Réponse envoyée lors d'un échec de poignée de main (aucun détail sur l'opérateur).
+fn handshake_error(err: &ServiceError) -> Response {
+    match err {
+        ServiceError::QuotaExceeded(_) => Response::error("BUSY", "connection limit reached"),
+        ServiceError::Validation(msg) => Response::error("AUTH_FAILED", msg.clone()),
+        _ => Response::error("AUTH_FAILED", "authentication failed"),
+    }
+}
+
 /// Convertit une erreur de contrôle en réponse d'erreur typée.
 fn error_response(err: &ServiceError) -> Response {
     let code = match err {
-        ServiceError::PermissionDenied(_) | ServiceError::UnknownOperator(_) => {
-            "PERMISSION_DENIED"
-        }
+        ServiceError::PermissionDenied(_) | ServiceError::UnknownOperator(_) => "PERMISSION_DENIED",
         ServiceError::QuotaExceeded(_) => "QUOTA_EXCEEDED",
         ServiceError::DatabaseNotFound(_) => "NOT_FOUND",
         ServiceError::Validation(_) => "INVALID_REQUEST",
