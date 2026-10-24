@@ -25,6 +25,7 @@ Index global de la documentation du projet Miyukini COG.
 | [miyukini-webway-system/](miyukini-webway-system/) | Documents lies au Webway System |
 | [ux_ui/](ux_ui/) | Ressources UX/UI et composants |
 | [legal/](legal/) | Documentation juridique |
+| [securite/](securite/) | Audits de securite transverses (auth, WAN, federation, secrets) |
 
 ## Migration documentaire recente
 

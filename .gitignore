@@ -104,3 +104,9 @@ jayclub.db-journal
 jaybureau.db
 jaybureau.db-journal
 .git_token.md
+
+# Secrets / signature (audit sécurité 2026-10-23)
+*.keystore
+*.jks
+Origin_VPS_SSH_and_IP
+.git_token.md
