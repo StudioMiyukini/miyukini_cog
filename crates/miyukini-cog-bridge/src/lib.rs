@@ -27,7 +27,10 @@ pub mod ssh;
 pub mod whitelist;
 
 pub use bridge::{BridgeStatus, CogBridge, ConnectionMode};
-pub use e2e::{E2eHandshake, E2eKeypair, E2eSession, EncryptedMessage};
+pub use e2e::{
+    E2eError, E2eHandshake, E2eIdentity, E2eRole, E2eSession, EncryptedMessage,
+    PendingHandshake, E2E_PROTOCOL_VERSION,
+};
 
 /// Résultat standard du bridge.
 pub type BridgeResult<T> = Result<T, BridgeError>;
@@ -61,4 +64,7 @@ pub enum BridgeError {
 
     #[error("Device non autorisé (whitelist)")]
     DeviceNotWhitelisted,
+
+    #[error("E2E: {0}")]
+    E2e(#[from] e2e::E2eError),
 }

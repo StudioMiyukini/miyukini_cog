@@ -49,7 +49,7 @@ pub async fn connect(
 }
 
 /// Génère une paire de clés ed25519 pour l'appairage SSH.
-pub fn generate_keypair() -> (String, String) {
+pub fn generate_keypair() -> BridgeResult<(String, String)> {
     use ed25519_dalek::SigningKey;
     use rand::rngs::OsRng;
 
@@ -58,16 +58,16 @@ pub fn generate_keypair() -> (String, String) {
 
     // Format OpenSSH pour la clé publique
     let pub_key_bytes = verifying_key.to_bytes();
-    let pub_key_b64 = base64_encode(&pub_key_bytes);
+    let pub_key_b64 = base64_encode(&pub_key_bytes)?;
     let public_key = format!("ssh-ed25519 {pub_key_b64} central-mobile");
 
     // Clé privée en hex (sera convertie en PEM dans une version future)
     let private_key = hex::encode(signing_key.to_bytes());
 
-    (private_key, public_key)
+    Ok((private_key, public_key))
 }
 
-fn base64_encode(data: &[u8]) -> String {
+fn base64_encode(data: &[u8]) -> BridgeResult<String> {
     // Construction manuelle du blob SSH ed25519
     let key_type = b"ssh-ed25519";
     let mut blob = Vec::new();
@@ -82,10 +82,12 @@ fn base64_encode(data: &[u8]) -> String {
     let mut buf = Vec::new();
     {
         let mut encoder = Base64Encoder::new(&mut buf);
-        encoder.write_all(&blob).unwrap();
-        encoder.finish().unwrap();
+        encoder
+            .write_all(&blob)
+            .and_then(|()| encoder.finish())
+            .map_err(|e| BridgeError::SshError(format!("encodage base64: {e}")))?;
     }
-    String::from_utf8(buf).unwrap()
+    String::from_utf8(buf).map_err(|e| BridgeError::SshError(format!("encodage base64: {e}")))
 }
 
 /// Encodeur base64 minimal (pas de dépendance externe).

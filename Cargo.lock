@@ -6957,16 +6957,19 @@ dependencies = [
  "chrono",
  "ed25519-dalek",
  "hex",
+ "hkdf",
  "rand 0.8.5",
  "reqwest",
  "russh",
  "russh-keys",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
  "x25519-dalek",
+ "zeroize",
 ]
 
 [[package]]

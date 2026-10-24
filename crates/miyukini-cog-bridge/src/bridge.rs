@@ -6,14 +6,18 @@
 
 //! Trait `CogBridge` — interface unifiée pour les 3 modes de connexion.
 //!
-//! Toutes les communications passent par un chiffrement E2E (X25519 + ChaCha20-Poly1305)
-//! négocié automatiquement lors de la connexion, quel que soit le mode de transport.
+//! Toutes les communications passent par un chiffrement E2E v2 (handshake X25519
+//! signé ed25519, HKDF-SHA256, XChaCha20-Poly1305 — voir [`crate::e2e`]) négocié
+//! lors de la connexion, quel que soit le mode de transport.
 
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use crate::e2e::{E2eHandshake, E2eKeypair, E2eSession, EncryptedMessage};
+use crate::e2e::{
+    E2eError, E2eHandshake, E2eIdentity, E2eRole, E2eSession, EncryptedMessage,
+    PendingHandshake, MAX_HANDSHAKE_JSON_LEN, MAX_MESSAGE_JSON_LEN,
+};
 use crate::BridgeResult;
 
 /// Mode de connexion au COG Host.
@@ -66,6 +70,15 @@ pub struct CogBridge {
     status: Arc<RwLock<BridgeStatus>>,
     /// Session E2E active (établie après le handshake).
     e2e_session: Arc<RwLock<Option<E2eSession>>>,
+    /// Identité ed25519 de l'appareil et clé d'identité épinglée du COG
+    /// (issues de l'appairage). Sans elles, le handshake E2E est refusé.
+    e2e_identities: Option<Arc<E2eIdentities>>,
+}
+
+/// Identités utilisées pour le handshake E2E v2.
+struct E2eIdentities {
+    device: E2eIdentity,
+    cog_identity_key: [u8; 32],
 }
 
 impl CogBridge {
@@ -75,7 +88,18 @@ impl CogBridge {
             mode,
             status: Arc::new(RwLock::new(BridgeStatus::Disconnected)),
             e2e_session: Arc::new(RwLock::new(None)),
+            e2e_identities: None,
         }
+    }
+
+    /// Configure les identités E2E : identité ed25519 de l'appareil et clé
+    /// d'identité du COG épinglée lors de l'appairage (vérifiée hors bande).
+    pub fn with_e2e_identities(mut self, device: E2eIdentity, cog_identity_key: [u8; 32]) -> Self {
+        self.e2e_identities = Some(Arc::new(E2eIdentities {
+            device,
+            cog_identity_key,
+        }));
+        self
     }
 
     /// Retourne le statut actuel de la connexion.
@@ -122,6 +146,7 @@ impl CogBridge {
 
     /// Déconnecte proprement le bridge.
     pub async fn disconnect(&self) -> BridgeResult<()> {
+        *self.e2e_session.write().await = None;
         *self.status.write().await = BridgeStatus::Disconnected;
         Ok(())
     }
@@ -163,23 +188,29 @@ impl CogBridge {
     // Chiffrement E2E
     // ═══════════════════════════════════════════════════════════════════════
 
-    /// Négocie le chiffrement E2E avec le COG Host.
+    /// Négocie le chiffrement E2E (protocole v2) avec le COG Host.
     ///
-    /// Échange de clés X25519 via l'endpoint `/api/bridge/e2e-handshake`.
-    /// Après le handshake, toutes les communications passent par ChaCha20-Poly1305.
+    /// Envoie l'offre signée de l'appareil à `/api/bridge/e2e-handshake` et
+    /// vérifie l'offre signée du COG (identité épinglée) avant toute dérivation.
+    /// Toute version autre que v2 est refusée, sans repli.
     pub async fn negotiate_e2e(&self) -> BridgeResult<()> {
+        // Une session précédente n'est jamais conservée en cas d'échec.
+        *self.e2e_session.write().await = None;
+
+        let ids = self
+            .e2e_identities
+            .as_ref()
+            .ok_or(E2eError::MissingIdentity)?;
+        let (pending, our_offer) =
+            PendingHandshake::initiate(E2eRole::Device, &ids.device, &ids.cog_identity_key)?;
+
         let base = self.base_url();
         let url = format!("{base}/api/bridge/e2e-handshake");
 
-        // Générer notre paire de clés éphémères
-        let keypair = E2eKeypair::generate();
-        let our_handshake = E2eHandshake::from_public_key(&keypair.public_key_bytes());
-
-        // Envoyer notre clé publique, recevoir celle du COG Host
         let client = reqwest::Client::new();
         let resp = client
             .post(&url)
-            .json(&our_handshake)
+            .json(&our_offer)
             .timeout(std::time::Duration::from_secs(10))
             .send()
             .await
@@ -191,28 +222,20 @@ impl CogBridge {
             ));
         }
 
-        let host_handshake: E2eHandshake = resp
-            .json()
-            .await
-            .map_err(|e| crate::BridgeError::NetworkError(format!("E2E parse: {e}")))?;
-
-        // Dériver le secret partagé
-        let peer_key = host_handshake.parse_public_key()?;
-        let shared_key = keypair.derive_shared_secret(&peer_key)?;
-
-        // Créer la session E2E
-        let session = E2eSession::from_shared_key(&shared_key);
+        let body = read_bounded(resp, MAX_HANDSHAKE_JSON_LEN).await?;
+        let host_offer = E2eHandshake::from_json(&body)?;
+        let session = pending.complete(&host_offer)?;
         *self.e2e_session.write().await = Some(session);
 
-        tracing::info!("E2E: chiffrement de bout en bout établi (X25519 + ChaCha20-Poly1305)");
+        tracing::info!("E2E v2 : chiffrement de bout en bout établi (handshake signé)");
         Ok(())
     }
 
     /// Chiffre et envoie un message JSON au COG Host.
     pub async fn send_encrypted<T: Serialize>(&self, endpoint: &str, value: &T) -> BridgeResult<()> {
-        let mut session_guard = self.e2e_session.write().await;
+        let session_guard = self.e2e_session.read().await;
         let session = session_guard
-            .as_mut()
+            .as_ref()
             .ok_or(crate::BridgeError::Disconnected)?;
 
         let encrypted = session.encrypt_json(value)?;
@@ -244,9 +267,9 @@ impl CogBridge {
         endpoint: &str,
         value: &T,
     ) -> BridgeResult<R> {
-        let mut session_guard = self.e2e_session.write().await;
+        let session_guard = self.e2e_session.read().await;
         let session = session_guard
-            .as_mut()
+            .as_ref()
             .ok_or(crate::BridgeError::Disconnected)?;
 
         let encrypted = session.encrypt_json(value)?;
@@ -269,10 +292,8 @@ impl CogBridge {
             )));
         }
 
-        let encrypted_resp: EncryptedMessage = resp
-            .json()
-            .await
-            .map_err(|e| crate::BridgeError::NetworkError(e.to_string()))?;
+        let body = read_bounded(resp, MAX_MESSAGE_JSON_LEN).await?;
+        let encrypted_resp = EncryptedMessage::from_json(&body)?;
 
         session.decrypt_json(&encrypted_resp)
     }
@@ -281,4 +302,23 @@ impl CogBridge {
     pub async fn is_e2e_active(&self) -> bool {
         self.e2e_session.read().await.is_some()
     }
+}
+
+/// Lit le corps d'une réponse HTTP en refusant tout dépassement de `max` octets (C-13).
+async fn read_bounded(mut resp: reqwest::Response, max: usize) -> BridgeResult<Vec<u8>> {
+    if resp.content_length().is_some_and(|n| n > max as u64) {
+        return Err(E2eError::TooLarge("réponse HTTP").into());
+    }
+    let mut body = Vec::new();
+    while let Some(chunk) = resp
+        .chunk()
+        .await
+        .map_err(|e| crate::BridgeError::NetworkError(e.to_string()))?
+    {
+        if body.len().saturating_add(chunk.len()) > max {
+            return Err(E2eError::TooLarge("réponse HTTP").into());
+        }
+        body.extend_from_slice(&chunk);
+    }
+    Ok(body)
 }

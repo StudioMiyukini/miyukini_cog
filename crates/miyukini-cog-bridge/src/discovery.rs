@@ -49,7 +49,7 @@ pub async fn discover_lan(timeout: Duration) -> BridgeResult<(SocketAddr, Discov
         .map_err(|e| BridgeError::NetworkError(format!("UDP broadcast: {e}")))?;
 
     // Envoyer le magic sur le broadcast
-    let broadcast_addr: SocketAddr = format!("255.255.255.255:{DISCOVERY_PORT}").parse().unwrap();
+    let broadcast_addr = SocketAddr::from((std::net::Ipv4Addr::BROADCAST, DISCOVERY_PORT));
     socket
         .send_to(DISCOVERY_MAGIC, broadcast_addr)
         .await
