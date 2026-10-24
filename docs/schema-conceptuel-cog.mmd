@@ -1,63 +1,40 @@
 %% @id arch.cog.schema-conceptuel
 %% @role architecture-diagram
 %% @layer 3-8+kernel
-%% @human Schéma conceptuel COG : 4 zones, Douanes, strates, identité signée
+%% @human Schéma conceptuel COG v2 : BorderGuard, zone Franche, Portail interne, zone COG, canal officiel
 %% @do visualize_cog_architecture
 %% Référence : docs/architecture/MODELE-ZONES-ET-COUCHES-COG.md (2026-10-24)
-flowchart LR
-    subgraph INTL["🌐 INTERNATIONAL — Internet · Unknown"]
-        VIS["Visiteurs · services tiers"]
-        ORIP["🏪 Origin — face publique"]
+flowchart TB
+    FED(("🤝 Fédération"))
+    ORIGIN(("🏛️ Origin"))
+    INTL(("🌐 International<br/>(Internet)"))
+
+    FED <-- "identification<br/>certification globale" --> ORIGIN
+
+    subgraph COG["COG"]
+        BG{{"🛂 BorderGuard<br/>(pare-feu externe)"}}
+        subgraph FRANCHE["🏪 Zone Franche (DMZ)"]
+            F1["Services exposables : pages web, services web<br/>DB secondaire · agents relais des services internes<br/>(bureautique coopérative, explorateur web…)"]
+        end
+        PORTAIL{{"🚪 Portail interne<br/>(pare-feu interne)"}}
+        subgraph NAT["🏛️ Zone COG (nationale)"]
+            N1["Kernel · Cores · Services · interfaces<br/>stockage local · DB principale"]
+        end
     end
 
-    subgraph FED["🤝 FÉDÉRATION — WAN privé WireGuard/Noise · Verified"]
-        COG2["🏛️ COG reconnus"]
-        APP["📱 Appareils de l'utilisateur<br/>passeport + clé d'appareil"]
-        ORIF["🏪 Origin — face fédérale<br/>racine Market · registre Merkle"]
-    end
+    FED -- "identification<br/>certification fédérale" --> BG
+    ORIGIN -- "identification<br/>certification globale" --> BG
+    INTL -- "zero trust<br/>liste blanche" --> BG
+    BG <--> FRANCHE
+    FRANCHE <--> PORTAIL
+    PORTAIL <--> NAT
+    BG -. "canal officiel (tiré, signé Origin)<br/>gouvernance Cores · services officiels<br/>Market officiel · MAJ Cores" .-> NAT
 
-    FWINTL{{"🔥 FW-INTL<br/>IPS · ports déclarés (0 par défaut)"}}
-    FWFED{{"🔥 FW-FED<br/>pairs reconnus · IDS"}}
-
-    subgraph FRANCHE["🏪 FRANCHE — DMZ tampon"]
-        ACCES["Points d'accès TLS / Noise"]
-        QUAR[("📥 Quarantaine")]
-        PUB[("📤 Publication")]
-    end
-
-    FWINT{{"🔥 FW-INT — Douane intérieure<br/>rupture protocolaire · liste blanche MSCE"}}
-
-    subgraph NAT["🏛️ NATIONALE — LAN sans passerelle · Trusted"]
-        ADMIN["👑 MiyukiniAdmin<br/>clé d'émission"]
-        SVC["Services : Central · Jay · MiyuCloud · MAIA"]
-        CORES["Cores : StrongFather · WorrySentinel · MasterButler<br/>KindMother · CaringNanny · TAMR · …"]
-        DATA[("🔒 Données · clés · registre Merkle")]
-    end
-
-    USB[["🔑 Racine COG — USB hors ligne"]]
-
-    VIS --> FWINTL --> ACCES
-    COG2 <--> FWFED
-    APP --> FWFED
-    ORIF <--> FWFED
-    FWFED --> ACCES
-    ACCES --> QUAR
-    PUB --> ACCES
-    NAT -- "la Nationale tire" --> FWINT
-    FWINT -- "relève" --> QUAR
-    FWINT -- "dépose" --> PUB
-    SVC -- "intention" --> CORES
-    CORES --> DATA
-    USB -- "signe" --> ADMIN
-    ADMIN -- "passeports" --> APP
-
-    classDef intl fill:#f3f4f6,stroke:#6b7280
-    classDef fed fill:#eef2ff,stroke:#6366f1
+    classDef ext fill:#eef2ff,stroke:#6366f1
     classDef fw fill:#fee2e2,stroke:#dc2626
     classDef franche fill:#fef3c7,stroke:#d97706
     classDef nat fill:#ecfdf5,stroke:#059669
-    class VIS,ORIP intl
-    class COG2,APP,ORIF fed
-    class FWINTL,FWFED,FWINT fw
-    class ACCES,QUAR,PUB franche
-    class ADMIN,SVC,CORES,DATA,USB nat
+    class FED,ORIGIN,INTL ext
+    class BG,PORTAIL fw
+    class F1 franche
+    class N1 nat
