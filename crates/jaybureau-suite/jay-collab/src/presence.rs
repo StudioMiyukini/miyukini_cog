@@ -88,7 +88,7 @@ impl PresenceManager {
 
     /// Nombre total de participants (local + distants).
     pub fn participant_count(&self) -> usize {
-        1 + self.remote.read().map(|r| r.len()).unwrap_or(0)
+        1 + self.remote.read().map_or(0, |r| r.len())
     }
 }
 

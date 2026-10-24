@@ -13,19 +13,41 @@
 //! 4. Lors d'un membership change (ajout/retrait), la cle est rotee.
 
 use crate::{ConversationId, JayMessageError, Result, UserId};
-use chacha20poly1305::aead::{Aead, KeyInit};
-use chacha20poly1305::{ChaCha20Poly1305, Nonce};
+use chacha20poly1305::aead::{Aead, KeyInit, Payload};
+use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use zeroize::{Zeroize, ZeroizeOnDrop};
+
+/// Domaine des donnees associees (AAD) des messages de groupe.
+const GROUP_AAD_DOMAIN: &[u8] = b"miyukini/jaymessage/group/v2";
 
 /// Cle symetrique de groupe.
-#[derive(Debug, Clone)]
+///
+/// La cle est privee, effacee a la destruction et jamais affichee par `Debug`.
+/// Le chiffrement utilise XChaCha20-Poly1305 avec un nonce aleatoire de
+/// 192 bits tire en interne : l'appelant ne fournit plus de compteur (R-009).
+#[derive(Clone, Zeroize, ZeroizeOnDrop)]
 pub struct GroupKey {
+    #[zeroize(skip)]
     pub conversation_id: ConversationId,
-    pub key: [u8; 32],
+    key: [u8; 32],
+    #[zeroize(skip)]
     pub generation: u32,
+    #[zeroize(skip)]
     pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+impl std::fmt::Debug for GroupKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GroupKey")
+            .field("conversation_id", &self.conversation_id)
+            .field("key", &"<redacted>")
+            .field("generation", &self.generation)
+            .field("created_at", &self.created_at)
+            .finish()
+    }
 }
 
 impl GroupKey {
@@ -42,15 +64,31 @@ impl GroupKey {
         }
     }
 
-    /// Chiffre un message avec la cle de groupe.
-    pub fn encrypt(&self, plaintext: &[u8], nonce_counter: u64) -> Result<(String, String)> {
-        let cipher = ChaCha20Poly1305::new(&self.key.into());
-        let mut nonce_bytes = [0u8; 12];
-        nonce_bytes[4..].copy_from_slice(&nonce_counter.to_le_bytes());
-        let nonce = Nonce::from_slice(&nonce_bytes);
+    /// Donnees associees : lient le chiffre au groupe et a la generation.
+    fn aad(&self) -> Vec<u8> {
+        let mut aad = Vec::with_capacity(GROUP_AAD_DOMAIN.len() + self.conversation_id.len() + 4);
+        aad.extend_from_slice(GROUP_AAD_DOMAIN);
+        aad.extend_from_slice(&self.generation.to_be_bytes());
+        aad.extend_from_slice(self.conversation_id.as_bytes());
+        aad
+    }
 
+    /// Chiffre un message avec la cle de groupe.
+    ///
+    /// Retourne `(nonce_hex, ciphertext_hex)`. Le nonce (24 octets) est tire
+    /// de `OsRng` a chaque appel.
+    pub fn encrypt(&self, plaintext: &[u8]) -> Result<(String, String)> {
+        let cipher = XChaCha20Poly1305::new((&self.key).into());
+        let nonce_bytes = crate::session::random_nonce();
+        let aad = self.aad();
         let ciphertext = cipher
-            .encrypt(nonce, plaintext)
+            .encrypt(
+                XNonce::from_slice(&nonce_bytes),
+                Payload {
+                    msg: plaintext,
+                    aad: &aad,
+                },
+            )
             .map_err(|e| JayMessageError::Crypto(format!("group encrypt: {e}")))?;
         Ok((hex::encode(nonce_bytes), hex::encode(ciphertext)))
     }
@@ -59,17 +97,22 @@ impl GroupKey {
     pub fn decrypt(&self, nonce_hex: &str, ciphertext_hex: &str) -> Result<Vec<u8>> {
         let nonce_bytes = hex::decode(nonce_hex)
             .map_err(|e| JayMessageError::Crypto(format!("nonce hex: {e}")))?;
-        if nonce_bytes.len() != 12 {
-            return Err(JayMessageError::Crypto("nonce 12 bytes".into()));
+        if nonce_bytes.len() != crate::session::NONCE_LEN {
+            return Err(JayMessageError::Crypto("nonce 24 bytes".into()));
         }
-        let nonce = Nonce::from_slice(&nonce_bytes);
-
         let ciphertext = hex::decode(ciphertext_hex)
             .map_err(|e| JayMessageError::Crypto(format!("ct hex: {e}")))?;
 
-        let cipher = ChaCha20Poly1305::new(&self.key.into());
+        let cipher = XChaCha20Poly1305::new((&self.key).into());
+        let aad = self.aad();
         cipher
-            .decrypt(nonce, ciphertext.as_ref())
+            .decrypt(
+                XNonce::from_slice(&nonce_bytes),
+                Payload {
+                    msg: &ciphertext,
+                    aad: &aad,
+                },
+            )
             .map_err(|e| JayMessageError::Crypto(format!("group decrypt: {e}")))
     }
 }
@@ -112,8 +155,7 @@ impl GroupKeyStore {
     pub fn rotate(&self, conversation_id: ConversationId) -> GroupKey {
         let new_gen = self
             .get(&conversation_id)
-            .map(|k| k.generation + 1)
-            .unwrap_or(1);
+            .map_or(1, |k| k.generation.saturating_add(1));
         let key = GroupKey::generate(conversation_id, new_gen);
         self.set(key.clone());
         key
@@ -133,7 +175,7 @@ mod tests {
     #[test]
     fn group_encrypt_decrypt_roundtrip() {
         let key = GroupKey::generate("group-1".into(), 1);
-        let (nonce, ct) = key.encrypt(b"secret group message", 0).unwrap();
+        let (nonce, ct) = key.encrypt(b"secret group message").unwrap();
         let pt = key.decrypt(&nonce, &ct).unwrap();
         assert_eq!(pt, b"secret group message");
     }
@@ -155,7 +197,43 @@ mod tests {
     fn wrong_key_cannot_decrypt() {
         let k1 = GroupKey::generate("g1".into(), 1);
         let k2 = GroupKey::generate("g2".into(), 1);
-        let (nonce, ct) = k1.encrypt(b"top secret", 0).unwrap();
+        let (nonce, ct) = k1.encrypt(b"top secret").unwrap();
         assert!(k2.decrypt(&nonce, &ct).is_err());
+    }
+
+    #[test]
+    fn group_nonces_never_repeat() {
+        let key = GroupKey::generate("g1".into(), 1);
+        let mut seen = std::collections::HashSet::new();
+        for _ in 0..10_000 {
+            let (nonce, _) = key.encrypt(b"m").unwrap();
+            assert_eq!(nonce.len(), 48);
+            assert!(seen.insert(nonce), "nonce de groupe repete");
+        }
+    }
+
+    #[test]
+    fn old_generation_ciphertext_rejected_after_rotation() {
+        // Meme materiau de cle mais generation differente : l'AAD differe.
+        let k1 = GroupKey::generate("g1".into(), 1);
+        let mut k1_next = k1.clone();
+        k1_next.generation = 2;
+        let (nonce, ct) = k1.encrypt(b"x").unwrap();
+        assert!(k1_next.decrypt(&nonce, &ct).is_err());
+    }
+
+    #[test]
+    fn short_nonce_rejected() {
+        let key = GroupKey::generate("g1".into(), 1);
+        let (_, ct) = key.encrypt(b"x").unwrap();
+        assert!(key.decrypt(&"00".repeat(12), &ct).is_err());
+    }
+
+    #[test]
+    fn debug_does_not_leak_key() {
+        let key = GroupKey::generate("g1".into(), 1);
+        let dbg = format!("{key:?}");
+        assert!(!dbg.contains(&hex::encode(key.key)));
+        assert!(dbg.contains("<redacted>"));
     }
 }

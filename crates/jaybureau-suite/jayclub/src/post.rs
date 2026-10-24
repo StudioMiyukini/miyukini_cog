@@ -220,7 +220,7 @@ mod tests {
     #[test]
     fn extract_mentions_ignores_inline_at() {
         let m = extract_mentions("user@example.com is not a mention");
-        assert!(m.is_empty());
+        assert_eq!(m, Vec::<String>::new());
     }
 
     #[test]

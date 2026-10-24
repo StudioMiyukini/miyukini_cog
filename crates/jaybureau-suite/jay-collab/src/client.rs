@@ -5,8 +5,14 @@
 //! @human  jaybureau-suite — module « jay-collab client ».
 
 //! Client WebSocket pour la collaboration temps réel.
+//!
+//! Le premier message envoyé est un [`JoinRequest`] portant un [`JoinToken`]
+//! signé par l'identité ed25519 de l'utilisateur (R-008) ; le serveur refuse
+//! tout autre message avant un `join` vérifié.
 
+use crate::auth::{unix_now, JoinRequest, JoinToken};
 use crate::presence::PresenceManager;
+use ed25519_dalek::SigningKey;
 use futures_util::{SinkExt, StreamExt};
 use jaybureau_core::{CollabEvent, DocId, Presence, UserId};
 use std::sync::Arc;
@@ -25,6 +31,26 @@ pub enum CollabError {
     Protocol(String),
     #[error("Déconnecté")]
     Disconnected,
+    #[error("Authentification requise")]
+    AuthMissing,
+    #[error("Authentification invalide: {0}")]
+    AuthInvalid(String),
+    #[error("Jeton expiré")]
+    TokenExpired,
+    #[error("Jeton déjà utilisé")]
+    TokenReplayed,
+    #[error("Identité inconnue")]
+    UnknownIdentity,
+    #[error("Accès refusé au document")]
+    AccessDenied,
+    #[error("Lecture seule : modification refusée")]
+    ReadOnly,
+    #[error("Participant non connecté à la salle")]
+    NotJoined,
+    #[error("Salle pleine")]
+    RoomFull,
+    #[error("Message trop volumineux: {0} octets")]
+    TooLarge(usize),
 }
 
 /// Client de collaboration pour un document.
@@ -51,7 +77,15 @@ impl CollabClient {
     }
 
     /// Se connecte au serveur collab via WebSocket.
-    pub async fn connect(&mut self, ws_url: &str) -> Result<(), CollabError> {
+    ///
+    /// `identity` : clé ed25519 de l'utilisateur, dont la clé publique est
+    /// enregistrée côté serveur. Le jeton de connexion est signé avec elle et
+    /// envoyé en premier message.
+    pub async fn connect(&mut self, ws_url: &str, identity: &SigningKey) -> Result<(), CollabError> {
+        let token = JoinToken::sign(identity, self.user_id.clone(), self.doc_id.clone(), unix_now()?)?;
+        let join = serde_json::to_string(&JoinRequest::Join { token })
+            .map_err(|e| CollabError::Protocol(format!("join: {e}")))?;
+
         let url = format!("{ws_url}/collab/{}", self.doc_id);
         tracing::info!("Connexion collab: {url}");
 
@@ -60,6 +94,12 @@ impl CollabClient {
             .map_err(|e| CollabError::WebSocket(format!("connect: {e}")))?;
 
         let (mut ws_tx, mut ws_rx) = ws_stream.split();
+
+        // Authentification avant tout autre message.
+        ws_tx
+            .send(Message::Text(join))
+            .await
+            .map_err(|e| CollabError::WebSocket(format!("join: {e}")))?;
 
         let (tx, mut rx) = mpsc::unbounded_channel::<CollabEvent>();
         self.tx = Some(tx.clone());
@@ -72,15 +112,14 @@ impl CollabClient {
         })
         .ok();
 
-        // Demander l'état initial du document
-        tx.send(CollabEvent::Update { update: Vec::new() }).ok();
+        // L'état initial est envoyé par le serveur après un join vérifié.
 
         // Tâche d'envoi
         tokio::spawn(async move {
             while let Some(evt) = rx.recv().await {
                 match serde_json::to_string(&evt) {
                     Ok(json) => {
-                        if let Err(e) = ws_tx.send(Message::Text(json.into())).await {
+                        if let Err(e) = ws_tx.send(Message::Text(json)).await {
                             tracing::warn!("WS send: {e}");
                             break;
                         }

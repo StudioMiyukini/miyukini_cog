@@ -172,9 +172,10 @@ impl JayClubStore {
                             post.author_id == user_id
                                 || following.contains(&post.author_id)
                         }
-                        PostVisibility::Friends => post.author_id == user_id,
+                        PostVisibility::Friends | PostVisibility::Draft => {
+                            post.author_id == user_id
+                        }
                         PostVisibility::Tribe { .. } => false,
-                        PostVisibility::Draft => post.author_id == user_id,
                     }
                 })
                 .cloned()
@@ -375,12 +376,10 @@ impl JayClubStore {
     pub fn unread_count(&self, user_id: &str) -> usize {
         self.notifications
             .read()
-            .map(|n| {
+            .map_or(0, |n| {
                 n.get(user_id)
-                    .map(|v| v.iter().filter(|n| !n.read).count())
-                    .unwrap_or(0)
+                    .map_or(0, |v| v.iter().filter(|n| !n.read).count())
             })
-            .unwrap_or(0)
     }
 }
 

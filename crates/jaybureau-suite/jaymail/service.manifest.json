@@ -45,11 +45,6 @@
           "type": "string",
           "required": false,
           "description": "Destinataire(s) en copie (séparés par virgule)."
-        },
-        "bcc": {
-          "type": "string",
-          "required": false,
-          "description": "Destinataire(s) en copie cachée (séparés par virgule)."
         }
       },
       "writes": true,

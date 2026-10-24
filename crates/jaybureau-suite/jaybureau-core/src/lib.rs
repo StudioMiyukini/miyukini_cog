@@ -95,6 +95,27 @@ impl DocKind {
         ]
     }
 
+    /// Chemin du binaire de l'app, **uniquement** à côté de l'exécutable
+    /// lanceur (`exe_dir`), suffixe de la plateforme (`.exe` sous Windows).
+    ///
+    /// Pas de repli sur `PATH` (R-011) : un binaire absent = erreur, ce qui
+    /// empêche le détournement par un exécutable homonyme placé dans `PATH`.
+    pub fn sibling_binary_path(
+        &self,
+        exe_dir: &std::path::Path,
+    ) -> Result<std::path::PathBuf, JayBureauError> {
+        let path = exe_dir.join(format!(
+            "{}{}",
+            self.binary_name(),
+            std::env::consts::EXE_SUFFIX
+        ));
+        if path.is_file() {
+            Ok(path)
+        } else {
+            Err(JayBureauError::BinaryNotFound(path.display().to_string()))
+        }
+    }
+
     /// Nom du binaire associé.
     pub fn binary_name(&self) -> &'static str {
         match self {
@@ -215,6 +236,8 @@ pub enum JayBureauError {
     InvalidFormat(String),
     #[error("Erreur I/O: {0}")]
     Io(String),
+    #[error("Binaire introuvable à côté du lanceur: {0}")]
+    BinaryNotFound(String),
 }
 
 /// Helper Serde pour encoder Vec<u8> en hex.
@@ -241,7 +264,7 @@ mod hex_bytes {
     }
 
     fn hex_decode(s: &str) -> Result<Vec<u8>, String> {
-        if s.len() % 2 != 0 {
+        if !s.len().is_multiple_of(2) {
             return Err("hex length must be even".into());
         }
         let mut out = Vec::with_capacity(s.len() / 2);
@@ -260,10 +283,26 @@ mod tests {
 
     #[test]
     fn doc_kind_all_have_unique_binary_names() {
-        let mut names: Vec<&str> = DocKind::all().iter().map(|k| k.binary_name()).collect();
+        let mut names: Vec<&str> = DocKind::all().iter().map(DocKind::binary_name).collect();
         names.sort_unstable();
         names.dedup();
         assert_eq!(names.len(), DocKind::all().len());
+    }
+
+    #[test]
+    fn sibling_binary_never_falls_back_to_path() {
+        let dir = std::env::temp_dir().join(format!("jaybureau-test-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        // Absent du répertoire : erreur, même si un homonyme existe dans PATH.
+        let err = DocKind::Doc.sibling_binary_path(&dir);
+        assert!(matches!(err, Err(JayBureauError::BinaryNotFound(_))));
+        // Présent : chemin absolu dans le répertoire du lanceur.
+        let bin = dir.join(format!("jay-docs{}", std::env::consts::EXE_SUFFIX));
+        std::fs::write(&bin, b"").unwrap();
+        let found = DocKind::Doc.sibling_binary_path(&dir).unwrap();
+        assert_eq!(found, bin);
+        assert!(found.starts_with(&dir));
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]

@@ -56,9 +56,9 @@ pub struct EncryptedEnvelope {
     pub sender_id: UserId,
     /// Destinataire individuel (le sender envoie une enveloppe par destinataire).
     pub recipient_id: UserId,
-    /// Nonce ChaCha20 (12 bytes hex).
+    /// Nonce XChaCha20 (24 bytes hex), tire aleatoirement par l'emetteur.
     pub nonce: String,
-    /// Ciphertext + tag Poly1305 (hex).
+    /// Ciphertext + tag Poly1305 (hex) — XChaCha20-Poly1305.
     pub ciphertext: String,
     /// Signature ed25519 du sender sur (nonce || ciphertext).
     pub signature: String,

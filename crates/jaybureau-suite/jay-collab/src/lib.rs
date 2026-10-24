@@ -16,7 +16,7 @@
 //! ```text
 //!   Participant A          Serveur Collab          Participant B
 //!      │                        │                       │
-//!      │─── Join room ─────────▶│                       │
+//!      │─── Join (jeton signé) ▶│ vérif. identité + ACL │
 //!      │◀── Initial state ──────│                       │
 //!      │                        │◀─── Join room ────────│
 //!      │                        │──── Initial state ───▶│
@@ -28,13 +28,15 @@
 //!      │                        │                       │
 //! ```
 
+pub mod auth;
 pub mod client;
 pub mod presence;
 pub mod room;
 
+pub use auth::{IdentityVerifier, JoinRequest, JoinToken, KeyDirectory};
 pub use client::{CollabClient, CollabError};
 pub use presence::PresenceManager;
-pub use room::{CollabRoom, RoomStats};
+pub use room::{CollabRoom, JoinGrant, RoomRegistry, RoomStats};
 
 use yrs::{Doc, ReadTxn, Transact};
 

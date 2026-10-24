@@ -79,16 +79,14 @@ fn Sidebar() -> Element {
 fn AppTile(kind: DocKind) -> Element {
     let label = kind.label();
     let icon = kind.icon();
-    let binary = kind.binary_name();
 
     rsx! {
         li {
             class: "jay-app-tile",
             onclick: move |_| {
-                let bin = binary.to_string();
-                tokio::spawn(async move {
-                    let _ = launch_app(&bin).await;
-                });
+                if let Err(e) = launch_app(kind) {
+                    tracing::warn!("Lancement de {} impossible: {e}", kind.binary_name());
+                }
             },
             span { class: "jay-app-icon", "{icon}" }
             span { class: "jay-app-label", "{label}" }
@@ -121,16 +119,14 @@ fn Content() -> Element {
 fn CreateCard(kind: DocKind) -> Element {
     let label = kind.label();
     let icon = kind.icon();
-    let binary = kind.binary_name();
 
     rsx! {
         div {
             class: "jay-create-card",
             onclick: move |_| {
-                let bin = binary.to_string();
-                tokio::spawn(async move {
-                    let _ = launch_app(&bin).await;
-                });
+                if let Err(e) = launch_app(kind) {
+                    tracing::warn!("Lancement de {} impossible: {e}", kind.binary_name());
+                }
             },
             div { class: "jay-create-icon", "{icon}" }
             div { class: "jay-create-label", "{label}" }
@@ -140,17 +136,17 @@ fn CreateCard(kind: DocKind) -> Element {
 }
 
 /// Lance un app Jay Bureau en tant que processus fils.
-async fn launch_app(binary: &str) -> std::io::Result<()> {
-    tracing::info!("Lancement de {binary}");
-    // Chercher le binaire dans le meme répertoire que jaybureau.exe
+///
+/// Le binaire est cherché **uniquement** à côté de l'exécutable du hub ; pas
+/// de repli sur `PATH` (R-011, détournement de binaire).
+fn launch_app(kind: DocKind) -> std::io::Result<()> {
+    tracing::info!("Lancement de {}", kind.binary_name());
     let exe = std::env::current_exe()?;
-    let dir = exe.parent().unwrap_or(std::path::Path::new("."));
-    let bin_path = dir.join(format!("{binary}.exe"));
-    let bin_path = if bin_path.exists() {
-        bin_path
-    } else {
-        // Fallback : chercher via PATH
-        std::path::PathBuf::from(binary)
-    };
+    let dir = exe.parent().ok_or_else(|| {
+        std::io::Error::new(std::io::ErrorKind::NotFound, "répertoire du lanceur introuvable")
+    })?;
+    let bin_path = kind
+        .sibling_binary_path(dir)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::NotFound, e.to_string()))?;
     std::process::Command::new(bin_path).spawn().map(|_| ())
 }

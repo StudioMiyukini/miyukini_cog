@@ -27,19 +27,15 @@ pub enum FeedFilter {
 }
 
 /// Tri du feed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FeedSort {
     /// Plus recents en premier (chronologique inverse).
+    #[default]
     Recent,
     /// Plus populaires (algorithme : reactions + comments + temps).
     Trending,
 }
 
-impl Default for FeedSort {
-    fn default() -> Self {
-        Self::Recent
-    }
-}
 
 /// Pagination cursor (timestamp + id pour eviter les doublons).
 #[derive(Debug, Clone, Serialize, Deserialize)]

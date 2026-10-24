@@ -33,6 +33,9 @@ tracing = "0.1"
 # Errors
 thiserror = "2"
 
+# Secrets effacés de la mémoire (C-25)
+zeroize = { version = "1", features = ["serde"] }
+
 # Utils
 uuid = { version = "1", features = ["v4"] }
 

@@ -19,12 +19,15 @@ use crate::Result;
 /// MVP : retourne 3 emails de demonstration. Pour activer le vrai IMAP,
 /// il suffit de remplacer le corps de cette fonction par un appel a
 /// `imap::ClientBuilder::new(&config.host, config.port).native_tls()...`
-pub fn fetch_inbox(_config: &ImapConfig, _limit: u32) -> Result<Vec<Email>> {
+pub fn fetch_inbox(config: &ImapConfig, _limit: u32) -> Result<Vec<Email>> {
+    // TLS obligatoire hors bouclage explicite (R-011).
+    config.validate()?;
     Ok(demo_emails())
 }
 
 /// Recupere un message specifique.
-pub fn fetch_message(_config: &ImapConfig, _folder: &str, uid: u32) -> Result<Email> {
+pub fn fetch_message(config: &ImapConfig, _folder: &str, uid: u32) -> Result<Email> {
+    config.validate()?;
     let mut emails = demo_emails();
     if let Some(idx) = emails.iter().position(|e| e.uid == uid) {
         Ok(emails.remove(idx))

@@ -16,14 +16,15 @@ use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 
 /// Envoie un email via SMTP.
 pub async fn send_email(config: &SmtpConfig, draft: &EmailDraft) -> Result<()> {
+    // TLS obligatoire hors bouclage explicite (R-011) — avant toute connexion.
+    config.validate()?;
     draft.validate().map_err(JayMailError::Config)?;
 
     // Constructeur de message lettre
     let from_email = draft
         .from
         .as_ref()
-        .map(|a| a.email.clone())
-        .unwrap_or_else(|| config.username.clone());
+        .map_or_else(|| config.username.clone(), |a| a.email.clone());
 
     let from_mb: Mailbox = from_email
         .parse()
@@ -81,7 +82,7 @@ pub async fn send_email(config: &SmtpConfig, draft: &EmailDraft) -> Result<()> {
     };
 
     // Construire le transport selon le mode TLS
-    let creds = Credentials::new(config.username.clone(), config.password.clone());
+    let creds = Credentials::new(config.username.clone(), config.password.to_string());
 
     let mailer: AsyncSmtpTransport<Tokio1Executor> = match config.tls {
         TlsMode::Tls => AsyncSmtpTransport::<Tokio1Executor>::relay(&config.host)
@@ -94,6 +95,7 @@ pub async fn send_email(config: &SmtpConfig, draft: &EmailDraft) -> Result<()> {
             .port(config.port)
             .credentials(creds)
             .build(),
+        // Atteint seulement après `validate()` : IP de bouclage + opt-in.
         TlsMode::None => AsyncSmtpTransport::<Tokio1Executor>::builder_dangerous(&config.host)
             .port(config.port)
             .credentials(creds)

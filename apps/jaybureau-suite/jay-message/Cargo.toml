@@ -19,7 +19,6 @@ tracing-subscriber = "0.3"
 chrono = "0.4"
 
 jaymessage = { path = "../../../crates/jaybureau-suite/jaymessage" }
-miyukini-cog-bridge = { path = "../../../crates/miyukini-cog-bridge" }
 
 [lints]
 workspace = true

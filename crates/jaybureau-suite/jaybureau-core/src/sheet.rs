@@ -33,10 +33,11 @@ pub struct Cell {
 }
 
 /// Valeur d'une cellule (typée).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(tag = "type", content = "value")]
 pub enum CellValue {
     #[serde(rename = "empty")]
+    #[default]
     Empty,
     #[serde(rename = "text")]
     Text(String),
@@ -48,12 +49,6 @@ pub enum CellValue {
     Date(chrono::NaiveDate),
     #[serde(rename = "error")]
     Error(String),
-}
-
-impl Default for CellValue {
-    fn default() -> Self {
-        Self::Empty
-    }
 }
 
 /// Formatage d'une cellule (style d'affichage).
@@ -147,7 +142,7 @@ mod tests {
         };
         sheet.set(3, 2, cell);
         let got = sheet.get(3, 2);
-        assert!(matches!(got.value, CellValue::Number(n) if n == 42.0));
+        assert!(matches!(got.value, CellValue::Number(n) if (n - 42.0).abs() < f64::EPSILON));
     }
 
     #[test]

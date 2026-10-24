@@ -7,8 +7,10 @@
 //! Jay Message — messagerie chiffree E2E.
 
 use dioxus::prelude::*;
-use jaymessage::{Conversation, ConversationKind, IdentityKey, Message, MessageStatus, SessionStore};
-use miyukini_cog_bridge::e2e::E2eKeypair;
+use jaymessage::{
+    Conversation, ConversationKind, IdentityKey, Message, MessageStatus, PendingHandshake,
+    SessionStore,
+};
 use std::sync::Arc;
 
 fn main() {
@@ -28,21 +30,23 @@ fn App() -> Element {
         let identity = IdentityKey::generate("me".into());
         let sessions = Arc::new(SessionStore::new());
 
-        // Demo : etablir 2 sessions chiffrees avec Alice et Bob
-        let alice_kp = E2eKeypair::generate();
-        let me_kp1 = E2eKeypair::generate();
-        let alice_pub = alice_kp.public_key_bytes();
-        let me_pub1 = me_kp1.public_key_bytes();
-        let _ = alice_kp.derive_shared_secret(&me_pub1);
-        let me_secret = me_kp1.derive_shared_secret(&alice_pub).unwrap();
-        sessions.register("conv-alice".into(), "alice".into(), me_secret);
-
-        let bob_kp = E2eKeypair::generate();
-        let me_kp2 = E2eKeypair::generate();
-        let bob_pub = bob_kp.public_key_bytes();
-        let me_pub2 = me_kp2.public_key_bytes();
-        let me_secret2 = me_kp2.derive_shared_secret(&bob_pub).unwrap();
-        sessions.register("conv-bob".into(), "bob".into(), me_secret2);
+        // Demo : etablir 2 sessions chiffrees avec Alice et Bob via le
+        // handshake authentifie (cles ephemeres signees par l'identite, R-009).
+        for (conv_id, peer_name) in [("conv-alice", "alice"), ("conv-bob", "bob")] {
+            let peer = IdentityKey::generate(peer_name.into());
+            let established = PendingHandshake::initiate(&identity, &peer.public())
+                .and_then(|(me_pending, me_offer)| {
+                    let (peer_pending, peer_offer) =
+                        PendingHandshake::initiate(&peer, &identity.public())?;
+                    // Cote pair (simule) : verifie l'offre locale.
+                    let _peer_keys = peer_pending.complete(&me_offer)?;
+                    me_pending.complete(&peer_offer)
+                })
+                .and_then(|keys| sessions.register(conv_id.into(), peer_name.into(), keys));
+            if let Err(e) = established {
+                tracing::warn!("Session demo {conv_id} non etablie: {e}");
+            }
+        }
 
         AppState {
             identity: Arc::new(identity),

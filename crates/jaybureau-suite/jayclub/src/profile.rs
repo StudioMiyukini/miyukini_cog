@@ -111,6 +111,6 @@ mod tests {
         assert_eq!(p.display_name, "alice_doe");
         assert_eq!(p.follower_count, 0);
         assert!(!p.private);
-        assert!(p.badges.is_empty());
+        assert_eq!(p.badges.len(), 0);
     }
 }

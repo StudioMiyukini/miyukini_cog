@@ -53,7 +53,7 @@ impl SqliteStore {
     fn migrate(&self) -> Result<(), JayClubError> {
         let conn = self.conn.lock().map_err(|_| JayClubError::Invalid("lock".into()))?;
         conn.execute_batch(
-            r#"
+            r"
             CREATE TABLE IF NOT EXISTS profiles (
                 user_id TEXT PRIMARY KEY,
                 json TEXT NOT NULL
@@ -115,7 +115,7 @@ impl SqliteStore {
                 json_full TEXT NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_notifs_user ON notifications(user_id);
-            "#,
+            ",
         )
         .map_err(|e| JayClubError::Invalid(format!("migrate: {e}")))?;
         Ok(())
@@ -192,6 +192,9 @@ impl SqliteStore {
             )
             .optional()
             .map_err(|e| JayClubError::Invalid(format!("get post: {e}")))?;
+        // Libérer le verrou avant `hydrate_post` (qui le reprend) : le Mutex
+        // std n'est pas réentrant (interblocage sinon).
+        drop(conn);
         match json_opt {
             Some(j) => Ok(Some(self.hydrate_post(&j)?)),
             None => Ok(None),
@@ -231,12 +234,14 @@ impl SqliteStore {
         let rows = stmt
             .query_map(params![user_id], |row| row.get::<_, String>(0))
             .map_err(|e| JayClubError::Invalid(format!("query: {e}")))?;
-        let mut posts = Vec::new();
+        let mut jsons = Vec::new();
         for r in rows {
-            let json = r.map_err(|e| JayClubError::Invalid(format!("row: {e}")))?;
-            posts.push(self.hydrate_post(&json)?);
+            jsons.push(r.map_err(|e| JayClubError::Invalid(format!("row: {e}")))?);
         }
-        Ok(posts)
+        // Libérer le verrou avant `hydrate_post` (Mutex non réentrant).
+        drop(stmt);
+        drop(conn);
+        jsons.iter().map(|j| self.hydrate_post(j)).collect()
     }
 
     /// Feed = posts publics + posts des followings (followers visibility).
@@ -255,16 +260,18 @@ impl SqliteStore {
             )
             .map_err(|e| JayClubError::Invalid(format!("prepare: {e}")))?;
         let rows = stmt
-            .query_map(params![user_id, limit as i64], |row| {
+            .query_map(params![user_id, i64::try_from(limit).unwrap_or(i64::MAX)], |row| {
                 row.get::<_, String>(0)
             })
             .map_err(|e| JayClubError::Invalid(format!("query: {e}")))?;
-        let mut posts = Vec::new();
+        let mut jsons = Vec::new();
         for r in rows {
-            let json = r.map_err(|e| JayClubError::Invalid(format!("row: {e}")))?;
-            posts.push(self.hydrate_post(&json)?);
+            jsons.push(r.map_err(|e| JayClubError::Invalid(format!("row: {e}")))?);
         }
-        Ok(posts)
+        // Libérer le verrou avant `hydrate_post` (Mutex non réentrant).
+        drop(stmt);
+        drop(conn);
+        jsons.iter().map(|j| self.hydrate_post(j)).collect()
     }
 
     /// Ajoute/remplace une reaction d'un user sur un post.
@@ -313,8 +320,7 @@ impl SqliteStore {
             let (user_id, kind, at) = r.map_err(|e| JayClubError::Invalid(format!("row: {e}")))?;
             let kind = parse_reaction_kind(&kind);
             let at = chrono::DateTime::parse_from_rfc3339(&at)
-                .map(|dt| dt.with_timezone(&chrono::Utc))
-                .unwrap_or_else(|_| chrono::Utc::now());
+                .map_or_else(|_| chrono::Utc::now(), |dt| dt.with_timezone(&chrono::Utc));
             reactions.push(Reaction { user_id, kind, at });
         }
         Ok(reactions)
@@ -445,7 +451,7 @@ impl SqliteStore {
         let rows = stmt
             .query_map(params![user_id], |row| row.get::<_, String>(0))
             .map_err(|e| JayClubError::Invalid(format!("query: {e}")))?;
-        Ok(rows.filter_map(|r| r.ok()).collect())
+        Ok(rows.filter_map(std::result::Result::ok).collect())
     }
 
     pub fn list_following(&self, user_id: &str) -> Result<Vec<UserId>, JayClubError> {
@@ -456,7 +462,7 @@ impl SqliteStore {
         let rows = stmt
             .query_map(params![user_id], |row| row.get::<_, String>(0))
             .map_err(|e| JayClubError::Invalid(format!("query: {e}")))?;
-        Ok(rows.filter_map(|r| r.ok()).collect())
+        Ok(rows.filter_map(std::result::Result::ok).collect())
     }
 
     // ─── Notifications ────────────────────────────────────────────────
@@ -506,13 +512,23 @@ impl SqliteStore {
         Ok(count as usize)
     }
 
-    pub fn mark_notification_read(&self, notif_id: &str) -> Result<(), JayClubError> {
+    /// Marque une notification comme lue.
+    ///
+    /// `owner_id` : utilisateur authentifié qui fait la demande. Seul le
+    /// destinataire de la notification peut la marquer lue (R-011) ; une
+    /// notification d'un autre utilisateur est traitée comme introuvable
+    /// (pas de divulgation de son existence).
+    pub fn mark_notification_read(&self, owner_id: &str, notif_id: &str) -> Result<(), JayClubError> {
         let conn = self.conn.lock().map_err(|_| JayClubError::Invalid("lock".into()))?;
-        conn.execute(
-            "UPDATE notifications SET read = 1 WHERE id = ?1",
-            params![notif_id],
-        )
-        .map_err(|e| JayClubError::Invalid(format!("update: {e}")))?;
+        let changed = conn
+            .execute(
+                "UPDATE notifications SET read = 1 WHERE id = ?1 AND user_id = ?2",
+                params![notif_id, owner_id],
+            )
+            .map_err(|e| JayClubError::Invalid(format!("update: {e}")))?;
+        if changed == 0 {
+            return Err(JayClubError::NotFound(notif_id.to_string()));
+        }
         Ok(())
     }
 
@@ -648,7 +664,26 @@ mod tests {
         assert_eq!(store.unread_count("alice").unwrap(), 2);
 
         let notifs = store.list_notifications("alice").unwrap();
-        store.mark_notification_read(&notifs[0].id).unwrap();
+        store.mark_notification_read("alice", &notifs[0].id).unwrap();
         assert_eq!(store.unread_count("alice").unwrap(), 1);
+    }
+
+    #[test]
+    fn cannot_mark_other_users_notification_read() {
+        let store = fresh_store();
+        store
+            .add_notification(
+                "alice",
+                crate::NotificationKind::Follow {
+                    from_user_id: "bob".into(),
+                },
+            )
+            .unwrap();
+        let notifs = store.list_notifications("alice").unwrap();
+        // Bob tente de marquer la notification d'Alice : refus.
+        assert!(store.mark_notification_read("bob", &notifs[0].id).is_err());
+        assert_eq!(store.unread_count("alice").unwrap(), 1);
+        // Identifiant inexistant : refus aussi.
+        assert!(store.mark_notification_read("alice", "inexistant").is_err());
     }
 }

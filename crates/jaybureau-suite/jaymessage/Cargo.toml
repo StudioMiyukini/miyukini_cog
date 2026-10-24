@@ -14,17 +14,14 @@ uuid = { version = "1", features = ["v4", "serde"] }
 thiserror = "2"
 tracing = "0.1"
 
-# Réutilise la crypto E2E déjà dans le bridge Android
-miyukini-cog-bridge = { path = "../../miyukini-cog-bridge" }
-
-# Reuse miyusocialmessaging pour les structures conversationnelles
-miyusocialmessaging = { path = "../../miyusocialmessaging" }
-
-# Crypto additionnelle
-x25519-dalek = { version = "2", features = ["static_secrets"] }
-ed25519-dalek = { version = "2" }
+# Crypto (crates éprouvées uniquement, C-24) — le handshake n'utilise plus
+# `miyukini_cog_bridge::e2e` (clé éphémère non signée, dérivation maison, R-009)
+x25519-dalek = { version = "2", features = ["static_secrets", "zeroize"] }
+ed25519-dalek = { version = "2", features = ["zeroize"] }
 chacha20poly1305 = "0.10"
 sha2 = "0.10"
+hkdf = "0.12"
+zeroize = { version = "1", features = ["zeroize_derive"] }
 hex = "0.4"
 rand = "0.8"
 
