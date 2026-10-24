@@ -108,3 +108,71 @@ impl fmt::Display for ErreurSceau {
 }
 
 impl std::error::Error for ErreurSceau {}
+
+/// Preuve d'équivoque : deux têtes signées du même registre, incompatibles
+/// entre elles (même numéro de séquence et contenu différent, ou histoire
+/// réécrite). Les deux sceaux sont vérifiables par un tiers.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PreuveEquivoque {
+    /// Sceau de la tête acceptée précédemment.
+    pub acceptee: Vec<u8>,
+    /// Sceau de la tête contradictoire présentée.
+    pub contradictoire: Vec<u8>,
+}
+
+/// Motif de refus d'une tête de registre, d'une preuve Merkle ou d'un état
+/// persistant. Toutes les variantes signifient « refus ».
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ErreurRegistre {
+    /// Refus au niveau du sceau (format, signature, seuil, validité).
+    Sceau(ErreurSceau),
+    /// Politique hors bornes (seuil hors `1..=8`, âge maximal nul ou au-delà
+    /// du plafond).
+    PolitiqueInvalide,
+    /// Tête trop ancienne : le registre est considéré comme gelé (anti-gel).
+    TeteGelee {
+        /// Horodatage d'émission de la tête.
+        emise_a: u64,
+        /// Âge maximal effectif appliqué (secondes).
+        age_max_secs: u64,
+    },
+    /// La tête appartient à un autre registre que celui attendu.
+    RegistreInattendu,
+    /// Tête plus ancienne que la dernière acceptée (séquence ou horodatage
+    /// en recul) : retour en arrière refusé.
+    RetourArriere,
+    /// Deux têtes signées contradictoires : preuve d'équivoque.
+    Equivoque(Box<PreuveEquivoque>),
+    /// Le registre a grandi mais aucune preuve de cohérence n'a été fournie.
+    CoherenceManquante,
+    /// Preuve Merkle (inclusion ou cohérence) mal formée ou fausse.
+    PreuveInvalide,
+    /// État persistant mal formé.
+    EtatInvalide,
+}
+
+impl From<ErreurSceau> for ErreurRegistre {
+    fn from(e: ErreurSceau) -> Self {
+        Self::Sceau(e)
+    }
+}
+
+impl fmt::Display for ErreurRegistre {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Sceau(e) => write!(f, "tête de registre refusée : {e}"),
+            Self::PolitiqueInvalide => write!(f, "politique de tête de registre invalide"),
+            Self::TeteGelee { emise_a, age_max_secs } => {
+                write!(f, "registre gelé : tête émise à {emise_a}, âge maximal {age_max_secs} s dépassé")
+            }
+            Self::RegistreInattendu => write!(f, "tête d'un autre registre"),
+            Self::RetourArriere => write!(f, "tête plus ancienne que la dernière acceptée (retour en arrière)"),
+            Self::Equivoque(_) => write!(f, "équivoque : deux têtes signées contradictoires"),
+            Self::CoherenceManquante => write!(f, "preuve de cohérence manquante"),
+            Self::PreuveInvalide => write!(f, "preuve Merkle invalide"),
+            Self::EtatInvalide => write!(f, "état de registre persistant invalide"),
+        }
+    }
+}
+
+impl std::error::Error for ErreurRegistre {}

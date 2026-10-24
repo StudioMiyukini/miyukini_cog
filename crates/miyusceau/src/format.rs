@@ -334,7 +334,10 @@ pub fn cosigner<T: Titre>(octets: &[u8], cle: &CleSignature) -> Result<Vec<u8>, 
     Ok(sceau.encoder())
 }
 
-fn decoder_titre<T: Titre>(charge: &[u8]) -> Result<T, ErreurSceau> {
+/// Décode canoniquement une charge TLV en titre `T` (structure validée, tout
+/// champ non lu refusé). **Aucune signature n'est vérifiée** : outillage,
+/// fuzzing ; un titre exploitable s'obtient par [`verifier`] / [`verifier_seuil`].
+pub fn decoder_titre<T: Titre>(charge: &[u8]) -> Result<T, ErreurSceau> {
     crate::tlv::valider_structure(charge)?;
     let mut lecteur = LecteurTlv::new(charge);
     let titre = T::decoder(&mut lecteur)?;

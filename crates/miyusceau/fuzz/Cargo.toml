@@ -1,0 +1,50 @@
+# Cibles de fuzzing de miyusceau (EX-10) — cargo-fuzz, nightly.
+# Hors du workspace (table [workspace] propre) : les builds normaux l'ignorent.
+# Lancement : cd crates/miyusceau/fuzz && cargo +nightly fuzz run decoder_sceau
+[package]
+name = "miyusceau-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+miyusceau = { path = ".." }
+
+[workspace]
+members = ["."]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "decoder_sceau"
+path = "fuzz_targets/decoder_sceau.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "verifier_seuil"
+path = "fuzz_targets/verifier_seuil.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "decoder_titres"
+path = "fuzz_targets/decoder_titres.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "preuves_merkle"
+path = "fuzz_targets/preuves_merkle.rs"
+test = false
+doc = false
+bench = false
