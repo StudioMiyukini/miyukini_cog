@@ -10,9 +10,8 @@ description = "Jay Mail — client email Miyukini (SMTP + IMAP)"
 # SMTP send
 lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1-rustls-tls", "builder"] }
 
-# IMAP fetch (synchrone, simple)
-imap = "3.0.0-alpha.15"
-native-tls = "0.2"
+# IMAP fetch (synchrone, simple) — TLS via rustls (pas d'OpenSSL, C-24)
+imap = { version = "3.0.0-alpha.15", default-features = false, features = ["rustls-tls"] }
 
 # Parse RFC822
 mail-parser = "0.9"

@@ -38,6 +38,7 @@ moka = { version = "0.12", features = ["future", "sync"] }
 
 # Crypto/Hash
 sha2 = "0.10"
+hmac = "0.12"   # signature WOPI HMAC-SHA256 (M-20)
 
 # Compression
 flate2 = "1"

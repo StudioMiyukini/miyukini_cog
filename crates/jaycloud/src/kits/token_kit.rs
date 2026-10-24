@@ -20,6 +20,7 @@
 //! révocables, jamais en clair côté serveur).
 
 use base32::Alphabet;
+use hmac::{Hmac, Mac};
 use rand::RngCore;
 use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
@@ -30,6 +31,8 @@ const TOKEN_PREFIX: &str = "mws-jc-";
 const RANDOM_BYTES: usize = 16;
 const CHECKSUM_BYTES: usize = 8;
 const BASE32_ALPHABET: Alphabet = Alphabet::Rfc4648Lower { padding: false };
+
+type HmacSha256 = Hmac<Sha256>;
 
 /// Erreurs du Kit token.
 #[derive(Debug, thiserror::Error)]
@@ -116,45 +119,30 @@ pub fn verify_integrity(raw_token: &str, signing_secret: &Key32) -> Result<(), T
         )));
     }
 
-    let checksum_expected = hmac8(signing_secret, &random);
-    let valid: bool = checksum_given
-        .as_slice()
-        .ct_eq(checksum_expected.as_slice())
-        .into();
-    if !valid {
-        return Err(TokenKitError::InvalidChecksum);
-    }
-    Ok(())
+    // Vérification constant-time des 8 premiers octets du tag (crate `hmac`).
+    hmac_sha256(signing_secret, &random)
+        .verify_truncated_left(&checksum_given)
+        .map_err(|_| TokenKitError::InvalidChecksum)
 }
 
-/// HMAC-SHA256 tronqué à 8 octets utilisé comme checksum.
+/// HMAC-SHA256 (crate `hmac`, RFC 2104) tronqué à 8 octets, utilisé comme checksum.
+///
+/// Sortie identique bit à bit à l'ancienne implémentation manuelle (clé de
+/// 32 octets < bloc de 64 octets) : les jetons déjà émis restent valides.
 fn hmac8(secret: &Key32, message: &[u8]) -> [u8; CHECKSUM_BYTES] {
-    // HMAC via deux passes SHA-256 (équivalent RFC 2104).
-    // Bloc SHA-256 = 64 octets.
-    const BLOCK_SIZE: usize = 64;
-    let mut key_padded = [0u8; BLOCK_SIZE];
-    key_padded[..secret.0.len()].copy_from_slice(&secret.0);
-
-    let mut ipad = [0u8; BLOCK_SIZE];
-    let mut opad = [0u8; BLOCK_SIZE];
-    for i in 0..BLOCK_SIZE {
-        ipad[i] = key_padded[i] ^ 0x36;
-        opad[i] = key_padded[i] ^ 0x5c;
-    }
-
-    let mut inner = Sha256::new();
-    inner.update(ipad);
-    inner.update(message);
-    let inner_hash = inner.finalize();
-
-    let mut outer = Sha256::new();
-    outer.update(opad);
-    outer.update(inner_hash);
-    let outer_hash = outer.finalize();
-
+    let tag = hmac_sha256(secret, message).finalize().into_bytes();
     let mut out = [0u8; CHECKSUM_BYTES];
-    out.copy_from_slice(&outer_hash[..CHECKSUM_BYTES]);
+    out.copy_from_slice(&tag[..CHECKSUM_BYTES]);
     out
+}
+
+/// Instancie un HMAC-SHA256 initialisé sur `message`.
+fn hmac_sha256(secret: &Key32, message: &[u8]) -> HmacSha256 {
+    // `new_from_slice` n'échoue jamais pour HMAC (toute longueur de clé est acceptée).
+    let mut mac = <HmacSha256 as Mac>::new_from_slice(&secret.0)
+        .expect("HMAC accepte toute longueur de clé");
+    mac.update(message);
+    mac
 }
 
 #[cfg(test)]
@@ -247,5 +235,70 @@ mod tests {
         let bad_token = format!("{TOKEN_PREFIX}{tampered}-{checksum}");
         let r = verify_integrity(&bad_token, &secret);
         assert!(matches!(r, Err(TokenKitError::InvalidChecksum)));
+    }
+
+    /// Référence : l'ancienne implémentation manuelle (ipad/opad), conservée
+    /// uniquement en test pour prouver la compatibilité des jetons émis.
+    fn legacy_hmac8(secret: &Key32, message: &[u8]) -> [u8; CHECKSUM_BYTES] {
+        const BLOCK_SIZE: usize = 64;
+        let mut key_padded = [0u8; BLOCK_SIZE];
+        key_padded[..secret.0.len()].copy_from_slice(&secret.0);
+        let ipad: Vec<u8> = key_padded.iter().map(|b| b ^ 0x36).collect();
+        let opad: Vec<u8> = key_padded.iter().map(|b| b ^ 0x5c).collect();
+        let mut inner = Sha256::new();
+        inner.update(&ipad);
+        inner.update(message);
+        let mut outer = Sha256::new();
+        outer.update(&opad);
+        outer.update(inner.finalize());
+        let mut out = [0u8; CHECKSUM_BYTES];
+        out.copy_from_slice(&outer.finalize()[..CHECKSUM_BYTES]);
+        out
+    }
+
+    #[test]
+    fn hmac_crate_matches_legacy_checksum() {
+        for _ in 0..16 {
+            let secret = Key32::generate();
+            let mut msg = [0u8; RANDOM_BYTES];
+            rand::rngs::OsRng.fill_bytes(&mut msg);
+            assert_eq!(hmac8(&secret, &msg), legacy_hmac8(&secret, &msg));
+        }
+    }
+
+    #[test]
+    fn legacy_token_still_verifies() {
+        let secret = Key32::generate();
+        let mut random = [0u8; RANDOM_BYTES];
+        rand::rngs::OsRng.fill_bytes(&mut random);
+        let token = format!(
+            "{TOKEN_PREFIX}{}-{}",
+            base32::encode(BASE32_ALPHABET, &random),
+            base32::encode(BASE32_ALPHABET, &legacy_hmac8(&secret, &random))
+        );
+        assert!(verify_integrity(&token, &secret).is_ok());
+    }
+
+    #[test]
+    fn hmac_rfc4231_case2_vector() {
+        // RFC 4231 cas 2 : clé "Jefe", tag tronqué aux 8 premiers octets.
+        let mut mac = <HmacSha256 as Mac>::new_from_slice(b"Jefe").unwrap();
+        mac.update(b"what do ya want for nothing?");
+        let tag = mac.finalize().into_bytes();
+        assert_eq!(hex::encode(&tag[..8]), "5bdcc146bf60754e");
+    }
+
+    #[test]
+    fn integrity_tampered_checksum_fails() {
+        let secret = Key32::generate();
+        let (token, _) = generate(&secret);
+        let (head, checksum) = token.rsplit_once('-').unwrap();
+        let mut bytes = base32::decode(BASE32_ALPHABET, checksum).unwrap();
+        bytes[0] ^= 0x01;
+        let bad = format!("{head}-{}", base32::encode(BASE32_ALPHABET, &bytes));
+        assert!(matches!(
+            verify_integrity(&bad, &secret),
+            Err(TokenKitError::InvalidChecksum)
+        ));
     }
 }
