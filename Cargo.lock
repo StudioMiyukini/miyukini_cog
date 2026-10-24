@@ -6359,8 +6359,14 @@ dependencies = [
 name = "miyauth"
 version = "0.1.0"
 dependencies = [
+ "ed25519-dalek",
+ "hkdf",
  "miyukini-kernel",
+ "miyusceau",
+ "rand_core 0.6.4",
  "serde",
+ "sha2",
+ "zeroize",
 ]
 
 [[package]]

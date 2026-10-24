@@ -8,9 +8,29 @@
 //! @do documenter_tests
 
 use miyauth::{
-    identity_attest, identity_resolve, identity_role, identity_verify, identity_verify_verified, GovernedContext,
-    IdentityArtefacts, IdentityContext, IdentityRole, MiyauthError, VerificationResult,
+    identity_attest, identity_resolve, identity_role, identity_verify, AccesVerifie, AnnuaireEmetteurs, CogId,
+    GovernedContext, IdentityArtefacts, IdentityContext, IdentityRole, ListeRevocation, MiyauthError,
+    PolitiqueIdentite, RefusIdentite, VerificationResult,
 };
+
+/// Vérifie `raw` comme passeport ET visa avec une politique vide (aucune ancre) : tout
+/// artefact doit être refusé.
+fn verifier_brut(ctx: &GovernedContext, raw: &[u8]) -> Result<AccesVerifie, MiyauthError> {
+    let cog = CogId::new("aaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
+    let annuaire = AnnuaireEmetteurs::new();
+    let revocations = ListeRevocation::new(cog.clone(), 1_000, 900);
+    let politique = PolitiqueIdentite { cog_local: cog, annuaire: &annuaire, revocations: &revocations };
+    let artefacts = IdentityArtefacts {
+        passport_raw: Some(raw.to_vec()),
+        visa_raw: Some(raw.to_vec()),
+        session_ref: None,
+    };
+    identity_verify(ctx, &politique, &artefacts, "jaykoa", 1_000)
+}
+
+fn est_refus(r: &Result<AccesVerifie, MiyauthError>) -> bool {
+    matches!(r, Err(MiyauthError::Refus(_)))
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers de test
@@ -230,7 +250,7 @@ fn mauth_tool_001_resolve_no_mandate() {
     let ctx = empty_ctx();
     let artefacts = sample_artefacts();
 
-    let result = identity_resolve(&ctx, &artefacts, None, None);
+    let result = identity_resolve(&ctx, &artefacts, None);
 
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
@@ -245,7 +265,7 @@ fn mauth_tool_002_verify_no_mandate() {
     let ctx = empty_ctx();
     let passport_data = b"passport-raw-data";
 
-    let result = identity_verify(&ctx, passport_data);
+    let result = verifier_brut(&ctx, passport_data);
 
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
@@ -294,7 +314,7 @@ fn mauth_tool_010_resolve_with_mandate() {
     let ctx = governed_ctx();
     let artefacts = sample_artefacts();
 
-    let result = identity_resolve(&ctx, &artefacts, None, None);
+    let result = identity_resolve(&ctx, &artefacts, None);
 
     assert!(result.is_ok());
     let context = result.unwrap();
@@ -313,10 +333,9 @@ fn mauth_tool_011_verify_with_mandate() {
     let ctx = governed_ctx();
     let passport_data = mock_passport_valid_no_expiry();
 
-    let result = identity_verify(&ctx, &passport_data);
+    let result = verifier_brut(&ctx, &passport_data);
 
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), VerificationResult::Invalid);
+    assert!(est_refus(&result));
 }
 
 /// @id MAUTH_TOOL_012
@@ -375,7 +394,7 @@ fn mauth_r_001_artefacts_empty_data() {
         session_ref: Some(String::new()), // Session vide
     };
 
-    let result = identity_resolve(&ctx, &artefacts, None, None);
+    let result = identity_resolve(&ctx, &artefacts, None);
 
     assert!(result.is_ok());
     let context = result.unwrap();
@@ -393,10 +412,9 @@ fn mauth_r_001_artefacts_empty_data() {
 fn mauth_r_002_verify_empty_data() {
     let ctx = governed_ctx();
 
-    let result = identity_verify(&ctx, &[]);
+    let result = verifier_brut(&ctx, &[]);
 
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), VerificationResult::Invalid);
+    assert!(est_refus(&result));
 }
 
 /// @id MAUTH_R_003
@@ -475,7 +493,7 @@ fn mauth_d_003_debug_error() {
 fn mauth_sec_001_forged_artifact_invalid() {
     let ctx = governed_ctx();
     let forged = [0x01u8, 0, 0, 0, 0, 0, 0, 0, 0];
-    assert_eq!(identity_verify(&ctx, &forged).unwrap(), VerificationResult::Invalid);
+    assert!(est_refus(&verifier_brut(&ctx, &forged)));
 }
 
 /// @id MAUTH_SEC_002
@@ -489,7 +507,7 @@ fn mauth_sec_002_future_expiry_still_invalid() {
     for expiry in [1u64, u64::MAX, 4_000_000_000_000_000_000] {
         let mut b = vec![0x01u8];
         b.extend_from_slice(&expiry.to_le_bytes());
-        assert_ne!(identity_verify(&ctx, &b).unwrap(), VerificationResult::Valid);
+        assert!(est_refus(&verifier_brut(&ctx, &b)));
     }
 }
 
@@ -497,16 +515,30 @@ fn mauth_sec_002_future_expiry_still_invalid() {
 /// @role test
 /// @layer toolkit
 /// @do mauth_sec_003_verified_constructor_refuses_forged
-//@human / @human identity_verify_verified refuse l'artefact forgé (aucun Verifie constructible).
+//@human / @human identity_verify refuse l'artefact forgé v1 au décodage du sceau (aucun AccesVerifie constructible).
 #[test]
 fn mauth_sec_003_verified_constructor_refuses_forged() {
     let ctx = governed_ctx();
     let forged = mock_passport_valid_no_expiry();
-    let r = identity_verify_verified(&ctx, &forged);
-    assert!(matches!(
-        r,
-        Err(MiyauthError::VerificationFailed(VerificationResult::Invalid))
-    ));
+    let r = verifier_brut(&ctx, &forged);
+    assert!(matches!(r, Err(MiyauthError::Refus(RefusIdentite::Sceau(_)))));
+}
+
+/// @id MAUTH_SEC_005
+/// @role test
+/// @layer toolkit
+/// @do mauth_sec_005_verify_missing_visa
+//@human / @human identity_verify sans visa = ArtefactManquant.
+#[test]
+fn mauth_sec_005_verify_missing_visa() {
+    let ctx = governed_ctx();
+    let cog = CogId::new("aaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
+    let annuaire = AnnuaireEmetteurs::new();
+    let revocations = ListeRevocation::new(cog.clone(), 1_000, 900);
+    let politique = PolitiqueIdentite { cog_local: cog, annuaire: &annuaire, revocations: &revocations };
+    let artefacts = IdentityArtefacts { passport_raw: Some(vec![1, 2, 3]), visa_raw: None, session_ref: None };
+    let r = identity_verify(&ctx, &politique, &artefacts, "jaykoa", 1_000);
+    assert!(matches!(r, Err(MiyauthError::Refus(RefusIdentite::ArtefactManquant))));
 }
 
 /// @id MAUTH_SEC_004
@@ -522,6 +554,6 @@ fn mauth_sec_004_resolve_never_grants_role_on_raw() {
         visa_raw: Some(mock_passport_valid_no_expiry()),
         session_ref: None,
     };
-    let c = identity_resolve(&ctx, &artefacts, None, None).unwrap();
+    let c = identity_resolve(&ctx, &artefacts, None).unwrap();
     assert_eq!(c.role, IdentityRole::External);
 }

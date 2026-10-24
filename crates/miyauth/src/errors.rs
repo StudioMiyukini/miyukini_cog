@@ -10,8 +10,8 @@ pub enum MiyauthError {
     Unimplemented,
     /// Fonction volontairement non implémentée (fail-closed, lot 2).
     NotImplemented(&'static str),
-    /// La vérification préalable a échoué (artefact non `Valid`).
-    VerificationFailed(crate::types::VerificationResult),
+    /// Titre d'identité refusé (passeport, visa, révocation, possession).
+    Refus(crate::passeport::RefusIdentite),
 }
 
 impl std::fmt::Display for MiyauthError {
@@ -20,7 +20,7 @@ impl std::fmt::Display for MiyauthError {
             MiyauthError::NoMandate => write!(f, "Execution refused: no governed mandate"),
             MiyauthError::Unimplemented => write!(f, "Tool not yet implemented"),
             MiyauthError::NotImplemented(what) => write!(f, "Not implemented: {what}"),
-            MiyauthError::VerificationFailed(r) => write!(f, "Verification failed: {r:?}"),
+            MiyauthError::Refus(r) => write!(f, "Identity refused: {r}"),
         }
     }
 }

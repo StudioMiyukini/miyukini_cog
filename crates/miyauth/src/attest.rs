@@ -18,9 +18,11 @@ pub fn attest(
     if !ctx.has_mandate() {
         return Err(MiyauthError::NoMandate);
     }
-    // Fail-closed (audit C8) : une attestation non liée au contexte et non signée serait
-    // une fausse preuve. Lot 2 : Ed25519 — attestation signée dérivée de `_context`.
+    // Fail-closed (audit C8) : une attestation non signée serait une fausse preuve.
+    // Lot 2 incr. 4 : la doc gelée v1.2 n'attribue aucun code de type Sceau à une
+    // attestation (types 0x01 à 0x07) ni de format : refus maintenu jusqu'à un
+    // amendement. Le visa vérifié (`AccesVerifie`) tient lieu d'attestation.
     Err(MiyauthError::NotImplemented(
-        "identity.attest (attestation signée Ed25519, lot 2)",
+        "identity.attest (aucun type Sceau d'attestation dans la doc gelée v1.2)",
     ))
 }
