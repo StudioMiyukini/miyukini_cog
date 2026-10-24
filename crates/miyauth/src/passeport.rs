@@ -19,7 +19,7 @@
 //!    non révoqué.
 //! 3. Preuve de possession (§7) par la clé d'appareil.
 //!
-//! Les types [`PasseportVerifie`], [`PossessionProuvee`] et [`AccesVerifie`] ont des
+//! Les types [`PasseportVerifie`], [`PossessionProuvee`], [`AccesVerifie`] et [`AccesProuve`] ont des
 //! champs privés : les détenir prouve que les contrôles ont eu lieu.
 
 use std::collections::HashMap;
@@ -70,6 +70,8 @@ pub enum RefusIdentite {
     AudienceIncorrecte,
     /// Fenêtre du visa hors de celle du passeport.
     FenetreHorsPasseport,
+    /// Portée du visa absente du passeport (pas d'élévation par le visa).
+    PorteeHorsPasseport,
     /// Cible révoquée.
     Revoque(CibleRevocation),
     /// Statut de révocation indisponible ou périmé (fail-closed).
@@ -96,6 +98,7 @@ impl fmt::Display for RefusIdentite {
             Self::RoleIncoherent => write!(f, "rôle incohérent"),
             Self::AudienceIncorrecte => write!(f, "audience incorrecte"),
             Self::FenetreHorsPasseport => write!(f, "validité du visa hors de celle du passeport"),
+            Self::PorteeHorsPasseport => write!(f, "portée du visa absente du passeport"),
             Self::Revoque(c) => write!(f, "révoqué : {c:?}"),
             Self::Revocation(e) => write!(f, "révocation : {e}"),
             Self::PossessionInvalide => write!(f, "preuve de possession invalide"),
@@ -409,6 +412,10 @@ pub fn emettre_visa(
     if demande.pas_avant < p.pas_avant || demande.pas_apres > p.pas_apres {
         return Err(RefusIdentite::FenetreHorsPasseport);
     }
+    // Atténuation : un visa ne peut accorder que des portées du passeport.
+    if !portees_incluses(&demande.portees, &p.portees) {
+        return Err(RefusIdentite::PorteeHorsPasseport);
+    }
     let visa = Visa {
         serie: serie_aleatoire(),
         passeport: pv.empreinte,
@@ -452,15 +459,51 @@ impl AccesVerifie {
         &self.visa.titre().sujet
     }
 
-    /// Vérifie la preuve de possession de session (défi du service, audience du visa).
+    /// Vérifie la preuve de possession de session (défi du service, audience du
+    /// visa) et rend l'accès **prouvé**, seul type qui accorde un rôle.
+    ///
+    /// Un visa vérifié sans possession ne prouve rien (il peut avoir été
+    /// intercepté) : appeler avec un défi neuf à chaque session.
     pub fn verifier_possession(
         &self,
         defi: &[u8; 32],
         liaison_canal: &[u8; 32],
         signature: &[u8; 64],
-    ) -> Result<(), RefusIdentite> {
+    ) -> Result<AccesProuve, RefusIdentite> {
         let v = self.visa.titre();
-        controler_possession(&v.cle_appareil, defi, &v.audience, liaison_canal, signature)
+        controler_possession(&v.cle_appareil, defi, &v.audience, liaison_canal, signature)?;
+        Ok(AccesProuve { acces: self.clone() })
+    }
+}
+
+/// Accès prouvé : visa vérifié **et** possession de la clé d'appareil prouvée
+/// pour un défi de session. Constructible seulement par
+/// [`AccesVerifie::verifier_possession`] ; c'est lui qu'exige `identity_resolve`.
+#[derive(Debug, Clone)]
+pub struct AccesProuve {
+    acces: AccesVerifie,
+}
+
+impl AccesProuve {
+    /// Accès vérifié sous-jacent.
+    pub fn acces(&self) -> &AccesVerifie {
+        &self.acces
+    }
+
+    /// Rôle accordé par le visa.
+    pub fn role(&self) -> IdentityRole {
+        self.acces.role()
+    }
+
+    /// Identifiant par paire du titulaire pour le COG local.
+    pub fn sujet(&self) -> &[u8; 32] {
+        self.acces.sujet()
+    }
+
+    /// COG d'origine du titulaire (émetteur du passeport) : l'identifiant par
+    /// paire n'est unique que dans l'espace de ce COG.
+    pub fn cog_origine(&self) -> &CogId {
+        &self.acces.passeport.passeport().emetteur_cog
     }
 }
 
@@ -501,6 +544,10 @@ pub fn verifier_visa(
     if v.pas_avant < p.pas_avant || v.pas_apres > p.pas_apres {
         return Err(RefusIdentite::FenetreHorsPasseport);
     }
+    // Revérifié côté vérificateur : un émetteur fautif ne contourne pas l'atténuation.
+    if !portees_incluses(&v.portees, &p.portees) {
+        return Err(RefusIdentite::PorteeHorsPasseport);
+    }
     controler_revocation(
         politique.revocations,
         &politique.cog_local,
@@ -508,6 +555,12 @@ pub fn verifier_visa(
         maintenant,
     )?;
     Ok(AccesVerifie { passeport, visa })
+}
+
+/// Vrai si chaque portée de `visa` figure dans `passeport` (comparaison exacte,
+/// sans joker : la doc gelée ne définit pas de portée générique).
+fn portees_incluses(visa: &Portees, passeport: &Portees) -> bool {
+    visa.as_slice().iter().all(|x| passeport.contient(x))
 }
 
 /// `kid` d'une clé d'appareil (cible de révocation « appareil »).

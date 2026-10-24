@@ -73,7 +73,7 @@ impl Monde {
             secret: &self.secret,
             destination: destination.clone(),
             cle_appareil: self.appareil.cle_publique(),
-            portees: Portees::new(["services:*:read"]).unwrap(),
+            portees: Portees::new(["jaykoa:read", "services:*:read"]).unwrap(),
             pas_avant,
             pas_apres,
         };
@@ -134,14 +134,19 @@ fn mauth_pv_001_aller_retour_visiteur() {
 
     let (defi, liaison) = ([1u8; 32], [2u8; 32]);
     let sig = m.signer_pop(&defi, AUDIENCE, &liaison);
-    acces.verifier_possession(&defi, &liaison, &sig).unwrap();
+    let prouve = acces.verifier_possession(&defi, &liaison, &sig).unwrap();
     // Liaison de canal différente (relais) : refus.
-    assert_eq!(acces.verifier_possession(&defi, &[3u8; 32], &sig), Err(RefusIdentite::PossessionInvalide));
+    assert_eq!(
+        acces.verifier_possession(&defi, &[3u8; 32], &sig).err(),
+        Some(RefusIdentite::PossessionInvalide)
+    );
 
+    // Seul l'accès prouvé accorde un rôle (un visa vérifié seul ne le peut pas : typage).
     let ctx = GovernedContext::new("mandat".into(), 2);
-    let c = identity_resolve(&ctx, &IdentityArtefacts::default(), Some(&acces)).unwrap();
+    let c = identity_resolve(&ctx, &IdentityArtefacts::default(), Some(&prouve)).unwrap();
     assert_eq!(c.role, IdentityRole::Visitor);
-    assert!(c.opaque_id.starts_with("pw:") && c.opaque_id.len() == 3 + 64);
+    let attendu = format!("pw:{}:", m.h);
+    assert!(c.opaque_id.starts_with(&attendu) && c.opaque_id.len() == attendu.len() + 64);
 }
 
 /// @id MAUTH_PV_002
@@ -528,4 +533,22 @@ fn mauth_pv_061_portees_canoniques() {
     assert!(Portees::new([""]).is_none());
     assert!(Portees::new(["a b"]).is_none());
     assert!(Portees::new((0..33).map(|i| format!("p{i:02}"))).is_none());
+}
+
+/// @id MAUTH_PV_070
+/// @role test
+/// @layer toolkit
+/// @do mauth_pv_070_attenuation_des_portees
+//@human / @human Un visa ne peut accorder aucune portée absente du passeport.
+#[test]
+fn mauth_pv_070_attenuation_des_portees() {
+    let m = Monde::new();
+    let p = m.passeport();
+    let pp = m.possession(&m.politique_v(), &p);
+    let mut demande = m.demande_visa();
+    demande.portees = Portees::new(["jaykoa:read", "jaykoa:admin"]).unwrap();
+    assert_eq!(
+        emettre_visa(&m.v, &m.cle_v, &pp, &demande).err(),
+        Some(RefusIdentite::PorteeHorsPasseport)
+    );
 }

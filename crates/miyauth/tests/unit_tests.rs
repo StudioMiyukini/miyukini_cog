@@ -320,7 +320,9 @@ fn mauth_tool_010_resolve_with_mandate() {
     let context = result.unwrap();
     assert_eq!(context.role, IdentityRole::External);
     assert!(!context.opaque_id.is_empty());
-    assert_eq!(context.opaque_id, "session-abc-123");
+    // Jamais repris tel quel : empreinte préfixée `sess:` (pas d'imitation de `pw:`).
+    assert!(context.opaque_id.starts_with("sess:"));
+    assert_ne!(context.opaque_id, "session-abc-123");
 }
 
 /// @id MAUTH_TOOL_011

@@ -10,7 +10,7 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyauthError;
-use crate::passeport::AccesVerifie;
+use crate::passeport::AccesProuve;
 use crate::types::{IdentityArtefacts, IdentityContext, IdentityRole};
 use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 
@@ -21,26 +21,35 @@ use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 //@human / @human Résout le contexte d'identité à partir d'un accès vérifié (Passeport + Visa).
 /// tool.identity.resolve — ne décide pas de la confiance.
 ///
-/// - Accès vérifié : rôle du visa (`Citizen` / `Visitor`), identifiant opaque =
-///   `pw:` + hex de l'identifiant par paire (stable pour ce COG, EX-36).
+/// - Accès prouvé (visa vérifié + possession de session) : rôle du visa (`Citizen` / `Visitor`), identifiant opaque =
+///   `pw:<cog d'origine>:` + hex de l'identifiant par paire (stable pour ce COG, EX-36).
 /// - Sinon : `External`, identifiant opaque de session (jamais un rôle accordé par
 ///   des données brutes non vérifiées).
 pub fn resolve(
     ctx: &GovernedContext,
     artefacts: &IdentityArtefacts,
-    acces: Option<&AccesVerifie>,
+    acces: Option<&AccesProuve>,
 ) -> Result<IdentityContext, MiyauthError> {
     if !ctx.has_mandate() {
         return Err(MiyauthError::NoMandate);
     }
     if let Some(acces) = acces {
-        return Ok(IdentityContext { role: acces.role(), opaque_id: format!("pw:{}", hex(acces.sujet())) });
+        // Espace de noms par COG émetteur : deux COG ne peuvent pas produire le
+        // même identifiant (un COG étranger ne peut pas viser un citoyen local).
+        return Ok(IdentityContext {
+            role: acces.role(),
+            opaque_id: format!("pw:{}:{}", acces.cog_origine(), hex(acces.sujet())),
+        });
     }
-    let opaque_id = artefacts
-        .session_ref
-        .as_deref()
-        .filter(|s| !s.is_empty())
-        .map_or_else(|| format!("opaque:{}", UuidIdGenerator.generate()), String::from);
+    // Référence de session fournie par le client : jamais reprise telle quelle
+    // (elle pourrait imiter un identifiant `pw:`), seulement son empreinte.
+    let opaque_id = artefacts.session_ref.as_deref().filter(|s| !s.is_empty()).map_or_else(
+        || format!("opaque:{}", UuidIdGenerator.generate()),
+        |s| {
+            use sha2::{Digest, Sha256};
+            format!("sess:{}", hex(&Sha256::digest(s.as_bytes())))
+        },
+    );
     Ok(IdentityContext { role: IdentityRole::External, opaque_id })
 }
 
