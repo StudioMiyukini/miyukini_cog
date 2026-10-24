@@ -127,7 +127,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
 /// - cible inexistante (ex: écriture d'un nouveau fichier) : on remonte au
 ///   plus proche ancêtre existant, qu'on canonicalise (échec => refus, y
 ///   compris lien symbolique pendant) et qui doit être dans le sandbox.
-fn resolve_in_sandbox(sandbox: &Path, rel: &str) -> Result<PathBuf, String> {
+pub(crate) fn resolve_in_sandbox(sandbox: &Path, rel: &str) -> Result<PathBuf, String> {
     use std::path::Component;
     let deny = |m: &str| Err(format!("{m} — accès refusé"));
 
@@ -170,7 +170,7 @@ fn resolve_in_sandbox(sandbox: &Path, rel: &str) -> Result<PathBuf, String> {
 }
 
 /// Résout le répertoire sandbox.
-fn resolve_sandbox() -> PathBuf {
+pub(crate) fn resolve_sandbox() -> PathBuf {
     if let Ok(data_dir) = std::env::var("MIYUKINI_DATA_DIR") {
         Path::new(&data_dir).join(DEFAULT_SANDBOX)
     } else {

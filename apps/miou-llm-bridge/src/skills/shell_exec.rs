@@ -29,48 +29,25 @@ const MAX_OUTPUT_SIZE: usize = 65_536;
 
 /// Commandes autorisées (whitelist).
 /// Les commandes non listées ici sont refusées.
+///
+/// Uniquement des outils de lecture/filtrage SANS capacité d'exécuter du code :
+/// les interpréteurs (python, node, deno, bun), gestionnaires de paquets et
+/// outils de build (cargo, npm, npx, pip, rustc : build.rs / proc-macros / scripts),
+/// git (`-c`, alias `!`), find/fd (`-exec`, `-x`), curl/wget (écriture, SSRF)
+/// et cp/mv/mkdir (écriture hors sandbox) ont été retirés.
 const ALLOWED_COMMANDS: &[&str] = &[
-    // Build & dev
-    "cargo",
-    "rustc",
-    "rustfmt",
-    "clippy-driver",
-    "npm",
-    "npx",
-    "node",
-    "bun",
-    "deno",
-    "python",
-    "python3",
-    "pip",
-    "pip3",
-    "git",
-    // Utilitaires
-    "ls",
-    "dir",
-    "cat",
-    "head",
-    "tail",
-    "wc",
-    "sort",
-    "uniq",
-    "find",
-    "grep",
-    "rg",
-    "fd",
-    "echo",
-    "printf",
-    "mkdir",
-    "cp",
-    "mv",
-    "curl",
-    "wget",
-    // (interpréteurs de commandes powershell/cmd retirés : pas de shell)
-    // Diagnostic
-    "ping",
-    "nslookup",
-    "ipconfig",
-    "ifconfig",
+    "ls", "cat", "head", "tail", "wc", "sort", "uniq", "grep", "rg", "echo", "printf",
+];
+
+/// Options refusées même pour une commande de la whitelist, car elles
+/// exécutent un programme externe ou lisent une liste de fichiers arbitraire.
+const BLOCKED_OPTIONS: &[&str] = &[
+    "--pre",              // rg : préprocesseur = commande arbitraire
+    "--pre-glob",
+    "--compress-program", // sort : programme de compression arbitraire
+    "--files0-from",      // wc/sort : liste de fichiers hors sandbox
+    "--search-zip",       // rg -z : lance des décompresseurs externes
+    "-z",
 ];
 
 /// Commandes interdites (blocklist — même si elles passent la whitelist via shell).
@@ -95,7 +72,7 @@ pub fn info() -> SkillInfo {
     params.insert("args".into(), "Arguments (tableau de strings)".into());
     params.insert(
         "cwd".into(),
-        "Répertoire de travail (relatif au sandbox)".into(),
+        "Répertoire de travail relatif au sandbox (défaut : racine du sandbox)".into(),
     );
     params.insert(
         "timeout".into(),
@@ -137,6 +114,37 @@ fn check_command_allowed(command: &str) -> Result<(), String> {
          ni arguments inline). Commandes permises : {}",
         ALLOWED_COMMANDS.join(", ")
     ))
+}
+
+/// Valide les arguments : pas de chemin absolu ni de `..` (tout reste relatif
+/// au sandbox), pas d'option qui exécute un programme, et blocklist appliquée
+/// à la ligne complète (commande + arguments).
+fn check_args_allowed(args: &[String]) -> Result<(), String> {
+    use std::path::{Component, Path};
+    let joined = args.join(" ").to_lowercase();
+    for blocked in BLOCKED_PATTERNS {
+        if joined.contains(&blocked.to_lowercase()) {
+            return Err("Arguments bloqués par la politique de sécurité".into());
+        }
+    }
+    for arg in args {
+        let opt = arg.split('=').next().unwrap_or(arg);
+        if BLOCKED_OPTIONS.iter().any(|b| opt.eq_ignore_ascii_case(b)) {
+            return Err(format!("Option refusée : {opt}"));
+        }
+        // Une valeur d'option (`--file=/etc/x`) est aussi un chemin potentiel.
+        let value = arg.split_once('=').map(|(_, v)| v).unwrap_or(arg);
+        for candidate in [arg.as_str(), value] {
+            let path = Path::new(candidate);
+            if path.is_absolute()
+                || candidate.starts_with('~')
+                || path.components().any(|c| matches!(c, Component::ParentDir | Component::Prefix(_) | Component::RootDir))
+            {
+                return Err(format!("Argument hors sandbox refusé : {arg}"));
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Exécute une commande sandboxée (exécution directe, jamais via shell).
@@ -199,18 +207,25 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         })
         .unwrap_or_default();
 
-    // Répertoire de travail
-    let cwd = params
-        .get("cwd")
-        .and_then(|v| v.as_str())
-        .map(std::path::PathBuf::from);
+    if let Err(msg) = check_args_allowed(&args) {
+        return refuse(msg);
+    }
 
-    // Exécution directe du binaire (jamais via un shell)
+    // Répertoire de travail : toujours dans le sandbox (fail-closed).
+    let sandbox = super::file_ops::resolve_sandbox();
+    let cwd_rel = params.get("cwd").and_then(|v| v.as_str()).unwrap_or("");
+    let cwd = match super::file_ops::resolve_in_sandbox(&sandbox, cwd_rel) {
+        Ok(dir) => dir,
+        Err(msg) => return refuse(format!("cwd invalide : {msg}")),
+    };
+
+    // Exécution directe du binaire (jamais via un shell), environnement minimal.
     let mut cmd = tokio::process::Command::new(command);
     cmd.args(&args);
-
-    if let Some(ref dir) = cwd {
-        cmd.current_dir(dir);
+    cmd.current_dir(&cwd);
+    cmd.env_clear();
+    if let Ok(path) = std::env::var("PATH") {
+        cmd.env("PATH", path);
     }
 
     cmd.stdout(std::process::Stdio::piped());
@@ -302,6 +317,42 @@ mod tests {
         assert!(check_command_allowed("cmd").is_err());
         assert!(check_command_allowed("echo hi").is_err());
         assert!(check_command_allowed("").is_err());
+    }
+
+    #[test]
+    fn interpreteurs_et_outils_executants_refuses() {
+        for c in ["python", "python3", "node", "deno", "bun", "npx", "npm", "pip", "cargo", "rustc", "git", "find", "fd", "curl", "wget", "cp", "mv"] {
+            assert!(check_command_allowed(c).is_err(), "{c} devrait être refusé");
+        }
+    }
+
+    #[test]
+    fn arguments_hors_sandbox_refuses() {
+        let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        assert!(check_args_allowed(&a(&["notes.txt"])).is_ok());
+        assert!(check_args_allowed(&a(&["-n", "motif", "src"])).is_ok());
+        assert!(check_args_allowed(&a(&["/etc/passwd"])).is_err());
+        assert!(check_args_allowed(&a(&["../secret"])).is_err());
+        assert!(check_args_allowed(&a(&["a/../../b"])).is_err());
+        assert!(check_args_allowed(&a(&["~/.ssh/id_ed25519"])).is_err());
+        assert!(check_args_allowed(&a(&["--file=/etc/shadow"])).is_err());
+    }
+
+    #[test]
+    fn options_executantes_refusees() {
+        let a = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        assert!(check_args_allowed(&a(&["--pre=sh", "x"])).is_err());
+        assert!(check_args_allowed(&a(&["--pre", "sh", "x"])).is_err());
+        assert!(check_args_allowed(&a(&["--compress-program=sh"])).is_err());
+        assert!(check_args_allowed(&a(&["-z", "x"])).is_err());
+    }
+
+    #[tokio::test]
+    async fn cwd_hors_sandbox_refuse() {
+        let r = execute(&p(serde_json::json!({"command": "ls", "cwd": "/etc"}))).await;
+        assert!(!r.success);
+        let r = execute(&p(serde_json::json!({"command": "ls", "cwd": "../.."}))).await;
+        assert!(!r.success);
     }
 
     #[cfg(unix)]

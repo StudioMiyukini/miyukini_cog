@@ -227,6 +227,29 @@ pub fn ct_eq(a: &[u8], b: &[u8]) -> bool {
         == 0
 }
 
+/// Vrai si l'en-tête `Host` désigne la machine locale (`localhost`, `127.0.0.1`,
+/// `[::1]`, avec ou sans port). Absent ou autre nom : faux (fail-closed).
+/// Protège l'usage loopback sans token contre le DNS rebinding.
+pub fn is_loopback_host(headers: &axum::http::HeaderMap) -> bool {
+    let Some(host) = headers
+        .get(axum::http::header::HOST)
+        .and_then(|v| v.to_str().ok())
+    else {
+        return false;
+    };
+    let host = host.trim().to_ascii_lowercase();
+    let name = if let Some(rest) = host.strip_prefix('[') {
+        // IPv6 entre crochets : "[::1]" ou "[::1]:11435"
+        match rest.split_once(']') {
+            Some((addr, tail)) if tail.is_empty() || tail.starts_with(':') => addr.to_string(),
+            _ => return false,
+        }
+    } else {
+        host.split(':').next().unwrap_or_default().to_string()
+    };
+    matches!(name.as_str(), "localhost" | "127.0.0.1" | "::1")
+}
+
 /// Vérifie le token d'authentification (fail-closed : pas de token configuré = refus).
 pub fn verify_auth_token(
     headers: &axum::http::HeaderMap,
@@ -806,6 +829,22 @@ mod tests {
         // Aucun token côté serveur => refus (et non plus accès libre).
         assert!(verify_auth_token(&auth("Bearer abc"), &None).is_err());
         assert!(verify_auth_token(&auth("Bearer "), &Some(String::new())).is_err());
+    }
+
+    #[test]
+    fn host_loopback_seulement() {
+        let h = |v: &str| {
+            let mut m = HeaderMap::new();
+            m.insert(axum::http::header::HOST, v.parse().unwrap());
+            m
+        };
+        for ok in ["localhost", "localhost:11435", "127.0.0.1:11435", "[::1]", "[::1]:11435", "LOCALHOST"] {
+            assert!(is_loopback_host(&h(ok)), "{ok} devrait être accepté");
+        }
+        for ko in ["evil.example", "evil.example:11435", "127.0.0.1.evil.example", "[::1]evil", "192.168.1.10:11435"] {
+            assert!(!is_loopback_host(&h(ko)), "{ko} devrait être refusé");
+        }
+        assert!(!is_loopback_host(&HeaderMap::new()));
     }
 
     #[test]

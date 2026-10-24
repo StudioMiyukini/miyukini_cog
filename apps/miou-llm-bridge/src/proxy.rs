@@ -801,6 +801,22 @@ async fn security_middleware(
     )
     .to_string();
 
+    // 0b. Anti DNS rebinding : sans auth obligatoire (usage loopback), seul un
+    // Host loopback est accepté. Une page web qui fait pointer son domaine vers
+    // 127.0.0.1 enverrait son propre nom dans Host et serait refusée.
+    if state.security_config.require_auth_all != Some(true)
+        && !crate::security::is_loopback_host(&headers)
+    {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({
+                "error": "Accès refusé",
+                "reason": "host_not_loopback",
+            })),
+        )
+            .into_response();
+    }
+
     // 1. Validation d'origine
     match crate::security::check_origin(Some(&source_ip), &headers, &state.security_config) {
         crate::security::OriginCheck::Allowed => {}
