@@ -1,6 +1,6 @@
 # Modèle de zones et de couches — Miyukini COG
 
-> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
+> **Gelé v1.0 — 2026-10-24** · amendé **A-003** (v1.3 : clés par usage implémentées, §15) et **A-004** (v1.4 : frontières, Douane, Vigies, coupure de voie du lot 3, §5, §10–§12, §15) · amendé **A-005** (v1.5 : règles intégrées des Vigies sur le motif de la Douane, attribution de voie par le côté d'entrée, §12). Toute modification passe par un amendement : [règles du gel](GEL-DOC-CONCEPTUELLE-v1.md).
 
 <!-- @id arch.cog.zones-couches -->
 <!-- @role architecture-reference -->
@@ -319,6 +319,16 @@
 
 **Implémenté (A-004)**
 - Règles intégrées des Vigies : `R-EX12-SORTIE` (sortie de zone COG) et `R-INV-Z7-ENTREE` (entrée directe) **critiques, même si la Douane a bloqué** ; `R-INDETERMINE` (zone ou verdict inconnus) moyenne
+- **Règles intégrées sur le motif de la Douane (amendé A-005)** — non désactivables :
+  - `R-A005-LATERAL` : motif `LATERAL` (sandbox ⇄ sandbox dans une zone) → **critique**, `mouvement_lateral`
+  - `R-A005-NON-DECLARE` : motif `NON-DECLARE` de source **intérieure** (zone COG, Portail, Franche, Franche locale), y compris intra-zone → **critique**, `flux_hors_contrat`
+    - y compris zone COG → adresse du Portail sur un port non déclaré (journalisé `SORTIE-COG` par la Douane, destination en zone COG : hors `R-EX12-SORTIE`)
+    - `NON-DECLARE` de source extérieure : rejet ordinaire de frontière, aucun signal (IPS, bannissement automatique)
+  - attribué à une voie → **coupe la voie fautive** ; sinon incident critique **hors voie**
+- **Attribution de voie (amendé A-005, anti-usurpation)** : par le seul **côté d'entrée** (la sandbox émettrice)
+  - pont de zone : interface d'entrée `IN=` (port `sv<n>`) seulement, jamais `OUT=` ; atteinte seulement par `OUT=` ⇒ sans voie
+  - IPS : interface d'entrée jointe à la métadonnée ; voie seulement si sa zone (plan de la frontière) est celle de l'adresse source, et pour une **connexion nouvelle** seulement ; `HorsEtat`, paquet d'une connexion existante, interface absente ou inconnue ⇒ sans voie
+  - non attribuable ⇒ l'incident critique reste levé, **hors voie** (détection jamais perdue)
 - Jeux de règles supplémentaires : format `vigies-regles 1`, analyse stricte (une ligne invalide rejette le jeu, les règles intégrées restent)
 - **Voies** sous WorrySentinel : `Ouverte` / `Surveillee` / `Coupee`
   - signal critique attribué à une voie → **coupée** (elle seule) ; signal moyen ou élevé → surveillée
