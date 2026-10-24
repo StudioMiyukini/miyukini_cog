@@ -5,19 +5,27 @@
 //@human ! @role   data
 //! @layer  domain
 //!
-//! Par défaut : store mémoire. Avec feature `kindmother-only` : store KindMother (stub = délégation mémoire).
+//! Par défaut (feature `kindmother-only`) : store KindMother (persistance réelle, intentions typées).
+//! Feature `memory` (prioritaire si activée explicitement) ou aucune feature : store mémoire.
+//! Le store mémoire reste toujours accessible sous le nom `MemoryJayRdvStore`.
+
+#![allow(clippy::doc_markdown)] // En-têtes MSCM.
 
 mod memory_store;
 mod types;
 
-#[cfg(feature = "kindmother-only")]
+#[cfg(all(feature = "kindmother-only", not(feature = "memory")))]
 mod kindmother_client_db;
 
-#[cfg(feature = "kindmother-only")]
+#[cfg(all(test, feature = "kindmother-only", not(feature = "memory")))]
+pub(crate) use kindmother_client_db::test_support as kindmother_test_support;
+#[cfg(all(feature = "kindmother-only", not(feature = "memory")))]
 pub use kindmother_client_db::JayRdvStore;
 pub use memory_store::DbError;
-#[cfg(not(feature = "kindmother-only"))]
+#[cfg(any(feature = "memory", not(feature = "kindmother-only")))]
 pub use memory_store::JayRdvStore;
+/// Store mémoire (toujours disponible : tests, démos, mode hors-ligne).
+pub use memory_store::JayRdvStore as MemoryJayRdvStore;
 
 pub use types::{
     Appointment, AppointmentStatus, CancelledBy, Client, Exception, Practitioner, PractitionerRole,

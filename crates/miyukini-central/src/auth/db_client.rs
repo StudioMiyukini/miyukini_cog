@@ -1,34 +1,52 @@
-//! Base de données des profils Miyukini Central via KindMother Client.
-//!
-//! Cette implémentation utilise exclusivement `kindmother-client` pour accéder aux données.
-//! KindMother est le seul interlocuteur autorisé de la base de données.
-//!
-//! L'API publique est **synchrone** pour maintenir la compatibilité avec le code existant.
-//! En interne, les appels async sont exécutés via le runtime Tokio.
-//!
 //! @id     central_auth_kindmother_client_db
 //! @do     persist_central_auth_data_via_kindmother_client
-//@human ! @layer  infra
+//! @role   securite
+//! @layer  infra
+//! @human  miyukini-central — profils Central persistés via KindMother (seul écrivain, K-13).
 
+//! Base de données des profils Miyukini Central via KindMother Client.
+//!
+//! Cette implémentation utilise exclusivement `kindmother-client` : KindMother est le
+//! seul interlocuteur autorisé de la base `central` (K-13).
+//!
+//! - **Schéma** : migrations versionnées ([`SchemaMigration`]) appliquées par le service,
+//!   sous politique non destructive.
+//! - **Écritures** : intentions typées uniquement ([`TypedWriteIntent`]) — aucun texte SQL
+//!   d'écriture ne quitte ce module (EX-07). Les opérations multi-étapes passent par un lot
+//!   atomique (`submit_batch`).
+//! - **Lectures** : lectures typées ([`TypedSelect`]).
+//!
+//! L'API publique est **synchrone** et identique à celle du chemin legacy (`db.rs`).
+//! En interne, les appels async s'exécutent sur un runtime Tokio global multi-thread.
+//!
+//! Différences assumées avec le legacy :
+//! - le service active `PRAGMA foreign_keys` : lier une sauvegarde, une référence de
+//!   service ou un hash Connect à un profil inexistant est refusé ;
+//! - [`CentralAuthDb::update_profile_id`] déplace aussi les lignes liées (références,
+//!   sauvegardes, hash Connect, session courante) vers le nouvel ID ;
+//! - l'unicité du premier admin repose sur un jeton `cog_meta.first_admin` (voir `sign_up`).
+
+use super::hachage::{hash_password_argon2, verify_password};
+use super::{CentralProfile, CentralProfileSave, CentralProfileSaveRow};
 use crate::auth::password::validate_password;
-use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
-use sha2::{Digest, Sha256};
+use kindmother::intent::MAX_INTENTS_PER_BATCH;
+use kindmother_client::{
+    ClientError, IntentOutcome, KindMotherClient, OperatorCredential, SchemaMigration, SqlValue,
+    TypedSelect, TypedWriteIntent,
+};
 use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::OnceLock;
+use std::future::Future;
+use std::sync::{Arc, OnceLock};
 use thiserror::Error;
 use tokio::sync::OnceCell;
 
-fn hash_password(password: &str) -> String {
-    let mut h = Sha256::new();
-    h.update(password.as_bytes());
-    format!("{:x}", h.finalize())
-}
+/// Ligne renvoyée par KindMother (colonne → valeur JSON).
+type Row = HashMap<String, serde_json::Value>;
 
 /// Erreur de la base auth Central (KindMother Client).
 #[derive(Error, Debug)]
 pub enum AuthDbError {
-    /// Erreur du client KindMother.
+    /// Erreur du client KindMother (transport, refus ou échec d'une intention).
     #[error("KindMother client error: {0}")]
     Client(#[from] ClientError),
 
@@ -36,7 +54,7 @@ pub enum AuthDbError {
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
 
-    /// Erreur interne.
+    /// Erreur interne (ligne mal formée, hachage…).
     #[error("Internal error: {0}")]
     Internal(String),
 
@@ -44,111 +62,246 @@ pub enum AuthDbError {
     #[error("Client not initialized")]
     NotInitialized,
 
-    /// Erreur de validation.
+    /// Erreur de validation (entrée refusée avant tout accès).
     #[error("Validation error: {0}")]
     Validation(String),
+
+    /// Ligne attendue absente (équivalent legacy : « 0 ligne affectée »).
+    #[error("Not found: {0}")]
+    NotFound(String),
+
+    /// Opération refusée (preuve d'administrateur invalide…).
+    #[error("Refused: {0}")]
+    Refused(String),
 }
 
-/// Ligne de sauvegarde liée au profil Central (données complètes).
-#[derive(Debug, Clone)]
-pub struct CentralProfileSave {
-    /// Identifiant unique de la sauvegarde.
-    pub id: String,
-    /// Identifiant du profil Central.
-    pub profile_id: String,
-    /// Clé du service (ex. `jaykoa`).
-    pub service_key: String,
-    /// Numéro de slot (0, 1, 2…).
-    pub slot: i64,
-    /// Données sérialisées (BLOB).
-    pub data: Vec<u8>,
-    /// Date de création (ISO).
-    pub created_at: String,
-    /// Date de dernière mise à jour (ISO).
-    pub updated_at: String,
-}
+// ---------------------------------------------------------------------------
+// Connexion
+// ---------------------------------------------------------------------------
 
-/// Ligne allégée pour lister les sauvegardes (sans le BLOB).
-#[derive(Debug, Clone)]
-pub struct CentralProfileSaveRow {
-    /// Identifiant unique de la sauvegarde.
-    pub id: String,
-    /// Numéro de slot.
-    pub slot: i64,
-    /// Date de création (ISO).
-    pub created_at: String,
-    /// Date de dernière mise à jour (ISO).
-    pub updated_at: String,
-}
+/// Opérateur KindMother de Central (Admin de la base `central`).
+const OPERATOR_ID: &str = "miyukini-central";
 
-/// Profil Miyukini COG (email = login, champs enrichis modifiables).
-#[derive(Debug, Clone)]
-#[allow(missing_docs)]
-pub struct CentralProfile {
-    pub id: String,
-    pub email: String,
-    pub pseudonyme: Option<String>,
-    pub nom: Option<String>,
-    pub prenom: Option<String>,
-    pub date_naissance: Option<String>,
-    pub telephone: Option<String>,
-    pub numero_voie: Option<String>,
-    pub rue: Option<String>,
-    pub code_postal: Option<String>,
-    pub ville: Option<String>,
-    /// Premier compte créé = admin de l'environnement (MiyukiniAdmin).
-    pub is_admin: bool,
-}
+/// Base KindMother de Central.
+const DATABASE: &str = "central";
+
+/// Variable d'environnement de l'adresse du service KindMother.
+const ENV_KINDMOTHER_ADDR: &str = "KINDMOTHER_ADDR";
 
 /// Adresse par défaut du service KindMother.
 const DEFAULT_KINDMOTHER_ADDR: &str = "127.0.0.1:50051";
 
-/// Client global partagé (singleton).
+/// Client global partagé (singleton) du chemin applicatif (`open`).
 static CLIENT: OnceCell<Arc<KindMotherClient>> = OnceCell::const_new();
 
-/// Runtime Tokio global pour exécuter les appels async.
+/// Runtime Tokio global (multi-thread) qui exécute tous les appels async.
 static RUNTIME: OnceLock<tokio::runtime::Runtime> = OnceLock::new();
 
-fn get_runtime() -> &'static tokio::runtime::Runtime {
+fn runtime() -> &'static tokio::runtime::Runtime {
     RUNTIME.get_or_init(|| {
         tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(2)
+            .thread_name("central-auth-kindmother")
             .enable_all()
             .build()
             .expect("Failed to create Tokio runtime")
     })
 }
 
-/// Exécute un future de manière bloquante, compatible avec un runtime tokio existant (Dioxus).
-fn run_blocking<F: std::future::Future>(f: F) -> F::Output {
-    match tokio::runtime::Handle::try_current() {
-        Ok(handle) => tokio::task::block_in_place(|| handle.block_on(f)),
-        Err(_) => run_blocking(f),
+/// Exécute un future de manière bloquante sur le runtime global.
+///
+/// - Hors runtime : `block_on` direct sur le runtime global.
+/// - Depuis un runtime (Dioxus, `#[tokio::test]`, current-thread ou multi-thread) :
+///   `block_on` y paniquerait, et `block_in_place` panique sur un runtime current-thread ;
+///   le future est donc exécuté sur un fil dédié (portée bornée) qui bloque sur le
+///   runtime global. Les E/S du client restent ainsi toujours pilotées par le même runtime.
+fn run_blocking<F>(f: F) -> F::Output
+where
+    F: Future + Send,
+    F::Output: Send,
+{
+    if tokio::runtime::Handle::try_current().is_err() {
+        return runtime().block_on(f);
     }
+    std::thread::scope(|scope| {
+        scope
+            .spawn(|| runtime().block_on(f))
+            .join()
+            .unwrap_or_else(|panic| std::panic::resume_unwind(panic))
+    })
 }
+
+// ---------------------------------------------------------------------------
+// Schéma
+// ---------------------------------------------------------------------------
+
+/// Schéma v1 : identique au schéma final du chemin legacy (`db.rs`, colonnes ajoutées
+/// par `migrate_add_profile_columns` comprises).
+///
+/// Évolutions futures : **ajouter** une `SchemaMigration` de version suivante (v2, v3…),
+/// ne jamais modifier une version publiée ni supprimer de table de données — le service
+/// refuse toute migration destructive (aucun `DROP`, aucune disparition de table/colonne).
+const SCHEMA_V1: &str = r"
+CREATE TABLE IF NOT EXISTS central_profiles (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    pseudonyme TEXT,
+    nom TEXT,
+    prenom TEXT,
+    date_naissance TEXT,
+    telephone TEXT,
+    numero_voie TEXT,
+    rue TEXT,
+    code_postal TEXT,
+    ville TEXT,
+    is_admin INTEGER NOT NULL DEFAULT 0,
+    genre TEXT,
+    statut_marital TEXT,
+    partenaire_genre TEXT,
+    partenaire_nom TEXT,
+    enfants_nombre INTEGER,
+    enfants_noms TEXT,
+    profession TEXT,
+    langue_maternelle TEXT
+);
+CREATE TABLE IF NOT EXISTS cog_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS profile_service_refs (
+    profile_id TEXT NOT NULL,
+    service_key TEXT NOT NULL,
+    ref_id TEXT NOT NULL,
+    PRIMARY KEY (profile_id, service_key),
+    FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
+);
+CREATE TABLE IF NOT EXISTS central_profile_saves (
+    id TEXT PRIMARY KEY,
+    profile_id TEXT NOT NULL,
+    service_key TEXT NOT NULL,
+    slot INTEGER NOT NULL DEFAULT 0,
+    data BLOB NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(profile_id, service_key, slot),
+    FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
+);
+CREATE INDEX IF NOT EXISTS idx_central_profile_saves_profile_service
+    ON central_profile_saves(profile_id, service_key);
+CREATE TABLE IF NOT EXISTS connect_credentials (
+    profile_id TEXT PRIMARY KEY,
+    password_hash TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
+);
+";
+
+/// Migrations versionnées de la base `central` (contiguës depuis 1, ajout seulement).
+fn migrations() -> Vec<SchemaMigration> {
+    vec![SchemaMigration::new(
+        1,
+        "central auth : profils, cog_meta, références de service, sauvegardes, hash Connect",
+        &[SCHEMA_V1],
+    )]
+}
+
+const T_PROFILES: &str = "central_profiles";
+const T_META: &str = "cog_meta";
+const T_REFS: &str = "profile_service_refs";
+const T_SAVES: &str = "central_profile_saves";
+const T_CONNECT: &str = "connect_credentials";
+
+/// Clés de `cog_meta`.
+const META_VIRGIN: &str = "cog_virgin";
+const META_CURRENT_PROFILE: &str = "current_profile_id";
+/// Jeton d'unicité du premier admin (clé primaire : un seul candidat peut l'insérer).
+const META_FIRST_ADMIN: &str = "first_admin";
+
+/// Colonnes d'un profil (hors `password_hash`, jamais renvoyé hors `sign_in`).
+const PROFILE_COLUMNS: [&str; 20] = [
+    "id",
+    "email",
+    "pseudonyme",
+    "nom",
+    "prenom",
+    "date_naissance",
+    "telephone",
+    "numero_voie",
+    "rue",
+    "code_postal",
+    "ville",
+    "is_admin",
+    "genre",
+    "statut_marital",
+    "partenaire_genre",
+    "partenaire_nom",
+    "enfants_nombre",
+    "enfants_noms",
+    "profession",
+    "langue_maternelle",
+];
+
+/// Colonnes d'une sauvegarde complète.
+const SAVE_COLUMNS: [&str; 7] = [
+    "id",
+    "profile_id",
+    "service_key",
+    "slot",
+    "data",
+    "created_at",
+    "updated_at",
+];
+
+// ---------------------------------------------------------------------------
+// Base
+// ---------------------------------------------------------------------------
 
 /// Base des profils Central via KindMother Client.
 ///
-/// Fournit une API synchrone pour la compatibilité avec le code existant.
+/// Fournit une API synchrone identique à celle du chemin legacy.
 #[derive(Clone)]
 pub struct CentralAuthDb {
     client: Arc<KindMotherClient>,
 }
 
 impl CentralAuthDb {
+    /// Connexion injectable (tests, déploiements particuliers) : se connecte à `addr`
+    /// avec `credential` sur la base `central`, puis applique les migrations.
+    pub fn connect_with(addr: &str, credential: &OperatorCredential) -> Result<Self, AuthDbError> {
+        run_blocking(async {
+            let client = KindMotherClient::connect(addr, credential, DATABASE).await?;
+            let db = Self {
+                client: Arc::new(client),
+            };
+            db.init_schema_async().await?;
+            Ok(db)
+        })
+    }
+
     /// Initialise la connexion globale au service KindMother (synchrone).
+    ///
+    /// `addr` : adresse explicite, sinon `KINDMOTHER_ADDR`, sinon `127.0.0.1:50051`.
+    /// Sans effet si la connexion globale existe déjà.
     pub fn init_global_sync(addr: Option<&str>) -> Result<(), AuthDbError> {
         run_blocking(Self::init_global_async(addr))
     }
 
     /// Initialise la connexion globale au service KindMother (async).
     pub async fn init_global_async(addr: Option<&str>) -> Result<(), AuthDbError> {
-        let addr = addr.unwrap_or(DEFAULT_KINDMOTHER_ADDR);
-        let client = KindMotherClient::connect(addr, &OperatorCredential::load("miyukini-central")?, "central").await?;
-
+        let addr = addr.map_or_else(
+            || {
+                std::env::var(ENV_KINDMOTHER_ADDR)
+                    .unwrap_or_else(|_| DEFAULT_KINDMOTHER_ADDR.to_string())
+            },
+            str::to_string,
+        );
         CLIENT
-            .set(Arc::new(client))
-            .map_err(|_| AuthDbError::Internal("Client already initialized".to_string()))?;
-
+            .get_or_try_init(|| async {
+                let credential = OperatorCredential::load(OPERATOR_ID)?;
+                let client = KindMotherClient::connect(&addr, &credential, DATABASE).await?;
+                Ok::<_, AuthDbError>(Arc::new(client))
+            })
+            .await?;
         Ok(())
     }
 
@@ -158,83 +311,38 @@ impl CentralAuthDb {
         Ok(Self { client })
     }
 
-    /// Ouvre une connexion à la base de données (API compatible avec l'ancienne implémentation).
-    pub fn open(_path: impl AsRef<std::path::Path>) -> Result<Self, AuthDbError> {
-        if CLIENT.get().is_none() {
-            Self::init_global_sync(None)?;
-        }
+    /// Ouvre la base (API compatible avec le legacy) : `path` est ignoré, la base
+    /// `central` est servie par KindMother (client global, migrations appliquées).
+    pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self, AuthDbError> {
+        kindmother_client::heritage::refuser_si_base_heritee(path.as_ref())
+            .map_err(AuthDbError::Refused)?;
+        Self::init_global_sync(None)?;
         let db = Self::new()?;
         db.init_schema_sync()?;
         Ok(db)
     }
 
-    /// Initialise le schéma de la base de données (synchrone).
+    /// Applique les migrations de schéma (synchrone, idempotent).
     pub fn init_schema_sync(&self) -> Result<(), AuthDbError> {
         run_blocking(self.init_schema_async())
     }
 
-    /// Initialise le schéma de la base de données (async).
+    /// Applique les migrations de schéma (async, idempotent).
     pub async fn init_schema_async(&self) -> Result<(), AuthDbError> {
-        let schema = r#"
-            CREATE TABLE IF NOT EXISTS central_profiles (
-                id TEXT PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                pseudonyme TEXT,
-                nom TEXT,
-                prenom TEXT,
-                date_naissance TEXT,
-                telephone TEXT,
-                numero_voie TEXT,
-                rue TEXT,
-                code_postal TEXT,
-                ville TEXT,
-                is_admin INTEGER NOT NULL DEFAULT 0
-            );
-            CREATE TABLE IF NOT EXISTS cog_meta (
-                key TEXT PRIMARY KEY,
-                value TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS profile_service_refs (
-                profile_id TEXT NOT NULL,
-                service_key TEXT NOT NULL,
-                ref_id TEXT NOT NULL,
-                PRIMARY KEY (profile_id, service_key),
-                FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
-            );
-            CREATE TABLE IF NOT EXISTS central_profile_saves (
-                id TEXT PRIMARY KEY,
-                profile_id TEXT NOT NULL,
-                service_key TEXT NOT NULL,
-                slot INTEGER NOT NULL DEFAULT 0,
-                data_base64 TEXT NOT NULL,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                UNIQUE(profile_id, service_key, slot),
-                FOREIGN KEY (profile_id) REFERENCES central_profiles(id)
-            );
-            CREATE INDEX IF NOT EXISTS idx_central_profile_saves_profile_service
-                ON central_profile_saves(profile_id, service_key);
-        "#;
-
-        let statements: Vec<&str> = schema
-            .split(';')
-            .map(|s| s.trim())
-            .filter(|s| !s.is_empty())
-            .collect();
-
-        for sql in statements {
-            self.client
-                .execute(sql, Vec::<String>::new(), "init_schema")
-                .await?;
-        }
-
+        self.client.apply_migrations(migrations()).await?;
         Ok(())
     }
 
-    /// Connexion : email + mot de passe. Retourne le profil complet si valide (synchrone).
+    /// Vérification de la santé de la connexion (synchrone).
+    pub fn health_check(&self) -> Result<bool, AuthDbError> {
+        run_blocking(self.client.health_check()).map_err(AuthDbError::from)
+    }
+
+    // -----------------------------------------------------------------------
+    // Profils
+    // -----------------------------------------------------------------------
+
+    /// Connexion : email + mot de passe. Retourne le profil complet si valide.
     pub fn sign_in(
         &self,
         email: &str,
@@ -252,135 +360,197 @@ impl CentralAuthDb {
         if email.is_empty() {
             return Ok(None);
         }
-
         let rows = self
-            .client
-            .query(
-                "SELECT id, email, password_hash, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin FROM central_profiles WHERE email = ?1",
-                vec![email],
+            .select(
+                TypedSelect::from(T_PROFILES)
+                    .columns(PROFILE_COLUMNS.iter().copied().chain(["password_hash"]))
+                    .filter("email", email)
+                    .limit(1),
             )
             .await?;
-
-        if let Some(row) = rows.first() {
-            let hash = Self::get_string(row, "password_hash");
-            if hash == hash_password(password) {
-                Ok(Some(Self::row_to_profile(row)?))
-            } else {
-                Ok(None)
-            }
-        } else {
-            Ok(None)
+        let Some(row) = rows.first() else {
+            return Ok(None);
+        };
+        let hash = req_str(row, "password_hash")?;
+        if !verify_password(password, &hash) {
+            return Ok(None);
         }
+        let profile = row_to_profile(row)?;
+        // Migration progressive SHA-256 → Argon2id (échec non bloquant, comme le legacy).
+        if !hash.starts_with("$argon2") {
+            if let Ok(new_hash) = hash_password_argon2(password) {
+                let upgrade = TypedWriteIntent::update(T_PROFILES)
+                    .key("id", profile.id.as_str())
+                    .value("password_hash", new_hash)
+                    .purpose("central.auth.sign_in: migration du hash SHA-256 vers Argon2id");
+                if let Err(e) = self.client.submit(upgrade).await {
+                    tracing::warn!("migration du hash du profil {} : {e}", profile.id);
+                }
+            }
+        }
+        Ok(Some(profile))
     }
 
-    /// Charge un profil par ID (synchrone).
+    /// Charge un profil par ID (pour édition dans la fenêtre Profil).
     pub fn get_profile(&self, id: &str) -> Result<Option<CentralProfile>, AuthDbError> {
         run_blocking(self.get_profile_async(id))
     }
 
     async fn get_profile_async(&self, id: &str) -> Result<Option<CentralProfile>, AuthDbError> {
         let rows = self
-            .client
-            .query(
-                "SELECT id, email, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin FROM central_profiles WHERE id = ?1",
-                vec![id],
+            .select(
+                TypedSelect::from(T_PROFILES)
+                    .columns(PROFILE_COLUMNS)
+                    .filter("id", id)
+                    .limit(1),
             )
             .await?;
-
-        rows.first().map(|r| Self::row_to_profile(r)).transpose()
+        rows.first().map(row_to_profile).transpose()
     }
 
-    /// Enregistre les champs modifiables du profil en base (synchrone).
+    /// Enregistre les champs modifiables du profil en base.
     pub fn update_profile(&self, profile: &CentralProfile) -> Result<(), AuthDbError> {
         run_blocking(self.update_profile_async(profile))
     }
 
     async fn update_profile_async(&self, profile: &CentralProfile) -> Result<(), AuthDbError> {
         let now = chrono::Utc::now().to_rfc3339();
-
-        self.client
-            .execute(
-                "UPDATE central_profiles SET email = ?1, pseudonyme = ?2, nom = ?3, prenom = ?4, date_naissance = ?5, telephone = ?6, numero_voie = ?7, rue = ?8, code_postal = ?9, ville = ?10, updated_at = ?11 WHERE id = ?12",
-                vec![
-                    &profile.email,
-                    profile.pseudonyme.as_deref().unwrap_or(""),
-                    profile.nom.as_deref().unwrap_or(""),
-                    profile.prenom.as_deref().unwrap_or(""),
-                    profile.date_naissance.as_deref().unwrap_or(""),
-                    profile.telephone.as_deref().unwrap_or(""),
-                    profile.numero_voie.as_deref().unwrap_or(""),
-                    profile.rue.as_deref().unwrap_or(""),
-                    profile.code_postal.as_deref().unwrap_or(""),
-                    profile.ville.as_deref().unwrap_or(""),
-                    &now,
-                    &profile.id,
-                ],
-                "update_profile",
-            )
-            .await?;
-
+        let p = profile.clone();
+        let intent = TypedWriteIntent::update(T_PROFILES)
+            .key("id", p.id)
+            .value("email", p.email)
+            .value("pseudonyme", p.pseudonyme)
+            .value("nom", p.nom)
+            .value("prenom", p.prenom)
+            .value("date_naissance", p.date_naissance)
+            .value("telephone", p.telephone)
+            .value("numero_voie", p.numero_voie)
+            .value("rue", p.rue)
+            .value("code_postal", p.code_postal)
+            .value("ville", p.ville)
+            .value("genre", p.genre)
+            .value("statut_marital", p.statut_marital)
+            .value("partenaire_genre", p.partenaire_genre)
+            .value("partenaire_nom", p.partenaire_nom)
+            .value("enfants_nombre", p.enfants_nombre)
+            .value("enfants_noms", p.enfants_noms)
+            .value("profession", p.profession)
+            .value("langue_maternelle", p.langue_maternelle)
+            .value("updated_at", now)
+            .purpose("central.auth.update_profile: champs modifiables du profil");
+        // Comme le legacy : aucun contrôle du nombre de lignes (profil absent = sans effet).
+        self.client.submit(intent).await?;
         Ok(())
     }
 
-    /// Liste tous les profils (id, email uniquement) (synchrone).
+    /// Liste tous les profils (id, email, is_admin pour la DB mère).
     pub fn list_profiles(&self) -> Result<Vec<CentralProfile>, AuthDbError> {
         run_blocking(self.list_profiles_async())
     }
 
     async fn list_profiles_async(&self) -> Result<Vec<CentralProfile>, AuthDbError> {
         let rows = self
-            .client
-            .query(
-                "SELECT id, email, is_admin FROM central_profiles",
-                Vec::<String>::new(),
-            )
+            .select(TypedSelect::from(T_PROFILES).columns(["id", "email", "is_admin"]))
             .await?;
-
         rows.iter()
             .map(|row| {
-                Ok(CentralProfile {
-                    id: Self::get_string(row, "id"),
-                    email: Self::get_string(row, "email"),
-                    pseudonyme: None,
-                    nom: None,
-                    prenom: None,
-                    date_naissance: None,
-                    telephone: None,
-                    numero_voie: None,
-                    rue: None,
-                    code_postal: None,
-                    ville: None,
-                    is_admin: Self::get_opt_i64(row, "is_admin").unwrap_or(0) != 0,
-                })
+                Ok(CentralProfile::minimal(
+                    req_str(row, "id")?,
+                    req_str(row, "email")?,
+                    req_i64(row, "is_admin")? != 0,
+                ))
             })
             .collect()
     }
 
-    /// Met à jour l'ID d'un profil (synchrone).
+    /// Met à jour l'ID d'un profil (après réattribution par la DB mère en cas de conflit).
+    ///
+    /// Les clés étrangères étant actives côté service (sans `ON UPDATE CASCADE`), la ligne
+    /// est recréée sous le nouvel ID, les lignes liées y sont rattachées puis l'ancienne
+    /// ligne est supprimée — le tout en **un lot atomique**.
     pub fn update_profile_id(&self, old_id: &str, new_id: &str) -> Result<(), AuthDbError> {
         run_blocking(self.update_profile_id_async(old_id, new_id))
     }
 
     async fn update_profile_id_async(&self, old_id: &str, new_id: &str) -> Result<(), AuthDbError> {
-        let result = self
-            .client
-            .execute(
-                "UPDATE central_profiles SET id = ?1, updated_at = ?2 WHERE id = ?3",
-                vec![new_id, &chrono::Utc::now().to_rfc3339(), old_id],
-                "update_profile_id",
-            )
+        let now = chrono::Utc::now().to_rfc3339();
+        let rows = self
+            .select(TypedSelect::from(T_PROFILES).filter("id", old_id).limit(1))
             .await?;
+        let Some(row) = rows.into_iter().next() else {
+            return Err(AuthDbError::NotFound(format!(
+                "Profil non trouvé: {old_id}"
+            )));
+        };
+        if old_id == new_id {
+            let touch = TypedWriteIntent::update(T_PROFILES)
+                .key("id", old_id)
+                .value("updated_at", now)
+                .purpose("central.auth.update_profile_id: ID inchangé");
+            return self
+                .expect_rows(touch, || format!("Profil non trouvé: {old_id}"))
+                .await;
+        }
+        let email = req_str(&row, "email")?;
+        let purpose = "central.auth.update_profile_id: réattribution d'ID par la DB mère";
 
-        if result == 0 {
-            return Err(AuthDbError::Internal(format!(
+        // 1. Libère l'email (UNIQUE) de l'ancienne ligne, supprimée en fin de lot.
+        let free_email = TypedWriteIntent::update(T_PROFILES)
+            .key("id", old_id)
+            .value("email", format!("reattribution:{new_id}:{email}"))
+            .purpose(purpose);
+        // 2. Copie intégrale (toutes colonnes) sous le nouvel ID.
+        let mut copy = TypedWriteIntent::insert(T_PROFILES).purpose(purpose);
+        for (column, value) in &row {
+            let value = match column.as_str() {
+                "id" => SqlValue::from(new_id),
+                "updated_at" => SqlValue::from(now.as_str()),
+                _ => json_to_sql(column, value)?,
+            };
+            copy = copy.value(column.as_str(), value);
+        }
+        let mut batch = vec![free_email, copy];
+        // 3. Rattache les lignes liées.
+        for table in [T_REFS, T_SAVES, T_CONNECT] {
+            batch.push(
+                TypedWriteIntent::update(table)
+                    .key("profile_id", old_id)
+                    .value("profile_id", new_id)
+                    .purpose(purpose),
+            );
+        }
+        batch.push(
+            TypedWriteIntent::update(T_META)
+                .key("key", META_CURRENT_PROFILE)
+                .key("value", old_id)
+                .value("value", new_id)
+                .purpose(purpose),
+        );
+        // 4. Supprime l'ancienne ligne (plus aucune référence).
+        batch.push(
+            TypedWriteIntent::delete(T_PROFILES)
+                .key("id", old_id)
+                .purpose(purpose),
+        );
+        let outcomes = self.client.submit_batch(batch).await?;
+        if outcomes.last().map_or(0, |o| o.rows_affected) == 0 {
+            // Profil supprimé entre la lecture et le lot : rien de cohérent n'a été déplacé.
+            return Err(AuthDbError::NotFound(format!(
                 "Profil non trouvé: {old_id}"
             )));
         }
         Ok(())
     }
 
-    /// Création de compte : email + mot de passe complexe (synchrone).
-    /// `pseudonyme` : optionnel, pour le Rite d'Entrée (nom / pseudo).
+    /// Création de compte : email + mot de passe complexe. Retourne le profil créé.
+    /// Le premier compte créé est admin de l'environnement (MiyukiniAdmin).
+    /// `pseudonyme` : optionnel, utilisé pour le Rite d'Entrée (nom / pseudo).
+    ///
+    /// Unicité du premier admin : le legacy compte les profils dans une transaction
+    /// IMMEDIATE. Ici, le candidat « premier compte » insère (INSERT simple, pas upsert)
+    /// le jeton `cog_meta.first_admin` **dans le même lot atomique** que son profil admin :
+    /// un candidat concurrent échoue sur la clé primaire, tout son lot est annulé, et il
+    /// est alors créé comme simple compte. Le jeton est retiré par `reset_cog_to_virgin`.
     pub fn sign_up(
         &self,
         email: &str,
@@ -401,109 +571,97 @@ impl CentralAuthDb {
             return Err(AuthDbError::Validation("L'email est requis.".into()));
         }
         validate_password(password).map_err(|e| AuthDbError::Validation(e.to_string()))?;
-
-        let is_first = self.list_profiles_async().await?.is_empty();
         let id = uuid::Uuid::new_v4().to_string();
-        let hash = hash_password(password);
+        let hash = hash_password_argon2(password)
+            .map_err(|e| AuthDbError::Internal(format!("hash error: {e}")))?;
         let now = chrono::Utc::now().to_rfc3339();
-        let is_admin = is_first;
-        let pseudo_val = pseudonyme.map(|s| s.trim()).filter(|s| !s.is_empty());
-        let is_admin_param = if is_admin { "1" } else { "0" };
+        let pseudo_val = pseudonyme.map(str::trim).filter(|s| !s.is_empty());
 
-        self.client
-            .execute(
-                "INSERT INTO central_profiles (id, email, password_hash, created_at, updated_at, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?7)",
-                vec![
-                    id.as_str(),
-                    email,
-                    hash.as_str(),
-                    now.as_str(),
-                    now.as_str(),
-                    pseudo_val.unwrap_or(""),
-                    is_admin_param,
-                ],
-                "sign_up",
-            )
-            .await?;
+        let insert_profile = |is_admin: bool| {
+            TypedWriteIntent::insert(T_PROFILES)
+                .value("id", id.as_str())
+                .value("email", email)
+                .value("password_hash", hash.as_str())
+                .value("created_at", now.as_str())
+                .value("updated_at", now.as_str())
+                .value("pseudonyme", pseudo_val)
+                .value("is_admin", i64::from(is_admin))
+                .purpose("central.auth.sign_up: création de compte")
+        };
 
-        if is_first {
-            self.set_cog_virgin_sync(false)?;
-        }
+        let table_empty = self
+            .select(TypedSelect::from(T_PROFILES).columns(["id"]).limit(1))
+            .await?
+            .is_empty();
+        let is_admin = if table_empty {
+            let first = vec![
+                TypedWriteIntent::insert(T_META)
+                    .value("key", META_FIRST_ADMIN)
+                    .value("value", id.as_str())
+                    .purpose("central.auth.sign_up: jeton d'unicité du premier admin"),
+                insert_profile(true),
+                TypedWriteIntent::upsert(T_META)
+                    .key("key", META_VIRGIN)
+                    .value("value", "0")
+                    .purpose("central.auth.sign_up: le COG n'est plus vierge"),
+            ];
+            match self.client.submit_batch(first).await {
+                Ok(_) => true,
+                Err(e) => {
+                    // Jeton déjà pris (inscription concurrente) : lot annulé, compte simple.
+                    tracing::debug!("premier admin non attribué ({e}) : création en compte simple");
+                    self.client.submit(insert_profile(false)).await?;
+                    false
+                }
+            }
+        } else {
+            self.client.submit(insert_profile(false)).await?;
+            false
+        };
 
-        Ok(CentralProfile {
-            id,
-            email: email.to_string(),
-            pseudonyme: pseudo_val.map(String::from),
-            nom: None,
-            prenom: None,
-            date_naissance: None,
-            telephone: None,
-            numero_voie: None,
-            rue: None,
-            code_postal: None,
-            ville: None,
-            is_admin,
-        })
+        let mut profile = CentralProfile::minimal(id, email.to_string(), is_admin);
+        profile.pseudonyme = pseudo_val.map(String::from);
+        Ok(profile)
     }
 
-    /// Indique si le COG est vierge (aucun compte créé) (synchrone).
+    // -----------------------------------------------------------------------
+    // État du COG (cog_meta)
+    // -----------------------------------------------------------------------
+
+    /// Indique si le COG est vierge (aucun compte créé). Passe à false à la création du premier compte.
     pub fn is_cog_virgin(&self) -> Result<bool, AuthDbError> {
         run_blocking(self.is_cog_virgin_async())
     }
 
     async fn is_cog_virgin_async(&self) -> Result<bool, AuthDbError> {
-        let rows = self
-            .client
-            .query(
-                "SELECT value FROM cog_meta WHERE key = 'cog_virgin'",
-                Vec::<String>::new(),
-            )
-            .await?;
-        let v = rows
-            .first()
-            .and_then(|r| r.get("value"))
-            .and_then(|v| v.as_str());
-        Ok(v.map_or(true, |s| s == "1"))
+        Ok(self.get_meta(META_VIRGIN).await?.is_none_or(|v| v == "1"))
     }
 
-    /// Marque le COG comme non vierge (synchrone).
-    pub fn set_cog_virgin_sync(&self, virgin: bool) -> Result<(), AuthDbError> {
+    /// Marque le COG comme vierge ou non (appelé à la création du premier compte).
+    pub fn set_cog_virgin(&self, virgin: bool) -> Result<(), AuthDbError> {
         run_blocking(self.set_cog_virgin_async(virgin))
     }
 
+    /// Alias historique de [`Self::set_cog_virgin`].
+    pub fn set_cog_virgin_sync(&self, virgin: bool) -> Result<(), AuthDbError> {
+        self.set_cog_virgin(virgin)
+    }
+
     async fn set_cog_virgin_async(&self, virgin: bool) -> Result<(), AuthDbError> {
-        let value = if virgin { "1" } else { "0" };
-        self.client
-            .execute(
-                "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('cog_virgin', ?1)",
-                vec![value],
-                "set_cog_virgin",
-            )
-            .await?;
+        let intent = TypedWriteIntent::upsert(T_META)
+            .key("key", META_VIRGIN)
+            .value("value", if virgin { "1" } else { "0" })
+            .purpose("central.auth.set_cog_virgin");
+        self.client.submit(intent).await?;
         Ok(())
     }
 
-    /// ID du profil actuellement connecté (synchrone).
+    /// ID du profil actuellement connecté (session persistée).
     pub fn get_current_profile_id(&self) -> Result<Option<String>, AuthDbError> {
-        run_blocking(self.get_current_profile_id_async())
+        run_blocking(self.get_meta(META_CURRENT_PROFILE))
     }
 
-    async fn get_current_profile_id_async(&self) -> Result<Option<String>, AuthDbError> {
-        let rows = self
-            .client
-            .query(
-                "SELECT value FROM cog_meta WHERE key = 'current_profile_id'",
-                Vec::<String>::new(),
-            )
-            .await?;
-        Ok(rows
-            .first()
-            .and_then(|r| r.get("value"))
-            .and_then(|v| v.as_str())
-            .map(String::from))
-    }
-
-    /// Enregistre le profil connecté ou None pour déconnexion (synchrone).
+    /// Enregistre le profil connecté (ou None pour déconnexion).
     pub fn set_current_profile_id(&self, profile_id: Option<&str>) -> Result<(), AuthDbError> {
         run_blocking(self.set_current_profile_id_async(profile_id))
     }
@@ -512,129 +670,210 @@ impl CentralAuthDb {
         &self,
         profile_id: Option<&str>,
     ) -> Result<(), AuthDbError> {
-        match profile_id {
-            Some(id) => {
-                self.client
-                    .execute(
-                        "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('current_profile_id', ?1)",
-                        vec![id],
-                        "set_current_profile_id",
-                    )
-                    .await?;
+        let intent = match profile_id {
+            Some(id) => TypedWriteIntent::upsert(T_META)
+                .key("key", META_CURRENT_PROFILE)
+                .value("value", id)
+                .purpose("central.auth.set_current_profile_id: connexion"),
+            None => TypedWriteIntent::delete(T_META)
+                .key("key", META_CURRENT_PROFILE)
+                .purpose("central.auth.set_current_profile_id: déconnexion"),
+        };
+        self.client.submit(intent).await?;
+        Ok(())
+    }
+
+    /// Réinitialise le COG à l'état vierge (suppression de tous les comptes).
+    ///
+    /// Opération destructrice réservée à un administrateur : exige l'e-mail et le
+    /// mot de passe d'un profil `is_admin` (ré-authentification). Toute preuve
+    /// invalide, ou un profil non admin, est refusée sans rien supprimer.
+    ///
+    /// Les intentions typées interdisant toute suppression sans clé, les lignes sont
+    /// d'abord lues puis supprimées **une à une par clé**, enfants avant parents (clés
+    /// étrangères), dans un lot atomique. Au-delà de `MAX_INTENTS_PER_BATCH` intentions,
+    /// le lot est découpé dans le même ordre : chaque tranche reste atomique et un nouvel
+    /// appel termine le travail en cas d'interruption. Une ligne insérée entre la lecture
+    /// et le lot n'est pas supprimée (comme toute écriture postérieure à la réinitialisation).
+    pub fn reset_cog_to_virgin(
+        &self,
+        admin_email: &str,
+        admin_password: &str,
+    ) -> Result<(), AuthDbError> {
+        run_blocking(self.reset_cog_to_virgin_async(admin_email, admin_password))
+    }
+
+    async fn reset_cog_to_virgin_async(
+        &self,
+        admin_email: &str,
+        admin_password: &str,
+    ) -> Result<(), AuthDbError> {
+        // Preuve d'admin.
+        match self.sign_in_async(admin_email, admin_password).await? {
+            Some(p) if p.is_admin => {}
+            Some(_) => {
+                return Err(AuthDbError::Refused(
+                    "Réinitialisation refusée : droits administrateur requis.".into(),
+                ))
             }
             None => {
-                self.client
-                    .execute(
-                        "DELETE FROM cog_meta WHERE key = 'current_profile_id'",
-                        Vec::<String>::new(),
-                        "delete_current_profile_id",
-                    )
-                    .await?;
+                return Err(AuthDbError::Refused(
+                    "Réinitialisation refusée : authentification invalide.".into(),
+                ))
             }
+        }
+        let purpose = "central.auth.reset_cog_to_virgin: réinitialisation par un administrateur";
+        let mut batch = Vec::new();
+        for row in self
+            .select(TypedSelect::from(T_SAVES).columns(["id"]))
+            .await?
+        {
+            batch.push(
+                TypedWriteIntent::delete(T_SAVES)
+                    .key("id", req_str(&row, "id")?)
+                    .purpose(purpose),
+            );
+        }
+        for row in self
+            .select(TypedSelect::from(T_REFS).columns(["profile_id", "service_key"]))
+            .await?
+        {
+            batch.push(
+                TypedWriteIntent::delete(T_REFS)
+                    .key("profile_id", req_str(&row, "profile_id")?)
+                    .key("service_key", req_str(&row, "service_key")?)
+                    .purpose(purpose),
+            );
+        }
+        for row in self
+            .select(TypedSelect::from(T_CONNECT).columns(["profile_id"]))
+            .await?
+        {
+            batch.push(
+                TypedWriteIntent::delete(T_CONNECT)
+                    .key("profile_id", req_str(&row, "profile_id")?)
+                    .purpose(purpose),
+            );
+        }
+        for row in self
+            .select(TypedSelect::from(T_PROFILES).columns(["id"]))
+            .await?
+        {
+            batch.push(
+                TypedWriteIntent::delete(T_PROFILES)
+                    .key("id", req_str(&row, "id")?)
+                    .purpose(purpose),
+            );
+        }
+        batch.push(
+            TypedWriteIntent::upsert(T_META)
+                .key("key", META_VIRGIN)
+                .value("value", "1")
+                .purpose(purpose),
+        );
+        for key in [META_CURRENT_PROFILE, META_FIRST_ADMIN] {
+            batch.push(
+                TypedWriteIntent::delete(T_META)
+                    .key("key", key)
+                    .purpose(purpose),
+            );
+        }
+        let mut rest = batch;
+        while !rest.is_empty() {
+            let tail = rest.split_off(rest.len().min(MAX_INTENTS_PER_BATCH));
+            self.client.submit_batch(rest).await?;
+            rest = tail;
         }
         Ok(())
     }
 
-    /// Réinitialise le COG à l'état vierge (suppression de tous les comptes). Pour tests uniquement.
-    pub fn reset_cog_to_virgin(&self) -> Result<(), AuthDbError> {
-        run_blocking(self.reset_cog_to_virgin_async())
-    }
+    // -----------------------------------------------------------------------
+    // Hash Miyukini Connect
+    // -----------------------------------------------------------------------
 
-    async fn reset_cog_to_virgin_async(&self) -> Result<(), AuthDbError> {
-        self.client
-            .execute(
-                "DELETE FROM central_profile_saves",
-                Vec::<String>::new(),
-                "reset_cog",
-            )
-            .await?;
-        self.client
-            .execute(
-                "DELETE FROM profile_service_refs",
-                Vec::<String>::new(),
-                "reset_cog",
-            )
-            .await?;
-        self.client
-            .execute(
-                "DELETE FROM central_profiles",
-                Vec::<String>::new(),
-                "reset_cog",
-            )
-            .await?;
-        self.set_cog_virgin_async(true).await?;
-        self.set_current_profile_id_async(None).await?;
+    /// Enregistre (ou met a jour) un hash Argon2id Miyukini Connect pour un profil.
+    pub fn set_connect_password_hash(
+        &self,
+        profile_id: &str,
+        password_hash: &str,
+    ) -> Result<(), AuthDbError> {
+        if !password_hash.starts_with("$argon2id$") {
+            return Err(AuthDbError::Validation(
+                "Le hash Connect doit etre au format Argon2id.".to_string(),
+            ));
+        }
+        let intent = TypedWriteIntent::upsert(T_CONNECT)
+            .key("profile_id", profile_id)
+            .value("password_hash", password_hash)
+            .value("updated_at", chrono::Utc::now().to_rfc3339())
+            .purpose("central.auth.set_connect_password_hash");
+        run_blocking(self.client.submit(intent))?;
         Ok(())
     }
 
-    /// Retourne l'ID de référence du profil vers la table du service (synchrone).
+    /// Retourne le hash Argon2id Miyukini Connect associe a un profil.
+    pub fn get_connect_password_hash(
+        &self,
+        profile_id: &str,
+    ) -> Result<Option<String>, AuthDbError> {
+        run_blocking(
+            self.select_one_str(
+                TypedSelect::from(T_CONNECT)
+                    .columns(["password_hash"])
+                    .filter("profile_id", profile_id),
+                "password_hash",
+            ),
+        )
+    }
+
+    // -----------------------------------------------------------------------
+    // Références de service
+    // -----------------------------------------------------------------------
+
+    /// Retourne l’ID de référence du profil vers la table du service (ex. id de sauvegarde de jeu).
+    /// Chaque service utilise une `service_key` unique (ex. `"jaykoa"`, `"jaykonta"`).
     pub fn get_profile_service_ref(
         &self,
         profile_id: &str,
         service_key: &str,
     ) -> Result<Option<String>, AuthDbError> {
-        run_blocking(self.get_profile_service_ref_async(profile_id, service_key))
+        run_blocking(
+            self.select_one_str(
+                TypedSelect::from(T_REFS)
+                    .columns(["ref_id"])
+                    .filter("profile_id", profile_id)
+                    .filter("service_key", service_key),
+                "ref_id",
+            ),
+        )
     }
 
-    async fn get_profile_service_ref_async(
-        &self,
-        profile_id: &str,
-        service_key: &str,
-    ) -> Result<Option<String>, AuthDbError> {
-        let rows = self
-            .client
-            .query(
-                "SELECT ref_id FROM profile_service_refs WHERE profile_id = ?1 AND service_key = ?2",
-                vec![profile_id, service_key],
-            )
-            .await?;
-
-        Ok(rows.first().and_then(|r| Self::get_opt_string(r, "ref_id")))
-    }
-
-    /// Lie le profil à une ligne de la table du service (synchrone).
+    /// Lie le profil à une ligne de la table du service (ex. sauvegarde de jeu).
+    /// `ref_id` = id de la ligne dans la table dédiée au service. Passer `None` pour supprimer le lien.
     pub fn set_profile_service_ref(
         &self,
         profile_id: &str,
         service_key: &str,
         ref_id: Option<&str>,
     ) -> Result<(), AuthDbError> {
-        run_blocking(self.set_profile_service_ref_async(profile_id, service_key, ref_id))
-    }
-
-    async fn set_profile_service_ref_async(
-        &self,
-        profile_id: &str,
-        service_key: &str,
-        ref_id: Option<&str>,
-    ) -> Result<(), AuthDbError> {
-        match ref_id {
-            Some(id) => {
-                self.client
-                    .execute(
-                        "INSERT INTO profile_service_refs (profile_id, service_key, ref_id) VALUES (?1, ?2, ?3) ON CONFLICT(profile_id, service_key) DO UPDATE SET ref_id = excluded.ref_id",
-                        vec![profile_id, service_key, id],
-                        "set_profile_service_ref",
-                    )
-                    .await?;
-            }
-            None => {
-                self.client
-                    .execute(
-                        "DELETE FROM profile_service_refs WHERE profile_id = ?1 AND service_key = ?2",
-                        vec![profile_id, service_key],
-                        "delete_profile_service_ref",
-                    )
-                    .await?;
-            }
-        }
+        let intent = match ref_id {
+            Some(id) => TypedWriteIntent::upsert(T_REFS)
+                .key("profile_id", profile_id)
+                .key("service_key", service_key)
+                .value("ref_id", id)
+                .purpose("central.auth.set_profile_service_ref: lien"),
+            None => TypedWriteIntent::delete(T_REFS)
+                .key("profile_id", profile_id)
+                .key("service_key", service_key)
+                .purpose("central.auth.set_profile_service_ref: suppression du lien"),
+        };
+        run_blocking(self.client.submit(intent))?;
         Ok(())
     }
 
     // ---------- Sauvegardes liées au profil (central_profile_saves) ----------
 
-    /// Crée une sauvegarde pour un profil et un service. Retourne l'id de la ligne (synchrone).
-    /// Note: Les données sont encodées en base64 pour le transport JSON.
+    /// Crée une sauvegarde pour un profil et un service (slot 0 par défaut). Retourne l’id de la ligne.
     pub fn insert_profile_save(
         &self,
         profile_id: &str,
@@ -642,230 +881,242 @@ impl CentralAuthDb {
         slot: i64,
         data: &[u8],
     ) -> Result<String, AuthDbError> {
-        run_blocking(self.insert_profile_save_async(profile_id, service_key, slot, data))
-    }
-
-    async fn insert_profile_save_async(
-        &self,
-        profile_id: &str,
-        service_key: &str,
-        slot: i64,
-        data: &[u8],
-    ) -> Result<String, AuthDbError> {
-        use base64::Engine;
         let id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().to_rfc3339();
-        let data_base64 = base64::engine::general_purpose::STANDARD.encode(data);
-
-        self.client
-            .execute(
-                "INSERT INTO central_profile_saves (id, profile_id, service_key, slot, data_base64, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                vec![&id, profile_id, service_key, &slot.to_string(), &data_base64, &now, &now],
-                "insert_profile_save",
-            )
-            .await?;
-
+        let intent = TypedWriteIntent::insert(T_SAVES)
+            .value("id", id.as_str())
+            .value("profile_id", profile_id)
+            .value("service_key", service_key)
+            .value("slot", slot)
+            .value("data", data.to_vec())
+            .value("created_at", now.as_str())
+            .value("updated_at", now.as_str())
+            .purpose("central.auth.insert_profile_save");
+        run_blocking(self.client.submit(intent))?;
         Ok(id)
     }
 
-    /// Charge une sauvegarde par id (synchrone).
+    /// Charge une sauvegarde par id.
     pub fn get_profile_save(&self, id: &str) -> Result<Option<CentralProfileSave>, AuthDbError> {
-        run_blocking(self.get_profile_save_async(id))
+        run_blocking(
+            self.select_save(
+                TypedSelect::from(T_SAVES)
+                    .columns(SAVE_COLUMNS)
+                    .filter("id", id)
+                    .limit(1),
+            ),
+        )
     }
 
-    async fn get_profile_save_async(
-        &self,
-        id: &str,
-    ) -> Result<Option<CentralProfileSave>, AuthDbError> {
-        let rows = self
-            .client
-            .query(
-                "SELECT id, profile_id, service_key, slot, data_base64, created_at, updated_at FROM central_profile_saves WHERE id = ?1",
-                vec![id],
-            )
-            .await?;
-
-        rows.first()
-            .map(|r| Self::row_to_profile_save(r))
-            .transpose()
-    }
-
-    /// Charge une sauvegarde par (profile_id, service_key, slot) (synchrone).
+    /// Charge une sauvegarde par (profile_id, service_key, slot).
     pub fn get_profile_save_by_slot(
         &self,
         profile_id: &str,
         service_key: &str,
         slot: i64,
     ) -> Result<Option<CentralProfileSave>, AuthDbError> {
-        run_blocking(self.get_profile_save_by_slot_async(profile_id, service_key, slot))
+        run_blocking(
+            self.select_save(
+                TypedSelect::from(T_SAVES)
+                    .columns(SAVE_COLUMNS)
+                    .filter("profile_id", profile_id)
+                    .filter("service_key", service_key)
+                    .filter("slot", slot)
+                    .limit(1),
+            ),
+        )
     }
 
-    async fn get_profile_save_by_slot_async(
-        &self,
-        profile_id: &str,
-        service_key: &str,
-        slot: i64,
-    ) -> Result<Option<CentralProfileSave>, AuthDbError> {
-        let rows = self
-            .client
-            .query(
-                "SELECT id, profile_id, service_key, slot, data_base64, created_at, updated_at FROM central_profile_saves WHERE profile_id = ?1 AND service_key = ?2 AND slot = ?3",
-                vec![profile_id, service_key, &slot.to_string()],
-            )
-            .await?;
-
-        rows.first()
-            .map(|r| Self::row_to_profile_save(r))
-            .transpose()
-    }
-
-    /// Met à jour le blob et updated_at d'une sauvegarde existante (synchrone).
+    /// Met à jour le blob et updated_at d’une sauvegarde existante.
     pub fn update_profile_save(&self, id: &str, data: &[u8]) -> Result<(), AuthDbError> {
-        run_blocking(self.update_profile_save_async(id, data))
+        let intent = TypedWriteIntent::update(T_SAVES)
+            .key("id", id)
+            .value("data", data.to_vec())
+            .value("updated_at", chrono::Utc::now().to_rfc3339())
+            .purpose("central.auth.update_profile_save");
+        run_blocking(self.expect_rows(intent, || format!("Sauvegarde non trouvée: {id}")))
     }
 
-    async fn update_profile_save_async(&self, id: &str, data: &[u8]) -> Result<(), AuthDbError> {
-        use base64::Engine;
-        let now = chrono::Utc::now().to_rfc3339();
-        let data_base64 = base64::engine::general_purpose::STANDARD.encode(data);
-
-        let n = self
-            .client
-            .execute(
-                "UPDATE central_profile_saves SET data_base64 = ?1, updated_at = ?2 WHERE id = ?3",
-                vec![&data_base64, &now, id],
-                "update_profile_save",
-            )
-            .await?;
-
-        if n == 0 {
-            return Err(AuthDbError::Internal(format!(
-                "Sauvegarde non trouvée: {id}"
-            )));
-        }
-        Ok(())
-    }
-
-    /// Liste les sauvegardes (sans BLOB) pour un profil et un service (synchrone).
+    /// Liste les sauvegardes (sans BLOB) pour un profil et un service.
     pub fn list_profile_saves(
         &self,
         profile_id: &str,
         service_key: &str,
     ) -> Result<Vec<CentralProfileSaveRow>, AuthDbError> {
-        run_blocking(self.list_profile_saves_async(profile_id, service_key))
-    }
-
-    async fn list_profile_saves_async(
-        &self,
-        profile_id: &str,
-        service_key: &str,
-    ) -> Result<Vec<CentralProfileSaveRow>, AuthDbError> {
-        let rows = self
-            .client
-            .query(
-                "SELECT id, slot, created_at, updated_at FROM central_profile_saves WHERE profile_id = ?1 AND service_key = ?2 ORDER BY slot",
-                vec![profile_id, service_key],
-            )
-            .await?;
-
+        let rows = run_blocking(
+            self.select(
+                TypedSelect::from(T_SAVES)
+                    .columns(["id", "slot", "created_at", "updated_at"])
+                    .filter("profile_id", profile_id)
+                    .filter("service_key", service_key)
+                    .order_by("slot", false),
+            ),
+        )?;
         rows.iter()
             .map(|row| {
                 Ok(CentralProfileSaveRow {
-                    id: Self::get_string(row, "id"),
-                    slot: Self::get_opt_i64(row, "slot").unwrap_or(0),
-                    created_at: Self::get_string(row, "created_at"),
-                    updated_at: Self::get_string(row, "updated_at"),
+                    id: req_str(row, "id")?,
+                    slot: req_i64(row, "slot")?,
+                    created_at: req_str(row, "created_at")?,
+                    updated_at: req_str(row, "updated_at")?,
                 })
             })
             .collect()
     }
 
-    /// Supprime une sauvegarde par id (synchrone).
+    /// Supprime une sauvegarde par id. Ne modifie pas `profile_service_refs` (à faire côté appelant si ref_id pointait ici).
     pub fn delete_profile_save(&self, id: &str) -> Result<(), AuthDbError> {
-        run_blocking(self.delete_profile_save_async(id))
-    }
-
-    async fn delete_profile_save_async(&self, id: &str) -> Result<(), AuthDbError> {
-        let n = self
-            .client
-            .execute(
-                "DELETE FROM central_profile_saves WHERE id = ?1",
-                vec![id],
-                "delete_profile_save",
-            )
-            .await?;
-
-        if n == 0 {
-            return Err(AuthDbError::Internal(format!(
-                "Sauvegarde non trouvée: {id}"
-            )));
-        }
-        Ok(())
-    }
-
-    /// Vérification de la santé de la connexion (synchrone).
-    pub fn health_check(&self) -> Result<bool, AuthDbError> {
-        run_blocking(self.client.health_check()).map_err(AuthDbError::from)
+        let intent = TypedWriteIntent::delete(T_SAVES)
+            .key("id", id)
+            .purpose("central.auth.delete_profile_save");
+        run_blocking(self.expect_rows(intent, || format!("Sauvegarde non trouvée: {id}")))
     }
 
     // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------
 
-    fn row_to_profile(
-        row: &HashMap<String, serde_json::Value>,
-    ) -> Result<CentralProfile, AuthDbError> {
-        Ok(CentralProfile {
-            id: Self::get_string(row, "id"),
-            email: Self::get_string(row, "email"),
-            pseudonyme: Self::get_opt_string(row, "pseudonyme"),
-            nom: Self::get_opt_string(row, "nom"),
-            prenom: Self::get_opt_string(row, "prenom"),
-            date_naissance: Self::get_opt_string(row, "date_naissance"),
-            telephone: Self::get_opt_string(row, "telephone"),
-            numero_voie: Self::get_opt_string(row, "numero_voie"),
-            rue: Self::get_opt_string(row, "rue"),
-            code_postal: Self::get_opt_string(row, "code_postal"),
-            ville: Self::get_opt_string(row, "ville"),
-            is_admin: Self::get_opt_i64(row, "is_admin").unwrap_or(0) != 0,
-        })
+    async fn select(&self, query: TypedSelect) -> Result<Vec<Row>, AuthDbError> {
+        Ok(self.client.select(query).await?)
     }
 
-    fn row_to_profile_save(
-        row: &HashMap<String, serde_json::Value>,
-    ) -> Result<CentralProfileSave, AuthDbError> {
-        use base64::Engine;
-        let data_base64 = Self::get_string(row, "data_base64");
-        let data = base64::engine::general_purpose::STANDARD
-            .decode(&data_base64)
-            .unwrap_or_default();
-
-        Ok(CentralProfileSave {
-            id: Self::get_string(row, "id"),
-            profile_id: Self::get_string(row, "profile_id"),
-            service_key: Self::get_string(row, "service_key"),
-            slot: Self::get_opt_i64(row, "slot").unwrap_or(0),
-            data,
-            created_at: Self::get_string(row, "created_at"),
-            updated_at: Self::get_string(row, "updated_at"),
-        })
+    /// Première ligne de `query`, colonne texte `column`.
+    async fn select_one_str(
+        &self,
+        query: TypedSelect,
+        column: &str,
+    ) -> Result<Option<String>, AuthDbError> {
+        let rows = self.select(query.limit(1)).await?;
+        rows.first().map(|r| req_str(r, column)).transpose()
     }
 
-    fn get_string(row: &HashMap<String, serde_json::Value>, key: &str) -> String {
-        row.get(key)
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string()
+    async fn get_meta(&self, key: &str) -> Result<Option<String>, AuthDbError> {
+        self.select_one_str(
+            TypedSelect::from(T_META)
+                .columns(["value"])
+                .filter("key", key),
+            "value",
+        )
+        .await
     }
 
-    fn get_opt_string(row: &HashMap<String, serde_json::Value>, key: &str) -> Option<String> {
-        row.get(key)
-            .and_then(|v| v.as_str())
-            .filter(|s| !s.is_empty())
-            .map(|s| s.to_string())
+    async fn select_save(
+        &self,
+        query: TypedSelect,
+    ) -> Result<Option<CentralProfileSave>, AuthDbError> {
+        let rows = self.select(query).await?;
+        rows.first().map(row_to_profile_save).transpose()
     }
 
-    fn get_opt_i64(row: &HashMap<String, serde_json::Value>, key: &str) -> Option<i64> {
-        row.get(key).and_then(|v| v.as_i64())
+    /// Soumet `intent` ; `NotFound` si aucune ligne n'est affectée (sémantique legacy).
+    async fn expect_rows(
+        &self,
+        intent: TypedWriteIntent,
+        not_found: impl FnOnce() -> String + Send,
+    ) -> Result<(), AuthDbError> {
+        let outcome: IntentOutcome = self.client.submit(intent).await?;
+        if outcome.rows_affected == 0 {
+            return Err(AuthDbError::NotFound(not_found()));
+        }
+        Ok(())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Conversion des lignes
+// ---------------------------------------------------------------------------
+
+fn row_to_profile(row: &Row) -> Result<CentralProfile, AuthDbError> {
+    let enfants_nombre = opt_i64(row, "enfants_nombre")?
+        .map(i32::try_from)
+        .transpose()
+        .map_err(|_| AuthDbError::Internal("enfants_nombre hors limites".into()))?;
+    Ok(CentralProfile {
+        id: req_str(row, "id")?,
+        email: req_str(row, "email")?,
+        pseudonyme: opt_str(row, "pseudonyme")?,
+        nom: opt_str(row, "nom")?,
+        prenom: opt_str(row, "prenom")?,
+        date_naissance: opt_str(row, "date_naissance")?,
+        telephone: opt_str(row, "telephone")?,
+        numero_voie: opt_str(row, "numero_voie")?,
+        rue: opt_str(row, "rue")?,
+        code_postal: opt_str(row, "code_postal")?,
+        ville: opt_str(row, "ville")?,
+        is_admin: req_i64(row, "is_admin")? != 0,
+        genre: opt_str(row, "genre")?,
+        statut_marital: opt_str(row, "statut_marital")?,
+        partenaire_genre: opt_str(row, "partenaire_genre")?,
+        partenaire_nom: opt_str(row, "partenaire_nom")?,
+        enfants_nombre,
+        enfants_noms: opt_str(row, "enfants_noms")?,
+        profession: opt_str(row, "profession")?,
+        langue_maternelle: opt_str(row, "langue_maternelle")?,
+    })
+}
+
+fn row_to_profile_save(row: &Row) -> Result<CentralProfileSave, AuthDbError> {
+    use base64::Engine;
+    // KindMother transporte les BLOB en base64 (alphabet standard, avec remplissage).
+    let data = base64::engine::general_purpose::STANDARD
+        .decode(req_str(row, "data")?)
+        .map_err(|e| AuthDbError::Internal(format!("data de sauvegarde illisible : {e}")))?;
+    Ok(CentralProfileSave {
+        id: req_str(row, "id")?,
+        profile_id: req_str(row, "profile_id")?,
+        service_key: req_str(row, "service_key")?,
+        slot: req_i64(row, "slot")?,
+        data,
+        created_at: req_str(row, "created_at")?,
+        updated_at: req_str(row, "updated_at")?,
+    })
+}
+
+fn bad_column(column: &str, expected: &str) -> AuthDbError {
+    AuthDbError::Internal(format!("colonne {column} : {expected} attendu"))
+}
+
+/// Texte non nul (équivalent de `row.get::<_, String>`).
+fn req_str(row: &Row, column: &str) -> Result<String, AuthDbError> {
+    opt_str(row, column)?.ok_or_else(|| bad_column(column, "texte non nul"))
+}
+
+/// Texte nullable (chaîne vide conservée, comme le legacy).
+fn opt_str(row: &Row, column: &str) -> Result<Option<String>, AuthDbError> {
+    match row.get(column) {
+        None | Some(serde_json::Value::Null) => Ok(None),
+        Some(serde_json::Value::String(s)) => Ok(Some(s.clone())),
+        Some(_) => Err(bad_column(column, "texte")),
+    }
+}
+
+/// Entier non nul.
+fn req_i64(row: &Row, column: &str) -> Result<i64, AuthDbError> {
+    opt_i64(row, column)?.ok_or_else(|| bad_column(column, "entier non nul"))
+}
+
+/// Entier nullable.
+fn opt_i64(row: &Row, column: &str) -> Result<Option<i64>, AuthDbError> {
+    match row.get(column) {
+        None | Some(serde_json::Value::Null) => Ok(None),
+        Some(v) => v
+            .as_i64()
+            .map(Some)
+            .ok_or_else(|| bad_column(column, "entier")),
+    }
+}
+
+/// Valeur JSON d'une ligne lue → valeur typée réinsérable (copie de ligne).
+fn json_to_sql(column: &str, value: &serde_json::Value) -> Result<SqlValue, AuthDbError> {
+    match value {
+        serde_json::Value::Null => Ok(SqlValue::Null),
+        serde_json::Value::Bool(b) => Ok(SqlValue::from(*b)),
+        serde_json::Value::String(s) => Ok(SqlValue::from(s.as_str())),
+        serde_json::Value::Number(n) => n
+            .as_i64()
+            .map(SqlValue::from)
+            .or_else(|| n.as_f64().map(SqlValue::from))
+            .ok_or_else(|| bad_column(column, "nombre représentable")),
+        _ => Err(bad_column(column, "scalaire")),
     }
 }

@@ -59,6 +59,7 @@
 mod client;
 mod credential;
 mod errors;
+pub mod heritage;
 mod protocol;
 
 pub use client::KindMotherClient;

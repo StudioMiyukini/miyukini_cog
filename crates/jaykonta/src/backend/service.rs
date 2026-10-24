@@ -31,7 +31,14 @@ pub struct JayKontaBackend {
 impl JayKontaBackend {
     /// Cree le backend avec un chemin DB explicite.
     pub fn new_with_db(path: &str) -> Result<Self, DbError> {
-        let db = Arc::new(JayKontaDb::open(path)?);
+        Self::new_with_store(Arc::new(JayKontaDb::open(path)?))
+    }
+
+    /// Cree le backend sur une base deja ouverte (injection : tests, hote applicatif).
+    ///
+    /// # Errors
+    /// Echec de lecture de la base lors du controle de bootstrap.
+    pub fn new_with_store(db: Arc<JayKontaDb>) -> Result<Self, DbError> {
         let backend = Self {
             entry_point: EntryPoint::Account,
             section: DashboardSection::Overview,

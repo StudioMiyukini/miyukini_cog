@@ -24,10 +24,20 @@ chrono = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "2"
 
+[dev-dependencies]
+# Tests du chemin KindMother : serveur KindMother éphémère en processus.
+kindmother-service = { path = "../kindmother-service" }
+kindmother-client = { path = "../kindmother-client" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
 [features]
-default = ["legacy-sqlite"]
-legacy-sqlite = ["rusqlite"]
+# K-13 : KindMother est le seul écrivain ; chemin par défaut (n'active pas rusqlite).
+default = ["kindmother-only"]
 kindmother-only = []
+# HÉRITÉ (transitoire, K-13) : accès SQLite direct, retiré au lot C+ ; non défaut.
+# Activé explicitement, il prend le pas sur kindmother-only (voir src/data/mod.rs).
+legacy-sqlite = ["rusqlite"]
+# Chiffrement de la base locale du chemin hérité uniquement.
 db-encryption = ["kindmother-db-key"]
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript

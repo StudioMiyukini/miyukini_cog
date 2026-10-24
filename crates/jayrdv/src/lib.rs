@@ -15,8 +15,8 @@ pub mod domain;
 
 pub use data::{
     Appointment, AppointmentStatus, CancelledBy, Client, DbError, Exception, JayRdvStore,
-    Practitioner, PractitionerRole, Professional, ProfessionalSettings, Reminder, ReminderChannel,
-    Resource, Schedule, ScheduleOwner, Service, Slot, SlotStatus,
+    MemoryJayRdvStore, Practitioner, PractitionerRole, Professional, ProfessionalSettings,
+    Reminder, ReminderChannel, Resource, Schedule, ScheduleOwner, Service, Slot, SlotStatus,
 };
 pub use domain::{
     appointment_cancel, appointment_create, appointment_set_status, client_create,

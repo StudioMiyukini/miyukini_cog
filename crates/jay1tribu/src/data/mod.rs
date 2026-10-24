@@ -5,17 +5,23 @@
 //@human ! @role   data
 //! @layer  domain
 //!
-//! legacy-sqlite : accès SQLite direct. kindmother-only : délégation au service KindMother.
+//! kindmother-only (défaut, K-13) : délégation au service KindMother (intentions typées).
+//! legacy-sqlite (HÉRITÉ, transitoire) : accès SQLite direct.
+//!
+//! Règle de priorité : si `legacy-sqlite` est activée explicitement par un dépendant
+//! (ex. jayclub, qui garde aussi les features par défaut), le chemin SQLite HÉRITÉ
+//! l'emporte jusqu'à la migration de ce dépendant ; le chemin KindMother n'est alors
+//! pas compilé.
 
-#[cfg(all(feature = "legacy-sqlite", feature = "kindmother-only"))]
-compile_error!("Choisir une seule feature de persistance: legacy-sqlite OU kindmother-only.");
+#[cfg(not(any(feature = "kindmother-only", feature = "legacy-sqlite")))]
+compile_error!("Activer une feature de persistance : kindmother-only (défaut) ou legacy-sqlite.");
 
 pub mod types;
 
 #[cfg(feature = "legacy-sqlite")]
 mod kindmother_db;
 
-#[cfg(feature = "kindmother-only")]
+#[cfg(all(feature = "kindmother-only", not(feature = "legacy-sqlite")))]
 mod kindmother_client_db;
 
 pub use types::{
@@ -26,5 +32,5 @@ pub use types::{
 #[cfg(feature = "legacy-sqlite")]
 pub use kindmother_db::{DbError, Jay1TribuDb};
 
-#[cfg(feature = "kindmother-only")]
+#[cfg(all(feature = "kindmother-only", not(feature = "legacy-sqlite")))]
 pub use kindmother_client_db::{DbError, Jay1TribuDb};

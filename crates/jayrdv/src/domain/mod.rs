@@ -451,8 +451,16 @@ pub fn reminder_create(
 mod tests {
     use super::*;
 
+    /// Store de test : store mémoire si la feature `memory` est active (ou si aucune
+    /// persistance n'est choisie), sinon store KindMother sur un serveur éphémère dédié.
+    #[cfg(any(feature = "memory", not(feature = "kindmother-only")))]
     fn make_store() -> JayRdvStore {
         JayRdvStore::new()
+    }
+
+    #[cfg(all(feature = "kindmother-only", not(feature = "memory")))]
+    fn make_store() -> JayRdvStore {
+        crate::data::kindmother_test_support::ephemeral_store()
     }
 
     // -- Validations -------------------------------------------------------

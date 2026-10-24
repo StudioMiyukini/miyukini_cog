@@ -39,10 +39,17 @@ base64 = "0.22"
 tracing = "0.1"
 
 [features]
-default = ["legacy-sqlite"]
-legacy-sqlite = ["rusqlite"]
+# K-13 : KindMother seul écrivain de la base `central` (intentions typées, EX-07).
+default = ["kindmother-only"]
 kindmother-only = []
+# HÉRITÉ (transitoire, K-13) : accès SQLite direct ; apps/central et crates/central-remote l'activent encore explicitement
+# (s'il est actif en même temps que kindmother-only, le legacy l'emporte : voir src/auth/mod.rs).
+legacy-sqlite = ["rusqlite"]
+# Clé de base pour le chemin legacy uniquement (sans effet sur le chemin KindMother, chiffré par kindmother-service).
 db-encryption = ["kindmother-db-key"]
+
+[dev-dependencies]
+kindmother-service = { path = "../kindmother-service" }
 
 # Note: eGUI supprimé — migration vers Tauri + React/TypeScript
 # Voir docs/implementation/Miyukini - Plan Migration Tauri React TypeScript.md

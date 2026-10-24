@@ -20,13 +20,25 @@ serde = { version = "1", features = ["derive"] }
 uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
+# Persistance KindMother (K-13 : KindMother seul écrivain ; EX-07 : écritures par intentions typées).
+kindmother-client = { path = "../kindmother-client", optional = true }
+tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
+serde_json = { version = "1", optional = true }
+
+[dev-dependencies]
+# Serveur KindMother éphémère en processus (tests du store KindMother).
+kindmother-service = { path = "../kindmother-service" }
+kindmother-client = { path = "../kindmother-client" }
+tempfile = "3"
 
 [features]
-default = []
-# Store en mémoire (défaut si aucune feature).
+# Défaut : persistance réelle via KindMother (full KM).
+default = ["kindmother-only"]
+# Store en mémoire : prioritaire s'il est activé explicitement (tests, démos sans serveur).
+# Aussi utilisé si aucune feature de persistance n'est activée.
 memory = []
-# Full KM : persistance via KindMother (stub actuel = délégation au store mémoire).
-kindmother-only = []
+# Full KM : persistance via le service KindMother (intentions typées, lectures typées).
+kindmother-only = ["dep:kindmother-client", "dep:tokio", "dep:serde_json"]
 
 [lints.rust]
 unsafe_code = "forbid"

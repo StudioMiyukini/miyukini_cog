@@ -16,46 +16,18 @@
 //! - `central_profile_saves` : sauvegardes par (profile_id, service_key, slot).
 //!   `ref_id` dans `profile_service_refs` pointe vers `central_profile_saves.id` (sauvegarde courante).
 //! - Un profil peut avoir plusieurs slots par service (slot 0, 1, 2…).
+//!
+//! **HÉRITÉ (transitoire, K-13)** : accès SQLite direct, actif seulement avec la feature
+//! `legacy-sqlite`. Le chemin par défaut est `db_client` (KindMother seul écrivain).
 
+use super::hachage::{hash_password_argon2, verify_password};
+use super::{CentralProfile, CentralProfileSave, CentralProfileSaveRow};
 use crate::auth::password::validate_password;
-use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 #[cfg(feature = "db-encryption")]
 use kindmother_db_key::KeyDerivation;
 use rusqlite::{params, Connection};
-use sha2::{Digest, Sha256};
 use std::path::Path;
 use std::sync::Mutex;
-
-/// Hash SHA-256 legacy (pour rétrocompatibilité).
-fn hash_password_sha256(password: &str) -> String {
-    let mut h = Sha256::new();
-    h.update(password.as_bytes());
-    format!("{:x}", h.finalize())
-}
-
-/// Hash Argon2id (recommandé pour la production).
-fn hash_password_argon2(password: &str) -> Result<String, String> {
-    let salt = SaltString::generate(&mut rand::thread_rng());
-    let argon2 = argon2::Argon2::default();
-    argon2
-        .hash_password(password.as_bytes(), &salt)
-        .map(|h| h.to_string())
-        .map_err(|e| format!("argon2 hash error: {e}"))
-}
-
-/// Vérifie un mot de passe contre un hash stocké (Argon2id ou SHA-256 legacy).
-fn verify_password(password: &str, stored_hash: &str) -> bool {
-    if stored_hash.starts_with("$argon2") {
-        if let Ok(parsed) = PasswordHash::new(stored_hash) {
-            return argon2::Argon2::default()
-                .verify_password(password.as_bytes(), &parsed)
-                .is_ok();
-        }
-        false
-    } else {
-        hash_password_sha256(password) == stored_hash
-    }
-}
 
 /// Migre un hash SHA-256 legacy vers Argon2id.
 fn upgrade_hash_if_legacy(conn: &Connection, profile_id: &str, password: &str, stored_hash: &str) {
@@ -86,73 +58,6 @@ impl From<rusqlite::Error> for AuthDbError {
     fn from(e: rusqlite::Error) -> Self {
         AuthDbError(e.to_string())
     }
-}
-
-/// Ligne de sauvegarde liée au profil Central (données complètes).
-#[derive(Debug, Clone)]
-pub struct CentralProfileSave {
-    /// Identifiant unique de la sauvegarde.
-    pub id: String,
-    /// Identifiant du profil Central.
-    pub profile_id: String,
-    /// Clé du service (ex. `jaykoa`).
-    pub service_key: String,
-    /// Numéro de slot (0, 1, 2…).
-    pub slot: i64,
-    /// Données sérialisées (BLOB).
-    pub data: Vec<u8>,
-    /// Date de création (ISO).
-    pub created_at: String,
-    /// Date de dernière mise à jour (ISO).
-    pub updated_at: String,
-}
-
-/// Ligne allégée pour lister les sauvegardes (sans le BLOB).
-#[derive(Debug, Clone)]
-pub struct CentralProfileSaveRow {
-    /// Identifiant unique de la sauvegarde.
-    pub id: String,
-    /// Numéro de slot.
-    pub slot: i64,
-    /// Date de création (ISO).
-    pub created_at: String,
-    /// Date de dernière mise à jour (ISO).
-    pub updated_at: String,
-}
-
-/// Profil Miyukini COG (email = login, champs enrichis modifiables).
-#[derive(Debug, Clone)]
-#[allow(missing_docs)]
-pub struct CentralProfile {
-    pub id: String,
-    pub email: String,
-    pub pseudonyme: Option<String>,
-    pub nom: Option<String>,
-    pub prenom: Option<String>,
-    pub date_naissance: Option<String>,
-    pub telephone: Option<String>,
-    pub numero_voie: Option<String>,
-    pub rue: Option<String>,
-    pub code_postal: Option<String>,
-    pub ville: Option<String>,
-    /// Premier compte créé = admin de l'environnement (MiyukiniAdmin).
-    pub is_admin: bool,
-    /// Genre (Masculin, Féminin, Neutre) — Rite d'Entrée.
-    pub genre: Option<String>,
-    /// Statut relationnel (Célibataire, En couple, Marié) — Rite d'Entrée.
-    pub statut_marital: Option<String>,
-    /// Genre du/de la partenaire si non célibataire.
-    pub partenaire_genre: Option<String>,
-    /// Nom ou prénom du/de la partenaire si non célibataire.
-    pub partenaire_nom: Option<String>,
-    /// Nombre d'enfants (0 si aucun ou non renseigné).
-    pub enfants_nombre: Option<i32>,
-    /// Prénoms des enfants (JSON array ou séparés par virgule).
-    pub enfants_noms: Option<String>,
-    /// Profession ou activité — Rite d'Entrée.
-    pub profession: Option<String>,
-    /// Langue maternelle.
-    pub langue_maternelle: Option<String>,
 }
 
 /// Base des profils Central (SQLite).
@@ -460,28 +365,11 @@ impl CentralAuthDb {
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
         let mut stmt = conn.prepare("SELECT id, email, is_admin FROM central_profiles")?;
         let rows = stmt.query_map([], |row| {
-            Ok(CentralProfile {
-                id: row.get::<_, String>(0)?,
-                email: row.get::<_, String>(1)?,
-                pseudonyme: None,
-                nom: None,
-                prenom: None,
-                date_naissance: None,
-                telephone: None,
-                numero_voie: None,
-                rue: None,
-                code_postal: None,
-                ville: None,
-                is_admin: row.get::<_, i64>(2)? != 0,
-                genre: None,
-                statut_marital: None,
-                partenaire_genre: None,
-                partenaire_nom: None,
-                enfants_nombre: None,
-                enfants_noms: None,
-                profession: None,
-                langue_maternelle: None,
-            })
+            Ok(CentralProfile::minimal(
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, i64>(2)? != 0,
+            ))
         })?;
         let mut out = Vec::new();
         for row in rows {
@@ -618,7 +506,7 @@ impl CentralAuthDb {
         let hash = hash_password_argon2(password)
             .map_err(|e| AuthDbError(format!("hash error: {e}")))?;
         let now = chrono::Utc::now().to_rfc3339();
-        let pseudo_val = pseudonyme.map(|s| s.trim()).filter(|s| !s.is_empty());
+        let pseudo_val = pseudonyme.map(str::trim).filter(|s| !s.is_empty());
         // Vérification « table vide » + insertion + bascule « non vierge » dans UNE
         // transaction IMMEDIATE : un seul compte peut devenir le premier admin.
         let is_admin = {
@@ -632,7 +520,7 @@ impl CentralAuthDb {
             let is_first = count == 0;
             tx.execute(
                 "INSERT INTO central_profiles (id, email, password_hash, created_at, updated_at, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?7)",
-                params![id, email, hash, now, now, pseudo_val, if is_first { 1i64 } else { 0i64 }],
+                params![id, email, hash, now, now, pseudo_val, i64::from(is_first)],
             )?;
             if is_first {
                 tx.execute(
@@ -643,28 +531,9 @@ impl CentralAuthDb {
             tx.commit()?;
             is_first
         };
-        Ok(CentralProfile {
-            id: id.clone(),
-            email: email.to_string(),
-            pseudonyme: pseudo_val.map(String::from),
-            nom: None,
-            prenom: None,
-            date_naissance: None,
-            telephone: None,
-            numero_voie: None,
-            rue: None,
-            code_postal: None,
-            ville: None,
-            is_admin,
-            genre: None,
-            statut_marital: None,
-            partenaire_genre: None,
-            partenaire_nom: None,
-            enfants_nombre: None,
-            enfants_noms: None,
-            profession: None,
-            langue_maternelle: None,
-        })
+        let mut profile = CentralProfile::minimal(id, email.to_string(), is_admin);
+        profile.pseudonyme = pseudo_val.map(String::from);
+        Ok(profile)
     }
 
     /// Enregistre (ou met a jour) un hash Argon2id Miyukini Connect pour un profil.

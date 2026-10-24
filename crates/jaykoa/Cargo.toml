@@ -30,6 +30,12 @@ chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "2"
 
+[dev-dependencies]
+# Serveur KindMother en processus pour les tests de persistance (opérateur jaykoa).
+kindmother-service = { path = "../kindmother-service" }
+tempfile = "3"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
 [features]
 default = ["kindmother-only"]
 # Full KM : accès exclusif via KindMother (kindmother-client)

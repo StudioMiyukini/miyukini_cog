@@ -4960,9 +4960,11 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-service",
  "rusqlite",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror 2.0.18",
  "tokio",
  "uuid",
@@ -5132,8 +5134,10 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-service",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror 2.0.18",
  "tokio",
  "uuid",
@@ -5182,6 +5186,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-service",
  "rusqlite",
  "serde",
  "serde_json",
@@ -5352,8 +5357,13 @@ name = "jayrdv"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "kindmother-client",
+ "kindmother-service",
  "serde",
+ "serde_json",
+ "tempfile",
  "thiserror 2.0.18",
+ "tokio",
  "uuid",
 ]
 
@@ -6889,6 +6899,7 @@ dependencies = [
  "kindmother",
  "kindmother-client",
  "kindmother-db-key",
+ "kindmother-service",
  "miyuwebway_participant",
  "rand 0.8.5",
  "rusqlite",
@@ -7091,11 +7102,15 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "kindmother",
+ "kindmother-client",
  "kindmother-db-key",
+ "kindmother-service",
  "rusqlite",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror 2.0.18",
+ "tokio",
  "uuid",
 ]
 

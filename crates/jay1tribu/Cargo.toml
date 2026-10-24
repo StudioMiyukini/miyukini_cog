@@ -22,11 +22,22 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 
+[dev-dependencies]
+# Serveur KindMother en processus pour les tests du chemin kindmother-only.
+kindmother-service = { path = "../kindmother-service" }
+tempfile = "3"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
 [features]
-default = ["legacy-sqlite"]
-legacy-sqlite = ["rusqlite"]
+# K-13 : KindMother est le seul écrivain ; la persistance passe par kindmother-client.
+default = ["kindmother-only"]
 kindmother-only = ["dep:kindmother-client", "dep:tokio"]
-db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
+# HÉRITÉ (transitoire, K-13) : accès SQLite direct, non défaut, retiré quand les données sont importées dans KindMother
+# Prioritaire si activée explicitement (ex. jayclub) : voir src/data/mod.rs.
+legacy-sqlite = ["rusqlite"]
+# Chiffrement SQLCipher du chemin HÉRITÉ uniquement. Sous kindmother-only, le chiffrement
+# au repos est assuré par kindmother-service (sa propre feature db-encryption, K-06).
+db-encryption = ["legacy-sqlite", "dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
 
 [lints.rust]
 unsafe_code = "forbid"

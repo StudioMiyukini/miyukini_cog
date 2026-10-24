@@ -10,7 +10,7 @@
 //! interroge la DB mère pour valider les ID des profils. Si un ID existe déjà
 //! pour un autre compte, la mère alloue un nouvel ID et la fille l'inscrit en local.
 
-use crate::auth::db::CentralProfile;
+use crate::auth::CentralProfile;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -64,6 +64,7 @@ const REQUEST_TIMEOUT_SEC: u64 = 15;
 /// - Corps : `{ "profiles": [ { "id": "uuid", "email": "..." } ] }`
 /// - Réponse 200 : `{ "results": [ { "id": "...", "email": "...", "assigned_id": "..." } ] }`
 /// - Si un `id` existe déjà pour un autre compte, la mère alloue un nouvel UUID et le renvoie dans `assigned_id` ; sinon `assigned_id` = `id`.
+///
 /// Retourne la liste des réattributions à appliquer en local : `(ancien_id, nouvel_id)`.
 /// En cas d'erreur réseau ou de format, retourne une erreur (pas de mise à jour).
 pub fn validate_profiles_with_mother(

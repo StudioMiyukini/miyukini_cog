@@ -54,6 +54,14 @@ jobs:
       - name: clippy crates sécurité
         run: cargo clippy --locked -p miyusceau -- -D warnings
 
+  regles-depot:
+    # Lot C (K-13, C-32) : rusqlite réservé à kindmother-service (liste transitoire datée).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: rusqlite réservé à KindMother
+        run: bash scripts/verifier-regle-rusqlite.sh
+
   dependances:
     # C-04 / EX-15 : vulnérabilités, licences, sources.
     runs-on: ubuntu-latest
