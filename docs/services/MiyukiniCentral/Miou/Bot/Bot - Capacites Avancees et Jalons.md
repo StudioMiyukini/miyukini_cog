@@ -111,7 +111,7 @@ Lorsque plusieurs jalons sont « fraîchement » débloqués :
 | Priorité | Type de jalon | Règle |
 |----------|---------------|-------|
 | 1 | Streak 30 | Avant streak 7 (plus rare) |
-| 2 | Badge (Webway, Vitrine) | Avant milestone « first » |
+| 2 | Badge (Webway) | Avant milestone « first » |
 | 3 | First service/ami | Une fois par type |
 | 4 | Observation (favori, ami proche) | Priorité basse, 1 par session max |
 

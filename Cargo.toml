@@ -117,7 +117,7 @@ members = [
     "crates/jaymeteo-client",
     "crates/jaycontact-client",
 
-    # === JayCloud — sauvegarde cloud souveraine (héritier MiyuCloud) ===
+    # === JayCloud — sauvegarde cloud souveraine (distinct de MiyuCloud) ===
     "crates/jaycloud",
     "crates/jaycloud-client",
     "crates/jaycloud-migrate",

@@ -12,6 +12,8 @@ Un Service ne prend aucune décision de gouvernance. Il propose des fonctionnali
 
 ## Catalogue des Services
 
+Le workspace compte **30 services avec code** : 21 services et 9 applications de la suite Jay Bureau (décompte : [vue globale](../../architecture/COG-VUE-GLOBALE.md) §4). Ils sont gouvernés par **10 Cores**.
+
 ### Services Centraux
 
 | Service | Description | Statut |
@@ -26,7 +28,7 @@ Un Service ne prend aucune décision de gouvernance. Il propose des fonctionnali
 |---------|-------------|--------|
 | **JayKoa** | Calendrier universel du COG | Fonctionnel |
 | **JayKonta** | Comptabilité unifiée Purse + Account | Fonctionnel (Bourse) |
-| **JayRDV** | Prise de rendez-vous et créneaux | Beta |
+| **JayRDV** | Prise de rendez-vous et créneaux | En préparation |
 | **JayShop** | Commerce, point de vente, billetterie | En préparation |
 | **JayFaim** | Réservation de tables et restauration | En préparation |
 | **MiyukiniSales** | Cycle devis → facture → paiement | En préparation |
@@ -57,6 +59,7 @@ Un Service ne prend aucune décision de gouvernance. Il propose des fonctionnali
 | Service | Description | Statut |
 |---------|-------------|--------|
 | **Miyukini Cloud** | Cloud privé (WebDAV/CalDAV/CardDAV) | Fonctionnel |
+| **JayCloud** | Sauvegarde souveraine (snapshots, restauration, WebDAV) — distinct de Miyukini Cloud | En préparation |
 | **MAIA / Miou LLM** | IA locale (LLM, STT) sans internet | Fonctionnel |
 | **Miyukini Whisper** | Dictée locale STT/TTS | Fonctionnel |
 | **Alicia** | Assistante domotique (vocal, MQTT) | MVP |

@@ -74,7 +74,6 @@ Un **trigger** est un événement ou une condition qui lance le cycle : Construc
 | E-22 | Premier service installé | `first_service_installed` | P1 | `felicitation_milestone` |
 | E-23 | Premier ami contacté | `first_friend_contact` | P1 | `felicitation_milestone` |
 | E-24 | Webway connecté | `webway_connected` | P1 | `felicitation_badge` |
-| E-25 | Vitrine publiée | `vitrine_published` | P2 | `felicitation_badge` |
 
 ### 3.4 Services externes (contexte applicatif)
 

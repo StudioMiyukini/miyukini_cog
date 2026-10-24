@@ -4,7 +4,7 @@
 
 Ce document est le **guide d'implementation** du service **JayShop**. Il detaille l'architecture technique, la structure des crates, le schema de persistance, les Operateurs et Kits d'Outils, le plan de livraison par phases et l'integration dans Miyukini Central.
 
-> **Note 2026-04-29 :** Les integrations JayXpose (catalogue, stocks) et JayFestival (evenements) ont ete retirees de ce guide suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md).
+> **Note 2026-04-29 :** Les integrations JayXpose (catalogue, stocks) et JayFestival (evenements) ont ete retirees de ce guide suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md). Le catalogue produits et les stocks sont desormais detenus par JayShop.
 
 **References** : [Document fondateur](./JayShop%20-%20Document%20Fondateur.md), [Analyse des besoins](./JayShop%20-%20Analyse%20des%20besoins.md), [Ecrans et UI](./JayShop%20-%20Ecrans%20et%20UI.md), [Interfaces Inter-Services](./JayShop%20-%20Interfaces%20Inter-Services.md), [Reference Loyverse](./reference/JayShop%20-%20Reference%20Loyverse%20Back%20Office.md).
 

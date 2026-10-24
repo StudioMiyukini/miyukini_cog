@@ -10,7 +10,7 @@ JayShop est le service Miyukini dedie au **commerce et a la vente** :
 - gestion des evenements ponctuels (fiches, couts, stock temporaire, benefices)
 - suivi comptable (JayKonta)
 
-> **Note 2026-04-29 :** Les integrations JayXpose (catalogue) et JayFestival (festivals) ont ete retirees suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md). JayShop reste autonome sur son perimetre commerce.
+> **Note 2026-04-29 :** Les integrations JayXpose (catalogue) et JayFestival (festivals) ont ete retirees suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md). JayShop reste autonome sur son perimetre commerce et **detient desormais son propre catalogue produits et ses stocks** (source de verite).
 
 ## Documentation principale
 

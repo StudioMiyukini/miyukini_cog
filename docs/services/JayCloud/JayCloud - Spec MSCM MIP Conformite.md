@@ -14,7 +14,7 @@
 | P2 | Skeleton crates + manifest + workspace entry | à venir |
 | P3 | Backup core + WebDAV (Litmus pass) | à venir |
 | P4 | UI web backup + scheduling | à venir |
-| P5 | Migration MiyuCloud | à venir |
+| P5 | Import optionnel depuis MiyuCloud (MiyuCloud conservé) | à venir |
 | P6 | Intégration Alicia + sauvegarde MWS inter-COG | à venir |
 | P7 | Polish (intégrité périodique, RFC 3253, sharing extensions) | à venir |
 
@@ -49,7 +49,7 @@
 | **DT-04** | **Aucune dépendance vers un autre service Jay.** Pas de `jaykoa-client`, `jaycontact-client`, `jaymail-client` etc. dans `crates/jaycloud/Cargo.toml`. | Garantit l'absence de doublon et l'autonomie totale du service de sauvegarde. |
 | **DT-05** | **Persistance via libSQL chiffré (clé dérivée KindMother) ; filesystem chiffré au repos pour les blobs.** | Cohérent avec le reste du COG. |
 | **DT-06** | **Authentification = délégation KindMother + jetons applicatifs WebDAV signés.** | Évite tout stockage de mot de passe ; chaque outil de backup tiers reçoit son app-password scopé. |
-| **DT-07** | **`files_op` est l'héritier direct de MiyuCloud**, intégré au crate `jaycloud` (pas un crate séparé). | MiyuCloud étant retiré, son code est rapatrié dans `crates/jaycloud/src/files/`. |
+| **DT-07** | **`files_op` est l'héritier direct de MiyuCloud**, intégré au crate `jaycloud` (pas un crate séparé). | Le code de stockage chiffré de MiyuCloud est dupliqué dans `crates/jaycloud/src/files/` ; MiyuCloud reste un service distinct et conservé (décision du 2026-10-24). |
 | **DT-08** | **Snapshots stockés en content-addressed storage (CAS) + manifest libSQL.** | Évite la duplication entre snapshots incrémentaux ; dédup naturelle via hash de bloc. |
 | **DT-09** | **Pas de cache de second niveau en P3-P4.** | Le filesystem OS et libSQL suffisent. Cache évalué en P7 si nécessaire. |
 
@@ -571,6 +571,10 @@ Liste des intents (cf. §3.3).
 
 ## 10. Migration depuis MiyuCloud
 
+> **Révisé le 2026-10-24** : MiyuCloud est **conservé** (cloud privé, distinct de JayCloud).
+> Le pipeline s'arrête à l'import et aux redirections ; la mise en lecture seule,
+> la désinstallation de MiyuCloud et le retrait du catalogue (§10.2) sont **abandonnés**.
+
 ### 10.1 Pipeline
 
 ```
@@ -687,6 +691,9 @@ Matrice de validation P3 :
 **Aucune.** JayCloud n'extension aucune API d'aucun service Jay (DT-04).
 
 ### 14.3 Suppression progressive de MiyuCloud
+
+> **Abandonné le 2026-10-24** : MiyuCloud est conservé ; `crates/miyucloud` et
+> `crates/miyucloud-dav` restent dans le workspace. Seule la ligne PR-2 (P3.a) s'applique.
 
 | Étape | Action MiyuCloud |
 |-------|------------------|

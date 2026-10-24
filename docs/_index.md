@@ -22,8 +22,7 @@ Numérotation unifiée K / C / T / S / A / H (décision D6, [vue globale](archit
 
 | Dossier | Description |
 |---|---|
-| [implementation/](implementation/) | Plans, audits et references d'implementation |
-| [distribution/](distribution/) | Distribution et procedures de publication |
+| [implementation/](implementation/) | [Contraintes](implementation/CONTRAINTES-IMPLEMENTATION.md), [revue de code](implementation/REVUE-CODE-PREPARATION.md), [plan d'implementation](implementation/PLAN-IMPLEMENTATION.md) |
 | [doc_for_website/](doc_for_website/) | Documentation preparee pour le site |
 | [miyukini-webway-system/](miyukini-webway-system/) | Documents lies au Webway System |
 | [ux_ui/](ux_ui/) | Ressources UX/UI et composants |

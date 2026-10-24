@@ -4,7 +4,7 @@
 
 **JayShop** est le **service Miyukini dedie au commerce et a la vente** au sein de l'ecosysteme COG. Il couvre l'ensemble du cycle de vente : **onboarding vendeur**, **boutique en ligne**, **point de vente (PoS)** en caisse et **suivi des ventes**. JayShop transmet les donnees comptables a **JayKonta** pour le suivi financier.
 
-> **Note 2026-04-29 :** Les integrations JayXpose (catalogue, stocks) et JayFestival (evenements) ont ete retirees suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md).
+> **Note 2026-04-29 :** Les integrations JayXpose (catalogue, stocks) et JayFestival (evenements) ont ete retirees suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md). Depuis, **JayShop detient son propre catalogue produits et ses stocks**.
 
 **Un seul service COG**, avec **deux modes d'interaction** :
 
@@ -182,7 +182,7 @@ JayShop permet de gerer les **participations a des evenements ou festivals** ave
 | Principe | Description |
 |----------|-------------|
 | **Gouvernance COG** | Le service fonctionne sous gouvernance COG : StrongFather (decisions), KindMother (persistance), Master Butler (capacites/permissions), WorrySentinel (securite), Ever Buddy (cycle de vie). |
-| **Source de verite unique** | Les donnees de vente (tickets, paiements) resident dans JayShop. La comptabilite reside dans JayKonta. |
+| **Source de verite unique** | Le catalogue produits, les stocks et les donnees de vente (tickets, paiements) resident dans JayShop. La comptabilite reside dans JayKonta. |
 | **Reutilisabilite** | S'appuyer sur les Kits d'outils Miyukini existants (MiyuInvoice, MiyuContacts, MiyuPayment) et les Operateurs JayKonta. |
 | **Interpolarite** | Concu pour s'integrer dans l'ecosysteme Jay. Les couplages avec JayKonta sont explicites et gouvernes (Mandats de Permission, niveaux de securite). |
 | **Hors-ligne d'abord** | Le mode PoS doit fonctionner sans connexion internet. Les ventes sont enregistrees localement et synchronisees a la reconnexion (LOI-1, LOI-2, LOI-3). |

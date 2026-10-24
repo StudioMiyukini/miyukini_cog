@@ -30,7 +30,7 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 
 | Id | Besoin | Priorite | Description |
 |----|--------|----------|-------------|
-| JSH-10 | Lire le catalogue | P0 | JayShop affiche les produits, categories, visuels et prix. |
+| JSH-10 | Lire le catalogue | P0 | JayShop affiche les produits, categories, visuels et prix (catalogue detenu par JayShop). |
 | JSH-11 | Creer un produit | P1 | L'admin cree un produit depuis JayShop (nom, prix, categorie, visuel). |
 | JSH-12 | Modifier un produit | P1 | L'admin modifie un produit (prix, description, disponibilite, categorie). |
 | JSH-13 | Supprimer un produit | P1 | L'admin archive un produit (soft delete). |

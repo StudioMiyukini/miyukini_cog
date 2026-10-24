@@ -40,6 +40,7 @@
 | **JayRDV** | Prise de rendez-vous en ligne (B2B2C) |
 | **JayFaim** | Reservation de tables et commande en ligne |
 | **JayShop** | Boutique et point de vente unifies |
+| **JayCloud** | Sauvegarde souveraine (snapshots, restauration, WebDAV) — distinct de Miyukini Cloud |
 | **MiyukiniSales** | Cycle complet devis, commandes, facturation, paiements |
 | **MIPowa** | Editeur de workflows visuels |
 | **Jay1Tribu** | Reseau social prive pour groupes et familles |
@@ -118,7 +119,7 @@ Miyukini n'est pas un simple logiciel. C'est un **environnement gouverne** (COG 
 | Strate | Role | En langage simple |
 |---|---|---|
 | **Kernel** | Fondations techniques | L'electricite et la plomberie |
-| **Cores** (x9) | Gouvernance du systeme | Les ministeres qui fixent les regles |
+| **Cores** (x10) | Gouvernance du systeme | Les ministeres qui fixent les regles |
 | **Toolkits** (x49) | Capacites metier | La boite a outils universelle |
 | **Services** | Ce que vous utilisez | Les guichets ouverts au public |
 | **Admin** | Autorite souveraine | Le bureau du president |
@@ -133,14 +134,14 @@ Miyukini n'est pas un simple logiciel. C'est un **environnement gouverne** (COG 
 ### Chiffres cles
 
 ```
-  9 Cores de gouvernance
+ 10 Cores de gouvernance
  49 Toolkits implementes (crates Rust)
  70+ crates dans le workspace
- 13 services et applications (dont 9 dans la suite Jay Bureau)
+ 30 services et applications (dont 9 dans la suite Jay Bureau)
   2 jeux jouables
   1 assistante domotique (Alicia)
   1 IA locale (MAIA — LLM + STT)
-  1 cloud prive (Miyukini Cloud)
+  1 cloud prive (Miyukini Cloud) + 1 service de sauvegarde (JayCloud)
 ```
 
 ---

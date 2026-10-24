@@ -4,6 +4,8 @@
 
 **JayRDV** est le service dédié à la **prise de rendez-vous et à la réservation en ligne** au sein de l'écosystème Miyukini. Ce dossier regroupe la documentation produit, les analyses de marché et les spécifications liées aux solutions de réservation en ligne.
 
+> **Statut (2026-10-24)** : en préparation — crate `jayrdv` (backend, testée) dans le workspace ; pas encore de binaire autonome ni d'entrée au catalogue officiel de Central.
+
 ## Portée / Scope
 
 - **Périmètre** : Analyse produit, benchmark des fonctionnalités, spécifications du service JayRDV.

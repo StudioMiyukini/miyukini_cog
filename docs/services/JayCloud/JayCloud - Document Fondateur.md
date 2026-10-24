@@ -3,8 +3,8 @@
 ## Contexte
 
 **JayCloud** est le **service Miyukini de sauvegarde cloud souverain** du COG.
-Il prend le relais de **MiyuCloud** (stockage chiffré limité, sans logique
-de sauvegarde structurée) en se concentrant **exclusivement** sur les
+Il est **distinct de MiyuCloud** (cloud privé auto-hébergé : fichiers,
+CalDAV, CardDAV, WOPI — conservé, décision du 2026-10-24) et se concentre **exclusivement** sur les
 fonctions de sauvegarde et de stockage durable :
 
 | Fonction | Périmètre |
@@ -14,7 +14,7 @@ fonctions de sauvegarde et de stockage durable :
 | **Restore** | Restauration sélective (un fichier, un dossier, un snapshot complet) vers l'emplacement d'origine ou ailleurs. |
 | **Partage de liens** | Liens publics signés (mot de passe / expiration) vers un fichier ou un snapshot. |
 | **WebDAV (RFC 4918)** | Protocole standard pour outils de sauvegarde tiers (rclone, Cyberduck, RaiDrive) et montage natif OS si voulu. |
-| **Migration depuis MiyuCloud** | Rapatriement transparent de l'arborescence + redirection des liens publics existants. |
+| **Import depuis MiyuCloud** (optionnel) | Rapatriement de l'arborescence + redirection des liens publics (`jaycloud-migrate`) ; MiyuCloud reste en service. |
 
 > **JayCloud ne fait QUE de la sauvegarde cloud.** Aucune fonction de
 > messagerie, agenda, contacts, bureautique, lecture média, ou
@@ -47,7 +47,7 @@ Nextcloud et des autres services Miyukini, et les règles de sécurité.
 
 | Élément | Description |
 |---------|-------------|
-| **Documentation autorisée** | Glossaire Miyukini ; Document fondateur **MiyuCloud** (archivé) ; RFC 4918 (WebDAV) ; Politique de résidence des données sensibles. |
+| **Documentation autorisée** | Glossaire Miyukini ; Document fondateur **MiyuCloud** ; RFC 4918 (WebDAV) ; Politique de résidence des données sensibles. |
 | **Ce document ne fusionne pas** | Avec les Documents fondateurs des autres services Jay — JayCloud ne consomme pas leurs API. |
 | **Ce document n'anticipe pas** | Les spécifications techniques (renvoyées au document P1 *JayCloud - Spec MSCM MIP Conformite*). |
 
@@ -64,7 +64,7 @@ Nextcloud et des autres services Miyukini, et les règles de sécurité.
 
 | Id | Décision | Justification |
 |----|----------|---------------|
-| **DS-01** | JayCloud **remplace** MiyuCloud, en élargissant uniquement vers les fonctions de **backup structurées** (snapshots, restore, scheduling) que MiyuCloud n'avait pas. | MiyuCloud n'était qu'un dossier chiffré ; JayCloud apporte la logique de sauvegarde. Cohérent avec la marque Jay (services métiers). |
+| **DS-01** | *(révisée le 2026-10-24)* JayCloud **ne remplace pas** MiyuCloud : JayCloud = **sauvegarde** (snapshots, restore, scheduling) ; MiyuCloud = **cloud privé** (fichiers, CalDAV, CardDAV, WOPI). Les deux services sont conservés. | Sauvegarder ≠ travailler sur ses fichiers : deux besoins distincts. Cohérent avec la marque Jay (services métiers). |
 | **DS-02** | Scope = **backup files + snapshots + restore + partage + WebDAV + migration**. Rien d'autre. | Garantit que JayCloud reste un service **étroit et maîtrisé**, sans dérive vers le hub multi-fonction Nextcloud-like. |
 | **DS-03** | JayCloud ne **consomme** aucun autre service Jay. | Un service de sauvegarde n'a pas besoin de connaître les contenus métier ; il opère sur des fichiers / blobs. Élimine tout couplage et tout risque de doublon. |
 | **DS-04** | **Données souveraines au minimum niveau 2 (Sensitive)** ; niveau 3 pour les snapshots tagués `sensible`. | Cohérent avec MiyuCloud et la Politique de résidence Miyukini. |
@@ -270,6 +270,10 @@ JayCloud garantit :
 ---
 
 ## 6. Migration depuis MiyuCloud
+
+> **Révisé le 2026-10-24** : MiyuCloud est **conservé** (service distinct, voir DS-01).
+> Seuls M-0 et M-1 (import optionnel) restent valables ; M-2 à M-4 et le
+> retrait de MiyuCloud du catalogue (§6.2) sont **abandonnés**.
 
 ### 6.1 Stratégie
 

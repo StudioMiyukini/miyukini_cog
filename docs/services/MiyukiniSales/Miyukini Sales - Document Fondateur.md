@@ -19,7 +19,7 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'ê
 
 ### 1.1 Origine du Besoin
 
-La définition des services **Miyukini CRM** (conversion Opportunity → Quotation), **Miyukini Account** (facturation), **Miyukini Festival Service** (devis exposants), **JayRDV** (devis professionnels) et les besoins **B2B/B2C** ont fait émerger un **besoin transversal** :
+La définition des services **Miyukini CRM** (conversion Opportunity → Quotation), **Miyukini Account** (facturation), **JayRDV** (devis professionnels) et les besoins **B2B/B2C** ont fait émerger un **besoin transversal** :
 
 - **CRM** : Conversion des opportunities en devis/commandes
 - **Account** : Génération de factures depuis les commandes

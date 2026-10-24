@@ -83,11 +83,12 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 <!-- @role service-inventory -->
 <!-- @do place_services -->
 
-- **H0 · zone COG** : Central (cœur), Miou, JayKoa, JayKonta, MiyukiniWatch, MiyukiniAdmin, MAIA, Whisper, MIPOWER, JayEcole (projet)
+- **H0 · zone COG** : Central (cœur), Miou, JayKoa (calendrier universel, récepteur temporel), JayKonta, MiyukiniWatch, MiyukiniAdmin, MAIA, Whisper, MIPOWER, JayEcole (projet)
 - **H1 · publication** : site / page publique, partage cloud en lecture
-- **H2 · collaboratif** : Suite Jay Bureau (Docs, Sheets, Slides, Formulaire, Réunion, Club, Message), Jay1Tribu, JayManga, JayRDV, JayFaim, JayShop, MiyukiniBB, MiyuCloud / JayCloud, Web Portal, accès mobile, CentralRemote
+- **H2 · collaboratif** : Suite Jay Bureau (Docs, Sheets, Slides, Formulaire, Réunion, Club, Message), Jay1Tribu, JayManga, JayRDV (crate backend testée, sans binaire ni entrée au catalogue), JayFaim, JayShop (catalogue et stocks propres, pas encore de code), MiyukiniBB, MiyuCloud (cloud privé : fichiers, CalDAV, CardDAV, WOPI), JayCloud (sauvegarde : snapshots, restauration, WebDAV) — MiyuCloud ≠ JayCloud, Web Portal, accès mobile, CentralRemote
 - **H3 · actif** : Jay Mail (SMTP), MiyukiniSales (envoi de devis), Alicia (domotique, Franche locale), explorateur web, Origin
 - **Central** : lance chaque service en processus fils (`MIYUKINI_SERVICE_ID`, `KINDMOTHER_LISTEN_ADDR`), catalogue `OFFICIAL_CATALOG` + Market
+- **Décompte (code, 2026-10-24)** : **30 services** dans le workspace — 21 services (Central, MiyukiniAdmin, JayKoa, JayKonta, JayRDV, JayFaim, MiyukiniSales, Jay1Tribu, MiyukiniWatch, MiyukiniBB, JayManga, MiyuCloud, JayCloud, Alicia, MAIA, Whisper, TEAM, MIPOWER, Web Portal, Origin, CentralRemote) + 9 applications Jay Bureau (Hub, Docs, Sheets, Slides, Formulaire, Réunion, Club, Mail, Message) ; sans code : JayShop, JayEcole ; Miou est intégré à Central
 - **Retirés** : MGE, Allumina, Sodomight, MiyuClicker, Survivor (2026-10) · JayXpose, JayFestival (2026-04)
 
 ## 5. Fédération et Origin
@@ -160,11 +161,11 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 <!-- @do list_documentation_debt -->
 
 - **Encodage** : ✅ réparé le 2026-10-24 — 565 fichiers de `docs/` et 2 README (UTF-8 relu en cp1252) ; `.mip/` non touché (registres de certification générés)
-- **Retraits incomplets** : docs texte ✅ (README, `doc_for_website`, `DEPRECATED.md`, SKILL, présentation marquée historique) ; reste la suppression des dossiers et du code non compilé — liste dans `docs/services/DEPRECATED.md`
-- **Services retirés encore cités** : JayXpose, JayFestival ✅ retirés de 85 docs et du pont LLM ; restent des notions « vitrine / exposant » dans 4 docs Miou et le propriétaire du catalogue JayShop (à décider)
-- **Code mort** : modules non déclarés dans `apps/central/src/services/`, `apps/miyuclicker`
-- **Hors workspace** : `lifegame-*`, `crates/jayclub` (vide), `kindmother-db-adapter`, `apps/ui-builder`
-- **Sans doc** : Suite Jay Bureau, Whisper, maia-llm, TEAM, MIPOWER, design system UI (`miyusceau` ✅ [fiche](../tools/MiyuSceau/_index.md))
-- **Contradictions** : rôle de JayKoa (site web), statut JayRDV, MiyuCloud vs JayCloud, nombre de services et de Cores annoncés
-- **Stubs de sécurité** : `miyuantispam` (limitation toujours « autorisée »), `miyuwebway_tracker`, `miyuvalidate`
+- **Retraits incomplets** : ✅ docs et code supprimés (Clicker, Survivor, thème Sodomight, `miyuki-ui-egui`)
+- **Services retirés encore cités** : ✅ JayXpose, JayFestival retirés (docs, pont LLM, notions « vitrine / exposant ») ; JayShop propriétaire de son catalogue et de ses stocks
+- **Code mort** : ✅ 10 modules non déclarés de `apps/central/src/services/` supprimés (≈ 15 000 lignes)
+- **Hors workspace** : `crates/jayclub` vide supprimé ; **décision ouverte** : `lifegame-*` (4 crates), `apps/ui-builder`, `kindmother-db-adapter` (10 lignes)
+- **Sans doc** : ✅ fiches créées — [Jay Bureau](../services/JayBureau/_index.md), [Whisper](../services/MiyukiniWhisper/_index.md), [maia-llm](../tools/MaiaLLM/_index.md), [TEAM](../tools/TEAM/_index.md), [MIPOWER](../tools/MIPOWER/_index.md), [design system](../ux_ui/DesignSystem/_index.md), [MiyuSceau](../tools/MiyuSceau/_index.md), [MiyuCloud](../services/MiyuCloud/_index.md), [JayCloud](../services/JayCloud/_index.md)
+- **Contradictions** : ✅ résolues le 2026-10-24 — rôle de JayKoa (calendrier universel, fiche site corrigée) ; statut JayRDV (en préparation : crate backend testée, sans binaire) ; MiyuCloud ≠ JayCloud (deux services conservés, docs JayCloud révisées) ; décompte 10 Cores / 30 services (§4, README, `doc_for_website`)
+- **Stubs de sécurité** : → code, lot 0 du [plan](../implementation/PLAN-IMPLEMENTATION.md) (`miyuantispam`, `miyuwebway_tracker`, `miyuvalidate`)
 - **Index** : ✅ `_index.md` racine aligné sur D6 ; [index des Cores](../cores/_index.md) créé

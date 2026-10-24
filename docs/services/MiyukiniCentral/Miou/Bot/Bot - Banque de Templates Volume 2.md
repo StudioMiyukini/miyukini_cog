@@ -117,7 +117,7 @@ Ce document **complète** la [Banque de Templates](./Bot%20-%20Banque%20de%20Tem
 | fm7 | {milestone}. C'est parti. |
 | fm8 | {milestone} — j'aime voir ton COG prendre vie. |
 
-**Valeurs de {milestone} :** « service installé », « ami contacté », « événement créé », « profil exposant », « vitrine publiée ».
+**Valeurs de {milestone} :** « service installé », « ami contacté », « événement créé ».
 
 ---
 
@@ -129,7 +129,7 @@ Ce document **complète** la [Banque de Templates](./Bot%20-%20Banque%20de%20Tem
 
 | ID | Template |
 |----|----------|
-| of1 | Tu reviens souvent sur {service}, {pseudo}. Ta vitrine est à jour ? |
+| of1 | Tu reviens souvent sur {service}, {pseudo}. |
 | of2 | {service} — ton coin préféré, on dirait. |
 | of3 | Tu passes beaucoup de temps sur {service}. Un événement à rappeler ? |
 | of4 | {service} a ta faveur. Tant mieux. |

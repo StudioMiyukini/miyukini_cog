@@ -38,8 +38,8 @@ Document de propositions pour faire du **Salon** (anciennement Magasin) la page 
 | Proposition | Description |
 |-------------|-------------|
 | **Titre personnalisé** | « Bienvenue, [pseudo] » ou « Bonsoir, [pseudo] » selon l’heure, au lieu d’un générique « Bienvenue dans Miyukini Central ». |
-| **Bloc « À faire / suggéré »** | Liste courte (3–5 items) : tâches ou suggestions dérivées des métriques (ex. « Mettre à jour ta vitrine », « Événement demain 9h »). |
-| **Services en « lieu de vie »** | Présenter les services comme des « pièces » ou « coins » (Coin Exposant, Coin Calendrier, Coin Réseau) avec libellés chaleureux et icônes cohérentes. |
+| **Bloc « À faire / suggéré »** | Liste courte (3–5 items) : tâches ou suggestions dérivées des métriques (ex. « Événement demain 9h »). |
+| **Services en « lieu de vie »** | Présenter les services comme des « pièces » ou « coins » (Coin Calendrier, Coin Réseau) avec libellés chaleureux et icônes cohérentes. |
 | **Nouvelles / annonces COG** | Petit bandeau ou ligne « Dernière nouvelle Miyukini » (optionnel, si contenu disponible). |
 
 ---
@@ -48,10 +48,10 @@ Document de propositions pour faire du **Salon** (anciennement Magasin) la page 
 
 | Proposition | Description |
 |-------------|-------------|
-| **Miou comme guide** | Miou n’est pas un simple avatar : elle commente les petites victoires (« Ta vitrine est à jour »), encourage (« Plus qu’un pas pour finir ta config Webway »), félicite (« Premier événement créé dans JayKoa ! »). |
+| **Miou comme guide** | Miou n’est pas un simple avatar : elle commente les petites victoires (« Premier service installé »), encourage (« Plus qu’un pas pour finir ta config Webway »), félicite (« Premier événement créé dans JayKoa ! »). |
 | **Phrases courtes et voix** | Réutiliser le système audio existant (voix Miou) pour des répliques ponctuelles sur le Salon (optionnel, désactivable) : connexion, première visite du jour, objectif atteint. |
 | **Progression visible** | Indicateurs simples que Miou peut commenter : « Premier lancement », « 7 jours d’utilisation », « Tous les Cores verts », « Premier service installé », « Webway connecté ». |
-| **Badges / étapes** | Badges discrets (icône + tooltip) : « Habitant installé », « Exposant actif », « Calendrier en usage », « Réseau connecté ». Miou peut les mentionner dans la bulle (« Tu as débloqué le badge Réseau connecté »). |
+| **Badges / étapes** | Badges discrets (icône + tooltip) : « Habitant installé », « Calendrier en usage », « Réseau connecté ». Miou peut les mentionner dans la bulle (« Tu as débloqué le badge Réseau connecté »). |
 | **Pas de punition** | Gamification positive uniquement : pas de « niveau qui baisse » ni de pression ; Miou encourage sans culpabiliser. |
 | **Cohérence narrative** | Ton de Miou identique à Connexion / Rite d’Entrée : bienveillant, invitant, léger (« Entre donc », « Rejoins moi à l’intérieur »). |
 
@@ -69,7 +69,7 @@ Les métriques servent à **alimenter la bulle Miou** et les suggestions du Salo
 | **Heure de connexion** | Adapter le message (bonjour / bonsoir) et les suggestions (matin : calendrier, soir : détente). |
 | **Services les plus ouverts** | Suggérer le service favori ou « Tu n’as pas ouvert JayKoa depuis un moment ». |
 | **Onglet principal** | Salon vs Bibliothèque vs Webway : adapter le message (ex. « Tu passes souvent par la Bibliothèque — un service à découvrir ? »). |
-| **État des services** | Vitrine à jour ou pas, événements à venir (JayKoa), connexion MWS. |
+| **État des services** | Événements à venir (JayKoa), connexion MWS. |
 | **Nombre de lancements / jours actifs** | Déblocage de badges ou messages du type « 7 jours avec ton COG ». |
 | **Rite d’entrée vs Connexion** | Premier passage après Rite : message « Bienvenue dans ton nouveau chez-toi » ; après Connexion : « Content de te revoir ». |
 | **Amis contactés / temps depuis dernière discussion** | Rappels bienveillants : « Pense à reprendre contact avec [pseudo] ». Voir MiyukiniWatch. |

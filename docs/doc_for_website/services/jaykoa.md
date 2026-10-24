@@ -1,24 +1,24 @@
 # JayKoa
 
-## Design System et Composants UI
+## Calendrier universel du COG
 
-**JayKoa** est le système de design et la bibliothèque de composants UI partagés par les services Miyukini.
+**JayKoa** est le calendrier universel du COG : un récepteur temporel transversal qui reflète, agrège et orchestre le temps issu des autres services (JayRDV, futurs services).
 
 ## Rôle
 
-> JayKoa **unifie** l’apparence et l’accessibilité des interfaces.
+> JayKoa **reflète** le temps des autres services ; il ne crée jamais d’événement externe, ne modifie jamais un rendez-vous et ne calcule aucune disponibilité.
 
 ## Fonctionnalités Principales
 
 | Fonction | Description |
 |----------|-------------|
-| **Design system** | Design atomique, tokens, thèmes |
-| **Composants** | Boutons, formulaires, cartes, listes |
-| **Accessibilité** | ARIA, contraste, navigation clavier |
-| **Responsive** | Adaptation mobile / desktop |
+| **Agrégation** | Entrées agenda issues de plusieurs services, vue unifiée |
+| **Conflits** | Détection des chevauchements (visualisation uniquement) |
+| **Vues** | Jour, semaine, mois, planning, filtres par source et type |
+| **Export** | iCal (PDF prévu) |
 
 ## Intégration
 
-- Utilisé par Central, JayKonta, JayRDV, JayShop, etc.
-- Référence pour MiyuWidgets et les écrans des services
+- Lecture réfléchie des rendez-vous JayRDV
+- Intégré à Central (écran agenda) et lançable en application autonome
 - Niveaux de sécurité et protection des données documentés
