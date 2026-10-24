@@ -77,8 +77,10 @@ impl DatabaseKeyStore {
 
     /// Valeur `PRAGMA key` (format `x'…'`) pour `database`.
     ///
-    /// `existing_file` : la base existe déjà sur disque. Une base existante sans
-    /// secret `v2` est ouverte en `v1` ; une base nouvelle reçoit un secret `v2`.
+    /// `existing_file` : la base existe déjà sur disque **et n'est pas vide**
+    /// (base antérieure à la v2). Une telle base sans secret `v2` est ouverte en
+    /// `v1` ; toute autre base reçoit un secret `v2`. L'appelant ne doit jamais
+    /// passer `true` pour un fichier vide ou créé par l'ouverture en cours.
     pub fn pragma_key(
         &self,
         database: &str,
@@ -87,14 +89,15 @@ impl DatabaseKeyStore {
         if !is_valid_name(database) {
             return Err(DbKeyError(format!("Invalid database name: {database}")));
         }
-        {
-            let cache = self
-                .cache
-                .lock()
-                .map_err(|_| DbKeyError("key cache poisoned".to_string()))?;
-            if let Some((key, scheme)) = cache.get(database) {
-                return Ok((key.clone(), *scheme));
-            }
+        // Décision atomique (lecture du cache, existence du secret, création,
+        // insertion) sous un seul verrou : deux ouvertures concurrentes d'une
+        // base neuve ne peuvent pas aboutir l'une en v2, l'autre en v1.
+        let mut cache = self
+            .cache
+            .lock()
+            .map_err(|_| DbKeyError("key cache poisoned".to_string()))?;
+        if let Some((key, scheme)) = cache.get(database) {
+            return Ok((key.clone(), *scheme));
         }
 
         let secret_path = self.secret_path(database);
@@ -111,10 +114,6 @@ impl DatabaseKeyStore {
             (self.derive_v2(database, &secret)?, KeyScheme::V2PerDatabase)
         };
 
-        let mut cache = self
-            .cache
-            .lock()
-            .map_err(|_| DbKeyError("key cache poisoned".to_string()))?;
         cache.insert(database.to_string(), (key.clone(), scheme));
         Ok((key, scheme))
     }

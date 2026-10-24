@@ -331,7 +331,10 @@ impl EncryptedDatabase {
         }
 
         let db_path = self.database_path(database);
-        let existed = db_path.exists();
+        // Base antérieure seulement si non vide : un fichier vide vient d'être
+        // créé (par cette ouverture ou une autre concurrente) et ne doit jamais
+        // déclencher le repli sur la clé v1.
+        let existed = std::fs::metadata(&db_path).is_ok_and(|m| m.len() > 0);
 
         let conn = Connection::open_with_flags(
             &db_path,
