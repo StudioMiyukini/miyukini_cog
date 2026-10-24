@@ -408,7 +408,7 @@ impl ContentManager {
         downloads.push(Download {
             id: "miyukini-cog-windows".to_string(),
             name: "Miyukini Central — Installateur Windows".to_string(),
-            description: "Installateur Miyukini Central v0.2.0 pour Windows — Inclut Central, KindMother, voix Miou et tous les Services (JayKonta, JayKoa, Jay1Tribu, JayManga, MiyukiniWatch, MiyuClicker, Lord of the Castle). Installation sans droits admin dans AppData.".to_string(),
+            description: "Installateur Miyukini Central v0.2.0 pour Windows — Inclut Central, KindMother, voix Miou et tous les Services (JayKonta, JayKoa, Jay1Tribu, JayManga, MiyukiniWatch). Installation sans droits admin dans AppData.".to_string(),
             version: "0.2.0".to_string(),
             category: DownloadCategory::Cog,
             platforms: vec![Platform::Windows],
@@ -1384,15 +1384,6 @@ Les Opérateurs sont les **exécutants** de la strate 3. Ils traduisent les déc
 
 Les Services sont les **applications utilisateur** de la strate 4. C'est ce que vous utilisez au quotidien.
 
-## Services Miyukini
-
-Services officiels développés par l'équipe Miyukini :
-
-| Service | Description |
-|---------|-------------|
-| MiyuClicker | Jeu idle/clicker |
-| Lord of the Castle | Jeu de stratégie coopératif |
-
 ## Services Jay
 
 Services de productivité de la gamme Jay :
@@ -1402,14 +1393,6 @@ Services de productivité de la gamme Jay :
 | JayKonta | Comptabilité et finances |
 | JayKoa | Calendrier universel |
 | JayShop | Boutique en ligne |
-
-## Jeux
-
-Jeux disponibles dans le COG :
-
-- **MiyuClicker** — Clicker avec progression infinie
-- **Lord of the Castle** — Tower defense coopératif
-- **Survivor** — Jeu de survie multijoueur
 
 ## Installation d'un Service
 

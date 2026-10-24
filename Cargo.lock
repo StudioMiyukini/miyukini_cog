@@ -5263,7 +5263,6 @@ dependencies = [
  "image",
  "kindmother",
  "kindmother-client",
- "kindmother-db-adapter",
  "kindmother-db-key",
  "miyukini-kernel",
  "rusqlite",
@@ -5535,10 +5534,6 @@ dependencies = [
  "tracing",
  "uuid",
 ]
-
-[[package]]
-name = "kindmother-db-adapter"
-version = "0.1.0"
 
 [[package]]
 name = "kindmother-db-key"

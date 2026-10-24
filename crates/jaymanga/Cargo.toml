@@ -32,7 +32,6 @@ thiserror = "2"
 rusqlite = { version = "0.32", features = ["bundled"], optional = true }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 kindmother-client = { path = "../kindmother-client", optional = true }
-kindmother-db-adapter = { path = "../kindmother-db-adapter" }
 
 # Image processing
 image = "0.25"

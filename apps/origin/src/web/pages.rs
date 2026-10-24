@@ -1917,8 +1917,6 @@ pub async fn downloads_page(content_mgr: &ContentManager) -> String {
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F4AC;</span> Jay1Tribu</span>
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F4DA;</span> JayManga</span>
             <span class="gi-svc"><span class="gi-svc-icon">&#x1F441;</span> MiyukiniWatch</span>
-            <span class="gi-svc"><span class="gi-svc-icon">&#x1F3AE;</span> Lord of the Click</span>
-            <span class="gi-svc"><span class="gi-svc-icon">&#x1F3F0;</span> Miyukini Survivor</span>
         </div>
     </div>
 </div>
@@ -3252,12 +3250,12 @@ pub fn mip_page() -> String {
         </div>
         <div class="card" style="margin-top:1rem; padding:1.5rem;">
           <h3>Exemple d'annotation</h3>
-          <pre><code>// @id MGE-RENDER-001
-// @do Rend le monde de jeu a l'ecran via le pipeline de rendu
-// @role renderer
-// @layer presentation
-// @human Fonction principale de rendu du moteur de jeu
-pub fn render_world(state: &amp;GameState) -&gt; Result&lt;()&gt; { ... }</code></pre>
+          <pre><code>// @id miyusceau.format.verifier
+// @do verifier_sceau
+// @role securite
+// @layer toolkit
+// @human Verifie un titre signe (fail-closed)
+pub fn verifier&lt;T: Titre&gt;(octets: &amp;[u8], ancres: &amp;AncresDeConfiance, maintenant: u64) -&gt; Result&lt;Verifie&lt;T&gt;, ErreurSceau&gt; { ... }</code></pre>
         </div>
       </section>
 

@@ -1,49 +1,7 @@
 // Registre d'espaces de noms MSCM — déclare les nœuds de namespace parents
-// des ids logiques (service.*, lifegame.*, toolkit.*, cog) qui s'étalent sur
+// des ids logiques (service.*, toolkit.*, cog) qui s'étalent sur
 // plusieurs crates. Fichier de documentation uniquement : hors mod tree,
 // non compilé par cargo, lu seulement par la CLI MSCM pour l'intégrité.
-
-/// @id lifegame
-/// @do regrouper_lifegame
-//@human / @role orchestration
-/// @layer domain
-/// @human Moteur de simulation de vie (jeu) : entités, monde, opérateurs et pouvoirs.
-
-/// @id lifegame.ai
-/// @do regrouper_lifegame_ai
-//@human / @role orchestration
-/// @layer domain
-/// @human Lifegame — intelligence des entités.
-
-/// @id lifegame.entities
-/// @do regrouper_lifegame_entities
-//@human / @role orchestration
-/// @layer domain
-/// @human Lifegame — entités du monde simulé.
-
-/// @id lifegame.operator
-/// @do regrouper_lifegame_operator
-//@human / @role orchestration
-/// @layer domain
-/// @human Lifegame — opérateurs pilotant la simulation.
-
-/// @id lifegame.powers
-/// @do regrouper_lifegame_powers
-//@human / @role rule
-/// @layer domain
-/// @human Lifegame — pouvoirs et capacités.
-
-/// @id lifegame.simulation
-/// @do regrouper_lifegame_simulation
-//@human / @role orchestration
-/// @layer domain
-/// @human Lifegame — boucle de simulation.
-
-/// @id lifegame.world
-/// @do regrouper_lifegame_world
-//@human / @role donnee
-/// @layer domain
-/// @human Lifegame — monde, carte et environnement.
 
 /// @id service
 /// @do regrouper_service

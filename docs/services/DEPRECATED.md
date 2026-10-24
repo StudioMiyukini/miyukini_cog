@@ -6,6 +6,14 @@ restants.
 
 ---
 
+## MiyukiniLifeGame, UI Builder, kindmother-db-adapter — retirés le 2026-10-24
+
+- **Raison** : hors workspace ou vides, recentrage système
+- **Périmètre** : `crates/lifegame-{entities,powers,simulation,world}`, `apps/ui-builder`, `crates/kindmother-db-adapter` (stub de 10 lignes ; dépendance inutilisée retirée de `jaymanga`), `docs/services/MiyukiniLifeGame/`, fiches du site
+- **Reste** : régénérer les index MSCM (`mscm_index/`, `apps/central/src/mscm_index/`) avec la CLI MSCM
+
+---
+
 ## MGE, Sodomight, Allumina, MiyuClicker, Miyukini Survivor — retirés le 2026-10-23
 
 ### Raison
@@ -20,13 +28,11 @@ Aucune crate système ne dépendait de ces projets.
 - Références Clicker / Survivor dans Central (onglets, manifestes)
 - Archive complète : branche `archive/mge-allumina` (`12019a6e`)
 
-### Reste à supprimer (non compilé, hors workspace)
+### Suppressions effectuées le 2026-10-24
 
-- `apps/miyuclicker/`
-- `apps/central/src/services/game_view.rs`, `crates/miyukini-central/src/services/miyuclicker.rs`
-- `docs/services/MiyukiniClicker/`, `docs/services/MiyukiniSurvivor/`, `docs/doc_for_website/services/miyukini-clicker.md`
-- Thème UI « Sodomight Medieval (D2) » dans `crates/miyuki-ui-tokens` et `crates/miyuki-ui-egui` (à renommer ou retirer)
-- Fiches du site officiel (`site_officiel_miyukini_cog/src/data/`) et pages Origin (`apps/origin/src/web/`)
+- `apps/miyuclicker/`, vues Central `game_view.rs` et `miyuclicker.rs`, docs Clicker / Survivor
+- Thème « Sodomight Medieval (D2) » et `crates/miyuki-ui-egui` (interface du jeu)
+- Fiches du site officiel et pages Origin, mention dans le prompt de Miou
 
 ### Commits de référence
 

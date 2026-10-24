@@ -132,36 +132,6 @@ export const SERVICES: ServiceMeta[] = [
     type: 1,
     status: 'production',
   },
-  {
-    id: 'miyuclicker',
-    name: 'Lord of the Click',
-    shortDesc: 'Idle / Clicker + carte stratégique.',
-    category: 'game',
-    icon: '👑',
-    color: '#fbbf24',
-    type: 1,
-    status: 'development',
-  },
-  {
-    id: 'lord-of-the-castle',
-    name: 'Lord of the Castle',
-    shortDesc: 'Survivor + Tower Defense.',
-    category: 'game',
-    icon: '🏰',
-    color: '#7c3aed',
-    type: 1,
-    status: 'development',
-  },
-  {
-    id: 'miyulifegame',
-    name: 'LifeGame',
-    shortDesc: 'Simulation de vie — style WorldBox.',
-    category: 'game',
-    icon: '🌎',
-    color: '#22c55e',
-    type: 1,
-    status: 'development',
-  },
 ];
 
 export const CATEGORY_LABELS: Record<ServiceMeta['category'], string> = {
@@ -216,9 +186,6 @@ export const MIOU_QUOTES: Record<string, string> = {
   'calculator': 'Un outil simple mais tellement pratique !',
   'notes': 'Note tes idées avant qu\'elles s\'envolent~ 💭',
   'text-editor': 'Pour écrire de beaux textes, c\'est par ici !',
-  'miyuclicker': 'Click click click ! C\'est addictif, attention~ 👆',
-  'lord-of-the-castle': 'Défends ton château ! Les ennemis approchent... ⚔️',
-  'miyulifegame': 'Crée un monde et regarde-le vivre ! C\'est fascinant~ 🌍',
 };
 
 /** Phrase par défaut de Miou */

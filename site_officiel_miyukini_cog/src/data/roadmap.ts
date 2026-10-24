@@ -156,32 +156,6 @@ export const ROADMAP_PHASES: RoadmapPhase[] = [
     ],
   },
   {
-    id: 'phase-5',
-    name: 'Phase 5 — Jeux',
-    description: 'Services de divertissement intégrés',
-    status: 'in-progress',
-    milestones: [
-      {
-        id: 'm5-1',
-        title: 'Lord of the Click',
-        description: 'Idle / Clicker avec carte stratégique',
-        status: 'in-progress',
-      },
-      {
-        id: 'm5-2',
-        title: 'Lord of the Castle',
-        description: 'Survivor + Tower Defense',
-        status: 'in-progress',
-      },
-      {
-        id: 'm5-3',
-        title: 'MiyukiniLifeGame',
-        description: 'Simulateur de monde vivant style WorldBox',
-        status: 'in-progress',
-      },
-    ],
-  },
-  {
     id: 'phase-6',
     name: 'Phase 6 — Fédération',
     description: 'Interactions Inter-COG et fédération',
