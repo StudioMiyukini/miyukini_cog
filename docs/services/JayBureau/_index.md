@@ -131,3 +131,17 @@
 - Pas d'intégration KindMother / StrongFather ; persistance fichiers directe côté Origin
 - Binaires et manifestes ciblés Windows (`.exe`, `windows_x64`)
 - Pas de doc fonctionnelle par app (à créer si la suite sort du stade démo)
+
+## Mise à jour lot 0 (2026-10-24)
+
+<!-- @id services.jaybureau.lot0 -->
+<!-- @role security-update -->
+<!-- @do record_jaybureau_lot0 -->
+
+- **Prime sur les sections « sécurité » et « manques » précédentes** (R-008, R-009, R-011, commit `e92afebc`)
+- Collaboration : jeton de jonction signé ed25519, anti-rejeu, ACL vérifiée à chaque édition
+- jaymessage **protocole v2** : handshake signé, HKDF, XChaCha20-Poly1305 à nonce interne ; clés de groupe à redistribuer
+- jaymail : TLS obligatoire hors loopback explicite, mot de passe masqué ; `bcc` retiré du manifeste
+- Notifications limitées au propriétaire ; hub sans repli `PATH`
+- Tests : 88 sur les 5 crates
+- Reste : annuaire de clés (`KeyDirectory`) à alimenter depuis une source de confiance ; routes Origin à brancher avec jonction obligatoire

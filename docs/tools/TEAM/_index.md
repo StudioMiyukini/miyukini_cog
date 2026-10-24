@@ -80,3 +80,17 @@
 - Format de séquence attendu (`index.json` = liste d'étapes, `brief.md` par dossier) absent des dossiers réels de `.mip/sequences/` → 0 séquence chargée en pratique (à vérifier à l'exécution)
 - Doc de module : `GET /api/agents` annoncée (`mws/routes.rs`) mais non routée ; usage `team serve --port` non implémenté
 - `/api/nodes` : `match: true` codé en dur (« Simplification S3-E02 »)
+
+## Mise à jour lot 0 (2026-10-24)
+
+<!-- @id tools.team.lot0 -->
+<!-- @role security-update -->
+<!-- @do record_team_lot0 -->
+
+- **Prime sur les sections précédentes** pour la sécurité (R-001, commits `f225741d`, `d14a04a0`)
+- Écoute `127.0.0.1:7800` par défaut ; hors loopback, secret obligatoire (≥ 16 caractères, `TEAM_HMAC_SECRET`)
+- Bearer exigé sur toutes les routes sauf `GET /team/health` ; sans secret : requêtes locales uniquement (Host / Origin), anti DNS rebinding
+- CORS : liste explicite, vide par défaut
+- Nœuds : URL validée (http/https, loopback ou `node_allowed_hosts`), revérifiée avant chaque sonde ; pas de redirection
+- Corps bornés (413), registre plafonné à 256 nœuds (503) ; 49 tests
+- Reste : file de tâches non consommée (R-007), écrasement d'un nœud par tout client authentifié

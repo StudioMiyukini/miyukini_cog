@@ -99,24 +99,25 @@
 
 | Id | Gravité | Constat | Réf. |
 |---|---|---|---|
-| R-001 | critique | TEAM : API sans authentification sur `0.0.0.0`, CORS `*`, SSRF via URL de nœud | C-21, C-22 |
-| R-002 | haute | Alicia API : persona issue du corps de requête | C-20 |
-| R-003 | haute | `miyuantispam` autorise toujours | C-12, C-14 |
+| R-001 | critique | ✅ lot 0 (f225741d, d14a04a0) — TEAM : API sans authentification sur `0.0.0.0`, CORS `*`, SSRF via URL de nœud | C-21, C-22 |
+| R-002 | haute | ✅ lot 0 (ae59e034, a71adb22) — Alicia API : persona issue du corps de requête | C-20 |
+| R-003 | haute | ✅ lot 0 (cee31a09) — `miyuantispam` autorise toujours | C-12, C-14 |
 | R-004 | moyenne | ✅ 2026-10-24 — mesure corrigée : 106 paquets ont leurs propres lints ; 6 sans interdiction de `unsafe` (miyucloud-server, mipower, 4 outils) → `unsafe_code = "forbid"` ajouté ; 148 / 148 couverts | C-01, C-02 |
 | R-005 | moyenne | ✅ 2026-10-24 — CI `cog-ci.yml` (build, tests, clippy sécurité, `cargo deny`, `cargo audit`) + `deny.toml` ; à valider au premier push | C-04, EX-15 |
 | R-006 | moyenne | Douane, Vigies, Portail, canal officiel : absents du code | EX-12, EX-19, EX-20, EX-44 |
 | R-007 | basse | TEAM : file de tâches jamais consommée, état non persistant | — |
-| R-008 | haute | Jay Bureau : WebSocket collaboratif sans jeton, `CollabRoom` sans contrôle d'ACL | C-22 |
-| R-009 | haute | Jay Bureau : échange X25519 non signé par l'identité (MITM) ; nonce de groupe fourni par l'appelant | C-24 |
-| R-010 | haute | Whisper : jeton optionnel, comparaison non constante, origine validée par préfixe (`localhost.evil.com`) ; `alicia-mvp` sans auth | C-21, C-22 |
-| R-011 | moyenne | Jay Bureau : SMTP sans TLS possible, mot de passe dans `Debug`, `mark_notification_read` sans propriétaire, repli `PATH` au lancement | C-25 |
+| R-008 | haute | ✅ lot 0 (e92afebc) — Jay Bureau : WebSocket collaboratif sans jeton, `CollabRoom` sans contrôle d'ACL | C-22 |
+| R-009 | haute | ✅ lot 0 (e92afebc) — Jay Bureau : échange X25519 non signé par l'identité (MITM) ; nonce de groupe fourni par l'appelant | C-24 |
+| R-010 | haute | ✅ lot 0 (4d0a6bf1) — Whisper : jeton optionnel, comparaison non constante, origine validée par préfixe (`localhost.evil.com`) ; `alicia-mvp` sans auth | C-21, C-22 |
+| R-011 | moyenne | ✅ lot 0 (e92afebc) — Jay Bureau : SMTP sans TLS possible, mot de passe dans `Debug`, `mark_notification_read` sans propriétaire, repli `PATH` au lancement | C-25 |
 | R-012 | moyenne | maia-llm : prompt assemblé par concaténation (faux tour système), `max_tokens` non borné, verrou global, clé visible en argument | C-13, C-50 |
 | R-013 | basse | Conflit de port 11435 entre maia-llm et `miou-llm-bridge` | — |
 | R-014 | basse | Incohérences code : manifeste JayRDV vers un binaire inexistant ; restes du remplacement de MiyuCloud dans JayCloud (`miyucloud_transition_days`) | — |
-| R-015 | moyenne | `miyuwebway_tracker` et `miyuvalidate` : stubs sans test | C-14, C-60 |
-| R-016 | haute | Alicia API : `/dispatch/confirm` sans état exécute directement une capacité soumise à confirmation (contournement du garde-fou) — n'exécuter que l'enregistrement en attente | C-12 |
-| R-017 | moyenne | Alicia : confirmation en attente non réclamée atomiquement → double exécution possible (`capabilities_runtime.rs`) | C-12 |
-| R-018 | moyenne | `jaymail-client` : `send_mail` piloté par l'IA accepte `bcc` → exfiltration par injection ; afficher tous les destinataires à la confirmation, refuser `bcc` depuis l'IA, signaler les destinataires hors contacts | C-50, C-51 |
+| R-015 | moyenne | ✅ lot 0 (cee31a09) — `miyuwebway_tracker` et `miyuvalidate` : stubs sans test | C-14, C-60 |
+| R-016 | haute | ✅ lot 0 (ae59e034) — Alicia API : `/dispatch/confirm` sans état exécute directement une capacité soumise à confirmation (contournement du garde-fou) — n'exécuter que l'enregistrement en attente | C-12 |
+| R-017 | moyenne | ✅ lot 0 (ae59e034) — Alicia : confirmation en attente non réclamée atomiquement → double exécution possible (`capabilities_runtime.rs`) | C-12 |
+| R-018 | moyenne | ✅ lot 0 (cee31a09, a71adb22) — `jaymail-client` : `send_mail` piloté par l'IA accepte `bcc` → exfiltration par injection ; afficher tous les destinataires à la confirmation, refuser `bcc` depuis l'IA, signaler les destinataires hors contacts | C-50, C-51 |
+| R-019 | haute | `miyukini-cog-bridge/src/e2e.rs` (pont Android) : `sha256()` n'est pas SHA-256 (XOR + DefaultHasher), handshake non signé, compteurs de nonce partagés entre les deux sens → réutilisation de nonce | C-24 |
 
 ## 7. Livrables
 
