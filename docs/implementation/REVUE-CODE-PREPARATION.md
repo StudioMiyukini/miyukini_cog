@@ -88,7 +88,7 @@
 <!-- @do record_findings -->
 
 - Un constat = `R-NNN` · gravité (**critique / haute / moyenne / basse**) · `fichier:ligne` · scénario d'exploitation · exigence (EX / C) · correctif proposé
-- Registre unique : `docs/implementation/REVUE-CONSTATS.md` (créé au lancement)
+- Registre : [REVUE-CONSTATS](REVUE-CONSTATS.md) (lot R, 2026-10-24) ; matrice : [MATRICE-EXIGENCES](MATRICE-EXIGENCES.md)
 - Critique ou haute sur P0 → correctif avant toute nouvelle fonctionnalité
 
 ## 6. Constats d'entrée (déjà connus)

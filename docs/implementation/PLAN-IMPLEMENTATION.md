@@ -21,8 +21,10 @@
 |---|---|---|---|
 | 0 | Sécurisation immédiate (constats P0) | S | — |
 | R | Revue de code et matrice EX | M | 0 (en parallèle) |
+| 0 bis | Constats critiques et hauts de la revue (21) | M | R |
+| C | Cores réels : StrongFather appelé, KindMother authentifié et seul écrivain | L | 0 bis |
 | 2 | Identité signée : suite | M | 0 |
-| 3 | Frontières : Portail, Douane, Vigies | L | 2 |
+| 3 | Frontières : Portail, Douane, Vigies | L | 2, C |
 | 4 | Canal officiel et registre Merkle | M | 2, 3 |
 | 5 | Services hybrides (contrat, moteur, façade) | L | 3, 4 |
 | 6 | Fédération | L | 2, 4 |
@@ -60,6 +62,38 @@
 - **Objectif** : registre `R-NNN` complet sur P0 et P1, matrice EX-01..63
 - **Méthode** : [préparation de la revue](REVUE-CODE-PREPARATION.md)
 - **Sortie** : chaque exigence a un statut prouvé ; corrections P0 planifiées dans les lots suivants
+
+## 3 bis. Résultat du lot R (2026-10-24)
+
+<!-- @id impl.plan.lotr.resultat -->
+<!-- @role review-outcome -->
+<!-- @do record_lot_r_outcome -->
+
+- **Matrice** : 1 fait · 14 partiel · 42 absent · 6 contredit — [MATRICE-EXIGENCES](MATRICE-EXIGENCES.md)
+- **Constats** : 71 (5 critiques, 16 hauts) — [REVUE-CONSTATS](REVUE-CONSTATS.md)
+- **Verdict** : les Cores ne décident de rien dans le code (StrongFather jamais appelé) → nouveau lot C avant les frontières
+
+## 3 ter. Lot 0 bis — Constats critiques et hauts
+
+<!-- @id impl.plan.lot0bis -->
+<!-- @role plan-lot -->
+<!-- @do plan_lot0bis -->
+
+- **Critiques** : identité de COG usurpable sur Origin (O-01) ; SSRF de l'outil `cog_services` de MAIA (K-01) ; injection de prompt pilotant des actions (K-02) ; KindMother sans authentification de l'appelant (K-04) ; StrongFather jamais appelé (K-11, traité au lot C)
+- **Hauts** : Tracker non authentifié (O-02), SSRF du proxy Origin (O-03), XSS `/visit` et `/mws` (O-04, O-05), mélange de réponses entre visiteurs (O-06), Market sans signature (CA-01), serveur Home sur `0.0.0.0` (CA-02), anti-SSRF par sous-chaîne (K-03), SQL KindMother contournable (K-05), bases non chiffrées (K-06), MiyuCloud : calendriers (M-01), Nextcloud sans propriétaire (M-02, M-03), envois sans quota (M-04)
+- **Contradictions de la matrice** : EX-08 (JayKonta efface ses tables), EX-26 (modèles IA non signés), EX-30, EX-41, EX-48 (exposition par défaut), EX-52 (mémoire écrasée)
+- **Sortie** : 0 critique ou haut ouvert ; contradictions EX-08, EX-26 et EX-48 corrigées
+
+## 3 quater. Lot C — Cores réels
+
+<!-- @id impl.plan.lotc -->
+<!-- @role plan-lot -->
+<!-- @do plan_lot_c -->
+
+- StrongFather appelé sur les vrais chemins (MAIA, Alicia, Market, Admin), moteur de règles réellement évalué, refus par défaut (K-11, K-12, C-12)
+- KindMother : authentification des opérateurs (clé par service), requêtes typées à la place du SQL brut, seul écrivain des données (K-04, K-05, K-13, EX-07, EX-21)
+- Stubs des Cores qui renvoient un faux succès → refus explicite (C-14)
+- **Sortie** : un test de bout en bout montre qu'une action refusée par StrongFather n'est pas exécutée
 
 ## 4. Lot 2 — Identité signée (suite)
 
