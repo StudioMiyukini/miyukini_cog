@@ -788,3 +788,104 @@ fn pending_round_trip_preserves_params() {
     assert_eq!(got.user_phrase, "12 € café");
     assert_eq!(got.prompt, "Confirmer la dépense ?");
 }
+
+// ----------------------------------------------------------------------
+// R-017 : réclamation atomique avant exécution
+// ----------------------------------------------------------------------
+
+#[test]
+fn claim_pending_moves_to_executing_and_returns_stored_record() {
+    let s = store();
+    let pc = s
+        .enqueue_pending_confirmation("a.b", json!({"k": 1}), "voice", "x", "p")
+        .unwrap();
+    let claimed = s.claim_pending_confirmation(pc.id).unwrap();
+    assert_eq!(claimed.status, PendingStatus::Executing);
+    assert_eq!(claimed.qualified_id, "a.b");
+    assert_eq!(claimed.params, json!({"k": 1}));
+    // N'apparaît plus dans la liste des pending
+    assert_eq!(s.list_pending_confirmations().unwrap().len(), 0);
+}
+
+#[test]
+fn second_claim_is_refused() {
+    let s = store();
+    let pc = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    s.claim_pending_confirmation(pc.id).unwrap();
+    let err = s.claim_pending_confirmation(pc.id).unwrap_err();
+    assert!(matches!(
+        err,
+        miyualicia_memory::MemoryError::PendingConfirmationAlreadyResolved { .. }
+    ));
+}
+
+#[test]
+fn concurrent_claims_from_threads_only_one_wins() {
+    let s = std::sync::Arc::new(store());
+    let pc = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    let handles: Vec<_> = (0..8)
+        .map(|_| {
+            let s = s.clone();
+            std::thread::spawn(move || s.claim_pending_confirmation(pc.id).is_ok())
+        })
+        .collect();
+    let wins = handles
+        .into_iter()
+        .map(|h| h.join().unwrap())
+        .filter(|ok| *ok)
+        .count();
+    assert_eq!(wins, 1);
+}
+
+#[test]
+fn claim_unknown_returns_not_found() {
+    let s = store();
+    let err = s
+        .claim_pending_confirmation(uuid::Uuid::new_v4())
+        .unwrap_err();
+    assert!(matches!(
+        err,
+        miyualicia_memory::MemoryError::PendingConfirmationNotFound(_)
+    ));
+}
+
+#[test]
+fn cannot_cancel_claimed_pending() {
+    let s = store();
+    let pc = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    s.claim_pending_confirmation(pc.id).unwrap();
+    assert!(s.mark_pending_cancelled(pc.id).is_err());
+}
+
+#[test]
+fn finalize_sets_confirmed_or_failed_only_from_executing() {
+    let s = store();
+    let ok = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "x", "p")
+        .unwrap();
+    let ko = s
+        .enqueue_pending_confirmation("a.b", json!({}), "voice", "y", "p")
+        .unwrap();
+    // Finaliser sans réclamation : refusé
+    assert!(s.finalize_pending_confirmation(ok.id, true).is_err());
+
+    s.claim_pending_confirmation(ok.id).unwrap();
+    s.finalize_pending_confirmation(ok.id, true).unwrap();
+    let got = s.pending_confirmation(ok.id).unwrap().unwrap();
+    assert_eq!(got.status, PendingStatus::Confirmed);
+    assert!(got.resolved_at.is_some());
+
+    s.claim_pending_confirmation(ko.id).unwrap();
+    s.finalize_pending_confirmation(ko.id, false).unwrap();
+    let got = s.pending_confirmation(ko.id).unwrap().unwrap();
+    assert_eq!(got.status, PendingStatus::Failed);
+    // Terminal : ni re-finalisation ni nouvelle réclamation
+    assert!(s.finalize_pending_confirmation(ko.id, true).is_err());
+    assert!(s.claim_pending_confirmation(ko.id).is_err());
+}

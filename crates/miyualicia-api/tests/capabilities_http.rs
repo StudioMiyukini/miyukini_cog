@@ -21,7 +21,7 @@ use tower::ServiceExt;
 use miyualicia::{AliciaConfig, AliciaService, CapabilitiesRuntime, CapabilitiesRuntimeConfig};
 use miyualicia_api::auth::{generate_token, JwtClaims, JwtScope};
 use miyualicia_api::config::ApiConfig;
-use miyualicia_api::router::{build_router, AppState};
+use miyualicia_api::router::build_router;
 use miyualicia_dispatcher::{MockServiceClient, ServiceCallResult};
 use miyualicia_memory::Persona;
 
@@ -29,6 +29,13 @@ const TEST_SECRET: &[u8] = b"\
     test-secret-key-32-bytes-minimum-required-here\
     abcdefghijklmnopqrstuvwxyz0123456789\
 ";
+
+/// Token de test : scope admin, personas `voice` et `work` autorisées.
+fn token_with(scopes: Vec<JwtScope>, personas: &[&str]) -> String {
+    let claims = JwtClaims::new("test-client", scopes, 3600)
+        .with_personas(personas.iter().map(|p| (*p).to_string()).collect());
+    generate_token(&claims, TEST_SECRET).expect("token")
+}
 
 /// Construit un AppState minimal + un token JWT de test à scope admin.
 async fn setup_with_runtime(services_dir: Option<&Path>) -> (axum::Router, String, Arc<CapabilitiesRuntime>) {
@@ -51,14 +58,9 @@ async fn setup_with_runtime(services_dir: Option<&Path>) -> (axum::Router, Strin
     let api_config = ApiConfig::default();
     let router = build_router(alicia, api_config, TEST_SECRET.to_vec());
 
-    let claims = JwtClaims::new("test-client", vec![JwtScope::Admin], 3600);
-    let token = generate_token(&claims, TEST_SECRET).expect("token");
+    let token = token_with(vec![JwtScope::Admin], &["voice", "work"]);
 
     (router, token, runtime)
-}
-
-fn auth_header(token: &str) -> (header::HeaderName, String) {
-    (header::AUTHORIZATION, format!("Bearer {token}"))
 }
 
 async fn parse_body(body: Body) -> Value {
@@ -230,6 +232,10 @@ async fn dispatch_write_capability_returns_pending() {
     .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(body["kind"], "pending_confirmation");
+    // R-016 : la pending est enregistrée et référencée par son id
+    let id: uuid::Uuid = body["id"].as_str().expect("id").parse().expect("uuid");
+    let pc = runtime.pending_confirmation(id).await.unwrap().expect("stockée");
+    assert_eq!(pc.persona, "voice");
 }
 
 #[tokio::test]
@@ -254,32 +260,87 @@ async fn dispatch_unknown_capability_returns_500_with_clear_message() {
 // POST /capabilities/dispatch/confirm
 // -------------------------------------------------------------------
 
+/// Ancien comportement (stateless : `qualified_id` + `params` dans le body)
+/// supprimé par R-016 : la confirmation passe par l'`id` renvoyé par `/dispatch`.
 #[tokio::test]
-async fn dispatch_confirm_executes_write_capability() {
+async fn dispatch_confirm_executes_stored_pending_by_id() {
     let tmp = tempfile::tempdir().unwrap();
     write_demo_manifest(tmp.path());
     let (router, token, runtime) = setup_with_runtime(Some(tmp.path())).await;
-    let mock = MockServiceClient::new();
+    let mock = Arc::new(MockServiceClient::new());
     mock.expect("demo.shout", ServiceCallResult::ok(json!({"shouted": true})));
-    runtime
-        .register_service_client("demo", Arc::new(mock))
-        .await;
+    runtime.register_service_client("demo", mock.clone()).await;
+
+    let (_, pending) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch",
+        &token,
+        json!({"qualified_id": "demo.shout", "params": {"loud": true}, "persona": "voice", "user_phrase": "shout"}),
+    )
+    .await;
+    assert_eq!(pending["kind"], "pending_confirmation");
+    assert_eq!(mock.calls().len(), 0);
 
     let (status, body) = json_post(
         router,
         "/api/v1/alicia/capabilities/dispatch/confirm",
         &token,
-        json!({
-            "qualified_id": "demo.shout",
-            "params": {},
-            "persona": "voice",
-            "user_phrase": "shout"
-        }),
+        json!({"id": pending["id"]}),
     )
     .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(body["kind"], "executed");
     assert_eq!(body["service_result"]["data"]["shouted"], true);
+    // Paramètres exécutés = ceux stockés
+    assert_eq!(mock.calls(), vec![("demo.shout".to_string(), json!({"loud": true}))]);
+}
+
+/// R-016 (négatif) : l'ancien body stateless est refusé, rien n'est exécuté.
+#[tokio::test]
+async fn dispatch_confirm_with_arbitrary_qualified_id_is_refused() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, token, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+
+    let (status, _) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch/confirm",
+        &token,
+        json!({"qualified_id": "demo.shout", "params": {}, "persona": "voice", "user_phrase": "shout"}),
+    )
+    .await;
+    assert!(status.is_client_error(), "body stateless refusé, obtenu {status}");
+
+    // id sans enregistrement en attente → 404
+    let (status, _) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch/confirm",
+        &token,
+        json!({"id": uuid::Uuid::new_v4()}),
+    )
+    .await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+
+    // id + champs supplémentaires (tentative de substitution) → refusé
+    let id = queued_id(
+        runtime
+        .dispatch_and_queue("demo.shout", &json!({"a": 1}), "voice", "x")
+        .await
+        .unwrap(),
+    );
+    let (status, _) = json_post(
+        router,
+        "/api/v1/alicia/capabilities/dispatch/confirm",
+        &token,
+        json!({"id": id, "qualified_id": "demo.ping", "params": {"evil": true}}),
+    )
+    .await;
+    assert!(status.is_client_error());
+    assert_eq!(mock.calls().len(), 0, "aucune exécution");
+    let pc = runtime.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Pending);
 }
 
 // -------------------------------------------------------------------
@@ -287,10 +348,20 @@ async fn dispatch_confirm_executes_write_capability() {
 // -------------------------------------------------------------------
 
 #[tokio::test]
-async fn dispatch_cancel_records_episode_returns_204() {
+async fn dispatch_cancel_by_id_records_episode_returns_204() {
     let tmp = tempfile::tempdir().unwrap();
     write_demo_manifest(tmp.path());
     let (router, token, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    runtime
+        .register_service_client("demo", Arc::new(MockServiceClient::new()))
+        .await;
+    let (_, pending) = json_post(
+        router.clone(),
+        "/api/v1/alicia/capabilities/dispatch",
+        &token,
+        json!({"qualified_id": "demo.shout", "params": {}, "persona": "voice", "user_phrase": "annule"}),
+    )
+    .await;
 
     let req = Request::builder()
         .uri("/api/v1/alicia/capabilities/dispatch/cancel")
@@ -298,13 +369,7 @@ async fn dispatch_cancel_records_episode_returns_204() {
         .header(header::AUTHORIZATION, format!("Bearer {token}"))
         .header(header::CONTENT_TYPE, "application/json")
         .body(Body::from(
-            serde_json::to_vec(&json!({
-                "qualified_id": "demo.shout",
-                "params": {},
-                "persona": "voice",
-                "user_phrase": "annule"
-            }))
-            .unwrap(),
+            serde_json::to_vec(&json!({"id": pending["id"]})).unwrap(),
         ))
         .unwrap();
     let resp = router.oneshot(req).await.unwrap();
@@ -323,7 +388,7 @@ async fn dispatch_cancel_records_episode_returns_204() {
 async fn pending_learnings_returns_proposed_skills() {
     let (router, token, runtime) = setup_with_runtime(None).await;
     let mem = runtime.memory();
-    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), "".into(), true))
+    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
         .unwrap();
     mem.propose_learned_skill("voice", "x", "demo.x", json!({}))
         .unwrap();
@@ -342,7 +407,7 @@ async fn pending_learnings_returns_proposed_skills() {
 async fn accept_learning_makes_it_active() {
     let (router, token, runtime) = setup_with_runtime(None).await;
     let mem = runtime.memory();
-    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), "".into(), true))
+    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
         .unwrap();
     let ls = mem
         .propose_learned_skill("voice", "x", "demo.x", json!({}))
@@ -406,7 +471,7 @@ async fn persona_active_returns_default() {
         .upsert_persona(&Persona::new(
             "voice".into(),
             "Voix".into(),
-            "".into(),
+            String::new(),
             true,
         ))
         .unwrap();
@@ -424,9 +489,9 @@ async fn persona_active_returns_default() {
 async fn persona_activate_switches_active() {
     let (router, token, runtime) = setup_with_runtime(None).await;
     let mem = runtime.memory();
-    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), "".into(), true))
+    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
         .unwrap();
-    mem.upsert_persona(&Persona::new("work".into(), "Travail".into(), "".into(), false))
+    mem.upsert_persona(&Persona::new("work".into(), "Travail".into(), String::new(), false))
         .unwrap();
 
     let req = Request::builder()
@@ -442,7 +507,10 @@ async fn persona_activate_switches_active() {
 
 #[tokio::test]
 async fn persona_activate_unknown_returns_404() {
-    let (router, token, _runtime) = setup_with_runtime(None).await;
+    // Persona autorisée par le token mais absente du store → 404. (Une persona
+    // non autorisée est refusée en 403 avant toute recherche, R-002.)
+    let (router, _admin, _runtime) = setup_with_runtime(None).await;
+    let token = token_with(vec![JwtScope::Admin], &["ghost"]);
     let req = Request::builder()
         .uri("/api/v1/alicia/capabilities/persona/ghost/activate")
         .method("POST")
@@ -462,7 +530,7 @@ async fn manifest_reload_picks_up_new_manifest() {
     let tmp = tempfile::tempdir().unwrap();
     let (router, token, runtime) = setup_with_runtime(Some(tmp.path())).await;
     // Pas de manifeste au démarrage → 0 capabilities
-    assert!(runtime.list_tools().await.is_empty());
+    assert_eq!(runtime.list_tools().await.len(), 0);
 
     write_demo_manifest(tmp.path());
     let (status, body) = json_post(
@@ -699,7 +767,7 @@ async fn pending_cancel_endpoint_returns_204() {
 }
 
 #[tokio::test]
-async fn pending_confirm_unknown_id_returns_500() {
+async fn pending_confirm_unknown_id_returns_404() {
     let (router, token, _runtime) = setup_with_runtime(None).await;
     let id = uuid::Uuid::new_v4();
     let (status, _body) = json_post(
@@ -711,7 +779,8 @@ async fn pending_confirm_unknown_id_returns_500() {
         json!({}),
     )
     .await;
-    assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
+    // Erreur typée (avant : 500 générique).
+    assert_eq!(status, StatusCode::NOT_FOUND);
 }
 
 // -------------------------------------------------------------------
@@ -727,8 +796,7 @@ async fn dispatch_returns_500_when_runtime_disabled() {
     }));
     let api_config = ApiConfig::default();
     let router = build_router(alicia, api_config, TEST_SECRET.to_vec());
-    let claims = JwtClaims::new("test-client", vec![JwtScope::Admin], 3600);
-    let token = generate_token(&claims, TEST_SECRET).expect("token");
+    let token = token_with(vec![JwtScope::Admin], &["voice"]);
 
     let (status, _body) = json_post(
         router,
@@ -744,4 +812,236 @@ async fn dispatch_returns_500_when_runtime_disabled() {
     .await;
     assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
     let _ = Instant::now;
+}
+
+// -------------------------------------------------------------------
+// R-002 : persona dérivée de l'identité authentifiée
+// -------------------------------------------------------------------
+
+#[tokio::test]
+async fn dispatch_with_foreign_persona_returns_403_and_executes_nothing() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+    let voice_only = token_with(vec![JwtScope::Write], &["voice"]);
+
+    for uri in [
+        "/api/v1/alicia/capabilities/dispatch",
+        "/api/v1/alicia/capabilities/dispatch_and_queue",
+    ] {
+        let (status, body) = json_post(
+            router.clone(),
+            uri,
+            &voice_only,
+            json!({"qualified_id": "demo.ping", "params": {}, "persona": "work", "user_phrase": "x"}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::FORBIDDEN, "{uri}");
+        assert_eq!(body["error"]["type"], "PersonaForbidden");
+    }
+    assert_eq!(mock.calls().len(), 0);
+    assert_eq!(runtime.memory().recent_episodes(10).unwrap().len(), 0);
+}
+
+#[tokio::test]
+async fn admin_token_without_personas_cannot_dispatch() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+    let no_persona = token_with(vec![JwtScope::Admin], &[]);
+    for persona in [json!("voice"), Value::Null] {
+        let (status, _) = json_post(
+            router.clone(),
+            "/api/v1/alicia/capabilities/dispatch",
+            &no_persona,
+            json!({"qualified_id": "demo.ping", "params": {}, "persona": persona, "user_phrase": "x"}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::FORBIDDEN);
+    }
+    assert_eq!(mock.calls().len(), 0);
+}
+
+#[tokio::test]
+async fn dispatch_without_persona_uses_authorized_persona() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    runtime
+        .register_service_client("demo", Arc::new(MockServiceClient::new()))
+        .await;
+    let work_only = token_with(vec![JwtScope::Write], &["work"]);
+    let (status, body) = json_post(
+        router,
+        "/api/v1/alicia/capabilities/dispatch",
+        &work_only,
+        json!({"qualified_id": "demo.ping", "params": {}, "user_phrase": "ping"}),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body["kind"], "executed");
+    let recent = runtime.memory().recent_episodes(1).unwrap();
+    assert_eq!(recent[0].persona, "work");
+}
+
+#[tokio::test]
+async fn confirm_or_cancel_pending_of_foreign_persona_returns_403() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+    let id = queued_id(
+        runtime
+        .dispatch_and_queue("demo.shout", &Value::Null, "work", "x")
+        .await
+        .unwrap(),
+    );
+    let voice_only = token_with(vec![JwtScope::Write], &["voice"]);
+    for (uri, body) in [
+        (format!("/api/v1/alicia/capabilities/pending_confirmations/{id}/confirm"), json!({})),
+        (format!("/api/v1/alicia/capabilities/pending_confirmations/{id}/cancel"), json!({})),
+        ("/api/v1/alicia/capabilities/dispatch/confirm".to_string(), json!({"id": id})),
+        ("/api/v1/alicia/capabilities/dispatch/cancel".to_string(), json!({"id": id})),
+    ] {
+        let (status, _) = json_post(router.clone(), &uri, &voice_only, body).await;
+        assert_eq!(status, StatusCode::FORBIDDEN, "{uri}");
+    }
+    assert_eq!(mock.calls().len(), 0);
+    let pc = runtime.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Pending);
+}
+
+#[tokio::test]
+async fn pending_list_only_shows_authorized_personas() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_with_writes(tmp.path());
+    let (router, _admin, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    runtime
+        .register_service_client("demo", Arc::new(MockServiceClient::new()))
+        .await;
+    for persona in ["voice", "work"] {
+        runtime
+            .dispatch_and_queue("demo.shout", &Value::Null, persona, "x")
+            .await
+            .unwrap();
+    }
+    let voice_only = token_with(vec![JwtScope::Read], &["voice"]);
+    let (status, body) = json_get(
+        router.clone(),
+        "/api/v1/alicia/capabilities/pending_confirmations",
+        &voice_only,
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body["count"], 1);
+    assert_eq!(body["pending"][0]["persona"], "voice");
+    let (status, _) = json_get(
+        router,
+        "/api/v1/alicia/capabilities/pending_confirmations?persona=work",
+        &voice_only,
+    )
+    .await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+}
+
+#[tokio::test]
+async fn persona_paths_require_authorized_persona() {
+    let (router, _admin, runtime) = setup_with_runtime(None).await;
+    let mem = runtime.memory();
+    mem.upsert_persona(&Persona::new("voice".into(), "Voix".into(), String::new(), true))
+        .unwrap();
+    mem.upsert_persona(&Persona::new("work".into(), "Travail".into(), String::new(), false))
+        .unwrap();
+    let ls = mem
+        .propose_learned_skill("work", "x", "demo.x", json!({}))
+        .unwrap();
+    let voice_only = token_with(vec![JwtScope::Write, JwtScope::Read], &["voice"]);
+
+    let (st, _) = json_get(
+        router.clone(),
+        "/api/v1/alicia/capabilities/learnings/pending/work",
+        &voice_only,
+    )
+    .await;
+    assert_eq!(st, StatusCode::FORBIDDEN);
+    for uri in [
+        "/api/v1/alicia/capabilities/persona/work/activate".to_string(),
+        "/api/v1/alicia/capabilities/learnings/detect/work".to_string(),
+        format!("/api/v1/alicia/capabilities/learnings/{}/accept", ls.id),
+    ] {
+        let (st, _) = json_post(router.clone(), &uri, &voice_only, json!({})).await;
+        assert_eq!(st, StatusCode::FORBIDDEN, "{uri}");
+    }
+    assert_eq!(mem.active_persona_id().unwrap().as_deref(), Some("voice"));
+    assert_eq!(mem.active_learned_skills("work").unwrap().len(), 0);
+}
+
+// -------------------------------------------------------------------
+// R-017 : deux confirmations HTTP concurrentes → une seule exécution
+// -------------------------------------------------------------------
+
+struct SlowCountingClient {
+    calls: std::sync::atomic::AtomicUsize,
+}
+
+impl miyualicia_dispatcher::ServiceClient for SlowCountingClient {
+    // Forme désucrée d'`async_trait` (évite une dépendance de dev).
+    fn call<'life0, 'life1, 'life2, 'async_trait>(
+        &'life0 self,
+        _qualified_id: &'life1 str,
+        _params: &'life2 Value,
+    ) -> std::pin::Pin<
+        Box<dyn std::future::Future<Output = ServiceCallResult> + Send + 'async_trait>,
+    >
+    where
+        'life0: 'async_trait,
+        'life1: 'async_trait,
+        'life2: 'async_trait,
+        Self: 'async_trait,
+    {
+        Box::pin(async move {
+            self.calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+            ServiceCallResult::ok(json!({"done": true}))
+        })
+    }
+}
+
+#[tokio::test]
+async fn concurrent_http_confirms_execute_once() {
+    let tmp = tempfile::tempdir().unwrap();
+    write_demo_manifest(tmp.path());
+    let (router, token, runtime) = setup_with_runtime(Some(tmp.path())).await;
+    let client = Arc::new(SlowCountingClient {
+        calls: std::sync::atomic::AtomicUsize::new(0),
+    });
+    runtime.register_service_client("demo", client.clone()).await;
+    let id = queued_id(
+        runtime
+        .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+        .await
+        .unwrap(),
+    );
+    let uri = format!("/api/v1/alicia/capabilities/pending_confirmations/{id}/confirm");
+    let ((s1, _), (s2, _)) = tokio::join!(
+        json_post(router.clone(), &uri, &token, json!({})),
+        json_post(router.clone(), &uri, &token, json!({})),
+    );
+    let mut statuses = [s1, s2];
+    statuses.sort();
+    assert_eq!(statuses, [StatusCode::OK, StatusCode::CONFLICT]);
+    assert_eq!(client.calls.load(std::sync::atomic::Ordering::SeqCst), 1);
+}
+
+/// Extrait l'id d'une `PendingConfirmation` mise en file.
+fn queued_id(outcome: miyualicia::capabilities_runtime::QueuedDispatch) -> uuid::Uuid {
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued");
+    };
+    id
 }

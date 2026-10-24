@@ -100,6 +100,10 @@ pub struct HandledToolCall {
     /// prochain appel chat — `None` si la décision est `PendingConfirmation`
     /// (le caller doit d'abord obtenir la confirmation utilisateur).
     pub tool_message: Option<serde_json::Value>,
+    /// Identifiant de la `PendingConfirmation` mise en file si la décision
+    /// est `PendingConfirmation` — à résoudre via `confirm_queued` /
+    /// `cancel_queued`. `None` si exécuté directement.
+    pub pending_id: Option<uuid::Uuid>,
 }
 
 /// Sous-système runtime des capacités services.
@@ -231,8 +235,14 @@ impl CapabilitiesRuntime {
             .map_err(dispatch_err)
     }
 
-    /// Reprise après confirmation utilisateur.
-    pub async fn dispatch_confirmed(
+    /// Exécution après confirmation utilisateur.
+    ///
+    /// **Privé** (R-016) : ne doit être appelé qu'avec les champs d'une
+    /// `PendingConfirmation` stockée et réclamée atomiquement par
+    /// [`CapabilitiesRuntime::confirm_queued`] — jamais avec des valeurs
+    /// fournies par un client, sous peine de contourner le garde-fou de
+    /// confirmation.
+    async fn dispatch_confirmed(
         &self,
         qualified_id: &str,
         params: &Value,
@@ -258,7 +268,10 @@ impl CapabilitiesRuntime {
     }
 
     /// Reprise après refus utilisateur (pose un épisode `Cancelled`).
-    pub async fn dispatch_cancelled(
+    ///
+    /// Privé : appelé uniquement par [`CapabilitiesRuntime::cancel_queued`]
+    /// avec les champs de l'enregistrement stocké.
+    fn dispatch_cancelled(
         &self,
         qualified_id: &str,
         params: &Value,
@@ -384,57 +397,57 @@ impl CapabilitiesRuntime {
         self.memory.pending_confirmation(id).map_err(memory_err)
     }
 
-    /// Confirme une `PendingConfirmation` : exécute la capability via
-    /// `dispatch_confirmed` (gates cores actives, audit posé) puis marque la
-    /// pending `Confirmed` en mémoire.
+    /// Confirme une `PendingConfirmation` stockée.
+    ///
+    /// Séquence (R-016 / R-017) :
+    /// 1. **réclamation atomique** `Pending → Executing` en mémoire — un
+    ///    seul appelant concurrent l'obtient, les autres sont refusés ;
+    /// 2. exécution des seuls `qualified_id` / `params` / `persona` /
+    ///    `user_phrase` **stockés** (gates cores actives, audit posé) ;
+    /// 3. finalisation `Executing → Confirmed` (succès) ou `→ Failed`.
     pub async fn confirm_queued(
         &self,
         id: uuid::Uuid,
     ) -> Result<miyualicia_dispatcher::ExecutionResult, AliciaError> {
         let pc = self
             .memory
-            .pending_confirmation(id)
-            .map_err(memory_err)?
-            .ok_or_else(|| {
-                AliciaError::InternalError(format!("PendingConfirmation {id} introuvable"))
-            })?;
-        if pc.status != miyualicia_memory::PendingStatus::Pending {
-            return Err(AliciaError::InternalError(format!(
-                "PendingConfirmation {id} déjà résolue (statut {:?})",
-                pc.status
-            )));
-        }
-        let result = self
-            .dispatch_confirmed(&pc.qualified_id, &pc.params, &pc.persona, &pc.user_phrase)
-            .await?;
-        self.memory
-            .mark_pending_confirmed(id)
+            .claim_pending_confirmation(id)
             .map_err(memory_err)?;
-        Ok(result)
+        let outcome = self
+            .dispatch_confirmed(&pc.qualified_id, &pc.params, &pc.persona, &pc.user_phrase)
+            .await;
+        let finalized = self
+            .memory
+            .finalize_pending_confirmation(id, outcome.is_ok())
+            .map_err(memory_err);
+        match (outcome, finalized) {
+            (Ok(result), Ok(())) => Ok(result),
+            // L'erreur d'exécution prime : la pending est `Failed` (ou reste
+            // `Executing` si la finalisation elle-même a échoué — jamais
+            // ré-exécutable dans les deux cas).
+            (Err(e), _) => Err(e),
+            (Ok(_), Err(e)) => {
+                tracing::error!(%id, "exécution effectuée mais finalisation impossible : {e}");
+                Err(e)
+            }
+        }
     }
 
-    /// Annule une `PendingConfirmation` : marque l'épisode `Cancelled` dans
-    /// l'audit puis marque la pending `Cancelled` en mémoire.
+    /// Annule une `PendingConfirmation` : transition atomique
+    /// `Pending → Cancelled` d'abord (refus si déjà réclamée / résolue), puis
+    /// épisode `Cancelled` dans l'audit à partir de l'enregistrement stocké.
+    // API async conservée (symétrie avec `confirm_queued`, appelants existants).
+    #[allow(clippy::unused_async)]
     pub async fn cancel_queued(&self, id: uuid::Uuid) -> Result<(), AliciaError> {
         let pc = self
             .memory
             .pending_confirmation(id)
             .map_err(memory_err)?
-            .ok_or_else(|| {
-                AliciaError::InternalError(format!("PendingConfirmation {id} introuvable"))
-            })?;
-        if pc.status != miyualicia_memory::PendingStatus::Pending {
-            return Err(AliciaError::InternalError(format!(
-                "PendingConfirmation {id} déjà résolue (statut {:?})",
-                pc.status
-            )));
-        }
-        self.dispatch_cancelled(&pc.qualified_id, &pc.params, &pc.persona, &pc.user_phrase)
-            .await?;
+            .ok_or(AliciaError::PendingConfirmationNotFound(id))?;
         self.memory
             .mark_pending_cancelled(id)
             .map_err(memory_err)?;
-        Ok(())
+        self.dispatch_cancelled(&pc.qualified_id, &pc.params, &pc.persona, &pc.user_phrase)
     }
 
     // ------------------------------------------------------------------
@@ -464,9 +477,10 @@ impl CapabilitiesRuntime {
     /// - sérialise le résultat en message `role: "tool"` réinjectable dans la
     ///   prochaine itération chat (sauf si `PendingConfirmation`)
     ///
-    /// Le caller (typiquement `AliciaService`) appelle ensuite
-    /// `dispatch_confirmed` / `dispatch_cancelled` après accord utilisateur
-    /// pour les tool calls restés `PendingConfirmation`.
+    /// Les tool calls restés `PendingConfirmation` sont **mis en file**
+    /// (`pending_id`) ; le caller appelle ensuite `confirm_queued` /
+    /// `cancel_queued` après décision utilisateur (R-016 : aucune exécution
+    /// confirmée hors enregistrement stocké).
     pub async fn handle_tool_calls(
         &self,
         tool_calls: &[ToolCall],
@@ -479,22 +493,35 @@ impl CapabilitiesRuntime {
             let decision = self
                 .dispatch_capability(&resolved.qualified_id, &resolved.params, persona, user_phrase)
                 .await?;
-            let tool_message = match &decision {
+            let (tool_message, pending_id) = match &decision {
                 Decision::Executed(result) => {
                     let content = serde_json::json!({
                         "success": result.service_result.success,
                         "data":    result.service_result.data,
                         "message": result.service_result.message,
                     });
-                    Some(build_tool_response(&call.id, &content))
+                    (Some(build_tool_response(&call.id, &content)), None)
                 }
-                Decision::PendingConfirmation { .. } => None,
+                Decision::PendingConfirmation { qualified_id, prompt } => {
+                    let pc = self
+                        .memory
+                        .enqueue_pending_confirmation(
+                            qualified_id,
+                            resolved.params.clone(),
+                            persona,
+                            user_phrase,
+                            prompt,
+                        )
+                        .map_err(memory_err)?;
+                    (None, Some(pc.id))
+                }
             };
             out.push(HandledToolCall {
                 id: call.id.clone(),
                 qualified_id: resolved.qualified_id,
                 decision,
                 tool_message,
+                pending_id,
             });
         }
         Ok(out)
@@ -523,7 +550,16 @@ impl CapabilitiesRuntime {
 }
 
 fn memory_err(e: miyualicia_memory::MemoryError) -> AliciaError {
-    AliciaError::InternalError(format!("memory: {e}"))
+    use miyualicia_memory::MemoryError;
+    match e {
+        MemoryError::PendingConfirmationNotFound(id) => {
+            AliciaError::PendingConfirmationNotFound(id)
+        }
+        MemoryError::PendingConfirmationAlreadyResolved { id, status } => {
+            AliciaError::PendingConfirmationAlreadyResolved { id, status }
+        }
+        other => AliciaError::InternalError(format!("memory: {other}")),
+    }
 }
 
 fn skills_err(e: SkillsError) -> AliciaError {

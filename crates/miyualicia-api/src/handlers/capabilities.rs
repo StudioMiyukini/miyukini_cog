@@ -21,9 +21,8 @@ use uuid::Uuid;
 
 use miyualicia::capabilities_runtime::QueuedDispatch;
 use miyualicia::CapabilitiesRuntime;
-use miyualicia_dispatcher::Decision;
 
-use crate::auth::{JwtAuth, JwtScope};
+use crate::auth::{JwtAuth, JwtClaims, JwtScope};
 use crate::errors::ApiError;
 use crate::router::AppState;
 
@@ -36,6 +35,55 @@ async fn capabilities_or_503(
             "sous-système capacités désactivé (enable_capabilities_runtime non appelé)".into(),
         )
     })
+}
+
+/// Résout la persona d'une requête à partir de l'identité authentifiée
+/// (R-002, C-20) — jamais d'un champ de requête seul.
+///
+/// - `requested = Some(p)` : `p` doit figurer dans `claims.personas` (403 sinon) ;
+/// - `requested = None` : persona active côté serveur si elle est autorisée,
+///   sinon l'unique persona autorisée du client, sinon 403.
+///
+/// Fail-closed : un client sans persona configurée ne peut rien dispatcher,
+/// y compris avec le scope `admin`.
+fn resolve_persona(
+    claims: &JwtClaims,
+    requested: Option<&str>,
+    runtime: &CapabilitiesRuntime,
+) -> Result<String, ApiError> {
+    if let Some(p) = requested {
+        claims.require_persona(p)?;
+        return Ok(p.to_string());
+    }
+    let active = runtime
+        .memory()
+        .active_persona_id()
+        .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
+    if let Some(a) = active {
+        if claims.allows_persona(&a) {
+            return Ok(a);
+        }
+    }
+    match claims.personas.as_slice() {
+        [only] => Ok(only.clone()),
+        _ => Err(ApiError::PersonaForbidden {
+            persona: "(aucune persona autorisée résolue)".into(),
+        }),
+    }
+}
+
+/// Vérifie que la `PendingConfirmation` `id` existe et appartient à une
+/// persona autorisée pour le client (404 / 403 sinon).
+async fn require_pending_owned(
+    claims: &JwtClaims,
+    runtime: &CapabilitiesRuntime,
+    id: Uuid,
+) -> Result<(), ApiError> {
+    let pc = runtime
+        .pending_confirmation(id)
+        .await?
+        .ok_or_else(|| ApiError::NotFound(format!("confirmation en attente {id}")))?;
+    claims.require_persona(&pc.persona)
 }
 
 // ----------------------------------------------------------------------
@@ -74,13 +122,16 @@ pub async fn services(
 // POST /capabilities/dispatch — exécute une capability
 // ----------------------------------------------------------------------
 
-/// Body POST `/capabilities/dispatch` (et variantes confirm/cancel).
+/// Body POST `/capabilities/dispatch` et `/capabilities/dispatch_and_queue`.
 #[derive(Debug, Deserialize)]
 pub struct DispatchBody {
     /// Identifiant qualifié de la capability (`service_id.intent`).
     pub qualified_id: String,
-    /// Persona active.
-    pub persona: String,
+    /// Persona demandée (optionnelle). Elle n'est qu'une **sélection** parmi
+    /// les personas autorisées par le token (R-002) : toute valeur hors de
+    /// cette liste est refusée (403). Absente : persona active serveur.
+    #[serde(default)]
+    pub persona: Option<String>,
     /// Phrase utilisateur pour audit.
     pub user_phrase: String,
     /// Paramètres JSON (objet ou null).
@@ -88,26 +139,34 @@ pub struct DispatchBody {
     pub params: Value,
 }
 
-/// Représentation JSON d'une `Decision`.
-fn decision_to_json(d: Decision) -> Value {
-    match d {
-        Decision::Executed(r) => serde_json::json!({
-            "kind": "executed",
-            "qualified_id": r.qualified_id,
-            "service_result": {
-                "success": r.service_result.success,
-                "data":    r.service_result.data,
-                "message": r.service_result.message,
-            },
-        }),
-        Decision::PendingConfirmation { qualified_id, prompt } => serde_json::json!({
-            "kind": "pending_confirmation",
-            "qualified_id": qualified_id,
-            "prompt": prompt,
-        }),
-    }
+/// Body POST `/capabilities/dispatch/confirm` et `/capabilities/dispatch/cancel`.
+///
+/// R-016 : seule la référence d'une `PendingConfirmation` **stockée** est
+/// acceptée. `qualified_id` / `params` / `persona` fournis par le client sont
+/// rejetés (champ inconnu → 422) : seul l'enregistrement stocké est exécuté.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PendingRefBody {
+    /// Identifiant de la `PendingConfirmation` (renvoyé par `/dispatch`).
+    pub id: Uuid,
 }
 
+/// Représentation JSON d'un résultat d'exécution.
+fn executed_to_json(r: &miyualicia_dispatcher::ExecutionResult) -> Value {
+    serde_json::json!({
+        "kind": "executed",
+        "qualified_id": r.qualified_id,
+        "service_result": {
+            "success": r.service_result.success,
+            "data":    r.service_result.data,
+            "message": r.service_result.message,
+        },
+    })
+}
+
+/// POST `/capabilities/dispatch` — exécute une capability, ou **enregistre**
+/// la `PendingConfirmation` (R-016) et renvoie son `id` : la confirmation ne
+/// peut ensuite se faire que par cet `id`.
 pub async fn dispatch(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -116,45 +175,47 @@ pub async fn dispatch(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    let decision = runtime
-        .dispatch_capability(&body.qualified_id, &body.params, &body.persona, &body.user_phrase)
+    let persona = resolve_persona(&claims, body.persona.as_deref(), &runtime)?;
+    let outcome = runtime
+        .dispatch_and_queue(&body.qualified_id, &body.params, &persona, &body.user_phrase)
         .await?;
-    Ok(Json(decision_to_json(decision)))
+    Ok(Json(match outcome {
+        QueuedDispatch::Executed(r) => executed_to_json(&r),
+        QueuedDispatch::Queued { id, qualified_id, prompt } => serde_json::json!({
+            "kind": "pending_confirmation",
+            "id": id.to_string(),
+            "qualified_id": qualified_id,
+            "prompt": prompt,
+        }),
+    }))
 }
 
+/// POST `/capabilities/dispatch/confirm` — body `{ "id": <uuid> }` uniquement.
+/// Exécute l'enregistrement stocké (réclamation atomique, R-017).
 pub async fn dispatch_confirm(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
-    Json(body): Json<DispatchBody>,
+    Json(body): Json<PendingRefBody>,
 ) -> Result<Json<Value>, ApiError> {
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    let result = runtime
-        .dispatch_confirmed(&body.qualified_id, &body.params, &body.persona, &body.user_phrase)
-        .await?;
-    Ok(Json(serde_json::json!({
-        "kind": "executed",
-        "qualified_id": result.qualified_id,
-        "service_result": {
-            "success": result.service_result.success,
-            "data":    result.service_result.data,
-            "message": result.service_result.message,
-        },
-    })))
+    require_pending_owned(&claims, &runtime, body.id).await?;
+    let result = runtime.confirm_queued(body.id).await?;
+    Ok(Json(executed_to_json(&result)))
 }
 
+/// POST `/capabilities/dispatch/cancel` — body `{ "id": <uuid> }` uniquement.
 pub async fn dispatch_cancel(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
-    Json(body): Json<DispatchBody>,
+    Json(body): Json<PendingRefBody>,
 ) -> Result<StatusCode, ApiError> {
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
-    runtime
-        .dispatch_cancelled(&body.qualified_id, &body.params, &body.persona, &body.user_phrase)
-        .await?;
+    require_pending_owned(&claims, &runtime, body.id).await?;
+    runtime.cancel_queued(body.id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -162,6 +223,21 @@ pub async fn dispatch_cancel(
 // Apprentissage — pending / accept / reject / detect
 // ----------------------------------------------------------------------
 
+/// Vérifie qu'une skill apprise existe et appartient à une persona autorisée.
+fn require_learned_skill_owned(
+    claims: &JwtClaims,
+    runtime: &CapabilitiesRuntime,
+    id: Uuid,
+) -> Result<(), ApiError> {
+    let skill = runtime
+        .memory()
+        .learned_skill(id)
+        .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?
+        .ok_or_else(|| ApiError::NotFound(format!("skill apprise {id}")))?;
+    claims.require_persona(&skill.persona)
+}
+
+/// GET `/capabilities/learnings/pending/{persona}` — skills proposées (persona autorisée).
 pub async fn learnings_pending(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -169,6 +245,7 @@ pub async fn learnings_pending(
 ) -> Result<Json<Value>, ApiError> {
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Read)?;
+    claims.require_persona(&persona)?;
     let runtime = capabilities_or_503(&state).await?;
     let pending = runtime
         .memory()
@@ -177,6 +254,7 @@ pub async fn learnings_pending(
     Ok(Json(serde_json::json!({ "pending": pending })))
 }
 
+/// GET `/capabilities/learnings/active/{persona}` — skills actives (persona autorisée).
 pub async fn learnings_active(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -184,6 +262,7 @@ pub async fn learnings_active(
 ) -> Result<Json<Value>, ApiError> {
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Read)?;
+    claims.require_persona(&persona)?;
     let runtime = capabilities_or_503(&state).await?;
     let active = runtime
         .memory()
@@ -192,6 +271,7 @@ pub async fn learnings_active(
     Ok(Json(serde_json::json!({ "active": active })))
 }
 
+/// POST `/capabilities/learnings/{id}/accept` — accepte une skill d'une persona autorisée.
 pub async fn learnings_accept(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -200,6 +280,7 @@ pub async fn learnings_accept(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
+    require_learned_skill_owned(&claims, &runtime, id)?;
     runtime
         .memory()
         .accept_learned_skill(id)
@@ -207,6 +288,7 @@ pub async fn learnings_accept(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/// POST `/capabilities/learnings/{id}/reject` — rejette une skill d'une persona autorisée.
 pub async fn learnings_reject(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -215,6 +297,7 @@ pub async fn learnings_reject(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
+    require_learned_skill_owned(&claims, &runtime, id)?;
     runtime
         .memory()
         .reject_learned_skill(id)
@@ -222,6 +305,7 @@ pub async fn learnings_reject(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/// POST `/capabilities/learnings/detect/{persona}` — détection de patterns (persona autorisée).
 pub async fn learnings_detect(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -229,6 +313,7 @@ pub async fn learnings_detect(
 ) -> Result<Json<Value>, ApiError> {
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
+    claims.require_persona(&persona)?;
     let runtime = capabilities_or_503(&state).await?;
     let patterns = runtime.detect_patterns(&persona).await?;
     Ok(Json(serde_json::json!({ "patterns": patterns })))
@@ -238,6 +323,7 @@ pub async fn learnings_detect(
 // Persona active
 // ----------------------------------------------------------------------
 
+/// GET `/capabilities/persona/active` — persona active côté serveur.
 pub async fn persona_active(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -252,6 +338,7 @@ pub async fn persona_active(
     Ok(Json(serde_json::json!({ "persona_id": id })))
 }
 
+/// POST `/capabilities/persona/{id}/activate` — active une persona autorisée pour le client.
 pub async fn persona_activate(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -259,6 +346,8 @@ pub async fn persona_activate(
 ) -> Result<StatusCode, ApiError> {
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
+    // Un client ne peut activer qu'une persona qui lui est autorisée (R-002).
+    claims.require_persona(&id)?;
     let runtime = capabilities_or_503(&state).await?;
     runtime
         .memory()
@@ -274,6 +363,7 @@ pub async fn persona_activate(
 // Hot reload manuel
 // ----------------------------------------------------------------------
 
+/// POST `/capabilities/manifest/reload` — rechargement manuel des manifestes (admin).
 pub async fn manifest_reload(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -288,7 +378,7 @@ pub async fn manifest_reload(
             "added":   report.added,
             "kept":    report.kept,
             "removed": report.removed,
-            "errors":  report.errors.iter().map(|e| e.to_string()).collect::<Vec<_>>(),
+            "errors":  report.errors.iter().map(ToString::to_string).collect::<Vec<_>>(),
         }))),
     }
 }
@@ -297,6 +387,7 @@ pub async fn manifest_reload(
 // Episodes récents (lecture mémoire)
 // ----------------------------------------------------------------------
 
+/// Paramètres de `GET /capabilities/episodes/recent`.
 #[derive(Debug, Deserialize)]
 pub struct EpisodesQuery {
     /// Limite (default 20).
@@ -304,6 +395,7 @@ pub struct EpisodesQuery {
     pub limit: Option<usize>,
 }
 
+/// GET `/capabilities/episodes/recent` — derniers épisodes d'audit.
 pub async fn episodes_recent(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -339,19 +431,12 @@ pub async fn dispatch_and_queue(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
+    let persona = resolve_persona(&claims, body.persona.as_deref(), &runtime)?;
     let outcome = runtime
-        .dispatch_and_queue(&body.qualified_id, &body.params, &body.persona, &body.user_phrase)
+        .dispatch_and_queue(&body.qualified_id, &body.params, &persona, &body.user_phrase)
         .await?;
     let body = match outcome {
-        QueuedDispatch::Executed(r) => serde_json::json!({
-            "kind": "executed",
-            "qualified_id": r.qualified_id,
-            "service_result": {
-                "success": r.service_result.success,
-                "data":    r.service_result.data,
-                "message": r.service_result.message,
-            },
-        }),
+        QueuedDispatch::Executed(r) => executed_to_json(&r),
         QueuedDispatch::Queued { id, qualified_id, prompt } => serde_json::json!({
             "kind": "queued",
             "id": id.to_string(),
@@ -370,6 +455,7 @@ pub struct PendingFilterQuery {
     pub persona: Option<String>,
 }
 
+/// GET `/capabilities/pending_confirmations` — pending des personas autorisées.
 pub async fn pending_list(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -378,9 +464,18 @@ pub async fn pending_list(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Read)?;
     let runtime = capabilities_or_503(&state).await?;
+    // Seules les pending des personas autorisées pour le client sont visibles.
     let pending = match q.persona.as_deref() {
-        Some(p) => runtime.pending_confirmations_for(p).await?,
-        None => runtime.list_pending_confirmations().await?,
+        Some(p) => {
+            claims.require_persona(p)?;
+            runtime.pending_confirmations_for(p).await?
+        }
+        None => runtime
+            .list_pending_confirmations()
+            .await?
+            .into_iter()
+            .filter(|pc| claims.allows_persona(&pc.persona))
+            .collect(),
     };
     Ok(Json(serde_json::json!({
         "pending": pending,
@@ -388,6 +483,7 @@ pub async fn pending_list(
     })))
 }
 
+/// POST `/capabilities/pending_confirmations/{id}/confirm` — exécute l'enregistrement stocké.
 pub async fn pending_confirm(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -396,18 +492,12 @@ pub async fn pending_confirm(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
+    require_pending_owned(&claims, &runtime, id).await?;
     let result = runtime.confirm_queued(id).await?;
-    Ok(Json(serde_json::json!({
-        "kind": "executed",
-        "qualified_id": result.qualified_id,
-        "service_result": {
-            "success": result.service_result.success,
-            "data":    result.service_result.data,
-            "message": result.service_result.message,
-        },
-    })))
+    Ok(Json(executed_to_json(&result)))
 }
 
+/// POST `/capabilities/pending_confirmations/{id}/cancel` — annule l'enregistrement stocké.
 pub async fn pending_cancel(
     JwtAuth(claims): JwtAuth,
     State(state): State<Arc<AppState>>,
@@ -416,6 +506,7 @@ pub async fn pending_cancel(
     // Controle de scope fail-closed (audit C9).
     claims.require_scope(&JwtScope::Write)?;
     let runtime = capabilities_or_503(&state).await?;
+    require_pending_owned(&claims, &runtime, id).await?;
     runtime.cancel_queued(id).await?;
     Ok(StatusCode::NO_CONTENT)
 }

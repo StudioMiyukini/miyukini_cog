@@ -40,11 +40,11 @@ pub struct MemoryStore {
 }
 
 impl MemoryStore {
-    fn lock_conn(&self) -> std::sync::MutexGuard<'_, Connection> {
+    fn lock_conn(&self) -> Result<std::sync::MutexGuard<'_, Connection>, MemoryError> {
         // Le lock ne peut être empoisonné que si une autre tâche a paniqué en
-        // tenant le mutex. Dans ce cas, autant remonter le poison plutôt que
-        // de continuer avec un état incohérent.
-        self.conn.lock().expect("MemoryStore mutex empoisonné")
+        // tenant le mutex. Fail-closed (C-12) : on remonte une erreur typée
+        // plutôt que de continuer avec un état potentiellement incohérent.
+        self.conn.lock().map_err(|_| MemoryError::LockPoisoned)
     }
 
     /// Ouvre (ou crée) un store dans le fichier `path`. Crée le dossier parent
@@ -77,7 +77,7 @@ impl MemoryStore {
     }
 
     fn init_schema(&self) -> Result<(), MemoryError> {
-        self.lock_conn().execute_batch(
+        self.lock_conn()?.execute_batch(
             r#"
             CREATE TABLE IF NOT EXISTS facts (
                 id          TEXT PRIMARY KEY,
@@ -168,7 +168,7 @@ impl MemoryStore {
 
     /// Enregistre (ou met à jour) un fait. Identifiant stable par `id`.
     pub fn remember(&self, fact: &Fact) -> Result<(), MemoryError> {
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             r#"
             INSERT INTO facts(id, persona, subject, content, source, confidence, created_at, updated_at)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
@@ -192,7 +192,7 @@ impl MemoryStore {
             ],
         )?;
         // Sync FTS index. We rely on facts.rowid (auto) ↔ facts_fts.rowid.
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             "INSERT INTO facts_fts(rowid, content) SELECT rowid, content FROM facts WHERE id = ?1",
             params![fact.id.to_string()],
         )?;
@@ -202,10 +202,10 @@ impl MemoryStore {
     /// Supprime un fait par son `id`. Renvoie le nombre de lignes supprimées.
     pub fn forget(&self, id: Uuid) -> Result<usize, MemoryError> {
         let n = self
-            .lock_conn()
+            .lock_conn()?
             .execute("DELETE FROM facts WHERE id = ?1", params![id.to_string()])?;
         // Le trigger sync FTS5 n'est pas posé en P1 — on nettoie à la main.
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             "DELETE FROM facts_fts WHERE rowid NOT IN (SELECT rowid FROM facts)",
             [],
         )?;
@@ -214,7 +214,7 @@ impl MemoryStore {
 
     /// Liste les faits d'un persona (triés par `updated_at` décroissant).
     pub fn facts_for_persona(&self, persona: &str) -> Result<Vec<Fact>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, persona, subject, content, source, confidence, created_at, updated_at
              FROM facts WHERE persona = ?1 ORDER BY updated_at DESC",
@@ -228,7 +228,7 @@ impl MemoryStore {
         if query.trim().is_empty() {
             return Ok(Vec::new());
         }
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             r#"
             SELECT f.id, f.persona, f.subject, f.content, f.source, f.confidence,
@@ -251,7 +251,7 @@ impl MemoryStore {
     /// Définit (ou met à jour) une préférence.
     pub fn prefer(&self, pref: &Preference) -> Result<(), MemoryError> {
         let value_json = serde_json::to_string(&pref.value)?;
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             r#"
             INSERT INTO preferences(scope, key, value_json, updated_at)
             VALUES (?1, ?2, ?3, ?4)
@@ -266,7 +266,7 @@ impl MemoryStore {
 
     /// Récupère une préférence (None si absente).
     pub fn preference(&self, scope: &str, key: &str) -> Result<Option<Preference>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT scope, key, value_json, updated_at FROM preferences
              WHERE scope = ?1 AND key = ?2",
@@ -297,7 +297,7 @@ impl MemoryStore {
 
     /// Liste toutes les préférences d'un scope (persona ou `"global"`).
     pub fn preferences_for_scope(&self, scope: &str) -> Result<Vec<Preference>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT scope, key, value_json, updated_at FROM preferences
              WHERE scope = ?1 ORDER BY key",
@@ -326,7 +326,7 @@ impl MemoryStore {
 
     /// Supprime une préférence. Renvoie le nombre de lignes supprimées.
     pub fn unprefer(&self, scope: &str, key: &str) -> Result<usize, MemoryError> {
-        let n = self.lock_conn().execute(
+        let n = self.lock_conn()?.execute(
             "DELETE FROM preferences WHERE scope = ?1 AND key = ?2",
             params![scope, key],
         )?;
@@ -345,7 +345,7 @@ impl MemoryStore {
             EpisodeOutcome::Cancelled => "cancelled",
             EpisodeOutcome::Failed => "failed",
         };
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             r#"
             INSERT INTO episodes(id, persona, service_id, intent, user_phrase, params_json,
                                  outcome, error, created_at)
@@ -363,7 +363,7 @@ impl MemoryStore {
                 ep.created_at.to_rfc3339(),
             ],
         )?;
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             "INSERT INTO episodes_fts(rowid, user_phrase) SELECT rowid, user_phrase FROM episodes WHERE id = ?1",
             params![ep.id.to_string()],
         )?;
@@ -372,7 +372,7 @@ impl MemoryStore {
 
     /// Récupère les `limit` derniers épisodes (tous personas confondus).
     pub fn recent_episodes(&self, limit: usize) -> Result<Vec<Episode>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, persona, service_id, intent, user_phrase, params_json,
                     outcome, error, created_at
@@ -389,7 +389,7 @@ impl MemoryStore {
         service_id: &str,
         limit: usize,
     ) -> Result<Vec<Episode>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, persona, service_id, intent, user_phrase, params_json,
                     outcome, error, created_at
@@ -410,7 +410,7 @@ impl MemoryStore {
         if query.trim().is_empty() {
             return Ok(Vec::new());
         }
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             r#"
             SELECT e.id, e.persona, e.service_id, e.intent, e.user_phrase, e.params_json,
@@ -436,7 +436,7 @@ impl MemoryStore {
         if persona.id.trim().is_empty() {
             return Err(MemoryError::InvalidId(persona.id.clone()));
         }
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             r#"
             INSERT INTO personas(id, display_name, description, is_default, created_at)
             VALUES (?1, ?2, ?3, ?4, ?5)
@@ -458,7 +458,7 @@ impl MemoryStore {
 
     /// Récupère un persona par son `id`.
     pub fn persona(&self, id: &str) -> Result<Option<Persona>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, display_name, description, is_default, created_at
              FROM personas WHERE id = ?1",
@@ -470,7 +470,7 @@ impl MemoryStore {
 
     /// Liste tous les personas (triés par `id`).
     pub fn personas(&self) -> Result<Vec<Persona>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, display_name, description, is_default, created_at
              FROM personas ORDER BY id",
@@ -482,7 +482,7 @@ impl MemoryStore {
 
     /// Persona marqué `is_default = 1` (s'il y en a un).
     pub fn default_persona(&self) -> Result<Option<Persona>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, display_name, description, is_default, created_at
              FROM personas WHERE is_default = 1 LIMIT 1",
@@ -591,7 +591,7 @@ impl MemoryStore {
     /// Insère ou met à jour une `LearnedSkill` (clé = `id`).
     pub fn upsert_learned_skill(&self, skill: &LearnedSkill) -> Result<(), MemoryError> {
         let params_json = serde_json::to_string(&skill.params_template)?;
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             r#"
             INSERT INTO learned_skills(id, persona, trigger_phrase, qualified_id,
                                        params_template, status, created_at, accepted_at)
@@ -646,7 +646,7 @@ impl MemoryStore {
 
     /// Marque une skill comme acceptée (statut `Accepted`, `accepted_at` posé).
     pub fn accept_learned_skill(&self, id: Uuid) -> Result<(), MemoryError> {
-        let n = self.lock_conn().execute(
+        let n = self.lock_conn()?.execute(
             "UPDATE learned_skills SET status = ?1, accepted_at = ?2 WHERE id = ?3",
             params![
                 learned_status_as_str(LearnedSkillStatus::Accepted),
@@ -662,7 +662,7 @@ impl MemoryStore {
 
     /// Marque une skill comme refusée (statut `Rejected`).
     pub fn reject_learned_skill(&self, id: Uuid) -> Result<(), MemoryError> {
-        let n = self.lock_conn().execute(
+        let n = self.lock_conn()?.execute(
             "UPDATE learned_skills SET status = ?1 WHERE id = ?2",
             params![
                 learned_status_as_str(LearnedSkillStatus::Rejected),
@@ -677,7 +677,7 @@ impl MemoryStore {
 
     /// Récupère une skill apprise par son id.
     pub fn learned_skill(&self, id: Uuid) -> Result<Option<LearnedSkill>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, persona, trigger_phrase, qualified_id, params_template,
                     status, created_at, accepted_at
@@ -691,7 +691,7 @@ impl MemoryStore {
     /// Liste les skills apprises **acceptées** pour une persona donnée
     /// (utilisable au runtime pour matcher des phrases).
     pub fn active_learned_skills(&self, persona: &str) -> Result<Vec<LearnedSkill>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, persona, trigger_phrase, qualified_id, params_template,
                     status, created_at, accepted_at
@@ -710,7 +710,7 @@ impl MemoryStore {
         &self,
         persona: &str,
     ) -> Result<Vec<LearnedSkill>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, persona, trigger_phrase, qualified_id, params_template,
                     status, created_at, accepted_at
@@ -731,7 +731,7 @@ impl MemoryStore {
         persona: &str,
         qualified_id: &str,
     ) -> Result<bool, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT 1 FROM learned_skills
              WHERE persona = ?1 AND qualified_id = ?2 LIMIT 1",
@@ -824,7 +824,7 @@ impl MemoryStore {
             prompt.to_string(),
         );
         let params_json = serde_json::to_string(&pc.params)?;
-        self.lock_conn().execute(
+        self.lock_conn()?.execute(
             r#"
             INSERT INTO pending_confirmations(id, qualified_id, params_json, persona,
                                               user_phrase, prompt, status, created_at, resolved_at)
@@ -848,7 +848,7 @@ impl MemoryStore {
     /// Liste toutes les confirmations actuellement `Pending` (toutes personas
     /// confondues, plus récentes d'abord).
     pub fn list_pending_confirmations(&self) -> Result<Vec<PendingConfirmation>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
                     status, created_at, resolved_at
@@ -866,7 +866,7 @@ impl MemoryStore {
         &self,
         persona: &str,
     ) -> Result<Vec<PendingConfirmation>, MemoryError> {
-        let conn = self.lock_conn();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
                     status, created_at, resolved_at
@@ -884,64 +884,134 @@ impl MemoryStore {
         &self,
         id: Uuid,
     ) -> Result<Option<PendingConfirmation>, MemoryError> {
-        let conn = self.lock_conn();
-        let mut stmt = conn.prepare(
-            "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
-                    status, created_at, resolved_at
-             FROM pending_confirmations
-             WHERE id = ?1",
-        )?;
-        stmt.query_row(params![id.to_string()], row_to_pending)
-            .optional()
-            .map_err(MemoryError::from)
+        let conn = self.lock_conn()?;
+        pending_by_id(&conn, id)
     }
 
-    /// Marque une confirmation `Confirmed` (statut + resolved_at). Refuse si
-    /// la confirmation n'existe pas ou n'est plus `Pending`.
+    /// Marque une confirmation `Confirmed` (statut + resolved_at) directement
+    /// depuis `Pending`, **sans exécution**. Refuse si la confirmation
+    /// n'existe pas ou n'est plus `Pending`.
+    ///
+    /// Le chemin d'exécution réel doit passer par
+    /// [`MemoryStore::claim_pending_confirmation`] puis
+    /// [`MemoryStore::finalize_pending_confirmation`] (R-017).
     pub fn mark_pending_confirmed(&self, id: Uuid) -> Result<(), MemoryError> {
-        self.transition_pending(id, PendingStatus::Confirmed)
+        self.transition_pending(id, PendingStatus::Pending, PendingStatus::Confirmed)
     }
 
-    /// Marque une confirmation `Cancelled`. Mêmes garanties que `confirmed`.
+    /// Marque une confirmation `Cancelled`. Transition atomique
+    /// `Pending → Cancelled` : refuse si la confirmation n'existe pas ou n'est
+    /// plus `Pending` (y compris si une exécution l'a déjà réclamée).
     pub fn mark_pending_cancelled(&self, id: Uuid) -> Result<(), MemoryError> {
-        self.transition_pending(id, PendingStatus::Cancelled)
+        self.transition_pending(id, PendingStatus::Pending, PendingStatus::Cancelled)
     }
 
+    /// Réclame **atomiquement** une confirmation en vue de son exécution
+    /// (R-017) : `UPDATE ... SET status = 'executing' WHERE id = ? AND
+    /// status = 'pending'`. Seul l'appelant qui fait passer exactement une
+    /// ligne obtient l'enregistrement ; tout appel concurrent reçoit
+    /// `PendingConfirmationAlreadyResolved` (ou `NotFound`).
+    ///
+    /// Retourne l'enregistrement stocké (statut `Executing`) : c'est lui, et
+    /// lui seul, qui doit être exécuté.
+    pub fn claim_pending_confirmation(
+        &self,
+        id: Uuid,
+    ) -> Result<PendingConfirmation, MemoryError> {
+        let conn = self.lock_conn()?;
+        let n = conn.execute(
+            "UPDATE pending_confirmations
+             SET status = ?1
+             WHERE id = ?2 AND status = ?3",
+            params![
+                pending_status_as_str(PendingStatus::Executing),
+                id.to_string(),
+                pending_status_as_str(PendingStatus::Pending),
+            ],
+        )?;
+        let current = pending_by_id(&conn, id)?;
+        match (n, current) {
+            (1, Some(pc)) => Ok(pc),
+            (_, None) => Err(MemoryError::PendingConfirmationNotFound(id)),
+            (_, Some(pc)) => Err(MemoryError::PendingConfirmationAlreadyResolved {
+                id,
+                status: pending_status_as_str(pc.status).into(),
+            }),
+        }
+    }
+
+    /// Finalise une confirmation réclamée par
+    /// [`MemoryStore::claim_pending_confirmation`] : `Executing → Confirmed`
+    /// si `executed`, sinon `Executing → Failed`. Refuse toute autre
+    /// transition.
+    pub fn finalize_pending_confirmation(
+        &self,
+        id: Uuid,
+        executed: bool,
+    ) -> Result<(), MemoryError> {
+        let target = if executed {
+            PendingStatus::Confirmed
+        } else {
+            PendingStatus::Failed
+        };
+        self.transition_pending(id, PendingStatus::Executing, target)
+    }
+
+    /// Transition atomique `from → to` (une seule requête conditionnelle,
+    /// sous le verrou de connexion). Erreur typée si aucune ligne ne change.
     fn transition_pending(
         &self,
         id: Uuid,
-        new_status: PendingStatus,
+        from: PendingStatus,
+        to: PendingStatus,
     ) -> Result<(), MemoryError> {
-        let current = self
-            .pending_confirmation(id)?
-            .ok_or(MemoryError::PendingConfirmationNotFound(id))?;
-        if current.status != PendingStatus::Pending {
-            return Err(MemoryError::PendingConfirmationAlreadyResolved {
-                id,
-                status: pending_status_as_str(current.status).into(),
-            });
-        }
-        let n = self.lock_conn().execute(
+        let conn = self.lock_conn()?;
+        let n = conn.execute(
             "UPDATE pending_confirmations
              SET status = ?1, resolved_at = ?2
-             WHERE id = ?3 AND status = 'pending'",
+             WHERE id = ?3 AND status = ?4",
             params![
-                pending_status_as_str(new_status),
+                pending_status_as_str(to),
                 Utc::now().to_rfc3339(),
                 id.to_string(),
+                pending_status_as_str(from),
             ],
         )?;
-        if n == 0 {
-            return Err(MemoryError::PendingConfirmationNotFound(id));
+        if n == 1 {
+            return Ok(());
         }
-        Ok(())
+        match pending_by_id(&conn, id)? {
+            None => Err(MemoryError::PendingConfirmationNotFound(id)),
+            Some(pc) => Err(MemoryError::PendingConfirmationAlreadyResolved {
+                id,
+                status: pending_status_as_str(pc.status).into(),
+            }),
+        }
     }
+}
+
+/// Lecture d'une confirmation par id sur une connexion déjà verrouillée.
+fn pending_by_id(
+    conn: &Connection,
+    id: Uuid,
+) -> Result<Option<PendingConfirmation>, MemoryError> {
+    let mut stmt = conn.prepare(
+        "SELECT id, qualified_id, params_json, persona, user_phrase, prompt,
+                status, created_at, resolved_at
+         FROM pending_confirmations
+         WHERE id = ?1",
+    )?;
+    stmt.query_row(params![id.to_string()], row_to_pending)
+        .optional()
+        .map_err(MemoryError::from)
 }
 
 fn pending_status_as_str(s: PendingStatus) -> &'static str {
     match s {
         PendingStatus::Pending => "pending",
+        PendingStatus::Executing => "executing",
         PendingStatus::Confirmed => "confirmed",
+        PendingStatus::Failed => "failed",
         PendingStatus::Cancelled => "cancelled",
     }
 }
@@ -958,7 +1028,9 @@ fn row_to_pending(row: &Row<'_>) -> rusqlite::Result<PendingConfirmation> {
     let status_str: String = row.get(6)?;
     let status = match status_str.as_str() {
         "pending" => PendingStatus::Pending,
+        "executing" => PendingStatus::Executing,
         "confirmed" => PendingStatus::Confirmed,
+        "failed" => PendingStatus::Failed,
         "cancelled" => PendingStatus::Cancelled,
         other => {
             return Err(rusqlite::Error::FromSqlConversionFailure(

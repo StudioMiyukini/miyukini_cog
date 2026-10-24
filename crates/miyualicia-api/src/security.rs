@@ -19,12 +19,22 @@ use argon2::Argon2;
 use crate::auth::JwtScope;
 use crate::config::ApiConfig;
 
+/// Droits accordes a un client authentifie, issus EXCLUSIVEMENT de la config.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ClientGrant {
+    /// Scopes accordes.
+    pub scopes: Vec<JwtScope>,
+    /// Personas autorisees (R-002).
+    pub personas: Vec<String>,
+}
+
 /// Verifie `client_id` + `secret` contre le registre configure.
 ///
-/// Retourne les scopes du client (issus de la config, jamais du nom du client) ou `None`.
+/// Retourne les scopes et personas du client (issus de la config, jamais du nom du
+/// client ni de la requete) ou `None`.
 /// Un client inconnu declenche quand meme une verification factice pour limiter
 /// l'enumeration par timing. La comparaison du hash est en temps constant (crate argon2).
-pub fn authenticate_client(config: &ApiConfig, client_id: &str, secret: &str) -> Option<Vec<JwtScope>> {
+pub fn authenticate_client(config: &ApiConfig, client_id: &str, secret: &str) -> Option<ClientGrant> {
     // Hash factice Argon2id valide (secret inconnu) pour egaliser le temps de reponse.
     const DUMMY: &str = "$argon2id$v=19$m=19456,t=2,p=1$ZHVtbXlzYWx0ZHVtbXk$Kq3b3m3mQ4h7m1o0cYk3x5v0o4d8Qm0pJm3wq0ZkZ9o";
     if client_id.is_empty() || secret.is_empty() || config.clients.is_empty() {
@@ -39,7 +49,10 @@ pub fn authenticate_client(config: &ApiConfig, client_id: &str, secret: &str) ->
         .verify_password(secret.as_bytes(), &parsed)
         .is_ok();
     match client {
-        Some(c) if ok => Some(c.scopes.clone()),
+        Some(c) if ok => Some(ClientGrant {
+            scopes: c.scopes.clone(),
+            personas: c.personas.clone(),
+        }),
         _ => None,
     }
 }
@@ -108,11 +121,13 @@ mod tests {
                     client_id: "ops".into(),
                     secret_hash: hash("bon-secret"),
                     scopes: vec![JwtScope::Admin],
+                    personas: vec!["voice".into()],
                 },
                 ApiClientConfig {
                     client_id: "admin".into(),
                     secret_hash: hash("autre"),
                     scopes: vec![JwtScope::Read],
+                    personas: vec![],
                 },
             ],
             ..Default::default()
@@ -121,13 +136,17 @@ mod tests {
 
     #[test]
     fn good_secret_returns_configured_scopes() {
-        assert_eq!(authenticate_client(&cfg(), "ops", "bon-secret"), Some(vec![JwtScope::Admin]));
+        let g = authenticate_client(&cfg(), "ops", "bon-secret").expect("grant");
+        assert_eq!(g.scopes, vec![JwtScope::Admin]);
+        assert_eq!(g.personas, vec!["voice".to_string()]);
     }
 
     #[test]
     fn scope_comes_from_config_not_client_name() {
         // Le client nomme "admin" n'a que Read.
-        assert_eq!(authenticate_client(&cfg(), "admin", "autre"), Some(vec![JwtScope::Read]));
+        let g = authenticate_client(&cfg(), "admin", "autre").expect("grant");
+        assert_eq!(g.scopes, vec![JwtScope::Read]);
+        assert!(g.personas.is_empty());
     }
 
     #[test]

@@ -566,3 +566,176 @@ async fn detect_then_propose_pattern_via_runtime() {
     let pending = mem.pending_learned_skills("voice").unwrap();
     assert_eq!(pending.len(), 1);
 }
+
+// -------------------------------------------------------------------
+// R-017 : confirmation concurrente — une seule exécution
+// -------------------------------------------------------------------
+
+/// Client de service lent qui compte ses appels : l'attente force
+/// l'entrelacement des deux confirmations concurrentes.
+struct SlowCountingClient {
+    calls: std::sync::atomic::AtomicUsize,
+}
+
+impl miyualicia_dispatcher::ServiceClient for SlowCountingClient {
+    // Forme désucrée d'`async_trait` (évite une dépendance de dev).
+    fn call<'life0, 'life1, 'life2, 'async_trait>(
+        &'life0 self,
+        _qualified_id: &'life1 str,
+        _params: &'life2 Value,
+    ) -> std::pin::Pin<
+        Box<dyn std::future::Future<Output = ServiceCallResult> + Send + 'async_trait>,
+    >
+    where
+        'life0: 'async_trait,
+        'life1: 'async_trait,
+        'life2: 'async_trait,
+        Self: 'async_trait,
+    {
+        Box::pin(async move {
+            self.calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+            ServiceCallResult::ok(json!({"done": true}))
+        })
+    }
+}
+
+async fn runtime_with_shout(tmp: &std::path::Path) -> Arc<CapabilitiesRuntime> {
+    let demo = tmp.join("demo");
+    std::fs::create_dir_all(&demo).unwrap();
+    std::fs::write(
+        demo.join("service.manifest.json"),
+        r#"{
+            "id": "demo",
+            "alicia_capabilities": [{
+                "intent": "shout",
+                "phrases_examples": ["x"],
+                "params": {},
+                "writes": true,
+                "confirmation_default": "always_for_writes"
+            }]
+        }"#,
+    )
+    .unwrap();
+    Arc::new(
+        CapabilitiesRuntime::new_with_bypass_gate(CapabilitiesRuntimeConfig {
+            services_dir: Some(tmp.to_path_buf()),
+            ..Default::default()
+        })
+        .await
+        .unwrap(),
+    )
+}
+
+#[tokio::test]
+async fn concurrent_double_confirm_executes_once() {
+    let tmp = tempfile::tempdir().unwrap();
+    let runtime = runtime_with_shout(tmp.path()).await;
+    let client = Arc::new(SlowCountingClient {
+        calls: std::sync::atomic::AtomicUsize::new(0),
+    });
+    runtime.register_service_client("demo", client.clone()).await;
+
+    let id = queued_id(
+        runtime
+        .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+        .await
+        .unwrap(),
+    );
+
+    let (a, b) = tokio::join!(runtime.confirm_queued(id), runtime.confirm_queued(id));
+    let oks = [a.is_ok(), b.is_ok()].iter().filter(|x| **x).count();
+    assert_eq!(oks, 1, "une seule confirmation doit réussir");
+    let refusal = if a.is_err() { a.unwrap_err() } else { b.unwrap_err() };
+    assert!(
+        matches!(
+            refusal,
+            miyualicia::AliciaError::PendingConfirmationAlreadyResolved { .. }
+        ),
+        "refus typé attendu, obtenu {refusal:?}"
+    );
+    assert_eq!(
+        client.calls.load(std::sync::atomic::Ordering::SeqCst),
+        1,
+        "le service ne doit être appelé qu'une fois"
+    );
+    let resolved = runtime.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(resolved.status, miyualicia_memory::PendingStatus::Confirmed);
+}
+
+#[tokio::test]
+async fn confirm_failure_marks_failed_and_is_not_retryable() {
+    let tmp = tempfile::tempdir().unwrap();
+    let runtime = runtime_with_shout(tmp.path()).await;
+    // Aucun ServiceClient enregistré pour `demo` : l'exécution échoue.
+    let id = queued_id(
+        runtime
+        .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+        .await
+        .unwrap(),
+    );
+    assert!(runtime.confirm_queued(id).await.is_err());
+    let pc = runtime.pending_confirmation(id).await.unwrap().unwrap();
+    assert_eq!(pc.status, miyualicia_memory::PendingStatus::Failed);
+    // Pas de nouvelle tentative possible
+    let err = runtime.confirm_queued(id).await.unwrap_err();
+    assert!(matches!(
+        err,
+        miyualicia::AliciaError::PendingConfirmationAlreadyResolved { .. }
+    ));
+}
+
+#[tokio::test]
+async fn cancel_after_confirm_is_refused() {
+    let tmp = tempfile::tempdir().unwrap();
+    let runtime = runtime_with_shout(tmp.path()).await;
+    runtime
+        .register_service_client("demo", Arc::new(MockServiceClient::new()))
+        .await;
+    let id = queued_id(
+        runtime
+        .dispatch_and_queue("demo.shout", &Value::Null, "voice", "x")
+        .await
+        .unwrap(),
+    );
+    runtime.confirm_queued(id).await.unwrap();
+    assert!(runtime.cancel_queued(id).await.is_err());
+}
+
+#[tokio::test]
+async fn handle_tool_calls_queues_pending_confirmation() {
+    let tmp = tempfile::tempdir().unwrap();
+    let runtime = runtime_with_shout(tmp.path()).await;
+    let mock = Arc::new(MockServiceClient::new());
+    runtime.register_service_client("demo", mock.clone()).await;
+    let response = json!({
+        "choices": [{
+            "message": {
+                "role": "assistant",
+                "tool_calls": [{
+                    "id": "call_1",
+                    "type": "function",
+                    "function": {"name": "demo.shout", "arguments": "{\"loud\":true}"}
+                }]
+            }
+        }]
+    });
+    let calls = CapabilitiesRuntime::extract_tool_calls(&response).expect("calls");
+    let handled = runtime.handle_tool_calls(&calls, "voice", "crie").await.unwrap();
+    assert!(handled[0].tool_message.is_none());
+    let pid = handled[0].pending_id.expect("pending mise en file");
+    assert_eq!(mock.calls().len(), 0, "rien d'exécuté avant confirmation");
+    let pc = runtime.pending_confirmation(pid).await.unwrap().unwrap();
+    assert_eq!(pc.qualified_id, "demo.shout");
+    assert_eq!(pc.params, json!({"loud": true}));
+    runtime.confirm_queued(pid).await.unwrap();
+    assert_eq!(mock.calls().len(), 1);
+}
+
+/// Extrait l'id d'une `PendingConfirmation` mise en file.
+fn queued_id(outcome: miyualicia::capabilities_runtime::QueuedDispatch) -> uuid::Uuid {
+    let miyualicia::capabilities_runtime::QueuedDispatch::Queued { id, .. } = outcome else {
+        panic!("expected Queued");
+    };
+    id
+}

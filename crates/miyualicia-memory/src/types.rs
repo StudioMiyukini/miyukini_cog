@@ -259,8 +259,15 @@ impl LearnedSkill {
 pub enum PendingStatus {
     /// En attente de décision utilisateur.
     Pending,
-    /// L'utilisateur a confirmé — l'exécution a eu lieu (ou est en cours).
+    /// Confirmation réclamée atomiquement, exécution en cours (R-017). Un
+    /// enregistrement dans cet état ne peut plus être réclamé : il ne sera
+    /// jamais ré-exécuté, même après un arrêt brutal (fail-closed).
+    Executing,
+    /// L'utilisateur a confirmé — l'exécution a eu lieu.
     Confirmed,
+    /// L'exécution a été tentée après confirmation mais a échoué (erreur
+    /// dispatcher / gouvernance). Terminal : pas de nouvelle tentative.
+    Failed,
     /// L'utilisateur a refusé — pas d'exécution, audit `Cancelled` posé.
     Cancelled,
 }

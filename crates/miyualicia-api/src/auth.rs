@@ -57,6 +57,13 @@ pub struct JwtClaims {
     pub iat: u64,
     /// Scopes d'acces autorises.
     pub scopes: Vec<JwtScope>,
+    /// Personas qu'Alicia peut incarner pour ce client (R-002, C-20).
+    ///
+    /// Issues EXCLUSIVEMENT de `api.clients[].personas` a l'emission du token
+    /// (signe HS256) ; jamais d'un champ de requete. Absent / vide : aucune
+    /// persona autorisee (fail-closed, y compris pour un token `admin`).
+    #[serde(default)]
+    pub personas: Vec<String>,
 }
 
 impl JwtClaims {
@@ -71,6 +78,31 @@ impl JwtClaims {
             exp: now + ttl_secs,
             iat: now,
             scopes,
+            personas: Vec::new(),
+        }
+    }
+
+    /// Fixe les personas autorisees (issues de la config du client).
+    #[must_use]
+    pub fn with_personas(mut self, personas: Vec<String>) -> Self {
+        self.personas = personas;
+        self
+    }
+
+    /// Retourne `true` si la persona fait partie des personas autorisees.
+    pub fn allows_persona(&self, persona: &str) -> bool {
+        self.personas.iter().any(|p| p == persona)
+    }
+
+    /// Verifie que la persona est autorisee pour ce client, `PersonaForbidden`
+    /// sinon (fail-closed, aucun passe-droit `admin`).
+    pub fn require_persona(&self, persona: &str) -> Result<(), ApiError> {
+        if self.allows_persona(persona) {
+            Ok(())
+        } else {
+            Err(ApiError::PersonaForbidden {
+                persona: persona.to_string(),
+            })
         }
     }
 
@@ -259,6 +291,26 @@ mod tests {
         assert_eq!(JwtScope::Read.to_string(), "read");
         assert_eq!(JwtScope::Write.to_string(), "write");
         assert_eq!(JwtScope::Admin.to_string(), "admin");
+    }
+
+    #[test]
+    fn test_personas_roundtrip_and_require() {
+        let claims = JwtClaims::new("c", vec![JwtScope::Write], 3600)
+            .with_personas(vec!["voice".into()]);
+        let token = generate_token(&claims, TEST_SECRET).expect("generate token");
+        let verified = verify_token(&token, TEST_SECRET).expect("verify token");
+        assert_eq!(verified.personas, vec!["voice".to_string()]);
+        assert!(verified.require_persona("voice").is_ok());
+        assert!(matches!(
+            verified.require_persona("work"),
+            Err(ApiError::PersonaForbidden { .. })
+        ));
+    }
+
+    #[test]
+    fn test_admin_without_personas_gets_none() {
+        let claims = JwtClaims::new("admin", vec![JwtScope::Admin], 3600);
+        assert!(claims.require_persona("voice").is_err());
     }
 
     #[test]

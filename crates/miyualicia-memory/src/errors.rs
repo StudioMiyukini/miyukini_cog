@@ -54,8 +54,13 @@ pub enum MemoryError {
     #[error("confirmation en attente introuvable : {0}")]
     PendingConfirmationNotFound(uuid::Uuid),
 
-    /// Confirmation déjà résolue (confirmée ou annulée) — ne peut plus être
-    /// modifiée.
+    /// Verrou interne de la connexion SQLite empoisonné (panique d'un autre
+    /// thread pendant qu'il le tenait). Fail-closed : l'opération est refusée.
+    #[error("verrou du store mémoire empoisonné")]
+    LockPoisoned,
+
+    /// Confirmation déjà résolue (confirmée, annulée, en cours d'exécution
+    /// ou échouée) — ne peut plus être réclamée ni modifiée.
     #[error("confirmation {id} déjà résolue (statut {status})")]
     PendingConfirmationAlreadyResolved {
         /// Identifiant.

@@ -52,6 +52,20 @@ pub enum AliciaError {
         action: String,
     },
 
+    /// Confirmation en attente introuvable (aucun enregistrement pour cet id).
+    #[error("confirmation en attente introuvable : {0}")]
+    PendingConfirmationNotFound(uuid::Uuid),
+
+    /// Confirmation en attente deja resolue ou deja reclamee par une autre
+    /// execution (R-017) : refus, aucune execution.
+    #[error("confirmation {id} déjà résolue (statut {status})")]
+    PendingConfirmationAlreadyResolved {
+        /// Identifiant de la confirmation.
+        id: uuid::Uuid,
+        /// Statut courant (serialise).
+        status: String,
+    },
+
     /// Erreur interne imprevue.
     #[error("erreur interne : {0}")]
     InternalError(String),

@@ -212,7 +212,7 @@ pub fn build_router(alicia: Arc<AliciaService>, config: ApiConfig, secret: Vec<u
 ///
 /// Genere un token JWT pour un client authentifie. Le secret est verifie (Argon2id, temps
 /// constant) contre le registre `clients` de la config ; registre vide => refus (fail-closed).
-/// Les scopes viennent de la config du client, jamais du nom du `client_id`.
+/// Les scopes et personas viennent de la config du client, jamais du nom du `client_id`.
 async fn auth_token_handler(
     axum::extract::State(state): axum::extract::State<Arc<AppState>>,
     axum::Json(req): axum::Json<crate::dto::TokenRequest>,
@@ -224,19 +224,23 @@ async fn auth_token_handler(
     let config = state.config.clone();
     let (cid, secret) = (req.client_id.clone(), req.secret);
     // Argon2 est couteux : hors du runtime async.
-    let scopes = tokio::task::spawn_blocking(move || {
+    let grant = tokio::task::spawn_blocking(move || {
         crate::security::authenticate_client(&config, &cid, &secret)
     })
     .await
     .map_err(|e| crate::errors::ApiError::InternalError(format!("auth: {e}")))?
     .ok_or(crate::errors::ApiError::Unauthorized)?;
 
-    let scope_names: Vec<String> = scopes
+    let scope_names: Vec<String> = grant
+        .scopes
         .iter()
         .map(std::string::ToString::to_string)
         .collect();
     let ttl = state.config.token_ttl_secs;
-    let claims = crate::auth::JwtClaims::new(&req.client_id, scopes, ttl);
+    // Personas autorisees : config du client uniquement (R-002, C-20).
+    let personas = grant.personas.clone();
+    let claims = crate::auth::JwtClaims::new(&req.client_id, grant.scopes, ttl)
+        .with_personas(grant.personas);
     let token = crate::auth::generate_token(&claims, &state.jwt_secret.0)?;
 
     Ok(axum::Json(crate::dto::TokenResponse {
@@ -244,6 +248,7 @@ async fn auth_token_handler(
         token_type: "Bearer".to_string(),
         expires_in: ttl,
         scopes: scope_names,
+        personas,
     }))
 }
 

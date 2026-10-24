@@ -25,6 +25,11 @@ pub struct ApiClientConfig {
     pub secret_hash: String,
     /// Scopes accordes a ce client (ex: `["read","write"]`, `["admin"]`).
     pub scopes: Vec<JwtScope>,
+    /// Personas qu'Alicia peut incarner pour ce client (R-002). Liste explicite,
+    /// sans joker. Vide (defaut) : aucune persona, donc aucun dispatch ni
+    /// resolution de confirmation possible (fail-closed).
+    #[serde(default)]
+    pub personas: Vec<String>,
 }
 
 /// Configuration du serveur API REST Alicia.
@@ -122,6 +127,14 @@ impl ApiConfig {
                     c.client_id
                 ))
             })?;
+            for p in &c.personas {
+                if p.trim().is_empty() || p.contains('*') {
+                    return Err(ApiError::InternalError(format!(
+                        "config api: persona invalide ou joker interdit pour '{}': '{p}'",
+                        c.client_id
+                    )));
+                }
+            }
         }
         Ok(())
     }
@@ -186,9 +199,28 @@ mod tests {
                 client_id: "c".into(),
                 secret_hash: "plaintext".into(),
                 scopes: vec![JwtScope::Read],
+                personas: vec![],
             }],
             ..Default::default()
         };
         assert!(cfg.validate().is_err());
+    }
+
+    #[test]
+    fn test_validate_persona_wildcard_or_empty_fails() {
+        // Hash PHC syntaxiquement valide (la verification n'est pas en jeu ici).
+        let hash = "$argon2id$v=19$m=19456,t=2,p=1$ZHVtbXlzYWx0ZHVtbXk$Kq3b3m3mQ4h7m1o0cYk3x5v0o4d8Qm0pJm3wq0ZkZ9o";
+        for bad in ["*", "", "  "] {
+            let cfg = ApiConfig {
+                clients: vec![ApiClientConfig {
+                    client_id: "c".into(),
+                    secret_hash: hash.into(),
+                    scopes: vec![JwtScope::Write],
+                    personas: vec![bad.into()],
+                }],
+                ..Default::default()
+            };
+            assert!(cfg.validate().is_err(), "persona '{bad}' doit etre refusee");
+        }
     }
 }

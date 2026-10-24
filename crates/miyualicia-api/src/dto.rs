@@ -66,6 +66,8 @@ pub struct TokenResponse {
     pub expires_in: u64,
     /// Scopes accordes.
     pub scopes: Vec<String>,
+    /// Personas autorisees pour ce client (issues de la config).
+    pub personas: Vec<String>,
 }
 
 /// Etat complet de la maison.
@@ -244,6 +246,7 @@ mod tests {
             token_type: "Bearer".to_string(),
             expires_in: 3600,
             scopes: vec!["read".to_string(), "write".to_string()],
+            personas: vec!["voice".to_string()],
         };
         let json = serde_json::to_string(&resp).expect("serialize");
         assert!(json.contains("access_token"));

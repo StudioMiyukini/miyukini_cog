@@ -73,11 +73,13 @@ fn cfg_with_clients() -> ApiConfig {
                 client_id: "ops".into(),
                 secret_hash: hash("s3cret"),
                 scopes: vec![JwtScope::Admin],
+                personas: vec!["voice".into()],
             },
             ApiClientConfig {
                 client_id: "admin".into(),
                 secret_hash: hash("lecteur"),
                 scopes: vec![JwtScope::Read],
+                personas: vec![],
             },
         ],
         ..Default::default()
@@ -104,6 +106,20 @@ async fn token_scopes_come_from_config_not_client_id() {
     let (st, body, _) = call(router(cfg_with_clients()), token_req("ops", "s3cret")).await;
     assert_eq!(st, StatusCode::OK);
     assert_eq!(body["scopes"], json!(["admin"]));
+}
+
+#[tokio::test]
+async fn token_personas_come_from_config() {
+    // R-002 : les personas du token viennent de la config du client.
+    let (st, body, _) = call(router(cfg_with_clients()), token_req("ops", "s3cret")).await;
+    assert_eq!(st, StatusCode::OK);
+    assert_eq!(body["personas"], json!(["voice"]));
+    let tok = body["access_token"].as_str().unwrap();
+    let claims = miyualicia_api::auth::verify_token(tok, SECRET).unwrap();
+    assert_eq!(claims.personas, vec!["voice".to_string()]);
+
+    let (_, body, _) = call(router(cfg_with_clients()), token_req("admin", "lecteur")).await;
+    assert_eq!(body["personas"], json!([]));
 }
 
 #[tokio::test]

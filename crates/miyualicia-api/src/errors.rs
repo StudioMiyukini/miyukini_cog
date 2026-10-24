@@ -30,6 +30,17 @@ pub enum ApiError {
         required: String,
     },
 
+    /// Persona non autorisee pour le client authentifie (R-002, C-20).
+    #[error("persona '{persona}' non autorisee pour ce client")]
+    PersonaForbidden {
+        /// Persona refusee.
+        persona: String,
+    },
+
+    /// Conflit d'etat (ex : confirmation deja resolue ou deja reclamee).
+    #[error("conflit : {0}")]
+    Conflict(String),
+
     /// Ressource non trouvee.
     #[error("ressource introuvable : {0}")]
     NotFound(String),
@@ -63,7 +74,8 @@ impl ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::Unauthorized | Self::TokenExpired | Self::JwtError(_) => StatusCode::UNAUTHORIZED,
-            Self::Forbidden { .. } => StatusCode::FORBIDDEN,
+            Self::Forbidden { .. } | Self::PersonaForbidden { .. } => StatusCode::FORBIDDEN,
+            Self::Conflict(_) => StatusCode::CONFLICT,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Self::TooManyRequests { .. } => StatusCode::TOO_MANY_REQUESTS,
@@ -77,6 +89,8 @@ impl ApiError {
             Self::Unauthorized => "Unauthorized",
             Self::TokenExpired => "TokenExpired",
             Self::Forbidden { .. } => "Forbidden",
+            Self::PersonaForbidden { .. } => "PersonaForbidden",
+            Self::Conflict(_) => "Conflict",
             Self::NotFound(_) => "NotFound",
             Self::UnprocessableEntity(_) => "UnprocessableEntity",
             Self::TooManyRequests { .. } => "TooManyRequests",
@@ -104,7 +118,15 @@ impl IntoResponse for ApiError {
 
 impl From<miyualicia::AliciaError> for ApiError {
     fn from(err: miyualicia::AliciaError) -> Self {
-        Self::AliciaError(err.to_string())
+        match err {
+            miyualicia::AliciaError::PendingConfirmationNotFound(id) => {
+                Self::NotFound(format!("confirmation en attente {id}"))
+            }
+            e @ miyualicia::AliciaError::PendingConfirmationAlreadyResolved { .. } => {
+                Self::Conflict(e.to_string())
+            }
+            other => Self::AliciaError(other.to_string()),
+        }
     }
 }
 
@@ -138,6 +160,28 @@ mod tests {
             retry_after_secs: 30,
         };
         assert_eq!(err.status_code(), StatusCode::TOO_MANY_REQUESTS);
+    }
+
+    #[test]
+    fn test_persona_forbidden_and_conflict_status_codes() {
+        let err = ApiError::PersonaForbidden {
+            persona: "work".into(),
+        };
+        assert_eq!(err.status_code(), StatusCode::FORBIDDEN);
+        assert_eq!(ApiError::Conflict("x".into()).status_code(), StatusCode::CONFLICT);
+    }
+
+    #[test]
+    fn test_pending_errors_mapping() {
+        let id = uuid::Uuid::new_v4();
+        let nf: ApiError = miyualicia::AliciaError::PendingConfirmationNotFound(id).into();
+        assert_eq!(nf.status_code(), StatusCode::NOT_FOUND);
+        let ar: ApiError = miyualicia::AliciaError::PendingConfirmationAlreadyResolved {
+            id,
+            status: "executing".into(),
+        }
+        .into();
+        assert_eq!(ar.status_code(), StatusCode::CONFLICT);
     }
 
     #[test]
