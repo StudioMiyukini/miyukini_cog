@@ -1,0 +1,111 @@
+{
+  "id": "jaymail",
+  "name": "Jay Mail",
+  "description": "Client email Miyukini (SMTP + IMAP) de la suite Jay Bureau",
+  "icon": "✉️",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "network", "email"],
+  "tags": ["email", "smtp", "imap", "communication"],
+  "execution_mode": "standalone",
+  "binary_name": "jaymail.exe",
+  "platforms": {
+    "windows_x64": "jaymail.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "send_mail",
+      "description": "Envoie un courriel via SMTP. Demande confirmation avant envoi.",
+      "phrases_examples": [
+        "envoie un mail à Jean",
+        "écris un email à mon comptable",
+        "transmets ce message à l'équipe"
+      ],
+      "params": {
+        "to": {
+          "type": "string",
+          "required": true,
+          "description": "Destinataire principal (adresse email)."
+        },
+        "subject": {
+          "type": "string",
+          "required": true,
+          "description": "Sujet de l'email."
+        },
+        "body": {
+          "type": "string",
+          "required": true,
+          "description": "Corps du message (texte brut)."
+        },
+        "cc": {
+          "type": "string",
+          "required": false,
+          "description": "Destinataire(s) en copie (séparés par virgule)."
+        },
+        "bcc": {
+          "type": "string",
+          "required": false,
+          "description": "Destinataire(s) en copie cachée (séparés par virgule)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "email"
+    },
+    {
+      "intent": "list_recent_inbox",
+      "description": "Liste les courriels récents reçus dans la boîte de réception.",
+      "phrases_examples": [
+        "mes derniers mails",
+        "qu'est-ce que j'ai reçu",
+        "mes nouveaux messages"
+      ],
+      "params": {
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 10,
+          "description": "Nombre de mails à retourner. Défaut : 10."
+        },
+        "unread_only": {
+          "type": "bool",
+          "required": false,
+          "default": false,
+          "description": "Si true, ne retourne que les non-lus."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "email"
+    },
+    {
+      "intent": "search_mail",
+      "description": "Recherche dans la boîte de réception sur expéditeur, sujet ou texte.",
+      "phrases_examples": [
+        "trouve les mails de Jean",
+        "cherche les mails contenant 'facture'",
+        "mes échanges avec le comptable"
+      ],
+      "params": {
+        "query": {
+          "type": "string",
+          "required": true,
+          "description": "Texte à rechercher (matché contre from / subject / body)."
+        },
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 20,
+          "description": "Nombre maximum de résultats. Défaut : 20."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "email"
+    }
+  ]
+}

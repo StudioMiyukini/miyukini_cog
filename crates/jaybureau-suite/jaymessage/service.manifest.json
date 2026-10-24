@@ -1,0 +1,101 @@
+{
+  "id": "jaymessage",
+  "name": "Jay Message",
+  "description": "Messagerie instantanée Miyukini de la suite Jay Bureau",
+  "icon": "💬",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "network", "messaging"],
+  "tags": ["chat", "messagerie", "instant", "communication"],
+  "execution_mode": "standalone",
+  "binary_name": "jaymessage.exe",
+  "platforms": {
+    "windows_x64": "jaymessage.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "send_message",
+      "description": "Envoie un message instantané dans un thread (1-1 ou groupe). Demande confirmation avant envoi.",
+      "phrases_examples": [
+        "envoie un message à Jean",
+        "écris à l'équipe",
+        "ping Marie sur le chat"
+      ],
+      "params": {
+        "thread_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du thread cible (1-1 ou groupe)."
+        },
+        "body": {
+          "type": "string",
+          "required": true,
+          "description": "Corps du message (texte brut)."
+        },
+        "reply_to": {
+          "type": "string",
+          "required": false,
+          "description": "Identifiant du message auquel on répond (optionnel)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "messaging"
+    },
+    {
+      "intent": "list_recent_threads",
+      "description": "Liste les threads de discussion récents avec leur dernier message.",
+      "phrases_examples": [
+        "mes derniers messages",
+        "qui m'a écrit",
+        "mes conversations récentes"
+      ],
+      "params": {
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 10,
+          "description": "Nombre maximum de threads à retourner. Défaut : 10."
+        },
+        "unread_only": {
+          "type": "bool",
+          "required": false,
+          "default": false,
+          "description": "Si true, ne retourne que les threads avec messages non lus."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "messaging"
+    },
+    {
+      "intent": "search_threads",
+      "description": "Recherche des messages dans les threads (par texte, expéditeur ou nom de thread).",
+      "phrases_examples": [
+        "cherche les messages contenant 'projet'",
+        "trouve mes échanges avec Jean",
+        "qu'est-ce qu'on a dit sur la facture"
+      ],
+      "params": {
+        "query": {
+          "type": "string",
+          "required": true,
+          "description": "Texte à rechercher (matché contre body / from / thread name)."
+        },
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 20,
+          "description": "Nombre maximum de résultats. Défaut : 20."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "messaging"
+    }
+  ]
+}

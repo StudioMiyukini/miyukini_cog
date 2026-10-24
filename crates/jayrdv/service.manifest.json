@@ -1,0 +1,137 @@
+{
+  "id": "jayrdv",
+  "name": "JayRDV",
+  "description": "Service rendez-vous et réservation en ligne du COG",
+  "icon": "📅",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "calendar", "notifications"],
+  "tags": ["rendez-vous", "booking", "réservation"],
+  "execution_mode": "standalone",
+  "binary_name": "jayrdv.exe",
+  "platforms": {
+    "windows_x64": "jayrdv.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "book_appointment",
+      "description": "Réserve un rendez-vous chez un professionnel sur un créneau donné. Demande confirmation avant écriture.",
+      "phrases_examples": [
+        "prends-moi un rendez-vous chez le médecin",
+        "réserve un créneau",
+        "book un rdv le 15 mai à 10h"
+      ],
+      "params": {
+        "professional_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du professionnel chez qui réserver."
+        },
+        "service_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du service (consultation, soin, ...)."
+        },
+        "slot_start": {
+          "type": "datetime",
+          "required": true,
+          "description": "Début du créneau (ISO 8601 avec timezone)."
+        },
+        "client_note": {
+          "type": "string",
+          "required": false,
+          "description": "Note personnelle à transmettre au professionnel."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "booking"
+    },
+    {
+      "intent": "cancel_appointment",
+      "description": "Annule un rendez-vous existant. Demande confirmation avant écriture.",
+      "phrases_examples": [
+        "annule mon rendez-vous chez le médecin",
+        "annule le rdv de demain",
+        "supprime ma réservation"
+      ],
+      "params": {
+        "appointment_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du rendez-vous à annuler."
+        },
+        "reason": {
+          "type": "string",
+          "required": false,
+          "description": "Motif d'annulation (optionnel)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "booking"
+    },
+    {
+      "intent": "list_my_appointments",
+      "description": "Liste les rendez-vous à venir de l'utilisateur sur une période.",
+      "phrases_examples": [
+        "mes rendez-vous à venir",
+        "qu'est-ce que j'ai comme rdv",
+        "mes prochaines réservations"
+      ],
+      "params": {
+        "from": {
+          "type": "date",
+          "required": false,
+          "description": "Date de début (incluse). Défaut : aujourd'hui."
+        },
+        "to": {
+          "type": "date",
+          "required": false,
+          "description": "Date de fin (incluse). Défaut : 30 jours après from."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "booking"
+    },
+    {
+      "intent": "list_available_slots",
+      "description": "Liste les créneaux disponibles chez un professionnel sur un service donné.",
+      "phrases_examples": [
+        "trouve-moi un créneau chez le dentiste",
+        "quand est-ce que tel pro est disponible",
+        "quels créneaux libres demain"
+      ],
+      "params": {
+        "professional_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du professionnel."
+        },
+        "service_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du service voulu."
+        },
+        "from": {
+          "type": "datetime",
+          "required": false,
+          "description": "Début de la fenêtre de recherche (ISO 8601). Défaut : maintenant."
+        },
+        "to": {
+          "type": "datetime",
+          "required": false,
+          "description": "Fin de la fenêtre. Défaut : 7 jours après from."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "booking"
+    }
+  ]
+}

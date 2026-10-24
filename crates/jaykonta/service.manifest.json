@@ -15,5 +15,91 @@
   "binary_name": "jaykonta.exe",
   "platforms": {
     "windows_x64": "jaykonta.exe"
-  }
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "add_movement",
+      "description": "Ajoute un mouvement (dépense ou revenu) dans une cagnotte JayKonta. Demande confirmation avant écriture.",
+      "phrases_examples": [
+        "note une dépense de 12 euros",
+        "ajoute 50€ de courses",
+        "enregistre un revenu de 200€"
+      ],
+      "params": {
+        "amount": {
+          "type": "float",
+          "required": true,
+          "description": "Montant en euros (positif). Le sens (dépense/revenu) est porté par 'kind'."
+        },
+        "kind": {
+          "type": "enum",
+          "required": true,
+          "enum_values": ["expense", "income"],
+          "description": "expense = dépense, income = revenu"
+        },
+        "label": {
+          "type": "string",
+          "required": false,
+          "description": "Libellé court du mouvement (ex: 'café', 'salaire')."
+        },
+        "category": {
+          "type": "string",
+          "required": false,
+          "description": "Catégorie de la dépense ou du revenu."
+        },
+        "purse_id": {
+          "type": "string",
+          "required": false,
+          "description": "Identifiant de la cagnotte cible. Défaut : cagnotte par défaut de l'utilisateur."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "finance"
+    },
+    {
+      "intent": "list_recent_movements",
+      "description": "Liste les derniers mouvements d'une cagnotte JayKonta.",
+      "phrases_examples": [
+        "mes dernières dépenses",
+        "qu'est-ce que j'ai dépensé récemment",
+        "mes derniers mouvements"
+      ],
+      "params": {
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 10,
+          "description": "Nombre maximum de mouvements à retourner. Défaut : 10."
+        },
+        "purse_id": {
+          "type": "string",
+          "required": false,
+          "description": "Cagnotte à consulter. Défaut : cagnotte par défaut."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "finance"
+    },
+    {
+      "intent": "get_balance",
+      "description": "Donne le solde courant d'une cagnotte JayKonta.",
+      "phrases_examples": [
+        "quel est mon solde",
+        "combien il me reste",
+        "mon budget restant"
+      ],
+      "params": {
+        "purse_id": {
+          "type": "string",
+          "required": false,
+          "description": "Cagnotte à consulter. Défaut : cagnotte par défaut."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "finance"
+    }
+  ]
 }

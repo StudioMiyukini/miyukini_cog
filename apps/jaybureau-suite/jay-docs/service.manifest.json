@@ -1,0 +1,94 @@
+{
+  "id": "jaydocs",
+  "name": "Jay Docs",
+  "description": "Éditeur de documents collaboratif Miyukini (Google Docs-like)",
+  "icon": "📝",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "collaboration"],
+  "tags": ["bureautique", "documents", "collaboratif"],
+  "execution_mode": "standalone",
+  "binary_name": "jay-docs.exe",
+  "platforms": {
+    "windows_x64": "jay-docs.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "create_document",
+      "description": "Crée un nouveau document Jay Docs avec un titre et un contenu initial optionnel.",
+      "phrases_examples": [
+        "crée un nouveau document",
+        "ouvre un doc pour les notes de réunion",
+        "nouveau fichier intitulé compte-rendu"
+      ],
+      "params": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Titre du document."
+        },
+        "content": {
+          "type": "string",
+          "required": false,
+          "description": "Contenu initial (texte brut ou Markdown)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "office"
+    },
+    {
+      "intent": "list_my_documents",
+      "description": "Liste les documents Jay Docs de l'utilisateur, optionnellement filtrés par recherche dans les titres.",
+      "phrases_examples": [
+        "mes derniers documents",
+        "trouve mon doc sur le projet",
+        "liste mes fichiers texte"
+      ],
+      "params": {
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 10,
+          "description": "Nombre max à retourner. Défaut : 10."
+        },
+        "search": {
+          "type": "string",
+          "required": false,
+          "description": "Filtre substring sur le titre."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "office"
+    },
+    {
+      "intent": "append_to_document",
+      "description": "Ajoute du contenu à la fin d'un document existant. Demande confirmation avant écriture.",
+      "phrases_examples": [
+        "ajoute cette note au document",
+        "rajoute le résumé à la fin du doc",
+        "complète le compte-rendu"
+      ],
+      "params": {
+        "document_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du document cible."
+        },
+        "content": {
+          "type": "string",
+          "required": true,
+          "description": "Contenu à ajouter (texte brut ou Markdown)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "office"
+    }
+  ]
+}

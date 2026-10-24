@@ -1,0 +1,89 @@
+{
+  "id": "jaysheets",
+  "name": "Jay Sheets",
+  "description": "Tableur collaboratif Miyukini (Google Sheets-like)",
+  "icon": "📊",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "collaboration"],
+  "tags": ["bureautique", "tableur", "collaboratif"],
+  "execution_mode": "standalone",
+  "binary_name": "jay-sheets.exe",
+  "platforms": {
+    "windows_x64": "jay-sheets.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "create_sheet",
+      "description": "Crée un nouveau tableur Jay Sheets.",
+      "phrases_examples": [
+        "crée un nouveau tableur",
+        "ouvre une feuille pour les ventes",
+        "nouveau classeur"
+      ],
+      "params": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Titre du tableur."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "office"
+    },
+    {
+      "intent": "list_my_sheets",
+      "description": "Liste les tableurs Jay Sheets de l'utilisateur.",
+      "phrases_examples": [
+        "mes tableurs",
+        "liste mes feuilles de calcul",
+        "mes classeurs récents"
+      ],
+      "params": {
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 10,
+          "description": "Nombre max à retourner. Défaut : 10."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "office"
+    },
+    {
+      "intent": "write_cell",
+      "description": "Écrit une valeur dans une cellule donnée. Demande confirmation avant écriture.",
+      "phrases_examples": [
+        "écris 42 en A1",
+        "mets le total dans B5",
+        "remplis la cellule C3"
+      ],
+      "params": {
+        "sheet_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant du tableur."
+        },
+        "cell": {
+          "type": "string",
+          "required": true,
+          "description": "Référence de cellule (A1, B5, ...)."
+        },
+        "value": {
+          "type": "string",
+          "required": true,
+          "description": "Valeur à écrire (texte ou nombre stringifié)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "office"
+    }
+  ]
+}

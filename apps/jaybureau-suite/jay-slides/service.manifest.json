@@ -1,0 +1,89 @@
+{
+  "id": "jayslides",
+  "name": "Jay Slides",
+  "description": "Présentations collaboratives Miyukini (Google Slides-like)",
+  "icon": "🖼️",
+  "version": "0.1.0",
+  "service_type": "interne_cog",
+  "source": "officiel",
+  "developer": "Miyukini",
+  "min_central_version": "0.2.0",
+  "dependencies": [],
+  "permissions": ["storage", "collaboration"],
+  "tags": ["bureautique", "présentation", "collaboratif"],
+  "execution_mode": "standalone",
+  "binary_name": "jay-slides.exe",
+  "platforms": {
+    "windows_x64": "jay-slides.exe"
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "create_presentation",
+      "description": "Crée une nouvelle présentation Jay Slides.",
+      "phrases_examples": [
+        "crée une nouvelle présentation",
+        "ouvre des slides pour la réunion",
+        "nouveau pitch"
+      ],
+      "params": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Titre de la présentation."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "office"
+    },
+    {
+      "intent": "list_my_presentations",
+      "description": "Liste les présentations Jay Slides de l'utilisateur.",
+      "phrases_examples": [
+        "mes présentations",
+        "liste mes slides",
+        "mes derniers pitchs"
+      ],
+      "params": {
+        "limit": {
+          "type": "int",
+          "required": false,
+          "default": 10,
+          "description": "Nombre max à retourner. Défaut : 10."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "office"
+    },
+    {
+      "intent": "add_slide",
+      "description": "Ajoute une slide à une présentation existante. Demande confirmation avant écriture.",
+      "phrases_examples": [
+        "ajoute une slide d'introduction",
+        "rajoute un slide sur le bilan",
+        "nouvelle slide titrée Conclusion"
+      ],
+      "params": {
+        "presentation_id": {
+          "type": "string",
+          "required": true,
+          "description": "Identifiant de la présentation cible."
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Titre de la slide."
+        },
+        "content": {
+          "type": "string",
+          "required": false,
+          "description": "Texte du corps de la slide (texte brut)."
+        }
+      },
+      "writes": true,
+      "confirmation_default": "always_for_writes",
+      "category": "office"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+# @id: jayslides_client_crate_config
+# @do: declare_jayslides_client_crate
+# @layer: 7
+# @human: Crate jayslides-client — adaptateur ServiceClient pour Jay Slides.
+
+[package]
+name = "jayslides-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Client Alicia → Jay Slides — implémente ServiceClient pour create_presentation, list_my_presentations, add_slide."
+
+[dependencies]
+miyualicia-dispatcher = { path = "../miyualicia-dispatcher" }
+miyualicia-skills     = { path = "../miyualicia-skills" }
+
+serde       = { version = "1", features = ["derive"] }
+serde_json  = "1"
+chrono      = { version = "0.4", features = ["serde"] }
+async-trait = "0.1"
+thiserror   = "2"
+tracing     = "0.1"
+
+[dev-dependencies]
+miyualicia-memory = { path = "../miyualicia-memory" }
+tokio       = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
+tempfile    = "3"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+module_name_repetitions = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"
+unused_self = "allow"
+needless_pass_by_value = "allow"
+similar_names = "allow"
+items_after_statements = "allow"

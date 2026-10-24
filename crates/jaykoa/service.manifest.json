@@ -15,5 +15,45 @@
   "binary_name": "jaykoa.exe",
   "platforms": {
     "windows_x64": "jaykoa.exe"
-  }
+  },
+  "alicia_capabilities": [
+    {
+      "intent": "list_events",
+      "description": "Liste les événements de l'agenda sur une période donnée (par défaut : aujourd'hui).",
+      "phrases_examples": [
+        "qu'est-ce que j'ai aujourd'hui",
+        "mon agenda du jour",
+        "quels sont mes rendez-vous demain",
+        "liste mes événements de la semaine"
+      ],
+      "params": {
+        "from": {
+          "type": "date",
+          "required": false,
+          "description": "Date de début (incluse, format ISO 8601). Défaut : aujourd'hui."
+        },
+        "to": {
+          "type": "date",
+          "required": false,
+          "description": "Date de fin (incluse, format ISO 8601). Défaut : même jour que from."
+        }
+      },
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "calendar"
+    },
+    {
+      "intent": "next_event",
+      "description": "Donne le prochain événement à venir dans l'agenda.",
+      "phrases_examples": [
+        "quel est mon prochain rendez-vous",
+        "qu'est-ce que j'ai après",
+        "donne-moi ma prochaine réunion"
+      ],
+      "params": {},
+      "writes": false,
+      "confirmation_default": "never",
+      "category": "calendar"
+    }
+  ]
 }
