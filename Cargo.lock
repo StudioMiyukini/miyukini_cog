@@ -7293,6 +7293,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "miyuracine"
+version = "0.1.0"
+dependencies = [
+ "hmac",
+ "miyusceau",
+ "pbkdf2",
+ "rand_core 0.6.4",
+ "serde_json",
+ "sha2",
+ "zeroize",
+]
+
+[[package]]
 name = "miyusceau"
 version = "0.1.0"
 dependencies = [

@@ -8,9 +8,9 @@ members = [
     "crates/kindmother",
     "crates/kindmother-db-key",   # Dérivation clé pour SQLCipher
     "crates/kindmother-service",  # Serveur libSQL isolé
+    "crates/kindmother-client",   # Client délégation IPC
     "crates/kindmother-heritage", # Import des bases SQLite héritées (transitoire, K-13)
     "crates/kindmother-import",   # CLI d'import des bases héritées (transitoire, K-13)
-    "crates/kindmother-client",   # Client délégation IPC
     "crates/borderguard",
     "crates/caringnanny",
     "crates/masterbutler",
@@ -34,6 +34,7 @@ members = [
     "crates/miyujobs",
     "crates/miyauth",
     "crates/miyusceau",
+    "crates/miyuracine",          # Racine COG hors ligne : SLIP-39 2 sur 3, clés SLIP-10 par usage (EX-24, EX-25)
     "crates/miyuweb",
     "crates/miyuclock",
     "crates/miyuforum",
