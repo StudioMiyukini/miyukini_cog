@@ -33,18 +33,19 @@ pub trait Titre: Sized {
 
 /// Titre dont la signature, le signataire et la validité ont été vérifiés.
 ///
-/// Seule [`crate::verifier`] peut en construire un : détenir un `Verifie<T>`
+/// Seules [`crate::verifier`] et [`crate::verifier_seuil`] peuvent en construire un : détenir un `Verifie<T>`
 /// prouve que le contrôle a eu lieu.
 #[derive(Debug, Clone)]
 pub struct Verifie<T> {
     titre: T,
-    signataire: Kid,
+    signataires: Vec<Kid>,
     niveau: NiveauConfiance,
 }
 
 impl<T> Verifie<T> {
-    pub(crate) fn nouveau(titre: T, signataire: Kid, niveau: NiveauConfiance) -> Self {
-        Self { titre, signataire, niveau }
+    /// `signataires` : non vide, `kid` croissants (garanti par le vérificateur).
+    pub(crate) fn nouveau(titre: T, signataires: Vec<Kid>, niveau: NiveauConfiance) -> Self {
+        Self { titre, signataires, niveau }
     }
 
     /// Titre vérifié.
@@ -52,12 +53,19 @@ impl<T> Verifie<T> {
         &self.titre
     }
 
-    /// `kid` de la clé qui a signé.
+    /// `kid` du premier signataire compté (le plus petit `kid`). Pour un sceau
+    /// à signature simple, c'est le signataire.
     pub fn signataire(&self) -> &Kid {
-        &self.signataire
+        &self.signataires[0]
     }
 
-    /// Niveau de confiance de l'ancre du signataire.
+    /// Tous les signataires épinglés dont la signature a été vérifiée
+    /// (`kid` croissants, sans doublon).
+    pub fn signataires(&self) -> &[Kid] {
+        &self.signataires
+    }
+
+    /// Niveau de confiance : le plus faible des signataires comptés.
     pub fn niveau(&self) -> NiveauConfiance {
         self.niveau
     }

@@ -4,7 +4,7 @@
 //! @layer  core
 //! @human  miyumarket — outil de signature des paquets Market (éditeur / développement).
 
-//! Outil de signature des paquets Market (Sceau v1, type `ManifestePaquet`).
+//! Outil de signature des paquets Market (Sceau v1.1, type `ManifestePaquet`).
 //!
 //! ```text
 //! miyumarket-signer cle-nouvelle <fichier-cle>

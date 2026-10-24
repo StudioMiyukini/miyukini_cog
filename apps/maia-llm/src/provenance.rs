@@ -12,7 +12,7 @@
 //! Un fichier `X.gguf` n'est chargé que si :
 //!
 //! 1. un **manifeste signé** `X.gguf.sceau` existe à côté de lui ;
-//! 2. ce manifeste est un Sceau v1 (`miyusceau`) de type `ManifestePaquet`
+//! 2. ce manifeste est un Sceau v1.1 (`miyusceau`) de type `ManifestePaquet`
 //!    (`0x03`), de genre [`GENRE_MODELE`], signé par une **ancre de confiance
 //!    épinglée** dans la configuration (`model_trust_anchors`) ;
 //! 3. le nom de fichier, la taille et le **SHA-256 recalculé** du fichier

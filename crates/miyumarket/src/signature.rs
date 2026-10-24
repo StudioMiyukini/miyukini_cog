@@ -2,7 +2,7 @@
 //! @do     signer_verifier_paquet
 //! @role   securite
 //! @layer  core
-//! @human  miyumarket — signature obligatoire des paquets Market (Sceau v1, type 0x03).
+//! @human  miyumarket — signature obligatoire des paquets Market (Sceau v1.1, type 0x03).
 
 //! Paquets signés du Market (CA-01, EX-09, EX-26, C-23, C-34).
 //!
@@ -12,7 +12,7 @@
 //! "MSPS" (4) | version 0x01 (1) | longueur du sceau u32 BE (4) | sceau (n) | archive ZIP (reste)
 //! ```
 //!
-//! Le sceau est un titre Sceau v1 de type `ManifestePaquet` (0x03) signé par
+//! Le sceau est un titre Sceau v1.1 de type `ManifestePaquet` (0x03) signé par
 //! la clé d'un **éditeur de confiance** épinglée dans Central. Sa charge TLV :
 //!
 //! | Tag | Champ | Obligatoire |
@@ -43,8 +43,9 @@ pub const MAGIC_PAQUET_SIGNE: &[u8; 4] = b"MSPS";
 pub const VERSION_ENVELOPPE: u8 = 0x01;
 /// Taille de l'entête d'enveloppe (magic + version + longueur).
 const TAILLE_ENTETE: usize = 4 + 1 + 4;
-/// Taille maximale d'un sceau dans l'enveloppe (entête Sceau + charge max + signature).
-pub const TAILLE_MAX_SCEAU: usize = 42 + miyusceau::TAILLE_MAX_CHARGE + 64;
+/// Taille maximale d'un sceau dans l'enveloppe (borne du format Sceau v1.1 :
+/// charge maximale + bloc de signatures maximal).
+pub const TAILLE_MAX_SCEAU: usize = miyusceau::TAILLE_MAX_SCEAU;
 /// Longueur maximale d'un champ texte (id, version, binaire).
 const TAILLE_MAX_TEXTE: usize = 255;
 
@@ -389,7 +390,7 @@ mod tests {
         let cle = CleSignature::generer();
         let mut paquet = signer_paquet(ARCHIVE, "svc", "1.0.0", None, &cle).unwrap();
         // Octet de la charge TLV (après entête d'enveloppe + entête Sceau).
-        paquet[TAILLE_ENTETE + 42 + 6] ^= 0x01;
+        paquet[TAILLE_ENTETE + 11 + 6] ^= 0x01;
         assert!(matches!(
             verifier_paquet(&paquet, "svc", Some("1.0.0"), &ancres_pour(&cle), 0),
             Err(ErreurSignaturePaquet::Sceau(_))

@@ -45,6 +45,27 @@ pub enum ErreurSceau {
     ChampManquant(u8),
     /// Valeur de champ mal formée (taille, UTF-8, contenu).
     ValeurInvalide(u8),
+    /// Code d'algorithme inconnu (refusé au décodage).
+    AlgorithmeInconnu(u8),
+    /// Algorithme réservé mais non implémenté (ML-DSA-65, hybride) : refusé.
+    AlgorithmeNonPrisEnCharge(u8),
+    /// Algorithme d'une signature différent de celui de l'entête.
+    AlgorithmeIncoherent,
+    /// Nombre de signatures hors de `1..=8`.
+    NombreSignaturesInvalide(u8),
+    /// Signatures non triées par `kid` croissant.
+    SignaturesNonTriees,
+    /// Même signataire présent deux fois.
+    SignataireDuplique,
+    /// Seuil demandé hors de `1..=8`.
+    SeuilInvalide,
+    /// Pas assez de signataires épinglés valides.
+    SeuilNonAtteint {
+        /// Seuil demandé.
+        requis: usize,
+        /// Signataires épinglés valides trouvés.
+        obtenu: usize,
+    },
     /// Titre pas encore valide.
     PasEncoreValide,
     /// Titre expiré.
@@ -70,6 +91,16 @@ impl fmt::Display for ErreurSceau {
             Self::ChampInconnu(t) => write!(f, "champ inconnu : {t}"),
             Self::ChampManquant(t) => write!(f, "champ obligatoire manquant : {t}"),
             Self::ValeurInvalide(t) => write!(f, "valeur invalide pour le champ {t}"),
+            Self::AlgorithmeInconnu(a) => write!(f, "algorithme de signature inconnu : {a:#04x}"),
+            Self::AlgorithmeNonPrisEnCharge(a) => write!(f, "algorithme de signature non pris en charge : {a:#04x}"),
+            Self::AlgorithmeIncoherent => write!(f, "algorithme de signature incohérent avec l'entête"),
+            Self::NombreSignaturesInvalide(n) => write!(f, "nombre de signatures invalide : {n}"),
+            Self::SignaturesNonTriees => write!(f, "signatures non canoniques (kid non croissants)"),
+            Self::SignataireDuplique => write!(f, "signataire présent deux fois"),
+            Self::SeuilInvalide => write!(f, "seuil de signatures invalide"),
+            Self::SeuilNonAtteint { requis, obtenu } => {
+                write!(f, "seuil non atteint : {obtenu} signataire(s) valide(s) sur {requis} requis")
+            }
             Self::PasEncoreValide => write!(f, "titre pas encore valide"),
             Self::Expire => write!(f, "titre expiré"),
         }

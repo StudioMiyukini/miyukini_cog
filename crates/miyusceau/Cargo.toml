@@ -9,7 +9,7 @@ homepage.workspace = true
 documentation.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Sceau v1 — titres signés Ed25519 (passeports, visas, paquets, registre) au format canonique"
+description = "Sceau v1.1 — titres signés Ed25519, multi-signature à seuil (passeports, visas, paquets, registre) au format canonique"
 
 [dependencies]
 ed25519-dalek = { version = "2", features = ["rand_core"] }
