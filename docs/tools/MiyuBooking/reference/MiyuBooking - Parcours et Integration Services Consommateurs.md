@@ -2,13 +2,13 @@
 
 ## Contexte
 
-Ce document décrit de façon **exhaustive** les **parcours** types (créneaux, réservation, annulation, modification), les **points d'entrée** et le **contrat d'intégration** pour les **services consommateurs** (JayFestival, JayRDV, etc.) qui utilisent MiyuBooking. Il permet une exploitation directe du kit dans ses services : flux d'appel, données échangées, cas d'usage, exemples.
+Ce document décrit de façon **exhaustive** les **parcours** types (créneaux, réservation, annulation, modification), les **points d'entrée** et le **contrat d'intégration** pour les **services consommateurs** (JayRDV, etc.) qui utilisent MiyuBooking. Il permet une exploitation directe du kit dans ses services : flux d'appel, données échangées, cas d'usage, exemples.
 
 **Références** : [MiyuBooking - Documentation Fondatrice](../MiyuBooking%20-%20Documentation%20Fondatrice.md), [MiyuBooking - Reference Outils](../MiyuBooking%20-%20Reference%20Outils.md), [MiyuBooking - Tool Governance Compliance Contract](../contracts/governance/MiyuBooking%20-%20Tool%20Governance%20Compliance%20Contract.md).
 
 ## Portée / Scope
 
-- **Périmètre** : Parcours utilisateur (réserver, annuler, modifier), flux Opérateur → MiyuBooking → KindMother, données (créneaux, réservations, ressources, tarifs), points d'entrée pour JayFestival (billets, réservations ateliers/visiteur), JayRDV (créneaux RDV), et tout service consommateur.
+- **Périmètre** : Parcours utilisateur (réserver, annuler, modifier), flux Opérateur → MiyuBooking → KindMother, données (créneaux, réservations, ressources, tarifs), points d'entrée pour JayRDV (créneaux RDV), et tout service consommateur.
 - **Hors périmètre** : Implémentation détaillée du moteur de créneaux (fuseaux, récurrence) — référencée dans les Implementation Guidelines.
 
 ---
@@ -34,7 +34,7 @@ Ce document décrit de façon **exhaustive** les **parcours** types (créneaux, 
 ## 2. Flux d'appel (gouvernance)
 
 ```
-[Opérateur consommateur] (ex. JayFestival Visiteur, JayRDV Client)
+[Opérateur consommateur] (ex. JayRDV Client)
         ↓ intention (réserver, annuler, lister créneaux)
 [BondingBrother] — traduction intention → requête gouvernée
         ↓
@@ -49,7 +49,7 @@ Ce document décrit de façon **exhaustive** les **parcours** types (créneaux, 
 [Réponse] — succès ou erreur (sans exposer données sensibles)
 ```
 
-Le **service consommateur** (JayFestival, JayRDV) ne appelle **pas** MiyuBooking directement : il passe par **BondingBrother** avec une intention (ex. « réserver le créneau X pour l'utilisateur Y »). StrongFather décide ; MiyuBooking exécute.
+Le **service consommateur** (ex. JayRDV) ne appelle **pas** MiyuBooking directement : il passe par **BondingBrother** avec une intention (ex. « réserver le créneau X pour l'utilisateur Y »). StrongFather décide ; MiyuBooking exécute.
 
 ---
 
@@ -119,17 +119,7 @@ Le **service consommateur** ne détient pas la source de vérité : il envoie de
 
 ## 5. Points d'entrée par service consommateur
 
-### 5.1 JayFestival (visiteur : billets, réservations ateliers)
-
-| Cas d'usage JayFestival | Tools MiyuBooking utilisés | Données côté JayFestival |
-|-------------------------|----------------------------|---------------------------|
-| **Billets / pass événement** | `slots.list` (créneaux d'accès si applicable), `create` (réservation billet/pass), `cancel` | edition_id, visiteur_id, type billet/pass ; liaison édition ↔ ressources (KindMother ou tables alpha). |
-| **Réservation atelier** | `slots.list`, `slots.resolve`, `resource.availability`, `participants.compute`, `create`, `cancel`, `update` | edition_id, atelier_id (ressource), visiteur_id ; créneaux ateliers = ressources avec règles de créneaux. |
-| **Réservation créneau visiteur** (si applicable) | Idem | Même logique ; ressource = « créneau visiteur » pour une édition. |
-
-**Flux typique** : L'Opérateur JayFestival Visiteur envoie les intentions (lister créneaux atelier X pour la date Y, réserver le créneau Z) via BondingBrother ; StrongFather valide ; MiyuBooking exécute ; KindMother persiste. En **alpha**, les réservations peuvent être stockées dans des tables Supabase (atelier_reservations, billets, etc.) en respectant le même contrat logique (WriteIntent équivalent).
-
-### 5.2 JayRDV (créneaux RDV, rendez-vous)
+### 5.1 JayRDV (créneaux RDV, rendez-vous)
 
 | Cas d'usage JayRDV | Tools MiyuBooking utilisés | Données côté JayRDV |
 |--------------------|----------------------------|----------------------|
@@ -140,15 +130,15 @@ Le **service consommateur** ne détient pas la source de vérité : il envoie de
 
 **Flux typique** : Le client (ou le pro) consulte les créneaux via l'Opérateur JayRDV ; l'intention « réserver » est envoyée ; MiyuBooking exécute `create` ; la réservation est persistée (KindMother ou table alpha `appointments` / `reservations`).
 
-### 5.3 Autres services consommateurs
+### 5.2 Autres services consommateurs
 
-Tout **service** qui a besoin de **créneaux**, **réservations**, **ressources** ou **tarification** peut s'appuyer sur le même contrat : intention → BondingBrother → StrongFather → MiyuBooking → KindMother. Les **points d'entrée** sont les ToolIds listés en § 1 ; les **données** sont définies par le contexte métier du service (ex. édition, atelier, professionnel, prestation) et mappées vers ressource_id, slot_id, reservation_id.
+Tout **service** qui a besoin de **créneaux**, **réservations**, **ressources** ou **tarification** peut s'appuyer sur le même contrat : intention → BondingBrother → StrongFather → MiyuBooking → KindMother. Les **points d'entrée** sont les ToolIds listés en § 1 ; les **données** sont définies par le contexte métier du service (ex. professionnel, prestation) et mappées vers ressource_id, slot_id, reservation_id.
 
 ---
 
 ## 6. Alpha / pré-COG : persistance équivalente
 
-En **alpha** (Supabase ou autre backend pré-COG), la persistance des réservations peut être réalisée par des **tables locales** (ex. `atelier_reservations`, `billets`, `appointments`) et des **services** qui reproduisent le comportement attendu (création, annulation, liste créneaux) sans appeler encore KindMother. Le **contrat logique** reste le même : le service consommateur envoie des intentions ; une couche « réservation » exécute l’équivalent des Tools (liste créneaux, créer, annuler) et écrit en base. À la migration COG-native, cette couche est remplacée par l’appel réel à MiyuBooking + WriteIntent KindMother.
+En **alpha** (Supabase ou autre backend pré-COG), la persistance des réservations peut être réalisée par des **tables locales** (ex. `appointments`) et des **services** qui reproduisent le comportement attendu (création, annulation, liste créneaux) sans appeler encore KindMother. Le **contrat logique** reste le même : le service consommateur envoie des intentions ; une couche « réservation » exécute l’équivalent des Tools (liste créneaux, créer, annuler) et écrit en base. À la migration COG-native, cette couche est remplacée par l’appel réel à MiyuBooking + WriteIntent KindMother.
 
 ---
 

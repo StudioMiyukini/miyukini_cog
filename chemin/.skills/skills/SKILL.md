@@ -45,7 +45,7 @@ members = [
     "crates/miyu*",
 
     # Services/Operateurs (Strate 7)
-    "crates/jayfestival", "crates/jayxpose", "crates/jaykoa",
+    "crates/jaykoa",
     "crates/jayrdv", "crates/jayfaim", "crates/jay1tribu",
     "crates/jaykonta", "crates/miyukinisales",
     "crates/miyukinibb", "crates/miyukiniwatch",
@@ -144,8 +144,8 @@ pub use kindmother_impl::*;
 ### Compiler avec un flag specifique
 
 ```bash
-cargo build -p jayfestival --features kindmother-only --no-default-features
-cargo build -p jayfestival --features db-encryption
+cargo build -p jaykonta --features kindmother-only --no-default-features
+cargo build -p jaykonta --features db-encryption
 ```
 
 ---
@@ -294,10 +294,10 @@ packages:
 cargo build
 
 # Build un service specifique
-cargo build -p jayfestival
+cargo build -p jayrdv
 
 # Build avec feature flag
-cargo build -p jayxpose --features kindmother-only --no-default-features
+cargo build -p jayrdv --features kindmother-only --no-default-features
 
 # Clippy
 cargo clippy --workspace

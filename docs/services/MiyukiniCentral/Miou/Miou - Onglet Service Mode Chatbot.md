@@ -8,7 +8,7 @@ Miou dispose d'un **onglet de service dédié** dans Miyukini Central, offrant u
 
 | Aspect | Description |
 |--------|-------------|
-| **Type** | Onglet de service Miou (comme JayKoa, JayXpose) dans la TabBar de Central |
+| **Type** | Onglet de service Miou (comme JayKoa, JayKonta) dans la TabBar de Central |
 | **Accès** | Bibliothèque > Carte Miou, ou onglet dédié si Miou est « installée » comme service |
 | **Rôle** | Canal conversationnel privilégié, enrichissement des connaissances, transparence totale |
 

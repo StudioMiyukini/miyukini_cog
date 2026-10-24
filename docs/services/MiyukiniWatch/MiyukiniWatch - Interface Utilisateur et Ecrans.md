@@ -110,7 +110,7 @@ L'écran est organisé en onglets (tabs) par catégorie de métriques :
 | **Tableau** | Affichage tabulaire pour les listes (sessions, services, amis). Colonnes triables. |
 | **Graphique barres** | Durée de session ou nombre d'ouvertures de service par jour/semaine. |
 | **Graphique circulaire** | Répartition du temps par service (période sélectionnée). |
-| **Indicateur textuel** | Phrases lisibles : « Tu as passé 2h30 dans JayXpose cette semaine » ; « Ton ami [pseudo] n'a pas été contacté depuis 12 jours ». |
+| **Indicateur textuel** | Phrases lisibles : « Tu as passé 2h30 dans JayShop cette semaine » ; « Ton ami [pseudo] n'a pas été contacté depuis 12 jours ». |
 
 ### 4.4 Rappel de transparence
 

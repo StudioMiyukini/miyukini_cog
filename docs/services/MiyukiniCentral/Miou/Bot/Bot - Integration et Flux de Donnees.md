@@ -12,7 +12,7 @@ Le Bot consomme des données provenant de **six sources** principales :
 |--------|------|------------------|---------------------------|
 | **MiyukiniWatch** | Service silencieux | Sessions, services, amis, clics | Temps réel (agrégats) |
 | **Profil utilisateur** | Base auth Central | Pseudo, préférences, langue | Au chargement session |
-| **Contexte applicatif** | Services (JayKoa, JayXpose, MWS, Jay1Tribu) | Événements, vitrine, connexion, présence | Au chargement + événements |
+| **Contexte applicatif** | Services (JayKoa, MWS, Jay1Tribu) | Événements, connexion, présence | Au chargement + événements |
 | **Paramètres Miou** | Préférences | Seuils, fréquence, LLM activé | Au chargement session |
 | **Specs machine** | Système (sysinfo) | RAM, stockage, CPU, OS | Au démarrage + événement upgrade |
 | **Réponses utilisateur Miou** | Base dédiée chiffrée | Réponses aux questions de curiosité | Enregistrement à la réponse |
@@ -48,7 +48,7 @@ struct SessionSummary {
 
 struct ServiceUsage {
     service_id: String,
-    service_name: String,  // Nom affiché (ex. "JayXpose")
+    service_name: String,  // Nom affiché (ex. "JayKonta")
     last_opened: Option<DateTime>,
     days_since_last_open: Option<u32>,
     minutes_today: u32,
@@ -167,22 +167,14 @@ struct Event {
 
 **Usage :** Condition rappel_événement si `event.start - now < 1h`.
 
-### 4.2 JayXpose (exposant, vitrine)
-
-**Données requises :**
-- `has_exposant_profile(profile_id) -> bool`
-- `is_vitrine_published(profile_id) -> bool`
-
-**Usage :** Gamification (badges Exposant actif, Vitrine en ligne). Le Bot ne génère pas de bulles spécifiques JayXpose sauf via les badges.
-
-### 4.3 MWS (Miyukini Webway System)
+### 4.2 MWS (Miyukini Webway System)
 
 **Données requises :**
 - `is_mws_connected() -> bool`
 
 **Usage :** Badge Webway connecté. Pas de bulle directe MWS sauf via badge.
 
-### 4.4 Jay1Tribu (messagerie, amis)
+### 4.3 Jay1Tribu (messagerie, amis)
 
 **Données requises :**
 - Liste des amis (identifiant, pseudo) — métadonnées uniquement.
@@ -197,7 +189,7 @@ fn get_friends_list(profile_id: &str) -> Vec<Friend>    // Métadonnées
 
 **Usage :** Notification ami connecté, rappel ami (via MiyukiniWatch pour le délai).
 
-### 4.5 Indisponibilité d'un service
+### 4.4 Indisponibilité d'un service
 
 Si un service (JayKoa, Jay1Tribu, etc.) n'est pas installé ou ne répond pas :
 - Retourner None ou valeur par défaut.
@@ -207,7 +199,7 @@ Si un service (JayKoa, Jay1Tribu, etc.) n'est pas installé ou ne répond pas :
 
 ---
 
-### 4.6 Specs machine
+### 4.5 Specs machine
 
 **Données requises :**
 - `ram_available_mb` (RAM disponible en Mo)
@@ -232,7 +224,7 @@ fn has_specs_upgraded_since_last_session() -> bool
 
 ---
 
-### 4.7 Réponses utilisateur Miou (stockage chiffré)
+### 4.6 Réponses utilisateur Miou (stockage chiffré)
 
 **Source :** Base dédiée `miou_user_responses` (SQLCipher). **Seule donnée lue et enregistrée par Miou.**
 
@@ -273,8 +265,8 @@ Voir [Bot - Connaissance Utilisateur et Specs Machine](./Bot%20-%20Connaissance%
 
 ```json
 {
-  "service_id": "jayxpose",
-  "service_name": "JayXpose",
+  "service_id": "jaykonta",
+  "service_name": "JayKonta",
   "last_opened": "2026-02-10T09:00:00Z",
   "days_since_last_open": 4,
   "minutes_today": 25
@@ -303,9 +295,9 @@ Voir [Bot - Connaissance Utilisateur et Specs Machine](./Bot%20-%20Connaissance%
   "pseudo": "Kaito",
   "langue": "fr",
   "jours_depuis_derniere_visite": 1,
-  "service_le_plus_utilise": ["JayXpose", 25],
+  "service_le_plus_utilise": ["JayKonta", 25],
   "service_delaisse": ["JayKoa", 14],
-  "services_ouverts_aujourd_hui": ["JayXpose", "Jay1Tribu"],
+  "services_ouverts_aujourd_hui": ["JayKonta", "Jay1Tribu"],
   "ami_plus_delaisse": ["Luna", 13],
   "amis_contactes_recemment": [],
   "evenement_prochain": ["Réunion équipe", "2026-02-14T15:00:00Z"],
@@ -533,8 +525,8 @@ pub fn inject_variables(
 ┌─────────────────┐     ┌─────────────────┐
 │ Profil          │     │ Contexte app     │
 │ (pseudo,        │     │ (JayKoa,         │
-│  préférences)   │     │  JayXpose,       │
-└────────┬────────┘     │  Jay1Tribu, MWS) │
+│  préférences)   │     │  Jay1Tribu, MWS) │
+└────────┬────────┘     │                  │
          │              └────────┬─────────┘
          │                       │
          └───────────┬────────────┘

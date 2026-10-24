@@ -110,7 +110,7 @@ Ce guide définit les règles UI/UX pour garantir une expérience **cohérente**
 │  ─────────────────────────────────────────────────  │
 │                                                      │
 │  « Bonsoir Kaito ! Tu as passé un bon moment        │  ← Corps
-│    sur JayXpose ce soir. Pense à faire une pause. »│
+│    sur JayKonta ce soir. Pense à faire une pause. »│
 │                                                      │
 │  ┌─────────────────┐  ┌─────────────────────────┐   │  ← Actions (0–2)
 │  │ 🕐 Bonne idée    │  │ C'est noté              │   │

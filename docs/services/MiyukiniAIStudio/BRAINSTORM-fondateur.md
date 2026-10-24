@@ -244,8 +244,6 @@ Autres services COG (JayKonta :11441, JayKoa :11442, ...)
 | **Central** | — | Chat Miou dans le Salon, recommandation modeles, bulles IA |
 | **JayKonta** | 11441 | Resume comptable, analyse depenses, generation de rapports |
 | **JayKoa** | 11442 | Planification intelligente, resume d'agenda, suggestions |
-| **JayXpose** | 11443 | Generation de descriptions produits, SEO, traduction |
-| **JayFestival** | 11444 | Generation d'evenements, textes promotionnels |
 | **MiyukiniWatch** | 11445 | Analyse d'habitudes, recommandations bien-etre |
 | **Jay1Tribu** | 11446 | Moderation IA, suggestions sociales, chatbots |
 | **JayManga** | 11447 | Traduction de manga, OCR, suggestions de lecture |

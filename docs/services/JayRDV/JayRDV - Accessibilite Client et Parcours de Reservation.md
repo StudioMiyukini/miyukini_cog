@@ -681,7 +681,7 @@ MiyuNotify SMS confirmation annulation + notification Marie
 - ✅ **Souveraineté des données** : Pro garde ses données chez lui (mini PC, NAS)
 - ✅ **Offline-first** : Fonctionne sans réseau (événements, zones isolées)
 - ✅ **Coût maîtrisé** : Pas d'abonnement cloud obligatoire (licence perpétuelle possible)
-- ✅ **Interpolarité** : S'intègre avec JayKoa (agenda), JayKonta (compta), JayXpose (vitrine)
+- ✅ **Interpolarité** : S'intègre avec JayKoa (agenda), JayKonta (compta)
 - ✅ **Gouvernance** : BorderGuard, StrongFather, anti-spam structurel
 
 **Cibles privilégiées :**

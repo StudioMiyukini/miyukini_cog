@@ -44,7 +44,7 @@ Ce document couvre :
 │  │       CRATE PRINCIPAL           │    │     KINDMOTHER-SERVICE          │ │
 │  │                                 │    │                                 │ │
 │  │  ┌───────────────────────────┐  │    │  ┌───────────────────────────┐  │ │
-│  │  │    jayxpose / jaykonta    │  │    │  │     gRPC Server           │  │ │
+│  │  │     jaykoa / jaykonta     │  │    │  │     gRPC Server           │  │ │
 │  │  │    (Opérateurs)           │  │    │  │     (tonic)               │  │ │
 │  │  └─────────────┬─────────────┘  │    │  └─────────────┬─────────────┘  │ │
 │  │                │                │    │                │               │ │
@@ -144,7 +144,7 @@ tokio = { version = "1.40", features = ["rt-multi-thread"] }
 **Avant (crates utilisant rusqlite directement) :**
 
 ```toml
-# jayxpose/Cargo.toml - AVANT
+# jaykonta/Cargo.toml - AVANT
 [dependencies]
 rusqlite = { version = "0.32", features = ["bundled"] }
 ```
@@ -152,7 +152,7 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 **Après (crates utilisant kindmother-client) :**
 
 ```toml
-# jayxpose/Cargo.toml - APRÈS
+# jaykonta/Cargo.toml - APRÈS
 [dependencies]
 kindmother-client = { path = "../kindmother-client" }
 # rusqlite SUPPRIMÉ - accès uniquement via KindMother
@@ -396,7 +396,7 @@ message AuthToken {
 
 message QueryRequest {
     AuthToken auth = 1;
-    string database = 2;      // "jayxpose", "jaykonta", etc.
+    string database = 2;      // "jaykonta", "jaykoa", etc.
     string sql = 3;
     repeated Value params = 4;
 }
@@ -610,7 +610,7 @@ pub async fn run_server(addr: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut databases = HashMap::new();
     
     // Ouvrir les bases des différents opérateurs
-    for db_name in ["jayxpose", "jaykonta", "jayfestival"] {
+    for db_name in ["jaykoa", "jaykonta", "jayrdv"] {
         let db_path = data_dir.join(format!("{}.db", db_name));
         let db = EncryptedDatabase::open(&db_path, master_key.clone()).await?;
         databases.insert(db_name.to_string(), db);
@@ -818,17 +818,17 @@ cd kindmother-client
 
 ### 7.4 Phase 3 : Migrer les Opérateurs
 
-**Exemple pour JayXpose :**
+**Exemple pour JayKonta :**
 
 ```rust
-// AVANT (jayxpose/src/data/kindmother_db.rs)
+// AVANT (jaykonta/src/data/kindmother_db.rs)
 use rusqlite::{Connection, params};
 
-pub struct JayXposeDb {
+pub struct JayKontaDb {
     conn: Mutex<Connection>,
 }
 
-impl JayXposeDb {
+impl JayKontaDb {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, DbError> {
         let conn = Connection::open(path)?;
         // ...
@@ -837,30 +837,30 @@ impl JayXposeDb {
 ```
 
 ```rust
-// APRÈS (jayxpose/src/data/kindmother_db.rs)
+// APRÈS (jaykonta/src/data/kindmother_db.rs)
 use kindmother_client::KindMotherClient;
 
-pub struct JayXposeDb {
+pub struct JayKontaDb {
     client: KindMotherClient,
 }
 
-impl JayXposeDb {
+impl JayKontaDb {
     pub async fn connect() -> Result<Self, DbError> {
         let client = KindMotherClient::connect(
             "http://[::1]:50051",  // Adresse du service
-            "jayxpose",             // Identifiant opérateur
-            "jayxpose",             // Base de données
+            "jaykonta",             // Identifiant opérateur
+            "jaykonta",             // Base de données
         ).await?;
         
         Ok(Self { client })
     }
     
-    pub async fn exposant_by_id(&mut self, id: &str) -> Result<Option<ExposantProfile>, DbError> {
-        let data = self.client.read_entity("exposants", id).await?;
+    pub async fn invoice_by_id(&mut self, id: &str) -> Result<Option<InvoiceRecord>, DbError> {
+        let data = self.client.read_entity("invoices", id).await?;
         match data {
             Some(bytes) => {
-                let profile: ExposantProfile = serde_json::from_slice(&bytes)?;
-                Ok(Some(profile))
+                let invoice: InvoiceRecord = serde_json::from_slice(&bytes)?;
+                Ok(Some(invoice))
             }
             None => Ok(None),
         }
@@ -982,7 +982,7 @@ Pour vérifier qu'une base est bien chiffrée :
 
 ```bash
 # Tenter d'ouvrir avec sqlite3 standard
-sqlite3 jayxpose.db "SELECT * FROM exposants LIMIT 1;"
+sqlite3 jaykonta.db "SELECT * FROM invoices LIMIT 1;"
 # Résultat attendu : "file is not a database"
 
 # Si ça fonctionne, la base N'EST PAS chiffrée !

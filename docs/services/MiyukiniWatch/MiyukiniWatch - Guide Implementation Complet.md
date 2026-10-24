@@ -246,7 +246,7 @@ pub enum TimeSlot {
 
 ### 3.5 Implémentation MiyukiniWatchDb
 
-- Suivre le pattern `JayXposeDb` : SQLite chiffré via `kindmother_db_key`, instance KindMother Daughter.
+- Suivre le pattern `JayKoaDb` : SQLite chiffré via `kindmother_db_key`, instance KindMother Daughter.
 - Méthodes minimales : `open`, `init_schema`, `insert_metric`, `insert_audit`, `get_prefs`, `set_prefs`.
 - Isolation par `profile_id` sur toutes les requêtes.
 

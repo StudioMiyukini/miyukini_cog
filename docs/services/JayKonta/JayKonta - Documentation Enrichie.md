@@ -22,7 +22,7 @@ JayKonta est un service COG unique avec deux points d'entree :
 - Unifier budget personnel et comptabilite entreprise dans un meme socle gouverne
 - Eviter la duplication de logique comptable dans les services consommateurs
 - Garantir traçabilite, audit et residence des donnees sensibles
-- Permettre des integrations robustes avec JayFestival, JayRDV et JayKoa
+- Permettre des integrations robustes avec JayRDV et JayKoa
 
 ## Positionnement concurrence (synthese PR)
 
@@ -110,13 +110,6 @@ Differenciateur COG JayKonta :
 - bridge inter-COG transporte les intentions sans pouvoir decisionnel
 
 ## Integrations service a service
-
-### JayFestival vers JayKonta
-
-- budget edition via mouvements classes
-- devis exposants
-- factures exposants
-- reporting budget edition
 
 ### JayRDV vers JayKonta
 

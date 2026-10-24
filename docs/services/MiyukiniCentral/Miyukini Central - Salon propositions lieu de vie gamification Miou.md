@@ -28,8 +28,8 @@ Document de propositions pour faire du **Salon** (anciennement Magasin) la page 
 |-------------|-------------|
 | **Bulle de suggestion** | Une bulle (type bulle de BD ou carte arrondie) affichée en évidence, avec avatar/icône Miou (🌸 ou mascotte dédiée) et un court message contextuel. |
 | **Contenu dynamique** | Message basé sur : heure de la journée, dernier passage, métriques **MiyukiniWatch** (voir section 3 et [MiyukiniWatch](../MiyukiniWatch/MiyukiniWatch%20-%20Document%20Fondateur.md)), habitudes (services les plus ouverts, onglet favori). |
-| **Exemples de messages** | « Bonjour [pseudo], tu n’es pas passé depuis 3 jours — JayKoa a peut-être des événements à te rappeler. » / « Ce soir, rien de prévu dans ton calendrier. Veux-tu faire un tour au Webway ? » / « Tu reviens souvent sur JayXpose : ta vitrine est à jour ? » |
-| **Actions rapides** | 1–2 boutons dans la bulle : « Voir le calendrier », « Ouvrir JayXpose », « Explorer le Webway », « C’est tout pour l’instant ». |
+| **Exemples de messages** | « Bonjour [pseudo], tu n’es pas passé depuis 3 jours — JayKoa a peut-être des événements à te rappeler. » / « Ce soir, rien de prévu dans ton calendrier. Veux-tu faire un tour au Webway ? » |
+| **Actions rapides** | 1–2 boutons dans la bulle : « Voir le calendrier », « Explorer le Webway », « C’est tout pour l’instant ». |
 | **Dismiss / rappel** | Possibilité de fermer la bulle pour la session ; elle réapparaît au prochain lancement ou après un délai configurable. |
 | **Placement** | **Bulles Miou : en bas à droite** (position canonique). Voir [Miou — Système de Bulles et UI](./Miou/Miou%20-%20Systeme%20de%20Bulles%20et%20UI.md). Sur le Salon, une zone « Table du jour » peut reprendre le message au centre (above the fold). |
 

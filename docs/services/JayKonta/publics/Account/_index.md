@@ -2,7 +2,7 @@
 
 ## Contexte
 
-**JayKonta** (marque) est le **point d’entrée entreprise** du service COG JayKonta. Il permet aux **professionnels**, **associations** et **entreprises** de gérer leur comptabilité au sens large : grand livre, devis, facturation, suivi des encaissements, rapports légaux. Ce point d’entrée est **consommé** par les services métier (JayFestival, JayRDV) pour la facturation des exposants, des professionnels, etc.
+**JayKonta** (marque) est le **point d’entrée entreprise** du service COG JayKonta. Il permet aux **professionnels**, **associations** et **entreprises** de gérer leur comptabilité au sens large : grand livre, devis, facturation, suivi des encaissements, rapports légaux. Ce point d’entrée est **consommé** par les services métier (JayRDV) pour la facturation des professionnels, etc.
 
 ## Proposition de valeur
 
@@ -15,7 +15,7 @@
 
 | Document | Rôle |
 |----------|------|
-| [Account - Analyse des besoins](./Account%20-%20Analyse%20des%20besoins.md) | Besoins fonctionnels et non fonctionnels, personas, parcours, priorisation, intégration JayFestival/JayRDV. |
+| [Account - Analyse des besoins](./Account%20-%20Analyse%20des%20besoins.md) | Besoins fonctionnels et non fonctionnels, personas, parcours, priorisation, intégration JayRDV. |
 | [Account - Operateurs et Toolkits](./Account%20-%20Operateurs%20et%20Toolkits.md) | Réponse besoin → Service / Opérateur / Toolkit ; matrice exhaustive MAC-01 à MAC-19, NFR-MAC-01 à NFR-MAC-08. |
 | [Account - Parcours Capacites Livrables](./Account%20-%20Parcours%20Capacites%20Livrables.md) | Parcours, capacités et livrables Account. |
 

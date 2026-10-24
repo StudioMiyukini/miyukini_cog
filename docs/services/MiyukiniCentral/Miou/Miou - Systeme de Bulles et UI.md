@@ -22,7 +22,7 @@ Spécification du canal de communication principal de Miou : les **bulles** affi
 │  🌸  ─── Miou                     ✕   │
 │                                        │
 │  « Bonsoir Kaito ! Tu as passé un      │
-│    bon moment sur JayXpose ce soir.    │
+│    bon moment sur JayKonta ce soir.    │
 │    Pense à faire une pause. »          │
 │                                        │
 │  ┌──────────────┐  ┌────────────────┐  │

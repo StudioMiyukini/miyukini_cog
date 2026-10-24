@@ -18,8 +18,8 @@ Ce document constitue un **audit** de la documentation JayKoa pour identifier ce
 | **Document Fondateur** | Besoins, positionnement, intégration synthétique, sécurité. | Pas de section dédiée Opérateurs/Toolkits/Équipe ; pas de parcours « événements publics → ajout à mon agenda ». |
 | **Écrans et UI** | Composants AGD-UI-01 à 08 (calendrier, alerte, export, filtre source/type, prochaine entrée, conflit, liste, libre/occupé). | Filtres **détaillés** (période, statut, visibilité public/privé) peu explicites ; **vue événements publics** et **sélection pour ajout à l’agenda** absents. |
 | **Parcours Utilisateurs** | Consultation agenda, vérification conflit, export, agrégation ; parcours côté service (publication, interrogation). | Parcours **« Vue événements publics → Sélection → Validation sur mon agenda »** absent. |
-| **Integration Services Consommateurs** | Principe, JayRDV, JayFestival, agrégation, futurs services. | **Séquence d’intégration** (qui appelle quoi, dans quel ordre) et **contrat des filtres** (paramètres passés à JayKoa) peu détaillés. |
-| **Opérateurs et Toolkits** | **Absent** : aucun document équivalent à « Exposants - Operateurs et Toolkits » (JayFestival) ou « Professionnels - Operateurs et Toolkits » (JayRDV). | Besoin d’un document **JayKoa - Operateurs et Toolkits** : quels Opérateurs exposent le service, quels Kits agrègent les outils, Contrat d’équipe. |
+| **Integration Services Consommateurs** | Principe, JayRDV, agrégation, futurs services. | **Séquence d’intégration** (qui appelle quoi, dans quel ordre) et **contrat des filtres** (paramètres passés à JayKoa) peu détaillés. |
+| **Opérateurs et Toolkits** | **Absent** : aucun document équivalent à « Professionnels - Operateurs et Toolkits » (JayRDV). | Besoin d’un document **JayKoa - Operateurs et Toolkits** : quels Opérateurs exposent le service, quels Kits agrègent les outils, Contrat d’équipe. |
 | **Niveaux Sécurité, Bornage, Referentiel Google** | Présents et structurés. | Pas de manque majeur pour un service complet. |
 
 ---
@@ -30,7 +30,7 @@ Ce document constitue un **audit** de la documentation JayKoa pour identifier ce
 
 | Manque | Description | Action |
 |--------|-------------|--------|
-| **Opérateurs JayKoa** | Les documents citent « Opérateurs et Kits » (ex. `agenda.entries.list`, `agenda.conflict.check`) mais aucun document ne **liste et décrit** les Opérateurs du service (ex. « JayKoa Entrées », « JayKoa Conflits », « JayKoa Vue & Export ») ni leur rôle par rapport aux services consommateurs. | Créer **JayKoa - Operateurs et Toolkits.md** : Opérateurs exposés par JayKoa, Kits d’outils (Kit Entrées, Kit Conflits, Kit Vue, Kit Export, Kit Événements publics), Consommation par JayRDV/JayFestival, Contrat d’équipe si applicable. |
+| **Opérateurs JayKoa** | Les documents citent « Opérateurs et Kits » (ex. `agenda.entries.list`, `agenda.conflict.check`) mais aucun document ne **liste et décrit** les Opérateurs du service (ex. « JayKoa Entrées », « JayKoa Conflits », « JayKoa Vue & Export ») ni leur rôle par rapport aux services consommateurs. | Créer **JayKoa - Operateurs et Toolkits.md** : Opérateurs exposés par JayKoa, Kits d’outils (Kit Entrées, Kit Conflits, Kit Vue, Kit Export, Kit Événements publics), Consommation par JayRDV, Contrat d’équipe si applicable. |
 | **Toolkits (Kits d’outils)** | Les outils agrégés (`agenda.entries.list`, `agenda.conflict.check`, `agenda.export.ical`, etc.) ne sont pas regroupés en **Kits** nommés ni en lien avec les Opérateurs. | Document Operateurs et Toolkits : pour chaque Kit, rôle, outils agrégés (exemples), composants sous-jacents (MiyuClock, Miyubooking, KindMother), consommé par quels Opérateurs / services. |
 | **Équipe d’Opérateurs** | JayKoa en tant que **service** peut être exposé par une **Équipe d’Opérateurs** (plusieurs Opérateurs collaborant sous Contrat d’équipe) ; non explicité. | Dans Operateurs et Toolkits : préciser si JayKoa est exposé par un seul Opérateur ou une Équipe d’Opérateurs ; Contrat d’équipe et Mandats. |
 
@@ -38,7 +38,7 @@ Ce document constitue un **audit** de la documentation JayKoa pour identifier ce
 
 | Manque | Description | Action |
 |--------|-------------|--------|
-| **Séquence d’intégration** | L’ordre des appels (service consommateur → JayKoa → réponse) et les **points d’entrée** (à quel moment JayRDV/JayFestival appellent publication, conflit, vue, export) ne sont pas décrits étape par étape. | Enrichir **Integration Services Consommateurs** : section « Séquence d’intégration » (flux publication, flux interrogation conflit, flux vue/export) ; tableau qui appelle quoi et quand. |
+| **Séquence d’intégration** | L’ordre des appels (service consommateur → JayKoa → réponse) et les **points d’entrée** (à quel moment JayRDV appelle publication, conflit, vue, export) ne sont pas décrits étape par étape. | Enrichir **Integration Services Consommateurs** : section « Séquence d’intégration » (flux publication, flux interrogation conflit, flux vue/export) ; tableau qui appelle quoi et quand. |
 | **Contrat d’intégration** | Les **paramètres** passés à JayKoa (utilisateur, période, **filtres**) et le format des réponses (liste d’entrées, conflit oui/non + liste) ne sont pas formalisés dans un contrat conceptuel. | Enrichir **Integration Services Consommateurs** : section « Contrat conceptuel » (paramètres d’entrée, filtres supportés, format de sortie). |
 | **Filtres côté API** | Les filtres (source, type, période, statut, visibilité) sont mentionnés en UI (AGD-UI-04) mais pas **explicitement** comme paramètres d’interrogation vers JayKoa. | Enrichir **Integration** et **Operateurs et Toolkits** : liste des **filtres** supportés par JayKoa (période, source, type, statut, visibilité public/privé) et comment les services les passent. |
 
@@ -53,7 +53,7 @@ Ce document constitue un **audit** de la documentation JayKoa pour identifier ce
 
 | Manque | Description | Action |
 |--------|-------------|--------|
-| **Vue des événements publics** | L’utilisateur doit pouvoir **voir** un catalogue ou une liste d’**événements publics** (ex. festivals ouverts aux inscriptions, ateliers ouverts) **sur** ou **à côté de** son agenda, pour décider lesquels ajouter. Non documenté. | Ajouter composant **AGD-UI-09** (Vue catalogue / liste événements publics) : objectif, données (événements publics éligibles, plage, type, source), intégration (page « Découvrir », « Ajouter à mon agenda », ou zone dans « Mon agenda »). Les **données** événements publics peuvent être fournies par le **service consommateur** (JayFestival, JayRDV) ; JayKoa peut exposer une **liste d’entrées publiques** (sans détail utilisateur) ou le consommateur agrège catalogue métier + appels JayKoa pour conflit/vue. |
+| **Vue des événements publics** | L’utilisateur doit pouvoir **voir** un catalogue ou une liste d’**événements publics** (ex. ateliers ouverts) **sur** ou **à côté de** son agenda, pour décider lesquels ajouter. Non documenté. | Ajouter composant **AGD-UI-09** (Vue catalogue / liste événements publics) : objectif, données (événements publics éligibles, plage, type, source), intégration (page « Découvrir », « Ajouter à mon agenda », ou zone dans « Mon agenda »). Les **données** événements publics peuvent être fournies par le **service consommateur** (JayRDV) ; JayKoa peut exposer une **liste d’entrées publiques** (sans détail utilisateur) ou le consommateur agrège catalogue métier + appels JayKoa pour conflit/vue. |
 | **Sélection et validation sur son propre agenda** | L’utilisateur **sélectionne** un ou plusieurs événements publics et **valide** pour les **ajouter à son agenda** (inscription, réservation). Le flux : sélection → vérification conflit (JayKoa) → confirmation → enregistrement métier (service consommateur) → publication entrée (JayKoa). Non documenté. | Ajouter composant **AGD-UI-10** (Sélection / Ajouter à mon agenda) : actions « Sélectionner », « Ajouter à mon agenda » ; vérification conflit avant validation ; enregistrement côté service consommateur puis publication vers JayKoa. Ajouter parcours **« Vue événements publics et ajout à mon agenda »** dans Parcours Utilisateurs. |
 
 ---
@@ -62,7 +62,7 @@ Ce document constitue un **audit** de la documentation JayKoa pour identifier ce
 
 | Action | Document créé ou enrichi |
 |--------|---------------------------|
-| Création **JayKoa - Operateurs et Toolkits.md** | Nouveau document : Opérateurs, Kits, Équipe, Consommation par JayRDV/JayFestival. |
+| Création **JayKoa - Operateurs et Toolkits.md** | Nouveau document : Opérateurs, Kits, Équipe, Consommation par JayRDV. |
 | Enrichissement **Integration Services Consommateurs** | Section Séquence d’intégration ; Contrat conceptuel (paramètres, filtres) ; Filtres supportés. |
 | Enrichissement **Écrans et UI** | Section Filtres de l’agenda (détaillée) ; AGD-UI-09 (Vue événements publics) ; AGD-UI-10 (Sélection / Ajouter à mon agenda). |
 | Enrichissement **Parcours Utilisateurs** | Parcours « Vue événements publics → Sélection → Validation sur mon agenda ». |

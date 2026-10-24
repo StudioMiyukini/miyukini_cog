@@ -741,7 +741,7 @@ Un COG peut **embarquer un serveur web**. Celui-ci permet a certains Services de
 | Cas d'usage | Description |
 |-------------|-------------|
 | **Site web, SaaS** | Services necessitant une disponibilite web permanente (site vitrine, application web, portail). |
-| **Acces visiteur** | Les utilisateurs « visiteurs » peuvent acceder par navigateur pour faciliter l'acces (ex. COG gerant la disponibilite web de JayFestival). |
+| **Acces visiteur** | Les utilisateurs « visiteurs » peuvent acceder par navigateur pour faciliter l'acces. |
 | **Facilitation par les trackers** | Les trackers peuvent faciliter l'acces aux COGs ayant une surface web active et publique (catalogue, redirection) ; voir section 9.1. |
 
 Le serveur web embarque est expose sur les ports 80 et/ou 8080 ; il reste soumis a la politique de surface du COG (seuls les Services autorises sont exposes).

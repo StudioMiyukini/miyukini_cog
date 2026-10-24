@@ -30,7 +30,7 @@ Miou ne reçoit **jamais** les données brutes de MiyukiniWatch. Il reçoit uniq
 | Ce que Miou reçoit | Ce que Miou ne reçoit PAS |
 |--------------------|--------------------------|
 | « 3 jours depuis la dernière session » | Liste détaillée de toutes les sessions |
-| « Top 3 services : JayXpose (12), JayKoa (5), Jay1Tribu (3) » | Horodatage de chaque ouverture de service |
+| « Top 3 services : JayShop (12), JayKoa (5), Jay1Tribu (3) » | Horodatage de chaque ouverture de service |
 | « Ami X non contacté depuis 10 jours » | Historique complet des interactions avec chaque ami |
 | « Activité : 5 sessions cette semaine » | Compteurs de clics bruts par minute |
 
@@ -129,7 +129,7 @@ Miou demande un agrégat
 | `AGG_SESSION_TIME` | `current_time_slot == MORNING` | « Bonjour [pseudo] ! Bien dormi ? » |
 | `AGG_SESSION_TIME` | `current_time_slot == EVENING` | « Bonsoir [pseudo], une petite visite ce soir ? » |
 | `AGG_CURRENT_SESSION` | `duration > 90 min` | « Tu es là depuis un moment — une petite pause ? » |
-| `AGG_FAVORITE_SERVICE` | — | « Tu reviens souvent sur JayXpose — ta vitrine est à jour ? » |
+| `AGG_FAVORITE_SERVICE` | — | « Tu reviens souvent sur JayShop — ta boutique est à jour ? » |
 | `AGG_NEGLECTED_SERVICES` | `days_since > 21` | « Tu n'as pas ouvert JayKoa depuis 3 semaines — un événement à rappeler ? » |
 | `AGG_FRIEND_REMINDERS` | `days_since > 14` | « Pense à reprendre contact avec [pseudo], ça fait un moment ! » |
 | `AGG_TOP_FRIENDS` | — | « Tu passes beaucoup de temps avec [pseudo] — une belle amitié ! » |

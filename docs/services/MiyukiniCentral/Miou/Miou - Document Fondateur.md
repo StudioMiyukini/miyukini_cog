@@ -53,7 +53,7 @@ La mission de Miou tient en une phrase :
 |--------|-------------|---------------------|
 | **Santé** | Encourager une bonne hygiène d'usage du COG : pauses, horaires raisonnables. | « Ça fait 2h que tu es là — accorde-toi une petite pause. » / « Il est tard, pense à toi. » |
 | **Bien-être émotionnel** | Rappeler les relations, féliciter les étapes, accompagner les moments importants. | « Tu n'as pas échangé avec Kaito depuis 12 jours — il serait peut-être content d'avoir de tes nouvelles. » / « Bravo, tu as débloqué le badge Webway connecté ! » |
-| **Bien-être physique** | Suggérer des pauses physiques après de longues sessions. | « Tu as passé un bon moment sur JayXpose — et si tu allais prendre l'air ? » |
+| **Bien-être physique** | Suggérer des pauses physiques après de longues sessions. | « Tu as passé un bon moment sur JayKoa — et si tu allais prendre l'air ? » |
 | **Amusement** | Gamification positive, ton léger, célébration. | « Premier événement créé dans JayKoa — ça se fête ! » / « 7 jours avec ton COG, tu es fidèle. » |
 
 ### 2.2 La relation
@@ -94,7 +94,7 @@ Miou s'appuie sur plusieurs sources, dans un cadre strict :
 |--------|---------|-----------|
 | **MiyukiniWatch** | Sessions (durée, heure, fréquence), services utilisés (quand, combien de temps), amis contactés (dernière discussion, classement par temps), nombre de clics. | MiyukiniWatch ne lit **jamais** les contenus (messages, saisies, fichiers). |
 | **Profil utilisateur** | Pseudo, préférences (langue, thème), préférences Miou (fréquence des bulles, voix activée/désactivée). | Données déclaratives de l'utilisateur uniquement. |
-| **Contexte applicatif** | Événements à venir (JayKoa), état vitrine (JayXpose), connexion MWS, présence amis (Jay1Tribu). | Miou lit les métadonnées des services (existence d'un événement, pas son contenu détaillé). |
+| **Contexte applicatif** | Événements à venir (JayKoa), connexion MWS, présence amis (Jay1Tribu). | Miou lit les métadonnées des services (existence d'un événement, pas son contenu détaillé). |
 | **Specs machine** | RAM, stockage, CPU, OS. | Lecture seule — Miou peut commenter ou « réclamer » plus de ressources (ton espiègle). |
 | **Réponses explicites utilisateur** | Réponses aux questions de curiosité de Miou (préférences, contexte, loisirs). | **Seule donnée lue et enregistrée par Miou.** Stockage local chiffré. L'utilisateur répond volontairement. |
 

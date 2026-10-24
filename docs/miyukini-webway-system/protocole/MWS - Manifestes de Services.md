@@ -89,7 +89,7 @@ Tout manifeste, quel que soit le service, suit une **enveloppe commune** :
 
 | Champ | Type | Requis | Description |
 |-------|------|--------|-------------|
-| `service_id` | TEXT | Oui | Identifiant normalise du service (ex. `jaymanga`, `jayshop`, `jayxpose`). Doit correspondre a un service declare dans le Passeport COG. |
+| `service_id` | TEXT | Oui | Identifiant normalise du service (ex. `jaymanga`, `jayshop`). Doit correspondre a un service declare dans le Passeport COG. |
 | `manifest_version` | TEXT | Oui | Version du schema de manifeste pour ce service (semver). Permet l'evolution des schemas sans casser la compatibilite. |
 | `cog_id` | TEXT | Oui | Identifiant du COG declarant. Injecte et verifie par le Tracker (pas auto-declare). |
 | `updated_at` | TEXT (ISO 8601) | Oui | Horodatage de la derniere mise a jour du manifeste par le COG. |
@@ -334,7 +334,6 @@ Le mecanisme de manifeste est **generique** et peut etre adopte par tout service
 | Service | Payload potentiel |
 |---------|-------------------|
 | **JayShop** | Nombre de produits, categories, statut boutique, devise. |
-| **JayXpose** | Nombre de galeries, themes, formats d'image. |
 | **MiyukiniChat** | Disponibilite pour le chat, statut. |
 
 Chaque service definit son propre schema de payload dans sa documentation fondatrice ou dans un document de specification dedie.

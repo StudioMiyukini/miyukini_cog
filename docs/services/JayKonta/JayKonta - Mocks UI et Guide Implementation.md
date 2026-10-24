@@ -533,7 +533,6 @@ Ce document fournit les **mocks ASCII** de tous les ecrans JayKonta (Purse et Ac
 │          │  ┌──────────────────────────────────────────────────┐    │
 │          │  │ INTEGRATIONS ACTIVES                             │    │
 │          │  │                                                  │    │
-│          │  │  JayFestival  │ ● Connecte │ 3 ops ce mois      │    │
 │          │  │  JayRDV       │ ● Connecte │ 8 ops ce mois      │    │
 │          │  │  JayKoa       │ ○ Optionnel│ 0 rappels           │    │
 │          │  │                                                  │    │
@@ -566,7 +565,6 @@ Ce document fournit les **mocks ASCII** de tous les ecrans JayKonta (Purse et Ac
 │          │  │07/02 │JE-086 │Paiement partiel │          │  600,00│  │
 │ □ Rappo. │  │      │       │ FAC-039 Laurent │          │        │  │
 │          │  │06/02 │JE-085 │Location stand   │          │  150,00│  │
-│          │  │      │       │ JayFestival     │          │        │  │
 │          │  │05/02 │JE-084 │Abonnement SaaS  │   49,99  │        │  │
 │          │  │04/02 │JE-083 │Facture FAC-042  │  600,00  │        │  │
 │          │  │      │       │ Bernard Expo    │          │        │  │
@@ -902,32 +900,18 @@ Ce document fournit les **mocks ASCII** de tous les ecrans JayKonta (Purse et Ac
 ├──────────┬──────────────────────────────────────────────────────────┤
 │          │                                                          │
 │ □ Tableau│  ┌──────────────────────────────────────────────────┐    │
-│          │  │ JAYFESTIVAL (CK-INT-01)                ● Actif   │    │
-│ □ Journal│  │                                                  │    │
-│          │  │  Operations ce mois : 3                          │    │
-│ □ Devis  │  │  ─ quote.create : 1                              │    │
-│          │  │  ─ invoice.emit : 1                              │    │
-│ □ Factur.│  │  ─ budget.movements.record : 1                   │    │
-│          │  │                                                  │    │
-│ □ Paiem. │  │  Derniere operation : 08/02 — budget.movements   │    │
-│          │  │  Edition active : Catakana 2026                  │    │
-│ □ Rappo. │  │                                                  │    │
-│          │  │  [ Voir operations ]  [ Rapport par edition ]    │    │
-│ ■ Integr.│  └──────────────────────────────────────────────────┘    │
-│          │                                                          │
-│          │  ┌──────────────────────────────────────────────────┐    │
 │          │  │ JAYRDV (CK-INT-02)                     ● Actif   │    │
-│          │  │                                                  │    │
+│ □ Journal│  │                                                  │    │
 │          │  │  Operations ce mois : 8                          │    │
-│          │  │  ─ quote.create : 2                              │    │
+│ □ Devis  │  │  ─ quote.create : 2                              │    │
 │          │  │  ─ invoice.emit : 3                              │    │
-│          │  │  ─ payment.record : 3                            │    │
+│ □ Factur.│  │  ─ payment.record : 3                            │    │
 │          │  │                                                  │    │
-│          │  │  Derniere operation : 10/02 — payment.record     │    │
+│ □ Paiem. │  │  Derniere operation : 10/02 — payment.record     │    │
 │          │  │                                                  │    │
-│          │  │  [ Voir operations ]  [ Rapport par pro. ]       │    │
+│ □ Rappo. │  │  [ Voir operations ]  [ Rapport par pro. ]       │    │
 │          │  └──────────────────────────────────────────────────┘    │
-│          │                                                          │
+│ ■ Integr.│                                                          │
 │          │  ┌──────────────────────────────────────────────────┐    │
 │          │  │ JAYKOA (CK-INT-03)                     ○ Option. │    │
 │          │  │                                                  │    │
@@ -941,10 +925,8 @@ Ce document fournit les **mocks ASCII** de tous les ecrans JayKonta (Purse et Ac
 │          │  │ JOURNAL D'AUDIT INTEGRATIONS                     │    │
 │          │  │                                                  │    │
 │          │  │  10/02 14:32 │ JayRDV  │payment.record │ OK     │    │
-│          │  │  08/02 09:15 │ JayFest │budget.move.   │ OK     │    │
 │          │  │  07/02 16:45 │ JayRDV  │invoice.emit   │ OK     │    │
 │          │  │  06/02 11:20 │ JayRDV  │quote.create   │ OK     │    │
-│          │  │  05/02 10:00 │ JayFest │invoice.emit   │ OK     │    │
 │          │  │                                                  │    │
 │          │  │  [ Voir journal complet ]                        │    │
 │          │  └──────────────────────────────────────────────────┘    │
@@ -1086,7 +1068,7 @@ CREATE TABLE IF NOT EXISTS movements (
     description     TEXT,
     movement_date   TEXT NOT NULL,
     context_ref     TEXT,                    -- ex: edition_id, budget_id
-    source_service  TEXT,                    -- ex: 'jayfestival', 'jayrdv', 'manual'
+    source_service  TEXT,                    -- ex: 'jayrdv', 'manual'
     budget_id       TEXT REFERENCES budgets(id),
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
@@ -1180,7 +1162,7 @@ CREATE TABLE IF NOT EXISTS quotes (
     account_id      TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     number          TEXT NOT NULL,           -- DEV-2026-001
     counterparty_id TEXT NOT NULL REFERENCES counterparties(id),
-    context_ref     TEXT,                    -- ex: edition_id (JayFestival)
+    context_ref     TEXT,                    -- ex: edition_id
     total_ht        REAL NOT NULL,
     total_tva       REAL NOT NULL DEFAULT 0.0,
     total_ttc       REAL NOT NULL,
@@ -1189,7 +1171,7 @@ CREATE TABLE IF NOT EXISTS quotes (
                     CHECK(status IN ('draft', 'sent', 'accepted', 'rejected', 'converted')),
     validity_days   INTEGER NOT NULL DEFAULT 30,
     notes           TEXT,
-    source_service  TEXT,                    -- 'jayfestival', 'jayrdv', 'manual'
+    source_service  TEXT,                    -- 'jayrdv', 'manual'
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
 
@@ -1537,7 +1519,7 @@ pub enum PaymentMethod { Virement, Cb, Cheque, Especes, Autre }
 | `InvoiceService` | Factures, relances, statut | CK-OP-12, CK-OP-13, CK-TK-31 |
 | `PaymentService` | Enregistrement, liaison facture | CK-OP-14, CK-TK-41 |
 | `ReportService` | Dashboard, rapports, export | CK-OP-15, CK-TK-51, CK-AUD-02 |
-| `IntegrationPipeline` | Ingestion JayFestival, JayRDV, JayKoa | CK-INT-01/02/03 |
+| `IntegrationPipeline` | Ingestion JayRDV, JayKoa | CK-INT-02/03 |
 | `AuditService` | Journalisation, lecture audit | CK-AUD-01 |
 
 ---
@@ -1680,7 +1662,7 @@ pub enum PaymentMethod { Virement, Cb, Cheque, Especes, Autre }
 
 | Etape | Tache | Fichiers | Estimation |
 |-------|-------|----------|------------|
-| 5.1 | IntegrationPipeline (JayFestival CK-INT-01) | Enrichir `integrations/pipeline.rs` | 1j |
+| 5.1 | Sans objet (JayFestival CK-INT-01 retire le 2026-04-29) | — | — |
 | 5.2 | IntegrationPipeline (JayRDV CK-INT-02) | Enrichir `pipeline.rs` | 1j |
 | 5.3 | JayKoa reminders (CK-INT-03) | Enrichir `pipeline.rs` | 0.5j |
 | 5.4 | AlertService (Purse) | `services/alert_service.rs` | 1j |
@@ -1769,7 +1751,6 @@ pub enum PaymentMethod { Virement, Cb, Cheque, Especes, Autre }
 | **BorderGuard** | Frontieres donnees sensibles |
 | **CaringNanny** | Monitoring soldes et seuils |
 | **MiyuAuth** | Authentification + contexte Purse/Account |
-| **JayFestival** | CK-INT-01 : devis, factures, budget editions |
 | **JayRDV** | CK-INT-02 : facturation professionnels |
 | **JayKoa** | CK-INT-03 : rappels echeances |
 

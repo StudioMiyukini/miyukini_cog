@@ -51,7 +51,7 @@ Chaque concurrent est analyse selon :
 | **Perimetre** | Grand livre, devis, factures, paiements, rapports legaux | Mouvements, categories, budgets occasionnels, objectifs |
 | **Besoins** | MAC-01 a MAC-19 | PUR-01 a PUR-16 |
 | **Securite** | Niveau 2-3, residence centralisee | Niveau 2, residence selon politique |
-| **Integrations** | JayFestival, JayRDV, futurs services | JayKoa (optionnel, rappels) |
+| **Integrations** | JayRDV, futurs services | JayKoa (optionnel, rappels) |
 | **7 Toolkits** | MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations, MiyuBilling, MiyuInvoice, MiyuExpense, MiyuTreasury | Sous-ensemble selon contexte |
 | **Gouvernance** | StrongFather, KindMother, MasterButler, WorrySentinel | Idem |
 
@@ -380,7 +380,6 @@ Chaque concurrent est analyse selon :
 |--------------------|------------------------|
 | Expense approval workflow | StrongFather Mandat pour validation depenses |
 | Sync inter-modules | Integration Services JayKonta (CK-INT) entre Operateurs |
-| Inventory → compta | Futur : JayXpose (stock) → JayKonta via Bridge |
 | Regles categorisation | `tool.compta.transaction.categorize` avec regles KindMother |
 
 ---
@@ -732,7 +731,7 @@ Chaque concurrent est analyse selon :
 
 #### Passerelles COG
 
-- Integration ventes → finance aligne sur JayFestival/JayRDV → JayKonta (CK-INT)
+- Integration ventes → finance aligne sur JayRDV → JayKonta (CK-INT)
 - ERP-wide workflows traduisibles en Equipes d'Operateurs sous Contrat
 
 ---
@@ -1095,7 +1094,7 @@ Chaque concurrent est analyse selon :
 | **Gouvernance multi-niveau** | WorrySentinel (securite) + MasterButler (permissions) + StrongFather (decisions) | Les concurrents ont des roles basiques (admin/user) |
 | **Audit structurel** | KindMother WriteIntent = tout est trace par design, pas par option | Les concurrents ajoutent l'audit en surcouche |
 | **Multi-echelle unifie** | Budget perso (Purse) et comptabilite entreprise (Account) dans le meme service | Aucun concurrent ne couvre les deux segments |
-| **Integration gouvernee** | JayFestival, JayRDV consomment JayKonta via contrats — pas d'API sauvage | Les ERP ont des modules couples, pas des contrats gouvernes |
+| **Integration gouvernee** | JayRDV consomme JayKonta via contrats — pas d'API sauvage | Les ERP ont des modules couples, pas des contrats gouvernes |
 | **Offline-first** | Fonctionne sans connexion internet | Quasi aucun concurrent web ne le propose |
 | **Federation inter-COG** | Collaboration expert-comptable via Bridge, pas via partage cloud | Pennylane s'en approche mais reste centralise |
 
@@ -1105,7 +1104,7 @@ Chaque concurrent est analyse selon :
 |----------|-------------|
 | **Deux marques, un service** | JayBudget pour le perso, JayKonta pour l'entreprise — meme base, UX adaptee |
 | **7 Toolkits specialises** | MiyuComptaLedger, MiyuComptaReports, MiyuDeclarations, MiyuBilling, MiyuInvoice, MiyuExpense, MiyuTreasury |
-| **Integration native** | JayFestival (evenements), JayRDV (rendez-vous), JayKoa (calendrier) — ecosysteme coherent |
+| **Integration native** | JayRDV (rendez-vous), JayKoa (calendrier) — ecosysteme coherent |
 | **Mandats granulaires** | Permissions au niveau de chaque action, pas des roles globaux |
 | **Residence configurable** | Purse : local ou COG ; Account : centralise obligatoire — choix explicite |
 
@@ -1174,7 +1173,7 @@ Chaque concurrent est analyse selon :
 | Priorite | Differenciateur | Valeur ajoutee |
 |----------|----------------|----------------|
 | **P0** | Double entree Purse/Account | Unique sur le marche — perso et pro unifies |
-| **P1** | Integration JayFestival/JayRDV | Ecosysteme interne coherent |
+| **P1** | Integration JayRDV | Ecosysteme interne coherent |
 | **P1** | Offline-first avec sync | Souverainete locale impossible chez les SaaS |
 | **P2** | Portail client Visa | Acces gouverne sans compte COG |
 | **P2** | Collaboration expert via Bridge | Alternative a Pennylane avec souverainete |
@@ -1204,7 +1203,7 @@ L'analyse de **19 concurrents** couvrant les segments ERP (Odoo, Sage Intacct, S
 **JayKonta se differencie par** :
 - La **double entree** Purse/Account (unique sur le marche)
 - La **souverainete COG** avec gouvernance multi-niveau
-- L'**integration ecosysteme** native (JayFestival, JayRDV, JayKoa)
+- L'**integration ecosysteme** native (JayRDV, JayKoa)
 - Le modele **offline-first** avec sync
 - La **federation inter-COG** pour collaboration expert et multi-entite
 
@@ -1219,7 +1218,7 @@ La priorite est de livrer un **MVP solide** (P0 : dashboard, cycle devis→factu
 | [JayKonta - Document Fondateur](./JayKonta%20-%20Document%20Fondateur.md) | Contexte, besoins, positionnement, securite |
 | [Account - Analyse des besoins](./publics/Account/Account%20-%20Analyse%20des%20besoins.md) | Besoins MAC-01 a MAC-19 |
 | [Purse - Analyse des besoins](./publics/Purse/Purse%20-%20Analyse%20des%20besoins.md) | Besoins PUR-01 a PUR-16 |
-| [JayKonta - Integration Services](./reference/JayKonta%20-%20Integration%20Services.md) | Integration JayFestival, JayRDV |
+| [JayKonta - Integration Services](./reference/JayKonta%20-%20Integration%20Services.md) | Integration JayRDV |
 | [JayKonta - Niveaux Securite](./reference/JayKonta%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | Classification donnees et mesures |
 | [Equivalents Comptabilite Independants](..//..//miyukini-webway-system//reference//_index.md) | Cartographie detaillee Toolkits/Tools compta |
 | [Miyukini Architecture Skill](_index.md) | Architecture pyramidale et Cores |

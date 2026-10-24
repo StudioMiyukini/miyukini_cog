@@ -34,10 +34,10 @@ Chaque Service de Type 2 doit définir un **contrat d'exposition** :
 | **Niveau de sécurité** | Niveau WorrySentinel requis (0, 1, 2) |
 | **Quotas / Limites** | Rate limiting, taille des requêtes, etc. |
 
-**Exemple — JayXpose :**
+**Exemple illustratif — service de type vitrine** (JayXpose/JayFestival retirés le 2026-04-29) :
 
 ```yaml
-service: JayXpose
+service: <service>
 surface_web:
   capacites_exposees:
     - catalogue.list.public
@@ -75,7 +75,7 @@ surface_web:
                             │ Appel interne (BondingBrother)
                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Service (ex. JayXpose)                                              │
+│  Service (ex. JayRDV)                                                │
 │  · Expose des capacités via API interne                             │
 │  · Jamais d'accès HTTP direct depuis l'extérieur                    │
 │  · Logique métier gouvernée                                         │
@@ -166,12 +166,7 @@ Le contenu exposé sur le Portail doit être **préparé** dans Central :
 Le Portail doit fournir un **routage clair** vers les surfaces des Services :
 
 ```
-https://moncommerce.cog/                → Page d'accueil (JayXpose)
-https://moncommerce.cog/catalogue       → Catalogue (JayXpose)
-https://moncommerce.cog/produit/123     → Fiche produit (JayXpose)
-https://moncommerce.cog/contact         → Formulaire contact (JayXpose)
 https://rdv.kine.cog/                   → Page réservation (JayRDV)
-https://festival.event.cog/             → Catalogue événement (JayFestival)
 ```
 
 ---
@@ -210,7 +205,7 @@ Chaque surface web est gouvernée par un **Mandat Public d'Accès** :
 
 ```yaml
 mandat_public:
-  service: JayXpose
+  service: <service>
   surface: vitrine
   allowed_methods:
     - GET (lecture)

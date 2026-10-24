@@ -2,11 +2,11 @@
 
 ## Contexte
 
-Ce document décrit les **besoins en Opérateurs** (Strate 7) et en **Toolkits** (Strate 6) du **service JayKoa**. JayKoa est un service de **plateforme** : il n’a pas de « public » final direct comme JayRDV ou JayFestival — ses **consommateurs** sont les **services métier** (JayRDV, JayFestival, futurs services) et, via eux, les utilisateurs finaux. Ce document précise quels Opérateurs exposent les capacités agenda, quels Kits d’outils agrègent les outils sous-jacents, et comment les services consommateurs s’y couplent.
+Ce document décrit les **besoins en Opérateurs** (Strate 7) et en **Toolkits** (Strate 6) du **service JayKoa**. JayKoa est un service de **plateforme** : il n’a pas de « public » final direct comme JayRDV — ses **consommateurs** sont les **services métier** (JayRDV, futurs services) et, via eux, les utilisateurs finaux. Ce document précise quels Opérateurs exposent les capacités agenda, quels Kits d’outils agrègent les outils sous-jacents, et comment les services consommateurs s’y couplent.
 
 ## Portée / Scope
 
-- **Périmètre** : Identification des Opérateurs et Toolkits JayKoa ; consommation par JayRDV, JayFestival ; Contrat d’équipe si applicable.
+- **Périmètre** : Identification des Opérateurs et Toolkits JayKoa ; consommation par JayRDV ; Contrat d’équipe si applicable.
 - **Hors périmètre** : Spécifications API détaillées (référencées dans les contrats d’implémentation) ; définition détaillée des Cores (Glossaire Miyukini).
 
 ---
@@ -21,7 +21,7 @@ Ce document décrit les **besoins en Opérateurs** (Strate 7) et en **Toolkits**
 | **Équipe d’Opérateurs** | Collectif gouverné d’Opérateurs qui collaborent sous règles explicites pour délivrer un Service. |
 | **Mandat de Permission** | Autorisation déléguée, temporaire et encadrée, émise par StrongFather. |
 
-Les **services consommateurs** (JayRDV, JayFestival) **appellent** les Opérateurs et Kits JayKoa ; ils ne les « utilisent » pas comme un utilisateur final — ils **intègrent** JayKoa dans leurs propres Opérateurs (ex. JayRDV Pro, JayFestival Exposant) qui, eux, exposent les écrans aux utilisateurs.
+Les **services consommateurs** (JayRDV) **appellent** les Opérateurs et Kits JayKoa ; ils ne les « utilisent » pas comme un utilisateur final — ils **intègrent** JayKoa dans leurs propres Opérateurs (ex. JayRDV Pro) qui, eux, exposent les écrans aux utilisateurs.
 
 ---
 
@@ -38,10 +38,10 @@ Le document ci-dessous décrit les **capacités** nécessaires ; l’architectur
 
 | Regroupement | Rôle | Consommé par |
 |--------------|------|--------------|
-| **Entrées** | Publication, mise à jour, suppression d’entrées agenda (plage, type, nature, id opaque, référence utilisateur) ; enregistrement des références côté JayKoa. | JayRDV, JayFestival (après validation métier : création RDV, candidature, inscription atelier). |
-| **Conflits** | Vérification de conflit pour un utilisateur et une plage ; retour conflit oui/non + liste des entrées en conflit (plage, type, libellé court) ; règles par type (ex. présence physique : pas de blocage, notification). | JayRDV, JayFestival (avant ou lors de la validation d’une réservation, candidature, inscription). |
-| **Vue & Export** | Fourniture des entrées agenda pour un utilisateur sur une période, avec **filtres** (source, type, période, statut, visibilité) ; export iCal/PDF (entrées éligibles, pas de données au-delà du niveau autorisé). | JayRDV, JayFestival (affichage « Mon agenda », calendrier, liste ; téléchargement iCal/PDF). |
-| **Événements publics** | Fourniture d’une **liste d’événements publics** éligibles (plage, type, source, libellé court, id opaque) — sans données personnelles — pour affichage « catalogue » ou « à ajouter à mon agenda » ; après **sélection et validation** par l’utilisateur, le service consommateur enregistre l’inscription/réservation puis **publie** l’entrée vers JayKoa (flux Entrées). | JayFestival (catalogue festivals/ateliers ouverts), JayRDV (créneaux publics), futurs services. |
+| **Entrées** | Publication, mise à jour, suppression d’entrées agenda (plage, type, nature, id opaque, référence utilisateur) ; enregistrement des références côté JayKoa. | JayRDV (après validation métier : création RDV, inscription atelier). |
+| **Conflits** | Vérification de conflit pour un utilisateur et une plage ; retour conflit oui/non + liste des entrées en conflit (plage, type, libellé court) ; règles par type (ex. présence physique : pas de blocage, notification). | JayRDV (avant ou lors de la validation d’une réservation, inscription). |
+| **Vue & Export** | Fourniture des entrées agenda pour un utilisateur sur une période, avec **filtres** (source, type, période, statut, visibilité) ; export iCal/PDF (entrées éligibles, pas de données au-delà du niveau autorisé). | JayRDV (affichage « Mon agenda », calendrier, liste ; téléchargement iCal/PDF). |
+| **Événements publics** | Fourniture d’une **liste d’événements publics** éligibles (plage, type, source, libellé court, id opaque) — sans données personnelles — pour affichage « catalogue » ou « à ajouter à mon agenda » ; après **sélection et validation** par l’utilisateur, le service consommateur enregistre l’inscription/réservation puis **publie** l’entrée vers JayKoa (flux Entrées). | JayRDV (créneaux publics), futurs services. |
 
 ### 2.2 Synthèse Opérateurs
 
@@ -66,7 +66,7 @@ Les **Toolkits** sont des compositions d’**Outils** (capacités exécutables s
 |----------|-------------|
 | **Rôle** | Orchestrer la **publication**, la **mise à jour** et la **suppression** des entrées agenda (références : plage, type, nature, id opaque, référence utilisateur, source). |
 | **Outils agrégés (exemples)** | `agenda.entry.publish` (publier une entrée), `agenda.entry.update` (mettre à jour une plage ou un type), `agenda.entry.remove` (supprimer une référence), `agenda.entry.get` (détail d’une entrée par id opaque). |
-| **Consommé par** | Opérateur(s) JayKoa Entrées ; appelé par JayRDV, JayFestival après validation métier (création RDV, candidature validée, inscription atelier). |
+| **Consommé par** | Opérateur(s) JayKoa Entrées ; appelé par JayRDV après validation métier (création RDV, inscription atelier). |
 | **Composants sous-jacents** | KindMother (persistance des références), MiyuClock (fuseaux, pas de logique métier). |
 
 ### 3.2 Kit « Conflits »
@@ -75,7 +75,7 @@ Les **Toolkits** sont des compositions d’**Outils** (capacités exécutables s
 |----------|-------------|
 | **Rôle** | Orchestrer la **vérification de conflit** (chevauchement) pour un utilisateur et une plage ; retourner conflit oui/non + liste des entrées en conflit ; appliquer les règles par type (ex. présence physique : pas de blocage). |
 | **Outils agrégés (exemples)** | `agenda.conflict.check` (vérifier conflit pour utilisateur U, plage P, type T), `agenda.conflict.list` (liste des entrées en conflit pour un utilisateur, pour affichage indicateur persistant AGD-UI-06). |
-| **Consommé par** | Opérateur(s) JayKoa Conflits ; appelé par JayRDV, JayFestival (formulaires candidature, réservation, inscription). |
+| **Consommé par** | Opérateur(s) JayKoa Conflits ; appelé par JayRDV (formulaires réservation, inscription). |
 | **Composants sous-jacents** | KindMother (lecture des références), MiyuClock (comparaison de plages). |
 
 ### 3.3 Kit « Vue & Export »
@@ -84,16 +84,16 @@ Les **Toolkits** sont des compositions d’**Outils** (capacités exécutables s
 |----------|-------------|
 | **Rôle** | Orchestrer la **fourniture des entrées** pour un utilisateur sur une période, avec **filtres** (source, type, période, statut, visibilité) ; génération **export iCal/PDF** (entrées éligibles, respect AGD-SEC-3). |
 | **Outils agrégés (exemples)** | `agenda.entries.list` (liste des entrées pour utilisateur U, période P, filtres F), `agenda.export.ical` (générer iCal pour U, période P, filtres F), `agenda.export.pdf` (phase 2). |
-| **Consommé par** | Opérateur(s) JayKoa Vue & Export ; appelé par JayRDV, JayFestival (pages « Mon agenda », calendrier, export). |
+| **Consommé par** | Opérateur(s) JayKoa Vue & Export ; appelé par JayRDV (pages « Mon agenda », calendrier, export). |
 | **Composants sous-jacents** | KindMother (lecture des références), MiyuClock (fuseaux, période), WorrySentinel (niveau de sécurité pour export). |
 
 ### 3.4 Kit « Événements publics »
 
 | Attribut | Description |
 |----------|-------------|
-| **Rôle** | Fournir une **liste d’événements publics** éligibles (plage, type, source, libellé court, id opaque) — sans données personnelles — pour affichage catalogue « à ajouter à mon agenda ». Les données peuvent être **publiées** par les services consommateurs (JayFestival, JayRDV) comme « événement public » (ex. édition festival ouverte aux candidatures, atelier ouvert aux inscriptions) ; JayKoa les agrège et les expose selon Mandat et visibilité. |
+| **Rôle** | Fournir une **liste d’événements publics** éligibles (plage, type, source, libellé court, id opaque) — sans données personnelles — pour affichage catalogue « à ajouter à mon agenda ». Les données peuvent être **publiées** par les services consommateurs (JayRDV) comme « événement public » (ex. atelier ouvert aux inscriptions) ; JayKoa les agrège et les expose selon Mandat et visibilité. |
 | **Outils agrégés (exemples)** | `agenda.public.list` (liste des événements publics pour période P, filtres F — source, type), `agenda.public.get` (détail public d’un événement par id opaque). |
-| **Consommé par** | Opérateur(s) JayKoa Événements publics ; appelé par JayFestival (catalogue festivals/ateliers), JayRDV (créneaux publics), pour afficher la vue AGD-UI-09. La **sélection** et l’**ajout à mon agenda** (AGD-UI-10) déclenchent le flux métier du consommateur (inscription, réservation) puis la **publication** vers JayKoa (Kit Entrées). |
+| **Consommé par** | Opérateur(s) JayKoa Événements publics ; appelé par JayRDV (créneaux publics), pour afficher la vue AGD-UI-09. La **sélection** et l’**ajout à mon agenda** (AGD-UI-10) déclenchent le flux métier du consommateur (inscription, réservation) puis la **publication** vers JayKoa (Kit Entrées). |
 | **Composants sous-jacents** | KindMother (références des événements publics), MiyuClock (période). |
 
 ---
@@ -105,7 +105,7 @@ Les **filtres** sont des paramètres d’interrogation passés par les services 
 | Filtre | Description | Utilisé par |
 |--------|-------------|-------------|
 | **Période** | Date début, date fin (ou plage) pour restreindre les entrées retournées. | Vue calendrier, liste, export. |
-| **Source** | Filtrer par service d’origine (JayRDV, JayFestival, etc.). | AGD-UI-04, vue agrégée. |
+| **Source** | Filtrer par service d’origine (JayRDV, etc.). | AGD-UI-04, vue agrégée. |
 | **Type** | Filtrer par type d’entrée (RDV, édition, atelier, participation, etc.). | AGD-UI-04. |
 | **Statut** | Filtrer par statut métier si exposé (ex. candidat, inscrit, confirmé) — selon ce que le consommateur publie. | Vue liste, filtres détaillés. |
 | **Visibilité** | Public vs privé : n’afficher que les entrées marquées « public » (ex. pour vue événements publics) ou « mes entrées » (privé). | Vue événements publics (AGD-UI-09), vue « Mon agenda ». |
@@ -119,7 +119,7 @@ Les services consommateurs **passent** ces filtres lors des appels à JayKoa ; J
 
 Si JayKoa est exposé par une **Équipe d’Opérateurs** (plusieurs Opérateurs spécialisés) :
 
-- **Contrat d’équipe** : définit les Opérateurs membres (Entrées, Conflits, Vue & Export, Événements publics), les **flux autorisés** (qui peut appeler qui), la **direction des flux** (services consommateurs → Opérateurs JayKoa ; pas d’appel JayKoa → JayRDV/JayFestival sauf callback si prévu), les **types d’échanges** et les **conditions préalables** (Mandat valide).
+- **Contrat d’équipe** : définit les Opérateurs membres (Entrées, Conflits, Vue & Export, Événements publics), les **flux autorisés** (qui peut appeler qui), la **direction des flux** (services consommateurs → Opérateurs JayKoa ; pas d’appel JayKoa → JayRDV sauf callback si prévu), les **types d’échanges** et les **conditions préalables** (Mandat valide).
 - **Validation** : StrongFather valide le contrat ; les services consommateurs obtiennent un **Mandat de Permission** pour appeler l’Équipe JayKoa (ou un point d’entrée unique qui délègue aux Opérateurs internes).
 
 Si JayKoa est exposé par **un seul Opérateur**, pas de Contrat d’équipe interne ; le Mandat autorise l’appel à cet Opérateur.

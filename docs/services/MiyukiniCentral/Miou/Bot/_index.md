@@ -7,7 +7,7 @@ Le **Bot** (ou **Proto-IA**) est la **première couche d'intelligence** de Miou.
 Le Bot repose sur trois piliers :
 1. **Banque de templates** — phrases pré-écrites organisées par catégorie et variante.
 2. **Moteur de décision** — règles de priorité, conditions d'évaluation, sélection de la bulle à afficher.
-3. **Intégration données** — agrégats MiyukiniWatch, profil utilisateur, contexte applicatif (JayKoa, JayXpose, MWS, Jay1Tribu).
+3. **Intégration données** — agrégats MiyukiniWatch, profil utilisateur, contexte applicatif (JayKoa, MWS, Jay1Tribu).
 
 ## Statut
 
@@ -15,7 +15,7 @@ Le Bot repose sur trois piliers :
 |----------|--------|
 | **Nature** | Composant interne de Miou (sous-service de Miyukini Central) |
 | **Type** | Moteur à règles déterministe |
-| **Dépendances** | MiyukiniWatch (métriques), profil utilisateur, services applicatifs (JayKoa, JayXpose, Jay1Tribu, MWS) |
+| **Dépendances** | MiyukiniWatch (métriques), profil utilisateur, services applicatifs (JayKoa, Jay1Tribu, MWS) |
 | **Ressources** | CPU négligeable, RAM < 10 Mo |
 
 ## Documents

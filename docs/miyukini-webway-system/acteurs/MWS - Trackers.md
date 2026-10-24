@@ -259,7 +259,7 @@ Chaque manifeste suit une **enveloppe commune** :
 
 | Champ | Type | Description |
 |-------|------|-------------|
-| `service_id` | TEXT | Identifiant normalisé du service (`jaymanga`, `jayshop`, `jayxpose`, etc.). |
+| `service_id` | TEXT | Identifiant normalisé du service (`jaymanga`, `jayshop`, etc.). |
 | `manifest_version` | TEXT | Version du schéma de manifeste (ex. `1.0`). |
 | `cog_id` | TEXT | Identifiant du COG déclarant. |
 | `updated_at` | TEXT (ISO 8601) | Date de dernière mise à jour du manifeste par le COG. |

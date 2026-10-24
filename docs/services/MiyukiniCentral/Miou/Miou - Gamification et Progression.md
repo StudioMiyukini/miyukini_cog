@@ -27,8 +27,6 @@ Système de gamification incarnée par Miou : badges, étapes de progression, to
 | **Assidu (30 jours)** | 🌟 | 30 jours distincts de connexion | « Un mois ensemble — c'est devenu une habitude. » |
 | **Explorateur** | 🧭 | Avoir ouvert au moins 3 services différents | « Tu as exploré 3 coins de ton COG — curiosité récompensée. » |
 | **Webway connecté** | 🌐 | Première connexion MWS réussie | « Ton COG est relié au monde — bienvenue sur le Webway. » |
-| **Exposant actif** | 🏪 | Avoir créé un profil exposant dans JayXpose | « Ton profil exposant est en place — belle initiative. » |
-| **Vitrine en ligne** | 🖼️ | Vitrine JayXpose publiée sur le web | « Ta vitrine est visible sur le web — le monde peut te découvrir. » |
 | **Premier événement** | 📆 | Avoir créé un événement dans JayKoa | « Premier événement dans ton calendrier — ça se fête. » |
 | **Ami connecté** | 💬 | Premier échange via Jay1Tribu | « Premier échange avec un ami — le Webway prend vie. » |
 | **Cercle d'amis** | 👥 | 3 amis ajoutés dans Jay1Tribu | « 3 amis dans ton cercle — ton réseau grandit. » |
@@ -95,8 +93,6 @@ Toutes les données de progression proviennent de **MiyukiniWatch** et de l'éta
 | Nombre de jours de connexion | MiyukiniWatch (sessions) |
 | Services ouverts / utilisés | MiyukiniWatch (services) |
 | Connexion MWS réussie | État MWS dans Central |
-| Profil exposant créé | JayXpose (état interne) |
-| Vitrine publiée | JayXpose (état interne) |
 | Événement créé | JayKoa (état interne) |
 | Amis ajoutés / échanges | Jay1Tribu (métadonnées MiyukiniWatch) |
 

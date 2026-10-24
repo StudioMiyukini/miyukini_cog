@@ -24,7 +24,7 @@ Ce document détaille les **niveaux de sécurité** (WorrySentinel 0–4) appliq
 | **Métadonnées utilisateur** | Qui est concerné (référence utilisateur) | Standard à sensible | 1–2 |
 | **Données personnelles ou métier** | Nom du client, objet du RDV, nom de l’exposant, détail candidature | Sensible à critique | 2–3 |
 
-JayKoa **ne détient pas** la copie canonique des données personnelles ou métier des services consommateurs (JayRDV, JayFestival). Il travaille sur **références** (plage, type, id opaque) et **synthèses** (conflits, vues agrégées) ; la résidence des données sensibles reste définie par le contrat de chaque service consommateur.
+JayKoa **ne détient pas** la copie canonique des données personnelles ou métier des services consommateurs (JayRDV). Il travaille sur **références** (plage, type, id opaque) et **synthèses** (conflits, vues agrégées) ; la résidence des données sensibles reste définie par le contrat de chaque service consommateur.
 
 ### 1.2 Niveaux WorrySentinel (rappel)
 
@@ -68,7 +68,7 @@ JayKoa **ne détient pas** la copie canonique des données personnelles ou méti
 |--------|--------|
 | **Données concernées** | Données personnelles ou métier liées aux entrées agenda (noms, objets, détails) ; agrégation incluant des données sensibles. |
 | **Accès** | Mandat de Permission obligatoire ; résidence centralisée sur COG de référence (voir [Politique de résidence](..//..//..//miyukini-webway-system//reference//_index.md)). |
-| **Résidence** | COG de référence désigné par le service consommateur (JayRDV, JayFestival) ; JayKoa ne détient pas la copie canonique ; accès via Visite gouvernée ou session. |
+| **Résidence** | COG de référence désigné par le service consommateur (JayRDV) ; JayKoa ne détient pas la copie canonique ; accès via Visite gouvernée ou session. |
 | **Audit** | Audit des lectures et écritures ; traçabilité complète. |
 | **Export** | Export contrôlé ; pas d’exposition hors périmètre autorisé ; pas de noms de tiers en export partagé. |
 
@@ -102,7 +102,7 @@ JayKoa **ne détient pas** la copie canonique des données personnelles ou méti
 | **AGD-SEC-2** | Toute agrégation cross-service (vue utilisateur, export) est soumise à Mandat de Permission et au niveau de sécurité du contexte (WorrySentinel). |
 | **AGD-SEC-3** | L’export (iCal, PDF) ne doit pas inclure de données au-delà du niveau autorisé pour le destinataire (ex. pas de noms de tiers en export public). |
 | **AGD-SEC-4** | En état de confiance dégradé (T2–T4), les capacités d’agrégation ou d’export peuvent être restreintes (Caring Nanny, WorrySentinel). |
-| **AGD-SEC-5** | Les services consommateurs (JayRDV, JayFestival) déclarent le niveau WorrySentinel des données qu’ils publient vers JayKoa ; JayKoa applique les règles de visibilité et d’export en conséquence. |
+| **AGD-SEC-5** | Les services consommateurs (JayRDV) déclarent le niveau WorrySentinel des données qu’ils publient vers JayKoa ; JayKoa applique les règles de visibilité et d’export en conséquence. |
 | **AGD-SEC-6** | Pour les événements de type **présence physique** en conflit : pas de blocage de la réservation ou de l’entrée dans l’agenda ; notification systématique ; indicateurs UI (alerte, rouge clignotant) pour pousser à la résolution du conflit jusqu’à ce que l’utilisateur le résolve. |
 
 ---

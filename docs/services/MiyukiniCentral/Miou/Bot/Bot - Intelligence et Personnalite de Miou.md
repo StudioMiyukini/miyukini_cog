@@ -163,7 +163,7 @@ Miou ne fait **pas** d'apprentissage automatique. Mais elle applique des règles
 
 | Donnée | Règle d'utilisation |
 |--------|---------------------|
-| `service_le_plus_utilise` | Si c'est JayXpose → « ta vitrine est à jour ? » ; JayKoa → « un événement à rappeler ? » |
+| `service_le_plus_utilise` | Si c'est JayKoa → « un événement à rappeler ? » |
 | `onglet_favori` | Si Bibliothèque → suggérer exploration ; si Salon → pas de suggestion supplémentaire |
 | `consecutive_active_days` | Si >= 7 → bulle streak ; adapter le ton en « complice » |
 | `ami_plus_delaisse` | Un seul ami par bulle ; cooldown 3 jours pour le même ami |
@@ -172,7 +172,6 @@ Miou ne fait **pas** d'apprentissage automatique. Mais elle applique des règles
 
 | Service favori | Variante de suggestion |
 |----------------|------------------------|
-| JayXpose | Vitrine, catalogue, exposant |
 | JayKoa | Événement, calendrier |
 | Jay1Tribu | Amis, messages |
 | JayKonta | Comptabilité (rare — pas de bulle spécifique) |

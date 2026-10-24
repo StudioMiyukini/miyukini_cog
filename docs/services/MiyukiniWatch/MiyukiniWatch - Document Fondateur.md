@@ -40,7 +40,7 @@ Toutes les métriques sont **locales au COG** (KindMother ou stockage dédié). 
 
 | Métrique | Description | Usage possible |
 |----------|-------------|----------------|
-| **Service ouvert** | Identifiant du service (ex. JayXpose, JayKoa) + horodatage. | « Tu reviens souvent sur JayXpose » ; « Tu n'as pas ouvert JayKoa depuis un moment ». |
+| **Service ouvert** | Identifiant du service (ex. JayShop, JayKoa) + horodatage. | « Tu reviens souvent sur JayShop » ; « Tu n'as pas ouvert JayKoa depuis un moment ». |
 | **Fréquence par service** | Nombre d'ouvertures par service sur une période (jour, semaine). | Classement des services les plus utilisés. |
 | **Temps passé par service** | Durée d'affichage / focus du service par session. | Comprendre où l'utilisateur passe le plus de temps. |
 

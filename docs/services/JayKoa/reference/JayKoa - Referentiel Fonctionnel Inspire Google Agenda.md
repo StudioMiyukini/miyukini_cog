@@ -27,7 +27,7 @@ Google Agenda propose plusieurs **vues** : Jour, Semaine, Mois, Année, **Agenda
 | **Vue Année** | Aperçu **année** : vue synthétique (optionnel, phase 2 ou 3). | Hors scope MVP ; à traiter en phase ultérieure. |
 | **Début de semaine personnalisable** | Paramètre utilisateur ou service (lundi vs dimanche) ; MiyuClock / fuseau. | Données fournies par JayKoa (fuseau, préférence début de semaine si stockée par le service consommateur). |
 
-**Règle** : Les vues sont **fournies en données** par JayKoa ; l’affichage (grille, liste) est assuré par les UIs des services consommateurs (JayRDV, JayFestival). Les composants recommandés (AGD-UI-01, et option liste/agenda) décrivent le **contrat** (période, filtres, entrées).
+**Règle** : Les vues sont **fournies en données** par JayKoa ; l’affichage (grille, liste) est assuré par les UIs des services consommateurs (JayRDV). Les composants recommandés (AGD-UI-01, et option liste/agenda) décrivent le **contrat** (période, filtres, entrées).
 
 ---
 
@@ -50,9 +50,9 @@ Google Agenda propose un **partage au niveau calendrier** avec des niveaux : voi
 
 | Concept Google | Capacité JayKoa | Référence |
 |----------------|--------------------------|-----------|
-| **Libre / Occupé** | Exposition d’un **indicateur de disponibilité** (plages libres vs occupées) **sans détail des entrées** : pour qu’un tiers (ex. professionnel JayRDV, organisateur JayFestival) puisse proposer des créneaux sans voir le détail des RDV ou événements. | Niveau de visibilité **0–1** ; données agrégées (occupé oui/non par plage) ; Mandat avec périmètre « libre/occupé » uniquement. À documenter comme **option** (phase 2) : AGD-UI-08 (vue libre/occupé) ou API dédiée. |
+| **Libre / Occupé** | Exposition d’un **indicateur de disponibilité** (plages libres vs occupées) **sans détail des entrées** : pour qu’un tiers (ex. professionnel JayRDV) puisse proposer des créneaux sans voir le détail des RDV ou événements. | Niveau de visibilité **0–1** ; données agrégées (occupé oui/non par plage) ; Mandat avec périmètre « libre/occupé » uniquement. À documenter comme **option** (phase 2) : AGD-UI-08 (vue libre/occupé) ou API dédiée. |
 | **Voir les événements** | Accès **lecture** aux entrées agenda (plage, type, libellé) selon Mandat et Master Butler. | Vue calendrier (AGD-UI-01), liste ; Niveaux Sécurité. |
-| **Modifier les événements** | La **modification** des entrées reste du ressort des **services consommateurs** (JayRDV, JayFestival) ; JayKoa enregistre les **références** mises à jour (plage, type) après validation métier. | Integration Services Consommateurs. |
+| **Modifier les événements** | La **modification** des entrées reste du ressort des **services consommateurs** (JayRDV) ; JayKoa enregistre les **références** mises à jour (plage, type) après validation métier. | Integration Services Consommateurs. |
 | **Gérer le partage** | Équivalent COG : **StrongFather** (Mandats), **Master Butler** (permissions) ; pas de « propriétaire calendrier » unique hors contexte utilisateur et service. | Document Fondateur, Niveaux Sécurité. |
 
 **Règle** : Le partage et les niveaux d’accès sont gouvernés par **Mandats de Permission** et **niveaux de sécurité** (WorrySentinel) ; JayKoa n’expose que les données autorisées pour le contexte (libre/occupé, détail, export).
@@ -61,11 +61,11 @@ Google Agenda propose un **partage au niveau calendrier** avec des niveaux : voi
 
 ## 4. Calendriers multiples et agrégation (inspirés Google Agenda)
 
-Google Agenda permet **plusieurs calendriers** (personnel, travail, etc.) affichés ensemble ou séparément, avec couleurs par calendrier. JayKoa gère l’**agrégation multi-sources** (plusieurs services : JayRDV, JayFestival) pour un même utilisateur :
+Google Agenda permet **plusieurs calendriers** (personnel, travail, etc.) affichés ensemble ou séparément, avec couleurs par calendrier. JayKoa gère l’**agrégation multi-sources** (plusieurs services : JayRDV, futurs services) pour un même utilisateur :
 
 | Concept Google | Capacité JayKoa | Référence |
 |----------------|--------------------------|-----------|
-| **Plusieurs calendriers** | **Plusieurs sources** d’entrées (JayRDV, JayFestival, futurs services) pour un même utilisateur ; affichage agrégé ou filtré par source/type. | Document Fondateur (§ 3 Intégration), Integration Services Consommateurs, AGD-UI-04 (filtre par source/type). |
+| **Plusieurs calendriers** | **Plusieurs sources** d’entrées (JayRDV, futurs services) pour un même utilisateur ; affichage agrégé ou filtré par source/type. | Document Fondateur (§ 3 Intégration), Integration Services Consommateurs, AGD-UI-04 (filtre par source/type). |
 | **Couleur / distinction par source** | Les entrées sont **typées et sourcées** (type, source) ; les UIs des services consommateurs peuvent afficher des couleurs ou styles par source/type. | Données fournies par JayKoa (type, source) ; implémentation UI côté consommateur. |
 | **Masquer / afficher une source** | Filtre par **source** ou **type** (AGD-UI-04) : l’utilisateur choisit d’afficher uniquement RDV, ou uniquement festivals, ou tout. | AGD-UI-04. |
 
@@ -75,7 +75,7 @@ Google Agenda permet **plusieurs calendriers** (personnel, travail, etc.) affich
 
 ## 5. Invitations à un événement (inspirées Google Agenda)
 
-Google Agenda permet d’**inviter des personnes** à un événement (acceptation, refus, peut-être) et de voir les réponses. JayKoa ne gère pas directement les invitations ni les réponses : celles-ci relèvent des **services consommateurs** (JayFestival pour un atelier, JayRDV pour un RDV). JayKoa peut :
+Google Agenda permet d’**inviter des personnes** à un événement (acceptation, refus, peut-être) et de voir les réponses. JayKoa ne gère pas directement les invitations ni les réponses : celles-ci relèvent des **services consommateurs** (JayRDV pour un RDV). JayKoa peut :
 
 | Concept Google | Capacité JayKoa | Référence |
 |----------------|--------------------------|-----------|
@@ -120,7 +120,7 @@ Google Agenda permet l’**export** (iCal, etc.) et la **synchronisation** avec 
 | **Vues** | Jour, Semaine, Mois, Année, Agenda (liste) | AGD-UI-01 (jour/semaine/mois) ; option vue liste/agenda (AGD-UI-07) ; année en phase 2+. |
 | **Rappels** | Rappel avant événement | Données pour Miyunotify / services ; AGD-UI-05 (prochaine entrée) ; phase 3 pour rappels automatiques. |
 | **Partage** | Libre/occupé, lecture, écriture, gestion | Mandats, niveaux (WorrySentinel) ; option libre/occupé (phase 2, AGD-UI-08 ou API). |
-| **Calendriers multiples** | Plusieurs calendriers, couleurs, masquer/afficher | Agrégation multi-sources (JayRDV, JayFestival) ; filtre par source/type (AGD-UI-04). |
+| **Calendriers multiples** | Plusieurs calendriers, couleurs, masquer/afficher | Agrégation multi-sources (JayRDV, futurs services) ; filtre par source/type (AGD-UI-04). |
 | **Invitations** | Inviter, accepter, refuser | Service consommateur ; JayKoa reçoit les entrées validées. |
 | **Tâches** | Tâches (to-do) | Entrées avec plage ou échéance si publiées ; tâches sans date hors périmètre cœur. |
 | **Export / sync** | iCal, sync externe, hors ligne | Export iCal/PDF (AGD-SEC-3) ; sync externe / hors ligne en phase 2+ ou par consommateurs. |

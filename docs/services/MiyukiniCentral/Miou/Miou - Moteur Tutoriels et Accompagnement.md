@@ -93,7 +93,7 @@ Chaque élément ciblable doit avoir un attribut `data-tutorial-id` (ou équival
 | `search-input` | Header | Champ de recherche |
 | `tab-accueil` | TabBar | Onglet Accueil |
 | `tab-add` | TabBar | Bouton « + » (ouvrir Bibliothèque) |
-| `service-card-{id}` | Grille | Carte service (ex. `service-card-jayxpose`) |
+| `service-card-{id}` | Grille | Carte service (ex. `service-card-jaykoa`) |
 | `filter-tous` | Grille | Filtre Tous |
 | `filter-installes` | Grille | Filtre Installés |
 | `filter-favoris` | Grille | Filtre Favoris |

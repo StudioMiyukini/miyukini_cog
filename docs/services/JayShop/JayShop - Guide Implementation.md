@@ -4,6 +4,8 @@
 
 Ce document est le **guide d'implementation** du service **JayShop**. Il detaille l'architecture technique, la structure des crates, le schema de persistance, les Operateurs et Kits d'Outils, le plan de livraison par phases et l'integration dans Miyukini Central.
 
+> **Note 2026-04-29 :** Les integrations JayXpose (catalogue, stocks) et JayFestival (evenements) ont ete retirees de ce guide suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md).
+
 **References** : [Document fondateur](./JayShop%20-%20Document%20Fondateur.md), [Analyse des besoins](./JayShop%20-%20Analyse%20des%20besoins.md), [Ecrans et UI](./JayShop%20-%20Ecrans%20et%20UI.md), [Interfaces Inter-Services](./JayShop%20-%20Interfaces%20Inter-Services.md), [Reference Loyverse](./reference/JayShop%20-%20Reference%20Loyverse%20Back%20Office.md).
 
 ## Portee / Scope
@@ -20,15 +22,14 @@ Ce document est le **guide d'implementation** du service **JayShop**. Il detaill
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                      MIYUKINI CENTRAL (app)                      │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌────────────────┐  │
-│  │ JayShop UI      │  │ JayXpose UI     │  │ JayKonta UI    │  │
-│  │ (Dioxus views)  │  │ (Dioxus views)  │  │ (Dioxus views) │  │
-│  └────────┬────────┘  └────────┬────────┘  └───────┬────────┘  │
-│           │                     │                    │           │
+│  ┌─────────────────┐                       ┌────────────────┐  │
+│  │ JayShop UI      │                       │ JayKonta UI    │  │
+│  │ (Dioxus views)  │                       │ (Dioxus views) │  │
+│  └────────┬────────┘                       └───────┬────────┘  │
+│           │                                          │           │
 │  ┌────────▼──────────────────────────────────────────▼────────┐ │
 │  │                  ServiceConnections                         │ │
 │  │  jayshop: Arc<JayShopDb>   (via kindmother-client)          │ │
-│  │  jayxpose: Arc<JayXposeDb> (via kindmother-client)          │ │
 │  │  jaykonta: Arc<JayKontaDb> (via kindmother-client)          │ │
 │  └──────────────────────┬──────────────────────────────────────┘ │
 └─────────────────────────┼────────────────────────────────────────┘
@@ -43,7 +44,7 @@ Ce document est le **guide d'implementation** du service **JayShop**. Il detaill
 │  │  Chiffrement AES-256-CBC natif                           │    │
 │  │  Cles derivees par Argon2id                              │    │
 │  │                                                          │    │
-│  │  jayshop.db  │  jayxpose.db  │  jaykonta.db  │  ...     │    │
+│  │  jayshop.db  │  jaykonta.db  │  ...                     │    │
 │  └──────────────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -59,7 +60,6 @@ Ce document est le **guide d'implementation** du service **JayShop**. Il detaill
     ↓ appel service
 [JayShopDb] (crates/jayshop/src/data/kindmother_client_db.rs)
     ↓ JSON/TCP → KindMother Service → libSQL chiffre (jayshop.db)
-    ↓ sync stock → [JayXposeDb] → KindMother → jayxpose.db
     ↓ transmission comptable → [JayKontaDb] → KindMother → jaykonta.db
 ```
 
@@ -89,7 +89,6 @@ crates/jayshop/
     │   └── tax.rs                # Taxes multi-taux (incluse/ajoutee)
     ├── integrations/
     │   ├── mod.rs                # Exports publics
-    │   ├── jayxpose_sync.rs      # Synchronisation catalogue et stocks avec JayXpose
     │   ├── jaykonta_pipeline.rs  # Transmission comptable vers JayKonta
     │   └── contracts.rs          # Payloads contractuels IFS-JSH-*
     └── services/
@@ -98,7 +97,7 @@ crates/jayshop/
         ├── payment_service.rs    # Service metier : paiement et rendu monnaie
         ├── cash_service.rs       # Service metier : sessions de caisse
         ├── report_service.rs     # Service metier : rapports et KPIs
-        └── sync_service.rs       # Service metier : orchestration sync JayXpose/JayKonta
+        └── sync_service.rs       # Service metier : orchestration sync JayKonta
 ```
 
 ### 2.2 Cargo.toml
@@ -126,7 +125,6 @@ description = "JayShop — Service commerce, point de vente et vente en ligne"
 [dependencies]
 kindmother = { path = "../kindmother" }
 kindmother-client = { path = "../kindmother-client" }
-jayxpose = { path = "../jayxpose" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
@@ -157,14 +155,13 @@ pedantic = { level = "warn", priority = -1 }
 //! @do expose_public_modules_jayshop
 //! @layer infra
 //!
-//! JayShop s'appuie sur JayXpose pour le catalogue et les stocks,
-//! et transmet les donnees comptables a JayKonta.
+//! JayShop transmet les donnees comptables a JayKonta.
 
 /// Persistance KindMother (libSQL via KindMother Service).
 pub mod data;
 /// Types et logique de domaine JayShop.
 pub mod domain;
-/// Integrations inter-services (JayXpose, JayKonta).
+/// Integrations inter-services (JayKonta).
 pub mod integrations;
 /// Services metier (ticket, paiement, caisse, rapports, sync).
 pub mod services;
@@ -300,7 +297,7 @@ CREATE TABLE IF NOT EXISTS tickets (
 CREATE TABLE IF NOT EXISTS ticket_lines (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     ticket_id TEXT NOT NULL REFERENCES tickets(id),
-    product_id TEXT NOT NULL,          -- reference JayXpose
+    product_id TEXT NOT NULL,          -- reference produit
     product_name TEXT NOT NULL,        -- snapshot au moment de la vente
     quantity INTEGER NOT NULL DEFAULT 1,
     unit_price INTEGER NOT NULL,       -- en centimes (snapshot)
@@ -346,7 +343,7 @@ CREATE TABLE IF NOT EXISTS customers (
 -- Journal de synchronisation inter-services
 CREATE TABLE IF NOT EXISTS sync_logs (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-    sync_source TEXT NOT NULL,         -- 'jayshop' | 'jayxpose' | 'jaykonta'
+    sync_source TEXT NOT NULL,         -- 'jayshop' | 'jaykonta'
     sync_type TEXT NOT NULL,           -- 'stock_push' | 'sale_closed' | 'refund' | etc.
     status TEXT NOT NULL,              -- 'ok' | 'partial' | 'error' | 'denied'
     payload_json TEXT,
@@ -377,10 +374,6 @@ CREATE TABLE IF NOT EXISTS events (
     stand_info TEXT,                   -- informations stand (numero, zone, taille)
     status TEXT NOT NULL DEFAULT 'draft',  -- 'draft' | 'confirmed' | 'ongoing' | 'closed' | 'cancelled'
     notes TEXT,                        -- notes internes
-    -- Liaison optionnelle avec JayFestival
-    jayfestival_edition_id TEXT,       -- FK vers edition JayFestival
-    jayfestival_candidature_id TEXT,   -- FK vers candidature JayFestival
-    jayfestival_sync_status TEXT,      -- 'synced' | 'pending' | 'error' | NULL si creation manuelle
     -- Metriques (calculees et mises a jour)
     total_revenue INTEGER DEFAULT 0,   -- CA total en centimes
     total_costs INTEGER DEFAULT 0,     -- Couts totaux en centimes
@@ -408,7 +401,7 @@ CREATE TABLE IF NOT EXISTS event_costs (
 CREATE TABLE IF NOT EXISTS event_stock (
     id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     event_id TEXT NOT NULL REFERENCES events(id),
-    product_id TEXT NOT NULL,          -- FK vers produit JayXpose
+    product_id TEXT NOT NULL,          -- FK vers produit
     product_name TEXT NOT NULL,        -- snapshot du nom (pour affichage meme si produit modifie)
     allocated_qty INTEGER NOT NULL,    -- quantite allouee pour l'evenement
     sold_qty INTEGER NOT NULL DEFAULT 0,  -- quantite vendue
@@ -435,7 +428,6 @@ CREATE INDEX IF NOT EXISTS idx_sync_logs_created ON sync_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_events_seller ON events(seller_id);
 CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
 CREATE INDEX IF NOT EXISTS idx_events_dates ON events(start_date, end_date);
-CREATE INDEX IF NOT EXISTS idx_events_jayfestival ON events(jayfestival_edition_id);
 CREATE INDEX IF NOT EXISTS idx_event_costs_event ON event_costs(event_id);
 CREATE INDEX IF NOT EXISTS idx_event_stock_event ON event_stock(event_id);
 CREATE INDEX IF NOT EXISTS idx_event_stock_product ON event_stock(product_id);
@@ -468,9 +460,6 @@ pub enum EventStatus { Draft, Confirmed, Ongoing, Closed, Cancelled }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum EventCostCategory { Stand, Transport, Lodging, Food, Other }
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum JayFestivalSyncStatus { Synced, Pending, Error }
 
 // -- Types principaux --
 
@@ -518,10 +507,6 @@ pub struct Event {
     pub stand_info: Option<String>,
     pub status: EventStatus,
     pub notes: Option<String>,
-    // Liaison JayFestival
-    pub jayfestival_edition_id: Option<String>,
-    pub jayfestival_candidature_id: Option<String>,
-    pub jayfestival_sync_status: Option<JayFestivalSyncStatus>,
     // Metriques
     pub total_revenue: i64,           // centimes
     pub total_costs: i64,             // centimes
@@ -562,7 +547,7 @@ pub struct EventStock {
 
 ### 3.3 Pattern JayShopDb (data/kindmother_client_db.rs)
 
-Le pattern suit exactement celui de `JayXposeDb` et `JayKontaDb` : un `KindMotherClient` global initialise au demarrage, enveloppe dans un `Arc`.
+Le pattern suit exactement celui de `JayKontaDb` : un `KindMotherClient` global initialise au demarrage, enveloppe dans un `Arc`.
 
 ```rust
 use std::sync::{Arc, OnceLock};
@@ -681,7 +666,7 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 | **Public servi** | Admin (PoS et gestion) ; Client (boutique en ligne, Phase 2). |
 | **Gouvernance** | Mandat de Permission (StrongFather) ; persistance (KindMother) ; securite (WorrySentinel). |
 | **Capacites exposees** | Creer un ticket (draft) ; ajouter/modifier/supprimer des lignes ; appliquer une remise ; calculer les totaux (HT, taxes, TTC) ; cloturer le ticket (apres paiement) ; rembourser (total ou partiel) ; lister les tickets ouverts. |
-| **Ne fait pas** | Paiement (JayShop Paiement) ; gestion catalogue (JayXpose) ; comptabilite (JayKonta). |
+| **Ne fait pas** | Paiement (JayShop Paiement) ; comptabilite (JayKonta). |
 
 ### 4.2 Operateur « JayShop Paiement » (encaissement)
 
@@ -727,10 +712,10 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 
 | Attribut | Description |
 |----------|-------------|
-| **Role** | Orchestrer la **synchronisation avec JayXpose et JayKonta** : lecture/ecriture catalogue, sync stocks, transmission comptable. |
+| **Role** | Orchestrer la **synchronisation avec JayKonta** : transmission comptable. |
 | **Public servi** | Systeme (arriere-plan). |
 | **Gouvernance** | Mandat ; securite Sensitive (2) a Critical (3) ; audit complet. |
-| **Capacites exposees** | Lire le catalogue JayXpose ; ecrire produit/categorie vers JayXpose ; sync stock push/pull ; transmettre vente/remboursement/cloture vers JayKonta ; journaliser dans sync_logs. |
+| **Capacites exposees** | Transmettre vente/remboursement/cloture vers JayKonta ; journaliser dans sync_logs. |
 | **Ne fait pas** | Vente ; paiement ; UI. |
 
 ### 4.7 Operateur « JayShop Evenement » (gestion des participations evenements/festivals)
@@ -740,9 +725,9 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 | **Role** | Exposer la **gestion des participations a des evenements/festivals** : fiche evenement, couts, stock temporaire, suivi des benefices, cloture. |
 | **Public servi** | Admin. |
 | **Gouvernance** | Mandat ; securite Standard (1) a Sensitive (2) pour les donnees financieres. |
-| **Capacites exposees** | CRUD fiche evenement (creation manuelle ou automatique depuis JayFestival) ; CRUD couts de participation (stand, transport, logement, nourriture, autres) ; allouer un stock temporaire (deduit du stock global JayXpose) ; associer un ticket a un evenement ; calculer les metriques (CA, couts, benefice) ; cloturer l'evenement (reintegration stock, synthese comptable) ; dashboard evenement. |
-| **Composants sous-jacents** | KindMother Client (tables `events`, `event_costs`, `event_stock`) ; JayXpose (lecture/decrementation stock) ; JayKonta (transmission comptable par evenement) ; JayFestival (synchronisation automatique). |
-| **Ne fait pas** | Vente (JayShop Vente) ; paiement (JayShop Paiement) ; gestion candidatures exposant (JayFestival). |
+| **Capacites exposees** | CRUD fiche evenement (creation manuelle) ; CRUD couts de participation (stand, transport, logement, nourriture, autres) ; allouer un stock temporaire (deduit du stock global) ; associer un ticket a un evenement ; calculer les metriques (CA, couts, benefice) ; cloturer l'evenement (reintegration stock, synthese comptable) ; dashboard evenement. |
+| **Composants sous-jacents** | KindMother Client (tables `events`, `event_costs`, `event_stock`) ; JayKonta (transmission comptable par evenement). |
+| **Ne fait pas** | Vente (JayShop Vente) ; paiement (JayShop Paiement). |
 
 ### 4.8 Synthese des Operateurs
 
@@ -753,7 +738,7 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 | **JayShop Caisse** | JSH-60 a JSH-63 |
 | **JayShop Config** | JSH-01 a JSH-06, JSH-90 a JSH-97 |
 | **JayShop Rapports** | JSH-53 a JSH-59, JSH-54, JSH-118 (dashboard evenement) |
-| **JayShop Sync** | JSH-70 a JSH-76, JSH-80 a JSH-83, JSH-130 a JSH-134 (integration JayFestival) |
+| **JayShop Sync** | JSH-74 a JSH-76, JSH-80 a JSH-83 |
 | **JayShop Evenement** | JSH-110 a JSH-120 (gestion evenements, couts, stock temporaire) |
 
 ---
@@ -767,7 +752,7 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 | **Role** | Orchestrer le **cycle de vie complet du ticket** (creation, lignes, remises, taxes, cloture, remboursement). |
 | **Outils agreges** | `ticket.create`, `ticket.line.add`, `ticket.line.update`, `ticket.line.remove`, `ticket.discount.apply`, `ticket.totals.compute`, `ticket.close`, `ticket.refund`, `ticket.list`, `ticket.get`, `ticket.open_list` (tickets ouverts). |
 | **Consomme par** | JayShop Vente ; JayShop Paiement (cloture) ; JayShop Rapports (lecture). |
-| **Composants sous-jacents** | KindMother Client → KindMother Service → libSQL `jayshop.db` (tables `tickets`, `ticket_lines`) ; JayXpose (catalogue pour resolution produit). |
+| **Composants sous-jacents** | KindMother Client → KindMother Service → libSQL `jayshop.db` (tables `tickets`, `ticket_lines`). |
 
 ### 5.2 Kit « Paiement »
 
@@ -809,10 +794,10 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 
 | Attribut | Description |
 |----------|-------------|
-| **Role** | Orchestrer la **synchronisation catalogue/stocks avec JayXpose**, la **transmission comptable vers JayKonta**, et l'**integration avec JayFestival**. |
-| **Outils agreges** | `sync.jayxpose.catalogue.read`, `sync.jayxpose.product.write`, `sync.jayxpose.stock.push`, `sync.jayxpose.stock.pull`, `sync.jaykonta.sale.transmit`, `sync.jaykonta.refund.transmit`, `sync.jaykonta.session.transmit`, `sync.jayfestival.event.create` (creation auto depuis validation candidature), `sync.jayfestival.event.update` (sync infos edition), `sync.jayfestival.event.cancel`, `sync.log.record`. |
-| **Consomme par** | JayShop Sync ; JayShop Evenement (pour stock temporaire). |
-| **Composants sous-jacents** | JayXpose (crate `jayxpose::data`), JayKonta (crate futur), JayFestival (crate `jayfestival::data`), KindMother (table `sync_logs`). |
+| **Role** | Orchestrer la **transmission comptable vers JayKonta**. |
+| **Outils agreges** | `sync.jaykonta.sale.transmit`, `sync.jaykonta.refund.transmit`, `sync.jaykonta.session.transmit`, `sync.log.record`. |
+| **Consomme par** | JayShop Sync. |
+| **Composants sous-jacents** | JayKonta (crate futur), KindMother (table `sync_logs`). |
 
 ### 5.7 Kit « Evenement »
 
@@ -820,8 +805,8 @@ pub use kindmother_client_db::{JayShopDb, DbError};
 |----------|-------------|
 | **Role** | Orchestrer la **gestion des participations a des evenements/festivals** : fiches, couts, stock temporaire, suivi benefices, cloture. |
 | **Outils agreges** | `event.create` (creation manuelle), `event.update`, `event.get`, `event.list`, `event.delete`, `event.cost.add`, `event.cost.update`, `event.cost.delete`, `event.cost.list`, `event.cost.total`, `event.stock.allocate` (allouer stock temporaire depuis stock global), `event.stock.update`, `event.stock.list`, `event.stock.remaining`, `event.stock.reintegrate` (reintegrer au stock global), `event.metrics.compute` (CA, couts, benefice), `event.close` (cloture + reintegration + synthese comptable), `event.dashboard`. |
-| **Consomme par** | JayShop Evenement ; JayShop Rapports (dashboard evenement) ; JayShop Sync (integration JayFestival). |
-| **Composants sous-jacents** | KindMother (tables `events`, `event_costs`, `event_stock`) ; JayXpose (stock global) ; JayKonta (transmission comptable par evenement). |
+| **Consomme par** | JayShop Evenement ; JayShop Rapports (dashboard evenement). |
+| **Composants sous-jacents** | KindMother (tables `events`, `event_costs`, `event_stock`) ; JayKonta (transmission comptable par evenement). |
 
 ---
 
@@ -847,7 +832,7 @@ Dans `apps/central/src/data.rs`, ajouter :
 use jayshop::data::JayShopDb;
 
 pub struct ServiceConnections {
-    // ... existants (jayxpose, jaykonta, jayfestival, jaykoa) ...
+    // ... existants (jaykonta, jaykoa) ...
     pub jayshop: Arc<JayShopDb>,
 }
 
@@ -943,9 +928,8 @@ apps/central/src/services/jayshop/
 | [202] | CRUD modes de paiement | Ecran + logique |
 | [203] | CRUD taux de taxe (JSH-A18) | Multi-taux, incluse/ajoutee, application par defaut |
 | [204] | CRUD remises pre-definies (JSH-A16) | Entites remises, type %/montant |
-| [205] | Lecture catalogue JayXpose (IFS-JSH-01) | Sync produits, categories depuis JayXpose |
 | [206] | Ecran liste produits (JSH-A02) | Affichage catalogue, filtres, alertes stock |
-| [207] | Formulaire produit CRUD (JSH-A03) | Creation/edition relayee vers JayXpose (IFS-JSH-02) |
+| [207] | Formulaire produit CRUD (JSH-A03) | Creation/edition |
 | [208] | Gestion categories (JSH-A04) | Avec couleur par categorie |
 
 **Criteres** : Admin peut configurer boutique, voir produits, creer/modifier produits, definir taxes et remises.
@@ -961,7 +945,6 @@ apps/central/src/services/jayshop/
 | [303] | Logique ticket (ticket_service.rs) | Creation, ajout ligne, calcul totaux, remises, taxes |
 | [304] | Ecran de paiement (JSH-A06) | Recap, saisie montant, calcul rendu, boutons mode, pave numerique |
 | [305] | Logique paiement (payment_service.rs) | Enregistrement, rendu monnaie, paiement mixte, validation |
-| [306] | Decrementation stock (IFS-JSH-03) | Sync stock push vers JayXpose a chaque cloture |
 | [307] | Generation recu | Numero, date, lignes, total, paiements, rendu |
 
 **Criteres** : Flux complet en PoS : ouvrir ticket → ajouter produits → payer → cloturer → stock decremente → recu genere.
@@ -999,18 +982,16 @@ apps/central/src/services/jayshop/
 
 ### Phase 6 — Integrations inter-services
 
-**Objectif** : Brancher JayXpose et JayKonta sur les contrats.
+**Objectif** : Brancher JayKonta sur les contrats.
 
 | Id | Tache | Livrable |
 |----|-------|----------|
 | [601] | Transmission comptable vente → JayKonta (IFS-JSH-04) | Payload `sale_closed` |
 | [602] | Transmission remboursement → JayKonta | Payload `refund` |
 | [603] | Transmission cloture caisse → JayKonta | Payload `cash_session_closed` |
-| [604] | Sync stock bidirectionnelle JayXpose (IFS-JSH-03) | Push/pull, resolution conflits |
-| [605] | CRUD catalogue relaye (IFS-JSH-02) | Ecriture produit/categorie vers JayXpose |
 | [606] | Journalisation sync_logs | Audit complet des echanges |
 
-**Criteres** : JayKonta recoit les ventes. JayXpose recoit les mouvements de stock. sync_logs trace tout.
+**Criteres** : JayKonta recoit les ventes. sync_logs trace tout.
 
 ### Phase 7 — Fichier client et fonctionnalites avancees
 
@@ -1022,9 +1003,9 @@ apps/central/src/services/jayshop/
 | [702] | Alertes stock bas (JSH-75) | Notifications quand stock < seuil |
 | [703] | Alertes stock negatif (JSH-76) | Avertissement en caisse |
 | [704] | Import CSV produits (JSH-17) | Import en masse |
-| [705] | Ajustement stock simplifie (JSH-A15) | Reception, perte, casse → relaye JayXpose |
+| [705] | Ajustement stock simplifie (JSH-A15) | Reception, perte, casse |
 
-### Phase 8 — Gestion des evenements et integration JayFestival
+### Phase 8 — Gestion des evenements
 
 **Objectif** : Permettre le suivi des participations a des evenements/festivals avec couts, stock temporaire et benefices.
 
@@ -1037,16 +1018,13 @@ apps/central/src/services/jayshop/
 | [805] | Formulaire creation/edition evenement (JSH-A21) | Nom, dates, lieu, stand, notes |
 | [806] | Ecran couts de participation (JSH-A22) | CRUD couts (stand, transport, logement, nourriture, autres), total |
 | [807] | Ecran stock temporaire (JSH-A23) | Selection produits, quantites, allocation depuis stock global |
-| [808] | Allocation stock temporaire | Logique de decrementation stock global JayXpose, allocation vers event_stock |
+| [808] | Allocation stock temporaire | Logique de decrementation stock global, allocation vers event_stock |
 | [809] | Association ticket ↔ evenement en PoS | Selecteur d'evenement actif, decrementation stock temporaire |
 | [810] | Dashboard evenement (JSH-A24) | CA, couts, stock restant, benefice brut, benefice net |
 | [811] | Cloture d'evenement | Reintegration stock non vendu vers stock global, synthese finale |
 | [812] | Transmission comptable par evenement | Synthese vers JayKonta avec ventilation par evenement |
-| [813] | Integration JayFestival — creation auto (IFS-JSH-06) | Reception notification validation candidature, creation fiche evenement |
-| [814] | Integration JayFestival — synchronisation | Mise a jour infos edition (dates, lieu, stand), annulation |
-| [815] | Notification creation evenement | Notification admin quand fiche creee automatiquement |
 
-**Criteres** : Admin peut creer une fiche evenement, saisir les couts, allouer un stock temporaire, vendre sur evenement, voir le dashboard benefices, cloturer et reintegrer le stock. Integration JayFestival fonctionnelle.
+**Criteres** : Admin peut creer une fiche evenement, saisir les couts, allouer un stock temporaire, vendre sur evenement, voir le dashboard benefices, cloturer et reintegrer le stock.
 
 ### Phase 9 — Durcissement et verification
 
@@ -1056,9 +1034,7 @@ apps/central/src/services/jayshop/
 |----|-------|----------|
 | [901] | Enforcement securite niveau 3 sur paiements | Chiffrement, mandats, audit |
 | [902] | Tests unitaires domaine | ticket, payment, cash_session, tax, discount, event |
-| [903] | Tests integration JayXpose sync | Fixtures JSON, scenarios push/pull, stock temporaire |
 | [904] | Tests integration JayKonta transmission | Fixtures JSON, scenarios vente/remboursement/evenement |
-| [905] | Tests integration JayFestival sync | Fixtures JSON, scenarios creation auto/sync/annulation |
 | [906] | Hors-ligne et sync reconnexion | Queue locale, replay a la reconnexion |
 | [907] | Rapport de verification final | Couverture, conformite, regressions |
 
@@ -1077,11 +1053,10 @@ apps/central/src/services/jayshop/
 | Multi-employes et pointage | Phase 2 |
 | Affichage client (second ecran) | Phase 2 |
 | Impressions cuisine (JayFaim) | Phase 2 |
-| ~~PoS evenementiel JayFestival~~ | ~~Phase 2~~ → **Phase 8 (P1)** |
 | Inventaire physique (scan) | Phase 3 |
 | Bons de commande fournisseur | Phase 3 |
 
-> **Note** : La gestion des evenements/festivals (fiches, couts, stock temporaire, integration JayFestival) a ete remontee en **Phase 8 (P1)** suite a l'analyse des besoins.
+> **Note** : La gestion des evenements/festivals (fiches, couts, stock temporaire) a ete remontee en **Phase 8 (P1)** suite a l'analyse des besoins.
 
 ---
 
@@ -1095,13 +1070,11 @@ apps/central/src/services/jayshop/
 - [ ] Sessions de caisse operationnelles
 - [ ] Historique des tickets consultable
 - [ ] Tableau de bord et KPIs
-- [ ] Sync stock JayXpose active
 - [ ] Transmission comptable JayKonta active
 - [ ] sync_logs trace tous les echanges
 - [ ] **Gestion des evenements operationnelle (fiche, couts, stock temporaire)**
-- [ ] **Integration JayFestival active (creation auto, sync, annulation)**
 - [ ] Tests unitaires passes
-- [ ] Tests integration passes (JayXpose, JayKonta, JayFestival)
+- [ ] Tests integration passes (JayKonta)
 - [ ] Securite niveau 3 sur paiements
 - [ ] `unsafe_code = "forbid"` verifie
 - [ ] Lints clippy pedantic passes
@@ -1113,9 +1086,7 @@ apps/central/src/services/jayshop/
 | Besoin | Composant | Role |
 |--------|-----------|------|
 | Persistance | KindMother Service, kindmother-client | libSQL chiffre (JSON/TCP), CRUD via WriteIntents. |
-| Catalogue produits | JayXpose (crate) | Source de verite produits, categories, stocks. |
 | Comptabilite | JayKonta (crate) | Reception des ecritures comptables. |
-| **Evenements/Festivals** | **JayFestival (crate)** | **Synchronisation automatique des participations evenements.** |
 | Authentification | Miyauth, Master Butler | Compte admin, mandats, permissions. |
 | Contacts client | MiyuContacts | Fiche client. |
 | Securite, audit | WorrySentinel | Niveaux de securite, audit. |
@@ -1131,9 +1102,8 @@ apps/central/src/services/jayshop/
 | [JayShop - Analyse des besoins](./JayShop%20-%20Analyse%20des%20besoins.md) | Besoins fonctionnels et non-fonctionnels. |
 | [JayShop - Ecrans et UI](./JayShop%20-%20Ecrans%20et%20UI.md) | Cartographie ecrans et wireframes. |
 | [JayShop - Parcours Utilisateur](./JayShop%20-%20Parcours%20Utilisateur.md) | Parcours admin et client. |
-| [JayShop - Interfaces Inter-Services](./JayShop%20-%20Interfaces%20Inter-Services.md) | Contrats IFS-JSH-01 a 05. |
+| [JayShop - Interfaces Inter-Services](./JayShop%20-%20Interfaces%20Inter-Services.md) | Contrats IFS-JSH-04 et 05. |
 | [JayShop - Reference Loyverse](./reference/JayShop%20-%20Reference%20Loyverse%20Back%20Office.md) | Analyse concurrentielle Loyverse. |
-| [JayXpose - Catalogue Produits](../JayXpose/JayXpose%20-%20Catalogue%20Produits.md) | Modele catalogue consomme. |
 | [JayKonta - Plan Implementation](../JayKonta/JayKonta%20-%20Plan%20Implementation.md) | Pattern plan implementation reference. |
 
 ---

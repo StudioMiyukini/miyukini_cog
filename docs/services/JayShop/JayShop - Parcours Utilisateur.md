@@ -28,8 +28,7 @@ Ce document decrit les **parcours utilisateur** du service **JayShop** pour les 
 
 ```
 [Miyukini Central] → Activer JayShop
-    → Si profil JayXpose existe : liaison automatique du catalogue
-    → Sinon : creation guidee (nom, secteur, premiers produits)
+    → Creation guidee (nom, secteur, premiers produits)
     → Configuration boutique :
         → Nom de la boutique, slug URL
         → Devise, taux de TVA
@@ -46,17 +45,17 @@ Ce document decrit les **parcours utilisateur** du service **JayShop** pour les 
 
 ```
 [JayShop > Produits]
-    → Voir la liste des produits (depuis JayXpose)
+    → Voir la liste des produits
     → Ajouter un produit :
         → Nom, description, prix, categorie, visuel(s)
         → Disponibilite (disponible / rupture / sur commande)
         → Optionnel : marquer comme « Produit PoS » → affecter a un onglet
-        → Enregistrer (relaye a JayXpose)
+        → Enregistrer
     → Modifier un produit :
         → Clic sur le produit → formulaire pre-rempli
         → Modifier les champs → Enregistrer
     → Supprimer un produit :
-        → Confirmation → Soft delete (relaye a JayXpose)
+        → Confirmation → Soft delete
     → Gerer les categories :
         → Creer / Renommer / Supprimer / Reordonner
 ```

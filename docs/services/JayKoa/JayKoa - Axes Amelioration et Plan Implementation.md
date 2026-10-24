@@ -23,7 +23,7 @@ Ce document constitue l'audit d'implementation complet du Service JayKoa, croisa
 | Persistance SQLite | OK | Schema, CRUD agendas, CRUD entries, reflets externes, settings, detect_conflicts |
 | UI calendrier egui | OK | Vues semaine, jour, mois, planning. Header, sidebar, mini-calendrier |
 | Composants Atomic Design | OK | Atoms (4), Molecules (4), Organisms (3) |
-| Adaptateurs sync | STUB | JayFestivalAdapter et JayRDVAdapter avec mock data hardcodee |
+| Adaptateurs sync | STUB | JayRDVAdapter avec mock data hardcodee |
 | Integration Central | BASIQUE | JayKoaService wrapping JayKoaApp, tab fonctionnelle |
 
 ### Ce qui manque
@@ -169,13 +169,9 @@ Version marquee 0.1.0 (mock). Priorite : Basse
 
 Criticite : HAUTE | Ref : Plan etape 4
 
-### 5.1 JayFestival Adapter reel
+### 5.1 Adaptateur festival (sans objet)
 
-Contient 2 editions hardcodees.
-
-Action : Requete via BondingBrother sous Mandat.
-
-Priorite : MVP (CF-MVP-1)
+Tache sans objet : adaptateur retire avec le service (JayXpose/JayFestival retirés le 2026-04-29).
 
 ### 5.2 JayRDV Adapter reel
 
@@ -326,7 +322,7 @@ Priorite : Phase 2
 | 7 | 3.4 | Alerte conflit avant validation | AGD-UI-02 |
 | 8 | 4.1 | Liaison Central profile_service_refs | Etape 5 |
 | 9 | 4.2 | Chargement auto agendas | Etape 5 |
-| 10 | 5.1 | JayFestival adapter reel | CF-MVP-1 |
+| 10 | 5.1 | Sans objet (adaptateur festival retire) | CF-MVP-1 |
 | 11 | 6.2 | Filtres source/type UI | AGD-UI-04 |
 | 12 | 9.1 | Tests unitaires | Qualite |
 | 13 | 9.3 | README crate | Qualite |

@@ -2,15 +2,15 @@
 
 ## Contexte
 
-**JayFaim** est le service Miyukini dédié à la **réservation de tables**, à la **commande en ligne** de nourriture et à la gestion des créneaux et menus (restaurants, traiteurs, food trucks). Il peut **se coupler avec JayFestival** : sur un événement festival, la restauration (stands, food trucks, points de vente) peut être gérée via JayFaim (créneaux, commandes, paiement selon Mandats).
+**JayFaim** est le service Miyukini dédié à la **réservation de tables**, à la **commande en ligne** de nourriture et à la gestion des créneaux et menus (restaurants, traiteurs, food trucks). (JayXpose/JayFestival retirés le 2026-04-29 : le couplage « restauration sur événement festival » n’a plus de service appelant.)
 
-Ce document est le **document fondateur** du service : il en fixe la raison d’être, la portée, les principes directeurs et l’intégration avec JayFestival (et JayKonta pour l’encaissement si applicable). Il s’adresse aux équipes produit, technique et aux parties prenantes.
+Ce document est le **document fondateur** du service : il en fixe la raison d’être, la portée, les principes directeurs et l’intégration avec JayKonta (encaissement si applicable). Il s’adresse aux équipes produit, technique et aux parties prenantes.
 
 ## Portée / Scope
 
-- **Périmètre** : Définition du service JayFaim, positionnement, intégration avec JayFestival et JayKonta, usage autonome ou couplé.
+- **Périmètre** : Définition du service JayFaim, positionnement, intégration avec JayKonta, usage autonome ou couplé.
 - **Hors périmètre** : Spécifications techniques détaillées, contrats d’API, implémentation (référencés dans d’autres documents).
-- **Références** : Glossaire Miyukini, document fondateur JayFestival, document fondateur JayKonta, [Interpolarité des services Jay](..//..//miyukini-webway-system//reference//_index.md).
+- **Références** : Glossaire Miyukini, document fondateur JayKonta, [Interpolarité des services Jay](..//..//miyukini-webway-system//reference//_index.md).
 
 ---
 
@@ -24,14 +24,11 @@ Ce document est le **document fondateur** du service : il en fixe la raison d’
 - **Proposer la commande en ligne** : menus, créneaux de service, panier, validation, préparation.
 - **Gérer les créneaux et les menus** : plages horaires, disponibilités, cartes, formules, options (allergies, préférences).
 
-En **mode couplé JayFestival**, sur un **événement festival**, la restauration (stands, food trucks, points de vente) est gérée via JayFaim : créneaux, commandes, paiement selon Mandats. Les flux **commande / créneaux / paiement** sont orchestrés entre JayFaim, JayFestival et JayKonta (encaissement si applicable).
-
 ### 1.2 Positionnement
 
 | Mode | Description |
 |------|-------------|
-| **Couplé JayFestival** | Sur un événement JayFestival, la restauration (stands, food trucks) est gérée via JayFaim ; créneaux, commandes, paiement ; orchestration avec JayFestival et JayKonta. |
-| **Autonome** | JayFaim peut être utilisé sans JayFestival : restaurant, traiteur ou food truck en site propre (réservation, commande en ligne, créneaux). |
+| **Autonome** | JayFaim est utilisé en autonomie : restaurant, traiteur ou food truck en site propre (réservation, commande en ligne, créneaux). |
 
 ---
 
@@ -41,27 +38,18 @@ En **mode couplé JayFestival**, sur un **événement festival**, la restauratio
 |----------|-------------|
 | **Gouvernance** | Le service fonctionne sous gouvernance COG : StrongFather, KindMother, Master Butler, WorrySentinel. |
 | **Réutilisabilité** | S’appuyer sur les Kits d’outils Miyukini existants (Miyauth, Miyubooking, Miyustore, Miyunotify, Miyubilling / JayKonta, etc.) et définir les Opérateurs et Kits spécifiques « restauration » (créneaux, commandes, menus). |
-| **Interpolarité** | Conçu pour se coupler avec JayFestival (restauration sur événement) et JayKonta (paiement, encaissement) ; les couplages sont explicites et gouvernés (Mandats de Permission, niveaux de sécurité). |
+| **Interpolarité** | Conçu pour se coupler avec JayKonta (paiement, encaissement) ; les couplages sont explicites et gouvernés (Mandats de Permission, niveaux de sécurité). |
 
 ---
 
 ## 3. Intégration et interpolarité
 
-### 3.1 JayFaim avec JayFestival
+### 3.1 JayFaim avec JayKonta
 
-- Sur un **événement JayFestival**, la restauration (stands, food trucks, points de vente) peut être gérée via JayFaim.
-- **Créneaux** : plages de service, capacité par stand, conflits avec le programme festival (JayKoa si besoin).
-- **Commandes** : prise de commande en ligne, préparation, retrait ou livraison sur site selon règles de l’édition.
-- **Paiement** : selon Mandats ; orchestration avec JayKonta pour l’encaissement (facturation, règlement).
-
-JayFestival détient les données **événement** (éditions, stands, exposants) ; JayFaim détient les données **métier restauration** (menus, commandes, créneaux). La liaison est explicite et gouvernée.
-
-### 3.2 JayFaim avec JayKonta
-
-- **Encaissement** : les paiements (commandes, réservations) peuvent transiter par les Opérateurs JayKonta (mouvements, facturation) selon Mandat et contexte (festival vs. autonome).
+- **Encaissement** : les paiements (commandes, réservations) peuvent transiter par les Opérateurs JayKonta (mouvements, facturation) selon Mandat et contexte.
 - **Responsabilités** : JayFaim détient les données commande/créneaux ; JayKonta détient les données comptables et moyens de paiement.
 
-### 3.3 Référence interpolarité
+### 3.2 Référence interpolarité
 
 Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) pour le principe global et les couplages entre services Jay.
 
@@ -76,8 +64,8 @@ Les données **commandes, réservations et moyens de paiement** sont au moins ni
 ## 5. Prochaines étapes (orientation)
 
 1. **Fonder** : Valider ce document fondateur et le diffuser.
-2. **Spécifier** : Documenter les Opérateurs et Kits JayFaim (créneaux, commandes, menus, liaison JayFestival et JayKonta).
-3. **Intégration** : Formaliser les contrats d’intégration avec JayFestival (restauration sur événement) et JayKonta (encaissement).
+2. **Spécifier** : Documenter les Opérateurs et Kits JayFaim (créneaux, commandes, menus, liaison JayKonta).
+3. **Intégration** : Formaliser les contrats d’intégration avec JayKonta (encaissement).
 4. **Implémentation** : Développer les Opérateurs et Kits en s’appuyant sur les Cores.
 
 ---
@@ -87,9 +75,8 @@ Les données **commandes, réservations et moyens de paiement** sont au moins ni
 | Document | Rôle |
 |----------|------|
 | [Miyukini Conceptual References — Glossaire](..//..//miyukini-webway-system//reference//_index.md) | Terminologie (Opérateur, Mandat, COG, Niveaux de sécurité). |
-| [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) | Service avec lequel JayFaim se couple (restauration sur événement). |
 | [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) | Service consommateur pour encaissement et facturation. |
-| [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) | Principe d’interpolarité et couplage JayFaim ↔ JayFestival. |
+| [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) | Principe d’interpolarité et couplages entre services Jay. |
 
 ---
 

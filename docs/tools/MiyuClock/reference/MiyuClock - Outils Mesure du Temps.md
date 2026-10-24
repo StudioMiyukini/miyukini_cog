@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Ce document constitue la **référence précise et exhaustive** des **outils de mesure du temps** exposés par le kit **MiyuClock** : sémantique (attestation horaire et date IRL), description détaillée de chaque outil, types d'entrée/sortie, relation avec le Kernel (Clock), cas d'usage et conformité LOI-4. Il permet d'exploiter MiyuClock dans les services consommateurs (JayKoa, JayFestival, etc.) en clarifiant le rôle : **MiyuClock atteste l'horaire et la date IRL** ; **JayKoa organise les données et fait l'interface avec l'utilisateur**.
+Ce document constitue la **référence précise et exhaustive** des **outils de mesure du temps** exposés par le kit **MiyuClock** : sémantique (attestation horaire et date IRL), description détaillée de chaque outil, types d'entrée/sortie, relation avec le Kernel (Clock), cas d'usage et conformité LOI-4. Il permet d'exploiter MiyuClock dans les services consommateurs (JayKoa, etc.) en clarifiant le rôle : **MiyuClock atteste l'horaire et la date IRL** ; **JayKoa organise les données et fait l'interface avec l'utilisateur**.
 
 **Références** : [MiyuClock - Documentation Fondatrice](../MiyuClock%20-%20Documentation%20Fondatrice.md), [MiyuClock - Reference Outils](../MiyuClock%20-%20Reference%20Outils.md), [MiyuClock - Runtime Boundary Contract](../contracts/boundaries/MiyuClock%20-%20Runtime%20Boundary%20Contract.md).
 

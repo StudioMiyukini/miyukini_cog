@@ -75,7 +75,7 @@ Ce document couvre :
 │  │  ┌─────────────────────────────────────────────────────────────────┐  │  │
 │  │  │                    libSQL Engine                                │  │  │
 │  │  │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐    │  │  │
-│  │  │  │ jayxpose  │  │ jaykonta  │  │jayfestival│  │   ...     │    │  │  │
+│  │  │  │  jaykoa   │  │ jaykonta  │  │  jayrdv   │  │   ...     │    │  │  │
 │  │  │  │    .db    │  │    .db    │  │    .db    │  │           │    │  │  │
 │  │  │  └───────────┘  └───────────┘  └───────────┘  └───────────┘    │  │  │
 │  │  │                     [Chiffrement AES-256-GCM]                   │  │  │
@@ -150,7 +150,7 @@ Chaque requête traverse un pipeline de validation en 4 étapes :
 ┌────────────────────────────────────────────────────────┐
 │                     AUTH TOKEN                         │
 ├────────────────────────────────────────────────────────┤
-│  operator_id   │ "jayxpose"                            │
+│  operator_id   │ "jaykonta"                            │
 │  request_id    │ "uuid-unique-par-requête"             │
 │  timestamp     │ 1707350400 (Unix epoch)               │
 │  signature     │ HMAC-SHA256(payload, shared_secret)   │
@@ -173,23 +173,14 @@ La matrice définit les accès par **Opérateur** × **Base** × **Table** × **
 ├────────────────┬───────────────┬─────────────────────────────────────────┤
 │    Opérateur   │     Base      │           Permissions                    │
 ├────────────────┼───────────────┼─────────────────────────────────────────┤
-│   jayxpose     │   jayxpose    │ exposants: CRUD                         │
-│                │               │ produits: CRUD                          │
-│                │               │ vitrines: CRUD                          │
-│                │               │ documents: CRUD                         │
-│                │               │ cms_articles: CRUD                      │
-├────────────────┼───────────────┼─────────────────────────────────────────┤
 │   jaykonta     │   jaykonta    │ comptes: CRUD                           │
 │                │               │ transactions: CR                        │
 │                │               │ rapports: R                             │
 ├────────────────┼───────────────┼─────────────────────────────────────────┤
-│   jayfestival  │  jayfestival  │ evenements: CRUD                        │
-│                │               │ participants: CRUD                      │
-├────────────────┼───────────────┼─────────────────────────────────────────┤
 │ miyukiniadmin  │     TOUTES    │ TOUTES: CRUD + ADMIN                    │
 ├────────────────┼───────────────┼─────────────────────────────────────────┤
-│   jayxpose     │   jaykonta    │ ❌ AUCUN ACCÈS                          │
-│   jaykonta     │   jayxpose    │ ❌ AUCUN ACCÈS                          │
+│   jaykoa       │   jaykonta    │ ❌ AUCUN ACCÈS                          │
+│   jaykonta     │   jaykoa      │ ❌ AUCUN ACCÈS                          │
 └────────────────┴───────────────┴─────────────────────────────────────────┘
 ```
 
@@ -267,19 +258,19 @@ Le Core Server gère plusieurs bases de données simultanément, une par Opérat
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
 │   Requête                   ┌──────────────────┐                   │
-│   (database: "jayxpose") → │  Route Resolver  │                   │
+│   (database: "jaykonta") → │  Route Resolver  │                   │
 │                             └────────┬─────────┘                   │
 │                                      │                             │
 │        ┌─────────────────────────────┼─────────────────────────┐   │
 │        ▼                             ▼                         ▼   │
 │   ┌─────────┐               ┌─────────────┐            ┌─────────┐ │
-│   │jayxpose │               │  jaykonta   │            │festival │ │
+│   │ jaykoa  │               │  jaykonta   │            │ jayrdv  │ │
 │   │Connection               │ Connection  │            │Connection│ │
 │   │   Pool  │               │    Pool     │            │   Pool  │ │
 │   └────┬────┘               └──────┬──────┘            └────┬────┘ │
 │        │                           │                        │      │
 │   ┌────▼────┐               ┌──────▼──────┐            ┌────▼────┐ │
-│   │jayxpose │               │  jaykonta   │            │festival │ │
+│   │ jaykoa  │               │  jaykonta   │            │ jayrdv  │ │
 │   │   .db   │               │     .db     │            │   .db   │ │
 │   │(chiffré)│               │  (chiffré)  │            │(chiffré)│ │
 │   └─────────┘               └─────────────┘            └─────────┘ │
@@ -430,11 +421,11 @@ Chaque opération est journalisée dans un log d'audit structuré :
 {
   "timestamp": "2026-02-08T14:30:00Z",
   "request_id": "uuid-xxx",
-  "operator": "jayxpose",
+  "operator": "jaykonta",
   "operation": "write",
-  "database": "jayxpose",
-  "table": "exposants",
-  "entity_id": "exp-123",
+  "database": "jaykonta",
+  "table": "accounts",
+  "entity_id": "acc-123",
   "result": "success",
   "duration_ms": 12,
   "arbitrage": {

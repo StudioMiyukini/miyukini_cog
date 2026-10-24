@@ -130,18 +130,18 @@ La sidebar Loyverse comporte les sections suivantes (icones de haut en bas) :
 
 | Section | Champs | Observations |
 |---------|--------|-------------|
-| **Infos principales** | Name, Category (dropdown), Description | Similaire au modele JayXpose. |
-| **Disponibilite** | Checkbox « The item is available for sale » | Equivalent au champ `availability` de JayXpose. |
+| **Infos principales** | Name, Category (dropdown), Description | — |
+| **Disponibilite** | Checkbox « The item is available for sale » | — |
 | **Vente par** | Each / Weight-Volume (radio) | **Nouveau pour JayShop** : vente a l'unite ou au poids/volume. |
 | **Prix** | Price, Cost | Cost = prix d'achat (calcul marge). Champ optionnel pour JayShop. |
-| **Identifiants** | SKU (auto-genere), Barcode | SKU deja present (mapping JayXpose). Barcode a ajouter au modele. |
+| **Identifiants** | SKU (auto-genere), Barcode | Barcode a ajouter au modele. |
 | **Inventory** | Composite item (toggle), Track stock (toggle) | Composite item = kit/pack. Track stock = suivi de stock actif. |
 | **Variants** | Add Variants → Create options (nom d'option + valeurs) | Gestion de variantes (taille, couleur, etc.). |
 | **Taxes** | Liste de taxes avec toggles par article | Association taxes ↔ articles. |
 
 **Enseignements pour JayShop** :
 - **Vente au poids/volume** : utile pour marche alimentaire. A ajouter en Phase 2 (JSH-18b).
-- **Cout (prix d'achat)** : permet le calcul de la marge. Champ optionnel a relayer vers JayXpose.
+- **Cout (prix d'achat)** : permet le calcul de la marge. Champ optionnel.
 - **Articles composites (kits)** : un produit compose de plusieurs sous-produits. Phase 2 (JSH-18c).
 - **Association taxes par article** : plus flexible que le taux unique actuel. A enrichir dans JSH-04.
 
@@ -155,7 +155,7 @@ La sidebar Loyverse comporte les sections suivantes (icones de haut en bas) :
 - Bouton « + Add Option » pour ajouter d'autres axes de variation
 - Chaque combinaison de valeurs genere une variante avec son propre stock/prix
 
-**Enseignement pour JayShop** : les variantes sont gerees comme des « axes d'options » combinatoires. A refleter dans le modele de donnees JayXpose (extension catalogue).
+**Enseignement pour JayShop** : les variantes sont gerees comme des « axes d'options » combinatoires. A refleter dans le modele de donnees (extension catalogue).
 
 ### 3.5 Representation sur le PoS
 
@@ -169,7 +169,7 @@ La sidebar Loyverse comporte les sections suivantes (icones de haut en bas) :
 
 **Enseignement pour JayShop** : enrichir la configuration des boutons PoS (JSH-A07) avec :
 - Choix de **forme** (pas seulement couleur) → carre, rond, badge, hexagone
-- Option **image** en alternative a couleur+forme (utilise le visuel produit de JayXpose)
+- Option **image** en alternative a couleur+forme (utilise le visuel produit)
 - Cela ameliore la reconnaissance visuelle rapide en caisse
 
 ### 3.6 Categories
@@ -212,14 +212,14 @@ La sidebar Loyverse comporte les sections suivantes (icones de haut en bas) :
 
 | Fonctionnalite | Description | Pertinence JayShop |
 |----------------|-------------|--------------------|
-| Purchase orders | Bons de commande fournisseur | Phase 2+ (hors perimetre initial, gere par JayXpose) |
+| Purchase orders | Bons de commande fournisseur | Phase 2+ (hors perimetre initial) |
 | Transfer orders | Transferts entre magasins | Hors perimetre (mono-magasin) |
-| Stock adjustments | Ajustements manuels (reception, perte, casse) | Pertinent — relaye vers JayXpose |
+| Stock adjustments | Ajustements manuels (reception, perte, casse) | Pertinent |
 | Inventory counts | Inventaire physique (scan ou manuel) | Phase 2 |
 | Production | Stock produit a partir d'ingredients | Phase 2 (articles composites) |
-| Inventory history | Historique de tous les mouvements | Pertinent — journal de sync JayXpose |
+| Inventory history | Historique de tous les mouvements | Pertinent |
 
-**Enseignement pour JayShop** : la gestion de stock avancee reste dans JayXpose (source de verite). JayShop peut offrir un ecran simplifie d'**ajustement de stock** (reception, perte, casse) relaye a JayXpose. Nouveau besoin JSH-74.
+**Enseignement pour JayShop** : JayShop peut offrir un ecran simplifie d'**ajustement de stock** (reception, perte, casse). Nouveau besoin JSH-74.
 
 ---
 
@@ -337,15 +337,15 @@ La sidebar Loyverse comporte les sections suivantes (icones de haut en bas) :
 
 | Fonctionnalite | Source Loyverse | Note |
 |----------------|-----------------|------|
-| Variantes de produit (taille, couleur) | Variants | Extension modele JayXpose |
-| Articles composites / kits | Composite item | Extension modele JayXpose |
+| Variantes de produit (taille, couleur) | Variants | Extension modele produit |
+| Articles composites / kits | Composite item | Extension modele produit |
 | Vente au poids/volume | Sold by Weight/Volume | Marche alimentaire |
 | Integration terminaux de paiement (SumUp, Zettle) | Payment types | Phase 2 |
 | Programme de fidelite | Loyalty | Phase 2 |
 | Multi-employes et pointage | Employees, Time clock | Phase 2 |
 | Affichage client (second ecran) | Customer displays | Phase 2 |
 | Impressions cuisine | Kitchen printers | Phase 2 (JayFaim) |
-| Bons de commande fournisseur | Purchase orders | JayXpose / Phase 3 |
+| Bons de commande fournisseur | Purchase orders | Phase 3 |
 | Inventaire physique (scan) | Inventory counts | Phase 2 |
 
 ---
@@ -366,7 +366,7 @@ La sidebar Loyverse comporte les sections suivantes (icones de haut en bas) :
 | Settings > Taxes | JSH-A13 > Taxes (enrichi) | Multi-taux, incluse/ajoutee |
 | Settings > Receipt | JSH-A07 > Parametres recu | Deja prevu |
 | Settings > Loyalty | Phase 2 | Programme de fidelite |
-| Inventory management | Via JayXpose + JSH-A15 | Ajustement simplifie |
+| Inventory management | JSH-A15 | Ajustement simplifie |
 | Representation on POS | JSH-A07 Configuration PoS | Ajouter forme et mode image |
 
 ---

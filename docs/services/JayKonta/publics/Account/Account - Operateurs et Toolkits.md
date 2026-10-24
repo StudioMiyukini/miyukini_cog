@@ -21,7 +21,7 @@ Il sert de reference d'architecture fonctionnelle pour l'implementation.
 
 ### OP-ACCOUNT-INTEGRATION
 
-- role : exposition contractuelle vers JayFestival/JayRDV
+- role : exposition contractuelle vers JayRDV
 - couvre : endpoints CK-INT et controle ownership
 - contrats : CK-INT-01, CK-INT-02
 

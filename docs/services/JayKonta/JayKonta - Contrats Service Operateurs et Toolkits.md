@@ -161,14 +161,6 @@ Tous les contrats sont alignes sur les references JayKonta existantes.
 
 ## 4. Contrats d'integration
 
-### CK-INT-01 - JayFestival vers JayKonta
-
-- Allowed operations : `quote.create`, `invoice.emit`, `budget.movements.record`, `report.by_edition`.
-- Ownership split :
-- JayFestival garde donnees metier (edition, exposant)
-- JayKonta garde donnees comptables (devis, factures, mouvements)
-- Required refs : edition_ref, exhibitor_ref, actor_ref.
-
 ### CK-INT-02 - JayRDV vers JayKonta
 
 - Allowed operations : `quote.create`, `invoice.emit`, `payment.record`, `report.by_professional`.

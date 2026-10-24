@@ -137,7 +137,7 @@ MiyukiniTerminal **ne possède pas** de Cores ni de BondingBrother complets. Il 
 - Administration de Services (installer, configurer)
 - Création d'autres Terminaux
 - Rôle Tracker ou Relay
-- Services complets (toutes les fonctions de JayXpose, JayFestival, etc.)
+- Services complets (toutes les fonctions des services)
 - iOS (phase actuelle)
 - Jeux lourds (Miyukini Survivor complet ; MiyuClicker léger possible)
 

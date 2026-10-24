@@ -43,7 +43,6 @@ Il est aligne sur la documentation JayKonta existante et sur le benchmark PR.
 
 ### Integrations
 
-- JayFestival : quote, invoice, budget by edition
 - JayRDV : quote, invoice, payment
 - JayKoa : reminders (optionnel)
 
@@ -89,7 +88,6 @@ Il est aligne sur la documentation JayKonta existante et sur le benchmark PR.
 
 ### Dependances inter-services
 
-- JayFestival
 - JayRDV
 - JayKoa (optionnel)
 
@@ -106,7 +104,7 @@ Il est aligne sur la documentation JayKonta existante et sur le benchmark PR.
 
 - CF-01 : parcours Purse complet operable de bout en bout
 - CF-02 : parcours Account devis->facture->paiement operable
-- CF-03 : integration JayFestival operative sur 3 appels coeur
+- CF-03 : sans objet (JayFestival retire le 2026-04-29)
 - CF-04 : integration JayRDV operative sur 3 appels coeur
 - CF-05 : export rapports operable avec restrictions de scope
 - CF-06 : audit et securite conformes aux niveaux definis

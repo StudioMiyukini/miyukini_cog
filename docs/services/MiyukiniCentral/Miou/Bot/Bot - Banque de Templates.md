@@ -38,7 +38,7 @@ Voir section 3 pour la liste complète par catégorie. Variables globales (dispo
 | `{jour_semaine}` | string | Jour de la semaine | "samedi" |
 | `{jours}` | number | Nombre de jours (absence, ami, etc.) | "5" |
 | `{duree}` | string | Durée formatée (session, etc.) | "2h15" |
-| `{service}` | string | Nom du service | "JayXpose" |
+| `{service}` | string | Nom du service | "JayKoa" |
 | `{ami}` | string | Pseudo de l'ami | "Luna" |
 | `{badge}` | string | Nom du badge | "Webway connecté" |
 | `{evenement}` | string | Titre de l'événement | "Réunion équipe" |
@@ -316,7 +316,7 @@ Certaines catégories ont un message unique (écrans Rite d'Entrée, Connexion) 
 | rs9 | Tu as bien utilisé ton COG : {temps_total}, {service_top}. |
 | rs10 | Résumé : {temps_total}, principalement {service_top}. Beau travail. |
 
-**Exemple de sortie :** « Aujourd'hui : 1h30 dans Central, surtout sur JayXpose. Beau boulot. »
+**Exemple de sortie :** « Aujourd'hui : 1h30 dans Central, surtout sur JayKoa. Beau boulot. »
 
 ---
 

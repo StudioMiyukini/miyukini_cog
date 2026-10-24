@@ -136,7 +136,7 @@ Tous les templates respectent la **personnalité de Miou** : tutoiement, ton cha
 **Entrées :**
 - Agrégats MiyukiniWatch (sessions, services, amis, clics).
 - Profil utilisateur (pseudo, préférences, langue).
-- Contexte applicatif (événements JayKoa, état vitrine JayXpose, connexion MWS, amis Jay1Tribu).
+- Contexte applicatif (événements JayKoa, connexion MWS, amis Jay1Tribu).
 - Paramètres Miou (fréquence bulles, seuil pause, etc.).
 
 **Sortie :** `BotContext` structuré, normalisé, prêt pour le moteur de décision.
@@ -342,7 +342,6 @@ Le Bot consomme des **agrégats** exposés par MiyukiniWatch. Pas d'accès direc
 ### 6.3 Interface avec le contexte applicatif
 
 - **JayKoa :** `get_next_event(profile_id) -> Option<Event>`
-- **JayXpose :** `is_vitrine_published(profile_id) -> bool`, `has_exposant_profile(profile_id) -> bool`
 - **MWS :** `is_connected() -> bool`
 - **Jay1Tribu :** `get_friends_list(profile_id) -> Vec<Friend>` (métadonnées uniquement)
 

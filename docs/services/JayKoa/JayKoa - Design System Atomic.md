@@ -229,7 +229,6 @@ Les atomes sont les éléments UI les plus petits. Ils ne peuvent pas être déc
 | Œil | `icon-visibility` | Visibilité (public/privé) |
 | Conflit | `icon-warning` | Conflit temporel |
 | Source JayRDV | `icon-jayrdv` | Événement synchronisé JayRDV |
-| Source JayFestival | `icon-jayfestival` | Événement synchronisé JayFestival |
 | Synchronisé | `icon-sync` | Événement en lecture réfléchie |
 
 ---
@@ -723,12 +722,12 @@ C'est l'organisme visible dans la deuxième capture Google Agenda.
 
 ### Variante : événement synchronisé
 
-Pour un événement issu de JayRDV ou JayFestival :
+Pour un événement issu de JayRDV :
 
 | Modification | Détail |
 |-------------|--------|
 | **Boutons modifier/supprimer** | Remplacés par un bouton "Ouvrir dans [Service source]" (A03 + A16 icon-external) |
-| **Badge source** | Badge (A12) "Synchronisé depuis JayRDV" ou "Synchronisé depuis JayFestival" visible sous le titre |
+| **Badge source** | Badge (A12) "Synchronisé depuis JayRDV" visible sous le titre |
 | **Barre d'actions** | Pas de bouton "Enregistrer". Uniquement "Ouvrir dans [Service source]" |
 
 ### Schéma du popover (calqué sur Google Agenda)

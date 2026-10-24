@@ -135,7 +135,7 @@ Les données sont regroupées dans l'interface « Ce que Miou sait de moi » par
 | Clé | Type | Source | Palier min | Description |
 |-----|------|--------|------------|-------------|
 | `theme_central` | enum | Rite d'Entrée / Paramètres Central | 0 | Gaming, Minimal, etc. — thème visuel Central |
-| `services_actifs` | liste | Central | 0 | Services installés (JayKoa, JayXpose…) |
+| `services_actifs` | liste | Central | 0 | Services installés (JayKoa, JayKonta…) |
 | `frequence_notifications` | enum | Central | 0 | Préférence globale notifications |
 
 **Note :** Ces données sont gérées par Central. Miou les lit en lecture seule pour adapter son contexte.

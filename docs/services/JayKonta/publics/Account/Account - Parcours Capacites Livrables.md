@@ -122,15 +122,6 @@ Il est aligne avec les contrats CK-OP/CK-TK et le plan d'implementation.
 
 ## Parcours P6 - Integrations metier
 
-### JayFestival
-
-- quote.create
-- invoice.emit
-- budget.movements.record
-- restitution reporting edition
-
-Contrats : CK-INT-01
-
 ### JayRDV
 
 - quote.create

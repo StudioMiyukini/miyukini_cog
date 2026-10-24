@@ -95,7 +95,7 @@ Le plan couvre Purse, Account, integrations et verification.
 
 ### Objectif
 
-- brancher JayFestival et JayRDV sur contrats minimaux
+- brancher JayRDV sur contrats minimaux
 
 ### Taches
 
@@ -106,7 +106,6 @@ Le plan couvre Purse, Account, integrations et verification.
 
 ### Criteres
 
-- JayFestival integrable sans duplication logique comptable
 - JayRDV integrable sans duplication logique comptable
 
 ## Phase 6 - Durcissement securite
@@ -131,7 +130,7 @@ Le plan couvre Purse, Account, integrations et verification.
 ### Taches
 
 - [701] tests unitaires coeur metier
-- [702] tests integration JayFestival et JayRDV
+- [702] tests integration JayRDV
 - [703] verification criteres CF-01 a CF-06
 - [704] rapport de verification final
 

@@ -19,10 +19,10 @@ Ce document définit le **bornage** (périmètre, limites, priorités) pour l’
 |----------|-------------|----------|
 | **Entrées agenda** | Modélisation des entrées (plage début/fin, type, id opaque, référence utilisateur, source) ; enregistrement des références publiées par les services consommateurs. | Must |
 | **Détection de conflits** | Vérification de chevauchement pour un utilisateur et une plage donnée ; retour conflit oui/non + liste des entrées en conflit (plage, type, libellé court). | Must |
-| **Vue calendrier (données)** | Fourniture des entrées pour un utilisateur sur une période (jour, semaine, mois) ; filtres par type et par source. Pas d’UI propre : **données** consommées par les UIs des services (JayRDV, JayFestival). | Must |
+| **Vue calendrier (données)** | Fourniture des entrées pour un utilisateur sur une période (jour, semaine, mois) ; filtres par type et par source. Pas d’UI propre : **données** consommées par les UIs des services (JayRDV). | Must |
 | **Export iCal** | Génération d’un fichier iCal contenant les entrées éligibles (Mandat, niveau de sécurité) ; pas de données sensibles ni de noms de tiers au-delà du niveau autorisé. | Must |
 | **Gouvernance** | Intégration StrongFather (Mandats), Master Butler (permissions), KindMother (persistance des références), WorrySentinel (niveau de sécurité). | Must |
-| **Intégration avec au moins un consommateur** | Au moins un service consommateur (JayRDV ou JayFestival) publie des entrées et interroge conflits + vue + export. | Must |
+| **Intégration avec au moins un consommateur** | Au moins un service consommateur (JayRDV) publie des entrées et interroge conflits + vue + export. | Must |
 
 ### 1.2 MVP (Phase 1) — Hors scope
 
@@ -30,7 +30,7 @@ Ce document définit le **bornage** (périmètre, limites, priorités) pour l’
 |---------|--------|
 | **UI propre JayKoa** | Les écrans sont intégrés dans les UIs des services consommateurs ; pas de portail « JayKoa » standalone pour l’utilisateur final. |
 | **Export PDF** | Reporté en phase 2 ; priorité à iCal pour l’MVP. |
-| **Agrégation multi-sources** | Si un seul service consommateur en phase 1, l’agrégation peut être limitée ; l’agrégation multi-sources (JayRDV + JayFestival) est cible dès que deux consommateurs sont connectés. |
+| **Agrégation multi-sources** | Si un seul service consommateur en phase 1, l’agrégation peut être limitée ; l’agrégation multi-sources est cible dès que deux consommateurs sont connectés. |
 | **Partage de calendrier (lien public)** | Hors scope MVP ; à traiter en phase 2 ou 3 selon besoin. |
 | **Synchronisation avec calendriers externes (Google, Outlook)** | Hors scope MVP ; intégration externe à traiter par les services consommateurs ou en phase ultérieure. |
 
@@ -39,8 +39,8 @@ Ce document définit le **bornage** (périmètre, limites, priorités) pour l’
 | Capacité | Description |
 |----------|-------------|
 | **Export PDF** | Génération d’un export PDF des entrées agenda (même règles de visibilité que iCal). |
-| **Agrégation multi-sources complète** | Vue et export agrégés (JayRDV + JayFestival + autres) avec filtres par source ; deux consommateurs ou plus connectés. |
-| **Composants UI réutilisables** | Livrable de composants (vue calendrier, alerte conflit, bloc export) réutilisables par JayRDV et JayFestival (design system, contrat clair). |
+| **Agrégation multi-sources complète** | Vue et export agrégés (JayRDV + autres) avec filtres par source ; deux consommateurs ou plus connectés. |
+| **Composants UI réutilisables** | Livrable de composants (vue calendrier, alerte conflit, bloc export) réutilisables par JayRDV et les autres services consommateurs (design system, contrat clair). |
 | **Partage (lien optionnel)** | Lien de partage contrôlé pour un agenda (lecture seule, période limitée) si besoin métier. |
 
 ### 1.4 Phase 3 et au-delà — Optionnel
@@ -79,11 +79,11 @@ Ce document définit le **bornage** (périmètre, limites, priorités) pour l’
 
 | Interface | Responsable | Contrat |
 |-----------|-------------|---------|
-| **Publication d’entrées** | Service consommateur (JayRDV, JayFestival) | Envoi plage, type, id opaque, référence utilisateur, niveau ; JayKoa enregistre et indexe. |
+| **Publication d’entrées** | Service consommateur (JayRDV) | Envoi plage, type, id opaque, référence utilisateur, niveau ; JayKoa enregistre et indexe. |
 | **Interrogation conflit** | JayKoa | Entrée : utilisateur, plage. Sortie : conflit oui/non + liste entrées en conflit. |
 | **Interrogation vue calendrier** | JayKoa | Entrée : utilisateur, période, filtres (type, source). Sortie : liste d’entrées (plage, type, libellé, source, id opaque). |
 | **Export iCal** | JayKoa (ou service consommateur avec données JayKoa) | Entrée : utilisateur, période, format. Sortie : fichier iCal (pas de données au-delà du niveau autorisé). |
-| **UI (écrans)** | Service consommateur | Les écrans sont hébergés par JayRDV, JayFestival ; ils appellent JayKoa pour les données et la logique. |
+| **UI (écrans)** | Service consommateur | Les écrans sont hébergés par JayRDV ; ils appellent JayKoa pour les données et la logique. |
 
 ---
 
@@ -91,7 +91,7 @@ Ce document définit le **bornage** (périmètre, limites, priorités) pour l’
 
 | Critère | Description |
 |---------|-------------|
-| **CF-MVP-1** | Les entrées agenda peuvent être publiées par au moins un service consommateur (JayRDV ou JayFestival) et enregistrées par JayKoa. |
+| **CF-MVP-1** | Les entrées agenda peuvent être publiées par au moins un service consommateur (JayRDV) et enregistrées par JayKoa. |
 | **CF-MVP-2** | La détection de conflit fonctionne pour un utilisateur et une plage donnée ; le service consommateur peut afficher une alerte (AGD-UI-02) et bloquer ou laisser confirmer selon règle métier. |
 | **CF-MVP-3** | La vue calendrier (données) est disponible : un service consommateur peut récupérer les entrées pour un utilisateur sur une période et les afficher dans son UI. |
 | **CF-MVP-4** | L’export iCal est disponible ; le fichier ne contient pas de données au-delà du niveau autorisé (AGD-SEC-3). |
@@ -118,7 +118,7 @@ Ce document définit le **bornage** (périmètre, limites, priorités) pour l’
 | [JayKoa - Document Fondateur](_index.md) | Contexte, besoins, positionnement. |
 | [JayKoa - Ecrans et UI](_index.md) | Composants UI à livrer (phase 2 pour composants réutilisables). |
 | [JayKoa - Parcours Utilisateurs](_index.md) | Parcours couverts par l’implémentation. |
-| [JayKoa - Integration Services Consommateurs](reference//_index.md) | Contrats d’intégration avec JayRDV, JayFestival. |
+| [JayKoa - Integration Services Consommateurs](reference//_index.md) | Contrats d’intégration avec JayRDV. |
 
 ---
 

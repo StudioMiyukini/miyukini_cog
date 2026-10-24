@@ -16,7 +16,7 @@ Ce document complete:
 - contrats d'interface inter-services (request/event)
 - format des payloads et metadonnees minimales
 - versioning, idempotence, audit, securite
-- matrice d'interfaces CK-INT-01, CK-INT-02, CK-INT-03
+- matrice d'interfaces CK-INT-02, CK-INT-03 (CK-INT-01 retire avec JayFestival le 2026-04-29)
 - regles pour futurs connecteurs
 
 - Exclu:
@@ -63,13 +63,13 @@ Tous les flux doivent transporter l'enveloppe suivante:
 ```json
 {
   "meta": {
-    "contract_id": "CK-INT-01",
+    "contract_id": "CK-INT-02",
     "operation": "invoice.emit",
     "schema_version": "1.0.0",
     "correlation_id": "c4e5d8f2-...",
     "idempotency_key": "idmp-2026-03-14-001",
-    "actor_ref": "jayfestival:org-admin",
-    "source_service": "jayfestival",
+    "actor_ref": "jayrdv:org-admin",
+    "source_service": "jayrdv",
     "occurred_at": "2026-03-14T09:12:00Z",
     "security_level": 2
   },
@@ -79,7 +79,7 @@ Tous les flux doivent transporter l'enveloppe suivante:
 
 ## Regles de metadonnees
 
-- `contract_id`: obligatoire, ex: `CK-INT-01`.
+- `contract_id`: obligatoire, ex: `CK-INT-02`.
 - `operation`: obligatoire, operation exacte du contrat.
 - `schema_version`: obligatoire, semver.
 - `correlation_id`: obligatoire, unique par conversation inter-services.
@@ -93,10 +93,6 @@ Tous les flux doivent transporter l'enveloppe suivante:
 
 | Contrat | Service source | Operation | Type | Ecriture JayKonta |
 |---------|----------------|-----------|------|-------------------|
-| CK-INT-01 | JayFestival | quote.create | sync_request_response | quotes |
-| CK-INT-01 | JayFestival | invoice.emit | sync_request_response | invoices |
-| CK-INT-01 | JayFestival | budget.movements.record | sync_request_response | ledger_movements |
-| CK-INT-01 | JayFestival | report.by_edition | async_event_ingest | audit_log |
 | CK-INT-02 | JayRDV | quote.create | sync_request_response | quotes |
 | CK-INT-02 | JayRDV | invoice.emit | sync_request_response | invoices |
 | CK-INT-02 | JayRDV | payment.record | sync_request_response | payments + invoices |
@@ -104,77 +100,6 @@ Tous les flux doivent transporter l'enveloppe suivante:
 | CK-INT-03 | JayKoa | deadline.reminder.publish | async_event_ingest | reminders + audit_log |
 
 ## Interfaces detaillees
-
-### CK-INT-01 - JayFestival -> JayKonta
-
-#### quote.create
-
-Payload minimal:
-
-```json
-{
-  "quote_id": "q-2026-001",
-  "scope": "account",
-  "context_ref": "edition:summer-2026",
-  "counterparty_ref": "exhibitor:alfa-food",
-  "total": 2800.0,
-  "currency": "EUR"
-}
-```
-
-Reponse attendue:
-
-```json
-{
-  "status": "ok",
-  "quote_id": "q-2026-001",
-  "audit_ref": "aud-..."
-}
-```
-
-#### invoice.emit
-
-Payload minimal:
-
-```json
-{
-  "invoice_id": "inv-2026-001",
-  "scope": "account",
-  "context_ref": "edition:summer-2026",
-  "counterparty_ref": "exhibitor:alfa-food",
-  "quote_id": "q-2026-001",
-  "total": 2800.0,
-  "currency": "EUR",
-  "due_at": "2026-03-31T23:59:59Z"
-}
-```
-
-#### budget.movements.record
-
-Payload minimal:
-
-```json
-{
-  "movement_id": "mov-2026-001",
-  "scope": "account",
-  "context_ref": "edition:summer-2026",
-  "category": "edition_income",
-  "amount": 2800.0,
-  "currency": "EUR",
-  "movement_date": "2026-03-14T09:12:00Z"
-}
-```
-
-#### report.by_edition
-
-Payload minimal:
-
-```json
-{
-  "edition_ref": "edition:summer-2026",
-  "scope": "account"
-}
-```
 
 ### CK-INT-02 - JayRDV -> JayKonta
 
@@ -365,7 +290,7 @@ Pour un nouveau service `SVC-X`, les prerequis d'integration sont:
 ## Roadmap d'implementation interfaces
 
 - Lot 1:
-- CK-INT-01/02/03 operationnels avec audit
+- CK-INT-02/03 operationnels avec audit
 - enveloppe commune imposee
 
 - Lot 2:

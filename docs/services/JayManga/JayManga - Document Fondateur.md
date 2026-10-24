@@ -35,7 +35,7 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 | **DS-15** | Guide d'implementation technique couvrant la structure crate, les types de domaine, la persistance (feature-gated), les APIs REST, l'integration MWS, les composants UI (Dioxus + Web), la gamification et la securite. | Fournit un cadre technique unifie pour l'ensemble des equipes de developpement, aligne sur les patterns standard des services Jay (miyukini-services, miyukini-rust-patterns). |
 | **DS-16** | Plan d'implementation en 8 phases sequentielles (Fondation → Catalogue → Optimisation → Lecteur → Paiement → Favoris/MWS → Gamification → Portail Agrege) avec dependances, criteres de validation et jalons. | Permet un developpement incremental avec livrables testables a chaque phase. Chaque phase produit un sous-ensemble fonctionnel autonome. |
 | **Dependance systeme** | MWS (presence, decouverte des COGs proposant JayManga). | — |
-| **Dependance optionnelle** | JayKonta (comptabilite avancee, a terme). JayXpose (si le vendeur souhaite lier ses oeuvres a un catalogue vitrine). | — |
+| **Dependance optionnelle** | JayKonta (comptabilite avancee, a terme). | — |
 
 ---
 
@@ -194,7 +194,7 @@ Les sections ci-dessous donnent une vue synthetique de chaque bloc fonctionnel. 
 | **Presence via MWS** | La disponibilite du vendeur est determinee par le MWS. JayManga n'invente pas son propre systeme de presence ; il consomme celui du MWS (LOI-6). |
 | **Demonstration avant achat** | Chaque oeuvre propose des pages de demonstration pour encourager la decouverte tout en protegeant le contenu payant. |
 | **Simplicite du paiement** | Le module de paiement est integre et leger. En V1, pas d'integration JayKonta ; le vendeur gere ses revenus directement. |
-| **Interpolarite** | JayManga peut a terme s'integrer avec JayXpose (vitrine du catalogue), JayKonta (comptabilite), et les autres services Jay. Ces integrations sont optionnelles et gouvernees. |
+| **Interpolarite** | JayManga peut a terme s'integrer avec JayKonta (comptabilite), et les autres services Jay. Ces integrations sont optionnelles et gouvernees. |
 
 ---
 
@@ -488,7 +488,6 @@ Lorsqu'un lecteur telecharge une oeuvre achetee :
 | [MWS - Document Fondateur](../../miyukini-webway-system/MWS%20-%20Document%20Fondateur.md) | Systeme de presence, decouverte et transport des COGs. |
 | [Miyukini Conceptual References - Types de Services et Espaces](..//..//miyukini-webway-system//reference//_index.md) | Classification Type 1 / Type 2 / Type 3. |
 | [JayShop - Document Fondateur](../JayShop/JayShop%20-%20Document%20Fondateur.md) | Reference pour les patterns de vente et paiement. |
-| [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) | Reference pour la gestion de catalogue (integration optionnelle). |
 | [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) | Reference pour la comptabilite (integration Phase 2). |
 | [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) | Principe d'interpolarite et couplage entre services Jay. |
 

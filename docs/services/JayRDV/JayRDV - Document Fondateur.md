@@ -41,7 +41,7 @@ L’analyse des **fonctionnalités des solutions de réservation en ligne** (voi
 
 **Le domaine médical est formellement exclu de JayRDV.** Les spécificités médicales (fiche patient, antécédents, prescriptions, consentement éclairé, téléconsultation médicale, conformité RGPD santé / HDS, intégration carte Vitale, protocoles HL7/FHIR) seront couvertes par un service dédié : **JayBobo**.
 
-JayRDV et JayBobo partagent les briques communes (MiyuBooking, MiyuNotify, JayKoa, JayXpose) mais JayBobo ajoute une couche de conformité santé au-dessus.
+JayRDV et JayBobo partagent les briques communes (MiyuBooking, MiyuNotify, JayKoa) mais JayBobo ajoute une couche de conformité santé au-dessus.
 
 **Référence :** [Spécification Complète du Service](./JayRDV%20-%20Specification%20Complete%20du%20Service.md) § 2.
 

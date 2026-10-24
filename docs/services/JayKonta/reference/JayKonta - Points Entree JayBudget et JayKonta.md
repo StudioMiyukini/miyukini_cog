@@ -37,7 +37,7 @@ Conformément au [Protocole d’écriture de la documentation conceptuelle](..//
 | **Données typiques** | Mouvements perso, catégories, objectifs, budgets par projet/occasion | Devis, factures, clients/fournisseurs, rapports, pièces comptables |
 | **Niveau de sécurité minimal** | 2 (Sensitive) | 2–3 (Sensitive à Critical) |
 | **Résidence** | COG de référence ou environnement utilisateur selon politique | Résidence centralisée recommandée ou obligatoire |
-| **Intégration** | Autonome ou articulé avec d’autres services (ex. agenda pour rappels) | Consommée par JayFestival, JayRDV, etc. pour facturation et budget |
+| **Intégration** | Autonome ou articulé avec d’autres services (ex. agenda pour rappels) | Consommée par JayRDV, etc. pour facturation et budget |
 | **Conformité légale** | Pas d’exigence de facturation légale ni de comptabilité d’entreprise | Conformité facturation, TVA, rapports selon juridiction |
 
 ---
@@ -84,7 +84,7 @@ Les capacités **devis** et **facturation légale** ne sont **pas** exposées da
 - **Facturer** : émission de factures, relances, suivi des encaissements, conformité légale (TVA, numérotation, etc.).
 - **Produire des rapports** : tableaux de bord, rapports légaux, export (PDF, CSV) pour comptabilité et contrôle.
 
-Ce point d’entrée est **consommé** par les services métier (JayFestival, JayRDV) pour la facturation des exposants, des professionnels, etc.
+Ce point d’entrée est **consommé** par les services métier (JayRDV) pour la facturation des professionnels, etc.
 
 ### 3.2 Capacités exposées (sous-ensemble du service COG)
 
@@ -95,7 +95,7 @@ Ce point d’entrée est **consommé** par les services métier (JayFestival, Ja
 | **Facturation** | Émission de factures, relances, suivi des encaissements, conformité (TVA, numérotation). |
 | **Rapports** | Synthèses, soldes, rapports légaux, export (PDF, CSV) pour comptabilité et contrôle. |
 
-Les capacités **budgets occasionnels** (type Purse) peuvent être réutilisées en contexte entreprise (ex. budget par projet ou par édition) selon les besoins du service consommateur (ex. JayFestival).
+Les capacités **budgets occasionnels** (type Purse) peuvent être réutilisées en contexte entreprise (ex. budget par projet ou par édition) selon les besoins du service consommateur.
 
 ### 3.3 Données et résidence
 
@@ -121,7 +121,7 @@ Les capacités **budgets occasionnels** (type Purse) peuvent être réutilisées
 |----------|------|
 | [JayKonta - Document Fondateur](..//_index.md) | Contexte, besoins, positionnement, sécurité synthétique. |
 | [JayKonta - Niveaux Securite et Protection Donnees](_index.md) | Détail des niveaux et mesures de protection. |
-| [JayKonta - Integration Services](_index.md) | Intégration JayFestival, JayRDV, futurs services. |
+| [JayKonta - Integration Services](_index.md) | Intégration JayRDV, futurs services. |
 | [Miyukini Prompt Protocol — Écriture documentation conceptuelle](..//..//..//contrats//Miyukini%20Prompt%20Protocol%20-%20Ecriture%20Documentation%20Conceptuelle.md) | Protocole d’écriture de la documentation conceptuelle (cadre de travail, contraintes). |
 
 ---

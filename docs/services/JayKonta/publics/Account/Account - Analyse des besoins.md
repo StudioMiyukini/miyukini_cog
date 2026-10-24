@@ -14,7 +14,7 @@ References principales :
 ## Portee
 
 - Public : professionnels, associations, TPE/PME, organisateurs
-- In scope : compte Account, roles, grand livre, devis, factures, paiements, rapports, export, integrations JayFestival/JayRDV
+- In scope : compte Account, roles, grand livre, devis, factures, paiements, rapports, export, integrations JayRDV
 - Out of scope : budget personnel Purse, implementation technique detaillee API/DB
 
 ## Objectifs metier
@@ -22,7 +22,7 @@ References principales :
 - O1 : tenir une comptabilite exploitable sans double saisie
 - O2 : executer le cycle commercial devis vers facture vers encaissement
 - O3 : produire des rapports legaux et de pilotage
-- O4 : supporter les integrations JayFestival et JayRDV sous contrat
+- O4 : supporter les integrations JayRDV sous contrat
 - O5 : garantir securite, residence et audit de niveau 2 a 3
 
 ## Personas et attentes
@@ -83,7 +83,7 @@ References principales :
 
 | ID | Besoin | Contrat associe |
 |----|--------|-----------------|
-| MAC-18 | Budget par edition (JayFestival) | CK-INT-01 |
+| MAC-18 | Budget par edition (JayFestival retire le 2026-04-29) | CK-INT-01 |
 | MAC-19 | Restitution budget organisateur | CK-INT-01 |
 
 ## Besoins non fonctionnels
@@ -114,7 +114,7 @@ References principales :
 - CA-2 : une facture peut passer en payee/partielle avec trace audit
 - CA-3 : journal et grand livre sont coherents sur une periode
 - CA-4 : export PDF/CSV respecte le scope autorise
-- CA-5 : appels JayFestival/JayRDV passent par les contrats CK-INT
+- CA-5 : appels JayRDV passent par les contrats CK-INT
 
 ## Definition of done (document)
 

@@ -30,7 +30,7 @@ Ce document décrit une **copie de l’UI de Google Agenda** (Google Calendar) a
 |-----|-------------|----------------|
 | **Chronologique** | Ordre par date/heure de début (défaut pour les vues jour/3j/semaine). | Liste d’entrées dans une plage |
 | **Par type** | Grouper ou ordonner par type d’entrée (RDV, édition, atelier). | Liste (vue Agenda/liste) |
-| **Par source** | Grouper ou ordonner par source (JayRDV, JayFestival). | Liste, vue agrégée |
+| **Par source** | Grouper ou ordonner par source (JayRDV, etc.). | Liste, vue agrégée |
 | **Par priorité / statut** | Si le consommateur expose un champ priorité ou statut (ex. candidat, inscrit). | Liste |
 
 Le **tri** s’applique aux données fournies par JayKoa (paramètre de requête ou tri côté client après réception).
@@ -39,7 +39,7 @@ Le **tri** s’applique aux données fournies par JayKoa (paramètre de requête
 
 | Filtre | Description | Zone UI type |
 |--------|-------------|--------------|
-| **Source** | Afficher uniquement RDV (JayRDV), ou uniquement Festivals (JayFestival), ou Tous. | Barre d’outils ou panneau latéral |
+| **Source** | Afficher uniquement RDV (JayRDV), ou Tous. | Barre d’outils ou panneau latéral |
 | **Type** | RDV, Édition, Atelier, Participation, etc. | Barre d’outils ou panneau latéral |
 | **Calendriers / couches** | Afficher ou masquer des « calendriers » (équivalent sources ou types) ; case à cocher par source/type. | Panneau latéral (liste de calendriers avec case à cocher) |
 | **Période** | Date début, date fin (souvent géré par la vue : jour = une date, semaine = 7 jours, etc.). | Sélecteur de date + vue |
@@ -68,8 +68,7 @@ Le **tri** s’applique aux données fournies par JayKoa (paramètre de requête
 | Filtres / Calendriers     |                                                                      |
 | [x] Tous                  |                                                                      |
 | [x] JayRDV (RDV)          |                    ZONE PRINCIPALE (VUE)                             |
-| [x] JayFestival (Festivals)       |                    Jour / 3j / Semaine / Mois / Liste                |
-| [ ] Ateliers              |                                                                      |
+| [ ] Ateliers              |                    Jour / 3j / Semaine / Mois / Liste                |
 | [x] Participations        |                    Grille ou liste selon vue sélectionnée            |
 |                           |                                                                      |
 | Tri: [Chronologique v]     |                                                                      |
@@ -182,9 +181,6 @@ Le **tri** s’applique aux données fournies par JayKoa (paramètre de requête
 | [x] Tous les calendriers                 |
 | ---------------------------------------- |
 | [x] JayRDV — Mes RDV         [couleur]   |
-| [x] JayFestival — Participations     [couleur]   |
-| [x] JayFestival — Ateliers           [couleur]   |
-| [ ] JayFestival — Candidatures       [couleur]   |
 | ---------------------------------------- |
 | Tri : [ Chronologique ▼ ]                |
 |       • Chronologique                    |
@@ -208,10 +204,8 @@ Le **tri** s’applique aux données fournies par JayKoa (paramètre de requête
 | Filtres                    | Date       | Heure  | Événement              | Source   | Type     |
 | [x] Tous                   +------------+--------+-------------------------+----------+----------+
 | [x] RDV                    | Lun 27 jan | 09:00  | RDV Dr Martin           | JayRDV   | RDV      |
-| [x] Festivals              | Lun 27 jan | 12:00  | Festival X — Stand      | JayFestival      | Particip.|
-|                             | Mar 28 jan | 14:00  | Atelier Y                | JayFestival      | Atelier  |
-| Tri: [Chronologique v]      | Mer 29 jan | 10:00  | Festival X — Stand       | JayFestival      | Particip.|
 |                             | ...        |        |                          |          |          |
+| Tri: [Chronologique v]      |            |        |                          |          |          |
 +-----------------------------+------------+--------+-------------------------+----------+----------+
 ```
 

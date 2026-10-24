@@ -13,7 +13,7 @@ Ce dossier regroupe les documents de reference du service JayKonta :
 |----------|------|
 | [JayKonta - Niveaux Securite et Protection Donnees](./JayKonta%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | Niveaux WorrySentinel, residence, chiffrement, audit, regles MAC-SEC. |
 | [JayKonta - Points Entree JayBudget et JayKonta](./JayKonta%20-%20Points%20Entree%20JayBudget%20et%20JayKonta.md) | Definition des points d'entree et perimetres fonctionnels. |
-| [JayKonta - Integration Services](./JayKonta%20-%20Integration%20Services.md) | Integrations JayFestival, JayRDV, JayKoa, responsabilites et flux. |
+| [JayKonta - Integration Services](./JayKonta%20-%20Integration%20Services.md) | Integrations JayRDV, JayKoa, responsabilites et flux. |
 | [JayKonta - Interfaces Inter-Services Futures](./JayKonta%20-%20Interfaces%20Inter-Services%20Futures.md) | Contrats d'interface implementables: enveloppe commune, payloads types, erreurs, versioning, idempotence, audit. |
 | [JayKonta - Dashboard Fonctionnalites Prototype](./JayKonta%20-%20Dashboard%20Fonctionnalites%20Prototype.html) | Prototype UI dashboard premium (Account/Purse, KPI, flux integration, conformite). |
 

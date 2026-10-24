@@ -30,8 +30,8 @@ L'utilisateur ouvre JayKoa pour la première fois.
 |-------|-------------------|-------------------|-------|
 | 1 | Ouvre JayKoa depuis son espace utilisateur | Affichage de la Vue Semaine centrée sur la date du jour. Le panneau latéral gauche est ouvert avec la liste des agendas | Vue Semaine (écran principal) |
 | 2 | Découvre la grille vide (aucun événement) | Le mini-calendrier indique le jour courant (cercle bleu). La ligne rouge de l'heure actuelle est visible | Barre d'en-tête + Panneau latéral + Grille |
-| 3 | Voit la section "Services synchronisés" dans le panneau latéral | Les Services disponibles (JayRDV, JayFestival) sont listés avec des cases à cocher. Par défaut, aucun n'est activé | Panneau latéral gauche |
-| 4 | (Optionnel) Active la synchronisation avec JayRDV ou JayFestival | Les événements synchronisés depuis ces Services apparaissent dans la grille avec leur couleur respective | Panneau latéral + Grille |
+| 3 | Voit la section "Services synchronisés" dans le panneau latéral | Les Services disponibles (JayRDV) sont listés avec des cases à cocher. Par défaut, aucun n'est activé | Panneau latéral gauche |
+| 4 | (Optionnel) Active la synchronisation avec JayRDV | Les événements synchronisés depuis ces Services apparaissent dans la grille avec leur couleur respective | Panneau latéral + Grille |
 
 **Résultat** : L'utilisateur voit son agenda vide, prêt à recevoir des événements internes ou des synchronisations.
 
@@ -115,7 +115,7 @@ L'utilisateur crée un événement avec tous les détails.
 | 1 | Clique sur un événement dans la grille (ex. "Psychologue — De 14:45 à 15:45") | Le popover de détail s'affiche à côté du bloc événement | Popover de détail |
 | 2 | Lit les informations : titre, date/heure, lieu, description, agenda, rappels | Toutes les informations sont affichées | Popover de détail |
 | 3a | (Événement interne) Clique sur "Modifier" | Le formulaire complet s'ouvre avec les données pré-remplies | Formulaire complet |
-| 3b | (Événement synchronisé) Clique sur "Ouvrir dans JayRDV" ou "Ouvrir dans JayFestival" | Redirection vers le Service source pour voir le détail métier | Service source |
+| 3b | (Événement synchronisé) Clique sur "Ouvrir dans JayRDV" | Redirection vers le Service source pour voir le détail métier | Service source |
 | 4 | Clique en dehors du popover ou sur "Fermer" | Le popover se ferme | Retour à la grille |
 
 ---
@@ -156,7 +156,6 @@ L'utilisateur choisit quels agendas afficher.
 | 1 | Regarde la liste des agendas dans le panneau latéral gauche | Tous les agendas sont listés avec leur case à cocher et leur pastille de couleur | Panneau latéral |
 | 2 | Décoche un agenda (ex. "JayRDV — Mes rendez-vous") | Les événements de cet agenda disparaissent immédiatement de la grille | Panneau latéral + Grille |
 | 3 | Recoche l'agenda | Les événements réapparaissent | Panneau latéral + Grille |
-| 4 | Décoche "JayFestival — Événements publics" | Les événements publics JayFestival disparaissent. Seuls les agendas cochés restent visibles | Panneau latéral + Grille |
 
 **Résultat** : L'utilisateur peut afficher ou masquer n'importe quel agenda (personnel, professionnel, synchronisé) pour personnaliser sa vue.
 
@@ -186,14 +185,13 @@ L'utilisateur choisit quels agendas afficher.
 
 ## 12. Parcours — Activation de la synchronisation avec un Service COG
 
-L'utilisateur active la synchronisation avec JayRDV ou JayFestival.
+L'utilisateur active la synchronisation avec JayRDV.
 
 | Étape | Action utilisateur | Réponse du système | Écran |
 |-------|-------------------|-------------------|-------|
-| 1 | Ouvre les paramètres (icône engrenage) ou regarde la section "Services synchronisés" dans le panneau latéral | Les Services disponibles sont listés (JayRDV, JayFestival) avec leur statut (activé/désactivé) | Paramètres ou Panneau latéral |
+| 1 | Ouvre les paramètres (icône engrenage) ou regarde la section "Services synchronisés" dans le panneau latéral | Les Services disponibles sont listés (JayRDV) avec leur statut (activé/désactivé) | Paramètres ou Panneau latéral |
 | 2 | Coche "JayRDV — Mes rendez-vous" | La synchronisation s'active. Les rendez-vous confirmés, créneaux bloqués et modifications/annulations de JayRDV apparaissent dans la grille avec la couleur dédiée (cyan) | Panneau latéral + Grille |
-| 3 | Coche "JayFestival — Mes festivals" | Les dates de festivals, inscriptions, deadlines et événements favoris de JayFestival apparaissent dans la grille avec la couleur dédiée (violet) | Panneau latéral + Grille |
-| 4 | Consulte son agenda | La vue consolidée affiche tous les événements : internes + JayRDV + JayFestival, chacun avec sa couleur et son icône de source | Grille |
+| 3 | Consulte son agenda | La vue consolidée affiche tous les événements : internes + JayRDV, chacun avec sa couleur et son icône de source | Grille |
 
 **Résultat** : L'utilisateur voit une timeline consolidée de tous ses engagements temporels, issus de ses agendas personnels et des Services synchronisés.
 
@@ -220,7 +218,7 @@ L'utilisateur a deux événements qui se chevauchent.
 
 | Étape | Action utilisateur | Réponse du système | Écran |
 |-------|-------------------|-------------------|-------|
-| 1 | Consulte la Vue Semaine | Deux événements se chevauchent sur le même créneau (ex. un RDV JayRDV et un atelier JayFestival, tous les deux le vendredi de 15:00 à 16:00). Les blocs se partagent la largeur de la colonne | Grille |
+| 1 | Consulte la Vue Semaine | Deux événements se chevauchent sur le même créneau (ex. un RDV JayRDV et un événement interne, tous les deux le vendredi de 15:00 à 16:00). Les blocs se partagent la largeur de la colonne | Grille |
 | 2 | Voit un indicateur de conflit | Les deux blocs en chevauchement ont une bordure rouge. Un bandeau en haut de la vue indique : "1 conflit de présence physique à résoudre" | Grille + Bandeau d'alerte |
 | 3 | Clique sur le bandeau d'alerte | Un panneau ou une modal détaille le conflit : les deux événements en chevauchement, leurs horaires, et les options de résolution | Panneau de conflit |
 | 4 | Décide de modifier l'un des événements | Pour un événement interne : ouvre le formulaire de modification. Pour un événement synchronisé : redirige vers le Service source | Formulaire ou Service source |

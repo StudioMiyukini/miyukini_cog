@@ -161,7 +161,7 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 
 - **Encodage** : ✅ réparé le 2026-10-24 — 565 fichiers de `docs/` et 2 README (UTF-8 relu en cp1252) ; `.mip/` non touché (registres de certification générés)
 - **Retraits incomplets** : docs texte ✅ (README, `doc_for_website`, `DEPRECATED.md`, SKILL, présentation marquée historique) ; reste la suppression des dossiers et du code non compilé — liste dans `docs/services/DEPRECATED.md`
-- **Services retirés encore cités** : JayXpose, JayFestival (≈ 20 dossiers)
+- **Services retirés encore cités** : JayXpose, JayFestival ✅ retirés de 85 docs et du pont LLM ; restent des notions « vitrine / exposant » dans 4 docs Miou et le propriétaire du catalogue JayShop (à décider)
 - **Code mort** : modules non déclarés dans `apps/central/src/services/`, `apps/miyuclicker`
 - **Hors workspace** : `lifegame-*`, `crates/jayclub` (vide), `kindmother-db-adapter`, `apps/ui-builder`
 - **Sans doc** : Suite Jay Bureau, Whisper, maia-llm, TEAM, MIPOWER, design system UI (`miyusceau` ✅ [fiche](../tools/MiyuSceau/_index.md))

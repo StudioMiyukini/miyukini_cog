@@ -13,7 +13,7 @@ Miou n'est pas un gadget visuel. Elle est le **canal privilégié** par lequel l
 | **Nature** | Sous-service de Miyukini Central |
 | **Type de service** | Service interne COG (Type 1) — intégré à Central, pas de surface web propre |
 | **Présence** | Toujours active dès que l'utilisateur est connecté dans Central |
-| **Dépendances** | MiyukiniWatch (métriques), profil utilisateur, contexte applicatif (JayKoa, JayXpose, MWS, Jay1Tribu...) |
+| **Dépendances** | MiyukiniWatch (métriques), profil utilisateur, contexte applicatif (JayKoa, MWS, Jay1Tribu...) |
 
 ## Documents
 

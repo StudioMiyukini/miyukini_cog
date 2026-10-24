@@ -27,7 +27,7 @@ Les agrégats MiyukiniWatch fournissent des données riches : `AGG_MILESTONES`, 
 |------|-----------|-----------|---------------|
 | `first_service` | Premier service ouvert | felicitation_milestone | « Premier service — bienvenue dans l'aventure. » |
 | `three_services` | 3 services différents ouverts | felicitation_milestone | « Tu as exploré 3 coins de ton COG. » |
-| `service_favorite` | Service le plus utilisé identifié | observation_service_favori | « JayXpose — ton coin préféré. » |
+| `service_favorite` | Service le plus utilisé identifié | observation_service_favori | « JayKoa — ton coin préféré. » |
 | `service_neglected` | Service non ouvert > 14j | suggestion_service | « Tu n'as pas ouvert JayKoa depuis un moment. » |
 
 ### 2.3 Jalons sociaux
@@ -44,7 +44,6 @@ Les agrégats MiyukiniWatch fournissent des données riches : `AGG_MILESTONES`, 
 | Type | Condition | Catégorie | Exemple bulle |
 |------|-----------|-----------|---------------|
 | `webway_connected` | Connexion MWS réussie | felicitation_badge | « Webway connecté — bienvenue sur le réseau. » |
-| `vitrine_published` | Vitrine JayXpose publiée | felicitation_badge | « Ta vitrine est en ligne. » |
 | `first_event` | Premier événement JayKoa créé | felicitation_milestone | « Premier événement — ça se fête ! » |
 
 ---
@@ -79,7 +78,6 @@ Les agrégats MiyukiniWatch fournissent des données riches : `AGG_MILESTONES`, 
 
 - **Agrégat :** `AGG_FAVORITE_SERVICE` ou `AGG_TOP_SERVICES`.
 - **Usage :** Adapter la variante de suggestion.
-  - JayXpose → « Ta vitrine est à jour ? »
   - JayKoa → « Un événement à rappeler ? »
   - Jay1Tribu → « Un ami à saluer ? »
 
@@ -101,7 +99,6 @@ Les agrégats MiyukiniWatch fournissent des données riches : `AGG_MILESTONES`, 
 
 | Service favori | Variante de suggestion délaissé | Variante service favori |
 |----------------|--------------------------------|---------------------------|
-| JayXpose | « Tu n'as pas ouvert JayKoa — une vitrine à visiter ? » | « JayXpose — ton profil exposant est à jour ? » |
 | JayKoa | « JayKoa te manque peut-être — un événement à créer ? » | « Tu aimes ton calendrier — un rappel ? » |
 | Jay1Tribu | « Jay1Tribu — un ami t'attend peut-être. » | « Tu passes du temps avec tes amis — c'est bien. » |
 

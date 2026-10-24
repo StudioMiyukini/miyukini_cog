@@ -104,7 +104,7 @@ La liste des agendas affiche tous les agendas de l'utilisateur avec un système 
 | **Case à cocher par agenda** | Active ou désactive l'affichage des événements de cet agenda dans la vue principale |
 | **Pastille de couleur** | Identifie visuellement l'agenda. Les événements de cet agenda utilisent cette couleur dans la grille |
 | **Section "Autres agendas"** | Agendas partagés, abonnements, jours fériés. Même logique de case à cocher et couleur |
-| **Section "Services synchronisés"** | Propre à JayKoa : affiche les sources de synchronisation inter-Services (JayFestival, JayRDV, etc.) avec case à cocher et couleur dédiée |
+| **Section "Services synchronisés"** | Propre à JayKoa : affiche les sources de synchronisation inter-Services (JayRDV, etc.) avec case à cocher et couleur dédiée |
 
 ### 3.4 Exemple de liste d'agendas JayKoa
 
@@ -116,8 +116,6 @@ MES AGENDAS
 
 SERVICES SYNCHRONISÉS
   [x] JayRDV — Mes rendez-vous     (cyan)
-  [x] JayFestival — Mes festivals   (violet)
-  [ ] JayFestival — Événements publics (gris)
 
 AUTRES AGENDAS
   [x] Jours fériés — France         (vert clair)
@@ -198,7 +196,6 @@ C'est la vue visible dans la capture de référence.
 | **Agenda personnel** | Bleu | Événements créés par l'utilisateur |
 | **Agenda professionnel** | Vert | Événements professionnels |
 | **JayRDV — Rendez-vous** | Cyan | Rendez-vous synchronisés depuis JayRDV |
-| **JayFestival — Festivals** | Violet | Événements synchronisés depuis JayFestival |
 | **Anniversaires** | Jaune/ambre | Dates d'anniversaire |
 | **Jours fériés** | Vert clair | Jours fériés officiels |
 | **Personnalisé** | Au choix de l'utilisateur | Chaque agenda peut recevoir une couleur personnalisée |
@@ -214,11 +211,11 @@ C'est la vue visible dans la capture de référence.
 
 ### 5.4 Événements synchronisés (spécifique JayKoa)
 
-Les événements issus de Services synchronisés (JayRDV, JayFestival) possèdent des attributs visuels supplémentaires :
+Les événements issus de Services synchronisés (JayRDV) possèdent des attributs visuels supplémentaires :
 
 | Attribut | Affichage |
 |----------|-----------|
-| **Icône de source** | Petite icône du Service source dans le coin du bloc événement (icône JayRDV, icône JayFestival) |
+| **Icône de source** | Petite icône du Service source dans le coin du bloc événement (icône JayRDV) |
 | **Badge "Synchronisé"** | Indicateur visuel discret signalant que l'événement est en lecture réfléchie (non modifiable depuis JayKoa) |
 | **Statut temporel** | Indicateur de statut : informatif (neutre), bloquant (marquage fort), annulé (barré/estompé), modifié (indicateur de changement) |
 
@@ -238,7 +235,7 @@ Au clic sur un événement dans la grille, un **popover** (bulle flottante) s'af
 | **Lieu** | Adresse ou nom du lieu, si renseigné |
 | **Description** | Texte de description libre |
 | **Agenda** | Nom de l'agenda contenant l'événement, avec pastille de couleur |
-| **Source** | Pour les événements synchronisés : nom du Service source (JayRDV, JayFestival) avec icône |
+| **Source** | Pour les événements synchronisés : nom du Service source (JayRDV) avec icône |
 | **Statut temporel** | Informatif, Bloquant, Annulé, Modifié |
 | **Rappels** | Liste des rappels configurés (ex. "30 minutes avant", "1 jour avant") |
 | **Participants** | Liste des participants si renseignés (nom ou référence) |
@@ -253,7 +250,7 @@ Au clic sur un événement dans la grille, un **popover** (bulle flottante) s'af
 | **Fermer** | Ferme le popover | Toujours |
 | **Voir dans l'agenda** | Ouvre la vue Jour centrée sur cet événement | Toujours |
 
-Pour les événements **synchronisés** (JayRDV, JayFestival), les actions Modifier et Supprimer sont remplacées par un lien "Ouvrir dans [Service source]" car JayKoa ne modifie jamais les données métier d'un autre Service.
+Pour les événements **synchronisés** (JayRDV), les actions Modifier et Supprimer sont remplacées par un lien "Ouvrir dans [Service source]" car JayKoa ne modifie jamais les données métier d'un autre Service.
 
 ---
 
@@ -413,14 +410,14 @@ Au clic sur un événement existant, le popover de détail s'affiche :
 | Modification | Détail |
 |-------------|--------|
 | **Barre d'actions en-tête** | Les boutons Modifier et Supprimer sont **absents**. Remplacés par un bouton "Ouvrir dans [Service source]" (A03 avec icône lien externe) |
-| **Badge source** | Badge (A12) sous le titre : "Synchronisé depuis JayRDV" ou "Synchronisé depuis JayFestival" |
+| **Badge source** | Badge (A12) sous le titre : "Synchronisé depuis JayRDV" |
 | **Rappels** | Les rappels sont configurables localement dans JayKoa (l'utilisateur peut ajouter ses propres rappels sur un événement synchronisé) |
 | **Barre d'actions bas** | Pas de bouton "Enregistrer" pour le contenu métier. Uniquement "Ouvrir dans [Service source]" |
 
 ### 7.4 Règles du formulaire de création
 
 - Le formulaire de création n'est disponible que pour les **agendas internes** de JayKoa
-- Il est **impossible** de créer un événement dans un agenda synchronisé (JayRDV, JayFestival) depuis JayKoa
+- Il est **impossible** de créer un événement dans un agenda synchronisé (JayRDV) depuis JayKoa
 - Si un **conflit temporel** est détecté avec un événement existant (chevauchement), un avertissement est affiché sans bloquer la création
 - La récurrence personnalisée permet de définir : fréquence, intervalle, jours spécifiques, date de fin ou nombre d'occurrences, exceptions
 - Le champ "Ajouter des invités" n'est pas une invitation Google : il ajoute des **références de participants** dans le modèle JayKoa
@@ -493,7 +490,7 @@ Accessible via l'icône engrenage dans la barre d'en-tête.
 | **Créer un agenda** | Créer un nouvel agenda personnel (nom, couleur, description) |
 | **Modifier un agenda** | Renommer, changer la couleur, modifier la description |
 | **Supprimer un agenda** | Supprimer un agenda personnel et tous ses événements (avec confirmation) |
-| **Gérer les abonnements** | Activer ou désactiver la synchronisation avec les Services COG (JayRDV, JayFestival) |
+| **Gérer les abonnements** | Activer ou désactiver la synchronisation avec les Services COG (JayRDV) |
 | **Partager un agenda** | Définir les règles de partage (qui peut voir, niveau de détail) |
 
 ---
@@ -526,7 +523,7 @@ Accessible via l'icône engrenage dans la barre d'en-tête.
 
 ### 11.2 Restrictions pour les événements synchronisés
 
-Les événements synchronisés depuis les Services COG (JayRDV, JayFestival) sont en **lecture réfléchie** :
+Les événements synchronisés depuis les Services COG (JayRDV) sont en **lecture réfléchie** :
 
 - Pas de glisser-déposer
 - Pas de redimensionnement

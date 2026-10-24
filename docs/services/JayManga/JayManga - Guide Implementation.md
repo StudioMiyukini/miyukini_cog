@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Ce document est le **guide d'implementation technique** du service JayManga. Il definit la structure du crate `jaymanga`, les modules a developper, les patterns Rust a suivre (alignes sur les crates existants JayShop, JayFestival, JayXpose), les dependances, les interfaces (APIs, endpoints, composants UI) et les conventions de code.
+Ce document est le **guide d'implementation technique** du service JayManga. Il definit la structure du crate `jaymanga`, les modules a developper, les patterns Rust a suivre (alignes sur les crates existants, ex. JayShop), les dependances, les interfaces (APIs, endpoints, composants UI) et les conventions de code.
 
 Ce guide s'adresse aux developpeurs implementant JayManga. Il traduit les specifications fonctionnelles (documents deja rediges) en specifications techniques actionnables.
 
@@ -26,7 +26,7 @@ Ce guide s'adresse aux developpeurs implementant JayManga. Il traduit les specif
 | **Dependances Cores** | KindMother (persistance), StrongFather (gouvernance publication), MasterButler (permissions lecture/telechargement), WorrySentinel (securite paiement), BorderGuard (frontieres contenu) |
 | **Dependances MWS** | `miyuwebway_participant` (presence, manifestes) |
 | **Dependances Toolkits** | `miyuvalidate`, `miyutext`, `miyulocale`, `miyunotify` |
-| **Dependances Services** | Optionnelles : `jayxpose` (catalogue vitrine), `jaykonta` (comptabilite Phase 2) |
+| **Dependances Services** | Optionnelles : `jaykonta` (comptabilite Phase 2) |
 
 ### 1.2 Structure du crate
 
@@ -71,10 +71,6 @@ crates/jaymanga/
     │   │   ├── presence.rs             # Requetes de presence (batch, unitaire)
     │   │   ├── manifests.rs            # Publication/mise a jour manifeste JayManga
     │   │   └── discovery.rs            # Decouverte COGs JayManga via trackers
-    │   ├── jayxpose/                   # Adaptateur JayXpose (optionnel)
-    │   │   ├── mod.rs
-    │   │   ├── adapter.rs              # Synchronisation catalogue → vitrine
-    │   │   └── contract.rs             # Types de contrat
     │   └── jaykonta/                   # Adaptateur JayKonta (Phase 2)
     │       ├── mod.rs
     │       └── adapter.rs              # Export transactions vers comptabilite

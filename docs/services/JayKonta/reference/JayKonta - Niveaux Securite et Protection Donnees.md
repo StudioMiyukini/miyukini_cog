@@ -115,7 +115,7 @@ Conformément au [Protocole d’écriture de la documentation conceptuelle](..//
 | **MAC-SEC-1** | Les données financières personnelles ou métier (mouvements, factures, devis, moyens de paiement) sont classées au minimum niveau 2 (Sensitive) ; les flux sont chiffrés et soumis à Mandat. |
 | **MAC-SEC-2** | La résidence des données sensibles (niveau 2+) est définie par le contrat du service et le point d’entrée (Purse vs Account) ; COG de référence désigné pour Account et, selon politique, pour Purse. |
 | **MAC-SEC-3** | Aucune donnée de paiement (RIB, cartes, tokens sensibles) n’est stockée en clair ; référencement par token ou identifiant opaque ; conformité PCI-DSS / réglementation en vigueur. |
-| **MAC-SEC-4** | Toute émission de devis ou facture par un service consommateur (JayFestival, JayRDV) transite par les Opérateurs JayKonta avec audit et niveau de sécurité déclaré. |
+| **MAC-SEC-4** | Toute émission de devis ou facture par un service consommateur (JayRDV) transite par les Opérateurs JayKonta avec audit et niveau de sécurité déclaré. |
 | **MAC-SEC-5** | En état de confiance dégradé (T2–T4), les capacités d’écriture ou d’export peuvent être restreintes (Caring Nanny, WorrySentinel). |
 | **MAC-SEC-6** | Les exports (PDF, CSV) ne doivent pas inclure de données au-delà du niveau autorisé pour le destinataire (ex. pas de RIB ni de données de paiement en export standard). |
 

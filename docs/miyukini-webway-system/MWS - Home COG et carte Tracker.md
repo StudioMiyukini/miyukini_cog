@@ -79,16 +79,7 @@ Cette distinction respecte le **droit de déconnexion** : un utilisateur peut é
 
 ---
 
-## 6. Carte service JayXpose sur la Home
-
-- Si le COG expose le **service JayXpose** et qu’une **vitrine est publiée** (`vitrine_status = 'publiee'`), la Home peut afficher une **carte** dédiée : nom du service, courte description, bouton **« Découvrir »** pointant vers les pages vitrine (servies par le serveur web Origin).
-- L’utilisateur du COG peut **activer ou non** cette exposition (config MWS : `expose_jayxpose_vitrine`, et optionnellement `jayxpose_vitrine_base_url` pour l’URL de base du serveur Origin). Par défaut, si une vitrine publiée existe au moment de la connexion MWS, la carte est proposée.
-- Voir **JayXpose — Intégration Home COG et surface web** (docs/services/JayXpose/) pour le détail.
-
----
-
-## 7. Voir aussi
+## 6. Voir aussi
 
 - **MWS - Document Fondateur** (présence, annonce, Tracker).
-- **JayXpose — Intégration Home COG et surface web** (docs/services/JayXpose/JayXpose - Integration Home COG et Surface Web.md).
 - **docs/miyukini-webway-system/reference/** pour le protocole Tracker et les types de messages.

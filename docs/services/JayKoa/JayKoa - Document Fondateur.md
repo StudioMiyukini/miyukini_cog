@@ -86,7 +86,6 @@ JayKoa est conçu pour se synchroniser notamment avec :
 
 | Service | Domaine temporel | Nature de la synchronisation |
 |---------|-----------------|-------------------------------|
-| **JayFestival** | Organisation d'événements (festivals, concours, inscriptions, deadlines, dates clés) | Dates de festival, dates d'inscription, deadlines, événements favoris |
 | **JayRDV** | Booking et prise de rendez-vous (disponibilités, créneaux, confirmations, annulations) | Rendez-vous confirmés, créneaux bloqués, modifications et annulations |
 
 JayKoa peut synchroniser ces informations dans les agendas des utilisateurs en fonction :
@@ -238,7 +237,6 @@ Un **Événement** est une occurrence temporelle placée dans un agenda.
 Un **Engagement temporel** est un événement issu d'un Service externe qui représente un engagement de l'utilisateur dans le temps.
 
 - Rendez-vous confirmé (issu de JayRDV)
-- Participation à un festival (issue de JayFestival)
 - Inscription à un atelier, une formation, un créneau
 
 Un engagement temporel est toujours en **lecture réfléchie** dans JayKoa : il est visible, mais JayKoa ne peut ni le modifier ni le supprimer. Seul le Service source détient l'autorité sur l'engagement.
@@ -286,7 +284,6 @@ Une **Source d'événement** identifie le Service du COG à l'origine d'un évé
 | Source | Exemples d'événements |
 |--------|----------------------|
 | **JayKoa** (interne) | Événement créé par l'utilisateur directement dans son agenda |
-| **JayFestival** | Date de festival, deadline d'inscription, événement favori |
 | **JayRDV** | Rendez-vous confirmé, créneau bloqué, modification, annulation |
 | **Autre Service COG** | Toute plage temporelle exposée par un Service compatible |
 
@@ -415,7 +412,6 @@ JayKoa expose les capacités suivantes en tant que Service du COG :
 | **Filtrer les événements synchronisés** | Filtrage par source, type, statut, période, visibilité |
 | **Identifier l'origine de chaque événement** | Chaque événement synchronisé conserve la référence immuable à son Service source |
 | **Afficher les engagements issus de JayRDV** | Rendez-vous confirmés, créneaux bloqués, modifications et annulations — en lecture réfléchie |
-| **Afficher les événements issus de JayFestival** | Dates de festival, dates d'inscription, deadlines, événements favoris — en lecture réfléchie |
 | **Marquer les événements comme informatifs ou bloquants** | Qualification du statut temporel de chaque événement |
 
 Ces capacités sont déclarées par Master Butler et soumises aux permissions et Mandats de Permission définis par StrongFather.
@@ -440,23 +436,7 @@ La synchronisation entre JayKoa et un Service du COG suit le flux conceptuel sui
 
 **Invariant** : JayKoa n'initie jamais une action métier dans le Service source. Le flux est unidirectionnel en lecture.
 
-### 10.2 Synchronisation avec JayFestival
-
-JayFestival (Service d'organisation d'événements et de festivals) expose des capacités temporelles que JayKoa peut synchroniser :
-
-| Donnée temporelle | Nature | Statut typique |
-|-------------------|--------|----------------|
-| **Dates de festival** | Plage temporelle d'une édition (début, fin) | Informatif |
-| **Dates d'inscription** | Périodes d'ouverture des inscriptions exposants ou visiteurs | Informatif |
-| **Deadlines** | Dates limites de candidature, de validation, de paiement | Bloquant |
-| **Événements favoris** | Événements marqués par l'utilisateur dans JayFestival | Informatif |
-| **Participations confirmées** | Inscription validée à un festival, un atelier, un créneau | Bloquant |
-
-JayKoa reflète ces données dans l'agenda de l'utilisateur. Si une date de festival est modifiée dans JayFestival, JayKoa reflète la modification. Si une inscription est annulée, JayKoa reflète l'annulation.
-
-JayKoa ne crée pas de candidature, ne valide pas d'inscription, ne gère pas de plan de salle. Ces responsabilités appartiennent exclusivement à JayFestival.
-
-### 10.3 Synchronisation avec JayRDV
+### 10.2 Synchronisation avec JayRDV
 
 JayRDV (Service de booking et de prise de rendez-vous) expose des capacités temporelles que JayKoa peut synchroniser :
 
@@ -480,7 +460,7 @@ Les contraintes suivantes sont **non négociables** et s'appliquent à toute imp
 | # | Contrainte | Description |
 |---|------------|-------------|
 | **C-1** | JayKoa ne modifie jamais les données métier des Services sources | Les données métier restent sous l'autorité exclusive du Service source |
-| **C-2** | JayKoa ne crée pas d'événement métier externe | JayKoa ne peut pas créer de rendez-vous dans JayRDV, ni d'inscription dans JayFestival |
+| **C-2** | JayKoa ne crée pas d'événement métier externe | JayKoa ne peut pas créer de rendez-vous dans JayRDV |
 | **C-3** | JayKoa ne réserve jamais de créneau | La réservation est une responsabilité métier qui appartient au Service de booking |
 | **C-4** | JayKoa ne calcule aucune disponibilité | Le calcul de disponibilité est une logique métier qui ne relève pas de l'agenda |
 | **C-5** | JayKoa ne résout aucun conflit de booking | La résolution de conflits de réservation appartient au Service métier concerné |
@@ -502,7 +482,6 @@ Il ne possède aucune logique métier. Il ne prend aucune décision. Il ne rése
 
 JayKoa **reflète le temps de tous les Services**.
 
-> **JayFestival annonce le temps.**
 > **JayRDV décide du temps.**
 > **JayKoa le rend visible, lisible et orchestré.**
 
@@ -522,10 +501,9 @@ Dans l'écosystème Miyukini, JayKoa est le Service qui transforme des fragments
 | [JayKoa - Bornage Implementation](./JayKoa%20-%20Bornage%20Implementation.md) | Bornage pour l'implémentation (MVP, phases, hors scope) |
 | [JayKoa - Operateurs et Toolkits](./JayKoa%20-%20Operateurs%20et%20Toolkits.md) | Opérateurs, Kits d'Outils, Équipe, filtres supportés |
 | [JayKoa - Niveaux Securite et Protection Donnees](./reference/JayKoa%20-%20Niveaux%20Securite%20et%20Protection%20Donnees.md) | Niveaux de sécurité WorrySentinel et mesures de protection |
-| [JayKoa - Integration Services Consommateurs](./reference/JayKoa%20-%20Integration%20Services%20Consommateurs.md) | Schémas d'intégration avec JayRDV, JayFestival, futurs Services |
+| [JayKoa - Integration Services Consommateurs](./reference/JayKoa%20-%20Integration%20Services%20Consommateurs.md) | Schémas d'intégration avec JayRDV, futurs Services |
 | [JayKoa - Referentiel Fonctionnel Inspire Google Agenda](./reference/JayKoa%20-%20Referentiel%20Fonctionnel%20Inspire%20Google%20Agenda.md) | Référentiel fonctionnel inspiré de Google Agenda |
 | [JayRDV - Document Fondateur](../JayRDV/JayRDV%20-%20Document%20Fondateur.md) | Service de booking et prise de rendez-vous |
-| [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) | Service d'organisation d'événements et de festivals |
 | [Politique de résidence des données sensibles](..//..//miyukini-webway-system//reference//_index.md) | Résidence centralisée, COG de référence, niveaux 2+ |
 
 ---

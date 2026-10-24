@@ -26,25 +26,21 @@ Ce document est le **plan de remédiation** dérivé de l’audit Jay1Tribu réa
 
 ---
 
-## Sync avec JayXpose et JayKoa
+## Sync avec JayKoa et JayRDV
 
-Cette section décrit le **flux de données et les responsabilités** entre Jay1Tribu et les services **JayXpose**, **JayKoa** et **JayRDV**, pour les parcours où un professionnel propose des créneaux de réservation et où les agendas sont unifiés.
+Cette section décrit le **flux de données et les responsabilités** entre Jay1Tribu et les services **JayKoa** et **JayRDV** (JayXpose/JayFestival retirés le 2026-04-29), pour les parcours où un professionnel propose des créneaux de réservation et où les agendas sont unifiés.
 
 ### Rôle de chaque service
 
 | Service | Rôle | En bref |
 |---------|------|--------|
-| **JayXpose** | Vitrine / portfolio du professionnel | Alimente **JayRDV** avec les **informations du professionnel** qui propose ses services (présentation, offre, lien public, widget). Les données exposées par JayXpose (profil pro, services proposés, page publique) sont la source pour configurer ce que le client voit côté réservation. |
-| **JayKoa** | Calendrier universel, agenda unifié | **Organise les agendas de chacun** : agrège et reflète les engagements temporels (événements internes, reflets JayFestival, reflets JayRDV). JayKoa ne crée pas d’événement externe ; il reflète les RDV confirmés issus de JayRDV pour afficher un calendrier unifié par utilisateur. |
-| **JayRDV** | Service rendez-vous et réservation | **Organise les écrans, les vues, le flux de réservation** : CRUD des créneaux (slots), gestion des rendez-vous (création, modification), **annulations** (côté client ou côté pro), **rappels** (confirmations, rappels avant RDV). JayRDV consomme les infos pro fournies par JayXpose et peut exposer des reflets vers JayKoa pour l’agenda. |
+| **JayKoa** | Calendrier universel, agenda unifié | **Organise les agendas de chacun** : agrège et reflète les engagements temporels (événements internes, reflets JayRDV). JayKoa ne crée pas d’événement externe ; il reflète les RDV confirmés issus de JayRDV pour afficher un calendrier unifié par utilisateur. |
+| **JayRDV** | Service rendez-vous et réservation | **Organise les écrans, les vues, le flux de réservation** : CRUD des créneaux (slots), gestion des rendez-vous (création, modification), **annulations** (côté client ou côté pro), **rappels** (confirmations, rappels avant RDV). JayRDV peut exposer des reflets vers JayKoa pour l’agenda. |
 
 ### Flux de données (schéma)
 
 ```
-JayXpose (infos professionnel, offre, page publique)
-    │
-    ▼
-JayRDV  ← reçoit : qui propose quoi, lien/widget, services
+JayRDV
     │
     ├── Écrans / vues / flux réservation
     ├── CRUD créneaux (slots), RDV
@@ -57,13 +53,12 @@ JayKoa  ← reçoit : reflets des RDV confirmés (lecture seule)
     └── Organise les agendas de chacun (vue calendrier unifiée)
 ```
 
-- **JayXpose → JayRDV** : les informations du professionnel (profil, services proposés, paramètres de la page de réservation) alimentent la configuration de JayRDV (quel pro, quels services, quel lien/widget). Sync ou lecture réfléchie selon l’implémentation (adaptateur ou API).
 - **JayRDV → JayKoa** : les rendez-vous **confirmés** sont synchronisés en reflets dans JayKoa (via `JayRDVAdapter::sync_appointments_from_store` ou équivalent) pour que l’agenda unifié (JayKoa) affiche les RDV sans modifier les données source.
 
 ### Points d’intégration Jay1Tribu
 
 - **Jay1Tribu** (amis, tribus, salons, messagerie) peut croiser les usages avec la réservation : par exemple afficher « Mes amis » ou « Ma tribu » dans un contexte où un pro (membre de la tribu) propose des créneaux via JayRDV ; ou lier notifications / rappels à la messagerie si besoin.
-- La **sync JayXpose / JayKoa / JayRDV** est décrite ici pour cohérence avec la doc produit et le [Suivi Audit et Todo](..//..//_index.md) ; les tâches d’implémentation des adaptateurs ou de l’UI restent dans les crates respectifs (jayxpose, jaykoa, jayrdv).
+- La **sync JayKoa / JayRDV** est décrite ici pour cohérence avec la doc produit et le [Suivi Audit et Todo](..//..//_index.md) ; les tâches d’implémentation des adaptateurs ou de l’UI restent dans les crates respectifs (jaykoa, jayrdv).
 
 ---
 
@@ -124,7 +119,7 @@ JayKoa  ← reçoit : reflets des RDV confirmés (lecture seule)
 | [Jay1Tribu - Integration Central et Miou](./Jay1Tribu%20-%20Integration%20Central%20et%20Miou.md) | Contrat Miou |
 | [Miyukini COG - Suivi Audit et Todo](..//..//_index.md) | Suivi global projet |
 | [JayRDV - Document Fondateur](../JayRDV/JayRDV%20-%20Document%20Fondateur.md) | Service rendez-vous, sync avec JayKoa |
-| [JayRDV - Professionnels Opérateurs et Toolkits](../JayRDV/publics/Professionnels/Professionnels%20-%20Operateurs%20et%20Toolkits.md) | JayXpose / JayRDV Pro, flux réservation |
+| [JayRDV - Professionnels Opérateurs et Toolkits](../JayRDV/publics/Professionnels/Professionnels%20-%20Operateurs%20et%20Toolkits.md) | JayRDV Pro, flux réservation |
 
 ---
 

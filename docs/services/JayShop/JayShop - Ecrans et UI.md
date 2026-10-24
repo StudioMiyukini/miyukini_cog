@@ -33,13 +33,13 @@ Ce document decrit la **cartographie des ecrans** du service **JayShop**, les co
 | JSH-A12 | Commandes en ligne | Liste des commandes web, statuts, actions (preparer, expedier). | JSH-25 |
 | JSH-A13 | Parametres boutique | Configuration generale (nom, slug, devise, CGV, modes paiement, fonctionnalites activables, recu). | JSH-02 a JSH-06 |
 | JSH-A14 | Mouvements de caisse | Entrees/sorties manuelles d'especes. | JSH-61 |
-| JSH-A15 | Ajustement de stock | Ajustement manuel du stock (reception, perte, casse). Relaye a JayXpose. | JSH-74 |
+| JSH-A15 | Ajustement de stock | Ajustement manuel du stock (reception, perte, casse). | JSH-74 |
 | JSH-A16 | Gestion des remises | Liste, creation, edition, suppression des remises pre-definies (nom, valeur, type). | JSH-90, JSH-91 |
 | JSH-A17 | Fichier client | Liste des clients, creation/edition fiche client. Association avec MiyuContacts. | JSH-98, JSH-99 |
 | JSH-A18 | Gestion des taxes | Liste, creation, edition des taux de taxe (nom, taux, incluse/ajoutee, application par defaut). | JSH-94 a JSH-97 |
 | JSH-A19 | Rapports detailles | Sous-rapports : ventes par produit, par categorie, par mode de paiement, taxes, remises. | JSH-55 a JSH-59 |
 | **JSH-A20** | **Liste des evenements** | **Liste des participations evenements/festivals avec statut, dates, CA, benefice. Actions : creer, editer, ouvrir.** | **JSH-110, JSH-111** |
-| **JSH-A21** | **Formulaire evenement** | **Creation / edition d'une fiche evenement (nom, dates, lieu, stand, notes). Affiche le lien JayFestival si lie.** | **JSH-110** |
+| **JSH-A21** | **Formulaire evenement** | **Creation / edition d'une fiche evenement (nom, dates, lieu, stand, notes).** | **JSH-110** |
 | **JSH-A22** | **Couts de participation** | **Liste des couts par evenement (stand, transport, logement, nourriture, autres). CRUD, total par categorie.** | **JSH-112 a JSH-114** |
 | **JSH-A23** | **Stock temporaire** | **Allocation de stock temporaire depuis le stock global. Selection produits, quantites. Indicateurs restant.** | **JSH-115, JSH-116** |
 | **JSH-A24** | **Dashboard evenement** | **Vue synthetique par evenement : CA, couts, stock restant, benefice brut, benefice net. Actions : cloturer.** | **JSH-118, JSH-119** |
@@ -288,7 +288,7 @@ Boucle :
 │  │ Couleur : [🟤][🔴][🩷][🟠][🟡][🟢][🔵][🟣]│                      │
 │  │ Forme :   [■][●][✿][⬡]              │                      │
 │  │                                       │                      │
-│  │ OU Image : [📷 Visuel JayXpose]       │                      │
+│  │ OU Image : [📷 Visuel produit]        │                      │
 │  │                                       │                      │
 │  │ Taille :  [1x1 ▼]                    │                      │
 │  │                                       │                      │
@@ -467,16 +467,14 @@ Boucle :
 │  │ Statut │ Evenement                │ Dates           │ CA      │ Benefice │  │
 │  ├────────┼──────────────────────────┼─────────────────┼─────────┼──────────┤  │
 │  │ 🟢 En  │ Salon du Livre 2026      │ 15-17 mars 2026 │ 1 250 € │  +420 €  │  │
-│  │  cours │ 📌 JayFestival           │ Paris Expo      │         │          │  │
+│  │  cours │                          │ Paris Expo      │         │          │  │
 │  ├────────┼──────────────────────────┼─────────────────┼─────────┼──────────┤  │
 │  │ 🔵 Con │ Marche de Noel           │ 01-24 dec 2025  │ 3 800 € │ +1 200 € │  │
 │  │  firme │                          │ Place centrale  │         │          │  │
 │  ├────────┼──────────────────────────┼─────────────────┼─────────┼──────────┤  │
 │  │ ⚫ Clo │ Foire de Printemps       │ 10-12 avr 2025  │ 2 100 € │  +650 €  │  │
-│  │  ture  │ 📌 JayFestival           │ Parc des expos  │         │          │  │
+│  │  ture  │                          │ Parc des expos  │         │          │  │
 │  └────────┴──────────────────────────┴─────────────────┴─────────┴──────────┘  │
-│                                                                                │
-│  📌 = Lie a JayFestival (synchronisation automatique)                          │
 │                                                                                │
 │  Legende : 🟢 En cours  🔵 Confirme  🟡 Brouillon  🔴 Annule  ⚫ Cloture        │
 └────────────────────────────────────────────────────────────────────────────────┘
@@ -508,13 +506,6 @@ Boucle :
 │  │  │ Emporter les nouveautes 2026 et les bestsellers 2025.        │     │   │
 │  │  │ Contact organisateur : Marie (06 12 34 56 78)                │     │   │
 │  │  └──────────────────────────────────────────────────────────────┘     │   │
-│  │                                                                        │   │
-│  │  ┌────────────────────────────────────────────────────────────┐       │   │
-│  │  │ 📌 Lie a JayFestival                                        │       │   │
-│  │  │ Edition : Salon du Livre 2026                               │       │   │
-│  │  │ Candidature : Validee le 11/02/2026                         │       │   │
-│  │  │ [Voir dans JayFestival →]                                   │       │   │
-│  │  └────────────────────────────────────────────────────────────┘       │   │
 │  │                                                                        │   │
 │  │                                    [Annuler] [Enregistrer]             │   │
 │  └────────────────────────────────────────────────────────────────────────┘   │
@@ -620,11 +611,6 @@ Boucle :
 │  │  🏪 Stand : 500 €  │  🚗 Transport : 300 €  │  🏨 Logement : 285 €       │  │
 │  │  🍽️ Repas : 150 €  │  📦 Autre : 25 €                                    │  │
 │  └─────────────────────────────────────────────────────────────────────────┘  │
-│                                                                                │
-│  ┌─────────────────────────────────────────────────────────────────────────┐  │
-│  │ 📌 Lie a JayFestival • Edition : Salon du Livre 2026                    │  │
-│  │ [Voir Couts →] [Voir Stock →] [Voir Tickets →] [Voir dans JayFestival →]│  │
-│  └─────────────────────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -654,7 +640,6 @@ Boucle :
 | `EventStatusBadge` | JSH-A20, JSH-A21, JSH-A24 | Badge de statut evenement (draft, confirmed, ongoing, closed, cancelled). |
 | `CostCategoryBadge` | JSH-A22 | Badge de categorie de cout (stand, transport, lodging, food, other). |
 | `StockAllocationRow` | JSH-A23 | Ligne d'allocation stock (produit, alloue, vendu, restant, indicateur). |
-| `JayFestivalLink` | JSH-A21, JSH-A24 | Encart de liaison JayFestival (edition, candidature, lien externe). |
 | `ProfitDisplay` | JSH-A20, JSH-A24 | Affichage benefice avec coloration (+vert, -rouge). |
 
 ---
@@ -710,7 +695,6 @@ Au clic sur un bouton produit :
 - [JayShop - Document Fondateur](./JayShop%20-%20Document%20Fondateur.md)
 - [JayShop - Parcours Utilisateur](./JayShop%20-%20Parcours%20Utilisateur.md)
 - [JayShop - Analyse des besoins](./JayShop%20-%20Analyse%20des%20besoins.md)
-- [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
 
 ---
 

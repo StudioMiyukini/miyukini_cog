@@ -8,7 +8,7 @@ Liste des `data-tutorial-id` utilisés par le moteur de tutoriels pour la **flè
 
 - Format : `{zone}-{element}` ou `{zone}-{element}-{suffixe}`
 - Minuscules, tirets
-- Suffixe dynamique pour éléments en liste : `{prefix}-{id}` (ex. `service-card-jayxpose`)
+- Suffixe dynamique pour éléments en liste : `{prefix}-{id}` (ex. `service-card-jaykoa`)
 
 ---
 
@@ -31,7 +31,7 @@ Liste des `data-tutorial-id` utilisés par le moteur de tutoriels pour la **flè
 | ID | Composant | Emplacement | Description |
 |----|-----------|-------------|-------------|
 | `tab-accueil` | TabBar | `tab_bar.rs` | Onglet Accueil (🏠) |
-| `tab-service-{id}` | TabBar | `tab_bar.rs` | Onglet d'un service (ex. `tab-service-jayxpose`) |
+| `tab-service-{id}` | TabBar | `tab_bar.rs` | Onglet d'un service (ex. `tab-service-jaykoa`) |
 | `tab-add` | TabBar | `tab_bar.rs` | Bouton « + » — ouvre Bibliothèque pour ajouter un onglet |
 
 ---
@@ -44,7 +44,7 @@ Liste des `data-tutorial-id` utilisés par le moteur de tutoriels pour la **flè
 | `filter-tous` | ServiceGrid | `service_grid.rs` | Bouton filtre « Tous » |
 | `filter-installes` | ServiceGrid | `service_grid.rs` | Bouton filtre « Installés » |
 | `filter-favoris` | ServiceGrid | `service_grid.rs` | Bouton filtre « Favoris » |
-| `service-card-{id}` | ServiceCard | `service_card.rs` | Carte d'un service (ex. `service-card-jayxpose`, `service-card-jaykoa`) |
+| `service-card-{id}` | ServiceCard | `service_card.rs` | Carte d'un service (ex. `service-card-jaykoa`) |
 
 ---
 
@@ -84,7 +84,7 @@ Liste des `data-tutorial-id` utilisés par le moteur de tutoriels pour la **flè
 | 2 | `nav-salon` | Expliquer Salon |
 | 3 | `nav-bibliotheque` | Expliquer Bibliothèque |
 | 4 | `nav-webway` | Expliquer Webway |
-| 5 | `service-card-jayxpose` (ou premier installé) | Montrer comment ouvrir un service |
+| 5 | `service-card-jaykoa` (ou premier installé) | Montrer comment ouvrir un service |
 | 6 | `tab-accueil` | Montrer les onglets ouverts |
 
 ### Tutoriel MWS (tutoriel_mws_connexion)

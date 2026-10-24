@@ -67,9 +67,9 @@ Tutoriel d'introduction à **Miyukini Central**, le hub de gestion des Services 
 
 | Champ | Valeur |
 |-------|--------|
-| **data-tutorial-id** | `service-card-jayxpose` (ou premier service installé disponible) |
+| **data-tutorial-id** | `service-card-jaykoa` (ou premier service installé disponible) |
 | **Flèche verte** | Oui, vers une carte de service |
-| **Texte Miou** | « Pour ouvrir un service, clique sur sa carte. Par exemple JayXpose pour ta vitrine, ou JayKoa pour ton calendrier. Un clic = un nouvel onglet. » |
+| **Texte Miou** | « Pour ouvrir un service, clique sur sa carte. Par exemple JayKoa pour ton calendrier. Un clic = un nouvel onglet. » |
 | **Variantes** | « Clique sur n'importe quelle carte pour lancer le service. L'onglet s'ouvrira en haut. » |
 
 ### Étape 6 — Les onglets

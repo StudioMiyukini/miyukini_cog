@@ -19,26 +19,26 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 
 | Id | Besoin | Priorite | Description |
 |----|--------|----------|-------------|
-| JSH-01 | Activation du service | P0 | L'admin active JayShop depuis Miyukini Central. Liaison automatique avec le profil JayXpose existant. |
+| JSH-01 | Activation du service | P0 | L'admin active JayShop depuis Miyukini Central. |
 | JSH-02 | Configuration boutique | P0 | Nom, slug URL, devise, CGV, mentions legales. |
 | JSH-03 | Configuration modes de paiement | P0 | L'admin definit les modes de paiement acceptes (especes, CB, cheque, virement, autre) et leur ordre. |
 | JSH-04 | Configuration fiscale | P0 | Taux de TVA par defaut, possibilite de definir des taux par categorie de produit. |
 | JSH-05 | Configuration PoS | P1 | Definition des onglets et boutons produits pour l'interface de caisse. |
 | JSH-06 | Fonctionnalites activables (toggles) | P1 | Ecran de parametres avec toggles pour activer/desactiver les fonctionnalites avancees (sessions de caisse, tickets ouverts, alertes stock, fichier client, remises). Inspire de Loyverse Settings > Features. |
 
-### 1.2 Gestion des produits (CRUD via JayXpose)
+### 1.2 Gestion des produits
 
 | Id | Besoin | Priorite | Description |
 |----|--------|----------|-------------|
-| JSH-10 | Lire le catalogue | P0 | JayShop affiche les produits, categories, visuels et prix depuis JayXpose. |
-| JSH-11 | Creer un produit | P1 | L'admin cree un produit depuis JayShop (nom, prix, categorie, visuel). Ecriture relayee a JayXpose. |
-| JSH-12 | Modifier un produit | P1 | L'admin modifie un produit (prix, description, disponibilite, categorie). Ecriture relayee a JayXpose. |
-| JSH-13 | Supprimer un produit | P1 | L'admin archive un produit. Soft delete relaye a JayXpose. |
+| JSH-10 | Lire le catalogue | P0 | JayShop affiche les produits, categories, visuels et prix. |
+| JSH-11 | Creer un produit | P1 | L'admin cree un produit depuis JayShop (nom, prix, categorie, visuel). |
+| JSH-12 | Modifier un produit | P1 | L'admin modifie un produit (prix, description, disponibilite, categorie). |
+| JSH-13 | Supprimer un produit | P1 | L'admin archive un produit (soft delete). |
 | JSH-14 | Gerer les categories | P1 | L'admin cree, renomme, supprime, reordonne les categories depuis JayShop. |
-| JSH-15 | Synchroniser les stocks | P0 | Decrementation du stock a chaque vente. Synchronisation bidirectionnelle avec JayXpose. |
+| JSH-15 | Synchroniser les stocks | P0 | Decrementation du stock a chaque vente. |
 | JSH-16 | Marquer produits PoS | P1 | L'admin assigne des produits a des onglets et boutons PoS. |
 | JSH-17 | Import CSV d'articles | P1 | Import en masse de produits via fichier CSV (nom, prix, categorie, SKU, barcode). Complement de l'export existant. Inspire de Loyverse Item list > Import. |
-| JSH-18 | Variantes de produit | P2 | Un article peut avoir des variantes (taille, couleur, option) avec prix et stock propres. Chaque combinaison d'options genere une variante. Extension du modele JayXpose. |
+| JSH-18 | Variantes de produit | P2 | Un article peut avoir des variantes (taille, couleur, option) avec prix et stock propres. Chaque combinaison d'options genere une variante. |
 | JSH-19 | Filtrage par alerte de stock | P1 | Filtre dans la liste des produits : stock bas, epuise, tous. Inspire de Loyverse Item list > Stock alert. |
 
 ### 1.3 Boutique en ligne
@@ -64,7 +64,7 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 | JSH-34 | Recherche produit | P1 | Barre de recherche dans la grille PoS pour trouver un produit non affiche dans les boutons. |
 | JSH-35 | Scan code-barres | P2 | Ajout de produit par scan code-barres (lecteur USB/Bluetooth). |
 | JSH-36 | Tickets ouverts | P1 | Sauvegarder un ticket en cours, ouvrir un nouveau, reprendre un ticket sauvegarde. Fonctionnalite activable par toggle. |
-| JSH-37 | Representation bouton PoS | P1 | Chaque bouton peut etre personnalise : couleur + forme (carre, rond, badge, hexagone) OU image du produit (visuel JayXpose). Inspire de Loyverse « Representation on POS ». |
+| JSH-37 | Representation bouton PoS | P1 | Chaque bouton peut etre personnalise : couleur + forme (carre, rond, badge, hexagone) OU image du produit. Inspire de Loyverse « Representation on POS ». |
 | JSH-38 | Couleur par categorie | P1 | Chaque categorie a une couleur associee (palette de 8 couleurs). Utilisee par defaut pour colorer les onglets et boutons PoS. |
 
 ### 1.5 Ecran de paiement
@@ -105,15 +105,11 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 | JSH-62 | Cloture de caisse | P0 | Synthese : total ventes, ventilation par mode, especes attendues vs comptees, ecart. |
 | JSH-63 | Periodes de travail | P2 | Suivi des sessions par utilisateur (debut, fin, totaux). |
 
-### 1.8 Integration JayXpose
+### 1.8 Gestion des stocks
 
 | Id | Besoin | Priorite | Description |
 |----|--------|----------|-------------|
-| JSH-70 | Liaison catalogue | P0 | JayShop lit le catalogue JayXpose (produits, categories, visuels, prix, disponibilite). |
-| JSH-71 | Ecriture relayee | P1 | CRUD produits/categories depuis JayShop relaye a JayXpose. |
-| JSH-72 | Sync stocks bidirectionnelle | P0 | Push (vente → decrementation) et Pull (modification stock JayXpose → mise a jour JayShop). |
-| JSH-73 | Resolution conflits stocks | P1 | Politique configurable : `prefer_pos`, `prefer_local`, `manual_review`. |
-| JSH-74 | Ajustement de stock simplifie | P1 | L'admin peut ajuster manuellement le stock depuis JayShop (reception, perte, casse). Relaye a JayXpose. Inspire de Loyverse « Stock adjustments ». |
+| JSH-74 | Ajustement de stock simplifie | P1 | L'admin peut ajuster manuellement le stock depuis JayShop (reception, perte, casse). Inspire de Loyverse « Stock adjustments ». |
 | JSH-75 | Alertes de stock bas | P1 | Notification quand le stock d'un produit passe sous un seuil configurable. Email et/ou badge dans l'interface. Inspire de Loyverse « Low stock notifications ». |
 | JSH-76 | Alerte stock negatif | P1 | Avertissement en caisse si le vendeur tente de vendre un produit dont le stock est a 0 ou negatif. Configurable (bloquer ou avertir). Inspire de Loyverse « Negative stock alerts ». |
 
@@ -162,22 +158,12 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 | JSH-112 | Saisir les couts de participation | P1 | L'admin saisit les couts lies a l'evenement par categorie : **stand**, **transport**, **logement**, **nourriture**, **autres**. Chaque cout a un libelle, un montant, une date et un justificatif optionnel. |
 | JSH-113 | Liste des couts par evenement | P1 | Vue liste des couts saisis avec total par categorie et total general. |
 | JSH-114 | Modifier/supprimer un cout | P1 | L'admin peut modifier ou supprimer un cout saisi. |
-| JSH-115 | Allouer un stock temporaire | P1 | L'admin selectionne des produits et definit les quantites a emporter sur l'evenement. Ce stock temporaire est **deduit du stock global** (JayXpose) et reserve pour l'evenement. |
+| JSH-115 | Allouer un stock temporaire | P1 | L'admin selectionne des produits et definit les quantites a emporter sur l'evenement. Ce stock temporaire est **deduit du stock global** et reserve pour l'evenement. |
 | JSH-116 | Vue stock temporaire par evenement | P1 | Liste des produits alloues avec : quantite allouee, quantite vendue, quantite restante. Indicateurs visuels (rupture, stock bas). |
 | JSH-117 | Associer ticket ↔ evenement | P1 | En PoS, l'admin peut **selectionner l'evenement actif**. Tous les tickets crees decrementent le stock temporaire de cet evenement (et non le stock global). |
 | JSH-118 | Dashboard evenement | P1 | Tableau de bord par evenement : CA realise, total des couts, stock restant, **benefice brut** (CA - couts), **benefice net** (CA - couts - cout des marchandises vendues). |
-| JSH-119 | Cloture d'evenement | P1 | Cloture de l'evenement : synthese finale, calcul du benefice. Le stock non vendu est **reintegre au stock global** (JayXpose). |
+| JSH-119 | Cloture d'evenement | P1 | Cloture de l'evenement : synthese finale, calcul du benefice. Le stock non vendu est **reintegre au stock global**. |
 | JSH-120 | Transmission comptable par evenement | P1 | A la cloture, transmission a JayKonta avec ventilation par evenement : CA, couts, benefice. |
-
-### 1.14 Integration JayFestival (evenements)
-
-| Id | Besoin | Priorite | Description |
-|----|--------|----------|-------------|
-| JSH-130 | Creation automatique de fiche evenement | P1 | Lorsque l'organisateur JayFestival **valide la candidature** d'un exposant, une fiche evenement est **automatiquement creee** dans JayShop avec les informations de l'edition (nom, dates, lieu, stand attribue). |
-| JSH-131 | Synchronisation des informations | P1 | Les mises a jour cote JayFestival (changement de dates, de stand, annulation de participation) sont **synchronisees** vers JayShop. La fiche evenement est mise a jour automatiquement. |
-| JSH-132 | Notification de validation | P1 | L'admin JayShop recoit une notification lorsqu'une candidature est validee et qu'une fiche evenement est creee. |
-| JSH-133 | Lien vers JayFestival | P2 | Depuis la fiche evenement JayShop, l'admin peut acceder a son dashboard exposant JayFestival (documents, factures organisateur, planning). |
-| JSH-134 | Annulation depuis JayFestival | P1 | Si la participation est annulee cote JayFestival, la fiche evenement JayShop passe en statut « annule » et le stock temporaire est reintegre automatiquement. |
 
 ---
 
@@ -188,7 +174,7 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 | NFR-JSH-01 | Performance PoS | L'ajout d'un produit au ticket doit etre instantane (< 100ms). Le calcul du rendu monnaie doit etre instantane. |
 | NFR-JSH-02 | Fonctionnement hors-ligne | Le mode PoS doit fonctionner sans connexion internet. Synchronisation a la reconnexion. (LOI-1, LOI-2) |
 | NFR-JSH-03 | Securite paiements | Les donnees de paiement sont classees niveau 3 (Critical). Chiffrement en transit et au repos. |
-| NFR-JSH-04 | Scalabilite | Support de 500 produits par vendeur (alignement JayXpose). Support de 10 000 tickets par an par vendeur. |
+| NFR-JSH-04 | Scalabilite | Support de 500 produits par vendeur. Support de 10 000 tickets par an par vendeur. |
 | NFR-JSH-05 | Accessibilite | Conformite WCAG 2.1 AA pour la boutique en ligne. Contraste suffisant pour le mode PoS. |
 | NFR-JSH-06 | Responsive | La boutique en ligne est adaptee mobile/tablette/desktop. Le PoS est optimise tablette et desktop. |
 | NFR-JSH-07 | Impression | Support des imprimantes thermiques (ESC/POS) via connexion Ethernet ou Bluetooth pour les recus. |
@@ -202,23 +188,20 @@ Ce document recense les **besoins fonctionnels et non-fonctionnels** du service 
 
 | Priorite | Description | Besoins |
 |----------|-------------|---------|
-| **P0** | Indispensable au MVP | JSH-01 a JSH-04, JSH-10, JSH-15, JSH-20 a JSH-24, JSH-30 a JSH-33, JSH-40 a JSH-44, JSH-46, JSH-50, JSH-51, JSH-60, JSH-62, JSH-70, JSH-72, JSH-80, JSH-94, JSH-95 |
-| **P1** | Important, post-MVP proche | JSH-05, JSH-06, JSH-11 a JSH-14, JSH-16 a JSH-17, JSH-19, JSH-25, JSH-34, JSH-36 a JSH-38, JSH-45, JSH-48, JSH-52 a JSH-57, JSH-61, JSH-71, JSH-73 a JSH-76, JSH-81, JSH-82, JSH-90 a JSH-92, JSH-96 a JSH-99, **JSH-110 a JSH-120** (evenements), **JSH-130 a JSH-132, JSH-134** (integration JayFestival) |
-| **P2** | Phase 2 | JSH-18, JSH-26, JSH-35, JSH-47, JSH-58, JSH-59, JSH-63, JSH-83, JSH-93, JSH-100, JSH-101, **JSH-133** (lien JayFestival) |
+| **P0** | Indispensable au MVP | JSH-01 a JSH-04, JSH-10, JSH-15, JSH-20 a JSH-24, JSH-30 a JSH-33, JSH-40 a JSH-44, JSH-46, JSH-50, JSH-51, JSH-60, JSH-62, JSH-80, JSH-94, JSH-95 |
+| **P1** | Important, post-MVP proche | JSH-05, JSH-06, JSH-11 a JSH-14, JSH-16 a JSH-17, JSH-19, JSH-25, JSH-34, JSH-36 a JSH-38, JSH-45, JSH-48, JSH-52 a JSH-57, JSH-61, JSH-74 a JSH-76, JSH-81, JSH-82, JSH-90 a JSH-92, JSH-96 a JSH-99, **JSH-110 a JSH-120** (evenements) |
+| **P2** | Phase 2 | JSH-18, JSH-26, JSH-35, JSH-47, JSH-58, JSH-59, JSH-63, JSH-83, JSH-93, JSH-100, JSH-101 |
 
 ---
 
 ## 4. References
 
 - [JayShop - Document Fondateur](./JayShop%20-%20Document%20Fondateur.md)
-- [JayXpose - Catalogue Produits](../JayXpose/JayXpose%20-%20Catalogue%20Produits.md)
-- [JayXpose - Interfaces Inter-Services](../JayXpose/JayXpose%20-%20Interfaces%20Inter-Services.md)
 - [JayKonta - Integration Services](../JayKonta/reference/JayKonta%20-%20Integration%20Services.md)
-- [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md)
 
 ---
 
 **Document** : JayShop — Analyse des besoins
 **Version** : 1.2
 **Date** : 2026-02-11
-**Statut** : Reference produit — enrichi avec gestion des evenements/festivals et integration JayFestival
+**Statut** : Reference produit — enrichi avec gestion des evenements/festivals (integrations JayXpose/JayFestival retirees le 2026-04-29)

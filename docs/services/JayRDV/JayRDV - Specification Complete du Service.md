@@ -17,7 +17,7 @@ Ce document est la **spécification exhaustive** du service : vision, périmètr
 | **Secteurs** | Beauté, bien-être, coaching, conseil, artisanat, restauration, immobilier, services à la personne, formation, événementiel, services B2B | Médical (→ JayBobo) |
 | **Publics** | Professionnels, Clients (avec ou sans compte), Utilisateurs non connectés (guest) | Patients (→ JayBobo) |
 | **Fonctionnel** | Réservation, créneaux, plannings, rappels, annulations, paiement, statistiques, équipe, widget, vitrine | Dossier patient, ordonnance, téléconsultation médicale, carte Vitale |
-| **Architecture** | Crate `jayrdv`, intégration JayXpose, JayKoa, MiyuBooking, MiyuNotify, Cores COG | UI finale (→ design system Central / Tauri) |
+| **Architecture** | Crate `jayrdv`, intégration JayKoa, MiyuBooking, MiyuNotify, Cores COG | UI finale (→ design system Central / Tauri) |
 
 **Audience :** Équipes produit, architecture, développement, design.
 
@@ -48,7 +48,7 @@ JayRDV permet à tout **professionnel du service** de :
 | Concurrent | Modèle | JayRDV se différencie par |
 |-----------|--------|--------------------------|
 | Planity | SaaS cloud, beauté/bien-être | Souveraineté des données, multi-secteur (pas limité beauté) |
-| Calendly | SaaS cloud, B2B/freelance | Interpolarité COG (JayKoa, JayXpose, JayKonta), offline-first |
+| Calendly | SaaS cloud, B2B/freelance | Interpolarité COG (JayKoa, JayKonta), offline-first |
 | Fresha | SaaS gratuit, beauté | Pas de dépendance cloud, gouvernance Cores |
 | Treatwell | Marketplace + SaaS | Pas de commission, données chez le pro |
 | Cal.com | Open source, self-hosted | Intégration native écosystème Miyukini, Cores de gouvernance |
@@ -82,7 +82,7 @@ Le domaine médical impose des **contraintes réglementaires, sécuritaires et f
 | **Téléconsultation** | Visio généraliste (optionnel) | Téléconsultation médicale (cadre légal, prescriptions, compte-rendu) |
 | **Rappels** | SMS/email/push configurables | Rappels + consignes pré-consultation (jeûne, documents à apporter) |
 | **Paiement** | Acompte / paiement libre | Tiers payant, mutuelle, dépassement d'honoraires |
-| **Intégrations** | JayXpose (vitrine), JayKoa (agenda), MiyuBooking, MiyuNotify | Logiciels métier santé, DMP, protocoles HL7/FHIR |
+| **Intégrations** | JayKoa (agenda), MiyuBooking, MiyuNotify | Logiciels métier santé, DMP, protocoles HL7/FHIR |
 | **Sécurité** | WorrySentinel standard (S1-S3) | Niveaux de sécurité renforcés (S3-S5), chiffrement bout-en-bout obligatoire |
 
 ### 2.2 Interfaces communes
@@ -91,7 +91,6 @@ JayRDV et JayBobo **partagent** :
 - Le moteur de créneaux (MiyuBooking) : slots, disponibilités, hold, anti-double-booking.
 - Le moteur de rappels (MiyuNotify) : SMS, email, push.
 - L'agenda unifié (JayKoa) : reflets des RDV confirmés.
-- La vitrine (JayXpose) : page publique du professionnel.
 
 JayBobo **ajoute** une couche de conformité santé au-dessus de ces briques communes.
 
@@ -102,9 +101,6 @@ JayBobo **ajoute** une couche de conformité santé au-dessus de ces briques com
 ### 3.1 Vue d'ensemble
 
 ```
-JayXpose (vitrine professionnel)
-    │ Alimente : profil pro, services proposés, page publique, widget
-    ▼
 JayRDV (service de réservation)
     │ Orchestre : écrans, vues, flux de réservation
     │ CRUD : services, créneaux, rendez-vous
@@ -125,7 +121,6 @@ JayKonta (comptabilité — optionnel)
 
 | Brique | Strate | Rôle dans JayRDV |
 |--------|--------|-----------------|
-| **JayXpose** | Service (7) | Alimente JayRDV avec les **informations du professionnel** : présentation, offre de services, photos, horaires, lien public, widget. JayXpose est la **vitrine** ; JayRDV en consomme les données pour configurer ce que le client voit. |
 | **JayKoa** | Service (7) | **Organise les agendas** de chacun. Agrège et reflète les engagements temporels. Reçoit les RDV confirmés de JayRDV en reflets (lecture seule) via `JayRDVAdapter::sync_appointments_from_store`. |
 | **MiyuBooking** | Toolkit (6) | **Moteur de créneaux** : calcul des disponibilités, hold temporaire, anti-double-booking, buffers, préavis min/max. |
 | **MiyuNotify** | Toolkit (6) | **Rappels et notifications** : SMS, email, push. Envoi de confirmations, rappels J-7/J-1/H-2, alertes pro (nouveau RDV, annulation). |
@@ -138,21 +133,7 @@ JayKonta (comptabilité — optionnel)
 | **BorderGuard** | Core (4) | **Sécurité périmétrique** : filtrage des requêtes publiques, niveaux S1-S2, rate limiting, anti-spam. |
 | **WorrySentinel** | Core (4) | **Sécurité** : niveaux de sécurité, détection de menaces, dégradation gracieuse. |
 
-### 3.3 Flux JayXpose → JayRDV
-
-JayXpose fournit à JayRDV :
-
-| Donnée | Source JayXpose | Usage JayRDV |
-|--------|----------------|-------------|
-| Profil professionnel | Nom, photo, description, coordonnées | Affiché sur la page de réservation |
-| Services proposés | Catalogue de prestations (nom, durée, prix, photo) | Liste des services réservables |
-| Horaires d'ouverture | Plages horaires par jour | Base pour le calcul des créneaux disponibles |
-| Page publique | URL, template, branding (couleurs, logo) | Habillage de la page de réservation |
-| Widget | Code embed, paramètres de personnalisation | Widget intégrable sur le site du pro |
-
-**Synchronisation :** Lecture réfléchie (adaptateur JayXpose → JayRDV) ou API directe. JayRDV ne modifie jamais les données JayXpose ; JayXpose est la source de vérité pour la présentation du pro.
-
-### 3.4 Flux JayRDV → JayKoa
+### 3.3 Flux JayRDV → JayKoa
 
 JayRDV envoie à JayKoa :
 
@@ -368,7 +349,7 @@ enum ScheduleOwner { Practitioner, Resource, Professional }
 1. DÉCOUVERTE
    Client accède à la page de réservation via :
    - Lien direct (email, SMS, réseaux sociaux)
-   - Widget sur le site du pro (via JayXpose)
+   - Widget sur le site du pro
    - QR code (carte de visite, salle d'attente)
    - Recherche sur la marketplace (si activée)
 
@@ -491,7 +472,7 @@ Tous les rappels sont programmés via **MiyuNotify** et stockés dans l'entité 
 
 | Écran | Description | Données affichées |
 |-------|-------------|-------------------|
-| **Page de réservation** | Page publique du pro (via JayXpose) avec bouton « Réserver » | Nom, photo, description, adresse, horaires |
+| **Page de réservation** | Page publique du pro avec bouton « Réserver » | Nom, photo, description, adresse, horaires |
 | **Sélection service** | Liste des prestations | Nom, durée, prix, photo, catégorie |
 | **Sélection créneau** | Calendrier interactif | Créneaux disponibles (vue jour/semaine), choix praticien |
 | **Formulaire réservation** | Saisie infos client + confirmation | Nom, téléphone, email, remarques, acompte |
@@ -647,7 +628,6 @@ JayKoa : création reflet (sync_appointments_from_store)
 | Hold de créneau | SlotStatus::Held, expiration automatique |
 | Intégration MiyuBooking | Calcul des créneaux disponibles, anti-double-booking |
 | Intégration MiyuNotify | Rappels SMS/email, confirmation, alertes pro |
-| Intégration JayXpose | Lecture réfléchie du profil pro et des services |
 
 ### 9.3 Phase 3 — Interface web publique (Stratégie 1)
 
@@ -656,7 +636,7 @@ JayKoa : création reflet (sync_appointments_from_store)
 | Page de réservation | Interface web responsive (MiyuWeb + JayRDV) |
 | Parcours « 3 clics » | Sélection service → créneau → confirmation |
 | OTP téléphone | Vérification SMS (MiyuAuth) |
-| Widget / embed | Code intégrable sur le site du pro (JayXpose) |
+| Widget / embed | Code intégrable sur le site du pro |
 | Lien de réservation | URL unique par professionnel |
 | Buffer offline | Cloudflare Workers / snapshot JSON si COG offline |
 
@@ -693,7 +673,7 @@ JayKoa : création reflet (sync_appointments_from_store)
 | INV-RDV-3 | **Délai d'annulation** | Le client ne peut annuler que si le délai configuré par le pro est respecté. |
 | INV-RDV-4 | **Données chez le pro** | Toutes les données (RDV, clients, plannings) sont persistées dans le COG du professionnel (KindMother), jamais dans un cloud tiers. |
 | INV-RDV-5 | **JayRDV ne décide pas du temps** | JayRDV gère les créneaux et les réservations ; l'agenda unifié est géré par JayKoa (reflets uniquement). |
-| INV-RDV-6 | **JayXpose est la source de vérité du pro** | JayRDV consomme les données professionnel de JayXpose (profil, services, page) sans les modifier. |
+| INV-RDV-6 | *(retiré)* | Invariant sans objet : JayXpose/JayFestival retirés le 2026-04-29. |
 | INV-RDV-7 | **Pas de donnée médicale** | JayRDV ne stocke ni ne traite de données de santé. Le domaine médical est réservé à JayBobo. |
 | INV-RDV-8 | **Rappels configurables** | Le professionnel contrôle les canaux et le timing des rappels. Aucun rappel n'est envoyé sans sa configuration. |
 | INV-RDV-9 | **Guest autorisé** | La réservation sans compte est autorisée par défaut (configurable). |
@@ -755,7 +735,7 @@ JayKoa : création reflet (sync_appointments_from_store)
 | [Professionnels — Analyse des besoins](./publics/Professionnels/Professionnels%20-%20Analyse%20des%20besoins.md) | Besoins fonctionnels détaillés (PRO-01 à PRO-50+) |
 | [Clients — Analyse des besoins](./publics/Clients/Clients%20-%20Analyse%20des%20besoins.md) | Besoins fonctionnels détaillés (CLI-01 à CLI-40+) |
 | [Professionnels — Opérateurs et Toolkits](./publics/Professionnels/Professionnels%20-%20Operateurs%20et%20Toolkits.md) | JayRDV Pro, JayRDV Exposition, Kits (Calendrier, Services, Notifications, Stats, Équipe) |
-| [Jay1Tribu — Todo Audit](../Jay1Tribu/Jay1Tribu%20-%20Todo%20Audit.md) | Sync JayXpose / JayKoa / JayRDV |
+| [Jay1Tribu — Todo Audit](../Jay1Tribu/Jay1Tribu%20-%20Todo%20Audit.md) | Sync JayKoa / JayRDV |
 | [Audit JayRDV](../../implementation/Miyukini%20COG%20-%20Audit%20JayRDV.md) | État actuel du crate jayrdv |
 | [Suivi Audit et Todo](..//..//_index.md) | Suivi global du projet |
 

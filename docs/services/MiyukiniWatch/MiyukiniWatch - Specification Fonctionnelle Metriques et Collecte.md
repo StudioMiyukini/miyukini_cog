@@ -151,7 +151,7 @@ Les métriques brutes sont agrégées à trois niveaux temporels :
 | Niveau | Période | Exemples | Rétention par défaut |
 |--------|---------|----------|----------------------|
 | **Brut** | Par événement | Chaque ouverture de service avec son horodatage | 30 jours |
-| **Quotidien** | Par jour | Nombre d'ouvertures de JayXpose le 14/02/2026 | 90 jours |
+| **Quotidien** | Par jour | Nombre d'ouvertures de JayShop le 14/02/2026 | 90 jours |
 | **Hebdomadaire** | Par semaine | Temps total passé dans Jay1Tribu semaine 7 | 365 jours |
 
 ### 4.2 Processus d'agrégation
@@ -172,7 +172,7 @@ Les agrégats exposés à Miou sont des structures simplifiées ne contenant que
 | Agrégat | Contenu | Exemple |
 |---------|---------|---------|
 | `session_summary` | Jours depuis dernière session, durée moyenne, tranche horaire habituelle | `{ days_away: 3, avg_duration: 45min, usual_slot: EVENING }` |
-| `top_services` | Top 3 services par fréquence (semaine en cours) | `[{ service: "JayXpose", count: 12 }, ...]` |
+| `top_services` | Top 3 services par fréquence (semaine en cours) | `[{ service: "JayShop", count: 12 }, ...]` |
 | `neglected_services` | Services non ouverts depuis > 14 jours | `[{ service: "JayKoa", days_since: 21 }]` |
 | `friend_reminders` | Amis non contactés depuis > 7 jours | `[{ friend_id: "...", days_since: 10 }]` |
 | `top_friends` | Top 3 amis par temps de discussion (30 jours) | `[{ friend_id: "...", total_min: 180 }]` |

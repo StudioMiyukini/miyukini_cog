@@ -2,7 +2,9 @@
 
 ## Contexte
 
-**JayShop** est le **service Miyukini dedie au commerce et a la vente** au sein de l'ecosysteme COG. Il couvre l'ensemble du cycle de vente : **onboarding vendeur**, **boutique en ligne**, **point de vente (PoS)** en caisse et **suivi des ventes**. JayShop s'appuie sur le **catalogue produits et les stocks de JayXpose** et transmet les donnees comptables a **JayKonta** pour le suivi financier.
+**JayShop** est le **service Miyukini dedie au commerce et a la vente** au sein de l'ecosysteme COG. Il couvre l'ensemble du cycle de vente : **onboarding vendeur**, **boutique en ligne**, **point de vente (PoS)** en caisse et **suivi des ventes**. JayShop transmet les donnees comptables a **JayKonta** pour le suivi financier.
+
+> **Note 2026-04-29 :** Les integrations JayXpose (catalogue, stocks) et JayFestival (evenements) ont ete retirees suite a la suppression de ces services. Voir [DEPRECATED](../DEPRECATED.md).
 
 **Un seul service COG**, avec **deux modes d'interaction** :
 
@@ -17,24 +19,20 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 
 ## Portee / Scope
 
-- **Perimetre** : Definition du service JayShop — positionnement, fonctionnalites (onboarding, boutique en ligne, PoS, tickets, paiements, historique ventes), integration avec JayXpose et JayKonta, niveaux de securite.
-- **Hors perimetre** : Specifications techniques detaillees (API, schemas), implementation des crates, logique de facturation et comptabilite (JayKonta), gestion du catalogue produits et du profil exposant (JayXpose).
-- **References** : Glossaire Miyukini, [Document fondateur JayXpose](../JayXpose/JayXpose%20-%20Document%20Fondateur.md), [Document fondateur JayKonta](../JayKonta/JayKonta%20-%20Document%20Fondateur.md), [Interpolarite des services Jay](..//..//miyukini-webway-system//reference//_index.md).
+- **Perimetre** : Definition du service JayShop — positionnement, fonctionnalites (onboarding, boutique en ligne, PoS, tickets, paiements, historique ventes), integration avec JayKonta, niveaux de securite.
+- **Hors perimetre** : Specifications techniques detaillees (API, schemas), implementation des crates, logique de facturation et comptabilite (JayKonta).
+- **References** : Glossaire Miyukini, [Document fondateur JayKonta](../JayKonta/JayKonta%20-%20Document%20Fondateur.md), [Interpolarite des services Jay](..//..//miyukini-webway-system//reference//_index.md).
 
 ### Decisions structurantes (mini log)
 
 | Id | Decision | Justification |
 |----|----------|---------------|
 | **DS-01** | Un seul service COG avec deux modes (boutique en ligne / PoS). | Meme socle Operateurs ; l'interface seule differe selon le contexte d'usage. |
-| **DS-02** | Le catalogue produits est lu depuis JayXpose ; JayShop ne duplique pas les fiches produits. | Source de verite unique pour les produits, categories, stocks et visuels. |
-| **DS-03** | L'admin peut CRUD produits et categories directement depuis JayShop (ecriture relayee vers JayXpose). | Ergonomie : l'admin ne devrait pas quitter JayShop pour gerer son catalogue pendant une session de vente. |
 | **DS-04** | Les donnees de vente (tickets, lignes, paiements) sont detenues par JayShop ; les ecritures comptables sont transmises a JayKonta. | Responsabilites claires : JayShop = vente, JayKonta = comptabilite. |
 | **DS-05** | Le mode PoS est reserve a l'admin ; les boutons et onglets PoS sont configurables. | Securite et personnalisation de l'interface de caisse. |
 | **DS-06** | Les donnees de paiement sont classees niveau 3 (Critical). | Donnees financieres sensibles ; alignement politique securite. |
 | **DS-07** | Les participations a des evenements/festivals ont un stock temporaire dedie. | Permet de suivre l'etat des stocks et les benefices par evenement sans impacter le stock global avant cloture. |
-| **DS-08** | Integration automatique avec JayFestival lors de la validation d'une candidature exposant. | L'admin n'a pas a saisir manuellement les fiches evenement quand il participe a un festival via JayFestival. |
-| **Dependance critique** | JayXpose (catalogue, stocks) et JayKonta (comptabilite) doivent exister pour que JayShop fonctionne pleinement. | — |
-| **Dependance optionnelle** | JayFestival pour la synchronisation automatique des participations a des evenements. | — |
+| **Dependance critique** | JayKonta (comptabilite) doit exister pour que JayShop fonctionne pleinement. | — |
 
 ---
 
@@ -46,7 +44,7 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 
 - **Vendre en ligne** : boutique web avec panier, commande, selection du mode de paiement, confirmation.
 - **Vendre en physique (PoS)** : interface de caisse avec boutons configurables, saisie rapide, selection des produits, ecran de paiement avec calcul du rendu monnaie et du reste a payer.
-- **Gerer les produits et categories** : CRUD complet depuis JayShop (relaye vers JayXpose), sans quitter le contexte de vente.
+- **Gerer les produits et categories** : CRUD complet depuis JayShop, sans quitter le contexte de vente.
 - **Suivre l'historique des ventes** : tickets, detail des lignes, mode de paiement, montants, date et heure, statuts.
 - **S'integrer au suivi comptable** : transmission automatique des ventes a JayKonta pour rapports, TVA, bilan.
 - **Fonctionner hors-ligne** : le mode PoS supporte le fonctionnement offline avec synchronisation a la reconnexion (LOI-1, LOI-2).
@@ -60,7 +58,7 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 
 ### 1.3 Phrase fondatrice
 
-> **JayShop est la surface de vente de l'ecosysteme Miyukini. Un catalogue, une boutique, une caisse — couples avec JayXpose et JayKonta, gouvernes par le COG.**
+> **JayShop est la surface de vente de l'ecosysteme Miyukini. Un catalogue, une boutique, une caisse — couples avec JayKonta, gouvernes par le COG.**
 
 ---
 
@@ -70,18 +68,17 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 
 | Fonctionnalite | Description |
 |----------------|-------------|
-| Activation du mode vente | L'admin active JayShop depuis Miyukini Central. Si un profil JayXpose existe, le catalogue est lie automatiquement. Sinon, creation guidee. |
+| Activation du mode vente | L'admin active JayShop depuis Miyukini Central. Creation guidee. |
 | Configuration boutique | Nom de la boutique, slug URL, devise, modes de paiement acceptes, informations legales (CGV, mentions legales). |
 | Configuration PoS | Definition des onglets (categories rapides) et des boutons produits. Configuration de l'interface de caisse (couleurs, taille des boutons, disposition). |
 | Parametres fiscaux | Taux de TVA par defaut, arrondis, devise. |
 
-### 2.2 Gestion des produits (via JayXpose)
+### 2.2 Gestion des produits
 
 | Fonctionnalite | Description |
 |----------------|-------------|
-| Lecture catalogue | JayShop lit le catalogue JayXpose en temps reel (produits, categories, visuels, prix, disponibilite). |
-| CRUD depuis JayShop | L'admin peut creer, modifier, supprimer des produits et categories directement depuis JayShop. Les ecritures sont relayees a JayXpose (source de verite). |
-| Synchronisation stocks | Chaque vente decremente le stock. Synchronisation bidirectionnelle avec JayXpose (push/pull, resolution de conflits). |
+| CRUD depuis JayShop | L'admin peut creer, modifier, supprimer des produits et categories directement depuis JayShop. |
+| Synchronisation stocks | Chaque vente decremente le stock. |
 | Produits PoS | L'admin peut marquer des produits comme « favoris PoS » et les affecter a des onglets pour la saisie rapide en caisse. |
 | Import / Export | Import CSV de produits en masse. Export CSV du catalogue. |
 | Alertes de stock | Notifications quand le stock d'un produit passe sous un seuil configurable. Alerte en caisse si vente avec stock negatif. |
@@ -133,7 +130,7 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 |----------------|-------------|
 | Ecran principal PoS | Zone gauche : ticket en cours (lignes produit, quantites, prix unitaire, sous-total par ligne). Zone droite : grille de boutons produits organises par onglets configurables. |
 | Onglets configurables | L'admin cree des onglets (ex. « Boissons », « Plats », « Desserts », « Favoris »). Chaque onglet contient une grille de boutons produits. |
-| Boutons produits | Chaque bouton affiche le nom du produit et optionnellement le prix. Personnalisable : **couleur + forme** (carre, rond, badge, hexagone) ou **image** du produit (visuel JayXpose). Clic = ajout d'une unite au ticket. Inspire de la « Representation on POS » de Loyverse. |
+| Boutons produits | Chaque bouton affiche le nom du produit et optionnellement le prix. Personnalisable : **couleur + forme** (carre, rond, badge, hexagone) ou **image** du produit. Clic = ajout d'une unite au ticket. Inspire de la « Representation on POS » de Loyverse. |
 | Modification ticket | Modifier la quantite d'une ligne, supprimer une ligne, appliquer une remise (pourcentage ou montant). |
 | Tickets ouverts | Sauvegarder un ticket en cours, ouvrir un nouveau, reprendre un ticket sauvegarde. |
 | Recherche produit | Barre de recherche et/ou scan code-barres pour ajouter un produit non present dans les boutons rapides. |
@@ -144,20 +141,19 @@ Ce document est le **document fondateur** du service : il en fixe la raison d'et
 | Validation paiement | Une fois le total atteint ou depasse, le paiement est valide. Le ticket est cloture. Le stock est decremente. |
 | Recu | Impression thermique et/ou envoi par email. Contient : numero de ticket, date/heure, lignes, total, mode(s) de paiement, rendu monnaie. |
 
-### 2.9 Gestion des evenements et festivals (Integration JayFestival)
+### 2.9 Gestion des evenements et festivals
 
 JayShop permet de gerer les **participations a des evenements ou festivals** avec suivi des couts, des stocks temporaires et des benefices par evenement.
 
 | Fonctionnalite | Description |
 |----------------|-------------|
-| **Fiche evenement** | Creation manuelle d'une fiche evenement avec : nom, dates, lieu, organisateur, edition JayFestival liee (optionnel). Ou **creation automatique** lors de la validation d'une candidature exposant par l'organisateur JayFestival. |
+| **Fiche evenement** | Creation manuelle d'une fiche evenement avec : nom, dates, lieu, organisateur. |
 | **Couts de participation** | Saisie des couts lies a l'evenement : **prix du stand**, **nourriture**, **logement**, **transport**, **autres frais** (badges, electricite, etc.). Chaque cout a un libelle, un montant, une categorie et une date. |
-| **Stock temporaire** | Stock **pre-alloue a l'evenement** : l'admin definit les produits et quantites qu'il emmene sur l'evenement. Ce stock temporaire est **deduit du stock global** (JayXpose) et alloue a l'evenement. A la cloture, le stock non vendu est reintegre au stock global. |
+| **Stock temporaire** | Stock **pre-alloue a l'evenement** : l'admin definit les produits et quantites qu'il emmene sur l'evenement. Ce stock temporaire est **deduit du stock global** et alloue a l'evenement. A la cloture, le stock non vendu est reintegre au stock global. |
 | **Ventes sur evenement** | Les tickets PoS peuvent etre **associes a un evenement**. Chaque vente decremente le stock temporaire de l'evenement (et non le stock global directement). |
 | **Suivi temps reel** | Dashboard par evenement : stock restant, CA realise, couts saisis, **benefice brut** (CA - couts), **benefice net** (CA - couts - cout des marchandises vendues). |
 | **Cloture d'evenement** | A la cloture : synthese finale, reintegration du stock non vendu au stock global, transmission comptable a JayKonta avec ventilation par evenement. |
-| **Liaison JayFestival** | Si l'exposant utilise JayFestival, la fiche evenement peut etre **creee automatiquement** lorsque l'organisateur valide sa candidature. Les informations (nom, dates, lieu, stand attribue) sont synchronisees. L'admin peut enrichir avec les couts et le stock temporaire. |
-| **Multi-evenements** | Un admin peut gerer plusieurs evenements en parallele avec des fiches, stocks et suivis independants. Alignement avec le modele cross-evenements de JayFestival. |
+| **Multi-evenements** | Un admin peut gerer plusieurs evenements en parallele avec des fiches, stocks et suivis independants. |
 
 ### 2.10 Historique des ventes et tickets
 
@@ -186,9 +182,9 @@ JayShop permet de gerer les **participations a des evenements ou festivals** ave
 | Principe | Description |
 |----------|-------------|
 | **Gouvernance COG** | Le service fonctionne sous gouvernance COG : StrongFather (decisions), KindMother (persistance), Master Butler (capacites/permissions), WorrySentinel (securite), Ever Buddy (cycle de vie). |
-| **Source de verite unique** | Le catalogue produits et les stocks resident dans JayXpose. JayShop lit et ecrit via les interfaces contractuelles. Les donnees de vente (tickets, paiements) resident dans JayShop. La comptabilite reside dans JayKonta. |
-| **Reutilisabilite** | S'appuyer sur les Kits d'outils Miyukini existants (MiyuInvoice, MiyuContacts, MiyuPayment) et les Operateurs JayXpose et JayKonta. |
-| **Interpolarite** | Concu pour s'integrer dans l'ecosysteme Jay. Les couplages avec JayXpose et JayKonta sont explicites et gouvernes (Mandats de Permission, niveaux de securite). |
+| **Source de verite unique** | Les donnees de vente (tickets, paiements) resident dans JayShop. La comptabilite reside dans JayKonta. |
+| **Reutilisabilite** | S'appuyer sur les Kits d'outils Miyukini existants (MiyuInvoice, MiyuContacts, MiyuPayment) et les Operateurs JayKonta. |
+| **Interpolarite** | Concu pour s'integrer dans l'ecosysteme Jay. Les couplages avec JayKonta sont explicites et gouvernes (Mandats de Permission, niveaux de securite). |
 | **Hors-ligne d'abord** | Le mode PoS doit fonctionner sans connexion internet. Les ventes sont enregistrees localement et synchronisees a la reconnexion (LOI-1, LOI-2, LOI-3). |
 | **Ergonomie de caisse** | L'interface PoS est optimisee pour la vitesse : grands boutons, onglets configurables, saisie minimale, calcul de monnaie instantane. Inspire de Loyverse POS. |
 | **Confidentialite** | Les donnees de paiement (montants, moyens de paiement) ne sont jamais exposees publiquement. Le partage vers JayKonta est gouverne. |
@@ -197,16 +193,7 @@ JayShop permet de gerer les **participations a des evenements ou festivals** ave
 
 ## 4. Integration et interpolarite
 
-### 4.1 JayShop et JayXpose
-
-| Fonctionnalite | Description |
-|----------------|-------------|
-| Lecture catalogue | JayShop lit les produits, categories, visuels, prix et disponibilite depuis JayXpose. |
-| Ecriture catalogue | L'admin peut CRUD les produits et categories depuis JayShop ; les ecritures sont relayees a JayXpose via l'interface contractuelle IFS-06. |
-| Synchronisation stocks | A chaque vente, JayShop decremente le stock et notifie JayXpose. En cas de modification de stock cote JayXpose, JayShop est notifie (push/pull). |
-| Resolution de conflits | Politique configurable : `prefer_pos`, `prefer_local`, `manual_review` (alignement avec le protocole de sync existant JayXpose/PoS). |
-
-### 4.2 JayShop et JayKonta
+### 4.1 JayShop et JayKonta
 
 | Fonctionnalite | Description |
 |----------------|-------------|
@@ -215,29 +202,16 @@ JayShop permet de gerer les **participations a des evenements ou festivals** ave
 | Rapprochement | JayKonta peut rapprocher les ventes JayShop avec les encaissements bancaires. |
 | Clotures de caisse | Les syntheses de cloture de caisse sont transmises a JayKonta pour le suivi des especes. |
 
-### 4.3 JayShop et JayFestival (Gestion des evenements)
-
-| Fonctionnalite | Description |
-|----------------|-------------|
-| **Creation automatique de fiche evenement** | Lorsque l'organisateur JayFestival **valide la candidature** d'un exposant, une fiche evenement est automatiquement creee dans JayShop avec les informations de l'edition (nom, dates, lieu, stand attribue). |
-| **Synchronisation des informations** | Les mises a jour cote JayFestival (changement de dates, de stand, annulation) sont synchronisees vers JayShop. |
-| **Stock temporaire** | L'admin JayShop peut definir un stock temporaire pour l'evenement. Ce stock est **deduit du stock global** (JayXpose) et alloue a l'evenement. Les ventes PoS associees a l'evenement decrementent ce stock temporaire. |
-| **Couts de participation** | L'admin saisit les couts lies a l'evenement (stand, transport, logement, nourriture). Ces couts ne proviennent pas de JayFestival (qui gere la facturation cote organisateur) mais du suivi interne du vendeur. |
-| **Suivi des benefices** | Dashboard evenement avec CA, couts, stock restant, benefice net. Permet de mesurer la rentabilite de chaque participation. |
-| **Cloture et reintegration stock** | A la cloture de l'evenement, le stock non vendu est reintegre au stock global. La synthese est transmise a JayKonta. |
-
-### 4.4 JayShop et les autres services Jay
+### 4.2 JayShop et les autres services Jay
 
 | Service | Integration |
 |---------|-------------|
-| **JayXpose** | Catalogue, stocks, profil entreprise, visuels. |
 | **JayKonta** | Comptabilite, facturation, rapprochement, TVA. |
-| **JayFestival** | Gestion des participations a des evenements/festivals : creation automatique de fiche evenement a la validation de candidature, synchronisation des informations. |
 | **JayKoa** | Synchronisation agenda pour evenements de vente. |
 | **Miyukini Central** | Hebergement de JayShop dans le shell Central (trait `ServiceUi`). |
 | **Miyukini Web Portal** | Surface web de la boutique en ligne (portail client). |
 
-### 4.4 Reference interpolarite
+### 4.3 Reference interpolarite
 
 Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) pour le principe global et les couplages entre services Jay.
 
@@ -267,7 +241,7 @@ Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyuk
 |-------|------|-------------|
 | id | UUID | Identifiant unique de la ligne. |
 | ticket_id | UUID (FK) | Ticket parent. |
-| product_id | UUID (FK) | Produit (reference JayXpose). |
+| product_id | UUID (FK) | Produit. |
 | product_name | TEXT | Nom du produit (snapshot au moment de la vente). |
 | quantity | INTEGER | Quantite vendue. |
 | unit_price | NUMERIC | Prix unitaire (en centimes, snapshot). |
@@ -326,8 +300,6 @@ Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyuk
 | location | TEXT | Lieu de l'evenement. |
 | stand_info | TEXT | Informations sur le stand attribue (numero, zone, taille). |
 | status | TEXT | `draft` / `confirmed` / `ongoing` / `closed` / `cancelled`. |
-| jayfestival_edition_id | UUID (FK, optionnel) | Liaison avec une edition JayFestival. |
-| jayfestival_candidature_id | UUID (FK, optionnel) | Liaison avec la candidature JayFestival. |
 | created_at | TIMESTAMPTZ | Date de creation. |
 | closed_at | TIMESTAMPTZ | Date de cloture. |
 | notes | TEXT | Notes internes. |
@@ -352,7 +324,7 @@ Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyuk
 |-------|------|-------------|
 | id | UUID | Identifiant unique de l'allocation. |
 | event_id | UUID (FK) | Fiche evenement parent. |
-| product_id | UUID (FK) | Produit (reference JayXpose). |
+| product_id | UUID (FK) | Produit. |
 | allocated_qty | INTEGER | Quantite allouee pour l'evenement. |
 | sold_qty | INTEGER | Quantite vendue sur l'evenement. |
 | remaining_qty | INTEGER | Quantite restante (= allocated - sold). |
@@ -383,7 +355,7 @@ Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyuk
 | Paiements (montants, modes, transactions) | **Critical (3)** | Donnees financieres sensibles. |
 | Configuration PoS (boutons, onglets) | **Standard (1)** | Configuration metier non sensible. |
 | Sessions de caisse (fonds, ecarts) | **Sensitive (2)** a **Critical (3)** | Donnees financieres. |
-| Donnees de stock (via JayXpose) | **Standard (1)** a **Sensitive (2)** | Selon strategie commerciale. |
+| Donnees de stock | **Standard (1)** a **Sensitive (2)** | Selon strategie commerciale. |
 
 ---
 
@@ -391,10 +363,10 @@ Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyuk
 
 1. **Fonder** : Valider ce document fondateur et le diffuser.
 2. **Specifier** : Documenter les Operateurs et Kits JayShop (ticket, paiement, session caisse, config PoS).
-3. **Integration** : Formaliser les contrats de synchronisation avec JayXpose (catalogue, stocks) et JayKonta (comptabilite).
+3. **Integration** : Formaliser les contrats de synchronisation avec JayKonta (comptabilite).
 4. **Securite** : Formaliser les niveaux de securite et la politique de confidentialite inter-services.
 5. **Implementation** : Developper les Operateurs et Kits en s'appuyant sur les Cores.
-6. **Phase 2** : Integration JayFestival (PoS evenementiel), programme de fidelite, multi-vendeurs.
+6. **Phase 2** : Programme de fidelite, multi-vendeurs.
 
 ---
 
@@ -403,20 +375,16 @@ Voir [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyuk
 | Document | Role |
 |----------|------|
 | [Miyukini Conceptual References — Glossaire](..//..//miyukini-webway-system//reference//_index.md) | Terminologie (Operateur, Mandat, COG, Niveaux de securite). |
-| [JayXpose - Document Fondateur](../JayXpose/JayXpose%20-%20Document%20Fondateur.md) | Service fournisseur du catalogue produits et des stocks. |
-| [JayXpose - Catalogue Produits](../JayXpose/JayXpose%20-%20Catalogue%20Produits.md) | Specification du module catalogue consomme par JayShop. |
 | [JayKonta - Document Fondateur](../JayKonta/JayKonta%20-%20Document%20Fondateur.md) | Service consommateur des ecritures comptables. |
 | [JayKonta - Integration Services](../JayKonta/reference/JayKonta%20-%20Integration%20Services.md) | Schemas d'integration comptable. |
-| [JayXpose - Interfaces Inter-Services](../JayXpose/JayXpose%20-%20Interfaces%20Inter-Services.md) | Contrats inter-services existants (IFS-04 PoS). |
 | [Miyukini Sales - Document Fondateur](../MiyukiniSales/Miyukini%20Sales%20-%20Document%20Fondateur.md) | Service de ventes B2B/B2C (socle Operateurs partages). |
 | [Miyukini Conceptual References - Interpolarite Services Jay](..//..//miyukini-webway-system//reference//_index.md) | Principe d'interpolarite et couplage entre services Jay. |
 | [JayShop - Reference Loyverse Back Office](./reference/JayShop%20-%20Reference%20Loyverse%20Back%20Office.md) | Analyse concurrentielle et screenshots annotes du back office Loyverse POS. |
-| [JayFestival - Document Fondateur](../JayFestival/JayFestival%20-%20Document%20Fondateur.md) | Service fournisseur des informations evenements (editions, candidatures). |
 
 ---
 
 **Document** : JayShop — Document fondateur
 **Version** : 1.2
 **Date** : 2026-02-11
-**Statut** : Document de reference — enrichi avec gestion des evenements/festivals et integration JayFestival.
+**Statut** : Document de reference — enrichi avec gestion des evenements/festivals.
 

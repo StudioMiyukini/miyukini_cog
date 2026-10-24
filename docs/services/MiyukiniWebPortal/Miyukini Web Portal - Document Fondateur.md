@@ -62,7 +62,7 @@ Le Portail expose les **Façades Publiques Gouvernées** des Services de Type 2 
 STRATE 7 — Opérateurs
 ├── Miyukini Central (Service Fondamental) ← Point d'entrée COG
 ├── Miyukini Web Portal (Service Fondamental) ← Point d'entrée Web
-├── JayXpose, JayFestival, JayRDV, JayKonta, ... (Services Type 1/2/3)
+├── JayRDV, JayKonta, ... (Services Type 1/2/3)
 └── …
 
 STRATE 9 — MiyukiniAdmin (exception, administration système)
@@ -161,7 +161,7 @@ Un COG sans Portail ne peut pas exposer de surfaces web (Services Type 2 limité
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Services (JayXpose, JayFestival, JayRDV, JayKonta)                  │
+│  Services (JayRDV, JayKonta)                                        │
 │  · Exposent leurs capacités (lecture, formulaires, actions bornées) │
 │  · Jamais d'accès direct aux Cores depuis l'extérieur               │
 └─────────────────────────────────────────────────────────────────────┘
@@ -171,9 +171,7 @@ Un COG sans Portail ne peut pas exposer de surfaces web (Services Type 2 limité
 
 | Flux | Description |
 |------|-------------|
-| **Consultation vitrine** | Utilisateur externe → Portail → BorderGuard → JayXpose (lecture catalogue, pages) → rendu HTML |
 | **Réservation RDV** | Utilisateur externe → Portail → BorderGuard → JayRDV (créneaux, formulaire, création RDV) |
-| **Achat e-shop** | Utilisateur externe → Portail → BorderGuard → JayXpose (panier, commande) → KindMother (persist) |
 | **Consultation facture** | Client (lien email) → Portail → BorderGuard (token) → JayKonta (lecture facture) |
 
 ---
@@ -253,8 +251,6 @@ Seuls les Services de **Type 2** exposent une surface via le Portail.
 
 | Service | Surface Portail | Parcours typiques |
 |---------|-----------------|-------------------|
-| **JayXpose** | Vitrine, e-shop, annuaire, blog | Consultation catalogue, achat, contact |
-| **JayFestival** | Catalogue événements, billets, espace visiteur | Découverte, inscription, réservation |
 | **JayRDV** | Page réservation, parcours guest | Choix créneau, formulaire, confirmation |
 | **JayKonta** | Portail client | Consultation factures, paiement en ligne |
 
@@ -264,7 +260,6 @@ Seuls les Services de **Type 2** exposent une surface via le Portail.
 |--------------------|--------------------|
 | **JayKoa** (agenda personnel) | ❌ Interne uniquement |
 | **Administration comptable** (JayKonta) | ❌ Central uniquement |
-| **Gestion exposant** (JayXpose) | ❌ Central uniquement |
 | **MiyukiniAdmin** | ❌ Jamais exposé |
 
 ---
@@ -302,7 +297,7 @@ Le Portail utilise les Outils suivants (Strate 6) :
 | **Rôle** | Point d'entrée web pour les utilisateurs externes |
 | **Cible** | Clients, visiteurs, prospects — sans COG |
 | **Gouvernance** | BorderGuard + Mandat Public d'Accès + Identification/Fichage |
-| **Services exposés** | Type 2 (JayXpose, JayFestival, JayRDV, JayKonta portail client) |
+| **Services exposés** | Type 2 (JayRDV, JayKonta portail client) |
 | **Outils** | MiyuWeb, MiyuValidate, MiyuAntiSpam |
 | **Relation Central** | Central = COG, Portail = Web |
 

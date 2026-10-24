@@ -8,7 +8,7 @@ Ce document décrit le **KindMother Client** — le composant qui permet aux Ser
 
 ### Contexte
 
-Dans l'architecture Miyukini COG, les Opérateurs (JayXpose, JayKonta, JayFestival...) n'ont **aucun accès direct** aux bases de données. Toute opération de persistance est **déléguée** à KindMother via le Client.
+Dans l'architecture Miyukini COG, les Opérateurs (JayKonta, JayKoa, JayRDV...) n'ont **aucun accès direct** aux bases de données. Toute opération de persistance est **déléguée** à KindMother via le Client.
 
 > **"Aucun module SPM ne parle directement à une base de données."**
 > — [KindMother - Documentation Fondatrice](../foundation/KindMother%20-%20Documentation%20Fondatrice.md)
@@ -36,7 +36,7 @@ Ce document couvre :
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                        SERVICE / OPÉRATEUR                                  │
-│                     (JayXpose, JayKonta, etc.)                              │
+│                     (JayKonta, JayKoa, etc.)                                │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌───────────────────────────────────────────────────────────────────────┐  │
@@ -157,8 +157,8 @@ Les contrats de délégation définissent les règles de la relation Client ↔ 
 │  1. CONNEXION                                                              │
 │     Client::connect(                                                       │
 │       address: "http://[::1]:50051",  // Adresse du Core Server            │
-│       operator_id: "jayxpose",         // Identité de l'opérateur          │
-│       database: "jayxpose",            // Base de données cible            │
+│       operator_id: "jaykonta",         // Identité de l'opérateur          │
+│       database: "jaykonta",            // Base de données cible            │
 │     )                                                                      │
 │                                                                            │
 │  2. AUTHENTIFICATION                                                       │
@@ -308,7 +308,7 @@ Les contrats de délégation définissent les règles de la relation Client ↔ 
 ├────────────────────────────────────────────────────────────────────────────┤
 │                                                                            │
 │   ┌─────────────────────────────────────────────────────────────────────┐  │
-│   │                     SERVICE (ex: JayXpose)                          │  │
+│   │                     SERVICE (ex: JayKonta)                          │  │
 │   │                                                                     │  │
 │   │   ┌─────────────────────────────────────────────────────────────┐   │  │
 │   │   │                    AppState                                 │   │  │
@@ -515,7 +515,7 @@ Le Client émet des logs structurés pour le diagnostic :
 
 | Niveau | Événement | Exemple |
 |--------|-----------|---------|
-| **DEBUG** | Requête envoyée | `Sending read_entity to jayxpose.exposants` |
+| **DEBUG** | Requête envoyée | `Sending read_entity to jaykonta.accounts` |
 | **DEBUG** | Réponse reçue | `Received response in 5ms` |
 | **INFO** | Connexion établie | `Connected to KindMother at [::1]:50051` |
 | **WARN** | Retry en cours | `Retrying request (attempt 2/3)` |

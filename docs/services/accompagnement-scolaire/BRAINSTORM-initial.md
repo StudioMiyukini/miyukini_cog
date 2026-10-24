@@ -46,7 +46,7 @@ Ce document est le brainstorming structure pour un nouveau service d'accompagnem
 
 ## Nom du service : JayEcole
 
-**Justification :** Le prefixe "Jay" s'inscrit dans la nomenclature des services Miyukini orientes utilisateur (JayKoa, JayFestival, JayKonta, JayXpose, JayShop, JayRDV, JayFaim). "Ecole" est le terme le plus direct et comprehensible pour les parents comme pour les enfants. Choix valide par l'utilisateur.
+**Justification :** Le prefixe "Jay" s'inscrit dans la nomenclature des services Miyukini orientes utilisateur (JayKoa, JayKonta, JayShop, JayRDV, JayFaim). "Ecole" est le terme le plus direct et comprehensible pour les parents comme pour les enfants. Choix valide par l'utilisateur.
 
 ---
 
