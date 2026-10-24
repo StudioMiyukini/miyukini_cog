@@ -38,6 +38,34 @@ pub enum HealthStatus {
     Inconnu,
 }
 
+impl HealthStatus {
+    /// @id caringnanny_health_status_rang_gravite
+    /// @role accessor
+    /// @layer core
+    /// @do rank_health_status_severity
+    //@human / @human Rang de gravité pour l'agrégation (le pire l'emporte) :
+    //@human Healthy < Degraded < Inconnu < Unhealthy. `Inconnu` n'est jamais
+    //@human meilleur que `Degraded` (fail-closed, C-12).
+    /// @depends caringnanny_health_status
+    pub fn rang_gravite(self) -> u8 {
+        match self {
+            HealthStatus::Healthy => 0,
+            HealthStatus::Degraded => 1,
+            HealthStatus::Inconnu => 2,
+            HealthStatus::Unhealthy => 3,
+        }
+    }
+
+    /// Le pire des deux statuts.
+    pub fn pire(self, autre: HealthStatus) -> HealthStatus {
+        if autre.rang_gravite() > self.rang_gravite() {
+            autre
+        } else {
+            self
+        }
+    }
+}
+
 /// @id caringnanny_health_checker_trait
 /// @role infrastructure
 /// @layer core

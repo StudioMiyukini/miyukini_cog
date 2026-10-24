@@ -12,11 +12,14 @@ members = [
     "crates/kindmother-heritage", # Import des bases SQLite héritées (transitoire, K-13)
     "crates/kindmother-import",   # CLI d'import des bases héritées (transitoire, K-13)
     "crates/borderguard",
+    "crates/miyudouane",          # Douane : pare-feu nftables + IPS appliquant les arrêtés de BorderGuard, une instance par frontière (lot 3, EX-19..21, EX-29)
     "crates/caringnanny",
     "crates/masterbutler",
     "crates/bondingbrother",
     "crates/everbuddy",
     "crates/worrysentinel",
+    "crates/miyuvigie",           # Vigies : capteurs IDS sous WorrySentinel (lot 3, EX-12, EX-49)
+    "crates/miyuportail",         # Portail interne : voies à sens unique, MSCE, CDR, sas seccomp (lot 3, EX-44..46, EX-49)
     "crates/tamr",
     "crates/logisticssteward",
     
@@ -35,6 +38,7 @@ members = [
     "crates/miyauth",
     "crates/miyusceau",
     "crates/miyuracine",          # Racine COG hors ligne : SLIP-39 2 sur 3, clés SLIP-10 par usage (EX-24, EX-25)
+    "crates/miyucdr",             # CDR : désarmement et reconstruction de toute entrée de fichier (EX-45)
     "crates/miyuweb",
     "crates/miyuclock",
     "crates/miyuforum",

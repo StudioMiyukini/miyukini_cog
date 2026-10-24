@@ -1,0 +1,39 @@
+#!/usr/sbin/nft -f
+# Généré par miyudouane — ne pas modifier à la main.
+# Douane — pont de zone filtré (segmentation par service, refus par défaut)
+# zone=cog reseau=10.77.0.0/24
+# journal : nflog groupe 110, prefixe "MDOU|zone-cog|<chaine>|<MOTIF>|"
+# prerequis : module nf_conntrack_bridge
+flush ruleset
+
+table bridge miyudouane_zone {
+	chain transit {
+		type filter hook forward priority filter; policy drop;
+		ether type arp accept
+		ct state invalid counter log prefix "MDOU|zone-cog|transit|INVALIDE|" group 110 drop
+		ct state established,related counter accept
+		iifname "sv5" oifname "z-pi" ip saddr 10.77.0.12 ip daddr 10.77.0.253 tcp dport 7080 meta length <= 1400 ct state new counter accept comment "voie=site service=site flux=0"
+		iifname "sv0" oifname "z-pi" ip saddr 10.77.0.10 ip daddr 10.77.0.253 tcp dport 7443 meta length <= 1400 ct state new counter accept comment "voie=jayoffice service=jayoffice flux=1"
+		iifname "sv3" oifname "z-pl" ip saddr 10.77.0.11 ip daddr 10.77.0.252 tcp dport 1883 meta length <= 1400 ct state new counter accept comment "voie=alicia service=alicia flux=0"
+		iifname "sv*" oifname "sv*" counter log prefix "MDOU|zone-cog|transit|LATERAL|" group 110 drop
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|zone-cog|transit|SORTIE-COG|" group 110 drop
+		counter log prefix "MDOU|zone-cog|transit|NON-DECLARE|" group 110 drop
+	}
+}
+
+table inet miyudouane_zone {
+	chain entree {
+		type filter hook input priority filter; policy drop;
+		iif "lo" accept
+		counter log prefix "MDOU|zone-cog|entree|NON-DECLARE|" group 110 drop
+	}
+	chain transit {
+		type filter hook forward priority filter; policy drop;
+		counter log prefix "MDOU|zone-cog|transit|NON-DECLARE|" group 110 drop
+	}
+	chain sortie {
+		type filter hook output priority filter; policy drop;
+		oif "lo" accept
+		counter log prefix "MDOU|zone-cog|sortie|SORTIE-COG|" group 110 drop
+	}
+}

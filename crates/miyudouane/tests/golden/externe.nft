@@ -1,0 +1,50 @@
+#!/usr/sbin/nft -f
+# Généré par miyudouane — ne pas modifier à la main.
+# Douane — règles de frontière (refus par défaut)
+# frontiere=externe arrete=1 empreinte=<sha256>
+# validite=1800000000..1802592000 emetteur=borderguard
+# journal : nflog groupe 101, prefixe "MDOU|externe|<chaine>|<MOTIF>|"
+flush ruleset
+
+table inet miyudouane {
+	chain entree {
+		type filter hook input priority filter; policy drop;
+		iif "lo" accept
+		ct state invalid counter log prefix "MDOU|externe|entree|INVALIDE|" group 101 drop
+		ct mark 0x00000001 meta length > 1400 counter log prefix "MDOU|externe|entree|TAILLE|" group 101 drop
+		ct mark 0x00000001 limit rate over 512 kbytes/second counter log prefix "MDOU|externe|entree|DEBIT|" group 101 drop
+		ct mark 0x00000002 meta length > 1400 counter log prefix "MDOU|externe|entree|TAILLE|" group 101 drop
+		ct mark 0x00000002 limit rate over 512 kbytes/second counter log prefix "MDOU|externe|entree|DEBIT|" group 101 drop
+		ct state established,related counter accept
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|externe|entree|SORTIE-COG|" group 101 drop
+		ip daddr 10.77.0.0/24 counter log prefix "MDOU|externe|entree|ENTREE-COG|" group 101 drop
+		counter log prefix "MDOU|externe|entree|NON-DECLARE|" group 101 drop
+	}
+	chain transit {
+		type filter hook forward priority filter; policy drop;
+		ct state invalid counter log prefix "MDOU|externe|transit|INVALIDE|" group 101 drop
+		ct mark 0x00000001 meta length > 1400 counter log prefix "MDOU|externe|transit|TAILLE|" group 101 drop
+		ct mark 0x00000001 limit rate over 512 kbytes/second counter log prefix "MDOU|externe|transit|DEBIT|" group 101 drop
+		ct mark 0x00000002 meta length > 1400 counter log prefix "MDOU|externe|transit|TAILLE|" group 101 drop
+		ct mark 0x00000002 limit rate over 512 kbytes/second counter log prefix "MDOU|externe|transit|DEBIT|" group 101 drop
+		ct state established,related counter accept
+		iifname "ext0" oifname "ext-franche" ip saddr { 198.51.100.7, 203.0.113.0/24 } ip daddr 10.77.1.11 tcp dport 443 meta length <= 1400 ct state new ct mark set 0x00000001 counter accept comment "voie=site service=site flux=0"
+		iifname "wg-fed" oifname "ext-franche" ip saddr 10.78.0.0/16 ip daddr 10.77.1.10 udp dport 51820 meta length <= 1400 ct state new ct mark set 0x00000002 counter accept comment "voie=jayoffice service=jayoffice flux=1"
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|externe|transit|SORTIE-COG|" group 101 drop
+		ip daddr 10.77.0.0/24 counter log prefix "MDOU|externe|transit|ENTREE-COG|" group 101 drop
+		counter log prefix "MDOU|externe|transit|NON-DECLARE|" group 101 drop
+	}
+	chain sortie {
+		type filter hook output priority filter; policy drop;
+		oif "lo" accept
+		ct state invalid counter log prefix "MDOU|externe|sortie|INVALIDE|" group 101 drop
+		ct mark 0x00000001 meta length > 1400 counter log prefix "MDOU|externe|sortie|TAILLE|" group 101 drop
+		ct mark 0x00000001 limit rate over 512 kbytes/second counter log prefix "MDOU|externe|sortie|DEBIT|" group 101 drop
+		ct mark 0x00000002 meta length > 1400 counter log prefix "MDOU|externe|sortie|TAILLE|" group 101 drop
+		ct mark 0x00000002 limit rate over 512 kbytes/second counter log prefix "MDOU|externe|sortie|DEBIT|" group 101 drop
+		ct state established,related counter accept
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|externe|sortie|SORTIE-COG|" group 101 drop
+		ip daddr 10.77.0.0/24 counter log prefix "MDOU|externe|sortie|ENTREE-COG|" group 101 drop
+		counter log prefix "MDOU|externe|sortie|NON-DECLARE|" group 101 drop
+	}
+}

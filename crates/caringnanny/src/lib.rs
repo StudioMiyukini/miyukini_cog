@@ -19,13 +19,19 @@
 //! Un composant sans statut enregistré est `HealthStatus::Inconnu`, jamais
 //! « sain » par défaut (C-12).
 //!
-//! Prévu, non implémenté : collecte réelle (signaux des Vigies, lot 3),
-//! propagation vers WorrySentinel et ESCALATION (constat K-17, à mettre au plan).
+//! Lot 3 : [`vigies::ObservatoireVigies`] ingère les signaux des Vigies
+//! (`miyuvigie`), tient la santé par capteur et par voie (capteur muet ou
+//! périmé = `Inconnu`) et établit le rapport transmis à WorrySentinel.
+//!
+//! Prévu, non implémenté : collecte depuis le noyau (ressources, pression) et
+//! ESCALATION (constat K-17, à mettre au plan).
 
 pub mod health;
 pub mod metrics;
 pub mod observer;
+pub mod vigies;
 
 pub use health::{DefaultHealthChecker, HealthChecker, HealthStatus};
 pub use metrics::{Metrics, MetricsCollector};
 pub use observer::{DefaultObserver, Observer, SystemEvent};
+pub use vigies::{CapteurAttendu, ObservatoireVigies, RapportObservation, RecuIngestion};

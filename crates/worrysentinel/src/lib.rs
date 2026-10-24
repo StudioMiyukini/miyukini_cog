@@ -19,16 +19,29 @@
 //! (`DefaultThreatDetector` ne fait que restituer les signaux qu'on lui fournit)
 //! et le niveau courant ne pilote aucune frontière.
 //!
-//! Prévu, non implémenté : signaux des Vigies via CaringNanny (lot 3), lien
-//! niveau WorrySentinel → contraintes StrongFather / BorderGuard, et mécanismes
-//! d'ESCALATION / OVERRIDE (constat K-17, à mettre au plan).
+//! Lot 3 : [`voies::SentinelleVoies`] consomme les rapports de CaringNanny
+//! (signaux des Vigies, santé par voie) et décide, **par voie**, surveillance
+//! ou coupure (EX-49), à côté de l'état global T0–T4 (escalade par étapes,
+//! T4 jamais automatique). Les décisions sont explicables (motif, preuves) et
+//! tracées dans un journal d'audit ; leur exécution est déléguée au
+//! consommateur [`voies::CoupureVoie`] (le Portail), WorrySentinel n'exécutant
+//! rien (INV-WS-2).
+//!
+//! Prévu, non implémenté : lien niveau WorrySentinel → contraintes StrongFather /
+//! BorderGuard, soumission TAMR des décisions en T3, inscription du journal au
+//! registre Merkle (lot 4) et OVERRIDE (constat K-17, à mettre au plan).
 
 pub mod degradation;
 pub mod security_level;
 pub mod threat_detector;
+pub mod voies;
 
 pub use degradation::{
     DefaultDegradationManager, Degradation, DegradationManager, DegradationState,
 };
 pub use security_level::{DefaultSecurityLevelManager, SecurityLevel, SecurityLevelManager};
 pub use threat_detector::{DefaultThreatDetector, ThreatDetector, ThreatLevel};
+pub use voies::{
+    Action, CoupureVoie, Decision, ErreurCoupure, EtatVoie, EvenementAudit, Motif, NatureAudit,
+    OrdreCoupure, PolitiqueVoies, Refus, ReponseVoieAveugle, SentinelleVoies,
+};

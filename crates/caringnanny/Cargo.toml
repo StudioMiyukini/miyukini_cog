@@ -13,6 +13,8 @@ description = "CaringNanny - Moteur d'observation et monitoring du Miyukini Core
 
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
+# Signaux typés des Vigies (lot 3, EX-12) ; crate sans dépendance.
+miyuvigie = { path = "../miyuvigie" }
 
 [dev-dependencies]
 

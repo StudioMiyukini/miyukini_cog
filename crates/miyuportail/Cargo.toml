@@ -1,0 +1,32 @@
+[package]
+name = "miyuportail"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Portail interne — voies à sens unique par service, rupture protocolaire MSCE, CDR, sas de décodage seccomp (EX-44, EX-45, EX-46, EX-49)"
+
+[[bin]]
+name = "portail-sas"
+path = "src/bin/portail-sas.rs"
+
+[dependencies]
+miyusceau = { path = "../miyusceau" }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+sha2 = "0.10"
+thiserror = "2"
+
+# Sas de décodage : Linux uniquement (seccomp + rlimits), API sûres.
+[target.'cfg(target_os = "linux")'.dependencies]
+seccompiler = { version = "0.5", default-features = false }
+rustix = { version = "1", default-features = false, features = ["std", "process"] }
+libc = { version = "0.2", default-features = false }
+
+[lints]
+workspace = true

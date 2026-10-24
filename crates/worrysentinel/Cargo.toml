@@ -14,6 +14,8 @@ description = "WorrySentinel - Détecteur de menaces et dégradation du Miyukini
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
 caringnanny = { path = "../caringnanny" }
+# Types des signaux et voies des Vigies (lot 3, EX-12, EX-49).
+miyuvigie = { path = "../miyuvigie" }
 
 [dev-dependencies]
 

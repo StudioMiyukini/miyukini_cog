@@ -13,6 +13,9 @@ description = "BorderGuard - Autorité de définition des frontières du Miyukin
 
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
+# Arrêtés signés (Sceau v1.1) et empreinte : MIT OR Apache-2.0.
+miyusceau = { path = "../miyusceau" }
+sha2 = "0.10"
 
 [dev-dependencies]
 

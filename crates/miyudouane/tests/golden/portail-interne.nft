@@ -1,0 +1,52 @@
+#!/usr/sbin/nft -f
+# Généré par miyudouane — ne pas modifier à la main.
+# Douane — règles de frontière (refus par défaut)
+# frontiere=portail-interne arrete=1 empreinte=<sha256>
+# validite=1800000000..1802592000 emetteur=borderguard
+# journal : nflog groupe 102, prefixe "MDOU|portail-interne|<chaine>|<MOTIF>|"
+flush ruleset
+
+table inet miyudouane {
+	chain entree {
+		type filter hook input priority filter; policy drop;
+		iif "lo" accept
+		ct state invalid counter log prefix "MDOU|portail-interne|entree|INVALIDE|" group 102 drop
+		ct mark 0x00000001 meta length > 1400 counter log prefix "MDOU|portail-interne|entree|TAILLE|" group 102 drop
+		ct mark 0x00000001 limit rate over 512 kbytes/second counter log prefix "MDOU|portail-interne|entree|DEBIT|" group 102 drop
+		ct mark 0x00000002 meta length > 1400 counter log prefix "MDOU|portail-interne|entree|TAILLE|" group 102 drop
+		ct mark 0x00000002 limit rate over 512 kbytes/second counter log prefix "MDOU|portail-interne|entree|DEBIT|" group 102 drop
+		ct state established,related counter accept
+		iifname "pi-cog" ip saddr 10.77.0.12 ip daddr 10.77.0.253 tcp dport 7080 meta length <= 1400 ct state new ct mark set 0x00000001 counter accept comment "voie=site service=site flux=0"
+		iifname "pi-cog" ip saddr 10.77.0.10 ip daddr 10.77.0.253 tcp dport 7443 meta length <= 1400 ct state new ct mark set 0x00000002 counter accept comment "voie=jayoffice service=jayoffice flux=1"
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|portail-interne|entree|SORTIE-COG|" group 102 drop
+		ip daddr 10.77.0.0/24 counter log prefix "MDOU|portail-interne|entree|ENTREE-COG|" group 102 drop
+		counter log prefix "MDOU|portail-interne|entree|NON-DECLARE|" group 102 drop
+	}
+	chain transit {
+		type filter hook forward priority filter; policy drop;
+		ct state invalid counter log prefix "MDOU|portail-interne|transit|INVALIDE|" group 102 drop
+		ct mark 0x00000001 meta length > 1400 counter log prefix "MDOU|portail-interne|transit|TAILLE|" group 102 drop
+		ct mark 0x00000001 limit rate over 512 kbytes/second counter log prefix "MDOU|portail-interne|transit|DEBIT|" group 102 drop
+		ct mark 0x00000002 meta length > 1400 counter log prefix "MDOU|portail-interne|transit|TAILLE|" group 102 drop
+		ct mark 0x00000002 limit rate over 512 kbytes/second counter log prefix "MDOU|portail-interne|transit|DEBIT|" group 102 drop
+		ct state established,related counter accept
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|portail-interne|transit|SORTIE-COG|" group 102 drop
+		ip daddr 10.77.0.0/24 counter log prefix "MDOU|portail-interne|transit|ENTREE-COG|" group 102 drop
+		counter log prefix "MDOU|portail-interne|transit|NON-DECLARE|" group 102 drop
+	}
+	chain sortie {
+		type filter hook output priority filter; policy drop;
+		oif "lo" accept
+		ct state invalid counter log prefix "MDOU|portail-interne|sortie|INVALIDE|" group 102 drop
+		ct mark 0x00000001 meta length > 1400 counter log prefix "MDOU|portail-interne|sortie|TAILLE|" group 102 drop
+		ct mark 0x00000001 limit rate over 512 kbytes/second counter log prefix "MDOU|portail-interne|sortie|DEBIT|" group 102 drop
+		ct mark 0x00000002 meta length > 1400 counter log prefix "MDOU|portail-interne|sortie|TAILLE|" group 102 drop
+		ct mark 0x00000002 limit rate over 512 kbytes/second counter log prefix "MDOU|portail-interne|sortie|DEBIT|" group 102 drop
+		ct state established,related counter accept
+		oifname "pi-franche" ip saddr 10.77.1.253 ip daddr 10.77.1.11 tcp dport 7080 meta length <= 1400 ct state new ct mark set 0x00000001 counter accept comment "voie=site service=site flux=0"
+		oifname "pi-franche" ip saddr 10.77.1.253 ip daddr 10.77.1.10 tcp dport 7443 meta length <= 1400 ct state new ct mark set 0x00000002 counter accept comment "voie=jayoffice service=jayoffice flux=1"
+		ip saddr 10.77.0.0/24 counter log prefix "MDOU|portail-interne|sortie|SORTIE-COG|" group 102 drop
+		ip daddr 10.77.0.0/24 counter log prefix "MDOU|portail-interne|sortie|ENTREE-COG|" group 102 drop
+		counter log prefix "MDOU|portail-interne|sortie|NON-DECLARE|" group 102 drop
+	}
+}

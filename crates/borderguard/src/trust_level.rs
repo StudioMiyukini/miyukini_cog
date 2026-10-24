@@ -46,19 +46,16 @@ impl PartialOrd for TrustLevel {
 impl Ord for TrustLevel {
     /// Ordre de confiance : Trusted > Verified > Unknown > Hostile.
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        use std::cmp::Ordering;
-        match (self, other) {
-            (TrustLevel::Trusted, TrustLevel::Trusted) => Ordering::Equal,
-            (TrustLevel::Trusted, _) => Ordering::Greater,
-            (_, TrustLevel::Trusted) => Ordering::Less,
-            (TrustLevel::Verified, TrustLevel::Verified) => Ordering::Equal,
-            (TrustLevel::Verified, _) => Ordering::Greater,
-            (_, TrustLevel::Verified) => Ordering::Less,
-            (TrustLevel::Unknown, TrustLevel::Unknown) => Ordering::Equal,
-            (TrustLevel::Unknown, _) => Ordering::Greater,
-            (_, TrustLevel::Unknown) => Ordering::Less,
-            (TrustLevel::Hostile, TrustLevel::Hostile) => Ordering::Equal,
+        /// Rang de confiance (plus grand = plus de confiance).
+        fn rang(t: TrustLevel) -> u8 {
+            match t {
+                TrustLevel::Trusted => 3,
+                TrustLevel::Verified => 2,
+                TrustLevel::Unknown => 1,
+                TrustLevel::Hostile => 0,
+            }
         }
+        rang(*self).cmp(&rang(*other))
     }
 }
 

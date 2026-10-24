@@ -40,8 +40,27 @@ pub mod metadata;
 //@human / @human Registre en mémoire des frontières (consultation uniquement).
 pub mod registry;
 
+/// @id borderguard_module_zone
+/// @role infrastructure
+/// @layer core
+/// @do declarer_module_zone
+//@human / @human Zones, frontières, réseaux et protocoles (vocabulaire des arrêtés).
+pub mod zone;
+
+/// @id borderguard_module_arrete
+/// @role infrastructure
+/// @layer core
+/// @do declarer_module_arrete
+//@human / @human Arrêtés de frontière signés : format, constitution, vérification (EX-19).
+pub mod arrete;
+
 pub use boundary::{Boundary, BoundaryType};
 pub use crossing::{CrossingRule, CrossingRules};
 pub use metadata::BoundaryMetadata;
 pub use registry::BoundaryRegistry;
 pub use trust_level::{DefaultTrustLevelClassifier, TrustLevel, TrustLevelClassifier};
+pub use arrete::{
+    sceller_arrete, verifier_arrete, Arrete, ArreteVerifie, Constitution, ErreurArrete, Flux, Voie, FORMAT_ARRETE,
+    INDICE_USAGE_ARRETES, NATURE_ARRETE,
+};
+pub use zone::{Frontiere, Protocole, Reseau, Zone};
