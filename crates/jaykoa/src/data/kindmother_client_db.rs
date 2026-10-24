@@ -12,7 +12,7 @@
 
 use crate::data::types::{Agenda, TemporalConflict, TemporalEntry, UserSettings};
 use kindmother::{InstanceIdentity, InstanceType};
-use kindmother_client::{ClientError, KindMotherClient};
+use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
 use std::collections::HashMap;
 use std::sync::Arc;
 use thiserror::Error;
@@ -71,7 +71,7 @@ impl JayKoaDb {
     /// Initialise la connexion globale au service KindMother (async).
     pub async fn init_global_async(addr: Option<&str>) -> Result<(), DbError> {
         let addr = addr.unwrap_or(DEFAULT_KINDMOTHER_ADDR);
-        let client = KindMotherClient::connect(addr, "jaykoa", "jaykoa").await?;
+        let client = KindMotherClient::connect(addr, &OperatorCredential::load("jaykoa")?, "jaykoa").await?;
 
         CLIENT
             .set(Arc::new(client))

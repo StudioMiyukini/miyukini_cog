@@ -19,6 +19,8 @@ struct Config {
     data_dir: PathBuf,
     /// Adresse d'écoute
     listen_addr: String,
+    /// Écoute hors boucle locale autorisée explicitement (`KINDMOTHER_ALLOW_NON_LOOPBACK=1`)
+    allow_non_loopback: bool,
 }
 
 impl Default for Config {
@@ -26,6 +28,7 @@ impl Default for Config {
         Self {
             data_dir: PathBuf::from("./data/kindmother"),
             listen_addr: "127.0.0.1:50051".to_string(),
+            allow_non_loopback: false,
         }
     }
 }
@@ -39,6 +42,8 @@ impl Config {
                 .unwrap_or_else(|_| PathBuf::from("./data/kindmother")),
             listen_addr: std::env::var("KINDMOTHER_LISTEN_ADDR")
                 .unwrap_or_else(|_| "127.0.0.1:50051".to_string()),
+            allow_non_loopback: std::env::var("KINDMOTHER_ALLOW_NON_LOOPBACK")
+                .is_ok_and(|v| v == "1"),
         }
     }
 }
@@ -68,9 +73,14 @@ async fn main() -> Result<(), ServiceError> {
         .map_err(|e| ServiceError::Internal(format!("Cannot create data dir: {}", e)))?;
 
     // Créer et lancer le serveur
-    let server = KindMotherServer::new(&config.data_dir).await?;
+    let server = KindMotherServer::new(&config.data_dir)
+        .await?
+        .with_non_loopback_allowed(config.allow_non_loopback);
 
-    tracing::info!("KindMother server ready, serving requests...");
+    tracing::info!(
+        "KindMother server ready (operator credentials in {:?}), serving requests...",
+        server.credentials_dir()
+    );
 
     server.serve(&config.listen_addr).await?;
 

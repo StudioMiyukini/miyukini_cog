@@ -11,6 +11,9 @@
 //! - Contrôle d'accès via arbitrage
 //! - Audit complet des opérations
 //! - Permissions fichiers restrictives
+//! - Politique SQL appliquée par l'autorisateur SQLite (`sql_guard`, K-05) ;
+//!   les lectures passent par une connexion ouverte en `SQLITE_OPEN_READ_ONLY`
+//!   avec `PRAGMA query_only = ON`, et une seule instruction est acceptée par requête.
 
 use rusqlite::{params, params_from_iter, Connection, OpenFlags};
 use std::collections::HashMap;
@@ -19,6 +22,10 @@ use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
 
 use crate::errors::ServiceError;
+use crate::sql_guard::{prepare_single, AuthorizerGuard, SqlPolicy};
+
+/// Nombre maximal d'opérations dans une transaction (C-13).
+pub const MAX_TRANSACTION_OPS: usize = 1000;
 
 /// Paramètres d'une entrée d'audit (réduit le nombre d'arguments de `audit_operation`).
 struct AuditEntry<'a> {
@@ -38,6 +45,8 @@ pub struct EncryptedDatabase {
     key_derivation: kindmother_db_key::KeyDerivation,
     /// Cache des connexions ouvertes (protégé par mutex async)
     connections: Arc<RwLock<HashMap<String, Arc<Mutex<Connection>>>>>,
+    /// Cache des connexions en lecture seule (chemin Query)
+    ro_connections: Arc<RwLock<HashMap<String, Arc<Mutex<Connection>>>>>,
 }
 
 impl EncryptedDatabase {
@@ -65,6 +74,7 @@ impl EncryptedDatabase {
             #[cfg(feature = "db-encryption")]
             key_derivation,
             connections: Arc::new(RwLock::new(HashMap::new())),
+            ro_connections: Arc::new(RwLock::new(HashMap::new())),
         })
     }
 
@@ -90,6 +100,70 @@ impl EncryptedDatabase {
             let mut connections = self.connections.write().await;
             connections.insert(database.to_string(), conn.clone());
         }
+
+        Ok(conn)
+    }
+
+    /// Ouvre ou récupère une connexion en lecture seule à une base de données.
+    ///
+    /// La base est d'abord ouverte en lecture-écriture (création et tables système),
+    /// puis une seconde connexion est ouverte avec `SQLITE_OPEN_READ_ONLY`.
+    pub async fn get_ro_connection(
+        &self,
+        database: &str,
+    ) -> Result<Arc<Mutex<Connection>>, ServiceError> {
+        {
+            let connections = self.ro_connections.read().await;
+            if let Some(conn) = connections.get(database) {
+                return Ok(conn.clone());
+            }
+        }
+
+        // Garantit l'existence du fichier et du schéma système.
+        self.get_connection(database).await?;
+
+        let conn = self.open_database_read_only(database)?;
+        let conn = Arc::new(Mutex::new(conn));
+        {
+            let mut connections = self.ro_connections.write().await;
+            connections.insert(database.to_string(), conn.clone());
+        }
+        Ok(conn)
+    }
+
+    /// Ouvre une base existante en lecture seule.
+    fn open_database_read_only(&self, database: &str) -> Result<Connection, ServiceError> {
+        if !Self::is_valid_database_name(database) {
+            return Err(ServiceError::Validation(format!(
+                "Invalid database name: {}",
+                database
+            )));
+        }
+        let db_path = self.data_dir.join(format!("{}.db", database));
+
+        let conn = Connection::open_with_flags(
+            &db_path,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )
+        .map_err(|e| ServiceError::Database(format!("Cannot open database read-only: {}", e)))?;
+
+        #[cfg(feature = "db-encryption")]
+        {
+            let pragma_key = self
+                .key_derivation
+                .pragma_key_hex(database)
+                .map_err(|e| ServiceError::Encryption(e.0))?;
+            conn.pragma_update(None, "key", &pragma_key)
+                .map_err(|e| ServiceError::Database(format!("Cannot set encryption key: {}", e)))?;
+        }
+
+        conn.execute_batch(
+            r#"
+            PRAGMA query_only = ON;
+            PRAGMA busy_timeout = 5000;
+            "#,
+        )
+        .map_err(|e| ServiceError::Database(format!("Cannot configure database: {}", e)))?;
 
         Ok(conn)
     }
@@ -191,19 +265,26 @@ impl EncryptedDatabase {
         Ok(())
     }
 
-    /// Exécute une requête SELECT.
+    /// Exécute une requête en lecture seule (une seule instruction).
+    ///
+    /// Trois barrières : connexion `SQLITE_OPEN_READ_ONLY` + `query_only`, autorisateur
+    /// en politique lecture seule, et `Statement::readonly()`.
     pub async fn query(
         &self,
         database: &str,
         sql: &str,
         params: Vec<String>,
     ) -> Result<Vec<HashMap<String, serde_json::Value>>, ServiceError> {
-        let conn = self.get_connection(database).await?;
+        let conn = self.get_ro_connection(database).await?;
         let conn = conn.lock().await;
 
-        let mut stmt = conn
-            .prepare(sql)
-            .map_err(|e| ServiceError::Database(format!("Query prepare failed: {}", e)))?;
+        let _guard = AuthorizerGuard::install(&conn, SqlPolicy::READ_ONLY);
+        let mut stmt = prepare_single(&conn, sql)?;
+        if !stmt.readonly() {
+            return Err(ServiceError::PermissionDenied(
+                "Query path accepts read-only statements only".to_string(),
+            ));
+        }
 
         let column_names: Vec<String> = stmt.column_names().iter().map(|s| s.to_string()).collect();
 
@@ -242,11 +323,12 @@ impl EncryptedDatabase {
         Ok(results)
     }
 
-    /// Exécute une requête d'écriture (INSERT, UPDATE, DELETE).
+    /// Exécute une instruction d'écriture sous la politique `policy` (une seule instruction).
     pub async fn execute(
         &self,
         database: &str,
         operator_id: &str,
+        policy: SqlPolicy,
         sql: &str,
         params: Vec<String>,
         intent: &str,
@@ -254,9 +336,12 @@ impl EncryptedDatabase {
         let conn = self.get_connection(database).await?;
         let conn = conn.lock().await;
 
-        let rows_affected = conn
-            .execute(sql, params_from_iter(params))
-            .map_err(|e| ServiceError::Database(format!("Execute failed: {}", e)))?;
+        let rows_affected = {
+            let _guard = AuthorizerGuard::install(&conn, policy);
+            let mut stmt = prepare_single(&conn, sql)?;
+            stmt.execute(params_from_iter(params))
+                .map_err(|e| ServiceError::Database(format!("Execute failed: {}", e)))?
+        };
 
         let last_insert_id = conn.last_insert_rowid();
 
@@ -276,14 +361,20 @@ impl EncryptedDatabase {
         Ok((rows_affected as u64, Some(last_insert_id)))
     }
 
-    /// Exécute une transaction.
+    /// Exécute une transaction (chaque opération : une instruction, sous `policy`).
     pub async fn transaction(
         &self,
         database: &str,
         operator_id: &str,
+        policy: SqlPolicy,
         operations: Vec<(String, Vec<String>)>,
         intent: &str,
     ) -> Result<Vec<u64>, ServiceError> {
+        if operations.len() > MAX_TRANSACTION_OPS {
+            return Err(ServiceError::Validation(format!(
+                "Too many operations in transaction (max {MAX_TRANSACTION_OPS})"
+            )));
+        }
         let conn = self.get_connection(database).await?;
         let mut conn = conn.lock().await;
 
@@ -294,14 +385,15 @@ impl EncryptedDatabase {
 
         let mut results = Vec::new();
 
-        for (sql, params) in &operations {
-            match tx.execute(sql, params_from_iter(params.clone())) {
-                Ok(rows) => results.push(rows as u64),
-                Err(e) => {
-                    // Rollback automatique via drop de tx
-                    return Err(ServiceError::Database(format!("Transaction failed: {}", e)));
-                }
-            }
+        for (sql, params) in operations {
+            // L'autorisateur n'est actif que pendant l'opération de l'opérateur
+            // (BEGIN / COMMIT sont émis par le service). Rollback via drop de tx en cas d'erreur.
+            let _guard = AuthorizerGuard::install(&tx, policy);
+            let mut stmt = prepare_single(&tx, &sql)?;
+            let rows = stmt
+                .execute(params_from_iter(params))
+                .map_err(|e| ServiceError::Database(format!("Transaction failed: {}", e)))?;
+            results.push(rows as u64);
         }
 
         // Commit

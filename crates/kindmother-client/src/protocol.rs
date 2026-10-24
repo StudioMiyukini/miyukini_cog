@@ -3,6 +3,10 @@
 //! @id     kindmother_client_protocol
 //! @do     define_client_protocol
 //@human ! @layer  toolkit
+//!
+//! Séquence (K-04) : le serveur envoie `Challenge`, le client répond `Authenticate`,
+//! le serveur confirme `Authenticated` ou refuse et ferme. Les champs `operator_id`
+//! des requêtes suivantes doivent égaler l'identité authentifiée (sinon refus).
 
 use serde::{Deserialize, Serialize};
 
@@ -11,6 +15,15 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "type")]
 #[allow(missing_docs)]
 pub enum Request {
+    /// Réponse au défi d'authentification (première trame envoyée par le client).
+    ///
+    /// `signature` : signature Ed25519 (hex, 64 octets) de
+    /// `"kindmother-auth-v1\0" || operator_id || "\0" || nonce`.
+    Authenticate {
+        operator_id: String,
+        signature: String,
+    },
+
     /// Requête SELECT.
     Query {
         operator_id: String,
@@ -59,6 +72,12 @@ pub struct Operation {
 #[serde(tag = "type")]
 #[allow(missing_docs)]
 pub enum Response {
+    /// Défi d'authentification (première trame envoyée par le serveur).
+    Challenge { protocol: String, nonce: String },
+
+    /// Authentification réussie : l'identité est liée à la connexion.
+    Authenticated { operator_id: String },
+
     /// Résultat d'une requête SELECT.
     QueryResult {
         success: bool,

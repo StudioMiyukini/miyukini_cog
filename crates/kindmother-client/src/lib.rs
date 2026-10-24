@@ -34,9 +34,11 @@
 //! ## Usage
 //!
 //! ```ignore
-//! use kindmother_client::KindMotherClient;
+//! use kindmother_client::{KindMotherClient, OperatorCredential};
 //!
-//! let client = KindMotherClient::connect("127.0.0.1:50051", "jaykoa", "jaykoa").await?;
+//! // Justificatif approvisionné par le service (`<data_dir>/credentials/jaykoa.key`, 0600)
+//! let credential = OperatorCredential::load("jaykoa")?;
+//! let client = KindMotherClient::connect("127.0.0.1:50051", &credential, "jaykoa").await?;
 //!
 //! // Lecture
 //! let entries = client.query("SELECT * FROM entries WHERE active = ?", vec!["1"]).await?;
@@ -50,9 +52,11 @@
 //! ```
 
 mod client;
+mod credential;
 mod errors;
 mod protocol;
 
 pub use client::KindMotherClient;
+pub use credential::{OperatorCredential, ENV_CREDENTIALS_DIR, ENV_DATA_DIR};
 pub use errors::ClientError;
 pub use protocol::{Operation, Request, Response};

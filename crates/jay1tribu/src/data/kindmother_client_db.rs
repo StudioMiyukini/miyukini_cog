@@ -9,7 +9,7 @@
 
 use crate::data::types::{Friend, Message, Salon, SalonType, Tribe};
 use kindmother::{InstanceIdentity, InstanceType};
-use kindmother_client::{ClientError, KindMotherClient};
+use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
@@ -88,7 +88,7 @@ impl Jay1TribuDb {
     /// Initialise la connexion globale (async).
     pub async fn init_global_async(addr: Option<&str>) -> Result<(), DbError> {
         let addr = addr.unwrap_or(DEFAULT_KINDMOTHER_ADDR);
-        let client = KindMotherClient::connect(addr, DB_NAME, DB_NAME).await?;
+        let client = KindMotherClient::connect(addr, &OperatorCredential::load(DB_NAME)?, DB_NAME).await?;
         CLIENT
             .set(Arc::new(client))
             .map_err(|_| DbError("Client déjà initialisé".to_string()))?;

@@ -25,6 +25,10 @@ pub enum ClientError {
     #[error("Serialization error: {0}")]
     Serialization(String),
 
+    /// Authentification de l'opérateur refusée ou impossible (justificatif absent, invalide).
+    #[error("Authentication failed: {0}")]
+    Authentication(String),
+
     /// Permission refusée.
     #[error("Permission denied: {0}")]
     PermissionDenied(String),

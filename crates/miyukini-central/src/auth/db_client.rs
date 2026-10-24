@@ -11,7 +11,7 @@
 //@human ! @layer  infra
 
 use crate::auth::password::validate_password;
-use kindmother_client::{ClientError, KindMotherClient};
+use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -143,7 +143,7 @@ impl CentralAuthDb {
     /// Initialise la connexion globale au service KindMother (async).
     pub async fn init_global_async(addr: Option<&str>) -> Result<(), AuthDbError> {
         let addr = addr.unwrap_or(DEFAULT_KINDMOTHER_ADDR);
-        let client = KindMotherClient::connect(addr, "miyukini-central", "central").await?;
+        let client = KindMotherClient::connect(addr, &OperatorCredential::load("miyukini-central")?, "central").await?;
 
         CLIENT
             .set(Arc::new(client))

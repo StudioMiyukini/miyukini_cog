@@ -23,7 +23,8 @@ kindmother = { path = "../kindmother" }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 
 # SQLite : bundled par défaut. db-encryption pour SQLCipher (requiert OpenSSL sur Windows)
-rusqlite = { version = "0.32", features = ["bundled"], default-features = false }
+# `hooks` : autorisateur SQLite (sqlite3_set_authorizer) pour l'arbitrage SQL (K-05)
+rusqlite = { version = "0.32", features = ["bundled", "hooks"], default-features = false }
 
 # Sérialisation
 serde = { version = "1", features = ["derive"] }
@@ -42,6 +43,15 @@ thiserror = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 sha2 = "0.10"
+
+# Authentification des opérateurs (K-04) : signature Ed25519 sur un défi serveur.
+# Primitives autorisées par C-24 (ed25519-dalek, rand_core::OsRng) ; zeroize pour C-25.
+ed25519-dalek = { version = "2", features = ["rand_core", "zeroize"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+zeroize = "1"
+
+[dev-dependencies]
+kindmother-client = { path = "../kindmother-client" }
 
 [features]
 default = []

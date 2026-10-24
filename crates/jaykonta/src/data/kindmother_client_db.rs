@@ -14,7 +14,7 @@ use crate::data::types::{
     AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,
 };
 use chrono::Local;
-use kindmother_client::{ClientError, KindMotherClient};
+use kindmother_client::{ClientError, KindMotherClient, OperatorCredential};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -110,7 +110,7 @@ impl JayKontaDb {
     /// Initialise la connexion globale au service KindMother (async).
     pub async fn init_global_async(addr: Option<&str>) -> Result<(), DbError> {
         let addr = addr.unwrap_or(DEFAULT_KINDMOTHER_ADDR);
-        let client = KindMotherClient::connect(addr, "jaykonta", "jaykonta").await?;
+        let client = KindMotherClient::connect(addr, &OperatorCredential::load("jaykonta")?, "jaykonta").await?;
 
         CLIENT
             .set(Arc::new(client))
@@ -140,7 +140,7 @@ impl JayKontaDb {
 
     /// Crée une nouvelle instance avec une connexion personnalisée (async).
     pub async fn connect_async(addr: &str) -> Result<Self, DbError> {
-        let client = KindMotherClient::connect(addr, "jaykonta", "jaykonta").await?;
+        let client = KindMotherClient::connect(addr, &OperatorCredential::load("jaykonta")?, "jaykonta").await?;
         Ok(Self {
             client: Arc::new(client),
         })

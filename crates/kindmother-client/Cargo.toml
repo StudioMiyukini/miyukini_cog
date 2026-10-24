@@ -37,6 +37,10 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "2"
 tracing = "0.1"
 
+# Authentification de l'opérateur (K-04) : signature Ed25519 du défi serveur (C-24, C-25).
+ed25519-dalek = { version = "2", features = ["zeroize"] }
+zeroize = "1"
+
 # Pas de build dependencies nécessaires sans gRPC
 
 [lints.rust]

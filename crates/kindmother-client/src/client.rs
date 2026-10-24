@@ -11,8 +11,18 @@ use tokio::net::TcpStream;
 use tokio::sync::Mutex;
 use tracing::{debug, instrument};
 
+use crate::credential::{decode_hex_fixed, OperatorCredential, AUTH_PROTOCOL, NONCE_LEN};
 use crate::errors::ClientError;
 use crate::protocol::{Operation, Request, Response};
+
+/// Taille maximale d'une trame de réponse acceptée (C-13).
+const MAX_RESPONSE_FRAME: usize = 64 * 1024 * 1024;
+
+/// Taille maximale d'une trame d'authentification.
+const MAX_AUTH_FRAME: usize = 4 * 1024;
+
+/// Délai de connexion et d'authentification.
+const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// Client de délégation vers KindMother.
 ///
@@ -28,32 +38,77 @@ pub struct KindMotherClient {
 }
 
 impl KindMotherClient {
-    /// Crée une nouvelle connexion vers le service KindMother.
+    /// Crée une connexion authentifiée vers le service KindMother.
+    ///
+    /// La connexion commence par le défi du serveur, signé avec la clé de
+    /// l'opérateur (K-04) ; l'identité est ensuite liée à la connexion.
     ///
     /// # Arguments
     /// * `addr` - Adresse du service (ex: "127.0.0.1:50051")
-    /// * `operator_id` - Identifiant de l'opérateur (ex: "jaykoa")
+    /// * `credential` - Justificatif de l'opérateur (voir [`OperatorCredential::load`])
     /// * `database` - Nom de la base de données par défaut
     pub async fn connect(
         addr: &str,
-        operator_id: &str,
+        credential: &OperatorCredential,
         database: &str,
     ) -> Result<Self, ClientError> {
-        let stream = tokio::time::timeout(Duration::from_secs(10), TcpStream::connect(addr))
+        let mut stream = tokio::time::timeout(HANDSHAKE_TIMEOUT, TcpStream::connect(addr))
             .await
             .map_err(|_| ClientError::Timeout("Connection timeout".to_string()))?
             .map_err(|e| ClientError::Connection(e.to_string()))?;
 
+        tokio::time::timeout(HANDSHAKE_TIMEOUT, Self::authenticate(&mut stream, credential))
+            .await
+            .map_err(|_| ClientError::Timeout("Authentication timeout".to_string()))??;
+
         debug!(
             "Connected to KindMother service at {} as operator '{}'",
-            addr, operator_id
+            addr,
+            credential.operator_id()
         );
 
         Ok(Self {
             stream: Mutex::new(stream),
-            operator_id: operator_id.to_string(),
+            operator_id: credential.operator_id().to_string(),
             default_database: database.to_string(),
         })
+    }
+
+    /// Répond au défi du serveur.
+    async fn authenticate(
+        stream: &mut TcpStream,
+        credential: &OperatorCredential,
+    ) -> Result<(), ClientError> {
+        let challenge = read_frame(stream, MAX_AUTH_FRAME).await?;
+        let nonce = match serde_json::from_slice::<Response>(&challenge)? {
+            Response::Challenge { protocol, nonce } if protocol == AUTH_PROTOCOL => {
+                decode_hex_fixed::<NONCE_LEN>(&nonce).ok_or_else(|| {
+                    ClientError::Authentication("Malformed challenge nonce".to_string())
+                })?
+            }
+            _ => {
+                return Err(ClientError::Authentication(
+                    "Unexpected or unsupported challenge".to_string(),
+                ))
+            }
+        };
+
+        let request = Request::Authenticate {
+            operator_id: credential.operator_id().to_string(),
+            signature: credential.sign_challenge(&nonce),
+        };
+        write_frame(stream, &serde_json::to_vec(&request)?).await?;
+
+        let reply = read_frame(stream, MAX_AUTH_FRAME).await?;
+        match serde_json::from_slice::<Response>(&reply)? {
+            Response::Authenticated { operator_id } if operator_id == credential.operator_id() => {
+                Ok(())
+            }
+            Response::Error { message, .. } => Err(ClientError::Authentication(message)),
+            _ => Err(ClientError::Authentication(
+                "Unexpected authentication reply".to_string(),
+            )),
+        }
     }
 
     /// Envoie une requête et reçoit la réponse.
@@ -61,20 +116,8 @@ impl KindMotherClient {
         let payload = serde_json::to_vec(&request)?;
 
         let mut stream = self.stream.lock().await;
-
-        // Écrire la longueur puis le payload
-        let len_bytes = (payload.len() as u32).to_be_bytes();
-        stream.write_all(&len_bytes).await?;
-        stream.write_all(&payload).await?;
-
-        // Lire la longueur de la réponse
-        let mut len_buf = [0u8; 4];
-        stream.read_exact(&mut len_buf).await?;
-        let len = u32::from_be_bytes(len_buf) as usize;
-
-        // Lire la réponse
-        let mut response_buf = vec![0u8; len];
-        stream.read_exact(&mut response_buf).await?;
+        write_frame(&mut stream, &payload).await?;
+        let response_buf = read_frame(&mut stream, MAX_RESPONSE_FRAME).await?;
 
         let response: Response = serde_json::from_slice(&response_buf)?;
 
@@ -84,6 +127,8 @@ impl KindMotherClient {
                 "PERMISSION_DENIED" => ClientError::PermissionDenied(message.clone()),
                 "NOT_FOUND" => ClientError::DatabaseNotFound(message.clone()),
                 "QUOTA_EXCEEDED" => ClientError::QuotaExceeded(message.clone()),
+                "AUTH_FAILED" => ClientError::Authentication(message.clone()),
+                "INVALID_REQUEST" => ClientError::InvalidRequest(message.clone()),
                 _ => ClientError::Service(message.clone()),
             });
         }
@@ -315,6 +360,31 @@ impl KindMotherClient {
     pub fn database(&self) -> &str {
         &self.default_database
     }
+}
+
+/// Lit une trame `[u32 BE longueur][payload]` bornée à `max` octets.
+async fn read_frame(stream: &mut TcpStream, max: usize) -> Result<Vec<u8>, ClientError> {
+    let mut len_buf = [0u8; 4];
+    stream.read_exact(&mut len_buf).await?;
+    let len = usize::try_from(u32::from_be_bytes(len_buf))
+        .map_err(|_| ClientError::Transport("Frame too large".to_string()))?;
+    if len > max {
+        return Err(ClientError::Transport(format!(
+            "Frame too large ({len} > {max} bytes)"
+        )));
+    }
+    let mut buf = vec![0u8; len];
+    stream.read_exact(&mut buf).await?;
+    Ok(buf)
+}
+
+/// Écrit une trame `[u32 BE longueur][payload]`.
+async fn write_frame(stream: &mut TcpStream, payload: &[u8]) -> Result<(), ClientError> {
+    let len = u32::try_from(payload.len())
+        .map_err(|_| ClientError::InvalidRequest("Request too large".to_string()))?;
+    stream.write_all(&len.to_be_bytes()).await?;
+    stream.write_all(payload).await?;
+    Ok(())
 }
 
 /// Informations sur une base de données.

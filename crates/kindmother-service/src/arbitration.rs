@@ -5,12 +5,16 @@
 //@human ! @layer  core
 //!
 //! Le moteur d'arbitrage assure que :
-//! - Seuls les opérateurs autorisés peuvent accéder aux données
-//! - Chaque opérateur ne peut accéder qu'à ses propres bases
-//! - Les requêtes SQL sont validées avant exécution
+//! - Seuls les opérateurs enregistrés peuvent accéder aux données
+//! - Chaque opérateur ne peut accéder qu'aux bases qui lui sont attribuées
+//! - Le mode d'accès (lecture / écriture) est compatible avec sa permission
 //! - Les quotas sont respectés
+//!
+//! L'identité de l'opérateur est celle **authentifiée** sur la connexion (K-04),
+//! jamais un champ de la requête. Le contenu SQL n'est plus analysé ici : la
+//! politique SQL est appliquée par l'autorisateur SQLite (`sql_guard`, K-05).
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -25,6 +29,15 @@ pub enum Permission {
     ReadWrite,
     /// Accès complet (y compris DDL)
     Admin,
+}
+
+/// Mode d'accès demandé par une requête.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AccessMode {
+    /// Lecture (Query, DatabaseInfo, HealthCheck)
+    Read,
+    /// Écriture (Execute, Transaction)
+    Write,
 }
 
 /// Configuration d'un opérateur.
@@ -44,10 +57,6 @@ pub struct ArbitrationEngine {
     operators: Arc<RwLock<HashMap<String, OperatorConfig>>>,
     /// Compteurs de requêtes pour le rate limiting
     request_counts: Arc<RwLock<HashMap<String, RequestCounter>>>,
-    /// Mots-clés SQL interdits en lecture seule
-    write_keywords: HashSet<&'static str>,
-    /// Mots-clés DDL (réservés aux admins)
-    ddl_keywords: HashSet<&'static str>,
 }
 
 /// Compteur de requêtes pour le rate limiting.
@@ -69,26 +78,18 @@ impl Default for RequestCounter {
 impl ArbitrationEngine {
     /// Crée un nouveau moteur d'arbitrage.
     pub fn new() -> Self {
-        let mut write_keywords = HashSet::new();
-        write_keywords.insert("INSERT");
-        write_keywords.insert("UPDATE");
-        write_keywords.insert("DELETE");
-        write_keywords.insert("REPLACE");
-
-        let mut ddl_keywords = HashSet::new();
-        ddl_keywords.insert("CREATE");
-        ddl_keywords.insert("DROP");
-        ddl_keywords.insert("ALTER");
-        ddl_keywords.insert("TRUNCATE");
-        ddl_keywords.insert("VACUUM");
-        ddl_keywords.insert("REINDEX");
-
         Self {
             operators: Arc::new(RwLock::new(HashMap::new())),
             request_counts: Arc::new(RwLock::new(HashMap::new())),
-            write_keywords,
-            ddl_keywords,
         }
+    }
+
+    /// Identifiants des opérateurs enregistrés.
+    pub async fn operator_ids(&self) -> Vec<String> {
+        let operators = self.operators.read().await;
+        let mut ids: Vec<String> = operators.keys().cloned().collect();
+        ids.sort();
+        ids
     }
 
     /// Enregistre un opérateur avec ses permissions.
@@ -139,14 +140,16 @@ impl ArbitrationEngine {
         .await;
     }
 
-    /// Vérifie qu'un opérateur peut effectuer une requête.
+    /// Vérifie qu'un opérateur (authentifié) peut accéder à une base dans le mode donné.
+    ///
+    /// Retourne la permission de l'opérateur sur cette base, d'où découle la
+    /// politique SQL (`SqlPolicy::for_permission`).
     pub async fn authorize(
         &self,
         operator_id: &str,
         database: &str,
-        sql: &str,
-        is_write: bool,
-    ) -> Result<(), ServiceError> {
+        mode: AccessMode,
+    ) -> Result<Permission, ServiceError> {
         // 1. Vérifier que l'opérateur existe
         let operators = self.operators.read().await;
         let operator = operators
@@ -154,82 +157,26 @@ impl ArbitrationEngine {
             .ok_or_else(|| ServiceError::UnknownOperator(operator_id.to_string()))?;
 
         // 2. Vérifier l'accès à la base
-        let permission = operator.databases.get(database).ok_or_else(|| {
+        let permission = operator.databases.get(database).cloned().ok_or_else(|| {
             ServiceError::PermissionDenied(format!(
                 "Operator '{}' has no access to database '{}'",
                 operator_id, database
             ))
         })?;
 
-        // 3. Vérifier les permissions selon le type d'opération
-        self.check_sql_permission(sql, permission, is_write)?;
+        // 3. Vérifier le mode d'accès
+        if mode == AccessMode::Write && permission == Permission::Read {
+            return Err(ServiceError::PermissionDenied(
+                "Write operations not allowed with Read permission".to_string(),
+            ));
+        }
 
         // 4. Vérifier le rate limit
         let rate_limit = operator.rate_limit;
         drop(operators); // Libérer le lock avant d'acquérir un autre
         self.check_rate_limit(operator_id, rate_limit).await?;
 
-        Ok(())
-    }
-
-    /// Vérifie les permissions SQL.
-    fn check_sql_permission(
-        &self,
-        sql: &str,
-        permission: &Permission,
-        is_write: bool,
-    ) -> Result<(), ServiceError> {
-        let sql_upper = sql.to_uppercase();
-        let first_keyword = sql_upper.split_whitespace().next().unwrap_or("");
-
-        // Vérifier les mots-clés DDL
-        if self.ddl_keywords.contains(first_keyword) && *permission != Permission::Admin {
-            return Err(ServiceError::PermissionDenied(
-                "DDL operations require Admin permission".to_string(),
-            ));
-        }
-
-        // Vérifier les mots-clés d'écriture
-        if is_write || self.write_keywords.contains(first_keyword) {
-            match permission {
-                Permission::Read => {
-                    return Err(ServiceError::PermissionDenied(
-                        "Write operations not allowed with Read permission".to_string(),
-                    ));
-                }
-                Permission::ReadWrite | Permission::Admin => {}
-            }
-        }
-
-        // Validation SQL basique (empêcher les injections évidentes)
-        self.validate_sql(sql)?;
-
-        Ok(())
-    }
-
-    /// Validation SQL basique.
-    fn validate_sql(&self, sql: &str) -> Result<(), ServiceError> {
-        let sql_upper = sql.to_uppercase();
-
-        // Interdire les commandes système dangereuses
-        if sql_upper.contains("ATTACH DATABASE")
-            || sql_upper.contains("DETACH DATABASE")
-            || sql_upper.contains("PRAGMA KEY")
-            || sql_upper.contains("PRAGMA REKEY")
-        {
-            return Err(ServiceError::Validation(
-                "Forbidden SQL command".to_string(),
-            ));
-        }
-
-        // Interdire les commentaires qui pourraient masquer des injections
-        if sql.contains("--") || sql.contains("/*") {
-            return Err(ServiceError::Validation(
-                "SQL comments are not allowed".to_string(),
-            ));
-        }
-
-        Ok(())
+        Ok(permission)
     }
 
     /// Vérifie le rate limit.
@@ -289,23 +236,26 @@ mod tests {
 
         // Devrait réussir
         assert!(engine
-            .authorize("test_op", "test_db", "SELECT * FROM users", false)
+            .authorize("test_op", "test_db", AccessMode::Read)
             .await
             .is_ok());
-        assert!(engine
-            .authorize("test_op", "test_db", "INSERT INTO users VALUES (?)", true)
-            .await
-            .is_ok());
+        assert_eq!(
+            engine
+                .authorize("test_op", "test_db", AccessMode::Write)
+                .await
+                .ok(),
+            Some(Permission::ReadWrite)
+        );
 
         // Devrait échouer - base non autorisée
         assert!(engine
-            .authorize("test_op", "other_db", "SELECT 1", false)
+            .authorize("test_op", "other_db", AccessMode::Read)
             .await
             .is_err());
 
         // Devrait échouer - opérateur inconnu
         assert!(engine
-            .authorize("unknown", "test_db", "SELECT 1", false)
+            .authorize("unknown", "test_db", AccessMode::Read)
             .await
             .is_err());
     }
@@ -324,13 +274,13 @@ mod tests {
 
         // Lecture OK
         assert!(engine
-            .authorize("reader", "db", "SELECT * FROM t", false)
+            .authorize("reader", "db", AccessMode::Read)
             .await
             .is_ok());
 
         // Écriture interdite
         assert!(engine
-            .authorize("reader", "db", "INSERT INTO t VALUES (1)", true)
+            .authorize("reader", "db", AccessMode::Write)
             .await
             .is_err());
     }
