@@ -9,6 +9,8 @@
 
 use std::collections::HashMap;
 
+use sha2::{Digest, Sha256};
+
 /// @id strongfather_intent_type
 /// @role domain_model
 /// @layer core
@@ -47,6 +49,40 @@ pub enum ActionType {
     /// @do represent_evaluation_action
     //@human / @human Intention d'évaluer une condition ou un état sans action.
     Evaluation,
+}
+
+impl ActionType {
+    /// @id strongfather_intent_action_as_str
+    /// @role domain_model
+    /// @layer core
+    /// @do expose_canonical_action_name
+    //@human / @human Nom canonique de l'action (utilisé par les règles et l'empreinte). Stable : ne pas renommer.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            ActionType::Creation => "creation",
+            ActionType::Modification => "modification",
+            ActionType::Deletion => "deletion",
+            ActionType::Read => "read",
+            ActionType::Evaluation => "evaluation",
+        }
+    }
+}
+
+impl std::str::FromStr for ActionType {
+    type Err = String;
+
+    /// Analyse stricte (correspondance exacte, sensible à la casse) du nom canonique.
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "creation" => Ok(ActionType::Creation),
+            "modification" => Ok(ActionType::Modification),
+            "deletion" => Ok(ActionType::Deletion),
+            "read" => Ok(ActionType::Read),
+            "evaluation" => Ok(ActionType::Evaluation),
+            autre => Err(format!("type d'action inconnu : '{autre}'")),
+        }
+    }
 }
 
 /// @id strongfather_intent_call_context
@@ -263,6 +299,65 @@ impl Intent {
         self.metadata = metadata;
         self
     }
+
+    /// @id strongfather_intent_digest
+    /// @role domain_model
+    /// @layer core
+    /// @do compute_intent_digest
+    //@human / @human Empreinte stable (SHA-256 hex) d'un encodage canonique de l'intention.
+    //@human Les tables sont triées par clé, chaque champ est préfixé par sa longueur : deux
+    //@human intentions égales donnent la même empreinte, toute modification la change.
+    /// Empreinte SHA-256 (hexadécimal minuscule) de l'encodage canonique de l'intention.
+    ///
+    /// Format `SF-INTENT-v1` : chaque champ est encodé `longueur (u64 BE) ‖ octets`,
+    /// les tables (`data`, `metadata`) sont triées par clé, les contraintes gardent leur ordre.
+    #[must_use]
+    pub fn digest(&self) -> String {
+        fn champ(h: &mut Sha256, octets: &[u8]) {
+            h.update((octets.len() as u64).to_be_bytes());
+            h.update(octets);
+        }
+        fn table(h: &mut Sha256, t: &HashMap<String, String>) {
+            let mut cles: Vec<&String> = t.keys().collect();
+            cles.sort();
+            h.update((cles.len() as u64).to_be_bytes());
+            for k in cles {
+                champ(h, k.as_bytes());
+                champ(h, t[k].as_bytes());
+            }
+        }
+
+        let mut h = Sha256::new();
+        champ(&mut h, b"SF-INTENT-v1");
+        champ(&mut h, self.intent_id.as_bytes());
+        champ(&mut h, self.action_type.as_str().as_bytes());
+        champ(&mut h, self.subject.as_bytes());
+        champ(&mut h, self.call_context.caller_identity.as_bytes());
+        champ(&mut h, self.call_context.origin.as_bytes());
+        champ(&mut h, self.call_context.instance.as_bytes());
+        table(&mut h, &self.data.content);
+        match self.requested_priority {
+            None => h.update([0u8]),
+            Some(p) => {
+                h.update([1u8]);
+                h.update(p.to_be_bytes());
+            }
+        }
+        h.update((self.constraints.len() as u64).to_be_bytes());
+        for c in &self.constraints {
+            champ(&mut h, c.id.as_bytes());
+            champ(&mut h, c.description.as_bytes());
+        }
+        table(&mut h, &self.metadata);
+
+        let octets = h.finalize();
+        let mut hex = String::with_capacity(octets.len() * 2);
+        for b in octets {
+            use std::fmt::Write as _;
+            let _ = write!(hex, "{b:02x}");
+        }
+        hex
+    }
 }
 
 #[cfg(test)]
@@ -298,7 +393,7 @@ mod tests {
         assert_eq!(intent.action_type, ActionType::Creation);
         assert_eq!(intent.subject, "entity_123");
         assert!(intent.requested_priority.is_none());
-        assert!(intent.constraints.is_empty());
+        assert_eq!(intent.constraints, Vec::<Constraint>::new());
         assert!(intent.metadata.is_empty());
     }
 
@@ -383,7 +478,7 @@ mod tests {
             content: HashMap::new(),
         };
 
-        let types = vec![
+        let types = [
             ActionType::Creation,
             ActionType::Modification,
             ActionType::Deletion,
@@ -393,7 +488,7 @@ mod tests {
 
         for (idx, action_type) in types.iter().enumerate() {
             let intent = Intent::new(
-                format!("intent_{}", idx),
+                format!("intent_{idx}"),
                 *action_type,
                 "subject".to_string(),
                 context.clone(),
@@ -402,5 +497,77 @@ mod tests {
 
             assert_eq!(intent.action_type, *action_type);
         }
+    }
+
+    fn intention_digest() -> Intent {
+        let mut data = HashMap::new();
+        data.insert("b".to_string(), "2".to_string());
+        data.insert("a".to_string(), "1".to_string());
+        Intent::new(
+            "i-1".to_string(),
+            ActionType::Read,
+            "jaykonta".to_string(),
+            CallContext {
+                caller_identity: "op-1".to_string(),
+                origin: "maia".to_string(),
+                instance: "cog-1".to_string(),
+            },
+            IntentData { content: data },
+        )
+    }
+
+    /// @id strongfather_intent_test_digest_stable
+    /// @role test
+    /// @layer core
+    /// @do test_digest_stability
+    //@human / @human L'empreinte est stable (indépendante de l'ordre d'insertion) et change si l'intention change.
+    #[test]
+    fn test_digest_stable_et_sensible() {
+        let base = intention_digest();
+        let mut data = HashMap::new();
+        data.insert("a".to_string(), "1".to_string());
+        data.insert("b".to_string(), "2".to_string());
+        let reordonnee = Intent {
+            data: IntentData { content: data },
+            ..intention_digest()
+        };
+        assert_eq!(base.digest(), reordonnee.digest());
+        assert_eq!(base.digest().len(), 64);
+
+        let mut autre_sujet = intention_digest();
+        autre_sujet.subject = "jaykonta-evil".to_string();
+        assert_ne!(base.digest(), autre_sujet.digest());
+        let mut autre_data = intention_digest();
+        autre_data
+            .data
+            .content
+            .insert("a".to_string(), "10".to_string());
+        assert_ne!(base.digest(), autre_data.digest());
+        // Pas de confusion par concaténation de champs (préfixes de longueur).
+        let mut concat = intention_digest();
+        concat.subject = "jaykontaop-1".to_string();
+        concat.call_context.caller_identity = String::new();
+        assert_ne!(base.digest(), concat.digest());
+        assert_ne!(base.digest(), intention_digest().with_priority(0).digest());
+    }
+
+    /// @id strongfather_intent_test_action_from_str
+    /// @role test
+    /// @layer core
+    /// @do test_action_parsing
+    //@human / @human Le nom canonique d'action fait l'aller-retour, sans correspondance approximative.
+    #[test]
+    fn test_action_from_str_exact() {
+        for a in [
+            ActionType::Creation,
+            ActionType::Modification,
+            ActionType::Deletion,
+            ActionType::Read,
+            ActionType::Evaluation,
+        ] {
+            assert_eq!(a.as_str().parse::<ActionType>(), Ok(a));
+        }
+        assert!("Read".parse::<ActionType>().is_err());
+        assert!("reading".parse::<ActionType>().is_err());
     }
 }

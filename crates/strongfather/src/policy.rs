@@ -9,6 +9,11 @@
 
 use std::collections::HashMap;
 
+use crate::intent::{ActionType, Intent};
+
+/// Clé de métadonnée d'intention portant la zone (H0, H1…) utilisée par [`PolicyTarget::zones`].
+pub const ZONE_METADATA_KEY: &str = "zone";
+
 /// @id strongfather_policy_type
 /// @role domain_model
 /// @layer core
@@ -174,6 +179,76 @@ pub struct PolicyRule {
     pub expression: String,
 }
 
+/// @id strongfather_policy_target
+/// @role domain_model
+/// @layer core
+/// @do represent_policy_target
+//@human / @human Cible structurée d'une politique : sélection par égalité exacte de champs de l'intention.
+//@human Jamais de sous-chaîne : une règle pour `jaykonta` ne vise pas `jaykonta-evil`.
+/// Cible structurée d'une politique.
+///
+/// Chaque champ vaut `None` (« tout ») ou `Some(liste)` (égalité exacte avec l'un des éléments ;
+/// une liste vide ne correspond à rien). La politique n'est examinée que si **tous** les champs
+/// correspondent.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PolicyTarget {
+    /// Types d'action visés.
+    pub actions: Option<Vec<ActionType>>,
+    /// Sujets visés (`Intent::subject`, égalité exacte).
+    pub subjects: Option<Vec<String>>,
+    /// Appelants visés (`CallContext::caller_identity`, égalité exacte).
+    pub callers: Option<Vec<String>>,
+    /// Origines visées (`CallContext::origin`, égalité exacte).
+    pub origins: Option<Vec<String>>,
+    /// Zones visées (métadonnée `zone` de l'intention ; absente ⇒ ne correspond pas).
+    pub zones: Option<Vec<String>>,
+}
+
+impl PolicyTarget {
+    /// @id strongfather_policy_target_any
+    /// @role constructor
+    /// @layer core
+    /// @do create_any_target
+    //@human / @human Cible universelle (toutes les intentions) ; la condition et la règle restreignent ensuite.
+    #[must_use]
+    pub fn any() -> Self {
+        Self::default()
+    }
+
+    /// @id strongfather_policy_target_matches
+    /// @role query
+    /// @layer core
+    /// @do match_target_exactly
+    //@human / @human Vrai si l'intention correspond exactement à tous les champs renseignés de la cible.
+    #[must_use]
+    pub fn matches(&self, intent: &Intent) -> bool {
+        fn dans(liste: Option<&Vec<String>>, valeur: Option<&str>) -> bool {
+            match liste {
+                None => true,
+                Some(l) => valeur.is_some_and(|v| l.iter().any(|x| x == v)),
+            }
+        }
+        let action_ok = self
+            .actions
+            .as_ref()
+            .is_none_or(|l| l.contains(&intent.action_type));
+        action_ok
+            && dans(self.subjects.as_ref(), Some(intent.subject.as_str()))
+            && dans(
+                self.callers.as_ref(),
+                Some(intent.call_context.caller_identity.as_str()),
+            )
+            && dans(
+                self.origins.as_ref(),
+                Some(intent.call_context.origin.as_str()),
+            )
+            && dans(
+                self.zones.as_ref(),
+                intent.metadata.get(ZONE_METADATA_KEY).map(String::as_str),
+            )
+    }
+}
+
 /// @id strongfather_policy
 /// @role domain_model
 /// @layer core
@@ -230,6 +305,12 @@ pub struct Policy {
     /// @do store_composite_policies
     //@human / @human Politiques élémentaires pour une politique composite (optionnel).
     pub composite_policies: Option<Vec<PolicyId>>,
+    /// @id strongfather_policy_target_field
+    /// @role domain_model
+    /// @layer core
+    /// @do specify_policy_target
+    //@human / @human Cible structurée (sélection exacte). Défaut : toutes les intentions.
+    pub target: PolicyTarget,
 }
 
 impl Policy {
@@ -256,7 +337,70 @@ impl Policy {
             priority: PolicyPriorityLevel::default(),
             metadata: HashMap::new(),
             composite_policies: None,
+            target: PolicyTarget::default(),
         }
+    }
+
+    /// @id strongfather_policy_with_target
+    /// @role builder
+    /// @layer core
+    /// @do set_policy_target
+    //@human / @human Définit la cible structurée de la politique.
+    /// @depends strongfather_policy_new
+    #[must_use]
+    pub fn with_target(mut self, target: PolicyTarget) -> Self {
+        self.target = target;
+        self
+    }
+
+    /// @id strongfather_policy_check_coherence
+    /// @role query
+    /// @layer core
+    /// @do check_type_effect_coherence
+    //@human / @human Vérifie la cohérence type/effet. Une politique incohérente est refusée au chargement
+    //@human et, si elle est visée par une intention, provoque un refus (fail-closed).
+    /// Cohérence type ↔ effet :
+    /// - `Permission` → `Authorize` | `Deny`
+    /// - `Constraint` → `Constrain` | `Deny`
+    /// - `Validation` → `Validate` | `Deny`
+    /// - `Priority` → `Prioritize`
+    /// - `Composite` → `Authorize` | `Deny` | `Constrain` | `Validate`, avec au moins une
+    ///   politique élémentaire
+    pub fn check_coherence(&self) -> Result<(), String> {
+        use PolicyEffect as E;
+        use PolicyType as T;
+        let ok = matches!(
+            (self.policy_type, self.effect),
+            (T::Permission, E::Authorize | E::Deny)
+                | (T::Constraint, E::Constrain | E::Deny)
+                | (T::Validation, E::Validate | E::Deny)
+                | (T::Priority, E::Prioritize)
+                | (
+                    T::Composite,
+                    E::Authorize | E::Deny | E::Constrain | E::Validate
+                )
+        );
+        if !ok {
+            return Err(format!(
+                "politique '{}' : effet {:?} incohérent avec le type {:?}",
+                self.id, self.effect, self.policy_type
+            ));
+        }
+        if self.policy_type == T::Composite
+            && self.composite_policies.as_ref().is_none_or(Vec::is_empty)
+        {
+            return Err(format!(
+                "politique composite '{}' sans politique élémentaire",
+                self.id
+            ));
+        }
+        if self.policy_type != T::Composite && self.composite_policies.is_some() {
+            return Err(format!(
+                "politique '{}' : composite_policies réservé au type Composite",
+                self.id
+            ));
+        }
+        Ok(())
     }
 
     /// @id strongfather_policy_with_priority
@@ -570,7 +714,7 @@ mod tests {
     //@human / @human Test que tous les types de politiques sont bien définis.
     #[test]
     fn test_all_policy_types() {
-        let types = vec![
+        let types = [
             PolicyType::Permission,
             PolicyType::Constraint,
             PolicyType::Priority,
@@ -580,7 +724,7 @@ mod tests {
 
         for (idx, policy_type) in types.iter().enumerate() {
             let policy = Policy::new(
-                format!("POL-{}", idx),
+                format!("POL-{idx}"),
                 *policy_type,
                 PolicyCondition {
                     expression: "true".to_string(),

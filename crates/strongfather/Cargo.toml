@@ -13,6 +13,12 @@ description = "StrongFather - Moteur de décision stratégique et politique du M
 
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
+# Empreinte canonique des intentions (Decision.intent_digest)
+sha2 = "0.10"
+# Chargeur de politiques (TOML / JSON), refus en cas d'erreur
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
 
 [dev-dependencies]
 

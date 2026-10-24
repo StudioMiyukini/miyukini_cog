@@ -12,9 +12,8 @@ categories.workspace = true
 description = "BondingBrother - Stratégie de liaison gouvernée du Miyukini Core System"
 
 [dependencies]
-miyukini-kernel = { path = "../miyukini-kernel" }
+# Décision ALLOW / DENY (porte obligatoire, K-11). KindMother retiré : non utilisé (K-18).
 strongfather = { path = "../strongfather" }
-kindmother = { path = "../kindmother" }
 
 [dev-dependencies]
 

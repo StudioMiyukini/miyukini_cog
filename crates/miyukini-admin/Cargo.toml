@@ -18,7 +18,7 @@ tokio = { version = "1", features = ["full"] }
 tower-http = { version = "0.5", features = ["cors", "fs"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-strongfather = { path = "../strongfather" }
+# strongfather retiré (K-18) : la décision passe par bondingbrother (ré-export `bondingbrother::strongfather`).
 kindmother = { path = "../kindmother" }
 borderguard = { path = "../borderguard" }
 caringnanny = { path = "../caringnanny" }

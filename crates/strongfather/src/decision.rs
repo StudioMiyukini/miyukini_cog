@@ -9,7 +9,25 @@
 
 use std::collections::HashMap;
 
+use crate::intent::Intent;
 use crate::policy::PolicyId;
+
+/// Identifiant de « règle décisive » quand aucune politique n'autorise : refus par défaut.
+pub const DEFAULT_DENY_RULE: &str = "défaut: refus";
+
+/// @id strongfather_verdict
+/// @role domain_model
+/// @layer core
+/// @do represent_binary_verdict
+//@human / @human Verdict binaire ALLOW / DENY dérivé d'une décision. Tout ce qui n'est pas
+//@human « Accepted » vaut DENY (ambigu, différé, refusé : fail-closed, C-12).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Verdict {
+    /// Autorisé.
+    Allow,
+    /// Refusé.
+    Deny,
+}
 
 /// @id strongfather_decision_type
 /// @role domain_model
@@ -300,6 +318,19 @@ pub struct Decision {
     /// @do store_decision_metadata
     //@human / @human Métadonnées de traçabilité.
     pub metadata: DecisionMetadata,
+    /// @id strongfather_decision_deciding_rule
+    /// @role domain_model
+    /// @layer core
+    /// @do reference_deciding_rule
+    //@human / @human Identifiant de la politique qui a tranché, ou `DEFAULT_DENY_RULE` (« défaut: refus »).
+    pub deciding_rule: PolicyId,
+    /// @id strongfather_decision_intent_digest
+    /// @role domain_model
+    /// @layer core
+    /// @do bind_decision_to_intent
+    //@human / @human Empreinte SHA-256 de l'intention évaluée (`Intent::digest`) ; permet à un auditeur
+    //@human de vérifier que la décision jointe à une action porte bien sur cette action.
+    pub intent_digest: String,
 }
 
 impl Decision {
@@ -323,7 +354,45 @@ impl Decision {
             policies_applied,
             evaluation_context: EvaluationContext::default(),
             metadata: DecisionMetadata::default(),
+            deciding_rule: String::new(),
+            intent_digest: String::new(),
         }
+    }
+
+    /// @id strongfather_decision_verdict
+    /// @role query
+    /// @layer core
+    /// @do derive_binary_verdict
+    //@human / @human Verdict binaire : Allow uniquement si la décision est acceptée ET liée à une empreinte.
+    #[must_use]
+    pub fn verdict(&self) -> Verdict {
+        if self.is_accepted() && !self.intent_digest.is_empty() {
+            Verdict::Allow
+        } else {
+            Verdict::Deny
+        }
+    }
+
+    /// @id strongfather_decision_reason
+    /// @role query
+    /// @layer core
+    /// @do expose_human_reason
+    //@human / @human Raison lisible de la décision (explication de la justification).
+    #[must_use]
+    pub fn reason(&self) -> &str {
+        &self.justification.explanation
+    }
+
+    /// @id strongfather_decision_matches_intent
+    /// @role query
+    /// @layer core
+    /// @do verify_decision_intent_binding
+    //@human / @human Vrai si la décision porte sur exactement cette intention (même id, même empreinte).
+    #[must_use]
+    pub fn matches_intent(&self, intent: &Intent) -> bool {
+        !self.intent_digest.is_empty()
+            && self.intent_id == intent.intent_id
+            && self.intent_digest == intent.digest()
     }
 
     /// @id strongfather_decision_with_evaluation_context

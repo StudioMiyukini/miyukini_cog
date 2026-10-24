@@ -8,18 +8,50 @@
 //!
 //! ## Principes fondamentaux
 //!
-//! - **Aucune autorité sur l'exécution** : StrongFather produit des décisions mais ne les exécute jamais
-//! - **Aucune autorité sur la persistance** : StrongFather ne modifie jamais de données persistées
+//! - **Aucune autorité sur l'exécution** : StrongFather produit des décisions mais ne les exécute jamais (INV-SF-1)
+//! - **Aucune autorité sur la persistance** : StrongFather ne modifie jamais de données persistées (INV-SF-2)
 //! - **Décisions pures** : Toutes les décisions sont non ambiguës et justifiables
 //! - **Zero-trust** : Toute intention est évaluée selon les politiques, sans présupposer la validité de l'appelant
 //! - **Pureté fonctionnelle** : Aucun effet de bord, déterminisme garanti
 //!
+//! ## API publique de décision
+//!
+//! - `PolicyEngine::decide(&self, &Intent) -> Decision` : pure, déterministe, synchrone ; **refus par défaut**
+//! - `PolicyEngine::try_new(PolicySet)` : moteur validé (expressions, cohérence, composites) ;
+//!   `PolicyEngine::new` accepte tout mais refuse toute intention visée par une politique invalide
+//! - `PolicyEngine::load_file(path)` / `PolicySet::from_toml_str` / `from_json_str` : chargeur
+//!   fail-closed (illisible, invalide ou vide ⇒ erreur, jamais « vide ⇒ autoriser »)
+//! - `PolicyEngine` se clone à coût constant (`Arc`) : un moteur par processus, partagé entre appels
+//! - `Decision::verdict()` → `Verdict::Allow` / `Verdict::Deny` ; `deciding_rule` (id de la
+//!   politique décisive ou `"défaut: refus"`) ; `reason()` ; `intent_digest` (SHA-256 canonique)
+//!
+//! ## Ordre de décision
+//!
+//! - (1) Intention structurellement invalide ⇒ Deny (`validation-structurelle`)
+//! - (2) Sélection des politiques par cible exacte (`PolicyTarget` : action, sujet, appelant,
+//!   origine, zone) — jamais par sous-chaîne ; ordre stable priorité ↓ puis id ↑
+//! - (3) Erreur d'évaluation (expression mal formée, attribut inconnu, type, composite
+//!   absente ou cyclique, type/effet incohérent) ⇒ Deny immédiat (C-12)
+//! - (4) `Deny` applicable et règle vraie ⇒ Deny (l'emporte toujours sur Authorize)
+//! - (5) `Constrain` / `Validate` applicable et règle fausse ⇒ Deny
+//! - (6) `Authorize` applicable et règle vraie ⇒ Allow
+//! - (7) Sinon ⇒ Deny « défaut: refus »
+//!
+//! ## Joindre une décision à une action
+//!
+//! - L'appelant ne branche pas StrongFather directement : il passe par la porte de
+//!   BondingBrother (`bondingbrother::Gate`), qui seule délivre un jeton d'autorisation
+//! - La `Decision` porte `intent_id` et `intent_digest` : on la journalise avec l'action ;
+//!   un auditeur vérifie `decision.matches_intent(&intent)` (même id, même empreinte)
+//!
 //! ## Modules
 //!
-//! - **intent** : Modèle d'intention (demande d'évaluation)
-//! - **policy** : Modèle de politique (règles déclaratives)
-//! - **decision** : Modèle de décision (résultat d'évaluation)
-//! - **policy_engine** : Moteur d'application des politiques
+//! - **intent** : Modèle d'intention (demande d'évaluation) et empreinte canonique
+//! - **policy** : Modèle de politique (règles déclaratives, cible structurée)
+//! - **decision** : Modèle de décision (résultat d'évaluation, verdict)
+//! - **expr** : Évaluateur d'expressions borné (conditions et règles)
+//! - **policy_engine** : Moteur d'application des politiques et `decide`
+//! - **loader** : Chargement TOML / JSON fail-closed
 //! - **priority** : Gestion des priorités
 //! - **validator** : Validation structurelle des intentions
 //!
@@ -62,6 +94,22 @@ pub mod decision;
 /// Module de moteur de politiques
 pub mod policy_engine;
 
+/// @id strongfather_module_expr
+/// @role infrastructure
+/// @layer core
+/// @do expose_expr_module
+//@human / @human Module d'évaluation d'expressions (conditions et règles), borné et sans `eval`.
+/// Module d'évaluation d'expressions
+pub mod expr;
+
+/// @id strongfather_module_loader
+/// @role infrastructure
+/// @layer core
+/// @do expose_loader_module
+//@human / @human Module de chargement des politiques (TOML / JSON), fail-closed.
+/// Module de chargement des politiques
+pub mod loader;
+
 /// @id strongfather_module_priority
 /// @role infrastructure
 /// @layer core
@@ -96,7 +144,7 @@ pub use intent::{ActionType, CallContext, Constraint, Intent, IntentData, Intent
 /// @depends strongfather_module_policy
 pub use policy::{
     Policy, PolicyCondition, PolicyEffect, PolicyId, PolicyPriorityLevel, PolicyResult, PolicyRule,
-    PolicySet, PolicyType,
+    PolicySet, PolicyTarget, PolicyType, ZONE_METADATA_KEY,
 };
 
 /// @id strongfather_reexport_decision
@@ -105,7 +153,10 @@ pub use policy::{
 /// @do reexport_decision_types
 //@human / @human Ré-export des types de décision pour faciliter l'usage.
 /// @depends strongfather_module_decision
-pub use decision::{Decision, DecisionMetadata, DecisionType, EvaluationContext, Justification};
+pub use decision::{
+    Decision, DecisionMetadata, DecisionType, EvaluationContext, Justification, Verdict,
+    DEFAULT_DENY_RULE,
+};
 
 /// @id strongfather_reexport_policy_engine
 /// @role infrastructure
@@ -113,7 +164,15 @@ pub use decision::{Decision, DecisionMetadata, DecisionType, EvaluationContext, 
 /// @do reexport_policy_engine
 //@human / @human Ré-export du moteur de politiques pour faciliter l'usage.
 /// @depends strongfather_module_policy_engine
-pub use policy_engine::{PolicyEngine, PolicyEngineError};
+pub use policy_engine::{PolicyEngine, PolicyEngineError, STRUCTURAL_VALIDATION_RULE};
+
+/// @id strongfather_reexport_expr_loader
+/// @role infrastructure
+/// @layer core
+/// @do reexport_expr_and_loader
+//@human / @human Ré-export de l'évaluateur d'expressions et des erreurs de chargement.
+pub use expr::{Expr, ExprError};
+pub use loader::PolicyLoadError;
 
 /// @id strongfather_reexport_priority
 /// @role infrastructure

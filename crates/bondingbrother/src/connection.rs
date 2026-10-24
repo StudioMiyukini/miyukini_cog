@@ -1,8 +1,5 @@
 //! Module de gestion de connexions de BondingBrother
 
-use miyukini_kernel::{IdGenerator, UuidIdGenerator};
-use std::collections::HashSet;
-
 /// @id bondingbrother_connection
 /// @role data
 /// @layer core
@@ -55,44 +52,46 @@ pub enum ConnectionError {
     //@human / @human Opérateur déjà connecté.
     /// @depends bondingbrother_connection_error
     AlreadyConnected,
+    /// @id bondingbrother_connection_error_not_implemented
+    /// @role error
+    /// @layer core
+    /// @do represent_not_implemented_error
+    //@human / @human Fonction non implémentée : refus explicite (C-14), jamais de succès factice.
+    /// @depends bondingbrother_connection_error
+    NonImplemente(String),
 }
 
 impl std::fmt::Display for ConnectionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ConnectionError::AlreadyConnected => write!(f, "Operator already connected"),
+            ConnectionError::NonImplemente(m) => write!(f, "Non implémenté : {m}"),
         }
     }
 }
 
 impl std::error::Error for ConnectionError {}
 
-/// Implémentation par défaut : registre en mémoire des connexions par operator_id.
+/// Implémentation par défaut : **refuse toute connexion** (C-14, K-14).
+///
+/// Une connexion d'Opérateur exige authentification et règles BorderGuard (INV-BG-7), non
+/// encore branchées : accepter n'importe quel `operator_id` serait un succès factice.
 #[derive(Debug, Default)]
-pub struct DefaultConnectionManager {
-    connected: HashSet<String>,
-}
+pub struct DefaultConnectionManager;
 
 impl DefaultConnectionManager {
-    /// Crée un gestionnaire de connexions vide.
+    /// Crée un gestionnaire de connexions (refus systématique tant que non implémenté).
     #[must_use]
     pub fn new() -> Self {
-        Self::default()
+        Self
     }
 }
 
 impl ConnectionManager for DefaultConnectionManager {
     fn connect(&mut self, operator_id: &str) -> Result<Connection, ConnectionError> {
-        let op = operator_id.to_string();
-        if self.connected.contains(&op) {
-            return Err(ConnectionError::AlreadyConnected);
-        }
-        let id = UuidIdGenerator.generate().to_string();
-        self.connected.insert(op.clone());
-        Ok(Connection {
-            id,
-            operator_id: op,
-        })
+        Err(ConnectionError::NonImplemente(format!(
+            "connexion de l'Opérateur '{operator_id}' : authentification et BorderGuard non branchés"
+        )))
     }
 }
 
@@ -115,15 +114,21 @@ mod tests {
         assert_eq!(conn.id, "conn-1");
     }
 
+    /// @id bondingbrother_connection_test_stub_refuse
+    /// @role test
+    /// @layer core
+    /// @do verify_stub_refuses
+    //@human / @human Le gestionnaire par défaut refuse explicitement (pas de connexion factice).
     #[test]
-    fn test_default_connection_manager_connect() {
-        use super::*;
+    fn test_default_connection_manager_refuse() {
         let mut mgr = DefaultConnectionManager::new();
-        let c1 = mgr.connect("op-1").unwrap();
-        assert!(!c1.id.is_empty());
-        assert_eq!(c1.operator_id, "op-1");
-        assert!(mgr.connect("op-1").is_err());
-        let c2 = mgr.connect("op-2").unwrap();
-        assert_ne!(c1.id, c2.id);
+        assert!(matches!(
+            mgr.connect("op-1"),
+            Err(ConnectionError::NonImplemente(_))
+        ));
+        assert!(matches!(
+            mgr.connect(""),
+            Err(ConnectionError::NonImplemente(_))
+        ));
     }
 }

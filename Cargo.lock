@@ -1061,8 +1061,6 @@ dependencies = [
 name = "bondingbrother"
 version = "0.1.0"
 dependencies = [
- "kindmother",
- "miyukini-kernel",
  "strongfather",
 ]
 
@@ -6143,9 +6141,7 @@ dependencies = [
 name = "masterbutler"
 version = "0.1.0"
 dependencies = [
- "kindmother",
  "miyukini-kernel",
- "strongfather",
 ]
 
 [[package]]
@@ -6868,7 +6864,6 @@ dependencies = [
  "miyukini-kernel",
  "serde",
  "serde_json",
- "strongfather",
  "tamr",
  "tokio",
  "tower-http 0.5.2",
@@ -11228,6 +11223,10 @@ name = "strongfather"
 version = "0.1.0"
 dependencies = [
  "miyukini-kernel",
+ "serde",
+ "serde_json",
+ "sha2",
+ "toml",
 ]
 
 [[package]]

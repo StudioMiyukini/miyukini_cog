@@ -230,7 +230,7 @@ mod tests {
         };
 
         let intent = Intent::new(
-            "".to_string(), // Identifiant vide
+            String::new(), // Identifiant vide
             ActionType::Creation,
             "entity_123".to_string(),
             context,
@@ -265,7 +265,7 @@ mod tests {
         let intent = Intent::new(
             "intent_002".to_string(),
             ActionType::Modification,
-            "".to_string(), // Sujet vide
+            String::new(), // Sujet vide
             context,
             IntentData {
                 content: HashMap::new(),
@@ -290,7 +290,7 @@ mod tests {
         let validator = IntentValidator::new();
 
         let context = CallContext {
-            caller_identity: "".to_string(), // Identité vide
+            caller_identity: String::new(), // Identité vide
             origin: "product_a".to_string(),
             instance: "instance_1".to_string(),
         };

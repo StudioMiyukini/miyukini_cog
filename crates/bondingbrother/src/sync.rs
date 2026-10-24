@@ -52,24 +52,33 @@ pub enum SyncError {
     //@human / @human Échec de synchronisation.
     /// @depends bondingbrother_sync_error
     Failed(String),
+    /// @id bondingbrother_sync_error_not_implemented
+    /// @role error
+    /// @layer core
+    /// @do represent_not_implemented_error
+    //@human / @human Synchronisation non implémentée : refus explicite (C-14), jamais d'`Ok` silencieux.
+    /// @depends bondingbrother_sync_error
+    NonImplemente(String),
 }
 
 impl std::fmt::Display for SyncError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SyncError::Failed(msg) => write!(f, "Sync failed: {msg}"),
+            SyncError::NonImplemente(msg) => write!(f, "Non implémenté : {msg}"),
         }
     }
 }
 
 impl std::error::Error for SyncError {}
 
-/// Implémentation par défaut : exécution de la stratégie sans persistance (no-op ou marquage).
+/// Implémentation par défaut : **refuse** (C-14, K-14). Un `Ok(())` sans rien synchroniser
+/// masquerait une perte de données hors ligne.
 #[derive(Debug, Default)]
 pub struct DefaultSyncManager;
 
 impl DefaultSyncManager {
-    /// Crée un gestionnaire de sync.
+    /// Crée un gestionnaire de sync (refus systématique tant que non implémenté).
     #[must_use]
     pub fn new() -> Self {
         Self
@@ -77,8 +86,10 @@ impl DefaultSyncManager {
 }
 
 impl SyncManager for DefaultSyncManager {
-    fn sync(&mut self, _strategy: SyncStrategy) -> Result<(), SyncError> {
-        Ok(())
+    fn sync(&mut self, strategy: SyncStrategy) -> Result<(), SyncError> {
+        Err(SyncError::NonImplemente(format!(
+            "synchronisation {strategy:?} : tampon hors ligne non branché"
+        )))
     }
 }
 
@@ -98,11 +109,21 @@ mod tests {
         assert_ne!(SyncStrategy::Immediate, SyncStrategy::Deferred);
     }
 
+    /// @id bondingbrother_sync_test_stub_refuse
+    /// @role test
+    /// @layer core
+    /// @do verify_stub_refuses
+    //@human / @human Le gestionnaire par défaut refuse explicitement (pas de succès silencieux).
     #[test]
-    fn test_default_sync_manager() {
-        use super::*;
+    fn test_default_sync_manager_refuse() {
         let mut mgr = DefaultSyncManager::new();
-        assert!(mgr.sync(SyncStrategy::Immediate).is_ok());
-        assert!(mgr.sync(SyncStrategy::Deferred).is_ok());
+        assert!(matches!(
+            mgr.sync(SyncStrategy::Immediate),
+            Err(SyncError::NonImplemente(_))
+        ));
+        assert!(matches!(
+            mgr.sync(SyncStrategy::Deferred),
+            Err(SyncError::NonImplemente(_))
+        ));
     }
 }
