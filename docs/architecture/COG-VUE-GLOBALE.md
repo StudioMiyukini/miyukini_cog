@@ -166,7 +166,7 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 - **Retraits incomplets** : ✅ docs et code supprimés (Clicker, Survivor, thème Sodomight, `miyuki-ui-egui`)
 - **Services retirés encore cités** : ✅ JayXpose, JayFestival retirés (docs, pont LLM, notions « vitrine / exposant ») ; JayShop propriétaire de son catalogue et de ses stocks
 - **Code mort** : ✅ 10 modules non déclarés de `apps/central/src/services/` supprimés (≈ 15 000 lignes)
-- **Hors workspace** : `crates/jayclub` vide supprimé ; **décision ouverte** : `lifegame-*` (4 crates), `apps/ui-builder`, `kindmother-db-adapter` (10 lignes)
+- **Hors workspace** : ✅ supprimés (`jayclub`, `lifegame-*`, `apps/ui-builder`, `kindmother-db-adapter`) — amendement A-001
 - **Sans doc** : ✅ fiches créées — [Jay Bureau](../services/JayBureau/_index.md), [Whisper](../services/MiyukiniWhisper/_index.md), [maia-llm](../tools/MaiaLLM/_index.md), [TEAM](../tools/TEAM/_index.md), [MIPOWER](../tools/MIPOWER/_index.md), [design system](../ux_ui/DesignSystem/_index.md), [MiyuSceau](../tools/MiyuSceau/_index.md), [MiyuCloud](../services/MiyuCloud/_index.md), [JayCloud](../services/JayCloud/_index.md)
 - **Contradictions** : ✅ résolues le 2026-10-24 — rôle de JayKoa (calendrier universel, fiche site corrigée) ; statut JayRDV (en préparation : crate backend testée, sans binaire) ; MiyuCloud ≠ JayCloud (deux services conservés, docs JayCloud révisées) ; décompte 10 Cores / 30 services (§4, README, `doc_for_website`)
 - **Stubs de sécurité** : → code, lot 0 du [plan](../implementation/PLAN-IMPLEMENTATION.md) (`miyuantispam`, `miyuwebway_tracker`, `miyuvalidate`)
