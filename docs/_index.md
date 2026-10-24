@@ -6,14 +6,17 @@ Index global de la documentation du projet Miyukini COG.
 
 ## Carte des strates actives
 
+Numérotation unifiée K / C / T / S / A / H (décision D6, [vue globale](architecture/COG-VUE-GLOBALE.md) §2).
+
 | Strate | Dossier | Description |
 |---|---|---|
 | K | [kernel/](kernel/) | Substrat technique neutre (Id, Logger, Clock, Config, Lifecycle) |
-| 3 | [contrats/](contrats/) | Invariants, protocoles et templates transverses |
-| 4 | [cores/](cores/) | Cores systeme (KindMother, StrongFather, CaringNanny, etc.) |
-| 6 | [tools/](tools/) | Toolkits et outils executables |
-| 7 | [services/](services/) | Services produits et operateurs |
-| 9 | [admin/](admin/) | MiyukiniAdmin |
+| C | [cores/](cores/_index.md) | 10 Cores : gouvernent, n'exécutent pas ([index](cores/_index.md)) |
+| T | [tools/](tools/) | Toolkits et outils executables |
+| S | [services/](services/) | Services produits et operateurs |
+| A | [admin/](admin/) | MiyukiniAdmin (zone COG uniquement, D7) |
+| H | [cores/TAMR/](cores/TAMR/_index.md) | Intervention humaine (TAMR), transversale |
+| — | [contrats/](contrats/) | Invariants, protocoles et templates transverses |
 
 ## Dossiers transverses actifs
 
@@ -36,4 +39,4 @@ Index global de la documentation du projet Miyukini COG.
 
 ---
 
-Date de mise a jour : 2026-03-05
+Date de mise a jour : 2026-10-24

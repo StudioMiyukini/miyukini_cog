@@ -167,4 +167,4 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 - **Sans doc** : Suite Jay Bureau, Whisper, maia-llm, TEAM, MIPOWER, `miyusceau` dans `tools/`, design system UI
 - **Contradictions** : rôle de JayKoa (site web), statut JayRDV, MiyuCloud vs JayCloud, nombre de services et de Cores annoncés
 - **Stubs de sécurité** : `miyuantispam` (limitation toujours « autorisée »), `miyuwebway_tracker`, `miyuvalidate`
-- **Index** : `_index.md` racine et index des Cores sans lien vers le modèle cible
+- **Index** : ✅ `_index.md` racine aligné sur D6 ; [index des Cores](../cores/_index.md) créé
