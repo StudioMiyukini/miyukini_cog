@@ -340,7 +340,12 @@ impl EtatRegistre {
     /// **revérifiées** (ancres et seuil de la politique, défense en profondeur
     /// contre un stockage altéré) ; la fraîcheur ne l'est pas (voir
     /// [`Self::exiger_fraicheur`]).
-    pub fn decoder(octets: &[u8], ancres: &AncresDeConfiance, politique: &PolitiqueTete) -> Result<Self, ErreurRegistre> {
+    pub fn decoder(
+        octets: &[u8],
+        ancres: &AncresDeConfiance,
+        politique: &PolitiqueTete,
+        registre_attendu: &[u8; 32],
+    ) -> Result<Self, ErreurRegistre> {
         if octets.len() < 9 || &octets[0..4] != MAGIC_ETAT || octets[4] != VERSION_ETAT {
             return Err(ErreurRegistre::EtatInvalide);
         }
@@ -352,6 +357,11 @@ impl EtatRegistre {
         let tete = decoder_titre::<TeteRegistre>(&Sceau::decoder(sceau)?.charge)?;
         // Instant d'émission : toujours dans la fenêtre de la tête.
         let verifie = verifier_seuil::<TeteRegistre>(sceau, ancres, politique.seuil, tete.emise_a)?;
+        // Un état stocké d'un autre registre (même ancres) ne doit jamais être
+        // repris comme référence de monotonie pour celui-ci.
+        if &verifie.titre().registre != registre_attendu {
+            return Err(ErreurRegistre::RegistreInattendu);
+        }
         Ok(Self { tete: verifie.into_titre(), sceau: sceau.to_vec() })
     }
 }

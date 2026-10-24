@@ -445,7 +445,7 @@ fn etat_persistant_et_inclusion() {
     let etat = etat_initial(&t);
     let octets = etat.encoder();
     assert_eq!(&octets[..5], b"MSRG\x01");
-    let relu = EtatRegistre::decoder(&octets, &a, &pol).unwrap();
+    let relu = EtatRegistre::decoder(&octets, &a, &pol, &REG).unwrap();
     assert_eq!(relu, etat);
     // Rechargé même périmé (la fraîcheur se contrôle à l'usage).
     assert!(matches!(relu.exiger_fraicheur(&pol, T0 + 10 * AGE_MAX_TETE_DEFAUT_SECS), Err(ErreurRegistre::TeteGelee { .. })));
@@ -454,10 +454,15 @@ fn etat_persistant_et_inclusion() {
     let mut altere = octets.clone();
     let n = altere.len();
     altere[n - 1] ^= 1;
-    assert!(EtatRegistre::decoder(&altere, &a, &pol).is_err());
-    assert!(EtatRegistre::decoder(&octets, &AncresDeConfiance::new(), &pol).is_err());
-    assert_eq!(EtatRegistre::decoder(&octets[..n - 1], &a, &pol).unwrap_err(), ErreurRegistre::EtatInvalide);
-    assert_eq!(EtatRegistre::decoder(b"MSRG", &a, &pol).unwrap_err(), ErreurRegistre::EtatInvalide);
+    assert!(EtatRegistre::decoder(&altere, &a, &pol, &REG).is_err());
+    assert!(EtatRegistre::decoder(&octets, &AncresDeConfiance::new(), &pol, &REG).is_err());
+    // État d'un autre registre : refusé même avec des signatures valides.
+    assert_eq!(
+        EtatRegistre::decoder(&octets, &a, &pol, &[0x99; 32]).unwrap_err(),
+        ErreurRegistre::RegistreInattendu
+    );
+    assert_eq!(EtatRegistre::decoder(&octets[..n - 1], &a, &pol, &REG).unwrap_err(), ErreurRegistre::EtatInvalide);
+    assert_eq!(EtatRegistre::decoder(b"MSRG", &a, &pol, &REG).unwrap_err(), ErreurRegistre::EtatInvalide);
 
     // Inclusion vérifiée contre la tête retenue, seulement si fraîche.
     let feuilles = arbre(9);

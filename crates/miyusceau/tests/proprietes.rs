@@ -109,7 +109,7 @@ fn exercer_decodeurs(octets: &[u8]) {
     let _ = decoder_titre::<TeteRegistre>(octets);
     let _ = PreuveInclusion::decoder(octets);
     let _ = PreuveCoherence::decoder(octets);
-    let _ = EtatRegistre::decoder(octets, &AncresDeConfiance::new(), &PolitiqueTete::journal_cog());
+    let _ = EtatRegistre::decoder(octets, &AncresDeConfiance::new(), &PolitiqueTete::journal_cog(), &REG);
 }
 
 fn campagne(graine: u64, cles: &[&CleSignature]) {
@@ -183,7 +183,7 @@ fn mutations_etat_et_preuves() {
         exercer_decodeurs(&m);
         if m != octets_etat {
             // Un état altéré n'est jamais rechargé avec une autre tête.
-            if let Ok(relu) = EtatRegistre::decoder(&m, &ancres, &pol) {
+            if let Ok(relu) = EtatRegistre::decoder(&m, &ancres, &pol, &REG) {
                 assert_eq!(relu.tete(), etat.tete());
             }
         }

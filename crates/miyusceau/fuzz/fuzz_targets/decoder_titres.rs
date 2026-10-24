@@ -21,5 +21,5 @@ fuzz_target!(|charge: &[u8]| {
         tete.encoder(&mut e).expect("titre décodé ré-encodable");
         assert_eq!(e.finir(), charge, "titre non canonique");
     }
-    assert!(EtatRegistre::decoder(charge, &AncresDeConfiance::new(), &PolitiqueTete::journal_cog()).is_err());
+    assert!(EtatRegistre::decoder(charge, &AncresDeConfiance::new(), &PolitiqueTete::journal_cog(), &[0u8; 32]).is_err());
 });
