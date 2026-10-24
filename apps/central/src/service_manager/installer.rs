@@ -16,11 +16,98 @@ use std::io::Read;
 use super::registry::{service_install_dir, InstalledService, ServiceRegistryData};
 use miyumarket::manifest::ServiceManifest;
 
+/// Valide le champ `binary_name` d'un manifeste : simple nom de fichier,
+/// sans séparateur, sans `..`, sans nom absolu/lecteur, non vide.
+/// Fail-closed : tout nom douteux est refusé (audit C3 — évite `../../x`).
+pub fn validate_binary_name(name: &str) -> Result<(), String> {
+    let invalid = || format!("binary_name invalide '{name}' : un simple nom de fichier est requis");
+    if name.is_empty() || name == "." || name == ".." || name.len() > 255 {
+        return Err(invalid());
+    }
+    if name.contains('/') || name.contains('\\') || name.contains(':') || name.contains('\0') {
+        return Err(invalid());
+    }
+    if name.contains("..") {
+        return Err(invalid());
+    }
+    // Contrôle final : un seul composant « normal » côté std::path.
+    let mut comps = std::path::Path::new(name).components();
+    match (comps.next(), comps.next()) {
+        (Some(std::path::Component::Normal(_)), None) => Ok(()),
+        _ => Err(invalid()),
+    }
+}
+
+/// Nom du binaire (validé) pour un manifeste donné.
+fn resolve_binary_name(manifest: &ServiceManifest) -> Result<String, String> {
+    match manifest.binary_name.as_deref() {
+        Some(n) => {
+            validate_binary_name(n)?;
+            Ok(n.to_string())
+        }
+        None => Ok(if cfg!(windows) {
+            format!("{}.exe", manifest.id)
+        } else {
+            manifest.id.clone()
+        }),
+    }
+}
+
+/// Calcule le chemin de sortie d'une entrée d'archive, ou refuse (Zip Slip).
+/// Rejette : chemin absolu, composant `..`, lecteur Windows, entrée symlink,
+/// et tout chemin qui sortirait de `install_dir` après jointure.
+fn safe_entry_path(
+    file: &zip::read::ZipFile<'_>,
+    install_dir: &std::path::Path,
+) -> Result<std::path::PathBuf, String> {
+    let raw = file.name().to_string();
+    if file.is_symlink() {
+        return Err(format!("Entrée symlink refusée dans le package : '{raw}'"));
+    }
+    if raw.starts_with('/') || raw.starts_with('\\') || raw.contains(':') {
+        return Err(format!("Chemin absolu refusé dans le package : '{raw}'"));
+    }
+    if raw.split(['/', '\\']).any(|c| c == "..") {
+        return Err(format!("Chemin '..' refusé dans le package : '{raw}'"));
+    }
+    let rel = file
+        .enclosed_name()
+        .ok_or_else(|| format!("Chemin d'entrée dangereux refusé : '{raw}'"))?;
+    let out = install_dir.join(&rel);
+    // Défense en profondeur : après jointure, rester sous install_dir.
+    if !out.starts_with(install_dir)
+        || out
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir))
+    {
+        return Err(format!("Chemin hors du répertoire d'installation : '{raw}'"));
+    }
+    Ok(out)
+}
+
 /// Installe un service depuis les bytes d'un package .msp (archive ZIP).
+/// `expected_id` : identifiant de service demandé ; le manifeste du package
+/// doit porter exactement cet id, sinon refus (audit C3).
 /// Retourne l'ID du service installé.
 pub fn install_package(
     package_bytes: &[u8],
     registry: &mut ServiceRegistryData,
+    expected_id: &str,
+) -> Result<String, String> {
+    install_package_with_root(
+        package_bytes,
+        registry,
+        expected_id,
+        &super::registry::services_root_dir(),
+    )
+}
+
+/// Variante avec racine d'installation explicite (utilisée par les tests).
+fn install_package_with_root(
+    package_bytes: &[u8],
+    registry: &mut ServiceRegistryData,
+    expected_id: &str,
+    root: &std::path::Path,
 ) -> Result<String, String> {
     let cursor = std::io::Cursor::new(package_bytes);
     let mut archive = zip::ZipArchive::new(cursor)
@@ -42,8 +129,27 @@ pub fn install_package(
         .validate()
         .map_err(|e| format!("Manifeste invalide : {e}"))?;
 
+    // Le manifeste doit correspondre au service demandé.
+    if manifest.id != expected_id {
+        return Err(format!(
+            "Identifiant du manifeste ('{}') différent du service demandé ('{expected_id}') : installation refusée",
+            manifest.id
+        ));
+    }
+    let binary_name = resolve_binary_name(&manifest)?;
+
     let service_id = manifest.id.clone();
-    let install_dir = service_install_dir(&service_id);
+    let install_dir = root.join(&service_id);
+
+    // 2. Pré-validation de TOUTES les entrées avant d'écrire quoi que ce soit.
+    let mut plan: Vec<(usize, std::path::PathBuf, bool)> = Vec::new();
+    for i in 0..archive.len() {
+        let file = archive
+            .by_index(i)
+            .map_err(|e| format!("Erreur lecture archive index {i}: {e}"))?;
+        let out_path = safe_entry_path(&file, &install_dir)?;
+        plan.push((i, out_path, file.is_dir()));
+    }
 
     tracing::info!(
         "Installation du service '{}' v{} dans {:?}",
@@ -52,7 +158,7 @@ pub fn install_package(
         install_dir
     );
 
-    // 2. Créer le répertoire d'installation
+    // 3. Créer le répertoire d'installation
     std::fs::create_dir_all(&install_dir)
         .map_err(|e| format!("Impossible de créer {}: {e}", install_dir.display()))?;
     std::fs::create_dir_all(install_dir.join("bin"))
@@ -60,25 +166,21 @@ pub fn install_package(
     std::fs::create_dir_all(install_dir.join("data"))
         .map_err(|e| format!("Impossible de créer data/ : {e}"))?;
 
-    // 3. Extraire les fichiers
-    for i in 0..archive.len() {
+    // 4. Extraire les fichiers
+    for (i, out_path, is_dir) in plan {
+        if is_dir {
+            std::fs::create_dir_all(&out_path)
+                .map_err(|e| format!("Création de '{}' échouée : {e}", out_path.display()))?;
+            continue;
+        }
         let mut file = archive
             .by_index(i)
             .map_err(|e| format!("Erreur lecture archive index {i}: {e}"))?;
-
         let name = file.name().to_string();
-        if name.ends_with('/') {
-            // Répertoire
-            let dir_path = install_dir.join(&name);
-            let _ = std::fs::create_dir_all(&dir_path);
-            continue;
-        }
-
-        let out_path = install_dir.join(&name);
         if let Some(parent) = out_path.parent() {
-            let _ = std::fs::create_dir_all(parent);
+            std::fs::create_dir_all(parent)
+                .map_err(|e| format!("Création de '{}' échouée : {e}", parent.display()))?;
         }
-
         let mut buf = Vec::new();
         file.read_to_end(&mut buf)
             .map_err(|e| format!("Lecture de '{name}' échouée : {e}"))?;
@@ -86,24 +188,17 @@ pub fn install_package(
             .map_err(|e| format!("Écriture de '{}' échouée : {e}", out_path.display()))?;
     }
 
-    // 4. Sauvegarder le manifeste séparément
+    // 5. Sauvegarder le manifeste séparément
     let manifest_path = install_dir.join("service.manifest.json");
     let manifest_json = serde_json::to_string_pretty(&manifest)
         .map_err(|e| format!("Sérialisation du manifeste échouée : {e}"))?;
     std::fs::write(&manifest_path, &manifest_json)
         .map_err(|e| format!("Écriture du manifeste échouée : {e}"))?;
 
-    // 5. Déterminer le chemin du binaire
-    let binary_name = manifest.binary_name.clone().unwrap_or_else(|| {
-        if cfg!(windows) {
-            format!("{}.exe", service_id)
-        } else {
-            service_id.clone()
-        }
-    });
+    // 6. Chemin du binaire (nom déjà validé)
     let binary_path = install_dir.join("bin").join(&binary_name);
 
-    // 6. Enregistrer dans le registre
+    // 7. Enregistrer dans le registre
     let installed = InstalledService {
         manifest,
         install_dir,
@@ -124,6 +219,9 @@ pub fn install_from_binary(
     binary_source: &std::path::Path,
     registry: &mut ServiceRegistryData,
 ) -> Result<String, String> {
+    manifest
+        .validate()
+        .map_err(|e| format!("Manifeste invalide : {e}"))?;
     let service_id = manifest.id.clone();
     let install_dir = service_install_dir(&service_id);
 
@@ -152,6 +250,7 @@ pub fn install_from_binary(
                 }
             })
     });
+    validate_binary_name(&binary_name)?;
     let binary_path = install_dir.join("bin").join(&binary_name);
     std::fs::copy(binary_source, &binary_path)
         .map_err(|e| format!("Copie du binaire échouée : {e}"))?;
@@ -256,6 +355,10 @@ pub fn scan_installed_services(registry: &mut ServiceRegistryData) {
                 service_id.clone()
             }
         });
+        if let Err(e) = validate_binary_name(&binary_name) {
+            tracing::warn!("Service '{service_id}' ignoré par le scan : {e}");
+            continue;
+        }
         let binary_path = path.join("bin").join(&binary_name);
 
         if binary_path.exists() {
@@ -275,5 +378,126 @@ pub fn scan_installed_services(registry: &mut ServiceRegistryData) {
                 },
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    fn manifest_json(id: &str, binary_name: Option<&str>) -> String {
+        let bn = binary_name
+            .map(|b| format!(r#", "binary_name": "{b}""#))
+            .unwrap_or_default();
+        format!(
+            r#"{{"id":"{id}","name":"Test","version":"1.0.0","developer":"dev","description":"d","icon":"x","service_type":"interne_cog","source":"tiers","min_central_version":"0.1.0"{bn}}}"#
+        )
+    }
+
+    fn build_zip(entries: &[(&str, &[u8])]) -> Vec<u8> {
+        let mut buf = Vec::new();
+        {
+            let mut w = zip::ZipWriter::new(std::io::Cursor::new(&mut buf));
+            let opts = zip::write::SimpleFileOptions::default();
+            for (name, data) in entries {
+                w.start_file(*name, opts).unwrap();
+                w.write_all(data).unwrap();
+            }
+            w.finish().unwrap();
+        }
+        buf
+    }
+
+    fn tmp_root(tag: &str) -> std::path::PathBuf {
+        let d = std::env::temp_dir().join(format!("miyu-installer-{tag}-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    fn try_install(entries: &[(&str, &[u8])], expected: &str, tag: &str) -> (Result<String, String>, std::path::PathBuf) {
+        let root = tmp_root(tag);
+        let bytes = build_zip(entries);
+        let mut reg = ServiceRegistryData::default();
+        let r = install_package_with_root(&bytes, &mut reg, expected, &root);
+        (r, root)
+    }
+
+    #[test]
+    fn zip_valide_installe() {
+        let m = manifest_json("svc", None);
+        let (r, root) = try_install(
+            &[("service.manifest.json", m.as_bytes()), ("bin/svc", b"x")],
+            "svc",
+            "ok",
+        );
+        assert_eq!(r.unwrap(), "svc");
+        assert!(root.join("svc/bin/svc").exists());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn zip_slip_dotdot_refuse() {
+        let m = manifest_json("svc", None);
+        let (r, root) = try_install(
+            &[("service.manifest.json", m.as_bytes()), ("../evil", b"x")],
+            "svc",
+            "dotdot",
+        );
+        assert!(r.is_err(), "{r:?}");
+        assert!(!root.join("evil").exists());
+        assert!(!root.join("svc").exists(), "rien ne doit être écrit");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn zip_chemin_absolu_refuse() {
+        let m = manifest_json("svc", None);
+        let (r, root) = try_install(
+            &[("service.manifest.json", m.as_bytes()), ("/tmp/miyu-evil-abs", b"x")],
+            "svc",
+            "abs",
+        );
+        assert!(r.is_err(), "{r:?}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn zip_symlink_refuse() {
+        let m = manifest_json("svc", None);
+        let mut buf = Vec::new();
+        {
+            let mut w = zip::ZipWriter::new(std::io::Cursor::new(&mut buf));
+            let opts = zip::write::SimpleFileOptions::default();
+            w.start_file("service.manifest.json", opts).unwrap();
+            w.write_all(m.as_bytes()).unwrap();
+            w.add_symlink("bin/link", "/etc/passwd", opts).unwrap();
+            w.finish().unwrap();
+        }
+        let root = tmp_root("symlink");
+        let mut reg = ServiceRegistryData::default();
+        let r = install_package_with_root(&buf, &mut reg, "svc", &root);
+        assert!(r.is_err(), "{r:?}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn binary_name_invalide_refuse() {
+        for bad in ["../x", "a/b", "a\\b", "..", "", "C:x"] {
+            assert!(validate_binary_name(bad).is_err(), "{bad:?} devrait être refusé");
+        }
+        assert!(validate_binary_name("svc.exe").is_ok());
+        let m = manifest_json("svc", Some("../../evil"));
+        let (r, root) = try_install(&[("service.manifest.json", m.as_bytes())], "svc", "bn");
+        assert!(r.is_err(), "{r:?}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn id_manifeste_different_refuse() {
+        let m = manifest_json("autre", None);
+        let (r, root) = try_install(&[("service.manifest.json", m.as_bytes())], "svc", "id");
+        assert!(r.unwrap_err().contains("différent"));
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

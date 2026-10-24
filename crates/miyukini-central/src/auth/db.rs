@@ -9,7 +9,7 @@
 //! Le profil central est la base pour les autres services. Chaque service peut
 //! lier le profil à sa table dédiée via `profile_service_refs` (une « colonne »
 //! par service : clé de service → id de la ligne dans la table du service).
-//! Exemple : sauvegarde de jeu → `service_key = "lord_of_the_castle"`, `ref_id` = id
+//! Exemple : événement agenda → `service_key = "jaykoa"`, `ref_id` = id
 //! de la ligne dans la table des sauvegardes du service.
 //!
 //! **Structure de sauvegarde liée au profil Central :**
@@ -95,7 +95,7 @@ pub struct CentralProfileSave {
     pub id: String,
     /// Identifiant du profil Central.
     pub profile_id: String,
-    /// Clé du service (ex. `lord_of_the_castle`).
+    /// Clé du service (ex. `jaykoa`).
     pub service_key: String,
     /// Numéro de slot (0, 1, 2…).
     pub slot: i64,
@@ -317,6 +317,10 @@ impl CentralAuthDb {
                 row.get::<_, Option<String>>(20)?,
             ))
         });
+        // Libère le verrou avant la suite : le chemin « succès » reverrouille
+        // `self.conn` (upgrade_hash_if_legacy) et se bloquerait sinon (deadlock).
+        drop(stmt);
+        drop(conn);
         match row {
             Ok((
                 id,
@@ -550,18 +554,43 @@ impl CentralAuthDb {
         Ok(())
     }
 
-    /// Réinitialise le COG à l'état vierge (suppression de tous les comptes). Pour tests uniquement.
-    pub fn reset_cog_to_virgin(&self) -> Result<(), AuthDbError> {
+    /// Réinitialise le COG à l'état vierge (suppression de tous les comptes).
+    ///
+    /// Opération destructrice réservée à un administrateur : exige l'e-mail et le
+    /// mot de passe d'un profil `is_admin` (ré-authentification). Toute preuve
+    /// invalide, ou un profil non admin, est refusée sans rien supprimer.
+    /// Les suppressions sont atomiques (transaction).
+    pub fn reset_cog_to_virgin(
+        &self,
+        admin_email: &str,
+        admin_password: &str,
+    ) -> Result<(), AuthDbError> {
+        // Preuve d'admin (verrou relâché avant la transaction).
+        match self.sign_in(admin_email, admin_password)? {
+            Some(p) if p.is_admin => {}
+            Some(_) => {
+                return Err(AuthDbError(
+                    "Réinitialisation refusée : droits administrateur requis.".into(),
+                ))
+            }
+            None => {
+                return Err(AuthDbError(
+                    "Réinitialisation refusée : authentification invalide.".into(),
+                ))
+            }
+        }
         let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-        conn.execute("DELETE FROM central_profile_saves", [])?;
-        conn.execute("DELETE FROM profile_service_refs", [])?;
-        conn.execute("DELETE FROM connect_credentials", [])?;
-        conn.execute("DELETE FROM central_profiles", [])?;
-        conn.execute(
+        let tx = rusqlite::Transaction::new_unchecked(&conn, rusqlite::TransactionBehavior::Immediate)?;
+        tx.execute("DELETE FROM central_profile_saves", [])?;
+        tx.execute("DELETE FROM profile_service_refs", [])?;
+        tx.execute("DELETE FROM connect_credentials", [])?;
+        tx.execute("DELETE FROM central_profiles", [])?;
+        tx.execute(
             "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('cog_virgin', '1')",
             [],
         )?;
-        conn.execute("DELETE FROM cog_meta WHERE key = 'current_profile_id'", [])?;
+        tx.execute("DELETE FROM cog_meta WHERE key = 'current_profile_id'", [])?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -579,23 +608,35 @@ impl CentralAuthDb {
             return Err(AuthDbError("L'email est requis.".into()));
         }
         validate_password(password).map_err(|e| AuthDbError(e.to_string()))?;
-        let is_first = self.list_profiles()?.is_empty();
         let id = uuid::Uuid::new_v4().to_string();
         let hash = hash_password_argon2(password)
             .map_err(|e| AuthDbError(format!("hash error: {e}")))?;
         let now = chrono::Utc::now().to_rfc3339();
-        let is_admin = is_first;
         let pseudo_val = pseudonyme.map(|s| s.trim()).filter(|s| !s.is_empty());
-        {
+        // Vérification « table vide » + insertion + bascule « non vierge » dans UNE
+        // transaction IMMEDIATE : un seul compte peut devenir le premier admin.
+        let is_admin = {
             let conn = self.conn.lock().map_err(|e| AuthDbError(e.to_string()))?;
-            conn.execute(
-                "INSERT INTO central_profiles (id, email, password_hash, created_at, updated_at, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?7)",
-                params![id, email, hash, now, now, pseudo_val, if is_admin { 1i64 } else { 0i64 }],
+            let tx = rusqlite::Transaction::new_unchecked(
+                &conn,
+                rusqlite::TransactionBehavior::Immediate,
             )?;
-        } // conn libéré ici — évite le deadlock avec set_cog_virgin ci-dessous
-        if is_first {
-            self.set_cog_virgin(false)?;
-        }
+            let count: i64 =
+                tx.query_row("SELECT COUNT(*) FROM central_profiles", [], |r| r.get(0))?;
+            let is_first = count == 0;
+            tx.execute(
+                "INSERT INTO central_profiles (id, email, password_hash, created_at, updated_at, pseudonyme, nom, prenom, date_naissance, telephone, numero_voie, rue, code_postal, ville, is_admin) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ?7)",
+                params![id, email, hash, now, now, pseudo_val, if is_first { 1i64 } else { 0i64 }],
+            )?;
+            if is_first {
+                tx.execute(
+                    "INSERT OR REPLACE INTO cog_meta (key, value) VALUES ('cog_virgin', '0')",
+                    [],
+                )?;
+            }
+            tx.commit()?;
+            is_first
+        };
         Ok(CentralProfile {
             id: id.clone(),
             email: email.to_string(),
@@ -655,7 +696,7 @@ impl CentralAuthDb {
     }
 
     /// Retourne l’ID de référence du profil vers la table du service (ex. id de sauvegarde de jeu).
-    /// Chaque service utilise une `service_key` unique (ex. `"lord_of_the_castle"`, `"miyuclicker"`).
+    /// Chaque service utilise une `service_key` unique (ex. `"jaykoa"`, `"jaykonta"`).
     pub fn get_profile_service_ref(
         &self,
         profile_id: &str,
@@ -824,5 +865,64 @@ impl CentralAuthDb {
             return Err(AuthDbError(format!("Sauvegarde non trouvée: {id}")));
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests_securite {
+    use super::*;
+
+    fn temp_db(tag: &str) -> (CentralAuthDb, std::path::PathBuf) {
+        let dir = std::env::temp_dir().join(format!("miyu-authdb-{tag}-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let db = CentralAuthDb::open(dir.join("central.db")).expect("open db");
+        (db, dir)
+    }
+
+    const PW: &str = "Str0ng!Passw0rd#2026";
+
+    #[test]
+    fn premier_admin_unique() {
+        let (db, _dir) = temp_db("admin");
+        let a = db.sign_up("a@example.com", PW, None).unwrap();
+        let b = db.sign_up("b@example.com", PW, None).unwrap();
+        assert!(a.is_admin);
+        assert!(!b.is_admin);
+        let admins = db.list_profiles().unwrap().iter().filter(|p| p.is_admin).count();
+        assert_eq!(admins, 1);
+        assert!(!db.is_cog_virgin().unwrap());
+    }
+
+    #[test]
+    fn premier_admin_unique_concurrent() {
+        let (db, _dir) = temp_db("conc");
+        let db = std::sync::Arc::new(db);
+        let handles: Vec<_> = (0..6)
+            .map(|i| {
+                let db = db.clone();
+                std::thread::spawn(move || db.sign_up(&format!("u{i}@example.com"), PW, None).unwrap())
+            })
+            .collect();
+        let admins = handles
+            .into_iter()
+            .map(|h| h.join().unwrap())
+            .filter(|p| p.is_admin)
+            .count();
+        assert_eq!(admins, 1);
+    }
+
+    #[test]
+    fn reset_refuse_pour_non_admin_ou_mauvais_mot_de_passe() {
+        let (db, _dir) = temp_db("reset");
+        db.sign_up("admin@example.com", PW, None).unwrap();
+        db.sign_up("user@example.com", PW, None).unwrap();
+        assert!(db.reset_cog_to_virgin("user@example.com", PW).is_err());
+        assert!(db.reset_cog_to_virgin("admin@example.com", "mauvais").is_err());
+        assert!(db.reset_cog_to_virgin("inconnu@example.com", PW).is_err());
+        assert_eq!(db.list_profiles().unwrap().len(), 2, "rien ne doit être supprimé");
+        assert!(!db.is_cog_virgin().unwrap());
+        db.reset_cog_to_virgin("admin@example.com", PW).unwrap();
+        assert!(db.list_profiles().unwrap().is_empty());
+        assert!(db.is_cog_virgin().unwrap());
     }
 }

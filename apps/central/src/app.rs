@@ -35,13 +35,27 @@ pub fn App() -> Element {
     // Fournir le theme miyuki-ui-dioxus à tous les composants enfants.
     provide_theme(COG_THEME.clone());
 
-    use_context_provider(|| {
+    // Erreur bloquante de lecture de l'état d'authentification (fail-closed) :
+    // si `is_cog_virgin` échoue, on n'affiche JAMAIS le parcours « COG vierge »
+    // (qui permettrait de créer un premier compte admin sur une base illisible).
+    let boot_error: std::rc::Rc<std::cell::RefCell<Option<String>>> =
+        use_hook(|| std::rc::Rc::new(std::cell::RefCell::new(None)));
+    let boot_error_writer = boot_error.clone();
+
+    use_context_provider(move || {
         let base_path = std::env::current_dir().unwrap_or_default();
         let connections =
             ServiceConnections::open(&base_path).expect("Impossible d'ouvrir la base auth");
         let connections = Arc::new(connections);
         let auth_db = &*connections.auth_db;
-        let is_cog_virgin = auth_db.is_cog_virgin().unwrap_or(true);
+        let is_cog_virgin = match auth_db.is_cog_virgin() {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("Lecture de l'état COG vierge impossible : {e}");
+                *boot_error_writer.borrow_mut() = Some(e.to_string());
+                false
+            }
+        };
         let last_profile = auth_db
             .get_current_profile_id()
             .ok()
@@ -68,6 +82,7 @@ pub fn App() -> Element {
     let ctx = use_context::<AppContext>();
     let mut mws_state = use_context_provider(|| Signal::new(MwsViewState::default()));
     let state = ctx.state;
+    let boot_error_msg: Option<String> = boot_error.borrow().clone();
     let is_cog_virgin = state.read().is_cog_virgin;
     let has_user = state.read().current_user.is_some();
     let theme = state.read().current_theme;
@@ -249,7 +264,15 @@ pub fn App() -> Element {
             style { {GLOBAL_CSS} }
             style { {MIOU_CSS} }
 
-            if is_cog_virgin || state.read().rite_infos_pending {
+            if let Some(err) = boot_error_msg {
+                div {
+                    role: "alert",
+                    style: "display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 12px; padding: 32px; color: {c.accent_red}; text-align: center;",
+                    h2 { "Base d'authentification illisible" }
+                    p { "Impossible de déterminer l'état du COG. Par sécurité, l'application est bloquée." }
+                    p { style: "font-size: 12px; opacity: 0.8;", "{err}" }
+                }
+            } else if is_cog_virgin || state.read().rite_infos_pending {
                 RiteEntree {}
             } else if !has_user {
                 Connexion {}

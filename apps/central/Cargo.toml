@@ -43,6 +43,10 @@ rodio = { version = "0.21", default-features = false, features = ["playback", "m
 # Archive ZIP pour les packages service (.msp)
 zip = "2"
 
+# Comparaison de versions (mises à jour) et intégrité des packages (SHA-256)
+semver = "1"
+sha2 = "0.10"
+
 # Auth et profils Central (COG vierge, premier compte admin)
 miyukini-central = { path = "../../crates/miyukini-central", features = ["legacy-sqlite"] }
 miyukini-connect = { path = "../../crates/miyukini-connect" }

@@ -219,7 +219,14 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
 
                                             spawn(async move {
                                                     let origin_url = market_origin_url();
-                                                    let client = MarketClient::new(&origin_url);
+                                                    let client = match MarketClient::new(&origin_url) {
+                                                        Ok(c) => c,
+                                                        Err(e) => {
+                                                            tracing::error!("Mise \u{e0} jour refus\u{e9}e: {e}");
+                                                            st.write().install_status = Some((sid.clone(), InstallStatus::Error(e.to_string())));
+                                                            return;
+                                                        }
+                                                    };
 
                                                     match client.download_package(&sid, &new_ver).await {
                                                         Ok(bytes) => {
@@ -318,12 +325,19 @@ pub fn ServiceDetail(state: Signal<MarketState>) -> Element {
 
                                             spawn(async move {
                                                 let origin_url = market_origin_url();
-                                                let client = MarketClient::new(&origin_url);
+                                                let client = match MarketClient::new(&origin_url) {
+                                                    Ok(c) => c,
+                                                    Err(e) => {
+                                                        tracing::error!("Installation refus\u{e9}e: {e}");
+                                                        st.write().install_status = Some((sid.clone(), InstallStatus::Error(e.to_string())));
+                                                        return;
+                                                    }
+                                                };
 
                                                 match client.download_package(&sid, &ver).await {
                                                     Ok(bytes) => {
                                                         st.write().install_status = Some((sid.clone(), InstallStatus::Installing));
-                                                        match mgr.install_from_package(&bytes) {
+                                                        match mgr.install_from_package(&sid, &bytes) {
                                                             Ok(installed_id) => {
                                                                 tracing::info!("Service installe: {installed_id}");
                                                                 st.write().install_status = Some((sid.clone(), InstallStatus::Done));

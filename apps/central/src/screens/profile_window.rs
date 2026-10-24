@@ -28,16 +28,33 @@ pub fn ProfileWindow() -> Element {
         state.write().show_profile_window = false;
     };
 
+    // Réinitialisation COG : réservée à un profil admin, avec ré-authentification.
+    let is_admin = p.is_admin;
+    let admin_email = p.email.clone();
+    let mut confirm_open = use_signal(|| false);
+    let mut reset_password = use_signal(String::new);
+    let mut reset_error = use_signal(|| Option::<String>::None);
+
     let on_reset_cog = move |_| {
-        let auth_db = connections.read().auth_db.clone();
-        if let Err(e) = auth_db.reset_cog_to_virgin() {
-            tracing::error!("reset_cog_to_virgin: {}", e);
+        if !is_admin {
             return;
         }
-        let mut s = state.write();
-        s.current_user = None;
-        s.is_cog_virgin = true;
-        s.show_profile_window = false;
+        let auth_db = connections.read().auth_db.clone();
+        let pw = reset_password.read().clone();
+        match auth_db.reset_cog_to_virgin(&admin_email, &pw) {
+            Ok(()) => {
+                reset_password.set(String::new());
+                let mut s = state.write();
+                s.current_user = None;
+                s.is_cog_virgin = true;
+                s.show_profile_window = false;
+            }
+            Err(e) => {
+                tracing::error!("reset_cog_to_virgin: {}", e);
+                reset_password.set(String::new());
+                reset_error.set(Some(e.to_string()));
+            }
+        }
     };
 
     rsx! {
@@ -105,12 +122,48 @@ pub fn ProfileWindow() -> Element {
                     }
                 }
 
+                // Zone dangereuse : visible uniquement pour un admin.
+                if is_admin && *confirm_open.read() {
+                    div {
+                        style: "display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;",
+                        div {
+                            style: "font-size: 12px; color: {c.accent_red};",
+                            "Action destructrice : tous les comptes seront supprimés. Confirmez avec votre mot de passe."
+                        }
+                        input {
+                            r#type: "password",
+                            autocomplete: "current-password",
+                            placeholder: "Mot de passe administrateur",
+                            value: "{reset_password}",
+                            oninput: move |evt| reset_password.set(evt.value()),
+                            style: "padding: 8px; border-radius: 4px; border: 1px solid {c.border}; background: transparent; color: {c.text_secondary};",
+                        }
+                        if let Some(err) = reset_error.read().clone() {
+                            div { style: "font-size: 12px; color: {c.accent_red};", "{err}" }
+                        }
+                    }
+                }
+
                 div {
                     style: "display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;",
-                    button {
-                        style: "{styles::btn_secondary(theme)}",
-                        onclick: on_reset_cog,
-                        "Réinitialiser le COG (tests)"
+                    if is_admin {
+                        if *confirm_open.read() {
+                            button {
+                                style: "{styles::btn_secondary(theme)}",
+                                disabled: reset_password.read().is_empty(),
+                                onclick: on_reset_cog,
+                                "Confirmer la réinitialisation"
+                            }
+                        } else {
+                            button {
+                                style: "{styles::btn_secondary(theme)}",
+                                onclick: move |_| {
+                                    reset_error.set(None);
+                                    confirm_open.set(true);
+                                },
+                                "Réinitialiser le COG (tests)"
+                            }
+                        }
                     }
                     button {
                         style: "{styles::btn_primary(theme)}",

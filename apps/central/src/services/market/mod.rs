@@ -90,7 +90,14 @@ pub fn MarketView() -> Element {
             let mut app_state = app_state.clone();
             spawn(async move {
                 let origin_url = market_origin_url();
-                let client = MarketClient::new(&origin_url);
+                let client = match MarketClient::new(&origin_url) {
+                    Ok(c) => c,
+                    Err(e) => {
+                        tracing::error!("Market désactivé : {e}");
+                        state.write().catalog_loaded = true;
+                        return;
+                    }
+                };
 
                 match client.fetch_catalog().await {
                     Ok(catalog) => {

@@ -94,9 +94,14 @@ impl ServiceManager {
     }
 
     /// Installe un service depuis des bytes de package (.msp).
-    pub fn install_from_package(&self, package_bytes: &[u8]) -> Result<String, String> {
+    /// `expected_id` : service demandé ; le manifeste du package doit correspondre.
+    pub fn install_from_package(
+        &self,
+        expected_id: &str,
+        package_bytes: &[u8],
+    ) -> Result<String, String> {
         let mut reg = self.registry.lock().unwrap_or_else(|e| e.into_inner());
-        let service_id = installer::install_package(package_bytes, &mut reg)?;
+        let service_id = installer::install_package(package_bytes, &mut reg, expected_id)?;
         registry::save_registry(&reg)?;
         Ok(service_id)
     }
@@ -112,9 +117,7 @@ impl ServiceManager {
         let mut updates = Vec::new();
         for (service_id, available_version) in catalog_versions {
             if let Some(installed) = reg.services.get(service_id) {
-                if installed.manifest.version != *available_version
-                    && *available_version > installed.manifest.version
-                {
+                if is_newer_version(available_version, &installed.manifest.version) {
                     updates.push((
                         service_id.clone(),
                         installed.manifest.version.clone(),
@@ -137,7 +140,7 @@ impl ServiceManager {
             self.stop_service(service_id)?;
         }
         // Réinstaller (install_package écrase l'entrée existante)
-        self.install_from_package(package_bytes)
+        self.install_from_package(service_id, package_bytes)
     }
 
     /// Désinstalle un service (arrête le processus, supprime les fichiers).
@@ -150,5 +153,48 @@ impl ServiceManager {
         installer::uninstall_service(service_id, &mut reg)?;
         registry::save_registry(&reg)?;
         Ok(())
+    }
+}
+
+/// Parse « X.Y.Z[-pre][+build] » en semver ; tolère un préfixe `v` et les
+/// versions à 1 ou 2 composantes (« 1.2 » -> 1.2.0).
+fn parse_version(v: &str) -> Option<semver::Version> {
+    let v = v.trim().trim_start_matches('v');
+    if let Ok(parsed) = semver::Version::parse(v) {
+        return Some(parsed);
+    }
+    // Complète les composantes manquantes (avant tout -pre / +build).
+    let split = v.find(['-', '+']).unwrap_or(v.len());
+    let (core, rest) = v.split_at(split);
+    let n = core.split('.').count();
+    let padded = match n {
+        1 => format!("{core}.0.0{rest}"),
+        2 => format!("{core}.0{rest}"),
+        _ => return None,
+    };
+    semver::Version::parse(&padded).ok()
+}
+
+/// Vrai si `available` est strictement plus récente que `installed` (semver).
+/// Fail-closed : une version illisible ne déclenche jamais de mise à jour.
+pub fn is_newer_version(available: &str, installed: &str) -> bool {
+    match (parse_version(available), parse_version(installed)) {
+        (Some(a), Some(i)) => a > i,
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_newer_version;
+
+    #[test]
+    fn semver_0_10_plus_recent_que_0_9() {
+        assert!(is_newer_version("0.10.0", "0.9.0"));
+        assert!(!is_newer_version("0.9.0", "0.10.0"));
+        assert!(is_newer_version("0.10", "0.9"));
+        assert!(!is_newer_version("1.0.0", "1.0.0"));
+        assert!(!is_newer_version("n'importe quoi", "1.0.0"));
+        assert!(is_newer_version("1.0.0", "1.0.0-beta.1"));
     }
 }
