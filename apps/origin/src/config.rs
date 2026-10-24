@@ -525,6 +525,17 @@ pub struct AdminConfig {
     /// `https://<identity.domain>`, sinon `https://<Host>` de la requête.
     #[serde(default)]
     pub public_origin: Option<String>,
+    /// Administrateurs autorisés (inventaire #15, sortie du lot 2) : identifiants par paire
+    /// `pw:<cog_id>:<sujet hex>` (tels que rendus par `identity_resolve` et par la connexion
+    /// admin). Connexion par passeport + preuve de possession → visa `origin-admin`
+    /// (≤ 15 min) ; clé d'hôte et COG reconnus : `[forum] cle_emission_path` et
+    /// `[[forum.cogs_reconnus]]`. Vide : personne ne peut se connecter par passeport.
+    #[serde(default)]
+    pub administrateurs: Vec<String>,
+    /// Connexion historique email + mot de passe (`admin.toml`) : **bris de glace**,
+    /// désactivée par défaut ; à activer explicitement.
+    #[serde(default)]
+    pub password_login: bool,
 }
 
 impl Default for AdminConfig {
@@ -534,6 +545,8 @@ impl Default for AdminConfig {
             port: default_admin_port(),
             config_file: None,
             public_origin: None,
+            administrateurs: Vec::new(),
+            password_login: false,
         }
     }
 }

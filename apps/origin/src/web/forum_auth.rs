@@ -218,17 +218,17 @@ impl SourceRevocation for RevocationsOrigin {
     }
 }
 
-/// Origin en tant que COG hôte du forum.
-struct HoteForum {
-    cog: CogId,
-    cle: CleSignature,
+/// Origin en tant que COG hôte (visas forum ; réutilisé par l'admin, audience `origin-admin`).
+pub(crate) struct HoteForum {
+    pub(crate) cog: CogId,
+    pub(crate) cle: CleSignature,
     annuaire: AnnuaireEmetteurs,
     revocations: RevocationsOrigin,
-    defis: MagasinDefisMemoire,
+    pub(crate) defis: MagasinDefisMemoire,
 }
 
 impl HoteForum {
-    fn new(cle: CleSignature, reconnus: &[(CogId, [u8; 32])]) -> Result<Self, String> {
+    pub(crate) fn new(cle: CleSignature, reconnus: &[(CogId, [u8; 32])]) -> Result<Self, String> {
         let cog = CogId::new(&cog_id_depuis_cle(&cle.cle_publique())).ok_or("cog_id d'Origin invalide")?;
         let mut annuaire = AnnuaireEmetteurs::new();
         annuaire
@@ -248,7 +248,7 @@ impl HoteForum {
         Ok(Self { cog, cle, annuaire, revocations, defis: MagasinDefisMemoire::default() })
     }
 
-    fn politique(&self) -> PolitiqueIdentite<'_> {
+    pub(crate) fn politique(&self) -> PolitiqueIdentite<'_> {
         PolitiqueIdentite { cog_local: self.cog.clone(), annuaire: &self.annuaire, revocations: &self.revocations }
     }
 }
@@ -261,7 +261,7 @@ fn texte_role(role: IdentityRole) -> &'static str {
     }
 }
 
-fn identite_opaque(cog: &CogId, sujet: &[u8; 32]) -> String {
+pub(crate) fn identite_opaque(cog: &CogId, sujet: &[u8; 32]) -> String {
     format!("pw:{cog}:{}", hex::encode(sujet))
 }
 

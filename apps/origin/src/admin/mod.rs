@@ -8,6 +8,7 @@
 //!
 //! Interface d'administration pour Origin sur le port 8081.
 
+pub mod acces;
 pub mod server;
 
 pub use server::AdminServer;

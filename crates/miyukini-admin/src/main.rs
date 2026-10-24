@@ -239,8 +239,9 @@ async fn main() {
         SetupGuard::closed()
     });
     if let Some(token) = setup_guard.token_for_console() {
-        // Affiché UNIQUEMENT sur la console locale ; jamais renvoyé par l'API ni journalisé ailleurs.
-        println!("MiyukiniAdmin SETUP — jeton à usage unique (à saisir dans /setup) : {token}");
+        // Remis une seule fois, sur la sortie d'erreur de la console locale uniquement ; jamais
+        // renvoyé par l'API ni journalisé (inventaire #22 : usage unique, 15 min).
+        eprintln!("MiyukiniAdmin SETUP — jeton à usage unique, valable 15 min, à saisir dans /setup (boucle locale) : {token}");
     }
 
     let backups = Arc::new(BackupServiceImpl::new().with_seed());
@@ -345,7 +346,9 @@ async fn main() {
     }
 
     let listener = tokio::net::TcpListener::bind(addr).await.expect("bind");
-    axum::serve(listener, app).await.expect("serve");
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
+        .await
+        .expect("serve");
 }
 
 /// Routes lorsque l'environnement est VIERGE : uniquement /setup, /health, /api/status, /api/setup/create-admin (Auth and First-Boot §5).
@@ -469,6 +472,8 @@ struct CreateAdminBody {
 /// @do api_setup_create_admin
 async fn api_setup_create_admin(
     State(state): State<Arc<AppState>>,
+    axum::extract::ConnectInfo(pair): axum::extract::ConnectInfo<SocketAddr>,
+    headers: axum::http::HeaderMap,
     JsonExtract(body): JsonExtract<CreateAdminBody>,
 ) -> Response {
     // Sérialise les appels : pas de double création concurrente.
@@ -480,6 +485,11 @@ async fn api_setup_create_admin(
         )
             .into_response()
     };
+    // Boucle locale uniquement (pair loopback et Host local : pas de rebinding DNS).
+    let host = headers.get(header::HOST).and_then(|v| v.to_str().ok());
+    if !miyukini_admin::services::setup_guard::requete_setup_locale(pair.ip(), host) {
+        return refuse(StatusCode::FORBIDDEN, "Setup accessible uniquement depuis la boucle locale.");
+    }
     // Revérifie l'état SUR DISQUE à chaque appel (et non l'état figé au démarrage).
     match state.environment_state_svc.detect().await {
         Ok(EnvironmentState::Vierge) => {}

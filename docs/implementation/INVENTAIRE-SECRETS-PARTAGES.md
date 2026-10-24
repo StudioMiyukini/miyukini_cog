@@ -9,7 +9,7 @@
 - **Date** : 2026-10-24 · **Base** : `miyauth` passeports, visas et preuve de possession (`miyukini/pop/v1`) disponibles depuis le lot 2 incrément 4
 - **Sortie du lot 2** : plus aucune authentification par secret partagé sur les points exposés ([plan §4](PLAN-IMPLEMENTATION.md))
 - « Visa + PoP » : visa scellé et signature de possession
-- **Avancement** : points WAN d'Origin (#11–14, #17) et CentralRemote (#1–5) traités (✅) ; services locaux #6–10 et #23 traités (✅, `miyauth::http::service` : clé de service en graine 0600, garde des clés épinglées) ; assistant réutilisable `miyauth::http` (schémas `MiyuVisa` / `MiyuPasseport` + `X-Miyu-PoP`, requêtes signées machine à machine)
+- **Avancement** : points WAN d'Origin (#11–15, #17) et CentralRemote (#1–5) traités (✅) ; services locaux #6–10 et #23 traités (✅, `miyauth::http::service` : clé de service en graine 0600, garde des clés épinglées) ; exceptions acceptées et motivées : #16 (secret de salon par-dessus des enveloppes signées), #19, #20, #22 (local) ; assistant réutilisable `miyauth::http` (schémas `MiyuVisa` / `MiyuPasseport` + `X-Miyu-PoP`, requêtes signées machine à machine)
 
 ## Points à remplacer
 
@@ -31,14 +31,14 @@
 | 11–12 | Origin forum `validate`, `session/verify` (`apps/origin/src/web/forum_auth.rs`) | ~~mot de passe → jeton HMAC~~ | **WAN** | ✅ passeport + PoP → visa `forum` ; mot de passe seulement si `[forum] password_login` (défaut : non) |
 | 13 | Origin `forum/sync` | ~~clé HMAC Central ⇄ Origin~~ | **WAN** | ✅ requête signée par la clé du COG (`[forum] sync_cles`), anti-rejeu |
 | 14 | Origin Market publish (`web/market.rs`) | ~~`MIYUKINI_MARKET_DEV_TOKEN`~~ | **WAN** | ✅ requête signée + paquet scellé par un éditeur officiel (`[market] editeurs_officiels`) |
-| 15 | Origin admin `/admin/*` | mot de passe → cookie `__Host-` | local derrière proxy | passeport admin + PoP (CSRF gardé) |
-| 16 | Origin Tracker lobby | mot de passe de salon | WAN | facultatif : visas signés par l'hôte |
+| 15 | Origin admin `/admin/*` (`apps/origin/src/admin/server.rs`, `acces.rs`) | ~~mot de passe → cookie `__Host-`~~ | **WAN** (nginx routait `/admin` sur l'origine publique) | ✅ passeport (portée `origin-admin`, ≤ 15 min) + PoP → visa `origin-admin` (≤ 15 min) pour une identité `pw:<cog>:<sujet>` de `[admin] administrateurs` ; session serveur aléatoire liée au visa (expire avec lui), CSRF et `public_origin` gardés ; mot de passe = bris de glace `[admin] password_login` (défaut : non) ; nginx : `/admin` retiré de l'origine publique (`origin-miyukini.conf`, tunnel SSH) |
+| 16 | Origin Tracker lobby | mot de passe de salon (exception ✅) | WAN | exception acceptée : secret d'accès propre à un salon, facultatif, posé par l'hôte, en plus des enveloppes Tracker signées (l'identité reste prouvée par signature) ; cible facultative : visas signés par l'hôte |
 | 17 | Origin Relay « clé de Cores » (`relay/verification.rs`) | ~~clé statique par version~~ | **WAN** | ✅ retirée de toute décision ; Phase A = REGISTER signé (attestation de build : à spécifier) |
 | 18 | MiyuCloud `/api/*`, DAV | ~~JWT HS256~~ ✅ sessions serveur + visa/PoP (2cf67520) | local ; LAN/WAN en pratique | visa + PoP (clients natifs) |
 | 19 | MiyuCloud Nextcloud/OCS | Basic + mot de passe d'application (exception ✅ : TLS ou loopback, limite par IP) | idem | exception acceptée (clients DAV), TLS, portée limitée |
 | 20 | MiyuCloud WOPI | `?access_token=` HS256 (exception ✅ : clé par processus, ≤ 15 min) | idem | exception imposée par WOPI : durée courte |
 | 21 | MiyuCloud device flow + admin | ~~Bearer HS256~~ ✅ clé d'appareil + requêtes signées ; admin = session | idem | fin du flux = passeport d'appareil |
-| 22 | miyukini-admin | mot de passe → cookie ; jeton d'installation | local | basse priorité |
+| 22 | miyukini-admin (`crates/miyukini-admin`) | mot de passe → cookie ; jeton d'installation (exception ✅) | local (écoute 127.0.0.1 seulement) | exception locale acceptée : identifiant personnel, non partagé entre services, jamais exposé ; jeton d'installation = second facteur local, seulement en état VIERGE, depuis la boucle locale (pair loopback + `Host` local, anti-rebinding DNS), usage unique, ≤ 15 min, affiché une fois sur stderr (jamais journalisé) ; cible : passeport local + PoP quand l'UI le portera |
 | 23 | miyualicia-api `/auth/token` | client_id/secret → JWT HS256 | non branché | ✅ route retirée par défaut (feature `jeton-secret-client`, désactivée) ; cible : passeport de service + PoP |
 
 - **Déjà signés** : REGISTER et enveloppes Tracker (`miyuwebway_participant`), Relay REGISTER, KindMother (défi Ed25519 mutuel), appairage v2 et poignée E2E de central-remote

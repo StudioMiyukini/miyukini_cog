@@ -7,7 +7,14 @@
 //! Serveur HTTP d'administration MiyukiniAdmin Origin.
 //!
 //! Expose les endpoints d'administration sur le port 8081.
-//! Toutes les routes (sauf /login) nécessitent une authentification par session.
+//! Toutes les routes (sauf `/login`, `/login/passeport` et `/defi`) nécessitent une session.
+//!
+//! Connexion (inventaire des secrets partagés #15, sortie du lot 2) : passeport + preuve de
+//! possession → visa `origin-admin` (≤ 15 min) pour une identité listée dans
+//! `[admin] administrateurs` (voir [`super::acces`]). La session (`__Host-admin_session`)
+//! est un jeton aléatoire côté serveur **lié au visa** : elle expire avec lui. La connexion
+//! par mot de passe (`admin.toml`) n'est qu'un bris de glace, désactivé par défaut
+//! (`[admin] password_login`).
 //!
 //! O-04 (cookie tossing, confiance « même site ») :
 //! - cookie de session `__Host-admin_session` (`Secure`, `Path=/`, sans `Domain`, `HttpOnly`,
@@ -25,8 +32,11 @@ use std::time::{Duration, Instant};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
-use tracing::{debug, info, warn};
+use tracing::{debug, error, info, warn};
 
+use miyauth::http::{b64_encoder, RequeteHttp, ENTETE_POP};
+
+use super::acces::{AccesAdmin, RefusAdmin};
 use crate::config::OriginConfig;
 use crate::relay::session::SessionManager;
 use crate::tracker::pool::PoolManager;
@@ -43,6 +53,20 @@ const COOKIE_CSRF_LOGIN: &str = "__Host-admin_csrf";
 const CSRF_LOGIN_TTL_SECS: u64 = 600;
 /// Réponse de refus CSRF (corps distinct, testable).
 const CORPS_REFUS_CSRF: &str = "Forbidden: CSRF check failed";
+/// Réponse de refus de la connexion par mot de passe désactivée.
+const CORPS_MOT_DE_PASSE_DESACTIVE: &str = "Forbidden: password login disabled";
+
+/// Page de connexion quand le mot de passe est désactivé (cas par défaut).
+const PAGE_CONNEXION_PASSEPORT: &str = r#"<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>MiyukiniAdmin Origin — Connexion</title></head>
+<body style="font-family:system-ui,sans-serif;background:#0c0a1d;color:#e8e4f0;padding:2rem">
+<h1 style="color:#8b5cf6">MiyukiniAdmin Origin</h1>
+<p>Connexion par passeport COG uniquement (portée <code>origin-admin</code>).</p>
+<p>Votre COG obtient un défi (<code>POST /admin/defi</code>), émet un passeport pour Origin et
+présente la preuve de possession sur <code>POST /admin/login/passeport</code>.</p>
+</body>
+</html>"#;
 
 /// Configuration d'authentification admin (chargée depuis admin.toml).
 #[derive(Debug, Clone)]
@@ -72,12 +96,18 @@ struct RequeteAdmin {
     referer: Option<String>,
     host: Option<String>,
     csrf_entete: Option<String>,
+    autorisation: Option<String>,
+    pop: Option<String>,
     body: String,
 }
 
 /// État d'authentification admin : config + sessions actives + rate limiting login.
 struct AdminAuthState {
     config: Option<AdminAuthConfig>,
+    /// Connexion par passeport (None = désactivée : pas de clé d'hôte ou liste vide).
+    acces: Option<AccesAdmin>,
+    /// Connexion par mot de passe autorisée (bris de glace, défaut : non).
+    password_login: bool,
     /// token -> session (expiration, jeton CSRF)
     sessions: Mutex<HashMap<String, SessionAdmin>>,
     /// IP -> (tentatives, dernière tentative, bloqué_jusqu'à)
@@ -100,8 +130,28 @@ impl AdminServer {
     /// Crée un nouveau serveur admin.
     #[must_use]
     pub fn new(config: Arc<OriginConfig>) -> Self {
+        let acces = match AccesAdmin::depuis_config(&config) {
+            Ok(a) => a,
+            Err(e) => {
+                error!("Admin : configuration de connexion par passeport invalide, connexion désactivée : {}", e);
+                None
+            }
+        };
+        match &acces {
+            Some(a) => info!(
+                "Admin : connexion par passeport activée (Origin cog_id {}, {} administrateur(s))",
+                a.cog(),
+                a.nb_administrateurs()
+            ),
+            None => warn!("Admin : connexion par passeport désactivée ([admin] administrateurs ou [forum] cle_emission_path absent)"),
+        }
+        if config.admin.password_login {
+            warn!("Admin : connexion par mot de passe ACTIVÉE ([admin] password_login = true, bris de glace)");
+        }
         let auth_state = Arc::new(AdminAuthState {
             config: Self::load_admin_auth_config(&config),
+            acces,
+            password_login: config.admin.password_login,
             sessions: Mutex::new(HashMap::new()),
             login_attempts: Mutex::new(HashMap::new()),
         });
@@ -242,6 +292,8 @@ impl AdminServer {
                 "referer" => r.referer = Some(valeur.to_string()),
                 "host" => r.host = Some(valeur.to_string()),
                 "x-csrf-token" => r.csrf_entete = Some(valeur.to_string()),
+                "authorization" => r.autorisation = Some(valeur.to_string()),
+                n if n == ENTETE_POP => r.pop = Some(valeur.to_string()),
                 _ => {}
             }
         }
@@ -478,7 +530,18 @@ impl AdminServer {
             }
         }
 
-        // Routes publiques : login (GET = formulaire, POST = traitement)
+        // Routes publiques : défi de possession et connexion par passeport.
+        if method == "POST" && path_norm == "/defi" {
+            return Self::route_defi(auth_state);
+        }
+        if method == "POST" && path_norm == "/login/passeport" {
+            if !Self::check_login_rate_limit(auth_state, client_ip).await {
+                return Self::http_response(429, "Too Many Requests", "Too many login attempts. Try again later.");
+            }
+            return Self::login_passeport(&req, auth_state, client_ip).await;
+        }
+
+        // Routes publiques : login (GET = page, POST = mot de passe, bris de glace)
         if path_norm == "/login" || path_norm == "login" {
             if method == "GET" {
                 return Self::login_form_html(auth_state).await;
@@ -489,6 +552,10 @@ impl AdminServer {
                 if !Self::egal_temps_constant(&Self::csrf_presente(&req), cookie) {
                     warn!("Admin login refused: CSRF token mismatch");
                     return Self::refus_csrf();
+                }
+                if !auth_state.password_login {
+                    warn!("Admin password login refused: [admin] password_login = false");
+                    return Self::http_response(403, "Forbidden", CORPS_MOT_DE_PASSE_DESACTIVE);
                 }
                 if !Self::check_login_rate_limit(auth_state, client_ip).await {
                     return Self::http_response(
@@ -530,11 +597,111 @@ impl AdminServer {
         }
     }
 
+    /// Secondes Unix courantes.
+    fn epoch_secs() -> u64 {
+        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs())
+    }
+
+    /// Chemin sans chaîne de requête (lié dans la preuve de possession).
+    fn chemin_brut(path: &str) -> &str {
+        path.split_once('?').map_or(path, |(p, _)| p)
+    }
+
+    /// `POST /admin/defi` : défi de possession (audience `origin-admin`).
+    fn route_defi(auth_state: &AdminAuthState) -> String {
+        let Some(acces) = auth_state.acces.as_ref() else {
+            return Self::http_response_json(503, "Service Unavailable", &serde_json::json!({"ok": false, "error": "passport_login_disabled"}));
+        };
+        match acces.emettre_defi(Self::epoch_secs()) {
+            Ok(d) => Self::sans_cache(Self::http_response_json(
+                200,
+                "OK",
+                &serde_json::json!({
+                    "ok": true,
+                    "defi_id": d.id_b64(),
+                    "defi": d.defi_b64(),
+                    "audience": d.audience,
+                    "expire_a": d.expire_a,
+                    "cog_id": acces.cog().as_str(),
+                }),
+            )),
+            Err(e) => {
+                warn!("Admin : émission de défi refusée : {}", e);
+                Self::http_response_json(503, "Service Unavailable", &serde_json::json!({"ok": false, "error": "unavailable"}))
+            }
+        }
+    }
+
+    /// `POST /admin/login/passeport` : passeport + preuve de possession → visa `origin-admin`
+    /// et session serveur liée au visa (expire avec lui).
+    async fn login_passeport(req: &RequeteAdmin, auth_state: &AdminAuthState, client_ip: std::net::IpAddr) -> String {
+        let Some(acces) = auth_state.acces.as_ref() else {
+            return Self::http_response_json(503, "Service Unavailable", &serde_json::json!({"ok": false, "error": "passport_login_disabled"}));
+        };
+        let maintenant = Self::epoch_secs();
+        let requete = RequeteHttp {
+            methode: "POST",
+            chemin: Self::chemin_brut(&req.path),
+            corps: req.body.as_bytes(),
+            autorisation: req.autorisation.as_deref(),
+            pop: req.pop.as_deref(),
+            liaison: None,
+        };
+        let connexion = match acces.connecter(&requete, maintenant) {
+            Ok(c) => c,
+            Err(e) => {
+                Self::record_failed_login(auth_state, client_ip).await;
+                warn!("Admin : connexion par passeport refusée ({}) : {}", client_ip, e);
+                let code = match e {
+                    RefusAdmin::NonAdministrateur(_) | RefusAdmin::PorteeAbsente => "forbidden",
+                    _ => "unauthorized",
+                };
+                let (statut, texte) = if code == "forbidden" { (403, "Forbidden") } else { (401, "Unauthorized") };
+                return Self::http_response_json(statut, texte, &serde_json::json!({"ok": false, "error": code}));
+            }
+        };
+        Self::reset_login_attempts(auth_state, client_ip).await;
+        let restant = connexion.expire_a.saturating_sub(maintenant);
+        let token = Self::jeton_aleatoire();
+        let csrf = Self::jeton_aleatoire();
+        auth_state.sessions.lock().await.insert(
+            token.clone(),
+            SessionAdmin { expiration: Instant::now() + Duration::from_secs(restant), csrf: csrf.clone() },
+        );
+        info!("Admin : connexion par passeport de {} (session {} s)", connexion.identite, restant);
+        let corps = serde_json::to_string(&serde_json::json!({
+            "ok": true,
+            "visa": b64_encoder(&connexion.visa),
+            "expire_a": connexion.expire_a,
+            "identite": connexion.identite,
+            "csrf": csrf,
+        }))
+        .unwrap_or_default();
+        format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n{}{}Cache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nConnection: close\r\n\r\n{}",
+            corps.len(),
+            Self::cookie_host(COOKIE_SESSION, &token, restant),
+            Self::cookie_host(COOKIE_CSRF_LOGIN, "", 0),
+            corps
+        )
+    }
+
+    /// Ajoute `Cache-Control: no-store` après la ligne de statut.
+    fn sans_cache(reponse: String) -> String {
+        match reponse.split_once("\r\n") {
+            Some((statut, reste)) => format!("{statut}\r\nCache-Control: no-store\r\n{reste}"),
+            None => reponse,
+        }
+    }
+
     /// Page de login (formulaire).
     ///
     /// Pose le cookie `__Host-admin_csrf` et place le même jeton dans un champ caché
     /// (double soumission, vérifiée au POST).
     async fn login_form_html(auth_state: &AdminAuthState) -> String {
+        if !auth_state.password_login {
+            return Self::sans_cache(Self::http_response_html(200, "OK", PAGE_CONNEXION_PASSEPORT));
+        }
         let csrf = Self::jeton_aleatoire();
         let email_placeholder = auth_state
             .config
@@ -1052,6 +1219,8 @@ mod tests {
     fn state() -> AdminAuthState {
         AdminAuthState {
             config: None,
+            acces: None,
+            password_login: false,
             sessions: Mutex::new(HashMap::new()),
             login_attempts: Mutex::new(HashMap::new()),
         }
@@ -1197,7 +1366,7 @@ mod tests {
 
     #[tokio::test]
     async fn login_post_exige_origin_et_double_soumission() {
-        let st = Arc::new(state());
+        let st = Arc::new(AdminAuthState { password_login: true, ..state() });
         // Le formulaire pose le cookie CSRF et le même jeton en champ caché.
         let page = requete(&st, "GET /admin/login HTTP/1.1\r\n\r\n").await;
         let ligne = page
@@ -1308,5 +1477,191 @@ mod tests {
         // Un nouvel échec repart de zéro (pas de re-blocage immédiat).
         AdminServer::record_failed_login(&st, ip).await;
         assert!(AdminServer::check_login_rate_limit(&st, ip).await);
+    }
+
+    // ----- #15 : passeport + PoP → visa origin-admin -----
+
+    use super::super::acces::{AUDIENCE_ADMIN, PORTEE_ADMIN};
+    use crate::web::forum_auth::{identite_opaque, HoteForum};
+    use miyauth::http::{b64_decoder, formater_autorisation_passeport, formater_pop, liaison_requete, signer_pop};
+    use miyauth::{emettre_passeport, CogId, DemandePasseport, Portees, SecretTitulaire};
+    use miyusceau::CleSignature;
+    use miyuwebway_participant::identite::cog_id_depuis_cle;
+
+    /// COG reconnu de l'administrateur, son appareil et son secret de titulaire.
+    struct MondeAdmin {
+        st: Arc<AdminAuthState>,
+        cog_origin: CogId,
+        cog_h: CogId,
+        cle_h: CleSignature,
+        appareil: CleSignature,
+        secret: SecretTitulaire,
+    }
+
+    fn sujet_pour(secret: &SecretTitulaire, destination: &CogId) -> [u8; 32] {
+        miyauth::identifiant_pairwise(secret, destination)
+    }
+
+    fn monde_admin(autoriser: bool) -> MondeAdmin {
+        let cle_h = CleSignature::generer();
+        let cog_h = CogId::new(&cog_id_depuis_cle(&cle_h.cle_publique())).unwrap();
+        let hote = HoteForum::new(CleSignature::generer(), &[(cog_h.clone(), cle_h.cle_publique())]).unwrap();
+        let cog_origin = hote.cog.clone();
+        let secret = SecretTitulaire::generer();
+        let mut admins = std::collections::HashSet::new();
+        if autoriser {
+            admins.insert((cog_h.clone(), sujet_pour(&secret, &cog_origin)));
+        } else {
+            admins.insert((cog_h.clone(), [9; 32]));
+        }
+        let st = Arc::new(AdminAuthState { acces: Some(AccesAdmin::new(hote, admins)), ..state() });
+        MondeAdmin { st, cog_origin, cog_h, cle_h, appareil: CleSignature::generer(), secret }
+    }
+
+    impl MondeAdmin {
+        fn passeport(&self, duree: u64, portees: &[&str]) -> Vec<u8> {
+            let t = AdminServer::epoch_secs();
+            let demande = DemandePasseport {
+                secret: &self.secret,
+                destination: self.cog_origin.clone(),
+                cle_appareil: self.appareil.cle_publique(),
+                portees: Portees::new(portees.iter().copied()).unwrap(),
+                pas_avant: t - 10,
+                pas_apres: t - 10 + duree,
+            };
+            emettre_passeport(&self.cog_h, &self.cle_h, &demande).unwrap()
+        }
+
+        async fn pop(&self, chemin: &str) -> String {
+            let r = requete(&self.st, "POST /admin/defi HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\n\r\n").await;
+            assert!(r.starts_with("HTTP/1.1 200"), "{r}");
+            let j: serde_json::Value = serde_json::from_str(r.split("\r\n\r\n").nth(1).unwrap()).unwrap();
+            assert_eq!(j["audience"], AUDIENCE_ADMIN);
+            assert_eq!(j["cog_id"], self.cog_origin.as_str());
+            let id: [u8; 16] = b64_decoder(j["defi_id"].as_str().unwrap()).unwrap().try_into().unwrap();
+            let defi: [u8; 32] = b64_decoder(j["defi"].as_str().unwrap()).unwrap().try_into().unwrap();
+            formater_pop(&id, &signer_pop(&self.appareil, &defi, AUDIENCE_ADMIN, &liaison_requete("POST", chemin, b"")))
+        }
+
+        async fn login(&self, passeport: &[u8], pop: &str) -> String {
+            requete(
+                &self.st,
+                &format!(
+                    "POST /admin/login/passeport HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\nAuthorization: {}\r\nX-Miyu-PoP: {pop}\r\n\r\n",
+                    formater_autorisation_passeport(passeport)
+                ),
+            )
+            .await
+        }
+    }
+
+    fn cookie_session_de(r: &str) -> String {
+        r.lines()
+            .find_map(|l| l.strip_prefix("Set-Cookie: __Host-admin_session="))
+            .and_then(|v| v.split(';').next())
+            .unwrap()
+            .to_string()
+    }
+
+    #[tokio::test]
+    #[allow(clippy::many_single_char_names)]
+    async fn passeport_admin_autorise_ouvre_une_session_liee_au_visa() {
+        let m = monde_admin(true);
+        let p = m.passeport(600, &[PORTEE_ADMIN]);
+        let pop = m.pop("/admin/login/passeport").await;
+        let r = m.login(&p, &pop).await;
+        assert!(r.starts_with("HTTP/1.1 200"), "{r}");
+        let j: serde_json::Value = serde_json::from_str(r.split("\r\n\r\n").nth(1).unwrap()).unwrap();
+        let attendu = identite_opaque(&m.cog_h, &sujet_pour(&m.secret, &m.cog_origin));
+        assert_eq!(j["identite"], attendu.as_str());
+        assert!(b64_decoder(j["visa"].as_str().unwrap()).is_some_and(|v| v.len() > 32));
+        // Session bornée par le visa (≤ 15 min) et par le passeport (590 s restantes).
+        let jeton = cookie_session_de(&r);
+        assert_eq!(jeton.len(), 64);
+        let ligne = r.lines().find(|l| l.starts_with("Set-Cookie: __Host-admin_session=")).unwrap();
+        let max_age: u64 = ligne.rsplit("Max-Age=").next().unwrap().trim().parse().unwrap();
+        assert!(max_age <= 600 && max_age > 500, "{max_age}");
+        assert!(r.contains("Cache-Control: no-store"));
+        // La session donne accès au tableau de bord.
+        let d = requete(&m.st, &format!("GET /admin/ HTTP/1.1\r\nCookie: __Host-admin_session={jeton}\r\n\r\n")).await;
+        assert!(d.starts_with("HTTP/1.1 200"), "{d}");
+        // Rejeu de la même preuve de possession (défi consommé) : refus.
+        let r = m.login(&p, &pop).await;
+        assert!(r.starts_with("HTTP/1.1 401"), "{r}");
+    }
+
+    #[tokio::test]
+    async fn passeport_hors_liste_sans_portee_trop_long_ou_sans_pop_refuse() {
+        // Identité valide mais pas administratrice.
+        let m = monde_admin(false);
+        let p = m.passeport(600, &[PORTEE_ADMIN]);
+        let r = m.login(&p, &m.pop("/admin/login/passeport").await).await;
+        assert!(r.starts_with("HTTP/1.1 403"), "{r}");
+        assert!(!r.contains("Set-Cookie: __Host-admin_session"));
+        assert_eq!(m.st.sessions.lock().await.len(), 0);
+
+        let m = monde_admin(true);
+        // Portée origin-admin absente (passeport « forum ») : refus.
+        let r = m.login(&m.passeport(600, &["forum:ecrire"]), &m.pop("/admin/login/passeport").await).await;
+        assert!(r.starts_with("HTTP/1.1 403"), "{r}");
+        // Passeport de plus de 15 min : refus.
+        let r = m.login(&m.passeport(3600, &[PORTEE_ADMIN]), &m.pop("/admin/login/passeport").await).await;
+        assert!(r.starts_with("HTTP/1.1 401"), "{r}");
+        // Preuve liée à un autre chemin : refus.
+        let r = m.login(&m.passeport(600, &[PORTEE_ADMIN]), &m.pop("/admin/autre").await).await;
+        assert!(r.starts_with("HTTP/1.1 401"), "{r}");
+        // Défi inventé : refus.
+        let r = m.login(&m.passeport(600, &[PORTEE_ADMIN]), &formater_pop(&[7; 16], &[0; 64])).await;
+        assert!(r.starts_with("HTTP/1.1 401"), "{r}");
+        // Passeport émis par un COG non reconnu : refus.
+        let mut autre = monde_admin(true);
+        autre.cle_h = CleSignature::generer();
+        let r = autre.login(&autre.passeport(600, &[PORTEE_ADMIN]), &autre.pop("/admin/login/passeport").await).await;
+        assert!(r.starts_with("HTTP/1.1 401"), "{r}");
+        assert_eq!(m.st.sessions.lock().await.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn connexion_passeport_exige_origin_admin() {
+        let m = monde_admin(true);
+        let p = m.passeport(600, &[PORTEE_ADMIN]);
+        let pop = m.pop("/admin/login/passeport").await;
+        let r = requete(
+            &m.st,
+            &format!(
+                "POST /admin/login/passeport HTTP/1.1\r\nOrigin: https://evil.example\r\nAuthorization: {}\r\nX-Miyu-PoP: {pop}\r\n\r\n",
+                formater_autorisation_passeport(&p)
+            ),
+        )
+        .await;
+        assert!(r.ends_with(CORPS_REFUS_CSRF), "{r}");
+    }
+
+    #[tokio::test]
+    async fn passeport_desactive_sans_acces_configure() {
+        let st = Arc::new(state());
+        let r = requete(&st, "POST /admin/defi HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\n\r\n").await;
+        assert!(r.starts_with("HTTP/1.1 503"), "{r}");
+        let r = requete(&st, "POST /admin/login/passeport HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\n\r\n").await;
+        assert!(r.starts_with("HTTP/1.1 503"), "{r}");
+    }
+
+    #[tokio::test]
+    async fn mot_de_passe_desactive_par_defaut() {
+        assert!(!OriginConfig::default().admin.password_login);
+        assert!(OriginConfig::default().admin.administrateurs.is_empty());
+        let st = Arc::new(state());
+        // La page de connexion ne propose plus de formulaire de mot de passe.
+        let page = requete(&st, "GET /admin/login HTTP/1.1\r\n\r\n").await;
+        assert!(page.starts_with("HTTP/1.1 200"));
+        assert!(!page.contains("type=\"password\""));
+        // Même avec un CSRF valide, le POST mot de passe est refusé.
+        let jeton = "j".repeat(64);
+        let r = requete(
+            &st,
+            &format!("POST /admin/login HTTP/1.1\r\nOrigin: https://admin.miyukini.com\r\nCookie: __Host-admin_csrf={jeton}\r\n\r\ncsrf={jeton}&email=a%40b.c&password=x"),
+        )
+        .await;
+        assert!(r.starts_with("HTTP/1.1 403") && r.ends_with(CORPS_MOT_DE_PASSE_DESACTIVE), "{r}");
     }
 }
