@@ -1,0 +1,67 @@
+# CI du workspace COG — lot 0, constat R-005 (contraintes C-03, C-04, C-05).
+name: cog-ci
+
+on:
+  push:
+    branches:
+      - main
+      - "mscm/**"
+      - "feat/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: dépendances système (GTK, WebKit, ALSA, clang)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-3-dev libwebkit2gtk-4.1-dev libasound2-dev libxdo-dev \
+            libssl-dev clang pkg-config
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      # maia-llm exige CUDA : construit hors CI.
+      - name: build
+        run: cargo build --workspace --exclude maia-llm --locked
+      - name: tests
+        run: cargo test --workspace --exclude maia-llm --locked
+
+  clippy-securite:
+    # C-03 : -D warnings sur les crates de sécurité ; la liste s'étend à chaque crate mise au propre.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libssl-dev clang pkg-config
+      - uses: dtolnay/rust-toolchain@1.99.0
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: clippy crates sécurité
+        run: cargo clippy --locked -p miyusceau -- -D warnings
+
+  dependances:
+    # C-04 / EX-15 : vulnérabilités, licences, sources.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories licenses sources bans
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: cargo audit
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit

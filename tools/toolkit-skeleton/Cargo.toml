@@ -7,3 +7,7 @@ description = "Générateur de squelettes de crates toolkit (Phase 1)"
 [[bin]]
 name = "toolkit-skeleton"
 path = "src/main.rs"
+
+[lints.rust]
+# C-02 : aucun code unsafe.
+unsafe_code = "forbid"

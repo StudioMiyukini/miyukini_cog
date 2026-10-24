@@ -65,6 +65,8 @@ test_utils = ["mockall"]
 integration_tests = []
 
 [lints.rust]
+# C-02 : aucun code unsafe.
+unsafe_code = "forbid"
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(integration_tests)'] }
 
 [build-dependencies]

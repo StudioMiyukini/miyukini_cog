@@ -18,7 +18,7 @@
 
 - 149 paquets dans le workspace · ≈ 296 000 lignes Rust · 1 936 tests
 - 2 075 `unwrap()` et 446 `expect()` (tests compris) · 0 bloc `unsafe` · 64 `todo!` / TODO
-- Lints du workspace hérités par **37 / 149** paquets seulement
+- Lints du workspace hérités par 37 paquets, lints propres pour 106 ; `unsafe` interdit partout depuis R-004
 - Outils absents du serveur : `cargo-audit`, `cargo-deny`, `cargo-fuzz` ; une seule CI (`miyucloud-ci.yml`)
 - **Déséquilibre** : les 10 Cores totalisent ≈ 7 000 lignes ; MiyuCloud seul ≈ 82 000
 
@@ -102,8 +102,8 @@
 | R-001 | critique | TEAM : API sans authentification sur `0.0.0.0`, CORS `*`, SSRF via URL de nœud | C-21, C-22 |
 | R-002 | haute | Alicia API : persona issue du corps de requête | C-20 |
 | R-003 | haute | `miyuantispam` autorise toujours | C-12, C-14 |
-| R-004 | moyenne | 112 paquets n'héritent pas des lints (`forbid(unsafe)` non garanti) | C-01, C-02 |
-| R-005 | moyenne | Aucune CI d'audit des dépendances | C-04, EX-15 |
+| R-004 | moyenne | ✅ 2026-10-24 — mesure corrigée : 106 paquets ont leurs propres lints ; 6 sans interdiction de `unsafe` (miyucloud-server, mipower, 4 outils) → `unsafe_code = "forbid"` ajouté ; 148 / 148 couverts | C-01, C-02 |
+| R-005 | moyenne | ✅ 2026-10-24 — CI `cog-ci.yml` (build, tests, clippy sécurité, `cargo deny`, `cargo audit`) + `deny.toml` ; à valider au premier push | C-04, EX-15 |
 | R-006 | moyenne | Douane, Vigies, Portail, canal officiel : absents du code | EX-12, EX-19, EX-20, EX-44 |
 | R-007 | basse | TEAM : file de tâches jamais consommée, état non persistant | — |
 | R-008 | haute | Jay Bureau : WebSocket collaboratif sans jeton, `CollabRoom` sans contrôle d'ACL | C-22 |

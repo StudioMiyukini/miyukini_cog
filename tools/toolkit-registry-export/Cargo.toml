@@ -63,3 +63,7 @@ miyusocialmessaging = { path = "../../crates/miyusocialmessaging" }
 miyusocialmoderation = { path = "../../crates/miyusocialmoderation" }
 miyusocialprofile = { path = "../../crates/miyusocialprofile" }
 miyustory = { path = "../../crates/miyustory" }
+
+[lints.rust]
+# C-02 : aucun code unsafe.
+unsafe_code = "forbid"
