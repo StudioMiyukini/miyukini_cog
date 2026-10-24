@@ -51,7 +51,6 @@ Central affiche et lance :
 - Miou (assistant)
 - MiyukiniWatch (métriques)
 - Miyukini Cloud (cloud privé)
-- MiyukiniClicker (jeu)
 - Et les autres services actifs sur le COG
 
 ## Rite de Première Connexion

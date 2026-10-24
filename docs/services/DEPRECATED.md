@@ -6,6 +6,37 @@ restants.
 
 ---
 
+## MGE, Sodomight, Allumina, MiyuClicker, Miyukini Survivor — retirés le 2026-10-23
+
+### Raison
+
+Recentrage sur la partie système (Kernel, Cores, Central, toolkits, services, sécurité).
+Aucune crate système ne dépendait de ces projets.
+
+### Périmètre retiré
+
+- `mge/` : workspace indépendant du Miyukini Game Engine (113 crates), dont Sodomight (clone ARPG)
+- Allumina
+- Références Clicker / Survivor dans Central (onglets, manifestes)
+- Archive complète : branche `archive/mge-allumina` (`12019a6e`)
+
+### Reste à supprimer (non compilé, hors workspace)
+
+- `apps/miyuclicker/`
+- `apps/central/src/services/game_view.rs`, `crates/miyukini-central/src/services/miyuclicker.rs`
+- `docs/services/MiyukiniClicker/`, `docs/services/MiyukiniSurvivor/`, `docs/doc_for_website/services/miyukini-clicker.md`
+- Thème UI « Sodomight Medieval (D2) » dans `crates/miyuki-ui-tokens` et `crates/miyuki-ui-egui` (à renommer ou retirer)
+- Fiches du site officiel (`site_officiel_miyukini_cog/src/data/`) et pages Origin (`apps/origin/src/web/`)
+
+### Commits de référence
+
+```
+5f84ffdc chore: retire MGE, Allumina et Sodomight du projet
+96843e41 chore: retire les références à MiyuClicker et Miyukini Survivor
+```
+
+---
+
 ## JayXpose — retiré le 2026-04-29
 
 ### Description (historique)

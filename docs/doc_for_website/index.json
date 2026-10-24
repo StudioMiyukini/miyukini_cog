@@ -298,15 +298,6 @@
       "order": 49
     },
     {
-      "id": "miyukini-clicker",
-      "title": "Miyukini Clicker",
-      "description": "Jeu clicker intégré",
-      "icon": "gamepad",
-      "path": "services/miyukini-clicker.md",
-      "tags": ["services", "7", "specification"],
-      "order": 50
-    },
-    {
       "id": "miyukini-watch",
       "title": "Miyukini Watch",
       "description": "Monitoring et métriques utilisateur",

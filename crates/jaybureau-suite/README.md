@@ -23,7 +23,6 @@ Crates partages entre toutes les apps de la suite Jay Bureau.
 ## Reutilisation
 
 Les crates de `jaybureau-suite/` peuvent etre embarques dans n'importe quel app Miyukini :
-- `jay-collab` peut servir d'engine collab pour MGE (Miyukini Game Engine)
 - `jayclub::SqliteStore` peut etre integre dans Central Desktop
 - `jaymessage::IdentityKey` reutilise `miyukini-cog-bridge::e2e` (le meme protocole que le bridge Android)
 

@@ -160,7 +160,7 @@ Un schéma global en **6 vues** superposables (une page chacune, même légende)
 <!-- @do list_documentation_debt -->
 
 - **Encodage** : ✅ réparé le 2026-10-24 — 565 fichiers de `docs/` et 2 README (UTF-8 relu en cp1252) ; `.mip/` non touché (registres de certification générés)
-- **Retraits incomplets** : README, `doc_for_website` (services-overview, miyukini-clicker, index.json), dossiers `services/MiyukiniClicker` et `MiyukiniSurvivor`, `DEPRECATED.md` sans les retraits 2026-10, mentions MGE / Survivor dans `apps/origin/src/web/pages.rs`
+- **Retraits incomplets** : docs texte ✅ (README, `doc_for_website`, `DEPRECATED.md`, SKILL, présentation marquée historique) ; reste la suppression des dossiers et du code non compilé — liste dans `docs/services/DEPRECATED.md`
 - **Services retirés encore cités** : JayXpose, JayFestival (≈ 20 dossiers)
 - **Code mort** : modules non déclarés dans `apps/central/src/services/`, `apps/miyuclicker`
 - **Hors workspace** : `lifegame-*`, `crates/jayclub` (vide), `kindmother-db-adapter`, `apps/ui-builder`

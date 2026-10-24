@@ -71,10 +71,7 @@ Un Service ne prend aucune décision de gouvernance. Il propose des fonctionnali
 
 | Service | Description | Statut |
 |---------|-------------|--------|
-| **MiyukiniClicker** | Jeu idle/clicker avec gestion de cité | Jouable |
-| **MiyukiniSurvivor** | Jeu Survivor + Tower Defense | Jouable |
 | **MiyukiniLifeGame** | Simulation de vie | En préparation |
-| **MGE** | Moteur de jeu multijoueur | En cours |
 
 ## Flux Standard
 

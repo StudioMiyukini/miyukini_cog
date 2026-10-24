@@ -32,8 +32,6 @@
 | **MAIA** | IA locale (LLM, STT) — fonctionne sans internet | Fonctionnel |
 | **Miyukini Whisper** | Dictee locale STT/TTS avec presets hardware | Fonctionnel |
 | **MiyukiniWatch** | Tableau de bord metriques et habitudes | Fonctionnel |
-| **MiyukiniClicker** | Jeu idle/clicker avec strategie et gestion de cite | Jouable |
-| **MiyukiniSurvivor** | Jeu Survivor + Tower Defense — tours, troupes, vagues | Jouable |
 
 ### Services en preparation
 

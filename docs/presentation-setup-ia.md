@@ -1,5 +1,9 @@
 # L'IA que tu utilises vs Miyukini Framework Studio — Presentation comparative
 
+> **Instantané historique.** Les chiffres ci-dessous datent d'avant le recentrage système du 2026-10-23 :
+> MGE, Sodomight, Lord of the Click (MiyuClicker) et Miyukini Survivor ont été retirés depuis
+> (voir `docs/services/DEPRECATED.md`).
+
 ## Ce que la plupart des gens font avec l'IA
 
 Tu ouvres ChatGPT, Copilot ou Mistral. Tu poses une question. Tu obtiens une reponse.

@@ -7,12 +7,11 @@ description: Configuration workspace Cargo de Miyukini COG. 106 membres, resolut
 
 ## Vue d'ensemble
 
-2 workspaces Rust independants + 1 workspace Node.js :
+1 workspace Rust + 1 workspace Node.js (MGE retiré le 2026-10-23) :
 
 | Workspace | Chemin | Membres | Usage |
 |-----------|--------|---------|-------|
 | Miyukini COG | `/Cargo.toml` | 106 crates | Ecosysteme principal |
-| MGE | `/mge/Cargo.toml` | 113 crates | Game Engine (independant) |
 | Node.js | `/package.json` | apps/central, apps/origin | Frontend Tauri/Dioxus |
 
 ---
@@ -56,7 +55,7 @@ members = [
     "crates/miyukini-admin",
 
     # Apps
-    "apps/central", "apps/origin", "apps/ui-builder", "apps/miyuclicker",
+    "apps/central", "apps/origin", "apps/ui-builder",
 
     # Tools
     "tools/mip-generator", "tools/toolkit-skeleton", "tools/toolkit-registry-export",
