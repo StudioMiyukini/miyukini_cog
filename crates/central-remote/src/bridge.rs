@@ -108,15 +108,17 @@ impl RemoteBridge {
         self.inner
             .snapshot
             .lock()
-            .map(|s| s.clone())
-            .unwrap_or_else(|_| RemoteSnapshot {
-                user_display_name: String::new(),
-                main_tab: "Salon".into(),
-                open_tabs: Vec::new(),
-                active_tab_index: 0,
-                services: Vec::new(),
-                theme: "Gaming".into(),
-            })
+            .map_or_else(
+                |_| RemoteSnapshot {
+                    user_display_name: String::new(),
+                    main_tab: "Salon".into(),
+                    open_tabs: Vec::new(),
+                    active_tab_index: 0,
+                    services: Vec::new(),
+                    theme: "Gaming".into(),
+                },
+                |s| s.clone(),
+            )
     }
 
     /// Souscrit au canal d'événements.

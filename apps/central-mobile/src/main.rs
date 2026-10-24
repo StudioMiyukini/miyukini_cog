@@ -9,10 +9,9 @@
 //! Client léger Dioxus Mobile pour piloter le COG Host depuis Android.
 //! Zéro donnée locale — tout passe par le bridge (SSH / Whitelist / API Key).
 
-use dioxus::prelude::*;
-
 mod app;
 mod bridge;
+mod login;
 mod platform;
 mod state;
 mod theme;

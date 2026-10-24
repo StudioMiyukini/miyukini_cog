@@ -171,6 +171,97 @@ fn identity_path() -> PathBuf {
     storage_dir().join("device_identity.json")
 }
 
+/// Chemin du fichier de l'identité E2E de l'appareil (graine ed25519, `0600`).
+fn e2e_identity_path() -> PathBuf {
+    storage_dir().join("e2e_identity.key")
+}
+
+/// Taille maximale du fichier d'identité E2E (64 hex + fin de ligne, C-13).
+const MAX_E2E_IDENTITY_FILE_LEN: u64 = 128;
+
+/// Charge l'identité E2E de l'appareil, ou la génère et la stocke (appairage).
+///
+/// Stockage : répertoire privé de l'application, fichier `0600`, jamais
+/// journalisé (C-25). Fail-closed : fichier mal formé ou aux permissions
+/// trop larges = erreur.
+pub fn load_or_create_e2e_identity() -> Result<miyukini_cog_bridge::E2eIdentity, String> {
+    load_or_create_e2e_identity_at(&e2e_identity_path())
+}
+
+/// Charge l'identité E2E existante de l'appareil (connexion). Absente = erreur
+/// (ré-appairage requis), jamais de génération silencieuse.
+pub fn load_e2e_identity() -> Result<miyukini_cog_bridge::E2eIdentity, String> {
+    load_e2e_identity_at(&e2e_identity_path())
+}
+
+fn load_or_create_e2e_identity_at(
+    path: &std::path::Path,
+) -> Result<miyukini_cog_bridge::E2eIdentity, String> {
+    match std::fs::symlink_metadata(path) {
+        Ok(_) => load_e2e_identity_at(path),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => create_e2e_identity_at(path),
+        Err(e) => Err(format!("identité E2E : {}", e.kind())),
+    }
+}
+
+fn load_e2e_identity_at(
+    path: &std::path::Path,
+) -> Result<miyukini_cog_bridge::E2eIdentity, String> {
+    use std::io::Read;
+    let meta = std::fs::symlink_metadata(path)
+        .map_err(|_| "Identité E2E absente : ré-appairez l'appareil.".to_string())?;
+    if !meta.file_type().is_file() || meta.len() > MAX_E2E_IDENTITY_FILE_LEN {
+        return Err("identité E2E : fichier invalide".into());
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if meta.permissions().mode() & 0o077 != 0 {
+            return Err("identité E2E : permissions trop larges".into());
+        }
+    }
+    let file = std::fs::File::open(path).map_err(|e| format!("identité E2E : {}", e.kind()))?;
+    let mut content = zeroize::Zeroizing::new(String::new());
+    file.take(MAX_E2E_IDENTITY_FILE_LEN + 1)
+        .read_to_string(&mut content)
+        .map_err(|_| "identité E2E : fichier invalide".to_string())?;
+    let hex_seed = content.trim();
+    if hex_seed.len() != 64 {
+        return Err("identité E2E : fichier invalide".into());
+    }
+    let mut seed = zeroize::Zeroizing::new([0u8; 32]);
+    hex::decode_to_slice(hex_seed, seed.as_mut())
+        .map_err(|_| "identité E2E : fichier invalide".to_string())?;
+    Ok(miyukini_cog_bridge::E2eIdentity::from_secret_bytes(&seed))
+}
+
+fn create_e2e_identity_at(
+    path: &std::path::Path,
+) -> Result<miyukini_cog_bridge::E2eIdentity, String> {
+    use std::io::Write;
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| format!("identité E2E : {}", e.kind()))?;
+    }
+    let identity = miyukini_cog_bridge::E2eIdentity::generate();
+    let seed = identity.secret_bytes();
+    let mut content = zeroize::Zeroizing::new(hex::encode(seed.as_ref()));
+    content.push('\n');
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut file = options
+        .open(path)
+        .map_err(|e| format!("identité E2E : {}", e.kind()))?;
+    file.write_all(content.as_bytes())
+        .and_then(|()| file.sync_all())
+        .map_err(|e| format!("identité E2E : {}", e.kind()))?;
+    Ok(identity)
+}
+
 /// Chemin du fichier de connexion sauvegardée.
 fn connection_path() -> PathBuf {
     storage_dir().join("saved_connection.json")
@@ -253,6 +344,35 @@ mod tests {
 
         let h3 = sha256_hex("different-input");
         assert_ne!(h1, h3);
+    }
+
+    #[test]
+    fn e2e_identity_created_0600_and_reloaded() {
+        let dir = std::env::temp_dir().join(format!("central-mobile-{}", uuid::Uuid::new_v4()));
+        let path = dir.join("e2e_identity.key");
+        assert!(load_e2e_identity_at(&path).is_err(), "pas de génération implicite");
+        let a = load_or_create_e2e_identity_at(&path).unwrap();
+        let b = load_e2e_identity_at(&path).unwrap();
+        assert_eq!(a.public_key_bytes(), b.public_key_bytes());
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(&path).unwrap().permissions().mode();
+            assert_eq!(mode & 0o777, 0o600);
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644)).unwrap();
+            assert!(load_e2e_identity_at(&path).is_err());
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+        }
+        std::fs::write(&path, "corrompu").unwrap();
+        assert!(load_e2e_identity_at(&path).is_err());
+    }
+
+    #[test]
+    fn saved_connection_without_cog_key_still_parses() {
+        // Connexion sauvegardée avant le E2E v2 : clé absente => ré-appairage.
+        let old = r#"{"mode":"whitelist","host":"h","port":1,"credential":"c"}"#;
+        let conn: crate::state::SavedConnection = serde_json::from_str(old).unwrap();
+        assert!(conn.cog_identity_key.is_none());
     }
 
     #[test]

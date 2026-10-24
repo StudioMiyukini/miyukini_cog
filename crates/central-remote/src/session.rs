@@ -94,8 +94,7 @@ impl SessionManager {
         let now = now_secs();
         self.sessions
             .lock()
-            .map(|s| s.values().filter(|sess| sess.expires_at > now).count())
-            .unwrap_or(0)
+            .map_or(0, |s| s.values().filter(|sess| sess.expires_at > now).count())
     }
 
     fn sign_token(&self, data: &str) -> String {

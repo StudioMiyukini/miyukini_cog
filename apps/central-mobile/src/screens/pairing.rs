@@ -11,11 +11,61 @@
 //!     → Found(host) → [user confirms] → Pairing (POST /api/bridge/pair)
 //!       → poll /api/bridge/validate jusqu'a approbation
 //!         → Approved → persiste SavedConnection → transition vers Connexion
+//!
+//! E2E (R-023) : la demande d'appairage transporte la clé publique d'identité
+//! E2E de l'appareil (générée une fois, stockée en `0600`) ; la réponse porte
+//! la clé publique du COG, épinglée dans la `SavedConnection` à l'approbation.
+//! Un code de confirmation à 6 chiffres, calculé localement à partir des deux
+//! clés, est affiché pour comparaison avec le desktop avant approbation.
 
 use dioxus::prelude::*;
-use miyukini_cog_bridge::discovery;
+use miyukini_cog_bridge::{
+    discovery, pairing_confirmation_code, parse_identity_key_hex, E2eIdentity,
+};
+use serde::Deserialize;
 use std::net::SocketAddr;
 use std::time::Duration;
+
+/// Taille maximale de la réponse de `/api/bridge/pair` (C-13).
+const MAX_PAIR_REPLY_LEN: usize = 4096;
+
+/// Réponse de `/api/bridge/pair` (champs utiles).
+#[derive(Deserialize)]
+struct PairReply {
+    status: String,
+    cog_identity_key: String,
+}
+
+/// Clé du COG à épingler et code de confirmation calculé localement.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct PinnedCog {
+    cog_identity_key_hex: String,
+    confirmation_code: String,
+}
+
+/// Décode la réponse d'appairage : clé du COG valide (point ed25519 non
+/// faible) et statut connu, sinon refus. Le code de confirmation est calculé
+/// localement (jamais repris de la réponse, qui pourrait être falsifiée).
+fn parse_pair_reply(body: &[u8], device_key: &[u8; 32]) -> Result<PinnedCog, String> {
+    if body.len() > MAX_PAIR_REPLY_LEN {
+        return Err("Réponse d'appairage trop grande".into());
+    }
+    let reply: PairReply = serde_json::from_slice(body).map_err(|_| {
+        "Réponse d'appairage invalide (COG Host sans E2E v2 ?)".to_string()
+    })?;
+    if reply.status != "pending" && reply.status != "accepted" {
+        return Err(format!("Appairage refusé ({})", reply.status));
+    }
+    let cog_key = parse_identity_key_hex(&reply.cog_identity_key)
+        .map_err(|_| "Clé du COG Host invalide".to_string())?;
+    if &cog_key == device_key {
+        return Err("Clé du COG Host invalide".into());
+    }
+    Ok(PinnedCog {
+        cog_identity_key_hex: hex::encode(cog_key),
+        confirmation_code: pairing_confirmation_code(device_key, &cog_key),
+    })
+}
 
 use crate::platform;
 use crate::state::{AppScreen, AppState, SavedConnection};
@@ -42,8 +92,8 @@ enum PairingStep {
 /// Écran d'appairage avec le COG Host.
 #[component]
 pub fn PairingScreen() -> Element {
-    let mut step = use_signal(|| PairingStep::Idle);
-    let mut state = use_context::<Signal<AppState>>();
+    let step = use_signal(|| PairingStep::Idle);
+    let state = use_context::<Signal<AppState>>();
 
     let current_step = step.read().clone();
 
@@ -145,7 +195,7 @@ fn SearchingView(step_signal: Signal<PairingStep>) -> Element {
                 }
                 Err(e) => {
                     tracing::warn!("Découverte échouée: {e}");
-                    step.set(PairingStep::Error(format!("Aucun COG Host trouvé sur le WiFi.\nVérifiez que Central Desktop est lancé et que le Remote est activé.")));
+                    step.set(PairingStep::Error("Aucun COG Host trouvé sur le WiFi.\nVérifiez que Central Desktop est lancé et que le Remote est activé.".to_string()));
                 }
             }
         });
@@ -243,39 +293,82 @@ fn PairingView(
     let mut step = step_signal;
     let mut state = state_signal;
 
+    // Code de confirmation affiché pendant l'attente d'approbation.
+    let mut confirmation = use_signal(|| None::<String>);
+
     // Envoyer la demande d'appairage, puis poll jusqu'a approbation
     use_effect(move || {
         let host_clone = host.clone();
         spawn(async move {
+            // Identité E2E de l'appareil (générée une fois, stockée 0600).
+            let identity: E2eIdentity = match platform::load_or_create_e2e_identity() {
+                Ok(id) => id,
+                Err(e) => {
+                    step.set(PairingStep::Error(format!("Identité E2E indisponible : {e}")));
+                    return;
+                }
+            };
+            let device_key = identity.public_key_bytes();
+            drop(identity);
+
             let device_id = platform::get_device_id();
-            let device_name = format!("Android-{}", &device_id[..8]);
+            let short_id: String = device_id.chars().take(8).collect();
+            let device_name = format!("Android-{short_id}");
 
             let pair_url = format!("http://{host_clone}:{port}/api/bridge/pair");
             let validate_url = format!("http://{host_clone}:{port}/api/bridge/validate");
 
             let client = reqwest::Client::new();
 
-            // 1. Envoyer la demande d'appairage
+            // 1. Envoyer la demande d'appairage (avec la clé publique E2E)
             let pair_resp = client
                 .post(&pair_url)
                 .json(&serde_json::json!({
                     "device_id": device_id,
                     "device_name": device_name,
                     "mode": "whitelist",
+                    "e2e_identity_key": hex::encode(device_key),
                 }))
                 .timeout(Duration::from_secs(10))
                 .send()
                 .await;
 
-            match pair_resp {
+            let resp = match pair_resp {
+                Ok(resp) if resp.status().is_success() => resp,
                 Ok(resp) => {
-                    tracing::info!("Pair request envoyée: {:?}", resp.status());
+                    step.set(PairingStep::Error(format!(
+                        "Appairage refusé par le COG Host (HTTP {})",
+                        resp.status()
+                    )));
+                    return;
                 }
                 Err(e) => {
                     step.set(PairingStep::Error(format!("Erreur de connexion: {e}")));
                     return;
                 }
+            };
+            if resp
+                .content_length()
+                .is_some_and(|n| n > MAX_PAIR_REPLY_LEN as u64)
+            {
+                step.set(PairingStep::Error("Réponse d'appairage trop grande".into()));
+                return;
             }
+            let body = match resp.bytes().await {
+                Ok(b) => b,
+                Err(e) => {
+                    step.set(PairingStep::Error(format!("Erreur de connexion: {e}")));
+                    return;
+                }
+            };
+            let pinned = match parse_pair_reply(&body, &device_key) {
+                Ok(p) => p,
+                Err(e) => {
+                    step.set(PairingStep::Error(e));
+                    return;
+                }
+            };
+            confirmation.set(Some(pinned.confirmation_code.clone()));
 
             // 2. Poller /api/bridge/validate jusqu'a approbation (max 60s)
             let device_id_for_loop = device_id.clone();
@@ -292,12 +385,13 @@ fn PairingView(
                 if let Ok(resp) = validate_resp {
                     if resp.status().is_success() {
                         tracing::info!("Device approuvé apres {} tentatives", attempt + 1);
-                        // Sauvegarder et transitionner
+                        // Sauvegarder (clé du COG épinglée) et transitionner
                         let saved = SavedConnection {
                             mode: "whitelist".to_string(),
                             host: host_clone.clone(),
                             port,
                             credential: device_id.clone(),
+                            cog_identity_key: Some(pinned.cog_identity_key_hex.clone()),
                         };
                         if let Err(e) = platform::save_connection(&saved) {
                             tracing::warn!("Persistance connection échouée: {e}");
@@ -331,6 +425,17 @@ fn PairingView(
             p {
                 style: "color: #888; font-size: 14px; text-align: center; line-height: 1.5;",
                 "Ouvrez Central Desktop sur votre PC\net approuvez ce device dans le panneau des devices mobiles."
+            }
+
+            if let Some(code) = confirmation.read().clone() {
+                p {
+                    style: "color: #e0e0e0; font-size: 14px; text-align: center; margin: 0;",
+                    "Code de confirmation (doit être identique sur Central Desktop) :"
+                }
+                p {
+                    style: "color: #22c55e; font-size: 28px; font-weight: bold; font-family: monospace; letter-spacing: 4px; margin: 0;",
+                    "{code}"
+                }
             }
 
             button {
@@ -371,5 +476,51 @@ fn ErrorView(step_signal: Signal<PairingStep>, message: String) -> Element {
             },
             "Retour"
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn keys() -> ([u8; 32], [u8; 32]) {
+        (
+            E2eIdentity::generate().public_key_bytes(),
+            E2eIdentity::generate().public_key_bytes(),
+        )
+    }
+
+    #[test]
+    fn pair_reply_pins_cog_key_and_computes_code_locally() {
+        let (device, cog) = keys();
+        let body = serde_json::json!({
+            "status": "pending",
+            "cog_identity_key": hex::encode(cog),
+            // Code fourni par le réseau : ignoré.
+            "confirmation_code": "000000",
+        })
+        .to_string();
+        let pinned = parse_pair_reply(body.as_bytes(), &device).unwrap();
+        assert_eq!(pinned.cog_identity_key_hex, hex::encode(cog));
+        assert_eq!(pinned.confirmation_code, pairing_confirmation_code(&device, &cog));
+    }
+
+    #[test]
+    fn pair_reply_without_valid_cog_key_refused() {
+        let (device, _) = keys();
+        // COG ancien (sans E2E v2) : pas de clé.
+        let old = br#"{"status":"pending","token":null,"message":"x"}"#;
+        assert!(parse_pair_reply(old, &device).is_err());
+        let mut weak = [0u8; 32];
+        weak[0] = 1;
+        for key in [hex::encode(weak), "zz".to_string(), hex::encode(device)] {
+            let body = serde_json::json!({"status": "pending", "cog_identity_key": key}).to_string();
+            assert!(parse_pair_reply(body.as_bytes(), &device).is_err());
+        }
+        let (_, cog) = keys();
+        let body = serde_json::json!({"status": "refused", "cog_identity_key": hex::encode(cog)})
+            .to_string();
+        assert!(parse_pair_reply(body.as_bytes(), &device).is_err());
+        assert!(parse_pair_reply(&vec![b' '; MAX_PAIR_REPLY_LEN + 1], &device).is_err());
     }
 }

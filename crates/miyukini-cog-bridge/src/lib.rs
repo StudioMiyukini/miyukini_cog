@@ -28,8 +28,9 @@ pub mod whitelist;
 
 pub use bridge::{BridgeStatus, CogBridge, ConnectionMode};
 pub use e2e::{
-    E2eError, E2eHandshake, E2eIdentity, E2eRole, E2eSession, EncryptedMessage,
-    PendingHandshake, E2E_PROTOCOL_VERSION,
+    pairing_confirmation_code, parse_identity_key_hex, E2eError, E2eHandshake, E2eIdentity,
+    E2eRole, E2eSession, EncryptedMessage, PendingHandshake, RequestBinding,
+    E2E_PROTOCOL_VERSION, E2E_SESSION_HEADER,
 };
 
 /// Résultat standard du bridge.

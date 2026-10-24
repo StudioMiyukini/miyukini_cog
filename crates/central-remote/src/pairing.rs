@@ -9,14 +9,22 @@
 //! Endpoints pour permettre à Central Mobile (Android) de se connecter
 //! au COG Host via 3 modes : Whitelist LAN, Clé API, ou SSH.
 
-use chacha20poly1305::aead::{Aead, KeyInit};
-use chacha20poly1305::{ChaCha20Poly1305, Nonce};
+//!
+//! ## Clés E2E (R-023)
+//!
+//! L'appairage échange les clés publiques d'identité ed25519 : l'appareil
+//! envoie la sienne dans `/api/bridge/pair`, le COG la conserve avec l'entrée
+//! de whitelist après approbation sur le desktop, et renvoie sa propre clé que
+//! l'appareil épingle. Un code de confirmation à 6 chiffres dérivé des deux
+//! clés est affiché sur l'appareil et exposé au desktop pour comparaison.
+//! Le handshake E2E (`/api/bridge/e2e-handshake`) n'est accepté que pour une
+//! clé présente dans la whitelist.
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
-use x25519_dalek::{EphemeralSecret, PublicKey};
 
 /// Durée de validité par défaut d'un token API (30 jours).
 pub const DEFAULT_API_TOKEN_TTL_SECS: u64 = 30 * 24 * 3600;
@@ -31,31 +39,16 @@ pub struct PairingManager {
     api_tokens: Mutex<HashMap<String, ApiToken>>,
     /// Devices en attente de validation (device_id → infos).
     pending: Mutex<HashMap<String, PendingDevice>>,
-    /// Sessions E2E actives (session_id → cipher + compteur).
-    e2e_sessions: Mutex<HashMap<String, E2eServerSession>>,
 }
 
-/// Session E2E côté serveur (COG Host).
-pub struct E2eServerSession {
-    pub cipher: ChaCha20Poly1305,
-    pub send_counter: u64,
-    pub created_at: u64,
-}
+/// Nombre maximal de demandes d'appairage en attente (C-13).
+pub const MAX_PENDING_DEVICES: usize = 64;
 
-/// Requête de handshake E2E.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct E2eHandshakeRequest {
-    pub public_key: String,
-    pub protocol_version: u8,
-}
+/// Longueur maximale d'un `device_id` (octets, C-13).
+pub const MAX_DEVICE_ID_LEN: usize = 128;
 
-/// Réponse de handshake E2E.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct E2eHandshakeResponse {
-    pub public_key: String,
-    pub session_id: String,
-    pub protocol_version: u8,
-}
+/// Longueur maximale d'un nom de device (caractères, C-13).
+pub const MAX_DEVICE_NAME_CHARS: usize = 64;
 
 /// Device appairé et autorisé.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,6 +58,9 @@ pub struct PairedDevice {
     pub paired_at: u64,
     pub last_seen: u64,
     pub mode: String,
+    /// Clé publique d'identité E2E ed25519 de l'appareil (hex 32 octets),
+    /// épinglée à l'approbation. Seule clé acceptée au handshake E2E.
+    pub e2e_identity_key: String,
 }
 
 /// Token API pour un device mobile.
@@ -83,6 +79,11 @@ pub struct PendingDevice {
     pub device_id: String,
     pub name: String,
     pub requested_at: u64,
+    /// Clé publique d'identité E2E présentée par l'appareil (hex 32 octets).
+    pub e2e_identity_key: String,
+    /// Code de confirmation (6 chiffres) à comparer avec celui de l'appareil
+    /// avant d'approuver.
+    pub confirmation_code: String,
 }
 
 /// Requête de validation whitelist.
@@ -97,6 +98,9 @@ pub struct PairRequest {
     pub device_id: String,
     pub device_name: String,
     pub mode: String,
+    /// Clé publique d'identité E2E ed25519 de l'appareil (hex 32 octets).
+    /// Obligatoire : un appareil sans clé ne peut pas être appairé.
+    pub e2e_identity_key: String,
 }
 
 /// Réponse d'appairage.
@@ -105,6 +109,17 @@ pub struct PairResponse {
     pub status: String,
     pub token: Option<String>,
     pub message: String,
+}
+
+/// Erreurs de demande d'appairage (une variante par cause, C-11).
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum PairingError {
+    #[error("device_id invalide")]
+    InvalidDeviceId,
+    #[error("trop de demandes d'appairage en attente")]
+    TooManyPending,
+    #[error("état d'appairage indisponible")]
+    Unavailable,
 }
 
 /// Info de découverte LAN.
@@ -129,7 +144,6 @@ impl PairingManager {
             whitelist: Mutex::new(HashMap::new()),
             api_tokens: Mutex::new(HashMap::new()),
             pending: Mutex::new(HashMap::new()),
-            e2e_sessions: Mutex::new(HashMap::new()),
         }
     }
 
@@ -137,8 +151,7 @@ impl PairingManager {
     pub fn is_whitelisted(&self, device_id: &str) -> bool {
         self.whitelist
             .lock()
-            .map(|w| w.contains_key(device_id))
-            .unwrap_or(false)
+            .is_ok_and(|w| w.contains_key(device_id))
     }
 
     /// Met à jour le last_seen d'un device whitelisté.
@@ -154,13 +167,12 @@ impl PairingManager {
     pub fn validate_api_token(&self, token: &str) -> bool {
         self.api_tokens
             .lock()
-            .map(|tokens| {
+            .is_ok_and(|tokens| {
                 // Fail-closed : un token sans expiration (0) n'est jamais valide.
                 tokens
                     .get(token)
-                    .map_or(false, |t| t.expires_at != 0 && t.expires_at > now_secs())
+                    .is_some_and(|t| t.expires_at != 0 && t.expires_at > now_secs())
             })
-            .unwrap_or(false)
     }
 
     /// Génère un nouveau token API (affiché en QR code sur le desktop).
@@ -187,35 +199,92 @@ impl PairingManager {
         token
     }
 
-    /// Ajoute un device en attente de validation.
-    pub fn request_pairing(&self, device_id: &str, device_name: &str) -> PairResponse {
-        // Si déjà whitelisté, accepter directement.
-        if self.is_whitelisted(device_id) {
+    /// Ajoute un device en attente de validation, avec sa clé publique
+    /// d'identité E2E (déjà validée, hex canonique) et le code de confirmation.
+    ///
+    /// Un device déjà whitelisté avec la **même** clé est accepté directement ;
+    /// avec une clé différente, la demande repasse en attente d'approbation
+    /// (la clé épinglée n'est jamais remplacée sans validation desktop).
+    pub fn request_pairing(
+        &self,
+        device_id: &str,
+        device_name: &str,
+        e2e_identity_key_hex: &str,
+        confirmation_code: &str,
+    ) -> Result<PairResponse, PairingError> {
+        if device_id.is_empty()
+            || device_id.len() > MAX_DEVICE_ID_LEN
+            || device_id.chars().any(char::is_control)
+        {
+            return Err(PairingError::InvalidDeviceId);
+        }
+        let name: String = device_name
+            .chars()
+            .filter(|c| !c.is_control())
+            .take(MAX_DEVICE_NAME_CHARS)
+            .collect();
+
+        let same_key = self
+            .whitelist
+            .lock()
+            .map_err(|_| PairingError::Unavailable)?
+            .get(device_id)
+            .is_some_and(|d| d.e2e_identity_key == e2e_identity_key_hex);
+        if same_key {
             self.touch_device(device_id);
-            return PairResponse {
+            return Ok(PairResponse {
                 status: "accepted".into(),
                 token: None,
                 message: "Device déjà autorisé".into(),
-            };
+            });
         }
 
-        // Ajouter en attente.
-        if let Ok(mut pending) = self.pending.lock() {
-            pending.insert(
-                device_id.to_string(),
-                PendingDevice {
-                    device_id: device_id.to_string(),
-                    name: device_name.to_string(),
-                    requested_at: now_secs(),
-                },
-            );
+        let mut pending = self.pending.lock().map_err(|_| PairingError::Unavailable)?;
+        if !pending.contains_key(device_id) && pending.len() >= MAX_PENDING_DEVICES {
+            return Err(PairingError::TooManyPending);
         }
+        pending.insert(
+            device_id.to_string(),
+            PendingDevice {
+                device_id: device_id.to_string(),
+                name,
+                requested_at: now_secs(),
+                e2e_identity_key: e2e_identity_key_hex.to_string(),
+                confirmation_code: confirmation_code.to_string(),
+            },
+        );
 
-        PairResponse {
+        Ok(PairResponse {
             status: "pending".into(),
             token: None,
             message: "En attente de validation sur le COG Host".into(),
+        })
+    }
+
+    /// Vrai si `device_id` est toujours appairé avec la clé E2E `e2e_identity_key_hex`
+    /// (révocation ou changement de clé = sessions E2E existantes invalides).
+    pub fn is_paired_with_key(&self, device_id: &str, e2e_identity_key_hex: &str) -> bool {
+        !e2e_identity_key_hex.is_empty()
+            && self
+                .whitelist
+                .lock()
+                .is_ok_and(|w| {
+                    w.get(device_id)
+                        .is_some_and(|d| d.e2e_identity_key == e2e_identity_key_hex)
+                })
+    }
+
+    /// Retrouve le device appairé dont la clé d'identité E2E épinglée vaut
+    /// `e2e_identity_key_hex` (hex canonique). Aucun résultat = refus.
+    pub fn device_for_identity_key(&self, e2e_identity_key_hex: &str) -> Option<PairedDevice> {
+        if e2e_identity_key_hex.is_empty() {
+            return None;
         }
+        self.whitelist.lock().ok().and_then(|w| {
+            w.values()
+                .find(|d| d.e2e_identity_key == e2e_identity_key_hex)
+                .cloned()
+        })
     }
 
     /// Approuve un device en attente (appelé par l'utilisateur desktop).
@@ -233,6 +302,7 @@ impl PairingManager {
                 paired_at: now_secs(),
                 last_seen: now_secs(),
                 mode: "whitelist".into(),
+                e2e_identity_key: device.e2e_identity_key,
             };
             if let Ok(mut whitelist) = self.whitelist.lock() {
                 whitelist.insert(device.device_id, paired);
@@ -247,9 +317,7 @@ impl PairingManager {
     pub fn reject_device(&self, device_id: &str) -> bool {
         self.pending
             .lock()
-            .ok()
-            .map(|mut p| p.remove(device_id).is_some())
-            .unwrap_or(false)
+            .is_ok_and(|mut p| p.remove(device_id).is_some())
     }
 
     /// Liste les devices en attente de validation.
@@ -272,18 +340,14 @@ impl PairingManager {
     pub fn revoke_device(&self, device_id: &str) -> bool {
         self.whitelist
             .lock()
-            .ok()
-            .map(|mut w| w.remove(device_id).is_some())
-            .unwrap_or(false)
+            .is_ok_and(|mut w| w.remove(device_id).is_some())
     }
 
     /// Révoque un token API.
     pub fn revoke_api_token(&self, token: &str) -> bool {
         self.api_tokens
             .lock()
-            .ok()
-            .map(|mut t| t.remove(token).is_some())
-            .unwrap_or(false)
+            .is_ok_and(|mut t| t.remove(token).is_some())
     }
 
     /// Info de découverte pour le broadcast LAN.
@@ -332,6 +396,13 @@ fn hostname() -> String {
 mod tests {
     use super::*;
 
+    const KEY_A: &str = "aa00000000000000000000000000000000000000000000000000000000000000";
+    const KEY_B: &str = "bb00000000000000000000000000000000000000000000000000000000000000";
+
+    fn request(mgr: &PairingManager, id: &str, name: &str, key: &str) -> PairResponse {
+        mgr.request_pairing(id, name, key, "123456").unwrap()
+    }
+
     #[test]
     fn whitelist_flow() {
         let mgr = PairingManager::new();
@@ -340,16 +411,61 @@ mod tests {
         assert!(!mgr.is_whitelisted("dev-1"));
 
         // Demande d'appairage.
-        let resp = mgr.request_pairing("dev-1", "Pixel 7");
+        let resp = request(&mgr, "dev-1", "Pixel 7", KEY_A);
         assert_eq!(resp.status, "pending");
+        assert!(mgr.device_for_identity_key(KEY_A).is_none());
 
-        // Approuver.
+        // Approuver : la clé E2E est épinglée avec l'entrée de whitelist.
         assert!(mgr.approve_device("dev-1"));
         assert!(mgr.is_whitelisted("dev-1"));
+        let paired = mgr.device_for_identity_key(KEY_A).unwrap();
+        assert_eq!(paired.device_id, "dev-1");
+        assert_eq!(paired.e2e_identity_key, KEY_A);
 
-        // Re-connexion directe.
-        let resp2 = mgr.request_pairing("dev-1", "Pixel 7");
+        // Re-connexion directe avec la même clé.
+        let resp2 = request(&mgr, "dev-1", "Pixel 7", KEY_A);
         assert_eq!(resp2.status, "accepted");
+    }
+
+    #[test]
+    fn key_change_requires_new_approval() {
+        let mgr = PairingManager::new();
+        request(&mgr, "dev-1", "Pixel", KEY_A);
+        assert!(mgr.approve_device("dev-1"));
+        // Même device_id, autre clé : en attente, l'ancienne clé reste épinglée.
+        let resp = request(&mgr, "dev-1", "Pixel", KEY_B);
+        assert_eq!(resp.status, "pending");
+        assert!(mgr.device_for_identity_key(KEY_B).is_none());
+        assert!(mgr.device_for_identity_key(KEY_A).is_some());
+        assert!(mgr.approve_device("dev-1"));
+        assert!(mgr.device_for_identity_key(KEY_B).is_some());
+        assert!(mgr.device_for_identity_key(KEY_A).is_none());
+    }
+
+    #[test]
+    fn pairing_inputs_bounded() {
+        let mgr = PairingManager::new();
+        assert_eq!(
+            mgr.request_pairing("", "x", KEY_A, "1").unwrap_err(),
+            PairingError::InvalidDeviceId
+        );
+        assert_eq!(
+            mgr.request_pairing(&"d".repeat(MAX_DEVICE_ID_LEN + 1), "x", KEY_A, "1")
+                .unwrap_err(),
+            PairingError::InvalidDeviceId
+        );
+        for i in 0..MAX_PENDING_DEVICES {
+            request(&mgr, &format!("dev-{i}"), "x", KEY_A);
+        }
+        assert_eq!(
+            mgr.request_pairing("dev-extra", "x", KEY_A, "1").unwrap_err(),
+            PairingError::TooManyPending
+        );
+        let long = "n".repeat(500);
+        request(&mgr, "dev-0", &long, KEY_A);
+        let p = mgr.pending_devices().into_iter().find(|d| d.device_id == "dev-0").unwrap();
+        assert_eq!(p.name.chars().count(), MAX_DEVICE_NAME_CHARS);
+        assert!(mgr.device_for_identity_key("").is_none());
     }
 
     #[test]
@@ -397,7 +513,7 @@ mod tests {
     #[test]
     fn reject_device() {
         let mgr = PairingManager::new();
-        mgr.request_pairing("dev-2", "Samsung S24");
+        request(&mgr, "dev-2", "Samsung S24", KEY_A);
         assert_eq!(mgr.pending_devices().len(), 1);
 
         mgr.reject_device("dev-2");

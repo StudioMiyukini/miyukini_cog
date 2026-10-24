@@ -131,10 +131,29 @@ pub struct RemoteServiceInfo {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Requête d'authentification pour le remote.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+///
+/// Le mot de passe est effacé à la destruction (C-25) et n'apparaît jamais
+/// dans `Debug`. Côté mobile, cette requête n'est émise que chiffrée dans une
+/// session E2E v2 (R-023).
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RemoteAuthRequest {
     pub email: String,
     pub password: String,
+}
+
+impl std::fmt::Debug for RemoteAuthRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RemoteAuthRequest")
+            .field("email", &self.email)
+            .field("password", &"<redacted>")
+            .finish()
+    }
+}
+
+impl Drop for RemoteAuthRequest {
+    fn drop(&mut self) {
+        zeroize::Zeroize::zeroize(&mut self.password);
+    }
 }
 
 /// Réponse d'authentification.
@@ -148,6 +167,17 @@ pub struct RemoteAuthResponse {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn auth_request_debug_redacts_password() {
+        let req = super::RemoteAuthRequest {
+            email: "a@b.c".into(),
+            password: "Secret-123".into(),
+        };
+        let dbg = format!("{req:?}");
+        assert!(dbg.contains("<redacted>"));
+        assert!(!dbg.contains("Secret-123"));
+    }
+
     use super::*;
 
     #[test]

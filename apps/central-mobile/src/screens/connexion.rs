@@ -8,13 +8,17 @@
 //!
 //! Flow :
 //!   1. Etablir le bridge avec le COG Host (via SavedConnection)
-//!   2. Negocier le handshake E2E (X25519 + ChaCha20-Poly1305)
-//!   3. Authentifier l'utilisateur via /auth sur CentralRemote
+//!   2. Negocier le handshake E2E v2 (identités épinglées à l'appairage)
+//!   3. Authentifier l'utilisateur via /auth **chiffré** dans la session E2E
 //!   4. Transition vers Main
+//!
+//! Fail-closed (R-023, C-12) : si le handshake E2E échoue, la connexion est
+//! abandonnée avec une erreur claire ; aucun identifiant n'est jamais envoyé
+//! en clair (voir [`crate::login`]).
 
 use dioxus::prelude::*;
-use miyukini_cog_bridge::{CogBridge, ConnectionMode};
 
+use crate::login;
 use crate::state::{AppScreen, AppState};
 
 /// État de la connexion.
@@ -24,10 +28,8 @@ enum ConnexionStatus {
     Idle,
     /// Etablissement du bridge en cours.
     ConnectingBridge,
-    /// Handshake E2E en cours.
+    /// Handshake E2E puis authentification chiffrée en cours.
     NegotiatingE2e,
-    /// Auth en cours.
-    Authenticating,
     /// Erreur.
     Error(String),
 }
@@ -46,8 +48,7 @@ pub fn ConnexionScreen() -> Element {
     let saved = state.read().saved_connection.clone();
     let host_label = saved
         .as_ref()
-        .map(|s| format!("{}:{}", s.host, s.port))
-        .unwrap_or_else(|| "non configuré".to_string());
+        .map_or_else(|| "non configuré".to_string(), |s| format!("{}:{}", s.host, s.port));
 
     rsx! {
         div {
@@ -90,10 +91,7 @@ pub fn ConnexionScreen() -> Element {
                     StatusLabel { text: "Connexion au COG Host...".to_string(), color: "#7c3aed".to_string() }
                 },
                 ConnexionStatus::NegotiatingE2e => rsx! {
-                    StatusLabel { text: "Chiffrement E2E...".to_string(), color: "#7c3aed".to_string() }
-                },
-                ConnexionStatus::Authenticating => rsx! {
-                    StatusLabel { text: "Authentification...".to_string(), color: "#7c3aed".to_string() }
+                    StatusLabel { text: "Chiffrement E2E et authentification...".to_string(), color: "#7c3aed".to_string() }
                 },
                 ConnexionStatus::Error(msg) => rsx! {
                     p {
@@ -101,7 +99,7 @@ pub fn ConnexionScreen() -> Element {
                         "{msg}"
                     }
                 },
-                _ => rsx! {},
+                ConnexionStatus::Idle => rsx! {},
             }
 
             // Bouton connexion
@@ -133,27 +131,21 @@ pub fn ConnexionScreen() -> Element {
                     spawn(async move {
                         status_sig.set(ConnexionStatus::ConnectingBridge);
 
-                        // 1. Construire le ConnectionMode
-                        let mode = match saved.mode.as_str() {
-                            "whitelist" => ConnectionMode::Whitelist {
-                                host: saved.host.clone(),
-                                port: saved.port,
-                                device_id: saved.credential.clone(),
-                            },
-                            "apikey" => ConnectionMode::ApiKey {
-                                host: saved.host.clone(),
-                                port: saved.port,
-                                token: saved.credential.clone(),
-                            },
-                            other => {
-                                status_sig.set(ConnexionStatus::Error(format!(
-                                    "Mode {other} pas encore supporté"
-                                )));
+                        // 1. Identités E2E (appairage) et bridge.
+                        let device_identity = match crate::platform::load_e2e_identity() {
+                            Ok(id) => id,
+                            Err(e) => {
+                                status_sig.set(ConnexionStatus::Error(e));
                                 return;
                             }
                         };
-
-                        let bridge = CogBridge::new(mode);
+                        let bridge = match login::build_bridge(&saved, device_identity) {
+                            Ok(b) => b,
+                            Err(e) => {
+                                status_sig.set(ConnexionStatus::Error(e));
+                                return;
+                            }
+                        };
 
                         // 2. Etablir le bridge
                         if let Err(e) = bridge.connect().await {
@@ -162,57 +154,25 @@ pub fn ConnexionScreen() -> Element {
                         }
                         state_sig.write().bridge_status = bridge.status().await;
 
-                        // 3. Handshake E2E
+                        // 3-4. Handshake E2E puis /auth chiffré (aucun repli clair).
                         status_sig.set(ConnexionStatus::NegotiatingE2e);
-                        if let Err(e) = bridge.negotiate_e2e().await {
-                            // Si E2E echoue, on continue quand meme en clair (mode degrade)
-                            tracing::warn!("E2E handshake échoué (fallback clair): {e}");
-                        }
-
-                        // 4. Auth via /auth sur CentralRemote
-                        status_sig.set(ConnexionStatus::Authenticating);
-                        let auth_url = format!("{}/auth", bridge.base_url());
-                        let client = reqwest::Client::new();
-                        let auth_resp = client
-                            .post(&auth_url)
-                            .json(&serde_json::json!({
-                                "email": email_val,
-                                "password": password_val,
-                            }))
-                            .timeout(std::time::Duration::from_secs(10))
-                            .send()
-                            .await;
-
-                        match auth_resp {
-                            Ok(resp) => {
-                                if let Ok(body) = resp.json::<serde_json::Value>().await {
-                                    let success = body.get("success").and_then(|v| v.as_bool()).unwrap_or(false);
-                                    if success {
-                                        let display = body.get("user_display_name")
-                                            .and_then(|v| v.as_str())
-                                            .unwrap_or(&email_val)
-                                            .to_string();
-                                        state_sig.write().user_display_name = Some(display);
-                                        state_sig.write().screen = AppScreen::Main;
-                                    } else {
-                                        let err_msg = body.get("error")
-                                            .and_then(|v| v.as_str())
-                                            .unwrap_or("Identifiants incorrects")
-                                            .to_string();
-                                        status_sig.set(ConnexionStatus::Error(err_msg));
-                                    }
-                                } else {
-                                    status_sig.set(ConnexionStatus::Error("Réponse invalide du COG Host".to_string()));
-                                }
+                        match login::login(&bridge, &email_val, &password_val).await {
+                            Ok(display) => {
+                                state_sig.write().user_display_name = Some(display);
+                                state_sig.write().screen = AppScreen::Main;
                             }
                             Err(e) => {
-                                status_sig.set(ConnexionStatus::Error(format!("Auth: {e}")));
+                                if let login::LoginError::E2eFailed(cause) = &e {
+                                    tracing::warn!("Connexion abandonnée : handshake E2E échoué ({cause})");
+                                }
+                                status_sig.set(ConnexionStatus::Error(e.user_message()));
                             }
                         }
 
-                        // Stocker le bridge pour les prochaines requetes (bridge est drop ici,
-                        // a stocker dans state pour un usage plus long)
-                        let _ = bridge; // TODO: persister dans state
+                        // Le bridge n'est pas encore conservé dans l'état
+                        // (appels API suivants non câblés) : il est libéré ici,
+                        // avec sa session E2E.
+                        drop(bridge);
                     });
                 },
                 if is_loading { "Connexion..." } else { "Se connecter" }

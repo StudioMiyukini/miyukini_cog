@@ -16,7 +16,8 @@ use tokio::sync::RwLock;
 
 use crate::e2e::{
     E2eError, E2eHandshake, E2eIdentity, E2eRole, E2eSession, EncryptedMessage,
-    PendingHandshake, MAX_HANDSHAKE_JSON_LEN, MAX_MESSAGE_JSON_LEN,
+    PendingHandshake, RequestBinding, E2E_SESSION_HEADER, MAX_HANDSHAKE_JSON_LEN,
+    MAX_MESSAGE_JSON_LEN,
 };
 use crate::BridgeResult;
 
@@ -231,14 +232,19 @@ impl CogBridge {
         Ok(())
     }
 
-    /// Chiffre et envoie un message JSON au COG Host.
+    /// Chiffre et envoie un message JSON au COG Host (`POST endpoint`).
+    ///
+    /// Le message est lié à un identifiant de requête aléatoire, à la méthode
+    /// et au point d'accès (AAD) ; l'identifiant de session est transmis dans
+    /// l'en-tête [`E2E_SESSION_HEADER`].
     pub async fn send_encrypted<T: Serialize>(&self, endpoint: &str, value: &T) -> BridgeResult<()> {
         let session_guard = self.e2e_session.read().await;
         let session = session_guard
             .as_ref()
             .ok_or(crate::BridgeError::Disconnected)?;
 
-        let encrypted = session.encrypt_json(value)?;
+        let binding = RequestBinding::new("POST", endpoint)?;
+        let encrypted = session.encrypt_json(&binding, value)?;
 
         let base = self.base_url();
         let url = format!("{base}{endpoint}");
@@ -246,6 +252,7 @@ impl CogBridge {
         let client = reqwest::Client::new();
         let resp = client
             .post(&url)
+            .header(E2E_SESSION_HEADER, hex::encode(session.session_id()))
             .json(&encrypted)
             .timeout(std::time::Duration::from_secs(10))
             .send()
@@ -272,7 +279,8 @@ impl CogBridge {
             .as_ref()
             .ok_or(crate::BridgeError::Disconnected)?;
 
-        let encrypted = session.encrypt_json(value)?;
+        let binding = RequestBinding::new("POST", endpoint)?;
+        let encrypted = session.encrypt_json(&binding, value)?;
 
         let base = self.base_url();
         let url = format!("{base}{endpoint}");
@@ -280,6 +288,7 @@ impl CogBridge {
         let client = reqwest::Client::new();
         let resp = client
             .post(&url)
+            .header(E2E_SESSION_HEADER, hex::encode(session.session_id()))
             .json(&encrypted)
             .timeout(std::time::Duration::from_secs(10))
             .send()
@@ -295,7 +304,9 @@ impl CogBridge {
         let body = read_bounded(resp, MAX_MESSAGE_JSON_LEN).await?;
         let encrypted_resp = EncryptedMessage::from_json(&body)?;
 
-        session.decrypt_json(&encrypted_resp)
+        // La réponse doit être liée à CETTE requête (identifiant, méthode,
+        // point d'accès) et porter une séquence COG strictement croissante.
+        session.decrypt_json(&binding, &encrypted_resp)
     }
 
     /// Retourne true si le chiffrement E2E est actif.

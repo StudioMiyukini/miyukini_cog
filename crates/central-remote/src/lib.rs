@@ -16,6 +16,7 @@
 
 pub mod bridge;
 pub mod discovery;
+pub mod e2e;
 pub mod pairing;
 pub mod protocol;
 pub mod server;

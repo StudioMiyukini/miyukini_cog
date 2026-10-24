@@ -61,4 +61,9 @@ pub struct SavedConnection {
     pub port: u16,
     /// Token ou device_id selon le mode.
     pub credential: String,
+    /// Clé publique d'identité E2E du COG (hex 32 octets), épinglée à
+    /// l'appairage. Absente pour un appairage antérieur au E2E v2 : la
+    /// connexion est alors refusée et un ré-appairage est demandé.
+    #[serde(default)]
+    pub cog_identity_key: Option<String>,
 }

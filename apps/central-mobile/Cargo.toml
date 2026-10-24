@@ -36,6 +36,8 @@ chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
 rand = "0.8"
 hex = "0.4"
+# Effacement de la graine d'identité E2E lue depuis le stockage (C-25, R-023).
+zeroize = "1"
 
 # === Crates internes Miyukini (portables Android) ===
 

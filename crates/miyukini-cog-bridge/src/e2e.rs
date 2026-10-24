@@ -28,7 +28,13 @@
 //!    deux clés directionnelles : appareil → COG et COG → appareil.
 //! 5. **Chiffrement** : XChaCha20-Poly1305, nonce aléatoire de 192 bits tiré
 //!    en interne (`OsRng`) — l'appelant ne fournit jamais de nonce. Les données
-//!    associées lient le sens d'émission et l'identifiant de session.
+//!    associées lient le sens d'émission, l'identifiant de session, un numéro
+//!    de séquence par sens, l'identifiant de requête, la méthode et le point
+//!    d'accès HTTP (voir [`RequestBinding`]).
+//! 6. **Anti-rejeu** : chaque sens a une séquence u64 strictement croissante ;
+//!    le récepteur refuse toute valeur ≤ à la dernière acceptée (pas de fenêtre :
+//!    échanges requête/réponse séquentiels). La réponse doit porter le même
+//!    identifiant de requête que la requête.
 //!
 //! ## Garanties
 //!
@@ -37,6 +43,8 @@
 //! - **Pas de réutilisation de nonce** : une clé par sens + nonces aléatoires
 //!   de 192 bits.
 //! - **Forward secrecy** : les clés éphémères sont consommées par le handshake.
+//! - **Pas de rejeu** : un message rejoué, plus ancien, ou présenté sur un autre
+//!   point d'accès est refusé ; une réponse d'une autre requête est refusée.
 //! - **Hygiène des secrets** : clés effacées à la destruction (C-25), jamais
 //!   affichées par `Debug`.
 
@@ -48,6 +56,7 @@ use rand::rngs::OsRng;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use std::sync::atomic::{AtomicU64, Ordering};
 use x25519_dalek::{EphemeralSecret, PublicKey};
 use zeroize::Zeroizing;
 
@@ -67,6 +76,21 @@ const SESSION_ID_DOMAIN: &[u8] = b"miyukini/cog-bridge/e2e-session-id/v2";
 
 /// Domaine des données associées (AAD) des messages.
 const MESSAGE_AAD_DOMAIN: &[u8] = b"miyukini/cog-bridge/e2e-msg/v2";
+
+/// Domaine du code de confirmation d'appairage.
+const PAIRING_CODE_DOMAIN: &[u8] = b"miyukini/cog-bridge/pairing-code/v2";
+
+/// En-tête HTTP portant l'identifiant (public) de session E2E, en hex.
+pub const E2E_SESSION_HEADER: &str = "x-miyukini-e2e-session";
+
+/// Taille de l'identifiant de requête (128 bits).
+pub const REQUEST_ID_SIZE: usize = 16;
+
+/// Longueur maximale d'une méthode HTTP liée dans l'AAD (C-13).
+pub const MAX_METHOD_LEN: usize = 16;
+
+/// Longueur maximale d'un point d'accès lié dans l'AAD (C-13).
+pub const MAX_ENDPOINT_LEN: usize = 256;
 
 /// Taille du nonce XChaCha20 (192 bits = 24 octets).
 pub const NONCE_SIZE: usize = 24;
@@ -128,6 +152,15 @@ pub enum E2eError {
 
     #[error("déchiffrement refusé (authentification AEAD)")]
     Decrypt,
+
+    #[error("message rejoué ou hors séquence")]
+    Replay,
+
+    #[error("compteur de séquence épuisé (nouveau handshake requis)")]
+    SequenceExhausted,
+
+    #[error("identifiant de requête différent de celui attendu")]
+    RequestIdMismatch,
 
     #[error("identités E2E non configurées (appairage requis)")]
     MissingIdentity,
@@ -195,6 +228,12 @@ impl E2eIdentity {
         Self {
             signing: SigningKey::from_bytes(secret),
         }
+    }
+
+    /// Graine secrète (32 octets) pour le stockage sécurisé ; effacée à la
+    /// destruction du conteneur. Ne jamais journaliser.
+    pub fn secret_bytes(&self) -> Zeroizing<[u8; 32]> {
+        Zeroizing::new(self.signing.to_bytes())
     }
 
     /// Clé publique d'identité (32 octets) à communiquer au pair lors de l'appairage.
@@ -464,18 +503,81 @@ impl PendingHandshake {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Liaison requête / réponse (anti-rejeu)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Liaison d'un message à une requête : identifiant aléatoire, méthode et
+/// point d'accès HTTP. Liée dans l'AAD : un chiffré produit pour un point
+/// d'accès A n'est pas accepté sur un point d'accès B, et la réponse doit
+/// porter le même identifiant de requête.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RequestBinding {
+    request_id: [u8; REQUEST_ID_SIZE],
+    method: String,
+    endpoint: String,
+}
+
+impl RequestBinding {
+    /// Nouvelle liaison pour une requête émise (identifiant tiré via `OsRng`).
+    pub fn new(method: &str, endpoint: &str) -> Result<Self, E2eError> {
+        let mut request_id = [0u8; REQUEST_ID_SIZE];
+        OsRng.fill_bytes(&mut request_id);
+        Self::with_request_id(request_id, method, endpoint)
+    }
+
+    /// Liaison d'une requête reçue : l'identifiant vient du message, la
+    /// méthode et le point d'accès viennent de la requête HTTP réellement reçue.
+    pub fn for_received(
+        msg: &EncryptedMessage,
+        method: &str,
+        endpoint: &str,
+    ) -> Result<Self, E2eError> {
+        Self::with_request_id(msg.request_id, method, endpoint)
+    }
+
+    fn with_request_id(
+        request_id: [u8; REQUEST_ID_SIZE],
+        method: &str,
+        endpoint: &str,
+    ) -> Result<Self, E2eError> {
+        if method.is_empty() || method.len() > MAX_METHOD_LEN {
+            return Err(E2eError::TooLarge("méthode"));
+        }
+        if endpoint.is_empty() || endpoint.len() > MAX_ENDPOINT_LEN {
+            return Err(E2eError::TooLarge("point d'accès"));
+        }
+        Ok(Self {
+            request_id,
+            method: method.to_string(),
+            endpoint: endpoint.to_string(),
+        })
+    }
+
+    /// Identifiant de la requête.
+    pub fn request_id(&self) -> [u8; REQUEST_ID_SIZE] {
+        self.request_id
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Session
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Session E2E établie — chiffre et déchiffre les messages.
 ///
 /// Deux clés distinctes (une par sens) ; les ciphers effacent leur clé à la
-/// destruction.
+/// destruction. Chaque sens porte un numéro de séquence strictement croissant
+/// (lié dans l'AAD) : le récepteur refuse toute valeur inférieure ou égale à
+/// la dernière acceptée (rejeu, désordre).
 pub struct E2eSession {
     role: E2eRole,
     send: XChaCha20Poly1305,
     recv: XChaCha20Poly1305,
     session_id: [u8; 32],
+    /// Dernier numéro de séquence émis (0 = aucun).
+    send_seq: AtomicU64,
+    /// Dernier numéro de séquence accepté en réception (0 = aucun).
+    recv_seq: AtomicU64,
 }
 
 impl std::fmt::Debug for E2eSession {
@@ -500,6 +602,8 @@ impl E2eSession {
             send: XChaCha20Poly1305::new(send.into()),
             recv: XChaCha20Poly1305::new(recv.into()),
             session_id: material.session_id,
+            send_seq: AtomicU64::new(0),
+            recv_seq: AtomicU64::new(0),
         }
     }
 
@@ -513,32 +617,71 @@ impl E2eSession {
         self.session_id
     }
 
-    /// AAD : domaine || version || rôle de l'émetteur || identifiant de session.
-    fn aad(&self, sender: E2eRole) -> Vec<u8> {
-        let mut aad = Vec::with_capacity(MESSAGE_AAD_DOMAIN.len() + 2 + 32);
+    /// AAD : domaine || version || rôle de l'émetteur || identifiant de session
+    /// || séquence (u64 BE) || identifiant de requête (16) || len(méthode) (u8)
+    /// || méthode || len(point d'accès) (u16 BE) || point d'accès.
+    fn aad(&self, sender: E2eRole, seq: u64, binding: &RequestBinding) -> Vec<u8> {
+        let mut aad = Vec::with_capacity(
+            MESSAGE_AAD_DOMAIN.len()
+                + 2
+                + 32
+                + 8
+                + REQUEST_ID_SIZE
+                + 3
+                + binding.method.len()
+                + binding.endpoint.len(),
+        );
         aad.extend_from_slice(MESSAGE_AAD_DOMAIN);
         aad.push(E2E_PROTOCOL_VERSION);
         aad.push(sender.code());
         aad.extend_from_slice(&self.session_id);
+        aad.extend_from_slice(&seq.to_be_bytes());
+        aad.extend_from_slice(&binding.request_id);
+        // Longueurs bornées à la construction de la liaison (≤ 16 et ≤ 256).
+        aad.push(u8::try_from(binding.method.len()).unwrap_or(u8::MAX));
+        aad.extend_from_slice(binding.method.as_bytes());
+        aad.extend_from_slice(
+            &u16::try_from(binding.endpoint.len())
+                .unwrap_or(u16::MAX)
+                .to_be_bytes(),
+        );
+        aad.extend_from_slice(binding.endpoint.as_bytes());
         aad
     }
 
-    /// Chiffre un message vers le pair. Le nonce (192 bits) est tiré en interne.
-    pub fn encrypt(&self, plaintext: &[u8]) -> BridgeResult<EncryptedMessage> {
+    /// Réserve le prochain numéro de séquence d'émission (strictement croissant).
+    fn next_send_seq(&self) -> Result<u64, E2eError> {
+        advance_counter(&self.send_seq, |last| last.checked_add(1))
+            .ok_or(E2eError::SequenceExhausted)
+    }
+
+    /// Chiffre un message vers le pair, lié à `binding`. Le nonce (192 bits)
+    /// est tiré en interne, le numéro de séquence est attribué en interne.
+    pub fn encrypt(
+        &self,
+        binding: &RequestBinding,
+        plaintext: &[u8],
+    ) -> BridgeResult<EncryptedMessage> {
+        if plaintext.len() > MAX_PLAINTEXT_LEN {
+            return Err(E2eError::TooLarge("clair").into());
+        }
+        let seq = self.next_send_seq()?;
         let mut nonce = [0u8; NONCE_SIZE];
         OsRng.fill_bytes(&mut nonce);
-        Ok(self.seal_with_nonce(nonce, plaintext)?)
+        Ok(self.seal_with_nonce(nonce, seq, binding, plaintext)?)
     }
 
     fn seal_with_nonce(
         &self,
         nonce: [u8; NONCE_SIZE],
+        seq: u64,
+        binding: &RequestBinding,
         plaintext: &[u8],
     ) -> Result<EncryptedMessage, E2eError> {
         if plaintext.len() > MAX_PLAINTEXT_LEN {
             return Err(E2eError::TooLarge("clair"));
         }
-        let aad = self.aad(self.role);
+        let aad = self.aad(self.role, seq, binding);
         let ciphertext = self
             .send
             .encrypt(
@@ -551,21 +694,38 @@ impl E2eSession {
             .map_err(|_| E2eError::Encrypt)?;
         Ok(EncryptedMessage {
             protocol_version: E2E_PROTOCOL_VERSION,
+            seq,
+            request_id: binding.request_id,
             nonce,
             ciphertext,
         })
     }
 
-    /// Déchiffre un message reçu du pair (version, taille et AEAD vérifiés).
-    pub fn decrypt(&self, msg: &EncryptedMessage) -> BridgeResult<Vec<u8>> {
+    /// Déchiffre un message reçu du pair, lié à `binding` (version, identifiant
+    /// de requête, taille, AEAD puis séquence strictement croissante vérifiés).
+    ///
+    /// La séquence n'est enregistrée qu'après authentification AEAD : un message
+    /// forgé ne peut pas faire avancer le compteur.
+    pub fn decrypt(
+        &self,
+        binding: &RequestBinding,
+        msg: &EncryptedMessage,
+    ) -> BridgeResult<Vec<u8>> {
         if msg.protocol_version != E2E_PROTOCOL_VERSION {
             return Err(E2eError::UnsupportedVersion(msg.protocol_version).into());
+        }
+        if msg.request_id != binding.request_id {
+            return Err(E2eError::RequestIdMismatch.into());
         }
         if msg.ciphertext.len() > MAX_PLAINTEXT_LEN + TAG_SIZE {
             return Err(E2eError::TooLarge("chiffré").into());
         }
-        let aad = self.aad(self.role.peer());
-        self.recv
+        if msg.seq == 0 || msg.seq <= self.recv_seq.load(Ordering::SeqCst) {
+            return Err(E2eError::Replay.into());
+        }
+        let aad = self.aad(self.role.peer(), msg.seq, binding);
+        let plaintext = self
+            .recv
             .decrypt(
                 XNonce::from_slice(&msg.nonce),
                 Payload {
@@ -573,33 +733,49 @@ impl E2eSession {
                     aad: &aad,
                 },
             )
-            .map_err(|_| BridgeError::E2e(E2eError::Decrypt))
+            .map_err(|_| BridgeError::E2e(E2eError::Decrypt))?;
+        // Engagement atomique : refusé si un message de séquence ≥ a été
+        // accepté entre-temps (rejeu concurrent).
+        advance_counter(&self.recv_seq, |last| (msg.seq > last).then_some(msg.seq))
+            .ok_or(BridgeError::E2e(E2eError::Replay))?;
+        Ok(plaintext)
     }
 
     /// Chiffre un message JSON sérialisable.
-    pub fn encrypt_json<T: Serialize>(&self, value: &T) -> BridgeResult<EncryptedMessage> {
+    pub fn encrypt_json<T: Serialize>(
+        &self,
+        binding: &RequestBinding,
+        value: &T,
+    ) -> BridgeResult<EncryptedMessage> {
         let json =
             Zeroizing::new(serde_json::to_vec(value).map_err(|e| E2eError::Json(e.to_string()))?);
-        self.encrypt(&json)
+        self.encrypt(binding, &json)
     }
 
     /// Déchiffre et désérialise un message JSON.
     pub fn decrypt_json<T: for<'de> Deserialize<'de>>(
         &self,
+        binding: &RequestBinding,
         msg: &EncryptedMessage,
     ) -> BridgeResult<T> {
-        let plaintext = Zeroizing::new(self.decrypt(msg)?);
+        let plaintext = Zeroizing::new(self.decrypt(binding, msg)?);
         Ok(serde_json::from_slice(&plaintext).map_err(|e| E2eError::Json(e.to_string()))?)
     }
 }
 
 /// Message chiffré transporté sur le réseau.
 ///
-/// Format JSON v2 : `{"protocol_version":2,"nonce":<hex 24>,"ciphertext":<hex>}`.
+/// Format JSON v2 : `{"protocol_version":2,"seq":<u64>,"request_id":<hex 16>,
+/// "nonce":<hex 24>,"ciphertext":<hex>}`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EncryptedMessage {
     /// Version du protocole E2E.
     pub protocol_version: u8,
+    /// Numéro de séquence de l'émetteur (strictement croissant, ≥ 1).
+    pub seq: u64,
+    /// Identifiant de la requête à laquelle le message est lié.
+    #[serde(with = "hex_request_id")]
+    pub request_id: [u8; REQUEST_ID_SIZE],
     /// Nonce XChaCha20 (24 octets), tiré par l'émetteur.
     #[serde(with = "hex_nonce")]
     pub nonce: [u8; NONCE_SIZE],
@@ -611,12 +787,46 @@ pub struct EncryptedMessage {
 impl EncryptedMessage {
     /// Décode un message reçu du réseau (taille bornée, version vérifiée d'abord).
     pub fn from_json(bytes: &[u8]) -> Result<Self, E2eError> {
-        if bytes.len() > MAX_MESSAGE_JSON_LEN {
+        Self::from_json_bounded(bytes, MAX_MESSAGE_JSON_LEN)
+    }
+
+    /// Décode un message avec une borne plus stricte que [`MAX_MESSAGE_JSON_LEN`]
+    /// (ex. point d'accès d'authentification).
+    pub fn from_json_bounded(bytes: &[u8], max: usize) -> Result<Self, E2eError> {
+        if bytes.len() > max.min(MAX_MESSAGE_JSON_LEN) {
             return Err(E2eError::TooLarge("message chiffré"));
         }
         probe_version(bytes)?;
         serde_json::from_slice(bytes).map_err(|e| E2eError::Json(e.to_string()))
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Appairage : clés d'identité et code de confirmation
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Décode et valide une clé publique d'identité ed25519 (hex, 32 octets) :
+/// point valide et non faible. Utilisé à l'appairage (C-12, C-13).
+pub fn parse_identity_key_hex(s: &str) -> Result<[u8; 32], E2eError> {
+    let bytes: [u8; 32] = decode_hex_fixed(s, "identity_key")?;
+    let vk = VerifyingKey::from_bytes(&bytes).map_err(|_| E2eError::InvalidIdentityKey)?;
+    if vk.is_weak() {
+        return Err(E2eError::InvalidIdentityKey);
+    }
+    Ok(bytes)
+}
+
+/// Code de confirmation d'appairage à 6 chiffres, à comparer visuellement sur
+/// l'appareil et sur le COG (substitution de clé par un intermédiaire = codes
+/// différents). Calculé sur SHA-256(domaine || identité appareil || identité COG).
+pub fn pairing_confirmation_code(device_identity: &[u8; 32], cog_identity: &[u8; 32]) -> String {
+    let mut input = Vec::with_capacity(PAIRING_CODE_DOMAIN.len() + 64);
+    input.extend_from_slice(PAIRING_CODE_DOMAIN);
+    input.extend_from_slice(device_identity);
+    input.extend_from_slice(cog_identity);
+    let digest = sha256(&input);
+    let n = u32::from_be_bytes([digest[0], digest[1], digest[2], digest[3]]) % 1_000_000;
+    format!("{n:06}")
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -626,6 +836,19 @@ impl EncryptedMessage {
 /// SHA-256 (crate `sha2`, C-24).
 pub(crate) fn sha256(data: &[u8]) -> [u8; 32] {
     Sha256::digest(data).into()
+}
+
+/// Avance atomiquement un compteur : `next(last)` donne la nouvelle valeur, ou
+/// `None` pour refuser. Retourne la valeur enregistrée.
+fn advance_counter(counter: &AtomicU64, next: impl Fn(u64) -> Option<u64>) -> Option<u64> {
+    let mut last = counter.load(Ordering::SeqCst);
+    loop {
+        let candidate = next(last)?;
+        match counter.compare_exchange(last, candidate, Ordering::SeqCst, Ordering::SeqCst) {
+            Ok(_) => return Some(candidate),
+            Err(actual) => last = actual,
+        }
+    }
 }
 
 /// Serde helper pour [u8; 24] en hex.
@@ -646,6 +869,29 @@ mod hex_nonce {
         bytes
             .try_into()
             .map_err(|_| serde::de::Error::custom("nonce: 24 octets attendus"))
+    }
+}
+
+/// Serde helper pour [u8; 16] (identifiant de requête) en hex.
+mod hex_request_id {
+    use super::REQUEST_ID_SIZE;
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S: Serializer>(bytes: &[u8; REQUEST_ID_SIZE], s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_str(&hex::encode(bytes))
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(
+        d: D,
+    ) -> Result<[u8; REQUEST_ID_SIZE], D::Error> {
+        let s = String::deserialize(d)?;
+        if s.len() != 2 * REQUEST_ID_SIZE {
+            return Err(serde::de::Error::custom("request_id: 16 octets attendus"));
+        }
+        let bytes = hex::decode(s).map_err(serde::de::Error::custom)?;
+        bytes
+            .try_into()
+            .map_err(|_| serde::de::Error::custom("request_id: 16 octets attendus"))
     }
 }
 
@@ -679,6 +925,10 @@ mod tests {
             device: E2eIdentity::generate(),
             cog: E2eIdentity::generate(),
         }
+    }
+
+    fn bnd() -> RequestBinding {
+        RequestBinding::new("POST", "/test").unwrap()
     }
 
     fn established() -> (E2eSession, E2eSession) {
@@ -720,13 +970,14 @@ mod tests {
     #[test]
     fn handshake_and_both_directions() {
         let (device, cog) = established();
+        let bd = bnd();
         assert_eq!(device.session_id(), cog.session_id());
 
-        let m = device.encrypt(b"Salut depuis Android!").unwrap();
-        assert_eq!(cog.decrypt(&m).unwrap(), b"Salut depuis Android!");
+        let m = device.encrypt(&bd, b"Salut depuis Android!").unwrap();
+        assert_eq!(cog.decrypt(&bd, &m).unwrap(), b"Salut depuis Android!");
 
-        let m = cog.encrypt(b"Bonjour depuis le COG").unwrap();
-        assert_eq!(device.decrypt(&m).unwrap(), b"Bonjour depuis le COG");
+        let m = cog.encrypt(&bd, b"Bonjour depuis le COG").unwrap();
+        assert_eq!(device.decrypt(&bd, &m).unwrap(), b"Bonjour depuis le COG");
     }
 
     #[test]
@@ -737,12 +988,13 @@ mod tests {
             value: u32,
         }
         let (device, cog) = established();
+        let bd = bnd();
         let msg = TestMsg {
             action: "navigate".into(),
             value: 42,
         };
-        let enc = device.encrypt_json(&msg).unwrap();
-        let dec: TestMsg = cog.decrypt_json(&enc).unwrap();
+        let enc = device.encrypt_json(&bd, &msg).unwrap();
+        let dec: TestMsg = cog.decrypt_json(&bd, &enc).unwrap();
         assert_eq!(dec, msg);
     }
 
@@ -895,9 +1147,10 @@ mod tests {
             Err(E2eError::TooLarge(_))
         ));
         let (device, _) = established();
+        let bd = bnd();
         let huge = vec![0u8; MAX_PLAINTEXT_LEN + 1];
         assert!(matches!(
-            device.encrypt(&huge),
+            device.encrypt(&bd, &huge),
             Err(BridgeError::E2e(E2eError::TooLarge(_)))
         ));
     }
@@ -960,16 +1213,17 @@ mod tests {
     #[test]
     fn nonces_never_repeat_in_each_direction() {
         let (device, cog) = established();
+        let bd = bnd();
         let mut seen = HashSet::new();
         for _ in 0..10_000 {
             assert!(
-                seen.insert(device.encrypt(b"m").unwrap().nonce),
+                seen.insert(device.encrypt(&bd, b"m").unwrap().nonce),
                 "nonce répété (appareil)"
             );
         }
         for _ in 0..10_000 {
             assert!(
-                seen.insert(cog.encrypt(b"m").unwrap().nonce),
+                seen.insert(cog.encrypt(&bd, b"m").unwrap().nonce),
                 "nonce répété (COG)"
             );
         }
@@ -978,50 +1232,55 @@ mod tests {
     #[test]
     fn message_cannot_be_decrypted_as_other_direction() {
         let (device, cog) = established();
+        let bd = bnd();
         // Réflexion : un message de l'appareil renvoyé à l'appareil.
-        let m = device.encrypt(b"x").unwrap();
-        assert_eq!(err_of(device.decrypt(&m)), E2eError::Decrypt);
+        let m = device.encrypt(&bd, b"x").unwrap();
+        assert_eq!(err_of(device.decrypt(&bd, &m)), E2eError::Decrypt);
         // Idem côté COG.
-        let m = cog.encrypt(b"y").unwrap();
-        assert_eq!(err_of(cog.decrypt(&m)), E2eError::Decrypt);
+        let m = cog.encrypt(&bd, b"y").unwrap();
+        assert_eq!(err_of(cog.decrypt(&bd, &m)), E2eError::Decrypt);
     }
 
     #[test]
     fn tampered_message_fails() {
         let (device, cog) = established();
-        let mut m = device.encrypt(b"secret").unwrap();
+        let bd = bnd();
+        let mut m = device.encrypt(&bd, b"secret").unwrap();
         if let Some(b) = m.ciphertext.first_mut() {
             *b ^= 0xff;
         }
-        assert_eq!(err_of(cog.decrypt(&m)), E2eError::Decrypt);
-        let mut m = device.encrypt(b"secret").unwrap();
+        assert_eq!(err_of(cog.decrypt(&bd, &m)), E2eError::Decrypt);
+        let mut m = device.encrypt(&bd, b"secret").unwrap();
         m.nonce[0] ^= 1;
-        assert_eq!(err_of(cog.decrypt(&m)), E2eError::Decrypt);
+        assert_eq!(err_of(cog.decrypt(&bd, &m)), E2eError::Decrypt);
     }
 
     #[test]
     fn other_session_cannot_decrypt() {
         let (device, _cog) = established();
+        let bd = bnd();
         let (_d2, cog2) = established();
-        let m = device.encrypt(b"confidentiel").unwrap();
-        assert_eq!(err_of(cog2.decrypt(&m)), E2eError::Decrypt);
+        let m = device.encrypt(&bd, b"confidentiel").unwrap();
+        assert_eq!(err_of(cog2.decrypt(&bd, &m)), E2eError::Decrypt);
     }
 
     #[test]
     fn message_wrong_version_refused() {
         let (device, cog) = established();
-        let mut m = device.encrypt(b"x").unwrap();
+        let bd = bnd();
+        let mut m = device.encrypt(&bd, b"x").unwrap();
         m.protocol_version = 1;
-        assert_eq!(err_of(cog.decrypt(&m)), E2eError::UnsupportedVersion(1));
+        assert_eq!(err_of(cog.decrypt(&bd, &m)), E2eError::UnsupportedVersion(1));
     }
 
     #[test]
     fn encrypted_message_wire_roundtrip() {
         let (device, cog) = established();
-        let m = device.encrypt(b"test over the wire").unwrap();
+        let bd = bnd();
+        let m = device.encrypt(&bd, b"test over the wire").unwrap();
         let json = serde_json::to_vec(&m).unwrap();
         let restored = EncryptedMessage::from_json(&json).unwrap();
-        assert_eq!(cog.decrypt(&restored).unwrap(), b"test over the wire");
+        assert_eq!(cog.decrypt(&bd, &restored).unwrap(), b"test over the wire");
     }
 
     #[test]
@@ -1032,6 +1291,130 @@ mod tests {
         assert!(!dbg.contains(&hex::encode([0x11u8; 32])));
         let (device, _) = established();
         assert!(format!("{device:?}").contains("<redacted>"));
+    }
+
+    // ── Anti-rejeu et liaison de requête ─────────────────────────────────
+
+    #[test]
+    fn replayed_message_rejected() {
+        let (device, cog) = established();
+        let bd = bnd();
+        let m = device.encrypt(&bd, b"ordre").unwrap();
+        assert_eq!(cog.decrypt(&bd, &m).unwrap(), b"ordre");
+        assert_eq!(err_of(cog.decrypt(&bd, &m)), E2eError::Replay);
+    }
+
+    #[test]
+    fn lower_sequence_rejected_out_of_order() {
+        let (device, cog) = established();
+        let bd = bnd();
+        let m1 = device.encrypt(&bd, b"un").unwrap();
+        let m2 = device.encrypt(&bd, b"deux").unwrap();
+        assert_eq!((m1.seq, m2.seq), (1, 2));
+        assert_eq!(cog.decrypt(&bd, &m2).unwrap(), b"deux");
+        assert_eq!(err_of(cog.decrypt(&bd, &m1)), E2eError::Replay);
+    }
+
+    #[test]
+    fn forged_sequence_cannot_advance_counter() {
+        let (device, cog) = established();
+        let bd = bnd();
+        let m1 = device.encrypt(&bd, b"un").unwrap();
+        // Un intermédiaire relève la séquence : l'AEAD échoue, le compteur reste.
+        let mut forged = m1.clone();
+        forged.seq = 1_000;
+        assert_eq!(err_of(cog.decrypt(&bd, &forged)), E2eError::Decrypt);
+        assert_eq!(cog.decrypt(&bd, &m1).unwrap(), b"un");
+        // Séquence nulle refusée.
+        let mut zero = device.encrypt(&bd, b"x").unwrap();
+        zero.seq = 0;
+        assert_eq!(err_of(cog.decrypt(&bd, &zero)), E2eError::Replay);
+    }
+
+    #[test]
+    fn response_with_other_request_id_rejected() {
+        let (device, cog) = established();
+        let req_a = RequestBinding::new("POST", "/auth").unwrap();
+        let req_b = RequestBinding::new("POST", "/auth").unwrap();
+        assert_ne!(req_a.request_id(), req_b.request_id());
+        // Le COG répond à la requête B ; l'appareil attend la réponse de A.
+        let resp_b = cog.encrypt(&req_b, b"reponse B").unwrap();
+        assert_eq!(
+            err_of(device.decrypt(&req_a, &resp_b)),
+            E2eError::RequestIdMismatch
+        );
+        // Même en réécrivant l'identifiant, l'AEAD refuse.
+        let mut forged = cog.encrypt(&req_b, b"reponse B").unwrap();
+        forged.request_id = req_a.request_id();
+        assert_eq!(err_of(device.decrypt(&req_a, &forged)), E2eError::Decrypt);
+    }
+
+    #[test]
+    fn ciphertext_for_endpoint_a_refused_on_endpoint_b() {
+        let (device, cog) = established();
+        let on_a = RequestBinding::new("POST", "/auth").unwrap();
+        let m = device.encrypt(&on_a, b"{}").unwrap();
+        let on_b = RequestBinding::for_received(&m, "POST", "/api/autre").unwrap();
+        assert_eq!(err_of(cog.decrypt(&on_b, &m)), E2eError::Decrypt);
+        // Autre méthode, même point d'accès : refus.
+        let get_a = RequestBinding::for_received(&m, "GET", "/auth").unwrap();
+        assert_eq!(err_of(cog.decrypt(&get_a, &m)), E2eError::Decrypt);
+        // Bonne liaison : accepté.
+        let ok = RequestBinding::for_received(&m, "POST", "/auth").unwrap();
+        assert_eq!(cog.decrypt(&ok, &m).unwrap(), b"{}");
+    }
+
+    #[test]
+    fn binding_bounds_enforced() {
+        assert!(RequestBinding::new("", "/x").is_err());
+        assert!(RequestBinding::new("POST", "").is_err());
+        assert!(RequestBinding::new(&"M".repeat(MAX_METHOD_LEN + 1), "/x").is_err());
+        assert!(RequestBinding::new("POST", &"/".repeat(MAX_ENDPOINT_LEN + 1)).is_err());
+    }
+
+    #[test]
+    fn send_sequence_exhaustion_refused() {
+        let (device, _) = established();
+        device.send_seq.store(u64::MAX, Ordering::SeqCst);
+        assert!(matches!(
+            device.encrypt(&bnd(), b"x"),
+            Err(BridgeError::E2e(E2eError::SequenceExhausted))
+        ));
+    }
+
+    // ── Appairage ────────────────────────────────────────────────────────
+
+    #[test]
+    fn identity_key_parsing_and_secret_roundtrip() {
+        let id = E2eIdentity::generate();
+        let pk = id.public_key_bytes();
+        assert_eq!(parse_identity_key_hex(&hex::encode(pk)).unwrap(), pk);
+        let restored = E2eIdentity::from_secret_bytes(&id.secret_bytes());
+        assert_eq!(restored.public_key_bytes(), pk);
+        let mut weak = [0u8; 32];
+        weak[0] = 1;
+        assert_eq!(
+            parse_identity_key_hex(&hex::encode(weak)).unwrap_err(),
+            E2eError::InvalidIdentityKey
+        );
+        assert!(parse_identity_key_hex("zz").is_err());
+        assert!(parse_identity_key_hex(&"00".repeat(33)).is_err());
+    }
+
+    #[test]
+    fn confirmation_code_depends_on_both_keys() {
+        let d = E2eIdentity::generate().public_key_bytes();
+        let c = E2eIdentity::generate().public_key_bytes();
+        let m = E2eIdentity::generate().public_key_bytes();
+        let code = pairing_confirmation_code(&d, &c);
+        assert_eq!(code.len(), 6);
+        assert!(code.chars().all(|ch| ch.is_ascii_digit()));
+        assert_eq!(code, pairing_confirmation_code(&d, &c));
+        assert_ne!(code, pairing_confirmation_code(&d, &m));
+        assert_eq!(
+            pairing_confirmation_code(&[0x01; 32], &[0x02; 32]),
+            pairing_confirmation_code(&[0x01; 32], &[0x02; 32])
+        );
     }
 
     // ── Vecteur de référence figé (C-61) ─────────────────────────────────
@@ -1071,13 +1454,28 @@ mod tests {
         let mat = derive_session_material(shared.as_bytes(), &d_id, &d_eph_pub, &c_id, &c_eph_pub)
             .unwrap();
         let session = E2eSession::from_material(E2eRole::Device, &mat);
+        let bd = RequestBinding::with_request_id([0x06; REQUEST_ID_SIZE], "POST", "/auth").unwrap();
+        let aad = session.aad(E2eRole::Device, 1, &bd);
+        let mut expected_aad = MESSAGE_AAD_DOMAIN.to_vec();
+        expected_aad.extend_from_slice(&[0x02, 0x01]);
+        expected_aad.extend_from_slice(&mat.session_id);
+        expected_aad.extend_from_slice(&1u64.to_be_bytes());
+        expected_aad.extend_from_slice(&[0x06; REQUEST_ID_SIZE]);
+        expected_aad.push(4);
+        expected_aad.extend_from_slice(b"POST");
+        expected_aad.extend_from_slice(&[0x00, 0x05]);
+        expected_aad.extend_from_slice(b"/auth");
+        assert_eq!(aad, expected_aad);
         let sealed = session
-            .seal_with_nonce([0x05; NONCE_SIZE], b"miyukini")
+            .seal_with_nonce([0x05; NONCE_SIZE], 1, &bd, b"miyukini")
             .unwrap();
+        assert_eq!(sealed.seq, 1);
+        assert_eq!(sealed.request_id, [0x06; REQUEST_ID_SIZE]);
 
         let derived = [
             ("okm", hex::encode(mat.okm.as_ref())),
             ("session_id", hex::encode(mat.session_id)),
+            ("aad_sha256", hex::encode(sha256(&aad))),
             ("ciphertext", hex::encode(&sealed.ciphertext)),
         ];
 
@@ -1092,13 +1490,14 @@ mod tests {
 
         // Le côté COG déchiffre le message de référence.
         let cog_session = E2eSession::from_material(E2eRole::Cog, &mat);
-        assert_eq!(cog_session.decrypt(&sealed).unwrap(), b"miyukini");
+        assert_eq!(cog_session.decrypt(&bd, &sealed).unwrap(), b"miyukini");
     }
 
     /// Valeurs figées du protocole E2E v2 (toute modification = rupture du format).
     ///
     /// Entrées : graines ed25519 appareil `01`×32 et COG `02`×32, secrets X25519
-    /// éphémères appareil `03`×32 et COG `04`×32, nonce `05`×24, clair `miyukini`
+    /// éphémères appareil `03`×32 et COG `04`×32, nonce `05`×24, séquence 1,
+    /// identifiant de requête `06`×16, liaison `POST /auth`, clair `miyukini`
     /// chiffré dans le sens appareil → COG.
     const REFERENCE: &[(&str, &str)] = &[
         (
@@ -1133,6 +1532,10 @@ mod tests {
             "session_id",
             "7749e2bf3a201b0020d4dc8546dddbb506a7918a4596306a94d568a31b1a976c",
         ),
-        ("ciphertext", "1ff15b16b2fd78457ae068479ad12f850aec05e045939b25"),
+        (
+            "aad_sha256",
+            "cb74d0f7d0ae766e0aafc184fa0c48e1ef9f3e04051e6172eee6ddd84af4d908",
+        ),
+        ("ciphertext", "1ff15b16b2fd7845d4e829c8bbb4651b51bc8ff0ab72ea4a"),
     ];
 }
