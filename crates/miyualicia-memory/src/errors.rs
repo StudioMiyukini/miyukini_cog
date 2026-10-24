@@ -68,4 +68,13 @@ pub enum MemoryError {
         /// Statut courant (sérialisé).
         status: String,
     },
+
+    /// Fait oublié à la demande : il ne peut pas être réécrit sous le même
+    /// identifiant (la pierre tombale fait foi).
+    #[error("fait oublié (pierre tombale) : {0}")]
+    FactForgotten(uuid::Uuid),
+
+    /// Demande d'oubli invalide (auteur ou motif manquant, trop long).
+    #[error("demande d'oubli invalide : {0}")]
+    InvalidForgetRequest(String),
 }

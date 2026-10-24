@@ -62,6 +62,49 @@ impl Fact {
     }
 }
 
+/// Une **version** d'un fait (EX-52 : notes versionnées).
+///
+/// Chaque écriture qui modifie un fait ajoute une version ; les versions
+/// antérieures ne sont jamais réécrites. Seul un oubli demandé
+/// (`MemoryStore::forget`) efface l'historique, en laissant une pierre tombale.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct FactVersion {
+    /// Identifiant du fait.
+    pub fact_id: Uuid,
+    /// Numéro de version (1 = première écriture), strictement croissant.
+    pub version: u32,
+    /// Persona au moment de cette version.
+    pub persona: String,
+    /// Sujet au moment de cette version.
+    pub subject: String,
+    /// Contenu de cette version.
+    pub content: String,
+    /// Source de cette version.
+    pub source: String,
+    /// Confiance de cette version.
+    pub confidence: f32,
+    /// Date d'enregistrement de la version (UTC).
+    pub recorded_at: DateTime<Utc>,
+}
+
+/// **Pierre tombale** d'un fait oublié à la demande (EX-52, EX-56).
+///
+/// Ne contient aucun contenu du fait : seulement qui, quand, pourquoi et
+/// combien de versions ont été effacées.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct FactTombstone {
+    /// Identifiant du fait oublié.
+    pub fact_id: Uuid,
+    /// Date de l'oubli (UTC).
+    pub forgotten_at: DateTime<Utc>,
+    /// Auteur de la demande d'oubli (ex. `user`, identifiant de persona).
+    pub forgotten_by: String,
+    /// Motif de l'oubli (texte libre, sans contenu du fait).
+    pub reason: String,
+    /// Nombre de versions effacées.
+    pub versions_erased: u32,
+}
+
 /// Une **préférence** — un choix par défaut configurable, avec un scope.
 ///
 /// Exemples :

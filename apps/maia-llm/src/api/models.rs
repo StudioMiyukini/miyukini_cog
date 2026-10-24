@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::path::PathBuf;
 
+use crate::engine::LlmError;
 use crate::store::GgufModel;
 use crate::AppState;
 
@@ -124,22 +125,30 @@ pub async fn load_handler(
 
     let path: PathBuf = model_entry.path.clone();
 
-    let result = tokio::task::spawn_blocking(move || state.engine.load_model(path))
-        .await
-        .map_err(|e| format!("Task join : {e}"))
-        .and_then(|r| r.map_err(|e| e.to_string()));
+    let result = tokio::task::spawn_blocking(move || state.engine.load_model(path)).await;
 
     match result {
-        Ok(info) => Json(json!({
+        Ok(Ok(info)) => Json(json!({
             "loaded": true,
             "model": info.name,
             "gpu_layers": info.gpu_layers,
             "context_size": info.context_size,
         }))
         .into_response(),
+        // EX-26 : modèle sans provenance signée vérifiée → refus explicite.
+        Ok(Err(e @ LlmError::ProvenanceRefusee(_))) => (
+            StatusCode::FORBIDDEN,
+            Json(json!({"error": e.to_string()})),
+        )
+            .into_response(),
+        Ok(Err(e)) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": e.to_string()})),
+        )
+            .into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": e})),
+            Json(json!({"error": format!("Task join : {e}")})),
         )
             .into_response(),
     }

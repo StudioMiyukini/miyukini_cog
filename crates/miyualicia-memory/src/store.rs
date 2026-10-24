@@ -26,7 +26,7 @@ use uuid::Uuid;
 
 use crate::errors::MemoryError;
 use crate::types::{
-    Episode, EpisodeOutcome, Fact, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
+    Episode, EpisodeOutcome, Fact, FactTombstone, FactVersion, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
     PendingExpiryReport, PendingStatus, Persona, Preference, PENDING_REASON_EXPIRED,
 };
 
@@ -78,7 +78,10 @@ impl MemoryStore {
 
     fn init_schema(&self) -> Result<(), MemoryError> {
         self.lock_conn()?.execute_batch(
-            r#"
+            r"
+            -- EX-52 : un oubli demandé efface réellement (pages réécrites à zéro).
+            PRAGMA secure_delete = ON;
+
             CREATE TABLE IF NOT EXISTS facts (
                 id          TEXT PRIMARY KEY,
                 persona     TEXT NOT NULL,
@@ -159,9 +162,67 @@ impl MemoryStore {
             CREATE INDEX IF NOT EXISTS idx_pending_status   ON pending_confirmations(status);
             CREATE INDEX IF NOT EXISTS idx_pending_persona  ON pending_confirmations(persona);
             CREATE INDEX IF NOT EXISTS idx_pending_created  ON pending_confirmations(created_at);
-            "#,
+
+            -- EX-52 : historique append-only des faits (jamais réécrit).
+            CREATE TABLE IF NOT EXISTS fact_versions (
+                fact_id     TEXT NOT NULL,
+                version     INTEGER NOT NULL CHECK (version >= 1),
+                persona     TEXT NOT NULL,
+                subject     TEXT NOT NULL,
+                content     TEXT NOT NULL,
+                source      TEXT NOT NULL,
+                confidence  REAL NOT NULL,
+                recorded_at TEXT NOT NULL,
+                PRIMARY KEY (fact_id, version)
+            );
+
+            -- EX-52 / EX-56 : pierres tombales des oublis demandés (sans contenu).
+            CREATE TABLE IF NOT EXISTS fact_tombstones (
+                fact_id          TEXT PRIMARY KEY,
+                forgotten_at     TEXT NOT NULL,
+                forgotten_by     TEXT NOT NULL,
+                reason           TEXT NOT NULL,
+                versions_erased  INTEGER NOT NULL
+            );
+            ",
         )?;
         self.migrate_schema()?;
+        self.migrate_fact_versions()?;
+        Ok(())
+    }
+
+    /// Migration additive EX-52 : chaque fait existant sans historique reçoit
+    /// une version 1 (son contenu courant). Les contenus écrasés par l'ancien
+    /// `remember` (avant versionnage) sont perdus et ne peuvent être
+    /// reconstitués. L'index FTS est reconstruit à cette occasion (l'ancien
+    /// `remember` y insérait des doublons à chaque mise à jour).
+    ///
+    /// Idempotente ; réversibilité (C-41) : tables additives, ignorées par
+    /// l'ancien code.
+    fn migrate_fact_versions(&self) -> Result<(), MemoryError> {
+        let mut conn = self.lock_conn()?;
+        let tx = conn.transaction()?;
+        let sans_historique: i64 = tx.query_row(
+            "SELECT COUNT(*) FROM facts
+             WHERE id NOT IN (SELECT fact_id FROM fact_versions)",
+            [],
+            |r| r.get(0),
+        )?;
+        if sans_historique > 0 {
+            tx.execute(
+                "INSERT INTO fact_versions
+                     (fact_id, version, persona, subject, content, source, confidence, recorded_at)
+                 SELECT id, 1, persona, subject, content, source, confidence, updated_at
+                 FROM facts WHERE id NOT IN (SELECT fact_id FROM fact_versions)",
+                [],
+            )?;
+            tx.execute("INSERT INTO facts_fts(facts_fts) VALUES('rebuild')", [])?;
+            tracing::info!(
+                faits = sans_historique,
+                "migration mémoire : version initiale créée pour les faits existants"
+            );
+        }
+        tx.commit()?;
         Ok(())
     }
 
@@ -202,50 +263,226 @@ impl MemoryStore {
     // FACTS
     // ------------------------------------------------------------------
 
-    /// Enregistre (ou met à jour) un fait. Identifiant stable par `id`.
+    /// Enregistre un fait, ou en crée une **nouvelle version** s'il existe
+    /// déjà (EX-52). Identifiant stable par `id`.
+    ///
+    /// - La version précédente reste dans l'historique (`fact_history`) ;
+    ///   aucune écriture destructive.
+    /// - Réécrire un fait identique (persona, sujet, contenu, source,
+    ///   confiance) ne crée pas de version (idempotent).
+    /// - Un fait oublié (pierre tombale) ne peut pas être réécrit sous le même
+    ///   identifiant : [`MemoryError::FactForgotten`].
+    ///
+    /// L'ensemble (version, vue courante, index FTS) est écrit dans une seule
+    /// transaction.
     pub fn remember(&self, fact: &Fact) -> Result<(), MemoryError> {
-        self.lock_conn()?.execute(
-            r#"
-            INSERT INTO facts(id, persona, subject, content, source, confidence, created_at, updated_at)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
-            ON CONFLICT(id) DO UPDATE SET
-                persona     = excluded.persona,
-                subject     = excluded.subject,
-                content     = excluded.content,
-                source      = excluded.source,
-                confidence  = excluded.confidence,
-                updated_at  = excluded.updated_at
-            "#,
+        let id = fact.id.to_string();
+        let mut conn = self.lock_conn()?;
+        let tx = conn.transaction()?;
+
+        let oublie = tx
+            .query_row(
+                "SELECT 1 FROM fact_tombstones WHERE fact_id = ?1",
+                params![id],
+                |_| Ok(()),
+            )
+            .optional()?
+            .is_some();
+        if oublie {
+            return Err(MemoryError::FactForgotten(fact.id));
+        }
+
+        let actuel = tx
+            .query_row(
+                "SELECT rowid, persona, subject, content, source, confidence
+                 FROM facts WHERE id = ?1",
+                params![id],
+                |r| {
+                    Ok(EtatFait {
+                        rowid: r.get(0)?,
+                        persona: r.get(1)?,
+                        subject: r.get(2)?,
+                        content: r.get(3)?,
+                        source: r.get(4)?,
+                        confidence: r.get(5)?,
+                    })
+                },
+            )
+            .optional()?;
+
+        if actuel.as_ref().is_some_and(|a| a.identique(fact)) {
+            // Rien de nouveau : pas de version supplémentaire.
+            return Ok(());
+        }
+
+        let version: i64 = tx.query_row(
+            "SELECT COALESCE(MAX(version), 0) + 1 FROM fact_versions WHERE fact_id = ?1",
+            params![id],
+            |r| r.get(0),
+        )?;
+        tx.execute(
+            "INSERT INTO fact_versions
+                 (fact_id, version, persona, subject, content, source, confidence, recorded_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
-                fact.id.to_string(),
+                id,
+                version,
                 fact.persona,
                 fact.subject,
                 fact.content,
                 fact.source,
                 fact.confidence,
-                fact.created_at.to_rfc3339(),
                 fact.updated_at.to_rfc3339(),
             ],
         )?;
-        // Sync FTS index. We rely on facts.rowid (auto) ↔ facts_fts.rowid.
-        self.lock_conn()?.execute(
-            "INSERT INTO facts_fts(rowid, content) SELECT rowid, content FROM facts WHERE id = ?1",
-            params![fact.id.to_string()],
-        )?;
+
+        match actuel {
+            Some(a) => {
+                // Index FTS à contenu externe : retirer l'ancien contenu avant
+                // de mettre à jour la vue courante.
+                tx.execute(
+                    "INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', ?1, ?2)",
+                    params![a.rowid, a.content],
+                )?;
+                tx.execute(
+                    "UPDATE facts SET persona = ?2, subject = ?3, content = ?4, source = ?5,
+                                      confidence = ?6, updated_at = ?7
+                     WHERE id = ?1",
+                    params![
+                        id,
+                        fact.persona,
+                        fact.subject,
+                        fact.content,
+                        fact.source,
+                        fact.confidence,
+                        fact.updated_at.to_rfc3339(),
+                    ],
+                )?;
+                tx.execute(
+                    "INSERT INTO facts_fts(rowid, content) VALUES (?1, ?2)",
+                    params![a.rowid, fact.content],
+                )?;
+            }
+            None => {
+                tx.execute(
+                    "INSERT INTO facts(id, persona, subject, content, source, confidence,
+                                       created_at, updated_at)
+                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                    params![
+                        id,
+                        fact.persona,
+                        fact.subject,
+                        fact.content,
+                        fact.source,
+                        fact.confidence,
+                        fact.created_at.to_rfc3339(),
+                        fact.updated_at.to_rfc3339(),
+                    ],
+                )?;
+                tx.execute(
+                    "INSERT INTO facts_fts(rowid, content)
+                     SELECT rowid, content FROM facts WHERE id = ?1",
+                    params![id],
+                )?;
+            }
+        }
+        tx.commit()?;
         Ok(())
     }
 
-    /// Supprime un fait par son `id`. Renvoie le nombre de lignes supprimées.
-    pub fn forget(&self, id: Uuid) -> Result<usize, MemoryError> {
-        let n = self
-            .lock_conn()?
-            .execute("DELETE FROM facts WHERE id = ?1", params![id.to_string()])?;
-        // Le trigger sync FTS5 n'est pas posé en P1 — on nettoie à la main.
-        self.lock_conn()?.execute(
-            "DELETE FROM facts_fts WHERE rowid NOT IN (SELECT rowid FROM facts)",
-            [],
+    /// **Oubli demandé** d'un fait (EX-52, EX-56) : seule écriture destructive
+    /// autorisée sur la mémoire.
+    ///
+    /// Efface réellement la vue courante, l'index FTS et **toutes** les
+    /// versions, puis enregistre une pierre tombale sans contenu (qui, quand,
+    /// pourquoi, nombre de versions effacées). `forgotten_by` et `reason` sont
+    /// obligatoires (non vides, bornés).
+    ///
+    /// Renvoie le nombre de faits retirés de la vue courante (0 ou 1). Un fait
+    /// inconnu ou déjà oublié renvoie 0 sans nouvelle pierre tombale.
+    pub fn forget(&self, id: Uuid, forgotten_by: &str, reason: &str) -> Result<usize, MemoryError> {
+        valider_champ_oubli("auteur", forgotten_by, OUBLI_AUTEUR_MAX)?;
+        valider_champ_oubli("motif", reason, OUBLI_MOTIF_MAX)?;
+        let id_s = id.to_string();
+        let mut conn = self.lock_conn()?;
+        let tx = conn.transaction()?;
+
+        let actuel: Option<(i64, String)> = tx
+            .query_row(
+                "SELECT rowid, content FROM facts WHERE id = ?1",
+                params![id_s],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .optional()?;
+        let versions: i64 = tx.query_row(
+            "SELECT COUNT(*) FROM fact_versions WHERE fact_id = ?1",
+            params![id_s],
+            |r| r.get(0),
         )?;
-        Ok(n)
+        if actuel.is_none() && versions == 0 {
+            return Ok(0);
+        }
+
+        let mut retires = 0usize;
+        if let Some((rowid, content)) = actuel {
+            tx.execute(
+                "INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', ?1, ?2)",
+                params![rowid, content],
+            )?;
+            retires = tx.execute("DELETE FROM facts WHERE id = ?1", params![id_s])?;
+        }
+        tx.execute("DELETE FROM fact_versions WHERE fact_id = ?1", params![id_s])?;
+        tx.execute(
+            "INSERT INTO fact_tombstones(fact_id, forgotten_at, forgotten_by, reason, versions_erased)
+             VALUES (?1, ?2, ?3, ?4, ?5)
+             ON CONFLICT(fact_id) DO NOTHING",
+            params![
+                id_s,
+                Utc::now().to_rfc3339(),
+                forgotten_by.trim(),
+                reason.trim(),
+                versions
+            ],
+        )?;
+        tx.commit()?;
+        tracing::info!(fait = %id, versions, "mémoire : fait oublié à la demande (pierre tombale)");
+        Ok(retires)
+    }
+
+    /// Version courante d'un fait (None si inconnu ou oublié).
+    pub fn fact(&self, id: Uuid) -> Result<Option<Fact>, MemoryError> {
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT id, persona, subject, content, source, confidence, created_at, updated_at
+             FROM facts WHERE id = ?1",
+        )?;
+        stmt.query_row(params![id.to_string()], row_to_fact)
+            .optional()
+            .map_err(MemoryError::from)
+    }
+
+    /// Historique complet d'un fait, de la version 1 à la version courante
+    /// (ordre croissant). Vide si inconnu ou oublié.
+    pub fn fact_history(&self, id: Uuid) -> Result<Vec<FactVersion>, MemoryError> {
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT fact_id, version, persona, subject, content, source, confidence, recorded_at
+             FROM fact_versions WHERE fact_id = ?1 ORDER BY version ASC",
+        )?;
+        let rows = stmt.query_map(params![id.to_string()], row_to_fact_version)?;
+        rows.collect::<Result<Vec<_>, _>>().map_err(MemoryError::from)
+    }
+
+    /// Pierre tombale d'un fait oublié (None si jamais oublié).
+    pub fn fact_tombstone(&self, id: Uuid) -> Result<Option<FactTombstone>, MemoryError> {
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(
+            "SELECT fact_id, forgotten_at, forgotten_by, reason, versions_erased
+             FROM fact_tombstones WHERE fact_id = ?1",
+        )?;
+        stmt.query_row(params![id.to_string()], row_to_tombstone)
+            .optional()
+            .map_err(MemoryError::from)
     }
 
     /// Liste les faits d'un persona (triés par `updated_at` décroissant).
@@ -1267,6 +1504,89 @@ fn row_to_learned_skill(row: &Row<'_>) -> rusqlite::Result<LearnedSkill> {
         status,
         created_at: rfc3339_or_err(&created_at, 6)?,
         accepted_at,
+    })
+}
+
+// ----------------------------------------------------------------------
+// Versionnage des faits (EX-52)
+// ----------------------------------------------------------------------
+
+/// Longueur maximale de l'auteur d'un oubli (C-13).
+const OUBLI_AUTEUR_MAX: usize = 128;
+/// Longueur maximale du motif d'un oubli (C-13).
+const OUBLI_MOTIF_MAX: usize = 512;
+
+/// État courant d'un fait, lu avant une nouvelle écriture.
+struct EtatFait {
+    rowid: i64,
+    persona: String,
+    subject: String,
+    content: String,
+    source: String,
+    confidence: f64,
+}
+
+impl EtatFait {
+    /// Vrai si `fait` n'apporte aucun changement à l'état courant.
+    fn identique(&self, fait: &Fact) -> bool {
+        self.persona == fait.persona
+            && self.subject == fait.subject
+            && self.content == fait.content
+            && self.source == fait.source
+            && (self.confidence - f64::from(fait.confidence)).abs() < f64::EPSILON
+    }
+}
+
+/// Valide un champ obligatoire d'une demande d'oubli (non vide, borné).
+fn valider_champ_oubli(nom: &str, valeur: &str, max: usize) -> Result<(), MemoryError> {
+    let v = valeur.trim();
+    if v.is_empty() {
+        return Err(MemoryError::InvalidForgetRequest(format!("{nom} manquant")));
+    }
+    if v.chars().count() > max {
+        return Err(MemoryError::InvalidForgetRequest(format!(
+            "{nom} trop long (max {max} caractères)"
+        )));
+    }
+    Ok(())
+}
+
+fn uuid_col(row: &Row<'_>, idx: usize) -> rusqlite::Result<Uuid> {
+    let s: String = row.get(idx)?;
+    Uuid::parse_str(&s).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Text, Box::new(e))
+    })
+}
+
+fn u32_col(row: &Row<'_>, idx: usize) -> rusqlite::Result<u32> {
+    let v: i64 = row.get(idx)?;
+    u32::try_from(v).map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Integer, Box::new(e))
+    })
+}
+
+fn row_to_fact_version(row: &Row<'_>) -> rusqlite::Result<FactVersion> {
+    let recorded_at: String = row.get(7)?;
+    Ok(FactVersion {
+        fact_id: uuid_col(row, 0)?,
+        version: u32_col(row, 1)?,
+        persona: row.get(2)?,
+        subject: row.get(3)?,
+        content: row.get(4)?,
+        source: row.get(5)?,
+        confidence: row.get(6)?,
+        recorded_at: rfc3339_or_err(&recorded_at, 7)?,
+    })
+}
+
+fn row_to_tombstone(row: &Row<'_>) -> rusqlite::Result<FactTombstone> {
+    let forgotten_at: String = row.get(1)?;
+    Ok(FactTombstone {
+        fact_id: uuid_col(row, 0)?,
+        forgotten_at: rfc3339_or_err(&forgotten_at, 1)?,
+        forgotten_by: row.get(2)?,
+        reason: row.get(3)?,
+        versions_erased: u32_col(row, 4)?,
     })
 }
 

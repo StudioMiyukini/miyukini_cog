@@ -48,6 +48,12 @@ pub struct MaiaLlmConfig {
     /// Active les logs des requêtes.
     #[serde(default = "default_true")]
     pub log_requests: bool,
+
+    /// Ancres de confiance des modèles (EX-26) : clés publiques Ed25519 en
+    /// hexadécimal (64 caractères) autorisées à signer les manifestes
+    /// `X.gguf.sceau`. Vide (défaut) = aucun modèle chargeable.
+    #[serde(default)]
+    pub model_trust_anchors: Vec<String>,
 }
 
 impl Default for MaiaLlmConfig {
@@ -61,6 +67,7 @@ impl Default for MaiaLlmConfig {
             auth_key: None,
             cors_allowed_origins: Vec::new(),
             log_requests: true,
+            model_trust_anchors: Vec::new(),
         }
     }
 }

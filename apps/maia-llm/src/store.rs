@@ -9,6 +9,11 @@
 //! SHA-256 content-addressed : chaque .gguf peut avoir un fichier sidecar
 //! `.gguf.sha256` avec son empreinte hex. Inspiré de miyucloud P3 dedup.
 //! Le calcul est paresseux (à la demande) pour éviter de hasher des GB au démarrage.
+//!
+//! **Sécurité (EX-26)** : le sidecar `.gguf.sha256` est purement informatif et
+//! n'est jamais une preuve de provenance. Le chargement exige un manifeste
+//! signé `X.gguf.sceau` et recalcule l'empreinte (module `provenance`). Lister
+//! un fichier ici ne le rend pas chargeable.
 
 use serde::Serialize;
 use sha2::{Digest, Sha256};

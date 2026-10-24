@@ -32,6 +32,6 @@ pub use learning::{detect_repetitions, propose_from_pattern, DetectorOptions, Re
 pub use prompt::{build_persona_context, ContextOptions};
 pub use store::MemoryStore;
 pub use types::{
-    Episode, EpisodeOutcome, Fact, LearnedSkill, LearnedSkillStatus, PendingConfirmation,
-    PendingExpiryReport, PendingStatus, Persona, Preference, PENDING_REASON_EXPIRED,
+    Episode, EpisodeOutcome, Fact, FactTombstone, FactVersion, LearnedSkill, LearnedSkillStatus,
+    PendingConfirmation, PendingExpiryReport, PendingStatus, Persona, Preference, PENDING_REASON_EXPIRED,
 };

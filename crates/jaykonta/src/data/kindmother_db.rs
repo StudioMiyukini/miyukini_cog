@@ -9,6 +9,7 @@
 //! Schema complet : 14 tables, triggers, vues.
 //! Voir `data/schema.sql` pour le DDL de reference.
 
+use crate::data::migrations;
 use crate::data::types::{
     AuditRecord, InvoiceRecord, MovementRecord, PaymentRecord, QuoteRecord, ReminderRecord,
 };
@@ -102,73 +103,30 @@ impl JayKontaDb {
             conn: Mutex::new(conn),
             instance: InstanceIdentity::new(InstanceType::Daughter),
         };
-        db.init_schema()?;
+        let chemin_fichier = (path != Path::new(":memory:")).then_some(path);
+        db.init_schema(chemin_fichier)?;
         Ok(db)
     }
 
-    /// Version courante du schema JayKonta.
-    /// Incrementer a chaque evolution incompatible du DDL.
-    const SCHEMA_VERSION: i32 = 2;
+    /// Version courante du schema JayKonta (voir `data::migrations`).
+    pub const SCHEMA_VERSION: i32 = migrations::VERSION_SCHEMA;
 
-    fn init_schema(&self) -> Result<(), DbError> {
-        let conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
-
-        // Lire la version courante de la DB
-        let current_version: i32 = conn
-            .query_row("PRAGMA user_version", [], |row| row.get(0))
-            .unwrap_or(0);
-
-        if current_version < Self::SCHEMA_VERSION {
-            // Migration : supprimer les anciennes tables/vues/triggers pour recreer proprement.
-            // En Phase 1 (developpement), on accepte la perte des donnees legacy.
-            conn.execute_batch(
-                "
-                -- Supprimer vues
-                DROP VIEW   IF EXISTS v_movements_by_category;
-                DROP VIEW   IF EXISTS v_invoice_summary;
-                DROP VIEW   IF EXISTS v_quote_summary;
-
-                -- Supprimer triggers
-                DROP TRIGGER IF EXISTS trg_movements_updated;
-                DROP TRIGGER IF EXISTS trg_budgets_updated;
-                DROP TRIGGER IF EXISTS trg_goals_updated;
-                DROP TRIGGER IF EXISTS trg_quotes_updated;
-                DROP TRIGGER IF EXISTS trg_invoices_updated;
-                DROP TRIGGER IF EXISTS trg_budget_spent_insert;
-                DROP TRIGGER IF EXISTS trg_invoice_paid_insert;
-                DROP TRIGGER IF EXISTS trg_recurring_updated;
-
-                -- Supprimer tables (ordre inverse des dependances)
-                DROP TABLE IF EXISTS recurring_transactions;
-                DROP TABLE IF EXISTS audit;
-                DROP TABLE IF EXISTS reminders;
-                DROP TABLE IF EXISTS payments;
-                DROP TABLE IF EXISTS invoice_lines;
-                DROP TABLE IF EXISTS invoices;
-                DROP TABLE IF EXISTS quote_lines;
-                DROP TABLE IF EXISTS quotes;
-                DROP TABLE IF EXISTS counterparties;
-                DROP TABLE IF EXISTS alerts;
-                DROP TABLE IF EXISTS goals;
-                DROP TABLE IF EXISTS budgets;
-                DROP TABLE IF EXISTS movements;
-                DROP TABLE IF EXISTS categories;
-                DROP TABLE IF EXISTS accounts;
-
-                -- Supprimer ancienne table legacy si existante
-                DROP TABLE IF EXISTS audit_log;
-                ",
-            )?;
+    /// Initialise ou migre le schema (EX-08, C-41).
+    ///
+    /// Migrations versionnees `vN -> vN+1` en transaction, sans suppression de
+    /// table de donnees ; sauvegarde du fichier avant migration ; version
+    /// illisible ou base plus recente que le code = refus (fail-closed).
+    fn init_schema(&self, chemin: Option<&Path>) -> Result<(), DbError> {
+        let mut conn = self.conn.lock().map_err(|e| DbError(e.to_string()))?;
+        let rapport = migrations::migrer(&mut conn, chemin).map_err(|e| DbError(e.to_string()))?;
+        if let Some(bak) = &rapport.sauvegarde {
+            eprintln!(
+                "[jaykonta] schema migre v{} -> v{} ; sauvegarde : {}",
+                rapport.version_initiale,
+                rapport.version_finale,
+                bak.display()
+            );
         }
-
-        // Creer (ou re-creer) le schema complet
-        conn.execute_batch(include_str!("schema.sql"))?;
-
-        // Mettre a jour la version
-        if current_version < Self::SCHEMA_VERSION {
-            conn.execute_batch(&format!("PRAGMA user_version = {};", Self::SCHEMA_VERSION))?;
-        }
-
         Ok(())
     }
 

@@ -45,7 +45,7 @@ fn forget_removes_fact_and_fts_entry() {
     );
     s.remember(&f).unwrap();
     assert_eq!(s.recall("Mochi", 5).unwrap().len(), 1);
-    let n = s.forget(f.id).unwrap();
+    let n = s.forget(f.id, "user", "test").unwrap();
     assert_eq!(n, 1);
     assert!(s.recall("Mochi", 5).unwrap().is_empty());
 }

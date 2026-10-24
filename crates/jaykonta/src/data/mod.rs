@@ -12,6 +12,9 @@ mod types;
 #[cfg(feature = "legacy-sqlite")]
 mod kindmother_db;
 
+#[cfg(feature = "legacy-sqlite")]
+pub mod migrations;
+
 #[cfg(feature = "kindmother-only")]
 mod kindmother_client_db;
 

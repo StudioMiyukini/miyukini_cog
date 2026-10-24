@@ -44,6 +44,9 @@ tower      = { version = "0.5", features = ["util"] }
 # Inférence GGUF — SEULE dépendance C (llama.cpp tensor engine) — version via workspace
 llama-cpp-2.workspace = true
 
+# Provenance signée des modèles (EX-26) : manifestes Sceau v1
+miyusceau = { path = "../../crates/miyusceau" }
+
 # Hash content-addressed (store)
 sha2 = "0.10"
 hex  = "0.4"

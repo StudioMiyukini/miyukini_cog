@@ -7,11 +7,16 @@
 //! MAIA-LLM — Service d'inférence GGUF local.
 //!
 //! Usage : `maia-llm serve [--bind 127.0.0.1:11435] [--models-dir ./models] [--config maia-llm.toml]`
+//!
+//! EX-26 : seuls les modèles accompagnés d'un manifeste signé `X.gguf.sceau`
+//! (ancres `model_trust_anchors`) sont chargés — voir le module `provenance`.
+//! Outillage : `maia-llm cle-dev --sortie <f>` et `maia-llm sceller-modele …`.
 
 mod api;
 mod auth;
 mod config;
 mod engine;
+mod provenance;
 mod store;
 
 use std::sync::Arc;
@@ -41,6 +46,21 @@ async fn main() {
         )
         .init();
 
+    // Outillage de signature des modèles (EX-26) : sous-commandes hors service.
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(r) = provenance::executer_outil(&args) {
+        match r {
+            Ok(msg) => {
+                println!("{msg}");
+                return;
+            }
+            Err(e) => {
+                eprintln!("{e}");
+                std::process::exit(2);
+            }
+        }
+    }
+
     // Config
     let cfg = parse_args_and_load_config();
     // Fail-closed : pas de bind hors loopback sans auth_key.
@@ -55,8 +75,21 @@ async fn main() {
 
     tracing::info!("MAIA-LLM démarrage — bind={bind_addr} models={models_dir}");
 
+    // Politique de provenance des modèles (EX-26) — fail-closed : une ancre
+    // mal formée empêche le démarrage.
+    let ancres = match provenance::ancres_depuis_hex(&cfg.model_trust_anchors) {
+        Ok(a) => a,
+        Err(e) => {
+            tracing::error!("{e}");
+            eprintln!("Refus de démarrer : {e}");
+            std::process::exit(1);
+        }
+    };
+    let politique =
+        provenance::PolitiqueModeles::new(ancres, provenance::derogation_demandee(&args));
+
     // Moteur + store
-    let engine = Arc::new(LlmEngine::new((*cfg).clone()));
+    let engine = Arc::new(LlmEngine::new((*cfg).clone(), politique));
     let store = Arc::new(ModelStore::new(&models_dir));
 
     // Auto-load du meilleur modèle si activé

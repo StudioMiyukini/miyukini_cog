@@ -27,6 +27,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 
 use crate::config::MaiaLlmConfig;
+use crate::provenance::{Autorisation, PolitiqueModeles};
 
 // ── Types publics ─────────────────────────────────────────────────
 
@@ -46,6 +47,8 @@ pub enum LlmError {
     NoModelLoaded,
     LlamaError(String),
     AlreadyRunning,
+    /// Provenance du modèle non vérifiée (EX-26) : chargement refusé.
+    ProvenanceRefusee(String),
 }
 
 impl std::fmt::Display for LlmError {
@@ -54,6 +57,7 @@ impl std::fmt::Display for LlmError {
             Self::NoModelLoaded => write!(f, "Aucun modèle GGUF chargé"),
             Self::LlamaError(e) => write!(f, "Erreur llama.cpp : {e}"),
             Self::AlreadyRunning => write!(f, "Inférence déjà en cours"),
+            Self::ProvenanceRefusee(e) => write!(f, "Modèle refusé (provenance) : {e}"),
         }
     }
 }
@@ -87,11 +91,13 @@ struct LlmState {
 #[derive(Clone)]
 pub struct LlmEngine {
     state: Arc<Mutex<LlmState>>,
+    /// Politique de provenance des modèles (EX-26), fixée au démarrage.
+    politique: Arc<PolitiqueModeles>,
 }
 
 impl LlmEngine {
     /// Initialise le moteur llama.cpp.
-    pub fn new(config: MaiaLlmConfig) -> Self {
+    pub fn new(config: MaiaLlmConfig, politique: PolitiqueModeles) -> Self {
         let backend = LlamaBackend::init().expect("Impossible d'initialiser llama.cpp");
         Self {
             state: Arc::new(Mutex::new(LlmState {
@@ -99,6 +105,7 @@ impl LlmEngine {
                 loaded: None,
                 config,
             })),
+            politique: Arc::new(politique),
         }
     }
 
@@ -106,8 +113,23 @@ impl LlmEngine {
 
     /// Charge un modèle GGUF depuis le chemin donné.
     /// Décharge l'éventuel modèle précédent.
+    ///
+    /// EX-26 : le modèle doit d'abord passer le contrôle de provenance
+    /// (manifeste signé par une ancre épinglée + empreinte SHA-256). Le
+    /// contrôle a lieu hors du verrou du moteur (hachage potentiellement long).
     pub fn load_model(&self, model_path: PathBuf) -> Result<ModelInfo, LlmError> {
-        let mut state = self.state.lock().unwrap();
+        match self.politique.autoriser(&model_path) {
+            Ok(Autorisation::Verifie(_) | Autorisation::DerogationDev(_)) => {}
+            Err(e) => {
+                tracing::warn!("Chargement refusé ({}) : {e}", model_path.display());
+                return Err(LlmError::ProvenanceRefusee(e.to_string()));
+            }
+        }
+
+        let mut state = self
+            .state
+            .lock()
+            .map_err(|_| LlmError::LlamaError("verrou du moteur empoisonné".into()))?;
 
         let model_name = model_path
             .file_name()
