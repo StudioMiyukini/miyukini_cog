@@ -13,7 +13,11 @@ use crate::state::InstanceIdentity;
 /// @layer core
 /// @do represent_write_intent
 //@human / @human Intention d'écriture avant validation et application.
-/// Intention d'écriture.
+/// Intention d'écriture (modèle conceptuel de la CoreDataAPI).
+///
+/// Le chemin d'écriture réel vers `kindmother-service` est l'intention **typée**
+/// [`crate::intent::TypedWriteIntent`] (opérateur, base, table, opération, valeurs
+/// typées, clé) et son cycle de vie [`crate::intent::IntentLifecycle`] (K-13, EX-07).
 #[derive(Debug, Clone)]
 pub struct WriteIntent {
     /// @id kindmother_api_write_intent_id

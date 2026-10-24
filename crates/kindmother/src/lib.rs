@@ -60,6 +60,14 @@ pub mod sync;
 /// Module API CoreData
 pub mod api;
 
+/// @id kindmother_module_intent
+/// @role infrastructure
+/// @layer core
+/// @do expose_intent_module
+//@human / @human Intentions d'écriture typées, lectures typées, migrations et cycle de vie (lot C, K-13).
+/// Module des intentions typées
+pub mod intent;
+
 /// @id kindmother_module_threat
 /// @role infrastructure
 /// @layer core
@@ -117,6 +125,17 @@ pub use sync::{DeltaOperation, Sync, SyncDelta, SyncError};
 //@human / @human Ré-export des types d'API pour faciliter l'usage.
 /// @depends kindmother_module_api
 pub use api::{APIError, CoreDataAPI, WriteIntent, WriteOperation};
+
+/// @id kindmother_reexport_intent
+/// @role infrastructure
+/// @layer core
+/// @do reexport_intent_types
+//@human / @human Ré-export des intentions typées (lot C, K-13, EX-07).
+/// @depends kindmother_module_intent
+pub use intent::{
+    IntentLifecycle, IntentOperation, IntentOutcome, IntentState, LifecycleError, OrderBy,
+    SchemaMigration, SqlValue, TypedSelect, TypedWriteIntent,
+};
 
 /// @id kindmother_reexport_threat
 /// @role infrastructure

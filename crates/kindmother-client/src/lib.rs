@@ -44,12 +44,16 @@
 //! // Lecture
 //! let entries = client.query("SELECT * FROM entries WHERE active = ?", vec!["1"]).await?;
 //!
-//! // Écriture
-//! client.execute(
-//!     "INSERT INTO entries (title, start_at) VALUES (?, ?)",
-//!     vec!["Reunion", "2026-05-01T09:00:00"],
-//!     "create_entry"
+//! // Écriture typée (lot C) : aucune instruction SQL côté opérateur
+//! client.submit(
+//!     TypedWriteIntent::insert("entries")
+//!         .value("title", "Reunion")
+//!         .value("start_at", "2026-05-01T09:00:00")
+//!         .purpose("create_entry"),
 //! ).await?;
+//!
+//! // Lecture typée
+//! let rows = client.select(TypedSelect::from("entries").filter("active", 1_i64)).await?;
 //! ```
 
 mod client;
@@ -64,3 +68,9 @@ pub use credential::{
 };
 pub use errors::ClientError;
 pub use protocol::{Operation, Request, Response};
+
+/// Intentions typées (ré-export de `kindmother::intent`).
+pub use kindmother::intent::{
+    IntentOperation, IntentOutcome, IntentState, OrderBy, SchemaMigration, SqlValue, TypedSelect,
+    TypedWriteIntent,
+};

@@ -100,6 +100,11 @@ where
         Self { executor }
     }
 
+    /// Contexte **non signé** : depuis l'exigence de `SignatureMandat` dans miyusql,
+    /// tout appel par ce pont est refusé (`MandatNonSigne`). C'est voulu (fail-closed,
+    /// C-14) : aucun chemin de production ne l'utilise ; le chemin réel d'écriture est
+    /// `kindmother-service` (intentions typées). À rebrancher sur un mandat signé par
+    /// StrongFather quand le pont servira.
     fn ctx(&self, mandate_id: &str, security_level: u8) -> GovernedContext {
         GovernedContext::new(mandate_id.to_string(), security_level)
     }

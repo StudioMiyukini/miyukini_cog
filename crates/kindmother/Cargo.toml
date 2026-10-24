@@ -14,8 +14,11 @@ description = "KindMother - Moteur de données et persistance du Miyukini Core S
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
 miyusql = { path = "../miyusql" }
+# Intentions typées échangées entre kindmother-client et kindmother-service (lot C, K-13).
+serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
+serde_json = "1"
 
 [lints.rust]
 unsafe_code = "forbid"

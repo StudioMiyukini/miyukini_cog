@@ -37,18 +37,27 @@
 //!   dans la requête (C-20)
 //! - Contrôle d'accès par opérateur (arbitrage) et politique SQL appliquée par
 //!   l'autorisateur SQLite (K-05)
-//! - Audit des écritures
+//! - Écritures par **intentions typées** (`SubmitIntents`) avec cycle de vie
+//!   `créée → validée → appliquée → archivée` (ou `refusée`/`échouée`), lectures typées
+//!   (`Select`) et migrations versionnées non destructives (`ApplyMigrations`) — lot C,
+//!   K-13, EX-07 ; le SQL brut (`Query`/`Execute`/`Transaction`) est **transitoire**
+//! - Journal d'audit chaîné, en ajout seul, hors des bases opérateurs : écritures,
+//!   lectures et refus (`audit`, K-08)
+//! - Chiffrement SQLCipher par défaut, une clé par base (K-06, K-07) ; refus de démarrer
+//!   en clair hors build de debug explicitement configuré
 //! - Écoute uniquement sur la boucle locale (sauf configuration explicite), trames
 //!   bornées, poignées de main non authentifiées bornées à part (éviction des plus
 //!   anciennes), emplacement principal pris après authentification, délai d'inactivité
 
 mod arbitration;
+pub mod audit;
 mod credentials;
 mod database;
 mod errors;
 mod protocol;
 mod server;
 mod sql_guard;
+mod typed;
 
 pub use arbitration::{AccessMode, ArbitrationEngine, OperatorConfig, Permission};
 pub use credentials::{
@@ -56,9 +65,12 @@ pub use credentials::{
     NONCE_LEN, PUBLIC_KEY_LEN, SERVER_KEY_NAME,
 };
 pub use sql_guard::SqlPolicy;
-pub use database::EncryptedDatabase;
+pub use database::{
+    is_plaintext_sqlite, EncryptedDatabase, MigrationReport, ENV_DEV_PLAINTEXT,
+    SQLITE_PLAINTEXT_HEADER,
+};
 pub use errors::ServiceError;
 #[cfg(feature = "db-encryption")]
-pub use kindmother_db_key::KeyDerivation;
+pub use kindmother_db_key::{DatabaseKeyStore, KeyDerivation};
 pub use protocol::{Request, Response};
-pub use server::{KindMotherServer, ServerLimits};
+pub use server::{spawn_ephemeral, spawn_ephemeral_blocking, KindMotherServer, ServerLimits};

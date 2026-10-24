@@ -77,6 +77,17 @@ async fn main() -> Result<(), ServiceError> {
         .await?
         .with_non_loopback_allowed(config.allow_non_loopback);
 
+    // Chiffrement (K-06) : sans db-encryption, `KindMotherServer::new` a déjà refusé de
+    // démarrer, sauf build de debug avec KINDMOTHER_DEV_PLAINTEXT=1.
+    if server.database().is_encrypted() {
+        tracing::info!("Storage: SQLCipher, one key per database (K-06, K-07)");
+    } else {
+        tracing::error!(
+            "Storage: PLAINTEXT (development mode, {}=1) — never use in production",
+            kindmother_service::ENV_DEV_PLAINTEXT
+        );
+    }
+
     tracing::info!(
         "KindMother server ready (operator credentials in {:?}), serving requests...",
         server.credentials_dir()

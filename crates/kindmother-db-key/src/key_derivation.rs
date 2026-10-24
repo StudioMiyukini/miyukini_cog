@@ -73,7 +73,7 @@ impl KeyDerivation {
     }
 
     #[cfg(windows)]
-    fn get_machine_id() -> Result<Vec<u8>, DbKeyError> {
+    pub(crate) fn get_machine_id() -> Result<Vec<u8>, DbKeyError> {
         use winreg::enums::*;
         use winreg::RegKey;
 
@@ -90,7 +90,7 @@ impl KeyDerivation {
     }
 
     #[cfg(not(windows))]
-    fn get_machine_id() -> Result<Vec<u8>, DbKeyError> {
+    pub(crate) fn get_machine_id() -> Result<Vec<u8>, DbKeyError> {
         let machine_id = std::fs::read_to_string("/etc/machine-id")
             .or_else(|_| std::fs::read_to_string("/var/lib/dbus/machine-id"))
             .map_err(|_| DbKeyError("Cannot read machine ID".to_string()))?;
@@ -98,7 +98,7 @@ impl KeyDerivation {
         Ok(machine_id.trim().as_bytes().to_vec())
     }
 
-    fn get_or_create_install_secret(data_dir: &Path) -> Result<Zeroizing<[u8; 32]>, DbKeyError> {
+    pub(crate) fn get_or_create_install_secret(data_dir: &Path) -> Result<Zeroizing<[u8; 32]>, DbKeyError> {
         let secret_path = data_dir.join(".kindmother_secret");
 
         if secret_path.exists() {

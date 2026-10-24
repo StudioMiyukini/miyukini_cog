@@ -18,6 +18,9 @@ use crate::credential::{
 };
 use crate::errors::ClientError;
 use crate::protocol::{Operation, Request, Response};
+use kindmother::intent::{
+    IntentOutcome, IntentState, SchemaMigration, TypedSelect, TypedWriteIntent,
+};
 
 /// Taille maximale d'une trame de réponse acceptée (C-13).
 const MAX_RESPONSE_FRAME: usize = 64 * 1024 * 1024;
@@ -154,7 +157,121 @@ impl KindMotherClient {
         Ok(response)
     }
 
+    /// Soumet une intention d'écriture typée (lot C, K-13) ; retourne son issue.
+    ///
+    /// `Err` si l'intention n'est pas appliquée (refusée ou échouée) ; le motif est
+    /// dans le message. L'identifiant d'intention est tiré au hasard s'il est vide.
+    pub async fn submit(&self, intent: TypedWriteIntent) -> Result<IntentOutcome, ClientError> {
+        let mut outcomes = self.submit_batch(vec![intent]).await?;
+        outcomes
+            .pop()
+            .ok_or_else(|| ClientError::Service("empty intent outcome".to_string()))
+    }
+
+    /// Soumet un lot d'intentions typées, appliqué atomiquement (même base).
+    ///
+    /// Les champs `operator_id` (identité authentifiée), `database` (base par défaut si
+    /// vide) et `intent_id` (aléatoire si vide) sont complétés. `Err` si une intention
+    /// n'est pas appliquée : aucune ne l'est alors.
+    pub async fn submit_batch(
+        &self,
+        intents: Vec<TypedWriteIntent>,
+    ) -> Result<Vec<IntentOutcome>, ClientError> {
+        let outcomes = self.submit_batch_outcomes(intents).await?;
+        if let Some(bad) = outcomes.iter().find(|o| o.state != IntentState::Appliquee) {
+            let reason = bad.reason.clone().unwrap_or_default();
+            return Err(match bad.state {
+                IntentState::Refusee => ClientError::PermissionDenied(format!(
+                    "intent {} refused: {reason}",
+                    bad.intent_id
+                )),
+                _ => ClientError::Service(format!("intent {} failed: {reason}", bad.intent_id)),
+            });
+        }
+        Ok(outcomes)
+    }
+
+    /// Comme [`Self::submit_batch`], mais retourne les issues sans les convertir en erreur.
+    pub async fn submit_batch_outcomes(
+        &self,
+        intents: Vec<TypedWriteIntent>,
+    ) -> Result<Vec<IntentOutcome>, ClientError> {
+        let mut intents = intents;
+        let database = intents
+            .iter()
+            .find(|i| !i.database.is_empty())
+            .map_or_else(|| self.default_database.clone(), |i| i.database.clone());
+        for intent in &mut intents {
+            intent.operator_id.clone_from(&self.operator_id);
+            if intent.database.is_empty() {
+                intent.database.clone_from(&database);
+            }
+            if intent.intent_id.is_empty() {
+                intent.intent_id = uuid::Uuid::new_v4().to_string();
+            }
+        }
+        let request = Request::SubmitIntents {
+            operator_id: self.operator_id.clone(),
+            database,
+            intents,
+        };
+        match self.send_request(request).await? {
+            Response::IntentsResult { outcomes, .. } => Ok(outcomes),
+            _ => Err(ClientError::Service("Unexpected response type".to_string())),
+        }
+    }
+
+    /// Lecture typée sur la base par défaut.
+    pub async fn select(
+        &self,
+        query: TypedSelect,
+    ) -> Result<Vec<HashMap<String, serde_json::Value>>, ClientError> {
+        self.select_db(&self.default_database, query).await
+    }
+
+    /// Lecture typée sur une base donnée.
+    pub async fn select_db(
+        &self,
+        database: &str,
+        query: TypedSelect,
+    ) -> Result<Vec<HashMap<String, serde_json::Value>>, ClientError> {
+        let request = Request::Select {
+            operator_id: self.operator_id.clone(),
+            database: database.to_string(),
+            query,
+        };
+        rows_of(self.send_request(request).await?)
+    }
+
+    /// Applique les migrations de schéma versionnées (`1..=n`) de la base par défaut.
+    ///
+    /// Retourne `(version avant, version après)`. Non destructif côté service.
+    pub async fn apply_migrations(
+        &self,
+        migrations: Vec<SchemaMigration>,
+    ) -> Result<(u32, u32), ClientError> {
+        let request = Request::ApplyMigrations {
+            operator_id: self.operator_id.clone(),
+            database: self.default_database.clone(),
+            migrations,
+        };
+        match self.send_request(request).await? {
+            Response::MigrationResult {
+                success: true,
+                version_before,
+                version_after,
+                ..
+            } => Ok((version_before, version_after)),
+            Response::MigrationResult { error, .. } => Err(ClientError::Service(
+                error.unwrap_or_else(|| "Migration failed".to_string()),
+            )),
+            _ => Err(ClientError::Service("Unexpected response type".to_string())),
+        }
+    }
+
     /// Exécute une requête SELECT et retourne les lignes.
+    ///
+    /// **TRANSITOIRE (lot C)** : SQL brut ; préférer [`Self::select`].
     #[instrument(skip(self, params))]
     pub async fn query<S: AsRef<str>>(
         &self,
@@ -220,6 +337,8 @@ impl KindMotherClient {
     }
 
     /// Exécute une requête d'écriture (INSERT, UPDATE, DELETE).
+    ///
+    /// **TRANSITOIRE (lot C)** : SQL brut ; préférer [`Self::submit`].
     #[instrument(skip(self, params))]
     pub async fn execute<S: AsRef<str>>(
         &self,
@@ -269,6 +388,8 @@ impl KindMotherClient {
     }
 
     /// Exécute une transaction avec plusieurs opérations.
+    ///
+    /// **TRANSITOIRE (lot C)** : SQL brut ; préférer [`Self::submit_batch`].
     #[instrument(skip(self, operations))]
     pub async fn transaction<S: AsRef<str>>(
         &self,
@@ -377,6 +498,24 @@ impl KindMotherClient {
     /// Retourne le nom de la base de données par défaut.
     pub fn database(&self) -> &str {
         &self.default_database
+    }
+}
+
+/// Lignes d'une réponse de lecture.
+fn rows_of(response: Response) -> Result<Vec<HashMap<String, serde_json::Value>>, ClientError> {
+    match response {
+        Response::QueryResult {
+            success: true,
+            rows,
+            ..
+        } => rows
+            .into_iter()
+            .map(|r| serde_json::from_value(r).map_err(ClientError::from))
+            .collect(),
+        Response::QueryResult { error, .. } => Err(ClientError::Service(
+            error.unwrap_or_else(|| "Query failed".to_string()),
+        )),
+        _ => Err(ClientError::Service("Unexpected response type".to_string())),
     }
 }
 

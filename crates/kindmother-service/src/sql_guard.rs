@@ -11,7 +11,10 @@
 //! (y compris dans les CTE, sous-requêtes, vues et corps de déclencheurs).
 //! Toute action non reconnue est refusée (fail-closed, C-12).
 //!
-//! Prochaine étape (lot C) : remplacer le SQL libre par des requêtes typées/nommées.
+//! Lot C : les écritures passent par des intentions **typées** (module `typed`) et le
+//! schéma par des migrations versionnées ; le SQL libre ne subsiste que sur le chemin
+//! **transitoire** `Query`/`Execute`/`Transaction`, sous cette garde, jusqu'à la
+//! migration de tous les services (puis retrait).
 
 use rusqlite::hooks::{AuthAction, AuthContext, Authorization};
 use rusqlite::{Batch, Connection, ErrorCode, Statement};
@@ -42,33 +45,63 @@ const FUNCTION_DENY_LIST: &[&str] = &[
 const PROTECTED_TABLE_PREFIXES: &[&str] = &["sqlite_", "_kindmother_"];
 
 /// Politique appliquée à une instruction d'opérateur.
+///
+/// Règle non destructive (C-41, EX-08) : **aucune** politique ne permet de supprimer
+/// une table. Les modifications de structure (`ALTER TABLE`, suppression de vues,
+/// index et déclencheurs) ne sont permises qu'au chemin de migration versionnée, qui
+/// vérifie en plus qu'aucune table ni colonne n'a disparu.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SqlPolicy {
-    /// Écritures de données (INSERT, UPDATE, DELETE) permises
+    /// Écritures de données (INSERT, UPDATE) permises
     pub can_write: bool,
-    /// Définition de schéma (CREATE, DROP, ALTER, REINDEX, ANALYZE) permise
+    /// Suppression de lignes (DELETE) permise
+    pub can_delete: bool,
+    /// Création de schéma additive (CREATE TABLE/INDEX/VIEW/TRIGGER, REINDEX, ANALYZE)
     pub can_ddl: bool,
+    /// Modification de structure (ALTER TABLE, retrait de vue/index/déclencheur) : migrations seulement
+    pub can_alter: bool,
 }
 
 impl SqlPolicy {
     /// Politique en lecture seule.
     pub const READ_ONLY: Self = Self {
         can_write: false,
+        can_delete: false,
         can_ddl: false,
+        can_alter: false,
     };
 
-    /// Déduit la politique de la permission de l'opérateur et du mode d'accès demandé.
+    /// Écriture de données sans schéma (ReadWrite, intentions typées).
+    pub const DATA_WRITE: Self = Self {
+        can_write: true,
+        can_delete: true,
+        can_ddl: false,
+        can_alter: false,
+    };
+
+    /// Admin sur le chemin SQL brut transitoire : données + création additive de schéma.
+    pub const ADMIN_RAW: Self = Self {
+        can_write: true,
+        can_delete: true,
+        can_ddl: true,
+        can_alter: false,
+    };
+
+    /// Migration versionnée : création et modification de structure, insertion et mise
+    /// à jour (rattrapage de données) ; jamais de retrait de lignes ni de tables.
+    pub const MIGRATION: Self = Self {
+        can_write: true,
+        can_delete: false,
+        can_ddl: true,
+        can_alter: true,
+    };
+
+    /// Déduit la politique (chemin SQL brut) de la permission de l'opérateur et du mode.
     pub fn for_permission(permission: &Permission, mode: AccessMode) -> Self {
         match (mode, permission) {
             (AccessMode::Read, _) | (AccessMode::Write, Permission::Read) => Self::READ_ONLY,
-            (AccessMode::Write, Permission::ReadWrite) => Self {
-                can_write: true,
-                can_ddl: false,
-            },
-            (AccessMode::Write, Permission::Admin) => Self {
-                can_write: true,
-                can_ddl: true,
-            },
+            (AccessMode::Write, Permission::ReadWrite) => Self::DATA_WRITE,
+            (AccessMode::Write, Permission::Admin) => Self::ADMIN_RAW,
         }
     }
 }
@@ -112,9 +145,7 @@ pub fn decide(policy: SqlPolicy, ctx: &AuthContext<'_>) -> Authorization {
         // Le catalogue n'est modifié que par le DDL lui-même (CREATE/DROP/ALTER émettent
         // ces actions) ; une écriture directe reste refusée par SQLite sans
         // `writable_schema`, pragma lui-même refusé.
-        AuthAction::Insert { table_name }
-        | AuthAction::Delete { table_name }
-        | AuthAction::Update { table_name, .. } => allow_if(
+        AuthAction::Insert { table_name } | AuthAction::Update { table_name, .. } => allow_if(
             main && if is_schema_table(table_name) {
                 policy.can_ddl
             } else {
@@ -122,13 +153,30 @@ pub fn decide(policy: SqlPolicy, ctx: &AuthContext<'_>) -> Authorization {
             },
         ),
 
+        AuthAction::Delete { table_name } => allow_if(
+            main && if is_schema_table(table_name) {
+                policy.can_ddl
+            } else {
+                policy.can_delete && !is_protected_table(table_name)
+            },
+        ),
+
+        // Jamais de retrait de table, quelle que soit la politique (règle non destructive, C-41).
+        AuthAction::DropTable { .. } => Authorization::Deny,
+
+        // Table interne créée par SQLite à la première table `AUTOINCREMENT`.
+        AuthAction::CreateTable { table_name } if table_name.eq_ignore_ascii_case("sqlite_sequence") => {
+            allow_if(policy.can_ddl && main)
+        }
+
         AuthAction::CreateTable { table_name }
-        | AuthAction::DropTable { table_name }
         | AuthAction::CreateIndex { table_name, .. }
-        | AuthAction::DropIndex { table_name, .. }
-        | AuthAction::CreateTrigger { table_name, .. }
-        | AuthAction::DropTrigger { table_name, .. } => {
+        | AuthAction::CreateTrigger { table_name, .. } => {
             allow_if(policy.can_ddl && main && !is_protected_table(table_name))
+        }
+
+        AuthAction::DropIndex { table_name, .. } | AuthAction::DropTrigger { table_name, .. } => {
+            allow_if(policy.can_alter && main && !is_protected_table(table_name))
         }
 
         // Pour ALTER TABLE, SQLite passe la base dans l'action, pas dans le contexte.
@@ -136,11 +184,14 @@ pub fn decide(policy: SqlPolicy, ctx: &AuthContext<'_>) -> Authorization {
             database_name,
             table_name,
         } => allow_if(
-            policy.can_ddl && database_name == "main" && !is_protected_table(table_name),
+            policy.can_alter && database_name == "main" && !is_protected_table(table_name),
         ),
 
-        AuthAction::CreateView { view_name } | AuthAction::DropView { view_name } => {
+        AuthAction::CreateView { view_name } => {
             allow_if(policy.can_ddl && main && !is_protected_table(view_name))
+        }
+        AuthAction::DropView { view_name } => {
+            allow_if(policy.can_alter && main && !is_protected_table(view_name))
         }
 
         AuthAction::Reindex { .. } | AuthAction::Analyze { .. } => {
@@ -221,14 +272,9 @@ pub fn prepare_single<'c>(conn: &'c Connection, sql: &str) -> Result<Statement<'
 mod tests {
     use super::*;
 
-    const RW: SqlPolicy = SqlPolicy {
-        can_write: true,
-        can_ddl: false,
-    };
-    const ADMIN: SqlPolicy = SqlPolicy {
-        can_write: true,
-        can_ddl: true,
-    };
+    const RW: SqlPolicy = SqlPolicy::DATA_WRITE;
+    const ADMIN: SqlPolicy = SqlPolicy::ADMIN_RAW;
+    const MIGRATION: SqlPolicy = SqlPolicy::MIGRATION;
 
     fn base() -> Connection {
         let conn = Connection::open_in_memory().expect("mem");
@@ -367,11 +413,21 @@ mod tests {
         assert!(run(&conn, RW, "WITH x AS (SELECT 2 AS i) DELETE FROM t WHERE id IN (SELECT i FROM x)").is_ok());
         assert!(run(&conn, RW, "CREATE TABLE u (x)").is_err());
         assert!(run(&conn, RW, "DROP TABLE t").is_err());
-        // Admin : schéma oui
+        // Admin (SQL brut) : création additive oui, modification ou retrait non
         assert!(run(&conn, ADMIN, "CREATE TABLE IF NOT EXISTS u (x)").is_ok());
         assert!(run(&conn, ADMIN, "CREATE INDEX IF NOT EXISTS idx_u ON u (x)").is_ok());
-        assert!(run(&conn, ADMIN, "ALTER TABLE u ADD COLUMN y").is_ok());
-        assert!(run(&conn, ADMIN, "DROP TABLE u").is_ok());
+        assert!(run(&conn, ADMIN, "ALTER TABLE u ADD COLUMN y").is_err());
+        assert!(run(&conn, ADMIN, "ALTER TABLE u RENAME TO v").is_err());
+        assert!(run(&conn, ADMIN, "DROP INDEX idx_u").is_err());
+        assert!(run(&conn, ADMIN, "DROP TABLE u").is_err());
+        // Migration : modification de structure oui, retrait de table ou de lignes non
+        assert!(run(&conn, MIGRATION, "ALTER TABLE u ADD COLUMN y").is_ok());
+        assert!(run(&conn, MIGRATION, "DROP INDEX idx_u").is_ok());
+        assert!(run(&conn, MIGRATION, "UPDATE u SET y = 1").is_ok());
+        assert!(run(&conn, MIGRATION, "DELETE FROM t").is_err());
+        assert!(run(&conn, MIGRATION, "DROP TABLE u").is_err());
+        assert!(run(&conn, MIGRATION, "DROP TABLE IF EXISTS u").is_err());
+        assert!(run(&conn, MIGRATION, "ALTER TABLE _kindmother_audit ADD COLUMN z").is_err());
         assert_eq!(count(&conn), 1);
     }
 

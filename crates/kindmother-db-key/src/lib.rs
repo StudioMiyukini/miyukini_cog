@@ -4,10 +4,15 @@
 //! via SQLCipher. Utilise Argon2id (OWASP 2024) et un secret d'installation
 //! stocké localement.
 //!
+//! [`DatabaseKeyStore`] (K-07) : une clé par base dérivée d'un secret aléatoire
+//! **propre à la base** (donc au service), détenu par `kindmother-service` seul.
+//!
 //! @id     kindmother_db_key
 //! @do     derive_encryption_keys_for_sqlite
 //@human ! @layer  core
 
 mod key_derivation;
+mod key_store;
 
 pub use key_derivation::{DbKeyError, KeyDerivation};
+pub use key_store::{DatabaseKeyStore, KeyScheme, KEYS_DIR};

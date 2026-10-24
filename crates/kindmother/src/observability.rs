@@ -34,6 +34,13 @@ pub enum HealthStatus {
     //@human / @human Instance non fonctionnelle.
     /// @depends kindmother_observability_health_status
     Unhealthy,
+    /// @id kindmother_observability_health_unknown
+    /// @role data
+    /// @layer core
+    /// @do represent_unknown_status
+    //@human / @human Aucune observation disponible : état inconnu (jamais « sain » par défaut, C-14).
+    /// @depends kindmother_observability_health_status
+    Unknown,
 }
 
 /// @id kindmother_observability_metrics
@@ -113,14 +120,15 @@ pub trait Observability {
 /// @role infrastructure
 /// @layer core
 /// @do provide_default_observability
-//@human / @human Observabilité par défaut. Implémentation basique pour les tests.
+//@human / @human Observabilité par défaut, sans sonde : santé `Unknown`, métriques nulles.
 /// Observabilité par défaut.
 #[derive(Debug, Default)]
 pub struct DefaultObservability;
 
 impl Observability for DefaultObservability {
+    /// Aucune sonde n'est branchée : l'état est `Unknown`, jamais un faux `Healthy` (C-14).
     fn get_health(&self, _instance: &InstanceIdentity) -> HealthStatus {
-        HealthStatus::Healthy
+        HealthStatus::Unknown
     }
 
     fn get_metrics(&self, _instance: &InstanceIdentity) -> Metrics {
@@ -143,7 +151,8 @@ mod tests {
     fn test_default_health() {
         let obs = DefaultObservability;
         let instance = InstanceState::new(InstanceType::Mother);
-        assert_eq!(obs.get_health(&instance.identity), HealthStatus::Healthy);
+        // Rien n'a été observé : pas de faux succès (C-14).
+        assert_eq!(obs.get_health(&instance.identity), HealthStatus::Unknown);
     }
 
     /// @id kindmother_observability_test_default_metrics

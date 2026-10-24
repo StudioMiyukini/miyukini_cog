@@ -49,6 +49,23 @@ pub struct OperatorConfig {
     pub databases: HashMap<String, Permission>,
     /// Quota de requêtes par minute (0 = illimité)
     pub rate_limit: u32,
+    /// Restriction par table des écritures typées : base → tables autorisées.
+    /// Base absente : toutes les tables de la base (hors tables réservées).
+    pub table_scope: HashMap<String, Vec<String>>,
+}
+
+impl OperatorConfig {
+    /// Opérateur administrateur de sa seule base (cas des services COG).
+    pub fn owner(id: &str, database: &str) -> Self {
+        Self {
+            id: id.to_string(),
+            databases: [(database.to_string(), Permission::Admin)]
+                .into_iter()
+                .collect(),
+            rate_limit: 0,
+            table_scope: HashMap::new(),
+        }
+    }
 }
 
 /// Moteur d'arbitrage des accès.
@@ -103,24 +120,23 @@ impl ArbitrationEngine {
         // === Services famille Jay ===
 
         // JayKonta - comptabilité COG unifiée (Purse + Account)
-        self.register_operator(OperatorConfig {
-            id: "jaykonta".to_string(),
-            databases: [("jaykonta".to_string(), Permission::Admin)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0, // Illimité pour les services COG
-        })
-        .await;
-
+        self.register_operator(OperatorConfig::owner("jaykonta", "jaykonta"))
+            .await;
         // JayKoa - calendrier universel COG
-        self.register_operator(OperatorConfig {
-            id: "jaykoa".to_string(),
-            databases: [("jaykoa".to_string(), Permission::Admin)]
-                .into_iter()
-                .collect(),
-            rate_limit: 0,
-        })
-        .await;
+        self.register_operator(OperatorConfig::owner("jaykoa", "jaykoa"))
+            .await;
+        // Jay1Tribu - social (tribus, salons, amis)
+        self.register_operator(OperatorConfig::owner("jay1tribu", "jay1tribu"))
+            .await;
+        // JayRDV - rendez-vous
+        self.register_operator(OperatorConfig::owner("jayrdv", "jayrdv"))
+            .await;
+        // JayManga - lecture et catalogue manga
+        self.register_operator(OperatorConfig::owner("jaymanga", "jaymanga"))
+            .await;
+        // MiyukiniWatch - observation (métriques, audit applicatif)
+        self.register_operator(OperatorConfig::owner("miyukiniwatch", "miyukiniwatch"))
+            .await;
 
         // === Hub Central ===
 
@@ -136,6 +152,7 @@ impl ArbitrationEngine {
             .into_iter()
             .collect(),
             rate_limit: 0,
+            table_scope: HashMap::new(),
         })
         .await;
     }
@@ -176,6 +193,30 @@ impl ArbitrationEngine {
         drop(operators); // Libérer le lock avant d'acquérir un autre
         self.check_rate_limit(operator_id, rate_limit).await?;
 
+        Ok(permission)
+    }
+
+    /// Comme [`Self::authorize`], et vérifie en plus que `table` est dans la portée
+    /// de l'opérateur pour cette base (écritures typées).
+    pub async fn authorize_table(
+        &self,
+        operator_id: &str,
+        database: &str,
+        table: &str,
+        mode: AccessMode,
+    ) -> Result<Permission, ServiceError> {
+        let permission = self.authorize(operator_id, database, mode).await?;
+        let operators = self.operators.read().await;
+        if let Some(scope) = operators
+            .get(operator_id)
+            .and_then(|op| op.table_scope.get(database))
+        {
+            if !scope.iter().any(|t| t.eq_ignore_ascii_case(table)) {
+                return Err(ServiceError::PermissionDenied(format!(
+                    "Operator '{operator_id}' may not write table '{table}' in '{database}'"
+                )));
+            }
+        }
         Ok(permission)
     }
 
@@ -231,8 +272,21 @@ mod tests {
                     .into_iter()
                     .collect(),
                 rate_limit: 0,
+                table_scope: [("test_db".to_string(), vec!["notes".to_string()])]
+                    .into_iter()
+                    .collect(),
             })
             .await;
+
+        // Portée par table
+        assert!(engine
+            .authorize_table("test_op", "test_db", "notes", AccessMode::Write)
+            .await
+            .is_ok());
+        assert!(engine
+            .authorize_table("test_op", "test_db", "comptes", AccessMode::Write)
+            .await
+            .is_err());
 
         // Devrait réussir
         assert!(engine
@@ -269,6 +323,7 @@ mod tests {
                 id: "reader".to_string(),
                 databases: [("db".to_string(), Permission::Read)].into_iter().collect(),
                 rate_limit: 0,
+                table_scope: HashMap::new(),
             })
             .await;
 

@@ -22,7 +22,10 @@ miyukini-kernel = { path = "../miyukini-kernel" }
 kindmother = { path = "../kindmother" }
 kindmother-db-key = { path = "../kindmother-db-key", optional = true }
 
-# SQLite : bundled par défaut. db-encryption pour SQLCipher (requiert OpenSSL sur Windows)
+# SQLite : SQLCipher par défaut (feature db-encryption, K-06) ; requiert libcrypto (OpenSSL)
+# à la compilation. Attention à l'unification des features : tout build du graphe qui inclut
+# kindmother-service avec ses features par défaut passe *tous* les rusqlite en SQLCipher
+# (sans clé, SQLCipher se comporte comme SQLite : les autres crates restent compatibles).
 # `hooks` : autorisateur SQLite (sqlite3_set_authorizer) pour l'arbitrage SQL (K-05)
 rusqlite = { version = "0.32", features = ["bundled", "hooks"], default-features = false }
 
@@ -54,7 +57,9 @@ zeroize = "1"
 kindmother-client = { path = "../kindmother-client" }
 
 [features]
-default = []
+# Chiffrement par défaut (K-06) : sans cette feature, le service refuse de démarrer, sauf
+# build de debug avec KINDMOTHER_DEV_PLAINTEXT=1 (développement uniquement).
+default = ["db-encryption"]
 db-encryption = ["dep:kindmother-db-key", "rusqlite/bundled-sqlcipher"]
 
 [[bin]]

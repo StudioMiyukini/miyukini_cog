@@ -14,6 +14,7 @@
 //! Toute autre version de protocole (dont `kindmother-auth-v1`) est refusée. Les champs
 //! `operator_id` des requêtes suivantes doivent égaler l'identité authentifiée.
 
+use kindmother::intent::{IntentOutcome, SchemaMigration, TypedSelect, TypedWriteIntent};
 use serde::{Deserialize, Serialize};
 
 /// Requête vers KindMother Service.
@@ -38,7 +39,34 @@ pub enum Request {
         signature: String,
     },
 
-    /// Requête SELECT.
+    /// Lot d'intentions d'écriture **typées** (lot C, K-13) : aucune instruction SQL.
+    ///
+    /// Toutes les intentions visent `database` et portent l'opérateur authentifié ;
+    /// le lot est appliqué atomiquement (une refusée ou échouée : aucune appliquée).
+    SubmitIntents {
+        operator_id: String,
+        database: String,
+        intents: Vec<TypedWriteIntent>,
+    },
+
+    /// Lecture **typée** (table, colonnes, égalités, tri, limite).
+    Select {
+        operator_id: String,
+        database: String,
+        query: TypedSelect,
+    },
+
+    /// Migrations de schéma versionnées (Admin seulement, non destructives).
+    ApplyMigrations {
+        operator_id: String,
+        database: String,
+        migrations: Vec<SchemaMigration>,
+    },
+
+    /// Requête SELECT en SQL brut.
+    ///
+    /// **TRANSITOIRE (lot C)** : chemin déprécié, gardé par l'autorisateur SQLite ; à
+    /// retirer quand tous les services utiliseront `Select`.
     Query {
         operator_id: String,
         database: String,
@@ -46,7 +74,10 @@ pub enum Request {
         params: Vec<String>,
     },
 
-    /// Requête d'écriture (INSERT, UPDATE, DELETE).
+    /// Requête d'écriture en SQL brut (INSERT, UPDATE, DELETE).
+    ///
+    /// **TRANSITOIRE (lot C)** : chemin déprécié, gardé par l'autorisateur SQLite ; à
+    /// retirer quand tous les services utiliseront `SubmitIntents`.
     Execute {
         operator_id: String,
         database: String,
@@ -55,7 +86,9 @@ pub enum Request {
         intent: String,
     },
 
-    /// Transaction avec plusieurs opérations.
+    /// Transaction en SQL brut avec plusieurs opérations.
+    ///
+    /// **TRANSITOIRE (lot C)** : à retirer au profit de `SubmitIntents` (lot atomique).
     Transaction {
         operator_id: String,
         database: String,
@@ -100,7 +133,23 @@ pub enum Response {
     /// Authentification réussie : l'identité est liée à la connexion.
     Authenticated { operator_id: String },
 
-    /// Résultat d'une requête SELECT.
+    /// Issue d'un lot d'intentions typées (une issue par intention, dans l'ordre).
+    IntentsResult {
+        success: bool,
+        outcomes: Vec<IntentOutcome>,
+        error: Option<String>,
+    },
+
+    /// Résultat de migrations de schéma.
+    MigrationResult {
+        success: bool,
+        version_before: u32,
+        version_after: u32,
+        backup: Option<String>,
+        error: Option<String>,
+    },
+
+    /// Résultat d'une requête SELECT (SQL brut ou lecture typée).
     QueryResult {
         success: bool,
         rows: Vec<serde_json::Value>,

@@ -41,7 +41,11 @@ use crate::credentials::{
 };
 use crate::database::EncryptedDatabase;
 use crate::errors::ServiceError;
+use crate::audit::{AuditKind, AuditRecord};
 use crate::protocol::{Operation, Request, Response};
+use kindmother::intent::{
+    IntentState, SchemaMigration, TypedSelect, TypedWriteIntent, MAX_INTENTS_PER_BATCH,
+};
 use crate::sql_guard::SqlPolicy;
 
 /// Bornes du serveur (C-13).
@@ -174,6 +178,8 @@ pub struct KindMotherServer {
     limits: ServerLimits,
     /// Autorise une écoute hors boucle locale (configuration explicite uniquement)
     allow_non_loopback: bool,
+    /// Opérateurs déjà avertis de l'usage du chemin SQL brut transitoire
+    raw_path_warned: Mutex<std::collections::HashSet<String>>,
 }
 
 impl KindMotherServer {
@@ -212,6 +218,7 @@ impl KindMotherServer {
             credentials,
             limits: ServerLimits::default(),
             allow_non_loopback: false,
+            raw_path_warned: Mutex::new(std::collections::HashSet::new()),
         })
     }
 
@@ -225,6 +232,11 @@ impl KindMotherServer {
     pub fn with_limits(mut self, limits: ServerLimits) -> Self {
         self.limits = limits;
         self
+    }
+
+    /// Gestionnaire des bases (journal d'audit, chiffrement) — inspection et tests.
+    pub fn database(&self) -> &EncryptedDatabase {
+        &self.database
     }
 
     /// Répertoire des justificatifs des opérateurs (et du pin `server.pub`).
@@ -424,6 +436,36 @@ impl KindMotherServer {
                 Response::error("INVALID_REQUEST", "Connection already authenticated")
             }
 
+            Request::SubmitIntents {
+                operator_id,
+                database,
+                intents,
+            } => match check_identity(authenticated, &operator_id) {
+                Err(r) => r,
+                Ok(()) => self.handle_intents(authenticated, &database, intents).await,
+            },
+
+            Request::Select {
+                operator_id,
+                database,
+                query,
+            } => match check_identity(authenticated, &operator_id) {
+                Err(r) => r,
+                Ok(()) => self.handle_select(authenticated, &database, &query).await,
+            },
+
+            Request::ApplyMigrations {
+                operator_id,
+                database,
+                migrations,
+            } => match check_identity(authenticated, &operator_id) {
+                Err(r) => r,
+                Ok(()) => {
+                    self.handle_migrations(authenticated, &database, &migrations)
+                        .await
+                }
+            },
+
             Request::Query {
                 operator_id,
                 database,
@@ -479,6 +521,170 @@ impl KindMotherServer {
         }
     }
 
+    /// Journalise un refus d'arbitrage (avant tout accès à la base).
+    fn audit_refusal(
+        &self,
+        kind: AuditKind,
+        operator_id: &str,
+        database: &str,
+        operation: &str,
+        table: Option<&str>,
+        err: &ServiceError,
+    ) {
+        let record = AuditRecord {
+            kind,
+            intent_id: None,
+            operator_id: operator_id.to_string(),
+            database: database.to_string(),
+            operation: operation.to_string(),
+            table: table.map(str::to_string),
+            verdict: "refusee".to_string(),
+            decision_digest: None,
+            params_hash: String::new(),
+            detail: err.to_string(),
+        };
+        if let Err(e) = self.database.journal().append(&record) {
+            error!("AUDIT FAILURE while recording a refusal: {e}");
+        }
+    }
+
+    /// Signale (une fois par opérateur) l'usage du chemin SQL brut transitoire.
+    fn note_raw_path(&self, operator_id: &str) {
+        let mut warned = self
+            .raw_path_warned
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if warned.insert(operator_id.to_string()) {
+            warn!(
+                "Operator '{operator_id}' uses the TRANSITIONAL raw SQL path \
+                 (Query/Execute/Transaction); migrate to typed intents (lot C, K-13)"
+            );
+        }
+    }
+
+    /// Lot d'intentions typées : contrôle d'identité et de base par intention,
+    /// arbitrage par table, puis validation/application/archivage par la base.
+    async fn handle_intents(
+        &self,
+        operator_id: &str,
+        database: &str,
+        intents: Vec<TypedWriteIntent>,
+    ) -> Response {
+        if intents.is_empty() || intents.len() > MAX_INTENTS_PER_BATCH {
+            return Response::error(
+                "INVALID_REQUEST",
+                format!("a batch holds 1 to {MAX_INTENTS_PER_BATCH} intents"),
+            );
+        }
+        let mut refusals = Vec::with_capacity(intents.len());
+        for intent in &intents {
+            let reason = if intent.intent_id.is_empty() || intent.intent_id.len() > 128 {
+                Some("intent_id required (1 to 128 characters)".to_string())
+            } else if intent.operator_id != operator_id {
+                Some("intent operator_id does not match authenticated operator".to_string())
+            } else if intent.database != database {
+                Some("intent database does not match the batch database".to_string())
+            } else {
+                self.arbitration
+                    .authorize_table(operator_id, database, &intent.table, AccessMode::Write)
+                    .await
+                    .err()
+                    .map(|e| e.to_string())
+            };
+            refusals.push(reason);
+        }
+        let outcomes = self
+            .database
+            .submit_intents(database, operator_id, intents, refusals)
+            .await;
+        let success = outcomes.iter().all(|o| o.state == IntentState::Appliquee);
+        let error = outcomes.iter().find_map(|o| o.reason.clone());
+        if !success {
+            warn!("Intents from '{operator_id}' on '{database}' not applied: {error:?}");
+        }
+        Response::IntentsResult {
+            success,
+            outcomes,
+            error,
+        }
+    }
+
+    async fn handle_select(
+        &self,
+        operator_id: &str,
+        database: &str,
+        query: &TypedSelect,
+    ) -> Response {
+        if let Err(e) = self
+            .arbitration
+            .authorize(operator_id, database, AccessMode::Read)
+            .await
+        {
+            self.audit_refusal(AuditKind::Select, operator_id, database, "select", Some(&query.table), &e);
+            return error_response(&e);
+        }
+        match self.database.select(database, operator_id, query).await {
+            Ok(rows) => rows_response(rows),
+            Err(e) => {
+                warn!("Select refused or failed for '{}': {}", operator_id, e);
+                error_response(&e)
+            }
+        }
+    }
+
+    async fn handle_migrations(
+        &self,
+        operator_id: &str,
+        database: &str,
+        migrations: &[SchemaMigration],
+    ) -> Response {
+        let permission = self
+            .arbitration
+            .authorize(operator_id, database, AccessMode::Write)
+            .await
+            .and_then(|p| {
+                if p == crate::arbitration::Permission::Admin {
+                    Ok(p)
+                } else {
+                    Err(ServiceError::PermissionDenied(
+                        "schema migrations require Admin permission".to_string(),
+                    ))
+                }
+            });
+        if let Err(e) = permission {
+            self.audit_refusal(AuditKind::Migration, operator_id, database, "migrate", None, &e);
+            return error_response(&e);
+        }
+        match self
+            .database
+            .apply_migrations(database, operator_id, migrations)
+            .await
+        {
+            Ok(report) => Response::MigrationResult {
+                success: true,
+                version_before: report.version_before,
+                version_after: report.version_after,
+                backup: report.backup,
+                error: None,
+            },
+            Err(e @ (ServiceError::PermissionDenied(_) | ServiceError::Validation(_))) => {
+                warn!("Migration refused for '{}': {}", operator_id, e);
+                error_response(&e)
+            }
+            Err(e) => {
+                error!("Migration failed on '{}': {}", database, e);
+                Response::MigrationResult {
+                    success: false,
+                    version_before: 0,
+                    version_after: 0,
+                    backup: None,
+                    error: Some(e.to_string()),
+                }
+            }
+        }
+    }
+
+    /// **TRANSITOIRE (lot C)** : SQL brut en lecture, à retirer (voir `Select`).
     async fn handle_query(
         &self,
         operator_id: &str,
@@ -486,31 +692,20 @@ impl KindMotherServer {
         sql: &str,
         params: Vec<String>,
     ) -> Response {
+        self.note_raw_path(operator_id);
         // Arbitrage (identité authentifiée)
         if let Err(e) = self
             .arbitration
             .authorize(operator_id, database, AccessMode::Read)
             .await
         {
+            self.audit_refusal(AuditKind::RawRead, operator_id, database, "query", None, &e);
             return error_response(&e);
         }
 
         // Exécution (connexion lecture seule + autorisateur lecture seule)
-        match self.database.query(database, sql, params).await {
-            Ok(rows) => {
-                let row_count = rows.len() as u64;
-                let rows: Vec<serde_json::Value> = rows
-                    .into_iter()
-                    .map(|r| serde_json::to_value(r).unwrap_or(serde_json::Value::Null))
-                    .collect();
-
-                Response::QueryResult {
-                    success: true,
-                    rows,
-                    row_count,
-                    error: None,
-                }
-            }
+        match self.database.query(database, operator_id, sql, params).await {
+            Ok(rows) => rows_response(rows),
             Err(e @ (ServiceError::PermissionDenied(_) | ServiceError::Validation(_))) => {
                 warn!("Query refused for '{}': {}", operator_id, e);
                 error_response(&e)
@@ -527,6 +722,7 @@ impl KindMotherServer {
         }
     }
 
+    /// **TRANSITOIRE (lot C)** : SQL brut en écriture, à retirer (voir `SubmitIntents`).
     async fn handle_execute(
         &self,
         operator_id: &str,
@@ -535,6 +731,7 @@ impl KindMotherServer {
         params: Vec<String>,
         intent: &str,
     ) -> Response {
+        self.note_raw_path(operator_id);
         // Arbitrage
         let permission = match self
             .arbitration
@@ -542,7 +739,10 @@ impl KindMotherServer {
             .await
         {
             Ok(p) => p,
-            Err(e) => return error_response(&e),
+            Err(e) => {
+                self.audit_refusal(AuditKind::RawWrite, operator_id, database, "execute", None, &e);
+                return error_response(&e);
+            }
         };
         let policy = SqlPolicy::for_permission(&permission, AccessMode::Write);
 
@@ -574,6 +774,7 @@ impl KindMotherServer {
         }
     }
 
+    /// **TRANSITOIRE (lot C)** : transaction SQL brut, à retirer (voir `SubmitIntents`).
     async fn handle_transaction(
         &self,
         operator_id: &str,
@@ -581,6 +782,7 @@ impl KindMotherServer {
         operations: Vec<Operation>,
         intent: &str,
     ) -> Response {
+        self.note_raw_path(operator_id);
         // Arbitrage
         let permission = match self
             .arbitration
@@ -588,7 +790,10 @@ impl KindMotherServer {
             .await
         {
             Ok(p) => p,
-            Err(e) => return error_response(&e),
+            Err(e) => {
+                self.audit_refusal(AuditKind::RawWrite, operator_id, database, "transaction", None, &e);
+                return error_response(&e);
+            }
         };
         let policy = SqlPolicy::for_permission(&permission, AccessMode::Write);
 
@@ -683,6 +888,75 @@ impl KindMotherServer {
                 error: Some(e.to_string()),
             },
         }
+    }
+}
+
+/// Démarre un serveur éphémère sur `127.0.0.1:0` (tests d'intégration des services).
+///
+/// Retourne l'adresse d'écoute et le répertoire des justificatifs (clés des opérateurs
+/// et pin `server.pub`, à charger avec `OperatorCredential::load_from_dir`).
+pub async fn spawn_ephemeral(
+    data_dir: impl AsRef<Path>,
+) -> Result<(SocketAddr, std::path::PathBuf), ServiceError> {
+    let server = KindMotherServer::new(data_dir).await?;
+    let credentials = server.credentials_dir().to_path_buf();
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .await
+        .map_err(|e| ServiceError::Internal(format!("Cannot bind: {e}")))?;
+    let addr = listener
+        .local_addr()
+        .map_err(|e| ServiceError::Internal(format!("Cannot read local addr: {e}")))?;
+    tokio::spawn(server.serve_listener(listener));
+    Ok((addr, credentials))
+}
+
+/// Comme [`spawn_ephemeral`], sur un fil dédié avec son propre runtime : utilisable
+/// depuis un test synchrone (`#[test]`) qui appelle l'API bloquante d'un service.
+pub fn spawn_ephemeral_blocking(
+    data_dir: impl AsRef<Path>,
+) -> Result<(SocketAddr, std::path::PathBuf), ServiceError> {
+    let data_dir = data_dir.as_ref().to_path_buf();
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::Builder::new()
+        .name("kindmother-ephemeral".to_string())
+        .spawn(move || {
+            let runtime = match tokio::runtime::Builder::new_multi_thread()
+                .worker_threads(2)
+                .enable_all()
+                .build()
+            {
+                Ok(rt) => rt,
+                Err(e) => {
+                    let _ = tx.send(Err(ServiceError::Internal(format!("runtime: {e}"))));
+                    return;
+                }
+            };
+            runtime.block_on(async move {
+                let started = spawn_ephemeral(&data_dir).await;
+                let ok = started.is_ok();
+                let _ = tx.send(started);
+                if ok {
+                    std::future::pending::<()>().await;
+                }
+            });
+        })
+        .map_err(|e| ServiceError::Internal(format!("thread: {e}")))?;
+    rx.recv()
+        .map_err(|e| ServiceError::Internal(format!("ephemeral server: {e}")))?
+}
+
+/// Réponse de lecture (SQL brut transitoire ou lecture typée).
+fn rows_response(rows: crate::database::Rows) -> Response {
+    let row_count = rows.len() as u64;
+    let rows: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|r| serde_json::to_value(r).unwrap_or(serde_json::Value::Null))
+        .collect();
+    Response::QueryResult {
+        success: true,
+        rows,
+        row_count,
+        error: None,
     }
 }
 
@@ -828,6 +1102,53 @@ mod tests {
         assert!(check_bind_address(any, false).is_err());
         assert!(check_bind_address(lan, false).is_err());
         assert!(check_bind_address(lan, true).is_ok());
+    }
+
+    #[tokio::test]
+    async fn intention_portant_une_autre_identite_refusee() {
+        let dir = std::env::temp_dir().join(format!("km-srv-{}", uuid::Uuid::new_v4()));
+        let Ok(server) = KindMotherServer::new(&dir).await else {
+            // Build sans chiffrement et sans KINDMOTHER_DEV_PLAINTEXT : démarrage refusé (attendu).
+            return;
+        };
+        let mut intent = TypedWriteIntent::insert("t").value("a", 1_i64);
+        intent.intent_id = "i-1".to_string();
+        intent.operator_id = "jaykoa".to_string();
+        intent.database = "jaykonta".to_string();
+        let resp = server
+            .handle_request(
+                "jaykonta",
+                Request::SubmitIntents {
+                    operator_id: "jaykonta".to_string(),
+                    database: "jaykonta".to_string(),
+                    intents: vec![intent.clone()],
+                },
+            )
+            .await;
+        let Response::IntentsResult { success, outcomes, .. } = resp else {
+            panic!("IntentsResult attendu");
+        };
+        assert!(!success);
+        assert_eq!(outcomes[0].state, IntentState::Refusee);
+        assert!(outcomes[0].archived);
+        // Base différente de celle du lot : refus également.
+        intent.operator_id = "jaykonta".to_string();
+        intent.database = "central".to_string();
+        intent.intent_id = "i-2".to_string();
+        let resp = server
+            .handle_request(
+                "jaykonta",
+                Request::SubmitIntents {
+                    operator_id: "jaykonta".to_string(),
+                    database: "jaykonta".to_string(),
+                    intents: vec![intent],
+                },
+            )
+            .await;
+        assert!(matches!(resp, Response::IntentsResult { success: false, .. }));
+        // Aucune base n'a été créée pour des refus.
+        assert!(!dir.join("jaykonta.db").exists());
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]
