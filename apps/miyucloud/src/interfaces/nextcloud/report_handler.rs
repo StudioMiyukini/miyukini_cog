@@ -100,7 +100,7 @@ async fn handle_filter_files(
         for fav in &favorites {
             match fav.item_type.as_str() {
                 "file" => {
-                    let file = match file_service.get_file(&fav.item_id).await {
+                    let file = match file_service.get_file_owned(&fav.item_id, user.id).await {
                         Ok(f) => f,
                         Err(_) => continue, // Deleted or inaccessible -- skip.
                     };
@@ -120,7 +120,8 @@ async fn handle_filter_files(
                     .map_err(|e| AppError::internal_error(format!("XML write error: {}", e)))?;
                 }
                 "folder" => {
-                    let folder = match folder_service.get_folder(&fav.item_id).await {
+                    let folder = match folder_service.get_folder_owned(&fav.item_id, user.id).await
+                    {
                         Ok(f) => f,
                         Err(_) => continue,
                     };
@@ -174,7 +175,7 @@ async fn handle_search(
     let nresults = parse_nresults(body).unwrap_or(100);
 
     // Resolve folder scope from <d:href> inside <d:scope>.
-    let folder_id = resolve_scope_folder(&state, body, &user.username).await;
+    let folder_id = resolve_scope_folder(&state, body, user).await;
 
     let criteria = SearchCriteriaDto {
         name_contains: Some(term),
@@ -406,7 +407,8 @@ fn xml_extract_text(body: &str, local_name: &[u8]) -> Option<String> {
 }
 
 /// Resolve a scope href (e.g. `/files/username/Documents`) to a folder ID.
-async fn resolve_scope_folder(state: &AppState, body: &str, username: &str) -> Option<String> {
+async fn resolve_scope_folder(state: &AppState, body: &str, user: &CurrentUser) -> Option<String> {
+    let username = user.username.as_str();
     let href = parse_scope_href(body)?;
 
     // The href is typically `/files/{user}/subpath` or `/remote.php/dav/files/{user}/subpath`.
@@ -416,15 +418,11 @@ async fn resolve_scope_folder(state: &AppState, body: &str, username: &str) -> O
         return None;
     }
 
-    let internal_path =
-        crate::interfaces::nextcloud::webdav_handler::nc_to_internal_path(username, &subpath)
-            .ok()?;
-
-    let folder_service = &state.applications.folder_service;
-    folder_service
-        .get_folder_by_path(&internal_path)
+    // M-02 : la portée est résolue sous la racine de l'appelant uniquement.
+    crate::interfaces::nextcloud::owned_paths::resolve_owned_folder(state, user, &subpath)
         .await
         .ok()
+        .flatten()
         .map(|f| f.id)
 }
 

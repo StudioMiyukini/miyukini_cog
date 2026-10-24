@@ -552,8 +552,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         tracing::info!("Starting Miyukini Cloud server on https://{}", tls_addr);
 
+        // M-06 : ConnectInfo fournit l'IP du pair à la limitation de débit.
         axum_server::bind_rustls(tls_addr, rustls_config)
-            .serve(app.into_make_service())
+            .serve(app.into_make_service_with_connect_info::<SocketAddr>())
             .await?;
     } else {
         // ── Plain HTTP ──────────────────────────────────────────────────
@@ -575,7 +576,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         socket.listen(2048)?;
 
         let listener = tokio::net::TcpListener::from_std(socket.into())?;
-        axum::serve(listener, app).await?;
+        // M-06 : ConnectInfo fournit l'IP du pair à la limitation de débit.
+        axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .await?;
     }
 
     tracing::info!("Server shutdown completed");

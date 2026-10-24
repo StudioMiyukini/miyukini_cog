@@ -710,7 +710,9 @@ fn generate_full_calendar_ical(
 
 fn generate_event_ical(event: &crate::application::dtos::calendar_dto::CalendarEventDto) -> String {
     let mut buf = String::with_capacity(512);
-    buf.push_str("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MiyukiniCloud//NONSGML Calendar//EN\r\n");
+    buf.push_str(
+        "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MiyukiniCloud//NONSGML Calendar//EN\r\n",
+    );
     write_vevent(&mut buf, event);
     buf.push_str("END:VCALENDAR\r\n");
     buf

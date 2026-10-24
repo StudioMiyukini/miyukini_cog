@@ -5,17 +5,20 @@
 //! @human  miyucloud — module « interfaces nextcloud uploads handler ».
 
 use axum::{
-    body::{self, Body},
+    body::Body,
     http::{Request, StatusCode, header},
     response::Response,
 };
 use std::sync::Arc;
 
-use crate::application::ports::file_ports::{FileRetrievalUseCase, FileUploadUseCase};
+use crate::application::ports::file_ports::FileUploadUseCase;
 use crate::common::di::AppState;
 use crate::common::mime_detect::{filename_from_path, refine_content_type_from_file};
+use crate::infrastructure::services::nextcloud_chunked_upload_service::MAX_CHUNKS_PER_SESSION;
 use crate::interfaces::errors::AppError;
 use crate::interfaces::middleware::auth::{AuthUser, CurrentUser};
+use crate::interfaces::nextcloud::owned_paths::{self, OwnedResource};
+use crate::interfaces::upload_spool;
 
 /// Dispatch Nextcloud chunked upload WebDAV requests.
 ///
@@ -84,15 +87,28 @@ async fn handle_put_chunk(
         return Err(AppError::bad_request("Missing chunk name"));
     }
 
-    let max_upload = state.core.config.storage.max_upload_size;
-    let body_bytes = body::to_bytes(req.into_body(), max_upload)
+    // M-04 : la tranche est écrite en flux sur disque ; la taille cumulée de
+    // la session est bornée par la taille maximale et le quota restant.
+    let (already, count) = nc
+        .chunked_uploads
+        .session_usage(&user.username, upload_id, Some(chunk_name))
         .await
-        .map_err(|e| AppError::bad_request(format!("Failed to read chunk body: {}", e)))?;
+        .map_err(AppError::from)?;
+    if count >= MAX_CHUNKS_PER_SESSION {
+        return Err(AppError::payload_too_large(
+            "Too many chunks in upload session",
+        ));
+    }
+    let budget = upload_spool::upload_budget_for(&state, user.id, 0)
+        .await?
+        .minus(already);
+    budget.check_declared(upload_spool::declared_length(req.headers()))?;
 
-    nc.chunked_uploads
-        .store_chunk(&user.username, upload_id, chunk_name, &body_bytes)
-        .await
-        .map_err(|e| AppError::internal_error(format!("Failed to store chunk: {}", e)))?;
+    let chunk_path = nc
+        .chunked_uploads
+        .chunk_path(&user.username, upload_id, chunk_name)
+        .map_err(AppError::from)?;
+    upload_spool::spool_to_path(req.into_body().into_data_stream(), &chunk_path, &budget).await?;
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
@@ -138,60 +154,7 @@ async fn handle_assemble(
         .await
         .map_err(|e| AppError::internal_error(format!("Failed to assemble chunks: {}", e)))?;
 
-    // Write assembled file to storage via the upload service.
-    let upload_service = &state.applications.file_upload_service;
-    let file_service = &state.applications.file_retrieval_service;
-
-    let internal_path = format!(
-        "My Folder - {}/{}",
-        user.username,
-        dest_subpath.trim_matches('/')
-    );
-
-    // Detect content type via magic bytes + extension fallback.
-    let filename = filename_from_path(&dest_subpath);
-    let content_type =
-        refine_content_type_from_file(&temp_path, filename, "application/octet-stream").await;
-
-    // Check if file exists (update vs create).
-    let existing = file_service.get_file_by_path(&internal_path).await;
-
-    let etag: Option<String> = if existing.is_ok() {
-        let dto = upload_service
-            .update_file_streaming(
-                &internal_path,
-                &temp_path,
-                size,
-                &content_type,
-                None,
-                oc_mtime,
-            )
-            .await
-            .map_err(|e| AppError::internal_error(format!("Failed to update file: {}", e)))?;
-        Some(dto.etag)
-    } else {
-        // For new files we still need to read the temp file since create_file takes &[u8].
-        let assembled = tokio::fs::read(&temp_path).await.map_err(|e| {
-            AppError::internal_error(format!("Failed to read assembled file: {}", e))
-        })?;
-
-        let (parent_sub, filename) = match dest_subpath.rsplit_once('/') {
-            Some((p, n)) => (p, n),
-            None => ("", dest_subpath.as_str()),
-        };
-        let parent_internal = format!(
-            "My Folder - {}/{}",
-            user.username,
-            parent_sub.trim_matches('/')
-        );
-        let parent_internal = parent_internal.trim_end_matches('/');
-
-        let dto = upload_service
-            .create_file(parent_internal, filename, &assembled, &content_type)
-            .await
-            .map_err(|e| AppError::internal_error(format!("Failed to create file: {}", e)))?;
-        Some(dto.etag)
-    };
+    let result = store_assembled(&state, user, &dest_subpath, &temp_path, size, oc_mtime).await;
 
     // Clean up temp file (session cleanup below removes the directory anyway).
     let _ = tokio::fs::remove_file(&temp_path).await;
@@ -199,19 +162,78 @@ async fn handle_assemble(
     // Cleanup session.
     let _ = nc.chunked_uploads.cleanup(&user.username, upload_id).await;
 
-    if let Some(tag) = etag {
-        return Ok(Response::builder()
-            .status(StatusCode::CREATED)
-            .header(header::ETAG, format!("\"{}\"", tag))
-            .header("oc-etag", format!("\"{}\"", tag))
-            .body(Body::empty())
-            .unwrap());
-    }
-
+    let tag = result?;
     Ok(Response::builder()
         .status(StatusCode::CREATED)
+        .header(header::ETAG, format!("\"{}\"", tag))
+        .header("oc-etag", format!("\"{}\"", tag))
         .body(Body::empty())
         .unwrap())
+}
+
+/// Range le fichier assemblé chez l'appelant et renvoie son ETag.
+///
+/// M-02 : destination résolue sous la racine de l'appelant (fichier existant
+/// de l'appelant, ou dossier parent de l'appelant) ; M-04 : quota revérifié
+/// sur la taille assemblée.
+async fn store_assembled(
+    state: &AppState,
+    user: &CurrentUser,
+    dest_subpath: &str,
+    temp_path: &std::path::Path,
+    size: u64,
+    oc_mtime: Option<i64>,
+) -> Result<String, AppError> {
+    let upload_service = &state.applications.file_upload_service;
+
+    // Detect content type via magic bytes + extension fallback.
+    let filename = filename_from_path(dest_subpath);
+    let content_type =
+        refine_content_type_from_file(temp_path, filename, "application/octet-stream").await;
+
+    match owned_paths::resolve_owned(state, user, dest_subpath).await? {
+        Some(OwnedResource::Folder(_)) => Err(AppError::conflict("Destination is a directory")),
+        Some(OwnedResource::File(existing)) => {
+            upload_spool::upload_budget_for(state, user.id, existing.size)
+                .await?
+                .check(size)?;
+            let dto = upload_service
+                .update_file_content_by_id(
+                    &existing.id,
+                    temp_path,
+                    size,
+                    &content_type,
+                    None,
+                    oc_mtime,
+                )
+                .await
+                .map_err(|e| AppError::internal_error(format!("Failed to update file: {}", e)))?;
+            Ok(dto.etag)
+        }
+        None => {
+            let (parent_sub, name) = owned_paths::split_parent(dest_subpath);
+            if name.is_empty() {
+                return Err(AppError::bad_request("Invalid Destination URL"));
+            }
+            let parent = owned_paths::resolve_owned_folder(state, user, parent_sub)
+                .await?
+                .ok_or_else(|| AppError::conflict("Parent folder not found"))?;
+            upload_spool::upload_budget_for(state, user.id, 0)
+                .await?
+                .check(size)?;
+            let dto = upload_service
+                .upload_file_from_path(
+                    name.to_string(),
+                    Some(parent.id),
+                    content_type,
+                    temp_path,
+                    None,
+                )
+                .await
+                .map_err(|e| AppError::internal_error(format!("Failed to create file: {}", e)))?;
+            Ok(dto.etag)
+        }
+    }
 }
 
 /// DELETE — abort an upload session.

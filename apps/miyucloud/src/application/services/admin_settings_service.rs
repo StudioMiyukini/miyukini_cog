@@ -402,17 +402,27 @@ impl AdminSettingsService {
     // ========================================================================
 
     /// Check if public self-registration is enabled.
-    /// Priority: env var `MIYUCLOUD_DISABLE_REGISTRATION` > DB setting > default (true).
+    ///
+    /// M-08 : **fermée par défaut** et fail-closed. Ouverture uniquement par
+    /// configuration explicite : `MIYUCLOUD_ENABLE_REGISTRATION=true` ou
+    /// réglage administrateur `registration_enabled = "true"`.
+    /// `MIYUCLOUD_DISABLE_REGISTRATION=true` ferme dans tous les cas.
+    /// Toute erreur de lecture du réglage = fermée.
     pub async fn get_registration_enabled(&self) -> bool {
-        // Env var override takes priority
-        if let Ok(val) = std::env::var("MIYUCLOUD_DISABLE_REGISTRATION") {
-            return !matches!(val.to_lowercase().as_str(), "true" | "1" | "yes");
+        let disable_env = std::env::var("MIYUCLOUD_DISABLE_REGISTRATION").ok();
+        let enable_env = std::env::var("MIYUCLOUD_ENABLE_REGISTRATION").ok();
+        let db = self.settings_repo.get("registration_enabled").await;
+        if let Err(e) = &db {
+            tracing::warn!(
+                "registration setting unreadable — registration closed: {}",
+                e
+            );
         }
-        // Check DB setting
-        match self.settings_repo.get("registration_enabled").await {
-            Ok(Some(val)) => val == "true",
-            _ => true, // default: enabled
-        }
+        registration_decision(
+            disable_env.as_deref(),
+            enable_env.as_deref(),
+            db.ok().flatten().as_deref(),
+        )
     }
 
     /// Enable or disable public self-registration.
@@ -430,5 +440,62 @@ impl AdminSettingsService {
                 Some(updated_by),
             )
             .await
+    }
+}
+
+fn env_flag_true(value: Option<&str>) -> bool {
+    value.is_some_and(|v| matches!(v.trim().to_lowercase().as_str(), "true" | "1" | "yes"))
+}
+
+/// Décision pure d'ouverture de l'inscription publique (M-08).
+///
+/// `db_setting` vaut `None` si le réglage est absent **ou illisible**.
+pub fn registration_decision(
+    disable_env: Option<&str>,
+    enable_env: Option<&str>,
+    db_setting: Option<&str>,
+) -> bool {
+    if env_flag_true(disable_env) {
+        return false;
+    }
+    if env_flag_true(enable_env) {
+        return true;
+    }
+    db_setting.is_some_and(|v| v.trim() == "true")
+}
+
+#[cfg(test)]
+mod registration_tests {
+    use super::registration_decision;
+
+    #[test]
+    fn registration_is_closed_by_default() {
+        assert!(!registration_decision(None, None, None));
+    }
+
+    #[test]
+    fn unreadable_or_unexpected_setting_keeps_registration_closed() {
+        // Erreur de lecture → None → fermé (plus de fail-open).
+        assert!(!registration_decision(None, None, None));
+        assert!(!registration_decision(None, None, Some("false")));
+        assert!(!registration_decision(None, None, Some("TRUE-ish")));
+        assert!(!registration_decision(Some("false"), Some("no"), Some("")));
+    }
+
+    #[test]
+    fn explicit_configuration_opens_registration() {
+        assert!(registration_decision(None, None, Some("true")));
+        assert!(registration_decision(None, Some("true"), None));
+        assert!(registration_decision(Some("false"), Some("1"), None));
+    }
+
+    #[test]
+    fn disable_env_always_wins() {
+        assert!(!registration_decision(
+            Some("true"),
+            Some("true"),
+            Some("true")
+        ));
+        assert!(!registration_decision(Some("1"), None, Some("true")));
     }
 }

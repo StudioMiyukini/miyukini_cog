@@ -8,12 +8,7 @@
 //!
 //! Provides actual data export, erasure, and rectification via GdprService.
 
-use axum::{
-    Json,
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-};
+use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use std::sync::Arc;
 
 use crate::application::ports::gdpr_ports::{GdprRightsPort, UserRectification};
@@ -31,12 +26,20 @@ impl GdprHandler {
         auth_user: AuthUser,
     ) -> impl IntoResponse {
         let Some(ref gdpr) = state.gdpr_service else {
-            return (StatusCode::SERVICE_UNAVAILABLE, Json(serde_json::json!({"error": "GDPR service not available"}))).into_response();
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "GDPR service not available"})),
+            )
+                .into_response();
         };
 
         match gdpr.export_user_data(auth_user.id).await {
             Ok(export) => (StatusCode::OK, Json(serde_json::json!(export))).into_response(),
-            Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))).into_response(),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+                .into_response(),
         }
     }
 
@@ -46,12 +49,23 @@ impl GdprHandler {
         auth_user: AuthUser,
     ) -> impl IntoResponse {
         let Some(ref gdpr) = state.gdpr_service else {
-            return (StatusCode::SERVICE_UNAVAILABLE, Json(serde_json::json!({"error": "GDPR service not available"}))).into_response();
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "GDPR service not available"})),
+            )
+                .into_response();
         };
 
-        match gdpr.erase_user_data(auth_user.id, "User-initiated erasure request").await {
+        match gdpr
+            .erase_user_data(auth_user.id, "User-initiated erasure request")
+            .await
+        {
             Ok(report) => (StatusCode::OK, Json(serde_json::json!(report))).into_response(),
-            Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))).into_response(),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+                .into_response(),
         }
     }
 
@@ -62,12 +76,24 @@ impl GdprHandler {
         Json(updates): Json<UserRectification>,
     ) -> impl IntoResponse {
         let Some(ref gdpr) = state.gdpr_service else {
-            return (StatusCode::SERVICE_UNAVAILABLE, Json(serde_json::json!({"error": "GDPR service not available"}))).into_response();
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "GDPR service not available"})),
+            )
+                .into_response();
         };
 
         match gdpr.rectify_user_data(auth_user.id, updates).await {
-            Ok(()) => (StatusCode::OK, Json(serde_json::json!({"status": "rectification_applied"}))).into_response(),
-            Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": e.to_string()}))).into_response(),
+            Ok(()) => (
+                StatusCode::OK,
+                Json(serde_json::json!({"status": "rectification_applied"})),
+            )
+                .into_response(),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+                .into_response(),
         }
     }
 }

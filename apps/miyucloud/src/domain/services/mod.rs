@@ -4,6 +4,7 @@
 //! @layer  app
 //! @human  miyucloud — module « domain services mod ».
 
+pub mod home_folder;
 pub mod i18n_service;
 pub mod path_service;
 

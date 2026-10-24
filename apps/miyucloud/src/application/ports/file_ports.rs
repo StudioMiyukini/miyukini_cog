@@ -92,6 +92,34 @@ pub trait FileUploadUseCase: Send + Sync + 'static {
         pre_computed_hash: Option<String>,
         modified_at: Option<i64>,
     ) -> Result<FileDto, DomainError>;
+
+    /// Replaces the content of the file `file_id` from a temp file on disk.
+    ///
+    /// M-02 : le fichier est désigné par son **identifiant** (déjà vérifié
+    /// comme appartenant à l'appelant), jamais par un chemin ambigu.
+    /// Default: refusé (fail-closed) pour les implémentations sans support.
+    async fn update_file_content_by_id(
+        &self,
+        file_id: &str,
+        temp_path: &Path,
+        size: u64,
+        content_type: &str,
+        pre_computed_hash: Option<String>,
+        modified_at: Option<i64>,
+    ) -> Result<FileDto, DomainError> {
+        let _ = (
+            temp_path,
+            size,
+            content_type,
+            pre_computed_hash,
+            modified_at,
+        );
+        Err(DomainError::new(
+            crate::common::errors::ErrorKind::NotImplemented,
+            "File",
+            format!("update by id not supported ({file_id})"),
+        ))
+    }
 }
 
 // ─────────────────────────────────────────────────────

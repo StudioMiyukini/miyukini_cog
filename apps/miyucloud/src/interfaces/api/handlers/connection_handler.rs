@@ -8,12 +8,7 @@
 //!
 //! Provides endpoints to view status and control MWS tunnel and DDNS modes.
 
-use axum::{
-    Json,
-    extract::State,
-    http::HeaderMap,
-    response::IntoResponse,
-};
+use axum::{Json, extract::State, http::HeaderMap, response::IntoResponse};
 use std::sync::Arc;
 
 use crate::common::di::AppState;

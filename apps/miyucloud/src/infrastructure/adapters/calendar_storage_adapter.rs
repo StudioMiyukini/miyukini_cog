@@ -22,6 +22,7 @@ use crate::application::dtos::calendar_dto::{
 use crate::application::ports::calendar_ports::CalendarStoragePort;
 use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::entities::calendar::Calendar;
+use crate::domain::entities::calendar_access::CalendarAccess;
 use crate::domain::entities::calendar_event::CalendarEvent;
 use crate::domain::repositories::calendar_event_repository::CalendarEventRepository;
 use crate::domain::repositories::calendar_repository::CalendarRepository;
@@ -155,11 +156,11 @@ impl CalendarStoragePort for CalendarStorageAdapter {
         Ok(calendars.into_iter().map(CalendarDto::from).collect())
     }
 
-    async fn check_calendar_access(
+    async fn get_calendar_access(
         &self,
         calendar_id: &str,
         user_id: Uuid,
-    ) -> Result<bool, DomainError> {
+    ) -> Result<CalendarAccess, DomainError> {
         let uuid = Uuid::parse_str(calendar_id).map_err(|_| {
             DomainError::new(
                 ErrorKind::InvalidInput,
@@ -169,7 +170,7 @@ impl CalendarStoragePort for CalendarStorageAdapter {
         })?;
 
         self.calendar_repository
-            .user_has_calendar_access(&uuid, user_id)
+            .get_calendar_access(&uuid, user_id)
             .await
     }
 

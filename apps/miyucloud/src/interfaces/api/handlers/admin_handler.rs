@@ -46,19 +46,43 @@ pub fn admin_routes() -> Router<Arc<AppState>> {
         .route("/settings/registration", get(get_registration_setting))
         .route("/settings/registration", put(set_registration_setting))
         // Audit log (ISO 27001 A.8.15)
-        .route("/audit", get(super::audit_handler::AuditHandler::list_events))
+        .route(
+            "/audit",
+            get(super::audit_handler::AuditHandler::list_events),
+        )
         // Web connections (MWS tunnel, DDNS, Central)
-        .route("/connections/status", get(super::connection_handler::ConnectionHandler::status))
-        .route("/connections/mws/connect", post(super::connection_handler::ConnectionHandler::mws_connect))
-        .route("/connections/mws/disconnect", post(super::connection_handler::ConnectionHandler::mws_disconnect))
-        .route("/connections/ddns/update", post(super::connection_handler::ConnectionHandler::ddns_update))
-        .route("/connections/ddns/start", post(super::connection_handler::ConnectionHandler::ddns_start))
-        .route("/connections/ddns/stop", post(super::connection_handler::ConnectionHandler::ddns_stop))
+        .route(
+            "/connections/status",
+            get(super::connection_handler::ConnectionHandler::status),
+        )
+        .route(
+            "/connections/mws/connect",
+            post(super::connection_handler::ConnectionHandler::mws_connect),
+        )
+        .route(
+            "/connections/mws/disconnect",
+            post(super::connection_handler::ConnectionHandler::mws_disconnect),
+        )
+        .route(
+            "/connections/ddns/update",
+            post(super::connection_handler::ConnectionHandler::ddns_update),
+        )
+        .route(
+            "/connections/ddns/start",
+            post(super::connection_handler::ConnectionHandler::ddns_start),
+        )
+        .route(
+            "/connections/ddns/stop",
+            post(super::connection_handler::ConnectionHandler::ddns_stop),
+        )
 }
 
 /// Validate JWT and require admin role. Returns (user_id, role).
 /// Public variant used by sibling handlers (audit_handler, etc.).
-pub async fn admin_guard_public(state: &AppState, headers: &HeaderMap) -> Result<(Uuid, String), AppError> {
+pub async fn admin_guard_public(
+    state: &AppState,
+    headers: &HeaderMap,
+) -> Result<(Uuid, String), AppError> {
     admin_guard(state, headers).await
 }
 
@@ -262,7 +286,7 @@ async fn get_dashboard_stats(
             if let Some(svc) = state.admin_settings_service.as_ref() {
                 svc.get_registration_enabled().await
             } else {
-                true // default: enabled
+                false // M-08 : fermée par défaut
             }
         },
     };

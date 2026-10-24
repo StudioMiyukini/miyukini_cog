@@ -14,6 +14,7 @@ use crate::application::dtos::calendar_dto::{
 };
 use crate::application::ports::calendar_ports::{CalendarStoragePort, CalendarUseCase};
 use crate::common::errors::{DomainError, ErrorKind};
+use crate::domain::entities::calendar_access::CalendarAccess;
 use crate::infrastructure::adapters::calendar_storage_adapter::CalendarStorageAdapter;
 
 pub struct CalendarService {
@@ -23,6 +24,64 @@ pub struct CalendarService {
 impl CalendarService {
     pub fn new(calendar_storage: Arc<CalendarStorageAdapter>) -> Self {
         Self { calendar_storage }
+    }
+
+    /// M-01 : contrôle d'accès par opération (lecture / écriture / gestion).
+    async fn authorize(
+        &self,
+        calendar_id: &str,
+        user_id: Uuid,
+        op: CalendarOp,
+    ) -> Result<(), DomainError> {
+        let access = self
+            .calendar_storage
+            .get_calendar_access(calendar_id, user_id)
+            .await?;
+        check_calendar_op(&access, op)
+    }
+}
+
+/// Opérations soumises au contrôle d'accès calendrier (M-01).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CalendarOp {
+    /// Lire le calendrier et ses événements.
+    Read,
+    /// Modifier les métadonnées du calendrier.
+    UpdateCalendar,
+    /// Supprimer le calendrier.
+    DeleteCalendar,
+    /// Créer, modifier ou supprimer des événements.
+    WriteEvents,
+}
+
+/// Décision pure : refuse (fail-closed) si le droit requis par `op` manque.
+pub fn check_calendar_op(access: &CalendarAccess, op: CalendarOp) -> Result<(), DomainError> {
+    let (allowed, message) = match op {
+        CalendarOp::Read => (
+            access.can_read(),
+            "You don't have permission to view this calendar",
+        ),
+        CalendarOp::UpdateCalendar => (
+            access.can_write(),
+            "You don't have permission to update this calendar",
+        ),
+        CalendarOp::DeleteCalendar => (
+            access.can_manage(),
+            "You don't have permission to delete this calendar",
+        ),
+        CalendarOp::WriteEvents => (
+            access.can_write(),
+            "You don't have permission to modify events in this calendar",
+        ),
+    };
+    if allowed {
+        Ok(())
+    } else {
+        Err(DomainError::new(
+            ErrorKind::AccessDenied,
+            "Calendar",
+            message,
+        ))
     }
 }
 
@@ -43,34 +102,16 @@ impl CalendarUseCase for CalendarService {
         update: UpdateCalendarDto,
         user_id: Uuid,
     ) -> Result<CalendarDto, DomainError> {
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(calendar_id, user_id)
+        self.authorize(calendar_id, user_id, CalendarOp::UpdateCalendar)
             .await?;
-        if !has_access {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to update this calendar",
-            ));
-        }
         self.calendar_storage
             .update_calendar(calendar_id, update)
             .await
     }
 
     async fn delete_calendar(&self, calendar_id: &str, user_id: Uuid) -> Result<(), DomainError> {
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(calendar_id, user_id)
+        self.authorize(calendar_id, user_id, CalendarOp::DeleteCalendar)
             .await?;
-        if !has_access {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to delete this calendar",
-            ));
-        }
         self.calendar_storage.delete_calendar(calendar_id).await
     }
 
@@ -80,17 +121,8 @@ impl CalendarUseCase for CalendarService {
         user_id: Uuid,
     ) -> Result<CalendarDto, DomainError> {
         let calendar = self.calendar_storage.get_calendar(calendar_id).await?;
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(calendar_id, user_id)
+        self.authorize(calendar_id, user_id, CalendarOp::Read)
             .await?;
-        if !has_access && !calendar.is_public {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to view this calendar",
-            ));
-        }
         Ok(calendar)
     }
 
@@ -189,17 +221,8 @@ impl CalendarUseCase for CalendarService {
         event: CreateEventDto,
         user_id: Uuid,
     ) -> Result<CalendarEventDto, DomainError> {
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(&event.calendar_id, user_id)
+        self.authorize(&event.calendar_id, user_id, CalendarOp::WriteEvents)
             .await?;
-        if !has_access {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to add events to this calendar",
-            ));
-        }
         self.calendar_storage.create_event(event).await
     }
 
@@ -208,17 +231,8 @@ impl CalendarUseCase for CalendarService {
         event: CreateEventICalDto,
         user_id: Uuid,
     ) -> Result<CalendarEventDto, DomainError> {
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(&event.calendar_id, user_id)
+        self.authorize(&event.calendar_id, user_id, CalendarOp::WriteEvents)
             .await?;
-        if !has_access {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to add events to this calendar",
-            ));
-        }
         self.calendar_storage.create_event_from_ical(event).await
     }
 
@@ -229,33 +243,15 @@ impl CalendarUseCase for CalendarService {
         user_id: Uuid,
     ) -> Result<CalendarEventDto, DomainError> {
         let event = self.calendar_storage.get_event(event_id).await?;
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(&event.calendar_id, user_id)
+        self.authorize(&event.calendar_id, user_id, CalendarOp::WriteEvents)
             .await?;
-        if !has_access {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to update events in this calendar",
-            ));
-        }
         self.calendar_storage.update_event(event_id, update).await
     }
 
     async fn delete_event(&self, event_id: &str, user_id: Uuid) -> Result<(), DomainError> {
         let event = self.calendar_storage.get_event(event_id).await?;
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(&event.calendar_id, user_id)
+        self.authorize(&event.calendar_id, user_id, CalendarOp::WriteEvents)
             .await?;
-        if !has_access {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to delete events in this calendar",
-            ));
-        }
         self.calendar_storage.delete_event(event_id).await
     }
 
@@ -265,21 +261,8 @@ impl CalendarUseCase for CalendarService {
         user_id: Uuid,
     ) -> Result<CalendarEventDto, DomainError> {
         let event = self.calendar_storage.get_event(event_id).await?;
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(&event.calendar_id, user_id)
+        self.authorize(&event.calendar_id, user_id, CalendarOp::Read)
             .await?;
-        let calendar = self
-            .calendar_storage
-            .get_calendar(&event.calendar_id)
-            .await?;
-        if !has_access && !calendar.is_public {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to view events in this calendar",
-            ));
-        }
         Ok(event)
     }
 
@@ -290,18 +273,8 @@ impl CalendarUseCase for CalendarService {
         offset: Option<i64>,
         user_id: Uuid,
     ) -> Result<Vec<CalendarEventDto>, DomainError> {
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(calendar_id, user_id)
+        self.authorize(calendar_id, user_id, CalendarOp::Read)
             .await?;
-        let calendar = self.calendar_storage.get_calendar(calendar_id).await?;
-        if !has_access && !calendar.is_public {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to view events in this calendar",
-            ));
-        }
         if limit.is_some() || offset.is_some() {
             let limit = limit.unwrap_or(100);
             let offset = offset.unwrap_or(0);
@@ -322,20 +295,80 @@ impl CalendarUseCase for CalendarService {
         end: DateTime<Utc>,
         user_id: Uuid,
     ) -> Result<Vec<CalendarEventDto>, DomainError> {
-        let has_access = self
-            .calendar_storage
-            .check_calendar_access(calendar_id, user_id)
+        self.authorize(calendar_id, user_id, CalendarOp::Read)
             .await?;
-        let calendar = self.calendar_storage.get_calendar(calendar_id).await?;
-        if !has_access && !calendar.is_public {
-            return Err(DomainError::new(
-                ErrorKind::AccessDenied,
-                "Calendar",
-                "You don't have permission to view events in this calendar",
-            ));
-        }
         self.calendar_storage
             .get_events_in_time_range(calendar_id, &start, &end)
             .await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::entities::calendar_access::CalendarShareLevel;
+
+    fn access(
+        is_owner: bool,
+        is_public: bool,
+        share: Option<CalendarShareLevel>,
+    ) -> CalendarAccess {
+        CalendarAccess {
+            exists: true,
+            is_owner,
+            is_public,
+            share,
+        }
+    }
+
+    fn denied(r: Result<(), DomainError>) -> bool {
+        matches!(r, Err(e) if e.kind == ErrorKind::AccessDenied)
+    }
+
+    #[test]
+    fn read_only_share_cannot_write_events_update_or_delete() {
+        let a = access(false, false, Some(CalendarShareLevel::Read));
+        assert!(check_calendar_op(&a, CalendarOp::Read).is_ok());
+        assert!(denied(check_calendar_op(&a, CalendarOp::WriteEvents)));
+        assert!(denied(check_calendar_op(&a, CalendarOp::UpdateCalendar)));
+        assert!(denied(check_calendar_op(&a, CalendarOp::DeleteCalendar)));
+    }
+
+    #[test]
+    fn public_calendar_cannot_be_modified_by_non_owner() {
+        let a = access(false, true, None);
+        assert!(check_calendar_op(&a, CalendarOp::Read).is_ok());
+        assert!(denied(check_calendar_op(&a, CalendarOp::WriteEvents)));
+        assert!(denied(check_calendar_op(&a, CalendarOp::UpdateCalendar)));
+        assert!(denied(check_calendar_op(&a, CalendarOp::DeleteCalendar)));
+    }
+
+    #[test]
+    fn write_share_can_edit_events_but_not_delete_calendar() {
+        let a = access(false, false, Some(CalendarShareLevel::Write));
+        assert!(check_calendar_op(&a, CalendarOp::WriteEvents).is_ok());
+        assert!(check_calendar_op(&a, CalendarOp::UpdateCalendar).is_ok());
+        assert!(denied(check_calendar_op(&a, CalendarOp::DeleteCalendar)));
+    }
+
+    #[test]
+    fn owner_can_do_everything() {
+        let a = access(true, false, None);
+        for op in [
+            CalendarOp::Read,
+            CalendarOp::UpdateCalendar,
+            CalendarOp::DeleteCalendar,
+            CalendarOp::WriteEvents,
+        ] {
+            assert!(check_calendar_op(&a, op).is_ok());
+        }
+    }
+
+    #[test]
+    fn stranger_and_missing_calendar_are_refused() {
+        for a in [access(false, false, None), CalendarAccess::none()] {
+            assert!(denied(check_calendar_op(&a, CalendarOp::Read)));
+            assert!(denied(check_calendar_op(&a, CalendarOp::WriteEvents)));
+        }
     }
 }

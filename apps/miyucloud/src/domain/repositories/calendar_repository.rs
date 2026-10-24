@@ -6,6 +6,7 @@
 
 use crate::common::errors::DomainError;
 use crate::domain::entities::calendar::Calendar;
+use crate::domain::entities::calendar_access::CalendarAccess;
 use uuid::Uuid;
 
 pub type CalendarRepositoryResult<T> = Result<T, DomainError>;
@@ -50,12 +51,13 @@ pub trait CalendarRepository: Send + Sync + 'static {
         offset: i64,
     ) -> CalendarRepositoryResult<Vec<Calendar>>;
 
-    /// Checks if a user has access to a calendar
-    async fn user_has_calendar_access(
+    /// Reads the access facts (owner, public, share level) of a user on a calendar.
+    /// M-01 : la décision lecture/écriture est prise par `CalendarAccess`.
+    async fn get_calendar_access(
         &self,
         calendar_id: &Uuid,
         user_id: Uuid,
-    ) -> CalendarRepositoryResult<bool>;
+    ) -> CalendarRepositoryResult<CalendarAccess>;
 
     /// Gets a custom property for a calendar
     async fn get_calendar_property(

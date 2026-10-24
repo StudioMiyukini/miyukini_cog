@@ -323,4 +323,32 @@ impl FileUploadUseCase for FileUploadService {
             .await?;
         Ok(FileDto::from(created))
     }
+
+    /// Replaces the content of an existing file identified by its id.
+    async fn update_file_content_by_id(
+        &self,
+        file_id: &str,
+        temp_path: &Path,
+        size: u64,
+        content_type: &str,
+        pre_computed_hash: Option<String>,
+        modified_at: Option<i64>,
+    ) -> Result<FileDto, DomainError> {
+        let file_read = self.file_read.as_ref().ok_or_else(|| {
+            DomainError::internal_error("FileUpload", "file read port unavailable")
+        })?;
+        self.file_write
+            .update_file_content_from_temp(
+                file_id,
+                temp_path,
+                size,
+                Some(content_type.to_string()),
+                pre_computed_hash,
+                modified_at,
+            )
+            .await?;
+        let updated = FileDto::from(file_read.get_file(file_id).await?);
+        self.maybe_update_storage_usage(&updated);
+        Ok(updated)
+    }
 }

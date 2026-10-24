@@ -52,6 +52,20 @@ struct CachedBasicAuthResult {
     username: String,
     email: String,
     role: String,
+    scopes: String,
+}
+
+/// Identité issue d'une authentification Basic par mot de passe d'application.
+///
+/// M-05 : les portées (`scopes`) du mot de passe sont transmises pour être
+/// appliquées par les middlewares d'authentification.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BasicAuthIdentity {
+    pub user_id: Uuid,
+    pub username: String,
+    pub email: String,
+    pub role: String,
+    pub scopes: String,
 }
 
 pub struct AppPasswordService {
@@ -276,7 +290,7 @@ impl AppPasswordService {
 
     /// Verify username + app password for HTTP Basic Auth.
     ///
-    /// Returns `(user_id, username, email, role)` on success.
+    /// Returns the identity **and the scopes** of the matching app password.
     ///
     /// Handles both `miyucloud-` format and Nextcloud format (`XXXXX-XXXXX-...`)
     /// passwords. Uses prefix-based DB lookup to minimize Argon2id attempts.
@@ -289,14 +303,20 @@ impl AppPasswordService {
         &self,
         username: &str,
         password: &str,
-    ) -> Result<(Uuid, String, String, String), DomainError> {
+    ) -> Result<BasicAuthIdentity, DomainError> {
         // ── 1. Compute cache key = blake3("username:password") ────────
         let cache_key: [u8; 32] =
             blake3::hash(format!("{}:{}", username, password).as_bytes()).into();
 
         // ── 2. Cache hit → return immediately ────────────────────────
         if let Some(cached) = self.auth_cache.get(&cache_key).await {
-            return Ok((cached.user_id, cached.username, cached.email, cached.role));
+            return Ok(BasicAuthIdentity {
+                user_id: cached.user_id,
+                username: cached.username,
+                email: cached.email,
+                role: cached.role,
+                scopes: cached.scopes,
+            });
         }
 
         // ── 3. Cache miss → full verification ────────────────────────
@@ -358,10 +378,17 @@ impl AppPasswordService {
                     username: user.username().to_string(),
                     email: user.email().to_string(),
                     role: user.role().to_string(),
+                    scopes: ap.scopes.clone(),
                 };
 
                 self.auth_cache.insert(cache_key, result.clone()).await;
-                return Ok((result.user_id, result.username, result.email, result.role));
+                return Ok(BasicAuthIdentity {
+                    user_id: result.user_id,
+                    username: result.username,
+                    email: result.email,
+                    role: result.role,
+                    scopes: result.scopes,
+                });
             }
         }
 

@@ -10,16 +10,28 @@ use axum::{
     http::{Response, StatusCode, header},
     response::IntoResponse,
 };
-use bytes::Bytes;
 use serde::Serialize;
 
 use crate::application::ports::dedup_ports::DedupResultDto;
 use crate::common::di::AppState;
+use crate::interfaces::errors::AppError;
 use crate::interfaces::middleware::auth::AuthUser;
+use crate::interfaces::upload_spool;
 use std::sync::Arc;
 
 /// Global application state for dependency injection
 type GlobalState = Arc<AppState>;
+
+/// Réponse JSON d'erreur `{"error": ...}`.
+fn json_error(status: StatusCode, message: &str) -> axum::response::Response {
+    let body = serde_json::json!({ "error": message }).to_string();
+    Response::builder()
+        .status(status)
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from(body))
+        .unwrap_or_default()
+        .into_response()
+}
 
 /// Response for hash check endpoint
 #[derive(Debug, Serialize)]
@@ -151,131 +163,116 @@ impl DedupHandler {
     /// Returns information about whether the content was new or deduplicated.
     pub async fn upload_with_dedup(
         State(state): State<GlobalState>,
-        _auth_user: AuthUser,
+        auth_user: AuthUser,
         mut multipart: Multipart,
     ) -> impl IntoResponse {
-        let dedup = &state.core.dedup_service;
-
-        // Process multipart form
-        while let Some(field) = multipart.next_field().await.unwrap_or(None) {
-            let name = field.name().unwrap_or("").to_string();
-
-            if name == "file" {
-                let content_type = field
-                    .content_type()
-                    .unwrap_or("application/octet-stream")
-                    .to_string();
-
-                // Collect all chunks — explicit match to detect client disconnection
-                let mut chunks: Vec<Bytes> = Vec::new();
-                let mut total_size: usize = 0;
-                let mut field = field;
-
-                loop {
-                    match field.chunk().await {
-                        Ok(Some(chunk)) => {
-                            total_size += chunk.len();
-                            chunks.push(chunk);
-                        }
-                        Ok(None) => break,
-                        Err(e) => {
-                            tracing::warn!(
-                                "Connection lost during dedup upload (received {} bytes): {}",
-                                total_size,
-                                e
-                            );
-                            return Response::builder()
-                                .status(StatusCode::BAD_REQUEST)
-                                .header(header::CONTENT_TYPE, "application/json")
-                                .body(Body::from(format!(
-                                    r#"{{"error": "Connection lost during upload: {}"}}"#,
-                                    e
-                                )))
-                                .unwrap()
-                                .into_response();
-                        }
-                    }
-                }
-
-                if chunks.is_empty() {
-                    return Response::builder()
-                        .status(StatusCode::BAD_REQUEST)
-                        .header(header::CONTENT_TYPE, "application/json")
-                        .body(Body::from(r#"{"error": "Empty file not allowed"}"#))
-                        .unwrap()
-                        .into_response();
-                }
-
-                // Combine chunks
-                let data: Vec<u8> = if chunks.len() == 1 {
-                    chunks.into_iter().next().unwrap().to_vec()
-                } else {
-                    let mut combined = Vec::with_capacity(total_size);
-                    for chunk in chunks {
-                        combined.extend_from_slice(&chunk);
-                    }
-                    combined
-                };
-
-                // Store with deduplication
-                match dedup.store_bytes(&data, Some(content_type)).await {
-                    Ok(result) => {
-                        let (is_new, bytes_saved) = match &result {
-                            DedupResultDto::NewBlob { .. } => (true, 0),
-                            DedupResultDto::ExistingBlob { saved_bytes, .. } => {
-                                (false, *saved_bytes)
-                            }
-                        };
-
-                        let metadata = dedup.get_blob_metadata(result.hash()).await;
-
-                        let response = DedupUploadResponse {
-                            is_new,
-                            hash: result.hash().to_string(),
-                            size: result.size(),
-                            bytes_saved,
-                            ref_count: metadata.map(|m| m.ref_count).unwrap_or(1),
-                        };
-
-                        tracing::info!(
-                            "🔗 Dedup upload: hash={}, new={}, saved={}",
-                            result.hash(),
-                            is_new,
-                            bytes_saved
-                        );
-
-                        return Response::builder()
-                            .status(if is_new {
-                                StatusCode::CREATED
-                            } else {
-                                StatusCode::OK
-                            })
-                            .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(serde_json::to_string(&response).unwrap()))
-                            .unwrap()
-                            .into_response();
-                    }
-                    Err(e) => {
-                        tracing::error!("Dedup upload failed: {}", e);
-                        return Response::builder()
-                            .status(StatusCode::INTERNAL_SERVER_ERROR)
-                            .header(header::CONTENT_TYPE, "application/json")
-                            .body(Body::from(r#"{"error": "Upload failed"}"#))
-                            .unwrap()
-                            .into_response();
-                    }
-                }
-            }
+        // M-04 / M-11 : les blobs déposés ici ne sont rattachés à aucun fichier
+        // et la réponse révèle l'existence globale d'un contenu — route
+        // réservée aux administrateurs.
+        if auth_user.role != "admin" {
+            return json_error(StatusCode::FORBIDDEN, "Admin role required");
         }
 
-        Response::builder()
-            .status(StatusCode::BAD_REQUEST)
-            .header(header::CONTENT_TYPE, "application/json")
-            .body(Body::from(
-                r#"{"error": "No file field found in multipart form"}"#,
-            ))
-            .unwrap()
-            .into_response()
+        let dedup = &state.core.dedup_service;
+
+        // M-04 : taille maximale et quota vérifiés pendant l'écriture en flux.
+        let budget = match upload_spool::upload_budget_for(&state, auth_user.id, 0).await {
+            Ok(b) => b,
+            Err(e) => return e.into_response(),
+        };
+
+        // Process multipart form
+        loop {
+            let field = match multipart.next_field().await {
+                Ok(Some(field)) => field,
+                Ok(None) => break,
+                Err(e) => {
+                    return json_error(
+                        StatusCode::BAD_REQUEST,
+                        &format!("Invalid multipart body: {}", e),
+                    );
+                }
+            };
+            if field.name().unwrap_or("") != "file" {
+                continue;
+            }
+            let content_type = field
+                .content_type()
+                .unwrap_or("application/octet-stream")
+                .to_string();
+
+            let temp = match tempfile::NamedTempFile::new() {
+                Ok(t) => t,
+                Err(e) => {
+                    tracing::error!("Dedup upload: temp file creation failed: {}", e);
+                    return json_error(StatusCode::INTERNAL_SERVER_ERROR, "Upload failed");
+                }
+            };
+            let spooled = match upload_spool::spool_to_path(field, temp.path(), &budget).await {
+                Ok(s) => s,
+                Err(e) => {
+                    tracing::warn!("Dedup upload refused: {}", e);
+                    return AppError::from(e).into_response();
+                }
+            };
+            if spooled.size == 0 {
+                return json_error(StatusCode::BAD_REQUEST, "Empty file not allowed");
+            }
+
+            // Store with deduplication (streaming from disk, constant RAM).
+            return match dedup
+                .store_from_file(temp.path(), Some(content_type), Some(spooled.hash))
+                .await
+            {
+                Ok(result) => {
+                    let (is_new, bytes_saved) = match &result {
+                        DedupResultDto::NewBlob { .. } => (true, 0),
+                        DedupResultDto::ExistingBlob { saved_bytes, .. } => (false, *saved_bytes),
+                    };
+
+                    let metadata = dedup.get_blob_metadata(result.hash()).await;
+
+                    let response = DedupUploadResponse {
+                        is_new,
+                        hash: result.hash().to_string(),
+                        size: result.size(),
+                        bytes_saved,
+                        ref_count: metadata.map(|m| m.ref_count).unwrap_or(1),
+                    };
+
+                    tracing::info!(
+                        "🔗 Dedup upload: hash={}, new={}, saved={}",
+                        result.hash(),
+                        is_new,
+                        bytes_saved
+                    );
+
+                    let status = if is_new {
+                        StatusCode::CREATED
+                    } else {
+                        StatusCode::OK
+                    };
+                    match serde_json::to_string(&response) {
+                        Ok(body) => Response::builder()
+                            .status(status)
+                            .header(header::CONTENT_TYPE, "application/json")
+                            .body(Body::from(body))
+                            .unwrap_or_default()
+                            .into_response(),
+                        Err(_) => json_error(StatusCode::INTERNAL_SERVER_ERROR, "Upload failed"),
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("Dedup upload failed: {}", e);
+                    json_error(StatusCode::INTERNAL_SERVER_ERROR, "Upload failed")
+                }
+            };
+        }
+
+        json_error(
+            StatusCode::BAD_REQUEST,
+            "No file field found in multipart form",
+        )
     }
 
     /// Get deduplication statistics

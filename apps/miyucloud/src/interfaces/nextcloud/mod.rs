@@ -8,6 +8,7 @@ pub mod avatar_handler;
 pub mod basic_auth_middleware;
 pub mod login_v2_handler;
 pub mod ocs_handler;
+pub mod owned_paths;
 pub mod preview_handler;
 pub mod report_handler;
 pub mod routes;

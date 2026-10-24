@@ -90,16 +90,25 @@ pub async fn basic_auth_middleware(
         .verify_basic_auth(&username, &password)
         .await
     {
-        Ok((user_id, uname, email, role)) => {
+        Ok(identity) => {
             // Reset lockout counter on success
             if let Some(auth_svc) = state.auth_service.as_ref() {
                 auth_svc.login_lockout.record_success(&username);
             }
+            // M-05 : l'API Nextcloud exige la portée `webdav` (ou `all`).
+            if !crate::interfaces::middleware::auth::scope_granted(&identity.scopes, "webdav") {
+                tracing::warn!(
+                    "[NC] app password of '{}' lacks webdav scope ({})",
+                    identity.username,
+                    identity.scopes
+                );
+                return Err(NextcloudAuthError::Unauthorized);
+            }
             request.extensions_mut().insert(Arc::new(CurrentUser {
-                id: user_id,
-                username: uname,
-                email,
-                role,
+                id: identity.user_id,
+                username: identity.username,
+                email: identity.email,
+                role: identity.role,
             }));
             Ok(next.run(request).await)
         }

@@ -221,9 +221,9 @@ impl Default for StorageConfig {
         };
         Self {
             root_dir: "storage".to_string(),
-            chunk_size: 1024 * 1024,                  // 1 MB
-            parallel_threshold: 100 * 1024 * 1024,    // 100 MB
-            trash_retention_days: 30,                 // 30 days
+            chunk_size: 1024 * 1024,               // 1 MB
+            parallel_threshold: 100 * 1024 * 1024, // 100 MB
+            trash_retention_days: 30,              // 30 days
             max_upload_size: MAX_UPLOAD_SIZE,
         }
     }
@@ -632,6 +632,9 @@ pub struct MwsTunnelConfig {
     pub auto_reconnect: bool,
     pub reconnect_delay_secs: u64,
     pub max_reconnect_attempts: u32,
+    /// Fichier de la clé d'identité du COG (O-01, droits 0600). `None` =
+    /// `{storage_path}/.mws_cog_identity.key`. Env : `MIYUCLOUD_MWS_IDENTITY_KEY`.
+    pub identity_key_path: Option<PathBuf>,
 }
 
 impl Default for MwsTunnelConfig {
@@ -645,6 +648,7 @@ impl Default for MwsTunnelConfig {
             auto_reconnect: true,
             reconnect_delay_secs: 10,
             max_reconnect_attempts: 5,
+            identity_key_path: None,
         }
     }
 }
@@ -966,7 +970,8 @@ impl AppConfig {
         {
             config.auth.rate_limit.refresh_max_requests = val;
         }
-        if let Ok(v) = env::var("MIYUCLOUD_RATE_LIMIT_REFRESH_WINDOW_SECS").map(|v| v.parse::<u64>())
+        if let Ok(v) =
+            env::var("MIYUCLOUD_RATE_LIMIT_REFRESH_WINDOW_SECS").map(|v| v.parse::<u64>())
             && let Ok(val) = v
         {
             config.auth.rate_limit.refresh_window_secs = val;
@@ -1130,6 +1135,12 @@ impl AppConfig {
         if let Ok(v) = env::var("MIYUCLOUD_MWS_SUBDOMAIN") {
             config.web_connection.mws.subdomain_slug = Some(v);
         }
+        // O-01 : clé d'identité cryptographique du COG (dans le dossier de données).
+        config.web_connection.mws.identity_key_path = Some(
+            env::var("MIYUCLOUD_MWS_IDENTITY_KEY")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| config.storage_path.join(".mws_cog_identity.key")),
+        );
 
         if let Ok(v) = env::var("MIYUCLOUD_DDNS_ENABLED") {
             config.web_connection.ddns.enabled = v.parse::<bool>().unwrap_or(false);

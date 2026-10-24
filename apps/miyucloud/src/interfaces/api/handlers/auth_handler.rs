@@ -96,13 +96,16 @@ async fn register(
         ));
     }
 
-    // Check if public registration has been disabled by the admin
-    if let Some(admin_svc) = state.admin_settings_service.as_ref()
-        && !admin_svc.get_registration_enabled().await
-    {
+    // M-08 : inscription publique fermée sauf ouverture explicite ; sans
+    // service de réglages, refus (fail-closed).
+    let registration_open = match state.admin_settings_service.as_ref() {
+        Some(admin_svc) => admin_svc.get_registration_enabled().await,
+        None => false,
+    };
+    if !registration_open {
         return Err(AppError::new(
             StatusCode::FORBIDDEN,
-            "Public registration has been disabled by the administrator.",
+            "Public registration is disabled on this server.",
             "RegistrationDisabled",
         ));
     }
@@ -485,10 +488,16 @@ async fn get_system_status(
         .await
         .unwrap_or(0);
 
+    // M-08 : l'inscription n'est annoncée que si elle est explicitement ouverte.
+    let registration_open = match state.admin_settings_service.as_ref() {
+        Some(admin_svc) => admin_svc.get_registration_enabled().await,
+        None => false,
+    };
+
     let status = SystemStatus {
         initialized: db_initialized || admin_count > 0,
         admin_count,
-        registration_allowed: db_initialized || admin_count > 0,
+        registration_allowed: (db_initialized || admin_count > 0) && registration_open,
     };
 
     tracing::info!(

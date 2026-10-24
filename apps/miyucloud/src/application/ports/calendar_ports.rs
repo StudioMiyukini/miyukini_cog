@@ -9,6 +9,7 @@ use crate::application::dtos::calendar_dto::{
     UpdateCalendarDto, UpdateEventDto,
 };
 use crate::common::errors::DomainError;
+use crate::domain::entities::calendar_access::CalendarAccess;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
@@ -40,11 +41,12 @@ pub trait CalendarStoragePort: Send + Sync + 'static {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<CalendarDto>, DomainError>;
-    async fn check_calendar_access(
+    /// Faits d'accès (propriétaire, public, partage) — M-01.
+    async fn get_calendar_access(
         &self,
         calendar_id: &str,
         user_id: Uuid,
-    ) -> Result<bool, DomainError>;
+    ) -> Result<CalendarAccess, DomainError>;
 
     // Calendar sharing
     async fn share_calendar(

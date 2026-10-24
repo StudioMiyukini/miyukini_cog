@@ -10,6 +10,7 @@ use crate::application::dtos::folder_dto::{
 use crate::application::ports::inbound::FolderUseCase;
 use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::repositories::folder_repository::FolderRepository;
+use crate::domain::services::home_folder::is_reserved_home_name;
 use crate::domain::services::path_service::StoragePath;
 use crate::infrastructure::repositories::pg::folder_db_repository::FolderDbRepository;
 use std::sync::Arc;
@@ -148,6 +149,11 @@ impl FolderUseCase for FolderService {
                 "Folder",
                 "Folder name cannot be empty",
             ));
+        }
+
+        // M-02 : le préfixe des dossiers personnels est réservé.
+        if is_reserved_home_name(&dto.name) {
+            return Err(reserved_name_error());
         }
 
         // If a parent_id is provided, verify it exists
@@ -429,6 +435,10 @@ impl FolderUseCase for FolderService {
             return Err(DomainError::not_found("Folder", id));
         }
 
+        // M-02 : le dossier personnel (racine) ne se renomme pas et aucun
+        // dossier ne peut prendre le nom réservé d'un dossier personnel.
+        validate_folder_rename(&FolderDto::from(existing_folder), &dto.name)?;
+
         // Rename folder — UPDATE RETURNING gives us the updated row directly
         let folder = self
             .folder_storage
@@ -469,25 +479,19 @@ impl FolderUseCase for FolderService {
             return Err(DomainError::not_found("Folder", id));
         }
 
-        // If a parent_id is specified, verify it exists
-        if let Some(parent_id) = &dto.parent_id {
-            // Verify we are not trying to move the folder into itself or one of its descendants
-            if parent_id == id {
-                return Err(DomainError::new(
-                    ErrorKind::InvalidInput,
-                    "Folder",
-                    "Cannot move a folder into itself",
-                ));
-            }
-
-            // Verify the destination exists
-            let parent_exists = self.folder_storage.get_folder(parent_id).await.is_ok();
-            if !parent_exists {
-                return Err(DomainError::not_found("Folder", parent_id));
-            }
-
-            // TODO: Ideally we should verify the entire hierarchy to prevent cycles
-        }
+        // M-03 : la destination doit appartenir à l'appelant, ne pas être la
+        // source ni l'un de ses descendants ; pas de déplacement à la racine.
+        let target = match &dto.parent_id {
+            Some(parent_id) => Some(
+                self.folder_storage
+                    .get_folder(parent_id)
+                    .await
+                    .map(FolderDto::from)
+                    .map_err(|_| DomainError::not_found("Folder", parent_id))?,
+            ),
+            None => None,
+        };
+        validate_folder_move(&FolderDto::from(source_folder), target.as_ref(), caller_id)?;
 
         // Move folder — UPDATE RETURNING gives us the updated row directly
         let parent_ref = dto.parent_id.as_deref();
@@ -532,5 +536,156 @@ impl FolderUseCase for FolderService {
                 format!("Failed to delete folder with ID: {}: {}", id, e),
             )
         })
+    }
+}
+
+fn reserved_name_error() -> DomainError {
+    DomainError::new(
+        ErrorKind::InvalidInput,
+        "Folder",
+        "This folder name is reserved",
+    )
+}
+
+/// M-02 : refuse le renommage d'un dossier racine (dossier personnel) et
+/// tout nom imitant un dossier personnel.
+pub(crate) fn validate_folder_rename(
+    folder: &FolderDto,
+    new_name: &str,
+) -> Result<(), DomainError> {
+    if folder.parent_id.is_none() {
+        return Err(DomainError::new(
+            ErrorKind::AccessDenied,
+            "Folder",
+            "The home folder cannot be renamed",
+        ));
+    }
+    if is_reserved_home_name(new_name) {
+        return Err(reserved_name_error());
+    }
+    Ok(())
+}
+
+/// M-03 : règles de déplacement d'un dossier (`source` déjà vérifié comme
+/// appartenant à `caller_id`).
+///
+/// - pas de déplacement du dossier personnel (racine) ;
+/// - pas de déplacement vers la racine (`target = None`) ;
+/// - la destination appartient à `caller_id` (sinon `NotFound`, sans fuite) ;
+/// - la destination n'est ni la source ni l'un de ses descendants (cycle).
+pub(crate) fn validate_folder_move(
+    source: &FolderDto,
+    target: Option<&FolderDto>,
+    caller_id: Uuid,
+) -> Result<(), DomainError> {
+    if source.parent_id.is_none() {
+        return Err(DomainError::new(
+            ErrorKind::AccessDenied,
+            "Folder",
+            "The home folder cannot be moved",
+        ));
+    }
+    let Some(target) = target else {
+        return Err(DomainError::new(
+            ErrorKind::AccessDenied,
+            "Folder",
+            "Folders cannot be moved to the storage root",
+        ));
+    };
+    let caller = caller_id.to_string();
+    if target.owner_id.as_deref() != Some(caller.as_str()) {
+        tracing::warn!(
+            "move_folder: user '{}' attempted to move folder '{}' into folder '{}' owned by '{:?}'",
+            caller_id,
+            source.id,
+            target.id,
+            target.owner_id
+        );
+        return Err(DomainError::not_found("Folder", &target.id));
+    }
+    let descendant_prefix = format!("{}/", source.path.trim_end_matches('/'));
+    if target.id == source.id
+        || target.path == source.path
+        || target.path.starts_with(&descendant_prefix)
+    {
+        return Err(DomainError::new(
+            ErrorKind::InvalidInput,
+            "Folder",
+            "Cannot move a folder into itself or one of its descendants",
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod security_tests {
+    use super::*;
+
+    fn folder(id: &str, path: &str, parent: Option<&str>, owner: Uuid) -> FolderDto {
+        FolderDto {
+            id: id.to_string(),
+            name: path.rsplit('/').next().unwrap_or(path).to_string(),
+            path: path.to_string(),
+            parent_id: parent.map(str::to_string),
+            owner_id: Some(owner.to_string()),
+            is_root: parent.is_none(),
+            ..FolderDto::empty()
+        }
+    }
+
+    #[test]
+    fn move_into_another_users_tree_is_refused() {
+        let alice = Uuid::new_v4();
+        let bob = Uuid::new_v4();
+        let src = folder("s", "My Folder - alice/Docs", Some("ha"), alice);
+        let bob_dir = folder("b", "My Folder - bob/Photos", Some("hb"), bob);
+        let err = validate_folder_move(&src, Some(&bob_dir), alice).expect_err("refused");
+        assert_eq!(err.kind, ErrorKind::NotFound);
+    }
+
+    #[test]
+    fn move_to_root_is_refused() {
+        let alice = Uuid::new_v4();
+        let src = folder("s", "My Folder - alice/Docs", Some("ha"), alice);
+        assert!(validate_folder_move(&src, None, alice).is_err());
+    }
+
+    #[test]
+    fn move_home_folder_is_refused() {
+        let alice = Uuid::new_v4();
+        let home = folder("ha", "My Folder - alice", None, alice);
+        let dst = folder("d", "My Folder - alice/Docs", Some("ha"), alice);
+        assert!(validate_folder_move(&home, Some(&dst), alice).is_err());
+    }
+
+    #[test]
+    fn move_into_descendant_is_refused() {
+        let alice = Uuid::new_v4();
+        let src = folder("s", "My Folder - alice/Docs", Some("ha"), alice);
+        let child = folder("c", "My Folder - alice/Docs/2027", Some("s"), alice);
+        let err = validate_folder_move(&src, Some(&child), alice).expect_err("cycle");
+        assert_eq!(err.kind, ErrorKind::InvalidInput);
+        assert!(validate_folder_move(&src, Some(&src), alice).is_err());
+    }
+
+    #[test]
+    fn move_into_sibling_with_common_prefix_is_allowed() {
+        let alice = Uuid::new_v4();
+        let src = folder("s", "My Folder - alice/Docs", Some("ha"), alice);
+        let sib = folder("x", "My Folder - alice/Docs2", Some("ha"), alice);
+        assert!(validate_folder_move(&src, Some(&sib), alice).is_ok());
+    }
+
+    #[test]
+    fn home_squatting_by_rename_is_refused() {
+        let alice = Uuid::new_v4();
+        let home = folder("ha", "My Folder - alice", None, alice);
+        // Renommer son dossier personnel en « My Folder - bob » : refusé.
+        assert!(validate_folder_rename(&home, "My Folder - bob").is_err());
+        // Renommer un sous-dossier avec le préfixe réservé : refusé.
+        let sub = folder("s", "My Folder - alice/Docs", Some("ha"), alice);
+        let err = validate_folder_rename(&sub, "my folder - bob").expect_err("reserved");
+        assert_eq!(err.kind, ErrorKind::InvalidInput);
+        assert!(validate_folder_rename(&sub, "Archives").is_ok());
     }
 }

@@ -148,6 +148,48 @@ impl IntoResponse for AuthError {
     }
 }
 
+/// Préfixes jamais accessibles par mot de passe d'application (M-05) :
+/// gestion des secrets, MFA, sessions, administration, RGPD.
+const BASIC_AUTH_FORBIDDEN_PREFIXES: &[&str] =
+    &["/api/auth", "/api/admin", "/api/user/gdpr", "/api/setup"];
+
+/// Vrai si la liste de portées `scopes` (séparées par des virgules) accorde
+/// `scope`. `all` (mots de passe Nextcloud) accorde les portées DAV
+/// (`webdav`, `caldav`, `carddav`) mais **pas** `api`.
+pub fn scope_granted(scopes: &str, scope: &str) -> bool {
+    scopes
+        .split(',')
+        .map(str::trim)
+        .any(|s| s == scope || (s == "all" && matches!(scope, "webdav" | "caldav" | "carddav")))
+}
+
+/// M-05 : un mot de passe d'application de portées `scopes` peut-il servir
+/// sur `path` ? Fail-closed : tout chemin non listé est refusé.
+pub fn app_password_allows(path: &str, scopes: &str) -> bool {
+    let under = |prefix: &str| {
+        path == prefix
+            || path
+                .strip_prefix(prefix)
+                .is_some_and(|rest| rest.starts_with('/'))
+    };
+    if BASIC_AUTH_FORBIDDEN_PREFIXES.iter().any(|p| under(p)) {
+        return false;
+    }
+    if under("/webdav") || under("/remote.php") {
+        return scope_granted(scopes, "webdav");
+    }
+    if under("/caldav") || under("/.well-known/caldav") {
+        return scope_granted(scopes, "caldav");
+    }
+    if under("/carddav") || under("/.well-known/carddav") {
+        return scope_granted(scopes, "carddav");
+    }
+    if under("/api") {
+        return scope_granted(scopes, "api");
+    }
+    false
+}
+
 /// Secure authentication middleware.
 ///
 /// Supports three authentication methods (tried in order):
@@ -226,18 +268,38 @@ pub async fn auth_middleware(
                     AuthError::InvalidToken("Invalid Basic auth format".to_string())
                 })?;
 
+                // Chemin complet (hors imbrication des routeurs) pour M-05.
+                let path = request
+                    .extensions()
+                    .get::<axum::extract::OriginalUri>()
+                    .map(|u| u.0.path().to_string())
+                    .unwrap_or_else(|| request.uri().path().to_string());
+
                 if let Some(app_pw_service) = state.app_password_service.as_ref() {
                     match app_pw_service.verify_basic_auth(username, password).await {
-                        Ok((user_id, uname, email, role)) => {
+                        Ok(identity) => {
+                            // M-05 : la portée du mot de passe d'application est
+                            // appliquée ; gestion des secrets jamais en Basic.
+                            if !app_password_allows(&path, &identity.scopes) {
+                                tracing::warn!(
+                                    "App password of '{}' used outside its scopes ({}) on {}",
+                                    identity.username,
+                                    identity.scopes,
+                                    path
+                                );
+                                return Err(AuthError::AccessDenied(
+                                    "App password scope does not allow this endpoint".to_string(),
+                                ));
+                            }
                             tracing::debug!(
                                 "App password authentication successful for user: {}",
-                                uname
+                                identity.username
                             );
                             let current_user = Arc::new(CurrentUser {
-                                id: user_id,
-                                username: uname,
-                                email,
-                                role,
+                                id: identity.user_id,
+                                username: identity.username,
+                                email: identity.email,
+                                role: identity.role,
                             });
                             request.extensions_mut().insert(current_user);
                             return Ok(next.run(request).await);
@@ -329,4 +391,59 @@ pub async fn require_admin(request: Request, next: Next) -> Response {
     // Access denied
     let error = AuthError::AccessDenied("Admin role required".to_string());
     error.into_response()
+}
+
+#[cfg(test)]
+mod app_password_scope_tests {
+    use super::*;
+
+    const DAV_DEFAULT: &str = "webdav,caldav,carddav";
+
+    #[test]
+    fn dav_scopes_reach_their_protocols() {
+        assert!(app_password_allows("/webdav/My Folder - a/x", DAV_DEFAULT));
+        assert!(app_password_allows("/caldav/cal-1", DAV_DEFAULT));
+        assert!(app_password_allows("/carddav/ab", DAV_DEFAULT));
+        assert!(app_password_allows("/caldav", "caldav"));
+    }
+
+    #[test]
+    fn scope_is_enforced_per_protocol() {
+        assert!(!app_password_allows("/webdav/x", "caldav"));
+        assert!(!app_password_allows("/caldav/x", "webdav"));
+        assert!(!app_password_allows("/carddav/x", "webdav,caldav"));
+    }
+
+    #[test]
+    fn dav_only_password_cannot_use_rest_api() {
+        assert!(!app_password_allows("/api/files/upload", DAV_DEFAULT));
+        assert!(!app_password_allows("/api/shares", "all"));
+        assert!(app_password_allows("/api/files/upload", "api"));
+    }
+
+    #[test]
+    fn secret_management_is_never_allowed_with_basic_auth() {
+        for scopes in [DAV_DEFAULT, "all", "api", "api,webdav,caldav,carddav,all"] {
+            assert!(!app_password_allows("/api/auth/app-passwords", scopes));
+            assert!(!app_password_allows("/api/auth/mfa/setup", scopes));
+            assert!(!app_password_allows("/api/admin/users", scopes));
+            assert!(!app_password_allows("/api/user/gdpr/export", scopes));
+        }
+    }
+
+    #[test]
+    fn unknown_paths_and_prefix_tricks_are_refused() {
+        assert!(!app_password_allows("/webdavx/a", DAV_DEFAULT));
+        assert!(!app_password_allows("/other", "all"));
+        assert!(!app_password_allows("/caldav/x", ""));
+    }
+
+    #[test]
+    fn all_scope_covers_dav_only() {
+        assert!(scope_granted("all", "webdav"));
+        assert!(scope_granted("all", "carddav"));
+        assert!(!scope_granted("all", "api"));
+        assert!(scope_granted(" webdav , api ", "api"));
+        assert!(!scope_granted("webdavs", "webdav"));
+    }
 }

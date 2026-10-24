@@ -145,7 +145,8 @@ impl FileManagementUseCase for FileManagementService {
         // Verify file ownership first
         self.verify_owner(file_id, caller_id).await?;
         // Verify target folder ownership (prevents file from "disappearing")
-        self.verify_target_folder_owner(&folder_id, caller_id).await?;
+        self.verify_target_folder_owner(&folder_id, caller_id)
+            .await?;
         self.move_file(file_id, folder_id).await
     }
 
@@ -185,6 +186,9 @@ impl FileManagementUseCase for FileManagementService {
         target_folder_id: Option<String>,
     ) -> Result<FileDto, DomainError> {
         self.verify_owner(file_id, caller_id).await?;
+        // M-03 : la destination doit aussi appartenir à l'appelant.
+        self.verify_target_folder_owner(&target_folder_id, caller_id)
+            .await?;
         self.copy_file(file_id, target_folder_id).await
     }
 

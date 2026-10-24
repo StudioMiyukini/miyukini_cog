@@ -7,7 +7,6 @@
 pub mod admin_handler;
 pub mod app_password_handler;
 pub mod audit_handler;
-pub mod gdpr_handler;
 pub mod auth_handler;
 pub mod batch_handler;
 pub mod caldav_handler;
@@ -19,6 +18,7 @@ pub mod device_auth_handler;
 pub mod favorites_handler;
 pub mod file_handler;
 pub mod folder_handler;
+pub mod gdpr_handler;
 pub mod i18n_handler;
 pub mod photos_handler;
 pub mod recent_handler;

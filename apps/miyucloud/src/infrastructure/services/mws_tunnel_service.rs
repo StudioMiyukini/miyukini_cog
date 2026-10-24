@@ -15,9 +15,10 @@ use crate::common::config::MwsTunnelConfig;
 use crate::common::errors::DomainError;
 use chrono::Utc;
 use miyuwebway_participant::{
-    CogIdentity, MwsService, MwsServiceConfig, MwsServiceState,
-    RelayClientConfig, TrackerClientConfig,
+    CogIdentity, IdentiteCog, MwsService, MwsServiceConfig, MwsServiceState, RelayClientConfig,
+    TrackerClientConfig,
 };
+use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -38,17 +39,81 @@ impl MwsTunnelService {
         }
     }
 
+    /// Chemin du fichier de clé d'identité du COG.
+    fn identity_key_path(&self) -> PathBuf {
+        self.config
+            .identity_key_path
+            .clone()
+            .unwrap_or_else(|| PathBuf::from("./storage/.mws_cog_identity.key"))
+    }
+
+    /// O-01 : charge (ou crée, droits 0600) l'identité cryptographique du COG.
+    pub fn load_identity(&self) -> Result<Arc<IdentiteCog>, DomainError> {
+        let path = self.identity_key_path();
+        IdentiteCog::charger_ou_creer(&path)
+            .map(Arc::new)
+            .map_err(|e| {
+                DomainError::internal_error(
+                    "MWS",
+                    format!("COG identity unavailable ({}): {}", path.display(), e),
+                )
+            })
+    }
+
+    /// Construit la configuration du service MWS liée à `identite` : le
+    /// `cog_id` annoncé est l'empreinte de la clé (`identite.cog_id()`).
+    pub fn build_mws_config(&self, identite: &Arc<IdentiteCog>) -> MwsServiceConfig {
+        let relay_host = self
+            .config
+            .relay_address
+            .split(':')
+            .next()
+            .unwrap_or("localhost")
+            .to_string();
+
+        MwsServiceConfig {
+            relay: RelayClientConfig {
+                relay_address: self.config.relay_address.clone(),
+                tls_domain: relay_host,
+                home_http_bind: Some(self.local_bind.clone()),
+                identite: Some(Arc::clone(identite)),
+                ..Default::default()
+            },
+            tracker: TrackerClientConfig {
+                tracker_address: self.config.tracker_address.clone(),
+                identite: Some(Arc::clone(identite)),
+                ..Default::default()
+            },
+            auto_heartbeat: true,
+            auto_reconnect: self.config.auto_reconnect,
+            reconnect_delay: self.config.reconnect_delay_secs,
+            max_reconnect_attempts: self.config.max_reconnect_attempts,
+            subdomain_slug: self.config.subdomain_slug.clone(),
+            home_http_bind: Some(self.local_bind.clone()),
+        }
+    }
+
     /// Connect to the MWS network (Relay + Tracker).
     pub async fn connect(&self) -> Result<(), DomainError> {
         if !self.config.enabled {
             return Ok(());
         }
 
+        // O-01 : identité cryptographique ; le cog_id est l'empreinte de la clé.
+        let identite = self.load_identity()?;
+        let cog_id = identite.cog_id();
+        if self.config.cog_id != cog_id {
+            tracing::info!(
+                "MWS: configured cog_id '{}' ignored — using key fingerprint",
+                self.config.cog_id
+            );
+        }
+
         tracing::info!(
             "Connecting to MWS network (relay={}, tracker={}, cog_id={})",
             self.config.relay_address,
             self.config.tracker_address,
-            self.config.cog_id
+            cog_id
         );
 
         // Update state
@@ -58,47 +123,20 @@ impl MwsTunnelService {
             s.active = false;
         }
 
-        // Build MwsServiceConfig from our config
-        let relay_host = self
-            .config
-            .relay_address
-            .split(':')
-            .next()
-            .unwrap_or("localhost")
-            .to_string();
-
-        let mws_config = MwsServiceConfig {
-            relay: RelayClientConfig {
-                relay_address: self.config.relay_address.clone(),
-                tls_domain: relay_host,
-                home_http_bind: Some(self.local_bind.clone()),
-                ..Default::default()
-            },
-            tracker: TrackerClientConfig {
-                tracker_address: self.config.tracker_address.clone(),
-                ..Default::default()
-            },
-            auto_heartbeat: true,
-            auto_reconnect: self.config.auto_reconnect,
-            reconnect_delay: self.config.reconnect_delay_secs,
-            max_reconnect_attempts: self.config.max_reconnect_attempts,
-            subdomain_slug: self.config.subdomain_slug.clone(),
-            home_http_bind: Some(self.local_bind.clone()),
-        };
-
-        let service = MwsService::new(mws_config);
+        let service = MwsService::new(self.build_mws_config(&identite));
 
         let identity = CogIdentity {
-            cog_id: self.config.cog_id.clone(),
+            cog_id: cog_id.clone(),
             core_version: env!("CARGO_PKG_VERSION").to_string(),
             public_address: self.local_bind.clone(),
             services: vec!["miyucloud".to_string()],
         };
 
         // Start the MWS service (connect relay + announce tracker + heartbeat)
-        service.start(identity).await.map_err(|e| {
-            DomainError::internal_error("MWS", format!("Connection failed: {}", e))
-        })?;
+        service
+            .start(identity)
+            .await
+            .map_err(|e| DomainError::internal_error("MWS", format!("Connection failed: {}", e)))?;
 
         // Build public URL
         let public_url = self
@@ -106,9 +144,7 @@ impl MwsTunnelService {
             .subdomain_slug
             .as_ref()
             .map(|slug| format!("https://{}.miyukini.com", slug))
-            .unwrap_or_else(|| {
-                format!("https://miyukini.com/cog/{}", self.config.cog_id)
-            });
+            .unwrap_or_else(|| format!("https://miyukini.com/cog/{}", cog_id));
 
         // Store service and update state
         *self.mws.write().await = Some(service);
@@ -121,7 +157,7 @@ impl MwsTunnelService {
             error: None,
         };
 
-        tracing::info!("MWS tunnel connected — COG {} is online", self.config.cog_id);
+        tracing::info!("MWS tunnel connected — COG {} is online", cog_id);
         Ok(())
     }
 
@@ -177,5 +213,40 @@ impl MwsTunnelService {
             Some(ref service) => service.is_online().await,
             None => false,
         }
+    }
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::*;
+
+    #[test]
+    fn tunnel_config_is_built_with_identity() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let key = dir.path().join("cog.key");
+        let config = MwsTunnelConfig {
+            enabled: true,
+            identity_key_path: Some(key.clone()),
+            ..MwsTunnelConfig::default()
+        };
+        let svc = MwsTunnelService::new(config, "127.0.0.1:8086".to_string());
+        let identite = svc.load_identity().expect("identity");
+        let mws = svc.build_mws_config(&identite);
+
+        let relay_id = mws.relay.identite.as_ref().expect("relay identity");
+        assert_eq!(relay_id.cog_id(), identite.cog_id());
+        let tracker_id = mws.tracker.identite.as_ref().expect("tracker identity");
+        assert_eq!(tracker_id.cog_id(), identite.cog_id());
+
+        // La clé est persistée (0600) et rechargée à l'identique.
+        assert!(key.exists());
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(&key).expect("meta").permissions().mode();
+            assert_eq!(mode & 0o777, 0o600);
+        }
+        let again = svc.load_identity().expect("reload");
+        assert_eq!(again.cog_id(), identite.cog_id());
     }
 }

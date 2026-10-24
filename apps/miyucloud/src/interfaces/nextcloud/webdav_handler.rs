@@ -27,8 +27,11 @@ use crate::application::ports::inbound::FolderUseCase;
 use crate::application::ports::trash_ports::TrashUseCase;
 use crate::common::di::AppState;
 use crate::common::mime_detect::{filename_from_path, refine_content_type};
+use crate::domain::services::home_folder::is_reserved_home_name;
 use crate::interfaces::errors::AppError;
 use crate::interfaces::middleware::auth::{AuthUser, CurrentUser};
+use crate::interfaces::nextcloud::owned_paths::{self, OwnedResource};
+use crate::interfaces::upload_spool::{self, MIME_SNIFF_BYTES};
 
 /// Extension trait to map XML write errors to `String` concisely.
 trait XmlResultExt<T> {
@@ -165,22 +168,21 @@ async fn handle_propfind(
             .map_err(|e| AppError::bad_request(format!("Invalid PROPFIND XML: {}", e)))?
     };
 
-    let internal_path = nc_to_internal_path(&user.username, subpath)?;
     let folder_service = &state.applications.folder_service;
     let file_service = &state.applications.file_retrieval_service;
 
-    // Try to resolve as folder first.
-    let folder_result = folder_service.get_folder_by_path(&internal_path).await;
+    // M-02 : résolution sous la racine de l'appelant uniquement.
+    let resource = owned_paths::resolve_owned(&state, user, subpath).await?;
 
-    if let Ok(folder) = folder_result {
+    if let Some(OwnedResource::Folder(folder)) = resource.clone() {
         // It's a folder.
         let (files, subfolders) = if depth != "0" {
             let files = file_service
-                .list_files(Some(&folder.id))
+                .list_files_owned(Some(&folder.id), user.id)
                 .await
                 .unwrap_or_default();
             let subfolders = folder_service
-                .list_folders(Some(&folder.id))
+                .list_folders_for_owner(Some(&folder.id), user.id)
                 .await
                 .unwrap_or_default();
             (files, subfolders)
@@ -234,8 +236,7 @@ async fn handle_propfind(
     }
 
     // Not a folder — try as a file.
-    let file_result = file_service.get_file_by_path(&internal_path).await;
-    if let Ok(file) = file_result {
+    if let Some(OwnedResource::File(file)) = resource {
         // Batch-check favorites for this single file.
         let favorite_ids = if let Some(fav_svc) = state.favorites_service.as_ref() {
             let items: Vec<(&str, &str)> = vec![(&file.id, "file")];
@@ -292,30 +293,24 @@ async fn handle_get(
             .unwrap());
     }
 
-    let internal_path = nc_to_internal_path(&user.username, subpath)?;
     let file_service = &state.applications.file_retrieval_service;
-    let folder_service = &state.applications.folder_service;
 
-    // Check if path is a folder first (NC clients use GET as existence check)
-    if folder_service
-        .get_folder_by_path(&internal_path)
-        .await
-        .is_ok()
-    {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("DAV", "1, 3")
-            .body(Body::empty())
-            .unwrap());
-    }
-
-    let file = file_service
-        .get_file_by_path(&internal_path)
-        .await
-        .map_err(|_| AppError::not_found("File not found"))?;
+    // M-02 : résolution sous la racine de l'appelant uniquement.
+    let file = match owned_paths::resolve_owned(&state, user, subpath).await? {
+        // NC clients use GET on folders as an existence check.
+        Some(OwnedResource::Folder(_)) => {
+            return Ok(Response::builder()
+                .status(StatusCode::OK)
+                .header("DAV", "1, 3")
+                .body(Body::empty())
+                .unwrap());
+        }
+        Some(OwnedResource::File(file)) => file,
+        None => return Err(AppError::not_found("File not found")),
+    };
 
     let stream = file_service
-        .get_file_stream(&file.id)
+        .get_file_stream_owned(&file.id, user.id)
         .await
         .map_err(|e| AppError::internal_error(format!("Failed to read file: {}", e)))?;
 
@@ -349,27 +344,19 @@ async fn handle_head(
             .unwrap());
     }
 
-    let internal_path = nc_to_internal_path(&user.username, subpath)?;
-    let file_service = &state.applications.file_retrieval_service;
-    let folder_service = &state.applications.folder_service;
-
-    // Check if path is a folder (NC clients use HEAD as existence check)
-    if folder_service
-        .get_folder_by_path(&internal_path)
-        .await
-        .is_ok()
-    {
-        return Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("DAV", "1, 3")
-            .body(Body::empty())
-            .unwrap());
-    }
-
-    let file = file_service
-        .get_file_by_path(&internal_path)
-        .await
-        .map_err(|_| AppError::not_found("File not found"))?;
+    // M-02 : résolution sous la racine de l'appelant uniquement.
+    let file = match owned_paths::resolve_owned(&state, user, subpath).await? {
+        // NC clients use HEAD on folders as an existence check.
+        Some(OwnedResource::Folder(_)) => {
+            return Ok(Response::builder()
+                .status(StatusCode::OK)
+                .header("DAV", "1, 3")
+                .body(Body::empty())
+                .unwrap());
+        }
+        Some(OwnedResource::File(file)) => file,
+        None => return Err(AppError::not_found("File not found")),
+    };
 
     let modified_at =
         chrono::DateTime::<Utc>::from_timestamp(timestamp_to_i64(file.modified_at), 0)
@@ -403,19 +390,12 @@ async fn handle_proppatch(
     let favorite_value = parse_proppatch_favorite(&body_str);
 
     if let Some(value) = favorite_value {
-        let internal_path = nc_to_internal_path(&user.username, subpath)?;
-        let file_service = &state.applications.file_retrieval_service;
-        let folder_service = &state.applications.folder_service;
-
-        // Determine item_id and item_type.
-        let (item_id, item_type) =
-            if let Ok(file) = file_service.get_file_by_path(&internal_path).await {
-                (file.id, "file")
-            } else if let Ok(folder) = folder_service.get_folder_by_path(&internal_path).await {
-                (folder.id, "folder")
-            } else {
-                return Err(AppError::not_found("Resource not found"));
-            };
+        // Determine item_id and item_type (M-02 : ressources de l'appelant).
+        let (item_id, item_type) = match owned_paths::resolve_owned(&state, user, subpath).await? {
+            Some(OwnedResource::File(file)) => (file.id, "file"),
+            Some(OwnedResource::Folder(folder)) => (folder.id, "folder"),
+            None => return Err(AppError::not_found("Resource not found")),
+        };
 
         if let Some(fav_svc) = state.favorites_service.as_ref() {
             if value == 1 {
@@ -515,15 +495,24 @@ fn parse_proppatch_favorite(body: &str) -> Option<u8> {
 
 // ──────────────────── PUT ────────────────────
 
+/// Cible d'un PUT : fichier existant de l'appelant ou nouveau fichier dans
+/// un dossier de l'appelant (M-02).
+enum PutTarget {
+    Existing { file_id: String, size: u64 },
+    New { folder_id: String, name: String },
+}
+
 async fn handle_put(
     state: Arc<AppState>,
     req: Request<Body>,
     user: &CurrentUser,
     subpath: &str,
 ) -> Result<Response<Body>, AppError> {
-    let internal_path = nc_to_internal_path(&user.username, subpath)?;
-    let file_service = &state.applications.file_retrieval_service;
     let upload_service = &state.applications.file_upload_service;
+
+    if subpath.trim_matches('/').is_empty() {
+        return Err(AppError::bad_request("Cannot PUT to root folder"));
+    }
 
     let claimed_type = req
         .headers()
@@ -538,52 +527,95 @@ async fn handle_put(
         .and_then(|v| v.to_str().ok())
         .and_then(|v| v.parse::<i64>().ok());
 
-    let max_upload = state.core.config.storage.max_upload_size;
-    let body_bytes = body::to_bytes(req.into_body(), max_upload)
-        .await
-        .map_err(|e| AppError::bad_request(format!("Failed to read body: {}", e)))?;
+    let declared = upload_spool::declared_length(req.headers());
+
+    // M-02 : la cible est résolue sous la racine de l'appelant uniquement.
+    let target = match owned_paths::resolve_owned(&state, user, subpath).await? {
+        Some(OwnedResource::Folder(_)) => {
+            return Err(AppError::conflict("Cannot PUT to a directory"));
+        }
+        Some(OwnedResource::File(file)) => PutTarget::Existing {
+            file_id: file.id,
+            size: file.size,
+        },
+        None => {
+            let (parent_sub, name) = owned_paths::split_parent(subpath);
+            if name.is_empty() {
+                return Err(AppError::bad_request("Missing file name"));
+            }
+            let parent = owned_paths::resolve_owned_folder(&state, user, parent_sub)
+                .await?
+                .ok_or_else(|| AppError::conflict("Parent folder not found"))?;
+            PutTarget::New {
+                folder_id: parent.id,
+                name: name.to_string(),
+            }
+        }
+    };
+
+    // M-04 : taille maximale et quota vérifiés avant puis pendant l'écriture,
+    // corps écrit en flux sur disque (jamais entièrement en mémoire).
+    let replaced = match &target {
+        PutTarget::Existing { size, .. } => *size,
+        PutTarget::New { .. } => 0,
+    };
+    let budget = upload_spool::upload_budget_for(&state, user.id, replaced).await?;
+    budget.check_declared(declared)?;
+
+    let temp = tempfile::NamedTempFile::new()
+        .map_err(|e| AppError::internal_error(format!("Failed to create temp file: {}", e)))?;
+    let spooled =
+        upload_spool::spool_to_path(req.into_body().into_data_stream(), temp.path(), &budget)
+            .await?;
 
     // Detect real MIME type via magic bytes + extension, falling back to client header.
     let filename = filename_from_path(subpath);
-    let content_type = refine_content_type(&body_bytes, filename, &claimed_type);
+    let head = &spooled.head[..spooled.head.len().min(MIME_SNIFF_BYTES)];
+    let content_type = refine_content_type(head, filename, &claimed_type);
 
-    // Check if the file already exists (update vs create).
-    let existing = file_service.get_file_by_path(&internal_path).await;
+    match target {
+        PutTarget::Existing { file_id, .. } => {
+            // Update existing file — returns FileDto with fresh content-hash etag.
+            let updated = upload_service
+                .update_file_content_by_id(
+                    &file_id,
+                    temp.path(),
+                    spooled.size,
+                    &content_type,
+                    Some(spooled.hash),
+                    oc_mtime,
+                )
+                .await
+                .map_err(|e| AppError::internal_error(format!("Failed to update file: {}", e)))?;
 
-    if existing.is_ok() {
-        // Update existing file — returns FileDto with fresh content-hash etag.
-        let updated = upload_service
-            .update_file(&internal_path, &body_bytes, &content_type, oc_mtime)
-            .await
-            .map_err(|e| AppError::internal_error(format!("Failed to update file: {}", e)))?;
+            Ok(Response::builder()
+                .status(StatusCode::NO_CONTENT)
+                .header(header::ETAG, format!("\"{}\"", updated.etag))
+                .header("oc-etag", format!("\"{}\"", updated.etag))
+                .body(Body::empty())
+                .unwrap())
+        }
+        PutTarget::New { folder_id, name } => {
+            let file_dto = upload_service
+                .upload_file_streaming(
+                    name,
+                    Some(folder_id),
+                    content_type,
+                    temp.path(),
+                    spooled.size,
+                    Some(spooled.hash),
+                )
+                .await
+                .map_err(|e| AppError::internal_error(format!("Failed to create file: {}", e)))?;
 
-        return Ok(Response::builder()
-            .status(StatusCode::NO_CONTENT)
-            .header(header::ETAG, format!("\"{}\"", updated.etag))
-            .header("oc-etag", format!("\"{}\"", updated.etag))
-            .body(Body::empty())
-            .unwrap());
+            Ok(Response::builder()
+                .status(StatusCode::CREATED)
+                .header(header::ETAG, format!("\"{}\"", file_dto.etag))
+                .header("oc-etag", format!("\"{}\"", file_dto.etag))
+                .body(Body::empty())
+                .unwrap())
+        }
     }
-
-    // Create new file — split subpath into parent dir and filename.
-    let (parent_subpath, filename) = match subpath.rsplit_once('/') {
-        Some((parent, name)) => (parent, name),
-        None => ("", subpath),
-    };
-
-    let parent_internal = nc_to_internal_path(&user.username, parent_subpath)?;
-
-    let file_dto = upload_service
-        .create_file(&parent_internal, filename, &body_bytes, &content_type)
-        .await
-        .map_err(|e| AppError::internal_error(format!("Failed to create file: {}", e)))?;
-
-    let builder = Response::builder()
-        .status(StatusCode::CREATED)
-        .header(header::ETAG, format!("\"{}\"", file_dto.etag))
-        .header("oc-etag", format!("\"{}\"", file_dto.etag));
-
-    Ok(builder.body(Body::empty()).unwrap())
 }
 
 // ──────────────────── MKCOL ────────────────────
@@ -596,13 +628,11 @@ async fn handle_mkcol(
     use crate::application::dtos::folder_dto::CreateFolderDto;
 
     let folder_service = &state.applications.folder_service;
-    let internal_path = nc_to_internal_path(&user.username, subpath)?;
 
-    // If the folder already exists, return 405 per RFC 4918 §9.3.1
-    if folder_service
-        .get_folder_by_path(&internal_path)
-        .await
-        .is_ok()
+    // If the resource already exists, return 405 per RFC 4918 §9.3.1
+    if owned_paths::resolve_owned(&state, user, subpath)
+        .await?
+        .is_some()
     {
         return Ok(Response::builder()
             .status(StatusCode::METHOD_NOT_ALLOWED)
@@ -612,50 +642,51 @@ async fn handle_mkcol(
 
     // Collect path segments that need to be created (walk from root to leaf)
     let segments: Vec<&str> = subpath.split('/').filter(|s| !s.is_empty()).collect();
+    if segments.iter().any(|seg| *seg == ".." || *seg == ".") {
+        return Err(AppError::bad_request("Invalid path: traversal not allowed"));
+    }
 
-    let user_root = nc_to_internal_path(&user.username, "")?;
-    let mut current_path = user_root.clone();
-    let mut parent_id = folder_service
-        .get_folder_by_path(&user_root)
-        .await
-        .map_err(|_| AppError::not_found("User root folder not found"))?
-        .id
-        .clone();
+    // M-02 : création uniquement sous le dossier personnel de l'appelant.
+    let mut parent = owned_paths::resolve_home(&state, user).await?;
+    let mut current_sub = String::new();
 
     for segment in &segments {
-        current_path = format!("{}/{}", current_path, segment);
-        match folder_service.get_folder_by_path(&current_path).await {
-            Ok(existing) => {
-                parent_id = existing.id.clone();
+        if is_reserved_home_name(segment) {
+            return Err(AppError::forbidden("This folder name is reserved"));
+        }
+        current_sub = if current_sub.is_empty() {
+            segment.to_string()
+        } else {
+            format!("{}/{}", current_sub, segment)
+        };
+        match owned_paths::resolve_owned(&state, user, &current_sub).await? {
+            Some(OwnedResource::Folder(existing)) => {
+                parent = existing;
             }
-            Err(_) => {
+            Some(OwnedResource::File(_)) => {
+                return Err(AppError::conflict("A file exists at this path"));
+            }
+            None => {
                 let dto = CreateFolderDto {
                     name: segment.to_string(),
-                    parent_id: Some(parent_id.clone()),
+                    parent_id: Some(parent.id.clone()),
                 };
                 match folder_service.create_folder(dto).await {
                     Ok(created) => {
-                        parent_id = created.id.clone();
+                        parent = created;
                     }
                     Err(e)
                         if e.message.contains("already exists")
                             || e.message.contains("Already Exists") =>
                     {
                         // Race condition — folder created concurrently
-                        let folder = folder_service
-                            .get_folder_by_path(&current_path)
-                            .await
-                            .map_err(|_| {
+                        parent = owned_paths::resolve_owned_folder(&state, user, &current_sub)
+                            .await?
+                            .ok_or_else(|| {
                                 AppError::internal_error("Folder exists but cannot be found")
                             })?;
-                        parent_id = folder.id.clone();
                     }
-                    Err(e) => {
-                        return Err(AppError::internal_error(format!(
-                            "Failed to create folder: {}",
-                            e
-                        )));
-                    }
+                    Err(e) => return Err(AppError::from(e)),
                 }
             }
         }
@@ -674,64 +705,57 @@ async fn handle_delete(
     user: &CurrentUser,
     subpath: &str,
 ) -> Result<Response<Body>, AppError> {
-    let internal_path = nc_to_internal_path(&user.username, subpath)?;
-    let folder_service = &state.applications.folder_service;
-    let file_service = &state.applications.file_retrieval_service;
+    // Le dossier personnel lui-même ne se supprime pas.
+    if subpath.trim_matches('/').is_empty() {
+        return Err(AppError::forbidden("The home folder cannot be deleted"));
+    }
+
+    // M-02 : ressource de l'appelant uniquement.
+    let resource = owned_paths::resolve_owned(&state, user, subpath)
+        .await?
+        .ok_or_else(|| AppError::not_found("Resource not found"))?;
 
     // Prefer soft-delete (move to trash) when trash service is available.
     // This is what Nextcloud clients expect — items appear in the trashbin.
     if let Some(trash_svc) = state.trash_service.as_ref() {
-        if let Ok(folder) = folder_service.get_folder_by_path(&internal_path).await {
-            trash_svc
-                .move_to_trash(&folder.id, "folder", user.id)
-                .await
-                .map_err(|e| AppError::internal_error(format!("Failed to trash folder: {}", e)))?;
-            return Ok(Response::builder()
-                .status(StatusCode::NO_CONTENT)
-                .body(Body::empty())
-                .unwrap());
-        }
-        if let Ok(file) = file_service.get_file_by_path(&internal_path).await {
-            trash_svc
-                .move_to_trash(&file.id, "file", user.id)
-                .await
-                .map_err(|e| AppError::internal_error(format!("Failed to trash file: {}", e)))?;
-            return Ok(Response::builder()
-                .status(StatusCode::NO_CONTENT)
-                .body(Body::empty())
-                .unwrap());
-        }
-        return Err(AppError::not_found("Resource not found"));
+        let (id, kind) = match &resource {
+            OwnedResource::Folder(folder) => (folder.id.as_str(), "folder"),
+            OwnedResource::File(file) => (file.id.as_str(), "file"),
+        };
+        trash_svc
+            .move_to_trash(id, kind, user.id)
+            .await
+            .map_err(|e| AppError::internal_error(format!("Failed to trash {}: {}", kind, e)))?;
+        return Ok(Response::builder()
+            .status(StatusCode::NO_CONTENT)
+            .body(Body::empty())
+            .unwrap());
     }
 
     // Fallback: hard delete when trash service is not available.
-    let file_mgmt = &state.applications.file_management_service;
-
-    if let Ok(folder) = folder_service.get_folder_by_path(&internal_path).await {
-        folder_service
-            .delete_folder(&folder.id, user.id)
-            .await
-            .map_err(|e| AppError::internal_error(format!("Failed to delete folder: {}", e)))?;
-
-        return Ok(Response::builder()
-            .status(StatusCode::NO_CONTENT)
-            .body(Body::empty())
-            .unwrap());
+    match resource {
+        OwnedResource::Folder(folder) => {
+            state
+                .applications
+                .folder_service
+                .delete_folder(&folder.id, user.id)
+                .await
+                .map_err(AppError::from)?;
+        }
+        OwnedResource::File(file) => {
+            state
+                .applications
+                .file_management_service
+                .delete_file_owned(&file.id, user.id)
+                .await
+                .map_err(AppError::from)?;
+        }
     }
 
-    if let Ok(file) = file_service.get_file_by_path(&internal_path).await {
-        file_mgmt
-            .delete_file(&file.id)
-            .await
-            .map_err(|e| AppError::internal_error(format!("Failed to delete file: {}", e)))?;
-
-        return Ok(Response::builder()
-            .status(StatusCode::NO_CONTENT)
-            .body(Body::empty())
-            .unwrap());
-    }
-
-    Err(AppError::not_found("Resource not found"))
+    Ok(Response::builder()
+        .status(StatusCode::NO_CONTENT)
+        .body(Body::empty())
+        .unwrap())
 }
 
 // ──────────────────── MOVE ────────────────────
@@ -742,6 +766,8 @@ async fn handle_move(
     user: &CurrentUser,
     subpath: &str,
 ) -> Result<Response<Body>, AppError> {
+    use crate::application::dtos::folder_dto::{MoveFolderDto, RenameFolderDto};
+
     let destination = req
         .headers()
         .get("destination")
@@ -753,112 +779,77 @@ async fn handle_move(
     let dest_subpath = extract_nc_subpath_from_dest(&destination, &user.username)
         .ok_or_else(|| AppError::bad_request("Invalid Destination URL"))?;
 
-    let src_internal = nc_to_internal_path(&user.username, subpath)?;
-    let folder_service = &state.applications.folder_service;
-    let file_service = &state.applications.file_retrieval_service;
-    let file_mgmt = &state.applications.file_management_service;
-
-    // Try as file first.
-    if let Ok(file) = file_service.get_file_by_path(&src_internal).await {
-        let (dest_parent_sub, dest_name) = match dest_subpath.rsplit_once('/') {
-            Some((parent, name)) => (parent, name),
-            None => ("", dest_subpath.as_str()),
-        };
-        let dest_parent_internal = nc_to_internal_path(&user.username, dest_parent_sub)?;
-
-        // Rename if only the name changes (same parent).
-        let src_parent_sub = match subpath.rsplit_once('/') {
-            Some((parent, _)) => parent,
-            None => "",
-        };
-
-        if src_parent_sub == dest_parent_sub {
-            // Same parent → rename.
-            file_mgmt
-                .rename_file(&file.id, dest_name)
-                .await
-                .map_err(|e| AppError::internal_error(format!("Rename failed: {}", e)))?;
-        } else {
-            // Different parent → move.
-            let dest_parent = folder_service
-                .get_folder_by_path(&dest_parent_internal)
-                .await
-                .map_err(|_| AppError::not_found("Destination folder not found"))?;
-
-            file_mgmt
-                .move_file(&file.id, Some(dest_parent.id.clone()))
-                .await
-                .map_err(|e| AppError::internal_error(format!("Move failed: {}", e)))?;
-
-            // If the filename changed too, rename after move.
-            if file.name != dest_name {
-                file_mgmt
-                    .rename_file(&file.id, dest_name)
-                    .await
-                    .map_err(|e| AppError::internal_error(format!("Rename failed: {}", e)))?;
-            }
-        }
-
-        // Return ETag and OC-ETag so Nextcloud clients can track the moved file.
-        let dest_internal = nc_to_internal_path(&user.username, &dest_subpath)?;
-        let mut builder = Response::builder().status(StatusCode::CREATED);
-        if let Ok(moved) = file_service.get_file_by_path(&dest_internal).await {
-            builder = builder
-                .header(header::ETAG, format!("\"{}\"", moved.id))
-                .header("oc-etag", format!("\"{}\"", moved.id));
-        }
-
-        return Ok(builder.body(Body::empty()).unwrap());
+    if subpath.trim_matches('/').is_empty() {
+        return Err(AppError::forbidden("The home folder cannot be moved"));
     }
 
-    // Try as folder.
-    if let Ok(folder) = folder_service.get_folder_by_path(&src_internal).await {
-        let (dest_parent_sub, dest_name) = match dest_subpath.rsplit_once('/') {
-            Some((parent, name)) => (parent, name),
-            None => ("", dest_subpath.as_str()),
-        };
-        let dest_parent_internal = nc_to_internal_path(&user.username, dest_parent_sub)?;
+    let (dest_parent_sub, dest_name) = owned_paths::split_parent(&dest_subpath);
+    if dest_name.is_empty() {
+        return Err(AppError::bad_request("Invalid Destination URL"));
+    }
+    let (src_parent_sub, _) = owned_paths::split_parent(subpath);
 
-        let src_parent_sub = match subpath.rsplit_once('/') {
-            Some((parent, _)) => parent,
-            None => "",
-        };
+    let folder_service = &state.applications.folder_service;
+    let file_mgmt = &state.applications.file_management_service;
 
-        if src_parent_sub == dest_parent_sub {
-            // Same parent → rename.
-            use crate::application::dtos::folder_dto::RenameFolderDto;
-            folder_service
-                .rename_folder(
-                    &folder.id,
-                    RenameFolderDto {
-                        name: dest_name.to_string(),
-                    },
-                    user.id,
-                )
-                .await
-                .map_err(|e| AppError::internal_error(format!("Rename failed: {}", e)))?;
-        } else {
-            // Different parent → move.
-            let dest_parent = folder_service
-                .get_folder_by_path(&dest_parent_internal)
-                .await
-                .map_err(|_| AppError::not_found("Destination parent not found"))?;
+    // M-02/M-03 : source ET dossier de destination résolus sous la racine
+    // de l'appelant ; les opérations `_owned` revérifient le propriétaire.
+    let source = owned_paths::resolve_owned(&state, user, subpath)
+        .await?
+        .ok_or_else(|| AppError::not_found("Source resource not found"))?;
 
-            use crate::application::dtos::folder_dto::MoveFolderDto;
-            folder_service
-                .move_folder(
-                    &folder.id,
-                    MoveFolderDto {
-                        parent_id: Some(dest_parent.id.clone()),
-                    },
-                    user.id,
-                )
-                .await
-                .map_err(|e| AppError::internal_error(format!("Move failed: {}", e)))?;
+    let dest_parent_id = if src_parent_sub == dest_parent_sub {
+        None
+    } else {
+        let parent = owned_paths::resolve_owned_folder(&state, user, dest_parent_sub)
+            .await?
+            .ok_or_else(|| AppError::conflict("Destination folder not found"))?;
+        Some(parent.id)
+    };
 
-            // If the name changed too, rename.
+    match source {
+        OwnedResource::File(file) => {
+            if let Some(parent_id) = dest_parent_id {
+                file_mgmt
+                    .move_file_owned(&file.id, user.id, Some(parent_id))
+                    .await
+                    .map_err(AppError::from)?;
+            }
+            if file.name != dest_name {
+                file_mgmt
+                    .rename_file_owned(&file.id, user.id, dest_name)
+                    .await
+                    .map_err(AppError::from)?;
+            }
+
+            // Return ETag and OC-ETag so Nextcloud clients can track the moved file.
+            let mut builder = Response::builder().status(StatusCode::CREATED);
+            if let Some(moved) =
+                owned_paths::resolve_owned_file(&state, user, &dest_subpath).await?
+            {
+                builder = builder
+                    .header(header::ETAG, format!("\"{}\"", moved.id))
+                    .header("oc-etag", format!("\"{}\"", moved.id));
+            }
+            Ok(builder.body(Body::empty()).unwrap())
+        }
+        OwnedResource::Folder(folder) => {
+            if is_reserved_home_name(dest_name) {
+                return Err(AppError::forbidden("This folder name is reserved"));
+            }
+            if let Some(parent_id) = dest_parent_id {
+                folder_service
+                    .move_folder(
+                        &folder.id,
+                        MoveFolderDto {
+                            parent_id: Some(parent_id),
+                        },
+                        user.id,
+                    )
+                    .await
+                    .map_err(AppError::from)?;
+            }
             if folder.name != dest_name {
-                use crate::application::dtos::folder_dto::RenameFolderDto;
                 folder_service
                     .rename_folder(
                         &folder.id,
@@ -868,17 +859,15 @@ async fn handle_move(
                         user.id,
                     )
                     .await
-                    .map_err(|e| AppError::internal_error(format!("Rename failed: {}", e)))?;
+                    .map_err(AppError::from)?;
             }
+
+            Ok(Response::builder()
+                .status(StatusCode::CREATED)
+                .body(Body::empty())
+                .unwrap())
         }
-
-        return Ok(Response::builder()
-            .status(StatusCode::CREATED)
-            .body(Body::empty())
-            .unwrap());
     }
-
-    Err(AppError::not_found("Source resource not found"))
 }
 
 /// Extract the subpath from a Destination header URL.

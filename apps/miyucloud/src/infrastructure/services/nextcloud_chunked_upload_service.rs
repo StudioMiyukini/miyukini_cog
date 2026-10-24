@@ -10,6 +10,9 @@ use tokio::io::AsyncWriteExt;
 
 use crate::common::errors::{DomainError, Result};
 
+/// Nombre maximal de tranches par session d'envoi (M-04, C-13).
+pub const MAX_CHUNKS_PER_SESSION: usize = 10_000;
+
 #[derive(Clone)]
 pub struct NextcloudChunkedUploadService {
     pub base_dir: PathBuf,
@@ -58,6 +61,59 @@ impl NextcloudChunkedUploadService {
         Ok(())
     }
 
+    /// Chemin d'écriture d'une tranche ; la session doit exister (M-04 :
+    /// la tranche est écrite en flux par l'appelant, jamais en mémoire).
+    pub fn chunk_path(&self, user: &str, upload_id: &str, chunk_name: &str) -> Result<PathBuf> {
+        Self::validate_path_component(chunk_name, "chunk_name")?;
+        if chunk_name.starts_with('.') {
+            return Err(DomainError::validation_error(
+                "ChunkedUpload: invalid chunk_name: reserved name",
+            ));
+        }
+        let session_dir = self.safe_session_dir(user, upload_id)?;
+        if !session_dir.is_dir() {
+            return Err(DomainError::not_found("UploadSession", upload_id));
+        }
+        Ok(session_dir.join(chunk_name))
+    }
+
+    /// Octets et nombre de tranches déjà reçus pour la session, en excluant
+    /// `except_chunk` (tranche sur le point d'être réécrite).
+    pub async fn session_usage(
+        &self,
+        user: &str,
+        upload_id: &str,
+        except_chunk: Option<&str>,
+    ) -> Result<(u64, usize)> {
+        let session_dir = self.safe_session_dir(user, upload_id)?;
+        let mut dir = match fs::read_dir(&session_dir).await {
+            Ok(dir) => dir,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                return Err(DomainError::not_found("UploadSession", upload_id));
+            }
+            Err(e) => return Err(DomainError::internal_error("ChunkedUpload", e.to_string())),
+        };
+        let mut total: u64 = 0;
+        let mut count: usize = 0;
+        while let Some(entry) = dir
+            .next_entry()
+            .await
+            .map_err(|e| DomainError::internal_error("ChunkedUpload", e.to_string()))?
+        {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with('.') || Some(name.as_str()) == except_chunk {
+                continue;
+            }
+            let meta = entry
+                .metadata()
+                .await
+                .map_err(|e| DomainError::internal_error("ChunkedUpload", e.to_string()))?;
+            total = total.saturating_add(meta.len());
+            count += 1;
+        }
+        Ok((total, count))
+    }
+
     /// Store a chunk in the session directory.
     pub async fn store_chunk(
         &self,
@@ -95,8 +151,8 @@ impl NextcloudChunkedUploadService {
             .map_err(|e| DomainError::internal_error("ChunkedUpload", e.to_string()))?
         {
             let name = entry.file_name().to_string_lossy().to_string();
-            if name == ".file" {
-                continue; // Skip the assembly marker.
+            if name.starts_with('.') {
+                continue; // Skip the assembly marker and the assembled output.
             }
             entries.push(name);
         }
@@ -225,5 +281,38 @@ mod tests {
         let (svc, _dir) = test_service();
         // Should not error.
         svc.cleanup("alice", "nonexistent").await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_chunk_path_requires_session_and_valid_name() {
+        let (svc, _dir) = test_service();
+        assert!(svc.chunk_path("alice", "nope", "00001").is_err());
+        svc.create_session("alice", "up").await.unwrap();
+        assert!(svc.chunk_path("alice", "up", "00001").is_ok());
+        assert!(svc.chunk_path("alice", "up", ".assembled").is_err());
+        assert!(svc.chunk_path("alice", "up", "../x").is_err());
+    }
+
+    #[tokio::test]
+    async fn test_session_usage_counts_chunks() {
+        let (svc, _dir) = test_service();
+        svc.create_session("alice", "up").await.unwrap();
+        svc.store_chunk("alice", "up", "00001", b"abc")
+            .await
+            .unwrap();
+        svc.store_chunk("alice", "up", "00002", b"defgh")
+            .await
+            .unwrap();
+        assert_eq!(
+            svc.session_usage("alice", "up", None).await.unwrap(),
+            (8, 2)
+        );
+        assert_eq!(
+            svc.session_usage("alice", "up", Some("00002"))
+                .await
+                .unwrap(),
+            (3, 1)
+        );
+        assert!(svc.session_usage("alice", "missing", None).await.is_err());
     }
 }

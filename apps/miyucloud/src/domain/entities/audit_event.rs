@@ -137,11 +137,7 @@ pub struct AuditEvent {
 
 impl AuditEvent {
     /// Create a new audit event with the current timestamp.
-    pub fn new(
-        action: AuditAction,
-        resource_type: ResourceType,
-        outcome: AuditOutcome,
-    ) -> Self {
+    pub fn new(action: AuditAction, resource_type: ResourceType, outcome: AuditOutcome) -> Self {
         Self {
             id: Uuid::new_v4(),
             timestamp: Utc::now(),
