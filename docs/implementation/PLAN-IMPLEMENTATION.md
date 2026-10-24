@@ -45,6 +45,7 @@
   - Jay Bureau : authentification et ACL du WebSocket, échange de clés signé, nonces internes (R-008, R-009)
   - Whisper / `alicia-mvp` : jeton obligatoire, comparaison constante, origine exacte (R-010)
   - `miyuwebway_tracker`, `miyuvalidate` : implémentation testée ou refus explicite (R-015)
+  - JayMail via l'IA : destinataires complets à la confirmation, pas de `bcc` d'origine IA (R-018)
   - `[lints] workspace = true` sur les 149 paquets, corrections clippy bloquantes (R-004)
   - CI : build, tests, clippy, `cargo audit`, `cargo deny` sur le workspace (R-005)
 - **Sortie** : 0 constat critique ou haut connu ; CI verte

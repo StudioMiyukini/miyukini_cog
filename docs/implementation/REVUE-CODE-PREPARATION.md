@@ -116,6 +116,7 @@
 | R-015 | moyenne | `miyuwebway_tracker` et `miyuvalidate` : stubs sans test | C-14, C-60 |
 | R-016 | haute | Alicia API : `/dispatch/confirm` sans état exécute directement une capacité soumise à confirmation (contournement du garde-fou) — n'exécuter que l'enregistrement en attente | C-12 |
 | R-017 | moyenne | Alicia : confirmation en attente non réclamée atomiquement → double exécution possible (`capabilities_runtime.rs`) | C-12 |
+| R-018 | moyenne | `jaymail-client` : `send_mail` piloté par l'IA accepte `bcc` → exfiltration par injection ; afficher tous les destinataires à la confirmation, refuser `bcc` depuis l'IA, signaler les destinataires hors contacts | C-50, C-51 |
 
 ## 7. Livrables
 
