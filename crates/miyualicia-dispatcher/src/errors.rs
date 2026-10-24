@@ -41,4 +41,9 @@ pub enum DispatchError {
     /// Erreur de transport / connexion vers le core ou le service.
     #[error("transport : {0}")]
     Transport(String),
+
+    /// Paramètres refusés par le service avant toute confirmation
+    /// (ex. destinataire caché d'un mail). Rien n'est proposé à l'utilisateur.
+    #[error("paramètres refusés : {0}")]
+    ParamsRefused(String),
 }

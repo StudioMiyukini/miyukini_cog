@@ -137,6 +137,33 @@ fn record_episode_and_recent_returns_in_order() {
 }
 
 #[test]
+fn recent_episodes_for_personas_filtre_en_sql() {
+    let s = store();
+    for persona in ["voice", "work", "intrus"] {
+        s.record_episode(&Episode::new(
+            persona.into(),
+            "jaykoa".into(),
+            "x".into(),
+            format!("phrase {persona}"),
+            json!({}),
+            EpisodeOutcome::Ok,
+            None,
+        ))
+        .unwrap();
+    }
+    let autorisees = vec!["voice".to_string(), "work".to_string()];
+    let r = s.recent_episodes_for_personas(&autorisees, 10).unwrap();
+    assert_eq!(r.len(), 2);
+    assert!(r.iter().all(|e| e.persona != "intrus"));
+    // Le filtre précède le LIMIT : limite 1 → un épisode autorisé.
+    let un = s.recent_episodes_for_personas(&autorisees, 1).unwrap();
+    assert_eq!(un.len(), 1);
+    assert_ne!(un[0].persona, "intrus");
+    // Aucune persona autorisée → rien.
+    assert!(s.recent_episodes_for_personas(&[], 10).unwrap().is_empty());
+}
+
+#[test]
 fn episodes_for_service_filters() {
     let s = store();
     s.record_episode(&Episode::new(

@@ -111,10 +111,16 @@ impl Dispatcher {
         let capability = self.resolve(qualified_id, registry)?;
 
         if self.should_confirm(&capability, persona, policy, memory)? {
-            let prompt = capability
+            let description = capability
                 .description
                 .clone()
                 .unwrap_or_else(|| capability.intent.clone());
+            // L'utilisateur confirme ce qui sera réellement fait (R-018).
+            let prompt = match service_client.confirmation_preview(&capability.qualified_id(), params) {
+                None => description,
+                Some(Ok(apercu)) => format!("{description}\n{apercu}"),
+                Some(Err(motif)) => return Err(DispatchError::ParamsRefused(motif)),
+            };
             return Ok(Decision::PendingConfirmation {
                 qualified_id: capability.qualified_id(),
                 prompt,

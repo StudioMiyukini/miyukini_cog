@@ -125,6 +125,7 @@ impl From<miyualicia::AliciaError> for ApiError {
             e @ miyualicia::AliciaError::PendingConfirmationAlreadyResolved { .. } => {
                 Self::Conflict(e.to_string())
             }
+            miyualicia::AliciaError::ParamsRefused(motif) => Self::UnprocessableEntity(motif),
             other => Self::AliciaError(other.to_string()),
         }
     }

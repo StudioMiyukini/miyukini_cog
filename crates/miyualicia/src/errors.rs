@@ -66,6 +66,11 @@ pub enum AliciaError {
         status: String,
     },
 
+    /// Parametres refuses par le service avant confirmation (R-018) :
+    /// rien n'est propose ni execute.
+    #[error("parametres refuses : {0}")]
+    ParamsRefused(String),
+
     /// Erreur interne imprevue.
     #[error("erreur interne : {0}")]
     InternalError(String),

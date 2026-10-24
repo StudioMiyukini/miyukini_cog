@@ -568,6 +568,11 @@ async fn episodes_recent_lists_dispatched_calls() {
             .await
             .unwrap();
     }
+    // Épisode d'une persona non autorisée pour ce client : jamais renvoyé (R-002).
+    runtime
+        .dispatch_capability("demo.ping", &Value::Null, "intrus", "secret")
+        .await
+        .unwrap();
 
     let (status, body) = json_get(
         router,

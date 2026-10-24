@@ -529,6 +529,21 @@ impl ServiceClient for JayMailClient {
             other => ServiceCallResult::fail(format!("intent JayMail non supporté : '{other}'")),
         }
     }
+
+    fn confirmation_preview(
+        &self,
+        qualified_id: &str,
+        params: &Value,
+    ) -> Option<Result<String, String>> {
+        match miyualicia_skills::split_qualified_id(qualified_id) {
+            Ok((service, intent)) if service == "jaymail" && intent == "send_mail" => Some(
+                Self::confirmation_preview(params)
+                    .map(|apercu| apercu.render())
+                    .map_err(|e| e.to_string()),
+            ),
+            _ => None,
+        }
+    }
 }
 
 // ----------------------------------------------------------------------

@@ -335,6 +335,8 @@ pub async fn persona_active(
         .memory()
         .active_persona_id()
         .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
+    // Persona active révélée seulement si le client y a droit (R-002).
+    let id = id.filter(|p| claims.allows_persona(p));
     Ok(Json(serde_json::json!({ "persona_id": id })))
 }
 
@@ -405,9 +407,10 @@ pub async fn episodes_recent(
     claims.require_scope(&JwtScope::Read)?;
     let runtime = capabilities_or_503(&state).await?;
     let limit = query.limit.unwrap_or(20).min(200);
+    // Seuls les épisodes des personas autorisées pour ce client (R-002).
     let episodes = runtime
         .memory()
-        .recent_episodes(limit)
+        .recent_episodes_for_personas(&claims.personas, limit)
         .map_err(|e| ApiError::InternalError(format!("memory: {e}")))?;
     Ok(Json(serde_json::json!({
         "episodes": episodes,

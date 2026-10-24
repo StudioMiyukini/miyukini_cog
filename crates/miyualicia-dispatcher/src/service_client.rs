@@ -58,6 +58,20 @@ impl ServiceCallResult {
 pub trait ServiceClient: Send + Sync {
     /// Invoque la capability.
     async fn call(&self, qualified_id: &str, params: &Value) -> ServiceCallResult;
+
+    /// Aperçu lisible des effets **réels** de l'appel, montré à l'utilisateur
+    /// dans la demande de confirmation (R-018, C-51). Doit être calculé avec
+    /// le même analyseur que l'exécution.
+    ///
+    /// - `None` : pas d'aperçu spécifique (description de la capability seule)
+    /// - `Some(Err(_))` : paramètres refusés — aucune confirmation proposée
+    fn confirmation_preview(
+        &self,
+        _qualified_id: &str,
+        _params: &Value,
+    ) -> Option<Result<String, String>> {
+        None
+    }
 }
 
 /// Mock programmable — utile pour les tests d'intégration du dispatcher.

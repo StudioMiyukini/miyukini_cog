@@ -567,7 +567,10 @@ fn skills_err(e: SkillsError) -> AliciaError {
 }
 
 fn dispatch_err(e: DispatchError) -> AliciaError {
-    AliciaError::InternalError(format!("dispatch: {e}"))
+    match e {
+        DispatchError::ParamsRefused(motif) => AliciaError::ParamsRefused(motif),
+        autre => AliciaError::InternalError(format!("dispatch: {autre}")),
+    }
 }
 
 /// Erreur d'I/O sur le chemin de la mémoire.

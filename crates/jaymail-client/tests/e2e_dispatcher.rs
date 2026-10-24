@@ -160,6 +160,63 @@ async fn capabilities_serialize_to_openai_tools() {
 }
 
 #[tokio::test]
+async fn confirmation_affiche_tous_les_destinataires() {
+    // R-018 : la demande de confirmation montre ce qui sera réellement envoyé.
+    let reg = load_jaymail_registry();
+    let mem = MemoryStore::open_in_memory().unwrap();
+    let client = JayMailClient::new(Arc::new(FakeJayMailBackend::new()));
+    let decision = Dispatcher::new()
+        .execute(
+            "jaymail.send_mail",
+            &json!({"to": "jean@x.com", "cc": "marie@y.com", "subject": "Bonjour", "body": "salut"}),
+            "voice",
+            "envoie un mail à Jean",
+            &reg,
+            &AliciaPolicy::strict(),
+            &BypassCoreGate,
+            &client,
+            &mem,
+        )
+        .await
+        .unwrap();
+    match decision {
+        Decision::PendingConfirmation { prompt, .. } => {
+            for attendu in ["jean@x.com", "marie@y.com", "Bonjour"] {
+                assert!(prompt.contains(attendu), "aperçu sans {attendu} : {prompt}");
+            }
+        }
+        autre => panic!("confirmation attendue, obtenu {autre:?}"),
+    }
+}
+
+#[tokio::test]
+async fn bcc_refuse_avant_toute_confirmation() {
+    // R-018 : des paramètres refusés ne produisent aucune demande de confirmation.
+    let reg = load_jaymail_registry();
+    let mem = MemoryStore::open_in_memory().unwrap();
+    let backend = Arc::new(FakeJayMailBackend::new());
+    let client = JayMailClient::new(backend.clone());
+    let r = Dispatcher::new()
+        .execute(
+            "jaymail.send_mail",
+            &json!({"to": "jean@x.com", "subject": "T", "body": "b", "bcc": "x@evil.com"}),
+            "voice",
+            "envoie",
+            &reg,
+            &AliciaPolicy::strict(),
+            &BypassCoreGate,
+            &client,
+            &mem,
+        )
+        .await;
+    assert!(
+        matches!(r, Err(miyualicia_dispatcher::DispatchError::ParamsRefused(_))),
+        "refus attendu : {r:?}"
+    );
+    assert_eq!(backend.snapshot_sent().len(), 0);
+}
+
+#[tokio::test]
 async fn send_mail_with_bcc_refused_even_after_confirmation() {
     // R-018 : le manifeste annonce encore `bcc`, mais le client le refuse
     // même après consentement utilisateur ; rien n'est envoyé.

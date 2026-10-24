@@ -383,6 +383,36 @@ impl MemoryStore {
             .map_err(MemoryError::from)
     }
 
+    /// Épisodes récents restreints à une liste de personas (filtre en SQL,
+    /// avant le `LIMIT`). Liste vide → aucun épisode. Au plus 64 personas.
+    pub fn recent_episodes_for_personas(
+        &self,
+        personas: &[String],
+        limit: usize,
+    ) -> Result<Vec<Episode>, MemoryError> {
+        if personas.is_empty() {
+            return Ok(Vec::new());
+        }
+        let personas = &personas[..personas.len().min(64)];
+        let marques = vec!["?"; personas.len()].join(", ");
+        let sql = format!(
+            "SELECT id, persona, service_id, intent, user_phrase, params_json,
+                    outcome, error, created_at
+             FROM episodes WHERE persona IN ({marques})
+             ORDER BY created_at DESC LIMIT ?{}",
+            personas.len() + 1
+        );
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(&sql)?;
+        let mut valeurs: Vec<&dyn rusqlite::ToSql> =
+            personas.iter().map(|p| p as &dyn rusqlite::ToSql).collect();
+        let limite = i64::try_from(limit).unwrap_or(i64::MAX);
+        valeurs.push(&limite);
+        let rows = stmt.query_map(valeurs.as_slice(), row_to_episode)?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(MemoryError::from)
+    }
+
     /// Liste les épisodes d'un service donné, plus récents d'abord.
     pub fn episodes_for_service(
         &self,
