@@ -134,6 +134,14 @@ mod tests {
     }
 
     #[test]
+    fn expired_session_rejected() {
+        let mgr = SessionManager::with_random_secret();
+        let token = mgr.create_session("prof-1", "Alice");
+        mgr.sessions.lock().unwrap().get_mut(&token).unwrap().expires_at = now_secs() - 1;
+        assert!(mgr.validate_token(&token).is_none());
+    }
+
+    #[test]
     fn revoked_session_rejected() {
         let mgr = SessionManager::with_random_secret();
         let token = mgr.create_session("prof-1", "Alice");

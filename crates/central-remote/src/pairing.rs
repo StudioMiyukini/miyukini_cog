@@ -18,8 +18,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 use x25519_dalek::{EphemeralSecret, PublicKey};
 
+/// Durée de validité par défaut d'un token API (30 jours).
+pub const DEFAULT_API_TOKEN_TTL_SECS: u64 = 30 * 24 * 3600;
+
 /// Gestionnaire d'appairage mobile.
 pub struct PairingManager {
+    /// Durée de validité des tokens API générés (secondes, jamais 0).
+    api_token_ttl_secs: u64,
     /// Devices whitelistés (device_id → infos).
     whitelist: Mutex<HashMap<String, PairedDevice>>,
     /// Tokens API actifs (token → infos).
@@ -68,7 +73,7 @@ pub struct ApiToken {
     pub token: String,
     pub device_name: String,
     pub created_at: u64,
-    /// 0 = pas d'expiration.
+    /// Expiration (secondes UNIX). Un token à 0 est considéré comme invalide.
     pub expires_at: u64,
 }
 
@@ -113,7 +118,14 @@ pub struct DiscoveryInfo {
 
 impl PairingManager {
     pub fn new() -> Self {
+        Self::with_token_ttl(DEFAULT_API_TOKEN_TTL_SECS)
+    }
+
+    /// Crée un gestionnaire avec une durée de vie de token API donnée
+    /// (0 → valeur par défaut de 30 jours).
+    pub fn with_token_ttl(ttl_secs: u64) -> Self {
         Self {
+            api_token_ttl_secs: if ttl_secs == 0 { DEFAULT_API_TOKEN_TTL_SECS } else { ttl_secs },
             whitelist: Mutex::new(HashMap::new()),
             api_tokens: Mutex::new(HashMap::new()),
             pending: Mutex::new(HashMap::new()),
@@ -143,23 +155,33 @@ impl PairingManager {
         self.api_tokens
             .lock()
             .map(|tokens| {
-                tokens.get(token).map_or(false, |t| {
-                    t.expires_at == 0 || t.expires_at > now_secs()
-                })
+                // Fail-closed : un token sans expiration (0) n'est jamais valide.
+                tokens
+                    .get(token)
+                    .map_or(false, |t| t.expires_at != 0 && t.expires_at > now_secs())
             })
             .unwrap_or(false)
     }
 
     /// Génère un nouveau token API (affiché en QR code sur le desktop).
+    /// Le token expire après la durée configurée (30 jours par défaut).
     pub fn generate_api_token(&self, device_name: &str) -> String {
+        self.generate_api_token_with_ttl(device_name, self.api_token_ttl_secs)
+    }
+
+    /// Génère un token API avec une durée de vie explicite (secondes, min. 1).
+    pub fn generate_api_token_with_ttl(&self, device_name: &str, ttl_secs: u64) -> String {
         let token = format!("myk_{}", Uuid::new_v4().as_simple());
+        let now = now_secs();
         let api_token = ApiToken {
             token: token.clone(),
             device_name: device_name.to_string(),
-            created_at: now_secs(),
-            expires_at: 0, // pas d'expiration
+            created_at: now,
+            expires_at: now.saturating_add(ttl_secs.max(1)),
         };
         if let Ok(mut tokens) = self.api_tokens.lock() {
+            // Purge des tokens expirés.
+            tokens.retain(|_, t| t.expires_at > now);
             tokens.insert(token.clone(), api_token);
         }
         token
@@ -238,7 +260,7 @@ impl PairingManager {
             .unwrap_or_default()
     }
 
-    /// Liste les devices appairés.
+    /// Liste les devices appairés (identifiants complets : usage Rust local uniquement).
     pub fn paired_devices(&self) -> Vec<PairedDevice> {
         self.whitelist
             .lock()
@@ -279,6 +301,18 @@ impl Default for PairingManager {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Masque un identifiant de device pour toute exposition hors processus
+/// (ex. `abc…yz`). Les identifiants courts sont entièrement masqués.
+pub fn mask_device_id(id: &str) -> String {
+    let chars: Vec<char> = id.chars().collect();
+    if chars.len() <= 8 {
+        return "***".into();
+    }
+    let head: String = chars[..3].iter().collect();
+    let tail: String = chars[chars.len() - 2..].iter().collect();
+    format!("{head}…{tail}")
 }
 
 fn now_secs() -> u64 {
@@ -329,6 +363,35 @@ mod tests {
 
         mgr.revoke_api_token(&token);
         assert!(!mgr.validate_api_token(&token));
+    }
+
+    #[test]
+    fn api_token_has_expiry_by_default() {
+        let mgr = PairingManager::new();
+        let token = mgr.generate_api_token("Tel");
+        let exp = mgr.api_tokens.lock().unwrap().get(&token).unwrap().expires_at;
+        assert_ne!(exp, 0);
+        let delta = exp - now_secs();
+        assert!(delta > 29 * 24 * 3600 && delta <= DEFAULT_API_TOKEN_TTL_SECS);
+    }
+
+    #[test]
+    fn api_token_expires() {
+        let mgr = PairingManager::with_token_ttl(3600);
+        let token = mgr.generate_api_token("Tel");
+        assert!(mgr.validate_api_token(&token));
+        // Simule l'écoulement du temps : expiration dans le passé.
+        mgr.api_tokens.lock().unwrap().get_mut(&token).unwrap().expires_at = now_secs() - 1;
+        assert!(!mgr.validate_api_token(&token));
+        // Un token sans expiration (0) est refusé (fail-closed).
+        mgr.api_tokens.lock().unwrap().get_mut(&token).unwrap().expires_at = 0;
+        assert!(!mgr.validate_api_token(&token));
+    }
+
+    #[test]
+    fn device_id_masked() {
+        assert_eq!(mask_device_id("abcdef-1234-uvwxyz"), "abc…yz");
+        assert_eq!(mask_device_id("short"), "***");
     }
 
     #[test]

@@ -10,7 +10,7 @@ use crate::data::profile_display_name;
 use crate::remote;
 use crate::state::{use_app_state, MainTab, OpenTab};
 use crate::theme::styles;
-use central_remote::server::RemoteServerConfig;
+use central_remote::server::{RemoteServerConfig, RemoteServerHandle};
 use dioxus::prelude::*;
 
 /// Header principal de l'application.
@@ -19,6 +19,9 @@ pub fn Header() -> Element {
     let mut state = use_app_state();
     let ctx = use_context::<crate::state::AppContext>();
     let mut remote_state = ctx.remote_state;
+    // Handle du serveur remote : le conserver ici (et le dropper à la
+    // désactivation) est ce qui arrête réellement le serveur.
+    let mut remote_handle = use_signal(|| None::<RemoteServerHandle>);
     let theme = state.read().current_theme;
     let c = theme.palette();
 
@@ -123,7 +126,10 @@ pub fn Header() -> Element {
                             onclick: move |_| {
                                 let currently_enabled = remote_state.read().enabled;
                                 if currently_enabled {
-                                    // Désactiver le remote
+                                    // Désactiver le remote : drop du handle = arrêt réel
+                                    // (HTTP, WebSocket ouverts, découverte UDP).
+                                    let old = remote_handle.write().take();
+                                    drop(old);
                                     remote_state.write().enabled = false;
                                     remote_state.write().server_addr = None;
                                     tracing::info!("CentralRemote désactivé");
@@ -141,6 +147,16 @@ pub fn Header() -> Element {
                                             .join("central.db")
                                             .to_string_lossy()
                                             .to_string(),
+                                        // Liste d'origines CORS explicite (vide = aucun CORS).
+                                        cors_allowed_origins: std::env::var("CENTRAL_REMOTE_CORS_ORIGINS")
+                                            .map(|v| {
+                                                v.split(',')
+                                                    .map(|o| o.trim().to_string())
+                                                    .filter(|o| !o.is_empty())
+                                                    .collect()
+                                            })
+                                            .unwrap_or_default(),
+                                        ..RemoteServerConfig::default()
                                     };
 
                                     // Sync l'état initial vers le bridge avant de démarrer le serveur
@@ -149,12 +165,16 @@ pub fn Header() -> Element {
                                     spawn(async move {
                                         match remote::start_remote(config).await {
                                             Ok(handle) => {
+                                                // Désactivé pendant le démarrage : on arrête aussitôt.
+                                                if !remote_state.read().enabled {
+                                                    drop(handle);
+                                                    return;
+                                                }
                                                 let addr = handle.addr_string();
                                                 tracing::info!("CentralRemote démarré sur {addr}");
                                                 remote_state.write().server_addr = Some(addr);
-                                                // Le handle est gardé en vie par le spawn — le serveur
-                                                // tourne tant que Central tourne.
-                                                std::mem::forget(handle);
+                                                // Conservé jusqu'à la désactivation (drop => shutdown).
+                                                *remote_handle.write() = Some(handle);
                                             }
                                             Err(e) => {
                                                 tracing::error!("CentralRemote échec: {e}");

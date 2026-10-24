@@ -24,6 +24,12 @@ pub const DISCOVERY_PORT: u16 = 19847;
 /// Magic bytes de la requête de découverte.
 const DISCOVERY_MAGIC: &[u8] = b"MIYUKINI_COG_DISCOVER_V1";
 
+/// La découverte LAN n'a de sens (et n'est sûre) que si le serveur HTTP écoute
+/// lui-même sur une interface non-loopback.
+pub fn should_start_discovery(http_addr: &std::net::SocketAddr) -> bool {
+    !http_addr.ip().to_canonical().is_loopback()
+}
+
 /// Lance le listener UDP de découverte en background.
 /// Retourne un handle pour l'arrêter.
 pub async fn start_discovery_listener(
@@ -112,6 +118,14 @@ mod tests {
     fn magic_bytes_match_bridge() {
         // Le magic doit être identique côté mobile
         assert_eq!(DISCOVERY_MAGIC, b"MIYUKINI_COG_DISCOVER_V1");
+    }
+
+    #[test]
+    fn discovery_only_when_non_loopback() {
+        assert!(!should_start_discovery(&"127.0.0.1:8091".parse().unwrap()));
+        assert!(!should_start_discovery(&"[::1]:8091".parse().unwrap()));
+        assert!(should_start_discovery(&"0.0.0.0:8091".parse().unwrap()));
+        assert!(should_start_discovery(&"192.168.1.10:8091".parse().unwrap()));
     }
 
     #[test]
