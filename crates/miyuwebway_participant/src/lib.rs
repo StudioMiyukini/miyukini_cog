@@ -134,9 +134,16 @@ mod tests {
         let c = ctx();
         let raw = declaration_build(&c, "payload").unwrap();
         assert_eq!(raw, b"payload");
-        let signed = declaration_sign(&c, &raw).unwrap();
-        assert!(declaration_validate(&c, &signed).unwrap());
-        assert!(declaration_verify(&c, &signed).unwrap());
+        // Fail-closed (audit C8) : sign/verify non implémentés tant que lot 2 : Ed25519.
+        assert!(matches!(
+            declaration_sign(&c, &raw),
+            Err(MiyuwebwayParticipantError::Unimplemented)
+        ));
+        assert!(declaration_validate(&c, &raw).unwrap());
+        assert!(matches!(
+            declaration_verify(&c, &raw),
+            Err(MiyuwebwayParticipantError::Unimplemented)
+        ));
     }
 
     #[test]

@@ -32,3 +32,4 @@ pub use types::{
     Attestation, IdentityArtefacts, IdentityContext, IdentityRole, VerificationResult,
 };
 pub use verify::verify as identity_verify;
+pub use verify::{verify_verified as identity_verify_verified, VerifiedArtifact, Verifie};

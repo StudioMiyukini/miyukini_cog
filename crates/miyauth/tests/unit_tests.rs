@@ -8,7 +8,7 @@
 //! @do documenter_tests
 
 use miyauth::{
-    identity_attest, identity_resolve, identity_role, identity_verify, GovernedContext,
+    identity_attest, identity_resolve, identity_role, identity_verify, identity_verify_verified, GovernedContext,
     IdentityArtefacts, IdentityContext, IdentityRole, MiyauthError, VerificationResult,
 };
 
@@ -39,7 +39,7 @@ fn sample_artefacts() -> IdentityArtefacts {
     }
 }
 
-/// Passeport/Visa mock au format MiyuAuth v1 : [0x01][expiry_nanos 8 bytes LE]. expiry=0 = pas d'expiration.
+/// Passeport/Visa mock au format MiyuAuth v1 : [0x01][expiry_nanos 8 bytes LE]. expiry=0 = pas d'expiration (jamais valide).
 fn mock_passport_valid_no_expiry() -> Vec<u8> {
     let mut b = vec![0x01u8];
     b.extend_from_slice(&0u64.to_le_bytes());
@@ -230,7 +230,7 @@ fn mauth_tool_001_resolve_no_mandate() {
     let ctx = empty_ctx();
     let artefacts = sample_artefacts();
 
-    let result = identity_resolve(&ctx, &artefacts);
+    let result = identity_resolve(&ctx, &artefacts, None, None);
 
     assert!(matches!(result, Err(MiyauthError::NoMandate)));
 }
@@ -288,17 +288,17 @@ fn mauth_tool_004_role_no_mandate() {
 /// @role test
 /// @layer toolkit
 /// @do mauth_tool_010_resolve_with_mandate
-//@human / @human identity_resolve avec mandat - vérifie résolution (Citizen car Passeport présent).
+//@human / @human identity_resolve avec mandat - vérifie résolution (External : artefacts bruts non vérifiés n'accordent aucun rôle).
 #[test]
 fn mauth_tool_010_resolve_with_mandate() {
     let ctx = governed_ctx();
     let artefacts = sample_artefacts();
 
-    let result = identity_resolve(&ctx, &artefacts);
+    let result = identity_resolve(&ctx, &artefacts, None, None);
 
     assert!(result.is_ok());
     let context = result.unwrap();
-    assert_eq!(context.role, IdentityRole::Citizen);
+    assert_eq!(context.role, IdentityRole::External);
     assert!(!context.opaque_id.is_empty());
     assert_eq!(context.opaque_id, "session-abc-123");
 }
@@ -307,7 +307,7 @@ fn mauth_tool_010_resolve_with_mandate() {
 /// @role test
 /// @layer toolkit
 /// @do mauth_tool_011_verify_with_mandate
-//@human / @human identity_verify avec mandat - vérifie Passeport mock valide (format v1, pas d'expiration).
+//@human / @human identity_verify avec mandat - format v1 non signé = Invalid (fail-closed, audit C8).
 #[test]
 fn mauth_tool_011_verify_with_mandate() {
     let ctx = governed_ctx();
@@ -316,14 +316,14 @@ fn mauth_tool_011_verify_with_mandate() {
     let result = identity_verify(&ctx, &passport_data);
 
     assert!(result.is_ok());
-    assert_eq!(result.unwrap(), VerificationResult::Valid);
+    assert_eq!(result.unwrap(), VerificationResult::Invalid);
 }
 
 /// @id MAUTH_TOOL_012
 /// @role test
 /// @layer toolkit
 /// @do mauth_tool_012_attest_with_mandate
-//@human / @human identity_attest avec mandat - vérifie production d'une attestation.
+//@human / @human identity_attest avec mandat - renvoie NotImplemented (fail-closed).
 #[test]
 fn mauth_tool_012_attest_with_mandate() {
     let ctx = governed_ctx();
@@ -331,9 +331,7 @@ fn mauth_tool_012_attest_with_mandate() {
 
     let result = identity_attest(&ctx, &identity_ctx);
 
-    assert!(result.is_ok());
-    let att = result.unwrap();
-    assert!(!att.attestation_id.is_empty());
+    assert!(matches!(result, Err(MiyauthError::NotImplemented(_))));
 }
 
 /// @id MAUTH_TOOL_013
@@ -377,7 +375,7 @@ fn mauth_r_001_artefacts_empty_data() {
         session_ref: Some(String::new()), // Session vide
     };
 
-    let result = identity_resolve(&ctx, &artefacts);
+    let result = identity_resolve(&ctx, &artefacts, None, None);
 
     assert!(result.is_ok());
     let context = result.unwrap();
@@ -462,4 +460,68 @@ fn mauth_d_003_debug_error() {
     let debug_str = format!("{:?}", err);
 
     assert!(debug_str.contains("NoMandate"));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Non-régression sécurité (audit C8) — fail-closed
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// @id MAUTH_SEC_001
+/// @role test
+/// @layer toolkit
+/// @do mauth_sec_001_forged_artifact_invalid
+//@human / @human Artefact forgé [0x01, 0x00 x8] (valide à vie avant correctif) = Invalid.
+#[test]
+fn mauth_sec_001_forged_artifact_invalid() {
+    let ctx = governed_ctx();
+    let forged = [0x01u8, 0, 0, 0, 0, 0, 0, 0, 0];
+    assert_eq!(identity_verify(&ctx, &forged).unwrap(), VerificationResult::Invalid);
+}
+
+/// @id MAUTH_SEC_002
+/// @role test
+/// @layer toolkit
+/// @do mauth_sec_002_future_expiry_still_invalid
+//@human / @human Un v1 non signé avec expiration lointaine n'est jamais Valid.
+#[test]
+fn mauth_sec_002_future_expiry_still_invalid() {
+    let ctx = governed_ctx();
+    for expiry in [1u64, u64::MAX, 4_000_000_000_000_000_000] {
+        let mut b = vec![0x01u8];
+        b.extend_from_slice(&expiry.to_le_bytes());
+        assert_ne!(identity_verify(&ctx, &b).unwrap(), VerificationResult::Valid);
+    }
+}
+
+/// @id MAUTH_SEC_003
+/// @role test
+/// @layer toolkit
+/// @do mauth_sec_003_verified_constructor_refuses_forged
+//@human / @human identity_verify_verified refuse l'artefact forgé (aucun Verifie constructible).
+#[test]
+fn mauth_sec_003_verified_constructor_refuses_forged() {
+    let ctx = governed_ctx();
+    let forged = mock_passport_valid_no_expiry();
+    let r = identity_verify_verified(&ctx, &forged);
+    assert!(matches!(
+        r,
+        Err(MiyauthError::VerificationFailed(VerificationResult::Invalid))
+    ));
+}
+
+/// @id MAUTH_SEC_004
+/// @role test
+/// @layer toolkit
+/// @do mauth_sec_004_resolve_never_grants_role_on_raw
+//@human / @human resolve n'accorde ni Citizen ni Visitor sur simple non-vacuité.
+#[test]
+fn mauth_sec_004_resolve_never_grants_role_on_raw() {
+    let ctx = governed_ctx();
+    let artefacts = IdentityArtefacts {
+        passport_raw: Some(mock_passport_valid_no_expiry()),
+        visa_raw: Some(mock_passport_valid_no_expiry()),
+        session_ref: None,
+    };
+    let c = identity_resolve(&ctx, &artefacts, None, None).unwrap();
+    assert_eq!(c.role, IdentityRole::External);
 }

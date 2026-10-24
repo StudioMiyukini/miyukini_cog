@@ -25,14 +25,13 @@ use miyukini_admin::module_testing_service::{
 };
 use miyukini_admin::services::{
     AuthService, AutoRecoveryService, DestructionAndReinitService, EnvironmentStateService,
-    PermissionService, PreDestructionBackupService,
+    PermissionService, PreDestructionBackupService, SetupGuard,
 };
 use miyukini_kernel::EnvConfig;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::{env, fs};
-use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
 /// @id miyukiniadmin_backend_app_state
@@ -85,6 +84,10 @@ struct AppState {
     /// @do documenter_reader
     /// @human Stub reader cellule Admin (pour enregistrement après add).
     admin_cell_reader: Arc<StubAdminCellReader>,
+    /// Jeton de setup à usage unique (ouvert seulement en état VIERGE ; audit H6).
+    setup_guard: Arc<SetupGuard>,
+    /// Sérialise les appels à create-admin (pas de course entre deux créations).
+    setup_lock: Arc<tokio::sync::Mutex<()>>,
 }
 
 /// Nom du cookie de session (HttpOnly, Path=/).
@@ -155,10 +158,20 @@ async fn main() {
 
     let data_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("data");
     let env_state_svc = Arc::new(EnvironmentStateService::new(data_dir.clone()));
-    let environment_state = env_state_svc
-        .detect()
-        .await
-        .unwrap_or(EnvironmentState::Vierge);
+    // Fail-closed (audit H6) : une erreur de détection donne COMPROMIS, jamais VIERGE
+    // (VIERGE ouvrirait le parcours de création du premier admin).
+    let environment_state = env_state_svc.detect_or_compromised().await;
+
+    // Jeton de setup à usage unique : généré seulement si l'environnement est VIERGE.
+    let setup_guard = Arc::new(if environment_state == EnvironmentState::Vierge {
+        SetupGuard::generate()
+    } else {
+        SetupGuard::closed()
+    });
+    if let Some(token) = setup_guard.token_for_console() {
+        // Affiché UNIQUEMENT sur la console locale ; jamais renvoyé par l'API ni journalisé ailleurs.
+        println!("MiyukiniAdmin SETUP — jeton à usage unique (à saisir dans /setup) : {token}");
+    }
 
     let backups = Arc::new(BackupServiceImpl::new().with_seed());
     let backups_dir = data_dir.join("backups");
@@ -217,12 +230,12 @@ async fn main() {
         module_lifecycle_svc,
         module_discovery,
         admin_cell_reader,
+        setup_guard,
+        setup_lock: Arc::new(tokio::sync::Mutex::new(())),
     };
 
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    // Pas de CORS : l'UI est servie par ce même serveur (même origine) et l'écoute est
+    // limitée à 127.0.0.1. Ancien `allow_origin(Any)` retiré (audit H6).
 
     let ui_path: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("ui");
     let shared_state = Arc::new(app_state);
@@ -235,8 +248,7 @@ async fn main() {
             middleware::from_fn_with_state(state_for_router, require_session_layer),
         ),
         EnvironmentState::Compromis => router_compromised_only(state_for_router, ui_path),
-    }
-    .layer(cors);
+    };
 
     let addr = SocketAddr::from(([127, 0, 0, 1], config.port));
     let scheme = if config.use_https { "https" } else { "http" };
@@ -366,6 +378,9 @@ struct CreateAdminBody {
     username: String,
     password: String,
     password_confirm: String,
+    /// Jeton de setup à usage unique affiché dans la console locale.
+    #[serde(default)]
+    setup_token: String,
 }
 
 /// POST /api/setup/create-admin : création du premier compte admin et génération EIP (First-boot).
@@ -375,38 +390,52 @@ struct CreateAdminBody {
 async fn api_setup_create_admin(
     State(state): State<Arc<AppState>>,
     JsonExtract(body): JsonExtract<CreateAdminBody>,
-) -> impl IntoResponse {
-    if state.environment_state != EnvironmentState::Vierge {
-        return Json(serde_json::json!({
-            "success": false,
-            "message": "Environnement déjà initialisé. Cette action n'est possible qu'au premier démarrage."
-        }));
+) -> Response {
+    // Sérialise les appels : pas de double création concurrente.
+    let _setup_lock = state.setup_lock.lock().await;
+    let refuse = |code: StatusCode, message: &str| {
+        (
+            code,
+            Json(serde_json::json!({ "success": false, "message": message })),
+        )
+            .into_response()
+    };
+    // Revérifie l'état SUR DISQUE à chaque appel (et non l'état figé au démarrage).
+    match state.environment_state_svc.detect().await {
+        Ok(EnvironmentState::Vierge) => {}
+        _ => {
+            state.setup_guard.close();
+            return refuse(
+                StatusCode::FORBIDDEN,
+                "Setup fermé : l'environnement n'est pas vierge.",
+            );
+        }
+    }
+    if state.environment_state != EnvironmentState::Vierge || !state.setup_guard.is_open() {
+        return refuse(StatusCode::FORBIDDEN, "Setup fermé.");
+    }
+    if !state.setup_guard.authorize(&body.setup_token) {
+        return refuse(StatusCode::FORBIDDEN, "Jeton de setup invalide.");
     }
     let username = body.username.trim();
     if username.is_empty() {
-        return Json(serde_json::json!({
-            "success": false,
-            "message": "Le nom d'utilisateur est requis."
-        }));
+        return refuse(StatusCode::OK, "Le nom d'utilisateur est requis.");
     }
     if body.password != body.password_confirm {
-        return Json(serde_json::json!({
-            "success": false,
-            "message": "Les mots de passe ne correspondent pas."
-        }));
+        return refuse(StatusCode::OK, "Les mots de passe ne correspondent pas.");
     }
     if body.password.len() < 12 {
-        return Json(serde_json::json!({
-            "success": false,
-            "message": "Le mot de passe doit contenir au moins 12 caractères."
-        }));
+        return refuse(StatusCode::OK, "Le mot de passe doit contenir au moins 12 caractères.");
     }
     match state
         .auth_svc
         .create_account(username, &body.password, AdminRole::Admin)
         .await
     {
-        Ok(_) => {}
+        Ok(_) => {
+            // Compte créé : jeton consommé immédiatement (même si l'écriture EIP échoue ensuite).
+            state.setup_guard.close();
+        }
         Err(e) => {
             let message = match e {
                 miyukini_admin::services::auth::CreateAccountError::PolicyViolation => {
@@ -422,30 +451,27 @@ async fn api_setup_create_admin(
                     "Erreur d'écriture du registre admin."
                 }
             };
-            return Json(serde_json::json!({ "success": false, "message": message }));
+            return refuse(StatusCode::OK, message);
         }
     }
     if let Err(_) = state.environment_state_svc.write_eip_stub().await {
-        return Json(serde_json::json!({
-            "success": false,
-            "message": "Profil admin créé mais échec de la génération EIP. Consultez les logs."
-        }));
+        return refuse(StatusCode::OK, "Profil admin créé mais échec de la génération EIP. Consultez les logs.");
     }
     if let Err(_) = state
         .environment_state_svc
         .write_bootstrap_schema_initial()
         .await
     {
-        return Json(serde_json::json!({
-            "success": false,
-            "message": "Profil admin et EIP créés mais échec du schéma bootstrap. Consultez les logs."
-        }));
+        return refuse(StatusCode::OK, "Profil admin et EIP créés mais échec du schéma bootstrap. Consultez les logs.");
     }
+    // Premier admin créé : la route est fermée définitivement (jeton consommé).
+    state.setup_guard.close();
     Json(serde_json::json!({
         "success": true,
         "message": "Profil administrateur créé. Redémarrez MiyukiniAdmin pour accéder au tableau de bord.",
         "next_step": "restart"
     }))
+    .into_response()
 }
 
 /// POST /api/auth/login : authentification admin ; en cas de succès, pose le cookie de session (HttpOnly).
@@ -465,7 +491,6 @@ async fn api_auth_login(
         Ok(session) => {
             let json = Json(serde_json::json!({
                 "success": true,
-                "session_id": session.session_id,
                 "role": serde_json::to_value(session.role).unwrap_or(serde_json::Value::Null),
                 "expires_at": session.expires_at.to_rfc3339()
             }));
@@ -1112,6 +1137,8 @@ const SETUP_HTML: &str = r#"<!DOCTYPE html>
     <input type="password" id="password" name="password" required minlength="12" autocomplete="new-password" placeholder="">
     <label for="password_confirm">Confirmer le mot de passe</label>
     <input type="password" id="password_confirm" name="password_confirm" required minlength="12" autocomplete="new-password" placeholder="">
+    <label for="setup_token">Jeton de setup (affiché dans la console du serveur)</label>
+    <input type="password" id="setup_token" name="setup_token" required autocomplete="off" placeholder="">
     <button type="submit" id="submit-btn">Créer le profil administrateur</button>
   </form>
   <div id="message" class="message" role="alert" style="display: none;"></div>
@@ -1131,6 +1158,7 @@ const SETUP_HTML: &str = r#"<!DOCTYPE html>
         var username = document.getElementById('username').value.trim();
         var password = document.getElementById('password').value;
         var password_confirm = document.getElementById('password_confirm').value;
+        var setup_token = document.getElementById('setup_token').value.trim();
         if (password !== password_confirm) {
           showMessage('Les mots de passe ne correspondent pas.', true);
           return;
@@ -1143,7 +1171,7 @@ const SETUP_HTML: &str = r#"<!DOCTYPE html>
         fetch('/api/setup/create-admin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username, password: password, password_confirm: password_confirm })
+          body: JSON.stringify({ username: username, password: password, password_confirm: password_confirm, setup_token: setup_token })
         }).then(function(r) { return r.json(); }).then(function(data) {
           if (data.success) {
             showMessage(data.message + ' Redémarrez l\'application pour accéder au tableau de bord.', false);

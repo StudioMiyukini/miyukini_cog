@@ -27,10 +27,12 @@ pub fn validate(ctx: &GovernedContext, declaration: &[u8]) -> Result<bool, Miyuw
 /// @layer tool
 /// @do mws_declaration_verify_under_governance
 //@human / @human Vérifie la signature d'une déclaration reçue ; exécution seule.
-/// Stub : pas de vérification signature ; retourne false (non vérifié).
+/// Fail-closed (audit C8) : aucune vérification de signature n'existe encore ; refus explicite
+/// (`Ok(false)` = non vérifié). lot 2 : Ed25519.
 pub fn verify(ctx: &GovernedContext, _declaration: &[u8]) -> Result<bool, MiyuwebwayTrackerError> {
     if !ctx.has_mandate() {
         return Err(MiyuwebwayTrackerError::NoMandate);
     }
+    // Refus explicite : ne jamais renvoyer true tant que la signature n'est pas vérifiée.
     Ok(false)
 }

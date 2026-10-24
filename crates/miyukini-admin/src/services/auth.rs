@@ -6,15 +6,82 @@ use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, Utc};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::fs;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 use uuid::Uuid;
 
 use crate::models::{AdminAccount, AdminRole, AdminSession};
+
+/// Échecs de connexion consécutifs avant verrouillage du compte.
+pub const MAX_FAILED_ATTEMPTS: u32 = 5;
+/// Durée de verrouillage (minutes) une fois le seuil atteint.
+pub const LOCKOUT_MINUTES: i64 = 15;
+
+/// Forme persistée d'un compte. `AdminAccount` masque le hash (`skip_serializing`) : sans ce
+/// miroir, le registre écrit sur disque perdrait `password_hash` et `failed_attempts` ne
+/// serait pas durable. `password_hash` a un défaut vide pour relire les anciens registres
+/// (un hash vide ne vérifie jamais : connexion refusée).
+#[derive(Serialize, Deserialize)]
+struct StoredAccount {
+    account_id: String,
+    username: String,
+    #[serde(default)]
+    password_hash: String,
+    role: AdminRole,
+    #[serde(default)]
+    mfa_enabled: bool,
+    #[serde(default)]
+    mfa_secret_encrypted: Option<String>,
+    created_at: DateTime<Utc>,
+    updated_at: DateTime<Utc>,
+    #[serde(default)]
+    last_login_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    locked_until: Option<DateTime<Utc>>,
+    #[serde(default)]
+    failed_attempts: u32,
+}
+
+impl From<StoredAccount> for AdminAccount {
+    fn from(s: StoredAccount) -> Self {
+        Self {
+            account_id: s.account_id,
+            username: s.username,
+            password_hash: s.password_hash,
+            role: s.role,
+            mfa_enabled: s.mfa_enabled,
+            mfa_secret_encrypted: s.mfa_secret_encrypted,
+            created_at: s.created_at,
+            updated_at: s.updated_at,
+            last_login_at: s.last_login_at,
+            locked_until: s.locked_until,
+            failed_attempts: s.failed_attempts,
+        }
+    }
+}
+
+impl From<&AdminAccount> for StoredAccount {
+    fn from(a: &AdminAccount) -> Self {
+        Self {
+            account_id: a.account_id.clone(),
+            username: a.username.clone(),
+            password_hash: a.password_hash.clone(),
+            role: a.role,
+            mfa_enabled: a.mfa_enabled,
+            mfa_secret_encrypted: a.mfa_secret_encrypted.clone(),
+            created_at: a.created_at,
+            updated_at: a.updated_at,
+            last_login_at: a.last_login_at,
+            locked_until: a.locked_until,
+            failed_attempts: a.failed_attempts,
+        }
+    }
+}
 
 /// @id miyukiniadmin_auth_service
 /// @role infrastructure
@@ -31,6 +98,8 @@ pub struct AuthService {
     /// Paramètres : idle timeout (secs), absolute timeout (secs).
     session_idle_timeout_secs: u64,
     session_absolute_timeout_secs: u64,
+    /// Sérialise les lectures-modifications-écritures du registre (compteur d'échecs).
+    registry_lock: Arc<Mutex<()>>,
 }
 
 impl AuthService {
@@ -47,6 +116,7 @@ impl AuthService {
             sessions: Arc::new(RwLock::new(HashMap::new())),
             session_idle_timeout_secs: 900,
             session_absolute_timeout_secs: 28800,
+            registry_lock: Arc::new(Mutex::new(())),
         }
     }
 
@@ -87,8 +157,11 @@ impl AuthService {
             return Ok(Vec::new());
         }
         let content = fs::read_to_string(&path).await?;
-        let accounts: Vec<AdminAccount> = serde_json::from_str(&content).unwrap_or_default();
-        Ok(accounts)
+        // Fail-closed : un registre illisible est une erreur (jamais « vide », ce qui
+        // permettrait de l'écraser ou de rejouer le setup).
+        let stored: Vec<StoredAccount> = serde_json::from_str(&content)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+        Ok(stored.into_iter().map(AdminAccount::from).collect())
     }
 
     /// Enregistre le registre admin.
@@ -99,7 +172,9 @@ impl AuthService {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).await?;
         }
-        let content = serde_json::to_string_pretty(accounts).unwrap_or_default();
+        let stored: Vec<StoredAccount> = accounts.iter().map(StoredAccount::from).collect();
+        let content = serde_json::to_string_pretty(&stored)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
         fs::write(&path, content).await
     }
 
@@ -117,23 +192,45 @@ impl AuthService {
         ip: Option<&str>,
         user_agent: Option<&str>,
     ) -> Result<AdminSession, LoginError> {
-        let accounts = self
+        let _guard = self.registry_lock.lock().await;
+        let mut accounts = self
             .load_registry()
             .await
             .map_err(|_| LoginError::InvalidCredentials)?;
-        let account = accounts
+        let idx = accounts
             .iter()
-            .find(|a| a.username.eq_ignore_ascii_case(username))
+            .position(|a| a.username.eq_ignore_ascii_case(username))
             .ok_or(LoginError::InvalidCredentials)?;
 
-        if let Some(locked) = account.locked_until {
+        if let Some(locked) = accounts[idx].locked_until {
             if Utc::now() < locked {
                 return Err(LoginError::AccountLocked);
             }
         }
 
-        Self::verify_password(password, &account.password_hash)
-            .map_err(|_| LoginError::InvalidCredentials)?;
+        if Self::verify_password(password, &accounts[idx].password_hash).is_err() {
+            // Compteur d'échecs persistant ; verrouillage au seuil (audit H6).
+            let acc = &mut accounts[idx];
+            acc.failed_attempts = acc.failed_attempts.saturating_add(1);
+            acc.updated_at = Utc::now();
+            if acc.failed_attempts >= MAX_FAILED_ATTEMPTS {
+                acc.locked_until = Some(Utc::now() + Duration::minutes(LOCKOUT_MINUTES));
+                acc.failed_attempts = 0;
+            }
+            // Si l'écriture échoue, on refuse quand même la connexion.
+            let _ = self.save_registry(&accounts).await;
+            return Err(LoginError::InvalidCredentials);
+        }
+
+        // Succès : remise à zéro du compteur et du verrou expiré.
+        {
+            let acc = &mut accounts[idx];
+            acc.failed_attempts = 0;
+            acc.locked_until = None;
+            acc.last_login_at = Some(Utc::now());
+        }
+        let _ = self.save_registry(&accounts).await;
+        let account = &accounts[idx];
 
         let now = Utc::now();
         let expires_at = now
@@ -197,6 +294,7 @@ impl AuthService {
         if username.is_empty() || password.len() < 12 {
             return Err(CreateAccountError::PolicyViolation);
         }
+        let _guard = self.registry_lock.lock().await;
         let mut accounts = self
             .load_registry()
             .await
@@ -255,4 +353,79 @@ pub enum CreateAccountError {
     HashError,
     /// Erreur I/O (fichier registre).
     Io,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tmp() -> PathBuf {
+        let d = std::env::temp_dir().join(format!("miyadmin-auth-{}", Uuid::new_v4()));
+        std::fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    async fn svc_with_admin() -> AuthService {
+        let svc = AuthService::new(tmp());
+        svc.create_account("root", "un-mot-de-passe-long", AdminRole::Admin)
+            .await
+            .unwrap();
+        svc
+    }
+
+    #[tokio::test]
+    async fn good_login_works_after_reload_from_disk() {
+        let svc = svc_with_admin().await;
+        // Le hash doit survivre à la persistance (régression : skip_serializing).
+        assert!(svc.login("root", "un-mot-de-passe-long", None, None).await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn account_locks_after_max_failures_even_with_good_password() {
+        let svc = svc_with_admin().await;
+        for _ in 0..MAX_FAILED_ATTEMPTS {
+            assert!(matches!(
+                svc.login("root", "mauvais", None, None).await,
+                Err(LoginError::InvalidCredentials)
+            ));
+        }
+        assert!(matches!(
+            svc.login("root", "un-mot-de-passe-long", None, None).await,
+            Err(LoginError::AccountLocked)
+        ));
+        let acc = &svc.load_registry().await.unwrap()[0];
+        assert!(acc.locked_until.is_some());
+    }
+
+    #[tokio::test]
+    async fn expired_lock_allows_login_and_resets_counter() {
+        let svc = svc_with_admin().await;
+        let mut accs = svc.load_registry().await.unwrap();
+        accs[0].locked_until = Some(Utc::now() - Duration::minutes(1));
+        accs[0].failed_attempts = 3;
+        svc.save_registry(&accs).await.unwrap();
+        assert!(svc.login("root", "un-mot-de-passe-long", None, None).await.is_ok());
+        let acc = &svc.load_registry().await.unwrap()[0];
+        assert_eq!(acc.failed_attempts, 0);
+        assert!(acc.locked_until.is_none());
+    }
+
+    #[tokio::test]
+    async fn failures_below_threshold_do_not_lock_and_success_resets() {
+        let svc = svc_with_admin().await;
+        for _ in 0..(MAX_FAILED_ATTEMPTS - 1) {
+            let _ = svc.login("root", "x", None, None).await;
+        }
+        assert!(svc.login("root", "un-mot-de-passe-long", None, None).await.is_ok());
+        assert_eq!(svc.load_registry().await.unwrap()[0].failed_attempts, 0);
+    }
+
+    #[tokio::test]
+    async fn corrupt_registry_is_an_error_not_empty() {
+        let d = tmp();
+        std::fs::write(d.join("admin_registry.json"), "{pas du json").unwrap();
+        let svc = AuthService::new(d);
+        assert!(svc.load_registry().await.is_err());
+        assert!(svc.create_account("a", "un-mot-de-passe-long", AdminRole::Admin).await.is_err());
+    }
 }

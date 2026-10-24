@@ -13,6 +13,7 @@ pub mod destruction_reinit;
 pub mod environment_state;
 pub mod permission;
 pub mod pre_destruction_backup;
+pub mod setup_guard;
 
 pub use auth::AuthService;
 pub use auto_recovery::AutoRecoveryService;
@@ -20,3 +21,4 @@ pub use destruction_reinit::DestructionAndReinitService;
 pub use environment_state::EnvironmentStateService;
 pub use permission::PermissionService;
 pub use pre_destruction_backup::PreDestructionBackupService;
+pub use setup_guard::SetupGuard;

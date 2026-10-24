@@ -4,6 +4,7 @@
 
 use crate::context::GovernedContext;
 use crate::errors::MiyauthError;
+use crate::verify::VerifiedArtifact;
 use crate::types::{IdentityArtefacts, IdentityContext, IdentityRole};
 use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 
@@ -16,11 +17,13 @@ use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 pub fn resolve(
     ctx: &GovernedContext,
     artefacts: &IdentityArtefacts,
+    passport: Option<&VerifiedArtifact>,
+    visa: Option<&VerifiedArtifact>,
 ) -> Result<IdentityContext, MiyauthError> {
     if !ctx.has_mandate() {
         return Err(MiyauthError::NoMandate);
     }
-    let role = derive_role(artefacts);
+    let role = derive_role(passport, visa);
     let opaque_id = artefacts
         .session_ref
         .as_deref()
@@ -30,20 +33,16 @@ pub fn resolve(
     Ok(IdentityContext { role, opaque_id })
 }
 
-/// Dérive le rôle à partir des artefacts (données déjà validées par KindMother).
-/// Citizen = Passeport non vide ; Visitor = Visa non vide sans Passeport ; sinon External.
-fn derive_role(artefacts: &IdentityArtefacts) -> IdentityRole {
-    let has_passport = artefacts
-        .passport_raw
-        .as_deref()
-        .map_or(false, |b| !b.is_empty());
-    let has_visa = artefacts
-        .visa_raw
-        .as_deref()
-        .map_or(false, |b| !b.is_empty());
-    if has_passport {
+/// Dérive le rôle uniquement à partir d'artefacts VÉRIFIÉS (`Verifie`, construit par `verify`).
+/// Citizen = Passeport vérifié ; Visitor = Visa vérifié ; sinon External (rôle le plus faible).
+/// La simple présence de données brutes dans `IdentityArtefacts` n'accorde jamais de rôle.
+fn derive_role(
+    passport: Option<&VerifiedArtifact>,
+    visa: Option<&VerifiedArtifact>,
+) -> IdentityRole {
+    if passport.is_some() {
         IdentityRole::Citizen
-    } else if has_visa {
+    } else if visa.is_some() {
         IdentityRole::Visitor
     } else {
         IdentityRole::External

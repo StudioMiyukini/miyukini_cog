@@ -149,6 +149,18 @@ impl EnvironmentStateService {
         Ok(EnvironmentState::Initialise)
     }
 
+    /// Détection fail-closed : toute erreur de `detect()` donne `Compromis` (jamais `Vierge`,
+    /// qui ouvrirait le parcours de création du premier admin). Audit H6.
+    pub async fn detect_or_compromised(&self) -> EnvironmentState {
+        match self.detect().await {
+            Ok(state) => state,
+            Err(e) => {
+                eprintln!("MiyukiniAdmin: détection d'état impossible ({e}) : état COMPROMIS (fail-closed)");
+                EnvironmentState::Compromis
+            }
+        }
+    }
+
     /// Retourne le répertoire de données (pour autres services).
     #[must_use]
     pub fn data_dir(&self) -> &PathBuf {
@@ -187,5 +199,34 @@ impl EnvironmentStateService {
         let schema = serde_json::json!({ "version": "1.0", "created_at_first_boot": true });
         let content = serde_json::to_string_pretty(&schema).unwrap_or_default();
         fs::write(&path, content).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tmp(name: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("miyadmin-env-{name}-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    #[tokio::test]
+    async fn empty_dir_is_vierge() {
+        let svc = EnvironmentStateService::new(tmp("vierge"));
+        assert_eq!(svc.detect_or_compromised().await, EnvironmentState::Vierge);
+    }
+
+    #[tokio::test]
+    async fn detect_error_is_compromis_not_vierge() {
+        // Un répertoire à la place de eip.blob : has_artifact=false (is_file) ; on force une
+        // erreur d'E/S avec un EIP illisible (permissions) impossible portablement, donc on
+        // utilise un registre non-UTF8 : read_to_string échoue => Err => Compromis.
+        let d = tmp("err");
+        std::fs::write(d.join("admin_registry.json"), [0xff, 0xfe, 0xfd]).unwrap();
+        let svc = EnvironmentStateService::new(d);
+        assert!(svc.detect().await.is_err());
+        assert_eq!(svc.detect_or_compromised().await, EnvironmentState::Compromis);
     }
 }

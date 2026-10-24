@@ -28,7 +28,10 @@ pub fn sign(
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Ok(declaration.to_vec())
+    // Fail-closed (audit C8) : renvoyer l'entrée simulerait une signature inexistante.
+    // lot 2 : Ed25519 (signature avec clé gouvernée).
+    let _ = declaration;
+    Err(MiyuwebwayParticipantError::Unimplemented)
 }
 
 /// @id miyuwebway_participant_mws_declaration_validate
@@ -58,5 +61,7 @@ pub fn verify(
     if !ctx.has_mandate() {
         return Err(MiyuwebwayParticipantError::NoMandate);
     }
-    Ok(true)
+    // Fail-closed (audit C8) : ne jamais renvoyer Ok(true) sans vérification réelle.
+    // lot 2 : Ed25519 (vérification de signature).
+    Err(MiyuwebwayParticipantError::Unimplemented)
 }

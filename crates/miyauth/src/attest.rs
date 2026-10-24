@@ -4,7 +4,6 @@
 use crate::context::GovernedContext;
 use crate::errors::MiyauthError;
 use crate::types::{Attestation, IdentityContext};
-use miyukini_kernel::{IdGenerator, UuidIdGenerator};
 
 /// @id miyauth_tool_identity_attest
 /// @role mutator
@@ -19,6 +18,9 @@ pub fn attest(
     if !ctx.has_mandate() {
         return Err(MiyauthError::NoMandate);
     }
-    let attestation_id = UuidIdGenerator.generate().to_string();
-    Ok(Attestation { attestation_id })
+    // Fail-closed (audit C8) : une attestation non liée au contexte et non signée serait
+    // une fausse preuve. Lot 2 : Ed25519 — attestation signée dérivée de `_context`.
+    Err(MiyauthError::NotImplemented(
+        "identity.attest (attestation signée Ed25519, lot 2)",
+    ))
 }
