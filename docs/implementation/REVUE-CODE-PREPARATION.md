@@ -127,8 +127,10 @@
 | R-026 | haute | ✅ (1fbb0c06) — Pairing : code de confirmation à 6 chiffres dérivé des seules clés, sans engagement → MITM par recherche de collision (~10⁶ essais) ; engagement préalable (hash de clé + nonce) avec nonces des deux côtés dans le code, ou empreinte complète / QR affiché par Central | C-23, C-24 |
 | R-027 | moyenne | ✅ (1fbb0c06) — Pairing : une demande en attente peut être écrasée par une autre clé ; l'approbation ne vérifie pas la clé ou le code vus par l'administrateur | C-12 |
 | R-028 | moyenne | ✅ (1fbb0c06) — Pairing : file d'attente plafonnée sans durée de vie → saturation ; TTL (10 min) et limite par source | C-13 |
-| R-029 | basse | Pairing : qui connaît un device_id peut faire échouer son pairing (mauvaise révélation) ou le bloquer 10 min (engagement concurrent) ; parade actuelle : Rejeter sur Central | — |
+| R-029 | basse | ✅ (révélation et relance signées et liées à la source) — Pairing : qui connaît un device_id peut faire échouer son pairing (mauvaise révélation) ou le bloquer 10 min (engagement concurrent) ; parade actuelle : Rejeter sur Central | — |
 | R-030 | moyenne | Portail web : login par `/auth` en clair, refusé par défaut depuis R-025 ; à migrer vers une session E2E ou un login local dédié | C-12 |
+| R-031 | moyenne | ✅ — Pairing : statut « approved » non authentifié cru par le téléphone (MITM) → confirmation du code sur le téléphone + handshake E2E avant épinglage | C-23 |
+| R-032 | basse | Pairing : engagement signé sans fraîcheur (rejouable après expiration, borné par TTL et quota) ; NAT partagé neutralise la liaison à la source ; « Non » sur le téléphone après approbation laisse la clé épinglée côté COG jusqu'à révocation | — |
 
 ## 7. Livrables
 
