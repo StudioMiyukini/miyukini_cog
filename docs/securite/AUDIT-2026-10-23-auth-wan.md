@@ -92,7 +92,7 @@ Market/forum Origin ; `enclosed_name()` dans l'installateur ; supprimer le repli
 MiyukiniAdmin `detect()` → `Compromis` ; reset COG réservé admin ; retirer keystore/Dioxus.toml/
 `Origin_VPS_SSH_and_IP` du suivi.
 
-**Lot 2 — identité cryptographique (le « passeport type NFT »)**
+**Lot 2 — identité cryptographique (le « passeport type NFT »)** — détail : [ARCHITECTURE-lot2-identite-signee.md](ARCHITECTURE-lot2-identite-signee.md)
 Passeport v1 signé Ed25519 (encodage canonique, étiquette de domaine `miyukini/passport/v1`, `issuer_cog_pk`,
 `subject_device_pk`, `scope`, `nbf/exp`, `serial`, `verify_strict`) ; preuve de possession par challenge ;
 registre de révocation append-only à têtes signées ; `cog_id` = empreinte de clé ; packages `.msp` signés par
