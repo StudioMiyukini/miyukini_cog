@@ -9,10 +9,13 @@
 //! Centralise les nœuds MAIA, orchestre les tâches, expose la MWS gateway.
 //!
 //! Usage :
-//!   team serve --port 7800
-//!   TEAM_CONFIG=team.toml team serve
+//!   team                                  (écoute 127.0.0.1:7800)
+//!   TEAM_CONFIG=team.toml team
+//!   TEAM_HMAC_SECRET=<secret> team        (Bearer exigé ; requis hors loopback)
 
 mod api;
+mod app;
+mod auth;
 mod config;
 mod mipower;
 mod mws;
@@ -20,13 +23,6 @@ mod nodes;
 mod orchestrator;
 
 use std::sync::Arc;
-
-use axum::{
-    routing::{delete, get, post},
-    Router,
-};
-use tower_http::cors::{Any, CorsLayer};
-use tower_http::trace::TraceLayer;
 
 use nodes::registry::NodeRegistry;
 use orchestrator::scheduler::TaskScheduler;
@@ -52,6 +48,18 @@ async fn main() {
 
     let cfg = config::load_or_create();
 
+    // Fail-closed (C-21/C-22) : pas d'écoute hors loopback sans secret.
+    if let Err(e) = config::validate_startup(&cfg) {
+        tracing::error!("{e}");
+        eprintln!("{e}");
+        std::process::exit(1);
+    }
+    if cfg.secret().is_none() {
+        tracing::warn!(
+            "Aucun hmac_secret configuré : routes ouvertes aux processus locaux (loopback uniquement)"
+        );
+    }
+
     tracing::info!("╔══════════════════════════════════════════════════╗");
     tracing::info!(
         "║     TEAM Hub v{}                          ║",
@@ -75,10 +83,19 @@ async fn main() {
     let registry = NodeRegistry::new();
     let scheduler = TaskScheduler::new();
 
-    let http_client = reqwest::Client::builder()
+    // Pas de suivi de redirection : une URL de nœud validée ne doit pas
+    // pouvoir rediriger le hub vers une destination arbitraire (SSRF).
+    let http_client = match reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(30))
+        .redirect(reqwest::redirect::Policy::none())
         .build()
-        .expect("reqwest client");
+    {
+        Ok(c) => c,
+        Err(e) => {
+            tracing::error!("Client HTTP impossible à construire : {e}");
+            std::process::exit(1);
+        }
+    };
 
     let state = AppState {
         registry: registry.clone(),
@@ -92,33 +109,13 @@ async fn main() {
     {
         let registry = registry.clone();
         let client = http_client.clone();
-        let interval = cfg.health_interval_secs;
-        let stale = cfg.stale_threshold_secs;
+        let config = Arc::clone(&state.config);
         tokio::spawn(async move {
-            nodes::heartbeat::run_heartbeat_loop(registry, client, interval, stale).await;
+            nodes::heartbeat::run_heartbeat_loop(registry, client, config).await;
         });
     }
 
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
-
-    let app = Router::new()
-        // ── Enregistrement MAIA ────────────────────────────────────
-        .route("/team/register", post(api::register_node))
-        .route("/team/heartbeat", post(api::node_heartbeat))
-        .route("/team/nodes/{id}", delete(api::unregister_node))
-        .route("/team/nodes", get(api::list_nodes_internal))
-        // ── MWS Gateway ────────────────────────────────────────────
-        .route("/api/task", post(mws::routes::submit_task))
-        .route("/api/task/{id}", get(mws::routes::get_task))
-        .route("/api/nodes", get(mws::routes::list_nodes))
-        .route("/api/sequences", get(mws::routes::list_sequences))
-        .route("/api/status", get(mws::routes::team_status))
-        .layer(cors)
-        .layer(TraceLayer::new_for_http())
-        .with_state(state);
+    let app = app::build_router(state);
 
     let listener = tokio::net::TcpListener::bind(&cfg.bind_addr)
         .await
@@ -138,7 +135,9 @@ async fn main() {
 }
 
 async fn shutdown_signal() {
-    tokio::signal::ctrl_c()
-        .await
-        .expect("Failed to install Ctrl+C handler");
+    if let Err(e) = tokio::signal::ctrl_c().await {
+        tracing::error!("Impossible d'installer le gestionnaire Ctrl+C : {e}");
+        // Sans gestionnaire, on ne déclenche pas d'arrêt : attente indéfinie.
+        std::future::pending::<()>().await;
+    }
 }

@@ -13,6 +13,10 @@
 //!
 //! Si le hub TEAM est injoignable au démarrage, MAIA continue en mode dégradé
 //! et réessaie le prochain heartbeat.
+//!
+//! Authentification : si la variable d'environnement `TEAM_HMAC_SECRET` est
+//! définie (même secret que le hub), chaque requête porte
+//! `Authorization: Bearer <secret>`. Le hub l'exige dès qu'un secret y est configuré.
 
 use serde::{Deserialize, Serialize};
 
@@ -72,20 +76,38 @@ impl NodeInfo {
     }
 }
 
+/// Variable d'environnement portant le secret partagé avec le hub TEAM.
+const TEAM_SECRET_ENV_VAR: &str = "TEAM_HMAC_SECRET";
+
 /// Client TEAM (HTTP).
 #[derive(Clone)]
 pub struct TeamClient {
     client: reqwest::Client,
     team_url: String,
     node_info: NodeInfo,
+    /// Secret Bearer (None = hub sans authentification, loopback uniquement).
+    auth_token: Option<String>,
 }
 
 impl TeamClient {
     pub fn new(client: reqwest::Client, team_url: String, node_info: NodeInfo) -> Self {
+        let auth_token = std::env::var(TEAM_SECRET_ENV_VAR)
+            .ok()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty());
         Self {
             client,
             team_url,
             node_info,
+            auth_token,
+        }
+    }
+
+    /// Ajoute l'en-tête `Authorization: Bearer` si un secret est configuré.
+    fn with_auth(&self, rb: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        match &self.auth_token {
+            Some(token) => rb.bearer_auth(token),
+            None => rb,
         }
     }
 
@@ -94,8 +116,7 @@ impl TeamClient {
     pub async fn register(&self) -> bool {
         let url = format!("{}/team/register", self.team_url);
         match self
-            .client
-            .post(&url)
+            .with_auth(self.client.post(&url))
             .json(&self.node_info)
             .timeout(std::time::Duration::from_secs(10))
             .send()
@@ -135,8 +156,7 @@ impl TeamClient {
         });
 
         match self
-            .client
-            .post(&url)
+            .with_auth(self.client.post(&url))
             .json(&body)
             .timeout(std::time::Duration::from_secs(5))
             .send()
@@ -176,8 +196,7 @@ impl TeamClient {
     pub async fn unregister(&self) {
         let url = format!("{}/team/nodes/{}", self.team_url, self.node_info.id);
         match self
-            .client
-            .delete(&url)
+            .with_auth(self.client.delete(&url))
             .timeout(std::time::Duration::from_secs(5))
             .send()
             .await

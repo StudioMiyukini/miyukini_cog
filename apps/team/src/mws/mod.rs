@@ -7,4 +7,4 @@
 pub mod policy;
 pub mod routes;
 
-pub use policy::is_allowed_destination;
+pub use policy::{is_allowed_destination, validate_node_url, NodeUrlError};

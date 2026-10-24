@@ -124,16 +124,32 @@ impl NodeRegistry {
     /// Enregistre un nouveau nœud (ou met à jour si déjà présent).
     pub fn register(&self, info: NodeInfo) {
         let id = info.id.clone();
-        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
         let entry = nodes.entry(id).or_insert_with(|| NodeEntry::new(info.clone()));
         entry.info = info;
         entry.last_seen = Instant::now();
         entry.status = NodeStatus::Online;
     }
 
+    /// Enregistre un nœud si la capacité `max_nodes` n'est pas atteinte
+    /// (C-13). La mise à jour d'un nœud déjà connu est toujours acceptée.
+    /// Retourne `false` si le registre est plein.
+    pub fn register_bounded(&self, info: NodeInfo, max_nodes: usize) -> bool {
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
+        if !nodes.contains_key(&info.id) && nodes.len() >= max_nodes {
+            return false;
+        }
+        let id = info.id.clone();
+        let entry = nodes.entry(id).or_insert_with(|| NodeEntry::new(info.clone()));
+        entry.info = info;
+        entry.last_seen = Instant::now();
+        entry.status = NodeStatus::Online;
+        true
+    }
+
     /// Met à jour le dernier heartbeat + health d'un nœud.
     pub fn heartbeat(&self, id: &str, health: NodeHealth, model_active: Option<String>, persona: Option<String>) {
-        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
         if let Some(entry) = nodes.get_mut(id) {
             entry.update_health(health);
             entry.info.model_active = model_active;
@@ -143,7 +159,7 @@ impl NodeRegistry {
 
     /// Marque un nœud comme offline (désenregistrement propre).
     pub fn unregister(&self, id: &str) {
-        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
         if let Some(entry) = nodes.get_mut(id) {
             entry.mark_offline();
         }
@@ -151,7 +167,7 @@ impl NodeRegistry {
 
     /// Marque les nœuds stale (pas vu depuis > threshold).
     pub fn mark_stale_nodes(&self, stale_threshold: Duration) {
-        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
         for entry in nodes.values_mut() {
             if entry.status == NodeStatus::Online && entry.age() > stale_threshold {
                 entry.mark_stale();
@@ -163,7 +179,7 @@ impl NodeRegistry {
     pub fn healthy_nodes(&self) -> Vec<NodeEntry> {
         self.nodes
             .read()
-            .unwrap()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
             .values()
             .filter(|e| e.status == NodeStatus::Online)
             .cloned()
@@ -172,18 +188,18 @@ impl NodeRegistry {
 
     /// Retourne tous les nœuds (tous statuts).
     pub fn all_nodes(&self) -> Vec<NodeEntry> {
-        self.nodes.read().unwrap_or_else(|e| e.into_inner()).values().cloned().collect()
+        self.nodes.read().unwrap_or_else(std::sync::PoisonError::into_inner).values().cloned().collect()
     }
 
     /// Retourne un nœud par ID.
     pub fn get(&self, id: &str) -> Option<NodeEntry> {
-        self.nodes.read().unwrap_or_else(|e| e.into_inner()).get(id).cloned()
+        self.nodes.read().unwrap_or_else(std::sync::PoisonError::into_inner).get(id).cloned()
     }
 
     /// Supprime les nœuds stale/offline non vus depuis > reap_threshold.
     /// Retourne le nombre de nœuds supprimés.
     pub fn reap_dead_nodes(&self, reap_threshold: Duration) -> usize {
-        let mut nodes = self.nodes.write().unwrap_or_else(|e| e.into_inner());
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
         let before = nodes.len();
         nodes.retain(|_, entry| {
             if entry.status == NodeStatus::Online {
@@ -199,7 +215,7 @@ impl NodeRegistry {
     pub fn online_count(&self) -> usize {
         self.nodes
             .read()
-            .unwrap()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
             .values()
             .filter(|e| e.status == NodeStatus::Online)
             .count()
@@ -207,7 +223,7 @@ impl NodeRegistry {
 
     /// Nombre total de nœuds dans le registre.
     pub fn total_count(&self) -> usize {
-        self.nodes.read().unwrap_or_else(|e| e.into_inner()).len()
+        self.nodes.read().unwrap_or_else(std::sync::PoisonError::into_inner).len()
     }
 }
 
@@ -278,6 +294,17 @@ mod tests {
         // Reap avec seuil très long — ne devrait rien supprimer
         let reaped = registry.reap_dead_nodes(Duration::from_secs(3600));
         assert_eq!(reaped, 0);
+        assert_eq!(registry.total_count(), 1);
+    }
+
+    #[test]
+    fn test_register_bounded() {
+        let registry = NodeRegistry::new();
+        assert!(registry.register_bounded(make_node("1"), 1));
+        // Registre plein : nouveau nœud refusé
+        assert!(!registry.register_bounded(make_node("2"), 1));
+        // Mise à jour d'un nœud existant toujours acceptée
+        assert!(registry.register_bounded(make_node("1"), 1));
         assert_eq!(registry.total_count(), 1);
     }
 
