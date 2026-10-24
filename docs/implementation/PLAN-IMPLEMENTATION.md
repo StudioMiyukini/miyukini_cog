@@ -147,11 +147,12 @@
     - `miyudouane` : instances par frontière, compilation, nftables, IPS, rendu des zones
     - `miyuvigie` : capteurs, règles intégrées et jeux de règles
     - CaringNanny module « vigies » ; WorrySentinel module « voies » (voie aveugle coupée)
+    - câblage `miyufrontiere` : Douane → Vigies, WorrySentinel → Portail et IPS, Portail → CDR ; lecteur `MDOU|` ; `Usage::Arretes` ; test de bout en bout au niveau bibliothèque (469db8bf)
+    - MiyuCloud : CDR sur toute écriture, quarantaine (3d632a16)
   - **Reste** :
-    - câblage Douane → Vigies (événements IPS) et WorrySentinel → Portail (`CoupureVoie`)
-    - lecteur nftables des Vigies aligné sur `MDOU|` + NFLOG (convention A-004) ; `miyuracine::Usage` indice 4 « arrêtés »
-    - adaptateur `miyucdr` → `Desarmement` du Portail
-    - MiyuCloud : CDR des envois + **quarantaine** des fichiers non désarmés (A-004)
+    - règles Vigies sur le motif de la Douane (LATERAL, NON-DECLARE intra-zone, COG → adresse du Portail hors port déclaré) : amendement à prévoir
+    - format de ligne du relais NFLOG à confirmer quand le relais existe
+    - reclassement des fichiers MiyuCloud `inconnu` hérités ; migration à exécuter sur PostgreSQL
     - séparation des processus entrant / sortant ; Portail en micro-VM ou espace réseau dédié
     - source de paquets NFQUEUE / NFLOG pour l'IPS et les Vigies
     - mise en forme du débit (`tc`)
