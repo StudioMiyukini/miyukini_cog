@@ -74,12 +74,11 @@
 <!-- @role security-posture -->
 <!-- @do assess_maia_llm_security -->
 
-- **Bind** : `127.0.0.1:11435` par défaut ; hors loopback **sans** `auth_key` → refus de démarrer (**fail-closed**, `config.rs` `validate_bind`, testé) ; nom d'hôte non parsable = non loopback
-- **Auth** : `Authorization: Bearer` ou `X-MAIA-Key`, comparaison à temps constant (`auth.rs`) ; sans clé sur loopback → tout accepté (fail-open local assumé)
+- **Bind** : `127.0.0.1:11435` par défaut ; hors loopback **sans** appelant épinglé → refus de démarrer (**fail-closed**, `config.rs` `validate_bind`, testé) ; nom d'hôte non parsable = non loopback
+- **Auth** (lot 2, sortie) : requêtes signées par des clés épinglées (`appelants_inference` pour `/v1/*`, usage `maia-llm/inference` ; `appelants_modeles` pour `/maia/llm/models*`, usage `maia-llm/modeles`) ; famille sans clé → 503, même en loopback ; `auth_key` / `X-MAIA-Key` / `--auth-key` retirés (plus de pass-through)
 - **CORS** : liste explicite, `*` ignoré, vide = aucun en-tête CORS
 - **Chargement** : uniquement des fichiers trouvés dans `models_dir` (pas de chemin libre) ; correspondance partielle par sous-chaîne → modèle chargé ambigu possible
 - **Gaps** :
-  - `--auth-key` en argument CLI visible dans la liste des processus
   - `max_tokens` sans plafond côté serveur ; un seul `Mutex` tenu pendant toute la génération → une requête longue bloque les autres
   - ChatML construit par concaténation : `role` / `content` non échappés → injection de balises `<|im_start|>system` possible
   - Gabarit ChatML imposé quel que soit le modèle

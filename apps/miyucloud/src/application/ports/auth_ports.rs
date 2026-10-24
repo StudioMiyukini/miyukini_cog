@@ -30,7 +30,7 @@ pub trait PasswordHasherPort: Send + Sync + 'static {
     async fn verify_password(&self, password: &str, hash: &str) -> Result<bool, DomainError>;
 }
 
-/// Claims contained in a JWT token
+/// Identité attachée à un jeton de session (porteur opaque, côté serveur).
 #[derive(Debug, Clone)]
 pub struct TokenClaims {
     /// Subject identifier (user ID)
@@ -39,7 +39,7 @@ pub struct TokenClaims {
     pub exp: i64,
     /// Issued at timestamp (seconds since Unix epoch)
     pub iat: i64,
-    /// JWT unique ID
+    /// Identifiant unique de la session d'accès
     pub jti: String,
     /// Username
     pub username: String,
@@ -49,18 +49,19 @@ pub struct TokenClaims {
     pub role: String,
 }
 
-/// Port for JWT token operations.
+/// Port des jetons de session.
 ///
-/// This trait abstracts token generation and validation, allowing the domain
-/// layer to remain independent of specific JWT implementations.
+/// Lot 2 : plus de JWT signé par un secret partagé. Un jeton d'accès est un
+/// identifiant **aléatoire opaque** (256 bits) ; l'identité qu'il désigne est
+/// conservée **côté serveur** et révocable. Aucune clé de signature n'existe.
 pub trait TokenServicePort: Send + Sync + 'static {
-    /// Generate an access token for a user
+    /// Ouvre une session d'accès pour `user` et rend son identifiant opaque.
     fn generate_access_token(&self, user: &User) -> Result<String, DomainError>;
 
-    /// Validate a token and extract its claims
+    /// Résout un identifiant de session (inconnu, expiré ou révoqué = refus).
     fn validate_token(&self, token: &str) -> Result<TokenClaims, DomainError>;
 
-    /// Generate a refresh token
+    /// Generate a refresh token (aléatoire, 256 bits)
     fn generate_refresh_token(&self) -> String;
 
     /// Get refresh token expiry in seconds
@@ -68,6 +69,15 @@ pub trait TokenServicePort: Send + Sync + 'static {
 
     /// Get refresh token expiry in days
     fn refresh_token_expiry_days(&self) -> i64;
+
+    /// Durée de vie d'une session d'accès (secondes).
+    fn access_token_expiry_secs(&self) -> i64;
+
+    /// Révoque une session d'accès (déconnexion). Rend vrai si elle existait.
+    fn revoke_token(&self, token: &str) -> bool;
+
+    /// Révoque toutes les sessions d'accès d'un utilisateur.
+    fn revoke_user(&self, user_id: Uuid) -> usize;
 }
 
 // ============================================================================

@@ -6,13 +6,13 @@
 
 //! Admin API handler for querying the persistent audit log.
 //!
-//! Requires admin role (uses admin_guard like all admin endpoints).
+//! Requires admin role (extracteur `AdminUser`, après `auth_middleware`).
 //! Provides filtering by user, action, date range, outcome.
 
+use crate::interfaces::middleware::auth::AdminUser;
 use axum::{
     Json,
     extract::{Query, State},
-    http::HeaderMap,
     response::IntoResponse,
 };
 use std::sync::Arc;
@@ -31,13 +31,10 @@ impl AuditHandler {
     /// Query params: user_id, action, resource_type, from, to, outcome, limit, offset
     pub async fn list_events(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
         Query(filter): Query<AuditFilter>,
         Query(pagination): Query<AuditPagination>,
     ) -> Result<impl IntoResponse, AppError> {
-        // Use same admin_guard as all other admin endpoints
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let audit_service = state
             .audit_service
             .as_ref()

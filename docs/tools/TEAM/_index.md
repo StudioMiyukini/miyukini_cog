@@ -94,3 +94,14 @@
 - Nœuds : URL validée (http/https, loopback ou `node_allowed_hosts`), revérifiée avant chaque sonde ; pas de redirection
 - Corps bornés (413), registre plafonné à 256 nœuds (503) ; 49 tests
 - Reste : file de tâches non consommée (R-007), écrasement d'un nœud par tout client authentifié
+
+## Mise à jour lot 2 — sortie (2026-10-24)
+
+<!-- @id tools.team.lot2 -->
+<!-- @role security-update -->
+<!-- @do record_team_lot2 -->
+
+- **Prime sur les sections précédentes** : plus de secret partagé (`hmac_secret`, `TEAM_HMAC_SECRET` ignorés, signalés au démarrage)
+- Toute route sauf `GET /team/health` exige une requête signée (`miyauth::http::service`) par une clé épinglée : `noeuds_autorises` (usage `team/noeud` : register, heartbeat, retrait) ou `clients_autorises` (usage `team/api` : `/team/nodes`, `/api/*`) ; famille sans clé ⇒ 503, même en loopback
+- Nœud lié à la clé qui l'a enregistré : autre clé ⇒ 409 (register) / 404 (heartbeat, retrait)
+- Le hub signe ses appels aux nœuds (`maia/team`) avec sa clé `cle_service` (défaut `keys/team.seed`, 0600) ; clé publique affichée au démarrage

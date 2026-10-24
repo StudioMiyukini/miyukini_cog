@@ -63,12 +63,30 @@ async fn main() {
 
     // Config
     let cfg = parse_args_and_load_config();
-    // Fail-closed : pas de bind hors loopback sans auth_key.
+    // Fail-closed : clés épinglées bien formées, pas de bind hors loopback sans appelant.
     if let Err(msg) = config::validate_bind(&cfg) {
         tracing::error!("{msg}");
         eprintln!("{msg}");
         std::process::exit(1);
     }
+    if cfg.auth_key.is_some() {
+        tracing::warn!("`auth_key` est obsolète et ignorée : épinglez les clés des appelants (appelants_inference / appelants_modeles)");
+    }
+    let gardes = match config::cles_appelants(&cfg) {
+        Ok((inference, modeles)) => {
+            if inference.is_empty() {
+                tracing::warn!("Aucun appelant épinglé pour /v1/* : requêtes refusées (503)");
+            }
+            if modeles.is_empty() {
+                tracing::warn!("Aucun appelant épinglé pour /maia/llm/models* : requêtes refusées (503)");
+            }
+            auth::Gardes::new(inference, modeles)
+        }
+        Err(e) => {
+            eprintln!("Refus de démarrer : {e}");
+            std::process::exit(1);
+        }
+    };
     let bind_addr = cfg.bind_addr.clone();
     let models_dir = cfg.models_dir.clone();
     let auto_load = cfg.auto_load;
@@ -121,10 +139,8 @@ async fn main() {
         started_at: Arc::new(SystemTime::now()),
     };
 
-    // Router
-    // Note: Extension<Option<String>> injectée ici pour le middleware auth
-    let app = api::build_router(state.clone())
-        .layer(axum::Extension(state.config.auth_key.clone()))
+    // Router (routes protégées : requêtes signées par un appelant épinglé)
+    let app = api::build_router(state.clone(), gardes)
         .layer(config::build_cors(&state.config.cors_allowed_origins))
         .layer(TraceLayer::new_for_http());
 
@@ -173,11 +189,11 @@ fn parse_args_and_load_config() -> Arc<config::MaiaLlmConfig> {
                 }
             }
             "--auth-key" => {
-                if let Some(v) = args.get(i + 1) {
-                    cfg.auth_key = Some(v.clone());
-                    i += 2;
-                    continue;
-                }
+                eprintln!(
+                    "--auth-key est retirée (lot 2 : plus de secret partagé). Épinglez la clé \
+                     publique de chaque appelant dans `appelants_inference` / `appelants_modeles`."
+                );
+                std::process::exit(2);
             }
             "--no-auto-load" => {
                 cfg.auto_load = false;

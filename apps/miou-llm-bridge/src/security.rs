@@ -7,12 +7,12 @@
 //! Sécurité — Auth, rate limiting, audit, sandboxing, anti-MITM, chiffrement.
 //!
 //! Garantit la sécurité des données, des requêtes et la disponibilité.
-//! - Bearer token authentication
+//! - Authentification : requêtes signées par des appelants épinglés
+//!   (module `signature` ; plus de jeton Bearer ni de secret HMAC partagés, lot 2)
 //! - Rate limiting par agent et par endpoint
 //! - Audit log de toutes les actions (agents + sécurité)
 //! - Vérification des permissions (agent → skill)
 //! - Validation d'origine (anti-appels externes non autorisés)
-//! - Signature HMAC-SHA256 (primitives disponibles, NON appliquées par le middleware)
 //! - Chiffrement AES-256-GCM des réponses sensibles
 
 use serde::{Deserialize, Serialize};
@@ -210,70 +210,6 @@ pub fn check_agent_skill_permission(agent: &AgentDef, skill_id: &str) -> Permiss
     }
 
     PermissionCheck::Allowed
-}
-
-/// Comparaison de secrets en temps constant.
-///
-/// Les deux entrées sont d'abord hachées (SHA-256) : les digests ont une
-/// longueur fixe, donc ni le contenu ni la longueur du secret ne fuient par
-/// le temps d'exécution. Le XOR est cumulé sans court-circuit.
-pub fn ct_eq(a: &[u8], b: &[u8]) -> bool {
-    use sha2::Digest;
-    let da = sha2::Sha256::digest(a);
-    let db = sha2::Sha256::digest(b);
-    da.iter()
-        .zip(db.iter())
-        .fold(0u8, |acc, (x, y)| acc | (x ^ y))
-        == 0
-}
-
-/// Vrai si l'en-tête `Host` désigne la machine locale (`localhost`, `127.0.0.1`,
-/// `[::1]`, avec ou sans port). Absent ou autre nom : faux (fail-closed).
-/// Protège l'usage loopback sans token contre le DNS rebinding.
-pub fn is_loopback_host(headers: &axum::http::HeaderMap) -> bool {
-    let Some(host) = headers
-        .get(axum::http::header::HOST)
-        .and_then(|v| v.to_str().ok())
-    else {
-        return false;
-    };
-    let host = host.trim().to_ascii_lowercase();
-    let name = if let Some(rest) = host.strip_prefix('[') {
-        // IPv6 entre crochets : "[::1]" ou "[::1]:11435"
-        match rest.split_once(']') {
-            Some((addr, tail)) if tail.is_empty() || tail.starts_with(':') => addr.to_string(),
-            _ => return false,
-        }
-    } else {
-        host.split(':').next().unwrap_or_default().to_string()
-    };
-    matches!(name.as_str(), "localhost" | "127.0.0.1" | "::1")
-}
-
-/// Vérifie le token d'authentification (fail-closed : pas de token configuré = refus).
-pub fn verify_auth_token(
-    headers: &axum::http::HeaderMap,
-    expected_token: &Option<String>,
-) -> Result<(), &'static str> {
-    let Some(expected) = expected_token.as_deref().filter(|t| !t.is_empty()) else {
-        return Err("Aucun token configuré côté serveur");
-    };
-
-    let auth_header = headers
-        .get(axum::http::header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok());
-
-    match auth_header {
-        Some(value) => {
-            let token = value.strip_prefix("Bearer ").unwrap_or(value);
-            if ct_eq(token.as_bytes(), expected.as_bytes()) {
-                Ok(())
-            } else {
-                Err("Token invalide")
-            }
-        }
-        None => Err("Header Authorization manquant"),
-    }
 }
 
 /// Autorise l'exécution d'un skill pour un agent donné (fail-closed).
@@ -500,144 +436,11 @@ fn match_cidr(ip_str: &str, cidr: &str) -> bool {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// Signature HMAC-SHA256 (anti-MITM)
+// En-têtes COG
 // ═══════════════════════════════════════════════════════════════════════
 
-/// Headers utilisés pour la signature inter-services COG.
-pub const HEADER_COG_SIGNATURE: &str = "x-cog-signature";
-pub const HEADER_COG_TIMESTAMP: &str = "x-cog-timestamp";
-pub const HEADER_COG_SERVICE: &str = "x-cog-service";
+/// En-tête par lequel un client demande une réponse chiffrée.
 pub const HEADER_COG_ENCRYPT: &str = "x-cog-encrypt";
-
-/// Résultat de la vérification HMAC.
-#[derive(Debug)]
-pub enum HmacCheck {
-    /// Pas de HMAC configuré — vérification ignorée.
-    NotConfigured,
-    /// Signature valide.
-    Valid { service_id: String },
-    /// Signature invalide ou expirée.
-    Invalid(String),
-}
-
-/// Vérifie la signature HMAC-SHA256 d'une requête inter-service.
-///
-/// NOTE SÉCURITÉ : cette fonction n'est actuellement appelée par AUCUN handler
-/// (le middleware ne peut pas lire le body sans le consommer, et une requête
-/// sans signature retourne `NotConfigured`, donc ne serait pas rejetée). Le
-/// choix du lot 1 est de RETIRER la promesse anti-MITM (voir main.rs et
-/// /v1/security/status : `enforced=false`) plutôt que de la simuler. La
-/// protection réelle repose sur Bearer + loopback/TLS en frontal.
-///
-/// Le message signé est : `{timestamp}:{method}:{path}:{body_hash}`
-/// où body_hash = hex(SHA256(body)).
-///
-/// Anti-replay : le timestamp doit être dans la fenêtre `hmac_max_age_secs`.
-pub fn verify_hmac(
-    headers: &axum::http::HeaderMap,
-    method: &str,
-    path: &str,
-    body: &[u8],
-    config: &SecurityConfig,
-) -> HmacCheck {
-    let Some(ref secret) = config.hmac_secret else {
-        return HmacCheck::NotConfigured;
-    };
-
-    // Extraire les headers COG
-    let signature = match headers
-        .get(HEADER_COG_SIGNATURE)
-        .and_then(|v| v.to_str().ok())
-    {
-        Some(s) => s,
-        None => return HmacCheck::NotConfigured, // Pas de signature = pas un appel inter-service
-    };
-
-    let timestamp_str = match headers
-        .get(HEADER_COG_TIMESTAMP)
-        .and_then(|v| v.to_str().ok())
-    {
-        Some(t) => t,
-        None => return HmacCheck::Invalid("Header X-COG-Timestamp manquant".into()),
-    };
-
-    let service_id = headers
-        .get(HEADER_COG_SERVICE)
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("unknown")
-        .to_string();
-
-    // Vérifier le timestamp (anti-replay)
-    let timestamp: u64 = match timestamp_str.parse() {
-        Ok(t) => t,
-        Err(_) => return HmacCheck::Invalid("Timestamp invalide".into()),
-    };
-
-    let now = epoch_now();
-    let age = if now > timestamp {
-        now - timestamp
-    } else {
-        timestamp - now
-    };
-
-    if age > config.hmac_max_age_secs {
-        return HmacCheck::Invalid(format!(
-            "Requête expirée (age: {age}s, max: {}s) — possible attaque par rejeu",
-            config.hmac_max_age_secs
-        ));
-    }
-
-    // Calculer le hash du body
-    use sha2::Digest;
-    let body_hash = hex::encode(sha2::Sha256::digest(body));
-
-    // Construire le message à vérifier
-    let message = format!("{timestamp}:{method}:{path}:{body_hash}");
-
-    // Vérifier la signature HMAC-SHA256
-    use hmac::{Hmac, Mac};
-    type HmacSha256 = Hmac<sha2::Sha256>;
-
-    let Ok(mut mac) = HmacSha256::new_from_slice(secret.as_bytes()) else {
-        return HmacCheck::Invalid("Clé HMAC invalide".into());
-    };
-
-    mac.update(message.as_bytes());
-
-    let Ok(expected_signature) = hex::decode(signature) else {
-        return HmacCheck::Invalid("Signature non hex-valide".into());
-    };
-
-    match mac.verify_slice(&expected_signature) {
-        Ok(()) => HmacCheck::Valid { service_id },
-        Err(_) => HmacCheck::Invalid(format!(
-            "Signature HMAC invalide (service: {service_id}) — possible MITM"
-        )),
-    }
-}
-
-/// Génère une signature HMAC-SHA256 pour un appel sortant vers un service COG.
-pub fn sign_request(
-    method: &str,
-    path: &str,
-    body: &[u8],
-    secret: &str,
-    service_id: &str,
-) -> (String, String, String) {
-    use sha2::Digest;
-    let timestamp = epoch_now().to_string();
-    let body_hash = hex::encode(sha2::Sha256::digest(body));
-    let message = format!("{timestamp}:{method}:{path}:{body_hash}");
-
-    use hmac::{Hmac, Mac};
-    type HmacSha256 = Hmac<sha2::Sha256>;
-
-    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC key");
-    mac.update(message.as_bytes());
-    let signature = hex::encode(mac.finalize().into_bytes());
-
-    (signature, timestamp, service_id.to_string())
-}
 
 // ═══════════════════════════════════════════════════════════════════════
 // Chiffrement AES-256-GCM des réponses
@@ -804,48 +607,6 @@ impl SecurityAuditLog {
 mod tests {
     use super::*;
     use axum::http::{header, HeaderMap, HeaderValue};
-
-    fn auth(v: &str) -> HeaderMap {
-        let mut h = HeaderMap::new();
-        h.insert(header::AUTHORIZATION, HeaderValue::from_str(v).unwrap());
-        h
-    }
-
-    #[test]
-    fn ct_eq_compare_correctement() {
-        assert!(ct_eq(b"secret", b"secret"));
-        assert!(!ct_eq(b"secret", b"secreT"));
-        assert!(!ct_eq(b"secret", b"secret2"));
-        assert!(!ct_eq(b"", b"x"));
-        assert!(ct_eq(b"", b""));
-    }
-
-    #[test]
-    fn verify_auth_token_fail_closed() {
-        let tok = Some("abc".to_string());
-        assert!(verify_auth_token(&auth("Bearer abc"), &tok).is_ok());
-        assert!(verify_auth_token(&auth("Bearer abd"), &tok).is_err());
-        assert!(verify_auth_token(&HeaderMap::new(), &tok).is_err());
-        // Aucun token côté serveur => refus (et non plus accès libre).
-        assert!(verify_auth_token(&auth("Bearer abc"), &None).is_err());
-        assert!(verify_auth_token(&auth("Bearer "), &Some(String::new())).is_err());
-    }
-
-    #[test]
-    fn host_loopback_seulement() {
-        let h = |v: &str| {
-            let mut m = HeaderMap::new();
-            m.insert(axum::http::header::HOST, v.parse().unwrap());
-            m
-        };
-        for ok in ["localhost", "localhost:11435", "127.0.0.1:11435", "[::1]", "[::1]:11435", "LOCALHOST"] {
-            assert!(is_loopback_host(&h(ok)), "{ok} devrait être accepté");
-        }
-        for ko in ["evil.example", "evil.example:11435", "127.0.0.1.evil.example", "[::1]evil", "192.168.1.10:11435"] {
-            assert!(!is_loopback_host(&h(ko)), "{ko} devrait être refusé");
-        }
-        assert!(!is_loopback_host(&HeaderMap::new()));
-    }
 
     #[test]
     fn agent_id_absent_refuse() {

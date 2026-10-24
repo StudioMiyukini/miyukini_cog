@@ -51,8 +51,7 @@ tower = { version = "0.5", features = ["util"] }
 rodio = { version = "0.21", default-features = false, features = ["playback", "wav"] }
 hound = "3.5"
 
-# Cryptographie (HMAC anti-MITM + AES-256-GCM chiffrement réponses)
-hmac = "0.12"
+# Cryptographie (AES-256-GCM chiffrement réponses ; empreintes)
 sha2 = "0.10"
 aes-gcm = "0.10"
 hex = "0.4"
@@ -61,6 +60,10 @@ rand = "0.8"
 
 # Identifiant de nœud TEAM (hostname)
 hostname = "0.4"
+
+# Requêtes signées entrantes / sortantes (lot 2 : plus de secret partagé)
+miyauth   = { path = "../../crates/miyauth", features = ["http"] }
+miyusceau = { path = "../../crates/miyusceau" }
 
 # Porte obligatoire StrongFather (K-11) : outils et administration des agents
 bondingbrother = { path = "../../crates/bondingbrother" }

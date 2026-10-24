@@ -13,7 +13,10 @@
 //! affiche le nom et l'identifiant de l'appareil, l'empreinte de sa clé et le
 //! code de confirmation à 8 chiffres (dès que l'appareil a révélé son aléa),
 //! ainsi que l'empreinte de la clé du COG. « Approuver » transmet le code
-//! affiché à `approve_device`, qui refuse s'il ne correspond plus à la demande.
+//! affiché à `approve_device_for`, qui refuse s'il ne correspond plus à la demande.
+//! L'appareil approuvé est lié au profil connecté (titulaire de ses passeports).
+//! « Révoquer » ajoute sa clé à la liste de révocation du COG : ses passeports,
+//! visas et sessions WebSocket sont refusés immédiatement.
 
 use crate::remote;
 use crate::state::AppContext;
@@ -147,6 +150,7 @@ fn PendingDeviceRow(
 ) -> Element {
     let id_for_approve = device_id.clone();
     let id_for_reject = device_id.clone();
+    let app_state = crate::state::use_app_state();
     let mut error = use_signal(|| None::<String>);
     let code_display = confirmation_code
         .as_deref()
@@ -196,7 +200,8 @@ fn PendingDeviceRow(
                     };
                     if let Some(mgr) = remote::pairing_manager() {
                         // Le code transmis est celui affiché : refus s'il a changé (R-027).
-                        match mgr.approve_device(&id_for_approve, &code) {
+                        let profile_id = app_state.read().current_user.as_ref().map(|p| p.id.clone());
+                        match mgr.approve_device_for(&id_for_approve, &code, profile_id.as_deref()) {
                             Ok(()) => tracing::info!("Device approuvé"),
                             Err(e) => {
                                 tracing::warn!("Approbation refusée: {e}");

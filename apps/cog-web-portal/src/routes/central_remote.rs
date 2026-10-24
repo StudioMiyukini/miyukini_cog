@@ -4,46 +4,34 @@
 //! @do serve_central_remote_ui
 //! @role   api
 //! @layer app
-//! @human  Routes /central-remote : page de login, UI remote, proxy WebSocket.
+//! @human  Routes /central-remote : pilotage par navigateur retiré (sortie du lot 2), message explicatif.
 
-use axum::Extension;
+//! Sortie du lot 2 : CentralRemote n'authentifie plus par courriel + mot de
+//! passe ni par jeton au porteur (`/auth`, `/ws?token=` retirés). Seuls les
+//! appareils appairés (passeport d'appareil + visa + preuve de possession) sont
+//! acceptés ; un navigateur sans clé d'appareil ne peut pas piloter Central.
+//! Les routes restent pour expliquer la situation plutôt que d'échouer en silence.
+
 use axum::extract::State;
-use axum::http::StatusCode;
 use axum::response::Html;
+use axum::Extension;
 
-use crate::AppState;
 use crate::security_headers::CspNonce;
-use crate::templates::{render_central_remote_login, render_central_remote_ui, render_error};
+use crate::templates::render_error;
+use crate::AppState;
 
-/// GET /central-remote — page de connexion CentralRemote.
-/// Si Central n'a pas activé le remote, affiche un message d'information.
+/// Message affiché à la place du pilotage par navigateur.
+pub const MESSAGE_PILOTAGE_RETIRE: &str = "Le pilotage de Central depuis le navigateur est retiré : \
+     CentralRemote n'accepte plus que des appareils appairés (passeport d'appareil). \
+     Utilisez Central Mobile, appairé depuis Central Desktop.";
+
+/// GET /central-remote — information : pilotage par navigateur retiré.
 pub async fn central_remote_login(
     State(state): State<AppState>,
     Extension(CspNonce(nonce)): Extension<CspNonce>,
 ) -> Html<String> {
-    let remote_addr = state.central_remote_addr.as_deref();
-
-    match remote_addr {
-        Some(addr) => {
-            // Vérifie que le serveur remote Central est joignable.
-            let status_url = format!("http://{addr}/status");
-            let reachable = reqwest::Client::new()
-                .get(&status_url)
-                .timeout(std::time::Duration::from_secs(3))
-                .send()
-                .await
-                .is_ok();
-
-            if reachable {
-                Html(render_central_remote_login(addr, &nonce))
-            } else {
-                Html(render_error(
-                    503,
-                    "Central n'est pas joignable. Vérifiez que Central est lancé et que le remote est activé.",
-                    &nonce,
-                ))
-            }
-        }
+    match state.central_remote_addr.as_deref() {
+        Some(_) => Html(render_error(410, MESSAGE_PILOTAGE_RETIRE, &nonce)),
         None => Html(render_error(
             503,
             "Le remote Central n'est pas configuré sur ce portail. Configurez PORTAL_CENTRAL_REMOTE_ADDR.",
@@ -52,17 +40,10 @@ pub async fn central_remote_login(
     }
 }
 
-/// GET /central-remote/app — interface de contrôle à distance (nécessite un token JS-side).
+/// GET /central-remote/app — information : pilotage par navigateur retiré.
 pub async fn central_remote_app(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     Extension(CspNonce(nonce)): Extension<CspNonce>,
 ) -> Html<String> {
-    match state.central_remote_addr.as_deref() {
-        Some(addr) => Html(render_central_remote_ui(addr, &nonce)),
-        None => Html(render_error(
-            503,
-            "Le remote Central n'est pas configuré.",
-            &nonce,
-        )),
-    }
+    Html(render_error(410, MESSAGE_PILOTAGE_RETIRE, &nonce))
 }

@@ -14,10 +14,14 @@
 //! Si le hub TEAM est injoignable au démarrage, MAIA continue en mode dégradé
 //! et réessaie le prochain heartbeat.
 //!
-//! Authentification : si la variable d'environnement `TEAM_HMAC_SECRET` est
-//! définie (même secret que le hub), chaque requête porte
-//! `Authorization: Bearer <secret>`. Le hub l'exige dès qu'un secret y est configuré.
+//! Authentification (lot 2, #7) : chaque requête est signée par la clé de service
+//! de MAIA (usage [`USAGE_TEAM_NOEUD`]) ; le hub épingle sa clé publique
+//! (`noeuds_autorises`) et lie le nœud enregistré à cette clé. Plus de secret
+//! partagé (`TEAM_HMAC_SECRET` n'est plus lu).
 
+use std::sync::Arc;
+
+use miyusceau::CleSignature;
 use serde::{Deserialize, Serialize};
 
 use crate::hardware::HardwareInfo;
@@ -76,8 +80,8 @@ impl NodeInfo {
     }
 }
 
-/// Variable d'environnement portant le secret partagé avec le hub TEAM.
-const TEAM_SECRET_ENV_VAR: &str = "TEAM_HMAC_SECRET";
+/// Usage signé des requêtes d'un nœud MAIA vers le hub TEAM (côté hub : `team/noeud`).
+pub const USAGE_TEAM_NOEUD: &str = "team/noeud";
 
 /// Client TEAM (HTTP).
 #[derive(Clone)]
@@ -85,29 +89,33 @@ pub struct TeamClient {
     client: reqwest::Client,
     team_url: String,
     node_info: NodeInfo,
-    /// Secret Bearer (None = hub sans authentification, loopback uniquement).
-    auth_token: Option<String>,
+    /// Clé de service de MAIA (signe chaque requête vers le hub).
+    cle: Arc<CleSignature>,
 }
 
 impl TeamClient {
-    pub fn new(client: reqwest::Client, team_url: String, node_info: NodeInfo) -> Self {
-        let auth_token = std::env::var(TEAM_SECRET_ENV_VAR)
-            .ok()
-            .map(|s| s.trim().to_string())
-            .filter(|s| !s.is_empty());
+    pub fn new(client: reqwest::Client, team_url: String, node_info: NodeInfo, cle: Arc<CleSignature>) -> Self {
         Self {
             client,
             team_url,
             node_info,
-            auth_token,
+            cle,
         }
     }
 
-    /// Ajoute l'en-tête `Authorization: Bearer` si un secret est configuré.
-    fn with_auth(&self, rb: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
-        match &self.auth_token {
-            Some(token) => rb.bearer_auth(token),
-            None => rb,
+    /// Requête signée par la clé de MAIA ; `corps` JSON éventuel (exactement
+    /// les octets envoyés).
+    fn signee(&self, methode: reqwest::Method, url: &str, corps: Option<&serde_json::Value>) -> reqwest::RequestBuilder {
+        let octets = corps.map(|c| serde_json::to_vec(c).unwrap_or_default()).unwrap_or_default();
+        let mut rb = self.client.request(methode.clone(), url);
+        if corps.is_some() {
+            rb = rb.header(reqwest::header::CONTENT_TYPE, "application/json");
+        }
+        let rb = crate::signature::signer(rb, Some(&self.cle), USAGE_TEAM_NOEUD, methode.as_str(), url, &octets);
+        if corps.is_some() {
+            rb.body(octets)
+        } else {
+            rb
         }
     }
 
@@ -115,9 +123,9 @@ impl TeamClient {
     /// Retourne true si succès, false si le hub est injoignable.
     pub async fn register(&self) -> bool {
         let url = format!("{}/team/register", self.team_url);
+        let corps = serde_json::to_value(&self.node_info).unwrap_or_default();
         match self
-            .with_auth(self.client.post(&url))
-            .json(&self.node_info)
+            .signee(reqwest::Method::POST, &url, Some(&corps))
             .timeout(std::time::Duration::from_secs(10))
             .send()
             .await
@@ -156,8 +164,7 @@ impl TeamClient {
         });
 
         match self
-            .with_auth(self.client.post(&url))
-            .json(&body)
+            .signee(reqwest::Method::POST, &url, Some(&body))
             .timeout(std::time::Duration::from_secs(5))
             .send()
             .await
@@ -196,7 +203,7 @@ impl TeamClient {
     pub async fn unregister(&self) {
         let url = format!("{}/team/nodes/{}", self.team_url, self.node_info.id);
         match self
-            .with_auth(self.client.delete(&url))
+            .signee(reqwest::Method::DELETE, &url, None)
             .timeout(std::time::Duration::from_secs(5))
             .send()
             .await
@@ -231,4 +238,58 @@ fn current_epoch_secs() -> u64 {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_secs()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Aller-retour avec un faux hub : la requête porte une signature valide pour
+    /// la clé de MAIA, l'usage `team/noeud`, le chemin et le corps envoyés.
+    #[tokio::test]
+    async fn requetes_signees_verifiables_par_le_hub() {
+        use axum::{extract::Request, routing::post, Router};
+        use miyauth::http::service::GardeSignee;
+
+        let cle = Arc::new(CleSignature::generer());
+        let garde = Arc::new(GardeSignee::new([cle.cle_publique()]));
+        let garde_srv = garde.clone();
+        let app = Router::new().route(
+            "/team/register",
+            post(move |req: Request| {
+                let garde_srv = garde_srv.clone();
+                async move {
+                    let entetes_http = req.headers().clone();
+                    let v = |nom: &str| entetes_http.get(nom).and_then(|x| x.to_str().ok());
+                    let instant = miyauth::http::service::maintenant_unix();
+                    let entetes = garde_srv
+                        .controler_entetes(
+                            v(miyauth::http::ENTETE_SIGNATAIRE),
+                            v(miyauth::http::ENTETE_HORODATAGE),
+                            v(miyauth::http::ENTETE_NONCE),
+                            v(miyauth::http::ENTETE_SIGNATURE),
+                            instant,
+                        )
+                        .map_err(|_| axum::http::StatusCode::UNAUTHORIZED)?;
+                    let corps = axum::body::to_bytes(req.into_body(), 1 << 20).await.unwrap();
+                    garde_srv.verifier(&entetes, USAGE_TEAM_NOEUD, "POST", "/team/register", &corps, instant)
+                        .map_err(|_| axum::http::StatusCode::UNAUTHORIZED)?;
+                    Ok::<_, axum::http::StatusCode>("ok")
+                }
+            }),
+        );
+        let ecoute = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let adresse = ecoute.local_addr().unwrap();
+        tokio::spawn(async move {
+            let _ = axum::serve(ecoute, app).await;
+        });
+        let hw = crate::hardware::detect_hardware();
+        let noeud = NodeInfo::new("n", "http://127.0.0.1:1", &hw, MaiaMode::Pro, None, None);
+        let url = format!("http://{adresse}");
+        let client = TeamClient::new(reqwest::Client::new(), url.clone(), noeud.clone(), cle);
+        assert!(client.register().await);
+        // Une autre clé (non épinglée) est refusée par le même hub.
+        let intrus = TeamClient::new(reqwest::Client::new(), url, noeud, Arc::new(CleSignature::generer()));
+        assert!(!intrus.register().await);
+    }
 }

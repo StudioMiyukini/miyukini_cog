@@ -75,6 +75,8 @@ use crate::passeport::{
 };
 use crate::titres::audience_valide;
 
+pub mod service;
+
 /// Schéma `Authorization` portant un visa et son passeport.
 pub const SCHEMA_VISA: &str = "MiyuVisa";
 /// Schéma `Authorization` portant un passeport seul (demande de visa).

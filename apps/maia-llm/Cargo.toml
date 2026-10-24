@@ -46,6 +46,8 @@ llama-cpp-2.workspace = true
 
 # Provenance signée des modèles (EX-26) : manifestes Sceau v1
 miyusceau = { path = "../../crates/miyusceau" }
+# Requêtes signées des appelants épinglés (lot 2 : plus de clé partagée)
+miyauth = { path = "../../crates/miyauth", features = ["http"] }
 
 # Hash content-addressed (store)
 sha2 = "0.10"

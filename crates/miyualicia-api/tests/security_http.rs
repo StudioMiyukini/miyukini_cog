@@ -1,4 +1,6 @@
 //! Tests de securite HTTP (audit C9) : /auth/token fail-closed, scopes, rate limit, CORS.
+//! `/auth/token` (secret partage) n'existe qu'avec la feature `jeton-secret-client`
+//! (lot 2, #23) : `cargo test -p miyualicia-api --features jeton-secret-client`.
 //!
 //! @id     alicia_api_security_http_tests
 //! @role   test
@@ -6,7 +8,9 @@
 
 use std::sync::Arc;
 
+#[cfg(feature = "jeton-secret-client")]
 use argon2::password_hash::{PasswordHasher, SaltString};
+#[cfg(feature = "jeton-secret-client")]
 use argon2::Argon2;
 use axum::body::Body;
 use axum::http::{header, Request, StatusCode};
@@ -16,11 +20,14 @@ use tower::ServiceExt;
 
 use miyualicia::{AliciaConfig, AliciaService};
 use miyualicia_api::auth::{generate_token, JwtClaims, JwtScope};
-use miyualicia_api::config::{ApiClientConfig, ApiConfig};
+#[cfg(feature = "jeton-secret-client")]
+use miyualicia_api::config::ApiClientConfig;
+use miyualicia_api::config::ApiConfig;
 use miyualicia_api::router::build_router;
 
 const SECRET: &[u8] = b"test-secret-key-32-bytes-minimum-required-here-0123456789";
 
+#[cfg(feature = "jeton-secret-client")]
 fn hash(secret: &str) -> String {
     let salt = SaltString::from_b64("c2VsdGVzdHNlbHRlc3Q").unwrap();
     Argon2::default()
@@ -45,6 +52,7 @@ async fn call(r: axum::Router, req: Request<Body>) -> (StatusCode, Value, axum::
     (st, serde_json::from_slice(&b).unwrap_or(Value::Null), h)
 }
 
+#[cfg(feature = "jeton-secret-client")]
 fn token_req(client: &str, secret: &str) -> Request<Body> {
     Request::builder()
         .uri("/api/v1/alicia/auth/token")
@@ -66,6 +74,7 @@ fn post_with(token: &str, uri: &str, body: Value) -> Request<Body> {
         .unwrap()
 }
 
+#[cfg(feature = "jeton-secret-client")]
 fn cfg_with_clients() -> ApiConfig {
     ApiConfig {
         clients: vec![
@@ -95,18 +104,21 @@ fn cfg_with_clients() -> ApiConfig {
     }
 }
 
+#[cfg(feature = "jeton-secret-client")]
 #[tokio::test]
 async fn token_refused_when_no_client_configured() {
     let (st, _, _) = call(router(ApiConfig::default()), token_req("admin", "nimporte")).await;
     assert_eq!(st, StatusCode::UNAUTHORIZED);
 }
 
+#[cfg(feature = "jeton-secret-client")]
 #[tokio::test]
 async fn token_refused_with_wrong_secret() {
     let (st, _, _) = call(router(cfg_with_clients()), token_req("ops", "faux")).await;
     assert_eq!(st, StatusCode::UNAUTHORIZED);
 }
 
+#[cfg(feature = "jeton-secret-client")]
 #[tokio::test]
 async fn token_scopes_come_from_config_not_client_id() {
     let (st, body, _) = call(router(cfg_with_clients()), token_req("admin", "lecteur")).await;
@@ -117,6 +129,7 @@ async fn token_scopes_come_from_config_not_client_id() {
     assert_eq!(body["scopes"], json!(["admin"]));
 }
 
+#[cfg(feature = "jeton-secret-client")]
 #[tokio::test]
 async fn token_personas_come_from_config() {
     // R-002 : les personas du token viennent de la config du client.
@@ -134,6 +147,7 @@ async fn token_personas_come_from_config() {
     assert!(!miyualicia_api::auth::verify_token(tok, SECRET).unwrap().all_personas);
 }
 
+#[cfg(feature = "jeton-secret-client")]
 #[tokio::test]
 async fn token_all_personas_claim_comes_from_admin_config() {
     // Décision propriétaire : drapeau explicite, porté en claim booléen signé.
@@ -147,6 +161,7 @@ async fn token_all_personas_claim_comes_from_admin_config() {
     assert!(claims.has_all_personas());
 }
 
+#[cfg(feature = "jeton-secret-client")]
 #[test]
 fn all_personas_without_admin_scope_rejected_at_config_validation() {
     let cfg = ApiConfig {
@@ -216,4 +231,19 @@ async fn cors_only_explicit_origin() {
     assert_eq!(h.get("access-control-allow-origin").unwrap(), "https://ok.example");
     let (_, _, h) = call(router(cfg), mk("https://evil.example")).await;
     assert!(h.get("access-control-allow-origin").is_none());
+}
+
+#[cfg(not(feature = "jeton-secret-client"))]
+#[tokio::test]
+async fn auth_token_route_absent_by_default() {
+    // Lot 2, #23 : plus d'echange client_id/secret partage -> JWT par defaut.
+    let req = Request::builder()
+        .uri("/api/v1/alicia/auth/token")
+        .method("POST")
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from(r#"{"client_id":"ops","secret":"s3cret"}"#))
+        .unwrap();
+    let (st, body, _) = call(router(ApiConfig::default()), req).await;
+    assert_eq!(st, StatusCode::NOT_FOUND);
+    assert!(body.get("access_token").is_none());
 }

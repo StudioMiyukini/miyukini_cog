@@ -10,15 +10,17 @@
 //! ## Architecture
 //!
 //! - `protocol` : types partagés (RemoteCommand, RemoteEvent, RemoteSnapshot)
-//! - `session` : gestion des sessions authentifiées (token HMAC, expiration)
+//! - `identite` : Central COG d'origine — passeports d'appareil, visas, preuve
+//!   de possession, révocation (sortie du lot 2 : plus de secret partagé)
+//! - `pairing` : appairage v2 (racine de confiance des clés d'appareil)
 //! - `server` : serveur Axum embarqué lancé par Central quand le remote est activé
 //! - `bridge` : état partagé entre Central (Dioxus) et le serveur remote
 
 pub mod bridge;
 pub mod discovery;
 pub mod e2e;
+pub mod identite;
 pub mod paired_store;
 pub mod pairing;
 pub mod protocol;
 pub mod server;
-pub mod session;

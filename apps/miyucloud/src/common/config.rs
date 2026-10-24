@@ -265,7 +265,7 @@ impl Default for DatabaseConfig {
 /// Authentication configuration
 #[derive(Debug, Clone)]
 pub struct AuthConfig {
-    pub jwt_secret: String,
+    /// Durée de vie d'une session d'accès opaque (secondes).
     pub access_token_expiry_secs: i64,
     pub refresh_token_expiry_secs: i64,
     /// Argon2id memory cost in KiB (default 65536 = 64 MiB)
@@ -317,10 +317,6 @@ impl Default for RateLimitConfig {
 impl Default for AuthConfig {
     fn default() -> Self {
         Self {
-            // SECURITY: This default is intentionally insecure to force operators
-            // to set MIYUCLOUD_JWT_SECRET in production. The from_env() method
-            // will validate this and warn/panic if not configured.
-            jwt_secret: String::new(),
             access_token_expiry_secs: 3600,     // 1 hour
             refresh_token_expiry_secs: 2592000, // 30 days
             hash_memory_cost: 65536,            // 64 MiB
@@ -426,10 +422,8 @@ pub struct WopiConfig {
     /// URL to the WOPI client's discovery endpoint
     /// e.g., "http://collabora:9980/hosting/discovery"
     pub discovery_url: String,
-    /// Secret key for signing WOPI access tokens
-    /// Falls back to JWT secret if empty
-    pub secret: String,
-    /// Access token TTL in seconds (default: 86400 = 24 hours)
+    /// Durée de vie des jetons WOPI en secondes (défaut et maximum : 900 = 15 min).
+    /// Les jetons sont signés par une clé aléatoire propre au processus.
     pub token_ttl_secs: i64,
     /// Lock expiration in seconds (default: 1800 = 30 minutes)
     pub lock_ttl_secs: u64,
@@ -440,8 +434,7 @@ impl Default for WopiConfig {
         Self {
             enabled: false,
             discovery_url: String::new(),
-            secret: String::new(),
-            token_ttl_secs: 86400,
+            token_ttl_secs: 900,
             lock_ttl_secs: 1800,
         }
     }
@@ -823,93 +816,26 @@ impl AppConfig {
             config.database.maintenance_min_connections = val;
         }
 
-        // Auth configuration
-        if let Some(jwt_secret) = env::var("MIYUCLOUD_JWT_SECRET")
-            .ok()
-            .filter(|s| !s.is_empty())
-        {
-            // SECURITY: Validate JWT secret minimum entropy (RFC 7518 §3.2
-            // recommends ≥256 bits for HS256). Panic on dangerously short
-            // secrets, warn on sub-optimal ones.
-            let len = jwt_secret.len();
-            if config.features.enable_auth && len < 16 {
-                panic!(
-                    "FATAL: MIYUCLOUD_JWT_SECRET is dangerously short ({} bytes). \
-                     Minimum: 32 bytes (256 bits) for HS256. \
-                     Generate a secure secret with: openssl rand -hex 32",
-                    len
-                );
-            } else if config.features.enable_auth && len < 32 {
-                tracing::warn!("==========================================================");
+        // Auth configuration — lot 2 : plus de secret de signature. Les sessions
+        // sont des identifiants opaques côté serveur ; MIYUCLOUD_JWT_SECRET et
+        // MIYUCLOUD_JWT_SECRET_PREVIOUS sont ignorés.
+        for obsolete in [
+            "MIYUCLOUD_JWT_SECRET",
+            "MIYUCLOUD_JWT_SECRET_PREVIOUS",
+            "MIYUCLOUD_WOPI_SECRET",
+        ] {
+            if env::var(obsolete).is_ok_and(|v| !v.is_empty()) {
                 tracing::warn!(
-                    "MIYUCLOUD_JWT_SECRET is only {} bytes — recommended minimum is 32 (256 bits).",
-                    len
+                    "{} est obsolète et ignoré (lot 2 : aucun secret partagé) — à retirer de la configuration",
+                    obsolete
                 );
-                tracing::warn!("Generate a stronger secret with: openssl rand -hex 32");
-                tracing::warn!("==========================================================");
             }
-            config.auth.jwt_secret = jwt_secret;
         }
-
-        // SECURITY: Auto-persist JWT secret to storage so it survives restarts.
-        // Priority: env var > persisted file > generate new.
-        if config.features.enable_auth && config.auth.jwt_secret.is_empty() {
-            let secret_file = config.storage_path.join(".jwt_secret");
-
-            if secret_file.exists() {
-                // Read persisted secret from previous run
-                match std::fs::read_to_string(&secret_file) {
-                    Ok(persisted) => {
-                        let persisted = persisted.trim().to_string();
-                        if persisted.len() >= 32 {
-                            config.auth.jwt_secret = persisted;
-                            tracing::info!("JWT secret loaded from {}", secret_file.display());
-                        } else {
-                            tracing::warn!(
-                                "Persisted JWT secret too short ({}B), regenerating",
-                                persisted.len()
-                            );
-                        }
-                    }
-                    Err(e) => {
-                        tracing::warn!("Failed to read {}: {}", secret_file.display(), e);
-                    }
-                }
-            }
-
-            // Still empty → generate and persist
-            if config.auth.jwt_secret.is_empty() {
-                use rand_core::{OsRng, RngCore};
-                let mut key = [0u8; 32];
-                OsRng.fill_bytes(&mut key);
-                let generated_secret: String = key.iter().map(|b| format!("{:02x}", b)).collect();
-
-                // Persist to storage volume so it survives container restarts
-                if let Err(e) = std::fs::write(&secret_file, &generated_secret) {
-                    tracing::error!(
-                        "Failed to persist JWT secret to {}: {}. \
-                         Tokens will be invalidated on restart!",
-                        secret_file.display(),
-                        e
-                    );
-                } else {
-                    // Restrict file permissions (owner-only read/write)
-                    #[cfg(unix)]
-                    {
-                        use std::os::unix::fs::PermissionsExt;
-                        let _ = std::fs::set_permissions(
-                            &secret_file,
-                            std::fs::Permissions::from_mode(0o600),
-                        );
-                    }
-                    tracing::info!(
-                        "JWT secret auto-generated and persisted to {}",
-                        secret_file.display()
-                    );
-                }
-
-                config.auth.jwt_secret = generated_secret;
-            }
+        if config.storage_path.join(".jwt_secret").exists() {
+            tracing::warn!(
+                "{} n'est plus utilisé (lot 2) et peut être supprimé",
+                config.storage_path.join(".jwt_secret").display()
+            );
         }
 
         if let Ok(access_token_expiry) =
@@ -1199,9 +1125,6 @@ impl AppConfig {
         if let Ok(v) = env::var("MIYUCLOUD_WOPI_DISCOVERY_URL") {
             config.wopi.discovery_url = v;
         }
-        if let Ok(v) = env::var("MIYUCLOUD_WOPI_SECRET") {
-            config.wopi.secret = v;
-        }
         if let Ok(v) = env::var("MIYUCLOUD_WOPI_TOKEN_TTL_SECS")
             && let Ok(val) = v.parse::<i64>()
         {
@@ -1211,12 +1134,6 @@ impl AppConfig {
             && let Ok(val) = v.parse::<u64>()
         {
             config.wopi.lock_ttl_secs = val;
-        }
-
-        // WOPI secret fallback: use JWT secret if WOPI secret not set
-        if config.wopi.enabled && config.wopi.secret.is_empty() {
-            config.wopi.secret = config.auth.jwt_secret.clone();
-            tracing::info!("WOPI secret not set, falling back to JWT secret");
         }
 
         // Nextcloud compatibility configuration

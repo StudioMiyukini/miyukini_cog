@@ -156,13 +156,12 @@ pub fn Header() -> Element {
                                                     .collect()
                                             })
                                             .unwrap_or_default(),
-                                        // R-025 : /auth en clair refusé par défaut (E2E
-                                        // obligatoire). Opt-in explicite pour le portail web
-                                        // local uniquement (jamais derrière un proxy inverse).
-                                        allow_plaintext_local_auth: std::env::var(
-                                            "CENTRAL_REMOTE_ALLOW_PLAINTEXT_LOCAL_AUTH",
-                                        )
-                                        .is_ok_and(|v| v == "1"),
+                                        // Sortie du lot 2 : plus de /auth par mot de passe ;
+                                        // les appareils s'authentifient par passeport + visa.
+                                        // Racine COG (miyuracine) : graine d'émission exportée
+                                        // et cog_id de la racine.
+                                        cle_emission_path: std::env::var("CENTRAL_REMOTE_CLE_EMISSION").ok(),
+                                        cog_id: std::env::var("CENTRAL_REMOTE_COG_ID").ok(),
                                         ..RemoteServerConfig::default()
                                     };
 

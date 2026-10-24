@@ -52,14 +52,14 @@ use crate::infrastructure::repositories::AppPasswordPgRepository;
 use crate::infrastructure::repositories::DeviceCodePgRepository;
 use crate::infrastructure::repositories::pg::{
     AddressBookPgRepository, CalendarEventPgRepository, CalendarPgRepository,
-    ContactGroupPgRepository, ContactPgRepository, SessionPgRepository, UserPgRepository,
+    ContactGroupPgRepository, ContactPgRepository, UserPgRepository,
 };
 use crate::infrastructure::services::chunked_upload_service::ChunkedUploadService;
 use crate::infrastructure::services::dedup_service::DedupService;
 use crate::infrastructure::services::image_transcode_service::ImageTranscodeService;
-use crate::infrastructure::services::jwt_service::JwtTokenService;
 use crate::infrastructure::services::password_hasher::Argon2PasswordHasher;
 use crate::infrastructure::services::path_resolver_service::PathResolverService;
+use crate::infrastructure::services::session_token_service::SessionTokenService;
 use crate::infrastructure::services::thumbnail_service::ThumbnailService;
 use crate::infrastructure::services::wopi_discovery_service::WopiDiscoveryService;
 use crate::infrastructure::services::zip_service::ZipService;
@@ -623,6 +623,7 @@ impl AppServiceFactory {
             wopi_lock_service: None,
             wopi_discovery_service: None,
             device_auth_service: None,
+            miyu_auth: None,
             app_password_service: None,
             path_resolver: None,
             webdav_lock_store:
@@ -659,10 +660,10 @@ impl AppServiceFactory {
 
         // 9b. Web Connection Manager (MWS tunnel, DDNS, Central client)
         {
+            use crate::infrastructure::services::central_client_service::CentralClientService;
             use crate::infrastructure::services::connection_manager::ConnectionManagerService;
             use crate::infrastructure::services::ddns_service::DdnsService;
             use crate::infrastructure::services::mws_tunnel_service::MwsTunnelService;
-            use crate::infrastructure::services::central_client_service::CentralClientService;
 
             let wc = &self.config.web_connection;
             let local_bind = format!("127.0.0.1:{}", self.config.server_port);
@@ -750,22 +751,41 @@ impl AppServiceFactory {
                 tracing::info!("System already initialized — setup endpoint disabled");
             }
 
+            // 9c-bis. Visa + PoP et clés d'appareil (lot 2). Ancre mal configurée :
+            //         refus de démarrer (fail-closed).
+            let miyu_store = Arc::new(
+                crate::infrastructure::repositories::pg::MiyuIdentityPgRepository::new(
+                    pool.clone(),
+                ),
+            );
+            {
+                use crate::infrastructure::services::miyu_auth_service::{
+                    AncreCog, MiyuAuthService,
+                };
+                let ancre = AncreCog::depuis_env()
+                    .map_err(|e| DomainError::internal_error("MiyuAuth", e))?;
+                match &ancre {
+                    Some(a) => tracing::info!(
+                        "MiyuVisa activé : COG d'origine épinglé {}",
+                        a.cog_id.as_str()
+                    ),
+                    None => tracing::info!(
+                        "MiyuVisa désactivé (MIYUCLOUD_MIYU_COG_ID / MIYUCLOUD_MIYU_CLE_EMISSION absents)"
+                    ),
+                }
+                let svc = MiyuAuthService::new(miyu_store.clone(), ancre)
+                    .map_err(|e| DomainError::internal_error("MiyuAuth", e))?;
+                app_state.miyu_auth = Some(Arc::new(svc));
+            }
+
             // 9c. Wire Device Authorization Grant (RFC 8628) service
             {
                 let device_code_repo = Arc::new(DeviceCodePgRepository::new(pool.clone()));
-                let user_repo: Arc<UserPgRepository> = Arc::new(
-                    crate::infrastructure::repositories::UserPgRepository::new(pool.clone()),
-                );
-                let session_repo: Arc<SessionPgRepository> = Arc::new(
-                    crate::infrastructure::repositories::SessionPgRepository::new(pool.clone()),
-                );
                 let base_url = self.config.base_url();
 
                 let device_auth_svc = Arc::new(DeviceAuthService::new(
                     device_code_repo,
-                    auth_svc.token_service.clone(),
-                    user_repo,
-                    session_repo,
+                    miyu_store.clone(),
                     base_url,
                 ));
                 app_state.device_auth_service = Some(device_auth_svc);
@@ -839,16 +859,9 @@ impl AppServiceFactory {
                     "WOPI is enabled but WOPI_DISCOVERY_URL is empty — WOPI services will NOT be available"
                 );
             } else {
-                let wopi_secret = if self.config.wopi.secret.is_empty() {
-                    self.config.auth.jwt_secret.clone()
-                } else {
-                    self.config.wopi.secret.clone()
-                };
-
-                let wopi_token_service = Arc::new(WopiTokenService::new(
-                    wopi_secret,
-                    self.config.wopi.token_ttl_secs,
-                ));
+                // Clé aléatoire propre au processus (lot 2, #20).
+                let wopi_token_service =
+                    Arc::new(WopiTokenService::new(self.config.wopi.token_ttl_secs));
 
                 let wopi_lock_service =
                     Arc::new(WopiLockService::new(self.config.wopi.lock_ttl_secs));
@@ -915,10 +928,15 @@ pub struct ApplicationServices {
     pub recent_service: Option<Arc<RecentService>>,
 }
 
+/// Service d'authentification Miyukini adossé à PostgreSQL.
+pub type MiyuAuth = crate::infrastructure::services::miyu_auth_service::MiyuAuthService<
+    crate::infrastructure::repositories::pg::MiyuIdentityPgRepository,
+>;
+
 /// Container for authentication services
 #[derive(Clone)]
 pub struct AuthServices {
-    pub token_service: Arc<JwtTokenService>,
+    pub token_service: Arc<SessionTokenService>,
     pub auth_application_service: Arc<AuthApplicationService>,
     pub login_lockout:
         Arc<crate::infrastructure::services::login_lockout_service::LoginLockoutService>,
@@ -962,6 +980,8 @@ pub struct AppState {
         Option<Arc<crate::infrastructure::services::wopi_discovery_service::WopiDiscoveryService>>,
     pub device_auth_service:
         Option<Arc<crate::application::services::device_auth_service::DeviceAuthService>>,
+    /// Visa + preuve de possession et clés d'appareil (lot 2, sans secret partagé).
+    pub miyu_auth: Option<Arc<MiyuAuth>>,
     pub app_password_service:
         Option<Arc<crate::application::services::app_password_service::AppPasswordService>>,
     pub path_resolver:
@@ -973,15 +993,13 @@ pub struct AppState {
         Arc<crate::infrastructure::repositories::pg::audit_pg_repository::AuditPgRepository>,
     >,
     /// Web connection manager (MWS tunnel, DDNS, Central client).
-    pub connection_manager: Option<
-        Arc<crate::infrastructure::services::connection_manager::ConnectionManagerService>,
-    >,
+    pub connection_manager:
+        Option<Arc<crate::infrastructure::services::connection_manager::ConnectionManagerService>>,
     /// GDPR data subject rights service (RGPD Art. 15-20).
     pub gdpr_service: Option<Arc<crate::application::services::gdpr_service::GdprService>>,
     /// Lazy-initialized bandwidth tracker for per-user throttling.
-    pub bandwidth_tracker: std::sync::OnceLock<
-        Arc<crate::interfaces::middleware::bandwidth::BandwidthTracker>,
-    >,
+    pub bandwidth_tracker:
+        std::sync::OnceLock<Arc<crate::interfaces::middleware::bandwidth::BandwidthTracker>>,
     pub config: AppConfig,
 }
 

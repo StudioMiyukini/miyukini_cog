@@ -4,17 +4,17 @@
 //! @layer  app
 //! @human  central-mobile — module « screens connexion ».
 
-//! Écran de connexion — login utilisateur COG.
+//! Écran de connexion — session de l'appareil appairé.
 //!
 //! Flow :
-//!   1. Etablir le bridge avec le COG Host (via SavedConnection)
+//!   1. Construire le bridge (SavedConnection + identité de l'appareil)
 //!   2. Negocier le handshake E2E v2 (identités épinglées à l'appairage)
-//!   3. Authentifier l'utilisateur via /auth **chiffré** dans la session E2E
+//!   3. Passeport d'appareil → visa → validation (preuve de possession)
 //!   4. Transition vers Main
 //!
-//! Fail-closed (R-023, C-12) : si le handshake E2E échoue, la connexion est
-//! abandonnée avec une erreur claire ; aucun identifiant n'est jamais envoyé
-//! en clair (voir [`crate::login`]).
+//! Plus de courriel ni de mot de passe (sortie du lot 2) : le titulaire est le
+//! profil Central qui a approuvé l'appareil. Fail-closed (R-023, C-12) : si le
+//! handshake E2E échoue, la connexion est abandonnée (voir [`crate::login`]).
 
 use dioxus::prelude::*;
 
@@ -26,20 +26,18 @@ use crate::state::{AppScreen, AppState};
 enum ConnexionStatus {
     /// Formulaire visible, pas de connexion en cours.
     Idle,
-    /// Etablissement du bridge en cours.
+    /// Préparation du bridge en cours.
     ConnectingBridge,
-    /// Handshake E2E puis authentification chiffrée en cours.
+    /// Handshake E2E puis passeport + visa en cours.
     NegotiatingE2e,
     /// Erreur.
     Error(String),
 }
 
-/// Écran de connexion (email + mot de passe).
+/// Écran de connexion (appareil appairé, sans mot de passe).
 #[component]
 pub fn ConnexionScreen() -> Element {
     let mut state = use_context::<Signal<AppState>>();
-    let mut email = use_signal(String::new);
-    let mut password = use_signal(String::new);
     let mut status = use_signal(|| ConnexionStatus::Idle);
 
     let current_status = status.read().clone();
@@ -65,33 +63,13 @@ pub fn ConnexionScreen() -> Element {
                 "→ {host_label}"
             }
 
-            // Email
-            input {
-                style: "width: 100%; max-width: 320px; padding: 14px; background: #2d2d44; border: 1px solid #3d3d55; border-radius: 8px; color: #e0e0e0; font-size: 16px;",
-                r#type: "email",
-                placeholder: "Email",
-                value: "{email}",
-                disabled: is_loading,
-                oninput: move |evt| email.set(evt.value()),
-            }
-
-            // Mot de passe
-            input {
-                style: "width: 100%; max-width: 320px; padding: 14px; background: #2d2d44; border: 1px solid #3d3d55; border-radius: 8px; color: #e0e0e0; font-size: 16px;",
-                r#type: "password",
-                placeholder: "Mot de passe",
-                value: "{password}",
-                disabled: is_loading,
-                oninput: move |evt| password.set(evt.value()),
-            }
-
             // Statut / erreur
             match current_status.clone() {
                 ConnexionStatus::ConnectingBridge => rsx! {
                     StatusLabel { text: "Connexion au COG Host...".to_string(), color: "#7c3aed".to_string() }
                 },
                 ConnexionStatus::NegotiatingE2e => rsx! {
-                    StatusLabel { text: "Chiffrement E2E et authentification...".to_string(), color: "#7c3aed".to_string() }
+                    StatusLabel { text: "Chiffrement E2E et passeport de l'appareil...".to_string(), color: "#7c3aed".to_string() }
                 },
                 ConnexionStatus::Error(msg) => rsx! {
                     p {
@@ -111,14 +89,7 @@ pub fn ConnexionScreen() -> Element {
                 },
                 disabled: is_loading,
                 onclick: move |_| {
-                    let email_val = email.read().clone();
-                    let password_val = password.read().clone();
                     let saved_clone = state.read().saved_connection.clone();
-
-                    if email_val.is_empty() || password_val.is_empty() {
-                        status.set(ConnexionStatus::Error("Veuillez remplir tous les champs".to_string()));
-                        return;
-                    }
 
                     let Some(saved) = saved_clone else {
                         status.set(ConnexionStatus::Error("Aucune connexion sauvegardée".to_string()));
@@ -147,17 +118,11 @@ pub fn ConnexionScreen() -> Element {
                             }
                         };
 
-                        // 2. Etablir le bridge
-                        if let Err(e) = bridge.connect().await {
-                            status_sig.set(ConnexionStatus::Error(format!("Bridge: {e}")));
-                            return;
-                        }
-                        state_sig.write().bridge_status = bridge.status().await;
-
-                        // 3-4. Handshake E2E puis /auth chiffré (aucun repli clair).
+                        // 2-3. Handshake E2E puis passeport + visa (aucun repli).
                         status_sig.set(ConnexionStatus::NegotiatingE2e);
-                        match login::login(&bridge, &email_val, &password_val).await {
+                        match login::login(&bridge).await {
                             Ok(display) => {
+                                state_sig.write().bridge_status = bridge.status().await;
                                 state_sig.write().user_display_name = Some(display);
                                 state_sig.write().screen = AppScreen::Main;
                             }

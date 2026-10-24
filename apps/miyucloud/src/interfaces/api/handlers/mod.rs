@@ -20,6 +20,7 @@ pub mod file_handler;
 pub mod folder_handler;
 pub mod gdpr_handler;
 pub mod i18n_handler;
+pub mod miyu_auth_handler;
 pub mod photos_handler;
 pub mod recent_handler;
 pub mod search_handler;

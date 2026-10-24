@@ -37,8 +37,9 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 tracing             = "0.1"
 tracing-subscriber  = { version = "0.3", features = ["env-filter"] }
 
-# Sécurité (comparaison de secrets en temps constant)
-subtle = "2"
+# Requêtes signées par des clés épinglées (lot 2 : plus de secret partagé)
+miyauth   = { path = "../../crates/miyauth", features = ["http"] }
+miyusceau = { path = "../../crates/miyusceau" }
 
 # Utilitaires
 uuid    = { version = "1", features = ["v4"] }

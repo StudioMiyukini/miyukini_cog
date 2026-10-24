@@ -17,8 +17,13 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 central-remote-protocol = { path = "../central-remote-protocol" }
 uuid = { version = "1", features = ["v4"] }
-hmac = "0.12"
 sha2 = "0.10"
+hkdf = "0.12"
+# Identité signée (sortie du lot 2) : passeports d'appareil, visas, preuve de
+# possession, requêtes signées (miyauth::http) ; cog_id (miyuracine).
+miyauth = { path = "../miyauth", features = ["http"] }
+miyusceau = { path = "../miyusceau" }
+miyuracine = { path = "../miyuracine" }
 # E2E mobile ↔ COG v2 (R-023) : réutilise le protocole du bridge, aucune
 # primitive dupliquée ici (C-24) ; zeroize pour les secrets (C-25) ;
 # thiserror pour les erreurs typées (C-11).
@@ -34,9 +39,12 @@ tower-http = { version = "0.6", features = ["cors"] }
 futures-util = "0.3"
 tokio-stream = "0.1"
 
-# Auth — même stack que Central
+# Profils Central (nom affiché du titulaire d'un appareil).
 miyukini-central = { path = "../miyukini-central", features = ["legacy-sqlite"] }
-miyukini-connect = { path = "../miyukini-connect" }
+
+[dev-dependencies]
+# Test de bout en bout du WebSocket authentifié (déjà dans le graphe via central-mobile).
+tokio-tungstenite = "0.24"
 
 [lints]
 workspace = true

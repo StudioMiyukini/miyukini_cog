@@ -10,8 +10,11 @@
 //!
 //! ## Authentication
 //!
-//! JWT HS256. Le token est obtenu via `POST /api/v1/alicia/auth/token`.
-//! Duree de vie par defaut : 3600 secondes (1 heure).
+//! JWT HS256 (duree de vie par defaut : 3600 secondes). L'echange
+//! `client_id` + secret partage -> JWT (`POST /api/v1/alicia/auth/token`) est
+//! **desactive par defaut** (sortie du lot 2, point #23) : il n'existe qu'avec la
+//! feature `jeton-secret-client`. Cible : passeport de service + preuve de
+//! possession (non branche).
 //!
 //! ## Loi d'Autonomie
 //!

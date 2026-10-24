@@ -12,7 +12,7 @@
 use crate::application::dtos::app_password_dto::CreateAppPasswordRequestDto;
 use crate::common::di::AppState;
 use crate::interfaces::errors::AppError;
-use crate::interfaces::middleware::auth::AuthUser;
+use crate::interfaces::middleware::auth::SessionUser;
 use axum::extract::State;
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
@@ -32,7 +32,7 @@ pub fn app_password_routes() -> Router<Arc<AppState>> {
 /// Returns the plain-text password ONCE. The user must copy it immediately.
 async fn create_app_password(
     State(state): State<Arc<AppState>>,
-    user: AuthUser,
+    user: SessionUser,
     Json(request): Json<CreateAppPasswordRequestDto>,
 ) -> Result<Json<crate::application::dtos::app_password_dto::AppPasswordCreatedResponseDto>, AppError>
 {
@@ -54,7 +54,7 @@ async fn create_app_password(
 /// Never returns plain-text passwords (only prefix + metadata).
 async fn list_app_passwords(
     State(state): State<Arc<AppState>>,
-    user: AuthUser,
+    user: SessionUser,
 ) -> Result<Json<crate::application::dtos::app_password_dto::AppPasswordListResponseDto>, AppError>
 {
     let service = state
@@ -70,7 +70,7 @@ async fn list_app_passwords(
 /// DELETE /api/auth/app-passwords/:id — Revoke an app password.
 async fn revoke_app_password(
     State(state): State<Arc<AppState>>,
-    user: AuthUser,
+    user: SessionUser,
     axum::extract::Path(id): axum::extract::Path<String>,
 ) -> Result<Json<crate::application::dtos::app_password_dto::AppPasswordRevokeResponseDto>, AppError>
 {

@@ -19,9 +19,9 @@ use crate::domain::entities::session::Session;
 use crate::domain::entities::user::{User, UserRole};
 use crate::infrastructure::repositories::pg::SessionPgRepository;
 use crate::infrastructure::repositories::pg::UserPgRepository;
-use crate::infrastructure::services::jwt_service::JwtTokenService;
 use crate::infrastructure::services::oidc_service::OidcService;
 use crate::infrastructure::services::password_hasher::Argon2PasswordHasher;
+use crate::infrastructure::services::session_token_service::SessionTokenService;
 use moka::sync::Cache;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -76,7 +76,7 @@ pub struct AuthApplicationService {
     user_storage: Arc<UserPgRepository>,
     session_storage: Arc<SessionPgRepository>,
     password_hasher: Arc<Argon2PasswordHasher>,
-    token_service: Arc<JwtTokenService>,
+    token_service: Arc<SessionTokenService>,
     folder_service: Option<Arc<FolderService>>,
     /// Path to the storage directory, used for disk-space–aware quota calculation
     storage_path: PathBuf,
@@ -94,7 +94,7 @@ impl AuthApplicationService {
         user_storage: Arc<UserPgRepository>,
         session_storage: Arc<SessionPgRepository>,
         password_hasher: Arc<Argon2PasswordHasher>,
-        token_service: Arc<JwtTokenService>,
+        token_service: Arc<SessionTokenService>,
         storage_path: PathBuf,
     ) -> Self {
         Self {
@@ -433,7 +433,7 @@ impl AuthApplicationService {
             access_token,
             refresh_token,
             token_type: "Bearer".to_string(),
-            expires_in: self.token_service.refresh_token_expiry_secs(),
+            expires_in: self.token_service.access_token_expiry_secs(),
         })
     }
 
@@ -535,7 +535,7 @@ impl AuthApplicationService {
             access_token,
             refresh_token: new_refresh_token,
             token_type: "Bearer".to_string(),
-            expires_in: self.token_service.refresh_token_expiry_secs(),
+            expires_in: self.token_service.access_token_expiry_secs(),
         })
     }
 
@@ -572,6 +572,7 @@ impl AuthApplicationService {
             .session_storage
             .revoke_all_user_sessions(user_id)
             .await?;
+        self.token_service.revoke_user(user_id);
 
         Ok(revoked_count)
     }
@@ -626,10 +627,11 @@ impl AuthApplicationService {
         // Save updated user
         self.user_storage.update_user(user).await?;
 
-        // Optional: revoke all sessions to force re-login with new password
+        // Révoque sessions de rafraîchissement ET sessions d'accès.
         self.session_storage
             .revoke_all_user_sessions(user_id)
             .await?;
+        self.token_service.revoke_user(user_id);
 
         Ok(())
     }
@@ -807,6 +809,7 @@ impl AuthApplicationService {
         self.session_storage
             .revoke_all_user_sessions(user_id)
             .await?;
+        self.token_service.revoke_user(user_id);
 
         tracing::info!(user_id = %user_id, "Admin reset password — all sessions revoked");
         Ok(())
@@ -823,14 +826,21 @@ impl AuthApplicationService {
         // Prevent deleting yourself
         let user = self.user_storage.get_user_by_id(user_id).await?;
         tracing::info!("Admin deleting user: {} ({})", user.username(), user_id);
-        self.user_storage.delete_user(user_id).await
+        self.user_storage.delete_user(user_id).await?;
+        self.token_service.revoke_user(user_id);
+        Ok(())
     }
 
     /// Activate or deactivate a user (admin only)
     pub async fn set_user_active(&self, user_id: Uuid, active: bool) -> Result<(), DomainError> {
         self.user_storage
             .set_user_active_status(user_id, active)
-            .await
+            .await?;
+        if !active {
+            // Compte désactivé : ses sessions d'accès sont fermées immédiatement.
+            self.token_service.revoke_user(user_id);
+        }
+        Ok(())
     }
 
     /// Change user role (admin only)
@@ -842,7 +852,15 @@ impl AuthApplicationService {
                 format!("Invalid role: {}. Must be 'admin' or 'user'", role),
             ));
         }
-        self.user_storage.change_role(user_id, role).await
+        self.user_storage.change_role(user_id, role).await?;
+        // Le rôle est figé dans la session d'accès : on la ferme.
+        self.token_service.revoke_user(user_id);
+        Ok(())
+    }
+
+    /// Révoque une session d'accès opaque (déconnexion).
+    pub fn revoke_access_token(&self, token: &str) -> bool {
+        self.token_service.revoke_token(token)
     }
 
     /// Update user's storage quota (admin only)
@@ -1233,7 +1251,7 @@ impl AuthApplicationService {
             access_token,
             refresh_token,
             token_type: "Bearer".to_string(),
-            expires_in: self.token_service.refresh_token_expiry_secs(),
+            expires_in: self.token_service.access_token_expiry_secs(),
         };
 
         // 7. Store auth response behind a one-time exchange code (Fix #4: no tokens in URL)

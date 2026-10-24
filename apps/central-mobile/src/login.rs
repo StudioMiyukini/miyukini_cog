@@ -1,23 +1,24 @@
 //! @id     central_mobile_login
-//! @do     authentifier_via_session_e2e
+//! @do     authentifier_par_passeport_appareil
 //! @role   security
 //! @layer  app
-//! @human  central-mobile — logique de connexion fail-closed (E2E obligatoire).
+//! @human  central-mobile — connexion fail-closed : E2E puis passeport d'appareil + visa (aucun mot de passe).
 
 //! Logique de connexion au COG, séparée de l'UI pour être testable (R-023).
 //!
-//! Règle (C-12, fail-closed) : **aucun identifiant ne quitte l'appareil sans
-//! session E2E v2 établie**. Si le handshake échoue, la connexion est abandonnée
-//! avec une erreur lisible — il n'existe aucun repli en clair. La requête
-//! `/auth` n'est émise que chiffrée et liée (`POST /auth`) dans la session.
+//! Sortie du lot 2 : plus de courriel + mot de passe ni de jeton au porteur.
+//! L'appareil s'authentifie avec la clé d'identité épinglée à l'appairage :
+//! passeport d'appareil, visa (≤ 15 min) et preuve de possession à chaque
+//! requête (`miyukini_cog_bridge::identite`). Le titulaire est le profil Central
+//! qui a approuvé l'appareil.
+//!
+//! Règle (C-12, fail-closed) : la session E2E v2 (clé du COG épinglée) est
+//! établie d'abord ; si le handshake échoue, la connexion est abandonnée sans
+//! repli.
 
-use central_remote_protocol::{RemoteAuthRequest, RemoteAuthResponse};
 use miyukini_cog_bridge::{parse_identity_key_hex, CogBridge, ConnectionMode, E2eIdentity};
 
 use crate::state::SavedConnection;
-
-/// Point d'accès d'authentification du COG (lié dans l'AAD E2E).
-pub const AUTH_ENDPOINT: &str = "/auth";
 
 /// Canal vers le COG utilisé pour la connexion (abstrait pour les tests).
 pub trait AuthChannel {
@@ -25,23 +26,19 @@ pub trait AuthChannel {
     async fn negotiate_e2e(&self) -> Result<(), String>;
     /// Vrai si une session E2E est établie.
     async fn e2e_active(&self) -> bool;
-    /// Envoie la requête d'authentification **chiffrée** dans la session E2E.
-    async fn authenticate_encrypted(
-        &self,
-        req: &RemoteAuthRequest,
-    ) -> Result<RemoteAuthResponse, String>;
+    /// Ouvre la session de l'appareil (passeport → visa → validation) et rend
+    /// le nom affiché du titulaire.
+    async fn open_device_session(&self) -> Result<String, String>;
 }
 
 /// Causes d'échec de la connexion (une variante par cause).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LoginError {
-    /// Le handshake E2E a échoué : rien n'a été envoyé.
+    /// Le handshake E2E a échoué : aucune requête d'authentification émise.
     E2eFailed(String),
-    /// Aucune session E2E active après le handshake : rien n'a été envoyé.
+    /// Aucune session E2E active après le handshake.
     E2eInactive,
-    /// Erreur de transport pendant l'authentification chiffrée.
-    Transport(String),
-    /// Le COG a refusé les identifiants.
+    /// Le COG a refusé l'appareil (non appairé, révoqué) ou est injoignable.
     Rejected(String),
 }
 
@@ -51,47 +48,23 @@ impl LoginError {
         match self {
             Self::E2eFailed(e) => format!(
                 "Connexion sécurisée impossible avec le COG Host ({e}). \
-                 Aucun identifiant n'a été envoyé. Ré-appairez l'appareil si le problème persiste."
+                 Ré-appairez l'appareil si le problème persiste."
             ),
-            Self::E2eInactive => "Connexion sécurisée non établie : aucun identifiant n'a été envoyé."
-                .to_string(),
-            Self::Transport(e) => format!("Authentification impossible : {e}"),
-            Self::Rejected(e) => e.clone(),
+            Self::E2eInactive => "Connexion sécurisée non établie.".to_string(),
+            Self::Rejected(e) => format!("Appareil refusé par le COG Host : {e}"),
         }
     }
 }
 
-/// Connexion fail-closed : handshake E2E puis `/auth` chiffré uniquement.
+/// Connexion fail-closed : handshake E2E, puis session d'appareil.
 ///
-/// Retourne le nom affiché de l'utilisateur.
-pub async fn login<C: AuthChannel>(
-    channel: &C,
-    email: &str,
-    password: &str,
-) -> Result<String, LoginError> {
+/// Retourne le nom affiché du titulaire.
+pub async fn login<C: AuthChannel>(channel: &C) -> Result<String, LoginError> {
     channel.negotiate_e2e().await.map_err(LoginError::E2eFailed)?;
     if !channel.e2e_active().await {
         return Err(LoginError::E2eInactive);
     }
-    let req = RemoteAuthRequest {
-        email: email.trim().to_string(),
-        password: password.to_string(),
-    };
-    let resp = channel
-        .authenticate_encrypted(&req)
-        .await
-        .map_err(LoginError::Transport)?;
-    if resp.success {
-        Ok(resp
-            .user_display_name
-            .filter(|n| !n.is_empty())
-            .unwrap_or_else(|| req.email.clone()))
-    } else {
-        Err(LoginError::Rejected(
-            resp.error
-                .unwrap_or_else(|| "Identifiants incorrects".to_string()),
-        ))
-    }
+    channel.open_device_session().await.map_err(LoginError::Rejected)
 }
 
 impl AuthChannel for CogBridge {
@@ -103,19 +76,20 @@ impl AuthChannel for CogBridge {
         self.is_e2e_active().await
     }
 
-    async fn authenticate_encrypted(
-        &self,
-        req: &RemoteAuthRequest,
-    ) -> Result<RemoteAuthResponse, String> {
-        self.request_encrypted(AUTH_ENDPOINT, req)
+    async fn open_device_session(&self) -> Result<String, String> {
+        self.connect().await.map_err(|e| e.to_string())?;
+        Ok(self
+            .session_appareil()
             .await
-            .map_err(|e| e.to_string())
+            .map(|s| s.display_name)
+            .unwrap_or_default())
     }
 }
 
 /// Construit le bridge depuis la connexion sauvegardée : mode de transport et
-/// identités E2E (identité de l'appareil + clé du COG épinglée à l'appairage).
-/// Sans clé épinglée (appairage antérieur au E2E v2) : ré-appairage requis.
+/// identités (identité de l'appareil + clé du COG épinglée à l'appairage).
+/// Sans clé épinglée (appairage antérieur au E2E v2) ou mode « clé API »
+/// (retiré) : ré-appairage requis.
 pub fn build_bridge(saved: &SavedConnection, device: E2eIdentity) -> Result<CogBridge, String> {
     let cog_key_hex = saved
         .cog_identity_key
@@ -129,11 +103,9 @@ pub fn build_bridge(saved: &SavedConnection, device: E2eIdentity) -> Result<CogB
             port: saved.port,
             device_id: saved.credential.clone(),
         },
-        "apikey" => ConnectionMode::ApiKey {
-            host: saved.host.clone(),
-            port: saved.port,
-            token: saved.credential.clone(),
-        },
+        "apikey" => {
+            return Err("Mode clé API retiré : ré-appairez l'appareil avec le COG Host.".to_string())
+        }
         other => return Err(format!("Mode {other} pas encore supporté")),
     };
     Ok(CogBridge::new(mode).with_e2e_identities(device, cog_key))
@@ -144,22 +116,22 @@ mod tests {
     use super::*;
     use std::cell::Cell;
 
-    /// Transport simulé : compte les requêtes d'authentification émises.
+    /// Transport simulé : compte les ouvertures de session émises.
     struct MockChannel {
         handshake_ok: bool,
         active_after_handshake: bool,
-        auth_success: bool,
-        auth_calls: Cell<u32>,
+        accepted: bool,
+        session_calls: Cell<u32>,
         handshake_calls: Cell<u32>,
     }
 
     impl MockChannel {
-        fn new(handshake_ok: bool, active: bool, auth_success: bool) -> Self {
+        fn new(handshake_ok: bool, active: bool, accepted: bool) -> Self {
             Self {
                 handshake_ok,
                 active_after_handshake: active,
-                auth_success,
-                auth_calls: Cell::new(0),
+                accepted,
+                session_calls: Cell::new(0),
                 handshake_calls: Cell::new(0),
             }
         }
@@ -180,60 +152,53 @@ mod tests {
             self.handshake_ok && self.active_after_handshake
         }
 
-        async fn authenticate_encrypted(
-            &self,
-            req: &RemoteAuthRequest,
-        ) -> Result<RemoteAuthResponse, String> {
-            self.auth_calls.set(self.auth_calls.get() + 1);
-            assert_eq!(req.email, "alice@example.org");
-            Ok(RemoteAuthResponse {
-                success: self.auth_success,
-                token: self.auth_success.then(|| "tok".to_string()),
-                user_display_name: self.auth_success.then(|| "Alice".to_string()),
-                error: (!self.auth_success).then(|| "Identifiants incorrects".to_string()),
-            })
+        async fn open_device_session(&self) -> Result<String, String> {
+            self.session_calls.set(self.session_calls.get() + 1);
+            if self.accepted {
+                Ok("Alice".into())
+            } else {
+                Err("Appareil non autorisé (non appairé ou révoqué)".into())
+            }
         }
     }
 
     fn run<F: std::future::Future>(f: F) -> F::Output {
         tokio::runtime::Builder::new_current_thread()
+            .enable_all()
             .build()
             .unwrap()
             .block_on(f)
     }
 
     #[test]
-    fn handshake_failure_sends_no_credentials() {
+    fn handshake_failure_opens_no_session() {
         let chan = MockChannel::new(false, false, true);
-        let err = run(login(&chan, "alice@example.org", "secret")).unwrap_err();
+        let err = run(login(&chan)).unwrap_err();
         assert!(matches!(err, LoginError::E2eFailed(_)));
         assert_eq!(chan.handshake_calls.get(), 1);
-        assert_eq!(chan.auth_calls.get(), 0, "identifiants émis sans E2E");
-        assert!(err.user_message().contains("Aucun identifiant"));
-        assert!(!err.user_message().contains("secret"));
+        assert_eq!(chan.session_calls.get(), 0, "session ouverte sans E2E");
     }
 
     #[test]
-    fn inactive_session_sends_no_credentials() {
+    fn inactive_session_opens_no_session() {
         let chan = MockChannel::new(true, false, true);
-        let err = run(login(&chan, "alice@example.org", "secret")).unwrap_err();
-        assert_eq!(err, LoginError::E2eInactive);
-        assert_eq!(chan.auth_calls.get(), 0);
+        assert_eq!(run(login(&chan)).unwrap_err(), LoginError::E2eInactive);
+        assert_eq!(chan.session_calls.get(), 0);
     }
 
     #[test]
-    fn successful_login_over_e2e() {
+    fn successful_device_login() {
         let chan = MockChannel::new(true, true, true);
-        let name = run(login(&chan, " alice@example.org ", "secret")).unwrap();
-        assert_eq!(name, "Alice");
-        assert_eq!(chan.auth_calls.get(), 1);
+        assert_eq!(run(login(&chan)).unwrap(), "Alice");
+        assert_eq!(chan.session_calls.get(), 1);
     }
 
     #[test]
-    fn rejected_credentials_reported() {
+    fn revoked_device_reported() {
         let chan = MockChannel::new(true, true, false);
-        let err = run(login(&chan, "alice@example.org", "faux")).unwrap_err();
-        assert_eq!(err, LoginError::Rejected("Identifiants incorrects".into()));
+        let err = run(login(&chan)).unwrap_err();
+        assert!(matches!(err, LoginError::Rejected(_)));
+        assert!(err.user_message().contains("refusé"));
     }
 
     fn saved(cog_key: Option<String>, mode: &str) -> SavedConnection {
@@ -247,7 +212,7 @@ mod tests {
     }
 
     #[test]
-    fn bridge_requires_pinned_cog_key() {
+    fn bridge_requires_pinned_cog_key_and_refuses_api_key_mode() {
         // Connexion sauvegardée avant le E2E v2 : ré-appairage requis.
         let err = build_bridge(&saved(None, "whitelist"), E2eIdentity::generate())
             .err()
@@ -259,22 +224,24 @@ mod tests {
         assert!(err.contains("invalide"));
         let cog = hex::encode(E2eIdentity::generate().public_key_bytes());
         assert!(build_bridge(&saved(Some(cog.clone()), "whitelist"), E2eIdentity::generate()).is_ok());
-        assert!(build_bridge(&saved(Some(cog), "ssh"), E2eIdentity::generate()).is_err());
+        assert!(build_bridge(&saved(Some(cog.clone()), "ssh"), E2eIdentity::generate()).is_err());
+        let err = build_bridge(&saved(Some(cog), "apikey"), E2eIdentity::generate())
+            .err()
+            .unwrap();
+        assert!(err.contains("clé API retiré"));
     }
 
     #[test]
-    fn real_bridge_without_session_refuses_auth() {
-        // Sans handshake, le bridge réel refuse d'émettre /auth (aucun clair).
+    fn real_bridge_without_cog_refuses_session() {
+        // COG injoignable : aucune session (pas de repli).
         let cog = hex::encode(E2eIdentity::generate().public_key_bytes());
-        let Ok(bridge) = build_bridge(&saved(Some(cog), "whitelist"), E2eIdentity::generate())
-        else {
+        let mut s = saved(Some(cog), "whitelist");
+        s.host = "127.0.0.1".into();
+        s.port = 9;
+        let Ok(bridge) = build_bridge(&s, E2eIdentity::generate()) else {
             panic!("bridge attendu");
         };
-        let req = RemoteAuthRequest {
-            email: "alice@example.org".into(),
-            password: "secret".into(),
-        };
         assert!(!run(bridge.e2e_active()));
-        assert!(run(bridge.authenticate_encrypted(&req)).is_err());
+        assert!(run(bridge.open_device_session()).is_err());
     }
 }

@@ -23,6 +23,7 @@ use miyualicia::config::AliciaConfig;
 use miyualicia::intent::Intent;
 use miyualicia::AliciaService;
 use miyualicia_devices::CommandSource;
+use miyusceau::CleSignature;
 
 use crate::demo;
 use crate::nlu::NluEngine;
@@ -47,10 +48,11 @@ pub struct AliciaRuntime {
     pub http: reqwest::Client,
     pub stt_url: String,
     pub tts_url: String,
-    /// Jeton bearer STT (mock : jeton du processus ; externe : `ALICIA_VOICE_TOKEN`).
-    pub stt_token: Option<String>,
-    /// Jeton bearer TTS (mock : jeton du processus ; externe : `ALICIA_VOICE_TOKEN`).
-    pub tts_token: Option<String>,
+    /// Cle signant les requetes STT (mock : cle du processus ; externe : graine
+    /// `ALICIA_VOICE_KEY_FILE`, cle publique a epingler cote serveur).
+    pub stt_key: Option<Arc<CleSignature>>,
+    /// Cle signant les requetes TTS (idem).
+    pub tts_key: Option<Arc<CleSignature>>,
     pub face_url: Option<String>,
 }
 
@@ -63,8 +65,8 @@ impl AliciaRuntime {
         let VoiceEndpoints {
             stt_url,
             tts_url,
-            stt_token,
-            tts_token,
+            stt_key,
+            tts_key,
         } = resolve_urls(args.stt_url, args.tts_url).await?;
 
         let config = AliciaConfig {
@@ -84,8 +86,8 @@ impl AliciaRuntime {
             http: reqwest::Client::new(),
             stt_url,
             tts_url,
-            stt_token,
-            tts_token,
+            stt_key,
+            tts_key,
             face_url: args.face_url,
         })
     }
@@ -105,8 +107,8 @@ impl AliciaRuntime {
             http: reqwest::Client::new(),
             stt_url: String::new(),
             tts_url: String::new(),
-            stt_token: None,
-            tts_token: None,
+            stt_key: None,
+            tts_key: None,
             face_url: None,
         }
     }
@@ -149,34 +151,28 @@ impl AliciaRuntime {
     }
 }
 
-/// URLs STT/TTS resolues et jetons bearer associes.
+/// URLs STT/TTS resolues et cles de signature associees.
 struct VoiceEndpoints {
     stt_url: String,
     tts_url: String,
-    stt_token: Option<String>,
-    tts_token: Option<String>,
-}
-
-/// Jeton des serveurs externes, lu dans l'environnement (jamais en argument CLI).
-fn external_voice_token() -> Option<String> {
-    std::env::var(voice::VOICE_TOKEN_ENV)
-        .ok()
-        .filter(|t| !t.trim().is_empty())
+    stt_key: Option<Arc<CleSignature>>,
+    tts_key: Option<Arc<CleSignature>>,
 }
 
 /// Resout les URLs STT et TTS : demarre un unique serveur mock si les deux sont vides,
 /// ou demarre le mock uniquement pour celle qui est vide.
 ///
-/// Les mocks ecoutent en loopback et exigent un jeton aleatoire propre au processus.
+/// Les mocks ecoutent en loopback et n'epinglent que la cle ephemere du processus ;
+/// les serveurs externes recoivent des requetes signees par la cle d'Alicia.
 async fn resolve_urls(stt_url: String, tts_url: String) -> anyhow::Result<VoiceEndpoints> {
     match (stt_url.is_empty(), tts_url.is_empty()) {
         (false, false) => {
-            let token = external_voice_token();
+            let key = voice::external_voice_key()?;
             Ok(VoiceEndpoints {
                 stt_url,
                 tts_url,
-                stt_token: token.clone(),
-                tts_token: token,
+                stt_key: Some(key.clone()),
+                tts_key: Some(key),
             })
         }
         (true, true) => {
@@ -186,8 +182,8 @@ async fn resolve_urls(stt_url: String, tts_url: String) -> anyhow::Result<VoiceE
             Ok(VoiceEndpoints {
                 stt_url: mock.stt_url,
                 tts_url: mock.tts_url,
-                stt_token: Some(mock.token.clone()),
-                tts_token: Some(mock.token),
+                stt_key: Some(mock.key.clone()),
+                tts_key: Some(mock.key),
             })
         }
         (true, false) => {
@@ -196,8 +192,8 @@ async fn resolve_urls(stt_url: String, tts_url: String) -> anyhow::Result<VoiceE
             Ok(VoiceEndpoints {
                 stt_url: mock.stt_url,
                 tts_url,
-                stt_token: Some(mock.token),
-                tts_token: external_voice_token(),
+                stt_key: Some(mock.key),
+                tts_key: Some(voice::external_voice_key()?),
             })
         }
         (false, true) => {
@@ -206,8 +202,8 @@ async fn resolve_urls(stt_url: String, tts_url: String) -> anyhow::Result<VoiceE
             Ok(VoiceEndpoints {
                 stt_url,
                 tts_url: mock.tts_url,
-                stt_token: external_voice_token(),
-                tts_token: Some(mock.token),
+                stt_key: Some(voice::external_voice_key()?),
+                tts_key: Some(mock.key),
             })
         }
     }

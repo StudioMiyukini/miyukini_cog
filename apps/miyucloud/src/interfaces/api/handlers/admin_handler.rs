@@ -4,10 +4,11 @@
 //! @layer  app
 //! @human  miyucloud — module « interfaces api handlers admin handler ».
 
+use crate::interfaces::middleware::auth::AdminUser;
 use axum::{
     Router,
     extract::{Json, Path, Query, State},
-    http::{HeaderMap, StatusCode, header},
+    http::StatusCode,
     response::IntoResponse,
     routing::{delete, get, post, put},
 };
@@ -17,7 +18,6 @@ use crate::application::dtos::settings_dto::{
     SaveOidcSettingsDto, TestOidcConnectionDto, UpdateUserActiveDto, UpdateUserQuotaDto,
     UpdateUserRoleDto,
 };
-use crate::application::ports::auth_ports::TokenServicePort;
 use crate::common::di::AppState;
 use crate::interfaces::errors::AppError;
 use std::sync::Arc;
@@ -77,61 +77,11 @@ pub fn admin_routes() -> Router<Arc<AppState>> {
         )
 }
 
-/// Validate JWT and require admin role. Returns (user_id, role).
-/// Public variant used by sibling handlers (audit_handler, etc.).
-pub async fn admin_guard_public(
-    state: &AppState,
-    headers: &HeaderMap,
-) -> Result<(Uuid, String), AppError> {
-    admin_guard(state, headers).await
-}
-
-/// Validate JWT and require admin role. Returns (user_id, role).
-async fn admin_guard(state: &AppState, headers: &HeaderMap) -> Result<(Uuid, String), AppError> {
-    let auth = state
-        .auth_service
-        .as_ref()
-        .ok_or_else(|| AppError::internal_error("Auth service not configured"))?;
-
-    let token = headers
-        .get(header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.strip_prefix("Bearer ").map(|s| s.to_string()))
-        .or_else(|| {
-            crate::interfaces::api::cookie_auth::extract_cookie_value(
-                headers,
-                crate::interfaces::api::cookie_auth::ACCESS_COOKIE,
-            )
-        })
-        .ok_or_else(|| AppError::unauthorized("Authorization token required"))?;
-
-    let claims = auth
-        .token_service
-        .validate_token(&token)
-        .map_err(|e| AppError::unauthorized(format!("Invalid token: {}", e)))?;
-
-    if claims.role != "admin" {
-        return Err(AppError::new(
-            StatusCode::FORBIDDEN,
-            "Admin access required",
-            "Forbidden",
-        ));
-    }
-
-    Ok((
-        Uuid::parse_str(&claims.sub)
-            .map_err(|_| AppError::internal_error("Invalid user ID in token"))?,
-        claims.role,
-    ))
-}
-
 /// GET /api/admin/settings/oidc — get OIDC settings for the admin panel
 async fn get_oidc_settings(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let svc = state
         .admin_settings_service
         .as_ref()
@@ -148,10 +98,10 @@ async fn get_oidc_settings(
 /// PUT /api/admin/settings/oidc — save OIDC settings + hot-reload
 async fn save_oidc_settings(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    admin: AdminUser,
     Json(dto): Json<SaveOidcSettingsDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    let (user_id, _) = admin_guard(&state, &headers).await?;
+    let (user_id, _) = admin.ids();
 
     let svc = state
         .admin_settings_service
@@ -173,11 +123,9 @@ async fn save_oidc_settings(
 /// POST /api/admin/settings/oidc/test — test OIDC discovery
 async fn test_oidc_connection(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
     Json(dto): Json<TestOidcConnectionDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let svc = state
         .admin_settings_service
         .as_ref()
@@ -194,10 +142,8 @@ async fn test_oidc_connection(
 /// GET /api/admin/settings/general — system overview (backward compat)
 async fn get_general_settings(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let auth = state
         .auth_service
         .as_ref()
@@ -225,10 +171,8 @@ async fn get_general_settings(
 /// GET /api/admin/dashboard — full dashboard statistics
 async fn get_dashboard_stats(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let auth = state
         .auth_service
         .as_ref()
@@ -301,11 +245,9 @@ async fn get_dashboard_stats(
 /// GET /api/admin/users?limit=50&offset=0 — list all users
 async fn list_users(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
     Query(query): Query<ListUsersQueryDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let auth = state
         .auth_service
         .as_ref()
@@ -337,11 +279,9 @@ async fn list_users(
 /// GET /api/admin/users/:id — get single user
 async fn get_user(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
     Path(id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let id = Uuid::parse_str(&id).map_err(|_| AppError::bad_request("Invalid UUID"))?;
 
     let auth = state
@@ -361,10 +301,10 @@ async fn get_user(
 /// DELETE /api/admin/users/:id — delete a user
 async fn delete_user(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    admin: AdminUser,
     Path(id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
-    let (admin_id, _) = admin_guard(&state, &headers).await?;
+    let (admin_id, _) = admin.ids();
 
     let id = Uuid::parse_str(&id).map_err(|_| AppError::bad_request("Invalid UUID"))?;
 
@@ -398,11 +338,11 @@ async fn delete_user(
 /// PUT /api/admin/users/:id/role — change user role
 async fn update_user_role(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    admin: AdminUser,
     Path(id): Path<String>,
     Json(dto): Json<UpdateUserRoleDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    let (admin_id, _) = admin_guard(&state, &headers).await?;
+    let (admin_id, _) = admin.ids();
 
     let id = Uuid::parse_str(&id).map_err(|_| AppError::bad_request("Invalid UUID"))?;
 
@@ -436,11 +376,11 @@ async fn update_user_role(
 /// PUT /api/admin/users/:id/active — activate/deactivate user
 async fn update_user_active(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    admin: AdminUser,
     Path(id): Path<String>,
     Json(dto): Json<UpdateUserActiveDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    let (admin_id, _) = admin_guard(&state, &headers).await?;
+    let (admin_id, _) = admin.ids();
 
     let id = Uuid::parse_str(&id).map_err(|_| AppError::bad_request("Invalid UUID"))?;
 
@@ -479,12 +419,10 @@ async fn update_user_active(
 /// PUT /api/admin/users/:id/quota — update user storage quota
 async fn update_user_quota(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
     Path(id): Path<String>,
     Json(dto): Json<UpdateUserQuotaDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let id = Uuid::parse_str(&id).map_err(|_| AppError::bad_request("Invalid UUID"))?;
 
     let auth = state
@@ -513,11 +451,9 @@ async fn update_user_quota(
 /// POST /api/admin/users — create a new user (admin only)
 async fn create_user(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
     Json(dto): Json<AdminCreateUserDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let auth = state
         .auth_service
         .as_ref()
@@ -541,12 +477,10 @@ async fn create_user(
 /// PUT /api/admin/users/:id/password — reset a user's password (admin only)
 async fn reset_user_password(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
     Path(id): Path<String>,
     Json(dto): Json<AdminResetPasswordDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let id = Uuid::parse_str(&id).map_err(|_| AppError::bad_request("Invalid UUID"))?;
 
     let auth = state
@@ -580,10 +514,8 @@ async fn reset_user_password(
 /// GET /api/admin/settings/registration — check if public registration is enabled
 async fn get_registration_setting(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    _admin: AdminUser,
 ) -> Result<impl IntoResponse, AppError> {
-    admin_guard(&state, &headers).await?;
-
     let svc = state
         .admin_settings_service
         .as_ref()
@@ -599,10 +531,10 @@ async fn get_registration_setting(
 /// PUT /api/admin/settings/registration — enable/disable public registration
 async fn set_registration_setting(
     State(state): State<Arc<AppState>>,
-    headers: HeaderMap,
+    admin: AdminUser,
     Json(body): Json<serde_json::Value>,
 ) -> Result<impl IntoResponse, AppError> {
-    let (admin_id, _) = admin_guard(&state, &headers).await?;
+    let (admin_id, _) = admin.ids();
 
     let enabled = body
         .get("registration_enabled")

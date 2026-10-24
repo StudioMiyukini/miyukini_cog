@@ -1,6 +1,8 @@
 //! Securite de l'API : verification des clients (Argon2id) et limitation de debit en memoire.
 //!
 //! Fail-closed (audit C9) : aucun client configure => aucun token ; scopes issus de la config.
+//! La verification client_id/secret (secret partage) n'existe qu'avec la feature
+//! `jeton-secret-client`, desactivee par defaut (sortie du lot 2, point #23).
 
 // @id service.alicia.api.security
 // @role client_auth_and_rate_limit
@@ -13,13 +15,18 @@ use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+#[cfg(feature = "jeton-secret-client")]
 use argon2::password_hash::{PasswordHash, PasswordVerifier};
+#[cfg(feature = "jeton-secret-client")]
 use argon2::Argon2;
 
+#[cfg(feature = "jeton-secret-client")]
 use crate::auth::JwtScope;
+#[cfg(feature = "jeton-secret-client")]
 use crate::config::ApiConfig;
 
 /// Droits accordes a un client authentifie, issus EXCLUSIVEMENT de la config.
+#[cfg(feature = "jeton-secret-client")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClientGrant {
     /// Scopes accordes.
@@ -37,6 +44,7 @@ pub struct ClientGrant {
 /// client ni de la requete) ou `None`.
 /// Un client inconnu declenche quand meme une verification factice pour limiter
 /// l'enumeration par timing. La comparaison du hash est en temps constant (crate argon2).
+#[cfg(feature = "jeton-secret-client")]
 pub fn authenticate_client(config: &ApiConfig, client_id: &str, secret: &str) -> Option<ClientGrant> {
     // Hash factice Argon2id valide (secret inconnu) pour egaliser le temps de reponse.
     const DUMMY: &str = "$argon2id$v=19$m=19456,t=2,p=1$ZHVtbXlzYWx0ZHVtbXk$Kq3b3m3mQ4h7m1o0cYk3x5v0o4d8Qm0pJm3wq0ZkZ9o";
@@ -107,9 +115,12 @@ impl RateLimiter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "jeton-secret-client")]
     use crate::config::ApiClientConfig;
+    #[cfg(feature = "jeton-secret-client")]
     use argon2::password_hash::{PasswordHasher, SaltString};
 
+    #[cfg(feature = "jeton-secret-client")]
     pub(crate) fn hash(secret: &str) -> String {
         let salt = SaltString::from_b64("c2VsdGVzdHNlbHRlc3Q").unwrap();
         Argon2::default()
@@ -118,6 +129,7 @@ mod tests {
             .to_string()
     }
 
+    #[cfg(feature = "jeton-secret-client")]
     fn cfg() -> ApiConfig {
         ApiConfig {
             clients: vec![
@@ -140,6 +152,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "jeton-secret-client")]
     #[test]
     fn good_secret_returns_configured_scopes() {
         let g = authenticate_client(&cfg(), "ops", "bon-secret").expect("grant");
@@ -148,6 +161,7 @@ mod tests {
         assert!(g.all_personas);
     }
 
+    #[cfg(feature = "jeton-secret-client")]
     #[test]
     fn scope_comes_from_config_not_client_name() {
         // Le client nomme "admin" n'a que Read.
@@ -158,12 +172,14 @@ mod tests {
         assert!(!g.all_personas);
     }
 
+    #[cfg(feature = "jeton-secret-client")]
     #[test]
     fn wrong_secret_or_unknown_client_refused() {
         assert!(authenticate_client(&cfg(), "ops", "mauvais").is_none());
         assert!(authenticate_client(&cfg(), "inconnu", "bon-secret").is_none());
     }
 
+    #[cfg(feature = "jeton-secret-client")]
     #[test]
     fn no_clients_configured_refuses_all() {
         assert!(authenticate_client(&ApiConfig::default(), "admin", "x").is_none());

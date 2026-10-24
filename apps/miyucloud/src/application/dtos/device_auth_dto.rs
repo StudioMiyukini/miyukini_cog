@@ -21,6 +21,11 @@ pub struct DeviceAuthorizeRequestDto {
     /// Comma-separated scopes (e.g. "webdav,caldav,carddav")
     #[serde(default = "default_scopes")]
     pub scope: String,
+    /// Clé publique Ed25519 de l'appareil (64 hex ou base64 URL, **obligatoire**).
+    /// À l'approbation elle est enregistrée ; l'appareil signe ensuite chaque
+    /// requête (aucun jeton porteur n'est délivré).
+    #[serde(default)]
+    pub device_public_key: Option<String>,
 }
 
 fn default_client_name() -> String {
@@ -81,16 +86,21 @@ pub struct DeviceTokenPendingDto {
 }
 
 /// Response to POST /api/auth/device/token when authorization is complete
+/// Fin du flux d'appareil : aucun jeton, la clé de l'appareil est enregistrée.
 #[derive(Debug, Serialize)]
 pub struct DeviceTokenSuccessDto {
-    pub access_token: String,
+    /// Toujours `MiyuSignature` : signer chaque requête (en-têtes `X-Miyu-*`).
     pub token_type: String,
-    pub refresh_token: String,
-    pub expires_in: i64,
+    /// Identifiant de la clé enregistrée (révocable depuis le profil).
+    pub device_id: String,
+    /// Clé publique enregistrée (base64 URL).
+    pub device_public_key: String,
+    /// Usage à signer (séparation de domaine).
+    pub usage: String,
+    /// Portées accordées à la clé.
     pub scope: String,
 }
 
-/// GET /api/auth/device/verify — info about the pending device code
 #[derive(Debug, Serialize)]
 pub struct DeviceVerifyInfoDto {
     /// The client name requesting access

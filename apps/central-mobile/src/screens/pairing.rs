@@ -122,6 +122,9 @@ fn refusal_message(http: u16, body: &[u8]) -> String {
         "missing_pairing_signature" | "invalid_pairing_signature" => {
             "Signature d'appairage refusée : mettez à jour Central Mobile.".into()
         }
+        "key_revoked" => {
+            "La clé de cet appareil a été révoquée : réinitialisez l'identité de Central Mobile avant de ré-appairer.".into()
+        }
         "source_mismatch" => {
             "Le réseau a changé pendant l'appairage : recommencez depuis le même WiFi.".into()
         }

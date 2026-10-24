@@ -77,6 +77,18 @@ pub struct NodeEntry {
     pub status: NodeStatus,
     pub registered_at: Instant,
     pub last_seen: Instant,
+    /// Clé publique qui a enregistré le nœud (requête signée) : seule autorisée
+    /// à le mettre à jour ou le retirer. `None` : entrée interne (tests).
+    pub signataire: Option<[u8; 32]>,
+}
+
+/// Refus d'enregistrement d'un nœud.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RefusEnregistrement {
+    /// Registre plein (C-13).
+    Plein,
+    /// Identifiant déjà enregistré par une autre clé.
+    AutreSignataire,
 }
 
 impl NodeEntry {
@@ -88,6 +100,7 @@ impl NodeEntry {
             status: NodeStatus::Online,
             registered_at: now,
             last_seen: now,
+            signataire: None,
         }
     }
 
@@ -131,20 +144,63 @@ impl NodeRegistry {
         entry.status = NodeStatus::Online;
     }
 
-    /// Enregistre un nœud si la capacité `max_nodes` n'est pas atteinte
-    /// (C-13). La mise à jour d'un nœud déjà connu est toujours acceptée.
-    /// Retourne `false` si le registre est plein.
-    pub fn register_bounded(&self, info: NodeInfo, max_nodes: usize) -> bool {
+    /// Enregistre (ou met à jour) un nœud au nom de `signataire` : un identifiant
+    /// déjà lié à une autre clé est refusé, comme un nouveau nœud au-delà de
+    /// `max_nodes` (C-13).
+    pub fn register_signed(
+        &self,
+        info: NodeInfo,
+        max_nodes: usize,
+        signataire: [u8; 32],
+    ) -> Result<(), RefusEnregistrement> {
         let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
-        if !nodes.contains_key(&info.id) && nodes.len() >= max_nodes {
-            return false;
+        match nodes.get(&info.id) {
+            Some(e) if e.signataire != Some(signataire) => return Err(RefusEnregistrement::AutreSignataire),
+            None if nodes.len() >= max_nodes => return Err(RefusEnregistrement::Plein),
+            _ => {}
         }
         let id = info.id.clone();
         let entry = nodes.entry(id).or_insert_with(|| NodeEntry::new(info.clone()));
         entry.info = info;
+        entry.signataire = Some(signataire);
         entry.last_seen = Instant::now();
         entry.status = NodeStatus::Online;
-        true
+        Ok(())
+    }
+
+    /// Heartbeat d'un nœud au nom de `signataire`. `false` si le nœud est
+    /// inconnu ou lié à une autre clé.
+    pub fn heartbeat_signed(
+        &self,
+        id: &str,
+        signataire: [u8; 32],
+        health: NodeHealth,
+        model_active: Option<String>,
+        persona: Option<String>,
+    ) -> bool {
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
+        match nodes.get_mut(id) {
+            Some(entry) if entry.signataire == Some(signataire) => {
+                entry.update_health(health);
+                entry.info.model_active = model_active;
+                entry.info.persona = persona;
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// Retrait d'un nœud au nom de `signataire`. `false` si le nœud est inconnu
+    /// ou lié à une autre clé.
+    pub fn unregister_signed(&self, id: &str, signataire: [u8; 32]) -> bool {
+        let mut nodes = self.nodes.write().unwrap_or_else(std::sync::PoisonError::into_inner);
+        match nodes.get_mut(id) {
+            Some(entry) if entry.signataire == Some(signataire) => {
+                entry.mark_offline();
+                true
+            }
+            _ => false,
+        }
     }
 
     /// Met à jour le dernier heartbeat + health d'un nœud.
@@ -298,14 +354,30 @@ mod tests {
     }
 
     #[test]
-    fn test_register_bounded() {
+    fn test_register_signed_bounded_and_bound_to_key() {
         let registry = NodeRegistry::new();
-        assert!(registry.register_bounded(make_node("1"), 1));
+        let (a, b) = ([1_u8; 32], [2_u8; 32]);
+        assert_eq!(registry.register_signed(make_node("1"), 1, a), Ok(()));
         // Registre plein : nouveau nœud refusé
-        assert!(!registry.register_bounded(make_node("2"), 1));
-        // Mise à jour d'un nœud existant toujours acceptée
-        assert!(registry.register_bounded(make_node("1"), 1));
+        assert_eq!(registry.register_signed(make_node("2"), 1, a), Err(RefusEnregistrement::Plein));
+        // Mise à jour par la même clé : acceptée ; par une autre : refusée
+        assert_eq!(registry.register_signed(make_node("1"), 1, a), Ok(()));
+        assert_eq!(registry.register_signed(make_node("1"), 1, b), Err(RefusEnregistrement::AutreSignataire));
         assert_eq!(registry.total_count(), 1);
+        let health = || NodeHealth {
+            model: None,
+            backend: None,
+            hardware_tier: String::new(),
+            uptime_secs: 0,
+            capabilities_agents: 0,
+            capabilities_tts: false,
+        };
+        assert!(!registry.heartbeat_signed("1", b, health(), None, None));
+        assert!(registry.heartbeat_signed("1", a, health(), None, None));
+        assert!(!registry.unregister_signed("1", b));
+        assert_eq!(registry.get("1").unwrap().status, NodeStatus::Online);
+        assert!(registry.unregister_signed("1", a));
+        assert_eq!(registry.get("1").unwrap().status, NodeStatus::Offline);
     }
 
     #[test]

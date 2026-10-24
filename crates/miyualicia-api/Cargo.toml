@@ -29,13 +29,22 @@ chrono             = { version = "0.4", features = ["serde"] }
 uuid               = { version = "1", features = ["v4", "serde"] }
 thiserror          = "2"
 tracing            = "0.1"
-argon2             = "0.5"
+# Verification client_id/secret -> JWT (`/auth/token`) : secret partage, desactive
+# par defaut (lot 2, point #23) ; voir la feature `jeton-secret-client`.
+argon2             = { version = "0.5", optional = true }
+
+[features]
+default = []
+# Retablit `POST /auth/token` (client_id + secret -> JWT HS256). Secret partage :
+# hors de la sortie du lot 2, a remplacer par passeport de service + PoP.
+jeton-secret-client = ["dep:argon2"]
 
 [dev-dependencies]
 # Tests uniquement : active le bypass de la gate cores (K-16).
 miyualicia = { path = "../miyualicia", features = ["dev-bypass"] }
 tokio          = { version = "1", features = ["full", "test-util"] }
 http-body-util = "0.1"
+argon2         = "0.5"
 tempfile       = "3"
 
 [lints.rust]

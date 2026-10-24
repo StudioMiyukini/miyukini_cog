@@ -4,7 +4,11 @@
 //! @layer  core
 //! @human  miyukini-cog-bridge — module « bridge ».
 
-//! Trait `CogBridge` — interface unifiée pour les 3 modes de connexion.
+//! `CogBridge` — interface unifiée pour les modes de connexion (SSH, LAN).
+//!
+//! Authentification (sortie du lot 2) : passeport d'appareil + visa + preuve de
+//! possession ([`crate::identite::ClientAppareil`]), avec la clé d'identité de
+//! l'appareil épinglée à l'appairage. Plus de `device_id` ni de jeton au porteur.
 //!
 //! Toutes les communications passent par un chiffrement E2E v2 (handshake X25519
 //! signé ed25519, HKDF-SHA256, XChaCha20-Poly1305 — voir [`crate::e2e`]) négocié
@@ -19,7 +23,9 @@ use crate::e2e::{
     PendingHandshake, RequestBinding, E2E_SESSION_HEADER, MAX_HANDSHAKE_JSON_LEN,
     MAX_MESSAGE_JSON_LEN,
 };
+use crate::identite::{ClientAppareil, EntetesAuth};
 use crate::BridgeResult;
+use central_remote_protocol::identite::VisaResponse;
 
 /// Mode de connexion au COG Host.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,17 +38,13 @@ pub enum ConnectionMode {
         /// Clé privée ed25519 au format PEM.
         private_key_pem: String,
     },
-    /// Connexion directe en LAN (device whitelisté sur le COG Host).
+    /// Connexion directe en LAN (appareil appairé sur le COG Host). Le
+    /// `device_id` n'est qu'un libellé : l'accès repose sur le passeport de la
+    /// clé d'appareil.
     Whitelist {
         host: String,
         port: u16,
         device_id: String,
-    },
-    /// Clé API Bearer token (scanné via QR code).
-    ApiKey {
-        host: String,
-        port: u16,
-        token: String,
     },
 }
 
@@ -74,6 +76,8 @@ pub struct CogBridge {
     /// Identité ed25519 de l'appareil et clé d'identité épinglée du COG
     /// (issues de l'appairage). Sans elles, le handshake E2E est refusé.
     e2e_identities: Option<Arc<E2eIdentities>>,
+    /// Client passeport + visa de l'appareil (même clé que l'E2E).
+    appareil: Option<Arc<ClientAppareil>>,
 }
 
 /// Identités utilisées pour le handshake E2E v2.
@@ -90,12 +94,15 @@ impl CogBridge {
             status: Arc::new(RwLock::new(BridgeStatus::Disconnected)),
             e2e_session: Arc::new(RwLock::new(None)),
             e2e_identities: None,
+            appareil: None,
         }
     }
 
     /// Configure les identités E2E : identité ed25519 de l'appareil et clé
     /// d'identité du COG épinglée lors de l'appairage (vérifiée hors bande).
+    /// La même clé d'appareil sert à l'authentification par passeport.
     pub fn with_e2e_identities(mut self, device: E2eIdentity, cog_identity_key: [u8; 32]) -> Self {
+        self.appareil = Some(Arc::new(ClientAppareil::new(self.base_url(), &device)));
         self.e2e_identities = Some(Arc::new(E2eIdentities {
             device,
             cog_identity_key,
@@ -116,12 +123,10 @@ impl CogBridge {
             ConnectionMode::Ssh { host, port, username, private_key_pem } => {
                 crate::ssh::connect(host, *port, username, private_key_pem).await
             }
-            ConnectionMode::Whitelist { host, port, device_id } => {
-                crate::whitelist::connect(host, *port, device_id).await
-            }
-            ConnectionMode::ApiKey { host, port, token } => {
-                crate::apikey::connect(host, *port, token).await
-            }
+            ConnectionMode::Whitelist { host, port, device_id } => match &self.appareil {
+                Some(client) => crate::whitelist::connect(host, *port, device_id, client).await,
+                None => Err(E2eError::MissingIdentity.into()),
+            },
         };
 
         match &result {
@@ -129,7 +134,6 @@ impl CogBridge {
                 let mode_name = match &self.mode {
                     ConnectionMode::Ssh { .. } => "SSH",
                     ConnectionMode::Whitelist { .. } => "Whitelist",
-                    ConnectionMode::ApiKey { .. } => "API Key",
                 };
                 *self.status.write().await = BridgeStatus::Connected {
                     mode: mode_name.to_string(),
@@ -148,6 +152,9 @@ impl CogBridge {
     /// Déconnecte proprement le bridge.
     pub async fn disconnect(&self) -> BridgeResult<()> {
         *self.e2e_session.write().await = None;
+        if let Some(client) = &self.appareil {
+            client.oublier().await;
+        }
         *self.status.write().await = BridgeStatus::Disconnected;
         Ok(())
     }
@@ -155,15 +162,14 @@ impl CogBridge {
     /// Retourne l'URL de base pour les requêtes HTTP vers le COG Host.
     ///
     /// En mode SSH, c'est `http://localhost:<port_forwarde>`.
-    /// En mode Whitelist/ApiKey, c'est `http://<host>:<port>`.
+    /// En mode Whitelist, c'est `http://<host>:<port>`.
     pub fn base_url(&self) -> String {
         match &self.mode {
             ConnectionMode::Ssh { .. } => {
                 // En mode SSH, les ports sont forwardés localement
                 "http://127.0.0.1:8080".to_string()
             }
-            ConnectionMode::Whitelist { host, port, .. }
-            | ConnectionMode::ApiKey { host, port, .. } => {
+            ConnectionMode::Whitelist { host, port, .. } => {
                 format!("http://{host}:{port}")
             }
         }
@@ -173,8 +179,7 @@ impl CogBridge {
     pub fn ws_url(&self) -> String {
         match &self.mode {
             ConnectionMode::Ssh { .. } => "ws://127.0.0.1:3030/ws".to_string(),
-            ConnectionMode::Whitelist { host, port, .. }
-            | ConnectionMode::ApiKey { host, port, .. } => {
+            ConnectionMode::Whitelist { host, port, .. } => {
                 format!("ws://{host}:{port}/ws")
             }
         }
@@ -183,6 +188,34 @@ impl CogBridge {
     /// Retourne le mode de connexion actuel.
     pub fn mode(&self) -> &ConnectionMode {
         &self.mode
+    }
+
+    /// Client passeport + visa de l'appareil (présent si les identités sont configurées).
+    pub fn client_appareil(&self) -> Option<&ClientAppareil> {
+        self.appareil.as_deref()
+    }
+
+    /// En-têtes `MiyuVisa` + `X-Miyu-PoP` (preuve neuve) d'une requête
+    /// authentifiée ; pour le WebSocket : `("GET", "/ws", b"")`.
+    pub async fn entetes_authentifies(
+        &self,
+        methode: &str,
+        chemin: &str,
+        corps: &[u8],
+    ) -> BridgeResult<EntetesAuth> {
+        self.appareil
+            .as_ref()
+            .ok_or(E2eError::MissingIdentity)?
+            .entetes(methode, chemin, corps)
+            .await
+    }
+
+    /// Session de l'appareil (dernier visa : nom affiché, identité opaque).
+    pub async fn session_appareil(&self) -> Option<VisaResponse> {
+        match &self.appareil {
+            Some(c) => c.session().await,
+            None => None,
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -316,7 +349,7 @@ impl CogBridge {
 }
 
 /// Lit le corps d'une réponse HTTP en refusant tout dépassement de `max` octets (C-13).
-async fn read_bounded(mut resp: reqwest::Response, max: usize) -> BridgeResult<Vec<u8>> {
+pub(crate) async fn read_bounded(mut resp: reqwest::Response, max: usize) -> BridgeResult<Vec<u8>> {
     if resp.content_length().is_some_and(|n| n > max as u64) {
         return Err(E2eError::TooLarge("réponse HTTP").into());
     }

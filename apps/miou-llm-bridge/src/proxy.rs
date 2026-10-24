@@ -36,7 +36,8 @@ use crate::skills::{SkillExecRequest, SkillRegistry};
 pub struct ProxyState {
     pub client: reqwest::Client,
     pub upstream_url: String,
-    pub auth_token: Option<String>,
+    /// Appelants épinglés (requêtes signées ; aucun secret partagé).
+    pub gardes: std::sync::Arc<crate::signature::GardesMaia>,
     pub log_requests: bool,
     pub hardware: HardwareInfo,
     pub agent_registry: AgentRegistry,
@@ -83,7 +84,13 @@ pub fn build_cors(origins: &[String]) -> CorsLayer {
             Method::DELETE,
             Method::OPTIONS,
         ])
-        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
+        .allow_headers([
+            header::CONTENT_TYPE,
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_SIGNATAIRE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_HORODATAGE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_NONCE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_SIGNATURE),
+        ])
 }
 
 /// Construit le routeur axum avec toutes les routes.
@@ -100,7 +107,7 @@ pub fn proxy_router(state: ProxyState) -> Router {
         // MAIA health endpoint — état complet pour TEAM et monitoring
         .route("/maia/health", get(crate::health::health_handler));
 
-    // Routes protégées (sécurité : origin + auth + HMAC)
+    // Routes protégées (sécurité : origine IP + requête signée par un appelant épinglé)
     let protected_routes = Router::new()
         // ── Status ────────────────────────────────────────────────
         .route("/status", get(status_handler))
@@ -146,7 +153,7 @@ pub fn proxy_router(state: ProxyState) -> Router {
         .route("/v1/security/status", get(security_status_handler))
         // ── Catch-all proxy passthrough vers LM Studio (backup) ──
         .route("/v1/{*path}", any(proxy_handler))
-        // ── Middleware de sécurité (origin + auth + HMAC) ────────
+        // ── Middleware de sécurité (origine + requête signée) ────
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             security_middleware,
@@ -931,16 +938,17 @@ async fn inference_status(State(state): State<ProxyState>) -> impl IntoResponse 
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// Middleware de sécurité (origin + auth globale + HMAC)
+// Middleware de sécurité (origine + requête signée)
 // ═══════════════════════════════════════════════════════════════════════
 
 /// Middleware de sécurité appliqué sur toutes les routes protégées.
 ///
-/// Vérifie dans l'ordre :
+/// Vérifie dans l'ordre (fail-closed) :
 /// 0. IP source = adresse TCP réelle (XFF seulement via trusted_proxies)
 /// 1. Validation d'origine (IP source dans allowed_origins ou loopback)
-/// 2. Auth Bearer globale (si require_auth_all est activé)
-/// 3. Signature HMAC (si le header X-COG-Signature est présent)
+/// 2. Requête signée par un appelant épinglé (`crate::signature`) : en-têtes
+///    contrôlés avant la lecture du corps ; aucun appelant épinglé ⇒ 503.
+///    Plus de jeton Bearer ni de loopback ouvert (lot 2, K-09).
 async fn security_middleware(
     State(state): State<ProxyState>,
     req: Request<Body>,
@@ -948,7 +956,6 @@ async fn security_middleware(
 ) -> impl IntoResponse {
     let headers = req.headers().clone();
     let path = req.uri().path().to_string();
-    let method = req.method().to_string();
 
     // IP source = adresse réelle de la connexion (ConnectInfo). X-Forwarded-For
     // n'est lu que si la connexion vient d'un proxy listé dans `trusted_proxies`.
@@ -974,22 +981,6 @@ async fn security_middleware(
     )
     .to_string();
 
-    // 0b. Anti DNS rebinding : sans auth obligatoire (usage loopback), seul un
-    // Host loopback est accepté. Une page web qui fait pointer son domaine vers
-    // 127.0.0.1 enverrait son propre nom dans Host et serait refusée.
-    if state.security_config.require_auth_all != Some(true)
-        && !crate::security::is_loopback_host(&headers)
-    {
-        return (
-            StatusCode::FORBIDDEN,
-            Json(serde_json::json!({
-                "error": "Accès refusé",
-                "reason": "host_not_loopback",
-            })),
-        )
-            .into_response();
-    }
-
     // 1. Validation d'origine
     match crate::security::check_origin(Some(&source_ip), &headers, &state.security_config) {
         crate::security::OriginCheck::Allowed => {}
@@ -1014,74 +1005,33 @@ async fn security_middleware(
         }
     }
 
-    // 2. Auth Bearer globale (si activée)
-    if state.security_config.require_auth_all == Some(true) {
-        if let Err(msg) = crate::security::verify_auth_token(&headers, &state.auth_token) {
+    // 2. Requête signée par un appelant épinglé
+    match crate::signature::verifier(&state.gardes, req).await {
+        Ok(req) => next.run(req).await.into_response(),
+        Err(refus) => {
             state
                 .security_audit
                 .log_event(crate::security::SecurityEvent {
                     timestamp: crate::security::epoch_now(),
-                    kind: crate::security::SecurityEventKind::AuthFailed,
-                    source_ip: source_ip.clone(),
-                    path: path.clone(),
-                    details: msg.to_string(),
+                    kind: if refus.motif == "rejeu" {
+                        crate::security::SecurityEventKind::HmacReplay
+                    } else {
+                        crate::security::SecurityEventKind::AuthFailed
+                    },
+                    source_ip,
+                    path,
+                    details: refus.motif.to_string(),
                 });
-            return (
-                StatusCode::UNAUTHORIZED,
+            (
+                refus.statut,
                 Json(serde_json::json!({
-                    "error": msg,
-                    "reason": "auth_required",
+                    "error": "Authentification requise (requête signée)",
+                    "reason": refus.motif,
                 })),
             )
-                .into_response();
+                .into_response()
         }
     }
-
-    // 3. Vérification HMAC (si le header X-COG-Signature est présent)
-    if headers.get(crate::security::HEADER_COG_SIGNATURE).is_some() {
-        // Pour la vérification HMAC, on a besoin du body — on ne peut pas le lire ici
-        // sans consommer la requête. On vérifie seulement le timestamp pour l'anti-replay.
-        // La vérification complète du body est faite dans les handlers qui en ont besoin.
-        if let Some(ts_str) = headers
-            .get(crate::security::HEADER_COG_TIMESTAMP)
-            .and_then(|v| v.to_str().ok())
-        {
-            if let Ok(timestamp) = ts_str.parse::<u64>() {
-                let now = crate::security::epoch_now();
-                let age = if now > timestamp {
-                    now - timestamp
-                } else {
-                    timestamp - now
-                };
-
-                if age > state.security_config.hmac_max_age_secs {
-                    state
-                        .security_audit
-                        .log_event(crate::security::SecurityEvent {
-                            timestamp: now,
-                            kind: crate::security::SecurityEventKind::HmacReplay,
-                            source_ip: source_ip.clone(),
-                            path: path.clone(),
-                            details: format!(
-                                "Timestamp expiré (age: {age}s, max: {}s)",
-                                state.security_config.hmac_max_age_secs
-                            ),
-                        });
-                    return (
-                        StatusCode::FORBIDDEN,
-                        Json(serde_json::json!({
-                            "error": "Requête expirée (anti-replay)",
-                            "reason": "hmac_replay",
-                        })),
-                    )
-                        .into_response();
-                }
-            }
-        }
-    }
-
-    // Passer au handler suivant
-    next.run(req).await.into_response()
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1112,14 +1062,11 @@ async fn security_status_handler(State(state): State<ProxyState>) -> impl IntoRe
             "strict_user_agent": cfg.strict_user_agent,
         },
         "authentication": {
-            "bearer_token_configured": state.auth_token.is_some(),
-            "require_auth_all": cfg.require_auth_all == Some(true),
-        },
-        "hmac_signing": {
-            "configured": cfg.hmac_secret.is_some(),
-            // verify_hmac n'est appelée par aucun handler : pas d'application réelle.
-            "enforced": false,
-            "max_age_secs": cfg.hmac_max_age_secs,
+            // Requêtes signées Ed25519 par des appelants épinglés, toujours exigées.
+            "signed_requests": true,
+            "callers_pinned": cfg.cles_appelants.len(),
+            "team_hubs_pinned": cfg.cles_hub_team.len(),
+            "shared_secret": false,
         },
         "encryption": {
             "enabled": cfg.encryption_key.is_some(),
@@ -1134,29 +1081,10 @@ async fn security_status_handler(State(state): State<ProxyState>) -> impl IntoRe
 // Proxy passthrough (catch-all vers LM Studio)
 // ═══════════════════════════════════════════════════════════════════════
 
+/// Passthrough vers l'upstream. L'appelant est déjà authentifié par
+/// `security_middleware` (requête signée) ; ses en-têtes d'authentification ne
+/// sont jamais relayés.
 async fn proxy_handler(State(state): State<ProxyState>, req: Request<Body>) -> impl IntoResponse {
-    if let Some(ref expected_token) = state.auth_token {
-        let authorized = req
-            .headers()
-            .get(header::AUTHORIZATION)
-            .and_then(|v| v.to_str().ok())
-            .map(|v| {
-                crate::security::ct_eq(
-                    v.strip_prefix("Bearer ").unwrap_or(v).as_bytes(),
-                    expected_token.as_bytes(),
-                )
-            })
-            .unwrap_or(false);
-
-        if !authorized {
-            return (
-                StatusCode::UNAUTHORIZED,
-                Json(serde_json::json!({ "error": "Unauthorized" })),
-            )
-                .into_response();
-        }
-    }
-
     let method = req.method().clone();
     let uri = req.uri().clone();
     let headers = req.headers().clone();
@@ -1183,7 +1111,9 @@ async fn proxy_handler(State(state): State<ProxyState>, req: Request<Body>) -> i
 
     for (name, value) in &headers {
         match name.as_str() {
-            "host" | "connection" | "transfer-encoding" => continue,
+            // En-têtes de transport et d'authentification : jamais relayés.
+            "host" | "connection" | "transfer-encoding" | "authorization" => {}
+            n if n.starts_with("x-miyu-") => {}
             _ => {
                 if let Ok(v) = value.to_str() {
                     upstream_req = upstream_req.header(name.as_str(), v);
@@ -1250,5 +1180,152 @@ fn to_reqwest_method(method: &Method) -> reqwest::Method {
         Method::HEAD => reqwest::Method::HEAD,
         Method::OPTIONS => reqwest::Method::OPTIONS,
         _ => reqwest::Method::GET,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::signature::{GardesMaia, USAGE_API, USAGE_TEAM};
+    use miyauth::http::service::{entetes_signees, maintenant_unix};
+    use miyusceau::CleSignature;
+    use tower::ServiceExt;
+
+    fn cle_appelant() -> CleSignature {
+        CleSignature::depuis_graine(&[3_u8; 32])
+    }
+    fn cle_hub() -> CleSignature {
+        CleSignature::depuis_graine(&[4_u8; 32])
+    }
+
+    fn etat(gardes: GardesMaia) -> ProxyState {
+        let client = reqwest::Client::new();
+        // Backends injoignables (port 9) : seule l'authentification est testée.
+        let maia = crate::inference::MaiaLlmClient::new("http://127.0.0.1:9".into(), None, client.clone());
+        let amont = crate::inference::UpstreamBackend::new(client.clone(), "http://127.0.0.1:9".into());
+        ProxyState {
+            client: client.clone(),
+            upstream_url: "http://127.0.0.1:9".into(),
+            gardes: std::sync::Arc::new(gardes),
+            log_requests: false,
+            hardware: crate::hardware::detect_hardware(),
+            agent_registry: AgentRegistry::new(),
+            context_registry: ContextRegistry::new(),
+            rate_limiter: RateLimiter::new(crate::security::RateLimitConfig::default()),
+            audit_log: AuditLog::new(100),
+            inference: InferenceRouter::new(maia, amont, true),
+            model_manager: ModelManager::new(std::env::temp_dir().join("maia-test-modeles-absents")),
+            security_config: SecurityConfig::default(),
+            security_audit: SecurityAuditLog::new(100),
+            active_persona: None,
+            maia_mode: MaiaMode::Standalone,
+            started_at: 0,
+            team_registered: false,
+            confirmations: std::sync::Arc::new(crate::confirmations::RegistreConfirmations::new()),
+            gouvernance: std::sync::Arc::new(crate::gouvernance::GouvernanceMaia::depuis_fichier(
+                std::env::temp_dir().join("maia-test-politiques-absentes.toml"),
+            )),
+        }
+    }
+
+    fn securise() -> Router {
+        proxy_router(etat(GardesMaia::new(vec![cle_appelant().cle_publique()], vec![cle_hub().cle_publique()])))
+    }
+
+    fn requete(methode: &str, chemin: &str, corps: &str, cle: Option<(&CleSignature, &str)>) -> Request<Body> {
+        let mut b = Request::builder()
+            .method(methode)
+            .uri(chemin)
+            .header(header::CONTENT_TYPE, "application/json");
+        if let Some((cle, usage)) = cle {
+            for (n, v) in entetes_signees(cle, usage, methode, chemin, corps.as_bytes()) {
+                b = b.header(n, v);
+            }
+        }
+        let mut r = b.body(Body::from(corps.to_string())).unwrap();
+        r.extensions_mut()
+            .insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 40000))));
+        r
+    }
+
+    async fn statut(app: &Router, r: Request<Body>) -> StatusCode {
+        app.clone().oneshot(r).await.unwrap().status()
+    }
+
+    #[tokio::test]
+    async fn appelant_epingle_accepte() {
+        let app = securise();
+        let r = requete("GET", "/v1/agents", "", Some((&cle_appelant(), USAGE_API)));
+        assert_eq!(statut(&app, r).await, StatusCode::OK);
+        let r = requete("GET", "/v1/security/status", "", Some((&cle_appelant(), USAGE_API)));
+        assert_eq!(statut(&app, r).await, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn non_signe_cle_inconnue_bearer_refuses() {
+        let app = securise();
+        assert_eq!(statut(&app, requete("GET", "/v1/agents", "", None)).await, StatusCode::UNAUTHORIZED);
+        assert_eq!(statut(&app, requete("GET", "/status", "", None)).await, StatusCode::UNAUTHORIZED);
+        let mut r = requete("GET", "/v1/agents", "", None);
+        r.headers_mut().insert(header::AUTHORIZATION, "Bearer secret".parse().unwrap());
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+        let intrus = CleSignature::generer();
+        let r = requete("GET", "/v1/agents", "", Some((&intrus, USAGE_API)));
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+        // Passthrough proxy : même porte.
+        let r = requete("POST", "/v1/chat/completions", "{}", None);
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+        // Santé publique.
+        assert_eq!(statut(&app, requete("GET", "/health", "", None)).await, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn hub_team_limite_au_chat_d_agent() {
+        let app = securise();
+        let r = requete("GET", "/v1/agents", "", Some((&cle_hub(), USAGE_TEAM)));
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+        let r = requete("GET", "/v1/agents", "", Some((&cle_hub(), USAGE_API)));
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+        // Usage d'appelant sur la route TEAM : signature invalide.
+        let r = requete("POST", "/v1/agents/inconnu/chat", "{}", Some((&cle_hub(), USAGE_API)));
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+        // Route TEAM avec l'usage TEAM : authentifié (l'agent inconnu donne 404, pas 401).
+        let r = requete("POST", "/v1/agents/inconnu/chat", "{\"messages\":[]}", Some((&cle_hub(), USAGE_TEAM)));
+        let s = statut(&app, r).await;
+        assert!(s != StatusCode::UNAUTHORIZED && s != StatusCode::SERVICE_UNAVAILABLE, "{s}");
+    }
+
+    #[tokio::test]
+    async fn rejeu_perime_corps_altere_refuses() {
+        let app = securise();
+        let corps = "{\"name\":\"x\"}";
+        let signe = requete("POST", "/v1/contexts", corps, Some((&cle_appelant(), USAGE_API)));
+        let entetes = signe.headers().clone();
+        assert_ne!(statut(&app, signe).await, StatusCode::UNAUTHORIZED);
+        let mut rejeu = requete("POST", "/v1/contexts", corps, None);
+        rejeu.headers_mut().extend(entetes);
+        assert_eq!(statut(&app, rejeu).await, StatusCode::UNAUTHORIZED);
+        let signe = requete("POST", "/v1/contexts", corps, Some((&cle_appelant(), USAGE_API)));
+        let mut altere = requete("POST", "/v1/contexts", "{\"name\":\"y\"}", None);
+        altere.headers_mut().extend(signe.headers().clone());
+        assert_eq!(statut(&app, altere).await, StatusCode::UNAUTHORIZED);
+        let vieux = miyauth::http::signer_requete(&cle_appelant(), USAGE_API, "GET", "/v1/agents", b"", maintenant_unix() - 600);
+        let mut r = requete("GET", "/v1/agents", "", None);
+        for (n, v) in vieux.en_entetes() {
+            r.headers_mut().insert(n, v.parse().unwrap());
+        }
+        assert_eq!(statut(&app, r).await, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn aucune_cle_epinglee_tout_refuse_meme_en_loopback() {
+        let app = proxy_router(etat(GardesMaia::default()));
+        let mut r = requete("GET", "/v1/agents", "", Some((&cle_appelant(), USAGE_API)));
+        r.headers_mut().insert(header::HOST, "127.0.0.1:11435".parse().unwrap());
+        assert_eq!(statut(&app, r).await, StatusCode::SERVICE_UNAVAILABLE);
+        let mut r = requete("GET", "/v1/agents", "", None);
+        r.headers_mut().insert(header::HOST, "localhost:11435".parse().unwrap());
+        assert_eq!(statut(&app, r).await, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(statut(&app, requete("GET", "/health", "", None)).await, StatusCode::OK);
     }
 }

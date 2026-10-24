@@ -13,8 +13,9 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BridgeConfig {
     /// Adresse d'écoute. Défaut : "127.0.0.1:11435" (loopback uniquement).
-    /// Une adresse non-loopback (ex: "0.0.0.0:11435") exige un `auth_token` :
-    /// sans token, le service refuse de démarrer (voir `validate_startup`).
+    /// Une adresse non-loopback (ex: "0.0.0.0:11435") exige au moins un appelant
+    /// épinglé (`[security] cles_appelants` / `cles_hub_team`) : sinon, le
+    /// service refuse de démarrer (voir `validate_startup`).
     #[serde(default = "default_bind_addr")]
     pub bind_addr: String,
 
@@ -26,8 +27,15 @@ pub struct BridgeConfig {
     #[serde(default)]
     pub default_model: Option<String>,
 
-    /// Token d'authentification (Bearer token). Obligatoire hors loopback.
+    /// Graine de la clé de service de MAIA (signe ses appels à maia-llm et au hub
+    /// TEAM ; fichier 0600 créé une seule fois). Absent :
+    /// `$MIYUKINI_DATA_DIR/keys/maia.seed`, sinon `keys/maia.seed`.
     #[serde(default)]
+    pub cle_service: Option<String>,
+
+    /// Obsolète (lot 2) : ancien jeton Bearer partagé. Ignoré — jamais une
+    /// autorisation ; avertissement au démarrage s'il est présent.
+    #[serde(default, skip_serializing)]
     pub auth_token: Option<String>,
 
     /// Active les logs des requêtes.
@@ -87,11 +95,20 @@ pub struct SecurityConfig {
     #[serde(default)]
     pub allowed_origins: Vec<String>,
 
-    /// Requiert l'authentification Bearer sur tous les endpoints protégés.
-    /// Non défini (défaut) : activé automatiquement dès que le bind n'est pas
-    /// loopback, désactivé en loopback (usage local sans token). Explicite
-    /// `true` sans `auth_token` => refus de démarrer (fail-closed).
+    /// Clés publiques Ed25519 (base64 URL ou hex) des appelants autorisés sur
+    /// toute l'API protégée (requêtes signées, usage `maia/api` : Central, …).
+    /// Vide (défaut) : toute requête protégée est refusée, y compris en loopback.
     #[serde(default)]
+    pub cles_appelants: Vec<String>,
+
+    /// Clés publiques des hubs TEAM autorisés, **uniquement** sur
+    /// `POST /v1/agents/{id}/chat` (usage `maia/team`).
+    #[serde(default)]
+    pub cles_hub_team: Vec<String>,
+
+    /// Obsolète (lot 2) : l'authentification est désormais toujours exigée.
+    /// Ignoré.
+    #[serde(default, skip_serializing)]
     pub require_auth_all: Option<bool>,
 
     /// Proxies de confiance (IP ou CIDR IPv4). `X-Forwarded-For` n'est lu QUE
@@ -105,12 +122,9 @@ pub struct SecurityConfig {
     #[serde(default)]
     pub cors_allowed_origins: Vec<String>,
 
-    /// Clé secrète HMAC-SHA256 pour la signature inter-services COG.
-    /// ATTENTION : la signature n'est PAS appliquée par le middleware actuel
-    /// (`verify_hmac` n'est appelée par aucun handler) ; seul un contrôle de
-    /// fraîcheur du timestamp est fait si X-COG-Signature est présent.
-    /// Ne pas s'appuyer sur ce champ comme protection anti-MITM.
-    #[serde(default)]
+    /// Obsolète (lot 2) : ancien secret HMAC partagé (jamais appliqué).
+    /// Ignoré ; remplacé par les requêtes signées Ed25519.
+    #[serde(default, skip_serializing)]
     pub hmac_secret: Option<String>,
 
     /// Active le chiffrement AES-256-GCM des réponses sensibles.
@@ -122,10 +136,6 @@ pub struct SecurityConfig {
     #[serde(default)]
     pub strict_user_agent: bool,
 
-    /// Durée max d'une session HMAC en secondes (anti-replay). Défaut: 300s.
-    #[serde(default = "default_hmac_max_age")]
-    pub hmac_max_age_secs: u64,
-
     /// Limite les IP qui peuvent accéder aux endpoints d'administration.
     /// Vide = mêmes règles que allowed_origins.
     #[serde(default)]
@@ -136,20 +146,17 @@ impl Default for SecurityConfig {
     fn default() -> Self {
         Self {
             allowed_origins: Vec::new(),
+            cles_appelants: Vec::new(),
+            cles_hub_team: Vec::new(),
             require_auth_all: None,
             trusted_proxies: Vec::new(),
             cors_allowed_origins: Vec::new(),
             hmac_secret: None,
             encryption_key: None,
             strict_user_agent: false,
-            hmac_max_age_secs: 300,
             admin_origins: Vec::new(),
         }
     }
-}
-
-fn default_hmac_max_age() -> u64 {
-    300
 }
 
 fn default_bind_addr() -> String {
@@ -190,6 +197,7 @@ impl Default for BridgeConfig {
             bind_addr: default_bind_addr(),
             upstream_url: default_upstream_url(),
             default_model: None,
+            cle_service: None,
             auth_token: None,
             log_requests: true,
             native: NativeInferenceConfig::default(),
@@ -208,32 +216,57 @@ pub fn is_loopback_bind(bind_addr: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Clés publiques épinglées `(appelants, hubs TEAM)`.
+pub type ClesEpinglees = (Vec<[u8; 32]>, Vec<[u8; 32]>);
+
 impl BridgeConfig {
-    /// Valeur effective de `require_auth_all` : explicite, sinon vrai hors loopback.
-    pub fn effective_require_auth_all(&self) -> bool {
-        self.security
-            .require_auth_all
-            .unwrap_or_else(|| !is_loopback_bind(&self.bind_addr))
+    /// Clés épinglées `(appelants, hubs TEAM)`. Une entrée mal formée ⇒ erreur.
+    pub fn cles_epinglees(&self) -> Result<ClesEpinglees, String> {
+        use miyauth::http::service::analyser_cles_publiques;
+        let appelants = analyser_cles_publiques(&self.security.cles_appelants)
+            .map_err(|e| format!("security.cles_appelants : {e}"))?;
+        let hubs = analyser_cles_publiques(&self.security.cles_hub_team)
+            .map_err(|e| format!("security.cles_hub_team : {e}"))?;
+        Ok((appelants, hubs))
     }
 
-    fn has_token(&self) -> bool {
-        self.auth_token.as_deref().is_some_and(|t| !t.trim().is_empty())
+    /// Champs obsolètes encore présents (ignorés, signalés au démarrage).
+    pub fn champs_obsoletes(&self) -> Vec<&'static str> {
+        let mut v = Vec::new();
+        if self.auth_token.is_some() {
+            v.push("auth_token");
+        }
+        if self.security.require_auth_all.is_some() {
+            v.push("security.require_auth_all");
+        }
+        if self.security.hmac_secret.is_some() {
+            v.push("security.hmac_secret");
+        }
+        v
     }
 
-    /// Valide la cohérence bind/auth (fail-closed). À appeler avant d'ouvrir le port.
+    /// Chemin de la graine de la clé de service.
+    pub fn chemin_cle_service(&self) -> PathBuf {
+        if let Some(p) = self.cle_service.as_deref().filter(|p| !p.trim().is_empty()) {
+            return PathBuf::from(p);
+        }
+        match std::env::var("MIYUKINI_DATA_DIR") {
+            Ok(d) => Path::new(&d).join("keys").join("maia.seed"),
+            Err(_) => PathBuf::from("keys/maia.seed"),
+        }
+    }
+
+    /// Valide la configuration (fail-closed). À appeler avant d'ouvrir le port :
+    /// clés épinglées bien formées, et pas de bind non-loopback sans appelant.
     pub fn validate_startup(&self) -> Result<(), String> {
-        if !is_loopback_bind(&self.bind_addr) && !self.has_token() {
+        let (appelants, hubs) = self.cles_epinglees().map_err(|e| format!("Refus de démarrer : {e}"))?;
+        if !is_loopback_bind(&self.bind_addr) && appelants.is_empty() && hubs.is_empty() {
             return Err(format!(
-                "Refus de démarrer : bind_addr={} n'est pas loopback et aucun auth_token \
-                 n'est configuré. Définissez `auth_token` dans bridge.toml ou utilisez \
-                 127.0.0.1.",
+                "Refus de démarrer : bind_addr={} n'est pas loopback et aucun appelant \
+                 n'est épinglé. Renseignez `[security] cles_appelants` dans bridge.toml \
+                 ou utilisez 127.0.0.1.",
                 self.bind_addr
             ));
-        }
-        if self.effective_require_auth_all() && !self.has_token() {
-            return Err("Refus de démarrer : require_auth_all est actif mais aucun \
-                        auth_token n'est configuré."
-                .into());
         }
         Ok(())
     }
@@ -291,31 +324,48 @@ pub fn load_or_create() -> BridgeConfig {
 mod tests {
     use super::*;
 
+    fn cle_b64() -> String {
+        miyauth::http::service::encoder_cle_publique(&miyusceau::CleSignature::generer().cle_publique())
+    }
+
     #[test]
-    fn defaut_loopback_utilisable_sans_token() {
+    fn defaut_loopback_demarre_mais_n_epingle_rien() {
         let c = BridgeConfig::default();
         assert!(c.bind_addr.starts_with("127.0.0.1:"));
-        assert!(!c.effective_require_auth_all());
         assert!(c.validate_startup().is_ok());
+        assert_eq!(c.cles_epinglees().unwrap(), (vec![], vec![]));
     }
 
     #[test]
-    fn refus_demarrage_non_loopback_sans_auth() {
-        let mut c = BridgeConfig::default();
-        c.bind_addr = "0.0.0.0:11435".into();
+    fn refus_demarrage_non_loopback_sans_appelant() {
+        let mut c = BridgeConfig {
+            bind_addr: "0.0.0.0:11435".into(),
+            ..BridgeConfig::default()
+        };
         assert!(c.validate_startup().is_err());
-        c.auth_token = Some("   ".into());
-        assert!(c.validate_startup().is_err());
+        // L'ancien jeton partagé n'autorise plus rien.
         c.auth_token = Some("secret".into());
-        assert!(c.effective_require_auth_all());
+        assert!(c.validate_startup().is_err());
+        c.security.cles_appelants = vec![cle_b64()];
         assert!(c.validate_startup().is_ok());
     }
 
     #[test]
-    fn require_auth_all_explicite_sans_token_refuse() {
+    fn cle_epinglee_mal_formee_refusee() {
         let mut c = BridgeConfig::default();
-        c.security.require_auth_all = Some(true);
+        c.security.cles_hub_team = vec!["xyz".into()];
         assert!(c.validate_startup().is_err());
+    }
+
+    #[test]
+    fn champs_obsoletes_signales_et_jamais_reecrits() {
+        let c: BridgeConfig = toml::from_str(
+            "auth_token = \"s3cret\"\n[security]\nrequire_auth_all = true\nhmac_secret = \"h\"\n",
+        )
+        .unwrap();
+        assert_eq!(c.champs_obsoletes(), vec!["auth_token", "security.require_auth_all", "security.hmac_secret"]);
+        let t = toml::to_string(&c).unwrap();
+        assert!(!t.contains("s3cret") && !t.contains("hmac_secret") && !t.contains("require_auth_all"));
     }
 
     #[test]

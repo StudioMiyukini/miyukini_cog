@@ -7,7 +7,11 @@
 //! Mode voix : micro -> STT -> NLU -> intent -> TTS -> haut-parleur.
 
 use std::io::{self, Write as _};
+use std::sync::Arc;
 use std::time::Instant;
+
+use miyauth::http::service::{charger_ou_creer_cle, encoder_cle_publique, entetes_signees};
+use miyusceau::CleSignature;
 
 use miyualicia::intent::Intent;
 
@@ -141,50 +145,46 @@ pub async fn capture_speech() -> anyhow::Result<Vec<f32>> {
 /// Adresse d'ecoute des serveurs mock embarques : loopback, port ephemere (C-21).
 pub const MOCK_BIND_ADDR: &str = "127.0.0.1:0";
 
-/// Variable d'environnement portant le jeton bearer des serveurs STT/TTS externes.
-/// (Pas d'argument CLI : un secret en argument serait visible dans la liste des processus.)
-pub const VOICE_TOKEN_ENV: &str = "ALICIA_VOICE_TOKEN";
+/// Variable d'environnement : chemin du fichier de graine (0600) de la cle
+/// d'Alicia pour les serveurs STT/TTS externes (lot 2 : plus de jeton partage).
+pub const VOICE_KEY_ENV: &str = "ALICIA_VOICE_KEY_FILE";
 
-/// Serveurs mock STT/TTS demarres, avec le jeton bearer qui les protege.
+/// Chemin par defaut de la graine de la cle d'Alicia (cree une seule fois, 0600).
+pub const DEFAULT_VOICE_KEY_PATH: &str = "keys/alicia-mvp.seed";
+
+/// Serveurs mock STT/TTS demarres, avec la cle qui seule y est epinglee.
 pub struct MockServers {
     pub stt_url: String,
     pub tts_url: String,
-    /// Jeton aleatoire propre au processus, exige par les deux serveurs.
-    pub token: String,
+    /// Cle ephemere propre au processus : seule appelante epinglee par les deux serveurs.
+    pub key: Arc<CleSignature>,
 }
 
-/// Jeton bearer aleatoire de 256 bits (OS RNG, C-24), encode en hexadecimal.
-fn generate_token() -> anyhow::Result<String> {
-    use rand_core::{OsRng, RngCore as _};
-    let mut bytes = [0_u8; 32];
-    OsRng
-        .try_fill_bytes(&mut bytes)
-        .map_err(|e| anyhow::anyhow!("generation du jeton impossible : {e}"))?;
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut out = String::with_capacity(64);
-    for b in bytes {
-        out.push(char::from(HEX[usize::from(b >> 4)]));
-        out.push(char::from(HEX[usize::from(b & 0x0f)]));
-    }
-    bytes.fill(0);
-    Ok(out)
+/// Charge (ou cree une fois, 0600) la cle d'Alicia pour les serveurs externes et
+/// affiche sa cle publique, a epingler cote STT/TTS.
+pub fn external_voice_key() -> anyhow::Result<Arc<CleSignature>> {
+    let path = std::env::var(VOICE_KEY_ENV)
+        .ok()
+        .filter(|p| !p.trim().is_empty())
+        .unwrap_or_else(|| DEFAULT_VOICE_KEY_PATH.to_string());
+    let key = charger_ou_creer_cle(std::path::Path::new(&path))
+        .map_err(|e| anyhow::anyhow!("cle d'Alicia ({path}) : {e}"))?;
+    println!(
+        "  [Voix] Cle publique d'Alicia (a epingler sur STT/TTS) : {}",
+        encoder_cle_publique(&key.cle_publique())
+    );
+    Ok(Arc::new(key))
 }
 
-/// Construit les routeurs STT/TTS proteges (jeton obligatoire, origine locale stricte).
-fn mock_routers(token: &str) -> (axum::Router, axum::Router, miyustt::SttSecurity, miyutts::TtsSecurity) {
-    let stt_security = miyustt::SttSecurity {
-        bearer_token: Some(token.to_string()),
-        enforce_local_origin: true,
-    };
+/// Construit les routeurs STT/TTS proteges (seule `caller` est epinglee, origine locale stricte).
+fn mock_routers(caller: [u8; 32]) -> (axum::Router, axum::Router, miyustt::SttSecurity, miyutts::TtsSecurity) {
+    let stt_security = miyustt::SttSecurity::avec_appelants([caller], true);
     let stt_router = miyustt::router_with_state(miyustt::SttState {
         security: stt_security.clone(),
         ..Default::default()
     });
 
-    let tts_security = miyutts::TtsSecurity {
-        bearer_token: Some(token.to_string()),
-        enforce_local_origin: true,
-    };
+    let tts_security = miyutts::TtsSecurity::avec_appelants([caller], true);
     let tts_router = miyutts::router_with_state(miyutts::TtsState {
         security: tts_security.clone(),
         ..Default::default()
@@ -195,10 +195,10 @@ fn mock_routers(token: &str) -> (axum::Router, axum::Router, miyustt::SttSecurit
 /// Demarre les serveurs mock STT/TTS sur `bind_addr`.
 ///
 /// Fail-closed : l'adresse est validee par `validate_bind` (hors loopback sans
-/// jeton = refus) avant toute ouverture de port.
+/// appelant epingle = refus) avant toute ouverture de port.
 pub async fn start_mock_servers_on(bind_addr: &str) -> anyhow::Result<MockServers> {
-    let token = generate_token()?;
-    let (stt_router, tts_router, stt_security, tts_security) = mock_routers(&token);
+    let key = Arc::new(CleSignature::generer());
+    let (stt_router, tts_router, stt_security, tts_security) = mock_routers(key.cle_publique());
 
     let stt_addr = miyustt::validate_bind(bind_addr, &stt_security)?;
     let tts_addr = miyutts::validate_bind(bind_addr, &tts_security)?;
@@ -215,11 +215,7 @@ pub async fn start_mock_servers_on(bind_addr: &str) -> anyhow::Result<MockServer
         let _ = axum::serve(tts_listener, tts_router).await;
     });
 
-    Ok(MockServers {
-        stt_url,
-        tts_url,
-        token,
-    })
+    Ok(MockServers { stt_url, tts_url, key })
 }
 
 /// Demarre les serveurs mock STT/TTS en loopback (defaut).
@@ -231,10 +227,35 @@ pub async fn start_mock_servers() -> anyhow::Result<MockServers> {
 // HTTP clients STT / TTS
 // ---------------------------------------------------------------------------
 
+/// POST JSON, signe par `key` (usage du service) si une cle est fournie.
+fn signed_post(
+    client: &reqwest::Client,
+    url: &str,
+    usage: &str,
+    key: Option<&CleSignature>,
+    body: &serde_json::Value,
+) -> anyhow::Result<reqwest::RequestBuilder> {
+    let bytes = serde_json::to_vec(body)?;
+    let parsed = reqwest::Url::parse(url)?;
+    let path = match parsed.query() {
+        Some(q) => format!("{}?{q}", parsed.path()),
+        None => parsed.path().to_string(),
+    };
+    let mut request = client
+        .post(parsed)
+        .header(reqwest::header::CONTENT_TYPE, "application/json");
+    if let Some(key) = key {
+        for (name, value) in entetes_signees(key, usage, "POST", &path, &bytes) {
+            request = request.header(name, value);
+        }
+    }
+    Ok(request.body(bytes))
+}
+
 pub async fn call_stt(
     client: &reqwest::Client,
     base_url: &str,
-    token: Option<&str>,
+    key: Option<&CleSignature>,
     samples: &[f32],
 ) -> anyhow::Result<String> {
     let url = format!("{base_url}/api/stt");
@@ -245,10 +266,7 @@ pub async fn call_stt(
         "language": "fr"
     });
 
-    let mut request = client.post(&url).json(&body);
-    if let Some(token) = token {
-        request = request.bearer_auth(token);
-    }
+    let request = signed_post(client, &url, miyustt::USAGE, key, &body)?;
     let resp = match request
         .timeout(std::time::Duration::from_secs(30))
         .send()
@@ -281,7 +299,7 @@ pub async fn call_stt(
 pub async fn call_tts(
     client: &reqwest::Client,
     base_url: &str,
-    token: Option<&str>,
+    key: Option<&CleSignature>,
     text: &str,
 ) -> anyhow::Result<Vec<u8>> {
     let url = format!("{base_url}/api/tts/wav");
@@ -293,10 +311,7 @@ pub async fn call_tts(
         "sample_rate": 22050
     });
 
-    let mut request = client.post(&url).json(&body);
-    if let Some(token) = token {
-        request = request.bearer_auth(token);
-    }
+    let request = signed_post(client, &url, miyutts::USAGE, key, &body)?;
     let resp = request
         .timeout(std::time::Duration::from_secs(10))
         .send()
@@ -399,7 +414,7 @@ pub async fn run_voice_mode(
                         samples.len(),
                         samples.len() as f64 / 16_000.0
                     );
-                    match call_stt(&rt.http, &rt.stt_url, rt.stt_token.as_deref(), &samples).await {
+                    match call_stt(&rt.http, &rt.stt_url, rt.stt_key.as_deref(), &samples).await {
                         Ok(t) => { println!("  [STT] \"{t}\""); t }
                         Err(e) => { println!("  [STT] Erreur : {e:#}"); continue; }
                     }
@@ -423,7 +438,7 @@ pub async fn run_voice_mode(
         // Response + TTS
         let response_text = rt.nlu.generate_response(&intent, &transcript).await;
         println!("  [Alicia] \"{response_text}\"");
-        match call_tts(&rt.http, &rt.tts_url, rt.tts_token.as_deref(), &response_text).await {
+        match call_tts(&rt.http, &rt.tts_url, rt.tts_key.as_deref(), &response_text).await {
             Ok(wav) => { println!("  [TTS] {} octets", wav.len()); play_wav(&wav); }
             Err(e) => println!("  [TTS] Erreur : {e}"),
         }
@@ -443,11 +458,11 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn mock_servers_require_token() {
+    async fn mock_servers_require_signature() {
         let mock = start_mock_servers().await.unwrap();
         let client = reqwest::Client::new();
 
-        // Sans jeton : 401.
+        // Non signe : 401.
         let resp = client
             .post(format!("{}/api/stt", mock.stt_url))
             .json(&stt_body())
@@ -456,7 +471,7 @@ mod tests {
             .unwrap();
         assert_eq!(resp.status(), reqwest::StatusCode::UNAUTHORIZED);
 
-        // Mauvais jeton : 401.
+        // Ancien jeton bearer : 401.
         let resp = client
             .post(format!("{}/api/tts/wav", mock.tts_url))
             .bearer_auth("mauvais")
@@ -468,12 +483,17 @@ mod tests {
             .unwrap();
         assert_eq!(resp.status(), reqwest::StatusCode::UNAUTHORIZED);
 
-        // Bon jeton : 200 via les clients de l'application.
-        let transcript = call_stt(&client, &mock.stt_url, Some(&mock.token), &[0.1, -0.1])
+        // Cle non epinglee : refus.
+        let other = CleSignature::generer();
+        assert!(call_stt(&client, &mock.stt_url, Some(&other), &[0.1]).await.is_err());
+        assert!(call_tts(&client, &mock.tts_url, Some(&other), "Bonjour").await.is_err());
+
+        // Cle epinglee : 200 via les clients de l'application (aller-retour).
+        let transcript = call_stt(&client, &mock.stt_url, Some(&mock.key), &[0.1, -0.1])
             .await
             .unwrap();
         assert_ne!(transcript, "");
-        let wav = call_tts(&client, &mock.tts_url, Some(&mock.token), "Bonjour")
+        let wav = call_tts(&client, &mock.tts_url, Some(&mock.key), "Bonjour")
             .await
             .unwrap();
         assert!(wav.len() > 44);
@@ -485,22 +505,19 @@ mod tests {
         let mock = start_mock_servers().await.unwrap();
         let client = reqwest::Client::new();
         let port = mock.stt_url.rsplit(':').next().unwrap().to_string();
+        let url = format!("{}/api/stt", mock.stt_url);
 
-        let resp = client
-            .post(format!("{}/api/stt", mock.stt_url))
-            .bearer_auth(&mock.token)
+        let resp = signed_post(&client, &url, miyustt::USAGE, Some(&mock.key), &stt_body())
+            .unwrap()
             .header("origin", "http://localhost.evil.com")
-            .json(&stt_body())
             .send()
             .await
             .unwrap();
         assert_eq!(resp.status(), reqwest::StatusCode::FORBIDDEN);
 
-        let resp = client
-            .post(format!("{}/api/stt", mock.stt_url))
-            .bearer_auth(&mock.token)
+        let resp = signed_post(&client, &url, miyustt::USAGE, Some(&mock.key), &stt_body())
+            .unwrap()
             .header("origin", format!("http://localhost:{port}"))
-            .json(&stt_body())
             .send()
             .await
             .unwrap();
@@ -512,12 +529,11 @@ mod tests {
         let mock = start_mock_servers().await.unwrap();
         let client = reqwest::Client::new();
         let text = "a".repeat(miyutts::MAX_TTS_BODY_BYTES + 1);
-        let resp = client
-            .post(format!("{}/api/tts", mock.tts_url))
-            .bearer_auth(&mock.token)
-            .json(&serde_json::json!({
-                "text": text, "voice": "", "format": "wav", "language": "fr"
-            }))
+        let body = serde_json::json!({
+            "text": text, "voice": "", "format": "wav", "language": "fr"
+        });
+        let resp = signed_post(&client, &format!("{}/api/tts", mock.tts_url), miyutts::USAGE, Some(&mock.key), &body)
+            .unwrap()
             .send()
             .await
             .unwrap();
@@ -529,8 +545,6 @@ mod tests {
         let mock = start_mock_servers().await.unwrap();
         assert!(mock.stt_url.starts_with("http://127.0.0.1:"));
         assert!(mock.tts_url.starts_with("http://127.0.0.1:"));
-        assert_eq!(mock.token.len(), 64);
         assert!(start_mock_servers_on("localhost:0").await.is_err());
     }
 }
-

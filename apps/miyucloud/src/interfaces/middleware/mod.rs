@@ -6,5 +6,6 @@
 
 pub mod auth;
 pub mod bandwidth;
+pub mod basic_policy;
 pub mod csrf;
 pub mod rate_limit;

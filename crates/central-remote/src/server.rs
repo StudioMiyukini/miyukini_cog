@@ -5,24 +5,73 @@
 //@human ! @role   infra
 //! @layer toolkit
 //! @human  Serveur Axum lancé par Central quand le remote est activé.
-//! Expose : POST /auth (login), GET /ws (WebSocket), GET /status (santé).
-//! Les routes d'administration de l'appairage exigent un pair loopback + secret.
+//! Authentification des appareils par passeport + visa + preuve de possession
+//! (aucun secret partagé, sortie du lot 2).
+//!
+//! # Protocole client (Central Mobile ou tout client natif)
+//!
+//! Prérequis : appareil appairé (appairage v2 ci-dessous) ; l'appareil détient
+//! sa clé d'identité Ed25519 `Kd` (la même que pour l'E2E), épinglée par le COG.
+//! Encodages : base64 URL **sans remplissage** (RFC 4648 §5), décodage strict.
+//! Format exact des en-têtes : `miyauth::http`.
+//!
+//! 1. **Passeport** — `POST /api/bridge/passeport`, corps vide, requête signée
+//!    par `Kd` (usage `central-remote/passeport`) :
+//!    ```text
+//!    X-Miyu-Signataire: b64(Kd publique)     X-Miyu-Horodatage: <secondes Unix>
+//!    X-Miyu-Nonce:      b64(16 o aléatoires)  X-Miyu-Signature: b64(Ed25519(Kd, m))
+//!    m = "miyukini/requete-signee/v1" || 0 || lp("central-remote/passeport") || lp("POST")
+//!        || lp("/api/bridge/passeport") || horodatage (u64 BE) || lp(nonce) || SHA-256(corps)
+//!    ```
+//!    (`lp` = longueur u16 BE + octets ; fenêtre ± 300 s ; nonce à usage unique.)
+//!    Réponse `{passeport, expire_a, cog_id}` : passeport scellé (24 h) émis par
+//!    la clé d'émission du COG pour `Kd`. Refus : 401 (clé non appairée ou
+//!    révoquée, signature, horodatage, rejeu).
+//! 2. **Défi** — `POST /api/bridge/defi` → `{defi_id, defi, audience:
+//!    "central-remote", expire_a, cog_id}` (usage unique, 60 s).
+//! 3. **Visa** — `POST /api/bridge/visa`, corps vide :
+//!    ```text
+//!    Authorization: MiyuPasseport b64(passeport)
+//!    X-Miyu-PoP:    <defi_id>.b64(Ed25519(Kd, "miyukini/pop/v1" || defi || "central-remote" || liaison))
+//!    liaison = SHA-256("miyukini/http-liaison/v1" || 0 || méthode || 0 || chemin || 0 || SHA-256(corps))
+//!    ```
+//!    → `{visa, expire_a, role, identite, display_name}` ; visa ≤ 15 min,
+//!    audience `central-remote`.
+//! 4. **Chaque requête** — `Authorization: MiyuVisa b64(visa).b64(passeport)` et
+//!    une **nouvelle** preuve `X-Miyu-PoP` (nouveau défi, liaison de cette
+//!    requête) :
+//!    - `POST /api/bridge/validate` → `{status: "ok", identite, role, expire_a,
+//!      display_name}` (remplace la validation par `device_id` au porteur) ;
+//!    - `GET /ws` : vérifié **avant** l'upgrade (liaison de `GET /ws`, corps
+//!      vide). Toute chaîne de requête est refusée (400) : `?token=` n'existe
+//!      plus. La session WebSocket est fermée à l'expiration du visa et dès la
+//!      révocation de l'appareil (revérification toutes les 5 s et à chaque
+//!      commande).
+//!
+//! Refus : 401 (titre, preuve, défi expiré ou rejoué, révocation), 503 si le
+//! service est saturé (défis ou nonces), 429 en cas de débit excessif.
+//!
+//! # Points retirés (inventaire des secrets partagés #1 à #5)
+//!
+//! - `POST /api/bridge/validate` avec `device_id` au porteur → visa + PoP.
+//! - `GET /api/bridge/validate-token`, `POST /api/bridge/generate-token` (jeton
+//!   API de 30 jours) : supprimés (404).
+//! - `GET /ws` avec jeton HMAC (`Bearer` ou `?token=`) → visa + PoP.
+//! - `POST /auth` (courriel + mot de passe → session) : supprimé (404). La doc
+//!   gelée (§5) fait du passeport l'identité personne + appareil ; elle n'exige
+//!   aucune connexion par mot de passe dans le canal E2E. Le titulaire est le
+//!   profil Central lié à l'appareil à l'approbation.
+//! - Routes d'administration `/api/bridge/{devices,approve,reject,generate-token}`
+//!   (secret par processus + loopback) : supprimées. Central les appelait déjà
+//!   **dans le processus** ([`RemoteServerHandle::pairing`]) ; aucune surface HTTP
+//!   d'administration ne subsiste.
 //!
 //! ## Chiffrement E2E mobile ↔ COG (R-023, fail-closed C-12)
 //!
-//! - `POST /api/bridge/e2e-handshake` : l'appareil envoie son offre v2 signée ;
-//!   le COG retrouve la clé d'identité épinglée dans la whitelist (appareil
-//!   inconnu = 403), vérifie l'offre (`PendingHandshake::complete`) et répond
-//!   par sa propre offre v2.
-//! - `POST /auth` chiffré : en-tête `x-miyukini-e2e-session` + corps
-//!   `EncryptedMessage` v2 lié à `POST /auth` ; la réponse est chiffrée et liée
-//!   au même identifiant de requête.
-//! - `POST /auth` en clair (R-025) : **refusé partout par défaut** (E2E
-//!   obligatoire). Avec [`RemoteServerConfig::allow_plaintext_local_auth`]
-//!   (opt-in explicite, avertissement au démarrage), accepté depuis un pair
-//!   loopback uniquement — utile au portail web local, mais un proxy inverse
-//!   local ferait paraître « locale » toute requête : ne jamais l'activer
-//!   derrière un proxy.
+//! `POST /api/bridge/e2e-handshake` : l'appareil envoie son offre v2 signée ; le
+//! COG retrouve la clé d'identité épinglée dans la liste blanche (appareil
+//! inconnu = 403), vérifie l'offre (`PendingHandshake::complete`) et répond par
+//! sa propre offre v2.
 //!
 //! ## Appairage v2 : engagement puis révélation (R-026 à R-028)
 //!
@@ -31,16 +80,18 @@
 //!   Engagement et révélation sont signés par la clé de l'appareil (preuve de
 //!   possession) ; requête non signée = refus explicite, sans repli.
 //! - `POST /api/bridge/pair/status` : suivi de la demande par l'appareil.
-//! - Administration (loopback + secret) : `/api/bridge/devices` expose code
-//!   SAS et empreinte de clé ; `/api/bridge/approve` exige le code affiché.
+//! - Approbation sur Central (code SAS affiché) via [`PairingManager`] ; la clé
+//!   épinglée devient la clé des passeports de l'appareil.
 //! - Liste blanche persistée à côté de l'identité E2E (R-024).
 
 use crate::bridge::RemoteBridge;
 use crate::e2e::{load_or_create_cog_identity, E2eSessionStore, DEFAULT_IDENTITY_FILE};
+use crate::identite::{texte_role, AccesAppareil, AutoriteAppareils, FICHIER_CLE_EMISSION_DEFAUT};
 use crate::paired_store::DEFAULT_PAIRED_DEVICES_FILE;
-use crate::pairing::{
-    mask_device_id, PairingConfig, PairingError, PairingManager, WhitelistValidateRequest,
-    DEFAULT_API_TOKEN_TTL_SECS, DEFAULT_PENDING_TTL,
+use crate::pairing::{mask_device_id, PairingConfig, PairingError, PairingManager, DEFAULT_PENDING_TTL};
+use crate::protocol::identite::{
+    DefiResponse, PasseportResponse, ValidateResponse, VisaResponse, DEFI_ENDPOINT,
+    PASSEPORT_ENDPOINT, VALIDATE_ENDPOINT, VISA_ENDPOINT, WS_ENDPOINT,
 };
 use crate::protocol::pairing::{
     check_pairing_version, PairCommitRequest, PairCommitResponse, PairRevealRequest,
@@ -49,32 +100,30 @@ use crate::protocol::pairing::{
     STATUS_INVALID_SIGNATURE, STATUS_MISSING_SIGNATURE, STATUS_SOURCE_MISMATCH,
     STATUS_UNSUPPORTED_VERSION,
 };
-use crate::protocol::{RemoteAuthRequest, RemoteAuthResponse, RemoteCommand, RemoteEvent};
-use crate::session::SessionManager;
+use crate::protocol::{RemoteCommand, RemoteEvent};
 
 use axum::body::Bytes;
 use axum::extract::connect_info::ConnectInfo;
-use axum::extract::DefaultBodyLimit;
+use axum::extract::ws::rejection::WebSocketUpgradeRejection;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::{Query, Request, State};
-use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode};
-use axum::middleware::{self, Next};
+use axum::extract::{DefaultBodyLimit, State};
+use axum::http::{header, HeaderMap, HeaderValue, Method, StatusCode, Uri};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
+use miyauth::http::service::maintenant_unix;
+use miyauth::http::{
+    b64_encoder, EntetesSignees, RefusHttp, RequeteHttp, ENTETE_HORODATAGE, ENTETE_NONCE,
+    ENTETE_POP, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE,
+};
 use miyukini_central::auth::CentralAuthDb;
 use miyukini_cog_bridge::e2e::MAX_HANDSHAKE_JSON_LEN;
 use miyukini_cog_bridge::{
-    identity_fingerprint, identity_fingerprint_hex, parse_commitment_hex, parse_identity_key_hex,
-    parse_pairing_signature_hex, E2eHandshake, E2eIdentity, E2eRole, EncryptedMessage,
-    PairingNonce, PendingHandshake, RequestBinding, E2E_SESSION_HEADER, PAIRING_SIGNATURE_SIZE,
+    identity_fingerprint, parse_commitment_hex, parse_identity_key_hex,
+    parse_pairing_signature_hex, E2eHandshake, E2eIdentity, E2eRole, PairingNonce,
+    PendingHandshake, PAIRING_SIGNATURE_SIZE,
 };
-use miyukini_connect::{AuthVerifyRequest, ConnectService, IdentitySetup, PermissionTier};
-use rand::rngs::OsRng;
-use rand::RngCore;
-use serde::Deserialize;
-use sha2::{Digest, Sha256};
 use std::collections::{HashMap, VecDeque};
 use std::net::{IpAddr, SocketAddr};
 use std::path::{Path, PathBuf};
@@ -84,27 +133,21 @@ use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::{info, warn};
 
-/// En-tête portant le secret d'administration (routes d'appairage desktop).
-pub const ADMIN_SECRET_HEADER: &str = "x-central-admin-secret";
-
-/// Fenêtre glissante de limitation de débit sur /auth.
-const AUTH_RATE_WINDOW: Duration = Duration::from_secs(60);
-/// Nombre maximal de tentatives /auth par IP dans la fenêtre.
-const AUTH_RATE_MAX: usize = 10;
-/// Fenêtre de limitation de débit des routes d'appairage / handshake E2E.
+/// Fenêtre de limitation de débit des routes d'appairage / handshake E2E /
+/// passeport / visa / validation.
 const BRIDGE_RATE_WINDOW: Duration = Duration::from_secs(60);
-/// Nombre maximal d'appels appairage + handshake par IP dans la fenêtre.
+/// Nombre maximal d'appels appairage + handshake + titres par IP dans la fenêtre.
 const BRIDGE_RATE_MAX: usize = 30;
 /// Nombre maximal d'appels de suivi d'appairage par IP et par minute
 /// (l'appareil interroge toutes les 3 s pendant l'attente d'approbation).
 const PAIR_STATUS_RATE_MAX: usize = 60;
-/// Taille maximale du corps de /auth (clair ou enveloppe chiffrée, C-13).
-pub const AUTH_MAX_BODY: usize = 16 * 1024;
+/// Nombre maximal de défis par IP et par minute (un défi par requête authentifiée).
+const DEFI_RATE_MAX: usize = 60;
 /// Taille maximale du corps de /api/bridge/pair (C-13).
 const PAIR_MAX_BODY: usize = 4 * 1024;
-/// Point d'accès d'authentification (lié dans l'AAD des messages E2E).
-pub const AUTH_ENDPOINT: &str = "/auth";
-/// Intervalle de revérification du token pendant une session WS.
+/// Taille maximale du corps des routes de titres (corps vide attendu, C-13).
+const TITRE_MAX_BODY: usize = 1024;
+/// Intervalle de revérification de l'accès pendant une session WS.
 const WS_RECHECK_INTERVAL: Duration = Duration::from_secs(5);
 
 /// Configuration du serveur CentralRemote.
@@ -113,14 +156,12 @@ pub struct RemoteServerConfig {
     /// Adresse d'écoute (défaut : 127.0.0.1:8091).
     /// Le bind LAN (ex. `0.0.0.0:8091`) doit être demandé explicitement.
     pub listen_addr: String,
-    /// Chemin vers la base auth Central.
+    /// Chemin vers la base auth Central (profils : nom affiché des titulaires).
     pub auth_db_path: String,
     /// Origines CORS autorisées (vide par défaut = aucun CORS cross-origin).
     /// Le client mobile natif n'en a pas besoin ; utile seulement pour un
     /// client navigateur (ex. portail web) explicitement déclaré.
     pub cors_allowed_origins: Vec<String>,
-    /// Durée de validité des tokens API générés (secondes ; défaut 30 jours).
-    pub api_token_ttl_secs: u64,
     /// Fichier de l'identité E2E longue durée du COG (`0600`). Défaut :
     /// `central-remote-e2e-identity.key` dans le dossier de la base auth.
     pub e2e_identity_path: Option<String>,
@@ -135,16 +176,14 @@ pub struct RemoteServerConfig {
     /// suffisantes) ; ne désactiver que si l'adresse source change entre deux
     /// requêtes d'un même appareil.
     pub pairing_require_same_source: bool,
-    /// `/auth` en clair accepté depuis un pair loopback (R-025). **Faux par
-    /// défaut** : E2E obligatoire partout. À n'activer que pour le portail web
-    /// local, jamais derrière un proxy inverse local (toute requête y paraît
-    /// locale). Un avertissement est journalisé au démarrage s'il est actif.
-    pub allow_plaintext_local_auth: bool,
-}
-
-/// Vrai si un `/auth` en clair est accepté depuis `ip` (R-025).
-fn plaintext_auth_allowed(allow_plaintext_local_auth: bool, ip: IpAddr) -> bool {
-    allow_plaintext_local_auth && ip.to_canonical().is_loopback()
+    /// Graine de la clé d'émission du COG (32 octets bruts, `0600`), qui scelle
+    /// passeports et visas. Défaut : `central-remote-emission.key` dans le
+    /// dossier de l'identité E2E (créée une fois si absente). Avec une racine
+    /// COG : graine exportée par `miyuracine` (voir [`crate::identite`]).
+    pub cle_emission_path: Option<String>,
+    /// `cog_id` du COG (celui de la racine `miyuracine`). Absent : dérivé de la
+    /// clé d'émission.
+    pub cog_id: Option<String>,
 }
 
 impl Default for RemoteServerConfig {
@@ -154,12 +193,12 @@ impl Default for RemoteServerConfig {
             listen_addr: "127.0.0.1:8091".into(),
             auth_db_path: "central.db".into(),
             cors_allowed_origins: Vec::new(),
-            api_token_ttl_secs: DEFAULT_API_TOKEN_TTL_SECS,
             e2e_identity_path: None,
             paired_devices_path: None,
             pairing_pending_ttl_secs: DEFAULT_PENDING_TTL.as_secs(),
             pairing_require_same_source: true,
-            allow_plaintext_local_auth: false,
+            cle_emission_path: None,
+            cog_id: None,
         }
     }
 }
@@ -197,46 +236,27 @@ impl RateLimiter {
     }
 }
 
-/// Comparaison en temps constant (via condensats SHA-256 : pas de fuite de longueur).
-fn ct_eq(a: &[u8], b: &[u8]) -> bool {
-    let ha = Sha256::digest(a);
-    let hb = Sha256::digest(b);
-    let mut diff = 0u8;
-    for (x, y) in ha.iter().zip(hb.iter()) {
-        diff |= x ^ y;
-    }
-    diff == 0
-}
-
 /// État partagé du serveur remote.
 #[derive(Clone)]
 struct ServerState {
     bridge: RemoteBridge,
-    sessions: Arc<SessionManager>,
+    /// Profils Central (nom affiché du titulaire).
     auth_db: Arc<CentralAuthDb>,
-    connect: Arc<Mutex<ConnectService>>,
     pairing: Arc<PairingManager>,
-    /// Secret d'administration (hex de 32 octets aléatoires), jamais exposé via HTTP.
-    admin_secret: Arc<String>,
-    auth_limiter: Arc<RateLimiter>,
-    /// Limiteur des routes d'appairage et de handshake E2E.
+    /// COG d'origine des appareils : passeports, visas, preuve de possession.
+    autorite: Arc<AutoriteAppareils>,
+    /// Limiteur des routes d'appairage, de handshake E2E et de titres.
     bridge_limiter: Arc<RateLimiter>,
     /// Limiteur du suivi d'appairage (`/api/bridge/pair/status`).
     status_limiter: Arc<RateLimiter>,
+    /// Limiteur de l'émission de défis.
+    defi_limiter: Arc<RateLimiter>,
     /// Identité E2E longue durée du COG (secret effacé à la destruction).
     cog_identity: Arc<E2eIdentity>,
     /// Sessions E2E établies avec les appareils appairés.
     e2e_sessions: Arc<E2eSessionStore>,
-    /// `/auth` en clair accepté depuis loopback (R-025, faux par défaut).
-    allow_plaintext_local_auth: bool,
     /// Signal d'arrêt pour fermer les WebSocket ouverts.
     shutdown: tokio::sync::watch::Receiver<bool>,
-}
-
-fn generate_admin_secret() -> String {
-    let mut bytes = [0u8; 32];
-    OsRng.fill_bytes(&mut bytes);
-    hex::encode(bytes)
 }
 
 /// Construit la couche CORS : aucune par défaut, liste blanche stricte sinon.
@@ -258,51 +278,33 @@ fn build_cors(origins: &[String]) -> Option<CorsLayer> {
         CorsLayer::new()
             .allow_origin(parsed)
             .allow_methods([Method::GET, Method::POST])
-            .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION]),
+            .allow_headers([
+                header::CONTENT_TYPE,
+                header::AUTHORIZATION,
+                header::HeaderName::from_static(ENTETE_POP),
+            ]),
     )
 }
 
-/// Middleware des routes d'administration : pair loopback ET secret valide.
-async fn require_local_admin(
-    State(state): State<ServerState>,
-    ConnectInfo(peer): ConnectInfo<SocketAddr>,
-    req: Request,
-    next: Next,
-) -> Response {
-    if !peer.ip().to_canonical().is_loopback() {
-        warn!("CentralRemote admin refusé: pair non loopback {}", peer.ip());
-        return StatusCode::FORBIDDEN.into_response();
-    }
-    let provided = req
-        .headers()
-        .get(ADMIN_SECRET_HEADER)
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
-    if provided.is_empty() || !ct_eq(provided.as_bytes(), state.admin_secret.as_bytes()) {
-        return StatusCode::UNAUTHORIZED.into_response();
-    }
-    next.run(req).await
-}
-
 fn build_router(state: ServerState, cors: Option<CorsLayer>) -> Router {
-    // Routes d'administration de l'appairage : desktop local uniquement.
-    let admin = Router::new()
-        .route("/api/bridge/generate-token", post(handle_bridge_generate_token))
-        .route("/api/bridge/devices", get(handle_bridge_devices))
-        .route("/api/bridge/approve", post(handle_bridge_approve))
-        .route("/api/bridge/reject", post(handle_bridge_reject))
-        .route_layer(middleware::from_fn_with_state(state.clone(), require_local_admin));
-
     let app = Router::new()
-        .route(
-            "/auth",
-            post(handle_auth).layer(DefaultBodyLimit::max(AUTH_MAX_BODY)),
-        )
-        .route("/ws", get(handle_ws_upgrade))
+        .route(WS_ENDPOINT, get(handle_ws_upgrade))
         .route("/status", get(handle_status))
-        // Endpoints d'appairage mobile (COG Bridge)
-        .route("/api/bridge/validate", post(handle_bridge_validate))
-        .route("/api/bridge/validate-token", get(handle_bridge_validate_token))
+        // Identité signée des appareils (passeport, défi, visa, validation).
+        .route(
+            PASSEPORT_ENDPOINT,
+            post(handle_bridge_passeport).layer(DefaultBodyLimit::max(TITRE_MAX_BODY)),
+        )
+        .route(DEFI_ENDPOINT, post(handle_bridge_defi))
+        .route(
+            VISA_ENDPOINT,
+            post(handle_bridge_visa).layer(DefaultBodyLimit::max(TITRE_MAX_BODY)),
+        )
+        .route(
+            VALIDATE_ENDPOINT,
+            post(handle_bridge_validate).layer(DefaultBodyLimit::max(TITRE_MAX_BODY)),
+        )
+        // Appairage mobile (COG Bridge)
         .route(
             PAIR_ENDPOINT,
             post(handle_bridge_pair).layer(DefaultBodyLimit::max(PAIR_MAX_BODY)),
@@ -321,7 +323,6 @@ fn build_router(state: ServerState, cors: Option<CorsLayer>) -> Router {
                 .layer(DefaultBodyLimit::max(MAX_HANDSHAKE_JSON_LEN)),
         )
         .route("/api/bridge/discovery", get(handle_bridge_discovery))
-        .merge(admin)
         .with_state(state);
 
     match cors {
@@ -341,9 +342,6 @@ pub async fn start_remote_server(
     let auth_db = CentralAuthDb::open(Path::new(&config.auth_db_path))
         .map_err(|e| format!("CentralRemote auth DB: {e}"))?;
 
-    let connect = ConnectService::new("2026.03.05");
-    let sessions = SessionManager::with_random_secret();
-
     // Identité E2E longue durée du COG : chargée ou créée (0600), sinon refus
     // de démarrer (fail-closed).
     let identity_path = config.e2e_identity_path.as_ref().map_or_else(
@@ -360,16 +358,15 @@ pub async fn start_remote_server(
     );
     let cog_identity_key_hex = hex::encode(cog_identity.public_key_bytes());
     let cog_identity_fingerprint = identity_fingerprint(&cog_identity.public_key_bytes());
+    let identity_dir = identity_path
+        .parent()
+        .unwrap_or_else(|| Path::new(""))
+        .to_path_buf();
 
     // Liste blanche persistée à côté de l'identité ; fichier corrompu = refus
     // de démarrer (fail-closed, R-024).
     let paired_path = config.paired_devices_path.as_ref().map_or_else(
-        || {
-            identity_path
-                .parent()
-                .unwrap_or_else(|| Path::new(""))
-                .join(DEFAULT_PAIRED_DEVICES_FILE)
-        },
+        || identity_dir.join(DEFAULT_PAIRED_DEVICES_FILE),
         PathBuf::from,
     );
     let pairing_config = PairingConfig {
@@ -377,23 +374,27 @@ pub async fn start_remote_server(
         require_same_source: config.pairing_require_same_source,
         ..PairingConfig::default()
     };
-    let pairing = Arc::new(
-        PairingManager::open(config.api_token_ttl_secs, pairing_config, paired_path.clone())
-            .map_err(|e| {
-                format!(
-                    "CentralRemote: {e} ({}) — démarrage refusé ; corriger ou supprimer \
-                     ce fichier (suppression = ré-appairage de tous les appareils)",
-                    paired_path.display()
-                )
-            })?,
-    );
+    let pairing = Arc::new(PairingManager::open(pairing_config, paired_path.clone()).map_err(
+        |e| {
+            format!(
+                "CentralRemote: {e} ({}) — démarrage refusé ; corriger ou supprimer \
+                 ce fichier (suppression = ré-appairage de tous les appareils)",
+                paired_path.display()
+            )
+        },
+    )?);
 
-    if config.allow_plaintext_local_auth {
-        warn!(
-            "CentralRemote: /auth en clair accepté depuis loopback \
-             (allow_plaintext_local_auth) — ne jamais exposer derrière un proxy inverse local"
-        );
-    }
+    // Clé d'émission (passeports + visas) et liste de révocation : sans elles,
+    // refus de démarrer (fail-closed).
+    let emission_path = config.cle_emission_path.as_ref().map_or_else(
+        || identity_dir.join(FICHIER_CLE_EMISSION_DEFAUT),
+        PathBuf::from,
+    );
+    let autorite = Arc::new(
+        AutoriteAppareils::charger(&emission_path, config.cog_id.as_deref(), pairing.clone())
+            .map_err(|e| format!("CentralRemote: {e}"))?,
+    );
+    info!("CentralRemote: COG d'origine des appareils, cog_id {}", autorite.cog());
 
     let listener = TcpListener::bind(&config.listen_addr)
         .await
@@ -420,23 +421,18 @@ pub async fn start_remote_server(
         None
     };
 
-    let admin_secret = Arc::new(generate_admin_secret());
     let (ws_shutdown_tx, ws_shutdown_rx) = tokio::sync::watch::channel(false);
 
-    let pairing_for_handle = pairing.clone();
     let state = ServerState {
         bridge,
-        sessions: Arc::new(sessions),
         auth_db: Arc::new(auth_db),
-        connect: Arc::new(Mutex::new(connect)),
-        pairing,
-        admin_secret: admin_secret.clone(),
-        auth_limiter: Arc::new(RateLimiter::new(AUTH_RATE_WINDOW, AUTH_RATE_MAX)),
+        pairing: pairing.clone(),
+        autorite: autorite.clone(),
         bridge_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, BRIDGE_RATE_MAX)),
         status_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, PAIR_STATUS_RATE_MAX)),
+        defi_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, DEFI_RATE_MAX)),
         cog_identity,
         e2e_sessions: Arc::new(E2eSessionStore::default()),
-        allow_plaintext_local_auth: config.allow_plaintext_local_auth,
         shutdown: ws_shutdown_rx,
     };
 
@@ -463,8 +459,9 @@ pub async fn start_remote_server(
         addr: local_addr,
         shutdown_tx: Some(shutdown_tx),
         ws_shutdown_tx,
-        pairing: pairing_for_handle,
-        admin_secret,
+        pairing,
+        cog_id: autorite.cog().to_string(),
+        cle_emission_hex: hex::encode(autorite.cle_publique_emission()),
         cog_identity_key_hex,
         cog_identity_fingerprint,
         discovery: discovery_handle,
@@ -478,9 +475,13 @@ pub struct RemoteServerHandle {
     pub addr: SocketAddr,
     shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
     ws_shutdown_tx: tokio::sync::watch::Sender<bool>,
-    /// Gestionnaire de l'appairage (exposé pour l'UI Central Desktop).
+    /// Gestionnaire de l'appairage (approbation, refus, révocation : appelé
+    /// dans le processus par Central Desktop, sans surface HTTP).
     pub pairing: Arc<PairingManager>,
-    admin_secret: Arc<String>,
+    /// `cog_id` du COG (émetteur des passeports d'appareil).
+    cog_id: String,
+    /// Clé publique d'émission (hex).
+    cle_emission_hex: String,
     /// Clé publique d'identité E2E du COG (hex), publique.
     cog_identity_key_hex: String,
     /// Empreinte lisible de la clé d'identité du COG.
@@ -506,11 +507,14 @@ impl RemoteServerHandle {
         self.addr.to_string()
     }
 
-    /// Secret d'administration de l'appairage (à joindre en en-tête
-    /// `x-central-admin-secret` pour les routes /api/bridge d'administration).
-    /// Transmis à Central uniquement via cette API Rust, jamais via HTTP.
-    pub fn admin_secret(&self) -> &str {
-        &self.admin_secret
+    /// `cog_id` du COG, émetteur et destination des passeports d'appareil.
+    pub fn cog_id(&self) -> &str {
+        &self.cog_id
+    }
+
+    /// Clé publique d'émission (hex 32 octets) qui scelle passeports et visas.
+    pub fn cle_emission_publique_hex(&self) -> &str {
+        &self.cle_emission_hex
     }
 
     /// Clé publique d'identité E2E du COG (hex 32 octets), épinglée par les
@@ -533,242 +537,211 @@ impl Drop for RemoteServerHandle {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Handlers
+// Identité signée des appareils
 // ═══════════════════════════════════════════════════════════════════════════
 
-fn auth_failure(msg: &str) -> Json<RemoteAuthResponse> {
-    Json(auth_failure_response(msg))
+fn entete<'a>(headers: &'a HeaderMap, nom: &str) -> Option<&'a str> {
+    headers.get(nom).and_then(|v| v.to_str().ok())
 }
 
-/// POST /auth — authentification et obtention d'un token.
-///
-/// Avec l'en-tête [`E2E_SESSION_HEADER`] : corps `EncryptedMessage` v2 lié à
-/// `POST /auth`, réponse chiffrée liée à la même requête. Sans : clair, accepté
-/// seulement si `allow_plaintext_local_auth` est actif et le pair loopback.
-async fn handle_auth(
+/// Vue `miyauth::http` d'une requête (liaison = méthode, chemin, SHA-256 du corps).
+fn requete_http<'a>(methode: &'a str, chemin: &'a str, headers: &'a HeaderMap, corps: &'a [u8]) -> RequeteHttp<'a> {
+    RequeteHttp {
+        methode,
+        chemin,
+        corps,
+        autorisation: entete(headers, header::AUTHORIZATION.as_str()),
+        pop: entete(headers, ENTETE_POP),
+        liaison: None,
+    }
+}
+
+/// Réponse de refus : statut conseillé par `miyauth::http` (401 ou 503), sans détail.
+fn refus_reply(contexte: &str, e: &RefusHttp) -> Response {
+    warn!("CentralRemote {contexte} refusé: {e}");
+    let code = StatusCode::from_u16(e.statut()).unwrap_or(StatusCode::UNAUTHORIZED);
+    (
+        code,
+        [(header::WWW_AUTHENTICATE, "MiyuVisa")],
+        Json(serde_json::json!({ "status": "unauthorized" })),
+    )
+        .into_response()
+}
+
+fn too_many() -> Response {
+    (StatusCode::TOO_MANY_REQUESTS, [(header::RETRY_AFTER, "60")]).into_response()
+}
+
+/// Nom affiché du titulaire : pseudonyme du profil lié, sinon nom de l'appareil.
+fn display_name(state: &ServerState, acces: &AccesAppareil) -> String {
+    acces
+        .appareil
+        .profile_id
+        .as_deref()
+        .and_then(|id| {
+            state
+                .auth_db
+                .get_profile(id)
+                .ok()
+                .flatten()
+                .map(|p| p.pseudonyme.filter(|s| !s.is_empty()).unwrap_or(p.email))
+        })
+        .unwrap_or_else(|| acces.appareil.name.clone())
+}
+
+/// POST /api/bridge/passeport — passeport d'appareil (requête signée par la
+/// clé d'appareil épinglée). En-têtes contrôlés avant le corps.
+async fn handle_bridge_passeport(
     State(state): State<ServerState>,
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
-    if !state.auth_limiter.check(peer.ip().to_canonical()) {
-        warn!("CentralRemote /auth: limite de débit dépassée pour {}", peer.ip());
-        return (
-            StatusCode::TOO_MANY_REQUESTS,
-            [(header::RETRY_AFTER, "60")],
-            auth_failure("Trop de tentatives, réessayez plus tard"),
-        )
-            .into_response();
+    if !state.bridge_limiter.check(peer.ip().to_canonical()) {
+        return too_many();
     }
-
-    match headers.get(E2E_SESSION_HEADER) {
-        Some(session_header) => handle_auth_e2e(&state, session_header, &body),
-        None => handle_auth_clear(&state, peer, &body),
-    }
-}
-
-/// /auth en clair : uniquement si l'option l'autorise et le pair est loopback.
-fn handle_auth_clear(state: &ServerState, peer: SocketAddr, body: &[u8]) -> Response {
-    if !plaintext_auth_allowed(state.allow_plaintext_local_auth, peer.ip()) {
-        warn!("CentralRemote /auth en clair refusé (E2E requis) pour {}", peer.ip());
-        return (
-            StatusCode::FORBIDDEN,
-            auth_failure("Chiffrement de bout en bout requis"),
-        )
-            .into_response();
-    }
-    let Ok(req) = serde_json::from_slice::<RemoteAuthRequest>(body) else {
-        return (StatusCode::BAD_REQUEST, auth_failure("Requête invalide")).into_response();
+    let maintenant = maintenant_unix();
+    let entetes = match EntetesSignees::analyser(
+        entete(&headers, ENTETE_SIGNATAIRE),
+        entete(&headers, ENTETE_HORODATAGE),
+        entete(&headers, ENTETE_NONCE),
+        entete(&headers, ENTETE_SIGNATURE),
+    ) {
+        Ok(e) => e,
+        Err(e) => return refus_reply("passeport", &e),
     };
-    Json(authenticate(state, &req)).into_response()
+    match state.autorite.delivrer_passeport(&entetes, &body, maintenant) {
+        Ok((passeport, expire_a)) => {
+            if let Some(d) = state.pairing.device_for_identity_key(&hex::encode(entetes.signataire)) {
+                state.pairing.touch_device(&d.device_id);
+                info!("CentralRemote: passeport émis ({})", mask_device_id(&d.device_id));
+            }
+            Json(PasseportResponse {
+                passeport: b64_encoder(&passeport),
+                expire_a,
+                cog_id: state.autorite.cog().to_string(),
+            })
+            .into_response()
+        }
+        Err(e) => refus_reply("passeport", &e),
+    }
 }
 
-/// /auth chiffré : session E2E connue, appareil toujours appairé avec la même
-/// clé, enveloppe v2 liée à `POST /auth` ; toute anomalie = refus (C-12).
-fn handle_auth_e2e(
-    state: &ServerState,
-    session_header: &HeaderValue,
-    body: &[u8],
+/// POST /api/bridge/defi — défi de possession à usage unique (60 s).
+async fn handle_bridge_defi(
+    State(state): State<ServerState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
 ) -> Response {
-    let Some(entry) = session_header
-        .to_str()
-        .ok()
-        .and_then(|h| state.e2e_sessions.get_hex(h))
-    else {
-        warn!("CentralRemote /auth E2E: session inconnue ou expirée");
-        return StatusCode::UNAUTHORIZED.into_response();
-    };
-    if !state
-        .pairing
-        .is_paired_with_key(&entry.device_id, &entry.device_key_hex)
-    {
-        warn!(
-            "CentralRemote /auth E2E: appareil {} révoqué",
-            mask_device_id(&entry.device_id)
-        );
-        state.e2e_sessions.remove_device(&entry.device_id);
-        return StatusCode::UNAUTHORIZED.into_response();
+    if !state.defi_limiter.check(peer.ip().to_canonical()) {
+        return too_many();
     }
-    let Ok(msg) = EncryptedMessage::from_json_bounded(body, AUTH_MAX_BODY) else {
-        return StatusCode::BAD_REQUEST.into_response();
-    };
-    let Ok(binding) = RequestBinding::for_received(&msg, "POST", AUTH_ENDPOINT) else {
-        return StatusCode::BAD_REQUEST.into_response();
-    };
-    let req: RemoteAuthRequest = match entry.session.decrypt_json(&binding, &msg) {
-        Ok(r) => r,
-        Err(e) => {
-            warn!("CentralRemote /auth E2E refusé: {e}");
-            return StatusCode::UNAUTHORIZED.into_response();
-        }
-    };
-    let resp = authenticate(state, &req);
-    match entry.session.encrypt_json(&binding, &resp) {
-        Ok(m) => Json(m).into_response(),
-        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    match state.autorite.emettre_defi(maintenant_unix()) {
+        Ok(d) => Json(DefiResponse {
+            defi_id: d.id_b64(),
+            defi: d.defi_b64(),
+            audience: d.audience,
+            expire_a: d.expire_a,
+            cog_id: state.autorite.cog().to_string(),
+        })
+        .into_response(),
+        Err(e) => refus_reply("défi", &e),
     }
 }
 
-fn auth_failure_response(msg: &str) -> RemoteAuthResponse {
-    RemoteAuthResponse {
-        success: false,
-        token: None,
-        user_display_name: None,
-        error: Some(msg.into()),
+/// POST /api/bridge/visa — `MiyuPasseport` + `X-Miyu-PoP` → visa ≤ 15 min.
+async fn handle_bridge_visa(
+    State(state): State<ServerState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> Response {
+    if !state.bridge_limiter.check(peer.ip().to_canonical()) {
+        return too_many();
+    }
+    let requete = requete_http("POST", VISA_ENDPOINT, &headers, &body);
+    match state.autorite.delivrer_visa(&requete, maintenant_unix()) {
+        Ok(v) => {
+            state.pairing.touch_device(&v.acces.appareil.device_id);
+            Json(VisaResponse {
+                visa: b64_encoder(&v.visa),
+                expire_a: v.acces.expire_a,
+                role: texte_role(v.acces.role).into(),
+                display_name: display_name(&state, &v.acces),
+                identite: v.acces.identite,
+            })
+            .into_response()
+        }
+        Err(e) => refus_reply("visa", &e),
     }
 }
 
-/// Vérifie les identifiants (Miyukini Connect uniquement) et crée la session.
-fn authenticate(state: &ServerState, req: &RemoteAuthRequest) -> RemoteAuthResponse {
-    let email = req.email.trim();
-    if email.is_empty() || req.password.is_empty() {
-        return auth_failure_response("Email et mot de passe requis");
+/// POST /api/bridge/validate — vérifie `MiyuVisa` + `X-Miyu-PoP`.
+async fn handle_bridge_validate(
+    State(state): State<ServerState>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    body: Bytes,
+) -> Response {
+    if !state.bridge_limiter.check(peer.ip().to_canonical()) {
+        return too_many();
     }
-
-    // Recherche du profil par email.
-    let profiles = match state.auth_db.list_profiles() {
-        Ok(p) => p,
-        Err(e) => {
-            warn!("CentralRemote auth list_profiles error: {e}");
-            return auth_failure_response("Erreur interne");
+    let requete = requete_http("POST", VALIDATE_ENDPOINT, &headers, &body);
+    match state.autorite.verifier_acces(&requete, maintenant_unix()) {
+        Ok(acces) => {
+            state.pairing.touch_device(&acces.appareil.device_id);
+            Json(ValidateResponse {
+                status: "ok".into(),
+                role: texte_role(acces.role).into(),
+                expire_a: acces.expire_a,
+                display_name: display_name(&state, &acces),
+                identite: acces.identite,
+            })
+            .into_response()
         }
-    };
-
-    let profile = profiles
-        .into_iter()
-        .find(|p| p.email.eq_ignore_ascii_case(email));
-
-    let Some(profile) = profile else {
-        // Email inconnu : travail Argon2 factice pour égaliser le temps de réponse.
-        let mut dummy = IdentitySetup::new("remote-dummy");
-        let _ = dummy.set_password(&req.password);
-        return auth_failure_response("Identifiants incorrects");
-    };
-
-    // Seul chemin : Miyukini Connect (compteur d'échecs + verrouillage).
-    // Aucun repli legacy : échec, verrouillage ou hash absent => refus.
-    if !verify_connect_auth(state, &profile.id, &req.password) {
-        return auth_failure_response("Identifiants incorrects");
-    }
-
-    let display_name = profile
-        .pseudonyme
-        .as_deref()
-        .filter(|s| !s.is_empty())
-        .unwrap_or(&profile.email)
-        .to_string();
-
-    let token = state.sessions.create_session(&profile.id, &display_name);
-
-    RemoteAuthResponse {
-        success: true,
-        token: Some(token),
-        user_display_name: Some(display_name),
-        error: None,
+        Err(e) => refus_reply("validation", &e),
     }
 }
 
-fn verify_connect_auth(state: &ServerState, profile_id: &str, password: &str) -> bool {
-    let stored_hash = match state.auth_db.get_connect_password_hash(profile_id) {
-        Ok(Some(h)) => h,
-        Ok(None) => {
-            // Pas de hash Connect : travail factice (timing), puis refus.
-            let mut dummy = IdentitySetup::new("remote-dummy");
-            let _ = dummy.set_password(password);
-            return false;
-        }
-        Err(_) => return false,
-    };
-
-    let Ok(mut connect) = state.connect.lock() else {
-        return false;
-    };
-
-    // N'écrase l'identité que si le hash a changé : les compteurs d'échecs /
-    // verrouillages vivent dans le service et sont conservés dans tous les cas.
-    if connect.password_hash_for(profile_id) != Some(stored_hash.as_str()) {
-        let mut identity = IdentitySetup::new(profile_id.to_string());
-        if identity.set_password_hash_for_import(stored_hash).is_err() {
-            return false;
-        }
-        if connect.register_identity(identity).is_err() {
-            return false;
-        }
-    }
-
-    let runtime_state = connect.current_runtime_state();
-    let request = AuthVerifyRequest {
-        subject_id: profile_id.to_string(),
-        password: password.to_string(),
-        totp_code: None,
-        requested_tier: PermissionTier::Basic,
-        runtime_state,
-    };
-
-    // Toute erreur (InvalidCredentials, LockedOut, StepUp...) => refus.
-    connect.auth_verify(request).is_ok()
-}
-
-/// Paramètres de connexion WebSocket.
-#[derive(Deserialize)]
-struct WsParams {
-    /// Déprécié : token en query string (fuite dans logs/historique). Conservé
-    /// uniquement pour les clients existants (portail web, mobile) ; préférer
-    /// l'en-tête `Authorization: Bearer <token>`.
-    token: Option<String>,
-}
-
-/// GET /ws — upgrade WebSocket. Token via `Authorization: Bearer` (préféré)
-/// ou, par compatibilité, `?token=`.
+/// GET /ws — upgrade WebSocket après vérification visa + preuve de possession
+/// (défi obtenu juste avant). Toute chaîne de requête est refusée : le jeton
+/// `?token=` n'existe plus.
 async fn handle_ws_upgrade(
     State(state): State<ServerState>,
-    Query(params): Query<WsParams>,
+    uri: Uri,
     headers: HeaderMap,
-    ws: WebSocketUpgrade,
+    ws: Result<WebSocketUpgrade, WebSocketUpgradeRejection>,
 ) -> Response {
-    let token = headers
-        .get(header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.strip_prefix("Bearer "))
-        .map(str::to_string)
-        .or(params.token)
-        .unwrap_or_default();
-
-    if let Some(session) = state.sessions.validate_token(&token) {
-        info!("CentralRemote WS upgrade for {}", session.display_name);
-        ws.on_upgrade(move |socket| handle_ws_connection(socket, state, token))
-    } else {
-        warn!("CentralRemote WS rejected: invalid token");
+    // Authentification d'abord : une requête non authentifiée est refusée
+    // (400 / 401) avant tout examen de l'upgrade.
+    if uri.query().is_some() {
+        warn!("CentralRemote WS refusé: chaîne de requête (jeton en URL non supporté)");
+        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"status": "query_refused"})))
+            .into_response();
+    }
+    let requete = requete_http("GET", WS_ENDPOINT, &headers, b"");
+    match state.autorite.verifier_acces(&requete, maintenant_unix()) {
+        Ok(acces) => {
+            info!(
+                "CentralRemote WS upgrade ({})",
+                mask_device_id(&acces.appareil.device_id)
+            );
+            state.pairing.touch_device(&acces.appareil.device_id);
+            match ws {
+                Ok(ws) => ws.on_upgrade(move |socket| handle_ws_connection(socket, state, acces)),
+                Err(rejet) => rejet.into_response(),
+            }
+        }
         // Refus avant l'upgrade.
-        StatusCode::UNAUTHORIZED.into_response()
+        Err(e) => refus_reply("WS", &e),
     }
 }
 
-/// Gère une connexion WebSocket authentifiée.
-async fn handle_ws_connection(socket: WebSocket, state: ServerState, token: String) {
+/// Gère une connexion WebSocket authentifiée (durée bornée par le visa).
+async fn handle_ws_connection(socket: WebSocket, state: ServerState, acces: AccesAppareil) {
     let (mut ws_tx, mut ws_rx) = socket.split();
     let mut shutdown = state.shutdown.clone();
     let mut recheck = tokio::time::interval(WS_RECHECK_INTERVAL);
+    let valide = |state: &ServerState| state.autorite.acces_toujours_valide(&acces, maintenant_unix());
 
     // Envoyer le snapshot initial.
     let snapshot = state.bridge.current_snapshot();
@@ -790,12 +763,12 @@ async fn handle_ws_connection(socket: WebSocket, state: ServerState, token: Stri
                 let _ = ws_tx.send(Message::Close(None)).await;
                 break;
             }
-            // Revérification périodique : expiration ou révocation du token
+            // Revérification périodique : expiration du visa ou révocation de l'appareil
             _ = recheck.tick() => {
-                if state.sessions.validate_token(&token).is_none() {
-                    warn!("CentralRemote WS fermé : token expiré ou révoqué");
+                if !valide(&state) {
+                    warn!("CentralRemote WS fermé : visa expiré ou appareil révoqué");
                     if let Ok(json) = serde_json::to_string(&RemoteEvent::Error {
-                        message: "Token invalide ou expiré".into(),
+                        message: "Visa expiré ou appareil révoqué".into(),
                     }) {
                         let _ = ws_tx.send(Message::Text(json.into())).await;
                     }
@@ -813,8 +786,8 @@ async fn handle_ws_connection(socket: WebSocket, state: ServerState, token: Stri
             }
             // Message client WS → commande Central
             msg = ws_rx.next() => {
-                // Chaque commande revalide aussi le token (pas d'attente du tick).
-                if state.sessions.validate_token(&token).is_none() {
+                // Chaque commande revalide aussi l'accès (pas d'attente du tick).
+                if !valide(&state) {
                     let _ = ws_tx.send(Message::Close(None)).await;
                     break;
                 }
@@ -854,44 +827,12 @@ async fn handle_status(State(state): State<ServerState>) -> Json<serde_json::Val
         "status": "ok",
         "service": "CentralRemote",
         "connected_clients": state.bridge.connected_clients(),
-        "active_sessions": state.sessions.active_count(),
     }))
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Handlers d'appairage mobile (COG Bridge)
 // ═══════════════════════════════════════════════════════════════════════════
-
-/// POST /api/bridge/validate — valide un device whitelisté (mode Whitelist LAN).
-async fn handle_bridge_validate(
-    State(state): State<ServerState>,
-    Json(req): Json<WhitelistValidateRequest>,
-) -> impl IntoResponse {
-    if state.pairing.is_whitelisted(&req.device_id) {
-        state.pairing.touch_device(&req.device_id);
-        (StatusCode::OK, Json(serde_json::json!({"status": "ok"})))
-    } else {
-        (StatusCode::FORBIDDEN, Json(serde_json::json!({"status": "not_whitelisted"})))
-    }
-}
-
-/// GET /api/bridge/validate-token — valide un token API (mode Clé API).
-async fn handle_bridge_validate_token(
-    State(state): State<ServerState>,
-    headers: axum::http::HeaderMap,
-) -> impl IntoResponse {
-    let token = headers
-        .get("Authorization")
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.strip_prefix("Bearer "))
-        .unwrap_or("");
-
-    if state.pairing.validate_api_token(token) {
-        (StatusCode::OK, Json(serde_json::json!({"status": "ok"})))
-    } else {
-        (StatusCode::UNAUTHORIZED, Json(serde_json::json!({"status": "invalid_token"})))
-    }
-}
 
 /// Réponse JSON `{"status": <statut>}` avec un code HTTP.
 fn status_reply(code: StatusCode, status: &str) -> Response {
@@ -925,6 +866,7 @@ fn pairing_error_reply(e: &PairingError) -> Response {
             status_reply(StatusCode::UNAUTHORIZED, STATUS_INVALID_SIGNATURE)
         }
         PairingError::SourceMismatch => status_reply(StatusCode::FORBIDDEN, STATUS_SOURCE_MISMATCH),
+        PairingError::KeyRevoked => status_reply(StatusCode::FORBIDDEN, "key_revoked"),
         PairingError::Persistence(_) | PairingError::Unavailable => {
             status_reply(StatusCode::SERVICE_UNAVAILABLE, "unavailable")
         }
@@ -1153,22 +1095,6 @@ async fn handle_bridge_e2e_handshake(
     Json(cog_offer).into_response()
 }
 
-/// POST /api/bridge/generate-token — génère un token API (appelé depuis le desktop).
-async fn handle_bridge_generate_token(
-    State(state): State<ServerState>,
-    Json(req): Json<serde_json::Value>,
-) -> Json<serde_json::Value> {
-    let device_name = req
-        .get("device_name")
-        .and_then(|v| v.as_str())
-        .unwrap_or("Mobile");
-    let device_name: String = device_name.chars().take(64).collect();
-    let token = state.pairing.generate_api_token(&device_name);
-    Json(serde_json::json!({
-        "token": token,
-        "device_name": device_name,
-    }))
-}
 
 /// GET /api/bridge/discovery — info de découverte LAN.
 async fn handle_bridge_discovery(
@@ -1178,99 +1104,18 @@ async fn handle_bridge_discovery(
     Json(serde_json::to_value(info).unwrap_or_default())
 }
 
-/// GET /api/bridge/devices — liste les devices appairés et en attente
-/// (admin local ; les `device_id` sont masqués). Chaque demande révélée porte
-/// son code SAS et l'empreinte de la clé de l'appareil ; la réponse porte
-/// aussi l'empreinte de la clé du COG.
-async fn handle_bridge_devices(
-    State(state): State<ServerState>,
-) -> Json<serde_json::Value> {
-    let paired: Vec<_> = state
-        .pairing
-        .paired_devices()
-        .into_iter()
-        .map(|d| {
-            serde_json::json!({
-                "device_id": mask_device_id(&d.device_id),
-                "name": d.name,
-                "paired_at": d.paired_at,
-                "last_seen": d.last_seen,
-                "mode": d.mode,
-                "key_fingerprint": identity_fingerprint_hex(&d.e2e_identity_key),
-            })
-        })
-        .collect();
-    let pending: Vec<_> = state
-        .pairing
-        .pending_devices()
-        .into_iter()
-        .map(|d| {
-            serde_json::json!({
-                "device_id": mask_device_id(&d.device_id),
-                "name": d.name,
-                "requested_at": d.requested_at,
-                "status": d.status,
-                "confirmation_code": d.confirmation_code,
-                "key_fingerprint": d.key_fingerprint,
-                "expires_in_secs": d.expires_in_secs,
-            })
-        })
-        .collect();
-    Json(serde_json::json!({
-        "cog_key_fingerprint": identity_fingerprint(&state.cog_identity.public_key_bytes()),
-        "paired": paired,
-        "pending": pending,
-    }))
-}
-
-/// Requête de rejet.
-#[derive(Deserialize)]
-struct DeviceAction {
-    device_id: String,
-}
-
-/// Requête d'approbation : le code SAS que l'administrateur a vu (R-027).
-#[derive(Deserialize)]
-struct ApproveAction {
-    device_id: String,
-    confirmation_code: String,
-}
-
-/// POST /api/bridge/approve — approuve une demande révélée (depuis le desktop)
-/// si le code fourni est celui de la demande (temps constant).
-async fn handle_bridge_approve(
-    State(state): State<ServerState>,
-    Json(req): Json<ApproveAction>,
-) -> Response {
-    match state
-        .pairing
-        .approve_device(&req.device_id, &req.confirmation_code)
-    {
-        Ok(()) => Json(serde_json::json!({"approved": true})).into_response(),
-        Err(e) => {
-            warn!(
-                "CentralRemote approbation refusée ({}): {e}",
-                mask_device_id(&req.device_id)
-            );
-            pairing_error_reply(&e)
-        }
-    }
-}
-
-/// POST /api/bridge/reject — refuse un device en attente (depuis le desktop).
-async fn handle_bridge_reject(
-    State(state): State<ServerState>,
-    Json(req): Json<DeviceAction>,
-) -> Json<serde_json::Value> {
-    let ok = state.pairing.reject_device(&req.device_id);
-    Json(serde_json::json!({"rejected": ok}))
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use axum::body::Body;
     use axum::extract::connect_info::MockConnectInfo;
+    use central_remote_protocol::identite::{AUDIENCE, USAGE_PASSEPORT};
+    use miyauth::http::{
+        b64_decoder, formater_autorisation_passeport, formater_autorisation_visa, formater_pop,
+        liaison_requete, signer_pop, signer_requete,
+    };
+    use miyusceau::CleSignature;
     use tower::ServiceExt;
 
     const PASSWORD: &str = "Str0ng!Passw0rd-xyz";
@@ -1280,42 +1125,24 @@ mod tests {
         let db = CentralAuthDb::open(&path).expect("open db");
         let profile = db.sign_up("alice@example.org", PASSWORD, Some("Alice")).expect("sign_up");
 
-        // Hash Connect (Argon2id) pour le profil.
-        let mut ident = IdentitySetup::new(profile.id.clone());
-        ident.set_password(PASSWORD).unwrap();
-        let mut svc = ConnectService::new("test");
-        svc.register_identity(ident).unwrap();
-        let hash = svc.password_hash_for(&profile.id).unwrap().to_string();
-        db.set_connect_password_hash(&profile.id, &hash).unwrap();
-
-        // Profil legacy sans hash Connect.
-        db.sign_up("legacy@example.org", PASSWORD, None).expect("sign_up legacy");
-
+        let pairing = Arc::new(PairingManager::new());
+        let autorite = Arc::new(
+            AutoriteAppareils::new(CleSignature::generer(), None, [9; 32], pairing.clone()).unwrap(),
+        );
         let (tx, rx) = tokio::sync::watch::channel(false);
         let state = ServerState {
             bridge: RemoteBridge::new(),
-            sessions: Arc::new(SessionManager::with_random_secret()),
             auth_db: Arc::new(db),
-            connect: Arc::new(Mutex::new(ConnectService::new("test"))),
-            pairing: Arc::new(PairingManager::new()),
-            admin_secret: Arc::new(generate_admin_secret()),
-            auth_limiter: Arc::new(RateLimiter::new(AUTH_RATE_WINDOW, AUTH_RATE_MAX)),
-            bridge_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, BRIDGE_RATE_MAX)),
+            pairing,
+            autorite,
+            bridge_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, 1000)),
             status_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, PAIR_STATUS_RATE_MAX)),
+            defi_limiter: Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, 1000)),
             cog_identity: Arc::new(E2eIdentity::generate()),
             e2e_sessions: Arc::new(E2eSessionStore::default()),
-            allow_plaintext_local_auth: false,
             shutdown: rx,
         };
         (state, tx, profile.id)
-    }
-
-    /// État de test avec `/auth` en clair accepté depuis loopback (tests de la
-    /// logique d'authentification elle-même).
-    fn test_state_plain() -> (ServerState, tokio::sync::watch::Sender<bool>, String) {
-        let (mut state, tx, id) = test_state();
-        state.allow_plaintext_local_auth = true;
-        (state, tx, id)
     }
 
     /// Demande d'appairage honnête jusqu'à la révélation, directement sur le
@@ -1365,31 +1192,12 @@ mod tests {
         (status, String::from_utf8_lossy(&bytes).to_string())
     }
 
-    fn admin_req(uri: &str, secret: Option<&str>) -> axum::http::Request<Body> {
-        let mut b = axum::http::Request::builder().method("GET").uri(uri);
-        if let Some(s) = secret {
-            b = b.header(ADMIN_SECRET_HEADER, s);
-        }
-        b.body(Body::empty()).unwrap()
-    }
-
-    fn auth_req(email: &str, password: &str) -> axum::http::Request<Body> {
-        axum::http::Request::builder()
-            .method("POST")
-            .uri("/auth")
-            .header("content-type", "application/json")
-            .body(Body::from(
-                serde_json::json!({"email": email, "password": password}).to_string(),
-            ))
-            .unwrap()
-    }
-
     #[test]
     fn default_config_is_loopback() {
         let config = RemoteServerConfig::default();
         assert_eq!(config.listen_addr, "127.0.0.1:8091");
         assert_eq!(config.cors_allowed_origins, Vec::<String>::new());
-        assert_eq!(config.api_token_ttl_secs, DEFAULT_API_TOKEN_TTL_SECS);
+        assert!(config.cle_emission_path.is_none() && config.cog_id.is_none());
     }
 
     #[test]
@@ -1397,13 +1205,6 @@ mod tests {
         assert!(build_cors(&[]).is_none());
         assert!(build_cors(&["*".into()]).is_none());
         assert!(build_cors(&["http://localhost:3000".into()]).is_some());
-    }
-
-    #[test]
-    fn ct_eq_works() {
-        assert!(ct_eq(b"abc", b"abc"));
-        assert!(!ct_eq(b"abc", b"abd"));
-        assert!(!ct_eq(b"abc", b"abcd"));
     }
 
     #[test]
@@ -1419,155 +1220,6 @@ mod tests {
         assert!(rl.check(ip));
         std::thread::sleep(Duration::from_millis(5));
         assert!(rl.check(ip));
-    }
-
-    #[tokio::test]
-    async fn admin_routes_refused_without_secret() {
-        let (state, _tx, _) = test_state();
-        for uri in ["/api/bridge/devices"] {
-            let (st, _) = call(app_for(state.clone(), "127.0.0.1:5000"), admin_req(uri, None)).await;
-            assert_eq!(st, StatusCode::UNAUTHORIZED);
-            let (st, _) = call(app_for(state.clone(), "127.0.0.1:5000"), admin_req(uri, Some("wrong"))).await;
-            assert_eq!(st, StatusCode::UNAUTHORIZED);
-        }
-        for (m, uri) in [
-            ("POST", "/api/bridge/generate-token"),
-            ("POST", "/api/bridge/approve"),
-            ("POST", "/api/bridge/reject"),
-        ] {
-            let req = axum::http::Request::builder()
-                .method(m)
-                .uri(uri)
-                .header("content-type", "application/json")
-                .body(Body::from("{\"device_id\":\"x\"}"))
-                .unwrap();
-            let (st, _) = call(app_for(state.clone(), "127.0.0.1:5000"), req).await;
-            assert_eq!(st, StatusCode::UNAUTHORIZED, "{uri}");
-        }
-    }
-
-    #[tokio::test]
-    async fn admin_routes_refused_from_non_loopback_even_with_secret() {
-        let (state, _tx, _) = test_state();
-        let secret = state.admin_secret.as_str().to_string();
-        for peer in ["192.168.1.50:5000", "[2001:db8::1]:5000"] {
-            let (st, _) = call(
-                app_for(state.clone(), peer),
-                admin_req("/api/bridge/devices", Some(&secret)),
-            )
-            .await;
-            assert_eq!(st, StatusCode::FORBIDDEN, "{peer}");
-        }
-    }
-
-    #[tokio::test]
-    async fn admin_routes_ok_with_secret_and_ids_masked() {
-        let (state, _tx, _) = test_state();
-        let full_id = "device-abcdef-1234567890";
-        let (device, code) = commit_reveal(&state, full_id);
-        let secret = state.admin_secret.as_str().to_string();
-        let (st, body) = call(
-            app_for(state.clone(), "127.0.0.1:5000"),
-            admin_req("/api/bridge/devices", Some(&secret)),
-        )
-        .await;
-        assert_eq!(st, StatusCode::OK);
-        assert!(!body.contains(full_id), "device_id complet fuité: {body}");
-        assert!(body.contains(&mask_device_id(full_id)));
-        let v: serde_json::Value = serde_json::from_str(&body).unwrap();
-        assert_eq!(v["pending"][0]["confirmation_code"], code.as_str());
-        assert_eq!(v["pending"][0]["status"], "revealed");
-        assert_eq!(
-            v["pending"][0]["key_fingerprint"],
-            identity_fingerprint(&device.public_key_bytes()).as_str()
-        );
-        assert_eq!(
-            v["cog_key_fingerprint"],
-            identity_fingerprint(&state.cog_identity.public_key_bytes()).as_str()
-        );
-    }
-
-    #[tokio::test]
-    async fn generate_token_has_expiry() {
-        let (state, _tx, _) = test_state();
-        let secret = state.admin_secret.as_str().to_string();
-        let req = axum::http::Request::builder()
-            .method("POST")
-            .uri("/api/bridge/generate-token")
-            .header("content-type", "application/json")
-            .header(ADMIN_SECRET_HEADER, &secret)
-            .body(Body::from("{\"device_name\":\"Tel\"}"))
-            .unwrap();
-        let (st, body) = call(app_for(state.clone(), "127.0.0.1:5000"), req).await;
-        assert_eq!(st, StatusCode::OK);
-        let v: serde_json::Value = serde_json::from_str(&body).unwrap();
-        assert!(state.pairing.validate_api_token(v["token"].as_str().unwrap()));
-    }
-
-    #[tokio::test]
-    async fn lockout_cannot_be_bypassed() {
-        let (state, _tx, _) = test_state_plain();
-        // 5 échecs => verrouillage Connect (limite /auth : 10 par minute).
-        for _ in 0..5 {
-            let (_, body) = call(
-                app_for(state.clone(), "127.0.0.1:6000"),
-                auth_req("alice@example.org", "mauvais-mot-de-passe"),
-            )
-            .await;
-            assert!(body.contains("\"success\":false"));
-        }
-        // Le bon mot de passe est désormais refusé : aucun repli legacy.
-        let (_, body) = call(
-            app_for(state.clone(), "127.0.0.1:6000"),
-            auth_req("alice@example.org", PASSWORD),
-        )
-        .await;
-        assert!(body.contains("\"success\":false"), "verrouillage contourné: {body}");
-    }
-
-    #[tokio::test]
-    async fn valid_login_works_and_legacy_only_account_refused() {
-        let (state, _tx, _) = test_state_plain();
-        let (_, body) = call(
-            app_for(state.clone(), "127.0.0.1:6001"),
-            auth_req("alice@example.org", PASSWORD),
-        )
-        .await;
-        assert!(body.contains("\"success\":true"), "{body}");
-        // Compte sans hash Connect : pas de repli sign_in.
-        let (_, body) = call(
-            app_for(state.clone(), "127.0.0.1:6001"),
-            auth_req("legacy@example.org", PASSWORD),
-        )
-        .await;
-        assert!(body.contains("\"success\":false"), "{body}");
-    }
-
-    #[tokio::test]
-    async fn auth_rate_limited_per_ip() {
-        let (state, _tx, _) = test_state();
-        let mut last = StatusCode::OK;
-        for _ in 0..=AUTH_RATE_MAX {
-            let (st, _) = call(
-                app_for(state.clone(), "10.1.2.3:7000"),
-                auth_req("inconnu@example.org", "x"),
-            )
-            .await;
-            last = st;
-        }
-        assert_eq!(last, StatusCode::TOO_MANY_REQUESTS);
-    }
-
-    #[tokio::test]
-    async fn ws_without_valid_token_refused() {
-        let (state, _tx, _) = test_state();
-        let (st, _) = call(
-            app_for(state, "127.0.0.1:5000"),
-            axum::http::Request::builder().uri("/ws").body(Body::empty()).unwrap(),
-        )
-        .await;
-        assert_ne!(st, StatusCode::SWITCHING_PROTOCOLS);
-        assert!(st.is_client_error());
     }
 
     // ── E2E mobile ↔ COG (R-023) ─────────────────────────────────────────
@@ -1606,32 +1258,302 @@ mod tests {
         pending.complete(&cog_offer).unwrap()
     }
 
-    fn e2e_auth_req(
-        session: &E2eSession,
-        binding: &RequestBinding,
-        email: &str,
-        password: &str,
-    ) -> (axum::http::Request<Body>, EncryptedMessage) {
-        let msg = session
-            .encrypt_json(
-                binding,
-                &RemoteAuthRequest {
-                    email: email.into(),
-                    password: password.into(),
-                },
-            )
-            .unwrap();
-        (raw_e2e_req(session, &msg), msg)
+
+    // ── Identité signée : passeport → visa → requête (sortie du lot 2) ──────
+
+    /// Appareil appairé, lié au profil `profile_id`, et sa clé de signature.
+    fn appareil_appaire(state: &ServerState, device_id: &str, profile_id: Option<&str>) -> (E2eIdentity, CleSignature) {
+        let (device, code) = commit_reveal(state, device_id);
+        state.pairing.approve_device_for(device_id, &code, profile_id).unwrap();
+        let cle = CleSignature::depuis_graine(&device.secret_bytes());
+        (device, cle)
     }
 
-    fn raw_e2e_req(session: &E2eSession, msg: &EncryptedMessage) -> axum::http::Request<Body> {
+    fn req_passeport(cle: &CleSignature) -> axum::http::Request<Body> {
+        let e = signer_requete(cle, USAGE_PASSEPORT, "POST", PASSEPORT_ENDPOINT, b"", maintenant_unix());
+        let mut b = axum::http::Request::builder().method("POST").uri(PASSEPORT_ENDPOINT);
+        for (k, v) in e.en_entetes() {
+            b = b.header(k, v);
+        }
+        b.body(Body::empty()).unwrap()
+    }
+
+    async fn passeport(state: &ServerState, cle: &CleSignature) -> Vec<u8> {
+        let (st, body) = call(app_for(state.clone(), PEER_LAN), req_passeport(cle)).await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let r: PasseportResponse = serde_json::from_str(&body).unwrap();
+        assert_eq!(r.cog_id, state.autorite.cog().as_str());
+        b64_decoder(&r.passeport).unwrap()
+    }
+
+    /// Défi neuf (HTTP) et preuve de possession liée à `methode chemin` (corps vide).
+    async fn pop(state: &ServerState, cle: &CleSignature, methode: &str, chemin: &str) -> String {
+        let (st, body) = call(
+            app_for(state.clone(), PEER_LAN),
+            axum::http::Request::builder().method("POST").uri(DEFI_ENDPOINT).body(Body::empty()).unwrap(),
+        )
+        .await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let d: DefiResponse = serde_json::from_str(&body).unwrap();
+        assert_eq!(d.audience, AUDIENCE);
+        let id: [u8; 16] = b64_decoder(&d.defi_id).unwrap().try_into().unwrap();
+        let defi: [u8; 32] = b64_decoder(&d.defi).unwrap().try_into().unwrap();
+        let sig = signer_pop(cle, &defi, AUDIENCE, &liaison_requete(methode, chemin, b""));
+        formater_pop(&id, &sig)
+    }
+
+    fn req_titre(methode: &str, uri: &str, autorisation: &str, pop: &str) -> axum::http::Request<Body> {
         axum::http::Request::builder()
-            .method("POST")
-            .uri(AUTH_ENDPOINT)
-            .header("content-type", "application/json")
-            .header(E2E_SESSION_HEADER, hex::encode(session.session_id()))
-            .body(Body::from(serde_json::to_string(msg).unwrap()))
+            .method(methode)
+            .uri(uri)
+            .header(header::AUTHORIZATION, autorisation)
+            .header(ENTETE_POP, pop)
+            .body(Body::empty())
             .unwrap()
+    }
+
+    /// Requête d'ouverture WebSocket authentifiée.
+    fn req_ws(uri: &str, autorisation: &str, pop: &str) -> axum::http::Request<Body> {
+        axum::http::Request::builder()
+            .method("GET")
+            .uri(uri)
+            .header(header::CONNECTION, "upgrade")
+            .header(header::UPGRADE, "websocket")
+            .header(header::SEC_WEBSOCKET_VERSION, "13")
+            .header(header::SEC_WEBSOCKET_KEY, "dGhlIHNhbXBsZSBub25jZQ==")
+            .header(header::AUTHORIZATION, autorisation)
+            .header(ENTETE_POP, pop)
+            .body(Body::empty())
+            .unwrap()
+    }
+
+    async fn visa(state: &ServerState, cle: &CleSignature, passeport: &[u8]) -> (StatusCode, String) {
+        let pop = pop(state, cle, "POST", VISA_ENDPOINT).await;
+        call(
+            app_for(state.clone(), PEER_LAN),
+            req_titre("POST", VISA_ENDPOINT, &formater_autorisation_passeport(passeport), &pop),
+        )
+        .await
+    }
+
+    /// Passeport + visa d'un appareil appairé ; rend `Authorization: MiyuVisa …`.
+    async fn autorisation_visa(state: &ServerState, cle: &CleSignature) -> String {
+        let p = passeport(state, cle).await;
+        let (st, body) = visa(state, cle, &p).await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let v: VisaResponse = serde_json::from_str(&body).unwrap();
+        formater_autorisation_visa(&b64_decoder(&v.visa).unwrap(), &p)
+    }
+
+    #[tokio::test]
+    async fn full_flow_pair_passport_visa_request() {
+        let (state, _tx, profile_id) = test_state();
+        let (_device, cle) = appareil_appaire(&state, "device-flow-0001", Some(&profile_id));
+        let p = passeport(&state, &cle).await;
+        let (st, body) = visa(&state, &cle, &p).await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let v: VisaResponse = serde_json::from_str(&body).unwrap();
+        assert_eq!(v.role, "citizen");
+        assert_eq!(v.display_name, "Alice");
+        assert!(v.identite.starts_with(&format!("pw:{}:", state.autorite.cog())));
+        assert!(v.expire_a <= maintenant_unix() + miyauth::titres::DUREE_MAX_VISA_SECS);
+
+        let auth = formater_autorisation_visa(&b64_decoder(&v.visa).unwrap(), &p);
+        let pop1 = pop(&state, &cle, "POST", VALIDATE_ENDPOINT).await;
+        let (st, body) = call(app_for(state.clone(), PEER_LAN), req_titre("POST", VALIDATE_ENDPOINT, &auth, &pop1)).await;
+        assert_eq!(st, StatusCode::OK, "{body}");
+        let r: ValidateResponse = serde_json::from_str(&body).unwrap();
+        assert_eq!((r.status.as_str(), r.identite.as_str()), ("ok", v.identite.as_str()));
+
+        // Visa sans preuve de possession : refus (pas de jeton au porteur).
+        let req = axum::http::Request::builder()
+            .method("POST")
+            .uri(VALIDATE_ENDPOINT)
+            .header(header::AUTHORIZATION, &auth)
+            .body(Body::empty())
+            .unwrap();
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Passeport présenté comme visa : refus.
+        let pop2 = pop(&state, &cle, "POST", VALIDATE_ENDPOINT).await;
+        let (st, _) = call(
+            app_for(state.clone(), PEER_LAN),
+            req_titre("POST", VALIDATE_ENDPOINT, &formater_autorisation_passeport(&p), &pop2),
+        )
+        .await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn replayed_pop_refused() {
+        let (state, _tx, _) = test_state();
+        let (_d, cle) = appareil_appaire(&state, "device-replay-01", None);
+        let auth = autorisation_visa(&state, &cle).await;
+        let pop1 = pop(&state, &cle, "POST", VALIDATE_ENDPOINT).await;
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_titre("POST", VALIDATE_ENDPOINT, &auth, &pop1)).await;
+        assert_eq!(st, StatusCode::OK);
+        // Même preuve rejouée : défi déjà consommé.
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_titre("POST", VALIDATE_ENDPOINT, &auth, &pop1)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Preuve produite pour une autre requête (liaison) : refus.
+        let pop_ws = pop(&state, &cle, "GET", WS_ENDPOINT).await;
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_titre("POST", VALIDATE_ENDPOINT, &auth, &pop_ws)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Requête de passeport rejouée (même nonce) : refus.
+        let req = req_passeport(&cle);
+        let (parts, _) = req.into_parts();
+        let rebuild = || {
+            let mut b = axum::http::Request::builder().method("POST").uri(PASSEPORT_ENDPOINT);
+            for (k, v) in &parts.headers {
+                b = b.header(k, v);
+            }
+            b.body(Body::empty()).unwrap()
+        };
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), rebuild()).await;
+        assert_eq!(st, StatusCode::OK);
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), rebuild()).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn revoked_device_refused() {
+        let (state, _tx, _) = test_state();
+        let (_d, cle) = appareil_appaire(&state, "device-revoke-01", None);
+        let p = passeport(&state, &cle).await;
+        let auth = autorisation_visa(&state, &cle).await;
+        // Révocation depuis Central (bouton « Révoquer » → PairingManager::revoke_device).
+        assert_eq!(state.pairing.revoke_device("device-revoke-01"), Ok(true));
+        let pop1 = pop(&state, &cle, "POST", VALIDATE_ENDPOINT).await;
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_titre("POST", VALIDATE_ENDPOINT, &auth, &pop1)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED, "visa d'un appareil révoqué accepté");
+        let (st, _) = visa(&state, &cle, &p).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED, "passeport d'un appareil révoqué accepté");
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_passeport(&cle)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        let pop2 = pop(&state, &cle, "GET", WS_ENDPOINT).await;
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_ws(WS_ENDPOINT, &auth, &pop2)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn unpaired_key_gets_no_passport() {
+        let (state, _tx, _) = test_state();
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_passeport(&CleSignature::generer())).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Appareil seulement en attente (révélé, non approuvé) : refus aussi.
+        let (device, _code) = commit_reveal(&state, "device-pending-02");
+        let cle = CleSignature::depuis_graine(&device.secret_bytes());
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_passeport(&cle)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Sans en-têtes signés.
+        let req = axum::http::Request::builder().method("POST").uri(PASSEPORT_ENDPOINT).body(Body::empty()).unwrap();
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn ws_requires_visa_and_pop_and_refuses_query_token() {
+        let (state, _tx, _) = test_state();
+        let (_d, cle) = appareil_appaire(&state, "device-ws-0001", None);
+        let auth = autorisation_visa(&state, &cle).await;
+        // `?token=` : refusé, même accompagné d'un visa valide.
+        let pop1 = pop(&state, &cle, "GET", WS_ENDPOINT).await;
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_ws("/ws?token=abc", &auth, &pop1)).await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        let req = axum::http::Request::builder().uri("/ws?token=abc").body(Body::empty()).unwrap();
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
+        assert_eq!(st, StatusCode::BAD_REQUEST);
+        // Ancien jeton HMAC en Bearer : refus.
+        let req = axum::http::Request::builder()
+            .uri(WS_ENDPOINT)
+            .header(header::AUTHORIZATION, "Bearer prof-1.123.abc.def")
+            .body(Body::empty())
+            .unwrap();
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Visa + preuve neuve : authentification acceptée ; la requête de test
+        // n'étant pas une vraie connexion HTTP/1.1, seul l'upgrade échoue (426).
+        let pop2 = pop(&state, &cle, "GET", WS_ENDPOINT).await;
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_ws(WS_ENDPOINT, &auth, &pop2)).await;
+        assert_eq!(st, StatusCode::UPGRADE_REQUIRED);
+        // La même preuve ne rouvre pas de session (défi consommé).
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req_ws(WS_ENDPOINT, &auth, &pop2)).await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn old_api_token_and_device_id_refused() {
+        let (state, _tx, _) = test_state();
+        let _ = appareil_appaire(&state, "device-legacy-01", None);
+        // Mode clé API retiré.
+        let req = axum::http::Request::builder()
+            .uri("/api/bridge/validate-token")
+            .header(header::AUTHORIZATION, "Bearer myk_0123456789abcdef0123456789abcdef")
+            .body(Body::empty())
+            .unwrap();
+        let (st, _) = call(app_for(state.clone(), "127.0.0.1:5000"), req).await;
+        assert_eq!(st, StatusCode::NOT_FOUND);
+        let (st, _) = call(
+            app_for(state.clone(), "127.0.0.1:5000"),
+            post_json("/api/bridge/generate-token", "{\"device_name\":\"Tel\"}".into()),
+        )
+        .await;
+        assert_eq!(st, StatusCode::NOT_FOUND);
+        // `device_id` au porteur : plus aucune valeur.
+        let (st, _) = call(
+            app_for(state.clone(), PEER_LAN),
+            post_json(VALIDATE_ENDPOINT, "{\"device_id\":\"device-legacy-01\"}".into()),
+        )
+        .await;
+        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Routes d'administration HTTP supprimées (appel dans le processus).
+        for (m, uri) in [("GET", "/api/bridge/devices"), ("POST", "/api/bridge/approve"), ("POST", "/api/bridge/reject")] {
+            let req = axum::http::Request::builder()
+                .method(m)
+                .uri(uri)
+                .header("x-central-admin-secret", "00")
+                .header("content-type", "application/json")
+                .body(Body::from("{\"device_id\":\"x\"}"))
+                .unwrap();
+            let (st, _) = call(app_for(state.clone(), "127.0.0.1:5000"), req).await;
+            assert!(st == StatusCode::NOT_FOUND || st == StatusCode::METHOD_NOT_ALLOWED, "{uri}: {st}");
+        }
+    }
+
+    #[tokio::test]
+    async fn password_alone_refused() {
+        let (state, _tx, _) = test_state();
+        let device = paired_device(&state, "device-pwd-0001");
+        let body = serde_json::json!({"email": "alice@example.org", "password": PASSWORD}).to_string();
+        for peer in ["127.0.0.1:6000", PEER_LAN] {
+            let (st, resp) = call(app_for(state.clone(), peer), post_json("/auth", body.clone())).await;
+            assert_eq!(st, StatusCode::NOT_FOUND, "{resp}");
+            assert!(!resp.contains("token"));
+        }
+        // Même dans une session E2E établie : aucun point d'accès par mot de passe.
+        let session = handshake(&state, &device).await;
+        let req = axum::http::Request::builder()
+            .method("POST")
+            .uri("/auth")
+            .header("content-type", "application/json")
+            .header(miyukini_cog_bridge::E2E_SESSION_HEADER, hex::encode(session.session_id()))
+            .body(Body::from(body))
+            .unwrap();
+        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
+        assert_eq!(st, StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn defi_rate_limited() {
+        let (mut state, _tx, _) = test_state();
+        state.defi_limiter = Arc::new(RateLimiter::new(BRIDGE_RATE_WINDOW, 2));
+        let req = || axum::http::Request::builder().method("POST").uri(DEFI_ENDPOINT).body(Body::empty()).unwrap();
+        for _ in 0..2 {
+            let (st, _) = call(app_for(state.clone(), "10.9.9.9:1"), req()).await;
+            assert_eq!(st, StatusCode::OK);
+        }
+        let (st, _) = call(app_for(state.clone(), "10.9.9.9:1"), req()).await;
+        assert_eq!(st, StatusCode::TOO_MANY_REQUESTS);
     }
 
     #[tokio::test]
@@ -1816,15 +1738,6 @@ mod tests {
         v["status"].as_str().unwrap().to_string()
     }
 
-    fn admin_post(uri: &str, secret: &str, body: serde_json::Value) -> axum::http::Request<Body> {
-        axum::http::Request::builder()
-            .method("POST")
-            .uri(uri)
-            .header("content-type", "application/json")
-            .header(ADMIN_SECRET_HEADER, secret)
-            .body(Body::from(body.to_string()))
-            .unwrap()
-    }
 
     #[tokio::test]
     async fn http_pairing_v2_end_to_end() {
@@ -1874,43 +1787,18 @@ mod tests {
         assert_eq!(pending[0].confirmation_code.as_deref(), Some(revealed.code()));
         assert!(!state.pairing.is_whitelisted(id), "jamais d'approbation implicite");
 
-        // Approbation : mauvais code refusé, bon code accepté.
-        let secret = state.admin_secret.as_str().to_string();
+        // Approbation (Central, dans le processus) : mauvais code refusé, bon code accepté.
         let wrong = if revealed.code() == "00000000" { "11111111" } else { "00000000" };
-        let (st, _) = call(
-            app_for(state.clone(), "127.0.0.1:5000"),
-            admin_post(
-                "/api/bridge/approve",
-                &secret,
-                serde_json::json!({"device_id": id, "confirmation_code": wrong}),
-            ),
-        )
-        .await;
-        assert_eq!(st, StatusCode::CONFLICT);
-        // Sans code : rejet par le désérialiseur.
-        let (st, _) = call(
-            app_for(state.clone(), "127.0.0.1:5000"),
-            admin_post("/api/bridge/approve", &secret, serde_json::json!({"device_id": id})),
-        )
-        .await;
-        assert!(st.is_client_error());
+        assert_eq!(state.pairing.approve_device(id, wrong), Err(PairingError::CodeMismatch));
         assert!(!state.pairing.is_whitelisted(id));
-        let (st, _) = call(
-            app_for(state.clone(), "127.0.0.1:5000"),
-            admin_post(
-                "/api/bridge/approve",
-                &secret,
-                serde_json::json!({"device_id": id, "confirmation_code": revealed.code()}),
-            ),
-        )
-        .await;
-        assert_eq!(st, StatusCode::OK);
+        state.pairing.approve_device(id, revealed.code()).unwrap();
         assert_eq!(pair_status(&state, id, &key_hex).await, "approved");
         let paired = state.pairing.device_for_identity_key(&key_hex).unwrap();
         assert_eq!(paired.device_id, id);
         // La clé épinglée permet le handshake E2E.
         let _session = handshake(&state, &device).await;
     }
+
 
     #[tokio::test]
     async fn http_old_pairing_protocol_refused() {
@@ -2174,137 +2062,61 @@ mod tests {
         assert_eq!(state.pairing.pending_devices().len(), 0);
     }
 
+
+    /// Bout en bout sur un vrai serveur : appairage → client de l'appareil
+    /// (`miyukini_cog_bridge::ClientAppareil`) → passeport → visa → validation →
+    /// WebSocket authentifié ; révocation ⇒ fermeture du WebSocket et refus.
     #[tokio::test]
-    async fn auth_over_e2e_succeeds_and_response_bound() {
-        let (state, _tx, _) = test_state();
-        let device = paired_device(&state, "device-0005-abcdef");
-        let session = handshake(&state, &device).await;
-        let binding = RequestBinding::new("POST", AUTH_ENDPOINT).unwrap();
-        let (req, _) = e2e_auth_req(&session, &binding, "alice@example.org", PASSWORD);
-        let (st, body) = call(app_for(state.clone(), PEER_LAN), req).await;
-        assert_eq!(st, StatusCode::OK);
-        // Rien en clair dans la réponse.
-        assert!(!body.contains("success"), "{body}");
-        let msg = EncryptedMessage::from_json(body.as_bytes()).unwrap();
-        let resp: RemoteAuthResponse = session.decrypt_json(&binding, &msg).unwrap();
-        assert!(resp.success);
-        assert!(resp.token.is_some());
+    async fn real_server_client_flow_and_ws_closed_on_revocation() {
+        use tokio_tungstenite::tungstenite::client::IntoClientRequest;
+        let dir = std::env::temp_dir().join(format!("central-remote-e2e-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let config = RemoteServerConfig {
+            listen_addr: "127.0.0.1:0".into(),
+            auth_db_path: dir.join("central.db").to_string_lossy().to_string(),
+            ..RemoteServerConfig::default()
+        };
+        let h = start_remote_server(config, RemoteBridge::new()).await.unwrap();
+        assert!(dir.join(FICHIER_CLE_EMISSION_DEFAUT).exists());
+        let device = E2eIdentity::generate();
+        let cog_key = parse_identity_key_hex(h.e2e_identity_public_key_hex()).unwrap();
+        let code = direct_pair(&h.pairing, cog_key, &device, "device-real-0001", "127.0.0.1");
+        h.pairing.approve_device("device-real-0001", &code).unwrap();
 
-        // Mauvais mot de passe : réponse chiffrée success=false.
-        let binding = RequestBinding::new("POST", AUTH_ENDPOINT).unwrap();
-        let (req, _) = e2e_auth_req(&session, &binding, "alice@example.org", "faux");
-        let (st, body) = call(app_for(state.clone(), PEER_LAN), req).await;
-        assert_eq!(st, StatusCode::OK);
-        let msg = EncryptedMessage::from_json(body.as_bytes()).unwrap();
-        let resp: RemoteAuthResponse = session.decrypt_json(&binding, &msg).unwrap();
-        assert!(!resp.success);
-    }
+        let base = format!("http://{}", h.addr);
+        let client = miyukini_cog_bridge::ClientAppareil::new(base, &device);
+        let v = client.ouvrir_session().await.unwrap();
+        assert_eq!(v.display_name, "Pixel");
+        let r = client.valider().await.unwrap();
+        assert_eq!(r.identite, v.identite);
 
-    #[tokio::test]
-    async fn auth_e2e_replay_wrong_endpoint_and_unknown_session_refused() {
-        let (state, _tx, _) = test_state();
-        let device = paired_device(&state, "device-0006-abcdef");
-        let session = handshake(&state, &device).await;
+        let mut req = format!("ws://{}{WS_ENDPOINT}", h.addr).into_client_request().unwrap();
+        for (k, val) in client.entetes_ws().await.unwrap() {
+            req.headers_mut().insert(k, val.parse().unwrap());
+        }
+        let (mut ws, _) = tokio_tungstenite::connect_async(req).await.unwrap();
+        let first = ws.next().await.unwrap().unwrap();
+        assert!(first.to_text().unwrap().contains("snapshot"), "{first:?}");
 
-        // Rejeu d'une requête déjà acceptée.
-        let binding = RequestBinding::new("POST", AUTH_ENDPOINT).unwrap();
-        let (req, msg) = e2e_auth_req(&session, &binding, "alice@example.org", PASSWORD);
-        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
-        assert_eq!(st, StatusCode::OK);
-        let (st, _) = call(app_for(state.clone(), PEER_LAN), raw_e2e_req(&session, &msg)).await;
-        assert_eq!(st, StatusCode::UNAUTHORIZED);
+        // Sans en-têtes : upgrade refusé.
+        let nu = format!("ws://{}{WS_ENDPOINT}", h.addr).into_client_request().unwrap();
+        assert!(tokio_tungstenite::connect_async(nu).await.is_err());
 
-        // Chiffré produit pour un autre point d'accès.
-        let other = RequestBinding::new("POST", "/api/autre").unwrap();
-        let (req, _) = e2e_auth_req(&session, &other, "alice@example.org", PASSWORD);
-        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
-        assert_eq!(st, StatusCode::UNAUTHORIZED);
-
-        // Session inconnue.
-        let binding = RequestBinding::new("POST", AUTH_ENDPOINT).unwrap();
-        let (_, msg) = e2e_auth_req(&session, &binding, "alice@example.org", PASSWORD);
-        let req = axum::http::Request::builder()
-            .method("POST")
-            .uri(AUTH_ENDPOINT)
-            .header("content-type", "application/json")
-            .header(E2E_SESSION_HEADER, "00".repeat(32))
-            .body(Body::from(serde_json::to_string(&msg).unwrap()))
-            .unwrap();
-        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
-        assert_eq!(st, StatusCode::UNAUTHORIZED);
-    }
-
-    #[tokio::test]
-    async fn auth_e2e_refused_after_revocation() {
-        let (state, _tx, _) = test_state();
-        let device = paired_device(&state, "device-0007-abcdef");
-        let session = handshake(&state, &device).await;
-        assert_eq!(state.pairing.revoke_device("device-0007-abcdef"), Ok(true));
-        let binding = RequestBinding::new("POST", AUTH_ENDPOINT).unwrap();
-        let (req, _) = e2e_auth_req(&session, &binding, "alice@example.org", PASSWORD);
-        let (st, _) = call(app_for(state.clone(), PEER_LAN), req).await;
-        assert_eq!(st, StatusCode::UNAUTHORIZED);
-        assert!(state.e2e_sessions.is_empty());
-    }
-
-    #[tokio::test]
-    async fn clear_auth_refused_from_network_peer() {
-        let (state, _tx, _) = test_state();
-        let (st, body) = call(
-            app_for(state.clone(), PEER_LAN),
-            auth_req("alice@example.org", PASSWORD),
-        )
-        .await;
-        assert_eq!(st, StatusCode::FORBIDDEN);
-        assert!(body.contains("\"success\":false"));
-        assert!(!body.contains("token\":\""));
-    }
-
-    #[tokio::test]
-    async fn clear_auth_refused_by_default_even_from_loopback() {
-        let (state, _tx, _) = test_state();
-        assert!(!RemoteServerConfig::default().allow_plaintext_local_auth);
-        let (st, body) = call(
-            app_for(state.clone(), "127.0.0.1:6100"),
-            auth_req("alice@example.org", PASSWORD),
-        )
-        .await;
-        assert_eq!(st, StatusCode::FORBIDDEN);
-        assert!(!body.contains("token\":\""));
-    }
-
-    #[tokio::test]
-    async fn clear_auth_loopback_only_when_flag_set() {
-        let (state, _tx, _) = test_state_plain();
-        let (st, body) = call(
-            app_for(state.clone(), "127.0.0.1:6101"),
-            auth_req("alice@example.org", PASSWORD),
-        )
-        .await;
-        assert_eq!(st, StatusCode::OK);
-        assert!(body.contains("\"success\":true"), "{body}");
-        // Pair réseau : toujours refusé, même avec l'option.
-        let (st, _) = call(app_for(state.clone(), PEER_LAN), auth_req("alice@example.org", PASSWORD)).await;
-        assert_eq!(st, StatusCode::FORBIDDEN);
-    }
-
-    #[test]
-    fn plaintext_auth_policy() {
-        assert!(!plaintext_auth_allowed(false, "127.0.0.1".parse().unwrap()));
-        assert!(plaintext_auth_allowed(true, "127.0.0.1".parse().unwrap()));
-        assert!(plaintext_auth_allowed(true, "::ffff:127.0.0.1".parse().unwrap()));
-        assert!(!plaintext_auth_allowed(true, "192.168.1.2".parse().unwrap()));
-    }
-
-    #[tokio::test]
-    async fn auth_body_bounded() {
-        let (state, _tx, _) = test_state();
-        let (st, _) = call(
-            app_for(state.clone(), "127.0.0.1:6200"),
-            post_json(AUTH_ENDPOINT, " ".repeat(AUTH_MAX_BODY + 1)),
-        )
-        .await;
-        assert_eq!(st, StatusCode::PAYLOAD_TOO_LARGE);
+        // Révocation : la session ouverte est fermée à la revérification suivante.
+        assert_eq!(h.pairing.revoke_device("device-real-0001"), Ok(true));
+        let ferme = tokio::time::timeout(Duration::from_secs(8), async {
+            while let Some(m) = ws.next().await {
+                match m {
+                    Ok(tokio_tungstenite::tungstenite::Message::Close(_)) | Err(_) => return true,
+                    Ok(_) => {}
+                }
+            }
+            true
+        })
+        .await
+        .unwrap_or(false);
+        assert!(ferme, "WebSocket non fermé après révocation");
+        assert!(client.valider().await.is_err());
     }
 
     #[tokio::test]

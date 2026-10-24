@@ -9,8 +9,11 @@
 // @human Client HTTP vers miou-llm-bridge pour STT et NLU, avec fallback regex.
 
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::time::Duration;
 
+use miyauth::http::service::entetes_signees;
+use miyusceau::CleSignature;
 use serde::{Deserialize, Serialize};
 
 use crate::intent::Intent;
@@ -135,12 +138,42 @@ pub struct BridgeNluResponse {
     pub slots: HashMap<String, serde_json::Value>,
 }
 
+/// Usage signe des requetes vers MiyuSTT (egal a `miyustt::USAGE`).
+pub const USAGE_STT: &str = "miyustt/transcription";
+/// Usage signe des requetes vers MiyuTTS (egal a `miyutts::USAGE`).
+pub const USAGE_TTS: &str = "miyutts/synthese";
+
 /// Client NLU : appels HTTP vers miou-llm-bridge avec fallback regex.
 #[derive(Debug, Clone)]
 pub struct NluBridge {
     config: NluBridgeConfig,
     client: reqwest::Client,
     fallback: FallbackNluParser,
+    /// Cle d'Alicia signant les requetes STT/TTS (sans cle : requetes refusees).
+    cle: Option<Arc<CleSignature>>,
+}
+
+/// POST JSON signe par `cle` (si fournie) pour `usage`.
+fn post_signe<T: Serialize>(
+    client: &reqwest::Client,
+    url: &str,
+    usage: &str,
+    cle: Option<&CleSignature>,
+    corps: &T,
+) -> Result<reqwest::RequestBuilder, NluError> {
+    let octets = serde_json::to_vec(corps).map_err(|e| NluError::HttpError(format!("serialisation : {e}")))?;
+    let url = reqwest::Url::parse(url).map_err(|e| NluError::HttpError(format!("URL invalide : {e}")))?;
+    let chemin = match url.query() {
+        Some(q) => format!("{}?{q}", url.path()),
+        None => url.path().to_string(),
+    };
+    let mut requete = client.post(url).header(reqwest::header::CONTENT_TYPE, "application/json");
+    if let Some(cle) = cle {
+        for (nom, valeur) in entetes_signees(cle, usage, "POST", &chemin, &octets) {
+            requete = requete.header(nom, valeur);
+        }
+    }
+    Ok(requete.body(octets))
 }
 
 impl NluBridge {
@@ -150,7 +183,15 @@ impl NluBridge {
             config,
             client,
             fallback: FallbackNluParser,
+            cle: None,
         }
+    }
+
+    /// Signe desormais les requetes STT/TTS avec `cle` (cle publique a epingler
+    /// cote MiyuSTT / MiyuTTS).
+    pub fn avec_cle(mut self, cle: Arc<CleSignature>) -> Self {
+        self.cle = Some(cle);
+        self
     }
 
     /// Transcrit des echantillons audio en texte via le bridge STT.
@@ -171,13 +212,10 @@ impl NluBridge {
 
         let timeout = Duration::from_millis(self.config.stt_timeout_ms);
 
-        let response = self
-            .client
-            .post(&url)
+        let response = post_signe(&self.client, &url, USAGE_STT, self.cle.as_deref(), &body)?
             .header("X-Request-ID", &request_id)
             .header("X-Source", "alicia-home")
             .timeout(timeout)
-            .json(&body)
             .send()
             .await
             .map_err(|e| {
@@ -298,13 +336,10 @@ impl NluBridge {
         };
         let timeout = Duration::from_millis(self.config.tts_timeout_ms);
 
-        let response = self
-            .client
-            .post(&url)
+        let response = post_signe(&self.client, &url, USAGE_TTS, self.cle.as_deref(), &body)?
             .header("X-Request-ID", &request_id)
             .header("X-Source", "alicia-home")
             .timeout(timeout)
-            .json(&body)
             .send()
             .await
             .map_err(|e| {
@@ -550,14 +585,31 @@ mod tests {
         assert!(!bridge.is_tts_available().await);
     }
 
+    #[test]
+    fn usages_alignes_sur_les_services() {
+        assert_eq!(USAGE_STT, miyustt::USAGE);
+        assert_eq!(USAGE_TTS, miyutts::USAGE);
+    }
+
     #[tokio::test]
     async fn test_transcribe_contract_with_miyustt() {
-        let stt_url = spawn_router(miyustt::router()).await;
+        let cle = Arc::new(CleSignature::generer());
+        let stt_url = spawn_router(miyustt::router_with_state(miyustt::SttState {
+            security: miyustt::SttSecurity::avec_appelants([cle.cle_publique()], true),
+            ..Default::default()
+        }))
+        .await;
         let config = NluBridgeConfig {
             stt_base_url: stt_url,
             ..Default::default()
         };
-        let bridge = NluBridge::new(config, reqwest::Client::new());
+        // Sans cle : refus (plus aucun acces non authentifie).
+        let anonyme = NluBridge::new(config.clone(), reqwest::Client::new());
+        assert!(anonyme.transcribe(&[0.1]).await.is_err());
+        // Cle non epinglee : refus.
+        let intrus = NluBridge::new(config.clone(), reqwest::Client::new()).avec_cle(Arc::new(CleSignature::generer()));
+        assert!(intrus.transcribe(&[0.1]).await.is_err());
+        let bridge = NluBridge::new(config, reqwest::Client::new()).avec_cle(cle);
 
         let transcript = bridge
             .transcribe(&[0.12, -0.08, 0.03, -0.02, 0.01])
@@ -569,13 +621,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_tts_contract_with_miyutts() {
-        let tts_url = spawn_router(miyutts::router()).await;
+        let cle = Arc::new(CleSignature::generer());
+        let tts_url = spawn_router(miyutts::router_with_state(miyutts::TtsState {
+            security: miyutts::TtsSecurity::avec_appelants([cle.cle_publique()], true),
+            ..Default::default()
+        }))
+        .await;
         let config = NluBridgeConfig {
             tts_base_url: tts_url,
             tts_enabled: true,
             ..Default::default()
         };
-        let bridge = NluBridge::new(config, reqwest::Client::new());
+        let anonyme = NluBridge::new(config.clone(), reqwest::Client::new());
+        assert!(anonyme.synthesize_tts("bonjour", "fr").await.is_err());
+        let bridge = NluBridge::new(config, reqwest::Client::new()).avec_cle(cle);
 
         assert!(bridge.is_tts_available().await);
 

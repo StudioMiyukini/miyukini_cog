@@ -1,4 +1,6 @@
-# Loopback par défaut. Hors loopback : auth_token obligatoire (sinon refus de démarrer).
+# Loopback par défaut. Hors loopback : au moins un appelant épinglé ([security] cles_appelants),
+# sinon refus de démarrer. Plus de jeton partagé : chaque appelant signe ses requêtes (lot 2).
+# cle_service = "keys/maia.seed"   # graine 0600 de la clé de MAIA (créée au premier démarrage)
 bind_addr = "127.0.0.1:11435"
 upstream_url = "http://localhost:1234"
 log_requests = true
@@ -13,12 +15,14 @@ auto_load = true
 
 [security]
 allowed_origins = []
-# require_auth_all : non défini = auto (actif hors loopback, inactif en loopback).
-# require_auth_all = true
+# Clés publiques Ed25519 (base64 URL ou hex) des appelants autorisés (usage `maia/api`).
+# Vide = API protégée refusée (503), y compris en loopback.
+cles_appelants = []
+# Clés publiques des hubs TEAM, autorisés seulement sur POST /v1/agents/{id}/chat (usage `maia/team`).
+cles_hub_team = []
 # Proxys de confiance (IP/CIDR IPv4) autorisés à fournir X-Forwarded-For. Vide = jamais.
 trusted_proxies = []
 # Origines CORS explicites (ex: ["http://localhost:3000"]). Vide = pas de CORS cross-origin.
 cors_allowed_origins = []
 strict_user_agent = false
-hmac_max_age_secs = 300
 admin_origins = []

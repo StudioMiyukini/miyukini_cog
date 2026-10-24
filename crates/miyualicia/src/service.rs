@@ -67,7 +67,20 @@ impl AliciaService {
             ..Default::default()
         };
         let reqwest_client = reqwest::Client::new();
-        let nlu_bridge = NluBridge::new(nlu_config, reqwest_client);
+        let mut nlu_bridge = NluBridge::new(nlu_config, reqwest_client);
+        if let Some(chemin) = config.cle_voix.as_deref() {
+            match miyauth::http::service::charger_ou_creer_cle(std::path::Path::new(chemin)) {
+                Ok(cle) => {
+                    tracing::info!(
+                        cle_publique = %miyauth::http::service::encoder_cle_publique(&cle.cle_publique()),
+                        "cle d'Alicia chargee (a epingler sur MiyuSTT / MiyuTTS)"
+                    );
+                    nlu_bridge = nlu_bridge.avec_cle(std::sync::Arc::new(cle));
+                }
+                // Fail-closed : sans cle, les requetes STT/TTS seront refusees.
+                Err(e) => tracing::error!("cle d'Alicia illisible ({chemin}) : {e}"),
+            }
+        }
 
         Self {
             config,

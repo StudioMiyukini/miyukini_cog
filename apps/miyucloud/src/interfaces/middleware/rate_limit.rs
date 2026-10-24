@@ -250,8 +250,13 @@ pub fn extract_client_ip<B>(req: &Request<B>) -> String {
     )
 }
 
+/// Proxys de confiance configurés (`MIYUCLOUD_TRUSTED_PROXIES`).
+pub fn trusted_proxies() -> &'static TrustedProxies {
+    TRUSTED_PROXIES.get_or_init(TrustedProxies::from_env)
+}
+
 /// Build a rate-limit response with the standard `Retry-After` header.
-fn too_many_requests(retry_after: u64) -> Response {
+pub fn too_many_requests(retry_after: u64) -> Response {
     let body = serde_json::json!({
         "error": "Too many requests",
         "retry_after_secs": retry_after,

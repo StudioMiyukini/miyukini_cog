@@ -13,8 +13,8 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MaiaLlmConfig {
     /// Adresse d'écoute. Défaut : "127.0.0.1:11435" (loopback uniquement).
-    /// Une adresse non-loopback (ex: "0.0.0.0:11435") exige `auth_key` :
-    /// sans clé, le service refuse de démarrer (voir `validate_bind`).
+    /// Une adresse non-loopback (ex: "0.0.0.0:11435") exige au moins un appelant
+    /// épinglé : sinon, le service refuse de démarrer (voir `validate_bind`).
     #[serde(default = "default_bind_addr")]
     pub bind_addr: String,
 
@@ -34,9 +34,20 @@ pub struct MaiaLlmConfig {
     #[serde(default = "default_true")]
     pub auto_load: bool,
 
-    /// Clé d'authentification Bearer (X-MAIA-Key header). None = pas d'auth
-    /// (autorisé uniquement si le bind est loopback).
+    /// Clés publiques Ed25519 (base64 URL ou hexadécimal) des appelants autorisés
+    /// sur `/v1/*` (requêtes signées, usage `maia-llm/inference`). Vide (défaut) :
+    /// toute requête d'inférence est refusée (503), y compris en loopback.
     #[serde(default)]
+    pub appelants_inference: Vec<String>,
+
+    /// Clés publiques des appelants autorisés sur `/maia/llm/models*`
+    /// (usage `maia-llm/modeles`). Vide (défaut) : refus.
+    #[serde(default)]
+    pub appelants_modeles: Vec<String>,
+
+    /// Obsolète (lot 2) : ancienne clé partagée. Ignorée — jamais une
+    /// autorisation ; avertissement au démarrage si présente.
+    #[serde(default, skip_serializing)]
     pub auth_key: Option<String>,
 
     /// Origines CORS autorisées (ex: ["http://localhost:3000"]).
@@ -64,6 +75,8 @@ impl Default for MaiaLlmConfig {
             gpu_layers: default_gpu_layers(),
             context_size: default_context_size(),
             auto_load: true,
+            appelants_inference: Vec::new(),
+            appelants_modeles: Vec::new(),
             auth_key: None,
             cors_allowed_origins: Vec::new(),
             log_requests: true,
@@ -97,13 +110,28 @@ pub fn is_loopback_bind(bind_addr: &str) -> bool {
         .unwrap_or(false)
 }
 
-/// Valide la combinaison bind/auth : refuse un bind non-loopback sans `auth_key`.
+/// Clés publiques épinglées `(inférence, modèles)`.
+pub type ClesAppelants = (Vec<[u8; 32]>, Vec<[u8; 32]>);
+
+/// Clés publiques épinglées `(inférence, modèles)`. Une entrée mal formée ⇒
+/// erreur (refus de démarrer).
+pub fn cles_appelants(cfg: &MaiaLlmConfig) -> Result<ClesAppelants, String> {
+    use miyauth::http::service::analyser_cles_publiques;
+    let inference = analyser_cles_publiques(&cfg.appelants_inference)
+        .map_err(|e| format!("appelants_inference : {e}"))?;
+    let modeles = analyser_cles_publiques(&cfg.appelants_modeles)
+        .map_err(|e| format!("appelants_modeles : {e}"))?;
+    Ok((inference, modeles))
+}
+
+/// Valide la combinaison bind/appelants : clés bien formées, et pas de bind
+/// non-loopback sans appelant épinglé.
 pub fn validate_bind(cfg: &MaiaLlmConfig) -> Result<(), String> {
-    let has_key = cfg.auth_key.as_deref().is_some_and(|k| !k.trim().is_empty());
-    if !is_loopback_bind(&cfg.bind_addr) && !has_key {
+    let (inference, modeles) = cles_appelants(cfg).map_err(|e| format!("Refus de démarrer : {e}"))?;
+    if !is_loopback_bind(&cfg.bind_addr) && inference.is_empty() && modeles.is_empty() {
         return Err(format!(
-            "Refus de démarrer : bind_addr={} n'est pas loopback et aucune auth_key n'est \
-             configurée. Définissez `auth_key` (ou --auth-key) ou utilisez 127.0.0.1.",
+            "Refus de démarrer : bind_addr={} n'est pas loopback et aucun appelant n'est \
+             épinglé. Renseignez `appelants_inference` / `appelants_modeles` ou utilisez 127.0.0.1.",
             cfg.bind_addr
         ));
     }
@@ -139,7 +167,10 @@ pub fn build_cors(origins: &[String]) -> tower_http::cors::CorsLayer {
         .allow_headers([
             header::AUTHORIZATION,
             header::CONTENT_TYPE,
-            axum::http::HeaderName::from_static("x-maia-key"),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_SIGNATAIRE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_HORODATAGE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_NONCE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_SIGNATURE),
         ])
 }
 
@@ -197,14 +228,37 @@ mod tests {
     }
 
     #[test]
-    fn refus_non_loopback_sans_auth() {
-        let mut c = MaiaLlmConfig::default();
-        c.bind_addr = "0.0.0.0:11435".into();
+    fn refus_non_loopback_sans_appelant() {
+        let mut c = MaiaLlmConfig {
+            bind_addr: "0.0.0.0:11435".into(),
+            ..MaiaLlmConfig::default()
+        };
         assert!(validate_bind(&c).is_err());
-        c.auth_key = Some("  ".into());
-        assert!(validate_bind(&c).is_err());
+        // L'ancienne clé partagée n'autorise plus rien.
         c.auth_key = Some("secret".into());
+        assert!(validate_bind(&c).is_err());
+        let cle = miyusceau::CleSignature::generer().cle_publique();
+        c.appelants_inference = vec![miyauth::http::service::encoder_cle_publique(&cle)];
         assert!(validate_bind(&c).is_ok());
+        assert_eq!(cles_appelants(&c).unwrap().0, vec![cle]);
+    }
+
+    #[test]
+    fn cle_epinglee_mal_formee_refus_de_demarrer() {
+        let c = MaiaLlmConfig {
+            appelants_modeles: vec!["pas-une-cle".into()],
+            ..MaiaLlmConfig::default()
+        };
+        assert!(validate_bind(&c).is_err());
+    }
+
+    #[test]
+    fn auth_key_jamais_reecrite() {
+        let c = MaiaLlmConfig {
+            auth_key: Some("secret".into()),
+            ..MaiaLlmConfig::default()
+        };
+        assert!(!toml::to_string(&c).unwrap().contains("secret"));
     }
 
     #[test]

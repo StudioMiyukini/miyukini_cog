@@ -37,6 +37,7 @@ mod persona;
 mod proxy;
 mod recommend;
 mod security;
+mod signature;
 mod skills;
 mod team_client;
 mod tools;
@@ -58,17 +59,41 @@ async fn main() {
         )
         .init();
 
-    let mut cfg = config::load_or_create();
+    let cfg = config::load_or_create();
 
-    // Fail-closed : refuse un bind non-loopback sans token (et require_auth_all sans token).
+    // Fail-closed : clés épinglées bien formées ; pas de bind non-loopback sans appelant.
     if let Err(msg) = cfg.validate_startup() {
         tracing::error!("{msg}");
         eprintln!("{msg}");
         std::process::exit(1);
     }
-    // Fige la valeur effective de require_auth_all (auto = actif hors loopback).
-    let auth_all = cfg.effective_require_auth_all();
-    cfg.security.require_auth_all = Some(auth_all);
+    for champ in cfg.champs_obsoletes() {
+        tracing::warn!("`{champ}` est obsolète et ignoré (lot 2 : requêtes signées, plus de secret partagé)");
+    }
+    let gardes = match cfg.cles_epinglees() {
+        Ok((appelants, hubs)) => std::sync::Arc::new(signature::GardesMaia::new(appelants, hubs)),
+        Err(e) => {
+            eprintln!("Refus de démarrer : {e}");
+            std::process::exit(1);
+        }
+    };
+    if !gardes.est_configuree() {
+        tracing::warn!("Aucun appelant épinglé ([security] cles_appelants) : API protégée refusée (503)");
+    }
+    // Clé de service de MAIA : signe ses appels à maia-llm et au hub TEAM.
+    let chemin_cle = cfg.chemin_cle_service();
+    let cle = match miyauth::http::service::charger_ou_creer_cle(&chemin_cle) {
+        Ok(c) => std::sync::Arc::new(c),
+        Err(e) => {
+            tracing::error!("Clé de service illisible ({}) : {e}", chemin_cle.display());
+            eprintln!("Refus de démarrer : clé de service ({}) : {e}", chemin_cle.display());
+            std::process::exit(1);
+        }
+    };
+    tracing::info!(
+        "Clé publique de MAIA (à épingler dans maia-llm et le hub TEAM) : {}",
+        miyauth::http::service::encoder_cle_publique(&cle.cle_publique())
+    );
 
     // Timestamp de démarrage (pour uptime)
     let started_at = std::time::SystemTime::now()
@@ -119,7 +144,7 @@ async fn main() {
         .unwrap_or_else(|_| "http://localhost:11435".into());
     let maia_client = MaiaLlmClient::new(
         maia_llm_url.clone(),
-        cfg.auth_token.clone(),
+        Some(cle.clone()),
         http_client.clone(),
     );
     let model_manager = ModelManager::new(&cfg.native.models_dir);
@@ -183,9 +208,14 @@ async fn main() {
             format!("{local_model_count} GGUF disponibles (aucun chargé)")
         );
     }
-    if cfg.auth_token.is_some() {
-        tracing::info!("║  Auth     : {:<37}║", "Bearer token activé");
-    }
+    tracing::info!(
+        "║  Auth     : {:<37}║",
+        format!(
+            "signée ({} appelant(s), {} hub(s))",
+            cfg.security.cles_appelants.len(),
+            cfg.security.cles_hub_team.len()
+        )
+    );
     tracing::info!("╠══════════════════════════════════════════════════╣");
     tracing::info!("║  CPU      : {:<37}║", hw.cpu_name);
     tracing::info!(
@@ -234,27 +264,11 @@ async fn main() {
     };
     tracing::info!("║  Origins  : {:<37}║", origin_status);
     tracing::info!(
-        "║  HMAC     : {:<37}║",
-        if sec.hmac_secret.is_some() {
-            "secret défini (NON appliqué)"
-        } else {
-            "désactivé"
-        }
-    );
-    tracing::info!(
         "║  Encrypt  : {:<37}║",
         if sec.encryption_key.is_some() {
             "AES-256-GCM activé"
         } else {
             "désactivé"
-        }
-    );
-    tracing::info!(
-        "║  Auth all : {:<37}║",
-        if sec.require_auth_all == Some(true) {
-            "oui (Bearer requis partout)"
-        } else {
-            "non (proxy seulement)"
         }
     );
     if let Some(ref p) = active_persona {
@@ -286,7 +300,7 @@ async fn main() {
                 inference_router.native.loaded_model_name(),
                 persona_name,
             );
-            let client = team_client::TeamClient::new(http_client.clone(), team_url, node);
+            let client = team_client::TeamClient::new(http_client.clone(), team_url, node, cle.clone());
             team_registered = client.register().await;
         }
     }
@@ -299,7 +313,7 @@ async fn main() {
     let state = ProxyState {
         client: http_client,
         upstream_url: cfg.upstream_url,
-        auth_token: cfg.auth_token,
+        gardes,
         log_requests: cfg.log_requests,
         hardware: hw,
         agent_registry,

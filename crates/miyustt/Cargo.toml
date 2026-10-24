@@ -16,9 +16,11 @@ axum = { version = "0.8", features = ["ws"] }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "2"
 serde_json = "1.0"
-subtle = "2"   # comparaison du jeton en temps constant (deja au Cargo.lock)
+# Requetes signees par des appelants epingles (lot 2 : plus de jeton partage)
+miyauth = { path = "../miyauth", features = ["http"] }
 
 [dev-dependencies]
+miyusceau = { path = "../miyusceau" }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5", features = ["util"] }
 

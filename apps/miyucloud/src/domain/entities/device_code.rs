@@ -16,7 +16,7 @@ use uuid::Uuid;
 pub enum DeviceCodeStatus {
     /// Waiting for the user to authorize on the verification page.
     Pending,
-    /// User approved — tokens are ready for the polling client.
+    /// User approved — the device key is registered for the polling client.
     Authorized,
     /// User explicitly denied the request.
     Denied,
@@ -61,8 +61,8 @@ pub struct DeviceCode {
     scopes: String,
     status: DeviceCodeStatus,
     user_id: Option<Uuid>,
-    access_token: Option<String>,
-    refresh_token: Option<String>,
+    /// Clé publique Ed25519 de l'appareil (fournie au début du flux).
+    device_public_key: Option<[u8; 32]>,
     verification_uri: String,
     verification_uri_complete: Option<String>,
     expires_at: DateTime<Utc>,
@@ -82,12 +82,14 @@ impl DeviceCode {
     /// * `verification_uri` — URL the user must visit
     /// * `expires_in_secs` — TTL for the device code
     /// * `poll_interval_secs` — minimum polling interval
+    /// * `device_public_key` — clé publique Ed25519 de l'appareil
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         device_code: String,
         user_code: String,
         client_name: String,
         scopes: String,
+        device_public_key: [u8; 32],
         verification_uri: String,
         verification_uri_complete: Option<String>,
         expires_in_secs: i64,
@@ -102,8 +104,7 @@ impl DeviceCode {
             scopes,
             status: DeviceCodeStatus::Pending,
             user_id: None,
-            access_token: None,
-            refresh_token: None,
+            device_public_key: Some(device_public_key),
             verification_uri,
             verification_uri_complete,
             expires_at: now + Duration::seconds(expires_in_secs),
@@ -124,8 +125,7 @@ impl DeviceCode {
         scopes: String,
         status: DeviceCodeStatus,
         user_id: Option<Uuid>,
-        access_token: Option<String>,
-        refresh_token: Option<String>,
+        device_public_key: Option<[u8; 32]>,
         verification_uri: String,
         verification_uri_complete: Option<String>,
         expires_at: DateTime<Utc>,
@@ -142,8 +142,7 @@ impl DeviceCode {
             scopes,
             status,
             user_id,
-            access_token,
-            refresh_token,
+            device_public_key,
             verification_uri,
             verification_uri_complete,
             expires_at,
@@ -184,12 +183,8 @@ impl DeviceCode {
         self.user_id
     }
 
-    pub fn access_token(&self) -> Option<&str> {
-        self.access_token.as_deref()
-    }
-
-    pub fn refresh_token(&self) -> Option<&str> {
-        self.refresh_token.as_deref()
+    pub fn device_public_key(&self) -> Option<&[u8; 32]> {
+        self.device_public_key.as_ref()
     }
 
     pub fn verification_uri(&self) -> &str {
@@ -248,12 +243,10 @@ impl DeviceCode {
         self.last_poll_at = Some(Utc::now());
     }
 
-    /// Authorize this device code for a specific user, storing the tokens.
-    pub fn authorize(&mut self, user_id: Uuid, access_token: String, refresh_token: String) {
+    /// Autorise le flux pour `user_id` (aucun jeton : la clé d'appareil est enregistrée).
+    pub fn authorize(&mut self, user_id: Uuid) {
         self.status = DeviceCodeStatus::Authorized;
         self.user_id = Some(user_id);
-        self.access_token = Some(access_token);
-        self.refresh_token = Some(refresh_token);
         self.authorized_at = Some(Utc::now());
     }
 

@@ -9,8 +9,9 @@
 //! Implements the WOPI host endpoints called by document editors
 //! (Collabora Online, OnlyOffice) to access and modify files.
 //!
-//! These endpoints use `?access_token=` query parameter auth, NOT the
-//! regular JWT auth middleware.
+//! These endpoints use `?access_token=` query parameter auth (exception
+//! imposée par WOPI : jeton ≤ 15 min, lié au fichier et à l'utilisateur, clé
+//! propre au processus — voir `wopi_token_service`), NOT the session middleware.
 //!
 //! Reference: doc/wopi-integration.md
 
@@ -77,7 +78,7 @@ async fn check_file_info(
 ) -> Response {
     let claims = match state
         .token_service
-        .validate_token(&token_query.access_token)
+        .validate_for_file(&token_query.access_token, &file_id)
     {
         Ok(c) => c,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
@@ -134,7 +135,7 @@ async fn get_file(
 ) -> Response {
     let claims = match state
         .token_service
-        .validate_token(&token_query.access_token)
+        .validate_for_file(&token_query.access_token, &file_id)
     {
         Ok(c) => c,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
@@ -177,7 +178,7 @@ async fn put_file(
 
     let claims = match state
         .token_service
-        .validate_token(&token_query.access_token)
+        .validate_for_file(&token_query.access_token, &file_id)
     {
         Ok(c) => c,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
@@ -311,7 +312,7 @@ async fn file_operations(
 ) -> Response {
     let claims = match state
         .token_service
-        .validate_token(&token_query.access_token)
+        .validate_for_file(&token_query.access_token, &file_id)
     {
         Ok(c) => c,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
@@ -497,7 +498,7 @@ async fn host_page(
 ) -> Response {
     let claims = match state
         .token_service
-        .validate_token(&token_query.access_token)
+        .validate_for_file(&token_query.access_token, &file_id)
     {
         Ok(c) => c,
         Err(_) => return StatusCode::UNAUTHORIZED.into_response(),
@@ -538,15 +539,10 @@ async fn host_page(
         _ => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     };
 
-    let (token, ttl) = match state.token_service.generate_token(
-        &file_id,
-        &claims.sub,
-        &claims.username,
-        claims.can_write,
-    ) {
-        Ok(t) => t,
-        Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-    };
+    // Pas de nouveau jeton frappé à partir d'un jeton (pas de prolongation en
+    // chaîne) : la page réutilise le jeton reçu et son échéance.
+    let token = token_query.access_token.clone();
+    let ttl = claims.exp * 1000;
 
     // Escape HTML entities in file name
     let safe_name = file

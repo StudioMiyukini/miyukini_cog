@@ -14,21 +14,36 @@ use crate::application::services::folder_service::FolderService;
 use crate::common::config::AppConfig;
 use crate::common::di::AuthServices;
 use crate::infrastructure::repositories::{SessionPgRepository, UserPgRepository};
-use crate::infrastructure::services::jwt_service::JwtTokenService;
 use crate::infrastructure::services::oidc_service::OidcService;
 use crate::infrastructure::services::password_hasher::Argon2PasswordHasher;
+use crate::infrastructure::services::session_token_service::SessionTokenService;
 
 pub async fn create_auth_services(
     config: &AppConfig,
     pool: Arc<PgPool>,
     folder_service: Option<Arc<FolderService>>,
 ) -> Result<AuthServices> {
-    // Create JWT token service (TokenServicePort implementation)
-    let token_service: Arc<JwtTokenService> = Arc::new(JwtTokenService::new(
-        config.auth.jwt_secret.clone(),
+    // Lot 2 : sessions d'accès opaques côté serveur (aucun secret de signature).
+    let token_service: Arc<SessionTokenService> = Arc::new(SessionTokenService::new(
         config.auth.access_token_expiry_secs,
         config.auth.refresh_token_expiry_secs,
     ));
+    {
+        // Purge périodique des sessions d'accès expirées.
+        let ts = Arc::downgrade(&token_service);
+        tokio::spawn(async move {
+            let mut tick = tokio::time::interval(std::time::Duration::from_secs(300));
+            loop {
+                tick.tick().await;
+                match ts.upgrade() {
+                    Some(ts) => {
+                        ts.purge_expired();
+                    }
+                    None => break,
+                }
+            }
+        });
+    }
 
     // Create password hashing service with configured Argon2id parameters
     let password_hasher = Arc::new(Argon2PasswordHasher::new(

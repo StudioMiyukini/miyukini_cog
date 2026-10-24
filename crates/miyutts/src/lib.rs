@@ -11,13 +11,17 @@
 //! - selection de preset hardware
 //! - routeur HTTP local (`/api/health`, `/api/tts/voices`, `/api/tts`, `/api/tts/wav`)
 //!
-//! Securite (R-010) : jeton bearer compare en temps constant, origine locale
-//! stricte, corps borne, et [`validate_bind`] qui refuse une ecoute hors loopback
-//! sans jeton. Le controle s'execute en middleware, avant la lecture du corps.
+//! Securite (R-010, lot 2 #10) : requetes signees par des appelants epingles
+//! (aucun secret partage ; usage [`USAGE`]), origine locale stricte, corps borne,
+//! et [`validate_bind`] qui refuse une ecoute hors loopback sans appelant epingle.
+//! Le controle s'execute en middleware : en-tetes verifies avant la lecture du corps.
 
 mod securite;
 
 use std::net::SocketAddr;
+use std::sync::Arc;
+
+use miyauth::http::service::GardeSignee;
 
 use axum::{
     extract::{DefaultBodyLimit, Request, State},
@@ -30,7 +34,7 @@ use axum::{
 use base64::Engine as _;
 use serde::{Deserialize, Serialize};
 
-pub use securite::{is_local_origin, SecurityConfigError};
+pub use securite::{is_local_origin, SecurityConfigError, USAGE};
 
 /// Taille max du corps HTTP des routes TTS (octets). Au-dela : 413.
 pub const MAX_TTS_BODY_BYTES: usize = 64 * 1024;
@@ -175,27 +179,25 @@ pub struct TtsState {
 
 /// Configuration securite de MiyuTTS.
 ///
-/// `bearer_token` : s'il est present, il est exige sur toute route sauf `/api/health`,
-/// y compris en loopback. Son absence n'est admise qu'en ecoute loopback
-/// (voir [`validate_bind`]). Un jeton vide refuse toute requete.
-#[derive(Clone, Default)]
+/// `appelants` : garde des requetes signees (cles publiques des appelants
+/// epingles, usage [`USAGE`]), exigee sur toute route sauf `/api/health`, y
+/// compris en loopback. Aucune cle epinglee : toute requete protegee est
+/// refusee (503). Hors loopback, au moins une cle est exigee ([`validate_bind`]).
+#[derive(Clone, Default, Debug)]
 pub struct TtsSecurity {
-    /// Token bearer attendu (obligatoire hors loopback).
-    pub bearer_token: Option<String>,
+    /// Appelants autorises (cles epinglees + registre anti-rejeu).
+    pub appelants: Arc<GardeSignee>,
     /// Restreint les requetes avec `Origin` non-local.
     pub enforce_local_origin: bool,
 }
 
-impl std::fmt::Debug for TtsSecurity {
-    // Le jeton n'est jamais affiche (C-25).
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TtsSecurity")
-            .field(
-                "bearer_token",
-                &self.bearer_token.as_ref().map(|_| "<masque>"),
-            )
-            .field("enforce_local_origin", &self.enforce_local_origin)
-            .finish()
+impl TtsSecurity {
+    /// Securite avec les cles publiques Ed25519 des appelants autorises.
+    pub fn avec_appelants(cles: impl IntoIterator<Item = [u8; 32]>, enforce_local_origin: bool) -> Self {
+        Self {
+            appelants: Arc::new(GardeSignee::new(cles)),
+            enforce_local_origin,
+        }
     }
 }
 
@@ -203,8 +205,7 @@ impl std::fmt::Debug for TtsSecurity {
 ///
 /// A appeler avant d'ouvrir le port. Refuse (fail-closed) :
 /// - une adresse non analysable comme `IP:port` ;
-/// - un jeton configure mais vide ;
-/// - une adresse non-loopback sans jeton.
+/// - une adresse non-loopback sans appelant epingle.
 ///
 /// # Errors
 /// [`SecurityConfigError`] decrivant la cause du refus.
@@ -212,7 +213,7 @@ pub fn validate_bind(
     bind_addr: &str,
     security: &TtsSecurity,
 ) -> Result<SocketAddr, SecurityConfigError> {
-    securite::check_bind(bind_addr, security.bearer_token.as_deref())
+    securite::check_bind(bind_addr, &security.appelants)
 }
 
 impl Default for TtsState {
@@ -221,7 +222,7 @@ impl Default for TtsState {
             primary_engine: TtsEngine::KokoroOnnx,
             fallback_engine: TtsEngine::EspeakNg,
             security: TtsSecurity {
-                bearer_token: None,
+                appelants: Arc::default(),
                 enforce_local_origin: true,
             },
         }
@@ -236,7 +237,7 @@ pub fn router() -> Router {
 /// Construit un routeur HTTP MiyuTTS v1 avec etat personnalise.
 ///
 /// `/api/health` reste public ; les autres routes passent par le controle
-/// origine + jeton avant toute lecture du corps.
+/// origine + requete signee (en-tetes avant lecture du corps).
 pub fn router_with_state(state: TtsState) -> Router {
     let protected = Router::new()
         .route("/api/tts/voices", get(voices_handler))
@@ -259,11 +260,14 @@ async fn security_middleware(
     next: Next,
 ) -> Response {
     match securite::check_request(
-        req.headers(),
-        security.bearer_token.as_deref(),
+        req,
+        &security.appelants,
         security.enforce_local_origin,
-    ) {
-        Ok(()) => next.run(req).await,
+        MAX_TTS_BODY_BYTES,
+    )
+    .await
+    {
+        Ok(req) => next.run(req).await,
         Err(status) => status.into_response(),
     }
 }
@@ -470,6 +474,33 @@ mod tests {
     use axum::{body::Body, http::Request};
     use serde_json::json;
     use tower::util::ServiceExt;
+    use miyauth::http::service::entetes_signees;
+    use miyusceau::CleSignature;
+
+    /// Cle de l'appelant de test.
+    fn test_key() -> CleSignature {
+        CleSignature::depuis_graine(&[7_u8; 32])
+    }
+
+    /// Securite epinglant la cle de test.
+    fn test_security(enforce_local_origin: bool) -> TtsSecurity {
+        TtsSecurity::avec_appelants([test_key().cle_publique()], enforce_local_origin)
+    }
+
+    /// Signe une requete avec `cle` (corps lu puis remis).
+    async fn sign_with(cle: &CleSignature, req: Request<Body>) -> Request<Body> {
+        let (mut parts, body) = req.into_parts();
+        let bytes = axum::body::to_bytes(body, usize::MAX).await.unwrap();
+        let path = parts.uri.path_and_query().unwrap().as_str().to_string();
+        for (name, value) in entetes_signees(cle, USAGE, parts.method.as_str(), &path, &bytes) {
+            parts.headers.insert(name, value.parse().unwrap());
+        }
+        Request::from_parts(parts, Body::from(bytes))
+    }
+
+    async fn signed(req: Request<Body>) -> Request<Body> {
+        sign_with(&test_key(), req).await
+    }
 
     #[test]
     fn preset_selection_compact_on_low_ram() {
@@ -482,22 +513,18 @@ mod tests {
 
     #[tokio::test]
     async fn voices_route_returns_ok() {
-        let app = router();
-        let response = app
-            .oneshot(
-                Request::builder()
-                    .uri("/api/tts/voices")
-                    .body(Body::empty())
-                    .unwrap(),
-            )
-            .await
+        let app = secured_app(true);
+        let req = Request::builder()
+            .uri("/api/tts/voices")
+            .body(Body::empty())
             .unwrap();
+        let response = app.oneshot(signed(req).await).await.unwrap();
         assert_eq!(response.status(), axum::http::StatusCode::OK);
     }
 
     #[tokio::test]
     async fn wav_route_returns_audio_content_type() {
-        let app = router();
+        let app = secured_app(true);
         let req = Request::builder()
             .method("POST")
             .uri("/api/tts/wav")
@@ -514,37 +541,29 @@ mod tests {
             ))
             .unwrap();
 
-        let response = app.oneshot(req).await.unwrap();
+        let response = app.oneshot(signed(req).await).await.unwrap();
         assert_eq!(response.status(), axum::http::StatusCode::OK);
         assert_eq!(response.headers().get("content-type").unwrap(), "audio/wav");
     }
 
     #[tokio::test]
-    async fn tts_requires_bearer_when_configured() {
+    async fn tts_requires_signature_when_configured() {
+        let status = post_tts_raw(secured_app(false), &[], tts_body("Bonjour")).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        // Ancien jeton bearer : sans effet.
+        let status = post_tts_raw(secured_app(false), &[("authorization", "Bearer secret")], tts_body("Bonjour")).await;
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn no_pinned_caller_refuses_everything() {
+        // Pas de cle epinglee : refus (503), meme signee, meme en loopback.
         let app = router_with_state(TtsState {
-            security: TtsSecurity {
-                bearer_token: Some("secret".to_string()),
-                enforce_local_origin: false,
-            },
+            security: TtsSecurity { enforce_local_origin: false, ..TtsSecurity::default() },
             ..TtsState::default()
         });
-        let req = Request::builder()
-            .method("POST")
-            .uri("/api/tts")
-            .header("content-type", "application/json")
-            .body(Body::from(
-                json!({
-                    "text": "Bonjour",
-                    "voice": "fr_female_01_compact",
-                    "format": "wav",
-                    "language": "fr"
-                })
-                .to_string(),
-            ))
-            .unwrap();
-
-        let response = app.oneshot(req).await.unwrap();
-        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+        assert_eq!(post_tts(app.clone(), &[], tts_body("Bonjour")).await, StatusCode::SERVICE_UNAVAILABLE);
+        assert_eq!(post_tts_raw(app, &[], tts_body("Bonjour")).await, StatusCode::SERVICE_UNAVAILABLE);
     }
 
     #[tokio::test]
@@ -571,41 +590,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn tts_accepts_valid_bearer_and_local_origin() {
-        let app = router_with_state(TtsState {
-            security: TtsSecurity {
-                bearer_token: Some("secret".to_string()),
-                enforce_local_origin: true,
-            },
-            ..TtsState::default()
-        });
-        let req = Request::builder()
-            .method("POST")
-            .uri("/api/tts")
-            .header("content-type", "application/json")
-            .header("origin", "http://localhost:8080")
-            .header("authorization", "Bearer secret")
-            .body(Body::from(
-                json!({
-                    "text": "Bonjour",
-                    "voice": "fr_female_01_compact",
-                    "format": "wav",
-                    "language": "fr"
-                })
-                .to_string(),
-            ))
-            .unwrap();
-
-        let response = app.oneshot(req).await.unwrap();
-        assert_eq!(response.status(), StatusCode::OK);
+    async fn tts_accepts_signed_request_and_local_origin() {
+        let status = post_tts(secured_app(true), &[("origin", "http://localhost:8080")], tts_body("Bonjour")).await;
+        assert_eq!(status, StatusCode::OK);
     }
 
     fn secured_app(enforce_local_origin: bool) -> Router {
         router_with_state(TtsState {
-            security: TtsSecurity {
-                bearer_token: Some("secret".to_string()),
-                enforce_local_origin,
-            },
+            security: test_security(enforce_local_origin),
             ..TtsState::default()
         })
     }
@@ -620,7 +612,7 @@ mod tests {
         .to_string()
     }
 
-    async fn post_tts(app: Router, headers: &[(&str, &str)], body: String) -> StatusCode {
+    fn tts_request(headers: &[(&str, &str)], body: String) -> Request<Body> {
         let mut builder = Request::builder()
             .method("POST")
             .uri("/api/tts")
@@ -628,46 +620,67 @@ mod tests {
         for (k, v) in headers {
             builder = builder.header(*k, *v);
         }
-        app.oneshot(builder.body(Body::from(body)).unwrap())
-            .await
-            .unwrap()
-            .status()
+        builder.body(Body::from(body)).unwrap()
+    }
+
+    /// POST `/api/tts` signe par la cle de test.
+    async fn post_tts(app: Router, headers: &[(&str, &str)], body: String) -> StatusCode {
+        let req = signed(tts_request(headers, body)).await;
+        app.oneshot(req).await.unwrap().status()
+    }
+
+    /// POST `/api/tts` non signe.
+    async fn post_tts_raw(app: Router, headers: &[(&str, &str)], body: String) -> StatusCode {
+        app.oneshot(tts_request(headers, body)).await.unwrap().status()
     }
 
     #[test]
-    fn startup_refuses_non_loopback_without_token() {
+    fn startup_refuses_non_loopback_without_caller() {
         let err = validate_bind("0.0.0.0:3004", &TtsSecurity::default()).unwrap_err();
-        assert!(matches!(err, SecurityConfigError::TokenRequired(_)));
-        let ok = validate_bind(
-            "0.0.0.0:3004",
-            &TtsSecurity {
-                bearer_token: Some("secret".into()),
-                enforce_local_origin: true,
-            },
-        );
-        assert!(ok.is_ok());
+        assert!(matches!(err, SecurityConfigError::CallerRequired(_)));
+        assert!(validate_bind("0.0.0.0:3004", &test_security(true)).is_ok());
         assert!(validate_bind("127.0.0.1:3004", &TtsSecurity::default()).is_ok());
     }
 
     #[tokio::test]
-    async fn bad_token_is_401() {
-        let status = post_tts(
-            secured_app(false),
-            &[("authorization", "Bearer secreu")],
-            tts_body("Bonjour"),
-        )
-        .await;
-        assert_eq!(status, StatusCode::UNAUTHORIZED);
+    async fn unknown_key_replay_stale_and_tampered_are_401() {
+        let app = secured_app(false);
+        let body = || tts_body("Bonjour");
+        // Cle inconnue.
+        let other = CleSignature::generer();
+        let req = sign_with(&other, tts_request(&[], body())).await;
+        assert_eq!(app.clone().oneshot(req).await.unwrap().status(), StatusCode::UNAUTHORIZED);
+        // Rejeu de la meme requete signee.
+        let req = signed(tts_request(&[], body())).await;
+        let headers = req.headers().clone();
+        assert_eq!(app.clone().oneshot(req).await.unwrap().status(), StatusCode::OK);
+        let mut replay = tts_request(&[], body());
+        replay.headers_mut().extend(headers);
+        assert_eq!(app.clone().oneshot(replay).await.unwrap().status(), StatusCode::UNAUTHORIZED);
+        // Corps altere.
+        let req = signed(tts_request(&[], body())).await;
+        let mut tampered = tts_request(&[], tts_body("Bonsoir"));
+        tampered.headers_mut().extend(req.headers().clone());
+        assert_eq!(app.clone().oneshot(tampered).await.unwrap().status(), StatusCode::UNAUTHORIZED);
+        // Horodatage perime.
+        let old = miyauth::http::signer_requete(
+            &test_key(),
+            USAGE,
+            "POST",
+            "/api/tts",
+            body().as_bytes(),
+            miyauth::http::service::maintenant_unix() - 600,
+        );
+        let mut stale = tts_request(&[], body());
+        for (name, value) in old.en_entetes() {
+            stale.headers_mut().insert(name, value.parse().unwrap());
+        }
+        assert_eq!(app.oneshot(stale).await.unwrap().status(), StatusCode::UNAUTHORIZED);
     }
 
     #[tokio::test]
-    async fn good_token_is_200() {
-        let status = post_tts(
-            secured_app(false),
-            &[("authorization", "Bearer secret")],
-            tts_body("Bonjour"),
-        )
-        .await;
+    async fn signed_request_is_200() {
+        let status = post_tts(secured_app(false), &[], tts_body("Bonjour")).await;
         assert_eq!(status, StatusCode::OK);
     }
 
@@ -676,7 +689,7 @@ mod tests {
         for origin in ["http://localhost.evil.com", "http://[::1].evil.com"] {
             let status = post_tts(
                 secured_app(true),
-                &[("origin", origin), ("authorization", "Bearer secret")],
+                &[("origin", origin)],
                 tts_body("Bonjour"),
             )
             .await;
@@ -688,10 +701,7 @@ mod tests {
     async fn local_origin_with_port_is_accepted() {
         let status = post_tts(
             secured_app(true),
-            &[
-                ("origin", "http://localhost:5173"),
-                ("authorization", "Bearer secret"),
-            ],
+            &[("origin", "http://localhost:5173")],
             tts_body("Bonjour"),
         )
         .await;
@@ -703,7 +713,7 @@ mod tests {
         let text = "a".repeat(MAX_TTS_BODY_BYTES + 1);
         let status = post_tts(
             secured_app(false),
-            &[("authorization", "Bearer secret")],
+            &[],
             tts_body(&text),
         )
         .await;
@@ -715,7 +725,7 @@ mod tests {
         let text = "a".repeat(MAX_TTS_TEXT_CHARS + 1);
         let status = post_tts(
             secured_app(false),
-            &[("authorization", "Bearer secret")],
+            &[],
             tts_body(&text),
         )
         .await;
@@ -723,7 +733,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn voices_require_token_and_health_stays_public() {
+    async fn voices_require_signature_and_health_stays_public() {
         let voices = secured_app(false)
             .oneshot(
                 Request::builder()
@@ -746,29 +756,12 @@ mod tests {
         assert_eq!(health.status(), StatusCode::OK);
     }
 
-    #[test]
-    fn debug_masks_token() {
-        let sec = TtsSecurity {
-            bearer_token: Some("super-secret".into()),
-            enforce_local_origin: true,
-        };
-        let shown = format!(
-            "{:?}",
-            TtsState {
-                security: sec,
-                ..TtsState::default()
-            }
-        );
-        assert!(!shown.contains("super-secret"));
-    }
+
 
     #[tokio::test]
     async fn latency_snapshot_three_presets() {
         let app = router_with_state(TtsState {
-            security: TtsSecurity {
-                bearer_token: None,
-                enforce_local_origin: false,
-            },
+            security: test_security(false),
             ..TtsState::default()
         });
 
@@ -789,6 +782,7 @@ mod tests {
                 ))
                 .unwrap();
 
+            let req = signed(req).await;
             let start = std::time::Instant::now();
             let response = app.clone().oneshot(req).await.unwrap();
             let elapsed_ms = start.elapsed().as_millis();

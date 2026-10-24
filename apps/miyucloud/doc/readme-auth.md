@@ -1,6 +1,6 @@
 # 32 - Authentication
 
-The auth system uses JWT (JSON Web Tokens) with Argon2id password hashing. Features include registration, login, role-based access control (Admin/User), token refresh, storage quotas, and file/folder ownership.
+The auth system uses opaque server-side sessions (no signing secret; lot 2) with Argon2id password hashing; native clients use MiyuVisa + proof of possession, devices enrolled through RFC 8628 sign each request with their Ed25519 key. Features include registration, login, role-based access control (Admin/User), token refresh, storage quotas, and file/folder ownership.
 
 ## API Endpoints
 
@@ -172,7 +172,7 @@ The auth system uses these tables in the **auth** schema:
 ## Implementation Details
 
 - **Password hashing**: Argon2id with memory cost 65536 (64MB), time cost 3, parallelism 4
-- **JWT secret**: configured via **MIYUCLOUD_JWT_SECRET** environment variable
+- **No shared secret**: `MIYUCLOUD_JWT_SECRET` is obsolete and ignored; sessions are random 256-bit identifiers resolved server-side
 - **Token expiry**: access token 1 hour, refresh token 30 days (configurable)
 - **Database connection**: PostgreSQL with connection pooling
 - **Middleware**: auth middleware for protected routes
@@ -180,7 +180,7 @@ The auth system uses these tables in the **auth** schema:
 ## Security
 
 - Passwords stored only as Argon2id hashes, never in plain text
-- JWT tokens signed with a secret key
+- Session identifiers are random and revocable (logout, password change, deactivation)
 - Refresh tokens can be revoked to force logout
 - Rate limiting should be applied to login attempts
 - Password policy requires at least 8 characters

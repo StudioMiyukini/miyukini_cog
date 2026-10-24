@@ -20,6 +20,10 @@ use crate::interfaces::middleware::auth::CurrentUser;
 pub enum NextcloudAuthError {
     #[error("Unauthorized")]
     Unauthorized,
+    #[error("HTTPS required")]
+    TlsRequired,
+    #[error("Too many failures")]
+    TooManyFailures,
     #[error("Nextcloud services unavailable")]
     ServiceUnavailable,
     #[error("Internal error: {0}")]
@@ -35,6 +39,14 @@ impl IntoResponse for NextcloudAuthError {
                 "Unauthorized",
             )
                 .into_response(),
+            NextcloudAuthError::TlsRequired => {
+                (StatusCode::FORBIDDEN, "Basic authentication requires HTTPS").into_response()
+            }
+            NextcloudAuthError::TooManyFailures => {
+                crate::interfaces::middleware::rate_limit::too_many_requests(
+                    crate::interfaces::middleware::basic_policy::FENETRE_ECHECS_SECS,
+                )
+            }
             NextcloudAuthError::ServiceUnavailable => {
                 (StatusCode::SERVICE_UNAVAILABLE, "Nextcloud unavailable").into_response()
             }
@@ -64,6 +76,30 @@ pub async fn basic_auth_middleware(
             );
             NextcloudAuthError::Unauthorized
         })?;
+
+    // #19 : exception Basic encadrée — TLS obligatoire (sauf boucle locale) et
+    // échecs limités par IP (en plus du verrouillage par compte).
+    use crate::interfaces::middleware::basic_policy;
+    let peer = request
+        .extensions()
+        .get::<axum::extract::ConnectInfo<std::net::SocketAddr>>()
+        .map(|c| c.0.ip());
+    if !basic_policy::transport_securise(
+        state.core.config.tls.enabled,
+        peer,
+        headers
+            .get("x-forwarded-proto")
+            .and_then(|v| v.to_str().ok()),
+        crate::interfaces::middleware::rate_limit::trusted_proxies(),
+    ) {
+        tracing::warn!("[NC] Basic auth refused over plain HTTP (peer {:?})", peer);
+        return Err(NextcloudAuthError::TlsRequired);
+    }
+    let ip = crate::interfaces::middleware::rate_limit::extract_client_ip(&request);
+    if basic_policy::echecs_basic().bloque(&ip) {
+        tracing::warn!(ip = %ip, "[NC] too many Basic auth failures from this IP");
+        return Err(NextcloudAuthError::TooManyFailures);
+    }
 
     let (username, password) =
         parse_basic_auth(auth_header).ok_or(NextcloudAuthError::Unauthorized)?;
@@ -117,6 +153,7 @@ pub async fn basic_auth_middleware(
             if let Some(auth_svc) = state.auth_service.as_ref() {
                 auth_svc.login_lockout.record_failure(&username);
             }
+            basic_policy::echecs_basic().noter_echec(&ip);
             Err(NextcloudAuthError::Unauthorized)
         }
     }

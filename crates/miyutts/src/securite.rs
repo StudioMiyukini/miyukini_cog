@@ -2,24 +2,35 @@
 //! @do     securiser_endpoint_tts
 //! @role   securite
 //! @layer  core
-//! @human  miyutts — module « securite » : jeton bearer, origine locale stricte, adresse d'ecoute.
+//! @human  miyutts — module « securite » : requetes signees par appelants epingles, origine locale stricte, adresse d'ecoute.
 
-//! Controles de securite des points d'acces MiyuTTS (R-010, C-12, C-21, C-22).
+//! Controles de securite des points d'acces MiyuTTS (R-010, C-12, C-21, C-22, lot 2 #10).
 //!
-//! - Jeton bearer compare en temps constant (`subtle`).
+//! - Plus de jeton bearer partage : chaque appelant signe ses requetes avec sa
+//!   propre cle Ed25519 (`miyauth::http::service`, usage [`USAGE`]) et le service
+//!   epingle les cles publiques autorisees. Ordre fail-closed : origine, en-tetes
+//!   (cle epinglee, horodatage +/- 300 s, nonce neuf) **avant** la lecture du
+//!   corps, puis signature sur le corps lu (borne).
+//! - Aucune cle epinglee : toute requete protegee est refusee (503), y compris
+//!   en loopback.
 //! - Origine navigateur analysee (schema + hote exact + port optionnel) :
 //!   seuls `localhost`, `127.0.0.1` et `[::1]` sont locaux.
-//! - Adresse d'ecoute : hors loopback, un jeton est obligatoire, sinon refus de demarrer.
-//!
-//! Tout echec de controle est un refus (fail-closed).
+//! - Adresse d'ecoute : hors loopback, au moins un appelant epingle est
+//!   obligatoire, sinon refus de demarrer.
 //!
 //! Module duplique a l'identique dans `miyustt` et `miyutts` (toolkits independants) :
 //! toute correction doit etre reportee dans les deux.
 
 use std::net::SocketAddr;
 
+use axum::body::Body;
+use axum::extract::Request;
 use axum::http::{header, HeaderMap, StatusCode};
-use subtle::ConstantTimeEq;
+use miyauth::http::service::{maintenant_unix, GardeSignee};
+use miyauth::http::{ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE};
+
+/// Usage signe des requetes vers MiyuTTS (separation de domaine).
+pub const USAGE: &str = "miyutts/synthese";
 
 /// Erreurs de configuration de securite detectees au demarrage.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -27,69 +38,67 @@ pub enum SecurityConfigError {
     /// Adresse d'ecoute non analysable (nom d'hote, format invalide).
     #[error("adresse d'ecoute invalide (IP:port attendu) : {0}")]
     InvalidBind(String),
-    /// Jeton configure mais vide.
-    #[error("jeton bearer configure mais vide")]
-    EmptyToken,
-    /// Ecoute hors loopback sans jeton : demarrage refuse.
-    #[error("ecoute non-loopback {0} sans jeton bearer : demarrage refuse")]
-    TokenRequired(String),
+    /// Ecoute hors loopback sans appelant epingle : demarrage refuse.
+    #[error("ecoute non-loopback {0} sans appelant epingle : demarrage refuse")]
+    CallerRequired(String),
 }
 
-/// Valide le couple (adresse d'ecoute, jeton) avant d'ouvrir un port.
+/// Valide le couple (adresse d'ecoute, appelants) avant d'ouvrir un port.
 ///
 /// - Adresse non analysable comme `IP:port` → refus (pas de resolution DNS).
-/// - Jeton present mais vide → refus.
-/// - Adresse non-loopback sans jeton → refus.
-pub(crate) fn check_bind(
-    bind_addr: &str,
-    bearer_token: Option<&str>,
-) -> Result<SocketAddr, SecurityConfigError> {
+/// - Adresse non-loopback sans appelant epingle → refus.
+pub(crate) fn check_bind(bind_addr: &str, garde: &GardeSignee) -> Result<SocketAddr, SecurityConfigError> {
     let addr: SocketAddr = bind_addr
         .parse()
         .map_err(|_| SecurityConfigError::InvalidBind(bind_addr.to_string()))?;
-    let token_present = match bearer_token {
-        Some(token) if token.trim().is_empty() => return Err(SecurityConfigError::EmptyToken),
-        Some(_) => true,
-        None => false,
-    };
-    if !addr.ip().to_canonical().is_loopback() && !token_present {
-        return Err(SecurityConfigError::TokenRequired(bind_addr.to_string()));
+    if !addr.ip().to_canonical().is_loopback() && !garde.est_configuree() {
+        return Err(SecurityConfigError::CallerRequired(bind_addr.to_string()));
     }
     Ok(addr)
 }
 
-/// Controle d'une requete : origine puis jeton.
-pub(crate) fn check_request(
-    headers: &HeaderMap,
-    bearer_token: Option<&str>,
+/// Controle d'une requete : origine, puis requete signee par un appelant epingle.
+/// Rend la requete reconstruite (corps lu, borne a `max_body`) si elle est admise.
+pub(crate) async fn check_request(
+    req: Request,
+    garde: &GardeSignee,
     enforce_local_origin: bool,
-) -> Result<(), StatusCode> {
+    max_body: usize,
+) -> Result<Request, StatusCode> {
     if enforce_local_origin {
-        check_origin(headers)?;
+        check_origin(req.headers())?;
     }
-    check_bearer(headers, bearer_token)
-}
-
-fn check_bearer(headers: &HeaderMap, bearer_token: Option<&str>) -> Result<(), StatusCode> {
-    let Some(expected) = bearer_token else {
-        return Ok(());
-    };
-    // Jeton vide configure : aucune requete ne peut s'authentifier (fail-closed).
-    if expected.trim().is_empty() {
-        return Err(StatusCode::UNAUTHORIZED);
+    if !garde.est_configuree() {
+        return Err(StatusCode::SERVICE_UNAVAILABLE);
     }
-    let provided = headers
-        .get(header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|v| v.strip_prefix("Bearer "));
-    match provided {
-        Some(token) if bool::from(token.as_bytes().ct_eq(expected.as_bytes())) => Ok(()),
-        _ => Err(StatusCode::UNAUTHORIZED),
-    }
+    let now = maintenant_unix();
+    let headers = req.headers();
+    let value = |n: &str| headers.get(n).and_then(|v| v.to_str().ok());
+    let signed = garde
+        .controler_entetes(
+            value(ENTETE_SIGNATAIRE),
+            value(ENTETE_HORODATAGE),
+            value(ENTETE_NONCE),
+            value(ENTETE_SIGNATURE),
+            now,
+        )
+        .map_err(|r| StatusCode::from_u16(r.statut()).unwrap_or(StatusCode::UNAUTHORIZED))?;
+    let (parts, body) = req.into_parts();
+    let body = axum::body::to_bytes(body, max_body)
+        .await
+        .map_err(|_| StatusCode::PAYLOAD_TOO_LARGE)?;
+    let path = parts
+        .uri
+        .path_and_query()
+        .map_or_else(|| parts.uri.path(), |pq| pq.as_str());
+    garde
+        .verifier(&signed, USAGE, parts.method.as_str(), path, &body, now)
+        .map_err(|r| StatusCode::from_u16(r.statut()).unwrap_or(StatusCode::UNAUTHORIZED))?;
+    Ok(Request::from_parts(parts, Body::from(body)))
 }
 
 fn check_origin(headers: &HeaderMap) -> Result<(), StatusCode> {
-    // Sans `Origin` : client non navigateur, accepte (le jeton reste exige s'il est configure).
+    // Sans `Origin` : client non navigateur, accepte (la signature reste exigee).
     let Some(origin) = headers.get(header::ORIGIN) else {
         return Ok(());
     };
@@ -190,50 +199,32 @@ mod tests {
         }
     }
 
-    #[test]
-    fn bind_non_loopback_sans_jeton_refuse() {
-        assert_eq!(
-            check_bind("0.0.0.0:3004", None),
-            Err(SecurityConfigError::TokenRequired("0.0.0.0:3004".into()))
-        );
-        assert!(check_bind("192.168.1.10:3004", None).is_err());
-        assert!(check_bind("[::]:3004", None).is_err());
+    fn garde_avec_appelant() -> GardeSignee {
+        GardeSignee::new([miyusceau::CleSignature::generer().cle_publique()])
     }
 
     #[test]
-    fn bind_jeton_vide_refuse() {
+    fn bind_non_loopback_sans_appelant_refuse() {
         assert_eq!(
-            check_bind("127.0.0.1:3004", Some("  ")),
-            Err(SecurityConfigError::EmptyToken)
+            check_bind("0.0.0.0:3004", &GardeSignee::default()),
+            Err(SecurityConfigError::CallerRequired("0.0.0.0:3004".into()))
         );
-        assert_eq!(
-            check_bind("0.0.0.0:3004", Some("")),
-            Err(SecurityConfigError::EmptyToken)
-        );
+        assert!(check_bind("192.168.1.10:3004", &GardeSignee::default()).is_err());
+        assert!(check_bind("[::]:3004", &GardeSignee::default()).is_err());
     }
 
     #[test]
     fn bind_hote_non_analysable_refuse() {
         assert!(matches!(
-            check_bind("localhost:3004", Some("secret")),
+            check_bind("localhost:3004", &garde_avec_appelant()),
             Err(SecurityConfigError::InvalidBind(_))
         ));
     }
 
     #[test]
-    fn bind_loopback_ou_avec_jeton_accepte() {
-        assert!(check_bind("127.0.0.1:3004", None).is_ok());
-        assert!(check_bind("[::1]:3004", None).is_ok());
-        assert!(check_bind("0.0.0.0:3004", Some("secret")).is_ok());
-    }
-
-    #[test]
-    fn jeton_vide_configure_refuse_toute_requete() {
-        let mut headers = HeaderMap::new();
-        headers.insert(header::AUTHORIZATION, "Bearer ".parse().unwrap());
-        assert_eq!(
-            check_request(&headers, Some(""), false),
-            Err(StatusCode::UNAUTHORIZED)
-        );
+    fn bind_loopback_ou_avec_appelant_accepte() {
+        assert!(check_bind("127.0.0.1:3004", &GardeSignee::default()).is_ok());
+        assert!(check_bind("[::1]:3004", &GardeSignee::default()).is_ok());
+        assert!(check_bind("0.0.0.0:3004", &garde_avec_appelant()).is_ok());
     }
 }

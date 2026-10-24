@@ -42,8 +42,10 @@ impl DeviceCodePgRepository {
             row.try_get("scopes").unwrap_or_default(),
             status,
             row.try_get("user_id").ok(),
-            row.try_get("access_token").ok(),
-            row.try_get("refresh_token").ok(),
+            row.try_get::<Option<Vec<u8>>, _>("device_public_key")
+                .ok()
+                .flatten()
+                .and_then(|v| <[u8; 32]>::try_from(v.as_slice()).ok()),
             row.try_get("verification_uri").unwrap_or_default(),
             row.try_get("verification_uri_complete").ok(),
             row.try_get("expires_at").unwrap_or_default(),
@@ -61,16 +63,16 @@ impl DeviceCodeStoragePort for DeviceCodePgRepository {
             r#"
             INSERT INTO auth.device_codes (
                 id, device_code, user_code, client_name, scopes, status,
-                user_id, access_token, refresh_token,
+                user_id, device_public_key,
                 verification_uri, verification_uri_complete,
                 expires_at, poll_interval_secs, last_poll_at,
                 created_at, authorized_at
             ) VALUES (
                 $1, $2, $3, $4, $5, $6::auth.device_code_status,
-                $7, $8, $9,
-                $10, $11,
-                $12, $13, $14,
-                $15, $16
+                $7, $8,
+                $9, $10,
+                $11, $12, $13,
+                $14, $15
             )
             "#,
         )
@@ -81,8 +83,7 @@ impl DeviceCodeStoragePort for DeviceCodePgRepository {
         .bind(dc.scopes())
         .bind(dc.status().as_str())
         .bind(dc.user_id())
-        .bind(dc.access_token())
-        .bind(dc.refresh_token())
+        .bind(dc.device_public_key().map(|k| k.to_vec()))
         .bind(dc.verification_uri())
         .bind(dc.verification_uri_complete())
         .bind(dc.expires_at())
@@ -107,7 +108,7 @@ impl DeviceCodeStoragePort for DeviceCodePgRepository {
         let row = sqlx::query(
             r#"
             SELECT id, device_code, user_code, client_name, scopes,
-                   status::text AS status, user_id, access_token, refresh_token,
+                   status::text AS status, user_id, device_public_key,
                    verification_uri, verification_uri_complete,
                    expires_at, poll_interval_secs, last_poll_at,
                    created_at, authorized_at
@@ -136,7 +137,7 @@ impl DeviceCodeStoragePort for DeviceCodePgRepository {
         let row = sqlx::query(
             r#"
             SELECT id, device_code, user_code, client_name, scopes,
-                   status::text AS status, user_id, access_token, refresh_token,
+                   status::text AS status, user_id, device_public_key,
                    verification_uri, verification_uri_complete,
                    expires_at, poll_interval_secs, last_poll_at,
                    created_at, authorized_at
@@ -171,18 +172,14 @@ impl DeviceCodeStoragePort for DeviceCodePgRepository {
             UPDATE auth.device_codes SET
                 status = $2::auth.device_code_status,
                 user_id = $3,
-                access_token = $4,
-                refresh_token = $5,
-                last_poll_at = $6,
-                authorized_at = $7
+                last_poll_at = $4,
+                authorized_at = $5
             WHERE id = $1
             "#,
         )
         .bind(dc.id())
         .bind(dc.status().as_str())
         .bind(dc.user_id())
-        .bind(dc.access_token())
-        .bind(dc.refresh_token())
         .bind(dc.last_poll_at())
         .bind(dc.authorized_at())
         .execute(self.pool.as_ref())
@@ -223,7 +220,7 @@ impl DeviceCodeStoragePort for DeviceCodePgRepository {
         let rows = sqlx::query(
             r#"
             SELECT id, device_code, user_code, client_name, scopes,
-                   status::text AS status, user_id, access_token, refresh_token,
+                   status::text AS status, user_id, device_public_key,
                    verification_uri, verification_uri_complete,
                    expires_at, poll_interval_secs, last_poll_at,
                    created_at, authorized_at

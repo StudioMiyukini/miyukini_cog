@@ -4,10 +4,23 @@
 //! @layer  core
 //! @human  central-remote — module « pairing ».
 
-//! Appairage mobile — gestion des devices autorisés et tokens API.
+//! Appairage mobile — gestion des appareils autorisés et de leur révocation.
 //!
-//! Endpoints pour permettre à Central Mobile (Android) de se connecter
-//! au COG Host via 3 modes : Whitelist LAN, Clé API, ou SSH.
+//! L'appairage v2 épingle la clé d'identité Ed25519 de l'appareil : c'est la
+//! racine de confiance des passeports d'appareil émis ensuite par le COG
+//! ([`crate::identite`]). Le mode « clé API » (jeton au porteur de 30 jours) est
+//! retiré (sortie du lot 2, inventaire #2).
+//!
+//! ## Révocation (EX-14, fail-closed)
+//!
+//! [`PairingManager::revoke_device`] retire l'appareil de la liste blanche
+//! persistée **et** ajoute sa clé à la [`ListeRevocation`] du COG (activée par
+//! [`PairingManager::activer_revocations`]), consultée à chaque vérification de
+//! passeport et de visa. Sans liste activée, tout passeport est refusé. Une clé
+//! révoquée ne peut pas être ré-appairée pendant la vie du processus
+//! ([`PairingError::KeyRevoked`]) ; au redémarrage, la révocation durable est
+//! l'absence de la liste blanche (toute clé non appairée est traitée comme
+//! révoquée par [`crate::identite`]).
 //!
 //! ## Appairage v2 : engagement puis révélation (R-026)
 //!
@@ -51,6 +64,8 @@
 //! - Liste blanche persistée (`crate::paired_store`), fail-closed (R-024).
 
 use crate::paired_store::{load_paired_devices, save_paired_devices, PairedStoreError};
+use miyauth::{CibleRevocation, CogId, ErreurRevocation, ListeRevocation, SourceRevocation};
+use miyusceau::{empreinte_cle, Kid};
 use central_remote_protocol::pairing::PairingStatus;
 use miyukini_cog_bridge::{
     identity_fingerprint_hex, pairing_sas_code, parse_identity_key_hex, sas_codes_equal,
@@ -66,10 +81,6 @@ use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use uuid::Uuid;
-
-/// Durée de validité par défaut d'un token API (30 jours).
-pub const DEFAULT_API_TOKEN_TTL_SECS: u64 = 30 * 24 * 3600;
 
 /// Durée de vie par défaut d'une demande d'appairage en attente (R-028).
 pub const DEFAULT_PENDING_TTL: Duration = Duration::from_mins(10);
@@ -123,18 +134,13 @@ pub struct PairedDevice {
     pub last_seen: u64,
     pub mode: String,
     /// Clé publique d'identité E2E ed25519 de l'appareil (hex 32 octets),
-    /// épinglée à l'approbation. Seule clé acceptée au handshake E2E.
+    /// épinglée à l'approbation. Seule clé acceptée au handshake E2E et seule
+    /// clé pour laquelle le COG émet un passeport d'appareil.
     pub e2e_identity_key: String,
-}
-
-/// Token API pour un device mobile.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ApiToken {
-    pub token: String,
-    pub device_name: String,
-    pub created_at: u64,
-    /// Expiration (secondes UNIX). Un token à 0 est considéré comme invalide.
-    pub expires_at: u64,
+    /// Profil Central (titulaire) lié à l'appareil à l'approbation ; `None` =
+    /// titulaire par défaut du COG.
+    #[serde(default)]
+    pub profile_id: Option<String>,
 }
 
 /// Vue d'une demande en attente pour Central (bureau). Ne contient aucun aléa.
@@ -155,12 +161,6 @@ pub struct PendingDevice {
     pub confirmation_code: Option<String>,
     /// Secondes restantes avant expiration.
     pub expires_in_secs: u64,
-}
-
-/// Requête de validation whitelist.
-#[derive(Debug, Deserialize)]
-pub struct WhitelistValidateRequest {
-    pub device_id: String,
 }
 
 /// Erreurs d'appairage (une variante par cause de refus, C-11).
@@ -198,6 +198,8 @@ pub enum PairingError {
     Persistence(String),
     #[error("état d'appairage indisponible")]
     Unavailable,
+    #[error("clé d'appareil révoquée : générer une nouvelle identité avant de ré-appairer")]
+    KeyRevoked,
 }
 
 impl From<PairedStoreError> for PairingError {
@@ -286,53 +288,41 @@ impl PendingBook {
 
 /// Gestionnaire d'appairage mobile.
 pub struct PairingManager {
-    /// Durée de validité des tokens API générés (secondes, jamais 0).
-    api_token_ttl_secs: u64,
     /// Paramètres de la file d'attente.
     config: PairingConfig,
     /// Fichier de persistance de la liste blanche (`None` = mémoire seule).
     store_path: Option<PathBuf>,
     /// Devices whitelistés (device_id → infos).
     whitelist: Mutex<HashMap<String, PairedDevice>>,
-    /// Tokens API actifs (token → infos).
-    api_tokens: Mutex<HashMap<String, ApiToken>>,
-    /// Demandes en attente. Ordre des verrous : `pending` puis `whitelist`.
+    /// Demandes en attente. Ordre des verrous : `pending` puis `whitelist`
+    /// (puis `revocations`).
     pending: Mutex<PendingBook>,
+    /// Liste de révocation du COG (`None` = non activée : tout est refusé).
+    revocations: Mutex<Option<ListeRevocation>>,
 }
 
 impl PairingManager {
     /// Gestionnaire en mémoire seule (tests, outils).
     pub fn new() -> Self {
-        Self::with_token_ttl(DEFAULT_API_TOKEN_TTL_SECS)
-    }
-
-    /// Crée un gestionnaire avec une durée de vie de token API donnée
-    /// (0 → valeur par défaut de 30 jours).
-    pub fn with_token_ttl(ttl_secs: u64) -> Self {
-        Self::with_config(ttl_secs, PairingConfig::default())
+        Self::with_config(PairingConfig::default())
     }
 
     /// Gestionnaire en mémoire avec paramètres de file explicites.
-    pub fn with_config(ttl_secs: u64, config: PairingConfig) -> Self {
+    pub fn with_config(config: PairingConfig) -> Self {
         Self {
-            api_token_ttl_secs: if ttl_secs == 0 { DEFAULT_API_TOKEN_TTL_SECS } else { ttl_secs },
             config: sanitize_config(config),
             store_path: None,
             whitelist: Mutex::new(HashMap::new()),
-            api_tokens: Mutex::new(HashMap::new()),
             pending: Mutex::new(PendingBook::default()),
+            revocations: Mutex::new(None),
         }
     }
 
     /// Gestionnaire à liste blanche persistée dans `store_path`, chargée ici.
     /// Fichier corrompu ⇒ erreur (le serveur refuse de démarrer, R-024).
-    pub fn open(
-        ttl_secs: u64,
-        config: PairingConfig,
-        store_path: PathBuf,
-    ) -> Result<Self, PairedStoreError> {
+    pub fn open(config: PairingConfig, store_path: PathBuf) -> Result<Self, PairedStoreError> {
         let devices = load_paired_devices(&store_path)?;
-        let mut mgr = Self::with_config(ttl_secs, config);
+        let mut mgr = Self::with_config(config);
         mgr.whitelist = Mutex::new(
             devices
                 .into_iter()
@@ -362,42 +352,6 @@ impl PairingManager {
                 device.last_seen = now_secs();
             }
         }
-    }
-
-    /// Valide un token API.
-    pub fn validate_api_token(&self, token: &str) -> bool {
-        self.api_tokens
-            .lock()
-            .is_ok_and(|tokens| {
-                // Fail-closed : un token sans expiration (0) n'est jamais valide.
-                tokens
-                    .get(token)
-                    .is_some_and(|t| t.expires_at != 0 && t.expires_at > now_secs())
-            })
-    }
-
-    /// Génère un nouveau token API (affiché en QR code sur le desktop).
-    /// Le token expire après la durée configurée (30 jours par défaut).
-    pub fn generate_api_token(&self, device_name: &str) -> String {
-        self.generate_api_token_with_ttl(device_name, self.api_token_ttl_secs)
-    }
-
-    /// Génère un token API avec une durée de vie explicite (secondes, min. 1).
-    pub fn generate_api_token_with_ttl(&self, device_name: &str, ttl_secs: u64) -> String {
-        let token = format!("myk_{}", Uuid::new_v4().as_simple());
-        let now = now_secs();
-        let api_token = ApiToken {
-            token: token.clone(),
-            device_name: device_name.to_string(),
-            created_at: now,
-            expires_at: now.saturating_add(ttl_secs.max(1)),
-        };
-        if let Ok(mut tokens) = self.api_tokens.lock() {
-            // Purge des tokens expirés.
-            tokens.retain(|_, t| t.expires_at > now);
-            tokens.insert(token.clone(), api_token);
-        }
-        token
     }
 
     // ── Appairage v2 (R-026 / R-027 / R-028) ────────────────────────────
@@ -439,6 +393,9 @@ impl PairingManager {
         // Preuve de possession de Kd, avant toute lecture de l'état (C-23).
         verify_pairing_commit_signature(&device_key, device_id, &commitment, commit_signature)
             .map_err(|_| PairingError::InvalidSignature)?;
+        if self.is_key_revoked(e2e_identity_key_hex) {
+            return Err(PairingError::KeyRevoked);
+        }
         let name: String = device_name
             .chars()
             .filter(|c| !c.is_control())
@@ -579,6 +536,17 @@ impl PairingManager {
     /// La liste blanche est persistée avant de confirmer ; en cas d'échec
     /// d'écriture, rien n'est approuvé (fail-closed).
     pub fn approve_device(&self, device_id: &str, displayed_code: &str) -> Result<(), PairingError> {
+        self.approve_device_for(device_id, displayed_code, None)
+    }
+
+    /// Comme [`Self::approve_device`], en liant l'appareil au profil Central
+    /// `profile_id` (titulaire de ses passeports ; `None` = titulaire par défaut).
+    pub fn approve_device_for(
+        &self,
+        device_id: &str,
+        displayed_code: &str,
+        profile_id: Option<&str>,
+    ) -> Result<(), PairingError> {
         let mut book = self.pending.lock().map_err(|_| PairingError::Unavailable)?;
         book.purge(self.config.pending_ttl);
         let entry = book.entries.get(device_id).ok_or(PairingError::NoPending)?;
@@ -587,6 +555,9 @@ impl PairingManager {
         };
         if !sas_codes_equal(code, displayed_code) {
             return Err(PairingError::CodeMismatch);
+        }
+        if self.is_key_revoked(&entry.key_hex) {
+            return Err(PairingError::KeyRevoked);
         }
         let mut whitelist = self.whitelist.lock().map_err(|_| PairingError::Unavailable)?;
         let now = now_secs();
@@ -597,6 +568,7 @@ impl PairingManager {
             last_seen: now,
             mode: "whitelist".into(),
             e2e_identity_key: entry.key_hex.clone(),
+            profile_id: profile_id.map(str::to_string),
         };
         let previous = whitelist.insert(device_id.to_string(), paired);
         if let Err(e) = self.persist(&whitelist) {
@@ -724,20 +696,72 @@ impl PairingManager {
     /// Révoque un device appairé. Le retrait en mémoire est immédiat (accès
     /// coupé) ; une erreur de persistance est remontée pour que l'UI la
     /// signale (sinon l'appareil réapparaîtrait au redémarrage).
+    ///
+    /// La clé de l'appareil est ajoutée à la liste de révocation du COG avant
+    /// toute autre étape : ses passeports et visas sont refusés immédiatement,
+    /// même si l'écriture de la liste blanche échoue (EX-14).
     pub fn revoke_device(&self, device_id: &str) -> Result<bool, PairingError> {
         let mut whitelist = self.whitelist.lock().map_err(|_| PairingError::Unavailable)?;
-        if whitelist.remove(device_id).is_none() {
+        let Some(device) = whitelist.remove(device_id) else {
             return Ok(false);
+        };
+        if let Ok(key) = parse_identity_key_hex(&device.e2e_identity_key) {
+            let mut revocations = self.revocations.lock().map_err(|_| PairingError::Unavailable)?;
+            if let Some(liste) = revocations.as_mut() {
+                liste.revoquer(CibleRevocation::appareil(&key));
+            }
         }
         self.persist(&whitelist)?;
         Ok(true)
     }
 
-    /// Révoque un token API.
-    pub fn revoke_api_token(&self, token: &str) -> bool {
-        self.api_tokens
-            .lock()
-            .is_ok_and(|mut t| t.remove(token).is_some())
+    // ── Révocation (EX-14) ──────────────────────────────────────────────
+
+    /// Active la liste de révocation du COG `cog` (appelé au démarrage du
+    /// serveur, une fois l'identité d'émission chargée). Sans effet si déjà active.
+    pub fn activer_revocations(&self, cog: CogId) -> Result<(), PairingError> {
+        let mut revocations = self.revocations.lock().map_err(|_| PairingError::Unavailable)?;
+        if revocations.is_none() {
+            *revocations = Some(ListeRevocation::new(
+                cog,
+                now_secs(),
+                miyauth::revocation::FRAICHEUR_MAX_DEFAUT_SECS,
+            ));
+        }
+        Ok(())
+    }
+
+    /// Vrai si la clé d'appareil (hex) figure dans la liste de révocation.
+    /// Clé invalide, verrou empoisonné ou horloge incohérente ⇒ vrai
+    /// (fail-closed) ; liste non activée ⇒ faux (aucune révocation connue).
+    pub fn is_key_revoked(&self, e2e_identity_key_hex: &str) -> bool {
+        let Ok(key) = parse_identity_key_hex(e2e_identity_key_hex) else {
+            return true;
+        };
+        let Ok(mut revocations) = self.revocations.lock() else {
+            return true;
+        };
+        let Some(liste) = revocations.as_mut() else {
+            return false;
+        };
+        let maintenant = now_secs();
+        liste.rafraichir(maintenant);
+        let cog = liste.cog().clone();
+        liste
+            .est_revoque(&cog, &CibleRevocation::appareil(&key), maintenant)
+            .unwrap_or(true)
+    }
+
+    /// Appareil appairé dont la clé a pour empreinte `kid`.
+    pub fn device_for_key_id(&self, kid: &Kid) -> Option<PairedDevice> {
+        self.whitelist.lock().ok().and_then(|w| {
+            w.values()
+                .find(|d| {
+                    parse_identity_key_hex(&d.e2e_identity_key)
+                        .is_ok_and(|k| &empreinte_cle(&k) == kid)
+                })
+                .cloned()
+        })
     }
 
     /// Info de découverte pour le broadcast LAN.
@@ -790,6 +814,26 @@ pub fn mask_device_id(id: &str) -> String {
     format!("{head}…{tail}")
 }
 
+/// La liste de révocation est l'état d'autorité **local** du COG (pas une copie
+/// distribuée) : elle est à jour à l'instant où elle est lue sous verrou. Liste
+/// non activée, verrou empoisonné ou horloge en recul ⇒ erreur (refus).
+impl SourceRevocation for PairingManager {
+    fn est_revoque(
+        &self,
+        emetteur: &CogId,
+        cible: &CibleRevocation,
+        maintenant_secs: u64,
+    ) -> Result<bool, ErreurRevocation> {
+        let mut revocations = self
+            .revocations
+            .lock()
+            .map_err(|_| ErreurRevocation::Indisponible("verrou de révocation".into()))?;
+        let liste = revocations.as_mut().ok_or(ErreurRevocation::ListeAbsente)?;
+        liste.rafraichir(maintenant_secs);
+        liste.est_revoque(emetteur, cible, maintenant_secs)
+    }
+}
+
 fn now_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -807,6 +851,7 @@ fn hostname() -> String {
 mod tests {
     use super::*;
     use crate::paired_store::DEFAULT_PAIRED_DEVICES_FILE;
+    use uuid::Uuid;
     use miyukini_cog_bridge::{parse_commitment_hex, DevicePairing, E2eIdentity};
 
     const IP_A: &str = "192.168.1.10";
@@ -980,9 +1025,7 @@ mod tests {
 
     #[test]
     fn source_binding_can_be_disabled() {
-        let mgr = PairingManager::with_config(
-            0,
-            PairingConfig {
+        let mgr = PairingManager::with_config(PairingConfig {
                 require_same_source: false,
                 ..PairingConfig::default()
             },
@@ -1142,9 +1185,7 @@ mod tests {
 
     #[test]
     fn pending_expires_after_ttl() {
-        let mgr = PairingManager::with_config(
-            0,
-            PairingConfig {
+        let mgr = PairingManager::with_config(PairingConfig {
                 pending_ttl: Duration::from_secs(600),
                 ..PairingConfig::default()
             },
@@ -1165,9 +1206,7 @@ mod tests {
 
     #[test]
     fn per_source_and_global_caps_refuse_without_eviction() {
-        let mgr = PairingManager::with_config(
-            0,
-            PairingConfig {
+        let mgr = PairingManager::with_config(PairingConfig {
                 max_pending: 5,
                 max_pending_per_source: 3,
                 ..PairingConfig::default()
@@ -1240,7 +1279,7 @@ mod tests {
         let path = tmp_store();
         let key_hex;
         {
-            let mgr = PairingManager::open(0, PairingConfig::default(), path.clone()).unwrap();
+            let mgr = PairingManager::open(PairingConfig::default(), path.clone()).unwrap();
             let (d, _, code) = commit_and_reveal(&mgr, "dev-1", IP_A);
             key_hex = d.key_hex;
             mgr.approve_device("dev-1", &code).unwrap();
@@ -1254,7 +1293,7 @@ mod tests {
             let mode = std::fs::metadata(&path).unwrap().permissions().mode();
             assert_eq!(mode & 0o777, 0o600);
         }
-        let mgr = PairingManager::open(0, PairingConfig::default(), path).unwrap();
+        let mgr = PairingManager::open(PairingConfig::default(), path).unwrap();
         assert!(mgr.is_paired_with_key("dev-1", &key_hex));
         assert!(!mgr.is_whitelisted("dev-2"), "révocation persistée");
         let p = mgr.device_for_identity_key(&key_hex).unwrap();
@@ -1271,7 +1310,7 @@ mod tests {
             std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
         }
         assert!(matches!(
-            PairingManager::open(0, PairingConfig::default(), path),
+            PairingManager::open(PairingConfig::default(), path),
             Err(PairedStoreError::Malformed(_))
         ));
     }
@@ -1283,7 +1322,7 @@ mod tests {
         // Le chemin de stockage est un dossier : écriture (rename) impossible.
         let path = dir.join("store-as-dir");
         std::fs::create_dir_all(path.join("x")).unwrap();
-        let mgr = PairingManager::with_config(0, PairingConfig::default());
+        let mgr = PairingManager::with_config(PairingConfig::default());
         let mgr = PairingManager {
             store_path: Some(path),
             ..mgr
@@ -1295,40 +1334,42 @@ mod tests {
         assert_eq!(mgr.pairing_status("dev-1", &d.key_hex), PairingStatus::Revealed);
     }
 
-    #[test]
-    fn api_token_flow() {
-        let mgr = PairingManager::new();
-
-        let token = mgr.generate_api_token("Mon Telephone");
-        assert!(token.starts_with("myk_"));
-        assert!(mgr.validate_api_token(&token));
-        assert!(!mgr.validate_api_token("bogus"));
-
-        mgr.revoke_api_token(&token);
-        assert!(!mgr.validate_api_token(&token));
+    fn cog() -> CogId {
+        CogId::new("abcdefghijklmnopqrstuvwxyz").unwrap()
     }
 
     #[test]
-    fn api_token_has_expiry_by_default() {
+    fn revocation_adds_key_to_list_and_blocks_repairing() {
         let mgr = PairingManager::new();
-        let token = mgr.generate_api_token("Tel");
-        let exp = mgr.api_tokens.lock().unwrap().get(&token).unwrap().expires_at;
-        assert_ne!(exp, 0);
-        let delta = exp - now_secs();
-        assert!(delta > 29 * 24 * 3600 && delta <= DEFAULT_API_TOKEN_TTL_SECS);
+        mgr.activer_revocations(cog()).unwrap();
+        let (d, _, code) = commit_and_reveal(&mgr, "dev-1", IP_A);
+        mgr.approve_device_for("dev-1", &code, Some("prof-1")).unwrap();
+        let key = parse_identity_key_hex(&d.key_hex).unwrap();
+        let cible = CibleRevocation::appareil(&key);
+        assert_eq!(mgr.est_revoque(&cog(), &cible, now_secs()), Ok(false));
+        assert_eq!(mgr.paired_devices()[0].profile_id.as_deref(), Some("prof-1"));
+        assert!(mgr.device_for_key_id(&empreinte_cle(&key)).is_some());
+
+        assert!(mgr.revoke_device("dev-1").unwrap());
+        assert_eq!(mgr.est_revoque(&cog(), &cible, now_secs()), Ok(true));
+        assert!(mgr.is_key_revoked(&d.key_hex));
+        assert!(mgr.device_for_key_id(&empreinte_cle(&key)).is_none());
+        // Même clé : ré-appairage refusé.
+        assert_eq!(commit(&mgr, "dev-1", &d, IP_A).unwrap_err(), PairingError::KeyRevoked);
     }
 
     #[test]
-    fn api_token_expires() {
-        let mgr = PairingManager::with_token_ttl(3600);
-        let token = mgr.generate_api_token("Tel");
-        assert!(mgr.validate_api_token(&token));
-        // Simule l'écoulement du temps : expiration dans le passé.
-        mgr.api_tokens.lock().unwrap().get_mut(&token).unwrap().expires_at = now_secs() - 1;
-        assert!(!mgr.validate_api_token(&token));
-        // Un token sans expiration (0) est refusé (fail-closed).
-        mgr.api_tokens.lock().unwrap().get_mut(&token).unwrap().expires_at = 0;
-        assert!(!mgr.validate_api_token(&token));
+    fn revocation_source_fails_closed() {
+        let mgr = PairingManager::new();
+        let cible = CibleRevocation::appareil(&cog_key());
+        // Liste non activée : refus.
+        assert_eq!(mgr.est_revoque(&cog(), &cible, now_secs()), Err(ErreurRevocation::ListeAbsente));
+        mgr.activer_revocations(cog()).unwrap();
+        // Autre COG : refus.
+        let autre = CogId::new("zyxwvutsrqponmlkjihgfedcba").unwrap();
+        assert_eq!(mgr.est_revoque(&autre, &cible, now_secs()), Err(ErreurRevocation::ListeAbsente));
+        // Horloge en recul : refus.
+        assert!(matches!(mgr.est_revoque(&cog(), &cible, 1), Err(ErreurRevocation::HorlogeIncoherente)));
     }
 
     #[test]

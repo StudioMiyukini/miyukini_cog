@@ -4,35 +4,22 @@
 //! @layer  core
 //! @human  miyukini-cog-bridge — module « whitelist ».
 
-//! Mode Whitelist — connexion directe HTTP en LAN.
+//! Mode LAN — connexion directe HTTP à un COG Host qui a appairé l'appareil.
 //!
-//! Le COG Host expose un endpoint de validation sur le réseau local.
-//! Le device Android, une fois autorisé (whitelisté), se connecte directement
-//! sans tunnel — latence minimale, idéal pour le WiFi maison.
+//! L'appareil, une fois appairé (clé épinglée), obtient un passeport puis un
+//! visa et prouve la possession de sa clé à chaque requête
+//! ([`crate::identite`]). Le `device_id` n'est plus un secret au porteur : il
+//! ne sert qu'aux journaux.
 
-use crate::{BridgeError, BridgeResult};
+use crate::identite::ClientAppareil;
+use crate::BridgeResult;
 
-/// Établit une connexion directe au COG Host en LAN via whitelist.
-pub async fn connect(host: &str, port: u16, device_id: &str) -> BridgeResult<()> {
-    tracing::info!("Whitelist: connexion directe à {host}:{port} (device={device_id})");
-
-    let url = format!("http://{host}:{port}/api/bridge/validate");
-
-    let client = reqwest::Client::new();
-    let resp = client
-        .post(&url)
-        .json(&serde_json::json!({ "device_id": device_id }))
-        .timeout(std::time::Duration::from_secs(5))
-        .send()
-        .await
-        .map_err(|e| BridgeError::NetworkError(format!("LAN: {e}")))?;
-
-    if resp.status().is_success() {
-        tracing::info!("Whitelist: device autorisé");
-        Ok(())
-    } else if resp.status().as_u16() == 403 {
-        Err(BridgeError::DeviceNotWhitelisted)
-    } else {
-        Err(BridgeError::ConnectionRefused)
-    }
+/// Établit une connexion directe au COG Host en LAN : passeport, visa, puis
+/// `POST /api/bridge/validate` (visa + preuve de possession).
+pub async fn connect(host: &str, port: u16, device_id: &str, client: &ClientAppareil) -> BridgeResult<()> {
+    tracing::info!("LAN : connexion à {host}:{port} (appareil {device_id})");
+    client.ouvrir_session().await?;
+    let r = client.valider().await?;
+    tracing::info!("LAN : appareil authentifié ({})", r.role);
+    Ok(())
 }

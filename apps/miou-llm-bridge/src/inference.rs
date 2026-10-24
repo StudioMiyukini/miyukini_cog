@@ -109,25 +109,54 @@ impl std::fmt::Display for InferenceError {
 
 // ── MaiaLlmClient ──────────────────────────────────────────────────
 
+/// Usage signé des appels d'inférence vers maia-llm (`/v1/*`).
+pub const USAGE_MAIA_LLM_INFERENCE: &str = "maia-llm/inference";
+/// Usage signé des appels de gestion des modèles vers maia-llm (`/maia/llm/models*`).
+pub const USAGE_MAIA_LLM_MODELES: &str = "maia-llm/modeles";
+
 /// Client HTTP vers le service maia-llm (remplace NativeBackend llama-cpp-2).
 /// Maintient un cache local du modèle chargé pour les appels synchrones.
+/// Les requêtes sont signées par la clé de service de MAIA (à épingler dans
+/// `appelants_inference` / `appelants_modeles` de maia-llm) : plus de clé partagée.
 #[derive(Clone)]
 pub struct MaiaLlmClient {
     pub base_url: String,
-    auth_key: Option<String>,
+    cle: Option<Arc<miyusceau::CleSignature>>,
     client: reqwest::Client,
     /// Cache : nom du modèle actuellement chargé dans maia-llm (None = aucun).
     loaded_model: Arc<RwLock<Option<String>>>,
 }
 
 impl MaiaLlmClient {
-    pub fn new(base_url: String, auth_key: Option<String>, client: reqwest::Client) -> Self {
+    pub fn new(base_url: String, cle: Option<Arc<miyusceau::CleSignature>>, client: reqwest::Client) -> Self {
         Self {
             base_url,
-            auth_key,
+            cle,
             client,
             loaded_model: Arc::new(RwLock::new(None)),
         }
+    }
+
+    /// Requête sans corps, signée par la clé de MAIA.
+    fn requete(&self, methode: reqwest::Method, url: &str, usage: &str) -> reqwest::RequestBuilder {
+        let rb = self.client.request(methode.clone(), url);
+        crate::signature::signer(rb, self.cle.as_deref(), usage, methode.as_str(), url, b"")
+    }
+
+    /// Requête JSON signée (le corps signé est exactement celui envoyé).
+    fn requete_json(
+        &self,
+        methode: reqwest::Method,
+        url: &str,
+        usage: &str,
+        corps: &serde_json::Value,
+    ) -> reqwest::RequestBuilder {
+        let octets = serde_json::to_vec(corps).unwrap_or_default();
+        let rb = self
+            .client
+            .request(methode.clone(), url)
+            .header(reqwest::header::CONTENT_TYPE, "application/json");
+        crate::signature::signer(rb, self.cle.as_deref(), usage, methode.as_str(), url, &octets).body(octets)
     }
 
     // ── Méthodes synchrones (cache local) ──────────────────────────
@@ -182,10 +211,7 @@ impl MaiaLlmClient {
         let url = format!("{}/maia/llm/models/load", self.base_url);
         let body = serde_json::json!({ "model": filename });
 
-        let mut req = self.client.post(&url).json(&body);
-        if let Some(key) = &self.auth_key {
-            req = req.header("Authorization", format!("Bearer {key}"));
-        }
+        let req = self.requete_json(reqwest::Method::POST, &url, USAGE_MAIA_LLM_MODELES, &body);
 
         let resp = req
             .timeout(std::time::Duration::from_secs(120))
@@ -220,10 +246,7 @@ impl MaiaLlmClient {
     /// Décharge le modèle actuel dans maia-llm via DELETE /maia/llm/models/unload.
     pub async fn unload_model(&self) -> bool {
         let url = format!("{}/maia/llm/models/unload", self.base_url);
-        let mut req = self.client.delete(&url);
-        if let Some(key) = &self.auth_key {
-            req = req.header("Authorization", format!("Bearer {key}"));
-        }
+        let req = self.requete(reqwest::Method::DELETE, &url, USAGE_MAIA_LLM_MODELES);
 
         let success = req
             .timeout(std::time::Duration::from_secs(30))
@@ -243,10 +266,9 @@ impl MaiaLlmClient {
     /// Retourne les `model_id` — noms sans extension pour les requêtes API.
     pub async fn available_models(&self) -> Vec<String> {
         let url = format!("{}/maia/llm/models", self.base_url);
-        let mut req = self.client.get(&url).timeout(std::time::Duration::from_secs(10));
-        if let Some(key) = &self.auth_key {
-            req = req.header("Authorization", format!("Bearer {key}"));
-        }
+        let req = self
+            .requete(reqwest::Method::GET, &url, USAGE_MAIA_LLM_MODELES)
+            .timeout(std::time::Duration::from_secs(10));
         let resp = match req.send().await {
             Ok(r) if r.status().is_success() => r,
             _ => return Vec::new(),
@@ -264,10 +286,9 @@ impl MaiaLlmClient {
     /// Liste les modèles chargés via GET /v1/models (OpenAI-compat) de maia-llm.
     pub async fn loaded_models(&self) -> Vec<String> {
         let url = format!("{}/v1/models", self.base_url);
-        let mut req = self.client.get(&url).timeout(std::time::Duration::from_secs(5));
-        if let Some(key) = &self.auth_key {
-            req = req.header("Authorization", format!("Bearer {key}"));
-        }
+        let req = self
+            .requete(reqwest::Method::GET, &url, USAGE_MAIA_LLM_INFERENCE)
+            .timeout(std::time::Duration::from_secs(5));
         let resp = match req.send().await {
             Ok(r) if r.status().is_success() => r,
             _ => return Vec::new(),
@@ -293,10 +314,7 @@ impl MaiaLlmClient {
         body: &serde_json::Value,
     ) -> Result<serde_json::Value, InferenceError> {
         let url = format!("{}/v1/chat/completions", self.base_url);
-        let mut req = self.client.post(&url).json(body);
-        if let Some(key) = &self.auth_key {
-            req = req.header("Authorization", format!("Bearer {key}"));
-        }
+        let req = self.requete_json(reqwest::Method::POST, &url, USAGE_MAIA_LLM_INFERENCE, body);
 
         let resp = req
             .send()
@@ -507,4 +525,82 @@ fn parse_response(
         },
         backend,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::{extract::Request, http::StatusCode, routing::any, Router};
+    use miyauth::http::service::{maintenant_unix, GardeSignee};
+    use miyusceau::CleSignature;
+
+    /// Faux maia-llm : vérifie la signature (usage selon la famille de route,
+    /// comme `apps/maia-llm/src/auth.rs`) puis répond.
+    async fn faux_maia_llm(cle_epinglee: [u8; 32]) -> String {
+        let garde = Arc::new(GardeSignee::new([cle_epinglee]));
+        let verifier = move |req: Request| {
+            let garde_srv = garde.clone();
+            async move {
+                let usage = if req.uri().path().starts_with("/maia/llm/models") {
+                    USAGE_MAIA_LLM_MODELES
+                } else {
+                    USAGE_MAIA_LLM_INFERENCE
+                };
+                let entetes_http = req.headers().clone();
+                let v = |nom: &str| entetes_http.get(nom).and_then(|x| x.to_str().ok());
+                let instant = maintenant_unix();
+                let entetes = garde_srv
+                    .controler_entetes(
+                        v(miyauth::http::ENTETE_SIGNATAIRE),
+                        v(miyauth::http::ENTETE_HORODATAGE),
+                        v(miyauth::http::ENTETE_NONCE),
+                        v(miyauth::http::ENTETE_SIGNATURE),
+                        instant,
+                    )
+                    .map_err(|_| StatusCode::UNAUTHORIZED)?;
+                let (parts, corps) = req.into_parts();
+                let corps = axum::body::to_bytes(corps, 1 << 20).await.unwrap();
+                let chemin = parts.uri.path_and_query().unwrap().as_str().to_string();
+                garde_srv.verifier(&entetes, usage, parts.method.as_str(), &chemin, &corps, instant)
+                    .map_err(|_| StatusCode::UNAUTHORIZED)?;
+                let reponse = match parts.uri.path() {
+                    "/maia/llm/models" => serde_json::json!([{ "model_id": "m1" }]),
+                    "/v1/models" => serde_json::json!({ "data": [{ "id": "m1" }] }),
+                    _ => serde_json::json!({ "choices": [{ "message": { "content": "ok" } }] }),
+                };
+                Ok::<_, StatusCode>(axum::Json(reponse))
+            }
+        };
+        let app = Router::new()
+            .route("/maia/llm/models", any(verifier.clone()))
+            .route("/v1/models", any(verifier.clone()))
+            .route("/v1/chat/completions", any(verifier));
+        let ecoute = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let adresse = ecoute.local_addr().unwrap();
+        tokio::spawn(async move {
+            let _ = axum::serve(ecoute, app).await;
+        });
+        format!("http://{adresse}")
+    }
+
+    #[tokio::test]
+    async fn client_maia_llm_signe_ses_requetes() {
+        let cle = Arc::new(CleSignature::generer());
+        let url = faux_maia_llm(cle.cle_publique()).await;
+        let client = MaiaLlmClient::new(url.clone(), Some(cle), reqwest::Client::new());
+        assert_eq!(client.available_models().await, vec!["m1".to_string()]);
+        assert_eq!(client.loaded_models().await, vec!["m1".to_string()]);
+        let r = client
+            .chat_completion(&serde_json::json!({ "messages": [] }))
+            .await
+            .unwrap();
+        assert_eq!(r["choices"][0]["message"]["content"], "ok");
+
+        // Sans clé, ou avec une clé non épinglée : refus.
+        let anonyme = MaiaLlmClient::new(url.clone(), None, reqwest::Client::new());
+        assert!(anonyme.available_models().await.is_empty());
+        assert!(anonyme.chat_completion(&serde_json::json!({})).await.is_err());
+        let intrus = MaiaLlmClient::new(url, Some(Arc::new(CleSignature::generer())), reqwest::Client::new());
+        assert!(intrus.chat_completion(&serde_json::json!({})).await.is_err());
+    }
 }

@@ -8,7 +8,8 @@
 //!
 //! Provides endpoints to view status and control MWS tunnel and DDNS modes.
 
-use axum::{Json, extract::State, http::HeaderMap, response::IntoResponse};
+use crate::interfaces::middleware::auth::AdminUser;
+use axum::{Json, extract::State, response::IntoResponse};
 use std::sync::Arc;
 
 use crate::common::di::AppState;
@@ -22,10 +23,8 @@ impl ConnectionHandler {
     /// GET /api/admin/connections/status
     pub async fn status(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
     ) -> Result<impl IntoResponse, AppError> {
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let mgr = state
             .connection_manager
             .as_ref()
@@ -42,10 +41,8 @@ impl ConnectionHandler {
     /// POST /api/admin/connections/mws/connect
     pub async fn mws_connect(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
     ) -> Result<impl IntoResponse, AppError> {
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let mgr = state
             .connection_manager
             .as_ref()
@@ -66,10 +63,8 @@ impl ConnectionHandler {
     /// POST /api/admin/connections/mws/disconnect
     pub async fn mws_disconnect(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
     ) -> Result<impl IntoResponse, AppError> {
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let mgr = state
             .connection_manager
             .as_ref()
@@ -90,10 +85,8 @@ impl ConnectionHandler {
     /// POST /api/admin/connections/ddns/update
     pub async fn ddns_update(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
     ) -> Result<impl IntoResponse, AppError> {
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let mgr = state
             .connection_manager
             .as_ref()
@@ -115,10 +108,8 @@ impl ConnectionHandler {
     /// POST /api/admin/connections/ddns/start
     pub async fn ddns_start(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
     ) -> Result<impl IntoResponse, AppError> {
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let mgr = state
             .connection_manager
             .as_ref()
@@ -139,10 +130,8 @@ impl ConnectionHandler {
     /// POST /api/admin/connections/ddns/stop
     pub async fn ddns_stop(
         State(state): State<GlobalState>,
-        headers: HeaderMap,
+        _admin: AdminUser,
     ) -> Result<impl IntoResponse, AppError> {
-        super::admin_handler::admin_guard_public(&state, &headers).await?;
-
         let mgr = state
             .connection_manager
             .as_ref()

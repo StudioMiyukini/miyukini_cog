@@ -11,7 +11,9 @@
 //! Usage :
 //!   team                                  (écoute 127.0.0.1:7800)
 //!   TEAM_CONFIG=team.toml team
-//!   TEAM_HMAC_SECRET=<secret> team        (Bearer exigé ; requis hors loopback)
+//!
+//! Authentification : requêtes signées par des clés épinglées (`noeuds_autorises`,
+//! `clients_autorises`) ; plus de secret partagé (`TEAM_HMAC_SECRET` ignoré).
 
 mod api;
 mod app;
@@ -35,6 +37,8 @@ pub struct AppState {
     pub sequences: Arc<Vec<mipower::MiPowerSequence>>,
     pub config: Arc<config::TeamConfig>,
     pub client: reqwest::Client,
+    /// Clé de service du hub (signe ses appels aux nœuds MAIA).
+    pub cle: Arc<miyusceau::CleSignature>,
 }
 
 #[tokio::main]
@@ -48,17 +52,34 @@ async fn main() {
 
     let cfg = config::load_or_create();
 
-    // Fail-closed (C-21/C-22) : pas d'écoute hors loopback sans secret.
+    // Fail-closed (C-21/C-22) : clés épinglées bien formées ; pas d'écoute hors
+    // loopback sans appelant épinglé.
     if let Err(e) = config::validate_startup(&cfg) {
         tracing::error!("{e}");
         eprintln!("{e}");
         std::process::exit(1);
     }
-    if cfg.secret().is_none() {
-        tracing::warn!(
-            "Aucun hmac_secret configuré : routes ouvertes aux processus locaux (loopback uniquement)"
-        );
+    if cfg.ancien_secret_present() {
+        tracing::warn!("hmac_secret est obsolète et ignoré : épinglez les clés des nœuds (noeuds_autorises)");
     }
+    if cfg.noeuds_autorises.is_empty() {
+        tracing::warn!("Aucun nœud épinglé (noeuds_autorises) : enregistrements refusés (503)");
+    }
+    if cfg.clients_autorises.is_empty() {
+        tracing::warn!("Aucun client épinglé (clients_autorises) : /team/nodes et /api/* refusés (503)");
+    }
+    let cle = match miyauth::http::service::charger_ou_creer_cle(std::path::Path::new(&cfg.cle_service)) {
+        Ok(c) => Arc::new(c),
+        Err(e) => {
+            tracing::error!("Clé de service du hub illisible ({}) : {e}", cfg.cle_service);
+            eprintln!("Refus de démarrer : clé de service ({}) : {e}", cfg.cle_service);
+            std::process::exit(1);
+        }
+    };
+    tracing::info!(
+        "Clé publique du hub (à épingler côté MAIA, `cles_hub_team`) : {}",
+        miyauth::http::service::encoder_cle_publique(&cle.cle_publique())
+    );
 
     tracing::info!("╔══════════════════════════════════════════════════╗");
     tracing::info!(
@@ -103,6 +124,7 @@ async fn main() {
         sequences: Arc::new(sequences),
         config: Arc::new(cfg.clone()),
         client: http_client.clone(),
+        cle,
     };
 
     // Démarrer la boucle heartbeat

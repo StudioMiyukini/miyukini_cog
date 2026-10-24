@@ -6,7 +6,14 @@
 
 //! Exécuteur d'étapes MIPOWER — dispatche vers les nœuds MAIA.
 //!
-//! Chaque étape = POST /v1/agents/{agent_id}/chat vers le nœud sélectionné.
+//! Chaque étape = POST /v1/agents/{agent_id}/chat vers le nœud sélectionné,
+//! signé par la clé de service du hub (usage [`USAGE_MAIA_TEAM`]) ; le nœud MAIA
+//! épingle cette clé (`cles_hub_team`). Plus de secret partagé.
+
+use std::sync::Arc;
+
+use miyauth::http::service::entetes_signees;
+use miyusceau::CleSignature;
 
 use serde::{Deserialize, Serialize};
 
@@ -36,15 +43,19 @@ pub struct StepExecRequest {
     pub timeout_secs: u64,
 }
 
+/// Usage signé des appels du hub vers un nœud MAIA (côté MAIA : `maia/team`).
+pub const USAGE_MAIA_TEAM: &str = "maia/team";
+
 /// Exécuteur d'étapes MIPOWER.
 pub struct MiPowerRunner {
     client: reqwest::Client,
     registry: NodeRegistry,
+    cle: Arc<CleSignature>,
 }
 
 impl MiPowerRunner {
-    pub fn new(client: reqwest::Client, registry: NodeRegistry) -> Self {
-        Self { client, registry }
+    pub fn new(client: reqwest::Client, registry: NodeRegistry, cle: Arc<CleSignature>) -> Self {
+        Self { client, registry, cle }
     }
 
     /// Exécute une étape en sélectionnant le meilleur nœud.
@@ -82,10 +93,23 @@ impl MiPowerRunner {
             "stream": false,
         });
 
-        let result = self
+        let corps = serde_json::to_vec(&body).unwrap_or_default();
+        let chemin = reqwest::Url::parse(&url).map_or_else(
+            |_| String::new(),
+            |u| match u.query() {
+                Some(q) => format!("{}?{q}", u.path()),
+                None => u.path().to_string(),
+            },
+        );
+        let mut requete = self
             .client
             .post(&url)
-            .json(&body)
+            .header(reqwest::header::CONTENT_TYPE, "application/json");
+        for (nom, valeur) in entetes_signees(&self.cle, USAGE_MAIA_TEAM, "POST", &chemin, &corps) {
+            requete = requete.header(nom, valeur);
+        }
+        let result = requete
+            .body(corps)
             .timeout(std::time::Duration::from_secs(req.timeout_secs))
             .send()
             .await;

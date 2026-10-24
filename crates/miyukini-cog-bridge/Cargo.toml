@@ -1,5 +1,6 @@
 # Miyukini COG Bridge — Connexion Android ↔ COG Host.
-# 3 modes : SSH tunnel, Whitelist LAN (mDNS), Clé API (Bearer token).
+# Modes : SSH tunnel, LAN (appareil appairé) ; authentification par passeport
+# d'appareil + visa + preuve de possession (plus de jeton au porteur).
 # Compile pour desktop (tests) et Android (mobile).
 
 [package]
@@ -18,7 +19,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "net",
 russh = "0.48"
 russh-keys = "0.48"
 
-# HTTP client (whitelist + API key modes)
+# HTTP client (mode LAN)
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 
 # Serialization
@@ -35,6 +36,12 @@ sha2 = "0.10"
 hkdf = "0.12"
 zeroize = "1"
 rand = "0.8"
+
+# Identité signée (sortie du lot 2) : passeport, visa, preuve de possession,
+# requêtes signées — pur Rust, portable Android.
+miyauth = { path = "../miyauth", features = ["http"] }
+miyusceau = { path = "../miyusceau" }
+central-remote-protocol = { path = "../central-remote-protocol" }
 
 # Logging
 tracing = "0.1"

@@ -54,7 +54,7 @@ wopi:
 secrets:
   # If existingSecret is set, the chart will NOT create a Secret and will use this one instead.
   existingSecret: ""
-  jwtSecret: ""
+  # jwtSecret retiré (lot 2) : aucune clé de signature de session n'existe plus.
   oidcClientSecret: ""
 
 service:

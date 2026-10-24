@@ -2,136 +2,113 @@
 //! @do     auth_middleware
 //! @role   securite
 //! @layer  app
-//! @human  team — module « auth ».
+//! @human  team — module « auth » : requêtes signées par des nœuds et clients épinglés (sans secret partagé).
 
-//! Middleware d'authentification du hub TEAM (C-22).
+//! Authentification du hub TEAM (C-22, sortie du lot 2, points #7–8).
 //!
-//! - Secret configuré → `Authorization: Bearer <secret>` exigé sur la route ;
-//!   absent ou invalide → 401. Comparaison en temps constant (`subtle`).
-//! - Aucun secret → requête acceptée. Ce cas n'est possible qu'en écoute
-//!   loopback : `config::validate_startup` refuse sinon de démarrer.
+//! Plus de secret Bearer pré-partagé (`hmac_secret` / `TEAM_HMAC_SECRET`) :
+//! chaque appelant signe ses requêtes avec **sa** clé Ed25519
+//! (`miyauth::http::service`) et le hub épingle les clés autorisées par famille :
+//!
+//! | Famille | Routes | Usage signé | Configuration |
+//! |---|---|---|---|
+//! | nœud MAIA | `POST /team/register`, `POST /team/heartbeat`, `DELETE /team/nodes/{id}` | [`USAGE_NOEUD`] | `noeuds_autorises` |
+//! | client | `GET /team/nodes`, `/api/*` | [`USAGE_API`] | `clients_autorises` |
+//!
+//! Le signataire vérifié est transmis aux handlers ([`Signataire`]) : un nœud
+//! enregistré reste lié à la clé qui l'a enregistré (heartbeat et
+//! désenregistrement par une autre clé refusés).
+//!
+//! Fail-closed : aucune clé épinglée pour une famille ⇒ 503, y compris en
+//! loopback ; signature absente, clé inconnue, horodatage hors fenêtre
+//! (± 300 s), nonce rejoué ou corps altéré ⇒ 401. Seul `GET /team/health`
+//! reste public.
 
 use std::sync::Arc;
 
 use axum::{
+    body::Body,
     extract::{Request, State},
-    http::{header, StatusCode},
+    http::{Method, StatusCode},
     middleware::Next,
     response::{IntoResponse, Response},
     Json,
 };
+use miyauth::http::service::{maintenant_unix, GardeSignee};
+use miyauth::http::{ENTETE_HORODATAGE, ENTETE_NONCE, ENTETE_SIGNATAIRE, ENTETE_SIGNATURE};
 use serde_json::json;
-use subtle::ConstantTimeEq;
 
-/// Secret attendu (None = pas d'authentification, loopback uniquement).
-#[derive(Clone, Default)]
+/// Usage signé des routes de nœuds MAIA (enregistrement, heartbeat, retrait).
+pub const USAGE_NOEUD: &str = "team/noeud";
+/// Usage signé des routes clientes (`/team/nodes`, `/api/*`).
+pub const USAGE_API: &str = "team/api";
+
+/// Corps maximal lu par le middleware pour vérifier la signature (octets) ;
+/// les limites par route (`DefaultBodyLimit`) s'appliquent ensuite.
+pub const MAX_CORPS_SIGNE: usize = crate::app::MAX_TASK_BODY_BYTES;
+
+/// Clé publique de l'appelant vérifié (extension de requête).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Signataire(pub [u8; 32]);
+
+/// Appelants épinglés, par famille de routes.
+#[derive(Clone, Debug, Default)]
 pub struct AuthConfig {
-    secret: Option<Arc<str>>,
+    noeuds: Arc<GardeSignee>,
+    clients: Arc<GardeSignee>,
 }
 
 impl AuthConfig {
-    pub fn new(secret: Option<&str>) -> Self {
-        Self {
-            secret: secret.map(Arc::from),
-        }
+    /// Configuration à partir des clés publiques déjà analysées.
+    pub fn new(noeuds: Vec<[u8; 32]>, clients: Vec<[u8; 32]>) -> Self {
+        Self { noeuds: Arc::new(GardeSignee::new(noeuds)), clients: Arc::new(GardeSignee::new(clients)) }
     }
 
-    pub fn is_enabled(&self) -> bool {
-        self.secret.is_some()
+    fn famille(&self, methode: &Method, chemin: &str) -> (&GardeSignee, &'static str) {
+        let noeud = chemin == "/team/register"
+            || chemin == "/team/heartbeat"
+            || (methode == Method::DELETE && chemin.starts_with("/team/nodes/"));
+        if noeud {
+            (&self.noeuds, USAGE_NOEUD)
+        } else {
+            (&self.clients, USAGE_API)
+        }
     }
 }
 
-/// Middleware axum : vérifie le Bearer token si un secret est configuré.
+fn refus(statut: u16) -> Response {
+    let statut = StatusCode::from_u16(statut).unwrap_or(StatusCode::UNAUTHORIZED);
+    let motif = if statut == StatusCode::SERVICE_UNAVAILABLE { "unavailable" } else { "unauthorized" };
+    (statut, Json(json!({"error": motif}))).into_response()
+}
+
+/// Middleware axum : requête signée par un appelant épinglé pour la famille de la route.
 pub async fn auth_middleware(State(auth): State<AuthConfig>, req: Request, next: Next) -> Response {
-    let Some(expected) = auth.secret.as_deref() else {
-        // Sans secret (loopback seul) : refuser tout ce qui ne vient pas
-        // explicitement de la machine locale, contre le DNS rebinding.
-        if requete_locale(&req) {
-            return next.run(req).await;
-        }
-        return (
-            StatusCode::FORBIDDEN,
-            Json(json!({"error": "forbidden"})),
-        )
-            .into_response();
-    };
-
-    let provided = req
-        .headers()
-        .get(header::AUTHORIZATION)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.strip_prefix("Bearer "));
-
-    match provided {
-        Some(token) if constant_time_eq(token, expected) => next.run(req).await,
-        _ => (
-            StatusCode::UNAUTHORIZED,
-            Json(json!({"error": "unauthorized"})),
-        )
-            .into_response(),
+    let (garde, usage) = auth.famille(req.method(), req.uri().path());
+    if !garde.est_configuree() {
+        return refus(503);
     }
-}
-
-/// Hôte local exact : `localhost`, `127.0.0.1` ou `[::1]`, port facultatif.
-fn hote_local(valeur: &str) -> bool {
-    let hote = if let Some(reste) = valeur.strip_prefix('[') {
-        match reste.split_once(']') {
-            Some((h, apres)) if apres.is_empty() || apres.starts_with(':') => h,
-            _ => return false,
-        }
-    } else {
-        match valeur.rsplit_once(':') {
-            Some((h, port)) if !port.is_empty() && port.bytes().all(|b| b.is_ascii_digit()) => h,
-            Some(_) => return false,
-            None => valeur,
-        }
+    let maintenant = maintenant_unix();
+    let h = req.headers();
+    let valeur = |n: &str| h.get(n).and_then(|v| v.to_str().ok());
+    let entetes = match garde.controler_entetes(
+        valeur(ENTETE_SIGNATAIRE),
+        valeur(ENTETE_HORODATAGE),
+        valeur(ENTETE_NONCE),
+        valeur(ENTETE_SIGNATURE),
+        maintenant,
+    ) {
+        Ok(e) => e,
+        Err(r) => return refus(r.statut()),
     };
-    hote.eq_ignore_ascii_case("localhost") || hote == "127.0.0.1" || hote == "::1"
-}
-
-/// Requête locale : `Host` local obligatoire ; `Origin`, s'il est présent,
-/// doit être `http(s)://` vers un hôte local.
-fn requete_locale(req: &Request) -> bool {
-    let hote_ok = req
-        .headers()
-        .get(header::HOST)
-        .and_then(|v| v.to_str().ok())
-        .is_some_and(hote_local);
-    let origine_ok = match req.headers().get(header::ORIGIN) {
-        None => true,
-        Some(v) => v
-            .to_str()
-            .ok()
-            .and_then(|o| o.strip_prefix("http://").or_else(|| o.strip_prefix("https://")))
-            .is_some_and(hote_local),
+    let (mut parts, corps) = req.into_parts();
+    let Ok(corps) = axum::body::to_bytes(corps, MAX_CORPS_SIGNE).await else {
+        return (StatusCode::PAYLOAD_TOO_LARGE, Json(json!({"error": "payload too large"}))).into_response();
     };
-    hote_ok && origine_ok
-}
-
-/// Comparaison en temps constant (seule la longueur peut fuiter).
-fn constant_time_eq(a: &str, b: &str) -> bool {
-    a.as_bytes().ct_eq(b.as_bytes()).into()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn comparaison_constante() {
-        assert!(constant_time_eq("abc", "abc"));
-        assert!(!constant_time_eq("abc", "abd"));
-        assert!(!constant_time_eq("abc", "abcd"));
-        assert!(!constant_time_eq("", "abc"));
+    let chemin = parts.uri.path_and_query().map_or_else(|| parts.uri.path(), |pq| pq.as_str());
+    if let Err(r) = garde.verifier(&entetes, usage, parts.method.as_str(), chemin, &corps, maintenant) {
+        return refus(r.statut());
     }
-
-    #[test]
-    fn hote_local_exact() {
-        for ok in ["localhost", "localhost:7800", "127.0.0.1", "127.0.0.1:7800", "[::1]", "[::1]:7800", "LOCALHOST"] {
-            assert!(hote_local(ok), "{ok}");
-        }
-        for ko in ["localhost.evil.com", "evil.com", "127.0.0.1.evil.com:80", "127.0.0.2", "localhost:abc", "[::1]x", "", "::1"] {
-            assert!(!hote_local(ko), "{ko}");
-        }
-    }
+    parts.extensions.insert(Signataire(entetes.signataire));
+    next.run(Request::from_parts(parts, Body::from(corps))).await
 }

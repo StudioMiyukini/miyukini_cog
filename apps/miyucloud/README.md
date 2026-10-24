@@ -14,7 +14,7 @@ Built in Rust for minimal resource usage. Your files, photos, calendars & contac
 - **PWA** — Installable on iPhone, Android & Desktop as a native-like app.
 - **WOPI** — Collabora Online / OnlyOffice integration for document editing.
 - **NextCloud Compatible** — Legacy NextCloud clients can connect via compatibility layer.
-- **Security** — JWT auth, Argon2id passwords, CSRF protection, rate limiting, audit logging, RLS.
+- **Security** — no shared secret: opaque server-side sessions (`__Host-` cookie), MiyuVisa + proof of possession, device keys (signed requests), Argon2id passwords, CSRF protection, rate limiting, audit logging, RLS.
 - **RGPD / GDPR** — Data export, erasure, consent management.
 - **Encryption at Rest** — AES-256-GCM for file blobs.
 - **MWS Tunnel** — Connect via Miyukini Webway System for zero-config internet access.
@@ -60,7 +60,7 @@ Hexagonal / Clean Architecture in Rust (Axum + PostgreSQL + sqlx).
 src/
 ├── domain/          # Core entities (File, Folder, User, Calendar, Contact)
 ├── application/     # Use cases, ports (traits), services, DTOs
-├── infrastructure/  # PostgreSQL repos, JWT, Argon2, encryption, caching
+├── infrastructure/  # PostgreSQL repos, sessions, Argon2, encryption, caching
 ├── interfaces/      # HTTP handlers, middleware, WebDAV/CalDAV/CardDAV
 └── common/          # Config, DI container, error types
 ```
@@ -84,7 +84,7 @@ Access `/mobile` for guided installation.
 
 | Control | Implementation |
 |---|---|
-| Authentication | JWT HS256 + BLAKE3 cache, Argon2id, OIDC/SSO |
+| Authentication | Opaque server-side sessions, MiyuVisa + PoP, Ed25519 device keys, Argon2id, OIDC/SSO |
 | Authorization | RBAC + PostgreSQL Row-Level Security |
 | Encryption at rest | AES-256-GCM (opt-in) |
 | Audit logging | Persistent `audit.events` table |

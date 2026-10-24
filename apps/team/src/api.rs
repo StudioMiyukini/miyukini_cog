@@ -7,7 +7,7 @@
 //! Routes d'enregistrement et heartbeat des nœuds MAIA.
 
 use axum::{
-    extract::{Path, State},
+    extract::{Extension, Path, State},
     http::StatusCode,
     response::IntoResponse,
     Json,
@@ -15,8 +15,9 @@ use axum::{
 use serde::Deserialize;
 use serde_json::json;
 
+use crate::auth::Signataire;
 use crate::mws::policy::validate_node_url;
-use crate::nodes::registry::{NodeHealth, NodeInfo};
+use crate::nodes::registry::{NodeHealth, NodeInfo, RefusEnregistrement};
 use crate::AppState;
 
 /// Nombre maximal de nœuds dans le registre (C-13).
@@ -46,9 +47,11 @@ fn bad_request(msg: &str) -> axum::response::Response {
 /// POST /team/register — enregistrement d'un nœud MAIA.
 ///
 /// L'URL du nœud est validée (anti-SSRF) : http(s), politique d'isolation,
-/// loopback ou `node_allowed_hosts`. Refus → 400.
+/// loopback ou `node_allowed_hosts`. Refus → 400. Le nœud est lié à la clé
+/// qui a signé la requête : un identifiant déjà lié à une autre clé → 409.
 pub async fn register_node(
     State(state): State<AppState>,
+    Extension(Signataire(signataire)): Extension<Signataire>,
     Json(info): Json<NodeInfo>,
 ) -> axum::response::Response {
     if !node_fields_within_bounds(&info) {
@@ -63,12 +66,23 @@ pub async fn register_node(
         return bad_request(&format!("maia_url refusée : {e}"));
     }
     let id = info.id.clone();
-    if !state.registry.register_bounded(info, MAX_NODES) {
-        return (
-            StatusCode::SERVICE_UNAVAILABLE,
-            Json(json!({ "error": "registre de nœuds plein" })),
-        )
-            .into_response();
+    match state.registry.register_signed(info, MAX_NODES, signataire) {
+        Ok(()) => {}
+        Err(RefusEnregistrement::Plein) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(json!({ "error": "registre de nœuds plein" })),
+            )
+                .into_response();
+        }
+        Err(RefusEnregistrement::AutreSignataire) => {
+            tracing::warn!("Enregistrement refusé ({id}) : identifiant lié à une autre clé");
+            return (
+                StatusCode::CONFLICT,
+                Json(json!({ "error": "identifiant de nœud lié à une autre clé" })),
+            )
+                .into_response();
+        }
     }
     tracing::info!("Nœud enregistré : {id}");
     Json(json!({
@@ -94,8 +108,9 @@ pub struct HeartbeatRequest {
 
 pub async fn node_heartbeat(
     State(state): State<AppState>,
+    Extension(Signataire(signataire)): Extension<Signataire>,
     Json(req): Json<HeartbeatRequest>,
-) -> impl IntoResponse {
+) -> axum::response::Response {
     let health = req.health.unwrap_or(NodeHealth {
         model: req.model_active.clone(),
         backend: None,
@@ -105,19 +120,27 @@ pub async fn node_heartbeat(
         capabilities_tts: false,
     });
 
-    state.registry.heartbeat(&req.id, health, req.model_active, req.persona);
+    if !state
+        .registry
+        .heartbeat_signed(&req.id, signataire, health, req.model_active, req.persona)
+    {
+        return (StatusCode::NOT_FOUND, Json(json!({ "error": "nœud inconnu pour cette clé" }))).into_response();
+    }
     tracing::debug!("Heartbeat reçu : {}", req.id);
-    Json(json!({ "ack": true }))
+    Json(json!({ "ack": true })).into_response()
 }
 
 /// DELETE /team/nodes/:id — désenregistrement propre.
 pub async fn unregister_node(
     State(state): State<AppState>,
+    Extension(Signataire(signataire)): Extension<Signataire>,
     Path(node_id): Path<String>,
-) -> impl IntoResponse {
-    state.registry.unregister(&node_id);
+) -> axum::response::Response {
+    if !state.registry.unregister_signed(&node_id, signataire) {
+        return (StatusCode::NOT_FOUND, Json(json!({ "error": "nœud inconnu pour cette clé" }))).into_response();
+    }
     tracing::info!("Nœud désenregistré : {node_id}");
-    Json(json!({ "unregistered": true }))
+    Json(json!({ "unregistered": true })).into_response()
 }
 
 /// GET /team/nodes — liste des nœuds (vue interne).

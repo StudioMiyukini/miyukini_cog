@@ -24,6 +24,24 @@ use crate::interfaces::api::cookie_auth;
 use crate::interfaces::errors::AppError;
 use crate::interfaces::middleware::auth::CurrentUserId;
 
+/// Pose les cookies de session (identifiant opaque), de rafraîchissement et CSRF.
+fn poser_cookies_session(
+    response: &mut Response,
+    auth_response: &crate::application::dtos::user_dto::AuthResponseDto,
+    state: &AppState,
+) {
+    let refresh_secs = state.core.config.auth.refresh_token_expiry_secs;
+    cookie_auth::append_auth_cookies(
+        response.headers_mut(),
+        &auth_response.access_token,
+        &auth_response.refresh_token,
+        auth_response.expires_in,
+        refresh_secs,
+    );
+    // Le jeton CSRF vit aussi longtemps que la session rafraîchissable.
+    cookie_auth::append_csrf_cookie(response.headers_mut(), refresh_secs);
+}
+
 /// Public auth routes — no authentication required.
 pub fn auth_public_routes() -> Router<Arc<AppState>> {
     Router::new()
@@ -205,14 +223,7 @@ async fn login(
 
             // ── Set HttpOnly cookies so the browser never stores tokens in JS ──
             let mut response = (StatusCode::OK, Json(&auth_response)).into_response();
-            cookie_auth::append_auth_cookies(
-                response.headers_mut(),
-                &auth_response.access_token,
-                &auth_response.refresh_token,
-                auth_response.expires_in,
-                state.core.config.auth.refresh_token_expiry_secs,
-            );
-            cookie_auth::append_csrf_cookie(response.headers_mut(), auth_response.expires_in);
+            poser_cookies_session(&mut response, &auth_response, &state);
             Ok(response)
         }
         Err(err) => {
@@ -226,7 +237,7 @@ async fn login(
 
 /// Token refresh — accepts the refresh token from **either**:
 /// 1. JSON body `{ "refresh_token": "..." }` (API clients, backward compat)
-/// 2. HttpOnly cookie `miyucloud_refresh` (browsers)
+/// 2. HttpOnly cookie `__Secure-miyucloud_refresh` (browsers)
 async fn refresh_token(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
@@ -243,7 +254,7 @@ async fn refresh_token(
     let refresh_tok = serde_json::from_slice::<RefreshTokenDto>(&body)
         .ok()
         .map(|dto| dto.refresh_token)
-        .or_else(|| cookie_auth::extract_cookie_value(&headers, cookie_auth::REFRESH_COOKIE))
+        .or_else(|| cookie_auth::extract_refresh_cookie(&headers))
         .ok_or_else(|| AppError::unauthorized("Refresh token required (JSON body or cookie)"))?;
 
     let dto = RefreshTokenDto {
@@ -258,14 +269,7 @@ async fn refresh_token(
     tracing::info!("Token refresh successful, new token issued");
 
     let mut response = (StatusCode::OK, Json(&auth_response)).into_response();
-    cookie_auth::append_auth_cookies(
-        response.headers_mut(),
-        &auth_response.access_token,
-        &auth_response.refresh_token,
-        auth_response.expires_in,
-        state.core.config.auth.refresh_token_expiry_secs,
-    );
-    cookie_auth::append_csrf_cookie(response.headers_mut(), auth_response.expires_in);
+    poser_cookies_session(&mut response, &auth_response, &state);
     Ok(response)
 }
 
@@ -338,21 +342,31 @@ async fn logout(
         .as_ref()
         .ok_or_else(|| AppError::internal_error("Authentication service not configured"))?;
 
-    // Extract the REFRESH token (not the access token) so the service can
-    // look up and revoke the correct session.
-    // Strategy: try JSON body first (API clients), then HttpOnly cookie (browsers).
+    // 1. Ferme la session d'accès présentée (identifiant opaque, Bearer ou cookie).
+    let access = headers
+        .get(axum::http::header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "))
+        .map(|t| t.trim().to_string())
+        .or_else(|| cookie_auth::extract_session_cookie(&headers));
+    if let Some(token) = access {
+        auth_service
+            .auth_application_service
+            .revoke_access_token(&token);
+    }
+
+    // 2. Révoque la session de rafraîchissement si elle est présentée
+    //    (corps JSON pour les clients API, cookie pour le navigateur).
     let refresh_token = serde_json::from_slice::<RefreshTokenDto>(&body)
         .ok()
         .map(|dto| dto.refresh_token)
-        .or_else(|| cookie_auth::extract_cookie_value(&headers, cookie_auth::REFRESH_COOKIE))
-        .ok_or_else(|| {
-            AppError::unauthorized("Refresh token required for logout (JSON body or cookie)")
-        })?;
-
-    auth_service
-        .auth_application_service
-        .logout(user_id, &refresh_token)
-        .await?;
+        .or_else(|| cookie_auth::extract_refresh_cookie(&headers));
+    if let Some(refresh_token) = refresh_token {
+        auth_service
+            .auth_application_service
+            .logout(user_id, &refresh_token)
+            .await?;
+    }
 
     // Clear HttpOnly + CSRF cookies so the browser forgets the session
     let mut response = StatusCode::OK.into_response();
@@ -682,13 +696,6 @@ async fn oidc_exchange(
 
     // Set HttpOnly cookies for the browser
     let mut response = (StatusCode::OK, Json(&auth_response)).into_response();
-    cookie_auth::append_auth_cookies(
-        response.headers_mut(),
-        &auth_response.access_token,
-        &auth_response.refresh_token,
-        auth_response.expires_in,
-        state.core.config.auth.refresh_token_expiry_secs,
-    );
-    cookie_auth::append_csrf_cookie(response.headers_mut(), auth_response.expires_in);
+    poser_cookies_session(&mut response, &auth_response, &state);
     Ok(response)
 }

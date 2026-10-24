@@ -2,32 +2,33 @@
 //! @do     definir_device_code_lifetime_secs
 //! @role   securite
 //! @layer  app
-//! @human  miyucloud — module « application services device auth service ».
+//! @human  miyucloud — flux d'appareil RFC 8628 terminé par l'enregistrement d'une clé d'appareil.
 
-//! OAuth 2.0 Device Authorization Grant service (RFC 8628).
+//! OAuth 2.0 Device Authorization Grant (RFC 8628), sans jeton porteur (lot 2, #21).
 //!
-//! Orchestrates the full device flow:
-//!   1. `initiate` — generates device_code + user_code, stores in DB
-//!   2. `verify_user_code` — looks up pending code for the verification page
-//!   3. `approve` — user approves, tokens are generated and stored
-//!   4. `deny` — user denies the request
-//!   5. `poll` — client polls by device_code; returns tokens or status error
-//!   6. `cleanup_expired` — background job to purge stale entries
+//!   1. `initiate` — le client envoie sa **clé publique Ed25519** ; device_code +
+//!      user_code sont générés et stockés ;
+//!   2. `verify_user_code` — page de vérification ;
+//!   3. `approve` — l'utilisateur connecté approuve : la clé de l'appareil est
+//!      **enregistrée** pour lui (portées du flux) ; aucun jeton n'est créé ;
+//!   4. `deny` ;
+//!   5. `poll` — le client apprend que sa clé est enregistrée (`MiyuSignature`) et
+//!      signe désormais chaque requête ([`crate::infrastructure::services::miyu_auth_service`]) ;
+//!   6. `cleanup_expired`.
+//!
+//! Avant : la fin du flux délivrait un Bearer JWT HS256 signé par le secret
+//! partagé `MIYUCLOUD_JWT_SECRET`, stocké en clair dans `auth.device_codes`.
 
 use std::sync::Arc;
 
 use crate::application::dtos::device_auth_dto::*;
-use crate::application::ports::auth_ports::SessionStoragePort;
-use crate::application::ports::auth_ports::{
-    DeviceCodeStoragePort, TokenServicePort, UserStoragePort,
-};
+use crate::application::ports::auth_ports::DeviceCodeStoragePort;
 use crate::common::errors::{DomainError, ErrorKind};
 use crate::domain::entities::device_code::{DeviceCode, DeviceCodeStatus};
-use crate::domain::entities::session::Session;
-use crate::infrastructure::repositories::pg::DeviceCodePgRepository;
-use crate::infrastructure::repositories::pg::SessionPgRepository;
-use crate::infrastructure::repositories::pg::UserPgRepository;
-use crate::infrastructure::services::jwt_service::JwtTokenService;
+use crate::infrastructure::repositories::pg::{DeviceCodePgRepository, MiyuIdentityPgRepository};
+use crate::infrastructure::services::miyu_auth_service::{
+    MiyuIdentityStore, USAGE_APPAREIL, analyser_cle_publique,
+};
 use uuid::Uuid;
 
 /// Default device code lifetime: 15 minutes (RFC 8628 recommends 5-30 min).
@@ -40,32 +41,53 @@ const DEFAULT_POLL_INTERVAL: i32 = 5;
 const DEVICE_CODE_BYTES: usize = 32;
 
 /// User code format: 4 uppercase letters + hyphen + 4 digits → "ABCD-1234"
-/// Short enough to type, long enough to avoid collisions with 26^4 * 10^4 = ~4.5 billion combos.
 const USER_CODE_LETTER_LEN: usize = 4;
 const USER_CODE_DIGIT_LEN: usize = 4;
 
-pub struct DeviceAuthService {
-    device_code_storage: Arc<DeviceCodePgRepository>,
-    token_service: Arc<JwtTokenService>,
-    user_storage: Arc<UserPgRepository>,
-    session_storage: Arc<SessionPgRepository>,
+/// Portées qu'une clé d'appareil peut recevoir (fail-closed : le reste est refusé).
+const PORTEES_APPAREIL: &[&str] = &["webdav", "caldav", "carddav", "api"];
+
+/// Normalise et valide les portées demandées.
+fn portees_valides(scopes: &str) -> Result<String, DomainError> {
+    let mut retenues: Vec<&str> = Vec::new();
+    for p in scopes.split(',').map(str::trim).filter(|p| !p.is_empty()) {
+        if !PORTEES_APPAREIL.contains(&p) {
+            return Err(DomainError::new(
+                ErrorKind::InvalidInput,
+                "DeviceCode",
+                format!("Unsupported scope: {p}"),
+            ));
+        }
+        if !retenues.contains(&p) {
+            retenues.push(p);
+        }
+    }
+    if retenues.is_empty() {
+        return Err(DomainError::new(
+            ErrorKind::InvalidInput,
+            "DeviceCode",
+            "At least one scope is required",
+        ));
+    }
+    Ok(retenues.join(","))
+}
+
+pub struct DeviceAuthService<D = DeviceCodePgRepository, S = MiyuIdentityPgRepository>
+where
+    D: DeviceCodeStoragePort,
+    S: MiyuIdentityStore,
+{
+    device_code_storage: Arc<D>,
+    keys: Arc<S>,
     /// Base URL of the server (e.g. "https://cloud.example.com")
     base_url: String,
 }
 
-impl DeviceAuthService {
-    pub fn new(
-        device_code_storage: Arc<DeviceCodePgRepository>,
-        token_service: Arc<JwtTokenService>,
-        user_storage: Arc<UserPgRepository>,
-        session_storage: Arc<SessionPgRepository>,
-        base_url: String,
-    ) -> Self {
+impl<D: DeviceCodeStoragePort, S: MiyuIdentityStore> DeviceAuthService<D, S> {
+    pub fn new(device_code_storage: Arc<D>, keys: Arc<S>, base_url: String) -> Self {
         Self {
             device_code_storage,
-            token_service,
-            user_storage,
-            session_storage,
+            keys,
             base_url,
         }
     }
@@ -81,6 +103,19 @@ impl DeviceAuthService {
         &self,
         req: DeviceAuthorizeRequestDto,
     ) -> Result<DeviceAuthorizeResponseDto, DomainError> {
+        let cle = req
+            .device_public_key
+            .as_deref()
+            .and_then(analyser_cle_publique)
+            // Clé faible ou invalide : refusée à chaque requête (verify_strict).
+            .ok_or_else(|| {
+                DomainError::new(
+                    ErrorKind::InvalidInput,
+                    "DeviceCode",
+                    "device_public_key (Ed25519, 64 hex or base64url) is required",
+                )
+            })?;
+        let scopes = portees_valides(&req.scope)?;
         let device_code_token = generate_device_code();
         let user_code = generate_user_code();
 
@@ -90,8 +125,9 @@ impl DeviceAuthService {
         let dc = DeviceCode::new(
             device_code_token.clone(),
             user_code.clone(),
-            req.client_name,
-            req.scope,
+            req.client_name.chars().take(255).collect(),
+            scopes,
+            cle,
             verification_uri.clone(),
             Some(verification_uri_complete.clone()),
             DEVICE_CODE_LIFETIME_SECS,
@@ -158,10 +194,10 @@ impl DeviceAuthService {
     // 3. Approve — authenticated user approves the device code
     // ========================================================================
 
-    /// Approve a device code, generating tokens for the polling client.
+    /// Approuve un flux : la clé de l'appareil est enregistrée pour `user_id`.
     ///
     /// * `user_code` — the code from the verification page
-    /// * `user_id` — the authenticated user's ID (from session/JWT)
+    /// * `user_id` — the authenticated user's ID (session)
     pub async fn approve(&self, user_code: &str, user_id: Uuid) -> Result<(), DomainError> {
         let normalized = user_code.trim().to_uppercase().replace(' ', "");
 
@@ -178,25 +214,18 @@ impl DeviceAuthService {
             ));
         }
 
-        // Fetch user to generate tokens
-        let user = self.user_storage.get_user_by_id(user_id).await?;
-
-        // Generate internal JWT access token + refresh token
-        let access_token = self.token_service.generate_access_token(&user)?;
-        let refresh_token = self.token_service.generate_refresh_token();
-
-        // Persist refresh token as a session
-        let session = Session::new(
-            user_id,
-            refresh_token.clone(),
-            None,                                         // ip_address
-            Some(format!("device:{}", dc.client_name())), // user_agent
-            self.token_service.refresh_token_expiry_days(),
-        );
-        self.session_storage.create_session(session).await?;
-
-        // Store tokens on the device code entity
-        dc.authorize(user_id, access_token, refresh_token);
+        let cle = *dc.device_public_key().ok_or_else(|| {
+            DomainError::new(
+                ErrorKind::InvalidInput,
+                "DeviceCode",
+                "Device code has no device key",
+            )
+        })?;
+        // Enregistre la clé de l'appareil (aucun jeton n'est créé).
+        self.keys
+            .register_device_key(user_id, &cle, dc.client_name(), dc.scopes())
+            .await?;
+        dc.authorize(user_id);
         self.device_code_storage.update_device_code(dc).await?;
 
         tracing::info!(
@@ -232,8 +261,8 @@ impl DeviceAuthService {
     // 5. Poll — client polls by device_code for tokens
     // ========================================================================
 
-    /// Client polls for tokens. Returns:
-    /// - `Ok(DeviceTokenSuccessDto)` if authorized
+    /// Le client interroge le flux. Rend :
+    /// - `Ok(DeviceTokenSuccessDto)` si la clé est enregistrée
     /// - `Err` with specific RFC 8628 error codes for pending/slow_down/expired/denied
     pub async fn poll(&self, device_code: &str) -> Result<DeviceTokenSuccessDto, DevicePollError> {
         let mut dc = self
@@ -265,20 +294,24 @@ impl DeviceAuthService {
                 Err(DevicePollError::AuthorizationPending)
             }
             DeviceCodeStatus::Authorized => {
-                let access_token = dc.access_token().unwrap_or_default().to_string();
-                let refresh_token = dc.refresh_token().unwrap_or_default().to_string();
-                let scope = dc.scopes().to_string();
-
-                // Delete the device code row now that tokens have been retrieved.
-                // This prevents plain-text tokens from lingering in the database.
+                let cle = *dc
+                    .device_public_key()
+                    .ok_or(DevicePollError::InvalidDeviceCode)?;
+                let enregistree = self
+                    .keys
+                    .active_device_key(&cle)
+                    .await
+                    .ok()
+                    .flatten()
+                    .ok_or(DevicePollError::AccessDenied)?;
+                // Le code a servi : il est supprimé.
                 let _ = self.device_code_storage.delete_by_id(dc.id()).await;
-
                 Ok(DeviceTokenSuccessDto {
-                    access_token,
-                    token_type: "Bearer".to_string(),
-                    refresh_token,
-                    expires_in: self.token_service.refresh_token_expiry_secs(),
-                    scope,
+                    token_type: "MiyuSignature".to_string(),
+                    device_id: enregistree.id.to_string(),
+                    device_public_key: enregistree.public_key,
+                    usage: USAGE_APPAREIL.to_string(),
+                    scope: enregistree.scopes,
                 })
             }
             DeviceCodeStatus::Denied => Err(DevicePollError::AccessDenied),
@@ -306,37 +339,36 @@ impl DeviceAuthService {
         &self,
         user_id: Uuid,
     ) -> Result<Vec<DeviceInfoDto>, DomainError> {
-        let codes = self.device_code_storage.list_by_user(user_id).await?;
-        Ok(codes
+        let cles = self.keys.list_device_keys(user_id).await?;
+        Ok(cles
             .into_iter()
-            .map(|dc| DeviceInfoDto {
-                id: dc.id().to_string(),
-                client_name: dc.client_name().to_string(),
-                scopes: dc.scopes().to_string(),
-                status: dc.status().as_str().to_string(),
-                created_at: dc.created_at().to_rfc3339(),
-                authorized_at: dc.authorized_at().map(|t| t.to_rfc3339()),
-                expires_at: dc.expires_at().to_rfc3339(),
+            .map(|k| DeviceInfoDto {
+                id: k.id.to_string(),
+                client_name: k.client_name,
+                scopes: k.scopes,
+                status: "authorized".to_string(),
+                created_at: k.created_at.to_rfc3339(),
+                authorized_at: Some(k.created_at.to_rfc3339()),
+                last_used_at: k.last_used_at.map(|t| t.to_rfc3339()),
+                public_key: k.public_key,
             })
             .collect())
     }
 
     // ========================================================================
-    // 8. Revoke — user revokes a device authorization
+    // 8. Revoke — user revokes a device key
     // ========================================================================
 
     pub async fn revoke_device(&self, device_id: Uuid, user_id: Uuid) -> Result<(), DomainError> {
-        // Verify ownership before deleting
-        let devices = self.device_code_storage.list_by_user(user_id).await?;
-        let found = devices.iter().any(|d| d.id() == device_id);
-        if !found {
-            return Err(DomainError::new(
+        if self.keys.revoke_device_key(user_id, device_id).await? {
+            Ok(())
+        } else {
+            Err(DomainError::new(
                 ErrorKind::NotFound,
                 "DeviceCode",
                 "Device authorization not found or not owned by you",
-            ));
+            ))
         }
-        self.device_code_storage.delete_by_id(device_id).await
     }
 }
 
@@ -411,7 +443,9 @@ pub struct DeviceInfoDto {
     pub status: String,
     pub created_at: String,
     pub authorized_at: Option<String>,
-    pub expires_at: String,
+    pub last_used_at: Option<String>,
+    /// Clé publique de l'appareil (base64 URL).
+    pub public_key: String,
 }
 
 // ============================================================================
@@ -447,4 +481,208 @@ fn generate_user_code() -> String {
         .collect();
 
     format!("{}-{}", letters, digits)
+}
+
+#[cfg(test)]
+mod tests {
+    //! Flux d'appareil de bout en bout (sans PostgreSQL) : clé publique au début,
+    //! approbation = enregistrement de la clé, requêtes signées ensuite.
+    use super::*;
+    use crate::infrastructure::services::miyu_auth_service::{
+        MemoireIdentites, MiyuAuthService, RefusMiyu, RequeteProuvee, maintenant,
+    };
+    use miyauth::http::{b64_encoder, signer_requete};
+    use miyusceau::CleSignature;
+    use std::collections::HashMap;
+    use std::sync::Mutex;
+
+    #[derive(Default)]
+    struct MemoireCodes(Mutex<HashMap<Uuid, DeviceCode>>);
+
+    fn introuvable() -> DomainError {
+        DomainError::new(ErrorKind::NotFound, "DeviceCode", "not found")
+    }
+
+    impl DeviceCodeStoragePort for MemoireCodes {
+        async fn create_device_code(&self, dc: DeviceCode) -> Result<DeviceCode, DomainError> {
+            self.0.lock().unwrap().insert(dc.id(), dc.clone());
+            Ok(dc)
+        }
+        async fn get_by_device_code(&self, code: &str) -> Result<DeviceCode, DomainError> {
+            let m = self.0.lock().unwrap();
+            m.values()
+                .find(|d| d.device_code() == code)
+                .cloned()
+                .ok_or_else(introuvable)
+        }
+        async fn get_pending_by_user_code(&self, code: &str) -> Result<DeviceCode, DomainError> {
+            let m = self.0.lock().unwrap();
+            m.values()
+                .find(|d| {
+                    d.user_code() == code
+                        && d.status() == DeviceCodeStatus::Pending
+                        && !d.is_expired()
+                })
+                .cloned()
+                .ok_or_else(introuvable)
+        }
+        async fn update_device_code(&self, dc: DeviceCode) -> Result<(), DomainError> {
+            self.0.lock().unwrap().insert(dc.id(), dc);
+            Ok(())
+        }
+        async fn delete_expired(&self) -> Result<u64, DomainError> {
+            Ok(0)
+        }
+        async fn list_by_user(&self, user_id: Uuid) -> Result<Vec<DeviceCode>, DomainError> {
+            let m = self.0.lock().unwrap();
+            Ok(m.values()
+                .filter(|d| d.user_id() == Some(user_id))
+                .cloned()
+                .collect())
+        }
+        async fn delete_by_id(&self, id: Uuid) -> Result<(), DomainError> {
+            self.0.lock().unwrap().remove(&id);
+            Ok(())
+        }
+    }
+
+    fn bloquer<F: std::future::Future>(f: F) -> F::Output {
+        tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap()
+            .block_on(f)
+    }
+
+    fn requete(cle: Option<String>, scope: &str) -> DeviceAuthorizeRequestDto {
+        DeviceAuthorizeRequestDto {
+            client_name: "rclone".to_string(),
+            scope: scope.to_string(),
+            device_public_key: cle,
+        }
+    }
+
+    #[test]
+    fn device_flow_end_to_end_registers_key_and_issues_no_bearer() {
+        let codes = Arc::new(MemoireCodes::default());
+        let cles = Arc::new(MemoireIdentites::default());
+        let flux = DeviceAuthService::new(codes, cles.clone(), "https://cloud.test".into());
+        let verif = MiyuAuthService::new(cles, None).unwrap();
+        let appareil = CleSignature::generer();
+        let user = Uuid::new_v4();
+
+        // 1. L'appareil démarre le flux avec sa clé publique.
+        let debut = bloquer(flux.initiate(requete(
+            Some(b64_encoder(&appareil.cle_publique())),
+            "webdav, caldav",
+        )))
+        .unwrap();
+        // 2. En attente.
+        assert!(matches!(
+            bloquer(flux.poll(&debut.device_code)),
+            Err(DevicePollError::AuthorizationPending)
+        ));
+        assert!(
+            bloquer(flux.verify_user_code(&debut.user_code))
+                .unwrap()
+                .valid
+        );
+        // 3. L'utilisateur approuve.
+        bloquer(flux.approve(&debut.user_code, user)).unwrap();
+        // 4. Fin du flux : aucun jeton, la clé est enregistrée.
+        let fin = bloquer(flux.poll(&debut.device_code)).unwrap();
+        assert_eq!(fin.token_type, "MiyuSignature");
+        assert_eq!(fin.usage, USAGE_APPAREIL);
+        assert_eq!(fin.scope, "webdav,caldav");
+        assert_eq!(fin.device_public_key, b64_encoder(&appareil.cle_publique()));
+        let json = serde_json::to_value(&fin).unwrap();
+        assert!(json.get("access_token").is_none() && json.get("refresh_token").is_none());
+        // Le code a servi : un second relevé échoue.
+        assert!(matches!(
+            bloquer(flux.poll(&debut.device_code)),
+            Err(DevicePollError::InvalidDeviceCode)
+        ));
+
+        // 5. L'appareil signe ses requêtes : acceptée.
+        let t = maintenant();
+        let e = signer_requete(&appareil, USAGE_APPAREIL, "PROPFIND", "/webdav/", b"", t);
+        let h = e.en_entetes();
+        let r = RequeteProuvee {
+            methode: "PROPFIND",
+            chemin: "/webdav/",
+            chemin_et_requete: "/webdav/",
+            corps: b"",
+        };
+        let (en, cle) = bloquer(verif.preparer_appareil(
+            Some(&h[0].1),
+            Some(&h[1].1),
+            Some(&h[2].1),
+            Some(&h[3].1),
+            t,
+        ))
+        .unwrap();
+        assert_eq!(cle.user_id, user);
+        assert_eq!(cle.id.to_string(), fin.device_id);
+        verif.verifier_appareil(&en, r, t).unwrap();
+
+        // 6. Révocation depuis le profil : refusée ensuite.
+        let liste = bloquer(flux.list_user_devices(user)).unwrap();
+        assert_eq!(liste.len(), 1);
+        bloquer(flux.revoke_device(cle.id, user)).unwrap();
+        assert!(bloquer(flux.list_user_devices(user)).unwrap().is_empty());
+        let e2 = signer_requete(&appareil, USAGE_APPAREIL, "PROPFIND", "/webdav/", b"", t);
+        let h2 = e2.en_entetes();
+        assert!(matches!(
+            bloquer(verif.preparer_appareil(
+                Some(&h2[0].1),
+                Some(&h2[1].1),
+                Some(&h2[2].1),
+                Some(&h2[3].1),
+                t
+            )),
+            Err(RefusMiyu::AppareilInconnu)
+        ));
+        // Un autre utilisateur ne peut pas révoquer la clé d'autrui.
+        assert!(bloquer(flux.revoke_device(cle.id, Uuid::new_v4())).is_err());
+    }
+
+    #[test]
+    fn device_flow_requires_a_public_key_and_known_scopes() {
+        let flux = DeviceAuthService::new(
+            Arc::new(MemoireCodes::default()),
+            Arc::new(MemoireIdentites::default()),
+            "https://cloud.test".into(),
+        );
+        assert!(bloquer(flux.initiate(requete(None, "webdav"))).is_err());
+        assert!(bloquer(flux.initiate(requete(Some("pas une clé".into()), "webdav"))).is_err());
+        let cle = Some(b64_encoder(&CleSignature::generer().cle_publique()));
+        assert!(bloquer(flux.initiate(requete(cle.clone(), "admin"))).is_err());
+        assert!(bloquer(flux.initiate(requete(cle.clone(), ""))).is_err());
+        assert!(bloquer(flux.initiate(requete(cle, "webdav"))).is_ok());
+    }
+
+    #[test]
+    fn denied_flow_registers_nothing() {
+        let cles = Arc::new(MemoireIdentites::default());
+        let flux = DeviceAuthService::new(
+            Arc::new(MemoireCodes::default()),
+            cles.clone(),
+            "https://cloud.test".into(),
+        );
+        let appareil = CleSignature::generer();
+        let debut = bloquer(flux.initiate(requete(
+            Some(hex::encode(appareil.cle_publique())),
+            "webdav",
+        )))
+        .unwrap();
+        bloquer(flux.deny(&debut.user_code)).unwrap();
+        assert!(matches!(
+            bloquer(flux.poll(&debut.device_code)),
+            Err(DevicePollError::AccessDenied)
+        ));
+        assert!(
+            bloquer(cles.active_device_key(&appareil.cle_publique()))
+                .unwrap()
+                .is_none()
+        );
+    }
 }

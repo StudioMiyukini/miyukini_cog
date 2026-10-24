@@ -28,7 +28,7 @@ use crate::application::dtos::device_auth_dto::*;
 use crate::application::services::device_auth_service::DeviceAuthService;
 use crate::common::di::AppState;
 use crate::interfaces::errors::AppError;
-use crate::interfaces::middleware::auth::AuthUser;
+use crate::interfaces::middleware::auth::{AuthUser, SessionUser};
 
 /// Create the device auth router.
 ///
@@ -144,7 +144,7 @@ async fn device_verify_info(
 
 async fn device_verify_action(
     State(state): State<Arc<AppState>>,
-    auth_user: AuthUser,
+    auth_user: SessionUser,
     Json(body): Json<DeviceVerifyRequestDto>,
 ) -> Result<impl IntoResponse, AppError> {
     let device_service = get_device_service(&state)?;
@@ -183,7 +183,7 @@ async fn device_verify_action(
 
 async fn list_devices(
     State(state): State<Arc<AppState>>,
-    auth_user: AuthUser,
+    auth_user: SessionUser,
 ) -> Result<impl IntoResponse, AppError> {
     let device_service = get_device_service(&state)?;
 
@@ -204,7 +204,7 @@ async fn list_devices(
 
 async fn revoke_device(
     State(state): State<Arc<AppState>>,
-    auth_user: AuthUser,
+    auth_user: SessionUser,
     Path(device_id): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
     let device_service = get_device_service(&state)?;

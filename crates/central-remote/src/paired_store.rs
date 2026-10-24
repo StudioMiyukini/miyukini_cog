@@ -67,6 +67,9 @@ struct StoredDevice {
     /// Date d'approbation (secondes UNIX).
     paired_at: u64,
     mode: String,
+    /// Profil Central titulaire (absent dans les fichiers antérieurs).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    profile_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -128,6 +131,7 @@ pub fn load_paired_devices(path: &Path) -> Result<Vec<PairedDevice>, PairedStore
             last_seen: d.paired_at,
             mode: d.mode,
             e2e_identity_key: d.e2e_identity_key,
+            profile_id: d.profile_id,
         });
     }
     Ok(out)
@@ -145,6 +149,13 @@ fn validate_entry(d: &StoredDevice) -> Result<(), PairedStoreError> {
     }
     if d.mode.len() > 32 || d.mode.chars().any(char::is_control) {
         return Err(PairedStoreError::Malformed("mode"));
+    }
+    if d
+        .profile_id
+        .as_ref()
+        .is_some_and(|p| p.is_empty() || p.len() > MAX_DEVICE_ID_LEN || p.chars().any(char::is_control))
+    {
+        return Err(PairedStoreError::Malformed("profile_id"));
     }
     // Clé valide (point ed25519 non faible) et forme canonique (minuscules).
     let key = parse_identity_key_hex(&d.e2e_identity_key)
@@ -168,6 +179,7 @@ pub fn save_paired_devices(path: &Path, devices: &[PairedDevice]) -> Result<(), 
             e2e_identity_key: d.e2e_identity_key.clone(),
             paired_at: d.paired_at,
             mode: d.mode.clone(),
+            profile_id: d.profile_id.clone(),
         })
         .collect();
     // Ordre stable (diffs lisibles, contenu déterministe).
@@ -264,6 +276,7 @@ mod tests {
             last_seen: 1_700_000_500,
             mode: "whitelist".into(),
             e2e_identity_key: hex::encode(E2eIdentity::generate().public_key_bytes()),
+            profile_id: None,
         }
     }
 

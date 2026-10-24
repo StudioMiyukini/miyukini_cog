@@ -69,7 +69,9 @@ pub struct ApiConfig {
     #[serde(default)]
     pub cors_origins: Vec<String>,
 
-    /// Registre des clients autorises pour `/auth/token`. Vide (defaut) : la route refuse
+    /// Registre des clients autorises pour `/auth/token` (feature `jeton-secret-client`
+    /// seulement ; sans elle, un registre non vide est refuse a la validation).
+    /// Vide (defaut) : la route refuse
     /// toute demande (fail-closed).
     #[serde(default)]
     pub clients: Vec<ApiClientConfig>,
@@ -124,10 +126,20 @@ impl ApiConfig {
                 }
             }
         }
+        // Secret partage client_id/secret : desactive par defaut (lot 2, #23).
+        #[cfg(not(feature = "jeton-secret-client"))]
+        if !self.clients.is_empty() {
+            return Err(ApiError::InternalError(
+                "config api: api.clients exige la feature `jeton-secret-client` \
+                 (authentification par secret partage desactivee, lot 2)"
+                    .into(),
+            ));
+        }
         for c in &self.clients {
             if c.client_id.is_empty() {
                 return Err(ApiError::InternalError("config api: client_id vide".into()));
             }
+            #[cfg(feature = "jeton-secret-client")]
             argon2::password_hash::PasswordHash::new(&c.secret_hash).map_err(|e| {
                 ApiError::InternalError(format!(
                     "config api: secret_hash invalide pour '{}': {e}",
@@ -249,6 +261,17 @@ mod tests {
         }
     }
 
+    #[cfg(not(feature = "jeton-secret-client"))]
+    #[test]
+    fn test_clients_refused_without_feature() {
+        let cfg = ApiConfig {
+            clients: vec![client(vec![JwtScope::Admin], false)],
+            ..Default::default()
+        };
+        assert!(cfg.validate().is_err(), "secret partage desactive par defaut");
+    }
+
+    #[cfg(feature = "jeton-secret-client")]
     #[test]
     fn test_validate_all_personas_requires_admin_scope() {
         for scopes in [vec![], vec![JwtScope::Read, JwtScope::Write, JwtScope::History]] {

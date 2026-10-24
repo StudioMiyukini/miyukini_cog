@@ -6,33 +6,47 @@
 
 //! Configuration TEAM.
 //!
-//! Sécurité (fail-closed, C-12 / C-21 / C-22) :
+//! Sécurité (fail-closed, C-12 / C-21 / C-22, sortie du lot 2) :
 //! - écoute par défaut sur `127.0.0.1:7800` ;
-//! - une adresse non-loopback exige un secret partagé (`hmac_secret` ou
-//!   variable d'environnement `TEAM_HMAC_SECRET`), sinon refus de démarrer ;
-//! - si un secret est configuré, **toutes** les routes (sauf `GET /team/health`)
-//!   exigent `Authorization: Bearer <secret>`, y compris en loopback ;
-//! - sans secret (loopback uniquement), les routes restent ouvertes aux
-//!   processus locaux — comportement de développement, signalé au démarrage ;
+//! - plus de secret partagé : **toutes** les routes (sauf `GET /team/health`)
+//!   exigent une requête signée par un appelant épinglé (`noeuds_autorises`
+//!   pour les nœuds MAIA, `clients_autorises` pour `/team/nodes` et `/api/*`),
+//!   y compris en loopback ; famille sans clé épinglée ⇒ 503 ;
+//! - une adresse non-loopback exige au moins un appelant épinglé, sinon refus
+//!   de démarrer ; une clé épinglée mal formée ⇒ refus de démarrer ;
+//! - le hub signe ses propres appels aux nœuds MAIA avec sa clé de service
+//!   (graine `cle_service`, fichier 0600 créé une seule fois) ;
+//! - `hmac_secret` / `TEAM_HMAC_SECRET` : obsolètes, ignorés (avertissement) ;
 //! - CORS : liste blanche explicite `cors_allowed_origins`, vide par défaut ;
 //! - URL de nœuds : loopback ou `node_allowed_hosts` (voir `mws::policy`).
 
 use serde::{Deserialize, Serialize};
 
-/// Variable d'environnement prioritaire sur `hmac_secret` du fichier.
+/// Ancienne variable d'environnement du secret partagé (obsolète, ignorée).
 pub const SECRET_ENV_VAR: &str = "TEAM_HMAC_SECRET";
-
-/// Longueur minimale d'un secret configuré (octets).
-pub const MIN_SECRET_LEN: usize = 16;
 
 /// Configuration complète du hub TEAM.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct TeamConfig {
     /// Adresse d'écoute (défaut : "127.0.0.1:7800", loopback uniquement).
-    /// Une adresse non-loopback exige `hmac_secret`.
+    /// Une adresse non-loopback exige au moins un appelant épinglé.
     #[serde(default = "default_bind_addr")]
     pub bind_addr: String,
-    /// Secret partagé avec les nœuds MAIA, présenté en `Authorization: Bearer`.
+    /// Clés publiques Ed25519 (base64 URL ou hex) des nœuds MAIA autorisés à
+    /// s'enregistrer (usage `team/noeud`). Vide : enregistrement refusé (503).
+    #[serde(default)]
+    pub noeuds_autorises: Vec<String>,
+    /// Clés publiques des clients autorisés sur `/team/nodes` et `/api/*`
+    /// (usage `team/api`). Vide : refus (503).
+    #[serde(default)]
+    pub clients_autorises: Vec<String>,
+    /// Graine de la clé de service du hub (signe ses appels aux nœuds MAIA ;
+    /// fichier 0600 créé au premier démarrage).
+    #[serde(default = "default_cle_service")]
+    pub cle_service: String,
+    /// Obsolète (lot 2) : ancien secret partagé. Ignoré — jamais une
+    /// autorisation ; avertissement au démarrage s'il est présent.
+    #[serde(default, skip_serializing)]
     pub hmac_secret: Option<String>,
     /// Origines CORS autorisées (liste explicite ; vide = aucune ; `*` ignoré).
     #[serde(default)]
@@ -62,6 +76,9 @@ impl std::fmt::Debug for TeamConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TeamConfig")
             .field("bind_addr", &self.bind_addr)
+            .field("noeuds_autorises", &self.noeuds_autorises)
+            .field("clients_autorises", &self.clients_autorises)
+            .field("cle_service", &self.cle_service)
             .field("hmac_secret", &self.hmac_secret.as_ref().map(|_| "<masqué>"))
             .field("cors_allowed_origins", &self.cors_allowed_origins)
             .field("node_allowed_hosts", &self.node_allowed_hosts)
@@ -78,6 +95,9 @@ impl Default for TeamConfig {
     fn default() -> Self {
         Self {
             bind_addr: default_bind_addr(),
+            noeuds_autorises: Vec::new(),
+            clients_autorises: Vec::new(),
+            cle_service: default_cle_service(),
             hmac_secret: None,
             cors_allowed_origins: Vec::new(),
             node_allowed_hosts: Vec::new(),
@@ -90,18 +110,31 @@ impl Default for TeamConfig {
     }
 }
 
+/// Clés publiques épinglées `(nœuds, clients)`.
+pub type ClesAutorisees = (Vec<[u8; 32]>, Vec<[u8; 32]>);
+
 impl TeamConfig {
-    /// Secret effectif : `None` si absent ou vide (après trim).
-    pub fn secret(&self) -> Option<&str> {
-        self.hmac_secret
-            .as_deref()
-            .map(str::trim)
-            .filter(|s| !s.is_empty())
+    /// Clés épinglées `(nœuds, clients)`. Une entrée mal formée ⇒ erreur.
+    pub fn cles_autorisees(&self) -> Result<ClesAutorisees, StartupError> {
+        use miyauth::http::service::analyser_cles_publiques;
+        let noeuds = analyser_cles_publiques(&self.noeuds_autorises)
+            .map_err(|e| StartupError::MalformedKey(format!("noeuds_autorises : {e}")))?;
+        let clients = analyser_cles_publiques(&self.clients_autorises)
+            .map_err(|e| StartupError::MalformedKey(format!("clients_autorises : {e}")))?;
+        Ok((noeuds, clients))
+    }
+
+    /// Vrai si l'ancien secret partagé est encore configuré (ignoré).
+    pub fn ancien_secret_present(&self) -> bool {
+        self.hmac_secret.as_deref().is_some_and(|s| !s.trim().is_empty())
     }
 }
 
 fn default_bind_addr() -> String {
     "127.0.0.1:7800".into()
+}
+fn default_cle_service() -> String {
+    "keys/team.seed".into()
 }
 fn default_health_interval() -> u64 {
     30
@@ -139,25 +172,22 @@ impl std::fmt::Display for IsolationPolicy {
 /// Refus de démarrage (une variante par cause, C-11).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StartupError {
-    /// Adresse d'écoute non-loopback sans secret configuré.
-    NonLoopbackWithoutSecret(String),
-    /// Secret configuré mais trop court.
-    SecretTooShort,
+    /// Adresse d'écoute non-loopback sans appelant épinglé.
+    NonLoopbackWithoutCaller(String),
+    /// Clé publique épinglée mal formée.
+    MalformedKey(String),
 }
 
 impl std::fmt::Display for StartupError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::NonLoopbackWithoutSecret(addr) => write!(
+            Self::NonLoopbackWithoutCaller(addr) => write!(
                 f,
                 "Refus de démarrer : bind_addr={addr} n'est pas loopback et aucun \
-                 hmac_secret n'est configuré. Définissez `hmac_secret` (ou \
-                 {SECRET_ENV_VAR}) ou utilisez 127.0.0.1."
+                 appelant n'est épinglé. Renseignez `noeuds_autorises` / \
+                 `clients_autorises` ou utilisez 127.0.0.1."
             ),
-            Self::SecretTooShort => write!(
-                f,
-                "Refus de démarrer : hmac_secret trop court (minimum {MIN_SECRET_LEN} caractères)."
-            ),
+            Self::MalformedKey(e) => write!(f, "Refus de démarrer : clé épinglée invalide ({e})."),
         }
     }
 }
@@ -174,14 +204,11 @@ pub fn is_loopback_bind(bind_addr: &str) -> bool {
 
 /// Valide la configuration avant démarrage.
 pub fn validate_startup(cfg: &TeamConfig) -> Result<(), StartupError> {
-    match cfg.secret() {
-        Some(s) if s.len() < MIN_SECRET_LEN => Err(StartupError::SecretTooShort),
-        None if !is_loopback_bind(&cfg.bind_addr) => {
-            Err(StartupError::NonLoopbackWithoutSecret(cfg.bind_addr.clone()))
-        }
-        // Secret valide, ou loopback sans secret (dev local)
-        _ => Ok(()),
+    let (noeuds, clients) = cfg.cles_autorisees()?;
+    if !is_loopback_bind(&cfg.bind_addr) && noeuds.is_empty() && clients.is_empty() {
+        return Err(StartupError::NonLoopbackWithoutCaller(cfg.bind_addr.clone()));
     }
+    Ok(())
 }
 
 /// Construit la couche CORS à partir de la liste explicite d'origines.
@@ -211,15 +238,21 @@ pub fn build_cors(origins: &[String]) -> tower_http::cors::CorsLayer {
     layer
         .allow_origin(values)
         .allow_methods([Method::GET, Method::POST, Method::DELETE, Method::OPTIONS])
-        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
+        .allow_headers([
+            header::CONTENT_TYPE,
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_SIGNATAIRE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_HORODATAGE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_NONCE),
+            axum::http::HeaderName::from_static(miyauth::http::ENTETE_SIGNATURE),
+        ])
 }
 
 /// Charge la config depuis le fichier TOML ou retourne les défauts.
-/// `TEAM_HMAC_SECRET` (si non vide) remplace `hmac_secret` du fichier.
+/// `TEAM_HMAC_SECRET` (obsolète) est seulement signalé, jamais utilisé.
 pub fn load_or_create() -> TeamConfig {
     let config_path = std::env::var("TEAM_CONFIG").unwrap_or_else(|_| "team.toml".into());
 
-    let mut cfg = if let Ok(content) = std::fs::read_to_string(&config_path) {
+    let cfg = if let Ok(content) = std::fs::read_to_string(&config_path) {
         match toml::from_str(&content) {
             Ok(cfg) => {
                 tracing::info!("Config TEAM chargée depuis {config_path}");
@@ -235,10 +268,8 @@ pub fn load_or_create() -> TeamConfig {
         TeamConfig::default()
     };
 
-    if let Ok(secret) = std::env::var(SECRET_ENV_VAR) {
-        if !secret.trim().is_empty() {
-            cfg.hmac_secret = Some(secret);
-        }
+    if std::env::var(SECRET_ENV_VAR).is_ok_and(|s| !s.trim().is_empty()) {
+        tracing::warn!("{SECRET_ENV_VAR} est obsolète et ignorée : épinglez les clés des nœuds (noeuds_autorises)");
     }
     cfg
 }
@@ -255,45 +286,49 @@ mod tests {
         assert_eq!(validate_startup(&cfg), Ok(()));
     }
 
+    fn cle_b64() -> String {
+        miyauth::http::service::encoder_cle_publique(&miyusceau::CleSignature::generer().cle_publique())
+    }
+
     #[test]
-    fn refus_non_loopback_sans_secret() {
+    fn refus_non_loopback_sans_appelant() {
         let cfg = TeamConfig {
             bind_addr: "0.0.0.0:7800".into(),
             ..TeamConfig::default()
         };
         assert!(matches!(
             validate_startup(&cfg),
-            Err(StartupError::NonLoopbackWithoutSecret(_))
+            Err(StartupError::NonLoopbackWithoutCaller(_))
         ));
-        // Secret vide = absent
+        // L'ancien secret partagé n'autorise plus rien.
         let cfg = TeamConfig {
             bind_addr: "0.0.0.0:7800".into(),
-            hmac_secret: Some("   ".into()),
+            hmac_secret: Some("0123456789abcdef".into()),
             ..TeamConfig::default()
         };
         assert!(matches!(
             validate_startup(&cfg),
-            Err(StartupError::NonLoopbackWithoutSecret(_))
+            Err(StartupError::NonLoopbackWithoutCaller(_))
         ));
     }
 
     #[test]
-    fn non_loopback_avec_secret_accepte() {
+    fn non_loopback_avec_appelant_accepte() {
         let cfg = TeamConfig {
             bind_addr: "0.0.0.0:7800".into(),
-            hmac_secret: Some("0123456789abcdef".into()),
+            noeuds_autorises: vec![cle_b64()],
             ..TeamConfig::default()
         };
         assert_eq!(validate_startup(&cfg), Ok(()));
     }
 
     #[test]
-    fn refus_secret_trop_court() {
+    fn refus_cle_mal_formee() {
         let cfg = TeamConfig {
-            hmac_secret: Some("court".into()),
+            clients_autorises: vec!["pas-une-cle".into()],
             ..TeamConfig::default()
         };
-        assert_eq!(validate_startup(&cfg), Err(StartupError::SecretTooShort));
+        assert!(matches!(validate_startup(&cfg), Err(StartupError::MalformedKey(_))));
     }
 
     #[test]
@@ -305,11 +340,13 @@ mod tests {
     }
 
     #[test]
-    fn debug_masque_le_secret() {
+    fn ancien_secret_masque_et_jamais_reecrit() {
         let cfg = TeamConfig {
             hmac_secret: Some("super-secret-value-123".into()),
             ..TeamConfig::default()
         };
+        assert!(cfg.ancien_secret_present());
         assert!(!format!("{cfg:?}").contains("super-secret-value-123"));
+        assert!(!toml::to_string(&cfg).unwrap().contains("super-secret-value-123"));
     }
 }

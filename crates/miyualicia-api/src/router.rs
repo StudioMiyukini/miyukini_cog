@@ -102,10 +102,11 @@ pub fn build_router(alicia: Arc<AliciaService>, config: ApiConfig, secret: Vec<u
         rate_limiter: crate::security::RateLimiter::new(config.rate_limit_per_min),
     });
 
-    // Routes publiques (sans JWT)
-    let public_routes = Router::new()
-        .route("/health", get(handlers::health::health))
-        .route("/auth/token", post(auth_token_handler));
+    // Routes publiques (sans JWT). `/auth/token` (client_id + secret partage ->
+    // JWT) n'existe qu'avec la feature `jeton-secret-client` (lot 2, #23).
+    let public_routes = Router::new().route("/health", get(handlers::health::health));
+    #[cfg(feature = "jeton-secret-client")]
+    let public_routes = public_routes.route("/auth/token", post(auth_token_handler));
 
     // Routes protegees (JWT requis via extractor JwtAuth)
     let protected_routes = Router::new()
@@ -208,11 +209,12 @@ pub fn build_router(alicia: Arc<AliciaService>, config: ApiConfig, secret: Vec<u
         .with_state(app_state)
 }
 
-/// POST /api/v1/alicia/auth/token
+/// POST /api/v1/alicia/auth/token (feature `jeton-secret-client` seulement).
 ///
 /// Genere un token JWT pour un client authentifie. Le secret est verifie (Argon2id, temps
 /// constant) contre le registre `clients` de la config ; registre vide => refus (fail-closed).
 /// Les scopes et personas viennent de la config du client, jamais du nom du `client_id`.
+#[cfg(feature = "jeton-secret-client")]
 async fn auth_token_handler(
     axum::extract::State(state): axum::extract::State<Arc<AppState>>,
     axum::Json(req): axum::Json<crate::dto::TokenRequest>,

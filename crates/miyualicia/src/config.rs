@@ -118,6 +118,13 @@ pub struct AliciaConfig {
     #[serde(default)]
     pub tts_feature_enabled: bool,
 
+    /// Chemin de la graine (fichier 0600, creee une seule fois) de la cle d'Alicia
+    /// qui signe ses requetes vers MiyuSTT / MiyuTTS (lot 2 : plus de jeton partage ;
+    /// la cle publique est a epingler cote serveurs). Absent : requetes non signees,
+    /// donc refusees par MiyuSTT / MiyuTTS.
+    #[serde(default)]
+    pub cle_voix: Option<String>,
+
     /// Configuration du wake word.
     #[serde(default)]
     pub wake_word: WakeWordConfig,
@@ -194,6 +201,7 @@ impl Default for AliciaConfig {
             stt_service_url: Self::default_stt_service_url(),
             tts_service_url: Self::default_tts_service_url(),
             tts_feature_enabled: false,
+            cle_voix: None,
             wake_word: WakeWordConfig::default(),
             rooms: Self::default_rooms(),
             db_path: Self::default_db_path(),

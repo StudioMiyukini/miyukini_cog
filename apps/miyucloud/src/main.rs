@@ -195,6 +195,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
         use miyucloud_server::interfaces::api::handlers::app_password_handler;
         use miyucloud_server::interfaces::api::handlers::device_auth_handler;
+        use miyucloud_server::interfaces::api::handlers::miyu_auth_handler;
         use miyucloud_server::interfaces::middleware::auth::auth_middleware;
         use miyucloud_server::interfaces::middleware::csrf::csrf_middleware;
         use miyucloud_server::interfaces::middleware::rate_limit::{
@@ -286,7 +287,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ))
             .with_state(app_state.clone());
 
-        // Protected API routes — require valid JWT token + bandwidth throttling
+        // Authentification Miyukini (lot 2) : défis de possession (public, débit
+        // limité : un défi par requête signée par visa) et liaison d'identité.
+        let defi_limiter = Arc::new(RateLimiter::new(600, 60, 100_000));
+        let miyu_public = miyu_auth_handler::miyu_public_routes()
+            .layer(axum::middleware::from_fn_with_state(
+                defi_limiter,
+                rate_limit_refresh,
+            ))
+            .with_state(app_state.clone());
+        let miyu_protected = miyu_auth_handler::miyu_protected_routes()
+            .layer(axum::middleware::from_fn(csrf_middleware))
+            .layer(axum::middleware::from_fn_with_state(
+                app_state.clone(),
+                auth_middleware,
+            ))
+            .with_state(app_state.clone());
+
+        // Protected API routes — session / visa / device key / app password + bandwidth throttling
         let protected_api = api_routes
             .layer(axum::middleware::from_fn_with_state(
                 app_state.clone(),
@@ -329,6 +347,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .nest("/api/auth/device", device_public)
             // Device Auth Grant protected endpoints (verify + device management)
             .nest("/api/auth/device", device_protected)
+            // Authentification Miyukini : défi (public) et liaisons (protégées)
+            .nest("/api/auth/miyu", miyu_public)
+            .nest("/api/auth/miyu", miyu_protected)
             // Public API routes (share access, i18n) — no auth required
             .nest("/api", public_api_routes)
             // All other API routes are protected by auth middleware

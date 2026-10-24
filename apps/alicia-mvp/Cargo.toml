@@ -30,7 +30,9 @@ rodio    = { version = "0.21", default-features = false, features = ["playback",
 uuid     = { version = "1", features = ["v4"] }
 chrono   = "0.4"
 anyhow   = "1"
-rand_core = { version = "0.6", features = ["getrandom"] }  # jeton des serveurs mock (OS RNG, C-24)
+# Requetes signees vers STT/TTS (lot 2 : plus de jeton partage)
+miyauth   = { path = "../../crates/miyauth", features = ["http"] }
+miyusceau = { path = "../../crates/miyusceau" }
 base64   = "0.22"
 rusqlite = { version = "0.32", features = ["bundled"] }
 hound    = "3.5"
