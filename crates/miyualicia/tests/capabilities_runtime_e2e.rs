@@ -847,6 +847,9 @@ async fn pending_older_than_ttl_is_cancelled_and_cannot_be_confirmed() {
             .await
             .unwrap(),
     );
+    // TTL nul : laisser s'écouler quelques millisecondes (la date de création
+    // est convertie en ms par SQLite via julianday, arrondi flottant).
+    tokio::time::sleep(std::time::Duration::from_millis(20)).await;
     let err = rt.confirm_queued(id).await.unwrap_err();
     assert!(matches!(
         err,

@@ -1256,6 +1256,8 @@ async fn expired_pending_cannot_be_confirmed_over_http() {
             .await
             .unwrap(),
     );
+    // TTL nul : laisser s'écouler quelques millisecondes (conversion ms SQLite).
+    tokio::time::sleep(std::time::Duration::from_millis(20)).await;
     for (uri, body) in [
         (format!("/api/v1/alicia/capabilities/pending_confirmations/{id}/confirm"), json!({})),
         ("/api/v1/alicia/capabilities/dispatch/confirm".to_string(), json!({"id": id})),
