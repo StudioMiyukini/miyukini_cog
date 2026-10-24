@@ -215,7 +215,7 @@
 - **EX-09** Signature vérifiée avant tout décodage (canal officiel, Portail)
 - **EX-10** Fuzzing continu de `miyusceau` et des décodeurs du Portail
 - **EX-11** Quotas par session et par zone (LogisticsSteward)
-- **EX-12** IDS : toute tentative de sortie de la zone COG = incident critique
+- **EX-12** IDS (WorrySentinel) : toute tentative de sortie de la zone COG = incident critique, blocage par l'IPS (BorderGuard)
 - **EX-13** Contenu relayé jamais interprété comme instruction par l'IA
 - **EX-14** Révocation d'appareil en un geste, propagée par le registre
 - **EX-15** `Cargo.lock` versionné et `cargo audit` en CI

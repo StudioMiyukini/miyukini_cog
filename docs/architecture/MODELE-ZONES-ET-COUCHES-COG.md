@@ -209,8 +209,8 @@
 - **LogisticsSteward** : calcule et attribue les ressources (taille de la Franche, quotas par service et par session)
 - **CaringNanny** : lit les informations du noyau (ressources disponibles, consommation, pression) et ajuste **sous** les maxima déclarés
 - **StrongFather** : valide le contrat à l'installation
-- **BorderGuard** : applique — paquets autorisés, débit, taille, par service
-- **WorrySentinel** : tout dépassement de contrat = anomalie → incident
+- **BorderGuard** (IPS) : applique — paquets autorisés, débit, taille, par service
+- **WorrySentinel** (IDS) : tout dépassement de contrat = anomalie → incident
 
 **Ce que les Cores produisent**
 - Franche : un slice systemd par service (cgroups CPU / RAM / IO), espace disque borné
@@ -244,16 +244,36 @@
 <!-- @id arch.cog.ids-ips -->
 <!-- @role intrusion-detection -->
 <!-- @layer 3-7 -->
+<!-- @human WorrySentinel = IDS (détecte, ne modifie pas) ; BorderGuard = IPS (bloque aux frontières) -->
 <!-- @do detect_and_block_intrusions -->
 
+**Répartition des rôles**
+- **WorrySentinel = IDS** — détecte et qualifie, **ne modifie rien** (INV-WS-4)
+  - capteurs dans chaque zone : Franche, zone COG, BorderGuard, Portail interne
+  - compare le trafic au **contrat** de chaque service (§10)
+  - fixe le niveau de sécurité du COG
+- **BorderGuard = IPS** — bloque, aux frontières uniquement
+  - pare-feu externe : IPS bloquant (règles, anti-scan, anti-exploitation)
+  - Portail interne : IPS en liste blanche `MSCE`
+  - canal officiel : uniquement objets scellés Origin
+  - applique les décisions de WorrySentinel (bannissement, gel, coupure)
+- **CaringNanny** — santé et ressources (noyau), distinct de la sécurité
+
+**Moteur**
 - Rust, **salle blanche** : aucun code Suricata / Snort (GPLv2 incompatible)
 - Briques permissives : Rusticata, `aho-corasick`, `etherparse`, `nfq`
 - Sous-ensemble de la syntaxe de règles Suricata / Snort
-- BorderGuard : **IPS** bloquant
-- Portail interne : **IPS liste blanche `MSCE`**
-- Canal officiel : uniquement objets scellés Origin
-- Franche, zone COG : IDS (mouvement latéral, tentative de sortie)
-- Réponse : CaringNanny → WorrySentinel → bannissement / gel Franche / coupure Portail → TAMR → registre Merkle
+- Une base de détection commune, deux usages : analyse (WorrySentinel), blocage en ligne (BorderGuard)
+
+**Chaîne de réponse**
+1. Capteur → **WorrySentinel** détecte, qualifie, élève le niveau de sécurité
+2. **BorderGuard** bloque : bannissement / gel de la Franche / coupure du Portail
+3. **TAMR** alerte l'humain pour les décisions lourdes
+4. Inscription au **registre Merkle**
+
+**Détection prioritaire**
+- Franche, zone COG : mouvement latéral, tentative de sortie de la zone COG = incident critique
+- Tout flux hors contrat (§10)
 
 ## 13. Cloisonnement noyau
 
@@ -280,7 +300,7 @@
 - **6 · Présentation** — Sceau v1, chiffrement au repos · *KindMother, WorrySentinel*
 - **5 · Session** — passeport, preuve de possession, visa, Noise · *BorderGuard*
 - **4 · Transport** — ports, débit, sockets locaux · *LogisticsSteward, BorderGuard*
-- **3 · Réseau** — zones, pare-feu, IDS/IPS, WireGuard · *BorderGuard, WorrySentinel*
+- **3 · Réseau** — zones, pare-feu, IPS (BorderGuard), IDS (WorrySentinel), WireGuard · *BorderGuard, WorrySentinel*
 - **Kernel** — lockdown, modules signés, dm-verity, TPM, A/B signées · *WorrySentinel, EverBuddy*
 - Couches 1–2 : matériel et pilotes (hors COG)
 
