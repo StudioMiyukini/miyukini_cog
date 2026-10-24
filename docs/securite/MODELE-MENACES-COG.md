@@ -37,6 +37,8 @@
 - **M6** Contenu qui détourne l'IA (injection de prompt)
 - **M7** Accès physique à la machine
 - **M8** Chaîne d'approvisionnement (dépendance, compilation)
+- **M9** Coalition de COG (Sybil, fausses confirmations, fausse blacklist, éclipse)
+- **M10** Manipulation du temps (horloge recalée pour ressusciter des titres)
 
 ## 3. Canal officiel
 
@@ -222,6 +224,24 @@
 - **EX-16** Contrat de ressources et de flux dans le manifeste signé de chaque service
 - **EX-17** Tout flux non déclaré refusé ; dépassement de contrat = incident (WorrySentinel)
 - **EX-18** Arrêtés des Cores bornés par la constitution réseau, inscrits au registre
+- **EX-19** Une instance BorderGuard par frontière ; vérification finale côté zone COG
+- **EX-20** Canal officiel : dépôt officiel relevé via le Portail, aucune route vers la zone COG
+- **EX-21** Zone COG segmentée : sandbox par service, données via KindMother, clé de DB par service
+- **EX-22** Horloge monotone ancrée sur horodatages signés Origin
+- **EX-23** Contenu non fiable jamais rendu tel quel en zone COG (formats assainis, WebView sans réseau, CSP)
+- **EX-24** Racine en Shamir 2 sur 3, cérémonie de rotation guidée
+- **EX-25** Une clé par usage (passeports, visas, arrêtés, journal)
+- **EX-26** Correctifs OS et modèles IA uniquement via le canal officiel, signés
+- **EX-27** Sauvegarde hors site chiffrée par clé hors ligne, vers un pair fédéré
+- **EX-28** Amorçage : image signée, empreinte publiée hors bande
+- **EX-29** Un espace isolé et une DB secondaire par service en Franche
+- **EX-30** Gouvernance d'Origin à seuil, Fédération fonctionnelle sans Origin
+- **EX-31** Seuls les membres confirment ; confirmateurs indépendants (TPM, quotas) et responsables
+- **EX-32** Blacklist : preuves signées + quorum de 6 membres indépendants + contestation
+- **EX-33** Sanction = révocation d'identité ; aucune destruction à distance
+- **EX-34** Registre Merkle fédéral contresigné par Origin (anti-éclipse)
+- **EX-35** Fraîcheur maximale des révocations fédérées
+- **EX-36** Identifiant de passeport différent par COG visité
 
 ## 10. Priorités
 
@@ -229,8 +249,11 @@
 <!-- @role prioritization -->
 <!-- @do prioritize_mitigations -->
 
-1. **EX-09 / EX-10** — vérifier avant de décoder, fuzzer : protège canal officiel et Portail
-2. **EX-01 / EX-03** — signature à seuil et fraîcheur : neutralise un Origin compromis
-3. **EX-05** — un relais par session : contient toute compromission de relais
-4. **EX-08** — DB principale versionnée : rend l'empoisonnement réversible
-5. **EX-13** — IA gouvernée : ferme l'injection de prompt vers les actions
+1. **EX-19 / EX-20 / EX-21** — instances séparées, aucune route vers la zone COG, segmentation interne : conditionnent toute l'architecture
+2. **EX-22 / EX-23** — temps de confiance, rendu assaini
+3. **EX-09 / EX-10** — vérifier avant de décoder, fuzzer : protège canal officiel et Portail
+4. **EX-01 / EX-03** — signature à seuil et fraîcheur : neutralise un Origin compromis
+5. **EX-31 / EX-32 / EX-33** — fédération résistante aux Sybil et aux fausses blacklists
+6. **EX-05** — un relais par session : contient toute compromission de relais
+7. **EX-08** — DB principale versionnée : rend l'empoisonnement réversible
+8. **EX-13** — IA gouvernée : ferme l'injection de prompt vers les actions

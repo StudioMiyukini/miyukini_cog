@@ -32,16 +32,17 @@
           │ certification fédérale                │ certification globale     │ zero trust · liste blanche
           └──────────────────────┐                │              ┌────────────┘
 ╔══════════════════ COG ═════════▼════════════════▼══════════════▼═══════════════╗
-║                    🛂 BorderGuard (pare-feu externe)                            ║
-║                       │                          │                              ║
-║                       ▼                          │ canal officiel               ║
-║   🏪 Zone Franche (DMZ) — services exposables     │ (gouvernance Cores, services ║
-║                       │                          │  et Market officiels, MAJ)   ║
-║                       ▼                          │                              ║
-║                🚪 Portail interne (pare-feu interne)                            ║
-║                       │                          │                              ║
+║                 🛂 BorderGuard externe (instance dédiée)                        ║
+║                       │                          │ contenu Origin              ║
 ║                       ▼                          ▼                              ║
-║   🏛️ Zone COG (nationale) — Kernel, Cores, Services, interfaces, stockage, DB    ║
+║   🏪 Zone Franche (DMZ)                     📦 Dépôt officiel                    ║
+║   espace isolé par service                  (Cores, services, Market, MAJ OS,   ║
+║                       │                      modèles IA)                        ║
+║                       ▼                          │                              ║
+║          🚪 Portail interne (instance dédiée) ◀───┘ voie réservée               ║
+║                       ▲  la zone COG relève, vérifie chez elle                  ║
+║   🏛️ Zone COG (nationale) — segmentée par service — Kernel, Cores, Services, DB  ║
+║   🏠 Franche locale (domotique, LAN uniquement) ── relevée via le Portail        ║
 ╚═════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -61,6 +62,11 @@
   - **DB secondaire** (copies publiées uniquement)
   - **agents relais** des services internes : bureautique coopérative, explorateur web…
   - aucun secret, aucune donnée de la DB principale non publiée
+  - **un espace isolé par service** (namespace / micro-VM) et une DB secondaire par service
+- 🏠 **Franche locale** = seconde DMZ, LAN domestique uniquement
+  - domotique : Alicia (relais), MQTT, objets connectés du foyer
+  - aucun accès Internet ni Fédération ; relevée par la zone COG via le Portail
+  - objets connectés considérés hostiles ; actions physiques soumises à StrongFather
 
 ## 4. Origines extérieures
 
@@ -85,14 +91,15 @@
 <!-- @layer 3-6 -->
 <!-- @do control_zone_crossings -->
 
-- 🛂 **BorderGuard** (pare-feu externe)
+- **Une instance BorderGuard par frontière**, chacune dans son espace (puis micro-VM), privilèges distincts : la compromission d'une instance ne donne pas les autres
+- 🛂 **BorderGuard externe** (pare-feu externe)
   - vérifie la certification de chaque origine (fédérale / globale / liste blanche)
-  - ouvre vers la zone Franche, ou vers le canal officiel pour Origin uniquement
+  - ouvre vers la Franche ; dépose le contenu Origin dans le **dépôt officiel** (§7)
   - IPS, bannissement automatique, ports déclarés (zéro par défaut côté International)
 - 🚪 **Portail interne** (pare-feu interne)
-  - seul passage zone Franche ⇄ zone COG
+  - seul passage Franche / dépôt officiel ⇄ zone COG
   - rupture protocolaire, liste blanche de protocole `MSCE` (Sceau v1)
-  - dédouanement de chaque objet
+  - la **vérification finale** (signature, dédouanement) est faite **côté zone COG**, jamais par une instance exposée
 
 ## 6. Invariants de flux
 
@@ -101,13 +108,17 @@
 <!-- @layer 3-4 -->
 <!-- @do enforce_zone_flow_rules -->
 
-- **INV-Z1** Zone COG ⇄ extérieur : interdit, **sauf canal officiel** (§7)
+- **INV-Z1** Zone COG ⇄ extérieur : **interdit**, y compris pour le canal officiel (relevé via le Portail, §7)
 - **INV-Z2** **La zone COG tire** : la Franche n'ouvre jamais de connexion vers la zone COG
 - **INV-Z3** Fédération ⇄ International : pas de transit par le COG
 - **INV-Z4** Zone COG sans route par défaut
 - **INV-Z5** Franche sans secret ; DB secondaire = copies publiées seulement
 - **INV-Z6** International : rien n'entre hors liste blanche
 - **INV-Z7** Relais (Franche) ⇄ moteur (zone COG) : **uniquement par le Portail interne**, flux ouvert par la zone COG
+- **INV-Z8** Zone COG **segmentée** : une sandbox par service, accès aux données uniquement via KindMother, une clé de DB par service
+- **INV-Z9** Une instance BorderGuard par frontière ; vérification finale côté zone COG
+- **INV-Z10** Aucun contenu non fiable rendu tel quel en zone COG : formats assainis, WebView sans réseau, CSP stricte
+- **INV-Z11** Aucune destruction à distance : une sanction porte sur l'identité, jamais sur les données
 
 ## 7. Canal officiel
 
@@ -116,14 +127,19 @@
 <!-- @layer 3-7 -->
 <!-- @do deliver_official_signed_content -->
 
-- **Contenu** : gouvernance des Cores, services officiels, Market officiel, mises à jour des Cores
-- **Seul passage qui contourne la Franche** → règles strictes :
+- **Contenu** : gouvernance des Cores, services officiels, Market officiel, mises à jour des Cores, **correctifs de l'OS** (miroir re-signé), **modèles IA**
+- **Chemin** : Origin → BorderGuard externe → **dépôt officiel** → relevé par la zone COG via le Portail (voie réservée)
+- Ne contourne plus la zone Franche par une route réseau : aucune route vers la zone COG (INV-Z1, INV-Z4)
+- Règles :
   - source unique : **Origin**, certification globale
-  - **tiré par la zone COG**, jamais poussé par BorderGuard
+  - **signature à seuil 2 sur 2** : Origin + clé éditeur hors ligne
+  - preuve d'inclusion au registre Merkle + **fraîcheur** de la tête (anti-gel)
+  - **quarantaine de 48 h** avant installation, sauf correctif critique co-signé
+  - signature vérifiée **en zone COG, avant tout décodage**
+  - version strictement croissante (anti-rollback)
   - sens unique : aucune donnée de la zone COG ne sort par ce canal
-  - objets **scellés par Origin** (Sceau v1) + preuve d'inclusion au registre Merkle
-  - vérification complète **avant** installation ; pas de retour à une version antérieure
-  - aucun autre protocole ; tout écart = intrusion → WorrySentinel
+  - modèles IA chargés en sandbox
+  - tout écart = intrusion → WorrySentinel (IDS), blocage BorderGuard (IPS)
 
 ## 8. Rupture protocolaire et dédouanement
 
@@ -178,6 +194,9 @@
 - Un participant malveillant ne peut corrompre que la **copie de session**, jamais la DB principale
 - Le relais ne détient ni secret ni identifiant du moteur ; compromis, il ne donne accès qu'à la session en cours
 - Tunnel de session : Noise / WireGuard, clés éphémères, fermé à l'expiration du visa
+- **Un relais par session**, isolé ; un espace par service en Franche
+- La « vérification de santé » en Franche n'est qu'un filtre : **la validation qui compte est faite en zone COG** à la sauvegarde
+- DB principale **versionnée** : toute sauvegarde est réversible
 
 **Autres services relayables**
 - Bureautique coopérative (JayOffice : Docs, Sheets, Slides, Réunion)
@@ -316,8 +335,62 @@
 - **Certification fédérale** = reconnaissance croisée des racines entre COG
 - **Certification globale** = signature Origin (Market, canal officiel, Fédération)
 - Appareils de l'utilisateur = pairs Fédération → aucun port ouvert côté International
+- **Une clé par usage** (passeports, visas, arrêtés, journal), chacune certifiée par la racine
+- Racine sauvegardée en **Shamir 2 sur 3** (plusieurs USB + papier) ; cérémonie de rotation guidée
+- **Identifiant différent par COG visité** (pas de traçage entre COG)
 
-## 16. Feuille de route
+## 16. Fédération : admission et sanctions
+
+<!-- @id arch.cog.federation-admission -->
+<!-- @role federation-governance -->
+<!-- @layer 5-7 -->
+<!-- @human Statuts candidat / invité / membre / blacklisté, confirmations par les membres, blacklist sur preuves et quorum -->
+<!-- @do govern_federation_membership -->
+
+**Statuts**
+- **Candidat** : 0–1 confirmation · aucun accès fédéré
+- **Invité** : ≥ 2 confirmations · sessions sur invitation d'un membre, ne peut pas confirmer
+- **Membre** : ≥ 4 confirmations **continues pendant 7 jours** · accès complet, confirme et signale
+- **Blacklisté** : identité révoquée définitivement
+
+**Confirmations**
+- Seuls les **membres** confirment ; **membres fondateurs** créés par Origin
+- Confirmation signée (Sceau v1), datée, **renouvelée toutes les 24 h**
+- Compteur des 7 jours remis à zéro sous 4 confirmations ; membre durablement sous 2 → invité
+- Confirmateurs **indépendants** : racines distinctes, attestation TPM, nombre de confirmations limité par membre et par mois
+- Confirmateurs **responsables** : réputation réduite si un COG confirmé est blacklisté
+
+**Blacklist**
+- Signalement avec **preuves cryptographiques** (déclarations signées par le COG mis en cause)
+- **Quorum de 6 membres indépendants** qui vérifient les preuves (seuil > admission)
+- Délai de contestation ; faux signalement prouvé = sanction de l'auteur
+- Sanction = **révocation définitive du `cog_id`**, tous les pairs refusent
+- Retour possible seulement par **réinitialisation d'identité** (nouvelle racine) → repart candidat
+- **Aucune destruction à distance** (INV-Z11) : les données restent au propriétaire, souvent victime d'un piratage
+- Auto-détection : WorrySentinel propose quarantaine et réinitialisation au propriétaire (TAMR)
+
+**Registre fédéral**
+- Statuts, confirmations et blacklists dans un **registre Merkle fédéral**
+- Têtes échangées entre pairs, contresignées par Origin en témoin → éclipse et double discours détectables
+- Révocations fédérées avec **fraîcheur maximale** ; au-delà, accès fédéré refusé
+
+## 17. Confiance et résilience
+
+<!-- @id arch.cog.confiance-resilience -->
+<!-- @role resilience -->
+<!-- @layer 3-8+kernel -->
+<!-- @do ensure_trust_and_resilience -->
+
+- **Temps de confiance** : horloge monotone qui ne recule jamais, ancrée sur des horodatages signés par Origin et la dernière tête de registre vue
+- **Sauvegarde hors site** : DB principale chiffrée par une clé hors ligne, publiée via la Franche vers un pair fédéré (flux déclaré)
+- **Amorçage** : image signée, empreinte publiée hors bande (site, papier, QR), clé Origin intégrée à l'image
+- **Gouvernance d'Origin** : à seuil (plusieurs détenteurs), plan de succession ; la Fédération fonctionne sans Origin
+- **Flux sortants déclarés** : alertes TAMR, arrêtés vers BorderGuard, sauvegardes = types de publication du Portail
+- **Surallocation** : LogisticsSteward refuse une installation qui dépasse la capacité, ou applique des priorités
+- **TAMR sans fatigue** : peu de types sensibles, validations groupées, décisions mémorisées par règle
+- **Noyau partagé** : le niveau 1 (namespaces) ne sert qu'au prototype ; protection réelle à partir des micro-VM ou d'une machine dédiée
+
+## 18. Feuille de route
 
 <!-- @id arch.cog.feuille-de-route -->
 <!-- @role roadmap -->
@@ -325,18 +398,17 @@
 
 - ✅ **Lot 1** fermeture par défaut
 - 🔄 **Lot 2** identité signée (incrément 1 : `miyusceau`)
-- ⬜ **Lot 3** Noise, Fédération WireGuard, appareils pairs
+- ⬜ **Lot 3** Noise, Fédération WireGuard, appareils pairs, admission et blacklist fédérales
 - ⬜ **Lot 4** réseau intégré, BorderGuard, Portail interne, canal officiel, services relayés, IDS/IPS maison
 - ⬜ **Lot 5** gouvernance IA (couche 8)
 - ⬜ **Lot 6** COG OS
 
-## 17. Points ouverts
+## 19. Points ouverts
 
 <!-- @id arch.cog.points-ouverts -->
 <!-- @role open-questions -->
 <!-- @do track_open_decisions -->
 
-- Domotique (Alicia, MQTT) : Franche ou « Franche locale » dédiée ?
 - Agents relais : protocole de vérification moteur ⇄ relais à spécifier
 - DB secondaire : moteur de base temps réel et format des demandes de sauvegarde
 - Licence : `LICENSE` propriétaire vs `Cargo.toml` `MIT OR Apache-2.0`
