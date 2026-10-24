@@ -294,11 +294,41 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::PAYLOAD_TOO_LARGE);
     }
 
+    fn get_sans_secret(host: Option<&str>, origin: Option<&str>) -> Request<Body> {
+        let mut b = Request::builder().method(Method::GET).uri("/api/status");
+        if let Some(h) = host {
+            b = b.header(header::HOST, h);
+        }
+        if let Some(o) = origin {
+            b = b.header(header::ORIGIN, o);
+        }
+        b.body(Body::empty()).unwrap()
+    }
+
     #[tokio::test]
     async fn sans_secret_loopback_ouvert() {
-        // Comportement documenté : pas de secret ⇒ bind loopback imposé, routes ouvertes.
+        // Comportement documenté : pas de secret ⇒ bind loopback imposé,
+        // routes ouvertes aux seules requêtes locales (Host local).
         let app = build_router(state_with(TeamConfig::default()));
-        let resp = app.oneshot(get_req("/api/status", None)).await.unwrap();
+        let resp = app
+            .oneshot(get_sans_secret(Some("127.0.0.1:7800"), None))
+            .await
+            .unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn sans_secret_dns_rebinding_refuse() {
+        // Hôte étranger (rebinding) ou origine web étrangère : 403.
+        for (host, origin) in [
+            (Some("evil.example:7800"), None),
+            (Some("127.0.0.1:7800"), Some("http://evil.example")),
+            (Some("localhost:7800"), Some("http://localhost.evil.example")),
+            (None, None),
+        ] {
+            let app = build_router(state_with(TeamConfig::default()));
+            let resp = app.oneshot(get_sans_secret(host, origin)).await.unwrap();
+            assert_eq!(resp.status(), StatusCode::FORBIDDEN, "{host:?} {origin:?}");
+        }
     }
 }
