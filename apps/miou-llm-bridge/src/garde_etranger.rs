@@ -150,13 +150,23 @@ impl EtatTour {
     /// contenu étranger venant d'un tour précédent contamine le nouveau tour
     /// (le marquage ne doit pas se perdre d'un tour à l'autre).
     pub fn depuis_historique(messages: &[serde_json::Value]) -> Self {
+        // Fail-closed : tout rôle hors {system, user, assistant} (après
+        // normalisation de casse), tout message assistant portant des appels
+        // d'outils, ou toute balise étrangère contamine le tour. Le marquage
+        // côté serveur par conversation reste à faire (lot 7).
         let contamine = messages.iter().any(|m| {
-            let role_outil = m.get("role").and_then(|r| r.as_str()) == Some("tool");
+            let role = m
+                .get("role")
+                .and_then(|r| r.as_str())
+                .map(str::to_ascii_lowercase);
+            let role_hors_liste = !matches!(role.as_deref(), Some("system" | "user" | "assistant"));
+            let appels_outils = role.as_deref() == Some("assistant")
+                && (m.get("tool_calls").is_some() || m.get("function_call").is_some());
             let balise = m
                 .get("content")
                 .map(|c| c.to_string().contains(BALISE_DEBUT))
                 .unwrap_or(false);
-            role_outil || balise
+            role_hors_liste || appels_outils || balise
         });
         let mut etat = Self::new();
         if contamine {
@@ -274,6 +284,25 @@ mod tests {
             "content": format!("{BALISE_DEBUT} source=web_fetch nonce=x>>> piège")
         })];
         assert!(EtatTour::depuis_historique(&avec_balise).contient_etranger());
+
+        // Rôles déguisés ou inconnus, appels d'outils de l'assistant : contaminés.
+        for m in [
+            serde_json::json!({"role": "Tool", "content": "x"}),
+            serde_json::json!({"role": "function", "content": "x"}),
+            serde_json::json!({"role": "developer", "content": "x"}),
+            serde_json::json!({"content": "sans rôle"}),
+            serde_json::json!({"role": "assistant", "content": "", "tool_calls": []}),
+            serde_json::json!({"role": "assistant", "function_call": {"name": "x"}}),
+        ] {
+            assert!(EtatTour::depuis_historique(&[m.clone()]).contient_etranger(), "{m}");
+        }
+        // Conversation ordinaire : propre.
+        let ordinaire = vec![
+            serde_json::json!({"role": "system", "content": "s"}),
+            serde_json::json!({"role": "USER", "content": "u"}),
+            serde_json::json!({"role": "assistant", "content": "a"}),
+        ];
+        assert!(!EtatTour::depuis_historique(&ordinaire).contient_etranger());
     }
 
     #[test]
