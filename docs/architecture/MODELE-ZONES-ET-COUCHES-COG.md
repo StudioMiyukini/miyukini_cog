@@ -184,7 +184,46 @@
 - Explorateur web : le relais navigue et assainit, la zone COG affiche
 - Messagerie (JayMessage), partage MiyuCloud, agenda partagé (JayKoa)
 
-## 10. Réseau intégré
+## 10. Dimensionnement par contrat
+
+<!-- @id arch.cog.dimensionnement-contrat -->
+<!-- @role resource-governance -->
+<!-- @layer 3-7+kernel -->
+<!-- @human Les Cores dimensionnent la Franche, les portails et BorderGuard à partir des besoins maximaux déclarés par chaque service -->
+<!-- @do size_franche_and_flows_from_contracts -->
+
+**Principe**
+- Chaque service déclare ses **besoins maximaux** dans son manifeste signé (Sceau v1)
+- Le COG les connaît **dès l'installation**
+- Les Cores en dérivent la taille de la Franche, les flux des portails et les règles de BorderGuard
+- **Ce qui n'est pas déclaré n'existe pas** : refusé par défaut
+
+**Contrat de service (dans le manifeste)**
+- Ressources max en Franche : CPU, RAM, disque, nombre de sessions
+- Flux : sens, protocole, port, type de déclaration, débit max, taille max des objets
+- Pairs autorisés : Fédération, Origin, liste blanche International
+- Relais : besoin d'un agent relais, DB secondaire (taille max)
+
+**Rôle des Cores**
+- **MasterButler** : enregistre les capacités et flux déclarés
+- **LogisticsSteward** : calcule et attribue les ressources (taille de la Franche, quotas par service et par session)
+- **CaringNanny** : lit les informations du noyau (ressources disponibles, consommation, pression) et ajuste **sous** les maxima déclarés
+- **StrongFather** : valide le contrat à l'installation
+- **BorderGuard** : applique — paquets autorisés, débit, taille, par service
+- **WorrySentinel** : tout dépassement de contrat = anomalie → incident
+
+**Ce que les Cores produisent**
+- Franche : un slice systemd par service (cgroups CPU / RAM / IO), espace disque borné
+- Portail interne : types de déclarations et débits autorisés par service
+- BorderGuard : règles nftables par flux + mise en forme du débit (tc)
+- IDS : contrat attendu par flux → détection d'écart immédiate
+
+**Hiérarchie des règles**
+- **Constitution réseau** (racine COG, hors ligne) : zones, invariants, plafonds globaux
+- **Arrêtés** (clé d'émission, générés par les Cores) : règles par service, **dans les plafonds** de la constitution
+- Arrêté hors constitution = refusé ; installation / désinstallation = nouvel arrêté inscrit au registre Merkle
+
+## 11. Réseau intégré
 
 <!-- @id arch.cog.reseau-integre -->
 <!-- @role network-infrastructure -->
@@ -194,13 +233,13 @@
 - 1 network namespace par zone et par pare-feu, reliés en veth
 - 1 seule carte physique, portée par BorderGuard
 - Adressage indicatif : zone COG `10.77.0.0/24` sans passerelle · Franche `10.77.1.0/24` · Fédération `10.78.0.0/16`
-- nftables, drop par défaut, règles générées depuis la **constitution réseau** scellée par la racine COG
+- nftables, drop par défaut, règles générées depuis la **constitution réseau** (racine COG) et les **arrêtés** des Cores (§10)
 - Dureté :
   1. namespaces + utilisateurs + nftables (prototype, sans toucher le réseau de l'hôte)
   2. Franche et pare-feu en micro-VM (COG OS)
   3. machines physiques séparées
 
-## 11. IDS / IPS maison
+## 12. IDS / IPS maison
 
 <!-- @id arch.cog.ids-ips -->
 <!-- @role intrusion-detection -->
@@ -216,7 +255,7 @@
 - Franche, zone COG : IDS (mouvement latéral, tentative de sortie)
 - Réponse : CaringNanny → WorrySentinel → bannissement / gel Franche / coupure Portail → TAMR → registre Merkle
 
-## 12. Cloisonnement noyau
+## 13. Cloisonnement noyau
 
 <!-- @id arch.cog.cloisonnement-noyau -->
 <!-- @role kernel-hardening -->
@@ -229,7 +268,7 @@
 - Landlock, seccomp, AppArmor
 - sockets du Portail interne avec `SO_PEERCRED`
 
-## 13. Couches
+## 14. Couches
 
 <!-- @id arch.cog.couches -->
 <!-- @role layer-model -->
@@ -245,7 +284,7 @@
 - **Kernel** — lockdown, modules signés, dm-verity, TPM, A/B signées · *WorrySentinel, EverBuddy*
 - Couches 1–2 : matériel et pilotes (hors COG)
 
-## 14. Identité
+## 15. Identité
 
 <!-- @id arch.cog.identite -->
 <!-- @role identity-trust -->
@@ -258,7 +297,7 @@
 - **Certification globale** = signature Origin (Market, canal officiel, Fédération)
 - Appareils de l'utilisateur = pairs Fédération → aucun port ouvert côté International
 
-## 15. Feuille de route
+## 16. Feuille de route
 
 <!-- @id arch.cog.feuille-de-route -->
 <!-- @role roadmap -->
@@ -271,7 +310,7 @@
 - ⬜ **Lot 5** gouvernance IA (couche 8)
 - ⬜ **Lot 6** COG OS
 
-## 16. Points ouverts
+## 17. Points ouverts
 
 <!-- @id arch.cog.points-ouverts -->
 <!-- @role open-questions -->

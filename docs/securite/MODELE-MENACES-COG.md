@@ -219,6 +219,9 @@
 - **EX-13** Contenu relayé jamais interprété comme instruction par l'IA
 - **EX-14** Révocation d'appareil en un geste, propagée par le registre
 - **EX-15** `Cargo.lock` versionné et `cargo audit` en CI
+- **EX-16** Contrat de ressources et de flux dans le manifeste signé de chaque service
+- **EX-17** Tout flux non déclaré refusé ; dépassement de contrat = incident (WorrySentinel)
+- **EX-18** Arrêtés des Cores bornés par la constitution réseau, inscrits au registre
 
 ## 10. Priorités
 
