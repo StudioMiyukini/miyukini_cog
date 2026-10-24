@@ -96,6 +96,15 @@
 - Chiffrement des bases par défaut dans `kindmother-service`, démarrage refusé en clair hors build de debug (K-06, venu du lot 0 bis) ; journal d'audit hors des bases opérateurs, chaîné (K-08)
 - Stubs des Cores qui renvoient un faux succès → refus explicite (C-14)
 - **Sortie** : un test de bout en bout montre qu'une action refusée par StrongFather n'est pas exécutée
+- **Statut (2026-10-24)** : **sortie atteinte** (test `bondingbrother/tests/porte_bout_en_bout.rs`). StrongFather décide (refus par défaut) ; MAIA, Alicia, Market, cycle de vie des services et Admin passent par la porte BondingBrother ; KindMother : intentions typées, audit chaîné, SQLCipher par défaut, une clé par base ; jaykonta, jay1tribu, jaykoa, jayrdv, miyukiniwatch, miyukini-central écrits par KindMother par défaut ; règle rusqlite en CI
+- **Lot C (suite), restant** :
+  - import des bases SQLite héritées (garde de bascule en place : démarrage refusé tant que l'ancienne base non vide n'est pas importée)
+  - apps/central, central-remote et jayclub activent encore `legacy-sqlite` ; jaymanga sans chemin KindMother
+  - lectures brutes TRANSITOIRE restantes (jaykonta 10, jay1tribu 4, jaykoa 1, miyukiniwatch 3) ; chemin SQL brut de KindMother à retirer ensuite
+  - test d'architecture « aucune action sans décision » ; KindMother vérifiant l'empreinte de décision jointe aux intentions
+  - Alicia : `CapabilitiesRuntime::new_gouverne` à brancher dans les apps ; principal authentifié comme `caller` (MAIA et Alicia en `local`)
+  - non gouvernés : arrêt de services, enregistrement des services trouvés sur disque
+  - troncature de la fin du journal d'audit non détectée (ancre externe de la tête de chaîne)
 
 ## 4. Lot 2 — Identité signée (suite)
 

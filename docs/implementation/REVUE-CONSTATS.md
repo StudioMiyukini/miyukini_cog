@@ -201,8 +201,12 @@
 | CA-01, CA-02 | corrigé | b69a685f, 80262d60 |
 | K-01 à K-03 | corrigé | 86213746, 70147691, c2a7e64a |
 | K-04, K-05 | corrigé | b1f3522a, c5cc2ea1 |
-| K-06 | lot C | déplacé : chiffrement porté par `kindmother-service` seul écrivain |
-| K-11 à K-13 | lot C | — |
+| K-06 | corrigé (lot C) | 460a971f, 435ffcb9 |
+| K-11 | corrigé (lot C) | 692f37ed, 366a4cef, a774088c, 5bdaab92 |
+| K-12 | corrigé (lot C) | 692f37ed |
+| K-13 | partiel (lot C) | 460a971f, d7d284e9 — services restants et import des données au lot C (suite) |
+| K-07, K-08, K-09, K-14 à K-16, K-18, K-19 | corrigé (lot C) | 460a971f, 692f37ed, 8f85264a, a774088c |
+| K-17 | documenté (lot C) | 8f85264a — APPROVAL TAMR à mettre au plan |
 
 - **Contradictions de la matrice levées** : EX-48 (b69a685f), EX-08, EX-26, EX-52 (5140c42e, 9dc1ebb6)
 - **Moyens restants notés pendant le lot 0 bis** : portail web en `/auth` HTTP clair (R-030), appairage (R-032), API locale MAIA sans jeton (K-09), conflit de ports JayKonta / JayKoa / MiyuCloud, canal KindMother non chiffré par trame
