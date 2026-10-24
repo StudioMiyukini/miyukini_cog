@@ -6015,6 +6015,7 @@ dependencies = [
  "axum 0.8.8",
  "futures",
  "hex",
+ "libc",
  "llama-cpp-2",
  "miyusceau",
  "rand 0.8.5",

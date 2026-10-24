@@ -118,13 +118,13 @@ impl LlmEngine {
     /// (manifeste signé par une ancre épinglée + empreinte SHA-256). Le
     /// contrôle a lieu hors du verrou du moteur (hachage potentiellement long).
     pub fn load_model(&self, model_path: PathBuf) -> Result<ModelInfo, LlmError> {
-        match self.politique.autoriser(&model_path) {
-            Ok(Autorisation::Verifie(_) | Autorisation::DerogationDev(_)) => {}
+        let ouvert = match self.politique.autoriser(&model_path) {
+            Ok((Autorisation::Verifie(_) | Autorisation::DerogationDev(_), ouvert)) => ouvert,
             Err(e) => {
                 tracing::warn!("Chargement refusé ({}) : {e}", model_path.display());
                 return Err(LlmError::ProvenanceRefusee(e.to_string()));
             }
-        }
+        };
 
         let mut state = self
             .state
@@ -137,9 +137,7 @@ impl LlmEngine {
             .to_string_lossy()
             .to_string();
 
-        let size_bytes = std::fs::metadata(&model_path)
-            .map(|m| m.len())
-            .unwrap_or(0);
+        let size_bytes = ouvert.taille();
 
         tracing::info!("Chargement modèle GGUF : {model_name}");
 
@@ -147,8 +145,17 @@ impl LlmEngine {
         let mut model_params = LlamaModelParams::default();
         model_params = model_params.with_n_gpu_layers(gpu_layers);
 
-        let model = LlamaModel::load_from_file(&state.backend, &model_path, &model_params)
-            .map_err(|e| LlmError::LlamaError(format!("Chargement échoué : {e}")))?;
+        // Chargement des octets vérifiés (même descripteur), encadré par deux
+        // contrôles d'identité : un fichier modifié entre-temps est refusé.
+        ouvert
+            .inchange()
+            .map_err(|e| LlmError::ProvenanceRefusee(e.to_string()))?;
+        let model =
+            LlamaModel::load_from_file(&state.backend, ouvert.chemin_de_chargement(), &model_params)
+                .map_err(|e| LlmError::LlamaError(format!("Chargement échoué : {e}")))?;
+        ouvert
+            .inchange()
+            .map_err(|e| LlmError::ProvenanceRefusee(e.to_string()))?;
 
         let ctx_size = if state.config.context_size > 0 {
             state.config.context_size

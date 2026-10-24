@@ -51,7 +51,8 @@
 //! (`debug_assertions`), avec un journal d'erreur à chaque chargement. Dans un
 //! binaire de release, la demande est ignorée et journalisée.
 
-use std::io::Read;
+use std::fs::File;
+use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -179,6 +180,8 @@ pub enum ErreurProvenance {
     LectureModele(String),
     /// Ancre de confiance mal formée dans la configuration.
     AncreInvalide(String),
+    /// Le fichier a changé entre le contrôle et le chargement (TOCTOU).
+    ModeleModifie,
 }
 
 impl std::fmt::Display for ErreurProvenance {
@@ -199,6 +202,9 @@ impl std::fmt::Display for ErreurProvenance {
             Self::LicenceRefusee(l) => write!(f, "licence « {l} » non autorisée (Apache-2.0 ou MIT)"),
             Self::LectureModele(e) => write!(f, "lecture du modèle impossible : {e}"),
             Self::AncreInvalide(e) => write!(f, "ancre de confiance invalide : {e}"),
+            Self::ModeleModifie => {
+                write!(f, "fichier modèle modifié entre le contrôle et le chargement")
+            }
         }
     }
 }
@@ -238,7 +244,10 @@ fn maintenant_secs() -> u64 {
 
 /// SHA-256 d'un fichier, lu par blocs de 1 Mio.
 pub fn sha256_fichier(chemin: &Path) -> std::io::Result<[u8; 32]> {
-    let mut f = std::fs::File::open(chemin)?;
+    sha256_lecteur(&mut File::open(chemin)?)
+}
+
+fn sha256_lecteur(f: &mut impl Read) -> std::io::Result<[u8; 32]> {
     let mut h = Sha256::new();
     let mut buf = vec![0u8; 1024 * 1024];
     loop {
@@ -250,6 +259,119 @@ pub fn sha256_fichier(chemin: &Path) -> std::io::Result<[u8; 32]> {
     }
     Ok(h.finalize().into())
 }
+
+/// Identité d'un fichier ouvert : un changement révèle un remplacement ou une
+/// réécriture entre le contrôle et le chargement.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct IdentiteFichier {
+    dev: u64,
+    ino: u64,
+    taille: u64,
+    mtime_ns: i128,
+}
+
+impl IdentiteFichier {
+    fn de(meta: &std::fs::Metadata) -> Self {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            Self {
+                dev: meta.dev(),
+                ino: meta.ino(),
+                taille: meta.len(),
+                mtime_ns: i128::from(meta.mtime()) * 1_000_000_000 + i128::from(meta.mtime_nsec()),
+            }
+        }
+        #[cfg(not(unix))]
+        {
+            let mtime_ns = meta
+                .modified()
+                .ok()
+                .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                .map_or(0, |d| d.as_nanos() as i128);
+            Self { dev: 0, ino: 0, taille: meta.len(), mtime_ns }
+        }
+    }
+}
+
+/// Fichier modèle ouvert **une seule fois**, sans suivre de lien symbolique.
+///
+/// - Le hachage lit ce descripteur ; sous Linux le chargement passe par
+///   `/proc/self/fd/N`, donc par le même inode, même si le chemin est remplacé.
+/// - [`ModeleOuvert::inchange`] compare l'identité (périphérique, inode,
+///   taille, date de modification) à celle relevée à l'ouverture : à appeler
+///   juste avant et juste après le chargement.
+#[derive(Debug)]
+pub struct ModeleOuvert {
+    fichier: File,
+    chemin: PathBuf,
+    identite: IdentiteFichier,
+}
+
+impl ModeleOuvert {
+    /// Ouvre `chemin` en refusant les liens symboliques et les fichiers non réguliers.
+    pub fn ouvrir(chemin: &Path) -> Result<Self, ErreurProvenance> {
+        let lecture = |e: std::io::Error| ErreurProvenance::LectureModele(e.to_string());
+        let mut options = std::fs::OpenOptions::new();
+        options.read(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.custom_flags(libc::O_NOFOLLOW);
+        }
+        #[cfg(not(unix))]
+        if std::fs::symlink_metadata(chemin).map_err(lecture)?.file_type().is_symlink() {
+            return Err(ErreurProvenance::LectureModele("lien symbolique refusé".into()));
+        }
+        let fichier = options.open(chemin).map_err(lecture)?;
+        let meta = fichier.metadata().map_err(lecture)?;
+        if !meta.is_file() {
+            return Err(ErreurProvenance::LectureModele("pas un fichier régulier".into()));
+        }
+        Ok(Self { fichier, chemin: chemin.to_path_buf(), identite: IdentiteFichier::de(&meta) })
+    }
+
+    /// Taille relevée à l'ouverture.
+    pub fn taille(&self) -> u64 {
+        self.identite.taille
+    }
+
+    fn sha256(&mut self) -> Result<[u8; 32], ErreurProvenance> {
+        let lecture = |e: std::io::Error| ErreurProvenance::LectureModele(e.to_string());
+        self.fichier.seek(SeekFrom::Start(0)).map_err(lecture)?;
+        let h = sha256_lecteur(&mut self.fichier).map_err(lecture)?;
+        self.inchange()?;
+        Ok(h)
+    }
+
+    /// Refuse si le fichier ouvert a changé depuis l'ouverture.
+    pub fn inchange(&self) -> Result<(), ErreurProvenance> {
+        let meta = self
+            .fichier
+            .metadata()
+            .map_err(|e| ErreurProvenance::LectureModele(e.to_string()))?;
+        if IdentiteFichier::de(&meta) == self.identite {
+            Ok(())
+        } else {
+            Err(ErreurProvenance::ModeleModifie)
+        }
+    }
+
+    /// Chemin à donner au chargeur : le descripteur vérifié sous Linux, sinon
+    /// le chemin d'origine (fenêtre résiduelle couverte par [`Self::inchange`]).
+    pub fn chemin_de_chargement(&self) -> PathBuf {
+        #[cfg(target_os = "linux")]
+        {
+            use std::os::unix::io::AsRawFd;
+            let p = PathBuf::from(format!("/proc/self/fd/{}", self.fichier.as_raw_fd()));
+            if p.exists() {
+                return p;
+            }
+        }
+        self.chemin.clone()
+    }
+}
+
 
 /// Contrôle **pur** d'un manifeste face à un fichier présenté : signature et
 /// signataire épinglé, genre, nom, taille, licence. L'empreinte est contrôlée
@@ -294,7 +416,17 @@ pub fn verifier_modele(
     modele: &Path,
     ancres: &AncresDeConfiance,
 ) -> Result<ManifesteModele, ErreurProvenance> {
-    let manifeste = chemin_manifeste(modele);
+    let mut ouvert = ModeleOuvert::ouvrir(modele)?;
+    verifier_modele_ouvert(&mut ouvert, ancres)
+}
+
+/// Vérifie le manifeste puis l'empreinte des octets du descripteur ouvert.
+pub fn verifier_modele_ouvert(
+    ouvert: &mut ModeleOuvert,
+    ancres: &AncresDeConfiance,
+) -> Result<ManifesteModele, ErreurProvenance> {
+    let modele = ouvert.chemin.clone();
+    let manifeste = chemin_manifeste(&modele);
     let meta_manifeste = match std::fs::metadata(&manifeste) {
         Ok(m) if m.is_file() => m,
         _ => return Err(ErreurProvenance::ManifesteAbsent(manifeste)),
@@ -309,15 +441,11 @@ pub fn verifier_modele(
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .ok_or_else(|| ErreurProvenance::LectureModele("chemin sans nom de fichier".into()))?;
-    let taille = std::fs::metadata(modele)
-        .map_err(|e| ErreurProvenance::LectureModele(e.to_string()))?
-        .len();
 
     // Signature vérifiée avant tout hachage (C-23) : un manifeste forgé ne
     // coûte pas la lecture de plusieurs Go.
-    let m = controler_manifeste(&octets, ancres, &nom, taille)?;
-    let calculee =
-        sha256_fichier(modele).map_err(|e| ErreurProvenance::LectureModele(e.to_string()))?;
+    let m = controler_manifeste(&octets, ancres, &nom, ouvert.taille())?;
+    let calculee = ouvert.sha256()?;
     controler_empreinte(&m, &calculee)?;
     Ok(m)
 }
@@ -370,8 +498,17 @@ impl PolitiqueModeles {
     }
 
     /// Autorise (ou refuse) le chargement de `modele`.
-    pub fn autoriser(&self, modele: &Path) -> Result<Autorisation, ErreurProvenance> {
-        match verifier_modele(modele, &self.ancres) {
+    ///
+    /// Rend le fichier ouvert et vérifié : le chargeur doit utiliser
+    /// [`ModeleOuvert::chemin_de_chargement`] et appeler
+    /// [`ModeleOuvert::inchange`] avant et après le chargement. L'ouverture
+    /// (lien symbolique, fichier absent) est refusée même sous dérogation.
+    pub fn autoriser(
+        &self,
+        modele: &Path,
+    ) -> Result<(Autorisation, ModeleOuvert), ErreurProvenance> {
+        let mut ouvert = ModeleOuvert::ouvrir(modele)?;
+        match verifier_modele_ouvert(&mut ouvert, &self.ancres) {
             Ok(m) => {
                 tracing::info!(
                     modele = %m.nom_fichier,
@@ -379,14 +516,14 @@ impl PolitiqueModeles {
                     coupure = %m.date_coupure,
                     "provenance du modèle vérifiée"
                 );
-                Ok(Autorisation::Verifie(m))
+                Ok((Autorisation::Verifie(m), ouvert))
             }
             Err(e) if self.derogation_dev => {
                 tracing::error!(
                     "!!! MODÈLE NON VÉRIFIÉ CHARGÉ PAR DÉROGATION DÉVELOPPEUR : {} — {e} !!!",
                     modele.display()
                 );
-                Ok(Autorisation::DerogationDev(e.to_string()))
+                Ok((Autorisation::DerogationDev(e.to_string()), ouvert))
             }
             Err(e) => Err(e),
         }
@@ -541,7 +678,56 @@ mod tests {
         assert_eq!(m.date_coupure, "2025-06");
         assert_eq!(m.sha256, sha256_fichier(&p).unwrap());
         let pol = PolitiqueModeles::new(ancres(&c), false);
-        assert!(matches!(pol.autoriser(&p), Ok(Autorisation::Verifie(_))));
+        assert!(matches!(pol.autoriser(&p), Ok((Autorisation::Verifie(_), _))));
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn lien_symbolique_refuse() {
+        let d = dossier();
+        let p = modele(&d);
+        let c = cle();
+        sceller_modele(&p, &c, "Apache-2.0", "2025-06").unwrap();
+        let lien = d.join("lien.gguf");
+        std::os::unix::fs::symlink(&p, &lien).unwrap();
+        let pol = PolitiqueModeles::new(ancres(&c), true);
+        // Refusé même sous dérogation développeur : l'ouverture échoue.
+        assert!(matches!(pol.autoriser(&lien), Err(ErreurProvenance::LectureModele(_))));
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn modification_apres_controle_detectee() {
+        let d = dossier();
+        let p = modele(&d);
+        let c = cle();
+        sceller_modele(&p, &c, "Apache-2.0", "2025-06").unwrap();
+        let pol = PolitiqueModeles::new(ancres(&c), false);
+        let (_, ouvert) = pol.autoriser(&p).unwrap();
+        assert!(ouvert.inchange().is_ok());
+        std::thread::sleep(std::time::Duration::from_millis(20));
+        std::fs::write(&p, b"GGUF\x03\x00\x00\x00 modele substitue, plus long").unwrap();
+        assert!(matches!(ouvert.inchange(), Err(ErreurProvenance::ModeleModifie)));
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn chargement_par_le_descripteur_verifie() {
+        let d = dossier();
+        let p = modele(&d);
+        let c = cle();
+        sceller_modele(&p, &c, "Apache-2.0", "2025-06").unwrap();
+        let attendu = sha256_fichier(&p).unwrap();
+        let pol = PolitiqueModeles::new(ancres(&c), false);
+        let (_, ouvert) = pol.autoriser(&p).unwrap();
+        let chemin = ouvert.chemin_de_chargement();
+        assert!(chemin.starts_with("/proc/self/fd/"));
+        // Le chemin d'origine est remplacé : le descripteur garde les octets vérifiés.
+        std::fs::remove_file(&p).unwrap();
+        std::fs::write(&p, b"autre contenu").unwrap();
+        assert_eq!(sha256_fichier(&chemin).unwrap(), attendu);
         let _ = std::fs::remove_dir_all(&d);
     }
 
@@ -714,7 +900,7 @@ mod tests {
         let p = modele(&d);
         let pol = PolitiqueModeles::new(AncresDeConfiance::new(), true);
         assert_eq!(pol.derogation_active(), cfg!(debug_assertions));
-        let r = pol.autoriser(&p);
+        let r = pol.autoriser(&p).map(|(a, _)| a);
         if cfg!(debug_assertions) {
             assert!(matches!(r, Ok(Autorisation::DerogationDev(_))));
         } else {

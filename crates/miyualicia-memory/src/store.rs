@@ -444,7 +444,16 @@ impl MemoryStore {
                 versions
             ],
         )?;
+        // L'entrée 'delete' laisse d'anciens segments FTS contenant le texte :
+        // 'optimize' les fusionne et libère leurs pages (mises à zéro par
+        // secure_delete).
+        tx.execute("INSERT INTO facts_fts(facts_fts) VALUES('optimize')", [])?;
         tx.commit()?;
+        // Trames WAL éventuelles contenant l'ancien contenu : point de contrôle
+        // tronquant (sans effet hors mode WAL). Un échec n'annule pas l'oubli.
+        if let Err(e) = conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(())) {
+            tracing::warn!(fait = %id, "mémoire : point de contrôle WAL après oubli impossible : {e}");
+        }
         tracing::info!(fait = %id, versions, "mémoire : fait oublié à la demande (pierre tombale)");
         Ok(retires)
     }

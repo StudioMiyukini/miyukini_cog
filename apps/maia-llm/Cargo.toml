@@ -59,5 +59,9 @@ async-stream = "0.3"
 # Génération ID requête
 rand = "0.8"
 
+[target.'cfg(unix)'.dependencies]
+# O_NOFOLLOW à l'ouverture du modèle vérifié (EX-26, TOCTOU)
+libc = "0.2"
+
 [lints]
 workspace = true

@@ -181,3 +181,32 @@ fn migration_depuis_l_ancien_schema() {
     assert_eq!(s.recall("train", 5).unwrap().len(), 1);
     assert!(s.recall("métro", 5).unwrap().is_empty());
 }
+
+#[test]
+fn oubli_efface_le_contenu_du_fichier() {
+    let dir = std::env::temp_dir().join(format!("alicia-oubli-{}", uuid_court()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let chemin = dir.join("memoire.db");
+    let marqueur = "MARQUEUR-SECRET-A-OUBLIER-7f3a";
+    {
+        let s = MemoryStore::open(&chemin).unwrap();
+        let mut f = fait(&format!("{marqueur} version 1"));
+        s.remember(&f).unwrap();
+        f.content = format!("{marqueur} version 2");
+        f.updated_at = Utc::now() + Duration::seconds(1);
+        s.remember(&f).unwrap();
+        s.forget(f.id, "test", "droit à l'oubli").unwrap();
+    }
+    for entree in std::fs::read_dir(&dir).unwrap() {
+        let octets = std::fs::read(entree.unwrap().path()).unwrap();
+        assert!(
+            !octets.windows(marqueur.len()).any(|w| w == marqueur.as_bytes()),
+            "contenu oublié encore présent sur disque"
+        );
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+fn uuid_court() -> String {
+    format!("{}-{}", std::process::id(), Utc::now().timestamp_nanos_opt().unwrap_or(0))
+}
