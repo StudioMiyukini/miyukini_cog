@@ -298,6 +298,8 @@ pub enum OperationAgent {
     Creer,
     /// `PUT /v1/agents/{id}`.
     Modifier,
+    /// `DELETE /v1/agents/{id}`.
+    Supprimer,
 }
 
 /// Intention StrongFather d'une création / modification d'agent.
@@ -331,6 +333,7 @@ pub fn intention_agent(
         match operation {
             OperationAgent::Creer => "agent.creer",
             OperationAgent::Modifier => "agent.modifier",
+            OperationAgent::Supprimer => "agent.supprimer",
         }
         .into(),
     );
@@ -368,6 +371,7 @@ pub fn intention_agent(
     let action = match operation {
         OperationAgent::Creer => ActionType::Creation,
         OperationAgent::Modifier => ActionType::Modification,
+        OperationAgent::Supprimer => ActionType::Deletion,
     };
     intention(
         identifiant_intention("maia-agent"),
@@ -723,6 +727,29 @@ pub(crate) mod tests {
         assert!(autorise(
             &g,
             &intention_agent(OperationAgent::Modifier, &reduit, Some(&nouveau), local)
+        ));
+    }
+
+    #[test]
+    fn suppression_et_dispatch_a_la_creation() {
+        let g = gouvernance_de_base();
+        let agents = AgentRegistry::new();
+        let local = APPELANT_LOCAL;
+        let denis = agents.get_agent("denis").expect("denis");
+        assert!(!autorise(
+            &g,
+            &intention_agent(OperationAgent::Supprimer, &denis, Some(&denis), local)
+        ));
+        let perso = agent_custom("perso_suppr", SecurityLevel::Sandboxed, &["file_ops"]);
+        assert!(autorise(
+            &g,
+            &intention_agent(OperationAgent::Supprimer, &perso, Some(&perso), local)
+        ));
+        let mut dispatcheur = agent_custom("perso_dispatch", SecurityLevel::Sandboxed, &[]);
+        dispatcheur.can_dispatch = true;
+        assert!(!autorise(
+            &g,
+            &intention_agent(OperationAgent::Creer, &dispatcheur, None, local)
         ));
     }
 

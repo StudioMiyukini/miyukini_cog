@@ -18,9 +18,9 @@
 #   data.mode (boucle|confirmee|direct), data.autorisation (standard|ecriture_confirmee),
 #   data.action, data.service
 #
-# Intention « agent » (POST /v1/agents, PUT /v1/agents/{id}) :
-#   action  = creation | modification   subject = maia.agent.<agent_id>
-#   data.operation (agent.creer|agent.modifier), data.agent, data.existe, data.cible_builtin,
+# Intention « agent » (POST /v1/agents, PUT et DELETE /v1/agents/{id}) :
+#   action  = creation | modification | deletion   subject = maia.agent.<agent_id>
+#   data.operation (agent.creer|agent.modifier|agent.supprimer), data.agent, data.existe, data.cible_builtin,
 #   data.niveau_rang, data.niveau_precedent_rang, data.elevation_niveau, data.competences,
 #   data.competences_ajoutees (entier), data.dispatch_ajoute, data.prompt_modifie,
 #   data.modification_cosmetique
@@ -105,10 +105,10 @@ origins = ["maia"]
 id = "maia-agent-gestion"
 type = "permission"
 effect = "authorize"
-condition = "data.operation in ['agent.creer', 'agent.modifier']"
+condition = "data.operation in ['agent.creer', 'agent.modifier', 'agent.supprimer']"
 rule = "data.agent != ''"
 [policy.target]
-actions = ["creation", "modification"]
+actions = ["creation", "modification", "deletion"]
 origins = ["maia"]
 
 # Un agent built-in ne peut être ni écrasé (POST) ni modifié au-delà du cosmétique
@@ -118,7 +118,7 @@ id = "maia-agent-builtin-protege"
 type = "permission"
 effect = "deny"
 priority = "critical"
-condition = "data.operation in ['agent.creer', 'agent.modifier']"
+condition = "data.operation in ['agent.creer', 'agent.modifier', 'agent.supprimer']"
 rule = "data.cible_builtin == 'true' && data.modification_cosmetique != 'true'"
 [policy.target]
 origins = ["maia"]
@@ -142,6 +142,17 @@ effect = "deny"
 priority = "critical"
 condition = "data.operation == 'agent.creer'"
 rule = "data.niveau_rang > 1"
+[policy.target]
+origins = ["maia"]
+
+# Un agent créé par l'API n'obtient pas le droit de dispatch.
+[[policy]]
+id = "maia-agent-creation-dispatch"
+type = "permission"
+effect = "deny"
+priority = "critical"
+condition = "data.operation == 'agent.creer'"
+rule = "data.dispatch_ajoute == 'true'"
 [policy.target]
 origins = ["maia"]
 

@@ -182,6 +182,47 @@ impl AgentRegistry {
         agents.insert(agent.id.clone(), agent);
     }
 
+    /// Crée un agent seulement s'il n'existe pas (contrôle et insertion sous
+    /// le même verrou d'écriture : pas de course avec une autre création).
+    pub fn inserer_nouvel_agent(&self, agent: AgentDef) -> Result<(), &'static str> {
+        let mut agents = self.agents.write().unwrap();
+        if agents.contains_key(&agent.id) {
+            return Err("Agent déjà existant");
+        }
+        agents.insert(agent.id.clone(), agent);
+        Ok(())
+    }
+
+    /// Remplace un agent seulement s'il est encore identique à `attendu`
+    /// (celui sur lequel la décision StrongFather a porté).
+    pub fn remplacer_si_inchange(
+        &self,
+        attendu: &AgentDef,
+        agent: AgentDef,
+    ) -> Result<(), &'static str> {
+        let mut agents = self.agents.write().unwrap();
+        match agents.get(&agent.id) {
+            Some(actuel) if meme_agent(actuel, attendu) => {
+                agents.insert(agent.id.clone(), agent);
+                Ok(())
+            }
+            _ => Err("Agent modifié entre-temps : recommencer"),
+        }
+    }
+
+    /// Supprime un agent custom seulement s'il est encore identique à `attendu`.
+    pub fn supprimer_si_inchange(&self, attendu: &AgentDef) -> Result<(), &'static str> {
+        let mut agents = self.agents.write().unwrap();
+        match agents.get(&attendu.id) {
+            Some(actuel) if actuel.is_builtin => Err("Impossible de supprimer un agent built-in"),
+            Some(actuel) if meme_agent(actuel, attendu) => {
+                agents.remove(&attendu.id);
+                Ok(())
+            }
+            _ => Err("Agent modifié entre-temps : recommencer"),
+        }
+    }
+
     /// Supprime un agent custom (refuse de supprimer un built-in).
     pub fn delete_agent(&self, id: &str) -> Result<(), &'static str> {
         let mut agents = self.agents.write().unwrap();
@@ -229,5 +270,40 @@ impl AgentRegistry {
     pub fn delete_team(&self, id: &str) {
         let mut teams = self.teams.write().unwrap();
         teams.remove(id);
+    }
+}
+
+/// Égalité de définition (sérialisation) : `AgentDef` n'implémente pas `PartialEq`.
+fn meme_agent(a: &AgentDef, b: &AgentDef) -> bool {
+    match (serde_json::to_value(a), serde_json::to_value(b)) {
+        (Ok(x), Ok(y)) => x == y,
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn operations_conditionnelles_du_registre() {
+        let reg = AgentRegistry::new();
+        let denis = reg.get_agent("denis").expect("denis");
+        // Création : refusée si l'id existe déjà.
+        assert!(reg.inserer_nouvel_agent(denis.clone()).is_err());
+        let mut perso = denis.clone();
+        perso.id = "perso".into();
+        perso.is_builtin = false;
+        assert!(reg.inserer_nouvel_agent(perso.clone()).is_ok());
+        // Remplacement : refusé si l'agent a changé depuis la décision.
+        let mut modifie = perso.clone();
+        modifie.display_name = "autre".into();
+        assert!(reg.remplacer_si_inchange(&perso, modifie.clone()).is_ok());
+        assert!(reg.remplacer_si_inchange(&perso, perso.clone()).is_err());
+        // Suppression : refusée sur état périmé ou built-in.
+        assert!(reg.supprimer_si_inchange(&perso).is_err());
+        assert!(reg.supprimer_si_inchange(&denis).is_err());
+        assert!(reg.supprimer_si_inchange(&modifie).is_ok());
+        assert!(reg.get_agent("perso").is_none());
     }
 }

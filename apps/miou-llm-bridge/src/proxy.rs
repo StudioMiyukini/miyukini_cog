@@ -259,11 +259,14 @@ async fn create_agent(
         crate::gouvernance::APPELANT_LOCAL,
     );
     let registre = &state.agent_registry;
-    match state.gouvernance.executer(&intent, |_| registre.upsert_agent(agent)) {
-        Ok(()) => (
+    // Insertion conditionnelle : un agent apparu depuis la décision n'est pas écrasé.
+    match state.gouvernance.executer(&intent, |_| registre.inserer_nouvel_agent(agent)) {
+        Ok(Ok(())) => (
             StatusCode::CREATED,
             Json(serde_json::json!({ "created": id })),
         )
+            .into_response(),
+        Ok(Err(msg)) => (StatusCode::CONFLICT, Json(serde_json::json!({ "error": msg })))
             .into_response(),
         Err(motif) => refus_gouvernance(motif),
     }
@@ -286,8 +289,14 @@ async fn update_agent(
                 crate::gouvernance::APPELANT_LOCAL,
             );
             let registre = &state.agent_registry;
-            match state.gouvernance.executer(&intent, |_| registre.upsert_agent(agent)) {
-                Ok(()) => Json(serde_json::json!({ "updated": id })).into_response(),
+            // Remplacement conditionnel : la décision porte sur `existant`.
+            match state
+                .gouvernance
+                .executer(&intent, |_| registre.remplacer_si_inchange(&existant, agent))
+            {
+                Ok(Ok(())) => Json(serde_json::json!({ "updated": id })).into_response(),
+                Ok(Err(msg)) => (StatusCode::CONFLICT, Json(serde_json::json!({ "error": msg })))
+                    .into_response(),
                 Err(motif) => refus_gouvernance(motif),
             }
         }
@@ -303,13 +312,29 @@ async fn delete_agent(
     State(state): State<ProxyState>,
     Path(id): Path<String>,
 ) -> impl IntoResponse {
-    match state.agent_registry.delete_agent(&id) {
-        Ok(()) => Json(serde_json::json!({ "deleted": id })).into_response(),
-        Err(msg) => (
+    let Some(existant) = state.agent_registry.get_agent(&id) else {
+        return (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({ "error": format!("Agent '{id}' introuvable") })),
+        )
+            .into_response();
+    };
+    // Suppression soumise à StrongFather, puis conditionnelle à l'état décidé.
+    let intent = crate::gouvernance::intention_agent(
+        crate::gouvernance::OperationAgent::Supprimer,
+        &existant,
+        Some(&existant),
+        crate::gouvernance::APPELANT_LOCAL,
+    );
+    let registre = &state.agent_registry;
+    match state.gouvernance.executer(&intent, |_| registre.supprimer_si_inchange(&existant)) {
+        Ok(Ok(())) => Json(serde_json::json!({ "deleted": id })).into_response(),
+        Ok(Err(msg)) => (
             StatusCode::FORBIDDEN,
             Json(serde_json::json!({ "error": msg })),
         )
             .into_response(),
+        Err(motif) => refus_gouvernance(motif),
     }
 }
 
