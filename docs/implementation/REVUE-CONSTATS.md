@@ -185,3 +185,24 @@
 > 4. MAIA, le composant qui agit vraiment (réseau, services, fichiers), ne dépend d'aucun Core : ses seuls garde-fous sont locaux (liste de skills par agent, sandbox).
 > 5. Priorités : authentifier les opérateurs KindMother, fermer les SSRF de MAIA et créer une décision StrongFather obligatoire et en refus par défaut avant tout WriteIntent et tout outil d'action.
 
+
+## Suivi des corrections (critiques et hauts)
+
+<!-- @id impl.constats.suivi -->
+<!-- @role findings-tracking -->
+<!-- @do track_findings_fixes -->
+
+| Id | Statut | Commits |
+|---|---|---|
+| O-01 | corrigé | 418489e9, a7d71203 |
+| O-02 à O-05 | corrigé | 418489e9, a7d71203 |
+| O-06 | corrigé | 418489e9, 49733a86 |
+| M-01 à M-04 | corrigé | 964ee081, 9bd77293 |
+| CA-01, CA-02 | corrigé | b69a685f, 80262d60 |
+| K-01 à K-03 | corrigé | 86213746, 70147691, c2a7e64a |
+| K-04, K-05 | corrigé | b1f3522a, c5cc2ea1 |
+| K-06 | lot C | déplacé : chiffrement porté par `kindmother-service` seul écrivain |
+| K-11 à K-13 | lot C | — |
+
+- **Contradictions de la matrice levées** : EX-48 (b69a685f), EX-08, EX-26, EX-52 (5140c42e, 9dc1ebb6)
+- **Moyens restants notés pendant le lot 0 bis** : portail web en `/auth` HTTP clair (R-030), appairage (R-032), API locale MAIA sans jeton (K-09), conflit de ports JayKonta / JayKoa / MiyuCloud, canal KindMother non chiffré par trame

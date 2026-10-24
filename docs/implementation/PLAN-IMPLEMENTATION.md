@@ -22,7 +22,7 @@
 | 0 | Sécurisation immédiate (constats P0) | S | — |
 | R | Revue de code et matrice EX | M | 0 (en parallèle) |
 | 0 bis | Constats critiques et hauts de la revue (21) | M | R |
-| C | Cores réels : StrongFather appelé, KindMother authentifié et seul écrivain | L | 0 bis |
+| C | Cores réels : StrongFather appelé, KindMother authentifié, chiffré et seul écrivain | L | 0 bis |
 | 2 | Identité signée : suite | M | 0 |
 | 3 | Frontières : Portail, Douane, Vigies | L | 2, C |
 | 4 | Canal officiel et registre Merkle | M | 2, 3 |
@@ -83,6 +83,7 @@
 - **Hauts** : Tracker non authentifié (O-02), SSRF du proxy Origin (O-03), XSS `/visit` et `/mws` (O-04, O-05), mélange de réponses entre visiteurs (O-06), Market sans signature (CA-01), serveur Home sur `0.0.0.0` (CA-02), anti-SSRF par sous-chaîne (K-03), SQL KindMother contournable (K-05), bases non chiffrées (K-06), MiyuCloud : calendriers (M-01), Nextcloud sans propriétaire (M-02, M-03), envois sans quota (M-04)
 - **Contradictions de la matrice** : EX-08 (JayKonta efface ses tables), EX-26 (modèles IA non signés), EX-30, EX-41, EX-48 (exposition par défaut), EX-52 (mémoire écrasée)
 - **Sortie** : 0 critique ou haut ouvert ; contradictions EX-08, EX-26 et EX-48 corrigées
+- **Statut (2026-10-24)** : **clos**. Critiques et hauts corrigés sauf K-11, K-12, K-13 (architecture, lot C) et K-06 (déplacé au lot C : une fois KindMother seul écrivain, seul `kindmother-service` chiffre). Contradictions EX-08, EX-26, EX-48 et EX-52 levées ; EX-30 (lot 6) et EX-41 (lot 5) restent à leur lot. Suivi : [registre des constats §Suivi](REVUE-CONSTATS.md)
 
 ## 3 quater. Lot C — Cores réels
 
@@ -92,6 +93,7 @@
 
 - StrongFather appelé sur les vrais chemins (MAIA, Alicia, Market, Admin), moteur de règles réellement évalué, refus par défaut (K-11, K-12, C-12)
 - KindMother : authentification des opérateurs (clé par service), requêtes typées à la place du SQL brut, seul écrivain des données (K-04, K-05, K-13, EX-07, EX-21)
+- Chiffrement des bases par défaut dans `kindmother-service`, démarrage refusé en clair hors build de debug (K-06, venu du lot 0 bis) ; journal d'audit hors des bases opérateurs, chaîné (K-08)
 - Stubs des Cores qui renvoient un faux succès → refus explicite (C-14)
 - **Sortie** : un test de bout en bout montre qu'une action refusée par StrongFather n'est pas exécutée
 
