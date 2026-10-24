@@ -68,21 +68,18 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
     }
 
     let sandbox = resolve_sandbox();
-    let full_path = sandbox.join(path_str);
-
-    // Vérification de sécurité : le chemin résolu doit rester dans le sandbox
-    if let Ok(canonical) = full_path.canonicalize() {
-        if let Ok(sandbox_canonical) = sandbox.canonicalize() {
-            if !canonical.starts_with(&sandbox_canonical) {
-                return SkillResult {
-                    success: false,
-                    output: serde_json::Value::Null,
-                    error: Some("Chemin hors du sandbox — accès refusé".into()),
-                    duration_ms: 0,
-                };
-            }
+    // Fail-closed : tout chemin non résolu/non vérifiable dans le sandbox est refusé.
+    let full_path = match resolve_in_sandbox(&sandbox, path_str) {
+        Ok(p) => p,
+        Err(msg) => {
+            return SkillResult {
+                success: false,
+                output: serde_json::Value::Null,
+                error: Some(msg),
+                duration_ms: 0,
+            };
         }
-    }
+    };
 
     match action {
         "read" => read_file(&full_path).await,
@@ -91,11 +88,7 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             write_file(&full_path, content).await
         }
         "list" => {
-            let target = if path_str.is_empty() {
-                &sandbox
-            } else {
-                &full_path
-            };
+            let target = &full_path;
             let recursive = params
                 .get("recursive")
                 .and_then(|v| v.as_bool())
@@ -124,6 +117,56 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             duration_ms: 0,
         },
     }
+}
+
+/// Résout `rel` dans `sandbox` et garantit que le résultat y reste (fail-closed).
+///
+/// - chemin absolu / préfixe / composant `..` : refusé d'emblée ;
+/// - sandbox créé si absent puis canonicalisé (échec => refus) ;
+/// - cible existante : `canonicalize` doit rester sous le sandbox ;
+/// - cible inexistante (ex: écriture d'un nouveau fichier) : on remonte au
+///   plus proche ancêtre existant, qu'on canonicalise (échec => refus, y
+///   compris lien symbolique pendant) et qui doit être dans le sandbox.
+fn resolve_in_sandbox(sandbox: &Path, rel: &str) -> Result<PathBuf, String> {
+    use std::path::Component;
+    let deny = |m: &str| Err(format!("{m} — accès refusé"));
+
+    let rel_path = Path::new(rel);
+    for c in rel_path.components() {
+        match c {
+            Component::Normal(_) | Component::CurDir => {}
+            Component::ParentDir => return deny("Composant '..' interdit"),
+            Component::RootDir | Component::Prefix(_) => return deny("Chemin absolu interdit"),
+        }
+    }
+
+    if std::fs::create_dir_all(sandbox).is_err() {
+        return deny("Sandbox inaccessible");
+    }
+    let Ok(sandbox_canon) = sandbox.canonicalize() else {
+        return deny("Sandbox non résoluble");
+    };
+
+    let full = sandbox_canon.join(rel_path);
+
+    // Plus proche ancêtre existant (lien symbolique pendant inclus via symlink_metadata).
+    let mut probe: &Path = &full;
+    loop {
+        if std::fs::symlink_metadata(probe).is_ok() {
+            let Ok(canon) = probe.canonicalize() else {
+                return deny("Chemin non résoluble");
+            };
+            if !canon.starts_with(&sandbox_canon) {
+                return deny("Chemin hors du sandbox");
+            }
+            break;
+        }
+        match probe.parent() {
+            Some(parent) => probe = parent,
+            None => return deny("Chemin non vérifiable"),
+        }
+    }
+    Ok(full)
 }
 
 /// Résout le répertoire sandbox.
@@ -374,5 +417,58 @@ async fn delete_file(path: &Path) -> SkillResult {
             error: Some(format!("Erreur suppression : {e}")),
             duration_ms: 0,
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tmp(name: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("maia-fileops-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        std::fs::create_dir_all(&d).unwrap();
+        d
+    }
+
+    #[test]
+    fn chemin_inexistant_dans_sandbox_accepte() {
+        let sb = tmp("ok");
+        let p = resolve_in_sandbox(&sb, "nouveau/sous/fichier.txt").unwrap();
+        assert!(p.starts_with(sb.canonicalize().unwrap()));
+        assert!(resolve_in_sandbox(&sb, "").is_ok());
+        let _ = std::fs::remove_dir_all(&sb);
+    }
+
+    #[test]
+    fn composant_parent_refuse_meme_inexistant() {
+        let sb = tmp("dotdot");
+        assert!(resolve_in_sandbox(&sb, "../evil.txt").is_err());
+        assert!(resolve_in_sandbox(&sb, "a/../../evil.txt").is_err());
+        assert!(resolve_in_sandbox(&sb, "inexistant/../x").is_err());
+        let _ = std::fs::remove_dir_all(&sb);
+    }
+
+    #[test]
+    fn chemin_absolu_refuse() {
+        let sb = tmp("abs");
+        assert!(resolve_in_sandbox(&sb, "/etc/passwd").is_err());
+        let _ = std::fs::remove_dir_all(&sb);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn symlink_sortant_refuse() {
+        let sb = tmp("sym");
+        let outside = tmp("sym-out");
+        std::os::unix::fs::symlink(&outside, sb.join("lien")).unwrap();
+        // Existant via lien, et inexistant sous le lien : refus dans les deux cas.
+        assert!(resolve_in_sandbox(&sb, "lien").is_err());
+        assert!(resolve_in_sandbox(&sb, "lien/nouveau.txt").is_err());
+        // Lien pendant vers l'extérieur : canonicalize échoue => refus.
+        std::os::unix::fs::symlink(outside.join("absent"), sb.join("pendant")).unwrap();
+        assert!(resolve_in_sandbox(&sb, "pendant").is_err());
+        let _ = std::fs::remove_dir_all(&sb);
+        let _ = std::fs::remove_dir_all(&outside);
     }
 }

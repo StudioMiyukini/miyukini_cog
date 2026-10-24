@@ -12,7 +12,9 @@ use std::path::{Path, PathBuf};
 /// Configuration principale de maia-llm.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MaiaLlmConfig {
-    /// Adresse d'écoute (ex: "0.0.0.0:11435").
+    /// Adresse d'écoute. Défaut : "127.0.0.1:11435" (loopback uniquement).
+    /// Une adresse non-loopback (ex: "0.0.0.0:11435") exige `auth_key` :
+    /// sans clé, le service refuse de démarrer (voir `validate_bind`).
     #[serde(default = "default_bind_addr")]
     pub bind_addr: String,
 
@@ -32,9 +34,16 @@ pub struct MaiaLlmConfig {
     #[serde(default = "default_true")]
     pub auto_load: bool,
 
-    /// Clé d'authentification Bearer (X-MAIA-Key header). None = pas d'auth.
+    /// Clé d'authentification Bearer (X-MAIA-Key header). None = pas d'auth
+    /// (autorisé uniquement si le bind est loopback).
     #[serde(default)]
     pub auth_key: Option<String>,
+
+    /// Origines CORS autorisées (ex: ["http://localhost:3000"]).
+    /// Vide (défaut) = aucun en-tête CORS émis, donc pas d'accès cross-origin
+    /// depuis un navigateur. Jamais de joker `*`.
+    #[serde(default)]
+    pub cors_allowed_origins: Vec<String>,
 
     /// Active les logs des requêtes.
     #[serde(default = "default_true")]
@@ -50,13 +59,14 @@ impl Default for MaiaLlmConfig {
             context_size: default_context_size(),
             auto_load: true,
             auth_key: None,
+            cors_allowed_origins: Vec::new(),
             log_requests: true,
         }
     }
 }
 
 fn default_bind_addr() -> String {
-    "0.0.0.0:11435".into()
+    "127.0.0.1:11435".into()
 }
 fn default_models_dir() -> String {
     "models".into()
@@ -69,6 +79,61 @@ fn default_context_size() -> u32 {
 }
 fn default_true() -> bool {
     true
+}
+
+/// Vrai si l'adresse d'écoute est strictement loopback.
+/// Fail-closed : toute adresse non parsable ou « nom d'hôte » est considérée non-loopback.
+pub fn is_loopback_bind(bind_addr: &str) -> bool {
+    bind_addr
+        .parse::<std::net::SocketAddr>()
+        .map(|a| a.ip().to_canonical().is_loopback())
+        .unwrap_or(false)
+}
+
+/// Valide la combinaison bind/auth : refuse un bind non-loopback sans `auth_key`.
+pub fn validate_bind(cfg: &MaiaLlmConfig) -> Result<(), String> {
+    let has_key = cfg.auth_key.as_deref().is_some_and(|k| !k.trim().is_empty());
+    if !is_loopback_bind(&cfg.bind_addr) && !has_key {
+        return Err(format!(
+            "Refus de démarrer : bind_addr={} n'est pas loopback et aucune auth_key n'est \
+             configurée. Définissez `auth_key` (ou --auth-key) ou utilisez 127.0.0.1.",
+            cfg.bind_addr
+        ));
+    }
+    Ok(())
+}
+
+/// Construit la couche CORS à partir de la liste explicite d'origines.
+/// Liste vide → aucune origine autorisée (pas d'en-têtes CORS). Les entrées
+/// invalides ou `*` sont ignorées (avertissement).
+pub fn build_cors(origins: &[String]) -> tower_http::cors::CorsLayer {
+    use axum::http::{header, HeaderValue, Method};
+    let values: Vec<HeaderValue> = origins
+        .iter()
+        .filter(|o| o.trim() != "*")
+        .filter_map(|o| match HeaderValue::from_str(o.trim()) {
+            Ok(v) => Some(v),
+            Err(_) => {
+                tracing::warn!("Origine CORS invalide ignorée : {o}");
+                None
+            }
+        })
+        .collect();
+    if values.len() != origins.len() {
+        tracing::warn!("Certaines origines CORS ont été ignorées (joker '*' interdit ou invalide)");
+    }
+    let layer = tower_http::cors::CorsLayer::new();
+    if values.is_empty() {
+        return layer;
+    }
+    layer
+        .allow_origin(values)
+        .allow_methods([Method::GET, Method::POST, Method::DELETE, Method::OPTIONS])
+        .allow_headers([
+            header::AUTHORIZATION,
+            header::CONTENT_TYPE,
+            axum::http::HeaderName::from_static("x-maia-key"),
+        ])
 }
 
 /// Résout le chemin du fichier de configuration.
@@ -112,4 +177,32 @@ pub fn load_or_create() -> MaiaLlmConfig {
     }
 
     cfg
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn defaut_est_loopback() {
+        assert!(is_loopback_bind(&MaiaLlmConfig::default().bind_addr));
+        assert!(validate_bind(&MaiaLlmConfig::default()).is_ok());
+    }
+
+    #[test]
+    fn refus_non_loopback_sans_auth() {
+        let mut c = MaiaLlmConfig::default();
+        c.bind_addr = "0.0.0.0:11435".into();
+        assert!(validate_bind(&c).is_err());
+        c.auth_key = Some("  ".into());
+        assert!(validate_bind(&c).is_err());
+        c.auth_key = Some("secret".into());
+        assert!(validate_bind(&c).is_ok());
+    }
+
+    #[test]
+    fn hote_non_parsable_est_non_loopback() {
+        assert!(!is_loopback_bind("localhost:11435"));
+        assert!(is_loopback_bind("[::1]:11435"));
+    }
 }

@@ -1,4 +1,5 @@
-bind_addr = "0.0.0.0:11435"
+# Loopback par défaut. Hors loopback : auth_token obligatoire (sinon refus de démarrer).
+bind_addr = "127.0.0.1:11435"
 upstream_url = "http://localhost:1234"
 log_requests = true
 
@@ -12,7 +13,12 @@ auto_load = true
 
 [security]
 allowed_origins = []
-require_auth_all = false
+# require_auth_all : non défini = auto (actif hors loopback, inactif en loopback).
+# require_auth_all = true
+# Proxys de confiance (IP/CIDR IPv4) autorisés à fournir X-Forwarded-For. Vide = jamais.
+trusted_proxies = []
+# Origines CORS explicites (ex: ["http://localhost:3000"]). Vide = pas de CORS cross-origin.
+cors_allowed_origins = []
 strict_user_agent = false
 hmac_max_age_secs = 300
 admin_origins = []

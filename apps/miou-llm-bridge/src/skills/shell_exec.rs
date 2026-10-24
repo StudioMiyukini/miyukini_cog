@@ -11,6 +11,11 @@
 //! - Whitelist de commandes autorisées
 //! - Répertoire de travail restreint au sandbox
 //! - Taille de sortie limitée
+//!
+//! Sécurité (lot 1, fail-closed) : AUCUNE exécution via un interpréteur de
+//! commandes (`sh -c`, `cmd /C`). Le paramètre `shell=true` est refusé ;
+//! seul le lancement direct d'un binaire de la whitelist (nom nu, sans
+//! chemin ni espace) est possible.
 
 use super::{SkillInfo, SkillResult};
 use std::collections::HashMap;
@@ -60,9 +65,7 @@ const ALLOWED_COMMANDS: &[&str] = &[
     "mv",
     "curl",
     "wget",
-    // Windows
-    "powershell",
-    "cmd",
+    // (interpréteurs de commandes powershell/cmd retirés : pas de shell)
     // Diagnostic
     "ping",
     "nslookup",
@@ -98,7 +101,10 @@ pub fn info() -> SkillInfo {
         "timeout".into(),
         format!("Timeout en secondes (défaut {DEFAULT_TIMEOUT_SECS}, max {MAX_TIMEOUT_SECS})"),
     );
-    params.insert("shell".into(), "Exécuter via shell (défaut: false)".into());
+    params.insert(
+        "shell".into(),
+        "REFUSÉ si true — l'exécution via shell n'est pas supportée".into(),
+    );
 
     SkillInfo {
         id: "shell_exec".into(),
@@ -110,7 +116,30 @@ pub fn info() -> SkillInfo {
     }
 }
 
-/// Exécute une commande shell sandboxée.
+fn refuse(error: String) -> SkillResult {
+    SkillResult {
+        success: false,
+        output: serde_json::Value::Null,
+        error: Some(error),
+        duration_ms: 0,
+    }
+}
+
+/// Vérifie que `command` est un nom nu présent dans la whitelist.
+fn check_command_allowed(command: &str) -> Result<(), String> {
+    let bare = !command.is_empty()
+        && !command.chars().any(|c| c.is_whitespace() || c == '/' || c == '\\');
+    if bare && ALLOWED_COMMANDS.iter().any(|c| command.eq_ignore_ascii_case(c)) {
+        return Ok(());
+    }
+    Err(format!(
+        "Commande '{command}' non autorisée (nom nu de la whitelist requis, sans chemin \
+         ni arguments inline). Commandes permises : {}",
+        ALLOWED_COMMANDS.join(", ")
+    ))
+}
+
+/// Exécute une commande sandboxée (exécution directe, jamais via shell).
 pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult {
     let command = match params.get("command").and_then(|v| v.as_str()) {
         Some(cmd) => cmd,
@@ -139,32 +168,17 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         }
     }
 
-    // Vérifier la whitelist
-    let use_shell = params
-        .get("shell")
-        .and_then(|v| v.as_bool())
-        .unwrap_or(false);
-
-    if !use_shell {
-        let base_cmd = command.split_whitespace().next().unwrap_or("");
-        let base_cmd_lower = base_cmd.to_lowercase();
-        let allowed = ALLOWED_COMMANDS.iter().any(|c| {
-            base_cmd_lower == c.to_lowercase()
-                || base_cmd_lower.ends_with(&format!("/{c}"))
-                || base_cmd_lower.ends_with(&format!("\\{c}"))
-        });
-
-        if !allowed {
-            return SkillResult {
-                success: false,
-                output: serde_json::Value::Null,
-                error: Some(format!(
-                    "Commande '{base_cmd}' non autorisée. Commandes permises : {}",
-                    ALLOWED_COMMANDS.join(", ")
-                )),
-                duration_ms: 0,
-            };
+    // `shell` : tout sauf un `false` explicite est refusé (fail-closed).
+    if let Some(v) = params.get("shell") {
+        if v.as_bool() != Some(false) {
+            return refuse("Exécution via shell refusée (paramètre 'shell' non supporté)".into());
         }
+    }
+
+    // Whitelist : le nom de commande doit être un nom nu (ni espace, ni
+    // séparateur de chemin) égal à une entrée de la whitelist.
+    if let Err(msg) = check_command_allowed(command) {
+        return refuse(msg);
     }
 
     // Timeout
@@ -191,25 +205,9 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
         .and_then(|v| v.as_str())
         .map(std::path::PathBuf::from);
 
-    // Construire la commande
-    let mut cmd = if use_shell {
-        #[cfg(target_os = "windows")]
-        {
-            let mut c = tokio::process::Command::new("cmd");
-            c.args(["/C", command]);
-            c
-        }
-        #[cfg(not(target_os = "windows"))]
-        {
-            let mut c = tokio::process::Command::new("sh");
-            c.args(["-c", command]);
-            c
-        }
-    } else {
-        let mut c = tokio::process::Command::new(command);
-        c.args(&args);
-        c
-    };
+    // Exécution directe du binaire (jamais via un shell)
+    let mut cmd = tokio::process::Command::new(command);
+    cmd.args(&args);
 
     if let Some(ref dir) = cwd {
         cmd.current_dir(dir);
@@ -267,5 +265,50 @@ pub async fn execute(params: &HashMap<String, serde_json::Value>) -> SkillResult
             error: Some(format!("Timeout après {timeout_secs}s")),
             duration_ms: timeout_secs * 1000,
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn p(v: serde_json::Value) -> HashMap<String, serde_json::Value> {
+        serde_json::from_value(v).unwrap()
+    }
+
+    #[tokio::test]
+    async fn shell_true_refuse() {
+        let r = execute(&p(serde_json::json!({"command": "echo", "args": ["x"], "shell": true}))).await;
+        assert!(!r.success);
+        assert!(r.error.unwrap().contains("shell"));
+        // Valeur non booléenne : refusée aussi.
+        let r = execute(&p(serde_json::json!({"command": "echo", "shell": "true"}))).await;
+        assert!(!r.success);
+    }
+
+    #[tokio::test]
+    async fn injection_shell_dans_command_refusee() {
+        let r = execute(&p(serde_json::json!({"command": "echo hi; id", "shell": true}))).await;
+        assert!(!r.success);
+        let r = execute(&p(serde_json::json!({"command": "echo hi; id"}))).await;
+        assert!(!r.success);
+    }
+
+    #[test]
+    fn whitelist_nom_nu_uniquement() {
+        assert!(check_command_allowed("echo").is_ok());
+        assert!(check_command_allowed("/tmp/evil/cargo").is_err());
+        assert!(check_command_allowed("sh").is_err());
+        assert!(check_command_allowed("cmd").is_err());
+        assert!(check_command_allowed("echo hi").is_err());
+        assert!(check_command_allowed("").is_err());
+    }
+
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn execution_directe_whitelist_ok() {
+        let r = execute(&p(serde_json::json!({"command": "echo", "args": ["salut"]}))).await;
+        assert!(r.success, "{:?}", r.error);
+        assert!(r.output["stdout"].as_str().unwrap().contains("salut"));
     }
 }

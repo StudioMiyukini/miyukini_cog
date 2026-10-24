@@ -12,7 +12,7 @@
 //! - Audit log de toutes les actions (agents + sécurité)
 //! - Vérification des permissions (agent → skill)
 //! - Validation d'origine (anti-appels externes non autorisés)
-//! - Signature HMAC-SHA256 (anti-MITM pour les échanges inter-services COG)
+//! - Signature HMAC-SHA256 (primitives disponibles, NON appliquées par le middleware)
 //! - Chiffrement AES-256-GCM des réponses sensibles
 
 use serde::{Deserialize, Serialize};
@@ -212,13 +212,28 @@ pub fn check_agent_skill_permission(agent: &AgentDef, skill_id: &str) -> Permiss
     PermissionCheck::Allowed
 }
 
-/// Vérifie le token d'authentification.
+/// Comparaison de secrets en temps constant.
+///
+/// Les deux entrées sont d'abord hachées (SHA-256) : les digests ont une
+/// longueur fixe, donc ni le contenu ni la longueur du secret ne fuient par
+/// le temps d'exécution. Le XOR est cumulé sans court-circuit.
+pub fn ct_eq(a: &[u8], b: &[u8]) -> bool {
+    use sha2::Digest;
+    let da = sha2::Sha256::digest(a);
+    let db = sha2::Sha256::digest(b);
+    da.iter()
+        .zip(db.iter())
+        .fold(0u8, |acc, (x, y)| acc | (x ^ y))
+        == 0
+}
+
+/// Vérifie le token d'authentification (fail-closed : pas de token configuré = refus).
 pub fn verify_auth_token(
     headers: &axum::http::HeaderMap,
     expected_token: &Option<String>,
 ) -> Result<(), &'static str> {
-    let Some(expected) = expected_token else {
-        return Ok(()); // Pas de token configuré = accès libre
+    let Some(expected) = expected_token.as_deref().filter(|t| !t.is_empty()) else {
+        return Err("Aucun token configuré côté serveur");
     };
 
     let auth_header = headers
@@ -228,7 +243,7 @@ pub fn verify_auth_token(
     match auth_header {
         Some(value) => {
             let token = value.strip_prefix("Bearer ").unwrap_or(value);
-            if token == expected {
+            if ct_eq(token.as_bytes(), expected.as_bytes()) {
                 Ok(())
             } else {
                 Err("Token invalide")
@@ -236,6 +251,79 @@ pub fn verify_auth_token(
         }
         None => Err("Header Authorization manquant"),
     }
+}
+
+/// Autorise l'exécution d'un skill pour un agent donné (fail-closed).
+///
+/// - `agent_id` absent ou vide => refus (401-like : l'appelant doit s'identifier)
+/// - agent inconnu => refus
+/// - permission (skill autorisé + niveau de sécurité) vérifiée par
+///   `check_agent_skill_permission`.
+pub fn authorize_skill_request(
+    registry: &crate::agents::AgentRegistry,
+    agent_id: Option<&str>,
+    skill_id: &str,
+) -> Result<(), String> {
+    let Some(agent_id) = agent_id.map(str::trim).filter(|a| !a.is_empty()) else {
+        return Err("agent_id requis pour exécuter un skill".into());
+    };
+    let Some(agent) = registry.get_agent(agent_id) else {
+        return Err(format!("Agent '{agent_id}' inconnu — exécution refusée"));
+    };
+    match check_agent_skill_permission(&agent, skill_id) {
+        PermissionCheck::Allowed => Ok(()),
+        PermissionCheck::Denied(reason) => Err(reason),
+    }
+}
+
+/// Détermine l'IP source réelle d'une requête.
+///
+/// `peer` est l'adresse TCP de la connexion (ConnectInfo). `X-Forwarded-For`
+/// n'est pris en compte que si `peer` appartient à `trusted_proxies` ; on
+/// parcourt alors la chaîne de droite à gauche en sautant les proxies de
+/// confiance, et on retient la première adresse non fiable (la plus à droite
+/// est celle ajoutée par notre proxy, donc non falsifiable par le client).
+/// `X-Real-IP` est ignoré (trivialement falsifiable).
+pub fn resolve_client_ip(
+    peer: IpAddr,
+    headers: &axum::http::HeaderMap,
+    trusted_proxies: &[String],
+) -> IpAddr {
+    let peer = peer.to_canonical();
+    if !ip_in_list(peer, trusted_proxies) {
+        return peer;
+    }
+    let Some(xff) = headers
+        .get("x-forwarded-for")
+        .and_then(|v| v.to_str().ok())
+    else {
+        return peer;
+    };
+    for part in xff.rsplit(',') {
+        match part.trim().parse::<IpAddr>() {
+            Ok(ip) => {
+                let ip = ip.to_canonical();
+                if !ip_in_list(ip, trusted_proxies) {
+                    return ip;
+                }
+            }
+            // Entrée illisible dans la chaîne : on n'invente rien, on garde le proxy.
+            Err(_) => return peer,
+        }
+    }
+    peer
+}
+
+fn ip_in_list(ip: IpAddr, list: &[String]) -> bool {
+    let ip_s = ip.to_string();
+    list.iter().any(|entry| {
+        let entry = entry.trim();
+        if entry.contains('/') {
+            match_cidr(&ip_s, entry)
+        } else {
+            entry.parse::<IpAddr>().map(|e| e.to_canonical() == ip).unwrap_or(false)
+        }
+    })
 }
 
 /// Timestamp epoch actuel.
@@ -410,6 +498,13 @@ pub enum HmacCheck {
 }
 
 /// Vérifie la signature HMAC-SHA256 d'une requête inter-service.
+///
+/// NOTE SÉCURITÉ : cette fonction n'est actuellement appelée par AUCUN handler
+/// (le middleware ne peut pas lire le body sans le consommer, et une requête
+/// sans signature retourne `NotConfigured`, donc ne serait pas rejetée). Le
+/// choix du lot 1 est de RETIRER la promesse anti-MITM (voir main.rs et
+/// /v1/security/status : `enforced=false`) plutôt que de la simuler. La
+/// protection réelle repose sur Bearer + loopback/TLS en frontal.
 ///
 /// Le message signé est : `{timestamp}:{method}:{path}:{body_hash}`
 /// où body_hash = hex(SHA256(body)).
@@ -679,5 +774,101 @@ impl SecurityAuditLog {
         ips.sort();
         ips.dedup();
         ips
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::http::{header, HeaderMap, HeaderValue};
+
+    fn auth(v: &str) -> HeaderMap {
+        let mut h = HeaderMap::new();
+        h.insert(header::AUTHORIZATION, HeaderValue::from_str(v).unwrap());
+        h
+    }
+
+    #[test]
+    fn ct_eq_compare_correctement() {
+        assert!(ct_eq(b"secret", b"secret"));
+        assert!(!ct_eq(b"secret", b"secreT"));
+        assert!(!ct_eq(b"secret", b"secret2"));
+        assert!(!ct_eq(b"", b"x"));
+        assert!(ct_eq(b"", b""));
+    }
+
+    #[test]
+    fn verify_auth_token_fail_closed() {
+        let tok = Some("abc".to_string());
+        assert!(verify_auth_token(&auth("Bearer abc"), &tok).is_ok());
+        assert!(verify_auth_token(&auth("Bearer abd"), &tok).is_err());
+        assert!(verify_auth_token(&HeaderMap::new(), &tok).is_err());
+        // Aucun token côté serveur => refus (et non plus accès libre).
+        assert!(verify_auth_token(&auth("Bearer abc"), &None).is_err());
+        assert!(verify_auth_token(&auth("Bearer "), &Some(String::new())).is_err());
+    }
+
+    #[test]
+    fn agent_id_absent_refuse() {
+        let reg = crate::agents::AgentRegistry::new();
+        assert!(authorize_skill_request(&reg, None, "file_ops").is_err());
+        assert!(authorize_skill_request(&reg, Some("  "), "file_ops").is_err());
+        assert!(authorize_skill_request(&reg, Some("agent-inexistant"), "file_ops").is_err());
+    }
+
+    #[test]
+    fn agent_connu_avec_permission_autorise() {
+        let reg = crate::agents::AgentRegistry::new();
+        // Au moins un agent builtin doit pouvoir utiliser au moins un de ses skills.
+        let ok = reg.list_agents().iter().any(|a| {
+            a.skill_ids
+                .iter()
+                .any(|s| authorize_skill_request(&reg, Some(&a.id), s).is_ok())
+        });
+        assert!(ok);
+        // Skill hors liste de l'agent => refus.
+        let a = &reg.list_agents()[0];
+        assert!(authorize_skill_request(&reg, Some(&a.id), "skill_inconnu").is_err());
+    }
+
+    #[test]
+    fn ip_source_ignore_xff_sans_proxy_de_confiance() {
+        let mut h = HeaderMap::new();
+        h.insert("x-forwarded-for", HeaderValue::from_static("127.0.0.1"));
+        let peer: IpAddr = "203.0.113.9".parse().unwrap();
+        // Liste vide : XFF falsifié ignoré, on garde l'IP réelle.
+        assert_eq!(resolve_client_ip(peer, &h, &[]), peer);
+        // Peer non listé : idem.
+        assert_eq!(resolve_client_ip(peer, &h, &["10.0.0.1".into()]), peer);
+    }
+
+    #[test]
+    fn ip_source_xff_lu_si_proxy_de_confiance() {
+        let mut h = HeaderMap::new();
+        // Le client a injecté 127.0.0.1 ; notre proxy a ajouté 198.51.100.7 à droite.
+        h.insert(
+            "x-forwarded-for",
+            HeaderValue::from_static("127.0.0.1, 198.51.100.7"),
+        );
+        let proxy: IpAddr = "10.0.0.1".parse().unwrap();
+        let got = resolve_client_ip(proxy, &h, &["10.0.0.0/24".into()]);
+        assert_eq!(got, "198.51.100.7".parse::<IpAddr>().unwrap());
+    }
+
+    #[test]
+    fn origine_distante_bloquee_par_defaut_loopback_ok() {
+        let cfg = SecurityConfig {
+            allowed_origins: vec!["192.168.1.0/24".into()],
+            ..SecurityConfig::default()
+        };
+        let h = HeaderMap::new();
+        assert!(matches!(
+            check_origin(Some("127.0.0.1"), &h, &cfg),
+            OriginCheck::Allowed
+        ));
+        assert!(matches!(
+            check_origin(Some("203.0.113.9"), &h, &cfg),
+            OriginCheck::Blocked(_)
+        ));
     }
 }

@@ -55,7 +55,17 @@ async fn main() {
         )
         .init();
 
-    let cfg = config::load_or_create();
+    let mut cfg = config::load_or_create();
+
+    // Fail-closed : refuse un bind non-loopback sans token (et require_auth_all sans token).
+    if let Err(msg) = cfg.validate_startup() {
+        tracing::error!("{msg}");
+        eprintln!("{msg}");
+        std::process::exit(1);
+    }
+    // Fige la valeur effective de require_auth_all (auto = actif hors loopback).
+    let auth_all = cfg.effective_require_auth_all();
+    cfg.security.require_auth_all = Some(auth_all);
 
     // Timestamp de démarrage (pour uptime)
     let started_at = std::time::SystemTime::now()
@@ -217,13 +227,13 @@ async fn main() {
     } else if sec.strict_user_agent {
         "User-Agent COG requis".into()
     } else {
-        "localhost only (défaut)".into()
+        "loopback + IP réelle de la connexion (défaut)".into()
     };
     tracing::info!("║  Origins  : {:<37}║", origin_status);
     tracing::info!(
         "║  HMAC     : {:<37}║",
         if sec.hmac_secret.is_some() {
-            "SHA-256 activé (anti-MITM)"
+            "secret défini (NON appliqué)"
         } else {
             "désactivé"
         }
@@ -238,7 +248,7 @@ async fn main() {
     );
     tracing::info!(
         "║  Auth all : {:<37}║",
-        if sec.require_auth_all {
+        if sec.require_auth_all == Some(true) {
             "oui (Bearer requis partout)"
         } else {
             "non (proxy seulement)"
@@ -309,7 +319,11 @@ async fn main() {
 
     tracing::info!("AI Studio prêt — Ctrl+C pour arrêter");
 
-    axum::serve(listener, app)
+    // ConnectInfo requis : l'IP source vient de la connexion TCP, pas des headers.
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap_or_else(|e| {

@@ -9,13 +9,14 @@
 use axum::{
     body::Body,
     extract::{ConnectInfo, Path, State},
-    http::{header, HeaderMap, Method, Request, StatusCode, Uri},
+    http::{header, HeaderMap, HeaderValue, Method, Request, StatusCode, Uri},
     middleware::Next,
     response::{Html, IntoResponse},
     routing::{any, delete, get, post, put},
     Json, Router,
 };
-use tower_http::cors::{Any, CorsLayer};
+use std::net::SocketAddr;
+use tower_http::cors::CorsLayer;
 
 use crate::agents::custom::{CreateAgentRequest, UpdateAgentRequest};
 use crate::agents::AgentRegistry;
@@ -56,12 +57,37 @@ pub struct ProxyState {
     pub team_registered: bool,
 }
 
+/// Construit la couche CORS à partir d'une liste explicite d'origines.
+/// Liste vide (défaut) => aucun en-tête CORS (pas d'accès cross-origin navigateur).
+/// Le joker `*` et les valeurs invalides sont ignorés.
+pub fn build_cors(origins: &[String]) -> CorsLayer {
+    let values: Vec<HeaderValue> = origins
+        .iter()
+        .filter(|o| o.trim() != "*")
+        .filter_map(|o| HeaderValue::from_str(o.trim()).ok())
+        .collect();
+    let layer = CorsLayer::new();
+    if values.is_empty() {
+        return layer;
+    }
+    layer
+        .allow_origin(values)
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
+        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
+}
+
 /// Construit le routeur axum avec toutes les routes.
+///
+/// Le serveur DOIT être lancé avec `into_make_service_with_connect_info::<SocketAddr>()`
+/// (sinon le middleware de sécurité refuse toutes les requêtes protégées).
 pub fn proxy_router(state: ProxyState) -> Router {
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    let cors = build_cors(&state.security_config.cors_allowed_origins);
 
     // Routes publiques (health + UI — pas de vérification de sécurité)
     let public_routes = Router::new()
@@ -468,26 +494,22 @@ async fn execute_skill(
     Path(id): Path<String>,
     Json(req): Json<SkillExecRequest>,
 ) -> impl IntoResponse {
-    if let Some(ref agent_id) = req.agent_id {
-        if let Some(agent) = state.agent_registry.get_agent(agent_id) {
-            match crate::security::check_agent_skill_permission(&agent, &id) {
-                crate::security::PermissionCheck::Allowed => {}
-                crate::security::PermissionCheck::Denied(reason) => {
-                    return (
-                        StatusCode::FORBIDDEN,
-                        Json(serde_json::json!({ "error": reason })),
-                    )
-                        .into_response();
-                }
-            }
-        }
+    // Fail-closed : un agent_id connu et autorisé pour ce skill est obligatoire.
+    if let Err(reason) =
+        crate::security::authorize_skill_request(&state.agent_registry, req.agent_id.as_deref(), &id)
+    {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({ "error": reason })),
+        )
+            .into_response();
     }
 
     let result = SkillRegistry::execute(&id, &req.params).await;
 
     state.audit_log.log(crate::security::AuditEntry {
         timestamp: crate::security::epoch_now(),
-        agent_id: req.agent_id.unwrap_or_else(|| "anonymous".into()),
+        agent_id: req.agent_id.unwrap_or_default(),
         skill_id: id.clone(),
         action: req
             .params
@@ -742,6 +764,7 @@ async fn inference_status(State(state): State<ProxyState>) -> impl IntoResponse 
 /// Middleware de sécurité appliqué sur toutes les routes protégées.
 ///
 /// Vérifie dans l'ordre :
+/// 0. IP source = adresse TCP réelle (XFF seulement via trusted_proxies)
 /// 1. Validation d'origine (IP source dans allowed_origins ou loopback)
 /// 2. Auth Bearer globale (si require_auth_all est activé)
 /// 3. Signature HMAC (si le header X-COG-Signature est présent)
@@ -754,18 +777,29 @@ async fn security_middleware(
     let path = req.uri().path().to_string();
     let method = req.method().to_string();
 
-    // Extraire l'IP source (ConnectInfo n'est pas toujours disponible)
-    let source_ip = headers
-        .get("x-forwarded-for")
-        .and_then(|v| v.to_str().ok())
-        .map(|v| v.split(',').next().unwrap_or(v).trim().to_string())
-        .or_else(|| {
-            headers
-                .get("x-real-ip")
-                .and_then(|v| v.to_str().ok())
-                .map(String::from)
-        })
-        .unwrap_or_else(|| "127.0.0.1".into());
+    // IP source = adresse réelle de la connexion (ConnectInfo). X-Forwarded-For
+    // n'est lu que si la connexion vient d'un proxy listé dans `trusted_proxies`.
+    // Sans ConnectInfo (serveur mal lancé) : refus (fail-closed).
+    let Some(peer) = req
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|ci| ci.0.ip())
+    else {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(serde_json::json!({
+                "error": "Accès refusé",
+                "reason": "no_connect_info",
+            })),
+        )
+            .into_response();
+    };
+    let source_ip = crate::security::resolve_client_ip(
+        peer,
+        &headers,
+        &state.security_config.trusted_proxies,
+    )
+    .to_string();
 
     // 1. Validation d'origine
     match crate::security::check_origin(Some(&source_ip), &headers, &state.security_config) {
@@ -792,7 +826,7 @@ async fn security_middleware(
     }
 
     // 2. Auth Bearer globale (si activée)
-    if state.security_config.require_auth_all {
+    if state.security_config.require_auth_all == Some(true) {
         if let Err(msg) = crate::security::verify_auth_token(&headers, &state.auth_token) {
             state
                 .security_audit
@@ -890,10 +924,12 @@ async fn security_status_handler(State(state): State<ProxyState>) -> impl IntoRe
         },
         "authentication": {
             "bearer_token_configured": state.auth_token.is_some(),
-            "require_auth_all": cfg.require_auth_all,
+            "require_auth_all": cfg.require_auth_all == Some(true),
         },
         "hmac_signing": {
-            "enabled": cfg.hmac_secret.is_some(),
+            "configured": cfg.hmac_secret.is_some(),
+            // verify_hmac n'est appelée par aucun handler : pas d'application réelle.
+            "enforced": false,
             "max_age_secs": cfg.hmac_max_age_secs,
         },
         "encryption": {
@@ -915,7 +951,12 @@ async fn proxy_handler(State(state): State<ProxyState>, req: Request<Body>) -> i
             .headers()
             .get(header::AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
-            .map(|v| v.strip_prefix("Bearer ").unwrap_or(v) == expected_token.as_str())
+            .map(|v| {
+                crate::security::ct_eq(
+                    v.strip_prefix("Bearer ").unwrap_or(v).as_bytes(),
+                    expected_token.as_bytes(),
+                )
+            })
             .unwrap_or(false);
 
         if !authorized {

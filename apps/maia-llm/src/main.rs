@@ -6,7 +6,7 @@
 
 //! MAIA-LLM — Service d'inférence GGUF local.
 //!
-//! Usage : `maia-llm serve [--bind 0.0.0.0:11435] [--models-dir ./models] [--config maia-llm.toml]`
+//! Usage : `maia-llm serve [--bind 127.0.0.1:11435] [--models-dir ./models] [--config maia-llm.toml]`
 
 mod api;
 mod auth;
@@ -19,7 +19,6 @@ use std::time::SystemTime;
 
 use engine::LlmEngine;
 use store::ModelStore;
-use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
 /// État partagé entre tous les handlers axum.
@@ -44,6 +43,12 @@ async fn main() {
 
     // Config
     let cfg = parse_args_and_load_config();
+    // Fail-closed : pas de bind hors loopback sans auth_key.
+    if let Err(msg) = config::validate_bind(&cfg) {
+        tracing::error!("{msg}");
+        eprintln!("{msg}");
+        std::process::exit(1);
+    }
     let bind_addr = cfg.bind_addr.clone();
     let models_dir = cfg.models_dir.clone();
     let auto_load = cfg.auto_load;
@@ -87,7 +92,7 @@ async fn main() {
     // Note: Extension<Option<String>> injectée ici pour le middleware auth
     let app = api::build_router(state.clone())
         .layer(axum::Extension(state.config.auth_key.clone()))
-        .layer(CorsLayer::new().allow_origin(Any).allow_methods(Any).allow_headers(Any))
+        .layer(config::build_cors(&state.config.cors_allowed_origins))
         .layer(TraceLayer::new_for_http());
 
     let listener = tokio::net::TcpListener::bind(&bind_addr)
