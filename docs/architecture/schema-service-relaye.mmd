@@ -1,0 +1,44 @@
+%% @id arch.cog.schema-service-relaye
+%% @role architecture-diagram
+%% @layer 5-7
+%% @human Service relayé (exemple JayOffice) : moteur en zone COG, relais + DB secondaire en Franche
+%% @do visualize_relay_pattern
+%% Référence : docs/architecture/MODELE-ZONES-ET-COUCHES-COG.md §9
+flowchart TB
+    subgraph FED["🤝 Fédération"]
+        RD["Relais JayOffice<br/>(COG distant)"]
+    end
+
+    subgraph COG["COG"]
+        BG{{"🛂 BorderGuard<br/>(pare-feu externe)"}}
+        subgraph FRANCHE["🏪 Franche"]
+            RL["Relais JayOffice<br/>(suite bureautique coopérative)"]
+            DBS[("DB secondaire<br/>temps réel · temporaire")]
+        end
+        PI{{"🚪 Portail interne<br/>(pare-feu interne)"}}
+        subgraph NAT["🏛️ Nationale"]
+            SVC["Services JayOffice<br/>(moteur + interface interne)"]
+            DBP[("DB principale / stockage")]
+        end
+    end
+
+    USER(["👤 Utilisateur"])
+
+    RD <-- "rejoindre la session" --> BG
+    BG <-- "connexion après visa" --> RL
+    RL <-- "écriture à chaud et temporaire<br/>vérification de santé" --> DBS
+    DBS -- "demande de sauvegarde (async)" --> PI
+    PI -- "sauvegarde si OK" --> DBP
+    SVC == "flux ouvert par la Nationale :<br/>sync après authentification<br/>+ protocole de vérification" ==> PI
+    PI <--> RL
+    SVC <-- "sync temps réel" --> DBP
+    USER <-- "utilisation hors ligne" --> SVC
+
+    classDef fw fill:#fee2e2,stroke:#dc2626
+    classDef franche fill:#fef3c7,stroke:#d97706
+    classDef nat fill:#ecfdf5,stroke:#059669
+    classDef ext fill:#eef2ff,stroke:#6366f1
+    class BG,PI fw
+    class RL,DBS franche
+    class SVC,DBP,USER nat
+    class RD ext
