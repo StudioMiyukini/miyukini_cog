@@ -36,7 +36,7 @@ pub mod room;
 pub use auth::{IdentityVerifier, JoinRequest, JoinToken, KeyDirectory};
 pub use client::{CollabClient, CollabError};
 pub use presence::PresenceManager;
-pub use room::{CollabRoom, JoinGrant, RoomRegistry, RoomStats};
+pub use room::{CollabRoom, JoinGrant, MemberEvents, RoomRegistry, RoomStats};
 
 use yrs::{Doc, ReadTxn, Transact};
 

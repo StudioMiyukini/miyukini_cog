@@ -7,8 +7,13 @@
 //! Client WebSocket pour la collaboration temps réel.
 //!
 //! Le premier message envoyé est un [`JoinRequest`] portant un [`JoinToken`]
-//! signé par l'identité ed25519 de l'utilisateur (R-008) ; le serveur refuse
-//! tout autre message avant un `join` vérifié.
+//! signé par l'identité ed25519 de l'utilisateur et lié à l'audience du
+//! serveur visé (R-008, R-022) ; le serveur refuse tout autre message avant un
+//! `join` vérifié.
+//!
+//! Les tâches d'envoi et de réception partagent un signal d'arrêt : la
+//! fermeture côté serveur (révocation, R-020) ou [`CollabClient::disconnect`]
+//! termine les deux boucles.
 
 use crate::auth::{unix_now, JoinRequest, JoinToken};
 use crate::presence::PresenceManager;
@@ -16,7 +21,7 @@ use ed25519_dalek::SigningKey;
 use futures_util::{SinkExt, StreamExt};
 use jaybureau_core::{CollabEvent, DocId, Presence, UserId};
 use std::sync::Arc;
-use tokio::sync::{mpsc, RwLock};
+use tokio::sync::{mpsc, watch, RwLock};
 use tokio_tungstenite::tungstenite::Message;
 use yrs::Doc;
 
@@ -51,6 +56,16 @@ pub enum CollabError {
     RoomFull,
     #[error("Message trop volumineux: {0} octets")]
     TooLarge(usize),
+    #[error("Jeton émis pour un autre serveur")]
+    WrongAudience,
+    #[error("Trop de jetons récents pour cet utilisateur")]
+    TooManyTokens,
+    #[error("Anti-rejeu saturé")]
+    ReplayCacheSaturated,
+    #[error("Accès révoqué")]
+    Revoked,
+    #[error("Événements perdus: {0}")]
+    Lagged(u64),
 }
 
 /// Client de collaboration pour un document.
@@ -61,6 +76,8 @@ pub struct CollabClient {
     pub user_id: UserId,
     /// Canal pour envoyer des events vers le serveur.
     tx: Option<mpsc::UnboundedSender<CollabEvent>>,
+    /// Signal d'arrêt partagé par les tâches d'envoi et de réception.
+    shutdown: Option<watch::Sender<bool>>,
 }
 
 impl CollabClient {
@@ -73,6 +90,7 @@ impl CollabClient {
             doc_id,
             user_id,
             tx: None,
+            shutdown: None,
         }
     }
 
@@ -81,8 +99,22 @@ impl CollabClient {
     /// `identity` : clé ed25519 de l'utilisateur, dont la clé publique est
     /// enregistrée côté serveur. Le jeton de connexion est signé avec elle et
     /// envoyé en premier message.
-    pub async fn connect(&mut self, ws_url: &str, identity: &SigningKey) -> Result<(), CollabError> {
-        let token = JoinToken::sign(identity, self.user_id.clone(), self.doc_id.clone(), unix_now()?)?;
+    ///
+    /// `server_audience` : identité du serveur visé (identifiant ou empreinte
+    /// de clé, R-022) ; le jeton n'est valable que pour ce serveur.
+    pub async fn connect(
+        &mut self,
+        ws_url: &str,
+        server_audience: &str,
+        identity: &SigningKey,
+    ) -> Result<(), CollabError> {
+        let token = JoinToken::sign(
+            identity,
+            server_audience,
+            self.user_id.clone(),
+            self.doc_id.clone(),
+            unix_now()?,
+        )?;
         let join = serde_json::to_string(&JoinRequest::Join { token })
             .map_err(|e| CollabError::Protocol(format!("join: {e}")))?;
 
@@ -103,6 +135,12 @@ impl CollabClient {
 
         let (tx, mut rx) = mpsc::unbounded_channel::<CollabEvent>();
         self.tx = Some(tx.clone());
+        // Arrêt de la réception (disconnect) ; fin de la réception → arrêt de
+        // l'envoi. Deux signaux distincts : `disconnect` laisse l'envoi vider
+        // sa file (message Leave) avant de se terminer.
+        let (stop_tx, mut stop_recv) = watch::channel(false);
+        let (closed_tx, mut stop_send) = watch::channel(false);
+        self.shutdown = Some(stop_tx);
 
         // Envoyer notre présence initiale
         let initial_presence = self.presence.local_presence();
@@ -116,7 +154,15 @@ impl CollabClient {
 
         // Tâche d'envoi
         tokio::spawn(async move {
-            while let Some(evt) = rx.recv().await {
+            loop {
+                let evt = tokio::select! {
+                    biased;
+                    _ = stop_send.changed() => break,
+                    e = rx.recv() => match e {
+                        Some(e) => e,
+                        None => break,
+                    },
+                };
                 match serde_json::to_string(&evt) {
                     Ok(json) => {
                         if let Err(e) = ws_tx.send(Message::Text(json)).await {
@@ -127,13 +173,23 @@ impl CollabClient {
                     Err(e) => tracing::warn!("serialize: {e}"),
                 }
             }
+            // Fermeture propre ; échec ignoré (connexion déjà fermée).
+            let _ = ws_tx.close().await;
         });
 
         // Tâche de réception
         let doc = self.doc.clone();
         let presence = self.presence.clone();
         tokio::spawn(async move {
-            while let Some(msg) = ws_rx.next().await {
+            loop {
+                let msg = tokio::select! {
+                    biased;
+                    _ = stop_recv.changed() => break,
+                    m = ws_rx.next() => match m {
+                        Some(m) => m,
+                        None => break,
+                    },
+                };
                 match msg {
                     Ok(Message::Text(text)) => {
                         if let Ok(evt) = serde_json::from_str::<CollabEvent>(&text) {
@@ -144,6 +200,8 @@ impl CollabClient {
                     _ => {}
                 }
             }
+            // Fermeture côté serveur (révocation, R-020) : arrêt de l'envoi.
+            let _ = closed_tx.send(true);
             tracing::info!("Connexion collab fermée");
         });
 
@@ -177,6 +235,11 @@ impl CollabClient {
                 user_id: self.user_id.clone(),
             })
             .ok();
+        }
+        // Arrêt de la réception ; l'envoi se termine après avoir vidé la file
+        // (le canal est fermé par l'abandon de `tx`).
+        if let Some(stop) = self.shutdown.take() {
+            let _ = stop.send(true);
         }
     }
 }
