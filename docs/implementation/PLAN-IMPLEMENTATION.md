@@ -37,10 +37,10 @@
 <!-- @role plan-lot -->
 <!-- @do plan_lot0 -->
 
-- **Objectif** : fermer les constats critiques et hauts (R-001 à R-003, R-008 à R-010) et R-004, R-005, R-015
+- **Objectif** : fermer les constats critiques et hauts (R-001 à R-003, R-008 à R-010, R-016) et R-004, R-005, R-015
 - **Travaux**
   - TEAM : authentification, écoute locale, CORS fermé, liste blanche des nœuds (R-001)
-  - Alicia API : persona dérivée du jeton (R-002)
+  - Alicia API : persona dérivée du jeton, confirmation uniquement par enregistrement en attente réclamé atomiquement (R-002, R-016, R-017)
   - `miyuantispam` : implémentation réelle ou refus explicite (R-003)
   - Jay Bureau : authentification et ACL du WebSocket, échange de clés signé, nonces internes (R-008, R-009)
   - Whisper / `alicia-mvp` : jeton obligatoire, comparaison constante, origine exacte (R-010)

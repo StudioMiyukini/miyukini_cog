@@ -114,6 +114,8 @@
 | R-013 | basse | Conflit de port 11435 entre maia-llm et `miou-llm-bridge` | — |
 | R-014 | basse | Incohérences code : manifeste JayRDV vers un binaire inexistant ; restes du remplacement de MiyuCloud dans JayCloud (`miyucloud_transition_days`) | — |
 | R-015 | moyenne | `miyuwebway_tracker` et `miyuvalidate` : stubs sans test | C-14, C-60 |
+| R-016 | haute | Alicia API : `/dispatch/confirm` sans état exécute directement une capacité soumise à confirmation (contournement du garde-fou) — n'exécuter que l'enregistrement en attente | C-12 |
+| R-017 | moyenne | Alicia : confirmation en attente non réclamée atomiquement → double exécution possible (`capabilities_runtime.rs`) | C-12 |
 
 ## 7. Livrables
 
