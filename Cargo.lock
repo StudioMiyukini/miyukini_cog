@@ -99,6 +99,7 @@ dependencies = [
  "miyualicia-wakeword",
  "miyustt",
  "miyutts",
+ "rand_core 0.6.4",
  "reqwest",
  "rodio",
  "rusqlite",
@@ -4841,8 +4842,11 @@ dependencies = [
 name = "jay-collab"
 version = "0.1.0"
 dependencies = [
+ "ed25519-dalek",
  "futures-util",
+ "hex",
  "jaybureau-core",
+ "rand 0.8.5",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
@@ -4903,7 +4907,6 @@ dependencies = [
  "chrono",
  "dioxus",
  "jaymessage",
- "miyukini-cog-bridge",
  "serde",
  "tokio",
  "tracing",
@@ -5236,6 +5239,7 @@ dependencies = [
  "tokio",
  "tracing",
  "uuid",
+ "zeroize",
 ]
 
 [[package]]
@@ -5300,8 +5304,7 @@ dependencies = [
  "chrono",
  "ed25519-dalek",
  "hex",
- "miyukini-cog-bridge",
- "miyusocialmessaging",
+ "hkdf",
  "rand 0.8.5",
  "serde",
  "serde_json",
@@ -5310,6 +5313,7 @@ dependencies = [
  "tracing",
  "uuid",
  "x25519-dalek",
+ "zeroize",
 ]
 
 [[package]]
@@ -6539,6 +6543,7 @@ version = "0.1.0"
 dependencies = [
  "miyukini-kernel",
  "serde",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -7294,6 +7299,7 @@ dependencies = [
  "axum 0.8.8",
  "serde",
  "serde_json",
+ "subtle",
  "thiserror 2.0.18",
  "tokio",
  "tower",
@@ -7324,6 +7330,7 @@ dependencies = [
  "base64",
  "serde",
  "serde_json",
+ "subtle",
  "thiserror 2.0.18",
  "tokio",
  "tower",
@@ -7336,6 +7343,7 @@ dependencies = [
  "miyukini-kernel",
  "serde",
  "serde_json",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -7373,6 +7381,7 @@ version = "0.1.0"
 dependencies = [
  "miyukini-kernel",
  "serde",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -11491,6 +11500,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
+ "subtle",
  "tempfile",
  "tokio",
  "toml",
@@ -13943,6 +13953,7 @@ version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0"
 dependencies = [
+ "serde",
  "zeroize_derive",
 ]
 
