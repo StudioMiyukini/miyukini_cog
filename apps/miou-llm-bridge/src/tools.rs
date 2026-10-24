@@ -236,6 +236,12 @@ pub struct GardeTour<'a> {
 }
 
 impl<'a> GardeTour<'a> {
+    /// Initialise l'état du tour depuis l'historique reçu (voir
+    /// [`EtatTour::depuis_historique`]).
+    pub fn reprendre_historique(&mut self, messages: &[serde_json::Value]) {
+        self.etat = EtatTour::depuis_historique(messages);
+    }
+
     /// Nouvelle garde pour un tour.
     pub fn new(registre: &'a RegistreConfirmations, executeur: &'a dyn ExecuteurOutils) -> Self {
         Self {
@@ -479,6 +485,9 @@ pub async fn chat_with_tools(
     let mut tool_calls_log = Vec::new();
     let executeur = ExecuteurRegistre;
     let mut garde = GardeTour::new(registre, &executeur);
+    // Le marquage étranger survit d'un tour à l'autre : l'historique reçu
+    // (non fiable) contamine le tour s'il contient des résultats d'outils.
+    garde.reprendre_historique(&messages);
     injecter_avertissement(&mut messages);
 
     for iteration in 0..MAX_TOOL_ITERATIONS {

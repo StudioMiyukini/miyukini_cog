@@ -144,6 +144,28 @@ impl EtatTour {
         Self::default()
     }
 
+    /// État initial d'un tour à partir de l'historique reçu du client.
+    ///
+    /// L'historique n'est pas fiable : tout message `tool` ou toute balise de
+    /// contenu étranger venant d'un tour précédent contamine le nouveau tour
+    /// (le marquage ne doit pas se perdre d'un tour à l'autre).
+    pub fn depuis_historique(messages: &[serde_json::Value]) -> Self {
+        let contamine = messages.iter().any(|m| {
+            let role_outil = m.get("role").and_then(|r| r.as_str()) == Some("tool");
+            let balise = m
+                .get("content")
+                .map(|c| c.to_string().contains(BALISE_DEBUT))
+                .unwrap_or(false);
+            role_outil || balise
+        });
+        let mut etat = Self::new();
+        if contamine {
+            etat.etranger = true;
+            etat.sources.push("historique".to_string());
+        }
+        etat
+    }
+
     /// Vrai si le contexte du tour contient du contenu étranger.
     pub fn contient_etranger(&self) -> bool {
         self.etranger
@@ -230,6 +252,28 @@ mod tests {
             classer_appel("file_ops", &p(&[("action", "delete".into())])),
             EffetOutil::Ecriture
         );
+    }
+
+    #[test]
+    fn historique_avec_outil_ou_balise_contamine_le_tour() {
+        let propre = vec![serde_json::json!({"role": "user", "content": "bonjour"})];
+        assert!(!EtatTour::depuis_historique(&propre).contient_etranger());
+
+        let avec_outil = vec![
+            serde_json::json!({"role": "user", "content": "lis cette page"}),
+            serde_json::json!({"role": "tool", "content": "résultat"}),
+        ];
+        let etat = EtatTour::depuis_historique(&avec_outil);
+        assert!(etat.contient_etranger());
+        let mut p = HashMap::new();
+        p.insert("action".to_string(), serde_json::json!("write"));
+        assert!(matches!(etat.decider("file_ops", &p), Decision::ConfirmationRequise(_)));
+
+        let avec_balise = vec![serde_json::json!({
+            "role": "assistant",
+            "content": format!("{BALISE_DEBUT} source=web_fetch nonce=x>>> piège")
+        })];
+        assert!(EtatTour::depuis_historique(&avec_balise).contient_etranger());
     }
 
     #[test]
