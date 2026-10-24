@@ -12,7 +12,7 @@
 //!
 //! | Appelant | Routes | Usage signé | Configuration |
 //! |---|---|---|---|
-//! | Central, services COG | toute l'API protégée | [`USAGE_API`] | `[security] cles_appelants` |
+//! | Central, services COG | toute l'API protégée | [`USAGE_API`] | `[security] cles_appelants` (+ env `MAIA_CLES_APPELANTS_SUPPLEMENTAIRES`, posée par Central quand il lance MAIA) |
 //! | hub TEAM | `POST /v1/agents/{id}/chat` seulement | [`USAGE_TEAM`] | `[security] cles_hub_team` |
 //!
 //! Aucune clé épinglée ⇒ 503 ; signature absente, clé inconnue, horodatage
@@ -164,6 +164,34 @@ mod tests {
         ] {
             assert!(!est_route_team(m, c), "{m} {c}");
         }
+    }
+
+    /// Requête construite comme le client de Central (`apps/central/src/cle_service.rs`) :
+    /// en-têtes `entetes_signees(cle, "maia/api", méthode, chemin+requête, corps)`.
+    fn requete(cle: Option<&CleSignature>, methode: &str, chemin: &str, corps: &'static [u8]) -> Request {
+        let mut rb = axum::http::Request::builder().method(methode).uri(chemin);
+        if let Some(cle) = cle {
+            for (nom, valeur) in entetes_signees(cle, USAGE_API, methode, chemin, corps) {
+                rb = rb.header(nom, valeur);
+            }
+        }
+        rb.body(Body::from(corps)).unwrap()
+    }
+
+    #[tokio::test]
+    async fn requete_de_central_acceptee_non_signee_refusee() {
+        let central = CleSignature::generer();
+        let gardes = GardesMaia::new(vec![central.cle_publique()], vec![]);
+        let corps: &[u8] = br#"{"model":"m","messages":[]}"#;
+        let ok = verifier(&gardes, requete(Some(&central), "POST", "/v1/chat/completions", corps)).await;
+        assert!(ok.is_ok());
+        let ok = verifier(&gardes, requete(Some(&central), "GET", "/v1/models?x=1", b"")).await;
+        assert!(ok.is_ok());
+        let refus = verifier(&gardes, requete(None, "GET", "/v1/models", b"")).await.unwrap_err();
+        assert_eq!((refus.statut, refus.motif), (StatusCode::UNAUTHORIZED, "signature_absente"));
+        let autre = CleSignature::generer();
+        let refus = verifier(&gardes, requete(Some(&autre), "GET", "/v1/models", b"")).await.unwrap_err();
+        assert_eq!(refus.motif, "signataire_non_autorise");
     }
 
     #[test]

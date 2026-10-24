@@ -8,7 +8,7 @@
 
 use crate::components::{ServiceFilter, ServiceGrid};
 use crate::llm_client::{ChatMessage, LlmClient};
-use crate::miou::state::FrequenceBulles;
+use crate::miou::state::{FrequenceBulles, MiouPreferences};
 use crate::state::{use_app_state, AppContext, MainTab, MiouChatMsg, ServiceInfo};
 use chrono::{Local, Timelike};
 use dioxus::prelude::*;
@@ -309,17 +309,7 @@ fn MiouChatPanel() -> Element {
         } else {
             spawn(async move {
                 status.set(ChatStatus::Connecting);
-                let endpoint = {
-                    let p = app.read();
-                    if p.miou_prefs.use_remote_session
-                        && !p.miou_prefs.remote_session_url.is_empty()
-                    {
-                        p.miou_prefs.remote_session_url.clone()
-                    } else {
-                        p.miou_prefs.llm_endpoint.clone()
-                    }
-                };
-                let client = LlmClient::new(&endpoint);
+                let client = client_llm(&app.read().miou_prefs);
                 match client.ensure_model().await {
                     Ok(model) => {
                         app.write().miou_chat_model = Some(model.clone());
@@ -463,6 +453,17 @@ fn MiouChatPanel() -> Element {
 
 /// Envoie un message, appelle le LLM, ajoute la réponse.
 /// Les messages sont persistés dans AppState.
+/// Client LLM du chat Miou : session LM Studio distante (non signée — aucune
+/// signature exposée à un serveur tiers) ou MAIA locale (requêtes signées par
+/// la clé de service de Central, lot 2).
+fn client_llm(prefs: &MiouPreferences) -> LlmClient {
+    if prefs.use_remote_session && !prefs.remote_session_url.is_empty() {
+        LlmClient::new(&prefs.remote_session_url)
+    } else {
+        LlmClient::bridge(&prefs.llm_endpoint)
+    }
+}
+
 fn send_chat_message(
     text: String,
     mut app: Signal<crate::state::AppState>,
@@ -495,15 +496,7 @@ fn send_chat_message(
     }
 
     spawn(async move {
-        let endpoint = {
-            let p = app.read();
-            if p.miou_prefs.use_remote_session && !p.miou_prefs.remote_session_url.is_empty() {
-                p.miou_prefs.remote_session_url.clone()
-            } else {
-                p.miou_prefs.llm_endpoint.clone()
-            }
-        };
-        let client = LlmClient::new(&endpoint);
+        let client = client_llm(&app.read().miou_prefs);
         match client.chat(&model, &api_messages).await {
             Ok(reply) => {
                 app.write().miou_chat_messages.push(MiouChatMsg {

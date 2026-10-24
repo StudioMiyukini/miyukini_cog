@@ -8,7 +8,16 @@
 //!
 //! Pointe vers le bridge MiouLLM (par défaut localhost:11435)
 //! qui relaie les requêtes vers LM Studio ou tout autre serveur compatible.
+//!
+//! Lot 2 : MAIA n'accepte que des requêtes signées par un appelant épinglé.
+//! [`LlmClient::bridge`] signe chaque requête avec la clé de service de Central
+//! (usage `maia/api`, voir [`crate::cle_service`]) ; [`LlmClient::new`] reste non
+//! signé pour une session LM Studio distante (aucune signature n'est exposée à
+//! un serveur tiers, qui pourrait sinon la rejouer vers MAIA).
 
+use std::sync::Arc;
+
+use miyusceau::CleSignature;
 use serde::{Deserialize, Serialize};
 
 /// URL par défaut du bridge MiouLLM.
@@ -98,10 +107,21 @@ pub struct RecommendedModel {
 
 // ── Client ─────────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct LlmClient {
     client: reqwest::Client,
     base_url: String,
+    /// Clé de service de Central (requêtes vers MAIA) ; `None` : non signé.
+    cle: Option<Arc<CleSignature>>,
+}
+
+impl std::fmt::Debug for LlmClient {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LlmClient")
+            .field("base_url", &self.base_url)
+            .field("signe", &self.cle.is_some())
+            .finish_non_exhaustive()
+    }
 }
 
 #[derive(Debug)]
@@ -121,9 +141,32 @@ impl std::fmt::Display for LlmError {
     }
 }
 
+/// Erreur explicite si la réponse n'est pas un succès (ex. 401 : Central non
+/// épinglé dans `bridge.toml`).
+async fn statut_ok(resp: reqwest::Response) -> Result<reqwest::Response, LlmError> {
+    if resp.status().is_success() {
+        return Ok(resp);
+    }
+    let status = resp.status();
+    let body = resp.text().await.unwrap_or_default();
+    Err(LlmError::Api(format!("HTTP {status}: {body}")))
+}
+
 impl LlmClient {
-    /// Crée un client LLM pointant vers l'URL spécifiée.
+    /// Crée un client LLM **non signé** pointant vers l'URL spécifiée (serveur
+    /// OpenAI-compatible tiers : session LM Studio distante).
     pub fn new(base_url: &str) -> Self {
+        Self::avec_cle(base_url, None)
+    }
+
+    /// Crée un client vers MAIA (bridge) : chaque requête est signée avec la clé
+    /// de service de Central.
+    pub fn bridge(base_url: &str) -> Self {
+        Self::avec_cle(base_url, crate::cle_service::cle())
+    }
+
+    /// Client avec une clé de signature donnée (`None` : non signé).
+    pub fn avec_cle(base_url: &str, cle: Option<Arc<CleSignature>>) -> Self {
         let client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(120))
             .build()
@@ -131,23 +174,37 @@ impl LlmClient {
         Self {
             client,
             base_url: base_url.trim_end_matches('/').to_string(),
+            cle,
         }
     }
 
-    /// Crée un client pointant vers le bridge par défaut (localhost:11435).
+    /// Crée un client signé pointant vers le bridge par défaut (localhost:11435).
     pub fn default_bridge() -> Self {
-        Self::new(DEFAULT_BRIDGE_URL)
+        Self::bridge(DEFAULT_BRIDGE_URL)
+    }
+
+    /// Requête GET (corps vide), signée si le client a une clé.
+    fn get(&self, url: &str) -> reqwest::RequestBuilder {
+        crate::cle_service::signer_maia(self.client.get(url), self.cle.as_deref(), "GET", url, b"")
+    }
+
+    /// Requête POST JSON : le corps est sérialisé une fois, et ces octets exacts
+    /// sont signés puis envoyés.
+    fn post_json<T: Serialize>(&self, url: &str, corps: &T) -> Result<reqwest::RequestBuilder, LlmError> {
+        let octets = serde_json::to_vec(corps).map_err(|e| LlmError::Api(e.to_string()))?;
+        let rb = crate::cle_service::signer_maia(self.client.post(url), self.cle.as_deref(), "POST", url, &octets);
+        Ok(rb.header(reqwest::header::CONTENT_TYPE, "application/json").body(octets))
     }
 
     /// Liste les modèles chargés.
     pub async fn list_models(&self) -> Result<Vec<String>, LlmError> {
         let url = format!("{}/v1/models", self.base_url);
         let resp = self
-            .client
             .get(&url)
             .send()
             .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
+        let resp = statut_ok(resp).await?;
         let body: ModelsResponse = resp
             .json()
             .await
@@ -165,11 +222,11 @@ impl LlmClient {
     pub async fn hardware_info(&self) -> Result<HardwareData, LlmError> {
         let url = format!("{}/v1/hardware", self.base_url);
         let resp = self
-            .client
             .get(&url)
             .send()
             .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
+        let resp = statut_ok(resp).await?;
         let body: HardwareResponse = resp
             .json()
             .await
@@ -181,11 +238,11 @@ impl LlmClient {
     pub async fn recommend_model(&self) -> Result<RecommendModelResponse, LlmError> {
         let url = format!("{}/v1/recommend", self.base_url);
         let resp = self
-            .client
             .get(&url)
             .send()
             .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
+        let resp = statut_ok(resp).await?;
         let body: RecommendModelResponse = resp
             .json()
             .await
@@ -204,18 +261,12 @@ impl LlmClient {
         };
 
         let resp = self
-            .client
-            .post(&url)
-            .json(&req)
+            .post_json(&url, &req)?
             .send()
             .await
             .map_err(|e| LlmError::Network(e.to_string()))?;
 
-        if !resp.status().is_success() {
-            let status = resp.status();
-            let body = resp.text().await.unwrap_or_default();
-            return Err(LlmError::Api(format!("HTTP {status}: {body}")));
-        }
+        let resp = statut_ok(resp).await?;
 
         let body: ChatResponse = resp
             .json()
@@ -227,5 +278,47 @@ impl LlmClient {
             .next()
             .map(|c| c.message.content)
             .ok_or_else(|| LlmError::Api("Pas de réponse".into()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use miyauth::http::service::GardeSignee;
+
+    fn chat_req() -> ChatRequest {
+        ChatRequest {
+            model: "m".into(),
+            messages: vec![ChatMessage { role: "user".into(), content: "Bonjour é".into() }],
+            temperature: Some(0.8),
+            max_tokens: Some(16),
+        }
+    }
+
+    /// Les requêtes du client Central passent la vérification de MAIA ; sans clé
+    /// (session distante) elles sont refusées par MAIA.
+    #[test]
+    fn client_bridge_signe_get_et_post() {
+        let cle = Arc::new(CleSignature::generer());
+        let garde = GardeSignee::new([cle.cle_publique()]);
+        let client = LlmClient::avec_cle("http://localhost:11435/", Some(cle));
+        let get = client.get("http://localhost:11435/v1/models").build().unwrap();
+        assert_eq!(crate::cle_service::tests::verifier_comme_maia(&garde, &get), Ok(()));
+        let post = client
+            .post_json("http://localhost:11435/v1/chat/completions", &chat_req())
+            .unwrap()
+            .build()
+            .unwrap();
+        assert_eq!(post.headers()[reqwest::header::CONTENT_TYPE], "application/json");
+        assert_eq!(crate::cle_service::tests::verifier_comme_maia(&garde, &post), Ok(()));
+
+        let non_signe = LlmClient::new("http://localhost:11435");
+        let req = non_signe
+            .post_json("http://localhost:11435/v1/chat/completions", &chat_req())
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(req.headers().get(miyauth::http::ENTETE_SIGNATURE).is_none());
+        assert!(crate::cle_service::tests::verifier_comme_maia(&garde, &req).is_err());
     }
 }

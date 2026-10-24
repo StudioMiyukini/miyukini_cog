@@ -11,6 +11,7 @@
 
 mod app;
 mod audio;
+pub mod cle_service;
 mod components;
 mod data;
 mod kindmother_launcher;
@@ -73,6 +74,9 @@ fn main() {
 
     // CA-03 : secrets existants ramenés en 0600, dossiers applicatifs en 0700.
     durcir_fichiers_au_demarrage();
+
+    // Lot 2 : clé de service de Central (appels signés à MAIA) — clé publique journalisée.
+    cle_service::initialiser();
 
     // Initialiser le holder du processus KindMother
     KINDMOTHER_PROCESS.get_or_init(|| Mutex::new(None));

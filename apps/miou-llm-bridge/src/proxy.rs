@@ -169,6 +169,12 @@ pub fn proxy_router(state: ProxyState) -> Router {
 // UI
 // ═══════════════════════════════════════════════════════════════════════
 
+/// Page de l'UI intégrée. Elle est publique, mais les appels qu'elle fait à
+/// l'API (`/v1/…`, `/status`) sont protégés : un navigateur ne détient pas de clé
+/// épinglée, donc ils reçoivent 401 (ou 503 sans appelant épinglé). Central
+/// n'affiche pas cette UI ; pour l'utiliser, la servir derrière un backend qui
+/// signe les requêtes (usage `maia/api`) avec une clé épinglée dans
+/// `[security] cles_appelants`.
 async fn ui_handler() -> impl IntoResponse {
     Html(include_str!("../static/index.html"))
 }

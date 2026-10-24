@@ -204,6 +204,13 @@ impl ServiceProcesses {
         for (key, value) in &service_env {
             command.env(key, value);
         }
+        // Lot 2 : MAIA épingle la clé publique de Central (pas un secret) pour
+        // accepter ses requêtes signées sans édition manuelle de bridge.toml.
+        if let Some((cle, valeur)) =
+            crate::cle_service::env_lancement(service_id, crate::cle_service::cle_publique_b64().as_deref())
+        {
+            command.env(cle, valeur);
+        }
 
         let child = command
             .spawn()

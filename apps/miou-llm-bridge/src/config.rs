@@ -256,6 +256,26 @@ impl BridgeConfig {
         }
     }
 
+    /// Ajoute à `[security] cles_appelants` les clés publiques de `valeur`
+    /// (séparées par des virgules ou des espaces ; doublons ignorés). Contenu de
+    /// [`ENV_CLES_APPELANTS_SUPPLEMENTAIRES`], posé par Central quand il lance
+    /// MAIA. En mémoire seulement (jamais réécrit dans `bridge.toml`) ; une entrée
+    /// mal formée fera échouer [`Self::validate_startup`] (fail-closed).
+    /// Retourne le nombre de clés ajoutées.
+    pub fn fusionner_cles_appelants(&mut self, valeur: Option<&str>) -> usize {
+        let Some(valeur) = valeur else {
+            return 0;
+        };
+        let mut ajoutees = 0;
+        for cle in valeur.split(|c: char| c == ',' || c.is_whitespace()).filter(|c| !c.is_empty()) {
+            if !self.security.cles_appelants.iter().any(|c| c.trim() == cle) {
+                self.security.cles_appelants.push(cle.to_string());
+                ajoutees += 1;
+            }
+        }
+        ajoutees
+    }
+
     /// Valide la configuration (fail-closed). À appeler avant d'ouvrir le port :
     /// clés épinglées bien formées, et pas de bind non-loopback sans appelant.
     pub fn validate_startup(&self) -> Result<(), String> {
@@ -282,8 +302,26 @@ pub fn config_path() -> PathBuf {
     }
 }
 
-/// Charge la config depuis le fichier TOML. Crée le fichier par défaut si absent.
+/// Variable d'environnement : clés publiques d'appelants **supplémentaires**
+/// (base64 URL ou hex, séparées par des virgules), ajoutées en mémoire à
+/// `[security] cles_appelants`. Posée par Central quand il lance MAIA, pour
+/// épingler sa propre clé de service sans éditer `bridge.toml`.
+pub const ENV_CLES_APPELANTS_SUPPLEMENTAIRES: &str = "MAIA_CLES_APPELANTS_SUPPLEMENTAIRES";
+
+/// Charge la config (fichier TOML, créé par défaut si absent) puis ajoute les
+/// appelants de [`ENV_CLES_APPELANTS_SUPPLEMENTAIRES`].
 pub fn load_or_create() -> BridgeConfig {
+    let mut cfg = load_or_create_fichier();
+    let env = std::env::var(ENV_CLES_APPELANTS_SUPPLEMENTAIRES).ok();
+    let n = cfg.fusionner_cles_appelants(env.as_deref());
+    if n > 0 {
+        tracing::info!("{n} appelant(s) épinglé(s) via {ENV_CLES_APPELANTS_SUPPLEMENTAIRES} (lancement par Central)");
+    }
+    cfg
+}
+
+/// Charge la config depuis le fichier TOML. Crée le fichier par défaut si absent.
+fn load_or_create_fichier() -> BridgeConfig {
     let path = config_path();
 
     if path.exists() {
@@ -366,6 +404,22 @@ mod tests {
         assert_eq!(c.champs_obsoletes(), vec!["auth_token", "security.require_auth_all", "security.hmac_secret"]);
         let t = toml::to_string(&c).unwrap();
         assert!(!t.contains("s3cret") && !t.contains("hmac_secret") && !t.contains("require_auth_all"));
+    }
+
+    #[test]
+    fn appelants_supplementaires_fusionnes_sans_doublon() {
+        let a = cle_b64();
+        let b = cle_b64();
+        let mut c = BridgeConfig::default();
+        c.security.cles_appelants = vec![a.clone()];
+        assert_eq!(c.fusionner_cles_appelants(None), 0);
+        assert_eq!(c.fusionner_cles_appelants(Some(&format!("{a}, {b},,"))), 1);
+        assert_eq!(c.security.cles_appelants, vec![a.clone(), b.clone()]);
+        let (appelants, _) = c.cles_epinglees().unwrap();
+        assert_eq!(appelants.len(), 2);
+        // Jamais réécrit dans un fichier : seule la mémoire change ; entrée mal formée ⇒ refus.
+        c.fusionner_cles_appelants(Some("pas-une-cle"));
+        assert!(c.validate_startup().is_err());
     }
 
     #[test]

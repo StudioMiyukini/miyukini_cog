@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  Lot 2 : l'API de MAIA n'accepte que des requêtes signées (Ed25519, usage
+  `maia/api`) par un appelant épinglé dans bridge.toml `[security] cles_appelants`.
+  Un navigateur n'a pas de clé : servie directement, cette UI reçoit 401/503.
+  Elle doit être servie derrière un backend qui signe les requêtes.
+-->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
