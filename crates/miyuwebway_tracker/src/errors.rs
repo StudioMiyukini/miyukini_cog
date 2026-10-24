@@ -4,25 +4,30 @@
 //! @layer  core
 //! @human  miyuwebway tracker — module « errors ».
 
-#[derive(Debug, Clone)]
+/// Erreurs du toolkit MiyuWebwayTracker — une variante par cause de refus (C-11).
+///
+/// Toute erreur doit être traitée comme un **refus** par l'appelant (C-12).
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum MiyuwebwayTrackerError {
+    /// Aucun mandat gouverné dans le contexte.
+    #[error("Execution refused: no governed mandate")]
     NoMandate,
-    Unimplemented,
-    /// Tracker (Origin) indisponible ; délégation réseau non implémentée ou échec connexion.
+    /// Outil non implémenté : refus explicite (C-14). Porte le ToolId.
+    #[error("Tool not yet implemented: {0}")]
+    Unimplemented(&'static str),
+    /// Tracker (Origin) ou état local indisponible.
+    #[error("Tracker unavailable: {0}")]
     TrackerUnavailable(String),
+    /// Entrée de liste COG invalide (vide, trop longue, caractères interdits).
+    #[error("Invalid COG entry: {0}")]
+    InvalidEntry(&'static str),
+    /// Liste locale pleine (borne mémoire, C-13).
+    #[error("COG list capacity exceeded ({max} entries)")]
+    CapacityExceeded {
+        /// Nombre maximal d'entrées.
+        max: usize,
+    },
+    /// Hôte invalide pour la résolution d'adresse.
+    #[error("Invalid host: {0}")]
+    InvalidHost(&'static str),
 }
-
-impl std::fmt::Display for MiyuwebwayTrackerError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            MiyuwebwayTrackerError::NoMandate => {
-                write!(f, "Execution refused: no governed mandate")
-            }
-            MiyuwebwayTrackerError::Unimplemented => write!(f, "Tool not yet implemented"),
-            MiyuwebwayTrackerError::TrackerUnavailable(ref msg) => {
-                write!(f, "Tracker unavailable: {msg}")
-            }
-        }
-    }
-}
-impl std::error::Error for MiyuwebwayTrackerError {}

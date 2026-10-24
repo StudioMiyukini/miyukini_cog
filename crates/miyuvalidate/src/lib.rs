@@ -21,5 +21,10 @@ pub use admin_cell::{
 };
 pub use context::GovernedContext;
 pub use errors::MiyuValidateError;
-pub use sanitize::{sanitize as validate_sanitize, SanitizePolicy, SanitizeValueType};
-pub use schema::{check as schema_check, SchemaCheckResult};
+pub use sanitize::{
+    sanitize as validate_sanitize, SanitizePolicy, SanitizeValueType, MAX_LIST_ITEMS,
+    MAX_VALUE_BYTES,
+};
+pub use schema::{
+    check as schema_check, SchemaCheckResult, MAX_DATA_BYTES, MAX_SCHEMA_BYTES, MAX_SCHEMA_ENTRIES,
+};

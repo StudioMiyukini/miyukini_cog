@@ -14,6 +14,7 @@ description = "Kit d'outils Miyuantispam — squelette Phase 1 sous gouvernance"
 [dependencies]
 miyukini-kernel = { path = "../miyukini-kernel" }
 serde = { version = "1.0", features = ["derive"] }
+thiserror = "2"
 
 [dev-dependencies]
 

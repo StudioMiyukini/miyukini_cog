@@ -24,4 +24,6 @@ pub use captcha::{generate as captcha_generate, verify as captcha_verify};
 pub use context::GovernedContext;
 pub use errors::MiyuantispamError;
 pub use flood::{check as flood_check, FloodCheckResult};
-pub use rate_limit::{check as rate_limit_check, RateLimitCheckResult};
+pub use rate_limit::{
+    check as rate_limit_check, RateLimitCheckResult, RateLimitPolicy, RateLimiter, MAX_KEY_BYTES,
+};

@@ -28,7 +28,7 @@ pub use admin_cell::{
 };
 pub use cog_list::{
     filter as cog_list_filter, get as cog_list_get, merge as cog_list_merge,
-    update as cog_list_update,
+    update as cog_list_update, CogListStore, MAX_COG_ENTRIES, MAX_COG_ENTRY_BYTES,
 };
 pub use context::GovernedContext;
 pub use declaration::{validate as declaration_validate, verify as declaration_verify};

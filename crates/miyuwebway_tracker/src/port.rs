@@ -18,3 +18,21 @@ pub fn check(ctx: &GovernedContext, port: u16) -> Result<bool, MiyuwebwayTracker
     }
     Ok(port == MWS_TRACKER_PORT)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn port_tracker_reserve() {
+        let ctx = GovernedContext::new("m".into(), 1);
+        assert_eq!(check(&ctx, 21000), Ok(true));
+        assert_eq!(check(&ctx, 8080), Ok(false));
+    }
+
+    #[test]
+    fn refuse_sans_mandat() {
+        let empty = GovernedContext::new(String::new(), 1);
+        assert_eq!(check(&empty, 21000), Err(MiyuwebwayTrackerError::NoMandate));
+    }
+}
