@@ -268,6 +268,9 @@ struct IdentiteFichier {
     ino: u64,
     taille: u64,
     mtime_ns: i128,
+    /// Date de changement d'inode : non réglable par l'utilisateur (une
+    /// réécriture qui restaure la mtime la modifie quand même).
+    ctime_ns: i128,
 }
 
 impl IdentiteFichier {
@@ -280,6 +283,7 @@ impl IdentiteFichier {
                 ino: meta.ino(),
                 taille: meta.len(),
                 mtime_ns: i128::from(meta.mtime()) * 1_000_000_000 + i128::from(meta.mtime_nsec()),
+                ctime_ns: i128::from(meta.ctime()) * 1_000_000_000 + i128::from(meta.ctime_nsec()),
             }
         }
         #[cfg(not(unix))]
@@ -289,7 +293,7 @@ impl IdentiteFichier {
                 .ok()
                 .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
                 .map_or(0, |d| d.as_nanos() as i128);
-            Self { dev: 0, ino: 0, taille: meta.len(), mtime_ns }
+            Self { dev: 0, ino: 0, taille: meta.len(), mtime_ns, ctime_ns: 0 }
         }
     }
 }
@@ -328,6 +332,36 @@ impl ModeleOuvert {
         if !meta.is_file() {
             return Err(ErreurProvenance::LectureModele("pas un fichier régulier".into()));
         }
+        #[cfg(unix)]
+        {
+            // Personne d'autre que le service (ou root) ne doit pouvoir réécrire
+            // le modèle pendant son usage.
+            use std::os::unix::fs::MetadataExt;
+            // UID et GID effectifs du service : propriétaire de /proc/self (Linux).
+            #[cfg(target_os = "linux")]
+            let (euid, egid) = std::fs::metadata("/proc/self")
+                .map(|m| (m.uid(), m.gid()))
+                .map_err(lecture)?;
+            #[cfg(not(target_os = "linux"))]
+            let (euid, egid) = (meta.uid(), u32::MAX);
+            if meta.mode() & 0o002 != 0 {
+                return Err(ErreurProvenance::LectureModele(
+                    "modèle modifiable par tous (chmod o-w requis)".into(),
+                ));
+            }
+            // Écriture de groupe admise seulement pour le groupe du service
+            // (groupe privé d'utilisateur, umask 002).
+            if meta.mode() & 0o020 != 0 && meta.gid() != egid {
+                return Err(ErreurProvenance::LectureModele(
+                    "modèle modifiable par un autre groupe (chmod g-w requis)".into(),
+                ));
+            }
+            if meta.uid() != euid && meta.uid() != 0 {
+                return Err(ErreurProvenance::LectureModele(
+                    "modèle appartenant à un autre utilisateur que le service ou root".into(),
+                ));
+            }
+        }
         Ok(Self { fichier, chemin: chemin.to_path_buf(), identite: IdentiteFichier::de(&meta) })
     }
 
@@ -350,10 +384,17 @@ impl ModeleOuvert {
             .fichier
             .metadata()
             .map_err(|e| ErreurProvenance::LectureModele(e.to_string()))?;
-        if IdentiteFichier::de(&meta) == self.identite {
-            Ok(())
-        } else {
-            Err(ErreurProvenance::ModeleModifie)
+        if IdentiteFichier::de(&meta) != self.identite {
+            return Err(ErreurProvenance::ModeleModifie);
+        }
+        // Le chemin doit toujours désigner le fichier vérifié (lien symbolique
+        // ou remplacement ⇒ refus) : indispensable hors Linux, où le chargeur
+        // reçoit le chemin et non le descripteur.
+        match std::fs::symlink_metadata(&self.chemin) {
+            Ok(p) if !p.file_type().is_symlink() && IdentiteFichier::de(&p) == self.identite => {
+                Ok(())
+            }
+            _ => Err(ErreurProvenance::ModeleModifie),
         }
     }
 
@@ -728,6 +769,24 @@ mod tests {
         std::fs::remove_file(&p).unwrap();
         std::fs::write(&p, b"autre contenu").unwrap();
         assert_eq!(sha256_fichier(&chemin).unwrap(), attendu);
+        // Chemin remplacé : refus avant ou après chargement.
+        assert!(matches!(ouvert.inchange(), Err(ErreurProvenance::ModeleModifie)));
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn modele_modifiable_par_d_autres_refuse() {
+        use std::os::unix::fs::PermissionsExt;
+        let d = dossier();
+        let p = modele(&d);
+        let c = cle();
+        sceller_modele(&p, &c, "Apache-2.0", "2025-06").unwrap();
+        std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o646)).unwrap();
+        let pol = PolitiqueModeles::new(ancres(&c), true);
+        assert!(matches!(pol.autoriser(&p), Err(ErreurProvenance::LectureModele(_))));
+        std::fs::set_permissions(&p, std::fs::Permissions::from_mode(0o644)).unwrap();
+        assert!(pol.autoriser(&p).is_ok());
         let _ = std::fs::remove_dir_all(&d);
     }
 
