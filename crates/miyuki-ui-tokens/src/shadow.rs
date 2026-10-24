@@ -88,16 +88,6 @@ impl ShadowScale {
         }
     }
 
-    /// D2 minimal shadows (ambiance by color, not elevation).
-    pub const fn d2() -> Self {
-        Self {
-            none: Shadow::NONE,
-            sm: Shadow::new(0.0, 1.0, 2.0, 0.0, Rgba::with_alpha(0, 0, 0, 128)),
-            md: Shadow::new(0.0, 2.0, 6.0, 0.0, Rgba::with_alpha(0, 0, 0, 153)),
-            lg: Shadow::new(0.0, 4.0, 12.0, 0.0, Rgba::with_alpha(0, 0, 0, 179)),
-            xl: Shadow::new(0.0, 8.0, 24.0, 0.0, Rgba::with_alpha(0, 0, 0, 204)),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -123,14 +113,5 @@ mod tests {
         assert!(s.sm.blur < s.md.blur);
         assert!(s.md.blur < s.lg.blur);
         assert!(s.lg.blur < s.xl.blur);
-    }
-
-    #[test]
-    fn test_d2_shadows_smaller_than_cog() {
-        let cog = ShadowScale::cog();
-        let d2 = ShadowScale::d2();
-        // D2 shadows should be less dramatic (smaller blur at same level)
-        assert!(d2.md.blur <= cog.md.blur);
-        assert!(d2.lg.blur <= cog.lg.blur);
     }
 }

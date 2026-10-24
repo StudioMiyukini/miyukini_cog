@@ -5,11 +5,10 @@
 // @human miyuk
 
 pub mod cog;
-pub mod d2;
 
 use crate::color::Rgba;
 
-/// Unified palette structure used by both COG and D2 themes.
+/// Unified palette structure used by the COG theme.
 ///
 /// The palette contains all colors organized by semantic role.
 /// Framework-specific code reads from this palette to apply colors.
@@ -51,7 +50,7 @@ pub struct Palette {
     pub accent_primary_subtle: Rgba,
 
     // -- Accent secondary --
-    /// Secondary accent (sakura for COG, life red for D2).
+    /// Secondary accent (sakura for COG).
     pub accent_secondary: Rgba,
     /// Secondary accent hover state.
     pub accent_secondary_hover: Rgba,

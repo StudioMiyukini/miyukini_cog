@@ -31,24 +31,6 @@ impl FontFamily {
         fallback: "'Cascadia Code', 'Fira Code', monospace",
     };
 
-    /// D2 title font (Exocet-like).
-    pub const D2_TITLE: Self = Self {
-        primary: "Cinzel Decorative",
-        fallback: "'Cinzel', serif",
-    };
-
-    /// D2 body font.
-    pub const D2_BODY: Self = Self {
-        primary: "Georgia",
-        fallback: "'Times New Roman', serif",
-    };
-
-    /// D2 monospace for stats.
-    pub const D2_MONO: Self = Self {
-        primary: "Courier New",
-        fallback: "monospace",
-    };
-
     /// Full CSS font-family string.
     pub fn to_css(&self) -> String {
         format!("'{}', {}", self.primary, self.fallback)
@@ -117,21 +99,21 @@ pub struct TypographyScale {
     /// Monospace font family.
     pub family_mono: FontFamily,
 
-    /// 10px (COG) / 8px (D2) -- badges, legal, counters.
+    /// 10px (COG) -- badges, legal, counters.
     pub xs: FontSize,
-    /// 12px (COG) / 10px (D2) -- secondary labels, hints.
+    /// 12px (COG) -- secondary labels, hints.
     pub sm: FontSize,
-    /// 14px (COG) / 12px (D2) -- body text (base).
+    /// 14px (COG) -- body text (base).
     pub body: FontSize,
-    /// 16px (COG) / 14px (D2) -- subtitles, important labels.
+    /// 16px (COG) -- subtitles, important labels.
     pub lg: FontSize,
-    /// 18px (COG) / 16px (D2) -- section titles.
+    /// 18px (COG) -- section titles.
     pub xl: FontSize,
     /// 24px -- page titles.
     pub xxl: FontSize,
     /// 32px -- main titles, hero text.
     pub xxxl: FontSize,
-    /// 40px (COG) / 48px (D2) -- display, splash.
+    /// 40px (COG) -- display, splash.
     pub display: FontSize,
 }
 
@@ -155,12 +137,6 @@ mod tests {
         let css = FontFamily::COG_UI.to_css();
         assert!(css.contains("Inter"));
         assert!(css.contains("Segoe UI"));
-    }
-
-    #[test]
-    fn test_font_family_d2_title_to_css() {
-        let css = FontFamily::D2_TITLE.to_css();
-        assert!(css.contains("Cinzel Decorative"));
     }
 
     #[test]

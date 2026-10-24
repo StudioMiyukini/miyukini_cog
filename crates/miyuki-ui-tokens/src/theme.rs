@@ -15,7 +15,7 @@ use crate::z_index::ZIndexScale;
 /// Complete UI theme composing all design token categories.
 ///
 /// A `UiTheme` is the single source of truth for all visual decisions
-/// in a given context (COG desktop, D2 game, etc.).
+/// in a given context (COG desktop, etc.).
 ///
 /// # Usage
 ///
@@ -48,24 +48,12 @@ pub struct UiTheme {
 
 #[cfg(test)]
 mod tests {
-    use crate::themes::{COG_THEME, D2_THEME};
+    use crate::themes::COG_THEME;
 
     #[test]
     fn test_cog_theme_has_name() {
         assert!(!COG_THEME.name.is_empty());
         assert!(COG_THEME.name.contains("COG"));
-    }
-
-    #[test]
-    fn test_d2_theme_has_name() {
-        assert!(!D2_THEME.name.is_empty());
-        assert!(D2_THEME.name.contains("D2"));
-    }
-
-    #[test]
-    fn test_themes_are_different() {
-        assert_ne!(COG_THEME.palette, D2_THEME.palette);
-        assert_ne!(COG_THEME.name, D2_THEME.name);
     }
 
     #[test]

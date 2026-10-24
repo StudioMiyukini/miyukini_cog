@@ -20,7 +20,6 @@ members = [
     
     # === Toolkits (strate 5-6) ===
     "crates/miyuki-ui-tokens",
-    "crates/miyuki-ui-egui",
     "crates/miyuki-ui-dioxus",
     "crates/miyusql",
     "crates/miyucalc",
