@@ -7,7 +7,7 @@
 <!-- @do define_cog_zones_and_layers -->
 
 - **Statut** : référence, 2026-10-24 (schéma de l'auteur, v2)
-- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd)
+- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd)
 
 ## 1. Principes
 
@@ -140,7 +140,50 @@
   - décision StrongFather (+ TAMR si sensible)
   - inscrite au registre Merkle
 
-## 9. Réseau intégré
+## 9. Services relayés (agents relais)
+
+<!-- @id arch.cog.services-relayes -->
+<!-- @role relay-pattern -->
+<!-- @layer 5-7 -->
+<!-- @human Un service se coupe en moteur (zone COG) et relais (Franche) reliés par une DB secondaire temps réel ; exemple JayOffice -->
+<!-- @do relay_service_between_cogs -->
+
+**Principe**
+- Le **moteur** du service et ses prérequis restent en zone COG, isolés
+- Un **agent relais** en Franche porte la partie collaborative externe
+- Une **DB secondaire** temps réel en Franche sert de tampon
+- Deux COG collaborent par un **tunnel par service et par session** (relais ⇄ relais), jusqu'à l'interface utilisateur, sans exposer le moteur
+
+**Composants (exemple JayOffice)**
+- Zone COG : *Services JayOffice* (moteur + interface interne) ⇄ *DB principale* (sync temps réel)
+- Franche : *Relais JayOffice* ⇄ *DB secondaire* (temps réel)
+- Fédération : relais JayOffice du COG distant
+- Utilisateur local : utilise le moteur directement, **hors ligne**
+
+**Flux**
+1. Le COG distant demande à **rejoindre la session** (Fédération → BorderGuard)
+2. BorderGuard vérifie la certification fédérale et délivre un **visa** limité à la session (`audience = jayoffice:<session>`)
+3. **Connexion après visa** : BorderGuard → Relais
+4. Le relais écrit **à chaud et temporairement** dans la DB secondaire, qui en **vérifie la santé** (schéma, taille, type)
+5. **Synchronisation** moteur ⇄ relais, après authentification et **protocole de vérification**
+6. La DB secondaire émet une **demande de sauvegarde** (asynchrone) au Portail interne
+7. Le Portail **sauvegarde dans la DB principale seulement si OK** (dédouanement)
+
+**Règles**
+- Synchronisation moteur ⇄ relais **par le Portail interne** uniquement, sur un flux **ouvert par la zone COG** (temps réel préservé, la Nationale tire)
+- La DB secondaire ne contient **que** les données partagées dans la session (publication explicite)
+- DB secondaire **purgée** en fin de session ; rien n'y persiste au-delà
+- Rien n'entre en DB principale sans dédouanement : type, schéma, taille, signature, analyse des fichiers, décision StrongFather
+- Un participant malveillant ne peut corrompre que la **copie de session**, jamais la DB principale
+- Le relais ne détient ni secret ni identifiant du moteur ; compromis, il ne donne accès qu'à la session en cours
+- Tunnel de session : Noise / WireGuard, clés éphémères, fermé à l'expiration du visa
+
+**Autres services relayables**
+- Bureautique coopérative (JayOffice : Docs, Sheets, Slides, Réunion)
+- Explorateur web : le relais navigue et assainit, la zone COG affiche
+- Messagerie (JayMessage), partage MiyuCloud, agenda partagé (JayKoa)
+
+## 10. Réseau intégré
 
 <!-- @id arch.cog.reseau-integre -->
 <!-- @role network-infrastructure -->
@@ -156,7 +199,7 @@
   2. Franche et pare-feu en micro-VM (COG OS)
   3. machines physiques séparées
 
-## 10. IDS / IPS maison
+## 11. IDS / IPS maison
 
 <!-- @id arch.cog.ids-ips -->
 <!-- @role intrusion-detection -->
@@ -172,7 +215,7 @@
 - Franche, zone COG : IDS (mouvement latéral, tentative de sortie)
 - Réponse : CaringNanny → WorrySentinel → bannissement / gel Franche / coupure Portail → TAMR → registre Merkle
 
-## 11. Cloisonnement noyau
+## 12. Cloisonnement noyau
 
 <!-- @id arch.cog.cloisonnement-noyau -->
 <!-- @role kernel-hardening -->
@@ -185,7 +228,7 @@
 - Landlock, seccomp, AppArmor
 - sockets du Portail interne avec `SO_PEERCRED`
 
-## 12. Couches
+## 13. Couches
 
 <!-- @id arch.cog.couches -->
 <!-- @role layer-model -->
@@ -201,7 +244,7 @@
 - **Kernel** — lockdown, modules signés, dm-verity, TPM, A/B signées · *WorrySentinel, EverBuddy*
 - Couches 1–2 : matériel et pilotes (hors COG)
 
-## 13. Identité
+## 14. Identité
 
 <!-- @id arch.cog.identite -->
 <!-- @role identity-trust -->
@@ -214,7 +257,7 @@
 - **Certification globale** = signature Origin (Market, canal officiel, Fédération)
 - Appareils de l'utilisateur = pairs Fédération → aucun port ouvert côté International
 
-## 14. Feuille de route
+## 15. Feuille de route
 
 <!-- @id arch.cog.feuille-de-route -->
 <!-- @role roadmap -->
@@ -223,19 +266,19 @@
 - ✅ **Lot 1** fermeture par défaut
 - 🔄 **Lot 2** identité signée (incrément 1 : `miyusceau`)
 - ⬜ **Lot 3** Noise, Fédération WireGuard, appareils pairs
-- ⬜ **Lot 4** réseau intégré, BorderGuard, Portail interne, canal officiel, IDS/IPS maison
+- ⬜ **Lot 4** réseau intégré, BorderGuard, Portail interne, canal officiel, services relayés, IDS/IPS maison
 - ⬜ **Lot 5** gouvernance IA (couche 8)
 - ⬜ **Lot 6** COG OS
 
-## 15. Points ouverts
+## 16. Points ouverts
 
 <!-- @id arch.cog.points-ouverts -->
 <!-- @role open-questions -->
 <!-- @do track_open_decisions -->
 
 - Domotique (Alicia, MQTT) : Franche ou « Franche locale » dédiée ?
-- Agents relais : liste et périmètre exact de chaque agent
-- DB secondaire : quelles données publiées, synchronisation tirée par la zone COG ?
+- Agents relais : protocole de vérification moteur ⇄ relais à spécifier
+- DB secondaire : moteur de base temps réel et format des demandes de sauvegarde
 - Licence : `LICENSE` propriétaire vs `Cargo.toml` `MIT OR Apache-2.0`
 - Licences des jeux de règles IDS (ET Open, Snort Community)
 - Prototype réseau isolé de l'hôte de production
