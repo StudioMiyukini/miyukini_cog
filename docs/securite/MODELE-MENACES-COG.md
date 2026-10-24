@@ -247,6 +247,7 @@
 - **EX-39** Évolutions du protocole fédéral activées par seuil de signalement des membres
 - **EX-40 à EX-49** Services hybrides et Portail : voir [services hybrides](../architecture/SERVICES-HYBRIDES-ET-PORTAIL.md) §6
 - **EX-50 à EX-56** Mémoire de MAIA : voir [mémoire MAIA](../architecture/MEMOIRE-MAIA.md) §12
+- **EX-57 à EX-63** IA fédérée : voir [IA fédérée](../architecture/IA-FEDEREE.md) §7
 
 ## 10. Priorités
 

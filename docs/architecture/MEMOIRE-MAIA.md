@@ -7,7 +7,7 @@
 <!-- @do design_maia_memory -->
 
 - **Statut** : v1, 2026-10-24
-- **Base** : [modèle zones et couches](MODELE-ZONES-ET-COUCHES-COG.md) (couche 8) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md) · crate existante `miyualicia-memory` (types Fact, Preference, Episode, Persona, LearnedSkill)
+- **Base** : [modèle zones et couches](MODELE-ZONES-ET-COUCHES-COG.md) (couche 8) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md) · [IA fédérée](IA-FEDEREE.md) · crate existante `miyualicia-memory` (types Fact, Preference, Episode, Persona, LearnedSkill)
 
 ## 1. Objectifs
 

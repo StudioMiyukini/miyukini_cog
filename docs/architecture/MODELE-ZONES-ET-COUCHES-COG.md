@@ -7,7 +7,7 @@
 <!-- @do define_cog_zones_and_layers -->
 
 - **Statut** : référence, 2026-10-24 (schéma de l'auteur, v2)
-- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd) · [menaces](../securite/MODELE-MENACES-COG.md) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md) · [mémoire MAIA](MEMOIRE-MAIA.md)
+- **Liens** : [audit](../securite/AUDIT-2026-10-23-auth-wan.md) · [lot 2](../securite/ARCHITECTURE-lot2-identite-signee.md) · [schéma](../schema-conceptuel-cog.mmd) · [service relayé](schema-service-relaye.mmd) · [menaces](../securite/MODELE-MENACES-COG.md) · [services hybrides](SERVICES-HYBRIDES-ET-PORTAIL.md) · [mémoire MAIA](MEMOIRE-MAIA.md) · [IA fédérée](IA-FEDEREE.md)
 
 ## 1. Principes
 
@@ -314,7 +314,7 @@
 <!-- @layer 3-8+kernel -->
 <!-- @do map_layers_to_cores -->
 
-- **8 · IA** — intentions, outils, limites ; MAIA en zone COG ; [mémoire stratifiée](MEMOIRE-MAIA.md) · *TAMR, StrongFather, MasterButler*
+- **8 · IA** — intentions, outils, limites ; MAIA en zone COG ; [mémoire stratifiée](MEMOIRE-MAIA.md) ; [IA fédérée](IA-FEDEREE.md) · *TAMR, StrongFather, MasterButler*
 - **7 · Application** — services, permissions, visas, paquets signés · *StrongFather, MasterButler*
 - **6 · Présentation** — Sceau v1, chiffrement au repos · *KindMother, WorrySentinel*
 - **5 · Session** — passeport, preuve de possession, visa, Noise · *BorderGuard*
