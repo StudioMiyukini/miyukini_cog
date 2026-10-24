@@ -34,10 +34,10 @@
 | 15 | Origin admin `/admin/*` | mot de passe → cookie `__Host-` | local derrière proxy | passeport admin + PoP (CSRF gardé) |
 | 16 | Origin Tracker lobby | mot de passe de salon | WAN | facultatif : visas signés par l'hôte |
 | 17 | Origin Relay « clé de Cores » (`relay/verification.rs`) | ~~clé statique par version~~ | **WAN** | ✅ retirée de toute décision ; Phase A = REGISTER signé (attestation de build : à spécifier) |
-| 18 | MiyuCloud `/api/*`, DAV | **JWT HS256** + Basic + mot de passe d'application | local ; LAN/WAN en pratique | visa + PoP (clients natifs) |
-| 19 | MiyuCloud Nextcloud/OCS | Basic + mot de passe d'application | idem | exception acceptée (clients DAV), TLS, portée limitée |
-| 20 | MiyuCloud WOPI | `?access_token=` HS256 | idem | exception imposée par WOPI : durée courte |
-| 21 | MiyuCloud device flow + admin | RFC 8628 → Bearer HS256 | idem | fin du flux = passeport d'appareil |
+| 18 | MiyuCloud `/api/*`, DAV | ~~JWT HS256~~ ✅ sessions serveur + visa/PoP (2cf67520) | local ; LAN/WAN en pratique | visa + PoP (clients natifs) |
+| 19 | MiyuCloud Nextcloud/OCS | Basic + mot de passe d'application (exception ✅ : TLS ou loopback, limite par IP) | idem | exception acceptée (clients DAV), TLS, portée limitée |
+| 20 | MiyuCloud WOPI | `?access_token=` HS256 (exception ✅ : clé par processus, ≤ 15 min) | idem | exception imposée par WOPI : durée courte |
+| 21 | MiyuCloud device flow + admin | ~~Bearer HS256~~ ✅ clé d'appareil + requêtes signées ; admin = session | idem | fin du flux = passeport d'appareil |
 | 22 | miyukini-admin | mot de passe → cookie ; jeton d'installation | local | basse priorité |
 | 23 | miyualicia-api `/auth/token` | client_id/secret → JWT HS256 | non branché | ✅ route retirée par défaut (feature `jeton-secret-client`, désactivée) ; cible : passeport de service + PoP |
 

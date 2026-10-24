@@ -12,6 +12,7 @@ Usage :
 
 import argparse
 import asyncio
+import os
 import time
 import json
 import statistics
@@ -20,7 +21,7 @@ import aiohttp
 # --- Configuration -----------------------------------------------------------
 
 LLM_URL = "http://10.212.61.220:1234"
-LLM_KEY = "sk-lm-mG6IJnuL:Oe5PnXC4pQBIReJkeOou"
+LLM_KEY = os.environ.get("ALICIA_STRESS_LLM_KEY", "")  # jamais de clé dans le dépôt
 LLM_MODEL = "qwen/qwen3.5-9b"
 STT_URL = "http://127.0.0.1:8100"
 TTS_URL = "http://127.0.0.1:8101"
