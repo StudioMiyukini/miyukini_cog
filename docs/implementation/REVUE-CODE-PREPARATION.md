@@ -1,0 +1,126 @@
+# Revue de code COG — préparation
+
+<!-- @id impl.revue -->
+<!-- @role code-review-plan -->
+<!-- @layer 0-9+zones -->
+<!-- @human Périmètre, priorités, méthode, grille et constats d'entrée de la revue de code du COG -->
+<!-- @do prepare_code_review -->
+
+- **Statut** : prête à lancer, 2026-10-24
+- **Référentiels** : [contraintes C-xx](CONTRAINTES-IMPLEMENTATION.md) · [menaces EX-xx](../securite/MODELE-MENACES-COG.md) · [doc gelée](../architecture/GEL-DOC-CONCEPTUELLE-v1.md) · [audit 2026-10-23](../securite/AUDIT-2026-10-23-auth-wan.md)
+- **Objectif** : mesurer l'écart code ↔ doc gelée, trouver les failles exploitables, chiffrer le reste à faire
+
+## 1. Inventaire mesuré (2026-10-24)
+
+<!-- @id impl.revue.inventaire -->
+<!-- @role code-inventory -->
+<!-- @do measure_codebase -->
+
+- 149 paquets dans le workspace · ≈ 296 000 lignes Rust · 1 936 tests
+- 2 075 `unwrap()` et 446 `expect()` (tests compris) · 0 bloc `unsafe` · 64 `todo!` / TODO
+- Lints du workspace hérités par **37 / 149** paquets seulement
+- Outils absents du serveur : `cargo-audit`, `cargo-deny`, `cargo-fuzz` ; une seule CI (`miyucloud-ci.yml`)
+- **Déséquilibre** : les 10 Cores totalisent ≈ 7 000 lignes ; MiyuCloud seul ≈ 82 000
+
+| Paquet | Lignes | Tests | unwrap | Remarque |
+|---|---|---|---|---|
+| miyucloud-server (`apps/miyucloud`) | 68 812 | 228 | 365 | exposé (WebDAV, Nextcloud) |
+| miyukini-central-native | 41 619 | 31 | 16 | peu de tests pour la taille |
+| miyukini-origin | 21 246 | 75 | 37 | exposé Internet |
+| miyucloud | 13 164 | 303 | 492 | |
+| maia (pont LLM) | 9 600 | 38 | 42 | outils appelés par l'IA |
+| jaycloud | 4 540 | 128 | 257 | liens publics signés |
+| strongfather | 2 588 | 25 | 5 | Core |
+| borderguard · worrysentinel | 523 · 392 | 7 · 6 | 1 · 0 | Cores sécurité minces |
+| miyuantispam · miyuvalidate · miyuwebway_tracker | 259 · 305 · 441 | **0** | 0 | stubs sans test |
+
+## 2. Périmètre par priorité
+
+<!-- @id impl.revue.priorites -->
+<!-- @role review-scope -->
+<!-- @do prioritize_review -->
+
+- **P0 — exposé, authentification, cryptographie** (en premier)
+  - `apps/team` : écoute `0.0.0.0:7800`, aucune authentification, CORS ouvert, SSRF par enregistrement de nœud, `is_allowed_destination` jamais appelé
+  - `apps/origin`, `crates/miyukini-central` (remote, `shell_exec`), `central-remote*`, `miyauth`, `miyusceau`
+  - `crates/miyualicia-api` : persona prise dans le corps de requête (C-20)
+  - `miyuantispam` (limite toujours « autorisée »), `miyuvalidate`, `miyuwebway_tracker` / `participant`
+  - `apps/miyucloud`, `miyucloud-dav`, `jaycloud` (liens publics) — surfaces HTTP les plus larges
+  - `apps/miou-llm-bridge` (skills : outils déclenchés par l'IA)
+- **P1 — gouvernance** : Kernel, 10 Cores, `kindmother*`, `miyukini-admin`, `miyumarket`
+- **P2 — services métier** : Jay*, MiyuCloud (logique), Alicia, MAIA, Whisper
+- **P3 — UI et outils** : `miyuki-ui-*`, `apps/*-app`, MIPOWER, `tools/`
+
+## 3. Méthode
+
+<!-- @id impl.revue.methode -->
+<!-- @role review-method -->
+<!-- @do define_review_method -->
+
+- **Automatique** (avant lecture, par paquet)
+  - `cargo clippy -D warnings` avec les lints du workspace forcés
+  - `cargo audit`, `cargo deny check` (à installer)
+  - comptage `unwrap` / `expect` / `panic` hors tests ; liaisons réseau (`0.0.0.0`, `bind`) ; routes sans authentification
+- **Manuelle** : grille §4, un relecteur par paquet P0, double lecture pour l'authentification et la cryptographie
+- **Dynamique** : cibles de fuzzing sur les décodeurs P0 ; tests d'intrusion locaux sur les routes HTTP
+- **Conformité** : pour chaque exigence EX-xx, statut **fait / partiel / absent / contredit** avec preuve `fichier:ligne`
+
+## 4. Grille de lecture
+
+<!-- @id impl.revue.grille -->
+<!-- @role review-checklist -->
+<!-- @do check_code -->
+
+- **Entrées** : tailles bornées, décodage strict, aucune confiance dans un champ client (C-13, C-20)
+- **Authentification** : toute route non locale protégée ; identité issue du justificatif ; secrets comparés en temps constant
+- **Autorisation** : refus par défaut ; décision par StrongFather, pas dans le service
+- **Réseau** : écoute locale par défaut ; aucune sortie depuis la zone COG ; pas d'URL fournie par un tiers appelée sans liste blanche (SSRF)
+- **Cryptographie** : primitives autorisées seulement ; signature vérifiée avant décodage ; nonces et aléa via `OsRng`
+- **Erreurs** : fail-closed ; pas de panique atteignable depuis l'extérieur
+- **Données** : clé par service, étiquettes, aucune requête libre exposée
+- **Architecture** : sens S → C → K ; persistance par KindMother ; pas d'exécution dans un Core
+- **Tests** : cas de refus testés ; vecteurs figés pour les formats
+
+## 5. Format des constats
+
+<!-- @id impl.revue.format -->
+<!-- @role finding-format -->
+<!-- @do record_findings -->
+
+- Un constat = `R-NNN` · gravité (**critique / haute / moyenne / basse**) · `fichier:ligne` · scénario d'exploitation · exigence (EX / C) · correctif proposé
+- Registre unique : `docs/implementation/REVUE-CONSTATS.md` (créé au lancement)
+- Critique ou haute sur P0 → correctif avant toute nouvelle fonctionnalité
+
+## 6. Constats d'entrée (déjà connus)
+
+<!-- @id impl.revue.entree -->
+<!-- @role known-findings -->
+<!-- @do list_known_findings -->
+
+| Id | Gravité | Constat | Réf. |
+|---|---|---|---|
+| R-001 | critique | TEAM : API sans authentification sur `0.0.0.0`, CORS `*`, SSRF via URL de nœud | C-21, C-22 |
+| R-002 | haute | Alicia API : persona issue du corps de requête | C-20 |
+| R-003 | haute | `miyuantispam` autorise toujours | C-12, C-14 |
+| R-004 | moyenne | 112 paquets n'héritent pas des lints (`forbid(unsafe)` non garanti) | C-01, C-02 |
+| R-005 | moyenne | Aucune CI d'audit des dépendances | C-04, EX-15 |
+| R-006 | moyenne | Douane, Vigies, Portail, canal officiel : absents du code | EX-12, EX-19, EX-20, EX-44 |
+| R-007 | basse | TEAM : file de tâches jamais consommée, état non persistant | — |
+| R-008 | haute | Jay Bureau : WebSocket collaboratif sans jeton, `CollabRoom` sans contrôle d'ACL | C-22 |
+| R-009 | haute | Jay Bureau : échange X25519 non signé par l'identité (MITM) ; nonce de groupe fourni par l'appelant | C-24 |
+| R-010 | haute | Whisper : jeton optionnel, comparaison non constante, origine validée par préfixe (`localhost.evil.com`) ; `alicia-mvp` sans auth | C-21, C-22 |
+| R-011 | moyenne | Jay Bureau : SMTP sans TLS possible, mot de passe dans `Debug`, `mark_notification_read` sans propriétaire, repli `PATH` au lancement | C-25 |
+| R-012 | moyenne | maia-llm : prompt assemblé par concaténation (faux tour système), `max_tokens` non borné, verrou global, clé visible en argument | C-13, C-50 |
+| R-013 | basse | Conflit de port 11435 entre maia-llm et `miou-llm-bridge` | — |
+| R-014 | basse | Incohérences code : manifeste JayRDV vers un binaire inexistant ; restes du remplacement de MiyuCloud dans JayCloud (`miyucloud_transition_days`) | — |
+| R-015 | moyenne | `miyuwebway_tracker` et `miyuvalidate` : stubs sans test | C-14, C-60 |
+
+## 7. Livrables
+
+<!-- @id impl.revue.livrables -->
+<!-- @role review-deliverables -->
+<!-- @do deliver_review -->
+
+- Registre des constats `R-NNN`
+- Matrice de conformité EX-01..63 (fait / partiel / absent / contredit)
+- Liste des corrections P0, ordonnée, intégrée au [plan d'implémentation](PLAN-IMPLEMENTATION.md) lot 0
